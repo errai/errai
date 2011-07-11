@@ -20,8 +20,8 @@
 
     <inherits name='com.google.gwt.user.User'/>
 
-    <inherits name="org.jboss.errai.bus.ErraiBus" />
-    <inherits name="org.jboss.errai.workspaces.ErraiWorkspaces" />
+    <inherits name="org.jboss.errai.bus.ErraiBus"/>
+    <inherits name="org.jboss.errai.workspaces.ErraiWorkspaces"/>
 
     <entry-point class='org.jboss.errai.tools.source.client.SourceView'/>
 </module>

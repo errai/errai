@@ -24,7 +24,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class CollectionToList implements TypeHandler<Collection, List> {
-    public List getConverted(Collection in, DecodingContext ctx) {
-        return new ArrayList(in);
-    }
+  public List getConverted(Collection in, DecodingContext ctx) {
+    return new ArrayList(in);
+  }
 }

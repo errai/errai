@@ -19,5 +19,5 @@ package org.jboss.errai.bus.server.api;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
 
 public interface MessageInterceptor {
-    public void intercept(CommandMessage message);
+  public void intercept(CommandMessage message);
 }

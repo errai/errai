@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, a divison Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,41 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
-import com.google.gwt.core.ext.typeinfo.JClassType;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 public abstract class Injector {
-    public abstract String instantiateOnly(InjectionContext injectContext, InjectionPoint injectionPoint);
+  protected QualifyingMetadata qualifyingMetadata;
 
-    public abstract String getType(InjectionContext injectContext, InjectionPoint injectionPoint);
+  public abstract Statement instantiateOnly(InjectionContext injectContext, InjectionPoint injectionPoint);
 
-    public abstract boolean isInjected();
+  public Statement getType(InjectionPoint injectionPoint) {
+    return getType(injectionPoint.getInjectionContext(), injectionPoint);
+  }
 
-    public abstract boolean isSingleton();
+  public abstract Statement getType(InjectionContext injectContext, InjectionPoint injectionPoint);
 
-    public abstract String getVarName();
+  public abstract boolean isInjected();
 
-    public abstract JClassType getInjectedType();
+  public abstract boolean isSingleton();
+
+  public abstract String getVarName();
+
+  public abstract MetaClass getInjectedType();
+
+  public boolean metadataMatches(Injector injector) {
+    return (injector == null && qualifyingMetadata == null) ||
+        (injector != null && injector.getQualifyingMetadata() != null
+            && qualifyingMetadata != null
+            && injector.getQualifyingMetadata().doesSatisfy(qualifyingMetadata));
+  }
+
+  public QualifyingMetadata getQualifyingMetadata() {
+    return qualifyingMetadata;
+  }
+
+  public void setQualifyingMetadata(QualifyingMetadata qualifyingMetadata) {
+    this.qualifyingMetadata = qualifyingMetadata;
+  }
 }
 

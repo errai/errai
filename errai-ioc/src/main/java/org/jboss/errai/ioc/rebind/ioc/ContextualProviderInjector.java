@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, a divison Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,91 +17,94 @@
 package org.jboss.errai.ioc.rebind.ioc;
 
 import java.lang.annotation.Annotation;
-import java.util.List;
 
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.JField;
-import com.google.gwt.core.ext.typeinfo.JParameter;
-import com.google.gwt.core.ext.typeinfo.JParameterizedType;
-import com.google.gwt.user.client.Window;
-import org.jboss.errai.ioc.rebind.IOCGenerator;
+import org.jboss.errai.ioc.rebind.IOCProcessingContext;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameterizedType;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaType;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java.JavaReflectionField;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java.JavaReflectionParameterizedType;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.Refs;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 
 public class ContextualProviderInjector extends TypeInjector {
-    private final Injector providerInjector;
+  private final Injector providerInjector;
 
-    public ContextualProviderInjector(JClassType type, JClassType providerType) {
-        super(type);
-        this.providerInjector = new TypeInjector(providerType);
-    }
+  public ContextualProviderInjector(MetaClass type, MetaClass providerType) {
+    super(type);
+    this.providerInjector = new TypeInjector(providerType);
+  }
 
-    @Override
-    public String getType(InjectionContext injectContext, InjectionPoint injectionPoint) {
-        injected = true;
+  @Override
+  public Statement getType(InjectionContext injectContext, InjectionPoint injectionPoint) {
 
-        JClassType type = null;
-        JParameterizedType pType = null;
+    MetaClass type = null;
+    MetaParameterizedType pType = null;
 
-        switch (injectionPoint.getTaskType()) {
-            case PrivateField:
-            case Field:
-                JField field = injectionPoint.getField();
-                type = field.getType().isClassOrInterface();
+    switch (injectionPoint.getTaskType()) {
+      case PrivateField:
+      case Field:
+        MetaField field = injectionPoint.getField();
+        type = field.getType();
 
-                pType = type.isParameterized();
-
-                break;
-
-            case Parameter:
-                JParameter parm = injectionPoint.getParm();
-                type = parm.getType().isClassOrInterface();
-
-                pType = type.isParameterized();
-                break;
+        pType = type.getParameterizedType();
+        // TODO refactor!
+        if (pType == null && field instanceof JavaReflectionField) {
+          pType = (JavaReflectionParameterizedType) field.getGenericType();
         }
+        break;
 
-        StringBuilder sb = new StringBuilder();
+      case Parameter:
+        MetaParameter parm = injectionPoint.getParm();
+        type = parm.getType();
 
-
-
-        if (pType == null) {
-            sb.append(providerInjector.getType(injectContext, injectionPoint)).append(".provide(new Class[] {}");
-        } else {
-            JClassType[] typeArgs = pType.getTypeArgs();
-            sb.append("(").append(type.getQualifiedSourceName()).append("<")
-                    .append(typeArgs[0].getQualifiedSourceName()).append(">) ");
-
-            sb.append(providerInjector.getType(injectContext, injectionPoint)).append(".provide(new Class[] {");
-            for (int i = 0; i < typeArgs.length; i++) {
-                sb.append(typeArgs[i].getQualifiedSourceName()).append(".class");
-
-                if ((i + 1) < typeArgs.length) {
-                    sb.append(", ");
-                }
-            }
-            sb.append("}");
-        
-	        List<Annotation> qualifiers = InjectUtil.extractQualifiers(injectionPoint);
-	        if(!qualifiers.isEmpty()) {
-	        	sb.append(", new java.lang.annotation.Annotation[] {");
-	        	for(int i=0; i<qualifiers.size(); i++) {
-	        		sb.append("\nnew java.lang.annotation.Annotation() {")
-	        			.append("\npublic Class<? extends java.lang.annotation.Annotation> annotationType() {\n return ")
-	        			.append(qualifiers.get(i).annotationType().getName()).append(".class").append(";\n}\n}");
-	        		if ((i + 1) < qualifiers.size()) sb.append(",");
-	        	}
-	        	sb.append("\n}");
-	        } else {
-	        	sb.append(", null");
-	        }
-        }
-        sb.append(")");
-
-        return IOCGenerator.debugOutput(sb);
+        pType = type.getParameterizedType();
+        break;
     }
 
-    @Override
-    public String instantiateOnly(InjectionContext injectContext, InjectionPoint injectionPoint) {
-        injected = true;
-        return providerInjector.getType(injectContext, injectionPoint);
+    IOCProcessingContext processingContext = injectContext.getProcessingContext();
+
+    Statement statement;
+
+    if (pType == null) {
+      statement = Stmt.create().nestedCall(providerInjector.getType(injectContext, injectionPoint))
+              .invoke("provide", new Class[0]);
     }
+    else {
+      MetaType[] typeArgs = pType.getTypeParameters();
+
+      Annotation[] qualifiers = injectionPoint.getQualifiers();
+      if (qualifiers.length != 0) {
+
+        statement = Stmt.create().nestedCall(providerInjector.getType(injectContext, injectionPoint))
+                .invoke("provide", typeArgs, qualifiers);
+      }
+      else {
+        statement = Stmt.create().nestedCall(providerInjector.getType(injectContext, injectionPoint))
+                .invoke("provide", typeArgs, null);
+
+      }
+    }
+
+    if (singleton) {
+      if (!injected) {
+         injectContext.getProcessingContext().append(Stmt.create().declareVariable(type).named(varName)
+                .initializeWith(statement));
+      }
+      statement = Refs.get(varName);
+    }
+
+    injected = true;
+
+    return statement;
+  }
+
+  @Override
+  public Statement instantiateOnly(InjectionContext injectContext, InjectionPoint injectionPoint) {
+    injected = true;
+    return providerInjector.getType(injectContext, injectionPoint);
+  }
 }

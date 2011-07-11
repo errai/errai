@@ -20,7 +20,9 @@ import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 public interface ColMapper<T> {
-    public String generateGetField(TypeOracle oracle, JClassType fromType);
-    public String generateSetField(TypeOracle oracle, JClassType toType);
-    public String generateValueChange(TypeOracle oracle, JClassType type);
+  public String generateGetField(TypeOracle oracle, JClassType fromType);
+
+  public String generateSetField(TypeOracle oracle, JClassType toType);
+
+  public String generateValueChange(TypeOracle oracle, JClassType type);
 }

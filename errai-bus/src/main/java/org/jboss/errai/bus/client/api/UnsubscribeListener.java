@@ -23,10 +23,10 @@ import org.jboss.errai.bus.client.framework.SubscriptionEvent;
  */
 public interface UnsubscribeListener {
 
-    /**
-     * Function is called when a subscription is deregistered from the bus
-     *
-     * @param event - the subscription event that occurred
-     */
-    public void onUnsubscribe(SubscriptionEvent event);
+  /**
+   * Function is called when a subscription is deregistered from the bus
+   *
+   * @param event - the subscription event that occurred
+   */
+  public void onUnsubscribe(SubscriptionEvent event);
 }

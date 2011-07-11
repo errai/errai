@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, a divison Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,104 +16,159 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.JField;
-import org.jboss.errai.bus.rebind.ProcessingContext;
-
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.jboss.errai.ioc.rebind.IOCProcessingContext;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
 
 public class InjectionContext {
-    private ProcessingContext processingContext;
-    private Map<JClassType, Injector> injectors = new LinkedHashMap<JClassType, Injector>();
-    private Map<Class<? extends Annotation>, List<Decorator>> decorators = new LinkedHashMap<Class<? extends Annotation>, List<Decorator>>();
-    private Map<ElementType, Set<Class<? extends Annotation>>> decoratorsByElementType = new LinkedHashMap<ElementType, Set<Class<? extends Annotation>>>();
-    private List<JField> privateFieldsToExpose = new ArrayList<JField>();
+  private IOCProcessingContext processingContext;
+  private Map<MetaClass, List<Injector>> injectors = new LinkedHashMap<MetaClass, List<Injector>>();
+  private Map<Class<? extends Annotation>, List<IOCDecoratorExtension>> decorators = new LinkedHashMap<Class<? extends Annotation>, List<IOCDecoratorExtension>>();
+  private Map<ElementType, Set<Class<? extends Annotation>>> decoratorsByElementType = new LinkedHashMap<ElementType, Set<Class<? extends Annotation>>>();
+  private List<MetaField> privateFieldsToExpose = new ArrayList<MetaField>();
 
-    public InjectionContext(ProcessingContext processingContext) {
-        this.processingContext = processingContext;
+  public InjectionContext(IOCProcessingContext processingContext) {
+    this.processingContext = processingContext;
+  }
+
+  public Injector getQualifiedInjector(MetaClass type, QualifyingMetadata metadata) {
+    if (metadata == null) {
+      metadata = JSR299QualifyingMetadata.createDefaultQualifyingMetaData();
     }
 
-    public Injector getInjector(JClassType type) {
-        JClassType erased = type.getErasedType();
-        if (!injectors.containsKey(erased)) {
-            throw new InjectionFailure("could not resolve type for injection: " + erased.getQualifiedSourceName());
+    //todo: figure out why I was doing this.
+    MetaClass erased = type;
+    List<Injector> injs = injectors.get(erased);
+    if (injs != null) {
+      for (Injector inj : injs) {
+        if (metadata == null && inj.getQualifyingMetadata() == null) {
+          return inj;
         }
-        return injectors.get(erased);
-    }
-
-    public List<Injector> getInjectorsByType(Class<? extends Injector> injectorType) {
-        List<Injector> injs = new LinkedList<Injector>();
-        for (Injector i : injectors.values()) {
-            if (injectorType.isAssignableFrom(i.getClass())) {
-                injs.add(i);
-            }
+        else if (metadata != null && inj.getQualifyingMetadata() != null
+            && metadata.doesSatisfy(inj.getQualifyingMetadata())) {
+          return inj;
         }
-        return injs;
+      }
+    }
+    throw new InjectionFailure("could not resolve type for injection: " + erased.getFullyQualifiedName());
+  }
+
+  public Injector getInjector(Class<?> injectorType) {
+    return getInjector(MetaClassFactory.get(processingContext.loadClassType(injectorType)));
+  }
+
+  public Injector getInjector(MetaClass type) {
+    MetaClass erased = type;
+    if (!injectors.containsKey(erased)) {
+      throw new InjectionFailure("could not resolve type for injection: " + erased.getFullyQualifiedName());
+    }
+    List<Injector> injectorList = injectors.get(erased);
+    if (injectorList.size() > 1) {
+      throw new InjectionFailure("ambiguous injection type (multiple injectors resolved): "
+          + erased.getFullyQualifiedName());
+    }
+    else if (injectorList.isEmpty()) {
+      throw new InjectionFailure("could not resolve type for injection: " + erased.getFullyQualifiedName());
     }
 
-    public void registerInjector(Injector injector) {
-        if (!injectors.containsKey(injector.getInjectedType()))
-            injectors.put(injector.getInjectedType().getErasedType(), injector);
+    return injectorList.get(0);
+  }
+
+  public List<Injector> getInjectorsByType(Class<? extends Injector> injectorType) {
+    List<Injector> injs = new LinkedList<Injector>();
+    for (List<Injector> inj : injectors.values()) {
+      if (injectorType.isAssignableFrom(inj.getClass())) {
+        injs.addAll(inj);
+      }
     }
+    return injs;
+  }
 
-    public void registerDecorator(Decorator<?> decorator) {
-        if (!decorators.containsKey(decorator.decoratesWith()))
-            decorators.put(decorator.decoratesWith(), new ArrayList<Decorator>());
-
-        decorators.get(decorator.decoratesWith()).add(decorator);
+  public void registerInjector(Injector injector) {
+    List<Injector> injectorList = injectors.get(injector.getInjectedType());
+    if (injectorList == null) {
+      injectors.put(injector.getInjectedType(), injectorList = new ArrayList<Injector>());
     }
-
-    public Set<Class<? extends Annotation>> getDecoratorAnnotations() {
-        return Collections.unmodifiableSet(decorators.keySet());
-    }
-
-    public Decorator[] getDecorator(Class<? extends Annotation> annotation) {
-        List<Decorator> decs = decorators.get(annotation);
-        Decorator[] da = new Decorator[decs.size()];
-        decs.toArray(da);
-        return da;
-    }
-
-    public Set<Class<? extends Annotation>> getDecoratorAnnotationsBy(ElementType type) {
-        if (decoratorsByElementType.size() == 0) {
-            sortDecorators();
+    else {
+      for (Injector inj : injectorList) {
+        if (inj.metadataMatches(injector)) {
+          return;
         }
-        if (decoratorsByElementType.containsKey(type)) {
-            return Collections.unmodifiableSet(decoratorsByElementType.get(type));
-        } else {
-            return Collections.EMPTY_SET;
+      }
+    }
+
+    injectorList.add(injector);
+  }
+
+  public void registerDecorator(IOCDecoratorExtension<?> iocExtension) {
+    if (!decorators.containsKey(iocExtension.decoratesWith()))
+      decorators.put(iocExtension.decoratesWith(), new ArrayList<IOCDecoratorExtension>());
+
+    decorators.get(iocExtension.decoratesWith()).add(iocExtension);
+  }
+
+  public Set<Class<? extends Annotation>> getDecoratorAnnotations() {
+    return Collections.unmodifiableSet(decorators.keySet());
+  }
+
+  public IOCDecoratorExtension[] getDecorator(Class<? extends Annotation> annotation) {
+    List<IOCDecoratorExtension> decs = decorators.get(annotation);
+    IOCDecoratorExtension[] da = new IOCDecoratorExtension[decs.size()];
+    decs.toArray(da);
+    return da;
+  }
+
+  public Set<Class<? extends Annotation>> getDecoratorAnnotationsBy(ElementType type) {
+    if (decoratorsByElementType.size() == 0) {
+      sortDecorators();
+    }
+    if (decoratorsByElementType.containsKey(type)) {
+      return Collections.unmodifiableSet(decoratorsByElementType.get(type));
+    }
+    else {
+      return Collections.emptySet();
+    }
+  }
+
+
+  public boolean hasDecoratorsAssociated(ElementType type, Annotation a) {
+    if (decoratorsByElementType.size() == 0) {
+      sortDecorators();
+    }
+    return decoratorsByElementType.containsKey(type) && decoratorsByElementType.get(type).contains(a);
+  }
+
+  private void sortDecorators() {
+    for (Class<? extends Annotation> a : getDecoratorAnnotations()) {
+      if (a.isAnnotationPresent(Target.class)) {
+        for (ElementType type : a.getAnnotation(Target.class).value()) {
+          if (!decoratorsByElementType.containsKey(type)) {
+            decoratorsByElementType.put(type, new HashSet<Class<? extends Annotation>>());
+          }
+          decoratorsByElementType.get(type).add(a);
         }
+      }
     }
+  }
 
+  public List<MetaField> getPrivateFieldsToExpose() {
+    return privateFieldsToExpose;
+  }
 
-    public boolean hasDecoratorsAssociated(ElementType type, Annotation a) {
-        if (decoratorsByElementType.size() == 0) {
-            sortDecorators();
-        }
-        return decoratorsByElementType.containsKey(type) && decoratorsByElementType.get(type).contains(a);
-    }
-
-    private void sortDecorators() {
-        for (Class<? extends Annotation> a : getDecoratorAnnotations()) {
-            if (a.isAnnotationPresent(Target.class)) {
-                for (ElementType type : a.getAnnotation(Target.class).value()) {
-                    if (!decoratorsByElementType.containsKey(type)) {
-                        decoratorsByElementType.put(type, new HashSet<Class<? extends Annotation>>());
-                    }
-                    decoratorsByElementType.get(type).add(a);
-                }
-            }
-        }
-    }
-
-    public List<JField> getPrivateFieldsToExpose() {
-        return privateFieldsToExpose;
-    }
-
-    public ProcessingContext getProcessingContext() {
-        return processingContext;
-    }
+  public IOCProcessingContext getProcessingContext() {
+    return processingContext;
+  }
 }

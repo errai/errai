@@ -22,15 +22,15 @@ import org.jboss.errai.common.client.types.TypeHandler;
 import java.util.Collection;
 
 public class CollectionToStringArray implements TypeHandler<Collection, String[]> {
-    public String[] getConverted(Collection in, DecodingContext ctx) {
-        if (in == null) return null;
-        String[] newArray = new String[in.size()];
+  public String[] getConverted(Collection in, DecodingContext ctx) {
+    if (in == null) return null;
+    String[] newArray = new String[in.size()];
 
-        int i = 0;
-        for (Object o : in) {
-           newArray[i++] = String.valueOf(o);
-        }
-
-        return newArray;
+    int i = 0;
+    for (Object o : in) {
+      newArray[i++] = String.valueOf(o);
     }
+
+    return newArray;
+  }
 }

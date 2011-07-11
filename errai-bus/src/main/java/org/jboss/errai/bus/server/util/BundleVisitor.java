@@ -20,5 +20,5 @@ import java.util.ResourceBundle;
 
 
 public interface BundleVisitor {
-    public void visit(ResourceBundle bundle);
+  public void visit(ResourceBundle bundle);
 }

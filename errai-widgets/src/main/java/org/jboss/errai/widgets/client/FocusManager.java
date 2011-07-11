@@ -30,64 +30,64 @@ import org.jboss.errai.widgets.client.WSGrid.WSCell;
  */
 public interface FocusManager {
 
-	/**
-	 * A move left.
-	 * 
-	 * @return The number of cells moved (merged cells have their content
-	 *         counted individually)
-	 */
-	public int moveLeft();
+  /**
+   * A move left.
+   *
+   * @return The number of cells moved (merged cells have their content
+   *         counted individually)
+   */
+  public int moveLeft();
 
-	/**
-	 * A move right.
-	 * 
-	 * @return The number of cells moved (merged cells have their content
-	 *         counted individually)
-	 */
-	public int moveRight();
+  /**
+   * A move right.
+   *
+   * @return The number of cells moved (merged cells have their content
+   *         counted individually)
+   */
+  public int moveRight();
 
-	/**
-	 * A move upwards.
-	 * 
-	 * @return The number of cells moved (merged cells have their content
-	 *         counted individually)
-	 */
-	public int moveUpwards();
+  /**
+   * A move upwards.
+   *
+   * @return The number of cells moved (merged cells have their content
+   *         counted individually)
+   */
+  public int moveUpwards();
 
-	/**
-	 * A move downwards.
-	 * 
-	 * @return The number of cells moved (merged cells have their content
-	 *         counted individually)
-	 */
-	public int moveDownwards();
+  /**
+   * A move downwards.
+   *
+   * @return The number of cells moved (merged cells have their content
+   *         counted individually)
+   */
+  public int moveDownwards();
 
-	/**
-	 * The start cell represents the initial selection of a single cell in a
-	 * range from which the edges can be thought to extend to encompass a
-	 * greater range
-	 * 
-	 * @param cell
-	 */
-	public void setStartCell(WSCell cell);
+  /**
+   * The start cell represents the initial selection of a single cell in a
+   * range from which the edges can be thought to extend to encompass a
+   * greater range
+   *
+   * @param cell
+   */
+  public void setStartCell(WSCell cell);
 
-	/**
-	 * Return the starting cell.
-	 * 
-	 * @return
-	 */
-	public WSCell getStartCell();
+  /**
+   * Return the starting cell.
+   *
+   * @return
+   */
+  public WSCell getStartCell();
 
-	/**
-	 * Returns true if the start cell has been set.
-	 * 
-	 * @return
-	 */
-	public boolean isInitialised();
+  /**
+   * Returns true if the start cell has been set.
+   *
+   * @return
+   */
+  public boolean isInitialised();
 
-	/**
-	 * Remove the start cell returning the manager to an uninitialised state
-	 */
-	public void reset();
+  /**
+   * Remove the start cell returning the manager to an uninitialised state
+   */
+  public void reset();
 
 }

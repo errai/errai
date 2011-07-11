@@ -17,14 +17,14 @@
 package org.jboss.errai.bus.server.api;
 
 public class SessionEndEvent {
-    private QueueSession session;
+  private QueueSession session;
 
-    public SessionEndEvent(QueueSession session) {
-        this.session = session;
-    }
+  public SessionEndEvent(QueueSession session) {
+    this.session = session;
+  }
 
-    public QueueSession getSession() {
-        return session;
-    }
+  public QueueSession getSession() {
+    return session;
+  }
 }
 

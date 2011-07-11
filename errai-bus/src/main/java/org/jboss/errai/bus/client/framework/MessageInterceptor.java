@@ -27,6 +27,7 @@ import org.jboss.errai.bus.client.api.Message;
  */
 public interface MessageInterceptor {
 
-    boolean processOutbound(Message message);
-    boolean processInbound(Message message);
+  boolean processOutbound(Message message);
+
+  boolean processInbound(Message message);
 }

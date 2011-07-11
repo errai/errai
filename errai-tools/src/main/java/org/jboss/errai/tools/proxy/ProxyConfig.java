@@ -30,9 +30,8 @@ import java.util.Map;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Apr 21, 2010
  */
-public class ProxyConfig
-{
-  private Map<String,Object> rootConfig;
+public class ProxyConfig {
+  private Map<String, Object> rootConfig;
 
   public final static String SERVICES = "services";
   public final static String ID = "id";
@@ -40,33 +39,27 @@ public class ProxyConfig
   public final static String CONTENT_TYPE = "contentType";
   public final static String PASSTHROUGH = "passthrough";
 
-  protected ProxyConfig(Map<String,Object> rootConfig)
-  {
+  protected ProxyConfig(Map<String, Object> rootConfig) {
     this.rootConfig = rootConfig;
   }
 
-  public static ProxyConfig parse(String json)
-  {
+  public static ProxyConfig parse(String json) {
     JSONDecoder decoder = new JSONDecoder(json);
-    ProxyConfig config = new ProxyConfig((Map<String,Object>)decoder.parse());
+    ProxyConfig config = new ProxyConfig((Map<String, Object>) decoder.parse());
     return config;
   }
 
-  public static ProxyConfig parse(InputStream in)
-  {
+  public static ProxyConfig parse(InputStream in) {
     return parse(inputStreamToString(in));
   }
 
-  public List<Map<String,Object>> getServices()
-  {
-    Map<String,Object> root = (Map<String,Object>)rootConfig.get("xhp");
-    return (List)root.get(SERVICES);
+  public List<Map<String, Object>> getServices() {
+    Map<String, Object> root = (Map<String, Object>) rootConfig.get("xhp");
+    return (List) root.get(SERVICES);
   }
 
-  private static String inputStreamToString(InputStream in)
-  {
-    try
-    {
+  private static String inputStreamToString(InputStream in) {
+    try {
       BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in));
       StringBuilder stringBuilder = new StringBuilder();
       String line = null;
@@ -78,8 +71,7 @@ public class ProxyConfig
       bufferedReader.close();
       return stringBuilder.toString();
     }
-    catch (IOException e)
-    {
+    catch (IOException e) {
       throw new RuntimeException("Failed to parse input stream", e);
     }
   }

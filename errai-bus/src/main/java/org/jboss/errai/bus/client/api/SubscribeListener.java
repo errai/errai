@@ -23,10 +23,10 @@ import org.jboss.errai.bus.client.framework.SubscriptionEvent;
  */
 public interface SubscribeListener {
 
-    /**
-     * Function is called when a new subscription is registered on the bus
-     *
-     * @param event - the subscription event that occurred
-     */
-    public void onSubscribe(SubscriptionEvent event);
+  /**
+   * Function is called when a new subscription is registered on the bus
+   *
+   * @param event - the subscription event that occurred
+   */
+  public void onSubscribe(SubscriptionEvent event);
 }

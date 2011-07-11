@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, a divison Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
+
 public interface ConstructionStrategy {
-    public String generateConstructor();
+  public void generateConstructor();
 }

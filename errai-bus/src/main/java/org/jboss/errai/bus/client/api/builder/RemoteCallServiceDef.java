@@ -22,11 +22,11 @@ package org.jboss.errai.bus.client.api.builder;
  */
 public interface RemoteCallServiceDef {
 
-    /**
-     * Calls a service
-     *
-     * @param serviceName - the service to be called
-     * @return an instance of <tt>RemoteCallEndpointDef</tt>
-     */
-    public RemoteCallEndpointDef call(String serviceName);
+  /**
+   * Calls a service
+   *
+   * @param serviceName - the service to be called
+   * @return an instance of <tt>RemoteCallEndpointDef</tt>
+   */
+  public RemoteCallEndpointDef call(String serviceName);
 }

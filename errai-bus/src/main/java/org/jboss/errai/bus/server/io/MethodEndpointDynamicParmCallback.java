@@ -19,9 +19,9 @@ package org.jboss.errai.bus.server.io;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.ResourceProvider;
-import org.jboss.errai.bus.client.api.base.Reply;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
+import org.jboss.errai.bus.client.api.base.Reply;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 
@@ -33,83 +33,86 @@ import java.lang.reflect.Method;
  * Time: 4:57:59 PM
  */
 public class MethodEndpointDynamicParmCallback implements MessageCallback {
-    private final Object instance;
-    private final Method method;
+  private final Object instance;
+  private final Method method;
 
-    private final String[] parms;
-    private final ParmType[] callPlan;
+  private final String[] parms;
+  private final ParmType[] callPlan;
 
-    public MethodEndpointDynamicParmCallback(Object instance, Method method, String[] parms, Class[] parmTypes) {
-        this.instance = instance;
-        this.method = method;
-        this.parms = parms;
+  public MethodEndpointDynamicParmCallback(Object instance, Method method, String[] parms, Class[] parmTypes) {
+    this.instance = instance;
+    this.method = method;
+    this.parms = parms;
 
-        this.callPlan = new ParmType[parmTypes.length];
+    this.callPlan = new ParmType[parmTypes.length];
 
-        for (int i = 0; i < parmTypes.length; i++) {
-            if (Message.class.isAssignableFrom(parmTypes[i])) {
-                callPlan[i] = ParmType.Message;
-            } else if (Reply.class.isAssignableFrom(parmTypes[i])) {
-                callPlan[i] = ParmType.Conversation;
-            } else {
-                callPlan[i] = ParmType.Object;
-            }
+    for (int i = 0; i < parmTypes.length; i++) {
+      if (Message.class.isAssignableFrom(parmTypes[i])) {
+        callPlan[i] = ParmType.Message;
+      }
+      else if (Reply.class.isAssignableFrom(parmTypes[i])) {
+        callPlan[i] = ParmType.Conversation;
+      }
+      else {
+        callPlan[i] = ParmType.Object;
+      }
+    }
+  }
+
+  public void callback(final Message message) {
+    try {
+      Object[] parmValues = new Object[parms.length];
+      for (int i = 0; i < parmValues.length; i++) {
+        switch (callPlan[i]) {
+          case Object:
+            parmValues[i] = message.get(Object.class, parms[i]);
+            break;
+          case Message:
+            parmValues[i] = message;
+            break;
+          case Conversation:
+            parmValues[i] = new Reply() {
+              final Message replyMessage = MessageBuilder.createConversation(message).getMessage();
+
+              public void setValue(Object value) {
+                replyMessage.set(MessageParts.Value, value);
+              }
+
+              public void set(String part, Object value) {
+                replyMessage.set(part, value);
+              }
+
+              public void set(Enum<?> part, Object value) {
+                replyMessage.set(part, value);
+              }
+
+              public void setProvidedPart(String part, ResourceProvider provider) {
+                replyMessage.setProvidedPart(part, provider);
+              }
+
+              public void setProvidedPart(Enum<?> part, ResourceProvider provider) {
+                replyMessage.setProvidedPart(part, provider);
+              }
+
+              public void reply() {
+                replyMessage.sendNowWith((RequestDispatcher) message.getResource(ResourceProvider.class,
+                    RequestDispatcher.class.getName()).get());
+              }
+            };
+            break;
         }
+      }
+
+      method.invoke(instance, parmValues);
     }
-
-    public void callback(final Message message) {
-        try {
-            Object[] parmValues = new Object[parms.length];
-            for (int i = 0; i < parmValues.length; i++) {
-                switch (callPlan[i]) {
-                    case Object:
-                        parmValues[i] = message.get(Object.class, parms[i]);
-                        break;
-                    case Message:
-                        parmValues[i] = message;
-                        break;
-                    case Conversation:
-                        parmValues[i] = new Reply() {
-                            final Message replyMessage = MessageBuilder.createConversation(message).getMessage();
-
-                            public void setValue(Object value) {
-                                replyMessage.set(MessageParts.Value, value);
-                            }
-
-                            public void set(String part, Object value) {
-                                replyMessage.set(part, value);
-                            }
-
-                            public void set(Enum<?> part, Object value) {
-                                replyMessage.set(part, value);
-                            }
-
-                            public void setProvidedPart(String part, ResourceProvider provider) {
-                                replyMessage.setProvidedPart(part, provider);
-                            }
-
-                            public void setProvidedPart(Enum<?> part, ResourceProvider provider) {
-                                replyMessage.setProvidedPart(part, provider);
-                            }
-
-                            public void reply() {
-                                replyMessage.sendNowWith((RequestDispatcher) message.getResource(ResourceProvider.class,
-                                        RequestDispatcher.class.getName()).get());
-                            }
-                        };
-                        break;
-                }
-            }
-
-            method.invoke(instance, parmValues);
-        } catch (Exception e) {
-            throw new MessageDeliveryFailure(e);
-        }
+    catch (Exception e) {
+      throw new MessageDeliveryFailure(e);
     }
+  }
 
-    enum ParmType {
-        Object,
-        Message,
-        Conversation
-    }
+  enum ParmType {
+    Object,
+    Message,
+    Conversation
+  }
 }

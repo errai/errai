@@ -22,5 +22,5 @@ package org.jboss.errai.bus.client.api;
  * @param <T> injection target type
  */
 public interface ResourceProvider<T> {
-    public T get();
+  public T get();
 }

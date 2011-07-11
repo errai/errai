@@ -22,11 +22,11 @@ package org.jboss.errai.bus.client.framework;
  *         l
  */
 public class NoopModelAdapter implements ModelAdapter {
-    public Object clone(Object entity) {
-        return entity;
-    }
+  public Object clone(Object entity) {
+    return entity;
+  }
 
-    public Object merge(Object dto) {
-        return dto;
-    }
+  public Object merge(Object dto) {
+    return dto;
+  }
 }

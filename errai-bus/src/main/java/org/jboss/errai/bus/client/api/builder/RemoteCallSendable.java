@@ -24,10 +24,10 @@ import org.jboss.errai.bus.client.framework.MessageBus;
  */
 public interface RemoteCallSendable {
 
-    /**
-     * Specifies how to send the message
-     *
-     * @param viaThis - the message bus to send the message with
-     */
-    public void sendNowWith(MessageBus viaThis);
+  /**
+   * Specifies how to send the message
+   *
+   * @param viaThis - the message bus to send the message with
+   */
+  public void sendNowWith(MessageBus viaThis);
 }

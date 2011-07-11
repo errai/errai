@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, a divison Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,67 +16,67 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.JField;
-import com.google.gwt.core.ext.typeinfo.JMethod;
-import com.google.gwt.core.ext.typeinfo.JParameter;
-import org.mvel2.util.StringAppender;
-
 import java.lang.annotation.Annotation;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
+
 public class DecoratorTask extends InjectionTask {
-    private final Decorator[] decorators;
+  private final IOCDecoratorExtension[] IOCExtensions;
 
-    public DecoratorTask(Injector injector, JClassType type, Decorator[] decs) {
-        super(injector, type);
-        this.decorators = decs;
+  public DecoratorTask(Injector injector, MetaClass type, IOCDecoratorExtension[] decs) {
+    super(injector, type);
+    this.IOCExtensions = decs;
+  }
+
+  public DecoratorTask(Injector injector, MetaField field, IOCDecoratorExtension[] decs) {
+    super(injector, field);
+    this.IOCExtensions = decs;
+  }
+
+  public DecoratorTask(Injector injector, MetaMethod method, IOCDecoratorExtension[] decs) {
+    super(injector, method);
+    this.IOCExtensions = decs;
+  }
+
+  public DecoratorTask(Injector injector, MetaParameter parm, IOCDecoratorExtension[] decs) {
+    super(injector, parm);
+    this.IOCExtensions = decs;
+  }
+
+  @SuppressWarnings({"unchecked"})
+  @Override
+  public void doTask(InjectionContext ctx) {
+    Annotation anno = null;
+
+    for (IOCDecoratorExtension<? extends Annotation> dec : IOCExtensions) {
+      switch (injectType) {
+        case PrivateField:
+        case Field:
+          anno = field.getAnnotation(dec.decoratesWith());
+          break;
+        case Method:
+          anno = method.getAnnotation(dec.decoratesWith());
+          if (anno == null && field != null) {
+            anno = field.getAnnotation(dec.decoratesWith());
+          }
+          else if (anno == null && parm != null) {
+            anno = parm.getAnnotation(dec.decoratesWith());
+          }
+          break;
+        case Type:
+          anno = type.getAnnotation(dec.decoratesWith());
+          break;
+
+      }
+
+      Statement stmt = dec.generateDecorator(new InjectionPoint(anno, injectType, constructor, method, field, type,
+              parm, injector, ctx));
+
+      ctx.getProcessingContext().append(stmt);
     }
-
-    public DecoratorTask(Injector injector, JField field, Decorator[] decs) {
-        super(injector, field);
-        this.decorators = decs;
-    }
-
-    public DecoratorTask(Injector injector, JMethod method, Decorator[] decs) {
-        super(injector, method);
-        this.decorators = decs;
-    }
-
-    public DecoratorTask(Injector injector, JParameter parm, Decorator[] decs) {
-        super(injector, parm);
-        this.decorators = decs;
-    }
-
-    @SuppressWarnings({"unchecked"})
-    @Override
-    public String doTask(InjectionContext ctx) {
-        StringAppender appender = new StringAppender();
-        Annotation anno = null;
-
-        for (Decorator<?> dec : decorators) {
-            switch (injectType) {
-                case PrivateField:
-                case Field:
-                    anno = field.getAnnotation(dec.decoratesWith());
-                    break;
-                case Method:
-                    anno = method.getAnnotation(dec.decoratesWith());
-                    if (anno == null && field != null) {
-                        anno = field.getAnnotation(dec.decoratesWith());
-                    } else if (anno == null && parm != null) {
-                        anno = parm.getAnnotation(dec.decoratesWith());
-                    }
-                    break;
-                case Type:
-                    anno = type.getAnnotation(dec.decoratesWith());
-                    break;
-
-            }
-
-            appender.append(dec.generateDecorator(new InjectionPoint(anno, injectType, constructor, method, field, type, parm, injector, ctx)));
-
-            appender.append("\n");
-        }
-        return appender.toString();
-    }
+  }
 }

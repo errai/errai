@@ -19,10 +19,10 @@ package org.jboss.errai.tools.monitoring;
 import org.jboss.errai.bus.client.framework.MessageBus;
 
 public class MonitorController {
-    private MessageBus bus;
-     
+  private MessageBus bus;
 
-    public void attach(MessageBus bus) {
-        this.bus = bus;
-    }
+
+  public void attach(MessageBus bus) {
+    this.bus = bus;
+  }
 }

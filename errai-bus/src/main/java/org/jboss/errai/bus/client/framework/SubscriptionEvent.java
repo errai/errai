@@ -23,75 +23,75 @@ package org.jboss.errai.bus.client.framework;
  * @see org.jboss.errai.bus.client.api.UnsubscribeListener
  */
 public class SubscriptionEvent extends BusEvent<SubscriptionEvent> {
-    private boolean remote = false;
-    private boolean lastRemoteSubject = false;
-    private boolean localOnly = false;
-    private boolean isNew = false;
-    private int count;
+  private boolean remote = false;
+  private boolean lastRemoteSubject = false;
+  private boolean localOnly = false;
+  private boolean isNew = false;
+  private int count;
 
-    private String sessionId;
-    private String subject;
+  private String sessionId;
+  private String subject;
 
-    public SubscriptionEvent(boolean remote, String sessionId, int count, boolean isNew, String subject) {
-        this.remote = remote;
-        this.sessionId = sessionId;
-        this.count = count;
-        this.isNew = isNew;
-        this.subject = subject;
-    }
+  public SubscriptionEvent(boolean remote, String sessionId, int count, boolean isNew, String subject) {
+    this.remote = remote;
+    this.sessionId = sessionId;
+    this.count = count;
+    this.isNew = isNew;
+    this.subject = subject;
+  }
 
-    public SubscriptionEvent(boolean remote, boolean lastRemoteSubject, boolean localOnly, boolean isNew, int count, String sessionId, String subject) {
-        this.remote = remote;
-        this.lastRemoteSubject = lastRemoteSubject;
-        this.localOnly = localOnly;
-        this.isNew = isNew;
-        this.count = count;
-        this.sessionId = sessionId;
-        this.subject = subject;
-    }
+  public SubscriptionEvent(boolean remote, boolean lastRemoteSubject, boolean localOnly, boolean isNew, int count, String sessionId, String subject) {
+    this.remote = remote;
+    this.lastRemoteSubject = lastRemoteSubject;
+    this.localOnly = localOnly;
+    this.isNew = isNew;
+    this.count = count;
+    this.sessionId = sessionId;
+    this.subject = subject;
+  }
 
 
-    /**
-     * Return the associated sessionId with the subscription event.
-     *
-     * @return - Session instance.
-     */
-    public String getSessionId() {
-        return sessionId;
-    }
+  /**
+   * Return the associated sessionId with the subscription event.
+   *
+   * @return - Session instance.
+   */
+  public String getSessionId() {
+    return sessionId;
+  }
 
-    /**
-     * Indicates whether or not this is a remote subscription event, meaning that the subscription is to a foreign-bus,
-     * rather than to the current bus.
-     *
-     * @return
-     */
-    public boolean isRemote() {
-        return remote;
-    }
+  /**
+   * Indicates whether or not this is a remote subscription event, meaning that the subscription is to a foreign-bus,
+   * rather than to the current bus.
+   *
+   * @return
+   */
+  public boolean isRemote() {
+    return remote;
+  }
 
-    public boolean isNew() {
-        return isNew;
-    }
+  public boolean isNew() {
+    return isNew;
+  }
 
-    public boolean isLastRemoteSubject() {
-        return lastRemoteSubject;
-    }
+  public boolean isLastRemoteSubject() {
+    return lastRemoteSubject;
+  }
 
-    public boolean isLocalOnly() {
-        return localOnly;
-    }
+  public boolean isLocalOnly() {
+    return localOnly;
+  }
 
-    public int getCount() {
-        return count;
-    }
+  public int getCount() {
+    return count;
+  }
 
-    /**
-     * Get the subject being subscribed to.
-     *
-     * @return
-     */
-    public String getSubject() {
-        return subject;
-    }
+  /**
+   * Get the subject being subscribed to.
+   *
+   * @return
+   */
+  public String getSubject() {
+    return subject;
+  }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, a divison Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,18 @@
 
 package org.jboss.errai.ioc.client.api.builtin;
 
+import javax.inject.Singleton;
+
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 import org.jboss.errai.ioc.client.api.TypeProvider;
 
-import javax.inject.Singleton;
-
 @IOCProvider
 @Singleton
 public class MessageBusProvider implements TypeProvider<MessageBus> {
-    public MessageBus provide() {
-        return ErraiBus.get();
-    }
+  @Override
+  public MessageBus provide() {
+    return ErraiBus.get();
+  }
 }

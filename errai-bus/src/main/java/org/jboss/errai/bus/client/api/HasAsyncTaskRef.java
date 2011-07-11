@@ -21,7 +21,7 @@ package org.jboss.errai.bus.client.api;
  * internally controlled.
  */
 public interface HasAsyncTaskRef extends Runnable {
-    public void setAsyncTask(AsyncTask task);
+  public void setAsyncTask(AsyncTask task);
 
-    public AsyncTask getAsyncTask();
+  public AsyncTask getAsyncTask();
 }

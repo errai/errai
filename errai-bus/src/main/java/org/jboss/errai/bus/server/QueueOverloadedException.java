@@ -24,29 +24,29 @@ import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
  * completely maxed out with undelivered messages
  */
 public class QueueOverloadedException extends MessageDeliveryFailure {
-    private static final long serialVersionUID = 6014530858847384745L;
-    private Message triedSend;
+  private static final long serialVersionUID = 6014530858847384745L;
+  private Message triedSend;
 
-    public QueueOverloadedException(Message triedSend) {
-        this.triedSend = triedSend;
-    }
+  public QueueOverloadedException(Message triedSend) {
+    this.triedSend = triedSend;
+  }
 
-    public QueueOverloadedException(Message triedSend, String message) {
-        super(message);
-        this.triedSend = triedSend;
-    }
+  public QueueOverloadedException(Message triedSend, String message) {
+    super(message);
+    this.triedSend = triedSend;
+  }
 
-    public QueueOverloadedException(Message triedSend, String message, Throwable cause) {
-        super(message, cause);
-        this.triedSend = triedSend;
-    }
+  public QueueOverloadedException(Message triedSend, String message, Throwable cause) {
+    super(message, cause);
+    this.triedSend = triedSend;
+  }
 
-    public QueueOverloadedException(Message triedSend, Throwable cause) {
-        super(cause);
-        this.triedSend = triedSend;
-    }
+  public QueueOverloadedException(Message triedSend, Throwable cause) {
+    super(cause);
+    this.triedSend = triedSend;
+  }
 
-    public Message getTriedSend() {
-        return triedSend;
-    }
+  public Message getTriedSend() {
+    return triedSend;
+  }
 }

@@ -19,9 +19,9 @@ package org.jboss.errai.bus.server.async;
 import org.jboss.errai.bus.client.api.AsyncTask;
 
 public interface SchedulerService {
-    public AsyncTask addTask(TimedTask task);
+  public AsyncTask addTask(TimedTask task);
 
-    public void requestStop();
+  public void requestStop();
 
-    public void start();
+  public void start();
 }

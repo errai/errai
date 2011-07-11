@@ -29,21 +29,19 @@ import org.jboss.errai.bus.server.api.ErraiConfig;
 import org.jboss.errai.bus.server.api.ErraiConfigExtension;
 import org.jboss.errai.bus.server.io.JSONMessageServer;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
-import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
  * Configures {@link HibernateAdapter} and make it available
  * as an injection point in guice ( see {@link ResourceProvider} )
  *
  * @author Heiko Braun
- * @author Marcin Misiewicz 
+ * @author Marcin Misiewicz
  */
 @ExtensionComponent
 public class PersistenceConfiguration implements ErraiConfigExtension {
-	
+
   private ErraiServiceConfigurator configurator;
   private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -55,31 +53,31 @@ public class PersistenceConfiguration implements ErraiConfigExtension {
   }
 
   public void configure(ErraiConfig config) {
-	logger.info("Configuring persistence extension.");
-	if (!configurator.hasProperty("errai.persistence.factory.jndi.name")) {
-		logger.info("Stopped configuring persistence extension, can't find errai.factory.jndi.name.");
-		return;
-	} 
-	String jndiName = configurator.getProperty("errai.persistence.factory.jndi.name");
-	boolean useJbossUtil = Boolean.valueOf(configurator.getProperty("errai.persistence.use_jboss_util"));
-	boolean usingJpa = Boolean.valueOf(configurator.getProperty("errai.persistence.using_jpa"));
-	logger.info("Factory JNDI name : "+jndiName);
-	logger.info("Use jboss specific utility :  "+useJbossUtil);
-	logger.info("Using JPA  : "+usingJpa);
+    logger.info("Configuring persistence extension.");
+    if (!configurator.hasProperty("errai.persistence.factory.jndi.name")) {
+      logger.info("Stopped configuring persistence extension, can't find errai.factory.jndi.name.");
+      return;
+    }
+    String jndiName = configurator.getProperty("errai.persistence.factory.jndi.name");
+    boolean useJbossUtil = Boolean.valueOf(configurator.getProperty("errai.persistence.use_jboss_util"));
+    boolean usingJpa = Boolean.valueOf(configurator.getProperty("errai.persistence.using_jpa"));
+    logger.info("Factory JNDI name : " + jndiName);
+    logger.info("Use jboss specific utility :  " + useJbossUtil);
+    logger.info("Using JPA  : " + usingJpa);
 
-	final ModelAdapter modelAdapter = new HibernateAdapter(jndiName, useJbossUtil, usingJpa);
-	final ResourceProvider<ModelAdapter> modelAdapterProvider = new ResourceProvider<ModelAdapter>() {
+    final ModelAdapter modelAdapter = new HibernateAdapter(jndiName, useJbossUtil, usingJpa);
+    final ResourceProvider<ModelAdapter> modelAdapterProvider = new ResourceProvider<ModelAdapter>() {
 
-		public ModelAdapter get() {
-			return modelAdapter;
-		}
-	};
-	
-	logger.info("Adding binding for: "+modelAdapter.getClass());
-	config.addBinding(ModelAdapter.class, modelAdapterProvider);
+      public ModelAdapter get() {
+        return modelAdapter;
+      }
+    };
+
+    logger.info("Adding binding for: " + modelAdapter.getClass());
+    config.addBinding(ModelAdapter.class, modelAdapterProvider);
 
 
-      final NoopModelAdapter adapter = new NoopModelAdapter();
+    final NoopModelAdapter adapter = new NoopModelAdapter();
 
 //      final ResourceProvider<ModelAdapter> modelAdapterProvider = new ResourceProvider<ModelAdapter>() {
 //          public ModelAdapter get() {
@@ -87,17 +85,17 @@ public class PersistenceConfiguration implements ErraiConfigExtension {
 //          }
 //      };
 
-      /*** ModelAdapter ***/
-      config.addBinding(ModelAdapter.class, modelAdapterProvider);
+    /*** ModelAdapter ***/
+    config.addBinding(ModelAdapter.class, modelAdapterProvider);
 
-      final MessageProvider modelAdapterProxy = new MessageProvider() {
-          final MessageProvider delegate = JSONMessageServer.PROVIDER;
+    final MessageProvider modelAdapterProxy = new MessageProvider() {
+      final MessageProvider delegate = JSONMessageServer.PROVIDER;
 
-          public Message get() {
-              return new MessageModelWrapper(delegate.get(), modelAdapterProvider.get());
-          }
-      };
-      MessageBuilder.setMessageProvider(modelAdapterProxy);
+      public Message get() {
+        return new MessageModelWrapper(delegate.get(), modelAdapterProvider.get());
+      }
+    };
+    MessageBuilder.setMessageProvider(modelAdapterProxy);
 
   }
 }

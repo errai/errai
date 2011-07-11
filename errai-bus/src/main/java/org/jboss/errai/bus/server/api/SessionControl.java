@@ -21,16 +21,16 @@ package org.jboss.errai.bus.server.api;
  */
 public interface SessionControl {
 
-    /**
-     * Returns true if the current session is still valid
-     *
-     * @return true if session is valid, false otherwise
-     */
-    public boolean isSessionValid();
+  /**
+   * Returns true if the current session is still valid
+   *
+   * @return true if session is valid, false otherwise
+   */
+  public boolean isSessionValid();
 
-    /**
-     * This function indicates activity on the session, so the session knows when the last time there was activity.
-     * For example, <tt>MessageQueue</tt> relies on this function to figure out whether or not to timeout
-     */
-    public void activity();
+  /**
+   * This function indicates activity on the session, so the session knows when the last time there was activity.
+   * For example, <tt>MessageQueue</tt> relies on this function to figure out whether or not to timeout
+   */
+  public void activity();
 }

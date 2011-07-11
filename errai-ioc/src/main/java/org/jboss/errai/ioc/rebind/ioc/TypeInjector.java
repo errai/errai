@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, a divison Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,70 +17,89 @@
 package org.jboss.errai.ioc.rebind.ioc;
 
 
-import com.google.gwt.core.ext.typeinfo.JClassType;
+import java.lang.annotation.Annotation;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.inject.Singleton;
 
-/**
- * User: christopherbrock
- * Date: 7-Jul-2010
- * Time: 1:00:03 PM
- */
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.Refs;
+
 public class TypeInjector extends Injector {
-    protected final JClassType type;
-    protected boolean injected;
-    protected boolean singleTon;
-    protected String varName;
+  protected final MetaClass type;
+  protected boolean injected;
+  protected boolean singleton;
+  protected String varName;
 
-    public TypeInjector(JClassType type) {
-        this.type = type;
-        this.singleTon = type.isAnnotationPresent(Singleton.class)
-                || type.isAnnotationPresent(com.google.inject.Singleton.class);
-        this.varName = InjectUtil.getNewVarName();
+  public TypeInjector(MetaClass type) {
+    this.type = type;
+    this.singleton = type.isAnnotationPresent(Singleton.class)
+        || type.isAnnotationPresent(com.google.inject.Singleton.class);
+    this.varName = InjectUtil.getNewVarName();
+
+    try {
+      Set<Annotation> qualifiers = new HashSet<Annotation>();
+      qualifiers.addAll(InjectUtil.extractQualifiersFromType(type));
+
+      if (!qualifiers.isEmpty()) {
+        qualifyingMetadata = new JSR299QualifyingMetadata(qualifiers);
+      }
+      else {
+        qualifyingMetadata = JSR299QualifyingMetadata.createDefaultQualifyingMetaData();
+      }
+
+    }
+    catch (Throwable e) {
+      // ignore
+    }
+  }
+
+  @Override
+  public Statement getType(InjectionContext injectContext, InjectionPoint injectionPoint) {
+    if (isInjected()) {
+      if (isSingleton()) {
+        return Refs.get(varName);
+      }
+      else {
+        varName = InjectUtil.getNewVarName();
+      }
     }
 
-    @Override
-    public String getType(InjectionContext injectContext, InjectionPoint injectionPoint) {
-        if (isInjected()) {
-            if (isSingleton()) {
-                return varName;
-            } else {
-                varName = InjectUtil.getNewVarName();
-            }
-        }
+    InjectUtil.getConstructionStrategy(this, injectContext).generateConstructor();
 
-        ConstructionStrategy cs = InjectUtil.getConstructionStrategy(this, injectContext, injectionPoint);
+    injected = true;
 
-        String generated = cs.generateConstructor();
-        injectContext.getProcessingContext().getWriter().print(generated);
+    return Refs.get(varName);
+  }
 
-        injected = true;
+  @Override
+  public Statement instantiateOnly(InjectionContext injectContext, InjectionPoint injectionPoint) {
+    return getType(injectContext, injectionPoint);
+  }
 
-        return varName;
-    }
+  @Override
+  public boolean isInjected() {
+    return injected;
+  }
 
-    @Override
-    public String instantiateOnly(InjectionContext injectContext, InjectionPoint injectionPoint) {
-        return getType(injectContext, injectionPoint);
-    }
+  @Override
+  public boolean isSingleton() {
+    return singleton;
+  }
 
-    @Override
-    public boolean isInjected() {
-        return injected;
-    }
+  public void setSingleton(boolean singleton) {
+    this.singleton = singleton;
+  }
 
-    @Override
-    public boolean isSingleton() {
-        return singleTon;
-    }
+  @Override
+  public String getVarName() {
+    return varName;
+  }
 
-    @Override
-    public String getVarName() {
-        return varName;
-    }
-
-    @Override
-    public JClassType getInjectedType() {
-        return type;
-    }
+  @Override
+  public MetaClass getInjectedType() {
+    return type;
+  }
 }

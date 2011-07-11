@@ -23,32 +23,33 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ColMappers {
-    private static final Map<String, ColMapper> COLMAPPERS = new HashMap<String, ColMapper>();
-    static {
-        addMapper(CheckBox.class, new CheckBoxColMapper());
-    }
+  private static final Map<String, ColMapper> COLMAPPERS = new HashMap<String, ColMapper>();
 
-    public static boolean hasMapper(Class mapperType) {
-        return hasMapper(mapperType.toString());
-    }
+  static {
+    addMapper(CheckBox.class, new CheckBoxColMapper());
+  }
 
-    public static boolean hasMapper(String mapperType) {
-        return COLMAPPERS.containsKey(mapperType);
-    }
+  public static boolean hasMapper(Class mapperType) {
+    return hasMapper(mapperType.toString());
+  }
 
-    public static ColMapper getMapper(Class mapperType) {
-        return getMapper(mapperType.toString());
-    }
+  public static boolean hasMapper(String mapperType) {
+    return COLMAPPERS.containsKey(mapperType);
+  }
 
-    public static ColMapper getMapper(String mapperType) {
-        return COLMAPPERS.get(mapperType);
-    }
+  public static ColMapper getMapper(Class mapperType) {
+    return getMapper(mapperType.toString());
+  }
 
-    public static void addMapper(Class mapperType, ColMapper mapper) {
-        addMapper(mapperType.getName(), mapper);
-    }
+  public static ColMapper getMapper(String mapperType) {
+    return COLMAPPERS.get(mapperType);
+  }
 
-    public static void addMapper(String mapperType, ColMapper mapper) {
-        COLMAPPERS.put(mapperType, mapper);
-    }
+  public static void addMapper(Class mapperType, ColMapper mapper) {
+    addMapper(mapperType.getName(), mapper);
+  }
+
+  public static void addMapper(String mapperType, ColMapper mapper) {
+    COLMAPPERS.put(mapperType, mapper);
+  }
 }

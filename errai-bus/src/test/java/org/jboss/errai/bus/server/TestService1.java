@@ -29,13 +29,13 @@ import org.jboss.errai.bus.server.annotations.Service;
  */
 @Service
 public class TestService1 implements MessageCallback {
-    public void callback(Message message) {
-        SType sType = message.get(SType.class, "SType");
-        System.out.println("SERVER: " + sType);
+  public void callback(Message message) {
+    SType sType = message.get(SType.class, "SType");
+    System.out.println("SERVER: " + sType);
 
-        MessageBuilder.createConversation(message)
-                .subjectProvided()
-                .with("SType", sType)
-                .done().reply();
-    }
+    MessageBuilder.createConversation(message)
+        .subjectProvided()
+        .with("SType", sType)
+        .done().reply();
+  }
 }

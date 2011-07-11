@@ -22,7 +22,7 @@ import org.jboss.errai.bus.client.framework.RequestDispatcher;
  * A deferred message is a message that is held for sending at a future time, for either one or more times.
  */
 public interface DeferredMessage extends Message {
-    public void sendsWith(RequestDispatcher dispatcher);
+  public void sendsWith(RequestDispatcher dispatcher);
 
-    public void send();
+  public void send();
 }

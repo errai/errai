@@ -19,7 +19,7 @@ package org.jboss.errai.widgets.client.mapping;
 import com.google.gwt.user.client.ui.Widget;
 
 public abstract class CollectionWidgetMapper<T extends Widget, F, V> extends WidgetMapper<T, V> {
-    @Override
-    public abstract void map(V entity);
-  
+  @Override
+  public abstract void map(V entity);
+
 }

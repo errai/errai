@@ -33,19 +33,16 @@ import java.util.*;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Jun 11, 2010
  */
-public class CommonTestSetup
-{
+public class CommonTestSetup {
   protected static SessionFactory sessionFactory;
   protected static PersistentBeanManager beanManager;
 
-  public CommonTestSetup()
-  {
+  public CommonTestSetup() {
     sessionFactory = new Configuration().getSessionFactory();
     beanManager = createBeanManager(sessionFactory);
   }
 
-  protected PersistentBeanManager createBeanManager(SessionFactory sessionFactory)
-  {
+  protected PersistentBeanManager createBeanManager(SessionFactory sessionFactory) {
     // configure gilead
     HibernateUtil persistenceUtil = new HibernateUtil();
     persistenceUtil.setSessionFactory(sessionFactory);
@@ -60,16 +57,14 @@ public class CommonTestSetup
     return beanManager;
   }
 
-  protected User loadUser(Session session, String userId)
-  {
+  protected User loadUser(Session session, String userId) {
     Query q1 = session.createQuery("from User u where u.userId=:id");
     q1.setString("id", userId);
-    User user = (User)q1.uniqueResult();
+    User user = (User) q1.uniqueResult();
     return user;
   }
 
-  protected String createTestUser(Session session)
-  {
+  protected String createTestUser(Session session) {
     // cleanup first
     cleanTables(session);
 
@@ -77,13 +72,11 @@ public class CommonTestSetup
 
     // read-write test
     Transaction tx = session.beginTransaction();
-    try
-    {
+    try {
       session.save(user);
       tx.commit();
     }
-    catch (HibernateException e)
-    {
+    catch (HibernateException e) {
       tx.rollback();
       throw new RuntimeException("Faile to save User", e);
     }
@@ -91,8 +84,7 @@ public class CommonTestSetup
     return user.getUserId();
   }
 
-  public User createUserEntity()
-  {
+  public User createUserEntity() {
     User user = new User();
     user.setName("Heiko");
 
@@ -110,33 +102,30 @@ public class CommonTestSetup
     return user;
   }
 
-  public UserDTO createUserDTO()
-   {
-     UserDTO user = new UserDTO();
-     user.setUserId(UUID.randomUUID().toString());
-     user.setName("Heiko");
+  public UserDTO createUserDTO() {
+    UserDTO user = new UserDTO();
+    user.setUserId(UUID.randomUUID().toString());
+    user.setName("Heiko");
 
-     Set<OrderDTO> orders = new HashSet<OrderDTO>();
-     user.setOrders(orders);
+    Set<OrderDTO> orders = new HashSet<OrderDTO>();
+    user.setOrders(orders);
 
-     List<ItemDTO> items = new ArrayList<ItemDTO>();
-     items.add(new ItemDTO("TV", 12.99));
-     items.add(new ItemDTO("Radio", 15.99));
-     items.add(new ItemDTO("Laptop", 1.99));
+    List<ItemDTO> items = new ArrayList<ItemDTO>();
+    items.add(new ItemDTO("TV", 12.99));
+    items.add(new ItemDTO("Radio", 15.99));
+    items.add(new ItemDTO("Laptop", 1.99));
 
-     OrderDTO order = new OrderDTO();
-     order.setOrderNum(UUID.randomUUID().toString());
-     order.setItems(items);
-     orders.add(order);
-     return user;
-   }
+    OrderDTO order = new OrderDTO();
+    order.setOrderNum(UUID.randomUUID().toString());
+    order.setItems(items);
+    orders.add(order);
+    return user;
+  }
 
 
-  private void cleanTables(Session session)
-  {
+  private void cleanTables(Session session) {
     Transaction tx = session.beginTransaction();
-    try
-    {
+    try {
       Query query = session.createQuery("delete from Item");
       query.executeUpdate();
 
@@ -145,23 +134,20 @@ public class CommonTestSetup
 
       query = session.createQuery("delete from User");
       query.executeUpdate();
-      
+
       tx.commit();
     }
-    catch (HibernateException e)
-    {
+    catch (HibernateException e) {
       tx.rollback();
       throw new RuntimeException("Failed to clean user table", e);
     }
   }
 
-  public static SessionFactory getSessionFactory()
-  {
+  public static SessionFactory getSessionFactory() {
     return sessionFactory;
   }
 
-  public static PersistentBeanManager getBeanManager()
-  {
+  public static PersistentBeanManager getBeanManager() {
     return beanManager;
   }
 }

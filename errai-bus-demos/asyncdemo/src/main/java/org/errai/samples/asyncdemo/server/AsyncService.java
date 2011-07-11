@@ -17,6 +17,7 @@
 package org.errai.samples.asyncdemo.server;
 
 import org.jboss.errai.bus.client.api.AsyncTask;
+import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.ResourceProvider;
@@ -31,57 +32,60 @@ import java.util.regex.Pattern;
 @Service
 public class AsyncService implements MessageCallback {
 
-    private final static Pattern StartMatcher = Pattern.compile("^Start[0-9]{1}$");
-    private final static Pattern StopMatcher = Pattern.compile("^Stop[0-9]{1}$");
+  private final static Pattern StartMatcher = Pattern.compile("^Start[0-9]{1}$");
+  private final static Pattern StopMatcher = Pattern.compile("^Stop[0-9]{1}$");
 
-    public void callback(Message message) {
-        LocalContext ctx = LocalContext.get(message);
+  public void callback(Message message) {
+    LocalContext ctx = LocalContext.get(message);
 
-        String commandType = message.getCommandType();
-        String taskName = getTaskName(commandType);
+    String commandType = message.getCommandType();
+    String taskName = getTaskName(commandType);
 
-        if (StartMatcher.matcher(commandType).matches()) {
-            AsyncTask task = ctx.getAttribute(AsyncTask.class, taskName);
-                                                                                    
-            // there's no task running in this context.
-            if (task == null) {
-                ResourceProvider<Double> randomNumberProvider = new ResourceProvider<Double>() {
-                    public Double get() {
-                        return Math.random();
-                    }
-                };
+    if (StartMatcher.matcher(commandType).matches()) {
+      AsyncTask task = ctx.getAttribute(AsyncTask.class, taskName);
 
-                task = MessageBuilder.createConversation(message)
-                        .subjectProvided()
-                        .withProvided("Data", randomNumberProvider)
-                        .noErrorHandling()
-                        .replyRepeating(TimeUnit.MILLISECONDS, 50);
+      // there's no task running in this context.
+      if (task == null) {
+        ResourceProvider<Double> randomNumberProvider = new ResourceProvider<Double>() {
+          public Double get() {
+            return Math.random();
+          }
+        };
 
-                System.out.println("New task started: " + taskName);
-                ctx.setAttribute(taskName, task);
-            } else {
-                System.out.println("Task already started: " + taskName);
-            }
-        } else if (StopMatcher.matcher(commandType).matches()) {
-            AsyncTask task = ctx.getAttribute(AsyncTask.class, taskName);
+        task = MessageBuilder.createConversation(message)
+            .subjectProvided()
+            .withProvided("Data", randomNumberProvider)
+            .noErrorHandling()
+            .replyRepeating(TimeUnit.MILLISECONDS, 50);
 
-            if (task == null) {
-                System.out.println("Nothing to stop: " + taskName);
-            } else {
-                System.out.println("Stopping: " + taskName);
-                task.cancel(true);
-                ctx.removeAttribute(taskName);
-            }
-        }
+        System.out.println("New task started: " + taskName);
+        ctx.setAttribute(taskName, task);
+      }
+      else {
+        System.out.println("Task already started: " + taskName);
+      }
     }
+    else if (StopMatcher.matcher(commandType).matches()) {
+      AsyncTask task = ctx.getAttribute(AsyncTask.class, taskName);
 
-    public String getTaskName(String name) {
-        return "Task" + getLastChar(name);
+      if (task == null) {
+        System.out.println("Nothing to stop: " + taskName);
+      }
+      else {
+        System.out.println("Stopping: " + taskName);
+        task.cancel(true);
+        ctx.removeAttribute(taskName);
+      }
     }
+  }
 
-    public char getLastChar(String str) {
-        return str.charAt(str.length() - 1);
-    }
+  public String getTaskName(String name) {
+    return "Task" + getLastChar(name);
+  }
+
+  public char getLastChar(String str) {
+    return str.charAt(str.length() - 1);
+  }
 
 
 }

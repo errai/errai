@@ -18,7 +18,6 @@ package org.jboss.errai.tools.monitoring;
 
 import com.google.inject.Inject;
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.ResourceProvider;
 import org.jboss.errai.bus.client.framework.BusMonitor;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.SubscriptionEvent;
@@ -27,90 +26,90 @@ import org.jboss.errai.bus.server.annotations.ExtensionComponent;
 import org.jboss.errai.bus.server.api.ErraiConfig;
 import org.jboss.errai.bus.server.api.ErraiConfigExtension;
 
-import java.util.Map;
-
 @ExtensionComponent
 public class MonitorExtension implements ErraiConfigExtension {
-    public static String MONITOR_SVC = "BusMonitorService_000";
+  public static String MONITOR_SVC = "BusMonitorService_000";
 
-    private MessageBus bus;
-    private ActivityProcessor proc;
+  private MessageBus bus;
+  private ActivityProcessor proc;
 
-    @Inject
-    public MonitorExtension(MessageBus bus) {
-        this.bus = bus;
-    }
+  @Inject
+  public MonitorExtension(MessageBus bus) {
+    this.bus = bus;
+  }
 
-    public void configure(ErraiConfig config) {
-        if (Boolean.getBoolean("errai.tools.bus_monitor_attach")) {
+  public void configure(ErraiConfig config) {
+    if (Boolean.getBoolean("errai.tools.bus_monitor_attach")) {
 
-            proc = new ActivityProcessor();
-            ServerMessageBusImpl sBus = (ServerMessageBusImpl) bus;
+      proc = new ActivityProcessor();
+      ServerMessageBusImpl sBus = (ServerMessageBusImpl) bus;
 
-            try {
-                new Bootstrapper(proc, bus).init();
-            }
-            catch (Throwable t) {
-                t.printStackTrace();
-            }
+      try {
+        new Bootstrapper(proc, bus).init();
+      }
+      catch (Throwable t) {
+        t.printStackTrace();
+      }
 
-            sBus.attachMonitor(new BusMonitor() {
-                MessageBus bus;
+      sBus.attachMonitor(new BusMonitor() {
+        MessageBus bus;
 
-                public void attach(MessageBus bus) {
-                    this.bus = bus;
-                }
-
-                public void notifyNewSubscriptionEvent(final SubscriptionEvent event) {
-                    if (MONITOR_SVC.equals(event.getSubject())) return;
-
-                    if (event.isRemote()) {
-                        proc.notifyEvent(System.currentTimeMillis(), EventType.BUS_EVENT, SubEventType.REMOTE_SUBSCRIBE,
-                                event.getSessionId(), "Server", event.getSubject(), null, null, false);
-                    } else {
-                        proc.notifyEvent(System.currentTimeMillis(), EventType.BUS_EVENT, SubEventType.SERVER_SUBSCRIBE,
-                                "Server", "Server", event.getSubject(), null, null, false);
-                    }
-                }
-
-                public void notifyUnSubcriptionEvent(final SubscriptionEvent event) {
-                    if (MONITOR_SVC.equals(event.getSubject())) return;
-
-                    if (event.isRemote()) {
-                        proc.notifyEvent(System.currentTimeMillis(), EventType.BUS_EVENT, SubEventType.REMOTE_UNSUBSCRIBE,
-                                event.getSessionId(), "Server", event.getSubject(), null, null, false);
-                    } else {
-                        proc.notifyEvent(System.currentTimeMillis(), EventType.BUS_EVENT, SubEventType.SERVER_UNSUBSCRIBE,
-                                "Server", "Server", event.getSubject(), null, null, false);
-                    }
-                }
-
-                public void notifyQueueAttached(final String queueId, Object queueInstance) {
-                    proc.notifyEvent(System.currentTimeMillis(), EventType.BUS_EVENT, SubEventType.REMOTE_ATTACHED, queueId, "Server", null, null, null, false);
-                }
-
-                public void notifyQueueDetached(String queueId, Object queueInstance) {
-                    proc.notifyEvent(System.currentTimeMillis(), EventType.BUS_EVENT, SubEventType.REMOTE_DETATCHED, queueId, "Server", null, null, null, false);
-                }
-
-                public void notifyIncomingMessageFromRemote(String queue, final Message message) {
-                    proc.notifyEvent(System.currentTimeMillis(), EventType.MESSAGE, SubEventType.RX_REMOTE, String.valueOf(queue), "Server", message.getSubject(), message, null, false);
-                }
-
-                public void notifyOutgoingMessageToRemote(String queue, final Message message) {
-                    proc.notifyEvent(System.currentTimeMillis(), EventType.MESSAGE, SubEventType.TX_REMOTE, "Server", String.valueOf(queue), message.getSubject(), message, null, false);
-                }
-
-                public void notifyInBusMessage(Message message) {
-                    proc.notifyEvent(System.currentTimeMillis(), EventType.MESSAGE, SubEventType.INBUS, "Server", "Server", message.getSubject(), message, null, false);
-                }
-
-                public void notifyMessageDeliveryFailure(String queue, Message message, Throwable throwable) {
-                    proc.notifyEvent(System.currentTimeMillis(), EventType.ERROR, SubEventType.INBUS, String.valueOf(queue), "Server", message.getSubject(), message, throwable, false);
-                }
-            });
-
-
+        public void attach(MessageBus bus) {
+          this.bus = bus;
         }
+
+        public void notifyNewSubscriptionEvent(final SubscriptionEvent event) {
+          if (MONITOR_SVC.equals(event.getSubject())) return;
+
+          if (event.isRemote()) {
+            proc.notifyEvent(System.currentTimeMillis(), EventType.BUS_EVENT, SubEventType.REMOTE_SUBSCRIBE,
+                event.getSessionId(), "Server", event.getSubject(), null, null, false);
+          }
+          else {
+            proc.notifyEvent(System.currentTimeMillis(), EventType.BUS_EVENT, SubEventType.SERVER_SUBSCRIBE,
+                "Server", "Server", event.getSubject(), null, null, false);
+          }
+        }
+
+        public void notifyUnSubcriptionEvent(final SubscriptionEvent event) {
+          if (MONITOR_SVC.equals(event.getSubject())) return;
+
+          if (event.isRemote()) {
+            proc.notifyEvent(System.currentTimeMillis(), EventType.BUS_EVENT, SubEventType.REMOTE_UNSUBSCRIBE,
+                event.getSessionId(), "Server", event.getSubject(), null, null, false);
+          }
+          else {
+            proc.notifyEvent(System.currentTimeMillis(), EventType.BUS_EVENT, SubEventType.SERVER_UNSUBSCRIBE,
+                "Server", "Server", event.getSubject(), null, null, false);
+          }
+        }
+
+        public void notifyQueueAttached(final String queueId, Object queueInstance) {
+          proc.notifyEvent(System.currentTimeMillis(), EventType.BUS_EVENT, SubEventType.REMOTE_ATTACHED, queueId, "Server", null, null, null, false);
+        }
+
+        public void notifyQueueDetached(String queueId, Object queueInstance) {
+          proc.notifyEvent(System.currentTimeMillis(), EventType.BUS_EVENT, SubEventType.REMOTE_DETATCHED, queueId, "Server", null, null, null, false);
+        }
+
+        public void notifyIncomingMessageFromRemote(String queue, final Message message) {
+          proc.notifyEvent(System.currentTimeMillis(), EventType.MESSAGE, SubEventType.RX_REMOTE, String.valueOf(queue), "Server", message.getSubject(), message, null, false);
+        }
+
+        public void notifyOutgoingMessageToRemote(String queue, final Message message) {
+          proc.notifyEvent(System.currentTimeMillis(), EventType.MESSAGE, SubEventType.TX_REMOTE, "Server", String.valueOf(queue), message.getSubject(), message, null, false);
+        }
+
+        public void notifyInBusMessage(Message message) {
+          proc.notifyEvent(System.currentTimeMillis(), EventType.MESSAGE, SubEventType.INBUS, "Server", "Server", message.getSubject(), message, null, false);
+        }
+
+        public void notifyMessageDeliveryFailure(String queue, Message message, Throwable throwable) {
+          proc.notifyEvent(System.currentTimeMillis(), EventType.ERROR, SubEventType.INBUS, String.valueOf(queue), "Server", message.getSubject(), message, throwable, false);
+        }
+      });
+
+
     }
+  }
 }

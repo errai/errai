@@ -27,49 +27,49 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ServerLaundryList implements LaundryList {
-    private Queue<Laundry> listOfLaundry;
+  private Queue<Laundry> listOfLaundry;
 
-    public static ServerLaundryList get(QueueSession session) {
-        return setup(LocalContext.get(session));
+  public static ServerLaundryList get(QueueSession session) {
+    return setup(LocalContext.get(session));
+  }
+
+  public static ServerLaundryList get(Message message) {
+    return setup(LocalContext.get(message));
+  }
+
+  private ServerLaundryList() {
+    listOfLaundry = new ConcurrentLinkedQueue<Laundry>();
+  }
+
+  public void cleanAll() {
+    Iterator<Laundry> iter = listOfLaundry.iterator();
+    while (iter.hasNext()) {
+      iter.next().clean();
+      iter.remove();
     }
+  }
 
-    public static ServerLaundryList get(Message message) {
-        return setup(LocalContext.get(message));
+  public LaundryReclaim addToHamper(final Laundry laundry) {
+    listOfLaundry.add(laundry);
+    return new LaundryReclaim() {
+      public boolean reclaim() {
+        return removeFromHamper(laundry);
+      }
+    };
+  }
+
+  public boolean removeFromHamper(final Laundry laundry) {
+    return listOfLaundry.remove(laundry);
+  }
+
+  @SuppressWarnings({"SynchronizationOnLocalVariableOrMethodParameter"})
+  private static ServerLaundryList setup(final LocalContext ctx) {
+    ServerLaundryList list;
+    synchronized (ctx) {
+
+      if ((list = ctx.getAttribute(ServerLaundryList.class)) == null)
+        ctx.setAttribute(ServerLaundryList.class, list = new ServerLaundryList());
     }
-
-    private ServerLaundryList() {
-        listOfLaundry = new ConcurrentLinkedQueue<Laundry>();
-    }
-
-    public void cleanAll() {
-        Iterator<Laundry> iter = listOfLaundry.iterator();
-        while (iter.hasNext()) {
-            iter.next().clean();
-            iter.remove();
-        }
-    }
-
-    public LaundryReclaim addToHamper(final Laundry laundry) {
-        listOfLaundry.add(laundry);
-        return new LaundryReclaim() {
-            public boolean reclaim() {
-                return removeFromHamper(laundry);
-            }
-        };
-    }
-
-    public boolean removeFromHamper(final Laundry laundry) {
-        return listOfLaundry.remove(laundry);
-    }
-
-    @SuppressWarnings({"SynchronizationOnLocalVariableOrMethodParameter"})
-    private static ServerLaundryList setup(final LocalContext ctx) {
-        ServerLaundryList list;
-        synchronized (ctx) {
-
-            if ((list = ctx.getAttribute(ServerLaundryList.class)) == null)
-                ctx.setAttribute(ServerLaundryList.class, list = new ServerLaundryList());
-        }
-        return list;
-    }
+    return list;
+  }
 }

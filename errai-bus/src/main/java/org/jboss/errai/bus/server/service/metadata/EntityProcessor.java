@@ -52,7 +52,7 @@ public class EntityProcessor implements MetaDataProcessor {
 
       Iterator<Object> it = props.keySet().iterator();
       while (it.hasNext()) {
-        String key = (String)it.next();
+        String key = (String) it.next();
         if (key.equals(ErraiServiceConfigurator.CONFIG_ERRAI_SERIALIZABLE_TYPE)) {
           for (String s : props.getProperty(key).split(" ")) {
             try {

@@ -22,12 +22,10 @@ import org.gwt.mosaic.ui.client.ScrollLayoutPanel;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: May 18, 2010
  */
-public class SourcePanel extends ScrollLayoutPanel
-{
+public class SourcePanel extends ScrollLayoutPanel {
   private HTML html;
 
-  public SourcePanel()
-  {
+  public SourcePanel() {
     super();
 
     html = new HTML();
@@ -35,8 +33,7 @@ public class SourcePanel extends ScrollLayoutPanel
     this.add(html);
   }
 
-  public void setSource(String source)
-  {
+  public void setSource(String source) {
     html.setHTML(source);
   }
 }

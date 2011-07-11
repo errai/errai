@@ -28,56 +28,56 @@ import java.util.List;
 import java.util.Map;
 
 public class CollectionFMGenerator implements FieldMapperGenerator {
-    CompiledTemplate compiledTemplate;
+  CompiledTemplate compiledTemplate;
 
-    String varName;
+  String varName;
 
-    public String generateFieldMapperGenerator(TypeOracle oracle, JField targetWidgetField, JType targetType, JField targetEntityMember, JField targetEntityField) {
-        return varName;
+  public String generateFieldMapperGenerator(TypeOracle oracle, JField targetWidgetField, JType targetType, JField targetEntityMember, JField targetEntityField) {
+    return varName;
+  }
+
+  public String generateValueExtractorStatement(TypeOracle oracle, JField targetWidgetField, JType targetType, JField targetEntityMember, JField targetEntityField) {
+    return varName;
+  }
+
+  public String init(TypeOracle oracle, JField targetWidgetField, JType targetType, JField targetEntityMember, JField targetEntityField, String variable, List<JField> fields) {
+    JClassType widgetCollectionType = targetWidgetField.getType().isClassOrInterface();
+    JClassType entityCollectionType = targetEntityMember.getType().isClassOrInterface();
+
+    JParameterizedType paramaterizedType = widgetCollectionType.isParameterized();
+
+    if (paramaterizedType == null) {
+      throw new RuntimeException("cannot generateGetField mappers for collection of widgets (the collection is not properly parameterized: eg. List<Widget>)");
     }
 
-    public String generateValueExtractorStatement(TypeOracle oracle, JField targetWidgetField, JType targetType, JField targetEntityMember, JField targetEntityField) {
-        return varName;
+    JClassType widgetType = paramaterizedType.getTypeArgs()[0];
+    varName = targetEntityField.getType().isClassOrInterface().getName() + targetWidgetField.getName() + "Mapper";
+
+    if (compiledTemplate == null) {
+      InputStream istream = this.getClass().getResourceAsStream("CollectionFMGenerator.mv");
+      compiledTemplate = TemplateCompiler.compileTemplate(istream, null);
     }
 
-    public String init(TypeOracle oracle, JField targetWidgetField, JType targetType, JField targetEntityMember, JField targetEntityField, String variable, List<JField> fields) {
-        JClassType widgetCollectionType = targetWidgetField.getType().isClassOrInterface();
-        JClassType entityCollectionType = targetEntityMember.getType().isClassOrInterface();
+    Map vars = new HashMap();
+    vars.put("typeOracle", oracle);
+    vars.put("targetWidgetField", targetWidgetField);
+    vars.put("targetEntityField", targetEntityField);
+    vars.put("targetEntityMember", targetEntityMember);
+    vars.put("widgetType", widgetType);
+    vars.put("entityCollectionType", entityCollectionType);
+    vars.put("widgetCollectionType", widgetCollectionType);
+    vars.put("varName", varName);
 
-        JParameterizedType paramaterizedType = widgetCollectionType.isParameterized();
+    return String.valueOf(TemplateRuntime.execute(compiledTemplate, vars));
+  }
 
-        if (paramaterizedType == null) {
-            throw new RuntimeException("cannot generateGetField mappers for collection of widgets (the collection is not properly parameterized: eg. List<Widget>)");
-        }
 
-        JClassType widgetType = paramaterizedType.getTypeArgs()[0];
-        varName = targetEntityField.getType().isClassOrInterface().getName() + targetWidgetField.getName() + "Mapper";
-
-        if (compiledTemplate == null) {
-            InputStream istream = this.getClass().getResourceAsStream("CollectionFMGenerator.mv");
-            compiledTemplate = TemplateCompiler.compileTemplate(istream, null);
-        }
-
-        Map vars = new HashMap();
-        vars.put("typeOracle", oracle);
-        vars.put("targetWidgetField", targetWidgetField);
-        vars.put("targetEntityField", targetEntityField);
-        vars.put("targetEntityMember", targetEntityMember);
-        vars.put("widgetType", widgetType);
-        vars.put("entityCollectionType", entityCollectionType);
-        vars.put("widgetCollectionType", widgetCollectionType);
-        vars.put("varName", varName);
-      
-        return String.valueOf(TemplateRuntime.execute(compiledTemplate, vars));
+  private JClassType getType(TypeOracle oracle, Class cls) {
+    try {
+      return oracle.getType(cls.getName());
     }
-
-
-    private JClassType getType(TypeOracle oracle, Class cls) {
-        try {
-            return oracle.getType(cls.getName());
-        }
-        catch (NotFoundException e) {
-            throw new RuntimeException(e);
-        }
+    catch (NotFoundException e) {
+      throw new RuntimeException(e);
     }
+  }
 }

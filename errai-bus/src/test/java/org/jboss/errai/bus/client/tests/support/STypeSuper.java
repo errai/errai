@@ -22,30 +22,30 @@ package org.jboss.errai.bus.client.tests.support;
  * Time: 11:11:00 AM
  */
 public class STypeSuper {
-    private String superValue;
+  private String superValue;
 
-    public String getSuperValue() {
-        return superValue;
-    }
+  public String getSuperValue() {
+    return superValue;
+  }
 
-    public void setSuperValue(String superValue) {
-        this.superValue = superValue;
-    }
+  public void setSuperValue(String superValue) {
+    this.superValue = superValue;
+  }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
 
-        STypeSuper that = (STypeSuper) o;
+    STypeSuper that = (STypeSuper) o;
 
-        if (superValue != null ? !superValue.equals(that.superValue) : that.superValue != null) return false;
+    if (superValue != null ? !superValue.equals(that.superValue) : that.superValue != null) return false;
 
-        return true;
-    }
+    return true;
+  }
 
-    @Override
-    public int hashCode() {
-        return superValue != null ? superValue.hashCode() : 0;
-    }
+  @Override
+  public int hashCode() {
+    return superValue != null ? superValue.hashCode() : 0;
+  }
 }

@@ -24,18 +24,18 @@ import com.google.gwt.user.client.ui.TextBox;
 import org.jboss.errai.widgets.rebind.widgetmappers.ColMapper;
 
 public class CheckBoxColMapper implements ColMapper<TextBox> {
-    public String generateGetField(TypeOracle oracle, JClassType fromType) {
-        return "wld.setValue(value.contains(wld.getText()));";
-    }
+  public String generateGetField(TypeOracle oracle, JClassType fromType) {
+    return "wld.setValue(value.contains(wld.getText()));";
+  }
 
-    public String generateSetField(TypeOracle oracle, JClassType toType) {
-        return "if (wld.getValue()) { value.add(wld.getText()); } else { value.remove(wld.getText()); }";
-    }
+  public String generateSetField(TypeOracle oracle, JClassType toType) {
+    return "if (wld.getValue()) { value.add(wld.getText()); } else { value.remove(wld.getText()); }";
+  }
 
-    public String generateValueChange(TypeOracle oracle, JClassType type) {
-        return "wld.addValueChangeHandler(new " + ValueChangeHandler.class.getName() + "<Boolean>() { "
-                + "public void onValueChange(" + ValueChangeEvent.class.getName() + "<Boolean> booleanValueChangeEvent) { "
-                +  "@{varName}.setFieldValue(wld, widget.@{targetEntityField.getName()}.@{getGetter(targetEntityMember.getName())}());"
-                + "}});";
-    }
+  public String generateValueChange(TypeOracle oracle, JClassType type) {
+    return "wld.addValueChangeHandler(new " + ValueChangeHandler.class.getName() + "<Boolean>() { "
+        + "public void onValueChange(" + ValueChangeEvent.class.getName() + "<Boolean> booleanValueChangeEvent) { "
+        + "@{varName}.setFieldValue(wld, widget.@{targetEntityField.getName()}.@{getGetter(targetEntityMember.getName())}());"
+        + "}});";
+  }
 }

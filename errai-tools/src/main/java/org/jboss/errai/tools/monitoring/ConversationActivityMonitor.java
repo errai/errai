@@ -24,58 +24,58 @@ import java.util.regex.Pattern;
 
 public class ConversationActivityMonitor extends ServiceActivityMonitor {
 
-    private final Pattern MATCHER;
+  private final Pattern MATCHER;
 
-    public ConversationActivityMonitor(final ServerMonitorPanel serverMonitor, final String busId, final String service) {
-        super(serverMonitor, busId, service);
-        updateTitle(null);
+  public ConversationActivityMonitor(final ServerMonitorPanel serverMonitor, final String busId, final String service) {
+    super(serverMonitor, busId, service);
+    updateTitle(null);
 
-        removeWindowListener(defaultWindowListener);
+    removeWindowListener(defaultWindowListener);
 
-        addWindowListener(new WindowListener() {
-            public void windowOpened(WindowEvent e) {
-            }
+    addWindowListener(new WindowListener() {
+      public void windowOpened(WindowEvent e) {
+      }
 
-            public void windowClosing(WindowEvent e) {
-            }
+      public void windowClosing(WindowEvent e) {
+      }
 
-            public void windowClosed(WindowEvent e) {
-                handle.dispose();
-                serverMonitor.stopMonitor(service + ":Conversations");
-            }
+      public void windowClosed(WindowEvent e) {
+        handle.dispose();
+        serverMonitor.stopMonitor(service + ":Conversations");
+      }
 
-            public void windowIconified(WindowEvent e) {
-            }
+      public void windowIconified(WindowEvent e) {
+      }
 
-            public void windowDeiconified(WindowEvent e) {
-            }
+      public void windowDeiconified(WindowEvent e) {
+      }
 
-            public void windowActivated(WindowEvent e) {
-            }
+      public void windowActivated(WindowEvent e) {
+      }
 
-            public void windowDeactivated(WindowEvent e) {
-            }
-        });
+      public void windowDeactivated(WindowEvent e) {
+      }
+    });
 
-        MATCHER = Pattern.compile(service + ".*:RespondTo:.*");
-    }
+    MATCHER = Pattern.compile(service + ".*:RespondTo:.*");
+  }
 
-    @Override
-    public void attach(ActivityProcessor proc) {
-        handle = proc.registerEvent(EventType.MESSAGE, new MessageMonitor() {
-            public void monitorEvent(MessageEvent event) {
-                String incomingSubject = event.getSubject();
-                if (MATCHER.matcher(incomingSubject).matches()) {
-                    notifyMessage(event.getTime(), (Message) event.getContents());
-                }
-            }
-        });
+  @Override
+  public void attach(ActivityProcessor proc) {
+    handle = proc.registerEvent(EventType.MESSAGE, new MessageMonitor() {
+      public void monitorEvent(MessageEvent event) {
+        String incomingSubject = event.getSubject();
+        if (MATCHER.matcher(incomingSubject).matches()) {
+          notifyMessage(event.getTime(), (Message) event.getContents());
+        }
+      }
+    });
 
-        proc.notifyEvent(System.currentTimeMillis(), EventType.REPLAY_MESSAGES, SubEventType.NONE, null, null, service + "%:RespondTo:%", null, null, false);
-    }
+    proc.notifyEvent(System.currentTimeMillis(), EventType.REPLAY_MESSAGES, SubEventType.NONE, null, null, service + "%:RespondTo:%", null, null, false);
+  }
 
-    public void updateTitle(String s) {
-        if (s == null) setTitle("Conversations: " + service + "@" + busId);
-        else setTitle("Conversations: " + service + "@" + busId + ": " + s);
-    }
+  public void updateTitle(String s) {
+    if (s == null) setTitle("Conversations: " + service + "@" + busId);
+    else setTitle("Conversations: " + service + "@" + busId + ": " + s);
+  }
 }

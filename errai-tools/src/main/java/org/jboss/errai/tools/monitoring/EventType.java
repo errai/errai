@@ -17,5 +17,5 @@
 package org.jboss.errai.tools.monitoring;
 
 public enum EventType {
-    MESSAGE, ERROR, BUS_EVENT, REPLAY_MESSAGES, REPLAY_BUS_EVENTS
+  MESSAGE, ERROR, BUS_EVENT, REPLAY_MESSAGES, REPLAY_BUS_EVENTS
 }

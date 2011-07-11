@@ -23,12 +23,16 @@ import java.util.List;
 
 @Remote
 public interface TestService {
-    public long getMemoryFree();
-    public String append(String str, String str2);
-    public void update(String status);
-    public long add(long x, long y);
+  public long getMemoryFree();
 
-    List<Date> getDates();
-    Date getDate();
+  public String append(String str, String str2);
+
+  public void update(String status);
+
+  public long add(long x, long y);
+
+  List<Date> getDates();
+
+  Date getDate();
 
 }

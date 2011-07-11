@@ -22,7 +22,7 @@ import org.jboss.errai.common.client.types.TypeHandler;
 import java.sql.Date;
 
 public class NumberToSQLDate implements TypeHandler<Number, Date> {
-    public Date getConverted(Number in,  DecodingContext ctx) {
-        return new Date(in.longValue());
-    }
+  public Date getConverted(Number in, DecodingContext ctx) {
+    return new Date(in.longValue());
+  }
 }

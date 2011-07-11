@@ -23,13 +23,13 @@ import org.jboss.errai.bus.client.framework.RequestDispatcher;
  * @date: May 3, 2010
  */
 class DispatcherProvider implements ResourceProvider<RequestDispatcher> {
-    private final RequestDispatcher dispatcher;
+  private final RequestDispatcher dispatcher;
 
-    DispatcherProvider(RequestDispatcher dispatcher) {
-        this.dispatcher = dispatcher;
-    }
+  DispatcherProvider(RequestDispatcher dispatcher) {
+    this.dispatcher = dispatcher;
+  }
 
-    public RequestDispatcher get() {
-        return dispatcher;
-    }
+  public RequestDispatcher get() {
+    return dispatcher;
+  }
 }

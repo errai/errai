@@ -36,110 +36,124 @@ import static org.jboss.errai.common.client.types.TypeDemarshallers.hasDemarshal
 
 
 public class JSONDecoderCli {
-    public static Object decode(Object value) {
-        DecodingContext ctx = new DecodingContext();
-        Object v = null;
+  public static Object decode(Object value) {
+    DecodingContext ctx = new DecodingContext();
+    Object v = null;
 
-        if (value instanceof String) {
-            v = _decode(JSONParser.parseStrict((String) value), ctx);
-        } else if (value instanceof JSONValue) {
-            v = _decode((JSONValue) value, ctx);
-        } else if (value != null) {
-            throw new RuntimeException("could not decode type: " + value.getClass());
-        }
-
-        if (ctx.isUnsatisfiedDependencies()) {
-            JSONTypeHelper.resolveDependencies(ctx);
-        }
-
-        return v;
+    if (value instanceof String) {
+      v = _decode(JSONParser.parseStrict((String) value), ctx);
+    }
+    else if (value instanceof JSONValue) {
+      v = _decode((JSONValue) value, ctx);
+    }
+    else if (value != null) {
+      throw new RuntimeException("could not decode type: " + value.getClass());
     }
 
-    public static Object decode(Object value, DecodingContext ctx) {
-        if (value instanceof String) {
-            return _decode(JSONParser.parseStrict((String) value), ctx);
-        } else if (value instanceof JSONValue) {
-            return _decode((JSONValue) value, ctx);
-        } else if (value != null) {
-            throw new RuntimeException("could not decode type: " + value.getClass());
-        }
-
-        return null;
+    if (ctx.isUnsatisfiedDependencies()) {
+      JSONTypeHelper.resolveDependencies(ctx);
     }
 
-    private static Object _decode(JSONValue v, DecodingContext ctx) {
-        if (v.isString() != null) {
-            return v.isString().stringValue();
-        } else if (v.isNumber() != null) {
-            return v.isNumber().doubleValue();
-        } else if (v.isBoolean() != null) {
-            return v.isBoolean().booleanValue();
-        } else if (v.isNull() != null) {
+    return v;
+  }
+
+  public static Object decode(Object value, DecodingContext ctx) {
+    if (value instanceof String) {
+      return _decode(JSONParser.parseStrict((String) value), ctx);
+    }
+    else if (value instanceof JSONValue) {
+      return _decode((JSONValue) value, ctx);
+    }
+    else if (value != null) {
+      throw new RuntimeException("could not decode type: " + value.getClass());
+    }
+
+    return null;
+  }
+
+  private static Object _decode(JSONValue v, DecodingContext ctx) {
+    if (v.isString() != null) {
+      return v.isString().stringValue();
+    }
+    else if (v.isNumber() != null) {
+      return v.isNumber().doubleValue();
+    }
+    else if (v.isBoolean() != null) {
+      return v.isBoolean().booleanValue();
+    }
+    else if (v.isNull() != null) {
+      return null;
+    }
+    else if (v instanceof JSONObject) {
+      return decodeObject(v.isObject(), ctx);
+    }
+    else if (v instanceof JSONArray) {
+      return decodeList(v.isArray(), ctx);
+    }
+    else {
+      throw new RuntimeException("unknown encoding");
+    }
+  }
+
+  private static Object decodeObject(JSONObject eMap, DecodingContext ctx) {
+    Map<String, Object> m = new UHashMap<String, Object>();
+    for (String key : eMap.keySet()) {
+      if (SerializationParts.ENCODED_TYPE.equals(key)) {
+        String className = eMap.get(key).isString().stringValue();
+
+        String objId = eMap.get(SerializationParts.OBJECT_ID).isString().stringValue();
+
+        boolean ref = false;
+        if (objId != null) {
+          if (objId.charAt(0) == '$') {
+            ref = true;
+            objId = objId.substring(1);
+          }
+
+          if (ctx.hasObject(objId)) {
+            return ctx.getObject(objId);
+          }
+          else if (ref) {
+            return new UnsatisfiedForwardLookup(objId);
+          }
+        }
+
+        if (hasDemarshaller(className)) {
+          try {
+            Object o = getDemarshaller(className).demarshall(eMap, ctx);
+            if (objId == null) ctx.putObject(objId, o);
+            return o;
+          }
+          catch (Throwable t) {
+            t.printStackTrace();
+            GWT.log("Failure decoding object", t);
             return null;
-        } else if (v instanceof JSONObject) {
-            return decodeObject(v.isObject(), ctx);
-        } else if (v instanceof JSONArray) {
-            return decodeList(v.isArray(), ctx);
-        } else {
-            throw new RuntimeException("unknown encoding");
+          }
         }
-    }
-
-    private static Object decodeObject(JSONObject eMap, DecodingContext ctx) {
-        Map<String, Object> m = new UHashMap<String, Object>();
-        for (String key : eMap.keySet()) {
-            if (SerializationParts.ENCODED_TYPE.equals(key)) {
-                String className = eMap.get(key).isString().stringValue();
-
-                String objId = eMap.get(SerializationParts.OBJECT_ID).isString().stringValue();
-
-                boolean ref = false;
-                if (objId != null) {
-                    if (objId.charAt(0) == '$') {
-                        ref = true;
-                        objId = objId.substring(1);
-                    }
-
-                    if (ctx.hasObject(objId)) {
-                        return ctx.getObject(objId);
-                    } else if (ref) {
-                        return new UnsatisfiedForwardLookup(objId);
-                    }
-                }
-
-                if (hasDemarshaller(className)) {
-                    try {
-                        Object o = getDemarshaller(className).demarshall(eMap, ctx);
-                        if (objId == null) ctx.putObject(objId, o);
-                        return o;
-                    }
-                    catch (Throwable t) {
-                        t.printStackTrace();
-                        GWT.log("Failure decoding object", t);
-                        return null;
-                    }
-                } else {
-                    GWT.log("Could not demartial class: " + className + "; There is no available demarshaller. " +
-                            "Ensure you have exposed the class with @ExposeEntity.", null);
-                    throw new RuntimeException("no available demarshaller: " + className);
-                }
-            } else if (SerializationParts.MARSHALLED_TYPES.equals(key)) continue;
-
-            m.put(key, _decode(eMap.get(key), ctx));
+        else {
+          GWT.log("Could not demartial class: " + className + "; There is no available demarshaller. " +
+              "Ensure you have exposed the class with @ExposeEntity.", null);
+          throw new RuntimeException("no available demarshaller: " + className);
         }
-        return m;
-    }
+      }
+      else if (SerializationParts.MARSHALLED_TYPES.equals(key)) continue;
 
-    private static List<Object> decodeList(JSONArray arr, DecodingContext ctx) {
-        List<Object> list = new ArrayList<Object>();
-        Object o;
-        for (int i = 0; i < arr.size(); i++) {
-            if ((o = _decode(arr.get(i), ctx)) instanceof UnsatisfiedForwardLookup) {
-                ctx.addUnsatisfiedDependency(list, ((UnsatisfiedForwardLookup) o));
-            } else {
-                list.add(o);
-            }
-        }
-        return list;
+      m.put(key, _decode(eMap.get(key), ctx));
     }
+    return m;
+  }
+
+  private static List<Object> decodeList(JSONArray arr, DecodingContext ctx) {
+    List<Object> list = new ArrayList<Object>();
+    Object o;
+    for (int i = 0; i < arr.size(); i++) {
+      if ((o = _decode(arr.get(i), ctx)) instanceof UnsatisfiedForwardLookup) {
+        ctx.addUnsatisfiedDependency(list, ((UnsatisfiedForwardLookup) o));
+      }
+      else {
+        list.add(o);
+      }
+    }
+    return list;
+  }
 }

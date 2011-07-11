@@ -35,9 +35,9 @@ import java.util.logging.Logger;
  * XmlHttpProxyServlet . Used for development in Hosted Mode with
  * server message bus being deployed on an external container.
  * I.e. JBoss AS.<p/>
- *
+ * <p/>
  * Usage (web.xml):<br>
- *
+ * <p/>
  * <pre>
  *   &lt;servlet>
  *       &lt;servlet-name>erraiProxy&lt;/servlet-name>
@@ -56,9 +56,9 @@ import java.util.logging.Logger;
  *   &lt;/servlet-mapping>
  *
  * </pre>
- *
  * <p/>
- *
+ * <p/>
+ * <p/>
  * errai-config.json:<br>
  * <pre>
  *
@@ -67,8 +67,7 @@ import java.util.logging.Logger;
  * @author Greg Murray
  * @author Heiko Braun
  */
-public class XmlHttpProxyServlet extends HttpServlet
-{
+public class XmlHttpProxyServlet extends HttpServlet {
 
   public static String REMOTE_USER = "REMOTE_USER";
 
@@ -83,7 +82,7 @@ public class XmlHttpProxyServlet extends HttpServlet
   private Logger logger = null;
   private XmlHttpProxy xhp = null;
   private ServletContext ctx;
-  private List<Map<String,Object>> services = null;
+  private List<Map<String, Object>> services = null;
   private String resourcesDir = "/resources/";
   private String classpathResourcesDir = "/META-INF/resources/";
   private String headerToken = "jmaki-";
@@ -99,7 +98,7 @@ public class XmlHttpProxyServlet extends HttpServlet
     if (rDebug) {
       logger = getLogger();
     }
-      
+
   }
 
   public void init(ServletConfig config) throws ServletException {
@@ -113,7 +112,8 @@ public class XmlHttpProxyServlet extends HttpServlet
     // for the jmaki level resources
     if (ctx.getInitParameter("jmaki-xhp-resources") != null) {
       resourcesDir = ctx.getInitParameter("jmaki-xhp-resources");
-    } else if (ctx.getInitParameter("jmaki-resources") != null) {
+    }
+    else if (ctx.getInitParameter("jmaki-resources") != null) {
       resourcesDir = ctx.getInitParameter("jmaki-resources");
     }
     // allow for resources dir over-ride
@@ -126,7 +126,8 @@ public class XmlHttpProxyServlet extends HttpServlet
       if ("false".equals(requireSessionString)) {
         requireSession = false;
         getLogger().severe("XmlHttpProxyServlet: intialization. Session requirement disabled.");
-      } else if ("true".equals(requireSessionString)) {
+      }
+      else if ("true".equals(requireSessionString)) {
         requireSession = true;
         getLogger().severe("XmlHttpProxyServlet: intialization. Session requirement enabled.");
       }
@@ -137,7 +138,8 @@ public class XmlHttpProxyServlet extends HttpServlet
       if ("true".equals(xdomainString)) {
         allowXDomain = true;
         getLogger().severe("XmlHttpProxyServlet: intialization. xDomain access is enabled.");
-      } else if ("false".equals(xdomainString)) {
+      }
+      else if ("false".equals(xdomainString)) {
         allowXDomain = false;
         getLogger().severe("XmlHttpProxyServlet: intialization. xDomain access is disabled.");
       }
@@ -147,7 +149,8 @@ public class XmlHttpProxyServlet extends HttpServlet
       if ("true".equals(createSessionString)) {
         createSession = true;
         getLogger().severe("XmlHttpProxyServlet: intialization. create session is enabled.");
-      } else if ("false".equals(xdomainString)) {
+      }
+      else if ("false".equals(xdomainString)) {
         createSession = false;
         getLogger().severe("XmlHttpProxyServlet: intialization. create session is disabled.");
       }
@@ -158,68 +161,66 @@ public class XmlHttpProxyServlet extends HttpServlet
     if (proxyHost != null && proxyPortString != null) {
       int proxyPort = 8080;
       try {
-        proxyPort= new Integer(proxyPortString).intValue();
+        proxyPort = new Integer(proxyPortString).intValue();
         xhp = new XmlHttpProxy(proxyHost, proxyPort);
-      } catch (NumberFormatException nfe) {
+      }
+      catch (NumberFormatException nfe) {
         getLogger().severe("XmlHttpProxyServlet: intialization error. The proxyPort must be a number");
         throw new ServletException("XmlHttpProxyServlet: intialization error. The proxyPort must be a number");
       }
-    } else {
+    }
+    else {
       xhp = new XmlHttpProxy();
     }
 
     // config override
     String servletName = config.getServletName();
     String configName = config.getInitParameter("config.name");
-    configResource = configName!=null ? configName : XHP_CONFIG;
-    System.out.println("Configure "+servletName + " through "+configResource);       
+    configResource = configName != null ? configName : XHP_CONFIG;
+    System.out.println("Configure " + servletName + " through " + configResource);
   }
 
-  private void getServices(HttpServletResponse res)
-  {
+  private void getServices(HttpServletResponse res) {
     InputStream is = null;
-    try
-    {
+    try {
       /*URL url = ctx.getResource(configResource);
       // use classpath if not found locally.      
       if (url == null) url = XmlHttpProxyServlet.class.getResource(configResource);  // same package*/
 
       // use classpath if not found locally.
-      URL url = XmlHttpProxyServlet.class.getResource("/"+configResource);  
+      URL url = XmlHttpProxyServlet.class.getResource("/" + configResource);
       is = url.openStream();
     }
-    catch (Exception ex)
-    {
-      try
-      {
-        getLogger().severe("XmlHttpProxyServlet error loading "+configResource+" : " + ex);
+    catch (Exception ex) {
+      try {
+        getLogger().severe("XmlHttpProxyServlet error loading " + configResource + " : " + ex);
         PrintWriter writer = res.getWriter();
-        writer.write("XmlHttpProxyServlet Error: Error loading "+configResource+". Make sure it is available on the classpath.");
+        writer.write("XmlHttpProxyServlet Error: Error loading " + configResource + ". Make sure it is available on the classpath.");
         writer.flush();
       }
-      catch (Exception iox) {}
+      catch (Exception iox) {
+      }
     }
     services = xhp.loadServices(is).getServices();
   }
 
   public void doDelete(HttpServletRequest req, HttpServletResponse res) {
-    doProcess(req,res, XmlHttpProxy.DELETE);
+    doProcess(req, res, XmlHttpProxy.DELETE);
   }
 
   public void doGet(HttpServletRequest req, HttpServletResponse res) {
-    doProcess(req,res, XmlHttpProxy.GET);
+    doProcess(req, res, XmlHttpProxy.GET);
   }
 
   public void doPost(HttpServletRequest req, HttpServletResponse res) {
-    doProcess(req,res, XmlHttpProxy.POST);
+    doProcess(req, res, XmlHttpProxy.POST);
   }
 
   public void doPut(HttpServletRequest req, HttpServletResponse res) {
-    doProcess(req,res, XmlHttpProxy.PUT);
+    doProcess(req, res, XmlHttpProxy.PUT);
   }
 
-  public void doProcess(HttpServletRequest req, HttpServletResponse res, String method)
-  {
+  public void doProcess(HttpServletRequest req, HttpServletResponse res, String method) {
 
     boolean isPost = XmlHttpProxy.POST.equals(method);
     StringBuffer bodyContent = null;
@@ -233,11 +234,11 @@ public class XmlHttpProxyServlet extends HttpServlet
         if (bodyContent == null) bodyContent = new StringBuffer();
         bodyContent.append(line);
       }
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
     }
 
-    try
-    {
+    try {
       HttpSession session = null;
       // it really does not make sense to use create session with require session as
       // the create session will always result in a session created and the requireSession
@@ -284,81 +285,74 @@ public class XmlHttpProxyServlet extends HttpServlet
       // test hack
 
       while (hnum.hasMoreElements()) {
-        String name = (String)hnum.nextElement();
-        if (name.startsWith(headerToken))
-        {
+        String name = (String) hnum.nextElement();
+        if (name.startsWith(headerToken)) {
           if (headers == null) headers = new HashMap();
 
           String value = "";
           // handle multi-value headers
           Enumeration vnum = req.getHeaders(name);
           while (vnum.hasMoreElements()) {
-            value += (String)vnum.nextElement();
+            value += (String) vnum.nextElement();
             if (vnum.hasMoreElements()) value += ";";
           }
           String sname = name.substring(headerToken.length(), name.length());
-          headers.put(sname,value);
+          headers.put(sname, value);
         }
-        else if(name.startsWith(testToken))
-        {
+        else if (name.startsWith(testToken)) {
           // hack test capabilities for authentication
-          if("xtest-user".equals(name)) testUser = req.getHeader("xtest-user");
-          if("xtest-pass".equals(name)) testPass = req.getHeader("xtest-pass");
+          if ("xtest-user".equals(name)) testUser = req.getHeader("xtest-user");
+          if ("xtest-pass".equals(name)) testPass = req.getHeader("xtest-pass");
         }
       }
 
       String contentType = null;
-      try
-      {
+      try {
         String actualServiceKey = serviceKey != null ? serviceKey : "default";
-        Map<String,Object> service = null;
-        for(Map svc : services)
-        {
-          if(svc.get(ProxyConfig.ID).equals(actualServiceKey))
-          {
+        Map<String, Object> service = null;
+        for (Map svc : services) {
+          if (svc.get(ProxyConfig.ID).equals(actualServiceKey)) {
             service = svc;
             break;
           }
         }
-        if (service!=null)
-        {
+        if (service != null) {
 
-          String serviceURL = (String)service.get(ProxyConfig.URL);
-          if(null==serviceURL)
-            throw new IllegalArgumentException(configResource+": service url is mising");
+          String serviceURL = (String) service.get(ProxyConfig.URL);
+          if (null == serviceURL)
+            throw new IllegalArgumentException(configResource + ": service url is mising");
 
           if (service.containsKey(ProxyConfig.PASSTHROUGH))
-            passthrough = (Boolean)service.get(ProxyConfig.PASSTHROUGH);
+            passthrough = (Boolean) service.get(ProxyConfig.PASSTHROUGH);
 
-          if(service.containsKey(ProxyConfig.CONTENT_TYPE)) contentType = (String)service.get(ProxyConfig.CONTENT_TYPE);
+          if (service.containsKey(ProxyConfig.CONTENT_TYPE))
+            contentType = (String) service.get(ProxyConfig.CONTENT_TYPE);
 
-          if(null==testUser)
-          {
+          if (null == testUser) {
             System.out.println("Ignore service configuration credentials");
-            if (service.containsKey("username")) userName = (String)service.get("username");
-            if (service.containsKey("password")) password = (String)service.get("password");
+            if (service.containsKey("username")) userName = (String) service.get("username");
+            if (service.containsKey("password")) password = (String) service.get("password");
           }
-          else
-          {
+          else {
             userName = testUser;
             password = testPass;
           }
-          
+
           String apikey = "";
-          if (service.containsKey("apikey")) apikey = (String)service.get("apikey");
-          if (service.containsKey("xslStyleSheet")) xslURLString = (String)service.get("xslStyleSheet");
+          if (service.containsKey("apikey")) apikey = (String) service.get("apikey");
+          if (service.containsKey("xslStyleSheet")) xslURLString = (String) service.get("xslStyleSheet");
 
           // default to the service default if no url parameters are specified
-          if(!passthrough)
-          {
+          if (!passthrough) {
             if (urlParams == null && service.containsKey("defaultURLParams")) {
-              urlParams = (String)service.get("defaultURLParams");
+              urlParams = (String) service.get("defaultURLParams");
             }
 
             // build the URL
-            if (urlParams != null && serviceURL.indexOf("?") == -1){
+            if (urlParams != null && serviceURL.indexOf("?") == -1) {
               serviceURL += "?";
-            } else  if (urlParams != null) {
+            }
+            else if (urlParams != null) {
               serviceURL += "&";
             }
 
@@ -366,43 +360,39 @@ public class XmlHttpProxyServlet extends HttpServlet
             if (urlParams != null) urlString += "&" + urlParams;
           }
 
-          if(passthrough)
-          {
+          if (passthrough) {
             StringBuffer sb = new StringBuffer();
             sb.append(serviceURL);
 
             // override service url and url params
             String path = req.getRequestURI();
             String servletPath = req.getServletPath();
-            path = path.substring(path.indexOf(servletPath)+servletPath.length(), path.length());
+            path = path.substring(path.indexOf(servletPath) + servletPath.length(), path.length());
 
             StringTokenizer tok = new StringTokenizer(path, "/");
-            while(tok.hasMoreTokens())
-            {
+            while (tok.hasMoreTokens()) {
               String token = tok.nextToken();
-              if(token.indexOf(";")!=-1)
+              if (token.indexOf(";") != -1)
                 sb.append("/").append(token);    // ;JSESSIONID=XYZ
               else
                 sb.append("/").append(URLEncoder.encode(token));
             }
 
-            if(req.getQueryString()!=null)
+            if (req.getQueryString() != null)
               sb.append("?").append(req.getQueryString());
 
             urlString = sb.toString();
           }
         }
-        else
-        {
+        else {
           writer = res.getWriter();
           if (serviceKey == null) writer.write("XmlHttpProxyServlet Error: id parameter specifying serivce required.");
           else writer.write("XmlHttpProxyServlet Error : service for id '" + serviceKey + "' not  found.");
           writer.flush();
           return;
-        } 
+        }
       }
-      catch (Exception ex)
-      {
+      catch (Exception ex) {
         getLogger().severe("XmlHttpProxyServlet Error loading service: " + ex);
         res.setStatus(500);
       }
@@ -430,7 +420,7 @@ public class XmlHttpProxyServlet extends HttpServlet
         urlString = processURL(urlString, req, res);
       }
       // default to JSON
-      String actualContentType = contentType!=null ? contentType : defaultContentType;
+      String actualContentType = contentType != null ? contentType : defaultContentType;
       res.setContentType(actualContentType);
 
       out = res.getOutputStream();
@@ -438,40 +428,39 @@ public class XmlHttpProxyServlet extends HttpServlet
       if (xslURLString != null) {
         // check the web root for the resource
         URL xslURL = null;
-        xslURL = ctx.getResource(resourcesDir + "xsl/"+ xslURLString);
+        xslURL = ctx.getResource(resourcesDir + "xsl/" + xslURLString);
         // if not in the web root check the classpath
         if (xslURL == null) {
           xslURL = XmlHttpProxyServlet.class.getResource(classpathResourcesDir + "xsl/" + xslURLString);
         }
         if (xslURL != null) {
-          xslInputStream  = xslURL.openStream();
-        } else {
-          String message = "Could not locate the XSL stylesheet provided for service id " +  serviceKey + ". Please check the XMLHttpProxy configuration.";
+          xslInputStream = xslURL.openStream();
+        }
+        else {
+          String message = "Could not locate the XSL stylesheet provided for service id " + serviceKey + ". Please check the XMLHttpProxy configuration.";
           getLogger().severe(message);
           res.setStatus(500);
           try {
             out.write(message.getBytes());
             out.flush();
             return;
-          } catch (java.io.IOException iox){
+          }
+          catch (java.io.IOException iox) {
           }
         }
       }
 
-      if (!isPost)
-      {
+      if (!isPost) {
         xhp.processRequest(urlString, out, xslInputStream, paramsMap, headers, method, userName, password);
       }
-      else
-      {
+      else {
         final String content = bodyContent != null ? bodyContent.toString() : "";
         if (bodyContent == null)
           getLogger().info("XmlHttpProxyServlet attempting to post to url " + urlString + " with no body content");
         xhp.doPost(urlString, out, xslInputStream, paramsMap, headers, content, req.getContentType(), userName, password);
       }
     }
-    catch (Exception iox)
-    {
+    catch (Exception iox) {
       iox.printStackTrace();
       getLogger().severe("XmlHttpProxyServlet: caught " + iox);
       res.setStatus(500);
@@ -481,16 +470,16 @@ public class XmlHttpProxyServlet extends HttpServlet
          writer.flush();
       } catch (java.io.IOException ix) {
          ix.printStackTrace();
-      }*/      
+      }*/
       return;
     }
-    finally
-    {
-      try
-      {
+    finally {
+      try {
         if (out != null) out.close();
         if (writer != null) writer.close();
-      } catch (java.io.IOException iox){}
+      }
+      catch (java.io.IOException iox) {
+      }
     }
   }
 
@@ -540,13 +529,14 @@ public class XmlHttpProxyServlet extends HttpServlet
     try {
       URL url = ctx.getResource(resourcesDir + configResource);
       URLConnection con;
-      if (url == null) return false ;
+      if (url == null) return false;
       con = url.openConnection();
       long lastModified = con.getLastModified();
       long XHP_LAST_MODIFIEDModified = 0;
       if (ctx.getAttribute(XHP_LAST_MODIFIED) != null) {
-        XHP_LAST_MODIFIEDModified = ((Long)ctx.getAttribute(XHP_LAST_MODIFIED)).longValue();
-      } else {
+        XHP_LAST_MODIFIEDModified = ((Long) ctx.getAttribute(XHP_LAST_MODIFIED)).longValue();
+      }
+      else {
         ctx.setAttribute(XHP_LAST_MODIFIED, new Long(lastModified));
         return false;
       }
@@ -554,7 +544,8 @@ public class XmlHttpProxyServlet extends HttpServlet
         ctx.setAttribute(XHP_LAST_MODIFIED, new Long(lastModified));
         return true;
       }
-    } catch (Exception ex) {
+    }
+    catch (Exception ex) {
       getLogger().severe("XmlHttpProxyServlet error checking configuration: " + ex);
     }
     return false;

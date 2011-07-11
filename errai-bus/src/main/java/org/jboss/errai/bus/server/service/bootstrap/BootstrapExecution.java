@@ -22,5 +22,5 @@ package org.jboss.errai.bus.server.service.bootstrap;
  * @date: May 3, 2010
  */
 public interface BootstrapExecution {
-    public void execute(final BootstrapContext context);
+  public void execute(final BootstrapContext context);
 }

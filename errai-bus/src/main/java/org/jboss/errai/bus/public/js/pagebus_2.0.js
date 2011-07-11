@@ -2299,7 +2299,7 @@ OpenAjax.hub.IframePMContainer = function(container, hub, clientID, params) {
                         win.postMessage(msg, origin);
                     },
                     0
-                    );
+            );
         }
     }
 
@@ -2438,7 +2438,7 @@ OpenAjax.hub.IframePMContainer.prototype.connect = function(origin, securityToke
                     function() {
                         that._invokeSecurityAlert(OpenAjax.hub.SecurityAlert.FramePhish);
                     }, 1
-                    );
+            );
         }
     };
 
@@ -2583,7 +2583,7 @@ OpenAjax.hub.IframePMContainer.prototype._startLoadTimer = function() {
                 that._invokeSecurityAlert(OpenAjax.hub.SecurityAlert.LoadTimeout);
             },
             this._timeout
-            );
+    );
 }
 
 /**
@@ -2764,7 +2764,7 @@ OpenAjax.hub.IframePMHubClient = function(client, params) {
                         win.postMessage(msg, origin);
                     },
                     0
-                    );
+            );
         }
     }
 }
@@ -4618,7 +4618,7 @@ smash.CommLib = function(child, controllers, clientName) {
     var END = "4";
 
     /** END of communcation protocol **/
-    // This is used to make the object available to the private methods. This is a workaround for an error in the ECMAScript Language Specification which causes this to be set incorrectly for inner functions. See http://www.crockford.com/javascript/private.html
+        // This is used to make the object available to the private methods. This is a workaround for an error in the ECMAScript Language Specification which causes this to be set incorrectly for inner functions. See http://www.crockford.com/javascript/private.html
     var that = this;
     // polling and queue processing interval
     var interval = 100;
@@ -5065,10 +5065,7 @@ smash.crypto = {
 
 
     // MAC
-    'hmac_sha1' : function(
-        /* BigEndianWord[3-16]*/             keyWA,
-        /* Ascii or Unicode string */       dataS,
-        /* int 8 for Asci/16 for Unicode */ chrsz) {
+    'hmac_sha1' : function(/* BigEndianWord[3-16]*/             keyWA, /* Ascii or Unicode string */       dataS, /* int 8 for Asci/16 for Unicode */ chrsz) {
         // write our own hmac derived from paj's so we do not have to do constant key conversions and length checking ...
         var ipad = Array(16), opad = Array(16);
         for (var i = 0; i < 16; i++) {

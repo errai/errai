@@ -27,15 +27,11 @@ import org.gwt.mosaic.ui.client.layout.LayoutPanel;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: May 18, 2010
  */
-public class ViewSource
-{
-  public static void on(final LayoutPanel widget, final String[] sourceNames)
-  {
-    Timer t = new Timer()
-    {
+public class ViewSource {
+  public static void on(final LayoutPanel widget, final String[] sourceNames) {
+    Timer t = new Timer() {
       @Override
-      public void run()
-      {
+      public void run() {
         final int left = widget.getAbsoluteLeft();
         final int top = widget.getAbsoluteTop();
         final int width = widget.getOffsetWidth();
@@ -43,10 +39,8 @@ public class ViewSource
 
         final LayoutPopupPanel p = new LayoutPopupPanel(false);
         HTML html = new HTML("View Source");
-        html.addClickHandler(new ClickHandler()
-        {
-          public void onClick(ClickEvent clickEvent)
-          {
+        html.addClickHandler(new ClickHandler() {
+          public void onClick(ClickEvent clickEvent) {
             LayoutPopupPanel p2 = new LayoutPopupPanel(true);
             p2.setModal(true);
             //p2.setAnimationEnabled(true);
@@ -56,13 +50,13 @@ public class ViewSource
 
             int w2 = RootPanel.get().getOffsetWidth() - 100;
             int h2 = RootPanel.get().getOffsetHeight() - 100;
-            p2.setSize(w2+"px", h2+"px");
+            p2.setSize(w2 + "px", h2 + "px");
             p2.center();
 
           }
         });
         p.setWidget(html);
-        p.setPopupPosition(left+width-120, top+10);
+        p.setPopupPosition(left + width - 120, top + 10);
         p.pack();
         p.show();
 

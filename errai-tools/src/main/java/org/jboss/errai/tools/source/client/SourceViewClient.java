@@ -19,7 +19,6 @@ import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.workspaces.client.api.ProvisioningCallback;
 import org.jboss.errai.workspaces.client.api.WidgetProvider;
-import org.jboss.errai.workspaces.client.api.annotations.LoadTool;
 
 /**
  * @author: Heiko Braun <hbraun@redhat.com>
@@ -27,13 +26,13 @@ import org.jboss.errai.workspaces.client.api.annotations.LoadTool;
  */
 //@LoadTool(name = "SourceView", group = "Tools")
 public class SourceViewClient implements WidgetProvider {
-    private MessageBus bus = ErraiBus.get();
+  private MessageBus bus = ErraiBus.get();
 
-    public void provideWidget(ProvisioningCallback callback) {
-        SourceViewWidget viewWidget = new SourceViewWidget(
-                new String[]{"org/jboss/errai/demo/thestore/client/modules/domain/User.java"}
-        );
+  public void provideWidget(ProvisioningCallback callback) {
+    SourceViewWidget viewWidget = new SourceViewWidget(
+        new String[]{"org/jboss/errai/demo/thestore/client/modules/domain/User.java"}
+    );
 
-        callback.onSuccess(viewWidget);
-    }
+    callback.onSuccess(viewWidget);
+  }
 }

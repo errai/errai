@@ -17,9 +17,6 @@
 package org.jboss.errai.bus.server.servlet;
 
 import org.jboss.errai.bus.client.framework.ClientMessageBus;
-import org.jboss.errai.bus.client.framework.MarshalledMessage;
-import org.jboss.errai.bus.client.util.ErrorHelper;
-import org.jboss.errai.bus.server.QueueUnavailableException;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueSession;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
@@ -28,7 +25,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.OutputStream;
 
 import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
 
@@ -38,76 +34,77 @@ import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
 public class DefaultBlockingServlet extends AbstractErraiServlet {
 
 
-    /**
-     * Called by the server (via the <tt>service</tt> method) to allow a servlet to handle a GET request by supplying
-     * a response
-     *
-     * @param httpServletRequest  - object that contains the request the client has made of the servlet
-     * @param httpServletResponse - object that contains the response the servlet sends to the client
-     * @throws IOException      - if an input or output error is detected when the servlet handles the GET request
-     * @throws ServletException - if the request for the GET could not be handled
-     */
-    @Override
-    protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
-            throws ServletException, IOException {
-        pollForMessages(sessionProvider.getSession(httpServletRequest.getSession(),
-                httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER)),
-                httpServletRequest, httpServletResponse, ErraiServiceConfigurator.LONG_POLLING);
-    }
+  /**
+   * Called by the server (via the <tt>service</tt> method) to allow a servlet to handle a GET request by supplying
+   * a response
+   *
+   * @param httpServletRequest  - object that contains the request the client has made of the servlet
+   * @param httpServletResponse - object that contains the response the servlet sends to the client
+   * @throws IOException      - if an input or output error is detected when the servlet handles the GET request
+   * @throws ServletException - if the request for the GET could not be handled
+   */
+  @Override
+  protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
+      throws ServletException, IOException {
+    pollForMessages(sessionProvider.getSession(httpServletRequest.getSession(),
+        httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER)),
+        httpServletRequest, httpServletResponse, ErraiServiceConfigurator.LONG_POLLING);
+  }
 
-    /**
-     * Called by the server (via the <code>service</code> method) to allow a servlet to handle a POST request, by
-     * sending the request
-     *
-     * @param httpServletRequest  - object that contains the request the client has made of the servlet
-     * @param httpServletResponse - object that contains the response the servlet sends to the client
-     * @throws IOException      - if an input or output error is detected when the servlet handles the request
-     * @throws ServletException - if the request for the POST could not be handled
-     */
-    @Override
-    protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
-            throws ServletException, IOException {
+  /**
+   * Called by the server (via the <code>service</code> method) to allow a servlet to handle a POST request, by
+   * sending the request
+   *
+   * @param httpServletRequest  - object that contains the request the client has made of the servlet
+   * @param httpServletResponse - object that contains the response the servlet sends to the client
+   * @throws IOException      - if an input or output error is detected when the servlet handles the request
+   * @throws ServletException - if the request for the POST could not be handled
+   */
+  @Override
+  protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
+      throws ServletException, IOException {
 
 
-        final QueueSession session = sessionProvider.getSession(httpServletRequest.getSession(),
-                httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
+    final QueueSession session = sessionProvider.getSession(httpServletRequest.getSession(),
+        httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
 
-        service.store(createCommandMessage(session, httpServletRequest.getInputStream()));
+    service.store(createCommandMessage(session, httpServletRequest.getInputStream()));
 
-        pollForMessages(session, httpServletRequest, httpServletResponse, false);
-    }
+    pollForMessages(session, httpServletRequest, httpServletResponse, false);
+  }
 
-    private void pollForMessages(QueueSession session, HttpServletRequest httpServletRequest,
-                                 HttpServletResponse httpServletResponse, boolean wait) throws IOException {
-        try {
-            httpServletResponse.setHeader("Cache-Control", "no-cache");
-            httpServletResponse.setHeader("Pragma", "no-cache");
-            httpServletResponse.setHeader("Expires", "-1");
-            httpServletResponse.setContentType("application/json");
+  private void pollForMessages(QueueSession session, HttpServletRequest httpServletRequest,
+                               HttpServletResponse httpServletResponse, boolean wait) throws IOException {
+    try {
+      httpServletResponse.setHeader("Cache-Control", "no-cache");
+      httpServletResponse.setHeader("Pragma", "no-cache");
+      httpServletResponse.setHeader("Expires", "-1");
+      httpServletResponse.setContentType("application/json");
 
-            final MessageQueue queue = service.getBus().getQueue(session);
+      final MessageQueue queue = service.getBus().getQueue(session);
 
-            if (queue == null) {
-                switch (getConnectionPhase(httpServletRequest)) {
-                    case CONNECTING:
-                    case DISCONNECTING:
-                        return;
-                }
-
-                sendDisconnectDueToSessionExpiry(httpServletResponse.getOutputStream());
-
-                return;
-            }
-
-            queue.heartBeat();
-
-            queue.poll(wait, httpServletResponse.getOutputStream());
-
-            httpServletResponse.getOutputStream().close();
-        } catch (final Throwable t) {
-            t.printStackTrace();
-            writeExceptionToOutputStream(httpServletResponse, t);
+      if (queue == null) {
+        switch (getConnectionPhase(httpServletRequest)) {
+          case CONNECTING:
+          case DISCONNECTING:
+            return;
         }
+
+        sendDisconnectDueToSessionExpiry(httpServletResponse.getOutputStream());
+
+        return;
+      }
+
+      queue.heartBeat();
+
+      queue.poll(wait, httpServletResponse.getOutputStream());
+
+      httpServletResponse.getOutputStream().close();
     }
+    catch (final Throwable t) {
+      t.printStackTrace();
+      writeExceptionToOutputStream(httpServletResponse, t);
+    }
+  }
 
 }

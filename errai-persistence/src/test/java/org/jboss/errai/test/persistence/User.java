@@ -25,8 +25,7 @@ import java.util.Set;
  * @date: Jun 11, 2010
  */
 @Entity
-public class User
-{
+public class User {
   @Id
   @GeneratedValue(generator = "system-uuid")
   @GenericGenerator(name = "system-uuid", strategy = "uuid")
@@ -34,8 +33,8 @@ public class User
 
   private String name;
 
-  @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-  @JoinColumn(name="user_fk")
+  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  @JoinColumn(name = "user_fk")
   private Set<Order> orders;
 
   public String getUserId() {
@@ -54,13 +53,11 @@ public class User
     this.name = name;
   }
 
-  public Set<Order> getOrders()
-  {
+  public Set<Order> getOrders() {
     return orders;
   }
 
-  public void setOrders(Set<Order> orders)
-  {
+  public void setOrders(Set<Order> orders) {
     this.orders = orders;
   }
 }

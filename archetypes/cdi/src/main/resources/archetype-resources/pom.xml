@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <name>Errai::Archetypes::CDI</name>
     <groupId>${groupId}</groupId>
@@ -148,7 +149,7 @@
                             <artifactId>slf4j-log4j12</artifactId>
                         </exclusion>
                         <exclusion>
-                            <groupId> junit</groupId>
+                            <groupId>junit</groupId>
                             <artifactId>junit</artifactId>
                         </exclusion>
                         <exclusion>
@@ -263,7 +264,7 @@
                     <artifactId>errai-cdi</artifactId>
                     <version>${errai-cdi.version}</version>
                 </dependency>
-                
+
                 <!--dependency>
                     <groupId>org.jboss.errai</groupId>
                     <artifactId>errai-jms</artifactId>
@@ -413,14 +414,14 @@
                                     the plugin and remove all GWT related artifacts that are required
                                     to run the hosted mode.
                                 -->
-                                <delete dir="war/WEB-INF/classes" />
-                                <delete dir="war/WEB-INF/lib" />
-                                <delete dir="war/META-INF" />
-                                <delete file="war/WEB-INF/web.xml" />
-                                <delete dir="war/app" />
-                                <delete dir="target" />
+                                <delete dir="war/WEB-INF/classes"/>
+                                <delete dir="war/WEB-INF/lib"/>
+                                <delete dir="war/META-INF"/>
+                                <delete file="war/WEB-INF/web.xml"/>
+                                <delete dir="war/app"/>
+                                <delete dir="target"/>
 
-                                <copy file="src/${webDescriptor}/web.xml" toDir="war/WEB-INF" />
+                                <copy file="src/${webDescriptor}/web.xml" toDir="war/WEB-INF"/>
                             </tasks>
                         </configuration>
                         <goals>

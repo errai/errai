@@ -29,36 +29,36 @@ import java.util.Map;
  * @date: Aug 11, 2010
  */
 public class Errai103Test extends TestCase {
-    public void testMarshalling() {
-        SimpleEntity entity = new SimpleEntity();
-        entity.setId(System.currentTimeMillis());
-        entity.setLogin("username");
-        entity.setPassword("password");
+  public void testMarshalling() {
+    SimpleEntity entity = new SimpleEntity();
+    entity.setId(System.currentTimeMillis());
+    entity.setLogin("username");
+    entity.setPassword("password");
 
-        entity.setNumber("docnumer-1233455");
-        entity.setCreateDate(new Date());
-        entity.setLastModifyDate(new Date());
-        entity.setSelected(true);
+    entity.setNumber("docnumer-1233455");
+    entity.setCreateDate(new Date());
+    entity.setLastModifyDate(new Date());
+    entity.setSelected(true);
 
-        System.out.println("type  :" + entity);
+    System.out.println("type  :" + entity);
 
-        Map<String, Object> vars = new HashMap<String, Object>();
-        vars.put("SimpleEntity", entity);
+    Map<String, Object> vars = new HashMap<String, Object>();
+    vars.put("SimpleEntity", entity);
 
-        String json = JSONEncoder.encode(vars);
-     
-        System.out.println("---");
-        System.out.println("json:" + json);
-        System.out.println("----");
+    String json = JSONEncoder.encode(vars);
 
-        Map<String, Object> result = (Map<String, Object>) JSONDecoder.decode(json);
+    System.out.println("---");
+    System.out.println("json:" + json);
+    System.out.println("----");
 
-        SimpleEntity rEntity = (SimpleEntity) result.get("SimpleEntity");
+    Map<String, Object> result = (Map<String, Object>) JSONDecoder.decode(json);
+
+    SimpleEntity rEntity = (SimpleEntity) result.get("SimpleEntity");
 
 
-        System.out.println("entity: " + entity);
-        System.out.println("rEntity:" + rEntity);
+    System.out.println("entity: " + entity);
+    System.out.println("rEntity:" + rEntity);
 
-        assertEquals("Unmarshalling failed. Instances are not equal.", entity, rEntity);
-    }
+    assertEquals("Unmarshalling failed. Instances are not equal.", entity, rEntity);
+  }
 }

@@ -23,5 +23,5 @@
 
     <entry-point class='org.errai.samples.queryservice.client.QueryClient'/>
 
-    <source path="client" />
+    <source path="client"/>
 </module>

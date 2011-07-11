@@ -22,24 +22,24 @@ import java.util.Set;
  * Defines the context of an authenticated session.
  */
 public interface AuthenticationContext {
-    public String getName();
+  public String getName();
 
-    /**
-     * Return any roles associated with the session.
-     *
-     * @return
-     */
-    public Set<Role> getRoles();
+  /**
+   * Return any roles associated with the session.
+   *
+   * @return
+   */
+  public Set<Role> getRoles();
 
-    /**
-     * Terminate the context.
-     */
-    public void logout();
+  /**
+   * Terminate the context.
+   */
+  public void logout();
 
-    /**
-     * Returns true if the context is currently valid.
-     *
-     * @return - boolean indicating the validity of the session.
-     */
-    public boolean isValid();
+  /**
+   * Returns true if the context is currently valid.
+   *
+   * @return - boolean indicating the validity of the session.
+   */
+  public boolean isValid();
 }

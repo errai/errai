@@ -10,8 +10,14 @@
             utilities.
 
             <itemizedlist>
-                <listitem>JDK 5: <ulink url="http://java.sun.com/javase/downloads/index.jsp">http://java.sun.com/javase/downloads/index.jsp</ulink></listitem>
-                <listitem>Apache Maven: <ulink url="http://maven.apache.org/download.html">http://maven.apache.org/download.html</ulink></listitem>
+                <listitem>JDK 5:
+                    <ulink url="http://java.sun.com/javase/downloads/index.jsp">
+                        http://java.sun.com/javase/downloads/index.jsp
+                    </ulink>
+                </listitem>
+                <listitem>Apache Maven:
+                    <ulink url="http://maven.apache.org/download.html">http://maven.apache.org/download.html</ulink>
+                </listitem>
             </itemizedlist>
 
             <note>
@@ -33,9 +39,12 @@
             You'll see following subdirectories:
         </para>
         <itemizedlist>
-            <listitem><literal>doc</literal>: User guide, javadocs and developers guide</listitem>
-            <listitem><literal>examples</literal>: Examples that are used in the user guide</listitem>
-            <listitem><literal>lib</literal>: Required libraries</listitem>
+            <listitem><literal>doc</literal>: User guide, javadocs and developers guide
+            </listitem>
+            <listitem><literal>examples</literal>: Examples that are used in the user guide
+            </listitem>
+            <listitem><literal>lib</literal>: Required libraries
+            </listitem>
         </itemizedlist>
     </section>
 

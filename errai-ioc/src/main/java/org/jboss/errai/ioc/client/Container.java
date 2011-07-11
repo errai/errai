@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, a divison Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,40 +16,28 @@
 
 package org.jboss.errai.ioc.client;
 
+import java.util.Map;
+
+import org.jboss.errai.ioc.client.api.Bootstrapper;
+
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
-import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.api.InitializationListener;
-import org.jboss.errai.bus.client.framework.ClientMessageBus;
-import org.jboss.errai.ioc.client.api.Bootstrapper;
-
-import java.util.Map;
-
-import static org.jboss.errai.bus.client.ErraiBus.*;
 
 public class Container implements EntryPoint {
-    public void onModuleLoad() {
-        final Bootstrapper bootstrapper = GWT.create(Bootstrapper.class);
+  @Override
+  public void onModuleLoad() {
+    final Bootstrapper bootstrapper = GWT.create(Bootstrapper.class);
+    final RootPanel rootPanel = RootPanel.get();
+    final InterfaceInjectionContext ctx = bootstrapper.bootstrapContainer();
 
-//        ((ClientMessageBus) get()).addInitializationListener(new InitializationListener() {
-//
-//
-//            public void onInitilization() {
-        final RootPanel rootPanel = RootPanel.get();
-        final InterfaceInjectionContext ctx = bootstrapper.bootstrapContainer();
-
-
-        for (Widget w : ctx.getToRootPanel()) {
-            rootPanel.add(w);
-        }
-
-        for (Map.Entry<Widget, String> entry : ctx.getWidgetToPanel().entrySet()) {
-            ctx.getPanels().get(entry.getValue()).add(entry.getKey());
-        }
-//
-//            }
-//        });
+    for (Widget w : ctx.getToRootPanel()) {
+      rootPanel.add(w);
     }
+
+    for (Map.Entry<Widget, String> entry : ctx.getWidgetToPanel().entrySet()) {
+      ctx.getPanels().get(entry.getValue()).add(entry.getKey());
+    }
+  }
 }

@@ -36,14 +36,12 @@ import org.gwt.mosaic.ui.client.layout.FillLayout;
  *
  * @author Heiko.Braun <heiko.braun@jboss.com>
  */
-public class PropertyGrid extends ScrollLayoutPanel
-{
+public class PropertyGrid extends ScrollLayoutPanel {
   private String[] fieldNames;
 
   private Grid grid;
 
-  public PropertyGrid(String[] fieldDesc)
-  {
+  public PropertyGrid(String[] fieldDesc) {
     super(new FillLayout());
     this.grid = new Grid(fieldDesc.length, 2);
     grid.setStyleName("soa-prop-grid");
@@ -54,14 +52,12 @@ public class PropertyGrid extends ScrollLayoutPanel
     initReset();
   }
 
-  private void initReset()
-  {
-    for(int i=0; i< fieldNames.length; i++)
-    {
+  private void initReset() {
+    for (int i = 0; i < fieldNames.length; i++) {
       Label label = new Label(fieldNames[i]);
       label.setStyleName("soa-prop-grid-label");
-      grid.setWidget(i,0, label);
-      grid.setWidget(i,1, new HTML(""));
+      grid.setWidget(i, 0, label);
+      grid.setWidget(i, 1, new HTML(""));
 
       String style = (i % 2 == 0) ? "soa-prop-grid-even" : "soa-prop-grid-odd";
       grid.getRowFormatter().setStyleName(i, style);
@@ -70,22 +66,19 @@ public class PropertyGrid extends ScrollLayoutPanel
     }
   }
 
-  public void clear()
-  {
+  public void clear() {
     initReset();
   }
 
-  public void update(String[] fieldValues)
-  {
-    if(fieldValues.length!= fieldNames.length)
-      throw new IllegalArgumentException("fieldValues.length doesn't match fieldName.length: "+ fieldNames);
+  public void update(String[] fieldValues) {
+    if (fieldValues.length != fieldNames.length)
+      throw new IllegalArgumentException("fieldValues.length doesn't match fieldName.length: " + fieldNames);
 
-    for(int i=0; i< fieldNames.length; i++)
-    {
+    for (int i = 0; i < fieldNames.length; i++) {
       Label label = new Label(fieldNames[i]);
       label.setStyleName("soa-prop-grid-label");
-      grid.setWidget(i,0, label);
-      grid.setWidget(i,1, new HTML(fieldValues[i]));
+      grid.setWidget(i, 0, label);
+      grid.setWidget(i, 1, new HTML(fieldValues[i]));
     }
   }
 

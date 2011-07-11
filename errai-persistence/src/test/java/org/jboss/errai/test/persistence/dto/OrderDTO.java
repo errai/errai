@@ -21,33 +21,27 @@ import java.util.List;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Jun 11, 2010
  */
-public class OrderDTO
-{
+public class OrderDTO {
   String orderNum;
 
   List<ItemDTO> items;
 
-  public OrderDTO()
-  {
+  public OrderDTO() {
   }
 
-  public String getOrderNum()
-  {
+  public String getOrderNum() {
     return orderNum;
   }
 
-  public void setOrderNum(String orderNum)
-  {
+  public void setOrderNum(String orderNum) {
     this.orderNum = orderNum;
   }
 
-  public List<ItemDTO> getItems()
-  {
+  public List<ItemDTO> getItems() {
     return items;
   }
 
-  public void setItems(List<ItemDTO> items)
-  {
+  public void setItems(List<ItemDTO> items) {
     this.items = items;
   }
 }

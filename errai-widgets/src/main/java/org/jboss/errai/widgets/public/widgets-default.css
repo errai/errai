@@ -14,37 +14,36 @@
  * limitations under the License.
  */
 
-.bpm-header{
-  background-color:#ffffff;
+.bpm-header {
+    background-color: #ffffff;
 }
 
 .bpm-header-left {
-  background-color:#ffffff;
-  vertical-align:bottom;
-  margin-left:15px;
+    background-color: #ffffff;
+    vertical-align: bottom;
+    margin-left: 15px;
 }
 
 .bpm-header-right {
-  background-color:#ffffff;
-  vertical-align:bottom;
-  margin-right:15px;
+    background-color: #ffffff;
+    vertical-align: bottom;
+    margin-right: 15px;
 }
 
 .bpm-user-info-popup {
-  font-family: sans-serif;
-  color: #000000;
-  font-size:9px;
-  margin:5px;
+    font-family: sans-serif;
+    color: #000000;
+    font-size: 9px;
+    margin: 5px;
 }
-
 
 .WSGrid-header {
     border-collapse: collapse;
     border-spacing: 0;
     height: 20px;
 
-    padding:0;
-    margin:0;
+    padding: 0;
+    margin: 0;
 
     background-image: url("images/ui/layout/column-header.png");
 
@@ -72,8 +71,8 @@
 }
 
 .WSGrid-datagrid {
-    padding:0;
-    margin:0;
+    padding: 0;
+    margin: 0;
 }
 
 .WSCell {
@@ -183,7 +182,6 @@
     border-left: 1px solid lightblue;
     height: 100%;
 }
-
 
 .WSWindowPanel {
     background: white;
@@ -307,20 +305,19 @@
     background: url("images/ui/layout/dropshadow/eq-bottomright.png") no-repeat;
 }
 
-
 /* soa widgets styles*/
 
 .soa-prop-grid {
-  width:100%;
-  border:1px solid #cccccc;
+    width: 100%;
+    border: 1px solid #cccccc;
 }
 
 .soa-prop-grid-even {
-  background: #F8F8F8;
+    background: #F8F8F8;
 }
 
 .soa-prop-grid-odd {
-  background:#F0F0F0;
+    background: #F0F0F0;
 }
 
 .soa-prop-grid-label {

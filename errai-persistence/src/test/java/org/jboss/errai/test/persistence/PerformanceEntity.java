@@ -18,25 +18,21 @@ package org.jboss.errai.test.persistence;
 import com.sun.japex.JapexDriverBase;
 import com.sun.japex.TestCase;
 import org.hibernate.HibernateException;
-import org.hibernate.Query;
 import org.hibernate.Transaction;
 import org.hibernate.classic.Session;
 
-import java.util.List;
 import java.util.Set;
 
 /**
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Jun 16, 2010
  */
-public class PerformanceEntity extends JapexDriverBase
-{
+public class PerformanceEntity extends JapexDriverBase {
   private CommonTestSetup testEnv;
   private User entity;
 
   @Override
-  public void initializeDriver()
-  {
+  public void initializeDriver() {
     testEnv = new CommonTestSetup();
 
     Session session = testEnv.getSessionFactory().openSession();
@@ -44,26 +40,22 @@ public class PerformanceEntity extends JapexDriverBase
 
     Transaction tx = session.beginTransaction();
 
-    try
-    {
+    try {
       entity = testEnv.loadUser(session, userId);
       Set<Order> orderSet = entity.getOrders();
-      for(Order order : orderSet)
-      {
+      for (Order order : orderSet) {
         order.getItems();
       }
 
       tx.commit();
     }
-    catch (HibernateException e)
-    {
+    catch (HibernateException e) {
       tx.rollback();
     }
   }
 
   @Override
-  public void run(TestCase testCase)
-  {
-    User dto = (User)testEnv.getBeanManager().clone(entity);
+  public void run(TestCase testCase) {
+    User dto = (User) testEnv.getBeanManager().clone(entity);
   }
 }

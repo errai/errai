@@ -22,15 +22,15 @@ import org.jboss.errai.common.client.types.TypeHandler;
 import java.util.Collection;
 
 public class CollectionToBooleanArray implements TypeHandler<Collection, Boolean[]> {
-    public Boolean[] getConverted(Collection in, DecodingContext ctx) {
-        if (in == null) return null;
-        Boolean[] newArray = new Boolean[in.size()];
+  public Boolean[] getConverted(Collection in, DecodingContext ctx) {
+    if (in == null) return null;
+    Boolean[] newArray = new Boolean[in.size()];
 
-        int i = 0;
-        for (Object o : in) {
-           newArray[i++] = (Boolean) o; 
-        }
-
-        return newArray;
+    int i = 0;
+    for (Object o : in) {
+      newArray[i++] = (Boolean) o;
     }
+
+    return newArray;
+  }
 }

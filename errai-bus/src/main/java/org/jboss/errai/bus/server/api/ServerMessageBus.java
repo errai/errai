@@ -34,77 +34,77 @@ import java.util.Map;
 public interface ServerMessageBus extends MessageBus {
 
 
-    /**
-     * Gets the queue containing the messages that are waiting to be transmitted
-     *
-     * @param session - the session of the queue
-     * @return the message queue needed
-     */
-    public MessageQueue getQueue(QueueSession session);
+  /**
+   * Gets the queue containing the messages that are waiting to be transmitted
+   *
+   * @param session - the session of the queue
+   * @return the message queue needed
+   */
+  public MessageQueue getQueue(QueueSession session);
 
-    /**
-     * Closes the queue associated with the <tt>sessionId</tt>
-     *
-     * @param sessionId - the session id of the message queue
-     */
-    public void closeQueue(String sessionId);
+  /**
+   * Closes the queue associated with the <tt>sessionId</tt>
+   *
+   * @param sessionId - the session id of the message queue
+   */
+  public void closeQueue(String sessionId);
 
-    /**
-     * Closes the specified message queue
-     *
-     * @param queue - the message queue to close
-     */
-    public void closeQueue(MessageQueue queue);
+  /**
+   * Closes the specified message queue
+   *
+   * @param queue - the message queue to close
+   */
+  public void closeQueue(MessageQueue queue);
 
-    /**
-     * Adds a rule for a specific subscription. The <tt>BooleanRoutingRule</tt> determines if a message should
-     * be routed based on the already specified rules or not.
-     *
-     * @param subject - the subject of the subscription
-     * @param rule    - the <tt>BooleanRoutingRule</tt> instance specifying the routing rules
-     */
-    public void addRule(String subject, BooleanRoutingRule rule);
+  /**
+   * Adds a rule for a specific subscription. The <tt>BooleanRoutingRule</tt> determines if a message should
+   * be routed based on the already specified rules or not.
+   *
+   * @param subject - the subject of the subscription
+   * @param rule    - the <tt>BooleanRoutingRule</tt> instance specifying the routing rules
+   */
+  public void addRule(String subject, BooleanRoutingRule rule);
 
-    /**
-     * Returns the associated scheduler which keeps track of timed events
-     *
-     * @return the <tt>Scheduler</tt> associated with this bus
-     */
-    public SchedulerService getScheduler();
+  /**
+   * Returns the associated scheduler which keeps track of timed events
+   *
+   * @return the <tt>Scheduler</tt> associated with this bus
+   */
+  public SchedulerService getScheduler();
 
-    /**
-     * Register a {@link org.jboss.errai.bus.server.api.QueueClosedListener} with the bus.
-     *
-     * @param listener a instance of the listener
-     */
-    public void addQueueClosedListener(QueueClosedListener listener);
+  /**
+   * Register a {@link org.jboss.errai.bus.server.api.QueueClosedListener} with the bus.
+   *
+   * @param listener a instance of the listener
+   */
+  public void addQueueClosedListener(QueueClosedListener listener);
 
-    //  public TimedTask scheduleForSession(QueueSession session, TimeUnit unit, int time, Runnable task);
+  //  public TimedTask scheduleForSession(QueueSession session, TimeUnit unit, int time, Runnable task);
 
-    /**
-     * Configures the bus using the configuration specified
-     *
-     * @param service - the configuration to use
-     */
-    public void configure(ErraiServiceConfigurator service);
+  /**
+   * Configures the bus using the configuration specified
+   *
+   * @param service - the configuration to use
+   */
+  public void configure(ErraiServiceConfigurator service);
 
-    /**
-     * Get a collection of all receivers registered for a specificed subject
-     *
-     * @param subject The subject.
-     * @return
-     */
-    public List<MessageCallback> getReceivers(String subject);
+  /**
+   * Get a collection of all receivers registered for a specificed subject
+   *
+   * @param subject The subject.
+   * @return
+   */
+  public List<MessageCallback> getReceivers(String subject);
 
-    public boolean hasRemoteSubscriptions(String subject);
+  public boolean hasRemoteSubscriptions(String subject);
 
-    public boolean hasRemoteSubscription(String sessionId, String subject);
+  public boolean hasRemoteSubscription(String sessionId, String subject);
 
-    public Map<QueueSession, MessageQueue> getMessageQueues();
+  public Map<QueueSession, MessageQueue> getMessageQueues();
 
 
-    /**
-     * Stop the MessateBus.
-     */
-    public void stop();
+  /**
+   * Stop the MessateBus.
+   */
+  public void stop();
 }

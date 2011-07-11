@@ -19,5 +19,5 @@ package org.jboss.errai.tools.monitoring;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 public interface ValRenderer {
-    public boolean render(ObjectExplorer explorer, DefaultMutableTreeNode node, String name, Object val);
+  public boolean render(ObjectExplorer explorer, DefaultMutableTreeNode node, String name, Object val);
 }

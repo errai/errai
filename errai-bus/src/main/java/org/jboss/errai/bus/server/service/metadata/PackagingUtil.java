@@ -33,109 +33,109 @@ import java.util.zip.ZipInputStream;
  * @date: Aug 9, 2010
  */
 public class PackagingUtil {
-    public static File identifyDeployment(URL url) {
-        String normalizedPath = Vfs.normalizePath(url);
-        return findActualDeploymentFile(new File(normalizedPath));
-    }
+  public static File identifyDeployment(URL url) {
+    String normalizedPath = Vfs.normalizePath(url);
+    return findActualDeploymentFile(new File(normalizedPath));
+  }
 
-    private static URL toUrl(String s) {
+  private static URL toUrl(String s) {
+    try {
+      return new URL(s);
+    }
+    catch (MalformedURLException e) {
+      throw new RuntimeException("Invalid URL " + s, e);
+    }
+  }
+
+  static File findActualDeploymentFile(File start) {
+    int pivotPoint;
+    String rootPath = start.getPath();
+
+    do {
+      start = new File(rootPath);
+      rootPath = rootPath.substring(0, (pivotPoint = rootPath.lastIndexOf("/")) < 0 ? 0 : pivotPoint);
+    } while (!start.exists() && pivotPoint > 0);
+
+    return start;
+  }
+
+  static void process(DeploymentContext ctx) {
+    for (URL url : ctx.getConfigUrls()) {
+      File file = PackagingUtil.identifyDeployment(url);
+
+      /**
+       * several config urls may derive from the same archive
+       * don't process them twice
+       */
+      if (!ctx.hasProcessed(file)) {
+        ctx.markProcessed(file);
+        PackagingUtil.processNestedZip(file, ctx);
+      }
+    }
+  }
+
+  private static void processNestedZip(File file, DeploymentContext ctx) {
+    try {
+      if (file.getName().matches(".+\\.(ear|war|sar)$") && !file.isDirectory()) // process only certain deployment types
+      {
+        if (file.getName().endsWith(".war"))
+          ctx.getSubContexts().put(file.getName(), file); // WEB-INF/classes
+
+        ZipInputStream zipFile = new ZipInputStream(new FileInputStream(file));
+        ZipEntry zipEntry = null;
+
         try {
-            return new URL(s);
-        }
-        catch (MalformedURLException e) {
-            throw new RuntimeException("Invalid URL " + s, e);
-        }
-    }
-
-    static File findActualDeploymentFile(File start) {
-        int pivotPoint;
-        String rootPath = start.getPath();
-
-        do {
-            start = new File(rootPath);
-            rootPath = rootPath.substring(0, (pivotPoint = rootPath.lastIndexOf("/")) < 0 ? 0 : pivotPoint);
-        } while (!start.exists() && pivotPoint > 0);
-
-        return start;
-    }
-
-    static void process(DeploymentContext ctx) {
-        for (URL url : ctx.getConfigUrls()) {
-            File file = PackagingUtil.identifyDeployment(url);
-
-            /**
-             * several config urls may derive from the same archive
-             * don't process them twice
-             */
-            if (!ctx.hasProcessed(file)) {
-                ctx.markProcessed(file);
-                PackagingUtil.processNestedZip(file, ctx);
-            }
-        }
-    }
-
-    private static void processNestedZip(File file, DeploymentContext ctx) {
-        try {
-            if (file.getName().matches(".+\\.(ear|war|sar)$") && !file.isDirectory()) // process only certain deployment types
+          while ((zipEntry = zipFile.getNextEntry()) != null) {
+            if (zipEntry.getName().matches(".+\\.(zip|jar|war)$")) // expand nested zip archives
             {
-                if (file.getName().endsWith(".war"))
-                    ctx.getSubContexts().put(file.getName(), file); // WEB-INF/classes
-
-                ZipInputStream zipFile = new ZipInputStream(new FileInputStream(file));
-                ZipEntry zipEntry = null;
-
-                try {
-                    while ((zipEntry = zipFile.getNextEntry()) != null) {
-                        if (zipEntry.getName().matches(".+\\.(zip|jar|war)$")) // expand nested zip archives
-                        {
-                            if (!ctx.getSubContexts().containsKey(zipEntry.getName())) {
-                                File tmpUnZip = expandZipEntry(zipFile, zipEntry, ctx);
-                                ctx.getSubContexts().put(zipEntry.getName(), tmpUnZip);
-                                processNestedZip(tmpUnZip, ctx);
-                            }
-                        }
-                    }
-                }
-                finally {
-                    zipFile.close();
-                }
+              if (!ctx.getSubContexts().containsKey(zipEntry.getName())) {
+                File tmpUnZip = expandZipEntry(zipFile, zipEntry, ctx);
+                ctx.getSubContexts().put(zipEntry.getName(), tmpUnZip);
+                processNestedZip(tmpUnZip, ctx);
+              }
             }
+          }
         }
-        catch (Exception e) {
-            throw new RuntimeException("Failed to process nested zip", e);
+        finally {
+          zipFile.close();
         }
+      }
     }
-
-    protected static File expandZipEntry(ZipInputStream stream, ZipEntry entry, DeploymentContext ctx) {
-
-        String tmpUUID = "erraiBootstrap_" + UUID.randomUUID().toString().replaceAll("\\-", "_");
-        String tmpDir = System.getProperty("java.io.tmpdir") + "/" + tmpUUID;
-        int idx = entry.getName().lastIndexOf('/');
-        String tmpFileName = tmpDir + "/" + entry.getName().substring(idx == -1 ? 0 : idx);
-
-        try {
-            File tmpDirFile = new File(tmpDir);
-            tmpDirFile.mkdirs();
-            ctx.markTmpFile(tmpDirFile);
-
-            File newFile = new File(tmpFileName);
-
-            FileOutputStream outStream = new FileOutputStream(newFile);
-            byte[] buf = new byte[1024];
-            int read;
-            while ((read = stream.read(buf)) != -1) {
-                outStream.write(buf, 0, read);
-            }
-
-            outStream.flush();
-            outStream.close();
-
-            newFile.getParentFile();
-
-            return newFile;
-        }
-        catch (Exception e) {
-            throw new RuntimeException("Error reading from stream", e);
-        }
+    catch (Exception e) {
+      throw new RuntimeException("Failed to process nested zip", e);
     }
+  }
+
+  protected static File expandZipEntry(ZipInputStream stream, ZipEntry entry, DeploymentContext ctx) {
+
+    String tmpUUID = "erraiBootstrap_" + UUID.randomUUID().toString().replaceAll("\\-", "_");
+    String tmpDir = System.getProperty("java.io.tmpdir") + "/" + tmpUUID;
+    int idx = entry.getName().lastIndexOf('/');
+    String tmpFileName = tmpDir + "/" + entry.getName().substring(idx == -1 ? 0 : idx);
+
+    try {
+      File tmpDirFile = new File(tmpDir);
+      tmpDirFile.mkdirs();
+      ctx.markTmpFile(tmpDirFile);
+
+      File newFile = new File(tmpFileName);
+
+      FileOutputStream outStream = new FileOutputStream(newFile);
+      byte[] buf = new byte[1024];
+      int read;
+      while ((read = stream.read(buf)) != -1) {
+        outStream.write(buf, 0, read);
+      }
+
+      outStream.flush();
+      outStream.close();
+
+      newFile.getParentFile();
+
+      return newFile;
+    }
+    catch (Exception e) {
+      throw new RuntimeException("Error reading from stream", e);
+    }
+  }
 }

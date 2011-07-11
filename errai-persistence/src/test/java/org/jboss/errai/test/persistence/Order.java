@@ -26,38 +26,32 @@ import java.util.List;
  */
 @Entity
 @Table(name = "ORDER_TABLE")
-public class Order
-{
+public class Order {
   @Id
   @GeneratedValue(generator = "system-uuid")
   @GenericGenerator(name = "system-uuid", strategy = "uuid")
   String orderNum;
 
-  @OneToMany( cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-  @JoinColumn(name="order_fk")
+  @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  @JoinColumn(name = "order_fk")
   List<Item> items;
 
-  public Order()
-  {
+  public Order() {
   }
 
-  public String getOrderNum()
-  {
+  public String getOrderNum() {
     return orderNum;
   }
 
-  public void setOrderNum(String orderNum)
-  {
+  public void setOrderNum(String orderNum) {
     this.orderNum = orderNum;
   }
 
-  public List<Item> getItems()
-  {
+  public List<Item> getItems() {
     return items;
   }
 
-  public void setItems(List<Item> items)
-  {
+  public void setItems(List<Item> items) {
     this.items = items;
   }
 }

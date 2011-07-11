@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, a divison Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,8 @@ package org.jboss.errai.ioc.rebind.ioc;
 import org.jboss.errai.bus.rebind.ProcessingContext;
 import org.jboss.errai.ioc.rebind.ProcessorFactory;
 
-/**
- * User: christopherbrock
- * Date: 19-Jul-2010
- * Time: 3:44:39 PM
- */
 public interface IOCExtensionConfigurator {
-    public void configure(ProcessingContext context, InjectorFactory injectorFactory, ProcessorFactory procFactory);
+  public void configure(ProcessingContext context, InjectorFactory injectorFactory, ProcessorFactory procFactory);
+
+  public void afterInitialization(ProcessingContext context, InjectorFactory injectorFactory, ProcessorFactory procFactory);
 }

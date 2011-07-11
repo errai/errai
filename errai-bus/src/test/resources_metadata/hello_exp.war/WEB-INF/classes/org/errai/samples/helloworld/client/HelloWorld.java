@@ -18,46 +18,46 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-@EntryPoint @Service
-public class HelloWorld extends VerticalPanel implements MessageCallback
-{
-    private Button sayHello;
-    private Label label;
+@EntryPoint
+@Service
+public class HelloWorld extends VerticalPanel implements MessageCallback {
+  private Button sayHello;
+  private Label label;
 
-    private MessageBus bus;
+  private MessageBus bus;
 
-    @Inject
-    public HelloWorld(MessageBus bus) {
-        this.bus = bus;
-    }
+  @Inject
+  public HelloWorld(MessageBus bus) {
+    this.bus = bus;
+  }
 
-    public void callback(Message message) {
-        label.setText(SimpleMessage.get(message));
-    }
+  public void callback(Message message) {
+    label.setText(SimpleMessage.get(message));
+  }
 
-    @PostConstruct
-    public void init() {
-        sayHello = new Button("Say Hello!");
+  @PostConstruct
+  public void init() {
+    sayHello = new Button("Say Hello!");
 
-        /**
-         * Register click handler.
-         */
-        sayHello.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent event) {
-                MessageBuilder.createMessage()
-                        .toSubject("HelloWorldService")
-                        .with(MessageParts.ReplyTo, "HelloWorld")
-                        .with("TestLong", 1000l)
-                        .with("TestDouble", 1500.55d)
-                        .done().sendNowWith(bus);
-            }
-        });
+    /**
+     * Register click handler.
+     */
+    sayHello.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent event) {
+        MessageBuilder.createMessage()
+            .toSubject("HelloWorldService")
+            .with(MessageParts.ReplyTo, "HelloWorld")
+            .with("TestLong", 1000l)
+            .with("TestDouble", 1500.55d)
+            .done().sendNowWith(bus);
+      }
+    });
 
-        label = new Label();
+    label = new Label();
 
-        add(sayHello);
-        add(label);
+    add(sayHello);
+    add(label);
 
-        RootPanel.get().add(this);
-    }
+    RootPanel.get().add(this);
+  }
 }

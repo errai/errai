@@ -71,8 +71,7 @@ public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
 
       MetaDataScanner scanner = configurator.getMetaDataScanner();
       Set<Class<?>> userEntities = scanner.getTypesAnnotatedWith(AuthUserEntity.class);
-      for(Class<?> clazz : userEntities)
-      {
+      for (Class<?> clazz : userEntities) {
         if (userEntity != null) {
           throw new ErraiBootstrapFailure("More than one @AuthUserEntity defined in classpath (" + userEntity.getName() + " and " + clazz.getName() + " cannot co-exist)");
         }
@@ -84,13 +83,15 @@ public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
               throw new ErraiBootstrapFailure("@AuthUsernameField must annotated a String field");
             }
             userField = f.getName();
-          } else if (f.isAnnotationPresent(AuthPasswordField.class)) {
+          }
+          else if (f.isAnnotationPresent(AuthPasswordField.class)) {
             if (f.getType() != String.class) {
               System.out.println("Stopping B");
               throw new ErraiBootstrapFailure("@AuthPasswordField must annotated a String field");
             }
             passworldField = f.getName();
-          } else if (f.isAnnotationPresent(AuthRolesField.class)) {
+          }
+          else if (f.isAnnotationPresent(AuthRolesField.class)) {
             rolesField = f.getName();
           }
         }
@@ -102,11 +103,14 @@ public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
 
     if (userEntity == null) {
       throw new RuntimeException("You have not specified a @AuthUserEntity for the hibernate security extension.");
-    } else if (userField == null) {
+    }
+    else if (userField == null) {
       throw new RuntimeException("You must specify a @AuthUsernameField in the '" + userEntity.getName() + "' entity.");
-    } else if (passworldField == null) {
+    }
+    else if (passworldField == null) {
       throw new RuntimeException("You must specify a @AuthPasswordField in the '" + userEntity.getName() + "' entity.");
-    } else if (rolesField == null) {
+    }
+    else if (rolesField == null) {
       throw new RuntimeException("You must specify a @AuthRolesField in the '" + userEntity.getName() + "' entity.");
     }
 
@@ -148,7 +152,8 @@ public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
           .with(SecurityParts.Name, name)
           .noErrorHandling()
           .sendNowWith(bus);
-    } else {
+    }
+    else {
       /**
        * The login failed. How upsetting. Life must go on, and we must inform the client of the
        * unfortunate news.
@@ -177,7 +182,8 @@ public class HibernateAuthenticationAdapter implements AuthenticationAdapter {
       getAuthDescriptor(message).remove(new SimpleRole(CredentialTypes.Authenticated.name()));
       message.getResource(QueueSession.class, "Session").removeAttribute(ErraiService.SESSION_AUTH_DATA);
       return true;
-    } else {
+    }
+    else {
       return false;
     }
   }

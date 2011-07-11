@@ -22,72 +22,72 @@ import org.jboss.errai.bus.server.api.QueueSession;
 import java.util.Collection;
 
 public class SessionContext implements Context {
-    private QueueSession session;
+  private QueueSession session;
 
-    public static SessionContext get(QueueSession session) {
-        return new SessionContext(session);
+  public static SessionContext get(QueueSession session) {
+    return new SessionContext(session);
+  }
+
+  public static SessionContext get(Message message) {
+    return new SessionContext(message.getResource(QueueSession.class, "Session"));
+  }
+
+  private SessionContext(QueueSession session) {
+    if (session == null) {
+      throw new RuntimeException("no session");
+    }
+    this.session = session;
+  }
+
+  public void setAttribute(Enum<?> key, Object value) {
+    session.setAttribute(key.toString(), value);
+  }
+
+  public <T> T getAttribute(Class<T> type, Enum<?> key) {
+    return session.getAttribute(type, key.toString());
+  }
+
+  public void setAttribute(Class<?> typeIndexed, Object value) {
+    if (session.hasAttribute(typeIndexed.getName())) {
+      throw new IllegalStateException("The type-indexed property already exists: " + typeIndexed.getName());
     }
 
-    public static SessionContext get(Message message) {
-        return new SessionContext(message.getResource(QueueSession.class, "Session"));
-    }
+    session.setAttribute(typeIndexed.getName(), value);
+  }
 
-    private SessionContext(QueueSession session) {
-        if (session == null) {
-            throw new RuntimeException("no session");
-        }
-        this.session = session;
-    }
+  public <T> T getAttribute(Class<T> type, Class<?> typeIndexed) {
+    return session.getAttribute(type, typeIndexed.getName());
+  }
 
-    public void setAttribute(Enum<?> key, Object value) {
-        session.setAttribute(key.toString(), value);
-    }
+  public <T> T getAttribute(Class<T> type) {
+    return getAttribute(type, type);
+  }
 
-    public <T> T getAttribute(Class<T> type, Enum<?> key) {
-        return session.getAttribute(type, key.toString());
-    }
+  public void setAttribute(String param, Object value) {
+    session.setAttribute(param, value);
+  }
 
-    public void setAttribute(Class<?> typeIndexed, Object value) {
-        if (session.hasAttribute(typeIndexed.getName())) {
-            throw new IllegalStateException("The type-indexed property already exists: " + typeIndexed.getName());
-        }
+  public <T> T getAttribute(Class<T> type, String param) {
+    return session.getAttribute(type, param);
+  }
 
-        session.setAttribute(typeIndexed.getName(), value);
-    }
+  public Collection<String> getAttributeNames() {
+    return session.getAttributeNames();
+  }
 
-    public <T> T getAttribute(Class<T> type, Class<?> typeIndexed) {
-        return session.getAttribute(type, typeIndexed.getName());
-    }
+  public boolean removeAttribute(Enum key) {
+    return session.removeAttribute(key.toString());
+  }
 
-    public <T> T getAttribute(Class<T> type) {
-        return getAttribute(type, type);
-    }
+  public boolean removeAttribute(Class<?> typeIndexed) {
+    return session.removeAttribute(typeIndexed.getName());
+  }
 
-    public void setAttribute(String param, Object value) {
-        session.setAttribute(param, value);
-    }
+  public boolean removeAttribute(String param) {
+    return session.removeAttribute(param);
+  }
 
-    public <T> T getAttribute(Class<T> type, String param) {
-        return session.getAttribute(type, param);
-    }
-
-    public Collection<String> getAttributeNames() {
-        return session.getAttributeNames();
-    }
-
-    public boolean removeAttribute(Enum key) {
-        return session.removeAttribute(key.toString());
-    }
-
-    public boolean removeAttribute(Class<?> typeIndexed) {
-        return session.removeAttribute(typeIndexed.getName());
-    }
-
-    public boolean removeAttribute(String param) {
-        return session.removeAttribute(param);
-    }
-
-    public QueueSession getSession() {
-        return session;
-    }
+  public QueueSession getSession() {
+    return session;
+  }
 }

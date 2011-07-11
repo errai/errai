@@ -23,10 +23,10 @@ import java.lang.annotation.Target;
 
 /**
  * Specifies that the field should be bound as a widget mapper class. WidgetMappers are responsible
- * for mapping a collection of many elements to a single, complex widget. 
+ * for mapping a collection of many elements to a single, complex widget.
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface WidgetMapper {
-    String value();
+  String value();
 }

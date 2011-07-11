@@ -18,5 +18,5 @@ package org.jboss.errai.tools.monitoring;
 
 
 public interface MessageMonitor {
-    public void monitorEvent(MessageEvent event);
+  public void monitorEvent(MessageEvent event);
 }

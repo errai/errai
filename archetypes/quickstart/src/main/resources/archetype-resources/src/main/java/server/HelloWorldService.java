@@ -1,6 +1,6 @@
-#set( $symbol_pound = '#' )
-#set( $symbol_dollar = '$' )
-#set( $symbol_escape = '\' )
+#set($symbol_pound='#')
+    #set($symbol_dollar='$')
+    #set($symbol_escape='\' )
 /*
  * JBoss, Home of Professional Open Source.
  * Copyright 2006, Red Hat Middleware LLC, and individual contributors
@@ -22,7 +22,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package ${package}.server;
+    package ${package}.server;
 
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
@@ -47,8 +47,7 @@ import org.jboss.errai.bus.server.annotations.Service;
 @Service("HelloWorld")
 public class HelloWorldService implements MessageCallback {
 
-  public void callback(Message message)
-  {
+  public void callback(Message message) {
     System.out.println("Hello " + message.get(String.class, "messageText"));
   }
 }

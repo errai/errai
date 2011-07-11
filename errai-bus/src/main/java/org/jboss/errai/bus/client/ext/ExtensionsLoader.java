@@ -24,10 +24,10 @@ import org.jboss.errai.bus.client.framework.MessageBus;
  */
 public interface ExtensionsLoader {
 
-    /**
-     * Loads all the initialization extentions for the specified bus
-     *
-     * @param bus - the <tt>MessageBus</tt> to load the extensions for
-     */
-    public void initExtensions(MessageBus bus);
+  /**
+   * Loads all the initialization extentions for the specified bus
+   *
+   * @param bus - the <tt>MessageBus</tt> to load the extensions for
+   */
+  public void initExtensions(MessageBus bus);
 }

@@ -31,98 +31,98 @@ import java.util.List;
 
 @EntryPoint
 public class RPCDemo {
-    /**
-     * Get an instance of the MessageBus
-     */
-    private MessageBus bus;
+  /**
+   * Get an instance of the MessageBus
+   */
+  private MessageBus bus;
 
-    @Inject
-    public RPCDemo(MessageBus bus) {
-        this.bus = bus;
-    }
+  @Inject
+  public RPCDemo(MessageBus bus) {
+    this.bus = bus;
+  }
 
-    @PostConstruct
-    public void init() {
-        final Button checkMemoryButton = new Button("Check Memory Free");
-        final Label memoryFreeLabel = new Label();
+  @PostConstruct
+  public void init() {
+    final Button checkMemoryButton = new Button("Check Memory Free");
+    final Label memoryFreeLabel = new Label();
 
-        final TextBox inputOne = new TextBox();
-        final TextBox inputTwo = new TextBox();
-        final Button appendTwoStrings = new Button("Append");
-        final Label appendResult = new Label();
+    final TextBox inputOne = new TextBox();
+    final TextBox inputTwo = new TextBox();
+    final Button appendTwoStrings = new Button("Append");
+    final Label appendResult = new Label();
 
-        checkMemoryButton.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent clickEvent) {
-                MessageBuilder.createCall(new RemoteCallback<Long>() {
-                    public void callback(Long response) {
-                        memoryFreeLabel.setText("Free Memory: " + response);
-                    }
-                }, TestService.class).getMemoryFree();
-            }
-        });
+    checkMemoryButton.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent clickEvent) {
+        MessageBuilder.createCall(new RemoteCallback<Long>() {
+          public void callback(Long response) {
+            memoryFreeLabel.setText("Free Memory: " + response);
+          }
+        }, TestService.class).getMemoryFree();
+      }
+    });
 
-        appendTwoStrings.addClickHandler(new ClickHandler() {
-            public void onClick(ClickEvent clickEvent) {
-                MessageBuilder.createCall(new RemoteCallback<String>() {
-                    public void callback(String response) {
-                        appendResult.setText(response);
-                    }
-                }, TestService.class).append(inputOne.getText(), inputTwo.getText());
-            }
-        });
+    appendTwoStrings.addClickHandler(new ClickHandler() {
+      public void onClick(ClickEvent clickEvent) {
+        MessageBuilder.createCall(new RemoteCallback<String>() {
+          public void callback(String response) {
+            appendResult.setText(response);
+          }
+        }, TestService.class).append(inputOne.getText(), inputTwo.getText());
+      }
+    });
 
-        final Button voidReturn = new Button("Test Add", new ClickHandler() {
-            public void onClick(ClickEvent clickEvent) {
-                MessageBuilder.createCall(new RemoteCallback<Long>() {
-                    public void callback(Long response) {
-                        appendResult.setText(String.valueOf(response));
-                    }
-                }, TestService.class).add(Long.parseLong(inputOne.getText()), Long.parseLong(inputTwo.getText()));
-            }
-        });
+    final Button voidReturn = new Button("Test Add", new ClickHandler() {
+      public void onClick(ClickEvent clickEvent) {
+        MessageBuilder.createCall(new RemoteCallback<Long>() {
+          public void callback(Long response) {
+            appendResult.setText(String.valueOf(response));
+          }
+        }, TestService.class).add(Long.parseLong(inputOne.getText()), Long.parseLong(inputTwo.getText()));
+      }
+    });
 
 
-        final Button dates = new Button("Dates", new ClickHandler() {
-            public void onClick(ClickEvent clickEvent) {
-                MessageBuilder.createCall(new RemoteCallback<List<Date>>() {
-                    public void callback(List<Date> response) {
+    final Button dates = new Button("Dates", new ClickHandler() {
+      public void onClick(ClickEvent clickEvent) {
+        MessageBuilder.createCall(new RemoteCallback<List<Date>>() {
+          public void callback(List<Date> response) {
 
-                        for(Date d : response)
-                        appendResult.setText(d.toString());
-                    }
-                }, TestService.class).getDates();
-            }
-        });
+            for (Date d : response)
+              appendResult.setText(d.toString());
+          }
+        }, TestService.class).getDates();
+      }
+    });
 
-         final Button date = new Button("Date", new ClickHandler() {
-            public void onClick(ClickEvent clickEvent) {
-                MessageBuilder.createCall(new RemoteCallback<Date>() {
-                    public void callback(Date response) {
-                        appendResult.setText(response.toString());
-                    }
-                }, TestService.class).getDate();
-            }
-        });
+    final Button date = new Button("Date", new ClickHandler() {
+      public void onClick(ClickEvent clickEvent) {
+        MessageBuilder.createCall(new RemoteCallback<Date>() {
+          public void callback(Date response) {
+            appendResult.setText(response.toString());
+          }
+        }, TestService.class).getDate();
+      }
+    });
 
-        VerticalPanel vPanel = new VerticalPanel();
-        HorizontalPanel memoryFreeTest = new HorizontalPanel();
-        memoryFreeTest.add(checkMemoryButton);
-        memoryFreeTest.add(memoryFreeLabel);
-        vPanel.add(memoryFreeTest);
+    VerticalPanel vPanel = new VerticalPanel();
+    HorizontalPanel memoryFreeTest = new HorizontalPanel();
+    memoryFreeTest.add(checkMemoryButton);
+    memoryFreeTest.add(memoryFreeLabel);
+    vPanel.add(memoryFreeTest);
 
-        HorizontalPanel appendTest = new HorizontalPanel();
-        appendTest.add(inputOne);
-        appendTest.add(inputTwo);
-        appendTest.add(appendTwoStrings);
-        appendTest.add(appendResult);
+    HorizontalPanel appendTest = new HorizontalPanel();
+    appendTest.add(inputOne);
+    appendTest.add(inputTwo);
+    appendTest.add(appendTwoStrings);
+    appendTest.add(appendResult);
 
-        vPanel.add(appendTest);
+    vPanel.add(appendTest);
 
-        vPanel.add(voidReturn);
+    vPanel.add(voidReturn);
 
-        vPanel.add(dates);
-        vPanel.add(date);
+    vPanel.add(dates);
+    vPanel.add(date);
 
-        RootPanel.get().add(vPanel);
-    }
+    RootPanel.get().add(vPanel);
+  }
 }

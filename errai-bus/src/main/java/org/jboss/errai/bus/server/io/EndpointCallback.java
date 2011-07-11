@@ -28,48 +28,49 @@ import java.lang.reflect.Method;
  * specified
  */
 public class EndpointCallback implements MessageCallback {
-    private Object genericSvc;
-    private Class[] targetTypes;
-    private Method method;
+  private Object genericSvc;
+  private Class[] targetTypes;
+  private Method method;
 
-    /**
-     * Initializes the service and endpoint method
-     *
-     * @param genericSvc - the service that delivers the message
-     * @param method     - the endpoint function
-     */
-    public EndpointCallback(Object genericSvc, Method method) {
-        this.genericSvc = genericSvc;
-        this.targetTypes = (this.method = method).getParameterTypes();
+  /**
+   * Initializes the service and endpoint method
+   *
+   * @param genericSvc - the service that delivers the message
+   * @param method     - the endpoint function
+   */
+  public EndpointCallback(Object genericSvc, Method method) {
+    this.genericSvc = genericSvc;
+    this.targetTypes = (this.method = method).getParameterTypes();
+  }
+
+  /**
+   * Invokes the endpoint function based on the details of the message
+   *
+   * @param message - the message
+   */
+  public void callback(Message message) {
+    Object[] parms = message.get(Object[].class, "MethodParms");
+
+    if ((parms == null && targetTypes.length != 0) || (parms.length != targetTypes.length)) {
+      throw new MessageDeliveryFailure("wrong number of arguments sent to endpoint. (received: "
+          + (parms == null ? 0 : parms.length) + "; required: " + targetTypes.length + ")");
+    }
+    for (int i = 0; i < parms.length; i++) {
+      if (parms[i] != null && !targetTypes[i].isAssignableFrom(parms[i].getClass())) {
+        if (DataConversion.canConvert(targetTypes[i], parms[i].getClass())) {
+          parms[i] = DataConversion.convert(parms[i], targetTypes[i]);
+        }
+        else {
+          throw new MessageDeliveryFailure("type mismatch in method parameters");
+        }
+      }
     }
 
-    /**
-     * Invokes the endpoint function based on the details of the message
-     *
-     * @param message - the message
-     */
-    public void callback(Message message) {
-        Object[] parms = message.get(Object[].class, "MethodParms");
-
-        if ((parms == null && targetTypes.length != 0) || (parms.length != targetTypes.length)) {
-            throw new MessageDeliveryFailure("wrong number of arguments sent to endpoint. (received: "
-                    + (parms == null ? 0 : parms.length) + "; required: " + targetTypes.length + ")");
-        }
-        for (int i = 0; i < parms.length; i++) {
-            if (parms[i] != null && !targetTypes[i].isAssignableFrom(parms[i].getClass())) {
-                if (DataConversion.canConvert(targetTypes[i], parms[i].getClass())) {
-                    parms[i] = DataConversion.convert(parms[i], targetTypes[i]);
-                } else {
-                    throw new MessageDeliveryFailure("type mismatch in method parameters");
-                }
-            }
-        }
-
-        try {
-            method.invoke(genericSvc, parms);
-        }
-        catch (Exception e) {
-            throw new MessageDeliveryFailure("error invoking endpoint", e);
-        }
+    try {
+      method.invoke(genericSvc, parms);
     }
+    catch (Exception e) {
+      throw new MessageDeliveryFailure("error invoking endpoint", e);
+    }
+  }
 }

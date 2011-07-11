@@ -29,26 +29,26 @@ import java.util.List;
 import java.util.Map;
 
 public class TextBoxFMGenerator implements FieldMapperGenerator {
-    public String generateFieldMapperGenerator(TypeOracle oracle, JField targetWidget,
-                                               JType targetType, JField targetEntityMember, JField targetEntityField) {
-        InputStream istream = this.getClass().getResourceAsStream("TextBoxFMGenerator.mv");
-        Map<String, Object> vars = new HashMap<String, Object>();
-        vars.put("typeOracle", oracle);
-        vars.put("targetWidget", targetWidget.getType().isClassOrInterface().getQualifiedSourceName());
-        vars.put("targetType", targetType.isClassOrInterface().getQualifiedSourceName());
-        vars.put("fieldType", targetEntityMember.getType().isClassOrInterface().getQualifiedSourceName());
-        vars.put("fieldName", targetEntityMember.getName());
+  public String generateFieldMapperGenerator(TypeOracle oracle, JField targetWidget,
+                                             JType targetType, JField targetEntityMember, JField targetEntityField) {
+    InputStream istream = this.getClass().getResourceAsStream("TextBoxFMGenerator.mv");
+    Map<String, Object> vars = new HashMap<String, Object>();
+    vars.put("typeOracle", oracle);
+    vars.put("targetWidget", targetWidget.getType().isClassOrInterface().getQualifiedSourceName());
+    vars.put("targetType", targetType.isClassOrInterface().getQualifiedSourceName());
+    vars.put("fieldType", targetEntityMember.getType().isClassOrInterface().getQualifiedSourceName());
+    vars.put("fieldName", targetEntityMember.getName());
 
-        return (String) TemplateRuntime.eval(istream, null, new MapVariableResolverFactory(vars), null);
-    }
+    return (String) TemplateRuntime.eval(istream, null, new MapVariableResolverFactory(vars), null);
+  }
 
-    public String generateValueExtractorStatement(TypeOracle oracle, JField targetWidget,
-                                                  JType targetType, JField targetEntityMember, JField targetEntityField) {
-        return "getText()";
-    }
+  public String generateValueExtractorStatement(TypeOracle oracle, JField targetWidget,
+                                                JType targetType, JField targetEntityMember, JField targetEntityField) {
+    return "getText()";
+  }
 
-    public String init(TypeOracle oracle, JField targetWidget, JType targetType, JField targetFieldType,
-                       JField targetEntityField, String variable, List<JField> fields) {
-        return "";
-    }
+  public String init(TypeOracle oracle, JField targetWidget, JType targetType, JField targetFieldType,
+                     JField targetEntityField, String variable, List<JField> fields) {
+    return "";
+  }
 }

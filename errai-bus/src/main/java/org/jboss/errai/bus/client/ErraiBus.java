@@ -27,31 +27,31 @@ import org.jboss.errai.bus.client.framework.RequestDispatcher;
  * client {@link org.jboss.errai.bus.client.framework.MessageBus} which can be obtained by calling: <tt>ErraiBus.get()</tt>
  */
 public class ErraiBus implements EntryPoint {
-    private static MessageBus bus = GWT.create(MessageBus.class);
+  private static MessageBus bus = GWT.create(MessageBus.class);
 
-    /**
-     * Obtain an instance of the client MessageBus.
-     *
-     * @return Returns instance of MessageBus
-     */
-    public static MessageBus get() {
-        return bus;
-    }
-                                                                 
-    private static RequestDispatcher DISPATCHER_INST = new RequestDispatcher() {
-        public void dispatchGlobal(Message message) {
-            get().sendGlobal(message);
-        }
+  /**
+   * Obtain an instance of the client MessageBus.
+   *
+   * @return Returns instance of MessageBus
+   */
+  public static MessageBus get() {
+    return bus;
+  }
 
-        public void dispatch(Message message) {
-            get().send(message);
-        }
-    };
-
-    public static RequestDispatcher getDispatcher() {
-        return DISPATCHER_INST;
+  private static RequestDispatcher DISPATCHER_INST = new RequestDispatcher() {
+    public void dispatchGlobal(Message message) {
+      get().sendGlobal(message);
     }
 
-    public void onModuleLoad() {
+    public void dispatch(Message message) {
+      get().send(message);
     }
+  };
+
+  public static RequestDispatcher getDispatcher() {
+    return DISPATCHER_INST;
+  }
+
+  public void onModuleLoad() {
+  }
 }

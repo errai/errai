@@ -19,25 +19,25 @@ package org.jboss.errai.bus.server.util;
 import java.util.Collection;
 
 public interface Context {
-    public void setAttribute(Enum<?> key, Object value);
+  public void setAttribute(Enum<?> key, Object value);
 
-    public void setAttribute(Class<?> typeIndexed, Object value);
+  public void setAttribute(Class<?> typeIndexed, Object value);
 
-    public void setAttribute(String param, Object value);
+  public void setAttribute(String param, Object value);
 
-    public <T> T getAttribute(Class<T> type, Enum<?> key);
+  public <T> T getAttribute(Class<T> type, Enum<?> key);
 
-    public <T> T getAttribute(Class<T> type, Class<?> typeIndexed);
+  public <T> T getAttribute(Class<T> type, Class<?> typeIndexed);
 
-    public <T> T getAttribute(Class<T> type);
+  public <T> T getAttribute(Class<T> type);
 
-    public <T> T getAttribute(Class<T> type, String param);
+  public <T> T getAttribute(Class<T> type, String param);
 
-    public Collection<String> getAttributeNames();
+  public Collection<String> getAttributeNames();
 
-    public boolean removeAttribute(Enum<?> key);
+  public boolean removeAttribute(Enum<?> key);
 
-    public boolean removeAttribute(Class<?> typeIndexed);
+  public boolean removeAttribute(Class<?> typeIndexed);
 
-    public boolean removeAttribute(String param);
+  public boolean removeAttribute(String param);
 }

@@ -17,5 +17,5 @@
 package org.jboss.errai.bus.client.api;
 
 public interface LaundryListProvider<T> {
-    public LaundryList getLaundryList(Object ref);
+  public LaundryList getLaundryList(Object ref);
 }

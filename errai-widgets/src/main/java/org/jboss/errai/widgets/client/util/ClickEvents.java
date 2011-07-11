@@ -16,13 +16,13 @@
 
 package org.jboss.errai.widgets.client.util;
 
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FocusWidget;
 import org.jboss.errai.bus.client.api.Message;
 
 public class ClickEvents {
-    private ClickEvents() {}
+  private ClickEvents() {
+  }
 
-    public static void messageOnClick(final FocusWidget widget, final Message message)  {
-    }
+  public static void messageOnClick(final FocusWidget widget, final Message message) {
+  }
 }

@@ -26,117 +26,117 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class ActivityProcessor {
-    private List<List<MessageMonitor>> messageMonitors = new ArrayList<List<MessageMonitor>>(20);
-    private ThreadPoolExecutor workers;
+  private List<List<MessageMonitor>> messageMonitors = new ArrayList<List<MessageMonitor>>(20);
+  private ThreadPoolExecutor workers;
 
-    public ActivityProcessor() {
-        messageMonitors = new ArrayList<List<MessageMonitor>>(20);
-        workers = new ThreadPoolExecutor(2, Runtime.getRuntime().availableProcessors(), 30, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(500, false));
-        workers.setRejectedExecutionHandler(new RejectedExecutionHandler() {
-            public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
-                // just run on calling thread.
-                r.run();
-            }
-        });
+  public ActivityProcessor() {
+    messageMonitors = new ArrayList<List<MessageMonitor>>(20);
+    workers = new ThreadPoolExecutor(2, Runtime.getRuntime().availableProcessors(), 30, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(500, false));
+    workers.setRejectedExecutionHandler(new RejectedExecutionHandler() {
+      public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+        // just run on calling thread.
+        r.run();
+      }
+    });
+  }
+
+  private void padList(int size) {
+    for (int i = messageMonitors.size() - 1; i < size; i++) {
+      messageMonitors.add(new ArrayList<MessageMonitor>(10));
     }
+  }
 
-    private void padList(int size) {
-        for (int i = messageMonitors.size() - 1; i < size; i++) {
-            messageMonitors.add(new ArrayList<MessageMonitor>(10));
-        }
-    }
+  public Handle registerEvent(EventType type, MessageMonitor monitor) {
+    padList(type.ordinal());
+    messageMonitors.get(type.ordinal()).add(monitor);
+    return new Handle(this, type, monitor);
+  }
 
-    public Handle registerEvent(EventType type, MessageMonitor monitor) {
-        padList(type.ordinal());
-        messageMonitors.get(type.ordinal()).add(monitor);
-        return new Handle(this, type, monitor);
-    }
+  public void notifyEvent(final long time, final EventType type, final SubEventType subType, final String fromBus, final String toBus, final String subject, final Message message, final Throwable error, final boolean replay) {
+    workers.execute(new Runnable() {
+      public void run() {
+        MessageEvent evt = type == EventType.ERROR ? new MessageEvent() {
+          public long getTime() {
+            return time;
+          }
 
-    public void notifyEvent(final long time, final EventType type, final SubEventType subType, final String fromBus, final String toBus, final String subject, final Message message, final Throwable error, final boolean replay) {
-        workers.execute(new Runnable() {
-            public void run() {
-                MessageEvent evt = type == EventType.ERROR ? new MessageEvent() {
-                    public long getTime() {
-                        return time;
-                    }
+          public SubEventType getSubType() {
+            return subType;
+          }
 
-                    public SubEventType getSubType() {
-                        return subType;
-                    }
+          public String getSubject() {
+            return subject;
+          }
 
-                    public String getSubject() {
-                        return subject;
-                    }
+          public String getFromBus() {
+            return fromBus;
+          }
 
-                    public String getFromBus() {
-                        return fromBus;
-                    }
+          public String getToBus() {
+            return toBus;
+          }
 
-                    public String getToBus() {
-                        return toBus;
-                    }
+          public Object getContents() {
+            return error;
+          }
 
-                    public Object getContents() {
-                        return error;
-                    }
+          public boolean isReplay() {
+            return replay;
+          }
+        } : new MessageEvent() {
+          public long getTime() {
+            return time;
+          }
 
-                    public boolean isReplay() {
-                        return replay;
-                    }
-                } : new MessageEvent() {
-                    public long getTime() {
-                        return time;
-                    }
+          public SubEventType getSubType() {
+            return subType;
+          }
 
-                    public SubEventType getSubType() {
-                        return subType;
-                    }
+          public String getSubject() {
+            return subject;
+          }
 
-                    public String getSubject() {
-                        return subject;
-                    }
+          public String getFromBus() {
+            return fromBus;
+          }
 
-                    public String getFromBus() {
-                        return fromBus;
-                    }
+          public String getToBus() {
+            return toBus;
+          }
 
-                    public String getToBus() {
-                        return toBus;
-                    }
+          public Object getContents() {
+            return message;
+          }
 
-                    public Object getContents() {
-                        return message;
-                    }
+          public boolean isReplay() {
+            return replay;
+          }
+        };
 
-                    public boolean isReplay() {
-                        return replay;
-                    }
-                };
-
-                if (type.ordinal() > messageMonitors.size()) {
-                    return;
-                }
-
-                for (MessageMonitor monitor : messageMonitors.get(type.ordinal())) {
-                    monitor.monitorEvent(evt);
-                }
-            }
-        });
-    }
-
-    public class Handle {
-        private ActivityProcessor processor;
-        private EventType type;
-        private MessageMonitor monitor;
-
-        public Handle(ActivityProcessor processor, EventType type, MessageMonitor monitor) {
-            this.processor = processor;
-            this.type = type;
-            this.monitor = monitor;
+        if (type.ordinal() > messageMonitors.size()) {
+          return;
         }
 
-        public void dispose() {
-            processor.messageMonitors.get(type.ordinal()).remove(monitor);
+        for (MessageMonitor monitor : messageMonitors.get(type.ordinal())) {
+          monitor.monitorEvent(evt);
         }
+      }
+    });
+  }
+
+  public class Handle {
+    private ActivityProcessor processor;
+    private EventType type;
+    private MessageMonitor monitor;
+
+    public Handle(ActivityProcessor processor, EventType type, MessageMonitor monitor) {
+      this.processor = processor;
+      this.type = type;
+      this.monitor = monitor;
     }
+
+    public void dispose() {
+      processor.messageMonitors.get(type.ordinal()).remove(monitor);
+    }
+  }
 }

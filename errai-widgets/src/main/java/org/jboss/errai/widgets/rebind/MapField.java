@@ -24,6 +24,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface MapField {
-    String value() default "";
-    String field() default "";
+  String value() default "";
+
+  String field() default "";
 }

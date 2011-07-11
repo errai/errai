@@ -22,27 +22,27 @@ import org.jboss.errai.bus.client.api.Message;
  * Defines interface for performing authentication on the bus.
  */
 public interface AuthenticationAdapter {
-    /**
-     * Performs a security challenge against any existing credentials (or lack thereof) in the current
-     * <tt>CommandMessage</tt>
-     *
-     * @param message -
-     */
-    public void challenge(Message message);
+  /**
+   * Performs a security challenge against any existing credentials (or lack thereof) in the current
+   * <tt>CommandMessage</tt>
+   *
+   * @param message -
+   */
+  public void challenge(Message message);
 
-    /**
-     * Returns true if the current <tt>CommandMessage</tt> has an authentication sessino.
-     *
-     * @param message
-     * @return
-     */
-    public boolean isAuthenticated(Message message);
+  /**
+   * Returns true if the current <tt>CommandMessage</tt> has an authentication sessino.
+   *
+   * @param message
+   * @return
+   */
+  public boolean isAuthenticated(Message message);
 
-    /**
-     * Terminates any session associated with the specified <tt>CommandMessage</tt>
-     *
-     * @param message
-     * @return
-     */
-    public boolean endSession(Message message);
+  /**
+   * Terminates any session associated with the specified <tt>CommandMessage</tt>
+   *
+   * @param message
+   * @return
+   */
+  public boolean endSession(Message message);
 }

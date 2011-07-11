@@ -32,181 +32,184 @@ import java.util.concurrent.TimeUnit;
  * @param <E>
  */
 public class UnboundedArrayBlockingQueue<E> implements BlockingQueue<E> {
-    private volatile ArrayBlockingQueue<E> blockingQueue;
-    private final Semaphore semaphore = new Semaphore(1000);
-    private volatile int size;
-    private final int maximumSize;
-    private volatile boolean resizing = false;
+  private volatile ArrayBlockingQueue<E> blockingQueue;
+  private final Semaphore semaphore = new Semaphore(1000);
+  private volatile int size;
+  private final int maximumSize;
+  private volatile boolean resizing = false;
 
 
-    public UnboundedArrayBlockingQueue(int size) {
-        blockingQueue = new ArrayBlockingQueue<E>(this.size = size);
-        maximumSize = -1;
-    }
+  public UnboundedArrayBlockingQueue(int size) {
+    blockingQueue = new ArrayBlockingQueue<E>(this.size = size);
+    maximumSize = -1;
+  }
 
-    public UnboundedArrayBlockingQueue(int size, int maximumSize) {
-        blockingQueue = new ArrayBlockingQueue<E>(this.size = size);
-        this.maximumSize = maximumSize;
-    }
+  public UnboundedArrayBlockingQueue(int size, int maximumSize) {
+    blockingQueue = new ArrayBlockingQueue<E>(this.size = size);
+    this.maximumSize = maximumSize;
+  }
 
-    public boolean add(E o) {
-        try {
-            semaphore.acquireUninterruptibly();
+  public boolean add(E o) {
+    try {
+      semaphore.acquireUninterruptibly();
 
-            try {
-                return blockingQueue.add(o);
-            }
-            catch (IllegalStateException e) {
-                if (e.getMessage().equals("Queue full")) {
-                    growQueue();
-                    return add(o);
-                } else {
-                    throw e;
-                }
-            }
+      try {
+        return blockingQueue.add(o);
+      }
+      catch (IllegalStateException e) {
+        if (e.getMessage().equals("Queue full")) {
+          growQueue();
+          return add(o);
         }
-        finally {
-            semaphore.release();
+        else {
+          throw e;
         }
+      }
     }
-
-    public boolean offer(E o) {
-        try {
-            semaphore.acquireUninterruptibly();
-            if (blockingQueue.offer(o)) {
-                return true;
-            } else {
-                growQueue();
-                return offer(o);
-            }
-        }
-        finally {
-            semaphore.release();
-        }
+    finally {
+      semaphore.release();
     }
+  }
 
-    private void growQueue() {
-        try {
-            if (size >= maximumSize) return;
-            semaphore.acquireUninterruptibly(999);
-            if (resizing) {
-                return;
-            }
-            resizing = true;
-
-            if ((size *= 2) > maximumSize)
-                size = maximumSize;
-
-            ArrayBlockingQueue<E> newQueue = new ArrayBlockingQueue<E>(size *= 2);
-            blockingQueue.drainTo(newQueue);
-            blockingQueue = newQueue;
-        }
-        finally {
-            resizing = false;
-            semaphore.release(999);
-        }
+  public boolean offer(E o) {
+    try {
+      semaphore.acquireUninterruptibly();
+      if (blockingQueue.offer(o)) {
+        return true;
+      }
+      else {
+        growQueue();
+        return offer(o);
+      }
     }
-
-    public void put(E o) throws InterruptedException {
-        blockingQueue.offer(o);
+    finally {
+      semaphore.release();
     }
+  }
 
-    public boolean offer(E o, long timeout, TimeUnit unit) throws InterruptedException {
-        try {
-            semaphore.acquireUninterruptibly();
-            if (blockingQueue.offer(o, timeout, unit)) {
-                return true;
-            } else {
-                growQueue();
-                return offer(o);
-            }
-        }
-        finally {
-            semaphore.release();
-        }
-    }
+  private void growQueue() {
+    try {
+      if (size >= maximumSize) return;
+      semaphore.acquireUninterruptibly(999);
+      if (resizing) {
+        return;
+      }
+      resizing = true;
 
-    public E take() throws InterruptedException {
-        return blockingQueue.take();
-    }
+      if ((size *= 2) > maximumSize)
+        size = maximumSize;
 
-    public E poll(long timeout, TimeUnit unit) throws InterruptedException {
-        return blockingQueue.poll(timeout, unit);
+      ArrayBlockingQueue<E> newQueue = new ArrayBlockingQueue<E>(size *= 2);
+      blockingQueue.drainTo(newQueue);
+      blockingQueue = newQueue;
     }
+    finally {
+      resizing = false;
+      semaphore.release(999);
+    }
+  }
 
-    public int remainingCapacity() {
-        return blockingQueue.remainingCapacity();
-    }
+  public void put(E o) throws InterruptedException {
+    blockingQueue.offer(o);
+  }
 
-    public boolean remove(Object o) {
-        return blockingQueue.remove(o);
+  public boolean offer(E o, long timeout, TimeUnit unit) throws InterruptedException {
+    try {
+      semaphore.acquireUninterruptibly();
+      if (blockingQueue.offer(o, timeout, unit)) {
+        return true;
+      }
+      else {
+        growQueue();
+        return offer(o);
+      }
     }
+    finally {
+      semaphore.release();
+    }
+  }
 
-    public boolean contains(Object o) {
-        return blockingQueue.contains(o);
-    }
+  public E take() throws InterruptedException {
+    return blockingQueue.take();
+  }
 
-    public int drainTo(Collection<? super E> c) {
-        return blockingQueue.drainTo(c);
-    }
+  public E poll(long timeout, TimeUnit unit) throws InterruptedException {
+    return blockingQueue.poll(timeout, unit);
+  }
 
-    public int drainTo(Collection<? super E> c, int maxElements) {
-        return blockingQueue.drainTo(c, maxElements);
-    }
+  public int remainingCapacity() {
+    return blockingQueue.remainingCapacity();
+  }
 
-    public E remove() {
-        return blockingQueue.remove();
-    }
+  public boolean remove(Object o) {
+    return blockingQueue.remove(o);
+  }
 
-    public E poll() {
-        return blockingQueue.poll();
-    }
+  public boolean contains(Object o) {
+    return blockingQueue.contains(o);
+  }
 
-    public E element() {
-        return blockingQueue.element();
-    }
+  public int drainTo(Collection<? super E> c) {
+    return blockingQueue.drainTo(c);
+  }
 
-    public E peek() {
-        return blockingQueue.peek();
-    }
+  public int drainTo(Collection<? super E> c, int maxElements) {
+    return blockingQueue.drainTo(c, maxElements);
+  }
 
-    public int size() {
-        return blockingQueue.size();
-    }
+  public E remove() {
+    return blockingQueue.remove();
+  }
 
-    public boolean isEmpty() {
-        return blockingQueue.isEmpty();
-    }
+  public E poll() {
+    return blockingQueue.poll();
+  }
 
-    public Iterator<E> iterator() {
-        return blockingQueue.iterator();
-    }
+  public E element() {
+    return blockingQueue.element();
+  }
 
-    public Object[] toArray() {
-        return blockingQueue.toArray();
-    }
+  public E peek() {
+    return blockingQueue.peek();
+  }
 
-    public <T> T[] toArray(T[] a) {
-        return blockingQueue.toArray(a);
-    }
+  public int size() {
+    return blockingQueue.size();
+  }
 
-    public boolean containsAll(Collection<?> c) {
-        return blockingQueue.containsAll(c);
-    }
+  public boolean isEmpty() {
+    return blockingQueue.isEmpty();
+  }
 
-    public boolean addAll(Collection c) {
-        return blockingQueue.addAll(c);
-    }
+  public Iterator<E> iterator() {
+    return blockingQueue.iterator();
+  }
 
-    public boolean removeAll(Collection<?> c) {
-        return blockingQueue.removeAll(c);
-    }
+  public Object[] toArray() {
+    return blockingQueue.toArray();
+  }
 
-    public boolean retainAll(Collection<?> c) {
-        return blockingQueue.retainAll(c);
-    }
+  public <T> T[] toArray(T[] a) {
+    return blockingQueue.toArray(a);
+  }
 
-    public void clear() {
-        blockingQueue.clear();
-    }
+  public boolean containsAll(Collection<?> c) {
+    return blockingQueue.containsAll(c);
+  }
+
+  public boolean addAll(Collection c) {
+    return blockingQueue.addAll(c);
+  }
+
+  public boolean removeAll(Collection<?> c) {
+    return blockingQueue.removeAll(c);
+  }
+
+  public boolean retainAll(Collection<?> c) {
+    return blockingQueue.retainAll(c);
+  }
+
+  public void clear() {
+    blockingQueue.clear();
+  }
 }

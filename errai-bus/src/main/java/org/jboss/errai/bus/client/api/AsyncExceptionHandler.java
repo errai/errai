@@ -22,5 +22,5 @@ package org.jboss.errai.bus.client.api;
  * Time: 10:34:20 PM
  */
 public interface AsyncExceptionHandler {
-    public void handleException(Throwable t);
+  public void handleException(Throwable t);
 }

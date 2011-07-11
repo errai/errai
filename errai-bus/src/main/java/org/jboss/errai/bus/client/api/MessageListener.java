@@ -22,5 +22,5 @@ package org.jboss.errai.bus.client.api;
  * @see org.jboss.errai.bus.client.framework.BooleanRoutingRule
  */
 public interface MessageListener {
-    public boolean handleMessage(Message message);
+  public boolean handleMessage(Message message);
 }

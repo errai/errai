@@ -19,23 +19,21 @@ package org.jboss.errai.tools.proxy;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.Security;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.List;
-import java.util.HashMap;
 import java.util.logging.Logger;
 
 /**
  * @author Yutaka Yoshida, Greg Murray, Heiko Braun
- *
- * Minimum set of HTTPclient supporting both http and https.
- * It's aslo capable of POST, but it doesn't provide doGet because
- * the caller can just read the inputstream.
+ *         <p/>
+ *         Minimum set of HTTPclient supporting both http and https.
+ *         It's aslo capable of POST, but it doesn't provide doGet because
+ *         the caller can just read the inputstream.
  */
 public class HttpClient {
 
@@ -52,9 +50,9 @@ public class HttpClient {
   private XmlHttpProxy.CookieCallback callback;
 
   /**
-   * @param phost PROXY host name
-   * @param pport PROXY port string
-   * @param url URL string
+   * @param phost   PROXY host name
+   * @param pport   PROXY port string
+   * @param url     URL string
    * @param headers Map
    */
   public HttpClient(
@@ -64,12 +62,10 @@ public class HttpClient {
       Map headers,
       String method,
       XmlHttpProxy.CookieCallback callback)
-      throws MalformedURLException
-  {
+      throws MalformedURLException {
     this.callback = callback;
 
-    if (phost != null && pport != -1)
-    {
+    if (phost != null && pport != -1) {
       this.isProxy = true;
     }
 
@@ -83,7 +79,8 @@ public class HttpClient {
     this.urlConnection = getURLConnection(url);
     try {
       this.urlConnection.setRequestMethod(method);
-    } catch (java.net.ProtocolException pe) {
+    }
+    catch (java.net.ProtocolException pe) {
       HttpClient.getLogger().severe("Unable protocol method to " + method + " : " + pe);
     }
     this.headers = headers;
@@ -91,16 +88,13 @@ public class HttpClient {
 
   }
 
-  private void writeHeaders(Map headers)
-  {
-    if(this.callback!=null)
-    {
+  private void writeHeaders(Map headers) {
+    if (this.callback != null) {
       Map<String, XmlHttpProxy.Cookie> cookies = callback.getCookies();
       Iterator it = cookies.keySet().iterator();
-      while(it.hasNext())
-      {
+      while (it.hasNext()) {
         XmlHttpProxy.Cookie c = cookies.get(it.next());
-        if(headers==null) headers = new HashMap();
+        if (headers == null) headers = new HashMap();
         headers.put(
             "Cookie", c.name + "=" + c.value // + "; Path=" + c.path
         );
@@ -112,20 +106,20 @@ public class HttpClient {
       Iterator it = headers.keySet().iterator();
       if (it != null) {
         while (it.hasNext()) {
-          String key = (String)it.next();
-          String value = (String)headers.get(key);
-          System.out.println("Set Request Header: "+key + "->"+value);
-          this.urlConnection.setRequestProperty (key, value);
+          String key = (String) it.next();
+          String value = (String) headers.get(key);
+          System.out.println("Set Request Header: " + key + "->" + value);
+          this.urlConnection.setRequestProperty(key, value);
         }
       }
     }
   }
 
   /**
-   * @param phost PROXY host name
-   * @param pport PROXY port string
-   * @param url URL string
-   * @param headers Map
+   * @param phost    PROXY host name
+   * @param pport    PROXY port string
+   * @param url      URL string
+   * @param headers  Map
    * @param userName string
    * @param password string
    */
@@ -141,8 +135,7 @@ public class HttpClient {
 
     this.callback = callback;
 
-    try
-    {
+    try {
       if (phost != null && pport != -1) {
         this.isProxy = true;
       }
@@ -155,23 +148,26 @@ public class HttpClient {
       this.urlConnection = getURLConnection(url);
       try {
         this.urlConnection.setRequestMethod(method);
-      } catch (java.net.ProtocolException pe) {
+      }
+      catch (java.net.ProtocolException pe) {
         HttpClient.getLogger().severe("Unable protocol method to " + method + " : " + pe);
       }
       // set basic authentication information
-      String auth = userName + ":" +  password;
-      String encoded = new sun.misc.BASE64Encoder().encode (auth.getBytes());
+      String auth = userName + ":" + password;
+      String encoded = new sun.misc.BASE64Encoder().encode(auth.getBytes());
       // set basic authorization
-      this.urlConnection.setRequestProperty ("Authorization", "Basic " + encoded);
+      this.urlConnection.setRequestProperty("Authorization", "Basic " + encoded);
       this.headers = headers;
       writeHeaders(headers);
-    } catch (Exception ex) {
-      HttpClient.getLogger().severe("Unable to set basic authorization for " + userName  + " : " +ex);
+    }
+    catch (Exception ex) {
+      HttpClient.getLogger().severe("Unable to set basic authorization for " + userName + " : " + ex);
     }
   }
 
   /**
    * private method to get the URLConnection
+   *
    * @param str URL string
    */
   private HttpURLConnection getURLConnection(String str)
@@ -190,23 +186,21 @@ public class HttpClient {
           System.setProperty("https.proxyPort", proxyPort + "");
         }
       }
-      else
-      {
-        if (isProxy)
-        {
+      else {
+        if (isProxy) {
           System.setProperty("http.proxyHost", proxyHost);
-          System.setProperty("http.proxyPort", proxyPort  + "");
+          System.setProperty("http.proxyPort", proxyPort + "");
         }
       }
 
       URL url = new URL(str);
-      HttpURLConnection uc = (HttpURLConnection)url.openConnection();
+      HttpURLConnection uc = (HttpURLConnection) url.openConnection();
 
       // if this header has not been set by a request set the user agent.
       if (headers == null ||
-          (headers != null &&  headers.get("user-agent") == null)) {
+          (headers != null && headers.get("user-agent") == null)) {
         // set user agent to mimic a common browser
-        String ua="Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; .NET CLR 1.1.4322)";
+        String ua = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; .NET CLR 1.1.4322)";
         uc.setRequestProperty("user-agent", ua);
       }
 
@@ -214,57 +208,52 @@ public class HttpClient {
 
       return uc;
     }
-    catch (MalformedURLException me)
-    {
+    catch (MalformedURLException me) {
       throw new MalformedURLException(str + " is not a valid URL");
     }
-    catch (Exception e)
-    {
+    catch (Exception e) {
       throw new RuntimeException("Unknown error creating UrlConnection: " + e);
     }
   }
 
-  public String getSetCookieHeader()
-  {
+  public String getSetCookieHeader() {
     return setCookieHeader;
   }
 
   /**
    * returns the inputstream from URLConnection
+   *
    * @return InputStream
    */
   public InputStream getInputStream() {
-    try
-    {
+    try {
       // logger doesnt work, because it writes to stderr,
       // which causes GwtTest to interpret it as failure
       System.out.println(
-          this.urlConnection.getRequestMethod()+ " " +
-              this.urlConnection.getURL() +": "+
+          this.urlConnection.getRequestMethod() + " " +
+              this.urlConnection.getURL() + ": " +
               this.urlConnection.getResponseCode()
       );
 
-      try
-      {
+      try {
         // HACK: manually follow redirects, for the login to work
         // HTTPUrlConnection auto redirect doesn't respect the provided headers
-        if(this.urlConnection.getResponseCode()==302)
-        {
+        if (this.urlConnection.getResponseCode() == 302) {
           HttpClient redirectClient =
-              new HttpClient(proxyHost,proxyPort, urlConnection.getHeaderField("Location"),
+              new HttpClient(proxyHost, proxyPort, urlConnection.getHeaderField("Location"),
                   headers, urlConnection.getRequestMethod(), callback);
           redirectClient.getInputStream().close();
         }
       }
-      catch (Throwable e)
-      {
+      catch (Throwable e) {
         System.out.println("Following redirect failed");
       }
 
       setCookieHeader = this.urlConnection.getHeaderField("Set-Cookie");
 
       return (this.urlConnection.getInputStream());
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       System.out.println("Failed to open " + this.urlConnection.getURL());
       e.printStackTrace();
       return null;
@@ -273,13 +262,15 @@ public class HttpClient {
 
   /**
    * return the OutputStream from URLConnection
+   *
    * @return OutputStream
    */
   public OutputStream getOutputStream() {
 
     try {
       return (this.urlConnection.getOutputStream());
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       e.printStackTrace();
       return null;
     }
@@ -287,13 +278,14 @@ public class HttpClient {
 
   /**
    * posts data to the inputstream and returns the InputStream.
-   * @param postData data to be posted. must be url-encoded already.
+   *
+   * @param postData    data to be posted. must be url-encoded already.
    * @param contentType allows you to set the contentType of the request.
    * @return InputStream input stream from URLConnection
    */
   public InputStream doPost(String postData, String contentType) {
     this.urlConnection.setDoOutput(true);
-    if (contentType != null) this.urlConnection.setRequestProperty( "Content-type", contentType );
+    if (contentType != null) this.urlConnection.setRequestProperty("Content-type", contentType);
 
     OutputStream os = this.getOutputStream();
     PrintStream ps = new PrintStream(os);
@@ -306,22 +298,27 @@ public class HttpClient {
     if (this.urlConnection == null) return null;
     return (this.urlConnection.getContentEncoding());
   }
+
   public int getContentLength() {
     if (this.urlConnection == null) return -1;
     return (this.urlConnection.getContentLength());
   }
+
   public String getContentType() {
     if (this.urlConnection == null) return null;
     return (this.urlConnection.getContentType());
   }
+
   public long getDate() {
     if (this.urlConnection == null) return -1;
     return (this.urlConnection.getDate());
   }
+
   public String getHeader(String name) {
     if (this.urlConnection == null) return null;
     return (this.urlConnection.getHeaderField(name));
   }
+
   public long getIfModifiedSince() {
     if (this.urlConnection == null) return -1;
     return (this.urlConnection.getIfModifiedSince());

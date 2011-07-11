@@ -22,5 +22,5 @@ package org.jboss.errai.bus.client.api.base;
  * Time: 10:28:28 AM
  */
 public enum Capabilities {
-    LongPollAvailable, NoLongPollAvailable, WebSockets, Proxy
+  LongPollAvailable, NoLongPollAvailable, WebSockets, Proxy
 }

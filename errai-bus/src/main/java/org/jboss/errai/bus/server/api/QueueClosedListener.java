@@ -22,5 +22,5 @@ package org.jboss.errai.bus.server.api;
  * times out.
  */
 public interface QueueClosedListener {
-    public void onQueueClosed(QueueCloseEvent queue);
+  public void onQueueClosed(QueueCloseEvent queue);
 }

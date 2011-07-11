@@ -1,7 +1,7 @@
 #set( $symbol_pound = '#' )
-#set( $symbol_dollar = '$' )
-#set( $symbol_escape = '\' )
-<?xml version="1.0" encoding="UTF-8"?>
+        #set( $symbol_dollar = '$' )
+        #set( $symbol_escape = '\' )
+        <?xml version="1.0" encoding="UTF-8"?>
 <web-app xmlns="http://java.sun.com/xml/ns/javaee"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
@@ -22,7 +22,7 @@
         <servlet-name>ErraiServlet</servlet-name>
         <url-pattern>*.erraiBus</url-pattern>
     </servlet-mapping>
-   
+
     <context-param>
         <param-name>errai.properties</param-name>
         <param-value>/WEB-INF/errai.properties</param-value>

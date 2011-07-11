@@ -15,9 +15,8 @@
  */
 package org.jboss.errai.bus.client.tests.support;
 
-import java.io.Serializable;
-
 import javax.persistence.MappedSuperclass;
+import java.io.Serializable;
 
 //import pl.scentia.smartoffice.persistence.pojo.AbstractDocument;
 //import pl.scentia.smartoffice.persistence.pojo.OrganizationUnit;
@@ -25,68 +24,68 @@ import javax.persistence.MappedSuperclass;
 @MappedSuperclass
 public abstract class AbstractAssignment extends AbstractDocument implements Serializable {
 
-     private static final long serialVersionUID = 2658581482246530051L;
+  private static final long serialVersionUID = 2658581482246530051L;
 
-     /*@ManyToOne(cascade={CascadeType.PERSIST,CascadeType.REMOVE,CascadeType.REFRESH})
-     @JoinColumn(name="SOURCE_ID")
-     private OrganizationUnit sourceUnit;*/
+  /*@ManyToOne(cascade={CascadeType.PERSIST,CascadeType.REMOVE,CascadeType.REFRESH})
+@JoinColumn(name="SOURCE_ID")
+private OrganizationUnit sourceUnit;*/
 
-     /*@ManyToOne(cascade={CascadeType.PERSIST,CascadeType.REMOVE,CascadeType.REFRESH})
-     @JoinColumn(name="DEST_ID")
-     private OrganizationUnit destinationUnit;
+  /*@ManyToOne(cascade={CascadeType.PERSIST,CascadeType.REMOVE,CascadeType.REFRESH})
+@JoinColumn(name="DEST_ID")
+private OrganizationUnit destinationUnit;
 
-     public OrganizationUnit getSourceUnit() {
-          return sourceUnit;
-     }
+public OrganizationUnit getSourceUnit() {
+     return sourceUnit;
+}
 
-     public void setSourceUnit(OrganizationUnit sourceUnit) {
-          this.sourceUnit = sourceUnit;
-     }
+public void setSourceUnit(OrganizationUnit sourceUnit) {
+     this.sourceUnit = sourceUnit;
+}
 
-     public OrganizationUnit getDestinationUnit() {
-          return destinationUnit;
-     }
+public OrganizationUnit getDestinationUnit() {
+     return destinationUnit;
+}
 
-     public void setDestinationUnit(OrganizationUnit destinationUnit) {
-          this.destinationUnit = destinationUnit;
-     }
+public void setDestinationUnit(OrganizationUnit destinationUnit) {
+     this.destinationUnit = destinationUnit;
+}
 
-     @Override
-     public int hashCode() {
-          final int prime = 31;
-          int result = super.hashCode();
-          result = prime * result
-                    + ((destinationUnit == null) ? 0 : destinationUnit.hashCode());
-          result = prime * result
-                    + ((sourceUnit == null) ? 0 : sourceUnit.hashCode());
-          return result;
-     }
+@Override
+public int hashCode() {
+     final int prime = 31;
+     int result = super.hashCode();
+     result = prime * result
+               + ((destinationUnit == null) ? 0 : destinationUnit.hashCode());
+     result = prime * result
+               + ((sourceUnit == null) ? 0 : sourceUnit.hashCode());
+     return result;
+}
 
-     @Override
-     public boolean equals(Object obj) {
-          if (obj == null)
-               return false;
-          if (this == obj)
-               return true;
-          if (getClass() != obj.getClass())
-               return false;
-
-          AbstractAssignment other = (AbstractAssignment) obj;
-          if (destinationUnit == null) {
-               if (other.destinationUnit != null)
-                    return false;
-          } else if (!destinationUnit.equals(other.destinationUnit))
-               return false;
-          if (sourceUnit == null) {
-               if (other.sourceUnit != null)
-                    return false;
-          } else if (!sourceUnit.equals(other.sourceUnit))
-               return false;
+@Override
+public boolean equals(Object obj) {
+     if (obj == null)
+          return false;
+     if (this == obj)
           return true;
-     }  */
+     if (getClass() != obj.getClass())
+          return false;
 
-    @Override
-    public boolean equals(Object o) {
-        return super.equals(o);  
-    }
+     AbstractAssignment other = (AbstractAssignment) obj;
+     if (destinationUnit == null) {
+          if (other.destinationUnit != null)
+               return false;
+     } else if (!destinationUnit.equals(other.destinationUnit))
+          return false;
+     if (sourceUnit == null) {
+          if (other.sourceUnit != null)
+               return false;
+     } else if (!sourceUnit.equals(other.sourceUnit))
+          return false;
+     return true;
+}  */
+
+  @Override
+  public boolean equals(Object o) {
+    return super.equals(o);
+  }
 }

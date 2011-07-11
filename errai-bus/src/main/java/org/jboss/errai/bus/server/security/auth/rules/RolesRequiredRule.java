@@ -41,94 +41,95 @@ import static org.jboss.errai.bus.client.api.base.MessageBuilder.createMessage;
  * to return true.
  */
 public class RolesRequiredRule implements BooleanRoutingRule {
-    private Set<Object> requiredRoles;
-    private ServerMessageBus bus;
+  private Set<Object> requiredRoles;
+  private ServerMessageBus bus;
 
-    public RolesRequiredRule(String[] requiredRoles, ServerMessageBus bus) {
-        this.requiredRoles = new HashSet<Object>();
-        for (String role : requiredRoles) {
-            this.requiredRoles.add(role.trim());
+  public RolesRequiredRule(String[] requiredRoles, ServerMessageBus bus) {
+    this.requiredRoles = new HashSet<Object>();
+    for (String role : requiredRoles) {
+      this.requiredRoles.add(role.trim());
+    }
+    this.bus = bus;
+  }
+
+  public RolesRequiredRule(Set<Object> requiredRoles, ServerMessageBus bus) {
+    this.requiredRoles = requiredRoles;
+    this.bus = bus;
+  }
+
+  public boolean decision(final Message message) {
+    if (!message.hasResource("Session")) return false;
+    else {
+
+      AuthSubject subject = getSession(message).getAttribute(AuthSubject.class, ErraiService.SESSION_AUTH_DATA);
+
+      if (subject == null) {
+        /**
+         * Inform the client they must login.
+         */
+
+        if ("LoginClient".equals(message.getSubject())) {
+          /**
+           * Make an exception for the LoginClient ...
+           */
+          return true;
         }
-        this.bus = bus;
-    }
-
-    public RolesRequiredRule(Set<Object> requiredRoles, ServerMessageBus bus) {
-        this.requiredRoles = requiredRoles;
-        this.bus = bus;
-    }
-
-    public boolean decision(final Message message) {
-        if (!message.hasResource("Session")) return false;
-        else {
-
-            AuthSubject subject = getSession(message).getAttribute(AuthSubject.class, ErraiService.SESSION_AUTH_DATA);
-
-            if (subject == null) {
-                /**
-                 * Inform the client they must login.
-                 */
-
-                if ("LoginClient".equals(message.getSubject())) {
-                    /**
-                     * Make an exception for the LoginClient ...
-                     */
-                    return true;
-                }
 
 
-                // TODO: This reside with the "AuthenticationService" listener, no
-                // i.e. by forwarding to that subject. See ErraiServiceImpl
-                createMessage()
-                        .toSubject("LoginClient")
-                        .command(SecurityCommands.SecurityChallenge)
-                        .with(SecurityParts.CredentialsRequired, "Name,Password")
-                        .with(MessageParts.ReplyTo, ErraiService.AUTHORIZATION_SVC_SUBJECT)
-                        .with(SecurityParts.RejectedMessage, ServerBusUtils.encodeJSON(message.getParts()))
-                        .copyResource("Session", message)
-                        .errorsHandledBy(new ErrorCallback() {
-                            public boolean error(Message message, Throwable throwable) {
-                                ErrorHelper.sendClientError(bus, message, throwable.getMessage(), throwable);
-                                return false;
-                            }
-                        })
-                        .sendNowWith(bus, false);
-
+        // TODO: This reside with the "AuthenticationService" listener, no
+        // i.e. by forwarding to that subject. See ErraiServiceImpl
+        createMessage()
+            .toSubject("LoginClient")
+            .command(SecurityCommands.SecurityChallenge)
+            .with(SecurityParts.CredentialsRequired, "Name,Password")
+            .with(MessageParts.ReplyTo, ErraiService.AUTHORIZATION_SVC_SUBJECT)
+            .with(SecurityParts.RejectedMessage, ServerBusUtils.encodeJSON(message.getParts()))
+            .copyResource("Session", message)
+            .errorsHandledBy(new ErrorCallback() {
+              public boolean error(Message message, Throwable throwable) {
+                ErrorHelper.sendClientError(bus, message, throwable.getMessage(), throwable);
                 return false;
-            }
+              }
+            })
+            .sendNowWith(bus, false);
 
-            if (!subject.getRoles().containsAll(requiredRoles)) {
-                createConversation(message)
-                        .toSubject("ClientErrorService")
-                        .with(MessageParts.ErrorMessage, "Access denied to service: "
-                                + message.get(String.class, MessageParts.ToSubject) +
-                                " (Required Roles: [" + getRequiredRolesString() + "])")
-                        .noErrorHandling().sendNowWith(bus);
+        return false;
+      }
 
-                return false;
+      if (!subject.getRoles().containsAll(requiredRoles)) {
+        createConversation(message)
+            .toSubject("ClientErrorService")
+            .with(MessageParts.ErrorMessage, "Access denied to service: "
+                + message.get(String.class, MessageParts.ToSubject) +
+                " (Required Roles: [" + getRequiredRolesString() + "])")
+            .noErrorHandling().sendNowWith(bus);
 
-            } else {
-                return true;
-            }
-        }
+        return false;
+
+      }
+      else {
+        return true;
+      }
+    }
+  }
+
+  public String getRequiredRolesString() {
+    StringBuilder builder = new StringBuilder();
+    Iterator<Object> iter = requiredRoles.iterator();
+
+    while (iter.hasNext()) {
+      builder.append(String.valueOf(iter.next()));
+      if (iter.hasNext()) builder.append(", ");
     }
 
-    public String getRequiredRolesString() {
-        StringBuilder builder = new StringBuilder();
-        Iterator<Object> iter = requiredRoles.iterator();
+    return builder.toString();
+  }
 
-        while (iter.hasNext()) {
-            builder.append(String.valueOf(iter.next()));
-            if (iter.hasNext()) builder.append(", ");
-        }
+  public Set<Object> getRoles() {
+    return requiredRoles;
+  }
 
-        return builder.toString();
-    }
-
-    public Set<Object> getRoles() {
-        return requiredRoles;
-    }
-
-    private static QueueSession getSession(Message message) {
-        return message.getResource(QueueSession.class, "Session");
-    }
+  private static QueueSession getSession(Message message) {
+    return message.getResource(QueueSession.class, "Session");
+  }
 }

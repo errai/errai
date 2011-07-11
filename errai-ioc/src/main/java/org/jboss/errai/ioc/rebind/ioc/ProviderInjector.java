@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, a divison Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,29 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
-import com.google.gwt.core.ext.typeinfo.JClassType;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 
 public class ProviderInjector extends TypeInjector {
-    private final Injector providerInjector;
+  private final Injector providerInjector;
 
-    public ProviderInjector(JClassType type, JClassType providerType) {
-        super(type);
-        this.providerInjector = new TypeInjector(providerType);
-    }
+  public ProviderInjector(MetaClass type, MetaClass providerType) {
+    super(type);
+    this.providerInjector = new TypeInjector(providerType);
+  }
 
-    @Override
-    public String getType(InjectionContext injectContext, InjectionPoint injectionPoint) {
-        injected = true;
-        return providerInjector.getType(injectContext, injectionPoint) + ".provide()";
-    }
+  @Override
+  public Statement getType(InjectionContext injectContext, InjectionPoint injectionPoint) {
+    injected = true;
 
-    @Override
-    public String instantiateOnly(InjectionContext injectContext, InjectionPoint injectionPoint) {
-        injected = true;
-        return providerInjector.getType(injectContext, injectionPoint);
-    }
+    return Stmt.create().nestedCall(providerInjector.getType(injectContext, injectionPoint))
+                    .invoke("provide");
+  }
+
+  @Override
+  public Statement instantiateOnly(InjectionContext injectContext, InjectionPoint injectionPoint) {
+    injected = true;
+    return providerInjector.getType(injectContext, injectionPoint);
+  }
 }
