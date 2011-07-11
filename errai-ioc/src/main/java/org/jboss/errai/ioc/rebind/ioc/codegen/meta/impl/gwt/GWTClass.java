@@ -209,7 +209,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
       return null;
     }
 
-    return MetaClassFactory.get(type.getEnclosingType());
+    return MetaClassFactory.get(type.getSuperclass());
   }
 
   @Override
