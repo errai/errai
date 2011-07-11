@@ -43,7 +43,7 @@ public class ProducerTestModule {
 
   @Produces
   public String produceString(@C Integer number) {
-    return new Integer(number).toString();
+    return Integer.toString(number);
   }
 
   private Integer numberC;
