@@ -168,7 +168,7 @@ public class JSONEncoder {
       if (!(entry.getKey() instanceof String)) {
         mapBuild.append(write(ctx, '\"'));
         if (!ctx.isEscapeMode()) {
-          mapBuild.append("\"").append(SerializationParts.EMBEDDED_JSON).append("\"");
+          mapBuild.append(SerializationParts.EMBEDDED_JSON);
         }
         ctx.setEscapeMode();
         mapBuild.append(_encode(entry.getKey(), ctx));
