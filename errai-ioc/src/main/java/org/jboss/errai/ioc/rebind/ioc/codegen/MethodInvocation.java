@@ -42,8 +42,8 @@ public class MethodInvocation extends AbstractStatement {
     resolveTypeVariables();
   }
 
-  
-  //Resolves type variables by inspecting call parameters (TODO nested parameterized type are not supported).
+  // Resolves type variables by inspecting call parameters
+  // TODO nested parameterized type are not supported.
   private void resolveTypeVariables() {
     int methodParmIndex = 0;
     for (MetaType methodParmType : method.getGenericParameterTypes()) {
@@ -90,9 +90,8 @@ public class MethodInvocation extends AbstractStatement {
   public MetaClass getType() {
     MetaClass returnType = null;
 
-    // Try to resolve the type variable's real type.
-    // TODO Nested parameterized return types are not supported as of now.
     if (method.getGenericReturnType() != null && method.getGenericReturnType() instanceof MetaTypeVariable) {
+      // TODO Nested parameterized return types are not supported as of now.
       MetaTypeVariable typeVar = (MetaTypeVariable) method.getGenericReturnType();
       returnType = typeVariables.get(typeVar.getName());
     }
