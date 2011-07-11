@@ -38,7 +38,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Parameter;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BlockBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ExtendsClassStructureBuilderImpl;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.AnonymousClassStructureBuilderImpl;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
@@ -75,7 +75,7 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
     final Annotation[] qualifiers = InjectUtil.extractQualifiers(injectionPoint).toArray(new Annotation[0]);
     final Set<String> qualifierNames = CDI.getQualifiersPart(qualifiers);
 
-    BlockBuilder<ExtendsClassStructureBuilderImpl> callBackBlock = ObjectBuilder
+    BlockBuilder<AnonymousClassStructureBuilderImpl> callBackBlock = ObjectBuilder
         .newInstanceOf(MessageCallback.class, ctx)
         .extend()
         .publicOverridesMethod("callback", Parameter.of(Message.class, "message"))
@@ -100,12 +100,8 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
             Bool.and(Bool.equals(Refs.get("qualifiers"), null),
                 Stmt.create().loadVariable("methodQualifiers").invoke("isEmpty")))
         .append(
-            Stmt.create().declareVariable(
-                "response",
-                Object.class,
-                Stmt.create()
-                    .loadVariable("message")
-                    .invoke("get", parm.getType().asClass(), CDIProtocol.OBJECT_REF)))
+            Stmt.create().declareVariable("response", Object.class,
+                Stmt.create().loadVariable("message").invoke("get", parm.getType().asClass(), CDIProtocol.OBJECT_REF)))
         .append(
             Stmt.create().loadVariable(injectionPoint.getInjector().getVarName())
                 .invoke(method.getName(), Cast.to(parm.getType(), Refs.get("response")))).finish());
