@@ -528,5 +528,5 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
       //expected
       assertEquals("Wrong exception message", "java.lang.String cannot be cast to java.lang.Integer", e.getMessage());
     }
-  }
+  } 
 }

@@ -166,7 +166,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
           return null;
         }
       }
-
+      m = ParseTools.getWidenedTarget(m);
       return getMethod(name, m.getParameterTypes());
     }
     else {
@@ -282,6 +282,9 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   @Override
   public boolean isAssignableFrom(MetaClass clazz) {
+    if (equals(MetaClassFactory.get(Object.class)) && clazz.isInterface()) 
+      return true;
+    
     MetaClass cls = clazz;
     do {
       if (this.equals(cls))
@@ -294,6 +297,9 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   @Override
   public boolean isAssignableTo(MetaClass clazz) {
+    if (isInterface() && clazz.equals(MetaClassFactory.get(Object.class))) 
+      return true;
+    
     MetaClass cls = this;
     do {
       if (cls.equals(clazz))
