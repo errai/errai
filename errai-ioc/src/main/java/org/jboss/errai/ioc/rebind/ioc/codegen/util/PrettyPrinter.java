@@ -31,30 +31,11 @@ public class PrettyPrinter {
     int indentLevel = 0;
     int statementIndent = 0;
 
- //   int la;
-
-    Outer:
     for (int i = 0; i < expr.length; i++) {
       switch (expr[i]) {
         case '{':
           lineBuffer.append('{');
-
-       //   int st = (la = i + 1);
-
-//          Lookahead:
-//          while (la != expr.length) {
-//            switch (expr[la]) {
-//              case '\n':
-//                break Lookahead;
-//              case '}':
-//                lineBuffer.append(' ').append(new String(expr, st + 1, la - st - 1).trim()).append(" }");
-//                writeToBuffer(out, lineBuffer, indentLevel, statementIndent);
-//                lineBuffer = new StringBuilder();
-//                i = la;
-//                continue Outer;
-//            }
-//            la++;
-//          }
+          lineBuffer.append(' ');
 
           writeToBuffer(out, lineBuffer, indentLevel++, statementIndent);
           lineBuffer = new StringBuilder();
@@ -63,7 +44,9 @@ public class PrettyPrinter {
         case '}':
           writeToBuffer(out, lineBuffer, --indentLevel, statementIndent);
           lineBuffer = new StringBuilder();
+          lineBuffer.append(' ');
           lineBuffer.append('}');
+
           break;
 
         case '"':
@@ -78,6 +61,11 @@ public class PrettyPrinter {
           out.append('\n');
           lineBuffer = new StringBuilder();
           break;
+
+        case ',':
+          lineBuffer.append(", ");
+          break;
+
 
         default:
           if (Character.isWhitespace(expr[i])) {
@@ -155,7 +143,6 @@ public class PrettyPrinter {
     Skip:
     while (cursor != expr.length) {
       switch (expr[cursor]) {
-//        case '\n':
         case '\r':
           cursor++;
           continue;

@@ -62,7 +62,7 @@ public class ArrayLiteral extends LiteralValue<Object> {
   }
 
   private static String renderInlineArrayLiteral(Context context, Object arrayInstance) {
-    StringBuilder builder = new StringBuilder("{");
+    StringBuilder builder = new StringBuilder("{ ");
 
     int length = Array.getLength(arrayInstance);
     Object element;
@@ -82,6 +82,6 @@ public class ArrayLiteral extends LiteralValue<Object> {
       }
     }
 
-    return builder.append("}").toString();
+    return builder.append(" }").toString();
   }
 }

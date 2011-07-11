@@ -66,7 +66,7 @@ public class LiteralTest extends TestCase {
 
   public void testStringArrayCreation() {
     final String[][] input = new String[][]{{"Hello1", "Hello2"}, {"Hello3", "Hello4"}};
-    final String expected = "new String[][] {{\"Hello1\", \"Hello2\"}, {\"Hello3\", \"Hello4\"}}";
+    final String expected = "new String[][] { { \"Hello1\", \"Hello2\" }, { \"Hello3\", \"Hello4\" } }";
 
     assertEquals(expected, LiteralFactory.getLiteral(input).generate(Context.create()));
   }
