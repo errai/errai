@@ -91,10 +91,9 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
     callBackBlock.append(Stmt.create().declareVariable("qualifiers",new TypeLiteral<Set<String>>() {},
         Stmt.create().loadVariable("message").invoke("get", Set.class, CDIProtocol.QUALIFIERS)));
 
-    callBackBlock.append(Stmt
-        .create()
+    callBackBlock.append(Stmt.create()
         .loadVariable("methodQualifiers")
-        .invoke("equals", Cast.to(HashSet.class, Refs.get("qualifiers")))
+        .invoke("equals", Refs.get("qualifiers"))
         .if_(
             BooleanOperator.Or,
             Bool.and(Bool.equals(Refs.get("qualifiers"), null),
