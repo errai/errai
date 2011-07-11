@@ -28,7 +28,6 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.util.TypeLiteral;
 import javax.inject.Inject;
 
-import org.jboss.errai.bus.server.annotations.ExposeEntity;
 import org.jboss.errai.ioc.rebind.ioc.codegen.AssignmentOperator;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Cast;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
