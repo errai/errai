@@ -112,7 +112,7 @@ public interface LoopBuilderTestResult {
           "     if (i == 50) {" +
           "       continue;" +
           "     };" +
-          "   };" +
+          "   };\n" +
           "\n}";
 
   public static final String LOOP_WITH_CONTINUE_AND_LABEL =
@@ -122,7 +122,7 @@ public interface LoopBuilderTestResult {
           "     if (i == 50) {" +
           "       continue label;" +
           "     };" +
-          "   };" +
+          "   };\n" +
           "\n}";
 
   public static final String LOOP_WITH_BREAK =
@@ -131,7 +131,7 @@ public interface LoopBuilderTestResult {
           "     if (i == 50) {" +
           "       break;" +
           "     };" +
-          "   };" +
+          "   };\n" +
           "\n}";
 
   public static final String LOOP_WITH_BREAK_AND_LABEL =
@@ -141,6 +141,6 @@ public interface LoopBuilderTestResult {
           "     if (i == 50) {" +
           "       break label;" +
           "     };" +
-          "   };" +
+          "   };\n" +
           "\n}";
 }

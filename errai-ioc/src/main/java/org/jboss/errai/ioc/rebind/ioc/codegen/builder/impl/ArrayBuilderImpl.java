@@ -111,7 +111,7 @@ public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayB
   }
 
   private void generateInitialization(StringBuilder buf, Object values) {
-    buf.append("{");
+    buf.append("{ ");
     int length = Array.getLength(values);
     for (int i = 0; i < length; i++) {
       Object element = Array.get(values, i);
@@ -125,9 +125,9 @@ public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayB
         buf.append(statementExpr);
       }
       if (i + 1 < length) {
-        buf.append(",");
+        buf.append(", ");
       }
     }
-    buf.append("}");
+    buf.append(" }");
   }
 }

@@ -188,7 +188,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   @Test
   public void testCreateAndInitializeArray() {
     String s = StatementBuilder.create().newArray(String.class).initialize("1", "2").toJavaString();
-    assertEquals("Failed to generate 1-dimensional String array", "new String[] {\"1\",\"2\"}", s);
+    assertEquals("Failed to generate 1-dimensional String array", "new String[] { \"1\", \"2\" }", s);
   }
 
   @Test
@@ -238,17 +238,17 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
             .toJavaString();
 
     assertEquals("failed to generate Annotation array",
-            "new java.lang.annotation.Annotation[] {" +
+            "new java.lang.annotation.Annotation[] { " +
                     "new java.lang.annotation.Annotation() {\n" +
                     " public Class annotationType() {\n" +
                     "   return javax.inject.Inject.class;\n" +
                     " }\n" +
                     "}" +
-                    ",new java.lang.annotation.Annotation() {\n" +
+                    ", new java.lang.annotation.Annotation() {\n" +
                     "   public Class annotationType() {\n" +
                     "     return javax.annotation.PostConstruct.class;\n" +
                     "   }\n" +
-                    " }" +
+                    " }\n" +
                     "}", s);
   }
 
@@ -259,7 +259,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
             .initialize(new Integer[][] { { 1, 2 }, { 3, 4 } })
             .toJavaString();
 
-    assertEquals("Failed to generate two dimensional array", "new Integer[][] {{1,2},{3,4}}", s);
+    assertEquals("Failed to generate two dimensional array", "new Integer[][] { { 1, 2 }, { 3, 4 } }", s);
   }
 
   @Test
@@ -269,7 +269,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
             .initialize(new Object[][] { { 1, 2 } })
             .toJavaString();
 
-    assertEquals("Failed to generate two dimensional array", "new Integer[][] {{1,2}}", s);
+    assertEquals("Failed to generate two dimensional array", "new Integer[][] { { 1, 2 } }", s);
   }
 
   @Test
@@ -279,7 +279,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
             .initialize(new Object[][] { { 1, 2 } })
             .toJavaString();
 
-    assertEquals("Failed to generate two dimensional array", "new Object[][] {{1,2}}", s);
+    assertEquals("Failed to generate two dimensional array", "new Object[][] { { 1, 2 } }", s);
   }
 
   @Test
@@ -294,8 +294,8 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
             .toJavaString();
 
     assertEquals("Failed to generate two dimensional array using statements",
-            "new String[][] {{Integer.toString(1),Integer.toString(2)}," +
-                    "{Integer.toString(3),Integer.toString(4)}}", s);
+            "new String[][] { { Integer.toString(1), Integer.toString(2) }, " +
+                    "{ Integer.toString(3), Integer.toString(4) } }", s);
   }
 
   @Test
@@ -308,8 +308,8 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
             .toJavaString();
 
     assertEquals("Failed to generate two dimensional array using statements and objects",
-            "new String[][] {{Integer.toString(1),\"2\"}," +
-                    "{Integer.toString(3),\"4\"}}", s);
+            "new String[][] { { Integer.toString(1), \"2\" }," +
+                    " { Integer.toString(3), \"4\" } }", s);
   }
 
   @Test
@@ -320,7 +320,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
             .toJavaString();
 
     assertEquals("Failed to generate three dimensional array",
-            "new String[][][] {{{\"1\",\"2\"},{\"a\",\"b\"}},{{\"3\",\"4\"},{\"b\",\"c\"}}}", s);
+            "new String[][][] { { { \"1\", \"2\" }, { \"a\", \"b\" } }, { { \"3\", \"4\" }, { \"b\", \"c\" } } }", s);
   }
 
   @Test
