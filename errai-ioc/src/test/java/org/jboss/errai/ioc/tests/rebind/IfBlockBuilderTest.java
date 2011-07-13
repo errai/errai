@@ -83,10 +83,10 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
         .loadVariable("str")
         .invoke("endsWith", "abc")
         .if_()
-          .append(Stmt.create().declareVariable(Integer.class).named("n").initializeWith(0))
+          .append(Stmt.declareVariable(Integer.class).named("n").initializeWith(0))
         .finish()
         .else_()
-          .append(Stmt.create().declareVariable(Integer.class).named("n").initializeWith(1))
+          .append(Stmt.declareVariable(Integer.class).named("n").initializeWith(1))
         .finish().toJavaString();
 
     assertEquals("Failed to generate empty if block using no rhs", IF_ELSE_BLOCK_NO_RHS, s);
@@ -99,10 +99,10 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
         .declareVariable("m", Integer.class)
         .loadVariable("n")
         .if_(BooleanOperator.GreaterThan, Variable.get("m"))
-          .append(Stmt.create().declareVariable(Integer.class).named("n").initializeWith(0))
+          .append(Stmt.declareVariable(Integer.class).named("n").initializeWith(0))
         .finish()
         .else_()
-          .append(Stmt.create().declareVariable(Integer.class).named("n").initializeWith(1))
+          .append(Stmt.declareVariable(Integer.class).named("n").initializeWith(1))
         .finish().toJavaString();
 
     assertEquals("Failed to generate empty if block using a rhs", IF_ELSE_BLOCK_RHS, s);
@@ -324,8 +324,8 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
                   BooleanOperator.And, 
                   Bool.expr("girl", BooleanOperator.NotEquals, "boy"))))
         .finish()
-        .elseif_(Bool.expr(Stmt.create().loadVariable("a"), BooleanOperator.And, Stmt.create().loadVariable("b")))
-          .append(Stmt.create().loadStatic(System.class, "out").invoke("println", Refs.get("a")))
+        .elseif_(Bool.expr(Stmt.loadVariable("a"), BooleanOperator.And, Stmt.loadVariable("b")))
+          .append(Stmt.loadStatic(System.class, "out").invoke("println", Refs.get("a")))
         .finish()
         .toJavaString();
 
@@ -340,9 +340,8 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
 
     String s =
         Stmt.create(ctx)
-            .if_(Bool.expr(Stmt.create().loadVariable("a"), BooleanOperator.And,
-                  Bool.expr(Stmt.create().loadVariable("b")).negate()))
-            .append(Stmt.create().loadStatic(System.class, "out").invoke("println", Refs.get("a")))
+            .if_(Bool.expr(Stmt.loadVariable("a"), BooleanOperator.And, Bool.expr(Stmt.loadVariable("b")).negate()))
+            .append(Stmt.loadStatic(System.class, "out").invoke("println", Refs.get("a")))
             .finish()
             .toJavaString();
 
@@ -361,12 +360,11 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
         Stmt.create(ctx)
             .if_(Bool.expr(
                 Arith.expr(
-                    Arith.expr(Stmt.create().loadVariable("a"), ArithmeticOperator.Addition, 
-                        Stmt.create().loadVariable("b")),
+                    Arith.expr(Stmt.loadVariable("a"), ArithmeticOperator.Addition, Stmt.loadVariable("b")),
                     ArithmeticOperator.Division,
-                    Stmt.create().loadVariable("c")),
+                    Stmt.loadVariable("c")),
                  BooleanOperator.GreaterThan, 1))
-            .append(Stmt.create().loadStatic(System.class, "out").invoke("println", Refs.get("a")))
+            .append(Stmt.loadStatic(System.class, "out").invoke("println", Refs.get("a")))
             .finish()
             .toJavaString();
 

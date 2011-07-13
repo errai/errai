@@ -57,13 +57,13 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
             .publicScope()
             .body()
             .privateField("name", String.class)
-            .initializesWith(Stmt.create().load("default"))
+            .initializesWith(Stmt.load("default"))
             .finish()
             .publicMethod(String.class, "getName")
-            .append(Stmt.create().loadVariable("name").returnValue())
+            .append(Stmt.loadVariable("name").returnValue())
             .finish()
             .publicMethod(void.class, "setName", Parameter.of(String.class, "name"))
-            .append(Stmt.create().loadClassMember("name").assignValue(Variable.get("name")))
+            .append(Stmt.loadClassMember("name").assignValue(Variable.get("name")))
             .finish()
             .toJavaString();
 
@@ -77,13 +77,13 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
             .publicScope()
             .body()
             .privateField("name", String.class)
-            .initializesWith(Stmt.create().load("default"))
+            .initializesWith(Stmt.load("default"))
             .finish()
             .publicMethod(String.class, "getName")
-            .append(Stmt.create().loadVariable("name").returnValue())
+            .append(Stmt.loadVariable("name").returnValue())
             .finish()
             .publicMethod(void.class, "setName", Parameter.of(String.class, "name"))
-            .append(Stmt.create().loadVariable("this.name").assignValue(Variable.get("name")))
+            .append(Stmt.loadVariable("this.name").assignValue(Variable.get("name")))
             .finish()
             .toJavaString();
 
@@ -165,7 +165,7 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
             .callThis(false)
             .finish()
             .publicConstructor(Parameter.of(boolean.class, "b"))
-            .append(Stmt.create().loadClassMember("b").assignValue(Variable.get("b")))
+            .append(Stmt.loadClassMember("b").assignValue(Variable.get("b")))
             .finish()
             .toJavaString();
 
@@ -179,10 +179,10 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
             .publicScope()
             .body()
             .publicMethod(void.class, "bar")
-            .append(Stmt.create().loadVariable("this").invoke("foo"))
+            .append(Stmt.loadVariable("this").invoke("foo"))
             .finish()
             .publicMethod(String.class, "foo")
-            .append(Stmt.create().load(null).returnValue())
+            .append(Stmt.load(null).returnValue())
             .finish()
             .toJavaString();
 
@@ -197,10 +197,10 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
               .publicScope()
               .body()
               .publicMethod(void.class, "bar")
-              .append(Stmt.create().loadVariable("this").invoke("foo", "invalidParam"))
+              .append(Stmt.loadVariable("this").invoke("foo", "invalidParam"))
               .finish()
               .publicMethod(String.class, "foo")
-              .append(Stmt.create().load(null).returnValue())
+              .append(Stmt.load(null).returnValue())
               .finish()
               .toJavaString();
       fail("exprected UndefinedMethodException");
@@ -217,10 +217,10 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
             .publicScope()
             .body()
             .publicMethod(void.class, "bar")
-            .append(Stmt.create().loadVariable("this").invoke("foo"))
+            .append(Stmt.loadVariable("this").invoke("foo"))
             .finish()
             .publicMethod(String.class, "foo")
-            .append(Stmt.create().loadVariable("super").invoke("toString").returnValue())
+            .append(Stmt.loadVariable("super").invoke("toString").returnValue())
             .finish()
             .toJavaString();
 
@@ -235,10 +235,10 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
               .publicScope()
               .body()
               .publicMethod(void.class, "bar")
-              .append(Stmt.create().loadVariable("this").invoke("foo"))
+              .append(Stmt.loadVariable("this").invoke("foo"))
               .finish()
               .publicMethod(String.class, "foo")
-              .append(Stmt.create().loadVariable("super").invoke("undefinedMethod"))
+              .append(Stmt.loadVariable("super").invoke("undefinedMethod"))
               .finish()
               .toJavaString();
       fail("exprected UndefinedMethodException");
@@ -330,8 +330,8 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
   public void testDefineClassByImplementingInterface() {
     String cls = ClassBuilder.implement(Bootstrapper.class)
             .publicMethod(InterfaceInjectionContext.class, "bootstrapContainer")
-            .append(Stmt.create().declareVariable("ctx", Stmt.create().newObject(InterfaceInjectionContext.class)))
-            .append(Stmt.create().loadVariable("ctx").returnValue())
+            .append(Stmt.declareVariable("ctx", Stmt.newObject(InterfaceInjectionContext.class)))
+            .append(Stmt.loadVariable("ctx").returnValue())
             .finish().toJavaString();
 
     assertEquals("failed to generate class by implementing an interface",
@@ -344,7 +344,7 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
             .publicScope().body()
             .publicMethod(void.class, "test").modifiers(Modifier.Static)
             .body()
-            .append(Stmt.create().loadStatic(System.class, "out").invoke("println", "Hello, World!"))
+            .append(Stmt.loadStatic(System.class, "out").invoke("println", "Hello, World!"))
             .finish()
             .toJavaString();
 
@@ -357,7 +357,7 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
             .publicScope().body()
             .publicMethod(void.class, "test").modifiers(Modifier.JSNI)
             .body()
-            .append(Stmt.create().loadStatic(System.class, "out").invoke("println", "Hello, World!"))
+            .append(Stmt.loadStatic(System.class, "out").invoke("println", "Hello, World!"))
             .finish()
             .toJavaString();
 

@@ -62,7 +62,7 @@ public class AnonymousClassStructureBuilderTest extends AbstractStatementBuilder
     String src = ObjectBuilder.newInstanceOf(Bar.class, Context.create().autoImport())
         .extend()
         .publicOverridesMethod("setName", Parameter.of(String.class, "name"))
-        .append(Stmt.create().loadClassMember("name").assignValue(Variable.get("name")))
+        .append(Stmt.loadClassMember("name").assignValue(Variable.get("name")))
         .finish()
         .finish()
         .toJavaString();

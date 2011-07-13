@@ -321,8 +321,8 @@ public class IOCGenerator extends Generator {
   private void generateExtensions(SourceWriter sourceWriter, ClassStructureBuilder<?> classBuilder,
                                   BlockBuilder<?> blockBuilder) {
     // InterfaceInjectionContext ctx = new InterfaceInjectionContext()
-    blockBuilder.append(Stmt.create().declareVariable("ctx", InterfaceInjectionContext.class,
-            Stmt.create().newObject(InterfaceInjectionContext.class)));
+    blockBuilder.append(Stmt.declareVariable("ctx", InterfaceInjectionContext.class,
+            Stmt.newObject(InterfaceInjectionContext.class)));
 
     MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
     procFactory.process(scanner, procContext);
@@ -330,7 +330,7 @@ public class IOCGenerator extends Generator {
 
     runAllDeferred();
 
-    blockBuilder.append(Stmt.create().loadVariable("ctx").returnValue());
+    blockBuilder.append(Stmt.loadVariable("ctx").returnValue());
 
     Collection<MetaField> privateFields = injectFactory.getInjectionContext().getPrivateFieldsToExpose();
     for (MetaField f : privateFields) {

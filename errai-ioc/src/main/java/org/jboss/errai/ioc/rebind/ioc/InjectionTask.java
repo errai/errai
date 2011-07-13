@@ -89,8 +89,7 @@ public class InjectionTask {
                 JSR299QualifyingMetadata.createFromAnnotations(injectableInstance.getQualifiers()));
 
         processingContext.append(
-                Stmt.create()
-                        .invokeStatic(processingContext.getBootstrapClass(), getPrivateFieldInjectorName(field),
+                Stmt.invokeStatic(processingContext.getBootstrapClass(), getPrivateFieldInjectorName(field),
                                 Refs.get(injector.getVarName()), inj.getType(ctx, injectableInstance))
         );
 
@@ -106,8 +105,7 @@ public class InjectionTask {
                 JSR299QualifyingMetadata.createFromAnnotations(injectableInstance.getQualifiers()));
 
         processingContext.append(
-                Stmt.create().
-                        loadVariable(injector.getVarName()).loadField(field.getName()).assignValue(inj.getType(ctx,
+            Stmt.loadVariable(injector.getVarName()).loadField(field.getName()).assignValue(inj.getType(ctx,
                         injectableInstance))
         );
 
@@ -119,9 +117,8 @@ public class InjectionTask {
         }
 
         processingContext.append(
-                Stmt.create()
-                        .loadVariable(injector.getVarName()).invoke(method,
-                        resolveInjectionDependencies(method.getParameters(), ctx, injectableInstance))
+                Stmt.loadVariable(injector.getVarName()).invoke(method, 
+                    resolveInjectionDependencies(method.getParameters(), ctx, injectableInstance))
         );
 
         break;

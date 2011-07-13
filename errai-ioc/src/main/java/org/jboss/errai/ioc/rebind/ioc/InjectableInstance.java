@@ -145,21 +145,21 @@ public class InjectableInstance<T extends Annotation> {
     Statement[] stmt;
     switch (taskType) {
       case PrivateField:
-        return Stmt.create().invokeStatic(injectionContext.getProcessingContext().getBootstrapClass(),
+        return Stmt.invokeStatic(injectionContext.getProcessingContext().getBootstrapClass(),
                 getPrivateFieldInjectorName(field), Refs.get(injector.getVarName()));
 
       case Field:
-        return Stmt.create().loadVariable(injector.getVarName()).loadField(field.getName());
+        return Stmt.loadVariable(injector.getVarName()).loadField(field.getName());
 
       case Method:
         stmt = InjectUtil.resolveInjectionDependencies(method.getParameters(), injectionContext, method);
 
-        return Stmt.create().loadVariable(injector.getVarName()).invoke(method, stmt);
+        return Stmt.loadVariable(injector.getVarName()).invoke(method, stmt);
 
       case StaticMethod:
         stmt = InjectUtil.resolveInjectionDependencies(method.getParameters(), injectionContext, method);
 
-        return Stmt.create().invokeStatic(method.getDeclaringClass(), method.getName(), stmt);
+        return Stmt.invokeStatic(method.getDeclaringClass(), method.getName(), stmt);
 
       case Parameter:
       case Type:

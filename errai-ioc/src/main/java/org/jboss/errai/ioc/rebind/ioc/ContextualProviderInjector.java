@@ -70,7 +70,7 @@ public class ContextualProviderInjector extends TypeInjector {
     Statement statement;
 
     if (pType == null) {
-      statement = Stmt.create().nestedCall(providerInjector.getType(injectContext, injectableInstance))
+      statement = Stmt.nestedCall(providerInjector.getType(injectContext, injectableInstance))
               .invoke("provide", new Class[0]);
     }
     else {
@@ -79,11 +79,11 @@ public class ContextualProviderInjector extends TypeInjector {
       Annotation[] qualifiers = injectableInstance.getQualifiers();
       if (qualifiers.length != 0) {
 
-        statement = Stmt.create().nestedCall(providerInjector.getType(injectContext, injectableInstance))
+        statement = Stmt.nestedCall(providerInjector.getType(injectContext, injectableInstance))
                 .invoke("provide", typeArgs, qualifiers);
       }
       else {
-        statement = Stmt.create().nestedCall(providerInjector.getType(injectContext, injectableInstance))
+        statement = Stmt.nestedCall(providerInjector.getType(injectContext, injectableInstance))
                 .invoke("provide", typeArgs, null);
 
       }
@@ -91,7 +91,7 @@ public class ContextualProviderInjector extends TypeInjector {
 
     if (singleton) {
       if (!injected) {
-         injectContext.getProcessingContext().append(Stmt.create().declareVariable(type).named(varName)
+         injectContext.getProcessingContext().append(Stmt.declareVariable(type).named(varName)
                 .initializeWith(statement));
       }
       statement = Refs.get(varName);

@@ -148,8 +148,8 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   @Test
   public void testDeclareVariableWithStatementInitialization() {
     Context ctx = Context.create();
-    String s = Stmt.create().declareVariable("str", String.class,
-            Stmt.create().nestedCall(Stmt.create().newObject(Integer.class).withParameters(2)).invoke("toString"))
+    String s = Stmt.declareVariable("str", String.class,
+            Stmt.nestedCall(Stmt.newObject(Integer.class).withParameters(2)).invoke("toString"))
         .generate(ctx);
 
     assertEquals("failed to generate variable declaration with statement initialization",
@@ -499,8 +499,8 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
 
   @Test
   public void testAssignField() {
-    String s = Stmt.create(Context.create().autoImport()).nestedCall(Stmt.create()
-            .newObject(Foo.class)).loadField("bar").loadField("name").assignValue("test").toJavaString();
+    String s = Stmt.create(Context.create().autoImport()).nestedCall(
+            Stmt.newObject(Foo.class)).loadField("bar").loadField("name").assignValue("test").toJavaString();
 
     assertEquals("failed to generate nested field assignment", 
         "(new Foo()).bar.name = \"test\"", s);
@@ -508,20 +508,20 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   
   @Test
   public void testCastDown() {
-    Statement stmt = Cast.to(String.class, Stmt.create().declareVariable("obj", Object.class).loadVariable("obj"));
+    Statement stmt = Cast.to(String.class, Stmt.declareVariable("obj", Object.class).loadVariable("obj"));
     assertEquals("failed to generate cast", "(String) obj", stmt.generate(Context.create()));
   }
   
   @Test
   public void testCastUp() {
-    Statement stmt = Cast.to(Object.class, Stmt.create().declareVariable("str", String.class).loadVariable("str"));
+    Statement stmt = Cast.to(Object.class, Stmt.declareVariable("str", String.class).loadVariable("str"));
     assertEquals("failed to generate cast", "(Object) str", stmt.generate(Context.create()));
   }
   
   @Test
   public void testInvalidCast() {
     try {
-      Statement stmt = Cast.to(Integer.class, Stmt.create().declareVariable("str", String.class).loadVariable("str"));
+      Statement stmt = Cast.to(Integer.class, Stmt.declareVariable("str", String.class).loadVariable("str"));
       stmt.generate(Context.create());
       fail("expected InvalidTypeException");
     } catch(InvalidTypeException e) {

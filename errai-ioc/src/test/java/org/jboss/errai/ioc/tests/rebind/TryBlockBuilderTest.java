@@ -96,13 +96,13 @@ public class TryBlockBuilderTest extends AbstractStatementBuilderTest implements
   public void testTryCatchFinallyBlock() {
     String s = StatementBuilder.create()
         .try_()
-        .append(Stmt.create().throw_(Exception.class))
+        .append(Stmt.throw_(Exception.class))
         .finish()
         .catch_(Exception.class, "e")
-        .append(Stmt.create().throw_(RuntimeException.class, Variable.get("e")))
+        .append(Stmt.throw_(RuntimeException.class, Variable.get("e")))
         .finish()
         .finally_()
-        .append(Stmt.create().load(0).returnValue())
+        .append(Stmt.load(0).returnValue())
         .finish()
         .toJavaString();
 

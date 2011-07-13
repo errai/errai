@@ -32,7 +32,7 @@ public class ProviderInjector extends TypeInjector {
   public Statement getType(InjectionContext injectContext, InjectableInstance injectableInstance) {
     injected = true;
 
-    return Stmt.create().nestedCall(providerInjector.getType(injectContext, injectableInstance))
+    return Stmt.nestedCall(providerInjector.getType(injectContext, injectableInstance))
                     .invoke("provide");
   }
 

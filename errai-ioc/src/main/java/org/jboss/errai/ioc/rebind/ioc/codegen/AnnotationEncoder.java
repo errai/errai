@@ -44,7 +44,7 @@ public class AnnotationEncoder {
                   && (!"equals".equals(method.getName()) && !"hashCode".equals(method.getName()))) {
             try {
               builder.publicOverridesMethod(method.getName())
-                      .append(Stmt.create().load(method.invoke(annotation)).returnValue()).finish();
+                      .append(Stmt.load(method.invoke(annotation)).returnValue()).finish();
             }
             catch (IllegalAccessException e) {
               throw new RuntimeException("error generation annotation wrapper", e);

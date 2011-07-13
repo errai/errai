@@ -284,7 +284,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   public void testWhileLoopUnchainedWithExpression() {
     Context ctx = Context.create().addVariable("str", String.class);
     String s = StatementBuilder.create(ctx)
-        .while_(Bool.expr(Stmt.create().loadVariable("str").invoke("length"), BooleanOperator.GreaterThanOrEqual, 2))
+        .while_(Bool.expr(Stmt.loadVariable("str").invoke("length"), BooleanOperator.GreaterThanOrEqual, 2))
         .finish().toJavaString();
 
     assertEquals("Failed to generate while loop with rhs and no body", WHILE_RHS_EMPTY, s);
@@ -297,7 +297,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .while_(Bool.expr(
             Bool.expr(Variable.get("str"), BooleanOperator.NotEquals, null),
             BooleanOperator.And,
-            Bool.expr(Stmt.create().loadVariable("str").invoke("length"), BooleanOperator.GreaterThan, 0)))
+            Bool.expr(Stmt.loadVariable("str").invoke("length"), BooleanOperator.GreaterThan, 0)))
         .finish().toJavaString();
 
     assertEquals("Failed to generate while loop with nested expressions and no body", WHILE_NESTED_EMPTY, s);
@@ -335,7 +335,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
     String s = StatementBuilder.create()
         .declareVariable("i", Integer.class, 0)
         .loadVariable("i")
-        .for_(Stmt.create().loadVariable("i").assignValue(0), Bool.expr(BooleanOperator.LessThan, 100))
+        .for_(Stmt.loadVariable("i").assignValue(0), Bool.expr(BooleanOperator.LessThan, 100))
         .finish().toJavaString();
 
     assertEquals("Failed to generate for loop with initializer and chained lhs",
@@ -359,7 +359,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
     String s = StatementBuilder.create()
         .declareVariable("i", Integer.class, 0)
         .loadVariable("i")
-        .for_(Stmt.create().loadVariable("i").assignValue(0), Bool.expr(BooleanOperator.LessThan, 100),
+        .for_(Stmt.loadVariable("i").assignValue(0), Bool.expr(BooleanOperator.LessThan, 100),
             StatementBuilder.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
         .finish().toJavaString();
 
@@ -383,7 +383,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
   @Test
   public void testForLoopUnchainedWithDeclaringInitializerAndCountingExpression() {
     String s = StatementBuilder.create()
-        .for_(Stmt.create().declareVariable(int.class).named("i").initializeWith(0),
+        .for_(Stmt.declareVariable(int.class).named("i").initializeWith(0),
             Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100),
             StatementBuilder.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
         .append(StatementBuilder.create().loadStatic(System.class, "out").invoke("println", Variable.get("i")))
@@ -447,7 +447,7 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .while_(Bool.expr(
             Bool.expr(Variable.get("str"), BooleanOperator.NotEquals, null),
             BooleanOperator.And,
-            Bool.expr(Stmt.create().loadVariable("str").invoke("length"), BooleanOperator.GreaterThan, 0)))
+            Bool.expr(Stmt.loadVariable("str").invoke("length"), BooleanOperator.GreaterThan, 0)))
         .toJavaString();
 
     assertEquals("Failed to generate do while loop with nested expression", DOWHILE_NESTED_EXPRESSION, s);
@@ -459,14 +459,14 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .declareVariable("i", Integer.class, 0)
         .loadVariable("i")
         .if_(BooleanOperator.GreaterThan, 100)
-        .append(Stmt.create()
-            .for_(Stmt.create().loadVariable("i").assignValue(0),
+        .append(Stmt
+            .for_(Stmt.loadVariable("i").assignValue(0),
                 Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100),
-                Stmt.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
-            .append(Stmt.create()
-                .if_(Bool.expr(Variable.get("i"), BooleanOperator.Equals, 50))
-                .append(Stmt.create().continue_())
-                .finish())
+                Stmt.loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
+            .append(
+                Stmt.if_(Bool.expr(Variable.get("i"), BooleanOperator.Equals, 50))
+                    .append(Stmt.continue_())
+                    .finish())
             .finish())
         .finish()
         .toJavaString();
@@ -480,14 +480,14 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .declareVariable("i", Integer.class, 0)
         .loadVariable("i")
         .if_(BooleanOperator.GreaterThan, 100)
-        .append(Stmt.create().label("label"))
-        .append(Stmt.create()
-            .for_(Stmt.create().loadVariable("i").assignValue(0),
+        .append(Stmt.label("label"))
+        .append(Stmt
+            .for_(Stmt.loadVariable("i").assignValue(0),
                 Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100),
-                Stmt.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
-            .append(Stmt.create()
+                Stmt.loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
+            .append(Stmt
                 .if_(Bool.expr(Variable.get("i"), BooleanOperator.Equals, 50))
-                .append(Stmt.create().continue_("label"))
+                .append(Stmt.continue_("label"))
                 .finish())
             .finish())
         .finish()
@@ -502,13 +502,13 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .declareVariable("i", Integer.class, 0)
         .loadVariable("i")
         .if_(BooleanOperator.GreaterThan, 100)
-        .append(Stmt.create()
-            .for_(Stmt.create().loadVariable("i").assignValue(0),
+        .append(Stmt
+            .for_(Stmt.loadVariable("i").assignValue(0),
                 Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100),
-                Stmt.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
-            .append(Stmt.create()
+                Stmt.loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
+            .append(Stmt
                 .if_(Bool.expr(Variable.get("i"), BooleanOperator.Equals, 50))
-                .append(Stmt.create().break_())
+                .append(Stmt.break_())
                 .finish())
             .finish())
         .finish()
@@ -523,14 +523,14 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
         .declareVariable("i", Integer.class, 0)
         .loadVariable("i")
         .if_(BooleanOperator.GreaterThan, 100)
-        .append(Stmt.create().label("label"))
-        .append(Stmt.create()
-            .for_(Stmt.create().loadVariable("i").assignValue(0),
+        .append(Stmt.label("label"))
+        .append(Stmt
+            .for_(Stmt.loadVariable("i").assignValue(0),
                 Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100),
-                Stmt.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
-            .append(Stmt.create()
+                Stmt.loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
+            .append(Stmt
                 .if_(Bool.expr(Variable.get("i"), BooleanOperator.Equals, 50))
-                .append(Stmt.create().break_("label"))
+                .append(Stmt.break_("label"))
                 .finish())
             .finish())
         .finish()
@@ -546,12 +546,12 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
           .declareVariable("i", Integer.class, 0)
           .loadVariable("i")
           .if_(BooleanOperator.GreaterThan, 100)
-          .append(Stmt.create().label("label"))
-          .append(Stmt.create()
-              .for_(Stmt.create().loadVariable("i").assignValue(0),
+          .append(Stmt.label("label"))
+          .append(Stmt
+              .for_(Stmt.loadVariable("i").assignValue(0),
                   Bool.expr(Variable.get("i"), BooleanOperator.LessThan, 100),
-                  Stmt.create().loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
-              .append(Stmt.create().continue_("undefinedlabel"))
+                  Stmt.loadVariable("i").assignValue(AssignmentOperator.PreIncrementAssign, 1))
+              .append(Stmt.continue_("undefinedlabel"))
               .finish())
           .finish()
           .toJavaString();

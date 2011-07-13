@@ -96,13 +96,12 @@ public class InjectUtil {
           IOCProcessingContext processingContext = ctx.getProcessingContext();
 
           processingContext.append(
-                  Stmt.create()
-                          .declareVariable(type)
-                          .asFinal()
-                          .named(injector.getVarName())
-                          .initializeWith(Stmt.create()
-                                  .newObject(type)
-                                  .withParameters(parameterStatements))
+                  Stmt.declareVariable(type)
+                      .asFinal()
+                      .named(injector.getVarName())
+                      .initializeWith(Stmt
+                          .newObject(type)
+                          .withParameters(parameterStatements))
           );
 
           handleInjectionTasks(ctx, injectionTasks);
@@ -123,12 +122,10 @@ public class InjectUtil {
           IOCProcessingContext processingContext = ctx.getProcessingContext();
 
           processingContext.append(
-                  Stmt.create()
-                          .declareVariable(type)
-                          .asFinal()
-                          .named(injector.getVarName())
-                          .initializeWith(Stmt.create()
-                                  .newObject(type))
+                  Stmt.declareVariable(type)
+                      .asFinal()
+                      .named(injector.getVarName())
+                      .initializeWith(Stmt.newObject(type))
 
           );
 
@@ -163,7 +160,7 @@ public class InjectUtil {
       }
 
       processingContext.append(
-              Stmt.create().loadVariable(injector.getVarName()).invoke(meth.getName())
+              Stmt.loadVariable(injector.getVarName()).invoke(meth.getName())
       );
     }
   }

@@ -38,7 +38,7 @@ public class ToSubjectIOCExtension extends IOCDecoratorExtension<ToSubject> {
     final MetaField field = injectableInstance.getField();
     final ToSubject context = field.getAnnotation(ToSubject.class);
 
-    return Stmt.create().nestedCall(injectableInstance.getValueStatement())
+    return Stmt.nestedCall(injectableInstance.getValueStatement())
             .invoke("setToSubject", context.value());
   }
 }

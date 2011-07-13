@@ -16,19 +16,181 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.util;
 
+import javax.enterprise.util.TypeLiteral;
+
+import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanExpression;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ArrayInitializationBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BlockBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.CaseBlockBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.CatchBlockBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ContextualStatementBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ElseBlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementBegin;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.StatementEnd;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.VariableDeclarationStart;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.VariableReferenceContextualStatementBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.WhileBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class Stmt {
   public static StatementBegin create() {
     return StatementBuilder.create();
   }
-
+  
   public static StatementBegin create(Context ctx) {
     return StatementBuilder.create(ctx);
+  }
+
+  public static ArrayInitializationBuilder newArray(Class<?> componentType) {
+    return StatementBuilder.create().newArray(componentType);
+  }
+
+  public static ArrayInitializationBuilder newArray(Class<?> componentType, Integer... dimensions) {
+    return StatementBuilder.create().newArray(componentType, dimensions);
+  }
+
+  public static BlockBuilder<WhileBuilder> do_() {
+    return StatementBuilder.create().do_();
+  }
+
+  public static BlockBuilder<StatementEnd> while_(BooleanExpression condition) {
+    return StatementBuilder.create().while_(condition);
+  }
+
+  public static BlockBuilder<StatementEnd> for_(BooleanExpression condition) {
+    return StatementBuilder.create().for_(condition);
+  }
+
+  public static BlockBuilder<StatementEnd> for_(Statement initializer, BooleanExpression condition) {
+    return StatementBuilder.create().for_(initializer, condition);
+  }
+
+  public static BlockBuilder<StatementEnd> for_(Statement initializer, BooleanExpression condition,
+      Statement countingExpression) {
+    return StatementBuilder.create().for_(initializer, condition, countingExpression);
+  }
+
+  public static BlockBuilder<ElseBlockBuilder> if_(BooleanExpression condition) {
+    return StatementBuilder.create().if_(condition);
+  }
+
+  public static CaseBlockBuilder switch_(Statement statement) {
+    return StatementBuilder.create().switch_(statement);
+  }
+
+  public static BlockBuilder<CatchBlockBuilder> try_() {
+    return StatementBuilder.create().try_();
+  }
+
+  public static VariableDeclarationStart<StatementBegin> declareVariable(Class<?> type) {
+    return StatementBuilder.create().declareVariable(type);
+  }
+
+  public static VariableDeclarationStart<StatementBegin> declareVariable(MetaClass type) {
+    return StatementBuilder.create().declareVariable(type);
+  }
+
+  public static StatementBuilder declareVariable(String name, Class<?> type) {
+    return StatementBuilder.create().declareVariable(name, type);
+  }
+
+  public static StatementBuilder declareVariable(String name, TypeLiteral<?> type) {
+    return StatementBuilder.create().declareVariable(name, type);
+  }
+
+  public static StatementBuilder declareVariable(String name, Object initialization) {
+    return StatementBuilder.create().declareVariable(name, initialization);
+  }
+
+  public static StatementBuilder declareVariable(String name, Class<?> type, Object initialization) {
+    return StatementBuilder.create().declareVariable(name, type, initialization);
+  }
+
+  public static StatementBuilder declareVariable(String name, TypeLiteral<?> type, Object initialization) {
+    return StatementBuilder.create().declareVariable(name, type, initialization);
+  }
+
+  public static VariableReferenceContextualStatementBuilder loadVariable(String name, Object... indexes) {
+    return StatementBuilder.create().loadVariable(name, indexes);
+  }
+
+  public static VariableReferenceContextualStatementBuilder loadClassMember(String name, Object... indexes) {
+    return StatementBuilder.create().loadClassMember(name, indexes);
+  }
+
+  public static ContextualStatementBuilder loadLiteral(Object o) {
+    return StatementBuilder.create().loadLiteral(o);
+  }
+
+  public static ContextualStatementBuilder load(Object o) {
+    return StatementBuilder.create().load(o);
+  }
+
+  public static ContextualStatementBuilder invokeStatic(MetaClass clazz, String methodName, Object... parameters) {
+    return StatementBuilder.create().invokeStatic(clazz, methodName, parameters);
+  }
+
+  public static ContextualStatementBuilder invokeStatic(Class<?> clazz, String methodName, Object... parameters) {
+    return StatementBuilder.create().invokeStatic(clazz, methodName, parameters);
+  }
+
+  public static ContextualStatementBuilder loadStatic(Class<?> clazz, String fieldName) {
+    return StatementBuilder.create().loadStatic(clazz, fieldName);
+  }
+
+  public static ContextualStatementBuilder loadStatic(MetaClass clazz, String fieldName) {
+    return StatementBuilder.create().loadStatic(clazz, fieldName);
+  }
+
+  public static ContextualStatementBuilder nestedCall(Statement statement) {
+    return StatementBuilder.create().nestedCall(statement);
+  }
+
+  public static ObjectBuilder newObject(Class<?> type) {
+    return StatementBuilder.create().newObject(type);
+  }
+
+  public static ObjectBuilder newObject(MetaClass type) {
+    return StatementBuilder.create().newObject(type);
+  }
+
+  public static ObjectBuilder newObject(TypeLiteral<?> type) {
+    return StatementBuilder.create().newObject(type);
+  }
+
+  public static StatementEnd throw_(Class<? extends Throwable> throwableType, Object... parameters) {
+    return StatementBuilder.create().throw_(throwableType, parameters);
+  }
+
+  public static StatementEnd throw_(String exceptionVarName) {
+    return StatementBuilder.create().throw_(exceptionVarName);
+  }
+
+  public static StatementEnd label(String label) {
+    return StatementBuilder.create().label(label);
+  }
+
+  public static StatementEnd break_() {
+    return StatementBuilder.create().break_();
+  }
+
+  public static StatementEnd break_(String label) {
+    return StatementBuilder.create().break_(label);
+  }
+
+  public static StatementEnd continue_() {
+    return StatementBuilder.create().continue_();
+  }
+
+  public static StatementEnd continue_(String label) {
+    return StatementBuilder.create().continue_(label);
   }
 }

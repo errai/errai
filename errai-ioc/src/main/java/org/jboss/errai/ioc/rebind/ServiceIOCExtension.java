@@ -56,7 +56,7 @@ public class ServiceIOCExtension extends IOCDecoratorExtension<Service> {
     final String svcName = decContext.getAnnotation().value().equals("")
             ? decContext.getMemberName() : decContext.getAnnotation().value();
 
-    return Stmt.create().nestedCall(busHandle)
+    return Stmt.nestedCall(busHandle)
             .invoke("subscribe", svcName, decContext.getValueStatement());
   }
 }
