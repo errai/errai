@@ -36,7 +36,6 @@ public class ProducerTestModule {
     return numberB;
   }
 
-
   @Produces
   public String produceString(@C Integer number) {
     return Integer.toString(number);

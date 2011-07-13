@@ -22,10 +22,6 @@ public class ProducerIntegrationTest extends AbstractErraiCDITest {
   }
 
   public void testProducers() {
-    assertNotNull("Failed to produce @A", ProducerTestModule.getInstance().getNumberA());
-    assertNotNull("Failed to produce @B", ProducerTestModule.getInstance().getNumberB());
-    assertNotNull("Failed to produce @C", ProducerTestModule.getInstance().getNumberC());
-
     assertEquals("Failed to inject produced @A", ProducerTestModule.getInstance().getNumberA(), ProducerTestModule
             .getInstance().getTestBean().getaInteger());
     assertEquals("Failed to inject produced @B", ProducerTestModule.getInstance().getNumberB(), ProducerTestModule
