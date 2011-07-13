@@ -54,27 +54,28 @@ public class MethodInvocation extends AbstractStatement {
 
     if (method.getGenericReturnType() != null && method.getGenericReturnType() instanceof MetaTypeVariable) {
       resolveTypeVariables();
-      
+
       MetaTypeVariable typeVar = (MetaTypeVariable) method.getGenericReturnType();
       returnType = typeVariables.get(typeVar.getName());
     }
 
     return (returnType != null) ? returnType : method.getReturnType();
   }
-  
+
   // Resolves type variables by inspecting call parameters
   private void resolveTypeVariables() {
     int methodParmIndex = 0;
     for (MetaType methodParmType : method.getGenericParameterTypes()) {
       Statement parm = callParameters.getParameters().get(methodParmIndex);
-      
+
       MetaType callParmType;
       if (parm instanceof ClassLiteral) {
         callParmType = ((ClassLiteral) parm).getActualType();
-      } else {
-        callParmType = callParameters.getParameterTypes()[methodParmIndex];
       }
-      
+      else {
+        callParmType = parm.getType();
+      }
+
       resolveTypeVariable(methodParmType, callParmType);
       methodParmIndex++;
     }
@@ -89,17 +90,19 @@ public class MethodInvocation extends AbstractStatement {
       MetaType parameterizedCallParmType;
       if (callParmType instanceof MetaParameterizedType) {
         parameterizedCallParmType = callParmType;
-      } else {
-        parameterizedCallParmType = ((MetaClass)callParmType).getParameterizedType(); 
       }
-      
+      else {
+        parameterizedCallParmType = ((MetaClass) callParmType).getParameterizedType();
+      }
+
       MetaParameterizedType parameterizedMethodParmType = (MetaParameterizedType) methodParmType;
       int typeParmIndex = 0;
       for (MetaType typeParm : parameterizedMethodParmType.getTypeParameters()) {
         if (parameterizedCallParmType != null) {
-          resolveTypeVariable(typeParm, 
+          resolveTypeVariable(typeParm,
               ((MetaParameterizedType) parameterizedCallParmType).getTypeParameters()[typeParmIndex++]);
-        } else {
+        }
+        else {
           resolveTypeVariable(typeParm, callParmType);
         }
       }
