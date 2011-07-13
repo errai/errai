@@ -263,7 +263,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
   }
 
   @Test
-  public void testInvokeUsingVariableReturnType() {
+  public void testInvokeWithVariableReturnType() {
     String s =
         StatementBuilder.create(Context.create().autoImport())
             .declareVariable("s", String.class)
@@ -271,11 +271,12 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
                 StatementBuilder.create().invokeStatic(Foo.class, "foo", Variable.get("s")))
             .toJavaString();
 
-    assertEquals("Failed to generate method invocation using generics", "String str = Foo.foo(s)", s);
+    assertEquals("Failed to generate method invocation using variable return type", 
+        "String str = Foo.foo(s)", s);
   }
 
   @Test
-  public void testInvokeUsingInvalidVariableReturnType() {
+  public void testInvokeWithInvalidVariableReturnType() {
 
     try {
       StatementBuilder.create(Context.create().autoImport())
@@ -291,7 +292,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
   }
 
   @Test
-  public void testInvokeUsingParameterizedListAndVariableReturnType() {
+  public void testInvokeWithParameterizedListAndVariableReturnType() {
     String s =
         StatementBuilder.create(Context.create().autoImport())
             .declareVariable("list", new TypeLiteral<List<String>>() {})
@@ -299,11 +300,26 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
                 StatementBuilder.create().invokeStatic(Foo.class, "bar", Variable.get("list")))
             .toJavaString();
 
-    assertEquals("Failed to generate method invocation using generics", "String str = Foo.bar(list)", s);
+    assertEquals("Failed to generate method invocation with variable return type inferred from List<T>", 
+        "String str = Foo.bar(list)", s);
+  }
+  
+  @Test
+  public void testInvokeWithNestedParameterizedListAndVariableReturnType() {
+    String s =
+        StatementBuilder.create(Context.create().autoImport())
+            .declareVariable("n", int.class)
+            .declareVariable("list", new TypeLiteral<List<List<Map<String, Integer>>>>() {})
+            .declareVariable("str", String.class,
+                StatementBuilder.create().invokeStatic(Foo.class, "bar", Variable.get("n"), Variable.get("list")))
+            .toJavaString();
+
+    assertEquals("Failed to generate method invocation with variable return type inferred from nested List<T>",
+        "String str = Foo.bar(n, list)", s);
   }
 
   @Test
-  public void testInvokeUsingParameterizedMapAndVariableReturnType() {
+  public void testInvokeWithParameterizedMapAndVariableReturnType() {
     String s =
         StatementBuilder.create(Context.create().autoImport())
             .declareVariable("map", new TypeLiteral<Map<String, Integer>>() {})
@@ -311,17 +327,19 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
                 StatementBuilder.create().invokeStatic(Foo.class, "bar", Variable.get("map")))
             .toJavaString();
 
-    assertEquals("Failed to generate method invocation using generics", "Integer val = Foo.bar(map)", s);
+    assertEquals("Failed to generate method invocation with variable return type inferred from Map<K, V>", 
+        "Integer val = Foo.bar(map)", s);
   }
 
   @Test
-  public void testInvokeUsingParameterizedClassAndVariableReturnType() {
+  public void testInvokeWithParameterizedClassAndVariableReturnType() {
     String s =
         StatementBuilder.create(Context.create().autoImport())
             .declareVariable("set", Set.class,
                 StatementBuilder.create().invokeStatic(Foo.class, "baz", Set.class))
             .toJavaString();
 
-    assertEquals("Failed to generate method invocation using generics", "Set set = Foo.baz(Set.class)", s);
+    assertEquals("Failed to generate method invocation with variable return type inferred from Class<T>", 
+        "Set set = Foo.baz(Set.class)", s);
   }
 }
