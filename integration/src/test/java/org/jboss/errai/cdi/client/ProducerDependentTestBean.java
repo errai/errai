@@ -1,14 +1,15 @@
 package org.jboss.errai.cdi.client;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
 import org.jboss.errai.cdi.client.qualifier.A;
 import org.jboss.errai.cdi.client.qualifier.B;
 import org.jboss.errai.cdi.client.qualifier.C;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-
 /**
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 @ApplicationScoped
 public class ProducerDependentTestBean {
@@ -24,15 +25,15 @@ public class ProducerDependentTestBean {
   @Inject
   String producedString;
 
-  public Integer getaInteger() {
+  public Integer getIntegerA() {
     return aInteger;
   }
 
-  public Integer getbInteger() {
+  public Integer getIntegerB() {
     return bInteger;
   }
 
-  public Integer getcInteger() {
+  public Integer getIntegerC() {
     return cInteger;
   }
 

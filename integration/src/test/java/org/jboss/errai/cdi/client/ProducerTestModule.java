@@ -23,19 +23,16 @@ public class ProducerTestModule {
   @Inject
   private ProducerDependentTestBean testBean;
 
-  @Produces
-  @A
+  @Produces @A
   private Integer numberA = new Random().nextInt();
 
   private Integer numberB;
 
-  @Produces
-  @B
+  @Produces @B
   public Integer produceNumberB() {
     numberB = new Random().nextInt();
     return numberB;
   }
-
 
   @Produces
   public String produceString(@C Integer number) {
@@ -44,13 +41,11 @@ public class ProducerTestModule {
 
   private Integer numberC;
 
-  @Produces
-  @C
+  @Produces @C
   public Integer produceNumberC() {
     numberC = 1000;
     return numberC;
   }
-
 
   public Integer getNumberA() {
     return numberA;
