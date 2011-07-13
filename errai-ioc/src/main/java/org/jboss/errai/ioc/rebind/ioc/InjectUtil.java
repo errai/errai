@@ -347,7 +347,6 @@ public class InjectUtil {
     for (int i = 0; i < parmTypes.length; i++) {
       Injector injector;
       try {
-
         injector = ctx.getQualifiedInjector(parmTypes[i],
                 JSR299QualifyingMetadata.createFromAnnotations(parms[i].getAnnotations()));
       }

@@ -127,14 +127,14 @@ public class InjectionTask {
         break;
 
       case Method:
-        if (!ctx.isInjectable(method.getReturnType())) {
+        if (!ctx.isInjectable(method.getParameters()[0].getType())) {
           return false;
         }
 
         processingContext.append(
                 Stmt.create()
                         .loadVariable(injector.getVarName()).invoke(method,
-                        resolveInjectionDependencies(method.getParameters(), ctx, injectableInstance))
+                        resolveInjectionDependencies(method.getParameters(), ctx, method))
         );
 
         break;
