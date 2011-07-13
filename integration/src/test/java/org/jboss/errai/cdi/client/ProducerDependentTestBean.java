@@ -21,6 +21,9 @@ public class ProducerDependentTestBean {
   @Inject @C
   Integer cInteger;
 
+  @Inject
+  String producedString;
+
   public Integer getaInteger() {
     return aInteger;
   }
@@ -31,5 +34,9 @@ public class ProducerDependentTestBean {
 
   public Integer getcInteger() {
     return cInteger;
+  }
+
+  public String getProducedString() {
+    return producedString;
   }
 }

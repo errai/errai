@@ -32,5 +32,8 @@ public class ProducerIntegrationTest extends AbstractErraiCDITest {
             .getInstance().getTestBean().getbInteger());
     assertEquals("Failed to inject produced @C", ProducerTestModule.getInstance().getNumberC(), ProducerTestModule
             .getInstance().getTestBean().getcInteger());
+    assertEquals("Failed to inject String", ProducerTestModule.getInstance().getNumberC().toString(),
+            ProducerTestModule.getInstance().getTestBean().getProducedString());
+
   }
 }

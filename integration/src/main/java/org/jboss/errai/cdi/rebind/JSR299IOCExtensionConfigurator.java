@@ -33,10 +33,13 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
             if (!instance.getInjectionContext().isInjectable(instance.getType())) {
               return false;
             }
-            //  instance.getInjectionContext().getInjector(instance.getType()).getType(instance);
         }
 
         injectorFactory.addInjector(new Injector() {
+
+          {
+            super.qualifyingMetadata = JSR299QualifyingMetadata.createFromAnnotations(instance.getQualifiers());
+          }
 
           @Override
           public Statement instantiateOnly(InjectionContext injectContext, InjectableInstance injectableInstance) {
@@ -61,11 +64,6 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
           @Override
           public String getVarName() {
             return null;
-          }
-
-          @Override
-          public QualifyingMetadata getQualifyingMetadata() {
-            return JSR299QualifyingMetadata.createFromAnnotations(instance.getQualifiers());
           }
 
           @Override

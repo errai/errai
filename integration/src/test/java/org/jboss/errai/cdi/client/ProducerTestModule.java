@@ -36,8 +36,6 @@ public class ProducerTestModule {
     return numberB;
   }
 
-  //@Inject
-  private String injectedString;
 
   @Produces
   public String produceString(@C Integer number) {
@@ -49,7 +47,7 @@ public class ProducerTestModule {
   @Produces
   @C
   public Integer produceNumberC() {
-    numberC = new Random().nextInt();
+    numberC = 1000;
     return numberC;
   }
 
@@ -60,11 +58,6 @@ public class ProducerTestModule {
 
   public Integer getNumberB() {
     return numberB;
-  }
-
-
-  public String getInjectedString() {
-    return injectedString;
   }
 
   public Integer getNumberC() {
