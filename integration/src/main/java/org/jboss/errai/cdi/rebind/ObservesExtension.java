@@ -31,7 +31,7 @@ import org.jboss.errai.cdi.client.api.CDI;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
-import org.jboss.errai.ioc.rebind.ioc.InjectionPoint;
+import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Cast;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
@@ -62,17 +62,17 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
   }
 
   @Override
-  public Statement generateDecorator(InjectionPoint<Observes> injectionPoint) {
-    final Context ctx = injectionPoint.getInjectionContext().getProcessingContext().getContext();
-    final MetaMethod method = injectionPoint.getMethod();
-    final MetaParameter parm = injectionPoint.getParm();
+  public Statement generateDecorator(InjectableInstance<Observes> injectableInstance) {
+    final Context ctx = injectableInstance.getInjectionContext().getProcessingContext().getContext();
+    final MetaMethod method = injectableInstance.getMethod();
+    final MetaParameter parm = injectableInstance.getParm();
 
     final String parmClassName = parm.getType().getFullyQualifiedName();
-    final Statement messageBusInst = injectionPoint.getInjectionContext().getInjector(MessageBus.class).getType(injectionPoint);
+    final Statement messageBusInst = injectableInstance.getInjectionContext().getInjector(MessageBus.class).getType(injectableInstance);
     final String subscribeMethodName = method.isAnnotationPresent(Local.class) ? "subscribeLocal" : "subscribe";
 
     final String subject = CDI.getSubjectNameByType(parmClassName);
-    final Annotation[] qualifiers = InjectUtil.extractQualifiers(injectionPoint).toArray(new Annotation[0]);
+    final Annotation[] qualifiers = InjectUtil.extractQualifiers(injectableInstance).toArray(new Annotation[0]);
     final Set<String> qualifierNames = CDI.getQualifiersPart(qualifiers);
 
     BlockBuilder<AnonymousClassStructureBuilderImpl> callBackBlock = ObjectBuilder
@@ -102,7 +102,7 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
             Stmt.create().declareVariable("response", Object.class,
                 Stmt.create().loadVariable("message").invoke("get", parm.getType().asClass(), CDIProtocol.OBJECT_REF)))
         .append(
-            Stmt.create().loadVariable(injectionPoint.getInjector().getVarName())
+            Stmt.create().loadVariable(injectableInstance.getInjector().getVarName())
                 .invoke(method.getName(), Cast.to(parm.getType(), Refs.get("response"))))
          .finish());
 

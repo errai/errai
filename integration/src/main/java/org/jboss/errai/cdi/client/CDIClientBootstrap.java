@@ -31,7 +31,7 @@ import com.google.gwt.core.client.EntryPoint;
 /**
  * The GWT entry point
  */
-public class GWTBootstrap implements EntryPoint {
+public class CDIClientBootstrap implements EntryPoint {
   public void onModuleLoad() {
     final ClientMessageBusImpl bus = (ClientMessageBusImpl) ErraiBus.get();
 

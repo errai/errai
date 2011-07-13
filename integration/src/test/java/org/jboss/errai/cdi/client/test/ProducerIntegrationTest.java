@@ -5,7 +5,7 @@ import org.junit.Ignore;
 
 /**
  * Tests CDI producers.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Ignore
@@ -27,10 +27,10 @@ public class ProducerIntegrationTest extends AbstractErraiCDITest {
     assertNotNull("Failed to produce @C", ProducerTestModule.getInstance().getNumberC());
 
     assertEquals("Failed to inject produced @A", ProducerTestModule.getInstance().getNumberA(), ProducerTestModule
-        .getInstance().getInjectedNumberA());
+            .getInstance().getTestBean().getaInteger());
     assertEquals("Failed to inject produced @B", ProducerTestModule.getInstance().getNumberB(), ProducerTestModule
-        .getInstance().getInjectedNumberB());
-    assertEquals("Failed to inject produced @C", new Integer(ProducerTestModule.getInstance().getNumberC()).toString(),
-        ProducerTestModule.getInstance().getInjectedString());
+            .getInstance().getTestBean().getbInteger());
+    assertEquals("Failed to inject produced @C", ProducerTestModule.getInstance().getNumberC(), ProducerTestModule
+            .getInstance().getTestBean().getcInteger());
   }
 }

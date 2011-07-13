@@ -1,6 +1,6 @@
 package org.jboss.errai.cdi.client.test;
 
-import org.jboss.errai.cdi.client.GWTBootstrap;
+import org.jboss.errai.cdi.client.CDIClientBootstrap;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
 
 import com.google.gwt.core.client.GWT;
@@ -23,6 +23,6 @@ public abstract class AbstractErraiCDITest extends GWTTestCase {
 
     // Unfortunately, GWTTestCase does not call our inherited module's onModuleLoad() methods
     // http://code.google.com/p/google-web-toolkit/issues/detail?id=3791
-    new GWTBootstrap().onModuleLoad();
+    new CDIClientBootstrap().onModuleLoad();
   }
 }

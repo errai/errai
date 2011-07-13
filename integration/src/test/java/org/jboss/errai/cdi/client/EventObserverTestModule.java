@@ -53,7 +53,7 @@ public class EventObserverTestModule {
   }
 
   /**
-   * count the {@link BusReadyEvents}
+   * count the {@link BusReadyEvent}
    */
   public void onBusReady(@Observes BusReadyEvent event) {
     busReadyEventsReceived++;

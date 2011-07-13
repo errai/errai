@@ -20,7 +20,7 @@ import org.jboss.errai.cdi.client.api.ConversationContext;
 import org.jboss.errai.cdi.client.api.Event;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.IOCDecoratorExtension;
-import org.jboss.errai.ioc.rebind.ioc.InjectionPoint;
+import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
@@ -42,9 +42,9 @@ public class ConversationExtension extends IOCDecoratorExtension<ConversationCon
   }
 
   @Override
-  public Statement generateDecorator(InjectionPoint<ConversationContext> injectionPoint) {
-    final MetaField field = injectionPoint.getField();
-    final JClassType eventClassType = injectionPoint.getInjectionContext().getProcessingContext()
+  public Statement generateDecorator(InjectableInstance<ConversationContext> injectableInstance) {
+    final MetaField field = injectableInstance.getField();
+    final JClassType eventClassType = injectableInstance.getInjectionContext().getProcessingContext()
         .loadClassType(Event.class);
 
     if (!MetaClassFactory.get(eventClassType).isAssignableFrom(field.getType())) {
@@ -58,7 +58,7 @@ public class ConversationExtension extends IOCDecoratorExtension<ConversationCon
 
     MetaClass typeParm = (MetaClass) type.getTypeParameters()[0];
     String toSubject = CDI.getSubjectNameByType(typeParm.getFullyQualifiedName());
-    Statement statement = Stmt.create().nestedCall(injectionPoint.getValueExpression())
+    Statement statement = Stmt.create().nestedCall(injectableInstance.getValueStatement())
         .invoke("registerConversation", Stmt.create().invokeStatic(CDI.class, "createConversation", toSubject));
 
     return statement;

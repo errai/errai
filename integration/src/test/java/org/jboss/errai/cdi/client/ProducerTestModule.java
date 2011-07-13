@@ -4,6 +4,7 @@ import java.util.Random;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.inject.Produces;
+import javax.inject.Inject;
 
 import org.jboss.errai.cdi.client.qualifier.A;
 import org.jboss.errai.cdi.client.qualifier.B;
@@ -19,15 +20,12 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
 public class ProducerTestModule {
   private static ProducerTestModule instance;
 
-  //@Inject @A
-  private Integer injectedNumberA;
+  @Inject
+  private ProducerDependentTestBean testBean;
 
   @Produces
   @A
   private Integer numberA = new Random().nextInt();
-
-  //@Inject @B
-  private Integer injectedNumberB;
 
   private Integer numberB;
 
@@ -55,9 +53,6 @@ public class ProducerTestModule {
     return numberC;
   }
 
-  public Integer getInjectedNumberA() {
-    return injectedNumberA;
-  }
 
   public Integer getNumberA() {
     return numberA;
@@ -67,9 +62,6 @@ public class ProducerTestModule {
     return numberB;
   }
 
-  public Integer getInjectedNumberB() {
-    return injectedNumberB;
-  }
 
   public String getInjectedString() {
     return injectedString;
@@ -86,5 +78,9 @@ public class ProducerTestModule {
 
   public static ProducerTestModule getInstance() {
     return instance;
+  }
+
+  public ProducerDependentTestBean getTestBean() {
+    return testBean;
   }
 }

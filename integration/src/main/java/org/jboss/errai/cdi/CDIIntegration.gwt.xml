@@ -3,5 +3,5 @@
 <module>
     <inherits name='com.google.gwt.user.User'/>
     <!--inherits name="gwt.JavaxEnterprise"/-->
-    <entry-point class='org.jboss.errai.cdi.client.GWTBootstrap'/>
+    <entry-point class='org.jboss.errai.cdi.client.CDIClientBootstrap'/>
 </module>
