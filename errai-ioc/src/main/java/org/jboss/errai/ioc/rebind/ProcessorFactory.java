@@ -17,42 +17,268 @@
 package org.jboss.errai.ioc.rebind;
 
 import java.lang.annotation.Annotation;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Target;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.*;
 
 import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
+import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
+import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
+import org.jboss.errai.ioc.rebind.ioc.Injector;
 import org.jboss.errai.ioc.rebind.ioc.InjectorFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
+
+import static org.jboss.errai.ioc.rebind.ioc.InjectableInstance.getMethodInjectedInstance;
+import static org.jboss.errai.ioc.rebind.ioc.InjectableInstance.getTypeInjectedInstance;
 
 public class ProcessorFactory {
-  private Map<Class<? extends Annotation>, AnnotationHandler> annotationHandlers;
+  private SortedSet<ProcessingEntry> processingEntries = new TreeSet<ProcessingEntry>();
+
+  // private Map<Class<? extends Annotation>, AnnotationHandler> annotationHandlers;
   private InjectorFactory injectorFactory;
 
   public ProcessorFactory(InjectorFactory factory) {
-    this.annotationHandlers = new HashMap<Class<? extends Annotation>, AnnotationHandler>();
+    //   this.annotationHandlers = new HashMap<Class<? extends Annotation>, AnnotationHandler>();
     this.injectorFactory = factory;
   }
 
   public void registerHandler(Class<? extends Annotation> annotation, AnnotationHandler handler) {
-    annotationHandlers.put(annotation, handler);
+    //   annotationHandlers.put(annotation, handler);
+    processingEntries.add(new ProcessingEntry(annotation, handler));
   }
 
-  @SuppressWarnings({"unchecked"})
-  public void process(MetaDataScanner scanner, IOCProcessingContext context) {
-    for (Class<? extends Annotation> aClass : annotationHandlers.keySet()) {
-      Set<Class<?>> classes = scanner.getTypesAnnotatedWith(aClass);
-      for (Class<?> clazz : classes) {
-        if (clazz.getPackage().getName().contains("server")) {
-          continue;
-        }
+  public void registerHandler(Class<? extends Annotation> annotation, AnnotationHandler handler, List<RuleDef> rules) {
+    processingEntries.add(new ProcessingEntry(annotation, handler, rules));
+  }
 
-        MetaClass type = MetaClassFactory.get(context.getOracle(), clazz);
-        injectorFactory.addType(type);
-        annotationHandlers.get(aClass).handle(type, type.getAnnotation(aClass), context);
+
+  @SuppressWarnings({"unchecked"})
+  public void process(final MetaDataScanner scanner, final IOCProcessingContext context) {
+    /**
+     * Let's accumulate all the processing tasks.
+     */
+    for (final ProcessingEntry entry : processingEntries) {
+      Class<? extends Annotation> aClass = entry.annotationClass;
+      Target target = aClass.getAnnotation(Target.class);
+
+      for (ElementType elementType : target.value()) {
+        switch (elementType) {
+          case TYPE: {
+            Set<Class<?>> classes = scanner.getTypesAnnotatedWith(aClass);
+            for (final Class<?> clazz : classes) {
+              if (clazz.getPackage().getName().contains("server")) {
+                continue;
+              }
+
+              final Annotation aInstance = clazz.getAnnotation(aClass);
+
+              entry.addProcessingDelegate(new ProcessingDelegate<MetaClass>() {
+                @Override
+                public boolean process() {
+                  final MetaClass type = MetaClassFactory.get(context.getOracle(), clazz);
+                  injectorFactory.addType(type);
+
+                  Injector injector = injectorFactory.getInjectionContext().getInjector(type);
+                  final InjectableInstance injectableInstance
+                          = getTypeInjectedInstance(aInstance, type, injector, injectorFactory.getInjectionContext());
+                  return entry.handler.handle(injectableInstance, aInstance, context);
+                }
+
+
+                public String toString() {
+                  return clazz.getName();
+                }
+              });
+            }
+          }
+          break;
+
+          case METHOD: {
+            Set<Method> methods = scanner.getMethodsAnnotatedWith(aClass);
+
+            for (Method method : methods) {
+              final Annotation aInstance = method.getAnnotation(aClass);
+
+              final MetaClass type = MetaClassFactory.get(method.getDeclaringClass());
+              final MetaMethod metaMethod = MetaClassFactory.get(method);
+
+              entry.addProcessingDelegate(new ProcessingDelegate<MetaField>() {
+                @Override
+                public boolean process() {
+                  injectorFactory.addType(type);
+                  Injector injector = injectorFactory.getInjectionContext().getInjector(type);
+                  final InjectableInstance injectableInstance
+                          = getMethodInjectedInstance(aInstance, metaMethod, injector,
+                          injectorFactory.getInjectionContext());
+                  return entry.handler.handle(injectableInstance, aInstance, context);
+                }
+
+                public String toString() {
+                  return type.getFullyQualifiedName();
+                }
+              });
+
+            }
+          }
+
+          case FIELD: {
+            Set<Field> fields = scanner.getFieldsAnnotatedWith(aClass);
+
+            for (Field method : fields) {
+              final Annotation aInstance = method.getAnnotation(aClass);
+
+              final MetaClass type = MetaClassFactory.get(method.getDeclaringClass());
+              final MetaField metaField = MetaClassFactory.get(method);
+
+              entry.addProcessingDelegate(new ProcessingDelegate<MetaField>() {
+                @Override
+                public boolean process() {
+                  injectorFactory.addType(type);
+                  Injector injector = injectorFactory.getInjectionContext().getInjector(type);
+                  final InjectableInstance injectableInstance
+                          = InjectableInstance.getFieldInjectedInstance(aInstance, metaField, injector,
+                          injectorFactory.getInjectionContext());
+                  return entry.handler.handle(injectableInstance, aInstance, context);
+                }
+
+                public String toString() {
+                  return type.getFullyQualifiedName();
+                }
+              });
+            }
+          }
+        }
       }
     }
+  }
+
+  public boolean processAll() {
+    int start;
+
+    List<ProcessingEntry> procEntries = new ArrayList<ProcessingEntry>(processingEntries);
+
+    // brute force FTW
+    do {
+      start = procEntries.size();
+
+     // List<ProcessingEntry> toRun = new ArrayList<ProcessingEntry>(procEntries);
+
+      Iterator<ProcessingEntry> iter = procEntries.iterator();
+
+      while (iter.hasNext()) {
+        if (iter.next().processAllDelegates()) {
+          iter.remove();
+        }
+      }
+    } while (!procEntries.isEmpty() && procEntries.size() < start);
+
+
+    // aww man, something's screwed.
+    if (!procEntries.isEmpty()) {
+      // throw a meaningless exception
+      throw new RuntimeException("unresolved dependences: " + processingEntries);
+    }
+
+    return true;
+  }
+
+  private class ProcessingEntry<T> implements Comparable<ProcessingEntry> {
+    private Class<? extends Annotation> annotationClass;
+    private AnnotationHandler handler;
+    private Set<RuleDef> rules;
+    private List<ProcessingDelegate<T>> targets = new ArrayList<ProcessingDelegate<T>>();
+
+    private ProcessingEntry(Class<? extends Annotation> annotationClass, AnnotationHandler handler) {
+      this.annotationClass = annotationClass;
+      this.handler = handler;
+    }
+
+    private ProcessingEntry(Class<? extends Annotation> annotationClass, AnnotationHandler handler,
+                            List<RuleDef> rule) {
+      this.annotationClass = annotationClass;
+      this.handler = handler;
+      this.rules = new HashSet<RuleDef>(rule);
+    }
+
+    public boolean processAllDelegates() {
+      int start;
+
+      do {
+        start = targets.size();
+
+        Iterator<ProcessingDelegate<T>> iterator = targets.iterator();
+
+        while (iterator.hasNext()) {
+          if (iterator.next().process()) {
+            iterator.remove();
+          }
+        }
+
+      } while (!targets.isEmpty() && targets.size() < start);
+
+      return targets.isEmpty();
+    }
+
+    public void addProcessingDelegate(ProcessingDelegate<T> delegate) {
+      targets.add(delegate);
+    }
+
+    @Override
+    public int compareTo(ProcessingEntry processingEntry) {
+      if (rules != null) {
+        for (RuleDef def : rules) {
+          if (!def.relAnnotation.equals(annotationClass)) {
+            continue;
+          }
+
+          switch (def.order) {
+            case After:
+              return 1;
+            case Before:
+              return -1;
+          }
+        }
+      }
+      else if (processingEntry.rules != null) {
+        for (RuleDef def : (Set<RuleDef>) processingEntry.rules) {
+          if (!def.relAnnotation.equals(annotationClass)) {
+            continue;
+          }
+
+          switch (def.order) {
+            case After:
+              return -1;
+            case Before:
+              return 1;
+          }
+        }
+      }
+
+      return -1;
+    }
+
+    public String toString() {
+      return "Scope:" + annotationClass.getName() + "(" + targets.toString() + ")";
+    }
+  }
+
+  static class RuleDef {
+    private Class<? extends Annotation> relAnnotation;
+    private RelativeOrder order;
+
+    RuleDef(Class<? extends Annotation> relAnnotation, RelativeOrder order) {
+      this.relAnnotation = relAnnotation;
+      this.order = order;
+    }
+  }
+
+  private static interface ProcessingDelegate<T> {
+    public boolean process();
   }
 
 }

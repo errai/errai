@@ -39,15 +39,15 @@ public class ContextualProviderInjector extends TypeInjector {
   }
 
   @Override
-  public Statement getType(InjectionContext injectContext, InjectionPoint injectionPoint) {
+  public Statement getType(InjectionContext injectContext, InjectableInstance injectableInstance) {
 
     MetaClass type = null;
     MetaParameterizedType pType = null;
 
-    switch (injectionPoint.getTaskType()) {
+    switch (injectableInstance.getTaskType()) {
       case PrivateField:
       case Field:
-        MetaField field = injectionPoint.getField();
+        MetaField field = injectableInstance.getField();
         type = field.getType();
 
         pType = type.getParameterizedType();
@@ -58,7 +58,7 @@ public class ContextualProviderInjector extends TypeInjector {
         break;
 
       case Parameter:
-        MetaParameter parm = injectionPoint.getParm();
+        MetaParameter parm = injectableInstance.getParm();
         type = parm.getType();
 
         pType = type.getParameterizedType();
@@ -70,20 +70,20 @@ public class ContextualProviderInjector extends TypeInjector {
     Statement statement;
 
     if (pType == null) {
-      statement = Stmt.create().nestedCall(providerInjector.getType(injectContext, injectionPoint))
+      statement = Stmt.create().nestedCall(providerInjector.getType(injectContext, injectableInstance))
               .invoke("provide", new Class[0]);
     }
     else {
       MetaType[] typeArgs = pType.getTypeParameters();
 
-      Annotation[] qualifiers = injectionPoint.getQualifiers();
+      Annotation[] qualifiers = injectableInstance.getQualifiers();
       if (qualifiers.length != 0) {
 
-        statement = Stmt.create().nestedCall(providerInjector.getType(injectContext, injectionPoint))
+        statement = Stmt.create().nestedCall(providerInjector.getType(injectContext, injectableInstance))
                 .invoke("provide", typeArgs, qualifiers);
       }
       else {
-        statement = Stmt.create().nestedCall(providerInjector.getType(injectContext, injectionPoint))
+        statement = Stmt.create().nestedCall(providerInjector.getType(injectContext, injectableInstance))
                 .invoke("provide", typeArgs, null);
 
       }
@@ -103,8 +103,8 @@ public class ContextualProviderInjector extends TypeInjector {
   }
 
   @Override
-  public Statement instantiateOnly(InjectionContext injectContext, InjectionPoint injectionPoint) {
+  public Statement instantiateOnly(InjectionContext injectContext, InjectableInstance injectableInstance) {
     injected = true;
-    return providerInjector.getType(injectContext, injectionPoint);
+    return providerInjector.getType(injectContext, injectableInstance);
   }
 }

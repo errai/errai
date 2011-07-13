@@ -31,5 +31,5 @@ public abstract class IOCDecoratorExtension<T extends Annotation> {
     return decoratesWith;
   }
 
-  public abstract Statement generateDecorator(InjectionPoint<T> ctx);
+  public abstract Statement generateDecorator(InjectableInstance<T> ctx);
 }

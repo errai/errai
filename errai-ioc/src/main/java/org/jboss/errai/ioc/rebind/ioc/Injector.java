@@ -22,13 +22,13 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 public abstract class Injector {
   protected QualifyingMetadata qualifyingMetadata;
 
-  public abstract Statement instantiateOnly(InjectionContext injectContext, InjectionPoint injectionPoint);
+  public abstract Statement instantiateOnly(InjectionContext injectContext, InjectableInstance injectableInstance);
 
-  public Statement getType(InjectionPoint injectionPoint) {
-    return getType(injectionPoint.getInjectionContext(), injectionPoint);
+  public Statement getType(InjectableInstance injectableInstance) {
+    return getType(injectableInstance.getInjectionContext(), injectableInstance);
   }
 
-  public abstract Statement getType(InjectionContext injectContext, InjectionPoint injectionPoint);
+  public abstract Statement getType(InjectionContext injectContext, InjectableInstance injectableInstance);
 
   public abstract boolean isInjected();
 

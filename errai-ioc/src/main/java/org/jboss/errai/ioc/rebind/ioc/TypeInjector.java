@@ -57,7 +57,7 @@ public class TypeInjector extends Injector {
   }
 
   @Override
-  public Statement getType(InjectionContext injectContext, InjectionPoint injectionPoint) {
+  public Statement getType(InjectionContext injectContext, InjectableInstance injectableInstance) {
     if (isInjected()) {
       if (isSingleton()) {
         return Refs.get(varName);
@@ -75,8 +75,8 @@ public class TypeInjector extends Injector {
   }
 
   @Override
-  public Statement instantiateOnly(InjectionContext injectContext, InjectionPoint injectionPoint) {
-    return getType(injectContext, injectionPoint);
+  public Statement instantiateOnly(InjectionContext injectContext, InjectableInstance injectableInstance) {
+    return getType(injectContext, injectableInstance);
   }
 
   @Override

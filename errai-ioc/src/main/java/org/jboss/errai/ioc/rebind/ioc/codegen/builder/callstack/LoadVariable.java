@@ -24,7 +24,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.util.GenUtil;
 
 /**
  * {@link CallElement} to load {@link VariableReference}s. Indexes can be provided in case of an array.
- * 
+ *
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -42,13 +42,13 @@ public class LoadVariable extends AbstractCallElement {
     this(variableName, indexes);
     this.classMember = classMember;
   }
-  
+
   @Override
   public void handleCall(CallWriter writer, Context context, Statement statement) {
     writer.reset();
 
-    VariableReference ref = (classMember)?context.getClassMember(variableName):context.getVariable(variableName);
-    
+    VariableReference ref = (classMember) ? context.getClassMember(variableName) : context.getVariable(variableName);
+
     Statement[] indexes = new Statement[this.indexes.length];
     for (int i = 0; i < indexes.length; i++) {
       indexes[i] = GenUtil.generate(context, this.indexes[i]);

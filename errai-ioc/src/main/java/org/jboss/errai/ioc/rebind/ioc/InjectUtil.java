@@ -74,8 +74,6 @@ public class InjectUtil {
 
 
     if (!constructorInjectionPoints.isEmpty()) {
-      // constructor injection
-
       if (constructorInjectionPoints.size() > 1) {
         throw new InjectionFailure("more than one constructor in "
                 + type.getFullyQualifiedName() + " is marked as the injection point!");
@@ -146,7 +144,9 @@ public class InjectUtil {
   private static void handleInjectionTasks(InjectionContext ctx,
                                            List<InjectionTask> tasks) {
     for (InjectionTask task : tasks) {
-      task.doTask(ctx);
+      if (!task.doTask(ctx)) {
+        ctx.deferTask(task);
+      }
     }
   }
 
@@ -178,7 +178,7 @@ public class InjectUtil {
       }
     }
 
-    for (MetaField field : type.getFields()) {
+    for (MetaField field : type.getDeclaredFields()) {
       if (isInjectionPoint(field)) {
         if (!field.isPublic()) {
           MetaMethod meth = type.getMethod(ReflectionUtil.getSetter(field.getName()),
@@ -217,7 +217,7 @@ public class InjectUtil {
       }
     }
 
-    for (MetaMethod meth : type.getMethods()) {
+    for (MetaMethod meth : type.getDeclaredMethods()) {
       if (isInjectionPoint(meth)) {
         accumulator.add(new InjectionTask(injector, meth));
       }
@@ -311,6 +311,24 @@ public class InjectUtil {
   }
 
   public static Statement[] resolveInjectionDependencies(MetaParameter[] parms, InjectionContext ctx,
+                                                         MetaMethod method) {
+
+    MetaClass[] parmTypes = parametersToClassTypeArray(parms);
+    Statement[] parmValues = new Statement[parmTypes.length];
+
+    for (int i = 0; i < parmTypes.length; i++) {
+      Injector injector = ctx.getInjector(parmTypes[i]);
+
+      @SuppressWarnings({"unchecked"}) InjectableInstance injectableInstance
+              = new InjectableInstance(null, TaskType.Method, null, method, null, null, parms[i], injector, ctx);
+
+      parmValues[i] = injector.getType(ctx, injectableInstance);
+    }
+
+    return parmValues;
+  }
+
+  public static Statement[] resolveInjectionDependencies(MetaParameter[] parms, InjectionContext ctx,
                                                          MetaConstructor constructor) {
     MetaClass[] parmTypes = parametersToClassTypeArray(parms);
     Statement[] parmValues = new Statement[parmTypes.length];
@@ -318,22 +336,22 @@ public class InjectUtil {
     for (int i = 0; i < parmTypes.length; i++) {
       Injector injector = ctx.getInjector(parmTypes[i]);
 
-      @SuppressWarnings({"unchecked"}) InjectionPoint injectionPoint
-              = new InjectionPoint(null, TaskType.Parameter, constructor, null, null, null, parms[i], injector, ctx);
+      @SuppressWarnings({"unchecked"}) InjectableInstance injectableInstance
+              = new InjectableInstance(null, TaskType.Parameter, constructor, null, null, null, parms[i], injector, ctx);
 
-      parmValues[i] = injector.getType(ctx, injectionPoint);
+      parmValues[i] = injector.getType(ctx, injectableInstance);
     }
 
     return parmValues;
   }
 
   public static Statement[] resolveInjectionDependencies(MetaParameter[] parms,
-                                                         InjectionContext ctx, InjectionPoint injectionPoint) {
+                                                         InjectionContext ctx, InjectableInstance injectableInstance) {
     MetaClass[] parmTypes = parametersToClassTypeArray(parms);
     Statement[] parmValues = new Statement[parmTypes.length];
 
     for (int i = 0; i < parmTypes.length; i++) {
-      parmValues[i] = ctx.getInjector(parmTypes[i]).getType(ctx, injectionPoint);
+      parmValues[i] = ctx.getInjector(parmTypes[i]).getType(ctx, injectableInstance);
     }
 
     return parmValues;
@@ -384,21 +402,21 @@ public class InjectUtil {
     return annotationsCache;
   }
 
-  public static Annotation[] extractQualifiersAsArray(InjectionPoint<?> injectionPoint) {
-    List<Annotation> annos = extractQualifiers(injectionPoint);
+  public static Annotation[] extractQualifiersAsArray(InjectableInstance<?> injectableInstance) {
+    List<Annotation> annos = extractQualifiers(injectableInstance);
     return annos.toArray(new Annotation[annos.size()]);
   }
 
-  public static List<Annotation> extractQualifiers(InjectionPoint<? extends Annotation> injectionPoint) {
-    switch (injectionPoint.getTaskType()) {
+  public static List<Annotation> extractQualifiers(InjectableInstance<? extends Annotation> injectableInstance) {
+    switch (injectableInstance.getTaskType()) {
       case Field:
-        return extractQualifiersFromField(injectionPoint.getField());
+        return extractQualifiersFromField(injectableInstance.getField());
       case Method:
-        return extractQualifiersFromMethod(injectionPoint.getMethod());
+        return extractQualifiersFromMethod(injectableInstance.getMethod());
       case Parameter:
-        return extractQualifiersFromParameter(injectionPoint.getParm());
+        return extractQualifiersFromParameter(injectableInstance.getParm());
       case Type:
-        return extractQualifiersFromType(injectionPoint.getType());
+        return extractQualifiersFromType(injectableInstance.getType());
       default:
         return Collections.emptyList();
     }

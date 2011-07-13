@@ -29,16 +29,16 @@ public class ProviderInjector extends TypeInjector {
   }
 
   @Override
-  public Statement getType(InjectionContext injectContext, InjectionPoint injectionPoint) {
+  public Statement getType(InjectionContext injectContext, InjectableInstance injectableInstance) {
     injected = true;
 
-    return Stmt.create().nestedCall(providerInjector.getType(injectContext, injectionPoint))
+    return Stmt.create().nestedCall(providerInjector.getType(injectContext, injectableInstance))
                     .invoke("provide");
   }
 
   @Override
-  public Statement instantiateOnly(InjectionContext injectContext, InjectionPoint injectionPoint) {
+  public Statement instantiateOnly(InjectionContext injectContext, InjectableInstance injectableInstance) {
     injected = true;
-    return providerInjector.getType(injectContext, injectionPoint);
+    return providerInjector.getType(injectContext, injectableInstance);
   }
 }

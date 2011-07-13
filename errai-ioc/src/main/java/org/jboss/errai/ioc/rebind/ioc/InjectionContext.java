@@ -19,14 +19,7 @@ package org.jboss.errai.ioc.rebind.ioc;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
@@ -38,7 +31,9 @@ public class InjectionContext {
   private Map<MetaClass, List<Injector>> injectors = new LinkedHashMap<MetaClass, List<Injector>>();
   private Map<Class<? extends Annotation>, List<IOCDecoratorExtension>> decorators = new LinkedHashMap<Class<? extends Annotation>, List<IOCDecoratorExtension>>();
   private Map<ElementType, Set<Class<? extends Annotation>>> decoratorsByElementType = new LinkedHashMap<ElementType, Set<Class<? extends Annotation>>>();
-  private List<MetaField> privateFieldsToExpose = new ArrayList<MetaField>();
+  private List<InjectionTask> deferredInjectionTasks = new ArrayList<InjectionTask>();
+
+  private Collection<MetaField> privateFieldsToExpose = new LinkedHashSet<MetaField>();
 
   public InjectionContext(IOCProcessingContext processingContext) {
     this.processingContext = processingContext;
@@ -58,12 +53,22 @@ public class InjectionContext {
           return inj;
         }
         else if (metadata != null && inj.getQualifyingMetadata() != null
-            && metadata.doesSatisfy(inj.getQualifyingMetadata())) {
+                && metadata.doesSatisfy(inj.getQualifyingMetadata())) {
           return inj;
         }
       }
     }
     throw new InjectionFailure("could not resolve type for injection: " + erased.getFullyQualifiedName());
+  }
+
+  public boolean isInjectable(MetaClass injectorType) {
+    if (injectors.containsKey(injectorType)) {
+      Injector injector = injectors.get(injectorType).get(0);
+      return !(injector.isSingleton() && !injector.isInjected());
+    }
+    else {
+      return false;
+    }
   }
 
   public Injector getInjector(Class<?> injectorType) {
@@ -78,7 +83,7 @@ public class InjectionContext {
     List<Injector> injectorList = injectors.get(erased);
     if (injectorList.size() > 1) {
       throw new InjectionFailure("ambiguous injection type (multiple injectors resolved): "
-          + erased.getFullyQualifiedName());
+              + erased.getFullyQualifiedName());
     }
     else if (injectorList.isEmpty()) {
       throw new InjectionFailure("could not resolve type for injection: " + erased.getFullyQualifiedName());
@@ -164,8 +169,54 @@ public class InjectionContext {
     }
   }
 
-  public List<MetaField> getPrivateFieldsToExpose() {
-    return privateFieldsToExpose;
+  // Set<Injector> deferred = new HashSet<Injector>();
+
+  public void deferTask(InjectionTask injectionTask) {
+//    if (deferred.contains(injectionTask.getInjector().g)) return;
+    //   deferred.add(injectionTask.getInjector());
+
+    deferredInjectionTasks.add(injectionTask);
+  }
+
+  public void runAllDeferred() {
+
+    int start;
+    List<InjectionTask> toExecute = new ArrayList<InjectionTask>(deferredInjectionTasks);
+
+    do {
+      start = toExecute.size();
+
+      Iterator<InjectionTask> iter = toExecute.iterator();
+
+      while (iter.hasNext()) {
+        if (iter.next().doTask(this)) {
+          iter.remove();
+        }
+      }
+    } while (!toExecute.isEmpty() && toExecute.size() < start);
+
+    if (!toExecute.isEmpty()) {
+      StringBuilder sbuf = new StringBuilder();
+      for (InjectionTask task : toExecute) {
+        sbuf.append(" - ").append(task.getInjector().getInjectedType()).append("\n");
+      }
+
+      throw new RuntimeException("unsatified depedencies:\n" + sbuf);
+    }
+
+    //  deferred.clear();
+  }
+
+  private Set<String> exposedFields = new HashSet<String>();
+
+  public void addExposedField(MetaField field) {
+    if (exposedFields.contains(field.toString())) return;
+    exposedFields.add(field.toString());
+    privateFieldsToExpose.add(field);
+  }
+
+  public Collection<MetaField> getPrivateFieldsToExpose() {
+    return Collections.unmodifiableCollection(privateFieldsToExpose);
   }
 
   public IOCProcessingContext getProcessingContext() {

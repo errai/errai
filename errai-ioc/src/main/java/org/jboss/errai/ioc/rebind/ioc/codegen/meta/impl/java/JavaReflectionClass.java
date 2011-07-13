@@ -139,7 +139,7 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
   @Override
   public MetaField getField(String name) {
     try {
-      return new JavaReflectionField(getEnclosedMetaObject().getField(name));
+      return new JavaReflectionField(getEnclosedMetaObject().getDeclaredField(name));
     }
     catch (Exception e) {
       throw new RuntimeException("Could not get field: " + name, e);

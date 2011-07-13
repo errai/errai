@@ -20,10 +20,7 @@ import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.framework.MessageBus;
@@ -41,13 +38,7 @@ import org.jboss.errai.ioc.client.api.IOCProvider;
 import org.jboss.errai.ioc.client.api.ToPanel;
 import org.jboss.errai.ioc.client.api.ToRootPanel;
 import org.jboss.errai.ioc.client.api.TypeProvider;
-import org.jboss.errai.ioc.rebind.ioc.ContextualProviderInjector;
-import org.jboss.errai.ioc.rebind.ioc.IOCDecoratorExtension;
-import org.jboss.errai.ioc.rebind.ioc.IOCExtensionConfigurator;
-import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
-import org.jboss.errai.ioc.rebind.ioc.InjectionFailure;
-import org.jboss.errai.ioc.rebind.ioc.InjectorFactory;
-import org.jboss.errai.ioc.rebind.ioc.ProviderInjector;
+import org.jboss.errai.ioc.rebind.ioc.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.DefParameters;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Modifier;
@@ -292,13 +283,18 @@ public class IOCGenerator extends Generator {
 
       final MetaClass finalBindType = bindType;
 
+      Injector injector;
       if (contextual) {
-        injectFactory.addInjector(new ContextualProviderInjector(finalBindType, type));
+        injector = new ContextualProviderInjector(finalBindType, type);
 
-      } else {
-        injectFactory.addInjector(new ProviderInjector(finalBindType, type));
       }
+      else {
+        injector = new ProviderInjector(finalBindType, type);
+      }
+
+      injectFactory.addInjector(injector);
     }
+
 
     /**
      * GeneratedBy.class
@@ -330,26 +326,27 @@ public class IOCGenerator extends Generator {
 
     MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
     procFactory.process(scanner, procContext);
+    procFactory.processAll();
 
     runAllDeferred();
 
     blockBuilder.append(Stmt.create().loadVariable("ctx").returnValue());
 
-    List<MetaField> privateFields = injectFactory.getInjectionContext().getPrivateFieldsToExpose();
+    Collection<MetaField> privateFields = injectFactory.getInjectionContext().getPrivateFieldsToExpose();
     for (MetaField f : privateFields) {
       classBuilder.privateMethod(void.class, InjectUtil.getPrivateFieldInjectorName(f))
-              .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance"), 
-                  Parameter.of(f.getType(), "value")))
+              .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance"),
+                      Parameter.of(f.getType(), "value")))
               .modifiers(Modifier.Static, Modifier.JSNI)
               .body()
-                .append(new StringStatement(JSNIUtil.fieldAccess(f) + " = value"))
+              .append(new StringStatement(JSNIUtil.fieldAccess(f) + " = value"))
               .finish();
 
       classBuilder.privateMethod(f.getType(), InjectUtil.getPrivateFieldInjectorName(f))
               .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance")))
               .modifiers(Modifier.Static, Modifier.JSNI)
               .body()
-                .append(new StringStatement("return " + JSNIUtil.fieldAccess(f)))
+              .append(new StringStatement("return " + JSNIUtil.fieldAccess(f)))
               .finish();
 
     }
@@ -362,7 +359,7 @@ public class IOCGenerator extends Generator {
 
     sourceWriter.print(classBuilder.toJavaString());
   }
-  
+
   public void addType(final MetaClass type) {
     injectFactory.addType(type);
   }
@@ -384,6 +381,8 @@ public class IOCGenerator extends Generator {
   }
 
   private void runAllDeferred() {
+    injectFactory.getInjectionContext().runAllDeferred();
+
     for (Runnable r : deferredTasks)
       r.run();
   }
@@ -404,70 +403,85 @@ public class IOCGenerator extends Generator {
 
     procFactory.registerHandler(EntryPoint.class, new AnnotationHandler<EntryPoint>() {
       @Override
-      public void handle(final MetaClass type, EntryPoint annotation, IOCProcessingContext context) {
-        addDeferred(new Runnable() {
-          @Override
-          public void run() {
-            generateWithSingletonSemantics(type);
-          }
-        });
+      public boolean handle(final InjectableInstance type, EntryPoint annotation, IOCProcessingContext context) {
+        generateWithSingletonSemantics(type.getType());
+
+//
+//        addDeferred(new Runnable() {
+//          @Override
+//          public void run() {
+//            generateWithSingletonSemantics(type.getType());
+//          }
+//        });
+
+        return true;
       }
     });
 
     procFactory.registerHandler(ToRootPanel.class, new AnnotationHandler<ToRootPanel>() {
       @Override
-      public void handle(final MetaClass type, final ToRootPanel annotation, final IOCProcessingContext context) {
-        if (widgetType.isAssignableFrom(type)) {
+      public boolean handle(final InjectableInstance type, final ToRootPanel annotation,
+                            final IOCProcessingContext context) {
+        if (widgetType.isAssignableFrom(type.getType())) {
 
           addDeferred(new Runnable() {
             @Override
             public void run() {
-              context.getWriter().println("ctx.addToRootPanel(" + generateWithSingletonSemantics(type) + ");");
+              context.getWriter().println("ctx.addToRootPanel(" + generateWithSingletonSemantics(type.getType()) + ");");
             }
           });
-        } else {
-          throw new InjectionFailure("type declares @" + annotation.getClass().getSimpleName()
-                  + "  but does not extend type Widget: " + type.getFullyQualifiedName());
         }
+        else {
+          throw new InjectionFailure("type declares @" + annotation.getClass().getSimpleName()
+                  + "  but does not extend type Widget: " + type.getType().getFullyQualifiedName());
+        }
+
+        return true;
       }
     });
 
     procFactory.registerHandler(CreatePanel.class, new AnnotationHandler<CreatePanel>() {
       @Override
-      public void handle(final MetaClass type, final CreatePanel annotation, final IOCProcessingContext context) {
-        if (widgetType.isAssignableFrom(type)) {
+      public boolean handle(final InjectableInstance type, final CreatePanel annotation,
+                            final IOCProcessingContext context) {
+        if (widgetType.isAssignableFrom(type.getType())) {
 
           addDeferred(new Runnable() {
             @Override
             public void run() {
               context.getWriter().println("ctx.registerPanel(\"" + (annotation.value().equals("")
-                      ? type.getName() : annotation.value()) + "\", " + generateInjectors(type) + ");");
+                      ? type.getType().getName() : annotation.value()) + "\", " + generateInjectors(type.getType()) + ");");
             }
           });
-        } else {
-          throw new InjectionFailure("type declares @" + annotation.getClass().getSimpleName()
-                  + "  but does not extend type Widget: " + type.getFullyQualifiedName());
         }
+        else {
+          throw new InjectionFailure("type declares @" + annotation.getClass().getSimpleName()
+                  + "  but does not extend type Widget: " + type.getType().getFullyQualifiedName());
+        }
+        return true;
       }
     });
 
     procFactory.registerHandler(ToPanel.class, new AnnotationHandler<ToPanel>() {
       @Override
-      public void handle(final MetaClass type, final ToPanel annotation, final IOCProcessingContext context) {
-        if (widgetType.isAssignableFrom(type)) {
+      public boolean handle(final InjectableInstance type, final ToPanel annotation,
+                            final IOCProcessingContext context) {
+        if (widgetType.isAssignableFrom(type.getType())) {
 
           addDeferred(new Runnable() {
             @Override
             public void run() {
               context.getWriter()
-                      .println("ctx.widgetToPanel(" + generateWithSingletonSemantics(type)
+                      .println("ctx.widgetToPanel(" + generateWithSingletonSemantics(type.getType())
                               + ", \"" + annotation.value() + "\");");
             }
           });
-        } else {
-          throw new InjectionFailure("type declares @" + annotation.getClass().getSimpleName()
-                  + "  but does not extend type Widget: " + type.getFullyQualifiedName());
         }
+        else {
+          throw new InjectionFailure("type declares @" + annotation.getClass().getSimpleName()
+                  + "  but does not extend type Widget: " + type.getType().getFullyQualifiedName());
+        }
+        return true;
       }
     });
   }

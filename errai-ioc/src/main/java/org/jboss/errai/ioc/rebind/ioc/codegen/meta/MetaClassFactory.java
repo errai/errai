@@ -17,6 +17,8 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -114,6 +116,14 @@ public final class MetaClassFactory {
 
   public static MetaClass get(TypeLiteral<?> literal) {
     return createOrGet(literal);
+  }
+
+  public static MetaMethod get(Method method) {
+    return get(method.getDeclaringClass()).getMethod(method.getName(), method.getParameterTypes());
+  }
+
+  public static MetaField get(Field field) {
+    return get(field.getDeclaringClass()).getField(field.getName());
   }
 
   public static Statement getAsStatement(Class<?> clazz) {

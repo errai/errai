@@ -27,4 +27,12 @@ public abstract class MetaField implements HasAnnotations, MetaClassMember {
 
   @Override
   public abstract Annotation[] getAnnotations();
+
+  public String toString() {
+    return MetaField.class.getName() + ":" + getDeclaringClass().getFullyQualifiedName() + "." + getName();
+  }
+
+  public int hashCode() {
+    return toString().hashCode();
+  }
 }

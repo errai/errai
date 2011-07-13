@@ -21,7 +21,7 @@ import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
-import org.jboss.errai.ioc.rebind.ioc.InjectionPoint;
+import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
@@ -34,7 +34,7 @@ public class ServiceIOCExtension extends IOCDecoratorExtension<Service> {
   }
 
   @Override
-  public Statement generateDecorator(InjectionPoint<Service> decContext) {
+  public Statement generateDecorator(InjectableInstance<Service> decContext) {
     final InjectionContext ctx = decContext.getInjectionContext();
 
     /**
@@ -57,6 +57,6 @@ public class ServiceIOCExtension extends IOCDecoratorExtension<Service> {
             ? decContext.getMemberName() : decContext.getAnnotation().value();
 
     return Stmt.create().nestedCall(busHandle)
-            .invoke("subscribe", svcName, decContext.getValueExpression());
+            .invoke("subscribe", svcName, decContext.getValueStatement());
   }
 }

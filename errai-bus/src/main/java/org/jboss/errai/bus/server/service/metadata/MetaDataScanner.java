@@ -19,6 +19,8 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import org.reflections.Reflections;
 import org.reflections.Store;
+import org.reflections.scanners.FieldAnnotationsScanner;
+import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.scanners.Scanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
 import org.reflections.util.ConfigurationBuilder;
@@ -64,8 +66,8 @@ public class MetaDataScanner extends Reflections {
         .setUrls(urls)
             //.filterInputsBy(new FilterBuilder().exclude(CLIENT_PKG_REGEX))
         .setScanners(
-            //new FieldAnnotationsScanner(),
-            //new MethodAnnotationsScanner(),
+            new FieldAnnotationsScanner(),
+            new MethodAnnotationsScanner(),
             new TypeAnnotationsScanner(),
             //new SubTypesScanner(),
             propScanner

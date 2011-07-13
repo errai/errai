@@ -27,6 +27,8 @@ import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.user.rebind.SourceWriter;
 
+import java.util.List;
+
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
@@ -34,6 +36,7 @@ public class IOCProcessingContext extends ProcessingContext {
   protected Context context;
   protected MetaClass bootstrapClass;
   protected BlockBuilder<?> blockBuilder;
+  protected List<Runnable> deferredTasks;
 
   public IOCProcessingContext(TreeLogger treeLogger,
                               GeneratorContext generatorContext,

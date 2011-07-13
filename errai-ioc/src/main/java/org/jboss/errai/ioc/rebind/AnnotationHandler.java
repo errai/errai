@@ -18,8 +18,10 @@ package org.jboss.errai.ioc.rebind;
 
 import java.lang.annotation.Annotation;
 
+import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
+import org.jboss.errai.ioc.rebind.ioc.Injector;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 public interface AnnotationHandler<T extends Annotation> {
-  public void handle(MetaClass type, T annotation, IOCProcessingContext context);
+  public boolean handle(InjectableInstance instance, T annotation, IOCProcessingContext context);
 }

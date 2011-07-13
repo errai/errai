@@ -19,8 +19,8 @@ package org.jboss.errai.ioc.rebind.decorators.builtin;
 import org.jboss.errai.bus.client.api.annotations.ReplyTo;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.IOCDecoratorExtension;
+import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
-import org.jboss.errai.ioc.rebind.ioc.InjectionPoint;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
@@ -35,13 +35,13 @@ public class ReplyToIOCExtension extends IOCDecoratorExtension<ReplyTo> {
   }
 
   @Override
-  public Statement generateDecorator(InjectionPoint<ReplyTo> injectionPoint) {
-    final InjectionContext ctx = injectionPoint.getInjectionContext();
+  public Statement generateDecorator(InjectableInstance<ReplyTo> injectableInstance) {
+    final InjectionContext ctx = injectableInstance.getInjectionContext();
 
-    final MetaField field = injectionPoint.getField();
+    final MetaField field = injectableInstance.getField();
     final ReplyTo context = field.getAnnotation(ReplyTo.class);
 
-     return Stmt.create().nestedCall(injectionPoint.getValueExpression())
+     return Stmt.create().nestedCall(injectableInstance.getValueStatement())
              .invoke("setReplyTo", context.value());
   }
 }

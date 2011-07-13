@@ -49,7 +49,7 @@ public class DecoratorTask extends InjectionTask {
 
   @SuppressWarnings({"unchecked"})
   @Override
-  public void doTask(InjectionContext ctx) {
+  public boolean doTask(InjectionContext ctx) {
     Annotation anno = null;
 
     for (IOCDecoratorExtension<? extends Annotation> dec : IOCExtensions) {
@@ -73,10 +73,12 @@ public class DecoratorTask extends InjectionTask {
 
       }
 
-      Statement stmt = dec.generateDecorator(new InjectionPoint(anno, injectType, constructor, method, field, type,
+      Statement stmt = dec.generateDecorator(new InjectableInstance(anno, injectType, constructor, method, field, type,
               parm, injector, ctx));
 
       ctx.getProcessingContext().append(stmt);
+
     }
+    return true;
   }
 }

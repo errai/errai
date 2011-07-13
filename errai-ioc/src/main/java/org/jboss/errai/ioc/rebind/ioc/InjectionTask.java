@@ -42,7 +42,7 @@ public class InjectionTask {
 
 
   public InjectionTask(Injector injector, MetaField field) {
-    this.injectType = field.isPrivate() ? TaskType.PrivateField : TaskType.Field;
+    this.injectType = !field.isPublic() ? TaskType.PrivateField : TaskType.Field;
     this.injector = injector;
     this.field = field;
   }
@@ -66,57 +66,68 @@ public class InjectionTask {
   }
 
   @SuppressWarnings({"unchecked"})
-  public void doTask(InjectionContext ctx) {
+  public boolean doTask(InjectionContext ctx) {
     IOCProcessingContext processingContext = ctx.getProcessingContext();
 
-    InjectionPoint<? extends Annotation> injectionPoint
-        = new InjectionPoint(null, injectType, constructor, method, field, type, parm, injector, ctx);
+    InjectableInstance<? extends Annotation> injectableInstance
+            = new InjectableInstance(null, injectType, constructor, method, field, type, parm, injector, ctx);
 
     Injector inj;
 
     switch (injectType) {
       case Type:
         ctx.getQualifiedInjector(type,
-            JSR299QualifyingMetadata.createFromAnnotations(injectionPoint.getQualifiers()));
+                JSR299QualifyingMetadata.createFromAnnotations(injectableInstance.getQualifiers()));
         break;
 
       case PrivateField:
+        if (!ctx.isInjectable(field.getType())) {
+          return false;
+        }
+
         inj = ctx.getQualifiedInjector(field.getType(),
-            JSR299QualifyingMetadata.createFromAnnotations(injectionPoint.getQualifiers()));
+                JSR299QualifyingMetadata.createFromAnnotations(injectableInstance.getQualifiers()));
 
         processingContext.append(
-            Stmt.create()
-                    .invokeStatic(processingContext.getBootstrapClass(), getPrivateFieldInjectorName(field),
-                            Refs.get(injector.getVarName()), inj.getType(ctx, injectionPoint))
+                Stmt.create()
+                        .invokeStatic(processingContext.getBootstrapClass(), getPrivateFieldInjectorName(field),
+                                Refs.get(injector.getVarName()), inj.getType(ctx, injectableInstance))
         );
 
-        ctx.getPrivateFieldsToExpose().add(field);
+        ctx.addExposedField(field);
         break;
 
       case Field:
-        inj = ctx.getQualifiedInjector(field.getType(),
-            JSR299QualifyingMetadata.createFromAnnotations(injectionPoint.getQualifiers()));
+        if (!ctx.isInjectable(field.getType())) {
+          return false;
+        }
 
+        inj = ctx.getQualifiedInjector(field.getType(),
+                JSR299QualifyingMetadata.createFromAnnotations(injectableInstance.getQualifiers()));
 
         processingContext.append(
                 Stmt.create().
                         loadVariable(injector.getVarName()).loadField(field.getName()).assignValue(inj.getType(ctx,
-                        injectionPoint))
+                        injectableInstance))
         );
 
         break;
 
       case Method:
+        if (!ctx.isInjectable(method.getReturnType())) {
+          return false;
+        }
 
         processingContext.append(
                 Stmt.create()
-                .loadVariable(injector.getVarName()).invoke(method,
-                        resolveInjectionDependencies(method.getParameters(), ctx, injectionPoint))
+                        .loadVariable(injector.getVarName()).invoke(method,
+                        resolveInjectionDependencies(method.getParameters(), ctx, injectableInstance))
         );
 
         break;
     }
 
+    return true;
   }
 
   public TaskType getInjectType() {
