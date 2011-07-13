@@ -58,8 +58,8 @@ public class ConversationExtension extends IOCDecoratorExtension<ConversationCon
 
     MetaClass typeParm = (MetaClass) type.getTypeParameters()[0];
     String toSubject = CDI.getSubjectNameByType(typeParm.getFullyQualifiedName());
-    Statement statement = Stmt.create().nestedCall(injectableInstance.getValueStatement())
-        .invoke("registerConversation", Stmt.create().invokeStatic(CDI.class, "createConversation", toSubject));
+    Statement statement = Stmt.nestedCall(injectableInstance.getValueStatement())
+        .invoke("registerConversation", Stmt.invokeStatic(CDI.class, "createConversation", toSubject));
 
     return statement;
   }
