@@ -317,7 +317,8 @@ public class InjectUtil {
     Statement[] parmValues = new Statement[parmTypes.length];
 
     for (int i = 0; i < parmTypes.length; i++) {
-      Injector injector = ctx.getInjector(parmTypes[i]);
+      Injector injector = ctx.getQualifiedInjector(parmTypes[i],
+              JSR299QualifyingMetadata.createFromAnnotations(parms[i].getAnnotations()));
 
       @SuppressWarnings({"unchecked"}) InjectableInstance injectableInstance
               = new InjectableInstance(null, TaskType.Method, null, method, null, null, parms[i], injector, ctx);

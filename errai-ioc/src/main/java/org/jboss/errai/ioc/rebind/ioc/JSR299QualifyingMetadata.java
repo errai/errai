@@ -34,6 +34,10 @@ public class JSR299QualifyingMetadata implements QualifyingMetadata {
     public Class<? extends Annotation> annotationType() {
       return Any.class;
     }
+
+    public String toString() {
+      return "@Any";
+    }
   };
 
   public JSR299QualifyingMetadata(Set<Annotation> qualifiers) {
@@ -55,7 +59,7 @@ public class JSR299QualifyingMetadata implements QualifyingMetadata {
   }
 
   public static JSR299QualifyingMetadata createFromAnnotations(Annotation[] annotations) {
-    if (annotations == null) return createDefaultQualifyingMetaData();
+    if (annotations == null || annotations.length == 0) return createDefaultQualifyingMetaData();
 
     Set<Annotation> qualifiers = new HashSet<Annotation>();
 
