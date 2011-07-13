@@ -39,44 +39,6 @@ public class MethodInvocation extends AbstractStatement {
   public MethodInvocation(MetaMethod method, CallParameters callParameters) {
     this.method = method;
     this.callParameters = callParameters;
-    resolveTypeVariables();
-  }
-
-  // Resolves type variables by inspecting call parameters
-  // TODO nested parameterized type are not supported.
-  private void resolveTypeVariables() {
-    int methodParmIndex = 0;
-    for (MetaType methodParmType : method.getGenericParameterTypes()) {
-      if (methodParmType instanceof MetaParameterizedType) {
-        int typeParmIndex = 0;
-        MetaParameterizedType parameterizedMethodParmType = (MetaParameterizedType) methodParmType;
-        for (MetaType typeParm : parameterizedMethodParmType.getTypeParameters()) {
-          resolveTypeVariable(typeParm, methodParmIndex, typeParmIndex++);
-        }
-      }
-      else {
-        resolveTypeVariable(methodParmType, methodParmIndex, 0);
-      }
-      methodParmIndex++;
-    }
-  }
-
-  private void resolveTypeVariable(MetaType parmType, int methodParmIndex, int typeParmIndex) {
-    if (parmType instanceof MetaTypeVariable) {
-      MetaTypeVariable typeVar = (MetaTypeVariable) parmType;
-      MetaClass callParmType = callParameters.getParameterTypes()[methodParmIndex];
-      MetaParameterizedType parameterizedCallParmType = callParmType.getParameterizedType();
-      if (parameterizedCallParmType != null) {
-        typeVariables.put(typeVar.getName(), (MetaClass) parameterizedCallParmType.getTypeParameters()[typeParmIndex]);
-      }
-      else {
-        Statement parm = callParameters.getParameters().get(methodParmIndex);
-        if (parm instanceof ClassLiteral) {
-          callParmType = ((ClassLiteral) parm).getActualType();
-        }
-        typeVariables.put(typeVar.getName(), (MetaClass) callParmType);
-      }
-    }
   }
 
   @Override
@@ -91,11 +53,56 @@ public class MethodInvocation extends AbstractStatement {
     MetaClass returnType = null;
 
     if (method.getGenericReturnType() != null && method.getGenericReturnType() instanceof MetaTypeVariable) {
-      // TODO Nested parameterized return types are not supported as of now.
+      resolveTypeVariables();
+      
       MetaTypeVariable typeVar = (MetaTypeVariable) method.getGenericReturnType();
       returnType = typeVariables.get(typeVar.getName());
     }
 
     return (returnType != null) ? returnType : method.getReturnType();
+  }
+  
+  // Resolves type variables by inspecting call parameters
+  private void resolveTypeVariables() {
+    int methodParmIndex = 0;
+    for (MetaType methodParmType : method.getGenericParameterTypes()) {
+      Statement parm = callParameters.getParameters().get(methodParmIndex);
+      
+      MetaType callParmType;
+      if (parm instanceof ClassLiteral) {
+        callParmType = ((ClassLiteral) parm).getActualType();
+      } else {
+        callParmType = callParameters.getParameterTypes()[methodParmIndex];
+      }
+      
+      resolveTypeVariable(methodParmType, callParmType);
+      methodParmIndex++;
+    }
+  }
+
+  private void resolveTypeVariable(MetaType methodParmType, MetaType callParmType) {
+    if (methodParmType instanceof MetaTypeVariable) {
+      MetaTypeVariable typeVar = (MetaTypeVariable) methodParmType;
+      typeVariables.put(typeVar.getName(), (MetaClass) callParmType);
+    }
+    else if (methodParmType instanceof MetaParameterizedType) {
+      MetaType parameterizedCallParmType;
+      if (callParmType instanceof MetaParameterizedType) {
+        parameterizedCallParmType = callParmType;
+      } else {
+        parameterizedCallParmType = ((MetaClass)callParmType).getParameterizedType(); 
+      }
+      
+      MetaParameterizedType parameterizedMethodParmType = (MetaParameterizedType) methodParmType;
+      int typeParmIndex = 0;
+      for (MetaType typeParm : parameterizedMethodParmType.getTypeParameters()) {
+        if (parameterizedCallParmType != null) {
+          resolveTypeVariable(typeParm, 
+              ((MetaParameterizedType) parameterizedCallParmType).getTypeParameters()[typeParmIndex++]);
+        } else {
+          resolveTypeVariable(typeParm, callParmType);
+        }
+      }
+    }
   }
 }

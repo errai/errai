@@ -17,7 +17,11 @@ public class Foo {
   public static <T> T bar(List<T> list) {
     return list.get(0);
   }
-  
+
+  public static <T, V> T bar(int n, List<List<Map<T, V>>> list) {
+    return null;
+  }
+
   public static <K, V> V bar(Map<K, V> map) {
     return map.get(null);
   }
