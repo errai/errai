@@ -85,8 +85,15 @@ public class InjectionTask {
           return false;
         }
 
-        inj = ctx.getQualifiedInjector(field.getType(),
-                JSR299QualifyingMetadata.createFromAnnotations(injectableInstance.getQualifiers()));
+        try {
+          inj = ctx.getQualifiedInjector(field.getType(),
+                  JSR299QualifyingMetadata.createFromAnnotations(injectableInstance.getQualifiers()));
+
+        }
+        catch (InjectionFailure e) {
+          e.setTarget(toString());
+          throw e;
+        }
 
         processingContext.append(
                 Stmt.create()
@@ -102,8 +109,14 @@ public class InjectionTask {
           return false;
         }
 
-        inj = ctx.getQualifiedInjector(field.getType(),
-                JSR299QualifyingMetadata.createFromAnnotations(injectableInstance.getQualifiers()));
+        try {
+          inj = ctx.getQualifiedInjector(field.getType(),
+                  JSR299QualifyingMetadata.createFromAnnotations(injectableInstance.getQualifiers()));
+        }
+        catch (InjectionFailure e) {
+          e.setTarget(toString());
+          throw e;
+        }
 
         processingContext.append(
                 Stmt.create().
@@ -154,5 +167,21 @@ public class InjectionTask {
   public void setField(MetaField field) {
     if (this.field == null)
       this.field = field;
+  }
+
+  public String toString() {
+    switch (injectType) {
+      case Type:
+        return type.getFullyQualifiedName();
+      case Method:
+        return method.getDeclaringClass().getFullyQualifiedName() + "." + method.getName() + "()::" + method
+                .getReturnType().getFullyQualifiedName();
+      case PrivateField:
+      case Field:
+        return field.getDeclaringClass().getFullyQualifiedName() + "." + field.getName() + "::" + field.getType()
+                .getFullyQualifiedName();
+    }
+
+    return null;
   }
 }

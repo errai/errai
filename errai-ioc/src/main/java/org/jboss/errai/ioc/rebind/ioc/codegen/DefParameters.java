@@ -38,8 +38,10 @@ public class DefParameters extends AbstractStatement {
 
   public static DefParameters from(MetaMethod method) {
     List<Parameter> parameters = new ArrayList<Parameter>();
+
+    int i = 0;
     for (MetaParameter parm : method.getParameters()) {
-      parameters.add(Parameter.of(parm.getType(), parm.getName()));
+      parameters.add(Parameter.of(parm.getType(), "a" + i++));
     }
     return new DefParameters(parameters);
   }
