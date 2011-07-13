@@ -47,6 +47,8 @@ public class InjectionContext {
     //todo: figure out why I was doing this.
     MetaClass erased = type;
     List<Injector> injs = injectors.get(erased);
+    List<Injector> matching = new ArrayList<Injector>();
+
     if (injs != null) {
       for (Injector inj : injs) {
         if (metadata == null && inj.getQualifyingMetadata() == null) {
@@ -54,11 +56,21 @@ public class InjectionContext {
         }
         else if (metadata != null && inj.getQualifyingMetadata() != null
                 && metadata.doesSatisfy(inj.getQualifyingMetadata())) {
-          return inj;
+          matching.add(inj);
         }
       }
     }
-    throw new InjectionFailure("could not resolve type for injection: " + erased.getFullyQualifiedName());
+
+    if (matching.isEmpty()) {
+      throw new InjectionFailure(erased);
+    }
+    else if (matching.size() > 1) {
+      throw new InjectionFailure("ambiguous injection type (multiple injectors resolved): " + erased
+              .getFullyQualifiedName() + (metadata == null ? "" : metadata.toString()));
+    }
+    else {
+      return matching.get(0);
+    }
   }
 
   public boolean isInjectable(MetaClass injectorType) {

@@ -17,13 +17,55 @@
 package org.jboss.errai.ioc.rebind.ioc;
 
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 public class InjectionFailure extends ErraiBootstrapFailure {
+  private MetaClass failedDependency;
+
+  private String target;
+
   public InjectionFailure(String message) {
     super(message);
   }
 
-  public InjectionFailure(String message, Throwable cause) {
-    super(message, cause);
+  public InjectionFailure(MetaClass failedDependency) {
+    this.failedDependency = failedDependency;
+  }
+
+  public InjectionFailure(MetaClass failedDependency, Throwable cause) {
+    super(cause);
+    this.failedDependency = failedDependency;
+  }
+
+
+  @Override
+  public String getMessage() {
+    StringBuilder buf = new StringBuilder();
+    if (failedDependency != null) {
+      buf.append("unable to resolve type injector for: ").append(failedDependency.getFullyQualifiedName());
+    }
+    else {
+      buf.append(super.getMessage().trim());
+    }
+    if (target != null) {
+      buf.append("; at injection point: ").append(target);
+    }
+    return buf.toString();
+  }
+
+  public MetaClass getFailedDependency() {
+    return failedDependency;
+  }
+
+  public void setFailedDependency(MetaClass failedDependency) {
+    this.failedDependency = failedDependency;
+  }
+
+  public String getTarget() {
+    return target;
+  }
+
+  public void setTarget(String target) {
+    this.target = target;
   }
 }

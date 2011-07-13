@@ -85,8 +85,15 @@ public class InjectionTask {
           return false;
         }
 
-        inj = ctx.getQualifiedInjector(field.getType(),
-                JSR299QualifyingMetadata.createFromAnnotations(injectableInstance.getQualifiers()));
+        try {
+          inj = ctx.getQualifiedInjector(field.getType(),
+                  JSR299QualifyingMetadata.createFromAnnotations(injectableInstance.getQualifiers()));
+
+        }
+        catch (InjectionFailure e) {
+          e.setTarget(toString());
+          throw e;
+        }
 
         processingContext.append(
                 Stmt.invokeStatic(processingContext.getBootstrapClass(), getPrivateFieldInjectorName(field),
@@ -101,8 +108,14 @@ public class InjectionTask {
           return false;
         }
 
-        inj = ctx.getQualifiedInjector(field.getType(),
-                JSR299QualifyingMetadata.createFromAnnotations(injectableInstance.getQualifiers()));
+        try {
+          inj = ctx.getQualifiedInjector(field.getType(),
+                  JSR299QualifyingMetadata.createFromAnnotations(injectableInstance.getQualifiers()));
+        }
+        catch (InjectionFailure e) {
+          e.setTarget(toString());
+          throw e;
+        }
 
         processingContext.append(
             Stmt.loadVariable(injector.getVarName()).loadField(field.getName()).assignValue(inj.getType(ctx,
@@ -112,13 +125,13 @@ public class InjectionTask {
         break;
 
       case Method:
-        if (!ctx.isInjectable(method.getReturnType())) {
+        if (!ctx.isInjectable(method.getParameters()[0].getType())) {
           return false;
         }
 
         processingContext.append(
-                Stmt.loadVariable(injector.getVarName()).invoke(method, 
-                    resolveInjectionDependencies(method.getParameters(), ctx, injectableInstance))
+                Stmt.loadVariable(injector.getVarName()).invoke(method,
+                        resolveInjectionDependencies(method.getParameters(), ctx, method))
         );
 
         break;
@@ -151,5 +164,21 @@ public class InjectionTask {
   public void setField(MetaField field) {
     if (this.field == null)
       this.field = field;
+  }
+
+  public String toString() {
+    switch (injectType) {
+      case Type:
+        return type.getFullyQualifiedName();
+      case Method:
+        return method.getDeclaringClass().getFullyQualifiedName() + "." + method.getName() + "()::" + method
+                .getReturnType().getFullyQualifiedName();
+      case PrivateField:
+      case Field:
+        return field.getDeclaringClass().getFullyQualifiedName() + "." + field.getName() + "::" + field.getType()
+                .getFullyQualifiedName();
+    }
+
+    return null;
   }
 }

@@ -38,6 +38,7 @@ import javax.inject.Qualifier;
 import org.jboss.errai.bus.rebind.ScannerSingleton;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.DefParameters;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
@@ -314,8 +315,17 @@ public class InjectUtil {
     Statement[] parmValues = new Statement[parmTypes.length];
 
     for (int i = 0; i < parmTypes.length; i++) {
-      Injector injector = ctx.getQualifiedInjector(parmTypes[i],
-              JSR299QualifyingMetadata.createFromAnnotations(parms[i].getAnnotations()));
+      Injector injector;
+      try {
+
+        injector = ctx.getQualifiedInjector(parmTypes[i],
+                JSR299QualifyingMetadata.createFromAnnotations(parms[i].getAnnotations()));
+      }
+      catch (InjectionFailure e) {
+        e.setTarget(method.getDeclaringClass() + "." + method.getName() + DefParameters.from(method)
+                .generate(Context.create()));
+        throw e;
+      }
 
       @SuppressWarnings({"unchecked"}) InjectableInstance injectableInstance
               = new InjectableInstance(null, TaskType.Method, null, method, null, null, parms[i], injector, ctx);
@@ -332,7 +342,16 @@ public class InjectUtil {
     Statement[] parmValues = new Statement[parmTypes.length];
 
     for (int i = 0; i < parmTypes.length; i++) {
-      Injector injector = ctx.getInjector(parmTypes[i]);
+      Injector injector;
+      try {
+        injector = ctx.getQualifiedInjector(parmTypes[i],
+                JSR299QualifyingMetadata.createFromAnnotations(parms[i].getAnnotations()));
+      }
+      catch (InjectionFailure e) {
+        e.setTarget(constructor.getDeclaringClass() + "." + DefParameters.from(constructor)
+                .generate(Context.create()));
+        throw e;
+      }
 
       @SuppressWarnings({"unchecked"}) InjectableInstance injectableInstance
               = new InjectableInstance(null, TaskType.Parameter, constructor, null, null, null, parms[i], injector, ctx);
