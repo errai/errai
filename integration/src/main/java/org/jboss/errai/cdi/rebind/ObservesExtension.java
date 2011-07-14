@@ -32,8 +32,6 @@ import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
-import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Cast;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Parameter;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
@@ -68,7 +66,7 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
     final MetaParameter parm = injectableInstance.getParm();
 
     final String parmClassName = parm.getType().getFullyQualifiedName();
-    final Statement messageBusInst = injectableInstance.getInjectionContext().getInjector(MessageBus.class).getType(injectableInstance);
+    final Statement bus = injectableInstance.getInjectionContext().getInjector(MessageBus.class).getType(injectableInstance);
     final String subscribeMethodName = method.isAnnotationPresent(Local.class) ? "subscribeLocal" : "subscribe";
 
     final String subject = CDI.getSubjectNameByType(parmClassName);
@@ -76,38 +74,30 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
     final Set<String> qualifierNames = CDI.getQualifiersPart(qualifiers);
 
     BlockBuilder<AnonymousClassStructureBuilderImpl> callBackBlock = ObjectBuilder
-            .newInstanceOf(MessageCallback.class, ctx)
-            .extend()
-            .publicOverridesMethod("callback", Parameter.of(Message.class, "message"))
-            .append(
-                    Stmt.create().declareVariable("methodQualifiers", new TypeLiteral<Set<String>>() {},
-                            Stmt.create().newObject(new TypeLiteral<HashSet<String>>() {})));
+        .newInstanceOf(MessageCallback.class, ctx)
+        .extend()
+        .publicOverridesMethod("callback", Parameter.of(Message.class, "message"))
+        .append(Stmt.declareVariable("defQualifiers", new TypeLiteral<Set<String>>() {},
+                  Stmt.newObject(new TypeLiteral<HashSet<String>>() {})));
 
     if (qualifierNames != null) {
       for (String qualifierName : qualifierNames) {
-        callBackBlock.append(Stmt.create().loadVariable("methodQualifiers").invoke("add", qualifierName));
+        callBackBlock.append(Stmt.loadVariable("defQualifiers").invoke("add", qualifierName));
       }
     }
-    callBackBlock.append(Stmt.create().declareVariable("qualifiers", new TypeLiteral<Set<String>>() {},
-            Stmt.create().loadVariable("message").invoke("get", Set.class, CDIProtocol.QUALIFIERS)));
+    callBackBlock.append(Stmt.declareVariable("qualifiers", new TypeLiteral<Set<String>>() {},
+        Stmt.loadVariable("message").invoke("get", Set.class, CDIProtocol.QUALIFIERS)));
 
-    callBackBlock.append(Stmt.create()
-            .loadVariable("methodQualifiers")
-            .invoke("equals", Refs.get("qualifiers"))
-            .if_(
-                    BooleanOperator.Or,
-                    Bool.and(Bool.equals(Refs.get("qualifiers"), null),
-                            Stmt.create().loadVariable("methodQualifiers").invoke("isEmpty")))
-
-            .append(
-                    Stmt.create().loadVariable(injectableInstance.getInjector().getVarName())
-                            .invoke(method.getName(), Cast.to(parm.getType(),
-                                    Stmt.create().loadVariable("message").invoke("get", parm.getType().asClass(), CDIProtocol.OBJECT_REF))))
-            .finish());
+    callBackBlock.append(Stmt
+        .if_(Bool.or(
+            Stmt.loadVariable("defQualifiers").invoke("equals", Refs.get("qualifiers")),
+            Bool.and(Bool.equals(Refs.get("qualifiers"), null), Stmt.loadVariable("defQualifiers").invoke("isEmpty"))))    
+        .append(Stmt.loadVariable(injectableInstance.getInjector().getVarName())
+            .invoke(method.getName(), Stmt.loadVariable("message")
+                .invoke("get", parm.getType().asClass(), CDIProtocol.OBJECT_REF)))
+        .finish());
 
     Statement messageCallback = callBackBlock.finish().finish();
-    return Stmt.create(ctx).nestedCall(messageBusInst).invoke(subscribeMethodName, subject, messageCallback);
-  }
-
-  ;
+    return Stmt.create(ctx).nestedCall(bus).invoke(subscribeMethodName, subject, messageCallback);
+  };
 }
