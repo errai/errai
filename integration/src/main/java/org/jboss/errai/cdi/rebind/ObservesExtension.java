@@ -16,16 +16,15 @@
 package org.jboss.errai.cdi.rebind;
 
 import java.lang.annotation.Annotation;
-import java.util.HashSet;
 import java.util.Set;
 
 import javax.enterprise.event.Observes;
 import javax.enterprise.util.TypeLiteral;
 
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.annotations.Local;
 import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.cdi.client.AbstractMessageCallback;
 import org.jboss.errai.cdi.client.CDIProtocol;
 import org.jboss.errai.cdi.client.api.CDI;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
@@ -37,7 +36,6 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Parameter;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.AnonymousClassStructureBuilderImpl;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Bool;
@@ -60,44 +58,43 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
   }
 
   @Override
-  public Statement generateDecorator(InjectableInstance<Observes> injectableInstance) {
-    final Context ctx = injectableInstance.getInjectionContext().getProcessingContext().getContext();
-    final MetaMethod method = injectableInstance.getMethod();
-    final MetaParameter parm = injectableInstance.getParm();
+  public Statement generateDecorator(InjectableInstance<Observes> instance) {
+    final Context ctx = instance.getInjectionContext().getProcessingContext().getContext();
+    final MetaMethod method = instance.getMethod();
+    final MetaParameter parm = instance.getParm();
 
     final String parmClassName = parm.getType().getFullyQualifiedName();
-    final Statement bus = injectableInstance.getInjectionContext().getInjector(MessageBus.class).getType(injectableInstance);
+    final Statement bus = instance.getInjectionContext().getInjector(MessageBus.class).getType(instance);
     final String subscribeMethodName = method.isAnnotationPresent(Local.class) ? "subscribeLocal" : "subscribe";
 
     final String subject = CDI.getSubjectNameByType(parmClassName);
-    final Annotation[] qualifiers = InjectUtil.extractQualifiers(injectableInstance).toArray(new Annotation[0]);
+    final Annotation[] qualifiers = InjectUtil.extractQualifiers(instance).toArray(new Annotation[0]);
     final Set<String> qualifierNames = CDI.getQualifiersPart(qualifiers);
 
-    BlockBuilder<AnonymousClassStructureBuilderImpl> callBackBlock = ObjectBuilder
-        .newInstanceOf(MessageCallback.class, ctx)
-        .extend()
-        .publicOverridesMethod("callback", Parameter.of(Message.class, "message"))
-        .append(Stmt.declareVariable("defQualifiers", new TypeLiteral<Set<String>>() {},
-                  Stmt.newObject(new TypeLiteral<HashSet<String>>() {})));
+    AnonymousClassStructureBuilderImpl callBack = Stmt.newObject(AbstractMessageCallback.class).extend();
 
+    BlockBuilder<AnonymousClassStructureBuilderImpl> callBackBlock;
     if (qualifierNames != null) {
+      callBackBlock = callBack.initialize();
       for (String qualifierName : qualifierNames) {
-        callBackBlock.append(Stmt.loadVariable("defQualifiers").invoke("add", qualifierName));
+        callBackBlock.append(Stmt.loadClassMember("qualifiers").invoke("add", qualifierName));
       }
+      callBack = callBackBlock.finish();
     }
-    callBackBlock.append(Stmt.declareVariable("qualifiers", new TypeLiteral<Set<String>>() {},
-        Stmt.loadVariable("message").invoke("get", Set.class, CDIProtocol.QUALIFIERS)));
 
-    callBackBlock.append(Stmt
-        .if_(Bool.or(
-            Stmt.loadVariable("defQualifiers").invoke("equals", Refs.get("qualifiers")),
-            Bool.and(Bool.equals(Refs.get("qualifiers"), null), Stmt.loadVariable("defQualifiers").invoke("isEmpty"))))    
-        .append(Stmt.loadVariable(injectableInstance.getInjector().getVarName())
-            .invoke(method.getName(), Stmt.loadVariable("message")
-                .invoke("get", parm.getType().asClass(), CDIProtocol.OBJECT_REF)))
-        .finish());
+    callBackBlock = callBack.publicOverridesMethod("callback", Parameter.of(Message.class, "message"))
+        .append(Stmt.declareVariable("msgQualifiers", new TypeLiteral<Set<String>>() {},
+            Stmt.loadVariable("message").invoke("get", Set.class, CDIProtocol.QUALIFIERS)))
+        .append(Stmt
+            .if_(Bool.or(
+                Stmt.loadClassMember("qualifiers").invoke("equals", Refs.get("msgQualifiers")),
+                Bool.and(Bool.equals(Refs.get("msgQualifiers"), null),
+                    Stmt.loadClassMember("qualifiers").invoke("isEmpty"))))
+            .append(Stmt.loadVariable(instance.getInjector().getVarName())
+                .invoke(method.getName(), 
+                    Stmt.loadVariable("message").invoke("get", parm.getType().asClass(), CDIProtocol.OBJECT_REF)))
+            .finish());
 
-    Statement messageCallback = callBackBlock.finish().finish();
-    return Stmt.create(ctx).nestedCall(bus).invoke(subscribeMethodName, subject, messageCallback);
+    return Stmt.create(ctx).nestedCall(bus).invoke(subscribeMethodName, subject, callBackBlock.finish().finish());
   };
 }
