@@ -93,6 +93,9 @@ public class PooledExecuterServiceTests extends TestCase {
   double average1 = 0;
   double average2 = 0;
 
+  boolean failTest = false;
+  Throwable failure;
+
   public void testHighLoad() throws InterruptedException {
     PooledExecutorService svc = new PooledExecutorService(10, PooledExecutorService.SaturationPolicy.CallerRuns);
 
@@ -178,12 +181,18 @@ public class PooledExecuterServiceTests extends TestCase {
             System.out.println("(A) GOOD!");
           }
           catch (Throwable e) {
+            failure = e;
+            failTest = true;
             System.out.println("(A) ERR");
             e.printStackTrace();
           }
 
         }
       });
+
+      if (failTest) {
+        fail("potential thread-racing condition detected in scheduler");
+      }
 
       executor.execute(new Runnable() {
         public void run() {
