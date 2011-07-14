@@ -23,7 +23,7 @@ import org.jboss.errai.bus.client.api.MessageCallback;
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public abstract class AbstractMessageCallback implements MessageCallback {
+public abstract class AbstractCDIMessageCallback implements MessageCallback {
   /**
    * The qualifiers a message must contain to be propagated.
    */
