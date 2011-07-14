@@ -53,7 +53,7 @@ public class ObjectBuilder extends AbstractStatementBuilder {
     super(context, callElementBuilder);
     this.type = type;
 
-    for (MetaField field : type.getFields()) {
+    for (MetaField field : type.getDeclaredFields()) {
       context.addVariable(Variable.create(field.getName(), field.getType()));
     }
   }
@@ -158,7 +158,7 @@ public class ObjectBuilder extends AbstractStatementBuilder {
            buf.append(callParameters.generate(Context.create(context)));
          }
          if (extendsBlock != null) {
-           for (MetaField field : type.getFields()){
+           for (MetaField field : type.getDeclaredFields()) {
              context.addVariable(Variable.createClassMember(field.getName(), field.getType()));
            }
            buf.append(" {\n").append(extendsBlock.generate(context)).append("\n}\n");

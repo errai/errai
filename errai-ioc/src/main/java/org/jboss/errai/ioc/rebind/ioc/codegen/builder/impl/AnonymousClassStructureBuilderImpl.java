@@ -41,45 +41,70 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 public class AnonymousClassStructureBuilderImpl implements Finishable<ObjectBuilder> {
   private MetaClass toExtend;
   private BuildCallback<ObjectBuilder> callback;
-
   private List<DeferredGenerateCallback> callables = new ArrayList<DeferredGenerateCallback>();
 
   AnonymousClassStructureBuilderImpl(MetaClass clazz, BuildCallback<ObjectBuilder> builderBuildCallback) {
     this.toExtend = clazz;
-
     this.callback = builderBuildCallback;
   }
 
-  private BlockBuilder<AnonymousClassStructureBuilderImpl> publicOverridesMethod(final MetaMethod method, final DefParameters parameters) {
-    return new BlockBuilderImpl<AnonymousClassStructureBuilderImpl>(new BuildCallback<AnonymousClassStructureBuilderImpl>() {
-      @Override
-      public AnonymousClassStructureBuilderImpl callback(final Statement statement) {
-
-        addCallable(new DeferredGenerateCallback() {
+  public BlockBuilder<AnonymousClassStructureBuilderImpl> initialize() {
+    return new BlockBuilderImpl<AnonymousClassStructureBuilderImpl>(
+        new BuildCallback<AnonymousClassStructureBuilderImpl>() {
           @Override
-          public String doGenerate(Context context) {
-            Context subContext = Context.create(context);
-            for (Parameter parm : parameters.getParameters()) {
-              subContext.addVariable(Variable.create(parm.getName(), parm.getType()));
-            }
+          public AnonymousClassStructureBuilderImpl callback(final Statement statement) {
 
-            StringBuilder buf = new StringBuilder();
-            buf.append("public ").append(getClassReference(method.getReturnType(), context))
+            addCallable(new DeferredGenerateCallback() {
+              @Override
+              public String doGenerate(Context context) {
+                StringBuilder buf = new StringBuilder();
+                buf.append("{\n");
+                 if (statement != null) {
+                  buf.append(statement.generate(Context.create(context))).append("\n");
+                }
+                buf.append("}\n");
+
+                return buf.toString();
+              }
+            });
+
+            return AnonymousClassStructureBuilderImpl.this;
+          }
+        });
+  }
+  
+  private BlockBuilder<AnonymousClassStructureBuilderImpl> publicOverridesMethod(final MetaMethod method,
+      final DefParameters parameters) {
+    return new BlockBuilderImpl<AnonymousClassStructureBuilderImpl>(
+        new BuildCallback<AnonymousClassStructureBuilderImpl>() {
+          @Override
+          public AnonymousClassStructureBuilderImpl callback(final Statement statement) {
+
+            addCallable(new DeferredGenerateCallback() {
+              @Override
+              public String doGenerate(Context context) {
+                Context subContext = Context.create(context);
+                for (Parameter parm : parameters.getParameters()) {
+                  subContext.addVariable(Variable.create(parm.getName(), parm.getType()));
+                }
+
+                StringBuilder buf = new StringBuilder();
+                buf.append("public ").append(getClassReference(method.getReturnType(), context))
                     .append(" ")
                     .append(method.getName())
                     .append(parameters.generate(context)).append(" {\n");
-            if (statement != null) {
-              buf.append(statement.generate(subContext)).append("\n");
-            }
-            buf.append("}\n");
+                if (statement != null) {
+                  buf.append(statement.generate(subContext)).append("\n");
+                }
+                buf.append("}\n");
 
-            return buf.toString();
+                return buf.toString();
+              }
+            });
+
+            return AnonymousClassStructureBuilderImpl.this;
           }
         });
-
-        return AnonymousClassStructureBuilderImpl.this;
-      }
-    });
   }
 
   public BlockBuilder<AnonymousClassStructureBuilderImpl> publicOverridesMethod(String name, Parameter... args) {
@@ -90,7 +115,7 @@ public class AnonymousClassStructureBuilderImpl implements Finishable<ObjectBuil
     MetaMethod method = toExtend.getBestMatchingMethod(name, types.toArray(new MetaClass[args.length]));
     if (method == null)
       throw new UndefinedMethodException("Method not found:" + name);
-    
+
     return publicOverridesMethod(method, DefParameters.fromParameters(args));
   }
 
@@ -114,7 +139,7 @@ public class AnonymousClassStructureBuilderImpl implements Finishable<ObjectBuil
 
   private String doGenerate(Context context) {
     try {
-      if (callables == null) 
+      if (callables == null)
         return null;
 
       StringBuilder buf = new StringBuilder();

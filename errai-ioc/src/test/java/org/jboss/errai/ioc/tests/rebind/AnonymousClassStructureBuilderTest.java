@@ -74,4 +74,28 @@ public class AnonymousClassStructureBuilderTest extends AbstractStatementBuilder
         "}\n" +
       "}", src);
   }
+  
+  @Test
+  public void testAnonymousClassWithInitializationBlock() {
+    String src = ObjectBuilder.newInstanceOf(Bar.class, Context.create().autoImport())
+        .extend()
+        .initialize()
+        .append(Stmt.loadClassMember("name").assignValue("init"))
+        .finish()
+        .publicOverridesMethod("setName", Parameter.of(String.class, "name"))
+        .append(Stmt.loadClassMember("name").assignValue(Variable.get("name")))
+        .finish()
+        .finish()
+        .toJavaString();
+
+    assertEquals("failed to generate anonymous class with overloaded construct", 
+        "new Bar() {\n" +
+          "{\n" +
+          "this.name = \"init\";" +
+          "\n}\n" +
+          "public void setName(String name) {\n" +
+            "this.name = name;\n" +
+        "}\n" +
+      "}", src);
+  }
 }
