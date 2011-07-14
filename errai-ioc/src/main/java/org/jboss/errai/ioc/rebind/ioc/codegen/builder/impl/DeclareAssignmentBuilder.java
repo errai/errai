@@ -24,6 +24,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReferen
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class DeclareAssignmentBuilder extends AssignmentBuilder {
   public DeclareAssignmentBuilder(boolean isFinal, VariableReference reference, Statement statement) {
@@ -32,7 +33,7 @@ public class DeclareAssignmentBuilder extends AssignmentBuilder {
 
   @Override
   public String generate(Context context) {
-    String type = LoadClassReference.getClassReference(reference.getType(), context);
+    String type = LoadClassReference.getClassReference(reference.getType(), context, true);
     if (statement != null) {
       return (isFinal ? "final " : "") + type + " " + super.generate(context);
     }

@@ -16,15 +16,23 @@
 
 package org.jboss.errai.ioc.rebind;
 
+import static org.jboss.errai.ioc.rebind.ioc.InjectableInstance.getMethodInjectedInstance;
+import static org.jboss.errai.ioc.rebind.ioc.InjectableInstance.getTypeInjectedInstance;
+
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
-import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.Injector;
 import org.jboss.errai.ioc.rebind.ioc.InjectorFactory;
@@ -32,9 +40,6 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
-
-import static org.jboss.errai.ioc.rebind.ioc.InjectableInstance.getMethodInjectedInstance;
-import static org.jboss.errai.ioc.rebind.ioc.InjectableInstance.getTypeInjectedInstance;
 
 public class ProcessorFactory {
   private SortedSet<ProcessingEntry> processingEntries = new TreeSet<ProcessingEntry>();

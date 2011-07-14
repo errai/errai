@@ -16,6 +16,8 @@
 
 package org.jboss.errai.ioc.rebind;
 
+import java.util.List;
+
 import org.jboss.errai.bus.rebind.ProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
@@ -26,8 +28,6 @@ import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.user.rebind.SourceWriter;
-
-import java.util.List;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

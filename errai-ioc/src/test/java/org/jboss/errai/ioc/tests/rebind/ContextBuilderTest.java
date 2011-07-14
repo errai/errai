@@ -20,6 +20,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.List;
+
+import javax.enterprise.util.TypeLiteral;
+
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.VariableReference;
@@ -50,6 +54,17 @@ public class ContextBuilderTest extends AbstractStatementBuilderTest {
         "Integer n = 10;", declaration);
   }
 
+  @Test
+  public void testDeclareVariableWithTypeLiteral() {
+    String declaration = ContextBuilder.create(Context.create().autoImport())
+        .declareVariable("list", new TypeLiteral<List<String>>() {})
+        .finish()
+        .toJavaString();
+      
+    assertEquals("failed to generate variable declaration using a type literal",
+        "List<String> list;", declaration);
+  }
+  
   @Test
   public void testDeclareVariableWithIntegerTypeInference() {
     String declaration = ContextBuilder.create()
