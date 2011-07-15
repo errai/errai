@@ -332,7 +332,6 @@ public class IOCGenerator extends Generator {
 
   private void generateExtensions(SourceWriter sourceWriter, ClassStructureBuilder<?> classBuilder,
                                   BlockBuilder<?> blockBuilder) {
-    // InterfaceInjectionContext ctx = new InterfaceInjectionContext()
     blockBuilder.append(Stmt.declareVariable("ctx", InterfaceInjectionContext.class,
             Stmt.newObject(InterfaceInjectionContext.class)));
 
