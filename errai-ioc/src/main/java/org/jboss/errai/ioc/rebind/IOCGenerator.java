@@ -365,11 +365,15 @@ public class IOCGenerator extends Generator {
 
     blockBuilder.finish();
 
-    System.out.println("----Emitting Class--->\n\n");
-    System.out.println(classBuilder.toJavaString());
-    System.out.println("<---Emitting Class----");
+    String generated = classBuilder.toJavaString();
 
-    sourceWriter.print(classBuilder.toJavaString());
+    if (Boolean.getBoolean("errai.ioc.generator.print_out_result")) {
+      System.out.println("----Emitting Class--->\n\n");
+      System.out.println(generated);
+      System.out.println("<---Emitting Class----");
+    }
+
+    sourceWriter.print(generated);
   }
 
   public void addType(final MetaClass type) {
