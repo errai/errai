@@ -30,7 +30,7 @@
     </dependencies>
 
     <build>
-        <finalName>errai-asyncdemo</finalName>
+        <!--<finalName>errai-asyncdemo</finalName>-->
         <outputDirectory>war/WEB-INF/classes</outputDirectory>
         <plugins>
             <plugin>

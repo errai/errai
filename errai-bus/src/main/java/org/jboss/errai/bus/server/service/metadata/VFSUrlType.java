@@ -15,6 +15,7 @@
  */
 package org.jboss.errai.bus.server.service.metadata;
 
+import org.jboss.vfs.VirtualFile;
 import org.reflections.vfs.SystemDir;
 import org.reflections.vfs.Vfs;
 import org.reflections.vfs.ZipDir;
@@ -22,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -36,9 +38,24 @@ import java.net.URL;
 public class VFSUrlType implements Vfs.UrlType {
   protected static final Logger log = LoggerFactory.getLogger(VFSUrlType.class);
 
+  final static boolean jbossAS;
+
   final static String VFS = "vfs";
   final static String VFSZIP = "vfszip";
   final static String VFSFILE = "vfsfile";
+
+  static {
+    boolean jbossFound;
+    try {
+      Class.forName("org.jboss.vfs.VirtualFile");
+      jbossFound = true;
+    }
+    catch (ClassNotFoundException e) {
+      jbossFound = false;
+    }
+
+    jbossAS = jbossFound;
+  }
 
   public boolean matches(URL url) {
     return url.getProtocol().equals(VFS)
@@ -55,6 +72,17 @@ public class VFSUrlType implements Vfs.UrlType {
     File file = deployment.getAbsoluteFile();
 
     try {
+      if (jbossAS) {
+        try {
+          if (url.getContent() instanceof VirtualFile) {
+             return new JBossVFSDIr(url);
+          }
+        }
+        catch (IOException e) {
+          throw new RuntimeException("error reading from VFS", e);
+        }
+      }
+
       URL targetURL = file.toURI().toURL();
 
       // delegate unpacked archives to SystemDir handler
