@@ -6,6 +6,12 @@
     <artifactId>errai-bus-demos-asyncdemo</artifactId>
     <packaging>war</packaging>
 
+    <properties>
+        <webXmlPath>src/jetty/web.xml</webXmlPath>
+        <jetty.version>6.1.25</jetty.version>
+    </properties>
+
+
     <!-- Parent -->
     <parent>
         <groupId>org.jboss.errai</groupId>
@@ -13,6 +19,7 @@
         <version>1.3.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
+
 
     <dependencies>
         <dependency>
@@ -23,9 +30,9 @@
     </dependencies>
 
     <build>
+        <finalName>errai-asyncdemo</finalName>
         <outputDirectory>war/WEB-INF/classes</outputDirectory>
         <plugins>
-
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>gwt-maven-plugin</artifactId>
@@ -51,7 +58,7 @@
                 <artifactId>maven-war-plugin</artifactId>
                 <configuration>
                     <warSourceDirectory>war</warSourceDirectory>
-                    <webappDirectory>war</webappDirectory>
+                    <webXml>${webXmlPath}</webXml>
                     <packagingExcludes>**/javax/**/*.*,**/client/**/*.class</packagingExcludes>
                 </configuration>
             </plugin>
@@ -73,12 +80,9 @@
                         <phase>clean</phase>
                         <configuration>
                             <tasks>
-                                <!--
-                                    The gwt-maven-plugin use the war source folder
-                                    as it's build directory. We need to cleanup after we'd run
-                                    the plugin and remove all GWT related artifacts that are required
-                                    to run the hosted mode.
-                                -->
+                                <!-- The gwt-maven-plugin use the war source folder as it's build
+                                                    directory. We need to cleanup after we'd run the plugin and remove all GWT
+                                                    related artifacts that are required to run the hosted mode. -->
                                 <delete dir="war/WEB-INF/classes"/>
                                 <delete dir="war/WEB-INF/lib"/>
                                 <delete dir="war/AsyncDemo"/>
@@ -93,4 +97,29 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>jboss</id>
+
+            <properties>
+                <webXmlPath>src/jboss/web.xml</webXmlPath>
+            </properties>
+
+            <dependencies>
+                <dependency>
+                    <groupId>org.jboss.errai</groupId>
+                    <artifactId>errai-bus</artifactId>
+                    <exclusions>
+                        <exclusion>
+                            <artifactId>javax.inject</artifactId>
+                            <groupId>javax.inject</groupId>
+                        </exclusion>
+                    </exclusions>
+                    <version>${version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+
+    </profiles>
 </project>

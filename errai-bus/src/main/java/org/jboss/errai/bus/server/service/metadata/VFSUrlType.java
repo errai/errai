@@ -42,8 +42,8 @@ public class VFSUrlType implements Vfs.UrlType {
 
   public boolean matches(URL url) {
     return url.getProtocol().equals(VFS)
-        || url.getProtocol().equals(VFSZIP)
-        || url.getProtocol().equals(VFSFILE);
+            || url.getProtocol().equals(VFSZIP)
+            || url.getProtocol().equals(VFSFILE);
   }
 
   public Vfs.Dir createDir(URL url) {
@@ -52,17 +52,29 @@ public class VFSUrlType implements Vfs.UrlType {
     if (null == deployment)
       throw new RuntimeException("Unable identify deployment file for: " + url);
 
-    // delegate unpacked archives to SystemDir handler
-    if (deployment.isDirectory())
-      return new SystemDir(toUrl("file:/" + deployment.getAbsolutePath()));
+    File file = deployment.getAbsoluteFile();
 
-    // if it's a file delegate to ZipDir handler
-    ZipDir delegate = new ZipDir(toUrl("file:/" + deployment.getAbsolutePath()));
-    return delegate;
+    try {
+      URL targetURL = file.toURI().toURL();
+
+      // delegate unpacked archives to SystemDir handler
+      if (deployment.isDirectory())
+        return new SystemDir(targetURL);
+
+      // if it's a file delegate to ZipDir handler
+      return new ZipDir(targetURL);
+    }
+    catch (MalformedURLException e) {
+      throw new RuntimeException("Invalid URL", e);
+    }
   }
 
   private static URL toUrl(String s) {
     try {
+      if (!s.startsWith("/")) {
+        s = "/" + s;
+      }
+
       return new URL(s);
     }
     catch (MalformedURLException e) {
