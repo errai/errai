@@ -194,18 +194,5 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
 
     queue.poll(false, httpServletResponse.getOutputStream());
 
-//        OutputStream stream = httpServletResponse.getOutputStream();
-//
-//        Iterator<MarshalledMessage> iter = messages.iterator();
-//
-//        stream.write('[');
-//        while (iter.hasNext()) {
-//            writeToOutputStream(stream, iter.next());
-//            if (iter.hasNext()) {
-//                stream.write(',');
-//            }
-//        }
-//        stream.write(']');
-//        stream.flush();
   }
 }

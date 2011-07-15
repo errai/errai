@@ -49,7 +49,7 @@ import static org.reflections.vfs.Vfs.UrlType;
  * @date: Aug 3, 2010
  */
 public class MetaDataScanner extends Reflections {
-  public static final String CLIENT_PKG_REGEX = "(.*?)(\\.client\\.)(.*?)";
+  public static final String CLIENT_PKG_REGEX = ".*(\\.client\\.).*";
   public static final String ERRAI_CONFIG_STUB_NAME = "ErraiApp.properties";
 
   private final PropertyScanner propScanner = new PropertyScanner(
