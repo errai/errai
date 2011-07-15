@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.errai.samples.rpcdemo.client;
+package org.errai.samples.rpcdemo.client.shared;
 
 import org.jboss.errai.bus.server.annotations.Remote;
 

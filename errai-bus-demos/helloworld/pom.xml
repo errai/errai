@@ -1,112 +1,190 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <name>Errai::Bus::Demos::HelloWorld</name>
-    <groupId>org.jboss.errai</groupId>
-    <artifactId>errai-bus-demos-helloworld</artifactId>
-    <packaging>war</packaging>
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<name>Errai::Bus::Demos::HelloWorld</name>
+	<groupId>org.jboss.errai</groupId>
+	<artifactId>errai-bus-demos-helloworld</artifactId>
+	<packaging>war</packaging>
 
-    <!-- Parent -->
-    <parent>
-        <groupId>org.jboss.errai</groupId>
-        <artifactId>errai-bus-demos</artifactId>
-        <version>1.3.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
-    </parent>
+	<properties>
+		<webXmlPath>src/jetty/web.xml</webXmlPath>
+	</properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.jboss.errai</groupId>
-            <artifactId>errai-tools</artifactId>
-            <version>${version}</version>
-        </dependency>
+	<!-- Parent -->
+	<parent>
+		<groupId>org.jboss.errai</groupId>
+		<artifactId>errai-bus-demos</artifactId>
+		<version>1.3.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
 
-        <dependency>
-            <groupId>org.jboss.errai</groupId>
-            <artifactId>errai-ioc</artifactId>
-            <version>${version}</version>
-        </dependency>
-    </dependencies>
+	<dependencies>
+		<dependency>
+			<groupId>org.jboss.errai</groupId>
+			<artifactId>errai-tools</artifactId>
+			<version>${version}</version>
+		</dependency>
 
-    <build>
-        <outputDirectory>war/WEB-INF/classes</outputDirectory>
+		<dependency>
+			<groupId>org.jboss.errai</groupId>
+			<artifactId>errai-ioc</artifactId>
+			<version>${version}</version>
+		</dependency>
+	</dependencies>
 
-        <resources>
-            <resource>
-                <directory>src/main/java</directory>
-            </resource>
-        </resources>
+	<build>
+		<finalName>${project.artifactId}</finalName>
+		<outputDirectory>war/WEB-INF/classes</outputDirectory>
 
-        <plugins>
+		<resources>
+			<resource>
+				<directory>src/main/java</directory>
+			</resource>
+		</resources>
 
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>gwt-maven-plugin</artifactId>
-                <version>${gwt.maven}</version>
-                <configuration>
-                    <inplace>true</inplace>
-                    <logLevel>INFO</logLevel>
-                    <runTarget>HelloWorld.html</runTarget>
-                    <warSourceDirectory>war</warSourceDirectory>
-                    <extraJvmArgs>-Xmx512m</extraJvmArgs>
-                    <soyc>false</soyc>
-                    <hostedWebapp>war</hostedWebapp>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>resources</goal>
-                            <goal>compile</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-war-plugin</artifactId>
-                <configuration>
-                    <warSourceDirectory>war</warSourceDirectory>
-                    <webappDirectory>war</webappDirectory>
-                    <packagingExcludes>**/javax/**/*.*,**/client/**/*.class</packagingExcludes>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-clean-plugin</artifactId>
-                <version>2.2</version>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-            </plugin>
+		<plugins>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.2</version>
-                <executions>
-                    <execution>
-                        <id>clean.war</id>
-                        <phase>clean</phase>
-                        <configuration>
-                            <tasks>
-                                <!--
-                                    The gwt-maven-plugin use the war source folder
-                                    as it's build directory. We need to cleanup after we'd run
-                                    the plugin and remove all GWT related artifacts that are required
-                                    to run the hosted mode.
-                                -->
-                                <delete dir="war/WEB-INF/classes"/>
-                                <delete dir="war/WEB-INF/lib"/>
-                                <delete dir="war/HelloWorld"/>
-                                <delete dir="target"/>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>gwt-maven-plugin</artifactId>
+				<version>${gwt.maven}</version>
+				<configuration>
+					<inplace>true</inplace>
+					<logLevel>INFO</logLevel>
+					<runTarget>HelloWorld.html</runTarget>
+					<warSourceDirectory>war</warSourceDirectory>
+					<extraJvmArgs>-Xmx512m</extraJvmArgs>
+					<soyc>false</soyc>
+					<hostedWebapp>war</hostedWebapp>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>resources</goal>
+							<goal>compile</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-war-plugin</artifactId>
+				<configuration>
+					<warSourceDirectory>war</warSourceDirectory>
+					<webXml>${webXmlPath}</webXml>
+					<packagingExcludes>**/javax/**/*.*,**/client/**/*.class</packagingExcludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>2.2</version>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
 
-                            </tasks>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.2</version>
+				<executions>
+					<execution>
+						<id>clean.war</id>
+						<phase>clean</phase>
+						<configuration>
+							<tasks>
+								<!-- The gwt-maven-plugin use the war source folder as it's build 
+									directory. We need to cleanup after we'd run the plugin and remove all GWT 
+									related artifacts that are required to run the hosted mode. -->
+								<delete dir="war/WEB-INF/classes" />
+								<delete dir="war/WEB-INF/lib" />
+								<delete dir="war/HelloWorld" />
+								<delete dir="target" />
 
+							</tasks>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+	<profiles>
+		<profile>
+			<id>jboss5</id>
+
+			<properties>
+				<webXmlPath>src/jboss/web.xml</webXmlPath>
+			</properties>
+
+			<dependencies>
+				<dependency>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+					<version>1.5.10</version>
+					<scope>provided</scope>
+				</dependency>
+
+				<dependency>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+					<version>1.5.10</version>
+					<scope>provided</scope>
+				</dependency>
+
+				<dependency>
+					<groupId>javassist</groupId>
+					<artifactId>javassist</artifactId>
+					<version>3.12.1.GA</version>
+					<scope>provided</scope>
+				</dependency>
+			</dependencies>
+		</profile>
+		<profile>
+			<id>jboss6</id>
+
+			<properties>
+				<webXmlPath>src/jboss/web.xml</webXmlPath>
+			</properties>
+
+			<dependencies>
+				<dependency>
+					<groupId>javax.inject</groupId>
+					<artifactId>javax.inject</artifactId>
+					<version>1</version>
+					<scope>provided</scope>
+				</dependency>
+
+				<dependency>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+					<version>1.5.10</version>
+					<scope>provided</scope>
+				</dependency>
+
+				<dependency>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+					<version>1.5.10</version>
+					<scope>provided</scope>
+				</dependency>
+
+				<dependency>
+					<groupId>javassist</groupId>
+					<artifactId>javassist</artifactId>
+					<version>3.12.1.GA</version>
+					<scope>provided</scope>
+				</dependency>
+			</dependencies>
+		</profile>
+		<profile>
+			<id>jboss7</id>
+
+			<properties>
+				<webXmlPath>src/jboss/web.xml</webXmlPath>
+			</properties>
+
+		</profile>
+	</profiles>
 </project>

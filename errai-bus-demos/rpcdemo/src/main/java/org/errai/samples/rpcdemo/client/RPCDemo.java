@@ -19,6 +19,8 @@ package org.errai.samples.rpcdemo.client;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.*;
+
+import org.errai.samples.rpcdemo.client.shared.TestService;
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;

@@ -24,6 +24,6 @@
 	</servlet-mapping>
 
 	<welcome-file-list>
-		<welcome-file>StockDemo.html</welcome-file>
+		<welcome-file>RPCDemo.html</welcome-file>
 	</welcome-file-list>
 </web-app>

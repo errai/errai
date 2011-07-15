@@ -14,7 +14,7 @@
 	version="2.5">
 	<servlet>
 		<servlet-name>ErraiServlet</servlet-name>
-		<servlet-class>org.jboss.errai.bus.server.servlet.JettyContinuationsServlet</servlet-class>
+		<servlet-class>org.jboss.errai.bus.server.servlet.DefaultBlockingServlet</servlet-class>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 

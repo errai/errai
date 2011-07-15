@@ -17,7 +17,8 @@
 package org.errai.samples.rpcdemo.server;
 
 import com.google.inject.Inject;
-import org.errai.samples.rpcdemo.client.TestService;
+
+import org.errai.samples.rpcdemo.client.shared.TestService;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.server.annotations.Service;
 
