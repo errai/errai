@@ -74,7 +74,7 @@ public class ArrayLiteral extends LiteralValue<Object> {
 
       }
       else {
-        builder.append(LiteralFactory.getLiteral(context, element).generate(context));
+        builder.append(LiteralFactory.getLiteral(element).generate(context));
       }
 
       if (i + 1 < length) {

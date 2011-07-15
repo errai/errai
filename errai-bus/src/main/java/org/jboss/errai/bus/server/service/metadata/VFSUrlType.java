@@ -30,8 +30,8 @@ import java.net.URL;
  * It simply delegates to {@link org.reflections.vfs.SystemDir} and
  * {@link org.reflections.vfs.ZipDir} respectively
  *
- * @author: Heiko Braun <hbraun@redhat.com>
- * @date: Aug 4, 2010
+ * @author Heiko Braun <hbraun@redhat.com>
+ * @author Mike Brock <cbrock@redhat.com>
  */
 public class VFSUrlType implements Vfs.UrlType {
   protected static final Logger log = LoggerFactory.getLogger(VFSUrlType.class);

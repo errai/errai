@@ -32,7 +32,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaType;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class LiteralFactory {
-  public static LiteralValue<?> getLiteral(final Context context, final Object o) {
+  public static LiteralValue<?> getLiteral(final Object o) {
     if (o instanceof MetaType) {
       return new LiteralValue<MetaType>((MetaType) o) {
         @Override
@@ -58,11 +58,11 @@ public class LiteralFactory {
       };
     }
     else {
-      return getLiteral(o);
+      return _getLiteral(o);
     }
   }
 
-  public static LiteralValue<?> getLiteral(Object o) {
+  public static LiteralValue<?> _getLiteral(Object o) {
     if (o == null) {
       return NullLiteral.INSTANCE;
     }
@@ -108,7 +108,7 @@ public class LiteralFactory {
 
   public static LiteralValue<?> isLiteral(Object o) {
     try {
-      return getLiteral(null, o);
+      return getLiteral(o);
     }
     catch (IllegalArgumentException a) {
       return null;
