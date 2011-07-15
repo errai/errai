@@ -2,6 +2,7 @@ package org.jboss.errai.cdi.rebind;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
+import javax.inject.Singleton;
 
 import org.jboss.errai.bus.rebind.ProcessingContext;
 import org.jboss.errai.ioc.client.api.EntryPoint;
@@ -83,7 +84,7 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
 
         return true;
       }
-    }, Rule.after(EntryPoint.class, ApplicationScoped.class));
+    }, Rule.after(EntryPoint.class, ApplicationScoped.class, Singleton.class));
 
     procFactory.registerHandler(ApplicationScoped.class, new AnnotationHandler<ApplicationScoped>() {
       public boolean handle(InjectableInstance instance, ApplicationScoped annotation, IOCProcessingContext context) {

@@ -8,7 +8,9 @@ import org.jboss.errai.cdi.client.api.Event;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 
-@IOCProvider
+import javax.inject.Singleton;
+
+@IOCProvider @Singleton
 public class EventProvider implements ContextualTypeProvider<Event<?>> {
 
   public Event<?> provide(final Class[] typeargs, final Annotation[] qualifiers) {
