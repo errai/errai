@@ -46,6 +46,13 @@
             <artifactId>errai-common</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.jboss.errai</groupId>
+            <artifactId>errai-jboss</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>com.google.gwt</groupId>
             <artifactId>gwt-user</artifactId>
@@ -101,6 +108,7 @@
             <artifactId>slf4j-api</artifactId>
             <version>1.5.10</version>
         </dependency>
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
@@ -156,7 +164,6 @@
             <artifactId>junit</artifactId>
             <version>4.8.1</version>
         </dependency>
-
 
 
         <!-- GAE -->

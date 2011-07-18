@@ -298,7 +298,6 @@ public class IOCGenerator extends Generator {
       Injector injector;
       if (contextual) {
         injector = new ContextualProviderInjector(finalBindType, type);
-
       }
       else {
         injector = new ProviderInjector(finalBindType, type);
@@ -306,7 +305,6 @@ public class IOCGenerator extends Generator {
 
       injectFactory.addInjector(injector);
     }
-
 
     /**
      * GeneratedBy.class

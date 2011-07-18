@@ -127,7 +127,7 @@ public class LoadExtensions implements BootstrapExecution {
         log.info("added extension binding: " + bindingType.getName());
       }
 
-      log.info("total extension binding: " + config.getExtensionBindings().keySet().size());
+   //   log.info("total extension binding: " + config.getExtensionBindings().keySet().size());
 
     }
     else {

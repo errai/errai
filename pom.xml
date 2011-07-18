@@ -87,6 +87,7 @@
         <module>errai-persistence</module>
         <module>errai-tools</module>
         <module>errai-bus-demos</module>
+        <module>errai-jboss</module>
         <module>userguide</module>
     </modules>
 
