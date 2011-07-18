@@ -184,7 +184,13 @@
 			<properties>
 				<webXmlPath>src/jboss/web.xml</webXmlPath>
 			</properties>
+		</profile>
+		<profile>
+			<id>tomcat</id>
 
+			<properties>
+				<webXmlPath>src/tomcat/web.xml</webXmlPath>
+			</properties>
 		</profile>
 	</profiles>
 </project>
