@@ -54,7 +54,7 @@ public class LoadExtensions implements BootstrapExecution {
     }
     if (autoScanModules) {
 
-      log.info("beging searching for Errai extensions ...");
+      log.info("searching for Errai extensions ...");
 
       final ErraiConfig erraiConfig = new ErraiConfig() {
         public void addBinding(Class<?> type, ResourceProvider provider) {
