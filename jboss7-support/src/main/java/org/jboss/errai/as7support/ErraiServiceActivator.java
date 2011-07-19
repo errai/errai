@@ -61,6 +61,7 @@ public class ErraiServiceActivator implements ServiceActivator {
             service.stopService();
           }
 
+
           @Override
           public Object getInstance() {
             return service;
@@ -70,6 +71,6 @@ public class ErraiServiceActivator implements ServiceActivator {
     });
     builder.install();
 
-    log.info("bound errai service to JNDI context: java:module/ErraiService");
+    log.info("bound errai service to JNDI context: java:global/ErraiService");
   }
 }
