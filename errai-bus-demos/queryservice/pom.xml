@@ -50,7 +50,7 @@
 				<configuration>
 					<warSourceDirectory>war</warSourceDirectory>
 					<webXml>${webXmlPath}</webXml>
-					<packagingExcludes>**/javax/**/*.*</packagingExcludes>
+					<packagingExcludes>**/javax/**/*.*,**/client/local/**/*.class</packagingExcludes>
 				</configuration>
 			</plugin>
 			<plugin>

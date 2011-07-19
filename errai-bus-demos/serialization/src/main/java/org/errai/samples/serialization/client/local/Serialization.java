@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package org.errai.samples.serialization.client;
+package org.errai.samples.serialization.client.local;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.*;
-import org.errai.samples.serialization.client.model.Record;
+
+import org.errai.samples.serialization.client.shared.Record;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;

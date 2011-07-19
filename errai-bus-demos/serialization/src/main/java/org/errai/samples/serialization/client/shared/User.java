@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.errai.samples.serialization.client.model;
+package org.errai.samples.serialization.client.shared;
 
 import org.jboss.errai.bus.server.annotations.ExposeEntity;
 

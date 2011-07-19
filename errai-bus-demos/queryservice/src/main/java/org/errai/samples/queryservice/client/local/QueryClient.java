@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.errai.samples.queryservice.client;
+package org.errai.samples.queryservice.client.local;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.user.client.ui.HTML;

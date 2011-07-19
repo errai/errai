@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.errai.samples.broadcastservice.client;
+package org.errai.samples.broadcastservice.client.local;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.dom.client.ClickEvent;

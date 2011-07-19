@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.errai.samples.stockdemo.client;
+package org.errai.samples.stockdemo.client.local;
 
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.ui.FlexTable;

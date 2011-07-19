@@ -1,4 +1,4 @@
-package org.errai.samples.helloworld.client;
+package org.errai.samples.helloworld.client.local;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;

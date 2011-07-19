@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.errai.samples.rpcdemo.client;
+package org.errai.samples.rpcdemo.client.local;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;

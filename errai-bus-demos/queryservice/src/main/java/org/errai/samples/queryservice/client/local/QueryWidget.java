@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.errai.samples.queryservice.client;
+package org.errai.samples.queryservice.client.local;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -23,6 +23,8 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.uibinder.client.UiTemplate;
 import com.google.gwt.user.client.ui.*;
+
+import org.errai.samples.queryservice.client.shared.QueryServiceRemote;
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 

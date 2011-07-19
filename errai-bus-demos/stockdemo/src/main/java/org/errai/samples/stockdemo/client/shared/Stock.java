@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.errai.samples.stockdemo.client;
+package org.errai.samples.stockdemo.client.shared;
 
 import org.jboss.errai.bus.server.annotations.ExposeEntity;
 

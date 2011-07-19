@@ -1,9 +1,11 @@
-package org.errai.samples.stockdemo.client;
+package org.errai.samples.stockdemo.client.local;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
+
+import org.errai.samples.stockdemo.client.shared.Stock;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
@@ -12,7 +14,7 @@ import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.errai.samples.stockdemo.client.EquityRenderer.newEquity;
+import static org.errai.samples.stockdemo.client.local.EquityRenderer.newEquity;
 
 public class StockClient implements EntryPoint {
   private Map<String, EquityRenderer> equities = new HashMap<String, EquityRenderer>();

@@ -14,19 +14,41 @@
  * limitations under the License.
  */
 
-package org.errai.samples.serialization.client.model;
+package org.errai.samples.serialization.client.shared;
 
 import org.jboss.errai.bus.server.annotations.ExposeEntity;
 
 @ExposeEntity
-public class Role {
-  private String roleName;
+public class Item {
+  private String itemName;
+  private int quantity;
 
-  public String getRoleName() {
-    return roleName;
+  public Item() {
   }
 
-  public void setRoleName(String roleName) {
-    this.roleName = roleName;
+  public Item(int quantity, String itemName) {
+    this.quantity = quantity;
+    this.itemName = itemName;
+  }
+
+  public String getItemName() {
+    return itemName;
+  }
+
+  public void setItemName(String itemName) {
+    this.itemName = itemName;
+  }
+
+  public int getQuantity() {
+    return quantity;
+  }
+
+  public void setQuantity(int quantity) {
+    this.quantity = quantity;
+  }
+
+  @Override
+  public String toString() {
+    return "[" + quantity + " x " + itemName + "]";
   }
 }

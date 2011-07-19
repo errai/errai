@@ -14,13 +14,8 @@
  * limitations under the License.
  */
 
-package org.errai.samples.queryservice.client;
+package org.errai.samples.serialization.client.shared;
 
-import org.jboss.errai.bus.server.annotations.Remote;
-
-@Remote
-public interface QueryServiceRemote {
-  public String[] query(String queryString);
-
-  public String append(String... arg);
+public enum RecordType {
+  Checking, Savings
 }

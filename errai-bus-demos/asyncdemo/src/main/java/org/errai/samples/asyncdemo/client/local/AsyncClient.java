@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.errai.samples.asyncdemo.client;
+package org.errai.samples.asyncdemo.client.local;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.dom.client.Style;
