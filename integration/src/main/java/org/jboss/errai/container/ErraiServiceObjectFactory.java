@@ -11,7 +11,11 @@ import java.util.Hashtable;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class ErraiServiceObjectFactory implements ObjectFactory {
-  private static final ErraiService service = ServiceFactory.create();
+  private ErraiService service;
+
+  public ErraiServiceObjectFactory() {
+    service = ServiceFactory.create();
+  }
 
   @Override
   public Object getObjectInstance(Object o, Name name, Context context, Hashtable<?, ?> hashtable) throws Exception {

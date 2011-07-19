@@ -23,7 +23,6 @@ import javax.enterprise.inject.spi.BeanManager;
 import javax.naming.*;
 
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.container.ErraiServiceObjectFactory;
@@ -36,9 +35,10 @@ import org.slf4j.LoggerFactory;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class Util {
-  private static final String COMPONENT_CONTEXT = "java:app";
+  private static final String COMPONENT_CONTEXT = "java:comp/env";
 
-  private static final String ERRAI_SERVICE_JNDI = COMPONENT_CONTEXT + "/Errai";
+  private static final String ERRAI_STANDARD_SERVICE_JNDI = COMPONENT_CONTEXT + "/ErraiService";
+  private static final String ERRAI_DEVEL_SERVICE_JNDI = "java:comp/ErraiService";
 
   private static final String BEAN_MANAGER_JNDI = "java:comp/BeanManager";
   private static final String BEAN_MANAGER_FALLBACK_JNDI = "java:comp/env/BeanManager";
@@ -70,7 +70,7 @@ public class Util {
 
   }
 
-  private static ErraiServiceObjectFactory factory = new ErraiServiceObjectFactory();
+  private static ErraiService backupSingleton;
 
   public static ErraiService lookupErraiService() {
     InitialContext ctx = null;
@@ -79,45 +79,80 @@ public class Util {
     boolean bound = false;
     try {
       ctx = new InitialContext();
-
-      NamingEnumeration<NameClassPair> bindings = ctx.list(COMPONENT_CONTEXT);
-
-      while (bindings.hasMoreElements()) {
-        NameClassPair n = bindings.next();
-
-        if (n.getName().equals(ERRAI_SERVICE_JNDI) && n.getClassName().equals(ErraiService.class)) {
-          bound = true;
-
-          errai = (ErraiService) ctx.lookup(ERRAI_SERVICE_JNDI);
-          break;
-        }
-      }
     }
     catch (NamingException e) {
-      log.warn("could not find JNDI binding context: " + COMPONENT_CONTEXT);
+      log.warn("could not create initial context", e);
     }
 
-    if (!bound && ctx != null) {
-      try {
-        ctx.rebind(ERRAI_SERVICE_JNDI, new Reference(ErraiService.class.getName(),
-                ErraiServiceObjectFactory.class.getName(), null));
+    if (ctx != null) {
+      log.info("searching to see if ErraiService is already bound...");
 
-        errai = (ErraiService) ctx.lookup(ERRAI_SERVICE_JNDI);
+      if ((errai = tryLookup(ctx, ERRAI_STANDARD_SERVICE_JNDI)) != null) {
+        bound = true;
       }
-      catch (Exception e) {
-        log.warn("JNDI binding failed due to error: " + e.getMessage() + " -- will initialize with singleton.");
 
-        try {
-          errai = (ErraiService) factory.getObjectInstance(null, null, null, null);
+      if (!bound && (errai = tryLookup(ctx, ERRAI_DEVEL_SERVICE_JNDI)) != null) {
+        bound = true;
+      }
+
+      Reference ref = new Reference(ErraiService.class.getName(), ErraiServiceObjectFactory.class.getName(), null);
+      if (!bound) {
+        bound = tryBind(ctx, ERRAI_STANDARD_SERVICE_JNDI, ref);
+      }
+
+      if (!bound) {
+        bound = tryBind(ctx, ERRAI_DEVEL_SERVICE_JNDI, ref);
+      }
+    }
+
+    if (!bound) {
+      log.warn("JNDI binding failed due to error  -- will initialize with singleton.");
+
+      try {
+        if (backupSingleton == null) {
+          backupSingleton = ServiceFactory.create();
         }
-        catch (Exception e2) {
-          throw new RuntimeException("could not initialize ErraiService instance", e);
-        }
+
+        errai = backupSingleton;
+      }
+      catch (Exception e2) {
+        throw new RuntimeException("could not initialize ErraiService instance", e2);
       }
     }
 
     return errai;
 
+  }
+
+  private static ErraiService tryLookup(Context ctx, String addr) {
+
+    ErraiService errai;
+    try {
+      errai = (ErraiService) ctx.lookup(ERRAI_STANDARD_SERVICE_JNDI);
+      log.info("found ErraiService bound at: " + ERRAI_STANDARD_SERVICE_JNDI);
+
+      return errai;
+    }
+    catch (Exception e) {
+      return null;
+    }
+  }
+
+  private static boolean tryBind(Context ctx, String addr, Reference ref) {
+    String message = "attempting to bind ErraiService to JNDI context: " + addr + " ... ";
+    try {
+      ctx.bind(addr, ref);
+
+      message += "success.";
+      return true;
+    }
+    catch (Exception e) {
+      message += "failed: " + e.getMessage();
+      return false;
+    }
+    finally {
+      log.info(message);
+    }
   }
 
   public static BeanManager lookupBeanManager() {
