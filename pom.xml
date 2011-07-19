@@ -47,12 +47,6 @@
 
             <dependency>
                 <groupId>org.jboss.errai</groupId>
-                <artifactId>errai-jms</artifactId>
-                <version>${errai-jms.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.jboss.errai</groupId>
                 <artifactId>errai-widgets</artifactId>
                 <version>${project.version}</version>
             </dependency>

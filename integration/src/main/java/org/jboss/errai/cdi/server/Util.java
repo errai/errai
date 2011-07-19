@@ -20,24 +20,30 @@ import java.util.Set;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
+import javax.naming.*;
 
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.service.ErraiService;
+import org.jboss.errai.container.ErraiServiceObjectFactory;
 import org.jboss.errai.container.ServiceFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * @author: Heiko Braun <hbraun@redhat.com>
- * @date: Sep 15, 2010
+ * @author Heiko Braun <hbraun@redhat.com>
+ * @author Mike Brock <cbrock@redhat.com>
  */
 public class Util {
-  private static final String ERRAI_SERVICE_JNDI = "java:comp/ErraiService";
+  private static final String COMPONENT_CONTEXT = "java:app";
+
+  private static final String ERRAI_SERVICE_JNDI = COMPONENT_CONTEXT + "/Errai";
 
   private static final String BEAN_MANAGER_JNDI = "java:comp/BeanManager";
   private static final String BEAN_MANAGER_FALLBACK_JNDI = "java:comp/env/BeanManager";
+
+  private static Logger log = LoggerFactory.getLogger("ErraiJNDI");
 
   public static Object lookupCallbackBean(BeanManager beanManager, Class<?> serviceType) {
     Set<Bean<?>> beans = beanManager.getBeans(serviceType);
@@ -64,51 +70,54 @@ public class Util {
 
   }
 
-  @Deprecated
-  public static MessageBus lookupMessageBus() {
+  private static ErraiServiceObjectFactory factory = new ErraiServiceObjectFactory();
+
+  public static ErraiService lookupErraiService() {
     InitialContext ctx = null;
     ErraiService errai = null;
 
+    boolean bound = false;
     try {
       ctx = new InitialContext();
-      errai = (ErraiService) ctx.lookup("java:/Errai");
-    } catch (NamingException e) {
-      if (ctx != null) {
-        try {
-          errai = (ErraiService) ctx.lookup("java:comp/env/Errai"); // development mode
-        } catch (NamingException e1) {}
-      }
 
-      if (null == errai)
-        throw new RuntimeException("Failed to locate Errai service instance", e);
+      NamingEnumeration<NameClassPair> bindings = ctx.list(COMPONENT_CONTEXT);
+
+      while (bindings.hasMoreElements()) {
+        NameClassPair n = bindings.next();
+
+        if (n.getName().equals(ERRAI_SERVICE_JNDI) && n.getClassName().equals(ErraiService.class)) {
+          bound = true;
+
+          errai = (ErraiService) ctx.lookup(ERRAI_SERVICE_JNDI);
+          break;
+        }
+      }
+    }
+    catch (NamingException e) {
+      log.warn("could not find JNDI binding context: " + COMPONENT_CONTEXT);
     }
 
-    return errai.getBus();
-  }
+    if (!bound && ctx != null) {
+      try {
+        ctx.rebind(ERRAI_SERVICE_JNDI, new Reference(ErraiService.class.getName(),
+                ErraiServiceObjectFactory.class.getName(), null));
 
-  public static ErraiService lookupErraiService() {
-
-    InitialContext ctx = null;
-    ErraiService erraiService = null;
-
-    try {
-      ctx = new InitialContext();
-      erraiService = (ErraiService) ctx.lookup(ERRAI_SERVICE_JNDI);
-    } catch (NamingException e) {
-
-      if (ctx != null) {
-        try {
-          erraiService = ServiceFactory.create();
-          ctx.bind(ERRAI_SERVICE_JNDI, erraiService);
-
-        } catch (NamingException e1) {}
+        errai = (ErraiService) ctx.lookup(ERRAI_SERVICE_JNDI);
       }
+      catch (Exception e) {
+        log.warn("JNDI binding failed due to error: " + e.getMessage() + " -- will initialize with singleton.");
 
-      if (null == erraiService)
-        throw new RuntimeException("Failed to locate or create ErraiService", e);
+        try {
+          errai = (ErraiService) factory.getObjectInstance(null, null, null, null);
+        }
+        catch (Exception e2) {
+          throw new RuntimeException("could not initialize ErraiService instance", e);
+        }
+      }
     }
 
-    return erraiService;
+    return errai;
+
   }
 
   public static BeanManager lookupBeanManager() {
@@ -118,12 +127,15 @@ public class Util {
     try {
       ctx = new InitialContext();
       bm = (BeanManager) ctx.lookup(BEAN_MANAGER_JNDI);
-    } catch (NamingException e) {
+    }
+    catch (NamingException e) {
 
       if (ctx != null) {
         try {
           bm = (BeanManager) ctx.lookup(BEAN_MANAGER_FALLBACK_JNDI); // development mode
-        } catch (NamingException e1) {}
+        }
+        catch (NamingException e1) {
+        }
       }
 
       if (null == bm)

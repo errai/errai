@@ -42,7 +42,7 @@ public class BootstrapListener implements ServletContextListener {
 
   protected Logger log = LoggerFactory.getLogger(BootstrapListener.class);
 
-  private static String DEFAULT_JNDI_NAME = "java:/Errai";
+  private static String DEFAULT_JNDI_NAME = "java:app/Errai";
   private String managedJndiName;
 
   public void contextInitialized(ServletContextEvent event) {

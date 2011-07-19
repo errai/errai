@@ -51,12 +51,6 @@
 					<scope>provided</scope>
 				</dependency>
 
-                <dependency>
-                    <groupId>org.jboss.errai</groupId>
-                    <artifactId>errai-jboss</artifactId>
-                    <scope>provided</scope>
-                </dependency>
-
 				<dependency>
 					<groupId>org.jboss.errai</groupId>
 					<artifactId>errai-cdi-jetty</artifactId>
