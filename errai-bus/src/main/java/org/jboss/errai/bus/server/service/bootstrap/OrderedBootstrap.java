@@ -19,6 +19,7 @@ import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -48,6 +49,8 @@ public class OrderedBootstrap implements BootstrapExecution {
 
   public void execute(final BootstrapContext context) {
     log.info("Bootstrap Errai");
+    log.info("Working directory: " + new File("").getAbsolutePath());
+
 
     try {
       for (BootstrapExecution execution : bootstrap) {

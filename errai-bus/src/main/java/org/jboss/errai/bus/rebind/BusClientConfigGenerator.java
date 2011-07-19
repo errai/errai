@@ -89,11 +89,8 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
     if (props != null) {
       logger.log(TreeLogger.Type.INFO, "Checking ErraiApp.properties for configured types ...");
 
-      Iterator<Object> it = props.keySet().iterator();
-      while (it.hasNext()) {
-
-        String key = (String) it.next();
-
+      for (Object o : props.keySet()) {
+        String key = (String) o;
         /**
          * Types configuration
          */
@@ -380,37 +377,4 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
     return "L" + c + ";";
   }
 
-
-  /*public static void main(String[] args) throws Exception {
-   org.jboss.errai.common.client.types.TypeHandlerFactory.addHandler(
-           java.util.Collection.class,
-           char[][].class,
-           new org.jboss.errai.common.client.types.TypeHandler<java.util.Collection, char[][]>() {
-               public char[][] getConverted(java.util.Collection col0) {
-                   char[][] a = new char[col0.size()][];
-
-
-                   java.util.Iterator iter0 = col0.iterator();
-
-                   for (int i0 = 0; i0 < a.length; i0++) {
-
-
-                       java.util.Collection col1 = (java.util.Collection) iter0.next();
-                       a[i0] = new char[col1.size()];
-
-
-                       java.util.Iterator iter1 = col1.iterator();
-
-                       for (int i1 = 0; i1 < a[i0].length; i1++) {
-                           a[i0][i1] = org.jboss.errai.common.client.types.TypeHandlerFactory.convert(iter1.next(), java.lang.Character.class);
-                       }
-
-                   }
-
-
-                   return a;
-               }
-
-           });
-}   */
 }
