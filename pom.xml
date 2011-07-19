@@ -88,6 +88,7 @@
         <module>errai-tools</module>
         <module>errai-bus-demos</module>
         <module>userguide</module>
+        <module>jboss7-support</module>
     </modules>
 
     <dependencyManagement>

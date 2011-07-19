@@ -27,8 +27,9 @@ public interface ErraiService<S> extends ServiceComposite<S> {
   public static final String AUTHORIZATION_SVC_SUBJECT = "AuthenticationService";
   public static final String SERVER_ECHO_SERVICE = "ServerEchoService";
   public static final String AUTHORIZATION_SERVICE = "AuthorizationService";
-
   public static final String SESSION_AUTH_DATA = "ErraiAuthData";
+
+  public static final String ERRAI_DEFAULT_JNDI = "java:global/ErraiService";
 
   /**
    * Stores the specified message
