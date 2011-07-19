@@ -72,6 +72,23 @@ public class Util {
 
   private static ErraiService backupSingleton;
 
+  private static ErraiService _lookupErraiService(InitialContext ctx) {
+    ErraiService errai;
+        if ((errai = tryLookup(ctx, ErraiService.ERRAI_DEFAULT_JNDI)) != null) {
+        return errai;
+      }
+
+      if ((errai = tryLookup(ctx, ERRAI_STANDARD_SERVICE_JNDI)) != null) {
+        return errai;
+      }
+
+      if ((errai = tryLookup(ctx, ERRAI_DEVEL_SERVICE_JNDI)) != null) {
+        return errai;
+      }
+
+    return null;
+  }
+
   public static ErraiService lookupErraiService() {
     InitialContext ctx = null;
     ErraiService errai = null;
@@ -87,25 +104,19 @@ public class Util {
     if (ctx != null) {
       log.info("searching to see if ErraiService is already bound...");
 
-      if ((errai = tryLookup(ctx, ErraiService.ERRAI_DEFAULT_JNDI)) != null) {
-        bound = true;
-      }
-
-      if (!bound && (errai = tryLookup(ctx, ERRAI_STANDARD_SERVICE_JNDI)) != null) {
-        bound = true;
-      }
-
-      if (!bound && (errai = tryLookup(ctx, ERRAI_DEVEL_SERVICE_JNDI)) != null) {
+      if ((errai = _lookupErraiService(ctx)) != null) {
         bound = true;
       }
 
       Reference ref = new Reference(ErraiService.class.getName(), ErraiServiceObjectFactory.class.getName(), null);
       if (!bound) {
         bound = tryBind(ctx, ERRAI_STANDARD_SERVICE_JNDI, ref);
+        errai = tryLookup(ctx, ERRAI_STANDARD_SERVICE_JNDI);
       }
 
       if (!bound) {
         bound = tryBind(ctx, ERRAI_DEVEL_SERVICE_JNDI, ref);
+        errai = tryLookup(ctx, ERRAI_DEVEL_SERVICE_JNDI);
       }
     }
 
