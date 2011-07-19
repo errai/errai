@@ -74,17 +74,17 @@ public class Util {
 
   private static ErraiService _lookupErraiService(InitialContext ctx) {
     ErraiService errai;
-        if ((errai = tryLookup(ctx, ErraiService.ERRAI_DEFAULT_JNDI)) != null) {
-        return errai;
-      }
+    if ((errai = tryLookup(ctx, ErraiService.ERRAI_DEFAULT_JNDI)) != null) {
+      return errai;
+    }
 
-      if ((errai = tryLookup(ctx, ERRAI_STANDARD_SERVICE_JNDI)) != null) {
-        return errai;
-      }
+    if ((errai = tryLookup(ctx, ERRAI_STANDARD_SERVICE_JNDI)) != null) {
+      return errai;
+    }
 
-      if ((errai = tryLookup(ctx, ERRAI_DEVEL_SERVICE_JNDI)) != null) {
-        return errai;
-      }
+    if ((errai = tryLookup(ctx, ERRAI_DEVEL_SERVICE_JNDI)) != null) {
+      return errai;
+    }
 
     return null;
   }
@@ -109,6 +109,11 @@ public class Util {
       }
 
       Reference ref = new Reference(ErraiService.class.getName(), ErraiServiceObjectFactory.class.getName(), null);
+      if (!bound) {
+        bound = tryBind(ctx, ErraiService.ERRAI_DEFAULT_JNDI, ref);
+        errai = tryLookup(ctx, ErraiService.ERRAI_DEFAULT_JNDI);
+      }
+
       if (!bound) {
         bound = tryBind(ctx, ERRAI_STANDARD_SERVICE_JNDI, ref);
         errai = tryLookup(ctx, ERRAI_STANDARD_SERVICE_JNDI);
