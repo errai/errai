@@ -40,6 +40,5 @@ public class ServiceFactory {
         bind(ErraiServiceConfigurator.class).to(ErraiServiceConfiguratorImpl.class);
       }
     }).getInstance(ErraiService.class);
-
   }
 }

@@ -87,7 +87,11 @@ public class Util {
     if (ctx != null) {
       log.info("searching to see if ErraiService is already bound...");
 
-      if ((errai = tryLookup(ctx, ERRAI_STANDARD_SERVICE_JNDI)) != null) {
+      if ((errai = tryLookup(ctx, ErraiService.ERRAI_DEFAULT_JNDI)) != null) {
+        bound = true;
+      }
+
+      if (!bound && (errai = tryLookup(ctx, ERRAI_STANDARD_SERVICE_JNDI)) != null) {
         bound = true;
       }
 
@@ -128,8 +132,8 @@ public class Util {
 
     ErraiService errai;
     try {
-      errai = (ErraiService) ctx.lookup(ERRAI_STANDARD_SERVICE_JNDI);
-      log.info("found ErraiService bound at: " + ERRAI_STANDARD_SERVICE_JNDI);
+      errai = (ErraiService) ctx.lookup(addr);
+      log.info("found ErraiService bound at: " + addr);
 
       return errai;
     }

@@ -2,7 +2,7 @@
 <deployment xmlns="urn:jboss:bean-deployer:2.0">
 
     <bean class="org.jboss.errai.container.JBossService" name="ErraiService">
-        <property name="jndiName"><value>java:/Errai</value></property>
+        <property name="jndiName"><value>java:comp/env/ErraiService</value></property>
 
         <!--
         Make Sure the JMS provider is available before Errai boots
