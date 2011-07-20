@@ -1,8 +1,6 @@
 package org.jboss.errai.ioc.rebind;
 
 
-import org.jboss.errai.ioc.client.IOCClientTestCase;
-import org.jboss.errai.ioc.client.InterfaceInjectionContext;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCBootstrapGenerator;
 

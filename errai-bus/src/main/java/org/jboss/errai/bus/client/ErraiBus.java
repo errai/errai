@@ -31,7 +31,7 @@ public class ErraiBus implements EntryPoint {
   private static MessageBus bus;
 
   static {
-    if (GWT.isScript()) {
+    if (GWT.isClient()) {
       bus = GWT.create(MessageBus.class);
     }
     else {

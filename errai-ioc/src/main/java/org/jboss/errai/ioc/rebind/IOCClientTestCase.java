@@ -1,13 +1,13 @@
-package org.jboss.errai.ioc.client;
+package org.jboss.errai.ioc.rebind;
 
 import com.google.gwt.junit.client.GWTTestCase;
+import org.jboss.errai.ioc.client.InterfaceInjectionContext;
 import org.jboss.errai.ioc.rebind.MockIOCGenerator;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public abstract class IOCClientTestCase extends GWTTestCase {
-
 
   protected IOCClientTestCase() {
     setForcePureJava(true);
@@ -21,5 +21,4 @@ public abstract class IOCClientTestCase extends GWTTestCase {
       throw new RuntimeException("failed to run in emulated mode", e);
     }
   }
-
 }

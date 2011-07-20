@@ -38,7 +38,7 @@ public class AnnotationEncoderTest extends AbstractStatementBuilderTest {
     assertEquals("new java.lang.annotation.Target() { " +
     		"public java.lang.annotation.ElementType[] value() { " +
     		" return new java.lang.annotation.ElementType[] { " +
-    		" java.lang.annotation.ElementType.METHOD }; " +
+    		" java.lang.annotation.ElementType.METHOD } " +
     		"} " +
     		"public String toString() { " +
     		" return \"@java.lang.annotation.Target(value=[METHOD])\"; " +
