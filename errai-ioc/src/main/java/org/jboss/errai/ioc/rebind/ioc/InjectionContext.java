@@ -55,7 +55,7 @@ public class InjectionContext {
     }
 
     //todo: figure out why I was doing this.
-    MetaClass erased = type;
+    MetaClass erased = type.getErased();
     List<Injector> injs = injectors.get(erased);
     List<Injector> matching = new ArrayList<Injector>();
 
@@ -67,6 +67,28 @@ public class InjectionContext {
         else if (metadata != null && inj.getQualifyingMetadata() != null
                 && metadata.doesSatisfy(inj.getQualifyingMetadata())) {
           matching.add(inj);
+        }
+      }
+    }
+
+    matching =  new ArrayList<Injector>(matching);
+
+    Iterator<Injector> iter = matching.iterator();
+    Injector inj;
+
+    if (matching.size() > 1) {
+      while (iter.hasNext()) {
+        inj = iter.next();
+
+        if (type.getParameterizedType() != null) {
+          if (inj.getQualifyingTypeInformation() != null) {
+            if (!type.getParameterizedType().isAssignableFrom(inj.getQualifyingTypeInformation())) {
+              iter.remove();
+            }
+          }
+        }
+        else if (inj.getQualifyingTypeInformation() == null) {
+          iter.remove();
         }
       }
     }
@@ -84,8 +106,8 @@ public class InjectionContext {
   }
 
   public boolean isInjectable(MetaClass injectorType) {
-    if (injectors.containsKey(injectorType)) {
-      Injector injector = injectors.get(injectorType).get(0);
+    if (injectors.containsKey(injectorType.getErased())) {
+      Injector injector = injectors.get(injectorType.getErased()).get(0);
       return !(injector.isSingleton() && !injector.isInjected());
     }
     else {
@@ -98,11 +120,32 @@ public class InjectionContext {
   }
 
   public Injector getInjector(MetaClass type) {
-    MetaClass erased = type;
+    MetaClass erased = type.getErased();
     if (!injectors.containsKey(erased)) {
       throw new InjectionFailure("could not resolve type for injection: " + erased.getFullyQualifiedName());
     }
-    List<Injector> injectorList = injectors.get(erased);
+    List<Injector> injectorList = new ArrayList<Injector>(injectors.get(erased));
+
+    Iterator<Injector> iter = injectorList.iterator();
+    Injector inj;
+
+    if (injectorList.size() > 1) {
+      while (iter.hasNext()) {
+        inj = iter.next();
+
+        if (type.getParameterizedType() != null) {
+          if (inj.getQualifyingTypeInformation() != null) {
+            if (!type.getParameterizedType().isAssignableFrom(inj.getQualifyingTypeInformation())) {
+              iter.remove();
+            }
+          }
+        }
+        else if (inj.getQualifyingTypeInformation() == null) {
+          iter.remove();
+        }
+      }
+    }
+
     if (injectorList.size() > 1) {
       throw new InjectionFailure("ambiguous injection type (multiple injectors resolved): "
               + erased.getFullyQualifiedName());
@@ -125,13 +168,21 @@ public class InjectionContext {
   }
 
   public void registerInjector(Injector injector) {
-    List<Injector> injectorList = injectors.get(injector.getInjectedType());
+    _registerInjector(injector.getInjectedType(), injector);
+  }
+
+  private void _registerInjector(MetaClass type, Injector injector) {
+    List<Injector> injectorList = injectors.get(type.getErased());
     if (injectorList == null) {
-      injectors.put(injector.getInjectedType(), injectorList = new ArrayList<Injector>());
+      injectors.put(type.getErased(), injectorList = new ArrayList<Injector>());
+
+      for (MetaClass iface : type.getInterfaces()) {
+        _registerInjector(iface, new QualifiedTypeInjectorDelegate(injector, iface.getParameterizedType()));
+      }
     }
     else {
       for (Injector inj : injectorList) {
-        if (inj.metadataMatches(injector)) {
+        if (type.isAssignableFrom(inj.getInjectedType()) && inj.metadataMatches(injector)) {
           return;
         }
       }
@@ -220,7 +271,20 @@ public class InjectionContext {
     if (!toExecute.isEmpty()) {
       StringBuilder sbuf = new StringBuilder();
       for (InjectionTask task : toExecute) {
-        sbuf.append(" - ").append(task.getInjector().getInjectedType()).append("\n");
+        sbuf.append(" @> ").append(task.getInjector().getInjectedType()).append("\n");
+        switch (task.getInjectType()) {
+          case PrivateField:
+          case Field:
+            sbuf.append("   - field ").append(task.getField().getName()).append(" could not be satisfied for type: ")
+                    .append(task.getField
+                            ().getType().getFullyQualifiedName()).append("\n");
+            break;
+
+          case Method:
+            sbuf.append("   - setter ").append(task.getMethod()).append(" could not be satisified for type: ").append
+                    (task.getMethod().getParameters()[0].getType().getFullyQualifiedName()).append("\n");
+        }
+
       }
 
       throw new RuntimeException("unsatified depedencies:\n" + sbuf);

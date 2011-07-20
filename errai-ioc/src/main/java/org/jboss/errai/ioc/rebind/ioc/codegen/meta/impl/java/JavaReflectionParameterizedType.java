@@ -17,14 +17,18 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java;
 
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 
+import com.google.gwt.core.ext.typeinfo.JClassType;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaType;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.AbstractMetaParameterizedType;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public class JavaReflectionParameterizedType implements MetaParameterizedType {
+public class JavaReflectionParameterizedType extends AbstractMetaParameterizedType {
   ParameterizedType parameterizedType;
 
   public JavaReflectionParameterizedType(ParameterizedType parameterizedType) {
@@ -44,5 +48,20 @@ public class JavaReflectionParameterizedType implements MetaParameterizedType {
   @Override
   public MetaType getRawType() {
     return JavaReflectionUtil.fromType(parameterizedType.getRawType());
+  }
+
+  public String toString() {
+    StringBuilder buf = new StringBuilder("<");
+    Type[] parms = parameterizedType.getActualTypeArguments();
+    for (int i = 0; i < parms.length; i++) {
+      if (parms[i] instanceof Class) {
+        buf.append(MetaClassFactory.get((Class) parms[i]).getFullyQualifiedName());
+      }
+      else {
+        buf.append(parms[i].toString());
+      }
+      if (i + 1 < parms.length) buf.append(',');
+    }
+    return buf.append('>').toString();
   }
 }

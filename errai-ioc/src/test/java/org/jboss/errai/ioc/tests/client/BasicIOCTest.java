@@ -18,6 +18,8 @@ package org.jboss.errai.ioc.tests.client;
 
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
+import org.jboss.errai.ioc.tests.client.res.HappyInspector;
+import org.jboss.errai.ioc.tests.client.res.HappyServiceImpl;
 import org.jboss.errai.ioc.tests.client.res.SimpleBean;
 import org.jboss.errai.ioc.tests.client.res.SimpleBean2;
 
@@ -68,5 +70,16 @@ public class BasicIOCTest extends GWTTestCase {
     SimpleBean2 simpleBean2 = SimpleBean2.TEST_INSTANCE;
     assertEquals("FOO", simpleBean2.getMessage());
     assertEquals("java.lang.String", simpleBean2.getbSvc().get());
+  }
+
+  public void testInterfaceResolution() {
+    HappyInspector happyInspector = HappyInspector.INSTANCE;
+    assertTrue(happyInspector.confirmHappiness());
+
+    assertNotNull(happyInspector.getStringService());
+    assertEquals("Hello", happyInspector.getStringService().get());
+
+    assertNotNull(happyInspector.getIntegerService());
+    assertEquals(new Integer(111), happyInspector.getIntegerService().get());
   }
 }

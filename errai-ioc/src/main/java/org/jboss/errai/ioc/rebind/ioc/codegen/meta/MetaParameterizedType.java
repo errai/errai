@@ -25,4 +25,6 @@ public interface MetaParameterizedType extends MetaType {
   public MetaType getOwnerType();
 
   public MetaType getRawType();
+
+  public boolean isAssignableFrom(MetaParameterizedType type);
 }

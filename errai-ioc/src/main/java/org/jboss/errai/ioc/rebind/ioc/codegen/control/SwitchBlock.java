@@ -91,7 +91,7 @@ public class SwitchBlock extends AbstractStatement {
 
     if (!caseBlocks.isEmpty()) {
       for (LiteralValue<?> value : caseBlocks.keySet()) {
-        if (!switchExprStmt.getType().asBoxed().isAssignableFrom(value.getType())) {
+        if (!switchExprStmt.getType().getErased().asBoxed().isAssignableFrom(value.getType().getErased())) {
           throw new InvalidTypeException(
               value.generate(context) + " is not a valid value for " + switchExprStmt.getType().getFullyQualifiedName());
         }

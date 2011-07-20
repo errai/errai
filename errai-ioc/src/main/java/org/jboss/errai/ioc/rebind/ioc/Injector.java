@@ -18,9 +18,12 @@ package org.jboss.errai.ioc.rebind.ioc;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameterizedType;
 
 public abstract class Injector {
   protected QualifyingMetadata qualifyingMetadata;
+
+  protected MetaParameterizedType qualifyingTypeInformation;
 
   public abstract Statement instantiateOnly(InjectionContext injectContext, InjectableInstance injectableInstance);
 
@@ -39,10 +42,17 @@ public abstract class Injector {
   public abstract MetaClass getInjectedType();
 
   public boolean metadataMatches(Injector injector) {
-    return (injector == null && qualifyingMetadata == null) ||
+    boolean meta = (injector == null && qualifyingMetadata == null) ||
         (injector != null && injector.getQualifyingMetadata() != null
             && qualifyingMetadata != null
             && injector.getQualifyingMetadata().doesSatisfy(qualifyingMetadata));
+
+
+    return meta && (qualifyingTypeInformation == null && (injector != null && injector.qualifyingTypeInformation ==
+            null)
+            || !(qualifyingTypeInformation == null || (injector != null && injector.qualifyingTypeInformation ==
+            null))
+            && qualifyingTypeInformation.isAssignableFrom(injector.qualifyingTypeInformation));
   }
 
   public QualifyingMetadata getQualifyingMetadata() {
@@ -51,6 +61,14 @@ public abstract class Injector {
 
   public void setQualifyingMetadata(QualifyingMetadata qualifyingMetadata) {
     this.qualifyingMetadata = qualifyingMetadata;
+  }
+
+  public MetaParameterizedType getQualifyingTypeInformation() {
+    return qualifyingTypeInformation;
+  }
+
+  public void setQualifyingTypeInformation(MetaParameterizedType qualifyingTypeInformation) {
+    this.qualifyingTypeInformation = qualifyingTypeInformation;
   }
 }
 

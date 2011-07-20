@@ -25,11 +25,12 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaType;
 
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.JParameterizedType;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.AbstractMetaParameterizedType;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public class GWTParameterizedType implements MetaParameterizedType {
+public class GWTParameterizedType extends AbstractMetaParameterizedType {
   private JParameterizedType parameterizedType;
 
   public GWTParameterizedType(JParameterizedType parameterizedType) {
@@ -53,5 +54,15 @@ public class GWTParameterizedType implements MetaParameterizedType {
   @Override
   public MetaType getRawType() {
     return MetaClassFactory.get(parameterizedType.getRawType());
+  }
+
+  public String toString() {
+    StringBuilder buf = new StringBuilder("<");
+    JClassType[] parms = parameterizedType.getTypeArgs();
+    for (int i = 0; i < parms.length; i++) {
+      buf.append(MetaClassFactory.get(parms[i]).getFullyQualifiedName());
+      if (i + 1 < parms.length) buf.append(',');
+    }
+    return buf.append('>').toString();
   }
 }
