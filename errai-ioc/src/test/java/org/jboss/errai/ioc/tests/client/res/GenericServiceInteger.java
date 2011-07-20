@@ -5,7 +5,7 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@EntryPoint
+@EntryPoint @AQual
 public class GenericServiceInteger implements GenericService<Integer> {
   @Override
   public Integer get() {

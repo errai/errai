@@ -55,7 +55,7 @@ public class JSR299QualifyingMetadata implements QualifyingMetadata {
               && qualifiers.contains(ANY_INSTANCE)
               || comparable.qualifiers.containsAll(qualifiers));
     }
-    return false;
+    else return metadata == null;
   }
 
   public static JSR299QualifyingMetadata createFromAnnotations(Annotation[] annotations) {

@@ -98,11 +98,11 @@ public class InjectUtil {
 
           processingContext.append(
                   Stmt.declareVariable(type)
-                      .asFinal()
-                      .named(injector.getVarName())
-                      .initializeWith(Stmt
-                          .newObject(type)
-                          .withParameters(parameterStatements))
+                          .asFinal()
+                          .named(injector.getVarName())
+                          .initializeWith(Stmt
+                                  .newObject(type)
+                                  .withParameters(parameterStatements))
           );
 
           handleInjectionTasks(ctx, injectionTasks);
@@ -124,9 +124,9 @@ public class InjectUtil {
 
           processingContext.append(
                   Stmt.declareVariable(type)
-                      .asFinal()
-                      .named(injector.getVarName())
-                      .initializeWith(Stmt.newObject(type))
+                          .asFinal()
+                          .named(injector.getVarName())
+                          .initializeWith(Stmt.newObject(type))
 
           );
 
@@ -456,24 +456,30 @@ public class InjectUtil {
 
     try {
       final MetaClassMember member = parm.getDeclaringMember();
-      final MetaMethod method = (MetaMethod) member;
+      MetaParameter[] parameters;
 
-      MetaClass[] jMethodParms = new MetaClass[method.getParameters().length];
-      int eventParamIndex = 0;
-      for (int i = 0; i < method.getParameters().length; i++) {
-        if (method.getParameters()[i].getName().equals(parm.getName())) {
-          eventParamIndex = i;
-        }
-        jMethodParms[i] = method.getParameters()[i].getType();
+      if (member instanceof MetaMethod) {
+        parameters = ((MetaMethod) member).getParameters();
+      }
+      else {
+        parameters = ((MetaConstructor) member).getParameters();
       }
 
-      MetaClass jType = parm.getDeclaringMember().getDeclaringClass();
-      MetaMethod observesMethod = jType.getMethod(method.getName(), jMethodParms);
+      MetaClass[] jMethodParms = new MetaClass[parameters.length];
+      int eventParamIndex = 0;
+      for (int i = 0; i < parameters.length; i++) {
+        if (parameters[i].getName().equals(parm.getName())) {
+          eventParamIndex = i;
+        }
+        jMethodParms[i] = parameters[i].getType();
+      }
+
+     // MetaMethod observesMethod = jType.getMethod(method.getName(), jMethodParms);
 
       for (Class<?> qualifier : getQualifiersCache()) {
-        if (observesMethod.getParameters()[eventParamIndex]
+        if (parameters[eventParamIndex]
                 .isAnnotationPresent(qualifier.asSubclass(Annotation.class))) {
-          qualifiers.add(observesMethod.getParameters()[eventParamIndex]
+          qualifiers.add(parameters[eventParamIndex]
                   .getAnnotation(qualifier.asSubclass(Annotation.class)));
         }
       }
