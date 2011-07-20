@@ -85,7 +85,7 @@ public class ProcessorFactory {
               entry.addProcessingDelegate(new ProcessingDelegate<MetaClass>() {
                 @Override
                 public boolean process() {
-                  final MetaClass type = MetaClassFactory.get(context.getOracle(), clazz);
+                  final MetaClass type = MetaClassFactory.get(clazz);
                   injectorFactory.addType(type);
 
                   Injector injector = injectorFactory.getInjectionContext().getInjector(type);
@@ -93,7 +93,6 @@ public class ProcessorFactory {
                           = getTypeInjectedInstance(aInstance, type, injector, injectorFactory.getInjectionContext());
                   return entry.handler.handle(injectableInstance, aInstance, context);
                 }
-
 
                 public String toString() {
                   return clazz.getName();

@@ -18,7 +18,8 @@ package org.jboss.errai.bus.client;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
-import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.*;
+import org.jboss.errai.bus.client.framework.BusMonitor;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 
@@ -27,7 +28,66 @@ import org.jboss.errai.bus.client.framework.RequestDispatcher;
  * client {@link org.jboss.errai.bus.client.framework.MessageBus} which can be obtained by calling: <tt>ErraiBus.get()</tt>
  */
 public class ErraiBus implements EntryPoint {
-  private static MessageBus bus = GWT.create(MessageBus.class);
+  private static MessageBus bus;
+
+  static {
+    if (GWT.isScript()) {
+      bus = GWT.create(MessageBus.class);
+    }
+    else {
+      bus = new MessageBus() {
+        @Override
+        public void sendGlobal(Message message) {
+        }
+
+        @Override
+        public void send(Message message) {
+        }
+
+        @Override
+        public void send(Message message, boolean fireListeners) {
+        }
+
+        @Override
+        public void conversationWith(Message message, MessageCallback callback) {
+        }
+
+        @Override
+        public void subscribe(String subject, MessageCallback receiver) {
+        }
+
+        @Override
+        public void subscribeLocal(String subject, MessageCallback receiver) {
+        }
+
+        @Override
+        public void unsubscribeAll(String subject) {
+        }
+
+        @Override
+        public boolean isSubscribed(String subject) {
+          return false;
+        }
+
+        @Override
+        public void addGlobalListener(MessageListener listener) {
+        }
+
+        @Override
+        public void addSubscribeListener(SubscribeListener listener) {
+        }
+
+        @Override
+        public void addUnsubscribeListener(UnsubscribeListener listener) {
+        }
+
+        @Override
+        public void attachMonitor(BusMonitor monitor) {
+        }
+      };
+    }
+
+  }
 
   /**
    * Obtain an instance of the client MessageBus.

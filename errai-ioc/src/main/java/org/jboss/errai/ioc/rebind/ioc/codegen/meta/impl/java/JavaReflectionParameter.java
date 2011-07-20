@@ -29,12 +29,12 @@ import org.mvel2.util.ReflectionUtil;
  */
 public class JavaReflectionParameter implements MetaParameter {
   private String name;
-  private Class<?> type;
+  private MetaClass type;
   private Annotation[] annotations;
   private MetaClassMember declaredBy;
 
-  public JavaReflectionParameter(Class<?> type, Annotation[] annotations, MetaClassMember declaredBy) {
-    this.name = ReflectionUtil.getPropertyFromAccessor(type.getSimpleName());
+  public JavaReflectionParameter(MetaClass type, Annotation[] annotations, MetaClassMember declaredBy) {
+    this.name = ReflectionUtil.getPropertyFromAccessor(type.getName());
     this.type = type;
     this.annotations = annotations;
     this.declaredBy = declaredBy;
@@ -47,7 +47,7 @@ public class JavaReflectionParameter implements MetaParameter {
 
   @Override
   public MetaClass getType() {
-    return MetaClassFactory.get(type);
+    return type;
   }
 
   @Override

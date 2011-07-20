@@ -17,6 +17,7 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 
 /**
@@ -33,4 +34,8 @@ public interface ContextualStatementBuilder extends ContextualLoopBuilder, Conte
   public VariableReferenceContextualStatementBuilder loadField(String fieldName);
 
   public Statement returnValue();
+
+  public Statement returnValueAs(Class<?> castTo);
+
+  public Statement returnValueAs(MetaClass castTo);
 }
