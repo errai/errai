@@ -35,6 +35,7 @@ import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameterizedType;
 
 public class InjectionContext {
   private IOCProcessingContext processingContext;
@@ -61,34 +62,8 @@ public class InjectionContext {
 
     if (injs != null) {
       for (Injector inj : injs) {
-        if (metadata == null && inj.getQualifyingMetadata() == null) {
-          return inj;
-        }
-        else if (metadata != null && inj.getQualifyingMetadata() != null
-                && metadata.doesSatisfy(inj.getQualifyingMetadata())) {
+        if (inj.matches(type.getParameterizedType(), metadata)) {
           matching.add(inj);
-        }
-      }
-    }
-
-    matching =  new ArrayList<Injector>(matching);
-
-    Iterator<Injector> iter = matching.iterator();
-    Injector inj;
-
-    if (matching.size() > 1) {
-      while (iter.hasNext()) {
-        inj = iter.next();
-
-        if (type.getParameterizedType() != null) {
-          if (inj.getQualifyingTypeInformation() != null) {
-            if (!type.getParameterizedType().isAssignableFrom(inj.getQualifyingTypeInformation())) {
-              iter.remove();
-            }
-          }
-        }
-        else if (inj.getQualifyingTypeInformation() == null) {
-          iter.remove();
         }
       }
     }
@@ -106,13 +81,19 @@ public class InjectionContext {
   }
 
   public boolean isInjectable(MetaClass injectorType) {
+    return isInjectableQualified(injectorType, null);
+  }
+
+
+  public boolean isInjectableQualified(MetaClass injectorType, QualifyingMetadata qualifyingMetadata) {
     if (injectors.containsKey(injectorType.getErased())) {
-      Injector injector = injectors.get(injectorType.getErased()).get(0);
-      return !(injector.isSingleton() && !injector.isInjected());
+      for (Injector inj : injectors.get(injectorType.getErased())) {
+        if (inj.matches(injectorType.getParameterizedType(), qualifyingMetadata)) {
+          return !(inj.isSingleton() && !inj.isInjected());
+        }
+      }
     }
-    else {
-      return false;
-    }
+    return false;
   }
 
   public Injector getInjector(Class<?> injectorType) {

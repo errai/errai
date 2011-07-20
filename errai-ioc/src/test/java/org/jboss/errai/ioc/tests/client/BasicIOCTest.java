@@ -18,10 +18,7 @@ package org.jboss.errai.ioc.tests.client;
 
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
-import org.jboss.errai.ioc.tests.client.res.HappyInspector;
-import org.jboss.errai.ioc.tests.client.res.HappyServiceImpl;
-import org.jboss.errai.ioc.tests.client.res.SimpleBean;
-import org.jboss.errai.ioc.tests.client.res.SimpleBean2;
+import org.jboss.errai.ioc.tests.client.res.*;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.junit.client.GWTTestCase;
@@ -81,5 +78,12 @@ public class BasicIOCTest extends GWTTestCase {
 
     assertNotNull(happyInspector.getIntegerService());
     assertEquals(new Integer(111), happyInspector.getIntegerService().get());
+  }
+
+  public void testQualifiers() {
+    QualInspector qualInspector = QualInspector.INSTANCE;
+
+    assertTrue(qualInspector.getaQualService().get() instanceof Integer);
+    assertTrue(qualInspector.getbQualService().get() instanceof String);
   }
 }

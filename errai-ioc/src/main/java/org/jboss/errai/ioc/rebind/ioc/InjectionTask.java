@@ -73,22 +73,21 @@ public class InjectionTask {
             = new InjectableInstance(null, injectType, constructor, method, field, type, parm, injector, ctx);
 
     Injector inj;
+    QualifyingMetadata qualifyingMetadata = JSR299QualifyingMetadata.createFromAnnotations(injectableInstance.getQualifiers());
 
     switch (injectType) {
       case Type:
-        ctx.getQualifiedInjector(type,
-                JSR299QualifyingMetadata.createFromAnnotations(injectableInstance.getQualifiers()));
+        ctx.getQualifiedInjector(type, qualifyingMetadata);
         break;
 
       case PrivateField:
-        if (!ctx.isInjectable(field.getType())) {
+
+        if (!ctx.isInjectableQualified(field.getType(), qualifyingMetadata)) {
           return false;
         }
 
         try {
-          inj = ctx.getQualifiedInjector(field.getType(),
-                  JSR299QualifyingMetadata.createFromAnnotations(injectableInstance.getQualifiers()));
-
+          inj = ctx.getQualifiedInjector(field.getType(), qualifyingMetadata);
         }
         catch (InjectionFailure e) {
           e.setTarget(toString());
@@ -97,20 +96,19 @@ public class InjectionTask {
 
         processingContext.append(
                 Stmt.invokeStatic(processingContext.getBootstrapClass(), getPrivateFieldInjectorName(field),
-                                Refs.get(injector.getVarName()), inj.getType(ctx, injectableInstance))
+                        Refs.get(injector.getVarName()), inj.getType(ctx, injectableInstance))
         );
 
         ctx.addExposedField(field);
         break;
 
       case Field:
-        if (!ctx.isInjectable(field.getType())) {
+        if (!ctx.isInjectableQualified(field.getType(), qualifyingMetadata)) {
           return false;
         }
 
         try {
-          inj = ctx.getQualifiedInjector(field.getType(),
-                  JSR299QualifyingMetadata.createFromAnnotations(injectableInstance.getQualifiers()));
+          inj = ctx.getQualifiedInjector(field.getType(), qualifyingMetadata);
         }
         catch (InjectionFailure e) {
           e.setTarget(toString());
@@ -118,14 +116,14 @@ public class InjectionTask {
         }
 
         processingContext.append(
-            Stmt.loadVariable(injector.getVarName()).loadField(field.getName()).assignValue(inj.getType(ctx,
+                Stmt.loadVariable(injector.getVarName()).loadField(field.getName()).assignValue(inj.getType(ctx,
                         injectableInstance))
         );
 
         break;
 
       case Method:
-        if (!ctx.isInjectable(method.getParameters()[0].getType())) {
+        if (!ctx.isInjectableQualified(method.getParameters()[0].getType(), qualifyingMetadata)) {
           return false;
         }
 
