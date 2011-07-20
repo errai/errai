@@ -345,7 +345,6 @@
                 <module>dist</module>
                 <module>errai-bus-demos</module>
                 <module>archetypes/quickstart</module>
-                <module>archetypes/cdi</module>
             </modules>
         </profile>
 
