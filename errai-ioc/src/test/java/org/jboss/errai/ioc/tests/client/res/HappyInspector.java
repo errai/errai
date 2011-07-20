@@ -13,6 +13,12 @@ public class HappyInspector {
   @Inject
   private HappyService happyService;
 
+  @Inject
+  private GenericService<Integer> integerService;
+
+  @Inject
+  private GenericService<String> stringService;
+
   public boolean confirmHappiness() {
     return happyService.isHappy();
   }
@@ -20,6 +26,14 @@ public class HappyInspector {
   @PostConstruct
   public void init() {
     INSTANCE = this;
+  }
+
+  public GenericService<Integer> getIntegerService() {
+    return integerService;
+  }
+
+  public GenericService<String> getStringService() {
+    return stringService;
   }
 
   public static HappyInspector INSTANCE;

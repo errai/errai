@@ -276,30 +276,33 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   private String hashString() {
     if (hashString == null) {
       hashString = MetaClass.class.getName() + ":" + getFullyQualifiedName();
+      if (getParameterizedType() != null) {
+        hashString += getParameterizedType().toString();
+      }
     }
     return hashString;
   }
 
   @Override
   public boolean isAssignableFrom(MetaClass clazz) {
-    if (equals(MetaClassFactory.get(Object.class)) && clazz.isInterface()) 
+    if (equals(MetaClassFactory.get(Object.class)) && clazz.isInterface())
       return true;
-    
+
     MetaClass cls = clazz;
     do {
-      if (this.equals(cls))
+      if (this.getFullyQualifiedName().equals(cls.getFullyQualifiedName()))
         return true;
     }
     while ((cls = cls.getSuperClass()) != null);
 
-    return _hasInterface(clazz.getInterfaces(), this);
+    return _hasInterface(clazz.getInterfaces(), this.getErased());
   }
 
   @Override
   public boolean isAssignableTo(MetaClass clazz) {
-    if (isInterface() && clazz.equals(MetaClassFactory.get(Object.class))) 
+    if (isInterface() && clazz.equals(MetaClassFactory.get(Object.class)))
       return true;
-    
+
     MetaClass cls = this;
     do {
       if (cls.equals(clazz))
@@ -307,12 +310,12 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     }
     while ((cls = cls.getSuperClass()) != null);
 
-    return _hasInterface(getInterfaces(), clazz);
+    return _hasInterface(getInterfaces(), clazz.getErased());
   }
 
   private static boolean _hasInterface(MetaClass[] from, MetaClass to) {
     for (MetaClass iface : from) {
-      if (to.equals(iface))
+      if (to.getFullyQualifiedName().equals(iface.getErased().getFullyQualifiedName()))
         return true;
       else if (_hasInterface(iface.getInterfaces(), to))
         return true;
@@ -370,13 +373,6 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
           type = type.getComponentType();
         }
 
-        // if (MetaClassFactory.get(MetaClass.class).isAssignableFrom(type)) {
-        // type = MetaClassFactory.get(Class.class);
-        // }
-        // else if (MetaClassFactory.get(MetaType.class).isAssignableFrom(type)) {
-        // type = MetaClassFactory.get(Type.class);
-        // }
-
         String dimString = "";
         for (int i = 0; i < dim; i++) {
           dimString += "[";
@@ -414,5 +410,15 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   @Override
   public MetaClass asUnboxed() {
     return MetaClassFactory.get(ParseTools.unboxPrimitive(asClass()));
+  }
+
+  @Override
+  public MetaClass getErased() {
+    try {
+      return MetaClassFactory.get(getFullyQualifiedName());
+    }
+    catch (Exception e) {
+      return this;
+    }
   }
 }

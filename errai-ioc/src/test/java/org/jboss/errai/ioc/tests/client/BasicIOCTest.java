@@ -75,5 +75,11 @@ public class BasicIOCTest extends GWTTestCase {
   public void testInterfaceResolution() {
     HappyInspector happyInspector = HappyInspector.INSTANCE;
     assertTrue(happyInspector.confirmHappiness());
+
+    assertNotNull(happyInspector.getStringService());
+    assertEquals("Hello", happyInspector.getStringService().get());
+
+    assertNotNull(happyInspector.getIntegerService());
+    assertEquals(new Integer(111), happyInspector.getIntegerService().get());
   }
 }

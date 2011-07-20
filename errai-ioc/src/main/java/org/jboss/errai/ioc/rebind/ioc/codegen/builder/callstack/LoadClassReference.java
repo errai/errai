@@ -56,18 +56,20 @@ public class LoadClassReference extends AbstractCallElement {
   }
 
   public static String getClassReference(MetaClass metaClass, Context context, boolean typeParms) {
-    String fqcn = metaClass.getFullyQualifiedName();
+    MetaClass erased = metaClass.getErased();
+
+    String fqcn = erased.getFullyQualifiedName();
     String pkg;
 
     int idx = fqcn.lastIndexOf('.');
     if (idx != -1) {
       pkg = fqcn.substring(0, idx);
 
-      if (context.isAutoImports() && !context.hasClassImport(metaClass) && !context.hasPackageImport(pkg)) {
-        context.addClassImport(metaClass);
+      if (context.isAutoImports() && !context.hasClassImport(erased) && !context.hasPackageImport(pkg)) {
+        context.addClassImport(erased);
       }
 
-      if (context.hasPackageImport(pkg) || context.hasClassImport(metaClass)) {
+      if (context.hasPackageImport(pkg) || context.hasClassImport(erased)) {
         fqcn = fqcn.substring(idx + 1);
       }
     }
