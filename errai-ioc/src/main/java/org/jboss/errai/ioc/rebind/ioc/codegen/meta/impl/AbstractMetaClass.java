@@ -86,7 +86,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     for (MetaMethod method : methods) {
       if (method.getName().equals(name) && method.getParameters().length == parmTypes.length) {
         for (int i = 0; i < parmTypes.length; i++) {
-          if (!method.getParameters()[i].getType().equals(parmTypes[i])) {
+          if (!method.getParameters()[i].getType().isAssignableFrom(parmTypes[i])) {
             continue Outer;
           }
         }
@@ -101,7 +101,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     for (MetaConstructor constructor : constructors) {
       if (constructor.getParameters().length == parmTypes.length) {
         for (int i = 0; i < parmTypes.length; i++) {
-          if (!constructor.getParameters()[i].getType().equals(parmTypes[i])) {
+          if (!constructor.getParameters()[i].getType().isAssignableFrom(parmTypes[i])) {
             continue Outer;
           }
         }

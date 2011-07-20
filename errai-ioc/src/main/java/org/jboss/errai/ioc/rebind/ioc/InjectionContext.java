@@ -128,6 +128,10 @@ public class InjectionContext {
     List<Injector> injectorList = injectors.get(injector.getInjectedType());
     if (injectorList == null) {
       injectors.put(injector.getInjectedType(), injectorList = new ArrayList<Injector>());
+
+      for (MetaClass iface : injector.getInjectedType().getInterfaces()) {
+        injectors.put(iface, injectorList);
+      }
     }
     else {
       for (Injector inj : injectorList) {
@@ -220,7 +224,20 @@ public class InjectionContext {
     if (!toExecute.isEmpty()) {
       StringBuilder sbuf = new StringBuilder();
       for (InjectionTask task : toExecute) {
-        sbuf.append(" - ").append(task.getInjector().getInjectedType()).append("\n");
+        sbuf.append(" @> ").append(task.getInjector().getInjectedType()).append("\n");
+        switch (task.getInjectType()) {
+          case PrivateField:
+          case Field:
+            sbuf.append("   - field ").append(task.getField().getName()).append(" could not be satisfied for type: ")
+                    .append(task.getField
+                    ().getType().getFullyQualifiedName()).append("\n");
+            break;
+
+          case Method:
+            sbuf.append("   - setter ").append(task.getMethod()).append(" could not be satisified for type: ").append
+                    (task.getMethod().getParameters()[0].getType().getFullyQualifiedName()).append("\n");
+        }
+
       }
 
       throw new RuntimeException("unsatified depedencies:\n" + sbuf);

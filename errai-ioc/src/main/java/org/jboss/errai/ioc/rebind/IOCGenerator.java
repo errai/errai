@@ -343,21 +343,7 @@ public class IOCGenerator extends Generator {
 
     Collection<MetaField> privateFields = injectFactory.getInjectionContext().getPrivateFieldsToExpose();
     for (MetaField f : privateFields) {
-      classBuilder.privateMethod(void.class, InjectUtil.getPrivateFieldInjectorName(f))
-              .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance"),
-                      Parameter.of(f.getType(), "value")))
-              .modifiers(Modifier.Static, Modifier.JSNI)
-              .body()
-              .append(new StringStatement(JSNIUtil.fieldAccess(f) + " = value"))
-              .finish();
-
-      classBuilder.privateMethod(f.getType(), InjectUtil.getPrivateFieldInjectorName(f))
-              .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance")))
-              .modifiers(Modifier.Static, Modifier.JSNI)
-              .body()
-              .append(new StringStatement("return " + JSNIUtil.fieldAccess(f)))
-              .finish();
-
+      addJSNIStubs(classBuilder, f, f.getType());
     }
 
     blockBuilder.finish();
@@ -371,6 +357,23 @@ public class IOCGenerator extends Generator {
     }
 
     sourceWriter.print(generated);
+  }
+
+  private static void addJSNIStubs(ClassStructureBuilder<?> classBuilder, MetaField f, MetaClass type) {
+    classBuilder.privateMethod(void.class, InjectUtil.getPrivateFieldInjectorName(f))
+            .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance"),
+                    Parameter.of(type, "value")))
+            .modifiers(Modifier.Static, Modifier.JSNI)
+            .body()
+            .append(new StringStatement(JSNIUtil.fieldAccess(f) + " = value"))
+            .finish();
+
+    classBuilder.privateMethod(type, InjectUtil.getPrivateFieldInjectorName(f))
+            .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance")))
+            .modifiers(Modifier.Static, Modifier.JSNI)
+            .body()
+            .append(new StringStatement("return " + JSNIUtil.fieldAccess(f)))
+            .finish();
   }
 
   public void addType(final MetaClass type) {
@@ -418,15 +421,6 @@ public class IOCGenerator extends Generator {
       @Override
       public boolean handle(final InjectableInstance type, EntryPoint annotation, IOCProcessingContext context) {
         generateWithSingletonSemantics(type.getType());
-
-//
-//        addDeferred(new Runnable() {
-//          @Override
-//          public void run() {
-//            generateWithSingletonSemantics(type.getType());
-//          }
-//        });
-
         return true;
       }
     });
