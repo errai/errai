@@ -6,8 +6,6 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.rebind.SourceWriter;
 import com.google.gwt.user.rebind.StringSourceWriter;
-import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.rebind.ScannerSingleton;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
@@ -33,6 +31,8 @@ import java.lang.reflect.Type;
 import java.util.*;
 
 /**
+ * The main generator class for the Errai IOC system.
+ *
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class IOCBootstrapGenerator {
@@ -42,6 +42,8 @@ public class IOCBootstrapGenerator {
 
   InjectorFactory injectFactory;
   ProcessorFactory procFactory;
+
+  private String packageFilter = null;
 
   private boolean useReflectionStubs = false;
 
@@ -113,7 +115,6 @@ public class IOCBootstrapGenerator {
                                   BlockBuilder<?> blockBuilder) {
     blockBuilder.append(Stmt.declareVariable("ctx", InterfaceInjectionContext.class,
             Stmt.newObject(InterfaceInjectionContext.class)));
-
     MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
     procFactory.process(scanner, procContext);
     procFactory.processAll();
@@ -230,7 +231,8 @@ public class IOCBootstrapGenerator {
     /*
     * IOCDecoratorExtension.class
     */
-    Set<Class<?>> iocExtensions = scanner.getTypesAnnotatedWith(org.jboss.errai.ioc.client.api.IOCExtension.class);
+    Set<Class<?>> iocExtensions = scanner
+            .getTypesAnnotatedWith(org.jboss.errai.ioc.client.api.IOCExtension.class);
     List<IOCExtensionConfigurator> extensionConfigurators = new ArrayList<IOCExtensionConfigurator>();
     for (Class<?> clazz : iocExtensions) {
       try {
@@ -268,6 +270,7 @@ public class IOCBootstrapGenerator {
             throw new ErraiBootstrapFailure("code decorator must extend IOCDecoratorExtension<@AnnotationType>");
           }
 
+          //noinspection unchecked
           annoType = ((Class) pType.getActualTypeArguments()[0]).asSubclass(Annotation.class);
         }
 
@@ -372,8 +375,6 @@ public class IOCBootstrapGenerator {
 
   private void defaultConfigureProcessor() {
     final MetaClass widgetType = MetaClassFactory.get(Widget.class);
-    final MetaClass messageCallbackType = MetaClassFactory.get(MessageCallback.class);
-    final MetaClass messageBusType = MetaClassFactory.get(MessageBus.class);
 
     procFactory.registerHandler(EntryPoint.class, new AnnotationHandler<EntryPoint>() {
       @Override
@@ -453,5 +454,9 @@ public class IOCBootstrapGenerator {
 
   public void setUseReflectionStubs(boolean useReflectionStubs) {
     this.useReflectionStubs = useReflectionStubs;
+  }
+
+  public void setPackageFilter(String packageFilter) {
+    this.packageFilter = packageFilter;
   }
 }

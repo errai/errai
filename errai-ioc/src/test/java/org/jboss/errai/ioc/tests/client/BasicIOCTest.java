@@ -21,11 +21,14 @@ import com.google.gwt.junit.client.GWTTestCase;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
 import org.jboss.errai.ioc.rebind.IOCClientTestCase;
+import org.jboss.errai.ioc.rebind.IOCTestRunner;
 import org.jboss.errai.ioc.tests.client.res.HappyInspector;
 import org.jboss.errai.ioc.tests.client.res.QualInspector;
 import org.jboss.errai.ioc.tests.client.res.SimpleBean;
 import org.jboss.errai.ioc.tests.client.res.SimpleBean2;
+import org.junit.runner.RunWith;
 
+@RunWith(IOCTestRunner.class)
 public class BasicIOCTest extends IOCClientTestCase {
 
   @Override

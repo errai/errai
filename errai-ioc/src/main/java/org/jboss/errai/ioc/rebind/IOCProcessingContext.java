@@ -37,6 +37,7 @@ public class IOCProcessingContext extends ProcessingContext {
   protected MetaClass bootstrapClass;
   protected BlockBuilder<?> blockBuilder;
   protected List<Runnable> deferredTasks;
+  protected String packageFilter;
 
   public IOCProcessingContext(TreeLogger treeLogger,
                               GeneratorContext generatorContext,
@@ -75,5 +76,13 @@ public class IOCProcessingContext extends ProcessingContext {
 
   public Context getContext() {
     return context;
+  }
+
+  public void setPackageFilter(String packageFilter) {
+    this.packageFilter = packageFilter;
+  }
+
+  public String getPackageFilter() {
+    return packageFilter;
   }
 }
