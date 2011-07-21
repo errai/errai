@@ -7,12 +7,14 @@ import org.jboss.errai.cdi.client.api.Conversation;
 import org.jboss.errai.cdi.client.api.Event;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.IOCProvider;
+import org.jboss.errai.ioc.rebind.ioc.QualifyingMetadata;
+import sun.reflect.generics.tree.TypeArgument;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @IOCProvider @Singleton
 public class EventProvider implements ContextualTypeProvider<Event<?>> {
-
   public Event<?> provide(final Class[] typeargs, final Annotation[] qualifiers) {
     return new Event() {
       private Class eventType = (typeargs.length == 1 ? typeargs[0] : Object.class);
