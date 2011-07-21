@@ -376,8 +376,8 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     if (!context.getImportedClasses().isEmpty())
       headerBuffer.append("\n");
 
-    for (MetaClass cls : context.getImportedClasses()) {
-      headerBuffer.append("import ").append(cls.getFullyQualifiedName()).append(";\n");
+    for (String cls : context.getImportedClasses()) {
+      headerBuffer.append("import ").append(cls).append(";\n");
     }
 
     return PrettyPrinter.prettyPrintJava(headerBuffer.toString() + buf.append("}\n").toString());

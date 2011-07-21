@@ -127,8 +127,8 @@ public class IOCGenerator extends Generator {
     if (printWriter == null) return;
 
     IOCBootstrapGenerator iocBootstrapGenerator = new IOCBootstrapGenerator(typeOracle, context, logger);
-    if (packageName != null && packageName.length() != 0) {
-      iocBootstrapGenerator.setPackageFilter(packageName);
+    if (modulePackage != null && modulePackage.length() != 0) {
+      iocBootstrapGenerator.setPackageFilter(modulePackage);
     }
 
 

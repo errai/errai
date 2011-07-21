@@ -13,7 +13,6 @@ import java.io.*;
 public class MockIOCGenerator {
   private String packageFilter;
 
-
   public Class<? extends Bootstrapper> generate() {
     IOCBootstrapGenerator bootstrapGenerator = new IOCBootstrapGenerator();
     bootstrapGenerator.setUseReflectionStubs(true);
@@ -70,7 +69,6 @@ public class MockIOCGenerator {
         System.out.print((char) b);
       }
 
-
       FileInputStream inputStream = new FileInputStream(outFile);
 
       byte[] classDefinition = new byte[inputStream.available()];
@@ -83,7 +81,6 @@ public class MockIOCGenerator {
     catch (Exception e) {
       throw new RuntimeException(e);
     }
-
   }
 
   private static class BootstrapClassloader extends ClassLoader {

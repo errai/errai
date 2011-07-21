@@ -46,7 +46,7 @@ public class Context {
   private Map<String, Label> labels;
 
   private Set<String> importedPackages;
-  private Set<MetaClass> importedClasses;
+  private Set<String> importedClasses;
   private boolean autoImports = false;
 
   private Context() {
@@ -139,7 +139,7 @@ public class Context {
       }
 
       if (c.importedClasses == null) {
-        c.importedClasses = importedClasses = new LinkedHashSet<MetaClass>();
+        c.importedClasses = importedClasses = new LinkedHashSet<String>();
       }
       else {
         importedClasses = c.importedClasses;
@@ -149,7 +149,7 @@ public class Context {
 
   public Context addClassImport(MetaClass clazz) {
     initImportedClass();
-    importedClasses.add(clazz);
+    importedClasses.add(clazz.getFullyQualifiedName());
     return this;
   }
 
@@ -231,9 +231,9 @@ public class Context {
     return importedPackages;
   }
 
-  public Set<MetaClass> getImportedClasses() {
+  public Set<String> getImportedClasses() {
     if (importedClasses == null)
-      return Collections.<MetaClass>emptySet();
+      return Collections.emptySet();
     
     return importedClasses;
   }
