@@ -78,12 +78,12 @@ public class IOCGenerator extends Generator {
         for (int i = 0; i < moduleName.length(); i++) {
           if (moduleName.charAt(i) == '.' && i < moduleName.length()
                   && Character.isUpperCase(moduleName.charAt(i + 1))) {
-            moduleName = moduleName.substring(0, i);
+            this.modulePackage = moduleName.substring(0, i);
             break;
           }
         }
 
-       logger.log(TreeLogger.INFO, "will scan in package: " + packageName);
+       logger.log(TreeLogger.INFO, "will scan in package: " + modulePackage);
       }
     }
     catch (Exception e) {
