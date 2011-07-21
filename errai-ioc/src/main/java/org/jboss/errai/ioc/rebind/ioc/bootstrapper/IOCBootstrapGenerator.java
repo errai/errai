@@ -100,6 +100,8 @@ public class IOCBootstrapGenerator {
 
     injectFactory = new InjectorFactory(procContext);
     procFactory = new ProcessorFactory(injectFactory);
+    procContext.setPackageFilter(packageFilter);
+
     defaultConfigureProcessor();
 
     // generator constructor source code

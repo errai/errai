@@ -138,7 +138,9 @@ public class MetaDataScanner extends Reflections {
   public Set<Method> getMethodsAnnotatedWith(Class<? extends Annotation> annotation, String packagePrefix) {
     Set<Method> results = new HashSet<Method>();
     for (Method method : getMethodsAnnotatedWith(annotation)) {
-      if (packagePrefix == null || packagePrefix.length() == 0 || method.getName().startsWith(packagePrefix)) {
+      if (packagePrefix == null || packagePrefix.length() == 0 || method.getDeclaringClass().getName().startsWith
+              (packagePrefix)
+              ) {
         results.add(method);
       }
     }
@@ -148,7 +150,8 @@ public class MetaDataScanner extends Reflections {
   public Set<Field> getFieldsAnnotatedWith(Class<? extends Annotation> annotation, String packagePrefix) {
     Set<Field> results = new HashSet<Field>();
     for (Field field : getFieldsAnnotatedWith(annotation)) {
-      if (packagePrefix == null || packagePrefix.length() == 0 || field.getName().startsWith(packagePrefix)) {
+      if (packagePrefix == null || packagePrefix.length() == 0 || field.getDeclaringClass().getName()
+              .startsWith(packagePrefix)) {
         results.add(field);
       }
     }
