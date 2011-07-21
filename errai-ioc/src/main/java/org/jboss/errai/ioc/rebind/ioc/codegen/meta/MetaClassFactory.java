@@ -19,6 +19,7 @@ package org.jboss.errai.ioc.rebind.ioc.codegen.meta;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,6 +37,7 @@ import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.JType;
 import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import sun.reflect.generics.tree.TypeTree;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -112,6 +114,10 @@ public final class MetaClassFactory {
 
   public static MetaClass get(Class<?> clazz) {
     return createOrGet(clazz);
+  }
+
+  public static MetaClass get(Class<?> clazz, Type type) {
+    return createOrGet(clazz, type);
   }
 
   public static MetaClass get(TypeLiteral<?> literal) {
@@ -206,6 +212,23 @@ public final class MetaClassFactory {
 
     if (!CLASS_CACHE.containsKey(cls.getName())) {
       MetaClass javaReflectionClass = JavaReflectionClass.newUncachedInstance(cls);
+
+      addLookups(cls, javaReflectionClass);
+      return javaReflectionClass;
+    }
+
+    return CLASS_CACHE.get(cls.getName());
+  }
+
+  private static MetaClass createOrGet(Class cls, Type type) {
+    if (cls == null) return null;
+
+    if (cls.getTypeParameters() != null) {
+      return JavaReflectionClass.newUncachedInstance(cls, type);
+    }
+
+    if (!CLASS_CACHE.containsKey(cls.getName())) {
+      MetaClass javaReflectionClass = JavaReflectionClass.newUncachedInstance(cls, type);
 
       addLookups(cls, javaReflectionClass);
       return javaReflectionClass;

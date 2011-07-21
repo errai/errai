@@ -16,11 +16,7 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.AssignmentOperator;
-import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanExpression;
-import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.CaseBlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ContextualStatementBuilder;
@@ -32,16 +28,18 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.AssignVariable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadField;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.MethodCall;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.ReturnValue;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 
 /**
  * Implementation of the {@link ContextualStatementBuilder}.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class ContextualStatementBuilderImpl extends AbstractStatementBuilder implements ContextualStatementBuilder,
-    VariableReferenceContextualStatementBuilder {
+                                                                                        VariableReferenceContextualStatementBuilder {
 
   protected ContextualStatementBuilderImpl(Context context, CallElementBuilder callElementBuilder) {
     super(context, callElementBuilder);
@@ -126,18 +124,29 @@ public class ContextualStatementBuilderImpl extends AbstractStatementBuilder imp
   public BlockBuilder<ElseBlockBuilder> ifNot() {
     return new IfBlockBuilderImpl(context, callElementBuilder).ifNot();
   }
-  
+
   // Switch
   @Override
   public CaseBlockBuilder switch_() {
     return new SwitchBlockBuilderImpl(context, callElementBuilder).switch_();
   }
-  
+
   // Value return
   @Override
   public Statement returnValue() {
     appendCallElement(new ReturnValue());
     return this;
+  }
+
+  @Override
+  public Statement returnValueAs(Class<?> castTo) {
+    return returnValueAs(MetaClassFactory.get(castTo));
+  }
+
+  @Override
+  public Statement returnValueAs(MetaClass castTo) {
+    appendCallElement(new ReturnValue());
+    return Cast.to(castTo, this);
   }
 
   // Assignments

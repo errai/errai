@@ -39,7 +39,7 @@ public class JavaReflectionField extends MetaField {
 
   @Override
   public MetaClass getType() {
-    return MetaClassFactory.get(field.getType());
+    return MetaClassFactory.get(field.getType(), field.getGenericType());
   }
 
   @Override

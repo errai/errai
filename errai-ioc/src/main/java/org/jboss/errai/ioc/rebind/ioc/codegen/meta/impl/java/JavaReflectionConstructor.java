@@ -44,8 +44,8 @@ public class JavaReflectionConstructor extends MetaConstructor {
     List<MetaParameter> parmList = new ArrayList<MetaParameter>();
 
     for (int i = 0; i < c.getParameterTypes().length; i++) {
-      parmList.add(new JavaReflectionParameter(c.getParameterTypes()[i],
-          c.getParameterAnnotations()[i], this));
+      MetaClass mcParm = MetaClassFactory.get(c.getParameterTypes()[i], c.getGenericParameterTypes()[i]);
+      parmList.add(new JavaReflectionParameter(mcParm, c.getParameterAnnotations()[i], this));
     }
 
     parameters = parmList.toArray(new MetaParameter[parmList.size()]);

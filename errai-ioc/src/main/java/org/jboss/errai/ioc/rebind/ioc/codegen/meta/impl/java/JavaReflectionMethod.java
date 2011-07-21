@@ -41,7 +41,9 @@ public class JavaReflectionMethod extends MetaMethod {
     List<MetaParameter> parmList = new ArrayList<MetaParameter>();
 
     for (int i = 0; i < method.getParameterTypes().length; i++) {
-      parmList.add(new JavaReflectionParameter(method.getParameterTypes()[i],
+      MetaClass mcParm = MetaClassFactory.get(method.getParameterTypes()[i], method.getGenericParameterTypes()[i]);
+
+      parmList.add(new JavaReflectionParameter(mcParm,
           method.getParameterAnnotations()[i], this));
     }
 

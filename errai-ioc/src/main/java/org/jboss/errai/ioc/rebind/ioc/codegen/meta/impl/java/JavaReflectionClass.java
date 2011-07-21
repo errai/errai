@@ -40,9 +40,12 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
   private Annotation[] annotationsCache;
 
   private JavaReflectionClass(Class clazz) {
+    this(clazz, clazz.getGenericSuperclass());
+  }
+
+  private JavaReflectionClass(Class clazz, Type type) {
     super(clazz);
     this.annotationsCache = clazz.getAnnotations();
-    Type type = getEnclosedMetaObject().getGenericSuperclass();
     if (type instanceof ParameterizedType) {
       super.parameterizedType = new JavaReflectionParameterizedType((ParameterizedType) type);
     }
@@ -61,6 +64,10 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
 
   public static MetaClass newUncachedInstance(Class type) {
     return new JavaReflectionClass(type);
+  }
+
+  public static MetaClass newUncachedInstance(Class clazz, Type type) {
+    return new JavaReflectionClass(clazz, type);
   }
 
   public static MetaClass newInstance(TypeLiteral type) {
@@ -201,9 +208,17 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
   @Override
   public MetaClass[] getInterfaces() {
     List<MetaClass> metaClassList = new ArrayList<MetaClass>();
-    for (Class<?> type : getEnclosedMetaObject().getInterfaces()) {
+    Type[] genIface = getEnclosedMetaObject().getGenericInterfaces();
 
-      metaClassList.add(new JavaReflectionClass(type));
+    int i = 0;
+    for (Class<?> type : getEnclosedMetaObject().getInterfaces()) {
+      if (genIface != null) {
+        metaClassList.add(new JavaReflectionClass(type, genIface[i]));
+      }
+      else {
+        metaClassList.add(new JavaReflectionClass(type));
+      }
+      i++;
     }
 
     return metaClassList.toArray(new MetaClass[metaClassList.size()]);

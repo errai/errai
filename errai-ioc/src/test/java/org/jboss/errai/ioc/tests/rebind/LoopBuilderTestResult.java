@@ -46,7 +46,7 @@ public interface LoopBuilderTestResult {
       "     for (String element : list) {" +
           " \nfor (String anotherElement : anotherList) {" +
           "   \nnew String();" +
-          " \n};" +
+          " \n}" +
           "\n}";
 
   public static final String FOREACH_KEYSET_LOOP =
@@ -76,7 +76,7 @@ public interface LoopBuilderTestResult {
   public static final String WHILE_NESTED_LOOPS =
       "   while (str != null) { " +
           " while (str2 != null) {" +
-          " };\n" +
+          " }\n" +
           "}";
 
   public static final String FOR_NO_INITIALIZER_NO_COUNTING_EXP_EMPTY =
@@ -111,8 +111,8 @@ public interface LoopBuilderTestResult {
           "   for (i = 0; i < 100; i += 1) { " +
           "     if (i == 50) {" +
           "       continue;" +
-          "     };" +
-          "   };\n" +
+          "     }" +
+          "   }\n" +
           "\n}";
 
   public static final String LOOP_WITH_CONTINUE_AND_LABEL =
@@ -121,8 +121,8 @@ public interface LoopBuilderTestResult {
           "   for (i = 0; i < 100; i += 1) { " +
           "     if (i == 50) {" +
           "       continue label;" +
-          "     };" +
-          "   };\n" +
+          "     }" +
+          "   }\n" +
           "\n}";
 
   public static final String LOOP_WITH_BREAK =
@@ -130,8 +130,8 @@ public interface LoopBuilderTestResult {
           "   for (i = 0; i < 100; i += 1) { " +
           "     if (i == 50) {" +
           "       break;" +
-          "     };" +
-          "   };\n" +
+          "     }" +
+          "   }\n" +
           "\n}";
 
   public static final String LOOP_WITH_BREAK_AND_LABEL =
@@ -140,7 +140,7 @@ public interface LoopBuilderTestResult {
           "   for (i = 0; i < 100; i += 1) { " +
           "     if (i == 50) {" +
           "       break label;" +
-          "     };" +
-          "   };\n" +
+          "     }" +
+          "   }\n" +
           "\n}";
 }

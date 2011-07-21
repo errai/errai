@@ -16,19 +16,18 @@
 
 package org.jboss.errai.ioc.tests.client;
 
-import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.ioc.client.api.Bootstrapper;
-import org.jboss.errai.ioc.tests.client.res.*;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.junit.client.GWTTestCase;
+import org.jboss.errai.bus.client.ErraiBus;
+import org.jboss.errai.ioc.client.api.Bootstrapper;
+import org.jboss.errai.ioc.rebind.IOCClientTestCase;
+import org.jboss.errai.ioc.tests.client.res.HappyInspector;
+import org.jboss.errai.ioc.tests.client.res.QualInspector;
+import org.jboss.errai.ioc.tests.client.res.SimpleBean;
+import org.jboss.errai.ioc.tests.client.res.SimpleBean2;
 
-/**
- * User: christopherbrock
- * Date: 14-Aug-2010
- * Time: 6:49:53 PM
- */
-public class BasicIOCTest extends GWTTestCase {
+public class BasicIOCTest extends IOCClientTestCase {
+
   @Override
   public String getModuleName() {
     return "org.jboss.errai.ioc.tests.IOCTests";
@@ -36,14 +35,10 @@ public class BasicIOCTest extends GWTTestCase {
 
   @Override
   protected void gwtSetUp() throws Exception {
-    super.gwtSetUp();
-
-    Bootstrapper bootstrapper = GWT.create(Bootstrapper.class);
-    bootstrapper.bootstrapContainer();
+    super.bootstrapContainer();
   }
 
   public void testBasicInjectionScenarios() {
-
     SimpleBean simpleBean = SimpleBean.TEST_INSTANCE;
     assertNotNull(simpleBean);
 
