@@ -17,6 +17,7 @@ public class MockIOCGenerator {
   public Class<? extends Bootstrapper> generate() {
     IOCBootstrapGenerator bootstrapGenerator = new IOCBootstrapGenerator();
     bootstrapGenerator.setUseReflectionStubs(true);
+    bootstrapGenerator.setPackageFilter(packageFilter);
 
     String packageName = Bootstrapper.class.getPackage().getName();
     String className = "MockBootstrapperImpl";

@@ -23,11 +23,15 @@ import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import com.google.gwt.dev.cfg.ModuleDef;
+import com.google.gwt.dev.javac.StandardGeneratorContext;
+import org.apache.http.impl.client.TunnelRefusedException;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCBootstrapGenerator;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 
 import java.io.PrintWriter;
+import java.lang.reflect.Field;
 
 /**
  * The main generator class for the errai-ioc framework.
@@ -44,6 +48,8 @@ public class IOCGenerator extends Generator {
   private String packageName = null;
   private TypeOracle typeOracle;
 
+  private String modulePackage;
+
   public static final boolean isDebugCompile = Boolean.getBoolean("errai.ioc.debug");
 
   public IOCGenerator() {
@@ -53,6 +59,36 @@ public class IOCGenerator extends Generator {
   public String generate(TreeLogger logger, GeneratorContext context, String typeName)
           throws UnableToCompleteException {
     typeOracle = context.getTypeOracle();
+
+
+    /**
+     * Try to determine the module package -- hackishly
+     */
+    //TODO: Find a more standard way to do this.
+    try {
+      if (context instanceof StandardGeneratorContext) {
+        StandardGeneratorContext stdContext = (StandardGeneratorContext) context;
+        Field field = StandardGeneratorContext.class.getDeclaredField("module");
+        field.setAccessible(true);
+
+        ModuleDef moduleDef = (ModuleDef) field.get(stdContext);
+
+        String moduleName = moduleDef.getName();
+
+        for (int i = 0; i < moduleName.length(); i++) {
+          if (moduleName.charAt(i) == '.' && i < moduleName.length()
+                  && Character.isUpperCase(moduleName.charAt(i + 1))) {
+            packageName = moduleName.substring(0, i);
+            break;
+          }
+        }
+
+       logger.log(TreeLogger.INFO, "will scan in package: " + packageName);
+      }
+    }
+    catch (Exception e) {
+      // could not determine package.
+    }
 
     try {
       // get classType and save instance variables
@@ -91,6 +127,10 @@ public class IOCGenerator extends Generator {
     if (printWriter == null) return;
 
     IOCBootstrapGenerator iocBootstrapGenerator = new IOCBootstrapGenerator(typeOracle, context, logger);
+    if (packageName != null && packageName.length() != 0) {
+      iocBootstrapGenerator.setPackageFilter(packageName);
+    }
+
 
     printWriter.append(iocBootstrapGenerator.generate(packageName, className));
     // commit generated class

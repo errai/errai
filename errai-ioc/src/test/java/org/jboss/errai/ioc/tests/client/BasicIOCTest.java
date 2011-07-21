@@ -28,7 +28,6 @@ import org.jboss.errai.ioc.tests.client.res.SimpleBean;
 import org.jboss.errai.ioc.tests.client.res.SimpleBean2;
 import org.junit.runner.RunWith;
 
-@RunWith(IOCTestRunner.class)
 public class BasicIOCTest extends IOCClientTestCase {
 
   @Override
