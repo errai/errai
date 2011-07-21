@@ -1,4 +1,4 @@
-package org.jboss.errai.cdi.producer.client.test.res;
+package org.jboss.errai.cdi.producer.client;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
