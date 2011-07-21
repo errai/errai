@@ -1,14 +1,14 @@
 package org.jboss.errai.cdi.producer.client.test;
 
+import org.jboss.errai.cdi.client.AbstractErraiCDITest;
 import org.jboss.errai.cdi.producer.client.ProducerTestModule;
-import org.jboss.errai.ioc.rebind.IOCClientTestCase;
 
 /**
  * Tests CDI producers.
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class ProducerIntegrationTest extends IOCClientTestCase {
+public class ProducerIntegrationTest extends AbstractErraiCDITest {
 
   @Override
   public String getModuleName() {
@@ -17,8 +17,7 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
 
   @Override
   public void gwtSetUp() throws Exception {
-    super.setPackageFilter("org.jboss.errai.cdi.producer");
-    super.bootstrapContainer();
+    super.gwtSetUp();
   }
 
   public void testProducers() {

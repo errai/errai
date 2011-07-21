@@ -16,6 +16,9 @@ public class InvalidProducerDependentTestBean {
   @Inject @A @B
   Integer abInteger;
   
+  @Inject @A @B
+  String adsf;
+  
   public Integer getIntegerAB() {
     return abInteger;
   }

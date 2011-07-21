@@ -1,8 +1,6 @@
 package org.jboss.errai.cdi.invalid.producer.client.test;
 
-import static org.junit.Assert.fail;
-
-import org.jboss.errai.ioc.rebind.MockIOCGenerator;
+import org.jboss.errai.cdi.client.AbstractErraiCDITest;
 import org.junit.Test;
 
 /**
@@ -10,15 +8,18 @@ import org.junit.Test;
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class InvalidProducerIntegrationTest {
+public class InvalidProducerIntegrationTest extends AbstractErraiCDITest {
+
+  @Override
+  public String getModuleName() {
+    return "org.jboss.errai.cdi.invalid.producer.InvalidProducerTestModule";
+  }
 
   @Test
-  public void testInvalidProducers() throws InstantiationException, IllegalAccessException {
+  public void testInvalidProducers() {
     try {
-      MockIOCGenerator mockIOCGenerator = new MockIOCGenerator();
-      mockIOCGenerator.setPackageFilter("org.jboss.errai.cdi.invalid.producer");
-      mockIOCGenerator.generate().newInstance().bootstrapContainer();
-      fail("expected a nice exception explaining which injection points could not be satisfied and why");
+      super.gwtSetUp();
+      fail("expected a nice exception explaining which injection points could not be satisfied and why!");
     } catch (Exception e) {
       //TODO we want detailed exception information here
       //expected
