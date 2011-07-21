@@ -1,4 +1,4 @@
-package org.jboss.errai.cdi.client;
+package org.jboss.errai.cdi.producer.client;
 
 import java.util.Random;
 
@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import org.jboss.errai.cdi.client.qualifier.A;
 import org.jboss.errai.cdi.client.qualifier.B;
 import org.jboss.errai.cdi.client.qualifier.C;
+import org.jboss.errai.cdi.client.qualifier.D;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
 /**
@@ -19,7 +20,7 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
 @EntryPoint
 public class ProducerTestModule {
   private static ProducerTestModule instance;
-
+  
   @Inject
   private ProducerDependentTestBean testBean;
 
@@ -34,11 +35,6 @@ public class ProducerTestModule {
     return numberB;
   }
 
-  @Produces
-  public String produceString(@C Integer number) {
-    return Integer.toString(number);
-  }
-
   private Integer numberC;
 
   @Produces @C
@@ -47,6 +43,14 @@ public class ProducerTestModule {
     return numberC;
   }
 
+  @Produces
+  public String produceString(@C Integer number) {
+    return Integer.toString(number);
+  }
+
+  @Produces @D
+  private Float floatA = 1.1f;
+  
   public Integer getNumberA() {
     return numberA;
   }
@@ -59,6 +63,10 @@ public class ProducerTestModule {
     return numberC;
   }
 
+  public Float getFloatD() {
+    return floatA;
+  }
+  
   @PostConstruct
   public void doPostConstruct() {
     instance = this;

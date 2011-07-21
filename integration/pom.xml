@@ -186,7 +186,7 @@
 							</additionalClasspathElements>
 							<useSystemClassLoader>false</useSystemClassLoader>
 							<forkMode>pertest</forkMode>
-							<argLine>-Xmx1024m</argLine>
+							<argLine>-Xmx2048m</argLine>
 						</configuration>
 					</plugin>
 				</plugins>

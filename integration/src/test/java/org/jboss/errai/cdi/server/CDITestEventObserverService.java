@@ -6,10 +6,10 @@ import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
-import org.jboss.errai.cdi.client.event.ReceivedEvent;
 import org.jboss.errai.cdi.client.qualifier.A;
 import org.jboss.errai.cdi.client.qualifier.B;
 import org.jboss.errai.cdi.client.qualifier.C;
+import org.jboss.errai.cdi.event.client.ReceivedEvent;
 
 @ApplicationScoped
 public class CDITestEventObserverService {

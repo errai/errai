@@ -1,9 +1,11 @@
-package org.jboss.errai.cdi.client.test;
+package org.jboss.errai.cdi.event.client.test;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.jboss.errai.cdi.client.AbstractErraiCDITest;
 
 /**
  * Base class for all event integration tests.

@@ -1,4 +1,4 @@
-package org.jboss.errai.cdi.client;
+package org.jboss.errai.cdi.event.client;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,7 +10,6 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
 import org.jboss.errai.cdi.client.api.Event;
-import org.jboss.errai.cdi.client.event.StartEvent;
 import org.jboss.errai.cdi.client.events.BusReadyEvent;
 import org.jboss.errai.cdi.client.qualifier.A;
 import org.jboss.errai.cdi.client.qualifier.B;

@@ -7,13 +7,19 @@ import javax.inject.Singleton;
 import org.jboss.errai.bus.rebind.ProcessingContext;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.api.IOCExtension;
-import org.jboss.errai.ioc.rebind.*;
-import org.jboss.errai.ioc.rebind.ioc.*;
+import org.jboss.errai.ioc.rebind.AnnotationHandler;
+import org.jboss.errai.ioc.rebind.IOCProcessingContext;
+import org.jboss.errai.ioc.rebind.ProcessorFactory;
+import org.jboss.errai.ioc.rebind.Rule;
+import org.jboss.errai.ioc.rebind.ioc.IOCExtensionConfigurator;
+import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
+import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
+import org.jboss.errai.ioc.rebind.ioc.Injector;
+import org.jboss.errai.ioc.rebind.ioc.InjectorFactory;
+import org.jboss.errai.ioc.rebind.ioc.JSR299QualifyingMetadata;
+import org.jboss.errai.ioc.rebind.ioc.TypeInjector;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
-
-import static org.jboss.errai.ioc.rebind.Rule.before;
 
 @IOCExtension
 public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator {

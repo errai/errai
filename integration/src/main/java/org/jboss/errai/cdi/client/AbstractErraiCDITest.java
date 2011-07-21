@@ -1,6 +1,5 @@
-package org.jboss.errai.cdi.client.test;
+package org.jboss.errai.cdi.client;
 
-import org.jboss.errai.cdi.client.CDIClientBootstrap;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
 
 import com.google.gwt.core.client.GWT;
