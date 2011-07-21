@@ -1,4 +1,4 @@
-package org.jboss.errai.cdi.client;
+package org.jboss.errai.cdi.producer.client;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -6,6 +6,7 @@ import javax.inject.Inject;
 import org.jboss.errai.cdi.client.qualifier.A;
 import org.jboss.errai.cdi.client.qualifier.B;
 import org.jboss.errai.cdi.client.qualifier.C;
+import org.jboss.errai.cdi.client.qualifier.D;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -25,6 +26,12 @@ public class ProducerDependentTestBean {
   @Inject
   String producedString;
 
+  @Inject
+  Float unqualifiedFloat;
+  
+  @Inject @A @D
+  Float adFloat;
+  
   public Integer getIntegerA() {
     return aInteger;
   }
@@ -39,5 +46,13 @@ public class ProducerDependentTestBean {
 
   public String getProducedString() {
     return producedString;
+  }
+  
+  public Float getUnqualifiedFloat() {
+    return unqualifiedFloat;
+  }
+  
+  public Float getFloatAD() {
+    return adFloat;
   }
 }

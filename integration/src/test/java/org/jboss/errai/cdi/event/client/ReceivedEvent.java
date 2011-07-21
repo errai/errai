@@ -1,4 +1,4 @@
-package org.jboss.errai.cdi.client.event;
+package org.jboss.errai.cdi.event.client;
 
 import org.jboss.errai.bus.server.annotations.ExposeEntity;
 

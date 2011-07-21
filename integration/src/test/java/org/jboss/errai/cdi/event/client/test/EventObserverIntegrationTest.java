@@ -1,9 +1,9 @@
-package org.jboss.errai.cdi.client.test;
+package org.jboss.errai.cdi.event.client.test;
 
 import java.util.List;
 import java.util.Map;
 
-import org.jboss.errai.cdi.client.EventObserverTestModule;
+import org.jboss.errai.cdi.event.client.EventObserverTestModule;
 
 import com.google.gwt.user.client.Timer;
 
@@ -16,7 +16,7 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
 
   @Override
   public String getModuleName() {
-    return "org.jboss.errai.cdi.EventObserverTestModule";
+    return "org.jboss.errai.cdi.event.EventObserverTestModule";
   }
 
   public void testBusReadyEventObserver() {
