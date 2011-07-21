@@ -78,7 +78,7 @@ public class IOCGenerator extends Generator {
         for (int i = 0; i < moduleName.length(); i++) {
           if (moduleName.charAt(i) == '.' && i < moduleName.length()
                   && Character.isUpperCase(moduleName.charAt(i + 1))) {
-            packageName = moduleName.substring(0, i);
+            moduleName = moduleName.substring(0, i);
             break;
           }
         }
