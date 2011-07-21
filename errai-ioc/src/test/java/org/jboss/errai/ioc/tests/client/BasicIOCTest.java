@@ -16,11 +16,8 @@
 
 package org.jboss.errai.ioc.tests.client;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.junit.client.GWTTestCase;
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.ioc.client.api.Bootstrapper;
-import org.jboss.errai.ioc.rebind.IOCClientTestCase;
+import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.rebind.IOCTestRunner;
 import org.jboss.errai.ioc.tests.client.res.HappyInspector;
 import org.jboss.errai.ioc.tests.client.res.QualInspector;
@@ -37,10 +34,6 @@ public class BasicIOCTest extends IOCClientTestCase {
     return "org.jboss.errai.ioc.tests.IOCTests";
   }
 
-  @Override
-  protected void gwtSetUp() throws Exception {
-    super.bootstrapContainer();
-  }
 
   @Test
   public void testBasicInjectionScenarios() {
