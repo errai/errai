@@ -26,8 +26,10 @@ import org.jboss.errai.ioc.tests.client.res.HappyInspector;
 import org.jboss.errai.ioc.tests.client.res.QualInspector;
 import org.jboss.errai.ioc.tests.client.res.SimpleBean;
 import org.jboss.errai.ioc.tests.client.res.SimpleBean2;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
+@RunWith(IOCTestRunner.class)
 public class BasicIOCTest extends IOCClientTestCase {
 
   @Override
@@ -40,6 +42,7 @@ public class BasicIOCTest extends IOCClientTestCase {
     super.bootstrapContainer();
   }
 
+  @Test
   public void testBasicInjectionScenarios() {
     SimpleBean simpleBean = SimpleBean.TEST_INSTANCE;
     assertNotNull(simpleBean);

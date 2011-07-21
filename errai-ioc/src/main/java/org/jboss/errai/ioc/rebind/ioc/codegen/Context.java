@@ -154,7 +154,7 @@ public class Context {
   }
 
   public boolean hasClassImport(MetaClass clazz) {
-    return importedClasses != null && importedClasses.contains(clazz);
+    return importedClasses != null && importedClasses.contains(clazz.getFullyQualifiedName());
   }
 
   public Context autoImport() {
