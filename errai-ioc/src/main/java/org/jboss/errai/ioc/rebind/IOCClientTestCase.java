@@ -12,6 +12,7 @@ public abstract class IOCClientTestCase extends GWTTestCase {
 
   protected IOCClientTestCase() {
     setForcePureJava(true);
+    packageFilter = getModuleName().substring(0, getModuleName().lastIndexOf('.'));
   }
 
   protected InterfaceInjectionContext bootstrapContainer() {
