@@ -1,4 +1,4 @@
-package org.jboss.errai.cdi.producer.client;
+package org.jboss.errai.cdi.producer.client.test.res;
 
 import java.util.Random;
 

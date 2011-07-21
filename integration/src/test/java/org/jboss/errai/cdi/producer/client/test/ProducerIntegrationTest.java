@@ -1,6 +1,6 @@
 package org.jboss.errai.cdi.producer.client.test;
 
-import org.jboss.errai.cdi.producer.client.ProducerTestModule;
+import org.jboss.errai.cdi.producer.client.test.res.ProducerTestModule;
 import org.jboss.errai.ioc.rebind.IOCClientTestCase;
 
 /**
