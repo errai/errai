@@ -28,6 +28,8 @@ import org.reflections.vfs.Vfs;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.*;
@@ -53,25 +55,25 @@ public class MetaDataScanner extends Reflections {
   public static final String ERRAI_CONFIG_STUB_NAME = "ErraiApp.properties";
 
   private final PropertyScanner propScanner = new PropertyScanner(
-      new Predicate<String>() {
-        public boolean apply(String file) {
-          return file.endsWith(".properties");
-        }
-      }
+          new Predicate<String>() {
+            public boolean apply(String file) {
+              return file.endsWith(".properties");
+            }
+          }
   );
 
   MetaDataScanner(List<URL> urls) {
 
     configuration = new ConfigurationBuilder()
-        .setUrls(urls)
-            //.filterInputsBy(new FilterBuilder().exclude(CLIENT_PKG_REGEX))
-        .setScanners(
-            new FieldAnnotationsScanner(),
-            new MethodAnnotationsScanner(),
-            new TypeAnnotationsScanner(),
-            //new SubTypesScanner(),
-            propScanner
-        );
+            .setUrls(urls)
+                    //.filterInputsBy(new FilterBuilder().exclude(CLIENT_PKG_REGEX))
+            .setScanners(
+                    new FieldAnnotationsScanner(),
+                    new MethodAnnotationsScanner(),
+                    new TypeAnnotationsScanner(),
+                    //new SubTypesScanner(),
+                    propScanner
+            );
 
     store = new Store();
 
@@ -109,7 +111,7 @@ public class MetaDataScanner extends Reflections {
   }
 
   public Set<Class<?>> getTypesAnnotatedWithExcluding(
-      Class<? extends Annotation> annotation, String excludeRegex) {
+          Class<? extends Annotation> annotation, String excludeRegex) {
     Pattern p = Pattern.compile(excludeRegex);
     Set<String> result = new HashSet<String>();
 
@@ -120,6 +122,37 @@ public class MetaDataScanner extends Reflections {
     }
 
     return ImmutableSet.copyOf(forNames(result));
+  }
+
+  public Set<Class<?>> getTypesAnnotatedWith(Class<? extends Annotation> annotation, String packagePrefix) {
+    Set<Class<?>> results = new HashSet<Class<?>>();
+    for (Class<?> cls : getTypesAnnotatedWith(annotation)) {
+      if (packagePrefix == null || packagePrefix.length() == 0 || cls.getName().startsWith(packagePrefix)) {
+        results.add(cls);
+      }
+    }
+    return results;
+  }
+
+
+  public Set<Method> getMethodsAnnotatedWith(Class<? extends Annotation> annotation, String packagePrefix) {
+    Set<Method> results = new HashSet<Method>();
+    for (Method method : getMethodsAnnotatedWith(annotation)) {
+      if (packagePrefix == null || packagePrefix.length() == 0 || method.getName().startsWith(packagePrefix)) {
+        results.add(method);
+      }
+    }
+    return results;
+  }
+
+  public Set<Field> getFieldsAnnotatedWith(Class<? extends Annotation> annotation, String packagePrefix) {
+    Set<Field> results = new HashSet<Field>();
+    for (Field field : getFieldsAnnotatedWith(annotation)) {
+      if (packagePrefix == null || packagePrefix.length() == 0 || field.getName().startsWith(packagePrefix)) {
+        results.add(field);
+      }
+    }
+    return results;
   }
 
   public static List<URL> getConfigUrls(ClassLoader loader) {

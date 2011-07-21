@@ -11,6 +11,7 @@ import java.io.*;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class MockIOCGenerator {
+  private String packageFilter;
 
 
   public Class<? extends Bootstrapper> generate() {
@@ -92,5 +93,9 @@ public class MockIOCGenerator {
     public Class<?> defineClassX(String className, byte[] b, int off, int len) {
       return super.defineClass(className, b, off, len);
     }
+  }
+
+  public void setPackageFilter(String packageFilter) {
+    this.packageFilter = packageFilter;
   }
 }

@@ -74,7 +74,7 @@ public class ProcessorFactory {
       for (ElementType elementType : target.value()) {
         switch (elementType) {
           case TYPE: {
-            Set<Class<?>> classes = scanner.getTypesAnnotatedWith(aClass);
+            Set<Class<?>> classes = scanner.getTypesAnnotatedWith(aClass, context.getPackageFilter());
             for (final Class<?> clazz : classes) {
               if (clazz.getPackage().getName().contains("server")) {
                 continue;
@@ -103,7 +103,7 @@ public class ProcessorFactory {
           break;
 
           case METHOD: {
-            Set<Method> methods = scanner.getMethodsAnnotatedWith(aClass);
+            Set<Method> methods = scanner.getMethodsAnnotatedWith(aClass, context.getPackageFilter());
 
             for (Method method : methods) {
               final Annotation aInstance = method.getAnnotation(aClass);
@@ -131,7 +131,7 @@ public class ProcessorFactory {
           }
 
           case FIELD: {
-            Set<Field> fields = scanner.getFieldsAnnotatedWith(aClass);
+            Set<Field> fields = scanner.getFieldsAnnotatedWith(aClass, context.getPackageFilter());
 
             for (Field method : fields) {
               final Annotation aInstance = method.getAnnotation(aClass);
