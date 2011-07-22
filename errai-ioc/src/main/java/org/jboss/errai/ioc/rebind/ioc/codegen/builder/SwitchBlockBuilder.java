@@ -21,6 +21,6 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface SwitchBlockBuilder extends Statement, Builder {
+public interface SwitchBlockBuilder extends Statement, Builder, ClosedBlock {
   public CaseBlockBuilder switch_(Statement statement);
 }

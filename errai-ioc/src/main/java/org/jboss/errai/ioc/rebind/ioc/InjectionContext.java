@@ -102,7 +102,7 @@ public class InjectionContext {
   }
 
   public Injector getInjector(Class<?> injectorType) {
-    return getInjector(MetaClassFactory.get(processingContext.loadClassType(injectorType)));
+    return getInjector(MetaClassFactory.get(injectorType));
   }
 
   public Injector getInjector(MetaClass type) {
@@ -182,6 +182,17 @@ public class InjectionContext {
       decorators.put(iocExtension.decoratesWith(), new ArrayList<IOCDecoratorExtension>());
 
     decorators.get(iocExtension.decoratesWith()).add(iocExtension);
+  }
+
+  public void deregisterInjector(Injector injector) {
+    List<Injector> injectorList = injectors.get(injector.getInjectedType());
+    if (injectorList != null) {
+      injectorList.remove(injector);
+
+      if (injectorList.isEmpty()) {
+        injectors.remove(injector.getInjectedType());
+      }
+    }
   }
 
   public Set<Class<? extends Annotation>> getDecoratorAnnotations() {

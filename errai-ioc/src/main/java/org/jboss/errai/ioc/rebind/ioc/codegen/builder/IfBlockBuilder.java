@@ -22,6 +22,6 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface IfBlockBuilder extends Statement, Builder {
+public interface IfBlockBuilder extends Statement, Builder, ClosedBlock {
   public BlockBuilder<ElseBlockBuilder> if_(BooleanExpression condition);
 }

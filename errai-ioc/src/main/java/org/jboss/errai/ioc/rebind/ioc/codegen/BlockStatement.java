@@ -16,6 +16,8 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ClosedBlock;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,6 +48,7 @@ public class BlockStatement extends AbstractStatement {
   public String generate(Context context) {
     StringBuilder buf = new StringBuilder();
 
+    boolean lastIsBlock = false;
     for (Statement statement : statements) {
       if (buf.length() != 0)
         buf.append("\n");
@@ -54,7 +57,14 @@ public class BlockStatement extends AbstractStatement {
 
       if (!buf.toString().endsWith(";") && !buf.toString().endsWith(":") && !buf.toString().endsWith("}"))
         buf.append(";");
+
+      lastIsBlock = statement instanceof ClosedBlock;
     }
+
+    if (buf.length() != 0 && buf.charAt(buf.length() - 1) != ';' && !lastIsBlock) {
+      buf.append(';');
+    }
+
     return buf.toString();
   }
 

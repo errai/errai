@@ -9,6 +9,7 @@ import com.google.gwt.user.rebind.StringSourceWriter;
 import org.jboss.errai.bus.rebind.ScannerSingleton;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
+import org.jboss.errai.ioc.client.ContextualProviderContext;
 import org.jboss.errai.ioc.client.InterfaceInjectionContext;
 import org.jboss.errai.ioc.client.api.*;
 import org.jboss.errai.ioc.rebind.AnnotationHandler;
@@ -25,6 +26,8 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.util.JSNIUtil;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Refs;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 
+import javax.inject.Inject;
+import javax.inject.Provider;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -138,6 +141,9 @@ public class IOCBootstrapGenerator {
       System.out.println("----Emitting Class--->\n\n");
       System.out.println(generated);
       System.out.println("<---Emitting Class----");
+    }
+    else {
+      System.out.println("not printing results...");
     }
 
     sourceWriter.print(generated);
@@ -294,6 +300,39 @@ public class IOCBootstrapGenerator {
 
       boolean contextual = false;
       for (MetaClass iface : type.getInterfaces()) {
+        if (iface.getFullyQualifiedName().equals(Provider.class.getName())) {
+          injectFactory.addType(type);
+
+
+          MetaParameterizedType pType = iface.getParameterizedType();
+          MetaType typeParm = pType.getTypeParameters()[0];
+          if (typeParm instanceof MetaParameterizedType) {
+            bindType = (MetaClass) ((MetaParameterizedType) typeParm).getRawType();
+          }
+          else {
+            bindType = (MetaClass) pType.getTypeParameters()[0];
+          }
+
+          boolean isContextual = false;
+          for (MetaField field : type.getDeclaredFields()) {
+            if (field.isAnnotationPresent(Inject.class)
+                    && field.getType().isAssignableTo(ContextualProviderContext.class)) {
+
+              isContextual = true;
+              break;
+            }
+          }
+
+
+          if (isContextual) {
+            injectFactory.addInjector(new ContextualProviderInjector(bindType, type));
+          }
+          else {
+            injectFactory.addInjector(new ProviderInjector(bindType, type));
+          }
+          break;
+        }
+
         if (iface.getFullyQualifiedName().equals(ContextualTypeProvider.class.getName())) {
           contextual = true;
 

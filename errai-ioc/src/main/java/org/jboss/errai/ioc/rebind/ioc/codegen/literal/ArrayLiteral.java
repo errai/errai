@@ -49,14 +49,20 @@ public class ArrayLiteral extends LiteralValue<Object> {
 
   @Override
   public String getCanonicalString(Context context) {
-    StringBuilder buf = new StringBuilder("new " + 
-        LoadClassReference.getClassReference(MetaClassFactory.get(arrayType), context));
+    StringBuilder buf = new StringBuilder("new " +
+            LoadClassReference.getClassReference(MetaClassFactory.get(arrayType), context));
+
+    Object val = getValue();
+
+    if (Array.getLength(val) == 0) {
+      return buf.append("[0]").toString();
+    }
 
     for (int i = 0; i < dimensions; i++) {
       buf.append("[]");
     }
     buf.append(" ");
-    buf.append(renderInlineArrayLiteral(context, getValue()));
+    buf.append(renderInlineArrayLiteral(context, val));
 
     return buf.toString();
   }
@@ -65,6 +71,7 @@ public class ArrayLiteral extends LiteralValue<Object> {
     StringBuilder builder = new StringBuilder("{ ");
 
     int length = Array.getLength(arrayInstance);
+
     Object element;
 
     for (int i = 0; i < length; i++) {

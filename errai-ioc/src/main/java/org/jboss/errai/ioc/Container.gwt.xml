@@ -26,4 +26,7 @@
         <when-type-assignable
                 class="org.jboss.errai.ioc.client.api.Bootstrapper"/>
     </generate-with>
+
+    <super-source path="compat"/>
+    <source path="client"/>
 </module>

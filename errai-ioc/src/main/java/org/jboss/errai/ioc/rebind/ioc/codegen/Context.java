@@ -149,7 +149,8 @@ public class Context {
 
   public Context addClassImport(MetaClass clazz) {
     initImportedClass();
-    importedClasses.add(clazz.getFullyQualifiedName());
+    importedClasses.add(clazz.isArray() ? clazz.getComponentType().getFullyQualifiedName() : clazz
+            .getFullyQualifiedName());
     return this;
   }
 
@@ -182,7 +183,7 @@ public class Context {
     while (found == null && (ctx = ctx.parent) != null);
 
     if (found == null)
-      throw new OutOfScopeException((mustBeClassMember)?"this."+name:name);
+      throw new OutOfScopeException((mustBeClassMember) ? "this." + name : name);
 
     return found.getReference();
   }
@@ -234,7 +235,7 @@ public class Context {
   public Set<String> getImportedClasses() {
     if (importedClasses == null)
       return Collections.emptySet();
-    
+
     return importedClasses;
   }
 

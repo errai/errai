@@ -16,6 +16,7 @@
 
 package org.jboss.errai.ioc.client.api.builtin;
 
+import javax.inject.Provider;
 import javax.inject.Singleton;
 
 import org.jboss.errai.bus.client.ErraiBus;
@@ -25,9 +26,9 @@ import org.jboss.errai.ioc.client.api.TypeProvider;
 
 @IOCProvider
 @Singleton
-public class MessageBusProvider implements TypeProvider<MessageBus> {
+public class MessageBusProvider implements Provider<MessageBus> {
   @Override
-  public MessageBus provide() {
+  public MessageBus get() {
     return ErraiBus.get();
   }
 }

@@ -21,6 +21,6 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface TryBlockBuilder extends Statement, Builder {
+public interface TryBlockBuilder extends Statement, Builder, ClosedBlock {
   public BlockBuilder<CatchBlockBuilder> try_();
 }

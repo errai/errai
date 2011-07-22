@@ -18,17 +18,16 @@ package org.jboss.errai.ioc.rebind.ioc;
 
 import java.lang.annotation.Annotation;
 
-import org.jboss.errai.ioc.rebind.IOCProcessingContext;
+import org.jboss.errai.ioc.client.ContextualProviderContext;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameterizedType;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaType;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ObjectBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java.JavaReflectionField;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java.JavaReflectionParameterizedType;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Refs;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
+
+import javax.inject.Provider;
 
 public class ContextualProviderInjector extends TypeInjector {
   private final Injector providerInjector;
@@ -65,33 +64,50 @@ public class ContextualProviderInjector extends TypeInjector {
         break;
     }
 
-    IOCProcessingContext processingContext = injectContext.getProcessingContext();
-
     Statement statement;
+    Injector contextInjector = null;
 
     if (pType == null) {
-      statement = Stmt.nestedCall(providerInjector.getType(injectContext, injectableInstance))
-              .invoke("provide", new Class[0]);
+      if (providerInjector.getInjectedType().isAssignableTo(Provider.class)) {
+        contextInjector = new ContextualProviderContextInjector();
+        injectContext.registerInjector(contextInjector);
+
+        statement = Stmt.nestedCall(providerInjector.getType(injectContext, injectableInstance))
+                .invoke("get");
+
+        injectContext.deregisterInjector(contextInjector);
+      }
+      else {
+
+        statement = Stmt.nestedCall(providerInjector.getType(injectContext, injectableInstance))
+                .invoke("provide", new Class[0]);
+      }
+
     }
     else {
       MetaType[] typeArgs = pType.getTypeParameters();
-
       Annotation[] qualifiers = injectableInstance.getQualifiers();
-      if (qualifiers.length != 0) {
+
+      if (providerInjector.getInjectedType().isAssignableTo(Provider.class)) {
+        contextInjector = new ContextualProviderContextInjector(qualifiers, typeArgs);
+        injectContext.registerInjector(contextInjector);
 
         statement = Stmt.nestedCall(providerInjector.getType(injectContext, injectableInstance))
-                .invoke("provide", typeArgs, qualifiers);
+                .invoke("get");
+
+        injectContext.deregisterInjector(contextInjector);
       }
       else {
+
         statement = Stmt.nestedCall(providerInjector.getType(injectContext, injectableInstance))
-                .invoke("provide", typeArgs, null);
+                .invoke("provide", typeArgs, qualifiers.length != 0 ? qualifiers : null);
 
       }
     }
 
     if (singleton) {
       if (!injected) {
-         injectContext.getProcessingContext().append(Stmt.declareVariable(type).named(varName)
+        injectContext.getProcessingContext().append(Stmt.declareVariable(type).named(varName)
                 .initializeWith(statement));
       }
       statement = Refs.get(varName);
@@ -106,5 +122,56 @@ public class ContextualProviderInjector extends TypeInjector {
   public Statement instantiateOnly(InjectionContext injectContext, InjectableInstance injectableInstance) {
     injected = true;
     return providerInjector.getType(injectContext, injectableInstance);
+  }
+
+  private static class ContextualProviderContextInjector extends Injector {
+    private Annotation[] annotations = new Annotation[0];
+    private MetaType[] typeArguments = new MetaType[0];
+
+    private ContextualProviderContextInjector() {
+    }
+
+    private ContextualProviderContextInjector(Annotation[] annotations, MetaType[] typeArguments) {
+      this.annotations = annotations;
+      this.typeArguments = typeArguments;
+    }
+
+    @Override
+    public Statement instantiateOnly(InjectionContext injectContext, InjectableInstance injectableInstance) {
+      return ObjectBuilder.newInstanceOf(ContextualProviderContext.class)
+              .extend()
+              .publicOverridesMethod("getQualifiers")
+              .append(Stmt.load(annotations).returnValue())
+              .finish()
+              .publicOverridesMethod("getTypeArguments")
+              .append(Stmt.load(MetaClassFactory.asClassArray(typeArguments)).returnValue())
+              .finish()
+              .finish();
+    }
+
+    @Override
+    public Statement getType(InjectionContext injectContext, InjectableInstance injectableInstance) {
+      return instantiateOnly(injectContext, injectableInstance);
+    }
+
+    @Override
+    public boolean isInjected() {
+      return false;
+    }
+
+    @Override
+    public boolean isSingleton() {
+      return false;
+    }
+
+    @Override
+    public String getVarName() {
+      return null;
+    }
+
+    @Override
+    public MetaClass getInjectedType() {
+      return MetaClassFactory.get(ContextualProviderContext.class);
+    }
   }
 }

@@ -275,10 +275,15 @@ public final class MetaClassFactory {
     return newClasses;
   }
 
-  public static Class<?>[] asClassArray(MetaClass[] cls) {
+  public static Class<?>[] asClassArray(MetaType[] cls) {
     Class<?>[] newClasses = new Class<?>[cls.length];
     for (int i = 0; i < cls.length; i++) {
-      newClasses[i] = cls[i].asClass();
+      if (cls[i] instanceof MetaParameterizedType) {
+        newClasses[i] = ((MetaClass) ((MetaParameterizedType) cls[i]).getRawType()).asClass();
+      }
+      else {
+        newClasses[i] = ((MetaClass) cls[i]).asClass();
+      }
     }
     return newClasses;
   }

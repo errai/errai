@@ -57,7 +57,7 @@ public class CallParameters extends AbstractStatement {
     }
     return parameterTypes;
   }
-  
+
   public List<Statement> getParameters() {
     return parameters;
   }
@@ -66,7 +66,13 @@ public class CallParameters extends AbstractStatement {
   public String generate(Context context) {
     StringBuilder buf = new StringBuilder("(");
     for (int i = 0; i < parameters.size(); i++) {
-      buf.append(parameters.get(i).generate(context));
+      String parm = parameters.get(i).generate(context).trim();
+
+      if (parm.endsWith(";")) {
+        parm = parm.substring(0, parm.length() - 1);
+      }
+
+      buf.append(parm);
 
       if (i + 1 < parameters.size()) {
         buf.append(", ");

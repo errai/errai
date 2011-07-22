@@ -18,7 +18,11 @@ package org.jboss.errai.ioc.rebind.ioc;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.Refs;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
+
+import javax.inject.Provider;
+
 
 public class ProviderInjector extends TypeInjector {
   private final Injector providerInjector;
@@ -30,10 +34,21 @@ public class ProviderInjector extends TypeInjector {
 
   @Override
   public Statement getType(InjectionContext injectContext, InjectableInstance injectableInstance) {
+    if (isSingleton() && isInjected()) {
+      return Refs.get(getVarName());
+    }
+
     injected = true;
 
-    return Stmt.nestedCall(providerInjector.getType(injectContext, injectableInstance))
-                    .invoke("provide");
+    if (providerInjector.getInjectedType().isAssignableTo(Provider.class)) {
+      return Stmt.nestedCall(providerInjector.getType(injectContext, injectableInstance))
+              .invoke("get");
+    }
+    else {
+
+      return Stmt.nestedCall(providerInjector.getType(injectContext, injectableInstance))
+              .invoke("provide");
+    }
   }
 
   @Override

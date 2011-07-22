@@ -22,13 +22,15 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface LoopBuilder extends Statement, Builder {
+public interface LoopBuilder extends Statement, Builder, ClosedBlock {
   public BlockBuilder<WhileBuilder> do_();
 
   public BlockBuilder<StatementEnd> while_(BooleanExpression condition);
 
   public BlockBuilder<StatementEnd> for_(BooleanExpression condition);
+
   public BlockBuilder<StatementEnd> for_(Statement initializer, BooleanExpression condition);
+
   public BlockBuilder<StatementEnd> for_(Statement initializer, BooleanExpression condition,
-      Statement countingExpression);
+                                         Statement countingExpression);
 }
