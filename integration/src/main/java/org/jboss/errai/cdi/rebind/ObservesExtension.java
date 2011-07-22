@@ -83,17 +83,16 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
     }
 
     callBackBlock = callBack.publicOverridesMethod("callback", Parameter.of(Message.class, "message"))
-            .append(Stmt.declareVariable("msgQualifiers", new TypeLiteral<Set<String>>() {},
-                    Stmt.loadVariable("message").invoke("get", Set.class, CDIProtocol.QUALIFIERS)))
-            .append(Stmt
-                    .if_(Bool.or(
-                            Stmt.loadClassMember("qualifiers").invoke("equals", Refs.get("msgQualifiers")),
-                            Bool.and(Bool.equals(Refs.get("msgQualifiers"), null),
-                                    Stmt.loadClassMember("qualifiers").invoke("isEmpty"))))
-                    .append(Stmt.loadVariable(instance.getInjector().getVarName())
-                            .invoke(method.getName(),
-                                    Stmt.loadVariable("message").invoke("get", parm.getType().asClass(), CDIProtocol.OBJECT_REF)))
-                    .finish());
+        .append(Stmt.declareVariable("msgQualifiers", new TypeLiteral<Set<String>>() {}, 
+            Stmt.loadVariable("message").invoke("get", Set.class, CDIProtocol.QUALIFIERS)))
+        .append(Stmt
+            .if_(Bool.or(
+                Stmt.loadClassMember("qualifiers").invoke("equals", Refs.get("msgQualifiers")),
+                Bool.and(Bool.equals(Refs.get("msgQualifiers"), null), 
+                    Stmt.loadClassMember("qualifiers").invoke("isEmpty"))))
+            .append(Stmt.loadVariable(instance.getInjector().getVarName()).invoke(method.getName(), 
+                Stmt.loadVariable("message").invoke("get", parm.getType().asClass(), CDIProtocol.OBJECT_REF)))
+            .finish());
 
     return Stmt.create(ctx).nestedCall(bus).invoke(subscribeMethodName, subject, callBackBlock.finish().finish());
   }
