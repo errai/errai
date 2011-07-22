@@ -8,21 +8,21 @@ import java.util.List;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class Rule {
-  public static List<ProcessorFactory.RuleDef> before(Class<? extends Annotation>... annos) {
+  public static List<IOCProcessorFactory.RuleDef> before(Class<? extends Annotation>... annos) {
 
-    List<ProcessorFactory.RuleDef> rules = new ArrayList<ProcessorFactory.RuleDef>();
+    List<IOCProcessorFactory.RuleDef> rules = new ArrayList<IOCProcessorFactory.RuleDef>();
     for (Class<? extends Annotation> cls : annos) {
-      rules.add(new ProcessorFactory.RuleDef(cls, RelativeOrder.Before));
+      rules.add(new IOCProcessorFactory.RuleDef(cls, RelativeOrder.Before));
     }
 
     return rules;
   }
 
-  public static List<ProcessorFactory.RuleDef> after(Class<? extends Annotation>... annos) {
+  public static List<IOCProcessorFactory.RuleDef> after(Class<? extends Annotation>... annos) {
 
-    List<ProcessorFactory.RuleDef> rules = new ArrayList<ProcessorFactory.RuleDef>();
+    List<IOCProcessorFactory.RuleDef> rules = new ArrayList<IOCProcessorFactory.RuleDef>();
     for (Class<? extends Annotation> cls : annos) {
-      rules.add(new ProcessorFactory.RuleDef(cls, RelativeOrder.After));
+      rules.add(new IOCProcessorFactory.RuleDef(cls, RelativeOrder.After));
     }
 
     return rules;

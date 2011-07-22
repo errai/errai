@@ -13,7 +13,7 @@ import org.jboss.errai.ioc.client.InterfaceInjectionContext;
 import org.jboss.errai.ioc.client.api.*;
 import org.jboss.errai.ioc.rebind.AnnotationHandler;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
-import org.jboss.errai.ioc.rebind.ProcessorFactory;
+import org.jboss.errai.ioc.rebind.IOCProcessorFactory;
 import org.jboss.errai.ioc.rebind.ioc.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BlockBuilder;
@@ -41,7 +41,7 @@ public class IOCBootstrapGenerator {
   GeneratorContext context;
 
   InjectorFactory injectFactory;
-  ProcessorFactory procFactory;
+  IOCProcessorFactory procFactory;
 
   private String packageFilter = null;
 
@@ -99,7 +99,7 @@ public class IOCBootstrapGenerator {
             typeOracle, buildContext, bootStrapClass, blockBuilder);
 
     injectFactory = new InjectorFactory(procContext);
-    procFactory = new ProcessorFactory(injectFactory);
+    procFactory = new IOCProcessorFactory(injectFactory);
     procContext.setPackageFilter(packageFilter);
 
     defaultConfigureProcessor();

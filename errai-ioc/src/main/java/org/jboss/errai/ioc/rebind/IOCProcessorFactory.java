@@ -41,13 +41,13 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 
-public class ProcessorFactory {
+public class IOCProcessorFactory {
   private SortedSet<ProcessingEntry> processingEntries = new TreeSet<ProcessingEntry>();
 
   // private Map<Class<? extends Annotation>, AnnotationHandler> annotationHandlers;
   private InjectorFactory injectorFactory;
 
-  public ProcessorFactory(InjectorFactory factory) {
+  public IOCProcessorFactory(InjectorFactory factory) {
     //   this.annotationHandlers = new HashMap<Class<? extends Annotation>, AnnotationHandler>();
     this.injectorFactory = factory;
   }
@@ -170,8 +170,6 @@ public class ProcessorFactory {
     do {
       start = procEntries.size();
 
-     // List<ProcessingEntry> toRun = new ArrayList<ProcessingEntry>(procEntries);
-
       Iterator<ProcessingEntry> iter = procEntries.iterator();
 
       while (iter.hasNext()) {
@@ -267,7 +265,7 @@ public class ProcessorFactory {
     }
 
     public String toString() {
-      return "Scope:" + annotationClass.getName() + "(" + targets.toString() + ")";
+      return "Scope:" + annotationClass.getName() + "(" + targets.toString() + "):\n" + targets;
     }
   }
 

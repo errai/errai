@@ -228,12 +228,7 @@ public class InjectionContext {
     }
   }
 
-  // Set<Injector> deferred = new HashSet<Injector>();
-
   public void deferTask(InjectionTask injectionTask) {
-//    if (deferred.contains(injectionTask.getInjector().g)) return;
-    //   deferred.add(injectionTask.getInjector());
-
     deferredInjectionTasks.add(injectionTask);
   }
 
@@ -261,12 +256,12 @@ public class InjectionContext {
           case PrivateField:
           case Field:
             unsatisfiedDependencies.addUnsatisfiedDependency(
-                new UnsatisfiedField(task.getField(), task.getInjector().getInjectedType(), task.getField().getType()));
+                    new UnsatisfiedField(task.getField(), task.getInjector().getInjectedType(), task.getField().getType()));
             break;
 
           case Method:
             unsatisfiedDependencies.addUnsatisfiedDependency(
-                new UnsatisfiedMethod(task.getMethod(), task.getInjector().getInjectedType(), task.getMethod().getParameters()[0].getType()));
+                    new UnsatisfiedMethod(task.getMethod(), task.getInjector().getInjectedType(), task.getMethod().getParameters()[0].getType()));
         }
       }
 

@@ -150,41 +150,4 @@ public class IOCTestRunner extends ParentRunner<Runner> {
       super.run(notifier);
     }
   }
-
-//    try {
-//      if (SIMULATED) {
-//
-//
-//      }
-//      else {
-//        IOCTestSuite suite = new IOCTestSuite(toRun, notifier);
-//        suite.run(new TestResult());
-//
-//        return;
-//      }
-//
-//
-//    }
-//    catch (InstantiationException e) {
-//      throw new RuntimeException("Could not intantiate test class: " + toRun.getName(), e);
-//    }
-//    catch (IllegalAccessException e) {
-//      throw new RuntimeException("Could not intantiate test class: " + toRun.getName(), e);
-//    }
-//    catch (Exception e) {
-//      throw new RuntimeException("could not bootstrap", e);
-//    }
-//
-//    for (Description description : getDescription().getChildren()) {
-//      try {
-//
-//      }
-//      catch (InvocationTargetException e) {
-//        notifier.fireTestFailure(new Failure(description, e.getTargetException()));
-//      }
-//      catch (Exception e) {
-//        notifier.fireTestFailure(new Failure(description, e));
-//      }
-//    }
-//  }
 }
