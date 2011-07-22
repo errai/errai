@@ -65,8 +65,6 @@ public class MockIOCGenerator {
 
       JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 
-      System.out.println(System.getProperty("java.class.path"));
-
       compiler.run(null, null, errorOutputStream, sourceFile.getAbsolutePath());
 
       for (byte b : errorOutputStream.toByteArray()) {
