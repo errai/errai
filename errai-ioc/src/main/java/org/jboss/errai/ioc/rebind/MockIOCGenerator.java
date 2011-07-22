@@ -4,6 +4,7 @@ package org.jboss.errai.ioc.rebind;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCBootstrapGenerator;
 
+import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 import java.io.*;
 
@@ -43,7 +44,7 @@ public class MockIOCGenerator {
               new File(System.getProperty("java.io.tmpdir") + "/out/classes/" + packageName.replaceAll("\\.", "/"));
 
       File sourceFile = new File(directory.getAbsolutePath() + "/" + className + ".java");
-      File outFile = new File(directory.getAbsolutePath() +"/" + className + ".class");
+      File outFile = new File(directory.getAbsolutePath() + "/" + className + ".class");
 
       if (sourceFile.exists()) {
         sourceFile.delete();
@@ -62,8 +63,9 @@ public class MockIOCGenerator {
 
       ByteArrayOutputStream errorOutputStream = new ByteArrayOutputStream();
 
-      ToolProvider.getSystemJavaCompiler()
-              .run(null, null, errorOutputStream, sourceFile.getAbsolutePath());
+      JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+
+      compiler.run(null, null, errorOutputStream, sourceFile.getAbsolutePath());
 
       for (byte b : errorOutputStream.toByteArray()) {
         System.out.print((char) b);
@@ -75,7 +77,7 @@ public class MockIOCGenerator {
 
       inputStream.read(classDefinition);
 
-      return (Class<? extends Bootstrapper>) new BootstrapClassloader(this.getClass().getClassLoader())
+      return (Class<? extends Bootstrapper>) new BootstrapClassloader(ClassLoader.getSystemClassLoader())
               .defineClassX(packageName + "." + className, classDefinition, 0, classDefinition.length);
     }
     catch (Exception e) {

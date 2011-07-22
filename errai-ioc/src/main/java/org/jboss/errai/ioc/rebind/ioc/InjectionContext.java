@@ -43,6 +43,7 @@ public class InjectionContext {
   private Map<Class<? extends Annotation>, List<IOCDecoratorExtension>> decorators = new LinkedHashMap<Class<? extends Annotation>, List<IOCDecoratorExtension>>();
   private Map<ElementType, Set<Class<? extends Annotation>>> decoratorsByElementType = new LinkedHashMap<ElementType, Set<Class<? extends Annotation>>>();
   private List<InjectionTask> deferredInjectionTasks = new ArrayList<InjectionTask>();
+  protected List<Runnable> deferredTasks = new ArrayList<Runnable>();
 
   private Collection<MetaField> privateFieldsToExpose = new LinkedHashSet<MetaField>();
 
@@ -271,7 +272,17 @@ public class InjectionContext {
       throw new RuntimeException("unsatified depedencies:\n" + sbuf);
     }
 
-    //  deferred.clear();
+    runAllDeferredTasks();    //  deferred.clear();
+  }
+
+  public void deferRunnableTask(Runnable runnable) {
+    deferredTasks.add(runnable);
+  }
+
+  private void runAllDeferredTasks() {
+    for (Runnable runnable : deferredTasks) {
+      runnable.run();
+    }
   }
 
   private Set<String> exposedFields = new HashSet<String>();

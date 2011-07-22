@@ -148,21 +148,27 @@ public class InjectUtil {
     }
   }
 
-  private static void doPostConstruct(InjectionContext ctx,
-                                      Injector injector,
-                                      List<MetaMethod> postConstructTasks) {
+  private static void doPostConstruct(final InjectionContext ctx,
+                                      final Injector injector,
+                                      final List<MetaMethod> postConstructTasks) {
 
-    IOCProcessingContext processingContext = ctx.getProcessingContext();
+    final IOCProcessingContext processingContext = ctx.getProcessingContext();
 
-    for (MetaMethod meth : postConstructTasks) {
+    for (final MetaMethod meth : postConstructTasks) {
       if (!meth.isPublic() || meth.getParameters().length != 0) {
         throw new InjectionFailure("PostConstruct method must be public and contain no parameters: "
                 + injector.getInjectedType().getFullyQualifiedName() + "." + meth.getName());
       }
 
-      processingContext.append(
-              Stmt.loadVariable(injector.getVarName()).invoke(meth.getName())
-      );
+      ctx.deferRunnableTask(new Runnable() {
+        @Override
+        public void run() {
+          processingContext.append(
+                  Stmt.loadVariable(injector.getVarName()).invoke(meth.getName())
+          );
+        }
+      });
+
     }
   }
 
@@ -474,7 +480,7 @@ public class InjectUtil {
         jMethodParms[i] = parameters[i].getType();
       }
 
-     // MetaMethod observesMethod = jType.getMethod(method.getName(), jMethodParms);
+      // MetaMethod observesMethod = jType.getMethod(method.getName(), jMethodParms);
 
       for (Class<?> qualifier : getQualifiersCache()) {
         if (parameters[eventParamIndex]

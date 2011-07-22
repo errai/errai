@@ -16,6 +16,7 @@
 
 package org.jboss.errai.ioc.rebind;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jboss.errai.bus.rebind.ProcessingContext;
@@ -36,7 +37,6 @@ public class IOCProcessingContext extends ProcessingContext {
   protected Context context;
   protected MetaClass bootstrapClass;
   protected BlockBuilder<?> blockBuilder;
-  protected List<Runnable> deferredTasks;
   protected String packageFilter;
 
   public IOCProcessingContext(TreeLogger treeLogger,
@@ -85,4 +85,6 @@ public class IOCProcessingContext extends ProcessingContext {
   public String getPackageFilter() {
     return packageFilter;
   }
+
+
 }
