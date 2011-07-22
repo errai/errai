@@ -23,25 +23,25 @@ import java.util.List;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class UnsatisfiedDependencies {
-  private List<UnsatisfiedDependency> unsatisfiedDependecies;
+  private List<UnsatisfiedDependency> unsatisfiedDependencies;
 
   public void addUnsatisfiedDependency(UnsatisfiedDependency dependency) {
-    if (unsatisfiedDependecies == null)
-      unsatisfiedDependecies = new ArrayList<UnsatisfiedDependency>();
+    if (unsatisfiedDependencies == null)
+      unsatisfiedDependencies = new ArrayList<UnsatisfiedDependency>();
 
-    unsatisfiedDependecies.add(dependency);
+    unsatisfiedDependencies.add(dependency);
   }
   
   @Override
   public String toString() {
     StringBuilder buf = new StringBuilder();
-    for (UnsatisfiedDependency d : unsatisfiedDependecies) {
+    for (UnsatisfiedDependency d : unsatisfiedDependencies) {
       buf.append(d.toString());
     }
     return buf.toString();
   }
   
   public List<UnsatisfiedDependency> get() {
-    return unsatisfiedDependecies;
+    return unsatisfiedDependencies;
   }
 }
