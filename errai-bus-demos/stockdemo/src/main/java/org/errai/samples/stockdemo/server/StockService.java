@@ -1,7 +1,8 @@
 package org.errai.samples.stockdemo.server;
 
 import com.google.inject.Inject;
-import org.errai.samples.stockdemo.client.Stock;
+
+import org.errai.samples.stockdemo.client.shared.Stock;
 import org.jboss.errai.bus.client.api.AsyncTask;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.ResourceProvider;

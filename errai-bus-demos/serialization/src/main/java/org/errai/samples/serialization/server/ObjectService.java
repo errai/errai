@@ -17,9 +17,10 @@
 package org.errai.samples.serialization.server;
 
 import com.google.inject.Inject;
-import org.errai.samples.serialization.client.model.Item;
-import org.errai.samples.serialization.client.model.Record;
-import org.errai.samples.serialization.client.model.RecordType;
+
+import org.errai.samples.serialization.client.shared.Item;
+import org.errai.samples.serialization.client.shared.Record;
+import org.errai.samples.serialization.client.shared.RecordType;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;

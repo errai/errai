@@ -36,6 +36,10 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameterizedType;
+import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependencies;
+import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependenciesException;
+import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedField;
+import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedMethod;
 
 public class InjectionContext {
   private IOCProcessingContext processingContext;
@@ -251,25 +255,22 @@ public class InjectionContext {
     } while (!toExecute.isEmpty() && toExecute.size() < start);
 
     if (!toExecute.isEmpty()) {
-      StringBuilder sbuf = new StringBuilder();
+      UnsatisfiedDependencies unsatisfiedDependencies = new UnsatisfiedDependencies();
       for (InjectionTask task : toExecute) {
-        sbuf.append(" @> ").append(task.getInjector().getInjectedType()).append("\n");
         switch (task.getInjectType()) {
           case PrivateField:
           case Field:
-            sbuf.append("   - field ").append(task.getField().getName()).append(" could not be satisfied for type: ")
-                    .append(task.getField
-                            ().getType().getFullyQualifiedName()).append("\n");
+            unsatisfiedDependencies.addUnsatisfiedDependency(
+                new UnsatisfiedField(task.getField(), task.getInjector().getInjectedType(), task.getField().getType()));
             break;
 
           case Method:
-            sbuf.append("   - setter ").append(task.getMethod()).append(" could not be satisified for type: ").append
-                    (task.getMethod().getParameters()[0].getType().getFullyQualifiedName()).append("\n");
+            unsatisfiedDependencies.addUnsatisfiedDependency(
+                new UnsatisfiedMethod(task.getMethod(), task.getInjector().getInjectedType(), task.getMethod().getParameters()[0].getType()));
         }
-
       }
 
-      throw new RuntimeException("unsatified depedencies:\n" + sbuf);
+      throw new UnsatisfiedDependenciesException(unsatisfiedDependencies);
     }
 
     runAllDeferredTasks();    //  deferred.clear();

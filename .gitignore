@@ -3,6 +3,6 @@
 .gwt-tmp/
 target/
 classes/
-tomcat/
+/tomcat/
 .DS_Store
 

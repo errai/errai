@@ -53,7 +53,7 @@ public class JSR299QualifyingMetadata implements QualifyingMetadata {
               && comparable.qualifiers.contains(ANY_INSTANCE))
               || qualifiers.size() == 1
               && qualifiers.contains(ANY_INSTANCE)
-              || comparable.qualifiers.containsAll(qualifiers));
+              || qualifiers.containsAll(comparable.qualifiers));
     }
     else return metadata == null;
   }

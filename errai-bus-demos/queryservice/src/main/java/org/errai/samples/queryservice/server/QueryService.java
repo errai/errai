@@ -16,7 +16,7 @@
 
 package org.errai.samples.queryservice.server;
 
-import org.errai.samples.queryservice.client.QueryServiceRemote;
+import org.errai.samples.queryservice.client.shared.QueryServiceRemote;
 import org.jboss.errai.bus.server.annotations.Service;
 
 import java.util.HashMap;
