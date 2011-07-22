@@ -51,14 +51,14 @@ public class CDI {
 
   public static MessageInterceptor CONVERSATION_INTERCEPTOR = new ConversationInterceptor();
 
-  public static void handleEvent(final Class<?> type, final EventHandler handler) {
+  public static void handleEvent(final Class<?> type, final EventHandler<Object> handler) {
     ErraiBus.get().subscribe("cdi.event:" + type.getName(), // by convention
-        new MessageCallback() {
-          public void callback(Message message) {
-            Object response = message.get(type, CDIProtocol.OBJECT_REF);
-            handler.handleEvent(response);
-          }
-        });
+            new MessageCallback() {
+              public void callback(Message message) {
+                Object response = message.get(type, CDIProtocol.OBJECT_REF);
+                handler.handleEvent(response);
+              }
+            });
   }
 
   public static String getSubjectNameByType(final Class<?> type) {
@@ -93,24 +93,26 @@ public class CDI {
     if (ErraiBus.get().isSubscribed(subject)) {
       if (qualifiersPart != null && !qualifiersPart.isEmpty()) {
         MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
-            .with(CDIProtocol.TYPE, payload.getClass().getName()).with(CDIProtocol.OBJECT_REF, payload)
-            .with(CDIProtocol.QUALIFIERS, qualifiersPart).noErrorHandling().sendNowWith(ErraiBus.get());
-      } else {
+                .with(CDIProtocol.TYPE, payload.getClass().getName()).with(CDIProtocol.OBJECT_REF, payload)
+                .with(CDIProtocol.QUALIFIERS, qualifiersPart).noErrorHandling().sendNowWith(ErraiBus.get());
+      }
+      else {
         MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
-            .with(CDIProtocol.TYPE, payload.getClass().getName()).with(CDIProtocol.OBJECT_REF, payload)
-            .noErrorHandling().sendNowWith(ErraiBus.get());
+                .with(CDIProtocol.TYPE, payload.getClass().getName()).with(CDIProtocol.OBJECT_REF, payload)
+                .noErrorHandling().sendNowWith(ErraiBus.get());
       }
     }
 
     if (remoteEvents.contains(payload.getClass().getName())) {
       if (qualifiersPart != null && !qualifiersPart.isEmpty()) {
         MessageBuilder.createMessage().toSubject(DISPATCHER_SUBJECT).command(CDICommands.CDIEvent)
-            .with(CDIProtocol.TYPE, payload.getClass().getName()).with(CDIProtocol.OBJECT_REF, payload)
-            .with(CDIProtocol.QUALIFIERS, qualifiersPart).noErrorHandling().sendNowWith(ErraiBus.get());
-      } else {
+                .with(CDIProtocol.TYPE, payload.getClass().getName()).with(CDIProtocol.OBJECT_REF, payload)
+                .with(CDIProtocol.QUALIFIERS, qualifiersPart).noErrorHandling().sendNowWith(ErraiBus.get());
+      }
+      else {
         MessageBuilder.createMessage().toSubject(DISPATCHER_SUBJECT).command(CDICommands.CDIEvent)
-            .with(CDIProtocol.TYPE, payload.getClass().getName()).with(CDIProtocol.OBJECT_REF, payload)
-            .noErrorHandling().sendNowWith(ErraiBus.get());
+                .with(CDIProtocol.TYPE, payload.getClass().getName()).with(CDIProtocol.OBJECT_REF, payload)
+                .noErrorHandling().sendNowWith(ErraiBus.get());
       }
     }
   }

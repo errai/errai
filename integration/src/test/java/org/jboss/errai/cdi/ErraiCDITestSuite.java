@@ -4,6 +4,7 @@ import org.jboss.errai.cdi.event.client.test.EventObserverIntegrationTest;
 import org.jboss.errai.cdi.event.client.test.EventProducerIntegrationTest;
 import org.jboss.errai.cdi.invalid.producer.client.test.InvalidProducerIntegrationTest;
 import org.jboss.errai.cdi.producer.client.test.ProducerIntegrationTest;
+import org.jboss.errai.common.client.ErraiCommon;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
@@ -12,7 +13,7 @@ import org.junit.runners.Suite;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({ProducerIntegrationTest.class, InvalidProducerIntegrationTest.class,
-    EventObserverIntegrationTest.class, EventProducerIntegrationTest.class})
+        EventObserverIntegrationTest.class, EventProducerIntegrationTest.class})
 public class ErraiCDITestSuite {
 
 }
