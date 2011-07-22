@@ -31,7 +31,7 @@ public class UnsatisfiedDependenciesException extends RuntimeException {
     this.unsatisfiedDependencies = unsatisfiedDependencies;
   } 
   
-  public List<UnsatisfiedDependency> getUnsatisfiedDependecies() {
+  public List<UnsatisfiedDependency> getUnsatisfiedDependencies() {
     return unsatisfiedDependencies.get();
   }
 }
