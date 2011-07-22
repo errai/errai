@@ -1,6 +1,8 @@
 package org.jboss.errai.cdi.invalid.producer.client.test;
 
-import org.jboss.errai.cdi.client.AbstractErraiCDITest;
+import static org.junit.Assert.fail;
+
+import org.jboss.errai.ioc.rebind.MockIOCGenerator;
 import org.junit.Test;
 
 /**
@@ -8,19 +10,17 @@ import org.junit.Test;
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class InvalidProducerIntegrationTest extends AbstractErraiCDITest {
-
-  @Override
-  public String getModuleName() {
-    return "org.jboss.errai.cdi.invalid.producer.InvalidProducerTestModule";
-  }
+public class InvalidProducerIntegrationTest {
 
   @Test
   public void testInvalidProducers() {
     try {
-      super.gwtSetUp();
-      fail("expected a nice exception explaining which injection points could not be satisfied and why!");
+      MockIOCGenerator mockIOCGenerator = new MockIOCGenerator();
+      mockIOCGenerator.setPackageFilter("org.jboss.errai.cdi.invalid.producer");
+      mockIOCGenerator.generate().newInstance().bootstrapContainer();
+      fail("expected a nice exception explaining which injection points could not be satisfied and why");
     } catch (Exception e) {
+      System.out.println(e);
       //TODO we want detailed exception information here
       //expected
     }

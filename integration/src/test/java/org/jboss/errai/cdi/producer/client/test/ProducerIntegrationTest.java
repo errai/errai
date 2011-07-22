@@ -1,23 +1,21 @@
 package org.jboss.errai.cdi.producer.client.test;
 
-import org.jboss.errai.cdi.client.AbstractErraiCDITest;
 import org.jboss.errai.cdi.producer.client.ProducerTestModule;
+import org.jboss.errai.ioc.client.IOCClientTestCase;
+import org.jboss.errai.ioc.rebind.IOCTestRunner;
+import org.junit.runner.RunWith;
 
 /**
  * Tests CDI producers.
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class ProducerIntegrationTest extends AbstractErraiCDITest {
+@RunWith(IOCTestRunner.class)
+public class ProducerIntegrationTest extends IOCClientTestCase {
 
   @Override
   public String getModuleName() {
     return "org.jboss.errai.cdi.producer.ProducerTestModule";
-  }
-
-  @Override
-  public void gwtSetUp() throws Exception {
-    super.gwtSetUp();
   }
 
   public void testProducers() {
