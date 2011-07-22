@@ -1,13 +1,17 @@
 package org.jboss.errai.cdi.producer.client.test;
 
-import org.jboss.errai.cdi.producer.client.test.res.ProducerTestModule;
+
+import org.jboss.errai.cdi.producer.client.ProducerTestModule;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
+import org.jboss.errai.ioc.rebind.IOCTestRunner;
+import org.junit.runner.RunWith;
 
 /**
  * Tests CDI producers.
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
+@RunWith(IOCTestRunner.class)
 public class ProducerIntegrationTest extends IOCClientTestCase {
 
   @Override
@@ -15,15 +19,10 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
     return "org.jboss.errai.cdi.producer.ProducerTestModule";
   }
 
-  @Override
-  public void gwtSetUp() throws Exception {
-    super.setPackageFilter("org.jboss.errai.cdi.producer");
-    super.bootstrapContainer();
-  }
 
   public void testProducers() {
     assertEquals("Failed to inject produced @A", 
-        ProducerTestModule.getInstance().getNumberA(), 
+        ProducerTestModule.getInstance().getNumberA(),
         ProducerTestModule.getInstance().getTestBean().getIntegerA());
     
     assertEquals("Failed to inject produced @B", 
