@@ -9,7 +9,7 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.api.IOCExtension;
 import org.jboss.errai.ioc.rebind.AnnotationHandler;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
-import org.jboss.errai.ioc.rebind.ProcessorFactory;
+import org.jboss.errai.ioc.rebind.IOCProcessorFactory;
 import org.jboss.errai.ioc.rebind.Rule;
 import org.jboss.errai.ioc.rebind.ioc.IOCExtensionConfigurator;
 import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
@@ -24,7 +24,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 @IOCExtension
 public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator {
   public void configure(final ProcessingContext context, final InjectorFactory injectorFactory,
-                        final ProcessorFactory procFactory) {
+                        final IOCProcessorFactory procFactory) {
 
     procFactory.registerHandler(Produces.class, new AnnotationHandler<Produces>() {
       @Override
@@ -111,6 +111,6 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
   }
 
   public void afterInitialization(ProcessingContext context, InjectorFactory injectorFactory,
-                                  ProcessorFactory procFactory) {
+                                  IOCProcessorFactory procFactory) {
   }
 }

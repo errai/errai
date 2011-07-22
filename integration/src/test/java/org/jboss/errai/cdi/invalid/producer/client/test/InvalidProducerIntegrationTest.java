@@ -19,6 +19,9 @@ public class InvalidProducerIntegrationTest {
 
   /**
    * In this case, a producer is available for @A but the injection point specifies @A @B
+   *
+   * @throws IllegalAccessException -
+   * @throws InstantiationException -
    */
   @Test
   public void testInvalidProducerWithMissingQualifier() throws InstantiationException, IllegalAccessException {
@@ -27,10 +30,10 @@ public class InvalidProducerIntegrationTest {
       mockIOCGenerator.setPackageFilter("org.jboss.errai.cdi.invalid.producer");
       mockIOCGenerator.generate().newInstance().bootstrapContainer();
       fail("Expected an UnsatisfiedDependenciesException");
-    } 
+    }
     catch (UnsatisfiedDependenciesException e) {
       assertEquals("Expected to find excatly 1 unsatisfied dependency", 1, e.getUnsatisfiedDependencies().size());
-     
+
       UnsatisfiedDependency dependency = e.getUnsatisfiedDependencies().get(0);
       assertTrue("Should be an unsatisfied field", dependency instanceof UnsatisfiedField);
       assertEquals("Wrong field name", ((UnsatisfiedField) dependency).getField().getName(), "abInteger");
