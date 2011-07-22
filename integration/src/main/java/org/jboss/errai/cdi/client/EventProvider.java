@@ -1,22 +1,26 @@
 package org.jboss.errai.cdi.client;
 
-import java.lang.annotation.Annotation;
-
-import javax.inject.Singleton;
-
 import org.jboss.errai.cdi.client.api.CDI;
 import org.jboss.errai.cdi.client.api.Conversation;
 import org.jboss.errai.cdi.client.api.Event;
-import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
+import org.jboss.errai.ioc.client.ContextualProviderContext;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 
-@IOCProvider @Singleton
-public class EventProvider implements ContextualTypeProvider<Event<?>> {
-  public Event<?> provide(final Class[] typeargs, final Annotation[] qualifiers) {
+import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.inject.Singleton;
+import java.lang.annotation.Annotation;
+
+@IOCProvider
+public class EventProvider implements Provider<Event<?>> {
+  @Inject
+  ContextualProviderContext context;
+
+  public Event<?> get() {
     return new Event() {
-      private Class eventType = (typeargs.length == 1 ? typeargs[0] : Object.class);
+      private Class eventType = (context.getTypeArguments().length == 1 ? context.getTypeArguments()[0] : Object.class);
       private Conversation conversation;
-      private Annotation[] _qualifiers = qualifiers;
+      private Annotation[] _qualifiers = context.getQualifiers();
 
       public void fire(Object event) {
         if (event == null)
@@ -25,7 +29,7 @@ public class EventProvider implements ContextualTypeProvider<Event<?>> {
           conversation.begin();
         }
 
-        CDI.fireEvent(event, qualifiers);
+        CDI.fireEvent(event, _qualifiers);
       }
 
       public Event select(Annotation... qualifiers) {
@@ -42,7 +46,7 @@ public class EventProvider implements ContextualTypeProvider<Event<?>> {
       }
 
       public Annotation[] getQualifiers() {
-        return qualifiers;
+        return _qualifiers;
       }
 
       public void registerConversation(Conversation conversation) {

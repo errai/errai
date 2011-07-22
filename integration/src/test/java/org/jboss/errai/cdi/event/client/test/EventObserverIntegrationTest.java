@@ -6,10 +6,12 @@ import java.util.Map;
 import org.jboss.errai.cdi.event.client.EventObserverTestModule;
 
 import com.google.gwt.user.client.Timer;
+import org.jboss.errai.ioc.rebind.IOCTestRunner;
+import org.junit.runner.RunWith;
 
 /**
  * Tests CDI event observers.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
@@ -23,7 +25,7 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
     Timer timer = new Timer() {
       public void run() {
         assertEquals("Wrong number of BusReadyEvents received:", 1, EventObserverTestModule.getInstance()
-            .getBusReadyEventsReceived());
+                .getBusReadyEventsReceived());
         finishTest();
       }
     };
