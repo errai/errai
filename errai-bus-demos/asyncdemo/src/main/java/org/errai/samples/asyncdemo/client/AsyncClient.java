@@ -85,10 +85,10 @@ public class AsyncClient implements EntryPoint {
            * Send a message to Start/Stop the task on the server.
            */
           MessageBuilder.createMessage()
-              .toSubject("AsyncService")
-              .command(startStopButton.getText())
-              .with(MessageParts.ReplyTo, receiverName)
-              .noErrorHandling().sendNowWith(ErraiBus.get());
+                  .toSubject("AsyncService")
+                  .command(startStopButton.getText())
+                  .with(MessageParts.ReplyTo, receiverName)
+                  .noErrorHandling().sendNowWith(ErraiBus.get());
 
           /**
            * Flip-flop the value of the button every time it's pushed between 'Start' and 'Stop'
