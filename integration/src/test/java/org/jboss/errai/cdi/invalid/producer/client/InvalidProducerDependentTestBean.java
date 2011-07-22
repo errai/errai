@@ -12,7 +12,7 @@ import org.jboss.errai.cdi.client.qualifier.B;
  */
 @ApplicationScoped
 public class InvalidProducerDependentTestBean {
-  // cannot be satisfied
+  // cannot be satisfied (no producer for @A @B available)
   @Inject @A @B
   Integer abInteger;
   

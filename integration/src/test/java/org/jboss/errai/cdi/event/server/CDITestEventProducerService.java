@@ -1,4 +1,4 @@
-package org.jboss.errai.cdi.server;
+package org.jboss.errai.cdi.event.server;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;

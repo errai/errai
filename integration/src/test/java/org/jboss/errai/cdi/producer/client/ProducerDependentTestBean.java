@@ -28,7 +28,10 @@ public class ProducerDependentTestBean {
 
   @Inject
   Float unqualifiedFloat;
-  
+
+  @Inject @D
+  Float dFloat;
+
   public Integer getIntegerA() {
     return aInteger;
   }
@@ -47,5 +50,9 @@ public class ProducerDependentTestBean {
   
   public Float getUnqualifiedFloat() {
     return unqualifiedFloat;
+  }
+  
+  public Float getFloatD() {
+    return dFloat;
   }
 }

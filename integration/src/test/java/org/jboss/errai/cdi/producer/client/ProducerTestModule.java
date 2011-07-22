@@ -10,6 +10,7 @@ import org.jboss.errai.cdi.client.qualifier.A;
 import org.jboss.errai.cdi.client.qualifier.B;
 import org.jboss.errai.cdi.client.qualifier.C;
 import org.jboss.errai.cdi.client.qualifier.D;
+import org.jboss.errai.cdi.client.qualifier.E;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
 /**
@@ -48,8 +49,8 @@ public class ProducerTestModule {
     return Integer.toString(number);
   }
 
-  @Produces @D
-  private Float floatA = 1.1f;
+  @Produces @D @E
+  private Float floatDE = 1.1f;
   
   public Integer getNumberA() {
     return numberA;
@@ -63,8 +64,8 @@ public class ProducerTestModule {
     return numberC;
   }
 
-  public Float getFloatD() {
-    return floatA;
+  public Float getFloatDE() {
+    return floatDE;
   }
   
   @PostConstruct
