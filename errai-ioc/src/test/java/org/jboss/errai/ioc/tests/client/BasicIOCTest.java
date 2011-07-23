@@ -34,7 +34,6 @@ public class BasicIOCTest extends IOCClientTestCase {
     return "org.jboss.errai.ioc.tests.IOCTests";
   }
 
-
   @Test
   public void testBasicInjectionScenarios() {
     SimpleBean simpleBean = SimpleBean.TEST_INSTANCE;

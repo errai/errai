@@ -1,8 +1,6 @@
 package org.jboss.errai.ioc.rebind;
 
 import com.google.gwt.junit.JUnitShell;
-import com.google.gwt.junit.client.GWTTestCase;
-import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestResult;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
@@ -13,8 +11,6 @@ import org.junit.runner.Runner;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.ParentRunner;
-import org.junit.runners.model.TestClass;
-import sun.rmi.transport.ObjectTable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -27,13 +23,11 @@ import java.util.List;
 public class IOCTestRunner extends ParentRunner<Runner> {
   public static boolean SIMULATED = Boolean.getBoolean("errai.ioc.debug.simulated_client");
 
-
   List<Runner> runners = new ArrayList<Runner>();
   private Object instance;
 
   public IOCTestRunner(Class<? extends TestCase> toRun) throws Throwable {
     super(toRun);
-
 
     for (final Method method : toRun.getDeclaredMethods()) {
       if (method.getName().startsWith("test") && method.getParameterTypes().length == 0) {
@@ -85,7 +79,6 @@ public class IOCTestRunner extends ParentRunner<Runner> {
     }
   }
 
-
   public Object getInstance() {
     if (instance == null) {
       try {
@@ -103,7 +96,6 @@ public class IOCTestRunner extends ParentRunner<Runner> {
     }
     return instance;
   }
-
 
   @Override
   protected List<Runner> getChildren() {

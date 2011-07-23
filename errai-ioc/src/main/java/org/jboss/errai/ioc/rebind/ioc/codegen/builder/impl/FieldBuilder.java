@@ -32,7 +32,8 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class FieldBuilder<T> implements FieldBuildStart<T>, FieldBuildType<T>,
-        FieldBuildName<T>, FieldBuildInitializer<T> {
+                                        FieldBuildName<T>, FieldBuildInitializer<T> {
+
   private BuildCallback<T> callback;
   private Scope scope;
   private MetaClass type;
