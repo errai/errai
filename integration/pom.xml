@@ -54,8 +54,15 @@
                 <dependency>
                     <groupId>org.jboss.errai</groupId>
                     <artifactId>errai-cdi-jetty</artifactId>
-                    <version>${project.version}</version>
+                    <version>${project.parent.version}</version>
                     <scope>test</scope>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.jboss.errai</groupId>
+                    <artifactId>errai-jre-extended</artifactId>
+                    <version>${project.parent.version}</version>
+                    <scope>provided</scope>
                 </dependency>
 
                 <!-- Weld -->

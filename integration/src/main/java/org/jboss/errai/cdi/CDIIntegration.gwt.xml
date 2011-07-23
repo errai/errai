@@ -4,4 +4,7 @@
     <inherits name='com.google.gwt.user.User'/>
     <!--inherits name="gwt.JavaxEnterprise"/-->
     <entry-point class='org.jboss.errai.cdi.client.CDIClientBootstrap'/>
+
+    <super-source path="emul"/>
+    <source path="client"/>
 </module>

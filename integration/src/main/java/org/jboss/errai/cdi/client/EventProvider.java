@@ -2,13 +2,13 @@ package org.jboss.errai.cdi.client;
 
 import org.jboss.errai.cdi.client.api.CDI;
 import org.jboss.errai.cdi.client.api.Conversation;
-import org.jboss.errai.cdi.client.api.Event;
 import org.jboss.errai.ioc.client.ContextualProviderContext;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 
+import javax.enterprise.event.Event;
+import javax.enterprise.util.TypeLiteral;
 import javax.inject.Inject;
 import javax.inject.Provider;
-import javax.inject.Singleton;
 import java.lang.annotation.Annotation;
 
 @IOCProvider
@@ -17,7 +17,7 @@ public class EventProvider implements Provider<Event<?>> {
   ContextualProviderContext context;
 
   public Event<?> get() {
-    return new Event() {
+    return new Event<Object>() {
       private Class eventType = (context.getTypeArguments().length == 1 ? context.getTypeArguments()[0] : Object.class);
       private Conversation conversation;
       private Annotation[] _qualifiers = context.getQualifiers();
@@ -32,14 +32,20 @@ public class EventProvider implements Provider<Event<?>> {
         CDI.fireEvent(event, _qualifiers);
       }
 
-      public Event select(Annotation... qualifiers) {
-        _qualifiers = qualifiers;
-        return this;
+      @Override
+      public Event<Object> select(Annotation... qualifiers) {
+        throw new RuntimeException("use of event selectors is unsupported");
       }
 
-      public Event select(Class subtype, Annotation... qualifiers) {
-        throw new RuntimeException("Not implemented");
+      @Override
+      public <U extends Object> Event<U> select(Class<U> subtype, Annotation... qualifiers) {
+        throw new RuntimeException("use of event selectors is unsupported");
       }
+
+//      @Override
+//      public <U extends Object> Event<U> select(TypeLiteral<U> subtype, Annotation... qualifiers) {
+//        throw new RuntimeException("use of event selectors is unsupported");
+//      }
 
       public Class getEventType() {
         return eventType;

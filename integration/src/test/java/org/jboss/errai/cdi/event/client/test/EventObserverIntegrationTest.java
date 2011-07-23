@@ -6,8 +6,6 @@ import java.util.Map;
 import org.jboss.errai.cdi.event.client.EventObserverTestModule;
 
 import com.google.gwt.user.client.Timer;
-import org.jboss.errai.ioc.rebind.IOCTestRunner;
-import org.junit.runner.RunWith;
 
 /**
  * Tests CDI event observers.

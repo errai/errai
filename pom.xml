@@ -27,6 +27,7 @@
         <module>jboss</module>
         <module>examples/model</module>
         <module>examples/server</module>
+        <module>../errai/errai-jre-extended</module>
         <!--module>examples/gui</module-->
     </modules>
 
@@ -157,7 +158,7 @@
                 <version>${validation.api.version}</version>
                 <scope>provided</scope>
             </dependency>
-            
+
             <dependency>
                 <groupId>javax.validation</groupId>
                 <artifactId>validation-api</artifactId>

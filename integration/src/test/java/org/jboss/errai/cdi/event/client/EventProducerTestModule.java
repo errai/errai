@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
+import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
-import org.jboss.errai.cdi.client.api.Event;
 import org.jboss.errai.cdi.client.events.BusReadyEvent;
 import org.jboss.errai.cdi.client.qualifier.A;
 import org.jboss.errai.cdi.client.qualifier.B;
@@ -18,7 +18,7 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
 
 /**
  * Test module used by {@see EventProducerIntegrationTest}.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @EntryPoint
@@ -31,25 +31,37 @@ public class EventProducerTestModule {
   @Inject
   private Event<String> event;
 
-  @Inject @A
+  @Inject
+  @A
   private Event<String> eventA;
 
-  @Inject @B
+  @Inject
+  @B
   private Event<String> eventB;
 
-  @Inject @C
+  @Inject
+  @C
   private Event<String> eventC;
 
-  @Inject @A @B
+  @Inject
+  @A
+  @B
   private Event<String> eventAB;
 
-  @Inject @B @C
+  @Inject
+  @B
+  @C
   private Event<String> eventBC;
 
-  @Inject @A @C
+  @Inject
+  @A
+  @C
   private Event<String> eventAC;
 
-  @Inject @A @B @C
+  @Inject
+  @A
+  @B
+  @C
   private Event<String> eventABC;
 
   @PostConstruct

@@ -17,7 +17,6 @@ package org.jboss.errai.cdi.rebind;
 
 import org.jboss.errai.cdi.client.api.CDI;
 import org.jboss.errai.cdi.client.api.ConversationContext;
-import org.jboss.errai.cdi.client.api.Event;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
@@ -29,6 +28,8 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 
 import com.google.gwt.core.ext.typeinfo.JClassType;
+
+import javax.enterprise.event.Event;
 
 /**
  * @author Heiko Braun <hbraun@redhat.com>
@@ -45,7 +46,7 @@ public class ConversationExtension extends IOCDecoratorExtension<ConversationCon
   public Statement generateDecorator(InjectableInstance<ConversationContext> injectableInstance) {
     final MetaField field = injectableInstance.getField();
     final JClassType eventClassType = injectableInstance.getInjectionContext().getProcessingContext()
-        .loadClassType(Event.class);
+            .loadClassType(Event.class);
 
     if (!MetaClassFactory.get(eventClassType).isAssignableFrom(field.getType())) {
       throw new RuntimeException("@ConversationContext should be used with type Event");
@@ -59,7 +60,7 @@ public class ConversationExtension extends IOCDecoratorExtension<ConversationCon
     MetaClass typeParm = (MetaClass) type.getTypeParameters()[0];
     String toSubject = CDI.getSubjectNameByType(typeParm.getFullyQualifiedName());
     Statement statement = Stmt.nestedCall(injectableInstance.getValueStatement())
-        .invoke("registerConversation", Stmt.invokeStatic(CDI.class, "createConversation", toSubject));
+            .invoke("registerConversation", Stmt.invokeStatic(CDI.class, "createConversation", toSubject));
 
     return statement;
   }

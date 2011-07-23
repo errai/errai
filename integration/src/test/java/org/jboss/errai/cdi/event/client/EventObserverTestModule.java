@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
+import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
-import org.jboss.errai.cdi.client.api.Event;
 import org.jboss.errai.cdi.client.events.BusReadyEvent;
 import org.jboss.errai.cdi.client.qualifier.A;
 import org.jboss.errai.cdi.client.qualifier.B;
@@ -18,7 +18,7 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
 
 /**
  * Test module used by {@see EventObserverIntegrationTest}.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @EntryPoint
