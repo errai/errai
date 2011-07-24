@@ -58,13 +58,6 @@
                     <scope>test</scope>
                 </dependency>
 
-                <dependency>
-                    <groupId>org.jboss.errai</groupId>
-                    <artifactId>errai-jre-extended</artifactId>
-                    <version>${project.parent.version}</version>
-                    <scope>provided</scope>
-                </dependency>
-
                 <!-- Weld -->
                 <dependency>
                     <groupId>org.jboss.weld.servlet</groupId>

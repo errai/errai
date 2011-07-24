@@ -27,8 +27,6 @@
         <module>jboss</module>
         <module>examples/model</module>
         <module>examples/server</module>
-        <module>../errai/errai-jre-extended</module>
-        <!--module>examples/gui</module-->
     </modules>
 
     <scm>
