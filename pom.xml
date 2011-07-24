@@ -1,0 +1,102 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>org.reflections</groupId>
+	<artifactId>reflections-parent</artifactId>
+    <version>0.9.6-SNAPSHOT</version>
+	<packaging>pom</packaging>
+
+    <name>Reflections parent</name>
+
+    <modules>
+		<module>reflections</module>
+		<module>reflections-maven</module>
+    </modules>
+
+    <distributionManagement>
+      <repository>
+            <id>jboss-releases-repository</id>
+            <name>JBoss Releases Repository</name>
+            <url>https://repository.jboss.org/nexus/service/local/staging/deploy/maven2/</url>
+        </repository>
+
+        <snapshotRepository>
+            <id>jboss-snapshots-repository</id>
+            <name>JBoss Snapshots Repository</name>
+            <url>https://repository.jboss.org/nexus/content/repositories/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+    
+    <build>
+        <extensions>
+            <extension>
+                <groupId>org.jvnet.wagon-svn</groupId>
+                <artifactId>wagon-svn</artifactId>
+                <version>1.9</version>
+            </extension>
+        </extensions>
+        
+        <plugins>
+            <plugin>
+                 <artifactId>maven-resources-plugin</artifactId>
+                 <configuration>
+                     <encoding>UTF-8</encoding>
+                 </configuration>
+             </plugin>
+             <plugin>
+                 <artifactId>maven-source-plugin</artifactId>
+                 <executions>
+                     <execution>
+                         <goals>
+                             <goal>jar</goal>
+                         </goals>
+                     </execution>
+                 </executions>
+             </plugin>
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <reportOutputDirectory>javadoc</reportOutputDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>jar</goal>
+                            <goal>javadoc</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                    <source>1.5</source>
+                    <target>1.5</target>
+                </configuration>
+            </plugin>
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <!-- fix java.class.path -->
+                    <useSystemClassLoader>false</useSystemClassLoader>
+                    <additionalClasspathElements>
+                        <additionalClasspathElement>${project.build.outputDirectory}/target/test-classes</additionalClasspathElement>
+                    </additionalClasspathElements>
+                </configuration>
+			</plugin>
+
+        </plugins>
+    </build>
+
+    <repositories>
+        <repository>
+            <id>java.net-repo</id>
+            <name>java.net-repo</name>
+            <url>http://download.java.net/maven/2/</url>
+        </repository>
+    </repositories>
+
+</project>
