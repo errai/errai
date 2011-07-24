@@ -3,7 +3,7 @@
     <parent>
         <groupId>org.reflections</groupId>
         <artifactId>reflections-parent</artifactId>
-        <version>0.9.6_jboss_errai</version>
+        <version>0.9.7_jboss_errai-SNAPSHOT</version>
     </parent>
 
     <artifactId>reflections</artifactId>
