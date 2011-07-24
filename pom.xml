@@ -14,6 +14,13 @@
 		<module>reflections-maven</module>
     </modules>
 
+   <scm>
+        <connection>scm:git:git@github.com:errai/Reflections.git</connection>
+        <developerConnection>scm:git:git@github.com:errai/Reflections.git</developerConnection>
+        <url>scm:git:git@github.com:errai/Reflections.git</url>
+    </scm>
+
+
     <distributionManagement>
       <repository>
             <id>jboss-releases-repository</id>
