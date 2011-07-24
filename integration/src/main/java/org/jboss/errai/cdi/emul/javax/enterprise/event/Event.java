@@ -105,18 +105,4 @@ public interface Event<T> {
    *                                  a qualifier type
    */
   public <U extends T> Event<U> select(Class<U> subtype, Annotation... qualifiers);
-
-  /**
-   * <p>Obtains a child <tt>Event</tt> for the given required type and
-   * additional required qualifiers.</p>
-   *
-   * @param <U> the specified type
-   * @param subtype a {@link javax.enterprise.util.TypeLiteral} representing the specified type
-   * @param qualifiers the additional specified qualifiers
-   * @return the child <tt>Event</tt>
-   * @throws IllegalArgumentException if passed two instances of the
-   * same qualifier type, or an instance of an annotation that is not
-   * a qualifier type
-   */
-//   public <U extends T> Event<U> select(TypeLiteral<U> subtype, Annotation... qualifiers);
 }

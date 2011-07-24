@@ -35,7 +35,9 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
           case Type:
             break;
           case PrivateField:
-            instance.ensureFieldExposed();
+          case PrivateMethod:
+            instance.ensureMemberExposed();
+
           default:
             if (!instance.getInjectionContext().isInjectable(instance.getType())) {
               return false;
@@ -77,6 +79,7 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
           public MetaClass getInjectedType() {
             switch (instance.getTaskType()) {
               case StaticMethod:
+              case PrivateMethod:
               case Method:
                 return instance.getMethod().getReturnType();
               case PrivateField:
