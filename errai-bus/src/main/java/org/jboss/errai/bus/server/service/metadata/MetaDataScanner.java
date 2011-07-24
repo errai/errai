@@ -17,11 +17,10 @@ package org.jboss.errai.bus.server.service.metadata;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
+import org.reflections.Configuration;
 import org.reflections.Reflections;
-import org.reflections.Store;
 import org.reflections.scanners.FieldAnnotationsScanner;
 import org.reflections.scanners.MethodAnnotationsScanner;
-import org.reflections.scanners.Scanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
 import org.reflections.util.ConfigurationBuilder;
 import org.reflections.vfs.Vfs;
@@ -35,7 +34,6 @@ import java.net.URLDecoder;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import static org.reflections.util.Utils.forNames;
 import static org.reflections.vfs.Vfs.UrlType;
 
 /**
@@ -54,7 +52,7 @@ public class MetaDataScanner extends Reflections {
   public static final String CLIENT_PKG_REGEX = ".*(\\.client\\.).*";
   public static final String ERRAI_CONFIG_STUB_NAME = "ErraiApp.properties";
 
-  private final PropertyScanner propScanner = new PropertyScanner(
+  private static final PropertyScanner propScanner = new PropertyScanner(
           new Predicate<String>() {
             public boolean apply(String file) {
               return file.endsWith(".properties");
@@ -63,8 +61,12 @@ public class MetaDataScanner extends Reflections {
   );
 
   MetaDataScanner(List<URL> urls) {
+    super(getConfiguration(urls));
+    scan();
+  }
 
-    configuration = new ConfigurationBuilder()
+  private static Configuration getConfiguration(List<URL> urls) {
+    return new ConfigurationBuilder()
             .setUrls(urls)
                     //.filterInputsBy(new FilterBuilder().exclude(CLIENT_PKG_REGEX))
             .setScanners(
@@ -74,16 +76,6 @@ public class MetaDataScanner extends Reflections {
                     //new SubTypesScanner(),
                     propScanner
             );
-
-    store = new Store();
-
-    //inject to scanners
-    for (Scanner scanner : configuration.getScanners()) {
-      scanner.setConfiguration(configuration);
-      scanner.setStore(store.get(scanner.getClass()));
-    }
-
-    scan();
   }
 
   public static MetaDataScanner createInstance() {

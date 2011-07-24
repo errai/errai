@@ -43,7 +43,6 @@ public class MethodCall extends AbstractCallElement {
 
   public MethodCall(String methodName, Object[] parameters, boolean staticMethod) {
     this.methodName = methodName;
-
     this.parameters = parameters;
     this.staticMethod = staticMethod;
   }

@@ -118,7 +118,7 @@ public class JSONEncoder {
         int i = 0;
         for (Field f : fields) {
           if ((f.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
-              || f.isSynthetic()) {
+                  || f.isSynthetic()) {
             continue;
           }
           s[i++] = MVEL.compileExpression(f.getName());
@@ -134,7 +134,7 @@ public class JSONEncoder {
       if (first) build.append(',');
 
       if ((field.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
-          || field.isSynthetic()) {
+              || field.isSynthetic()) {
         continue;
       }
       else if (!first) {
@@ -175,12 +175,12 @@ public class JSONEncoder {
         ctx.unsetEscapeMode();
         mapBuild.append(write(ctx, '\"'));
         mapBuild.append(":")
-            .append(val);
+                .append(val);
 
       }
       else {
         mapBuild.append(_encode(entry.getKey(), ctx))
-            .append(':').append(val);
+                .append(':').append(val);
       }
 
       first = false;
@@ -271,7 +271,6 @@ public class JSONEncoder {
   public static void addEncodingHandler(Class from, TypeHandler handler) {
     tHandlers.put(from, handler);
   }
-
 
   private static final DecodingContext STATIC_DEC_CONTEXT = new DecodingContext();
 

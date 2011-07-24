@@ -17,6 +17,7 @@
 package org.jboss.errai.ioc.rebind.ioc;
 
 import static org.jboss.errai.ioc.rebind.ioc.InjectUtil.getPrivateFieldInjectorName;
+import static org.jboss.errai.ioc.rebind.ioc.InjectUtil.getPrivateMethodName;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -164,6 +165,21 @@ public class InjectableInstance<T extends Annotation> {
 
       case Field:
         return Stmt.loadVariable(injector.getVarName()).loadField(field.getName());
+
+      case PrivateMethod:
+        if (method.getReturnType().isVoid()) {
+          return Stmt.load(Void.class);
+        }
+
+        MetaParameter[] methParms = method.getParameters();
+        Statement[] resolveParmsDeps = InjectUtil.resolveInjectionDependencies(methParms, injectionContext, method);
+        stmt = new Statement[methParms.length + 1];
+        stmt[0] = Refs.get(injector.getVarName());
+        System.arraycopy(resolveParmsDeps, 0, stmt, 1, methParms.length);
+
+        //todo: this
+        return Stmt.invokeStatic(injectionContext.getProcessingContext().getBootstrapClass(),
+                getPrivateMethodName(method), stmt);
 
       case Method:
         stmt = InjectUtil.resolveInjectionDependencies(method.getParameters(), injectionContext, method);

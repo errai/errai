@@ -125,11 +125,11 @@ public final class MetaClassFactory {
   }
 
   public static MetaMethod get(Method method) {
-    return get(method.getDeclaringClass()).getMethod(method.getName(), method.getParameterTypes());
+    return get(method.getDeclaringClass()).getDeclaredMethod(method.getName(), method.getParameterTypes());
   }
 
   public static MetaField get(Field field) {
-    return get(field.getDeclaringClass()).getField(field.getName());
+    return get(field.getDeclaringClass()).getDeclaredField(field.getName());
   }
 
   public static Statement getAsStatement(Class<?> clazz) {

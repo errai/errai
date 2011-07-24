@@ -82,7 +82,7 @@ public class JBossVFSDIr implements Vfs.Dir {
               }
 
               @Override
-              public InputStream getInputStream() throws IOException {
+              public InputStream openInputStream() throws IOException {
                 return file.openStream();
               }
             };
