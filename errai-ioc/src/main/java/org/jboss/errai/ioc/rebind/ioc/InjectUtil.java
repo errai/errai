@@ -47,6 +47,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaConstructor;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.Refs;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 import org.mvel2.util.ReflectionUtil;
 import org.mvel2.util.StringAppender;
@@ -155,17 +156,28 @@ public class InjectUtil {
     final IOCProcessingContext processingContext = ctx.getProcessingContext();
 
     for (final MetaMethod meth : postConstructTasks) {
-      if (!meth.isPublic() || meth.getParameters().length != 0) {
+      if (meth.getParameters().length != 0) {
         throw new InjectionFailure("PostConstruct method must be public and contain no parameters: "
                 + injector.getInjectedType().getFullyQualifiedName() + "." + meth.getName());
+      }
+
+      if (!meth.isPublic()) {
+        ctx.addExposedMethod(meth);
       }
 
       ctx.deferRunnableTask(new Runnable() {
         @Override
         public void run() {
-          processingContext.append(
-                  Stmt.loadVariable(injector.getVarName()).invoke(meth.getName())
-          );
+          Statement stmt;
+          if (!meth.isPublic()) {
+            stmt = Stmt.invokeStatic(ctx.getProcessingContext().getBootstrapClass(),
+                    InjectUtil.getPrivateMethodName(meth), Refs.get(injector.getVarName()));
+          }
+          else {
+            stmt = Stmt.loadVariable(injector.getVarName()).invoke(meth.getName());
+          }
+
+          processingContext.append(stmt);
         }
       });
 
@@ -269,7 +281,7 @@ public class InjectUtil {
   private static List<MetaMethod> scanForPostConstruct(MetaClass type) {
     final List<MetaMethod> accumulator = new LinkedList<MetaMethod>();
 
-    for (MetaMethod meth : type.getMethods()) {
+    for (MetaMethod meth : type.getDeclaredMethods()) {
       if (meth.isAnnotationPresent(PostConstruct.class)) {
         accumulator.add(meth);
       }
@@ -395,7 +407,19 @@ public class InjectUtil {
   }
 
   public static String getPrivateFieldInjectorName(MetaField field) {
-    return field.getDeclaringClass().getName().replaceAll("\\.", "_") + "_" + field.getName();
+    return field.getDeclaringClass()
+            .getFullyQualifiedName().replaceAll("\\.", "_") + "_" + field.getName();
+  }
+
+  public static String getPrivateMethodName(MetaMethod method) {
+    StringBuffer buf = new StringBuffer(method.getDeclaringClass()
+            .getFullyQualifiedName().replaceAll("\\.", "_") + "_" + method.getName());
+
+    for (MetaParameter parm : method.getParameters()) {
+      buf.append('_').append(parm.getType().getFullyQualifiedName().replaceAll("\\.", "_"));
+    }
+
+    return buf.toString();
   }
 
   private static Set<Class<?>> qualifiersCache;

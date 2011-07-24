@@ -41,6 +41,7 @@ import org.mvel2.DataConversion;
 public class GenUtil {
   public static Statement[] generateCallParameters(Context context, Object... parameters) {
     Statement[] statements = new Statement[parameters.length];
+
     int i = 0;
     for (Object parameter : parameters) {
       statements[i++] = generate(context, parameter);
@@ -98,7 +99,7 @@ public class GenUtil {
   public static void assertAssignableTypes(MetaClass from, MetaClass to) {
     if (!to.asBoxed().isAssignableFrom(from.asBoxed())) {
       throw new InvalidTypeException(to.getFullyQualifiedName() + " is not assignable from "
-          + from.getFullyQualifiedName());
+              + from.getFullyQualifiedName());
     }
   }
 
@@ -109,7 +110,7 @@ public class GenUtil {
           input = ((LiteralValue<?>) input).getValue();
         }
         else {
-          ((Statement)input).generate(context);
+          ((Statement) input).generate(context);
           assertAssignableTypes(((Statement) input).getType(), targetType);
           return (Statement) input;
         }

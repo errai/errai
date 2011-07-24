@@ -93,4 +93,19 @@ public class DefParameters extends AbstractStatement {
     }
     return buf.append(")").toString();
   }
+
+  @Override
+  public String toString() {
+    StringBuilder buf = new StringBuilder("(");
+    for (int i = 0; i < parameters.size(); i++) {
+      buf.append(parameters.get(i).getType().getFullyQualifiedName())
+              .append(' ').append(parameters.get(i).getName());
+
+      if (i + 1 < parameters.size()) {
+        buf.append(", ");
+      }
+    }
+    return buf.append(")").toString();
+  }
+
 }

@@ -93,10 +93,6 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     return getEnclosedMetaObject().getCanonicalName();
   }
 
-  @Override
-  public String getInternalName() {
-    return getEnclosedMetaObject().getName();
-  }
 
   @Override
   public String getPackageName() {
@@ -245,6 +241,17 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
   @Override
   public MetaTypeVariable[] getTypeParameters() {
     return JavaReflectionUtil.fromTypeVariable(getEnclosedMetaObject().getTypeParameters());
+  }
+
+
+  @Override
+  public boolean isPrimitive() {
+    return getEnclosedMetaObject().isPrimitive();
+  }
+
+  @Override
+  public boolean isVoid() {
+    return getEnclosedMetaObject().equals(Void.TYPE);
   }
 
   @Override

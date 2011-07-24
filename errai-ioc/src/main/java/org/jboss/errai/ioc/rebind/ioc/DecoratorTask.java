@@ -58,6 +58,7 @@ public class DecoratorTask extends InjectionTask {
         case Field:
           anno = field.getAnnotation(dec.decoratesWith());
           break;
+        case PrivateMethod:
         case Method:
           anno = method.getAnnotation(dec.decoratesWith());
           if (anno == null && field != null) {

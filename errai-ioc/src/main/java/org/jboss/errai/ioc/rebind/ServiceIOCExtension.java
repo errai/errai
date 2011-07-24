@@ -40,7 +40,7 @@ public class ServiceIOCExtension extends IOCDecoratorExtension<Service> {
     /**
      * Ensure the the container generates a stub to internally expose the field if it's private.
      */
-    decContext.ensureFieldExposed();
+    decContext.ensureMemberExposed();
 
     /**
      * Get an instance of the message bus.

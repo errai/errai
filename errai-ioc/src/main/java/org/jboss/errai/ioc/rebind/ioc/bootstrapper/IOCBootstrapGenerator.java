@@ -18,7 +18,9 @@ import org.jboss.errai.ioc.rebind.IOCProcessorFactory;
 import org.jboss.errai.ioc.rebind.ioc.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BlockBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.CatchBlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ClassStructureBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ContextualStatementBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.*;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.build.BuildMetaClass;
@@ -133,6 +135,12 @@ public class IOCBootstrapGenerator {
       addJSNIStubs(classBuilder, f, f.getType());
     }
 
+    Collection<MetaMethod> privateMethods = injectFactory.getInjectionContext().getPrivateMethodsToExpose();
+
+    for (MetaMethod m : privateMethods) {
+      addJSNIStubs(classBuilder, m);
+    }
+
     blockBuilder.finish();
 
     String generated = classBuilder.toJavaString();
@@ -200,6 +208,62 @@ public class IOCBootstrapGenerator {
                       .append(Stmt.loadVariable("e").invoke("printStackTrace"))
                       .append(Stmt.throw_(RuntimeException.class, Refs.get("e")))
                       .finish())
+              .finish();
+    }
+  }
+
+  private void addJSNIStubs(ClassStructureBuilder<?> classBuilder, MetaMethod m) {
+    List<Parameter> wrapperDefParms = new ArrayList<Parameter>();
+    wrapperDefParms.add(Parameter.of(m.getDeclaringClass(), "instance"));
+    List<Parameter> methodDefParms = DefParameters.from(m).getParameters();
+
+    wrapperDefParms.addAll(methodDefParms);
+
+    if (!useReflectionStubs) {
+      classBuilder.publicMethod(m.getReturnType(), InjectUtil.getPrivateMethodName(m))
+              .parameters(new DefParameters(wrapperDefParms))
+              .modifiers(Modifier.Static, Modifier.JSNI)
+              .body()
+              .append(new StringStatement(JSNIUtil.methodAccess(m)))
+              .finish();
+    }
+    else {
+      Object[] args = new Object[methodDefParms.size()];
+
+      int i = 0;
+      for (Parameter p : methodDefParms) {
+        args[i++] = Refs.get(p.getName());
+      }
+
+      BlockBuilder<? extends ClassStructureBuilder> body = classBuilder.publicMethod(m.getReturnType(),
+              InjectUtil.getPrivateMethodName(m))
+              .parameters(new DefParameters(wrapperDefParms))
+              .modifiers(Modifier.Static)
+              .body();
+
+      BlockBuilder<CatchBlockBuilder> tryBuilder = Stmt.try_();
+      tryBuilder.append(Stmt.declareVariable("method",
+              Stmt.load(m.getDeclaringClass().asClass()).invoke("getDeclaredMethod", m.getName(),
+                      MetaClassFactory.asClassArray(m.getParameters()))))
+
+              .append(Stmt.loadVariable("method").invoke("setAccessible", true));
+
+      ContextualStatementBuilder statementBuilder = Stmt.loadVariable("method")
+              .invoke("invoke", Refs.get("instance"), args);
+
+      if (m.getReturnType().isVoid()) {
+        tryBuilder.append(statementBuilder);
+      }
+      else {
+        tryBuilder.append(statementBuilder.returnValue());
+      }
+
+      body.append(tryBuilder
+              .finish()
+              .catch_(Throwable.class, "e")
+              .append(Stmt.loadVariable("e").invoke("printStackTrace"))
+              .append(Stmt.throw_(RuntimeException.class, Refs.get("e")))
+              .finish())
               .finish();
     }
   }

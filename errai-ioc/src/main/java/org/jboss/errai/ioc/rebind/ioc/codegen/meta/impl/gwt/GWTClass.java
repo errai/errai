@@ -77,7 +77,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
 
   @Override
   public String getInternalName() {
-    return getEnclosedMetaObject().getJNISignature().replace("/", ".");
+    return getEnclosedMetaObject().getJNISignature();
   }
 
   @Override
@@ -251,6 +251,16 @@ public class GWTClass extends AbstractMetaClass<JType> {
     }
 
     return typeVariables.toArray(new MetaTypeVariable[typeVariables.size()]);
+  }
+
+  @Override
+  public boolean isVoid() {
+    return getEnclosedMetaObject().getSimpleSourceName().equals("void");
+  }
+
+  @Override
+  public boolean isPrimitive() {
+    return getEnclosedMetaObject().isPrimitive() != null;
   }
 
   @Override

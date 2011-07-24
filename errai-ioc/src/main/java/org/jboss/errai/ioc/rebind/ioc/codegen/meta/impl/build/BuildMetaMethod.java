@@ -96,7 +96,7 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
   public MetaType[] getGenericParameterTypes() {
     if (genericParameterTypes == null)
       return new MetaType[0];
-    
+
     return genericParameterTypes.toArray(new MetaType[genericParameterTypes.size()]);
   }
 
@@ -252,5 +252,9 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
     }
 
     return buf.toString();
+  }
+
+  public String toString() {
+    return name + defParameters;
   }
 }

@@ -21,7 +21,7 @@ public class QualInspector {
   public static QualInspector INSTANCE;
 
   @PostConstruct
-  public void init() {
+  private void init() {
     INSTANCE = this;
   }
 

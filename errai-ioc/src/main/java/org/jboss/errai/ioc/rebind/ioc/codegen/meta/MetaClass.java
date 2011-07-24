@@ -96,6 +96,8 @@ public abstract class MetaClass implements HasAnnotations, MetaType, MetaGeneric
 
   public abstract boolean isAssignableTo(JClassType clazz);
 
+  public abstract boolean isPrimitive();
+
   public abstract boolean isInterface();
 
   public abstract boolean isAbstract();
@@ -115,6 +117,8 @@ public abstract class MetaClass implements HasAnnotations, MetaType, MetaGeneric
   public abstract boolean isFinal();
 
   public abstract boolean isStatic();
+
+  public abstract boolean isVoid();
 
   public abstract MetaClass asBoxed();
 

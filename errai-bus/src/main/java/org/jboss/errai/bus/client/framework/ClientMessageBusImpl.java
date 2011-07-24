@@ -67,7 +67,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private Map<String, List<Object>> subscriptions;
 
   private Map<String, List<MessageCallback>> shadowSubscriptions =
-      new HashMap<String, List<MessageCallback>>();
+          new HashMap<String, List<MessageCallback>>();
 
   private Map<String, MessageCallback> remotes;
 
@@ -75,10 +75,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   // private final Queue<Message> outgoingQueue = new LinkedList<Message>();
 
   private List<SessionExpirationListener> onSessionExpirationListeners
-      = new ArrayList<SessionExpirationListener>();
+          = new ArrayList<SessionExpirationListener>();
 
   private List<InitializationListener> onInitializationListeners
-      = new ArrayList<InitializationListener>();
+          = new ArrayList<InitializationListener>();
 
   /* Map of subjects to references registered in this session */
   private Map<String, List<Object>> registeredInThisSession = new HashMap<String, List<Object>>();
@@ -149,8 +149,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     String endpoint = proxySettings.hasProxy ? proxySettings.url : SERVICE_ENTRY_POINT;
 
     RequestBuilder builder = new RequestBuilder(
-        RequestBuilder.POST,
-        URL.encode(endpoint)
+            RequestBuilder.POST,
+            URL.encode(endpoint)
     );
 
     builder.setHeader("Content-Type", "application/json");
@@ -163,8 +163,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     String endpoint = proxySettings.hasProxy ? proxySettings.url : SERVICE_ENTRY_POINT;
 
     RequestBuilder builder = new RequestBuilder(
-        RequestBuilder.GET,
-        URL.encode(endpoint)
+            RequestBuilder.GET,
+            URL.encode(endpoint)
     );
 
     builder.setHeader("Content-Type", "application/json");
@@ -348,7 +348,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         else {
           if (!subscriptions.containsKey(message.getSubject())) {
             logError("No subscribers for: " + message.getSubject(),
-                "Attempt to send message to subject for which there are no subscribers", null);
+                    "Attempt to send message to subject for which there are no subscribers", null);
             return;
           }
 
@@ -358,7 +358,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
       else {
         throw new RuntimeException("Cannot send message using this method" +
-            " if the message does not contain a ToSubject field.");
+                " if the message does not contain a ToSubject field.");
       }
     }
     catch (RuntimeException e) {
@@ -374,7 +374,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private void directStore(final Message message) {
     String subject = message.getSubject();
     Object v = (message instanceof HasEncoded
-        ? ((HasEncoded) message).getEncoded() : encodeMap(message.getParts()));
+            ? ((HasEncoded) message).getEncoded() : encodeMap(message.getParts()));
 
     if (remotes.containsKey(subject)) {
       remotes.get(subject).callback(message);
@@ -394,7 +394,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private void encodeAndTransmit(Message message) {
     //outgoingQueue.add(message);
     transmitRemote(message instanceof HasEncoded ?
-        ((HasEncoded) message).getEncoded() : encodeMap(message.getParts()), message);
+            ((HasEncoded) message).getEncoded() : encodeMap(message.getParts()), message);
   }
 
   private void addSubscription(String subject, Object reference) {
@@ -556,8 +556,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       sendBuilder.setHeader("phase", "disconnect");
 
       Message m = MessageBuilder.createMessage()
-          .toSubject("ServerBus")
-          .command(BusCommands.Disconnect).getMessage();
+              .toSubject("ServerBus")
+              .command(BusCommands.Disconnect).getMessage();
 
       encodeAndTransmit(m);
     }
@@ -596,7 +596,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     disconnected = false;
 
     clientId = String.valueOf(com.google.gwt.user.client.Random.nextInt(1000))
-        + "-" + (System.currentTimeMillis() % 1000);
+            + "-" + (System.currentTimeMillis() % 1000);
 
     onSubscribeHooks = new ArrayList<SubscribeListener>();
     onUnsubscribeHooks = new ArrayList<UnsubscribeListener>();
@@ -734,19 +734,19 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             remoteSubscribe("ServerBus");
 
             MessageBuilder.createMessage()
-                .toSubject("ServerBus")
-                .command(RemoteSubscribe)
-                .with("SubjectsList", subjects)
-                .with(PriorityProcessing, "1")
-                .noErrorHandling()
-                .sendNowWith(ClientMessageBusImpl.this);
+                    .toSubject("ServerBus")
+                    .command(RemoteSubscribe)
+                    .with("SubjectsList", subjects)
+                    .with(PriorityProcessing, "1")
+                    .noErrorHandling()
+                    .sendNowWith(ClientMessageBusImpl.this);
 
 
             MessageBuilder.createMessage()
-                .toSubject("ServerBus")
-                .command(BusCommands.FinishStateSync)
-                .with(PriorityProcessing, "1")
-                .noErrorHandling().sendNowWith(ClientMessageBusImpl.this);
+                    .toSubject("ServerBus")
+                    .command(BusCommands.FinishStateSync)
+                    .with(PriorityProcessing, "1")
+                    .noErrorHandling().sendNowWith(ClientMessageBusImpl.this);
 
             /**
              * ... also send RemoteUnsubscribe signals.
@@ -759,27 +759,27 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 }
 
                 MessageBuilder.getMessageProvider().get().command(RemoteSubscribe)
-                    .toSubject("ServerBus")
-                    .set(Subject, event.getSubject())
-                    .set(PriorityProcessing, "1")
-                    .sendNowWith(ClientMessageBusImpl.this);
+                        .toSubject("ServerBus")
+                        .set(Subject, event.getSubject())
+                        .set(PriorityProcessing, "1")
+                        .sendNowWith(ClientMessageBusImpl.this);
               }
             });
 
             addUnsubscribeListener(new UnsubscribeListener() {
               public void onUnsubscribe(SubscriptionEvent event) {
                 MessageBuilder.getMessageProvider().get().command(BusCommands.RemoteUnsubscribe)
-                    .toSubject("ServerBus")
-                    .set(Subject, event.getSubject())
-                    .set(PriorityProcessing, "1")
-                    .sendNowWith(ClientMessageBusImpl.this);
+                        .toSubject("ServerBus")
+                        .set(Subject, event.getSubject())
+                        .set(PriorityProcessing, "1")
+                        .sendNowWith(ClientMessageBusImpl.this);
               }
             });
 
             subscribe("ClientBusErrors", new MessageCallback() {
               public void callback(Message message) {
                 logError(message.get(String.class, "ErrorMessage"),
-                    message.get(String.class, "AdditionalDetails"), null);
+                        message.get(String.class, "AdditionalDetails"), null);
               }
             });
 
@@ -828,7 +828,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
             if (message.hasPart("Reason")) {
               logError("The bus was disconnected by the server", "Reason: "
-                  + message.get(String.class, "Reason"), null);
+                      + message.get(String.class, "Reason"), null);
             }
             break;
         }
@@ -875,7 +875,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private boolean sendInitialMessage(final HookCallback callback) {
     try {
       String initialMessage = "{\"CommandType\":\"ConnectToQueue\",\"ToSubject\":\"ServerBus\"," +
-          " \"PriorityProcessing\":\"1\"}";
+              " \"PriorityProcessing\":\"1\"}";
 
       RequestBuilder initialRequest = getSendBuilder();
       initialRequest.setHeader("phase", "connection");
@@ -890,7 +890,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           catch (Exception e) {
             e.printStackTrace();
             logError("Error attaching to bus", e.getMessage() + "<br/>Message Contents:<br/>"
-                + response.getText(), e);
+                    + response.getText(), e);
           }
         }
 
@@ -898,8 +898,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           logError("Could not connect to remote bus", "", exception);
         }
       });
-
-
     }
     catch (RequestException e) {
       e.printStackTrace();
@@ -987,7 +985,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
       catch (Throwable e) {
         logError("Errai MessageBus Disconnected Due to Fatal Error",
-            response.getText(), e);
+                response.getText(), e);
         incomingTimer.cancel();
       }
       finally {
@@ -1048,22 +1046,22 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }.schedule(5);
 
     heartBeatTimer =
-        new Timer() {
-          @Override
-          public void run() {
-            if (System.currentTimeMillis() - lastTransmit >= HEARTBEAT_DELAY) {
-              encodeAndTransmit(MessageBuilder.createMessage().toSubject("ServerBus")
-                  .command(BusCommands.Heartbeat).noErrorHandling().getMessage());
-              schedule(HEARTBEAT_DELAY);
-            }
-            else {
-              long win = System.currentTimeMillis() - lastTransmit;
-              int diff = HEARTBEAT_DELAY - (int) win;
-              if (diff <= 1) diff = 1;
-              schedule(diff);
-            }
-          }
-        };
+            new Timer() {
+              @Override
+              public void run() {
+                if (System.currentTimeMillis() - lastTransmit >= HEARTBEAT_DELAY) {
+                  encodeAndTransmit(MessageBuilder.createMessage().toSubject("ServerBus")
+                          .command(BusCommands.Heartbeat).noErrorHandling().getMessage());
+                  schedule(HEARTBEAT_DELAY);
+                }
+                else {
+                  long win = System.currentTimeMillis() - lastTransmit;
+                  int diff = HEARTBEAT_DELAY - (int) win;
+                  if (diff <= 1) diff = 1;
+                  schedule(diff);
+                }
+              }
+            };
 
     heartBeatTimer.scheduleRepeating(HEARTBEAT_DELAY);
   }
@@ -1117,7 +1115,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private static String decodeCommandMessage(Message msg) {
     StringBuffer decode = new StringBuffer(
-        "<table><thead style='font-weight:bold;'><tr><td>Field</td><td>Value</td></tr></thead><tbody>");
+            "<table><thead style='font-weight:bold;'><tr><td>Field</td><td>Value</td></tr></thead><tbody>");
 
     for (Map.Entry<String, Object> entry : msg.getParts().entrySet()) {
       decode.append("<tr><td>").append(entry.getKey()).append("</td><td>").append(entry.getValue()).append("</td></tr>");
@@ -1195,16 +1193,15 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private native static Object _subscribe(String subject, MessageCallback callback,
                                           Object subscriberData) /*-{
     return $wnd.PageBus.subscribe(subject, null,
-        function (subject, message) {
-          callback.@org.jboss.errai.bus.client.api.MessageCallback::callback(Lorg/jboss/errai/bus/client/api/Message;)(@org.jboss.errai.bus.client.json.JSONUtilCli::decodeCommandMessage(Ljava/lang/Object;)(message))
-        },
-        null);
+            function (subject, message) {
+              callback.@org.jboss.errai.bus.client.api.MessageCallback::callback(Lorg/jboss/errai/bus/client/api/Message;)(@org.jboss.errai.bus.client.json.JSONUtilCli::decodeCommandMessage(Ljava/lang/Object;)(message))
+            },
+            null);
   }-*/;
 
   public native static void _store(String subject, Object value) /*-{
     $wnd.PageBus.store(subject, value);
   }-*/;
-
 
   class BusErrorDialog extends DialogBox {
     ScrollPanel scrollPanel;

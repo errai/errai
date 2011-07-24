@@ -366,19 +366,8 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
     if (isArray()) {
       try {
-        MetaClass type = getComponentType();
-        int dim = 1;
-        while (type.isArray()) {
-          dim++;
-          type = type.getComponentType();
-        }
-
-        String dimString = "";
-        for (int i = 0; i < dim; i++) {
-          dimString += "[";
-        }
-
-        cls = Class.forName(dimString + "L" + type.getFullyQualifiedName() + ";", false,
+        String name = getInternalName().replaceAll("/", "\\.");
+        cls = Class.forName(name, false,
                 Thread.currentThread().getContextClassLoader());
       }
       catch (ClassNotFoundException e) {
@@ -420,5 +409,61 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     catch (Exception e) {
       return this;
     }
+  }
+
+  public String getInternalName() {
+    String name = getFullyQualifiedName();
+
+    String dimString = "";
+    if (isArray()) {
+      MetaClass type = getComponentType();
+      int dim = 1;
+      while (type.isArray()) {
+        dim++;
+        type = type.getComponentType();
+      }
+
+      for (int i = 0; i < dim; i++) {
+        dimString += "[";
+      }
+
+      name = type.getFullyQualifiedName();
+    }
+
+    if (isPrimitive()) {
+      if ("int".equals(name)) {
+        name = "I";
+      }
+      else if ("boolean".equals(name)) {
+        name = "Z";
+      }
+      else if ("byte".equals(name)) {
+        name = "B";
+      }
+      else if ("char".equals(name)) {
+        name = "C";
+      }
+      else if ("short".equals(name)) {
+        name = "S";
+      }
+      else if ("long".equals(name)) {
+        name = "J";
+      }
+      else if ("float".equals(name)) {
+        name = "F";
+      }
+      else if ("double".equals(name)) {
+        name = "D";
+      }
+      else if ("void".equals(name)) {
+        name = "V";
+      }
+    }
+    else {
+      name = "L" + name.replaceAll("\\.", "/") + ";";
+    }
+
+
+    return dimString + name;
   }
 }

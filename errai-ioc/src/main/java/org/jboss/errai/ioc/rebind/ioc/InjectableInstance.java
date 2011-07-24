@@ -71,7 +71,8 @@ public class InjectableInstance<T extends Annotation> {
                                                                                        Injector injector,
                                                                                        InjectionContext context) {
 
-    return new InjectableInstance<T>(annotation, TaskType.Method, null, method, null,
+    return new InjectableInstance<T>(annotation, !method.isPublic() ? TaskType.PrivateMethod : TaskType.Method, null,
+            method, null,
             method.getDeclaringClass(),
             null, injector, context);
 
@@ -82,15 +83,17 @@ public class InjectableInstance<T extends Annotation> {
                                                                                              Injector injector,
                                                                                              InjectionContext
                                                                                                      context) {
-    return new InjectableInstance<T>(annotation, TaskType.StaticMethod, null, method, null, null, null,
+    return new InjectableInstance<T>(annotation, TaskType.StaticMethod,
+            null, method,
+            null, null, null,
             injector, context);
   }
 
 
-    public static <T extends Annotation> InjectableInstance<T> getFieldInjectedInstance(T annotation,
-                                                                                       MetaField field,
-                                                                                       Injector injector,
-                                                                                       InjectionContext context) {
+  public static <T extends Annotation> InjectableInstance<T> getFieldInjectedInstance(T annotation,
+                                                                                      MetaField field,
+                                                                                      Injector injector,
+                                                                                      InjectionContext context) {
 
     return new InjectableInstance<T>(annotation, !field.isPublic() ? TaskType.PrivateField : TaskType.Field, null,
             null, field,
@@ -135,8 +138,15 @@ public class InjectableInstance<T extends Annotation> {
     return injectionContext;
   }
 
-  public void ensureFieldExposed() {
-    injectionContext.addExposedField(field);
+  public void ensureMemberExposed() {
+    switch (taskType) {
+      case PrivateMethod:
+        injectionContext.addExposedMethod(method);
+        break;
+      case PrivateField:
+        injectionContext.addExposedField(field);
+        break;
+    }
   }
 
   /**
@@ -184,6 +194,7 @@ public class InjectableInstance<T extends Annotation> {
 
       case Parameter:
       case StaticMethod:
+      case PrivateMethod:
       case Method:
         return method.getName();
 
@@ -207,6 +218,7 @@ public class InjectableInstance<T extends Annotation> {
         annotations = InjectUtil.extractQualifiersFromParameter(parm);
         return annotations.toArray(new Annotation[annotations.size()]);
 
+      case PrivateMethod:
       case Method:
         annotations = InjectUtil.extractQualifiersFromMethod(method);
         return annotations.toArray(new Annotation[annotations.size()]);

@@ -32,10 +32,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
+import org.jboss.errai.ioc.rebind.ioc.codegen.DefParameters;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameterizedType;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependencies;
 import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependenciesException;
 import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedField;
@@ -50,6 +51,7 @@ public class InjectionContext {
   protected List<Runnable> deferredTasks = new ArrayList<Runnable>();
 
   private Collection<MetaField> privateFieldsToExpose = new LinkedHashSet<MetaField>();
+  private Collection<MetaMethod> privateMethodsToExpose = new LinkedHashSet<MetaMethod>();
 
   public InjectionContext(IOCProcessingContext processingContext) {
     this.processingContext = processingContext;
@@ -270,6 +272,7 @@ public class InjectionContext {
                     new UnsatisfiedField(task.getField(), task.getInjector().getInjectedType(), task.getField().getType()));
             break;
 
+          case PrivateMethod:
           case Method:
             unsatisfiedDependencies.addUnsatisfiedDependency(
                     new UnsatisfiedMethod(task.getMethod(), task.getInjector().getInjectedType(), task.getMethod().getParameters()[0].getType()));
@@ -292,16 +295,28 @@ public class InjectionContext {
     }
   }
 
-  private Set<String> exposedFields = new HashSet<String>();
+  private Set<String> exposedMembers = new HashSet<String>();
 
   public void addExposedField(MetaField field) {
-    if (exposedFields.contains(field.toString())) return;
-    exposedFields.add(field.toString());
+    String fieldSignature = InjectUtil.getPrivateFieldInjectorName(field);
+    if (exposedMembers.contains(fieldSignature)) return;
+    exposedMembers.add(fieldSignature);
     privateFieldsToExpose.add(field);
+  }
+
+  public void addExposedMethod(MetaMethod method) {
+    String methodSignature = InjectUtil.getPrivateMethodName(method);
+    if (exposedMembers.contains(methodSignature)) return;
+    exposedMembers.add(methodSignature);
+    privateMethodsToExpose.add(method);
   }
 
   public Collection<MetaField> getPrivateFieldsToExpose() {
     return Collections.unmodifiableCollection(privateFieldsToExpose);
+  }
+
+  public Collection<MetaMethod> getPrivateMethodsToExpose() {
+    return Collections.unmodifiableCollection(privateMethodsToExpose);
   }
 
   public IOCProcessingContext getProcessingContext() {

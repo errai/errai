@@ -17,7 +17,8 @@
 package org.jboss.errai.ioc.tests.client.res;
 
 import org.jboss.errai.ioc.client.api.IOCProvider;
-import org.jboss.errai.ioc.client.api.TypeProvider;
+
+import javax.inject.Provider;
 
 /**
  * User: christopherbrock
@@ -25,9 +26,9 @@ import org.jboss.errai.ioc.client.api.TypeProvider;
  * Time: 7:54:20 PM
  */
 @IOCProvider
-public class FooServiceProvider implements TypeProvider<FooService> {
+public class FooServiceProvider implements Provider<FooService> {
   @Override
-  public FooService provide() {
+  public FooService get() {
     return new FooService() {
       @Override
       public String getMessage() {

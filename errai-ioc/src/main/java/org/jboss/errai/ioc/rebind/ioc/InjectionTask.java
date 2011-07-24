@@ -17,11 +17,14 @@
 package org.jboss.errai.ioc.rebind.ioc;
 
 import static org.jboss.errai.ioc.rebind.ioc.InjectUtil.getPrivateFieldInjectorName;
+import static org.jboss.errai.ioc.rebind.ioc.InjectUtil.getPrivateMethodName;
 import static org.jboss.errai.ioc.rebind.ioc.InjectUtil.resolveInjectionDependencies;
 
 import java.lang.annotation.Annotation;
 
+import com.sun.org.omg.CORBA.StructMemberSeqHelper;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaConstructor;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
@@ -48,7 +51,7 @@ public class InjectionTask {
   }
 
   public InjectionTask(Injector injector, MetaMethod method) {
-    this.injectType = TaskType.Method;
+    this.injectType = !method.isPublic() ? TaskType.PrivateMethod : TaskType.Method;
     this.injector = injector;
     this.method = method;
   }
@@ -80,7 +83,7 @@ public class InjectionTask {
         ctx.getQualifiedInjector(type, qualifyingMetadata);
         break;
 
-      case PrivateField:
+      case PrivateField: {
 
         if (!ctx.isInjectableQualified(field.getType(), qualifyingMetadata)) {
           return false;
@@ -94,6 +97,7 @@ public class InjectionTask {
           throw e;
         }
 
+
         processingContext.append(
                 Stmt.invokeStatic(processingContext.getBootstrapClass(), getPrivateFieldInjectorName(field),
                         Refs.get(injector.getVarName()), inj.getType(ctx, injectableInstance))
@@ -101,6 +105,7 @@ public class InjectionTask {
 
         ctx.addExposedField(field);
         break;
+      }
 
       case Field:
         if (!ctx.isInjectableQualified(field.getType(), qualifyingMetadata)) {
@@ -122,9 +127,31 @@ public class InjectionTask {
 
         break;
 
+      case PrivateMethod: {
+        for (MetaParameter parm : method.getParameters()) {
+          if (!ctx.isInjectableQualified(parm.getType(), qualifyingMetadata)) {
+            return false;
+          }
+        }
+
+        Statement[] smts = resolveInjectionDependencies(method.getParameters(), ctx, method);
+        Statement[] parms = new Statement[smts.length];
+        parms[0] = Refs.get(injector.getVarName());
+        System.arraycopy(smts, 0, parms, 1, smts.length);
+
+        processingContext.append(
+                Stmt.invokeStatic(processingContext.getBootstrapClass(), getPrivateMethodName(method),
+                        parms)
+        );
+
+        break;
+      }
+
       case Method:
-        if (!ctx.isInjectableQualified(method.getParameters()[0].getType(), qualifyingMetadata)) {
-          return false;
+        for (MetaParameter parm : method.getParameters()) {
+          if (!ctx.isInjectableQualified(parm.getType(), qualifyingMetadata)) {
+            return false;
+          }
         }
 
         processingContext.append(

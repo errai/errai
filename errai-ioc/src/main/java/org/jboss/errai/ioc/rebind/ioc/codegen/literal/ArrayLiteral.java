@@ -21,6 +21,7 @@ import java.lang.reflect.Array;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.GenUtil;
 
 /**
  * Renders an array back to it's canonical Java-based literal representation, assuming the contents
@@ -81,7 +82,7 @@ public class ArrayLiteral extends LiteralValue<Object> {
 
       }
       else {
-        builder.append(LiteralFactory.getLiteral(element).generate(context));
+        builder.append(GenUtil.generate(context, element).generate(context));
       }
 
       if (i + 1 < length) {

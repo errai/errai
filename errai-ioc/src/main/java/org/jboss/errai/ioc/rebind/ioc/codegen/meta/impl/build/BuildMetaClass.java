@@ -113,7 +113,8 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
       methodList.addAll(Arrays.asList(methodArray));
 
       outputMethods = methodList.toArray(new MetaMethod[methodList.size()]);
-    } else {
+    }
+    else {
       outputMethods = methodArray;
     }
 
@@ -174,6 +175,16 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   @Override
   public MetaClass getComponentType() {
     return null;
+  }
+
+  @Override
+  public boolean isPrimitive() {
+    return false;
+  }
+
+  @Override
+  public boolean isVoid() {
+    return false;
   }
 
   @Override
@@ -327,8 +338,8 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     }
 
     context.addVariable(Variable.create("this", this));
-    
-    superClass = (superClass != null)?superClass:MetaClassFactory.get(Object.class);
+
+    superClass = (superClass != null) ? superClass : MetaClassFactory.get(Object.class);
     context.addVariable(Variable.create("super", superClass));
 
     buf.append(" {\n");
