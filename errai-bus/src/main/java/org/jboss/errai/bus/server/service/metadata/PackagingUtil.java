@@ -15,7 +15,6 @@
  */
 package org.jboss.errai.bus.server.service.metadata;
 
-import org.reflections.vfs.Vfs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
