@@ -16,6 +16,8 @@
 package org.jboss.errai.bus.server.service.metadata;
 
 import org.reflections.vfs.Vfs;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,9 +35,32 @@ import java.util.zip.ZipInputStream;
  * @date: Aug 9, 2010
  */
 public class PackagingUtil {
+  private static Logger log = LoggerFactory.getLogger(PackagingUtil.class);
+
   public static File identifyDeployment(URL url) {
-    String normalizedPath = Vfs.normalizePath(url);
-    return findActualDeploymentFile(new File(normalizedPath));
+    String actualFilePath = url.getPath();
+    String nestedPath = "";
+    if (actualFilePath.startsWith("file:")) {
+      actualFilePath = actualFilePath.substring(5);
+    }
+
+    int nestedSeperator = actualFilePath.indexOf('!');
+    if (nestedSeperator != -1) {
+      actualFilePath = actualFilePath.substring(0, nestedSeperator);
+      nestedPath = actualFilePath.substring(nestedSeperator + 1);
+
+      if (nestedPath.equals("/")) {
+        nestedPath = "";
+      }
+    }
+
+    if (nestedPath.length() != 0) {
+      throw new RuntimeException("cannot access nested resource: " + actualFilePath);
+    }
+
+    log.info("identifying deployment type for uri: " + actualFilePath);
+
+    return findActualDeploymentFile(new File(actualFilePath));
   }
 
   private static URL toUrl(String s) {
