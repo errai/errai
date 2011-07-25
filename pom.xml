@@ -107,12 +107,6 @@
                 </exclusions>
             </dependency>
 
-            <!--dependency>
-                <groupId>client.javax.enterprise</groupId>
-                <artifactId>gwtclient-javax-enterprise</artifactId>
-                <version>1.0</version>
-            </dependency-->
-
             <!-- Custom Jetty Version -->
             <dependency>
                 <groupId>org.mortbay.jetty</groupId>
