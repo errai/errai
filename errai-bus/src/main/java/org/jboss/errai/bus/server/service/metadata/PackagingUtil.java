@@ -46,8 +46,8 @@ public class PackagingUtil {
 
     int nestedSeperator = actualFilePath.indexOf('!');
     if (nestedSeperator != -1) {
-      actualFilePath = actualFilePath.substring(0, nestedSeperator);
       nestedPath = actualFilePath.substring(nestedSeperator + 1);
+      actualFilePath = actualFilePath.substring(0, nestedSeperator);
 
       if (nestedPath.equals("/")) {
         nestedPath = "";
