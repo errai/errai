@@ -17,7 +17,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>r08</version>
+            <version>r06</version>
         </dependency>
 
         <!-- actually needed only when scanning is done. if using {@link Reflections.collect()} javassist is not needed -->

@@ -150,12 +150,12 @@ public abstract class ReflectionUtils {
     }
 
     /** try to resolve all given string representation of types to a list of java types */
-    public static <T> List<Class<? extends T>> forNames(final Iterable<String> classes, ClassLoader... classLoaders) {
+    public static <T> Class<? extends T>[] forNames(final Iterable<String> classes, ClassLoader... classLoaders) {
         List<Class<? extends T>> result = new ArrayList<Class<? extends T>>();
         for (String className : classes) {
             //noinspection unchecked
             result.add((Class<? extends T>) forName(className, classLoaders));
         }
-        return result;
+        return result.toArray(new Class[result.size()]);
     }
 }
