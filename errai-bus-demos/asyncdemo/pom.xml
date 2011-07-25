@@ -39,8 +39,7 @@
                     <logLevel>INFO</logLevel>
                     <runTarget>AsyncDemo.html</runTarget>
                     <warSourceDirectory>war</warSourceDirectory>
-                    <extraJvmArgs>-Xmx512m -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005
-                    </extraJvmArgs>
+                    <extraJvmArgs>-Xmx512m</extraJvmArgs>
                     <webXml>${webXmlPath}</webXml>
                     <hostedWebapp>war</hostedWebapp>
                 </configuration>
