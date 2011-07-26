@@ -2237,7 +2237,7 @@
                 </para>
 
                 <para>One important thing to note is the use of the
-                    <literal>org.jboss.errai.cdi.client.api.Event</literal>
+                    <literal>org.jboss.errai.enterprise.client.cdi.api.Event</literal>
                     interface,
                     which is the client-side equivlant of the standard CDI
                     <literal>Event</literal>
