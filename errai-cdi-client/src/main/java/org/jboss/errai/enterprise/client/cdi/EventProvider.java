@@ -41,11 +41,6 @@ public class EventProvider implements Provider<Event<?>> {
         throw new RuntimeException("use of event selectors is unsupported");
       }
 
-//      @Override
-//      public <U extends Object> Event<U> select(TypeLiteral<U> subtype, Annotation... qualifiers) {
-//        throw new RuntimeException("use of event selectors is unsupported");
-//      }
-
       public Class getEventType() {
         return eventType;
       }

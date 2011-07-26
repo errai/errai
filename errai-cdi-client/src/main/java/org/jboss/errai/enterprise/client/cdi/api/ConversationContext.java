@@ -23,8 +23,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * @author: Heiko Braun <hbraun@redhat.com>
- * @date: Oct 29, 2010
+ * @author Heiko Braun <hbraun@redhat.com>
  */
 @Target({FIELD})
 @Retention(RUNTIME)
