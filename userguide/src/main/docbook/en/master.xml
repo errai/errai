@@ -2240,7 +2240,7 @@
                     <literal>org.jboss.errai.cdi.client.api.Event</literal>
                     interface,
                     which is the client-side equivlant of the standard CDI
-                    <literal>javax.enterprise.event.Event</literal>
+                    <literal>Event</literal>
                     interface. While
                     standard annotations can be used in client-side GWT code, other APIs
                     cannot be directly exposed as part of the emulation library, so this

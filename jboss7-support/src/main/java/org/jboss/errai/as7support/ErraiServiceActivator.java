@@ -31,6 +31,12 @@ public class ErraiServiceActivator implements ServiceActivator {
 
     final ServiceName bindingServiceName = ContextNames.GLOBAL_CONTEXT_SERVICE_NAME
             .append("ErraiService");
+
+    if (serviceActivatorContext.getServiceRegistry().getService(bindingServiceName) != null) {
+      log.info("Service already registered.");
+      return;
+    }
+
     final BinderService binderService = new BinderService("ErraiService");
     ServiceBuilder<ManagedReferenceFactory> builder = serviceActivatorContext.getServiceTarget()
             .addService(bindingServiceName, binderService);
