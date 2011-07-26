@@ -28,9 +28,10 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageInterceptor;
-import org.jboss.errai.cdi.client.CDICommands;
-import org.jboss.errai.cdi.client.CDIProtocol;
-import org.jboss.errai.cdi.client.EventHandler;
+import org.jboss.errai.enterprise.client.cdi.CDICommands;
+import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
+import org.jboss.errai.enterprise.client.cdi.EventHandler;
+
 
 /**
  * CDI client interface.

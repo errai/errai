@@ -2,7 +2,7 @@
         "http://google-web-toolkit.googlecode.com/svn/tags/2.0.1/distro-source/core/src/gwt-module.dtd">
 
 <module>
-    <inherits name="org.jboss.errai.ioc.Container" />
+    <inherits name="org.jboss.errai.ioc.Container"/>
 
     <source path="client">
         <exclude name="super/"/>
