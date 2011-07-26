@@ -16,7 +16,7 @@ import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.Injector;
 import org.jboss.errai.ioc.rebind.ioc.InjectorFactory;
-import org.jboss.errai.ioc.rebind.ioc.JSR299QualifyingMetadata;
+import org.jboss.errai.ioc.rebind.ioc.JSR330QualifyingMetadata;
 import org.jboss.errai.ioc.rebind.ioc.TypeInjector;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
@@ -45,7 +45,6 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
         }
 
         injectorFactory.addInjector(new Injector() {
-
           {
             super.qualifyingMetadata = JSR299QualifyingMetadata.createFromAnnotations(instance.getQualifiers());
           }
@@ -109,8 +108,6 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
         return true;
       }
     });
-
-
   }
 
   public void afterInitialization(ProcessingContext context, InjectorFactory injectorFactory,
