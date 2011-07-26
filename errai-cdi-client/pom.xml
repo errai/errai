@@ -9,7 +9,10 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <groupId>org.jboss.errai</groupId>
     <artifactId>errai-cdi-client</artifactId>
+    <version>${parent.version}</version>
+
 
     <build>
         <resources>
@@ -29,6 +32,18 @@
             <scope>provided</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.jboss.errai</groupId>
+            <artifactId>errai-javax-enterprise</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.enterprise</groupId>
+            <artifactId>cdi-api</artifactId>
+            <version>1.0-SP4</version>
+        </dependency>
         <!--
            GWT
         -->

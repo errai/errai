@@ -3,11 +3,6 @@
 
 <module>
     <inherits name="org.jboss.errai.ioc.Container"/>
-
-    <source path="client">
-        <exclude name="super/"/>
-    </source>
-    <super-source path="super"/>
-
+    <inherits name="javax.enterprise.Support"/>
     <entry-point class='org.jboss.errai.enterprise.client.cdi.CDIClientBootstrap'/>
 </module>
