@@ -53,10 +53,6 @@ public class PackagingUtil {
       }
     }
 
-    if (nestedPath.length() != 0) {
-      throw new RuntimeException("cannot access nested resource: " + actualFilePath);
-    }
-
     log.info("identifying deployment type for uri: " + actualFilePath);
 
     return findActualDeploymentFile(new File(actualFilePath));

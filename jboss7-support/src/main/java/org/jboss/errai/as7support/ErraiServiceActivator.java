@@ -38,7 +38,9 @@ public class ErraiServiceActivator implements ServiceActivator {
     if (str != null && str.equals("true")) {
       return;
     }
-
+    //todo: remove this hack at some point.
+    System.setProperty(DEFER_PROP, "true");
+    
     log.info("JBoss AS 7 Service Activator initialized ...");
 
     final ServiceName bindingServiceName = ContextNames.GLOBAL_CONTEXT_SERVICE_NAME
@@ -89,8 +91,5 @@ public class ErraiServiceActivator implements ServiceActivator {
     builder.install();
 
     log.info("bound errai service to JNDI context: java:global/ErraiService");
-
-    //todo: remove this hack at some point.
-    System.setProperty(DEFER_PROP, "true");
   }
 }
