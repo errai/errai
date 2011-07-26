@@ -19,6 +19,7 @@ package org.jboss.errai.ioc.rebind.ioc;
 import java.lang.annotation.Annotation;
 
 import org.jboss.errai.ioc.client.ContextualProviderContext;
+import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.*;
@@ -32,9 +33,9 @@ import javax.inject.Provider;
 public class ContextualProviderInjector extends TypeInjector {
   private final Injector providerInjector;
 
-  public ContextualProviderInjector(MetaClass type, MetaClass providerType) {
-    super(type);
-    this.providerInjector = new TypeInjector(providerType);
+  public ContextualProviderInjector(MetaClass type, MetaClass providerType, IOCProcessingContext context) {
+    super(type, context);
+    this.providerInjector = new TypeInjector(providerType, context);
   }
 
   @Override

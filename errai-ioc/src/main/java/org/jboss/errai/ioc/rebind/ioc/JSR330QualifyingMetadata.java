@@ -16,38 +16,37 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
+import javax.inject.Qualifier;
 import java.lang.annotation.Annotation;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.enterprise.inject.Any;
-import javax.inject.Qualifier;
-
 /**
  * @author Mike Brock .
  */
-public class JSR299QualifyingMetadata implements QualifyingMetadata {
+public class JSR330QualifyingMetadata implements QualifyingMetadata {
   private Set<Annotation> qualifiers;
-  private static Any ANY_INSTANCE = new Any() {
+
+  private static @interface Any {
+  }
+
+  private static Annotation ANY_INSTANCE = new Annotation() {
     @Override
     public Class<? extends Annotation> annotationType() {
       return Any.class;
     }
-
-    public String toString() {
-      return "@Any";
-    }
   };
 
-  public JSR299QualifyingMetadata(Set<Annotation> qualifiers) {
-    this.qualifiers = qualifiers;
+  public JSR330QualifyingMetadata(Collection<Annotation> qualifiers) {
+    this.qualifiers = Collections.unmodifiableSet(new HashSet<Annotation>(qualifiers));
   }
 
   @Override
   public boolean doesSatisfy(QualifyingMetadata metadata) {
-    if (metadata instanceof JSR299QualifyingMetadata) {
-      JSR299QualifyingMetadata comparable = (JSR299QualifyingMetadata) metadata;
+    if (metadata instanceof JSR330QualifyingMetadata) {
+      JSR330QualifyingMetadata comparable = (JSR330QualifyingMetadata) metadata;
 
       return ((comparable.qualifiers.size() == 1
               && comparable.qualifiers.contains(ANY_INSTANCE))
@@ -58,7 +57,7 @@ public class JSR299QualifyingMetadata implements QualifyingMetadata {
     else return metadata == null;
   }
 
-  public static JSR299QualifyingMetadata createFromAnnotations(Annotation[] annotations) {
+  static JSR330QualifyingMetadata createFromAnnotations(Annotation[] annotations) {
     if (annotations == null || annotations.length == 0) return createDefaultQualifyingMetaData();
 
     Set<Annotation> qualifiers = new HashSet<Annotation>();
@@ -69,11 +68,11 @@ public class JSR299QualifyingMetadata implements QualifyingMetadata {
       }
     }
 
-    return qualifiers.isEmpty() ? null : new JSR299QualifyingMetadata(qualifiers);
+    return qualifiers.isEmpty() ? null : new JSR330QualifyingMetadata(qualifiers);
   }
 
-  public static JSR299QualifyingMetadata createDefaultQualifyingMetaData() {
-    return new JSR299QualifyingMetadata(
+  static JSR330QualifyingMetadata createDefaultQualifyingMetaData() {
+    return new JSR330QualifyingMetadata(
             Collections.<Annotation>singleton(ANY_INSTANCE));
   }
 

@@ -16,6 +16,7 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
+import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Refs;
@@ -27,9 +28,9 @@ import javax.inject.Provider;
 public class ProviderInjector extends TypeInjector {
   private final Injector providerInjector;
 
-  public ProviderInjector(MetaClass type, MetaClass providerType) {
-    super(type);
-    this.providerInjector = new TypeInjector(providerType);
+  public ProviderInjector(MetaClass type, MetaClass providerType, IOCProcessingContext context) {
+    super(type, context);
+    this.providerInjector = new TypeInjector(providerType, context);
   }
 
   @Override

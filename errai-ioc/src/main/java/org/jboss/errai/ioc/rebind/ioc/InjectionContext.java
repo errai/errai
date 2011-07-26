@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
-import org.jboss.errai.ioc.rebind.ioc.codegen.DefParameters;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
@@ -59,7 +58,7 @@ public class InjectionContext {
 
   public Injector getQualifiedInjector(MetaClass type, QualifyingMetadata metadata) {
     if (metadata == null) {
-      metadata = JSR299QualifyingMetadata.createDefaultQualifyingMetaData();
+      metadata = processingContext.getQualifyingMetadataFactory().createDefaultMetadata();
     }
 
     //todo: figure out why I was doing this.

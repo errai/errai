@@ -16,10 +16,9 @@
 
 package org.jboss.errai.ioc.rebind;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.jboss.errai.bus.rebind.ProcessingContext;
+import org.jboss.errai.ioc.rebind.ioc.JSR330QualifyingMetadataFactory;
+import org.jboss.errai.ioc.rebind.ioc.QualifyingMetadataFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BlockBuilder;
@@ -38,6 +37,7 @@ public class IOCProcessingContext extends ProcessingContext {
   protected MetaClass bootstrapClass;
   protected BlockBuilder<?> blockBuilder;
   protected String packageFilter;
+  protected QualifyingMetadataFactory qualifyingMetadataFactory = new JSR330QualifyingMetadataFactory();
 
   public IOCProcessingContext(TreeLogger treeLogger,
                               GeneratorContext generatorContext,
@@ -86,5 +86,11 @@ public class IOCProcessingContext extends ProcessingContext {
     return packageFilter;
   }
 
+  public QualifyingMetadataFactory getQualifyingMetadataFactory() {
+    return qualifyingMetadataFactory;
+  }
 
+  public void setQualifyingMetadataFactory(QualifyingMetadataFactory qualifyingMetadataFactory) {
+    this.qualifyingMetadataFactory = qualifyingMetadataFactory;
+  }
 }

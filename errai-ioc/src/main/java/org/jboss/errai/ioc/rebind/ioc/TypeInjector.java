@@ -21,13 +21,12 @@ import java.lang.annotation.Annotation;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.enterprise.util.TypeLiteral;
 import javax.inject.Singleton;
 
 import org.jboss.errai.ioc.client.api.EntryPoint;
+import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.util.Refs;
 
 public class TypeInjector extends Injector {
@@ -36,7 +35,7 @@ public class TypeInjector extends Injector {
   protected boolean singleton;
   protected String varName;
 
-  public TypeInjector(MetaClass type) {
+  public TypeInjector(MetaClass type, IOCProcessingContext context) {
     this.type = type;
     this.singleton = type.isAnnotationPresent(Singleton.class)
             || type.isAnnotationPresent(com.google.inject.Singleton.class)
@@ -49,10 +48,11 @@ public class TypeInjector extends Injector {
       qualifiers.addAll(InjectUtil.extractQualifiersFromType(type));
 
       if (!qualifiers.isEmpty()) {
-        qualifyingMetadata = new JSR299QualifyingMetadata(qualifiers);
+        qualifyingMetadata = context.getQualifyingMetadataFactory().createFrom(qualifiers.toArray(new
+                Annotation[qualifiers.size()]));
       }
       else {
-        qualifyingMetadata = JSR299QualifyingMetadata.createDefaultQualifyingMetaData();
+        qualifyingMetadata = context.getQualifyingMetadataFactory().createDefaultMetadata();
       }
 
     }

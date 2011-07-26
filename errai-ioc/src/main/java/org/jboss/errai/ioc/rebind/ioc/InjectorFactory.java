@@ -50,7 +50,7 @@ public class InjectorFactory {
   }
 
   public void addType(MetaClass type) {
-    ctx.registerInjector(new TypeInjector(type));
+    ctx.registerInjector(new TypeInjector(type, ctx.getProcessingContext()));
   }
 
   public void addInjector(Injector injector) {

@@ -22,7 +22,6 @@ import static org.jboss.errai.ioc.rebind.ioc.InjectUtil.resolveInjectionDependen
 
 import java.lang.annotation.Annotation;
 
-import com.sun.org.omg.CORBA.StructMemberSeqHelper;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
@@ -76,7 +75,8 @@ public class InjectionTask {
             = new InjectableInstance(null, injectType, constructor, method, field, type, parm, injector, ctx);
 
     Injector inj;
-    QualifyingMetadata qualifyingMetadata = JSR299QualifyingMetadata.createFromAnnotations(injectableInstance.getQualifiers());
+    QualifyingMetadata qualifyingMetadata = processingContext.getQualifyingMetadataFactory()
+            .createFrom(injectableInstance.getQualifiers());
 
     switch (injectType) {
       case Type:

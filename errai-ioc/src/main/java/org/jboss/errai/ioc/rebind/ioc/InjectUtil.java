@@ -335,9 +335,8 @@ public class InjectUtil {
     for (int i = 0; i < parmTypes.length; i++) {
       Injector injector;
       try {
-
         injector = ctx.getQualifiedInjector(parmTypes[i],
-                JSR299QualifyingMetadata.createFromAnnotations(parms[i].getAnnotations()));
+                ctx.getProcessingContext().getQualifyingMetadataFactory().createFrom(parms[i].getAnnotations()));
       }
       catch (InjectionFailure e) {
         e.setTarget(method.getDeclaringClass() + "." + method.getName() + DefParameters.from(method)
@@ -363,7 +362,7 @@ public class InjectUtil {
       Injector injector;
       try {
         injector = ctx.getQualifiedInjector(parmTypes[i],
-                JSR299QualifyingMetadata.createFromAnnotations(parms[i].getAnnotations()));
+                ctx.getProcessingContext().getQualifyingMetadataFactory().createFrom(parms[i].getAnnotations()));
       }
       catch (InjectionFailure e) {
         e.setTarget(constructor.getDeclaringClass() + "." + DefParameters.from(constructor)

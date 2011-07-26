@@ -8,6 +8,7 @@ import com.google.gwt.user.rebind.SourceWriter;
 import com.google.gwt.user.rebind.StringSourceWriter;
 import org.jboss.errai.bus.rebind.ScannerSingleton;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
+import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
 import org.jboss.errai.ioc.client.ContextualProviderContext;
 import org.jboss.errai.ioc.client.InterfaceInjectionContext;
@@ -49,10 +50,10 @@ public class IOCBootstrapGenerator {
   IOCProcessorFactory procFactory;
 
   private String packageFilter = null;
-
   private boolean useReflectionStubs = false;
-
   private List<Runnable> deferredTasks = new LinkedList<Runnable>();
+
+  public static final String QUALIFYING_METADATA_FACTORY_PROPERTY = "errai.ioc.QualifyingMetaDataFactory";
 
 
   TreeLogger logger = new TreeLogger() {
@@ -105,6 +106,38 @@ public class IOCBootstrapGenerator {
 
     injectFactory = new InjectorFactory(procContext);
     procFactory = new IOCProcessorFactory(injectFactory);
+
+    MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
+    Properties props = scanner.getProperties("ErraiApp.properties");
+    if (props != null) {
+      logger.log(TreeLogger.Type.INFO, "Checking ErraiApp.properties for configured types ...");
+
+      for (Object o : props.keySet()) {
+        String key = (String) o;
+        if (key.equals(QUALIFYING_METADATA_FACTORY_PROPERTY)) {
+          String fqcnQualifyingMetadataFactory = String.valueOf(props.get(key));
+
+          try {
+            QualifyingMetadataFactory factory = (QualifyingMetadataFactory)
+                    Class.forName
+                            (fqcnQualifyingMetadataFactory).newInstance();
+
+            procContext.setQualifyingMetadataFactory(factory);
+          }
+          catch (ClassNotFoundException e) {
+            e.printStackTrace();
+          }
+          catch (InstantiationException e) {
+            e.printStackTrace();
+          }
+          catch (IllegalAccessException e) {
+            e.printStackTrace();
+          }
+        }
+      }
+    }
+
+
     procContext.setPackageFilter(packageFilter);
 
     defaultConfigureProcessor();
@@ -123,6 +156,7 @@ public class IOCBootstrapGenerator {
     blockBuilder.append(Stmt.declareVariable("ctx", InterfaceInjectionContext.class,
             Stmt.newObject(InterfaceInjectionContext.class)));
     MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
+
     procFactory.process(scanner, procContext);
     procFactory.processAll();
 
@@ -389,10 +423,10 @@ public class IOCBootstrapGenerator {
 
 
           if (isContextual) {
-            injectFactory.addInjector(new ContextualProviderInjector(bindType, type));
+            injectFactory.addInjector(new ContextualProviderInjector(bindType, type, procContext));
           }
           else {
-            injectFactory.addInjector(new ProviderInjector(bindType, type));
+            injectFactory.addInjector(new ProviderInjector(bindType, type, procContext));
           }
           break;
         }
@@ -446,10 +480,10 @@ public class IOCBootstrapGenerator {
 
       Injector injector;
       if (contextual) {
-        injector = new ContextualProviderInjector(finalBindType, type);
+        injector = new ContextualProviderInjector(finalBindType, type, procContext);
       }
       else {
-        injector = new ProviderInjector(finalBindType, type);
+        injector = new ProviderInjector(finalBindType, type, procContext);
       }
 
       injectFactory.addInjector(injector);
@@ -465,7 +499,7 @@ public class IOCBootstrapGenerator {
       Class<? extends ContextualTypeProvider> injectorClass = anno.value();
 
       try {
-        injectFactory.addInjector(new ContextualProviderInjector(type, MetaClassFactory.get(injectorClass)));
+        injectFactory.addInjector(new ContextualProviderInjector(type, MetaClassFactory.get(injectorClass), procContext));
       }
       catch (Exception e) {
         throw new ErraiBootstrapFailure("could not load injector: " + e.getMessage(), e);
