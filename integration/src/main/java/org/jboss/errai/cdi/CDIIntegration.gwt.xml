@@ -3,6 +3,6 @@
 <module>
     <inherits name="com.google.gwt.user.User"/>
     <inherits name="org.jboss.errai.enterprise.Support"/>
-    <entry-point class='org.jboss.errai.cdi.client.CDIClientBootstrap'/>
+    <entry-point class='org.jboss.errai.enterprise.client.cdi.CDIClientBootstrap'/>
     <source path="client"/>
 </module>

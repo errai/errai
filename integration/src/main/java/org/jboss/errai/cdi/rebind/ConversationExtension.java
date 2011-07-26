@@ -15,8 +15,8 @@
  */
 package org.jboss.errai.cdi.rebind;
 
-import org.jboss.errai.cdi.client.api.CDI;
-import org.jboss.errai.cdi.client.api.ConversationContext;
+import org.jboss.errai.enterprise.client.cdi.api.CDI;
+import org.jboss.errai.enterprise.client.cdi.api.ConversationContext;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;

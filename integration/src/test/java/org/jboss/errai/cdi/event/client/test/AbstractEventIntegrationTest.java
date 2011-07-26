@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jboss.errai.cdi.client.AbstractErraiCDITest;
+import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 
 /**
  * Base class for all event integration tests.

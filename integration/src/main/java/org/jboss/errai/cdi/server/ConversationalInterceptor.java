@@ -6,7 +6,7 @@ import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
 
 import org.jboss.errai.bus.client.protocols.MessageParts;
-import org.jboss.errai.cdi.client.api.Conversational;
+import org.jboss.errai.enterprise.client.cdi.api.Conversational;
 
 /**
  * @author Mike Brock .

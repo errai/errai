@@ -32,8 +32,8 @@ import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RoutingFlags;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
-import org.jboss.errai.cdi.client.CDICommands;
-import org.jboss.errai.cdi.client.CDIProtocol;
+import org.jboss.errai.enterprise.client.cdi.CDICommands;
+import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 
 /**
  * Acts as a bridge between Errai Bus and the CDI event system.<br/>
