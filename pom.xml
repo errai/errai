@@ -89,6 +89,7 @@
         <module>errai-bus-demos</module>
         <module>userguide</module>
         <module>jboss7-support</module>
+        <module>errai-javax-enterprise</module>
     </modules>
 
     <dependencyManagement>
