@@ -67,7 +67,6 @@ public class ErraiServiceActivator implements ServiceActivator {
             service.stopService();
           }
 
-
           @Override
           public Object getInstance() {
             return service;
