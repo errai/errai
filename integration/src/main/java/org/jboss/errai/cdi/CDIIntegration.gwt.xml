@@ -1,8 +1,0 @@
-<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 1.6//EN"
-        "http://google-web-toolkit.googlecode.com/svn/releases/1.6/distro-source/core/src/gwt-module.dtd">
-<module>
-    <inherits name="com.google.gwt.user.User"/>
-    <inherits name="org.jboss.errai.enterprise.Support"/>
-    <entry-point class='org.jboss.errai.enterprise.client.cdi.CDIClientBootstrap'/>
-    <source path="client"/>
-</module>
