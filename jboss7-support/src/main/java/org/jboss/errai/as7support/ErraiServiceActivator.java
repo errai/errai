@@ -24,8 +24,20 @@ import org.slf4j.LoggerFactory;
 public class ErraiServiceActivator implements ServiceActivator {
   private Logger log = LoggerFactory.getLogger(ErraiServiceActivator.class);
 
+  private static final String DEFER_PROP = "org.jboss.errai.jboss7support.jndibinding.defer";
+
   @Override
   public void activate(ServiceActivatorContext serviceActivatorContext) throws ServiceRegistryException {
+
+    /**
+     * Temporary hack to avoid double-binding of JNDI
+     *
+     * TODO: Fix this in the future with a more elegant solution.
+     */
+    String str = System.getProperty(DEFER_PROP);
+    if (str != null && str.equals("true")) {
+      return;
+    }
 
     log.info("JBoss AS 7 Service Activator initialized ...");
 
@@ -77,5 +89,8 @@ public class ErraiServiceActivator implements ServiceActivator {
     builder.install();
 
     log.info("bound errai service to JNDI context: java:global/ErraiService");
+
+    //todo: remove this hack at some point.
+    System.setProperty(DEFER_PROP, "true");
   }
 }
