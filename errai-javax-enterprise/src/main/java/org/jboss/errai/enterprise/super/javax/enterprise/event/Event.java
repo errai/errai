@@ -19,56 +19,6 @@ package javax.enterprise.event;
 
 import java.lang.annotation.Annotation;
 
-import javax.enterprise.util.TypeLiteral;
-
-/**
- * <p>Allows the application to fire events of a particular type.</p>
- * <p/>
- * <p>Beans fire events via an instance of the <tt>Event</tt>
- * interface, which may be injected:</p>
- * <p/>
- * <pre>
- * &#064;Inject &#064;Any Event&lt;LoggedInEvent&gt; loggedInEvent;
- * </pre>
- * <p/>
- * <p>The <tt>fire()</tt> method accepts an event object:</p>
- * <p/>
- * <pre>
- * public void login() {
- *    ...
- *    loggedInEvent.fire( new LoggedInEvent(user) );
- * }
- * </pre>
- * <p/>
- * <p>Any combination of qualifiers may be specified at the injection
- * point:</p>
- * <p/>
- * <pre>
- * &#064;Inject &#064;Admin Event&lt;LoggedInEvent&gt; adminLoggedInEvent;
- * </pre>
- * <p/>
- * <p>Or, the {@link javax.enterprise.inject.Any &#064;Any} qualifier may
- * be used, allowing the application to specify qualifiers dynamically:</p>
- * <p/>
- * <pre>
- * &#064;Inject &#064;Any Event&lt;LoggedInEvent&gt; loggedInEvent;
- * </pre>
- * <p/>
- * <p>For an injected <tt>Event</tt>:</p>
- * <p/>
- * <ul>
- * <li>the <em>specified type</em> is the type parameter specified at the
- * injection point, and</li>
- * <li>the <em>specified qualifiers</em> are the qualifiers specified at
- * the injection point.</li>
- * </ul>
- *
- * @param <T> the type of the event object
- * @author Gavin King
- * @author Pete Muir
- * @author David Allen
- */
-
 public interface Event<T> {
 
   /**

@@ -51,6 +51,14 @@
                     <scope>provided</scope>
                 </dependency>
 
+
+                <dependency>
+                    <groupId>org.jboss.errai</groupId>
+                    <artifactId>errai-javax-enterprise</artifactId>
+                    <version>${project.version}</version>
+                    <scope>provided</scope>
+                </dependency>
+
                 <dependency>
                     <groupId>org.jboss.errai</groupId>
                     <artifactId>errai-cdi-jetty</artifactId>
@@ -62,6 +70,12 @@
                 <dependency>
                     <groupId>org.jboss.weld.servlet</groupId>
                     <artifactId>weld-servlet</artifactId>
+                    <exclusions>
+                        <exclusion>
+                            <artifactId>javax.enterprise</artifactId>
+                            <groupId>cdi-api</groupId>
+                        </exclusion>
+                    </exclusions>
                 </dependency>
 
                 <dependency>
@@ -103,6 +117,7 @@
                     <version>${jboss.version}</version>
                     <scope>provided</scope>
                 </dependency>
+
                 <dependency>
                     <groupId>org.jboss.jbossas</groupId>
                     <artifactId>jboss-as-client</artifactId>
@@ -125,6 +140,7 @@
                     <version>4.8.1</version>
                     <scope>provided</scope>
                 </dependency>
+
 
             </dependencies>
 
@@ -245,6 +261,15 @@
                         </exclusion>
                     </exclusions>
                 </dependency>
+
+
+                <dependency>
+                    <groupId>org.jboss.errai</groupId>
+                    <artifactId>errai-javax-enterprise</artifactId>
+                    <version>${project.version}</version>
+                    <scope>provided</scope>
+                </dependency>
+
                 <dependency>
                     <groupId>org.jboss.errai</groupId>
                     <artifactId>errai-tools</artifactId>
@@ -290,6 +315,7 @@
                     <artifactId>weld-se-core</artifactId>
                     <version>${weld.version}</version>
                     <scope>compile</scope>
+
                 </dependency>
                 <dependency>
                     <groupId>org.jboss.weld.servlet</groupId>
@@ -344,6 +370,7 @@
                     <artifactId>jboss-common-core</artifactId>
                     <version>2.2.14.GA</version>
                 </dependency>
+
             </dependencies>
         </profile>
     </profiles>

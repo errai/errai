@@ -1,4 +1,4 @@
-package org.jboss.errai.cdi.client;
+package org.jboss.errai.enterprise.client;
 
 import org.jboss.errai.cdi.client.api.CDI;
 import org.jboss.errai.cdi.client.api.Conversation;
@@ -6,7 +6,6 @@ import org.jboss.errai.ioc.client.ContextualProviderContext;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 
 import javax.enterprise.event.Event;
-import javax.enterprise.util.TypeLiteral;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import java.lang.annotation.Annotation;

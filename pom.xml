@@ -24,6 +24,7 @@
     <modules>
         <module>jetty</module>
         <module>integration</module>
+        <module>errai-javax-enterprise</module>
         <module>jboss</module>
         <module>examples/model</module>
         <module>examples/server</module>
@@ -68,6 +69,7 @@
                 <version>${project.version}</version>
             </dependency>
 
+
             <dependency>
                 <groupId>org.mvel</groupId>
                 <artifactId>mvel2</artifactId>
@@ -79,6 +81,12 @@
                 <groupId>org.jboss.weld.servlet</groupId>
                 <artifactId>weld-servlet</artifactId>
                 <version>${weld.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>javax.enterprise</artifactId>
+                        <groupId>cdi-api</groupId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
@@ -86,6 +94,12 @@
                 <artifactId>weld-servlet</artifactId>
                 <classifier>sources</classifier>
                 <version>${weld.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>javax.enterprise</artifactId>
+                        <groupId>cdi-api</groupId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
