@@ -23,8 +23,8 @@
 
     <modules>
         <module>jetty</module>
-        <module>integration</module>
-        <module>errai-javax-enterprise</module>
+        <module>errai-cdi-client</module>
+        <module>weld-integration</module>
         <module>jboss</module>
         <module>examples/model</module>
         <module>examples/server</module>

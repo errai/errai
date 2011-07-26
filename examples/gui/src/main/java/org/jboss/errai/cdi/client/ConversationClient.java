@@ -21,7 +21,7 @@ import com.google.gwt.user.client.ui.Button;
 import org.gwt.mosaic.ui.client.layout.LayoutPanel;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.cdi.client.api.Conversation;
+import org.jboss.errai.enterprise.client.cdi.api.Conversation;
 import org.jboss.errai.workspaces.client.api.ProvisioningCallback;
 import org.jboss.errai.workspaces.client.api.WidgetProvider;
 import org.jboss.errai.workspaces.client.api.annotations.LoadTool;

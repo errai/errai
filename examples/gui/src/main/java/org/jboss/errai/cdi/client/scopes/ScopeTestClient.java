@@ -17,7 +17,6 @@ package org.jboss.errai.cdi.client.scopes;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.*;
 import org.gwt.mosaic.ui.client.CaptionLayoutPanel;
 import org.gwt.mosaic.ui.client.layout.BoxLayout;
 import org.gwt.mosaic.ui.client.layout.BoxLayoutData;
@@ -26,8 +25,8 @@ import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.cdi.client.api.Conversation;
-import org.jboss.errai.cdi.client.api.ConversationContext;
+import org.jboss.errai.enterprise.client.cdi.api.Conversation;
+import org.jboss.errai.enterprise.client.cdi.api.ConversationContext;
 import org.jboss.errai.workspaces.client.api.ProvisioningCallback;
 import org.jboss.errai.workspaces.client.api.WidgetProvider;
 import org.jboss.errai.workspaces.client.api.annotations.LoadTool;
