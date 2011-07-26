@@ -89,7 +89,6 @@
         <module>errai-bus-demos</module>
         <module>userguide</module>
         <module>jboss7-support</module>
-        <module>errai-javax-enterprise</module>
     </modules>
 
     <dependencyManagement>
@@ -131,12 +130,6 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-
-            <!--<dependency>-->
-            <!--<groupId>com.google.guava</groupId>-->
-            <!--<artifactId>guava</artifactId>-->
-            <!--<version>r08</version>-->
-            <!--</dependency>-->
 
             <dependency>
                 <groupId>org.mvel</groupId>
@@ -267,11 +260,6 @@
                     <artifactId>build-helper-maven-plugin</artifactId>
                     <version>1.5</version>
                 </plugin>
-                <!--<plugin>-->
-                <!--<groupId>net.sourceforge.maven-taglib</groupId>-->
-                <!--<artifactId>maven-taglib-plugin</artifactId>-->
-                <!--<version>2.3</version>-->
-                <!--</plugin>-->
             </plugins>
         </pluginManagement>
 
