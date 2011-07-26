@@ -36,9 +36,8 @@ import org.jboss.errai.enterprise.client.cdi.EventHandler;
 /**
  * CDI client interface.
  *
- * @author: Heiko Braun <hbraun@redhat.com>
- * @author: Christian Sadilek <csadilek@redhat.com>
- * @date: Apr 9, 2010
+ * @author Heiko Braun <hbraun@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class CDI {
   public static final String DISPATCHER_SUBJECT = "cdi.event:Dispatcher";

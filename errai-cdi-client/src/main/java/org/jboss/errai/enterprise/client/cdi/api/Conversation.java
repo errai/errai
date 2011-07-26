@@ -24,10 +24,8 @@ import org.jboss.errai.bus.client.api.base.MessageBuilder;
  * Handles can be created through the
  * {@link org.jboss.errai.enterprise.client.cdi.api.CDI#createConversation(String)} client interface.
  *
+ * @author Heiko Braun <hbraun@redhat.com>
  * @see CDI
- *
- * @author: Heiko Braun <hbraun@redhat.com>
- * @date: Oct 5, 2010
  */
 public class Conversation {
 
@@ -71,8 +69,8 @@ public class Conversation {
     assertEnded();
 
     MessageBuilder.createMessage().toSubject("cdi.conversation:Manager,conversation=" + id).command("end")
-        .with("cdi.conversation.id", id).with("cdi.internal", true) // will be excluded in interceptor
-        .done().sendNowWith(ErraiBus.get());
+            .with("cdi.conversation.id", id).with("cdi.internal", true) // will be excluded in interceptor
+            .done().sendNowWith(ErraiBus.get());
 
     CDI.getActiveConversations().remove(id);
 
