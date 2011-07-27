@@ -1,5 +1,6 @@
 *.iml
 /.idea/*
+/.eclipse/*
 .gwt-tmp/
 target/
 classes/
