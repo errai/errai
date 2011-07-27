@@ -1,7 +1,5 @@
 package org.jboss.errai.as7support;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
 import org.jboss.as.naming.ManagedReference;
 import org.jboss.as.naming.ManagedReferenceFactory;
 import org.jboss.as.naming.NamingStore;
@@ -14,42 +12,32 @@ import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
 import org.jboss.errai.bus.server.service.ErraiServiceImpl;
-import org.jboss.msc.service.*;
+import org.jboss.msc.service.DuplicateServiceException;
+import org.jboss.msc.service.ServiceActivator;
+import org.jboss.msc.service.ServiceActivatorContext;
+import org.jboss.msc.service.ServiceBuilder;
+import org.jboss.msc.service.ServiceName;
+import org.jboss.msc.service.ServiceRegistryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+
 /**
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ErraiServiceActivator implements ServiceActivator {
   private Logger log = LoggerFactory.getLogger(ErraiServiceActivator.class);
 
-  private static final String DEFER_PROP = "org.jboss.errai.jboss7support.jndibinding.defer";
-
   @Override
   public void activate(ServiceActivatorContext serviceActivatorContext) throws ServiceRegistryException {
 
-    /**
-     * Temporary hack to avoid double-binding of JNDI
-     *
-     * TODO: Fix this in the future with a more elegant solution.
-     */
-    String str = System.getProperty(DEFER_PROP);
-    if (str != null && str.equals("true")) {
-      return;
-    }
-    //todo: remove this hack at some point.
-    System.setProperty(DEFER_PROP, "true");
-    
     log.info("JBoss AS 7 Service Activator initialized ...");
 
     final ServiceName bindingServiceName = ContextNames.GLOBAL_CONTEXT_SERVICE_NAME
             .append("ErraiService");
-
-    if (serviceActivatorContext.getServiceRegistry().getService(bindingServiceName) != null) {
-      log.info("Service already registered.");
-      return;
-    }
 
     final BinderService binderService = new BinderService("ErraiService");
     ServiceBuilder<ManagedReferenceFactory> builder = serviceActivatorContext.getServiceTarget()
@@ -88,7 +76,13 @@ public class ErraiServiceActivator implements ServiceActivator {
         };
       }
     });
-    builder.install();
+
+    try {
+      builder.install();
+    }
+    catch (DuplicateServiceException dse) {
+      log.info("Service already registered.");
+    }
 
     log.info("bound errai service to JNDI context: java:global/ErraiService");
   }
