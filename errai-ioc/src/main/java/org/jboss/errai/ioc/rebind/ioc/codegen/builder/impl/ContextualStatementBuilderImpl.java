@@ -39,7 +39,7 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class ContextualStatementBuilderImpl extends AbstractStatementBuilder implements ContextualStatementBuilder,
-                                                                                        VariableReferenceContextualStatementBuilder {
+    VariableReferenceContextualStatementBuilder {
 
   protected ContextualStatementBuilderImpl(Context context, CallElementBuilder callElementBuilder) {
     super(context, callElementBuilder);
@@ -133,20 +133,9 @@ public class ContextualStatementBuilderImpl extends AbstractStatementBuilder imp
 
   // Value return
   @Override
-  public Statement returnValue() {
+  public StatementEnd returnValue() {
     appendCallElement(new ReturnValue());
     return this;
-  }
-
-  @Override
-  public Statement returnValueAs(Class<?> castTo) {
-    return returnValueAs(MetaClassFactory.get(castTo));
-  }
-
-  @Override
-  public Statement returnValueAs(MetaClass castTo) {
-    appendCallElement(new ReturnValue());
-    return Cast.to(castTo, this);
   }
 
   // Assignments
