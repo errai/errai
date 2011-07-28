@@ -45,136 +45,213 @@ import java.util.List;
  * </pre>
  */
 public abstract class Vfs {
-    private static List<UrlType> defaultUrlTypes = Lists.<UrlType>newArrayList(DefaultUrlTypes.values());
+  private static List<UrlType> defaultUrlTypes = Lists.<UrlType>newArrayList(DefaultUrlTypes.values());
 
-    /** an abstract vfs dir */
-    public interface Dir {
-        String getPath();
-        Iterable<File> getFiles();
-        void close();
-    }
+  /**
+   * an abstract vfs dir
+   */
+  public interface Dir {
+    String getPath();
 
-    /** an abstract vfs file */
-    public interface File {
-        String getName();
-        String getRelativePath();
-        String getFullPath();
-        InputStream openInputStream() throws IOException;
-    }
+    Iterable<File> getFiles();
 
-    /** a matcher and factory for a url */
-    public interface UrlType {
-        boolean matches(URL url);
-        Dir createDir(URL url);
-    }
+    void close();
+  }
 
-    /** the default url types that will be used when issuing {@link org.reflections.vfs.Vfs#fromURL(java.net.URL)} */
-    public static List<UrlType> getDefaultUrlTypes() {
-        return defaultUrlTypes;
-    }
+  /**
+   * an abstract vfs file
+   */
+  public interface File {
+    String getName();
 
-    /** sets the static default url types. can be used to statically plug in urlTypes */
-    public static void setDefaultURLTypes(final List<UrlType> urlTypes) {
-        defaultUrlTypes = urlTypes;
-    }
+    String getRelativePath();
 
-    /** add a static default url types. can be used to statically plug in urlTypes */
-    public static void addDefaultURLTypes(UrlType urlType) {
-        defaultUrlTypes.add(urlType);
-    }
+    String getFullPath();
 
-    /** tries to create a Dir from the given url, using the defaultUrlTypes */
-    public static Dir fromURL(final URL url) {
-        return fromURL(url, defaultUrlTypes);
-    }
+    InputStream openInputStream() throws IOException;
+  }
 
-    /** tries to create a Dir from the given url, using the given urlTypes*/
-    public static Dir fromURL(final URL url, final List<UrlType> urlTypes) {
-        for (UrlType type : urlTypes) {
-            if (type.matches(url)) {
-                try {
-                    return type.createDir(url);
-                } catch (Exception e) {
-                    throw new ReflectionsException("could not create Dir using " + type.getClass().getName() +" from url " + url.toExternalForm());
-                }
-            }
-        }
+  /**
+   * a matcher and factory for a url
+   */
+  public interface UrlType {
+    boolean matches(URL url);
 
-        throw new ReflectionsException("could not create Vfs.Dir from url, no matching UrlType was found [" + url.toExternalForm() + "]\n" +
-                "either use fromURL(final URL url, final List<UrlType> urlTypes) or " +
-                "use the static setDefaultURLTypes(final List<UrlType> urlTypes) or addDefaultURLTypes(UrlType urlType) " +
-                "with your specialized UrlType.");
-    }
+    Dir createDir(URL url);
+  }
 
-    /** tries to create a Dir from the given url, using the given urlTypes*/
-    public static Dir fromURL(final URL url, final UrlType... urlTypes) {
-        return fromURL(url, Lists.<UrlType>newArrayList(urlTypes));
-    }
+  /**
+   * the default url types that will be used when issuing {@link org.reflections.vfs.Vfs#fromURL(java.net.URL)}
+   */
+  public static List<UrlType> getDefaultUrlTypes() {
+    return defaultUrlTypes;
+  }
 
-    /** return an iterable of all {@link org.reflections.vfs.Vfs.File} in given urls, matching filePredicate */
-    public static Iterable<File> findFiles(final Collection<URL> inUrls, final Predicate<File> filePredicate) {
-        Iterable<File> result = new ArrayList<File>();
+  /**
+   * sets the static default url types. can be used to statically plug in urlTypes
+   */
+  public static void setDefaultURLTypes(final List<UrlType> urlTypes) {
+    defaultUrlTypes = urlTypes;
+  }
 
-        for (URL url : inUrls) {
-            Iterable<File> iterable = Iterables.filter(fromURL(url).getFiles(), filePredicate);
-            result = Iterables.concat(result, iterable);
-        }
+  /**
+   * add a static default url types. can be used to statically plug in urlTypes
+   */
+  public static void addDefaultURLTypes(UrlType urlType) {
+    defaultUrlTypes.add(urlType);
+  }
 
-        return result;
-    }
+  /**
+   * tries to create a Dir from the given url, using the defaultUrlTypes
+   */
+  public static Dir fromURL(final URL url) {
+    return fromURL(url, defaultUrlTypes);
+  }
 
-    /** return an iterable of all {@link org.reflections.vfs.Vfs.File} in given urls, starting with given packagePrefix and matching nameFilter */
-    public static Iterable<File> findFiles(final Collection<URL> inUrls, final String packagePrefix, final Predicate<String> nameFilter) {
-        Predicate<File> fileNamePredicate = new Predicate<File>() {
-            public boolean apply(File file) {
-                String path = file.getRelativePath();
-                if (path.startsWith(packagePrefix)) {
-                    String filename = path.substring(path.indexOf(packagePrefix) + packagePrefix.length());
-                    return !Utils.isEmpty(filename) && nameFilter.apply(filename.substring(1));
-                } else {
-                    return false;
-                }
-            }
-        };
-
-        return findFiles(inUrls, fileNamePredicate);
-    }
-
-    /** default url types used by {@link org.reflections.vfs.Vfs#fromURL(java.net.URL)}
-     * <p>
-     * <p>jarfile - creates a {@link org.reflections.vfs.ZipDir} over jar file
-     * <p>jarUrl - creates a {@link org.reflections.vfs.ZipDir} over a jar url (contains ".jar!/" in it's name)
-     * <p>directory - creates a {@link org.reflections.vfs.SystemDir} over a file system directory
-     * <p>vfsfile and vfszip - creates a {@link org.reflections.vfs.ZipDir} over jboss vfs types
-     * */
-    public static enum DefaultUrlTypes implements UrlType {
-        jarfile {
-            public boolean matches(URL url) {return url.getProtocol().equals("file") && url.toExternalForm().endsWith(".jar");}
-            public Dir createDir(final URL url) {return new ZipDir(url);}},
-
-        jarUrl {
-            public boolean matches(URL url) {return url.toExternalForm().contains(".jar!");}
-            public Dir createDir(URL url) {return new ZipDir(url);}},
-
-        directory {
-            public boolean matches(URL url) {return url.getProtocol().equals("file") && new java.io.File(normalizePath(url)).isDirectory();}
-            public Dir createDir(final URL url) {return new SystemDir(url);}},
-
-        vfsfile {
-            public boolean matches(URL url) {return url.getProtocol().equals("vfsfile") && url.toExternalForm().endsWith(".jar");}
-            public Dir createDir(URL url) {return new ZipDir(url.toString().replaceFirst("vfsfile:", "file:"));}},
-
-        vfszip {
-            public boolean matches(URL url) {return url.getProtocol().equals("vfszip") && url.toExternalForm().endsWith(".jar");}
-            public Dir createDir(URL url) {return new ZipDir(url.toString().replaceFirst("vfszip:", "file:"));}}
-    }
-
-    //
-    public static String normalizePath(final URL url) {
+  /**
+   * tries to create a Dir from the given url, using the given urlTypes
+   */
+  public static Dir fromURL(final URL url, final List<UrlType> urlTypes) {
+    for (UrlType type : urlTypes) {
+      if (type.matches(url)) {
         try {
-            return url.toURI().getPath();
-        } catch (URISyntaxException e) {
-            throw new RuntimeException("could not normalize path of " + url, e);
+          return type.createDir(url);
         }
+        catch (Exception e) {
+          throw new ReflectionsException("could not create Dir using " + type.getClass().getName() + " from url " + url.toExternalForm());
+        }
+      }
     }
+
+    throw new ReflectionsException("could not create Vfs.Dir from url, no matching UrlType was found [" + url.toExternalForm() + "]\n" +
+            "either use fromURL(final URL url, final List<UrlType> urlTypes) or " +
+            "use the static setDefaultURLTypes(final List<UrlType> urlTypes) or addDefaultURLTypes(UrlType urlType) " +
+            "with your specialized UrlType.");
+  }
+
+  /**
+   * tries to create a Dir from the given url, using the given urlTypes
+   */
+  public static Dir fromURL(final URL url, final UrlType... urlTypes) {
+    return fromURL(url, Lists.<UrlType>newArrayList(urlTypes));
+  }
+
+  /**
+   * return an iterable of all {@link org.reflections.vfs.Vfs.File} in given urls, matching filePredicate
+   */
+  public static Iterable<File> findFiles(final Collection<URL> inUrls, final Predicate<File> filePredicate) {
+    Iterable<File> result = new ArrayList<File>();
+
+    for (URL url : inUrls) {
+      Iterable<File> iterable = Iterables.filter(fromURL(url).getFiles(), filePredicate);
+      result = Iterables.concat(result, iterable);
+    }
+
+    return result;
+  }
+
+  /**
+   * return an iterable of all {@link org.reflections.vfs.Vfs.File} in given urls, starting with given packagePrefix and matching nameFilter
+   */
+  public static Iterable<File> findFiles(final Collection<URL> inUrls, final String packagePrefix, final Predicate<String> nameFilter) {
+    Predicate<File> fileNamePredicate = new Predicate<File>() {
+      public boolean apply(File file) {
+        String path = file.getRelativePath();
+        if (path.startsWith(packagePrefix)) {
+          String filename = path.substring(path.indexOf(packagePrefix) + packagePrefix.length());
+          return !Utils.isEmpty(filename) && nameFilter.apply(filename.substring(1));
+        }
+        else {
+          return false;
+        }
+      }
+    };
+
+    return findFiles(inUrls, fileNamePredicate);
+  }
+
+  /**
+   * default url types used by {@link org.reflections.vfs.Vfs#fromURL(java.net.URL)}
+   * <p/>
+   * <p>jarfile - creates a {@link org.reflections.vfs.ZipDir} over jar file
+   * <p>jarUrl - creates a {@link org.reflections.vfs.ZipDir} over a jar url (contains ".jar!/" in it's name)
+   * <p>directory - creates a {@link org.reflections.vfs.SystemDir} over a file system directory
+   * <p>vfsfile and vfszip - creates a {@link org.reflections.vfs.ZipDir} over jboss vfs types
+   */
+  public static enum DefaultUrlTypes implements UrlType {
+    jarfile {
+      public boolean matches(URL url) {
+        return url.getProtocol().equals("file") && url.toExternalForm().endsWith(".jar");
+      }
+
+      public Dir createDir(final URL url) {
+        return new ZipDir(url);
+      }
+    },
+
+    jarUrl {
+      public boolean matches(URL url) {
+        return url.toExternalForm().contains(".jar!");
+      }
+
+      public Dir createDir(URL url) {
+        return new ZipDir(url);
+      }
+    },
+
+    directory {
+      public boolean matches(URL url) {
+        return url.getProtocol().equals("file") && new java.io.File(normalizePath(url)).isDirectory();
+      }
+
+      public Dir createDir(final URL url) {
+        return new SystemDir(url);
+      }
+    },
+
+    vfsfile {
+      public boolean matches(URL url) {
+        return url.getProtocol().equals("vfsfile") && url.toExternalForm().endsWith(".jar");
+      }
+
+      public Dir createDir(URL url) {
+        return new ZipDir(url.toString().replaceFirst("vfsfile:", "file:"));
+      }
+    },
+
+    vfszip {
+      public boolean matches(URL url) {
+        return url.getProtocol().equals("vfszip") && url.toExternalForm().endsWith(".jar");
+      }
+
+      public Dir createDir(URL url) {
+        return new ZipDir(url.toString().replaceFirst("vfszip:", "file:"));
+      }
+    }
+  }
+
+  //
+  public static String normalizePath(final URL url) {
+    try {
+      return url.toURI().getPath();
+    }
+    catch (URISyntaxException e) {
+      String actualFilePath = url.getPath();
+      String nestedPath = "";
+      if (actualFilePath.startsWith("file:")) {
+        actualFilePath = actualFilePath.substring(5);
+      }
+
+      int nestedSeperator = actualFilePath.indexOf('!');
+      if (nestedSeperator != -1) {
+        nestedPath = actualFilePath.substring(nestedSeperator + 1);
+        actualFilePath = actualFilePath.substring(0, nestedSeperator);
+
+        if (nestedPath.equals("/")) {
+          nestedPath = "";
+        }
+      }
+      return actualFilePath;
+    }
+  }
 }
