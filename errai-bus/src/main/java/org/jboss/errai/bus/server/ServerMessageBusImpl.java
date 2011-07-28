@@ -341,8 +341,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
           @Override
           public void run() {
             sendGlobal(message);
-            cancel = true;
-            nextRuntime = -1;
+            cancel();
           }
         });
       }
