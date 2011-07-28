@@ -16,7 +16,11 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.*;
+import org.jboss.errai.ioc.rebind.ioc.codegen.AssignmentOperator;
+import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanExpression;
+import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.CaseBlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ContextualStatementBuilder;
@@ -28,8 +32,6 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.AssignVariable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadField;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.MethodCall;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.ReturnValue;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 
 /**
