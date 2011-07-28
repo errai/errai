@@ -342,7 +342,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         message.setResource("retryAttempts", message.getResource(Integer.class, RETRY_COUNT_KEY) + 1);
         getScheduler().addTask(new TimedTask() {
           {
-            period = 150;
+            period = 250;
           }
 
           @Override
