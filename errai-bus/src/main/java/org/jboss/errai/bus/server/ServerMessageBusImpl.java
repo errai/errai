@@ -318,6 +318,9 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     //   this.modelAdapter = config.getResource(ModelAdapter.class);
   }
 
+
+  private static final String RETRY_COUNT_KEY = "retryAttempts";
+
   /**
    * Sends a message globally to all subscriptions containing the same subject as the specified message.
    *
@@ -328,14 +331,18 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     final String subject = message.getSubject();
 
     if (!subscriptions.containsKey(subject) && !remoteSubscriptions.containsKey(subject)) {
-      if (message.isFlagSet(RoutingFlags.RetryDelivery)) {
+      if (message.isFlagSet(RoutingFlags.RetryDelivery) && message.getResource(Integer.class, RETRY_COUNT_KEY) > 2) {
         throw new NoSubscribersToDeliverTo("for: " + subject + " [commandType:" + message.getCommandType() + "]");
       }
       else {
         message.setFlag(RoutingFlags.RetryDelivery);
+        if (!message.hasResource(RETRY_COUNT_KEY)) {
+          message.setResource("retryAttempts", 0);
+        }
+        message.setResource("retryAttempts", message.getResource(Integer.class, RETRY_COUNT_KEY) + 1);
         getScheduler().addTask(new TimedTask() {
           {
-            period = 100;
+            period = 150;
           }
 
           @Override
