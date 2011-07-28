@@ -379,15 +379,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
   private void delayOrFail(Message message, final Runnable deliveryTaskRunnable) {
     if (message.isFlagSet(RoutingFlags.RetryDelivery) && message.getResource(Integer.class, RETRY_COUNT_KEY) > 3) {
-//        log.error("DEBUG***");
-//        getScheduler().requestStop();
-//
-//        log.error("Queued Messages (undelivered)\n--------------\n");
-//        MessageQueue queue = messageQueues.get(message.getResource(QueueSession.class, "Session"));
-//        for (Message m : queue.getQueue()) {
-//          log.error(" -> " + m.getSubject() + ":" + m.getParts());
-//        }
-
       throw new NoSubscribersToDeliverTo("for: " + message.getSubject() + " [commandType:" + message.getCommandType() + "]");
     }
     else {
@@ -396,7 +387,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         message.setResource("retryAttempts", 0);
       }
       message.setResource("retryAttempts", message.getResource(Integer.class, RETRY_COUNT_KEY) + 1);
-      getScheduler().addTask(new TimedTask() {
+      getScheduler().addTaskConcurrently(new TimedTask() {
         {
           period = 250;
         }
@@ -408,7 +399,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
       });
     }
-
   }
 
   /**
