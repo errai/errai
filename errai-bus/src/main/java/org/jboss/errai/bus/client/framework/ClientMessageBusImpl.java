@@ -1074,6 +1074,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   public void addPostInitTask(Runnable run) {
     if (isInitialized()) {
       run.run();
+      return;
     }
     postInitTasks.add(run);
   }

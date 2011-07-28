@@ -50,7 +50,7 @@ public abstract class TimedTask implements Runnable, Comparable<TimedTask>, Asyn
   }
 
 
-  public void cancelAfterNextFire() {
+  public void cancel() {
     period = -1;
   }
 
@@ -61,10 +61,6 @@ public abstract class TimedTask implements Runnable, Comparable<TimedTask>, Asyn
    */
   public long nextRuntime() {
     return nextRuntime;
-  }
-
-  public boolean isStillActive() {
-    return nextRuntime == -1;
   }
 
   /**
