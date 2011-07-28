@@ -41,7 +41,7 @@ public class CDIClientBootstrap implements EntryPoint {
     final Runnable busReadyEvent = new Runnable() {
       public void run() {
         MessageBuilder.createMessage().toSubject("cdi.event:Dispatcher").command(CDICommands.AttachRemote).done()
-            .sendNowWith(bus);
+                .sendNowWith(bus);
 
         CDI.fireEvent(new BusReadyEvent());
       }
@@ -66,10 +66,16 @@ public class CDIClientBootstrap implements EntryPoint {
     bus.subscribe("cdi.event:ClientDispatcher", new MessageCallback() {
       public void callback(Message message) {
         switch (BusCommands.valueOf(message.getCommandType())) {
-        case RemoteSubscribe:
-          CDI.addRemoteEventTypes(message.get(String[].class, MessageParts.Value));
-          CDI.activate();
-          break;
+          case RemoteSubscribe:
+            CDI.addRemoteEventTypes(message.get(String[].class, MessageParts.Value));
+
+            bus.addPostInitTask(new Runnable() {
+              @Override
+              public void run() {
+                CDI.activate();
+              }
+            });
+            break;
 
         }
       }

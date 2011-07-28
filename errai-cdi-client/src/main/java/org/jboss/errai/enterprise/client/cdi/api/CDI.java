@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.sun.xml.internal.rngom.ast.builder.Annotations;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
@@ -38,6 +39,7 @@ import org.jboss.errai.enterprise.client.cdi.EventHandler;
  *
  * @author Heiko Braun <hbraun@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Mike Brock <cbrock@redhat.com>
  */
 public class CDI {
   public static final String DISPATCHER_SUBJECT = "cdi.event:Dispatcher";
@@ -47,7 +49,7 @@ public class CDI {
   static private Set<String> remoteEvents = new HashSet<String>();
 
   static private boolean active = false;
-  static private List<Object> deferredEvents = new ArrayList<Object>();
+  static private List<DeferredEvent> deferredEvents = new ArrayList<DeferredEvent>();
 
   public static MessageInterceptor CONVERSATION_INTERCEPTOR = new ConversationInterceptor();
 
@@ -83,7 +85,7 @@ public class CDI {
 
   public static void fireEvent(final Object payload, final Annotation... qualifiers) {
     if (!active) {
-      deferredEvents.add(payload);
+      deferredEvents.add(new DeferredEvent(payload, qualifiers));
       return;
     }
 
@@ -144,11 +146,21 @@ public class CDI {
     if (!active) {
       active = true;
 
-      for (Object o : deferredEvents) {
-        fireEvent(o);
+      for (DeferredEvent o : deferredEvents) {
+        fireEvent(o.eventInstance, o.annotations);
       }
 
       deferredEvents = null;
+    }
+  }
+
+  static class DeferredEvent {
+    final Object eventInstance;
+    final Annotation[] annotations;
+
+    DeferredEvent(Object eventInstance, Annotation[] annotations) {
+      this.eventInstance = eventInstance;
+      this.annotations = annotations;
     }
   }
 
