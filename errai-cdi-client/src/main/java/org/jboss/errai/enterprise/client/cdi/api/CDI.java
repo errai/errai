@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.sun.xml.internal.rngom.ast.builder.Annotations;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
