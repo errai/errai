@@ -87,7 +87,6 @@
         <module>errai-persistence</module>
         <module>errai-tools</module>
         <module>errai-bus-demos</module>
-        <module>userguide</module>
         <module>jboss7-support</module>
     </modules>
 
@@ -332,7 +331,6 @@
         <profile>
             <id>distro</id>
             <modules>
-                <module>userguide</module>
                 <module>dist</module>
                 <module>errai-bus-demos</module>
                 <module>archetypes/quickstart</module>
