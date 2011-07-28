@@ -331,7 +331,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     final String subject = message.getSubject();
 
     if (!subscriptions.containsKey(subject) && !remoteSubscriptions.containsKey(subject)) {
-      if (message.isFlagSet(RoutingFlags.RetryDelivery) && message.getResource(Integer.class, RETRY_COUNT_KEY) > 2) {
+      if (message.isFlagSet(RoutingFlags.RetryDelivery) && message.getResource(Integer.class, RETRY_COUNT_KEY) > 3) {
         throw new NoSubscribersToDeliverTo("for: " + subject + " [commandType:" + message.getCommandType() + "]");
       }
       else {
