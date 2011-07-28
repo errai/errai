@@ -47,21 +47,6 @@ public class CDIClientBootstrap implements EntryPoint {
       }
     };
 
-    bus.addPostInitTask(busReadyEvent);
-
-    /**
-     * Register an initialization lister to run the bus ready event.  This will be added
-     * post-initalization, so it is designed to fire on bus reconnection events.
-     */
-    bus.addPostInitTask(new Runnable() {
-      public void run() {
-        bus.addInitializationListener(new InitializationListener() {
-          public void onInitilization() {
-            bus.addPostInitTask(busReadyEvent);
-          }
-        });
-      }
-    });
 
     bus.subscribe("cdi.event:ClientDispatcher", new MessageCallback() {
       public void callback(Message message) {
@@ -80,5 +65,22 @@ public class CDIClientBootstrap implements EntryPoint {
         }
       }
     });
+
+    /**
+     * Register an initialization lister to run the bus ready event.  This will be added
+     * post-initalization, so it is designed to fire on bus reconnection events.
+     */
+    bus.addPostInitTask(new Runnable() {
+      public void run() {
+        bus.addInitializationListener(new InitializationListener() {
+          public void onInitilization() {
+            bus.addPostInitTask(busReadyEvent);
+          }
+        });
+      }
+    });
+
+    bus.addPostInitTask(busReadyEvent);
+
   }
 }
