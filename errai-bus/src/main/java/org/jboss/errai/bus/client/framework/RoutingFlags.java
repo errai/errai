@@ -59,6 +59,13 @@ public enum RoutingFlags {
     public int flag() {
       return 1 << 5;
     }
+  },
+
+  RetryDelivery {
+    @Override
+    public int flag() {
+      return 1 << 6;
+    }
   };
 
   /**
