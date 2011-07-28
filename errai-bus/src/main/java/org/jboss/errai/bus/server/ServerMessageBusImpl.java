@@ -33,7 +33,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static org.jboss.errai.bus.client.api.base.MessageBuilder.createCall;
 import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversation;
 import static org.jboss.errai.bus.client.protocols.MessageParts.ReplyTo;
 import static org.jboss.errai.bus.client.protocols.SecurityCommands.MessageNotDelivered;
@@ -332,6 +331,16 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     if (!subscriptions.containsKey(subject) && !remoteSubscriptions.containsKey(subject)) {
       if (message.isFlagSet(RoutingFlags.RetryDelivery) && message.getResource(Integer.class, RETRY_COUNT_KEY) > 3) {
+        System.out.println("DEBUG***");
+        getScheduler().requestStop();
+
+        System.out.println();
+        System.out.println("Queued Messages (undelivered)\n--------------\n");
+        MessageQueue queue = messageQueues.get(message.getResource(QueueSession.class, "Session"));
+        for (Message m : queue.getQueue()) {
+          System.out.println(" -> " + m.getSubject() + ":" + m.getParts());
+        }
+
         throw new NoSubscribersToDeliverTo("for: " + subject + " [commandType:" + message.getCommandType() + "]");
       }
       else {
