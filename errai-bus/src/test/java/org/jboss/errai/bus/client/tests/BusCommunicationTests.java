@@ -53,7 +53,23 @@ public class BusCommunicationTests extends AbstractErraiTest {
             .done().sendNowWith(bus);
       }
     });
+  }
+  
+  public void testBasicRoundTripWithoutToSubjectCall() {
+    runAfterInit(new Runnable() {
+      public void run() {
+        bus.subscribe("MyTestService", new MessageCallback() {
+          public void callback(Message message) {
+            System.out.println("GOT ECHO");
+            finishTest();
+          }
+        });
 
+        MessageBuilder.createMessage("ServerEchoService")
+            .with(MessageParts.ReplyTo, "MyTestService")
+            .done().sendNowWith(bus);
+      }
+    });
   }
 
   public static class GWTRandomProvider implements RandomProvider {
@@ -184,6 +200,4 @@ public class BusCommunicationTests extends AbstractErraiTest {
       }
     });
   }
-
-
 }
