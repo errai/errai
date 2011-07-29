@@ -17,10 +17,12 @@
 package org.jboss.errai.bus.server.async;
 
 import org.jboss.errai.bus.client.api.AsyncTask;
+import sun.rmi.transport.ObjectTable;
 
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static java.lang.System.currentTimeMillis;
 
@@ -36,15 +38,19 @@ public class SimpleSchedulerService implements Runnable, SchedulerService {
 
   private long nextRunTime = 0;
   private final TreeSet<TimedTask> tasks = new TreeSet<TimedTask>();
+  private final ConcurrentLinkedQueue<TimedTask> toAdd = new ConcurrentLinkedQueue<TimedTask>();
+
   private boolean autoStartStop = false;
   private Thread currentThread;
+
+  private final Object lock = new Object();
 
   public SimpleSchedulerService() {
     init();
   }
 
   private void init() {
-    synchronized (this) {
+    synchronized (lock) {
       if (!running) {
         currentThread = new Thread(this);
         currentThread.setDaemon(true);
@@ -54,7 +60,7 @@ public class SimpleSchedulerService implements Runnable, SchedulerService {
   }
 
   public void run() {
-    synchronized (this) {
+    synchronized (lock) {
       running = true;
       finished = false;
     }
@@ -82,7 +88,7 @@ public class SimpleSchedulerService implements Runnable, SchedulerService {
       }
     }
 
-    synchronized (this) {
+    synchronized (lock) {
       finished = true;
     }
     if (autoStartStop) init();
@@ -93,7 +99,7 @@ public class SimpleSchedulerService implements Runnable, SchedulerService {
   }
 
   public void startIfTasks() {
-    synchronized (this) {
+    synchronized (lock) {
       if (!tasks.isEmpty() && !running) {
         init();
         currentThread.start();
@@ -102,7 +108,7 @@ public class SimpleSchedulerService implements Runnable, SchedulerService {
   }
 
   public void stopIfNoTasks() {
-    synchronized (this) {
+    synchronized (lock) {
       if (running && tasks.isEmpty()) {
         requestStop();
       }
@@ -112,7 +118,7 @@ public class SimpleSchedulerService implements Runnable, SchedulerService {
   private void runAllDue() {
     long n = 0;
 
-    synchronized (this) {
+    synchronized (lock) {
       TimedTask task;
       for (Iterator<TimedTask> iter = tasks.iterator(); iter.hasNext(); ) {
         if ((task = iter.next()).runIfDue(n = currentTimeMillis())) {
@@ -143,6 +149,9 @@ public class SimpleSchedulerService implements Runnable, SchedulerService {
         }
       }
 
+      while (!toAdd.isEmpty()) {
+        addTask(toAdd.poll());
+      }
       if (autoStartStop) stopIfNoTasks();
     }
 
@@ -157,7 +166,7 @@ public class SimpleSchedulerService implements Runnable, SchedulerService {
    * @param task
    */
   public AsyncTask addTask(final TimedTask task) {
-    synchronized (this) {
+    synchronized (lock) {
       tasks.add(task);
       if (nextRunTime == 0 || task.nextRuntime() < nextRunTime) {
         nextRunTime = task.nextRuntime();
@@ -185,12 +194,17 @@ public class SimpleSchedulerService implements Runnable, SchedulerService {
     };
   }
 
+  @Override
+  public void addTaskConcurrently(TimedTask task) {
+    toAdd.add(task);
+  }
+
   public void setAutoStartStop(boolean autoStartStop) {
     this.autoStartStop = autoStartStop;
   }
 
   public void requestStop() {
-    synchronized (this) {
+    synchronized (lock) {
       currentThread.interrupt();
       running = false;
     }
@@ -198,7 +212,7 @@ public class SimpleSchedulerService implements Runnable, SchedulerService {
 
 
   public boolean isFinished() {
-    synchronized (this) {
+    synchronized (lock) {
       return finished;
     }
   }
