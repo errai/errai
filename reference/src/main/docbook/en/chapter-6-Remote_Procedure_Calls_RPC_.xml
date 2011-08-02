@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<chapter id="sid-5833085_ReferenceGuide-RemoteProcedureCalls%28RPC%29">
+    
+    <title>Remote Procedure Calls (RPC)</title>
+    <para>ErraiBus supports a high-level RPC layer to make typical client-server RPC communication easy on top of the bus. While it is possible to use ErraiBus without ever using this API, you may find it to be a more useful and concise approach to exposing services to the clients.</para>
+    <para>Please Note that this API has changed since version 1.0. RPC services provide a way of creating type-safe mechanisms to make client-to-server calls. Currently, this mechanism only support client-to-server calls, and not vice-versa.</para>
+    <para>Creating a service is straight forward. It requires the definition of a remote interface, and a service class which implements it. See the following:</para>
+    <informalexample>
+      <programlisting>@Remote
+  public interface MyRemoteService {
+    public boolean isEveryoneHappy();
+}</programlisting>
+    </informalexample>
+    <para>
+      The
+      <code>@Remote</code>
+      annotation tells Errai that we'd like to use this interface as a remote interface. The remote interface must be part of of the GWT client code. It cannot be part of the server-side code, since the interface will need to be referenced from both the client and server side code. That said, the implementation of a service is relatively to the point:
+    </para>
+    <informalexample>
+      <programlisting>@Service
+public class MyRemoteServiceImpl implements MyRemoteService {
+
+  public boolean isEveryoneHappy() {
+    // blatently lie and say everyone's happy.
+    return true;
+  }
+}</programlisting>
+    </informalexample>
+    <para>
+      That's all there is to it. You use the same
+      <code>@Service</code>
+      annotation as described in Section 2.4. The presence of the remote interface tips Errai off as to what you want to do with the class.
+    </para>
+    <para>
+      Making callsCalling a remote service involves use of the
+      <code>MessageBuilder</code>
+      API. Since all messages are asynchronous, the actual code for calling the remote service involves the use of a callback, which we use to receive the response from the remote method. Let's see how it works:
+    </para>
+    <informalexample>
+      <programlisting>MessageBuilder.createCall(new RemoteCallback&lt;Boolean&gt;() {
+  public void callback(Boolean isHappy) {
+    if (isHappy) Window.alert("Everyone is happy!");
+  }
+ }, MyRemoteService.class).isEveryoneHappy();</programlisting>
+    </informalexample>
+    <para>
+      In the above example, we declare a remote callback that receives a Boolean, to correpond to the return value of the method on the server. We also reference the remote interface we are calling, and directly call the method. However,
+      <emphasis role="italics">don't be tempted to write code like this</emphasis>
+      :
+    </para>
+    <informalexample>
+      <programlisting>boolean bool = MessageBuilder.createCall(..., MyRemoteService.class).isEveryoneHappy();</programlisting>
+    </informalexample>
+    <para>The above code will never return a valid result. In fact, it will always return null, false, or 0 depending on the type. This is due to the fact that the method is dispatched asynchronously, as in, it does not wait for a server response before returning control. The reason we chose to do this, as opposed to emulate the native GWT-approach, which requires the implementation of remote and async interfaces, was purely a function of a tradeoff for simplicity.</para>
+  </chapter>

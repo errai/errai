@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<chapter id="sid-5833085_ReferenceGuide-AsynchronousMessageTasks">
+    
+    <title>Asynchronous Message Tasks</title>
+    <para>
+      In some applications, it may be necessary or desirable to delay transmission of, or continually stream data to a remote client or group of clients (or from a client to the server). In cases like this, you can utilize the
+      <code>replyRepeating()</code>
+      ,
+      <code>replyDelayed()</code>
+      ,
+      <code>sendRepeating()</code>
+      and
+      <code>sendDelayed()</code>
+      methods in the
+      <code>MessageBuilder</code>
+      .
+    </para>
+    <para>
+      Delayed TasksSending a task with a delay is straight forward. Simply utilize the appropriate method (either
+      <code>replyDelayed()</code>
+      or
+      <code>sendDelayed()</code>
+      ).
+    </para>
+    <informalexample>
+      <programlisting>MessageBuilder.createConversation(msg)
+    .toSubject("FunSubject")
+    .signalling()
+    .noErrorHandling()
+    .replyDelayed(TimeUnit.SECONDS, 5); // sends the message after 5 seconds.</programlisting>
+    </informalexample>
+    <para>or</para>
+    <informalexample>
+      <programlisting>MessageBuilder.createMessage()
+     .toSubject("FunSubject")
+     .signalling()
+     .noErrorHandling()
+     .sendDelayed(requestDispatcher, TimeUnit.SECONDS, 5); // sends the message after 5 seconds.</programlisting>
+    </informalexample>
+  </chapter>

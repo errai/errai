@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<chapter id="sid-5833085_ReferenceGuide-BusConfiguration">
+    
+    <title>Bus Configuration</title>
+    <para>This section contains information on configuring the server-side bus.</para>
+    <section id="sid-5833085_ReferenceGuide-web.xmlandappserverconfiguration">
+      
+      <title>web.xml and appserver configuration</title>
+      <para>Depending on what application server you are deploying on, you must provide an appropriate servlet implementation if you wish to use true, asynchronous I/O. See _section 6.5 _ for information on the available servlet implementations.</para>
+      <para>Here's a sample web.xml file:</para>
+      <informalexample>
+        <programlisting>&lt;web-app xmlns="http://java.sun.com/xml/ns/javaee"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+  http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+  version="2.5"&gt;
+
+  &lt;servlet&gt;
+    &lt;servlet-name&gt;ErraiServlet&lt;/servlet-name&gt;
+    &lt;servlet-class&gt;org.jboss.errai.bus.server.servlet.DefaultBlockingServlet&lt;/servlet-class&gt;
+    &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
+  &lt;/servlet&gt;
+
+  &lt;servlet-mapping&gt;
+    &lt;servlet-name&gt;ErraiServlet&lt;/servlet-name&gt;
+    &lt;url-pattern&gt;*.erraiBus&lt;/url-pattern&gt;
+  &lt;/servlet-mapping&gt;
+
+  &lt;context-param&gt;
+    &lt;param-name&gt;errai.properties&lt;/param-name&gt;
+    &lt;param-value&gt;/WEB-INF/errai.properties&lt;/param-value&gt;
+  &lt;/context-param&gt;
+
+  &lt;context-param&gt;
+    &lt;param-name&gt;login.config&lt;/param-name&gt;
+    &lt;param-value&gt;/WEB-INF/login.config&lt;/param-value&gt;
+  &lt;/context-param&gt;
+
+  &lt;context-param&gt;
+    &lt;param-name&gt;users.properties&lt;/param-name&gt;
+    &lt;param-value&gt;/WEB-INF/users.properties&lt;/param-value&gt;
+  &lt;/context-param&gt;
+
+&lt;/web-app&gt;</programlisting>
+      </informalexample>
+    </section>
+    <section id="sid-5833085_ReferenceGuide-ErraiService.properties">
+      
+      <title>ErraiService.properties</title>
+      <para>he ErraiService.properties file contains basic configuration for the bus itself.</para>
+      <para>Example Configuration:</para>
+      <informalexample>
+        <programlisting>##
+## Request dispatcher implementation (default is SimpleDispatcher)
+##
+#errai.dispatcher_implementation=org.jboss.errai.bus.server.SimpleDispatcher
+errai.dispatcher_implementation=org.jboss.errai.bus.server.AsyncDispatcher
+
+
+#
+## Worker pool size. This is the number of threads the asynchronous worker pool should provide for
+processing
+## incoming messages. This option is only valid when using the AsyncDispatcher implementation.
+##
+errai.async.thread_pool_size=5
+
+##
+## Worker timeout (in seconds). This defines the time that a single asychronous process may run,
+before the worker pool
+## terminates it and reclaims the thread. This option is only valid when using the AsyncDispatcher
+implementation.
+##
+errai.async.worker.timeout=5
+
+##
+## Specify the Authentication/Authorization Adapter to use
+##
+#errai.authentication_adapter=org.jboss.errai.persistence.server.security.HibernateAuthenticationAdapter
+#errai.authentication_adapter=org.jboss.errai.bus.server.security.auth.JAASAdapter
+
+##
+## This property indicates whether or not authentication is required for all communication with the
+bus. Set this
+## to 'true' if all access to your application should be secure.
+##
+#errai.require_authentication_for_all=true</programlisting>
+      </informalexample>
+      <section id="sid-5833085_ReferenceGuide-errai.dispatcher.implementation">
+        
+        <title>errai.dispatcher.implementation</title>
+        <para>
+          The
+          <code>errai.dispatcher_implementation</code>
+          defines, as it's name quite succinctly implies, the dispatcher implementation to be used by the bus. There are two implementations which come with Errai out of the box: the
+          <code>SimpleDispatcher</code>
+          and the
+          <code>AsyncDispatcher</code>
+          . See section on Dispatchers for more information about the differences between the two.
+        </para>
+      </section>
+      <section id="sid-5833085_ReferenceGuide-errai.asyncthreadpoolsize">
+        
+        <title>errai.async_thread_pool_size</title>
+        <para>Specifies the total number of worker threads in the worker pool for handling and delivering messages. Adjusting this value does not have any effect if you are using the SimpleDispatcher.</para>
+      </section>
+      <section id="sid-5833085_ReferenceGuide-errai.async.workertimeout">
+        
+        <title>errai.async.worker_timeout</title>
+        <para>Specifies the total amount of a time (in seconds) a service has to finish processing an incoming message before the pool interrupts the thread and returns an error. Adjusting this value does not have an effect if you are using the SimpleDispatcher.</para>
+      </section>
+      <section id="sid-5833085_ReferenceGuide-errai.authenticationadapter">
+        
+        <title>errai.authentication_adapter</title>
+        <para>Specifies the authentication modelAdapter the bus should use for determining whether calls should be serviced based on authentication and security principles.</para>
+      </section>
+      <section id="sid-5833085_ReferenceGuide-errai.requireauthenticationforall">
+        
+        <title>errai.require_authentication_for_all</title>
+        <para>Indicates whether or not the bus should always require the use of authentication for all requests inbound for the bus. If this is turned on, an authentication model adapter must be defined, and any user must be authenticated before the bus will deliver any messages from the client to any service.</para>
+      </section>
+      <section id="sid-5833085_ReferenceGuide-errai.autodiscoverservices">
+        
+        <title>errai.auto_discover_services</title>
+        <para>A boolean indicating whether or not the Errai bootstrapper should automatically scan for services.</para>
+      </section>
+      <section id="sid-5833085_ReferenceGuide-errai.autoloadextensions">
+        
+        <title>errai.auto_load_extensions</title>
+        <para>A boolean indicating whether or not the Errai bootstrapper should automatically scan for extensions.</para>
+      </section>
+    </section>
+    <section id="sid-5833085_ReferenceGuide-ErraiApp.properties">
+      
+      <title>ErraiApp.properties</title>
+      <para>The ErraiApp.properties acts as a marker file. When it is detected inside a JAR or at the top of any classpath, the subdirectories are scanned for deployable components. As such, all Errai application modules in a project should contain an ErraiApp.properties at the root of all classpaths that you wish to be scanned.</para>
+      <para>The file can also include explicitly declared serializable types (such as those from third-party code) that cannot be annotated for serialization. (See the section on serialization for more details)</para>
+      <para>errai.bus.serializableTypesDefines a list of serializable types to expose to the bus.</para>
+      <informalexample>
+        <programlisting>errai.bus.serializableTypes=org.foo.Foo \
+                            org.bar.Bar \
+                            org.foobie.Foobie</programlisting>
+      </informalexample>
+    </section>
+  </chapter>

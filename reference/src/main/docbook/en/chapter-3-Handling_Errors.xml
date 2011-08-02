@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<chapter id="sid-5833085_ReferenceGuide-HandlingErrors">
+    
+    <title>Handling Errors</title>
+    <para>
+      Asynchronous messaging necessitates the need for asynchronous error handling. Luckily, support for handling errors is built directly into the
+      <code>MessageBuilder</code>
+      API, utilizing the
+      <code>ErrorCallback</code>
+      interface. In the examples shown in previous exceptions, error-handing has been glossed over with aubiquitous usage of the
+      <code>noErrorHandling()</code>
+      method while building messaging. We chose to require the explicit use of such a method to remind developers of the fact that they are responsible for their own error handling, requiring you to explicitly make the decision to forego handling potential errors.
+    </para>
+    <para>
+      As a general rule, you should
+      <emphasis role="italics">always handle your errors</emphasis>
+      . It will lead to faster and quicker identification of problems with your applications if you have error handlers, and generally help you build more robust code.
+    </para>
+    <informalexample>
+      <programlisting>MessageBuilder.createMessage()
+    .toSubject("HelloWorldService")
+    .signalling()
+    .with("msg", "Hi there!")
+    .errorsHandledBy(new ErrorCallback() {
+      public boolean error(Message message, Throwable throwable) {
+        throwable.printStackTrace();
+          return true;
+      }
+    })
+    .sendNowWith(dispatcher);</programlisting>
+    </informalexample>
+    <para>The addition of error-handling at first may put off developers as it makes code more verbose and less-readable. This is nothing that some good practice can't fix. In fact, you may find cases where the same error-handler can appropriately be shared between multiple different calls.</para>
+    <informalexample>
+      <programlisting>ErrorCallback error = new ErrorCallback() {
+    public boolean error(Message message, Throwable throwable) {
+      throwable.printStackTrace();
+      return true;
+    }
+  }
+
+  MessageBuilder.createMessage()
+    .toSubject("HelloWorldService")
+    .signalling()
+    .with("msg", "Hi there!")
+    .errorsHandledBy(error)
+    .sendNowWith(dispatcher);</programlisting>
+    </informalexample>
+    <para>A little nicer.</para>
+    <para>
+      The error handler requires that return a
+      <code>boolean</code>
+      value. This is to indicate whether or not Errai should perform the defautl error handling actions it would normally take during a failure. You will almost always want to return
+      <code>true</code>
+      here, unless you are trying to expicitly supress some undesirably activity by Errai, such as automatic subject-termination in conversations. But this is almost never the case.
+    </para>
+  </chapter>
