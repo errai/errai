@@ -25,17 +25,12 @@ import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.dev.cfg.ModuleDef;
 import com.google.gwt.dev.javac.StandardGeneratorContext;
-import org.apache.http.impl.client.TunnelRefusedException;
-import org.jboss.errai.bus.server.ErraiBootstrapFailure;
-import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCBootstrapGenerator;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
 
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
-import java.util.Iterator;
-import java.util.Properties;
 
 /**
  * The main generator class for the errai-ioc framework.
@@ -57,8 +52,6 @@ public class IOCGenerator extends Generator {
   public static final boolean isDebugCompile = Boolean.getBoolean("errai.ioc.debug");
 
   public IOCGenerator() {
-
-
   }
 
   @Override

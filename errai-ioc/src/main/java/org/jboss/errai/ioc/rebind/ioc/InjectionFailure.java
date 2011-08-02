@@ -37,7 +37,6 @@ public class InjectionFailure extends ErraiBootstrapFailure {
     this.failedDependency = failedDependency;
   }
 
-
   @Override
   public String getMessage() {
     StringBuilder buf = new StringBuilder();

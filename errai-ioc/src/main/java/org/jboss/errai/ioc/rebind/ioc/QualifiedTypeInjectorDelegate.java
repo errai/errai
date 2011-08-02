@@ -64,6 +64,4 @@ public class QualifiedTypeInjectorDelegate extends Injector {
   public void setQualifyingMetadata(QualifyingMetadata qualifyingMetadata) {
     delegate.setQualifyingMetadata(qualifyingMetadata);
   }
-
-
 }

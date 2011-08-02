@@ -42,7 +42,6 @@ public class InjectionTask {
   protected MetaClass type;
   protected MetaParameter parm;
 
-
   public InjectionTask(Injector injector, MetaField field) {
     this.injectType = !field.isPublic() ? TaskType.PrivateField : TaskType.Field;
     this.injector = injector;
@@ -84,7 +83,6 @@ public class InjectionTask {
         break;
 
       case PrivateField: {
-
         if (!ctx.isInjectableQualified(field.getType(), qualifyingMetadata)) {
           return false;
         }
@@ -96,7 +94,6 @@ public class InjectionTask {
           e.setTarget(toString());
           throw e;
         }
-
 
         processingContext.append(
                 Stmt.invokeStatic(processingContext.getBootstrapClass(), getPrivateFieldInjectorName(field),
