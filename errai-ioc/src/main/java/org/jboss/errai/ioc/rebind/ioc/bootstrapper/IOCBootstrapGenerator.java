@@ -55,7 +55,6 @@ public class IOCBootstrapGenerator {
 
   public static final String QUALIFYING_METADATA_FACTORY_PROPERTY = "errai.ioc.QualifyingMetaDataFactory";
 
-
   TreeLogger logger = new TreeLogger() {
     @Override
     public TreeLogger branch(Type type, String msg, Throwable caught, HelpInfo helpInfo) {
@@ -136,7 +135,6 @@ public class IOCBootstrapGenerator {
         }
       }
     }
-
 
     procContext.setPackageFilter(packageFilter);
 
@@ -329,7 +327,6 @@ public class IOCBootstrapGenerator {
     return injectFactory.generateAllProviders();
   }
 
-
   public void initializeProviders() {
 
     final MetaClass typeProviderCls = MetaClassFactory.get(TypeProvider.class);
@@ -401,7 +398,6 @@ public class IOCBootstrapGenerator {
         if (iface.getFullyQualifiedName().equals(Provider.class.getName())) {
           injectFactory.addType(type);
 
-
           MetaParameterizedType pType = iface.getParameterizedType();
           MetaType typeParm = pType.getTypeParameters()[0];
           if (typeParm instanceof MetaParameterizedType) {
@@ -420,7 +416,6 @@ public class IOCBootstrapGenerator {
               break;
             }
           }
-
 
           if (isContextual) {
             injectFactory.addInjector(new ContextualProviderInjector(bindType, type, procContext));
@@ -510,7 +505,6 @@ public class IOCBootstrapGenerator {
       extensionConfigurator.afterInitialization(procContext, injectFactory, procFactory);
     }
   }
-
 
   private void defaultConfigureProcessor() {
     final MetaClass widgetType = MetaClassFactory.get(Widget.class);

@@ -44,23 +44,19 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
 public class IOCProcessorFactory {
   private SortedSet<ProcessingEntry> processingEntries = new TreeSet<ProcessingEntry>();
 
-  // private Map<Class<? extends Annotation>, AnnotationHandler> annotationHandlers;
   private InjectorFactory injectorFactory;
 
   public IOCProcessorFactory(InjectorFactory factory) {
-    //   this.annotationHandlers = new HashMap<Class<? extends Annotation>, AnnotationHandler>();
     this.injectorFactory = factory;
   }
 
   public void registerHandler(Class<? extends Annotation> annotation, AnnotationHandler handler) {
-    //   annotationHandlers.put(annotation, handler);
     processingEntries.add(new ProcessingEntry(annotation, handler));
   }
 
   public void registerHandler(Class<? extends Annotation> annotation, AnnotationHandler handler, List<RuleDef> rules) {
     processingEntries.add(new ProcessingEntry(annotation, handler, rules));
   }
-
 
   @SuppressWarnings({"unchecked"})
   public void process(final MetaDataScanner scanner, final IOCProcessingContext context) {
@@ -282,5 +278,4 @@ public class IOCProcessorFactory {
   private static interface ProcessingDelegate<T> {
     public boolean process();
   }
-
 }

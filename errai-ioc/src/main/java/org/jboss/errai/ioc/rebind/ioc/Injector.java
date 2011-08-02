@@ -47,7 +47,6 @@ public abstract class Injector {
                     && qualifyingMetadata != null
                     && injector.getQualifyingMetadata().doesSatisfy(qualifyingMetadata));
 
-
     return meta && (qualifyingTypeInformation == null && (injector != null && injector.qualifyingTypeInformation ==
             null)
             || !(qualifyingTypeInformation == null || (injector != null && injector.qualifyingTypeInformation ==
@@ -55,14 +54,13 @@ public abstract class Injector {
             && qualifyingTypeInformation.isAssignableFrom(injector.qualifyingTypeInformation));
   }
 
-
   public boolean matches(MetaParameterizedType parameterizedType, QualifyingMetadata qualifyingMetadata) {
     boolean parmTypesSatisfied = true;
     if (parameterizedType != null) {
       parmTypesSatisfied = parameterizedType.isAssignableFrom(getQualifyingTypeInformation());
     }
 
-    boolean metaDataSatisfied  = getQualifyingMetadata() == null || getQualifyingMetadata().doesSatisfy
+    boolean metaDataSatisfied = getQualifyingMetadata() == null || getQualifyingMetadata().doesSatisfy
             (qualifyingMetadata);
 
     return parmTypesSatisfied && metaDataSatisfied;

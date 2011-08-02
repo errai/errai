@@ -46,7 +46,6 @@ public class ProviderInjector extends TypeInjector {
               .invoke("get");
     }
     else {
-
       return Stmt.nestedCall(providerInjector.getType(injectContext, injectableInstance))
               .invoke("provide");
     }

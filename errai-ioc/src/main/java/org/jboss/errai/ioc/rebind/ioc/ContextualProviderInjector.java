@@ -40,7 +40,6 @@ public class ContextualProviderInjector extends TypeInjector {
 
   @Override
   public Statement getType(InjectionContext injectContext, InjectableInstance injectableInstance) {
-
     MetaClass type = null;
     MetaParameterizedType pType = null;
 
@@ -99,7 +98,6 @@ public class ContextualProviderInjector extends TypeInjector {
         injectContext.deregisterInjector(contextInjector);
       }
       else {
-
         statement = Stmt.nestedCall(providerInjector.getType(injectContext, injectableInstance))
                 .invoke("provide", typeArgs, qualifiers.length != 0 ? qualifiers : null);
 

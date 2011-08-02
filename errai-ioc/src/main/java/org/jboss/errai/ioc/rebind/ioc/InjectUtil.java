@@ -74,7 +74,6 @@ public class InjectUtil {
     final List<InjectionTask> injectionTasks = scanForTasks(injector, ctx, type);
     final List<MetaMethod> postConstructTasks = scanForPostConstruct(type);
 
-
     if (!constructorInjectionPoints.isEmpty()) {
       if (constructorInjectionPoints.size() > 1) {
         throw new InjectionFailure("more than one constructor in "
@@ -111,7 +110,6 @@ public class InjectUtil {
           doPostConstruct(ctx, injector, postConstructTasks);
         }
       };
-
     }
     else {
       // field injection
@@ -130,7 +128,6 @@ public class InjectUtil {
                           .initializeWith(Stmt.newObject(type))
 
           );
-
 
           handleInjectionTasks(ctx, injectionTasks);
 
@@ -648,6 +645,5 @@ public class InjectUtil {
     else {
       return Class.forName(name, false, Thread.currentThread().getContextClassLoader());
     }
-
   }
 }

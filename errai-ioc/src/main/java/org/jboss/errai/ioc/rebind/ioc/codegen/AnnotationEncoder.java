@@ -16,17 +16,18 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.AnonymousClassStructureBuilderImpl;
+import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ObjectBuilder;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
+import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.AnonymousClassStructureBuilderImpl;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ObjectBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.PrettyPrinter;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
+import static org.jboss.errai.ioc.rebind.ioc.codegen.util.PrettyPrinter.prettyPrintJava;
 
 public class AnnotationEncoder {
   public static Statement encode(final Annotation annotation) {
@@ -35,7 +36,8 @@ public class AnnotationEncoder {
     return new Statement() {
       @Override
       public String generate(Context context) {
-        final AnonymousClassStructureBuilderImpl builder = ObjectBuilder.newInstanceOf(annotationClass, context).extend();
+        final AnonymousClassStructureBuilderImpl builder = ObjectBuilder.newInstanceOf(annotationClass, context)
+                .extend();
 
         Class<? extends Annotation> annoClass = annotation.getClass();
 
@@ -55,7 +57,7 @@ public class AnnotationEncoder {
           }
         }
 
-        return PrettyPrinter.prettyPrintJava(builder.finish().toJavaString());
+        return prettyPrintJava(builder.finish().toJavaString());
       }
 
       @Override

@@ -54,7 +54,6 @@ public class TypeInjector extends Injector {
       else {
         qualifyingMetadata = context.getQualifyingMetadataFactory().createDefaultMetadata();
       }
-
     }
     catch (Throwable e) {
       // ignore

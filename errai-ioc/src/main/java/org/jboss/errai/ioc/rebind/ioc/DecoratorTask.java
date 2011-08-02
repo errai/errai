@@ -78,7 +78,6 @@ public class DecoratorTask extends InjectionTask {
               parm, injector, ctx));
 
       ctx.getProcessingContext().append(stmt);
-
     }
     return true;
   }
