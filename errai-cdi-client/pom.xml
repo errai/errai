@@ -12,8 +12,8 @@
     <groupId>org.jboss.errai</groupId>
     <artifactId>errai-cdi-client</artifactId>
     <version>${parent.version}</version>
-
-
+	<name>Errai::CDI::Client</name>
+	
     <build>
         <resources>
             <resource>
