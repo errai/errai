@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<chapter id="sid-5833085_ReferenceGuide-DebuggingErraiApplications">
+    
+    <title>Debugging Errai Applications</title>
+    <para>Errai includes a bus monitoring application, which allows you to monitor all of the message exchange activity on the bus in order to help track down any potential problems It allows you to inspect individual messages to examine their state and structure.</para>
+    <para>
+      To utilize the bus monitor, you'll need to include the _errai-tools _ package as part of your application's dependencies. When you run your application in development mode, you will simply need to add the following JVM options to your run configuration in order to launch the monitor:
+      <code>-Derrai.tools.bus_monitor_attach=true</code>
+    </para>
+    <para>
+      <figure>
+<title>TODO InformalFigure image title empty</title>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="author/download/attachments/5931386/MonitorOverview.png"/>
+          </imageobject>
+        </mediaobject>
+      </figure>
+    </para>
+    <para>The monitor provides you a real-time perspective on what's going on inside the bus. The left side of the main screen lists the services that are currently available, and the right side is the service-explorer, which will show details about the service.</para>
+    <para>To see what's going on with a specific service, simply double-click on the service or highlight the service, then click "Monitor Service...". This will bring up the service activity monitor.</para>
+    <para>
+      <figure>
+<title>TODO InformalFigure image title empty</title>
+        <mediaobject>
+          <imageobject>
+            <imagedata fileref="author/download/attachments/5931386/MonitorOverview2.png"/>
+          </imageobject>
+        </mediaobject>
+      </figure>
+    </para>
+    <para>The service activity monitor will display a list of all the messages that were transmitted on the bus since the monitor became active. You do not need to actually have each specific monitor window open in order to actively monitor the bus activity. All activity on the bus is recorded.</para>
+    <para>The monitor allows you select individual messages, an view their individual parts. Clicking on a message part will bring up the object inspector, which will allow you to explore the state of any objects contained within the message, not unlike the object inspectors provided by debuggers in your favorite IDE. This can be a powerful tool for looking under the covers of your application.</para>
+  </chapter>

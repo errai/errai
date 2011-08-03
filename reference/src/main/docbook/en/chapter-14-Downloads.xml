@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<chapter id="sid-5833085_ReferenceGuide-Downloads">
+    
+    <title>Downloads</title>
+    <para>
+      The distribution packages can be downloaded from jboss.org
+      <ulink url="http://jboss.org/errai/Downloads.html"/>
+    </para>
+  </chapter>

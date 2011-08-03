@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <name>Errai::Userguide</name>
+    <groupId>org.jboss.errai</groupId>
+    <artifactId>errai-userguide</artifactId>
+    <packaging>jdocbook</packaging>
+
+    <!-- Parent -->
+    <parent>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-parent</artifactId>
+        <version>1.3.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+
+    <properties>
+        <translation>en</translation>
+        <docname>Reference_Guide</docname>
+        <bookname>Reference Guide</bookname>
+    </properties>
+
+
+    <dependencies>
+    </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.jboss.maven.plugins</groupId>
+                    <artifactId>maven-jdocbook-plugin</artifactId>
+                    <version>2.3.5</version>
+                    <extensions>true</extensions>
+
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.jboss.pressgang</groupId>
+                            <!--Non-namespaced version for DocBook 4.5 compatibility. For XSD namespaced version, use pressgang-xslt-ns-->
+                            <artifactId>pressgang-xslt</artifactId>
+                            <version>2.0.0</version>
+                        </dependency>
+
+                        <dependency>
+                            <groupId>org.jboss.pressgang</groupId>
+                            <artifactId>pressgang-jdocbook-style</artifactId>
+                            <type>jdocbook-style</type>
+                            <version>2.0.0</version>
+                        </dependency>
+                    </dependencies>
+
+                    <configuration>
+                        <sourceDocumentName>Reference_Guide.xml</sourceDocumentName>
+                        <masterTranslation>en</masterTranslation>
+                        <imageResource>
+                            <directory>src/main/docbook/en</directory>
+                            <includes>
+                                <include>images/*.png</include>
+                            </includes>
+                        </imageResource>
+
+                        <formats>
+                            <format>
+                                <formatName>pdf</formatName>
+                                <stylesheetResource>classpath:/xslt/org/jboss/pdf.xsl</stylesheetResource>
+                                <finalName>${docname}.pdf</finalName>
+                            </format>
+
+                            <format>
+                                <formatName>html</formatName>
+                                <stylesheetResource>classpath:/xslt/org/jboss/xhtml.xsl</stylesheetResource>
+                                <finalName>index.html</finalName>
+                            </format>
+
+                            <format>
+                                <formatName>html_single</formatName>
+                                <stylesheetResource>classpath:/xslt/org/jboss/xhtml-single.xsl</stylesheetResource>
+                                <finalName>index.html</finalName>
+                            </format>
+                        </formats>
+
+                        <options>
+                            <xmlTransformerType>saxon</xmlTransformerType>
+                            <xincludeSupported>true</xincludeSupported>
+                            <docbookVersion>1.72.0</docbookVersion>
+                            <useRelativeImageUris>true</useRelativeImageUris>
+                        </options>
+
+                    </configuration>
+
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <plugins>
+            <plugin>
+                <!-- Entry needed to enable jdocbook packaging -->
+                <groupId>org.jboss.maven.plugins</groupId>
+                <artifactId>maven-jdocbook-plugin</artifactId>
+            </plugin>
+        </plugins>
+
+    </build>
+
+    <repositories>
+
+        <!-- Conventions are described in http://community.jboss.org/wiki/MavenGettingStarted-Developers -->
+
+        <repository>
+            <id>jboss-public-repository-group</id>
+            <name>JBoss Public Repository Group</name>
+            <url>http://repository.jboss.org/nexus/content/groups/public/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+
+        <pluginRepository>
+            <id>jboss-public-repository-group</id>
+            <name>JBoss Public Repository Group</name>
+            <url>http://repository.jboss.org/nexus/content/groups/public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+
+</project>

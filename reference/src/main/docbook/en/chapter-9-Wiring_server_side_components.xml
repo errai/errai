@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<chapter id="sid-5833085_ReferenceGuide-Wiringserversidecomponents">
+    
+    <title>Wiring server side components</title>
+    <para>
+      By default, ErraiBus uses Google Guice to wire components. However, we plan on standardizing on
+      <emphasis role="italics">JSR-330 Dependency Injection</emphasis>
+      specification in the near future. When deploying services on the server-side, it is currently possible to obtain references to the
+      <code>MessageBus</code>
+      ,
+      <code>RequestDispatcher</code>
+      , the
+      <code>ErraiServiceConfigurator</code>
+      , and
+      <code>ErraiService</code>
+      by declaring them as injection dependencies in Service classes, extension components, and session providers.
+    </para>
+  </chapter>
