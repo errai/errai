@@ -139,13 +139,7 @@
                 <groupId>javax.persistence</groupId>
                 <artifactId>persistence-api</artifactId>
                 <version>1.0</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.jboss.errai</groupId>
-                <artifactId>errai-cdi</artifactId>
-                <version>${project.version}</version>
-            </dependency>
+            </dependency>>
 
             <dependency>
                 <groupId>com.google.appengine</groupId>
