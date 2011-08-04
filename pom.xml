@@ -277,13 +277,9 @@
                             <title>Bus</title>
                             <packages>org.jboss.errai.bus.*</packages>
                         </group>
-                        <group>
-                            <title>Workspaces</title>
-                            <packages>org.jboss.errai.workspaces.*</packages>
-                        </group>
                     </groups>
                     <subpackages>
-                        org.jboss.errai.bus.client.api:org.jboss.errai.bus.client.framework:org.jboss.errai.workspaces.client.api:org.jboss.errai.workspaces.client.framework
+                        org.jboss.errai.bus.client.api:org.jboss.errai.bus.client.framework
                     </subpackages>
                 </configuration>
             </plugin>
@@ -324,9 +320,10 @@
         <profile>
             <id>distro</id>
             <modules>
-                <module>dist</module>
-                <module>errai-bus-demos</module>
+                <module>reference</module>
+                <module>quickstart</module>
                 <module>archetypes/quickstart</module>
+                <module>dist</module>
             </modules>
         </profile>
 
@@ -393,7 +390,6 @@
             <name>Maven Central</name>
             <url>http://repo1.maven.org/</url>
         </repository>
-
     </repositories>
 
     <pluginRepositories>
