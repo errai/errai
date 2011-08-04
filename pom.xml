@@ -322,7 +322,6 @@
             <modules>
                 <module>reference</module>
                 <module>quickstart</module>
-                <module>archetypes/quickstart</module>
                 <module>dist</module>
             </modules>
         </profile>

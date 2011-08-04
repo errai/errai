@@ -15,15 +15,13 @@ before reading any further:
 
 [Contents of this distribution]
 
-    |-archetypes
-    |---quickstart 	(sandbox archetype)
     |-deps
     |---lib 		(third party libs)
     |-docs
     |---reference	(reference guide)
     |---quickstart	(quickstart guide)
     |-examples		(demo apps)
-    |-lib		    (errai libs)
+    |-libi		(errai libs)
     
 
 [Running the examples]

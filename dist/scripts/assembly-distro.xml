@@ -76,12 +76,5 @@
                 <exclude>**/war/StockDemo/**</exclude>
             </excludes>
         </fileSet>
-       <fileSet>
-          <directory>../archetypes/quickstart/target</directory>
-          <outputDirectory>archetypes/quickstart</outputDirectory>
-          <includes>
-              <include>*.jar</include>
-          </includes>
-       </fileSet>
     </fileSets>
 </assembly>
