@@ -4,9 +4,9 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <name>Errai CDI Reference Guide</name>
+    <name>Errai::CDI::Reference Guide</name>
     <groupId>org.jboss.errai</groupId>
-    <artifactId>errai-reference-cdi</artifactId>
+    <artifactId>errai-cdi-reference-guide</artifactId>
     <packaging>jdocbook</packaging>
 
     <!-- Parent -->
@@ -57,7 +57,7 @@
                         <sourceDocumentName>CDI_Reference_Guide.xml</sourceDocumentName>
                         <masterTranslation>en</masterTranslation>
                         <imageResource>
-                            <directory>src/main/docbook/en</directory>
+                            <directory>${basedir}/src/main/docbook/en</directory>
                             <includes>
                                 <include>images/*.png</include>
                             </includes>

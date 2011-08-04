@@ -319,7 +319,6 @@
                     <artifactId>weld-se-core</artifactId>
                     <version>${weld.version}</version>
                     <scope>compile</scope>
-
                 </dependency>
                 <dependency>
                     <groupId>org.jboss.weld.servlet</groupId>

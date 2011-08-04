@@ -4,9 +4,9 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <name>Errai::Userguide</name>
+    <name>Errai::CDI::Quickstart Guide</name>
     <groupId>org.jboss.errai</groupId>
-    <artifactId>errai-userguide</artifactId>
+    <artifactId>errai-cdi-quickstart-guide</artifactId>
     <packaging>jdocbook</packaging>
 
     <!-- Parent -->
@@ -20,8 +20,8 @@
 
     <properties>
         <translation>en</translation>
-        <docname>Reference_Guide</docname>
-        <bookname>Reference Guide</bookname>
+        <docname>Quickstart_Guide</docname>
+        <bookname>Quickstart Guide</bookname>
     </properties>
 
 
@@ -57,7 +57,7 @@
                         <sourceDocumentName>CDI_Quickstart_Guide.xml</sourceDocumentName>
                         <masterTranslation>en</masterTranslation>
                         <imageResource>
-                            <directory>src/main/docbook/en</directory>
+                            <directory>${basedir}/src/main/docbook/en</directory>
                             <includes>
                                 <include>images/*.png</include>
                             </includes>
