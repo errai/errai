@@ -4,9 +4,9 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <name>Errai::Userguide</name>
+    <name>Errai::Reference::Guide</name>
     <groupId>org.jboss.errai</groupId>
-    <artifactId>errai-userguide</artifactId>
+    <artifactId>errai-reference-guide</artifactId>
     <packaging>jdocbook</packaging>
 
     <!-- Parent -->
@@ -17,13 +17,11 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-
     <properties>
         <translation>en</translation>
         <docname>Reference_Guide</docname>
         <bookname>Reference Guide</bookname>
     </properties>
-
 
     <dependencies>
     </dependencies>
@@ -57,7 +55,7 @@
                         <sourceDocumentName>Reference_Guide.xml</sourceDocumentName>
                         <masterTranslation>en</masterTranslation>
                         <imageResource>
-                            <directory>src/main/docbook/en</directory>
+                            <directory>${basedir}/src/main/docbook/en</directory>
                             <includes>
                                 <include>images/*.png</include>
                             </includes>

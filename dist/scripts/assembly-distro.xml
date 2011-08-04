@@ -15,60 +15,31 @@
     <!-- Dependency Sets -->
     <dependencySets>
         <!-- lib -->
-
         <dependencySet>
-            <outputFileNameMapping>${artifact.artifactId}${dashClassifier?}.${artifact.extension}
-            </outputFileNameMapping>
             <unpack>false</unpack>
-            <scope>test</scope>
-            <includes>
+            <outputDirectory>lib</outputDirectory>
+              <includes>
 
                 <!-- Errai Libraries -->
                 <include>org.jboss.errai:errai-common</include>
                 <include>org.jboss.errai:errai-bus</include>
                 <include>org.jboss.errai:errai-workspaces</include>
-                <!--include>org.jboss.errai:errai-widgets</include-->
+                <include>org.jboss.errai:errai-widgets</include>
                 <include>org.jboss.errai:errai-ioc</include>
                 <include>org.jboss.errai:errai-tools</include>
-                <!--include>org.jboss.errai:errai-persistence</include-->
+                <include>org.jboss.errai:errai-persistence</include>
 
-                <include>org.slf4j:slf4j-api</include>
-                <include>org.slf4j:slf4j-log4j12</include>
-
-                <!-- 3rd Party -->
-                <include>com.google.code.guice:guice</include>
-                <include>com.google.code.guice:guice-servlet</include>
-                <include>org.mvel:mvel2</include>
-
-                <include>org.reflections:reflections:jar:0.9.5-RC2_jboss-SP1</include>
-                <include>com.google.collections:google-collections</include>
-                <include>dom4j:dom4j</include>
-                <include>xml-apis:xml-apis</include>
-                <include>javassist:javassist</include>
             </includes>
-            <outputDirectory>lib</outputDirectory>
         </dependencySet>
-
-        <dependencySet>
-            <outputFileNameMapping>${artifact.artifactId}${dashClassifier?}.${artifact.extension}
-            </outputFileNameMapping>
-            <unpack>false</unpack>
-            <scope>test</scope>
-            <includes>
-                <!-- CDI Extension Libraries -->
-                <include>org.jboss.errai:errai-cdi</include>
-            </includes>
-            <outputDirectory>ext/cdi/lib</outputDirectory>
-        </dependencySet>
-
-
         <dependencySet>
             <unpack>false</unpack>
-            <scope>test</scope>
-            <includes>
-                <include>*:guice:aopalliance</include>
-            </includes>
-            <outputDirectory>lib</outputDirectory>
+            <outputDirectory>deps/lib</outputDirectory>
+              <excludes>
+
+                <!-- Errai Libraries -->
+                <exclude>org.jboss.errai:*</exclude>
+                
+            </excludes>
         </dependencySet>
     </dependencySets>
 
@@ -78,11 +49,12 @@
             <outputDirectory>/</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>../userguide/target/docbook/publish/en</directory>
-            <outputDirectory>doc/userguide</outputDirectory>
-            <excludes>
-                <exclude>**/*.fo</exclude>
-            </excludes>
+            <directory>../reference/target/docbook/publish/en</directory>
+            <outputDirectory>docs/reference</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>../quickstart/target/docbook/publish/en</directory>
+            <outputDirectory>docs/quickstart</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>../errai-bus-demos/</directory>
@@ -103,10 +75,12 @@
                 <exclude>**/war/StockDemo/**</exclude>
             </excludes>
         </fileSet>
-
-        <fileSet>
-            <directory>jboss/</directory>
-            <outputDirectory>/ext/cdi</outputDirectory>
-        </fileSet>
+       <fileSet>
+          <directory>../archetypes/quickstart/target</directory>
+          <outputDirectory>archetypes/quickstart</outputDirectory>
+          <includes>
+              <include>*.jar</include>
+          </includes>
+       </fileSet>
     </fileSets>
 </assembly>
