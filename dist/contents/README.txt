@@ -23,7 +23,7 @@ before reading any further:
     |---reference	(reference guide)
     |---quickstart	(quickstart guide)
     |-examples		(demo apps)
-    |-lib		(errai libs)
+    |-lib		    (errai libs)
     
 
 [Running the examples]

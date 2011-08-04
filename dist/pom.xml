@@ -65,6 +65,12 @@
 			<artifactId>errai-tools</artifactId>
 			<version>${version}</version>
 		</dependency>
+		
+		<dependency>
+            <groupId>org.jboss.errai</groupId>
+            <artifactId>jboss7-support</artifactId>
+            <version>${version}</version>
+        </dependency>
 	</dependencies>
 
 	<!-- Plugins -->
