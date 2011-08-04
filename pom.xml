@@ -64,7 +64,6 @@
         <module>weld-integration</module>
         <module>jboss</module>
         <module>errai-javax-enterprise</module>
-        <module>errai-cdi-archetype</module>
         <module>demos/errai-cdi-tagcloud-demo</module>
     </modules>
 
