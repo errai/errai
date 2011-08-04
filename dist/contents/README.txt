@@ -2,10 +2,8 @@
 Errai CDI 1.3 (http://jboss.org/errai)
 =================================================
 
-
 [Contents of this distribution]
 
-    |-archetypes	(errai cdi maven archetype)
     |-deps
     |---lib 		(third party libs)
     |-docs
@@ -13,7 +11,6 @@ Errai CDI 1.3 (http://jboss.org/errai)
     |---quickstart	(quickstart guide)
     |-examples		(demo apps)
     |-lib			(errai libs)
-    
 
 [Running the examples]
 

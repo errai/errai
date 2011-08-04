@@ -72,12 +72,5 @@
                 <exclude>**/war/TagCloudDemo/**</exclude>
             </excludes>
         </fileSet>
-       <fileSet>
-          <directory>../errai-cdi-archetype/target</directory>
-          <outputDirectory>archetype</outputDirectory>
-          <includes>
-              <include>*.jar</include>
-          </includes>
-       </fileSet>
     </fileSets>
 </assembly>

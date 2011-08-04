@@ -290,7 +290,6 @@
             <modules>
                 <module>reference</module>
                 <module>quickstart</module>
-                <module>errai-cdi-archetype</module>
                 <module>demos/errai-cdi-tagcloud-demo</module>
                 <module>dist</module>
             </modules>
