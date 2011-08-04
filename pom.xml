@@ -47,7 +47,6 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <errai-jms.version>1.1-SNAPSHOT</errai-jms.version>
         <gwt.version>2.3.0</gwt.version>
         <hsqldb.version>1.8.0.7</hsqldb.version>
         <weld.version>1.1.0.Final</weld.version>
@@ -284,16 +283,16 @@
     </build>
 
     <profiles>
-      <profile>
-        <id>distro</id>
-        <modules>
-            <module>reference</module>
-            <module>quickstart</module>
-            <module>errai-cdi-archetype</module>
-            <module>demos/errai-cdi-tagcloud-demo</module>
-            <module>dist</module>
-        </modules>
-      </profile>
+        <profile>
+            <id>distro</id>
+            <modules>
+                <module>reference</module>
+                <module>quickstart</module>
+                <module>errai-cdi-archetype</module>
+                <module>demos/errai-cdi-tagcloud-demo</module>
+                <module>dist</module>
+            </modules>
+        </profile>
     </profiles>
 
     <!-- Repositories -->
