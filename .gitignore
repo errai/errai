@@ -1,4 +1,7 @@
 .idea/*
-.eclipse/*
+.classpath
+.settings
+.project
+.metadata/*
 *.iml
 target/
