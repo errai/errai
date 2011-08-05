@@ -1,6 +1,9 @@
 *.iml
 /.idea/*
-/.eclipse/*
+.classpath
+.project
+.settings
+.metadata/*
 .gwt-tmp/
 target/
 classes/
