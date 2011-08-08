@@ -14,24 +14,24 @@
     </para>
     <informalexample>
         <programlisting>mvn archetype:generate \
-            -DarchetypeGroupId=org.jboss.errai \
-            -DarchetypeArtifactId=errai-cdi-archetype \
-            -DarchetypeVersion=1.3.0-SNAPSHOT \
-            -DarchetypeRepository=https://repository.jboss.org/nexus/content/repositories/snapshots/
+-DarchetypeGroupId=org.jboss.errai \
+-DarchetypeArtifactId=errai-cdi-archetype \
+-DarchetypeVersion=1.3.0-SNAPSHOT \
+-DarchetypeRepository=https://repository.jboss.org/nexus/content/repositories/snapshots/
         </programlisting>
     </informalexample>
     <para>Customize the build properties according to your needs.</para>
     <informalexample>
         <programlisting>Define value for property 'groupId': : foo.bar
-            Define value for property 'artifactId': : gwt-app
-            Define value for property 'version': 1.0-SNAPSHOT:
-            Define value for property 'package': foo.bar: com.foo.bar
-            Confirm properties configuration:
-            groupId: foo.bar
-            artifactId: gwt-app
-            version: 1.0-SNAPSHOT
-            package: com.foo.bar
-            Y:
+Define value for property 'artifactId': : gwt-app
+Define value for property 'version': 1.0-SNAPSHOT:
+Define value for property 'package': foo.bar: com.foo.bar
+Confirm properties configuration:
+groupId: foo.bar
+artifactId: gwt-app
+version: 1.0-SNAPSHOT
+package: com.foo.bar
+Y:
         </programlisting>
     </informalexample>
     <para>The project will be created in a directory that corresponds to the provided artifactId.</para>
@@ -40,16 +40,16 @@
     </para>
     <informalexample>
         <programlisting>mvn gwt:run (launch hosted mode)
-            mvn gwt:debug (launch hosted with debug settings)
-            mvn install (package and install the web application)
+mvn gwt:debug (launch hosted with debug settings)
+mvn install (package and install the web application)
         </programlisting>
     </informalexample>
     <para>To deploy your application to JBoss, you need to execute a clean rebuild using the JBoss profile (e.g.
         -Pjboss7)
     </para>
     <informalexample>
-        <programlisting>mvn \-Pjboss7 clean install
-            cp target/gwt-app.war $JBOSS_HOME/standalone/deployments
+        <programlisting>mvn -Pjboss7 clean install
+cp target/gwt-app.war $JBOSS_HOME/standalone/deployments
         </programlisting>
     </informalexample>
     <note>
