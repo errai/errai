@@ -24,13 +24,12 @@
     <parent>
         <groupId>org.jboss.errai</groupId>
         <artifactId>errai-parent</artifactId>
-        <version>1.3.0.Beta1</version>
+        <version>1.3.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <dependencies>
         <!-- ERRAI Libraries -->
-
         <dependency>
             <groupId>org.jboss.errai</groupId>
             <artifactId>errai-common</artifactId>
@@ -67,22 +66,9 @@
             <version>${version}</version>
         </dependency>
 
-        <!-- CDI Extension -->
         <dependency>
             <groupId>org.jboss.errai</groupId>
-            <artifactId>errai-weld-integration</artifactId>
-            <version>${version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jboss.errai</groupId>
-            <artifactId>errai-cdi-client</artifactId>
-            <version>${version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jboss.errai</groupId>
-            <artifactId>errai-javax-enterprise</artifactId>
+            <artifactId>jboss7-support</artifactId>
             <version>${version}</version>
         </dependency>
     </dependencies>
@@ -117,6 +103,4 @@
             </plugin>
         </plugins>
     </build>
-
-
 </project>
