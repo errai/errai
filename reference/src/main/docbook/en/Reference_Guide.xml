@@ -28,5 +28,5 @@
   <xi:include href="chapter-23-Errai_IOC.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
   <xi:include href="chapter-24-Reporting_problems.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
 
-  <xi:include href="Revision_History.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+  <!-- xi:include href="Revision_History.xml" xmlns:xi="http://www.w3.org/2001/XInclude" /-->
 </book>
