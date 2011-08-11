@@ -131,20 +131,19 @@ public class JSONEncoder {
     boolean first = true;
 
     for (Field field : fields) {
-      if (first) build.append(',');
-
       if ((field.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
               || field.isSynthetic()) {
         continue;
       }
-      else if (!first) {
+      else if (first) {
         build.append(',');
+        first = true;
       }
 
       try {
         Object v = MVEL.executeExpression(s[i++], o);
         build.append(write(ctx, '\"')).append(field.getName()).append(write(ctx, '\"')).append(':').append(_encode(v, ctx));
-        first = false;
+
       }
       catch (Throwable t) {
         System.out.println("failed at encoding: " + field.getName());

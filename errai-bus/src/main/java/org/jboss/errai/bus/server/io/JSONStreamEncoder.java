@@ -145,7 +145,7 @@ public class JSONStreamEncoder {
         int i = 0;
         for (Field f : fields) {
           if ((f.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
-              || f.isSynthetic()) {
+                  || f.isSynthetic()) {
             continue;
           }
           s[i++] = MVEL.compileExpression(f.getName());
@@ -159,7 +159,7 @@ public class JSONStreamEncoder {
     for (Field field : fields) {
 
       if ((field.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
-          || field.isSynthetic()) {
+              || field.isSynthetic()) {
         continue;
       }
       else if (!first) {
@@ -179,7 +179,7 @@ public class JSONStreamEncoder {
   }
 
   private static void encodeMap(Map<Object, Object> map, OutputStream outstream, EncodingContext ctx) throws IOException {
-  //  StringAppender mapBuild = new StringAppender("{");
+    //  StringAppender mapBuild = new StringAppender("{");
     outstream.write('{');
     boolean first = true;
 
@@ -211,7 +211,7 @@ public class JSONStreamEncoder {
   private static void encodeCollection(Collection col, OutputStream outstream, EncodingContext ctx) throws IOException {
     outstream.write('[');
 
-  //  StringAppender buildCol = new StringAppender("[");
+    //  StringAppender buildCol = new StringAppender("[");
     Iterator iter = col.iterator();
     while (iter.hasNext()) {
       _encode(iter.next(), outstream, ctx);
@@ -222,7 +222,7 @@ public class JSONStreamEncoder {
   }
 
   private static void encodeArray(Object array, OutputStream outstream, EncodingContext ctx) throws IOException {
-   // StringAppender buildCol = new StringAppender("[");
+    // StringAppender buildCol = new StringAppender("[");
 
     int len = Array.getLength(array);
     for (int i = 0; i < len; i++) {
@@ -240,7 +240,7 @@ public class JSONStreamEncoder {
     outstream.write('\"');
     outstream.write(enumer.getClass().getName().getBytes());
     outstream.write('\"');
-    outstream.write(", EnumStringValue:\"".getBytes());
+    outstream.write(",\"EnumStringValue\":\"".getBytes());
     outstream.write(enumer.name().getBytes());
     outstream.write("\"}".getBytes());
   }
@@ -288,7 +288,6 @@ public class JSONStreamEncoder {
       stream.write(s);
     }
   }
-
 
   private static final DecodingContext STATIC_DEC_CONTEXT = new DecodingContext();
 

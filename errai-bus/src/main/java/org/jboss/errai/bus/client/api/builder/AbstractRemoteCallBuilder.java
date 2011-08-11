@@ -56,7 +56,7 @@ public class AbstractRemoteCallBuilder {
       GWT.create(ExtensionsLoader.class);
 
       if (proxyProvider.getRemoteProxy(remoteService) == null)
-        throw new RuntimeException("No service definition for: " + remoteService.getClass().getName());
+        throw new RuntimeException("No service definition for: " + remoteService.getName());
       else
         return call(callback, remoteService);
     }
@@ -100,13 +100,13 @@ public class AbstractRemoteCallBuilder {
 
           if (remoteCallback != null) {
             bus.subscribe(replyTo,
-                new MessageCallback() {
-                  @SuppressWarnings({"unchecked"})
-                  public void callback(Message message) {
-                    bus.unsubscribeAll(replyTo);
-                    remoteCallback.callback(message.get(responseType, "MethodReply"));
-                  }
-                });
+                    new MessageCallback() {
+                      @SuppressWarnings({"unchecked"})
+                      public void callback(Message message) {
+                        bus.unsubscribeAll(replyTo);
+                        remoteCallback.callback(message.get(responseType, "MethodReply"));
+                      }
+                    });
             message.set(MessageParts.ReplyTo, replyTo);
           }
         }
