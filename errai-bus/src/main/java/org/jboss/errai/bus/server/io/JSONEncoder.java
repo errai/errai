@@ -88,10 +88,12 @@ public class JSONEncoder {
     Class cls = o.getClass();
 
     if (java.util.Date.class.isAssignableFrom(cls)) {
-      return "{\"__EncodedType\":\"java.util.Date\", \"__ObjectID\":\"" + o.hashCode() + "\", \"Value\":" + ((java.util.Date) o).getTime() + "}";
+      return "{\"__EncodedType\":\"java.util.Date\", \"__ObjectID\":\"" + o.hashCode() + "\", \"Value\":"
+              + ((java.util.Date) o).getTime() + "}";
     }
     if (java.sql.Date.class.isAssignableFrom(cls)) {
-      return "{\"__EncodedType\":\"java.sql.Date\", \"__ObjectID\":\"" + o.hashCode() + "\", \"Value\":" + ((java.sql.Date) o).getTime() + "}";
+      return "{\"__EncodedType\":\"java.sql.Date\", \"__ObjectID\":\"" + o.hashCode() + "\", \"Value\":"
+              + ((java.sql.Date) o).getTime() + "}";
     }
 
     if (tHandlers.containsKey(cls)) {
@@ -102,12 +104,14 @@ public class JSONEncoder {
       /**
        * If this object is referencing a duplicate object in the graph, we only provide an ID reference.
        */
-      return write(ctx, "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + cls.getCanonicalName() + "\",\"" + SerializationParts.OBJECT_ID + "\":\"$" + ctx.markRef(o) + "\"}");
+      return write(ctx, "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + cls.getCanonicalName() + "\",\""
+              + SerializationParts.OBJECT_ID + "\":\"$" + ctx.markRef(o) + "\"}");
     }
 
     ctx.markEncoded(o);
 
-    StringAppender build = new StringAppender(write(ctx, "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + cls.getName() + "\",\"" + SerializationParts.OBJECT_ID + "\":\"" + String.valueOf(o.hashCode()) + "\""));
+    StringAppender build = new StringAppender(write(ctx, "{\"" + SerializationParts.ENCODED_TYPE + "\":\""
+            + cls.getName() + "\",\"" + SerializationParts.OBJECT_ID + "\":\"" + String.valueOf(o.hashCode()) + "\""));
 
     // Preliminary fix for https://jira.jboss.org/browse/ERRAI-103
     // TODO: Review my Mike
