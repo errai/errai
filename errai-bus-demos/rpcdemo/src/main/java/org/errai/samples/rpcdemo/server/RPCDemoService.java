@@ -18,6 +18,7 @@ package org.errai.samples.rpcdemo.server;
 
 import com.google.inject.Inject;
 
+import org.errai.samples.rpcdemo.client.shared.TestException;
 import org.errai.samples.rpcdemo.client.shared.TestService;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.server.annotations.Service;
@@ -60,5 +61,9 @@ public class RPCDemoService implements TestService {
 
   public Date getDate() {
     return new Date();
+  }
+
+  public void exception() throws TestException {
+    throw new TestException();
   }
 }

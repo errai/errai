@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, a divison Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,6 @@
 
 package org.errai.samples.rpcdemo.client.shared;
 
-import java.util.Date;
-import java.util.List;
-
-import org.jboss.errai.bus.server.annotations.Remote;
-
-@Remote
-public interface TestService {
-  public long getMemoryFree();
-
-  public String append(String str, String str2);
-
-  public void update(String status);
-
-  public long add(long x, long y);
-
-  List<Date> getDates();
-
-  Date getDate();
-  
-  public void exception() throws TestException;
+public class TestException extends RuntimeException {
 
 }

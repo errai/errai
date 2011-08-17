@@ -18,9 +18,13 @@ package org.errai.samples.rpcdemo.client.local;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 
+import org.errai.samples.rpcdemo.client.shared.TestException;
 import org.errai.samples.rpcdemo.client.shared.TestService;
+import org.jboss.errai.bus.client.api.ErrorCallback;
+import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
@@ -106,6 +110,27 @@ public class RPCDemo {
       }
     });
 
+    final Button exception = new Button("Exception", new ClickHandler() {
+      public void onClick(ClickEvent clickEvent) {
+          MessageBuilder.createCall(new RemoteCallback<Date>() {
+            public void callback(Date response) {
+              appendResult.setText(response.toString());
+            }
+          }, new ErrorCallback() {
+            public boolean error(Message message, Throwable throwable) {
+              try {
+                throw throwable;
+              } catch(TestException e) {
+                Window.alert("Exception received from server!");
+              } catch (Throwable t) {}
+              return true;
+            }
+            
+          },
+          TestService.class).exception();
+      }
+    });
+    
     VerticalPanel vPanel = new VerticalPanel();
     HorizontalPanel memoryFreeTest = new HorizontalPanel();
     memoryFreeTest.add(checkMemoryButton);
@@ -119,12 +144,10 @@ public class RPCDemo {
     appendTest.add(appendResult);
 
     vPanel.add(appendTest);
-
     vPanel.add(voidReturn);
-
     vPanel.add(dates);
     vPanel.add(date);
-
+    vPanel.add(exception);
     RootPanel.get().add(vPanel);
   }
 }

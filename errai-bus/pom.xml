@@ -230,7 +230,8 @@
                             <skipTests>false</skipTests>
                             <failIfNoTests>true</failIfNoTests>
                             <trimStackTrace>false</trimStackTrace>
--->
+-->         
+                            <forkMode>always</forkMode>
 
                             <additionalClasspathElements>
                                 <additionalClasspathElement>${basedir}/test-classes/</additionalClasspathElement>

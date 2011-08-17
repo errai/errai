@@ -52,7 +52,7 @@ public class AbstractRemoteCallBuilder {
     T svc = proxyProvider.getRemoteProxy(remoteService);
     if (svc == null) {
 
-      // double check that the extensions loader has been bootstraped
+      // double check that the extensions loader has been bootstrapped
       GWT.create(ExtensionsLoader.class);
 
       if (proxyProvider.getRemoteProxy(remoteService) == null)
@@ -65,18 +65,7 @@ public class AbstractRemoteCallBuilder {
   }
 
   public <T, R> T call(final RemoteCallback<R> callback, final ErrorCallback errorCallback, final Class<T> remoteService) {
-    T svc = proxyProvider.getRemoteProxy(remoteService);
-    if (svc == null) {
-
-      // double check that the extensions loader has been bootstraped
-      GWT.create(ExtensionsLoader.class);
-
-      if (proxyProvider.getRemoteProxy(remoteService) == null)
-        throw new RuntimeException("No service definition for: " + remoteService.getClass().getName());
-      else
-        return call(callback, errorCallback, remoteService);
-    }
-    ((RPCStub) svc).setRemoteCallback(callback);
+    T svc = call(callback, remoteService);
     ((RPCStub) svc).setErrorCallback(errorCallback);
     return svc;
   }

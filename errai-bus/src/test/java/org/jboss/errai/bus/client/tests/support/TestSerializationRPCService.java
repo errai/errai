@@ -1,6 +1,5 @@
-package org.jboss.errai.bus.client;
+package org.jboss.errai.bus.client.tests.support;
 
-import org.jboss.errai.bus.client.tests.res.TreeNodeContainer;
 import org.jboss.errai.bus.server.annotations.Remote;
 
 import java.util.List;

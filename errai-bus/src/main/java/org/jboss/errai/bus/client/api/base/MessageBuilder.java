@@ -16,10 +16,18 @@
 
 package org.jboss.errai.bus.client.api.base;
 
+import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.HasEncoded;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.RemoteCallback;
-import org.jboss.errai.bus.client.api.builder.*;
+import org.jboss.errai.bus.client.api.builder.AbstractMessageBuilder;
+import org.jboss.errai.bus.client.api.builder.AbstractRemoteCallBuilder;
+import org.jboss.errai.bus.client.api.builder.ConversationMessageWrapper;
+import org.jboss.errai.bus.client.api.builder.HasEncodedConvMessageWrapper;
+import org.jboss.errai.bus.client.api.builder.MessageBuildCommand;
+import org.jboss.errai.bus.client.api.builder.MessageBuildSendableWithReply;
+import org.jboss.errai.bus.client.api.builder.MessageBuildSubject;
+import org.jboss.errai.bus.client.api.builder.MessageReplySendable;
 import org.jboss.errai.bus.client.framework.MessageProvider;
 
 /**
@@ -100,10 +108,9 @@ public class MessageBuilder {
   public static AbstractRemoteCallBuilder createCall() {
     return new AbstractRemoteCallBuilder(CommandMessage.create());
   }
-
-
+  
   /**
-   * Creates a RPC call.
+   * Creates an RPC call.
    *
    * @param callback -
    * @param service  -
@@ -113,6 +120,20 @@ public class MessageBuilder {
    */
   public static <R, T> T createCall(RemoteCallback<R> callback, Class<T> service) {
     return new AbstractRemoteCallBuilder(CommandMessage.create()).call(callback, service);
+  }
+  
+  /**
+   * Creates an RPC call with an ErrorCallback.
+   *
+   * @param callback -
+   * @param errorcallback
+   * @param service  -
+   * @param <T>      -
+   * @param <R>      -
+   * @return -
+   */
+  public static <R, T> T createCall(RemoteCallback<R> callback, ErrorCallback errorCallback, Class<T> service) {
+    return new AbstractRemoteCallBuilder(CommandMessage.create()).call(callback, errorCallback, service);
   }
 
   /**
