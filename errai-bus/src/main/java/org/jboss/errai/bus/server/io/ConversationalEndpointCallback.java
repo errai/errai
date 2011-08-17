@@ -22,6 +22,7 @@ import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
 import org.jboss.errai.bus.client.framework.MessageBus;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
 
@@ -62,7 +63,7 @@ public class ConversationalEndpointCallback implements MessageCallback {
 
     if ((parms == null && targetTypes.length != 0) || (parms.length != targetTypes.length)) {
       throw new MessageDeliveryFailure("wrong number of arguments sent to endpoint. (received: "
-          + (parms == null ? 0 : parms.length) + "; required: " + targetTypes.length + ")");
+              + (parms == null ? 0 : parms.length) + "; required: " + targetTypes.length + ")");
     }
     for (int i = 0; i < parms.length; i++) {
       if (parms[i] != null && !targetTypes[i].isAssignableFrom(parms[i].getClass())) {
@@ -98,13 +99,16 @@ public class ConversationalEndpointCallback implements MessageCallback {
 
     try {
       createConversation(message)
-          .subjectProvided()
-          .with("MethodReply", method.invoke(genericSvc, parms))
-          .noErrorHandling().sendNowWith(bus);
+              .subjectProvided()
+              .with("MethodReply", method.invoke(genericSvc, parms))
+              .noErrorHandling().sendNowWith(bus);
 
     }
     catch (MessageDeliveryFailure e) {
       throw e;
+    }
+    catch (InvocationTargetException e) {
+      throw new MessageDeliveryFailure("error invoking endpoint", e.getCause());
     }
     catch (Exception e) {
       throw new MessageDeliveryFailure("error invoking endpoint", e);

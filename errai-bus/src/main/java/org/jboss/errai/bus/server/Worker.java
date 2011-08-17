@@ -19,6 +19,7 @@ package org.jboss.errai.bus.server;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RoutingFlags;
+import org.jboss.errai.bus.server.io.JSONEncoder;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.slf4j.Logger;
 
@@ -90,8 +91,8 @@ public class Worker extends Thread {
     else {
       workExpiry = 0;
       sendClientError(bus, message,
-          "Request for '" + message.getSubject() + "' timed out.",
-          "The process was terminated because it exceed the maximum timeout.");
+              "Request for '" + message.getSubject() + "' timed out.",
+              "The process was terminated because it exceed the maximum timeout.");
     }
   }
 
@@ -126,7 +127,9 @@ public class Worker extends Thread {
         //  handleMessageDeliveryFailure(bus, message, "Queue is not available", e, true);
       }
       catch (Throwable e) {
-        handleMessageDeliveryFailure(bus, message, "Error calling remote service: " + message.getSubject(), e, false);
+        message.setResource("Exception", e.getCause());
+        handleMessageDeliveryFailure(bus,
+                message, "Error calling remote service: " + message.getSubject(), e, false);
       }
       finally {
         workExpiry = 0;

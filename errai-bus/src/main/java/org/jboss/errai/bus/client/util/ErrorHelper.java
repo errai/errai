@@ -22,6 +22,7 @@ import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
+import org.jboss.errai.bus.server.io.JSONEncoder;
 
 /**
  * The <tt>ErrorHelper</tt> class facilitates handling and sending error messages to the correct place
@@ -52,7 +53,6 @@ public class ErrorHelper {
     else {
 
       if (e != null) {
-        message.set(MessageParts.Throwable, e);
         StringBuilder a = new StringBuilder("<tt><br/>").append(e.getClass().getName()).append(": ").append(e.getMessage()).append("<br/>");
 
         String str;
@@ -75,7 +75,7 @@ public class ErrorHelper {
               a.append("&nbsp;&nbsp;&nbsp;&nbsp;at ").append(str).append("<br/>");
           }
         }
-        
+
         sendClientError(bus, message, errorMessage, a.append("</tt>").toString());
 
       }
@@ -107,22 +107,22 @@ public class ErrorHelper {
     else {
 
       MessageBuilder.createConversation(message)
-          .toSubject("ClientBusErrors")
-          .with("ErrorMessage", errorMessage)
-          .with("AdditionalDetails", additionalDetails)
-          .with(MessageParts.ErrorTo, message.get(String.class, MessageParts.ErrorTo))
-          //.with(MessageParts.Throwable, message.get(String.class, MessageParts.Throwable))
-          .noErrorHandling().sendNowWith(bus);
+              .toSubject("ClientBusErrors")
+              .with("ErrorMessage", errorMessage)
+              .with("AdditionalDetails", additionalDetails)
+              .with(MessageParts.ErrorTo, message.get(String.class, MessageParts.ErrorTo))
+              .with(MessageParts.Throwable, message.getResource(Object.class, "Exception"))
+              .noErrorHandling().sendNowWith(bus);
     }
   }
 
   public static void sendClientError(MessageBus bus, String queueId, String errorMessage, String additionalDetails) {
     MessageBuilder.createMessage()
-        .toSubject("ClientBusErrors")
-        .with("ErrorMessage", errorMessage)
-        .with("AdditionalDetails", additionalDetails)
-        .with(MessageParts.SessionID, queueId)
-        .noErrorHandling().sendNowWith(bus);
+            .toSubject("ClientBusErrors")
+            .with("ErrorMessage", errorMessage)
+            .with("AdditionalDetails", additionalDetails)
+            .with(MessageParts.SessionID, queueId)
+            .noErrorHandling().sendNowWith(bus);
   }
 
 
@@ -134,9 +134,9 @@ public class ErrorHelper {
    */
   public static void disconnectRemoteBus(MessageBus bus, Message message) {
     MessageBuilder.createConversation(message)
-        .toSubject("ClientBus")
-        .command(BusCommands.Disconnect)
-        .noErrorHandling().sendNowWith(bus);
+            .toSubject("ClientBus")
+            .command(BusCommands.Disconnect)
+            .noErrorHandling().sendNowWith(bus);
   }
 
   public static void handleMessageDeliveryFailure(MessageBus bus, String queueId, String errorMessage, Throwable e, boolean disconnect) {
@@ -159,6 +159,7 @@ public class ErrorHelper {
           return;
         }
       }
+
       sendClientError(bus, message, errorMessage, e);
 
       if (e != null) throw new MessageDeliveryFailure(e);

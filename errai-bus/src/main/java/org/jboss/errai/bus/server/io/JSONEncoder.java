@@ -33,7 +33,6 @@ import java.util.*;
  * Encodes an object into a JSON string
  */
 public class JSONEncoder {
-
   protected static Set<Class> serializableTypes;
 
   public static void setSerializableTypes(Set<Class> serializableTypes) {
@@ -134,7 +133,7 @@ public class JSONEncoder {
     boolean first = true;
 
     for (Field field : fields) {
-      if ((field.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
+      if (!field.isAccessible() || (field.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
               || field.isSynthetic()) {
         continue;
       }

@@ -64,8 +64,8 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
   }
 
   public void generate(
-      GeneratorContext context, TreeLogger logger,
-      SourceWriter writer, MetaDataScanner scanner, final TypeOracle oracle) {
+          GeneratorContext context, TreeLogger logger,
+          SourceWriter writer, MetaDataScanner scanner, final TypeOracle oracle) {
 
     for (Class<?> entity : scanner.getTypesAnnotatedWith(ExposeEntity.class)) {
       generateMarshaller(loadType(oracle, entity), logger, writer);
@@ -75,10 +75,10 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
       JClassType type = loadType(oracle, remote);
       try {
         writer.print((String) execute(rpcProxyGenerator,
-            Make.Map.<String, Object>$()
-                ._("implementationClassName", type.getName() + "Impl")
-                ._("interfaceClass", Class.forName(type.getQualifiedSourceName()))
-                ._()));
+                Make.Map.<String, Object>$()
+                        ._("implementationClassName", type.getName() + "Impl")
+                        ._("interfaceClass", Class.forName(type.getQualifiedSourceName()))
+                        ._()));
       }
       catch (Throwable t) {
         throw new ErraiBootstrapFailure(t);
@@ -168,17 +168,15 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
                 else break;
               }
 
-              types.put(f.getName(), c = Class.forName(name.substring(0, depth) + getInternalRep(aType.getQualifiedBinaryName().substring(depth))));
-
+              types.put(f.getName(), c = Class.forName(name.substring(0, depth)
+                      + getInternalRep(aType.getQualifiedBinaryName().substring(depth))));
               arrayConverters.put(c, depth);
-
             }
             else {
               types.put(f.getName(), c = ParseTools.unboxPrimitive(Class.forName(pType.getQualifiedBoxedSourceName())));
             }
           }
           else {
-
             types.put(f.getName(), Class.forName(type.getQualifiedBinaryName()));
           }
 
@@ -190,7 +188,9 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
               getters.put(f.getName(), new ValueExtractor(f));
             }
             else if (visit == scan) {
-              throw new GenerationException("could not find a read accessor in class: " + visit.getQualifiedSourceName() + "; for field: " + f.getName() + "; should declare an accessor: " + ReflectionUtil.getGetter(f.getName()));
+              throw new GenerationException("could not find a read accessor in class: "
+                      + visit.getQualifiedSourceName() + "; for field: " + f.getName() + "; should declare an accessor: "
+                      + ReflectionUtil.getGetter(f.getName()));
             }
           }
           else {
@@ -202,14 +202,16 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
               setters.put(f.getName(), new ValueBinder(f));
             }
             else if (visit == scan) {
-              throw new GenerationException("could not find a write accessor in class: " + visit.getQualifiedSourceName() + "; for field: " + f.getName() + "; should declare an accessor: " + ReflectionUtil.getSetter(f.getName()));
+              throw new GenerationException("could not find a write accessor in class: " + visit.getQualifiedSourceName()
+                      + "; for field: " + f.getName() + "; should declare an accessor: " + ReflectionUtil.getSetter(f.getName()));
+            }
+            else {
+              types.remove(f.getName());
             }
           }
           else {
             setters.put(f.getName(), new ValueBinder(setterMeth));
           }
-
-
         }
       }
       while ((scan = scan.getSuperclass()) != null && !scan.getQualifiedSourceName().equals("java.lang.Object"));
@@ -224,20 +226,21 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
       if (!enumType) visit.getConstructor(new JClassType[0]);
     }
     catch (NotFoundException e) {
-      String errorMsg = "Type marked for serialization does not expose a default constructor: " + visit.getQualifiedSourceName();
+      String errorMsg = "Type marked for serialization does not expose a default constructor: "
+              + visit.getQualifiedSourceName();
       logger.log(TreeLogger.Type.ERROR, errorMsg, e);
       throw new GenerationException(errorMsg, e);
     }
 
     Map<String, Object> templateVars = Make.Map.<String, Object>$()
-        ._("className", visit.getQualifiedSourceName())
-        ._("canonicalClassName", visit.getQualifiedBinaryName())
-        ._("fields", types.keySet())
-        ._("targetTypes", types)
-        ._("getters", getters)
-        ._("setters", setters)
-        ._("arrayConverters", arrayConverters)
-        ._("enumType", enumType)._();
+            ._("className", visit.getQualifiedSourceName())
+            ._("canonicalClassName", visit.getQualifiedBinaryName())
+            ._("fields", types.keySet())
+            ._("targetTypes", types)
+            ._("getters", getters)
+            ._("setters", setters)
+            ._("arrayConverters", arrayConverters)
+            ._("enumType", enumType)._();
 
     String genStr;
 

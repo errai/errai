@@ -21,6 +21,7 @@ import com.google.inject.Singleton;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
+import org.jboss.errai.bus.server.io.JSONEncoder;
 import org.jboss.errai.bus.server.service.ErraiService;
 
 import static org.jboss.errai.bus.client.util.ErrorHelper.handleMessageDeliveryFailure;
@@ -47,6 +48,7 @@ public class SimpleDispatcher implements RequestDispatcher {
       handleMessageDeliveryFailure(bus, message, "Queue is not available", e, true);
     }
     catch (Throwable e) {
+      message.setResource("Exception", e.getCause());
       handleMessageDeliveryFailure(bus, message, "Error calling remote service: " + message.getSubject(), e, false);
     }
   }
@@ -59,6 +61,7 @@ public class SimpleDispatcher implements RequestDispatcher {
       handleMessageDeliveryFailure(bus, message, "Queue is not available", e, true);
     }
     catch (Throwable e) {
+      message.setResource("Exception", e.getCause());
       handleMessageDeliveryFailure(bus, message, "Error calling remote service: " + message.getSubject(), e, false);
     }
   }

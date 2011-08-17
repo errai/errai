@@ -37,12 +37,10 @@ public enum MessageParts {
    */
   Subject,
 
-
   /**
    * Default value payload. Used mostly for higher-level APIs.
    */
   Value,
-
 
   /**
    * A unique identifier for identifying the session with which a message is associated.
@@ -74,12 +72,12 @@ public enum MessageParts {
    * Specifies the subject to send error messages to.
    */
   ErrorTo,
-  
+
   /**
    * The throwable object in case of an error
    */
   Throwable,
-  
+
   /**
    * Specifies stack trace data in String form.
    */

@@ -24,6 +24,7 @@ import org.jboss.errai.bus.client.util.ErrorHelper;
 import org.jboss.errai.bus.server.DefaultTaskManager;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.bus.server.api.SessionProvider;
+import org.jboss.errai.bus.server.io.JSONEncoder;
 import org.jboss.errai.bus.server.service.bootstrap.BootstrapContext;
 import org.jboss.errai.bus.server.service.bootstrap.OrderedBootstrap;
 
@@ -79,7 +80,10 @@ public class ErraiServiceImpl<S> implements ErraiService<S> {
     }
     catch (Throwable t) {
       t.printStackTrace();
-      //ErrorHelper.sendClientError(bus, message, t.getMessage(), t);
+      if (!message.hasResource("Exception")) {
+        message.setResource("Exception", t.getCause());
+        ErrorHelper.sendClientError(bus, message, t.getMessage(), t);
+      }
     }
   }
 
