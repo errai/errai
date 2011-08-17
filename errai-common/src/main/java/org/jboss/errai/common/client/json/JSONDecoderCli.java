@@ -100,7 +100,6 @@ public class JSONDecoderCli {
     for (String key : eMap.keySet()) {
       if (SerializationParts.ENCODED_TYPE.equals(key)) {
         String className = eMap.get(key).isString().stringValue();
-
         String objId = eMap.get(SerializationParts.OBJECT_ID).isString().stringValue();
 
         boolean ref = false;
@@ -132,7 +131,7 @@ public class JSONDecoderCli {
         }
         else {
           GWT.log("Could not demartial class: " + className + "; There is no available demarshaller. " +
-              "Ensure you have exposed the class with @ExposeEntity.", null);
+                  "Ensure you have exposed the class with @ExposeEntity.", null);
           throw new RuntimeException("no available demarshaller: " + className);
         }
       }

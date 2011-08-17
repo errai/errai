@@ -21,7 +21,6 @@ import org.jboss.errai.common.client.types.DecodingContext;
 import org.jboss.errai.common.client.types.EncodingContext;
 import org.jboss.errai.common.client.types.TypeHandler;
 import org.mvel2.MVEL;
-import org.mvel2.util.StringAppender;
 
 import java.io.Serializable;
 import java.lang.reflect.Array;
@@ -110,7 +109,7 @@ public class JSONEncoder {
 
     ctx.markEncoded(o);
 
-    StringAppender build = new StringAppender(write(ctx, "{\"" + SerializationParts.ENCODED_TYPE + "\":\""
+    StringBuilder build = new StringBuilder(write(ctx, "{\"" + SerializationParts.ENCODED_TYPE + "\":\""
             + cls.getName() + "\",\"" + SerializationParts.OBJECT_ID + "\":\"" + String.valueOf(o.hashCode()) + "\""));
 
     // Preliminary fix for https://jira.jboss.org/browse/ERRAI-103
@@ -159,7 +158,7 @@ public class JSONEncoder {
   }
 
   private static String encodeMap(Map<Object, Object> map, EncodingContext ctx) {
-    StringAppender mapBuild = new StringAppender("{");
+    StringBuilder mapBuild = new StringBuilder("{");
     boolean first = true;
 
     for (Map.Entry<Object, Object> entry : map.entrySet()) {
@@ -177,7 +176,7 @@ public class JSONEncoder {
         mapBuild.append(_encode(entry.getKey(), ctx));
         ctx.unsetEscapeMode();
         mapBuild.append(write(ctx, '\"'));
-        mapBuild.append(":")
+        mapBuild.append(':')
                 .append(val);
 
       }
@@ -193,7 +192,7 @@ public class JSONEncoder {
   }
 
   private static String encodeCollection(Collection col, EncodingContext ctx) {
-    StringAppender buildCol = new StringAppender("[");
+    StringBuilder buildCol = new StringBuilder("[");
     Iterator iter = col.iterator();
     while (iter.hasNext()) {
       buildCol.append(_encode(iter.next(), ctx));
@@ -203,7 +202,7 @@ public class JSONEncoder {
   }
 
   private static String encodeArray(Object array, EncodingContext ctx) {
-    StringAppender buildCol = new StringAppender("[");
+    StringBuilder buildCol = new StringBuilder("[");
 
     int len = Array.getLength(array);
     for (int i = 0; i < len; i++) {
@@ -215,7 +214,8 @@ public class JSONEncoder {
   }
 
   private static String encodeEnum(Enum enumer, EncodingContext ctx) {
-    String s = "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + enumer.getClass().getName() + "\", \"EnumStringValue\":\"" + enumer.name() + "\"}";
+    String s = "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + enumer.getClass().getName() + "\", " +
+            "\"EnumStringValue\":\"" + enumer.name() + "\"}";
     if (ctx.isEscapeMode()) {
       return s.replaceAll("\"", "\\\\\"");
     }
@@ -227,18 +227,6 @@ public class JSONEncoder {
   private static final Map<Class, TypeHandler> tHandlers = new HashMap<Class, TypeHandler>();
 
   static {
-//        tHandlers.put(java.sql.Date.class, new TypeHandler<java.sql.Date, String>() {
-//            public String getConverted(java.sql.Date in, DecodingContext ctx) {
-//                return "{__EncodedType:\"java.sql.Date\", __ObjectID:\"" + in.hashCode() + "\", Value:\"" + in.getTime() + "\"}";
-//
-//            }
-//        });
-//        tHandlers.put(java.util.Date.class, new TypeHandler<java.util.Date, String>() {
-//            public String getConverted(java.util.Date in, DecodingContext ctx) {
-//                return "{__EncodedType:\"java.util.Date\", __ObjectID:\"" + in.hashCode() + "\", Value:\"" + in.getTime() + "\"}";
-//            }
-//        });
-
     tHandlers.put(Timestamp.class, new TypeHandler<Timestamp, Long>() {
       public Long getConverted(Timestamp in, DecodingContext ctx) {
         return in.getTime();
@@ -250,7 +238,6 @@ public class JSONEncoder {
         return String.valueOf(in.charValue());
       }
     });
-
   }
 
   private static String write(EncodingContext ctx, String s) {
