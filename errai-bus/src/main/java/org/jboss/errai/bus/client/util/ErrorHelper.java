@@ -52,6 +52,7 @@ public class ErrorHelper {
     else {
 
       if (e != null) {
+        message.set(MessageParts.Throwable, e);
         StringBuilder a = new StringBuilder("<tt><br/>").append(e.getClass().getName()).append(": ").append(e.getMessage()).append("<br/>");
 
         String str;
@@ -74,6 +75,7 @@ public class ErrorHelper {
               a.append("&nbsp;&nbsp;&nbsp;&nbsp;at ").append(str).append("<br/>");
           }
         }
+        
         sendClientError(bus, message, errorMessage, a.append("</tt>").toString());
 
       }
@@ -108,9 +110,10 @@ public class ErrorHelper {
           .toSubject("ClientBusErrors")
           .with("ErrorMessage", errorMessage)
           .with("AdditionalDetails", additionalDetails)
+          .with(MessageParts.ErrorTo, message.get(String.class, MessageParts.ErrorTo))
+          //.with(MessageParts.Throwable, message.get(String.class, MessageParts.Throwable))
           .noErrorHandling().sendNowWith(bus);
     }
-
   }
 
   public static void sendClientError(MessageBus bus, String queueId, String errorMessage, String additionalDetails) {

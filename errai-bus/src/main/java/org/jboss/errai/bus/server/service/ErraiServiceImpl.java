@@ -79,7 +79,7 @@ public class ErraiServiceImpl<S> implements ErraiService<S> {
     }
     catch (Throwable t) {
       t.printStackTrace();
-      ErrorHelper.sendClientError(bus, message, t.getMessage(), t);
+      //ErrorHelper.sendClientError(bus, message, t.getMessage(), t);
     }
   }
 

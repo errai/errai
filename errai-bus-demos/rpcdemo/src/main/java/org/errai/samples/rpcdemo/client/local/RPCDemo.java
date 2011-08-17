@@ -87,7 +87,6 @@ public class RPCDemo {
       }
     });
 
-
     final Button dates = new Button("Dates", new ClickHandler() {
       public void onClick(ClickEvent clickEvent) {
         MessageBuilder.createCall(new RemoteCallback<List<Date>>() {
@@ -112,25 +111,28 @@ public class RPCDemo {
 
     final Button exception = new Button("Exception", new ClickHandler() {
       public void onClick(ClickEvent clickEvent) {
-          MessageBuilder.createCall(new RemoteCallback<Date>() {
-            public void callback(Date response) {
-              appendResult.setText(response.toString());
+        MessageBuilder.createCall(new RemoteCallback<Date>() {
+          public void callback(Date response) {
+            appendResult.setText(response.toString());
+          }
+        }, new ErrorCallback() {
+          public boolean error(Message message, Throwable throwable) {
+            try {
+              Window.alert("Exception received from server!");
+              throw throwable;
             }
-          }, new ErrorCallback() {
-            public boolean error(Message message, Throwable throwable) {
-              try {
-                throw throwable;
-              } catch(TestException e) {
-                Window.alert("Exception received from server!");
-              } catch (Throwable t) {}
-              return true;
+            catch (TestException e) {
+              Window.alert("TestException received from server!");
             }
-            
-          },
-          TestService.class).exception();
+            catch (Throwable t) {
+            }
+            return false;
+          }
+
+        }, TestService.class).exception();
       }
     });
-    
+
     VerticalPanel vPanel = new VerticalPanel();
     HorizontalPanel memoryFreeTest = new HorizontalPanel();
     memoryFreeTest.add(checkMemoryButton);

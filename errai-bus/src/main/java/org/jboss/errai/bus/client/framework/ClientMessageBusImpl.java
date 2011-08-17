@@ -778,8 +778,15 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
             subscribe("ClientBusErrors", new MessageCallback() {
               public void callback(Message message) {
-                logError(message.get(String.class, "ErrorMessage"),
-                        message.get(String.class, "AdditionalDetails"), null);
+                String errorTo = message.get(String.class, MessageParts.ErrorTo);
+                if (errorTo == null) {
+                  logError(message.get(String.class, "ErrorMessage"), 
+                      message.get(String.class, "AdditionalDetails"), null);
+                } 
+                else {
+                  message.toSubject(errorTo);
+                  message.sendNowWith(ClientMessageBusImpl.this);
+                }
               }
             });
 

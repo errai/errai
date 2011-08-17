@@ -66,10 +66,20 @@ public enum MessageParts {
   ToSubject,
 
   /**
-   * Specifies error message test.
+   * Specifies error message.
    */
   ErrorMessage,
 
+  /**
+   * Specifies the subject to send error messages to.
+   */
+  ErrorTo,
+  
+  /**
+   * The throwable object in case of an error
+   */
+  Throwable,
+  
   /**
    * Specifies stack trace data in String form.
    */
