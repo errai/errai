@@ -1,4 +1,4 @@
-package org.jboss.errai.bus.client.tests.res;
+package org.jboss.errai.bus.client.tests.support;
 
 import org.jboss.errai.bus.server.annotations.ExposeEntity;
 
@@ -16,8 +16,7 @@ public class TreeNodeContainer implements Serializable {
   private String nodeName;
   private int parentNodeId;
 
-  public TreeNodeContainer() {
-  }
+  public TreeNodeContainer() {}
 
   public TreeNodeContainer(int nodeId, String nodeName, int parentNodeId) {
     this.nodeId = nodeId;

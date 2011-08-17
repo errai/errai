@@ -1,14 +1,13 @@
 package org.jboss.errai.bus.server;
 
-import org.jboss.errai.bus.client.TestSerializationRPCService;
-import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.framework.RequestDispatcher;
-import org.jboss.errai.bus.client.tests.SerializationTests;
-import org.jboss.errai.bus.client.tests.res.TreeNodeContainer;
-import org.jboss.errai.bus.server.annotations.Service;
+import java.util.List;
 
 import javax.inject.Inject;
-import java.util.List;
+
+import org.jboss.errai.bus.client.framework.RequestDispatcher;
+import org.jboss.errai.bus.client.tests.support.TestSerializationRPCService;
+import org.jboss.errai.bus.client.tests.support.TreeNodeContainer;
+import org.jboss.errai.bus.server.annotations.Service;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
