@@ -16,36 +16,35 @@
 
 package org.jboss.errai.bus.server.io;
 
-import java.lang.reflect.Field;
-import java.util.LinkedList;
+import org.mvel2.util.PropertyTools;
 
-/**
- * User: christopherbrock
- * Date: 11-Aug-2010
- * Time: 10:45:40 AM
- */
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
+
 public class EncodingUtil {
   private static Field[] __getAllEncodingFields(Class cls) {
-    LinkedList<Field[]> heirarchy = new LinkedList<Field[]>();
-    int size = 0;
+    List<Field[]> heirarchy = new ArrayList<Field[]>();
 
     do {
-      Field[] f = cls.getDeclaredFields();
-      size += f.length;
-      heirarchy.add(f);
-
+      heirarchy.add(cls.getDeclaredFields());
     } while ((cls = cls.getSuperclass()) != Object.class);
 
+    List<Field> encodingFields = new ArrayList<Field>();
 
-    Field[] fields = new Field[size];
-    int i = 0;
     for (Field[] fls : heirarchy) {
       for (Field f : fls) {
-        fields[i++] = f;
+        if (isSerializable(f)) {
+          encodingFields.add(f);
+        }
       }
     }
 
-    return fields;
+    return encodingFields.toArray(new Field[encodingFields.size()]);
+  }
+
+  public static boolean isSerializable(Field f) {
+    return f.isAccessible() || (PropertyTools.getGetter(f.getDeclaringClass(), f.getName()) != null);
   }
 
   public static Field[] getAllEncodingFields(final Class cls) {
