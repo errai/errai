@@ -49,6 +49,10 @@ public class AbstractRemoteCallBuilder {
   }
 
   public <T, R> T call(final RemoteCallback<R> callback, final Class<T> remoteService) {
+    return call(callback, null, remoteService);
+  }
+
+  public <T, R> T call(final RemoteCallback<R> callback, final ErrorCallback errorCallback, final Class<T> remoteService) {
     T svc = proxyProvider.getRemoteProxy(remoteService);
     if (svc == null) {
 
@@ -58,14 +62,10 @@ public class AbstractRemoteCallBuilder {
       if (proxyProvider.getRemoteProxy(remoteService) == null)
         throw new RuntimeException("No service definition for: " + remoteService.getName());
       else
-        return call(callback, remoteService);
+        return call(callback, errorCallback, remoteService);
     }
+    
     ((RPCStub) svc).setRemoteCallback(callback);
-    return svc;
-  }
-
-  public <T, R> T call(final RemoteCallback<R> callback, final ErrorCallback errorCallback, final Class<T> remoteService) {
-    T svc = call(callback, remoteService);
     ((RPCStub) svc).setErrorCallback(errorCallback);
     return svc;
   }
@@ -92,13 +92,14 @@ public class AbstractRemoteCallBuilder {
 
           if (remoteCallback != null) {
             bus.subscribe(replyTo,
-                    new MessageCallback() {
-                      @SuppressWarnings({"unchecked"})
-                      public void callback(Message message) {
-                        bus.unsubscribeAll(replyTo);
-                        remoteCallback.callback(message.get(responseType, "MethodReply"));
-                      }
-                    });
+              new MessageCallback() {
+                @SuppressWarnings({"unchecked"})
+                public void callback(Message message) {
+                  bus.unsubscribeAll(replyTo);
+                  remoteCallback.callback(message.get(responseType, "MethodReply"));
+                }
+              }
+            );
             message.set(MessageParts.ReplyTo, replyTo);
           }
         }
@@ -114,7 +115,8 @@ public class AbstractRemoteCallBuilder {
                   bus.unsubscribeAll(errorTo);
                   message.getErrorCallback().error(message, m.get(Throwable.class, MessageParts.Throwable));
                 }
-              });
+              }
+            );
           message.set(MessageParts.ErrorTo, errorTo);
         }
         
@@ -158,7 +160,6 @@ public class AbstractRemoteCallBuilder {
         return respondDef;
       }
     };
-
   }
 
   private static int uniqueNumber() {
@@ -168,5 +169,4 @@ public class AbstractRemoteCallBuilder {
   public static void setProxyFactory(ProxyProvider provider) {
     proxyProvider = provider;
   }
-
 }

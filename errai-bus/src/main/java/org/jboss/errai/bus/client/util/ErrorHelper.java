@@ -22,7 +22,6 @@ import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
-import org.jboss.errai.bus.server.io.JSONEncoder;
 
 /**
  * The <tt>ErrorHelper</tt> class facilitates handling and sending error messages to the correct place

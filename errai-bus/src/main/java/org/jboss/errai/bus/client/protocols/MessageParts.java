@@ -64,7 +64,7 @@ public enum MessageParts {
   ToSubject,
 
   /**
-   * Specifies error message.
+   * Specifies an error message.
    */
   ErrorMessage,
 

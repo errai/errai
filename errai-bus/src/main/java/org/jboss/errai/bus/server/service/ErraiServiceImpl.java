@@ -24,7 +24,6 @@ import org.jboss.errai.bus.client.util.ErrorHelper;
 import org.jboss.errai.bus.server.DefaultTaskManager;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.bus.server.api.SessionProvider;
-import org.jboss.errai.bus.server.io.JSONEncoder;
 import org.jboss.errai.bus.server.service.bootstrap.BootstrapContext;
 import org.jboss.errai.bus.server.service.bootstrap.OrderedBootstrap;
 
