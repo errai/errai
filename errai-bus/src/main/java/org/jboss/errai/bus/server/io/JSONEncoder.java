@@ -133,7 +133,7 @@ public class JSONEncoder {
     boolean first = true;
 
     for (Field field : fields) {
-      if (!field.isAccessible() || (field.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
+      if ((field.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
               || field.isSynthetic()) {
         continue;
       }
