@@ -44,8 +44,7 @@ public class EncodingUtil {
   }
 
   public static boolean isSerializable(Field f) {
-    return f.isAccessible() || (PropertyTools.getGetter(f.getDeclaringClass(), f.getName()) != null
-            && PropertyTools.getSetter(f.getDeclaringClass(), f.getName()) != null);
+    return f.isAccessible() || (PropertyTools.getGetter(f.getDeclaringClass(), f.getName()) != null);
   }
 
   public static Field[] getAllEncodingFields(final Class cls) {
