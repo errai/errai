@@ -297,7 +297,6 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
     }
   }
 
-
   private static JMethod getAccessorMethod(JClassType clazz, JField field) {
     JMethod m = null;
 

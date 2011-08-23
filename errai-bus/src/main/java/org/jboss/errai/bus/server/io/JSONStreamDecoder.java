@@ -103,7 +103,7 @@ public class JSONStreamDecoder {
 
   private Object _parse(Context ctx, Object collection, boolean map) throws IOException {
     char c;
-    StringAppender appender;
+    StringBuilder appender;
     while ((c = read()) != 0) {
       switch (c) {
         case '[':
@@ -136,7 +136,7 @@ public class JSONStreamDecoder {
         case '"':
         case '\'':
           char term = c;
-          appender = new StringAppender();
+          appender = new StringBuilder();
           StrCapture:
           while ((c = read()) != 0) {
             switch (c) {
@@ -150,7 +150,6 @@ public class JSONStreamDecoder {
                   term = 0;
                   break StrCapture;
                 }
-                break;
               default:
                 appender.append(c);
             }
@@ -171,7 +170,7 @@ public class JSONStreamDecoder {
             break;
           }
           else if (Character.isJavaIdentifierPart(c)) {
-            appender = new StringAppender().append(c);
+            appender = new StringBuilder().append(c);
 
             while (((c = read()) != 0) && Character.isJavaIdentifierPart(c)) {
               appender.append(c);

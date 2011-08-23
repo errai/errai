@@ -20,10 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-
 @Service
 public class StockService {
-
   private Map<String, Stock> stocks = new HashMap<String, Stock>();
   private List<String> tickerList = new CopyOnWriteArrayList<String>();
   private volatile AsyncTask task;
@@ -37,15 +35,15 @@ public class StockService {
         if (event.getSubject().equals("StockClient")) {
           if (task == null) {
             task = MessageBuilder.createMessage()
-                .toSubject("StockClient")
-                .command("PriceChange")
-                .withProvided("Data", new ResourceProvider<String>() {
-                  public String get() {
-                    return simulateRandomChange();
-                  }
-                })
-                .noErrorHandling()
-                .sendRepeatingWith(dispatcher, TimeUnit.MILLISECONDS, 50);
+                    .toSubject("StockClient")
+                    .command("PriceChange")
+                    .withProvided("Data", new ResourceProvider<String>() {
+                      public String get() {
+                        return simulateRandomChange();
+                      }
+                    })
+                    .noErrorHandling()
+                    .sendRepeatingWith(dispatcher, TimeUnit.MILLISECONDS, 50);
           }
         }
       }
@@ -56,23 +54,22 @@ public class StockService {
   public void start(Message message) {
     for (Stock stock : stocks.values()) {
       MessageBuilder.createConversation(message)
-          .toSubject("StockClient")
-          .command("UpdateStockInfo")
-          .with("Stock", stock)
-          .noErrorHandling().reply();
+              .toSubject("StockClient")
+              .command("UpdateStockInfo")
+              .with("Stock", stock)
+              .noErrorHandling().reply();
     }
   }
-
 
   @Command("GetStockInfo")
   public void getStockInfo(Message message) {
     Stock stock = stocks.get(message.get(String.class, "Ticker"));
 
     MessageBuilder.createConversation(message)
-        .toSubject("StockClient")
-        .command("UpdateStockInfo")
-        .with("Stock", stock)
-        .noErrorHandling().reply();
+            .toSubject("StockClient")
+            .command("UpdateStockInfo")
+            .with("Stock", stock)
+            .noErrorHandling().reply();
   }
 
   public String simulateRandomChange() {
