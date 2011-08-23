@@ -245,7 +245,6 @@ public class PooledExecuterServiceTests extends TestCase {
       }, TimeUnit.MILLISECONDS, 0, 1);
     }
 
-
     boolean loop = true;
     int loops = 0;
     try {

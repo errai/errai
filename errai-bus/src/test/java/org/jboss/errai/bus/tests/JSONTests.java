@@ -47,14 +47,14 @@ public class JSONTests extends TestCase {
     assertEquals(inputParts, decoded);
   }
 
-  public void testStreamDecoder() {
+  public void testDecoding() {
     MessageBuilder.setMessageProvider(JSONMessage.PROVIDER);
 
     Map<String, Object> inputParts = new HashMap<String, Object>();
     inputParts.put("ToSubject", "Foo");
     inputParts.put("Message", "\"Hello, World\"");
     inputParts.put("Sentence", "He said he was \"okay\"!");
-    inputParts.put("TestUnterminatedThings", "\" { [ ( ");
+    inputParts.put("TestUnterminatedThings", "' \" { [ ( ");
     inputParts.put("Num", 123l);
 
     Message msg = MessageBuilder.createMessage().getMessage();
@@ -70,7 +70,10 @@ public class JSONTests extends TestCase {
       ByteArrayInputStream instream = new ByteArrayInputStream(encodedJSON.getBytes());
 
       Map<String, Object> decoded = (Map<String, Object>) JSONStreamDecoder.decode(instream);
-      assertEquals(inputParts, decoded);
+      Map<String, Object> decoded2 = (Map<String, Object>)  JSONDecoder.decode(encodedJSON);
+
+      assertEquals("JSONStreamDecoder did not decode properly", inputParts, decoded);
+      assertEquals("JSONDecoder did not decode properly", inputParts, decoded2);
 
     }
     catch (IOException e) {
