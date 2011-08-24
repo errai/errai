@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="sid-5932033">
-
+    
     <title>License</title>
     <para>
-        Errai CDI is distributed under the terms of the the Apache License, Version 2.0. See
-        <ulink url="http://www.apache.org/licenses/LICENSE-2.0">﻿﻿the full Apache license text</ulink>
-        .
+      Errai CDI is distributed under the terms of the the Apache License, Version 2.0. See
+      <ulink url="http://www.apache.org/licenses/LICENSE-2.0">﻿﻿the full Apache license text</ulink>
+      .
     </para>
-</chapter>
+  </chapter>

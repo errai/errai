@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <book>
-    <xi:include href="Book_Info.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
-    <xi:include href="Preface.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
-    <xi:include href="chapter-1-CDI_Introduction.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
-    <xi:include href="chapter-2-Errai_CDI_Features.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
-    <xi:include href="chapter-3-Client_Server_Event_Example.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
-    <xi:include href="chapter-4-Deploying_Errai_CDI.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
-    <xi:include href="chapter-5-License_and_EULA.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
-    <xi:include href="chapter-6-CDI_Introduction.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
-    <xi:include href="chapter-7-Errai_CDI_Features.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
-    <xi:include href="chapter-8-Client_Server_Event_Example.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
-    <xi:include href="chapter-9-Deploying_Errai_CDI.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
-    <xi:include href="chapter-10-License.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+  <xi:include href="Book_Info.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+  <xi:include href="Preface.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+  <xi:include href="chapter-1-CDI_Introduction.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+  <xi:include href="chapter-2-Errai_CDI_Features.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+  <xi:include href="chapter-3-Client_Server_Event_Example.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+  <xi:include href="chapter-4-Deploying_Errai_CDI.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+  <xi:include href="chapter-5-License_and_EULA.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+  <xi:include href="chapter-6-CDI_Introduction.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+  <xi:include href="chapter-7-Errai_CDI_Features.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+  <xi:include href="chapter-8-Client_Server_Event_Example.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+  <xi:include href="chapter-9-Deploying_Errai_CDI.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+  <xi:include href="chapter-10-License.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
 
-    <!-- xi:include href="Revision_History.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/-->
+  <xi:include href="Revision_History.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
 </book>
