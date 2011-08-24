@@ -14,7 +14,11 @@
     <section id="sid-5833085_ReferenceGuide-MessageBuilderAPI">
       
       <title>MessageBuilder API</title>
-      <para>The MessageBuilder is the heart of the messaging API in ErraiBus. It provides a fluent / builder API, that is used for constructing messages. All three major message patterns can be constructed from the{{MessageBuilder}}.</para>
+      <para>
+        The MessageBuilder is the heart of the messaging API in ErraiBus. It provides a fluent / builder API, that is used for constructing messages. All three major message patterns can be constructed from the
+        <code>MessageBuilder</code>
+        .
+      </para>
       <para>
         Components that want to receive messages need to implement the
         <code>MessageCallback</code>
@@ -22,11 +26,11 @@
       </para>
       <para>But before we dive into the details, let look at some use cases first.</para>
       <para>
-        Sending Messages with the Client BusIn order to send a message from a client you need to create a _
-        <emphasis role="italics">
-          <code>Message</code>
-        </emphasis>
-        _ and send it through an instance of{{MessageBus}}. In this simple example we send it to the subject 'HelloWorldService'.
+        Sending Messages with the Client BusIn order to send a message from a client you need to create a
+        <code>Message</code>
+        and send it through an instance of
+        <code>MessageBus</code>
+        . In this simple example we send it to the subject 'HelloWorldService'.
       </para>
       <informalexample>
         <programlisting>public class HelloWorld implements EntryPoint {
