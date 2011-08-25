@@ -1,59 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="sid-5833096_QuickstartGuide-MavenArchetype">
-
+    
     <title>Maven Archetype</title>
     <para>
-        In order to get you going quickly, we've provided a project archetype, that allows you to create a project
-        skeleton similiar to the one we use for building the examples. It's based on the maven archetype plugin
-        <ulink url="http://maven.apache.org/plugins/maven-archetype-plugin/"/>
-        and needs to be invoked from the command line:
+      In order to get you going quickly, we've provided a project archetype, that allows you to create a project skeleton similiar to the one we use for building the examples. It's based on the maven archetype plugin
+      <ulink url="http://maven.apache.org/plugins/maven-archetype-plugin/"/>
+      and needs to be invoked from the command line:
     </para>
     <informalexample>
-        <programlisting>
-            mvn archetype:generate \
-            -DarchetypeGroupId=org.jboss.errai \
-            -DarchetypeArtifactId=sandbox-archetype \
-            -DarchetypeVersion=1.3.0-SNAPSHOT \
-            -DarchetypeRepository=https://repository.jboss.org/nexus/content/repositories/snapshots/
-        </programlisting>
+      <programlisting>mvn archetype:generate \
+-DarchetypeGroupId=org.jboss.errai.archetypes \
+-DarchetypeArtifactId=bus-quickstart \
+-DarchetypeVersion=1.3.0.CR1 \
+-DarchetypeRepository=https://repository.jboss.org/nexus/content/repositories/snapshots/</programlisting>
     </informalexample>
-    <para>When invoking the archetype build you will be asked to provide the maven groupId, artifactId and package name
-        your GWT application should use:
-    </para>
+    <para>When invoking the archetype build you will be asked to provide the maven groupId, artifactId and package name your GWT application should use:</para>
     <informalexample>
-        <programlisting>
-            Define value for groupId: : foo.bar
-            Define value for artifactId: : gwt-app
-            Define value for version: 1.0-SNAPSHOT: :
-            Define value for package: foo.bar: : foo.bar.ui
-            Confirm properties configuration:
-            groupId: foo.bar
-            artifactId: gwt-app
-            version: 1.0-SNAPSHOT
-            package: foo.bar.ui
-            Y: :
-        </programlisting>
+      <programlisting>Define value for groupId: : foo.bar
+Define value for artifactId: : gwt-app
+Define value for version: 1.0-SNAPSHOT: :
+Define value for package: foo.bar: : foo.bar.ui
+Confirm properties configuration:
+groupId: foo.bar
+artifactId: gwt-app
+version: 1.0-SNAPSHOT
+package: foo.bar.ui
+Y: :</programlisting>
     </informalexample>
-    <para>What will be created for you, is a maven build structure, including references to the GWT SDK and the Errai
-        dependencies necessary to launch a simple application.
-    </para>
-    <para>In order launch the GWT development mode, change into the project directory (name corresponding to the
-        provided artifactId) and type:
-    </para>
-    <sidebar>
-        <para>mvn gwt:run</para>
-    </sidebar>
+    <para>What will be created for you, is a maven build structure, including references to the GWT SDK and the Errai dependencies necessary to launch a simple application.</para>
+    <para>In order launch the GWT development mode, change into the project directory (name corresponding to the provided artifactId) and type:</para>
+    <informalexample>
+      <programlisting>mvn gwt:run</programlisting>
+    </informalexample>
     <para>
-        By default the archetype does package the web application for Development Mode execution. If you want to deploy
-        your application to JBoss, you need to execute a clean rebuild using the JBoss profile (e.g.
-        <code>-Pjboss7</code>
-        ).
+      By default the archetype does package the web application for Development Mode execution. If you want to deploy your application to JBoss, you need to execute a clean rebuild using the JBoss profile (e.g.
+      <code>-Pjboss7</code>
+      ).
     </para>
     <informalexample>
-        <programlisting>
-            mvn -Pjboss7 clean install
-            cp target/gwt-app.war $JBOSS_HOME/standalone/deployments
-        </programlisting>
+      <programlisting>mvn -Pjboss7 clean install
+cp target/gwt-app.war $JBOSS_HOME/standalone/deployments</programlisting>
     </informalexample>
-</chapter>
+  </chapter>

@@ -17,7 +17,11 @@
       <section id="sid-5833093_ErraiBus-MessageBuilderAPI">
         
         <title>MessageBuilder API</title>
-        <para>The MessageBuilder is the heart of the messaging API in ErraiBus. It provides a fluent / builder API, that is used for constructing messages. All three major message patterns can be constructed from the{{MessageBuilder}}.</para>
+        <para>
+          The MessageBuilder is the heart of the messaging API in ErraiBus. It provides a fluent / builder API, that is used for constructing messages. All three major message patterns can be constructed from the
+          <code>MessageBuilder</code>
+          .
+        </para>
         <para>
           Components that want to receive messages need to implement the
           <code>MessageCallback</code>
@@ -25,11 +29,11 @@
         </para>
         <para>But before we dive into the details, let look at some use cases first.</para>
         <para>
-          Sending Messages with the Client BusIn order to send a message from a client you need to create a _
-          <emphasis role="italics">
-            <code>Message</code>
-          </emphasis>
-          _ and send it through an instance of{{MessageBus}}. In this simple example we send it to the subject 'HelloWorldService'.
+          Sending Messages with the Client BusIn order to send a message from a client you need to create a
+          <code>Message</code>
+          and send it through an instance of
+          <code>MessageBus</code>
+          . In this simple example we send it to the subject 'HelloWorldService'.
         </para>
         <informalexample>
           <programlisting>public class HelloWorld implements EntryPoint {
@@ -505,12 +509,12 @@ public class HelloWorldService implements MessageCallback {
       
       <title>Remote Procedure Calls (RPC)</title>
       <para>ErraiBus supports a high-level RPC layer to make typical client-server RPC communication easy on top of the bus. While it is possible to use ErraiBus without ever using this API, you may find it to be a more useful and concise approach to exposing services to the clients.</para>
-      <para>Please Note that this API has changed since version 1.0. RPC services provide a way of creating type-safe mechanisms to make client-to-server calls. Currently, this mechanism only support client-to-server calls, and not vice-versa.</para>
+      <para>Please note that this API has changed since version 1.0. RPC services provide a way of creating type-safe mechanisms to make client-to-server calls. Currently, this mechanism only support client-to-server calls, and not vice-versa.</para>
       <para>Creating a service is straight forward. It requires the definition of a remote interface, and a service class which implements it. See the following:</para>
       <informalexample>
         <programlisting>@Remote
-  public interface MyRemoteService {
-    public boolean isEveryoneHappy();
+public interface MyRemoteService {
+  public boolean isEveryoneHappy();
 }</programlisting>
       </informalexample>
       <para>
@@ -533,27 +537,74 @@ public class MyRemoteServiceImpl implements MyRemoteService {
         <code>@Service</code>
         annotation as described in Section 2.4. The presence of the remote interface tips Errai off as to what you want to do with the class.
       </para>
-      <para>
-        Making callsCalling a remote service involves use of the
-        <code>MessageBuilder</code>
-        API. Since all messages are asynchronous, the actual code for calling the remote service involves the use of a callback, which we use to receive the response from the remote method. Let's see how it works:
-      </para>
-      <informalexample>
-        <programlisting>MessageBuilder.createCall(new RemoteCallback&lt;Boolean&gt;() {
+      <section id="sid-5833093_ErraiBus-Makingcalls">
+        
+        <title>Making calls</title>
+        <para>
+          Calling a remote service involves use of the
+          <code>MessageBuilder</code>
+          API. Since all messages are asynchronous, the actual code for calling the remote service involves the use of a callback, which we use to receive the response from the remote method. Let's see how it works:
+        </para>
+        <informalexample>
+          <programlisting>MessageBuilder.createCall(new RemoteCallback&lt;Boolean&gt;() {
   public void callback(Boolean isHappy) {
     if (isHappy) Window.alert("Everyone is happy!");
   }
  }, MyRemoteService.class).isEveryoneHappy();</programlisting>
-      </informalexample>
-      <para>
-        In the above example, we declare a remote callback that receives a Boolean, to correpond to the return value of the method on the server. We also reference the remote interface we are calling, and directly call the method. However,
-        <emphasis role="italics">don't be tempted to write code like this</emphasis>
-        :
-      </para>
-      <informalexample>
-        <programlisting>boolean bool = MessageBuilder.createCall(..., MyRemoteService.class).isEveryoneHappy();</programlisting>
-      </informalexample>
-      <para>The above code will never return a valid result. In fact, it will always return null, false, or 0 depending on the type. This is due to the fact that the method is dispatched asynchronously, as in, it does not wait for a server response before returning control. The reason we chose to do this, as opposed to emulate the native GWT-approach, which requires the implementation of remote and async interfaces, was purely a function of a tradeoff for simplicity.</para>
+        </informalexample>
+        <para>
+          In the above example, we declare a remote callback that receives a Boolean, to correpond to the return value of the method on the server. We also reference the remote interface we are calling, and directly call the method. However,
+          <emphasis role="italics">don't be tempted to write code like this</emphasis>
+          :
+        </para>
+        <informalexample>
+          <programlisting>boolean bool = MessageBuilder.createCall(..., MyRemoteService.class).isEveryoneHappy();</programlisting>
+        </informalexample>
+        <para>The above code will never return a valid result. In fact, it will always return null, false, or 0 depending on the type. This is due to the fact that the method is dispatched asynchronously, as in, it does not wait for a server response before returning control. The reason we chose to do this, as opposed to emulate the native GWT-approach, which requires the implementation of remote and async interfaces, was purely a function of a tradeoff for simplicity.</para>
+      </section>
+      <section id="sid-5833093_ErraiBus-Handlingexceptions">
+        
+        <title>Handling exceptions</title>
+        <para>
+          Handling remote exceptions can be done by providing an
+          <code>ErrorCallback</code>
+          on the client:
+        </para>
+        <informalexample>
+          <programlisting>MessageBuilder.createCall(
+  new RemoteCallback&lt;Boolean&gt;() {
+    public void callback(Boolean isHappy) {
+      if (isHappy) Window.alert("Everyone is happy!");
+    }
+  },
+  new ErrorCallback() {
+    public boolean error(Message message, Throwable caught) {
+      try {
+        throw caught;
+      }
+      catch (NobodyIsHappyException e) {
+        Window.alert("OK, that's sad!");
+      }
+      catch (Throwable t) {
+        GWT.log("An unexpected error has occurred", t);
+      }
+      return false;
+    }
+  },
+  MyRemoteService.class).isEveryoneHappy();</programlisting>
+        </informalexample>
+        <para>
+          As remote exceptions need to be serialized to be sent to the client, the
+          <code>@ExposeEntity</code>
+          annotation needs to be present on the corresponding exception class (see
+          <xref linkend="sid-5931328"/>
+          ). Further the exception class needs to be part of the client-side code. For more details on
+          <code>ErrorCallbacks</code>
+          see
+          <xref linkend="sid-5931306"/>
+          .
+        </para>
+      </section>
     </section>
     <section id="sid-5833093_ErraiBus-QueueSessions">
       
@@ -917,7 +968,11 @@ bus. Set this
       <section id="sid-5931263_Messaging-MessageBuilderAPI">
         
         <title>MessageBuilder API</title>
-        <para>The MessageBuilder is the heart of the messaging API in ErraiBus. It provides a fluent / builder API, that is used for constructing messages. All three major message patterns can be constructed from the{{MessageBuilder}}.</para>
+        <para>
+          The MessageBuilder is the heart of the messaging API in ErraiBus. It provides a fluent / builder API, that is used for constructing messages. All three major message patterns can be constructed from the
+          <code>MessageBuilder</code>
+          .
+        </para>
         <para>
           Components that want to receive messages need to implement the
           <code>MessageCallback</code>
@@ -925,11 +980,11 @@ bus. Set this
         </para>
         <para>But before we dive into the details, let look at some use cases first.</para>
         <para>
-          Sending Messages with the Client BusIn order to send a message from a client you need to create a _
-          <emphasis role="italics">
-            <code>Message</code>
-          </emphasis>
-          _ and send it through an instance of{{MessageBus}}. In this simple example we send it to the subject 'HelloWorldService'.
+          Sending Messages with the Client BusIn order to send a message from a client you need to create a
+          <code>Message</code>
+          and send it through an instance of
+          <code>MessageBus</code>
+          . In this simple example we send it to the subject 'HelloWorldService'.
         </para>
         <informalexample>
           <programlisting>public class HelloWorld implements EntryPoint {
@@ -1277,7 +1332,11 @@ public class HelloWorldService implements MessageCallback {
       <section id="sid-5931280">
         
         <title>MessageBuilder API</title>
-        <para>The MessageBuilder is the heart of the messaging API in ErraiBus. It provides a fluent / builder API, that is used for constructing messages. All three major message patterns can be constructed from the{{MessageBuilder}}.</para>
+        <para>
+          The MessageBuilder is the heart of the messaging API in ErraiBus. It provides a fluent / builder API, that is used for constructing messages. All three major message patterns can be constructed from the
+          <code>MessageBuilder</code>
+          .
+        </para>
         <para>
           Components that want to receive messages need to implement the
           <code>MessageCallback</code>
@@ -1285,11 +1344,11 @@ public class HelloWorldService implements MessageCallback {
         </para>
         <para>But before we dive into the details, let look at some use cases first.</para>
         <para>
-          Sending Messages with the Client BusIn order to send a message from a client you need to create a _
-          <emphasis role="italics">
-            <code>Message</code>
-          </emphasis>
-          _ and send it through an instance of{{MessageBus}}. In this simple example we send it to the subject 'HelloWorldService'.
+          Sending Messages with the Client BusIn order to send a message from a client you need to create a
+          <code>Message</code>
+          and send it through an instance of
+          <code>MessageBus</code>
+          . In this simple example we send it to the subject 'HelloWorldService'.
         </para>
         <informalexample>
           <programlisting>public class HelloWorld implements EntryPoint {
@@ -1776,12 +1835,12 @@ public class HelloWorldService implements MessageCallback {
       
       <title>Remote Procedure Calls (RPC)</title>
       <para>ErraiBus supports a high-level RPC layer to make typical client-server RPC communication easy on top of the bus. While it is possible to use ErraiBus without ever using this API, you may find it to be a more useful and concise approach to exposing services to the clients.</para>
-      <para>Please Note that this API has changed since version 1.0. RPC services provide a way of creating type-safe mechanisms to make client-to-server calls. Currently, this mechanism only support client-to-server calls, and not vice-versa.</para>
+      <para>Please note that this API has changed since version 1.0. RPC services provide a way of creating type-safe mechanisms to make client-to-server calls. Currently, this mechanism only support client-to-server calls, and not vice-versa.</para>
       <para>Creating a service is straight forward. It requires the definition of a remote interface, and a service class which implements it. See the following:</para>
       <informalexample>
         <programlisting>@Remote
-  public interface MyRemoteService {
-    public boolean isEveryoneHappy();
+public interface MyRemoteService {
+  public boolean isEveryoneHappy();
 }</programlisting>
       </informalexample>
       <para>
@@ -1804,27 +1863,74 @@ public class MyRemoteServiceImpl implements MyRemoteService {
         <code>@Service</code>
         annotation as described in Section 2.4. The presence of the remote interface tips Errai off as to what you want to do with the class.
       </para>
-      <para>
-        Making callsCalling a remote service involves use of the
-        <code>MessageBuilder</code>
-        API. Since all messages are asynchronous, the actual code for calling the remote service involves the use of a callback, which we use to receive the response from the remote method. Let's see how it works:
-      </para>
-      <informalexample>
-        <programlisting>MessageBuilder.createCall(new RemoteCallback&lt;Boolean&gt;() {
+      <section id="sid-5931313_RemoteProcedureCalls%28RPC%29-Makingcalls">
+        
+        <title>Making calls</title>
+        <para>
+          Calling a remote service involves use of the
+          <code>MessageBuilder</code>
+          API. Since all messages are asynchronous, the actual code for calling the remote service involves the use of a callback, which we use to receive the response from the remote method. Let's see how it works:
+        </para>
+        <informalexample>
+          <programlisting>MessageBuilder.createCall(new RemoteCallback&lt;Boolean&gt;() {
   public void callback(Boolean isHappy) {
     if (isHappy) Window.alert("Everyone is happy!");
   }
  }, MyRemoteService.class).isEveryoneHappy();</programlisting>
-      </informalexample>
-      <para>
-        In the above example, we declare a remote callback that receives a Boolean, to correpond to the return value of the method on the server. We also reference the remote interface we are calling, and directly call the method. However,
-        <emphasis role="italics">don't be tempted to write code like this</emphasis>
-        :
-      </para>
-      <informalexample>
-        <programlisting>boolean bool = MessageBuilder.createCall(..., MyRemoteService.class).isEveryoneHappy();</programlisting>
-      </informalexample>
-      <para>The above code will never return a valid result. In fact, it will always return null, false, or 0 depending on the type. This is due to the fact that the method is dispatched asynchronously, as in, it does not wait for a server response before returning control. The reason we chose to do this, as opposed to emulate the native GWT-approach, which requires the implementation of remote and async interfaces, was purely a function of a tradeoff for simplicity.</para>
+        </informalexample>
+        <para>
+          In the above example, we declare a remote callback that receives a Boolean, to correpond to the return value of the method on the server. We also reference the remote interface we are calling, and directly call the method. However,
+          <emphasis role="italics">don't be tempted to write code like this</emphasis>
+          :
+        </para>
+        <informalexample>
+          <programlisting>boolean bool = MessageBuilder.createCall(..., MyRemoteService.class).isEveryoneHappy();</programlisting>
+        </informalexample>
+        <para>The above code will never return a valid result. In fact, it will always return null, false, or 0 depending on the type. This is due to the fact that the method is dispatched asynchronously, as in, it does not wait for a server response before returning control. The reason we chose to do this, as opposed to emulate the native GWT-approach, which requires the implementation of remote and async interfaces, was purely a function of a tradeoff for simplicity.</para>
+      </section>
+      <section id="sid-5931313_RemoteProcedureCalls%28RPC%29-Handlingexceptions">
+        
+        <title>Handling exceptions</title>
+        <para>
+          Handling remote exceptions can be done by providing an
+          <code>ErrorCallback</code>
+          on the client:
+        </para>
+        <informalexample>
+          <programlisting>MessageBuilder.createCall(
+  new RemoteCallback&lt;Boolean&gt;() {
+    public void callback(Boolean isHappy) {
+      if (isHappy) Window.alert("Everyone is happy!");
+    }
+  },
+  new ErrorCallback() {
+    public boolean error(Message message, Throwable caught) {
+      try {
+        throw caught;
+      }
+      catch (NobodyIsHappyException e) {
+        Window.alert("OK, that's sad!");
+      }
+      catch (Throwable t) {
+        GWT.log("An unexpected error has occurred", t);
+      }
+      return false;
+    }
+  },
+  MyRemoteService.class).isEveryoneHappy();</programlisting>
+        </informalexample>
+        <para>
+          As remote exceptions need to be serialized to be sent to the client, the
+          <code>@ExposeEntity</code>
+          annotation needs to be present on the corresponding exception class (see
+          <xref linkend="sid-5931328"/>
+          ). Further the exception class needs to be part of the client-side code. For more details on
+          <code>ErrorCallbacks</code>
+          see
+          <xref linkend="sid-5931306"/>
+          .
+        </para>
+      </section>
     </section>
     <section id="sid-5931315">
       

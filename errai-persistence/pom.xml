@@ -14,8 +14,7 @@
   ~ limitations under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <name>Errai::Persistence</name>
     <groupId>org.jboss.errai</groupId>
@@ -228,14 +227,14 @@
                                     needs ant.jar and that's part of antrun-Plugin:-).
                                     So we just pass maven.plugin.classpath.
                                 -->
-                                <property name="maven.plugin.classpath" refid="maven.plugin.classpath"/>
-                                <property name="japexConfig" location="${japexConfig}"/>
+                                <property name="maven.plugin.classpath" refid="maven.plugin.classpath" />
+                                <property name="japexConfig" location="${japexConfig}" />
 
                                 <!-- important -->
-                                <delete file="target/dependency/gwt-dev-2.0.3.jar"/>
+                                <delete file="target/dependency/gwt-dev-2.0.3.jar" />
 
                                 <ant antfile="${basedir}/build.xml">
-                                    <target name="run"/>
+                                    <target name="run" />
                                 </ant>
                             </target>
                         </configuration>

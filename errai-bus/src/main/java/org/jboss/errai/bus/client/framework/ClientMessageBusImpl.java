@@ -103,7 +103,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   ProxySettings proxySettings;
 
-  class ProxySettings {
+  static class ProxySettings {
     final String url = GWT.getModuleBaseURL() + "proxy";
     boolean hasProxy = false;
   }
@@ -251,6 +251,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * Fire listeners to notify that a new subscription has been registered on the bus.
    *
    * @param subject - new subscription registered
+   * @param local -
+   * @param isNew -
    */
   private void fireAllSubscribeListeners(String subject, boolean local, boolean isNew) {
     Iterator<SubscribeListener> iter = onSubscribeHooks.iterator();
@@ -354,7 +356,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
           directStore(message);
         }
-
       }
       else {
         throw new RuntimeException("Cannot send message using this method" +
@@ -510,7 +511,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             // Handle it gracefully
             //noinspection ThrowableInstanceNeverThrown
 
-            TransportIOException tioe = new TransportIOException(response.getText(), response.getStatusCode(), "Failure communicating with server");
+            TransportIOException tioe = new TransportIOException(response.getText(), response.getStatusCode(),
+                    "Failure communicating with server");
             if (txMessage.getErrorCallback() == null || txMessage.getErrorCallback().error(txMessage, tioe)) {
               logError("Problem communicating with remote bus (Received HTTP 503 Error)", message, tioe);
             }
@@ -754,7 +756,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
             addSubscribeListener(new SubscribeListener() {
               public void onSubscribe(SubscriptionEvent event) {
-                if (event.isLocalOnly() || event.getSubject().startsWith("local:") || remotes.containsKey(event.getSubject())) {
+                if (event.isLocalOnly() || event.getSubject().startsWith("local:")
+                        || remotes.containsKey(event.getSubject())) {
                   return;
                 }
 

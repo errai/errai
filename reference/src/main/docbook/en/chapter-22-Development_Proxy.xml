@@ -3,30 +3,9 @@
 <chapter id="sid-5833097">
     
     <title>Development Proxy</title>
+    <para>Proxied access to external containersUsually GWT developement happens in hosted mode and then, later on, the GWT app is turned into a webapp (*.war) that can be deployed on a target container (app server, servlet engine). This works quiet well for closed systems that don't depend on additional resources the target container provides. A typical resource would be a DataSource for access to a relational database.</para>
+    <para>Instead of pulling these resources into the hosted mode servlet engine (jetty, read-only JNDI) or creating mock objects for any resources that cannot be run in hosted mode, we offer you a much more simple way to work with external resources: Simply proxy all requests that occur in hosted mode to an external target container:</para>
     <para>
-      Proxied access to external containersUsually GWT developement happens in hosted mode and then, later
-      
-      on, the GWT app is turned into a webapp (*.war) that can be deployed on
-      
-      a target container (app server, servlet engine). This works quiet well
-      
-      for closed systems that don't depend on additional resources the target
-      
-      container provides. A typical resource would be a DataSource for access
-      
-      to a relational database.
-    </para>
-    <para>
-      Instead of pulling these resources into the hosted mode servlet
-      
-      engine (jetty, read-only JNDI) or creating mock objects for any
-      
-      resources that cannot be run in hosted mode, we offer you a much more
-      
-      simple way to work with external resources: Simply proxy all requests
-      
-      that occur in hosted mode to an external target container:
-      
       <figure>
         <title>Development Proxy</title>
         <mediaobject>
@@ -36,86 +15,43 @@
         </mediaobject>
       </figure>
     </para>
-    <para>
-      The proxy is implemented a yet another servlet that you need to
-      
-      add to the web.xml that's being sed in hosted mode:
-    </para>
+    <para>The proxy is implemented a yet another servlet that you need to add to the web.xml that's being sed in hosted mode:</para>
     <informalexample>
       <programlisting>&lt;servlet&gt;
-                    &lt;servlet-name&gt;erraiProxy&lt;/servlet-name&gt;
-                    &lt;description&gt;Errai Proxy&lt;/description&gt;
-                    &lt;servlet-class&gt;org.jboss.errai.tools.proxy.XmlHttpProxyServlet&lt;/servlet-class&gt;
-                    &lt;init-param&gt;
-                    &lt;param-name&gt;config.name&lt;/param-name&gt;
-                    &lt;param-value&gt;errai-proxy.json&lt;/param-value&gt; (1)
-                    &lt;/init-param&gt;
-                    &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
-                    &lt;/servlet&gt;
+  &lt;servlet-name&gt;erraiProxy&lt;/servlet-name&gt;
+  &lt;description&gt;Errai Proxy&lt;/description&gt;
+  &lt;servlet-class&gt;org.jboss.errai.tools.proxy.XmlHttpProxyServlet&lt;/servlet-class&gt;
+  &lt;init-param&gt;
+    &lt;param-name&gt;config.name&lt;/param-name&gt;
+    &lt;param-value&gt;errai-proxy.json&lt;/param-value&gt; (1)
+  &lt;/init-param&gt;
+  &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
+&lt;/servlet&gt;
 
-                    &lt;servlet-mapping&gt;
-                    &lt;servlet-name&gt;erraiProxy&lt;/servlet-name&gt;
-                    &lt;url-pattern&gt;/app/proxy/*&lt;/url-pattern&gt; (2)
-                    &lt;/servlet-mapping&gt;</programlisting>
+&lt;servlet-mapping&gt;
+  &lt;servlet-name&gt;erraiProxy&lt;/servlet-name&gt;
+  &lt;url-pattern&gt;/app/proxy/*&lt;/url-pattern&gt; (2)
+&lt;/servlet-mapping&gt;</programlisting>
     </informalexample>
     <orderedlist>
       <listitem>
         <para>Proxy configuration. See details below.</para>
       </listitem>
       <listitem>
-        <para>
-          The proxy url pattern convetion. The bus bootstraps on this
-          
-          URL.
-        </para>
+        <para>The proxy url pattern convetion. The bus bootstraps on this URL.</para>
       </listitem>
     </orderedlist>
-    <para>
-      The web.xml proxy declaration contains two notable elements: A
-      
-      reference to the proxy configuration file and a URL pattern, where the
-      
-      proxy can found. While the later shouldn't be changed (the bus
-      
-      bootstraps on this URL), you need to change the proxy config according
-      
-      to your needs:
-    </para>
+    <para>The web.xml proxy declaration contains two notable elements: A reference to the proxy configuration file and a URL pattern, where the proxy can found. While the later shouldn't be changed (the bus bootstraps on this URL), you need to change the proxy config according to your needs:</para>
     <informalexample>
       <programlisting>{"xhp": {
-                    "version": "1.1",
-                    "services": [
-                    {"id": "default",
-                    "url":"http://127.0.0.1:8080/my-gwt-app/in.erraiBus",
-                    "passthrough":true
-                    },
-                    ]
-                    }
-                    }</programlisting>
+  "version": "1.1",
+  "services": [
+    {"id": "default",
+     "url":"http://127.0.0.1:8080/my-gwt-app/in.erraiBus",
+     "passthrough":true
+    },]
+  }
+}</programlisting>
     </informalexample>
-    <para>
-      You would need to
-      
-      _change the host,
-      
-      port and webcontext
-      
-      _
-      
-      ('my-gwt-app' in this case) to reflect
-      
-      the location of the external container. 'passthrough' simply means that
-      
-      any request to 'proxy/in.erraiBus' will go to
-      
-      'container/my-gwt-app/in.erraiBus'. This already indicates that you need
-      
-      to have the server side part of your GWT application, already running on
-      
-      the target container. The most simple way to achieve this, is to build a
-      
-      the complete webapp, deploy it and ignore the UI parts that may be
-      
-      available on the server.
-    </para>
+    <para>You would need to change the host, port and webcontext ('my-gwt-app' in this case) to reflect the location of the external container. 'passthrough' simply means that any request to 'proxy/in.erraiBus' will go to 'container/my-gwt-app/in.erraiBus'. This already indicates that you need to have the server side part of your GWT application, already running on the target container. The most simple way to achieve this, is to build a the complete webapp, deploy it and ignore the UI parts that may be available on the server.</para>
   </chapter>
