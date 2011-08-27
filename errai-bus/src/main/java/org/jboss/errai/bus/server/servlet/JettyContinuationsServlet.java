@@ -22,7 +22,6 @@ import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueActivationCallback;
 import org.jboss.errai.bus.server.api.QueueSession;
 import org.mortbay.jetty.RetryRequest;
-import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.util.ajax.Continuation;
 import org.mortbay.util.ajax.ContinuationSupport;
 
@@ -31,7 +30,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.zip.GZIPOutputStream;
 
 import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
 
