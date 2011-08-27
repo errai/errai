@@ -59,4 +59,6 @@ public interface MessageQueue {
   void setWindowPolling(boolean windowPolling);
 
   void stopQueue();
+
+  Object getActivationLock();
 }
