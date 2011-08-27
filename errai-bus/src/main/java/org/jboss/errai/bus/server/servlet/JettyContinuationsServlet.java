@@ -80,17 +80,12 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
     catch (Exception e) {
       if (!e.getMessage().contains("expired")) {
         writeExceptionToOutputStream(httpServletResponse, e);
-        return;
       }
     }
-
-
   }
 
   private void pollForMessages(QueueSession session, HttpServletRequest httpServletRequest,
                                HttpServletResponse httpServletResponse, boolean wait) throws IOException {
-
-  //  httpServletResponse.setHeader("Content-Encoding", "gzip");
     final OutputStream stream = httpServletResponse.getOutputStream();
 
     try {
@@ -161,7 +156,6 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
 
   private static void pollQueue(MessageQueue queue, OutputStream stream,
                                 HttpServletResponse httpServletResponse) throws IOException {
-
     if (queue == null) return;
 
     queue.heartBeat();
@@ -171,29 +165,18 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
     httpServletResponse.setHeader("Expires", "-1");
     httpServletResponse.setContentType("application/json");
     queue.poll(false, stream);
-    //  stream.close();
   }
 
   private static class JettyQueueActivationCallback implements QueueActivationCallback {
     private Continuation cont;
 
-
     private JettyQueueActivationCallback(Continuation cont) {
       this.cont = cont;
-
     }
 
     public void activate(MessageQueue queue) {
-//        pollQueue(queue, httpServletResponse.getOutputStream(), httpServletResponse);
-//   //     httpServletResponse.getOutputStream().close();
-//      }
-//      catch (IOException e) {
-//        throw new RuntimeException("Error resuming continuation", e);
-//      }
-
       queue.setActivationCallback(null);
       cont.resume();
     }
-
   }
 }
