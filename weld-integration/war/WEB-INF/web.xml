@@ -5,7 +5,7 @@
 
     <servlet>
         <servlet-name>ErraiServlet</servlet-name>
-        <servlet-class>org.jboss.errai.bus.server.servlet.JettyContinuationsServlet</servlet-class>
+        <servlet-class>org.jboss.errai.bus.server.servlet.DefaultBlockingServlet</servlet-class>
 
         <init-param>
             <param-name>service-locator</param-name>
