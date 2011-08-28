@@ -185,7 +185,8 @@ public abstract class AbstractErraiServlet extends HttpServlet {
       }
 
       public Object getMessage() {
-        StringBuilder b = new StringBuilder("{ErrorMessage:\"").append(t.getMessage()).append("\",AdditionalDetails:\"");
+        StringBuilder b = new StringBuilder("{\"ErrorMessage\":\"").append(t.getMessage()).append("\"," +
+                "\"AdditionalDetails\":\"");
         for (StackTraceElement e : t.getStackTrace()) {
           b.append(e.toString()).append("<br/>");
         }
@@ -205,8 +206,9 @@ public abstract class AbstractErraiServlet extends HttpServlet {
       }
 
       public Object getMessage() {
-        return reason != null ? "{ToSubject:\"ClientBus\", CommandType:\"" + BusCommands.Disconnect + "\",Reason:\"" + reason + "\"}"
-            : "{CommandType:\"" + BusCommands.Disconnect + "\"}";
+        return reason != null ? "{\"ToSubject\":\"ClientBus\", \"CommandType\":\"" + BusCommands.Disconnect + "\"," +
+                "\"Reason\":\"" + reason + "\"}"
+            : "{\"CommandType\":\"" + BusCommands.Disconnect + "\"}";
       }
     });
   }
@@ -219,7 +221,7 @@ public abstract class AbstractErraiServlet extends HttpServlet {
       }
 
       public Object getMessage() {
-        return "{ToSubject:\"ClientBus\", CommandType:\"" + BusCommands.SessionExpired + "\"}";
+        return "{\"ToSubject\":\"ClientBus\", \"CommandType\":\"" + BusCommands.SessionExpired + "\"}";
       }
     });
   }
