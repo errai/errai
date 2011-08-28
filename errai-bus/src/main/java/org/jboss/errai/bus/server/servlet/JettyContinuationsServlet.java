@@ -30,7 +30,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.zip.GZIPOutputStream;
 
 import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
 
@@ -50,10 +49,10 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
    */
   @Override
   protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
-      throws ServletException, IOException {
+          throws ServletException, IOException {
     pollForMessages(sessionProvider.getSession(httpServletRequest.getSession(),
-        httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER)),
-        httpServletRequest, httpServletResponse, true);
+            httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER)),
+            httpServletRequest, httpServletResponse, true);
   }
 
   /**
@@ -68,10 +67,10 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
    */
   @Override
   protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
-      throws ServletException, IOException {
+          throws ServletException, IOException {
 
     final QueueSession session = sessionProvider.getSession(httpServletRequest.getSession(),
-        httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
+            httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
 
     try {
       service.store(createCommandMessage(session, httpServletRequest.getInputStream()));
@@ -79,19 +78,13 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
     catch (Exception e) {
       if (!e.getMessage().contains("expired")) {
         writeExceptionToOutputStream(httpServletResponse, e);
-        return;
       }
     }
-
-
-    pollQueue(service.getBus().getQueue(session), httpServletResponse.getOutputStream(), httpServletResponse);
   }
 
   private void pollForMessages(QueueSession session, HttpServletRequest httpServletRequest,
                                HttpServletResponse httpServletResponse, boolean wait) throws IOException {
-
-    httpServletResponse.setHeader("Content-Encoding", "gzip");
-    final GZIPOutputStream stream = new GZIPOutputStream(httpServletResponse.getOutputStream());
+    final OutputStream stream = httpServletResponse.getOutputStream();
 
     try {
       final MessageQueue queue = service.getBus().getQueue(session);
@@ -108,22 +101,14 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
         return;
       }
 
-      synchronized (queue) {
+      synchronized (queue.getActivationLock()) {
         if (wait) {
           final Continuation cont = ContinuationSupport.getContinuation(httpServletRequest, queue);
-
-          if (!queue.messagesWaiting()) {
-
+          if (!cont.isResumed() && !queue.messagesWaiting()) {
             queue.setActivationCallback(new JettyQueueActivationCallback(cont));
-
-            if (!queue.messagesWaiting()) {
-              cont.suspend(45 * 1000);
-            }
+            cont.suspend(45 * 1000);
+            return;
           }
-          else {
-            queue.setActivationCallback(null);
-          }
-
         }
 
         pollQueue(queue, stream, httpServletResponse);
@@ -154,7 +139,7 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
 
         public Object getMessage() {
           StringBuilder b = new StringBuilder("{Error" +
-              "Message:\"").append(t.getMessage()).append("\",AdditionalDetails:\"");
+                  "Message:\"").append(t.getMessage()).append("\",AdditionalDetails:\"");
           for (StackTraceElement e : t.getStackTrace()) {
             b.append(e.toString()).append("<br/>");
           }
@@ -165,14 +150,10 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
 
       stream.write(']');
     }
-    finally {
-      stream.close();
-    }
   }
 
   private static void pollQueue(MessageQueue queue, OutputStream stream,
                                 HttpServletResponse httpServletResponse) throws IOException {
-
     if (queue == null) return;
 
     queue.heartBeat();
@@ -187,7 +168,6 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
   private static class JettyQueueActivationCallback implements QueueActivationCallback {
     private Continuation cont;
 
-
     private JettyQueueActivationCallback(Continuation cont) {
       this.cont = cont;
     }
@@ -196,6 +176,5 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
       queue.setActivationCallback(null);
       cont.resume();
     }
-
   }
 }

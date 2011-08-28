@@ -42,7 +42,7 @@ import static java.lang.System.nanoTime;
 public class MessageQueueImpl implements MessageQueue {
   private static final long HEARTBEAT_PERIOD = secs(30);
   private static final long TIMEOUT = Boolean.getBoolean("org.jboss.errai.debugmode") ?
-      secs(360) : secs(30);
+          secs(360) : secs(30);
 
   private static final int MAXIMUM_PAYLOAD_SIZE = 10;
   private static final long DEFAULT_TRANSMISSION_WINDOW = millis(25);
@@ -158,7 +158,7 @@ public class MessageQueueImpl implements MessageQueue {
         }
         else if (windowPolling) {
           while (!queue.isEmpty() && payLoadSize < MAXIMUM_PAYLOAD_SIZE
-              && !isWindowExceeded()) {
+                  && !isWindowExceeded()) {
             outstream.write(',');
             if ((m = queue.poll()) instanceof HasEncoded) {
               outstream.write(((HasEncoded) m).getEncoded().getBytes());
@@ -184,7 +184,7 @@ public class MessageQueueImpl implements MessageQueue {
             else {
               throttleIncoming = true;
               System.err.println("[Warning: A queue has become saturated and " +
-                  "performance is now being degraded.]");
+                      "performance is now being degraded.]");
             }
 
           }
@@ -274,28 +274,28 @@ public class MessageQueueImpl implements MessageQueue {
   public void scheduleActivation() {
     synchronized (activationLock) {
       bus.getScheduler().addTask(
-          task = new TimedTask() {
-            {
-              period = -1; // only fire once.
-              nextRuntime = getEndOfWindow();
-            }
+              task = new TimedTask() {
+                {
+                  period = -1; // only fire once.
+                  nextRuntime = getEndOfWindow();
+                }
 
-            public void run() {
-              if (activationCallback != null)
-                activationCallback.activate(MessageQueueImpl.this);
+                public void run() {
+                  if (activationCallback != null)
+                    activationCallback.activate(MessageQueueImpl.this);
 
-              task = null;
-            }
+                  task = null;
+                }
 
-            public boolean isFinished() {
-              return false;
-            }
+                public boolean isFinished() {
+                  return false;
+                }
 
-            @Override
-            public String toString() {
-              return "MessageResumer";
-            }
-          }
+                @Override
+                public String toString() {
+                  return "MessageResumer";
+                }
+              }
       );
     }
   }
@@ -354,7 +354,9 @@ public class MessageQueueImpl implements MessageQueue {
    * @param activationCallback - new activation callback function
    */
   public void setActivationCallback(QueueActivationCallback activationCallback) {
-    this.activationCallback = activationCallback;
+    synchronized (activationLock) {
+      this.activationCallback = activationCallback;
+    }
   }
 
   /**
@@ -444,5 +446,10 @@ public class MessageQueueImpl implements MessageQueue {
 
   private static long millis(long millis) {
     return millis * 1000000;
+  }
+
+  @Override
+  public Object getActivationLock() {
+    return activationLock;
   }
 }
