@@ -20,31 +20,38 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
   }
 
   public void testBusReadyEventObserver() {
-    Timer timer = new Timer() {
+    runAfterInit(new Runnable() {
+      @Override
       public void run() {
+        System.out.println("RUN!");
         assertEquals("Wrong number of BusReadyEvents received:", 1, EventObserverTestModule.getInstance()
                 .getBusReadyEventsReceived());
         finishTest();
       }
-    };
-    timer.schedule(10000);
-    delayTestFinish(15000);
+    });
   }
 
   public void testEventObservers() {
-    assertNotNull(EventObserverTestModule.getInstance().getStartEvent());
-    EventObserverTestModule.getInstance().start();
-
-    Timer timer = new Timer() {
+    runAfterInit(new Runnable() {
+      @Override
       public void run() {
-        Map<String, List<String>> actualEvents = EventObserverTestModule.getInstance().getReceivedEvents();
+        assertNotNull(EventObserverTestModule.getInstance().getStartEvent());
+        EventObserverTestModule.getInstance().start();
 
-        // assert that client received all events
-        EventObserverIntegrationTest.this.verifyEvents(actualEvents);
-        finishTest();
+        EventObserverTestModule.getInstance().registerCallback(9,
+                new Runnable() {
+                  @Override
+                  public void run() {
+                    Map<String, List<String>> actualEvents = EventObserverTestModule.getInstance().getReceivedEvents();
+
+                    // assert that client received all events
+                    EventObserverIntegrationTest.this.verifyEvents(actualEvents);
+                    finishTest();
+                  }
+                });
+
+
       }
-    };
-    timer.schedule(20000);
-    delayTestFinish(25000);
+    }, 2000);
   }
 }

@@ -208,6 +208,10 @@
                             <useManifestOnlyJar>false</useManifestOnlyJar>
                             <forkMode>pertest</forkMode>
                             <argLine>-Xmx2048m</argLine>
+
+                            <systemPropertyVariables>
+                                <errai.hosted_mode_testing>true</errai.hosted_mode_testing>
+                            </systemPropertyVariables>
                         </configuration>
                     </plugin>
                 </plugins>

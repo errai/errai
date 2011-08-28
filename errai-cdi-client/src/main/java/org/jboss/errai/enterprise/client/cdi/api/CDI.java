@@ -49,6 +49,7 @@ public class CDI {
 
   static private boolean active = false;
   static private List<DeferredEvent> deferredEvents = new ArrayList<DeferredEvent>();
+  static private List<Runnable> postInitTasks = new ArrayList<Runnable>();
 
   public static MessageInterceptor CONVERSATION_INTERCEPTOR = new ConversationInterceptor();
 
@@ -86,6 +87,8 @@ public class CDI {
     if (!active) {
       deferredEvents.add(new DeferredEvent(payload, qualifiers));
       return;
+    }
+    else {
     }
 
     String subject = getSubjectNameByType(payload.getClass());
@@ -141,6 +144,16 @@ public class CDI {
     }
   }
 
+  public static void addPostInitTask(Runnable runnable) {
+
+    if (active) {
+      runnable.run();
+    }
+    else {
+      postInitTasks.add(runnable);
+    }
+  }
+
   public static void activate() {
     if (!active) {
       active = true;
@@ -149,7 +162,12 @@ public class CDI {
         fireEvent(o.eventInstance, o.annotations);
       }
 
+      for (Runnable r : postInitTasks) {
+        r.run();
+      }
+
       deferredEvents = null;
+      postInitTasks = null;
     }
   }
 

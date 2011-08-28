@@ -1,5 +1,6 @@
 package org.jboss.errai.cdi.event.server;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
@@ -13,6 +14,10 @@ import org.jboss.errai.cdi.event.client.StartEvent;
 
 @ApplicationScoped
 public class CDITestEventProducerService {
+
+  public CDITestEventProducerService() {
+    System.out.println("constructed " + this.getClass().getName());
+  }
 
   @Inject
   private Event<String> event;
@@ -40,6 +45,7 @@ public class CDITestEventProducerService {
 
   @Conversational
   public void start(@Observes StartEvent event) {
+    System.out.println("Received start event from client");
     fireAll();
   }
 
@@ -85,4 +91,10 @@ public class CDITestEventProducerService {
   public void fireABC() {
     eventABC.fire("ABC");
   }
+
+  @PostConstruct
+  public void init() {
+    System.out.println(" **** INITIALIZED SERVICE **** ");
+  }
+
 }

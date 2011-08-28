@@ -9,7 +9,7 @@ import com.google.gwt.user.client.Timer;
 
 /**
  * Tests CDI event producers.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class EventProducerIntegrationTest extends AbstractEventIntegrationTest {
@@ -36,28 +36,32 @@ public class EventProducerIntegrationTest extends AbstractEventIntegrationTest {
   }
 
   public void testEventProducers() {
-    final Timer testInitTimer = new Timer() {
+    runAfterInit(new Runnable() {
+      @Override
       public void run() {
-        // we need to wait for the BusReadyEvent because deferred events are fired without qualifiers!
         if (EventProducerTestModule.getInstance().getBusReadyEventsReceived()) {
           EventProducerTestModule.getInstance().fireAll();
-        } else {
+        }
+        else {
           fail("Did not receive a BusReadyEvent!");
         }
-      }
-    };
-    testInitTimer.schedule(5000);
 
-    final Timer testResultTimer = new Timer() {
-      public void run() {
-        Map<String, List<String>> actualEvents = EventProducerTestModule.getInstance().getReceivedEventsOnServer();
+        EventProducerTestModule.getInstance().registerCallback(9,
+                new Runnable() {
+                  @Override
+                  public void run() {
+                    Map<String, List<String>> actualEvents = EventProducerTestModule.getInstance().getReceivedEventsOnServer();
 
-        // assert that the server received all events
-        EventProducerIntegrationTest.this.verifyEvents(actualEvents);
-        finishTest();
+                    // assert that the server received all events
+                    EventProducerIntegrationTest.this.verifyEvents(actualEvents);
+                    finishTest();
+                  }
+                }
+        );
+
       }
-    };
-    testResultTimer.schedule(20000);
-    delayTestFinish(25000);
+    }, 2000);
+
+
   }
 }
