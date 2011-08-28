@@ -5,8 +5,6 @@ import java.util.Map;
 
 import org.jboss.errai.cdi.event.client.EventProducerTestModule;
 
-import com.google.gwt.user.client.Timer;
-
 /**
  * Tests CDI event producers.
  *
@@ -46,22 +44,18 @@ public class EventProducerIntegrationTest extends AbstractEventIntegrationTest {
           fail("Did not receive a BusReadyEvent!");
         }
 
-        EventProducerTestModule.getInstance().registerCallback(9,
-                new Runnable() {
-                  @Override
-                  public void run() {
+        EventProducerTestModule.getInstance().registerCallback(9, 
+            new Runnable() {
+                @Override
+                public void run() {
                     Map<String, List<String>> actualEvents = EventProducerTestModule.getInstance().getReceivedEventsOnServer();
 
                     // assert that the server received all events
                     EventProducerIntegrationTest.this.verifyEvents(actualEvents);
                     finishTest();
-                  }
                 }
-        );
-
-      }
+            });
+        }
     }, 2000);
-
-
   }
 }

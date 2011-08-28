@@ -89,7 +89,6 @@ public abstract class AbstractEventIntegrationTest extends AbstractErraiCDITest 
           }
         };
 
-
         internalTimer.schedule(postInitDelay);
       }
     };
