@@ -154,6 +154,10 @@ public class CDI {
     }
   }
 
+  public static void removePostInitTasks() {
+    postInitTasks.clear();
+  }
+  
   public static void activate() {
     if (!active) {
       active = true;

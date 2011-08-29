@@ -28,9 +28,6 @@ public class EventProducerTestModule {
 
   private Map<String, List<String>> receivedEventsOnServer = new HashMap<String, List<String>>();
 
-  private Runnable callback;
-  private int callbackOnCount;
-
   @Inject
   private Event<String> event;
 
@@ -154,20 +151,12 @@ public class EventProducerTestModule {
     List<String> events = receivedEventsOnServer.get(event.getReceiver());
     if (events == null)
       events = new ArrayList<String>();
+    
     events.add(event.getEvent());
     receivedEventsOnServer.put(event.getReceiver(), events);
-
-    if (receivedEventsOnServer.size() == callbackOnCount) {
-      callback.run();
-    }
   }
 
   public Map<String, List<String>> getReceivedEventsOnServer() {
     return receivedEventsOnServer;
-  }
-
-  public void registerCallback(int onCount, Runnable runnable) {
-    callbackOnCount = onCount;
-    callback = runnable;
   }
 }

@@ -40,7 +40,6 @@ public class CDITestEventProducerService {
 
   @Conversational
   public void start(@Observes StartEvent event) {
-    System.out.println("Received start event from client");
     fireAll();
   }
 

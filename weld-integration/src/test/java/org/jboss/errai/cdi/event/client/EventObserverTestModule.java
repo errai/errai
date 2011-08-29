@@ -27,9 +27,6 @@ public class EventObserverTestModule {
   private static EventObserverTestModule instance;
   private Map<String, List<String>> receivedEvents = new HashMap<String, List<String>>();
 
-  private Runnable callback;
-  private int callbackOnCount;
-
   @Inject
   private Event<StartEvent> startEvent;
 
@@ -69,7 +66,6 @@ public class EventObserverTestModule {
   }
 
   // all the observer methods
-
   public void onEvent(@Observes String event) {
     addReceivedEvent("", event);
   }
@@ -110,16 +106,8 @@ public class EventObserverTestModule {
     List<String> events = receivedEvents.get(receiver);
     if (events == null)
       events = new ArrayList<String>();
+    
     events.add(event);
     receivedEvents.put(receiver, events);
-
-    if (receivedEvents.size() == callbackOnCount) {
-      callback.run();
-    }
-  }
-
-  public void registerCallback(int onCount, Runnable runnable) {
-    callbackOnCount = onCount;
-    callback = runnable;
   }
 }

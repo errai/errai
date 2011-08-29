@@ -5,6 +5,8 @@ import java.util.Map;
 
 import org.jboss.errai.cdi.event.client.EventObserverTestModule;
 
+import com.google.gwt.user.client.Timer;
+
 /**
  * Tests CDI event observers.
  * 
@@ -21,8 +23,9 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        assertEquals("Wrong number of BusReadyEvents received:", 1, EventObserverTestModule.getInstance()
-                .getBusReadyEventsReceived());
+        assertEquals("Wrong number of BusReadyEvents received:", 1, 
+            EventObserverTestModule.getInstance().getBusReadyEventsReceived());
+        
         finishTest();
       }
     });
@@ -34,18 +37,19 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
       public void run() {
         assertNotNull(EventObserverTestModule.getInstance().getStartEvent());
         EventObserverTestModule.getInstance().start();
-
-        EventObserverTestModule.getInstance().registerCallback(9, 
-            new Runnable() {
-                public void run() {
-                    Map<String, List<String>> actualEvents = EventObserverTestModule.getInstance().getReceivedEvents();
-  
-                    // assert that client received all events
-                    EventObserverIntegrationTest.this.verifyEvents(actualEvents);
-                    finishTest();
-                 }
-            });
       }
     }, 2000);
+    
+    final Timer timer = new Timer() {
+      public void run() {
+        Map<String, List<String>> actualEvents = EventObserverTestModule.getInstance().getReceivedEvents();
+
+        // assert that client received all events
+        EventObserverIntegrationTest.this.verifyEvents(actualEvents);
+        finishTest();
+      }
+    };
+    timer.schedule(20000);
+    delayTestFinish(25000);
   }
 }

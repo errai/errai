@@ -209,9 +209,13 @@
                             <forkMode>pertest</forkMode>
                             <argLine>-Xmx2048m</argLine>
 
-                            <systemPropertyVariables>
-                                <errai.hosted_mode_testing>true</errai.hosted_mode_testing>
-                            </systemPropertyVariables>
+                            <systemProperties>
+                                <!-- Must disable long polling for automated tests to succeed -->
+                                 <property>
+                                    <name>errai.hosted_mode_testing</name>
+                                    <value>true</value>
+                                 </property>
+                            </systemProperties>
                         </configuration>
                     </plugin>
                 </plugins>
