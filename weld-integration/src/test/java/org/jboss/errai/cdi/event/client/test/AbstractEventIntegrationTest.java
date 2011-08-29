@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
-import org.junit.Before;
 
 import com.google.gwt.user.client.Timer;
 
