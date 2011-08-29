@@ -251,8 +251,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * Fire listeners to notify that a new subscription has been registered on the bus.
    *
    * @param subject - new subscription registered
-   * @param local -
-   * @param isNew -
+   * @param local   -
+   * @param isNew   -
    */
   private void fireAllSubscribeListeners(String subject, boolean local, boolean isNew) {
     Iterator<SubscribeListener> iter = onSubscribeHooks.iterator();
@@ -712,7 +712,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                   COMM_CALLBACK = new LongPollRequestCallback();
                   break;
                 case NoLongPollAvailable:
-                  POLL_FREQUENCY = 500;
+                  if (message.hasPart("PollFrequency")) {
+                    POLL_FREQUENCY = message.get(Integer.class, "PollFrequency");
+                  }
+                  else {
+                    POLL_FREQUENCY = 500;
+                  }
                   break;
               }
             }
@@ -783,9 +788,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
               public void callback(Message message) {
                 String errorTo = message.get(String.class, MessageParts.ErrorTo);
                 if (errorTo == null) {
-                  logError(message.get(String.class, "ErrorMessage"), 
-                      message.get(String.class, "AdditionalDetails"), null);
-                } 
+                  logError(message.get(String.class, "ErrorMessage"),
+                          message.get(String.class, "AdditionalDetails"), null);
+                }
                 else {
                   message.toSubject(errorTo);
                   message.sendNowWith(ClientMessageBusImpl.this);

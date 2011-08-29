@@ -183,13 +183,19 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                       .with(MessageParts.PriorityProcessing, "1")
                       .noErrorHandling().sendNowWith(ServerMessageBusImpl.this, false);
 
-              createConversation(message)
-                      .toSubject("ClientBus")
-                      .command(BusCommands.CapabilitiesNotice)
-                      .with("Flags", ErraiServiceConfigurator.LONG_POLLING ?
-                              Capabilities.LongPollAvailable.name() :
-                              Capabilities.NoLongPollAvailable.name())
-                      .noErrorHandling().sendNowWith(ServerMessageBusImpl.this, false);
+              CommandMessage msg = ConversationMessage.create(message);
+              msg.toSubject("ClientBus")
+                      .command(BusCommands.CapabilitiesNotice);
+
+              if (ErraiServiceConfigurator.LONG_POLLING) {
+                msg.set("Flags", Capabilities.LongPollAvailable.name());
+              }
+              else {
+                msg.set("Flags", Capabilities.NoLongPollAvailable.name());
+                msg.set("PollFrequency", ErraiServiceConfigurator.HOSTED_MODE_TESTING ? 50 : 250);
+              }
+
+              send(msg, false);
 
               createConversation(message)
                       .toSubject("ClientBus")
