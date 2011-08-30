@@ -9,7 +9,7 @@ import com.google.gwt.user.client.Timer;
 
 /**
  * Tests CDI event observers.
- *
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
@@ -20,22 +20,27 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
   }
 
   public void testBusReadyEventObserver() {
-    Timer timer = new Timer() {
+    runAfterInit(new Runnable() {
+      @Override
       public void run() {
-        assertEquals("Wrong number of BusReadyEvents received:", 1, EventObserverTestModule.getInstance()
-                .getBusReadyEventsReceived());
+        assertEquals("Wrong number of BusReadyEvents received:", 1, 
+            EventObserverTestModule.getInstance().getBusReadyEventsReceived());
+        
         finishTest();
       }
-    };
-    timer.schedule(10000);
-    delayTestFinish(15000);
+    });
   }
 
   public void testEventObservers() {
-    assertNotNull(EventObserverTestModule.getInstance().getStartEvent());
-    EventObserverTestModule.getInstance().start();
-
-    Timer timer = new Timer() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        assertNotNull(EventObserverTestModule.getInstance().getStartEvent());
+        EventObserverTestModule.getInstance().start();
+      }
+    }, 2000);
+    
+    final Timer timer = new Timer() {
       public void run() {
         Map<String, List<String>> actualEvents = EventObserverTestModule.getInstance().getReceivedEvents();
 

@@ -151,6 +151,7 @@ public class EventProducerTestModule {
     List<String> events = receivedEventsOnServer.get(event.getReceiver());
     if (events == null)
       events = new ArrayList<String>();
+    
     events.add(event.getEvent());
     receivedEventsOnServer.put(event.getReceiver(), events);
   }

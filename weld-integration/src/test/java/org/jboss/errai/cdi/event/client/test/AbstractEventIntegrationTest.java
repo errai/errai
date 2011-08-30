@@ -5,9 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.user.client.Timer;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
+
+import com.google.gwt.user.client.Timer;
 
 /**
  * Base class for all event integration tests.
@@ -72,13 +73,16 @@ public abstract class AbstractEventIntegrationTest extends AbstractErraiCDITest 
     assertEquals("Wrong events observed for @ABC", expectedEvents.get("ABC"), actualEvents.get("ABC"));
   }
 
+  /**
+   * Runs the provided Runnable after the CDI client has been initialized.
+   * 
+   * @param r
+   */
   protected void runAfterInit(final Runnable r) {
     runAfterInit(r, 1000);
   }
 
   protected void runAfterInit(final Runnable r, final int postInitDelay) {
-    delayTestFinish(65000);
-
     Runnable internalRunnable = new Runnable() {
       @Override
       public void run() {
@@ -88,8 +92,6 @@ public abstract class AbstractEventIntegrationTest extends AbstractErraiCDITest 
             r.run();
           }
         };
-
-
         internalTimer.schedule(postInitDelay);
       }
     };

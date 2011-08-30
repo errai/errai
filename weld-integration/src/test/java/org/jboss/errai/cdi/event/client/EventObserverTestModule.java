@@ -66,7 +66,6 @@ public class EventObserverTestModule {
   }
 
   // all the observer methods
-
   public void onEvent(@Observes String event) {
     addReceivedEvent("", event);
   }
@@ -107,6 +106,7 @@ public class EventObserverTestModule {
     List<String> events = receivedEvents.get(receiver);
     if (events == null)
       events = new ArrayList<String>();
+    
     events.add(event);
     receivedEvents.put(receiver, events);
   }
