@@ -16,6 +16,7 @@
 
 package org.jboss.errai.bus.server;
 
+import org.jboss.errai.bus.client.tests.support.TestException;
 import org.jboss.errai.bus.client.tests.support.TestRPCServiceRemote;
 import org.jboss.errai.bus.server.annotations.Service;
 
@@ -29,5 +30,10 @@ public class TestRPCService implements TestRPCServiceRemote {
   public boolean isGreaterThan(int a, int b) {
     System.out.println("TestRPCService.isGreaterThan(" + a + ", " + b + ")");
     return a > b;
+  }
+
+  @Override
+  public void exception() throws TestException {
+    throw new TestException();
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, a divison Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,9 @@
 
 package org.jboss.errai.bus.client.tests.support;
 
-import org.jboss.errai.bus.server.annotations.Remote;
+import org.jboss.errai.bus.server.annotations.ExposeEntity;
 
-/**
- * User: christopherbrock
- * Date: 5-Aug-2010
- * Time: 4:11:01 PM
- */
-@Remote
-public interface TestRPCServiceRemote {
-  public boolean isGreaterThan(int a, int b);
-  public void exception() throws TestException;
+@ExposeEntity
+public class TestException extends RuntimeException {
+
 }

@@ -16,10 +16,11 @@
 
 package org.errai.samples.rpcdemo.client.local;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.*;
+import java.util.Date;
+import java.util.List;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.errai.samples.rpcdemo.client.shared.TestException;
 import org.errai.samples.rpcdemo.client.shared.TestService;
@@ -30,10 +31,16 @@ import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import java.util.Date;
-import java.util.List;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 @EntryPoint
 public class RPCDemo {
@@ -91,9 +98,9 @@ public class RPCDemo {
       public void onClick(ClickEvent clickEvent) {
         MessageBuilder.createCall(new RemoteCallback<List<Date>>() {
           public void callback(List<Date> response) {
-
+            appendResult.setText("");
             for (Date d : response)
-              appendResult.setText(d.toString());
+              appendResult.setText(appendResult.getText() + " " + d.toString());
           }
         }, TestService.class).getDates();
       }
@@ -111,24 +118,24 @@ public class RPCDemo {
 
     final Button exception = new Button("Exception", new ClickHandler() {
       public void onClick(ClickEvent clickEvent) {
-        MessageBuilder.createCall(new RemoteCallback<Date>() {
-          public void callback(Date response) {
-            appendResult.setText(response.toString());
-          }
-        }, new ErrorCallback() {
-          public boolean error(Message message, Throwable throwable) {
-            try {
-              Window.alert("Exception received from server!");
-              throw throwable;
-            }
-            catch (TestException e) {
-              Window.alert("TestException received from server!");
-            }
-            catch (Throwable t) {
-            }
-            return false;
-          }
-
+        MessageBuilder.createCall(
+            new RemoteCallback<Void>() {
+              public void callback(Void response) {
+              }
+            }, 
+            new ErrorCallback() {
+              public boolean error(Message message, Throwable throwable) {
+                try {
+                  throw throwable;
+                }
+                catch (TestException e) {
+                  Window.alert("Success! TestException received from remote call.");
+                }
+                catch (Throwable t) {
+                  GWT.log("An unexpected error has occured", t);
+                }
+                return false;
+              }
         }, TestService.class).exception();
       }
     });

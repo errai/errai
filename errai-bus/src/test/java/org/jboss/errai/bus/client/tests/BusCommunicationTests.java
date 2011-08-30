@@ -16,6 +16,7 @@
 
 package org.jboss.errai.bus.client.tests;
 
+import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.RemoteCallback;
@@ -23,8 +24,11 @@ import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.tests.support.RandomProvider;
 import org.jboss.errai.bus.client.tests.support.SType;
+import org.jboss.errai.bus.client.tests.support.TestException;
 import org.jboss.errai.bus.client.tests.support.TestRPCServiceRemote;
 import org.jboss.errai.bus.client.tests.support.User;
+
+import com.google.gwt.user.client.Timer;
 
 /**
  * User: christopherbrock
@@ -180,7 +184,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
     });
   }
 
-  public void testRPCCall() {
+  public void testRPC() {
     runAfterInit(new Runnable() {
       public void run() {
         TestRPCServiceRemote remote = MessageBuilder.createCall(new RemoteCallback<Boolean>() {
@@ -190,7 +194,8 @@ public class BusCommunicationTests extends AbstractErraiTest {
             ++count;
             System.out.println("response (" + count + ")" + response);
             assertTrue(response);
-            if (count == 3) finishTest();
+            assertEquals(3, count); 
+            finishTest();
           }
         }, TestRPCServiceRemote.class);
 
@@ -199,5 +204,48 @@ public class BusCommunicationTests extends AbstractErraiTest {
         remote.isGreaterThan(11, 3);
       }
     });
+  }
+  
+  private Throwable caught = null;
+  private Message message = null;
+  
+  public void testRPCThrowingException() {
+    runAfterInit(new Runnable() {
+      public void run() {
+        MessageBuilder.createCall(
+            new RemoteCallback<Object>() {
+              public void callback(Object response) {
+              }
+            },
+            new ErrorCallback() {
+              public boolean error(Message m, Throwable t) {
+                caught = t;
+                message = m;
+                return false;
+              }
+            },
+        TestRPCServiceRemote.class).exception();
+      }
+    });
+    
+    Timer t = new Timer() {
+      @Override
+      public void run() {
+        assertNotNull("Message is null.", message);
+        assertNotNull("Throwable is null.", caught);
+        
+        try {
+          throw caught;
+        } 
+        catch(TestException e) {
+          finishTest();
+        }
+        catch (Throwable throwable) {
+          fail("Received wrong Throwable.");
+        }
+      }
+    };
+    t.schedule(15000);
+    delayTestFinish(20000);
   }
 }

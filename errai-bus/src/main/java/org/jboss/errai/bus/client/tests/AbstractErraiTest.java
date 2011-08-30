@@ -89,7 +89,7 @@ public abstract class AbstractErraiTest extends GWTTestCase {
         }
         catch (Throwable t) {
           t.printStackTrace();
-          fail();
+          fail(t.getMessage());
         }
       }
     };
