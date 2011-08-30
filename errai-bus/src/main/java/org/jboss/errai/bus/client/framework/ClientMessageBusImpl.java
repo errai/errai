@@ -423,7 +423,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   }
 
-  public void remoteShadowSubscription(String subject) {
+  private void remoteShadowSubscription(String subject) {
     shadowSubscriptions.remove(subject);
   }
 
@@ -1003,9 +1003,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 response.getText(), e);
         incomingTimer.cancel();
       }
-      finally {
-        //  recvBuilder = getRecvBuilder();
-      }
     }
 
     public void schedule() {
@@ -1270,7 +1267,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     public void addError(String message, String additionalDetails, Throwable e) {
       contentPanel.add(new HTML("<strong style='background:red;color:white;'>" + message + "</strong>"));
 
-      StringBuffer buildTrace = new StringBuffer("<tt style=\"font-size:11px;\"><pre>");
+      StringBuilder buildTrace = new StringBuilder("<tt style=\"font-size:11px;\"><pre>");
       if (e != null) {
         buildTrace.append(e.getClass().getName()).append(": ").append(e.getMessage()).append("<br/>");
         for (StackTraceElement ste : e.getStackTrace()) {
