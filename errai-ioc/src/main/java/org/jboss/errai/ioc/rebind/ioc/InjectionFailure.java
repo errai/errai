@@ -17,7 +17,7 @@
 package org.jboss.errai.ioc.rebind.ioc;
 
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
 
 public class InjectionFailure extends ErraiBootstrapFailure {
   private MetaClass failedDependency;

@@ -14,7 +14,8 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <name>Errai</name>
     <groupId>org.jboss.errai</groupId>
@@ -87,6 +88,7 @@
         <module>errai-tools</module>
         <module>errai-bus-demos</module>
         <module>jboss7-support</module>
+        <module>errai-codegen</module>
     </modules>
 
     <dependencyManagement>
@@ -379,6 +381,12 @@
             <id>maven-central</id>
             <name>Maven Central</name>
             <url>http://repo1.maven.org/</url>
+        </repository>
+
+        <repository>
+            <id>msgpack.org</id>
+            <name>MessagePack Repository for Maven</name>
+            <url>http://msgpack.org/maven2/</url>
         </repository>
     </repositories>
 

@@ -18,8 +18,8 @@ package org.jboss.errai.ioc.tests.rebind.literals;
 
 import junit.framework.TestCase;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.literal.LiteralFactory;
+import org.jboss.errai.codegen.framework.Context;
+import org.jboss.errai.codegen.framework.literal.LiteralFactory;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

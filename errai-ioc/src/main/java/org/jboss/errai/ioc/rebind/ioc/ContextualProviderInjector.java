@@ -20,13 +20,12 @@ import java.lang.annotation.Annotation;
 
 import org.jboss.errai.ioc.client.ContextualProviderContext;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ObjectBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.*;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java.JavaReflectionField;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.java.JavaReflectionParameterizedType;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.Refs;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
+import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder;
+import org.jboss.errai.codegen.framework.meta.impl.java.JavaReflectionField;
+import org.jboss.errai.codegen.framework.meta.impl.java.JavaReflectionParameterizedType;
+import org.jboss.errai.codegen.framework.util.Refs;
+import org.jboss.errai.codegen.framework.util.Stmt;
 
 import javax.inject.Provider;
 

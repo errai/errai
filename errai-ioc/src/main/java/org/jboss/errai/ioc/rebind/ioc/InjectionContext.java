@@ -32,10 +32,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
+import org.jboss.errai.codegen.framework.meta.MetaField;
+import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependencies;
 import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependenciesException;
 import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedField;

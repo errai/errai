@@ -16,8 +16,8 @@
 
 package org.jboss.errai.ioc.rebind.ioc.exception;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaField;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>

@@ -25,9 +25,9 @@ import javax.inject.Singleton;
 
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.Refs;
+import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.util.Refs;
 
 public class TypeInjector extends Injector {
   protected final MetaClass type;

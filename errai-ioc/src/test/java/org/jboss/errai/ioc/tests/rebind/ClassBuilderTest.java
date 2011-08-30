@@ -22,12 +22,12 @@ import java.io.Serializable;
 
 import org.jboss.errai.ioc.client.InterfaceInjectionContext;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Modifier;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Parameter;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ClassBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.exception.UndefinedMethodException;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
+import org.jboss.errai.codegen.framework.Modifier;
+import org.jboss.errai.codegen.framework.Parameter;
+import org.jboss.errai.codegen.framework.Variable;
+import org.jboss.errai.codegen.framework.builder.impl.ClassBuilder;
+import org.jboss.errai.codegen.framework.exception.UndefinedMethodException;
+import org.jboss.errai.codegen.framework.util.Stmt;
 import org.junit.Test;
 
 

@@ -19,19 +19,19 @@ package org.jboss.errai.ioc.tests.rebind;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.ArithmeticOperator;
-import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ContextBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidExpressionException;
-import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.Arith;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.Bool;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.Refs;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
+import org.jboss.errai.codegen.framework.ArithmeticOperator;
+import org.jboss.errai.codegen.framework.BooleanOperator;
+import org.jboss.errai.codegen.framework.Context;
+import org.jboss.errai.codegen.framework.Variable;
+import org.jboss.errai.codegen.framework.builder.impl.ContextBuilder;
+import org.jboss.errai.codegen.framework.builder.impl.StatementBuilder;
+import org.jboss.errai.codegen.framework.exception.InvalidExpressionException;
+import org.jboss.errai.codegen.framework.exception.InvalidTypeException;
+import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
+import org.jboss.errai.codegen.framework.util.Arith;
+import org.jboss.errai.codegen.framework.util.Bool;
+import org.jboss.errai.codegen.framework.util.Refs;
+import org.jboss.errai.codegen.framework.util.Stmt;
 import org.junit.Test;
 
 /**

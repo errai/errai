@@ -23,15 +23,15 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.List;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.literal.LiteralFactory;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaConstructor;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.Refs;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
+import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.literal.LiteralFactory;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaConstructor;
+import org.jboss.errai.codegen.framework.meta.MetaField;
+import org.jboss.errai.codegen.framework.meta.MetaMethod;
+import org.jboss.errai.codegen.framework.meta.MetaParameter;
+import org.jboss.errai.codegen.framework.util.Refs;
+import org.jboss.errai.codegen.framework.util.Stmt;
 
 public class InjectableInstance<T extends Annotation> {
   private T annotation;

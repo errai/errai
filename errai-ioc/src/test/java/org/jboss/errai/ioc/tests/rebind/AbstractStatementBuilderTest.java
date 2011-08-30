@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ioc.tests.rebind;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
+import org.jboss.errai.codegen.framework.builder.impl.StatementBuilder;
 
 /**
  * Base class for all {@link StatementBuilder} tests.

@@ -24,20 +24,20 @@ import java.util.Map;
 
 import javax.enterprise.util.TypeLiteral;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.AssignmentOperator;
-import org.jboss.errai.ioc.rebind.ioc.codegen.BooleanOperator;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.Builder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ContextBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidExpressionException;
-import org.jboss.errai.ioc.rebind.ioc.codegen.exception.InvalidTypeException;
-import org.jboss.errai.ioc.rebind.ioc.codegen.exception.OutOfScopeException;
-import org.jboss.errai.ioc.rebind.ioc.codegen.exception.TypeNotIterableException;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.Bool;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
+import org.jboss.errai.codegen.framework.AssignmentOperator;
+import org.jboss.errai.codegen.framework.BooleanOperator;
+import org.jboss.errai.codegen.framework.Context;
+import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.Variable;
+import org.jboss.errai.codegen.framework.builder.Builder;
+import org.jboss.errai.codegen.framework.builder.impl.ContextBuilder;
+import org.jboss.errai.codegen.framework.builder.impl.StatementBuilder;
+import org.jboss.errai.codegen.framework.exception.InvalidExpressionException;
+import org.jboss.errai.codegen.framework.exception.InvalidTypeException;
+import org.jboss.errai.codegen.framework.exception.OutOfScopeException;
+import org.jboss.errai.codegen.framework.exception.TypeNotIterableException;
+import org.jboss.errai.codegen.framework.util.Bool;
+import org.jboss.errai.codegen.framework.util.Stmt;
 import org.junit.Test;
 
 /**

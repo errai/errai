@@ -26,8 +26,8 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.dev.cfg.ModuleDef;
 import com.google.gwt.dev.javac.StandardGeneratorContext;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCBootstrapGenerator;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 
 import java.io.PrintWriter;
 import java.lang.reflect.Field;

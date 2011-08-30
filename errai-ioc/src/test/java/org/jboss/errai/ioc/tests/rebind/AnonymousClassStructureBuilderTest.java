@@ -18,12 +18,12 @@ package org.jboss.errai.ioc.tests.rebind;
 
 import java.lang.annotation.Retention;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Parameter;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ObjectBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.StatementBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
+import org.jboss.errai.codegen.framework.Context;
+import org.jboss.errai.codegen.framework.Parameter;
+import org.jboss.errai.codegen.framework.Variable;
+import org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder;
+import org.jboss.errai.codegen.framework.builder.impl.StatementBuilder;
+import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.ioc.tests.rebind.model.Bar;
 import org.junit.Test;
 

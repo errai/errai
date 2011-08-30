@@ -20,7 +20,7 @@ import java.lang.annotation.Target;
 
 import javax.annotation.PostConstruct;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.AnnotationEncoder;
+import org.jboss.errai.codegen.framework.AnnotationEncoder;
 import org.jboss.errai.ioc.tests.rebind.model.MyBean;
 import org.jboss.errai.ioc.tests.rebind.model.MyTestAnnotation;
 import org.junit.Test;

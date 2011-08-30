@@ -17,10 +17,10 @@
 package org.jboss.errai.ioc.rebind.ioc;
 
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.Refs;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
+import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.util.Refs;
+import org.jboss.errai.codegen.framework.util.Stmt;
 
 import javax.inject.Provider;
 

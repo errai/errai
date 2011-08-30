@@ -23,14 +23,14 @@ import static org.jboss.errai.ioc.rebind.ioc.InjectUtil.resolveInjectionDependen
 import java.lang.annotation.Annotation;
 
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaConstructor;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.Refs;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
+import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaConstructor;
+import org.jboss.errai.codegen.framework.meta.MetaField;
+import org.jboss.errai.codegen.framework.meta.MetaMethod;
+import org.jboss.errai.codegen.framework.meta.MetaParameter;
+import org.jboss.errai.codegen.framework.util.Refs;
+import org.jboss.errai.codegen.framework.util.Stmt;
 
 public class InjectionTask {
   protected final TaskType injectType;

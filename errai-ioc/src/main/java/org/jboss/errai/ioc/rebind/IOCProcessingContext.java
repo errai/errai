@@ -19,10 +19,10 @@ package org.jboss.errai.ioc.rebind;
 import org.jboss.errai.bus.rebind.ProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.JSR330QualifyingMetadataFactory;
 import org.jboss.errai.ioc.rebind.ioc.QualifyingMetadataFactory;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BlockBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.framework.Context;
+import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.builder.BlockBuilder;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
 
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
