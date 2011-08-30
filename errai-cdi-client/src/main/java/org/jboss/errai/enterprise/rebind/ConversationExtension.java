@@ -20,12 +20,12 @@ import org.jboss.errai.enterprise.client.cdi.api.ConversationContext;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaField;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameterizedType;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
+import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
+import org.jboss.errai.codegen.framework.meta.MetaField;
+import org.jboss.errai.codegen.framework.meta.MetaParameterizedType;
+import org.jboss.errai.codegen.framework.util.Stmt;
 
 import com.google.gwt.core.ext.typeinfo.JClassType;
 
