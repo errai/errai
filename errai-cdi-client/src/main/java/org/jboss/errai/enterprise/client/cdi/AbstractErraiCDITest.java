@@ -1,5 +1,6 @@
 package org.jboss.errai.enterprise.client.cdi;
 
+import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
 
 import com.google.gwt.core.client.GWT;
@@ -16,6 +17,8 @@ public abstract class AbstractErraiCDITest extends GWTTestCase {
   @Override
   public void gwtSetUp() throws Exception {
     super.gwtSetUp();
+
+    CDI.removePostInitTasks();
 
     Bootstrapper bootstrapper = GWT.create(Bootstrapper.class);
     bootstrapper.bootstrapContainer();

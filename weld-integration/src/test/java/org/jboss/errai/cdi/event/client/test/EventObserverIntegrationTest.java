@@ -22,8 +22,8 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
   public void testBusReadyEventObserver() {
     Timer timer = new Timer() {
       public void run() {
-        assertEquals("Wrong number of BusReadyEvents received:", 1, EventObserverTestModule.getInstance()
-                .getBusReadyEventsReceived());
+        assertEquals("Wrong number of BusReadyEvents received:", 1,
+                EventObserverTestModule.getInstance().getBusReadyEventsReceived());
         finishTest();
       }
     };
@@ -43,6 +43,7 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
         EventObserverIntegrationTest.this.verifyEvents(actualEvents);
         finishTest();
       }
+
     };
     timer.schedule(20000);
     delayTestFinish(25000);
