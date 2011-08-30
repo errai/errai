@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.tests.rebind;
+package org.jboss.errai.codegen.framework.tests;
 
 import java.lang.annotation.Target;
 
 import javax.annotation.PostConstruct;
 
 import org.jboss.errai.codegen.framework.AnnotationEncoder;
-import org.jboss.errai.ioc.tests.rebind.model.MyBean;
-import org.jboss.errai.ioc.tests.rebind.model.MyTestAnnotation;
+import org.jboss.errai.codegen.framework.tests.model.MyBean;
+import org.jboss.errai.codegen.framework.tests.model.MyTestAnnotation;
 import org.junit.Test;
 
 /**

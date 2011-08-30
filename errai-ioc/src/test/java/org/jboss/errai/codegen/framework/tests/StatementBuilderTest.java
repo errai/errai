@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.tests.rebind;
+package org.jboss.errai.codegen.framework.tests;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -41,7 +41,7 @@ import org.jboss.errai.codegen.framework.exception.OutOfScopeException;
 import org.jboss.errai.codegen.framework.literal.LiteralFactory;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.util.Stmt;
-import org.jboss.errai.ioc.tests.rebind.model.Foo;
+import org.jboss.errai.codegen.framework.tests.model.Foo;
 import org.junit.Assert;
 import org.junit.Test;
 

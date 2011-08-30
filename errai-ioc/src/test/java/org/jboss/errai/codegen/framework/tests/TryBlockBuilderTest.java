@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.tests.rebind;
+package org.jboss.errai.codegen.framework.tests;
 
 import org.jboss.errai.codegen.framework.Variable;
 import org.jboss.errai.codegen.framework.builder.impl.StatementBuilder;

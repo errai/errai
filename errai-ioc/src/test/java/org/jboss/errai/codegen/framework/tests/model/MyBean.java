@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.tests.rebind.model;
+package org.jboss.errai.codegen.framework.tests.model;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public enum TestEnum {
-  FIRST, SECOND, THIRD, FOURTH
+
+@MyTestAnnotation(foo = "barfoo", testEum = TestEnum.FOURTH)
+public class MyBean {
 }

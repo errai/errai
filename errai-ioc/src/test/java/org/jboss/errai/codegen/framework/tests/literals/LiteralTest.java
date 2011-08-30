@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.tests.rebind.literals;
+package org.jboss.errai.codegen.framework.tests.literals;
 
 import junit.framework.TestCase;
 

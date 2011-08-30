@@ -14,21 +14,11 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.tests.rebind.model;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+package org.jboss.errai.codegen.framework.tests.model;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE, ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
-public @interface MyTestAnnotation {
-  public String foo() default "foobar";
-
-  public TestEnum testEum();
+public enum TestEnum {
+  FIRST, SECOND, THIRD, FOURTH
 }

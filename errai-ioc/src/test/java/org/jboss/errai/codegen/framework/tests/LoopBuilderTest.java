@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.tests.rebind;
+package org.jboss.errai.codegen.framework.tests;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;

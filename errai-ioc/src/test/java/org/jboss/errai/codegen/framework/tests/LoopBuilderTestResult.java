@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.tests.rebind;
+package org.jboss.errai.codegen.framework.tests;
 
 /**
  * Expected test results for the {@link LoopBuilderTest}

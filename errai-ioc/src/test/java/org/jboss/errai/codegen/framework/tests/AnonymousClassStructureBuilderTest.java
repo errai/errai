@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.tests.rebind;
+package org.jboss.errai.codegen.framework.tests;
 
 import java.lang.annotation.Retention;
 
@@ -24,7 +24,7 @@ import org.jboss.errai.codegen.framework.Variable;
 import org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.StatementBuilder;
 import org.jboss.errai.codegen.framework.util.Stmt;
-import org.jboss.errai.ioc.tests.rebind.model.Bar;
+import org.jboss.errai.codegen.framework.tests.model.Bar;
 import org.junit.Test;
 
 /**

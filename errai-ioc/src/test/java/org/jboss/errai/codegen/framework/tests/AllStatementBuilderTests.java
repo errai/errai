@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.tests.rebind;
+package org.jboss.errai.codegen.framework.tests;
 
-import org.jboss.errai.ioc.tests.rebind.literals.LiteralTest;
+import org.jboss.errai.codegen.framework.tests.literals.LiteralTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 

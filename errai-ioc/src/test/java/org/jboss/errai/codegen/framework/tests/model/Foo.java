@@ -1,4 +1,4 @@
-package org.jboss.errai.ioc.tests.rebind.model;
+package org.jboss.errai.codegen.framework.tests.model;
 
 import java.util.List;
 import java.util.Map;
