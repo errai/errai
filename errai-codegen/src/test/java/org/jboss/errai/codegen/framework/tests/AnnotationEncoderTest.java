@@ -53,18 +53,18 @@ public class AnnotationEncoderTest extends AbstractStatementBuilderTest {
   public void testEncodeAnnotationWithMultipleProperties() {
     String enc = AnnotationEncoder.encode(MyBean.class.getAnnotation(MyTestAnnotation.class)).generate(null);
 
-    assertEquals("new org.jboss.errai.ioc.tests.rebind.model.MyTestAnnotation() { " +
+    assertEquals("new org.jboss.errai.codegen.framework.tests.model.MyTestAnnotation() { " +
             "public String toString() { " +
-            "    return \"@org.jboss.errai.ioc.tests.rebind.model.MyTestAnnotation(foo=barfoo, testEum=FOURTH)\"; " +
+            "    return \"@org.jboss.errai.codegen.framework.tests.model.MyTestAnnotation(foo=barfoo, testEum=FOURTH)\"; " +
             "} " +
             "public Class annotationType() { " +
-            "    return org.jboss.errai.ioc.tests.rebind.model.MyTestAnnotation.class; " +
+            "    return org.jboss.errai.codegen.framework.tests.model.MyTestAnnotation.class; " +
             "} " +
             "public String foo() { " +
             "    return \"barfoo\"; " +
             "} " +
-            "public org.jboss.errai.ioc.tests.rebind.model.TestEnum testEum() { " +
-            "    return org.jboss.errai.ioc.tests.rebind.model.TestEnum.FOURTH; " +
+            "public org.jboss.errai.codegen.framework.tests.model.TestEnum testEum() { " +
+            "    return org.jboss.errai.codegen.framework.tests.model.TestEnum.FOURTH; " +
             "} " +
 
             "}", enc);

@@ -16,8 +16,8 @@
 
 package org.jboss.errai.codegen.framework.meta.impl;
 
-import static org.jboss.errai.ioc.rebind.ioc.InjectUtil.classToMeta;
 import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.asClassArray;
+import static org.jboss.errai.codegen.framework.util.GenUtil.classToMeta;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -32,6 +32,7 @@ import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.meta.MetaParameter;
 import org.jboss.errai.codegen.framework.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.framework.meta.MetaType;
+import org.jboss.errai.codegen.framework.util.GenUtil;
 import org.mvel2.util.ParseTools;
 
 import com.google.gwt.core.ext.typeinfo.JClassType;

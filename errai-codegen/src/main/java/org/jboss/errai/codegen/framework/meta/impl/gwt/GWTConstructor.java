@@ -21,7 +21,6 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaConstructor;
@@ -31,6 +30,7 @@ import org.jboss.errai.codegen.framework.meta.MetaTypeVariable;
 
 import com.google.gwt.core.ext.typeinfo.JConstructor;
 import com.google.gwt.core.ext.typeinfo.JParameter;
+import org.jboss.errai.codegen.framework.util.GenUtil;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -48,7 +48,7 @@ public class GWTConstructor extends MetaConstructor {
       Class<?> cls = Class.forName(c.getEnclosingType().getQualifiedSourceName(), false,
           Thread.currentThread().getContextClassLoader());
 
-      Constructor constr = cls.getConstructor(InjectUtil.jParmToClass(c.getParameters()));
+      Constructor constr = cls.getConstructor(GenUtil.jParmToClass(c.getParameters()));
 
       annotations = constr.getAnnotations();
 

@@ -19,6 +19,8 @@ package org.jboss.errai.codegen.framework.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.core.ext.typeinfo.JParameter;
+import com.google.gwt.core.ext.typeinfo.JType;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.Variable;
@@ -30,6 +32,7 @@ import org.jboss.errai.codegen.framework.exception.UndefinedMethodException;
 import org.jboss.errai.codegen.framework.literal.LiteralFactory;
 import org.jboss.errai.codegen.framework.literal.LiteralValue;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.meta.MetaParameter;
 import org.mvel2.DataConversion;
@@ -147,5 +150,56 @@ public class GenUtil {
       parameters.add(metaParameter.getType());
     }
     return parameters.toArray(new MetaClass[parameters.size()]);
+  }
+
+  public static MetaClass[] classToMeta(Class<?>[] types) {
+    MetaClass[] metaClasses = new MetaClass[types.length];
+    for (int i = 0; i < types.length; i++) {
+      metaClasses[i] = MetaClassFactory.get(types[i]);
+    }
+    return metaClasses;
+  }
+
+  public static Class<?>[] jParmToClass(JParameter[] parms) throws ClassNotFoundException {
+    Class<?>[] classes = new Class<?>[parms.length];
+    for (int i = 0; i < parms.length; i++) {
+      classes[i] = getPrimitiveOrClass(parms[i]);
+    }
+    return classes;
+  }
+
+  public static Class<?> getPrimitiveOrClass(JParameter parm) throws ClassNotFoundException {
+    JType type = parm.getType();
+    String name = type.isArray() != null ? type.getJNISignature().replace("/", ".") : type.getQualifiedSourceName();
+
+    if (parm.getType().isPrimitive() != null) {
+      char sig = parm.getType().isPrimitive().getJNISignature().charAt(0);
+
+      switch (sig) {
+        case 'Z':
+          return boolean.class;
+        case 'B':
+          return byte.class;
+        case 'C':
+          return char.class;
+        case 'D':
+          return double.class;
+        case 'F':
+          return float.class;
+        case 'I':
+          return int.class;
+        case 'J':
+          return long.class;
+        case 'S':
+          return short.class;
+        case 'V':
+          return void.class;
+        default:
+          return null;
+      }
+    }
+    else {
+      return Class.forName(name, false, Thread.currentThread().getContextClassLoader());
+    }
   }
 }
