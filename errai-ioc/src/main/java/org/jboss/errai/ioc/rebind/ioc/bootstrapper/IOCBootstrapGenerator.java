@@ -9,6 +9,8 @@ import com.google.gwt.user.rebind.StringSourceWriter;
 import org.jboss.errai.bus.rebind.ScannerSingleton;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
+import org.jboss.errai.codegen.framework.*;
+import org.jboss.errai.codegen.framework.meta.*;
 import org.jboss.errai.ioc.client.ContextualProviderContext;
 import org.jboss.errai.ioc.client.InterfaceInjectionContext;
 import org.jboss.errai.ioc.client.api.*;

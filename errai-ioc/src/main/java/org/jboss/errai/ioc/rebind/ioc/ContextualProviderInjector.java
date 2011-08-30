@@ -18,6 +18,7 @@ package org.jboss.errai.ioc.rebind.ioc;
 
 import java.lang.annotation.Annotation;
 
+import org.jboss.errai.codegen.framework.meta.*;
 import org.jboss.errai.ioc.client.ContextualProviderContext;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.codegen.framework.Statement;
