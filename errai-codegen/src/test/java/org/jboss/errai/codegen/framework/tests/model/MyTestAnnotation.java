@@ -30,5 +30,5 @@ import java.lang.annotation.Target;
 public @interface MyTestAnnotation {
   public String foo() default "foobar";
 
-  public TestEnum testEum();
+  public TEnum testEum();
 }

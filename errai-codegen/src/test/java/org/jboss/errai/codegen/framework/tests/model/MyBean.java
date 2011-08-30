@@ -20,6 +20,6 @@ package org.jboss.errai.codegen.framework.tests.model;
  * @author Mike Brock <cbrock@redhat.com>
  */
 
-@MyTestAnnotation(foo = "barfoo", testEum = TestEnum.FOURTH)
+@MyTestAnnotation(foo = "barfoo", testEum = TEnum.FOURTH)
 public class MyBean {
 }

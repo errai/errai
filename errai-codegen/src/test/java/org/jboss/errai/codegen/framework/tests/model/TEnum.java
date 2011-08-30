@@ -19,6 +19,6 @@ package org.jboss.errai.codegen.framework.tests.model;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public enum TestEnum {
+public enum TEnum {
   FIRST, SECOND, THIRD, FOURTH
 }
