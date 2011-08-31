@@ -398,12 +398,20 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   @Override
   public MetaClass asBoxed() {
-    return MetaClassFactory.get(ParseTools.boxPrimitive(asClass()));
+    Class<?> cls = asClass();
+    if (cls == null)
+      return this;
+    
+    return MetaClassFactory.get(ParseTools.boxPrimitive(cls));
   }
 
   @Override
   public MetaClass asUnboxed() {
-    return MetaClassFactory.get(ParseTools.unboxPrimitive(asClass()));
+    Class<?> cls = asClass();
+    if (cls == null)
+      return this;
+    
+    return MetaClassFactory.get(ParseTools.unboxPrimitive(cls));
   }
 
   @Override
