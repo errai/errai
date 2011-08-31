@@ -63,8 +63,8 @@ public class AnnotationEncoderTest extends AbstractStatementBuilderTest {
             "public String foo() { " +
             "    return \"barfoo\"; " +
             "} " +
-            "public org.jboss.errai.codegen.framework.tests.model.TestEnum testEum() { " +
-            "    return org.jboss.errai.codegen.framework.tests.model.TestEnum.FOURTH; " +
+            "public org.jboss.errai.codegen.framework.tests.model.TEnum testEum() { " +
+            "    return org.jboss.errai.codegen.framework.tests.model.TEnum.FOURTH; " +
             "} " +
 
             "}", enc);
