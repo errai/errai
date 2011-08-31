@@ -225,12 +225,17 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   @Override
   public MetaConstructor getBestMatchingConstructor(Class... parameters) {
     Class<?> cls = asClass();
-    Constructor c = ParseTools.getBestConstructorCandidate(parameters, cls, false);
-    if (c == null)
-      return null;
+    if (cls != null) {
+      Constructor c = ParseTools.getBestConstructorCandidate(parameters, cls, false);
+      if (c == null)
+        return null;
 
-    MetaClass metaClass = MetaClassFactory.get(cls);
-    return metaClass.getConstructor(c.getParameterTypes());
+      MetaClass metaClass = MetaClassFactory.get(cls);
+      return metaClass.getConstructor(c.getParameterTypes());
+    }
+    else {
+      return getConstructor(parameters);
+    }
   }
 
   @Override
