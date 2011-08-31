@@ -22,7 +22,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.BlockStatement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.DefParameters;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.Builder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.callstack.LoadClassReference;
@@ -154,7 +156,17 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
 
   @Override
   public MetaConstructor[] getConstructors() {
-    return constructors.toArray(new MetaConstructor[constructors.size()]);
+    if (constructors.isEmpty()) { 
+      // add an empty no-arg constructor
+      BuildMetaConstructor buildMetaConstructor =
+        new BuildMetaConstructor(this, new BlockStatement(), DefParameters.none());
+      
+      buildMetaConstructor.setScope(Scope.Public);
+      return new MetaConstructor[] {buildMetaConstructor};
+    } 
+    else {
+      return constructors.toArray(new MetaConstructor[constructors.size()]);      
+    }
   }
 
   @Override
@@ -333,7 +345,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
       while (iter.hasNext()) {
         buf.append(LoadClassReference.getClassReference(iter.next(), context));
         if (iter.hasNext())
-          buf.append(" ");
+          buf.append(", ");
       }
     }
 
@@ -373,7 +385,8 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
 
     StringBuilder headerBuffer = new StringBuilder();
 
-    headerBuffer.append("package ").append(getPackageName()).append(";\n");
+    if (!getPackageName().isEmpty())
+      headerBuffer.append("package ").append(getPackageName()).append(";\n");
 
     if (context.getImportedPackages().size() > 1)
       headerBuffer.append("\n");
