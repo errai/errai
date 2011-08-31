@@ -49,7 +49,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private String clientId;
 
   /* The encoded URL to be used for the bus */
-  private static final String SERVICE_ENTRY_POINT = "in.erraiBus";
+  private String OUT_SERVICE_ENTRY_POINT = "in.erraiBus";
+  private String IN_SERVICE_ENTRY_POINT = "in.erraiBus";
 
   /* ArrayList of all subscription listeners */
   private List<SubscribeListener> onSubscribeHooks;
@@ -89,7 +90,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private List<Message> deferredMessages = new ArrayList<Message>();
 
   /* The timer constantly ensures the client's polling with the server is active */
-  private Timer incomingTimer;
   private Timer heartBeatTimer;
 
   /* True if the client's message bus has been initialized */
@@ -146,7 +146,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private RequestBuilder getSendBuilder() {
-    String endpoint = proxySettings.hasProxy ? proxySettings.url : SERVICE_ENTRY_POINT;
+    String endpoint = proxySettings.hasProxy ? proxySettings.url : OUT_SERVICE_ENTRY_POINT;
 
     RequestBuilder builder = new RequestBuilder(
             RequestBuilder.POST,
@@ -160,7 +160,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private RequestBuilder getRecvBuilder() {
-    String endpoint = proxySettings.hasProxy ? proxySettings.url : SERVICE_ENTRY_POINT;
+    String endpoint = proxySettings.hasProxy ? proxySettings.url : IN_SERVICE_ENTRY_POINT;
 
     RequestBuilder builder = new RequestBuilder(
             RequestBuilder.GET,
@@ -169,7 +169,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     builder.setHeader("Content-Type", "application/json");
     builder.setHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER, clientId);
-
     return builder;
   }
 
@@ -423,7 +422,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   }
 
-  public void remoteShadowSubscription(String subject) {
+  private void remoteShadowSubscription(String subject) {
     shadowSubscriptions.remove(subject);
   }
 
@@ -546,6 +545,23 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     lastTransmit = System.currentTimeMillis();
   }
 
+  private void performPoll() {
+    try {
+      recvBuilder.sendRequest("", COMM_CALLBACK);
+    }
+    catch (RequestTimeoutException e) {
+      statusCode = 1;
+      COMM_CALLBACK.onError(null, e);
+    }
+    catch (RequestException e) {
+      logError(e.getMessage(), "", e);
+    }
+    catch (Throwable t) {
+      t.printStackTrace();
+    }
+  }
+
+
   /**
    * Initializes client message bus without a callback function
    */
@@ -578,8 +594,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     this.remotes.clear();
 
     this.heartBeatTimer.cancel();
-    this.incomingTimer.cancel();
-    this.incomingTimer = null;
     this.disconnected = true;
     this.initialized = false;
     this.sendBuilder = null;
@@ -597,8 +611,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     initialized = false;
     disconnected = false;
 
-    clientId = String.valueOf(com.google.gwt.user.client.Random.nextInt(1000))
-            + "-" + (System.currentTimeMillis() % 1000);
+    clientId = String.valueOf(com.google.gwt.user.client.Random.nextInt(10000))
+            + "-" + (System.currentTimeMillis() % 10000);
+
+    IN_SERVICE_ENTRY_POINT = "in." + clientId + ".erraiBus";
+    OUT_SERVICE_ENTRY_POINT = "out." + clientId + ".erraiBus";
 
     onSubscribeHooks = new ArrayList<SubscribeListener>();
     onUnsubscribeHooks = new ArrayList<UnsubscribeListener>();
@@ -712,6 +729,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                   COMM_CALLBACK = new LongPollRequestCallback();
                   break;
                 case NoLongPollAvailable:
+                  COMM_CALLBACK = new ShortPollRequestCallback();
                   if (message.hasPart("PollFrequency")) {
                     POLL_FREQUENCY = message.get(Integer.class, "PollFrequency");
                   }
@@ -956,7 +974,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   protected class LongPollRequestCallback implements RequestCallback {
     public void onError(Request request, Throwable throwable) {
-
       switch (statusCode) {
         case 1:
         case 408:
@@ -970,7 +987,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             logAdapter.warn("Attempting reconnection -- Retries: " + (maxRetries - retries));
             timeoutMessage.setText("Connection Interrupted -- Retries: " + (maxRetries - retries));
             retries++;
-            incomingTimer.scheduleRepeating(timeout);
+            new Timer() {
+              @Override
+              public void run() {
+                performPoll();
+              }
+            }.schedule(timeout);
+
             statusCode = 0;
             return;
           }
@@ -980,7 +1003,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
 
       logError("Communication Error", "None", throwable);
-      incomingTimer.cancel();
     }
 
     public void onResponseReceived(Request request, Response response) {
@@ -1001,27 +1023,44 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       catch (Throwable e) {
         logError("Errai MessageBus Disconnected Due to Fatal Error",
                 response.getText(), e);
-        incomingTimer.cancel();
-      }
-      finally {
-        //  recvBuilder = getRecvBuilder();
       }
     }
 
     public void schedule() {
-      if (incomingTimer != null) incomingTimer.schedule(25);
+      new Timer() {
+        @Override
+        public void run() {
+          performPoll();
+        }
+      }.schedule(50);
+    }
+  }
+
+  protected class NoPollRequestCallback extends LongPollRequestCallback {
+    @Override
+    public void schedule() {
+      performPoll();
     }
   }
 
   protected class ShortPollRequestCallback extends LongPollRequestCallback {
+    public ShortPollRequestCallback() {
+    }
+
     @Override
     public void schedule() {
-      if (incomingTimer != null) incomingTimer.schedule(POLL_FREQUENCY);
+      new Timer() {
+        @Override
+        public void run() {
+          performPoll();
+        }
+      }.schedule(POLL_FREQUENCY);
     }
   }
 
   public static int POLL_FREQUENCY = 250;
-  private RequestCallback COMM_CALLBACK = new ShortPollRequestCallback();
+  private RequestCallback COMM_CALLBACK = new NoPollRequestCallback();
+
 
   /**
    * Initializes the message bus by setting up the <tt>recvBuilder</tt> to accept responses. Also, initializes the
@@ -1035,26 +1074,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       return;
     }
 
-    incomingTimer = new Timer() {
-      @Override
-      public void run() {
-        try {
-          recvBuilder.sendRequest(null, COMM_CALLBACK);
-        }
-        catch (RequestTimeoutException e) {
-          statusCode = 1;
-          COMM_CALLBACK.onError(null, e);
-        }
-        catch (RequestException e) {
-          logError(e.getMessage(), "", e);
-        }
-      }
-    };
+    performPoll();
 
     new Timer() {
       @Override
       public void run() {
-        incomingTimer.scheduleRepeating(POLL_FREQUENCY);
         ExtensionsLoader loader = GWT.create(ExtensionsLoader.class);
         loader.initExtensions(ClientMessageBusImpl.this);
       }
@@ -1166,7 +1190,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
     catch (RuntimeException e) {
       logError("Error delivering message into bus", response.getText(), e);
-      if (incomingTimer != null) incomingTimer.cancel();
     }
   }
 
@@ -1270,7 +1293,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     public void addError(String message, String additionalDetails, Throwable e) {
       contentPanel.add(new HTML("<strong style='background:red;color:white;'>" + message + "</strong>"));
 
-      StringBuffer buildTrace = new StringBuffer("<tt style=\"font-size:11px;\"><pre>");
+      StringBuilder buildTrace = new StringBuilder("<tt style=\"font-size:11px;\"><pre>");
       if (e != null) {
         buildTrace.append(e.getClass().getName()).append(": ").append(e.getMessage()).append("<br/>");
         for (StackTraceElement ste : e.getStackTrace()) {
