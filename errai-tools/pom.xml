@@ -64,11 +64,6 @@
             <artifactId>gwtx</artifactId>
             <version>${mosaic.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.google.code.gwt-log</groupId>
-            <artifactId>gwt-log</artifactId>
-            <version>${gwt-log.version}</version>
-        </dependency>
     </dependencies>
 
     <build>
