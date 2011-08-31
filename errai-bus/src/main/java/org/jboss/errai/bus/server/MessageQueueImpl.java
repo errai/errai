@@ -69,7 +69,7 @@ public class MessageQueueImpl implements MessageQueue {
   private final ServerMessageBus bus;
   private volatile TimedTask task;
 
-  private final Semaphore lock = new Semaphore(1, true);
+  private final Semaphore lock = new Semaphore(1, false);
   private volatile boolean initLock = true;
   private final Object activationLock = new Object();
 
@@ -212,14 +212,12 @@ public class MessageQueueImpl implements MessageQueue {
         lock.release();
       }
       if (m == null && isHeartbeatNeeded()) {
-        System.out.println("Server_send_heartbeat");
         outstream.write(heartBeatBytes);
         outstream.write(']');
       }
 
     }
     else if (isHeartbeatNeeded()) {
-      System.out.println("Server_send_heartbeat");
       outstream.write('[');
       outstream.write(heartBeatBytes);
       outstream.write(']');
@@ -235,6 +233,7 @@ public class MessageQueueImpl implements MessageQueue {
    * @return true if insertion was successful
    */
   public boolean offer(final Message message) {
+
     if (!queueRunning) {
       throw new QueueUnavailableException("queue is not available");
     }
