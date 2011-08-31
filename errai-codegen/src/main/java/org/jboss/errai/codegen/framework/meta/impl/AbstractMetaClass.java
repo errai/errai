@@ -32,7 +32,6 @@ import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.meta.MetaParameter;
 import org.jboss.errai.codegen.framework.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.framework.meta.MetaType;
-import org.jboss.errai.codegen.framework.util.GenUtil;
 import org.mvel2.util.ParseTools;
 
 import com.google.gwt.core.ext.typeinfo.JClassType;
@@ -226,12 +225,17 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   @Override
   public MetaConstructor getBestMatchingConstructor(Class... parameters) {
     Class<?> cls = asClass();
-    Constructor c = ParseTools.getBestConstructorCandidate(parameters, cls, false);
-    if (c == null)
-      return null;
-
-    MetaClass metaClass = MetaClassFactory.get(cls);
-    return metaClass.getConstructor(c.getParameterTypes());
+    if (cls!=null) {
+      Constructor c = ParseTools.getBestConstructorCandidate(parameters, cls, false);
+      if (c == null)
+        return null;
+      
+      MetaClass metaClass = MetaClassFactory.get(cls);
+      return metaClass.getConstructor(c.getParameterTypes());
+    } 
+    else {
+      return getConstructor(parameters);
+    }
   }
 
   @Override

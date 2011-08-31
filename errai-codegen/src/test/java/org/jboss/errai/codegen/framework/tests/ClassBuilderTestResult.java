@@ -30,6 +30,27 @@ public interface ClassBuilderTestResult {
           "   private String name;\n" +
           " }";
 
+  public static final String CLASS_IMPLEMENTING_MULTIPLE_INTERFACES =
+      "     package org.foo;" +
+          "\n" +
+          " import java.io.Serializable;\n" +
+          "\n" +
+          " public class Bar implements Serializable, Cloneable {\n" +
+          "   private String name;\n" +
+          " }";
+
+  public static final String CLASS_WITH_METHOD_USING_INNER_CLASS =
+      "     package foo.bar;" +
+          "\n" +
+          " public class Baz  {\n" +
+          "   public void someMethod() {\n" +
+          "      class Inner {\n" +
+          "        public String name;" +
+          "      }" +
+          "      new Inner();" +
+          "   }" +
+          " }";
+
   public static final String CLASS_WITH_ACCESSOR_METHODS =
       "     package org.foo;\n" +
           "\n" +
@@ -173,24 +194,21 @@ public interface ClassBuilderTestResult {
           " }";
 
   public static final String CLASS_WITH_JSNI_METHOD =
-    "     package my.test;\n" +
-        "\n" +
-        " public class Clazz {\n" +
-        "    public native void test() /*-{\n" +
-        "        System.out.println(\"Hello, World!\");\n" +
-        "    }-*/;\n" +
-        " }";
-  
+      "     package my.test;\n" +
+          "\n" +
+          " public class Clazz {\n" +
+          "    public native void test() /*-{\n" +
+          "        System.out.println(\"Hello, World!\");\n" +
+          "    }-*/;\n" +
+          " }";
+
   public static final String CLASS_DEFINITION_BY_IMPLEMENTING_INTERFACE =
-      "     package org.jboss.errai.ioc.client.api;\n" +
+      "     package org.jboss.errai.codegen.framework.tests.model;\n" +
           "\n" +
-          " import org.jboss.errai.ioc.client.api.Bootstrapper;\n" +
-          " import org.jboss.errai.ioc.client.InterfaceInjectionContext;\n" +
+          " import org.jboss.errai.codegen.framework.tests.model.Baz;\n" +
           "\n" +
-          " public class BootstrapperImpl implements Bootstrapper {\n" +
-          "     public InterfaceInjectionContext bootstrapContainer() {\n" +
-          "         InterfaceInjectionContext ctx = new InterfaceInjectionContext();\n" +
-          "         return ctx;\n" +
+          " public class BazImpl implements Baz {\n" +
+          "     public void someMethod() {\n" +
           "     }\n" +
           " }";
 }
