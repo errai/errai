@@ -24,22 +24,20 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.build.BuildMetaClass;
  *  
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class InnerClass implements Statement {
+public class InnerClass {
 
   private BuildMetaClass clazz = null;
   
   public InnerClass(BuildMetaClass clazz) {
     this.clazz = clazz;
+    this.clazz.setInner(true);
   }
   
-  @Override
   public String generate(Context context) {
-    // this is just to turn autoimport off.
-    clazz.setContext(Context.create());
+    clazz.setContext(context);
     return clazz.toJavaString();
   }
-
-  @Override
+  
   public MetaClass getType() {
     return clazz;
   }

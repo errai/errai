@@ -17,12 +17,16 @@
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl;
 
 import org.jboss.errai.ioc.rebind.ioc.codegen.BlockStatement;
+import org.jboss.errai.ioc.rebind.ioc.codegen.Context;
+import org.jboss.errai.ioc.rebind.ioc.codegen.InnerClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BlockBuilder;
 import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BuildCallback;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class BlockBuilderImpl<T> implements BlockBuilder<T> {
   protected BlockStatement blockStatement;
@@ -48,6 +52,22 @@ public class BlockBuilderImpl<T> implements BlockBuilder<T> {
     return this;
   }
 
+  @Override
+  public BlockBuilder<T> append(final InnerClass innerClass) {
+    blockStatement.addStatement(new Statement() {
+      @Override
+      public String generate(Context context) {
+        return innerClass.generate(context);
+      }
+
+      @Override
+      public MetaClass getType() {
+        return innerClass.getType();
+      }
+    });
+    return this;
+  }
+  
   @Override
   public T finish() {
     if (callback != null) {

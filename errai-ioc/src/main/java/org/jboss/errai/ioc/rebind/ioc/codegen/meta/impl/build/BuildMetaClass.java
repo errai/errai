@@ -55,6 +55,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   private boolean isAbstract;
   private boolean isFinal;
   private boolean isStatic;
+  private boolean isInner;
 
   private List<BuildMetaMethod> methods = new ArrayList<BuildMetaMethod>();
   private List<BuildMetaField> fields = new ArrayList<BuildMetaField>();
@@ -286,6 +287,10 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   public void setStatic(boolean aStatic) {
     isStatic = aStatic;
   }
+  
+  public void setInner(boolean aInner) {
+    isInner = aInner;
+  }
 
   public void setScope(Scope scope) {
     this.scope = scope;
@@ -385,23 +390,27 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
 
     StringBuilder headerBuffer = new StringBuilder();
 
-    if (!getPackageName().isEmpty())
+    if (!getPackageName().isEmpty() && !isInner)
       headerBuffer.append("package ").append(getPackageName()).append(";\n");
 
     if (context.getImportedPackages().size() > 1)
       headerBuffer.append("\n");
 
-    for (String pkgImports : context.getImportedPackages()) {
-      if (pkgImports.equals("java.lang"))
-        continue;
-      headerBuffer.append("import ").append(pkgImports).append(".*;");
+    if (!isInner) {
+      for (String pkgImports : context.getImportedPackages()) {
+        if (pkgImports.equals("java.lang"))
+          continue;
+        headerBuffer.append("import ").append(pkgImports).append(".*;");
+      }
     }
 
     if (!context.getImportedClasses().isEmpty())
       headerBuffer.append("\n");
 
-    for (String cls : context.getImportedClasses()) {
-      headerBuffer.append("import ").append(cls).append(";\n");
+    if (!isInner) {
+      for (String cls : context.getImportedClasses()) {
+        headerBuffer.append("import ").append(cls).append(";\n");
+      }
     }
 
     return PrettyPrinter.prettyPrintJava(headerBuffer.toString() + buf.append("}\n").toString());

@@ -16,11 +16,14 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.builder;
 
+import org.jboss.errai.ioc.rebind.ioc.codegen.InnerClass;
 import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface BlockBuilder<T> extends Finishable<T> {
   public BlockBuilder<T> append(Statement stmt);
+  public BlockBuilder<T> append(InnerClass innerClass);
 }

@@ -71,6 +71,7 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
   public void testDefineInnerClass() {
     ClassStructureBuilder<?> innerClass = ClassBuilder.define("Inner")
         .packageScope()
+        .implementsInterface(Serializable.class)
         .body()
         .publicField("name", String.class)
         .finish();
@@ -83,7 +84,9 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
         .append(Stmt.newObject(innerClass.getClassDefinition()))
         .finish()
         .toJavaString();
-
+    
+    System.out.println(cls);
+    
     assertEquals("failed to generate class with method using inner class",
         CLASS_WITH_METHOD_USING_INNER_CLASS, cls);
   }
