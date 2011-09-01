@@ -24,6 +24,7 @@ import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
+import org.apache.tomcat.jni.Poll;
 import org.jboss.errai.bus.client.api.*;
 import org.jboss.errai.bus.client.api.base.Capabilities;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
@@ -63,6 +64,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   /* Used to build the HTTP GET request */
   private RequestBuilder recvBuilder;
+
+  public final MessageCallback remoteCallback = new RemoteMessageCallback();
+
+  private RequestCallback receiveCommCallback = new NoPollRequestCallback();
+
 
   /* Map of subjects to subscriptions  */
   private Map<String, List<Object>> subscriptions;
@@ -547,16 +553,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private void performPoll() {
     try {
-      if (recvBuilder == null) {
-        getRecvBuilder().sendRequest(null, COMM_CALLBACK);
-      }
-      else {
-        recvBuilder.sendRequest(null, COMM_CALLBACK);
-      }
+      recvBuilder.sendRequest(null, receiveCommCallback);
     }
     catch (RequestTimeoutException e) {
       statusCode = 1;
-      COMM_CALLBACK.onError(null, e);
+      receiveCommCallback.onError(null, e);
     }
     catch (RequestException e) {
       logError(e.getMessage(), "", e);
@@ -565,7 +566,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       t.printStackTrace();
     }
   }
-
 
   /**
    * Initializes client message bus without a callback function
@@ -616,8 +616,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     initialized = false;
     disconnected = false;
 
-    clientId = String.valueOf(com.google.gwt.user.client.Random.nextInt(10000))
-            + "-" + (System.currentTimeMillis() % 10000);
+    clientId = String.valueOf(com.google.gwt.user.client.Random.nextInt(99999))
+            + "-" + (System.currentTimeMillis() % com.google.gwt.user.client.Random.nextInt(99999));
 
     IN_SERVICE_ENTRY_POINT = "in." + clientId + ".erraiBus";
     OUT_SERVICE_ENTRY_POINT = "out." + clientId + ".erraiBus";
@@ -627,7 +627,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     subscriptions = new HashMap<String, List<Object>>();
     remotes = new HashMap<String, MessageCallback>();
   }
-
 
   public void setInitialized(boolean initialized) {
     this.initialized = initialized;
@@ -640,8 +639,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private void setReinit(boolean reinit) {
     this.reinit = reinit;
   }
-
-  public final MessageCallback REMOTE_CALLBACK = new RemoteMessageCallback();
 
   /**
    * Initializes the message bus, by subscribing to the ClientBus (to receive subscription messages) and the
@@ -731,10 +728,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             for (String capability : capabilites) {
               switch (Capabilities.valueOf(capability)) {
                 case LongPollAvailable:
-                  COMM_CALLBACK = new LongPollRequestCallback();
+                  receiveCommCallback = new LongPollRequestCallback();
                   break;
                 case NoLongPollAvailable:
-                  COMM_CALLBACK = new ShortPollRequestCallback();
+                  receiveCommCallback = new ShortPollRequestCallback();
                   if (message.hasPart("PollFrequency")) {
                     POLL_FREQUENCY = message.get(Integer.class, "PollFrequency");
                   }
@@ -837,7 +834,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             postInitTasks.clear();
 
             setInitialized(true);
-
             break;
 
           case SessionExpired:
@@ -884,8 +880,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private void remoteSubscribe(String subject) {
-    remotes.put(subject, REMOTE_CALLBACK);
-    addSubscription(subject, REMOTE_CALLBACK);
+    remotes.put(subject, remoteCallback);
+    addSubscription(subject, remoteCallback);
   }
 
   private void sendAllDeferred() {
@@ -1057,6 +1053,16 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       new Timer() {
         @Override
         public void run() {
+          /**
+           * Due to asynchronous handshake, the recvBuilder may not yet be created at this point, since we defer
+           * creation as we wait for the proxy configuration.
+           */
+          if (recvBuilder == null) {
+            // rechedule and try again in 0.1 seconds.
+            schedule(100);
+            return;
+          }
+
           performPoll();
         }
       }.schedule(POLL_FREQUENCY);
@@ -1064,8 +1070,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   public static int POLL_FREQUENCY = 250;
-  private RequestCallback COMM_CALLBACK = new NoPollRequestCallback();
-
 
   /**
    * Initializes the message bus by setting up the <tt>recvBuilder</tt> to accept responses. Also, initializes the
@@ -1113,8 +1117,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 }
               }
             };
-
-
 
 
     heartBeatTimer.scheduleRepeating(HEARTBEAT_DELAY);
