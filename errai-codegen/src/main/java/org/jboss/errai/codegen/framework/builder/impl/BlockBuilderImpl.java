@@ -17,42 +17,62 @@
 package org.jboss.errai.codegen.framework.builder.impl;
 
 import org.jboss.errai.codegen.framework.BlockStatement;
+import org.jboss.errai.codegen.framework.Context;
+import org.jboss.errai.codegen.framework.InnerClass;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
 import org.jboss.errai.codegen.framework.builder.BuildCallback;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
 
 /**
- * @author Mike Brock <cbrock@redhat.com>
- */
+* @author Mike Brock <cbrock@redhat.com>
+* @author Christian Sadilek <csadilek@redhat.com>
+*/
 public class BlockBuilderImpl<T> implements BlockBuilder<T> {
-  protected BlockStatement blockStatement;
-  protected BuildCallback<T> callback;
+ protected BlockStatement blockStatement;
+ protected BuildCallback<T> callback;
 
-  public BlockBuilderImpl() {
-    this.blockStatement = new BlockStatement();
-  }
+ public BlockBuilderImpl() {
+   this.blockStatement = new BlockStatement();
+ }
 
-  public BlockBuilderImpl(BuildCallback<T> callback) {
-    this();
-    this.callback = callback;
-  }
+ public BlockBuilderImpl(BuildCallback<T> callback) {
+   this();
+   this.callback = callback;
+ }
 
-  public BlockBuilderImpl(BlockStatement blockStatement, BuildCallback<T> callback) {
-    this.blockStatement = blockStatement;
-    this.callback = callback;
-  }
+ public BlockBuilderImpl(BlockStatement blockStatement, BuildCallback<T> callback) {
+   this.blockStatement = blockStatement;
+   this.callback = callback;
+ }
 
-  @Override
-  public BlockBuilder<T> append(Statement statement) {
-    blockStatement.addStatement(statement);
-    return this;
-  }
+ @Override
+ public BlockBuilder<T> append(Statement statement) {
+   blockStatement.addStatement(statement);
+   return this;
+ }
 
-  @Override
-  public T finish() {
-    if (callback != null) {
-      return callback.callback(blockStatement);
-    }
-    return null;
-  }
+ @Override
+ public BlockBuilder<T> append(final InnerClass innerClass) {
+   blockStatement.addStatement(new Statement() {
+     @Override
+     public String generate(Context context) {
+       return innerClass.generate(context);
+     }
+
+     @Override
+     public MetaClass getType() {
+       return innerClass.getType();
+     }
+   });
+   return this;
+ }
+ 
+ @Override
+ public T finish() {
+   if (callback != null) {
+     return callback.callback(blockStatement);
+   }
+   return null;
+ }
 }

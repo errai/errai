@@ -19,6 +19,7 @@ package org.jboss.errai.codegen.framework.tests;
 import static org.junit.Assert.fail;
 
 import java.io.Serializable;
+import java.util.Map;
 
 import org.jboss.errai.codegen.framework.InnerClass;
 import org.jboss.errai.codegen.framework.Modifier;
@@ -71,6 +72,7 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
   public void testDefineInnerClass() {
     ClassStructureBuilder<?> innerClass = ClassBuilder.define("Inner")
         .packageScope()
+        .implementsInterface(Serializable.class)
         .body()
         .publicField("name", String.class)
         .finish();
