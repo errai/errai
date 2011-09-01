@@ -42,9 +42,11 @@ public interface ClassBuilderTestResult {
   public static final String CLASS_WITH_METHOD_USING_INNER_CLASS =
       "     package foo.bar;" +
           "\n" +
-          " public class Baz  {\n" +
+          " import java.io.Serializable;\n" +
+          "\n" +
+          " public class Baz {\n" +
           "   public void someMethod() {\n" +
-          "      class Inner {\n" +
+          "      class Inner implements Serializable {\n" +
           "        public String name;" +
           "      }" +
           "      new Inner();" +

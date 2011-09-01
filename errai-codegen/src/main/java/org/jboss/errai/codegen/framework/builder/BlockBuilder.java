@@ -16,11 +16,14 @@
 
 package org.jboss.errai.codegen.framework.builder;
 
+import org.jboss.errai.codegen.framework.InnerClass;
 import org.jboss.errai.codegen.framework.Statement;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface BlockBuilder<T> extends Finishable<T> {
   public BlockBuilder<T> append(Statement stmt);
+  public BlockBuilder<T> append(InnerClass innerClass);
 }
