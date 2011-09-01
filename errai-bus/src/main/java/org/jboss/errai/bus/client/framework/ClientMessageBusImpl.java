@@ -547,7 +547,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private void performPoll() {
     try {
-      recvBuilder.sendRequest("", COMM_CALLBACK);
+      if (recvBuilder == null) {
+        getRecvBuilder().sendRequest(null, COMM_CALLBACK);
+      }
+      else {
+        recvBuilder.sendRequest(null, COMM_CALLBACK);
+      }
     }
     catch (RequestTimeoutException e) {
       statusCode = 1;
@@ -1032,7 +1037,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         public void run() {
           performPoll();
         }
-      }.schedule(50);
+      }.schedule(25);
     }
   }
 
@@ -1074,13 +1079,20 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       return;
     }
 
-    performPoll();
+
+    final Timer initialPollTimer = new Timer() {
+      @Override
+      public void run() {
+        performPoll();
+      }
+    };
 
     new Timer() {
       @Override
       public void run() {
         ExtensionsLoader loader = GWT.create(ExtensionsLoader.class);
         loader.initExtensions(ClientMessageBusImpl.this);
+        initialPollTimer.schedule(10);
       }
     }.schedule(5);
 
@@ -1101,6 +1113,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 }
               }
             };
+
+
+
 
     heartBeatTimer.scheduleRepeating(HEARTBEAT_DELAY);
   }
