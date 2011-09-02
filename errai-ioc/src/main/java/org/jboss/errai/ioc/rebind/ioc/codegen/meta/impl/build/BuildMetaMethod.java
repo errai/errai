@@ -66,7 +66,6 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
                          ThrowsDeclaration throwsDeclaration
   ) {
 
-    this.context = Context.create(declaringClass.getContext());
     this.declaringClass = declaringClass;
     this.body = body;
     this.modifiers = modifiers;
@@ -181,10 +180,6 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
     return new MetaTypeVariable[0];
   }
 
-  public void setContext(Context context) {
-    this.context = context;
-  }
-
   public void setDeclaringClass(BuildMetaClass declaringClass) {
     this.declaringClass = declaringClass;
   }
@@ -223,6 +218,8 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
 
   @Override
   public String toJavaString() {
+    this.context = Context.create(declaringClass.getContext());
+    
     for (Parameter p : defParameters.getParameters()) {
       context.addVariable(Variable.create(p.getName(), p.getType()));
     }
