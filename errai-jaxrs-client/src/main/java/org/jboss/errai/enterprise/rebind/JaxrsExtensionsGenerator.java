@@ -88,6 +88,7 @@ public class JaxrsExtensionsGenerator extends Generator {
     MethodBlockBuilder<?> createProxies = classBuilder.publicMethod(void.class, "createProxies");
     
     for (Class<?> remote : scanner.getTypesAnnotatedWith(Path.class)) {
+      // create the remote proxy for this interface
       ClassStructureBuilder<?> remoteProxy = new JaxrsProxyGenerator(remote).generate();
       createProxies.append(new InnerClass(remoteProxy.getClassDefinition()));
       

@@ -32,7 +32,12 @@ public class CustomerServiceImpl implements CustomerService {
     return "deleted customer:" + id;
   }
   
-  public String retrieveCustomerById(String id) {
+  public String retrieveCustomerById(String id, String format, boolean details) {
+    return "customer:" + id;
+  }
+
+  @Override
+  public String retrieveCustomerById(String id, String format) {
     return "customer:" + id;
   }
 }
