@@ -47,7 +47,10 @@ public interface ClassBuilderTestResult {
           " public class Baz {\n" +
           "   public void someMethod() {\n" +
           "      class Inner implements Serializable {\n" +
-          "        public String name;" +
+          "        private String name;" +
+          "        public void setName(String name) {\n" +
+          "          this.name = name;\n" +
+          "        }\n" +
           "      }" +
           "      new Inner();" +
           "   }" +
