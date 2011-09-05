@@ -58,7 +58,7 @@ public class JaxrsExtensionsGenerator extends Generator {
       JClassType classType = typeOracle.getType(typeName);
       
       if (classType.isInterface() == null) {
-        logger.log(TreeLogger.ERROR, typeName + "is not an inteface.");
+        logger.log(TreeLogger.ERROR, typeName + "is not an interface.");
         throw new RuntimeException("Invalid type");
       }
       
@@ -93,10 +93,10 @@ public class JaxrsExtensionsGenerator extends Generator {
       createProxies.append(new InnerClass(remoteProxy.getClassDefinition()));
       
       createProxies.append(Stmt.invokeStatic(RemoteServiceProxyFactory.class, "addRemoteProxy", 
-          remote, Stmt.newObject(classBuilder.getClassDefinition())));
+          remote, Stmt.newObject(remoteProxy.getClassDefinition())));
     }
     classBuilder = (ClassStructureBuilder<?>) createProxies.finish();
-    
+
     printWriter.append(classBuilder.toJavaString());
     context.commit(logger, printWriter);
   }

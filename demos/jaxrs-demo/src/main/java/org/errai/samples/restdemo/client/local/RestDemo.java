@@ -58,9 +58,9 @@ public class RestDemo {
         RestClient.createCall(
             new RemoteCallback<String>() {
               public void callback(String response) {
-                Window.alert(response);
+                Window.alert("Response from Server: " + response);
               }
-        }, CustomerService.class).retrieveCustomerById(customerName.getText(), "xml", true);
+        }, CustomerService.class).retrieveCustomerById(customerId.getText(), "xml", true);
         
       }
     });
@@ -71,7 +71,7 @@ public class RestDemo {
         RestClient.createCall(
             new RemoteCallback<String>() {
               public void callback(String response) {
-                Window.alert(response);
+                Window.alert("Response from Server: " + response);
               }
         }, CustomerService.class).createCustomer(customerName.getText());
         
@@ -84,7 +84,7 @@ public class RestDemo {
         RestClient.createCall(
             new RemoteCallback<String>() {
               public void callback(String response) {
-                Window.alert(response);
+                Window.alert("Response from Server: " + response);
               }
         }, CustomerService.class).updateCustomer(customerId.getText(), customerName.getText());
         
@@ -97,7 +97,7 @@ public class RestDemo {
         RestClient.createCall(
             new RemoteCallback<String>() {
               public void callback(String response) {
-                Window.alert(response);
+                Window.alert("Response from Server: " + response);
               }
         }, CustomerService.class).deleteCustomer(customerId.getText(), customerName.getText());
         
@@ -107,7 +107,9 @@ public class RestDemo {
     HorizontalPanel hPanel = new HorizontalPanel();
     hPanel.add(new Label("Customer ID: "));
     hPanel.add(customerId);
+    customerId.setValue("1");
     hPanel.add(new Label("Customer Name: "));
+    customerName.setValue("Christian");
     hPanel.add(customerName);
     
     VerticalPanel vPanel = new VerticalPanel();

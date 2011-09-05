@@ -58,10 +58,11 @@ public class JaxrsResourceMethod {
       else if ((a = param.getAnnotation(QueryParam.class)) != null) {
         numberOfQueryParams++;
         queryParameters.add(((QueryParam) a).value(), parmName);
-      } else {
+      } 
+      else {
         setEntityParameterName(parmName, method);
       }
-      // TODO ...
+      // TODO HeaderParam, CookieParam, etc.
       i++;
     }
   }
