@@ -40,4 +40,8 @@ public class CustomerServiceImpl implements CustomerService {
   public String retrieveCustomerById(String id, String format) {
     return "customer:" + id;
   }
+
+  @Override
+  public void noHttpMethod() {
+  }
 }

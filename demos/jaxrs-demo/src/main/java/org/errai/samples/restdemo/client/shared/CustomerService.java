@@ -44,4 +44,6 @@ public interface CustomerService {
   @GET
   @Path("/{id}")
   public String retrieveCustomerById(@PathParam("id") String id, @QueryParam("format") String format);
+  
+  public void noHttpMethod();
 }
