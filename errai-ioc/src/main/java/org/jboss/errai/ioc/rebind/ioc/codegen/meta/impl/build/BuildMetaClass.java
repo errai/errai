@@ -142,7 +142,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   @Override
   public MetaField getField(String name) {
     for (MetaField field : fields) {
-      if (field.getName().equals("name")) {
+      if (field.getName().equals(name)) {
         return field;
       }
     }
