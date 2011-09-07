@@ -19,7 +19,7 @@ import com.google.gwt.http.client.RequestBuilder;
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class JaxrsGwtRequestMapper {
+public class JaxrsGwtRequestMethodMapper {
 
   private static Map<Class<? extends Annotation>, Statement> map =
       new HashMap<Class<? extends Annotation>, Statement>() {
@@ -32,7 +32,7 @@ public class JaxrsGwtRequestMapper {
         }
       };
 
-  public static Statement getGwtRequestMethod(MetaMethod method) {
+  public static Statement fromMethod(MetaMethod method) {
     Statement gwtRequestMethod = null;
     for (Class<? extends Annotation> jaxrsMethod : map.keySet()) {
       if (method.isAnnotationPresent(jaxrsMethod)) {

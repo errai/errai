@@ -46,7 +46,7 @@ public class JaxrsProxyMethodGenerator {
 
   private String rootResourcePath;
   private JaxrsResourceMethod resourceMethod;
-  
+
   private Statement errorHandling;
   private Statement responseHandling;
 
@@ -56,11 +56,11 @@ public class JaxrsProxyMethodGenerator {
   }
 
   public void generate(ClassStructureBuilder<?> classBuilder) {
-    errorHandling = Stmt.loadStatic(classBuilder.getClassDefinition(), "this")
-      .invoke("handleError", Variable.get("throwable"));
-    responseHandling = Stmt.loadStatic(classBuilder.getClassDefinition(), "this")
-      .invoke("handleResponse", Variable.get("response"));
-    
+    this.errorHandling = Stmt.loadStatic(classBuilder.getClassDefinition(), "this")
+        .invoke("handleError", Variable.get("throwable"));
+    this.responseHandling = Stmt.loadStatic(classBuilder.getClassDefinition(), "this")
+        .invoke("handleResponse", Variable.get("response"));
+
     MetaMethod method = resourceMethod.getMethod();
 
     BlockBuilder<?> methodBlock =
@@ -68,8 +68,9 @@ public class JaxrsProxyMethodGenerator {
             DefParameters.from(method).getParameters().toArray(new Parameter[0]));
 
     if (resourceMethod.getHttpMethod() != null) {
-      generatePath(methodBlock);
+      generateUrl(methodBlock);
       generateRequestBuilder(methodBlock);
+      generateHeaders(methodBlock);
       generateRequest(methodBlock);
     }
 
@@ -79,41 +80,65 @@ public class JaxrsProxyMethodGenerator {
     methodBlock.finish();
   }
 
-  private void generatePath(BlockBuilder<?> methodBlock) {
+  private void generateUrl(BlockBuilder<?> methodBlock) {
+    JaxrsResourceMethodParameters parms = resourceMethod.getParameters();
     String path = rootResourcePath + resourceMethod.getPath();
+    ContextualStatementBuilder pathValue = Stmt.loadLiteral(path);
+
     List<String> pathParams =
         ((UriBuilderImpl) UriBuilderImpl.fromTemplate(path)).getPathParamNamesInDeclarationOrder();
-
-    ContextualStatementBuilder pathValue = Stmt.loadLiteral(path);
+    int i = 0;
     for (String pathParam : pathParams) {
       pathValue = pathValue.invoke("replaceFirst", "\\{" + pathParam + "\\}",
-          Variable.get(resourceMethod.getPathParameter(pathParam)));
+          Variable.get(parms.getPathParameter(pathParam, i++)));
     }
 
-    ContextualStatementBuilder pathBuilder = null;
-    if (!resourceMethod.getQueryParameters().isEmpty())
-      pathBuilder = Stmt.loadVariable("path").invoke(APPEND, "?");
+    methodBlock.append(Stmt.declareVariable("url", StringBuilder.class,
+        Stmt.newObject(StringBuilder.class).withParameters(pathValue)));
 
-    int i = 0;
-    for (String queryParamKey : resourceMethod.getQueryParameters().keySet()) {
-      for (String queryParam : resourceMethod.getQueryParameters().get(queryParamKey)) {
-        pathBuilder = pathBuilder.invoke(APPEND, queryParamKey);
-        pathBuilder = pathBuilder.invoke(APPEND, "=");
-        pathBuilder = pathBuilder.invoke(APPEND, Variable.get(queryParam));
-        if (++i < resourceMethod.getNumberOfQueryParams())
-          pathBuilder = pathBuilder.invoke(APPEND, "&");
+    ContextualStatementBuilder urlBuilder = null;
+    if (parms.getQueryParameters() != null) {
+      urlBuilder = Stmt.loadVariable("url").invoke(APPEND, "?");
+
+      i = 0;
+      for (String queryParamName : parms.getQueryParameters().keySet()) {
+        for (String queryParam : parms.getQueryParameters(queryParamName)) {
+          if (i++ > 0)
+            urlBuilder = urlBuilder.invoke(APPEND, "&");
+
+          urlBuilder = urlBuilder.invoke(APPEND, queryParamName);
+          urlBuilder = urlBuilder.invoke(APPEND, "=");
+          urlBuilder = urlBuilder.invoke(APPEND, Variable.get(queryParam));
+        }
       }
     }
 
-    methodBlock.append(Stmt.declareVariable("path", StringBuilder.class,
-        Stmt.newObject(StringBuilder.class).withParameters(pathValue)));
+    if (urlBuilder != null)
+      methodBlock.append(urlBuilder);
+  }
 
-    if (pathBuilder != null)
-      methodBlock.append(pathBuilder);
+  private void generateHeaders(BlockBuilder<?> methodBlock) {
+    JaxrsResourceMethodParameters parms = resourceMethod.getParameters();
+    
+    if (parms.getHeaderParameters() != null) {
+      for (String headerParamName : parms.getHeaderParameters().keySet()) {
+        ContextualStatementBuilder headerValueBuilder = Stmt.nestedCall(Stmt.newObject(StringBuilder.class));
+        int i = 0;
+        for (String headerParam : parms.getHeaderParameters(headerParamName)) {
+          if (i++ > 0) {
+            headerValueBuilder = headerValueBuilder.invoke(APPEND, ",");
+          }
+          headerValueBuilder = headerValueBuilder.invoke(APPEND, Variable.get(headerParam));
+        }
+
+        methodBlock.append(Stmt.loadVariable("requestBuilder").invoke("setHeader", headerParamName, 
+            headerValueBuilder.invoke("toString")));
+      }
+    }
   }
 
   private void generateRequestBuilder(BlockBuilder<?> methodBlock) {
-    Statement urlEncoder = Stmt.invokeStatic(URL.class, "encode", Stmt.loadVariable("path").invoke("toString"));
+    Statement urlEncoder = Stmt.invokeStatic(URL.class, "encode", Stmt.loadVariable("url").invoke("toString"));
 
     Statement requestBuilder =
         Stmt.declareVariable("requestBuilder", RequestBuilder.class,
@@ -125,11 +150,11 @@ public class JaxrsProxyMethodGenerator {
 
   private void generateRequest(BlockBuilder<?> methodBlock) {
     ContextualStatementBuilder sendRequest = Stmt.loadVariable("requestBuilder");
-    if (resourceMethod.getEntityParameterName() == null) {
+    if (resourceMethod.getParameters().getEntityParameterName() == null) {
       sendRequest = sendRequest.invoke("sendRequest", null, generateRequestCallback());
     }
     else {
-      Statement body = Variable.get(resourceMethod.getEntityParameterName());
+      Statement body = Variable.get(resourceMethod.getParameters().getEntityParameterName());
       sendRequest = sendRequest.invoke("sendRequest", body, generateRequestCallback());
     }
 
@@ -153,8 +178,7 @@ public class JaxrsProxyMethodGenerator {
         .finish()
         .publicOverridesMethod("onResponseReceived", Parameter.of(Request.class, "request"),
             Parameter.of(Response.class, "response"))
-        .append(Stmt.if_(
-            Bool.and(
+        .append(Stmt.if_(Bool.and(
                 Bool.greaterThanOrEqual(Stmt.loadVariable("response").invoke("getStatusCode"), 200),
                 Bool.lessThan(Stmt.loadVariable("response").invoke("getStatusCode"), 300)))
             .append(responseHandling)

@@ -17,11 +17,9 @@
 package org.errai.samples.restdemo.client.local;
 
 import javax.annotation.PostConstruct;
-import javax.inject.Inject;
 
 import org.errai.samples.restdemo.client.shared.CustomerService;
 import org.jboss.errai.bus.client.api.RemoteCallback;
-import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
@@ -37,15 +35,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 @EntryPoint
 public class RestDemo {
-  /**
-   * Get an instance of the MessageBus
-   */
-  private MessageBus bus;
-
-  @Inject
-  public RestDemo(MessageBus bus) {
-    this.bus = bus;
-  }
 
   @PostConstruct
   public void init() {

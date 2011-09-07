@@ -33,15 +33,14 @@ public class CustomerServiceImpl implements CustomerService {
   }
   
   public String retrieveCustomerById(String id, String format, boolean details) {
-    return "customer:" + id;
+    return "customer:" + id + " format:" + format + " details:" + details;
   }
 
   @Override
   public String retrieveCustomerById(String id, String format) {
-    return "customer:" + id;
+    return "customer:" + id + " format:" + format;
   }
 
   @Override
-  public void noHttpMethod() {
-  }
+  public void noHttpMethod() {}
 }
