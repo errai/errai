@@ -24,7 +24,6 @@ import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
-import org.apache.tomcat.jni.Poll;
 import org.jboss.errai.bus.client.api.*;
 import org.jboss.errai.bus.client.api.base.Capabilities;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
@@ -1171,7 +1170,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private static String decodeCommandMessage(Message msg) {
-    StringBuffer decode = new StringBuffer(
+    StringBuilder decode = new StringBuilder(
             "<table><thead style='font-weight:bold;'><tr><td>Field</td><td>Value</td></tr></thead><tbody>");
 
     for (Map.Entry<String, Object> entry : msg.getParts().entrySet()) {

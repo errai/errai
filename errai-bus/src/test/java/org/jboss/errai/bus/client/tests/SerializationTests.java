@@ -25,7 +25,7 @@ public class SerializationTests extends AbstractErraiTest {
       @Override
       public void run() {
         List<TreeNodeContainer> testList = new ArrayList<TreeNodeContainer>();
-        testList.add(new TreeNodeContainer(10, "Foo", 0));
+        testList.add(new TreeNodeContainer(10, "Foo\\", 0));
         testList.add(new TreeNodeContainer(15, "Bar", 10));
         testList.add(new StudyTreeNodeContainer(20, "Foobie", 15, 100));
 

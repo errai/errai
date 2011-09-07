@@ -42,8 +42,10 @@ public class JSONEncoderCli {
       return "null";
     }
     else if (v instanceof String) {
-      return "\"" + ((String) v).replaceAll("\\\\\"", "\\\\\\\\\"").replaceAll("\"", "\\\\\"") + "\"" +
-          "";
+      return "\"" + ((String) v)
+              .replaceAll("\\\\\"", "\\\\\\\\\"")
+              .replaceAll("\"", "\\\\\"")
+              .replaceAll("\\\\", "\\\\\\\\\\\\\\\\") + "\"";
     }
     else if (v instanceof Number || v instanceof Boolean) {
       return String.valueOf(v);
@@ -110,7 +112,7 @@ public class JSONEncoderCli {
           mapBuild.append(",");
         }
         mapBuild.append(_encode(entry.getKey(), ctx))
-            .append(":").append(val);
+                .append(":").append(val);
 
 
         first = false;
@@ -218,4 +220,5 @@ public class JSONEncoderCli {
   public Map<String, String> getMarshalledTypes() {
     return marshalledTypes;
   }
+
 }
