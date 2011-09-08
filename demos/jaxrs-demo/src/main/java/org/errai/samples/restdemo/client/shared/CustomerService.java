@@ -16,22 +16,25 @@
 
 package org.errai.samples.restdemo.client.shared;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
 @Path("customer")
 public interface CustomerService {
   @POST
+  @Produces("text/html")
   public String createCustomer(String customer);
 
   @PUT
   @Path("/{id}")
+  @Consumes("text/html")
   public String updateCustomer(@PathParam("id") String id, String customer);
 
   @DELETE
@@ -43,7 +46,7 @@ public interface CustomerService {
   public String retrieveCustomerById(@PathParam("id") String id, @QueryParam("format") String format, @QueryParam("details") boolean details);
   
   @GET
-  @Path("/{id}/{id}")
+  @Path("/{id}")
   public String retrieveCustomerById(@PathParam("id") String id, @QueryParam("format") String format);
   
   public void noHttpMethod();

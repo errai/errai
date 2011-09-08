@@ -44,15 +44,13 @@ import com.google.gwt.http.client.URL;
 public class JaxrsProxyMethodGenerator {
   private static final String APPEND = "append";
 
-  private String rootResourcePath;
   private JaxrsResourceMethod resourceMethod;
 
   private Statement errorHandling;
   private Statement responseHandling;
 
-  public JaxrsProxyMethodGenerator(JaxrsResourceMethod resourceMethod, String rootResourcePath) {
+  public JaxrsProxyMethodGenerator(JaxrsResourceMethod resourceMethod) {
     this.resourceMethod = resourceMethod;
-    this.rootResourcePath = rootResourcePath;
   }
 
   public void generate(ClassStructureBuilder<?> classBuilder) {
@@ -82,11 +80,10 @@ public class JaxrsProxyMethodGenerator {
 
   private void generateUrl(BlockBuilder<?> methodBlock) {
     JaxrsResourceMethodParameters parms = resourceMethod.getParameters();
-    String path = rootResourcePath + resourceMethod.getPath();
-    ContextualStatementBuilder pathValue = Stmt.loadLiteral(path);
+    ContextualStatementBuilder pathValue = Stmt.loadLiteral(resourceMethod.getPath());
 
     List<String> pathParams =
-        ((UriBuilderImpl) UriBuilderImpl.fromTemplate(path)).getPathParamNamesInDeclarationOrder();
+        ((UriBuilderImpl) UriBuilderImpl.fromTemplate(resourceMethod.getPath())).getPathParamNamesInDeclarationOrder();
     int i = 0;
     for (String pathParam : pathParams) {
       pathValue = pathValue.invoke("replaceFirst", "\\{" + pathParam + "\\}",
@@ -119,10 +116,16 @@ public class JaxrsProxyMethodGenerator {
 
   private void generateHeaders(BlockBuilder<?> methodBlock) {
     JaxrsResourceMethodParameters parms = resourceMethod.getParameters();
+
+    for (String key : resourceMethod.getHeaders().keySet()) {
+      methodBlock.append(Stmt.loadVariable("requestBuilder").invoke("setHeader", key, 
+          resourceMethod.getHeaders().get(key)));
+    }
     
     if (parms.getHeaderParameters() != null) {
       for (String headerParamName : parms.getHeaderParameters().keySet()) {
         ContextualStatementBuilder headerValueBuilder = Stmt.nestedCall(Stmt.newObject(StringBuilder.class));
+        
         int i = 0;
         for (String headerParam : parms.getHeaderParameters(headerParamName)) {
           if (i++ > 0) {
@@ -154,6 +157,7 @@ public class JaxrsProxyMethodGenerator {
       sendRequest = sendRequest.invoke("sendRequest", null, generateRequestCallback());
     }
     else {
+      // TODO serialization
       Statement body = Variable.get(resourceMethod.getParameters().getEntityParameterName());
       sendRequest = sendRequest.invoke("sendRequest", body, generateRequestCallback());
     }

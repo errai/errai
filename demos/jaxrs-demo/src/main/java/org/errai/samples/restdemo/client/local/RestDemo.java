@@ -44,7 +44,7 @@ public class RestDemo {
     final Button get = new Button("Get Customer", new ClickHandler() {
       public void onClick(ClickEvent clickEvent) {
     
-        RestClient.createCall(
+        RestClient.create(
             new RemoteCallback<String>() {
               public void callback(String response) {
                 Window.alert("Response from Server: " + response);
@@ -57,7 +57,7 @@ public class RestDemo {
     final Button post = new Button("Create Customer", new ClickHandler() {
       public void onClick(ClickEvent clickEvent) {
         
-        RestClient.createCall(
+        RestClient.create(
             new RemoteCallback<String>() {
               public void callback(String response) {
                 Window.alert("Response from Server: " + response);
@@ -70,7 +70,7 @@ public class RestDemo {
     final Button put = new Button("Update Customer", new ClickHandler() {
       public void onClick(ClickEvent clickEvent) {
         
-        RestClient.createCall(
+        RestClient.create(
             new RemoteCallback<String>() {
               public void callback(String response) {
                 Window.alert("Response from Server: " + response);
@@ -83,7 +83,7 @@ public class RestDemo {
     final Button delete = new Button("Delete Customer", new ClickHandler() {
       public void onClick(ClickEvent clickEvent) {
         
-        RestClient.createCall(
+        RestClient.create(
             new RemoteCallback<String>() {
               public void callback(String response) {
                 Window.alert("Response from Server: " + response);

@@ -17,6 +17,8 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 import com.google.gwt.http.client.RequestBuilder;
 
 /**
+ * Utility to map a JAX-RS @HttpMethod to the corresponding GWT RequestBuilder method.
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class JaxrsGwtRequestMethodMapper {
@@ -32,11 +34,19 @@ public class JaxrsGwtRequestMethodMapper {
         }
       };
 
+  /**
+   * Searches for @HttpMethod annotations on the provided method and
+   * returns the corresponding GWT RequestBuilder method. 
+   * 
+   * @param method
+   * @return statement representing the GWT RequestBuilder method
+   */
   public static Statement fromMethod(MetaMethod method) {
     Statement gwtRequestMethod = null;
     for (Class<? extends Annotation> jaxrsMethod : map.keySet()) {
       if (method.isAnnotationPresent(jaxrsMethod)) {
         gwtRequestMethod = map.get(jaxrsMethod);
+        break;
       }
     }
     return gwtRequestMethod;

@@ -39,16 +39,20 @@ import com.google.gwt.http.client.Response;
  */
 public class JaxrsProxyGenerator {
   private Class<?> remote = null;
+  
+  private JaxrsHeaders headers;
   private String rootResourcePath;
-
+  
   public JaxrsProxyGenerator(Class<?> remote) {
     this.remote = remote;
 
     rootResourcePath = MetaClassFactory.get(remote).getAnnotation(Path.class).value();
     if (!rootResourcePath.startsWith("/"))
       rootResourcePath = "/" + rootResourcePath;
+    
+    headers = JaxrsHeaders.fromClass(MetaClassFactory.get(remote));
   }
-
+  
   public ClassStructureBuilder<?> generate() {
     ClassStructureBuilder<?> classBuilder = ClassBuilder.define(remote.getSimpleName() + "Impl")
         .packageScope()
@@ -72,7 +76,7 @@ public class JaxrsProxyGenerator {
     generateReponseHandler(classBuilder);
     
     for (MetaMethod method : MetaClassFactory.get(remote).getMethods()) {
-      new JaxrsProxyMethodGenerator(new JaxrsResourceMethod(method), rootResourcePath).generate(classBuilder);
+      new JaxrsProxyMethodGenerator(new JaxrsResourceMethod(method, headers, rootResourcePath)).generate(classBuilder);
     }
 
     return classBuilder;
@@ -83,7 +87,7 @@ public class JaxrsProxyGenerator {
       .if_(Bool.notEquals(Variable.get("errorCallback"), null))
       .append(Stmt.loadVariable("errorCallback").invoke("error", null, Variable.get("throwable")))
       .finish()
-      . else_()
+      .else_()
       .append(Stmt.invokeStatic(GWT.class, "log",
           Stmt.loadVariable("throwable").invoke("getMessage"), Variable.get("throwable")))
       .finish();
@@ -96,7 +100,7 @@ public class JaxrsProxyGenerator {
   private void generateReponseHandler(ClassStructureBuilder<?> classBuilder) {
     classBuilder.privateMethod(void.class, "handleResponse", Parameter.of(Response.class, "response"))
        .append(Stmt.loadVariable("remoteCallback").invoke("callback",
-           // TODO serialization
+           // TODO deserialization
            Stmt.loadVariable("response").invoke("getText")))
      .finish();
   }
