@@ -34,7 +34,7 @@ public class InnerClass {
   }
   
   public String generate(Context context) {
-    clazz.setContext(context);
+    clazz.setContext(Context.create(context));
     return clazz.toJavaString();
   }
   
