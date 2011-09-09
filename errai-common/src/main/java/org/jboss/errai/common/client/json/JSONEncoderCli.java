@@ -93,7 +93,7 @@ public class JSONEncoderCli {
       return enc;
     }
     else if (v instanceof Enum) {
-      return "\"" + v.toString() + "\"";
+      return _encode(v.toString(), ctx);
     }
     else {
       defer = true;
