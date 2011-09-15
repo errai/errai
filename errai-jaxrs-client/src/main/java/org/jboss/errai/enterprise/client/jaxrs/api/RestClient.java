@@ -26,8 +26,8 @@ public class RestClient {
    * @param remoteService  the remote service class or interface
    * @return proxy of the specified remote service type
    */
-  public static <T, R> T create(final RemoteCallback<R> callback, final Class<T> remoteService) {
-    return create(callback, null, remoteService);
+  public static <T, R> T create(final Class<T> remoteService, final RemoteCallback<R> callback) {
+    return create(remoteService, callback, null);
   }
 
   /**
@@ -38,8 +38,8 @@ public class RestClient {
    * @param remoteService  the remote service class or interface
    * @return proxy of the specified remote service type
    */
-  public static <T, R> T create(final RemoteCallback<R> callback, final ErrorCallback errorCallback,
-      final Class<T> remoteService) {
+  public static <T, R> T create(final Class<T> remoteService, 
+      final RemoteCallback<R> callback, final ErrorCallback errorCallback) {
     
     T svc = proxyProvider.getRemoteProxy(remoteService);
     if (svc == null) {
@@ -50,7 +50,7 @@ public class RestClient {
       if (proxyProvider.getRemoteProxy(remoteService) == null)
         throw new RuntimeException("No proxy found for JAX-RS interface: " + remoteService.getName());
       else
-        return create(callback, errorCallback, remoteService);
+        return create(remoteService, callback, errorCallback);
     }
 
     ((RPCStub) svc).setRemoteCallback(callback);
