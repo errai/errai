@@ -19,8 +19,12 @@ import javax.inject.Inject;
 @EntryPoint
 public class HelloWorld extends VerticalPanel {
 
+  private final MessageBus bus;
+
   @Inject
-  private MessageBus bus;
+  public HelloWorld(MessageBus bus) {
+    this.bus = bus;
+  }
 
   @PostConstruct
   public void init() {

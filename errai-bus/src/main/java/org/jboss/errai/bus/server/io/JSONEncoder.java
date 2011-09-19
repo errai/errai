@@ -16,18 +16,24 @@
 
 package org.jboss.errai.bus.server.io;
 
+import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.common.client.types.DecodingContext;
 import org.jboss.errai.common.client.types.EncodingContext;
 import org.jboss.errai.common.client.types.TypeHandler;
 import org.mvel2.MVEL;
 
+import javax.sound.sampled.AudioFormat;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.sql.Timestamp;
 import java.util.*;
+
+import static org.jboss.errai.common.client.protocols.SerializationParts.ENCODED_TYPE;
+import static org.jboss.errai.common.client.protocols.SerializationParts.ENUM_STRING_VALUE;
+import static org.jboss.errai.common.client.protocols.SerializationParts.OBJECT_ID;
 
 /**
  * Encodes an object into a JSON string
@@ -48,7 +54,7 @@ public class JSONEncoder {
       return "null";
     }
     else if (v instanceof String) {
-      return "\"" + ((String) v).replaceAll("\"", "\\\\\"") + "\"";
+      return encodeString((String) v, ctx);
     }
     if (v instanceof Number || v instanceof Boolean) {
       return String.valueOf(v);
@@ -86,12 +92,25 @@ public class JSONEncoder {
     Class cls = o.getClass();
 
     if (java.util.Date.class.isAssignableFrom(cls)) {
-      return "{\"__EncodedType\":\"java.util.Date\", \"__ObjectID\":\"" + o.hashCode() + "\", \"Value\":"
-              + ((java.util.Date) o).getTime() + "}";
+      return map(
+              encodeCommaSeparatedStrings(ctx,
+                      keyValue(encodeString(ENCODED_TYPE, ctx), encodeString(java.util.Date.class.getName(), ctx)),
+                      keyValue(encodeString(OBJECT_ID, ctx), encodeString(String.valueOf(o.hashCode()), ctx)),
+                      keyValue(encodeString(MessageParts.Value.name(), ctx), String.valueOf(((java.util.Date) o)
+                              .getTime()
+                      ))),
+              ctx);
+
     }
     if (java.sql.Date.class.isAssignableFrom(cls)) {
-      return "{\"__EncodedType\":\"java.sql.Date\", \"__ObjectID\":\"" + o.hashCode() + "\", \"Value\":"
-              + ((java.sql.Date) o).getTime() + "}";
+      return map(
+              encodeCommaSeparatedStrings(ctx,
+                      keyValue(encodeString(ENCODED_TYPE, ctx), encodeString(java.sql.Date.class.getName(), ctx)),
+                      keyValue(encodeString(OBJECT_ID, ctx), encodeString(String.valueOf(o.hashCode()), ctx)),
+                      keyValue(encodeString(MessageParts.Value.name(), ctx), String.valueOf(((java.sql.Date) o)
+                              .getTime()
+                      ))),
+              ctx);
     }
 
     if (tHandlers.containsKey(cls)) {
@@ -102,14 +121,18 @@ public class JSONEncoder {
       /**
        * If this object is referencing a duplicate object in the graph, we only provide an ID reference.
        */
-      return write(ctx, "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + cls.getCanonicalName() + "\",\""
-              + SerializationParts.OBJECT_ID + "\":\"$" + ctx.markRef(o) + "\"}");
+
+      return map(encodeCommaSeparatedStrings(ctx,
+              keyValue(encodeString(ENCODED_TYPE, ctx), encodeString(cls.getCanonicalName(), ctx)),
+              keyValue(encodeString(OBJECT_ID, ctx), objRef(ctx, o))), ctx);
     }
 
     ctx.markEncoded(o);
 
-    StringBuilder build = new StringBuilder(write(ctx, "{\"" + SerializationParts.ENCODED_TYPE + "\":\""
-            + cls.getName() + "\",\"" + SerializationParts.OBJECT_ID + "\":\"" + String.valueOf(o.hashCode()) + "\""));
+    StringBuilder build = new StringBuilder("{" + encodeCommaSeparatedStrings(ctx,
+            keyValue(encodeString(ENCODED_TYPE, ctx), encodeString(cls.getCanonicalName(), ctx)),
+            keyValue(encodeString(OBJECT_ID, ctx), encodeString(String.valueOf(o.hashCode()),
+                    ctx))));
 
     // Preliminary fix for https://jira.jboss.org/browse/ERRAI-103
     // TODO: Review my Mike
@@ -144,7 +167,7 @@ public class JSONEncoder {
 
       try {
         Object v = MVEL.executeExpression(s[i++], o);
-        build.append(write(ctx, '\"')).append(field.getName()).append(write(ctx, '\"')).append(':').append(_encode(v, ctx));
+        build.append(encodeString(field.getName(), ctx)).append(':').append(_encode(v, ctx));
 
       }
       catch (Throwable t) {
@@ -171,6 +194,7 @@ public class JSONEncoder {
         if (!ctx.isEscapeMode()) {
           mapBuild.append(SerializationParts.EMBEDDED_JSON);
         }
+
         ctx.setEscapeMode();
         mapBuild.append(_encode(entry.getKey(), ctx));
         ctx.unsetEscapeMode();
@@ -188,6 +212,40 @@ public class JSONEncoder {
     }
 
     return mapBuild.append('}').toString();
+  }
+
+  private static String map(String elements, EncodingContext ctx) {
+    return "{" + elements + "}";
+  }
+
+  private static String objRef(EncodingContext ctx, Object o) {
+    return encodeString("$" + ctx.markRef(o), ctx);
+  }
+
+  private static String keyValue(String key, String value) {
+    return key + ":" + value;
+  }
+
+  private static String encodeCommaSeparatedStrings(EncodingContext ctx, String... strings) {
+    boolean first = true;
+
+    StringBuilder build = new StringBuilder();
+
+    for (String s : strings) {
+      if (!first) {
+        build.append(',');
+      }
+      first = false;
+
+      build.append(s);
+    }
+
+    return build.toString();
+  }
+
+  private static String encodeString(String string, EncodingContext ctx) {
+    String quotes = write(ctx, '\"');
+    return quotes + string.replaceAll("\\\"", "\\\\\"") + quotes;
   }
 
   private static String encodeCollection(Collection col, EncodingContext ctx) {
@@ -213,14 +271,9 @@ public class JSONEncoder {
   }
 
   private static String encodeEnum(Enum enumer, EncodingContext ctx) {
-    String s = "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + enumer.getClass().getName() + "\", " +
-            "\"EnumStringValue\":\"" + enumer.name() + "\"}";
-    if (ctx.isEscapeMode()) {
-      return s.replaceAll("\"", "\\\\\"");
-    }
-    else {
-      return s;
-    }
+    return map(encodeCommaSeparatedStrings(ctx,
+            keyValue(encodeString(ENCODED_TYPE, ctx), encodeString(enumer.getClass().getName(), ctx)),
+            keyValue(encodeString(ENUM_STRING_VALUE, ctx), encodeString(enumer.name(), ctx))), ctx);
   }
 
   private static final Map<Class, TypeHandler> tHandlers = new HashMap<Class, TypeHandler>();
@@ -250,7 +303,7 @@ public class JSONEncoder {
 
   private static String write(EncodingContext ctx, char s) {
     if (ctx.isEscapeMode() && s == '\"') {
-      return "\\\\\"";
+      return "\\" + "\"";
     }
     else {
       return String.valueOf(s);
@@ -270,5 +323,4 @@ public class JSONEncoder {
       return tHandlers.get(in.getClass()).getConverted(in, STATIC_DEC_CONTEXT);
     }
   }
-
 }
