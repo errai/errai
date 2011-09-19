@@ -20,11 +20,14 @@ import java.lang.annotation.Retention;
 
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Parameter;
+import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.Variable;
+import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
+import org.jboss.errai.codegen.framework.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.StatementBuilder;
-import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.codegen.framework.tests.model.Bar;
+import org.jboss.errai.codegen.framework.util.Stmt;
 import org.junit.Test;
 
 /**
@@ -74,7 +77,7 @@ public class AnonymousClassStructureBuilderTest extends AbstractStatementBuilder
         "}\n" +
       "}", src);
   }
-  
+
   @Test
   public void testAnonymousClassWithInitializationBlock() {
     String src = ObjectBuilder.newInstanceOf(Bar.class, Context.create().autoImport())
@@ -97,5 +100,51 @@ public class AnonymousClassStructureBuilderTest extends AbstractStatementBuilder
             "this.name = name;\n" +
         "}\n" +
       "}", src);
+  }
+
+  @Test
+  public void testAnonymousClassReferencingOuterClass() {
+    ClassStructureBuilder<?> outer = ClassBuilder.define("org.foo.Outer").publicScope().body();
+    
+    Statement anonInner = ObjectBuilder.newInstanceOf(Bar.class, Context.create().autoImport())
+      .extend()
+      .publicOverridesMethod("setName", Parameter.of(String.class, "name"))
+      .append(Stmt.loadStatic(outer.getClassDefinition(), "this").loadField("outerName").assignValue(Variable.get("name")))
+      .append(Stmt.loadStatic(outer.getClassDefinition(), "this").invoke("setOuterName", Variable.get("name")))
+      .finish()
+      .finish();
+    
+    String cls = outer
+      .publicField("outerName", String.class)
+      .finish()
+      .publicMethod(void.class, "setOuterName", Parameter.of(String.class, "outerName"))
+      .append(Stmt.loadClassMember("outerName").assignValue(Variable.get("outerName")))
+      .finish()
+      .publicMethod(void.class, "test")
+      .append(anonInner)
+      .finish()
+      .toJavaString();
+    
+    assertEquals("failed to generate anonymous class accessing outer class", 
+        "package org.foo;\n" +
+
+        "import org.jboss.errai.codegen.framework.tests.model.Bar;\n" +
+        "import org.foo.Outer;\n" +
+    
+        "public class Outer {\n" +
+            "public String outerName;\n" +
+            "public void setOuterName(String outerName) {\n" +
+                "this.outerName = outerName;\n" +
+            "}\n" +
+    
+            "public void test() {\n" +
+                "new Bar() {\n" +
+                    "public void setName(String name) {\n" +
+                        "Outer.this.outerName = name;\n" +
+                        "Outer.this.setOuterName(name);\n" +
+                    "}\n" +
+                "};\n" +
+            "}\n" +
+      "}\n", cls);
   }
 }

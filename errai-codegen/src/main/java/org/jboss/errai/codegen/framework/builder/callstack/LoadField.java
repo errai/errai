@@ -19,9 +19,11 @@ package org.jboss.errai.codegen.framework.builder.callstack;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.VariableReference;
+import org.jboss.errai.codegen.framework.builder.impl.Scope;
 import org.jboss.errai.codegen.framework.exception.UndefinedFieldException;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaField;
+import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaField;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -35,7 +37,14 @@ public class LoadField extends AbstractCallElement {
 
   @Override
   public void handleCall(final CallWriter writer, final Context context, Statement statement) {
-    final MetaField field = statement.getType().getField(fieldName);
+    final MetaField field;
+    if (fieldName.equals("this")) {
+      // TODO this is a workaround to access the enclosing instance of a type
+      field = new BuildMetaField(null, null, Scope.Private, statement.getType(), "this");
+    } 
+    else {
+      field = statement.getType().getField(fieldName);
+    }
 
     if (field == null) {
       throw new UndefinedFieldException(fieldName, statement.getType());
