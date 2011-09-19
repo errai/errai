@@ -6,6 +6,7 @@ import org.jboss.errai.bus.client.api.base.JSONMessage;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.tests.support.RandomProvider;
 import org.jboss.errai.bus.client.tests.support.SType;
+import org.jboss.errai.bus.client.tests.support.User;
 import org.jboss.errai.bus.server.io.JSONDecoder;
 import org.jboss.errai.bus.server.io.JSONEncoder;
 import org.jboss.errai.bus.server.io.JSONStreamDecoder;
@@ -73,7 +74,7 @@ public class JSONTests extends TestCase {
       ByteArrayInputStream instream = new ByteArrayInputStream(encodedJSON.getBytes());
 
       Map<String, Object> decoded = (Map<String, Object>) JSONStreamDecoder.decode(instream);
-      Map<String, Object> decoded2 = (Map<String, Object>)  JSONDecoder.decode(encodedJSON);
+      Map<String, Object> decoded2 = (Map<String, Object>) JSONDecoder.decode(encodedJSON);
 
       assertEquals("JSONStreamDecoder did not decode properly", inputParts, decoded);
       assertEquals("JSONDecoder did not decode properly", inputParts, decoded2);
@@ -86,8 +87,8 @@ public class JSONTests extends TestCase {
 
   public void testMarshalling() {
     String jsonData = "{\"SType\":{" + SerializationParts.ENCODED_TYPE + " :\"" + TType.class.getName()
-        + "\",startDate:1280250281006,fieldOne:\"One!\",active:true,endDate:1280251281006,fieldTwo:\"Two!!\"}," +
-        "\"ReplyTo\":\"ClientReceiver\",\"ToSubject\":\"TestService1\",__MarshalledTypes:\"SType\"}";
+            + "\",startDate:1280250281006,fieldOne:\"One!\",active:true,endDate:1280251281006,fieldTwo:\"Two!!\"}," +
+            "\"ReplyTo\":\"ClientReceiver\",\"ToSubject\":\"TestService1\",__MarshalledTypes:\"SType\"}";
 
     TType sType = new TType();
     sType.setActive(true);
@@ -112,7 +113,7 @@ public class JSONTests extends TestCase {
 
   public static class JavaRandomProvider implements RandomProvider {
     private static char[] CHARS = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q',
-        'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'};
+            'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'};
 
     private Random random = new Random(System.nanoTime());
 
@@ -160,7 +161,6 @@ public class JSONTests extends TestCase {
 
     SType rSType = (SType) result.get("SType");
 
-
     System.out.println("rSType:" + rSType);
 
     assertEquals(type, rSType);
@@ -185,6 +185,20 @@ public class JSONTests extends TestCase {
     System.out.println("rSType:" + rSType);
 
     assertEquals(type, rSType);
+  }
+
+  public void testMarshalling4() {
+    final User user = User.create();
+    Map<String, Object> vars = new HashMap<String, Object>();
+    vars.put("user", user);
+
+    String json = JSONEncoder.encode(vars);
+
+    Map<String, Object> result = (Map<String, Object>) JSONDecoder.decode(json);
+
+    User userDes = (User) result.get("user");
+
+    assertEquals(user, userDes);
   }
 
 
