@@ -35,12 +35,11 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 @EntryPoint
 public class RestDemo {
+  final TextBox customerId = new TextBox();
+  final TextBox customerName = new TextBox();
 
   @PostConstruct
-  public void init() {
-    final TextBox customerId = new TextBox();
-    final TextBox customerName = new TextBox();
-
+  public void init() {  
     final RemoteCallback<String> callback = new RemoteCallback<String>() {
       public void callback(String response) {
         Window.alert("Response from Server: " + response);
@@ -49,7 +48,7 @@ public class RestDemo {
     
     final Button get = new Button("Get Customer", new ClickHandler() {
       public void onClick(ClickEvent clickEvent) {
-        RestClient.create(CustomerService.class, callback).retrieveCustomerById(customerId.getText(), "xml", true);
+        RestClient.create(CustomerService.class, callback).retrieveCustomerById(getCustomerId(), "xml", true);
       }
     });
 
@@ -61,13 +60,13 @@ public class RestDemo {
 
     final Button put = new Button("Update Customer", new ClickHandler() {
       public void onClick(ClickEvent clickEvent) {
-        RestClient.create(CustomerService.class, callback).updateCustomer(customerId.getText(), customerName.getText());
+        RestClient.create(CustomerService.class, callback).updateCustomer(getCustomerId(), customerName.getText());
       }
     });
 
     final Button delete = new Button("Delete Customer", new ClickHandler() {
       public void onClick(ClickEvent clickEvent) {
-        RestClient.create(CustomerService.class, callback).deleteCustomer(customerId.getText());
+        RestClient.create(CustomerService.class, callback).deleteCustomer(getCustomerId());
       }
     });
 
@@ -86,5 +85,9 @@ public class RestDemo {
     vPanel.add(put);
     vPanel.add(delete);
     RootPanel.get().add(vPanel);
+  }
+  
+  private long getCustomerId() {
+    return Long.parseLong(customerId.getText());
   }
 }

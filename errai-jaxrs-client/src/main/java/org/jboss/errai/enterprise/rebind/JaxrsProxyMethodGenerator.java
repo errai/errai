@@ -87,7 +87,7 @@ public class JaxrsProxyMethodGenerator {
     int i = 0;
     for (String pathParam : pathParams) {
       pathValue = pathValue.invoke("replaceFirst", "\\{" + pathParam + "\\}",
-          Variable.get(parms.getPathParameter(pathParam, i++)));
+          asString(parms.getPathParameter(pathParam, i++)));
     }
 
     methodBlock.append(Stmt.declareVariable("url", StringBuilder.class,
@@ -99,13 +99,13 @@ public class JaxrsProxyMethodGenerator {
 
       i = 0;
       for (String queryParamName : parms.getQueryParameters().keySet()) {
-        for (String queryParam : parms.getQueryParameters(queryParamName)) {
+        for (Parameter queryParam : parms.getQueryParameters(queryParamName)) {
           if (i++ > 0)
             urlBuilder = urlBuilder.invoke(APPEND, "&");
 
           urlBuilder = urlBuilder.invoke(APPEND, queryParamName);
           urlBuilder = urlBuilder.invoke(APPEND, "=");
-          urlBuilder = urlBuilder.invoke(APPEND, Variable.get(queryParam));
+          urlBuilder = urlBuilder.invoke(APPEND, asString(queryParam));
         }
       }
     }
@@ -127,11 +127,11 @@ public class JaxrsProxyMethodGenerator {
         ContextualStatementBuilder headerValueBuilder = Stmt.nestedCall(Stmt.newObject(StringBuilder.class));
         
         int i = 0;
-        for (String headerParam : parms.getHeaderParameters(headerParamName)) {
+        for (Parameter headerParam : parms.getHeaderParameters(headerParamName)) {
           if (i++ > 0) {
             headerValueBuilder = headerValueBuilder.invoke(APPEND, ",");
           }
-          headerValueBuilder = headerValueBuilder.invoke(APPEND, Variable.get(headerParam));
+          headerValueBuilder = headerValueBuilder.invoke(APPEND, asString(headerParam));
         }
 
         methodBlock.append(Stmt.loadVariable("requestBuilder").invoke("setHeader", headerParamName, 
@@ -153,12 +153,12 @@ public class JaxrsProxyMethodGenerator {
 
   private void generateRequest(BlockBuilder<?> methodBlock) {
     ContextualStatementBuilder sendRequest = Stmt.loadVariable("requestBuilder");
-    if (resourceMethod.getParameters().getEntityParameterName() == null) {
+    if (resourceMethod.getParameters().getEntityParameter() == null) {
       sendRequest = sendRequest.invoke("sendRequest", null, generateRequestCallback());
     }
     else {
-      // TODO serialization
-      Statement body = Variable.get(resourceMethod.getParameters().getEntityParameterName());
+      // TODO serialization in case of custom type
+      Statement body = asString(resourceMethod.getParameters().getEntityParameter());
       sendRequest = sendRequest.invoke("sendRequest", body, generateRequestCallback());
     }
 
@@ -198,5 +198,11 @@ public class JaxrsProxyMethodGenerator {
         .finish();
 
     return requestCallback;
+  }
+  
+  private Statement asString(Parameter param) {
+    return Stmt.nestedCall(
+        Stmt.newObject(param.getType().asBoxed()).withParameters(Variable.get(param.getName())))
+      .invoke("toString");
   }
 }

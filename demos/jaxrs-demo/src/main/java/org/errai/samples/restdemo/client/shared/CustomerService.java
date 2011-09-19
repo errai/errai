@@ -35,19 +35,19 @@ public interface CustomerService {
   @PUT
   @Path("/{id}")
   @Consumes("text/html")
-  public String updateCustomer(@PathParam("id") String id, String customer);
+  public String updateCustomer(@PathParam("id") long id, String customer);
 
   @DELETE
   @Path("/{id}")
-  public String deleteCustomer(@PathParam("id") String id);
+  public String deleteCustomer(@PathParam("id") long id);
 
   @GET
   @Path("/{id}")
-  public String retrieveCustomerById(@PathParam("id") String id, @QueryParam("format") String format, @QueryParam("details") boolean details);
+  public String retrieveCustomerById(@PathParam("id") long id, @QueryParam("format") String format, @QueryParam("details") boolean details);
   
   @GET
   @Path("/{id}")
-  public String retrieveCustomerById(@PathParam("id") String id, @QueryParam("format") String format);
+  public String retrieveCustomerById(@PathParam("id") long id, @QueryParam("format") String format);
   
   public void noHttpMethod();
 }

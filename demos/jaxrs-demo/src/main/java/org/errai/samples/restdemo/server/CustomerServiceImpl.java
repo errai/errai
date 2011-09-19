@@ -24,20 +24,20 @@ public class CustomerServiceImpl implements CustomerService {
     return "created customer:" + customer;
   }
 
-  public String updateCustomer(String id, String customer) {
+  public String updateCustomer(long id, String customer) {
     return "updated customer:" + id;
   }
   
-  public String deleteCustomer(String id) {
+  public String deleteCustomer(long id) {
     return "deleted customer:" + id;
   }
   
-  public String retrieveCustomerById(String id, String format, boolean details) {
+  public String retrieveCustomerById(long id, String format, boolean details) {
     return "customer:" + id + " format:" + format + " details:" + details;
   }
 
   @Override
-  public String retrieveCustomerById(String id, String format) {
+  public String retrieveCustomerById(long id, String format) {
     return "customer:" + id + " format:" + format;
   }
 
