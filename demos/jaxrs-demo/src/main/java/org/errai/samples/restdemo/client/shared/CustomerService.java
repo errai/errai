@@ -39,7 +39,7 @@ public interface CustomerService {
 
   @DELETE
   @Path("/{id}")
-  public String deleteCustomer(@PathParam("id") String id, String customer);
+  public String deleteCustomer(@PathParam("id") String id);
 
   @GET
   @Path("/{id}")

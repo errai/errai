@@ -23,12 +23,12 @@ import javax.ws.rs.Path;
 import org.jboss.errai.bus.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.bus.rebind.ScannerSingleton;
 import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
+import org.jboss.errai.codegen.framework.InnerClass;
+import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
+import org.jboss.errai.codegen.framework.builder.MethodBlockBuilder;
+import org.jboss.errai.codegen.framework.builder.impl.ClassBuilder;
+import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.enterprise.client.jaxrs.JaxrsExtensionsLoader;
-import org.jboss.errai.ioc.rebind.ioc.codegen.InnerClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ClassStructureBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.MethodBlockBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.impl.ClassBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
 
 import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;

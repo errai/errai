@@ -8,8 +8,8 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
 
 import org.apache.commons.lang.StringUtils;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaMethod;
 
 /**
  * Represents HTTP headers based on JAX-RS annotations.

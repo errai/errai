@@ -13,10 +13,10 @@ import javax.ws.rs.MatrixParam;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.DefParameters;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Parameter;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
+import org.jboss.errai.codegen.framework.DefParameters;
+import org.jboss.errai.codegen.framework.Parameter;
+import org.jboss.errai.codegen.framework.meta.MetaMethod;
+import org.jboss.errai.codegen.framework.meta.MetaParameter;
 
 /**
  * Represents parameters of a JAX-RS resource method.

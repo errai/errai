@@ -67,7 +67,7 @@ public class RestDemo {
 
     final Button delete = new Button("Delete Customer", new ClickHandler() {
       public void onClick(ClickEvent clickEvent) {
-        RestClient.create(CustomerService.class, callback).deleteCustomer(customerId.getText(), customerName.getText());
+        RestClient.create(CustomerService.class, callback).deleteCustomer(customerId.getText());
       }
     });
 

@@ -16,17 +16,17 @@ package org.jboss.errai.enterprise.rebind;
 
 import java.util.List;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.DefParameters;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Parameter;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Statement;
-import org.jboss.errai.ioc.rebind.ioc.codegen.Variable;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.BlockBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ClassStructureBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.builder.ContextualStatementBuilder;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.Bool;
-import org.jboss.errai.ioc.rebind.ioc.codegen.util.Stmt;
+import org.jboss.errai.codegen.framework.DefParameters;
+import org.jboss.errai.codegen.framework.Parameter;
+import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.Variable;
+import org.jboss.errai.codegen.framework.builder.BlockBuilder;
+import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
+import org.jboss.errai.codegen.framework.builder.ContextualStatementBuilder;
+import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
+import org.jboss.errai.codegen.framework.meta.MetaMethod;
+import org.jboss.errai.codegen.framework.util.Bool;
+import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.resteasy.specimpl.UriBuilderImpl;
 
 import com.google.gwt.http.client.Request;

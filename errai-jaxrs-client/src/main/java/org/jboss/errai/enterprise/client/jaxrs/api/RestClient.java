@@ -45,7 +45,8 @@ public class RestClient {
     if (svc == null) {
 
       // double check that the extensions loader has been bootstrapped
-      GWT.create(JaxrsExtensionsLoader.class);
+      JaxrsExtensionsLoader extLoader = GWT.create(JaxrsExtensionsLoader.class);
+      extLoader.createProxies();
 
       if (proxyProvider.getRemoteProxy(remoteService) == null)
         throw new RuntimeException("No proxy found for JAX-RS interface: " + remoteService.getName());

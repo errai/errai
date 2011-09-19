@@ -28,7 +28,7 @@ public class CustomerServiceImpl implements CustomerService {
     return "updated customer:" + id;
   }
   
-  public String deleteCustomer(String id, String customer) {
+  public String deleteCustomer(String id) {
     return "deleted customer:" + id;
   }
   
