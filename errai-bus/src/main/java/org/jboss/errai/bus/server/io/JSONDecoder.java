@@ -16,6 +16,7 @@
 
 package org.jboss.errai.bus.server.io;
 
+import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.common.client.types.DecodingContext;
 import org.jboss.errai.common.client.types.UHashMap;
 import org.jboss.errai.common.client.types.UnsatisfiedForwardLookup;
@@ -98,7 +99,7 @@ public class JSONDecoder {
               return demarshallAll(ctx.record(collection, decodingContext), decodingContext);
             }
             catch (Exception e) {
-              throw new RuntimeException("Could not demarshall object", e);
+              throw new RuntimeException("could not demarshall object", e);
             }
           }
           else {
@@ -113,7 +114,7 @@ public class JSONDecoder {
         case '"':
         case '\'':
           ctx.addValue(handleStringEscapes(subArray(json, cursor + 1,
-              cursor = (captureStringLiteral(json[cursor], json, cursor, length)))));
+                  cursor = (captureStringLiteral(json[cursor], json, cursor, length)))));
           cursor++;
           break;
 
@@ -272,7 +273,6 @@ public class JSONDecoder {
     return val + dVal;
   }
 
-
   private static class Context {
     Object lhs;
     Object rhs;
@@ -308,12 +308,15 @@ public class JSONDecoder {
       }
     }
 
-
     private Object record(Object collection, DecodingContext ctx) {
       try {
         if (lhs != null) {
           if (collection instanceof Map) {
             if (!encodedType) encodedType = ENCODED_TYPE.equals(lhs);
+
+            if (lhs instanceof String && lhs.toString().startsWith(SerializationParts.EMBEDDED_JSON)) {
+              lhs = new JSONDecoder(lhs.toString().substring(SerializationParts.EMBEDDED_JSON.length())).parse();
+            }
 
             boolean rec = true;
             if (lhs instanceof UnsatisfiedForwardLookup) {
@@ -348,6 +351,7 @@ public class JSONDecoder {
             }
           }
         }
+
         return collection;
       }
       catch (ClassCastException e) {

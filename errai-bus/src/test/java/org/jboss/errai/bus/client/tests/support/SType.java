@@ -31,6 +31,8 @@ public class SType extends STypeSuper {
   private List<Date> listOfDates;
 
   private Map<String, SType> mapofStypes;
+  private Map<SType, SType> sTypeToStype;
+
   private Place place;
 
   private long longValue;
@@ -205,6 +207,14 @@ public class SType extends STypeSuper {
     this.sTypeArray = sTypeArray;
   }
 
+  public Map<SType, SType> getsTypeToStype() {
+    return sTypeToStype;
+  }
+
+  public void setsTypeToStype(Map<SType, SType> sTypeToStype) {
+    this.sTypeToStype = sTypeToStype;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -230,6 +240,10 @@ public class SType extends STypeSuper {
     if (listOfDates != null ? !listOfDates.equals(sType.listOfDates) : sType.listOfDates != null) return false;
 
     if (mapofStypes != null ? !mapofStypes.equals(sType.mapofStypes) : sType.mapofStypes != null) return false;
+    if (sTypeToStype != null ? !sTypeToStype.toString().equals(sType.sTypeToStype.toString()) : sType.sTypeToStype != null)
+      return
+            false;
+
     if (startDate != null ? !startDate.equals(sType.startDate) : sType.startDate != null) return false;
 
     if (charArrayMulti != null) {
@@ -288,6 +302,7 @@ public class SType extends STypeSuper {
         .append(" listOfStypes: " + listOfStypes + ",\n")
         .append(" listOfDates: " + listOfDates + ",\n")
         .append(" mapOfStypes: " + mapofStypes + ",\n")
+        .append(" sTypeToSTypes: " + sTypeToStype + ",\n")
         .append(" place: " + place + ",\n")
         .append(" longValue: " + longValue + ",\n")
         .append(" shortValue: " + shortValue + ",\n")
@@ -351,6 +366,10 @@ public class SType extends STypeSuper {
     mapOfSTypes.put(random.randString(), randomLeafCreate(random));
 
     sType1.setMapofStypes(mapOfSTypes);
+
+    Map<SType, SType> sTypeToSType = new HashMap<SType, SType>();
+    sTypeToSType.put(randomLeafCreate(random), randomLeafCreate(random));
+    sType1.setsTypeToStype(sTypeToSType);
 
     List<Date> listOfDates = new LinkedList<Date>();
     listOfDates.add(new Date(System.currentTimeMillis() + 3000));

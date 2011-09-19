@@ -43,6 +43,9 @@ public class JSONTests extends TestCase {
     }
 
     String encodedJSON = JSONEncoder.encode(msg.getParts());
+
+    System.out.println(encodedJSON);
+
     Map<String, Object> decoded = (Map<String, Object>) JSONDecoder.decode(encodedJSON);
     assertEquals(inputParts, decoded);
   }

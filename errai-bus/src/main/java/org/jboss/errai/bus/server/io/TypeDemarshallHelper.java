@@ -106,10 +106,10 @@ public class TypeDemarshallHelper {
             return Enum.valueOf(clazz, (String) oMap.get("EnumStringValue"));
           }
           else if (java.util.Date.class.isAssignableFrom(clazz)) {
-            return new java.util.Date((Long) oMap.get("Value"));
+            return new java.util.Date(getNumeric(oMap.get("Value")));
           }
           else if (java.sql.Date.class.isAssignableFrom(clazz)) {
-            return new java.sql.Date((Long) oMap.get("Value"));
+            return new java.sql.Date(getNumeric(oMap.get("Value")));
           }
 
           Object newInstance = clazz.newInstance();
@@ -253,5 +253,20 @@ public class TypeDemarshallHelper {
       }
     }
     return s;
+  }
+
+  public static Long getNumeric(Object val) {
+    Long longVal;
+    if (val instanceof String) {
+      longVal = Long.parseLong(String.valueOf(val));
+    }
+    else if (val instanceof Long) {
+      longVal = (Long) val;
+    }
+    else {
+      throw new RuntimeException("expected number: " + val);
+    }
+
+    return longVal;
   }
 }

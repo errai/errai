@@ -17,6 +17,7 @@
 
 package org.jboss.errai.bus.server.io;
 
+import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.common.client.types.DecodingContext;
 import org.jboss.errai.common.client.types.UHashMap;
 import org.jboss.errai.common.client.types.UnsatisfiedForwardLookup;
@@ -357,6 +358,10 @@ public class JSONStreamDecoder {
         if (lhs != null) {
           if (collection instanceof Map) {
             if (!encodedType) encodedType = ENCODED_TYPE.equals(lhs);
+
+            if (lhs instanceof String && lhs.toString().startsWith(SerializationParts.EMBEDDED_JSON)) {
+              lhs = new JSONDecoder(lhs.toString().substring(SerializationParts.EMBEDDED_JSON.length())).parse();
+            }
 
             boolean rec = true;
             if (lhs instanceof UnsatisfiedForwardLookup) {
