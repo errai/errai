@@ -128,14 +128,14 @@
             <groupId>com.sun.grizzly</groupId>
             <artifactId>grizzly-comet</artifactId>
             <scope>provided</scope>
-            <version>1.9.19-beta1</version>
+            <version>1.9.19-beta2</version>
         </dependency>
 
         <dependency>
             <groupId>com.sun.grizzly</groupId>
             <artifactId>grizzly-nio-framework</artifactId>
             <scope>provided</scope>
-            <version>1.9.19-beta1</version>
+            <version>1.9.19-beta2</version>
         </dependency>
 
         <dependency>
