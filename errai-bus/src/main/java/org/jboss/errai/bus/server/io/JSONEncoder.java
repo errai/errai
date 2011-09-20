@@ -23,7 +23,6 @@ import org.jboss.errai.common.client.types.EncodingContext;
 import org.jboss.errai.common.client.types.TypeHandler;
 import org.mvel2.MVEL;
 
-import javax.sound.sampled.AudioFormat;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -39,10 +38,12 @@ import static org.jboss.errai.common.client.protocols.SerializationParts.OBJECT_
  * Encodes an object into a JSON string
  */
 public class JSONEncoder {
-  protected static Set<Class> serializableTypes;
+  protected static Set<Class> SERIALIZABLE_TYPES;
+  private static final Map<Class, TypeHandler> TYPE_HANDLERS = new HashMap<Class, TypeHandler>();
+  private static final DecodingContext STATIC_DEC_CONTEXT = new DecodingContext();
 
   public static void setSerializableTypes(Set<Class> serializableTypes) {
-    JSONEncoder.serializableTypes = serializableTypes;
+    JSONEncoder.SERIALIZABLE_TYPES = serializableTypes;
   }
 
   public static String encode(Object v) {
@@ -68,16 +69,7 @@ public class JSONEncoder {
     }
     else if (v.getClass().isArray()) {
       return encodeArray(v, ctx);
-
-      // CDI Integration: Loading entities after the service was initialized
-      // This may cause the client to throw an exception if the entity is not known
-      // TODO: Improve exception handling for these cases
-
-    }/* else if (serializableTypes.contains(v.getClass()) || tHandlers.containsKey(v.getClass())) {
-            return encodeObject(v);
-        } else {
-            throw new RuntimeException("cannot serialize type: " + v.getClass().getName());
-        }  */
+    }
     else if (v instanceof Enum) {
       return encodeEnum((Enum) v, ctx);
     }
@@ -113,7 +105,7 @@ public class JSONEncoder {
               ctx);
     }
 
-    if (tHandlers.containsKey(cls)) {
+    if (TYPE_HANDLERS.containsKey(cls)) {
       return _encode(convert(o), ctx);
     }
 
@@ -245,7 +237,7 @@ public class JSONEncoder {
 
   private static String encodeString(String string, EncodingContext ctx) {
     String quotes = write(ctx, '\"');
-    return quotes + string.replaceAll("\\\"", "\\\\\"") + quotes;
+    return quotes + string.replaceAll("\\\\", "\\\\\\\\").replaceAll("[\\\\]{0}\\\"", "\\\\\"")  + quotes;
   }
 
   private static String encodeCollection(Collection col, EncodingContext ctx) {
@@ -276,29 +268,19 @@ public class JSONEncoder {
             keyValue(encodeString(ENUM_STRING_VALUE, ctx), encodeString(enumer.name(), ctx))), ctx);
   }
 
-  private static final Map<Class, TypeHandler> tHandlers = new HashMap<Class, TypeHandler>();
 
   static {
-    tHandlers.put(Timestamp.class, new TypeHandler<Timestamp, Long>() {
+    TYPE_HANDLERS.put(Timestamp.class, new TypeHandler<Timestamp, Long>() {
       public Long getConverted(Timestamp in, DecodingContext ctx) {
         return in.getTime();
       }
     });
 
-    tHandlers.put(Character.class, new TypeHandler<Character, String>() {
+    TYPE_HANDLERS.put(Character.class, new TypeHandler<Character, String>() {
       public String getConverted(Character in, DecodingContext ctx) {
         return String.valueOf(in.charValue());
       }
     });
-  }
-
-  private static String write(EncodingContext ctx, String s) {
-    if (ctx.isEscapeMode()) {
-      return s.replaceAll("\"", "\\\\\"");
-    }
-    else {
-      return s;
-    }
   }
 
   private static String write(EncodingContext ctx, char s) {
@@ -311,16 +293,15 @@ public class JSONEncoder {
   }
 
   public static void addEncodingHandler(Class from, TypeHandler handler) {
-    tHandlers.put(from, handler);
+    TYPE_HANDLERS.put(from, handler);
   }
 
-  private static final DecodingContext STATIC_DEC_CONTEXT = new DecodingContext();
 
   private static Object convert(Object in) {
-    if (in == null || !tHandlers.containsKey(in.getClass())) return in;
+    if (in == null || !TYPE_HANDLERS.containsKey(in.getClass())) return in;
     else {
       //noinspection unchecked
-      return tHandlers.get(in.getClass()).getConverted(in, STATIC_DEC_CONTEXT);
+      return TYPE_HANDLERS.get(in.getClass()).getConverted(in, STATIC_DEC_CONTEXT);
     }
   }
 }
