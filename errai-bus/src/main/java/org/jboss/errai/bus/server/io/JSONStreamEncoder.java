@@ -21,7 +21,6 @@ import org.jboss.errai.common.client.types.DecodingContext;
 import org.jboss.errai.common.client.types.EncodingContext;
 import org.jboss.errai.common.client.types.TypeHandler;
 import org.mvel2.MVEL;
-import org.mvel2.util.StringAppender;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -43,7 +42,7 @@ public class JSONStreamEncoder {
 
 
   public static void setSerializableTypes(Set<Class> serializableTypes) {
-    JSONEncoder.serializableTypes = serializableTypes;
+    JSONEncoder.SERIALIZABLE_TYPES = serializableTypes;
   }
 
   public static void encode(Object v, OutputStream outstream) throws IOException {

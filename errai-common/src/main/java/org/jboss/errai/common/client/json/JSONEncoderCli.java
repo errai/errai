@@ -16,6 +16,7 @@
 
 package org.jboss.errai.common.client.json;
 
+import com.google.gwt.json.client.JSONString;
 import org.jboss.errai.common.client.types.EncodingContext;
 import org.jboss.errai.common.client.types.Marshaller;
 
@@ -42,10 +43,7 @@ public class JSONEncoderCli {
       return "null";
     }
     else if (v instanceof String) {
-      return "\"" + ((String) v)
-              .replaceAll("\\\\\"", "\\\\\\\\\"")
-              .replaceAll("\"", "\\\\\"")
-              .replaceAll("\\\\", "\\\\\\\\\\\\\\\\") + "\"";
+      return encodeString((String) v, ctx);
     }
     else if (v instanceof Number || v instanceof Boolean) {
       return String.valueOf(v);
@@ -87,7 +85,6 @@ public class JSONEncoderCli {
       return null;
     }
     else if (hasMarshaller(v.getClass().getName())) {
-
       Marshaller<Object> m = getMarshaller(marshall = v.getClass().getName());
       String enc = m.marshall(v, ctx);
       return enc;
@@ -100,6 +97,11 @@ public class JSONEncoderCli {
       return null;
     }
   }
+
+  public static String encodeString(String string, EncodingContext ctx) {
+    return "\"" + string.replaceAll("\\\\", "\\\\\\\\").replaceAll("[\\\\]{0}\\\"", "\\\\\"")  + "\"";
+  }
+
 
   public String encodeMap(Map<Object, Object> map, EncodingContext ctx) {
     StringBuilder mapBuild = new StringBuilder("{");
