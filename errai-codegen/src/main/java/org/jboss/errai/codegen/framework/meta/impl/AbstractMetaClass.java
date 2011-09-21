@@ -194,7 +194,9 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     List<Method> staticMethods = new ArrayList<Method>();
 
     for (MetaMethod m : methods) {
-      staticMethods.add(getJavaMethodFromMetaMethod(m));
+      Method javaMethod = getJavaMethodFromMetaMethod(m);
+      if (javaMethod != null)
+        staticMethods.add(javaMethod);
     }
 
     return staticMethods.toArray(new Method[staticMethods.size()]);
