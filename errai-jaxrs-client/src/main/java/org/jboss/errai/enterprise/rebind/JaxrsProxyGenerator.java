@@ -30,7 +30,6 @@ import org.jboss.errai.codegen.framework.util.Bool;
 import org.jboss.errai.codegen.framework.util.Stmt;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.http.client.Response;
 
 /**
  * Generates a JAX-RS remote proxy.
@@ -73,7 +72,6 @@ public class JaxrsProxyGenerator {
         .finish();
 
     generateErrorHandler(classBuilder);
-    generateReponseHandler(classBuilder);
     
     for (MetaMethod method : MetaClassFactory.get(remote).getMethods()) {
       new JaxrsProxyMethodGenerator(new JaxrsResourceMethod(method, headers, rootResourcePath)).generate(classBuilder);
@@ -95,13 +93,5 @@ public class JaxrsProxyGenerator {
     classBuilder.privateMethod(void.class, "handleError", Parameter.of(Throwable.class, "throwable"))
       .append(errorHandling)
     .finish();
-  }
-
-  private void generateReponseHandler(ClassStructureBuilder<?> classBuilder) {
-    classBuilder.privateMethod(void.class, "handleResponse", Parameter.of(Response.class, "response"))
-       .append(Stmt.loadVariable("remoteCallback").invoke("callback",
-           // TODO deserialization
-           Stmt.loadVariable("response").invoke("getText")))
-     .finish();
   }
 }

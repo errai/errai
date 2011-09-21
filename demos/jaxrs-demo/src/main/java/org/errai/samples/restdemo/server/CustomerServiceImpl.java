@@ -20,16 +20,16 @@ import org.errai.samples.restdemo.client.shared.CustomerService;
 
 public class CustomerServiceImpl implements CustomerService {
 
-  public String createCustomer(String customer) {
-    return "created customer:" + customer;
+  public long createCustomer(String customer) {
+    return 123;
   }
 
   public String updateCustomer(long id, String customer) {
     return "updated customer:" + id;
   }
   
-  public String deleteCustomer(long id) {
-    return "deleted customer:" + id;
+  public void deleteCustomer(long id) {
+    System.out.println("deleted customer:" + id);
   }
   
   public String retrieveCustomerById(long id, String format, boolean details) {

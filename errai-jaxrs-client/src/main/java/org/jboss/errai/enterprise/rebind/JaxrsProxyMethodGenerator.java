@@ -36,6 +36,9 @@ import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
 
+import static org.jboss.errai.enterprise.rebind.PrimitiveTypeMarshaller.marshal;
+import static org.jboss.errai.enterprise.rebind.PrimitiveTypeMarshaller.demarshal;
+
 /**
  * Generates a JAX-RS remote proxy method.
  * 
@@ -54,12 +57,13 @@ public class JaxrsProxyMethodGenerator {
   }
 
   public void generate(ClassStructureBuilder<?> classBuilder) {
+    MetaMethod method = resourceMethod.getMethod();
+    
     this.errorHandling = Stmt.loadStatic(classBuilder.getClassDefinition(), "this")
         .invoke("handleError", Variable.get("throwable"));
     this.responseHandling = Stmt.loadStatic(classBuilder.getClassDefinition(), "this")
-        .invoke("handleResponse", Variable.get("response"));
-
-    MetaMethod method = resourceMethod.getMethod();
+      .loadField("remoteCallback").invoke("callback", 
+        demarshal(method.getReturnType(), Stmt.loadVariable("response").invoke("getText")));
 
     BlockBuilder<?> methodBlock =
         classBuilder.publicMethod(method.getReturnType(), method.getName(),
@@ -72,8 +76,19 @@ public class JaxrsProxyMethodGenerator {
       generateRequest(methodBlock);
     }
 
-    if (!method.getReturnType().equals(MetaClassFactory.get(void.class)))
-      methodBlock.append(Stmt.load(null).returnValue());
+    Statement returnStatement;
+    if (!method.getReturnType().equals(MetaClassFactory.get(void.class))) {
+      if (MetaClassFactory.get(Number.class).isAssignableFrom(method.getReturnType().asBoxed())) {
+        returnStatement = Stmt.load(0).returnValue();
+      } 
+      else if (MetaClassFactory.get(Boolean.class).isAssignableFrom(method.getReturnType().asBoxed())) {
+        returnStatement = Stmt.load(true).returnValue(); 
+      }
+      else {
+        returnStatement = Stmt.load(null).returnValue();
+      }
+      methodBlock.append(returnStatement);
+    }  
 
     methodBlock.finish();
   }
@@ -87,7 +102,7 @@ public class JaxrsProxyMethodGenerator {
     int i = 0;
     for (String pathParam : pathParams) {
       pathValue = pathValue.invoke("replaceFirst", "\\{" + pathParam + "\\}",
-          asString(parms.getPathParameter(pathParam, i++)));
+          marshal(parms.getPathParameter(pathParam, i++)));
     }
 
     methodBlock.append(Stmt.declareVariable("url", StringBuilder.class,
@@ -105,7 +120,7 @@ public class JaxrsProxyMethodGenerator {
 
           urlBuilder = urlBuilder.invoke(APPEND, queryParamName);
           urlBuilder = urlBuilder.invoke(APPEND, "=");
-          urlBuilder = urlBuilder.invoke(APPEND, asString(queryParam));
+          urlBuilder = urlBuilder.invoke(APPEND, marshal(queryParam));
         }
       }
     }
@@ -131,7 +146,7 @@ public class JaxrsProxyMethodGenerator {
           if (i++ > 0) {
             headerValueBuilder = headerValueBuilder.invoke(APPEND, ",");
           }
-          headerValueBuilder = headerValueBuilder.invoke(APPEND, asString(headerParam));
+          headerValueBuilder = headerValueBuilder.invoke(APPEND, marshal(headerParam));
         }
 
         methodBlock.append(Stmt.loadVariable("requestBuilder").invoke("setHeader", headerParamName, 
@@ -157,8 +172,7 @@ public class JaxrsProxyMethodGenerator {
       sendRequest = sendRequest.invoke("sendRequest", null, generateRequestCallback());
     }
     else {
-      // TODO serialization in case of custom type
-      Statement body = asString(resourceMethod.getParameters().getEntityParameter());
+      Statement body = marshal(resourceMethod.getParameters().getEntityParameter());
       sendRequest = sendRequest.invoke("sendRequest", body, generateRequestCallback());
     }
 
@@ -198,11 +212,5 @@ public class JaxrsProxyMethodGenerator {
         .finish();
 
     return requestCallback;
-  }
-  
-  private Statement asString(Parameter param) {
-    return Stmt.nestedCall(
-        Stmt.newObject(param.getType().asBoxed()).withParameters(Variable.get(param.getName())))
-      .invoke("toString");
   }
 }

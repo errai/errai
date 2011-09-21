@@ -37,9 +37,22 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class RestDemo {
   final TextBox customerId = new TextBox();
   final TextBox customerName = new TextBox();
-
+  
   @PostConstruct
-  public void init() {  
+  public void init() {
+    
+    final RemoteCallback<Long> creationCallback = new RemoteCallback<Long>() {
+      public void callback(Long response) {
+        Window.alert("Response from Server: Created Customer:" + response);
+      }
+    };
+    
+    final RemoteCallback<Void> deletionCallback = new RemoteCallback<Void>() {
+      public void callback(Void response) {
+        Window.alert("successfully deleted customer");
+      }
+    };
+    
     final RemoteCallback<String> callback = new RemoteCallback<String>() {
       public void callback(String response) {
         Window.alert("Response from Server: " + response);
@@ -54,7 +67,7 @@ public class RestDemo {
 
     final Button post = new Button("Create Customer", new ClickHandler() {
       public void onClick(ClickEvent clickEvent) {
-        RestClient.create(CustomerService.class, callback).createCustomer(customerName.getText());
+        RestClient.create(CustomerService.class, creationCallback).createCustomer(customerName.getText());
       }
     });
 
@@ -66,7 +79,7 @@ public class RestDemo {
 
     final Button delete = new Button("Delete Customer", new ClickHandler() {
       public void onClick(ClickEvent clickEvent) {
-        RestClient.create(CustomerService.class, callback).deleteCustomer(getCustomerId());
+        RestClient.create(CustomerService.class, deletionCallback).deleteCustomer(getCustomerId());
       }
     });
 

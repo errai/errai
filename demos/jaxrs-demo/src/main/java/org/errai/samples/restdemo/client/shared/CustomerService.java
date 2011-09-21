@@ -29,8 +29,8 @@ import javax.ws.rs.QueryParam;
 @Path("customer")
 public interface CustomerService {
   @POST
-  @Produces("text/html")
-  public String createCustomer(String customer);
+  @Produces("text/plain")
+  public long createCustomer(String customer);
 
   @PUT
   @Path("/{id}")
@@ -39,7 +39,7 @@ public interface CustomerService {
 
   @DELETE
   @Path("/{id}")
-  public String deleteCustomer(@PathParam("id") long id);
+  public void deleteCustomer(@PathParam("id") long id);
 
   @GET
   @Path("/{id}")
