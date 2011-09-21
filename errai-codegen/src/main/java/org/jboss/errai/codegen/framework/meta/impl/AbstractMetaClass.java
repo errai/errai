@@ -445,7 +445,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       name = type.getFullyQualifiedName();
     }
 
-    if (isPrimitive()) {
+    if (isPrimitive() || (isArray() && getComponentType().isPrimitive())) {
       if ("int".equals(name)) {
         name = "I";
       }

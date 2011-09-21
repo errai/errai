@@ -32,8 +32,8 @@ import org.jboss.errai.codegen.framework.builder.impl.StatementBuilder;
 import org.jboss.errai.codegen.framework.exception.InvalidTypeException;
 import org.jboss.errai.codegen.framework.exception.OutOfScopeException;
 import org.jboss.errai.codegen.framework.exception.UndefinedMethodException;
-import org.jboss.errai.codegen.framework.util.Refs;
 import org.jboss.errai.codegen.framework.tests.model.Foo;
+import org.jboss.errai.codegen.framework.util.Refs;
 import org.junit.Test;
 
 /**
