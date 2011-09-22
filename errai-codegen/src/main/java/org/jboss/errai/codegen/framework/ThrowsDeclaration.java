@@ -46,6 +46,10 @@ public class ThrowsDeclaration extends AbstractStatement {
     return (exceptionTypes == null) || (exceptionTypes.length == 0);
   }
 
+  public MetaClass[] getExceptionTypes() {
+    return exceptionTypes;
+  }
+
   @Override
   public String generate(Context context) {
     StringBuilder buf = new StringBuilder();

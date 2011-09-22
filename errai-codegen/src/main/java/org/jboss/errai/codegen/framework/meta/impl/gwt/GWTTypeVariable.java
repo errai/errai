@@ -49,4 +49,6 @@ public class GWTTypeVariable implements MetaTypeVariable {
   public String getName() {
     return typeParameter.getName();
   }
+
+
 }

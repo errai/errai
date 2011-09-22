@@ -37,6 +37,9 @@ public interface MetaClassMember extends HasAnnotations {
   public abstract boolean isTransient();
 
   public abstract boolean isSynthetic();
+  
+  public abstract boolean isVolatile();
 
   public abstract boolean isSynchronized();
+  
 }

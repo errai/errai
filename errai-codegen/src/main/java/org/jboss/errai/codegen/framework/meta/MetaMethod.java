@@ -26,4 +26,6 @@ public abstract class MetaMethod implements MetaClassMember, MetaGenericDeclarat
   public abstract MetaType[] getGenericParameterTypes();
 
   public abstract MetaParameter[] getParameters();
+
+  public abstract MetaClass[] getCheckedExceptions();
 }

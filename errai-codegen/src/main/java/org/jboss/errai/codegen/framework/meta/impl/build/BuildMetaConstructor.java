@@ -49,6 +49,7 @@ public class BuildMetaConstructor extends MetaConstructor implements Builder {
   //  private List<Annotation> annotations = new ArrayList<Annotation>();
   private List<MetaTypeVariable> typeVariables = new ArrayList<MetaTypeVariable>();
 
+
   public BuildMetaConstructor(BuildMetaClass declaringClass) {
     this.context = Context.create(declaringClass.getContext());
     this.declaringClass = declaringClass;
@@ -65,6 +66,14 @@ public class BuildMetaConstructor extends MetaConstructor implements Builder {
     this.declaringClass = declaringClass;
     this.body = body;
     this.defParameters = defParameters;
+  }
+  
+  public BuildMetaConstructor(BuildMetaClass declaringClass, Statement body, Scope scope, DefParameters defParameters) {
+    this.context = Context.create(declaringClass.getContext());
+    this.declaringClass = declaringClass;
+    this.body = body;
+    this.defParameters = defParameters;
+    this.scope = scope;
   }
 
   @Override
@@ -130,6 +139,11 @@ public class BuildMetaConstructor extends MetaConstructor implements Builder {
   }
 
   @Override
+  public boolean isVolatile() {
+    return false;
+  }
+
+  @Override
   public boolean isSynchronized() {
     return false;
   }
@@ -172,6 +186,19 @@ public class BuildMetaConstructor extends MetaConstructor implements Builder {
   public void setDefParameters(DefParameters defParameters) {
     this.defParameters = defParameters;
   }
+//
+//  public void addCheckedException(MetaClass clazz) {
+//    if (!clazz.isAssignableFrom(Throwable.class)) {
+//      throw new RuntimeException("not an exception type: " + clazz.getFullyQualifiedName());
+//    }
+//    checkedExceptions.add(clazz);
+//  }
+
+
+  @Override
+  public MetaClass[] getCheckedExceptions() {
+    return new MetaClass[0];
+  }
 
   @Override
   public String getName() {
@@ -193,7 +220,7 @@ public class BuildMetaConstructor extends MetaConstructor implements Builder {
     for (Parameter p : defParameters.getParameters()) {
       context.addVariable(Variable.create(p.getName(), p.getType()));
     }
-    
+
     return new StringBuilder().append(scope.getCanonicalName())
             .append(" ")
             .append(declaringClass.getName())

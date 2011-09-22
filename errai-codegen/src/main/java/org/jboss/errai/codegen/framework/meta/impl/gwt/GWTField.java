@@ -141,6 +141,11 @@ public class GWTField extends MetaField {
   }
 
   @Override
+  public boolean isVolatile() {
+    return field.isVolatile();
+  }
+
+  @Override
   public boolean isSynthetic() {
     return false;
   }

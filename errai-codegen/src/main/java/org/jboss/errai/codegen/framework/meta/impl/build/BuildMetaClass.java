@@ -29,13 +29,9 @@ import org.jboss.errai.codegen.framework.Variable;
 import org.jboss.errai.codegen.framework.builder.Builder;
 import org.jboss.errai.codegen.framework.builder.callstack.LoadClassReference;
 import org.jboss.errai.codegen.framework.builder.impl.Scope;
-import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
-import org.jboss.errai.codegen.framework.meta.MetaConstructor;
-import org.jboss.errai.codegen.framework.meta.MetaField;
-import org.jboss.errai.codegen.framework.meta.MetaMethod;
-import org.jboss.errai.codegen.framework.meta.MetaTypeVariable;
+import org.jboss.errai.codegen.framework.meta.*;
 import org.jboss.errai.codegen.framework.meta.impl.AbstractMetaClass;
+import org.jboss.errai.codegen.framework.meta.impl.AbstractMetaParameterizedType;
 import org.jboss.errai.codegen.framework.util.GenUtil;
 import org.jboss.errai.codegen.framework.util.PrettyPrinter;
 
@@ -157,16 +153,16 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
 
   @Override
   public MetaConstructor[] getConstructors() {
-    if (constructors.isEmpty()) { 
+    if (constructors.isEmpty()) {
       // add an empty no-arg constructor
       BuildMetaConstructor buildMetaConstructor =
-        new BuildMetaConstructor(this, new BlockStatement(), DefParameters.none());
-      
+              new BuildMetaConstructor(this, new BlockStatement(), DefParameters.none());
+
       buildMetaConstructor.setScope(Scope.Public);
-      return new MetaConstructor[] {buildMetaConstructor};
-    } 
+      return new MetaConstructor[]{buildMetaConstructor};
+    }
     else {
-      return constructors.toArray(new MetaConstructor[constructors.size()]);      
+      return constructors.toArray(new MetaConstructor[constructors.size()]);
     }
   }
 
@@ -287,7 +283,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   public void setStatic(boolean aStatic) {
     isStatic = aStatic;
   }
-  
+
   public void setInner(boolean aInner) {
     isInner = aInner;
   }
@@ -324,6 +320,9 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     typeVariables.add(typeVariable);
   }
 
+  public void settParameterizedType(MetaParameterizedType parameterizedType) {
+    this.parameterizedType = parameterizedType;
+  }
 
   @Override
   public String toJavaString() {

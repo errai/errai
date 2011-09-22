@@ -28,6 +28,7 @@ import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.meta.MetaParameter;
 import org.jboss.errai.codegen.framework.meta.MetaType;
 import org.jboss.errai.codegen.framework.meta.MetaTypeVariable;
+import org.jboss.errai.codegen.framework.util.GenUtil;
 
 public class JavaReflectionMethod extends MetaMethod {
   private Method method;
@@ -102,6 +103,11 @@ public class JavaReflectionMethod extends MetaMethod {
   }
 
   @Override
+  public MetaClass[] getCheckedExceptions() {
+    return MetaClassFactory.fromClassArray(method.getExceptionTypes());
+  }
+
+  @Override
   public MetaClass getDeclaringClass() {
     return declaringClass;
   }
@@ -139,6 +145,11 @@ public class JavaReflectionMethod extends MetaMethod {
   @Override
   public boolean isTransient() {
     return (method.getModifiers() & Modifier.TRANSIENT) != 0;
+  }
+
+  @Override
+  public boolean isVolatile() {
+    return false;
   }
 
   @Override

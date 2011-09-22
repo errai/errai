@@ -106,6 +106,11 @@ public class JavaReflectionField extends MetaField {
   }
 
   @Override
+  public boolean isVolatile() {
+    return (field.getModifiers() & Modifier.VOLATILE) != 0;
+  }
+
+  @Override
   public boolean isSynthetic() {
     return field.isSynthetic();
   }

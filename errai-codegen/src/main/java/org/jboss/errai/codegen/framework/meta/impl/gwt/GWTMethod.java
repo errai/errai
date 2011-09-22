@@ -125,6 +125,11 @@ public class GWTMethod extends MetaMethod {
   }
 
   @Override
+  public MetaClass[] getCheckedExceptions() {
+    return MetaClassFactory.fromClassArray(method.getThrows());
+  }
+
+  @Override
   public boolean isAbstract() {
     return method.isAbstract();
   }
@@ -156,6 +161,11 @@ public class GWTMethod extends MetaMethod {
 
   @Override
   public boolean isTransient() {
+    return false;
+  }
+
+  @Override
+  public boolean isVolatile() {
     return false;
   }
 

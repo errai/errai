@@ -112,7 +112,7 @@ public class FieldBuilder<T> implements FieldBuildStart<T>, FieldBuildType<T>,
         public String generate(Context context) {
           StringBuilder sbuf = new StringBuilder(scope.getCanonicalName())
                   .append(scope == Scope.Package ? "" : " ")
-                  .append(LoadClassReference.getClassReference(type, context))
+                  .append(LoadClassReference.getClassReference(type, context, type.getTypeParameters() != null))
                   .append(" ").append(name);
 
           if (initializer != null) {

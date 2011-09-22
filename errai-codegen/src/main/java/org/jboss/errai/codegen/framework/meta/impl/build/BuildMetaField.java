@@ -42,6 +42,7 @@ public class BuildMetaField extends MetaField implements Builder {
   private boolean isFinal;
   private boolean isStatic;
   private boolean isTransient;
+  private boolean isVolatile;
 
   public BuildMetaField(BuildMetaClass declaringClass, Statement statement, Scope scope, MetaClass type, String name) {
     this.declaringClass = declaringClass;
@@ -117,6 +118,11 @@ public class BuildMetaField extends MetaField implements Builder {
   }
 
   @Override
+  public boolean isVolatile() {
+    return isVolatile;
+  }
+
+  @Override
   public boolean isSynchronized() {
     return false;
   }
@@ -163,9 +169,14 @@ public class BuildMetaField extends MetaField implements Builder {
     isTransient = aTransient;
   }
 
+  public void setVolatile(boolean aVolatile) {
+    isVolatile = aVolatile;
+  }
+
   public void setStatement(Statement statement) {
     this.statement = statement;
   }
+
 
   @Override
   public String toJavaString() {

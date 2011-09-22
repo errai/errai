@@ -21,6 +21,7 @@ import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.framework.meta.MetaType;
+import org.jboss.errai.codegen.framework.meta.MetaTypeVariable;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -51,12 +52,23 @@ public class LoadClassReference extends AbstractCallElement {
     nextOrReturn(writer, context, statement);
   }
 
-  public static String getClassReference(MetaClass metaClass, Context context) {
+  public static String getClassReference(MetaType metaClass, Context context) {
     return getClassReference(metaClass, context, false);
   }
 
-  public static String getClassReference(MetaClass metaClass, Context context, boolean typeParms) {
-    MetaClass erased = metaClass.getErased();
+  public static String getClassReference(MetaType metaClass, Context context, boolean typeParms) {
+    MetaClass erased = null;
+    if (metaClass instanceof MetaClass) {
+      erased = ((MetaClass) metaClass).getErased();
+    }
+    else if (metaClass instanceof MetaParameterizedType) {
+      MetaParameterizedType parameterizedType = (MetaParameterizedType) metaClass;
+      return parameterizedType.toString();
+    }
+    else if (metaClass instanceof MetaTypeVariable) {
+      MetaTypeVariable parameterizedType = (MetaTypeVariable) metaClass;
+      return parameterizedType.getName();
+    }
 
     String fqcn = erased.getFullyQualifiedName();
     String pkg;
@@ -75,8 +87,8 @@ public class LoadClassReference extends AbstractCallElement {
     }
 
     StringBuilder buf = new StringBuilder(fqcn);
-    if (typeParms) {
-      buf.append(getClassReferencesForParameterizedTypes(metaClass.getParameterizedType(), context));
+    if (typeParms && metaClass instanceof MetaClass) {
+      buf.append(getClassReferencesForParameterizedTypes(((MetaClass)metaClass).getParameterizedType(), context));
     }
 
     return buf.toString();
@@ -94,11 +106,11 @@ public class LoadClassReference extends AbstractCallElement {
 
         if (typeParameter instanceof MetaParameterizedType) {
           MetaParameterizedType parameterizedTypeParemeter = (MetaParameterizedType) typeParameter;
-          buf.append(getClassReference((MetaClass) parameterizedTypeParemeter.getRawType(), context));
+          buf.append(getClassReference( parameterizedTypeParemeter.getRawType(), context));
           buf.append(getClassReferencesForParameterizedTypes(parameterizedTypeParemeter, context));
         }
         else {
-          buf.append(getClassReference((MetaClass) typeParameter, context));
+          buf.append(getClassReference(typeParameter, context));
         }
        
         if (i + 1 < parameterizedType.getTypeParameters().length)

@@ -156,6 +156,11 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
   }
 
   @Override
+  public boolean isVolatile() {
+    return false;
+  }
+
+  @Override
   public boolean isSynchronized() {
     return false;
   }
@@ -178,6 +183,11 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
   @Override
   public MetaTypeVariable[] getTypeParameters() {
     return new MetaTypeVariable[0];
+  }
+
+  @Override
+  public MetaClass[] getCheckedExceptions() {
+    return throwsDeclaration.getExceptionTypes();
   }
 
   public void setDeclaringClass(BuildMetaClass declaringClass) {

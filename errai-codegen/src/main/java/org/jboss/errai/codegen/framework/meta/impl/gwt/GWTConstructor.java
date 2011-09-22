@@ -116,6 +116,11 @@ public class GWTConstructor extends MetaConstructor {
   }
 
   @Override
+  public MetaClass[] getCheckedExceptions() {
+    return new MetaClass[0];
+  }
+
+  @Override
   public boolean isVarArgs() {
     return constructor.isVarArgs();
   }
@@ -157,6 +162,11 @@ public class GWTConstructor extends MetaConstructor {
 
   @Override
   public boolean isSynthetic() {
+    return false;
+  }
+
+  @Override
+  public boolean isVolatile() {
     return false;
   }
 

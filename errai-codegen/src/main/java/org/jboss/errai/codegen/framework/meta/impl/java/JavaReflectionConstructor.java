@@ -109,6 +109,11 @@ public class JavaReflectionConstructor extends MetaConstructor {
   }
 
   @Override
+  public MetaClass[] getCheckedExceptions() {
+    return new MetaClass[0];
+  }
+
+  @Override
   public boolean isAbstract() {
     return (constructor.getModifiers() & Modifier.ABSTRACT) != 0;
   }
@@ -141,6 +146,11 @@ public class JavaReflectionConstructor extends MetaConstructor {
   @Override
   public boolean isTransient() {
     return (constructor.getModifiers() & Modifier.TRANSIENT) != 0;
+  }
+
+  @Override
+  public boolean isVolatile() {
+    return false;
   }
 
   @Override

@@ -21,20 +21,15 @@ import java.util.List;
 
 import com.google.gwt.core.ext.typeinfo.JParameter;
 import com.google.gwt.core.ext.typeinfo.JType;
-import org.jboss.errai.codegen.framework.Context;
-import org.jboss.errai.codegen.framework.Statement;
-import org.jboss.errai.codegen.framework.Variable;
-import org.jboss.errai.codegen.framework.VariableReference;
+import org.jboss.errai.codegen.framework.*;
+import org.jboss.errai.codegen.framework.builder.impl.Scope;
 import org.jboss.errai.codegen.framework.exception.InvalidTypeException;
 import org.jboss.errai.codegen.framework.exception.OutOfScopeException;
 import org.jboss.errai.codegen.framework.exception.TypeNotIterableException;
 import org.jboss.errai.codegen.framework.exception.UndefinedMethodException;
 import org.jboss.errai.codegen.framework.literal.LiteralFactory;
 import org.jboss.errai.codegen.framework.literal.LiteralValue;
-import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
-import org.jboss.errai.codegen.framework.meta.MetaMethod;
-import org.jboss.errai.codegen.framework.meta.MetaParameter;
+import org.jboss.errai.codegen.framework.meta.*;
 import org.mvel2.DataConversion;
 
 /**
@@ -202,4 +197,59 @@ public class GenUtil {
       return Class.forName(name, false, Thread.currentThread().getContextClassLoader());
     }
   }
+
+
+  public static Scope scopeOf(MetaClass clazz) {
+    if (clazz.isPublic()) {
+      return Scope.Public;
+    }
+    else if (clazz.isPrivate()) {
+      return Scope.Private;
+    }
+    else if (clazz.isProtected()) {
+      return Scope.Protected;
+    }
+    else {
+      return Scope.Package;
+    }
+  }
+
+  public static Scope scopeOf(MetaClassMember member) {
+    if (member.isPublic()) {
+      return Scope.Public;
+    }
+    else if (member.isPrivate()) {
+      return Scope.Private;
+    }
+    else if (member.isProtected()) {
+      return Scope.Protected;
+    }
+    else {
+      return Scope.Package;
+    }
+  }
+
+  public static DefModifiers modifiersOf(MetaClassMember member) {
+    DefModifiers defModifiers = new DefModifiers();
+    if (member.isAbstract()) {
+      defModifiers.addModifiers(Modifier.Abstract);
+    }
+    else if (member.isFinal()) {
+      defModifiers.addModifiers(Modifier.Final);
+    }
+    else if (member.isStatic()) {
+      defModifiers.addModifiers(Modifier.Static);
+    }
+    else if (member.isSynchronized()) {
+      defModifiers.addModifiers(Modifier.Synchronized);
+    }
+    else if (member.isVolatile()) {
+      defModifiers.addModifiers(Modifier.Volatile);
+    }
+    else if (member.isTransient()) {
+      defModifiers.addModifiers(Modifier.Transient);
+    }
+    return defModifiers;
+  }
+
 }

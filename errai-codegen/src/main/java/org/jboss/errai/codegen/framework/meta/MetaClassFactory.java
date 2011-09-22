@@ -20,16 +20,19 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.enterprise.util.TypeLiteral;
 
-import org.jboss.errai.codegen.framework.Context;
-import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.*;
 import org.jboss.errai.codegen.framework.builder.callstack.LoadClassReference;
+import org.jboss.errai.codegen.framework.meta.impl.build.*;
 import org.jboss.errai.codegen.framework.meta.impl.gwt.GWTClass;
 import org.jboss.errai.codegen.framework.meta.impl.java.JavaReflectionClass;
+import org.jboss.errai.codegen.framework.util.EmptyStatement;
+import org.jboss.errai.codegen.framework.util.GenUtil;
 import org.mvel2.ConversionHandler;
 import org.mvel2.DataConversion;
 
@@ -236,6 +239,53 @@ public final class MetaClassFactory {
     return CLASS_CACHE.get(cls.getName());
   }
 
+  public static MetaClass parameterizedAs(MetaClass clazz, MetaParameterizedType parameterizedType) {
+    BuildMetaClass buildMetaClass = new BuildMetaClass(Context.create());
+
+    buildMetaClass.setClassName(clazz.getFullyQualifiedName());
+    buildMetaClass.setAbstract(clazz.isAbstract());
+    buildMetaClass.setFinal(clazz.isFinal());
+    buildMetaClass.setInterface(clazz.isInterface());
+    buildMetaClass.setInterfaces(Arrays.asList(clazz.getInterfaces()));
+    buildMetaClass.setScope(GenUtil.scopeOf(clazz));
+    buildMetaClass.setSuperClass(clazz.getSuperClass());
+
+    for (MetaTypeVariable typeVariable : clazz.getTypeParameters()) {
+      buildMetaClass.addTypeVariable(typeVariable);
+    }
+
+    buildMetaClass.settParameterizedType(parameterizedType);
+
+    for (MetaField field : clazz.getFields()) {
+      buildMetaClass.addField(new BuildMetaField(buildMetaClass, EmptyStatement.INSTANCE,
+              GenUtil.scopeOf(field), field.getType(), field.getName()));
+    }
+
+    for (MetaMethod method : clazz.getConstructors()) {
+      buildMetaClass.addConstructor(new BuildMetaConstructor(buildMetaClass, EmptyStatement.INSTANCE,
+              GenUtil.scopeOf(method),
+              DefParameters.from(method)));
+    }
+
+    for (MetaMethod method : clazz.getMethods()) {
+      buildMetaClass.addMethod(new BuildMetaMethod(buildMetaClass, EmptyStatement.INSTANCE,
+              GenUtil.scopeOf(method), GenUtil.modifiersOf(method), method.getName(), method.getReturnType(),
+              DefParameters.from(method), ThrowsDeclaration.of(method.getCheckedExceptions())));
+    }
+
+    return buildMetaClass;
+  }
+  
+  public static MetaParameterizedType typeParametersOf(Class<?>... classes) {
+    return typeParametersOf(fromClassArray(classes));
+  }
+
+  public static MetaParameterizedType typeParametersOf(MetaType... classes) {
+    BuildMetaParameterizedType buildMetaParms = new BuildMetaParameterizedType(classes, null, null);
+    
+    return buildMetaParms;
+  }
+
   private static void addLookups(TypeLiteral literal, MetaClass metaClass) {
     CLASS_CACHE.put(literal.toString(), metaClass);
   }
@@ -267,6 +317,14 @@ public final class MetaClassFactory {
   }
 
   public static MetaClass[] fromClassArray(Class<?>[] classes) {
+    MetaClass[] newClasses = new MetaClass[classes.length];
+    for (int i = 0; i < classes.length; i++) {
+      newClasses[i] = createOrGet(classes[i]);
+    }
+    return newClasses;
+  }
+
+  public static MetaClass[] fromClassArray(JClassType[] classes) {
     MetaClass[] newClasses = new MetaClass[classes.length];
     for (int i = 0; i < classes.length; i++) {
       newClasses[i] = createOrGet(classes[i]);
