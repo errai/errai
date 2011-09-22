@@ -1,0 +1,17 @@
+body {
+    background-color: #ffffff;
+    color: black;
+    font-family: Arial, sans-serif;
+    font-size: small;
+    margin: 8px;
+}
+
+#prototypeStockBox {
+	display: none;
+}
+
+div.chart {
+	width: 100%;
+	height: 15ex;
+	background-color: white;
+}
