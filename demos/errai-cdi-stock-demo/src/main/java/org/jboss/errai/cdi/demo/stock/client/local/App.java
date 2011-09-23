@@ -114,9 +114,14 @@ public class App {
       $(stockBoxDiv).data("tickData", ticks);
     }
     ticks.push([time, value]);
-    // TODO prune list if too long
+    
+    // prune entries too old to be visible
+    var startTime = time - 180 * 1000;
+    while (ticks[0][0] < startTime) {
+      ticks.shift();
+    }
 
     var chartDiv = $(stockBoxDiv).find(".chart");
-    $.plot(chartDiv, [ ticks ], { xaxis: { mode: "time" } });
+    $.plot(chartDiv, [ ticks ], { xaxis: { mode: "time", min: startTime, max: time } });
   }-*/;
 }
