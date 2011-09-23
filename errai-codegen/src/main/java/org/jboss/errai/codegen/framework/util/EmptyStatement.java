@@ -13,11 +13,11 @@ public class EmptyStatement implements Statement {
   
   @Override
   public String generate(Context context) {
-    return "";
+    throw new RuntimeException("empty statement cannot be generated");
   }
 
   @Override
   public MetaClass getType() {
-    return MetaClassFactory.get(void.class);
+    return MetaClassFactory.get(Object.class);
   }
 }

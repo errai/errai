@@ -123,6 +123,7 @@ public class ObjectBuilder extends AbstractStatementBuilder {
     return this;
   }
 
+  //todo: return a builder interface -- not a concrete implementation
   public AnonymousClassStructureBuilderImpl extend() {
     return new AnonymousClassStructureBuilderImpl(type, new BuildCallback<ObjectBuilder>() {
       @Override

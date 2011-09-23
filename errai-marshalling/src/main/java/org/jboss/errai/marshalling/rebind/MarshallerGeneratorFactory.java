@@ -61,11 +61,6 @@ public class MarshallerGeneratorFactory {
   }
 
   private Statement marshall(Class<?> cls) {
-    return new EmptyStatement();
-  }
-
-
-  public static void main(String[] args) {
-    new MarshallerGeneratorFactory().generate();
+    return MappingStrategyFactory.createStrategy(cls).getMapper().getMarshaller();
   }
 }
