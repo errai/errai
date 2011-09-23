@@ -6,6 +6,6 @@ import org.jboss.errai.bus.server.annotations.ExposeEntity;
  * A highly complex subscription event.
  */
 @ExposeEntity
-public class Subscription {
+public class SubscriptionRequest {
 
 }

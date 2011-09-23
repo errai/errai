@@ -15,8 +15,10 @@
  */
 package org.jboss.errai.cdi.demo.stock.server;
 
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.Executors;
@@ -29,8 +31,11 @@ import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
-import org.jboss.errai.cdi.demo.stock.client.shared.Subscription;
+import org.jboss.errai.cdi.demo.stock.client.shared.SubscriptionReply;
+import org.jboss.errai.cdi.demo.stock.client.shared.SubscriptionRequest;
 import org.jboss.errai.cdi.demo.stock.client.shared.TickBuilder;
+import org.jboss.errai.cdi.demo.stock.client.shared.TickCache;
+import org.jboss.errai.enterprise.client.cdi.api.Conversational;
 
 /**
  * Broadcasts fake price movements to clients.
@@ -41,11 +46,13 @@ public class TickerService {
   @Inject
   private Event<TickBuilder> tickEvent;
   
+  @Inject Event<SubscriptionReply> subscriptionEvent;
+  
   /** Scheduler that causes stock price updates. */
   private final ScheduledExecutorService tickGenerator = Executors.newScheduledThreadPool(1);
 
   /** The latest tick for each stock we care about. In each map entry, key == value.getSymbol(). */
-  private final Map<String, TickBuilder> latestTicks = new HashMap<String, TickBuilder>();
+  private final Map<String, TickCache> tickCaches = new LinkedHashMap<String, TickCache>();
   
   /** Source of randomness for initial state as well as subsequent ticks. */
   private final Random random = new Random();
@@ -58,8 +65,21 @@ public class TickerService {
    * @param subscription
    *          Details of the subscription request. Currently ignored.
    */
-  public void handleClientSubscription(@Observes Subscription subscription) {
+  @Conversational
+  public void handleClientSubscription(@Observes SubscriptionRequest subscription) {
     System.out.println("Got a client subscription");
+    
+    List<TickCache> histories = new ArrayList<TickCache>();
+    
+    // FIXME thread safety problem here. should synchronize on the tick caches here and in the ticker.
+    for (Map.Entry<String, TickCache> tickEntry : tickCaches.entrySet()) {
+      TickCache tickCache = tickEntry.getValue();
+      histories.add(tickCache);
+    }
+    
+    SubscriptionReply reply = new SubscriptionReply();
+    reply.setTickHistories(histories);
+    subscriptionEvent.fire(reply);
   }
   
   @PostConstruct
@@ -68,7 +88,9 @@ public class TickerService {
     // bootstrap the list of symbols
     String[] symbols = new String[] { "ABC", "DEF", "GHI", "JKL", "MNO", "PQR", "STU.V", "WXY.Z" };
     for (String symbol : symbols) {
-      latestTicks.put(symbol, generateBootstrapTick(symbol));
+      TickCache tickCache = new TickCache();
+      tickCache.add(generateBootstrapTick(symbol));
+      tickCaches.put(symbol, tickCache);
     }
     
     tickGenerator.scheduleAtFixedRate(new Runnable() {
@@ -89,12 +111,13 @@ public class TickerService {
   }
   
   private void generateTicks() {
-    for (Map.Entry<String, TickBuilder> tickEntry : latestTicks.entrySet()) {
+    for (Map.Entry<String, TickCache> tickEntry : tickCaches.entrySet()) {
       if (random.nextInt(1000) > 200) {
         continue;
       }
-      TickBuilder newTick = generateTick(tickEntry.getValue());
-      tickEntry.setValue(newTick);
+      TickCache tickCache = tickEntry.getValue();
+      TickBuilder newTick = generateTick(tickCache.getNewestEntry());
+      tickCache.add(newTick);
       tickEvent.fire(newTick);
     }
   }

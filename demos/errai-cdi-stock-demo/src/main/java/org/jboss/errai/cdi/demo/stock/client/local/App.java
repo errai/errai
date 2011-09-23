@@ -22,10 +22,14 @@ import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
-import org.jboss.errai.cdi.demo.stock.client.shared.Subscription;
+import org.jboss.errai.cdi.demo.stock.client.shared.SubscriptionReply;
+import org.jboss.errai.cdi.demo.stock.client.shared.SubscriptionRequest;
 import org.jboss.errai.cdi.demo.stock.client.shared.TickBuilder;
+import org.jboss.errai.cdi.demo.stock.client.shared.TickCache;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
+import com.google.gwt.core.client.JsArray;
+import com.google.gwt.core.client.JsArrayNumber;
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
@@ -37,15 +41,30 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 
 /**
- * Main application entry point.
+ * Main application entry point. Provides JavaScript code to the App.html page.
  */
 @EntryPoint
 public class App {
 
+  /**
+   * The amount of time each chart spans, in milliseconds. Gets populated in
+   * {@link #subscriptionCompleted(SubscriptionReply)} based on initial snapshot
+   * size from the server.
+   */
+  private long chartTimeSpan;
+
   private final Label tickerLabel = new Label();
 
+  /**
+   * Indicates whether or not the registration message has been received and
+   * processed yet: it is possible that we will receive ticks before the
+   * subscription reply, and that makes the order of things in the UI
+   * unpredictable.
+   */
+  private boolean registrationComplete = false;
+  
   @Inject
-  private Event<Subscription> subscriptionEvent;
+  private Event<SubscriptionRequest> subscriptionEvent;
   
   @PostConstruct
   public void buildUI() {
@@ -54,25 +73,50 @@ public class App {
 
     RootPanel.get().add(horizontalPanel);
     
-    subscriptionEvent.fire(new Subscription());
+    subscriptionEvent.fire(new SubscriptionRequest());
   }
 
+  /**
+   * Handles completion of the subscription request by creating all the stock
+   * info divs, pre-filling them with tick history, and rendering their charts.
+   * 
+   * @param subscriptionReply
+   *          The subscription reply message from the server (contains tick
+   *          history)
+   */
+  public void subscriptionCompleted(@Observes SubscriptionReply subscriptionReply) {
+    for (TickCache cache : subscriptionReply.getTickHistories()) {
+      chartTimeSpan = cache.getTimeSpan(); // XXX assumption is that all charts have same time span
+      DivElement stockBoxDiv = getStockBoxDiv(cache.getNewestEntry());
+      JsArray<JsArrayNumber> history = getChartData(stockBoxDiv);
+      for (TickBuilder t : cache.getEntries()) {
+        addTick(history, t);
+      }
+      long endTime = cache.getNewestEntry().getTime().getTime();
+      redrawChart(stockBoxDiv, endTime - chartTimeSpan, endTime);
+    }
+    registrationComplete = true;
+  }
+  
+  /**
+   * Handles a new tick from the server by updating the HTML UI.
+   * <p>
+   * This method doesn't do anything (it just returns immediately) until after
+   * {@link #subscriptionCompleted(SubscriptionReply)} has been called.
+   * 
+   * @param tick
+   *          The tick that just happened
+   */
   public void tickHappened(@Observes TickBuilder tick) {
+    if (!registrationComplete) return;
     try {
       tickerLabel.setText("New tick at " + new Date() + ": " + tick);
     } catch (Exception e) {
       tickerLabel.setText(e.toString());
     }
-    Document document = RootPanel.getBodyElement().getOwnerDocument();
+    DivElement stockBoxDiv = getStockBoxDiv(tick);
     
-    // find our stock box, creating if necessary
-    DivElement stockBoxDiv = (DivElement) document.getElementById("stockbox." + tick.getSymbol());
-    if (stockBoxDiv == null) {
-      DivElement prototype = (DivElement) document.getElementById("prototypeStockBox");
-      stockBoxDiv = (DivElement) prototype.cloneNode(true);
-      stockBoxDiv.setId("stockbox." + tick.getSymbol());
-      RootPanel.getBodyElement().appendChild(stockBoxDiv);
-    }
+    addTick(getChartData(stockBoxDiv), tick);
     
     // update the stock box with current tick data
     NodeList<Element> nl = stockBoxDiv.getElementsByTagName("span");
@@ -94,34 +138,121 @@ public class App {
     }
     
     // finally, update the chart
-    updateChart(
-        stockBoxDiv,
-        tick.getSymbol(),
-        tick.getTime().getTime(),
-        tick.getAsk() * Math.pow(10, -tick.getDecimalPlaces()));
+    double endTime = tick.getTime().getTime();
+    double startTime = endTime - chartTimeSpan;
+    redrawChart(stockBoxDiv, startTime, endTime);
+  }
+
+  /**
+   * Returns the HTML div element that contains all the information about the
+   * given tick's stock. If the document doesn't have a div for that stock yet,
+   * one will be created from the prototype, appended to the document, and
+   * returned.
+   * 
+   * @param tick
+   *          The tick for which you want to obtain a stock box.
+   * @return The div within the current document that contains all the
+   *         information about the given tick's stock. It will have been freshly
+   *         cloned from the prototype if necessary.
+   */
+  private DivElement getStockBoxDiv(TickBuilder tick) {
+    Document document = RootPanel.getBodyElement().getOwnerDocument();
+    
+    // find our stock box, creating if necessary
+    DivElement stockBoxDiv = (DivElement) document.getElementById("stockbox." + tick.getSymbol());
+    if (stockBoxDiv == null) {
+      DivElement prototype = (DivElement) document.getElementById("prototypeStockBox");
+      stockBoxDiv = (DivElement) prototype.cloneNode(true);
+      stockBoxDiv.setId("stockbox." + tick.getSymbol());
+      RootPanel.getBodyElement().appendChild(stockBoxDiv);
+    }
+    return stockBoxDiv;
   }
   
-  private native void updateChart(DivElement stockBoxDiv, String symbol, double time, double value) /*-{
+  /**
+   * Redraws the chart using the current data that's available. You can add to
+   * that data by calling
+   * {@link #getChartData(DivElement, String, TickBuilder[])}.
+   * 
+   * @param stockBoxDiv
+   *          The div element that contains the stock information.
+   * @param startTime
+   *          The earliest point in time to display on the chart's x-axis
+   * @param startTime
+   *          The latest point in time to display on the chart's x-axis
+   */
+  private native void redrawChart(DivElement stockBoxDiv, double startTime, double endTime) /*-{
+    var $ = $wnd.jQuery;
+    
+    var tickData = $(stockBoxDiv).data("tickData");
+    var chartDiv = $(stockBoxDiv).find(".chart");
+    $.plot(chartDiv, [ tickData ], { xaxis: { mode: "time", min: startTime, max: endTime } });
+  }-*/;
+  
+  /**
+   * Returns the JavaScript array that contains the tick data for the given div
+   * element, creating it if necessary. The data array is invisible to the user,
+   * but it is used in the rendering of the tick history chart.
+   * 
+   * @see #redrawChart(DivElement)
+   * 
+   * @param stockBoxDiv
+   *          The div that the data is attached to.
+   * @return The array of chart data that gets plotted by
+   *         {@link #redrawChart(DivElement)}. Each entry is an array in the
+   *         form {@code [ time, price ]} (both values are JavaScript doubles).
+   *         Additions to the returned array will persist, but they will only
+   *         appear in the rendered chart after a call to
+   *         {@link #redrawChart(DivElement)}.
+   */
+  private native JsArray<JsArrayNumber> getChartData(DivElement stockBoxDiv) /*-{
     var $ = $wnd.jQuery;
     
     // we store the tick history as data on the element for several reasons:
     // * no need to reparse JSON on every chart update
     // * keeping it in a Java Map keyed on symbol requires horrible JavaScript code for accessing it
     // * the data is removed exactly when we can't use it anymore (because the stock info div is gone)
-    var ticks = $(stockBoxDiv).data("tickData");
-    if (ticks == null) {
-      ticks = [];
-      $(stockBoxDiv).data("tickData", ticks);
-    }
-    ticks.push([time, value]);
-    
-    // prune entries too old to be visible
-    var startTime = time - 180 * 1000;
-    while (ticks[0][0] < startTime) {
-      ticks.shift();
-    }
 
-    var chartDiv = $(stockBoxDiv).find(".chart");
-    $.plot(chartDiv, [ ticks ], { xaxis: { mode: "time", min: startTime, max: time } });
+    var tickData = $(stockBoxDiv).data("tickData");
+    if (tickData == null) {
+      tickData = [];
+      $(stockBoxDiv).data("tickData", tickData);
+    }
+    return tickData;
+  }-*/;
+
+  /**
+   * Adds the given tick data to the given history array.
+   * 
+   * @param history
+   *          The array to insert into. Normally this is an array obtained from
+   *          {@link #getChartData(DivElement, String, TickBuilder[])}.
+   * @param tick
+   *          The tick to add to the given history array.
+   */
+  private void addTick(JsArray<JsArrayNumber> history, TickBuilder tick) {
+    addTick(history, tick.getTime().getTime(), tick.getAsk() * Math.pow(10, -tick.getDecimalPlaces()), chartTimeSpan);
+  }
+  
+  /**
+   * Adds the given tick data to the given history array. This is a subroutine
+   * of {@link #addTick(JsArray, TickBuilder)}.
+   * 
+   * @param history
+   *          The array to insert into. Normally this is an array obtained from
+   *          {@link #getChartData(DivElement, String, TickBuilder[])}.
+   * @param time
+   *          The {@link System#currentTimeMillis()} time expressed as a double
+   * @param price
+   *          The stock price in dollars at the given time
+   */
+  private native void addTick(JsArray<JsArrayNumber> history, double time, double price, double pruneThreshold) /*-{
+    history.push([time, price]);
+
+    // prune entries too old to be visible
+    var startTime = time - pruneThreshold;
+    while (history[0][0] < startTime) {
+      history.shift();
+    }
   }-*/;
 }
