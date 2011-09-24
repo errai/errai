@@ -1,9 +1,17 @@
 package org.jboss.errai.marshalling.rebind.api.impl;
 
+import org.jboss.errai.bus.rebind.ScannerSingleton;
+import org.jboss.errai.bus.server.service.metadata.MetaDataProcessor;
+import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.util.Stmt;
+import org.jboss.errai.marshalling.client.api.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.MappedOrdered;
 import org.jboss.errai.marshalling.client.api.MapsTo;
+import org.jboss.errai.marshalling.client.api.Marshaller;
+import org.jboss.errai.marshalling.client.marshallers.IntegerMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.LongMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.StringMarshaller;
 import org.jboss.errai.marshalling.rebind.api.MappingStrategy;
 import org.jboss.errai.marshalling.rebind.api.ObjectMapper;
 import org.jboss.errai.marshalling.rebind.util.MarshallingUtil;
@@ -17,9 +25,14 @@ import java.util.*;
  */
 public class DefaultJavaMappingStrategy implements MappingStrategy {
   private Class<?> toMap;
+  private static List<Class<? extends Marshaller>> registeredMarshallers;
+  private MetaDataScanner scanner;
+
 
   public DefaultJavaMappingStrategy(Class<?> toMap) {
     this.toMap = toMap;
+    scanner = ScannerSingleton.getOrCreateInstance();
+
   }
 
   @Override
@@ -147,4 +160,6 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
       return false;
     }
   }
+
+
 }
