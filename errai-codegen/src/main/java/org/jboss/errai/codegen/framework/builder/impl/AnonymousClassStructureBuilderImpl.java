@@ -89,7 +89,9 @@ public class AnonymousClassStructureBuilderImpl implements Finishable<ObjectBuil
                 }
 
                 StringBuilder buf = new StringBuilder();
-                buf.append("public ").append(getClassReference(method.getReturnType(), context))
+                String returnType = getClassReference(method.getReturnType(), context);
+
+                buf.append("public ").append(returnType)
                     .append(" ")
                     .append(method.getName())
                     .append(parameters.generate(context)).append(" {\n");

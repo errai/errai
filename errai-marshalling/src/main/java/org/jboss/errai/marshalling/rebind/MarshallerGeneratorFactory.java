@@ -16,6 +16,8 @@ import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.marshalling.client.api.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallerFactory;
+import org.jboss.errai.marshalling.rebind.api.MappingContext;
+import org.jboss.errai.marshalling.rebind.util.MarshallingUtil;
 
 import javax.enterprise.util.TypeLiteral;
 import java.util.*;
@@ -27,14 +29,16 @@ public class MarshallerGeneratorFactory {
   private static final String MARSHALLERS_VAR = "marshallers";
   private static final String DEFAULT_ENCODING_TYPE = "json";
 
-  private static List<Class<? extends Marshaller>> registeredMarshallers;
+  private MappingContext mappingContext;
+
 
   public void generate() {
-    loadMarshallers();
-
     ClassStructureBuilder<?> classStructureBuilder = Implementations.implement(MarshallerFactory.class);
 
     Context classContext = classStructureBuilder.getClassDefinition().getContext();
+    mappingContext = new MappingContext(classContext);
+
+    loadMarshallers();
 
     MetaClass javaUtilMap = MetaClassFactory.get(
             new TypeLiteral<Map<String, Marshaller>>() {
@@ -44,10 +48,20 @@ public class MarshallerGeneratorFactory {
     Implementations.autoInitializedField(classStructureBuilder, javaUtilMap, MARSHALLERS_VAR, HashMap.class);
 
     ConstructorBlockBuilder<?> constructor = classStructureBuilder.publicConstructor();
+
+    for (Map.Entry<String, Class<? extends Marshaller>> entry : mappingContext.getAllMarshallers().entrySet()) {
+      constructor.append(
+              Stmt.create(classContext).declareVariable(entry.getValue())
+                      .asFinal()
+                      .named(MarshallingUtil.getVarName(entry.getKey()))
+                      .initializeWith(Stmt.newObject(entry.getValue())));
+    }
+
     generateMarshallers(constructor, classContext);
 
     System.out.println(classStructureBuilder.toJavaString());
   }
+
 
   private void generateMarshallers(ConstructorBlockBuilder<?> constructor, Context classContext) {
     MetaDataScanner scanner = MetaDataScanner.createInstance();
@@ -64,7 +78,7 @@ public class MarshallerGeneratorFactory {
   }
 
   private Statement marshall(Class<?> cls) {
-    return MappingStrategyFactory.createStrategy(cls).getMapper().getMarshaller();
+    return MappingStrategyFactory.createStrategy(mappingContext, cls).getMapper().getMarshaller();
   }
 
   private void loadMarshallers() {
@@ -73,8 +87,15 @@ public class MarshallerGeneratorFactory {
 
     for (Class<?> cls : marshallers) {
       if (Marshaller.class.isAssignableFrom(cls)) {
-        registeredMarshallers.add(cls.asSubclass(Marshaller.class));
+        try {
+          Class<?> type = (Class<?>) Marshaller.class.getMethod("getTypeHandled").invoke(cls.newInstance());
+          mappingContext.registerMarshaller(type.getName(), cls.asSubclass(Marshaller.class));
+        }
+        catch (Throwable t) {
+          throw new RuntimeException("could not instantiate marshaller class: " + cls.getName(), t);
+        }
       }
+
       else {
         throw new RuntimeException("class annotated with " + ClientMarshaller.class.getCanonicalName()
                 + " does not implement " + Marshaller.class.getName());

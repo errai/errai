@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -53,7 +54,10 @@ public class CallParameters extends AbstractStatement {
   public MetaClass[] getParameterTypes() {
     MetaClass[] parameterTypes = new MetaClass[parameters.size()];
     for (int i = 0; i < parameters.size(); i++) {
-      parameterTypes[i] = parameters.get(i).getType();
+      if ((parameterTypes[i] = parameters.get(i).getType()) == null) {
+        parameterTypes[i] = MetaClassFactory.get(Object.class);
+      }
+      
     }
     return parameterTypes;
   }

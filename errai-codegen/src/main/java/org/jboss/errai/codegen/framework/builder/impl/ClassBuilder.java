@@ -385,7 +385,7 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
         }
 
         BuildMetaMethod buildMetaMethod = new BuildMetaMethod(classDefinition, statement, scope,
-                modifiers, name, returnType, dParameters, throwsDeclaration);
+                modifiers, name, returnType, null, dParameters, throwsDeclaration);
  
         classDefinition.addMethod(buildMetaMethod);
         return (T) ClassBuilder.this;

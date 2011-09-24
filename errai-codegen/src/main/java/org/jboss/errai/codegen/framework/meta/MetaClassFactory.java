@@ -238,6 +238,11 @@ public final class MetaClassFactory {
 
     return CLASS_CACHE.get(cls.getName());
   }
+  
+  
+  public static MetaClass parameterizedAs(Class clazz, MetaParameterizedType parameterizedType) {
+    return parameterizedAs(MetaClassFactory.get(clazz), parameterizedType);
+  }
 
   public static MetaClass parameterizedAs(MetaClass clazz, MetaParameterizedType parameterizedType) {
     BuildMetaClass buildMetaClass = new BuildMetaClass(Context.create());
@@ -268,12 +273,54 @@ public final class MetaClassFactory {
     }
 
     for (MetaMethod method : clazz.getMethods()) {
+      MetaClass returnType = method.getReturnType();
+      if (method.getGenericReturnType() instanceof MetaTypeVariable) {
+        MetaTypeVariable typeVariable = (MetaTypeVariable) method.getGenericReturnType();
+        int idx = -1;
+        MetaTypeVariable[] typeVariables = clazz.getTypeParameters();
+        for (int i = 0; i < typeVariables.length; i++) {
+          if (typeVariables[i].getName().equals(typeVariable.getName())) {
+            idx = i;
+            break;
+          }
+        }
+        
+        if (idx != -1) {
+           MetaType type = buildMetaClass.getParameterizedType().getTypeParameters()[idx];
+          if (type instanceof MetaClass) {
+            returnType = (MetaClass) type;
+          }
+        }
+      }
+      
       buildMetaClass.addMethod(new BuildMetaMethod(buildMetaClass, EmptyStatement.INSTANCE,
-              GenUtil.scopeOf(method), GenUtil.modifiersOf(method), method.getName(), method.getReturnType(),
+              GenUtil.scopeOf(method), GenUtil.modifiersOf(method), method.getName(), returnType,
+              method.getGenericReturnType(),
               DefParameters.from(method), ThrowsDeclaration.of(method.getCheckedExceptions())));
     }
 
     return buildMetaClass;
+  }
+  
+  public static MetaParameterizedType typeParametersOf(Object... classes) {
+    MetaType[] types = new MetaType[classes.length];
+    int i = 0;
+    for (Object o : classes) {
+      if (o instanceof Class) {
+        types[i++] = MetaClassFactory.get((Class) o);
+      }
+      else if (o instanceof TypeLiteral) {
+        types[i++] = MetaClassFactory.get((TypeLiteral) o);
+      }
+      else if (o instanceof MetaType) {
+        types[i++] = (MetaType) o;
+      }
+      else {
+        throw new RuntimeException("not a recognized type reference: " + o.getClass().getName());
+      }
+    }
+
+    return typeParametersOf(types);
   }
   
   public static MetaParameterizedType typeParametersOf(Class<?>... classes) {

@@ -14,27 +14,11 @@ import org.jboss.errai.marshalling.client.api.MarshallingContext;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class MarshallingUtil {
-  public static Statement marshallerForString(String fieldName) {
-    AnonymousClassStructureBuilderImpl classStructureBuilder
-            = ObjectBuilder.newInstanceOf(Marshaller.class).extend();
-
-    classStructureBuilder.publicOverridesMethod("getTypeHandled")
-            .append(Stmt.load(String.class).returnValue())
-            .finish();
-
-    classStructureBuilder.publicOverridesMethod("getEncodingType")
-            .append(Stmt.load("json").returnValue())
-            .finish();
-
-    classStructureBuilder.publicOverridesMethod("demarshall", Parameter.of(Object.class, "a0"), Parameter.of(MarshallingContext.class, "a1"))
-            .append(Stmt.nestedCall(Cast.to(JSONString.class, Stmt.loadVariable("a0"))).invoke("stringValue").returnValue())
-            .finish();
-
-    classStructureBuilder.publicOverridesMethod("marshall", Parameter.of(Object.class, "a0"), Parameter.of(MarshallingContext.class, "a1"))
-            .append(Stmt.loadVariable("a0").returnValue())
-            .finish();
-
-    return classStructureBuilder.finish();
+  public static String getVarName(Class<?> clazz) {
+    return getVarName(clazz.getName());
   }
 
+  public static String getVarName(String clazz) {
+    return clazz.replaceAll("\\.", "_");
+  }
 }
