@@ -82,8 +82,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   protected static MetaMethod _getMethod(MetaMethod[] methods, String name, MetaClass... parmTypes) {
-    Outer:
-    for (MetaMethod method : methods) {
+    Outer: for (MetaMethod method : methods) {
       if (method.getName().equals(name) && method.getParameters().length == parmTypes.length) {
         for (int i = 0; i < parmTypes.length; i++) {
           if (!method.getParameters()[i].getType().isAssignableFrom(parmTypes[i])) {
@@ -97,8 +96,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   protected static MetaConstructor _getConstructor(MetaConstructor[] constructors, MetaClass... parmTypes) {
-    Outer:
-    for (MetaConstructor constructor : constructors) {
+    Outer: for (MetaConstructor constructor : constructors) {
       if (constructor.getParameters().length == parmTypes.length) {
         for (int i = 0; i < parmTypes.length; i++) {
           if (!constructor.getParameters()[i].getType().isAssignableFrom(parmTypes[i])) {
@@ -194,7 +192,9 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     List<Method> staticMethods = new ArrayList<Method>();
 
     for (MetaMethod m : methods) {
-      staticMethods.add(getJavaMethodFromMetaMethod(m));
+      Method javaMethod = getJavaMethodFromMetaMethod(m);
+      if (javaMethod != null)
+        staticMethods.add(javaMethod);
     }
 
     return staticMethods.toArray(new Method[staticMethods.size()]);
@@ -399,18 +399,18 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   @Override
   public MetaClass asBoxed() {
     Class<?> cls = asClass();
-    if (cls == null) 
+    if (cls == null)
       return this;
-    
+
     return MetaClassFactory.get(ParseTools.boxPrimitive(cls));
   }
 
   @Override
   public MetaClass asUnboxed() {
     Class<?> cls = asClass();
-    if (cls == null) 
+    if (cls == null)
       return this;
-    
+
     return MetaClassFactory.get(ParseTools.unboxPrimitive(cls));
   }
 
@@ -443,7 +443,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       name = type.getFullyQualifiedName();
     }
 
-    if (isPrimitive()) {
+    if (isPrimitive() || (isArray() && getComponentType().isPrimitive())) {
       if ("int".equals(name)) {
         name = "I";
       }
@@ -475,7 +475,6 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     else {
       name = "L" + name.replaceAll("\\.", "/") + ";";
     }
-
 
     return dimString + name;
   }
