@@ -27,6 +27,7 @@ import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.bus.client.api.*;
 import org.jboss.errai.bus.client.api.base.Capabilities;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.api.base.NoSubscribersToDeliverTo;
 import org.jboss.errai.bus.client.api.base.TransportIOException;
 import org.jboss.errai.bus.client.ext.ExtensionsLoader;
 import org.jboss.errai.bus.client.protocols.BusCommands;
@@ -353,9 +354,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         }
         else {
           if (!subscriptions.containsKey(message.getSubject())) {
-            logError("No subscribers for: " + message.getSubject(),
-                    "Attempt to send message to subject for which there are no subscribers", null);
-            return;
+            throw new NoSubscribersToDeliverTo(message.getSubject());
           }
 
           directStore(message);
@@ -367,13 +366,16 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
     }
     catch (RuntimeException e) {
-      if (message.getErrorCallback() != null) {
-        if (!message.getErrorCallback().error(message, e)) {
-          return;
-        }
-      }
+      callErrorHandler(message, e);
       throw e;
     }
+  }
+
+  private void callErrorHandler(final Message message, final Throwable t) {
+    if (message.getErrorCallback() != null) {
+      message.getErrorCallback().error(message, t);
+    }
+    logError(t.getMessage(), "none", t);
   }
 
   private void directStore(final Message message) {
@@ -508,19 +510,26 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       sendBuilder.sendRequest(message, new RequestCallback() {
 
         public void onResponseReceived(Request request, Response response) {
-          if (503 == response.getStatusCode()) // Service Unavailable
-          {
-            // Sending the message failed.
-            // Although the response may still be valid
-            // Handle it gracefully
-            //noinspection ThrowableInstanceNeverThrown
+          switch (response.getStatusCode()) {
+            case 1:
+            case 404:
+            case 408:
+            case 502:
+            case 503:
+            case 504: {
+              // Sending the message failed.
+              // Although the response may still be valid
+              // Handle it gracefully
+              //noinspection ThrowableInstanceNeverThrown
 
-            TransportIOException tioe = new TransportIOException(response.getText(), response.getStatusCode(),
-                    "Failure communicating with server");
-            if (txMessage.getErrorCallback() == null || txMessage.getErrorCallback().error(txMessage, tioe)) {
-              logError("Problem communicating with remote bus (Received HTTP 503 Error)", message, tioe);
+              TransportIOException tioe = new TransportIOException(response.getText(), response.getStatusCode(),
+                      "Failure communicating with server");
+
+              callErrorHandler(txMessage, tioe);
+              return;
             }
           }
+
 
           /**
            * If the server bus returned us some client-destined messages
@@ -530,8 +539,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             procIncomingPayload(response);
           }
           catch (Throwable e) {
-            e.printStackTrace();
-            logError("Problem decoding incoming message:", response.getText(), e);
+            callErrorHandler(txMessage, e);
           }
         }
 
@@ -1248,7 +1256,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private native static Object _subscribe(String subject, MessageCallback callback,
                                           Object subscriberData) /*-{
     return $wnd.PageBus.subscribe(subject, null,
-            function (subject, message) {
+            function(subject, message) {
               callback.@org.jboss.errai.bus.client.api.MessageCallback::callback(Lorg/jboss/errai/bus/client/api/Message;)(@org.jboss.errai.bus.client.json.JSONUtilCli::decodeCommandMessage(Ljava/lang/Object;)(message))
             },
             null);

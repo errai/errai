@@ -385,7 +385,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
   private void delayOrFail(Message message, final Runnable deliveryTaskRunnable) {
     if (message.isFlagSet(RoutingFlags.RetryDelivery) && message.getResource(Integer.class, RETRY_COUNT_KEY) > 3) {
-      throw new NoSubscribersToDeliverTo("for: " + message.getSubject() + " [commandType:" + message.getCommandType() + "]");
+      throw new NoSubscribersToDeliverTo(message.getSubject());
     }
     else {
       message.setFlag(RoutingFlags.RetryDelivery);

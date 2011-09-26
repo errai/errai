@@ -6,6 +6,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
@@ -34,15 +35,21 @@ public class HelloWorld extends VerticalPanel {
     button.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
         MessageBuilder.createMessage()
-            .toSubject("HelloWorldService")
-            .withValue("Hello, There!")
-            .done()
-            .repliesTo(new MessageCallback() {
-              public void callback(Message message) {
-                Window.alert("From Server: " + message.get(String.class, MessageParts.Value));
-              }
-            })
-            .sendNowWith(bus);
+                .toSubject("HelloWorldService")
+                .withValue("Hello, There!")
+                .errorsHandledBy(new ErrorCallback() {
+                  @Override
+                  public boolean error(Message message, Throwable throwable) {
+                    throwable.printStackTrace();
+                    return true;
+                  }
+                })
+                .repliesTo(new MessageCallback() {
+                  public void callback(Message message) {
+                    Window.alert("From Server: " + message.get(String.class, MessageParts.Value));
+                  }
+                })
+                .sendNowWith(bus);
       }
     });
 
