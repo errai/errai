@@ -142,7 +142,8 @@ public class CDIExtensionPoints implements Extension {
         managedTypes.addServiceEndpoint(type);
       }
 
-    } else {
+    }
+    else {
       for (AnnotatedMethod method : type.getMethods()) {
         if (method.isAnnotationPresent(Service.class)) {
           managedTypes.addServiceMethod(type, method);
@@ -153,7 +154,7 @@ public class CDIExtensionPoints implements Extension {
     // veto on client side implementations that contain CDI annotations
     // (i.e. @Observes) Otherwise Weld might try to invoke on them
     if (vetoClasses.contains(type.getJavaClass().getName())
-        || (type.getJavaClass().getPackage().getName().contains("client") && !type.getJavaClass().isInterface())) {
+            || (type.getJavaClass().getPackage().getName().contains("client") && !type.getJavaClass().isInterface())) {
       event.veto();
       //    log.info("Veto " + type);
     }
@@ -215,7 +216,8 @@ public class CDIExtensionPoints implements Extension {
   private boolean isExposedEntityType(Class type) {
     if (type.isAnnotationPresent(ExposeEntity.class)) {
       return true;
-    } else {
+    }
+    else {
       if (String.class.equals(type) || TypeHandlerFactory.getHandler(type) != null) {
         return true;
       }
@@ -246,7 +248,7 @@ public class CDIExtensionPoints implements Extension {
 
     if (isExposedEntityType(type)) {
       Annotation[] methodQualifiers = (Annotation[]) processObserverMethod.getObserverMethod().getObservedQualifiers()
-          .toArray(new Annotation[0]);
+              .toArray(new Annotation[0]);
       for (Annotation qualifier : methodQualifiers) {
         eventQualifiers.put(qualifier.annotationType().getName(), qualifier);
       }
@@ -279,11 +281,11 @@ public class CDIExtensionPoints implements Extension {
 
     // Custom Reply
     abd.addBean(new ConversationMetaData(bm, new ErraiConversation((Conversation) Util.lookupCallbackBean(bm,
-        Conversation.class), this.contextManager)));
+            Conversation.class), this.contextManager)));
 
     // event dispatcher
     EventDispatcher eventDispatcher = new EventDispatcher(bm, bus, this.contextManager, observableEvents.keySet(),
-        eventQualifiers);
+            eventQualifiers);
 
     for (Map.Entry<Class<?>, Class<?>> entry : conversationalObservers.entrySet()) {
       eventDispatcher.registerConversationEvent(entry.getKey(), entry.getValue());
@@ -337,14 +339,17 @@ public class CDIExtensionPoints implements Extension {
               try {
                 contextManager.activateRequestContext();
                 callMethod.invoke(targetBean, message);
-              } catch (Exception e) {
+              }
+              catch (Exception e) {
                 ErrorHelper.sendClientError(bus, message, "Error dispatching service", e);
-              } finally {
+              }
+              finally {
                 contextManager.deactivateRequestContext();
               }
             }
           });
-        } else {
+        }
+        else {
           /**
            * Register the endpoint as a passivating scoped bean.
            */
@@ -355,9 +360,11 @@ public class CDIExtensionPoints implements Extension {
                 contextManager.activateSessionContext(message);
 
                 callMethod.invoke(Util.lookupCallbackBean(beanManager, type), message);
-              } catch (Exception e) {
+              }
+              catch (Exception e) {
                 ErrorHelper.sendClientError(bus, message, "Error dispatching service", e);
-              } finally {
+              }
+              finally {
                 contextManager.deactivateRequestContext();
               }
             }
@@ -401,13 +408,15 @@ public class CDIExtensionPoints implements Extension {
             contextManager.activateConversationContext(message);
             try {
               callback.callback(message);
-            } finally {
+            }
+            finally {
               contextManager.deactivateRequestContext();
               contextManager.deactivateConversationContext(message);
             }
           }
         });
-      } else {
+      }
+      else {
         /**
          * Map passitivating scope.
          */
@@ -418,7 +427,8 @@ public class CDIExtensionPoints implements Extension {
             //                        contextManager.activateConversationContext(message);
             try {
               ((MessageCallback) Util.lookupCallbackBean(beanManager, type.getJavaClass())).callback(message);
-            } finally {
+            }
+            finally {
               contextManager.deactivateRequestContext();
               contextManager.deactivateConversationContext(message);
             }
@@ -435,40 +445,43 @@ public class CDIExtensionPoints implements Extension {
       log.info("Register RPC Endpoint: " + type + "(" + rpcIntf + ")");
 
       // TODO: Copied from errai internals, refactor at some point
-      createRPCScaffolding(rpcIntf, beanClass, bus, new ResourceProvider() {
-        public Object get() {
-          return Util.lookupRPCBean(beanManager, rpcIntf, beanClass);
-        }
-      });
+      createRPCScaffolding(rpcIntf, beanClass, bus, beanManager);
     }
   }
 
   private void createRPCScaffolding(final Class remoteIface, final Class<?> type, final MessageBus bus,
-      final ResourceProvider resourceProvider) {
+                                    final BeanManager beanManager) {
 
-    final Injector injector = Guice.createInjector(new AbstractModule() {
-      @Override
-      protected void configure() {
-        bind(MessageBus.class).toInstance(bus);
-        //bind(RequestDispatcher.class).toInstance(context.getService().getDispatcher());
 
-        bind(type).toProvider(new Provider() {
-          public Object get() {
-            return resourceProvider.get();
-          }
-        });
-      }
-    });
+//    final Injector injector = Guice.createInjector(new AbstractModule() {
+//      @Override
+//      protected void configure() {
+//        bind(MessageBus.class).toInstance(bus);
+//        //bind(RequestDispatcher.class).toInstance(context.getService().getDispatcher());
+//
+//        bind(type).toProvider(new Provider() {
+//          public Object get() {
+//            return resourceProvider.get();
+//          }
+//        });
+//      }
+//    });
 
-    Object svc = injector.getInstance(type);
+
+ //   Object svc = Util.lookupRPCBean(beanManager, remoteIface, type);
 
     Map<String, MessageCallback> epts = new HashMap<String, MessageCallback>();
 
     // beware of classloading issues. better reflect on the actual instance
-    for (Class<?> intf : svc.getClass().getInterfaces()) {
+    for (Class<?> intf : type.getInterfaces()) {
       for (final Method method : intf.getDeclaredMethods()) {
         if (RebindUtils.isMethodInInterface(remoteIface, method)) {
-          epts.put(RebindUtils.createCallSignature(method), new ConversationalEndpointCallback(svc, method, bus));
+          epts.put(RebindUtils.createCallSignature(method), new ConversationalEndpointCallback(new Provider<Object>() {
+            @Override
+            public Object get() {
+              return Util.lookupRPCBean(beanManager, remoteIface, type);
+            }
+          }, method, bus));
         }
       }
     }
@@ -479,7 +492,8 @@ public class CDIExtensionPoints implements Extension {
         try {
           CDIExtensionPoints.this.contextManager.activateRequestContext();
           delegate.callback(message);
-        } finally {
+        }
+        finally {
           CDIExtensionPoints.this.contextManager.deactivateRequestContext();
         }
       }
