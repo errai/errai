@@ -452,24 +452,6 @@ public class CDIExtensionPoints implements Extension {
   private void createRPCScaffolding(final Class remoteIface, final Class<?> type, final MessageBus bus,
                                     final BeanManager beanManager) {
 
-
-//    final Injector injector = Guice.createInjector(new AbstractModule() {
-//      @Override
-//      protected void configure() {
-//        bind(MessageBus.class).toInstance(bus);
-//        //bind(RequestDispatcher.class).toInstance(context.getService().getDispatcher());
-//
-//        bind(type).toProvider(new Provider() {
-//          public Object get() {
-//            return resourceProvider.get();
-//          }
-//        });
-//      }
-//    });
-
-
- //   Object svc = Util.lookupRPCBean(beanManager, remoteIface, type);
-
     Map<String, MessageCallback> epts = new HashMap<String, MessageCallback>();
 
     // beware of classloading issues. better reflect on the actual instance
