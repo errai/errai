@@ -45,6 +45,7 @@ import org.jboss.errai.bus.server.service.bootstrap.GuiceProviderProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Provider;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -158,12 +159,19 @@ public class ServiceProcessor implements MetaDataProcessor {
 
       Map<String, MessageCallback> epts = new HashMap<String, MessageCallback>();
 
+      final Object targetService = svc;
+      
       // we scan for endpoints
       for (final Method method : loadClass.getDeclaredMethods()) {
         if (method.isAnnotationPresent(Endpoint.class)) {
           epts.put(method.getName(), method.getReturnType() == Void.class ?
               new EndpointCallback(svc, method) :
-              new ConversationalEndpointCallback(svc, method, context.getBus()));
+              new ConversationalEndpointCallback(new Provider<Object>() {
+                @Override
+                public Object get() {
+                  return targetService;
+                }
+              }, method, context.getBus()));
         }
       }
 
@@ -225,7 +233,12 @@ public class ServiceProcessor implements MetaDataProcessor {
     for (Class<?> intf : svc.getClass().getInterfaces()) {
       for (final Method method : intf.getDeclaredMethods()) {
         if (RebindUtils.isMethodInInterface(remoteIface, method)) {
-          epts.put(RebindUtils.createCallSignature(method), new ConversationalEndpointCallback(svc, method, context.getBus()));
+          epts.put(RebindUtils.createCallSignature(method), new ConversationalEndpointCallback(new Provider<Object>() {
+            @Override
+            public Object get() {
+              return svc;
+            }
+          }, method, context.getBus()));
         }
       }
     }

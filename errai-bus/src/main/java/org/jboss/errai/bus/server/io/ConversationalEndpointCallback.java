@@ -21,6 +21,7 @@ import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
 import org.jboss.errai.bus.client.framework.MessageBus;
 
+import javax.inject.Provider;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -34,7 +35,7 @@ import static org.mvel2.DataConversion.convert;
  * <tt>ConversationalEndpointCallback</tt> creates a conversation that invokes an endpoint function
  */
 public class ConversationalEndpointCallback implements MessageCallback {
-  private Object genericSvc;
+  private Provider<?> serviceProvider;
   private Class[] targetTypes;
   private Method method;
   private MessageBus bus;
@@ -46,8 +47,8 @@ public class ConversationalEndpointCallback implements MessageCallback {
    * @param method     - the endpoint function
    * @param bus        - the bus to send the messages on
    */
-  public ConversationalEndpointCallback(Object genericSvc, Method method, MessageBus bus) {
-    this.genericSvc = genericSvc;
+  public ConversationalEndpointCallback(Provider<?> genericSvc, Method method, MessageBus bus) {
+    this.serviceProvider = genericSvc;
     this.targetTypes = (this.method = method).getParameterTypes();
     this.bus = bus;
   }
@@ -100,7 +101,7 @@ public class ConversationalEndpointCallback implements MessageCallback {
     try {
       createConversation(message)
               .subjectProvided()
-              .with("MethodReply", method.invoke(genericSvc, parms))
+              .with("MethodReply", method.invoke(serviceProvider.get(), parms))
               .noErrorHandling().sendNowWith(bus);
 
     }
