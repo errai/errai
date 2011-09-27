@@ -99,14 +99,10 @@ public class ServiceProcessor implements MetaDataProcessor {
 
       Class remoteImpl = getRemoteImplementation(loadClass);
       if (remoteImpl != null) {
-        createRPCScaffolding(remoteImpl, loadClass, context);
+        svc = createRPCScaffolding(remoteImpl, loadClass, context);
       }
       else if (MessageCallback.class.isAssignableFrom(loadClass)) {
         final Class<? extends MessageCallback> clazz = loadClass.asSubclass(MessageCallback.class);
-
-        //loadedComponents.add(loadClass.getName());
-
-
         log.info("discovered service: " + clazz.getName());
         try {
           svc = Guice.createInjector(new AbstractModule() {
@@ -127,7 +123,6 @@ public class ServiceProcessor implements MetaDataProcessor {
         catch (Throwable t) {
           t.printStackTrace();
         }
-
 
         if (commandPoints.isEmpty()) {
           // Subscribe the service to the bus.
@@ -213,7 +208,7 @@ public class ServiceProcessor implements MetaDataProcessor {
     return null;
   }
 
-  private static void createRPCScaffolding(final Class remoteIface, final Class<?> type, final BootstrapContext context) {
+  private static Object createRPCScaffolding(final Class remoteIface, final Class<?> type, final BootstrapContext context) {
 
     final ErraiServiceConfiguratorImpl config = (ErraiServiceConfiguratorImpl) context.getConfig();
     final Injector injector = Guice.createInjector(new AbstractModule() {
@@ -259,5 +254,7 @@ public class ServiceProcessor implements MetaDataProcessor {
         throw new RuntimeException("This API is not supported in the server-side environment.");
       }
     };
+    
+    return svc;
   }
 }
