@@ -15,12 +15,13 @@ public class MockIOCGenerator {
   private String packageFilter;
 
   public Class<? extends Bootstrapper> generate() {
+    String packageName = Bootstrapper.class.getPackage().getName();
+    String className = "MockBootstrapperImpl";
+
     IOCBootstrapGenerator bootstrapGenerator = new IOCBootstrapGenerator();
     bootstrapGenerator.setUseReflectionStubs(true);
     bootstrapGenerator.setPackageFilter(packageFilter);
 
-    String packageName = Bootstrapper.class.getPackage().getName();
-    String className = "MockBootstrapperImpl";
 
     final String classStr = bootstrapGenerator.generate(packageName, className);
 

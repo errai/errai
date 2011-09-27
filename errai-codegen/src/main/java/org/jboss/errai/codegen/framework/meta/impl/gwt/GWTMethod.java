@@ -183,4 +183,9 @@ public class GWTMethod extends MetaMethod {
   public MetaTypeVariable[] getTypeParameters() {
     return GWTUtil.fromTypeVariable(method.getTypeParameters());
   }
+
+  @Override
+  public boolean equals(Object o) {
+    return o instanceof MetaMethod && GenUtil.equals(this, (MetaMethod) o);
+  }
 }

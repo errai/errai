@@ -252,4 +252,28 @@ public class GenUtil {
     return defModifiers;
   }
 
+  public static boolean equals(MetaConstructor a, MetaConstructor b) {
+    if (!a.getName().equals(b.getName())) return false;
+    if (a.getParameters().length != b.getParameters().length) return false;
+
+    for (int i = 0; i < a.getParameters().length; i++) {
+      if (!equals(a.getParameters()[i], b.getParameters()[i])) return false;
+    }
+    return true;
+  }
+
+
+  public static boolean equals(MetaMethod a, MetaMethod b) {
+    if (!a.getName().equals(b.getName())) return false;
+    if (a.getParameters().length != b.getParameters().length) return false;
+
+    for (int i = 0; i < a.getParameters().length; i++) {
+      if (!equals(a.getParameters()[i], b.getParameters()[i])) return false;
+    }
+    return true;
+  }
+
+  public static boolean equals(MetaParameter a, MetaParameter b) {
+    return a.getType().isAssignableFrom(b.getType()) || b.getType().isAssignableFrom(a.getType());
+  }
 }

@@ -31,7 +31,6 @@ import org.jboss.errai.codegen.framework.builder.callstack.LoadClassReference;
 import org.jboss.errai.codegen.framework.builder.impl.Scope;
 import org.jboss.errai.codegen.framework.meta.*;
 import org.jboss.errai.codegen.framework.meta.impl.AbstractMetaClass;
-import org.jboss.errai.codegen.framework.meta.impl.AbstractMetaParameterizedType;
 import org.jboss.errai.codegen.framework.util.GenUtil;
 import org.jboss.errai.codegen.framework.util.PrettyPrinter;
 
@@ -57,6 +56,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   private List<BuildMetaField> fields = new ArrayList<BuildMetaField>();
   private List<BuildMetaConstructor> constructors = new ArrayList<BuildMetaConstructor>();
   private List<MetaTypeVariable> typeVariables = new ArrayList<MetaTypeVariable>();
+  private MetaClass reifiedFormOf;
 
   public BuildMetaClass(Context context) {
     super(null);
@@ -323,6 +323,73 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   public void settParameterizedType(MetaParameterizedType parameterizedType) {
     this.parameterizedType = parameterizedType;
   }
+
+  public boolean isReifiedForm() {
+    return reifiedFormOf != null;
+  }
+
+  public MetaClass getReifiedFormOf() {
+    return reifiedFormOf;
+  }
+
+  public void setReifiedFormOf(MetaClass reifiedFormOf) {
+    this.reifiedFormOf = reifiedFormOf;
+  }
+
+  @Override
+  public MetaMethod getBestMatchingMethod(String name, Class... parameters) {
+    return isReifiedForm() ? findReifiedVersion(reifiedFormOf.getBestMatchingMethod(name, parameters))
+            : super.getBestMatchingMethod(name, parameters);
+  }
+
+  @Override
+  public MetaMethod getBestMatchingMethod(String name, MetaClass... parameters) {
+    return isReifiedForm() ? findReifiedVersion(reifiedFormOf.getBestMatchingMethod(name, parameters))
+            : super.getBestMatchingMethod(name, parameters);
+  }
+
+  @Override
+  public MetaMethod getBestMatchingStaticMethod(String name, Class... parameters) {
+    return isReifiedForm() ? findReifiedVersion(reifiedFormOf.getBestMatchingStaticMethod(name, parameters))
+            : super.getBestMatchingStaticMethod(name, parameters);
+  }
+
+  @Override
+  public MetaMethod getBestMatchingStaticMethod(String name, MetaClass... parameters) {
+    return isReifiedForm() ? findReifiedVersion(reifiedFormOf.getBestMatchingStaticMethod(name, parameters))
+            : super.getBestMatchingStaticMethod(name, parameters);
+  }
+
+  @Override
+  public MetaConstructor getBestMatchingConstructor(Class... parameters) {
+    return isReifiedForm() ? findReifiedVersion(reifiedFormOf.getBestMatchingConstructor(parameters))
+            : super.getBestMatchingConstructor(parameters);
+  }
+
+  @Override
+  public MetaConstructor getBestMatchingConstructor(MetaClass... parameters) {
+    return isReifiedForm() ? findReifiedVersion(reifiedFormOf.getBestMatchingConstructor(parameters))
+            : super.getBestMatchingConstructor(parameters);
+  }
+
+  private MetaMethod findReifiedVersion(MetaMethod formOf) {
+    for (BuildMetaMethod method : methods) {
+      if (method.getReifiedFormOf().equals(formOf)) {
+        return method;
+      }
+    }
+    return null;
+  }
+
+  private MetaConstructor findReifiedVersion(MetaConstructor formOf) {
+    for (BuildMetaConstructor method : constructors) {
+      if (method.getReifiedFormOf().equals(formOf)) {
+        return method;
+      }
+    }
+    return null;
+  }
+
 
   @Override
   public String toJavaString() {

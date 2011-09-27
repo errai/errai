@@ -20,9 +20,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import javax.enterprise.util.TypeLiteral;
 
@@ -238,8 +236,8 @@ public final class MetaClassFactory {
 
     return CLASS_CACHE.get(cls.getName());
   }
-  
-  
+
+
   public static MetaClass parameterizedAs(Class clazz, MetaParameterizedType parameterizedType) {
     return parameterizedAs(MetaClassFactory.get(clazz), parameterizedType);
   }
@@ -247,6 +245,7 @@ public final class MetaClassFactory {
   public static MetaClass parameterizedAs(MetaClass clazz, MetaParameterizedType parameterizedType) {
     BuildMetaClass buildMetaClass = new BuildMetaClass(Context.create());
 
+    buildMetaClass.setReifiedFormOf(clazz);
     buildMetaClass.setClassName(clazz.getFullyQualifiedName());
     buildMetaClass.setAbstract(clazz.isAbstract());
     buildMetaClass.setFinal(clazz.isFinal());
@@ -266,42 +265,79 @@ public final class MetaClassFactory {
               GenUtil.scopeOf(field), field.getType(), field.getName()));
     }
 
-    for (MetaMethod method : clazz.getConstructors()) {
-      buildMetaClass.addConstructor(new BuildMetaConstructor(buildMetaClass, EmptyStatement.INSTANCE,
-              GenUtil.scopeOf(method),
-              DefParameters.from(method)));
+    for (MetaConstructor c : clazz.getConstructors()) {
+      BuildMetaConstructor newConstructor = new BuildMetaConstructor(buildMetaClass, EmptyStatement.INSTANCE,
+                    GenUtil.scopeOf(c),
+                    DefParameters.from(c));
+      newConstructor.setReifiedFormOf(c);
+
+      buildMetaClass.addConstructor(newConstructor);
     }
 
     for (MetaMethod method : clazz.getMethods()) {
       MetaClass returnType = method.getReturnType();
       if (method.getGenericReturnType() instanceof MetaTypeVariable) {
         MetaTypeVariable typeVariable = (MetaTypeVariable) method.getGenericReturnType();
-        int idx = -1;
-        MetaTypeVariable[] typeVariables = clazz.getTypeParameters();
-        for (int i = 0; i < typeVariables.length; i++) {
-          if (typeVariables[i].getName().equals(typeVariable.getName())) {
-            idx = i;
-            break;
-          }
-        }
-        
-        if (idx != -1) {
-           MetaType type = buildMetaClass.getParameterizedType().getTypeParameters()[idx];
-          if (type instanceof MetaClass) {
-            returnType = (MetaClass) type;
-          }
+        MetaClass tVarVal = getTypeVariableValue(typeVariable, buildMetaClass);
+        if (tVarVal != null) {
+          returnType = tVarVal;
         }
       }
-      
-      buildMetaClass.addMethod(new BuildMetaMethod(buildMetaClass, EmptyStatement.INSTANCE,
-              GenUtil.scopeOf(method), GenUtil.modifiersOf(method), method.getName(), returnType,
-              method.getGenericReturnType(),
-              DefParameters.from(method), ThrowsDeclaration.of(method.getCheckedExceptions())));
+
+      List<Parameter> parameters = new ArrayList<Parameter>();
+      int i = 0;
+      for (MetaParameter parm : method.getParameters()) {
+        MetaClass parmType = null;
+        if (method.getGenericParameterTypes() != null) {
+          if (method.getGenericParameterTypes()[i] instanceof MetaTypeVariable) {
+            MetaTypeVariable typeVariable = (MetaTypeVariable) method.getGenericParameterTypes()[i];
+
+            MetaClass tVarVal = getTypeVariableValue(typeVariable, buildMetaClass);
+            if (tVarVal != null) {
+              parmType = tVarVal;
+            }
+          }
+        }
+
+        if (parmType == null) {
+          parmType = parm.getType();
+        }
+
+        parameters.add(Parameter.of(parmType, parm.getName()));
+        i++;
+      }
+      BuildMetaMethod newMethod = new BuildMetaMethod(buildMetaClass, EmptyStatement.INSTANCE,
+                    GenUtil.scopeOf(method), GenUtil.modifiersOf(method), method.getName(), returnType,
+                    method.getGenericReturnType(),
+                    DefParameters.fromParameters(parameters), ThrowsDeclaration.of(method.getCheckedExceptions()));
+
+      newMethod.setReifiedFormOf(method);
+
+      buildMetaClass.addMethod(newMethod);
     }
 
     return buildMetaClass;
   }
-  
+
+  private static MetaClass getTypeVariableValue(MetaTypeVariable typeVariable, MetaClass clazz) {
+    int idx = -1;
+    MetaTypeVariable[] typeVariables = clazz.getTypeParameters();
+    for (int i = 0; i < typeVariables.length; i++) {
+      if (typeVariables[i].getName().equals(typeVariable.getName())) {
+        idx = i;
+        break;
+      }
+    }
+
+    if (idx != -1) {
+      MetaType type = clazz.getParameterizedType().getTypeParameters()[idx];
+      if (type instanceof MetaClass) {
+        return (MetaClass) type;
+      }
+    }
+    return null;
+  }
+
   public static MetaParameterizedType typeParametersOf(Object... classes) {
     MetaType[] types = new MetaType[classes.length];
     int i = 0;
@@ -322,14 +358,14 @@ public final class MetaClassFactory {
 
     return typeParametersOf(types);
   }
-  
+
   public static MetaParameterizedType typeParametersOf(Class<?>... classes) {
     return typeParametersOf(fromClassArray(classes));
   }
 
   public static MetaParameterizedType typeParametersOf(MetaType... classes) {
     BuildMetaParameterizedType buildMetaParms = new BuildMetaParameterizedType(classes, null, null);
-    
+
     return buildMetaParms;
   }
 

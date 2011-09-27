@@ -87,7 +87,8 @@ public class IOCBootstrapGenerator {
   }
 
   public String generate(String packageName, String className) {
-    ClassStructureBuilder<?> classStructureBuilder = Implementations.implement(Bootstrapper.class);
+    ClassStructureBuilder<?> classStructureBuilder
+            = Implementations.implement(Bootstrapper.class, packageName, className);
 
     BuildMetaClass bootStrapClass = classStructureBuilder.getClassDefinition();
     Context buildContext = bootStrapClass.getContext();

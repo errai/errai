@@ -16,10 +16,7 @@
 
 package org.jboss.errai.codegen.framework;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaConstructor;
@@ -45,6 +42,16 @@ public class DefParameters extends AbstractStatement {
     }
     return new DefParameters(parameters);
   }
+  
+  public static DefParameters from(MetaMethod method, Parameter... mergeNames) {
+    List<Parameter> parameters = new ArrayList<Parameter>();
+
+    int i = 0;
+    for (MetaParameter parm : method.getParameters()) {
+      parameters.add(Parameter.of(parm.getType(), mergeNames[i++].getName()));
+    }
+    return new DefParameters(parameters);
+  }
 
   public static DefParameters from(MetaConstructor constructor) {
     List<Parameter> parameters = new ArrayList<Parameter>();
@@ -52,6 +59,10 @@ public class DefParameters extends AbstractStatement {
       parameters.add(Parameter.of(parm.getType(), parm.getName()));
     }
     return new DefParameters(parameters);
+  }
+
+  public static DefParameters fromParameters(List<Parameter> statements) {
+    return new DefParameters(statements);
   }
 
   public static DefParameters fromParameters(Parameter... statements) {

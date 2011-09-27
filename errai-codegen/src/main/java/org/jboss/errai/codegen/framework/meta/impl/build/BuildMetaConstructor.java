@@ -27,11 +27,8 @@ import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.Variable;
 import org.jboss.errai.codegen.framework.builder.Builder;
 import org.jboss.errai.codegen.framework.builder.impl.Scope;
-import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaConstructor;
-import org.jboss.errai.codegen.framework.meta.MetaParameter;
-import org.jboss.errai.codegen.framework.meta.MetaType;
-import org.jboss.errai.codegen.framework.meta.MetaTypeVariable;
+import org.jboss.errai.codegen.framework.meta.*;
+import org.jboss.errai.codegen.framework.util.GenUtil;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -46,9 +43,9 @@ public class BuildMetaConstructor extends MetaConstructor implements Builder {
   private Scope scope;
 
   private DefParameters defParameters;
-  //  private List<Annotation> annotations = new ArrayList<Annotation>();
   private List<MetaTypeVariable> typeVariables = new ArrayList<MetaTypeVariable>();
 
+  private MetaConstructor reifiedFormOf;
 
   public BuildMetaConstructor(BuildMetaClass declaringClass) {
     this.context = Context.create(declaringClass.getContext());
@@ -215,6 +212,18 @@ public class BuildMetaConstructor extends MetaConstructor implements Builder {
     return this.declaringClass;
   }
 
+  public boolean isReifiedForm() {
+    return reifiedFormOf != null;
+  }
+
+  public MetaConstructor getReifiedFormOf() {
+    return reifiedFormOf;
+  }
+
+  public void setReifiedFormOf(MetaConstructor reifiedFormOf) {
+    this.reifiedFormOf = reifiedFormOf;
+  }
+
   @Override
   public String toJavaString() {
     for (Parameter p : defParameters.getParameters()) {
@@ -227,5 +236,10 @@ public class BuildMetaConstructor extends MetaConstructor implements Builder {
             .append(defParameters.generate(context))
             .append(" {\n").append(body.generate(context)).append("\n}\n")
             .toString();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    return o instanceof MetaMethod && GenUtil.equals(this, (MetaMethod) o);
   }
 }

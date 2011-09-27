@@ -35,6 +35,7 @@ import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.meta.MetaParameter;
 import org.jboss.errai.codegen.framework.meta.MetaType;
 import org.jboss.errai.codegen.framework.meta.MetaTypeVariable;
+import org.jboss.errai.codegen.framework.util.GenUtil;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -56,6 +57,8 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
 
   private ThrowsDeclaration throwsDeclaration;
 
+  private MetaMethod reifiedFormOf;
+  
   public BuildMetaMethod(BuildMetaClass declaringClass,
                          Statement body,
                          Scope scope,
@@ -226,6 +229,18 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
   public void setThrowsDeclaration(ThrowsDeclaration throwsDeclaration) {
     this.throwsDeclaration = throwsDeclaration;
   }
+  
+  public boolean isReifiedForm() {
+    return reifiedFormOf != null;
+  }
+
+  public MetaMethod getReifiedFormOf() {
+    return reifiedFormOf;
+  }
+
+  public void setReifiedFormOf(MetaMethod reifiedFormOf) {
+    this.reifiedFormOf = reifiedFormOf;
+  }
 
   @Override
   public String toJavaString() {
@@ -260,6 +275,11 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
     }
 
     return buf.toString();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    return o instanceof MetaMethod && GenUtil.equals(this, (MetaMethod) o);
   }
 
   public String toString() {

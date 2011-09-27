@@ -161,4 +161,9 @@ public class JavaReflectionMethod extends MetaMethod {
   public boolean isSynchronized() {
     return (method.getModifiers() & Modifier.SYNCHRONIZED) != 0;
   }
+
+  @Override
+  public boolean equals(Object o) {
+    return o instanceof MetaMethod && GenUtil.equals(this, (MetaMethod) o);
+  }
 }

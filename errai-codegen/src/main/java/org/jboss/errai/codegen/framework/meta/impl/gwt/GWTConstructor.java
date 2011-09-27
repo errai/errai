@@ -21,12 +21,7 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
-import org.jboss.errai.codegen.framework.meta.MetaConstructor;
-import org.jboss.errai.codegen.framework.meta.MetaParameter;
-import org.jboss.errai.codegen.framework.meta.MetaType;
-import org.jboss.errai.codegen.framework.meta.MetaTypeVariable;
+import org.jboss.errai.codegen.framework.meta.*;
 
 import com.google.gwt.core.ext.typeinfo.JConstructor;
 import com.google.gwt.core.ext.typeinfo.JParameter;
@@ -46,7 +41,7 @@ public class GWTConstructor extends MetaConstructor {
 
     try {
       Class<?> cls = Class.forName(c.getEnclosingType().getQualifiedSourceName(), false,
-          Thread.currentThread().getContextClassLoader());
+              Thread.currentThread().getContextClassLoader());
 
       Constructor constr = cls.getConstructor(GenUtil.jParmToClass(c.getParameters()));
 
@@ -178,5 +173,10 @@ public class GWTConstructor extends MetaConstructor {
   @Override
   public MetaTypeVariable[] getTypeParameters() {
     return GWTUtil.fromTypeVariable(constructor.getTypeParameters());
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    return o instanceof MetaMethod && GenUtil.equals(this, (MetaMethod) o);
   }
 }

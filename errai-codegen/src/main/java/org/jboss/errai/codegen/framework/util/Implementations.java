@@ -16,6 +16,22 @@ public class Implementations {
                 .body();
   }
   
+  public static ClassStructureBuilder<?> implement(Class<?> clazz, String implClassName) {
+    return ClassBuilder.define(clazz.getPackage().getName() + "." + implClassName)
+                .publicScope()
+                .implementsInterface(clazz)
+                .body();
+  }
+  
+  public static ClassStructureBuilder<?> implement(Class<?> clazz, String implPackageName, String implClassName) {
+    return ClassBuilder.define(implPackageName+ "." + implClassName)
+                .publicScope()
+                .implementsInterface(clazz)
+                .body();
+  }
+  
+  
+  
   public static void autoInitializedField(ClassStructureBuilder<?> builder, MetaClass type,
                                            String name, Class<?> implementation) {
 

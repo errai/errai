@@ -17,7 +17,7 @@ public class Cast implements Statement {
     this.statement = statement;
   }
 
-  public static Cast to(Class<?> cls, Statement stmt) {
+  public static Statement to(Class<?> cls, Statement stmt) {
     return to(MetaClassFactory.get(cls), stmt);
   }
 
@@ -29,10 +29,15 @@ public class Cast implements Statement {
   public String generate(Context context) {
     String stmt = statement.generate(context);
 
-    if (!toType.isAssignableFrom(statement.getType()) && !toType.isAssignableTo(statement.getType()))
+    if (!toType.isAssignableFrom(statement.getType()) && !toType.isAssignableTo(statement.getType())) {
       throw new InvalidTypeException(statement.getType() + " cannot be cast to " + toType);
-
-    return "(" + LoadClassReference.getClassReference(toType, context) + ") " + stmt;
+    }
+    else if (toType.isAssignableFrom(statement.getType())) {
+      return stmt;
+    }
+    else {
+      return "(" + LoadClassReference.getClassReference(toType, context) + ") " + stmt;
+    }
   }
 
   @Override

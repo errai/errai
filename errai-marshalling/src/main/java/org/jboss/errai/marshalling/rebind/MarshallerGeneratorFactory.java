@@ -6,6 +6,7 @@ import org.jboss.errai.bus.server.annotations.Portable;
 import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.Variable;
 import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.ConstructorBlockBuilder;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
@@ -70,8 +71,11 @@ public class MarshallerGeneratorFactory {
     exposed.addAll(scanner.getTypesAnnotatedWith(Portable.class));
 
     for (Class<?> clazz : exposed) {
+      constructor.append(Stmt.declareVariable(Marshaller.class).asFinal()
+              .named(MarshallingUtil.getVarName(clazz)).initializeWith(marshall(clazz)));
+
       constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
-              .invoke("put", clazz.getName(), marshall(clazz)));
+              .invoke("put", clazz.getName(), Variable.get(MarshallingUtil.getVarName(clazz))));
     }
 
     constructor.finish();

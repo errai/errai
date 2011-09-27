@@ -153,7 +153,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
         .generate(ctx);
 
     assertEquals("failed to generate variable declaration with statement initialization",
-            "String str = (new Integer(2)).toString()", s);
+            "String str = new Integer(2).toString()", s);
 
     VariableReference str = ctx.getVariable("str");
     assertEquals("Wrong variable name", "str", str.getName());
@@ -494,7 +494,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
         .invoke("getBytes")
         .toJavaString();
 
-    assertEquals("failed to generate nested call", "(n.toString()).getBytes()", s);
+    assertEquals("failed to generate nested call", "n.toString().getBytes()", s);
   }
 
   @Test
@@ -503,7 +503,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
             Stmt.newObject(Foo.class)).loadField("bar").loadField("name").assignValue("test").toJavaString();
 
     assertEquals("failed to generate nested field assignment", 
-        "(new Foo()).bar.name = \"test\"", s);
+        "new Foo().bar.name = \"test\"", s);
   }
   
   @Test
@@ -515,7 +515,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   @Test
   public void testCastUp() {
     Statement stmt = Cast.to(Object.class, Stmt.declareVariable("str", String.class).loadVariable("str"));
-    assertEquals("failed to generate cast", "(Object) str", stmt.generate(Context.create()));
+    assertEquals("created a redundant cast", "str", stmt.generate(Context.create()));
   }
   
   @Test

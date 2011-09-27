@@ -5,18 +5,22 @@ import org.jboss.errai.codegen.framework.Cast;
 import org.jboss.errai.codegen.framework.Parameter;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.builder.impl.AnonymousClassStructureBuilderImpl;
-import org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder;
-import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.util.Stmt;
-import org.jboss.errai.marshalling.client.api.*;
+import org.jboss.errai.marshalling.client.api.MappedOrdered;
+import org.jboss.errai.marshalling.client.api.MapsTo;
+import org.jboss.errai.marshalling.client.api.Marshaller;
+import org.jboss.errai.marshalling.client.api.MarshallingContext;
 import org.jboss.errai.marshalling.rebind.api.MappingContext;
 import org.jboss.errai.marshalling.rebind.api.MappingStrategy;
 import org.jboss.errai.marshalling.rebind.api.ObjectMapper;
 import org.jboss.errai.marshalling.rebind.util.MarshallingUtil;
 
-import java.lang.reflect.Constructor;
 import java.lang.annotation.Annotation;
-import java.util.*;
+import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.typeParametersOf;
@@ -28,7 +32,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
   private MappingContext context;
   private Class<?> toMap;
 
-  public DefaultJavaMappingStrategy(MappingContext context, Class<?> toMap) {  
+  public DefaultJavaMappingStrategy(MappingContext context, Class<?> toMap) {
     this.context = context;
     this.toMap = toMap;
   }
@@ -60,24 +64,28 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
       @Override
       public Statement getMarshaller() {
         AnonymousClassStructureBuilderImpl classStructureBuilder
-                = Stmt.create(context.getCodegenContext()).newObject(parameterizedAs(Marshaller.class, typeParametersOf(JSONObject.class, toMap))).extend();
+                = Stmt.create(context.getCodegenContext())
+                .newObject(parameterizedAs(Marshaller.class, typeParametersOf(JSONObject.class, toMap))).extend();
 
         classStructureBuilder.publicOverridesMethod("getTypeHandled")
-                 .append(Stmt.load(toMap).returnValue())
-                 .finish();
+                .append(Stmt.load(toMap).returnValue())
+                .finish();
 
-         classStructureBuilder.publicOverridesMethod("getEncodingType")
-                 .append(Stmt.load("json").returnValue())
-                 .finish();
+        classStructureBuilder.publicOverridesMethod("getEncodingType")
+                .append(Stmt.load("json").returnValue())
+                .finish();
 
-         classStructureBuilder.publicOverridesMethod("demarshall", Parameter.of(Object.class, "a0"), Parameter.of(MarshallingContext.class, "a1"))
-                 .append(Stmt.nestedCall(Stmt.newObject(toMap).withParameters(marshallers.toArray(new Object[marshallers.size()]))).returnValue())
-                 .finish();
+        classStructureBuilder.publicOverridesMethod("demarshall",
+                Parameter.of(Object.class, "a0"), Parameter.of(MarshallingContext.class, "a1"))
+                .append(Stmt.nestedCall(Stmt.newObject(toMap)
+                        .withParameters(marshallers.toArray(new Object[marshallers.size()]))).returnValue())
+                .finish();
 
-         classStructureBuilder.publicOverridesMethod("marshall", Parameter.of(Object.class, "a0"), Parameter.of(MarshallingContext.class, "a1"))
-                 .append(Stmt.loadVariable("a0").returnValue())
-                 .finish();
-        
+        classStructureBuilder.publicOverridesMethod("marshall",
+                Parameter.of(Object.class, "a0"), Parameter.of(MarshallingContext.class, "a1"))
+                .append(Stmt.loadVariable("a0").returnValue())
+                .finish();
+
         return classStructureBuilder.finish();
       }
     };
@@ -103,7 +111,6 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
           Annotation[] annotations = c.getParameterAnnotations()[i];
           if (annotations.length == 0) {
             satisifed = false;
-            break FieldScan;
           }
           else {
             for (Annotation a : annotations) {
@@ -188,12 +195,12 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
       return false;
     }
   }
-  
+
   public Statement fieldDemarshall(FieldMapping mapping, Class<?> fromType) {
     return fieldDemarshall(mapping.getFieldName(), fromType, mapping.getType());
   }
 
-  
+
   public Statement fieldDemarshall(String fieldName, Class<?> fromType, Class<?> toType) {
     return unwrapJSON(Stmt.nestedCall(Cast.to(fromType, Stmt.loadVariable("a0"))).invoke("get", fieldName), toType);
   }
@@ -201,7 +208,8 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
   public Statement unwrapJSON(Statement valueStatement, Class<?> toType) {
     if (String.class.isAssignableFrom(toType)) {
       return Stmt.create(context.getCodegenContext())
-              .loadVariable(MarshallingUtil.getVarName(String.class)).invoke("demarshall", valueStatement, null);
+              .loadVariable(MarshallingUtil.getVarName(String.class))
+              .invoke("demarshall", valueStatement, Stmt.loadVariable("a1"));
     }
     else {
       return null;

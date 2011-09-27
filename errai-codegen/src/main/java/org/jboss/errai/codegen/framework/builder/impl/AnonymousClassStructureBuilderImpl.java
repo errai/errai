@@ -33,6 +33,7 @@ import org.jboss.errai.codegen.framework.builder.Finishable;
 import org.jboss.errai.codegen.framework.exception.UndefinedMethodException;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
+import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaMethod;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -118,7 +119,7 @@ public class AnonymousClassStructureBuilderImpl implements Finishable<ObjectBuil
     if (method == null)
       throw new UndefinedMethodException("Method not found:" + name);
 
-    return publicOverridesMethod(method, DefParameters.fromParameters(args));
+    return publicOverridesMethod(method, DefParameters.from(method, args));
   }
 
   @Override
