@@ -181,7 +181,7 @@ public class JaxrsProxyMethodGenerator {
         .append(sendRequest)
         .finish()
         .catch_(RequestException.class, "throwable")
-        // TODO separate error callback for JAX-RS rpcs?
+        // TODO separate error callback for JAX-RS including response?
         .append(errorHandling)
         .finish());
   }

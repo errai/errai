@@ -10,7 +10,7 @@ import org.jboss.errai.codegen.framework.util.Stmt;
 /**
  * Marshaller for primitive types. 
  * 
- * Works for all types that have a copy constructor, a toString() method and a static valueOf(String) method.  
+ * Relies on the existence of a primitive wrapper class for the corresponding type.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */

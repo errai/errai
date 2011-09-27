@@ -34,7 +34,7 @@ public interface CustomerService {
 
   @PUT
   @Path("/{id}")
-  @Consumes("text/html")
+  @Consumes("text/plain")
   public String updateCustomer(@PathParam("id") long id, String customer);
 
   @DELETE
@@ -43,10 +43,12 @@ public interface CustomerService {
 
   @GET
   @Path("/{id}")
+  @Consumes("text/plain")
   public String retrieveCustomerById(@PathParam("id") long id, @QueryParam("format") String format, @QueryParam("details") boolean details);
   
   @GET
   @Path("/{id}")
+  @Consumes("text/plain")
   public String retrieveCustomerById(@PathParam("id") long id, @QueryParam("format") String format);
   
   public void noHttpMethod();
