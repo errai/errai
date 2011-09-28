@@ -32,9 +32,10 @@ public class MarshallerGeneratorFactory {
 
   private MappingContext mappingContext;
 
+  ClassStructureBuilder<?> classStructureBuilder;
 
   public void generate() {
-    ClassStructureBuilder<?> classStructureBuilder = Implementations.implement(MarshallerFactory.class);
+    classStructureBuilder = Implementations.implement(MarshallerFactory.class);
 
     Context classContext = classStructureBuilder.getClassDefinition().getContext();
     mappingContext = new MappingContext(classContext);
@@ -48,14 +49,17 @@ public class MarshallerGeneratorFactory {
 
     Implementations.autoInitializedField(classStructureBuilder, javaUtilMap, MARSHALLERS_VAR, HashMap.class);
 
+
     ConstructorBlockBuilder<?> constructor = classStructureBuilder.publicConstructor();
 
     for (Map.Entry<String, Class<? extends Marshaller>> entry : mappingContext.getAllMarshallers().entrySet()) {
-      constructor.append(
-              Stmt.create(classContext).declareVariable(entry.getValue())
-                      .asFinal()
-                      .named(MarshallingUtil.getVarName(entry.getKey()))
-                      .initializeWith(Stmt.newObject(entry.getValue())));
+      String varName = MarshallingUtil.getVarName(entry.getKey());
+      classStructureBuilder.privateField(MarshallingUtil.getVarName(entry.getKey()), entry.getValue()).finish();
+      constructor.append(Stmt.create(classContext)
+              .loadVariable(varName).assignValue(Stmt.newObject(entry.getValue())));
+
+      constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
+              .invoke("put", entry.getValue().getName(), varName));
     }
 
     generateMarshallers(constructor, classContext);
@@ -71,8 +75,17 @@ public class MarshallerGeneratorFactory {
     exposed.addAll(scanner.getTypesAnnotatedWith(Portable.class));
 
     for (Class<?> clazz : exposed) {
-      constructor.append(Stmt.declareVariable(Marshaller.class).asFinal()
-              .named(MarshallingUtil.getVarName(clazz)).initializeWith(marshall(clazz)));
+      
+      Statement marshaller = marshall(clazz);
+      MetaClass type = marshaller.getType();
+      String varName = MarshallingUtil.getVarName(clazz);
+
+      classStructureBuilder.privateField(varName, type).finish();
+      
+      constructor.append(Stmt.loadVariable(varName).assignValue(marshaller));
+
+//      constructor.append(Stmt.declareVariable(Marshaller.class).asFinal()
+//              .named(MarshallingUtil.getVarName(clazz)).initializeWith(marshall(clazz)));
 
       constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
               .invoke("put", clazz.getName(), Variable.get(MarshallingUtil.getVarName(clazz))));

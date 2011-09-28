@@ -2,14 +2,19 @@ package org.jboss.errai.marshalling.rebind.api.impl;
 
 import com.google.gwt.json.client.JSONObject;
 import org.jboss.errai.codegen.framework.Cast;
+
 import org.jboss.errai.codegen.framework.Parameter;
 import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.builder.BlockBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.AnonymousClassStructureBuilderImpl;
+import org.jboss.errai.codegen.framework.util.Implementations;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.marshalling.client.api.MappedOrdered;
 import org.jboss.errai.marshalling.client.api.MapsTo;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingContext;
+import org.jboss.errai.marshalling.client.api.exceptions.MarshallingException;
+import org.jboss.errai.marshalling.client.api.exceptions.NoAvailableMarshallerException;
 import org.jboss.errai.marshalling.rebind.api.MappingContext;
 import org.jboss.errai.marshalling.rebind.api.MappingStrategy;
 import org.jboss.errai.marshalling.rebind.api.ObjectMapper;
@@ -17,6 +22,8 @@ import org.jboss.errai.marshalling.rebind.util.MarshallingUtil;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -205,6 +212,27 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
     return unwrapJSON(Stmt.nestedCall(Cast.to(fromType, Stmt.loadVariable("a0"))).invoke("get", fieldName), toType);
   }
 
+  public void marshallToJSON(BlockBuilder<?> builder, Class<?> toType) {
+    Implementations.StringBuilderBuilder sb = Implementations.newStringBuilder();
+    sb.append("{");
+
+    for (Field field: toType.getDeclaredFields()) {
+      if (Modifier.isTransient(field.getModifiers())) {
+        continue;
+      }
+
+      if (!context.hasMarshaller(toType)) {
+         throw new NoAvailableMarshallerException(toType);
+      }
+      
+      sb.append("\"" + field.getName() + "\" : ");
+      sb.append(null);
+    }
+
+  }
+
+
+  
   public Statement unwrapJSON(Statement valueStatement, Class<?> toType) {
     if (String.class.isAssignableFrom(toType)) {
       return Stmt.create(context.getCodegenContext())
