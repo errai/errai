@@ -78,7 +78,7 @@ public class DefParameters extends AbstractStatement {
     int idx = 0;
 
     for (MetaClass metaClass : types) {
-      parms.add(Parameter.of(metaClass, prefix + idx));
+      parms.add(Parameter.of(metaClass, prefix + idx++));
     }
 
     return new DefParameters(parms);

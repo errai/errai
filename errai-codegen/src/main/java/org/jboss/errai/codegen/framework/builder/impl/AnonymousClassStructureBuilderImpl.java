@@ -145,9 +145,12 @@ public class AnonymousClassStructureBuilderImpl implements Finishable<ObjectBuil
       if (callables == null)
         return null;
 
+      Context subContext = Context.create(context);
+      subContext.addVariable(Variable.create("this", getClassDefinition()));
+      
       StringBuilder buf = new StringBuilder();
       for (DeferredGenerateCallback c : callables) {
-        buf.append(c.doGenerate(context));
+        buf.append(c.doGenerate(subContext));
       }
       return buf.toString();
     }
@@ -158,5 +161,10 @@ public class AnonymousClassStructureBuilderImpl implements Finishable<ObjectBuil
 
   public static interface DeferredGenerateCallback {
     public String doGenerate(Context context);
+  }
+  
+  
+  public MetaClass getClassDefinition() {
+    return toExtend;
   }
 }

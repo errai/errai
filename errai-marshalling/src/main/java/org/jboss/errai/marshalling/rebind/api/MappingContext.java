@@ -1,6 +1,8 @@
 package org.jboss.errai.marshalling.rebind.api;
 
 import org.jboss.errai.codegen.framework.Context;
+import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 
 import java.util.*;
@@ -11,13 +13,19 @@ import java.util.*;
 public class MappingContext {
   private Map<String, Class<? extends Marshaller>> registeredMarshallers
           = new HashMap<String, Class<? extends Marshaller>>();
+  private Set<String> generatedMarshallers = new HashSet<String>();
+  
   private List<String> renderedMarshallers = new ArrayList<String>(); 
   
-
   private Context codegenContext;
 
-  public MappingContext(Context codegenContext) {
+  private MetaClass generatedBootstrapClass;
+  private ClassStructureBuilder<?> classStructureBuilder;
+
+  public MappingContext(Context codegenContext, MetaClass generatedBootstrapClass, ClassStructureBuilder<?> classStructureBuilder) {
     this.codegenContext = codegenContext;
+    this.generatedBootstrapClass = generatedBootstrapClass;
+    this.classStructureBuilder = classStructureBuilder;
   }
 
   public Class<? extends Marshaller> getMarshaller(Class<?> clazz) {
@@ -26,6 +34,10 @@ public class MappingContext {
   
   public Class<? extends Marshaller> getMarshaller(String clazzName) {
     return registeredMarshallers.get(clazzName);
+  }
+  
+  public void registerGeneratedMarshaller(String clazzName) {
+    generatedMarshallers.add(clazzName);
   }
   
   public void registerMarshaller(String clazzName, Class<? extends Marshaller> clazz) {
@@ -38,6 +50,22 @@ public class MappingContext {
   
   public boolean hasMarshaller(String clazzName) {
     return registeredMarshallers.containsKey(clazzName);
+  }
+
+  public boolean hasGeneratedMarshaller(Class<?> clazz) {
+    return hasGeneratedMarshaller(clazz.getName());
+  }
+  
+  public boolean hasGeneratedMarshaller(String clazzName) {
+    return generatedMarshallers.contains(clazzName);
+  }
+  
+  public boolean hasProvidedOrGeneratedMarshaller(Class<?> clazz) {
+    return hasProvidedOrGeneratedMarshaller(clazz.getName());
+  }
+  
+  public boolean hasProvidedOrGeneratedMarshaller(String clazz) {
+    return hasMarshaller(clazz) || hasGeneratedMarshaller(clazz);
   }
 
   public Map<String, Class<? extends Marshaller>> getAllMarshallers() {
@@ -54,5 +82,13 @@ public class MappingContext {
   
   public void markRendered(String className) {
     renderedMarshallers.add(className);
+  }
+
+  public MetaClass getGeneratedBootstrapClass() {
+    return generatedBootstrapClass;
+  }
+
+  public ClassStructureBuilder<?> getClassStructureBuilder() {
+    return classStructureBuilder;
   }
 }

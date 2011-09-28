@@ -85,7 +85,7 @@ public class MethodBlockBuilderImpl<T> extends BlockBuilderImpl<T>
   }
 
   @Override
-  public MethodBlockBuilder<T> parameters(Class<T>... parms) {
+  public MethodBlockBuilder<T> parameters(Class<?>... parms) {
     defParameters = DefParameters.fromTypeArray(MetaClassFactory.fromClassArray(parms)) ;
     return this;
   }

@@ -206,19 +206,19 @@ public class JSONEncoder {
     return mapBuild.append('}').toString();
   }
 
-  private static String map(String elements, EncodingContext ctx) {
+  public static String map(String elements, EncodingContext ctx) {
     return "{" + elements + "}";
   }
 
-  private static String objRef(EncodingContext ctx, Object o) {
+  public static String objRef(EncodingContext ctx, Object o) {
     return encodeString("$" + ctx.markRef(o), ctx);
   }
 
-  private static String keyValue(String key, String value) {
+  public static String keyValue(String key, String value) {
     return key + ":" + value;
   }
 
-  private static String encodeCommaSeparatedStrings(EncodingContext ctx, String... strings) {
+  public static String encodeCommaSeparatedStrings(EncodingContext ctx, String... strings) {
     boolean first = true;
 
     StringBuilder build = new StringBuilder();
@@ -235,7 +235,7 @@ public class JSONEncoder {
     return build.toString();
   }
 
-  private static String encodeString(String string, EncodingContext ctx) {
+  public static String encodeString(String string, EncodingContext ctx) {
     String quotes = write(ctx, '\"');
     return quotes + string.replaceAll("\\\\", "\\\\\\\\").replaceAll("[\\\\]{0}\\\"", "\\\\\"")  + quotes;
   }

@@ -395,6 +395,8 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   public String toJavaString() {
     StringBuilder buf = new StringBuilder();
 
+    context.addVariable(Variable.create("this", this));
+
     buf.append("\n");
 
     buf.append(scope.getCanonicalName());
@@ -420,7 +422,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
       }
     }
 
-    context.addVariable(Variable.create("this", this));
+
 
     superClass = (superClass != null) ? superClass : MetaClassFactory.get(Object.class);
     context.addVariable(Variable.create("super", superClass));

@@ -1,19 +1,25 @@
 package org.jboss.errai.marshalling.rebind.api.impl;
 
 import com.google.gwt.json.client.JSONObject;
+import org.jboss.errai.bus.server.io.JSONEncoder;
 import org.jboss.errai.codegen.framework.Cast;
 
 import org.jboss.errai.codegen.framework.Parameter;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.AnonymousClassStructureBuilderImpl;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
+import org.jboss.errai.codegen.framework.meta.MetaField;
+import org.jboss.errai.codegen.framework.util.Bool;
+import org.jboss.errai.codegen.framework.util.GenUtil;
 import org.jboss.errai.codegen.framework.util.Implementations;
 import org.jboss.errai.codegen.framework.util.Stmt;
+import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.MappedOrdered;
 import org.jboss.errai.marshalling.client.api.MapsTo;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingContext;
-import org.jboss.errai.marshalling.client.api.exceptions.MarshallingException;
 import org.jboss.errai.marshalling.client.api.exceptions.NoAvailableMarshallerException;
 import org.jboss.errai.marshalling.rebind.api.MappingContext;
 import org.jboss.errai.marshalling.rebind.api.MappingStrategy;
@@ -88,10 +94,19 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                         .withParameters(marshallers.toArray(new Object[marshallers.size()]))).returnValue())
                 .finish();
 
-        classStructureBuilder.publicOverridesMethod("marshall",
-                Parameter.of(Object.class, "a0"), Parameter.of(MarshallingContext.class, "a1"))
-                .append(Stmt.loadVariable("a0").returnValue())
-                .finish();
+        BlockBuilder<?> marshallMethodBlock = classStructureBuilder.publicOverridesMethod("marshall",
+                Parameter.of(Object.class, "a0"), Parameter.of(MarshallingContext.class, "a1"));
+
+        marshallToJSON(marshallMethodBlock, toMap);
+
+        marshallMethodBlock.finish();
+
+        classStructureBuilder.publicOverridesMethod("handles", Parameter.of(Object.class, "a0"))
+                .append(Stmt.nestedCall(Bool.and(
+                        Bool.notEquals(Stmt.loadVariable("a0").invoke("isObject"), null),
+                        Stmt.loadVariable("a0").invoke("isObject").invoke("get", SerializationParts.ENCODED_TYPE)
+                                .invoke("equals", Stmt.loadVariable("this").invoke("getTypeHandled").invoke("getName"))
+                )).returnValue()).finish();
 
         return classStructureBuilder.finish();
       }
@@ -213,26 +228,64 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
   }
 
   public void marshallToJSON(BlockBuilder<?> builder, Class<?> toType) {
+    if (!context.hasProvidedOrGeneratedMarshaller(toType)) {
+      throw new NoAvailableMarshallerException(toType.getName());
+    }
+
     Implementations.StringBuilderBuilder sb = Implementations.newStringBuilder();
     sb.append("{");
+    sb.append(keyValue(SerializationParts.ENCODED_TYPE, string(toType.getName())));
+    sb.append(",");
+    sb.append(string(SerializationParts.OBJECT_ID)).append(":").append(Stmt.loadVariable("a0").invoke("hashCode"));
 
-    for (Field field: toType.getDeclaredFields()) {
+    boolean hasEncoded = false;
+
+    for (Field field : toType.getDeclaredFields()) {
       if (Modifier.isTransient(field.getModifiers())) {
         continue;
       }
 
-      if (!context.hasMarshaller(toType)) {
-         throw new NoAvailableMarshallerException(toType);
+      if (!hasEncoded) {
+        sb.append(",");
+        hasEncoded = true;
       }
-      
+
+      MetaField metaField = MetaClassFactory.get(field);
+      MetaClass targetType = GenUtil.getPrimitiveWrapper(metaField.getType());
+
+      if (!context.hasProvidedOrGeneratedMarshaller(targetType.getFullyQualifiedName())) {
+        throw new NoAvailableMarshallerException(targetType.getFullyQualifiedName());
+      }
+
       sb.append("\"" + field.getName() + "\" : ");
-      sb.append(null);
+      sb.append(Stmt.loadVariable(MarshallingUtil.getVarName(targetType.getFullyQualifiedName()))
+              .invoke("marshall", valueAccessorFor(MetaClassFactory.get(field)), Stmt.loadVariable("a1")));
     }
 
+    sb.append("}");
+    builder.append(Stmt.nestedCall(sb).invoke("toString"));
   }
 
 
-  
+  private static String keyValue(String key, String value) {
+    return "\"" + key + "\":" + value + "";
+  }
+
+  private static String string(String value) {
+    return "\"" + value + "\"";
+  }
+
+  public Statement valueAccessorFor(MetaField field) {
+    if (field != null && !field.isPublic()) {
+      GenUtil.addPrivateAccessStubs(true, context.getClassStructureBuilder(), field, field.getDeclaringClass());
+      return Stmt.invokeStatic(context.getGeneratedBootstrapClass(), GenUtil.getPrivateFieldInjectorName(field), Stmt.loadVariable("a0"));
+    }
+    else {
+      return Stmt.loadStatic(field.getDeclaringClass(), field.getName());
+    }
+  }
+
+
   public Statement unwrapJSON(Statement valueStatement, Class<?> toType) {
     if (String.class.isAssignableFrom(toType)) {
       return Stmt.create(context.getCodegenContext())

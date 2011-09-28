@@ -11,7 +11,7 @@ import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
 import org.jboss.errai.codegen.framework.*;
 import org.jboss.errai.codegen.framework.meta.*;
-import org.jboss.errai.codegen.framework.util.Implementations;
+import org.jboss.errai.codegen.framework.util.*;
 import org.jboss.errai.ioc.client.ContextualProviderContext;
 import org.jboss.errai.ioc.client.InterfaceInjectionContext;
 import org.jboss.errai.ioc.client.api.*;
@@ -20,14 +20,8 @@ import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.IOCProcessorFactory;
 import org.jboss.errai.ioc.rebind.ioc.*;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
-import org.jboss.errai.codegen.framework.builder.CatchBlockBuilder;
 import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
-import org.jboss.errai.codegen.framework.builder.ContextualStatementBuilder;
-import org.jboss.errai.codegen.framework.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
-import org.jboss.errai.codegen.framework.util.JSNIUtil;
-import org.jboss.errai.codegen.framework.util.Refs;
-import org.jboss.errai.codegen.framework.util.Stmt;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -162,13 +156,13 @@ public class IOCBootstrapGenerator {
 
     Collection<MetaField> privateFields = injectFactory.getInjectionContext().getPrivateFieldsToExpose();
     for (MetaField f : privateFields) {
-      addJSNIStubs(classBuilder, f, f.getType());
+      GenUtil.addPrivateAccessStubs(!useReflectionStubs, classBuilder, f, f.getType());
     }
 
     Collection<MetaMethod> privateMethods = injectFactory.getInjectionContext().getPrivateMethodsToExpose();
 
     for (MetaMethod m : privateMethods) {
-      addJSNIStubs(classBuilder, m);
+      GenUtil.addPrivateAccessStubs(!useReflectionStubs, classBuilder, m);
     }
 
     blockBuilder.finish();
@@ -187,116 +181,6 @@ public class IOCBootstrapGenerator {
     sourceWriter.print(generated);
   }
 
-
-  private void addJSNIStubs(ClassStructureBuilder<?> classBuilder, MetaField f, MetaClass type) {
-    if (!useReflectionStubs) {
-      classBuilder.privateMethod(void.class, InjectUtil.getPrivateFieldInjectorName(f))
-              .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance"),
-                      Parameter.of(type, "value")))
-              .modifiers(Modifier.Static, Modifier.JSNI)
-              .body()
-              .append(new StringStatement(JSNIUtil.fieldAccess(f) + " = value"))
-              .finish();
-
-      classBuilder.privateMethod(type, InjectUtil.getPrivateFieldInjectorName(f))
-              .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance")))
-              .modifiers(Modifier.Static, Modifier.JSNI)
-              .body()
-              .append(new StringStatement("return " + JSNIUtil.fieldAccess(f)))
-              .finish();
-    }
-    else {
-      classBuilder.privateMethod(void.class, InjectUtil.getPrivateFieldInjectorName(f))
-              .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance"),
-                      Parameter.of(type, "value")))
-              .modifiers(Modifier.Static)
-              .body()
-              .append(Stmt.try_()
-                      .append(Stmt.declareVariable("field", Stmt.load(f.getDeclaringClass().asClass()).invoke("getDeclaredField",
-                              f.getName())))
-                      .append(Stmt.loadVariable("field").invoke("setAccessible", true))
-                      .append(Stmt.loadVariable("field").invoke("set", Refs.get("instance"), Refs.get("value")))
-                      .finish()
-                      .catch_(Throwable.class, "e")
-                      .append(Stmt.loadVariable("e").invoke("printStackTrace"))
-                      .append(Stmt.throw_(RuntimeException.class, Refs.get("e")))
-                      .finish())
-              .finish();
-
-      classBuilder.privateMethod(type, InjectUtil.getPrivateFieldInjectorName(f))
-              .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance")))
-              .modifiers(Modifier.Static)
-              .body()
-              .append(Stmt.try_()
-                      .append(Stmt.declareVariable("field", Stmt.load(f.getDeclaringClass().asClass()).invoke("getDeclaredField",
-                              f.getName())))
-                      .append(Stmt.loadVariable("field").invoke("setAccessible", true))
-                      .append(Stmt.nestedCall(Cast.to(type, Stmt.loadVariable("field")
-                              .invoke("get", Refs.get("instance")))).returnValue())
-                      .finish()
-                      .catch_(Throwable.class, "e")
-                      .append(Stmt.loadVariable("e").invoke("printStackTrace"))
-                      .append(Stmt.throw_(RuntimeException.class, Refs.get("e")))
-                      .finish())
-              .finish();
-    }
-  }
-
-  private void addJSNIStubs(ClassStructureBuilder<?> classBuilder, MetaMethod m) {
-    List<Parameter> wrapperDefParms = new ArrayList<Parameter>();
-    wrapperDefParms.add(Parameter.of(m.getDeclaringClass(), "instance"));
-    List<Parameter> methodDefParms = DefParameters.from(m).getParameters();
-
-    wrapperDefParms.addAll(methodDefParms);
-
-    if (!useReflectionStubs) {
-      classBuilder.publicMethod(m.getReturnType(), InjectUtil.getPrivateMethodName(m))
-              .parameters(new DefParameters(wrapperDefParms))
-              .modifiers(Modifier.Static, Modifier.JSNI)
-              .body()
-              .append(new StringStatement(JSNIUtil.methodAccess(m)))
-              .finish();
-    }
-    else {
-      Object[] args = new Object[methodDefParms.size()];
-
-      int i = 0;
-      for (Parameter p : methodDefParms) {
-        args[i++] = Refs.get(p.getName());
-      }
-
-      BlockBuilder<? extends ClassStructureBuilder> body = classBuilder.publicMethod(m.getReturnType(),
-              InjectUtil.getPrivateMethodName(m))
-              .parameters(new DefParameters(wrapperDefParms))
-              .modifiers(Modifier.Static)
-              .body();
-
-      BlockBuilder<CatchBlockBuilder> tryBuilder = Stmt.try_();
-      tryBuilder.append(Stmt.declareVariable("method",
-              Stmt.load(m.getDeclaringClass().asClass()).invoke("getDeclaredMethod", m.getName(),
-                      MetaClassFactory.asClassArray(m.getParameters()))))
-
-              .append(Stmt.loadVariable("method").invoke("setAccessible", true));
-
-      ContextualStatementBuilder statementBuilder = Stmt.loadVariable("method")
-              .invoke("invoke", Refs.get("instance"), args);
-
-      if (m.getReturnType().isVoid()) {
-        tryBuilder.append(statementBuilder);
-      }
-      else {
-        tryBuilder.append(statementBuilder.returnValue());
-      }
-
-      body.append(tryBuilder
-              .finish()
-              .catch_(Throwable.class, "e")
-              .append(Stmt.loadVariable("e").invoke("printStackTrace"))
-              .append(Stmt.throw_(RuntimeException.class, Refs.get("e")))
-              .finish())
-              .finish();
-    }
-  }
 
   public void addDeferred(Runnable task) {
     deferredTasks.add(task);

@@ -1,6 +1,7 @@
 package org.jboss.errai.marshalling.client.marshallers;
 
 import com.google.gwt.json.client.JSONNumber;
+import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.marshalling.client.api.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingContext;
@@ -9,9 +10,9 @@ import org.jboss.errai.marshalling.client.api.MarshallingContext;
  * @author Mike Brock <cbrock@redhat.com>
  */
 @ClientMarshaller
-public class DoubleMarshaller implements Marshaller<JSONNumber, Double> {
+public class DoubleMarshaller implements Marshaller<JSONValue, Double> {
   @Override
-  public Class<?> getTypeHandled() {
+  public Class<Double> getTypeHandled() {
     return Double.class;
   }
 
@@ -21,12 +22,17 @@ public class DoubleMarshaller implements Marshaller<JSONNumber, Double> {
   }
 
   @Override
-  public Double demarshall(JSONNumber o, MarshallingContext ctx) {
-    return o.doubleValue();
+  public Double demarshall(JSONValue o, MarshallingContext ctx) {
+    return o.isNumber().doubleValue();
   }
 
   @Override
   public String marshall(Double o, MarshallingContext ctx) {
     return o.toString();
+  }
+
+  @Override
+  public boolean handles(JSONValue o) {
+    return o.isNumber() != null;
   }
 }

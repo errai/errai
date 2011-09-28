@@ -22,6 +22,10 @@ import java.util.List;
 import com.google.gwt.core.ext.typeinfo.JParameter;
 import com.google.gwt.core.ext.typeinfo.JType;
 import org.jboss.errai.codegen.framework.*;
+import org.jboss.errai.codegen.framework.builder.BlockBuilder;
+import org.jboss.errai.codegen.framework.builder.CatchBlockBuilder;
+import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
+import org.jboss.errai.codegen.framework.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.Scope;
 import org.jboss.errai.codegen.framework.exception.InvalidTypeException;
 import org.jboss.errai.codegen.framework.exception.OutOfScopeException;
@@ -275,5 +279,161 @@ public class GenUtil {
 
   public static boolean equals(MetaParameter a, MetaParameter b) {
     return a.getType().isAssignableFrom(b.getType()) || b.getType().isAssignableFrom(a.getType());
+  }
+
+  public static void addPrivateAccessStubs(boolean useJSNIStubs, ClassStructureBuilder<?> classBuilder, MetaField f, MetaClass type) {
+    if (useJSNIStubs) {
+      classBuilder.privateMethod(void.class, getPrivateFieldInjectorName(f))
+              .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance"),
+                      Parameter.of(type, "value")))
+              .modifiers(Modifier.Static, Modifier.JSNI)
+              .body()
+              .append(new StringStatement(JSNIUtil.fieldAccess(f) + " = value"))
+              .finish();
+
+      classBuilder.privateMethod(type, getPrivateFieldInjectorName(f))
+              .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance")))
+              .modifiers(Modifier.Static, Modifier.JSNI)
+              .body()
+              .append(new StringStatement("return " + JSNIUtil.fieldAccess(f)))
+              .finish();
+    }
+    else {
+      classBuilder.privateMethod(void.class, getPrivateFieldInjectorName(f))
+              .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance"),
+                      Parameter.of(type, "value")))
+              .modifiers(Modifier.Static)
+              .body()
+              .append(Stmt.try_()
+                      .append(Stmt.declareVariable("field", Stmt.load(f.getDeclaringClass().asClass()).invoke("getDeclaredField",
+                              f.getName())))
+                      .append(Stmt.loadVariable("field").invoke("setAccessible", true))
+                      .append(Stmt.loadVariable("field").invoke("set", Refs.get("instance"), Refs.get("value")))
+                      .finish()
+                      .catch_(Throwable.class, "e")
+                      .append(Stmt.loadVariable("e").invoke("printStackTrace"))
+                      .append(Stmt.throw_(RuntimeException.class, Refs.get("e")))
+                      .finish())
+              .finish();
+
+      classBuilder.privateMethod(type, getPrivateFieldInjectorName(f))
+              .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance")))
+              .modifiers(Modifier.Static)
+              .body()
+              .append(Stmt.try_()
+                      .append(Stmt.declareVariable("field", Stmt.load(f.getDeclaringClass().asClass()).invoke("getDeclaredField",
+                              f.getName())))
+                      .append(Stmt.loadVariable("field").invoke("setAccessible", true))
+                      .append(Stmt.nestedCall(Cast.to(type, Stmt.loadVariable("field")
+                              .invoke("get", Refs.get("instance")))).returnValue())
+                      .finish()
+                      .catch_(Throwable.class, "e")
+                      .append(Stmt.loadVariable("e").invoke("printStackTrace"))
+                      .append(Stmt.throw_(RuntimeException.class, Refs.get("e")))
+                      .finish())
+              .finish();
+    }
+  }
+
+  public static void addPrivateAccessStubs(boolean useJSNIStubs, ClassStructureBuilder<?> classBuilder, MetaMethod m) {
+    List<Parameter> wrapperDefParms = new ArrayList<Parameter>();
+    wrapperDefParms.add(Parameter.of(m.getDeclaringClass(), "instance"));
+    List<Parameter> methodDefParms = DefParameters.from(m).getParameters();
+
+    wrapperDefParms.addAll(methodDefParms);
+
+    if (useJSNIStubs) {
+      classBuilder.publicMethod(m.getReturnType(), getPrivateMethodName(m))
+              .parameters(new DefParameters(wrapperDefParms))
+              .modifiers(Modifier.Static, Modifier.JSNI)
+              .body()
+              .append(new StringStatement(JSNIUtil.methodAccess(m)))
+              .finish();
+    }
+    else {
+      Object[] args = new Object[methodDefParms.size()];
+
+      int i = 0;
+      for (Parameter p : methodDefParms) {
+        args[i++] = Refs.get(p.getName());
+      }
+
+      BlockBuilder<? extends ClassStructureBuilder> body = classBuilder.publicMethod(m.getReturnType(),
+              getPrivateMethodName(m))
+              .parameters(new DefParameters(wrapperDefParms))
+              .modifiers(Modifier.Static)
+              .body();
+
+      BlockBuilder<CatchBlockBuilder> tryBuilder = Stmt.try_();
+      tryBuilder.append(Stmt.declareVariable("method",
+              Stmt.load(m.getDeclaringClass().asClass()).invoke("getDeclaredMethod", m.getName(),
+                      MetaClassFactory.asClassArray(m.getParameters()))))
+
+              .append(Stmt.loadVariable("method").invoke("setAccessible", true));
+
+      ContextualStatementBuilder statementBuilder = Stmt.loadVariable("method")
+              .invoke("invoke", Refs.get("instance"), args);
+
+      if (m.getReturnType().isVoid()) {
+        tryBuilder.append(statementBuilder);
+      }
+      else {
+        tryBuilder.append(statementBuilder.returnValue());
+      }
+
+      body.append(tryBuilder
+              .finish()
+              .catch_(Throwable.class, "e")
+              .append(Stmt.loadVariable("e").invoke("printStackTrace"))
+              .append(Stmt.throw_(RuntimeException.class, Refs.get("e")))
+              .finish())
+              .finish();
+    }
+  }
+
+  public static String getPrivateFieldInjectorName(MetaField field) {
+    return field.getDeclaringClass()
+            .getFullyQualifiedName().replaceAll("\\.", "_") + "_" + field.getName();
+  }
+
+  public static String getPrivateMethodName(MetaMethod method) {
+    StringBuffer buf = new StringBuffer(method.getDeclaringClass()
+            .getFullyQualifiedName().replaceAll("\\.", "_") + "_" + method.getName());
+
+    for (MetaParameter parm : method.getParameters()) {
+      buf.append('_').append(parm.getType().getFullyQualifiedName().replaceAll("\\.", "_"));
+    }
+
+    return buf.toString();
+  }
+
+  public static MetaClass getPrimitiveWrapper(MetaClass clazz) {
+    if (clazz.isPrimitive()) {
+      if ("int".equals(clazz.getCanonicalName())) {
+        return MetaClassFactory.get(Integer.class);
+      }
+      else if ("boolean".equals(clazz.getCanonicalName())) {
+        return MetaClassFactory.get(Boolean.class);
+      }
+      else if ("long".equals(clazz.getCanonicalName())) {
+        return MetaClassFactory.get(Long.class);
+      }
+      else if ("double".equals(clazz.getCanonicalName())) {
+        return MetaClassFactory.get(Double.class);
+      }
+      else if ("float".equals(clazz.getCanonicalName())) {
+        return MetaClassFactory.get(Float.class);
+      }
+      else if ("short".equals(clazz.getCanonicalName())) {
+        return MetaClassFactory.get(Short.class);
+      }
+      else if ("char".equals(clazz.getCanonicalName())) {
+        return MetaClassFactory.get(Character.class);
+      }
+      else if ("byte".equals(clazz.getCanonicalName())) {
+        return MetaClassFactory.get(Byte.class);
+      }
+    }
+    return clazz;
   }
 }

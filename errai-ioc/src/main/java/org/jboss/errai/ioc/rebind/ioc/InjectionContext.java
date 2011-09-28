@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jboss.errai.codegen.framework.util.GenUtil;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
@@ -297,14 +298,14 @@ public class InjectionContext {
   private Set<String> exposedMembers = new HashSet<String>();
 
   public void addExposedField(MetaField field) {
-    String fieldSignature = InjectUtil.getPrivateFieldInjectorName(field);
+    String fieldSignature = GenUtil.getPrivateFieldInjectorName(field);
     if (exposedMembers.contains(fieldSignature)) return;
     exposedMembers.add(fieldSignature);
     privateFieldsToExpose.add(field);
   }
 
   public void addExposedMethod(MetaMethod method) {
-    String methodSignature = InjectUtil.getPrivateMethodName(method);
+    String methodSignature = GenUtil.getPrivateMethodName(method);
     if (exposedMembers.contains(methodSignature)) return;
     exposedMembers.add(methodSignature);
     privateMethodsToExpose.add(method);

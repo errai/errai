@@ -36,6 +36,7 @@ import javax.inject.Inject;
 import javax.inject.Qualifier;
 
 import org.jboss.errai.bus.rebind.ScannerSingleton;
+import org.jboss.errai.codegen.framework.util.GenUtil;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.DefParameters;
@@ -168,7 +169,7 @@ public class InjectUtil {
           Statement stmt;
           if (!meth.isPublic()) {
             stmt = Stmt.invokeStatic(ctx.getProcessingContext().getBootstrapClass(),
-                    InjectUtil.getPrivateMethodName(meth), Refs.get(injector.getVarName()));
+                    GenUtil.getPrivateMethodName(meth), Refs.get(injector.getVarName()));
           }
           else {
             stmt = Stmt.loadVariable(injector.getVarName()).invoke(meth.getName());
@@ -400,22 +401,6 @@ public class InjectUtil {
   public static String getNewVarName() {
     String var = "inj" + counter.addAndGet(1);
     return var;
-  }
-
-  public static String getPrivateFieldInjectorName(MetaField field) {
-    return field.getDeclaringClass()
-            .getFullyQualifiedName().replaceAll("\\.", "_") + "_" + field.getName();
-  }
-
-  public static String getPrivateMethodName(MetaMethod method) {
-    StringBuffer buf = new StringBuffer(method.getDeclaringClass()
-            .getFullyQualifiedName().replaceAll("\\.", "_") + "_" + method.getName());
-
-    for (MetaParameter parm : method.getParameters()) {
-      buf.append('_').append(parm.getType().getFullyQualifiedName().replaceAll("\\.", "_"));
-    }
-
-    return buf.toString();
   }
 
   private static Set<Class<?>> qualifiersCache;
