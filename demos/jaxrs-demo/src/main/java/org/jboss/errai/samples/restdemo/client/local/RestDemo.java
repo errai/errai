@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package org.errai.samples.restdemo.client.local;
+package org.jboss.errai.samples.restdemo.client.local;
 
 import javax.annotation.PostConstruct;
 
-import org.errai.samples.restdemo.client.shared.CustomerService;
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.ioc.client.api.EntryPoint;
+import org.jboss.errai.samples.restdemo.client.shared.Customer;
+import org.jboss.errai.samples.restdemo.client.shared.CustomerService;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -47,6 +48,12 @@ public class RestDemo {
       }
     };
     
+    final RemoteCallback<Customer> updatedCallback = new RemoteCallback<Customer>() {
+      public void callback(Customer customer) {
+        Window.alert("successfully updated customer:" + customer);
+      }
+    };
+    
     final RemoteCallback<Void> deletionCallback = new RemoteCallback<Void>() {
       public void callback(Void response) {
         Window.alert("successfully deleted customer");
@@ -67,13 +74,13 @@ public class RestDemo {
 
     final Button post = new Button("Create Customer", new ClickHandler() {
       public void onClick(ClickEvent clickEvent) {
-        RestClient.create(CustomerService.class, creationCallback).createCustomer(customerName.getText());
+        RestClient.create(CustomerService.class, creationCallback).createCustomer(new Customer(customerName.getText()));
       }
     });
 
     final Button put = new Button("Update Customer", new ClickHandler() {
       public void onClick(ClickEvent clickEvent) {
-        RestClient.create(CustomerService.class, callback).updateCustomer(getCustomerId(), customerName.getText());
+        RestClient.create(CustomerService.class, updatedCallback).updateCustomer(getCustomerId(), new Customer(getCustomerId(), customerName.getText()));
       }
     });
 

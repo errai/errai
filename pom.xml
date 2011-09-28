@@ -55,6 +55,7 @@
 
     <modules>
         <module>errai-jaxrs-client</module>
+        <module>errai-jaxrs-provider</module>
         <module>demos/jaxrs-demo</module>
     </modules>
 
@@ -76,6 +77,12 @@
             <dependency>
                 <groupId>org.jboss.errai</groupId>
                 <artifactId>errai-ioc</artifactId>
+                <version>${errai.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jboss.errai</groupId>
+                <artifactId>errai-marshalling</artifactId>
                 <version>${errai.version}</version>
             </dependency>
 

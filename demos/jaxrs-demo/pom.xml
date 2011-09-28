@@ -30,6 +30,24 @@
 			<groupId>org.jboss.errai</groupId>
 			<artifactId>errai-tools</artifactId>
 		</dependency>
+		
+		<dependency>
+			<groupId>org.jboss.errai</groupId>
+			<artifactId>errai-jaxrs-client</artifactId>
+			<version>${version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.jboss.errai</groupId>
+			<artifactId>errai-jaxrs-provider</artifactId>
+			<version>${version}</version>
+		</dependency>
+		
+		<dependency>
+            <groupId>javax.enterprise</groupId>
+            <artifactId>cdi-api</artifactId>
+            <version>1.0-SP4</version>
+        </dependency>
 
 		<dependency>
 			<groupId>com.google.gwt</groupId>
@@ -48,12 +66,7 @@
 			<version>2.2.1.GA</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.jboss.errai</groupId>
-			<artifactId>errai-jaxrs-client</artifactId>
-			<version>${version}</version>
-		</dependency>
-
+		
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.errai.samples.restdemo.client.shared;
+package org.jboss.errai.samples.restdemo.client.shared;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -29,13 +29,15 @@ import javax.ws.rs.QueryParam;
 @Path("customer")
 public interface CustomerService {
   @POST
+  @Consumes("application/json")
   @Produces("text/plain")
-  public long createCustomer(String customer);
+  public long createCustomer(Customer customer);
 
   @PUT
   @Path("/{id}")
-  @Consumes("text/plain")
-  public String updateCustomer(@PathParam("id") long id, String customer);
+  @Consumes("application/json")
+  @Produces("application/json")
+  public Customer updateCustomer(@PathParam("id") long id, Customer customer);
 
   @DELETE
   @Path("/{id}")
@@ -43,13 +45,18 @@ public interface CustomerService {
 
   @GET
   @Path("/{id}")
-  @Consumes("text/plain")
+  @Produces("text/plain")
   public String retrieveCustomerById(@PathParam("id") long id, @QueryParam("format") String format, @QueryParam("details") boolean details);
   
   @GET
   @Path("/{id}")
-  @Consumes("text/plain")
+  @Produces("text/plain")
   public String retrieveCustomerById(@PathParam("id") long id, @QueryParam("format") String format);
+  
+  @GET
+  @Path("/json/{id}")
+  @Produces("application/json")
+  public Customer retrieveCustomerById(@PathParam("id") long id);  
   
   public void noHttpMethod();
 }

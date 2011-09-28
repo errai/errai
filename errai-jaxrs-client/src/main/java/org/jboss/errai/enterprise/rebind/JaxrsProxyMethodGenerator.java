@@ -36,8 +36,8 @@ import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
 
-import static org.jboss.errai.enterprise.rebind.PrimitiveTypeMarshaller.marshal;
-import static org.jboss.errai.enterprise.rebind.PrimitiveTypeMarshaller.demarshal;
+import static org.jboss.errai.enterprise.rebind.TypeMarshaller.demarshal;
+import static org.jboss.errai.enterprise.rebind.TypeMarshaller.marshal;
 
 /**
  * Generates a JAX-RS remote proxy method.

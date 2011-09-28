@@ -14,24 +14,29 @@
  * limitations under the License.
  */
 
-package org.errai.samples.restdemo.server;
+package org.jboss.errai.samples.restdemo.server;
 
-import org.errai.samples.restdemo.client.shared.CustomerService;
+import org.jboss.errai.samples.restdemo.client.shared.Customer;
+import org.jboss.errai.samples.restdemo.client.shared.CustomerService;
 
 public class CustomerServiceImpl implements CustomerService {
 
-  public long createCustomer(String customer) {
+  @Override
+  public long createCustomer(Customer customer) {
     return 123;
   }
 
-  public String updateCustomer(long id, String customer) {
-    return "updated customer:" + id;
+  @Override
+  public Customer updateCustomer(long id, Customer customer) {
+    return customer;
   }
-  
+
+  @Override
   public void deleteCustomer(long id) {
     System.out.println("deleted customer:" + id);
   }
-  
+
+  @Override
   public String retrieveCustomerById(long id, String format, boolean details) {
     return "customer:" + id + " format:" + format + " details:" + details;
   }
@@ -43,4 +48,12 @@ public class CustomerServiceImpl implements CustomerService {
 
   @Override
   public void noHttpMethod() {}
+
+  @Override
+  public Customer retrieveCustomerById(long id) {
+    Customer c = new Customer();
+    c.setId(id);
+    c.setName("customer name");
+    return c;
+  }
 }

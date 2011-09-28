@@ -29,6 +29,7 @@ import org.jboss.errai.codegen.framework.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.enterprise.client.jaxrs.JaxrsExtensionsLoader;
+import org.jboss.errai.marshalling.rebind.MarshallerGeneratorFactory;
 
 import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
@@ -43,7 +44,6 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class JaxrsExtensionsGenerator extends Generator {
-  
   private String className = null;
   private String packageName = null;
 
@@ -85,18 +85,26 @@ public class JaxrsExtensionsGenerator extends Generator {
       return;
    
     ClassStructureBuilder<?> classBuilder = ClassBuilder.implement(JaxrsExtensionsLoader.class);
+   
     MethodBlockBuilder<?> createProxies = classBuilder.publicMethod(void.class, "createProxies");
-    
-    for (Class<?> remote : scanner.getTypesAnnotatedWith(Path.class)) {
-      // create the remote proxy for this interface
-      ClassStructureBuilder<?> remoteProxy = new JaxrsProxyGenerator(remote).generate();
-      createProxies.append(new InnerClass(remoteProxy.getClassDefinition()));
-      
-      createProxies.append(Stmt.invokeStatic(RemoteServiceProxyFactory.class, "addRemoteProxy", 
-          remote, Stmt.newObject(remoteProxy.getClassDefinition())));
+    for (Class<?> remote : scanner.getTypesAnnotatedWith(Path.class, "")) {
+      if (remote.isInterface()) {
+        // create the remote proxy for this interface
+        ClassStructureBuilder<?> remoteProxy = new JaxrsProxyGenerator(remote).generate();
+        createProxies.append(new InnerClass(remoteProxy.getClassDefinition()));
+        
+        createProxies.append(Stmt.invokeStatic(RemoteServiceProxyFactory.class, "addRemoteProxy", 
+            remote, Stmt.newObject(remoteProxy.getClassDefinition())));
+      }
     }
     classBuilder = (ClassStructureBuilder<?>) createProxies.finish();
 
+    // create the marshallers
+    //MethodBlockBuilder<?> createMarshallers = classBuilder.publicMethod(void.class, "createMarshallers");
+    //createMarshallers.append(new MarshallerGeneratorFactory().generate());
+    //new MarshallerGeneratorFactory().generate();
+    //classBuilder = (ClassStructureBuilder<?>) createMarshallers.finish();
+    
     printWriter.append(classBuilder.toJavaString());
     context.commit(logger, printWriter);
   }
