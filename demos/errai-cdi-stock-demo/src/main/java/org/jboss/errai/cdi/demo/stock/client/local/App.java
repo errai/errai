@@ -130,6 +130,8 @@ public class App {
       }
       else if (el.getClassName().contains("change")) {
         el.setInnerText(tick.getFormattedChange());
+        String strobeCssColor = tick.getChange() >= 0 ? "rgb(40, 155, 40)" : "rgb(155, 40, 40)";
+        strobe(el, strobeCssColor, "rgb(0, 0, 0)");
       }
       else if (el.getClassName().contains("time")) {
         DateTimeFormat format = DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_MEDIUM);
@@ -142,6 +144,30 @@ public class App {
     double startTime = endTime - chartTimeSpan;
     redrawChart(stockBoxDiv, startTime, endTime);
   }
+
+  /**
+   * Strobes the foreground color of the given element. This feat is
+   * accomplished using jQuery's animate() method together with the jquery-color
+   * plugin.
+   * 
+   * @param el
+   *          The element whose colour to strobe
+   * @param strobeCssColor
+   *          The colour to strobe to
+   * @param normalCssColor
+   *          The normal colour for the element (has to be specified rather than
+   *          detected in case the element's colour is already in the process of
+   *          animating)
+   */
+  private native void strobe(Element el, String strobeCssColor, String normalCssColor) /*-{
+    var $ = $wnd.jQuery;
+    $(el).css({
+      color: $.Color(strobeCssColor)
+    });
+    $(el).animate({
+      color: $.Color(normalCssColor)
+    }, { duration: 1000, queue: false } );
+  }-*/;
 
   /**
    * Returns the HTML div element that contains all the information about the

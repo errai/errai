@@ -1,30 +1,34 @@
 <!DOCTYPE html>
 <html>
-<head>
-<title>Errai Application</title>
-<link rel="stylesheet" type="text/css" href="App.css">
-<script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
-<script type="text/javascript" src="js/jquery.flot.js"></script>
-<script type="text/javascript" src="app/app.nocache.js"></script>
-<link rel="stylesheet" href="http://twitter.github.com/bootstrap/1.3.0/bootstrap.min.css">
-</head>
-<body>
+  <head>
+    <title>Errai Application</title>
+    <link rel="stylesheet" type="text/css" href="App.css">
+    <script type="text/javascript" src="js/jquery-1.6.4.min.js"></script>
+    <script type="text/javascript" src="js/jquery.flot.js"></script>
+    <script type="text/javascript" src="js/jquery.color.min.js"></script>
+    <script type="text/javascript" src="app/app.nocache.js"></script>
+  </head>
+  <body>
 
-	<div id="rootPanel"></div>
+    <div id="rootPanel"></div>
 
-	<!-- This div is used as a prototype: whenever the client sees the first tick
-	     for a particular stock, this div is copied (recursively) and the copy is
-	     added to the document body.
-	     
-	     This prototype itself is hidden using a rule in the stylesheet.
-	 -->
-	<div id=prototypeStockBox class="stockbox alert-message block-message span-3">
-		Name: <span class=stockName>EXAMP</span><br>
-		Bid/Ask: <span class=bidAsk>123.45/678.90</span><br>
-		Change: <span class=change>+333.33</span><br>
-		Time: <span class=time>Jan 1, 0000</span><br>
-		<div class=chart>This is a placeholder for the chart.</div>
-	</div>
+    <!-- This div is used as a prototype: whenever the client sees the first tick
+         for a particular stock, this div is copied (recursively) and the copy is
+         added to the document body.
+         
+         This prototype itself is hidden using a rule in the stylesheet.
+     -->
+    <div id=prototypeStockBox class="stockbox">
+      <table>
+        <tbody>
+          <tr><th>Name:<td><span class=stockName>EXAMP</span></tr>
+          <tr><th>Bid/Ask:<td><span class=bidAsk>123.45/678.90</span></tr>
+          <tr><th>Change:<td><span class=change>+333.33</span></tr>
+          <tr><th>Time:<td><span class=time>Jan 1, 0000</span></tr>
+        </tbody>
+      </table>
+      <div class=chart>This is a placeholder for the chart.</div>
+    </div>
 
-</body>
+  </body>
 </html>
