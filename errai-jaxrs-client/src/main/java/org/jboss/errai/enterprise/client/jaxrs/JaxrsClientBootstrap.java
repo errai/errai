@@ -15,6 +15,8 @@
  */
 package org.jboss.errai.enterprise.client.jaxrs;
 
+import org.jboss.errai.bus.client.ext.ExtensionsLoader;
+
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 
@@ -25,7 +27,10 @@ import com.google.gwt.core.client.GWT;
  */
 public class JaxrsClientBootstrap implements EntryPoint {
   public void onModuleLoad() {
-	  JaxrsExtensionsLoader extLoader = GWT.create(JaxrsExtensionsLoader.class);
-	  extLoader.createProxies();
+    ExtensionsLoader extLoader = GWT.create(ExtensionsLoader.class);
+    extLoader.initExtensions(null);
+    
+	  JaxrsExtensionsLoader jaxrsExtLoader = GWT.create(JaxrsExtensionsLoader.class);
+	  jaxrsExtLoader.createProxies();
   }
 }

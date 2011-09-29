@@ -6,6 +6,9 @@ import org.jboss.errai.codegen.framework.Variable;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.util.Stmt;
+import org.jboss.errai.common.client.json.JSONDecoderCli;
+import org.jboss.errai.common.client.json.JSONEncoderCli;
+import org.jboss.errai.common.client.types.EncodingContext;
 
 /**
  * Generates the required {@link Statement}s for type marshalling.
@@ -24,8 +27,8 @@ public class TypeMarshaller {
       marshallingStatement =  PrimitiveTypeMarshaller.marshal(type, statement);
     }
     else {
-      //TODO invoke Errai default marshaller
-      marshallingStatement = Stmt.newObject(String.class);
+      marshallingStatement = Stmt.nestedCall(Stmt.newObject(JSONEncoderCli.class))
+        .invoke( "encode", statement, Stmt.newObject(EncodingContext.class));
     }
     return marshallingStatement;
   }
@@ -40,8 +43,7 @@ public class TypeMarshaller {
       demarshallingStatement =  PrimitiveTypeMarshaller.demarshal(type, statement);
     }
     else {
-      //TODO invoke Errai default demarshaller
-      demarshallingStatement = Stmt.newObject(type);
+      demarshallingStatement = Stmt.invokeStatic(JSONDecoderCli.class, "decode", statement);
     }
     return demarshallingStatement;
   }

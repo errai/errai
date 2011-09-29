@@ -12,7 +12,8 @@ public class ResponseException extends Exception {
 
   private Response response;
   
-  public ResponseException(Response response) {
+  public ResponseException(String message, Response response) {
+    super(message);
     this.response = response;
   }
   

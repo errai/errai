@@ -16,14 +16,18 @@
 
 package org.jboss.errai.samples.restdemo.server;
 
+import java.util.Random;
+
 import org.jboss.errai.samples.restdemo.client.shared.Customer;
 import org.jboss.errai.samples.restdemo.client.shared.CustomerService;
+
 
 public class CustomerServiceImpl implements CustomerService {
 
   @Override
   public long createCustomer(Customer customer) {
-    return 123;
+    customer.setId(new Random().nextInt());
+    return customer.getId();
   }
 
   @Override

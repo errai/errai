@@ -127,7 +127,6 @@ public class JaxrsProxyMethodGenerator {
     }
     
     // TODO MatrixParams
-
     if (urlBuilder != null)
       methodBlock.append(urlBuilder);
   }
@@ -208,7 +207,8 @@ public class JaxrsProxyMethodGenerator {
             .finish()
             .else_()
             .append(Stmt.declareVariable("throwable", ResponseException.class,
-                 Stmt.newObject(ResponseException.class).withParameters(Variable.get("response"))))
+                 Stmt.newObject(ResponseException.class).withParameters(
+                     Stmt.loadVariable("response").invoke("getStatusText"), Variable.get("response"))))
             .append(errorHandling)
             .finish())
         .finish()
