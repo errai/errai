@@ -28,6 +28,9 @@ import org.jboss.errai.common.client.json.JSONEncoderCli;
 import org.jboss.errai.common.client.types.DecodingContext;
 import org.jboss.errai.common.client.types.EncodingContext;
 import org.jboss.errai.common.client.types.JSONTypeHelper;
+import org.jboss.errai.marshalling.client.api.MarshallerFactory;
+import org.jboss.errai.marshalling.client.api.MarshallerFramework;
+import org.jboss.errai.marshalling.client.marshallers.MapMarshaller;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -87,14 +90,18 @@ public class JSONUtilCli {
   @SuppressWarnings({"unchecked"})
   public static Map<String, Object> decodeMap(Object value) {
     try {
-      DecodingContext ctx = new DecodingContext();
-      Map<String, Object> map = (Map<String, Object>) JSONDecoderCli.decode(value, ctx);
-
-      if (ctx.isUnsatisfiedDependencies()) {
-        JSONTypeHelper.resolveDependencies(ctx);
+      JSONObject jsonObject;
+      if (value instanceof String) {
+        jsonObject = JSONParser.parseStrict((String) value).isObject();
+      }
+      else if (value instanceof JSONObject) {
+        jsonObject = (JSONObject) value;
+      }
+      else {
+        throw new RuntimeException("what the hell is this? " + value);
       }
 
-      return map;
+      return (Map<String, Object>) MarshallerFramework.demarshallErraiJSON(jsonObject);
     }
     catch (RuntimeException e) {
       System.out.println("<<" + String.valueOf(value) + ">>");
@@ -110,7 +117,8 @@ public class JSONUtilCli {
   }
 
   public static String encodeMap(Map<String, Object> map) {
-    return new JSONEncoderCli().encode(map, new EncodingContext());
+    return MarshallerFramework.marshalErraiJSON(map);
+    // return new JSONEncoderCli().encode(map, new EncodingContext());
   }
 
 

@@ -5,7 +5,5 @@ package org.jboss.errai.marshalling.client.api;
  */
 public interface MarshallerFactory {
   Marshaller<Object, Object> getMarshaller(String formatType, String encodedType);
-  void notifyReference(int hashCode);
-
 }
 

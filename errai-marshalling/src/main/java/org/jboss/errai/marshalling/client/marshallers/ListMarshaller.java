@@ -4,7 +4,7 @@ import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.marshalling.client.api.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.Marshaller;
-import org.jboss.errai.marshalling.client.api.MarshallingContext;
+import org.jboss.errai.marshalling.client.api.MarshallingSession;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +25,7 @@ public class ListMarshaller implements Marshaller<JSONValue, List> {
   }
 
   @Override
-  public List demarshall(JSONValue o, MarshallingContext ctx) {
+  public List demarshall(JSONValue o, MarshallingSession ctx) {
     JSONArray jsonArray = o.isArray();
 
     ArrayList<Object> list = new ArrayList<Object>();
@@ -44,8 +44,23 @@ public class ListMarshaller implements Marshaller<JSONValue, List> {
   }
 
   @Override
-  public String marshall(List o, MarshallingContext ctx) {
-    return o.toString();
+  public String marshall(List o, MarshallingSession ctx) {
+    StringBuilder buf = new StringBuilder("[");
+    Marshaller<Object, Object> cachedMarshaller = null;
+    Object elem;
+    for (int i = 0; i < o.size(); i++) {
+      if (i > 0) {
+        buf.append(",");
+      }
+      elem = o.get(i);
+      if (cachedMarshaller == null) {
+        cachedMarshaller = ctx.getMarshallerForType(elem.getClass().getName());
+      }
+
+      buf.append(cachedMarshaller.marshall(elem, ctx));
+    }
+
+    return buf.append("]").toString();
   }
 
   @Override

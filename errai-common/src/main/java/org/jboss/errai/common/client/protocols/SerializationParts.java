@@ -23,7 +23,6 @@ public class SerializationParts {
 
   public static final String EMBEDDED_JSON = "${$JSON$}$::";
 
-
   public static final String ENUM_STRING_VALUE = "EnumStringValue";
 
   private SerializationParts() {

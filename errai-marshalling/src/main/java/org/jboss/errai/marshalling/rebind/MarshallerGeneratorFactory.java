@@ -15,6 +15,7 @@ import org.jboss.errai.marshalling.client.api.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallerFactory;
 import org.jboss.errai.marshalling.rebind.api.MappingContext;
+import org.jboss.errai.marshalling.rebind.api.MappingStrategy;
 
 import javax.enterprise.util.TypeLiteral;
 import java.util.HashMap;
@@ -37,8 +38,8 @@ public class MarshallerGeneratorFactory {
 
   ClassStructureBuilder<?> classStructureBuilder;
 
-  public void generate() {
-    classStructureBuilder = implement(MarshallerFactory.class);
+  public String generate(String packageName, String clazzName) {
+    classStructureBuilder = implement(MarshallerFactory.class, packageName, clazzName);
 
     Context classContext = classStructureBuilder.getClassDefinition().getContext();
     mappingContext = new MappingContext(classContext, classStructureBuilder.getClassDefinition(),
@@ -62,7 +63,7 @@ public class MarshallerGeneratorFactory {
               .loadVariable(varName).assignValue(Stmt.newObject(entry.getValue())));
 
       constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
-              .invoke("put", entry.getValue().getName(), loadVariable(varName)));
+              .invoke("put", entry.getKey(), loadVariable(varName)));
     }
 
     generateMarshallers(constructor, classContext);
@@ -72,7 +73,9 @@ public class MarshallerGeneratorFactory {
             .append(loadVariable(MARSHALLERS_VAR).invoke("get", loadVariable("a1")).returnValue())
             .finish();
 
-    System.out.println(classStructureBuilder.toJavaString());
+    String generatedClass = classStructureBuilder.toJavaString();
+    System.out.println(generatedClass);
+    return generatedClass;
   }
 
   private void generateMarshallers(ConstructorBlockBuilder<?> constructor, Context classContext) {
@@ -102,7 +105,11 @@ public class MarshallerGeneratorFactory {
   }
 
   private Statement marshall(Class<?> cls) {
-    return MappingStrategyFactory.createStrategy(mappingContext, cls).getMapper().getMarshaller();
+    MappingStrategy strategy = MappingStrategyFactory.createStrategy(mappingContext, cls);
+    if (strategy == null) {
+      throw new RuntimeException("no available marshaller for class: " + cls.getName());
+    }
+    return strategy.getMapper().getMarshaller();
   }
 
   private void loadMarshallers() {

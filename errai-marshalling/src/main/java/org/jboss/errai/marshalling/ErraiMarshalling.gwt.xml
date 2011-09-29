@@ -2,4 +2,12 @@
         "http://google-web-toolkit.googlecode.com/svn/releases/2.0/distro-source/core/src/gwt-module.dtd">
 <module>
     <inherits name='com.google.gwt.user.User'/>
+
+    <entry-point class='org.jboss.errai.marshalling.client.api.MarshallerFramework'/>
+
+    <generate-with class="org.jboss.errai.marshalling.rebind.MarshallersGenerator">
+        <when-type-assignable
+                class="org.jboss.errai.marshalling.client.api.MarshallerFactory"/>
+    </generate-with>
+
 </module>

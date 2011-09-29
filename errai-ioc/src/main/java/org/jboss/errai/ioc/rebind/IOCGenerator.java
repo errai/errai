@@ -85,7 +85,8 @@ public class IOCGenerator extends Generator {
         logger.log(TreeLogger.INFO, "will scan in package: " + modulePackage);
       }
     }
-    catch (Exception e) {
+    catch (Exception e) { 
+      throw new RuntimeException("could not determine module package", e);
       // could not determine package.
     }
 

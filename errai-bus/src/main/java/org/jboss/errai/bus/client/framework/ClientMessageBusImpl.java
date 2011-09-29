@@ -196,6 +196,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       fireAllUnSubscribeListeners(subject);
 
       subscriptions.remove(subject);
+      remoteShadowSubscription(subject);
     }
   }
 
@@ -400,8 +401,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    */
   private void encodeAndTransmit(Message message) {
     //outgoingQueue.add(message);
-    transmitRemote(message instanceof HasEncoded ?
-            ((HasEncoded) message).getEncoded() : encodeMap(message.getParts()), message);
+//    transmitRemote(message instanceof HasEncoded ?
+//            ((HasEncoded) message).getEncoded() : encodeMap(message.getParts()), message);
+
+    transmitRemote(encodeMap(message.getParts()), message);
   }
 
   private void addSubscription(String subject, Object reference) {
@@ -721,7 +724,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             else {
               String subject = message.get(String.class, Subject);
               remoteSubscribe(subject);
-
             }
             break;
 

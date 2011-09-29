@@ -17,7 +17,7 @@ import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.MappedOrdered;
 import org.jboss.errai.marshalling.client.api.MapsTo;
 import org.jboss.errai.marshalling.client.api.Marshaller;
-import org.jboss.errai.marshalling.client.api.MarshallingContext;
+import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.exceptions.NoAvailableMarshallerException;
 import org.jboss.errai.marshalling.rebind.api.MappingContext;
 import org.jboss.errai.marshalling.rebind.api.MappingStrategy;
@@ -69,7 +69,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
         marshallers.add(fieldDemarshall(m, JSONObject.class));
       }
       else {
-        //
+        System.out.println();
       }
     }
 
@@ -89,13 +89,13 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                 .finish();
 
         classStructureBuilder.publicOverridesMethod("demarshall",
-                Parameter.of(Object.class, "a0"), Parameter.of(MarshallingContext.class, "a1"))
+                Parameter.of(Object.class, "a0"), Parameter.of(MarshallingSession.class, "a1"))
                 .append(Stmt.nestedCall(Stmt.newObject(toMap)
                         .withParameters(marshallers.toArray(new Object[marshallers.size()]))).returnValue())
                 .finish();
 
         BlockBuilder<?> marshallMethodBlock = classStructureBuilder.publicOverridesMethod("marshall",
-                Parameter.of(Object.class, "a0"), Parameter.of(MarshallingContext.class, "a1"));
+                Parameter.of(Object.class, "a0"), Parameter.of(MarshallingSession.class, "a1"));
 
         marshallToJSON(marshallMethodBlock, toMap);
 
@@ -287,13 +287,8 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
   }
 
   public Statement unwrapJSON(Statement valueStatement, Class<?> toType) {
-    if (String.class.isAssignableFrom(toType)) {
-      return Stmt.create(context.getCodegenContext())
-              .loadVariable(MarshallingUtil.getVarName(String.class))
-              .invoke("demarshall", valueStatement, Stmt.loadVariable("a1"));
-    }
-    else {
-      return null;
-    }
+    return Stmt.create(context.getCodegenContext())
+            .loadVariable(MarshallingUtil.getVarName(toType))
+            .invoke("demarshall", valueStatement, Stmt.loadVariable("a1"));
   }
 }
