@@ -1,6 +1,5 @@
 package org.jboss.errai.marshalling.client.marshallers;
 
-import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.marshalling.client.api.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.Marshaller;

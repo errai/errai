@@ -16,11 +16,6 @@
 
 package org.jboss.errai.bus.client.api;
 
-/**
- * User: christopherbrock
- * Date: 9-Aug-2010
- * Time: 10:34:20 PM
- */
 public interface AsyncExceptionHandler {
   public void handleException(Throwable t);
 }

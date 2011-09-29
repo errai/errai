@@ -22,8 +22,6 @@ public class MarshallersGenerator extends Generator {
 
   @Override
   public String generate(TreeLogger logger, GeneratorContext context, String typeName) throws UnableToCompleteException {
-
-
      return "";
   }
 }

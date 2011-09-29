@@ -1,9 +1,7 @@
 package org.jboss.errai.marshalling.rebind.api.impl;
 
 import com.google.gwt.json.client.JSONObject;
-import org.jboss.errai.bus.server.io.JSONEncoder;
 import org.jboss.errai.codegen.framework.Cast;
-
 import org.jboss.errai.codegen.framework.Parameter;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
@@ -39,6 +37,8 @@ import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.parameteri
 import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.typeParametersOf;
 
 /**
+ * The Errai default Java-to-JSON-to-Java marshaling strategy.
+ *
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class DefaultJavaMappingStrategy implements MappingStrategy {
@@ -120,7 +120,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
   private ConstructorMapping findUsableConstructorMapping() {
     Set<Constructor<?>> constructors = new HashSet<Constructor<?>>();
-    Set<FieldMapping> mappings = new HashSet<FieldMapping>();
+    List<FieldMapping> mappings = new ArrayList<FieldMapping>();
 
     for (Constructor c : toMap.getConstructors()) {
       if (c.isAnnotationPresent(MappedOrdered.class)) {
@@ -163,9 +163,9 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
   private static class ConstructorMapping {
     Constructor<?> constructor;
     ConstructionType type;
-    Set<FieldMapping> mappings;
+    List<FieldMapping> mappings;
 
-    private ConstructorMapping(Constructor<?> constructor, ConstructionType type, Set<FieldMapping> mappings) {
+    private ConstructorMapping(Constructor<?> constructor, ConstructionType type, List<FieldMapping> mappings) {
       this.constructor = constructor;
       this.type = type;
       this.mappings = mappings;
@@ -179,7 +179,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
       return type;
     }
 
-    public Set<FieldMapping> getMappings() {
+    public List<FieldMapping> getMappings() {
       return mappings;
     }
   }
@@ -276,15 +276,15 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
   }
 
   public Statement valueAccessorFor(MetaField field) {
-    if (field != null && !field.isPublic()) {
+    if (!field.isPublic()) {
       GenUtil.addPrivateAccessStubs(true, context.getClassStructureBuilder(), field, field.getDeclaringClass());
-      return Stmt.invokeStatic(context.getGeneratedBootstrapClass(), GenUtil.getPrivateFieldInjectorName(field), Stmt.loadVariable("a0"));
+      return Stmt.invokeStatic(context.getGeneratedBootstrapClass(), GenUtil.getPrivateFieldInjectorName(field),
+              Stmt.loadVariable("a0"));
     }
     else {
       return Stmt.loadStatic(field.getDeclaringClass(), field.getName());
     }
   }
-
 
   public Statement unwrapJSON(Statement valueStatement, Class<?> toType) {
     if (String.class.isAssignableFrom(toType)) {

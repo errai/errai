@@ -29,7 +29,7 @@ public class MarshallerFramework {
       }
     };
 
-    Marshaller<Object, Object> marshaller = (Marshaller<Object, Object>)
+    Marshaller<Object, Object> marshaller =
             marshallerFactory.getMarshaller(null, context.determineTypeFor(null, object));
 
     return marshaller.demarshall(object, context);

@@ -22,7 +22,9 @@ public class MappingContext {
   private MetaClass generatedBootstrapClass;
   private ClassStructureBuilder<?> classStructureBuilder;
 
-  public MappingContext(Context codegenContext, MetaClass generatedBootstrapClass, ClassStructureBuilder<?> classStructureBuilder) {
+  public MappingContext(Context codegenContext, MetaClass generatedBootstrapClass,
+                        ClassStructureBuilder<?> classStructureBuilder) {
+
     this.codegenContext = codegenContext;
     this.generatedBootstrapClass = generatedBootstrapClass;
     this.classStructureBuilder = classStructureBuilder;
