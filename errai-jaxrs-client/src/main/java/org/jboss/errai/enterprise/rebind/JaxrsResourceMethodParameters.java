@@ -30,7 +30,7 @@ public class JaxrsResourceMethodParameters {
   private JaxrsResourceMethodParameters() {}
 
   public static JaxrsResourceMethodParameters fromMethod(MetaMethod method) {
-    JaxrsResourceMethodParameters parms = new JaxrsResourceMethodParameters();
+    JaxrsResourceMethodParameters params = new JaxrsResourceMethodParameters();
 
     List<Parameter> defParams = DefParameters.from(method).getParameters();
     int i = 0;
@@ -39,42 +39,42 @@ public class JaxrsResourceMethodParameters {
       Parameter defParam = defParams.get(i++);
       Annotation a = param.getAnnotation(PathParam.class);
       if (a != null) {
-        parms.add(PathParam.class, ((PathParam) a).value(), defParam);
+        params.add(PathParam.class, ((PathParam) a).value(), defParam);
       }
       else if ((a = param.getAnnotation(QueryParam.class)) != null) {
-        parms.add(QueryParam.class, ((QueryParam) a).value(), defParam);
+        params.add(QueryParam.class, ((QueryParam) a).value(), defParam);
       }
       else if ((a = param.getAnnotation(HeaderParam.class)) != null) {
-        parms.add(HeaderParam.class, ((HeaderParam) a).value(), defParam);
+        params.add(HeaderParam.class, ((HeaderParam) a).value(), defParam);
       }
       else if ((a = param.getAnnotation(MatrixParam.class)) != null) {
-        parms.add(MatrixParam.class, ((MatrixParam) a).value(), defParam);
+        params.add(MatrixParam.class, ((MatrixParam) a).value(), defParam);
       }
       else if ((a = param.getAnnotation(FormParam.class)) != null) {
-        parms.add(FormParam.class, ((FormParam) a).value(), defParam);
+        params.add(FormParam.class, ((FormParam) a).value(), defParam);
       }
       else if ((a = param.getAnnotation(CookieParam.class)) != null) {
-        parms.add(CookieParam.class, ((CookieParam) a).value(), defParam);
+        params.add(CookieParam.class, ((CookieParam) a).value(), defParam);
       }
       else {
-        parms.setEntityParameter(defParam, method);
+        params.setEntityParameter(defParam, method);
       }
     }
-    return parms;
+    return params;
   }
 
   private void add(Class<? extends Annotation> type, String name, Parameter value) {
     if (parameters == null)
       parameters = new HashMap<Class<? extends Annotation>, Map<String, List<Parameter>>>();
     
-    Map<String, List<Parameter>> parms = parameters.get(type);
-    if (parms == null) {
-      parameters.put(type, parms = new HashMap<String, List<Parameter>>());
+    Map<String, List<Parameter>> params = parameters.get(type);
+    if (params == null) {
+      parameters.put(type, params = new HashMap<String, List<Parameter>>());
     }
 
-    List<Parameter> values = parms.get(name);
+    List<Parameter> values = params.get(name);
     if (values == null) {
-      parms.put(name, values = new ArrayList<Parameter>());
+      params.put(name, values = new ArrayList<Parameter>());
     }
 
     values.add(value);

@@ -14,8 +14,8 @@ import org.jboss.errai.codegen.framework.util.Stmt;
  */
 public class TypeMarshaller {
 
-  public static Statement marshal(Parameter parm) {
-    return marshal(parm.getType(), Variable.get(parm.getName()));
+  public static Statement marshal(Parameter param) {
+    return marshal(param.getType(), Variable.get(param.getName()));
   }
   
   public static Statement marshal(MetaClass type, Statement statement) {
@@ -30,8 +30,8 @@ public class TypeMarshaller {
     return marshallingStatement;
   }
   
-  public static Statement demarshal(Parameter parm) {
-    return demarshal(parm.getType(), Variable.get(parm.getName()));
+  public static Statement demarshal(Parameter param) {
+    return demarshal(param.getType(), Variable.get(param.getName()));
   }
   
   public static Statement demarshal(MetaClass type, Statement statement) {
@@ -47,9 +47,7 @@ public class TypeMarshaller {
   }
   
   /**
-   * Marshaller for primitive types. 
-   * 
-   * Works for all types that have a copy constructor, a toString() 
+   * Works for all types that have a 'copy constructor', a toString() representation
    * and a valueOf() method (all primitive wrapper types and java.lang.String).
    */
   private static class PrimitiveTypeMarshaller {

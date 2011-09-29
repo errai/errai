@@ -39,33 +39,32 @@ public class RestDemo {
   final TextBox customerId = new TextBox();
   final TextBox customerName = new TextBox();
   
+  final RemoteCallback<Long> creationCallback = new RemoteCallback<Long>() {
+    public void callback(Long response) {
+      Window.alert("created customer: " + response);
+    }
+  };
+  
+  final RemoteCallback<Customer> updatedCallback = new RemoteCallback<Customer>() {
+    public void callback(Customer customer) {
+      Window.alert("updated customer: " + customer);
+    }
+  };
+  
+  final RemoteCallback<Void> deletionCallback = new RemoteCallback<Void>() {
+    public void callback(Void response) {
+      Window.alert("deleted customer: " + customerId.getText());
+    }
+  };
+  
+  final RemoteCallback<String> callback = new RemoteCallback<String>() {
+    public void callback(String response) {
+      Window.alert("retrieved customer: " + response);
+    }
+  };
+  
   @PostConstruct
   public void init() {
-    
-    final RemoteCallback<Long> creationCallback = new RemoteCallback<Long>() {
-      public void callback(Long response) {
-        Window.alert("Response from Server: Created Customer:" + response);
-      }
-    };
-    
-    final RemoteCallback<Customer> updatedCallback = new RemoteCallback<Customer>() {
-      public void callback(Customer customer) {
-        Window.alert("successfully updated customer:" + customer);
-      }
-    };
-    
-    final RemoteCallback<Void> deletionCallback = new RemoteCallback<Void>() {
-      public void callback(Void response) {
-        Window.alert("successfully deleted customer");
-      }
-    };
-    
-    final RemoteCallback<String> callback = new RemoteCallback<String>() {
-      public void callback(String response) {
-        Window.alert("Response from Server: " + response);
-      }
-    };
-    
     final Button get = new Button("Get Customer", new ClickHandler() {
       public void onClick(ClickEvent clickEvent) {
         RestClient.create(CustomerService.class, callback).retrieveCustomerById(getCustomerId(), "xml", true);
@@ -74,13 +73,15 @@ public class RestDemo {
 
     final Button post = new Button("Create Customer", new ClickHandler() {
       public void onClick(ClickEvent clickEvent) {
-        RestClient.create(CustomerService.class, creationCallback).createCustomer(new Customer(customerName.getText()));
+        Customer customer = new Customer(customerName.getText());
+        RestClient.create(CustomerService.class, creationCallback).createCustomer(customer);
       }
     });
 
     final Button put = new Button("Update Customer", new ClickHandler() {
       public void onClick(ClickEvent clickEvent) {
-        RestClient.create(CustomerService.class, updatedCallback).updateCustomer(getCustomerId(), new Customer(getCustomerId(), customerName.getText()));
+        Customer customer = new Customer(getCustomerId(), customerName.getText());
+        RestClient.create(CustomerService.class, updatedCallback).updateCustomer(customer.getId(), customer);
       }
     });
 

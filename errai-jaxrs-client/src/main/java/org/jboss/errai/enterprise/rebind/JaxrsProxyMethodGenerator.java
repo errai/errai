@@ -14,6 +14,9 @@
  */
 package org.jboss.errai.enterprise.rebind;
 
+import static org.jboss.errai.enterprise.rebind.TypeMarshaller.demarshal;
+import static org.jboss.errai.enterprise.rebind.TypeMarshaller.marshal;
+
 import java.util.List;
 
 import org.jboss.errai.codegen.framework.DefParameters;
@@ -27,6 +30,7 @@ import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.util.Bool;
 import org.jboss.errai.codegen.framework.util.Stmt;
+import org.jboss.errai.enterprise.client.jaxrs.api.ResponseException;
 import org.jboss.resteasy.specimpl.UriBuilderImpl;
 
 import com.google.gwt.http.client.Request;
@@ -35,9 +39,6 @@ import com.google.gwt.http.client.RequestCallback;
 import com.google.gwt.http.client.RequestException;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.http.client.URL;
-
-import static org.jboss.errai.enterprise.rebind.TypeMarshaller.demarshal;
-import static org.jboss.errai.enterprise.rebind.TypeMarshaller.marshal;
 
 /**
  * Generates a JAX-RS remote proxy method.
@@ -94,7 +95,7 @@ public class JaxrsProxyMethodGenerator {
   }
 
   private void generateUrl(BlockBuilder<?> methodBlock) {
-    JaxrsResourceMethodParameters parms = resourceMethod.getParameters();
+    JaxrsResourceMethodParameters params = resourceMethod.getParameters();
     ContextualStatementBuilder pathValue = Stmt.loadLiteral(resourceMethod.getPath());
 
     List<String> pathParams =
@@ -102,19 +103,19 @@ public class JaxrsProxyMethodGenerator {
     int i = 0;
     for (String pathParam : pathParams) {
       pathValue = pathValue.invoke("replaceFirst", "\\{" + pathParam + "\\}",
-          marshal(parms.getPathParameter(pathParam, i++)));
+          marshal(params.getPathParameter(pathParam, i++)));
     }
 
     methodBlock.append(Stmt.declareVariable("url", StringBuilder.class,
         Stmt.newObject(StringBuilder.class).withParameters(pathValue)));
 
     ContextualStatementBuilder urlBuilder = null;
-    if (parms.getQueryParameters() != null) {
+    if (params.getQueryParameters() != null) {
       urlBuilder = Stmt.loadVariable("url").invoke(APPEND, "?");
 
       i = 0;
-      for (String queryParamName : parms.getQueryParameters().keySet()) {
-        for (Parameter queryParam : parms.getQueryParameters(queryParamName)) {
+      for (String queryParamName : params.getQueryParameters().keySet()) {
+        for (Parameter queryParam : params.getQueryParameters(queryParamName)) {
           if (i++ > 0)
             urlBuilder = urlBuilder.invoke(APPEND, "&");
 
@@ -124,25 +125,27 @@ public class JaxrsProxyMethodGenerator {
         }
       }
     }
+    
+    // TODO MatrixParams
 
     if (urlBuilder != null)
       methodBlock.append(urlBuilder);
   }
 
   private void generateHeaders(BlockBuilder<?> methodBlock) {
-    JaxrsResourceMethodParameters parms = resourceMethod.getParameters();
+    JaxrsResourceMethodParameters params = resourceMethod.getParameters();
 
     for (String key : resourceMethod.getHeaders().keySet()) {
       methodBlock.append(Stmt.loadVariable("requestBuilder").invoke("setHeader", key, 
           resourceMethod.getHeaders().get(key)));
     }
     
-    if (parms.getHeaderParameters() != null) {
-      for (String headerParamName : parms.getHeaderParameters().keySet()) {
+    if (params.getHeaderParameters() != null) {
+      for (String headerParamName : params.getHeaderParameters().keySet()) {
         ContextualStatementBuilder headerValueBuilder = Stmt.nestedCall(Stmt.newObject(StringBuilder.class));
         
         int i = 0;
-        for (Parameter headerParam : parms.getHeaderParameters(headerParamName)) {
+        for (Parameter headerParam : params.getHeaderParameters(headerParamName)) {
           if (i++ > 0) {
             headerValueBuilder = headerValueBuilder.invoke(APPEND, ",");
           }
@@ -153,6 +156,8 @@ public class JaxrsProxyMethodGenerator {
             headerValueBuilder.invoke("toString")));
       }
     }
+    
+    // TODO CookieParams
   }
 
   private void generateRequestBuilder(BlockBuilder<?> methodBlock) {
@@ -202,10 +207,8 @@ public class JaxrsProxyMethodGenerator {
             .append(responseHandling)
             .finish()
             .else_()
-            .append(Stmt.declareVariable("throwable", RequestException.class,
-                 Stmt.newObject(RequestException.class).withParameters(
-                     Stmt.invokeStatic(Integer.class, "toString",
-                         Stmt.loadVariable("response").invoke("getStatusCode")))))
+            .append(Stmt.declareVariable("throwable", ResponseException.class,
+                 Stmt.newObject(ResponseException.class).withParameters(Variable.get("response"))))
             .append(errorHandling)
             .finish())
         .finish()
