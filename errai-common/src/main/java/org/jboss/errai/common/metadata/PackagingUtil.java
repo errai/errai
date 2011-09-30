@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.bus.server.service.metadata;
+package org.jboss.errai.common.metadata;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +28,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 /**
- * A set of utilities for processing a {@link org.jboss.errai.bus.server.service.metadata.DeploymentContext}
+ * A set of utilities for processing a {@link DeploymentContext}
  *
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Aug 9, 2010

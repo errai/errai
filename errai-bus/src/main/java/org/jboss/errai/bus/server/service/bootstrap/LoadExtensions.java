@@ -26,7 +26,7 @@ import org.jboss.errai.bus.server.api.ErraiConfig;
 import org.jboss.errai.bus.server.api.ErraiConfigExtension;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
-import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
+import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

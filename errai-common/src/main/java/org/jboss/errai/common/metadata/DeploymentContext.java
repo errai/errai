@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.bus.server.service.metadata;
+package org.jboss.errai.common.metadata;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +24,7 @@ import java.net.URL;
 import java.util.*;
 
 /**
- * DeploymentContext and {@link org.jboss.errai.bus.server.service.metadata.PackagingUtil}
+ * DeploymentContext and {@link PackagingUtil}
  * identify and unpack nested subdeployments (i.e. WAR inside EAR) before passing the resulting URL's to
  * the Reflections implementation.
  * <p/>

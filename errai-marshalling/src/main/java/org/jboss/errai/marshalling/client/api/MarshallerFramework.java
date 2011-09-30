@@ -46,6 +46,11 @@ public class MarshallerFramework implements EntryPoint {
     }
 
     @Override
+    public Marshaller<Object, Object> getArrayMarshallerForType(String fqcn) {
+      return null;
+    }
+
+    @Override
     public String determineTypeFor(String formatType, Object o) {
       JSONValue jsonValue = (JSONValue) o;
 

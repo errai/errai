@@ -6,6 +6,8 @@ package org.jboss.errai.marshalling.client.api;
 public interface MarshallingSession {
   public Marshaller<Object, Object> getMarshallerForType(String fqcn);
   
+  public Marshaller<Object, Object> getArrayMarshallerForType(String fqcn);
+  
   public String determineTypeFor(String formatType, Object o);
 
   //todo: list of available context.

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.bus.server.service.metadata;
+package org.jboss.errai.common.metadata;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
@@ -38,7 +38,7 @@ import static org.reflections.vfs.Vfs.UrlType;
 
 /**
  * Scans component meta data using javassist.
- * The scanner creates a {@link org.jboss.errai.bus.server.service.metadata.DeploymentContext}
+ * The scanner creates a {@link DeploymentContext}
  * that identifies nested subdeployments (i.e. WAR inside EAR) and processes the resulting archive Url's
  * using the <a href="http://code.google.com/p/reflections/">Reflections</a> library.
  * <p/>

@@ -16,7 +16,8 @@
 package org.jboss.errai.bus.server.service.bootstrap;
 
 import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
-import org.jboss.errai.bus.server.service.metadata.*;
+import org.jboss.errai.bus.server.service.ServiceProcessor;
+import org.jboss.errai.common.metadata.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

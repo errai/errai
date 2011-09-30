@@ -13,15 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.jboss.errai.common.metadata;
 
-package org.jboss.errai.bus.rebind;
+/**
+ * Shared scanner instance used with {@link com.google.gwt.core.ext.Generator}'s
+ *
+ * @author: Heiko Braun <hbraun@redhat.com>
+ * @date: Aug 4, 2010
+ */
+public class ScannerSingleton {
+  private static MetaDataScanner scanner;
 
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
-import com.google.gwt.user.rebind.SourceWriter;
-import org.jboss.errai.common.metadata.MetaDataScanner;
-
-public interface ExtensionGenerator {
-  public void generate(GeneratorContext context, TreeLogger logger, SourceWriter writer, MetaDataScanner scanner, TypeOracle oracle);
+  public static MetaDataScanner getOrCreateInstance() {
+    if (null == scanner)
+      scanner = MetaDataScanner.createInstance();
+    return scanner;
+  }
 }

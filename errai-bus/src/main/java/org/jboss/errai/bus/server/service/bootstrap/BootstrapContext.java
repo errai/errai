@@ -18,7 +18,7 @@ package org.jboss.errai.bus.server.service.bootstrap;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
-import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
+import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -24,7 +24,7 @@ import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.annotations.ExposeEntity;
 import org.jboss.errai.bus.server.annotations.Remote;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
-import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
+import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.mvel2.templates.CompiledTemplate;
 import org.mvel2.util.Make;
 import org.mvel2.util.ParseTools;
@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 

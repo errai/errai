@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.bus.server.service.metadata;
+package org.jboss.errai.common.metadata;
 
 import org.reflections.vfs.SystemDir;
 import org.reflections.vfs.Vfs;

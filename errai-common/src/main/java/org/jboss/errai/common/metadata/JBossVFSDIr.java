@@ -1,4 +1,4 @@
-package org.jboss.errai.bus.server.service.metadata;
+package org.jboss.errai.common.metadata;
 
 import org.jboss.vfs.VirtualFile;
 import org.reflections.vfs.Vfs;

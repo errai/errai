@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.bus.server.service.metadata;
+package org.jboss.errai.bus.server.service;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -39,9 +39,10 @@ import org.jboss.errai.bus.server.io.ConversationalEndpointCallback;
 import org.jboss.errai.bus.server.io.EndpointCallback;
 import org.jboss.errai.bus.server.io.RemoteServiceCallback;
 import org.jboss.errai.bus.server.security.auth.rules.RolesRequiredRule;
-import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
 import org.jboss.errai.bus.server.service.bootstrap.BootstrapContext;
 import org.jboss.errai.bus.server.service.bootstrap.GuiceProviderProxy;
+import org.jboss.errai.common.metadata.MetaDataProcessor;
+import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +57,7 @@ import java.util.Set;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Aug 3, 2010
  */
-public class ServiceProcessor implements MetaDataProcessor {
+public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
   private Logger log = LoggerFactory.getLogger(ServiceProcessor.class);
 
   public void process(final BootstrapContext context, MetaDataScanner reflections) {

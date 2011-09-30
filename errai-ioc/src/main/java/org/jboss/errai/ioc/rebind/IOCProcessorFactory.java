@@ -32,7 +32,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
+import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.Injector;
 import org.jboss.errai.ioc.rebind.ioc.InjectorFactory;

@@ -17,7 +17,7 @@
 package org.jboss.errai.bus.server.service;
 
 import org.jboss.errai.bus.client.api.ResourceProvider;
-import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
+import org.jboss.errai.common.metadata.MetaDataScanner;
 
 import java.util.Map;
 
@@ -38,7 +38,7 @@ public interface ErraiServiceConfigurator {
 
 
   /**
-   * Provides access to the {@link org.jboss.errai.bus.server.service.metadata.MetaDataScanner}
+   * Provides access to the {@link org.jboss.errai.common.metadata.MetaDataScanner}
    * that is used to read component annotation meta data.
    *
    * @return

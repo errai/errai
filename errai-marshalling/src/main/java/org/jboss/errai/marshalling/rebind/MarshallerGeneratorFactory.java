@@ -1,9 +1,8 @@
 package org.jboss.errai.marshalling.rebind;
 
-import org.jboss.errai.bus.rebind.ScannerSingleton;
-import org.jboss.errai.bus.server.annotations.ExposeEntity;
-import org.jboss.errai.bus.server.annotations.Portable;
-import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
+import org.jboss.errai.common.client.api.annotations.ExposeEntity;
+import org.jboss.errai.common.client.api.annotations.Portable;
+import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
@@ -11,6 +10,7 @@ import org.jboss.errai.codegen.framework.builder.ConstructorBlockBuilder;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.util.Stmt;
+import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.marshalling.client.api.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallerFactory;
@@ -81,8 +81,8 @@ public class MarshallerGeneratorFactory {
   private void generateMarshallers(ConstructorBlockBuilder<?> constructor, Context classContext) {
     MetaDataScanner scanner = MetaDataScanner.createInstance();
 
-    Set<Class<?>> exposed = new HashSet<Class<?>>(scanner.getTypesAnnotatedWith(ExposeEntity.class));
-    exposed.addAll(scanner.getTypesAnnotatedWith(Portable.class));
+    Set<Class<?>> exposed = new HashSet<Class<?>>(scanner.getTypesAnnotatedWith(Portable.class));
+    exposed.addAll(scanner.getTypesAnnotatedWith(ExposeEntity.class));
 
     for (Class<?> clazz : exposed) {
       mappingContext.registerGeneratedMarshaller(clazz.getName());

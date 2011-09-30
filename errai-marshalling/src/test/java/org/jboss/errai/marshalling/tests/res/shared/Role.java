@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.rebind;
+package org.jboss.errai.marshalling.tests.res.shared;
 
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
-import com.google.gwt.user.rebind.SourceWriter;
-import org.jboss.errai.common.metadata.MetaDataScanner;
+import org.jboss.errai.common.client.api.annotations.Portable;
 
-public interface ExtensionGenerator {
-  public void generate(GeneratorContext context, TreeLogger logger, SourceWriter writer, MetaDataScanner scanner, TypeOracle oracle);
+//@Portable
+public class Role {
+  private String roleName;
+
+  public String getRoleName() {
+    return roleName;
+  }
+
+  public void setRoleName(String roleName) {
+    this.roleName = roleName;
+  }
 }

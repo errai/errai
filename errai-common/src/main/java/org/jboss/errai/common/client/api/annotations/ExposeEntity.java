@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.rebind;
+package org.jboss.errai.common.client.api.annotations;
 
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
-import com.google.gwt.user.rebind.SourceWriter;
-import org.jboss.errai.common.metadata.MetaDataScanner;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public interface ExtensionGenerator {
-  public void generate(GeneratorContext context, TreeLogger logger, SourceWriter writer, MetaDataScanner scanner, TypeOracle oracle);
+@Deprecated
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface ExposeEntity {
 }

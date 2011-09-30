@@ -13,22 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.bus.rebind;
 
-import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
+package org.jboss.errai.marshalling.tests.res.shared;
 
-/**
- * Shared scanner instance used with {@link com.google.gwt.core.ext.Generator}'s
- *
- * @author: Heiko Braun <hbraun@redhat.com>
- * @date: Aug 4, 2010
- */
-public class ScannerSingleton {
-  private static MetaDataScanner scanner;
-
-  public static MetaDataScanner getOrCreateInstance() {
-    if (null == scanner)
-      scanner = MetaDataScanner.createInstance();
-    return scanner;
-  }
+public enum RecordType {
+  Checking, Savings
 }

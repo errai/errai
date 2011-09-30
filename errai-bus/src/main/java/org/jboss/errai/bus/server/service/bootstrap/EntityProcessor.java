@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.bus.server.service.metadata;
+package org.jboss.errai.bus.server.service.bootstrap;
 
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.annotations.ExposeEntity;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
-import org.jboss.errai.bus.server.service.bootstrap.BootstrapContext;
+import org.jboss.errai.common.metadata.MetaDataProcessor;
+import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.mvel2.ConversionHandler;
 import org.mvel2.DataConversion;
 import org.slf4j.Logger;
@@ -33,7 +34,7 @@ import java.util.Set;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Aug 3, 2010
  */
-public class EntityProcessor implements MetaDataProcessor {
+public class EntityProcessor implements MetaDataProcessor<BootstrapContext> {
   private Logger log = LoggerFactory.getLogger(EntityProcessor.class);
 
   public void process(BootstrapContext context, MetaDataScanner scanner) {
