@@ -15,7 +15,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <dependencies>
+   <dependencies>
         <dependency>
             <groupId>org.jboss.errai</groupId>
             <artifactId>errai-codegen</artifactId>
