@@ -9,7 +9,7 @@ import java.util.List;
  * @author Mike Brock <cbrock@redhat.com>
  */
 @Portable
-public class TestEntity {
+public class Entity {
   private final String foo;
   private final String foobar;
   private final String bar;
@@ -17,7 +17,7 @@ public class TestEntity {
 
   private int cachedHashCode = -1;
 
-  public TestEntity(@MapsTo("foo") String foo, @MapsTo("bar") String bar
+  public Entity(@MapsTo("foo") String foo, @MapsTo("bar") String bar
   //        , @MapsTo("entityList") List<TestEntity> entityList
   ) {
     this.foo = foo;
