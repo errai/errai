@@ -16,6 +16,8 @@
 
 package org.jboss.errai.samples.restdemo.client.shared;
 
+import java.util.List;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -24,10 +26,13 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 
-@Path("customer")
+@Path("customers")
 public interface CustomerService {
+  @GET
+  @Produces("application/json")
+  public List<Customer> listAllCustomers();
+ 
   @POST
   @Consumes("application/json")
   @Produces("text/plain")
@@ -37,7 +42,7 @@ public interface CustomerService {
   @Path("/{id}")
   @Consumes("application/json")
   @Produces("application/json")
-  public Customer updateCustomer(@PathParam("id") long id, Customer customer);
+  public void updateCustomer(@PathParam("id") long id, Customer customer);
 
   @DELETE
   @Path("/{id}")
@@ -45,18 +50,6 @@ public interface CustomerService {
 
   @GET
   @Path("/{id}")
-  @Produces("text/plain")
-  public String retrieveCustomerById(@PathParam("id") long id, @QueryParam("format") String format, @QueryParam("details") boolean details);
-  
-  @GET
-  @Path("/{id}")
-  @Produces("text/plain")
-  public String retrieveCustomerById(@PathParam("id") long id, @QueryParam("format") String format);
-  
-  @GET
-  @Path("/json/{id}")
   @Produces("application/json")
   public Customer retrieveCustomerById(@PathParam("id") long id);  
-  
-  public void noHttpMethod();
 }

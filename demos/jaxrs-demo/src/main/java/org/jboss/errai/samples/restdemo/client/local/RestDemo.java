@@ -16,6 +16,8 @@
 
 package org.jboss.errai.samples.restdemo.client.local;
 
+import java.util.List;
+
 import javax.annotation.PostConstruct;
 
 import org.jboss.errai.bus.client.api.RemoteCallback;
@@ -57,8 +59,18 @@ public class RestDemo {
     }
   };
   
-  final RemoteCallback<String> callback = new RemoteCallback<String>() {
-    public void callback(String response) {
+  final RemoteCallback<Customer> retrieveCallback = new RemoteCallback<Customer>() {
+    public void callback(Customer customer) {
+      Window.alert("retrieved customer: " + customer);
+    }
+  };
+  
+  final RemoteCallback<List<Customer>> listCallback = new RemoteCallback<List<Customer>>() {
+    public void callback(List<Customer> customers) {
+      String response = "";
+      for (Customer customer : customers) {
+        response += customer.toString();
+      }
       Window.alert("retrieved customer: " + response);
     }
   };
@@ -67,7 +79,7 @@ public class RestDemo {
   public void init() {
     final Button get = new Button("Get Customer", new ClickHandler() {
       public void onClick(ClickEvent clickEvent) {
-        RestClient.create(CustomerService.class, callback).retrieveCustomerById(getCustomerId(), "xml", true);
+        RestClient.create(CustomerService.class, retrieveCallback).retrieveCustomerById(getCustomerId());
       }
     });
 
@@ -90,6 +102,12 @@ public class RestDemo {
         RestClient.create(CustomerService.class, deletionCallback).deleteCustomer(getCustomerId());
       }
     });
+    
+    final Button list = new Button("List Customers", new ClickHandler() {
+      public void onClick(ClickEvent clickEvent) {
+        RestClient.create(CustomerService.class, listCallback).listAllCustomers();
+      }
+    });
 
     HorizontalPanel hPanel = new HorizontalPanel();
     hPanel.add(new Label("Customer ID: "));
@@ -105,6 +123,7 @@ public class RestDemo {
     vPanel.add(post);
     vPanel.add(put);
     vPanel.add(delete);
+    vPanel.add(list);
     RootPanel.get().add(vPanel);
   }
   

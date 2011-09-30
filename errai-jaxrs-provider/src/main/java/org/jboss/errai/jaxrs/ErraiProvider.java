@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.Collection;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
@@ -31,12 +32,12 @@ public class ErraiProvider implements MessageBodyReader<Object>, MessageBodyWrit
 
   @Override
   public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-    return type.isAnnotationPresent(ExposeEntity.class);
+    return type.isAnnotationPresent(ExposeEntity.class) || Collection.class.isAssignableFrom(type);
   }
   
   @Override
   public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-    return type.isAnnotationPresent(ExposeEntity.class);
+    return type.isAnnotationPresent(ExposeEntity.class) || Collection.class.isAssignableFrom(type);
   }
 
   @Override

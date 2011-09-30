@@ -16,48 +16,48 @@
 
 package org.jboss.errai.samples.restdemo.server;
 
-import java.util.Random;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.jboss.errai.samples.restdemo.client.shared.Customer;
 import org.jboss.errai.samples.restdemo.client.shared.CustomerService;
 
-
 public class CustomerServiceImpl implements CustomerService {
+
+  private Map<Long, Customer> customers = new HashMap<Long, Customer>() {
+    {
+      put(1l, new Customer(1, "Christian"));
+      put(2l, new Customer(2, "Mike"));
+      put(3l, new Customer(3, "Jonathan"));
+    }
+  };
 
   @Override
   public long createCustomer(Customer customer) {
-    customer.setId(new Random().nextInt());
+    customer.setId(customers.size()+1);
+    customers.put(customer.getId(), customer);
     return customer.getId();
   }
 
   @Override
-  public Customer updateCustomer(long id, Customer customer) {
-    return customer;
+  public void updateCustomer(long id, Customer customer) {
+    customers.put(id, customer);
   }
 
   @Override
   public void deleteCustomer(long id) {
-    System.out.println("deleted customer:" + id);
+    customers.remove(id);
   }
-
-  @Override
-  public String retrieveCustomerById(long id, String format, boolean details) {
-    return "customer:" + id + " format:" + format + " details:" + details;
-  }
-
-  @Override
-  public String retrieveCustomerById(long id, String format) {
-    return "customer:" + id + " format:" + format;
-  }
-
-  @Override
-  public void noHttpMethod() {}
 
   @Override
   public Customer retrieveCustomerById(long id) {
-    Customer c = new Customer();
-    c.setId(id);
-    c.setName("customer name");
-    return c;
+    return customers.get(id);
+  }
+
+  @Override
+  public List<Customer> listAllCustomers() {
+    return new ArrayList<Customer>(customers.values());
   }
 }
