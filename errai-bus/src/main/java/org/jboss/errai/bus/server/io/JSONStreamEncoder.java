@@ -99,11 +99,11 @@ public class JSONStreamEncoder {
     Class cls = o.getClass();
 
     if (java.util.Date.class.isAssignableFrom(cls)) {
-      outstream.write(("{__EncodedType:\"java.util.Date\", __ObjectID:\"" + o.hashCode() + "\", Value:" + ((java.util.Date) o).getTime() + "}").getBytes());
+      outstream.write(("{\"__EncodedType\":\"java.util.Date\", \"__ObjectID\":\"" + o.hashCode() + "\", \"Value\":" + ((java.util.Date) o).getTime() + "}").getBytes());
       return;
     }
     if (java.sql.Date.class.isAssignableFrom(cls)) {
-      outstream.write(("{__EncodedType:\"java.sql.Date\", __ObjectID:\"" + o.hashCode() + "\", Value:" + ((java.sql.Date) o).getTime() + "}").getBytes());
+      outstream.write(("{\"__EncodedType\":\"java.sql.Date\", \"__ObjectID\":\"" + o.hashCode() + "\", \"Value\":" + ((java.sql.Date) o).getTime() + "}").getBytes());
       return;
     }
 
@@ -240,7 +240,9 @@ public class JSONStreamEncoder {
 
   private static void encodeEnum(Enum enumer, OutputStream outstream, EncodingContext ctx) throws IOException {
     outstream.write('{');
+    outstream.write('\"');
     outstream.write(SerializationParts.ENCODED_TYPE.getBytes());
+    outstream.write('\"');
     outstream.write(':');
     outstream.write('\"');
     outstream.write(enumer.getClass().getName().getBytes());
