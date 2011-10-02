@@ -139,7 +139,9 @@ public class JSONStreamEncoder {
     outstream.write(SerializationParts.OBJECT_ID.getBytes());
     outstream.write('\"');
     outstream.write(':');
+    outstream.write('\"');
     outstream.write(String.valueOf(o.hashCode()).getBytes());
+    outstream.write('\"');
     outstream.write(',');
 
     final Field[] fields = EncodingUtil.getAllEncodingFields(cls);
