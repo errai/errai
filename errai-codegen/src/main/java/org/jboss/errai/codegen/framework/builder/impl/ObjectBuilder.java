@@ -24,7 +24,9 @@ import org.jboss.errai.codegen.framework.CallParameters;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.Variable;
+import org.jboss.errai.codegen.framework.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.BuildCallback;
+import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.StatementEnd;
 import org.jboss.errai.codegen.framework.builder.callstack.CallWriter;
 import org.jboss.errai.codegen.framework.builder.callstack.DeferredCallElement;
@@ -46,30 +48,35 @@ public class ObjectBuilder extends AbstractStatementBuilder {
 
   private MetaClass type;
   private Object[] parameters;
-  
+
   private Statement extendsBlock;
 
   ObjectBuilder(MetaClass type, Context context, CallElementBuilder callElementBuilder) {
     super(context, callElementBuilder);
-    this.type = type;
+    if (context != null) {
+      context.attachClass(type);
 
-    for (MetaField field : type.getDeclaredFields()) {
-      context.addVariable(Variable.create(field.getName(), field.getType()));
+      for (MetaField field : type.getDeclaredFields()) {
+        context.addVariable(Variable.create(field.getName(), field.getType()));
+      }
     }
+
+    this.type = type;
   }
 
   ObjectBuilder(MetaClass type, Context context) {
     this(type, context, new CallElementBuilder());
   }
-  
+
   ObjectBuilder(MetaClass type) {
     this(type, Context.create(), new CallElementBuilder());
   }
 
   ObjectBuilder() {
-     super(Context.create());
+    super(Context.create());
+    context.attachClass(type);
   }
-  
+
   public static ObjectBuilder newInstanceOf(MetaClass type) {
     return new ObjectBuilder(type);
   }
@@ -101,7 +108,7 @@ public class ObjectBuilder extends AbstractStatementBuilder {
   public static ObjectBuilder newInstanceOf(JClassType type, Context context) {
     return newInstanceOf(MetaClassFactory.get(type), context);
   }
-  
+
   public static ObjectBuilder newInstanceOf(MetaClass type, Context context, CallElementBuilder callElementBuilder) {
     return new ObjectBuilder(type, context, callElementBuilder);
   }
@@ -124,7 +131,7 @@ public class ObjectBuilder extends AbstractStatementBuilder {
   }
 
   //todo: return a builder interface -- not a concrete implementation
-  public AnonymousClassStructureBuilderImpl extend() {
+  public AnonymousClassStructureBuilder extend() {
     return new AnonymousClassStructureBuilderImpl(type, new BuildCallback<ObjectBuilder>() {
       @Override
       public ObjectBuilder callback(Statement statement) {
@@ -141,33 +148,33 @@ public class ObjectBuilder extends AbstractStatementBuilder {
 
   @Override
   public String generate(final Context context) {
-    
+
     appendCallElement(new DeferredCallElement(new DeferredCallback() {
       @Override
       public void doDeferred(CallWriter writer, Context context, Statement statement) {
         writer.reset();
-        
-        CallParameters callParameters = (parameters != null) ? 
-            fromStatements(GenUtil.generateCallParameters(context, parameters)) : CallParameters.none();
-         
-         if (!type.isInterface() && type.getBestMatchingConstructor(callParameters.getParameterTypes()) == null)
-           throw new UndefinedConstructorException(type, callParameters.getParameterTypes());
 
-         StringBuilder buf = new StringBuilder();
-         buf.append("new ").append(LoadClassReference.getClassReference(type, context, true));
-         if (callParameters != null) {
-           buf.append(callParameters.generate(Context.create(context)));
-         }
-         if (extendsBlock != null) {
-           for (MetaField field : type.getDeclaredFields()) {
-             context.addVariable(Variable.createClassMember(field.getName(), field.getType()));
-           }
-           buf.append(" {\n").append(extendsBlock.generate(context)).append("\n}\n");
-         }
-         writer.append(buf.toString());
+        CallParameters callParameters = (parameters != null) ?
+                fromStatements(GenUtil.generateCallParameters(context, parameters)) : CallParameters.none();
+
+        if (!type.isInterface() && type.getBestMatchingConstructor(callParameters.getParameterTypes()) == null)
+          throw new UndefinedConstructorException(type, callParameters.getParameterTypes());
+
+        StringBuilder buf = new StringBuilder();
+        buf.append("new ").append(LoadClassReference.getClassReference(type, context, true));
+        if (callParameters != null) {
+          buf.append(callParameters.generate(Context.create(context)));
+        }
+        if (extendsBlock != null) {
+          for (MetaField field : type.getDeclaredFields()) {
+            context.addVariable(Variable.createClassMember(field.getName(), field.getType()));
+          }
+          buf.append(" {\n").append(extendsBlock.generate(context)).append("\n}\n");
+        }
+        writer.append(buf.toString());
       }
     }));
-    
+
     return super.generate(context);
   }
 }

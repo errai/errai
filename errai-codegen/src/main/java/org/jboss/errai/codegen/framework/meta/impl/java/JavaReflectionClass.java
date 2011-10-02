@@ -145,6 +145,10 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
       return new JavaReflectionField(getEnclosedMetaObject().getDeclaredField(name));
     }
     catch (Exception e) {
+      if (getEnclosedMetaObject().isArray() && "length".equals(name)) {
+         return new MetaField.ArrayLengthMetaField(this);
+      }
+      
       throw new RuntimeException("Could not get field: " + name, e);
     }
   }

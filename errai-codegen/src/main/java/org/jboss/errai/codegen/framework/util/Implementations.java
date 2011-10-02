@@ -2,8 +2,12 @@ package org.jboss.errai.codegen.framework.util;
 
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.StringStatement;
+import org.jboss.errai.codegen.framework.Variable;
+import org.jboss.errai.codegen.framework.builder.BlockBuilder;
 import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.ContextualStatementBuilder;
+import org.jboss.errai.codegen.framework.builder.StatementEnd;
 import org.jboss.errai.codegen.framework.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
@@ -77,6 +81,12 @@ public class Implementations {
   
   public static interface StringBuilderBuilder extends Statement {
      public StringBuilderBuilder append(Object statement);
+  }
+  
+  public static BlockBuilder<StatementEnd> autoForLoop(String varName, Statement value) {
+    return Stmt.for_(Stmt.declareVariable(int.class).named("i").finish(),
+            Bool.lessThan(Variable.get("i"), value),
+            new StringStatement(varName + "++"));
   }
   
 }

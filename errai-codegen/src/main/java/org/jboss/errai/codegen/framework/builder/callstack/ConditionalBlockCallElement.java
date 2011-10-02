@@ -43,4 +43,9 @@ public class ConditionalBlockCallElement extends AbstractCallElement {
     writer.reset();
     writer.append(conditionalBlock.generate(Context.create(context)));
   }
+
+  @Override
+  public String toString() {
+    return "[Conditional<" + conditionalBlock + ">]";
+  }
 }

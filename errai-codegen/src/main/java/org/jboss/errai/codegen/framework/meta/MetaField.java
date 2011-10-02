@@ -35,4 +35,100 @@ public abstract class MetaField implements HasAnnotations, MetaClassMember {
   public int hashCode() {
     return toString().hashCode();
   }
+  
+  public static class ArrayLengthMetaField extends MetaField {
+
+    private MetaClass componentType;
+
+    public ArrayLengthMetaField(MetaClass componentType) {
+      this.componentType = componentType;
+    }
+
+    @Override
+    public MetaClass getType() {
+      return MetaClassFactory.get(int.class);
+    }
+
+    @Override
+    public MetaType getGenericType() {
+      return null;
+    }
+
+    @Override
+    public String getName() {
+      return "length";
+    }
+
+    @Override
+    public Annotation[] getAnnotations() {
+      return new Annotation[0];
+    }
+
+    @Override
+    public MetaClass getDeclaringClass() {
+      return componentType;
+    }
+
+    @Override
+    public boolean isAbstract() {
+      return false;
+    }
+
+    @Override
+    public boolean isPublic() {
+      return true;
+    }
+
+    @Override
+    public boolean isPrivate() {
+      return false;
+    }
+
+    @Override
+    public boolean isProtected() {
+      return false;
+    }
+
+    @Override
+    public boolean isFinal() {
+      return false;
+    }
+
+    @Override
+    public boolean isStatic() {
+      return false;
+    }
+
+    @Override
+    public boolean isTransient() {
+      return false;
+    }
+
+    @Override
+    public boolean isSynthetic() {
+      return false;
+    }
+
+    @Override
+    public boolean isVolatile() {
+      return false;
+    }
+
+    @Override
+    public boolean isSynchronized() {
+      return false;
+    }
+
+    @Override
+    public boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
+      return false;
+    }
+
+    @Override
+    public <A extends Annotation> A getAnnotation(Class<A> annotation) {
+      return null;
+    }
+  }
+  
+  
 }

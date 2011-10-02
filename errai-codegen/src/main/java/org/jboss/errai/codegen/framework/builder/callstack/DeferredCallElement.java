@@ -41,4 +41,9 @@ public class DeferredCallElement extends AbstractCallElement {
       getNext().handleCall(writer, context, statement);
     }
   }
+
+  @Override
+  public String toString() {
+    return "[DeferredEval<" + callback + ">]";
+  }
 }

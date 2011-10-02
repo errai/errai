@@ -24,6 +24,7 @@ import org.jboss.errai.codegen.framework.builder.Builder;
 import org.jboss.errai.codegen.framework.builder.StatementEnd;
 import org.jboss.errai.codegen.framework.builder.callstack.CallElement;
 import org.jboss.errai.codegen.framework.builder.callstack.CallWriter;
+import org.jboss.errai.codegen.framework.exception.*;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 
 /**
@@ -43,7 +44,7 @@ public abstract class AbstractStatementBuilder implements Statement, Builder, St
     this.context = context;
     this.callElementBuilder = new CallElementBuilder();
   }
-  
+
   protected AbstractStatementBuilder(Context context, CallElementBuilder callElementBuilder) {
     this(context);
     this.callElementBuilder = callElementBuilder;
@@ -51,8 +52,29 @@ public abstract class AbstractStatementBuilder implements Statement, Builder, St
 
   @Override
   public String generate(Context context) {
+
     CallWriter writer = new CallWriter();
-    callElementBuilder.getRootElement().handleCall(writer, context, null);
+    try {
+      callElementBuilder.getRootElement().handleCall(writer, context, null);
+    }
+    catch (OutOfScopeException e) {
+     throw e;
+    }
+    catch (InvalidExpressionException e) {
+      throw e;
+    }
+    catch (InvalidTypeException e) {
+      throw e;
+    }
+    catch (UndefinedMethodException e) {
+      throw e;
+    }
+    catch (TypeNotIterableException e) {
+      throw e;
+    }
+    catch (Exception e) {
+      throw new RuntimeException("generation failure at: " + writer.getCallString(), e);
+    }
     return prettyPrintJava(writer.getCallString());
   }
 

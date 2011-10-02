@@ -65,4 +65,9 @@ public class ThrowException extends AbstractCallElement {
     writer.reset();
     writer.append(statement.generate(context));
   }
+
+  @Override
+  public String toString() {
+    return "[Throw<" + throwableType.getName() + ">]";
+  }
 }

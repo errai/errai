@@ -56,6 +56,8 @@ public class GenUtil {
       throw new UndefinedMethodException("Wrong number of parameters");
     }
 
+    MetaParameter[] methParms = method.getParameters();
+
     Statement[] statements = new Statement[parameters.length];
     int i = 0;
     for (Object parameter : parameters) {
@@ -64,7 +66,7 @@ public class GenUtil {
           parameter = generate(context, parameter);
         }
       }
-      statements[i] = convert(context, parameter, method.getParameters()[i++].getType());
+      statements[i] = convert(context, parameter, methParms[i++].getType());
     }
     return statements;
   }
@@ -118,6 +120,10 @@ public class GenUtil {
         }
       }
 
+      if (Object.class.getName().equals(targetType.getFullyQualifiedName())) {
+        return generate(context, input);
+      }
+      
       Class<?> inputClass = input == null ? Object.class : input.getClass();
       Class<?> targetClass = targetType.asBoxed().asClass();
       if (DataConversion.canConvert(targetClass, inputClass)) {
@@ -256,26 +262,41 @@ public class GenUtil {
     return defModifiers;
   }
 
-  public static boolean equals(MetaConstructor a, MetaConstructor b) {
-    if (!a.getName().equals(b.getName())) return false;
-    if (a.getParameters().length != b.getParameters().length) return false;
-
-    for (int i = 0; i < a.getParameters().length; i++) {
-      if (!equals(a.getParameters()[i], b.getParameters()[i])) return false;
-    }
-    return true;
+  public static boolean equals(MetaField a, MetaField b) {
+    return a.getName().equals(b.getName()) && !a.getType().equals(b.getType())
+            && !a.getDeclaringClass().equals(b.getDeclaringClass());
   }
 
+  public static boolean equals(MetaConstructor a, MetaConstructor b) {
+//    if (!a.getName().equals(b.getName())) return false;
+    if (a.getParameters().length != b.getParameters().length){
+      return false;
+    }
+
+    for (int i = 0; i < a.getParameters().length; i++) {
+      if (!equals(a.getParameters()[i], b.getParameters()[i])) {
+        return false;
+      }
+    }
+
+    if (!a.getDeclaringClass().equals(b.getDeclaringClass())) {
+      return false;
+    }
+
+    return true;
+  }
 
   public static boolean equals(MetaMethod a, MetaMethod b) {
     if (!a.getName().equals(b.getName())) return false;
     if (a.getParameters().length != b.getParameters().length) return false;
+    if (!a.getDeclaringClass().equals(b.getDeclaringClass())) return false;
 
     for (int i = 0; i < a.getParameters().length; i++) {
       if (!equals(a.getParameters()[i], b.getParameters()[i])) return false;
     }
     return true;
   }
+
 
   public static boolean equals(MetaParameter a, MetaParameter b) {
     return a.getType().isAssignableFrom(b.getType()) || b.getType().isAssignableFrom(a.getType());

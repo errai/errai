@@ -45,4 +45,9 @@ public class AssignVariable extends AbstractCallElement {
             value));
     nextOrReturn(writer, context, s);
   }
+
+  @Override
+  public String toString() {
+    return "[Assignment<" + operator.getCanonicalString() + ":" + value + ">]";
+  }
 }

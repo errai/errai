@@ -25,6 +25,7 @@ import org.jboss.errai.codegen.framework.builder.impl.Scope;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaField;
 import org.jboss.errai.codegen.framework.meta.MetaType;
+import org.jboss.errai.codegen.framework.util.GenUtil;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -177,12 +178,16 @@ public class BuildMetaField extends MetaField implements Builder {
     this.statement = statement;
   }
 
-
   @Override
   public String toJavaString() {
     declaringClass.getContext().addVariable(Variable.createClassMember(name, type));
 
     return statement.generate(declaringClass.getContext());
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    return o instanceof MetaField && GenUtil.equals(this, (MetaField) o);
   }
 
 }

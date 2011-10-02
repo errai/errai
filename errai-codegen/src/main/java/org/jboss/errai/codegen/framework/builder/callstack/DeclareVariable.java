@@ -39,6 +39,6 @@ public class DeclareVariable extends AbstractCallElement {
   }
 
   public String toString() {
-    return "DeclareVariable:" + variable;
+    return "[DeclareVariable<" + variable + ">]";
   }
 }

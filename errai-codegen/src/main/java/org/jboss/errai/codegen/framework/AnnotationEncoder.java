@@ -16,7 +16,7 @@
 
 package org.jboss.errai.codegen.framework;
 
-import org.jboss.errai.codegen.framework.builder.impl.AnonymousClassStructureBuilderImpl;
+import org.jboss.errai.codegen.framework.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
@@ -36,7 +36,8 @@ public class AnnotationEncoder {
     return new Statement() {
       @Override
       public String generate(Context context) {
-        final AnonymousClassStructureBuilderImpl builder = ObjectBuilder.newInstanceOf(annotationClass, context)
+        final AnonymousClassStructureBuilder builder
+                = ObjectBuilder.newInstanceOf(annotationClass, context)
                 .extend();
 
         Class<? extends Annotation> annoClass = annotation.getClass();

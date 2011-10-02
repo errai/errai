@@ -22,10 +22,12 @@ import org.jboss.errai.codegen.framework.CallParameters;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.MethodInvocation;
 import org.jboss.errai.codegen.framework.Statement;
-import org.jboss.errai.codegen.framework.exception.UndefinedMethodException;
+import org.jboss.errai.codegen.framework.exception.*;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.util.GenUtil;
+
+import java.util.Arrays;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -49,20 +51,51 @@ public class MethodCall extends AbstractCallElement {
 
   @Override
   public void handleCall(CallWriter writer, Context context, Statement statement) {
-    CallParameters callParams = fromStatements(GenUtil.generateCallParameters(context, parameters));
+    try {
+      CallParameters callParams = fromStatements(GenUtil.generateCallParameters(context, parameters));
 
-    statement.generate(context);
+      statement.generate(context);
+      
+      MetaClass callType = statement.getType();
 
-    MetaClass[] parameterTypes = callParams.getParameterTypes();
-    MetaMethod method = (staticMethod) ? statement.getType().getBestMatchingStaticMethod(methodName, parameterTypes)
-            : statement.getType().getBestMatchingMethod(methodName, parameterTypes);
-    if (method == null) {
-      throw new UndefinedMethodException(statement.getType(), methodName, parameterTypes);
+      MetaClass[] parameterTypes = callParams.getParameterTypes();
+      MetaMethod method = (staticMethod) ? callType.getBestMatchingStaticMethod(methodName, parameterTypes)
+              : callType.getBestMatchingMethod(methodName, parameterTypes);
+
+      if (method == null) {
+        throw new UndefinedMethodException(statement.getType(), methodName, parameterTypes);
+      }
+
+      /**
+       * If the method is within the calling scope, we can strip the qualifying reference.
+       */
+      if (statement instanceof LoadClassReference.ClassReference && context.isInScope(method)) {
+        writer.reset();
+      }
+
+      callParams = fromStatements(GenUtil.generateCallParameters(method, context, parameters));
+      statement = new MethodInvocation(method, callParams);
+
+
+      nextOrReturn(writer, context, statement);
     }
-
-    callParams = fromStatements(GenUtil.generateCallParameters(method, context, parameters));
-    statement = new MethodInvocation(method, callParams);
-
-    nextOrReturn(writer, context, statement);
+    catch (OutOfScopeException e) {
+     throw e;
+    }
+    catch (InvalidExpressionException e) {
+      throw e;
+    }
+    catch (InvalidTypeException e) {
+      throw e;
+    }
+    catch (UndefinedMethodException e) {
+      throw e;
+    }
+    catch (TypeNotIterableException e) {
+      throw e;
+    }
+    catch (Exception e) {
+      throw new RuntimeException("error generating method call for: " + methodName + "(" + Arrays.toString(parameters) + ")", e);
+    }
   }
 }

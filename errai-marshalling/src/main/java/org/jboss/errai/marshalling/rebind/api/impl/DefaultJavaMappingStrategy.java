@@ -4,6 +4,7 @@ import com.google.gwt.json.client.JSONObject;
 import org.jboss.errai.codegen.framework.Cast;
 import org.jboss.errai.codegen.framework.Parameter;
 import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.AnonymousClassStructureBuilderImpl;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
@@ -18,6 +19,7 @@ import org.jboss.errai.marshalling.client.api.MappedOrdered;
 import org.jboss.errai.marshalling.client.api.MapsTo;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
+import org.jboss.errai.marshalling.client.api.exceptions.InvalidMappingException;
 import org.jboss.errai.marshalling.client.api.exceptions.NoAvailableMarshallerException;
 import org.jboss.errai.marshalling.rebind.api.MappingContext;
 import org.jboss.errai.marshalling.rebind.api.MappingStrategy;
@@ -76,7 +78,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
     return new ObjectMapper() {
       @Override
       public Statement getMarshaller() {
-        AnonymousClassStructureBuilderImpl classStructureBuilder
+        AnonymousClassStructureBuilder classStructureBuilder
                 = Stmt.create(context.getCodegenContext())
                 .newObject(parameterizedAs(Marshaller.class, typeParametersOf(JSONObject.class, toMap))).extend();
 
@@ -141,7 +143,19 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                 break FieldScan;
               }
               else {
-                mappings.add(new FieldMapping(i, ((MapsTo) a).value(), c.getParameterTypes()[i]));
+                MapsTo mapsTo = (MapsTo) a;
+                String fieldName = mapsTo.value();
+
+                try {
+                  toMap.getDeclaredField(fieldName);
+                }
+                catch (NoSuchFieldException e) {
+                  throw new InvalidMappingException(MapsTo.class.getCanonicalName()
+                          + " refers to a field ('" + fieldName + "') which does not exist in the class: "
+                          + toMap.getName());
+                }
+
+                mappings.add(new FieldMapping(fieldName, c.getParameterTypes()[i]));
               }
             }
           }
@@ -185,18 +199,12 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
   }
 
   private static class FieldMapping {
-    int index;
     String fieldName;
     Class<?> type;
 
-    private FieldMapping(int index, String fieldName, Class<?> type) {
-      this.index = index;
+    private FieldMapping(String fieldName, Class<?> type) {
       this.fieldName = fieldName;
       this.type = type;
-    }
-
-    public int getIndex() {
-      return index;
     }
 
     public String getFieldName() {

@@ -54,11 +54,13 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
     this.classDefinition = new BuildMetaClass(context);
     this.classDefinition.setClassName(className);
     this.classDefinition.setSuperClass(parent);
+    context.attachClass(classDefinition);
   }
 
   ClassBuilder(ClassBuilder<T> that, Context context) {
     this.classDefinition = that.classDefinition;
     this.classDefinition.setContext(context);
+    context.attachClass(classDefinition);
   }
 
   public static ClassDefinitionBuilderScope<?> define(String fullyQualifiedName) {
@@ -447,7 +449,7 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
     }, scope, type, name);
   }
 
-  public BuildMetaClass getClassDefinition() {
+  public MetaClass getClassDefinition() {
     return classDefinition;
   }
 

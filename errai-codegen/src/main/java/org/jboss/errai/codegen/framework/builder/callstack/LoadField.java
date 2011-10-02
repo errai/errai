@@ -78,4 +78,9 @@ public class LoadField extends AbstractCallElement {
 
     nextOrReturn(writer, context, statement);
   }
+
+  @Override
+  public String toString() {
+    return "[LoadField<" + fieldName + ">]";
+  }
 }

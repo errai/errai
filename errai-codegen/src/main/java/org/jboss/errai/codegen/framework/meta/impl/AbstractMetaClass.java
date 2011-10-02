@@ -292,8 +292,9 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   @Override
   public boolean isAssignableFrom(MetaClass clazz) {
-    if (equals(MetaClassFactory.get(Object.class)) && clazz.isInterface())
+    if (equals(MetaClassFactory.get(Object.class)))
       return true;
+
 
     MetaClass cls = clazz;
     do {
@@ -307,7 +308,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   @Override
   public boolean isAssignableTo(MetaClass clazz) {
-    if (isInterface() && clazz.equals(MetaClassFactory.get(Object.class)))
+    if (clazz.equals(MetaClassFactory.get(Object.class)))
       return true;
 
     MetaClass cls = this;
@@ -358,8 +359,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   @Override
   public boolean equals(Object o) {
-    return o instanceof MetaClass && hashString().equals(MetaClass.class.getName()
-            + ":" + ((MetaClass) o).getFullyQualifiedName());
+    return o instanceof AbstractMetaClass && hashString().equals(((AbstractMetaClass) o).hashString());
   }
 
   @Override
@@ -481,5 +481,10 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
 
     return dimString + name;
+  }
+
+  @Override
+  public String toString() {
+    return getCanonicalName();
   }
 }

@@ -26,30 +26,31 @@ import org.jboss.errai.codegen.framework.builder.callstack.LoadClassReference;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.util.GenUtil;
+import org.jboss.errai.codegen.framework.util.Stmt;
 
 /**
  * StatementBuilder to create and initialize Arrays.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayBuilder, ArrayInitializationBuilder {
   private MetaClass type;
   private MetaClass componentType;
-  private Integer[] dimensions;
-  private Object values = null;;
+  private Object[] dimensions;
+  private Object values = null;
 
   protected ArrayBuilderImpl(Context context, CallElementBuilder callElementBuilder) {
     super(context, callElementBuilder);
   }
 
-  @Override
-  public ArrayInitializationBuilder newArray(Class<?> componentType) {
-    return newArray(componentType, new Integer[1]);
-  }
+//  @Override
+//  public ArrayInitializationBuilder newArray(Class<?> componentType) {
+//    return newArray(componentType);
+//  }
 
   @Override
-  public ArrayInitializationBuilder newArray(Class<?> componentType, Integer... dimensions) {
-    this.type = MetaClassFactory.get(Array.newInstance(componentType, 0).getClass());
+  public ArrayInitializationBuilder newArray(Class<?> componentType, Object... dimensions) {
+    this.type = MetaClassFactory.getArrayOf(componentType, dimensions.length == 0 ? 1 : dimensions.length);
     this.componentType = MetaClassFactory.get(componentType);
     this.dimensions = dimensions;
     return this;
@@ -58,14 +59,15 @@ public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayB
   @Override
   public AbstractStatementBuilder initialize(Object... values) {
     if (values.length == 1 && values[0].getClass().isArray()
-        && values.getClass().getComponentType().equals(Object.class)) {
+            && values.getClass().getComponentType().equals(Object.class)) {
       // this is a workaround for the jdt compiler which is coercing a multi-dimensional array
       // into the first element of our vararg instead of flattening it out (like javac does).
       this.values = values[0];
-    } else {
+    }
+    else {
       this.values = values;
     }
-    
+
     return this;
   }
 
@@ -83,11 +85,30 @@ public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayB
       generateWithInitialization(buf);
     }
     else {
-      for (Integer dimension : dimensions) {
-        if (dimension == null)
-          throw new RuntimeException("Must provide either dimension expressions or an array initializer");
+      int i = 0;
 
-        buf.append("[").append(dimension).append("]");
+      for (Object dimension : dimensions) {
+        try {
+          if (dimension == null) {
+            if (i == 0) {
+              i--;
+              break;
+            }
+            else {
+              buf.append("[]");
+            }
+          }
+          else {
+            buf.append("[").append(GenUtil.generate(context, dimension).generate(context)).append("]");
+          }
+        }
+        finally {
+          i++;
+        }
+      }
+
+      if (i == 0) {
+        throw new RuntimeException("Must provide either dimension expressions or an array initializer");
       }
     }
 

@@ -115,7 +115,21 @@ public final class MetaClassFactory {
   public static MetaClass get(Class<?> clazz) {
     return createOrGet(clazz);
   }
+  
+  public static MetaClass getArrayOf(Class<?> clazz, int dims) {
+    int[] da = new int[dims];
+    for (int i = 0; i < da.length; i++) {
+      da[i] = 0;
+    }
+    
+    return getArrayOf(clazz, da);
+  }
 
+  public static MetaClass getArrayOf(Class<?> clazz, int... dims) {
+    return createOrGet(Array.newInstance(clazz, dims).getClass());
+  }
+  
+  
   public static MetaClass get(Class<?> clazz, Type type) {
     return createOrGet(clazz, type);
   }

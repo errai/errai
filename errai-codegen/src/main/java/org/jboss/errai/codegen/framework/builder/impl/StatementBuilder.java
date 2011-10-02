@@ -18,6 +18,7 @@ package org.jboss.errai.codegen.framework.builder.impl;
 
 import javax.enterprise.util.TypeLiteral;
 
+import com.google.gwt.core.ext.typeinfo.JClassType;
 import org.jboss.errai.codegen.framework.BooleanExpression;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Statement;
@@ -192,6 +193,24 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
     return new ContextualStatementBuilderImpl(context, callElementBuilder);
   }
 
+  @Override
+  public ContextualStatementBuilder loadClassReference(Object o) {
+    MetaClass c;
+    if (o instanceof MetaClass) {
+      c = (MetaClass) o;
+    }
+    else if (o instanceof Class) {
+      c = MetaClassFactory.get((Class) o);
+    }
+    else if (o instanceof JClassType) {
+      c = MetaClassFactory.get((JClassType) o);
+    }
+    else {
+      throw new RuntimeException("unknown class reference type: " + (o == null ? "null" : o.getClass().getName()));
+    }
+    appendCallElement(new LoadClassReference(c));
+    return new ContextualStatementBuilderImpl(context, callElementBuilder);
+  }
 
   @Override
   public ContextualStatementBuilder invokeStatic(MetaClass clazz, String methodName, Object... parameters) {
@@ -238,13 +257,13 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
     return ObjectBuilder.newInstanceOf(type, context, callElementBuilder);
   }
 
-  @Override
-  public ArrayInitializationBuilder newArray(Class<?> componentType) {
-    return new ArrayBuilderImpl(context, callElementBuilder).newArray(componentType);
-  }
+//  @Override
+//  public ArrayInitializationBuilder newArray(Class<?> componentType) {
+//    return new ArrayBuilderImpl(context, callElementBuilder).newArray(componentType);
+//  }
 
   @Override
-  public ArrayInitializationBuilder newArray(Class<?> componentType, Integer... dimensions) {
+  public ArrayInitializationBuilder newArray(Class<?> componentType, Object... dimensions) {
     return new ArrayBuilderImpl(context, callElementBuilder).newArray(componentType, dimensions);
   }
 

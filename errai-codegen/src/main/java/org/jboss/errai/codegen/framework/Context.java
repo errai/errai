@@ -16,13 +16,7 @@
 
 package org.jboss.errai.codegen.framework;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.enterprise.util.TypeLiteral;
 
@@ -30,6 +24,8 @@ import org.jboss.errai.codegen.framework.control.branch.Label;
 import org.jboss.errai.codegen.framework.control.branch.LabelReference;
 import org.jboss.errai.codegen.framework.exception.OutOfScopeException;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaField;
+import org.jboss.errai.codegen.framework.meta.MetaMethod;
 
 /**
  * This class represents a context in which {@link Statement}s are generated.
@@ -49,9 +45,12 @@ public class Context {
   private Set<String> importedClasses;
   private boolean autoImports = false;
 
+  private List<MetaClass> classContexts;
+
   private Context() {
     importedPackages = new HashSet<String>();
     importedPackages.add("java.lang");
+    classContexts = new ArrayList<MetaClass>();
   }
 
   private Context(Context parent) {
@@ -155,6 +154,9 @@ public class Context {
   }
 
   public boolean hasClassImport(MetaClass clazz) {
+    if (clazz.isArray()) {
+      clazz = clazz.getComponentType();
+    }
     return importedClasses != null && importedClasses.contains(clazz.getFullyQualifiedName());
   }
 
@@ -239,7 +241,41 @@ public class Context {
     return importedClasses;
   }
 
+  public void attachClass(MetaClass clazz) {
+    this.classContexts.add(clazz);
+  }
+
+  public boolean isInScope(MetaMethod method) {
+    Context c = this;
+    do {
+      for (MetaClass clazz : c.classContexts) {
+        for (MetaMethod m : clazz.getDeclaredMethods()) {
+          if (m.equals(method)) return true;
+        }
+      }
+    } while ((c = c.parent) != null);
+
+    return false;
+  }
+
+  public boolean isInScope(MetaField field) {
+    Context c = this;
+    do {
+      for (MetaClass clazz : c.classContexts) {
+        for (MetaField m : clazz.getDeclaredFields()) {
+          if (m.equals(field)) return true;
+        }
+      }
+    } while ((c = c.parent) != null);
+
+    return false;
+  }
+
   public boolean isAutoImports() {
     return autoImports;
+  }
+
+  public boolean hasParent() {
+    return parent != null;
   }
 }

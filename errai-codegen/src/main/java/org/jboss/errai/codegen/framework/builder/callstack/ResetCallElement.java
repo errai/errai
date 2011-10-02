@@ -28,4 +28,9 @@ public class ResetCallElement extends AbstractCallElement {
     writer.reset();
     nextOrReturn(writer, context, null);
   }
+
+  @Override
+  public String toString() {
+    return "[StackReset]";
+  }
 }

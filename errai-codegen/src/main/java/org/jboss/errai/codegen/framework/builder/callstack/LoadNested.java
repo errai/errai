@@ -66,4 +66,9 @@ public class LoadNested extends AbstractCallElement {
   public void handleCall(CallWriter writer, Context context, Statement statement) {
     nextOrReturn(writer, context, this.statement);
   }
+
+  @Override
+  public String toString() {
+    return "[Nest<" + statement + ">]";
+  }
 }

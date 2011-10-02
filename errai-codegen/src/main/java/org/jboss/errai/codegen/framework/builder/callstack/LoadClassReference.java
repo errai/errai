@@ -37,21 +37,27 @@ public class LoadClassReference extends AbstractCallElement {
   public void handleCall(CallWriter writer, Context context, Statement statement) {
     writer.reset();
 
-    statement = new Statement() {
-      @Override
-      public String generate(Context context) {
-        return getClassReference(metaClass, context);
-      }
-
-      @Override
-      public MetaClass getType() {
-        return metaClass;
-      }
-    };
-
-    nextOrReturn(writer, context, statement);
+    nextOrReturn(writer, context, new ClassReference(metaClass));
   }
 
+  public static class ClassReference implements Statement {
+    private MetaClass metaClass;
+
+    public ClassReference(MetaClass metaClass) {
+      this.metaClass = metaClass;
+    }
+
+    @Override
+    public String generate(Context context) {
+      return getClassReference(metaClass, context);
+    }
+
+    @Override
+    public MetaClass getType() {
+      return metaClass;
+    }
+  }
+  
   public static String getClassReference(MetaType metaClass, Context context) {
     return getClassReference(metaClass, context, false);
   }

@@ -61,6 +61,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   public BuildMetaClass(Context context) {
     super(null);
     this.context = context;
+    context.attachClass(this);
   }
 
   @Override
@@ -423,38 +424,12 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     }
 
 
-
     superClass = (superClass != null) ? superClass : MetaClassFactory.get(Object.class);
     context.addVariable(Variable.create("super", superClass));
 
     buf.append(" {\n");
 
-    Iterator<? extends Builder> iter = fields.iterator();
-    while (iter.hasNext()) {
-      buf.append(iter.next().toJavaString());
-      if (iter.hasNext())
-        buf.append("\n");
-    }
-
-    if (!fields.isEmpty())
-      buf.append("\n");
-
-    iter = constructors.iterator();
-    while (iter.hasNext()) {
-      buf.append(iter.next().toJavaString());
-      if (iter.hasNext())
-        buf.append("\n");
-    }
-
-    if (!constructors.isEmpty())
-      buf.append("\n");
-
-    iter = methods.iterator();
-    while (iter.hasNext()) {
-      buf.append(iter.next().toJavaString());
-      if (iter.hasNext())
-        buf.append("\n");
-    }
+    buf.append(membersToString());
 
     StringBuilder headerBuffer = new StringBuilder();
 
@@ -482,5 +457,36 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     }
 
     return PrettyPrinter.prettyPrintJava(headerBuffer.toString() + buf.append("}\n").toString());
+  }
+  
+  public String membersToString() {
+    StringBuilder buf = new StringBuilder();
+    Iterator<? extends Builder> iter = fields.iterator();
+    while (iter.hasNext()) {
+      buf.append(iter.next().toJavaString());
+      if (iter.hasNext())
+        buf.append("\n");
+    }
+
+    if (!fields.isEmpty())
+      buf.append("\n");
+
+    iter = constructors.iterator();
+    while (iter.hasNext()) {
+      buf.append(iter.next().toJavaString());
+      if (iter.hasNext())
+        buf.append("\n");
+    }
+
+    if (!constructors.isEmpty())
+      buf.append("\n");
+
+    iter = methods.iterator();
+    while (iter.hasNext()) {
+      buf.append(iter.next().toJavaString());
+      if (iter.hasNext())
+        buf.append("\n");
+    }
+    return buf.toString();
   }
 }

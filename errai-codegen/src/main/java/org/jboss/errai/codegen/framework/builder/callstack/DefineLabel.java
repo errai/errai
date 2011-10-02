@@ -39,4 +39,9 @@ public class DefineLabel extends AbstractCallElement {
     writer.reset();
     writer.append(label.generate(context));
   }
+
+  @Override
+  public String toString() {
+    return "[Label<" + name + ">]";
+  }
 }

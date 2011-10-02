@@ -30,4 +30,9 @@ public class ReturnValue extends AbstractCallElement {
 
     writer.append("return ").append(buf);
   }
+
+  @Override
+  public String toString() {
+    return "[Return]";
+  }
 }

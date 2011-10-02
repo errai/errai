@@ -53,7 +53,7 @@ public class Stmt {
     return StatementBuilder.create().newArray(componentType);
   }
 
-  public static ArrayInitializationBuilder newArray(Class<?> componentType, Integer... dimensions) {
+  public static ArrayInitializationBuilder newArray(Class<?> componentType, Object... dimensions) {
     return StatementBuilder.create().newArray(componentType, dimensions);
   }
 
@@ -132,6 +132,10 @@ public class Stmt {
 
   public static ContextualStatementBuilder load(Object o) {
     return StatementBuilder.create().load(o);
+  }
+
+  public static ContextualStatementBuilder loadClassReference(Object o) {
+    return StatementBuilder.create().loadClassReference(o);
   }
 
   public static ContextualStatementBuilder invokeStatic(MetaClass clazz, String methodName, Object... parameters) {

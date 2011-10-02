@@ -34,4 +34,9 @@ public class DynamicLoad extends AbstractCallElement {
   public void handleCall(CallWriter writer, Context context, Statement statement) {
     nextOrReturn(writer, context, GenUtil.generate(context, value));
   }
+
+  @Override
+  public String toString() {
+    return "[DynamicLoad<" + value + ">]";
+  }
 }

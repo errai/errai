@@ -35,4 +35,9 @@ public class LoadLiteral extends AbstractCallElement {
     writer.reset();
     nextOrReturn(writer, context, LiteralFactory.getLiteral(literalValue));
   }
+
+  @Override
+  public String toString() {
+    return "[Literal<" + literalValue + ">]";
+  }
 }
