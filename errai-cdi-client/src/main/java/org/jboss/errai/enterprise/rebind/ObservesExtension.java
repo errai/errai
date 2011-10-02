@@ -24,6 +24,7 @@ import javax.enterprise.util.TypeLiteral;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.annotations.Local;
 import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.codegen.framework.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.enterprise.client.cdi.AbstractCDIEventCallback;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
@@ -71,9 +72,9 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
     final Annotation[] qualifiers = InjectUtil.extractQualifiers(instance).toArray(new Annotation[0]);
     final Set<String> qualifierNames = CDI.getQualifiersPart(qualifiers);
 
-    AnonymousClassStructureBuilderImpl callBack = Stmt.newObject(AbstractCDIEventCallback.class).extend();
+    AnonymousClassStructureBuilder callBack = Stmt.newObject(AbstractCDIEventCallback.class).extend();
 
-    BlockBuilder<AnonymousClassStructureBuilderImpl> callBackBlock;
+    BlockBuilder<AnonymousClassStructureBuilder> callBackBlock;
     if (qualifierNames != null) {
       callBackBlock = callBack.initialize();
       for (String qualifierName : qualifierNames) {
