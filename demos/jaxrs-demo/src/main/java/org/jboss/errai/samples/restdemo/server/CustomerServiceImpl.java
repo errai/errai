@@ -17,20 +17,22 @@
 package org.jboss.errai.samples.restdemo.server;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.jboss.errai.samples.restdemo.client.shared.Customer;
 import org.jboss.errai.samples.restdemo.client.shared.CustomerService;
 
 public class CustomerServiceImpl implements CustomerService {
 
-  private Map<Long, Customer> customers = new HashMap<Long, Customer>() {
+  private static Map<Long, Customer> customers = new ConcurrentHashMap<Long, Customer>() {
     {
-      put(1l, new Customer(1, "Christian"));
-      put(2l, new Customer(2, "Mike"));
-      put(3l, new Customer(3, "Jonathan"));
+      put(1l, new Customer(1, "Christian", "Sadilek"));
+      put(2l, new Customer(2, "Mike", "Brock"));
+      put(3l, new Customer(3, "Jonathan", "Fuerth"));
     }
   };
 
@@ -42,8 +44,10 @@ public class CustomerServiceImpl implements CustomerService {
   }
 
   @Override
-  public void updateCustomer(long id, Customer customer) {
-    customers.put(id, customer);
+  public Customer updateCustomer(long id, Customer customer) {
+   customers.put(id, customer);
+   customer.setLastChanged(new Date());
+   return customer;
   }
 
   @Override
@@ -58,6 +62,8 @@ public class CustomerServiceImpl implements CustomerService {
 
   @Override
   public List<Customer> listAllCustomers() {
-    return new ArrayList<Customer>(customers.values());
+    List<Customer> customers = new ArrayList<Customer>(CustomerServiceImpl.customers.values());
+    Collections.sort(customers);
+    return customers;
   }
 }

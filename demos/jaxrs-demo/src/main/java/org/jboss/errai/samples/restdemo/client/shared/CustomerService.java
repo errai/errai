@@ -42,7 +42,7 @@ public interface CustomerService {
   @Path("/{id}")
   @Consumes("application/json")
   @Produces("application/json")
-  public void updateCustomer(@PathParam("id") long id, Customer customer);
+  public Customer updateCustomer(@PathParam("id") long id, Customer customer);
 
   @DELETE
   @Path("/{id}")
