@@ -74,16 +74,13 @@ import java.util.Map;
  *
  * @see ConversationMessage
  */
-@SuppressWarnings({"GwtInconsistentSerializableClass"})
+@SuppressWarnings({"GwtInconsistentSerializableClass", "UnusedDeclaration"})
 public class CommandMessage implements Message {
   protected transient Map<String, ResourceProvider> providedParts;
   protected Map<String, Object> parts;
   protected transient Map<String, Object> resources;
   protected ErrorCallback errorsCall;
   protected int routingFlags;
-
-  public static final int ROUTE_GLOBAL = 1;
-  public static final int PRIORITY_ROUTING = 2;
 
   /**
    * @param commandType -
@@ -168,8 +165,7 @@ public class CommandMessage implements Message {
 
   /**
    * Return the specified message subject.
-   *
-   * @return
+   * @return -
    */
   public String getSubject() {
     return String.valueOf(parts.get(MessageParts.ToSubject.name()));
@@ -189,8 +185,8 @@ public class CommandMessage implements Message {
   /**
    * Set the optional command type.
    *
-   * @param type
-   * @return
+   * @param type -
+   * @return -
    */
   public Message command(Enum type) {
     parts.put(MessageParts.CommandType.name(), type.name());
@@ -200,8 +196,8 @@ public class CommandMessage implements Message {
   /**
    * Set the optional command type.
    *
-   * @param type
-   * @return
+   * @param type -
+   * @return -
    */
   public Message command(String type) {
     parts.put(MessageParts.CommandType.name(), type);
@@ -329,7 +325,7 @@ public class CommandMessage implements Message {
   @SuppressWarnings({"UnusedDeclaration"})
   public <T> T get(Class<T> type, String part) {
     Object value = parts.get(part);
-    return value == null ? null : (T) TypeHandlerFactory.convert(value.getClass(), type, value, new DecodingContext());
+    return value == null ? null : TypeHandlerFactory.convert(value.getClass(), type, value, new DecodingContext());
   }
 
   /**
@@ -418,6 +414,7 @@ public class CommandMessage implements Message {
    * @param key - Name of resource.
    * @return - Instancee of resource.
    */
+  @SuppressWarnings("unchecked")
   public <T> T getResource(Class<T> type, String key) {
     return (T) (this.resources == null ? null : this.resources.get(key));
   }
@@ -427,7 +424,7 @@ public class CommandMessage implements Message {
    *
    * @param key      - Name of resource.
    * @param copyFrom - Message to copy from.
-   * @return
+   * @return -
    */
   public Message copyResource(String key, Message copyFrom) {
     if (!copyFrom.hasResource(key)) {
@@ -497,8 +494,7 @@ public class CommandMessage implements Message {
 
   /**
    * Transmit this message to the specified {@link org.jboss.errai.bus.client.framework.MessageBus} instance.
-   *
-   * @param viaThis
+   * @param viaThis -
    */
   public void sendNowWith(MessageBus viaThis) {
     viaThis.send(this);
@@ -506,8 +502,7 @@ public class CommandMessage implements Message {
 
   /**
    * Transmit this message using the specified {@link org.jboss.errai.bus.client.framework.RequestDispatcher}.
-   *
-   * @param viaThis
+   * @param viaThis -
    */
   public void sendNowWith(RequestDispatcher viaThis) {
     try {

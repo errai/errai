@@ -43,6 +43,8 @@ import static org.jboss.errai.bus.client.protocols.MessageParts.*;
 /**
  * The default client <tt>MessageBus</tt> implementation.  This bus runs in the browser and automatically federates
  * with the server immediately upon initialization.
+ *
+ * @author Mike Brock
  */
 public class ClientMessageBusImpl implements ClientMessageBus {
   private static final int HEARTBEAT_DELAY = 20000;

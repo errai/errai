@@ -96,7 +96,8 @@ public class TypeHandlerFactory {
     return convert(value.getClass(), to, value, decodingContext);
   }
 
-  public static <T> T convert(final Class from, final Class<T> to, final Object value, DecodingContext decodingContext) {
+  public static <T> T convert(final Class from, final Class<T> to, final Object value,
+                              DecodingContext decodingContext) {
     if (value.getClass() == to) return (T) value;
     Map<Class, TypeHandler> toHandlers = getHandler(from);
     if (toHandlers == null) {

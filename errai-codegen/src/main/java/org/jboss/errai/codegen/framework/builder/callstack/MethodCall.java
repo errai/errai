@@ -95,7 +95,8 @@ public class MethodCall extends AbstractCallElement {
       throw e;
     }
     catch (Exception e) {
-      throw new RuntimeException("error generating method call for: " + methodName + "(" + Arrays.toString(parameters) + ")", e);
+      throw new RuntimeException("error generating method call for: " + methodName
+              + "(" + Arrays.toString(parameters) + ")", e);
     }
   }
 }
