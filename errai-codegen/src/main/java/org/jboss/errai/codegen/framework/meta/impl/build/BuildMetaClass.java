@@ -46,6 +46,8 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
 
   private Scope scope;
 
+  private boolean isArray;
+  private int dimensions;
   private boolean isInterface;
   private boolean isAbstract;
   private boolean isFinal;
@@ -63,6 +65,31 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     this.context = context;
     context.attachClass(this);
   }
+
+  private BuildMetaClass shallowCopy() {
+    BuildMetaClass copy = new BuildMetaClass(context);
+
+    copy.className = className;
+    copy.superClass = superClass;
+    copy.interfaces = interfaces;
+
+    copy.isArray = isArray;
+    copy.dimensions = dimensions;
+    copy.isInterface = isInterface;
+    copy.isAbstract = isAbstract;
+    copy.isFinal = isFinal;
+    copy.isStatic = isStatic;
+    copy.isInner = isInner;
+
+    copy.methods = methods;
+    copy.fields = fields;
+    copy.constructors = constructors;
+    copy.typeVariables = typeVariables;
+    copy.reifiedFormOf = reifiedFormOf;
+
+    return copy;
+  }
+
 
   @Override
   public String getName() {
@@ -85,7 +112,17 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
 
   @Override
   public String getInternalName() {
-    return "L" + className.replace("\\.", "/") + ";";
+    String internalName = "L" + className.replace("\\.", "/") + ";";
+    if (isArray) {
+      StringBuilder buf = new StringBuilder("");
+      for (int i = 0; i < dimensions; i++) {
+        buf.append("[");
+      }
+      return buf.append(internalName).toString();
+    }
+    else {
+      return internalName;
+    }
   }
 
   @Override
@@ -184,6 +221,18 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
 
   @Override
   public MetaClass getComponentType() {
+    if (isArray) {
+      BuildMetaClass compType = shallowCopy();
+      if (dimensions > 1) {
+        compType.setDimensions(dimensions - 1);
+      }
+      else {
+        compType.setArray(false);
+        compType.setDimensions(0);
+      }
+
+      return compType;
+    }
     return null;
   }
 
@@ -275,6 +324,18 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
 
   public void setAbstract(boolean anAbstract) {
     isAbstract = anAbstract;
+  }
+
+  public void setArray(boolean array) {
+    isArray = array;
+  }
+
+  public void setDimensions(int dimensions) {
+    this.dimensions = dimensions;
+  }
+
+  public int getDimensions() {
+    return dimensions;
   }
 
   public void setFinal(boolean aFinal) {
@@ -393,6 +454,14 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
 
 
   @Override
+  public MetaClass asArrayOf(int dimensions) {
+    BuildMetaClass copy = shallowCopy();
+    copy.setArray(true);
+    copy.setDimensions(dimensions);
+    return copy;
+  }
+
+  @Override
   public String toJavaString() {
     StringBuilder buf = new StringBuilder();
 
@@ -458,7 +527,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
 
     return PrettyPrinter.prettyPrintJava(headerBuffer.toString() + buf.append("}\n").toString());
   }
-  
+
   public String membersToString() {
     StringBuilder buf = new StringBuilder();
     Iterator<? extends Builder> iter = fields.iterator();
@@ -489,4 +558,6 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     }
     return buf.toString();
   }
+
+
 }

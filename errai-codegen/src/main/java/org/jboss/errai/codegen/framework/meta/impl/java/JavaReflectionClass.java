@@ -309,6 +309,11 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
   }
 
   @Override
+  public MetaClass asArrayOf(int dimensions) {
+    return MetaClassFactory.getArrayOf(getEnclosedMetaObject(), dimensions);
+  }
+
+  @Override
   public String toString() {
     return getFullyQualifiedName();
   }

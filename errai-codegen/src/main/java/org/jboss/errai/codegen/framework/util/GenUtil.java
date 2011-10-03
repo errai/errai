@@ -457,4 +457,14 @@ public class GenUtil {
     }
     return clazz;
   }
+  
+  public static int getArrayDimensions(MetaClass type) {
+    if (!type.isArray()) return 0;
+    
+    String internalName = type.getInternalName();
+    for (int i = 0; i < internalName.length(); i++) {
+      if (internalName.charAt(i) != '[') return i - 1;
+    }
+    return 0;
+  }
 }

@@ -8,6 +8,7 @@ import org.jboss.errai.codegen.framework.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
+import org.jboss.errai.codegen.framework.meta.MetaConstructor;
 import org.jboss.errai.codegen.framework.meta.MetaField;
 import org.jboss.errai.codegen.framework.util.Bool;
 import org.jboss.errai.codegen.framework.util.GenUtil;
@@ -44,9 +45,9 @@ import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.typeParame
  */
 public class DefaultJavaMappingStrategy implements MappingStrategy {
   private MappingContext context;
-  private Class<?> toMap;
+  private MetaClass toMap;
 
-  public DefaultJavaMappingStrategy(MappingContext context, Class<?> toMap) {
+  public DefaultJavaMappingStrategy(MappingContext context, MetaClass toMap) {
     this.context = context;
     this.toMap = toMap;
   }
@@ -120,18 +121,18 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
   }
 
   private ConstructorMapping findUsableConstructorMapping() {
-    Set<Constructor<?>> constructors = new HashSet<Constructor<?>>();
+    Set<MetaConstructor> constructors = new HashSet<MetaConstructor>();
     List<FieldMapping> mappings = new ArrayList<FieldMapping>();
 
-    for (Constructor c : toMap.getConstructors()) {
+    for (MetaConstructor c : toMap.getConstructors()) {
       if (c.isAnnotationPresent(MappedOrdered.class)) {
         constructors.add(c);
       }
-      else if (c.getParameterTypes().length != 0) {
+      else if (c.getParameters().length != 0) {
         boolean satisifed = true;
         FieldScan:
-        for (int i = 0; i < c.getParameterTypes().length; i++) {
-          Annotation[] annotations = c.getParameterAnnotations()[i];
+        for (int i = 0; i < c.getParameters().length; i++) {
+          Annotation[] annotations = c.getParameters()[i].getAnnotations();
           if (annotations.length == 0) {
             satisifed = false;
           }
@@ -145,16 +146,14 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                 MapsTo mapsTo = (MapsTo) a;
                 String fieldName = mapsTo.value();
 
-                try {
-                  toMap.getDeclaredField(fieldName);
-                }
-                catch (NoSuchFieldException e) {
+                if (toMap.getDeclaredField(fieldName) == null) {
                   throw new InvalidMappingException(MapsTo.class.getCanonicalName()
                           + " refers to a field ('" + fieldName + "') which does not exist in the class: "
                           + toMap.getName());
                 }
 
-                mappings.add(new FieldMapping(fieldName, c.getParameterTypes()[i]));
+
+                mappings.add(new FieldMapping(fieldName, c.getParameters()[i].getType()));
               }
             }
           }
@@ -174,17 +173,17 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
   }
 
   private static class ConstructorMapping {
-    Constructor<?> constructor;
+    MetaConstructor constructor;
     ConstructionType type;
     List<FieldMapping> mappings;
 
-    private ConstructorMapping(Constructor<?> constructor, ConstructionType type, List<FieldMapping> mappings) {
+    private ConstructorMapping(MetaConstructor constructor, ConstructionType type, List<FieldMapping> mappings) {
       this.constructor = constructor;
       this.type = type;
       this.mappings = mappings;
     }
 
-    public Constructor<?> getConstructor() {
+    public MetaConstructor getConstructor() {
       return constructor;
     }
 
@@ -199,9 +198,9 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
   private static class FieldMapping {
     String fieldName;
-    Class<?> type;
+    MetaClass type;
 
-    private FieldMapping(String fieldName, Class<?> type) {
+    private FieldMapping(String fieldName, MetaClass type) {
       this.fieldName = fieldName;
       this.type = type;
     }
@@ -210,31 +209,29 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
       return fieldName;
     }
 
-    public Class<?> getType() {
+    public MetaClass getType() {
       return type;
     }
   }
 
-  private boolean isJavaBean(Class<?> toMap) {
-    try {
-      toMap.getConstructor();
-      return true;
-    }
-    catch (NoSuchMethodException e) {
-      return false;
-    }
+  private boolean isJavaBean(MetaClass toMap) {
+    return toMap.getConstructor(new MetaClass[0]) != null;
   }
 
   public Statement fieldDemarshall(FieldMapping mapping, Class<?> fromType) {
+     return fieldDemarshall(mapping, MetaClassFactory.get(fromType));
+   }
+  
+  
+  public Statement fieldDemarshall(FieldMapping mapping, MetaClass fromType) {
     return fieldDemarshall(mapping.getFieldName(), fromType, mapping.getType());
   }
 
-
-  public Statement fieldDemarshall(String fieldName, Class<?> fromType, Class<?> toType) {
+  public Statement fieldDemarshall(String fieldName, MetaClass fromType, MetaClass toType) {
     return unwrapJSON(Stmt.nestedCall(Cast.to(fromType, Stmt.loadVariable("a0"))).invoke("get", fieldName), toType);
   }
 
-  public void marshallToJSON(BlockBuilder<?> builder, Class<?> toType) {
+  public void marshallToJSON(BlockBuilder<?> builder, MetaClass toType) {
     if (!context.hasProvidedOrGeneratedMarshaller(toType)) {
       throw new NoAvailableMarshallerException(toType.getName());
     }
@@ -247,8 +244,8 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
     boolean hasEncoded = false;
 
-    for (Field field : toType.getDeclaredFields()) {
-      if (Modifier.isTransient(field.getModifiers())) {
+    for (MetaField metaField : toType.getDeclaredFields()) {
+      if (metaField.isTransient()) {
         continue;
       }
 
@@ -257,16 +254,24 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
         hasEncoded = true;
       }
 
-      MetaField metaField = MetaClassFactory.get(field);
-      MetaClass targetType = GenUtil.getPrimitiveWrapper(metaField.getType());
 
+      MetaClass targetType = GenUtil.getPrimitiveWrapper(metaField.getType());
+//      boolean array = targetType.isArray();
+//      int dims = array ? GenUtil.getArrayDimensions(targetType) : 0;
+//
+//      if (array) {
+//        while (targetType.isArray()) {
+//          targetType = targetType.getComponentType();
+//        }
+//      }
+//
       if (!context.hasProvidedOrGeneratedMarshaller(targetType.getFullyQualifiedName())) {
         throw new NoAvailableMarshallerException(targetType.getFullyQualifiedName());
       }
 
-      sb.append("\"" + field.getName() + "\" : ");
+      sb.append("\"" + metaField.getName() + "\" : ");
       sb.append(Stmt.loadVariable(MarshallingUtil.getVarName(targetType.getFullyQualifiedName()))
-              .invoke("marshall", valueAccessorFor(MetaClassFactory.get(field)), Stmt.loadVariable("a1")));
+              .invoke("marshall", valueAccessorFor(metaField), Stmt.loadVariable("a1")));
     }
 
     sb.append("}");
@@ -293,7 +298,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
     }
   }
 
-  public Statement unwrapJSON(Statement valueStatement, Class<?> toType) {
+  public Statement unwrapJSON(Statement valueStatement, MetaClass toType) {
     return Stmt.create(context.getCodegenContext())
             .loadVariable(MarshallingUtil.getVarName(toType))
             .invoke("demarshall", valueStatement, Stmt.loadVariable("a1"));

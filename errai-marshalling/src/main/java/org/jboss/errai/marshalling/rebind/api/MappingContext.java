@@ -45,7 +45,11 @@ public class MappingContext {
   public void registerMarshaller(String clazzName, Class<? extends Marshaller> clazz) {
     registeredMarshallers.put(clazzName, clazz);
   }
-  
+
+  public boolean hasMarshaller(MetaClass clazz) {
+    return hasMarshaller(clazz.getFullyQualifiedName());
+  }
+
   public boolean hasMarshaller(Class<?> clazz) {
     return hasMarshaller(clazz.getName());
   }
@@ -61,7 +65,11 @@ public class MappingContext {
   public boolean hasGeneratedMarshaller(String clazzName) {
     return generatedMarshallers.contains(clazzName);
   }
-  
+
+  public boolean hasProvidedOrGeneratedMarshaller(MetaClass clazz) {
+    return hasProvidedOrGeneratedMarshaller(clazz.getFullyQualifiedName());
+  }
+
   public boolean hasProvidedOrGeneratedMarshaller(Class<?> clazz) {
     return hasProvidedOrGeneratedMarshaller(clazz.getName());
   }

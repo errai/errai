@@ -49,6 +49,14 @@ public class Stmt {
     return StatementBuilder.create(ctx);
   }
 
+  public static ArrayInitializationBuilder newArray(MetaClass componentType) {
+    return StatementBuilder.create().newArray(componentType);
+  }
+
+  public static ArrayInitializationBuilder newArray(MetaClass componentType, Object... dimensions) {
+    return StatementBuilder.create().newArray(componentType, dimensions);
+  }
+
   public static ArrayInitializationBuilder newArray(Class<?> componentType) {
     return StatementBuilder.create().newArray(componentType);
   }

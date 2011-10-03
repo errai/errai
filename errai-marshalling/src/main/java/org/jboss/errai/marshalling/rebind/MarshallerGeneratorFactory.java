@@ -7,6 +7,7 @@ import org.jboss.errai.codegen.framework.builder.BlockBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.AnonymousClassStructureBuilderImpl;
 import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.framework.util.Bool;
+import org.jboss.errai.codegen.framework.util.GenUtil;
 import org.jboss.errai.codegen.framework.util.Implementations;
 import org.jboss.errai.common.client.api.annotations.ExposeEntity;
 import org.jboss.errai.common.client.api.annotations.Portable;
@@ -49,7 +50,7 @@ public class MarshallerGeneratorFactory {
   public String generate(String packageName, String clazzName) {
     classStructureBuilder = implement(MarshallerFactory.class, packageName, clazzName);
 
-    Context classContext = ((BuildMetaClass)classStructureBuilder.getClassDefinition()).getContext();
+    Context classContext = ((BuildMetaClass) classStructureBuilder.getClassDefinition()).getContext();
     mappingContext = new MappingContext(classContext, classStructureBuilder.getClassDefinition(),
             classStructureBuilder);
 
@@ -106,7 +107,8 @@ public class MarshallerGeneratorFactory {
     }
 
     for (Class<?> clazz : exposed) {
-      Statement marshaller = marshal(clazz);
+      MetaClass metaClazz = MetaClassFactory.get(clazz);
+      Statement marshaller = marshal(metaClazz);
       MetaClass type = marshaller.getType();
       String varName = getVarName(clazz);
       String arrayVarName = "arrayOf_" + varName;
@@ -119,7 +121,10 @@ public class MarshallerGeneratorFactory {
       constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
               .invoke("put", clazz.getName(), loadVariable(varName)));
 
-      Statement arrayMarshaller = arrayMarshal(clazz, 2);
+      Statement arrayMarshaller = arrayMarshal(metaClazz.asArrayOf(2));
+
+      constructor.append(Stmt.create(classContext).loadVariable(ARRAY_MARSHALLERS_VAR)
+              .invoke("put", clazz.getName(), loadVariable(arrayVarName)));
 
       constructor.append(loadVariable(arrayVarName).assignValue(arrayMarshaller));
     }
@@ -127,7 +132,19 @@ public class MarshallerGeneratorFactory {
     constructor.finish();
   }
 
-  private Statement marshal(Class<?> cls) {
+  private Statement marshal(MetaClass cls) {
+    boolean array = cls.isArray();
+//
+//    if (array) {
+//
+//
+//
+//     return arrayMarshal()
+//
+//
+//    }
+
+
     MappingStrategy strategy = MappingStrategyFactory.createStrategy(mappingContext, cls);
     if (strategy == null) {
       throw new RuntimeException("no available marshaller for class: " + cls.getName());
@@ -135,8 +152,12 @@ public class MarshallerGeneratorFactory {
     return strategy.getMapper().getMarshaller();
   }
 
-  private Statement arrayMarshal(Class<?> toMap, int dimensions) {
-    MetaClass arrayType = MetaClassFactory.getArrayOf(toMap, dimensions);
+  private Statement arrayMarshal(MetaClass arrayType) {
+    MetaClass toMap = arrayType;
+      while (toMap.isArray()) {
+        toMap = toMap.getComponentType();
+      }
+    int dimensions = GenUtil.getArrayDimensions(arrayType);
 
     AnonymousClassStructureBuilder classStructureBuilder
             = Stmt.create(mappingContext.getCodegenContext())
@@ -155,7 +176,7 @@ public class MarshallerGeneratorFactory {
     BlockBuilder<?> bBuilder = classStructureBuilder.publicOverridesMethod("demarshall",
             Parameter.of(Object.class, "a0"), Parameter.of(MarshallingSession.class, "a1"));
 
-  
+
     bBuilder.append(Stmt.invokeStatic(anonClass, "_demarshall" + dimensions, loadVariable("a0")).returnValue());
     bBuilder.finish();
 
@@ -171,11 +192,11 @@ public class MarshallerGeneratorFactory {
     return classStructureBuilder.finish();
   }
 
-  private void demarshalCode(Class<?> toMap, int dim, ClassStructureBuilder<? extends ClassStructureBuilder> anonBuilder) {
+  private void demarshalCode(MetaClass toMap, int dim, ClassStructureBuilder<? extends ClassStructureBuilder> anonBuilder) {
     Object[] dimParms = new Object[dim];
     dimParms[0] = Stmt.loadVariable("a0").invoke("size");
 
-    MetaClass arrayType = MetaClassFactory.getArrayOf(toMap, dim);
+    MetaClass arrayType = toMap.asArrayOf(dim);
 
     BlockBuilder<?> bBuilder =
             anonBuilder.privateMethod(arrayType, "_demarshall" + dim)
@@ -188,11 +209,11 @@ public class MarshallerGeneratorFactory {
 
     bBuilder.append(Implementations.autoForLoop("i", Stmt.loadVariable("newArray").loadField("length"))
             .append(dim == 1 ? loadVariable("newArray").assignValue(loadVariable("a0").invoke("get", loadVariable("i")))
-            : loadVariable("newArray").assignValue(
+                    : loadVariable("newArray").assignValue(
                     Stmt.invokeStatic(anonBuilder.getClassDefinition(), "_demarshall" + (dim - 1), loadVariable("a0"))))
             .finish());
 
-    
+
     if (dim > 1) {
       demarshalCode(toMap, dim - 1, anonBuilder);
     }

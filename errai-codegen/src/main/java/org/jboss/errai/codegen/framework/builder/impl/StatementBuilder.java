@@ -262,6 +262,12 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
 //    return new ArrayBuilderImpl(context, callElementBuilder).newArray(componentType);
 //  }
 
+
+  @Override
+  public ArrayInitializationBuilder newArray(MetaClass componentType, Object... dimensions) {
+    return new ArrayBuilderImpl(context, callElementBuilder).newArray(componentType, dimensions);
+  }
+
   @Override
   public ArrayInitializationBuilder newArray(Class<?> componentType, Object... dimensions) {
     return new ArrayBuilderImpl(context, callElementBuilder).newArray(componentType, dimensions);

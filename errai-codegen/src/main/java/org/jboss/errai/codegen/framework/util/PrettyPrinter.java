@@ -93,7 +93,7 @@ public class PrettyPrinter {
       return;
     }
 
-    out.append(pad((indentLevel + statementIndent) * 4)).append(trimmedLineBuffer);
+    out.append(pad((indentLevel + statementIndent) * 2)).append(trimmedLineBuffer);
   }
 
   private static String compactinate(String str) {

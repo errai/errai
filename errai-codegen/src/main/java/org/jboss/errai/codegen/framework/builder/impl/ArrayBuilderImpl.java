@@ -48,12 +48,18 @@ public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayB
 //    return newArray(componentType);
 //  }
 
+
   @Override
-  public ArrayInitializationBuilder newArray(Class<?> componentType, Object... dimensions) {
-    this.type = MetaClassFactory.getArrayOf(componentType, dimensions.length == 0 ? 1 : dimensions.length);
-    this.componentType = MetaClassFactory.get(componentType);
+  public ArrayInitializationBuilder newArray(MetaClass componentType, Object... dimensions) {
+    this.type = componentType.asArrayOf(dimensions.length == 0 ? 1 : dimensions.length);
+    this.componentType = componentType;
     this.dimensions = dimensions;
     return this;
+  }
+
+  @Override
+  public ArrayInitializationBuilder newArray(Class<?> componentType, Object... dimensions) {
+    return newArray(MetaClassFactory.get(componentType), dimensions);
   }
 
   @Override
