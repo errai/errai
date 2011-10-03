@@ -22,32 +22,40 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.jboss.errai.samples.restdemo.client.shared.Customer;
 import org.jboss.errai.samples.restdemo.client.shared.CustomerService;
 
+/**
+ * Simple mock based service implementation.
+ * 
+ * @author Christian Sadilek <csadilek@redhat.com>
+ */
 public class CustomerServiceImpl implements CustomerService {
 
+  private static AtomicInteger id = new AtomicInteger(3);
+  
   private static Map<Long, Customer> customers = new ConcurrentHashMap<Long, Customer>() {
     {
-      put(1l, new Customer(1, "Christian", "Sadilek"));
-      put(2l, new Customer(2, "Mike", "Brock"));
-      put(3l, new Customer(3, "Jonathan", "Fuerth"));
+      put(1l, new Customer(1, "Christian", "Sadilek", "A1B2C3"));
+      put(2l, new Customer(2, "Mike", "Brock", "A1B2C3"));
+      put(3l, new Customer(3, "Jonathan", "Fuerth", "A1B2C3"));
     }
   };
 
   @Override
   public long createCustomer(Customer customer) {
-    customer.setId(customers.size()+1);
+    customer.setId(id.incrementAndGet());
     customers.put(customer.getId(), customer);
     return customer.getId();
   }
 
   @Override
   public Customer updateCustomer(long id, Customer customer) {
-   customers.put(id, customer);
-   customer.setLastChanged(new Date());
-   return customer;
+    customers.put(id, customer);
+    customer.setLastChanged(new Date());
+    return customer;
   }
 
   @Override

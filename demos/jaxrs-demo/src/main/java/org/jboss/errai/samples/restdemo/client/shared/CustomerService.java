@@ -27,12 +27,17 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 
+/**
+ * JAX-RS service interface
+ * 
+ * @author Christian Sadilek <csadilek@redhat.com>
+ */
 @Path("customers")
 public interface CustomerService {
   @GET
   @Produces("application/json")
   public List<Customer> listAllCustomers();
- 
+
   @POST
   @Consumes("application/json")
   @Produces("text/plain")
@@ -51,5 +56,5 @@ public interface CustomerService {
   @GET
   @Path("/{id}")
   @Produces("application/json")
-  public Customer retrieveCustomerById(@PathParam("id") long id);  
+  public Customer retrieveCustomerById(@PathParam("id") long id);
 }

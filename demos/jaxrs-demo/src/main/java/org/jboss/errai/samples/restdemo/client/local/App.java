@@ -31,7 +31,6 @@ import org.jboss.errai.samples.restdemo.client.shared.CustomerService;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
@@ -39,21 +38,28 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+/**
+ * Example code showing how to use Errai-JAXRS.
+ *  
+ * @author Christian Sadilek <csadilek@redhat.com>
+ */
 @EntryPoint
-public class RestDemo {
+public class App {
   final private FlexTable customersTable = new FlexTable();
-  final private TextBox customerFirstName = new TextBox();
-  final private TextBox customerLastName = new TextBox();
+  final private TextBox custFirstName = new TextBox();
+  final private TextBox custLastName = new TextBox();
+  final private TextBox custPostalCode = new TextBox();
 
   final Map<Long, Integer> rows = new HashMap<Long, Integer>();
-  
+
   final RemoteCallback<Long> creationCallback = new RemoteCallback<Long>() {
     public void callback(Long id) {
       RestClient.create(CustomerService.class, new RemoteCallback<Customer>() {
         public void callback(Customer customer) {
           addCustomerToTable(customer, customersTable.getRowCount() + 1);
-        }})
-        .retrieveCustomerById(id);
+        }
+      })
+      .retrieveCustomerById(id);
     }
   };
 
@@ -74,15 +80,16 @@ public class RestDemo {
   public void init() {
     final Button create = new Button("Create", new ClickHandler() {
       public void onClick(ClickEvent clickEvent) {
-        Customer customer = new Customer(customerFirstName.getText(), customerLastName.getText());
+        Customer customer = new Customer(custFirstName.getText(), custLastName.getText(), custPostalCode.getText());
         RestClient.create(CustomerService.class, creationCallback).createCustomer(customer);
       }
     });
 
     FlexTable newCustomerTable = new FlexTable();
-    newCustomerTable.setWidget(0,1,customerFirstName);
-    newCustomerTable.setWidget(0,2,customerLastName);
-    newCustomerTable.setWidget(0,3,create);
+    newCustomerTable.setWidget(0, 1, custFirstName);
+    newCustomerTable.setWidget(0, 2, custLastName);
+    newCustomerTable.setWidget(0, 3, custPostalCode);
+    newCustomerTable.setWidget(0, 4, create);
     newCustomerTable.setStyleName("new-customer-table");
 
     VerticalPanel vPanel = new VerticalPanel();
@@ -98,7 +105,8 @@ public class RestDemo {
     customersTable.setText(0, 0, "ID");
     customersTable.setText(0, 1, "First Name");
     customersTable.setText(0, 2, "Last Name");
-    customersTable.setText(0, 3, "Date Changed");
+    customersTable.setText(0, 3, "Postal Code");
+    customersTable.setText(0, 4, "Date Changed");
 
     final RemoteCallback<List<Customer>> listCallback = new RemoteCallback<List<Customer>>() {
       public void callback(List<Customer> customers) {
@@ -107,7 +115,7 @@ public class RestDemo {
         }
       }
     };
-    
+
     RestClient.create(CustomerService.class, listCallback).listAllCustomers();
   }
 
@@ -117,11 +125,15 @@ public class RestDemo {
 
     final TextBox lastName = new TextBox();
     lastName.setText(customer.getLastName());
-    
+
+    final TextBox postalCode = new TextBox();
+    postalCode.setText(customer.getPostalCode());
+
     final Button update = new Button("Update", new ClickHandler() {
       public void onClick(ClickEvent clickEvent) {
         customer.setFirstName(firstName.getText());
         customer.setLastName(lastName.getText());
+        customer.setPostalCode(postalCode.getText());
         RestClient.create(CustomerService.class, modificationCallback).updateCustomer(customer.getId(), customer);
       }
     });
@@ -135,10 +147,10 @@ public class RestDemo {
     customersTable.setText(row, 0, new Long(customer.getId()).toString());
     customersTable.setWidget(row, 1, firstName);
     customersTable.setWidget(row, 2, lastName);
-    customersTable.setText(row, 3, 
-        DateTimeFormat.getFormat(PredefinedFormat.RFC_2822).format(customer.getLastChanged()));
-    customersTable.setWidget(row, 4, update);
-    customersTable.setWidget(row, 5, delete);
+    customersTable.setWidget(row, 3, postalCode);
+    customersTable.setText(row, 4,DateTimeFormat.getFormat("yyyy-MM-dd HH:mm:ss").format(customer.getLastChanged()));
+    customersTable.setWidget(row, 5, update);
+    customersTable.setWidget(row, 6, delete);
     rows.put(customer.getId(), row);
   }
 }
