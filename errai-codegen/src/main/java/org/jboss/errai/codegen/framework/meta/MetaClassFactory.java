@@ -320,6 +320,7 @@ public final class MetaClassFactory {
         parameters.add(Parameter.of(parmType, parm.getName()));
         i++;
       }
+
       BuildMetaMethod newMethod = new BuildMetaMethod(buildMetaClass, EmptyStatement.INSTANCE,
                     GenUtil.scopeOf(method), GenUtil.modifiersOf(method), method.getName(), returnType,
                     method.getGenericReturnType(),

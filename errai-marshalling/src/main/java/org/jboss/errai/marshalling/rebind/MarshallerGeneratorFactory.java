@@ -1,23 +1,22 @@
 package org.jboss.errai.marshalling.rebind;
 
-import com.google.gwt.json.client.JSONObject;
-import org.jboss.errai.codegen.framework.*;
+import org.jboss.errai.codegen.framework.Context;
+import org.jboss.errai.codegen.framework.Modifier;
+import org.jboss.errai.codegen.framework.Parameter;
+import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
-import org.jboss.errai.codegen.framework.builder.impl.AnonymousClassStructureBuilderImpl;
-import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
-import org.jboss.errai.codegen.framework.util.Bool;
-import org.jboss.errai.codegen.framework.util.GenUtil;
-import org.jboss.errai.codegen.framework.util.Implementations;
-import org.jboss.errai.common.client.api.annotations.ExposeEntity;
-import org.jboss.errai.common.client.api.annotations.Portable;
-import org.jboss.errai.common.client.protocols.SerializationParts;
-import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.ConstructorBlockBuilder;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
+import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
+import org.jboss.errai.codegen.framework.util.GenUtil;
+import org.jboss.errai.codegen.framework.util.Implementations;
 import org.jboss.errai.codegen.framework.util.Stmt;
+import org.jboss.errai.common.client.api.annotations.ExposeEntity;
+import org.jboss.errai.common.client.api.annotations.Portable;
+import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.marshalling.client.api.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.Marshaller;
@@ -134,16 +133,6 @@ public class MarshallerGeneratorFactory {
 
   private Statement marshal(MetaClass cls) {
     boolean array = cls.isArray();
-//
-//    if (array) {
-//
-//
-//
-//     return arrayMarshal()
-//
-//
-//    }
-
 
     MappingStrategy strategy = MappingStrategyFactory.createStrategy(mappingContext, cls);
     if (strategy == null) {
@@ -175,7 +164,6 @@ public class MarshallerGeneratorFactory {
 
     BlockBuilder<?> bBuilder = classStructureBuilder.publicOverridesMethod("demarshall",
             Parameter.of(Object.class, "a0"), Parameter.of(MarshallingSession.class, "a1"));
-
 
     bBuilder.append(Stmt.invokeStatic(anonClass, "_demarshall" + dimensions, loadVariable("a0")).returnValue());
     bBuilder.finish();
@@ -213,14 +201,12 @@ public class MarshallerGeneratorFactory {
                     Stmt.invokeStatic(anonBuilder.getClassDefinition(), "_demarshall" + (dim - 1), loadVariable("a0"))))
             .finish());
 
-
     if (dim > 1) {
       demarshalCode(toMap, dim - 1, anonBuilder);
     }
 
     bBuilder.finish();
   }
-
 
   private void loadMarshallers() {
     Set<Class<?>> marshallers =

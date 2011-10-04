@@ -27,9 +27,6 @@ import org.jboss.errai.marshalling.rebind.api.ObjectMapper;
 import org.jboss.errai.marshalling.rebind.util.MarshallingUtil;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -113,7 +110,6 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
         return classStructureBuilder.finish();
       }
     };
-
   }
 
   private ObjectMapper generateJavaBeanMapper() {
@@ -151,7 +147,6 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                           + " refers to a field ('" + fieldName + "') which does not exist in the class: "
                           + toMap.getName());
                 }
-
 
                 mappings.add(new FieldMapping(fieldName, c.getParameters()[i].getType()));
               }
@@ -219,10 +214,9 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
   }
 
   public Statement fieldDemarshall(FieldMapping mapping, Class<?> fromType) {
-     return fieldDemarshall(mapping, MetaClassFactory.get(fromType));
-   }
-  
-  
+    return fieldDemarshall(mapping, MetaClassFactory.get(fromType));
+  }
+
   public Statement fieldDemarshall(FieldMapping mapping, MetaClass fromType) {
     return fieldDemarshall(mapping.getFieldName(), fromType, mapping.getType());
   }
@@ -254,17 +248,8 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
         hasEncoded = true;
       }
 
-
       MetaClass targetType = GenUtil.getPrimitiveWrapper(metaField.getType());
-//      boolean array = targetType.isArray();
-//      int dims = array ? GenUtil.getArrayDimensions(targetType) : 0;
-//
-//      if (array) {
-//        while (targetType.isArray()) {
-//          targetType = targetType.getComponentType();
-//        }
-//      }
-//
+
       if (!context.hasProvidedOrGeneratedMarshaller(targetType.getFullyQualifiedName())) {
         throw new NoAvailableMarshallerException(targetType.getFullyQualifiedName());
       }
@@ -277,7 +262,6 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
     sb.append("}");
     builder.append(Stmt.nestedCall(sb).invoke("toString"));
   }
-
 
   private static String keyValue(String key, String value) {
     return "\"" + key + "\":" + value + "";
