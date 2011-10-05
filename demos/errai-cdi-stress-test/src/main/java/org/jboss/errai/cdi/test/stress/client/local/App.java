@@ -16,7 +16,9 @@
 package org.jboss.errai.cdi.test.stress.client.local;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.event.Event;
@@ -27,6 +29,7 @@ import org.jboss.errai.cdi.test.stress.client.shared.ConfigurationRequest;
 import org.jboss.errai.cdi.test.stress.client.shared.SubscriptionRequest;
 import org.jboss.errai.cdi.test.stress.client.shared.SubscriptionResponse;
 import org.jboss.errai.cdi.test.stress.client.shared.TickEvent;
+import org.jboss.errai.cdi.test.stress.client.shared.TickStreamGap;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -59,6 +62,17 @@ public class App {
   private final IntegerBox burstInterval = new IntegerBox();
   private final IntegerBox messagesPerBurst = new IntegerBox();
   private final IntegerBox payloadSize = new IntegerBox();
+  
+  /** The tick most recently received from the server */
+  private TickEvent lastTickEvent;
+  
+  /**
+   * Log of gaps in the tick stream (where a tick was received with an ID more
+   * than 1 greater than the previous tick).
+   */
+  private final List<TickStreamGap> tickStreamGaps = new ArrayList<TickStreamGap>();
+  
+  private final Label tickStreamGapLabel = new Label();
   
   @PostConstruct
   public void buildUI() {
@@ -101,6 +115,8 @@ public class App {
     p.setWidget(1, 3, lastTickAgeLabel);
     RootPanel.get().add(p);
 
+    RootPanel.get().add(tickStreamGapLabel);
+    
     subscriptionEvent.fire(new SubscriptionRequest(System.currentTimeMillis()));
   }
 
@@ -120,5 +136,14 @@ public class App {
     lastTickTimeLabel.setValue(new Date(tick.getServerTime()));
     lastTickAgeLabel.setText(String.valueOf(age));
     lastTickIdLabel.setText(String.valueOf(tick.getId()));
+    
+    if (lastTickEvent != null && lastTickEvent.getId() != tick.getId()) {
+      TickStreamGap gap = new TickStreamGap(lastTickEvent, tick, new Date());
+      tickStreamGaps.add(gap);
+      
+      // TODO keep visible list of all gaps
+      tickStreamGapLabel.setText(gap.toString());
+    }
+    lastTickEvent = tick;
   }
 }

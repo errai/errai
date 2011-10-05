@@ -45,4 +45,10 @@ public class TickEvent {
       this.payload = payload;
     }
     
+    @Override
+    public String toString() {
+      int payloadLength = payload == null ? 0 : payload.length();
+      return "Tick " + id + " at " + serverTime +
+          " with " + payloadLength + " byte payload";
+    }
 }

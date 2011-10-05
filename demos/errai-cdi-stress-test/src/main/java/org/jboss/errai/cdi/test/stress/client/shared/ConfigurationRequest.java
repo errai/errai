@@ -79,4 +79,11 @@ public class ConfigurationRequest {
     this.payloadSize = payloadSize;
   }
 
+  @Override
+  public String toString() {
+    return "ConfigurationRequest [messageInterval=" + messageInterval
+        + ", messageCount=" + messageCount + ", payloadSize=" + payloadSize
+        + "]";
+  }
+
 }
