@@ -2,7 +2,7 @@ package org.jboss.errai.marshalling.client.marshallers;
 
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONValue;
-import org.jboss.errai.marshalling.client.api.ClientMarshaller;
+import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 

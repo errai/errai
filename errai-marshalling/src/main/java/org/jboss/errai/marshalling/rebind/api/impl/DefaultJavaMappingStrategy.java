@@ -15,8 +15,8 @@ import org.jboss.errai.codegen.framework.util.GenUtil;
 import org.jboss.errai.codegen.framework.util.Implementations;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.common.client.protocols.SerializationParts;
-import org.jboss.errai.marshalling.client.api.MappedOrdered;
-import org.jboss.errai.marshalling.client.api.MapsTo;
+import org.jboss.errai.marshalling.client.api.annotations.MappedOrdered;
+import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.exceptions.InvalidMappingException;
@@ -160,7 +160,11 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
       }
     }
 
-    return new ConstructorMapping(constructors.iterator().next(), ConstructionType.Mapped, mappings);
+    if (constructors.isEmpty()) {
+      throw new InvalidMappingException("unable to find a usable constructor for: " + toMap.getFullyQualifiedName());
+    }
+
+    return new ConstructorMapping(ConstructionType.Mapped, mappings);
   }
 
   private static enum ConstructionType {
@@ -168,18 +172,12 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
   }
 
   private static class ConstructorMapping {
-    MetaConstructor constructor;
     ConstructionType type;
     List<FieldMapping> mappings;
 
-    private ConstructorMapping(MetaConstructor constructor, ConstructionType type, List<FieldMapping> mappings) {
-      this.constructor = constructor;
+    private ConstructorMapping(ConstructionType type, List<FieldMapping> mappings) {
       this.type = type;
       this.mappings = mappings;
-    }
-
-    public MetaConstructor getConstructor() {
-      return constructor;
     }
 
     public ConstructionType getType() {

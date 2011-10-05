@@ -1,4 +1,4 @@
-package org.jboss.errai.marshalling.client.api;
+package org.jboss.errai.marshalling.client.api.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

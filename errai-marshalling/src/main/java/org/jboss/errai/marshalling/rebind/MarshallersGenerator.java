@@ -23,7 +23,6 @@ public class MarshallersGenerator extends Generator {
    */
   private String packageName = null;
   private TypeOracle typeOracle;
-
   private String modulePackage;
 
   @Override
