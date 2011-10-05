@@ -96,7 +96,6 @@ public class TickerService {
     tickGenerator.scheduleAtFixedRate(new Runnable() {
       @Override
       public void run() {
-        System.out.print("Tick... ");
         try {
           generateTicks();
         } catch (Throwable e) {
