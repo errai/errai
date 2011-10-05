@@ -249,7 +249,32 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>2.0.2.SP1</version>
                 </plugin>
+                <plugin>
+                  <groupId>org.eclipse.m2e</groupId>
+                  <artifactId>lifecycle-mapping</artifactId>
+                  <version>1.0.0</version>
+                  <configuration>
+                    <lifecycleMappingMetadata>
+                      <pluginExecutions>
+                        <pluginExecution>
+                          <pluginExecutionFilter>
+                            <groupId>org.codehaus.mojo</groupId>
+                            <artifactId>gwt-maven-plugin</artifactId>
+                            <versionRange>[2.3.0,)</versionRange>
+                            <goals>
+                              <goal>resources</goal>
+                            </goals>
+                          </pluginExecutionFilter>
+                          <action>
+                            <execute />
+                          </action>
+                        </pluginExecution>
+                      </pluginExecutions>
+                    </lifecycleMappingMetadata>
+                  </configuration>
+                </plugin>
             </plugins>
+            
         </pluginManagement>
 
     </build>
