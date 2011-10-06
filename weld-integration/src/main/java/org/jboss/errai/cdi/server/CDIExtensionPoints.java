@@ -42,6 +42,7 @@ import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.ProcessObserverMethod;
 import javax.inject.Inject;
+import javax.inject.Provider;
 import javax.inject.Qualifier;
 
 import org.jboss.errai.bus.client.api.Message;
@@ -68,10 +69,6 @@ import org.jboss.errai.common.client.types.TypeHandlerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Provider;
 
 /**
  * Extension points to the CDI container.
