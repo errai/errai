@@ -143,9 +143,9 @@ public class MarshallerGeneratorFactory {
 
   private Statement arrayMarshal(MetaClass arrayType) {
     MetaClass toMap = arrayType;
-      while (toMap.isArray()) {
-        toMap = toMap.getComponentType();
-      }
+    while (toMap.isArray()) {
+      toMap = toMap.getComponentType();
+    }
     int dimensions = GenUtil.getArrayDimensions(arrayType);
 
     AnonymousClassStructureBuilder classStructureBuilder

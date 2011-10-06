@@ -3,6 +3,7 @@ package org.jboss.errai.marshalling.rebind.api;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.util.GenUtil;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 
 import java.util.*;
@@ -67,6 +68,10 @@ public class MappingContext {
   }
 
   public boolean hasProvidedOrGeneratedMarshaller(MetaClass clazz) {
+    if (clazz.isArray()) {
+
+    }
+
     return hasProvidedOrGeneratedMarshaller(clazz.getFullyQualifiedName());
   }
 
