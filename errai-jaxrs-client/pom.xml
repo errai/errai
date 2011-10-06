@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<parent>
 		<artifactId>jaxrs-integration-parent</artifactId>
 		<groupId>org.jboss.errai</groupId>
@@ -12,6 +13,7 @@
 	<name>Errai::JAX-RS::Client</name>
 
 	<build>
+		<testOutputDirectory>war/WEB-INF/classes</testOutputDirectory>
 		<resources>
 			<resource>
 				<directory>src/main/java</directory>
@@ -20,6 +22,31 @@
 				<directory>src/main/resources</directory>
 			</resource>
 		</resources>
+		<plugins>
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.7.2</version>
+				<configuration>
+					<skipTests>false</skipTests>
+					<additionalClasspathElements>
+						<additionalClasspathElement>${basedir}/${testOutputDirectory}/</additionalClasspathElement>
+						<additionalClasspathElement>${basedir}/src/main/java/</additionalClasspathElement>
+						<additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
+					</additionalClasspathElements>
+					<useManifestOnlyJar>false</useManifestOnlyJar>
+					<forkMode>pertest</forkMode>
+					<argLine>-Xmx2048m</argLine>
+
+					<systemProperties>
+						<!-- Must disable long polling for automated tests to succeed -->
+						<property>
+							<name>errai.hosted_mode_testing</name>
+							<value>true</value>
+						</property>
+					</systemProperties>
+				</configuration>
+			</plugin>
+		</plugins>
 	</build>
 
 	<dependencies>
@@ -33,7 +60,7 @@
 			<groupId>org.jboss.errai</groupId>
 			<artifactId>errai-marshalling</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>com.google.gwt</groupId>
 			<artifactId>gwt-user</artifactId>

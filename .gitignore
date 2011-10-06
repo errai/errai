@@ -1,3 +1,6 @@
+errai-jaxrs-client/war/WEB-INF/deploy
+errai-jaxrs-client/war/WEB-INF/classes
+errai-jaxrs-client/war/org.jboss.errai.enterprise.jaxrs.TestModule.JUnit
 .idea/*
 .classpath
 .settings
