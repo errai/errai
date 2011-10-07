@@ -293,7 +293,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
   public Statement valueAccessorFor(MetaField field) {
     if (!field.isPublic()) {
-      GenUtil.addPrivateAccessStubs(true, context.getClassStructureBuilder(), field, field.getDeclaringClass());
+      GenUtil.addPrivateAccessStubs(true, context.getClassStructureBuilder(), field, field.getType());
       return Stmt.invokeStatic(context.getGeneratedBootstrapClass(), GenUtil.getPrivateFieldInjectorName(field),
               Stmt.loadVariable("a0"));
     }

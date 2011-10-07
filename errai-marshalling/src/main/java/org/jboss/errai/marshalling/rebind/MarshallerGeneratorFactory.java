@@ -13,7 +13,6 @@ import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.framework.util.Bool;
 import org.jboss.errai.codegen.framework.util.GenUtil;
-import org.jboss.errai.codegen.framework.util.Implementations;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.common.client.api.annotations.ExposeEntity;
 import org.jboss.errai.common.client.api.annotations.Portable;
@@ -33,10 +32,7 @@ import java.util.*;
 
 import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.typeParametersOf;
-import static org.jboss.errai.codegen.framework.util.Implementations.autoForLoop;
-import static org.jboss.errai.codegen.framework.util.Implementations.autoInitializedField;
-import static org.jboss.errai.codegen.framework.util.Implementations.implement;
-import static org.jboss.errai.codegen.framework.util.Stmt.load;
+import static org.jboss.errai.codegen.framework.util.Implementations.*;
 import static org.jboss.errai.codegen.framework.util.Stmt.loadVariable;
 import static org.jboss.errai.marshalling.rebind.util.MarshallingUtil.getArrayVarName;
 import static org.jboss.errai.marshalling.rebind.util.MarshallingUtil.getVarName;
@@ -64,7 +60,10 @@ public class MarshallerGeneratorFactory {
             classStructureBuilder, new ArrayMarshallerCallback() {
       @Override
       public Statement marshal(MetaClass type, Statement value) {
-        return Stmt.load(null);
+        createDemarshallerIfNeeded(type);
+
+//        return Stmt.loadVariable(variable).invoke("marshall", value, Stmt.loadVariable("a1"));
+        return value;
       }
 
       @Override
@@ -82,7 +81,7 @@ public class MarshallerGeneratorFactory {
         if (!arrayMarshallers.contains(varName)) {
           classStructureBuilder.privateField(varName,
                   parameterizedAs(Marshaller.class, typeParametersOf(List.class, type))).finish();
-          Statement marshaller = generateArrayDemarshaller(type);
+          Statement marshaller = generateArrayMarshaller(type);
           constructor.append(loadVariable(varName).assignValue(marshaller));
 
           constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
@@ -173,10 +172,6 @@ public class MarshallerGeneratorFactory {
   }
 
   private Statement generateArrayMarshaller(MetaClass arrayType) {
-    return Stmt.load(null);
-  }
-
-  private Statement generateArrayDemarshaller(MetaClass arrayType) {
     MetaClass toMap = arrayType;
     while (toMap.isArray()) {
       toMap = toMap.getComponentType();
@@ -233,11 +228,13 @@ public class MarshallerGeneratorFactory {
             .initializeWith(Stmt.newArray(toMap, dimParms)));
 
     dmBuilder.append(autoForLoop("i", Stmt.loadVariable("newArray").loadField("length"))
-            .append(dim == 1 ? loadVariable("newArray").assignValue(loadVariable("a0").invoke("get", loadVariable("i")))
-                    : loadVariable("newArray").assignValue(
+            .append(dim == 1 ? loadVariable("newArray", loadVariable("i")).assignValue(loadVariable("a0").invoke("get", loadVariable("i")))
+                    : loadVariable("newArray", loadVariable("i")).assignValue(
                     Stmt.invokeStatic(anonBuilder.getClassDefinition(),
                             "_demarshall" + (dim - 1), loadVariable("a0"), loadVariable("a1"))))
-            .finish());
+
+            .finish())
+    .append(Stmt.loadVariable("newArray").returnValue());
 
 
     dmBuilder.finish();
@@ -251,11 +248,12 @@ public class MarshallerGeneratorFactory {
             .append(autoForLoop("i", Stmt.loadVariable("a0").loadField("length"))
                     .append(Stmt.if_(Bool.greaterThan(Stmt.loadVariable("i"), 0))
                             .append(Stmt.loadVariable("sb").invoke("append", ",")).finish())
-                    .append(dim == 1 ? Stmt.loadVariable(MarshallingUtil.getVarName(toMap))
+                    .append(Stmt.loadVariable("sb").invoke("append", dim == 1 ?
+                            Stmt.loadVariable(MarshallingUtil.getVarName(toMap))
                             .invoke("marshall", Stmt.loadVariable("a0", Stmt.loadVariable("i")), Stmt.loadVariable("a1"))
                             :
                             Stmt.invokeStatic(anonBuilder.getClassDefinition(),
-                                    "_marshall" + (dim - 1), Stmt.loadVariable("a0", Stmt.loadVariable("i")), loadVariable("a1")))
+                                    "_marshall" + (dim - 1), Stmt.loadVariable("a0", Stmt.loadVariable("i")), loadVariable("a1"))))
                     .finish())
             .append(Stmt.loadVariable("sb").invoke("append", "]").returnValue())
             .finish();
