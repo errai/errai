@@ -57,6 +57,10 @@ public class MappingContext {
       clazz = clazz.getOuterComponentType();
     }
 
+    if (clazz.isPrimitive()) {
+      clazz = clazz.asBoxed();
+    }
+
     return hasMarshaller(clazz.getFullyQualifiedName());
   }
 
@@ -67,6 +71,9 @@ public class MappingContext {
   public boolean hasGeneratedMarshaller(MetaClass clazz) {
     if (clazz.isArray()) {
       clazz = clazz.getOuterComponentType();
+    }
+    if (clazz.isPrimitive()) {
+      clazz = clazz.asBoxed();
     }
 
     return hasGeneratedMarshaller(clazz.getFullyQualifiedName());

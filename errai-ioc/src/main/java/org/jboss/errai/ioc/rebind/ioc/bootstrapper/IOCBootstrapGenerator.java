@@ -156,7 +156,7 @@ public class IOCBootstrapGenerator {
 
     Collection<MetaField> privateFields = injectFactory.getInjectionContext().getPrivateFieldsToExpose();
     for (MetaField f : privateFields) {
-      GenUtil.addPrivateAccessStubs(!useReflectionStubs, classBuilder, f, f.getType());
+      GenUtil.addPrivateAccessStubs(!useReflectionStubs, classBuilder, f);
     }
 
     Collection<MetaMethod> privateMethods = injectFactory.getInjectionContext().getPrivateMethodsToExpose();

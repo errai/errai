@@ -380,17 +380,17 @@ public class GenUtil {
     return a.getType().isAssignableFrom(b.getType()) || b.getType().isAssignableFrom(a.getType());
   }
 
-  public static void addPrivateAccessStubs(boolean useJSNIStubs, ClassStructureBuilder<?> classBuilder, MetaField f, MetaClass type) {
+  public static void addPrivateAccessStubs(boolean useJSNIStubs, ClassStructureBuilder<?> classBuilder, MetaField f) {
     if (useJSNIStubs) {
       classBuilder.privateMethod(void.class, getPrivateFieldInjectorName(f))
               .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance"),
-                      Parameter.of(type, "value")))
+                      Parameter.of(f.getType(), "value")))
               .modifiers(Modifier.Static, Modifier.JSNI)
               .body()
               .append(new StringStatement(JSNIUtil.fieldAccess(f) + " = value"))
               .finish();
 
-      classBuilder.privateMethod(type, getPrivateFieldInjectorName(f))
+      classBuilder.privateMethod(f.getType(), getPrivateFieldInjectorName(f))
               .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance")))
               .modifiers(Modifier.Static, Modifier.JSNI)
               .body()
@@ -400,7 +400,7 @@ public class GenUtil {
     else {
       classBuilder.privateMethod(void.class, getPrivateFieldInjectorName(f))
               .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance"),
-                      Parameter.of(type, "value")))
+                      Parameter.of(f.getType(), "value")))
               .modifiers(Modifier.Static)
               .body()
               .append(Stmt.try_()
@@ -415,7 +415,7 @@ public class GenUtil {
                       .finish())
               .finish();
 
-      classBuilder.privateMethod(type, getPrivateFieldInjectorName(f))
+      classBuilder.privateMethod(f.getType(), getPrivateFieldInjectorName(f))
               .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance")))
               .modifiers(Modifier.Static)
               .body()
@@ -423,7 +423,7 @@ public class GenUtil {
                       .append(Stmt.declareVariable("field", Stmt.load(f.getDeclaringClass().asClass()).invoke("getDeclaredField",
                               f.getName())))
                       .append(Stmt.loadVariable("field").invoke("setAccessible", true))
-                      .append(Stmt.nestedCall(Cast.to(type, Stmt.loadVariable("field")
+                      .append(Stmt.nestedCall(Cast.to(f.getType(), Stmt.loadVariable("field")
                               .invoke("get", Refs.get("instance")))).returnValue())
                       .finish()
                       .catch_(Throwable.class, "e")

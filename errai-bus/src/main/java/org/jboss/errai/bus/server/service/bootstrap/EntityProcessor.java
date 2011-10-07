@@ -16,9 +16,9 @@
 package org.jboss.errai.bus.server.service.bootstrap;
 
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
-import org.jboss.errai.bus.server.annotations.ExposeEntity;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
+import org.jboss.errai.common.client.api.annotations.ExposeEntity;
 import org.jboss.errai.common.metadata.MetaDataProcessor;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.mvel2.ConversionHandler;
