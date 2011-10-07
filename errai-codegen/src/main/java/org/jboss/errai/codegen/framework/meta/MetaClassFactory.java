@@ -126,6 +126,9 @@ public final class MetaClassFactory {
   }
 
   public static MetaClass getArrayOf(Class<?> clazz, int... dims) {
+    if (dims.length == 0) {
+      dims = new int[1];
+    }
     return createOrGet(Array.newInstance(clazz, dims).getClass());
   }
   

@@ -48,42 +48,56 @@ public class LoadVariable extends AbstractCallElement {
   public void handleCall(CallWriter writer, Context context, Statement statement) {
     writer.reset();
 
+    final Statement[] idx = new Statement[this.indexes.length];
+    for (int i = 0; i < idx.length; i++) {
+      idx[i] = GenUtil.generate(context, this.indexes[i]);
+      idx[i] = GenUtil.convert(context, idx[i], MetaClassFactory.get(Integer.class));
+    }
+
     final VariableReference ref = context.getVariable(variableName);
-    Statement stmt;
-    if (classMember && !context.isNonAmbiguous(ref.getName())) {
-      stmt = new VariableReference() {
+    final Statement stmt = new VariableReference() {
+      @Override
+      public String getName() {
+        return ref.getName();
+      }
 
-        @Override
-        public String getName() {
-          return ref.getName();
+      @Override
+      public Statement getValue() {
+        return ref.getValue();
+      }
+
+      @Override
+      public String generate(Context context) {
+        StringBuilder buf = new StringBuilder((classMember
+                && !context.isNonAmbiguous(ref.getName()) ? "this." : "") + getName());
+        
+        for (Statement s : idx) {
+          buf.append('[').append(s.generate(context)).append(']');
         }
 
-        @Override
-        public Statement getValue() {
-          return ref.getValue();
-        }
+        return buf.toString();
+      }
 
-        @Override
-        public String generate(Context context) {
-          return "this." + getName();
-        }
+      @Override
+      public MetaClass getType() {
+        int dims = GenUtil.getArrayDimensions(ref.getType());
 
-        @Override
-        public MetaClass getType() {
+        if (ref.getType().isArray() && idx.length > 0) {
+          int newDims = dims - idx.length;
+          if (newDims > 0) {
+            return ref.getType().getOuterComponentType().asArrayOf(dims - idx.length);
+          }
+          else {
+            return ref.getType().getOuterComponentType();
+          }
+        }
+        else {
           return ref.getType();
         }
-      };
-    }
-    else {
-      stmt = ref;
-    }
+      }
+    };
 
-    Statement[] indexes = new Statement[this.indexes.length];
-    for (int i = 0; i < indexes.length; i++) {
-      indexes[i] = GenUtil.generate(context, this.indexes[i]);
-      indexes[i] = GenUtil.convert(context, indexes[i], MetaClassFactory.get(Integer.class));
-    }
-    ref.setIndexes(indexes);
+    ref.setIndexes(idx);
 
     nextOrReturn(writer, context, stmt);
   }

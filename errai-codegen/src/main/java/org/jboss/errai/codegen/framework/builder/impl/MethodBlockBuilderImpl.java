@@ -24,8 +24,13 @@ import org.jboss.errai.codegen.framework.ThrowsDeclaration;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
 import org.jboss.errai.codegen.framework.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.framework.builder.MethodBuildCallback;
+import org.jboss.errai.codegen.framework.literal.LiteralFactory;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
+
+import javax.enterprise.util.TypeLiteral;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -93,7 +98,29 @@ public class MethodBlockBuilderImpl<T> extends BlockBuilderImpl<T>
   @Override
   public MethodBlockBuilder<T> parameters(MetaClass... parms) {
     defParameters = DefParameters.fromTypeArray(parms);
-    return null;
+    return this;
+  }
+
+  @Override
+  public MethodBlockBuilder<T> parameters(Object... parms) {
+    List<MetaClass> p = new ArrayList<MetaClass>();
+    for (Object o : parms) {
+      LiteralFactory.getLiteral(o);
+
+      if (o instanceof MetaClass) {
+        p.add((MetaClass) o);
+      }
+      else if (o instanceof Class<?>) {
+        p.add(MetaClassFactory.get((Class<?>) o));
+      }
+      else if (o instanceof TypeLiteral) {
+        p.add(MetaClassFactory.get((TypeLiteral) o));
+      }
+    }
+    
+    defParameters = DefParameters.fromTypeArray(p.toArray(new MetaClass[p.size()]));
+
+    return this;
   }
 
   @Override
