@@ -36,6 +36,7 @@ import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.typeParame
 import static org.jboss.errai.codegen.framework.util.Implementations.autoForLoop;
 import static org.jboss.errai.codegen.framework.util.Implementations.autoInitializedField;
 import static org.jboss.errai.codegen.framework.util.Implementations.implement;
+import static org.jboss.errai.codegen.framework.util.Stmt.load;
 import static org.jboss.errai.codegen.framework.util.Stmt.loadVariable;
 import static org.jboss.errai.marshalling.rebind.util.MarshallingUtil.getArrayVarName;
 import static org.jboss.errai.marshalling.rebind.util.MarshallingUtil.getVarName;
@@ -199,7 +200,8 @@ public class MarshallerGeneratorFactory {
     BlockBuilder<?> bBuilder = classStructureBuilder.publicOverridesMethod("demarshall",
             Parameter.of(Object.class, "a0"), Parameter.of(MarshallingSession.class, "a1"));
 
-    bBuilder.append(Stmt.invokeStatic(anonClass, "_demarshall" + dimensions, loadVariable("a0"), loadVariable("a1")).returnValue());
+    bBuilder.append(Stmt.invokeStatic(anonClass, "_demarshall" + dimensions,
+            loadVariable("a0"), loadVariable("a1")).returnValue());
     bBuilder.finish();
 
     demarshalCode(toMap, dimensions, classStructureBuilder);
@@ -207,7 +209,8 @@ public class MarshallerGeneratorFactory {
     BlockBuilder<?> marshallMethodBlock = classStructureBuilder.publicOverridesMethod("marshall",
             Parameter.of(Object.class, "a0"), Parameter.of(MarshallingSession.class, "a1"));
 
-    marshallMethodBlock.append(Stmt.throw_(RuntimeException.class, "not implemented"));
+    marshallMethodBlock.append(Stmt.invokeStatic(anonClass, "_marshall" + dimensions,
+            loadVariable("a0"), loadVariable("a1")).returnValue());
 
     marshallMethodBlock.finish();
 
@@ -252,7 +255,7 @@ public class MarshallerGeneratorFactory {
                             .invoke("marshall", Stmt.loadVariable("a0", Stmt.loadVariable("i")), Stmt.loadVariable("a1"))
                             :
                             Stmt.invokeStatic(anonBuilder.getClassDefinition(),
-                            "_marshall" + (dim - 1), Stmt.loadVariable("a0", Stmt.loadVariable("i")), loadVariable("a1")))
+                                    "_marshall" + (dim - 1), Stmt.loadVariable("a0", Stmt.loadVariable("i")), loadVariable("a1")))
                     .finish())
             .append(Stmt.loadVariable("sb").invoke("append", "]").returnValue())
             .finish();

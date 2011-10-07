@@ -80,20 +80,24 @@ public class LoadVariable extends AbstractCallElement {
 
       @Override
       public MetaClass getType() {
+        MetaClass ret;
+        
         int dims = GenUtil.getArrayDimensions(ref.getType());
 
         if (ref.getType().isArray() && idx.length > 0) {
           int newDims = dims - idx.length;
           if (newDims > 0) {
-            return ref.getType().getOuterComponentType().asArrayOf(dims - idx.length);
+            ret = ref.getType().getOuterComponentType().asArrayOf(dims - idx.length);
           }
           else {
-            return ref.getType().getOuterComponentType();
+            ret = ref.getType().getOuterComponentType();
           }
         }
         else {
-          return ref.getType();
+          ret = ref.getType();
         }
+        
+        return ret;
       }
     };
 
