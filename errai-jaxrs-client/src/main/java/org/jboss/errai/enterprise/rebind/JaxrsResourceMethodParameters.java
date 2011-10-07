@@ -84,16 +84,13 @@ public class JaxrsResourceMethodParameters {
     return parameters.get(PathParam.class);
   }
 
-  public Parameter getPathParameter(String name, int i) {
+  public Parameter getPathParameter(String name) {
     Parameter param = null;
 
     if (getPathParameters() != null) {
       List<Parameter> params = getPathParameters().get(name);
-      if (params != null && params.size() > i) {
-        do {
-          param = params.get(i--);
-        }
-        while (i >= 0);
+      if (params != null && !params.isEmpty()) {
+        param = params.get(0);
       }
     }
 

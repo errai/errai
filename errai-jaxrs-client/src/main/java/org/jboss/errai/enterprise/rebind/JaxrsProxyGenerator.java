@@ -67,6 +67,8 @@ public class JaxrsProxyGenerator {
         .append(Stmt.loadClassMember("errorCallback").assignValue(Variable.get("callback")))
         .finish();
 
+    // TODO provide a mechanism to register a ResponseCallback for the underlying HTTP response in addition
+    // to this remote callback.
     classBuilder.publicMethod(void.class, "setRemoteCallback", Parameter.of(RemoteCallback.class, "callback"))
         .append(Stmt.loadClassMember("remoteCallback").assignValue(Variable.get("callback")))
         .finish();

@@ -100,10 +100,10 @@ public class JaxrsProxyMethodGenerator {
 
     List<String> pathParams =
         ((UriBuilderImpl) UriBuilderImpl.fromTemplate(resourceMethod.getPath())).getPathParamNamesInDeclarationOrder();
-    int i = 0;
+
     for (String pathParam : pathParams) {
-      pathValue = pathValue.invoke("replaceFirst", "\\{" + pathParam + "\\}",
-          marshal(params.getPathParameter(pathParam, i++)));
+      pathValue = pathValue.invoke("replaceAll", "\\{" + pathParam + "\\}", 
+          marshal(params.getPathParameter(pathParam)));
     }
 
     methodBlock.append(Stmt.declareVariable("url", StringBuilder.class,
@@ -113,7 +113,7 @@ public class JaxrsProxyMethodGenerator {
     if (params.getQueryParameters() != null) {
       urlBuilder = Stmt.loadVariable("url").invoke(APPEND, "?");
 
-      i = 0;
+      int i = 0;
       for (String queryParamName : params.getQueryParameters().keySet()) {
         for (Parameter queryParam : params.getQueryParameters(queryParamName)) {
           if (i++ > 0)
@@ -185,7 +185,6 @@ public class JaxrsProxyMethodGenerator {
         .append(sendRequest)
         .finish()
         .catch_(RequestException.class, "throwable")
-        // TODO separate error callback for JAX-RS including response?
         .append(errorHandling)
         .finish());
   }
