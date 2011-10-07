@@ -48,7 +48,35 @@ public class LoadVariable extends AbstractCallElement {
   public void handleCall(CallWriter writer, Context context, Statement statement) {
     writer.reset();
 
-    VariableReference ref = (classMember) ? context.getClassMember(variableName) : context.getVariable(variableName);
+    final VariableReference ref = context.getVariable(variableName);
+    Statement stmt;
+    if (classMember && !context.isNonAmbiguous(ref.getName())) {
+      stmt = new VariableReference() {
+
+        @Override
+        public String getName() {
+          return ref.getName();
+        }
+
+        @Override
+        public Statement getValue() {
+          return ref.getValue();
+        }
+
+        @Override
+        public String generate(Context context) {
+          return "this." + getName();
+        }
+
+        @Override
+        public MetaClass getType() {
+          return ref.getType();
+        }
+      };
+    }
+    else {
+      stmt = ref;
+    }
 
     Statement[] indexes = new Statement[this.indexes.length];
     for (int i = 0; i < indexes.length; i++) {
@@ -57,7 +85,7 @@ public class LoadVariable extends AbstractCallElement {
     }
     ref.setIndexes(indexes);
 
-    nextOrReturn(writer, context, ref);
+    nextOrReturn(writer, context, stmt);
   }
 
   @Override

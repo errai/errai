@@ -216,11 +216,11 @@ public class Context {
     return false;
   }
   
-  public boolean isNonAmbiguous(Variable variable) {
+  public boolean isNonAmbiguous(String symbol) {
     Context ctx = this;
     int matches = 0;
     do {
-      if (ctx.variables != null && ctx.variables.containsValue(variable))
+      if (ctx.variables != null && ctx.variables.containsKey(symbol))
         matches++;
     }
     while ((ctx = ctx.parent) != null);

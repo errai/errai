@@ -94,7 +94,7 @@ public class AnonymousClassStructureBuilderTest extends AbstractStatementBuilder
     assertEquals("failed to generate anonymous class with overloaded construct", 
         "new Bar() {\n" +
           "{\n" +
-          "this.name = \"init\";" +
+          "name = \"init\";" +
           "\n}\n" +
           "public void setName(String name) {\n" +
             "this.name = name;\n" +
