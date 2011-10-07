@@ -44,6 +44,9 @@
 							<value>true</value>
 						</property>
 					</systemProperties>
+					<includes>
+						<include>**/AllJaxrsIntegrationTests.java</include>
+					</includes>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -59,6 +62,12 @@
 		<dependency>
 			<groupId>org.jboss.errai</groupId>
 			<artifactId>errai-marshalling</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.jboss.errai</groupId>
+			<artifactId>errai-jaxrs-provider</artifactId>
+			<version>${version}</version>
 		</dependency>
 
 		<dependency>

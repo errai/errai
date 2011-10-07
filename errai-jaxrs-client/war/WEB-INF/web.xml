@@ -17,6 +17,11 @@
 		<param-name>resteasy.scan</param-name>
 		<param-value>true</param-value>
 	</context-param>
+	
+	<context-param>
+		<param-name>resteasy.providers</param-name>
+		<param-value>org.jboss.errai.jaxrs.ErraiProvider</param-value>
+	</context-param>
 
 	<filter>
 		<filter-name>Resteasy</filter-name>

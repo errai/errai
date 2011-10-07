@@ -8,7 +8,7 @@ import org.junit.Test;
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class JaxrsPathParamIntegrationTest extends AbstractErraiJaxrsTest {
+public class PathParamIntegrationTest extends AbstractErraiJaxrsTest {
   
   @Override
   public String getModuleName() {
@@ -24,7 +24,7 @@ public class JaxrsPathParamIntegrationTest extends AbstractErraiJaxrsTest {
   @Test
   public void testGetWithMultiplePathParams() {
     RestClient.create(PathParamTestService.class, 
-        new AssertionCallback<String>("@GET with @PathParam failed", "1/2")).getWithMultiplePathParams(1l, 2l);
+        new AssertionCallback<String>("@GET with @PathParams failed", "1/2")).getWithMultiplePathParams(1l, 2l);
   }
  
   @Test

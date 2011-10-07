@@ -8,7 +8,7 @@ import org.junit.Test;
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class JaxrsPlainMethodIntegrationTest extends AbstractErraiJaxrsTest {
+public class PlainMethodIntegrationTest extends AbstractErraiJaxrsTest {
   
   @Override
   public String getModuleName() {
