@@ -47,7 +47,6 @@ import javax.inject.Qualifier;
 
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.api.ResourceProvider;
 import org.jboss.errai.bus.client.api.builder.AbstractRemoteCallBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.ProxyProvider;
@@ -56,7 +55,6 @@ import org.jboss.errai.bus.client.util.ErrorHelper;
 import org.jboss.errai.bus.rebind.RebindUtils;
 import org.jboss.errai.bus.server.ServerMessageBusImpl;
 import org.jboss.errai.bus.server.annotations.Command;
-import org.jboss.errai.bus.server.annotations.ExposeEntity;
 import org.jboss.errai.bus.server.annotations.Remote;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.io.ConversationalEndpointCallback;
