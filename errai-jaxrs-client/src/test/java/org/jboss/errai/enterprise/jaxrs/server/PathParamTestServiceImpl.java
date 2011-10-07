@@ -1,6 +1,6 @@
 package org.jboss.errai.enterprise.jaxrs.server;
 
-import org.jboss.errai.enterprise.jaxrs.client.PathParamTestService;
+import org.jboss.errai.enterprise.jaxrs.client.shared.PathParamTestService;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>

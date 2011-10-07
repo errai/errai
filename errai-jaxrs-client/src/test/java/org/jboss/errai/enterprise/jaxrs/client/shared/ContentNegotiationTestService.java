@@ -1,4 +1,4 @@
-package org.jboss.errai.enterprise.jaxrs.client;
+package org.jboss.errai.enterprise.jaxrs.client.shared;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;

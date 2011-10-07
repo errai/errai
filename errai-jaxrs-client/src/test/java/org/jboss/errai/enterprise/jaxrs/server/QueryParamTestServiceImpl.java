@@ -1,6 +1,6 @@
 package org.jboss.errai.enterprise.jaxrs.server;
 
-import org.jboss.errai.enterprise.jaxrs.client.QueryParamTestService;
+import org.jboss.errai.enterprise.jaxrs.client.shared.QueryParamTestService;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>

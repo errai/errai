@@ -2,8 +2,8 @@ package org.jboss.errai.enterprise.jaxrs.client.test;
 
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
-import org.jboss.errai.enterprise.jaxrs.client.CustomTypeTestService;
-import org.jboss.errai.enterprise.jaxrs.client.entity.Entity;
+import org.jboss.errai.enterprise.jaxrs.client.shared.CustomTypeTestService;
+import org.jboss.errai.enterprise.jaxrs.client.shared.entity.Entity;
 import org.junit.Test;
 
 /**
@@ -34,5 +34,12 @@ public class CustomTypeIntegrationTest extends AbstractErraiJaxrsTest {
     Entity entity = new Entity(1, "put-entity");
     RestClient.create(CustomTypeTestService.class,
         new AssertionCallback<Entity>("@PUT using custom type failed", entity)).putEntity(entity);
+  }
+  
+  @Test
+  public void testDeleteWithCustomType() {
+    Entity entity = new Entity(123, "entity");
+    RestClient.create(CustomTypeTestService.class,
+        new AssertionCallback<Entity>("@DELETE using custom type failed", entity)).deleteEntity(123l);
   }
 }

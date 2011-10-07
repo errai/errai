@@ -2,7 +2,7 @@ package org.jboss.errai.enterprise.jaxrs.client.test;
 
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
-import org.jboss.errai.enterprise.jaxrs.client.PlainMethodTestService;
+import org.jboss.errai.enterprise.jaxrs.client.shared.PlainMethodTestService;
 import org.junit.Test;
 
 /**

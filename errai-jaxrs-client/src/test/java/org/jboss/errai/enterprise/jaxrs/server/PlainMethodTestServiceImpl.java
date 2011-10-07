@@ -1,6 +1,6 @@
 package org.jboss.errai.enterprise.jaxrs.server;
 
-import org.jboss.errai.enterprise.jaxrs.client.PlainMethodTestService;
+import org.jboss.errai.enterprise.jaxrs.client.shared.PlainMethodTestService;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>

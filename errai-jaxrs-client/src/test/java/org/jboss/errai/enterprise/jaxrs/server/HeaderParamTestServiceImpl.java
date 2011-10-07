@@ -1,6 +1,6 @@
 package org.jboss.errai.enterprise.jaxrs.server;
 
-import org.jboss.errai.enterprise.jaxrs.client.HeaderParamTestService;
+import org.jboss.errai.enterprise.jaxrs.client.shared.HeaderParamTestService;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>

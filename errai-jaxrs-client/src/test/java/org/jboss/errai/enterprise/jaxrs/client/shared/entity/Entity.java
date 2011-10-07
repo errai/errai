@@ -1,4 +1,4 @@
-package org.jboss.errai.enterprise.jaxrs.client.entity;
+package org.jboss.errai.enterprise.jaxrs.client.shared.entity;
 
 import java.io.Serializable;
 
@@ -60,5 +60,10 @@ public class Entity implements Serializable {
     else if (!name.equals(other.name))
       return false;
     return true;
+  }
+
+  @Override
+  public String toString() {
+    return "Entity [id=" + id + ", name=" + name + "]";
   }
 }
