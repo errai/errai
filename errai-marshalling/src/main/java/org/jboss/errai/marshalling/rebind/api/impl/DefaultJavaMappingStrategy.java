@@ -279,7 +279,8 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
     }
 
     sb.append("}");
-    builder.append(Stmt.nestedCall(sb).invoke("toString"));
+ 
+     builder.append(Stmt.nestedCall(sb).invoke("toString").returnValue());
   }
 
   private static String keyValue(String key, String value) {
