@@ -180,7 +180,7 @@ public class BuildMetaField extends MetaField implements Builder {
 
   @Override
   public String toJavaString() {
-    declaringClass.getContext().addVariable(Variable.createClassMember(name, type));
+    declaringClass.getContext().addVariable(Variable.create(name, type));
 
     return statement.generate(declaringClass.getContext());
   }

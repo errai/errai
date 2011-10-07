@@ -15,11 +15,12 @@ import org.jboss.errai.codegen.framework.util.GenUtil;
 import org.jboss.errai.codegen.framework.util.Implementations;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.common.client.protocols.SerializationParts;
-import org.jboss.errai.marshalling.client.api.annotations.MappedOrdered;
-import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
+import org.jboss.errai.marshalling.client.api.annotations.MappedOrdered;
+import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 import org.jboss.errai.marshalling.client.api.exceptions.InvalidMappingException;
+import org.jboss.errai.marshalling.client.api.exceptions.MarshallingException;
 import org.jboss.errai.marshalling.client.api.exceptions.NoAvailableMarshallerException;
 import org.jboss.errai.marshalling.rebind.api.MappingContext;
 import org.jboss.errai.marshalling.rebind.api.MappingStrategy;
@@ -64,11 +65,17 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
     final List<Statement> marshallers = new ArrayList<Statement>();
     for (FieldMapping m : mapping.getMappings()) {
-      if (context.hasMarshaller(m.getType())) {
-        marshallers.add(fieldDemarshall(m, JSONObject.class));
+      if (context.hasProvidedOrGeneratedMarshaller(m.getType())) {
+        if (m.getType().isArray()) {
+          marshallers.add(context.getArrayMarshallerCallback()
+                  .demarshall(m.getType(), extractJSONObjectProperty(m.getFieldName(), JSONObject.class)));
+        }
+        else {
+          marshallers.add(fieldDemarshall(m, JSONObject.class));
+        }
       }
       else {
-        System.out.println();
+        throw new MarshallingException("no marshaller for type: " + m.getType());
       }
     }
 
@@ -220,8 +227,17 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
   }
 
   public Statement fieldDemarshall(String fieldName, MetaClass fromType, MetaClass toType) {
-    return unwrapJSON(Stmt.nestedCall(Cast.to(fromType, Stmt.loadVariable("a0"))).invoke("get", fieldName), toType);
+    return unwrapJSON(extractJSONObjectProperty(fieldName, fromType), toType);
   }
+
+  public Statement extractJSONObjectProperty(String fieldName, Class fromType) {
+    return extractJSONObjectProperty(fieldName, MetaClassFactory.get(fromType));
+  }
+
+  public Statement extractJSONObjectProperty(String fieldName, MetaClass fromType) {
+    return Stmt.nestedCall(Cast.to(fromType, Stmt.loadVariable("a0"))).invoke("get", fieldName);
+  }
+
 
   public void marshallToJSON(BlockBuilder<?> builder, MetaClass toType) {
     if (!context.hasProvidedOrGeneratedMarshaller(toType)) {
@@ -248,13 +264,18 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
       MetaClass targetType = GenUtil.getPrimitiveWrapper(metaField.getType());
 
-      if (!context.hasProvidedOrGeneratedMarshaller(targetType.getFullyQualifiedName())) {
+      if (!context.hasProvidedOrGeneratedMarshaller(targetType)) {
         throw new NoAvailableMarshallerException(targetType.getFullyQualifiedName());
       }
 
+      Statement valueStatement = valueAccessorFor(metaField);
+      if (targetType.isArray()) {
+        valueStatement = context.getArrayMarshallerCallback().marshal(targetType, valueStatement);
+      }
+
       sb.append("\"" + metaField.getName() + "\" : ");
-      sb.append(Stmt.loadVariable(MarshallingUtil.getVarName(targetType.getFullyQualifiedName()))
-              .invoke("marshall", valueAccessorFor(metaField), Stmt.loadVariable("a1")));
+      sb.append(Stmt.loadVariable(MarshallingUtil.getVarName(targetType))
+              .invoke("marshall", valueStatement, Stmt.loadVariable("a1")));
     }
 
     sb.append("}");

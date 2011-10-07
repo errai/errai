@@ -42,6 +42,6 @@ public class DefineLabel extends AbstractCallElement {
 
   @Override
   public String toString() {
-    return "[Label<" + name + ">]";
+    return "[[Label<" + name + ">]" + next + "]";
   }
 }

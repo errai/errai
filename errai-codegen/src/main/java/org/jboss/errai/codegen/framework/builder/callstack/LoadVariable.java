@@ -62,6 +62,6 @@ public class LoadVariable extends AbstractCallElement {
 
   @Override
   public String toString() {
-    return "LoadVariable<" + variableName + ">]";
+    return "[[LoadVariable<" + variableName + ">]" + next + "]";
   }
 }

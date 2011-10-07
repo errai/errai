@@ -37,6 +37,6 @@ public class BranchCallElement extends AbstractCallElement {
 
   @Override
   public String toString() {
-    return "[BranchStatement<" + branchStatement + ">]";
+    return "[[BranchStatement<" + branchStatement + ">]" + next + "]";
   }
 }

@@ -37,6 +37,10 @@ public class DynamicLoad extends AbstractCallElement {
 
   @Override
   public String toString() {
-    return "[DynamicLoad<" + value + ">]";
+    return "[[DynamicLoad<" + value + ">]" + next + "]";
+  }
+
+  public Object getValue() {
+    return value;
   }
 }

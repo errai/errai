@@ -76,6 +76,7 @@ public class MethodCall extends AbstractCallElement {
       callParams = fromStatements(GenUtil.generateCallParameters(method, context, parameters));
       statement = new MethodInvocation(method, callParams);
 
+      resultType = statement.getType();
 
       nextOrReturn(writer, context, statement);
     }
@@ -98,5 +99,10 @@ public class MethodCall extends AbstractCallElement {
       throw new RuntimeException("error generating method call for: " + methodName
               + "(" + Arrays.toString(parameters) + ")", e);
     }
+  }
+
+  @Override
+  public String toString() {
+    return "[[MethodCall<" + methodName + "(" + Arrays.toString(parameters) + ")>]" + next + "]";
   }
 }

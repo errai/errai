@@ -48,6 +48,6 @@ public class AssignVariable extends AbstractCallElement {
 
   @Override
   public String toString() {
-    return "[Assignment<" + operator.getCanonicalString() + ":" + value + ">]";
+    return "[[Assignment<" + operator.getCanonicalString() + ":" + value + ">]" + next + "]";
   }
 }

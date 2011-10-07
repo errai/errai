@@ -179,7 +179,7 @@ public class Context {
     do {
       if (ctx.variables != null) {
         Variable var = ctx.variables.get(name);
-        found = (mustBeClassMember && var != null && !var.isClassMember()) ? null : var;
+        found = (mustBeClassMember && var != null && !variables.containsKey(var.getName())) ? null : var;
       }
     }
     while (found == null && (ctx = ctx.parent) != null);
@@ -214,6 +214,17 @@ public class Context {
     }
     while ((ctx = ctx.parent) != null);
     return false;
+  }
+  
+  public boolean isNonAmbiguous(Variable variable) {
+    Context ctx = this;
+    int matches = 0;
+    do {
+      if (ctx.variables != null && ctx.variables.containsValue(variable))
+        matches++;
+    }
+    while ((ctx = ctx.parent) != null);
+    return matches == 0 || matches == 1;
   }
 
   public Collection<Variable> getDeclaredVariables() {

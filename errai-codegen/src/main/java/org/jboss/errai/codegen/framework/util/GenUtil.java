@@ -17,7 +17,9 @@
 package org.jboss.errai.codegen.framework.util;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gwt.core.ext.typeinfo.JParameter;
 import com.google.gwt.core.ext.typeinfo.JType;
@@ -31,6 +33,7 @@ import org.jboss.errai.codegen.framework.exception.InvalidTypeException;
 import org.jboss.errai.codegen.framework.exception.OutOfScopeException;
 import org.jboss.errai.codegen.framework.exception.TypeNotIterableException;
 import org.jboss.errai.codegen.framework.exception.UndefinedMethodException;
+import org.jboss.errai.codegen.framework.literal.ClassLiteral;
 import org.jboss.errai.codegen.framework.literal.LiteralFactory;
 import org.jboss.errai.codegen.framework.literal.LiteralValue;
 import org.jboss.errai.codegen.framework.meta.*;
@@ -114,7 +117,10 @@ public class GenUtil {
           input = ((LiteralValue<?>) input).getValue();
         }
         else {
-          ((Statement) input).generate(context);
+          if ("null".equals(((Statement) input).generate(context))) {
+            return (Statement) input;
+          }
+          
           assertAssignableTypes(((Statement) input).getType(), targetType);
           return (Statement) input;
         }
@@ -123,7 +129,7 @@ public class GenUtil {
       if (Object.class.getName().equals(targetType.getFullyQualifiedName())) {
         return generate(context, input);
       }
-      
+
       Class<?> inputClass = input == null ? Object.class : input.getClass();
       Class<?> targetClass = targetType.asBoxed().asClass();
       if (DataConversion.canConvert(targetClass, inputClass)) {
@@ -209,6 +215,78 @@ public class GenUtil {
   }
 
 
+//  public static MetaType determineGenericReturnType(MetaMethod method) {
+//    MetaClass returnType = method.getReturnType();
+//
+//    if (method.getGenericReturnType() != null && method.getGenericReturnType() instanceof MetaTypeVariable) {
+//      Map<String, MetaClass> typeVars = determineTypeVariables(method);
+//      MetaTypeVariable typeVar = (MetaTypeVariable) method.getGenericReturnType();
+//      returnType = typeVars.get(typeVar.getName());
+//    }
+//    else {
+//      MetaClass clazz = method.getDeclaringClass();
+//
+//      for (MetaClass iface : clazz.getInterfaces()) {
+//        if (iface.getParameterizedType() != null) {
+//          MetaParameterizedType parameterizedType = iface.getParameterizedType();
+//
+//          for (MetaMethod ifaceMethod : iface.getDeclaredMethods()) {
+//            if (ifaceMethod.getName().equals(method.getName())) {
+//
+//
+//            }
+//          }
+//        }
+//      }
+//    }
+//
+//     return null;
+//  }
+
+
+  public static Map<String, MetaClass> determineTypeVariables(MetaMethod method) {
+    HashMap<String, MetaClass> typeVariables = new HashMap<String, MetaClass>();
+
+    int methodParmIndex = 0;
+    for (MetaType methodParmType : method.getGenericParameterTypes()) {
+      MetaParameter parm = method.getParameters()[methodParmIndex];
+      resolveTypeVariable(typeVariables, methodParmType, parm.getType());
+      methodParmIndex++;
+    }
+
+    return typeVariables;
+  }
+
+
+  private static void resolveTypeVariable(Map<String, MetaClass> typeVariables,
+                                          MetaType methodParmType, MetaType callParmType) {
+    if (methodParmType instanceof MetaTypeVariable) {
+      MetaTypeVariable typeVar = (MetaTypeVariable) methodParmType;
+      typeVariables.put(typeVar.getName(), (MetaClass) callParmType);
+    }
+    else if (methodParmType instanceof MetaParameterizedType) {
+      MetaType parameterizedCallParmType;
+      if (callParmType instanceof MetaParameterizedType) {
+        parameterizedCallParmType = callParmType;
+      }
+      else {
+        parameterizedCallParmType = ((MetaClass) callParmType).getParameterizedType();
+      }
+
+      MetaParameterizedType parameterizedMethodParmType = (MetaParameterizedType) methodParmType;
+      int typeParmIndex = 0;
+      for (MetaType typeParm : parameterizedMethodParmType.getTypeParameters()) {
+        if (parameterizedCallParmType != null) {
+          resolveTypeVariable(typeVariables, typeParm,
+                  ((MetaParameterizedType) parameterizedCallParmType).getTypeParameters()[typeParmIndex++]);
+        }
+        else {
+          resolveTypeVariable(typeVariables, typeParm, callParmType);
+        }
+      }
+    }
+  }
+
   public static Scope scopeOf(MetaClass clazz) {
     if (clazz.isPublic()) {
       return Scope.Public;
@@ -269,7 +347,7 @@ public class GenUtil {
 
   public static boolean equals(MetaConstructor a, MetaConstructor b) {
 //    if (!a.getName().equals(b.getName())) return false;
-    if (a.getParameters().length != b.getParameters().length){
+    if (a.getParameters().length != b.getParameters().length) {
       return false;
     }
 
@@ -457,13 +535,13 @@ public class GenUtil {
     }
     return clazz;
   }
-  
+
   public static int getArrayDimensions(MetaClass type) {
     if (!type.isArray()) return 0;
-    
+
     String internalName = type.getInternalName();
     for (int i = 0; i < internalName.length(); i++) {
-      if (internalName.charAt(i) != '[') return i - 1;
+      if (internalName.charAt(i) != '[') return i;
     }
     return 0;
   }

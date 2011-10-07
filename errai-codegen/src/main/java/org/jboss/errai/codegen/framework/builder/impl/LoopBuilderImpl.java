@@ -115,6 +115,11 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements Context
           }
         };
       }
+
+      @Override
+      public Context getParentContext() {
+        return context;
+      }
     });
   }
 
@@ -168,6 +173,11 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements Context
       @Override
       public StatementEnd callback(Statement statement) {
         return LoopBuilderImpl.this;
+      }
+
+      @Override
+      public Context getParentContext() {
+        return context;
       }
     });
   }

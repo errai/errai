@@ -1,5 +1,6 @@
 package org.jboss.errai.marshalling.rebind;
 
+import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Modifier;
 import org.jboss.errai.codegen.framework.Parameter;
@@ -11,6 +12,7 @@ import org.jboss.errai.codegen.framework.builder.ConstructorBlockBuilder;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
+import org.jboss.errai.codegen.framework.util.EmptyStatement;
 import org.jboss.errai.codegen.framework.util.GenUtil;
 import org.jboss.errai.codegen.framework.util.Implementations;
 import org.jboss.errai.codegen.framework.util.Stmt;
@@ -22,6 +24,7 @@ import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallerFactory;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
+import org.jboss.errai.marshalling.rebind.api.ArrayMarshallerCallback;
 import org.jboss.errai.marshalling.rebind.api.MappingContext;
 import org.jboss.errai.marshalling.rebind.api.MappingStrategy;
 
@@ -33,6 +36,7 @@ import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.typeParame
 import static org.jboss.errai.codegen.framework.util.Implementations.autoInitializedField;
 import static org.jboss.errai.codegen.framework.util.Implementations.implement;
 import static org.jboss.errai.codegen.framework.util.Stmt.loadVariable;
+import static org.jboss.errai.marshalling.rebind.util.MarshallingUtil.getArrayVarName;
 import static org.jboss.errai.marshalling.rebind.util.MarshallingUtil.getVarName;
 
 /**
@@ -45,13 +49,49 @@ public class MarshallerGeneratorFactory {
   private MappingContext mappingContext;
 
   ClassStructureBuilder<?> classStructureBuilder;
+  ConstructorBlockBuilder<?> constructor;
+  Context classContext;
+
+  Set<String> arrayMarshallers = new HashSet<String>();
 
   public String generate(String packageName, String clazzName) {
     classStructureBuilder = implement(MarshallerFactory.class, packageName, clazzName);
 
-    Context classContext = ((BuildMetaClass) classStructureBuilder.getClassDefinition()).getContext();
+    classContext = ((BuildMetaClass) classStructureBuilder.getClassDefinition()).getContext();
     mappingContext = new MappingContext(classContext, classStructureBuilder.getClassDefinition(),
-            classStructureBuilder);
+            classStructureBuilder, new ArrayMarshallerCallback() {
+      @Override
+      public Statement marshal(MetaClass type, Statement value) {
+        return Stmt.load(null);
+      }
+
+      @Override
+      public Statement demarshall(MetaClass type, Statement value) {
+        String variable = createDemarshallerIfNeeded(type);
+
+        value = Stmt.loadVariable(getVarName(List.class)).invoke("demarshall", value, Stmt.loadVariable("a1"));
+
+        return Stmt.loadVariable(variable).invoke("demarshall", value, Stmt.loadVariable("a1"));
+      }
+
+      private String createDemarshallerIfNeeded(MetaClass type) {
+        String varName = getVarName(type);
+
+        if (!arrayMarshallers.contains(varName)) {
+          classStructureBuilder.privateField(varName,
+                  parameterizedAs(Marshaller.class, typeParametersOf(List.class, type))).finish();
+          Statement marshaller = arrayDemarshall(type);
+          constructor.append(loadVariable(varName).assignValue(marshaller));
+
+          constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
+                  .invoke("put", type.getFullyQualifiedName(), loadVariable(varName)));
+
+          arrayMarshallers.add(varName);
+        }
+
+        return varName;
+      }
+    });
 
     loadMarshallers();
 
@@ -63,11 +103,11 @@ public class MarshallerGeneratorFactory {
     autoInitializedField(classStructureBuilder, javaUtilMap, MARSHALLERS_VAR, HashMap.class);
     autoInitializedField(classStructureBuilder, javaUtilMap, ARRAY_MARSHALLERS_VAR, HashMap.class);
 
-    ConstructorBlockBuilder<?> constructor = classStructureBuilder.publicConstructor();
+    constructor = classStructureBuilder.publicConstructor();
 
     for (Map.Entry<String, Class<? extends Marshaller>> entry : mappingContext.getAllMarshallers().entrySet()) {
       String varName = getVarName(entry.getKey());
-      String arrayVarName = "arrayOf_" + varName;
+      String arrayVarName = getArrayVarName(entry.getKey());
       classStructureBuilder.privateField(varName, entry.getValue()).finish();
       classStructureBuilder.privateField(arrayVarName, entry.getValue()).finish();
 
@@ -78,7 +118,7 @@ public class MarshallerGeneratorFactory {
               .invoke("put", entry.getKey(), loadVariable(varName)));
     }
 
-    generateMarshallers(constructor, classContext);
+    generateMarshallers();
 
     classStructureBuilder.publicMethod(Marshaller.class, "getMarshaller").parameters(String.class, String.class)
             .body()
@@ -95,7 +135,7 @@ public class MarshallerGeneratorFactory {
     return generatedClass;
   }
 
-  private void generateMarshallers(ConstructorBlockBuilder<?> constructor, Context classContext) {
+  private void generateMarshallers() {
     MetaDataScanner scanner = MetaDataScanner.createInstance();
 
     Set<Class<?>> exposed = new HashSet<Class<?>>(scanner.getTypesAnnotatedWith(Portable.class));
@@ -110,30 +150,19 @@ public class MarshallerGeneratorFactory {
       Statement marshaller = marshal(metaClazz);
       MetaClass type = marshaller.getType();
       String varName = getVarName(clazz);
-      String arrayVarName = "arrayOf_" + varName;
 
       classStructureBuilder.privateField(varName, type).finish();
-      classStructureBuilder.privateField(arrayVarName, type).finish();
 
       constructor.append(loadVariable(varName).assignValue(marshaller));
 
       constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
               .invoke("put", clazz.getName(), loadVariable(varName)));
-
-      Statement arrayMarshaller = arrayMarshal(metaClazz.asArrayOf(2));
-
-      constructor.append(Stmt.create(classContext).loadVariable(ARRAY_MARSHALLERS_VAR)
-              .invoke("put", clazz.getName(), loadVariable(arrayVarName)));
-
-      constructor.append(loadVariable(arrayVarName).assignValue(arrayMarshaller));
     }
 
     constructor.finish();
   }
 
   private Statement marshal(MetaClass cls) {
-    boolean array = cls.isArray();
-
     MappingStrategy strategy = MappingStrategyFactory.createStrategy(mappingContext, cls);
     if (strategy == null) {
       throw new RuntimeException("no available marshaller for class: " + cls.getName());
@@ -141,7 +170,11 @@ public class MarshallerGeneratorFactory {
     return strategy.getMapper().getMarshaller();
   }
 
-  private Statement arrayMarshal(MetaClass arrayType) {
+  private Statement arrayMarshall(MetaClass arrayType) {
+    return EmptyStatement.INSTANCE;
+  }
+
+  private Statement arrayDemarshall(MetaClass arrayType) {
     MetaClass toMap = arrayType;
     while (toMap.isArray()) {
       toMap = toMap.getComponentType();

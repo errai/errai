@@ -63,7 +63,7 @@ public class LoadClassReference extends AbstractCallElement {
   }
 
   public static String getClassReference(MetaType metaClass, Context context, boolean typeParms) {
-    MetaClass erased = null;
+    MetaClass erased;
     if (metaClass instanceof MetaClass) {
       erased = ((MetaClass) metaClass).getErased();
     }
@@ -74,6 +74,9 @@ public class LoadClassReference extends AbstractCallElement {
     else if (metaClass instanceof MetaTypeVariable) {
       MetaTypeVariable parameterizedType = (MetaTypeVariable) metaClass;
       return parameterizedType.getName();
+    }
+    else {
+      throw new RuntimeException("unknown class reference type: " + metaClass);
     }
 
     String fqcn = erased.getFullyQualifiedName();
@@ -93,7 +96,7 @@ public class LoadClassReference extends AbstractCallElement {
     }
 
     StringBuilder buf = new StringBuilder(fqcn);
-    if (typeParms && metaClass instanceof MetaClass) {
+    if (typeParms) {
       buf.append(getClassReferencesForParameterizedTypes(((MetaClass)metaClass).getParameterizedType(), context));
     }
 
@@ -126,5 +129,10 @@ public class LoadClassReference extends AbstractCallElement {
     }
 
     return buf.toString();
+  }
+
+  @Override
+  public String toString() {
+    return "[[LoadClassReference<" + metaClass.getFullyQualifiedName() + ">]" + next + "]";
   }
 }

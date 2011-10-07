@@ -46,6 +46,6 @@ public class ConditionalBlockCallElement extends AbstractCallElement {
 
   @Override
   public String toString() {
-    return "[Conditional<" + conditionalBlock + ">]";
+    return "[[Conditional<" + conditionalBlock + ">]" + next + "]";
   }
 }

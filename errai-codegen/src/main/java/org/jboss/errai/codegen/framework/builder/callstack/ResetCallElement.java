@@ -31,6 +31,6 @@ public class ResetCallElement extends AbstractCallElement {
 
   @Override
   public String toString() {
-    return "[StackReset]";
+    return "[StackReset] -> " + next;
   }
 }

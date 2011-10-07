@@ -44,6 +44,6 @@ public class DeferredCallElement extends AbstractCallElement {
 
   @Override
   public String toString() {
-    return "[DeferredEval<" + callback + ">]";
+    return "[[DeferredEval<" + callback + ">]" + next + "]";
   }
 }

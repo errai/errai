@@ -138,6 +138,11 @@ public class ObjectBuilder extends AbstractStatementBuilder {
         extendsBlock = statement;
         return ObjectBuilder.this;
       }
+
+      @Override
+      public Context getParentContext() {
+        return context;
+      }
     });
   }
 
@@ -167,7 +172,7 @@ public class ObjectBuilder extends AbstractStatementBuilder {
         }
         if (extendsBlock != null) {
           for (MetaField field : type.getDeclaredFields()) {
-            context.addVariable(Variable.createClassMember(field.getName(), field.getType()));
+            context.addVariable(Variable.create(field.getName(), field.getType()));
           }
           buf.append(" {\n").append(extendsBlock.generate(context)).append("\n}\n");
         }

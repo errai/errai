@@ -38,6 +38,6 @@ public class LoadLiteral extends AbstractCallElement {
 
   @Override
   public String toString() {
-    return "[Literal<" + literalValue + ">]";
+    return "[[Literal<" + literalValue + ">]" + next + "]";
   }
 }

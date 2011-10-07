@@ -50,7 +50,7 @@ public class MethodInvocation extends AbstractStatement {
 
   @Override
   public MetaClass getType() {
-    MetaClass returnType = null;
+    MetaClass returnType = method.getReturnType();
 
     if (method.getGenericReturnType() != null && method.getGenericReturnType() instanceof MetaTypeVariable) {
       typeVariables = new HashMap<String, MetaClass>();
@@ -60,7 +60,7 @@ public class MethodInvocation extends AbstractStatement {
       returnType = typeVariables.get(typeVar.getName());
     }
 
-    return (returnType != null) ? returnType : method.getReturnType();
+    return returnType;
   }
 
   // Resolves type variables by inspecting call parameters

@@ -43,10 +43,12 @@ public class AnonymousClassStructureBuilderImpl
         implements AnonymousClassStructureBuilder {
   private BuildCallback<ObjectBuilder> callback;
   private List<DeferredGenerateCallback> callables = new ArrayList<DeferredGenerateCallback>();
-
+  private Context context;
+  
   AnonymousClassStructureBuilderImpl(MetaClass clazz, BuildCallback<ObjectBuilder> builderBuildCallback) {
-    super(clazz.getFullyQualifiedName(), clazz, Context.create());
+    super(clazz.getFullyQualifiedName(), clazz, builderBuildCallback.getParentContext());
     this.callback = builderBuildCallback;
+    this.context = builderBuildCallback.getParentContext();
   }
 
   public BlockBuilder<AnonymousClassStructureBuilder> initialize() {
@@ -70,6 +72,11 @@ public class AnonymousClassStructureBuilderImpl
                 });
 
                 return AnonymousClassStructureBuilderImpl.this;
+              }
+
+              @Override
+              public Context getParentContext() {
+                return  context;
               }
             });
   }
@@ -106,6 +113,11 @@ public class AnonymousClassStructureBuilderImpl
                 });
 
                 return AnonymousClassStructureBuilderImpl.this;
+              }
+
+              @Override
+              public Context getParentContext() {
+                return context;
               }
             });
   }

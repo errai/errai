@@ -16,8 +16,9 @@
 
 package org.jboss.errai.codegen.framework.meta.impl;
 
-import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.asClassArray;
-import static org.jboss.errai.codegen.framework.util.GenUtil.classToMeta;
+import com.google.gwt.core.ext.typeinfo.JClassType;
+import org.jboss.errai.codegen.framework.meta.*;
+import org.mvel2.util.ParseTools;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -25,16 +26,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
-import org.jboss.errai.codegen.framework.meta.MetaConstructor;
-import org.jboss.errai.codegen.framework.meta.MetaMethod;
-import org.jboss.errai.codegen.framework.meta.MetaParameter;
-import org.jboss.errai.codegen.framework.meta.MetaParameterizedType;
-import org.jboss.errai.codegen.framework.meta.MetaType;
-import org.mvel2.util.ParseTools;
-
-import com.google.gwt.core.ext.typeinfo.JClassType;
+import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.asClassArray;
+import static org.jboss.errai.codegen.framework.util.GenUtil.classToMeta;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -82,33 +75,71 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   protected static MetaMethod _getMethod(MetaMethod[] methods, String name, MetaClass... parmTypes) {
-    Outer:
+    MetaMethod candidate = null;
+    int bestScore = 0;
+    int score;
+
     for (MetaMethod method : methods) {
-      if (method.getName().equals(name) && method.getParameters().length == parmTypes.length) {
-        for (int i = 0; i < parmTypes.length; i++) {
-          if (!method.getParameters()[i].getType().isAssignableFrom(parmTypes[i])) {
-            continue Outer;
+      score = 0;
+      if (method.getName().equals(name)) {
+        if (method.getParameters().length == parmTypes.length) {
+          if (parmTypes.length == 0) {
+            score = 1;
+            MetaClass retType = method.getReturnType();
+            while ((retType = retType.getSuperClass()) != null) score++;
+          }
+          else {
+            for (int i = 0; i < parmTypes.length; i++) {
+              if (method.getParameters()[i].getType().isAssignableFrom(parmTypes[i])) {
+                score++;
+                if (method.getParameters()[i].getType().equals(parmTypes[i])) {
+                  score++;
+                }
+              }
+            }
           }
         }
-        return method;
+      }
+
+      if (score > bestScore) {
+        bestScore = score;
+        candidate = method;
       }
     }
-    return null;
+
+    return candidate;
   }
 
   protected static MetaConstructor _getConstructor(MetaConstructor[] constructors, MetaClass... parmTypes) {
-    Outer:
+    MetaConstructor candidate = null;
+    int bestScore = 0;
+    int score;
+
     for (MetaConstructor constructor : constructors) {
+      score = 0;
       if (constructor.getParameters().length == parmTypes.length) {
-        for (int i = 0; i < parmTypes.length; i++) {
-          if (!constructor.getParameters()[i].getType().isAssignableFrom(parmTypes[i])) {
-            continue Outer;
+        if (parmTypes.length == 0) {
+          score = 1;
+        }
+        else {
+          for (int i = 0; i < parmTypes.length; i++) {
+            if (constructor.getParameters()[i].getType().isAssignableFrom(parmTypes[i])) {
+              score++;
+              if (constructor.getParameters()[i].getType().equals(parmTypes[i])) {
+                score++;
+              }
+            }
           }
         }
-        return constructor;
+      }
+
+      if (score > bestScore) {
+        bestScore = score;
+        candidate = constructor;
       }
     }
-    return null;
+
+    return candidate;
   }
 
   @Override
@@ -166,7 +197,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
           return null;
         }
       }
-      m = ParseTools.getWidenedTarget(m);
+//      m = ParseTools.getWidenedTarget(m);
       return getMethod(name, m.getParameterTypes());
     }
     else {
@@ -227,14 +258,14 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   @Override
   public MetaConstructor getBestMatchingConstructor(Class... parameters) {
     Class<?> cls = asClass();
-    if (cls!=null) {
+    if (cls != null) {
       Constructor c = ParseTools.getBestConstructorCandidate(parameters, cls, false);
       if (c == null)
         return null;
-      
+
       MetaClass metaClass = MetaClassFactory.get(cls);
       return metaClass.getConstructor(c.getParameterTypes());
-    } 
+    }
     else {
       return getConstructor(parameters);
     }
@@ -403,7 +434,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     Class<?> cls = asClass();
     if (cls == null)
       return this;
-    
+
     return MetaClassFactory.get(ParseTools.boxPrimitive(cls));
   }
 
@@ -412,7 +443,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     Class<?> cls = asClass();
     if (cls == null)
       return this;
-    
+
     return MetaClassFactory.get(ParseTools.unboxPrimitive(cls));
   }
 
@@ -481,6 +512,15 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
 
     return dimString + name;
+  }
+
+  @Override
+  public MetaClass getOuterComponentType() {
+    MetaClass c = this;
+    while (c.isArray()) {
+      c = c.getComponentType();
+    }
+    return c;
   }
 
   @Override

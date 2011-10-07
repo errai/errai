@@ -238,6 +238,11 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
         classDefinition.addConstructor(buildMetaConstructor);
         return (T) ClassBuilder.this;
       }
+
+      @Override
+      public Context getParentContext() {
+        return classDefinition.getContext();
+      }
     });
   }
 
@@ -445,6 +450,11 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
 
         classDefinition.addField(buildMetaField);
         return (T) ClassBuilder.this;
+      }
+
+      @Override
+      public Context getParentContext() {
+        return classDefinition.getContext();
       }
     }, scope, type, name);
   }

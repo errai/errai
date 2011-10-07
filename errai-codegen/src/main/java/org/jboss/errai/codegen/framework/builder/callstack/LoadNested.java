@@ -51,6 +51,11 @@ public class LoadNested extends AbstractCallElement {
       public MetaClass getType() {
         return type;
       }
+
+      @Override
+      public String toString() {
+        return statement.toString();
+      }
     };
   }
 
@@ -69,6 +74,6 @@ public class LoadNested extends AbstractCallElement {
 
   @Override
   public String toString() {
-    return "[Nest<" + statement + ">]";
+    return "[[Nest<" + statement + ">]" + next + "]";
   }
 }
