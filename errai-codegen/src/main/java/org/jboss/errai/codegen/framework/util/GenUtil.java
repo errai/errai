@@ -16,10 +16,7 @@
 
 package org.jboss.errai.codegen.framework.util;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.google.gwt.core.ext.typeinfo.JParameter;
 import com.google.gwt.core.ext.typeinfo.JType;
@@ -29,10 +26,7 @@ import org.jboss.errai.codegen.framework.builder.CatchBlockBuilder;
 import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.Scope;
-import org.jboss.errai.codegen.framework.exception.InvalidTypeException;
-import org.jboss.errai.codegen.framework.exception.OutOfScopeException;
-import org.jboss.errai.codegen.framework.exception.TypeNotIterableException;
-import org.jboss.errai.codegen.framework.exception.UndefinedMethodException;
+import org.jboss.errai.codegen.framework.exception.*;
 import org.jboss.errai.codegen.framework.literal.ClassLiteral;
 import org.jboss.errai.codegen.framework.literal.LiteralFactory;
 import org.jboss.errai.codegen.framework.literal.LiteralValue;
@@ -69,7 +63,14 @@ public class GenUtil {
           parameter = generate(context, parameter);
         }
       }
-      statements[i] = convert(context, parameter, methParms[i++].getType());
+      try {
+        statements[i] = convert(context, parameter, methParms[i++].getType());
+      }
+      catch (InvalidTypeException e) {
+        throw new RuntimeException("in method call: "
+                + method.getDeclaringClass().getFullyQualifiedName()
+                + "." + method.getName() + "(" + Arrays.toString(methParms) + ")", e);
+      }
     }
     return statements;
   }
@@ -120,7 +121,7 @@ public class GenUtil {
           if ("null".equals(((Statement) input).generate(context))) {
             return (Statement) input;
           }
-          
+
           assertAssignableTypes(((Statement) input).getType(), targetType);
           return (Statement) input;
         }
@@ -544,5 +545,29 @@ public class GenUtil {
       if (internalName.charAt(i) != '[') return i;
     }
     return 0;
+  }
+
+  public static void throwIfUnhandled(String error, Throwable t) {
+    try {
+      throw t;
+    }
+    catch (OutOfScopeException e) {
+      throw e;
+    }
+    catch (InvalidExpressionException e) {
+      throw e;
+    }
+    catch (InvalidTypeException e) {
+      throw e;
+    }
+    catch (UndefinedMethodException e) {
+      throw e;
+    }
+    catch (TypeNotIterableException e) {
+      throw e;
+    }
+    catch (Throwable e) {
+      throw new RuntimeException("generation failure at: " + error, e);
+    }
   }
 }

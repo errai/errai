@@ -22,9 +22,12 @@ import java.util.Map;
 public class MarshallerFramework implements EntryPoint {
   private static MarshallerFactory marshallerFactory;
 
+  static {
+    marshallerFactory = GWT.create(MarshallerFactory.class);
+  }
+
   @Override
   public void onModuleLoad() {
-    marshallerFactory = GWT.create(MarshallerFactory.class);
     DataTypeHelper.setMarshallerProvider(new MarshallerProvider() {
       @Override
       public boolean hasMarshaller(String fqcn) {

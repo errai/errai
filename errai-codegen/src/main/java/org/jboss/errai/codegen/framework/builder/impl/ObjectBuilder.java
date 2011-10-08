@@ -180,6 +180,12 @@ public class ObjectBuilder extends AbstractStatementBuilder {
       }
     }));
 
+    try {
     return super.generate(context);
+    }
+    catch (Throwable t) {
+      GenUtil.throwIfUnhandled("while instantiating class: " + type.getFullyQualifiedName(), t);
+      return null;
+    }
   }
 }

@@ -402,9 +402,13 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   public Class<?> asClass() {
     Class<?> cls = null;
 
-    if (isArray()) {
+    if (enclosedMetaObject instanceof Class) {
+      cls = (Class<?>) enclosedMetaObject;
+    }
+    else if (isArray()) {
       try {
         String name = getInternalName().replaceAll("/", "\\.");
+
         cls = Class.forName(name, false,
                 Thread.currentThread().getContextClassLoader());
       }
@@ -412,9 +416,6 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
         e.printStackTrace();
         cls = null;
       }
-    }
-    else if (enclosedMetaObject instanceof Class) {
-      cls = (Class<?>) enclosedMetaObject;
     }
     else if (enclosedMetaObject != null) {
       try {
@@ -477,41 +478,76 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       name = type.getFullyQualifiedName();
     }
 
-    if (isPrimitive() || (isArray() && type.isPrimitive())) {
-      if ("int".equals(name)) {
-        name = "I";
-      }
-      else if ("boolean".equals(name)) {
-        name = "Z";
-      }
-      else if ("byte".equals(name)) {
-        name = "B";
-      }
-      else if ("char".equals(name)) {
-        name = "C";
-      }
-      else if ("short".equals(name)) {
-        name = "S";
-      }
-      else if ("long".equals(name)) {
-        name = "J";
-      }
-      else if ("float".equals(name)) {
-        name = "F";
-      }
-      else if ("double".equals(name)) {
-        name = "D";
-      }
-      else if ("void".equals(name)) {
-        name = "V";
-      }
+    if (isPrimitive() || (isArray() && getComponentType().isPrimitive())) {
+      name = getInternalPrimitiveNameFrom(name.trim());
     }
     else {
-      name = "L" + name.replaceAll("\\.", "/") + ";";
+      name = "L" + getInternalPrimitiveNameFrom(name.trim()).replaceAll("\\.", "/") + ";";
     }
 
-
     return dimString + name;
+  }
+
+  private static String getInternalPrimitiveNameFrom(String name) {
+    if ("int".equals(name)) {
+      return "I";
+    }
+    else if ("boolean".equals(name)) {
+      return "Z";
+    }
+    else if ("byte".equals(name)) {
+      return "B";
+    }
+    else if ("char".equals(name)) {
+      return "C";
+    }
+    else if ("short".equals(name)) {
+      return "S";
+    }
+    else if ("long".equals(name)) {
+      return "J";
+    }
+    else if ("float".equals(name)) {
+      return "F";
+    }
+    else if ("double".equals(name)) {
+      return "D";
+    }
+    else if ("void".equals(name)) {
+      return "V";
+    }
+    return name;
+  }
+
+  private static Class<?> getPrimitiveRefFrom(String name) {
+    if ("int".equals(name)) {
+      return int.class;
+    }
+    else if ("boolean".equals(name)) {
+      return boolean.class;
+    }
+    else if ("byte".equals(name)) {
+      return byte.class;
+    }
+    else if ("char".equals(name)) {
+      return char.class;
+    }
+    else if ("short".equals(name)) {
+      return short.class;
+    }
+    else if ("long".equals(name)) {
+      return long.class;
+    }
+    else if ("float".equals(name)) {
+      return float.class;
+    }
+    else if ("double".equals(name)) {
+      return double.class;
+    }
+    else if ("void".equals(name)) {
+      return void.class;
+    }
+    return null;
   }
 
   @Override

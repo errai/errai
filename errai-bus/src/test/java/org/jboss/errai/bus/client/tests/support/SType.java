@@ -48,8 +48,6 @@ public class SType extends STypeSuper {
 
   private SType[] sTypeArray;
 
-
-  @ExposeEntity
   public enum Place {
     FIRST, SECOND, THIRD
   }

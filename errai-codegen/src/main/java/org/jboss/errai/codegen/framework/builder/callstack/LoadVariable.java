@@ -61,9 +61,9 @@ public class LoadVariable extends AbstractCallElement {
       if (!ref.getType().isArray()) {
         throw new InvalidTypeException("attempt to use indexed accessor on non-array type: " + ref);
       }
-      else if (GenUtil.getArrayDimensions(ref.getType()) != idx.length) {
-        throw new InvalidTypeException("wrong number of dimension for array type " + ref);
-      }
+//      else if (GenUtil.getArrayDimensions(ref.getType()) != idx.length) {
+//        throw new InvalidTypeException("wrong number of dimension for array type " + ref);
+//      }
     }
 
     final Statement stmt = new VariableReference() {

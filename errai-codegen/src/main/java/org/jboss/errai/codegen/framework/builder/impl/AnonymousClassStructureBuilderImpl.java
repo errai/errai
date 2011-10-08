@@ -33,6 +33,7 @@ import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaMethod;
+import org.jboss.errai.codegen.framework.util.GenUtil;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -174,7 +175,8 @@ public class AnonymousClassStructureBuilderImpl
       return buf.toString();
     }
     catch (Exception e) {
-      throw new RuntimeException(e);
+      GenUtil.throwIfUnhandled("while generating: " + classDefinition.getFullyQualifiedName(), e);
+      return null;
     }
   }
 

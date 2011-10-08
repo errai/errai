@@ -26,6 +26,7 @@ import org.jboss.errai.codegen.framework.builder.callstack.CallElement;
 import org.jboss.errai.codegen.framework.builder.callstack.CallWriter;
 import org.jboss.errai.codegen.framework.exception.*;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.util.GenUtil;
 
 /**
  * Base class of all {@link StatementBuilder}s
@@ -57,23 +58,8 @@ public abstract class AbstractStatementBuilder implements Statement, Builder, St
     try {
       callElementBuilder.getRootElement().handleCall(writer, context, null);
     }
-    catch (OutOfScopeException e) {
-     throw e;
-    }
-    catch (InvalidExpressionException e) {
-      throw e;
-    }
-    catch (InvalidTypeException e) {
-      throw e;
-    }
-    catch (UndefinedMethodException e) {
-      throw e;
-    }
-    catch (TypeNotIterableException e) {
-      throw e;
-    }
     catch (Exception e) {
-      throw new RuntimeException("generation failure at: " + writer.getCallString(), e);
+      GenUtil.throwIfUnhandled("generation failure at: " + writer.getCallString(), e);
     }
     return prettyPrintJava(writer.getCallString());
   }

@@ -188,14 +188,14 @@ public class SType extends STypeSuper {
     this.charArray = charArray;
   }
 
-//  public char[][] getCharArrayMulti() {
-//    return charArrayMulti;
-//  }
-//
-//  public void setCharArrayMulti(char[][] charArrayMulti) {
-//    this.charArrayMulti = charArrayMulti;
-//  }
 
+  public char[][] getCharArrayMulti() {
+    return charArrayMulti;
+  }
+
+  public void setCharArrayMulti(char[][] charArrayMulti) {
+    this.charArrayMulti = charArrayMulti;
+  }
 
   public SType[] getsTypeArray() {
     return sTypeArray;

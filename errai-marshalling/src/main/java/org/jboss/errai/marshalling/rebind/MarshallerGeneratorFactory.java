@@ -1,7 +1,6 @@
 package org.jboss.errai.marshalling.rebind;
 
 import org.jboss.errai.codegen.framework.Context;
-import org.jboss.errai.codegen.framework.Modifier;
 import org.jboss.errai.codegen.framework.Parameter;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.builder.AnonymousClassStructureBuilder;
@@ -151,6 +150,8 @@ public class MarshallerGeneratorFactory {
     }
 
     for (Class<?> clazz : exposed) {
+      if (clazz.isEnum()) continue;
+      
       MetaClass metaClazz = MetaClassFactory.get(clazz);
       Statement marshaller = marshal(metaClazz);
       MetaClass type = marshaller.getType();
@@ -256,7 +257,7 @@ public class MarshallerGeneratorFactory {
                     .append(Stmt.if_(Bool.greaterThan(Stmt.loadVariable("i"), 0))
                             .append(Stmt.loadVariable("sb").invoke("append", ",")).finish())
                     .append(Stmt.loadVariable("sb").invoke("append", dim == 1 ?
-                            Stmt.loadVariable(MarshallingUtil.getVarName(toMap))
+                            Stmt.loadVariable(MarshallingUtil.getVarName(toMap.asBoxed()))
                                     .invoke("marshall", Stmt.loadVariable("a0", Stmt.loadVariable("i")), Stmt.loadVariable("a1"))
                             :
                             Stmt.invokeStatic(anonBuilder.getClassDefinition(),

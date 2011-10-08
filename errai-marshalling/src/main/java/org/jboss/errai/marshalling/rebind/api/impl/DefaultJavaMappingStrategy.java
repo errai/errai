@@ -1,6 +1,7 @@
 package org.jboss.errai.marshalling.rebind.api.impl;
 
 import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.codegen.framework.Cast;
 import org.jboss.errai.codegen.framework.Parameter;
 import org.jboss.errai.codegen.framework.Statement;
@@ -85,7 +86,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
       public Statement getMarshaller() {
         AnonymousClassStructureBuilder classStructureBuilder
                 = Stmt.create(context.getCodegenContext())
-                .newObject(parameterizedAs(Marshaller.class, typeParametersOf(JSONObject.class, toMap))).extend();
+                .newObject(parameterizedAs(Marshaller.class, typeParametersOf(JSONValue.class, toMap))).extend();
 
         classStructureBuilder.publicOverridesMethod("getTypeHandled")
                 .append(Stmt.load(toMap).returnValue())
@@ -128,7 +129,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
       public Statement getMarshaller() {
         AnonymousClassStructureBuilder classStructureBuilder
                 = Stmt.create(context.getCodegenContext())
-                .newObject(parameterizedAs(Marshaller.class, typeParametersOf(JSONObject.class, toMap))).extend();
+                .newObject(parameterizedAs(Marshaller.class, typeParametersOf(JSONValue.class, toMap))).extend();
 
         classStructureBuilder.publicOverridesMethod("getTypeHandled")
                 .append(Stmt.load(toMap).returnValue())
