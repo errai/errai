@@ -22,6 +22,7 @@ import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallerFactory;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
+import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 import org.jboss.errai.marshalling.rebind.api.ArrayMarshallerCallback;
 import org.jboss.errai.marshalling.rebind.api.MappingContext;
 import org.jboss.errai.marshalling.rebind.api.MappingStrategy;
@@ -61,8 +62,6 @@ public class MarshallerGeneratorFactory {
       @Override
       public Statement marshal(MetaClass type, Statement value) {
         createDemarshallerIfNeeded(type);
-
-//        return Stmt.loadVariable(variable).invoke("marshall", value, Stmt.loadVariable("a1"));
         return value;
       }
 
@@ -117,6 +116,11 @@ public class MarshallerGeneratorFactory {
 
       constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
               .invoke("put", entry.getKey(), loadVariable(varName)));
+
+      for (String s : mappingContext.getReverseMappingAliasFor(entry.getKey())) {
+        constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
+                .invoke("put", s, loadVariable(varName)));
+      }
     }
 
     generateMarshallers();
@@ -137,7 +141,7 @@ public class MarshallerGeneratorFactory {
   }
 
   private void generateMarshallers() {
-    MetaDataScanner scanner = MetaDataScanner.createInstance();
+    MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
 
     Set<Class<?>> exposed = new HashSet<Class<?>>(scanner.getTypesAnnotatedWith(Portable.class));
     exposed.addAll(scanner.getTypesAnnotatedWith(ExposeEntity.class));
@@ -158,6 +162,11 @@ public class MarshallerGeneratorFactory {
 
       constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
               .invoke("put", clazz.getName(), loadVariable(varName)));
+
+      for (String s : mappingContext.getReverseMappingAliasFor(clazz.getName())) {
+        constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
+                .invoke("put", s, loadVariable(varName)));
+      }
     }
 
     constructor.finish();
@@ -220,7 +229,6 @@ public class MarshallerGeneratorFactory {
 
     final BlockBuilder<?> dmBuilder =
             anonBuilder.privateMethod(arrayType, "_demarshall" + dim)
-                    .modifiers(Modifier.Static)
                     .parameters(List.class, MarshallingSession.class).body();
 
     dmBuilder.append(Stmt
@@ -234,13 +242,12 @@ public class MarshallerGeneratorFactory {
                             "_demarshall" + (dim - 1), loadVariable("a0"), loadVariable("a1"))))
 
             .finish())
-    .append(Stmt.loadVariable("newArray").returnValue());
+            .append(Stmt.loadVariable("newArray").returnValue());
 
 
     dmBuilder.finish();
 
     final BlockBuilder<?> mBuilder = anonBuilder.privateMethod(String.class, "_marshall" + dim)
-            .modifiers(Modifier.Static)
             .parameters(arrayType, MarshallingSession.class).body();
 
     mBuilder.append(Stmt.declareVariable(StringBuilder.class).named("sb")
@@ -250,7 +257,7 @@ public class MarshallerGeneratorFactory {
                             .append(Stmt.loadVariable("sb").invoke("append", ",")).finish())
                     .append(Stmt.loadVariable("sb").invoke("append", dim == 1 ?
                             Stmt.loadVariable(MarshallingUtil.getVarName(toMap))
-                            .invoke("marshall", Stmt.loadVariable("a0", Stmt.loadVariable("i")), Stmt.loadVariable("a1"))
+                                    .invoke("marshall", Stmt.loadVariable("a0", Stmt.loadVariable("i")), Stmt.loadVariable("a1"))
                             :
                             Stmt.invokeStatic(anonBuilder.getClassDefinition(),
                                     "_marshall" + (dim - 1), Stmt.loadVariable("a0", Stmt.loadVariable("i")), loadVariable("a1"))))
@@ -273,6 +280,12 @@ public class MarshallerGeneratorFactory {
         try {
           Class<?> type = (Class<?>) Marshaller.class.getMethod("getTypeHandled").invoke(cls.newInstance());
           mappingContext.registerMarshaller(type.getName(), cls.asSubclass(Marshaller.class));
+
+          if (cls.isAnnotationPresent(ImplementationAliases.class)) {
+            for (Class<?> c : cls.getAnnotation(ImplementationAliases.class).value()) {
+              mappingContext.registerMappingAlias(c, type);
+            }
+          }
         }
         catch (Throwable t) {
           throw new RuntimeException("could not instantiate marshaller class: " + cls.getName(), t);

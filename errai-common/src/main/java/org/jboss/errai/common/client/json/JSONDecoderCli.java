@@ -23,16 +23,13 @@ import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.common.client.types.DecodingContext;
-import org.jboss.errai.common.client.types.JSONTypeHelper;
+import org.jboss.errai.common.client.types.DataTypeHelper;
 import org.jboss.errai.common.client.types.UHashMap;
 import org.jboss.errai.common.client.types.UnsatisfiedForwardLookup;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import static org.jboss.errai.common.client.types.TypeDemarshallers.getDemarshaller;
-import static org.jboss.errai.common.client.types.TypeDemarshallers.hasDemarshaller;
 
 
 public class JSONDecoderCli {
@@ -51,7 +48,7 @@ public class JSONDecoderCli {
     }
 
     if (ctx.isUnsatisfiedDependencies()) {
-      JSONTypeHelper.resolveDependencies(ctx);
+      DataTypeHelper.resolveDependencies(ctx);
     }
 
     return v;
@@ -117,9 +114,9 @@ public class JSONDecoderCli {
           }
         }
 
-        if (hasDemarshaller(className)) {
+        if (DataTypeHelper.getMarshallerProvider().hasMarshaller(className)) {
           try {
-            Object o = getDemarshaller(className).demarshall(eMap, ctx);
+            Object o = DataTypeHelper.getMarshallerProvider().demarshall(className, eMap);
             if (objId == null) ctx.putObject(objId, o);
             return o;
           }

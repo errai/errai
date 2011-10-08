@@ -19,6 +19,7 @@ package org.jboss.errai.codegen.framework.builder.callstack;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.VariableReference;
+import org.jboss.errai.codegen.framework.exception.InvalidTypeException;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.util.GenUtil;
@@ -55,6 +56,16 @@ public class LoadVariable extends AbstractCallElement {
     }
 
     final VariableReference ref = context.getVariable(variableName);
+
+    if (idx.length > 0) {
+      if (!ref.getType().isArray()) {
+        throw new InvalidTypeException("attempt to use indexed accessor on non-array type: " + ref);
+      }
+      else if (GenUtil.getArrayDimensions(ref.getType()) != idx.length) {
+        throw new InvalidTypeException("wrong number of dimension for array type " + ref);
+      }
+    }
+
     final Statement stmt = new VariableReference() {
       @Override
       public String getName() {

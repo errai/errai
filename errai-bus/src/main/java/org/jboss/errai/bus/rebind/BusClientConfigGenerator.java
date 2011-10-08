@@ -25,6 +25,7 @@ import org.jboss.errai.bus.server.annotations.Remote;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.common.client.api.annotations.ExposeEntity;
 import org.jboss.errai.common.metadata.MetaDataScanner;
+import org.mvel2.ParserContext;
 import org.mvel2.templates.CompiledTemplate;
 import org.mvel2.util.Make;
 import org.mvel2.util.ParseTools;
@@ -47,28 +48,28 @@ import static org.mvel2.templates.TemplateRuntime.execute;
 public class BusClientConfigGenerator implements ExtensionGenerator {
   private Logger log = LoggerFactory.getLogger(BusClientConfigGenerator.class);
 
-  private CompiledTemplate demarshallerGenerator;
-  private CompiledTemplate marshallerGenerator;
+//  private CompiledTemplate demarshallerGenerator;
+//  private CompiledTemplate marshallerGenerator;
   private CompiledTemplate rpcProxyGenerator;
 
   public BusClientConfigGenerator() {
-    InputStream istream = this.getClass().getResourceAsStream("DemarshallerGenerator.mv");
-    demarshallerGenerator = compileTemplate(istream, null);
+//    InputStream istream = this.getClass().getResourceAsStream("DemarshallerGenerator.mv");
+//    demarshallerGenerator = compileTemplate(istream, null);
+//
+//    istream = this.getClass().getResourceAsStream("MarshallerGenerator.mv");
+//    marshallerGenerator = compileTemplate(istream, null);
 
-    istream = this.getClass().getResourceAsStream("MarshallerGenerator.mv");
-    marshallerGenerator = compileTemplate(istream, null);
-
-    istream = this.getClass().getResourceAsStream("RPCProxyGenerator.mv");
-    rpcProxyGenerator = compileTemplate(istream, null);
+    InputStream istream = this.getClass().getResourceAsStream("RPCProxyGenerator.mv");
+    rpcProxyGenerator = compileTemplate(istream, ParserContext.create());
   }
 
   public void generate(
           GeneratorContext context, TreeLogger logger,
           SourceWriter writer, MetaDataScanner scanner, final TypeOracle oracle) {
 
-    for (Class<?> entity : scanner.getTypesAnnotatedWith(ExposeEntity.class)) {
-      generateMarshaller(loadType(oracle, entity), logger, writer);
-    }
+//    for (Class<?> entity : scanner.getTypesAnnotatedWith(ExposeEntity.class)) {
+//      generateMarshaller(loadType(oracle, entity), logger, writer);
+//    }
 
     for (Class<?> remote : scanner.getTypesAnnotatedWith(Remote.class)) {
       JClassType type = loadType(oracle, remote);
@@ -93,32 +94,32 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
         /**
          * Types configuration
          */
-        if (ErraiServiceConfigurator.CONFIG_ERRAI_SERIALIZABLE_TYPE.equals(key)) {
-          for (String s : props.getProperty(key).split(" ")) {
-            try {
-              generateMarshaller(oracle.getType(s.trim()), logger, writer);
-            }
-            catch (Exception e) {
-              e.printStackTrace();
-              throw new ErraiBootstrapFailure(e);
-            }
-          }
-        }
+//        if (ErraiServiceConfigurator.CONFIG_ERRAI_SERIALIZABLE_TYPE.equals(key)) {
+//          for (String s : props.getProperty(key).split(" ")) {
+//            try {
+//              generateMarshaller(oracle.getType(s.trim()), logger, writer);
+//            }
+//            catch (Exception e) {
+//              e.printStackTrace();
+//              throw new ErraiBootstrapFailure(e);
+//            }
+//          }
+//        }
 
-        /**
-         * Entity configuration
-         */
-        else if (ErraiServiceConfigurator.CONFIG_ERRAI_SERIALIZABLE_TYPE.equals(key)) {
-          for (String s : props.getProperty(key).split(" ")) {
-            try {
-              generateMarshaller(oracle.getType(s.trim()), logger, writer);
-            }
-            catch (Exception e) {
-              e.printStackTrace();
-              throw new ErraiBootstrapFailure(e);
-            }
-          }
-        }
+//        /**
+//         * Entity configuration
+//         */
+//        else if (ErraiServiceConfigurator.CONFIG_ERRAI_SERIALIZABLE_TYPE.equals(key)) {
+//          for (String s : props.getProperty(key).split(" ")) {
+//            try {
+//              generateMarshaller(oracle.getType(s.trim()), logger, writer);
+//            }
+//            catch (Exception e) {
+//              e.printStackTrace();
+//              throw new ErraiBootstrapFailure(e);
+//            }
+//          }
+//        }
       }
     }
     else {
@@ -231,30 +232,30 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
       throw new GenerationException(errorMsg, e);
     }
 
-    Map<String, Object> templateVars = Make.Map.<String, Object>$()
-            ._("className", visit.getQualifiedSourceName())
-            ._("canonicalClassName", visit.getQualifiedBinaryName())
-            ._("fields", types.keySet())
-            ._("targetTypes", types)
-            ._("getters", getters)
-            ._("setters", setters)
-            ._("arrayConverters", arrayConverters)
-            ._("enumType", enumType)._();
-
-    String genStr;
-
-    writer.print(genStr = (String) execute(demarshallerGenerator, templateVars));
-
-    log.debug("generated demarshaller: \n" + genStr);
-
-    logger.log(TreeLogger.Type.INFO, genStr);
-
-    writer.print(genStr = (String) execute(marshallerGenerator, templateVars));
-
-    log.debug("generated marshaller: \n" + genStr);
-
-    logger.log(TreeLogger.Type.INFO, genStr);
-    logger.log(TreeLogger.Type.INFO, "Generated marshaller/demarshaller for: " + visit.getName());
+//    Map<String, Object> templateVars = Make.Map.<String, Object>$()
+//            ._("className", visit.getQualifiedSourceName())
+//            ._("canonicalClassName", visit.getQualifiedBinaryName())
+//            ._("fields", types.keySet())
+//            ._("targetTypes", types)
+//            ._("getters", getters)
+//            ._("setters", setters)
+//            ._("arrayConverters", arrayConverters)
+//            ._("enumType", enumType)._();
+//
+//    String genStr;
+//
+//    writer.print(genStr = (String) execute(demarshallerGenerator, templateVars));
+//
+//    log.debug("generated demarshaller: \n" + genStr);
+//
+//    logger.log(TreeLogger.Type.INFO, genStr);
+//
+//    writer.print(genStr = (String) execute(marshallerGenerator, templateVars));
+//
+//    log.debug("generated marshaller: \n" + genStr);
+//
+//    logger.log(TreeLogger.Type.INFO, genStr);
+//    logger.log(TreeLogger.Type.INFO, "Generated marshaller/demarshaller for: " + visit.getName());
   }
 
   public static class ValueExtractor {

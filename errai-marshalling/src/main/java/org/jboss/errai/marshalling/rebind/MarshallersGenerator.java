@@ -45,6 +45,8 @@ public class MarshallersGenerator extends Generator {
       logger.log(TreeLogger.ERROR, "Error generating marshallers", e);
     }
 
+    System.out.println("**FIN**");
+
     // return the fully qualified name of the class generated
     return packageName + "." + className;
   }

@@ -23,16 +23,10 @@ import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
-import org.jboss.errai.common.client.json.JSONDecoderCli;
-import org.jboss.errai.common.client.json.JSONEncoderCli;
-import org.jboss.errai.common.client.types.DecodingContext;
-import org.jboss.errai.common.client.types.EncodingContext;
-import org.jboss.errai.common.client.types.JSONTypeHelper;
-import org.jboss.errai.marshalling.client.api.MarshallerFactory;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
-import org.jboss.errai.marshalling.client.marshallers.MapMarshaller;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class JSONUtilCli {
@@ -57,10 +51,7 @@ public class JSONUtilCli {
         throw new RuntimeException("unrecognized payload" + val.toString());
       }
       ArrayList<MarshalledMessage> list = new ArrayList<MarshalledMessage>(arr.size());
-      for (int i = 0; i < arr.size(); i++) {
-        list.add(new MarshalledMessageImpl((JSONObject) arr.get(i)));
-      }
-
+      unwrap(list, arr);
       return list;
     }
     catch (Exception e) {
@@ -68,8 +59,20 @@ public class JSONUtilCli {
       e.printStackTrace();
       return EMPTYLIST;
     }
-
   }
+
+  private static void unwrap(List<MarshalledMessage> messages, JSONArray val) {
+    for (int i = 0; i < val.size(); i++) {
+      JSONValue v = val.get(i);
+      if (v.isArray() != null) {
+        unwrap(messages, v.isArray());
+      }
+      else {
+        messages.add(new MarshalledMessageImpl((JSONObject) val.get(i)));
+      }
+    }
+  }
+
 
   public static class MarshalledMessageImpl implements MarshalledMessage {
     public JSONObject o;

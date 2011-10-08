@@ -3,6 +3,10 @@ package org.jboss.errai.marshalling.rebind.api;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaClassMember;
+import org.jboss.errai.codegen.framework.meta.MetaField;
+import org.jboss.errai.codegen.framework.meta.MetaMethod;
+import org.jboss.errai.codegen.framework.util.GenUtil;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 
 import java.util.*;
@@ -21,6 +25,11 @@ public class MappingContext {
   private MetaClass generatedBootstrapClass;
   private ClassStructureBuilder<?> classStructureBuilder;
   private ArrayMarshallerCallback arrayMarshallerCallback;
+  private Map<String, String> mappingAliases = new HashMap<String, String>();
+  private Map<String, List<String>> reverseMappingAlias = new HashMap<String, List<String>>();
+
+
+  private Set<String> exposedMembers = new HashSet<String>();
 
   public MappingContext(Context codegenContext, MetaClass generatedBootstrapClass,
                         ClassStructureBuilder<?> classStructureBuilder,
@@ -41,6 +50,10 @@ public class MappingContext {
   }
 
   private Class<? extends Marshaller> getMarshaller(String clazzName) {
+    if (mappingAliases.containsKey(clazzName)) {
+      clazzName = mappingAliases.get(clazzName);
+    }
+
     return registeredMarshallers.get(clazzName);
   }
 
@@ -113,5 +126,44 @@ public class MappingContext {
 
   public ArrayMarshallerCallback getArrayMarshallerCallback() {
     return arrayMarshallerCallback;
+  }
+
+  private static String getPrivateMemberName(MetaClassMember member) {
+    if (member instanceof MetaField) {
+      return GenUtil.getPrivateFieldInjectorName((MetaField) member);
+    }
+    else {
+      return GenUtil.getPrivateMethodName((MetaMethod) member);
+    }
+  }
+
+  public void markExposed(MetaClassMember member) {
+    exposedMembers.add(getPrivateMemberName(member));
+  }
+
+  public boolean isExposed(MetaClassMember member) {
+    return exposedMembers.contains(getPrivateMemberName(member));
+  }
+
+  public void registerMappingAlias(Class<?> from, Class<?> to) {
+    registerMappingAlias(from.getName(), to.getName());
+  }
+
+  public void registerMappingAlias(String from, String to) {
+    mappingAliases.put(from, to);
+
+    if (!reverseMappingAlias.containsKey(to)) {
+      reverseMappingAlias.put(to, new ArrayList<String>());
+    }
+    reverseMappingAlias.get(to).add(from);
+  }
+
+  public List<String> getReverseMappingAliasFor(String type) {
+    if (reverseMappingAlias.containsKey(type)) {
+      return reverseMappingAlias.get(type);
+    }
+    else {
+      return Collections.emptyList();
+    }
   }
 }

@@ -10,6 +10,6 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface ClientMarshaller {
-  boolean multiReferenceable() default false;
+public @interface ImplementationAliases {
+  Class<?>[] value();
 }

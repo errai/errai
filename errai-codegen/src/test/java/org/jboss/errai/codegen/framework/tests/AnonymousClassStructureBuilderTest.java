@@ -35,116 +35,136 @@ import org.junit.Test;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class AnonymousClassStructureBuilderTest extends AbstractStatementBuilderTest {
-  
+
   @Test
   public void testAnonymousAnnotation() {
 
     String src = ObjectBuilder.newInstanceOf(Retention.class)
-        .extend()
-        .publicOverridesMethod("annotationType")
-        .append(StatementBuilder.create().load("foo"))
-        .append(StatementBuilder.create().load("bar"))
-        .append(StatementBuilder.create().load("foobie"))
-        .finish()
-        .finish()
-        .toJavaString();
+            .extend()
+            .publicOverridesMethod("annotationType")
+            .append(Stmt.load(Retention.class).returnValue())
+            .finish()
+            .finish()
+            .toJavaString();
 
-    assertEquals("failed to generate anonymous annotation with overloaded method", 
-        "new java.lang.annotation.Retention() {\n" +
-          "public Class annotationType() {\n" +
-            "\"foo\";\n" +
-            "\"bar\";\n" +
-            "\"foobie\";\n" +
-        "}\n" +
-      "}", src);
+    assertEquals("failed to generate anonymous annotation with overloaded method",
+            "new java.lang.annotation.Retention() {\n" +
+                    "public Class annotationType() {\n" +
+                    "return java.lang.annotation.Retention.class;\n" +
+                    "}\n" +
+                    "}", src);
   }
-  
+
   @Test
   public void testAnonymousClass() {
 
     String src = ObjectBuilder.newInstanceOf(Bar.class, Context.create().autoImport())
-        .extend()
-        .publicOverridesMethod("setName", Parameter.of(String.class, "name"))
-        .append(Stmt.loadClassMember("name").assignValue(Variable.get("name")))
-        .finish()
-        .finish()
-        .toJavaString();
+            .extend()
+            .publicOverridesMethod("setName", Parameter.of(String.class, "name"))
+            .append(Stmt.loadClassMember("name").assignValue(Variable.get("name")))
+            .finish()
+            .finish()
+            .toJavaString();
 
-    assertEquals("failed to generate anonymous class with overloaded construct", 
-        "new Bar() {\n" +
-          "public void setName(String name) {\n" +
-            "this.name = name;\n" +
-        "}\n" +
-      "}", src);
+    assertEquals("failed to generate anonymous class with overloaded construct",
+            "new Bar() {\n" +
+                    "public void setName(String name) {\n" +
+                    "this.name = name;\n" +
+                    "}\n" +
+                    "}", src);
   }
 
   @Test
   public void testAnonymousClassWithInitializationBlock() {
     String src = ObjectBuilder.newInstanceOf(Bar.class, Context.create().autoImport())
-        .extend()
-        .initialize()
-        .append(Stmt.loadClassMember("name").assignValue("init"))
-        .finish()
-        .publicOverridesMethod("setName", Parameter.of(String.class, "name"))
-        .append(Stmt.loadClassMember("name").assignValue(Variable.get("name")))
-        .finish()
-        .finish()
-        .toJavaString();
+            .extend()
+            .initialize()
+            .append(Stmt.loadClassMember("name").assignValue("init"))
+            .finish()
+            .publicOverridesMethod("setName", Parameter.of(String.class, "name"))
+            .append(Stmt.loadClassMember("name").assignValue(Variable.get("name")))
+            .finish()
+            .finish()
+            .toJavaString();
 
-    assertEquals("failed to generate anonymous class with overloaded construct", 
-        "new Bar() {\n" +
-          "{\n" +
-          "name = \"init\";" +
-          "\n}\n" +
-          "public void setName(String name) {\n" +
-            "this.name = name;\n" +
-        "}\n" +
-      "}", src);
+    assertEquals("failed to generate anonymous class with overloaded construct",
+            "new Bar() {\n" +
+                    "{\n" +
+                    "name = \"init\";" +
+                    "\n}\n" +
+                    "public void setName(String name) {\n" +
+                    "this.name = name;\n" +
+                    "}\n" +
+                    "}", src);
   }
 
   @Test
   public void testAnonymousClassReferencingOuterClass() {
     ClassStructureBuilder<?> outer = ClassBuilder.define("org.foo.Outer").publicScope().body();
-    
-    Statement anonInner = ObjectBuilder.newInstanceOf(Bar.class, Context.create().autoImport())
-      .extend()
-      .publicOverridesMethod("setName", Parameter.of(String.class, "name"))
-      .append(Stmt.loadStatic(outer.getClassDefinition(), "this").loadField("outerName").assignValue(Variable.get("name")))
-      .append(Stmt.loadStatic(outer.getClassDefinition(), "this").invoke("setOuterName", Variable.get("name")))
-      .finish()
-      .finish();
-    
-    String cls = outer
-      .publicField("outerName", String.class)
-      .finish()
-      .publicMethod(void.class, "setOuterName", Parameter.of(String.class, "outerName"))
-      .append(Stmt.loadClassMember("outerName").assignValue(Variable.get("outerName")))
-      .finish()
-      .publicMethod(void.class, "test")
-      .append(anonInner)
-      .finish()
-      .toJavaString();
-    
-    assertEquals("failed to generate anonymous class accessing outer class", 
-        "package org.foo;\n" +
 
-        "import org.jboss.errai.codegen.framework.tests.model.Bar;\n" +
-        "import org.foo.Outer;\n" +
-    
-        "public class Outer {\n" +
-            "public String outerName;\n" +
-            "public void setOuterName(String outerName) {\n" +
-                "this.outerName = outerName;\n" +
-            "}\n" +
-    
-            "public void test() {\n" +
-                "new Bar() {\n" +
-                    "public void setName(String name) {\n" +
-                        "Outer.this.outerName = name;\n" +
-                        "Outer.this.setOuterName(name);\n" +
+    Statement anonInner = ObjectBuilder.newInstanceOf(Bar.class, Context.create().autoImport())
+            .extend()
+            .publicOverridesMethod("setName", Parameter.of(String.class, "name"))
+            .append(Stmt.loadStatic(outer.getClassDefinition(), "this").loadField("outerName").assignValue(Variable.get("name")))
+            .append(Stmt.loadStatic(outer.getClassDefinition(), "this").invoke("setOuterName", Variable.get("name")))
+            .finish()
+            .finish();
+
+    String cls = outer
+            .publicField("outerName", String.class)
+            .finish()
+            .publicMethod(void.class, "setOuterName", Parameter.of(String.class, "outerName"))
+            .append(Stmt.loadClassMember("outerName").assignValue(Variable.get("outerName")))
+            .finish()
+            .publicMethod(void.class, "test")
+            .append(anonInner)
+            .finish()
+            .toJavaString();
+
+    assertEquals("failed to generate anonymous class accessing outer class",
+            "package org.foo;\n" +
+
+                    "import org.jboss.errai.codegen.framework.tests.model.Bar;\n" +
+                    "import org.foo.Outer;\n" +
+
+                    "public class Outer {\n" +
+                    "public String outerName;\n" +
+                    "public void setOuterName(String outerName) {\n" +
+                    "this.outerName = outerName;\n" +
                     "}\n" +
-                "};\n" +
-            "}\n" +
-      "}\n", cls);
+
+                    "public void test() {\n" +
+                    "new Bar() {\n" +
+                    "public void setName(String name) {\n" +
+                    "Outer.this.outerName = name;\n" +
+                    "Outer.this.setOuterName(name);\n" +
+                    "}\n" +
+                    "};\n" +
+                    "}\n" +
+                    "}\n", cls);
+  }
+
+  @Test
+  public void testAssignmentOfAnonymousClass() {
+    Statement stmt = ObjectBuilder.newInstanceOf(Retention.class)
+            .extend()
+            .publicOverridesMethod("annotationType")
+            .append(Stmt.load(Retention.class).returnValue())
+            .finish()
+            .finish();
+
+    Statement declaration = Stmt.declareVariable(java.lang.annotation.Annotation.class)
+            .named("foo").initializeWith(stmt);
+
+
+    String cls = declaration.generate(Context.create());
+
+    assertEquals("java.lang.annotation.Annotation foo = new java.lang.annotation.Retention() {\n" +
+            "  public Class annotationType() {\n" +
+            "    return java.lang.annotation.Retention.class;\n" +
+            "  }\n" +
+            "\n" +
+            "\n" +
+            "};", cls);
   }
 }

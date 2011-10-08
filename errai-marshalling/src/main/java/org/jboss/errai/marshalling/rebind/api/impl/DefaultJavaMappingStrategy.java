@@ -130,7 +130,6 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                 = Stmt.create(context.getCodegenContext())
                 .newObject(parameterizedAs(Marshaller.class, typeParametersOf(JSONObject.class, toMap))).extend();
 
-
         classStructureBuilder.publicOverridesMethod("getTypeHandled")
                 .append(Stmt.load(toMap).returnValue())
                 .finish();
@@ -139,12 +138,10 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                 .append(Stmt.load("json").returnValue())
                 .finish();
 
-
         BlockBuilder<?> builder =
                 classStructureBuilder.publicOverridesMethod("demarshall",
                         Parameter.of(Object.class, "a0"), Parameter.of(MarshallingSession.class, "a1"))
                         .append(Stmt.declareVariable(toMap).named("entity").initializeWith(Stmt.nestedCall(Stmt.newObject(toMap))));
-
 
         /**
          * Start binding of fields here.
@@ -159,7 +156,10 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
             val = fieldDemarshall(field.getName(), MetaClassFactory.get(JSONObject.class), field.getType().asBoxed());
           }
 
-          GenUtil.addPrivateAccessStubs(true, classStructureBuilder, field);
+          if (!context.isExposed(field)) {
+            GenUtil.addPrivateAccessStubs(true, context.getClassStructureBuilder(), field);
+            context.markExposed(field);
+          }
 
           builder.append(Stmt.invokeStatic(context.getGeneratedBootstrapClass(), GenUtil.getPrivateFieldInjectorName(field),
                   Stmt.loadVariable("entity"), val));
@@ -204,7 +204,8 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
       }
 
       MetaClass type = field.getType();
-      if (!context.hasProvidedOrGeneratedMarshaller(type)) {
+
+      if (!type.isEnum() && !context.hasProvidedOrGeneratedMarshaller(type)) {
         throw new InvalidMappingException("portable entity " + toMap.getFullyQualifiedName()
                 + " contains a field (" + field.getName() + ") that is not known to the marshaller: "
                 + type.getFullyQualifiedName());
@@ -356,11 +357,13 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
     Implementations.StringBuilderBuilder sb = Implementations.newStringBuilder();
     sb.append("{");
-    sb.append(keyValue(SerializationParts.ENCODED_TYPE, string(toType.getName())));
+    sb.append(keyValue(SerializationParts.ENCODED_TYPE, string(toType.getFullyQualifiedName())));
     sb.append(",");
     sb.append(string(SerializationParts.OBJECT_ID)).append(":").append(Stmt.loadVariable("a0").invoke("hashCode"));
 
     boolean hasEncoded = false;
+
+    int i = 0;
 
     for (MetaField metaField : toType.getDeclaredFields()) {
       if (metaField.isTransient()) {
@@ -371,10 +374,13 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
         sb.append(",");
         hasEncoded = true;
       }
+      else if (i > 0) {
+        sb.append(",");
+      }
 
       MetaClass targetType = GenUtil.getPrimitiveWrapper(metaField.getType());
 
-      if (!context.hasProvidedOrGeneratedMarshaller(targetType)) {
+      if (!targetType.isEnum() && !context.hasProvidedOrGeneratedMarshaller(targetType)) {
         throw new NoAvailableMarshallerException(targetType.getFullyQualifiedName());
       }
 
@@ -384,8 +390,20 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
       }
 
       sb.append("\"" + metaField.getName() + "\" : ");
-      sb.append(Stmt.loadVariable(MarshallingUtil.getVarName(targetType))
-              .invoke("marshall", valueStatement, Stmt.loadVariable("a1")));
+
+      if (targetType.isEnum()) {
+        sb.append("{\"" + SerializationParts.ENCODED_TYPE
+                + "\":\"" + targetType.getFullyQualifiedName() + "\",\"" + SerializationParts.ENUM_STRING_VALUE + "\":\"")
+                .append(Stmt.nestedCall(valueStatement).invoke("toString")).append("\"}");
+
+
+      }
+      else {
+        sb.append(Stmt.loadVariable(MarshallingUtil.getVarName(targetType))
+                .invoke("marshall", valueStatement, Stmt.loadVariable("a1")));
+      }
+
+      i++;
     }
 
     sb.append("}");
@@ -403,7 +421,11 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
   public Statement valueAccessorFor(MetaField field) {
     if (!field.isPublic()) {
-      GenUtil.addPrivateAccessStubs(true, context.getClassStructureBuilder(), field);
+      if (!context.isExposed(field)) {
+        GenUtil.addPrivateAccessStubs(true, context.getClassStructureBuilder(), field);
+        context.markExposed(field);
+      }
+
       return Stmt.invokeStatic(context.getGeneratedBootstrapClass(), GenUtil.getPrivateFieldInjectorName(field),
               Stmt.loadVariable("a0"));
     }
@@ -413,8 +435,14 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
   }
 
   public Statement unwrapJSON(Statement valueStatement, MetaClass toType) {
-    return Stmt.create(context.getCodegenContext())
-            .loadVariable(MarshallingUtil.getVarName(toType))
-            .invoke("demarshall", valueStatement, Stmt.loadVariable("a1"));
+    if (toType.isEnum()) {
+      return Stmt.invokeStatic(Enum.class, "valueOf", toType,
+              Stmt.nestedCall(valueStatement).invoke("isObject").invoke("get", SerializationParts.ENUM_STRING_VALUE).invoke("isString").invoke("stringValue"));
+    }
+    else {
+      return Stmt.create(context.getCodegenContext())
+              .loadVariable(MarshallingUtil.getVarName(toType))
+              .invoke("demarshall", valueStatement, Stmt.loadVariable("a1"));
+    }
   }
 }

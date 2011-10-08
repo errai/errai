@@ -58,7 +58,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
     String s = StatementBuilder.create().declareVariable("n", Integer.class, 10).generate(ctx);
 
     assertEquals("failed to generate variable declaration with type provided",
-            "Integer n = 10", s);
+            "Integer n = 10;", s);
 
     VariableReference n = ctx.getVariable("n");
     assertEquals("Wrong variable name", "n", n.getName());
@@ -72,7 +72,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
     String s = StatementBuilder.create().declareVariable("n", 10).generate(ctx);
 
     assertEquals("failed to generate variable declaration with Integers type inference",
-            "Integer n = 10", s);
+            "Integer n = 10;", s);
 
     VariableReference n = ctx.getVariable("n");
     assertEquals("Wrong variable name", "n", n.getName());
@@ -86,7 +86,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
     String s = StatementBuilder.create().declareVariable("n", "10").generate(ctx);
 
     assertEquals("failed to generate variable declaration with =String type inference",
-            "String n = \"10\"", s);
+            "String n = \"10\";", s);
 
     VariableReference n = ctx.getVariable("n");
     assertEquals("Wrong variable name", "n", n.getName());
@@ -100,7 +100,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
     String s = StatementBuilder.create().declareVariable("n", Integer.class, "10").generate(ctx);
 
     assertEquals("failed to generate variable declaration with implicit type conversion",
-            "Integer n = 10", s);
+            "Integer n = 10;", s);
 
     VariableReference n = ctx.getVariable("n");
     assertEquals("Wrong variable name", "n", n.getName());
@@ -124,7 +124,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
             ObjectBuilder.newInstanceOf(String.class)).generate(ctx);
 
     assertEquals("failed to generate variable declaration with object initialization and type provided",
-            "String str = new String()", s);
+            "String str = new String();", s);
 
     VariableReference str = ctx.getVariable("str");
     assertEquals("Wrong variable name", "str", str.getName());
@@ -138,7 +138,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
             .declareVariable("str", ObjectBuilder.newInstanceOf(String.class)).toJavaString();
 
     assertEquals("failed to generate variable declaration with object initialization and string type inference",
-            "String str = new String()", s);
+            "String str = new String();", s);
 
     VariableReference str = ctx.getVariable("str");
     assertEquals("Wrong variable name", "str", str.getName());
@@ -153,7 +153,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
         .generate(ctx);
 
     assertEquals("failed to generate variable declaration with statement initialization",
-            "String str = new Integer(2).toString()", s);
+            "String str = new Integer(2).toString();", s);
 
     VariableReference str = ctx.getVariable("str");
     assertEquals("Wrong variable name", "str", str.getName());
@@ -166,7 +166,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
     String s = StatementBuilder.create(ctx)
             .declareVariable(String.class).asFinal().named("str").initializeWith("10").toJavaString();
 
-    assertEquals("failed to generate final variable declaration", "final String str = \"10\"", s);
+    assertEquals("failed to generate final variable declaration", "final String str = \"10\";", s);
 
     VariableReference str = ctx.getVariable("str");
     assertEquals("Wrong variable name", "str", str.getName());
@@ -361,11 +361,13 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   @Test
   public void testAssignArrayValueWithInvalidArray() {
     try {
-      StatementBuilder.create()
+      String s = StatementBuilder.create()
               .declareVariable("twoDimArray", String.class)
               .loadVariable("twoDimArray", 1, 2)
               .assignValue("test")
               .toJavaString();
+      System.out.println(s);
+
       fail("Expected InvalidTypeExcpetion");
     }
     catch (InvalidTypeException ite) {
@@ -528,5 +530,5 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
       //expected
       assertEquals("Wrong exception message", "java.lang.String cannot be cast to java.lang.Integer", e.getMessage());
     }
-  } 
-}
+  }
+  }

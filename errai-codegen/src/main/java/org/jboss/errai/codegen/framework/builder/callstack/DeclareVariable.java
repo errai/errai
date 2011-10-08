@@ -35,6 +35,10 @@ public class DeclareVariable extends AbstractCallElement {
     writer.reset();
     context.addVariable(variable);
     writer.append(variable.generate(context));
+    if (next == null) {
+      writer.append(";");
+    }
+    
     nextOrReturn(writer, context, null);
   }
 

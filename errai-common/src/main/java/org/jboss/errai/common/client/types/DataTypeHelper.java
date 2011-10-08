@@ -23,7 +23,18 @@ import org.jboss.errai.common.client.protocols.SerializationParts;
 import java.util.*;
 
 
-public class JSONTypeHelper {
+public class DataTypeHelper {
+  private static MarshallerProvider marshallerProvider;
+
+  public static void setMarshallerProvider(MarshallerProvider provider) {
+    marshallerProvider = provider;
+  }
+
+  public static MarshallerProvider getMarshallerProvider() {
+    return marshallerProvider;
+  }
+
+
   public static Object convert(JSONValue value, Class to, DecodingContext ctx) {
     JSONValue v;
     if ((v = value.isString()) != null) {
@@ -96,12 +107,15 @@ public class JSONTypeHelper {
             }
           }
 
-
-          if (TypeDemarshallers.hasDemarshaller(className)) {
-            o = TypeDemarshallers.getDemarshaller(className).demarshall(eMap, ctx);
-            if (objId != null) ctx.putObject(objId, o);
-            return o;
+          if (marshallerProvider.hasMarshaller(className)) {
+            return marshallerProvider.demarshall(className, eMap);
           }
+//
+//          if (TypeDemarshallers.hasDemarshaller(className)) {
+//            o = TypeDemarshallers.getDemarshaller(className).demarshall(eMap, ctx);
+//            if (objId != null) ctx.putObject(objId, o);
+//            return o;
+//          }
           else {
             throw new RuntimeException("no available demarshaller: " + className);
           }

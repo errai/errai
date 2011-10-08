@@ -85,7 +85,7 @@ public class TypeDemarshallHelper {
       else if (o instanceof Map) {
         Map<?, ?> oMap = (Map) o;
         if (oMap.containsKey(SerializationParts.ENCODED_TYPE)) {
-          String objId = (String) oMap.get(SerializationParts.OBJECT_ID);
+          String objId = String.valueOf(oMap.get(SerializationParts.OBJECT_ID));
           boolean ref = false;
           if (objId != null) {
             if (objId.charAt(0) == '$') {

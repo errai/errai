@@ -123,6 +123,7 @@ public class JSONStreamDecoder {
               return demarshallAll(ctx.record(collection, decodingContext), decodingContext);
             }
             catch (Exception e) {
+              e.printStackTrace();
               throw new RuntimeException("Could not demarshall object", e);
             }
           }
@@ -222,7 +223,7 @@ public class JSONStreamDecoder {
       case '"':
         return '\"';
       default:
-        throw new CompileException("illegal escape sequence: " + c);
+        throw new RuntimeException("illegal escape sequence: " + c);
     }
   }
 

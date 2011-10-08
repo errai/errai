@@ -21,6 +21,7 @@ import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.VariableReference;
 import org.jboss.errai.codegen.framework.builder.impl.AssignmentBuilder;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.util.GenUtil;
 
 /**
@@ -41,9 +42,28 @@ public class AssignVariable extends AbstractCallElement {
   public void handleCall(CallWriter writer, Context context, Statement statement) {
     writer.reset();
 
-    Statement s = new AssignmentBuilder(false, operator, (VariableReference) statement, GenUtil.generate(context,
+    final Statement stmt = new AssignmentBuilder(false, operator, (VariableReference) statement, GenUtil.generate(context,
             value));
-    nextOrReturn(writer, context, s);
+    
+    Statement wrapperStmt;
+    
+    if (next == null) {
+      wrapperStmt = new Statement() {
+        @Override
+        public String generate(Context context) {
+          return stmt.generate(context) + ";";
+        }
+
+        @Override
+        public MetaClass getType() {
+          return stmt.getType();
+        }
+      };
+      nextOrReturn(writer, context, wrapperStmt);
+    }
+    else {
+      nextOrReturn(writer, context, stmt);
+    }
   }
 
   @Override
