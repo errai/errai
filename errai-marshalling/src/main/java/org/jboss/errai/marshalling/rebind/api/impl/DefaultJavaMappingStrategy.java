@@ -7,10 +7,7 @@ import org.jboss.errai.codegen.framework.Parameter;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
-import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
-import org.jboss.errai.codegen.framework.meta.MetaConstructor;
-import org.jboss.errai.codegen.framework.meta.MetaField;
+import org.jboss.errai.codegen.framework.meta.*;
 import org.jboss.errai.codegen.framework.util.Bool;
 import org.jboss.errai.codegen.framework.util.GenUtil;
 import org.jboss.errai.codegen.framework.util.Implementations;
@@ -28,8 +25,10 @@ import org.jboss.errai.marshalling.rebind.api.MappingContext;
 import org.jboss.errai.marshalling.rebind.api.MappingStrategy;
 import org.jboss.errai.marshalling.rebind.api.ObjectMapper;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
+import org.mvel2.util.ReflectionUtil;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -157,13 +156,33 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
             val = fieldDemarshall(field.getName(), MetaClassFactory.get(JSONValue.class), field.getType().asBoxed());
           }
 
-          if (!context.isExposed(field)) {
-            GenUtil.addPrivateAccessStubs(true, context.getClassStructureBuilder(), field);
-            context.markExposed(field);
+          // handle long case -- GWT does not support long in JSNI
+          if (field.isPublic()) {
+            builder.append(Stmt.loadVariable("entity").loadField(field.getName()).assignValue(val));
+          }
+          else {
+            MetaMethod setterMeth = field.getDeclaringClass()
+                    .getMethod(ReflectionUtil.getSetter(field.getName()), field.getType());
+            if (setterMeth != null) {
+              builder.append(Stmt.loadVariable("entity").invoke(setterMeth, val));
+            }
+            else if (field.getType().getCanonicalName().equals("long")) {
+              throw new RuntimeException("cannot support private field marshalling of long type" +
+                      " (not supported by JSNI) for field: "
+                      + field.getDeclaringClass().getFullyQualifiedName() + "#" + field.getName());
+            }
+            else {
+              if (!context.isExposed(field)) {
+                GenUtil.addPrivateAccessStubs(true, context.getClassStructureBuilder(), field);
+                context.markExposed(field);
+              }
+
+              builder.append(Stmt.invokeStatic(context.getGeneratedBootstrapClass(), GenUtil.getPrivateFieldInjectorName(field),
+                      Stmt.loadVariable("entity"), val));
+            }
           }
 
-          builder.append(Stmt.invokeStatic(context.getGeneratedBootstrapClass(), GenUtil.getPrivateFieldInjectorName(field),
-                  Stmt.loadVariable("entity"), val));
+
         }
 
         builder.append(Stmt.loadVariable("entity").returnValue());
@@ -349,7 +368,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
   public Statement extractJSONObjectProperty(String fieldName, MetaClass fromType) {
     if (fromType.getFullyQualifiedName().equals(JSONValue.class.getName())) {
       return Stmt.invokeStatic(MarshallUtil.class, "nullSafe_JSONObject", Stmt.loadVariable("a0"), fieldName);
-     // return Stmt.loadVariable("a0").invoke("isObject").invoke("get", fieldName);
+      // return Stmt.loadVariable("a0").invoke("isObject").invoke("get", fieldName);
     }
     else {
       return Stmt.nestedCall(Cast.to(fromType, Stmt.loadVariable("a0"))).invoke("get", fieldName);
@@ -384,6 +403,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
       else if (i > 0) {
         sb.append(",");
       }
+
 
       MetaClass targetType = GenUtil.getPrimitiveWrapper(metaField.getType());
 
