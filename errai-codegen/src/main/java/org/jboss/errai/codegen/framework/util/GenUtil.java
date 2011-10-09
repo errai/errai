@@ -551,6 +551,30 @@ public class GenUtil {
     }
     return 0;
   }
+  
+  public static MetaMethod findCaseInsensitiveMatch(MetaClass retType, MetaClass clazz, String name, MetaClass... parms) {
+    Outer: for (MetaMethod method : clazz.getDeclaredMethods()) {
+      if (name.equalsIgnoreCase(method.getName())) {
+        if (parms.length != method.getParameters().length) continue;
+
+        MetaParameter[] mps = method.getParameters();
+        for (int i = 0; i < parms.length; i++) {
+          if (!parms[i].getFullyQualifiedName().equals(mps[i].getType().getFullyQualifiedName())) {
+            continue Outer;
+          }
+        }
+        
+        if (retType != null
+                && !retType.getFullyQualifiedName().equals(method.getReturnType().getFullyQualifiedName())) {
+          continue;
+        }
+
+        return method;
+      }
+    }
+
+    return null;
+  }
 
   public static void throwIfUnhandled(String error, Throwable t) {
     try {

@@ -119,7 +119,7 @@ public class MarshallerGeneratorFactory {
               .invoke("put", entry.getKey(), loadVariable(varName)));
 
       for (String s : mappingContext.getReverseMappingAliasFor(entry.getKey())) {
-        constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
+        constructor.append(Stmt.create(classContext).loadVariable(ARRAY_MARSHALLERS_VAR)
                 .invoke("put", s, loadVariable(varName)));
       }
     }
@@ -133,7 +133,7 @@ public class MarshallerGeneratorFactory {
 
     classStructureBuilder.publicMethod(Marshaller.class, "getArrayMarshaller").parameters(String.class, String.class)
             .body()
-            .append(loadVariable(MARSHALLERS_VAR).invoke("get", loadVariable("a1")).returnValue())
+            .append(loadVariable(ARRAY_MARSHALLERS_VAR).invoke("get", loadVariable("a1")).returnValue())
             .finish();
 
     String generatedClass = classStructureBuilder.toJavaString();
@@ -211,7 +211,7 @@ public class MarshallerGeneratorFactory {
             loadVariable("a0"), loadVariable("a1")).returnValue());
     bBuilder.finish();
 
-    demarshalCode(toMap, dimensions, classStructureBuilder);
+    arrayDemarshallCode(toMap, dimensions, classStructureBuilder);
 
     BlockBuilder<?> marshallMethodBlock = classStructureBuilder.publicOverridesMethod("marshall",
             Parameter.of(Object.class, "a0"), Parameter.of(MarshallingSession.class, "a1"));
@@ -228,7 +228,7 @@ public class MarshallerGeneratorFactory {
     return classStructureBuilder.finish();
   }
 
-  private void demarshalCode(MetaClass toMap, int dim, AnonymousClassStructureBuilder anonBuilder) {
+  private void arrayDemarshallCode(MetaClass toMap, int dim, AnonymousClassStructureBuilder anonBuilder) {
     Object[] dimParms = new Object[dim];
     dimParms[0] = Stmt.loadVariable("a0").invoke("size");
 
@@ -277,7 +277,7 @@ public class MarshallerGeneratorFactory {
             .finish();
 
     if (dim > 1) {
-      demarshalCode(toMap, dim - 1, anonBuilder);
+      arrayDemarshallCode(toMap, dim - 1, anonBuilder);
     }
     
 

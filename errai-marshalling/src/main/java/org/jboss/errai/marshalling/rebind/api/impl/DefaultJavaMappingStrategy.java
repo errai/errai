@@ -161,8 +161,9 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
             builder.append(Stmt.loadVariable("entity").loadField(field.getName()).assignValue(val));
           }
           else {
-            MetaMethod setterMeth = field.getDeclaringClass()
-                    .getMethod(ReflectionUtil.getSetter(field.getName()), field.getType());
+            MetaMethod setterMeth = GenUtil.findCaseInsensitiveMatch(null,
+                    field.getDeclaringClass(), "set" + field.getName(),
+                    field.getType());
             if (setterMeth != null) {
               builder.append(Stmt.loadVariable("entity").invoke(setterMeth, val));
             }
@@ -368,7 +369,6 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
   public Statement extractJSONObjectProperty(String fieldName, MetaClass fromType) {
     if (fromType.getFullyQualifiedName().equals(JSONValue.class.getName())) {
       return Stmt.invokeStatic(MarshallUtil.class, "nullSafe_JSONObject", Stmt.loadVariable("a0"), fieldName);
-      // return Stmt.loadVariable("a0").invoke("isObject").invoke("get", fieldName);
     }
     else {
       return Stmt.nestedCall(Cast.to(fromType, Stmt.loadVariable("a0"))).invoke("get", fieldName);
@@ -448,16 +448,24 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
   public Statement valueAccessorFor(MetaField field) {
     if (!field.isPublic()) {
-      if (!context.isExposed(field)) {
-        GenUtil.addPrivateAccessStubs(true, context.getClassStructureBuilder(), field);
-        context.markExposed(field);
-      }
+      MetaMethod getterMethod = GenUtil.findCaseInsensitiveMatch(field.getType(),
+              field.getDeclaringClass(), "get" + field.getName());
 
-      return Stmt.invokeStatic(context.getGeneratedBootstrapClass(), GenUtil.getPrivateFieldInjectorName(field),
-              Stmt.loadVariable("a0"));
+      if (getterMethod != null) {
+        return Stmt.loadVariable("a0").invoke(getterMethod);
+      }
+      else {
+        if (!context.isExposed(field)) {
+          GenUtil.addPrivateAccessStubs(true, context.getClassStructureBuilder(), field);
+          context.markExposed(field);
+        }
+
+        return Stmt.invokeStatic(context.getGeneratedBootstrapClass(), GenUtil.getPrivateFieldInjectorName(field),
+                Stmt.loadVariable("a0"));
+      }
     }
     else {
-      return Stmt.loadStatic(field.getDeclaringClass(), field.getName());
+      return Stmt.loadVariable("a0").loadField(field.getName());
     }
   }
 
