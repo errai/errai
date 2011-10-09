@@ -59,7 +59,7 @@ public class MethodCall extends AbstractCallElement {
       MetaClass callType = statement.getType();
 
       MetaClass[] parameterTypes = callParams.getParameterTypes();
-      MetaMethod method = (staticMethod) ? callType.getBestMatchingStaticMethod(methodName, parameterTypes)
+      final MetaMethod method = (staticMethod) ? callType.getBestMatchingStaticMethod(methodName, parameterTypes)
               : callType.getBestMatchingMethod(methodName, parameterTypes);
 
       if (method == null) {
@@ -75,7 +75,7 @@ public class MethodCall extends AbstractCallElement {
 
       callParams = fromStatements(GenUtil.generateCallParameters(method, context, parameters));
       statement = new MethodInvocation(method, callParams);
-
+      
       resultType = statement.getType();
 
       nextOrReturn(writer, context, statement);

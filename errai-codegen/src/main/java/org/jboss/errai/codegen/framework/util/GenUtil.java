@@ -382,16 +382,21 @@ public class GenUtil {
   }
 
   public static void addPrivateAccessStubs(boolean useJSNIStubs, ClassStructureBuilder<?> classBuilder, MetaField f) {
+    MetaClass type = f.getType();
+    if (type.getCanonicalName().equals("long")) {
+      type = type.asBoxed();
+    }
+    
     if (useJSNIStubs) {
       classBuilder.privateMethod(void.class, getPrivateFieldInjectorName(f))
               .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance"),
-                      Parameter.of(f.getType(), "value")))
+                      Parameter.of(type.isArray() ? type.asBoxed() : type, "value")))
               .modifiers(Modifier.Static, Modifier.JSNI)
               .body()
               .append(new StringStatement(JSNIUtil.fieldAccess(f) + " = value"))
               .finish();
 
-      classBuilder.privateMethod(f.getType(), getPrivateFieldInjectorName(f))
+      classBuilder.privateMethod(type, getPrivateFieldInjectorName(f))
               .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance")))
               .modifiers(Modifier.Static, Modifier.JSNI)
               .body()
@@ -401,7 +406,7 @@ public class GenUtil {
     else {
       classBuilder.privateMethod(void.class, getPrivateFieldInjectorName(f))
               .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance"),
-                      Parameter.of(f.getType(), "value")))
+                      Parameter.of(f.getType().isArray() ? f.getType().asBoxed() : f.getType(), "value")))
               .modifiers(Modifier.Static)
               .body()
               .append(Stmt.try_()

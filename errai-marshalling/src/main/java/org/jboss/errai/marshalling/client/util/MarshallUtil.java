@@ -46,6 +46,15 @@ public class MarshallUtil {
     return demarshalledInstance;
   }
   
+  public static JSONValue nullSafe_JSONObject(JSONValue v, String key) {
+    if (v.isObject() == null) {
+      return null;
+    }
+    else {
+      return v.isObject().get(key);
+    }
+  }
+  
   public static boolean handles(JSONObject object, Class<?> cls) {
     JSONValue v = object.get(SerializationParts.ENCODED_TYPE);
     return !(v == null || v.isString() == null) && cls.getName().equals(v.isString().stringValue());

@@ -1,5 +1,7 @@
 package org.jboss.errai.marshalling.rebind;
 
+import com.google.gwt.json.client.JSONValue;
+import org.jboss.errai.codegen.framework.Cast;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Parameter;
 import org.jboss.errai.codegen.framework.Statement;
@@ -25,7 +27,7 @@ import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 import org.jboss.errai.marshalling.rebind.api.ArrayMarshallerCallback;
 import org.jboss.errai.marshalling.rebind.api.MappingContext;
 import org.jboss.errai.marshalling.rebind.api.MappingStrategy;
-import org.jboss.errai.marshalling.rebind.util.MarshallingUtil;
+import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 
 import javax.enterprise.util.TypeLiteral;
 import java.util.*;
@@ -34,8 +36,8 @@ import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.parameteri
 import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.typeParametersOf;
 import static org.jboss.errai.codegen.framework.util.Implementations.*;
 import static org.jboss.errai.codegen.framework.util.Stmt.loadVariable;
-import static org.jboss.errai.marshalling.rebind.util.MarshallingUtil.getArrayVarName;
-import static org.jboss.errai.marshalling.rebind.util.MarshallingUtil.getVarName;
+import static org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil.getArrayVarName;
+import static org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil.getVarName;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -151,7 +153,7 @@ public class MarshallerGeneratorFactory {
 
     for (Class<?> clazz : exposed) {
       if (clazz.isEnum()) continue;
-      
+
       MetaClass metaClazz = MetaClassFactory.get(clazz);
       Statement marshaller = marshal(metaClazz);
       MetaClass type = marshaller.getType();
@@ -217,12 +219,16 @@ public class MarshallerGeneratorFactory {
     marshallMethodBlock.append(Stmt.invokeStatic(anonClass, "_marshall" + dimensions,
             loadVariable("a0"), loadVariable("a1")).returnValue());
 
+    classStructureBuilder.publicOverridesMethod("handles", Parameter.of(JSONValue.class, "a0"))
+             .append(Stmt.load(true).returnValue())
+             .finish();
+
     marshallMethodBlock.finish();
 
     return classStructureBuilder.finish();
   }
 
-  private void demarshalCode(MetaClass toMap, int dim, ClassStructureBuilder<? extends ClassStructureBuilder> anonBuilder) {
+  private void demarshalCode(MetaClass toMap, int dim, AnonymousClassStructureBuilder anonBuilder) {
     Object[] dimParms = new Object[dim];
     dimParms[0] = Stmt.loadVariable("a0").invoke("size");
 
@@ -237,7 +243,9 @@ public class MarshallerGeneratorFactory {
             .initializeWith(Stmt.newArray(toMap, dimParms)));
 
     dmBuilder.append(autoForLoop("i", Stmt.loadVariable("newArray").loadField("length"))
-            .append(dim == 1 ? loadVariable("newArray", loadVariable("i")).assignValue(loadVariable("a0").invoke("get", loadVariable("i")))
+            .append(dim == 1 ? loadVariable("newArray", loadVariable("i"))
+                    .assignValue(Cast.to(toMap.getOuterComponentType().asBoxed(),
+                            loadVariable("a0").invoke("get", loadVariable("i"))))
                     : loadVariable("newArray", loadVariable("i")).assignValue(
                     Stmt.invokeStatic(anonBuilder.getClassDefinition(),
                             "_demarshall" + (dim - 1), loadVariable("a0"), loadVariable("a1"))))
@@ -257,19 +265,22 @@ public class MarshallerGeneratorFactory {
                     .append(Stmt.if_(Bool.greaterThan(Stmt.loadVariable("i"), 0))
                             .append(Stmt.loadVariable("sb").invoke("append", ",")).finish())
                     .append(Stmt.loadVariable("sb").invoke("append", dim == 1 ?
-                            Stmt.loadVariable(MarshallingUtil.getVarName(toMap.asBoxed()))
-                                    .invoke("marshall", Stmt.loadVariable("a0", Stmt.loadVariable("i")), Stmt.loadVariable("a1"))
+                            Stmt.loadVariable(MarshallingGenUtil.getVarName(toMap.asBoxed()))
+                                    .invoke("marshall",
+                                            Stmt.loadVariable("a0", Stmt.loadVariable("i")),
+                                            Stmt.loadVariable("a1"))
                             :
                             Stmt.invokeStatic(anonBuilder.getClassDefinition(),
                                     "_marshall" + (dim - 1), Stmt.loadVariable("a0", Stmt.loadVariable("i")), loadVariable("a1"))))
                     .finish())
-            .append(Stmt.loadVariable("sb").invoke("append", "]").returnValue())
+            .append(Stmt.loadVariable("sb").invoke("append", "]").invoke("toString").returnValue())
             .finish();
-
 
     if (dim > 1) {
       demarshalCode(toMap, dim - 1, anonBuilder);
     }
+    
+
   }
 
   private void loadMarshallers() {

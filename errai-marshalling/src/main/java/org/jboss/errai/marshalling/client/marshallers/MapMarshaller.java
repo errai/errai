@@ -59,6 +59,9 @@ public class MapMarshaller implements Marshaller<JSONValue, Map> {
 
   @Override
   public String marshall(Map o, MarshallingSession ctx) {
+    if (o == null) {
+      return "null";
+    }
     StringBuilder buf = new StringBuilder("{");
 
     Object key, val;

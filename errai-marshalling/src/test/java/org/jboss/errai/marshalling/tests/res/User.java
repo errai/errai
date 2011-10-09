@@ -1,6 +1,5 @@
 package org.jboss.errai.marshalling.tests.res;
 
-import org.jboss.errai.common.client.api.annotations.ExposeEntity;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,7 +8,7 @@ import java.util.Map;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ExposeEntity
+
 public class User {
   private int id;
   private String name;

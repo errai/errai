@@ -7,7 +7,6 @@ import org.jboss.errai.codegen.framework.Parameter;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
-import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaConstructor;
@@ -24,10 +23,11 @@ import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 import org.jboss.errai.marshalling.client.api.exceptions.InvalidMappingException;
 import org.jboss.errai.marshalling.client.api.exceptions.MarshallingException;
 import org.jboss.errai.marshalling.client.api.exceptions.NoAvailableMarshallerException;
+import org.jboss.errai.marshalling.client.util.MarshallUtil;
 import org.jboss.errai.marshalling.rebind.api.MappingContext;
 import org.jboss.errai.marshalling.rebind.api.MappingStrategy;
 import org.jboss.errai.marshalling.rebind.api.ObjectMapper;
-import org.jboss.errai.marshalling.rebind.util.MarshallingUtil;
+import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -151,10 +151,10 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
           Statement val;
           if (field.getType().isArray()) {
             val = context.getArrayMarshallerCallback()
-                    .demarshall(field.getType().asBoxed(), extractJSONObjectProperty(field.getName(), JSONObject.class));
+                    .demarshall(field.getType().asBoxed(), extractJSONObjectProperty(field.getName(), JSONValue.class));
           }
           else {
-            val = fieldDemarshall(field.getName(), MetaClassFactory.get(JSONObject.class), field.getType().asBoxed());
+            val = fieldDemarshall(field.getName(), MetaClassFactory.get(JSONValue.class), field.getType().asBoxed());
           }
 
           if (!context.isExposed(field)) {
@@ -200,7 +200,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
     List<MetaField> mappings = new ArrayList<MetaField>();
 
     for (MetaField field : toMap.getDeclaredFields()) {
-      if (field.isTransient()) {
+      if (field.isTransient() || field.isStatic()) {
         continue;
       }
 
@@ -347,7 +347,13 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
   }
 
   public Statement extractJSONObjectProperty(String fieldName, MetaClass fromType) {
-    return Stmt.nestedCall(Cast.to(fromType, Stmt.loadVariable("a0"))).invoke("get", fieldName);
+    if (fromType.getFullyQualifiedName().equals(JSONValue.class.getName())) {
+      return Stmt.invokeStatic(MarshallUtil.class, "nullSafe_JSONObject", Stmt.loadVariable("a0"), fieldName);
+     // return Stmt.loadVariable("a0").invoke("isObject").invoke("get", fieldName);
+    }
+    else {
+      return Stmt.nestedCall(Cast.to(fromType, Stmt.loadVariable("a0"))).invoke("get", fieldName);
+    }
   }
 
 
@@ -367,7 +373,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
     int i = 0;
 
     for (MetaField metaField : toType.getDeclaredFields()) {
-      if (metaField.isTransient()) {
+      if (metaField.isTransient() || metaField.isStatic()) {
         continue;
       }
 
@@ -400,7 +406,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
       }
       else {
-        sb.append(Stmt.loadVariable(MarshallingUtil.getVarName(targetType))
+        sb.append(Stmt.loadVariable(MarshallingGenUtil.getVarName(targetType))
                 .invoke("marshall", valueStatement, Stmt.loadVariable("a1")));
       }
 
@@ -438,11 +444,12 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
   public Statement unwrapJSON(Statement valueStatement, MetaClass toType) {
     if (toType.isEnum()) {
       return Stmt.invokeStatic(Enum.class, "valueOf", toType,
-              Stmt.nestedCall(valueStatement).invoke("isObject").invoke("get", SerializationParts.ENUM_STRING_VALUE).invoke("isString").invoke("stringValue"));
+              Stmt.nestedCall(valueStatement).invoke("isObject")
+                      .invoke("get", SerializationParts.ENUM_STRING_VALUE).invoke("isString").invoke("stringValue"));
     }
     else {
       return Stmt.create(context.getCodegenContext())
-              .loadVariable(MarshallingUtil.getVarName(toType))
+              .loadVariable(MarshallingGenUtil.getVarName(toType))
               .invoke("demarshall", valueStatement, Stmt.loadVariable("a1"));
     }
   }

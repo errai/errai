@@ -7,7 +7,7 @@ import org.jboss.errai.codegen.framework.util.GenUtil;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public class MarshallingUtil {
+public class MarshallingGenUtil {
   public static String getVarName(MetaClass clazz) {
     return clazz.isArray()
             ? getArrayVarName(clazz.getOuterComponentType().getFullyQualifiedName())

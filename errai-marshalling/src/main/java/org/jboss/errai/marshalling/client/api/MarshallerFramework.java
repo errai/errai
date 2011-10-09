@@ -24,10 +24,7 @@ public class MarshallerFramework implements EntryPoint {
 
   static {
     marshallerFactory = GWT.create(MarshallerFactory.class);
-  }
 
-  @Override
-  public void onModuleLoad() {
     DataTypeHelper.setMarshallerProvider(new MarshallerProvider() {
       @Override
       public boolean hasMarshaller(String fqcn) {
@@ -44,6 +41,10 @@ public class MarshallerFramework implements EntryPoint {
         return marshallerFactory.getMarshaller("json", fqcn).marshall(o, new JSONMarshallingSession());
       }
     });
+  }
+
+  @Override
+  public void onModuleLoad() {
   }
 
   public static Object demarshallErraiJSON(JSONObject object) {
@@ -97,14 +98,14 @@ public class MarshallerFramework implements EntryPoint {
 
     @Override
     public <T> T demarshall(Class<T> clazz, Object o) {
-      if (o == null){
+      if (o == null) {
         return null;
       }
       else {
         Marshaller<Object, Object> m = getMarshallerForType(clazz.getName());
         if (m == null) {
           throw new MarshallingException("no marshaller for type: " + o.getClass().getName());
-        }    
+        }
         return (T) m.demarshall(o, this);
       }
     }

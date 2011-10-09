@@ -361,10 +361,10 @@ public final class MetaClassFactory {
     int i = 0;
     for (Object o : classes) {
       if (o instanceof Class) {
-        types[i++] = MetaClassFactory.get((Class) o);
+        types[i++] = MetaClassFactory.get((Class) o).asBoxed();
       }
       else if (o instanceof TypeLiteral) {
-        types[i++] = MetaClassFactory.get((TypeLiteral) o);
+        types[i++] = MetaClassFactory.get((TypeLiteral) o).asBoxed();
       }
       else if (o instanceof MetaType) {
         types[i++] = (MetaType) o;
