@@ -150,7 +150,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
           Statement val;
           if (field.getType().isArray()) {
             val = context.getArrayMarshallerCallback()
-                    .demarshall(field.getType().asBoxed(), extractJSONObjectProperty(field.getName(), JSONValue.class));
+                    .demarshall(field.getType(), extractJSONObjectProperty(field.getName(), JSONValue.class));
           }
           else {
             val = fieldDemarshall(field.getName(), MetaClassFactory.get(JSONValue.class), field.getType().asBoxed());

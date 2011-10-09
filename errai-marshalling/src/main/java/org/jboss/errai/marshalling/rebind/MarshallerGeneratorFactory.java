@@ -119,7 +119,7 @@ public class MarshallerGeneratorFactory {
               .invoke("put", entry.getKey(), loadVariable(varName)));
 
       for (String s : mappingContext.getReverseMappingAliasFor(entry.getKey())) {
-        constructor.append(Stmt.create(classContext).loadVariable(ARRAY_MARSHALLERS_VAR)
+        constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
                 .invoke("put", s, loadVariable(varName)));
       }
     }
@@ -234,6 +234,11 @@ public class MarshallerGeneratorFactory {
 
     final MetaClass arrayType = toMap.asArrayOf(dim);
 
+    MetaClass outerType = toMap.getOuterComponentType();
+    if (!outerType.isArray() && outerType.isPrimitive()) {
+      outerType = outerType.asBoxed();
+    }
+    
     final BlockBuilder<?> dmBuilder =
             anonBuilder.privateMethod(arrayType, "_demarshall" + dim)
                     .parameters(List.class, MarshallingSession.class).body();
@@ -244,7 +249,7 @@ public class MarshallerGeneratorFactory {
 
     dmBuilder.append(autoForLoop("i", Stmt.loadVariable("newArray").loadField("length"))
             .append(dim == 1 ? loadVariable("newArray", loadVariable("i"))
-                    .assignValue(Cast.to(toMap.getOuterComponentType().asBoxed(),
+                    .assignValue(Cast.to(outerType,
                             loadVariable("a0").invoke("get", loadVariable("i"))))
                     : loadVariable("newArray", loadVariable("i")).assignValue(
                     Stmt.invokeStatic(anonBuilder.getClassDefinition(),
@@ -265,7 +270,7 @@ public class MarshallerGeneratorFactory {
                     .append(Stmt.if_(Bool.greaterThan(Stmt.loadVariable("i"), 0))
                             .append(Stmt.loadVariable("sb").invoke("append", ",")).finish())
                     .append(Stmt.loadVariable("sb").invoke("append", dim == 1 ?
-                            Stmt.loadVariable(MarshallingGenUtil.getVarName(toMap.asBoxed()))
+                            Stmt.loadVariable(MarshallingGenUtil.getVarName(outerType))
                                     .invoke("marshall",
                                             Stmt.loadVariable("a0", Stmt.loadVariable("i")),
                                             Stmt.loadVariable("a1"))
