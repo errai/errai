@@ -215,7 +215,8 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
         tryBuilder.finish()
                 .catch_(Throwable.class, "t")
                 .append(Stmt.loadVariable("t").invoke("printStackTrace"))
-                .append(Stmt.load(null).returnValue())
+                .append(Stmt.throw_(RuntimeException.class, "error demarshalling entity: " + toMap.getFullyQualifiedName(),
+                        Stmt.loadVariable("t")))
                 .finish();
 
         builder.append(tryBuilder.finish()).finish();

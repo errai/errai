@@ -109,17 +109,24 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     return methodList.toArray(new MetaMethod[methodList.size()]);
   }
 
+  private transient volatile MetaMethod[] methodsCache;
+  
   @Override
   public MetaMethod[] getMethods() {
-    return fromMethodArray(getEnclosedMetaObject().getMethods());
+    return methodsCache != null ? methodsCache : (methodsCache = fromMethodArray(getEnclosedMetaObject().getMethods()));
   }
+
+  private transient volatile MetaMethod[] declaredMethodCache;
 
   @Override
   public MetaMethod[] getDeclaredMethods() {
-    return fromMethodArray(getEnclosedMetaObject().getDeclaredMethods());
+    return declaredMethodCache != null ? declaredMethodCache
+            : (declaredMethodCache = fromMethodArray(getEnclosedMetaObject().getDeclaredMethods()));
   }
 
+
   private static MetaField[] fromFieldArray(Field[] methods) {
+
     List<MetaField> methodList = new ArrayList<MetaField>();
 
     for (Field f : methods) {
@@ -129,14 +136,19 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     return methodList.toArray(new MetaField[methodList.size()]);
   }
 
+  private transient volatile MetaField[] fieldCache;
+
   @Override
   public MetaField[] getFields() {
-    return fromFieldArray(getEnclosedMetaObject().getFields());
+    return fieldCache != null ? fieldCache : (fieldCache = fromFieldArray(getEnclosedMetaObject().getFields()));
   }
+
+  private transient volatile MetaField[] declaredFieldCache;
 
   @Override
   public MetaField[] getDeclaredFields() {
-    return fromFieldArray(getEnclosedMetaObject().getDeclaredFields());
+    return declaredFieldCache != null ? declaredFieldCache
+            : (declaredFieldCache = fromFieldArray(getEnclosedMetaObject().getDeclaredFields()));
   }
 
   @Override
@@ -163,26 +175,38 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     }
   }
 
+  
+  private transient volatile MetaConstructor[] constructorCache;
+  
   @Override
   public MetaConstructor[] getConstructors() {
+    if (constructorCache != null) {
+      return constructorCache;
+    }
+    
     List<MetaConstructor> constructorList = new ArrayList<MetaConstructor>();
 
     for (Constructor c : getEnclosedMetaObject().getConstructors()) {
       constructorList.add(new JavaReflectionConstructor(c));
     }
 
-    return constructorList.toArray(new MetaConstructor[constructorList.size()]);
+    return constructorCache = constructorList.toArray(new MetaConstructor[constructorList.size()]);
   }
 
+  private transient volatile MetaConstructor[] declConstructorCache;
+    
   @Override
   public MetaConstructor[] getDeclaredConstructors() {
+    if (declConstructorCache != null) {
+      return declConstructorCache;
+    }
     List<MetaConstructor> constructorList = new ArrayList<MetaConstructor>();
 
     for (Constructor c : getEnclosedMetaObject().getDeclaredConstructors()) {
       constructorList.add(new JavaReflectionConstructor(c));
     }
 
-    return constructorList.toArray(new MetaConstructor[constructorList.size()]);
+    return declConstructorCache = constructorList.toArray(new MetaConstructor[constructorList.size()]);
   }
 
   @Override

@@ -448,10 +448,12 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return MetaClassFactory.get(ParseTools.unboxPrimitive(cls));
   }
 
+  private transient volatile MetaClass erasedCache;
+
   @Override
   public MetaClass getErased() {
     try {
-      return MetaClassFactory.get(getFullyQualifiedName());
+      return erasedCache != null ? erasedCache : (erasedCache = MetaClassFactory.get(getFullyQualifiedName()));
     }
     catch (Exception e) {
       return this;

@@ -51,8 +51,7 @@ public class LoadVariable extends AbstractCallElement {
 
     final Statement[] idx = new Statement[this.indexes.length];
     for (int i = 0; i < idx.length; i++) {
-      idx[i] = GenUtil.generate(context, this.indexes[i]);
-      idx[i] = GenUtil.convert(context, idx[i], MetaClassFactory.get(Integer.class));
+      idx[i] = GenUtil.convert(context, GenUtil.generate(context, this.indexes[i]), MetaClassFactory.get(Integer.class));
     }
 
     final VariableReference ref = context.getVariable(variableName);
@@ -61,9 +60,6 @@ public class LoadVariable extends AbstractCallElement {
       if (!ref.getType().isArray()) {
         throw new InvalidTypeException("attempt to use indexed accessor on non-array type: " + ref);
       }
-//      else if (GenUtil.getArrayDimensions(ref.getType()) != idx.length) {
-//        throw new InvalidTypeException("wrong number of dimension for array type " + ref);
-//      }
     }
 
     final Statement stmt = new VariableReference() {

@@ -53,7 +53,11 @@ public class MarshallerGeneratorFactory {
 
   Set<String> arrayMarshallers = new HashSet<String>();
 
+  long startTime;
+  
   public String generate(String packageName, String clazzName) {
+    startTime = System.currentTimeMillis();
+    
     classStructureBuilder = implement(MarshallerFactory.class, packageName, clazzName);
 
     classContext = ((BuildMetaClass) classStructureBuilder.getClassDefinition()).getContext();
@@ -76,21 +80,6 @@ public class MarshallerGeneratorFactory {
 
       private String createDemarshallerIfNeeded(MetaClass type) {
         return addArrayMarshaller(type);
-//        String varName = getVarName(type);
-//
-//        if (!arrayMarshallers.contains(varName)) {
-//          classStructureBuilder.privateField(varName,
-//                  parameterizedAs(Marshaller.class, typeParametersOf(List.class, type))).finish();
-//          Statement marshaller = generateArrayMarshaller(type);
-//          constructor.append(loadVariable(varName).assignValue(marshaller));
-//
-//          constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
-//                  .invoke("put", type.getFullyQualifiedName(), loadVariable(varName)));
-//
-//          arrayMarshallers.add(varName);
-//        }
-//
-//        return varName;
       }
     });
 
@@ -134,6 +123,9 @@ public class MarshallerGeneratorFactory {
     addArrayMarshaller(MetaClassFactory.get(Object[].class));
 
     String generatedClass = classStructureBuilder.toJavaString();
+
+    System.out.println("[Generation Finished in: " + (System.currentTimeMillis() - startTime) + "ms]");
+
     System.out.println(generatedClass);
     return generatedClass;
   }
