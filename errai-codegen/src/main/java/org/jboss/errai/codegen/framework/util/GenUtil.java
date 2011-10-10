@@ -386,7 +386,7 @@ public class GenUtil {
     if (type.getCanonicalName().equals("long")) {
       type = type.asBoxed();
     }
-    
+
     if (useJSNIStubs) {
       classBuilder.privateMethod(void.class, getPrivateFieldInjectorName(f))
               .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance"),
@@ -551,27 +551,33 @@ public class GenUtil {
     }
     return 0;
   }
-  
+
   public static MetaMethod findCaseInsensitiveMatch(MetaClass retType, MetaClass clazz, String name, MetaClass... parms) {
-    Outer: for (MetaMethod method : clazz.getDeclaredMethods()) {
-      if (name.equalsIgnoreCase(method.getName())) {
-        if (parms.length != method.getParameters().length) continue;
+    MetaClass c = clazz;
 
-        MetaParameter[] mps = method.getParameters();
-        for (int i = 0; i < parms.length; i++) {
-          if (!parms[i].getFullyQualifiedName().equals(mps[i].getType().getFullyQualifiedName())) {
-            continue Outer;
+    do {
+      Outer:
+      for (MetaMethod method : c.getDeclaredMethods()) {
+        if (name.equalsIgnoreCase(method.getName())) {
+          if (parms.length != method.getParameters().length) continue;
+
+          MetaParameter[] mps = method.getParameters();
+          for (int i = 0; i < parms.length; i++) {
+            if (!parms[i].getFullyQualifiedName().equals(mps[i].getType().getFullyQualifiedName())) {
+              continue Outer;
+            }
           }
-        }
-        
-        if (retType != null
-                && !retType.getFullyQualifiedName().equals(method.getReturnType().getFullyQualifiedName())) {
-          continue;
-        }
 
-        return method;
+          if (retType != null
+                  && !retType.getFullyQualifiedName().equals(method.getReturnType().getFullyQualifiedName())) {
+            continue;
+          }
+
+          return method;
+        }
       }
     }
+    while ((c = c.getSuperClass()) != null);
 
     return null;
   }

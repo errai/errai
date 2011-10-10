@@ -79,7 +79,7 @@ public class LoadClassReference extends AbstractCallElement {
       throw new RuntimeException("unknown class reference type: " + metaClass);
     }
 
-    String fqcn = erased.getFullyQualifiedName();
+    String fqcn = erased.getCanonicalName();
     String pkg;
 
     int idx = fqcn.lastIndexOf('.');

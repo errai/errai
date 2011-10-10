@@ -74,4 +74,12 @@ public class Bool {
   public static BooleanExpression lessThan(Object lhs, Object rhs) {
     return BooleanExpressionBuilder.create(lhs, BooleanOperator.LessThan, rhs);
   }
+  
+  public static BooleanExpression isNotNull(Object test) {
+    return Bool.notEquals(test, null);
+  }
+  
+  public static BooleanExpression isNull(Object test) {
+    return Bool.equals(test, null);
+  }
 }

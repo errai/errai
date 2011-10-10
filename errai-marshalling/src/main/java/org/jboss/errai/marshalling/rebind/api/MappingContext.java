@@ -25,9 +25,9 @@ public class MappingContext {
   private MetaClass generatedBootstrapClass;
   private ClassStructureBuilder<?> classStructureBuilder;
   private ArrayMarshallerCallback arrayMarshallerCallback;
+
   private Map<String, String> mappingAliases = new HashMap<String, String>();
   private Map<String, List<String>> reverseMappingAlias = new HashMap<String, List<String>>();
-
 
   private Set<String> exposedMembers = new HashSet<String>();
 

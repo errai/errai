@@ -22,7 +22,15 @@ public class LongMarshaller implements Marshaller<JSONValue, Long> {
 
   @Override
   public Long demarshall(JSONValue o, MarshallingSession ctx) {
-    return Long.parseLong(o.isString().stringValue());
+    if (o.isString() != null) {
+      return Long.parseLong(o.isString().stringValue());
+    }
+    else if (o.isNumber() != null) {
+      return new Double(o.isNumber().doubleValue()).longValue();
+    }
+    else {
+      return null;
+    }
   }
 
   @Override
@@ -32,6 +40,6 @@ public class LongMarshaller implements Marshaller<JSONValue, Long> {
 
   @Override
   public boolean handles(JSONValue o) {
-    return o.isNumber() !=null;
+    return o.isNumber() != null;
   }
 }

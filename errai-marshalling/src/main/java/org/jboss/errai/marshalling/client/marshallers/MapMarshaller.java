@@ -77,7 +77,7 @@ public class MapMarshaller implements Marshaller<JSONValue, Map> {
       }
       else if (key != null) {
         buf.append(("\"" + SerializationParts.EMBEDDED_JSON))
-                .append(StringMarshaller.INSTANCE.marshall(ctx.marshall(key), ctx))
+                .append(StringMarshaller.jsonStringEscape(ctx.marshall(key)))
                 .append("\"");
       }
 

@@ -10,9 +10,9 @@ import org.jboss.errai.codegen.framework.util.GenUtil;
 public class MarshallingGenUtil {
   public static String getVarName(MetaClass clazz) {
     return clazz.isArray()
-            ? getArrayVarName(clazz.getOuterComponentType().getFullyQualifiedName())
+            ? getArrayVarName(clazz.getOuterComponentType().getCanonicalName())
             + "_D" + GenUtil.getArrayDimensions(clazz)
-            : getVarName(clazz.getFullyQualifiedName());
+            : getVarName(clazz.getCanonicalName());
   }
 
   public static String getVarName(Class<?> clazz) {

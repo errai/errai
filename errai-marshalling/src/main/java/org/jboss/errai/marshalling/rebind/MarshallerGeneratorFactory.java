@@ -147,6 +147,11 @@ public class MarshallerGeneratorFactory {
     Set<Class<?>> exposed = new HashSet<Class<?>>(scanner.getTypesAnnotatedWith(Portable.class));
     exposed.addAll(scanner.getTypesAnnotatedWith(ExposeEntity.class));
 
+    exposed.add(Throwable.class);
+    exposed.add(RuntimeException.class);
+    exposed.add(Exception.class);
+    exposed.add(StackTraceElement.class);
+    
     for (Class<?> clazz : exposed) {
       mappingContext.registerGeneratedMarshaller(clazz.getName());
     }
@@ -207,8 +212,14 @@ public class MarshallerGeneratorFactory {
     BlockBuilder<?> bBuilder = classStructureBuilder.publicOverridesMethod("demarshall",
             Parameter.of(Object.class, "a0"), Parameter.of(MarshallingSession.class, "a1"));
 
-    bBuilder.append(Stmt.invokeStatic(anonClass, "_demarshall" + dimensions,
-            loadVariable("a0"), loadVariable("a1")).returnValue());
+    bBuilder.append(
+            Stmt.if_(Bool.isNull(loadVariable("a0")))
+                    .append(Stmt.load(null).returnValue())
+                    .finish()
+                    .else_()
+                    .append(Stmt.invokeStatic(anonClass, "_demarshall" + dimensions,
+                            loadVariable("a0"), loadVariable("a1")).returnValue())
+                    .finish());
     bBuilder.finish();
 
     arrayDemarshallCode(toMap, dimensions, classStructureBuilder);
@@ -216,12 +227,19 @@ public class MarshallerGeneratorFactory {
     BlockBuilder<?> marshallMethodBlock = classStructureBuilder.publicOverridesMethod("marshall",
             Parameter.of(Object.class, "a0"), Parameter.of(MarshallingSession.class, "a1"));
 
-    marshallMethodBlock.append(Stmt.invokeStatic(anonClass, "_marshall" + dimensions,
-            loadVariable("a0"), loadVariable("a1")).returnValue());
+    marshallMethodBlock.append(
+            Stmt.if_(Bool.isNull(loadVariable("a0")))
+                    .append(Stmt.load(null).returnValue())
+                    .finish()
+                    .else_()
+                    .append(Stmt.invokeStatic(anonClass, "_marshall" + dimensions,
+                            loadVariable("a0"), loadVariable("a1")).returnValue())
+                    .finish()
+    );
 
     classStructureBuilder.publicOverridesMethod("handles", Parameter.of(JSONValue.class, "a0"))
-             .append(Stmt.load(true).returnValue())
-             .finish();
+            .append(Stmt.load(true).returnValue())
+            .finish();
 
     marshallMethodBlock.finish();
 
@@ -238,7 +256,24 @@ public class MarshallerGeneratorFactory {
     if (!outerType.isArray() && outerType.isPrimitive()) {
       outerType = outerType.asBoxed();
     }
-    
+
+    Statement outerAccessorStatement =
+            loadVariable("newArray", loadVariable("i"))
+                    .assignValue(Cast.to(outerType,
+                            loadVariable("a0").invoke("get", loadVariable("i"))));
+
+    /**
+     * Special case for handling char elements.
+     */
+    if (outerType.getFullyQualifiedName().equals(Character.class.getName())) {
+      outerAccessorStatement =
+              loadVariable("newArray", loadVariable("i"))
+                      .assignValue(
+                              Stmt.nestedCall(Cast.to(String.class, loadVariable("a0").invoke("get", loadVariable("i"))))
+                                      .invoke("charAt", 0));
+    }
+
+
     final BlockBuilder<?> dmBuilder =
             anonBuilder.privateMethod(arrayType, "_demarshall" + dim)
                     .parameters(List.class, MarshallingSession.class).body();
@@ -248,12 +283,12 @@ public class MarshallerGeneratorFactory {
             .initializeWith(Stmt.newArray(toMap, dimParms)));
 
     dmBuilder.append(autoForLoop("i", Stmt.loadVariable("newArray").loadField("length"))
-            .append(dim == 1 ? loadVariable("newArray", loadVariable("i"))
-                    .assignValue(Cast.to(outerType,
-                            loadVariable("a0").invoke("get", loadVariable("i"))))
+            .append(dim == 1 ? outerAccessorStatement
                     : loadVariable("newArray", loadVariable("i")).assignValue(
                     Stmt.invokeStatic(anonBuilder.getClassDefinition(),
-                            "_demarshall" + (dim - 1), loadVariable("a0"), loadVariable("a1"))))
+                            "_demarshall" + (dim - 1),
+                            Cast.to(List.class, Stmt.loadVariable("a0").invoke("get", Stmt.loadVariable("i"))),
+                            Stmt.loadVariable("a1"))))
 
             .finish())
             .append(Stmt.loadVariable("newArray").returnValue());
@@ -284,8 +319,6 @@ public class MarshallerGeneratorFactory {
     if (dim > 1) {
       arrayDemarshallCode(toMap, dim - 1, anonBuilder);
     }
-    
-
   }
 
   private void loadMarshallers() {

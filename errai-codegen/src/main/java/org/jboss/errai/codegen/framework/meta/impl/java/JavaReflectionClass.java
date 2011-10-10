@@ -85,7 +85,7 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
 
   @Override
   public String getFullyQualifiedName() {
-    return getCanonicalName();
+    return getEnclosedMetaObject().getName();
   }
 
   @Override

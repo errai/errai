@@ -17,8 +17,9 @@
 package org.errai.samples.rpcdemo.client.shared;
 
 import org.jboss.errai.common.client.api.annotations.ExposeEntity;
+import org.jboss.errai.common.client.api.annotations.Portable;
 
-@ExposeEntity
+@Portable
 public class TestException extends RuntimeException {
 
 }

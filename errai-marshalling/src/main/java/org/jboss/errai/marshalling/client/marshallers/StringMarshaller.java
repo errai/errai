@@ -29,8 +29,13 @@ public class StringMarshaller implements Marshaller<JSONValue, String> {
 
   @Override
   public String marshall(String o, MarshallingSession ctx) {
-    return o == null ? "null" : "\"" + o.replaceAll("\\\\", "\\\\\\\\").replaceAll("[\\\\]{0}\\\"", "\\\\\"")  + "\"";
+    return o == null ? "null" : "\"" + jsonStringEscape(o)  + "\"";
   }
+  
+  public static String jsonStringEscape(final String o) {
+     return o.replaceAll("\\\\", "\\\\\\\\").replaceAll("[\\\\]{0}\\\"", "\\\\\"");
+  }
+
 
   @Override
   public boolean handles(JSONValue o) {

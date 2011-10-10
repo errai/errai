@@ -148,8 +148,8 @@ public class Context {
 
   public Context addClassImport(MetaClass clazz) {
     initImportedClass();
-    importedClasses.add(clazz.isArray() ? clazz.getComponentType().getFullyQualifiedName() : clazz
-            .getFullyQualifiedName());
+    importedClasses.add(clazz.isArray() ? clazz.getComponentType().getCanonicalName() : clazz
+            .getCanonicalName());
     return this;
   }
 
@@ -157,7 +157,7 @@ public class Context {
     if (clazz.isArray()) {
       clazz = clazz.getComponentType();
     }
-    return importedClasses != null && importedClasses.contains(clazz.getFullyQualifiedName());
+    return importedClasses != null && importedClasses.contains(clazz.getCanonicalName());
   }
 
   public Context autoImport() {

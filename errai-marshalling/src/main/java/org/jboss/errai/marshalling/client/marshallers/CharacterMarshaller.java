@@ -27,7 +27,7 @@ public class CharacterMarshaller implements Marshaller<JSONValue, Character> {
 
   @Override
   public String marshall(Character o, MarshallingSession ctx) {
-    return "\" + o + \"";
+    return "\"" + o.toString() + "\"";
   }
 
   @Override

@@ -25,14 +25,9 @@ import org.jboss.errai.marshalling.rebind.api.MappingContext;
 import org.jboss.errai.marshalling.rebind.api.MappingStrategy;
 import org.jboss.errai.marshalling.rebind.api.ObjectMapper;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
-import org.mvel2.util.ReflectionUtil;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.typeParametersOf;
@@ -45,6 +40,12 @@ import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.typeParame
 public class DefaultJavaMappingStrategy implements MappingStrategy {
   private MappingContext context;
   private MetaClass toMap;
+  private static Map<String, ConstructorMapping> builtInConstructorMappings
+          = new HashMap<String, ConstructorMapping>();
+
+  static {
+    loadDefaultMappings();
+  }
 
   public DefaultJavaMappingStrategy(MappingContext context, MetaClass toMap) {
     this.context = context;
@@ -164,6 +165,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
             MetaMethod setterMeth = GenUtil.findCaseInsensitiveMatch(null,
                     field.getDeclaringClass(), "set" + field.getName(),
                     field.getType());
+
             if (setterMeth != null) {
               builder.append(Stmt.loadVariable("entity").invoke(setterMeth, val));
             }
@@ -182,8 +184,6 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                       Stmt.loadVariable("entity"), val));
             }
           }
-
-
         }
 
         builder.append(Stmt.loadVariable("entity").returnValue());
@@ -219,26 +219,36 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
     List<MetaField> mappings = new ArrayList<MetaField>();
 
-    for (MetaField field : toMap.getDeclaredFields()) {
-      if (field.isTransient() || field.isStatic()) {
-        continue;
+    MetaClass c = toMap;
+
+    do {
+      for (MetaField field : c.getDeclaredFields()) {
+        if (field.isTransient() || field.isStatic()) {
+          continue;
+        }
+
+        MetaClass type = field.getType();
+
+        if (!type.isEnum() && !context.hasProvidedOrGeneratedMarshaller(type)) {
+          throw new InvalidMappingException("portable entity " + toMap.getFullyQualifiedName()
+                  + " contains a field (" + field.getName() + ") that is not known to the marshaller: "
+                  + type.getFullyQualifiedName());
+        }
+
+        mappings.add(field);
       }
-
-      MetaClass type = field.getType();
-
-      if (!type.isEnum() && !context.hasProvidedOrGeneratedMarshaller(type)) {
-        throw new InvalidMappingException("portable entity " + toMap.getFullyQualifiedName()
-                + " contains a field (" + field.getName() + ") that is not known to the marshaller: "
-                + type.getFullyQualifiedName());
-      }
-
-      mappings.add(field);
     }
+    while ((c = c.getSuperClass()) != null);
+
 
     return new BeanMapping(mappings);
   }
 
   private ConstructorMapping findUsableConstructorMapping() {
+    if (builtInConstructorMappings.containsKey(toMap.getCanonicalName())) {
+      return builtInConstructorMappings.get(toMap.getCanonicalName());
+    }
+
     Set<MetaConstructor> constructors = new HashSet<MetaConstructor>();
     List<ConstructorFieldMapping> mappings = new ArrayList<ConstructorFieldMapping>();
 
@@ -391,47 +401,52 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
     int i = 0;
 
-    for (MetaField metaField : toType.getDeclaredFields()) {
-      if (metaField.isTransient() || metaField.isStatic()) {
-        continue;
+    MetaClass c = toType;
+    do {
+      for (MetaField metaField : c.getDeclaredFields()) {
+        if (metaField.isTransient() || metaField.isStatic()) {
+          continue;
+        }
+
+        if (!hasEncoded) {
+          sb.append(",");
+          hasEncoded = true;
+        }
+        else if (i > 0) {
+          sb.append(",");
+        }
+
+
+        MetaClass targetType = GenUtil.getPrimitiveWrapper(metaField.getType());
+
+        if (!targetType.isEnum() && !context.hasProvidedOrGeneratedMarshaller(targetType)) {
+          throw new NoAvailableMarshallerException(targetType.getFullyQualifiedName());
+        }
+
+        Statement valueStatement = valueAccessorFor(metaField);
+        if (targetType.isArray()) {
+          valueStatement = context.getArrayMarshallerCallback().marshal(targetType, valueStatement);
+        }
+
+        sb.append("\"" + metaField.getName() + "\" : ");
+
+        if (targetType.isEnum()) {
+          sb.append("{\"" + SerializationParts.ENCODED_TYPE
+                  + "\":\"" + targetType.getFullyQualifiedName() + "\",\"" + SerializationParts.ENUM_STRING_VALUE + "\":\"")
+                  .append(Stmt.nestedCall(valueStatement).invoke("toString")).append("\"}");
+
+
+        }
+        else {
+          sb.append(Stmt.loadVariable(MarshallingGenUtil.getVarName(targetType))
+                  .invoke("marshall", valueStatement, Stmt.loadVariable("a1")));
+        }
+
+        i++;
       }
-
-      if (!hasEncoded) {
-        sb.append(",");
-        hasEncoded = true;
-      }
-      else if (i > 0) {
-        sb.append(",");
-      }
-
-
-      MetaClass targetType = GenUtil.getPrimitiveWrapper(metaField.getType());
-
-      if (!targetType.isEnum() && !context.hasProvidedOrGeneratedMarshaller(targetType)) {
-        throw new NoAvailableMarshallerException(targetType.getFullyQualifiedName());
-      }
-
-      Statement valueStatement = valueAccessorFor(metaField);
-      if (targetType.isArray()) {
-        valueStatement = context.getArrayMarshallerCallback().marshal(targetType, valueStatement);
-      }
-
-      sb.append("\"" + metaField.getName() + "\" : ");
-
-      if (targetType.isEnum()) {
-        sb.append("{\"" + SerializationParts.ENCODED_TYPE
-                + "\":\"" + targetType.getFullyQualifiedName() + "\",\"" + SerializationParts.ENUM_STRING_VALUE + "\":\"")
-                .append(Stmt.nestedCall(valueStatement).invoke("toString")).append("\"}");
-
-
-      }
-      else {
-        sb.append(Stmt.loadVariable(MarshallingGenUtil.getVarName(targetType))
-                .invoke("marshall", valueStatement, Stmt.loadVariable("a1")));
-      }
-
-      i++;
     }
+    while ((c = c.getSuperClass()) != null);
+
 
     sb.append("}");
 
@@ -480,5 +495,18 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
               .loadVariable(MarshallingGenUtil.getVarName(toType))
               .invoke("demarshall", valueStatement, Stmt.loadVariable("a1"));
     }
+  }
+
+  private static void loadDefaultMappings() {
+    List<ConstructorFieldMapping> fieldMappings = new ArrayList<ConstructorFieldMapping>();
+    fieldMappings.add(new ConstructorFieldMapping("declaringClass", MetaClassFactory.get(String.class)));
+    fieldMappings.add(new ConstructorFieldMapping("methodName", MetaClassFactory.get(String.class)));
+    fieldMappings.add(new ConstructorFieldMapping("fileName", MetaClassFactory.get(String.class)));
+    fieldMappings.add(new ConstructorFieldMapping("lineNumber", MetaClassFactory.get(Integer.class)));
+
+    ConstructorMapping mapping = new ConstructorMapping(ConstructionType.Mapped, fieldMappings);
+
+    builtInConstructorMappings.put(StackTraceElement.class.getCanonicalName(), mapping);
+
   }
 }

@@ -331,7 +331,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
             .assignValue("test")
             .toJavaString();
 
-    assertEquals("Failed to generate array assignment", "twoDimArray[1][2] = \"test\"", s);
+    assertEquals("Failed to generate array assignment", "twoDimArray[1][2] = \"test\";", s);
   }
 
   @Test
@@ -342,7 +342,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
             .assignValue(AssignmentOperator.PreIncrementAssign, "test")
             .toJavaString();
 
-    assertEquals("Failed to generate array assignment", "twoDimArray[1][2] += \"test\"", s);
+    assertEquals("Failed to generate array assignment", "twoDimArray[1][2] += \"test\";", s);
   }
 
   @Test
@@ -355,7 +355,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
             .assignValue("test")
             .toJavaString();
 
-    assertEquals("Failed to generate array assignment", "twoDimArray[i][j] = \"test\"", s);
+    assertEquals("Failed to generate array assignment", "twoDimArray[i][j] = \"test\";", s);
   }
 
   @Test
@@ -505,7 +505,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
             Stmt.newObject(Foo.class)).loadField("bar").loadField("name").assignValue("test").toJavaString();
 
     assertEquals("failed to generate nested field assignment", 
-        "new Foo().bar.name = \"test\"", s);
+        "new Foo().bar.name = \"test\";", s);
   }
   
   @Test
