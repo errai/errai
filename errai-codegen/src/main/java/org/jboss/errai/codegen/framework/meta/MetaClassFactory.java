@@ -115,13 +115,13 @@ public final class MetaClassFactory {
   public static MetaClass get(Class<?> clazz) {
     return createOrGet(clazz);
   }
-
+  
   public static MetaClass getArrayOf(Class<?> clazz, int dims) {
     int[] da = new int[dims];
     for (int i = 0; i < da.length; i++) {
       da[i] = 0;
     }
-
+    
     return getArrayOf(clazz, da);
   }
 
@@ -131,8 +131,8 @@ public final class MetaClassFactory {
     }
     return createOrGet(Array.newInstance(clazz, dims).getClass());
   }
-
-
+  
+  
   public static MetaClass get(Class<?> clazz, Type type) {
     return createOrGet(clazz, type);
   }
@@ -224,7 +224,7 @@ public final class MetaClassFactory {
     if (cls == null) return null;
 
     final String encName = cls.getName()
-            + (cls.getTypeParameters() == null ? "" : Arrays.toString(cls.getTypeParameters()));
+            +"<" + Arrays.toString(cls.getTypeParameters()) + Arrays.toString(cls.getGenericInterfaces()) + ">";
 
     if (!CLASS_CACHE.containsKey(encName)) {
       MetaClass javaReflectionClass = JavaReflectionClass.newUncachedInstance(cls);
@@ -239,18 +239,18 @@ public final class MetaClassFactory {
   private static MetaClass createOrGet(Class cls, Type type) {
     if (cls == null) return null;
 
-    final String encName = cls.getName()
-            + (cls.getTypeParameters() == null ? "" : Arrays.toString(cls.getTypeParameters()))
-                    + type;
+    if (cls.getTypeParameters() != null) {
+      return JavaReflectionClass.newUncachedInstance(cls, type);
+    }
 
-    if (!CLASS_CACHE.containsKey(encName)) {
+    if (!CLASS_CACHE.containsKey(cls.getName())) {
       MetaClass javaReflectionClass = JavaReflectionClass.newUncachedInstance(cls, type);
 
       addLookups(cls, javaReflectionClass);
       return javaReflectionClass;
     }
 
-    return CLASS_CACHE.get(encName);
+    return CLASS_CACHE.get(cls.getName());
   }
 
 
@@ -283,8 +283,8 @@ public final class MetaClassFactory {
 
     for (MetaConstructor c : clazz.getConstructors()) {
       BuildMetaConstructor newConstructor = new BuildMetaConstructor(buildMetaClass, EmptyStatement.INSTANCE,
-              GenUtil.scopeOf(c),
-              DefParameters.from(c));
+                    GenUtil.scopeOf(c),
+                    DefParameters.from(c));
       newConstructor.setReifiedFormOf(c);
 
       buildMetaClass.addConstructor(newConstructor);
@@ -324,9 +324,9 @@ public final class MetaClassFactory {
       }
 
       BuildMetaMethod newMethod = new BuildMetaMethod(buildMetaClass, EmptyStatement.INSTANCE,
-              GenUtil.scopeOf(method), GenUtil.modifiersOf(method), method.getName(), returnType,
-              method.getGenericReturnType(),
-              DefParameters.fromParameters(parameters), ThrowsDeclaration.of(method.getCheckedExceptions()));
+                    GenUtil.scopeOf(method), GenUtil.modifiersOf(method), method.getName(), returnType,
+                    method.getGenericReturnType(),
+                    DefParameters.fromParameters(parameters), ThrowsDeclaration.of(method.getCheckedExceptions()));
 
       newMethod.setReifiedFormOf(method);
 
@@ -360,10 +360,10 @@ public final class MetaClassFactory {
     int i = 0;
     for (Object o : classes) {
       if (o instanceof Class) {
-        types[i++] = MetaClassFactory.get((Class) o).asBoxed();
+        types[i++] = MetaClassFactory.get((Class) o);
       }
       else if (o instanceof TypeLiteral) {
-        types[i++] = MetaClassFactory.get((TypeLiteral) o).asBoxed();
+        types[i++] = MetaClassFactory.get((TypeLiteral) o);
       }
       else if (o instanceof MetaType) {
         types[i++] = (MetaType) o;
@@ -398,18 +398,9 @@ public final class MetaClassFactory {
     CLASS_CACHE.put(cls.getQualifiedSourceName(), metaClass);
   }
 
-  private static Map<String, Class<?>> JCLASS_CACHE = new HashMap<String, Class<?>>();
-
   private static Class<?> load(String fullyQualifiedName) {
     try {
-      if (JCLASS_CACHE.containsKey(fullyQualifiedName)) {
-        return JCLASS_CACHE.get(fullyQualifiedName);
-      }
-      else {
-        Class<?> cls = Class.forName(fullyQualifiedName, false, Thread.currentThread().getContextClassLoader());
-        JCLASS_CACHE.put(fullyQualifiedName, cls);
-        return cls;
-      }
+      return Class.forName(fullyQualifiedName, false, Thread.currentThread().getContextClassLoader());
     }
     catch (ClassNotFoundException e) {
       throw new RuntimeException("Could not load class: " + fullyQualifiedName);

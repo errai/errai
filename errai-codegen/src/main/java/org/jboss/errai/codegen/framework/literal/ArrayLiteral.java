@@ -17,10 +17,13 @@
 package org.jboss.errai.codegen.framework.literal;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Type;
 
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.builder.callstack.LoadClassReference;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
+import org.jboss.errai.codegen.framework.meta.MetaType;
 import org.jboss.errai.codegen.framework.util.GenUtil;
 
 /**
@@ -34,6 +37,8 @@ public class ArrayLiteral extends LiteralValue<Object> {
   private final int dimensions;
   private Class<?> arrayType;
 
+  private MetaClass mArrayType;
+  
   public ArrayLiteral(Object value) {
     super(value);
 
@@ -45,7 +50,17 @@ public class ArrayLiteral extends LiteralValue<Object> {
     }
 
     this.dimensions = dim;
+    
+    if (MetaClass.class.isAssignableFrom(type)) {
+      type = Class.class;
+    }
+    else if (MetaType.class.isAssignableFrom(type)) {
+      type = Type.class;
+    }
+    
     this.arrayType = type;
+
+    mArrayType = MetaClassFactory.get(arrayType).asArrayOf(dim);
   }
 
   @Override
@@ -91,5 +106,10 @@ public class ArrayLiteral extends LiteralValue<Object> {
     }
 
     return builder.append(" }").toString();
+  }
+
+  @Override
+  public MetaClass getType() {
+    return mArrayType;
   }
 }

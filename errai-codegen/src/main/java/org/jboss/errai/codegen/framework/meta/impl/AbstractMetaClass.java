@@ -397,9 +397,15 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   public int hashCode() {
     return hashString().hashCode();
   }
+  
+  private volatile transient Class<?> asClassCache;
 
   @Override
   public Class<?> asClass() {
+    if (asClassCache != null) {
+      return asClassCache;
+    }
+    
     Class<?> cls = null;
 
     if (enclosedMetaObject instanceof Class) {
@@ -427,7 +433,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       }
     }
 
-    return cls;
+    return asClassCache = cls;
   }
 
   @Override
