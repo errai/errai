@@ -22,7 +22,7 @@ public class IntegerMarshaller implements Marshaller<JSONValue, Integer> {
 
   @Override
   public Integer demarshall(JSONValue o, MarshallingSession ctx) {
-    return new Double(o.isNumber().doubleValue()).intValue();
+    return o == null ? null : new Double(o.isNumber().doubleValue()).intValue();
   }
 
   @Override

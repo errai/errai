@@ -19,6 +19,7 @@ package org.jboss.errai.bus.server.io;
 import org.mvel2.util.PropertyTools;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +36,7 @@ public class EncodingUtil {
     for (Field[] fls : heirarchy) {
       for (Field f : fls) {
         if (isSerializable(f)) {
+          f.setAccessible(true);
           encodingFields.add(f);
         }
       }
@@ -44,7 +46,7 @@ public class EncodingUtil {
   }
 
   public static boolean isSerializable(Field f) {
-    return f.isAccessible() || (PropertyTools.getGetter(f.getDeclaringClass(), f.getName()) != null);
+    return !f.isSynthetic() && (f.getModifiers() & (Modifier.STATIC | Modifier.TRANSIENT)) == 0;
   }
 
   public static Field[] getAllEncodingFields(final Class cls) {

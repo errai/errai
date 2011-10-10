@@ -7,6 +7,7 @@ import org.jboss.errai.codegen.framework.Parameter;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
+import org.jboss.errai.codegen.framework.builder.CatchBlockBuilder;
 import org.jboss.errai.codegen.framework.meta.*;
 import org.jboss.errai.codegen.framework.util.Bool;
 import org.jboss.errai.codegen.framework.util.GenUtil;
@@ -105,7 +106,12 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
         BlockBuilder<?> marshallMethodBlock = classStructureBuilder.publicOverridesMethod("marshall",
                 Parameter.of(Object.class, "a0"), Parameter.of(MarshallingSession.class, "a1"));
 
-        marshallToJSON(marshallMethodBlock, toMap);
+        if (mapping.isDemarshallOnly()) {
+          marshallMethodBlock.append(Stmt.load(null).returnValue());
+        }
+        else {
+          marshallToJSON(marshallMethodBlock, toMap);
+        }
 
         marshallMethodBlock.finish();
 
@@ -141,8 +147,21 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
         BlockBuilder<?> builder =
                 classStructureBuilder.publicOverridesMethod("demarshall",
-                        Parameter.of(Object.class, "a0"), Parameter.of(MarshallingSession.class, "a1"))
-                        .append(Stmt.declareVariable(toMap).named("entity").initializeWith(Stmt.nestedCall(Stmt.newObject(toMap))));
+                        Parameter.of(Object.class, "a0"), Parameter.of(MarshallingSession.class, "a1"));
+
+        BlockBuilder<CatchBlockBuilder> tryBuilder = Stmt.try_();
+
+        /**
+         * Check to see if value is null. If so, return null.
+         */
+        tryBuilder.append(
+                Stmt.if_(Bool.or(Bool.isNull(Stmt.loadVariable("a0")),
+                        Bool.isNotNull(Stmt.loadVariable("a0").invoke("isNull"))))
+                        .append(Stmt.load(null).returnValue())
+                        .finish()
+        );
+
+        tryBuilder.append(Stmt.declareVariable(toMap).named("entity").initializeWith(Stmt.nestedCall(Stmt.newObject(toMap))));
 
         /**
          * Start binding of fields here.
@@ -159,7 +178,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
           // handle long case -- GWT does not support long in JSNI
           if (field.isPublic()) {
-            builder.append(Stmt.loadVariable("entity").loadField(field.getName()).assignValue(val));
+            tryBuilder.append(Stmt.loadVariable("entity").loadField(field.getName()).assignValue(val));
           }
           else {
             MetaMethod setterMeth = GenUtil.findCaseInsensitiveMatch(null,
@@ -167,7 +186,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                     field.getType());
 
             if (setterMeth != null) {
-              builder.append(Stmt.loadVariable("entity").invoke(setterMeth, val));
+              tryBuilder.append(Stmt.loadVariable("entity").invoke(setterMeth, val));
             }
             else if (field.getType().getCanonicalName().equals("long")) {
               throw new RuntimeException("cannot support private field marshalling of long type" +
@@ -180,15 +199,21 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                 context.markExposed(field);
               }
 
-              builder.append(Stmt.invokeStatic(context.getGeneratedBootstrapClass(), GenUtil.getPrivateFieldInjectorName(field),
+              tryBuilder.append(Stmt.invokeStatic(context.getGeneratedBootstrapClass(), GenUtil.getPrivateFieldInjectorName(field),
                       Stmt.loadVariable("entity"), val));
             }
           }
         }
 
-        builder.append(Stmt.loadVariable("entity").returnValue());
+        tryBuilder.append(Stmt.loadVariable("entity").returnValue());
 
-        builder.finish();
+        tryBuilder.finish()
+                .catch_(Throwable.class, "t")
+                .append(Stmt.loadVariable("t").invoke("printStackTrace"))
+                .append(Stmt.load(null).returnValue())
+                .finish();
+
+        builder.append(tryBuilder.finish()).finish();
 
         BlockBuilder<?> marshallMethodBlock = classStructureBuilder.publicOverridesMethod("marshall",
                 Parameter.of(Object.class, "a0"), Parameter.of(MarshallingSession.class, "a1"));
@@ -319,6 +344,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
   private static class ConstructorMapping {
     ConstructionType type;
     List<ConstructorFieldMapping> mappings;
+    private boolean demarshallOnly;
 
     private ConstructorMapping(ConstructionType type, List<ConstructorFieldMapping> mappings) {
       this.type = type;
@@ -331,6 +357,14 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
     public List<ConstructorFieldMapping> getMappings() {
       return mappings;
+    }
+
+    public boolean isDemarshallOnly() {
+      return demarshallOnly;
+    }
+
+    public void setDemarshallOnly(boolean demarshallOnly) {
+      this.demarshallOnly = demarshallOnly;
     }
   }
 
@@ -505,6 +539,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
     fieldMappings.add(new ConstructorFieldMapping("lineNumber", MetaClassFactory.get(Integer.class)));
 
     ConstructorMapping mapping = new ConstructorMapping(ConstructionType.Mapped, fieldMappings);
+    mapping.setDemarshallOnly(true);
 
     builtInConstructorMappings.put(StackTraceElement.class.getCanonicalName(), mapping);
 

@@ -24,7 +24,7 @@ public class StringMarshaller implements Marshaller<JSONValue, String> {
 
   @Override
   public String demarshall(JSONValue o, MarshallingSession ctx) {
-    return o.isString() == null ? null : o.isString().stringValue();
+    return (o == null || o.isString() == null) ? null : o.isString().stringValue();
   }
 
   @Override

@@ -11,6 +11,5 @@ public interface MarshallerFactory {
    * @return a marshaller instance.
    */
   Marshaller<Object, Object> getMarshaller(String formatType, String encodedType);
-  Marshaller<Object, Object> getArrayMarshaller(String formatType, String encodedType);
 }
 

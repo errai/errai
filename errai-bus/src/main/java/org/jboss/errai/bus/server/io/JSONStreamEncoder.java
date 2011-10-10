@@ -146,20 +146,20 @@ public class JSONStreamEncoder {
 
     final Field[] fields = EncodingUtil.getAllEncodingFields(cls);
 
-    final Serializable[] s = EncodingCache.get(fields, new EncodingCache.ValueProvider<Serializable[]>() {
-      public Serializable[] get() {
-        Serializable[] s = new Serializable[fields.length];
-        int i = 0;
-        for (Field f : fields) {
-          if ((f.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
-                  || f.isSynthetic()) {
-            continue;
-          }
-          s[i++] = MVEL.compileExpression(f.getName());
-        }
-        return s;
-      }
-    });
+//    final Serializable[] s = EncodingCache.get(fields, new EncodingCache.ValueProvider<Serializable[]>() {
+//      public Serializable[] get() {
+//        Serializable[] s = new Serializable[fields.length];
+//        int i = 0;
+//        for (Field f : fields) {
+//          if ((f.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
+//                  || f.isSynthetic()) {
+//            continue;
+//          }
+//          s[i++] = MVEL.compileExpression(f.getName());
+//        }
+//        return s;
+//      }
+//    });
 
     int i = 0;
     boolean first = true;
@@ -173,13 +173,19 @@ public class JSONStreamEncoder {
         outstream.write(',');
       }
 
-      Object v = MVEL.executeExpression(s[i++], o);
-      outstream.write('\"');
-      outstream.write(field.getName().getBytes());
-      outstream.write('\"');
-      outstream.write(':');
-      _encode(v, outstream, ctx);
-      first = false;
+      try {
+        // Object v = MVEL.executeExpression(s[i++], o);
+        Object v = field.get(o);
+        outstream.write('\"');
+        outstream.write(field.getName().getBytes());
+        outstream.write('\"');
+        outstream.write(':');
+        _encode(v, outstream, ctx);
+        first = false;
+      }
+      catch (Exception e) {
+        throw new RuntimeException("error serializing field: " + field, e);
+      }
     }
 
     outstream.write('}');

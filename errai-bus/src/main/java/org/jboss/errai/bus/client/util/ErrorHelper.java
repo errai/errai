@@ -138,9 +138,6 @@ public class ErrorHelper {
             .noErrorHandling().sendNowWith(bus);
   }
 
-  public static void handleMessageDeliveryFailure(MessageBus bus, String queueId, String errorMessage, Throwable e, boolean disconnect) {
-
-  }
 
   /**
    * Handles the failed delivery of a message, and sends the error to the appropriate place
@@ -161,7 +158,7 @@ public class ErrorHelper {
 
       sendClientError(bus, message, errorMessage, e);
 
-      if (e != null) throw new MessageDeliveryFailure(e);
+ //     if (e != null) throw new MessageDeliveryFailure(e);
     }
     finally {
       if (disconnect) disconnectRemoteBus(bus, message);

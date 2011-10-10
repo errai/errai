@@ -44,7 +44,6 @@ import static org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil.getVarN
  */
 public class MarshallerGeneratorFactory {
   private static final String MARSHALLERS_VAR = "marshallers";
-  private static final String ARRAY_MARSHALLERS_VAR = "arrayMarshallers";
 
   private MappingContext mappingContext;
 
@@ -76,21 +75,22 @@ public class MarshallerGeneratorFactory {
       }
 
       private String createDemarshallerIfNeeded(MetaClass type) {
-        String varName = getVarName(type);
-
-        if (!arrayMarshallers.contains(varName)) {
-          classStructureBuilder.privateField(varName,
-                  parameterizedAs(Marshaller.class, typeParametersOf(List.class, type))).finish();
-          Statement marshaller = generateArrayMarshaller(type);
-          constructor.append(loadVariable(varName).assignValue(marshaller));
-
-          constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
-                  .invoke("put", type.getFullyQualifiedName(), loadVariable(varName)));
-
-          arrayMarshallers.add(varName);
-        }
-
-        return varName;
+        return addArrayMarshaller(type);
+//        String varName = getVarName(type);
+//
+//        if (!arrayMarshallers.contains(varName)) {
+//          classStructureBuilder.privateField(varName,
+//                  parameterizedAs(Marshaller.class, typeParametersOf(List.class, type))).finish();
+//          Statement marshaller = generateArrayMarshaller(type);
+//          constructor.append(loadVariable(varName).assignValue(marshaller));
+//
+//          constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
+//                  .invoke("put", type.getFullyQualifiedName(), loadVariable(varName)));
+//
+//          arrayMarshallers.add(varName);
+//        }
+//
+//        return varName;
       }
     });
 
@@ -102,7 +102,6 @@ public class MarshallerGeneratorFactory {
     );
 
     autoInitializedField(classStructureBuilder, javaUtilMap, MARSHALLERS_VAR, HashMap.class);
-    autoInitializedField(classStructureBuilder, javaUtilMap, ARRAY_MARSHALLERS_VAR, HashMap.class);
 
     constructor = classStructureBuilder.publicConstructor();
 
@@ -131,10 +130,8 @@ public class MarshallerGeneratorFactory {
             .append(loadVariable(MARSHALLERS_VAR).invoke("get", loadVariable("a1")).returnValue())
             .finish();
 
-    classStructureBuilder.publicMethod(Marshaller.class, "getArrayMarshaller").parameters(String.class, String.class)
-            .body()
-            .append(loadVariable(ARRAY_MARSHALLERS_VAR).invoke("get", loadVariable("a1")).returnValue())
-            .finish();
+    // special support for Object[]
+    addArrayMarshaller(MetaClassFactory.get(Object[].class));
 
     String generatedClass = classStructureBuilder.toJavaString();
     System.out.println(generatedClass);
@@ -151,7 +148,7 @@ public class MarshallerGeneratorFactory {
     exposed.add(RuntimeException.class);
     exposed.add(Exception.class);
     exposed.add(StackTraceElement.class);
-    
+
     for (Class<?> clazz : exposed) {
       mappingContext.registerGeneratedMarshaller(clazz.getName());
     }
@@ -186,6 +183,24 @@ public class MarshallerGeneratorFactory {
       throw new RuntimeException("no available marshaller for class: " + cls.getName());
     }
     return strategy.getMapper().getMarshaller();
+  }
+
+  private String addArrayMarshaller(MetaClass type) {
+    String varName = getVarName(type);
+
+    if (!arrayMarshallers.contains(varName)) {
+      classStructureBuilder.privateField(varName,
+              parameterizedAs(Marshaller.class, typeParametersOf(List.class, type))).finish();
+      Statement marshaller = generateArrayMarshaller(type);
+      constructor.append(loadVariable(varName).assignValue(marshaller));
+
+      constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
+              .invoke("put", type.getFullyQualifiedName(), loadVariable(varName)));
+
+      arrayMarshallers.add(varName);
+    }
+
+    return varName;
   }
 
   private Statement generateArrayMarshaller(MetaClass arrayType) {

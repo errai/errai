@@ -47,7 +47,7 @@ public class MarshallUtil {
   }
   
   public static JSONValue nullSafe_JSONObject(JSONValue v, String key) {
-    if (v.isObject() == null) {
+    if (v == null || v.isObject() == null) {
       return null;
     }
     else {

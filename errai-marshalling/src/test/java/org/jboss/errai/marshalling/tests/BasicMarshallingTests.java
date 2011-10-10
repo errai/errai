@@ -16,6 +16,6 @@ public class BasicMarshallingTests {
 
   @Test
   public void test2() {
-    System.out.println(MetaClassFactory.get(SType.Place.class).getFullyQualifiedName());
+    System.out.println(Object[].class.getName());
   }
 }

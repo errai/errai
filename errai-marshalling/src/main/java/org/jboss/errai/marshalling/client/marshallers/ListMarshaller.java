@@ -30,6 +30,8 @@ public class ListMarshaller implements Marshaller<JSONValue, List> {
 
   @Override
   public List demarshall(JSONValue o, MarshallingSession ctx) {
+    if (o == null) return null;
+    
     JSONArray jsonArray = o.isArray();
     if (jsonArray == null) return null;
 

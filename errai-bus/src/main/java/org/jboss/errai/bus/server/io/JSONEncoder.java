@@ -129,20 +129,20 @@ public class JSONEncoder {
     // Preliminary fix for https://jira.jboss.org/browse/ERRAI-103
     // TODO: Review my Mike
     final Field[] fields = EncodingUtil.getAllEncodingFields(cls);
-    final Serializable[] s = EncodingCache.get(fields, new EncodingCache.ValueProvider<Serializable[]>() {
-      public Serializable[] get() {
-        Serializable[] s = new Serializable[fields.length];
-        int i = 0;
-        for (Field f : fields) {
-          if ((f.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
-                  || f.isSynthetic()) {
-            continue;
-          }
-          s[i++] = MVEL.compileExpression(f.getName());
-        }
-        return s;
-      }
-    });
+//    final Serializable[] s = EncodingCache.get(fields, new EncodingCache.ValueProvider<Serializable[]>() {
+//      public Serializable[] get() {
+//        Serializable[] s = new Serializable[fields.length];
+//        int i = 0;
+//        for (Field f : fields) {
+//          if ((f.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
+//                  || f.isSynthetic()) {
+//            continue;
+//          }
+//          s[i++] = MVEL.compileExpression(f.getName());
+//        }
+//        return s;
+//      }
+//    });
 
     int i = 0;
     boolean first = true;
@@ -158,9 +158,8 @@ public class JSONEncoder {
       }
 
       try {
-        Object v = MVEL.executeExpression(s[i++], o);
+        Object v = field.get(o);
         build.append(encodeString(field.getName(), ctx)).append(':').append(_encode(v, ctx));
-
       }
       catch (Throwable t) {
         System.out.println("failed at encoding: " + field.getName());
@@ -237,7 +236,7 @@ public class JSONEncoder {
 
   public static String encodeString(String string, EncodingContext ctx) {
     String quotes = write(ctx, '\"');
-    return quotes + string.replaceAll("\\\\", "\\\\\\\\").replaceAll("[\\\\]{0}\\\"", "\\\\\"")  + quotes;
+    return quotes + string.replaceAll("\\\\", "\\\\\\\\").replaceAll("[\\\\]{0}\\\"", "\\\\\"") + quotes;
   }
 
   private static String encodeCollection(Collection col, EncodingContext ctx) {

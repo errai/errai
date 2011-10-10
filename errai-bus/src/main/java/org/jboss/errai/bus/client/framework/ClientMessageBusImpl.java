@@ -819,12 +819,14 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
             subscribe("ClientBusErrors", new MessageCallback() {
               public void callback(Message message) {
+                System.out.println("Received Message To ClientBusErrors");
                 String errorTo = message.get(String.class, MessageParts.ErrorTo);
                 if (errorTo == null) {
                   logError(message.get(String.class, "ErrorMessage"),
                           message.get(String.class, "AdditionalDetails"), null);
                 }
                 else {
+                  System.out.println("routing ErrorTo");
                   message.toSubject(errorTo);
                   message.sendNowWith(ClientMessageBusImpl.this);
                 }
@@ -1213,12 +1215,14 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * @throws Exception -
    */
   private void procIncomingPayload(Response response) throws Exception {
+    System.out.println("INCOMING:" + response.getText());
     try {
       for (MarshalledMessage m : decodePayload(response.getText())) {
         _store(m.getSubject(), m.getMessage());
       }
     }
     catch (RuntimeException e) {
+      e.printStackTrace();
       logError("Error delivering message into bus", response.getText(), e);
     }
   }
