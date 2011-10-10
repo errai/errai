@@ -151,6 +151,8 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
         BlockBuilder<CatchBlockBuilder> tryBuilder = Stmt.try_();
 
+        tryBuilder.append(Stmt.declareVariable(JSONObject.class).named("obj").finish());
+        
         /**
          * Check to see if value is null. If so, return null.
          */
@@ -159,6 +161,9 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                         Bool.isNotNull(Stmt.loadVariable("a0").invoke("isNull"))))
                         .append(Stmt.load(null).returnValue())
                         .finish()
+                .else_()
+                .append(Stmt.loadVariable("obj").assignValue(Stmt.loadVariable("a0").invoke("isObject")))
+                .finish()
         );
 
         tryBuilder.append(Stmt.declareVariable(toMap).named("entity").initializeWith(Stmt.nestedCall(Stmt.newObject(toMap))));
@@ -412,7 +417,8 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
   public Statement extractJSONObjectProperty(String fieldName, MetaClass fromType) {
     if (fromType.getFullyQualifiedName().equals(JSONValue.class.getName())) {
-      return Stmt.invokeStatic(MarshallUtil.class, "nullSafe_JSONObject", Stmt.loadVariable("a0"), fieldName);
+      return Stmt.loadVariable("obj").invoke("get", fieldName);
+     // return Stmt.invokeStatic(MarshallUtil.class, "nullSafe_JSONObject", Stmt.loadVariable("a0"), fieldName);
     }
     else {
       return Stmt.nestedCall(Cast.to(fromType, Stmt.loadVariable("a0"))).invoke("get", fieldName);
