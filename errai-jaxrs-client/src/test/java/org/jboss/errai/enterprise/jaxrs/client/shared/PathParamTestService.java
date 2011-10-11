@@ -2,6 +2,7 @@ package org.jboss.errai.enterprise.jaxrs.client.shared;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.HEAD;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -33,4 +34,8 @@ public interface PathParamTestService {
   @DELETE
   @Path("/{id}")
   public long deleteWithPathParam(@PathParam("id") long id);
+  
+  @HEAD
+  @Path("/{id}")
+  public void headWithPathParam(@PathParam("id") long id);
 }

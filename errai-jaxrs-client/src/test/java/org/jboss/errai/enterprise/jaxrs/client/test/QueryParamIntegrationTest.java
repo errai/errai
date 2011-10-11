@@ -5,6 +5,8 @@ import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
 import org.jboss.errai.enterprise.jaxrs.client.shared.QueryParamTestService;
 import org.junit.Test;
 
+import com.google.gwt.http.client.Response;
+
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -43,5 +45,11 @@ public class QueryParamIntegrationTest extends AbstractErraiJaxrsTest {
   public void testDeleteWithQueryParam() {
     RestClient.create(QueryParamTestService.class, 
         new AssertionCallback<Long>("@DELETE with @QueryParam failed", 1l)).deleteWithQueryParam(1l);
+  }
+  
+  @Test
+  public void testHeadWithQueryParam() {
+    RestClient.create(QueryParamTestService.class, 
+        new AssertionResponseCallback("@HEAD with @QueryParam failed", Response.SC_NO_CONTENT)).headWithQueryParam(1l);
   }
 }

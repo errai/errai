@@ -31,4 +31,9 @@ public class HeaderParamTestServiceImpl implements HeaderParamTestService {
   public String deleteWithHeaderParam(String id) {
     return id;
   }
+
+  @Override
+  public void headWithHeaderParam(String header) {
+    
+  }
 }

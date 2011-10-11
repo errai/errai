@@ -36,4 +36,8 @@ public class PathParamTestServiceImpl implements PathParamTestService {
   public long deleteWithPathParam(long id) {
     return id;
   }
+  
+  @Override
+  public void headWithPathParam(long id) {
+  }
 }

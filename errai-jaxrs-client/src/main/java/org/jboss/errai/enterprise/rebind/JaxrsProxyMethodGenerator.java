@@ -28,8 +28,10 @@ import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
+import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.framework.util.Bool;
 import org.jboss.errai.codegen.framework.util.Stmt;
+import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseException;
 import org.jboss.resteasy.specimpl.UriBuilderImpl;
 
@@ -49,23 +51,44 @@ public class JaxrsProxyMethodGenerator {
   private static final String APPEND = "append";
 
   private JaxrsResourceMethod resourceMethod;
-
-  private Statement errorHandling;
+  private BuildMetaClass clazz;
+  
   private Statement responseHandling;
-
+  private Statement errorHandlingWithResponse;
+  private Statement errorHandling;
+  private Statement dummyResponse;
+  
   public JaxrsProxyMethodGenerator(JaxrsResourceMethod resourceMethod) {
     this.resourceMethod = resourceMethod;
   }
 
   public void generate(ClassStructureBuilder<?> classBuilder) {
+    this.clazz = classBuilder.getClassDefinition();
+    
     MetaMethod method = resourceMethod.getMethod();
     
-    this.errorHandling = Stmt.loadStatic(classBuilder.getClassDefinition(), "this")
-        .invoke("handleError", Variable.get("throwable"));
-    this.responseHandling = Stmt.loadStatic(classBuilder.getClassDefinition(), "this")
-      .loadField("remoteCallback").invoke("callback", 
-        demarshal(method.getReturnType(), Stmt.loadVariable("response").invoke("getText")));
+    // TODO remove as soon as codegen bug is fixed (passing null as a method param is currently not working)
+    dummyResponse = Stmt.declareVariable("response", Response.class, null);
+    errorHandling = Stmt.loadStatic(clazz, "this").invoke("handleError", Variable.get("throwable"), Variable.get("response"));
+    
+    errorHandlingWithResponse = Stmt.loadStatic(clazz, "this").invoke("handleError", 
+        Variable.get("throwable"), Variable.get("response"));
+   
+    Statement handleResponse = Stmt.loadStatic(clazz, "this").loadField("remoteCallback")
+      .invoke("callback", Stmt.loadVariable("response"));
 
+    Statement handleResult = Stmt.loadStatic(clazz, "this").loadField("remoteCallback")
+      .invoke("callback", demarshal(method.getReturnType(), Stmt.loadVariable("response").invoke("getText")));
+
+    this.responseHandling = Stmt.if_(Bool.instanceOf(
+        Stmt.loadStatic(clazz, "this").loadField("remoteCallback"), 
+          MetaClassFactory.getAsStatement(ResponseCallback.class)))
+        .append(handleResponse)
+        .finish()
+        .else_()
+        .append(handleResult)
+        .finish();
+                
     BlockBuilder<?> methodBlock =
         classBuilder.publicMethod(method.getReturnType(), method.getName(),
             DefParameters.from(method).getParameters().toArray(new Parameter[0]));
@@ -77,21 +100,7 @@ public class JaxrsProxyMethodGenerator {
       generateRequest(methodBlock);
     }
 
-    Statement returnStatement;
-    if (!method.getReturnType().equals(MetaClassFactory.get(void.class))) {
-      if (MetaClassFactory.get(Number.class).isAssignableFrom(method.getReturnType().asBoxed())) {
-        returnStatement = Stmt.load(0).returnValue();
-      } 
-      else if (MetaClassFactory.get(Boolean.class).isAssignableFrom(method.getReturnType().asBoxed())) {
-        returnStatement = Stmt.load(true).returnValue(); 
-      }
-      else {
-        returnStatement = Stmt.load(null).returnValue();
-      }
-      methodBlock.append(returnStatement);
-    }  
-
-    methodBlock.finish();
+    generateReturnStatement(methodBlock, method);
   }
 
   private void generateUrl(BlockBuilder<?> methodBlock) {
@@ -185,6 +194,7 @@ public class JaxrsProxyMethodGenerator {
         .append(sendRequest)
         .finish()
         .catch_(RequestException.class, "throwable")
+        .append(dummyResponse)
         .append(errorHandling)
         .finish());
   }
@@ -195,6 +205,7 @@ public class JaxrsProxyMethodGenerator {
         .extend()
         .publicOverridesMethod("onError", Parameter.of(Request.class, "request"),
             Parameter.of(Throwable.class, "throwable"))
+        .append(dummyResponse)
         .append(errorHandling)
         .finish()
         .publicOverridesMethod("onResponseReceived", Parameter.of(Request.class, "request"),
@@ -208,11 +219,28 @@ public class JaxrsProxyMethodGenerator {
             .append(Stmt.declareVariable("throwable", ResponseException.class,
                  Stmt.newObject(ResponseException.class).withParameters(
                      Stmt.loadVariable("response").invoke("getStatusText"), Variable.get("response"))))
-            .append(errorHandling)
+            .append(errorHandlingWithResponse)
             .finish())
         .finish()
         .finish();
 
     return requestCallback;
+  }
+  
+  private void generateReturnStatement(BlockBuilder<?> methodBlock, MetaMethod method) {
+    Statement returnStatement;
+    if (!method.getReturnType().equals(MetaClassFactory.get(void.class))) {
+      if (MetaClassFactory.get(Number.class).isAssignableFrom(method.getReturnType().asBoxed())) {
+        returnStatement = Stmt.load(0).returnValue();
+      } 
+      else if (MetaClassFactory.get(Boolean.class).isAssignableFrom(method.getReturnType().asBoxed())) {
+        returnStatement = Stmt.load(true).returnValue(); 
+      }
+      else {
+        returnStatement = Stmt.load(null).returnValue();
+      }
+      methodBlock.append(returnStatement);
+    }
+    methodBlock.finish();
   }
 }

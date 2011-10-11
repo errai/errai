@@ -23,6 +23,7 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import org.jboss.errai.bus.client.api.RemoteCallback;
+import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.samples.restdemo.client.shared.Customer;
@@ -30,7 +31,9 @@ import org.jboss.errai.samples.restdemo.client.shared.CustomerService;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.http.client.Response;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HTML;
@@ -69,10 +72,14 @@ public class App {
     }
   };
 
-  final RemoteCallback<Void> deletionCallback = new RemoteCallback<Void>() {
-    public void callback(Void response) {
-      customersTable.removeAllRows();
-      populateCustomersTable();
+  final ResponseCallback deletionCallback = new ResponseCallback() {
+    public void callback(Response response) {
+      if (response.getStatusCode() == Response.SC_NO_CONTENT) {
+        customersTable.removeAllRows();
+        populateCustomersTable();
+      } else {
+        Window.alert("Could not delete customer");
+      }
     }
   };
 

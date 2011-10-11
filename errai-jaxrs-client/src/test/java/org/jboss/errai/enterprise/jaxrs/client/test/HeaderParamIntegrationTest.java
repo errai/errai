@@ -5,6 +5,8 @@ import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
 import org.jboss.errai.enterprise.jaxrs.client.shared.HeaderParamTestService;
 import org.junit.Test;
 
+import com.google.gwt.http.client.Response;
+
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -43,5 +45,11 @@ public class HeaderParamIntegrationTest extends AbstractErraiJaxrsTest {
   public void testDeleteWithHeaderParam() {
     RestClient.create(HeaderParamTestService.class, 
         new AssertionCallback<String>("@DELETE with @HeaderParam failed", "1")).deleteWithHeaderParam("1");
+  }
+  
+  @Test
+  public void testHeadWithHeaderParam() {
+    RestClient.create(HeaderParamTestService.class, 
+        new AssertionResponseCallback("@HEAD with @HeaderParam failed", Response.SC_NO_CONTENT)).headWithHeaderParam("1");
   }
 }

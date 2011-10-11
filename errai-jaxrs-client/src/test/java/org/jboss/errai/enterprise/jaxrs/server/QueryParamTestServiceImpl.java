@@ -31,4 +31,8 @@ public class QueryParamTestServiceImpl implements QueryParamTestService {
   public long deleteWithQueryParam(long id) {
     return id;
   }
+
+  @Override
+  public void headWithQueryParam(long id) {
+  }
 }

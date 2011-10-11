@@ -5,6 +5,8 @@ import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
 import org.jboss.errai.enterprise.jaxrs.client.shared.PathParamTestService;
 import org.junit.Test;
 
+import com.google.gwt.http.client.Response;
+
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -49,5 +51,11 @@ public class PathParamIntegrationTest extends AbstractErraiJaxrsTest {
   public void testDeleteWithPathParam() {
     RestClient.create(PathParamTestService.class, 
         new AssertionCallback<Long>("@DELETE with @PathParam failed", 1l)).deleteWithPathParam(1l);
+  }
+  
+  @Test
+  public void testHeadWithPathParam() {
+    RestClient.create(PathParamTestService.class, 
+        new AssertionResponseCallback("@HEAD with @PathParam failed", Response.SC_NO_CONTENT)).headWithPathParam(1l);
   }
 }

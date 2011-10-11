@@ -29,7 +29,6 @@ import org.jboss.errai.codegen.framework.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.enterprise.client.jaxrs.JaxrsExtensionsLoader;
-import org.jboss.errai.marshalling.rebind.MarshallerGeneratorFactory;
 
 import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
@@ -99,12 +98,6 @@ public class JaxrsExtensionsGenerator extends Generator {
     }
     classBuilder = (ClassStructureBuilder<?>) createProxies.finish();
 
-    // create the marshallers
-    //MethodBlockBuilder<?> createMarshallers = classBuilder.publicMethod(void.class, "createMarshallers");
-    //createMarshallers.append(new MarshallerGeneratorFactory().generate());
-    //new MarshallerGeneratorFactory().generate();
-    //classBuilder = (ClassStructureBuilder<?>) createMarshallers.finish();
-    
     printWriter.append(classBuilder.toJavaString());
     context.commit(logger, printWriter);
   }
