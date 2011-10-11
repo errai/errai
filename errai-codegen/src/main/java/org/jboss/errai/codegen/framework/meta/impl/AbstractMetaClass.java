@@ -472,7 +472,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     String dimString = "";
     MetaClass type = this;
     if (isArray()) {
-      type = getComponentType();
+      type = type.getComponentType();
       int dim = 1;
       while (type.isArray()) {
         dim++;
@@ -486,7 +486,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       name = type.getFullyQualifiedName();
     }
 
-    if (isPrimitive() || (isArray() && getComponentType().isPrimitive())) {
+    if (type.isPrimitive()) {
       name = getInternalPrimitiveNameFrom(name.trim());
     }
     else {
