@@ -1,7 +1,9 @@
 package org.jboss.errai.enterprise.client.cdi.events;
 
+import org.jboss.errai.common.client.api.annotations.Portable;
+
 /**
  * @author Mike Brock .
  */
-@ExposeEntity
+@Portable
 public class BusReadyEvent {}

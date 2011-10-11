@@ -1,6 +1,8 @@
 package org.jboss.errai.cdi.event.client;
 
-@ExposeEntity
+import org.jboss.errai.common.client.api.annotations.Portable;
+
+@Portable
 public class StartEvent {
 
 }

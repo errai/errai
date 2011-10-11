@@ -60,6 +60,8 @@ import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.io.ConversationalEndpointCallback;
 import org.jboss.errai.bus.server.io.RemoteServiceCallback;
 import org.jboss.errai.bus.server.service.ErraiService;
+import org.jboss.errai.common.client.api.annotations.ExposeEntity;
+import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.enterprise.client.cdi.api.Conversational;
 import org.jboss.errai.cdi.server.events.ShutdownEventObserver;
@@ -209,7 +211,7 @@ public class CDIExtensionPoints implements Extension {
   }
 
   private boolean isExposedEntityType(Class type) {
-    if (type.isAnnotationPresent(ExposeEntity.class)) {
+    if (type.isAnnotationPresent(Portable.class) || type.isAnnotationPresent(ExposeEntity.class)) {
       return true;
     }
     else {
