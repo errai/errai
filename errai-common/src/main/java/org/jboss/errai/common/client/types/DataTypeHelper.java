@@ -94,9 +94,8 @@ public class DataTypeHelper {
 
           boolean ref = false;
           if (objId != null) {
-            if (objId.charAt(0) == '$') {
+            if (eMap.size() == 2) {
               ref = true;
-              objId = objId.substring(1);
             }
 
             if (ctx.hasObject(objId)) {
@@ -110,12 +109,6 @@ public class DataTypeHelper {
           if (marshallerProvider.hasMarshaller(className)) {
             return marshallerProvider.demarshall(className, eMap);
           }
-//
-//          if (TypeDemarshallers.hasDemarshaller(className)) {
-//            o = TypeDemarshallers.getDemarshaller(className).demarshall(eMap, ctx);
-//            if (objId != null) ctx.putObject(objId, o);
-//            return o;
-//          }
           else {
             throw new RuntimeException("no available demarshaller: " + className);
           }

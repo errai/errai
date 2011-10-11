@@ -85,12 +85,11 @@ public class TypeDemarshallHelper {
       else if (o instanceof Map) {
         Map<?, ?> oMap = (Map) o;
         if (oMap.containsKey(SerializationParts.ENCODED_TYPE)) {
-          String objId = String.valueOf(oMap.get(SerializationParts.OBJECT_ID));
+          String objId = (String) oMap.get(SerializationParts.OBJECT_ID);
           boolean ref = false;
           if (objId != null) {
-            if (objId.charAt(0) == '$') {
+            if (oMap.size() == 2) {
               ref = true;
-              objId = objId.substring(1);
             }
 
             if (ctx.hasObject(objId)) {
@@ -103,7 +102,7 @@ public class TypeDemarshallHelper {
 
           Class clazz = Thread.currentThread().getContextClassLoader().loadClass((String) oMap.get(SerializationParts.ENCODED_TYPE));
           if (clazz.isEnum()) {
-            return Enum.valueOf(clazz, (String) oMap.get("EnumStringValue"));
+            return Enum.valueOf(clazz, (String) oMap.get(SerializationParts.ENUM_STRING_VALUE));
           }
           else if (java.util.Date.class.isAssignableFrom(clazz)) {
             return new java.util.Date(getNumeric(oMap.get("Value")));

@@ -35,7 +35,7 @@ public class DateMarshaller implements Marshaller<JSONValue, Date> {
     if (o == null) { return "null"; }
 
     return "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + java.sql.Date.class.getName() + "\"," +
-            "\"" + SerializationParts.OBJECT_ID + "\":" + o.hashCode() + "," +
+            "\"" + SerializationParts.OBJECT_ID + "\":\"" + o.hashCode() + "\"," +
             "\"" + SerializationParts.VALUE + "\":\"" + o.getTime() + "\"}";
   }
 

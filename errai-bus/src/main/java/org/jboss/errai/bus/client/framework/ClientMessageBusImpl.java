@@ -389,6 +389,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     if (remotes.containsKey(subject)) {
       remotes.get(subject).callback(message);
     }
+    else if (shadowSubscriptions.containsKey(subject)) {
+      deliverToShadowSubscriptions(subject, message);
+    }
     else {
       _store(subject, v);
     }
@@ -444,6 +447,14 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         _subscribe(entry.getKey(), callback, false);
       }
     }
+  }
+
+  private void deliverToShadowSubscriptions(String subject, Message message) {
+//    if (shadowSubscriptions.containsKey(subject)) {
+    for (MessageCallback cb : shadowSubscriptions.get(subject)) {
+      cb.callback(message);
+    }
+//    }
   }
 
   /**

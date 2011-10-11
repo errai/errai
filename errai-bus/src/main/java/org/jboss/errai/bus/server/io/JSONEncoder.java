@@ -210,7 +210,7 @@ public class JSONEncoder {
   }
 
   public static String objRef(EncodingContext ctx, Object o) {
-    return encodeString("$" + ctx.markRef(o), ctx);
+    return encodeString(ctx.markRef(o), ctx);
   }
 
   public static String keyValue(String key, String value) {

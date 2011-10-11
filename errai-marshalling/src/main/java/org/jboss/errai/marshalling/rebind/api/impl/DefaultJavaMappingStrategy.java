@@ -31,6 +31,7 @@ import java.util.*;
 import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.typeParametersOf;
 import static org.jboss.errai.codegen.framework.util.Implementations.newStringBuilder;
+import static org.jboss.errai.codegen.framework.util.Stmt.loadVariable;
 
 /**
  * The Errai default Java-to-JSON-to-Java marshaling strategy.
@@ -108,39 +109,44 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
          * Check to see if value is null. If so, return null.
          */
         methBuilder.append(
-                Stmt.if_(Bool.or(Bool.isNull(Stmt.loadVariable("a0")),
-                        Bool.isNotNull(Stmt.loadVariable("a0").invoke("isNull"))))
+                Stmt.if_(Bool.or(Bool.isNull(loadVariable("a0")),
+                        Bool.isNotNull(loadVariable("a0").invoke("isNull"))))
                         .append(Stmt.load(null).returnValue())
                         .finish()
                         .else_()
-                        .append(Stmt.loadVariable("obj").assignValue(Stmt.loadVariable("a0").invoke("isObject")))
+                        .append(loadVariable("obj").assignValue(loadVariable("a0").invoke("isObject")))
                         .finish()
         );
 
 
         // String objId = a0.get(SerializationParts.OBJECTID).isString().stringValue();
         methBuilder.append(Stmt.declareVariable(String.class).named("objId")
-                .initializeWith(Stmt.loadVariable("obj")
+                .initializeWith(loadVariable("obj")
                         .invoke("get", SerializationParts.OBJECT_ID)
                         .invoke("isString").invoke("stringValue")));
 
         methBuilder.append(
-                Stmt.if_(Bool.expr(Stmt.loadVariable("a1").invoke("hasObjectHash", Stmt.loadVariable("objId"))))
-                        .append(Stmt.loadVariable("a1").invoke("getObject", toMap, Stmt.loadVariable("objId")).returnValue()).finish());
-       
+                Stmt.if_(Bool.expr(loadVariable("a1").invoke("hasObjectHash", loadVariable("objId"))))
+                        .append(loadVariable("a1").invoke("getObject", toMap, loadVariable("objId")).returnValue()).finish());
+
         methBuilder.append(Stmt.declareVariable(toMap).named("entity")
                 .initializeWith(Stmt.newObject(toMap)
                         .withParameters(marshallers.toArray(new Object[marshallers.size()]))));
-        
-        methBuilder.append(Stmt.loadVariable("a1").invoke("recordObjectHash",
-                Stmt.loadVariable("objId"), Stmt.loadVariable("entity")));
-        
-        methBuilder.append(Stmt.loadVariable("entity").returnValue());
+
+        methBuilder.append(loadVariable("a1").invoke("recordObjectHash",
+                loadVariable("objId"), loadVariable("entity")));
+
+        methBuilder.append(loadVariable("entity").returnValue());
 
         methBuilder.finish();
 
         BlockBuilder<?> marshallMethodBlock = classStructureBuilder.publicOverridesMethod("marshall",
                 Parameter.of(Object.class, "a0"), Parameter.of(MarshallingSession.class, "a1"));
+
+        marshallMethodBlock.append(
+                Stmt.if_(Bool.isNull(loadVariable("a0")))
+                        .append(Stmt.load("null").returnValue()).finish()
+        );
 
         if (mapping.isDemarshallOnly()) {
           marshallMethodBlock.append(Stmt.load(null).returnValue());
@@ -153,9 +159,9 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
         classStructureBuilder.publicOverridesMethod("handles", Parameter.of(Object.class, "a0"))
                 .append(Stmt.nestedCall(Bool.and(
-                        Bool.notEquals(Stmt.loadVariable("a0").invoke("isObject"), null),
-                        Stmt.loadVariable("a0").invoke("isObject").invoke("get", SerializationParts.ENCODED_TYPE)
-                                .invoke("equals", Stmt.loadVariable("this").invoke("getTypeHandled").invoke("getName"))
+                        Bool.notEquals(loadVariable("a0").invoke("isObject"), null),
+                        loadVariable("a0").invoke("isObject").invoke("get", SerializationParts.ENCODED_TYPE)
+                                .invoke("equals", loadVariable("this").invoke("getTypeHandled").invoke("getName"))
                 )).returnValue()).finish();
 
         return classStructureBuilder.finish();
@@ -187,38 +193,40 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
         BlockBuilder<CatchBlockBuilder> tryBuilder = Stmt.try_();
 
-        tryBuilder.append(Stmt.declareVariable(JSONObject.class).named("obj").finish());
+
+        tryBuilder.append(Stmt.declareVariable(JSONObject.class).named("obj")
+                .initializeWith(loadVariable("a0").invoke("isObject")));
 
         /**
          * Check to see if value is null. If so, return null.
          */
-        tryBuilder.append(
-                Stmt.if_(Bool.or(Bool.isNull(Stmt.loadVariable("a0")),
-                        Bool.isNotNull(Stmt.loadVariable("a0").invoke("isNull"))))
-                        .append(Stmt.load(null).returnValue())
-                        .finish()
-                        .else_()
-                        .append(Stmt.loadVariable("obj").assignValue(Stmt.loadVariable("a0").invoke("isObject")))
-                        .finish()
-        );
+//        tryBuilder.append(
+//                Stmt.if_(Bool.or(Bool.isNull(Stmt.loadVariable("a0")),
+//                        Bool.isNotNull(Stmt.loadVariable("a0").invoke("isNull"))))
+//                        .append(Stmt.load(null).returnValue())
+//                        .finish()
+//                        .else_()
+//                        .append(Stmt.loadVariable("obj").assignValue(Stmt.loadVariable("a0").invoke("isObject")))
+//                        .finish()
+//        );
 
 
         // String objId = a0.get(SerializationParts.OBJECTID).isString().stringValue();
         tryBuilder.append(Stmt.declareVariable(String.class).named("objId")
-                .initializeWith(Stmt.loadVariable("obj")
+                .initializeWith(loadVariable("obj")
                         .invoke("get", SerializationParts.OBJECT_ID)
                         .invoke("isString").invoke("stringValue")));
 
 
         // if (a1.hasObjectHash(objId)) { return a1.get(T, objId); }
         tryBuilder.append(
-                Stmt.if_(Bool.expr(Stmt.loadVariable("a1").invoke("hasObjectHash", Stmt.loadVariable("objId"))))
-                        .append(Stmt.loadVariable("a1").invoke("getObject", toMap, Stmt.loadVariable("objId")).returnValue()).finish());
+                Stmt.if_(Bool.expr(loadVariable("a1").invoke("hasObjectHash", loadVariable("objId"))))
+                        .append(loadVariable("a1").invoke("getObject", toMap, loadVariable("objId")).returnValue()).finish());
 
         tryBuilder.append(Stmt.declareVariable(toMap).named("entity").initializeWith(Stmt.nestedCall(Stmt.newObject(toMap))));
 
-        tryBuilder.append(Stmt.loadVariable("a1").invoke("recordObjectHash",
-                Stmt.loadVariable("objId"), Stmt.loadVariable("entity")));
+        tryBuilder.append(loadVariable("a1").invoke("recordObjectHash",
+                loadVariable("objId"), loadVariable("entity")));
 
         /**
          * Start binding of fields here.
@@ -235,15 +243,18 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
           // handle long case -- GWT does not support long in JSNI
           if (field.isPublic()) {
-            tryBuilder.append(Stmt.loadVariable("entity").loadField(field.getName()).assignValue(val));
+            tryBuilder.append(loadVariable("entity").loadField(field.getName()).assignValue(val));
           }
           else {
+            Statement bindingStatement;
+
             MetaMethod setterMeth = GenUtil.findCaseInsensitiveMatch(null,
                     field.getDeclaringClass(), "set" + field.getName(),
                     field.getType());
 
             if (setterMeth != null) {
-              tryBuilder.append(Stmt.loadVariable("entity").invoke(setterMeth, val));
+              // Bind via setter
+              bindingStatement = loadVariable("entity").invoke(setterMeth, val);
             }
             else if (field.getType().getCanonicalName().equals("long")) {
               throw new RuntimeException("cannot support private field marshalling of long type" +
@@ -256,19 +267,29 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                 context.markExposed(field);
               }
 
-              tryBuilder.append(Stmt.invokeStatic(context.getGeneratedBootstrapClass(), GenUtil.getPrivateFieldInjectorName(field),
-                      Stmt.loadVariable("entity"), val));
+              // Bind via JSNI
+              bindingStatement = Stmt.invokeStatic(context.getGeneratedBootstrapClass(), GenUtil.getPrivateFieldInjectorName(field),
+                      loadVariable("entity"), val);
+
             }
+
+            tryBuilder.append(
+                    Stmt.if_(Bool.and(
+                            Bool.expr(loadVariable("obj").invoke("containsKey", field.getName())),
+                            Bool.isNull(loadVariable("obj").invoke("get", field.getName()).invoke("isNull"))
+                            
+                    ))
+                            .append(bindingStatement).finish());
           }
         }
 
-        tryBuilder.append(Stmt.loadVariable("entity").returnValue());
+        tryBuilder.append(loadVariable("entity").returnValue());
 
         tryBuilder.finish()
                 .catch_(Throwable.class, "t")
-                .append(Stmt.loadVariable("t").invoke("printStackTrace"))
+                .append(loadVariable("t").invoke("printStackTrace"))
                 .append(Stmt.throw_(RuntimeException.class, "error demarshalling entity: " + toMap.getFullyQualifiedName(),
-                        Stmt.loadVariable("t")))
+                        loadVariable("t")))
                 .finish();
 
         builder.append(tryBuilder.finish()).finish();
@@ -282,9 +303,9 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
         classStructureBuilder.publicOverridesMethod("handles", Parameter.of(Object.class, "a0"))
                 .append(Stmt.nestedCall(Bool.and(
-                        Bool.notEquals(Stmt.loadVariable("a0").invoke("isObject"), null),
-                        Stmt.loadVariable("a0").invoke("isObject").invoke("get", SerializationParts.ENCODED_TYPE)
-                                .invoke("equals", Stmt.loadVariable("this").invoke("getTypeHandled").invoke("getName"))
+                        Bool.notEquals(loadVariable("a0").invoke("isObject"), null),
+                        loadVariable("a0").invoke("isObject").invoke("get", SerializationParts.ENCODED_TYPE)
+                                .invoke("equals", loadVariable("this").invoke("getTypeHandled").invoke("getName"))
                 )).returnValue()).finish();
 
         return classStructureBuilder.finish();
@@ -388,6 +409,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
   private static class BeanMapping {
     List<MetaField> mappings;
+    private boolean usePrivateInjectionOnly = false;
 
     private BeanMapping(List<MetaField> mappings) {
       this.mappings = mappings;
@@ -395,6 +417,14 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
     public List<MetaField> getMappings() {
       return mappings;
+    }
+
+    public boolean isUsePrivateInjectionOnly() {
+      return usePrivateInjectionOnly;
+    }
+
+    public void setUsePrivateInjectionOnly(boolean usePrivateInjectionOnly) {
+      this.usePrivateInjectionOnly = usePrivateInjectionOnly;
     }
   }
 
@@ -470,39 +500,43 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
   public Statement extractJSONObjectProperty(String fieldName, MetaClass fromType) {
     if (fromType.getFullyQualifiedName().equals(JSONValue.class.getName())) {
-      return Stmt.loadVariable("obj").invoke("get", fieldName);
+      return loadVariable("obj").invoke("get", fieldName);
       // return Stmt.invokeStatic(MarshallUtil.class, "nullSafe_JSONObject", Stmt.loadVariable("a0"), fieldName);
     }
     else {
-      return Stmt.nestedCall(Cast.to(fromType, Stmt.loadVariable("a0"))).invoke("get", fieldName);
+      return Stmt.nestedCall(Cast.to(fromType, loadVariable("a0"))).invoke("get", fieldName);
     }
   }
-
 
   public void marshallToJSON(BlockBuilder<?> builder, MetaClass toType) {
     if (!context.hasProvidedOrGeneratedMarshaller(toType)) {
       throw new NoAvailableMarshallerException(toType.getName());
     }
 
+    builder.append(
+            Stmt.if_(Bool.isNull(loadVariable("a0")))
+                    .append(Stmt.load("null").returnValue()).finish()
+    );
+
     builder.append(Stmt.declareVariable(String.class).named("objId")
-            .initializeWith(Stmt.invokeStatic(String.class, "valueOf", Stmt.loadVariable("a0").invoke("hashCode"))));
+            .initializeWith(Stmt.invokeStatic(String.class, "valueOf", loadVariable("a0").invoke("hashCode"))));
 
     Implementations.StringBuilderBuilder sb = newStringBuilder().append("{")
             .append(keyValue(SerializationParts.ENCODED_TYPE, string(toType.getFullyQualifiedName()))).append(",")
-            .append(string(SerializationParts.OBJECT_ID) + ":\"").append(Stmt.loadVariable("objId")).append("\"");
+            .append(string(SerializationParts.OBJECT_ID) + ":\"").append(loadVariable("objId")).append("\"");
 
     builder.append(
-            Stmt.if_(Bool.expr(Stmt.loadVariable("a1").invoke("hasObjectHash", Stmt.loadVariable("objId"))))
+            Stmt.if_(Bool.expr(loadVariable("a1").invoke("hasObjectHash", loadVariable("objId"))))
                     .append(Stmt.nestedCall(newStringBuilder().append("{")
                             .append(keyValue(SerializationParts.ENCODED_TYPE, string(toType.getFullyQualifiedName()))).append(",")
                             .append(string(SerializationParts.OBJECT_ID) + ":\"")
-                            .append("$")
-                            .append(Stmt.loadVariable("objId"))
+//                            .append("$")
+                            .append(loadVariable("objId"))
                             .append("\"}")).invoke("toString").returnValue())
                     .finish());
 
-    builder.append(Stmt.loadVariable("a1").invoke("recordObjectHash", Stmt.loadVariable("objId"),
-            Stmt.loadVariable("objId")));
+    builder.append(loadVariable("a1").invoke("recordObjectHash", loadVariable("objId"),
+            loadVariable("objId")));
 
     boolean hasEncoded = false;
 
@@ -545,8 +579,8 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
         }
         else {
-          sb.append(Stmt.loadVariable(MarshallingGenUtil.getVarName(targetType))
-                  .invoke("marshall", valueStatement, Stmt.loadVariable("a1")));
+          sb.append(loadVariable(MarshallingGenUtil.getVarName(targetType))
+                  .invoke("marshall", valueStatement, loadVariable("a1")));
         }
 
         i++;
@@ -574,7 +608,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
               field.getDeclaringClass(), "get" + field.getName());
 
       if (getterMethod != null) {
-        return Stmt.loadVariable("a0").invoke(getterMethod);
+        return loadVariable("a0").invoke(getterMethod);
       }
       else {
         if (!context.isExposed(field)) {
@@ -583,24 +617,24 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
         }
 
         return Stmt.invokeStatic(context.getGeneratedBootstrapClass(), GenUtil.getPrivateFieldInjectorName(field),
-                Stmt.loadVariable("a0"));
+                loadVariable("a0"));
       }
     }
     else {
-      return Stmt.loadVariable("a0").loadField(field.getName());
+      return loadVariable("a0").loadField(field.getName());
     }
   }
 
   public Statement unwrapJSON(Statement valueStatement, MetaClass toType) {
     if (toType.isEnum()) {
-      return Stmt.invokeStatic(Enum.class, "valueOf", toType,
-              Stmt.nestedCall(valueStatement).invoke("isObject")
-                      .invoke("get", SerializationParts.ENUM_STRING_VALUE).invoke("isString").invoke("stringValue"));
+      return Stmt.invokeStatic(MarshallUtil.class, "demarshalEnum", toType,
+              Stmt.nestedCall(valueStatement).invoke("isObject"),
+              SerializationParts.ENUM_STRING_VALUE);
     }
     else {
       return Stmt.create(context.getCodegenContext())
               .loadVariable(MarshallingGenUtil.getVarName(toType))
-              .invoke("demarshall", valueStatement, Stmt.loadVariable("a1"));
+              .invoke("demarshall", valueStatement, loadVariable("a1"));
     }
   }
 

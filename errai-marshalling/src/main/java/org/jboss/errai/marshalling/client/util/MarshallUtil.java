@@ -55,6 +55,13 @@ public class MarshallUtil {
     }
   }
   
+  public static <T extends Enum<T>> T demarshalEnum(Class<T> enumType, JSONObject obj, String name) {
+    if (obj == null || !obj.containsKey(name) || obj.get(name).isNull() != null) {
+      return null;
+    }
+    return Enum.valueOf(enumType, obj.get(name).isString().stringValue());
+  }
+  
   public static boolean handles(JSONObject object, Class<?> cls) {
     JSONValue v = object.get(SerializationParts.ENCODED_TYPE);
     return !(v == null || v.isString() == null) && cls.getName().equals(v.isString().stringValue());

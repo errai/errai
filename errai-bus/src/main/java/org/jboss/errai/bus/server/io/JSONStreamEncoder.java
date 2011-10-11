@@ -117,14 +117,12 @@ public class JSONStreamEncoder {
       /**
        * If this object is referencing a duplicate object in the graph, we only provide an ID reference.
        */
-      write(outstream, ctx, "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + cls.getCanonicalName() + "\",\"" + SerializationParts.OBJECT_ID + "\":\"$" + ctx.markRef(o) + "\"}");
+      write(outstream, ctx, "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + cls.getCanonicalName() + "\",\"" + SerializationParts.OBJECT_ID + "\":\"" + ctx.markRef(o) + "\"}");
 
       return;
     }
 
-
     ctx.markEncoded(o);
-
 
     outstream.write('{');
     outstream.write('\"');
@@ -146,20 +144,6 @@ public class JSONStreamEncoder {
 
     final Field[] fields = EncodingUtil.getAllEncodingFields(cls);
 
-//    final Serializable[] s = EncodingCache.get(fields, new EncodingCache.ValueProvider<Serializable[]>() {
-//      public Serializable[] get() {
-//        Serializable[] s = new Serializable[fields.length];
-//        int i = 0;
-//        for (Field f : fields) {
-//          if ((f.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
-//                  || f.isSynthetic()) {
-//            continue;
-//          }
-//          s[i++] = MVEL.compileExpression(f.getName());
-//        }
-//        return s;
-//      }
-//    });
 
     int i = 0;
     boolean first = true;

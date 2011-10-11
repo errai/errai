@@ -19,6 +19,4 @@ public interface MarshallingSession {
   public <T> T getObject(Class<T> type, String hashCode);
   
   public void recordObjectHash(String hashCode, Object instance);
-
-  //todo: list of available context.
 }
