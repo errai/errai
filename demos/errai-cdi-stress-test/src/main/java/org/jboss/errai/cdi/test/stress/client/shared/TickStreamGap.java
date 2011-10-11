@@ -53,11 +53,11 @@ public class TickStreamGap {
   
   @Override
   public String toString() {
-    int lostTickCount = firstTickAfterGap.getId() - lastTickBeforeGap.getId();
+    int lostTickCount = firstTickAfterGap.getId() - lastTickBeforeGap.getId() - 1;
     long gapStartTime = lastTickBeforeGap.getServerTime();
     long gapEndTime = firstTickAfterGap.getServerTime();
     return lostTickCount + " ticks missing from " +
-        new Date(gapStartTime) + " to " + new Date(gapEndTime) +
-        "(" + (gapEndTime - gapStartTime) + "ms)";
+        lastTickBeforeGap.getId() + " to " + firstTickAfterGap.getId() +
+        " (" + (gapEndTime - gapStartTime) + "ms starting at " + new Date(gapStartTime) + ")";
   }
 }

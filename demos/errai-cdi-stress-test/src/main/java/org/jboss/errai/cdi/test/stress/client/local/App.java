@@ -38,6 +38,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DateLabel;
 import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -47,6 +48,8 @@ import com.google.gwt.user.client.ui.RootPanel;
  */
 @EntryPoint
 public class App {
+
+  private static final int MAX_LOGGED_GAPS = 10;
 
   @Inject
   private Event<SubscriptionRequest> subscriptionEvent;
@@ -72,7 +75,7 @@ public class App {
    */
   private final List<TickStreamGap> tickStreamGaps = new ArrayList<TickStreamGap>();
   
-  private final Label tickStreamGapLabel = new Label();
+  private final HTML tickStreamGapLabel = new HTML();
   
   @PostConstruct
   public void buildUI() {
@@ -137,13 +140,20 @@ public class App {
     lastTickAgeLabel.setText(String.valueOf(age));
     lastTickIdLabel.setText(String.valueOf(tick.getId()));
     
-    if (lastTickEvent != null && lastTickEvent.getId() != tick.getId()) {
+    if (lastTickEvent != null && (lastTickEvent.getId() + 1) != tick.getId()) {
       TickStreamGap gap = new TickStreamGap(lastTickEvent, tick, new Date());
       tickStreamGaps.add(gap);
-      
-      // TODO keep visible list of all gaps
-      tickStreamGapLabel.setText(gap.toString());
+      if (tickStreamGaps.size() > MAX_LOGGED_GAPS) {
+        tickStreamGaps.remove(0);
+      }
     }
+
+    StringBuilder gaps = new StringBuilder();
+    for (TickStreamGap gap : tickStreamGaps) {
+      gaps.append(gap).append("<br>");
+    }
+    tickStreamGapLabel.setHTML(gaps.toString());
+    
     lastTickEvent = tick;
   }
 }

@@ -102,11 +102,31 @@ public class SimpleCDIService {
     currentTicker = tickMaker.scheduleAtFixedRate(new Runnable() {
       @Override
       public void run() {
-        for (int i = 0; i < config.getMessageCount(); i++) {
-          tickEvent.fire(new TickEvent(nextEventId.getAndIncrement(), System.currentTimeMillis(), payload));
+        try {
+          System.out.print("Firing " + config.getMessageCount() + " ticks... ");
+          for (int i = 0; i < config.getMessageCount(); i++) {
+            tickEvent.fire(new TickEvent(nextEventId.getAndIncrement(), System.currentTimeMillis(), payload));
+          }
+        } catch (Throwable t) {
+          t.printStackTrace(System.out);
+        } finally {
+          System.out.println("done. (interrupted=" + Thread.currentThread().isInterrupted() + ")");
         }
       }
     }, 0, config.getMessageInterval(), TimeUnit.MILLISECONDS);
+    
+    new Thread() {
+      public void run() {
+        try {
+          currentTicker.get();
+        } catch (Throwable t) {
+          System.out.println("Ticker exited with exception (trace follows):");
+          t.printStackTrace(System.out);
+        } finally {
+          System.out.println("Ticker finished");
+        }
+      };
+    }.start();
     
     currentConfiguration = config;
   }
