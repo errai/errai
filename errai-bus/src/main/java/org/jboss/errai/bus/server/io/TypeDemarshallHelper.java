@@ -88,7 +88,7 @@ public class TypeDemarshallHelper {
           String objId = (String) oMap.get(SerializationParts.OBJECT_ID);
           boolean ref = false;
           if (objId != null) {
-            if (oMap.size() == 2) {
+            if (oMap.size() == 2 && !oMap.containsKey(SerializationParts.INSTANTIATE_ONLY)) {
               ref = true;
             }
 
@@ -137,7 +137,7 @@ public class TypeDemarshallHelper {
 
           Object v;
           for (Map.Entry<?, ?> entry : oMap.entrySet()) {
-            if (SerializationParts.ENCODED_TYPE.equals(entry.getKey()) || SerializationParts.OBJECT_ID.equals(entry.getKey()))
+            if (entry.getKey() instanceof String && ((String) entry.getKey()).startsWith("__"))
               continue;
             final Serializable cachedSetExpr = s.get(entry.getKey());
             if (cachedSetExpr != null) {

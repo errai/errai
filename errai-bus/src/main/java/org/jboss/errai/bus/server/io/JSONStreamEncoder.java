@@ -172,6 +172,10 @@ public class JSONStreamEncoder {
       }
     }
 
+    if (first) {
+       outstream.write((",\"" + SerializationParts.INSTANTIATE_ONLY + "\":true").getBytes());
+     }
+
     outstream.write('}');
   }
 

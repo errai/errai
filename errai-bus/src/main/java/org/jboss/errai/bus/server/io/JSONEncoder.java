@@ -126,23 +126,8 @@ public class JSONEncoder {
             keyValue(encodeString(OBJECT_ID, ctx), encodeString(String.valueOf(o.hashCode()),
                     ctx))));
 
-    // Preliminary fix for https://jira.jboss.org/browse/ERRAI-103
-    // TODO: Review my Mike
-    final Field[] fields = EncodingUtil.getAllEncodingFields(cls);
-//    final Serializable[] s = EncodingCache.get(fields, new EncodingCache.ValueProvider<Serializable[]>() {
-//      public Serializable[] get() {
-//        Serializable[] s = new Serializable[fields.length];
-//        int i = 0;
-//        for (Field f : fields) {
-//          if ((f.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
-//                  || f.isSynthetic()) {
-//            continue;
-//          }
-//          s[i++] = MVEL.compileExpression(f.getName());
-//        }
-//        return s;
-//      }
-//    });
+     final Field[] fields = EncodingUtil.getAllEncodingFields(cls);
+
 
     int i = 0;
     boolean first = true;
@@ -167,6 +152,10 @@ public class JSONEncoder {
       }
     }
 
+    if (first) {
+      build.append(",\"" + SerializationParts.INSTANTIATE_ONLY + "\":true");
+    }
+    
     return build.append('}').toString();
   }
 

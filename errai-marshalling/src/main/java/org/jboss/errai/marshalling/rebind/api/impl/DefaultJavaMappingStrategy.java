@@ -541,7 +541,6 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
     boolean hasEncoded = false;
 
     int i = 0;
-
     MetaClass c = toType;
     do {
       for (MetaField metaField : c.getDeclaredFields()) {
@@ -588,7 +587,11 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
     }
     while ((c = c.getSuperClass()) != null);
 
+    if (i == 0) {
+      sb.append(",\"" + SerializationParts.INSTANTIATE_ONLY + "\":true");
+    }
 
+    
     sb.append("}");
 
     builder.append(Stmt.nestedCall(sb).invoke("toString").returnValue());

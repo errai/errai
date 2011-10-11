@@ -137,6 +137,7 @@ public class MarshallerGeneratorFactory {
     exposed.addAll(scanner.getTypesAnnotatedWith(ExposeEntity.class));
 
     exposed.add(Throwable.class);
+    exposed.add(NullPointerException.class);
     exposed.add(RuntimeException.class);
     exposed.add(Exception.class);
     exposed.add(StackTraceElement.class);
