@@ -297,6 +297,7 @@
                 <module>reference</module>
                 <module>quickstart</module>
                 <module>demos/errai-cdi-tagcloud-demo</module>
+                <module>demos/errai-cdi-stock-demo</module>
                 <module>dist</module>
             </modules>
         </profile>
