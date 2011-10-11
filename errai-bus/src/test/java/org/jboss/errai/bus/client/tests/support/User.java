@@ -80,8 +80,13 @@ public class User {
     return result;
   }
 
+  @Override
   public String toString() {
-    return "User:[id:" + id + ";name:" + name + ";groups:" + groups.size() + ";userStringMap:" + userStringMap.size() + ";userMapString:" + userMapString.size() + "]";
+    return "User{" +
+            "id=" + id +
+            ", name='" + name + '\'' +
+            ", groups=" + groups +
+            '}';
   }
 
   public static User create() {

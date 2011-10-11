@@ -216,7 +216,6 @@ public class TypeDemarshallHelper {
           UnsatisfiedForwardLookup u2 = iter.next();
           ((Map<Object, Object>) entry.getKey()).put(ctx.getObject(u1.getId()), ctx.getObject(u2.getId()));
         }
-
       }
       else {
         UnsatisfiedForwardLookup ufl;
@@ -228,7 +227,6 @@ public class TypeDemarshallHelper {
             setProperty(entry.getKey(), ufl.getPath(), ctx.getObject(ufl.getId()));
 
           }
-
         }
       }
 
@@ -236,7 +234,6 @@ public class TypeDemarshallHelper {
         ((UHashMap) entry.getKey()).normalHashMode();
     }
   }
-
 
   public static Serializable compileSetExpression(String s) {
     return MVEL.compileSetExpression(ensureSafe(s));

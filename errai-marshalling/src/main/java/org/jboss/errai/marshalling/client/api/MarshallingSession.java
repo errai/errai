@@ -1,7 +1,5 @@
 package org.jboss.errai.marshalling.client.api;
 
-import com.google.gwt.json.client.JSONValue;
-
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
