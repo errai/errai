@@ -61,7 +61,6 @@ public class JSONUtilCli {
         unwrap(messages, v.isArray());
       }
       else {
-        System.out.println(">" + v);
         messages.add(new MarshalledMessageImpl((JSONObject) v));
       }
     }
