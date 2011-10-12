@@ -17,7 +17,8 @@ package org.jboss.errai.cdi.demo.tagcloud.client.shared;
 
 import java.util.Date;
 
-import org.jboss.errai.bus.server.annotations.ExposeEntity;
+import org.jboss.errai.common.client.api.annotations.ExposeEntity;
+
 
 /**
  * This entity class represents a tag.

@@ -22,7 +22,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.jboss.errai.bus.server.annotations.ExposeEntity;
+import org.jboss.errai.common.client.api.annotations.ExposeEntity;
 
 /**
  * This class represents a tag cloud.
