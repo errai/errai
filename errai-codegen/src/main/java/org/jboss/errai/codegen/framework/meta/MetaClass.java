@@ -78,6 +78,8 @@ public abstract class MetaClass implements HasAnnotations, MetaType, MetaGeneric
 
   public abstract MetaParameterizedType getParameterizedType();
 
+  public abstract MetaParameterizedType getGenericSuperClass();
+
   public abstract MetaClass[] getInterfaces();
 
   public abstract MetaClass getSuperClass();

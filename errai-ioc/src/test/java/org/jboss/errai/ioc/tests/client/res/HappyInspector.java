@@ -18,6 +18,9 @@ public class HappyInspector {
 
   @Inject
   private GenericService<String> stringService;
+  
+  @Inject
+  private GenericServiceClassForLong longService;
 
   public boolean confirmHappiness() {
     return happyService.isHappy();
@@ -34,6 +37,10 @@ public class HappyInspector {
 
   public GenericService<String> getStringService() {
     return stringService;
+  }
+  
+  public GenericServiceClassForLong getLongService() {
+    return longService;
   }
 
   public static HappyInspector INSTANCE;

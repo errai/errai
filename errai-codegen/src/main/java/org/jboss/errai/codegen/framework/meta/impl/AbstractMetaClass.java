@@ -36,6 +36,7 @@ import static org.jboss.errai.codegen.framework.util.GenUtil.classToMeta;
 public abstract class AbstractMetaClass<T> extends MetaClass {
   private final T enclosedMetaObject;
   protected MetaParameterizedType parameterizedType;
+  protected MetaParameterizedType genericSuperClass;
 
   protected AbstractMetaClass(T enclosedMetaObject) {
     this.enclosedMetaObject = enclosedMetaObject;
@@ -388,6 +389,10 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return parameterizedType;
   }
 
+  public MetaParameterizedType getGenericSuperClass() {
+    return genericSuperClass;
+  }
+
   @Override
   public boolean equals(Object o) {
     return o instanceof AbstractMetaClass && hashString().equals(((AbstractMetaClass) o).hashString());
@@ -459,7 +464,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   @Override
   public MetaClass getErased() {
     try {
-      return erasedCache != null ? erasedCache : (erasedCache = MetaClassFactory.get(getFullyQualifiedName()));
+      return erasedCache != null ? erasedCache : (erasedCache = MetaClassFactory.get(getFullyQualifiedName(), true));
     }
     catch (Exception e) {
       return this;
