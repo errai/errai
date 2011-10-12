@@ -34,6 +34,7 @@ public abstract class AbstractEventIntegrationTest extends AbstractErraiCDITest 
    * https://issues.jboss.org/browse/CDI-7
    * spec: http://docs.jboss.org/cdi/spec/1.0/html/events.html#d0e6742
    * <p/>
+   * <pre>
    * {}     => {}
    * A      => {},A
    * B      => {},B
@@ -42,6 +43,7 @@ public abstract class AbstractEventIntegrationTest extends AbstractErraiCDITest 
    * A,C    => {},A,C,AC
    * B,C    => {},B,C,BC
    * A,B,C  => {},A,B,C,AB,BA,BC,AC,ABC
+   * </pre>
    */
   protected static final Map<String, List<String>> expectedEvents = new HashMap<String, List<String>>() {
     {
