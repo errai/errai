@@ -59,7 +59,10 @@ class DiscoverServices implements BootstrapExecution {
   private boolean isAutoScanEnabled(ErraiServiceConfiguratorImpl config) {
     boolean autoScanModules = true;
 
-    if (config.hasProperty("errai.auto_discover_services")) {
+    if (System.getProperty("errai.auto_discover_services") != null) {
+      autoScanModules = Boolean.getBoolean("errai.auto_discover_services");
+    }
+    else if (config.hasProperty("errai.auto_discover_services")) {
       autoScanModules = Boolean.parseBoolean(config.getProperty("errai.auto_discover_services"));
     }
     return autoScanModules;
