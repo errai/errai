@@ -117,14 +117,10 @@ public class JSONStreamEncoder {
       /**
        * If this object is referencing a duplicate object in the graph, we only provide an ID reference.
        */
-      write(outstream, ctx, "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + cls.getCanonicalName() + "\",\"" + SerializationParts.OBJECT_ID + "\":\"$" + ctx.markRef(o) + "\"}");
+      write(outstream, ctx, "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + cls.getCanonicalName() + "\",\"" + SerializationParts.OBJECT_ID + "\":\"" + ctx.markRef(o) + "\"}");
 
       return;
     }
-
-
-    ctx.markEncoded(o);
-
 
     outstream.write('{');
     outstream.write('\"');
@@ -140,31 +136,16 @@ public class JSONStreamEncoder {
     outstream.write('\"');
     outstream.write(':');
     outstream.write('\"');
-    outstream.write(String.valueOf(o.hashCode()).getBytes());
+    outstream.write(String.valueOf(ctx.markRef(o)).getBytes());
     outstream.write('\"');
     outstream.write(',');
 
     final Field[] fields = EncodingUtil.getAllEncodingFields(cls);
 
-    final Serializable[] s = EncodingCache.get(fields, new EncodingCache.ValueProvider<Serializable[]>() {
-      public Serializable[] get() {
-        Serializable[] s = new Serializable[fields.length];
-        int i = 0;
-        for (Field f : fields) {
-          if ((f.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
-                  || f.isSynthetic()) {
-            continue;
-          }
-          s[i++] = MVEL.compileExpression(f.getName());
-        }
-        return s;
-      }
-    });
 
     int i = 0;
     boolean first = true;
     for (Field field : fields) {
-
       if ((field.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
               || field.isSynthetic()) {
         continue;
@@ -173,14 +154,24 @@ public class JSONStreamEncoder {
         outstream.write(',');
       }
 
-      Object v = MVEL.executeExpression(s[i++], o);
-      outstream.write('\"');
-      outstream.write(field.getName().getBytes());
-      outstream.write('\"');
-      outstream.write(':');
-      _encode(v, outstream, ctx);
-      first = false;
+      try {
+        i++;
+        Object v = field.get(o);
+        outstream.write('\"');
+        outstream.write(field.getName().getBytes());
+        outstream.write('\"');
+        outstream.write(':');
+        _encode(v, outstream, ctx);
+        first = false;
+      }
+      catch (Exception e) {
+        throw new RuntimeException("error serializing field: " + field, e);
+      }
     }
+
+    if (i == 0) {
+       write(outstream, ctx, "\"" + SerializationParts.INSTANTIATE_ONLY + "\":true");
+     }
 
     outstream.write('}');
   }

@@ -19,6 +19,7 @@ package org.jboss.errai.codegen.framework.builder.callstack;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.VariableReference;
+import org.jboss.errai.codegen.framework.exception.InvalidTypeException;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.util.GenUtil;
@@ -48,15 +49,72 @@ public class LoadVariable extends AbstractCallElement {
   public void handleCall(CallWriter writer, Context context, Statement statement) {
     writer.reset();
 
-    VariableReference ref = (classMember) ? context.getClassMember(variableName) : context.getVariable(variableName);
-
-    Statement[] indexes = new Statement[this.indexes.length];
-    for (int i = 0; i < indexes.length; i++) {
-      indexes[i] = GenUtil.generate(context, this.indexes[i]);
-      indexes[i] = GenUtil.convert(context, indexes[i], MetaClassFactory.get(Integer.class));
+    final Statement[] idx = new Statement[this.indexes.length];
+    for (int i = 0; i < idx.length; i++) {
+      idx[i] = GenUtil.convert(context, GenUtil.generate(context, this.indexes[i]), MetaClassFactory.get(Integer.class));
     }
-    ref.setIndexes(indexes);
 
-    nextOrReturn(writer, context, ref);
+    final VariableReference ref = context.getVariable(variableName);
+
+    if (idx.length > 0) {
+      if (!ref.getType().isArray()) {
+        throw new InvalidTypeException("attempt to use indexed accessor on non-array type: " + ref);
+      }
+    }
+
+    final Statement stmt = new VariableReference() {
+      @Override
+      public String getName() {
+        return ref.getName();
+      }
+
+      @Override
+      public Statement getValue() {
+        return ref.getValue();
+      }
+
+      @Override
+      public String generate(Context context) {
+        StringBuilder buf = new StringBuilder((classMember
+                && !context.isNonAmbiguous(ref.getName()) ? "this." : "") + getName());
+        
+        for (Statement s : idx) {
+          buf.append('[').append(s.generate(context)).append(']');
+        }
+
+        return buf.toString();
+      }
+
+      @Override
+      public MetaClass getType() {
+        MetaClass ret;
+        
+        int dims = GenUtil.getArrayDimensions(ref.getType());
+
+        if (ref.getType().isArray() && idx.length > 0) {
+          int newDims = dims - idx.length;
+          if (newDims > 0) {
+            ret = ref.getType().getOuterComponentType().asArrayOf(dims - idx.length);
+          }
+          else {
+            ret = ref.getType().getOuterComponentType();
+          }
+        }
+        else {
+          ret = ref.getType();
+        }
+        
+        return ret;
+      }
+    };
+
+    ref.setIndexes(idx);
+
+    nextOrReturn(writer, context, stmt);
+  }
+
+  @Override
+  public String toString() {
+    return "[[LoadVariable<" + variableName + ">]" + next + "]";
   }
 }

@@ -86,6 +86,13 @@ public class ContextualProviderInjector extends TypeInjector {
     }
     else {
       MetaType[] typeArgs = pType.getTypeParameters();
+      MetaClass[] typeArgsClasses = new MetaClass[typeArgs.length];
+      
+      for (int i = 0; i < typeArgs.length; i++) {
+        typeArgsClasses[i] = (MetaClass) typeArgs[i];
+      }
+      
+      
       Annotation[] qualifiers = injectableInstance.getQualifiers();
 
       if (providerInjector.getInjectedType().isAssignableTo(Provider.class)) {
@@ -99,7 +106,7 @@ public class ContextualProviderInjector extends TypeInjector {
       }
       else {
         statement = Stmt.nestedCall(providerInjector.getType(injectContext, injectableInstance))
-                .invoke("provide", typeArgs, qualifiers.length != 0 ? qualifiers : null);
+                .invoke("provide", typeArgsClasses, qualifiers.length != 0 ? qualifiers : null);
 
       }
     }

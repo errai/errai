@@ -14,8 +14,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <name>Errai</name>
     <groupId>org.jboss.errai</groupId>
@@ -71,7 +70,7 @@
         <gwt.version>2.3.0</gwt.version>
         <gwt.maven>2.3.0</gwt.maven>
         <guice.version>3.0</guice.version>
-        <mvel.version>2.0.18-RC4</mvel.version>
+        <mvel.version>2.1.Beta6</mvel.version>
         <mosaic.version>0.4.0-rc4</mosaic.version>
         <appengine.version>1.3.5</appengine.version>
         <reflections.version>0.9.6_jboss_errai_r2</reflections.version>

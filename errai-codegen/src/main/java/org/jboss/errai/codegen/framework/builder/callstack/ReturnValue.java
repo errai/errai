@@ -25,9 +25,16 @@ import org.jboss.errai.codegen.framework.Statement;
 public class ReturnValue extends AbstractCallElement {
   @Override
   public void handleCall(CallWriter writer, Context context, Statement statement) {
+    resultType = statement.getType();
+
     String buf = writer.getCallString();
     writer.reset();
 
     writer.append("return ").append(buf);
+  }
+
+  @Override
+  public String toString() {
+    return "[Return]";
   }
 }

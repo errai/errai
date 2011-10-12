@@ -28,7 +28,7 @@ import org.jboss.errai.codegen.framework.meta.MetaTypeVariable;
 
 /**
  * Represents a method invocation statement.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class MethodInvocation extends AbstractStatement {
@@ -50,17 +50,21 @@ public class MethodInvocation extends AbstractStatement {
 
   @Override
   public MetaClass getType() {
-    MetaClass returnType = null;
+    MetaClass returnType = method.getReturnType();
 
     if (method.getGenericReturnType() != null && method.getGenericReturnType() instanceof MetaTypeVariable) {
       typeVariables = new HashMap<String, MetaClass>();
       resolveTypeVariables();
 
       MetaTypeVariable typeVar = (MetaTypeVariable) method.getGenericReturnType();
-      returnType = typeVariables.get(typeVar.getName());
+      if (typeVariables.containsKey(typeVar.getName())) {
+        returnType = typeVariables.get(typeVar.getName());
+      }
     }
 
-    return (returnType != null) ? returnType : method.getReturnType();
+    assert returnType != null;
+
+    return returnType;
   }
 
   // Resolves type variables by inspecting call parameters
@@ -101,7 +105,7 @@ public class MethodInvocation extends AbstractStatement {
       for (MetaType typeParm : parameterizedMethodParmType.getTypeParameters()) {
         if (parameterizedCallParmType != null) {
           resolveTypeVariable(typeParm,
-              ((MetaParameterizedType) parameterizedCallParmType).getTypeParameters()[typeParmIndex++]);
+                  ((MetaParameterizedType) parameterizedCallParmType).getTypeParameters()[typeParmIndex++]);
         }
         else {
           resolveTypeVariable(typeParm, callParmType);

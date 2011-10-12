@@ -96,6 +96,10 @@ public final class MetaClassFactory {
 
   private static final Map<String, MetaClass> CLASS_CACHE = new HashMap<String, MetaClass>();
 
+  public static MetaClass get(String fullyQualifiedClassName, boolean erased) {
+    return createOrGet(load(fullyQualifiedClassName), erased);
+  }
+
   public static MetaClass get(String fullyQualifiedClassName) {
     return createOrGet(fullyQualifiedClassName);
   }
@@ -113,8 +117,25 @@ public final class MetaClassFactory {
   }
 
   public static MetaClass get(Class<?> clazz) {
-    return createOrGet(clazz);
+    return createOrGet(clazz, false);
   }
+
+  public static MetaClass getArrayOf(Class<?> clazz, int dims) {
+    int[] da = new int[dims];
+    for (int i = 0; i < da.length; i++) {
+      da[i] = 0;
+    }
+
+    return getArrayOf(clazz, da);
+  }
+
+  public static MetaClass getArrayOf(Class<?> clazz, int... dims) {
+    if (dims.length == 0) {
+      dims = new int[1];
+    }
+    return createOrGet(Array.newInstance(clazz, dims).getClass(), false);
+  }
+
 
   public static MetaClass get(Class<?> clazz, Type type) {
     return createOrGet(clazz, type);
@@ -133,7 +154,7 @@ public final class MetaClassFactory {
   }
 
   public static Statement getAsStatement(Class<?> clazz) {
-    final MetaClass metaClass = createOrGet(clazz);
+    final MetaClass metaClass = createOrGet(clazz, false);
     return new Statement() {
       @Override
       public String generate(Context context) {
@@ -157,7 +178,7 @@ public final class MetaClassFactory {
 
   private static MetaClass createOrGet(String fullyQualifiedClassName) {
     if (!CLASS_CACHE.containsKey(fullyQualifiedClassName)) {
-      return createOrGet(load(fullyQualifiedClassName));
+      return createOrGet(load(fullyQualifiedClassName), false);
     }
 
     return CLASS_CACHE.get(fullyQualifiedClassName);
@@ -193,7 +214,7 @@ public final class MetaClassFactory {
     }
 
     if (!CLASS_CACHE.containsKey(type.getQualifiedSourceName())) {
-      MetaClass gwtClass = GWTClass.newUncachedInstance(type);
+      MetaClass gwtClass = GWTClass.newUncachedInstance(type, true);
 
       addLookups(type, gwtClass);
       return gwtClass;
@@ -203,21 +224,26 @@ public final class MetaClassFactory {
   }
 
 
-  private static MetaClass createOrGet(Class cls) {
+  private static MetaClass createOrGet(Class cls, boolean erased) {
     if (cls == null) return null;
 
-    if (cls.getTypeParameters() != null) {
-      return JavaReflectionClass.newUncachedInstance(cls);
+    String encName;
+
+    if (erased) {
+      encName = "{erased}" + cls.getName();
     }
+    else {
+      encName = cls.getName()
+              + "<" + Arrays.toString(cls.getTypeParameters()) + Arrays.toString(cls.getGenericInterfaces()) + ">";
+    }
+    if (!CLASS_CACHE.containsKey(encName)) {
+      MetaClass javaReflectionClass = JavaReflectionClass.newUncachedInstance(cls, erased);
 
-    if (!CLASS_CACHE.containsKey(cls.getName())) {
-      MetaClass javaReflectionClass = JavaReflectionClass.newUncachedInstance(cls);
-
-      addLookups(cls, javaReflectionClass);
+      addLookups(encName, javaReflectionClass);
       return javaReflectionClass;
     }
 
-    return CLASS_CACHE.get(cls.getName());
+    return CLASS_CACHE.get(encName);
   }
 
   private static MetaClass createOrGet(Class cls, Type type) {
@@ -267,8 +293,8 @@ public final class MetaClassFactory {
 
     for (MetaConstructor c : clazz.getConstructors()) {
       BuildMetaConstructor newConstructor = new BuildMetaConstructor(buildMetaClass, EmptyStatement.INSTANCE,
-                    GenUtil.scopeOf(c),
-                    DefParameters.from(c));
+              GenUtil.scopeOf(c),
+              DefParameters.from(c));
       newConstructor.setReifiedFormOf(c);
 
       buildMetaClass.addConstructor(newConstructor);
@@ -306,10 +332,11 @@ public final class MetaClassFactory {
         parameters.add(Parameter.of(parmType, parm.getName()));
         i++;
       }
+
       BuildMetaMethod newMethod = new BuildMetaMethod(buildMetaClass, EmptyStatement.INSTANCE,
-                    GenUtil.scopeOf(method), GenUtil.modifiersOf(method), method.getName(), returnType,
-                    method.getGenericReturnType(),
-                    DefParameters.fromParameters(parameters), ThrowsDeclaration.of(method.getCheckedExceptions()));
+              GenUtil.scopeOf(method), GenUtil.modifiersOf(method), method.getName(), returnType,
+              method.getGenericReturnType(),
+              DefParameters.fromParameters(parameters), ThrowsDeclaration.of(method.getCheckedExceptions()));
 
       newMethod.setReifiedFormOf(method);
 
@@ -381,6 +408,10 @@ public final class MetaClassFactory {
     CLASS_CACHE.put(cls.getQualifiedSourceName(), metaClass);
   }
 
+  private static void addLookups(String encName, MetaClass metaClass) {
+    CLASS_CACHE.put(encName, metaClass);
+  }
+
   private static Class<?> load(String fullyQualifiedName) {
     try {
       return Class.forName(fullyQualifiedName, false, Thread.currentThread().getContextClassLoader());
@@ -402,7 +433,7 @@ public final class MetaClassFactory {
   public static MetaClass[] fromClassArray(Class<?>[] classes) {
     MetaClass[] newClasses = new MetaClass[classes.length];
     for (int i = 0; i < classes.length; i++) {
-      newClasses[i] = createOrGet(classes[i]);
+      newClasses[i] = createOrGet(classes[i], false);
     }
     return newClasses;
   }

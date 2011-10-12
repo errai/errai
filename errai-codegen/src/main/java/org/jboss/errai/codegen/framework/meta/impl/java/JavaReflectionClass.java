@@ -39,15 +39,21 @@ import org.jboss.errai.codegen.framework.meta.impl.AbstractMetaClass;
 public class JavaReflectionClass extends AbstractMetaClass<Class> {
   private Annotation[] annotationsCache;
 
-  private JavaReflectionClass(Class clazz) {
-    this(clazz, clazz.getGenericSuperclass());
+  private JavaReflectionClass(Class clazz, boolean erased) {
+    this(clazz, null, erased);
   }
 
-  private JavaReflectionClass(Class clazz, Type type) {
+  private JavaReflectionClass(Class clazz, Type type, boolean erased) {
     super(clazz);
     this.annotationsCache = clazz.getAnnotations();
-    if (type instanceof ParameterizedType) {
-      super.parameterizedType = new JavaReflectionParameterizedType((ParameterizedType) type);
+
+    if (!erased) {
+      if (type instanceof ParameterizedType) {
+        super.parameterizedType = new JavaReflectionParameterizedType((ParameterizedType) type);
+      }
+      if (clazz.getGenericSuperclass() instanceof ParameterizedType) {
+        super.genericSuperClass = new JavaReflectionParameterizedType((ParameterizedType) clazz.getGenericSuperclass());
+      }
     }
   }
 
@@ -63,11 +69,15 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
   }
 
   public static MetaClass newUncachedInstance(Class type) {
-    return new JavaReflectionClass(type);
+    return new JavaReflectionClass(type, false);
+  }
+
+  public static MetaClass newUncachedInstance(Class clazz, boolean erased) {
+    return new JavaReflectionClass(clazz, erased);
   }
 
   public static MetaClass newUncachedInstance(Class clazz, Type type) {
-    return new JavaReflectionClass(clazz, type);
+    return new JavaReflectionClass(clazz, type, false);
   }
 
   public static MetaClass newInstance(TypeLiteral type) {
@@ -85,7 +95,7 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
 
   @Override
   public String getFullyQualifiedName() {
-    return getCanonicalName();
+    return getEnclosedMetaObject().getName();
   }
 
   @Override
@@ -109,17 +119,24 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     return methodList.toArray(new MetaMethod[methodList.size()]);
   }
 
+  private transient volatile MetaMethod[] methodsCache;
+
   @Override
   public MetaMethod[] getMethods() {
-    return fromMethodArray(getEnclosedMetaObject().getMethods());
+    return methodsCache != null ? methodsCache : (methodsCache = fromMethodArray(getEnclosedMetaObject().getMethods()));
   }
+
+  private transient volatile MetaMethod[] declaredMethodCache;
 
   @Override
   public MetaMethod[] getDeclaredMethods() {
-    return fromMethodArray(getEnclosedMetaObject().getDeclaredMethods());
+    return declaredMethodCache != null ? declaredMethodCache
+            : (declaredMethodCache = fromMethodArray(getEnclosedMetaObject().getDeclaredMethods()));
   }
 
+
   private static MetaField[] fromFieldArray(Field[] methods) {
+
     List<MetaField> methodList = new ArrayList<MetaField>();
 
     for (Field f : methods) {
@@ -129,14 +146,19 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     return methodList.toArray(new MetaField[methodList.size()]);
   }
 
+  private transient volatile MetaField[] fieldCache;
+
   @Override
   public MetaField[] getFields() {
-    return fromFieldArray(getEnclosedMetaObject().getFields());
+    return fieldCache != null ? fieldCache : (fieldCache = fromFieldArray(getEnclosedMetaObject().getFields()));
   }
+
+  private transient volatile MetaField[] declaredFieldCache;
 
   @Override
   public MetaField[] getDeclaredFields() {
-    return fromFieldArray(getEnclosedMetaObject().getDeclaredFields());
+    return declaredFieldCache != null ? declaredFieldCache
+            : (declaredFieldCache = fromFieldArray(getEnclosedMetaObject().getDeclaredFields()));
   }
 
   @Override
@@ -145,6 +167,10 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
       return new JavaReflectionField(getEnclosedMetaObject().getDeclaredField(name));
     }
     catch (Exception e) {
+      if (getEnclosedMetaObject().isArray() && "length".equals(name)) {
+        return new MetaField.ArrayLengthMetaField(this);
+      }
+
       throw new RuntimeException("Could not get field: " + name, e);
     }
   }
@@ -159,26 +185,38 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     }
   }
 
+
+  private transient volatile MetaConstructor[] constructorCache;
+
   @Override
   public MetaConstructor[] getConstructors() {
+    if (constructorCache != null) {
+      return constructorCache;
+    }
+
     List<MetaConstructor> constructorList = new ArrayList<MetaConstructor>();
 
     for (Constructor c : getEnclosedMetaObject().getConstructors()) {
       constructorList.add(new JavaReflectionConstructor(c));
     }
 
-    return constructorList.toArray(new MetaConstructor[constructorList.size()]);
+    return constructorCache = constructorList.toArray(new MetaConstructor[constructorList.size()]);
   }
+
+  private transient volatile MetaConstructor[] declConstructorCache;
 
   @Override
   public MetaConstructor[] getDeclaredConstructors() {
+    if (declConstructorCache != null) {
+      return declConstructorCache;
+    }
     List<MetaConstructor> constructorList = new ArrayList<MetaConstructor>();
 
     for (Constructor c : getEnclosedMetaObject().getDeclaredConstructors()) {
       constructorList.add(new JavaReflectionConstructor(c));
     }
 
-    return constructorList.toArray(new MetaConstructor[constructorList.size()]);
+    return declConstructorCache = constructorList.toArray(new MetaConstructor[constructorList.size()]);
   }
 
   @Override
@@ -209,10 +247,10 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     int i = 0;
     for (Class<?> type : getEnclosedMetaObject().getInterfaces()) {
       if (genIface != null) {
-        metaClassList.add(new JavaReflectionClass(type, genIface[i]));
+        metaClassList.add(new JavaReflectionClass(type, genIface[i], false));
       }
       else {
-        metaClassList.add(new JavaReflectionClass(type));
+        metaClassList.add(new JavaReflectionClass(type, false));
       }
       i++;
     }
@@ -302,6 +340,11 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
   @Override
   public boolean isStatic() {
     return (getEnclosedMetaObject().getModifiers() & Modifier.STATIC) != 0;
+  }
+
+  @Override
+  public MetaClass asArrayOf(int dimensions) {
+    return MetaClassFactory.getArrayOf(getEnclosedMetaObject(), dimensions);
   }
 
   @Override

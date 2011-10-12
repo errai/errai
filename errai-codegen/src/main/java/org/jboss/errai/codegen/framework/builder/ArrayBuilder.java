@@ -17,12 +17,16 @@
 package org.jboss.errai.codegen.framework.builder;
 
 import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface ArrayBuilder extends Statement, Builder {
-  public ArrayInitializationBuilder newArray(Class<?> componentType);
+//  public ArrayInitializationBuilder newArray(Class<?> componentType);
 
-  public ArrayInitializationBuilder newArray(Class<?> componentType, Integer... dimensions);
+  public ArrayInitializationBuilder newArray(MetaClass componentType, Object... dimensions);
+
+  public ArrayInitializationBuilder newArray(Class<?> componentType, Object... dimensions);
+
 }

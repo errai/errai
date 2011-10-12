@@ -40,6 +40,7 @@ public interface StatementBegin extends ArrayBuilder, LoopBuilder, IfBlockBuilde
   public VariableReferenceContextualStatementBuilder loadClassMember(String name, Object... indexes);
   public ContextualStatementBuilder loadLiteral(Object o);
   public ContextualStatementBuilder load(Object o);
+  public ContextualStatementBuilder loadClassReference(Object o);
 
   public ContextualStatementBuilder invokeStatic(MetaClass clazz, String methodName, Object... parameters);
   public ContextualStatementBuilder invokeStatic(Class<?> clazz, String methodName, Object... parameters);

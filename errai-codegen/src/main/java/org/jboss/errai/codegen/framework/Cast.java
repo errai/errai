@@ -44,4 +44,9 @@ public class Cast implements Statement {
   public MetaClass getType() {
     return toType;
   }
+
+  @Override
+  public String toString() {
+    return "((" + toType.getFullyQualifiedName() + ")" + statement.toString() + ")";
+  }
 }

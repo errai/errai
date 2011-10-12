@@ -1,6 +1,6 @@
 package org.jboss.errai.bus.client.tests.support;
 
-import org.jboss.errai.bus.server.annotations.ExposeEntity;
+import org.jboss.errai.common.client.api.annotations.ExposeEntity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -80,8 +80,13 @@ public class User {
     return result;
   }
 
+  @Override
   public String toString() {
-    return "User:[id:" + id + ";name:" + name + ";groups:" + groups.size() + ";userStringMap:" + userStringMap.size() + ";userMapString:" + userMapString.size() + "]";
+    return "User{" +
+            "id=" + id +
+            ", name='" + name + '\'' +
+            ", groups=" + groups +
+            '}';
   }
 
   public static User create() {

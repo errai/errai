@@ -25,10 +25,10 @@
 
     <stylesheet src="widgets-default.css"/>
 
-    <generate-with class="org.jboss.errai.widgets.rebind.WidgetMappingsGenerator">
-        <when-type-assignable
-                class="org.jboss.errai.widgets.client.mapping.ErraiWidgetBinding"/>
-    </generate-with>
+    <!--<generate-with class="org.jboss.errai.widgets.rebind.WidgetMappingsGenerator">-->
+        <!--<when-type-assignable-->
+                <!--class="org.jboss.errai.widgets.client.mapping.ErraiWidgetBinding"/>-->
+    <!--</generate-with>-->
 
     <replace-with class="org.jboss.errai.widgets.client.effects.effectimpl.KHTMLEffectImpl">
         <when-type-is class="org.jboss.errai.widgets.client.effects.Effect"/>

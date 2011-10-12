@@ -70,6 +70,9 @@ public class BasicIOCTest extends IOCClientTestCase {
 
     assertNotNull(happyInspector.getIntegerService());
     assertEquals(new Integer(111), happyInspector.getIntegerService().get());
+
+    assertNotNull(happyInspector.getLongService());
+    assertEquals(new Long(1l), happyInspector.getLongService().get());
   }
 
   public void testQualifiers() {

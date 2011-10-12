@@ -24,6 +24,8 @@ import java.util.Map;
 
 /**
  * An extended client-specific/in-browser interface of {@link MessageBus}, which defines client-specific functionalities.
+ *
+ * @author Mike Brock
  */
 public interface ClientMessageBus extends MessageBus {
   public static final String REMOTE_QUEUE_ID_HEADER = "RemoteQueueID";

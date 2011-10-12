@@ -87,7 +87,7 @@ public class JSONEncoder {
       return map(
               encodeCommaSeparatedStrings(ctx,
                       keyValue(encodeString(ENCODED_TYPE, ctx), encodeString(java.util.Date.class.getName(), ctx)),
-                      keyValue(encodeString(OBJECT_ID, ctx), encodeString(String.valueOf(o.hashCode()), ctx)),
+                      keyValue(encodeString(OBJECT_ID, ctx), encodeString(ctx.markRef(o), ctx)),
                       keyValue(encodeString(MessageParts.Value.name(), ctx), String.valueOf(((java.util.Date) o)
                               .getTime()
                       ))),
@@ -98,7 +98,7 @@ public class JSONEncoder {
       return map(
               encodeCommaSeparatedStrings(ctx,
                       keyValue(encodeString(ENCODED_TYPE, ctx), encodeString(java.sql.Date.class.getName(), ctx)),
-                      keyValue(encodeString(OBJECT_ID, ctx), encodeString(String.valueOf(o.hashCode()), ctx)),
+                      keyValue(encodeString(OBJECT_ID, ctx), encodeString(ctx.markRef(o), ctx)),
                       keyValue(encodeString(MessageParts.Value.name(), ctx), String.valueOf(((java.sql.Date) o)
                               .getTime()
                       ))),
@@ -119,30 +119,15 @@ public class JSONEncoder {
               keyValue(encodeString(OBJECT_ID, ctx), objRef(ctx, o))), ctx);
     }
 
-    ctx.markEncoded(o);
+//    ctx.markEncoded(o);
 
     StringBuilder build = new StringBuilder("{" + encodeCommaSeparatedStrings(ctx,
             keyValue(encodeString(ENCODED_TYPE, ctx), encodeString(cls.getCanonicalName(), ctx)),
-            keyValue(encodeString(OBJECT_ID, ctx), encodeString(String.valueOf(o.hashCode()),
+            keyValue(encodeString(OBJECT_ID, ctx), encodeString(String.valueOf(ctx.markRef(o)),
                     ctx))));
 
-    // Preliminary fix for https://jira.jboss.org/browse/ERRAI-103
-    // TODO: Review my Mike
-    final Field[] fields = EncodingUtil.getAllEncodingFields(cls);
-    final Serializable[] s = EncodingCache.get(fields, new EncodingCache.ValueProvider<Serializable[]>() {
-      public Serializable[] get() {
-        Serializable[] s = new Serializable[fields.length];
-        int i = 0;
-        for (Field f : fields) {
-          if ((f.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
-                  || f.isSynthetic()) {
-            continue;
-          }
-          s[i++] = MVEL.compileExpression(f.getName());
-        }
-        return s;
-      }
-    });
+     final Field[] fields = EncodingUtil.getAllEncodingFields(cls);
+
 
     int i = 0;
     boolean first = true;
@@ -158,9 +143,9 @@ public class JSONEncoder {
       }
 
       try {
-        Object v = MVEL.executeExpression(s[i++], o);
+        i++;
+        Object v = field.get(o);
         build.append(encodeString(field.getName(), ctx)).append(':').append(_encode(v, ctx));
-
       }
       catch (Throwable t) {
         System.out.println("failed at encoding: " + field.getName());
@@ -168,6 +153,10 @@ public class JSONEncoder {
       }
     }
 
+    if (i == 0) {
+      build.append(",").append(keyValue(encodeString(SerializationParts.INSTANTIATE_ONLY,ctx), "true"));
+    }
+    
     return build.append('}').toString();
   }
 
@@ -211,7 +200,7 @@ public class JSONEncoder {
   }
 
   public static String objRef(EncodingContext ctx, Object o) {
-    return encodeString("$" + ctx.markRef(o), ctx);
+    return encodeString(ctx.markRef(o), ctx);
   }
 
   public static String keyValue(String key, String value) {
@@ -237,7 +226,7 @@ public class JSONEncoder {
 
   public static String encodeString(String string, EncodingContext ctx) {
     String quotes = write(ctx, '\"');
-    return quotes + string.replaceAll("\\\\", "\\\\\\\\").replaceAll("[\\\\]{0}\\\"", "\\\\\"")  + quotes;
+    return quotes + string.replaceAll("\\\\", "\\\\\\\\").replaceAll("[\\\\]{0}\\\"", "\\\\\"") + quotes;
   }
 
   private static String encodeCollection(Collection col, EncodingContext ctx) {

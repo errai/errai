@@ -20,7 +20,8 @@ import com.google.inject.Inject;
 import org.jboss.errai.bus.client.api.ResourceProvider;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
-import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
+import org.jboss.errai.common.metadata.MetaDataScanner;
+import org.jboss.errai.common.metadata.ScannerSingleton;
 
 import java.util.*;
 
@@ -51,7 +52,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
     this.extensionBindings = new HashMap<Class<?>, ResourceProvider>();
     this.resourceProviders = new HashMap<String, ResourceProvider>();
     this.serializableTypes = new HashSet<Class>();
-    this.scanner = MetaDataScanner.createInstance();
+    this.scanner = ScannerSingleton.getOrCreateInstance();
     loadServiceProperties();
   }
 

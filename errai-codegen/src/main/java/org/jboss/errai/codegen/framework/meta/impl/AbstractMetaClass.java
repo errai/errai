@@ -16,8 +16,9 @@
 
 package org.jboss.errai.codegen.framework.meta.impl;
 
-import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.asClassArray;
-import static org.jboss.errai.codegen.framework.util.GenUtil.classToMeta;
+import com.google.gwt.core.ext.typeinfo.JClassType;
+import org.jboss.errai.codegen.framework.meta.*;
+import org.mvel2.util.ParseTools;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -25,16 +26,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
-import org.jboss.errai.codegen.framework.meta.MetaConstructor;
-import org.jboss.errai.codegen.framework.meta.MetaMethod;
-import org.jboss.errai.codegen.framework.meta.MetaParameter;
-import org.jboss.errai.codegen.framework.meta.MetaParameterizedType;
-import org.jboss.errai.codegen.framework.meta.MetaType;
-import org.mvel2.util.ParseTools;
-
-import com.google.gwt.core.ext.typeinfo.JClassType;
+import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.asClassArray;
+import static org.jboss.errai.codegen.framework.util.GenUtil.classToMeta;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -43,6 +36,7 @@ import com.google.gwt.core.ext.typeinfo.JClassType;
 public abstract class AbstractMetaClass<T> extends MetaClass {
   private final T enclosedMetaObject;
   protected MetaParameterizedType parameterizedType;
+  protected MetaParameterizedType genericSuperClass;
 
   protected AbstractMetaClass(T enclosedMetaObject) {
     this.enclosedMetaObject = enclosedMetaObject;
@@ -82,33 +76,71 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   protected static MetaMethod _getMethod(MetaMethod[] methods, String name, MetaClass... parmTypes) {
-    Outer:
+    MetaMethod candidate = null;
+    int bestScore = 0;
+    int score;
+
     for (MetaMethod method : methods) {
-      if (method.getName().equals(name) && method.getParameters().length == parmTypes.length) {
-        for (int i = 0; i < parmTypes.length; i++) {
-          if (!method.getParameters()[i].getType().isAssignableFrom(parmTypes[i])) {
-            continue Outer;
+      score = 0;
+      if (method.getName().equals(name)) {
+        if (method.getParameters().length == parmTypes.length) {
+          if (parmTypes.length == 0) {
+            score = 1;
+            MetaClass retType = method.getReturnType();
+            while ((retType = retType.getSuperClass()) != null) score++;
+          }
+          else {
+            for (int i = 0; i < parmTypes.length; i++) {
+              if (method.getParameters()[i].getType().isAssignableFrom(parmTypes[i])) {
+                score++;
+                if (method.getParameters()[i].getType().equals(parmTypes[i])) {
+                  score++;
+                }
+              }
+            }
           }
         }
-        return method;
+      }
+
+      if (score > bestScore) {
+        bestScore = score;
+        candidate = method;
       }
     }
-    return null;
+
+    return candidate;
   }
 
   protected static MetaConstructor _getConstructor(MetaConstructor[] constructors, MetaClass... parmTypes) {
-    Outer:
+    MetaConstructor candidate = null;
+    int bestScore = 0;
+    int score;
+
     for (MetaConstructor constructor : constructors) {
+      score = 0;
       if (constructor.getParameters().length == parmTypes.length) {
-        for (int i = 0; i < parmTypes.length; i++) {
-          if (!constructor.getParameters()[i].getType().isAssignableFrom(parmTypes[i])) {
-            continue Outer;
+        if (parmTypes.length == 0) {
+          score = 1;
+        }
+        else {
+          for (int i = 0; i < parmTypes.length; i++) {
+            if (constructor.getParameters()[i].getType().isAssignableFrom(parmTypes[i])) {
+              score++;
+              if (constructor.getParameters()[i].getType().equals(parmTypes[i])) {
+                score++;
+              }
+            }
           }
         }
-        return constructor;
+      }
+
+      if (score > bestScore) {
+        bestScore = score;
+        candidate = constructor;
       }
     }
-    return null;
+
+    return candidate;
   }
 
   @Override
@@ -166,7 +198,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
           return null;
         }
       }
-      m = ParseTools.getWidenedTarget(m);
+//      m = ParseTools.getWidenedTarget(m);
       return getMethod(name, m.getParameterTypes());
     }
     else {
@@ -227,14 +259,14 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   @Override
   public MetaConstructor getBestMatchingConstructor(Class... parameters) {
     Class<?> cls = asClass();
-    if (cls!=null) {
+    if (cls != null) {
       Constructor c = ParseTools.getBestConstructorCandidate(parameters, cls, false);
       if (c == null)
         return null;
-      
+
       MetaClass metaClass = MetaClassFactory.get(cls);
       return metaClass.getConstructor(c.getParameterTypes());
-    } 
+    }
     else {
       return getConstructor(parameters);
     }
@@ -292,8 +324,9 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   @Override
   public boolean isAssignableFrom(MetaClass clazz) {
-    if (equals(MetaClassFactory.get(Object.class)) && clazz.isInterface())
+    if (equals(MetaClassFactory.get(Object.class)))
       return true;
+
 
     MetaClass cls = clazz;
     do {
@@ -307,7 +340,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   @Override
   public boolean isAssignableTo(MetaClass clazz) {
-    if (isInterface() && clazz.equals(MetaClassFactory.get(Object.class)))
+    if (clazz.equals(MetaClassFactory.get(Object.class)))
       return true;
 
     MetaClass cls = this;
@@ -356,24 +389,37 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return parameterizedType;
   }
 
+  public MetaParameterizedType getGenericSuperClass() {
+    return genericSuperClass;
+  }
+
   @Override
   public boolean equals(Object o) {
-    return o instanceof MetaClass && hashString().equals(MetaClass.class.getName()
-            + ":" + ((MetaClass) o).getFullyQualifiedName());
+    return o instanceof AbstractMetaClass && hashString().equals(((AbstractMetaClass) o).hashString());
   }
 
   @Override
   public int hashCode() {
     return hashString().hashCode();
   }
+  
+  private volatile transient Class<?> asClassCache;
 
   @Override
   public Class<?> asClass() {
+    if (asClassCache != null) {
+      return asClassCache;
+    }
+    
     Class<?> cls = null;
 
-    if (isArray()) {
+    if (enclosedMetaObject instanceof Class) {
+      cls = (Class<?>) enclosedMetaObject;
+    }
+    else if (isArray()) {
       try {
         String name = getInternalName().replaceAll("/", "\\.");
+
         cls = Class.forName(name, false,
                 Thread.currentThread().getContextClassLoader());
       }
@@ -381,9 +427,6 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
         e.printStackTrace();
         cls = null;
       }
-    }
-    else if (enclosedMetaObject instanceof Class) {
-      cls = (Class<?>) enclosedMetaObject;
     }
     else if (enclosedMetaObject != null) {
       try {
@@ -395,7 +438,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       }
     }
 
-    return cls;
+    return asClassCache = cls;
   }
 
   @Override
@@ -403,7 +446,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     Class<?> cls = asClass();
     if (cls == null)
       return this;
-    
+
     return MetaClassFactory.get(ParseTools.boxPrimitive(cls));
   }
 
@@ -412,14 +455,16 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     Class<?> cls = asClass();
     if (cls == null)
       return this;
-    
+
     return MetaClassFactory.get(ParseTools.unboxPrimitive(cls));
   }
+
+  private transient volatile MetaClass erasedCache;
 
   @Override
   public MetaClass getErased() {
     try {
-      return MetaClassFactory.get(getFullyQualifiedName());
+      return erasedCache != null ? erasedCache : (erasedCache = MetaClassFactory.get(getFullyQualifiedName(), true));
     }
     catch (Exception e) {
       return this;
@@ -432,7 +477,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     String dimString = "";
     MetaClass type = this;
     if (isArray()) {
-      type = getComponentType();
+      type = type.getComponentType();
       int dim = 1;
       while (type.isArray()) {
         dim++;
@@ -446,40 +491,89 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       name = type.getFullyQualifiedName();
     }
 
-    if (isPrimitive() || (isArray() && type.isPrimitive())) {
-      if ("int".equals(name)) {
-        name = "I";
-      }
-      else if ("boolean".equals(name)) {
-        name = "Z";
-      }
-      else if ("byte".equals(name)) {
-        name = "B";
-      }
-      else if ("char".equals(name)) {
-        name = "C";
-      }
-      else if ("short".equals(name)) {
-        name = "S";
-      }
-      else if ("long".equals(name)) {
-        name = "J";
-      }
-      else if ("float".equals(name)) {
-        name = "F";
-      }
-      else if ("double".equals(name)) {
-        name = "D";
-      }
-      else if ("void".equals(name)) {
-        name = "V";
-      }
+    if (type.isPrimitive()) {
+      name = getInternalPrimitiveNameFrom(name.trim());
     }
     else {
-      name = "L" + name.replaceAll("\\.", "/") + ";";
+      name = "L" + getInternalPrimitiveNameFrom(name.trim()).replaceAll("\\.", "/") + ";";
     }
 
-
     return dimString + name;
+  }
+
+  private static String getInternalPrimitiveNameFrom(String name) {
+    if ("int".equals(name)) {
+      return "I";
+    }
+    else if ("boolean".equals(name)) {
+      return "Z";
+    }
+    else if ("byte".equals(name)) {
+      return "B";
+    }
+    else if ("char".equals(name)) {
+      return "C";
+    }
+    else if ("short".equals(name)) {
+      return "S";
+    }
+    else if ("long".equals(name)) {
+      return "J";
+    }
+    else if ("float".equals(name)) {
+      return "F";
+    }
+    else if ("double".equals(name)) {
+      return "D";
+    }
+    else if ("void".equals(name)) {
+      return "V";
+    }
+    return name;
+  }
+
+  private static Class<?> getPrimitiveRefFrom(String name) {
+    if ("int".equals(name)) {
+      return int.class;
+    }
+    else if ("boolean".equals(name)) {
+      return boolean.class;
+    }
+    else if ("byte".equals(name)) {
+      return byte.class;
+    }
+    else if ("char".equals(name)) {
+      return char.class;
+    }
+    else if ("short".equals(name)) {
+      return short.class;
+    }
+    else if ("long".equals(name)) {
+      return long.class;
+    }
+    else if ("float".equals(name)) {
+      return float.class;
+    }
+    else if ("double".equals(name)) {
+      return double.class;
+    }
+    else if ("void".equals(name)) {
+      return void.class;
+    }
+    return null;
+  }
+
+  @Override
+  public MetaClass getOuterComponentType() {
+    MetaClass c = this;
+    while (c.isArray()) {
+      c = c.getComponentType();
+    }
+    return c;
+  }
+
+  @Override
+  public String toString() {
+    return getCanonicalName();
   }
 }

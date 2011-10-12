@@ -38,6 +38,7 @@ import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaConstructor;
 import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaField;
 import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaMethod;
+import org.jboss.errai.codegen.framework.util.GenUtil;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -54,11 +55,13 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
     this.classDefinition = new BuildMetaClass(context);
     this.classDefinition.setClassName(className);
     this.classDefinition.setSuperClass(parent);
+    context.attachClass(classDefinition);
   }
 
   ClassBuilder(ClassBuilder<T> that, Context context) {
     this.classDefinition = that.classDefinition;
     this.classDefinition.setContext(context);
+    context.attachClass(classDefinition);
   }
 
   public static ClassDefinitionBuilderScope<?> define(String fullyQualifiedName) {
@@ -75,9 +78,9 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
 
   public static ClassStructureBuilder<?> implement(MetaClass cls) {
     return new ClassBuilder<DefaultClassStructureBuilder>(cls.getFullyQualifiedName() + "Impl", null, Context.create()
-        .autoImport())
-        .publicScope()
-        .implementsInterface(cls).body();
+            .autoImport())
+            .publicScope()
+            .implementsInterface(cls).body();
   }
 
   public static ClassStructureBuilder<?> implement(Class<?> cls) {
@@ -147,7 +150,7 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
   public ConstructorBlockBuilder<T> publicConstructor() {
     return genConstructor(Scope.Public, DefParameters.none());
   }
-  
+
   @Override
   public ConstructorBlockBuilder<T> publicConstructor(MetaClass... parms) {
     return genConstructor(Scope.Public, DefParameters.fromTypeArray(parms));
@@ -167,7 +170,7 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
   public ConstructorBlockBuilder<T> privateConstructor() {
     return genConstructor(Scope.Private, DefParameters.none());
   }
-  
+
   @Override
   public ConstructorBlockBuilder<T> privateConstructor(MetaClass... parms) {
     return genConstructor(Scope.Private, DefParameters.fromTypeArray(parms));
@@ -187,7 +190,7 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
   public ConstructorBlockBuilder<T> protectedConstructor() {
     return genConstructor(Scope.Protected, DefParameters.none());
   }
-  
+
   @Override
   public ConstructorBlockBuilder<T> protectedConstructor(MetaClass... parms) {
     return genConstructor(Scope.Protected, DefParameters.fromTypeArray(parms));
@@ -207,7 +210,7 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
   public ConstructorBlockBuilder<T> packageConstructor() {
     return genConstructor(Scope.Package, DefParameters.none());
   }
-  
+
   @Override
   public ConstructorBlockBuilder<T> packageConstructor(MetaClass... parms) {
     return genConstructor(Scope.Package, DefParameters.fromTypeArray(parms));
@@ -236,6 +239,11 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
         classDefinition.addConstructor(buildMetaConstructor);
         return (T) ClassBuilder.this;
       }
+
+      @Override
+      public Context getParentContext() {
+        return classDefinition.getContext();
+      }
     });
   }
 
@@ -249,7 +257,7 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
   public MethodBlockBuilder<T> publicMethod(Class<?> returnType, String name) {
     return publicMethod(MetaClassFactory.get(returnType), name);
   }
-    
+
   @Override
   public MethodBlockBuilder<T> publicMethod(MetaClass returnType, String name, MetaClass... parms) {
     return genMethod(Scope.Public, returnType, name, DefParameters.fromTypeArray(parms));
@@ -311,7 +319,7 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
   public MethodBlockBuilder<T> protectedMethod(Class<?> returnType, String name) {
     return protectedMethod(MetaClassFactory.get(returnType), name);
   }
-  
+
   @Override
   public MethodBlockBuilder<T> protectedMethod(MetaClass returnType, String name, MetaClass... parms) {
     return genMethod(Scope.Protected, returnType, name, DefParameters.fromTypeArray(parms));
@@ -381,12 +389,12 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
           dParameters = parameters;
         }
         else {
-          dParameters = defParameters;          
+          dParameters = defParameters;
         }
 
         BuildMetaMethod buildMetaMethod = new BuildMetaMethod(classDefinition, statement, scope,
                 modifiers, name, returnType, null, dParameters, throwsDeclaration);
- 
+
         classDefinition.addMethod(buildMetaMethod);
         return (T) ClassBuilder.this;
       }
@@ -434,7 +442,7 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
   }
 
   private FieldBuildInitializer<T> genField(final Scope scope, final String name,
-                                                                    final MetaClass type) {
+                                            final MetaClass type) {
     return new FieldBuilder<T>(new BuildCallback<T>() {
       @Override
       public T callback(final Statement statement) {
@@ -444,15 +452,26 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
         classDefinition.addField(buildMetaField);
         return (T) ClassBuilder.this;
       }
+
+      @Override
+      public Context getParentContext() {
+        return classDefinition.getContext();
+      }
     }, scope, type, name);
   }
 
-  public BuildMetaClass getClassDefinition() {
+  public MetaClass getClassDefinition() {
     return classDefinition;
   }
 
   @Override
   public String toJavaString() {
-    return classDefinition.toJavaString();
+    try {
+      return classDefinition.toJavaString();
+    }
+    catch (Throwable t) {
+      GenUtil.throwIfUnhandled("error generating class: " + classDefinition.getFullyQualifiedName(), t);
+      return null;
+    }
   }
 }

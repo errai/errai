@@ -16,7 +16,8 @@
 package org.jboss.errai.bus.server.service.bootstrap;
 
 import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
-import org.jboss.errai.bus.server.service.metadata.*;
+import org.jboss.errai.bus.server.service.ServiceProcessor;
+import org.jboss.errai.common.metadata.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +59,10 @@ class DiscoverServices implements BootstrapExecution {
   private boolean isAutoScanEnabled(ErraiServiceConfiguratorImpl config) {
     boolean autoScanModules = true;
 
-    if (config.hasProperty("errai.auto_discover_services")) {
+    if (System.getProperty("errai.auto_discover_services") != null) {
+      autoScanModules = Boolean.getBoolean("errai.auto_discover_services");
+    }
+    else if (config.hasProperty("errai.auto_discover_services")) {
       autoScanModules = Boolean.parseBoolean(config.getProperty("errai.auto_discover_services"));
     }
     return autoScanModules;

@@ -1,9 +1,9 @@
 package org.jboss.errai.marshalling.client.marshallers;
 
 import com.google.gwt.json.client.JSONValue;
-import org.jboss.errai.marshalling.client.api.ClientMarshaller;
+import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.Marshaller;
-import org.jboss.errai.marshalling.client.api.MarshallingContext;
+import org.jboss.errai.marshalling.client.api.MarshallingSession;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -21,13 +21,13 @@ public class CharacterMarshaller implements Marshaller<JSONValue, Character> {
   }
 
   @Override
-  public Character demarshall(JSONValue o, MarshallingContext ctx) {
+  public Character demarshall(JSONValue o, MarshallingSession ctx) {
     return o.isString().stringValue().charAt(0);
   }
 
   @Override
-  public String marshall(Character o, MarshallingContext ctx) {
-    return "\" + o + \"";
+  public String marshall(Character o, MarshallingSession ctx) {
+    return "\"" + o.toString() + "\"";
   }
 
   @Override

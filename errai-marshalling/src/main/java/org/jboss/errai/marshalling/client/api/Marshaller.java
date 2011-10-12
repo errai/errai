@@ -8,9 +8,9 @@ public interface Marshaller<Z, T> {
 
   String getEncodingType();
 
-  T demarshall(Z o, MarshallingContext ctx);
+  T demarshall(Z o, MarshallingSession ctx);
 
-  String marshall(T o, MarshallingContext ctx);
+  String marshall(T o, MarshallingSession ctx);
 
   boolean handles(Z o);
 }

@@ -144,6 +144,11 @@ public class SwitchBlockBuilderImpl extends AbstractStatementBuilder implements 
           public CaseBlockBuilder callback(Statement statement) {
             return SwitchBlockBuilderImpl.this;
           }
+
+          @Override
+          public Context getParentContext() {
+            return context;
+          }
         });
   }
 
@@ -155,6 +160,11 @@ public class SwitchBlockBuilderImpl extends AbstractStatementBuilder implements 
           @Override
           public StatementEnd callback(Statement statement) {
             return SwitchBlockBuilderImpl.this;
+          }
+
+          @Override
+          public Context getParentContext() {
+            return context;
           }
         });
   }

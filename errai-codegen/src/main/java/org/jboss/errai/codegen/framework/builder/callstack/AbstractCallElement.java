@@ -64,4 +64,8 @@ public abstract class AbstractCallElement implements CallElement {
     return resultType;
   }
 
+  @Override
+  public String toString() {
+    return "[CallElement<" + next + ">]";
+  }
 }

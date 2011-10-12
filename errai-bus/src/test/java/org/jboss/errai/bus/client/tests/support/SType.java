@@ -16,7 +16,7 @@
 
 package org.jboss.errai.bus.client.tests.support;
 
-import org.jboss.errai.bus.server.annotations.ExposeEntity;
+import org.jboss.errai.common.client.api.annotations.ExposeEntity;
 
 import java.util.*;
 
@@ -48,8 +48,6 @@ public class SType extends STypeSuper {
 
   private SType[] sTypeArray;
 
-
-  @ExposeEntity
   public enum Place {
     FIRST, SECOND, THIRD
   }

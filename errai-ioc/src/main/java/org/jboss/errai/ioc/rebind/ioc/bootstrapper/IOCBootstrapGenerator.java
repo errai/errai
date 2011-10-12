@@ -6,9 +6,9 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.rebind.SourceWriter;
 import com.google.gwt.user.rebind.StringSourceWriter;
-import org.jboss.errai.bus.rebind.ScannerSingleton;
+import org.jboss.errai.common.metadata.MetaDataScanner;
+import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
-import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
 import org.jboss.errai.codegen.framework.*;
 import org.jboss.errai.codegen.framework.meta.*;
 import org.jboss.errai.codegen.framework.util.*;
@@ -84,7 +84,7 @@ public class IOCBootstrapGenerator {
     ClassStructureBuilder<?> classStructureBuilder
             = Implementations.implement(Bootstrapper.class, packageName, className);
 
-    BuildMetaClass bootStrapClass = classStructureBuilder.getClassDefinition();
+    BuildMetaClass bootStrapClass = (BuildMetaClass) classStructureBuilder.getClassDefinition();
     Context buildContext = bootStrapClass.getContext();
 
     BlockBuilder<?> blockBuilder =
@@ -156,7 +156,7 @@ public class IOCBootstrapGenerator {
 
     Collection<MetaField> privateFields = injectFactory.getInjectionContext().getPrivateFieldsToExpose();
     for (MetaField f : privateFields) {
-      GenUtil.addPrivateAccessStubs(!useReflectionStubs, classBuilder, f, f.getType());
+      GenUtil.addPrivateAccessStubs(!useReflectionStubs, classBuilder, f);
     }
 
     Collection<MetaMethod> privateMethods = injectFactory.getInjectionContext().getPrivateMethodsToExpose();

@@ -16,16 +16,12 @@
 
 package org.jboss.errai.common.client.json;
 
-import com.google.gwt.json.client.JSONString;
+import org.jboss.errai.common.client.types.DataTypeHelper;
 import org.jboss.errai.common.client.types.EncodingContext;
-import org.jboss.errai.common.client.types.Marshaller;
 
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
-
-import static org.jboss.errai.common.client.types.TypeMarshallers.getMarshaller;
-import static org.jboss.errai.common.client.types.TypeMarshallers.hasMarshaller;
 
 public class JSONEncoderCli {
   boolean defer;
@@ -84,10 +80,10 @@ public class JSONEncoderCli {
       }
       return null;
     }
-    else if (hasMarshaller(v.getClass().getName())) {
-      Marshaller<Object> m = getMarshaller(marshall = v.getClass().getName());
-      String enc = m.marshall(v, ctx);
-      return enc;
+    else if (DataTypeHelper.getMarshallerProvider().hasMarshaller(v.getClass().getName())) {
+//      Marshaller<Object> m = getMarshaller(marshall = v.getClass().getName());
+//      String enc = m.marshall(v, ctx);
+      return DataTypeHelper.getMarshallerProvider().marshall(v.getClass().getName(), v);
     }
     else if (v instanceof Enum) {
       return _encode(v.toString(), ctx);
@@ -99,7 +95,7 @@ public class JSONEncoderCli {
   }
 
   public static String encodeString(String string, EncodingContext ctx) {
-    return "\"" + string.replaceAll("\\\\", "\\\\\\\\").replaceAll("[\\\\]{0}\\\"", "\\\\\"")  + "\"";
+    return "\"" + string.replaceAll("\\\\", "\\\\\\\\").replaceAll("[\\\\]{0}\\\"", "\\\\\"") + "\"";
   }
 
 

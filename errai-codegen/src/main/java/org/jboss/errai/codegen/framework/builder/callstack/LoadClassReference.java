@@ -37,27 +37,33 @@ public class LoadClassReference extends AbstractCallElement {
   public void handleCall(CallWriter writer, Context context, Statement statement) {
     writer.reset();
 
-    statement = new Statement() {
-      @Override
-      public String generate(Context context) {
-        return getClassReference(metaClass, context);
-      }
-
-      @Override
-      public MetaClass getType() {
-        return metaClass;
-      }
-    };
-
-    nextOrReturn(writer, context, statement);
+    nextOrReturn(writer, context, new ClassReference(metaClass));
   }
 
+  public static class ClassReference implements Statement {
+    private MetaClass metaClass;
+
+    public ClassReference(MetaClass metaClass) {
+      this.metaClass = metaClass;
+    }
+
+    @Override
+    public String generate(Context context) {
+      return getClassReference(metaClass, context);
+    }
+
+    @Override
+    public MetaClass getType() {
+      return metaClass;
+    }
+  }
+  
   public static String getClassReference(MetaType metaClass, Context context) {
     return getClassReference(metaClass, context, false);
   }
 
   public static String getClassReference(MetaType metaClass, Context context, boolean typeParms) {
-    MetaClass erased = null;
+    MetaClass erased;
     if (metaClass instanceof MetaClass) {
       erased = ((MetaClass) metaClass).getErased();
     }
@@ -69,8 +75,11 @@ public class LoadClassReference extends AbstractCallElement {
       MetaTypeVariable parameterizedType = (MetaTypeVariable) metaClass;
       return parameterizedType.getName();
     }
+    else {
+      throw new RuntimeException("unknown class reference type: " + metaClass);
+    }
 
-    String fqcn = erased.getFullyQualifiedName();
+    String fqcn = erased.getCanonicalName();
     String pkg;
 
     int idx = fqcn.lastIndexOf('.');
@@ -87,7 +96,7 @@ public class LoadClassReference extends AbstractCallElement {
     }
 
     StringBuilder buf = new StringBuilder(fqcn);
-    if (typeParms && metaClass instanceof MetaClass) {
+    if (typeParms) {
       buf.append(getClassReferencesForParameterizedTypes(((MetaClass)metaClass).getParameterizedType(), context));
     }
 
@@ -120,5 +129,10 @@ public class LoadClassReference extends AbstractCallElement {
     }
 
     return buf.toString();
+  }
+
+  @Override
+  public String toString() {
+    return "[[LoadClassReference<" + metaClass.getFullyQualifiedName() + ">]" + next + "]";
   }
 }

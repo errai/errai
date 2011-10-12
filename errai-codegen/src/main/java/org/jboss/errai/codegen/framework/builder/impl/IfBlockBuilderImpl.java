@@ -83,6 +83,11 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements Cont
       public ElseBlockBuilder callback(Statement statement) {
         return IfBlockBuilderImpl.this;
       }
+
+      @Override
+      public Context getParentContext() {
+        return context;
+      }
     });
   }
 
@@ -92,6 +97,11 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements Cont
       @Override
       public StatementEnd callback(Statement statement) {
         return IfBlockBuilderImpl.this;
+      }
+
+      @Override
+      public Context getParentContext() {
+        return context;
       }
     });
   }
@@ -122,6 +132,11 @@ public class IfBlockBuilderImpl extends AbstractStatementBuilder implements Cont
       @Override
       public ElseBlockBuilder callback(Statement statement) {
         return new IfBlockBuilderImpl(context, callElementBuilder, elseIfBlock);
+      }
+
+      @Override
+      public Context getParentContext() {
+        return context;
       }
     });
   }

@@ -32,7 +32,7 @@ import org.jboss.errai.bus.server.security.auth.AuthenticationFailedException;
 import org.jboss.errai.bus.server.security.auth.SimpleRole;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
-import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
+import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.persistence.server.security.annotations.AuthPasswordField;
 import org.jboss.errai.persistence.server.security.annotations.AuthRolesField;
 import org.jboss.errai.persistence.server.security.annotations.AuthUserEntity;
