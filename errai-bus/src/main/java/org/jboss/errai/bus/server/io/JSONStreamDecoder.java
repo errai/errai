@@ -31,6 +31,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import static org.jboss.errai.bus.server.io.TypeDemarshallHelper.demarshallAll;
+import static org.jboss.errai.bus.server.io.TypeDemarshallHelper.instantiate;
 import static org.jboss.errai.common.client.protocols.SerializationParts.ENCODED_TYPE;
 
 /**
@@ -56,7 +57,7 @@ public class JSONStreamDecoder {
     this.buffer = CharBuffer.allocate(25);
     try {
       this.reader = new BufferedReader(
-          new InputStreamReader(inStream, "UTF-8")
+              new InputStreamReader(inStream, "UTF-8")
       );
     }
     catch (UnsupportedEncodingException e) {
@@ -123,6 +124,7 @@ public class JSONStreamDecoder {
               return demarshallAll(ctx.record(collection, decodingContext), decodingContext);
             }
             catch (Exception e) {
+              e.printStackTrace();
               throw new RuntimeException("Could not demarshall object", e);
             }
           }
@@ -222,7 +224,7 @@ public class JSONStreamDecoder {
       case '"':
         return '\"';
       default:
-        throw new CompileException("illegal escape sequence: " + c);
+        throw new RuntimeException("illegal escape sequence: " + c);
     }
   }
 
@@ -237,7 +239,8 @@ public class JSONStreamDecoder {
     int len = 0;
     do {
       buf[len++] = c;
-    } while ((c = read()) != 0 && isValidNumberPart(c));
+    }
+    while ((c = read()) != 0 && isValidNumberPart(c));
 
     if (c != 0) {
       carry = c;
@@ -363,37 +366,13 @@ public class JSONStreamDecoder {
               lhs = new JSONDecoder(lhs.toString().substring(SerializationParts.EMBEDDED_JSON.length())).parse();
             }
 
-            boolean rec = true;
-            if (lhs instanceof UnsatisfiedForwardLookup) {
-              ctx.addUnsatisfiedDependency(collection, (UnsatisfiedForwardLookup) lhs);
-              if (!(rhs instanceof UnsatisfiedForwardLookup)) {
-                ((UnsatisfiedForwardLookup) lhs).setVal(rhs);
-                ((UnsatisfiedForwardLookup) lhs).setPath("{}");
-              }
-              rec = false;
-            }
-            if (rhs instanceof UnsatisfiedForwardLookup) {
-              ctx.addUnsatisfiedDependency(collection, (UnsatisfiedForwardLookup) rhs);
-              ((UnsatisfiedForwardLookup) rhs).setKey(lhs);
-              ((UnsatisfiedForwardLookup) rhs).setPath(String.valueOf(lhs));
-              rec = false;
-            }
-
-            //noinspection unchecked
-            if (rec)
-              ((Map) collection).put(lhs, rhs);
+            ((Map) collection).put(lhs, rhs);
 
           }
           else {
             if (collection == null) return lhs;
 
-            if (lhs instanceof UnsatisfiedForwardLookup) {
-              ctx.addUnsatisfiedDependency(collection, (UnsatisfiedForwardLookup) lhs);
-            }
-            else {
-              //noinspection unchecked
-              ((Collection) collection).add(lhs);
-            }
+            ((Collection) collection).add(lhs);
           }
         }
         return collection;

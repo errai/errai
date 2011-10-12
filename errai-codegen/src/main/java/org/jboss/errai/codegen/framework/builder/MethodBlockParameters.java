@@ -12,4 +12,6 @@ public interface MethodBlockParameters<T> {
   public MethodBlockBuilder<T> parameters(Class<?>... parms);
 
   public MethodBlockBuilder<T> parameters(MetaClass... parms);
+
+  public MethodBlockBuilder<T> parameters(Object... parms);
 }

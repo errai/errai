@@ -43,6 +43,8 @@ import static org.jboss.errai.bus.client.protocols.MessageParts.*;
 /**
  * The default client <tt>MessageBus</tt> implementation.  This bus runs in the browser and automatically federates
  * with the server immediately upon initialization.
+ *
+ * @author Mike Brock
  */
 public class ClientMessageBusImpl implements ClientMessageBus {
   private static final int HEARTBEAT_DELAY = 20000;
@@ -196,6 +198,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       fireAllUnSubscribeListeners(subject);
 
       subscriptions.remove(subject);
+      remoteShadowSubscription(subject);
     }
   }
 
@@ -386,6 +389,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     if (remotes.containsKey(subject)) {
       remotes.get(subject).callback(message);
     }
+    else if (shadowSubscriptions.containsKey(subject)) {
+      deliverToShadowSubscriptions(subject, message);
+    }
     else {
       _store(subject, v);
     }
@@ -400,8 +406,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    */
   private void encodeAndTransmit(Message message) {
     //outgoingQueue.add(message);
-    transmitRemote(message instanceof HasEncoded ?
-            ((HasEncoded) message).getEncoded() : encodeMap(message.getParts()), message);
+//    transmitRemote(message instanceof HasEncoded ?
+//            ((HasEncoded) message).getEncoded() : encodeMap(message.getParts()), message);
+
+    transmitRemote(encodeMap(message.getParts()), message);
   }
 
   private void addSubscription(String subject, Object reference) {
@@ -439,6 +447,14 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         _subscribe(entry.getKey(), callback, false);
       }
     }
+  }
+
+  private void deliverToShadowSubscriptions(String subject, Message message) {
+//    if (shadowSubscriptions.containsKey(subject)) {
+    for (MessageCallback cb : shadowSubscriptions.get(subject)) {
+      cb.callback(message);
+    }
+//    }
   }
 
   /**
@@ -505,6 +521,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    */
   private void transmitRemote(final String message, final Message txMessage) {
     if (message == null) return;
+
+   // System.out.println("TX:" + message);
 
     try {
       sendBuilder.sendRequest(message, new RequestCallback() {
@@ -721,7 +739,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             else {
               String subject = message.get(String.class, Subject);
               remoteSubscribe(subject);
-
             }
             break;
 
@@ -1207,12 +1224,15 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * @throws Exception -
    */
   private void procIncomingPayload(Response response) throws Exception {
+  //  System.out.println("RX:" +response.getText());
+
     try {
       for (MarshalledMessage m : decodePayload(response.getText())) {
         _store(m.getSubject(), m.getMessage());
       }
     }
     catch (RuntimeException e) {
+      e.printStackTrace();
       logError("Error delivering message into bus", response.getText(), e);
     }
   }

@@ -62,7 +62,7 @@ public interface ClassBuilderTestResult {
           " public class Foo {\n" +
           "   private String name = \"default\";\n" +
           "   public String getName() {\n" +
-          "     return this.name;\n" +
+          "     return name;\n" +
           "   }\n" +
           "   public void setName(String name) {\n" +
           "     this.name = name;\n" +

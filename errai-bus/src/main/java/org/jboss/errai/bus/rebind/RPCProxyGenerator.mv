@@ -43,7 +43,7 @@ def pretty(cls) {
     }
     
     @foreach{method : interfaceClass.getMethods()}
-        public @{method.getReturnType() == Void.class ? "void" : pretty(method.getReturnType())}
+        public @{method.getReturnType() == Void ? "void" : pretty(method.getReturnType())}
                @{method.getName()}(@code{count = 0;}@foreach{type : method.getParameterTypes()}@{type.getCanonicalName()} _@{count++}@end{", "}) {
 
                 if (errorCallback == null) {

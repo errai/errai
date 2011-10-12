@@ -73,6 +73,8 @@ import org.jboss.errai.bus.client.api.*;
  * ...
  * }
  * </code></pre>
+ *
+ * @author Mike Brock
  */
 public interface MessageBus {
   /**

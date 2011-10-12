@@ -151,4 +151,10 @@ public class ContextualStatementBuilderImpl extends AbstractStatementBuilder imp
     appendCallElement(new AssignVariable(operator, statement));
     return this;
   }
+  
+  @Override
+  public String toString() {
+    return "[Statement:" + callElementBuilder + "]";
+    
+  }
 }

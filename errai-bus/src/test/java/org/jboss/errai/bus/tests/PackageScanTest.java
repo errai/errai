@@ -18,7 +18,7 @@ package org.jboss.errai.bus.tests;
 import junit.framework.TestCase;
 import org.jboss.errai.bus.server.annotations.ApplicationComponent;
 import org.jboss.errai.bus.server.annotations.ExtensionComponent;
-import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
+import org.jboss.errai.common.metadata.MetaDataScanner;
 
 import java.io.File;
 import java.net.URL;

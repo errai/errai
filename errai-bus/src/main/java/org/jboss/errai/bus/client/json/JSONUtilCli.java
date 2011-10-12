@@ -23,20 +23,16 @@ import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
-import org.jboss.errai.common.client.json.JSONDecoderCli;
-import org.jboss.errai.common.client.json.JSONEncoderCli;
-import org.jboss.errai.common.client.types.DecodingContext;
-import org.jboss.errai.common.client.types.EncodingContext;
-import org.jboss.errai.common.client.types.JSONTypeHelper;
+import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 public class JSONUtilCli {
-  private static final ArrayList<MarshalledMessage> EMPTYLIST = new ArrayList<MarshalledMessage>(0);
-
-  public static ArrayList<MarshalledMessage> decodePayload(String value) {
-    if (value == null || value.trim().length() == 0) return EMPTYLIST;
+  public static List<MarshalledMessage> decodePayload(String value) {
+    if (value == null || value.trim().length() == 0) return Collections.emptyList();
 
     /**
      * We have to do a two-stage decoding of the message.  We cannot fully decode the message here, as we
@@ -44,32 +40,34 @@ public class JSONUtilCli {
      * field and send the unparsed JSON object onwards.
      *
      */
-    try {
-      JSONValue val = JSONParser.parseStrict(value);
-      if (val == null) {
-        return EMPTYLIST;
-      }
-      JSONArray arr = val.isArray();
-      if (arr == null) {
-        throw new RuntimeException("unrecognized payload" + val.toString());
-      }
-      ArrayList<MarshalledMessage> list = new ArrayList<MarshalledMessage>(arr.size());
-      for (int i = 0; i < arr.size(); i++) {
-        list.add(new MarshalledMessageImpl((JSONObject) arr.get(i)));
-      }
-
-      return list;
+    JSONValue val = JSONParser.parseStrict(value);
+    if (val == null) {
+      return Collections.emptyList();
     }
-    catch (Exception e) {
-      System.out.println("JSONUtilCli.decodePayload=" + value);
-      e.printStackTrace();
-      return EMPTYLIST;
+    JSONArray arr = val.isArray();
+    if (arr == null) {
+      throw new RuntimeException("unrecognized payload" + val.toString());
     }
+    ArrayList<MarshalledMessage> list = new ArrayList<MarshalledMessage>();
+    unwrap(list, arr);
+    return list;
 
   }
 
+  private static void unwrap(List<MarshalledMessage> messages, JSONArray val) {
+    for (int i = 0; i < val.size(); i++) {
+      JSONValue v = val.get(i);
+      if (v.isArray() != null) {
+        unwrap(messages, v.isArray());
+      }
+      else {
+        messages.add(new MarshalledMessageImpl((JSONObject) v));
+      }
+    }
+  }
+
   public static class MarshalledMessageImpl implements MarshalledMessage {
-    public JSONObject o;
+    public final JSONObject o;
 
     public MarshalledMessageImpl(JSONObject o) {
       this.o = o;
@@ -87,22 +85,23 @@ public class JSONUtilCli {
   @SuppressWarnings({"unchecked"})
   public static Map<String, Object> decodeMap(Object value) {
     try {
-      DecodingContext ctx = new DecodingContext();
-      Map<String, Object> map = (Map<String, Object>) JSONDecoderCli.decode(value, ctx);
-
-      if (ctx.isUnsatisfiedDependencies()) {
-        JSONTypeHelper.resolveDependencies(ctx);
+      if (value instanceof JSONObject) {
+        return (Map<String, Object>) MarshallerFramework
+                .demarshallErraiJSON((JSONObject) value);
+      }
+      else if (value instanceof String) {
+        return (Map<String, Object>) MarshallerFramework
+                .demarshallErraiJSON(JSONParser.parseStrict((String) value).isObject());
+      }
+      else {
+        throw new RuntimeException("what the hell is this? " + value);
       }
 
-      return map;
     }
     catch (RuntimeException e) {
-      System.out.println("<<" + String.valueOf(value) + ">>");
-
       e.printStackTrace();
     }
     return null;
-
   }
 
   public static Message decodeCommandMessage(Object value) {
@@ -110,8 +109,6 @@ public class JSONUtilCli {
   }
 
   public static String encodeMap(Map<String, Object> map) {
-    return new JSONEncoderCli().encode(map, new EncodingContext());
+    return MarshallerFramework.marshalErraiJSON(map);
   }
-
-
 }

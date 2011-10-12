@@ -21,8 +21,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.jboss.errai.codegen.framework.literal.NullLiteral;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
+import org.mvel2.util.NullType;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -54,10 +56,13 @@ public class CallParameters extends AbstractStatement {
   public MetaClass[] getParameterTypes() {
     MetaClass[] parameterTypes = new MetaClass[parameters.size()];
     for (int i = 0; i < parameters.size(); i++) {
-      if ((parameterTypes[i] = parameters.get(i).getType()) == null) {
+      if (parameters.get(i) instanceof NullLiteral) {
+        parameterTypes[i] = MetaClassFactory.get(NullType.class);
+      }
+      else if ((parameterTypes[i] = parameters.get(i).getType()) == null) {
         parameterTypes[i] = MetaClassFactory.get(Object.class);
       }
-      
+
     }
     return parameterTypes;
   }

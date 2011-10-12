@@ -177,6 +177,6 @@ public class GWTConstructor extends MetaConstructor {
 
   @Override
   public boolean equals(Object o) {
-    return o instanceof MetaMethod && GenUtil.equals(this, (MetaMethod) o);
+    return o instanceof MetaConstructor && GenUtil.equals(this, (MetaConstructor) o);
   }
 }

@@ -26,6 +26,7 @@ import org.jboss.errai.codegen.framework.meta.MetaType;
 
 import com.google.gwt.core.ext.typeinfo.JField;
 import com.google.gwt.core.ext.typeinfo.JGenericType;
+import org.jboss.errai.codegen.framework.util.GenUtil;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -153,5 +154,10 @@ public class GWTField extends MetaField {
   @Override
   public boolean isSynchronized() {
     return false;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    return o instanceof MetaField && GenUtil.equals(this, (MetaField) o);
   }
 }

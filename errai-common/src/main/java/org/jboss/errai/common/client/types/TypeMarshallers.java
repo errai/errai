@@ -54,20 +54,20 @@ public class TypeMarshallers {
     marshallers.put(type, d);
   }
 
-  @SuppressWarnings({"unchecked"})
-  public static <T> Marshaller<T> getMarshaller(Class<? extends T> type) {
-    return (Marshaller<T>) marshallers.get(type);
-  }
 
-  public static Marshaller<Object> getMarshaller(String type) {
-    return classMap.get(type);
-  }
-
-  public static boolean hasMarshaller(Class type) {
-    return marshallers.containsKey(type);
-  }
-
-  public static boolean hasMarshaller(String type) {
-    return classMap.containsKey(type);
-  }
+//  public static <T> Marshaller<T> getMarshaller(Class<? extends T> type) {
+//    return (Marshaller<T>) marshallers.get(type);
+//  }
+//
+//  public static Marshaller<Object> getMarshaller(String type) {
+//    return classMap.get(type);
+//  }
+//
+//  public static boolean hasMarshaller(Class type) {
+//    return marshallers.containsKey(type);
+//  }
+//
+//  public static boolean hasMarshaller(String type) {
+//    return classMap.containsKey(type);
+//  }
 }

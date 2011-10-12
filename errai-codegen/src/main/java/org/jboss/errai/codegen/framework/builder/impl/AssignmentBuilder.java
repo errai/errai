@@ -58,16 +58,16 @@ public class AssignmentBuilder implements Statement {
     operator.assertCanBeApplied(referenceType);
     operator.assertCanBeApplied(statement.getType());
 
-    return  reference.generate(context) + generateIndexes(indexes) +
+    return  reference.generate(context) + generateIndexes(context, indexes) +
         " " + operator.getCanonicalString() + " " + statement.generate(context);
   }
 
-  private String generateIndexes(Statement[] indexes) {
+  private String generateIndexes(Context context, Statement[] indexes) {
     if (indexes==null || indexes.length == 0) return "";
    
     StringBuilder buf = new StringBuilder();
     for (Statement index : indexes) {
-      buf.append("[").append(index.generate(null)).append("]");
+      buf.append("[").append(index.generate(context)).append("]");
     }
     return buf.toString();
   }

@@ -83,6 +83,8 @@ public abstract class MetaClass implements HasAnnotations, MetaType, MetaGeneric
   public abstract MetaClass getSuperClass();
 
   public abstract MetaClass getComponentType();
+  
+  public abstract MetaClass getOuterComponentType();
 
   public abstract boolean isAssignableFrom(MetaClass clazz);
 
@@ -123,6 +125,8 @@ public abstract class MetaClass implements HasAnnotations, MetaType, MetaGeneric
   public abstract MetaClass asBoxed();
 
   public abstract MetaClass asUnboxed();
+  
+  public abstract MetaClass asArrayOf(int dimensions);
 
   public abstract MetaClass getErased();
 

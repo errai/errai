@@ -15,7 +15,7 @@
  */
 package org.jboss.errai.bus.client.tests.support;
 
-import org.jboss.errai.bus.server.annotations.ExposeEntity;
+import org.jboss.errai.common.client.api.annotations.ExposeEntity;
 
 import javax.persistence.*;
 import java.io.Serializable;

@@ -315,6 +315,11 @@ public class GWTClass extends AbstractMetaClass<JType> {
   }
 
   @Override
+  public MetaClass asArrayOf(int dimensions) {
+    throw new UnsupportedOperationException("asArrayOf() is not supported with GWT types");
+  }
+
+  @Override
   public String toString() {
     return getFullyQualifiedName();
   }

@@ -40,19 +40,13 @@ public class Variable extends AbstractStatement {
   private Statement value;
 
   private Object initialization;
-  private boolean classMember;
+
 
   private boolean isFinal;
 
   private Variable(String name, MetaClass type) {
     this.name = name;
     this.type = type;
-  }
-
-  private Variable(String name, MetaClass type, boolean classMember) {
-    this.name = name;
-    this.type = type;
-    this.classMember = classMember;
   }
 
   private Variable(String name, MetaClass type, Object initialization) {
@@ -105,10 +99,6 @@ public class Variable extends AbstractStatement {
     return new Variable(name, type);
   }
 
-  public static Variable createClassMember(String name, MetaClass type) {
-    return new Variable(name, type, true);
-  }
-
   public static Variable create(String name, Object initialization) {
     return new Variable(name, null, initialization);
   }
@@ -153,7 +143,7 @@ public class Variable extends AbstractStatement {
     return new VariableReference() {
       @Override
       public String getName() {
-        return classMember ? "this." + name : name;
+        return  name;
       }
 
       @Override
@@ -181,9 +171,6 @@ public class Variable extends AbstractStatement {
     return value;
   }
 
-  public boolean isClassMember() {
-    return classMember;
-  }
   
   public boolean isFinal() {
     return isFinal;
@@ -211,7 +198,7 @@ public class Variable extends AbstractStatement {
 
   @Override
   public String toString() {
-    return "Variable [name=" + name + ", type=" + type + ", classMember=" + classMember + "]";
+    return "Variable [name=" + name + ", type=" + type + "]";
   }
 
   @Override

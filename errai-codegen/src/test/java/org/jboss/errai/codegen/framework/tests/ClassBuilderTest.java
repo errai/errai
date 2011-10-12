@@ -28,6 +28,7 @@ import org.jboss.errai.codegen.framework.Variable;
 import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.framework.exception.UndefinedMethodException;
+import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.framework.tests.model.Baz;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.junit.Test;
@@ -84,7 +85,7 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
         .publicScope()
         .body()
         .publicMethod(void.class, "someMethod")
-        .append(new InnerClass(innerClass.getClassDefinition()))
+        .append(new InnerClass((BuildMetaClass) innerClass.getClassDefinition()))
         .append(Stmt.newObject(innerClass.getClassDefinition()))
         .finish()
         .toJavaString();

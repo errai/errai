@@ -27,100 +27,115 @@ import org.jboss.errai.codegen.framework.DefParameters;
 import org.jboss.errai.codegen.framework.Parameter;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.Variable;
-import org.jboss.errai.codegen.framework.builder.BlockBuilder;
-import org.jboss.errai.codegen.framework.builder.BuildCallback;
-import org.jboss.errai.codegen.framework.builder.Finishable;
+import org.jboss.errai.codegen.framework.builder.*;
 import org.jboss.errai.codegen.framework.exception.UndefinedMethodException;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
+import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaMethod;
+import org.jboss.errai.codegen.framework.util.GenUtil;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class AnonymousClassStructureBuilderImpl implements Finishable<ObjectBuilder> {
-  private MetaClass toExtend;
+public class AnonymousClassStructureBuilderImpl
+        extends ClassBuilder<AnonymousClassStructureBuilder>
+        implements AnonymousClassStructureBuilder {
   private BuildCallback<ObjectBuilder> callback;
   private List<DeferredGenerateCallback> callables = new ArrayList<DeferredGenerateCallback>();
-
-  AnonymousClassStructureBuilderImpl(MetaClass clazz, BuildCallback<ObjectBuilder> builderBuildCallback) {
-    this.toExtend = clazz;
-    this.callback = builderBuildCallback;
-  }
-
-  public BlockBuilder<AnonymousClassStructureBuilderImpl> initialize() {
-    return new BlockBuilderImpl<AnonymousClassStructureBuilderImpl>(
-        new BuildCallback<AnonymousClassStructureBuilderImpl>() {
-          @Override
-          public AnonymousClassStructureBuilderImpl callback(final Statement statement) {
-
-            addCallable(new DeferredGenerateCallback() {
-              @Override
-              public String doGenerate(Context context) {
-                StringBuilder buf = new StringBuilder();
-                buf.append("{\n");
-                 if (statement != null) {
-                  buf.append(statement.generate(Context.create(context))).append("\n");
-                }
-                buf.append("}\n");
-
-                return buf.toString();
-              }
-            });
-
-            return AnonymousClassStructureBuilderImpl.this;
-          }
-        });
-  }
+  private Context context;
   
-  private BlockBuilder<AnonymousClassStructureBuilderImpl> publicOverridesMethod(final MetaMethod method,
-      final DefParameters parameters) {
-    return new BlockBuilderImpl<AnonymousClassStructureBuilderImpl>(
-        new BuildCallback<AnonymousClassStructureBuilderImpl>() {
-          @Override
-          public AnonymousClassStructureBuilderImpl callback(final Statement statement) {
-
-            addCallable(new DeferredGenerateCallback() {
-              @Override
-              public String doGenerate(Context context) {
-                Context subContext = Context.create(context);
-                for (Parameter parm : parameters.getParameters()) {
-                  subContext.addVariable(Variable.create(parm.getName(), parm.getType()));
-                }
-
-                StringBuilder buf = new StringBuilder();
-                String returnType = getClassReference(method.getReturnType(), context);
-
-                buf.append("public ").append(returnType)
-                    .append(" ")
-                    .append(method.getName())
-                    .append(parameters.generate(context)).append(" {\n");
-                if (statement != null) {
-                  buf.append(statement.generate(subContext)).append("\n");
-                }
-                buf.append("}\n");
-
-                return buf.toString();
-              }
-            });
-
-            return AnonymousClassStructureBuilderImpl.this;
-          }
-        });
+  AnonymousClassStructureBuilderImpl(MetaClass clazz, BuildCallback<ObjectBuilder> builderBuildCallback) {
+    super(clazz.getFullyQualifiedName(), clazz, builderBuildCallback.getParentContext());
+    this.callback = builderBuildCallback;
+    this.context = builderBuildCallback.getParentContext();
   }
 
-  public BlockBuilder<AnonymousClassStructureBuilderImpl> publicOverridesMethod(String name, Parameter... args) {
+  public BlockBuilder<AnonymousClassStructureBuilder> initialize() {
+    return new BlockBuilderImpl<AnonymousClassStructureBuilder>(
+            new BuildCallback<AnonymousClassStructureBuilder>() {
+              @Override
+              public AnonymousClassStructureBuilderImpl callback(final Statement statement) {
+
+                addCallable(new DeferredGenerateCallback() {
+                  @Override
+                  public String doGenerate(Context context) {
+                    StringBuilder buf = new StringBuilder();
+                    buf.append("{\n");
+                    if (statement != null) {
+                      buf.append(statement.generate(Context.create(context))).append("\n");
+                    }
+                    buf.append("}\n");
+
+                    return buf.toString();
+                  }
+                });
+
+                return AnonymousClassStructureBuilderImpl.this;
+              }
+
+              @Override
+              public Context getParentContext() {
+                return  context;
+              }
+            });
+  }
+
+  private BlockBuilder<AnonymousClassStructureBuilder> publicOverridesMethod(final MetaMethod method,
+                                                                             final DefParameters parameters) {
+    return new BlockBuilderImpl<AnonymousClassStructureBuilder>(
+            new BuildCallback<AnonymousClassStructureBuilder>() {
+              @Override
+              public AnonymousClassStructureBuilder callback(final Statement statement) {
+
+                addCallable(new DeferredGenerateCallback() {
+                  @Override
+                  public String doGenerate(Context context) {
+                    Context subContext = Context.create(context);
+                    for (Parameter parm : parameters.getParameters()) {
+                      subContext.addVariable(Variable.create(parm.getName(), parm.getType()));
+                    }
+
+                    StringBuilder buf = new StringBuilder();
+                    String returnType = getClassReference(method.getReturnType(), context);
+
+                    buf.append("public ").append(returnType)
+                            .append(" ")
+                            .append(method.getName())
+                            .append(parameters.generate(context)).append(" {\n");
+                    if (statement != null) {
+                      buf.append(statement.generate(subContext)).append("\n");
+                    }
+                    buf.append("}\n");
+
+                    return buf.toString();
+                  }
+                });
+
+                return AnonymousClassStructureBuilderImpl.this;
+              }
+
+              @Override
+              public Context getParentContext() {
+                return context;
+              }
+            });
+  }
+
+  public BlockBuilder<AnonymousClassStructureBuilder> publicOverridesMethod(String name, Parameter... args) {
     List<MetaClass> types = new ArrayList<MetaClass>();
     for (Parameter arg : args) {
       types.add(arg.getType());
     }
-    MetaMethod method = toExtend.getBestMatchingMethod(name, types.toArray(new MetaClass[args.length]));
+    MetaMethod method = classDefinition.getSuperClass()
+            .getBestMatchingMethod(name, types.toArray(new MetaClass[args.length]));
     if (method == null)
       throw new UndefinedMethodException("Method not found:" + name);
 
     return publicOverridesMethod(method, DefParameters.from(method, args));
   }
+
 
   @Override
   public ObjectBuilder finish() {
@@ -128,6 +143,7 @@ public class AnonymousClassStructureBuilderImpl implements Finishable<ObjectBuil
       return callback.callback(new AbstractStatement() {
         @Override
         public String generate(Context context) {
+          context.attachClass(getClassDefinition());
           return doGenerate(context);
         }
       });
@@ -147,24 +163,29 @@ public class AnonymousClassStructureBuilderImpl implements Finishable<ObjectBuil
 
       Context subContext = Context.create(context);
       subContext.addVariable(Variable.create("this", getClassDefinition()));
-      
+
       StringBuilder buf = new StringBuilder();
       for (DeferredGenerateCallback c : callables) {
         buf.append(c.doGenerate(subContext));
+        buf.append('\n');
       }
+
+      buf.append(classDefinition.membersToString());
+
       return buf.toString();
     }
     catch (Exception e) {
-      throw new RuntimeException(e);
+      GenUtil.throwIfUnhandled("while generating: " + classDefinition.getFullyQualifiedName(), e);
+      return null;
     }
   }
 
   public static interface DeferredGenerateCallback {
     public String doGenerate(Context context);
   }
-  
-  
+
+
   public MetaClass getClassDefinition() {
-    return toExtend;
+    return classDefinition;
   }
 }

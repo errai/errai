@@ -272,7 +272,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
             .toJavaString();
 
     assertEquals("Failed to generate method invocation using variable return type", 
-        "String str = Foo.foo(s)", s);
+        "String str = Foo.foo(s);", s);
   }
 
   @Test
@@ -301,7 +301,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
             .toJavaString();
 
     assertEquals("Failed to generate method invocation with variable return type inferred from List<T>", 
-        "String str = Foo.bar(list)", s);
+        "String str = Foo.bar(list);", s);
   }
   
   @Test
@@ -315,7 +315,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
             .toJavaString();
 
     assertEquals("Failed to generate method invocation with variable return type inferred from nested List<T>",
-        "String str = Foo.bar(n, list)", s);
+        "String str = Foo.bar(n, list);", s);
   }
 
   @Test
@@ -328,7 +328,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
             .toJavaString();
 
     assertEquals("Failed to generate method invocation with variable return type inferred from Map<K, V>", 
-        "Integer val = Foo.bar(map)", s);
+        "Integer val = Foo.bar(map);", s);
   }
 
   @Test
@@ -340,6 +340,6 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
             .toJavaString();
 
     assertEquals("Failed to generate method invocation with variable return type inferred from Class<T>", 
-        "Set set = Foo.baz(Set.class)", s);
+        "Set set = Foo.baz(Set.class);", s);
   }
 }

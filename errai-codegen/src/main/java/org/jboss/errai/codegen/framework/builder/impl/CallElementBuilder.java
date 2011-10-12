@@ -41,4 +41,9 @@ public class CallElementBuilder {
   public CallElement getCallElement() {
     return callElement;
   }
+
+  @Override
+  public String toString() {
+    return rootElement == null ? "<empty>" : rootElement.toString();
+  }
 }

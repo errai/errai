@@ -122,7 +122,9 @@ public class BusCommunicationTests extends AbstractErraiTest {
               try {
                 assertNotNull(type);
                 System.out.println("CLIENT: " + type.toString());
-                assertTrue(sType1.equals(type));
+                assertEquals(sType1, type);
+
+             //   assertTrue(sType1.equals(type));
 
                 System.out.println("**TEST PASSED**");
                 finishTest();
@@ -245,7 +247,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
         }
       }
     };
-    t.schedule(15000);
+    t.schedule(20000);
     delayTestFinish(20000);
   }
 }

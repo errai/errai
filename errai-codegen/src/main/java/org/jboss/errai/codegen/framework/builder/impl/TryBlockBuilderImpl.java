@@ -60,6 +60,11 @@ public class TryBlockBuilderImpl extends AbstractStatementBuilder implements Try
       public CatchBlockBuilder callback(Statement statement) {
         return TryBlockBuilderImpl.this;
       }
+
+      @Override
+      public Context getParentContext() {
+        return context;
+      }
     });
   }
 
@@ -79,6 +84,11 @@ public class TryBlockBuilderImpl extends AbstractStatementBuilder implements Try
           public CatchBlockBuilder callback(Statement statement) {
             return TryBlockBuilderImpl.this;
           }
+
+          @Override
+          public Context getParentContext() {
+            return context;
+          }
         });
   }
 
@@ -88,6 +98,11 @@ public class TryBlockBuilderImpl extends AbstractStatementBuilder implements Try
       @Override
       public StatementEnd callback(Statement statement) {
         return TryBlockBuilderImpl.this;
+      }
+
+      @Override
+      public Context getParentContext() {
+        return context;
       }
     });
   }

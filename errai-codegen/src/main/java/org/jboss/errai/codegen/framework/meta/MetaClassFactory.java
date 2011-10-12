@@ -115,7 +115,24 @@ public final class MetaClassFactory {
   public static MetaClass get(Class<?> clazz) {
     return createOrGet(clazz);
   }
+  
+  public static MetaClass getArrayOf(Class<?> clazz, int dims) {
+    int[] da = new int[dims];
+    for (int i = 0; i < da.length; i++) {
+      da[i] = 0;
+    }
+    
+    return getArrayOf(clazz, da);
+  }
 
+  public static MetaClass getArrayOf(Class<?> clazz, int... dims) {
+    if (dims.length == 0) {
+      dims = new int[1];
+    }
+    return createOrGet(Array.newInstance(clazz, dims).getClass());
+  }
+  
+  
   public static MetaClass get(Class<?> clazz, Type type) {
     return createOrGet(clazz, type);
   }
@@ -206,18 +223,17 @@ public final class MetaClassFactory {
   private static MetaClass createOrGet(Class cls) {
     if (cls == null) return null;
 
-    if (cls.getTypeParameters() != null) {
-      return JavaReflectionClass.newUncachedInstance(cls);
-    }
+    final String encName = cls.getName()
+            +"<" + Arrays.toString(cls.getTypeParameters()) + Arrays.toString(cls.getGenericInterfaces()) + ">";
 
-    if (!CLASS_CACHE.containsKey(cls.getName())) {
+    if (!CLASS_CACHE.containsKey(encName)) {
       MetaClass javaReflectionClass = JavaReflectionClass.newUncachedInstance(cls);
 
       addLookups(cls, javaReflectionClass);
       return javaReflectionClass;
     }
 
-    return CLASS_CACHE.get(cls.getName());
+    return CLASS_CACHE.get(encName);
   }
 
   private static MetaClass createOrGet(Class cls, Type type) {
@@ -306,6 +322,7 @@ public final class MetaClassFactory {
         parameters.add(Parameter.of(parmType, parm.getName()));
         i++;
       }
+
       BuildMetaMethod newMethod = new BuildMetaMethod(buildMetaClass, EmptyStatement.INSTANCE,
                     GenUtil.scopeOf(method), GenUtil.modifiersOf(method), method.getName(), returnType,
                     method.getGenericReturnType(),

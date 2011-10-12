@@ -16,8 +16,7 @@
 
 package org.jboss.errai.codegen.framework.util;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import com.google.gwt.core.ext.typeinfo.JParameter;
 import com.google.gwt.core.ext.typeinfo.JType;
@@ -27,10 +26,8 @@ import org.jboss.errai.codegen.framework.builder.CatchBlockBuilder;
 import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.Scope;
-import org.jboss.errai.codegen.framework.exception.InvalidTypeException;
-import org.jboss.errai.codegen.framework.exception.OutOfScopeException;
-import org.jboss.errai.codegen.framework.exception.TypeNotIterableException;
-import org.jboss.errai.codegen.framework.exception.UndefinedMethodException;
+import org.jboss.errai.codegen.framework.exception.*;
+import org.jboss.errai.codegen.framework.literal.ClassLiteral;
 import org.jboss.errai.codegen.framework.literal.LiteralFactory;
 import org.jboss.errai.codegen.framework.literal.LiteralValue;
 import org.jboss.errai.codegen.framework.meta.*;
@@ -56,6 +53,8 @@ public class GenUtil {
       throw new UndefinedMethodException("Wrong number of parameters");
     }
 
+    MetaParameter[] methParms = method.getParameters();
+
     Statement[] statements = new Statement[parameters.length];
     int i = 0;
     for (Object parameter : parameters) {
@@ -64,7 +63,14 @@ public class GenUtil {
           parameter = generate(context, parameter);
         }
       }
-      statements[i] = convert(context, parameter, method.getParameters()[i++].getType());
+      try {
+        statements[i] = convert(context, parameter, methParms[i++].getType());
+      }
+      catch (InvalidTypeException e) {
+        throw new RuntimeException("in method call: "
+                + method.getDeclaringClass().getFullyQualifiedName()
+                + "." + method.getName() + "(" + Arrays.toString(methParms) + ")", e);
+      }
     }
     return statements;
   }
@@ -112,10 +118,17 @@ public class GenUtil {
           input = ((LiteralValue<?>) input).getValue();
         }
         else {
-          ((Statement) input).generate(context);
+          if ("null".equals(((Statement) input).generate(context))) {
+            return (Statement) input;
+          }
+
           assertAssignableTypes(((Statement) input).getType(), targetType);
           return (Statement) input;
         }
+      }
+
+      if (Object.class.getName().equals(targetType.getFullyQualifiedName())) {
+        return generate(context, input);
       }
 
       Class<?> inputClass = input == null ? Object.class : input.getClass();
@@ -203,6 +216,78 @@ public class GenUtil {
   }
 
 
+//  public static MetaType determineGenericReturnType(MetaMethod method) {
+//    MetaClass returnType = method.getReturnType();
+//
+//    if (method.getGenericReturnType() != null && method.getGenericReturnType() instanceof MetaTypeVariable) {
+//      Map<String, MetaClass> typeVars = determineTypeVariables(method);
+//      MetaTypeVariable typeVar = (MetaTypeVariable) method.getGenericReturnType();
+//      returnType = typeVars.get(typeVar.getName());
+//    }
+//    else {
+//      MetaClass clazz = method.getDeclaringClass();
+//
+//      for (MetaClass iface : clazz.getInterfaces()) {
+//        if (iface.getParameterizedType() != null) {
+//          MetaParameterizedType parameterizedType = iface.getParameterizedType();
+//
+//          for (MetaMethod ifaceMethod : iface.getDeclaredMethods()) {
+//            if (ifaceMethod.getName().equals(method.getName())) {
+//
+//
+//            }
+//          }
+//        }
+//      }
+//    }
+//
+//     return null;
+//  }
+
+
+  public static Map<String, MetaClass> determineTypeVariables(MetaMethod method) {
+    HashMap<String, MetaClass> typeVariables = new HashMap<String, MetaClass>();
+
+    int methodParmIndex = 0;
+    for (MetaType methodParmType : method.getGenericParameterTypes()) {
+      MetaParameter parm = method.getParameters()[methodParmIndex];
+      resolveTypeVariable(typeVariables, methodParmType, parm.getType());
+      methodParmIndex++;
+    }
+
+    return typeVariables;
+  }
+
+
+  private static void resolveTypeVariable(Map<String, MetaClass> typeVariables,
+                                          MetaType methodParmType, MetaType callParmType) {
+    if (methodParmType instanceof MetaTypeVariable) {
+      MetaTypeVariable typeVar = (MetaTypeVariable) methodParmType;
+      typeVariables.put(typeVar.getName(), (MetaClass) callParmType);
+    }
+    else if (methodParmType instanceof MetaParameterizedType) {
+      MetaType parameterizedCallParmType;
+      if (callParmType instanceof MetaParameterizedType) {
+        parameterizedCallParmType = callParmType;
+      }
+      else {
+        parameterizedCallParmType = ((MetaClass) callParmType).getParameterizedType();
+      }
+
+      MetaParameterizedType parameterizedMethodParmType = (MetaParameterizedType) methodParmType;
+      int typeParmIndex = 0;
+      for (MetaType typeParm : parameterizedMethodParmType.getTypeParameters()) {
+        if (parameterizedCallParmType != null) {
+          resolveTypeVariable(typeVariables, typeParm,
+                  ((MetaParameterizedType) parameterizedCallParmType).getTypeParameters()[typeParmIndex++]);
+        }
+        else {
+          resolveTypeVariable(typeVariables, typeParm, callParmType);
+        }
+      }
+    }
+  }
+
   public static Scope scopeOf(MetaClass clazz) {
     if (clazz.isPublic()) {
       return Scope.Public;
@@ -256,36 +341,56 @@ public class GenUtil {
     return defModifiers;
   }
 
-  public static boolean equals(MetaConstructor a, MetaConstructor b) {
-    if (!a.getName().equals(b.getName())) return false;
-    if (a.getParameters().length != b.getParameters().length) return false;
-
-    for (int i = 0; i < a.getParameters().length; i++) {
-      if (!equals(a.getParameters()[i], b.getParameters()[i])) return false;
-    }
-    return true;
+  public static boolean equals(MetaField a, MetaField b) {
+    return a.getName().equals(b.getName()) && !a.getType().equals(b.getType())
+            && !a.getDeclaringClass().equals(b.getDeclaringClass());
   }
 
+  public static boolean equals(MetaConstructor a, MetaConstructor b) {
+//    if (!a.getName().equals(b.getName())) return false;
+    if (a.getParameters().length != b.getParameters().length) {
+      return false;
+    }
+
+    for (int i = 0; i < a.getParameters().length; i++) {
+      if (!equals(a.getParameters()[i], b.getParameters()[i])) {
+        return false;
+      }
+    }
+
+    if (!a.getDeclaringClass().equals(b.getDeclaringClass())) {
+      return false;
+    }
+
+    return true;
+  }
 
   public static boolean equals(MetaMethod a, MetaMethod b) {
     if (!a.getName().equals(b.getName())) return false;
     if (a.getParameters().length != b.getParameters().length) return false;
+    if (!a.getDeclaringClass().equals(b.getDeclaringClass())) return false;
 
     for (int i = 0; i < a.getParameters().length; i++) {
       if (!equals(a.getParameters()[i], b.getParameters()[i])) return false;
     }
     return true;
   }
+
 
   public static boolean equals(MetaParameter a, MetaParameter b) {
     return a.getType().isAssignableFrom(b.getType()) || b.getType().isAssignableFrom(a.getType());
   }
 
-  public static void addPrivateAccessStubs(boolean useJSNIStubs, ClassStructureBuilder<?> classBuilder, MetaField f, MetaClass type) {
+  public static void addPrivateAccessStubs(boolean useJSNIStubs, ClassStructureBuilder<?> classBuilder, MetaField f) {
+    MetaClass type = f.getType();
+    if (type.getCanonicalName().equals("long")) {
+      type = type.asBoxed();
+    }
+
     if (useJSNIStubs) {
       classBuilder.privateMethod(void.class, getPrivateFieldInjectorName(f))
               .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance"),
-                      Parameter.of(type, "value")))
+                      Parameter.of(type.isArray() ? type.asBoxed() : type, "value")))
               .modifiers(Modifier.Static, Modifier.JSNI)
               .body()
               .append(new StringStatement(JSNIUtil.fieldAccess(f) + " = value"))
@@ -301,7 +406,7 @@ public class GenUtil {
     else {
       classBuilder.privateMethod(void.class, getPrivateFieldInjectorName(f))
               .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance"),
-                      Parameter.of(type, "value")))
+                      Parameter.of(f.getType().isArray() ? f.getType().asBoxed() : f.getType(), "value")))
               .modifiers(Modifier.Static)
               .body()
               .append(Stmt.try_()
@@ -316,7 +421,7 @@ public class GenUtil {
                       .finish())
               .finish();
 
-      classBuilder.privateMethod(type, getPrivateFieldInjectorName(f))
+      classBuilder.privateMethod(f.getType(), getPrivateFieldInjectorName(f))
               .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance")))
               .modifiers(Modifier.Static)
               .body()
@@ -324,7 +429,7 @@ public class GenUtil {
                       .append(Stmt.declareVariable("field", Stmt.load(f.getDeclaringClass().asClass()).invoke("getDeclaredField",
                               f.getName())))
                       .append(Stmt.loadVariable("field").invoke("setAccessible", true))
-                      .append(Stmt.nestedCall(Cast.to(type, Stmt.loadVariable("field")
+                      .append(Stmt.nestedCall(Cast.to(f.getType(), Stmt.loadVariable("field")
                               .invoke("get", Refs.get("instance")))).returnValue())
                       .finish()
                       .catch_(Throwable.class, "e")
@@ -435,5 +540,69 @@ public class GenUtil {
       }
     }
     return clazz;
+  }
+
+  public static int getArrayDimensions(MetaClass type) {
+    if (!type.isArray()) return 0;
+
+    String internalName = type.getInternalName();
+    for (int i = 0; i < internalName.length(); i++) {
+      if (internalName.charAt(i) != '[') return i;
+    }
+    return 0;
+  }
+
+  public static MetaMethod findCaseInsensitiveMatch(MetaClass retType, MetaClass clazz, String name, MetaClass... parms) {
+    MetaClass c = clazz;
+
+    do {
+      Outer:
+      for (MetaMethod method : c.getDeclaredMethods()) {
+        if (name.equalsIgnoreCase(method.getName())) {
+          if (parms.length != method.getParameters().length) continue;
+
+          MetaParameter[] mps = method.getParameters();
+          for (int i = 0; i < parms.length; i++) {
+            if (!parms[i].getFullyQualifiedName().equals(mps[i].getType().getFullyQualifiedName())) {
+              continue Outer;
+            }
+          }
+
+          if (retType != null
+                  && !retType.getFullyQualifiedName().equals(method.getReturnType().getFullyQualifiedName())) {
+            continue;
+          }
+
+          return method;
+        }
+      }
+    }
+    while ((c = c.getSuperClass()) != null);
+
+    return null;
+  }
+
+  public static void throwIfUnhandled(String error, Throwable t) {
+    try {
+      throw t;
+    }
+    catch (OutOfScopeException e) {
+      throw e;
+    }
+    catch (InvalidExpressionException e) {
+      throw e;
+    }
+    catch (InvalidTypeException e) {
+      throw e;
+    }
+    catch (UndefinedMethodException e) {
+      throw e;
+    }
+    catch (TypeNotIterableException e) {
+      throw e;
+    }
+    catch (Throwable e) {
+      throw new RuntimeException("generation failure at: " + error, e);
+    }
   }
 }

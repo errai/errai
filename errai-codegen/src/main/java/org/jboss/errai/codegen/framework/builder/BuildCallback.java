@@ -16,6 +16,7 @@
 
 package org.jboss.errai.codegen.framework.builder;
 
+import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Statement;
 
 /**
@@ -23,4 +24,5 @@ import org.jboss.errai.codegen.framework.Statement;
  */
 public interface BuildCallback<T> {
   public T callback(Statement statement);
+  public Context getParentContext();
 }
