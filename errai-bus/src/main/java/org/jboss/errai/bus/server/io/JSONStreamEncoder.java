@@ -158,7 +158,6 @@ public class JSONStreamEncoder {
       }
 
       try {
-        // Object v = MVEL.executeExpression(s[i++], o);
         Object v = field.get(o);
         outstream.write('\"');
         outstream.write(field.getName().getBytes());
@@ -173,7 +172,7 @@ public class JSONStreamEncoder {
     }
 
     if (first) {
-       outstream.write((",\"" + SerializationParts.INSTANTIATE_ONLY + "\":true").getBytes());
+       write(outstream, ctx, "\"" + SerializationParts.INSTANTIATE_ONLY + "\":true");
      }
 
     outstream.write('}');

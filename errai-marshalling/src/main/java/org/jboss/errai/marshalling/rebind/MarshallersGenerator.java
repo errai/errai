@@ -53,6 +53,9 @@ public class MarshallersGenerator extends Generator {
 
   public void generateMarshallerBootstrapper(TreeLogger logger, GeneratorContext context) {
     PrintWriter printWriter = context.tryCreate(logger, packageName, className);
+
+    if (printWriter == null) return;
+
     printWriter.write(new MarshallerGeneratorFactory().generate(packageName, className));
     context.commit(logger, printWriter);
   }

@@ -153,7 +153,7 @@ public class JSONEncoder {
     }
 
     if (first) {
-      build.append(",\"" + SerializationParts.INSTANTIATE_ONLY + "\":true");
+      build.append(",").append(keyValue(encodeString(SerializationParts.INSTANTIATE_ONLY,ctx), "true"));
     }
     
     return build.append('}').toString();
