@@ -122,8 +122,6 @@ public class JSONStreamEncoder {
       return;
     }
 
-
-
     outstream.write('{');
     outstream.write('\"');
     outstream.write(SerializationParts.ENCODED_TYPE.getBytes());
@@ -148,7 +146,6 @@ public class JSONStreamEncoder {
     int i = 0;
     boolean first = true;
     for (Field field : fields) {
-
       if ((field.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
               || field.isSynthetic()) {
         continue;
@@ -158,6 +155,7 @@ public class JSONStreamEncoder {
       }
 
       try {
+        i++;
         Object v = field.get(o);
         outstream.write('\"');
         outstream.write(field.getName().getBytes());
@@ -171,7 +169,7 @@ public class JSONStreamEncoder {
       }
     }
 
-    if (first) {
+    if (i == 0) {
        write(outstream, ctx, "\"" + SerializationParts.INSTANTIATE_ONLY + "\":true");
      }
 

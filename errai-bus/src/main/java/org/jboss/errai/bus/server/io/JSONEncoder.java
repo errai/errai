@@ -143,6 +143,7 @@ public class JSONEncoder {
       }
 
       try {
+        i++;
         Object v = field.get(o);
         build.append(encodeString(field.getName(), ctx)).append(':').append(_encode(v, ctx));
       }
@@ -152,7 +153,7 @@ public class JSONEncoder {
       }
     }
 
-    if (first) {
+    if (i == 0) {
       build.append(",").append(keyValue(encodeString(SerializationParts.INSTANTIATE_ONLY,ctx), "true"));
     }
     
