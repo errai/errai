@@ -26,12 +26,10 @@ import org.jboss.errai.bus.server.service.ErraiServiceImpl;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 
-/**
- * @author: Heiko Braun <hbraun@redhat.com>
- * @date: Sep 29, 2010
- */
 public class ServiceFactory {
   public static ErraiService create() {
+    System.setProperty("errai.auto_discover_services", "false");
+    
     return Guice.createInjector(new AbstractModule() {
       public void configure() {
         bind(MessageBus.class).to(ServerMessageBusImpl.class);
