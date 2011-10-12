@@ -39,14 +39,14 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl.AbstractMetaClass;
 public class JavaReflectionClass extends AbstractMetaClass<Class> {
   private Annotation[] annotationsCache;
 
-  private JavaReflectionClass(Class clazz) {
-    this(clazz, clazz.getGenericSuperclass());
+  private JavaReflectionClass(Class clazz, boolean erased) {
+    this(clazz, clazz.getGenericSuperclass(), erased);
   }
 
-  private JavaReflectionClass(Class clazz, Type type) {
+  private JavaReflectionClass(Class clazz, Type type, boolean erased) {
     super(clazz);
     this.annotationsCache = clazz.getAnnotations();
-    if (type instanceof ParameterizedType) {
+    if (!erased && type instanceof ParameterizedType) {
       super.parameterizedType = new JavaReflectionParameterizedType((ParameterizedType) type);
     }
   }
@@ -63,12 +63,20 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
   }
 
   public static MetaClass newUncachedInstance(Class type) {
-    return new JavaReflectionClass(type);
+    return new JavaReflectionClass(type, false);
   }
 
-  public static MetaClass newUncachedInstance(Class clazz, Type type) {
-    return new JavaReflectionClass(clazz, type);
+  public static MetaClass newUncachedInstance(Class clazz, boolean erased) {
+    return new JavaReflectionClass(clazz, erased);
   }
+
+
+
+  public static MetaClass newUncachedInstance(Class clazz, Type type) {
+    return new JavaReflectionClass(clazz, type, false);
+  }
+
+
 
   public static MetaClass newInstance(TypeLiteral type) {
     return MetaClassFactory.get(type);
@@ -209,10 +217,10 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     int i = 0;
     for (Class<?> type : getEnclosedMetaObject().getInterfaces()) {
       if (genIface != null) {
-        metaClassList.add(new JavaReflectionClass(type, genIface[i]));
+        metaClassList.add(new JavaReflectionClass(type, genIface[i], false));
       }
       else {
-        metaClassList.add(new JavaReflectionClass(type));
+        metaClassList.add(new JavaReflectionClass(type, false));
       }
       i++;
     }

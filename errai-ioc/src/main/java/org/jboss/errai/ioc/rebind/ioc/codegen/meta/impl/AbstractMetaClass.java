@@ -16,8 +16,9 @@
 
 package org.jboss.errai.ioc.rebind.ioc.codegen.meta.impl;
 
-import static org.jboss.errai.ioc.rebind.ioc.InjectUtil.classToMeta;
-import static org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory.asClassArray;
+import com.google.gwt.core.ext.typeinfo.JClassType;
+import org.jboss.errai.ioc.rebind.ioc.codegen.meta.*;
+import org.mvel2.util.ParseTools;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -25,16 +26,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaConstructor;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaMethod;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameter;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaParameterizedType;
-import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaType;
-import org.mvel2.util.ParseTools;
-
-import com.google.gwt.core.ext.typeinfo.JClassType;
+import static org.jboss.errai.ioc.rebind.ioc.InjectUtil.classToMeta;
+import static org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClassFactory.asClassArray;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -82,7 +75,8 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   protected static MetaMethod _getMethod(MetaMethod[] methods, String name, MetaClass... parmTypes) {
-    Outer: for (MetaMethod method : methods) {
+    Outer:
+    for (MetaMethod method : methods) {
       if (method.getName().equals(name) && method.getParameters().length == parmTypes.length) {
         for (int i = 0; i < parmTypes.length; i++) {
           if (!method.getParameters()[i].getType().isAssignableFrom(parmTypes[i])) {
@@ -96,7 +90,8 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   protected static MetaConstructor _getConstructor(MetaConstructor[] constructors, MetaClass... parmTypes) {
-    Outer: for (MetaConstructor constructor : constructors) {
+    Outer:
+    for (MetaConstructor constructor : constructors) {
       if (constructor.getParameters().length == parmTypes.length) {
         for (int i = 0; i < parmTypes.length; i++) {
           if (!constructor.getParameters()[i].getType().isAssignableFrom(parmTypes[i])) {
@@ -288,6 +283,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return hashString;
   }
 
+
   @Override
   public boolean isAssignableFrom(MetaClass clazz) {
     if (equals(MetaClassFactory.get(Object.class)) && clazz.isInterface())
@@ -356,8 +352,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   @Override
   public boolean equals(Object o) {
-    return o instanceof MetaClass && hashString().equals(MetaClass.class.getName()
-            + ":" + ((MetaClass) o).getFullyQualifiedName());
+    return o instanceof AbstractMetaClass && hashString().equals(((AbstractMetaClass) o).hashString());
   }
 
   @Override

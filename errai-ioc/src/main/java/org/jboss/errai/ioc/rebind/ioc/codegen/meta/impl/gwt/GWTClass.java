@@ -44,10 +44,10 @@ import com.google.gwt.core.ext.typeinfo.JTypeParameter;
 public class GWTClass extends AbstractMetaClass<JType> {
   private Annotation[] annotationsCache;
 
-  private GWTClass(JType classType) {
+  private GWTClass(JType classType, boolean erased) {
     super(classType);
     JParameterizedType parameterizedType = classType.isParameterized();
-    if (parameterizedType != null) {
+    if (!erased && parameterizedType != null) {
       super.parameterizedType = new GWTParameterizedType(parameterizedType);
     }
   }
@@ -57,7 +57,11 @@ public class GWTClass extends AbstractMetaClass<JType> {
   }
 
   public static MetaClass newUncachedInstance(JType type) {
-    return new GWTClass(type);
+    return new GWTClass(type, false);
+  }
+
+  public static MetaClass newUncachedInstance(JType type, boolean erased) {
+    return new GWTClass(type, erased);
   }
 
   @Override
@@ -191,7 +195,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
     for (JClassType type : getEnclosedMetaObject().isClassOrInterface()
             .getImplementedInterfaces()) {
 
-      metaClassList.add(new GWTClass(type));
+      metaClassList.add(new GWTClass(type, false));
     }
 
     return metaClassList.toArray(new MetaClass[metaClassList.size()]);

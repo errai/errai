@@ -189,7 +189,7 @@ public final class MetaClassFactory {
     if (type == null) return null;
 
     if (type.isParameterized() != null) {
-      return GWTClass.newUncachedInstance(type);
+      return GWTClass.newUncachedInstance(type, true);
     }
 
     if (!CLASS_CACHE.containsKey(type.getQualifiedSourceName())) {
@@ -207,7 +207,7 @@ public final class MetaClassFactory {
     if (cls == null) return null;
 
     if (cls.getTypeParameters() != null) {
-      return JavaReflectionClass.newUncachedInstance(cls);
+      return JavaReflectionClass.newUncachedInstance(cls, true);
     }
 
     if (!CLASS_CACHE.containsKey(cls.getName())) {
