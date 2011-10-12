@@ -6,7 +6,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({ PlainMethodIntegrationTest.class, PathParamIntegrationTest.class,
     QueryParamIntegrationTest.class, HeaderParamIntegrationTest.class,
-    ContentNegotiationIntegrationTest.class, CustomTypeIntegrationTest.class })
+    ContentNegotiationIntegrationTest.class, CustomTypeIntegrationTest.class, ErrorHandlingIntegrationTest.class })
 public class AllJaxrsIntegrationTests {
 
 }
