@@ -102,7 +102,7 @@ public class DataTypeHelper {
               return ctx.getObject(objId);
             }
             else if (ref) {
-              return new UnsatisfiedForwardLookup(objId);
+              throw new RuntimeException("illegal forward graph reference: " + objId);
             }
           }
 
@@ -114,25 +114,25 @@ public class DataTypeHelper {
           }
         }
 
-        val = JSONDecoderCli.decode(eMap.get(key), ctx);
-        boolean commit = true;
+        //    val = JSONDecoderCli.decode(eMap.get(key), ctx);
+        //     boolean commit = true;
 
-        if (o instanceof UnsatisfiedForwardLookup) {
-          ctx.addUnsatisfiedDependency(m, (UnsatisfiedForwardLookup) o);
-          if (!(val instanceof UnsatisfiedForwardLookup)) {
-            ((UnsatisfiedForwardLookup) o).setVal(val);
-          }
-          commit = false;
-        }
-        if (val instanceof UnsatisfiedForwardLookup) {
-          ((UnsatisfiedForwardLookup) val).setKey(o);
-          ctx.addUnsatisfiedDependency(m, (UnsatisfiedForwardLookup) val);
-          commit = false;
-        }
+//        if (o instanceof UnsatisfiedForwardLookup) {
+//          ctx.addUnsatisfiedDependency(m, (UnsatisfiedForwardLookup) o);
+//          if (!(val instanceof UnsatisfiedForwardLookup)) {
+//            ((UnsatisfiedForwardLookup) o).setVal(val);
+//          }
+//          commit = false;
+//        }
+//        if (val instanceof UnsatisfiedForwardLookup) {
+//          ((UnsatisfiedForwardLookup) val).setKey(o);
+//          ctx.addUnsatisfiedDependency(m, (UnsatisfiedForwardLookup) val);
+//          commit = false;
+//        }
 
-        if (commit) {
-          m.put(o, JSONDecoderCli.decode(eMap.get(key), ctx));
-        }
+//        if (commit) {
+//          m.put(o, JSONDecoderCli.decode(eMap.get(key), ctx));
+//        }
 
       }
 
@@ -143,59 +143,59 @@ public class DataTypeHelper {
   }
 
   public static void resolveDependencies(DecodingContext ctx) {
-    try {
-      for (Map.Entry<Object, List<UnsatisfiedForwardLookup>> entry : ctx.getUnsatisfiedDependencies().entrySet()) {
-        if (entry.getValue() == null) continue;
-
-        Iterator<UnsatisfiedForwardLookup> iter = entry.getValue().iterator();
-        if (entry.getKey() instanceof Collection) {
-          while (iter.hasNext()) {
-            ((Collection<Object>) entry.getKey()).add(ctx.getObject(iter.next().getId()));
-          }
-        }
-        else if (entry.getKey() instanceof Map && !((Map) entry.getKey()).containsKey(SerializationParts.ENCODED_TYPE)) {
-          UnsatisfiedForwardLookup u1 = iter.next();
-          if (!iter.hasNext()) {
-            if (u1.getKey() != null) {
-              if (u1.getKey() instanceof UnsatisfiedForwardLookup) {
-                ((Map<Object, Object>) entry.getKey()).put(ctx.getObject(((UnsatisfiedForwardLookup) u1.getKey()).getId()), ctx.getObject(u1.getId()));
-              }
-              else {
-                ((Map<Object, Object>) entry.getKey()).put(u1.getKey(), ctx.getObject(u1.getId()));
-              }
-            }
-            else if (u1.getVal() != null) {
-              ((Map<Object, Object>) entry.getKey()).put(ctx.getObject(u1.getId()), u1.getVal());
-            }
-            else {
-              throw new RuntimeException("error resolving dependencies in payload (Map Element): " + u1.getId());
-            }
-          }
-          else {
-            UnsatisfiedForwardLookup u2 = iter.next();
-            ((Map<Object, Object>) entry.getKey()).put(ctx.getObject(u1.getId()), ctx.getObject(u2.getId()));
-          }
-        }
-        else {
-          UnsatisfiedForwardLookup ufl;
-          while (iter.hasNext()) {
-            if ((ufl = iter.next()).getBinder() == null) {
-              throw new RuntimeException("cannot satisfy dependency in object graph (path unresolvable):" + ufl.getId());
-            }
-            else {
-              ufl.getBinder().bind(ctx.getObject(ufl.getId()));
-            }
-          }
-        }
-
-        if (entry.getKey() instanceof UHashMap)
-          ((UHashMap) entry.getKey()).normalHashMode();
-      }
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-      throw new RuntimeException("error resolving dependenceis", e);
-    }
+//    try {
+//      for (Map.Entry<Object, List<UnsatisfiedForwardLookup>> entry : ctx.getUnsatisfiedDependencies().entrySet()) {
+//        if (entry.getValue() == null) continue;
+//
+//        Iterator<UnsatisfiedForwardLookup> iter = entry.getValue().iterator();
+//        if (entry.getKey() instanceof Collection) {
+//          while (iter.hasNext()) {
+//            ((Collection<Object>) entry.getKey()).add(ctx.getObject(iter.next().getId()));
+//          }
+//        }
+//        else if (entry.getKey() instanceof Map && !((Map) entry.getKey()).containsKey(SerializationParts.ENCODED_TYPE)) {
+//          UnsatisfiedForwardLookup u1 = iter.next();
+//          if (!iter.hasNext()) {
+//            if (u1.getKey() != null) {
+//              if (u1.getKey() instanceof UnsatisfiedForwardLookup) {
+//                ((Map<Object, Object>) entry.getKey()).put(ctx.getObject(((UnsatisfiedForwardLookup) u1.getKey()).getId()), ctx.getObject(u1.getId()));
+//              }
+//              else {
+//                ((Map<Object, Object>) entry.getKey()).put(u1.getKey(), ctx.getObject(u1.getId()));
+//              }
+//            }
+//            else if (u1.getVal() != null) {
+//              ((Map<Object, Object>) entry.getKey()).put(ctx.getObject(u1.getId()), u1.getVal());
+//            }
+//            else {
+//              throw new RuntimeException("error resolving dependencies in payload (Map Element): " + u1.getId());
+//            }
+//          }
+//          else {
+//            UnsatisfiedForwardLookup u2 = iter.next();
+//            ((Map<Object, Object>) entry.getKey()).put(ctx.getObject(u1.getId()), ctx.getObject(u2.getId()));
+//          }
+//        }
+//        else {
+//          UnsatisfiedForwardLookup ufl;
+//          while (iter.hasNext()) {
+//            if ((ufl = iter.next()).getBinder() == null) {
+//              throw new RuntimeException("cannot satisfy dependency in object graph (path unresolvable):" + ufl.getId());
+//            }
+//            else {
+//              ufl.getBinder().bind(ctx.getObject(ufl.getId()));
+//            }
+//          }
+//        }
+//
+//        if (entry.getKey() instanceof UHashMap)
+//          ((UHashMap) entry.getKey()).normalHashMode();
+//      }
+//    }
+//    catch (Exception e) {
+//      e.printStackTrace();
+//      throw new RuntimeException("error resolving dependenceis", e);
+//    }
   }
 
   public static String encodeHelper(Object v) {

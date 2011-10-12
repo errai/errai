@@ -122,7 +122,7 @@ public class JSONStreamEncoder {
       return;
     }
 
-    ctx.markEncoded(o);
+
 
     outstream.write('{');
     outstream.write('\"');
@@ -138,7 +138,7 @@ public class JSONStreamEncoder {
     outstream.write('\"');
     outstream.write(':');
     outstream.write('\"');
-    outstream.write(String.valueOf(o.hashCode()).getBytes());
+    outstream.write(String.valueOf(ctx.markRef(o)).getBytes());
     outstream.write('\"');
     outstream.write(',');
 

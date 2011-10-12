@@ -4,38 +4,32 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public class EncodingContext {
-  private Map<Object, String> alreadyEncoded;
-  private Set<String> refs;
+public class EncodingContext {  
+  private HashMap<Object, Integer> refs;
   private int escapeMode;
 
-  public EncodingContext() {
-    alreadyEncoded = new HashMap<Object, String>();
+  public boolean isEncoded(Object o) {
+    return !(o instanceof  String || o instanceof Number || o instanceof Boolean || o instanceof Character)
+            && (refs != null && refs.containsKey(o));
   }
-
-  public boolean isEncoded(Object instance) {
-    return alreadyEncoded.containsKey(instance);
-  }
-
-  public void markEncoded(Object o) {
-    if (o instanceof Number || o instanceof Boolean || o instanceof Character) return;
-
-    alreadyEncoded.put(o, String.valueOf(o.hashCode()));
-  }
-
+    
   public String markRef(Object o) {
-    if (refs == null) refs = new HashSet<String>();
-    String ref = alreadyEncoded.get(o);
-    refs.add(ref);
-    return ref;
-  }
+    if (o instanceof  String || o instanceof Number || o instanceof Boolean || o instanceof Character) return null;
+    if (refs == null) {
+      refs = new HashMap<Object, Integer>();
+    }
+    else if (refs.containsKey(o)) {
+      return refs.get(o).toString();
+    }
 
-  public Set<String> getRefs() {
-    return refs;
+    Integer id;
+    refs.put(o, id = refs.size() + 1);
+    return id.toString();
   }
 
   public boolean isEscapeMode() {

@@ -1224,6 +1224,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * @throws Exception -
    */
   private void procIncomingPayload(Response response) throws Exception {
+    System.out.println("RX:" +response.getText());
+
     try {
       for (MarshalledMessage m : decodePayload(response.getText())) {
         _store(m.getSubject(), m.getMessage());

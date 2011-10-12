@@ -1,16 +1,13 @@
 package org.jboss.errai.common.client.types;
 
+import java.lang.reflect.Field;
+
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public final class UnsatisfiedForwardLookup {
   private final String id;
-  private String path;
-
-  private Object key;
-  private Object val;
-
-  private DeferredBinder binder;
+  //private Field field;
 
   public UnsatisfiedForwardLookup(String id) {
     this.id = id;
@@ -20,35 +17,11 @@ public final class UnsatisfiedForwardLookup {
     return id;
   }
 
-  public void setPath(String path) {
-    this.path = path;
-  }
-
-  public String getPath() {
-    return path;
-  }
-
-  public Object getKey() {
-    return key;
-  }
-
-  public void setKey(Object key) {
-    this.key = key;
-  }
-
-  public Object getVal() {
-    return val;
-  }
-
-  public void setVal(Object val) {
-    this.val = val;
-  }
-
-  public DeferredBinder getBinder() {
-    return binder;
-  }
-
-  public void setBinder(DeferredBinder binder) {
-    this.binder = binder;
-  }
+//  public Field getField() {
+//    return field;
+//  }
+//
+//  public void setField(Field field) {
+//    this.field = field;
+//  }
 }

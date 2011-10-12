@@ -87,7 +87,7 @@ public class JSONEncoder {
       return map(
               encodeCommaSeparatedStrings(ctx,
                       keyValue(encodeString(ENCODED_TYPE, ctx), encodeString(java.util.Date.class.getName(), ctx)),
-                      keyValue(encodeString(OBJECT_ID, ctx), encodeString(String.valueOf(o.hashCode()), ctx)),
+                      keyValue(encodeString(OBJECT_ID, ctx), encodeString(ctx.markRef(o), ctx)),
                       keyValue(encodeString(MessageParts.Value.name(), ctx), String.valueOf(((java.util.Date) o)
                               .getTime()
                       ))),
@@ -98,7 +98,7 @@ public class JSONEncoder {
       return map(
               encodeCommaSeparatedStrings(ctx,
                       keyValue(encodeString(ENCODED_TYPE, ctx), encodeString(java.sql.Date.class.getName(), ctx)),
-                      keyValue(encodeString(OBJECT_ID, ctx), encodeString(String.valueOf(o.hashCode()), ctx)),
+                      keyValue(encodeString(OBJECT_ID, ctx), encodeString(ctx.markRef(o), ctx)),
                       keyValue(encodeString(MessageParts.Value.name(), ctx), String.valueOf(((java.sql.Date) o)
                               .getTime()
                       ))),
@@ -119,11 +119,11 @@ public class JSONEncoder {
               keyValue(encodeString(OBJECT_ID, ctx), objRef(ctx, o))), ctx);
     }
 
-    ctx.markEncoded(o);
+//    ctx.markEncoded(o);
 
     StringBuilder build = new StringBuilder("{" + encodeCommaSeparatedStrings(ctx,
             keyValue(encodeString(ENCODED_TYPE, ctx), encodeString(cls.getCanonicalName(), ctx)),
-            keyValue(encodeString(OBJECT_ID, ctx), encodeString(String.valueOf(o.hashCode()),
+            keyValue(encodeString(OBJECT_ID, ctx), encodeString(String.valueOf(ctx.markRef(o)),
                     ctx))));
 
      final Field[] fields = EncodingUtil.getAllEncodingFields(cls);
