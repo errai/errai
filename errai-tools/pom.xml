@@ -1,157 +1,134 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <name>Errai::Tools</name>
-    <groupId>org.jboss.errai</groupId>
-    <artifactId>errai-tools</artifactId>
-    <version>2.0-SNAPSHOT</version>
-    <packaging>jar</packaging>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<name>Errai::Tools</name>
+	<groupId>org.jboss.errai</groupId>
+	<artifactId>errai-tools</artifactId>
+	<version>2.0-SNAPSHOT</version>
+	<packaging>jar</packaging>
 
-    <!-- Parent -->
-    <parent>
-        <groupId>org.jboss.errai</groupId>
-        <artifactId>errai-parent</artifactId>
-        <version>2.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
-    </parent>
+	<!-- Parent -->
+	<parent>
+		<groupId>org.jboss.errai</groupId>
+		<artifactId>errai-parent</artifactId>
+		<version>2.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
 
-    <properties>
-        <hsqldb.version>1.8.0.7</hsqldb.version>
-    </properties>
+	<properties>
+		<hsqldb.version>1.8.0.7</hsqldb.version>
+	</properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.jboss.errai</groupId>
-            <artifactId>errai-bus</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>hsqldb</groupId>
-            <artifactId>hsqldb</artifactId>
-            <version>${hsqldb.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <version>2.5</version>
-            <scope>provided</scope>
-        </dependency>
+	<dependencies>
+		<dependency>
+			<groupId>org.jboss.errai</groupId>
+			<artifactId>errai-bus</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>hsqldb</groupId>
+			<artifactId>hsqldb</artifactId>
+			<version>${hsqldb.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+			<version>2.5</version>
+			<scope>provided</scope>
+		</dependency>
 
-        <dependency>
-            <groupId>com.google.gwt</groupId>
-            <artifactId>gwt-user</artifactId>
-            <scope>provided</scope>
-        </dependency>
+		<dependency>
+			<groupId>com.google.gwt</groupId>
+			<artifactId>gwt-user</artifactId>
+			<scope>provided</scope>
+		</dependency>
 
-        <dependency>
-            <groupId>com.googlecode.gwtmosaic</groupId>
-            <artifactId>gwt-mosaic</artifactId>
-            <version>${mosaic.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.googlecode.gwtmosaic</groupId>
-            <artifactId>gwt-beans-binding</artifactId>
-            <version>${mosaic.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.googlecode.gwtmosaic</groupId>
-            <artifactId>gwt-dnd</artifactId>
-            <version>${mosaic.version}</version>
-        </dependency>
+	</dependencies>
 
-        <dependency>
-            <groupId>com.googlecode.gwtmosaic</groupId>
-            <artifactId>gwtx</artifactId>
-            <version>${mosaic.version}</version>
-        </dependency>
-    </dependencies>
+	<build>
+		<outputDirectory>war/WEB-INF/classes</outputDirectory>
+		<plugins>
 
-    <build>
-        <outputDirectory>war/WEB-INF/classes</outputDirectory>
-        <plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>gwt-maven-plugin</artifactId>
+				<version>${gwt.maven}</version>
+				<configuration>
+					<inplace>true</inplace>
+					<logLevel>INFO</logLevel>
+					<runTarget>ClientService.html</runTarget>
+					<warSourceDirectory>war</warSourceDirectory>
+					<extraJvmArgs>-Xmx512m</extraJvmArgs>
+					<skip>true</skip>
+					<!--<soyc>false</soyc> -->
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>gwt-maven-plugin</artifactId>
-                <version>${gwt.maven}</version>
-                <configuration>
-                    <inplace>true</inplace>
-                    <logLevel>INFO</logLevel>
-                    <runTarget>ClientService.html</runTarget>
-                    <warSourceDirectory>war</warSourceDirectory>
-                    <extraJvmArgs>-Xmx512m</extraJvmArgs>
-                    <skip>true</skip>
-                    <!--<soyc>false</soyc>-->
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>ideauidesigner-maven-plugin</artifactId>
+				<version>1.0-beta-1</version>
+			</plugin>
 
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>ideauidesigner-maven-plugin</artifactId>
-                <version>1.0-beta-1</version>
-            </plugin>
+			<plugin>
+				<artifactId>maven-war-plugin</artifactId>
+				<configuration>
+					<warSourceDirectory>war</warSourceDirectory>
+					<webappDirectory>war</webappDirectory>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-clean-plugin</artifactId>
+				<version>2.2</version>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<childDelegation>true</childDelegation>
 
-            <plugin>
-                <artifactId>maven-war-plugin</artifactId>
-                <configuration>
-                    <warSourceDirectory>war</warSourceDirectory>
-                    <webappDirectory>war</webappDirectory>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-clean-plugin</artifactId>
-                <version>2.2</version>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <childDelegation>true</childDelegation>
+					<skipTests>true</skipTests>
+					<failIfNoTests>true</failIfNoTests>
+					<trimStackTrace>false</trimStackTrace>
+				</configuration>
+			</plugin>
 
-                    <skipTests>true</skipTests>
-                    <failIfNoTests>true</failIfNoTests>
-                    <trimStackTrace>false</trimStackTrace>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.2</version>
-                <executions>
-                    <execution>
-                        <id>clean.war</id>
-                        <phase>clean</phase>
-                        <configuration>
-                            <tasks>
-                                <!--
-                                    The gwt-maven-plugin use the war source folder
-                                    as it's build directory. We need to cleanup after we'd run
-                                    the plugin and remove all GWT related artifacts that are required
-                                    to run the hosted mode.
-                                -->
-                                <delete dir="war/WEB-INF/classes" />
-                                <delete dir="war/WEB-INF/lib" />
-                                <delete dir="war/ClientService" />
-                                <delete dir="target" />
-                            </tasks>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.2</version>
+				<executions>
+					<execution>
+						<id>clean.war</id>
+						<phase>clean</phase>
+						<configuration>
+							<tasks>
+								<!-- The gwt-maven-plugin use the war source folder as it's build 
+									directory. We need to cleanup after we'd run the plugin and remove all GWT 
+									related artifacts that are required to run the hosted mode. -->
+								<delete dir="war/WEB-INF/classes" />
+								<delete dir="war/WEB-INF/lib" />
+								<delete dir="war/ClientService" />
+								<delete dir="target" />
+							</tasks>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 </project>
