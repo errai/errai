@@ -44,7 +44,14 @@ public class MessageQueueImpl implements MessageQueue {
   private static final long TIMEOUT = Boolean.getBoolean("org.jboss.errai.debugmode") ?
           secs(360) : secs(30);
 
-  private static final int MAXIMUM_PAYLOAD_SIZE = 10;
+  /**
+   * We limit the number of messages in each transmission mostly as a
+   * convenience to the client: everything we send in one go normally has to be
+   * dealt with in the AJAX callback. This can make the UI choppy when work is
+   * done in such large chunks.
+   */
+  private static final int MAXIMUM_PAYLOAD_SIZE = 25;
+  
   private static final long DEFAULT_TRANSMISSION_WINDOW = millis(25);
   private static final long MAX_TRANSMISSION_WINDOW = millis(100);
 
@@ -241,15 +248,16 @@ public class MessageQueueImpl implements MessageQueue {
     boolean b = false;
     activity();
     try {
-      b = (throttleIncoming ? queue.offer(message, 1, TimeUnit.SECONDS) : queue.offer(message));
+      b = queue.offer(message, 1, TimeUnit.MINUTES);
     }
     catch (InterruptedException e) {
       // fall-through.
     }
 
     if (!b) {
+      int oldSize = queue.size();
       queue.clear();
-      throw new QueueOverloadedException(null, "too many undelievered messages in queue: cannot dispatch message.");
+      throw new QueueOverloadedException(null, "queue was overloaded for too long. discarding " + oldSize + " undelievered messages.");
     }
     else if (activationCallback != null) {
       synchronized (activationLock) {

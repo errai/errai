@@ -64,9 +64,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   /* Used to build the HTTP POST request */
   private RequestBuilder sendBuilder;
 
-  /* Used to build the HTTP GET request */
-  private RequestBuilder recvBuilder;
-
   public final MessageCallback remoteCallback = new RemoteMessageCallback();
 
   private RequestCallback receiveCommCallback = new NoPollRequestCallback();
@@ -107,6 +104,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private long lastTransmit = 0;
 
+  /**
+   * The unique ID that will sent with the next request.
+   * <p>
+   * IMPORTANT: only access this member via {@link #getNextRequestNumber()}.
+   */
+  private int requestNumber = 0;
+  
   private boolean disconnected = false;
 
   ProxySettings proxySettings;
@@ -142,13 +146,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     init();
   }
 
-  /**
-   * Constructor creates sendBuilder for HTTP POST requests, recvBuilder for HTTP GET requests and
-   * initializes the message bus.
-   */
   private void createRequestBuilders() {
     sendBuilder = getSendBuilder();
-    recvBuilder = getRecvBuilder();
 
     logAdapter.debug("Connecting Errai at URL " + sendBuilder.getUrl());
   }
@@ -172,9 +171,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     RequestBuilder builder = new RequestBuilder(
             RequestBuilder.GET,
-            URL.encode(endpoint)
+            URL.encode(endpoint) + "?z=" + getNextRequestNumber()
     );
-
+    
     builder.setHeader("Content-Type", "application/json");
     builder.setHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER, clientId);
     return builder;
@@ -245,7 +244,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           // TODO: performance impact? might be better when decoding the message from the wire
           executeInterceptorStack(true, message);
           callback.callback(message);
-          System.out.println("Delivered " + message);
         }
         catch (Exception e) {
           logError("receiver '" + subject + "' threw an exception", decodeCommandMessage(message), e);
@@ -579,7 +577,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private void performPoll() {
     try {
-      recvBuilder.sendRequest(null, receiveCommCallback);
+      getRecvBuilder().sendRequest(null, receiveCommCallback);
     }
     catch (RequestTimeoutException e) {
       statusCode = 1;
@@ -628,7 +626,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     this.disconnected = true;
     this.initialized = false;
     this.sendBuilder = null;
-    this.recvBuilder = null;
     this.postInitTasks.clear();
   }
 
@@ -1078,16 +1075,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       new Timer() {
         @Override
         public void run() {
-          /**
-           * Due to asynchronous handshake, the recvBuilder may not yet be created at this point, since we defer
-           * creation as we wait for the proxy configuration.
-           */
-          if (recvBuilder == null) {
-            // rechedule and try again in 0.1 seconds.
-            schedule(100);
-            return;
-          }
-
           performPoll();
         }
       }.schedule(POLL_FREQUENCY);
@@ -1355,5 +1342,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         getElement().getStyle().setProperty("zIndex", "5000");
       }
     }
+  }
+  
+  public int getNextRequestNumber() {
+    if (requestNumber == Integer.MAX_VALUE) {
+      requestNumber = 0;
+    }
+    return requestNumber++;
   }
 }

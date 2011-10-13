@@ -158,6 +158,7 @@ public class ErrorHelper {
         "\nBus: " + bus.toString() +
         "\nMessage: " + message +
         "\nerrorMessage: " + errorMessage +
+        "\nexception: " + e +
         "\ndisconnect: " + disconnect;
     log.warn(logMessage);
     
