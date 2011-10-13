@@ -16,17 +16,21 @@
 
 package org.jboss.errai.bus.client.util;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
+import org.slf4j.Logger;
 
 /**
  * The <tt>ErrorHelper</tt> class facilitates handling and sending error messages to the correct place
  */
 public class ErrorHelper {
+
+  private static final Logger log = getLogger(ErrorHelper.class);
 
   /**
    * Creates the stacktrace for the error message and sends it via conversation to the <tt>ClientBusErrors</tt>
@@ -149,6 +153,14 @@ public class ErrorHelper {
    * @param disconnect   - true if the bus should be disconnected after the error has been sent
    */
   public static void handleMessageDeliveryFailure(MessageBus bus, Message message, String errorMessage, Throwable e, boolean disconnect) {
+    String logMessage =
+        "*** Message delivery failure ***" +
+        "\nBus: " + bus.toString() +
+        "\nMessage: " + message +
+        "\nerrorMessage: " + errorMessage +
+        "\ndisconnect: " + disconnect;
+    log.warn(logMessage);
+    
     try {
       if (message.getErrorCallback() != null) {
         if (!message.getErrorCallback().error(message, e)) {

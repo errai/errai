@@ -245,6 +245,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           // TODO: performance impact? might be better when decoding the message from the wire
           executeInterceptorStack(true, message);
           callback.callback(message);
+          System.out.println("Delivered " + message);
         }
         catch (Exception e) {
           logError("receiver '" + subject + "' threw an exception", decodeCommandMessage(message), e);

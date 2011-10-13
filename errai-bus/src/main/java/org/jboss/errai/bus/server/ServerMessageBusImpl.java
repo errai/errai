@@ -359,7 +359,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
           enqueueForDelivery(getQueueByMessage(message), CommandMessage.createWithParts(rawMsg));
         }
         catch (NoSubscribersToDeliverTo nstdt) {
-          handleMessageDeliveryFailure(this, message, nstdt.getMessage(), nstdt, false);
+          handleMessageDeliveryFailure(this, message, "No subscribers to deliver to", nstdt, false);
         }
       }
 
@@ -466,7 +466,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
     catch (NoSubscribersToDeliverTo nstdt) {
       // catch this so we can get a full trace
-      handleMessageDeliveryFailure(this, message, nstdt.getMessage(), nstdt, false);
+      handleMessageDeliveryFailure(this, message, "No subscribers to deliver to", nstdt, false);
     }
   }
 
@@ -477,7 +477,9 @@ public class ServerMessageBusImpl implements ServerMessageBus {
           enqueueForDelivery(queue, message);
         }
         catch (QueueOverloadedException e) {
-          handleMessageDeliveryFailure(ServerMessageBusImpl.this, message, e.getMessage(), e, false);
+          String queueSessionId = (queue == null || queue.getSession() == null) ?
+              "(no queue session)" : "(session id=" + queue.getSession().getSessionId() + ")";
+          handleMessageDeliveryFailure(ServerMessageBusImpl.this, message, "Queue overloaded " + queueSessionId, e, false);
         }
       }
     });
