@@ -57,7 +57,6 @@ public class MarshallersGenerator extends Generator {
     if (printWriter == null) return;
 
     printWriter.write(new MarshallerGeneratorFactory().generate(packageName, className));
-
     context.commit(logger, printWriter);
   }
 }
