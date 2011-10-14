@@ -16,21 +16,16 @@
 
 package org.jboss.errai.bus.client.util;
 
-import static org.slf4j.LoggerFactory.getLogger;
-
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
-import org.slf4j.Logger;
 
 /**
  * The <tt>ErrorHelper</tt> class facilitates handling and sending error messages to the correct place
  */
 public class ErrorHelper {
-
-  private static final Logger log = getLogger(ErrorHelper.class);
 
   /**
    * Creates the stacktrace for the error message and sends it via conversation to the <tt>ClientBusErrors</tt>
@@ -50,8 +45,6 @@ public class ErrorHelper {
       System.err.println("*** An error occured that could not be delivered to the client.");
       System.err.println("Error Message: " + message.get(String.class, "ErrorMessage"));
       System.err.println("Details      : " + message.get(String.class, "AdditionalDetails").replaceAll("<br/>", "\n").replaceAll("&nbsp;", " "));
-      //  System.err.println("---");
-      //  e.printStackTrace(System.err);
     }
     else {
 
@@ -160,7 +153,7 @@ public class ErrorHelper {
         "\nerrorMessage: " + errorMessage +
         "\nexception: " + e +
         "\ndisconnect: " + disconnect;
-    log.warn(logMessage);
+    System.err.println(logMessage);
     
     try {
       if (message.getErrorCallback() != null) {
