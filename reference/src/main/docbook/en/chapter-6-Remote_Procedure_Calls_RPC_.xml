@@ -15,7 +15,7 @@ public interface MyRemoteService {
     <para>
       The
       <code>@Remote</code>
-      annotation tells Errai that we'd like to use this interface as a remote interface. The remote interface must be part of of the GWT client code. It cannot be part of the server-side code, since the interface will need to be referenced from both the client and server side code. That said, the implementation of a service is relatively to the point:
+      annotation tells Errai that we'd like to use this interface as a remote interface. The remote interface must be part of of the GWT client code. It cannot be part of the server-side code, since the interface will need to be referenced from both the client and server side code. That said, the implementation of a service is relatively simple to the point:
     </para>
     <informalexample>
       <programlisting>@Service

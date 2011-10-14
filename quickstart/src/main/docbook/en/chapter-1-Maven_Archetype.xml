@@ -12,7 +12,7 @@
       <programlisting>mvn archetype:generate \
 -DarchetypeGroupId=org.jboss.errai.archetypes \
 -DarchetypeArtifactId=bus-quickstart \
--DarchetypeVersion=1.3.0.CR1 \
+-DarchetypeVersion=1.3.0.GA \
 -DarchetypeRepository=https://repository.jboss.org/nexus/content/repositories/snapshots/</programlisting>
     </informalexample>
     <para>When invoking the archetype build you will be asked to provide the maven groupId, artifactId and package name your GWT application should use:</para>
