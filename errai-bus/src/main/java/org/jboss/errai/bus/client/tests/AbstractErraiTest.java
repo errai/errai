@@ -95,7 +95,7 @@ public abstract class AbstractErraiTest extends GWTTestCase {
     };
 
 
-    delayTestFinish(15000);
+    delayTestFinish(30000);
     t.schedule(1000);
   }
 }
