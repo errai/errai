@@ -174,30 +174,6 @@ public class MessageQueueImpl implements MessageQueue {
               JSONStreamEncoder.encode(m.getParts(), outstream);
             }
             payLoadSize++;
-
-            try {
-              if (queue.isEmpty())
-                Thread.sleep(nanoTime() - endWindow);
-            }
-            catch (Exception e) {
-              // just resume.
-            }
-          }
-
-          if (!throttleIncoming && queue.size() > lastQueueSize) {
-            if (transmissionWindow < MAX_TRANSMISSION_WINDOW) {
-              transmissionWindow += millis(50);
-            }
-            else {
-              throttleIncoming = true;
-              System.err.println("[Warning: A queue has become saturated and " +
-                      "performance is now being degraded.]");
-            }
-
-          }
-          else if (queue.isEmpty()) {
-            transmissionWindow = DEFAULT_TRANSMISSION_WINDOW;
-            throttleIncoming = false;
           }
         }
 
