@@ -160,7 +160,8 @@ public class App {
       </example>
       <example>
         <title>MyComposite.java</title>
-        <programlisting>public class MyComposite extends Composite {
+        <programlisting>@ApplicationScoped
+public class MyComposite extends Composite {
   
   @Inject @Supported
   public MyBaseWidget widget;
