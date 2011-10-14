@@ -364,7 +364,11 @@ public class HelloWorldService implements MessageCallback {
       <para>Now you're routing from client-to-client!</para>
       <para>
         It may be tempting however, to try and include destination
-        <code>SessionID}}s at the client level, assuming that this will make the infrastructure simpler. But this will not achieve the desired results, as the bus treats {{SessionID}}s as transient. Meaning, the {{SessionID</code>
+        <code>SessionIDs</code>
+        at the client level, assuming that this will make the infrastructure simpler. But this will not achieve the desired results, as the bus treats
+        <code>SessionIDs</code>
+        as transient. Meaning, the
+        <code>SessionID</code>
         information is not ever transmitted from bus-to-bus, and therefore is only directly relevant to the proximate bus.
       </para>
     </section>
