@@ -16,17 +16,20 @@
 
 package org.jboss.errai.bus.server.servlet;
 
+import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
+
+import java.io.IOException;
+import java.io.OutputStream;
+
+import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueSession;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-
-import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
 
 /**
  * The default DefaultBlockingServlet which provides the HTTP-protocol gateway between the server bus and the client buses.
@@ -76,13 +79,13 @@ public class DefaultBlockingServlet extends AbstractErraiServlet {
   private void pollForMessages(QueueSession session, HttpServletRequest httpServletRequest,
                                HttpServletResponse httpServletResponse, boolean wait) throws IOException {
     try {
-      httpServletResponse.setHeader("Cache-Control", "no-cache");
-      httpServletResponse.setHeader("Pragma", "no-cache");
-      httpServletResponse.setHeader("Expires", "-1");
+      // note about caching: clients now include a uniquifier in a request parameter called "z"
+      // so no-cache headers are now unnecessary.
       httpServletResponse.setContentType("application/json");
 
       final MessageQueue queue = service.getBus().getQueue(session);
 
+      OutputStream outputStream = httpServletResponse.getOutputStream();
       if (queue == null) {
         switch (getConnectionPhase(httpServletRequest)) {
           case CONNECTING:
@@ -90,16 +93,16 @@ public class DefaultBlockingServlet extends AbstractErraiServlet {
             return;
         }
 
-        sendDisconnectDueToSessionExpiry(httpServletResponse.getOutputStream());
+        sendDisconnectDueToSessionExpiry(outputStream);
 
         return;
       }
 
       queue.heartBeat();
 
-      queue.poll(wait, httpServletResponse.getOutputStream());
+      queue.poll(wait, outputStream);
 
-      httpServletResponse.getOutputStream().close();
+      outputStream.close();
     }
     catch (final Throwable t) {
       t.printStackTrace();

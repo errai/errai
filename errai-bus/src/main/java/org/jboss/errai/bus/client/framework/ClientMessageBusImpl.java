@@ -100,6 +100,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private long lastTransmit = 0;
 
+  /**
+   * The unique ID that will sent with the next request.
+   * <p>
+   * IMPORTANT: only access this member via {@link #getNextRequestNumber()}.
+   */
+  private int requestNumber = 0;
+  
   private boolean disconnected = false;
 
   ProxySettings proxySettings;
@@ -135,13 +142,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     init();
   }
 
-  /**
-   * Constructor creates sendBuilder for HTTP POST requests, recvBuilder for HTTP GET requests and
-   * initializes the message bus.
-   */
   private void createRequestBuilders() {
     sendBuilder = getSendBuilder();
-    recvBuilder = getRecvBuilder();
 
     logAdapter.debug("Connecting Errai at URL " + sendBuilder.getUrl());
   }
@@ -165,9 +167,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     RequestBuilder builder = new RequestBuilder(
             RequestBuilder.GET,
-            URL.encode(endpoint)
+            URL.encode(endpoint) + "?z=" + getNextRequestNumber()
     );
-
+    
     builder.setHeader("Content-Type", "application/json");
     builder.setHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER, clientId);
     return builder;
@@ -610,7 +612,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     this.disconnected = true;
     this.initialized = false;
     this.sendBuilder = null;
-    this.recvBuilder = null;
     this.postInitTasks.clear();
   }
 
@@ -1333,5 +1334,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         getElement().getStyle().setProperty("zIndex", "5000");
       }
     }
+  }
+  
+  public int getNextRequestNumber() {
+    if (requestNumber == Integer.MAX_VALUE) {
+      requestNumber = 0;
+    }
+    return requestNumber++;
   }
 }

@@ -22,6 +22,7 @@ import org.jboss.errai.bus.server.async.InterruptHandle;
 import org.jboss.errai.bus.server.async.TimedTask;
 import org.jboss.errai.bus.server.util.UnboundedArrayBlockingQueue;
 
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
@@ -48,8 +49,39 @@ public class PooledExecutorService implements TaskProvider {
 
   private final SaturationPolicy saturationPolicy;
 
+  /**
+   * Enumeration of possible ways of handling a queue full scenario.
+   */
   public enum SaturationPolicy {
-    CallerRuns, Fail
+    
+    /**
+     * Runs the task in the calling thread.
+     */
+    CallerRuns {
+      @Override
+      void dealWith(Runnable task) {
+        task.run();
+      }
+    },
+    
+    /**
+     * Throws a RuntimeException when called. The exception message includes
+     * {@code task.toString()}, so name your runnables if you'd like nice messages
+     * in this case.
+     */
+    Fail {
+      @Override
+      void dealWith(Runnable task) {
+        throw new RuntimeException("queue is saturated. not running " + task);
+      }
+    };
+
+    /**
+     * Deals with the given task in the manner consistent with the
+     * SaturationPolicy in use. See the documentation of the individual
+     * saturation policies for details.
+     */
+    abstract void dealWith(Runnable task);
   }
 
   /**
@@ -63,7 +95,7 @@ public class PooledExecutorService implements TaskProvider {
 
   public PooledExecutorService(int queueSize, SaturationPolicy saturationPolicy) {
     maxQueueSize = queueSize;
-    queue = new UnboundedArrayBlockingQueue<TimedTask>(queueSize);
+    queue = new ArrayBlockingQueue<TimedTask>(queueSize);
     pool = new ThreadWorkerPool(this);
 
     scheduledTasks = new PriorityBlockingQueue<TimedTask>();
@@ -80,7 +112,11 @@ public class PooledExecutorService implements TaskProvider {
    */
   public void execute(final Runnable runnable) throws InterruptedException {
     checkLoad();
-    queue.add(new SingleFireTask(runnable));
+    if (!queue.offer(new SingleFireTask(runnable))) {
+      saturationPolicy.dealWith(runnable);
+    }
+    
+    //    queue.add(new SingleFireTask(runnable));
   }
 
   public AsyncTask schedule(final Runnable runnable, TimeUnit unit, long interval) {
@@ -152,13 +188,7 @@ public class PooledExecutorService implements TaskProvider {
        * Sechedule the task for execution.
        */
       if (!queue.offer(task, 5, java.util.concurrent.TimeUnit.SECONDS)) {
-        switch (saturationPolicy) {
-          case CallerRuns:
-            task.run();
-            break;
-          case Fail:
-            throw new RuntimeException("could not schedule task: queue is saturated");
-        }
+        saturationPolicy.dealWith(task);
       }
 
       if (task.calculateNextRuntime()) {
