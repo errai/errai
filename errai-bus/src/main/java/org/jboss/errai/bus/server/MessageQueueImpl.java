@@ -52,8 +52,8 @@ public class MessageQueueImpl implements MessageQueue {
    */
   private static final int MAXIMUM_PAYLOAD_SIZE = 25;
   
-  private static final long DEFAULT_TRANSMISSION_WINDOW = millis(25);
-  private static final long MAX_TRANSMISSION_WINDOW = millis(100);
+//  private static final long DEFAULT_TRANSMISSION_WINDOW = millis(25);
+//  private static final long MAX_TRANSMISSION_WINDOW = millis(100);
 
   private final QueueSession session;
 
