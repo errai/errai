@@ -18,9 +18,7 @@
   <xi:include href="chapter-13-Debugging_Errai_Applications.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
   <xi:include href="chapter-14-Downloads.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
   <xi:include href="chapter-15-Sources.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
-  <xi:include href="chapter-16-License_and_EULA.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
   <xi:include href="chapter-17-Introduction.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
-  <xi:include href="chapter-18-License_and_EULA.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
   <xi:include href="chapter-19-Downloads.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
   <xi:include href="chapter-20-Sources.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
   <xi:include href="chapter-21-Errai_Bus.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
