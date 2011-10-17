@@ -21,6 +21,17 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * Indicates that instances of the annotated class are eligible to be serialized
+ * and sent over the wire between server and clients.
+ * <p>
+ * Note that this annotation has been renamed to {@link Portable}. Use the new
+ * name instead.
+ * 
+ * @deprecated This annotation has been renamed to {@link Portable}.
+ * @since Errai 2.0
+ * @author Mike Brock <cbrock@redhat.com>
+ */
 @Deprecated
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
