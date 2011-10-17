@@ -15,9 +15,9 @@
  */
 package org.jboss.errai.cdi.demo.tagcloud.client.shared;
 
-import org.jboss.errai.common.client.api.annotations.ExposeEntity;
+import org.jboss.errai.common.client.api.annotations.Portable;
 
-@ExposeEntity
+@Portable
 public class TagCloudSubscription {
 
 }

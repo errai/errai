@@ -22,144 +22,144 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.jboss.errai.common.client.api.annotations.ExposeEntity;
+import org.jboss.errai.common.client.api.annotations.Portable;
 
 /**
  * This class represents a tag cloud.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@ExposeEntity
+@Portable
 public class TagCloud {
-    private Map<String, Tag> tags;
-    private Integer minFrequency = -1;
-    private Integer maxFrequency = -1;
+  private Map<String, Tag> tags;
+  private Integer minFrequency = -1;
+  private Integer maxFrequency = -1;
 
-    public TagCloud() {
-        tags = new HashMap<String, Tag>();
+  public TagCloud() {
+    tags = new HashMap<String, Tag>();
+  }
+
+  public TagCloud(Set<Tag> tags) {
+    setAllTags(tags);
+  }
+
+  public Tag getTag(String name) {
+    return tags.get(name);
+  }
+
+  public boolean addTag(Tag tag) {
+    if (tag == null)
+      throw new IllegalArgumentException("Tag must not be null");
+
+    tags.put(tag.getName(), tag);
+    return updateMinMaxFrequency(tag);
+  }
+
+  public boolean updateTag(Tag tag) {
+    if (tag == null)
+      throw new IllegalArgumentException("Tag must not be null");
+
+    tag.setCreated(new Date());
+
+    boolean needsRefresh = updateMinMaxFrequency(tag);
+    Tag oldTag = tags.put(tag.getName(), tag);
+    if (oldTag != null && ((oldTag.getFrequency() == maxFrequency) || oldTag.getFrequency() == minFrequency)) {
+      needsRefresh = true;
+      refreshMinMaxFrequency();
     }
 
-    public TagCloud(Set<Tag> tags) {
-        setAllTags(tags);
+    return needsRefresh;
+  }
+
+  public boolean removeTag(Tag tag) {
+    if (tag == null)
+      throw new IllegalArgumentException("Tag must not be null");
+
+    Tag oldTag = tags.remove(tag.getName());
+    boolean needsRefresh =
+        (oldTag != null && (oldTag.getFrequency() == maxFrequency || oldTag.getFrequency() == minFrequency));
+
+    if (needsRefresh) {
+      refreshMinMaxFrequency();
+    }
+    return needsRefresh;
+  }
+
+  public Double getTagWeight(Tag tag) {
+    if (tag == null)
+      throw new IllegalArgumentException("Tag must not be null");
+
+    return (Math.log(tag.getFrequency()) - Math.log(minFrequency)) / (Math.log(maxFrequency) - Math.log(minFrequency));
+  }
+
+  public Set<Tag> getAllTags() {
+    if (tags == null)
+      return Collections.unmodifiableSet(new HashSet<Tag>());
+
+    return Collections.unmodifiableSet(new HashSet<Tag>(tags.values()));
+  }
+
+  public void setAllTags(Set<Tag> tagSet) {
+    if (tagSet == null)
+      throw new IllegalArgumentException("Tags must not be null");
+
+    if (tags == null)
+      tags = new HashMap<String, Tag>();
+
+    for (Tag tag : tagSet) {
+      tags.put(tag.getName(), tag);
+      updateMinMaxFrequency(tag);
+    }
+  }
+
+  public Map<String, Tag> getTags() {
+    if (tags == null)
+      return Collections.unmodifiableMap(new HashMap<String, Tag>());
+
+    return Collections.unmodifiableMap(tags);
+  }
+
+  public void setTags(Map<String, Tag> tags) {
+    this.tags = tags;
+  }
+
+  public int getMinFrequency() {
+    return minFrequency;
+  }
+
+  public void setMinFrequency(Integer minFrequency) {
+    this.minFrequency = minFrequency;
+  }
+
+  public int getMaxFrequency() {
+    return maxFrequency;
+  }
+
+  public void setMaxFrequency(Integer maxFrequency) {
+    this.maxFrequency = maxFrequency;
+  }
+
+  private boolean updateMinMaxFrequency(Tag tag) {
+    boolean updated = false;
+
+    if (maxFrequency == -1 || tag.getFrequency() > getMaxFrequency()) {
+      setMaxFrequency(tag.getFrequency());
+      updated = true;
     }
 
-    public Tag getTag(String name) {
-        return tags.get(name);
+    if (minFrequency == -1 || tag.getFrequency() < getMinFrequency() && tag.getFrequency() > 0) {
+      setMinFrequency(tag.getFrequency());
+      updated = true;
     }
 
-    public boolean addTag(Tag tag) {
-        if (tag == null)
-            throw new IllegalArgumentException("Tag must not be null");
+    return updated;
+  }
 
-        tags.put(tag.getName(), tag);
-        return updateMinMaxFrequency(tag);
+  private void refreshMinMaxFrequency() {
+    minFrequency = -1;
+    maxFrequency = -1;
+    for (Tag tag : this.tags.values()) {
+      updateMinMaxFrequency(tag);
     }
-
-    public boolean updateTag(Tag tag) {
-        if (tag == null)
-            throw new IllegalArgumentException("Tag must not be null");
-
-        tag.setCreated(new Date());
-
-        boolean needsRefresh = updateMinMaxFrequency(tag);
-        Tag oldTag = tags.put(tag.getName(), tag);
-        if (oldTag != null && ((oldTag.getFrequency() == maxFrequency) || oldTag.getFrequency() == minFrequency)) {
-            needsRefresh = true;
-            refreshMinMaxFrequency();
-        }
-
-        return needsRefresh;
-    }
-
-    public boolean removeTag(Tag tag) {
-        if (tag == null)
-            throw new IllegalArgumentException("Tag must not be null");
-
-        Tag oldTag = tags.remove(tag.getName());
-        boolean needsRefresh = (oldTag != null && (oldTag.getFrequency() == maxFrequency || oldTag.getFrequency() == minFrequency));
-
-        if (needsRefresh) {
-            refreshMinMaxFrequency();
-        }
-        return needsRefresh;
-    }
-
-    public Double getTagWeight(Tag tag) {
-        if (tag == null)
-            throw new IllegalArgumentException("Tag must not be null");
-
-        return (Math.log(tag.getFrequency()) - Math.log(minFrequency))
-                / (Math.log(maxFrequency) - Math.log(minFrequency));
-    }
-
-    public Set<Tag> getAllTags() {
-        if (tags == null)
-            return Collections.unmodifiableSet(new HashSet<Tag>());
-
-        return Collections.unmodifiableSet(new HashSet<Tag>(tags.values()));
-    }
-
-    public void setAllTags(Set<Tag> tagSet) {
-        if (tagSet == null)
-            throw new IllegalArgumentException("Tags must not be null");
-
-        if (tags == null)
-            tags = new HashMap<String, Tag>();
-
-        for (Tag tag : tagSet) {
-            tags.put(tag.getName(), tag);
-            updateMinMaxFrequency(tag);
-        }
-    }
-
-    public Map<String, Tag> getTags() {
-        if (tags == null)
-            return Collections.unmodifiableMap(new HashMap<String, Tag>());
-
-        return Collections.unmodifiableMap(tags);
-    }
-
-    public void setTags(Map<String, Tag> tags) {
-        this.tags = tags;
-    }
-
-    public int getMinFrequency() {
-        return minFrequency;
-    }
-
-    public void setMinFrequency(Integer minFrequency) {
-        this.minFrequency = minFrequency;
-    }
-
-    public int getMaxFrequency() {
-        return maxFrequency;
-    }
-
-    public void setMaxFrequency(Integer maxFrequency) {
-        this.maxFrequency = maxFrequency;
-    }
-
-    private boolean updateMinMaxFrequency(Tag tag) {
-        boolean updated = false;
-
-        if (maxFrequency == -1 || tag.getFrequency() > getMaxFrequency()) {
-            setMaxFrequency(tag.getFrequency());
-            updated = true;
-        }
-
-        if (minFrequency == -1 || tag.getFrequency() < getMinFrequency() && tag.getFrequency() > 0) {
-            setMinFrequency(tag.getFrequency());
-            updated = true;
-        }
-
-        return updated;
-    }
-
-    private void refreshMinMaxFrequency() {
-        minFrequency = -1;
-        maxFrequency = -1;
-        for (Tag tag : this.tags.values()) {
-            updateMinMaxFrequency(tag);
-        }
-    }
+  }
 }
