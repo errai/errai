@@ -177,15 +177,39 @@
 
         <plugins>
             <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.5.4-SNAPSHOT</version>
+                <executions>
+                    <execution>
+                        <id>jacoco-initialize</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>jacoco-site</id>
+                        <phase>site</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-install-plugin</artifactId>
                 <version>2.3</version>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
                 <version>2.5</version>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
@@ -238,7 +262,6 @@
                 <artifactId>maven-release-plugin</artifactId>
                 <version>2.0-beta-9</version>
             </plugin>
-
         </plugins>
 
         <!-- PluginManagement -->
@@ -427,6 +450,13 @@
             <snapshots>
                 <updatePolicy>never</updatePolicy>
             </snapshots>
+        </pluginRepository>
+
+        <pluginRepository>
+            <id>jacoco-snapshot-repository</id>
+            <name>JaCoCo Snapshot Build Repository</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <layout>default</layout>
         </pluginRepository>
     </pluginRepositories>
 
