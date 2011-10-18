@@ -8,9 +8,16 @@ import javax.inject.Inject;
  */
 @ApplicationScoped
 public class InjectionDependentTestBeanC {
-  @Inject
-  private InjectionDependentTestBeanD beanD;
 
+  private InjectionDependentTestBeanD beanD;
+  
+  public InjectionDependentTestBeanC() {}
+  
+  @Inject
+  public InjectionDependentTestBeanC(InjectionDependentTestBeanD beanD) {
+    this.beanD = beanD;
+  }
+  
   public InjectionDependentTestBeanD getBeanD() {
     return beanD;
   }
