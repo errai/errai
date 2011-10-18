@@ -179,14 +179,14 @@
             </properties>
 
             <build>
-                <resources>
-                    <resource>
+                <testResources>
+                    <testResource>
                         <directory>src/test/java</directory>
-                    </resource>
-                    <resource>
+                    </testResource>
+                    <testResource>
                         <directory>src/test/resources</directory>
-                    </resource>
-                </resources>
+                    </testResource>
+                </testResources>
                 <plugins>
                     <plugin>
                         <artifactId>maven-compiler-plugin</artifactId>
