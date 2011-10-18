@@ -32,14 +32,15 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.jboss.errai.common.metadata.MetaDataScanner;
-import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
-import org.jboss.errai.ioc.rebind.ioc.Injector;
-import org.jboss.errai.ioc.rebind.ioc.InjectorFactory;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaField;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
+import org.jboss.errai.common.metadata.MetaDataScanner;
+import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
+import org.jboss.errai.ioc.rebind.ioc.InjectionFailure;
+import org.jboss.errai.ioc.rebind.ioc.Injector;
+import org.jboss.errai.ioc.rebind.ioc.InjectorFactory;
 
 public class IOCProcessorFactory {
   private SortedSet<ProcessingEntry> processingEntries = new TreeSet<ProcessingEntry>();
@@ -162,24 +163,29 @@ public class IOCProcessorFactory {
 
     List<ProcessingEntry> procEntries = new ArrayList<ProcessingEntry>(processingEntries);
 
-    // brute force FTW
+    // The logic below processes the procEntries list in multiple passes, because the entries
+    // are not ordered according to their dependencies.
+    // TODO we should consider replacing this logic by applying an a priori topological sort for processing entries.
     do {
       start = procEntries.size();
 
       Iterator<ProcessingEntry> iter = procEntries.iterator();
 
       while (iter.hasNext()) {
-        if (iter.next().processAllDelegates()) {
-          iter.remove();
+        try {
+          if (iter.next().processAllDelegates()) {
+            iter.remove();
+          }
+        } 
+        catch (InjectionFailure f) {
+          // We are ignoring this Exception and keep retrying. The problem should go away after
+          // all the other dependencies have been processed.
         }
       }
     } while (!procEntries.isEmpty() && procEntries.size() < start);
 
-
-    // aww man, something's screwed.
     if (!procEntries.isEmpty()) {
-      // throw a meaningless exception
-      throw new RuntimeException("unresolved dependences: " + processingEntries);
+      throw new RuntimeException("unresolved dependencies: " + processingEntries);
     }
 
     return true;
@@ -212,8 +218,12 @@ public class IOCProcessorFactory {
         Iterator<ProcessingDelegate<T>> iterator = targets.iterator();
 
         while (iterator.hasNext()) {
-          if (iterator.next().process()) {
-            iterator.remove();
+          try {
+            if (iterator.next().process()) {
+              iterator.remove();
+            }
+          } catch (InjectionFailure f) {
+            System.out.println(f.getMessage());
           }
         }
 
