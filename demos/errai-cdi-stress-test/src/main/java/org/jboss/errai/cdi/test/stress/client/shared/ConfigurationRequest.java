@@ -1,6 +1,6 @@
 package org.jboss.errai.cdi.test.stress.client.shared;
 
-import org.jboss.errai.bus.server.annotations.ExposeEntity;
+import org.jboss.errai.common.client.api.annotations.Portable;
 
 /**
  * Request object sent by the client when it wants a new stream of ticks from
@@ -13,7 +13,7 @@ import org.jboss.errai.bus.server.annotations.ExposeEntity;
  * "leave the current message interval and count as is, and change the message
  * size to 1000 bytes."
  */
-@ExposeEntity
+@Portable
 public class ConfigurationRequest {
 
   /**

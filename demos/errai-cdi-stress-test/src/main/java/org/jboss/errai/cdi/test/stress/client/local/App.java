@@ -29,11 +29,13 @@ import org.jboss.errai.cdi.test.stress.client.shared.ConfigurationRequest;
 import org.jboss.errai.cdi.test.stress.client.shared.SubscriptionRequest;
 import org.jboss.errai.cdi.test.stress.client.shared.SubscriptionResponse;
 import org.jboss.errai.cdi.test.stress.client.shared.TickEvent;
-import org.jboss.errai.cdi.test.stress.client.shared.TickStreamGap;
+import org.jboss.errai.cdi.test.stress.client.shared.TickStreamDiscontinuity;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.DateTimeFormat.PredefinedFormat;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DateLabel;
@@ -58,7 +60,7 @@ public class App {
   private Event<ConfigurationRequest> configurationEvent;
 
   private final Label initialLatencyLabel = new Label();
-  private final DateLabel lastTickTimeLabel = new DateLabel();
+  private final DateLabel lastTickTimeLabel = new DateLabel(DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_MEDIUM));
   private final Label lastTickIdLabel = new Label();
   private final Label lastTickAgeLabel = new Label();
 
@@ -73,7 +75,7 @@ public class App {
    * Log of gaps in the tick stream (where a tick was received with an ID more
    * than 1 greater than the previous tick).
    */
-  private final List<TickStreamGap> tickStreamGaps = new ArrayList<TickStreamGap>();
+  private final List<TickStreamDiscontinuity> tickStreamGaps = new ArrayList<TickStreamDiscontinuity>();
   
   private final HTML tickStreamGapLabel = new HTML();
   
@@ -134,26 +136,28 @@ public class App {
     payloadSize.setValue(cr.getPayloadSize());
   }
   
-  public void tick(@Observes TickEvent tick) {
-    long age = System.currentTimeMillis() - tick.getServerTime();
-    lastTickTimeLabel.setValue(new Date(tick.getServerTime()));
-    lastTickAgeLabel.setText(String.valueOf(age));
-    lastTickIdLabel.setText(String.valueOf(tick.getId()));
-    
-    if (lastTickEvent != null && (lastTickEvent.getId() + 1) != tick.getId()) {
-      TickStreamGap gap = new TickStreamGap(lastTickEvent, tick, new Date());
-      tickStreamGaps.add(gap);
-      if (tickStreamGaps.size() > MAX_LOGGED_GAPS) {
-        tickStreamGaps.remove(0);
-      }
-    }
+  public void tick(@Observes final TickEvent tick) {
+    try {
+      long age = System.currentTimeMillis() - tick.getServerTime();
+      lastTickTimeLabel.setValue(new Date(tick.getServerTime()));
+      lastTickAgeLabel.setText(String.valueOf(age));
+      lastTickIdLabel.setText(String.valueOf(tick.getId()));
 
-    StringBuilder gaps = new StringBuilder();
-    for (TickStreamGap gap : tickStreamGaps) {
-      gaps.append(gap).append("<br>");
+      if (lastTickEvent != null && (lastTickEvent.getId() + 1) != tick.getId()) {
+        TickStreamDiscontinuity gap = new TickStreamDiscontinuity(lastTickEvent, tick, new Date());
+        tickStreamGaps.add(gap);
+        if (tickStreamGaps.size() > MAX_LOGGED_GAPS) {
+          tickStreamGaps.remove(0);
+        }
+
+        StringBuilder gaps = new StringBuilder();
+        for (TickStreamDiscontinuity tsd : tickStreamGaps) {
+          gaps.append(tsd).append("<br>");
+        }
+        tickStreamGapLabel.setHTML(gaps.toString());
+      }
+    } finally {
+      lastTickEvent = tick;
     }
-    tickStreamGapLabel.setHTML(gaps.toString());
-    
-    lastTickEvent = tick;
   }
 }
