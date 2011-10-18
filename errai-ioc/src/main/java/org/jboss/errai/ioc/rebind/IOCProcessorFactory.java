@@ -223,7 +223,7 @@ public class IOCProcessorFactory {
               iterator.remove();
             }
           } catch (InjectionFailure f) {
-            System.out.println(f.getMessage());
+            // Ignored, see processAll()
           }
         }
 
