@@ -107,8 +107,12 @@ public class JaxrsProxyMethodGenerator {
     JaxrsResourceMethodParameters params = resourceMethod.getParameters();
     ContextualStatementBuilder pathValue = Stmt.loadLiteral(resourceMethod.getPath());
 
+    String path =  resourceMethod.getPath();
+    if (!path.startsWith("/"))
+     path = "/" + path;
+
     List<String> pathParams =
-        ((UriBuilderImpl) UriBuilderImpl.fromTemplate(resourceMethod.getPath())).getPathParamNamesInDeclarationOrder();
+        ((UriBuilderImpl) UriBuilderImpl.fromTemplate(path)).getPathParamNamesInDeclarationOrder();
 
     for (String pathParam : pathParams) {
       pathValue = pathValue.invoke("replaceAll", "\\{" + pathParam + "\\}", 

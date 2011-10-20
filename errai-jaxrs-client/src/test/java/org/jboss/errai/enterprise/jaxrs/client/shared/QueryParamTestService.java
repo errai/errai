@@ -8,7 +8,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 
-@Path("test/queryparam")
+@Path("/test/queryparam")
 public interface QueryParamTestService {
 
   @GET

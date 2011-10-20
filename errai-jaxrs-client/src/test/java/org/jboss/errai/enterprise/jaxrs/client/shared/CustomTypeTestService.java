@@ -11,7 +11,7 @@ import javax.ws.rs.Produces;
 
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.Entity;
 
-@Path("test/customtype")
+@Path("/test/customtype")
 public interface CustomTypeTestService {
 
   @GET

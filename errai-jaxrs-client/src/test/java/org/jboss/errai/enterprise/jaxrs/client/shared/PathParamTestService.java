@@ -8,7 +8,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 
-@Path("test/pathparam")
+@Path("/test/pathparam")
 public interface PathParamTestService {
 
   @GET 

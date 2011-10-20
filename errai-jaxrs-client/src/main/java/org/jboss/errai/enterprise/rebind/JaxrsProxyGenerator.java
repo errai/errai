@@ -46,12 +46,8 @@ public class JaxrsProxyGenerator {
 
   public JaxrsProxyGenerator(Class<?> remote) {
     this.remote = remote;
-
-    rootResourcePath = MetaClassFactory.get(remote).getAnnotation(Path.class).value();
-    if (!rootResourcePath.startsWith("/"))
-      rootResourcePath = "/" + rootResourcePath;
-
-    headers = JaxrsHeaders.fromClass(MetaClassFactory.get(remote));
+    this.rootResourcePath = MetaClassFactory.get(remote).getAnnotation(Path.class).value();
+    this.headers = JaxrsHeaders.fromClass(MetaClassFactory.get(remote));
   }
 
   public ClassStructureBuilder<?> generate() {

@@ -8,7 +8,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 
-@Path("test/headerparam")
+@Path("/test/headerparam")
 public interface HeaderParamTestService {
 
   @GET

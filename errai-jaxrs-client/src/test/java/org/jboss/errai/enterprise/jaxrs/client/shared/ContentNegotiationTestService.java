@@ -8,7 +8,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
-@Path("test/contentnegotiation")
+@Path("/test/contentnegotiation")
 public interface ContentNegotiationTestService {
 
   @GET
