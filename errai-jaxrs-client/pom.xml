@@ -50,8 +50,8 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
+				<groupId>org.jboss.errai</groupId>
+				<artifactId>jacoco-gwt-maven-plugin</artifactId>
 				<version>0.5.4-SNAPSHOT</version>
 				<executions>
 					<execution>

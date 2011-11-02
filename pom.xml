@@ -241,8 +241,8 @@
                                 </pluginExecution>
                                 <pluginExecution>
                                     <pluginExecutionFilter>
-                                        <groupId>org.jacoco</groupId>
-                                        <artifactId>jacoco-maven-plugin</artifactId>
+                                        <groupId>org.jboss.errai</groupId>
+                                        <artifactId>jacoco-gwt-maven-plugin</artifactId>
                                         <versionRange>[0.0.0,)</versionRange>
                                         <goals>
                                             <goal>prepare-agent</goal>
