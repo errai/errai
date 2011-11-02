@@ -20,11 +20,6 @@ import java.lang.ref.SoftReference;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-/**
- * User: christopherbrock
- * Date: 11-Aug-2010
- * Time: 10:46:53 AM
- */
 public class EncodingCache {
   private static final Map<Object, SoftReference<?>> ENC_CACHE = new WeakHashMap<Object, SoftReference<?>>(1000);
 
