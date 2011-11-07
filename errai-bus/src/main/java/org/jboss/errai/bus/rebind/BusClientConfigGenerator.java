@@ -40,6 +40,7 @@ import java.util.Properties;
 
 import static org.mvel2.templates.TemplateCompiler.compileTemplate;
 import static org.mvel2.templates.TemplateRuntime.execute;
+import static org.mvel2.util.ParseTools.unboxPrimitive;
 
 /**
  * @author Mike Brock
@@ -173,7 +174,7 @@ public class BusClientConfigGenerator implements ExtensionGenerator {
               arrayConverters.put(c, depth);
             }
             else {
-              types.put(f.getName(), c = ParseTools.unboxPrimitive(Class.forName(pType.getQualifiedBoxedSourceName())));
+              types.put(f.getName(), c = unboxPrimitive(Class.forName(pType.getQualifiedBoxedSourceName())));
             }
           }
           else {

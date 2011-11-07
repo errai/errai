@@ -127,6 +127,7 @@ public class JSONEncoderCli {
     return mapBuild.append("}").toString();
   }
 
+  //todo: encode type data.
   private String encodeCollection(Collection col, EncodingContext ctx) {
     StringBuilder buildCol = new StringBuilder("[");
     Iterator iter = col.iterator();
@@ -217,7 +218,6 @@ public class JSONEncoderCli {
     }
     return buildCol.append("]").toString();
   }
-
 
   public Map<String, String> getMarshalledTypes() {
     return marshalledTypes;

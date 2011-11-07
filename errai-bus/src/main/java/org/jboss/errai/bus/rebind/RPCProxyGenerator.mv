@@ -46,6 +46,7 @@ def pretty(cls) {
         public @{method.getReturnType() == Void.class ? "void" : pretty(method.getReturnType())}
                @{method.getName()}(@code{count = 0;}@foreach{type : method.getParameterTypes()}@{type.getCanonicalName()} _@{count++}@end{", "}) {
 
+                try {
                 if (errorCallback == null) {
                  org.jboss.errai.bus.client.api.base.MessageBuilder.createCall()
                     .call("@{interfaceClass.getName()}")
@@ -71,6 +72,11 @@ def pretty(cls) {
                 // default
                 return null;
                 @end{}
+                }
+                catch (Throwable t) {
+                   t.printStackTrace();
+                   throw new RuntimeException("error sending RPC call: @{interfaceClass.getName()}.@{method}", t);
+                }
         }
     @end{}
 }

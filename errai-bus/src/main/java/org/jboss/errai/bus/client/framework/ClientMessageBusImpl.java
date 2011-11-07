@@ -1111,7 +1111,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
               public void run() {
                 if (System.currentTimeMillis() - lastTransmit >= HEARTBEAT_DELAY) {
                   encodeAndTransmit(MessageBuilder.createMessage().toSubject("ServerBus")
-                          .command(BusCommands.Heartbeat).noErrorHandling().getMessage());
+                          .command(BusCommands.Heartbeat).defaultErrorHandling().getMessage());
                   schedule(HEARTBEAT_DELAY);
                 }
                 else {

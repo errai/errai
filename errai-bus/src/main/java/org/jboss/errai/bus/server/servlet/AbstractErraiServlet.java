@@ -79,8 +79,8 @@ public abstract class AbstractErraiServlet extends HttpServlet {
 
   @Override
   public void init(ServletConfig config) throws ServletException {
-
     final ServletContext context = config.getServletContext();
+
     service = (ErraiService) context.getAttribute("errai");
     if (null == service) {
       synchronized (context) {
@@ -106,18 +106,18 @@ public abstract class AbstractErraiServlet extends HttpServlet {
         contextClassLoader = Thread.currentThread().getContextClassLoader();
 
         service.getConfiguration().getResourceProviders()
-            .put("errai.experimental.classLoader", new ResourceProvider<ClassLoader>() {
-              public ClassLoader get() {
-                return contextClassLoader;
-              }
-            });
+                .put("errai.experimental.classLoader", new ResourceProvider<ClassLoader>() {
+                  public ClassLoader get() {
+                    return contextClassLoader;
+                  }
+                });
 
         service.getConfiguration().getResourceProviders()
-            .put("errai.experimental.servletContext", new ResourceProvider<ServletContext>() {
-              public ServletContext get() {
-                return context;
-              }
-            });
+                .put("errai.experimental.servletContext", new ResourceProvider<ServletContext>() {
+                  public ServletContext get() {
+                    return context;
+                  }
+                });
 
         // store it in servlet context
         config.getServletContext().setAttribute("errai", service);
@@ -170,7 +170,7 @@ public abstract class AbstractErraiServlet extends HttpServlet {
 
 
   protected void writeExceptionToOutputStream(HttpServletResponse httpServletResponse
-      , final
+          , final
   Throwable t) throws IOException {
     httpServletResponse.setHeader("Cache-Control", "no-cache");
     httpServletResponse.addHeader("Payload-Size", "1");
@@ -208,7 +208,7 @@ public abstract class AbstractErraiServlet extends HttpServlet {
       public Object getMessage() {
         return reason != null ? "{\"ToSubject\":\"ClientBus\", \"CommandType\":\"" + BusCommands.Disconnect + "\"," +
                 "\"Reason\":\"" + reason + "\"}"
-            : "{\"CommandType\":\"" + BusCommands.Disconnect + "\"}";
+                : "{\"CommandType\":\"" + BusCommands.Disconnect + "\"}";
       }
     });
   }
