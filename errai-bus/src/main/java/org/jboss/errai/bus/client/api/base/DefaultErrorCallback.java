@@ -16,19 +16,29 @@
 
 package org.jboss.errai.bus.client.api.base;
 
+import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversation;
+import static org.jboss.errai.bus.client.api.base.MessageBuilder.createMessage;
+
+import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.builder.MessageBuildParms;
+import org.jboss.errai.bus.client.protocols.MessageParts;
 
-import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversation;
-
+/**
+ * The default error callback implementation, used when {@link MessageBuildParms#defaultErrorHandling()} was invoked. 
+ * 
+ * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
+ */
 public class DefaultErrorCallback implements ErrorCallback {
   public static final DefaultErrorCallback INSTANCE = new DefaultErrorCallback();
+  public static final String CLIENT_ERROR_SUBJECT = "ClientBusErrors";
 
-  public boolean error(Message message, Throwable e) {
-    e.printStackTrace();
-
+  public boolean error(Message message, final Throwable e) {
     if (e != null) {
-      StringBuilder a = new StringBuilder("<br/>").append(e.getClass().getName()).append(": ").append(e.getMessage()).append("<br/>");
+      StringBuilder a =
+          new StringBuilder("<br/>").append(e.getClass().getName()).append(": ").append(e.getMessage()).append("<br/>");
 
       // Let's build-up the stacktrace.
       boolean first = true;
@@ -38,29 +48,46 @@ public class DefaultErrorCallback implements ErrorCallback {
       }
 
       // And add the entire causal chain.
-      while ((e = e.getCause()) != null) {
+      Throwable t = e;
+      while ((t = t.getCause()) != null) {
         first = true;
         a.append("Caused by:<br/>");
-        for (StackTraceElement sel : e.getStackTrace()) {
+        for (StackTraceElement sel : t.getStackTrace()) {
           a.append(first ? "" : "&nbsp;&nbsp;").append(sel.toString()).append("<br/>");
           first = false;
         }
       }
 
-      createConversation(message)
-          .toSubject("ClientBusErrors")
-          .with("ErrorMessage", e.getMessage())
-          .with("AdditionalDetails", a.toString())
-          .noErrorHandling().reply();
-
-
+      if (message == null) {
+        createMessage(CLIENT_ERROR_SUBJECT)
+            .with(MessageParts.ErrorMessage, e.getMessage())
+            .with("AdditionalDetails", a.toString())
+            .with(MessageParts.Throwable, e)
+            .noErrorHandling().sendNowWith(ErraiBus.get());
+      }
+      else {
+        createConversation(message)
+            .toSubject(CLIENT_ERROR_SUBJECT)
+            .with(MessageParts.ErrorMessage, e.getMessage())
+            .with("AdditionalDetails", a.toString())
+            .with(MessageParts.Throwable, e)
+            .noErrorHandling().reply();
+      }
     }
     else {
-      createConversation(message)
-          .toSubject("ClientBusErrors")
-          .with("ErrorMessage", e.getMessage())
-          .with("AdditionalDetails", "No additional details")
-          .noErrorHandling().reply();
+      if (message == null) {
+        createMessage(CLIENT_ERROR_SUBJECT)
+            .with("ErrorMessage", "Null exception reference")
+            .with("AdditionalDetails", "No additional details")
+            .noErrorHandling().sendNowWith(ErraiBus.get());
+      }
+      else {
+        createConversation(message)
+            .toSubject(CLIENT_ERROR_SUBJECT)
+            .with("ErrorMessage", "Null exception reference")
+            .with("AdditionalDetails", "No additional details")
+            .noErrorHandling().reply();
+      }
     }
 
     return false;

@@ -19,6 +19,7 @@ package org.jboss.errai.bus.server.servlet;
 import org.apache.catalina.CometEvent;
 import org.apache.catalina.CometProcessor;
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.server.api.MessageQueue;
@@ -193,7 +194,7 @@ public class TomcatCometServlet extends AbstractErraiServlet implements CometPro
 
     writeToOutputStream(stream, new MarshalledMessage() {
       public String getSubject() {
-        return "ClientBusErrors";
+        return DefaultErrorCallback.CLIENT_ERROR_SUBJECT;
       }
 
       public Object getMessage() {

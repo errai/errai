@@ -212,6 +212,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
   private Message message = null;
   
   public void testRPCThrowingException() {
+    caught = null;
     runAfterInit(new Runnable() {
       public void run() {
         MessageBuilder.createCall(

@@ -16,6 +16,7 @@
 
 package org.jboss.errai.bus.server.servlet;
 
+import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.server.api.MessageQueue;
@@ -134,7 +135,7 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
 
       writeToOutputStream(stream, new MarshalledMessage() {
         public String getSubject() {
-          return "ClientBusErrors";
+          return DefaultErrorCallback.CLIENT_ERROR_SUBJECT;
         }
 
         public Object getMessage() {

@@ -16,16 +16,31 @@
 
 package org.jboss.errai.bus.client.framework;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.http.client.*;
-import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.*;
-import org.jboss.errai.bus.client.api.*;
+import static org.jboss.errai.bus.client.json.JSONUtilCli.decodePayload;
+import static org.jboss.errai.bus.client.json.JSONUtilCli.encodeMap;
+import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteSubscribe;
+import static org.jboss.errai.bus.client.protocols.MessageParts.PriorityProcessing;
+import static org.jboss.errai.bus.client.protocols.MessageParts.ReplyTo;
+import static org.jboss.errai.bus.client.protocols.MessageParts.Subject;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import org.jboss.errai.bus.client.api.HasEncoded;
+import org.jboss.errai.bus.client.api.HookCallback;
+import org.jboss.errai.bus.client.api.InitializationListener;
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.MessageListener;
+import org.jboss.errai.bus.client.api.SessionExpirationListener;
+import org.jboss.errai.bus.client.api.SubscribeListener;
+import org.jboss.errai.bus.client.api.UnsubscribeListener;
 import org.jboss.errai.bus.client.api.base.Capabilities;
+import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.NoSubscribersToDeliverTo;
 import org.jboss.errai.bus.client.api.base.TransportIOException;
@@ -33,12 +48,28 @@ import org.jboss.errai.bus.client.ext.ExtensionsLoader;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 
-import java.util.*;
-
-import static org.jboss.errai.bus.client.json.JSONUtilCli.decodePayload;
-import static org.jboss.errai.bus.client.json.JSONUtilCli.encodeMap;
-import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteSubscribe;
-import static org.jboss.errai.bus.client.protocols.MessageParts.*;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.RequestException;
+import com.google.gwt.http.client.RequestTimeoutException;
+import com.google.gwt.http.client.Response;
+import com.google.gwt.http.client.URL;
+import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 /**
  * The default client <tt>MessageBus</tt> implementation.  This bus runs in the browser and automatically federates
@@ -52,8 +83,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private String clientId;
 
   /* The encoded URL to be used for the bus */
-  private String OUT_SERVICE_ENTRY_POINT = "in.erraiBus";
-  private String IN_SERVICE_ENTRY_POINT = "in.erraiBus";
+  String OUT_SERVICE_ENTRY_POINT = "out.erraiBus";
+  String IN_SERVICE_ENTRY_POINT = "in.erraiBus";
 
   /* ArrayList of all subscription listeners */
   private List<SubscribeListener> onSubscribeHooks;
@@ -521,8 +552,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private void transmitRemote(final String message, final Message txMessage) {
     if (message == null) return;
 
-   // System.out.println("TX:" + message);
-
     try {
       sendBuilder.sendRequest(message, new RequestCallback() {
 
@@ -547,7 +576,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             }
           }
 
-
           /**
            * If the server bus returned us some client-destined messages
            * in response to our send, handle them now.
@@ -561,7 +589,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         }
 
         public void onError(Request request, Throwable exception) {
-          exception.printStackTrace();
           if (txMessage.getErrorCallback() == null || txMessage.getErrorCallback().error(txMessage, exception)) {
             logError("Failed to communicate with remote bus", "", exception);
           }
@@ -569,7 +596,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       });
     }
     catch (Exception e) {
-      e.printStackTrace();
+      callErrorHandler(txMessage, e);
     }
 
     lastTransmit = System.currentTimeMillis();
@@ -583,11 +610,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       statusCode = 1;
       receiveCommCallback.onError(null, e);
     }
-    catch (RequestException e) {
-      logError(e.getMessage(), "", e);
-    }
     catch (Throwable t) {
-      t.printStackTrace();
+      DefaultErrorCallback.INSTANCE.error(null, t);
     }
   }
 
@@ -826,7 +850,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
               }
             });
 
-            subscribe("ClientBusErrors", new MessageCallback() {
+            subscribe(DefaultErrorCallback.CLIENT_ERROR_SUBJECT, new MessageCallback() {
               public void callback(Message message) {
                 String errorTo = message.get(String.class, MessageParts.ErrorTo);
                 if (errorTo == null) {
@@ -1025,13 +1049,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           }
       }
 
-      logError("Communication Error", "None", throwable);
+      DefaultErrorCallback.INSTANCE.error(null, throwable);
     }
 
     public void onResponseReceived(Request request, Response response) {
       if (response.getStatusCode() != 200) {
         statusCode = response.getStatusCode();
-        onError(request, new Throwable());
+        onError(request, new TransportIOException("Unexpected response code", statusCode, response.getStatusText()));
         return;
       }
 
@@ -1118,7 +1142,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
               public void run() {
                 if (System.currentTimeMillis() - lastTransmit >= HEARTBEAT_DELAY) {
                   encodeAndTransmit(MessageBuilder.createMessage().toSubject("ServerBus")
-                          .command(BusCommands.Heartbeat).noErrorHandling().getMessage());
+                          .command(BusCommands.Heartbeat).defaultErrorHandling().getMessage());
                   schedule(HEARTBEAT_DELAY);
                 }
                 else {

@@ -16,9 +16,19 @@
 
 package org.jboss.errai.bus.server.servlet;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
+import java.io.IOException;
+import java.io.OutputStream;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
 import org.jboss.errai.bus.client.api.ResourceProvider;
+import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.protocols.BusCommands;
@@ -32,15 +42,8 @@ import org.jboss.errai.bus.server.service.ErraiServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import java.io.IOException;
-import java.io.OutputStream;
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
 
 /**
  * The <tt>AbstractErraiServlet</tt> provides a starting point for creating Http-protocol gateway between the server
@@ -181,7 +184,7 @@ public abstract class AbstractErraiServlet extends HttpServlet {
 
     writeToOutputStream(stream, new MarshalledMessage() {
       public String getSubject() {
-        return "ClientBusErrors";
+        return DefaultErrorCallback.CLIENT_ERROR_SUBJECT;
       }
 
       public Object getMessage() {
