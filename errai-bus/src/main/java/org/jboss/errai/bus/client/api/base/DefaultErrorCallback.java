@@ -21,6 +21,7 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 
 import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversation;
+import static org.jboss.errai.bus.client.api.base.MessageBuilder.createMessage;
 
 public class DefaultErrorCallback implements ErrorCallback {
   public static final DefaultErrorCallback INSTANCE = new DefaultErrorCallback();

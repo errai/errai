@@ -49,4 +49,5 @@ public class EncodingContext {
   public void unsetEscapeMode() {
     escapeMode--;
   }
+
 }

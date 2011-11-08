@@ -18,6 +18,7 @@ package org.jboss.errai.bus.server.io;
 
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.common.client.types.DecodingContext;
+import org.jboss.errai.common.client.types.NumbersUtils;
 import org.jboss.errai.common.client.types.UHashMap;
 import org.jboss.errai.common.client.types.UnsatisfiedForwardLookup;
 import org.mvel2.ConversionHandler;
@@ -86,6 +87,11 @@ public class TypeDemarshallHelper {
         Map<?, ?> oMap = (Map) o;
         if (oMap.containsKey(SerializationParts.ENCODED_TYPE)) {
           String objId = (String) oMap.get(SerializationParts.OBJECT_ID);
+
+          if (oMap.containsKey(SerializationParts.NUMERIC_VALUE)) {
+            return NumbersUtils.getNumber((String) oMap.get(SerializationParts.ENCODED_TYPE), oMap.get(SerializationParts.NUMERIC_VALUE));
+          }
+
           boolean ref = false;
           if (objId != null) {
             if (objId.charAt(0) == '$') {

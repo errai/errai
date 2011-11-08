@@ -20,6 +20,7 @@ import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.common.client.types.DecodingContext;
 import org.jboss.errai.common.client.types.EncodingContext;
+import org.jboss.errai.common.client.types.NumbersUtils;
 import org.jboss.errai.common.client.types.TypeHandler;
 import org.mvel2.MVEL;
 
@@ -51,6 +52,10 @@ public class JSONEncoder {
   }
 
   private static String _encode(Object v, EncodingContext ctx) {
+    return _encode(v, ctx, false);
+  }
+  
+  private static String _encode(Object v, EncodingContext ctx, boolean qualifyNumerics) {
     if (v == null) {
       return "null";
     }
@@ -58,7 +63,12 @@ public class JSONEncoder {
       return encodeString((String) v, ctx);
     }
     if (v instanceof Number || v instanceof Boolean) {
-      return String.valueOf(v);
+      if (qualifyNumerics) {
+        return NumbersUtils.qualifiedNumericEncoding(v);
+      }
+      else {
+        return String.valueOf(v);
+      }
     }
     else if (v instanceof Collection) {
       return encodeCollection((Collection) v, ctx);
@@ -175,8 +185,9 @@ public class JSONEncoder {
     StringBuilder mapBuild = new StringBuilder("{");
     boolean first = true;
 
+
     for (Map.Entry<Object, Object> entry : map.entrySet()) {
-      String val = _encode(entry.getValue(), ctx);
+      String val = _encode(entry.getValue(), ctx, true);
       if (!first) {
         mapBuild.append(',');
       }
@@ -188,7 +199,7 @@ public class JSONEncoder {
         }
 
         ctx.setEscapeMode();
-        mapBuild.append(_encode(entry.getKey(), ctx));
+        mapBuild.append(_encode(entry.getKey(), ctx, true));
         ctx.unsetEscapeMode();
         mapBuild.append(write(ctx, '\"'));
         mapBuild.append(':')
@@ -237,14 +248,14 @@ public class JSONEncoder {
 
   private static String encodeString(String string, EncodingContext ctx) {
     String quotes = write(ctx, '\"');
-    return quotes + string.replaceAll("\\\\", "\\\\\\\\").replaceAll("[\\\\]{0}\\\"", "\\\\\"")  + quotes;
+    return quotes + string.replaceAll("\\\\", "\\\\\\\\").replaceAll("[\\\\]{0}\\\"", "\\\\\"") + quotes;
   }
 
   private static String encodeCollection(Collection col, EncodingContext ctx) {
     StringBuilder buildCol = new StringBuilder("[");
     Iterator iter = col.iterator();
     while (iter.hasNext()) {
-      buildCol.append(_encode(iter.next(), ctx));
+      buildCol.append(_encode(iter.next(), ctx, true));
       if (iter.hasNext()) buildCol.append(',');
     }
     return buildCol.append(']').toString();
