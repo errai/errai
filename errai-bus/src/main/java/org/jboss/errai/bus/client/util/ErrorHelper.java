@@ -17,6 +17,7 @@
 package org.jboss.errai.bus.client.util;
 
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
 import org.jboss.errai.bus.client.framework.MessageBus;
@@ -38,7 +39,7 @@ public class ErrorHelper {
    * @param e            - the exception received
    */
   public static void sendClientError(MessageBus bus, Message message, String errorMessage, Throwable e) {
-    if ("ClientBusErrors".equals(message.getSubject())) {
+    if (DefaultErrorCallback.CLIENT_ERROR_SUBJECT.equals(message.getSubject())) {
       /**
        * Trying to send an error to the client when the client obviously can't receive it!
        */
@@ -93,7 +94,7 @@ public class ErrorHelper {
    * @param additionalDetails - the stacktrace represented as a <tt>String</tt>
    */
   public static void sendClientError(MessageBus bus, Message message, String errorMessage, String additionalDetails) {
-    if ("ClientBusErrors".equals(message.getSubject())) {
+    if (DefaultErrorCallback.CLIENT_ERROR_SUBJECT.equals(message.getSubject())) {
       /**
        * Trying to send an error to the client when the client obviously can't receive it!
        */
@@ -106,7 +107,7 @@ public class ErrorHelper {
     else {
 
       MessageBuilder.createConversation(message)
-              .toSubject("ClientBusErrors")
+              .toSubject(DefaultErrorCallback.CLIENT_ERROR_SUBJECT)
               .with("ErrorMessage", errorMessage)
               .with("AdditionalDetails", additionalDetails)
               .with(MessageParts.ErrorTo, message.get(String.class, MessageParts.ErrorTo))
@@ -117,7 +118,7 @@ public class ErrorHelper {
 
   public static void sendClientError(MessageBus bus, String queueId, String errorMessage, String additionalDetails) {
     MessageBuilder.createMessage()
-            .toSubject("ClientBusErrors")
+            .toSubject(DefaultErrorCallback.CLIENT_ERROR_SUBJECT)
             .with("ErrorMessage", errorMessage)
             .with("AdditionalDetails", additionalDetails)
             .with(MessageParts.SessionID, queueId)

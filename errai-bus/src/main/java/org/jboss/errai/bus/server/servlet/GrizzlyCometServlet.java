@@ -21,6 +21,7 @@ import com.sun.grizzly.comet.CometEngine;
 import com.sun.grizzly.comet.CometEvent;
 import com.sun.grizzly.comet.handlers.ReflectorCometHandler;
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.server.api.MessageQueue;
@@ -167,7 +168,7 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
 
       writeToOutputStream(stream, new MarshalledMessage() {
         public String getSubject() {
-          return "ClientBusErrors";
+          return DefaultErrorCallback.CLIENT_ERROR_SUBJECT;
         }
 
         public Object getMessage() {
