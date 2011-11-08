@@ -19,6 +19,7 @@ package org.jboss.errai.bus.server.servlet;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import org.jboss.errai.bus.client.api.ResourceProvider;
+import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.protocols.BusCommands;
@@ -181,7 +182,7 @@ public abstract class AbstractErraiServlet extends HttpServlet {
 
     writeToOutputStream(stream, new MarshalledMessage() {
       public String getSubject() {
-        return "ClientBusErrors";
+        return DefaultErrorCallback.CLIENT_ERROR_SUBJECT;
       }
 
       public Object getMessage() {

@@ -16,12 +16,12 @@
 
 package org.jboss.errai.bus.client.json;
 
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONValue;
+import java.util.ArrayList;
+import java.util.Map;
+
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
+import org.jboss.errai.bus.client.api.base.DefaultErrorCallback.ClientErrorMessage;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.common.client.json.JSONDecoderCli;
 import org.jboss.errai.common.client.json.JSONEncoderCli;
@@ -29,8 +29,10 @@ import org.jboss.errai.common.client.types.DecodingContext;
 import org.jboss.errai.common.client.types.EncodingContext;
 import org.jboss.errai.common.client.types.JSONTypeHelper;
 
-import java.util.ArrayList;
-import java.util.Map;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONValue;
 
 public class JSONUtilCli {
   private static final ArrayList<MarshalledMessage> EMPTYLIST = new ArrayList<MarshalledMessage>(0);
@@ -106,6 +108,9 @@ public class JSONUtilCli {
   }
 
   public static Message decodeCommandMessage(Object value) {
+    if (value instanceof ClientErrorMessage) {
+      return (CommandMessage) value;
+    }
     return CommandMessage.createWithParts(decodeMap(value));
   }
 

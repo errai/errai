@@ -20,6 +20,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
+
 public class BusTools {
   public static final Set<String> RESERVED_SERVICES;
 
@@ -32,7 +34,7 @@ public class BusTools {
     s.add("ServerEchoService");
 
     s.add("ClientBus");
-    s.add("ClientBusErrors");
+    s.add(DefaultErrorCallback.CLIENT_ERROR_SUBJECT);
 
     RESERVED_SERVICES = Collections.unmodifiableSet(s);
   }

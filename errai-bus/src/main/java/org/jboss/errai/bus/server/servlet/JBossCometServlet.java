@@ -17,6 +17,7 @@
 package org.jboss.errai.bus.server.servlet;
 
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueActivationCallback;
@@ -184,7 +185,7 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
 
     writeToOutputStream(stream, new MarshalledMessage() {
       public String getSubject() {
-        return "ClientBusErrors";
+        return DefaultErrorCallback.CLIENT_ERROR_SUBJECT;
       }
 
       public Object getMessage() {
