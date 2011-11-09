@@ -45,74 +45,78 @@ import org.jboss.errai.cdi.demo.tagcloud.client.shared.Updated;
  */
 @ApplicationScoped
 public class TagCloudService {
-    private static final int MAX_TAGS = 50;
-    private static Map<String, Tag> tags = new ConcurrentHashMap<String, Tag>();
+  private static final int MAX_TAGS = 50;
+  private static Map<String, Tag> tags = new ConcurrentHashMap<String, Tag>();
 
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    private ScheduledFuture<?> updater = null;
+  private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+  private ScheduledFuture<?> updater = null;
 
-    @Inject
-    private Event<TagCloud> tagCloudEvent;
+  @Inject
+  private Event<TagCloud> tagCloudEvent;
 
-    @Inject @New
-    private Event<Tag> newTagEvent;
+  @Inject
+  @New
+  private Event<Tag> newTagEvent;
 
-    @Inject @Updated
-    private Event<Tag> updatedTagEvent;
+  @Inject
+  @Updated
+  private Event<Tag> updatedTagEvent;
 
-    @Inject @Deleted
-    private Event<Tag> deletedTagEvent;
+  @Inject
+  @Deleted
+  private Event<Tag> deletedTagEvent;
 
-   // @Inject
-  //  private TagCloudPersistenceService tweetService;
+  // @Inject
+  // private TagCloudPersistenceService tweetService;
 
-    //@PostConstruct
-    public void start() {
-        updater = scheduler.scheduleAtFixedRate(new Runnable() {
-            public void run() {
-                updateTags();
-            }
-        }, 0, 3, TimeUnit.SECONDS);
-    }
+  // @PostConstruct
+  public void start() {
+    updater = scheduler.scheduleAtFixedRate(new Runnable() {
+      public void run() {
+        updateTags();
+      }
+    }, 0, 3, TimeUnit.SECONDS);
+  }
 
-   // @PreDestroy
-    public void stop() {
-        if (updater != null)
-            updater.cancel(true);
-    }
+  // @PreDestroy
+  public void stop() {
+    if (updater != null)
+      updater.cancel(true);
+  }
 
-    /*@Conversational
-    public void handleNewSubscription(@Observes TagCloudSubscription subscription) {
-    	tagCloudEvent.fire(new TagCloud(new HashSet<Tag>(tags.values())));
-    }*/
+  /*@Conversational
+  public void handleNewSubscription(@Observes TagCloudSubscription subscription) {
+  	tagCloudEvent.fire(new TagCloud(new HashSet<Tag>(tags.values())));
+  }*/
 
-    private void updateTags() {
-    /*    
-        Set<ScoredTerm> terms = tweetService.getTopHashTags(MAX_TAGS);
-        Set<Tag> updatedTags = new HashSet<Tag>();
+  private void updateTags() {
+  /*    
+      Set<ScoredTerm> terms = tweetService.getTopHashTags(MAX_TAGS);
+      Set<Tag> updatedTags = new HashSet<Tag>();
 
-        for (ScoredTerm term : terms) {
-            if (term.term == null || term.frequency <= 0)
-                continue;
+      for (ScoredTerm term : terms) {
+        if (term.term == null || term.frequency <= 0)
+            continue;
 
-            Tag tag = new Tag(term.term, term.frequency);
-            if (!tags.containsKey(tag.getName())) {
-                newTagEvent.fire(tag);
-            } else {
-                if (!tag.getFrequency().equals(tags.get(tag.getName()).getFrequency())) {
-                    updatedTagEvent.fire(tag);
-                }
-            }
-            tags.put(tag.getName(), tag);
-            updatedTags.add(tag);
-        }
-
-        for (String tag : tags.keySet()) {
-            if (!updatedTags.contains(tags.get(tag))) {
-                tags.remove(tag);
-                deletedTagEvent.fire(new Tag(tag, 0));
+        Tag tag = new Tag(term.term, term.frequency);
+        if (!tags.containsKey(tag.getName())) {
+            newTagEvent.fire(tag);
+        } 
+        else {
+            if (!tag.getFrequency().equals(tags.get(tag.getName()).getFrequency())) {
+                updatedTagEvent.fire(tag);
             }
         }
-        */
-    }
+        tags.put(tag.getName(), tag);
+        updatedTags.add(tag);
+      }
+
+      for (String tag : tags.keySet()) {
+        if (!updatedTags.contains(tags.get(tag))) {
+            tags.remove(tag);
+            deletedTagEvent.fire(new Tag(tag, 0));
+        }
+      }
+      */
+  }
 }

@@ -40,89 +40,92 @@ import org.jboss.errai.cdi.demo.tagcloud.client.shared.Updated;
 import org.jboss.errai.enterprise.client.cdi.api.Conversational;
 
 /**
- * A CDI based tag cloud service using random mock data.
+ * A CDI based tag cloud service using random mock data. 
  * This service can be used to test the client in dev mode using jetty.
  */
 @ApplicationScoped
 public class MockTagCloudService {
 
-    private static Set<Tag> initialTags = new CopyOnWriteArraySet<Tag>() {
-        {
-            add(new Tag("Errai", 10));
-            add(new Tag("Seam", 99));
-            add(new Tag("GWT", 7));
-            add(new Tag("RESTEasy", 5));
-            add(new Tag("Infinispan", 77));
-            add(new Tag("Hibernate", 13));
-            add(new Tag("RichFaces", 22));
-            add(new Tag("HornetQ", 11));
-            add(new Tag("jBPM", 45));
-            add(new Tag("JGroups", 88));
-            add(new Tag("StormGrind", 66));
-            add(new Tag("RiftSaw", 19));
-            add(new Tag("Netty", 9));
-            add(new Tag("Drools", 16));
-            add(new Tag("Railo", 5));
-            add(new Tag("AppServer", 9));
-        }
-    };
-
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    private ScheduledFuture<?> updater = null;
-
-    @Inject
-    private Event<TagCloud> tagCloudEvent;
-
-    @Inject @Updated
-    private Event<Tag> updatedTagEvent;
-
-    @Inject @New
-    private Event<Tag> newTagEvent;
-
-    @PostConstruct
-    public void start() {
-        updater = scheduler.scheduleAtFixedRate(new Runnable() {
-            public void run() {
-                createRandomChange();
-            }
-        }, 0, 2, TimeUnit.SECONDS);
+  @SuppressWarnings("serial")
+  private static Set<Tag> initialTags = new CopyOnWriteArraySet<Tag>() {
+    {
+      add(new Tag("Errai", 10));
+      add(new Tag("Seam", 99));
+      add(new Tag("GWT", 7));
+      add(new Tag("RESTEasy", 5));
+      add(new Tag("Infinispan", 77));
+      add(new Tag("Hibernate", 13));
+      add(new Tag("RichFaces", 22));
+      add(new Tag("HornetQ", 11));
+      add(new Tag("jBPM", 45));
+      add(new Tag("JGroups", 88));
+      add(new Tag("StormGrind", 66));
+      add(new Tag("RiftSaw", 19));
+      add(new Tag("Netty", 9));
+      add(new Tag("Drools", 16));
+      add(new Tag("Railo", 5));
+      add(new Tag("AppServer", 9));
     }
+  };
 
-    @PreDestroy
-    public void stop() {
-        if (updater != null)
-            updater.cancel(true);
-    }
+  private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+  private ScheduledFuture<?> updater = null;
 
-    @Conversational
-    public void handleNewSubscription(@Observes TagCloudSubscription subscription) {
-        tagCloudEvent.fire(new TagCloud(initialTags));
-    }
+  @Inject
+  private Event<TagCloud> tagCloudEvent;
 
-    private void createRandomChange() {
-        if (Math.random() > 0.9) {
-            // add a random tag
-            List<Tag> tags = new ArrayList<Tag>(initialTags);
-            Tag randomTag = new Tag(randomString(tags.get(new Random().nextInt(initialTags.size())).getName()),
+  @Inject @Updated
+  private Event<Tag> updatedTagEvent;
+
+  @Inject @New
+  private Event<Tag> newTagEvent;
+
+  @PostConstruct
+  public void start() {
+    updater = scheduler.scheduleAtFixedRate(new Runnable() {
+      public void run() {
+        createRandomChange();
+      }
+    }, 0, 2, TimeUnit.SECONDS);
+  }
+
+  @PreDestroy
+  public void stop() {
+    if (updater != null)
+      updater.cancel(true);
+  }
+
+  @Conversational
+  public void handleNewSubscription(@Observes TagCloudSubscription subscription) {
+    tagCloudEvent.fire(new TagCloud(initialTags));
+  }
+
+  private void createRandomChange() {
+    if (Math.random() > 0.9) {
+      // add a random tag
+      List<Tag> tags = new ArrayList<Tag>(initialTags);
+      Tag randomTag = new Tag(randomString(tags.get(new Random().nextInt(initialTags.size())).getName()),
                     (int) Math.ceil(Math.random() * 100));
-            initialTags.add(randomTag);
-            newTagEvent.fire(randomTag);
-        } else {
-            // modify a tag
-            for (Tag tag : initialTags) {
-                if (Math.random() > 0.8) {
-                    tag.setFrequency((int) Math.ceil(Math.random() * 100));
-                    updatedTagEvent.fire(tag);
-                }
-            }
+      initialTags.add(randomTag);
+      newTagEvent.fire(randomTag);
+    }
+    else {
+      // modify a tag
+      for (Tag tag : initialTags) {
+        if (Math.random() > 0.8) {
+          tag.setFrequency((int) Math.ceil(Math.random() * 100));
+          updatedTagEvent.fire(tag);
         }
+      }
     }
+  }
 
-    private String randomString(String base) {
-        Random r = new Random();
-        StringBuilder sb = new StringBuilder(base.length());
-        for (int i = 0; i < base.length(); i++)
-            sb.append(base.charAt(r.nextInt(base.length())));
-        return sb.toString();
+  private String randomString(String base) {
+    Random r = new Random();
+    StringBuilder sb = new StringBuilder(base.length());
+    for (int i = 0; i < base.length(); i++) {
+      sb.append(base.charAt(r.nextInt(base.length())));
     }
+    return sb.toString();
+  }
 }
