@@ -97,16 +97,4 @@ public class VFSUrlType implements Vfs.UrlType {
     }
   }
 
-  private static URL toUrl(String s) {
-    try {
-      if (!s.startsWith("/")) {
-        s = "/" + s;
-      }
-
-      return new URL(s);
-    }
-    catch (MalformedURLException e) {
-      throw new RuntimeException("Invalid URL " + s, e);
-    }
-  }
 }
