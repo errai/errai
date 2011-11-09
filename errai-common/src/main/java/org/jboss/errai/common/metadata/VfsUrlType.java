@@ -35,8 +35,8 @@ import java.net.URL;
  * @author Heiko Braun <hbraun@redhat.com>
  * @author Mike Brock <cbrock@redhat.com>
  */
-public class VFSUrlType implements Vfs.UrlType {
-  protected static final Logger log = LoggerFactory.getLogger(VFSUrlType.class);
+public class VfsUrlType implements Vfs.UrlType {
+  protected static final Logger log = LoggerFactory.getLogger(VfsUrlType.class);
 
   final static boolean jbossAS;
 
@@ -75,7 +75,7 @@ public class VFSUrlType implements Vfs.UrlType {
       if (jbossAS) {
         try {
           if (url.getContent() instanceof VirtualFile) {
-             return new JBossVFSDIr(url);
+             return new JBossVfsDir(url);
           }
         }
         catch (IOException e) {

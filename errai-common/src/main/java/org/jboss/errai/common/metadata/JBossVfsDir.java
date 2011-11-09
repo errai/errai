@@ -19,10 +19,10 @@ import com.google.common.collect.AbstractIterator;
  * @author Mike Brock <cbrock@redhat.com>
  * @author Jonathan Fuerth <jfuerth@redhat.com>
  */
-public class JBossVFSDIr implements Vfs.Dir {
+public class JBossVfsDir implements Vfs.Dir {
   private VirtualFile virtualFile;
 
-  public JBossVFSDIr(URL url) {
+  public JBossVfsDir(URL url) {
     try {
       Object content = url.getContent();
       if (content instanceof VirtualFile) {

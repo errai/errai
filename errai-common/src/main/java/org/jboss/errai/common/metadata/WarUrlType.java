@@ -30,7 +30,7 @@ import java.net.URL;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Aug 9, 2010
  */
-public class WARUrlType implements Vfs.UrlType {
+public class WarUrlType implements Vfs.UrlType {
   public boolean matches(URL url) {
     return url.getProtocol().equals("file") && url.toExternalForm().endsWith(".war");
   }

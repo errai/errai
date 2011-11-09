@@ -95,8 +95,8 @@ public class MetaDataScanner extends Reflections {
 
   private static void registerUrlTypeHandlers() {
     List<UrlType> urlTypes = Vfs.getDefaultUrlTypes();
-    urlTypes.add(new VFSUrlType());
-    urlTypes.add(new WARUrlType());
+    urlTypes.add(new VfsUrlType());
+    urlTypes.add(new WarUrlType());
 
     // thread safe?
     Vfs.setDefaultURLTypes(urlTypes);
