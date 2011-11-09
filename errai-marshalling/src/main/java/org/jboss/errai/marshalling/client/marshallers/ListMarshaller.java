@@ -6,6 +6,7 @@ import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
+import org.jboss.errai.marshalling.client.util.MarshallUtil;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
@@ -31,7 +32,7 @@ public class ListMarshaller implements Marshaller<JSONValue, List> {
   @Override
   public List demarshall(JSONValue o, MarshallingSession ctx) {
     if (o == null) return null;
-    
+
     JSONArray jsonArray = o.isArray();
     if (jsonArray == null) return null;
 
@@ -52,7 +53,9 @@ public class ListMarshaller implements Marshaller<JSONValue, List> {
 
   @Override
   public String marshall(List o, MarshallingSession ctx) {
-    if (o == null) { return "null"; }
+    if (o == null) {
+      return "null";
+    }
 
     StringBuilder buf = new StringBuilder("[");
     Marshaller<Object, Object> cachedMarshaller = null;
@@ -62,8 +65,14 @@ public class ListMarshaller implements Marshaller<JSONValue, List> {
         buf.append(",");
       }
       elem = o.get(i);
+
       if (cachedMarshaller == null) {
-        cachedMarshaller = ctx.getMarshallerForType(elem.getClass().getName());
+        if (elem instanceof Number || elem instanceof Boolean || elem instanceof Character) {
+          cachedMarshaller = MarshallUtil.getQualifiedNumberMarshaller(elem);
+        }
+        else {
+          cachedMarshaller = ctx.getMarshallerForType(elem.getClass().getName());
+        }
       }
 
       buf.append(cachedMarshaller.marshall(elem, ctx));

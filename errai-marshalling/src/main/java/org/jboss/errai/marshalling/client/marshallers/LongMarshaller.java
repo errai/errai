@@ -1,6 +1,7 @@
 package org.jboss.errai.marshalling.client.marshallers;
 
 import com.google.gwt.json.client.JSONValue;
+import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
@@ -22,7 +23,10 @@ public class LongMarshaller implements Marshaller<JSONValue, Long> {
 
   @Override
   public Long demarshall(JSONValue o, MarshallingSession ctx) {
-    if (o.isString() != null) {
+    if (o.isObject() != null) {
+      return Long.parseLong(o.isObject().get(SerializationParts.NUMERIC_VALUE).isString().stringValue());
+    }
+    else if (o.isString() != null) {
       return Long.parseLong(o.isString().stringValue());
     }
     else if (o.isNumber() != null) {

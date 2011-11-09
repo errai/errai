@@ -20,11 +20,11 @@ public class MarshallUtil {
 
   public static <T> T demarshallCache(Class<T> type, JSONObject jsonObject, MarshallingSession session) {
     final String hashCode = jsonObject.get(SerializationParts.OBJECT_ID).isNumber().toString();
-    
+
     if (session.hasObjectHash(hashCode)) {
       return session.getObject(type, hashCode);
     }
-    
+
     final String typeName = jsonObject.get(SerializationParts.ENCODED_TYPE).isString().stringValue();
     final Object demarshalledInstance = session.getMarshallerForType(typeName).demarshall(jsonObject, session);
     session.recordObjectHash(hashCode, demarshalledInstance);
@@ -45,7 +45,7 @@ public class MarshallUtil {
 
     return demarshalledInstance;
   }
-  
+
   public static JSONValue nullSafe_JSONObject(JSONValue v, String key) {
     if (v == null || v.isObject() == null) {
       return null;
@@ -54,17 +54,49 @@ public class MarshallUtil {
       return v.isObject().get(key);
     }
   }
-  
+
   public static <T extends Enum<T>> T demarshalEnum(Class<T> enumType, JSONObject obj, String name) {
     if (obj == null || !obj.containsKey(name) || obj.get(name).isNull() != null) {
       return null;
     }
     return Enum.valueOf(enumType, obj.get(name).isString().stringValue());
   }
-  
+
   public static boolean handles(JSONObject object, Class<?> cls) {
     JSONValue v = object.get(SerializationParts.ENCODED_TYPE);
     return !(v == null || v.isString() == null) && cls.getName().equals(v.isString().stringValue());
+  }
+
+  public static Marshaller<Object, Object> getQualifiedNumberMarshaller(Object o) {
+      final Class<Object> type = (Class<Object>) o.getClass();
+
+      return new Marshaller<Object, Object>() {
+        @Override
+        public boolean handles(Object o) {
+          return false;
+        }
+
+        @Override
+        public String marshall(Object o, MarshallingSession ctx) {
+          return NumbersUtils.qualifiedNumericEncoding(o);
+        }
+
+        @Override
+        public Object demarshall(Object o, MarshallingSession ctx) {
+          return null;
+        }
+
+        @Override
+        public String getEncodingType() {
+          return "json";
+        }
+
+        @Override
+        public Class<Object> getTypeHandled() {
+          return type;
+        }
+      };
+
   }
 
 }

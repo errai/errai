@@ -21,6 +21,7 @@ import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.common.client.types.DecodingContext;
 import org.jboss.errai.common.client.types.EncodingContext;
 import org.jboss.errai.common.client.types.TypeHandler;
+import org.jboss.errai.marshalling.client.util.NumbersUtils;
 import org.mvel2.MVEL;
 
 import java.io.Serializable;
@@ -51,15 +52,23 @@ public class JSONEncoder {
   }
 
   private static String _encode(Object v, EncodingContext ctx) {
+    return _encode(v, ctx, true);
+  }
+
+  private static String _encode(Object v, EncodingContext ctx, boolean qualifiedNumerics) {
     if (v == null) {
       return "null";
     }
     else if (v instanceof String) {
       return encodeString((String) v, ctx);
     }
-    if (v instanceof Number || v instanceof Boolean) {
-      return String.valueOf(v);
-    }
+    if (v instanceof Number || v instanceof Boolean || v instanceof Character) {
+      if (qualifiedNumerics) {
+        return NumbersUtils.qualifiedNumericEncoding(v);
+      }
+      else {
+        return String.valueOf(v);
+      }    }
     else if (v instanceof Collection) {
       return encodeCollection((Collection) v, ctx);
     }
@@ -165,7 +174,7 @@ public class JSONEncoder {
     boolean first = true;
 
     for (Map.Entry<Object, Object> entry : map.entrySet()) {
-      String val = _encode(entry.getValue(), ctx);
+      String val = _encode(entry.getValue(), ctx, true);
       if (!first) {
         mapBuild.append(',');
       }
@@ -177,7 +186,7 @@ public class JSONEncoder {
         }
 
         ctx.setEscapeMode();
-        mapBuild.append(_encode(entry.getKey(), ctx));
+        mapBuild.append(_encode(entry.getKey(), ctx, true));
         ctx.unsetEscapeMode();
         mapBuild.append(write(ctx, '\"'));
         mapBuild.append(':')
@@ -185,7 +194,7 @@ public class JSONEncoder {
 
       }
       else {
-        mapBuild.append(_encode(entry.getKey(), ctx))
+        mapBuild.append(_encode(entry.getKey(), ctx, true))
                 .append(':').append(val);
       }
 

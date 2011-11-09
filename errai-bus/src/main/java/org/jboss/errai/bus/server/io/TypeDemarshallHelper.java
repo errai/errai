@@ -20,6 +20,7 @@ import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.common.client.types.DecodingContext;
 import org.jboss.errai.common.client.types.UHashMap;
 import org.jboss.errai.common.client.types.UnsatisfiedForwardLookup;
+import org.jboss.errai.marshalling.client.util.NumbersUtils;
 import org.mvel2.ConversionHandler;
 import org.mvel2.DataConversion;
 import org.mvel2.MVEL;
@@ -126,6 +127,11 @@ public class TypeDemarshallHelper {
       else if (o instanceof Map) {
         Map<?, ?> oMap = (Map) o;
         if (oMap.containsKey(SerializationParts.ENCODED_TYPE)) {
+          if (oMap.containsKey(SerializationParts.NUMERIC_VALUE)) {
+            return NumbersUtils.getNumber((String) oMap.get(SerializationParts.ENCODED_TYPE),
+                    oMap.get(SerializationParts.NUMERIC_VALUE));
+          }
+
           Object newInstance = instantiate(oMap, ctx);
           
           if (ctx.hasUnsatisfiedDependency(o)) {

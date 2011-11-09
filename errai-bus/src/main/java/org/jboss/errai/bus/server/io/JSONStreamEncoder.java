@@ -20,6 +20,7 @@ import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.common.client.types.DecodingContext;
 import org.jboss.errai.common.client.types.EncodingContext;
 import org.jboss.errai.common.client.types.TypeHandler;
+import org.jboss.errai.marshalling.client.util.NumbersUtils;
 import org.mvel2.MVEL;
 
 import java.io.IOException;
@@ -50,6 +51,10 @@ public class JSONStreamEncoder {
   }
 
   private static void _encode(Object v, OutputStream outstream, EncodingContext ctx) throws IOException {
+    _encode(v, outstream, ctx, false);
+  }
+  
+  private static void _encode(Object v, OutputStream outstream, EncodingContext ctx, boolean qualifiedNumerics) throws IOException {
     if (v == null) {
       outstream.write(NULL_BYTES);
       return;
@@ -60,8 +65,13 @@ public class JSONStreamEncoder {
       outstream.write('\"');
       return;
     }
-    if (v instanceof Number || v instanceof Boolean) {
-      outstream.write(String.valueOf(v).getBytes());
+    if (v instanceof Number || v instanceof Boolean || v instanceof Character) {
+      if (qualifiedNumerics) {
+          outstream.write(NumbersUtils.qualifiedNumericEncoding(v).getBytes());
+        }
+        else {
+          outstream.write(String.valueOf(v).getBytes());
+        }      
     }
     else if (v instanceof Collection) {
       encodeCollection((Collection) v, outstream, ctx);
@@ -190,12 +200,12 @@ public class JSONStreamEncoder {
         write(outstream, ctx, '\"');
         if (!ctx.isEscapeMode()) outstream.write(SerializationParts.EMBEDDED_JSON.getBytes());
         ctx.setEscapeMode();
-        _encode(entry.getKey(), outstream, ctx);
+        _encode(entry.getKey(), outstream, ctx, true);
         ctx.unsetEscapeMode();
         write(outstream, ctx, '\"');
       }
       else {
-        _encode(entry.getKey(), outstream, ctx);
+        _encode(entry.getKey(), outstream, ctx, true);
       }
 
       outstream.write(':');
@@ -212,7 +222,7 @@ public class JSONStreamEncoder {
     //  StringAppender buildCol = new StringAppender("[");
     Iterator iter = col.iterator();
     while (iter.hasNext()) {
-      _encode(iter.next(), outstream, ctx);
+      _encode(iter.next(), outstream, ctx, true);
       if (iter.hasNext()) outstream.write(',');
     }
 

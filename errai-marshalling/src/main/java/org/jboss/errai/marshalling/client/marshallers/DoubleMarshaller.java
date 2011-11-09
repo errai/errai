@@ -1,6 +1,7 @@
 package org.jboss.errai.marshalling.client.marshallers;
 
 import com.google.gwt.json.client.JSONValue;
+import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
@@ -22,7 +23,15 @@ public class DoubleMarshaller implements Marshaller<JSONValue, Double> {
 
   @Override
   public Double demarshall(JSONValue o, MarshallingSession ctx) {
-    return o.isNumber().doubleValue();
+    if (o == null) {
+      return null;
+    }
+    else if (o.isObject() != null) {
+      return o.isObject().get(SerializationParts.NUMERIC_VALUE).isNumber().doubleValue();
+    }
+    else {
+      return o.isNumber().doubleValue();
+    }
   }
 
   @Override

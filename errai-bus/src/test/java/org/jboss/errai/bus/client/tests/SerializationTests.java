@@ -3,6 +3,7 @@ package org.jboss.errai.bus.client.tests;
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.tests.support.StudyTreeNodeContainer;
+import org.jboss.errai.bus.client.tests.support.TestRPCServiceRemote2;
 import org.jboss.errai.bus.client.tests.support.TestSerializationRPCService;
 import org.jboss.errai.bus.client.tests.support.TreeNodeContainer;
 
@@ -45,4 +46,26 @@ public class SerializationTests extends AbstractErraiTest {
     });
   }
 
+  public void testLongInCollection() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final List<Long> ll = new ArrayList<Long>();
+
+        ll.add(10L);
+        ll.add(15L);
+        ll.add(20L);
+        ll.add(25L);
+        ll.add(30L);
+
+        MessageBuilder.createCall(new RemoteCallback<List<Long>>() {
+          @Override
+          public void callback(List<Long> response) {
+            assertEquals(ll, response);
+            finishTest();
+          }
+        }, TestRPCServiceRemote2.class).heresALongList(ll);
+      }
+    });
+  }
 }

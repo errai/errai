@@ -7,6 +7,7 @@ import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
+import org.jboss.errai.marshalling.client.util.NumbersUtils;
 
 /**
  * This class is used to handle untyped Objects on the wire.
@@ -35,6 +36,10 @@ public class ObjectMarshaller implements Marshaller<JSONValue, Object> {
       JSONString string = jsObject.get(SerializationParts.ENCODED_TYPE).isString();
       if (string == null) {
         throw new RuntimeException("cannot decode unqualified object: " + o);
+      }
+
+      if (jsObject.containsKey(SerializationParts.NUMERIC_VALUE)) {
+        return NumbersUtils.getNumber(string.stringValue(), o);
       }
 
       Marshaller<Object, Object> marshaller = ctx.getMarshallerForType(string.stringValue());

@@ -2,7 +2,6 @@ package org.jboss.errai.marshalling.rebind.api.impl;
 
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
-import org.jboss.errai.codegen.framework.ArithmeticOperator;
 import org.jboss.errai.codegen.framework.Cast;
 import org.jboss.errai.codegen.framework.Parameter;
 import org.jboss.errai.codegen.framework.Statement;
@@ -10,7 +9,10 @@ import org.jboss.errai.codegen.framework.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
 import org.jboss.errai.codegen.framework.builder.CatchBlockBuilder;
 import org.jboss.errai.codegen.framework.meta.*;
-import org.jboss.errai.codegen.framework.util.*;
+import org.jboss.errai.codegen.framework.util.Bool;
+import org.jboss.errai.codegen.framework.util.GenUtil;
+import org.jboss.errai.codegen.framework.util.Implementations;
+import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
@@ -97,13 +99,11 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                 .append(Stmt.load("json").returnValue())
                 .finish();
 
-
         BlockBuilder<?> methBuilder =
                 classStructureBuilder.publicOverridesMethod("demarshall",
                         Parameter.of(Object.class, "a0"), Parameter.of(MarshallingSession.class, "a1"));
 
         methBuilder.append(Stmt.declareVariable(JSONObject.class).named("obj").finish());
-
 
         /**
          * Check to see if value is null. If so, return null.
@@ -268,18 +268,17 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
               }
 
               // Bind via JSNI
-              bindingStatement = Stmt.invokeStatic(context.getGeneratedBootstrapClass(), GenUtil.getPrivateFieldInjectorName(field),
+              bindingStatement = Stmt.invokeStatic(context.getGeneratedBootstrapClass(),
+                      GenUtil.getPrivateFieldInjectorName(field),
                       loadVariable("entity"), val);
-
             }
 
             tryBuilder.append(
                     Stmt.if_(Bool.and(
                             Bool.expr(loadVariable("obj").invoke("containsKey", field.getName())),
                             Bool.isNull(loadVariable("obj").invoke("get", field.getName()).invoke("isNull"))
-                            
-                    ))
-                            .append(bindingStatement).finish());
+
+                    )).append(bindingStatement).finish());
           }
         }
 
@@ -288,8 +287,8 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
         tryBuilder.finish()
                 .catch_(Throwable.class, "t")
                 .append(loadVariable("t").invoke("printStackTrace"))
-                .append(Stmt.throw_(RuntimeException.class, "error demarshalling entity: " + toMap.getFullyQualifiedName(),
-                        loadVariable("t")))
+                .append(Stmt.throw_(RuntimeException.class,
+                        "error demarshalling entity: " + toMap.getFullyQualifiedName(), loadVariable("t")))
                 .finish();
 
         builder.append(tryBuilder.finish()).finish();
@@ -309,7 +308,6 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                 )).returnValue()).finish();
 
         return classStructureBuilder.finish();
-
       }
     };
   }
@@ -556,7 +554,6 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
           sb.append(",");
         }
 
-
         MetaClass targetType = GenUtil.getPrimitiveWrapper(metaField.getType());
 
         if (!targetType.isEnum() && !context.hasProvidedOrGeneratedMarshaller(targetType)) {
@@ -591,7 +588,6 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
       sb.append(",\"" + SerializationParts.INSTANTIATE_ONLY + "\":true");
     }
 
-    
     sb.append("}");
 
     builder.append(Stmt.nestedCall(sb).invoke("toString").returnValue());
@@ -652,6 +648,5 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
     mapping.setDemarshallOnly(true);
 
     builtInConstructorMappings.put(StackTraceElement.class.getCanonicalName(), mapping);
-
   }
 }
