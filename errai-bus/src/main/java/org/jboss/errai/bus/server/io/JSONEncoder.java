@@ -207,7 +207,7 @@ public class JSONEncoder {
 
       }
       else {
-        mapBuild.append(_encode(entry.getKey(), ctx))
+        mapBuild.append(_encode(entry.getKey(), ctx, true))
                 .append(':').append(val);
       }
 
