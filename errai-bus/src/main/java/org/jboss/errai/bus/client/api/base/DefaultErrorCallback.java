@@ -70,6 +70,7 @@ public class DefaultErrorCallback implements ErrorCallback {
             .toSubject(CLIENT_ERROR_SUBJECT)
             .with(MessageParts.ErrorMessage, e.getMessage())
             .with("AdditionalDetails", a.toString())
+            .with(MessageParts.Throwable, e)
             .noErrorHandling().reply();
       }
     }
