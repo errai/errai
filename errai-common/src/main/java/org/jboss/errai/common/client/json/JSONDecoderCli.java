@@ -22,10 +22,7 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.common.client.protocols.SerializationParts;
-import org.jboss.errai.common.client.types.DecodingContext;
-import org.jboss.errai.common.client.types.JSONTypeHelper;
-import org.jboss.errai.common.client.types.UHashMap;
-import org.jboss.errai.common.client.types.UnsatisfiedForwardLookup;
+import org.jboss.errai.common.client.types.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -97,46 +94,51 @@ public class JSONDecoderCli {
 
   private static Object decodeObject(JSONObject eMap, DecodingContext ctx) {
     Map<String, Object> m = new UHashMap<String, Object>();
-    for (String key : eMap.keySet()) {
-      if (SerializationParts.ENCODED_TYPE.equals(key)) {
-        String className = eMap.get(key).isString().stringValue();
-        String objId = eMap.get(SerializationParts.OBJECT_ID).isString().stringValue();
 
-        boolean ref = false;
-        if (objId != null) {
-          if (objId.charAt(0) == '$') {
-            ref = true;
-            objId = objId.substring(1);
-          }
+    if (eMap.containsKey(SerializationParts.ENCODED_TYPE)) {
+      String className = eMap.get(SerializationParts.ENCODED_TYPE).isString().stringValue();
+      String objId = eMap.get(SerializationParts.OBJECT_ID).isString().stringValue();
 
-          if (ctx.hasObject(objId)) {
-            return ctx.getObject(objId);
-          }
-          else if (ref) {
-            return new UnsatisfiedForwardLookup(objId);
-          }
+      if (eMap.containsKey(SerializationParts.NUMERIC_VALUE)) {
+        return NumbersUtils.getNumber(className, eMap.get(SerializationParts.NUMERIC_VALUE));
+      }
+
+      boolean ref = false;
+      if (objId != null) {
+        if (objId.charAt(0) == '$') {
+          ref = true;
+          objId = objId.substring(1);
         }
 
-        if (hasDemarshaller(className)) {
-          try {
-            Object o = getDemarshaller(className).demarshall(eMap, ctx);
-            if (objId == null) ctx.putObject(objId, o);
-            return o;
-          }
-          catch (Throwable t) {
-            t.printStackTrace();
-            GWT.log("Failure decoding object", t);
-            return null;
-          }
+        if (ctx.hasObject(objId)) {
+          return ctx.getObject(objId);
         }
-        else {
-          GWT.log("Could not demartial class: " + className + "; There is no available demarshaller. " +
-                  "Ensure you have exposed the class with @ExposeEntity.", null);
-          throw new RuntimeException("no available demarshaller: " + className);
+        else if (ref) {
+          return new UnsatisfiedForwardLookup(objId);
         }
       }
-      else if (SerializationParts.MARSHALLED_TYPES.equals(key)) continue;
 
+      if (hasDemarshaller(className)) {
+        try {
+          Object o = getDemarshaller(className).demarshall(eMap, ctx);
+          if (objId == null) ctx.putObject(objId, o);
+          return o;
+        }
+        catch (Throwable t) {
+          t.printStackTrace();
+          GWT.log("Failure decoding object", t);
+          return null;
+        }
+      }
+      else {
+        GWT.log("Could not demartial class: " + className + "; There is no available demarshaller. " +
+                "Ensure you have exposed the class with @ExposeEntity.", null);
+        throw new RuntimeException("no available demarshaller: " + className);
+      } 
+    }
+    
+    for (String key : eMap.keySet()) {
+      if (key.startsWith("__")) continue;
       m.put(key, _decode(eMap.get(key), ctx));
     }
     return m;
