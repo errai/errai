@@ -11,6 +11,9 @@ public class InjectionDependentTestBeanC {
 
   private InjectionDependentTestBeanD beanD;
   
+  @Inject
+  private InjectionDependentTestBeanB beanB;
+  
   public InjectionDependentTestBeanC() {}
   
   @Inject
@@ -20,5 +23,9 @@ public class InjectionDependentTestBeanC {
   
   public InjectionDependentTestBeanD getBeanD() {
     return beanD;
+  }
+  
+  public InjectionDependentTestBeanB getBeanB() {
+    return beanB;
   }
 }

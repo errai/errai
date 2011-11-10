@@ -20,9 +20,11 @@ public class InjectionIntegrationTest extends IOCClientTestCase {
   }
 
   public void testInjections() {
-    assertNotNull("Failed to inject Bean A", InjectionTestModule.getInstance().getBeanA());
-    assertNotNull("Failed to inject Bean B in Bean A", InjectionTestModule.getInstance().getBeanA().getBeanB());
-    assertNotNull("Failed to inject Bean C", InjectionTestModule.getInstance().getBeanC());
-    assertNotNull("Failed to inject Bean D in Bean C", InjectionTestModule.getInstance().getBeanC().getBeanD());
+    assertNotNull("Field injection of BeanA failed", InjectionTestModule.getInstance().getBeanA());
+    assertNotNull("Field injection of BeanB in BeanA failed", InjectionTestModule.getInstance().getBeanA().getBeanB());
+    
+    assertNotNull("Field injection of BeanC failed", InjectionTestModule.getInstance().getBeanC());
+    assertNotNull("Field injection of BeanB in BeanC failed", InjectionTestModule.getInstance().getBeanC().getBeanB());
+    assertNotNull("Constructor injection of BeanD in BeanC", InjectionTestModule.getInstance().getBeanC().getBeanD());
   }
 }
