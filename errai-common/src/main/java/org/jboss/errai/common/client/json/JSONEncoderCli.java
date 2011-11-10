@@ -17,8 +17,10 @@
 package org.jboss.errai.common.client.json;
 
 import com.google.gwt.json.client.JSONString;
+import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.common.client.types.EncodingContext;
 import org.jboss.errai.common.client.types.Marshaller;
+import org.jboss.errai.common.client.types.NumbersUtils;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -37,8 +39,12 @@ public class JSONEncoderCli {
     return _encode(v, ctx);
   }
 
-  @SuppressWarnings({"unchecked"})
   public String _encode(Object v, EncodingContext ctx) {
+    return _encode(v, ctx, false);
+  }
+  
+  @SuppressWarnings({"unchecked"})
+  public String _encode(Object v, EncodingContext ctx, boolean qualifyNumerics) {
     if (v == null) {
       return "null";
     }
@@ -46,6 +52,9 @@ public class JSONEncoderCli {
       return encodeString((String) v, ctx);
     }
     else if (v instanceof Number || v instanceof Boolean) {
+      if (qualifyNumerics) {
+        return NumbersUtils.qualifiedNumericEncoding(v);
+      }
       return String.valueOf(v);
     }
     else if (v instanceof Collection) {
@@ -99,7 +108,7 @@ public class JSONEncoderCli {
   }
 
   public static String encodeString(String string, EncodingContext ctx) {
-    return "\"" + string.replaceAll("\\\\", "\\\\\\\\").replaceAll("[\\\\]{0}\\\"", "\\\\\"")  + "\"";
+    return "\"" + string.replaceAll("\\\\", "\\\\\\\\").replaceAll("[\\\\]{0}\\\"", "\\\\\"") + "\"";
   }
 
 
@@ -108,21 +117,20 @@ public class JSONEncoderCli {
     boolean first = true;
 
     for (Map.Entry<Object, Object> entry : map.entrySet()) {
-      String val = _encode(entry.getValue(), ctx);
+      String val = _encode(entry.getValue(), ctx, true);
       if (!defer) {
         if (!first) {
           mapBuild.append(",");
         }
-        mapBuild.append(_encode(entry.getKey(), ctx))
-            .append(":").append(val);
-
-
+        mapBuild.append(_encode(entry.getKey(), ctx, true))
+                .append(":").append(val);
         first = false;
       }
       else {
         defer = false;
       }
     }
+
 
     return mapBuild.append("}").toString();
   }
@@ -132,7 +140,7 @@ public class JSONEncoderCli {
     StringBuilder buildCol = new StringBuilder("[");
     Iterator iter = col.iterator();
     while (iter.hasNext()) {
-      buildCol.append(_encode(iter.next(), ctx));
+      buildCol.append(_encode(iter.next(), ctx, true));
       if (iter.hasNext()) buildCol.append(',');
     }
     return buildCol.append("]").toString();

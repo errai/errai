@@ -25,6 +25,8 @@ public class SerializationParts {
 
 
   public static final String ENUM_STRING_VALUE = "EnumStringValue";
+  public static final String NUMERIC_VALUE = "__NumVal";
+
 
   private SerializationParts() {
   }
