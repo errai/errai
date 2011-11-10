@@ -9,9 +9,11 @@ import java.io.IOException;
 
 import org.jboss.vfs.VFS;
 import org.jboss.vfs.VirtualFile;
+import org.jboss.vfs.protocol.VfsUrlStreamHandlerFactory;
 import org.jboss.vfs.spi.RealFileSystem;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -34,6 +36,18 @@ public class JBossVFSDirTest {
    */
   private Closeable mount;
 
+  @BeforeClass
+  public static void setURLStreamHandlerFactory() {
+    try {
+      java.net.URL.setURLStreamHandlerFactory(new VfsUrlStreamHandlerFactory());
+    } catch (Error e) {
+      System.out.println();
+      System.out.println("WARNING: something else has already set the URL stream handler factory.");
+      System.out.println("         These tests are likely to fail on resolving vfs: URLs.");
+      System.out.println();
+    }
+  }
+  
   @Before
   public void setup() throws IOException {
     mountedDir = new File(System.getProperty("java.io.tmpdir"), "JBossVFSDirTest_" + System.currentTimeMillis());
