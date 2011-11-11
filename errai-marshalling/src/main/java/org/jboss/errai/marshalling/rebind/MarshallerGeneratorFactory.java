@@ -30,6 +30,8 @@ import org.jboss.errai.marshalling.rebind.api.MappingStrategy;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 
 import javax.enterprise.util.TypeLiteral;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.parameterizedAs;
@@ -136,12 +138,33 @@ public class MarshallerGeneratorFactory {
     Set<Class<?>> exposed = new HashSet<Class<?>>(scanner.getTypesAnnotatedWith(Portable.class));
     exposed.addAll(scanner.getTypesAnnotatedWith(ExposeEntity.class));
 
+
+    // add all GWT JRE  classes
+
     exposed.add(Throwable.class);
     exposed.add(NullPointerException.class);
     exposed.add(RuntimeException.class);
     exposed.add(Exception.class);
+    exposed.add(ArithmeticException.class);
+    exposed.add(ArrayStoreException.class);
+    exposed.add(AssertionError.class);
+    exposed.add(ClassCastException.class);
+    exposed.add(IllegalArgumentException.class);
+    exposed.add(IndexOutOfBoundsException.class);
+    exposed.add(NegativeArraySizeException.class);
+    exposed.add(NumberFormatException.class);
+    exposed.add(StringIndexOutOfBoundsException.class);
+    exposed.add(UnsupportedOperationException.class);
     exposed.add(StackTraceElement.class);
+    
+    exposed.add(IOException.class);
+    exposed.add(UnsupportedEncodingException.class);
+    exposed.add(ConcurrentModificationException.class);
+    exposed.add(EmptyStackException.class);
+    //exposed.add(MissingResourceException.class);
+    exposed.add(NoSuchMethodException.class);
 
+   
     for (Class<?> clazz : exposed) {
       mappingContext.registerGeneratedMarshaller(clazz.getName());
     }
@@ -270,16 +293,16 @@ public class MarshallerGeneratorFactory {
                     .assignValue(Cast.to(outerType,
                             loadVariable("a0").invoke("get", loadVariable("i"))));
 
-    /**
-     * Special case for handling char elements.
-     */
-    if (outerType.getFullyQualifiedName().equals(Character.class.getName())) {
-      outerAccessorStatement =
-              loadVariable("newArray", loadVariable("i"))
-                      .assignValue(
-                              Stmt.nestedCall(Cast.to(String.class, loadVariable("a0").invoke("get", loadVariable("i"))))
-                                      .invoke("charAt", 0));
-    }
+//    /**
+//     * Special case for handling char elements.
+//     */
+//    if (outerType.getFullyQualifiedName().equals(Character.class.getName())) {
+//      outerAccessorStatement =
+//              loadVariable("newArray", loadVariable("i"))
+//                      .assignValue(
+//                              Stmt.nestedCall(Cast.to(String.class, loadVariable("a0").invoke("get", loadVariable("i"))))
+//                                      .invoke("charAt", 0));
+//    }
 
 
     final BlockBuilder<?> dmBuilder =

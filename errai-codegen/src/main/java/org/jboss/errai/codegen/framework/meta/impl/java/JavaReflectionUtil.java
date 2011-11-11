@@ -23,7 +23,9 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaType;
@@ -54,27 +56,33 @@ public class JavaReflectionUtil {
     return typeList.toArray(new MetaType[types.length]);
   }
 
+  private static final Map<Type, MetaType> FROM_TYPE_CLASS = new HashMap<Type, MetaType>();
+
   public static MetaType fromType(Type t) {
-    if (t instanceof Class) {
-      return (MetaClassFactory.get((Class) t));
+    MetaType type = FROM_TYPE_CLASS.get(t);
+    if (type == null) {
+      if (t instanceof Class) {
+        type = (MetaClassFactory.get((Class) t));
+      }
+      else if (t instanceof TypeVariable) {
+        type = new JavaReflectionTypeVariable((TypeVariable) t);
+      }
+      else if (t instanceof ParameterizedType) {
+        type = new JavaReflectionParameterizedType((ParameterizedType) t);
+      }
+      else if (t instanceof GenericArrayType) {
+        type = new JavaReflectionGenericArrayType((GenericArrayType) t);
+      }
+      else if (t instanceof GenericDeclaration) {
+        type = new JavaReflectionGenericDeclaration((GenericDeclaration) t);
+      }
+      else if (t instanceof WildcardType) {
+        type = new JavaReflectionWildcardType((WildcardType) t);
+      }
+
+      FROM_TYPE_CLASS.put(t, type);
     }
-    else if (t instanceof TypeVariable) {
-      return new JavaReflectionTypeVariable((TypeVariable) t);
-    }
-    else if (t instanceof ParameterizedType) {
-      return new JavaReflectionParameterizedType((ParameterizedType) t);
-    }
-    else if (t instanceof GenericArrayType) {
-      return new JavaReflectionGenericArrayType((GenericArrayType) t);
-    }
-    else if (t instanceof GenericDeclaration) {
-      return new JavaReflectionGenericDeclaration((GenericDeclaration) t);
-    }
-    else if (t instanceof WildcardType) {
-      return new JavaReflectionWildcardType((WildcardType) t);
-    }
-    else {
-      return null;
-    }
+
+    return type;
   }
 }

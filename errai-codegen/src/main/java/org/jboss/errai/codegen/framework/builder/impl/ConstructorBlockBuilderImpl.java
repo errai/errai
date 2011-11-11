@@ -50,8 +50,8 @@ public class ConstructorBlockBuilderImpl<T extends ClassStructureBuilder<T>> ext
     append(new AbstractStatement() {
       @Override
       public String generate(Context context) {
-        return "super" + 
-          CallParameters.fromStatements(GenUtil.generateCallParameters(context, parameters)).generate(context);
+        return "super" +
+                CallParameters.fromStatements(GenUtil.generateCallParameters(context, parameters)).generate(context);
       }
     });
 
@@ -61,10 +61,14 @@ public class ConstructorBlockBuilderImpl<T extends ClassStructureBuilder<T>> ext
   @Override
   public BlockBuilder<T> callThis(final Object... parameters) {
     append(new AbstractStatement() {
+
+      String generatedCache;
+
       @Override
       public String generate(Context context) {
-        return "this" + 
-          CallParameters.fromStatements(GenUtil.generateCallParameters(context, parameters)).generate(context);
+        if (generatedCache != null) return generatedCache;
+        return generatedCache = "this" +
+                CallParameters.fromStatements(GenUtil.generateCallParameters(context, parameters)).generate(context);
       }
     });
 

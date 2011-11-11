@@ -34,8 +34,12 @@ public class AnnotationEncoder {
     final Class<? extends Annotation> annotationClass = annotation.annotationType();
 
     return new Statement() {
+      String generatedCache;
+
       @Override
       public String generate(Context context) {
+        if (generatedCache != null) return generatedCache;
+
         final AnonymousClassStructureBuilder builder
                 = ObjectBuilder.newInstanceOf(annotationClass, context)
                 .extend();
@@ -58,7 +62,7 @@ public class AnnotationEncoder {
           }
         }
 
-        return prettyPrintJava(builder.finish().toJavaString());
+        return generatedCache = prettyPrintJava(builder.finish().toJavaString());
       }
 
       @Override

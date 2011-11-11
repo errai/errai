@@ -118,7 +118,6 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                         .finish()
         );
 
-
         // String objId = a0.get(SerializationParts.OBJECTID).isString().stringValue();
         methBuilder.append(Stmt.declareVariable(String.class).named("objId")
                 .initializeWith(loadVariable("obj")
@@ -127,7 +126,8 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
         methBuilder.append(
                 Stmt.if_(Bool.expr(loadVariable("a1").invoke("hasObjectHash", loadVariable("objId"))))
-                        .append(loadVariable("a1").invoke("getObject", toMap, loadVariable("objId")).returnValue()).finish());
+                        .append(loadVariable("a1").invoke("getObject", toMap, loadVariable("objId"))
+                                .returnValue()).finish());
 
         methBuilder.append(Stmt.declareVariable(toMap).named("entity")
                 .initializeWith(Stmt.newObject(toMap)
@@ -341,7 +341,6 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
       }
     }
     while ((c = c.getSuperClass()) != null);
-
 
     return new BeanMapping(mappings);
   }

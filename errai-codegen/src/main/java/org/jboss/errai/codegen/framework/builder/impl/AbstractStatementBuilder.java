@@ -36,6 +36,7 @@ import org.jboss.errai.codegen.framework.util.GenUtil;
 public abstract class AbstractStatementBuilder implements Statement, Builder, StatementEnd {
   protected Context context = null;
   protected CallElementBuilder callElementBuilder;
+  protected boolean generated;
 
   protected AbstractStatementBuilder(Context context) {
     if (context == null) {
@@ -50,9 +51,13 @@ public abstract class AbstractStatementBuilder implements Statement, Builder, St
     this(context);
     this.callElementBuilder = callElementBuilder;
   }
-
+  
+  
+  String generatorCache;
+  
   @Override
   public String generate(Context context) {
+    if (generatorCache != null) return generatorCache;
 
     CallWriter writer = new CallWriter();
     try {
@@ -61,7 +66,9 @@ public abstract class AbstractStatementBuilder implements Statement, Builder, St
     catch (Exception e) {
       GenUtil.throwIfUnhandled("generation failure at: " + writer.getCallString(), e);
     }
-    return prettyPrintJava(writer.getCallString());
+    generated = true;
+
+    return generatorCache = prettyPrintJava(writer.getCallString());
   }
 
   public void appendCallElement(CallElement element) {

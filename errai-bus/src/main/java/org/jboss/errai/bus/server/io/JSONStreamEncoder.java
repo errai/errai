@@ -53,7 +53,7 @@ public class JSONStreamEncoder {
   private static void _encode(Object v, OutputStream outstream, EncodingContext ctx) throws IOException {
     _encode(v, outstream, ctx, false);
   }
-  
+
   private static void _encode(Object v, OutputStream outstream, EncodingContext ctx, boolean qualifiedNumerics) throws IOException {
     if (v == null) {
       outstream.write(NULL_BYTES);
@@ -67,11 +67,14 @@ public class JSONStreamEncoder {
     }
     if (v instanceof Number || v instanceof Boolean || v instanceof Character) {
       if (qualifiedNumerics) {
-          outstream.write(NumbersUtils.qualifiedNumericEncoding(v).getBytes());
+        if (v instanceof Character) {
+          v = "\"" + v.toString() + "\"";
         }
-        else {
-          outstream.write(String.valueOf(v).getBytes());
-        }      
+        outstream.write(NumbersUtils.qualifiedNumericEncoding(ctx.isEscapeMode(), v).getBytes());
+      }
+      else {
+        outstream.write(String.valueOf(v).getBytes());
+      }
     }
     else if (v instanceof Collection) {
       encodeCollection((Collection) v, outstream, ctx);
@@ -180,8 +183,8 @@ public class JSONStreamEncoder {
     }
 
     if (i == 0) {
-       write(outstream, ctx, "\"" + SerializationParts.INSTANTIATE_ONLY + "\":true");
-     }
+      write(outstream, ctx, "\"" + SerializationParts.INSTANTIATE_ONLY + "\":true");
+    }
 
     outstream.write('}');
   }

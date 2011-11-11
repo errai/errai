@@ -136,7 +136,6 @@ public final class MetaClassFactory {
     return createOrGet(Array.newInstance(clazz, dims).getClass(), false);
   }
 
-
   public static MetaClass get(Class<?> clazz, Type type) {
     return createOrGet(clazz, type);
   }
@@ -412,8 +411,11 @@ public final class MetaClassFactory {
     CLASS_CACHE.put(encName, metaClass);
   }
 
+  public static int LOAD_CALL_COUNT = 0;
+  
   private static Class<?> load(String fullyQualifiedName) {
     try {
+      LOAD_CALL_COUNT++;
       return Class.forName(fullyQualifiedName, false, Thread.currentThread().getContextClassLoader());
     }
     catch (ClassNotFoundException e) {

@@ -73,8 +73,12 @@ public class LoadVariable extends AbstractCallElement {
         return ref.getValue();
       }
 
+      String generatedCache;
+      
       @Override
       public String generate(Context context) {
+        if (generatedCache != null) return generatedCache;
+        
         StringBuilder buf = new StringBuilder((classMember
                 && !context.isNonAmbiguous(ref.getName()) ? "this." : "") + getName());
         
@@ -82,7 +86,7 @@ public class LoadVariable extends AbstractCallElement {
           buf.append('[').append(s.generate(context)).append(']');
         }
 
-        return buf.toString();
+        return generatedCache = buf.toString();
       }
 
       @Override

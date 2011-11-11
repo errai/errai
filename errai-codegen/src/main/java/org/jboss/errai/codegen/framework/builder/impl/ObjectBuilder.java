@@ -154,34 +154,36 @@ public class ObjectBuilder extends AbstractStatementBuilder {
   @Override
   public String generate(final Context context) {
 
-    appendCallElement(new DeferredCallElement(new DeferredCallback() {
-      @Override
-      public void doDeferred(CallWriter writer, Context context, Statement statement) {
-        writer.reset();
+    if (!generated) {
+      appendCallElement(new DeferredCallElement(new DeferredCallback() {
+        @Override
+        public void doDeferred(CallWriter writer, Context context, Statement statement) {
+          writer.reset();
 
-        CallParameters callParameters = (parameters != null) ?
-                fromStatements(GenUtil.generateCallParameters(context, parameters)) : CallParameters.none();
+          CallParameters callParameters = (parameters != null) ?
+                  fromStatements(GenUtil.generateCallParameters(context, parameters)) : CallParameters.none();
 
-        if (!type.isInterface() && type.getBestMatchingConstructor(callParameters.getParameterTypes()) == null)
-          throw new UndefinedConstructorException(type, callParameters.getParameterTypes());
+          if (!type.isInterface() && type.getBestMatchingConstructor(callParameters.getParameterTypes()) == null)
+            throw new UndefinedConstructorException(type, callParameters.getParameterTypes());
 
-        StringBuilder buf = new StringBuilder();
-        buf.append("new ").append(LoadClassReference.getClassReference(type, context, true));
-        if (callParameters != null) {
-          buf.append(callParameters.generate(Context.create(context)));
-        }
-        if (extendsBlock != null) {
-          for (MetaField field : type.getDeclaredFields()) {
-            context.addVariable(Variable.create(field.getName(), field.getType()));
+          StringBuilder buf = new StringBuilder();
+          buf.append("new ").append(LoadClassReference.getClassReference(type, context, true));
+          if (callParameters != null) {
+            buf.append(callParameters.generate(Context.create(context)));
           }
-          buf.append(" {\n").append(extendsBlock.generate(context)).append("\n}\n");
+          if (extendsBlock != null) {
+            for (MetaField field : type.getDeclaredFields()) {
+              context.addVariable(Variable.create(field.getName(), field.getType()));
+            }
+            buf.append(" {\n").append(extendsBlock.generate(context)).append("\n}\n");
+          }
+          writer.append(buf.toString());
         }
-        writer.append(buf.toString());
-      }
-    }));
+      }));
+    }
 
     try {
-    return super.generate(context);
+      return super.generate(context);
     }
     catch (Throwable t) {
       GenUtil.throwIfUnhandled("while instantiating class: " + type.getFullyQualifiedName(), t);

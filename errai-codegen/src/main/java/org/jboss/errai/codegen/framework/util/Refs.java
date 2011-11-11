@@ -39,8 +39,12 @@ public abstract class Refs {
       public Statement getValue() {
         return new Statement() {
 
+          String generatedCache;
+
           @Override
           public String generate(Context context) {
+            if (generatedCache != null) return generatedCache;
+
             VariableReference var = context.getVariable(name);
 
             if (var == null) {
@@ -49,7 +53,7 @@ public abstract class Refs {
 
             type = var.getType();
 
-            return name;
+            return generatedCache = name;
           }
 
           @Override

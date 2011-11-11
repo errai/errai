@@ -460,9 +460,13 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     copy.setDimensions(dimensions);
     return copy;
   }
+  
+  String generatedCache;
 
   @Override
   public String toJavaString() {
+    if (generatedCache != null) return generatedCache;
+    
     StringBuilder buf = new StringBuilder();
 
     context.addVariable(Variable.create("this", this));
@@ -525,7 +529,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
       }
     }
 
-    return PrettyPrinter.prettyPrintJava(headerBuffer.toString() + buf.append("}\n").toString());
+    return generatedCache = PrettyPrinter.prettyPrintJava(headerBuffer.toString() + buf.append("}\n").toString());
   }
 
   public String membersToString() {

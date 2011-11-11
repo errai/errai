@@ -45,7 +45,7 @@ public class AnonymousClassStructureBuilderImpl
   private BuildCallback<ObjectBuilder> callback;
   private List<DeferredGenerateCallback> callables = new ArrayList<DeferredGenerateCallback>();
   private Context context;
-  
+
   AnonymousClassStructureBuilderImpl(MetaClass clazz, BuildCallback<ObjectBuilder> builderBuildCallback) {
     super(clazz.getFullyQualifiedName(), clazz, builderBuildCallback.getParentContext());
     this.callback = builderBuildCallback;
@@ -77,7 +77,7 @@ public class AnonymousClassStructureBuilderImpl
 
               @Override
               public Context getParentContext() {
-                return  context;
+                return context;
               }
             });
   }
@@ -156,7 +156,10 @@ public class AnonymousClassStructureBuilderImpl
     callables.add(callable);
   }
 
+  String generatedCache;
+
   private String doGenerate(Context context) {
+    if (generatedCache != null) return generatedCache;
     try {
       if (callables == null)
         return null;
@@ -172,7 +175,7 @@ public class AnonymousClassStructureBuilderImpl
 
       buf.append(classDefinition.membersToString());
 
-      return buf.toString();
+      return generatedCache = buf.toString();
     }
     catch (Exception e) {
       GenUtil.throwIfUnhandled("while generating: " + classDefinition.getFullyQualifiedName(), e);

@@ -30,20 +30,24 @@ public class LoadNested extends AbstractCallElement {
     this.statement = new Statement() {
       MetaClass type;
 
+      String generatedCache;
+      
       @Override
       public String generate(Context context) {
+        if (generatedCache != null) return generatedCache;
+
         String res = statement.generate(context).trim();
 
         type = statement.getType();
 
         if (getNext() == null || (getNext() instanceof ReturnValue)) {
-          return res;
+          return generatedCache = res;
         }
         else if (isIdentifierOnly(res)) {
-          return res;
+          return generatedCache =res;
         }
         else {
-          return "(" + res + ")";
+          return generatedCache = "(" + res + ")";
         }
       }
 

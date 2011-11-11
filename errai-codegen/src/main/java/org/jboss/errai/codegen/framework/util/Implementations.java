@@ -65,10 +65,13 @@ public class Implementations {
         statementBuilder.invoke("append", statement);
         return this;
       }
+      
+      String generatedCache;
 
       @Override
       public String generate(Context context) {
-        return statementBuilder.generate(context);
+        if (generatedCache != null) return generatedCache;
+        return generatedCache = statementBuilder.generate(context);
       }
 
       @Override

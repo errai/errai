@@ -75,7 +75,17 @@ public class GenUtil {
     return statements;
   }
 
+//  private static final RenderCacheStore<MetaParameterizedType, String> DYN_GENERATE_RENDER_CACHE =
+//          new RenderCacheStore<MetaParameterizedType, String>() {
+//            @Override
+//            public String getName() {
+//              return "DYN_GENERATE_RENDER_CACHE";
+//            }
+//          };
+
   public static Statement generate(Context context, Object o) {
+
+
     if (o instanceof VariableReference) {
       return context.getVariable(((VariableReference) o).getName());
     }
@@ -89,7 +99,7 @@ public class GenUtil {
       }
     }
     else if (o instanceof Statement) {
-      ((Statement) o).generate(context);
+     ((Statement) o).generate(context);
       return (Statement) o;
     }
     else {

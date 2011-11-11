@@ -2,6 +2,7 @@ package org.jboss.errai.marshalling.client.util;
 
 import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.common.client.protocols.SerializationParts;
+import org.jboss.errai.common.client.types.EncodingContext;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -44,9 +45,13 @@ public class NumbersUtils {
     else if (value instanceof Double) {
       return getNumber(wrapperClassName, (Double) value);
     }
+    else if (value instanceof Boolean) {
+      return value;
+    }
     else if (value instanceof Long) {
       return getNumber(wrapperClassName, (Long) value);
     }
+ 
     else {
       throw new RuntimeException("unknown numeric type: " + value);
     }
@@ -136,11 +141,14 @@ public class NumbersUtils {
     }
   }
 
-  public static String qualifiedNumericEncoding(Object o) {
-    return "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + o.getClass().getName() + "\", \"" +
-            SerializationParts.OBJECT_ID + "\": \"" + o.hashCode() + "\"," +
-            "\"" + SerializationParts.NUMERIC_VALUE + "\":"
-            + (o instanceof Long ? "\"" + String.valueOf(o) + "\"" : String.valueOf(o)) + "}";
+  public static String qualifiedNumericEncoding(boolean escaped, Object o) {
+    final String quote = escaped ? "\\" + "\"" : "\"";
+    
+    return "{" + quote + SerializationParts.ENCODED_TYPE + quote + ":"
+            + quote + (o instanceof String ? Character.class.getName() : o.getClass().getName()) + quote + ", "
+            + quote + SerializationParts.OBJECT_ID + quote + ": " + quote + o.hashCode() + quote + "," +
+            quote + SerializationParts.NUMERIC_VALUE + quote + ":"
+            + (o instanceof Long ? quote + String.valueOf(o) + quote : String.valueOf(o)) + "}";
 
   }
 }

@@ -26,7 +26,7 @@ public class NullMarshaller implements Marshaller<Object, Object> {
 
   @Override
   public String marshall(Object o, MarshallingSession ctx) {
-    return null;
+    return "null";
   }
 
   @Override

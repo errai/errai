@@ -108,8 +108,13 @@ public class FieldBuilder<T> implements FieldBuildStart<T>, FieldBuildType<T>,
   public T finish() {
     if (callback != null) {
       return callback.callback(new Statement() {
+
+        private String generatedCache;
+
         @Override
         public String generate(Context context) {
+          if (generatedCache != null) return generatedCache;
+
           StringBuilder sbuf = new StringBuilder(scope.getCanonicalName())
                   .append(scope == Scope.Package ? "" : " ")
                   .append(LoadClassReference.getClassReference(type, context, type.getTypeParameters() != null))
@@ -119,7 +124,7 @@ public class FieldBuilder<T> implements FieldBuildStart<T>, FieldBuildType<T>,
             sbuf.append(" = ").append(initializer.generate(context));
           }
 
-          return sbuf.append(";").toString();
+          return generatedCache = sbuf.append(";").toString();
         }
 
         @Override

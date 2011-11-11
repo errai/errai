@@ -55,6 +55,7 @@ public class BlockBuilderImpl<T> implements BlockBuilder<T> {
  @Override
  public BlockBuilder<T> append(final InnerClass innerClass) {
    blockStatement.addStatement(new Statement() {
+
      @Override
      public String generate(Context context) {
        return innerClass.generate(context);

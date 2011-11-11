@@ -41,11 +41,15 @@ public class MethodInvocation extends AbstractStatement {
     this.callParameters = callParameters;
   }
 
+  String generatedCache;
+
   @Override
   public String generate(Context context) {
+    if (generatedCache != null) return generatedCache;
+
     StringBuilder buf = new StringBuilder();
     buf.append(method.getName()).append(callParameters.generate(context));
-    return buf.toString();
+    return generatedCache = buf.toString();
   }
 
   @Override

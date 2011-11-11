@@ -84,6 +84,8 @@ public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayB
 
   @Override
   public String generate(Context context) {
+    if (generatorCache != null) return generatorCache;
+
     StringBuilder buf = new StringBuilder();
     buf.append("new ").append(LoadClassReference.getClassReference(componentType, context));
 
@@ -118,7 +120,7 @@ public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayB
       }
     }
 
-    return buf.toString();
+    return generatorCache = buf.toString();
   }
 
   private void generateWithInitialization(StringBuilder buf) {

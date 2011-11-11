@@ -46,12 +46,16 @@ public class Context {
   private boolean autoImports = false;
 
   private List<MetaClass> classContexts;
+  
+  private Map<String, Map<Object, Object>> renderingCache;
 
   private Context() {
     importedPackages = new HashSet<String>();
     importedPackages.add("java.lang");
     classContexts = new ArrayList<MetaClass>();
+    renderingCache = new HashMap<String, Map<Object, Object>>();
   }
+  
 
   private Context(Context parent) {
     this();
@@ -59,6 +63,7 @@ public class Context {
     this.autoImports = parent.autoImports;
     this.importedPackages = parent.importedPackages;
     this.importedClasses = parent.importedClasses;
+    this.renderingCache = parent.renderingCache;
   }
 
   public static Context create() {
@@ -288,5 +293,21 @@ public class Context {
 
   public boolean hasParent() {
     return parent != null;
+  }
+  
+//  public <K, V> Map<K, V> getRenderingCache(Class<K> keyType, Class<V> valType, String topic) {
+//    Map<Object, Object> cacheStore = renderingCache.get(topic);
+//    if (cacheStore == null) {
+//      renderingCache.put(topic, (cacheStore =  (Map<Object, Object>) new HashMap<K, V>()));
+//    }
+//    return (Map<K,V>) cacheStore;
+//  }
+  
+  public <K, V> Map<K, V> getRenderingCache(RenderCacheStore<K, V> store) {
+    Map<K, V> cacheStore = (Map<K,V>) renderingCache.get(store.getName());
+    if (cacheStore == null) {
+      renderingCache.put(store.getName(), (Map<Object, Object>) (cacheStore = new HashMap<K, V>()));
+    }
+    return  cacheStore; 
   }
 }

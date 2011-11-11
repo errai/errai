@@ -20,6 +20,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +36,8 @@ import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.Variable;
 import org.jboss.errai.codegen.framework.VariableReference;
+import org.jboss.errai.codegen.framework.builder.ContextualStatementBuilder;
+import org.jboss.errai.codegen.framework.builder.VariableReferenceContextualStatementBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.StatementBuilder;
 import org.jboss.errai.codegen.framework.exception.InvalidTypeException;
@@ -47,7 +51,7 @@ import org.junit.Test;
 
 /**
  * Tests the {@link StatementBuilder} API.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class StatementBuilderTest extends AbstractStatementBuilderTest {
@@ -116,7 +120,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
       assertTrue(ive.getCause() instanceof NumberFormatException);
     }
   }
-  
+
   @Test
   public void testDeclareVariableWithObjectInitializationWithExactTypeProvided() {
     Context ctx = Context.create();
@@ -144,13 +148,13 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
     assertEquals("Wrong variable name", "str", str.getName());
     Assert.assertEquals("Wrong variable type", MetaClassFactory.get(String.class), str.getType());
   }
-  
+
   @Test
   public void testDeclareVariableWithStatementInitialization() {
     Context ctx = Context.create();
     String s = Stmt.declareVariable("str", String.class,
             Stmt.nestedCall(Stmt.newObject(Integer.class).withParameters(2)).invoke("toString"))
-        .generate(ctx);
+            .generate(ctx);
 
     assertEquals("failed to generate variable declaration with statement initialization",
             "String str = new Integer(2).toString();", s);
@@ -253,44 +257,44 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   }
 
   @Test
-  @SuppressWarnings(value = { "all" })
+  @SuppressWarnings(value = {"all"})
   public void testCreateAndInitializeTwoDimensionalArray() {
     String s = StatementBuilder.create().newArray(Integer.class)
-            .initialize(new Integer[][] { { 1, 2 }, { 3, 4 } })
+            .initialize(new Integer[][]{{1, 2}, {3, 4}})
             .toJavaString();
 
     assertEquals("Failed to generate two dimensional array", "new Integer[][] { { 1, 2 }, { 3, 4 } }", s);
   }
 
   @Test
-  @SuppressWarnings(value = { "all" })
+  @SuppressWarnings(value = {"all"})
   public void testCreateAndInitializeTwoDimensionalArrayWithSingleValue() {
     String s = StatementBuilder.create().newArray(Integer.class)
-            .initialize(new Object[][] { { 1, 2 } })
+            .initialize(new Object[][]{{1, 2}})
             .toJavaString();
 
     assertEquals("Failed to generate two dimensional array", "new Integer[][] { { 1, 2 } }", s);
   }
 
   @Test
-  @SuppressWarnings(value = { "all" })
+  @SuppressWarnings(value = {"all"})
   public void testCreateAndInitializeTwoDimensionalObjectArrayWithIntegers() {
     String s = StatementBuilder.create().newArray(Object.class)
-            .initialize(new Object[][] { { 1, 2 } })
+            .initialize(new Object[][]{{1, 2}})
             .toJavaString();
 
     assertEquals("Failed to generate two dimensional array", "new Object[][] { { 1, 2 } }", s);
   }
 
   @Test
-  @SuppressWarnings(value = { "all" })
+  @SuppressWarnings(value = {"all"})
   public void testCreateAndInitializeTwoDimensionalArrayWithStatements() {
     String s = StatementBuilder.create().newArray(String.class)
-            .initialize(new Statement[][] {
-                    { StatementBuilder.create().invokeStatic(Integer.class, "toString", 1),
-                            StatementBuilder.create().invokeStatic(Integer.class, "toString", 2) },
-                    { StatementBuilder.create().invokeStatic(Integer.class, "toString", 3),
-                            StatementBuilder.create().invokeStatic(Integer.class, "toString", 4) } })
+            .initialize(new Statement[][]{
+                    {StatementBuilder.create().invokeStatic(Integer.class, "toString", 1),
+                            StatementBuilder.create().invokeStatic(Integer.class, "toString", 2)},
+                    {StatementBuilder.create().invokeStatic(Integer.class, "toString", 3),
+                            StatementBuilder.create().invokeStatic(Integer.class, "toString", 4)}})
             .toJavaString();
 
     assertEquals("Failed to generate two dimensional array using statements",
@@ -299,12 +303,12 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   }
 
   @Test
-  @SuppressWarnings(value = { "all" })
+  @SuppressWarnings(value = {"all"})
   public void testCreateAndInitializeTwoDimensionalArrayWithStatementsAndLiterals() {
     String s = StatementBuilder.create().newArray(String.class)
-            .initialize(new Object[][] {
-                    { StatementBuilder.create().invokeStatic(Integer.class, "toString", 1), "2" },
-                    { StatementBuilder.create().invokeStatic(Integer.class, "toString", 3), "4" } })
+            .initialize(new Object[][]{
+                    {StatementBuilder.create().invokeStatic(Integer.class, "toString", 1), "2"},
+                    {StatementBuilder.create().invokeStatic(Integer.class, "toString", 3), "4"}})
             .toJavaString();
 
     assertEquals("Failed to generate two dimensional array using statements and objects",
@@ -313,10 +317,10 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   }
 
   @Test
-  @SuppressWarnings(value = { "all" })
+  @SuppressWarnings(value = {"all"})
   public void testCreateAndInitializeThreeDimensionalArray() {
     String s = StatementBuilder.create().newArray(String.class)
-            .initialize(new String[][][] { { { "1", "2" }, { "a", "b" } }, { { "3", "4" }, { "b", "c" } } })
+            .initialize(new String[][][]{{{"1", "2"}, {"a", "b"}}, {{"3", "4"}, {"b", "c"}}})
             .toJavaString();
 
     assertEquals("Failed to generate three dimensional array",
@@ -401,35 +405,39 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   @Test
   public void testObjectCreationWithVariableParameter() {
     String s = StatementBuilder.create()
-        .declareVariable("original", String.class)
-        .newObject(String.class).withParameters(Variable.get("original")).toJavaString();
+            .declareVariable("original", String.class)
+            .newObject(String.class).withParameters(Variable.get("original")).toJavaString();
     assertEquals("failed to generate new object with parameters", "new String(original)", s);
   }
 
   @Test
   public void testObjectCreationWithParameterizedType() {
-    String s = StatementBuilder.create().newObject(new TypeLiteral<List<String>>() {}).toJavaString();
+    String s = StatementBuilder.create().newObject(new TypeLiteral<List<String>>() {
+    }).toJavaString();
     assertEquals("failed to generate new object with parameterized type", "new java.util.List<String>()", s);
   }
 
   @Test
   public void testObjectCreationWithAutoImportedParameterizedType() {
     Context c = Context.create().autoImport();
-    String s = StatementBuilder.create(c).newObject(new TypeLiteral<List<Date>>() {}).toJavaString();
+    String s = StatementBuilder.create(c).newObject(new TypeLiteral<List<Date>>() {
+    }).toJavaString();
     assertEquals("failed to generate new object with parameterized type", "new List<Date>()", s);
   }
 
   @Test
   public void testObjectCreationWithParameterizedTypeAndClassImport() {
     Context c = Context.create().addClassImport(MetaClassFactory.get(List.class));
-    String s = StatementBuilder.create(c).newObject(new TypeLiteral<List<String>>() {}).toJavaString();
+    String s = StatementBuilder.create(c).newObject(new TypeLiteral<List<String>>() {
+    }).toJavaString();
     assertEquals("failed to generate new object with parameterized type", "new List<String>()", s);
   }
 
   @Test
   public void testObjectCreationWithFullyQualifiedParameterizedTypeAndClassImport() {
     Context c = Context.create().addClassImport(MetaClassFactory.get(List.class));
-    String s = StatementBuilder.create(c).newObject(new TypeLiteral<List<Date>>() {}).toJavaString();
+    String s = StatementBuilder.create(c).newObject(new TypeLiteral<List<Date>>() {
+    }).toJavaString();
     assertEquals("failed to generate new object with parameterized type", "new List<java.util.Date>()", s);
   }
 
@@ -440,7 +448,8 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
             .addClassImport(MetaClassFactory.get(Map.class));
 
     String s = StatementBuilder.create(c)
-            .newObject(new TypeLiteral<List<List<Map<String, Integer>>>>() {}).toJavaString();
+            .newObject(new TypeLiteral<List<List<Map<String, Integer>>>>() {
+            }).toJavaString();
     assertEquals("failed to generate new object with parameterized type", "new List<List<Map<String, Integer>>>()", s);
   }
 
@@ -491,10 +500,10 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   @Test
   public void testNestedCall() {
     String s = StatementBuilder.create()
-        .nestedCall(
-            StatementBuilder.create().declareVariable("n", Integer.class).loadVariable("n").invoke("toString"))
-        .invoke("getBytes")
-        .toJavaString();
+            .nestedCall(
+                    StatementBuilder.create().declareVariable("n", Integer.class).loadVariable("n").invoke("toString"))
+            .invoke("getBytes")
+            .toJavaString();
 
     assertEquals("failed to generate nested call", "n.toString().getBytes()", s);
   }
@@ -504,31 +513,76 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
     String s = Stmt.create(Context.create().autoImport()).nestedCall(
             Stmt.newObject(Foo.class)).loadField("bar").loadField("name").assignValue("test").toJavaString();
 
-    assertEquals("failed to generate nested field assignment", 
-        "new Foo().bar.name = \"test\";", s);
+    assertEquals("failed to generate nested field assignment",
+            "new Foo().bar.name = \"test\";", s);
   }
-  
+
   @Test
   public void testCastDown() {
     Statement stmt = Cast.to(String.class, Stmt.declareVariable("obj", Object.class).loadVariable("obj"));
     assertEquals("failed to generate cast", "(String) obj", stmt.generate(Context.create()));
   }
-  
+
   @Test
   public void testCastUp() {
     Statement stmt = Cast.to(Object.class, Stmt.declareVariable("str", String.class).loadVariable("str"));
     assertEquals("created a redundant cast", "str", stmt.generate(Context.create()));
   }
-  
+
   @Test
   public void testInvalidCast() {
     try {
       Statement stmt = Cast.to(Integer.class, Stmt.declareVariable("str", String.class).loadVariable("str"));
       stmt.generate(Context.create());
       fail("expected InvalidTypeException");
-    } catch(InvalidTypeException e) {
+    }
+    catch (InvalidTypeException e) {
       //expected
       assertEquals("Wrong exception message", "java.lang.String cannot be cast to java.lang.Integer", e.getMessage());
     }
   }
-  }
+
+//  @Test
+//  public void testFun100() {
+//    for (int i = 0; i < 100; i++)
+//      testNestedCallsOfFun(100);
+//  }
+//
+//  @Test
+//  public void testFun1000() {
+//    for (int i = 0; i < 1000; i++)
+//      testNestedCallsOfFun(100);
+//  }
+//
+//  @Test
+//  public void testFun10000() {
+//    for (int i = 0; i < 10000; i++)
+//      testNestedCallsOfFun(100);
+//  }
+//
+//  @Test
+//  public void testFun100000() {
+//    for (int i = 0; i < 100000; i++)
+//      testNestedCallsOfFun(100);
+//  }
+//
+//  @Test
+//  public void testFun1000000() {
+//    for (int i = 0; i < 1000000; i++)
+//      testNestedCallsOfFun(100);
+//  }
+//
+//
+//  public void testNestedCallsOfFun(int n) {
+//    Integer[] dim = new Integer[n];
+//
+//    for (int dims = 0; dims < n; dims++) {
+//      dim[dims] = 10;
+//    }
+//
+//    String s = Stmt.newArray(String.class, dim).toJavaString();
+//    System.out.print(s.length() == 0 ? s.charAt(0) : "");
+//
+//  }
+
+}

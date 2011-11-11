@@ -49,9 +49,13 @@ public class IfBlock extends AbstractConditionalBlock {
   public void setElseIfBlock(IfBlock elseIfBlock) {
     this.elseIfBlock = elseIfBlock;
   }
+  
+  String generatedCache;
 
   @Override
   public String generate(Context context) {
+    if (generatedCache != null) return generatedCache;
+    
     StringBuilder builder = new StringBuilder("if ");
     builder.append("(").append(getCondition().generate(context)).append(") ");
 
@@ -73,6 +77,6 @@ public class IfBlock extends AbstractConditionalBlock {
       return builder.toString();
     }
 
-    return builder.toString();
+    return generatedCache = builder.toString();
   }
 }

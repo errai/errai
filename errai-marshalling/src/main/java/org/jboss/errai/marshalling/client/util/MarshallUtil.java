@@ -3,6 +3,7 @@ package org.jboss.errai.marshalling.client.util;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.common.client.protocols.SerializationParts;
+import org.jboss.errai.common.client.types.EncodingContext;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 
@@ -78,7 +79,7 @@ public class MarshallUtil {
 
         @Override
         public String marshall(Object o, MarshallingSession ctx) {
-          return NumbersUtils.qualifiedNumericEncoding(o);
+          return NumbersUtils.qualifiedNumericEncoding(false, o);
         }
 
         @Override
@@ -98,5 +99,6 @@ public class MarshallUtil {
       };
 
   }
+
 
 }

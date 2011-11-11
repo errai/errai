@@ -201,13 +201,17 @@ public class Variable extends AbstractStatement {
     return "Variable [name=" + name + ", type=" + type + "]";
   }
 
+  String generatedCache;
+  
   @Override
   public String generate(Context context) {
+    if (generatedCache != null) return generatedCache;
+    
     if (initialization != null) {
       this.type = (type == null) ? inferType(context, initialization) : type;
       this.value = GenUtil.convert(context, initialization, type);
     }
 
-    return new DeclareAssignmentBuilder(isFinal, getReference(), value).generate(context);
+    return generatedCache = new DeclareAssignmentBuilder(isFinal, getReference(), value).generate(context);
   }
 }

@@ -64,11 +64,16 @@ public class JSONEncoder {
     }
     if (v instanceof Number || v instanceof Boolean || v instanceof Character) {
       if (qualifiedNumerics) {
-        return NumbersUtils.qualifiedNumericEncoding(v);
+        if (v instanceof Character) {
+          v = write(ctx, '"') + v.toString() + write(ctx, '"');
+        }
+
+        return NumbersUtils.qualifiedNumericEncoding(ctx.isEscapeMode(), v);
       }
       else {
         return String.valueOf(v);
-      }    }
+      }
+    }
     else if (v instanceof Collection) {
       return encodeCollection((Collection) v, ctx);
     }
@@ -135,7 +140,7 @@ public class JSONEncoder {
             keyValue(encodeString(OBJECT_ID, ctx), encodeString(String.valueOf(ctx.markRef(o)),
                     ctx))));
 
-     final Field[] fields = EncodingUtil.getAllEncodingFields(cls);
+    final Field[] fields = EncodingUtil.getAllEncodingFields(cls);
 
 
     int i = 0;
@@ -163,9 +168,9 @@ public class JSONEncoder {
     }
 
     if (i == 0) {
-      build.append(",").append(keyValue(encodeString(SerializationParts.INSTANTIATE_ONLY,ctx), "true"));
+      build.append(",").append(keyValue(encodeString(SerializationParts.INSTANTIATE_ONLY, ctx), "true"));
     }
-    
+
     return build.append('}').toString();
   }
 

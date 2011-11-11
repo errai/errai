@@ -1,6 +1,7 @@
 package org.jboss.errai.marshalling.client.marshallers;
 
 import com.google.gwt.json.client.JSONValue;
+import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
@@ -22,7 +23,12 @@ public class BooleanMarshaller implements Marshaller<JSONValue, Boolean> {
 
   @Override
   public Boolean demarshall(JSONValue o, MarshallingSession ctx) {
-    return o.isBoolean().booleanValue();
+    if (o.isObject() != null) {
+      return o.isObject().get(SerializationParts.NUMERIC_VALUE).isBoolean().booleanValue();
+    }
+    else {
+      return o.isBoolean().booleanValue();
+    }
   }
 
   @Override
