@@ -18,6 +18,7 @@ import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.common.client.api.annotations.ExposeEntity;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.common.metadata.MetaDataScanner;
+import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallerFactory;
@@ -28,10 +29,15 @@ import org.jboss.errai.marshalling.rebind.api.ArrayMarshallerCallback;
 import org.jboss.errai.marshalling.rebind.api.MappingContext;
 import org.jboss.errai.marshalling.rebind.api.MappingStrategy;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.SessionScoped;
 import javax.enterprise.util.TypeLiteral;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import javax.inject.Singleton;
+import java.io.*;
+import java.lang.annotation.Annotation;
 import java.util.*;
 
 import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.parameterizedAs;
@@ -55,13 +61,44 @@ public class MarshallerGeneratorFactory {
 
   Set<String> arrayMarshallers = new HashSet<String>();
 
-  long startTime;
-  
-  public String generate(String packageName, String clazzName) {
-    startTime = System.currentTimeMillis();
-    
-    classStructureBuilder = implement(MarshallerFactory.class, packageName, clazzName);
+  private Logger log = LoggerFactory.getLogger(MarshallerGeneratorFactory.class);
 
+  long startTime;
+
+  public String generate(String packageName, String clazzName) {
+    File fileCacheDir = RebindUtils.getErraiCacheDir();
+    File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + clazzName + ".java");
+
+    final Set<Class<? extends Annotation>> annos = new HashSet<Class<? extends Annotation>>();
+    annos.add(Portable.class);
+    annos.add(ExposeEntity.class);
+
+    String gen;
+    if (RebindUtils.hasClasspathChangedForAnnotatedWith(annos)) {
+      if (!cacheFile.exists()) {
+        RebindUtils.writeStringToFile(cacheFile, gen = _generate(packageName, clazzName));
+      }
+      else {
+        gen = RebindUtils.readFileToString(cacheFile);
+        log.info("nothing has changed. using cached marshaller factory class.");
+      }
+    }
+    else {
+      log.info("generating marshalling class...");
+      long st = System.currentTimeMillis();
+      gen = _generate(packageName, clazzName);
+      log.info("generated marshalling class in " + (System.currentTimeMillis() - st) + "ms");
+
+      RebindUtils.writeStringToFile(cacheFile, gen);
+    }
+
+    return gen;
+  }
+
+  private String _generate(String packageName, String clazzName) {
+    startTime = System.currentTimeMillis();
+
+    classStructureBuilder = implement(MarshallerFactory.class, packageName, clazzName);
     classContext = ((BuildMetaClass) classStructureBuilder.getClassDefinition()).getContext();
     mappingContext = new MappingContext(classContext, classStructureBuilder.getClassDefinition(),
             classStructureBuilder, new ArrayMarshallerCallback() {
@@ -124,12 +161,12 @@ public class MarshallerGeneratorFactory {
     // special support for Object[]
     addArrayMarshaller(MetaClassFactory.get(Object[].class));
 
-    String generatedClass = classStructureBuilder.toJavaString();
+    return classStructureBuilder.toJavaString();
 
-    System.out.println("[Generation Finished in: " + (System.currentTimeMillis() - startTime) + "ms]");
+   // System.out.println("[Generation Finished in: " + (System.currentTimeMillis() - startTime) + "ms]");
 
-    System.out.println(generatedClass);
-    return generatedClass;
+  //  System.out.println(generatedClass);
+   // return generatedClass;
   }
 
   private void generateMarshallers() {
@@ -156,7 +193,7 @@ public class MarshallerGeneratorFactory {
     exposed.add(StringIndexOutOfBoundsException.class);
     exposed.add(UnsupportedOperationException.class);
     exposed.add(StackTraceElement.class);
-    
+
     exposed.add(IOException.class);
     exposed.add(UnsupportedEncodingException.class);
     exposed.add(ConcurrentModificationException.class);
@@ -164,7 +201,7 @@ public class MarshallerGeneratorFactory {
     //exposed.add(MissingResourceException.class);
     exposed.add(NoSuchMethodException.class);
 
-   
+
     for (Class<?> clazz : exposed) {
       mappingContext.registerGeneratedMarshaller(clazz.getName());
     }

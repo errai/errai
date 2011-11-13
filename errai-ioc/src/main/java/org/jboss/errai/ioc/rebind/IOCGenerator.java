@@ -60,6 +60,7 @@ public class IOCGenerator extends Generator {
     typeOracle = context.getTypeOracle();
 
 
+
     /**
      * Try to determine the module package -- hackishly
      */

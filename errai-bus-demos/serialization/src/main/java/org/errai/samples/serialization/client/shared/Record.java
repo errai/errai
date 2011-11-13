@@ -17,10 +17,11 @@
 package org.errai.samples.serialization.client.shared;
 
 import org.jboss.errai.common.client.api.annotations.ExposeEntity;
+import org.jboss.errai.common.client.api.annotations.Portable;
 
 import java.util.*;
 
-@ExposeEntity
+@Portable
 public class Record {
   private int recordId;
   private String name;

@@ -6,6 +6,7 @@ import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import org.jboss.errai.common.metadata.RebindUtils;
 
 import java.io.*;
 
@@ -53,73 +54,13 @@ public class MarshallersGenerator extends Generator {
 
   public void generateMarshallerBootstrapper(TreeLogger logger, GeneratorContext context) {
     PrintWriter printWriter = context.tryCreate(logger, packageName, className);
-
     if (printWriter == null) return;
-
-    boolean debugCache = Boolean.getBoolean("errai.marshalling.debugCache");
-    String cacheDir = System.getProperty("errai.marshalling.debugCacheDir");
-
-    if (cacheDir == null) cacheDir = new File("").getAbsolutePath();
-    File cacheFile = new File(cacheDir + "/" + className + ".java");
-    String gen;
-    
-    if (debugCache) {
-      if (!cacheFile.exists()) {
-        gen = _generate();
-
-        try {
-          FileOutputStream outputStream = new FileOutputStream(cacheFile, false);
-          outputStream.write(gen.getBytes());
-          outputStream.close();
-
-          System.out.println("*SAVED CACHE*");
-        }
-        catch (IOException e) {
-          throw new RuntimeException("could not write file for debug cache", e);
-        }
-      }
-      else {
-        StringBuilder buf = new StringBuilder();
-        try {
-          FileInputStream inputStream = new FileInputStream(cacheFile);
-          byte[] b = new byte[1024];
-          int read;
-          while ((read = inputStream.read(b)) != -1) {
-             for (int i = 0; i < read; i++) {
-               buf.append((char) b[i]);
-             }
-          }
-          inputStream.close();
-          System.out.println("*READ CACHE*");
-          
-        }
-        catch (FileNotFoundException e) {
-          throw new RuntimeException("could not read file for debug cache", e);
-        }
-        catch (IOException e) {
-          throw new RuntimeException("could not read file for debug cache", e);
-        }
-
-        gen = buf.toString();
-      }
-    }
-    else {
-      if (cacheFile.exists()) {
-        cacheFile.delete();
-      }
-      
-      gen = _generate();
-    }
-
-    printWriter.write(gen);
-
-    //  printWriter.write();
-
-
+    printWriter.write(_generate());
     context.commit(logger, printWriter);
   }
 
   private String _generate() {
+
     return new MarshallerGeneratorFactory().generate(packageName, className);
   }
 }

@@ -6,7 +6,9 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.rebind.SourceWriter;
 import com.google.gwt.user.rebind.StringSourceWriter;
+import com.google.inject.servlet.RequestScoped;
 import org.jboss.errai.common.metadata.MetaDataScanner;
+import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.codegen.framework.*;
@@ -22,9 +24,15 @@ import org.jboss.errai.ioc.rebind.ioc.*;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
 import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.SessionScoped;
 import javax.inject.Inject;
 import javax.inject.Provider;
+import javax.inject.Singleton;
+import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -45,7 +53,9 @@ public class IOCBootstrapGenerator {
 
   private String packageFilter = null;
   private boolean useReflectionStubs = false;
-  private List<Runnable> deferredTasks = new LinkedList<Runnable>();
+  private List<Runnable> deferredTasks = new ArrayList<Runnable>();
+  
+  private Logger log = LoggerFactory.getLogger(IOCBootstrapGenerator.class);
 
   public static final String QUALIFYING_METADATA_FACTORY_PROPERTY = "errai.ioc.QualifyingMetaDataFactory";
 
@@ -81,6 +91,39 @@ public class IOCBootstrapGenerator {
   }
 
   public String generate(String packageName, String className) {
+    File fileCacheDir = RebindUtils.getErraiCacheDir();
+    File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + className + ".java");
+
+    final Set<Class<? extends Annotation>> annos = new HashSet<Class<? extends Annotation>>();
+    annos.add(ApplicationScoped.class);
+    annos.add(SessionScoped.class);
+    annos.add(RequestScoped.class);
+    annos.add(Singleton.class);
+    annos.add(EntryPoint.class);
+
+    String gen;
+    if (RebindUtils.hasClasspathChangedForAnnotatedWith(annos)) {
+      if (!cacheFile.exists()) {
+        RebindUtils.writeStringToFile(cacheFile, gen = _generate(packageName, className));
+      }
+      else {
+        gen = RebindUtils.readFileToString(cacheFile);
+        log.info("nothing has changed. using cached bootstrap class.");
+      }
+    }
+    else {
+      log.info("generating IOC bootstrapper class...");
+      long st = System.currentTimeMillis();
+      gen = _generate(packageName, className);
+      log.info("generated bootstrapper in " + (System.currentTimeMillis() - st) + "ms");
+      
+      RebindUtils.writeStringToFile(cacheFile, gen);
+    }
+
+    return gen;
+  }
+  
+  private String _generate(String packageName, String className) {
     ClassStructureBuilder<?> classStructureBuilder
             = Implementations.implement(Bootstrapper.class, packageName, className);
 
@@ -174,13 +217,10 @@ public class IOCBootstrapGenerator {
       System.out.println(generated);
       System.out.println("<---Emitting Class----");
     }
-    else {
-      System.out.println("not printing results...");
-    }
+
 
     sourceWriter.print(generated);
   }
-
 
   public void addDeferred(Runnable task) {
     deferredTasks.add(task);

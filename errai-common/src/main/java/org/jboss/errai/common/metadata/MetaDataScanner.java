@@ -17,20 +17,26 @@ package org.jboss.errai.common.metadata;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
+import javassist.bytecode.ClassFile;
 import org.reflections.Configuration;
 import org.reflections.Reflections;
+import org.reflections.scanners.AbstractScanner;
 import org.reflections.scanners.FieldAnnotationsScanner;
 import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
 import org.reflections.util.ConfigurationBuilder;
 import org.reflections.vfs.Vfs;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.annotation.Inherited;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.security.MessageDigest;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -65,14 +71,36 @@ public class MetaDataScanner extends Reflections {
     scan();
   }
 
+  private static Map<String, Set<ClassFile>> annotationsToClassFile = new HashMap<String, Set<ClassFile>>();
+
   private static Configuration getConfiguration(List<URL> urls) {
     return new ConfigurationBuilder()
             .setUrls(urls)
-                    //.filterInputsBy(new FilterBuilder().exclude(CLIENT_PKG_REGEX))
             .setScanners(
                     new FieldAnnotationsScanner(),
                     new MethodAnnotationsScanner(),
-                    new TypeAnnotationsScanner(),
+                    new TypeAnnotationsScanner() {
+                      @Override
+                      public void scan(Object cls) {
+                        final String className = getMetadataAdapter().getClassName(cls);
+
+                        for (String annotationType : (List<String>) getMetadataAdapter().getClassAnnotationNames(cls)) {
+                          if (acceptResult(annotationType) ||
+                                  annotationType.equals(Inherited.class.getName())) { //as an exception, accept Inherited as well
+                            getStore().put(annotationType, className);
+
+                            if (cls instanceof ClassFile) {
+                              Set<ClassFile> classes = annotationsToClassFile.get(annotationType);
+                              if (classes == null) {
+                                annotationsToClassFile.put(annotationType, classes = new HashSet<ClassFile>());
+                              }
+                              classes.add((ClassFile) cls);
+                            }
+                          }
+                        }
+
+                      }
+                    },
                     //new SubTypesScanner(),
                     propScanner
             );
@@ -149,6 +177,44 @@ public class MetaDataScanner extends Reflections {
     }
     return results;
   }
+
+  private Map<Class<? extends Annotation>, Set<Class<?>>> _annotationCache
+          = new HashMap<Class<? extends Annotation>, Set<Class<?>>>();
+
+  @Override
+  public Set<Class<?>> getTypesAnnotatedWith(Class<? extends Annotation> annotation) {
+    Set<Class<?>> types = _annotationCache.get(annotation);
+    if (types == null) {
+      _annotationCache.put(annotation, types = super.getTypesAnnotatedWith(annotation));
+    }
+
+    return types;
+  }
+
+  public String getHashForTypesAnnotatedWith(Class<? extends Annotation> annotation) {
+    if (!annotationsToClassFile.containsKey(annotation.getName())) {
+      return "0";
+    }
+    else {
+      try {
+        final MessageDigest md = MessageDigest.getInstance("SHA-256");
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();                                                                               
+        for (ClassFile classFile : annotationsToClassFile.get(annotation.getName())) {
+          byteArrayOutputStream.reset();
+          classFile.write(new DataOutputStream(byteArrayOutputStream));
+          md.update(byteArrayOutputStream.toByteArray());
+        }
+
+        return RebindUtils.hashToHexString(md.digest());
+
+      }
+      catch (Exception e) {
+        throw new RuntimeException("could not generate hash", e);
+      }
+    }
+  }
+
+
 
   public static List<URL> getConfigUrls(ClassLoader loader) {
     try {
