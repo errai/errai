@@ -192,7 +192,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   private static interface GetMethodsCallback {
     Method[] getMethods();
   }
-  
+
   private MetaMethod getBestMatchingMethod(GetMethodsCallback methodsCallback, String name, Class... parameters) {
     Map<String, MetaMethod> subMap;
     MetaMethod meth;
@@ -350,16 +350,16 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return enclosedMetaObject;
   }
 
-  private String hashString;
+  private String _hashString;
 
   private String hashString() {
-    if (hashString == null) {
-      hashString = MetaClass.class.getName() + ":" + getFullyQualifiedName();
+    if (_hashString == null) {
+      _hashString = MetaClass.class.getName() + ":" + getFullyQualifiedName();
       if (getParameterizedType() != null) {
-        hashString += getParameterizedType().toString();
+        _hashString += getParameterizedType().toString();
       }
     }
-    return hashString;
+    return _hashString;
   }
 
   private Set<MetaClass> POS_ASSIGNABLE_CACHE = new HashSet<MetaClass>();
@@ -456,17 +456,20 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return o instanceof AbstractMetaClass && hashString().equals(((AbstractMetaClass) o).hashString());
   }
 
+  
+  int _hashCode;
   @Override
   public int hashCode() {
-    return hashString().hashCode();
+    if (_hashCode != 0) return _hashCode;
+    return _hashCode = hashString().hashCode();
   }
 
-  private volatile transient Class<?> asClassCache;
+  private volatile transient Class<?> _asClassCache;
 
   @Override
   public Class<?> asClass() {
-    if (asClassCache != null) {
-      return asClassCache;
+    if (_asClassCache != null) {
+      return _asClassCache;
     }
 
     Class<?> cls = null;
@@ -496,40 +499,51 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       }
     }
 
-    return asClassCache = cls;
+    return _asClassCache = cls;
   }
+
+  private MetaClass _boxedCache;
 
   @Override
   public MetaClass asBoxed() {
+    if (_boxedCache != null) return _boxedCache;
     Class<?> cls = asClass();
     if (cls == null)
-      return this;
+      return _boxedCache = this;
 
-    return MetaClassFactory.get(ParseTools.boxPrimitive(cls));
+    return _boxedCache = MetaClassFactory.get(ParseTools.boxPrimitive(cls));
   }
+  
+  private MetaClass _unboxedCache;
 
   @Override
   public MetaClass asUnboxed() {
+    if (_unboxedCache != null) return _unboxedCache;
+    
     Class<?> cls = asClass();
     if (cls == null)
-      return this;
+      return _unboxedCache = this;
 
-    return MetaClassFactory.get(ParseTools.unboxPrimitive(cls));
+    return _unboxedCache = MetaClassFactory.get(ParseTools.unboxPrimitive(cls));
   }
 
-  private MetaClass erasedCache;
+  private MetaClass _erasedCache;
 
   @Override
   public MetaClass getErased() {
     try {
-      return erasedCache != null ? erasedCache : (erasedCache = MetaClassFactory.get(getFullyQualifiedName(), true));
+      return _erasedCache != null ? _erasedCache : (_erasedCache = MetaClassFactory.get(getFullyQualifiedName(), true));
     }
     catch (Exception e) {
       return this;
     }
   }
+  
+  private String _internalNameCache;
 
   public String getInternalName() {
+    if (_internalNameCache != null) return _internalNameCache;
+    
     String name = getFullyQualifiedName();
 
     String dimString = "";
@@ -556,7 +570,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       name = "L" + getInternalPrimitiveNameFrom(name.trim()).replaceAll("\\.", "/") + ";";
     }
 
-    return dimString + name;
+    return _internalNameCache = dimString + name;
   }
 
   private static String getInternalPrimitiveNameFrom(String name) {
@@ -621,13 +635,17 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return null;
   }
 
+  private MetaClass _outerComponentCache;
+  
   @Override
   public MetaClass getOuterComponentType() {
+    if (_outerComponentCache != null) return _outerComponentCache;
+    
     MetaClass c = this;
     while (c.isArray()) {
       c = c.getComponentType();
     }
-    return c;
+    return _outerComponentCache = c;
   }
 
   @Override

@@ -19,6 +19,7 @@ package org.jboss.errai.codegen.framework.meta.impl.java;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,36 +37,50 @@ public class JavaReflectionConstructor extends MetaConstructor {
 
   JavaReflectionConstructor(Constructor c) {
     constructor = c;
-
-    List<MetaParameter> parmList = new ArrayList<MetaParameter>();
-
-    for (int i = 0; i < c.getParameterTypes().length; i++) {
-      MetaClass mcParm = MetaClassFactory.get(c.getParameterTypes()[i], c.getGenericParameterTypes()[i]);
-      parmList.add(new JavaReflectionParameter(mcParm, c.getParameterAnnotations()[i], this));
-    }
-
-    parameters = parmList.toArray(new MetaParameter[parmList.size()]);
-    declaringClass = MetaClassFactory.get(c.getDeclaringClass());
   }
 
   @Override
   public MetaParameter[] getParameters() {
+    if (parameters == null) {
+
+      Class<?>[] parmTypes = constructor.getParameterTypes();
+      Type[] genParmTypes = constructor.getGenericParameterTypes();
+      Annotation[][] parmAnnos = constructor.getParameterAnnotations();
+      List<MetaParameter> parmList = new ArrayList<MetaParameter>(parmTypes.length);
+
+      for (int i = 0; i < parmTypes.length; i++) {
+        MetaClass mcParm = MetaClassFactory.get(parmTypes[i], genParmTypes[i]);
+        parmList.add(new JavaReflectionParameter(mcParm, parmAnnos[i], this));
+      }
+
+      parameters = parmList.toArray(new MetaParameter[parmList.size()]);
+    }
+
     return parameters;
   }
 
   @Override
   public MetaClass getDeclaringClass() {
+    if (declaringClass == null) {
+      declaringClass = MetaClassFactory.get(constructor.getDeclaringClass());
+    }
     return declaringClass;
   }
 
+  private MetaType[] _genericParameterTypes;
+
   @Override
   public MetaType[] getGenericParameterTypes() {
-    return JavaReflectionUtil.fromTypeArray(constructor.getGenericParameterTypes());
+    if (_genericParameterTypes != null) return _genericParameterTypes;
+    return _genericParameterTypes = JavaReflectionUtil.fromTypeArray(constructor.getGenericParameterTypes());
   }
+
+  private MetaTypeVariable[] _typeParameters;
 
   @Override
   public MetaTypeVariable[] getTypeParameters() {
-    return JavaReflectionUtil.fromTypeVariable(constructor.getTypeParameters());
+    if (_typeParameters != null) return _typeParameters;
+    return _typeParameters = JavaReflectionUtil.fromTypeVariable(constructor.getTypeParameters());
   }
 
   @Override

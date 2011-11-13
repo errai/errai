@@ -24,7 +24,9 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.enterprise.util.TypeLiteral;
 
@@ -37,7 +39,7 @@ import org.jboss.errai.codegen.framework.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.framework.meta.impl.AbstractMetaClass;
 
 public class JavaReflectionClass extends AbstractMetaClass<Class> {
-  private Annotation[] annotationsCache;
+  private Annotation[] _annotationsCache;
 
   private JavaReflectionClass(Class clazz, boolean erased) {
     this(clazz, null, erased);
@@ -45,8 +47,6 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
 
   private JavaReflectionClass(Class clazz, Type type, boolean erased) {
     super(clazz);
-    this.annotationsCache = clazz.getAnnotations();
-
     if (!erased) {
       if (type instanceof ParameterizedType) {
         super.parameterizedType = new JavaReflectionParameterizedType((ParameterizedType) type);
@@ -103,7 +103,6 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     return getEnclosedMetaObject().getCanonicalName();
   }
 
-
   @Override
   public String getPackageName() {
     return getEnclosedMetaObject().getPackage().getName();
@@ -119,19 +118,19 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     return methodList.toArray(new MetaMethod[methodList.size()]);
   }
 
-  private transient volatile MetaMethod[] methodsCache;
+  private transient volatile MetaMethod[] _methodsCache;
 
   @Override
   public MetaMethod[] getMethods() {
-    return methodsCache != null ? methodsCache : (methodsCache = fromMethodArray(getEnclosedMetaObject().getMethods()));
+    return _methodsCache != null ? _methodsCache : (_methodsCache = fromMethodArray(getEnclosedMetaObject().getMethods()));
   }
 
-  private transient volatile MetaMethod[] declaredMethodCache;
+  private transient volatile MetaMethod[] _declaredMethodCache;
 
   @Override
   public MetaMethod[] getDeclaredMethods() {
-    return declaredMethodCache != null ? declaredMethodCache
-            : (declaredMethodCache = fromMethodArray(getEnclosedMetaObject().getDeclaredMethods()));
+    return _declaredMethodCache != null ? _declaredMethodCache
+            : (_declaredMethodCache = fromMethodArray(getEnclosedMetaObject().getDeclaredMethods()));
   }
 
 
@@ -146,30 +145,35 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     return methodList.toArray(new MetaField[methodList.size()]);
   }
 
-  private transient volatile MetaField[] fieldCache;
+  private transient volatile MetaField[] _fieldCache;
 
   @Override
   public MetaField[] getFields() {
-    return fieldCache != null ? fieldCache : (fieldCache = fromFieldArray(getEnclosedMetaObject().getFields()));
+    return _fieldCache != null ? _fieldCache : (_fieldCache = fromFieldArray(getEnclosedMetaObject().getFields()));
   }
 
-  private transient volatile MetaField[] declaredFieldCache;
+  private transient volatile MetaField[] _declaredFieldCache;
 
   @Override
   public MetaField[] getDeclaredFields() {
-    return declaredFieldCache != null ? declaredFieldCache
-            : (declaredFieldCache = fromFieldArray(getEnclosedMetaObject().getDeclaredFields()));
+    return _declaredFieldCache != null ? _declaredFieldCache
+            : (_declaredFieldCache = fromFieldArray(getEnclosedMetaObject().getDeclaredFields()));
   }
 
   @Override
   public MetaField getField(String name) {
     try {
-      return new JavaReflectionField(getEnclosedMetaObject().getDeclaredField(name));
+      MetaField mFld;
+      if ("length".equals(name) && getEnclosedMetaObject().isArray()) {
+        mFld = new MetaField.ArrayLengthMetaField(this);
+      }
+      else {
+        mFld = new JavaReflectionField(getEnclosedMetaObject().getField(name));
+      }
+      return mFld;
     }
     catch (Exception e) {
-      if (getEnclosedMetaObject().isArray() && "length".equals(name)) {
-        return new MetaField.ArrayLengthMetaField(this);
-      }
+
 
       throw new RuntimeException("Could not get field: " + name, e);
     }
@@ -178,7 +182,15 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
   @Override
   public MetaField getDeclaredField(String name) {
     try {
-      return new JavaReflectionField(getEnclosedMetaObject().getDeclaredField(name));
+      MetaField mFld;
+
+      if ("length".equals(name) && getEnclosedMetaObject().isArray()) {
+        mFld = new MetaField.ArrayLengthMetaField(this);
+      }
+      else {
+        mFld = new JavaReflectionField(getEnclosedMetaObject().getDeclaredField(name));
+      }
+      return mFld;
     }
     catch (Exception e) {
       throw new RuntimeException("Could not get field: " + name, e);
@@ -238,9 +250,15 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
       throw new RuntimeException("Could not get constructor", e);
     }
   }
+  
+  private MetaClass[] _interfacesCache;
 
   @Override
   public MetaClass[] getInterfaces() {
+    if (_interfacesCache != null){
+      return _interfacesCache;
+    }
+
     List<MetaClass> metaClassList = new ArrayList<MetaClass>();
     Type[] genIface = getEnclosedMetaObject().getGenericInterfaces();
 
@@ -255,7 +273,7 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
       i++;
     }
 
-    return metaClassList.toArray(new MetaClass[metaClassList.size()]);
+    return _interfacesCache = metaClassList.toArray(new MetaClass[metaClassList.size()]);
   }
 
   @Override
@@ -270,10 +288,10 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
 
   @Override
   public Annotation[] getAnnotations() {
-    if (annotationsCache == null) {
-      annotationsCache = getEnclosedMetaObject().getAnnotations();
+    if (_annotationsCache == null) {
+      _annotationsCache = getEnclosedMetaObject().getAnnotations();
     }
-    return annotationsCache;
+    return _annotationsCache;
   }
 
   @Override
@@ -342,9 +360,15 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     return (getEnclosedMetaObject().getModifiers() & Modifier.STATIC) != 0;
   }
 
+  private Map<Integer, MetaClass> _arrayTypeCache = new HashMap<Integer, MetaClass>();
+
   @Override
   public MetaClass asArrayOf(int dimensions) {
-    return MetaClassFactory.getArrayOf(getEnclosedMetaObject(), dimensions);
+    MetaClass arrayType = _arrayTypeCache.get(dimensions);
+    if (arrayType == null) {
+      _arrayTypeCache.put(dimensions, arrayType = MetaClassFactory.getArrayOf(getEnclosedMetaObject(), dimensions));
+    }
+    return arrayType;
   }
 
   @Override

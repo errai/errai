@@ -11,9 +11,9 @@ import org.junit.Test;
 public class BasicMarshallingTests {
   @Test
   public void test1() {
- //   for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 2; i++) {
       new MarshallerGeneratorFactory().generate("org.foo", "MarshallerBootstrapperImpl");
- //   }
+    }
  //   System.out.println("HAPPY!");
   }
 

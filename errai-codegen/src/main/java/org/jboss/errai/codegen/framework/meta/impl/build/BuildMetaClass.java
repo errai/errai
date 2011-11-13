@@ -91,13 +91,19 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   }
 
 
+  String _nameCache;
+
   @Override
   public String getName() {
+    if (_nameCache != null) return _nameCache;
+
     int idx = className.lastIndexOf('.');
     if (idx != -1) {
-      return className.substring(idx + 1);
+      return _nameCache = className.substring(idx + 1);
     }
-    return className;
+    else {
+      return _nameCache = className;
+    }
   }
 
   @Override
@@ -134,8 +140,12 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     return "";
   }
 
+  private MetaMethod[] _methodsCache;
+
   @Override
   public MetaMethod[] getMethods() {
+    if (_methodsCache != null) return _methodsCache;
+
     MetaMethod[] methodArray = methods.toArray(new MetaMethod[methods.size()]);
     MetaMethod[] outputMethods;
 
@@ -155,7 +165,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
       outputMethods = methodArray;
     }
 
-    return outputMethods;
+    return _methodsCache = outputMethods;
   }
 
   @Override
@@ -163,9 +173,12 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     return getMethods();
   }
 
+  private MetaField[] _fieldsCache;
+
   @Override
   public MetaField[] getFields() {
-    return fields.toArray(new MetaField[fields.size()]);
+    if (_fieldsCache != null) return _fieldsCache;
+    return _fieldsCache = fields.toArray(new MetaField[fields.size()]);
   }
 
   @Override
@@ -189,18 +202,22 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     return getField(name);
   }
 
+  private MetaConstructor[] _constructorsCache;
+
   @Override
   public MetaConstructor[] getConstructors() {
+    if (_constructorsCache != null) return _constructorsCache;
+
     if (constructors.isEmpty()) {
       // add an empty no-arg constructor
       BuildMetaConstructor buildMetaConstructor =
               new BuildMetaConstructor(this, new BlockStatement(), DefParameters.none());
 
       buildMetaConstructor.setScope(Scope.Public);
-      return new MetaConstructor[]{buildMetaConstructor};
+      return _constructorsCache = new MetaConstructor[]{buildMetaConstructor};
     }
     else {
-      return constructors.toArray(new MetaConstructor[constructors.size()]);
+      return _constructorsCache = constructors.toArray(new MetaConstructor[constructors.size()]);
     }
   }
 
@@ -367,14 +384,17 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   }
 
   public void addConstructor(BuildMetaConstructor constructor) {
+    _constructorsCache = null;
     constructors.add(constructor);
   }
 
   public void addMethod(BuildMetaMethod method) {
+    _methodsCache = null;
     methods.add(method);
   }
 
   public void addField(BuildMetaField field) {
+    _fieldsCache = null;
     fields.add(field);
   }
 
@@ -460,13 +480,13 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     copy.setDimensions(dimensions);
     return copy;
   }
-  
+
   String generatedCache;
 
   @Override
   public String toJavaString() {
     if (generatedCache != null) return generatedCache;
-    
+
     StringBuilder buf = new StringBuilder();
 
     context.addVariable(Variable.create("this", this));

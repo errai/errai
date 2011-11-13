@@ -23,8 +23,8 @@ import org.mvel2.util.ParseTools;
  */
 public class PrettyPrinter {
   public static String prettyPrintJava(String input) {
-    StringBuilder out = new StringBuilder();
-    StringBuilder lineBuffer = new StringBuilder();
+    StringBuilder out = new StringBuilder(2048);
+    StringBuilder lineBuffer = new StringBuilder(120);
 
     char[] expr = input.toCharArray();
 
@@ -34,19 +34,13 @@ public class PrettyPrinter {
     for (int i = 0; i < expr.length; i++) {
       switch (expr[i]) {
         case '{':
-          lineBuffer.append('{');
-          lineBuffer.append(' ');
-
-          writeToBuffer(out, lineBuffer, indentLevel++, statementIndent);
-          lineBuffer = new StringBuilder();
+          writeToBuffer(out, lineBuffer.append("{ "), indentLevel++, statementIndent);
+          lineBuffer = new StringBuilder(120);
           break;
 
         case '}':
           writeToBuffer(out, lineBuffer, --indentLevel, statementIndent);
-          lineBuffer = new StringBuilder();
-          lineBuffer.append(' ');
-          lineBuffer.append('}');
-
+          lineBuffer = new StringBuilder(120).append(" }");
           break;
 
         case '"':
@@ -59,7 +53,7 @@ public class PrettyPrinter {
         case '\n':
           writeToBuffer(out, lineBuffer, indentLevel, statementIndent);
           out.append('\n');
-          lineBuffer = new StringBuilder();
+          lineBuffer = new StringBuilder(120);
           break;
 
         case ',':
@@ -98,7 +92,7 @@ public class PrettyPrinter {
 
   private static String compactinate(final String str) {
     final char[] expr = str.toCharArray();
-    StringBuilder buf = new StringBuilder();
+    StringBuilder buf = new StringBuilder(expr.length);
     boolean newLine = false;
     for (int i = 0; i < expr.length; i++) {
       switch (expr[i]) {

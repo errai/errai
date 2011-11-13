@@ -19,6 +19,7 @@ package org.jboss.errai.codegen.framework.meta.impl.java;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,20 +39,6 @@ public class JavaReflectionMethod extends MetaMethod {
 
   JavaReflectionMethod(Method method) {
     this.method = method;
-
-    List<MetaParameter> parmList = new ArrayList<MetaParameter>();
-
-    for (int i = 0; i < method.getParameterTypes().length; i++) {
-      MetaClass mcParm = MetaClassFactory.get(method.getParameterTypes()[i], method.getGenericParameterTypes()[i]);
-
-      parmList.add(new JavaReflectionParameter(mcParm,
-          method.getParameterAnnotations()[i], this));
-    }
-
-    parameters = parmList.toArray(new MetaParameter[parmList.size()]);
-
-    declaringClass = MetaClassFactory.get(method.getDeclaringClass());
-    returnType = MetaClassFactory.get(method.getReturnType());
   }
 
   @Override
@@ -61,11 +48,29 @@ public class JavaReflectionMethod extends MetaMethod {
 
   @Override
   public MetaParameter[] getParameters() {
+    if (parameters == null) {
+      List<MetaParameter> parmList = new ArrayList<MetaParameter>();
+
+      Class<?>[] parmTypes = method.getParameterTypes();
+      Type[] genParmTypes = method.getGenericParameterTypes();
+      Annotation[][] parmAnnos = method.getParameterAnnotations();
+
+      for (int i = 0; i < parmTypes.length; i++) {
+        MetaClass mcParm = MetaClassFactory.get(parmTypes[i], genParmTypes[i]);
+
+        parmList.add(new JavaReflectionParameter(mcParm,
+                parmAnnos[i], this));
+      }
+      parameters = parmList.toArray(new MetaParameter[parmList.size()]);
+    }
     return parameters;
   }
 
   @Override
   public MetaClass getReturnType() {
+    if (returnType == null) {
+      returnType = MetaClassFactory.get(method.getReturnType());
+    }
     return returnType;
   }
 
@@ -84,9 +89,12 @@ public class JavaReflectionMethod extends MetaMethod {
     return JavaReflectionUtil.fromTypeVariable(method.getTypeParameters());
   }
 
+  private Annotation[] _annotationsCache;
+
   @Override
   public Annotation[] getAnnotations() {
-    return method.getAnnotations();
+    if (_annotationsCache != null) return _annotationsCache;
+    return _annotationsCache = method.getAnnotations();
   }
 
   @Override
@@ -109,6 +117,9 @@ public class JavaReflectionMethod extends MetaMethod {
 
   @Override
   public MetaClass getDeclaringClass() {
+    if (declaringClass == null) {
+      declaringClass = MetaClassFactory.get(method.getDeclaringClass());
+    }
     return declaringClass;
   }
 
