@@ -50,8 +50,11 @@ public class ThrowsDeclaration extends AbstractStatement {
     return exceptionTypes;
   }
 
+  String generatedCache;
+
   @Override
   public String generate(Context context) {
+    if (generatedCache != null) return generatedCache;
     StringBuilder buf = new StringBuilder();
     for (int i = 0; i < exceptionTypes.length; i++) {
       if (i == 0) {
@@ -64,6 +67,6 @@ public class ThrowsDeclaration extends AbstractStatement {
         buf.append(", ");
       }
     }
-    return buf.toString();
+    return generatedCache = buf.toString();
   }
 }

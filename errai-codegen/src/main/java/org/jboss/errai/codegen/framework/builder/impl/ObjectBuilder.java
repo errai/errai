@@ -151,6 +151,7 @@ public class ObjectBuilder extends AbstractStatementBuilder {
     return type;
   }
 
+
   @Override
   public String generate(final Context context) {
 

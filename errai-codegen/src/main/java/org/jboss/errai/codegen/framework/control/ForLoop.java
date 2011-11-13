@@ -40,8 +40,11 @@ public class ForLoop extends AbstractConditionalBlock {
     this.afterBlock = afterBlock;
   }
 
+  
+  String generatedCache;
   @Override
   public String generate(Context context) {
+    if (generatedCache != null) return generatedCache;
     StringBuilder builder = new StringBuilder("for (");
 
     if (initializer != null) {
@@ -70,6 +73,6 @@ public class ForLoop extends AbstractConditionalBlock {
         .append(getBlock().generate(Context.create(context)))
         .append("\n}\n");
 
-    return builder.toString();
+    return generatedCache = builder.toString();
   }
 }

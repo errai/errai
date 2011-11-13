@@ -39,8 +39,12 @@ public class ForeachLoop extends AbstractStatement {
     this.body = body;
   }
 
+  String generatedCache;
+
   @Override
   public String generate(Context context) {
+    if (generatedCache != null) return generatedCache;
+
     StringBuilder buf = new StringBuilder();
 
     buf.append("for (").append(LoadClassReference.getClassReference(loopVar.getType(), context))
@@ -49,6 +53,6 @@ public class ForeachLoop extends AbstractStatement {
         .append("\n\t").append(body.generate(context).replaceAll("\n", "\n\t"))
         .append("\n}");
 
-    return buf.toString();
+    return generatedCache = buf.toString();
   }
 }

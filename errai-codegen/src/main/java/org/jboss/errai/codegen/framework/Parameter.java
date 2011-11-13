@@ -45,9 +45,12 @@ public class Parameter extends AbstractStatement implements MetaParameter {
     return new Parameter(MetaClassFactory.get(type), name);
   }
 
+  String generatedCache;
+
   @Override
   public String generate(Context context) {
-    return LoadClassReference.getClassReference(type, context) + " " + name;
+    if (generatedCache != null) return generatedCache;
+    return generatedCache = LoadClassReference.getClassReference(type, context) + " " + name;
   }
 
   @Override

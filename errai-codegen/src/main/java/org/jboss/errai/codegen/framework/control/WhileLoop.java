@@ -42,9 +42,12 @@ public class WhileLoop extends AbstractConditionalBlock {
   public BooleanExpressionBuilder getCondition() {
     return (BooleanExpressionBuilder) super.getCondition();
   }
+  
+  String generatedCache;
 
   @Override
   public String generate(Context context) {
+    if (generatedCache != null) return generatedCache;
     StringBuilder builder = new StringBuilder("while (")
         .append(getCondition().generate(context)).append(") {\n");
 
@@ -54,6 +57,6 @@ public class WhileLoop extends AbstractConditionalBlock {
 
     builder.append("\n}");
 
-    return builder.toString();
+    return generatedCache = builder.toString();
   }
 }

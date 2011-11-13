@@ -44,8 +44,11 @@ public class BlockStatement extends AbstractStatement {
     return this;
   }
 
+  String generatedCache;
   @Override
   public String generate(Context context) {
+    if (generatedCache != null) return generatedCache;
+    
     StringBuilder buf = new StringBuilder();
 
     boolean lastIsBlock = false;
@@ -65,7 +68,7 @@ public class BlockStatement extends AbstractStatement {
       buf.append(';');
     }
 
-    return buf.toString();
+    return generatedCache = buf.toString();
   }
 
   public List<Statement> getStatements() {

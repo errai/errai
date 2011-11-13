@@ -94,7 +94,8 @@ public final class MetaClassFactory {
     });
   }
 
-  private static final Map<String, MetaClass> CLASS_CACHE = new HashMap<String, MetaClass>();
+  private static final Map<String, MetaClass> ERASED_CLASS_CACHE = new HashMap<String, MetaClass>();
+  private static final Map<Class, MetaClass> CLASS_CACHE = new HashMap<Class, MetaClass>();
 
   public static MetaClass get(String fullyQualifiedClassName, boolean erased) {
     return createOrGet(load(fullyQualifiedClassName), erased);
@@ -172,36 +173,36 @@ public final class MetaClassFactory {
   }
 
   public static boolean isCached(String name) {
-    return CLASS_CACHE.containsKey(name);
+    return ERASED_CLASS_CACHE.containsKey(name);
   }
 
   private static MetaClass createOrGet(String fullyQualifiedClassName) {
-    if (!CLASS_CACHE.containsKey(fullyQualifiedClassName)) {
+    if (!ERASED_CLASS_CACHE.containsKey(fullyQualifiedClassName)) {
       return createOrGet(load(fullyQualifiedClassName), false);
     }
 
-    return CLASS_CACHE.get(fullyQualifiedClassName);
+    return ERASED_CLASS_CACHE.get(fullyQualifiedClassName);
   }
 
   private static MetaClass createOrGet(TypeOracle oracle, String fullyQualifiedClassName) {
-    if (!CLASS_CACHE.containsKey(fullyQualifiedClassName)) {
+    if (!ERASED_CLASS_CACHE.containsKey(fullyQualifiedClassName)) {
       return createOrGet(load(oracle, fullyQualifiedClassName));
     }
 
-    return CLASS_CACHE.get(fullyQualifiedClassName);
+    return ERASED_CLASS_CACHE.get(fullyQualifiedClassName);
   }
 
   private static MetaClass createOrGet(TypeLiteral type) {
     if (type == null) return null;
 
-    if (!CLASS_CACHE.containsKey(type.toString())) {
+    if (!ERASED_CLASS_CACHE.containsKey(type.toString())) {
       MetaClass gwtClass = JavaReflectionClass.newUncachedInstance(type);
 
       addLookups(type, gwtClass);
       return gwtClass;
     }
 
-    return CLASS_CACHE.get(type.toString());
+    return ERASED_CLASS_CACHE.get(type.toString());
   }
 
 
@@ -212,37 +213,34 @@ public final class MetaClassFactory {
       return GWTClass.newUncachedInstance(type);
     }
 
-    if (!CLASS_CACHE.containsKey(type.getQualifiedSourceName())) {
+    if (!ERASED_CLASS_CACHE.containsKey(type.getQualifiedSourceName())) {
       MetaClass gwtClass = GWTClass.newUncachedInstance(type, true);
 
       addLookups(type, gwtClass);
       return gwtClass;
     }
 
-    return CLASS_CACHE.get(type.getQualifiedSourceName());
+    return ERASED_CLASS_CACHE.get(type.getQualifiedSourceName());
   }
 
 
   private static MetaClass createOrGet(Class cls, boolean erased) {
     if (cls == null) return null;
 
-    String encName;
-
+    MetaClass mCls;
     if (erased) {
-      encName = "{erased}" + cls.getName();
+      mCls = ERASED_CLASS_CACHE.get(cls.getName());
+      if (mCls == null) {
+        ERASED_CLASS_CACHE.put(cls.getName(), mCls = JavaReflectionClass.newUncachedInstance(cls, erased));
+      }
     }
     else {
-      encName = cls.getName()
-              + "<" + Arrays.toString(cls.getTypeParameters()) + Arrays.toString(cls.getGenericInterfaces()) + ">";
+      mCls = CLASS_CACHE.get(cls);
+      if (mCls == null) {
+        CLASS_CACHE.put(cls, mCls = JavaReflectionClass.newUncachedInstance(cls, erased));
+      }
     }
-    if (!CLASS_CACHE.containsKey(encName)) {
-      MetaClass javaReflectionClass = JavaReflectionClass.newUncachedInstance(cls, erased);
-
-      addLookups(encName, javaReflectionClass);
-      return javaReflectionClass;
-    }
-
-    return CLASS_CACHE.get(encName);
+    return mCls;
   }
 
   private static MetaClass createOrGet(Class cls, Type type) {
@@ -252,14 +250,14 @@ public final class MetaClassFactory {
       return JavaReflectionClass.newUncachedInstance(cls, type);
     }
 
-    if (!CLASS_CACHE.containsKey(cls.getName())) {
+    if (!ERASED_CLASS_CACHE.containsKey(cls.getName())) {
       MetaClass javaReflectionClass = JavaReflectionClass.newUncachedInstance(cls, type);
 
       addLookups(cls, javaReflectionClass);
       return javaReflectionClass;
     }
 
-    return CLASS_CACHE.get(cls.getName());
+    return ERASED_CLASS_CACHE.get(cls.getName());
   }
 
 
@@ -396,23 +394,23 @@ public final class MetaClassFactory {
   }
 
   private static void addLookups(TypeLiteral literal, MetaClass metaClass) {
-    CLASS_CACHE.put(literal.toString(), metaClass);
+    ERASED_CLASS_CACHE.put(literal.toString(), metaClass);
   }
 
   private static void addLookups(Class cls, MetaClass metaClass) {
-    CLASS_CACHE.put(cls.getName(), metaClass);
+    ERASED_CLASS_CACHE.put(cls.getName(), metaClass);
   }
 
   private static void addLookups(JType cls, MetaClass metaClass) {
-    CLASS_CACHE.put(cls.getQualifiedSourceName(), metaClass);
+    ERASED_CLASS_CACHE.put(cls.getQualifiedSourceName(), metaClass);
   }
 
   private static void addLookups(String encName, MetaClass metaClass) {
-    CLASS_CACHE.put(encName, metaClass);
+    ERASED_CLASS_CACHE.put(encName, metaClass);
   }
 
   public static int LOAD_CALL_COUNT = 0;
-  
+
   private static Class<?> load(String fullyQualifiedName) {
     try {
       LOAD_CALL_COUNT++;

@@ -53,7 +53,7 @@ public class PrettyPrinter {
         case '\'':
           int start = i;
           i = ParseTools.balancedCapture(expr, i, expr[i]);
-          lineBuffer.append(new String(expr, start, i - start + 1));
+          lineBuffer.append(expr, start, i - start + 1);
           break;
 
         case '\n':
@@ -87,7 +87,7 @@ public class PrettyPrinter {
 
   private static void writeToBuffer(StringBuilder out, StringBuilder lineBuffer,
                                     int indentLevel, int statementIndent) {
-    String trimmedLineBuffer = lineBuffer.toString().trim();
+    final String trimmedLineBuffer = lineBuffer.toString().trim();
 
     if (trimmedLineBuffer.length() == 0) {
       return;
@@ -96,8 +96,8 @@ public class PrettyPrinter {
     out.append(pad((indentLevel + statementIndent) * 2)).append(trimmedLineBuffer);
   }
 
-  private static String compactinate(String str) {
-    char[] expr = str.toCharArray();
+  private static String compactinate(final String str) {
+    final char[] expr = str.toCharArray();
     StringBuilder buf = new StringBuilder();
     boolean newLine = false;
     for (int i = 0; i < expr.length; i++) {
@@ -105,8 +105,7 @@ public class PrettyPrinter {
         case '"':
         case '\'':
           int start = i;
-          i = ParseTools.balancedCapture(expr, i, expr[i]);
-          buf.append(new String(expr, start, i - start + 1));
+          buf.append(expr, start, (i = ParseTools.balancedCapture(expr, i, expr[i])) - start + 1);
           break;
         case '\n':
           newLine = true;

@@ -224,13 +224,17 @@ public class BuildMetaConstructor extends MetaConstructor implements Builder {
     this.reifiedFormOf = reifiedFormOf;
   }
 
+  String generatedCache;
+  
   @Override
   public String toJavaString() {
+    if (generatedCache != null) return generatedCache;
+
     for (Parameter p : defParameters.getParameters()) {
       context.addVariable(Variable.create(p.getName(), p.getType()));
     }
 
-    return new StringBuilder().append(scope.getCanonicalName())
+    return generatedCache = new StringBuilder().append(scope.getCanonicalName())
             .append(" ")
             .append(declaringClass.getName())
             .append(defParameters.generate(context))

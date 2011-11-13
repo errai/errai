@@ -51,8 +51,10 @@ public class TryBlock extends AbstractStatement {
     return finallyBlock;
   }
 
+  String generatedCache;
   @Override
   public String generate(Context context) {
+    if (generatedCache != null) return generatedCache;
     StringBuilder buf = new StringBuilder("try {\n");
     buf.append(block.generate(context)).append("\n} ");
 
@@ -74,6 +76,6 @@ public class TryBlock extends AbstractStatement {
       buf.append(" finally {\n").append(finallyBlock.generate(ctx)).append("\n}\n");
     }
 
-    return buf.toString();
+    return generatedCache = buf.toString();
   }
 }
