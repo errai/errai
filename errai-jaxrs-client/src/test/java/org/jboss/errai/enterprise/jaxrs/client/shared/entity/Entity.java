@@ -2,9 +2,9 @@ package org.jboss.errai.enterprise.jaxrs.client.shared.entity;
 
 import java.io.Serializable;
 
-import org.jboss.errai.bus.server.annotations.ExposeEntity;
+import org.jboss.errai.common.client.api.annotations.Portable;
 
-@ExposeEntity
+@Portable
 public class Entity implements Serializable {
   private static final long serialVersionUID = 1L;
   

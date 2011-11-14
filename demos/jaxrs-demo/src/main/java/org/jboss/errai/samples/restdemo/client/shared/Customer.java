@@ -3,14 +3,14 @@ package org.jboss.errai.samples.restdemo.client.shared;
 import java.io.Serializable;
 import java.util.Date;
 
-import org.jboss.errai.bus.server.annotations.ExposeEntity;
+import org.jboss.errai.common.client.api.annotations.Portable;
 
 /**
  * Simple customer entity
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@ExposeEntity
+@Portable
 public class Customer implements Serializable, Comparable<Customer> {
   private static final long serialVersionUID = 1L;
 

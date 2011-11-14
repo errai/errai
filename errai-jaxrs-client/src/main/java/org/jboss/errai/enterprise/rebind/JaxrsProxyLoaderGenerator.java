@@ -16,19 +16,22 @@
 
 package org.jboss.errai.enterprise.rebind;
 
+import java.io.File;
 import java.io.PrintWriter;
 
 import javax.ws.rs.Path;
 
 import org.jboss.errai.bus.client.framework.RemoteServiceProxyFactory;
-import org.jboss.errai.bus.rebind.ScannerSingleton;
-import org.jboss.errai.bus.server.service.metadata.MetaDataScanner;
 import org.jboss.errai.codegen.framework.InnerClass;
 import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.ClassBuilder;
+import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.framework.util.Stmt;
-import org.jboss.errai.enterprise.client.jaxrs.JaxrsExtensionsLoader;
+import org.jboss.errai.common.metadata.MetaDataScanner;
+import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.enterprise.client.jaxrs.JaxrsProxyLoader;
 
 import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
@@ -38,16 +41,16 @@ import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 /**
- * Generates the JAX-RS extensions (remote proxies, serializers).
+ * Generates the JAX-RS proxy loader.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class JaxrsExtensionsGenerator extends Generator {
+public class JaxrsProxyLoaderGenerator extends Generator {
   private String className = null;
   private String packageName = null;
 
   private TypeOracle typeOracle;
-
+  
   @Override
   public String generate(TreeLogger logger, GeneratorContext context, String typeName)
       throws UnableToCompleteException {
@@ -55,18 +58,21 @@ public class JaxrsExtensionsGenerator extends Generator {
 
     try {
       JClassType classType = typeOracle.getType(typeName);
-      
+
       if (classType.isInterface() == null) {
         logger.log(TreeLogger.ERROR, typeName + "is not an interface.");
-        throw new RuntimeException("Invalid type");
+        throw new RuntimeException("invalid type: not an interface");
       }
-      
+
       packageName = classType.getPackage().getName();
       className = classType.getSimpleSourceName() + "Impl";
 
-      logger.log(TreeLogger.INFO, "Generating JAX-RS Extensions...");
-
-      generateClass(logger, context);
+      PrintWriter printWriter = context.tryCreate(logger, packageName, className);
+      // If code has not already been generated.
+      if (printWriter != null) {
+        printWriter.append(generate(logger, className));
+        context.commit(logger, printWriter);
+      }
     }
     catch (Throwable e) {
       logger.log(TreeLogger.ERROR, "Error generating JAX-RS extensions", e);
@@ -74,31 +80,42 @@ public class JaxrsExtensionsGenerator extends Generator {
 
     return packageName + "." + className;
   }
-
-  private void generateClass(TreeLogger logger, GeneratorContext context) {
-    MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
+  
+  private String generate(TreeLogger logger, String className) {
+    File fileCacheDir = RebindUtils.getErraiCacheDir();
+    File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + className + ".java");
     
-    PrintWriter printWriter = context.tryCreate(logger, packageName, className);
-    // Code has already been generated.
-    if (printWriter == null)
-      return;
-   
-    ClassStructureBuilder<?> classBuilder = ClassBuilder.implement(JaxrsExtensionsLoader.class);
-   
-    MethodBlockBuilder<?> createProxies = classBuilder.publicMethod(void.class, "createProxies");
+    String gen;
+    if (!cacheFile.exists() || RebindUtils.hasClasspathChangedForAnnotatedWith(Path.class)) {
+      logger.log(TreeLogger.INFO, "generating jax-rs proxy loader class.");
+      gen = _generate();
+      RebindUtils.writeStringToFile(cacheFile, gen);
+    } 
+    else {
+      logger.log(TreeLogger.INFO, "nothing has changed. using cached jax-rs proxy loader class.");
+      gen = RebindUtils.readFileToString(cacheFile);
+    }
+    
+    return gen;
+  }
+  
+  private String _generate() {
+    MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
+    ClassStructureBuilder<?> classBuilder = ClassBuilder.implement(JaxrsProxyLoader.class);
+
+    MethodBlockBuilder<?> createProxies = classBuilder.publicMethod(void.class, "loadProxies");
     for (Class<?> remote : scanner.getTypesAnnotatedWith(Path.class, "")) {
       if (remote.isInterface()) {
         // create the remote proxy for this interface
         ClassStructureBuilder<?> remoteProxy = new JaxrsProxyGenerator(remote).generate();
-        createProxies.append(new InnerClass(remoteProxy.getClassDefinition()));
-        
-        createProxies.append(Stmt.invokeStatic(RemoteServiceProxyFactory.class, "addRemoteProxy", 
+        createProxies.append(new InnerClass((BuildMetaClass) remoteProxy.getClassDefinition()));
+
+        createProxies.append(Stmt.invokeStatic(RemoteServiceProxyFactory.class, "addRemoteProxy",
             remote, Stmt.newObject(remoteProxy.getClassDefinition())));
       }
     }
     classBuilder = (ClassStructureBuilder<?>) createProxies.finish();
-
-    printWriter.append(classBuilder.toJavaString());
-    context.commit(logger, printWriter);
+    
+    return classBuilder.toJavaString();
   }
 }

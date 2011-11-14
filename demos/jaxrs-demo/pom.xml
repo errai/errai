@@ -27,6 +27,10 @@
 			<artifactId>errai-ioc</artifactId>
 		</dependency>
 		<dependency>
+            <groupId>org.jboss.errai</groupId>
+            <artifactId>errai-common</artifactId>
+        </dependency>
+		<dependency>
 			<groupId>org.jboss.errai</groupId>
 			<artifactId>errai-tools</artifactId>
 		</dependency>

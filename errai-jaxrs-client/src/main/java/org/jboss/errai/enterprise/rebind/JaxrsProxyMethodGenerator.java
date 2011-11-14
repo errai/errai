@@ -26,9 +26,9 @@ import org.jboss.errai.codegen.framework.Variable;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
 import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.ContextualStatementBuilder;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
-import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.framework.util.Bool;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
@@ -51,7 +51,7 @@ public class JaxrsProxyMethodGenerator {
   private static final String APPEND = "append";
 
   private JaxrsResourceMethod resourceMethod;
-  private BuildMetaClass clazz;
+  private MetaClass clazz;
   
   private Statement responseHandling;
   private Statement errorHandlingWithResponse;

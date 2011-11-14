@@ -5,7 +5,7 @@ import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.framework.ProxyProvider;
 import org.jboss.errai.bus.client.framework.RPCStub;
 import org.jboss.errai.bus.client.framework.RemoteServiceProxyFactory;
-import org.jboss.errai.enterprise.client.jaxrs.JaxrsExtensionsLoader;
+import org.jboss.errai.enterprise.client.jaxrs.JaxrsProxyLoader;
 
 import com.google.gwt.core.client.GWT;
 
@@ -45,8 +45,8 @@ public class RestClient {
     if (svc == null) {
 
       // double check that the extensions loader has been bootstrapped
-      JaxrsExtensionsLoader extLoader = GWT.create(JaxrsExtensionsLoader.class);
-      extLoader.createProxies();
+      JaxrsProxyLoader loader = GWT.create(JaxrsProxyLoader.class);
+      loader.loadProxies();
 
       if (proxyProvider.getRemoteProxy(remoteService) == null)
         throw new RuntimeException("No proxy found for JAX-RS interface: " + remoteService.getName());

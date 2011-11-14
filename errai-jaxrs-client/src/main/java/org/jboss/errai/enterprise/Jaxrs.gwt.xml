@@ -4,10 +4,11 @@
 <module>
 	<inherits name="com.google.gwt.http.HTTP" />
     <inherits name="org.jboss.errai.ioc.Container"/>
-    <entry-point class='org.jboss.errai.enterprise.client.jaxrs.JaxrsClientBootstrap'/>
     
-    <generate-with class="org.jboss.errai.enterprise.rebind.JaxrsExtensionsGenerator">
+    <entry-point class='org.jboss.errai.enterprise.client.jaxrs.JaxrsClientEntryPoint'/>
+    
+    <generate-with class="org.jboss.errai.enterprise.rebind.JaxrsProxyLoaderGenerator">
         <when-type-assignable
-                class="org.jboss.errai.enterprise.client.jaxrs.JaxrsExtensionsLoader"/>
+                class="org.jboss.errai.enterprise.client.jaxrs.JaxrsProxyLoader"/>
     </generate-with>
 </module>
