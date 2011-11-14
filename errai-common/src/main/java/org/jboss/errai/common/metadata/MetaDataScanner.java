@@ -71,7 +71,26 @@ public class MetaDataScanner extends Reflections {
     scan();
   }
 
-  private static Map<String, Set<ClassFile>> annotationsToClassFile = new HashMap<String, Set<ClassFile>>();
+  private static Map<String, Set<SortableClassFileWrapper>> annotationsToClassFile = new TreeMap<String, Set<SortableClassFileWrapper>>();
+  
+  private static class SortableClassFileWrapper implements Comparable<SortableClassFileWrapper> {
+    private String name;
+    private ClassFile classFile;
+
+    private SortableClassFileWrapper(String name, ClassFile classFile) {
+      this.name = name;
+      this.classFile = classFile;
+    }
+
+    public ClassFile getClassFile() {
+      return classFile;
+    }
+
+    @Override
+    public int compareTo(SortableClassFileWrapper o) {
+      return name.compareTo(o.name);
+    }
+  }
 
   private static Configuration getConfiguration(List<URL> urls) {
     return new ConfigurationBuilder()
@@ -90,11 +109,11 @@ public class MetaDataScanner extends Reflections {
                             getStore().put(annotationType, className);
 
                             if (cls instanceof ClassFile) {
-                              Set<ClassFile> classes = annotationsToClassFile.get(annotationType);
+                              Set<SortableClassFileWrapper> classes = annotationsToClassFile.get(annotationType);
                               if (classes == null) {
-                                annotationsToClassFile.put(annotationType, classes = new HashSet<ClassFile>());
+                                annotationsToClassFile.put(annotationType, classes = new TreeSet<SortableClassFileWrapper>());
                               }
-                              classes.add((ClassFile) cls);
+                              classes.add(new SortableClassFileWrapper(className, (ClassFile) cls));
                             }
                           }
                         }
@@ -199,9 +218,11 @@ public class MetaDataScanner extends Reflections {
       try {
         final MessageDigest md = MessageDigest.getInstance("SHA-256");
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();                                                                               
-        for (ClassFile classFile : annotationsToClassFile.get(annotation.getName())) {
+        for (SortableClassFileWrapper classFileWrapper : annotationsToClassFile.get(annotation.getName())) {
           byteArrayOutputStream.reset();
-          classFile.write(new DataOutputStream(byteArrayOutputStream));
+          DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
+          classFileWrapper.getClassFile().write(dataOutputStream);
+          dataOutputStream.flush();
           md.update(byteArrayOutputStream.toByteArray());
         }
 

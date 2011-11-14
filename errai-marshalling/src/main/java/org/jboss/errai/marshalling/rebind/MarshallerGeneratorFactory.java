@@ -74,22 +74,17 @@ public class MarshallerGeneratorFactory {
     annos.add(ExposeEntity.class);
 
     String gen;
-    if (RebindUtils.hasClasspathChangedForAnnotatedWith(annos)) {
-      if (!cacheFile.exists()) {
-        RebindUtils.writeStringToFile(cacheFile, gen = _generate(packageName, clazzName));
-      }
-      else {
-        gen = RebindUtils.readFileToString(cacheFile);
-        log.info("nothing has changed. using cached marshaller factory class.");
-      }
-    }
-    else {
+    if (!cacheFile.exists() || RebindUtils.hasClasspathChangedForAnnotatedWith(annos)) {
       log.info("generating marshalling class...");
       long st = System.currentTimeMillis();
       gen = _generate(packageName, clazzName);
       log.info("generated marshalling class in " + (System.currentTimeMillis() - st) + "ms");
 
       RebindUtils.writeStringToFile(cacheFile, gen);
+    }
+    else {
+      gen = RebindUtils.readFileToString(cacheFile);
+      log.info("nothing has changed. using cached marshaller factory class.");
     }
 
     return gen;
@@ -163,10 +158,10 @@ public class MarshallerGeneratorFactory {
 
     return classStructureBuilder.toJavaString();
 
-   // System.out.println("[Generation Finished in: " + (System.currentTimeMillis() - startTime) + "ms]");
+    // System.out.println("[Generation Finished in: " + (System.currentTimeMillis() - startTime) + "ms]");
 
-  //  System.out.println(generatedClass);
-   // return generatedClass;
+    //  System.out.println(generatedClass);
+    // return generatedClass;
   }
 
   private void generateMarshallers() {
@@ -199,7 +194,7 @@ public class MarshallerGeneratorFactory {
     exposed.add(ConcurrentModificationException.class);
     exposed.add(EmptyStackException.class);
     //exposed.add(MissingResourceException.class);
-    exposed.add(NoSuchMethodException.class);
+   // exposed.add(NoSuchMethodException.class);
 
 
     for (Class<?> clazz : exposed) {

@@ -45,6 +45,8 @@ public class Serialization {
     public void callback(Message message) {
       List<Record> records = message.get(List.class, "Records");
 
+      System.out.println();
+
       int row = 0;
       for (Record r : records) {
         table.setWidget(row, 0, new HTML(String.valueOf(r.getRecordId())));

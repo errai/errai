@@ -33,6 +33,7 @@ public class Record {
   private Map<String, String> properties;
 
   public Record() {
+    System.out.println();
   }
 
   public Record(int recordId, String name, float balance, Date accountOpened, RecordType type, Item[] stuff, String[][] properties) {

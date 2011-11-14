@@ -43,16 +43,18 @@ public class RebindUtils {
   }
 
   public static File getErraiCacheDir() {
-    String cacheDir = System.getProperty("errai.marshalling.debugCacheDir");
+    String cacheDir = System.getProperty("errai.devel.debugCacheDir");
     if (cacheDir == null) cacheDir = new File(".errai/").getAbsolutePath();
     File fileCacheDir = new File(cacheDir);
     fileCacheDir.mkdirs();
     return fileCacheDir;
   }
 
+  private static boolean nocache = Boolean.getBoolean("errai.devel.nocache");
   private static Boolean _hasClasspathChanged;
 
   public static boolean hasClasspathChanged() {
+    if (nocache) return true;
     if (_hasClasspathChanged != null) return _hasClasspathChanged;
     File hashFile = new File(getErraiCacheDir().getAbsolutePath() + "/hashstamp.sha");
     String hashValue = RebindUtils.getClasspathHash();
@@ -88,6 +90,7 @@ public class RebindUtils {
   }
 
   public static boolean hasClasspathChangedForAnnotatedWith(Class<? extends Annotation> annoClass) {
+    if (nocache) return true;
     Boolean changed = _changeMapForAnnotationScope.get(annoClass);
     if (changed == null) {
       File hashFile = new File(getErraiCacheDir().getAbsolutePath() + "/"
@@ -98,16 +101,16 @@ public class RebindUtils {
 
       if (!hashFile.exists()) {
         writeStringToFile(hashFile, hash);
-        changed = Boolean.FALSE;
+        changed = Boolean.TRUE;
       }
       else {
         String fileHashValue = readFileToString(hashFile);
         if (fileHashValue.equals(hash)) {
-          _changeMapForAnnotationScope.put(annoClass, changed = Boolean.TRUE);
+          _changeMapForAnnotationScope.put(annoClass, changed = Boolean.FALSE);
         }
         else {
           writeStringToFile(hashFile, hash);
-          changed = Boolean.FALSE;
+          _changeMapForAnnotationScope.put(annoClass, changed = Boolean.TRUE);
         }
       }
 
@@ -116,12 +119,10 @@ public class RebindUtils {
   }
 
   public static void writeStringToFile(File file, String data) {
-
     try {
       OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file, false));
       outputStream.write(data.getBytes());
       outputStream.close();
-
     }
     catch (IOException e) {
       throw new RuntimeException("could not write file for debug cache", e);

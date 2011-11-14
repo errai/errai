@@ -102,22 +102,17 @@ public class IOCBootstrapGenerator {
     annos.add(EntryPoint.class);
 
     String gen;
-    if (RebindUtils.hasClasspathChangedForAnnotatedWith(annos)) {
-      if (!cacheFile.exists()) {
-        RebindUtils.writeStringToFile(cacheFile, gen = _generate(packageName, className));
-      }
-      else {
-        gen = RebindUtils.readFileToString(cacheFile);
-        log.info("nothing has changed. using cached bootstrap class.");
-      }
-    }
-    else {
-      log.info("generating IOC bootstrapper class...");
+    if (!cacheFile.exists() || RebindUtils.hasClasspathChangedForAnnotatedWith(annos)) {
+      log.info("generating IOC bootstrapping class...");
       long st = System.currentTimeMillis();
       gen = _generate(packageName, className);
-      log.info("generated bootstrapper in " + (System.currentTimeMillis() - st) + "ms");
-      
+      log.info("generated IOC bootstrapping class in " + (System.currentTimeMillis() - st) + "ms");
+
       RebindUtils.writeStringToFile(cacheFile, gen);
+    }
+    else {
+      gen = RebindUtils.readFileToString(cacheFile);
+      log.info("nothing has changed. using cached IOC bootstrapping class.");
     }
 
     return gen;
