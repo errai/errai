@@ -56,7 +56,7 @@ public class RebindUtils {
   public static boolean hasClasspathChanged() {
     if (nocache) return true;
     if (_hasClasspathChanged != null) return _hasClasspathChanged;
-    File hashFile = new File(getErraiCacheDir().getAbsolutePath() + "/hashstamp.sha");
+    File hashFile = new File(getErraiCacheDir().getAbsolutePath() + "/classpath.sha");
     String hashValue = RebindUtils.getClasspathHash();
 
     if (!hashFile.exists()) {
