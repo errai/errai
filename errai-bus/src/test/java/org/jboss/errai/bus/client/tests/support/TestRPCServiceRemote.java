@@ -16,15 +16,20 @@
 
 package org.jboss.errai.bus.client.tests.support;
 
+import java.util.List;
+
 import org.jboss.errai.bus.server.annotations.Remote;
 
 /**
- * User: christopherbrock
- * Date: 5-Aug-2010
- * Time: 4:11:01 PM
+ * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Remote
 public interface TestRPCServiceRemote {
   public boolean isGreaterThan(int a, int b);
   public void exception() throws TestException;
+  
+  public List<Long> listOfLong(List<Long> list);
+  public List<Integer> listOfInteger(List<Integer> list);
+  public List<Float> listOfFloat(List<Float> list);
 }

@@ -16,14 +16,15 @@
 
 package org.jboss.errai.bus.server;
 
+import java.util.List;
+
 import org.jboss.errai.bus.client.tests.support.TestException;
 import org.jboss.errai.bus.client.tests.support.TestRPCServiceRemote;
 import org.jboss.errai.bus.server.annotations.Service;
 
 /**
- * User: christopherbrock
- * Date: 5-Aug-2010
- * Time: 3:46:09 PM
+ * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Service
 public class TestRPCService implements TestRPCServiceRemote {
@@ -35,5 +36,20 @@ public class TestRPCService implements TestRPCServiceRemote {
   @Override
   public void exception() throws TestException {
     throw new TestException();
+  }
+
+  @Override
+  public List<Long> listOfLong(List<Long> list) {
+    return list;
+  }
+
+  @Override
+  public List<Integer> listOfInteger(List<Integer> list) {
+    return list;
+  }
+
+  @Override
+  public List<Float> listOfFloat(List<Float> list) {
+    return list;
   }
 }
