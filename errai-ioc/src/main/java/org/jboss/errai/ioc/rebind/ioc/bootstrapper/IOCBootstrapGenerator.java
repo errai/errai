@@ -1,5 +1,67 @@
 package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
+import java.io.File;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.SessionScoped;
+import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.inject.Singleton;
+
+import org.jboss.errai.bus.server.ErraiBootstrapFailure;
+import org.jboss.errai.codegen.framework.Context;
+import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.builder.BlockBuilder;
+import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
+import org.jboss.errai.codegen.framework.meta.MetaField;
+import org.jboss.errai.codegen.framework.meta.MetaMethod;
+import org.jboss.errai.codegen.framework.meta.MetaParameterizedType;
+import org.jboss.errai.codegen.framework.meta.MetaType;
+import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
+import org.jboss.errai.codegen.framework.util.GenUtil;
+import org.jboss.errai.codegen.framework.util.Implementations;
+import org.jboss.errai.codegen.framework.util.Stmt;
+import org.jboss.errai.common.metadata.MetaDataScanner;
+import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.ioc.client.ContextualProviderContext;
+import org.jboss.errai.ioc.client.InterfaceInjectionContext;
+import org.jboss.errai.ioc.client.api.Bootstrapper;
+import org.jboss.errai.ioc.client.api.CodeDecorator;
+import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
+import org.jboss.errai.ioc.client.api.CreatePanel;
+import org.jboss.errai.ioc.client.api.EntryPoint;
+import org.jboss.errai.ioc.client.api.GeneratedBy;
+import org.jboss.errai.ioc.client.api.IOCProvider;
+import org.jboss.errai.ioc.client.api.ToPanel;
+import org.jboss.errai.ioc.client.api.ToRootPanel;
+import org.jboss.errai.ioc.client.api.TypeProvider;
+import org.jboss.errai.ioc.rebind.AnnotationHandler;
+import org.jboss.errai.ioc.rebind.IOCProcessingContext;
+import org.jboss.errai.ioc.rebind.IOCProcessorFactory;
+import org.jboss.errai.ioc.rebind.ioc.ContextualProviderInjector;
+import org.jboss.errai.ioc.rebind.ioc.IOCDecoratorExtension;
+import org.jboss.errai.ioc.rebind.ioc.IOCExtensionConfigurator;
+import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
+import org.jboss.errai.ioc.rebind.ioc.InjectionFailure;
+import org.jboss.errai.ioc.rebind.ioc.Injector;
+import org.jboss.errai.ioc.rebind.ioc.InjectorFactory;
+import org.jboss.errai.ioc.rebind.ioc.ProviderInjector;
+import org.jboss.errai.ioc.rebind.ioc.QualifyingMetadataFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
@@ -7,36 +69,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.rebind.SourceWriter;
 import com.google.gwt.user.rebind.StringSourceWriter;
 import com.google.inject.servlet.RequestScoped;
-import org.jboss.errai.common.metadata.MetaDataScanner;
-import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.common.metadata.ScannerSingleton;
-import org.jboss.errai.bus.server.ErraiBootstrapFailure;
-import org.jboss.errai.codegen.framework.*;
-import org.jboss.errai.codegen.framework.meta.*;
-import org.jboss.errai.codegen.framework.util.*;
-import org.jboss.errai.ioc.client.ContextualProviderContext;
-import org.jboss.errai.ioc.client.InterfaceInjectionContext;
-import org.jboss.errai.ioc.client.api.*;
-import org.jboss.errai.ioc.rebind.AnnotationHandler;
-import org.jboss.errai.ioc.rebind.IOCProcessingContext;
-import org.jboss.errai.ioc.rebind.IOCProcessorFactory;
-import org.jboss.errai.ioc.rebind.ioc.*;
-import org.jboss.errai.codegen.framework.builder.BlockBuilder;
-import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
-import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.SessionScoped;
-import javax.inject.Inject;
-import javax.inject.Provider;
-import javax.inject.Singleton;
-import java.io.File;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.*;
 
 /**
  * The main generator class for the Errai IOC system.
@@ -102,7 +134,7 @@ public class IOCBootstrapGenerator {
     annos.add(EntryPoint.class);
 
     String gen;
-    if (!cacheFile.exists() || RebindUtils.hasClasspathChangedForAnnotatedWith(annos)) {
+    if (RebindUtils.hasClasspathChangedForAnnotatedWith(annos) || !cacheFile.exists()) {
       log.info("generating IOC bootstrapping class...");
       long st = System.currentTimeMillis();
       gen = _generate(packageName, className);

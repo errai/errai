@@ -1,6 +1,28 @@
 package org.jboss.errai.marshalling.rebind;
 
-import com.google.gwt.json.client.JSONValue;
+import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.typeParametersOf;
+import static org.jboss.errai.codegen.framework.util.Implementations.autoForLoop;
+import static org.jboss.errai.codegen.framework.util.Implementations.autoInitializedField;
+import static org.jboss.errai.codegen.framework.util.Implementations.implement;
+import static org.jboss.errai.codegen.framework.util.Stmt.loadVariable;
+import static org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil.getArrayVarName;
+import static org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil.getVarName;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.lang.annotation.Annotation;
+import java.util.ConcurrentModificationException;
+import java.util.EmptyStackException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.enterprise.util.TypeLiteral;
+
 import org.jboss.errai.codegen.framework.Cast;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Parameter;
@@ -32,20 +54,7 @@ import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.SessionScoped;
-import javax.enterprise.util.TypeLiteral;
-import javax.inject.Singleton;
-import java.io.*;
-import java.lang.annotation.Annotation;
-import java.util.*;
-
-import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.parameterizedAs;
-import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.typeParametersOf;
-import static org.jboss.errai.codegen.framework.util.Implementations.*;
-import static org.jboss.errai.codegen.framework.util.Stmt.loadVariable;
-import static org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil.getArrayVarName;
-import static org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil.getVarName;
+import com.google.gwt.json.client.JSONValue;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -74,7 +83,7 @@ public class MarshallerGeneratorFactory {
     annos.add(ExposeEntity.class);
 
     String gen;
-    if (!cacheFile.exists() || RebindUtils.hasClasspathChangedForAnnotatedWith(annos)) {
+    if (RebindUtils.hasClasspathChangedForAnnotatedWith(annos) || !cacheFile.exists()) {
       log.info("generating marshalling class...");
       long st = System.currentTimeMillis();
       gen = _generate(packageName, clazzName);

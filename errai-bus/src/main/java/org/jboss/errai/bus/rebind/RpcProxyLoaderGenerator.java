@@ -33,6 +33,8 @@ import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
@@ -47,6 +49,8 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class RpcProxyLoaderGenerator extends Generator {
+  private Logger log = LoggerFactory.getLogger(RpcProxyLoaderGenerator.class);
+  
   /**
    * Simple name of class to be generated
    */
@@ -72,7 +76,7 @@ public class RpcProxyLoaderGenerator extends Generator {
       PrintWriter printWriter = context.tryCreate(logger, packageName, className);
       // If code has not already been generated.
       if (printWriter != null) {
-        printWriter.append(generate(logger, className));
+        printWriter.append(generate(className));
         context.commit(logger, printWriter);
       }
     }
@@ -84,18 +88,18 @@ public class RpcProxyLoaderGenerator extends Generator {
     return packageName + "." + className;
   }
 
-  private String generate(TreeLogger logger, String className) {
+  private String generate(String className) {
     File fileCacheDir = RebindUtils.getErraiCacheDir();
     File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + className + ".java");
     
     String gen;
-    if (!cacheFile.exists() || RebindUtils.hasClasspathChangedForAnnotatedWith(Remote.class)) {
-      logger.log(TreeLogger.INFO, "generating rpc proxy loader class.");
+    if (RebindUtils.hasClasspathChangedForAnnotatedWith(Remote.class) || !cacheFile.exists()) {
+      log.info("generating rpc proxy loader class.");
       gen = generate();
       RebindUtils.writeStringToFile(cacheFile, gen);
     } 
     else {
-      logger.log(TreeLogger.INFO, "nothing has changed. using cached rpc proxy loader class.");
+      log.info("nothing has changed. using cached rpc proxy loader class.");
       gen = RebindUtils.readFileToString(cacheFile);
     }
     

@@ -248,7 +248,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
         }
       }
     };
-    t.schedule(30000);
-    delayTestFinish(35000);
+    t.schedule(55000);
+    delayTestFinish(60000);
   }
 }

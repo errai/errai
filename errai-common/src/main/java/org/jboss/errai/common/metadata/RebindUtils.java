@@ -10,16 +10,22 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class RebindUtils {
+  
+  static Logger logger = LoggerFactory.getLogger(RebindUtils.class);
+  
   public static String getClasspathHash() {
     try {
       final MessageDigest md = MessageDigest.getInstance("SHA-256");
