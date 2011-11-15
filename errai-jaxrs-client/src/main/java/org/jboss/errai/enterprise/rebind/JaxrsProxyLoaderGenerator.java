@@ -88,7 +88,7 @@ public class JaxrsProxyLoaderGenerator extends Generator {
     String gen;
     if (!cacheFile.exists() || RebindUtils.hasClasspathChangedForAnnotatedWith(Path.class)) {
       logger.log(TreeLogger.INFO, "generating jax-rs proxy loader class.");
-      gen = _generate();
+      gen = generate();
       RebindUtils.writeStringToFile(cacheFile, gen);
     } 
     else {
@@ -99,22 +99,22 @@ public class JaxrsProxyLoaderGenerator extends Generator {
     return gen;
   }
   
-  private String _generate() {
+  private String generate() {
     MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
     ClassStructureBuilder<?> classBuilder = ClassBuilder.implement(JaxrsProxyLoader.class);
 
-    MethodBlockBuilder<?> createProxies = classBuilder.publicMethod(void.class, "loadProxies");
+    MethodBlockBuilder<?> loadProxies = classBuilder.publicMethod(void.class, "loadProxies");
     for (Class<?> remote : scanner.getTypesAnnotatedWith(Path.class, "")) {
       if (remote.isInterface()) {
         // create the remote proxy for this interface
         ClassStructureBuilder<?> remoteProxy = new JaxrsProxyGenerator(remote).generate();
-        createProxies.append(new InnerClass((BuildMetaClass) remoteProxy.getClassDefinition()));
+        loadProxies.append(new InnerClass((BuildMetaClass) remoteProxy.getClassDefinition()));
 
-        createProxies.append(Stmt.invokeStatic(RemoteServiceProxyFactory.class, "addRemoteProxy",
+        loadProxies.append(Stmt.invokeStatic(RemoteServiceProxyFactory.class, "addRemoteProxy",
             remote, Stmt.newObject(remoteProxy.getClassDefinition())));
       }
     }
-    classBuilder = (ClassStructureBuilder<?>) createProxies.finish();
+    classBuilder = (ClassStructureBuilder<?>) loadProxies.finish();
     
     return classBuilder.toJavaString();
   }

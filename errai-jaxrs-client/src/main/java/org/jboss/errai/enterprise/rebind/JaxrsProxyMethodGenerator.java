@@ -56,7 +56,6 @@ public class JaxrsProxyMethodGenerator {
   private Statement responseHandling;
   private Statement errorHandlingWithResponse;
   private Statement errorHandling;
-  private Statement dummyResponse;
   
   public JaxrsProxyMethodGenerator(JaxrsResourceMethod resourceMethod) {
     this.resourceMethod = resourceMethod;
@@ -67,10 +66,7 @@ public class JaxrsProxyMethodGenerator {
     
     MetaMethod method = resourceMethod.getMethod();
     
-    // TODO remove as soon as codegen bug is fixed (passing null as a method param is currently not working)
-    dummyResponse = Stmt.declareVariable("response", Response.class, null);
-    errorHandling = Stmt.loadStatic(clazz, "this").invoke("handleError", Variable.get("throwable"), Variable.get("response"));
-    
+    errorHandling = Stmt.loadStatic(clazz, "this").invoke("handleError", Variable.get("throwable"), null);
     errorHandlingWithResponse = Stmt.loadStatic(clazz, "this").invoke("handleError", 
         Variable.get("throwable"), Variable.get("response"));
    
@@ -198,7 +194,6 @@ public class JaxrsProxyMethodGenerator {
         .append(sendRequest)
         .finish()
         .catch_(RequestException.class, "throwable")
-        .append(dummyResponse)
         .append(errorHandling)
         .finish());
   }
@@ -209,7 +204,6 @@ public class JaxrsProxyMethodGenerator {
         .extend()
         .publicOverridesMethod("onError", Parameter.of(Request.class, "request"),
             Parameter.of(Throwable.class, "throwable"))
-        .append(dummyResponse)
         .append(errorHandling)
         .finish()
         .publicOverridesMethod("onResponseReceived", Parameter.of(Request.class, "request"),
