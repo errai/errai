@@ -207,7 +207,7 @@
                             </additionalClasspathElements>
                             <useManifestOnlyJar>false</useManifestOnlyJar>
                             <forkMode>pertest</forkMode>
-                            <argLine>-Xmx2048m ${argLine}</argLine>
+                            <argLine>-Xmx2048m ${argLine} -Derrai.devel.nocache=true</argLine>
 
                             <systemProperties>
                                 <!-- Must disable long polling for automated tests to succeed -->
