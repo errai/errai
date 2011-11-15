@@ -44,7 +44,6 @@ import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.NoSubscribersToDeliverTo;
 import org.jboss.errai.bus.client.api.base.TransportIOException;
-import org.jboss.errai.bus.client.ext.ExtensionsLoader;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.protocols.MessageParts;
 
@@ -1130,8 +1129,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     new Timer() {
       @Override
       public void run() {
-        ExtensionsLoader loader = GWT.create(ExtensionsLoader.class);
-        loader.initExtensions(ClientMessageBusImpl.this);
+        // TODO why is this in a timer?
+        RpcProxyLoader loader = GWT.create(RpcProxyLoader.class);
+        loader.loadProxies(ClientMessageBusImpl.this);
         initialPollTimer.schedule(10);
       }
     }.schedule(5);

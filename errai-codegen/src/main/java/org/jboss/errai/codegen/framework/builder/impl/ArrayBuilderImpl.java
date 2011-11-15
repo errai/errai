@@ -26,7 +26,6 @@ import org.jboss.errai.codegen.framework.builder.callstack.LoadClassReference;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.util.GenUtil;
-import org.jboss.errai.codegen.framework.util.Stmt;
 
 /**
  * StatementBuilder to create and initialize Arrays.
@@ -90,7 +89,7 @@ public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayB
     buf.append("new ").append(LoadClassReference.getClassReference(componentType, context));
 
     if (values != null) {
-      generateWithInitialization(buf);
+      generateWithInitialization(context, buf);
     }
     else {
       int i = 0;
@@ -123,7 +122,7 @@ public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayB
     return generatorCache = buf.toString();
   }
 
-  private void generateWithInitialization(StringBuilder buf) {
+  private void generateWithInitialization(Context context, StringBuilder buf) {
     int dim = 0;
     Class<?> type = values.getClass();
     while (type.isArray()) {
@@ -136,16 +135,16 @@ public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayB
     }
     buf.append(" ");
 
-    generateInitialization(buf, values);
+    generateInitialization(context, buf, values);
   }
 
-  private void generateInitialization(StringBuilder buf, Object values) {
+  private void generateInitialization(Context context, StringBuilder buf, Object values) {
     buf.append("{ ");
     int length = Array.getLength(values);
     for (int i = 0; i < length; i++) {
       Object element = Array.get(values, i);
       if (element.getClass().isArray()) {
-        generateInitialization(buf, element);
+        generateInitialization(context, buf, element);
       }
       else {
         Statement statement = GenUtil.generate(context, element);

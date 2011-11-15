@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.rebind;
+package org.jboss.errai.bus.client.framework;
 
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
-import com.google.gwt.user.rebind.SourceWriter;
-import org.jboss.errai.common.metadata.MetaDataScanner;
-
-public interface ExtensionGenerator {
-  public void generate(GeneratorContext context, TreeLogger logger, SourceWriter writer, MetaDataScanner scanner, TypeOracle oracle);
+/**
+ * This interface, <tt>RpcProxyLoader</tt>, is used internally during compile time to produce the required proxies.
+ * 
+ * @author Christian Sadilek <csadilek@redhat.com>
+ */
+public interface RpcProxyLoader {
+  public void loadProxies(MessageBus bus);
 }

@@ -31,26 +31,39 @@ import org.jboss.errai.codegen.framework.meta.MetaParameter;
 public class Parameter extends AbstractStatement implements MetaParameter {
   private MetaClass type;
   private String name;
+  private boolean isFinal;
 
-  public Parameter(MetaClass type, String name) {
+  public Parameter(MetaClass type, String name, boolean isFinal) {
     this.type = type;
     this.name = name;
+    this.isFinal = isFinal;
   }
 
   public static Parameter of(MetaClass type, String name) {
-    return new Parameter(type, name);
+    return new Parameter(type, name, false);
   }
 
   public static Parameter of(Class<?> type, String name) {
-    return new Parameter(MetaClassFactory.get(type), name);
+    return new Parameter(MetaClassFactory.get(type), name, false);
+  }
+
+  public static Parameter of(MetaClass type, String name, boolean isFinal) {
+    return new Parameter(type, name, isFinal);
+  }
+
+  public static Parameter of(Class<?> type, String name, boolean isFinal) {
+    return new Parameter(MetaClassFactory.get(type), name, isFinal);
   }
 
   String generatedCache;
 
   @Override
   public String generate(Context context) {
-    if (generatedCache != null) return generatedCache;
-    return generatedCache = LoadClassReference.getClassReference(type, context) + " " + name;
+    if (generatedCache != null)
+      return generatedCache;
+
+    generatedCache = (isFinal) ? Modifier.Final.getCanonicalString() + " " : "";
+    return generatedCache += LoadClassReference.getClassReference(type, context) + " " + name;
   }
 
   @Override

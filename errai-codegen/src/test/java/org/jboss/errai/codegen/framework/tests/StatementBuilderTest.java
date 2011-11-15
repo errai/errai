@@ -20,8 +20,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Array;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -36,16 +34,14 @@ import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.Variable;
 import org.jboss.errai.codegen.framework.VariableReference;
-import org.jboss.errai.codegen.framework.builder.ContextualStatementBuilder;
-import org.jboss.errai.codegen.framework.builder.VariableReferenceContextualStatementBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.StatementBuilder;
 import org.jboss.errai.codegen.framework.exception.InvalidTypeException;
 import org.jboss.errai.codegen.framework.exception.OutOfScopeException;
 import org.jboss.errai.codegen.framework.literal.LiteralFactory;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
-import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.codegen.framework.tests.model.Foo;
+import org.jboss.errai.codegen.framework.util.Stmt;
 import org.junit.Assert;
 import org.junit.Test;
 

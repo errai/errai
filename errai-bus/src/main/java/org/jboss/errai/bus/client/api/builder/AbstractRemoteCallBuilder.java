@@ -16,12 +16,11 @@
 
 package org.jboss.errai.bus.client.api.builder;
 
-import com.google.gwt.core.client.GWT;
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.RemoteCallback;
-import org.jboss.errai.bus.client.ext.ExtensionsLoader;
+import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.ProxyProvider;
 import org.jboss.errai.bus.client.framework.RPCStub;
@@ -55,14 +54,7 @@ public class AbstractRemoteCallBuilder {
   public <T, R> T call(final RemoteCallback<R> callback, final ErrorCallback errorCallback, final Class<T> remoteService) {
     T svc = proxyProvider.getRemoteProxy(remoteService);
     if (svc == null) {
-
-      // double check that the extensions loader has been bootstrapped
-      GWT.create(ExtensionsLoader.class);
-
-      if (proxyProvider.getRemoteProxy(remoteService) == null)
         throw new RuntimeException("No service definition for: " + remoteService.getName());
-      else
-        return call(callback, errorCallback, remoteService);
     }
     
     ((RPCStub) svc).setRemoteCallback(callback);
@@ -130,7 +122,8 @@ public class AbstractRemoteCallBuilder {
         return sendable;
       }
 
-      public RemoteCallSendable noErrorHandling() {
+      public RemoteCallSendable defaultErrorHandling() {
+        message.errorsCall(DefaultErrorCallback.INSTANCE);
         return sendable;
       }
     };

@@ -37,8 +37,8 @@
         <when-type-is class="org.jboss.errai.bus.client.framework.MessageBus"/>
     </replace-with>
 
-    <generate-with class="org.jboss.errai.bus.rebind.ExtensionProxyGenerator">
+    <generate-with class="org.jboss.errai.bus.rebind.RpcProxyLoaderGenerator">
         <when-type-assignable
-                class="org.jboss.errai.bus.client.ext.ExtensionsLoader"/>
+                class="org.jboss.errai.bus.client.framework.RpcProxyLoader"/>
     </generate-with>
 </module>

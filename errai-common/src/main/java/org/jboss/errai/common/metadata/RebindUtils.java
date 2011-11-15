@@ -1,8 +1,17 @@
 package org.jboss.errai.common.metadata;
 
-import java.io.*;
-import java.security.MessageDigest;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -167,4 +176,3 @@ public class RebindUtils {
     }
   }
 }
-

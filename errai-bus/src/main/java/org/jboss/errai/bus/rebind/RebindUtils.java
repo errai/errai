@@ -16,11 +16,24 @@
 
 package org.jboss.errai.bus.rebind;
 
-import org.mvel2.util.StringAppender;
-
 import java.lang.reflect.Method;
 
+import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
+import org.jboss.errai.codegen.framework.meta.MetaMethod;
+import org.jboss.errai.codegen.framework.meta.MetaParameter;
+import org.jboss.errai.codegen.framework.util.Stmt;
+import org.mvel2.util.StringAppender;
+
 public class RebindUtils {
+  public static String createCallSignature(MetaMethod m) {
+    StringAppender append = new StringAppender(m.getName()).append(':');
+    for (MetaParameter parm : m.getParameters()) {
+      append.append(parm.getType().getCanonicalName()).append(':');
+    }
+    return append.toString();
+  }
+  
   public static String createCallSignature(Method m) {
     StringAppender append = new StringAppender(m.getName()).append(':');
     for (Class c : m.getParameterTypes()) {
@@ -36,5 +49,21 @@ public class RebindUtils {
     catch (NoSuchMethodException e) {
     }
     return false;
+  }
+  
+  public static Statement generateProxyMethodReturnStatement(MetaMethod method) {
+    Statement returnStatement = null;
+    if (!method.getReturnType().equals(MetaClassFactory.get(void.class))) {
+      if (MetaClassFactory.get(Number.class).isAssignableFrom(method.getReturnType().asBoxed())) {
+        returnStatement = Stmt.load(0).returnValue();
+      } 
+      else if (MetaClassFactory.get(Boolean.class).isAssignableFrom(method.getReturnType().asBoxed())) {
+        returnStatement = Stmt.load(true).returnValue(); 
+      }
+      else {
+        returnStatement = Stmt.load(null).returnValue();
+      }
+    }
+    return returnStatement;
   }
 }

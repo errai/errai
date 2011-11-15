@@ -33,10 +33,9 @@ public interface RemoteCallErrorDef {
   public RemoteCallSendable errorsHandledBy(ErrorCallback errorCallback);
 
   /**
-   * If this function is called, it means that no there is no error handler, and only returns an instance of
-   * <tt>RemoteCallSendable</tt>
+   * Sets the default error handler function and returns an instance of <tt>RemoteCallSendable</tt>
    *
    * @return an instance of <tt>RemoteCallSendable</tt>
    */
-  public RemoteCallSendable noErrorHandling();
+  public RemoteCallSendable defaultErrorHandling();
 }

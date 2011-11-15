@@ -19,7 +19,6 @@ package org.jboss.errai.codegen.framework.tests;
 import static org.junit.Assert.fail;
 
 import java.io.Serializable;
-import java.util.Map;
 
 import org.jboss.errai.codegen.framework.InnerClass;
 import org.jboss.errai.codegen.framework.Modifier;
@@ -77,7 +76,7 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
         .body()
         .privateField("name", String.class)
         .finish()
-        .publicMethod(void.class, "setName", Parameter.of(String.class, "name"))
+        .publicMethod(void.class, "setName", Parameter.of(String.class, "name", true))
         .append(Stmt.loadClassMember("name").assignValue(Variable.get("name")))
         .finish();
 

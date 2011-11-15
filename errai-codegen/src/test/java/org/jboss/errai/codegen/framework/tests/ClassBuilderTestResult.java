@@ -48,7 +48,7 @@ public interface ClassBuilderTestResult {
           "   public void someMethod() {\n" +
           "      class Inner implements Serializable {\n" +
           "        private String name;" +
-          "        public void setName(String name) {\n" +
+          "        public void setName(final String name) {\n" +
           "          this.name = name;\n" +
           "        }\n" +
           "      }" +
