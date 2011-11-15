@@ -32,13 +32,14 @@ import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.enterprise.client.jaxrs.JaxrsProxyLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 /**
  * Generates the JAX-RS proxy loader.
@@ -46,18 +47,16 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class JaxrsProxyLoaderGenerator extends Generator {
-  private String className = null;
-  private String packageName = null;
-
-  private TypeOracle typeOracle;
+  private Logger log = LoggerFactory.getLogger(JaxrsProxyLoaderGenerator.class);
   
   @Override
   public String generate(TreeLogger logger, GeneratorContext context, String typeName)
       throws UnableToCompleteException {
-    typeOracle = context.getTypeOracle();
-
+    String packageName = null;
+    String className = null;
+    
     try {
-      JClassType classType = typeOracle.getType(typeName);
+      JClassType classType = context.getTypeOracle().getType(typeName);
 
       if (classType.isInterface() == null) {
         logger.log(TreeLogger.ERROR, typeName + "is not an interface.");
@@ -70,7 +69,7 @@ public class JaxrsProxyLoaderGenerator extends Generator {
       PrintWriter printWriter = context.tryCreate(logger, packageName, className);
       // If code has not already been generated.
       if (printWriter != null) {
-        printWriter.append(generate(logger, className));
+        printWriter.append(generate(className));
         context.commit(logger, printWriter);
       }
     }
@@ -81,18 +80,18 @@ public class JaxrsProxyLoaderGenerator extends Generator {
     return packageName + "." + className;
   }
   
-  private String generate(TreeLogger logger, String className) {
+  private String generate(String className) {
     File fileCacheDir = RebindUtils.getErraiCacheDir();
     File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + className + ".java");
     
     String gen;
-    if (!cacheFile.exists() || RebindUtils.hasClasspathChangedForAnnotatedWith(Path.class)) {
-      logger.log(TreeLogger.INFO, "generating jax-rs proxy loader class.");
+    if (RebindUtils.hasClasspathChangedForAnnotatedWith(Path.class) || !cacheFile.exists()) {
+      log.info("generating jax-rs proxy loader class.");
       gen = generate();
       RebindUtils.writeStringToFile(cacheFile, gen);
     } 
     else {
-      logger.log(TreeLogger.INFO, "nothing has changed. using cached jax-rs proxy loader class.");
+      log.info("nothing has changed. using cached jax-rs proxy loader class.");
       gen = RebindUtils.readFileToString(cacheFile);
     }
     

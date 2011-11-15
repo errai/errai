@@ -19,6 +19,7 @@ import static org.jboss.errai.enterprise.rebind.TypeMarshaller.marshal;
 
 import java.util.List;
 
+import org.jboss.errai.bus.rebind.RebindUtils;
 import org.jboss.errai.codegen.framework.DefParameters;
 import org.jboss.errai.codegen.framework.Parameter;
 import org.jboss.errai.codegen.framework.Statement;
@@ -226,19 +227,11 @@ public class JaxrsProxyMethodGenerator {
   }
   
   private void generateReturnStatement(BlockBuilder<?> methodBlock, MetaMethod method) {
-    Statement returnStatement;
-    if (!method.getReturnType().equals(MetaClassFactory.get(void.class))) {
-      if (MetaClassFactory.get(Number.class).isAssignableFrom(method.getReturnType().asBoxed())) {
-        returnStatement = Stmt.load(0).returnValue();
-      } 
-      else if (MetaClassFactory.get(Boolean.class).isAssignableFrom(method.getReturnType().asBoxed())) {
-        returnStatement = Stmt.load(true).returnValue(); 
-      }
-      else {
-        returnStatement = Stmt.load(null).returnValue();
-      }
+    Statement returnStatement = RebindUtils.generateProxyMethodReturnStatement(method);
+    if (returnStatement !=null) {
       methodBlock.append(returnStatement);
     }
+    
     methodBlock.finish();
   }
 }
