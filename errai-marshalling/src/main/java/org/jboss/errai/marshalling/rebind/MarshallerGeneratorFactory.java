@@ -166,11 +166,6 @@ public class MarshallerGeneratorFactory {
     addArrayMarshaller(MetaClassFactory.get(Object[].class));
 
     return classStructureBuilder.toJavaString();
-
-    // System.out.println("[Generation Finished in: " + (System.currentTimeMillis() - startTime) + "ms]");
-
-    //  System.out.println(generatedClass);
-    // return generatedClass;
   }
 
   private void generateMarshallers() {
@@ -178,8 +173,6 @@ public class MarshallerGeneratorFactory {
 
     Set<Class<?>> exposed = new HashSet<Class<?>>(scanner.getTypesAnnotatedWith(Portable.class));
     exposed.addAll(scanner.getTypesAnnotatedWith(ExposeEntity.class));
-
-
     // add all GWT JRE  classes
 
     exposed.add(Throwable.class);

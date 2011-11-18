@@ -66,7 +66,7 @@ public class LoadExtensions implements BootstrapExecution {
         }
 
         public void addSerializableType(Class<?> type) {
-          log.info("Marked " + type + " as serializable.");
+          log.info("marked " + type + " as serializable.");
           loadedComponents.add(type.getName());
           config.getSerializableTypes().add(type);
         }

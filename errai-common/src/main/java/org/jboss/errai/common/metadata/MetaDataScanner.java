@@ -51,8 +51,10 @@ import static org.reflections.vfs.Vfs.UrlType;
  * <p/>
  * The initial set of config Url's (entry points) is discovered through ErraiApp.properties.
  *
- * @author: Heiko Braun <hbraun@redhat.com>
- * @date: Aug 3, 2010
+ * @author Heiko Braun <hbraun@redhat.com>
+ * @author Mike Brock
+
+ * @date Aug 3, 2010
  */
 public class MetaDataScanner extends Reflections {
   public static final String CLIENT_PKG_REGEX = ".*(\\.client\\.).*";
@@ -120,7 +122,6 @@ public class MetaDataScanner extends Reflections {
 
                       }
                     },
-                    //new SubTypesScanner(),
                     propScanner
             );
   }

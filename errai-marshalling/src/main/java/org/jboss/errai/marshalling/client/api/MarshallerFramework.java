@@ -61,8 +61,7 @@ public class MarshallerFramework implements EntryPoint {
   }
 
   public static String marshalErraiJSON(Map<String, Object> map) {
-    String s = new MapMarshaller().marshall(map, new JSONMarshallingSession());
-    return s;
+    return new MapMarshaller().marshall(map, new JSONMarshallingSession());
   }
 
 
