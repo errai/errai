@@ -20,8 +20,6 @@ Release Steps
 
 1. Export docbook from confluence for /reference
    * https://docs.jboss.org/author/spaces/jboss_docbook_tools/exportandpostprocessConfigure.action?spaceKey=ERRAI&pageId=5833085 (Single book ouput, no static files)
-   * Remove redundant chapters from the Reference_Guide.xml
-   * Delete xml files for those chapters
    * Copy and commit the docbook files in /reference
    * UPLOAD SINGLE_HTML OUTPUT
 
@@ -29,8 +27,6 @@ Release Steps
 
 1. Export docbook from confluence for /quickstart
    * https://docs.jboss.org/author/spaces/jboss_docbook_tools/exportandpostprocessConfigure.action?spaceKey=ERRAI&pageId=5833096 (Single book ouput, no static files)
-   * Remove redundant chapters from the Quickstart_Guide.xml
-   * Delete xml files for those chapters
    * Copy and commit the docbook files in /quickstart
    * UPLOAD SINGLE_HTML OUTPUT
 
