@@ -156,7 +156,6 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
   private static void pollQueue(MessageQueue queue, OutputStream stream,
                                 HttpServletResponse httpServletResponse) throws IOException {
     if (queue == null) return;
-
     queue.heartBeat();
 
     httpServletResponse.setHeader("Cache-Control", "no-cache");
