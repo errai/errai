@@ -6,9 +6,11 @@ import org.jboss.errai.codegen.framework.Variable;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.util.Stmt;
-import org.jboss.errai.common.client.json.JSONDecoderCli;
 import org.jboss.errai.common.client.json.JSONEncoderCli;
 import org.jboss.errai.common.client.types.EncodingContext;
+import org.jboss.errai.marshalling.client.api.MarshallerFramework;
+
+import com.google.gwt.json.client.JSONParser;
 
 /**
  * Generates the required {@link Statement}s for type marshalling.
@@ -27,8 +29,7 @@ public class TypeMarshaller {
       marshallingStatement =  PrimitiveTypeMarshaller.marshal(type, statement);
     }
     else {
-      marshallingStatement = Stmt.nestedCall(Stmt.newObject(JSONEncoderCli.class))
-        .invoke( "encode", statement, Stmt.newObject(EncodingContext.class));
+      marshallingStatement = Stmt.invokeStatic(MarshallerFramework.class, "marshalErraiJSON", statement);
     }
     return marshallingStatement;
   }
@@ -43,7 +44,9 @@ public class TypeMarshaller {
       demarshallingStatement =  PrimitiveTypeMarshaller.demarshal(type, statement);
     }
     else {
-      demarshallingStatement = Stmt.invokeStatic(JSONDecoderCli.class, "decode", statement);
+      demarshallingStatement = 
+        Stmt.invokeStatic(MarshallerFramework.class, "demarshalErraiJSON", 
+            Stmt.invokeStatic(JSONParser.class, "parse", statement).invoke("isObject"));
     }
     return demarshallingStatement;
   }
