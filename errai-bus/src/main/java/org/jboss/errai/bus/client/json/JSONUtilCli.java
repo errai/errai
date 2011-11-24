@@ -87,11 +87,11 @@ public class JSONUtilCli {
     try {
       if (value instanceof JSONObject) {
         return (Map<String, Object>) MarshallerFramework
-                .demarshallErraiJSON((JSONObject) value);
+                .demarshalErraiJSON((JSONObject) value);
       }
       else if (value instanceof String) {
         return (Map<String, Object>) MarshallerFramework
-                .demarshallErraiJSON(JSONParser.parseStrict((String) value).isObject());
+                .demarshalErraiJSON(JSONParser.parseStrict((String) value).isObject());
       }
       else {
         throw new RuntimeException("what the hell is this? " + value);

@@ -1,18 +1,20 @@
 package org.jboss.errai.marshalling.client.api;
 
-import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONValue;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.exceptions.MarshallingException;
 import org.jboss.errai.marshalling.client.marshallers.MapMarshaller;
 import org.jboss.errai.marshalling.client.marshallers.NullMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.ObjectMarshaller;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONValue;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -28,7 +30,7 @@ public class MarshallerFramework implements EntryPoint {
   public void onModuleLoad() {
   }
 
-  public static Object demarshallErraiJSON(JSONObject object) {
+  public static Object demarshalErraiJSON(JSONObject object) {
     JSONMarshallingSession session = new JSONMarshallingSession();
 
     Marshaller<Object, Object> marshaller =
@@ -45,6 +47,9 @@ public class MarshallerFramework implements EntryPoint {
     return new MapMarshaller().marshall(map, new JSONMarshallingSession());
   }
 
+  public static String marshalErraiJSON(Object obj) {
+    return new ObjectMarshaller().marshall(obj, new JSONMarshallingSession());
+  }
 
   public static class JSONMarshallingSession implements MarshallingSession {
 
