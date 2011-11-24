@@ -16,7 +16,6 @@
 
 package org.jboss.errai.common.client.json;
 
-import org.jboss.errai.common.client.types.DataTypeHelper;
 import org.jboss.errai.common.client.types.EncodingContext;
 
 import java.util.Collection;
@@ -79,11 +78,6 @@ public class JSONEncoderCli {
         return encodeArray((float[]) v, ctx);
       }
       return null;
-    }
-    else if (DataTypeHelper.getMarshallerProvider().hasMarshaller(v.getClass().getName())) {
-//      Marshaller<Object> m = getMarshaller(marshall = v.getClass().getName());
-//      String enc = m.marshall(v, ctx);
-      return DataTypeHelper.getMarshallerProvider().marshall(v.getClass().getName(), v);
     }
     else if (v instanceof Enum) {
       return _encode(v.toString(), ctx);

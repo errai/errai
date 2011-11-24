@@ -20,7 +20,6 @@ import com.google.common.collect.ImmutableSet;
 import javassist.bytecode.ClassFile;
 import org.reflections.Configuration;
 import org.reflections.Reflections;
-import org.reflections.scanners.AbstractScanner;
 import org.reflections.scanners.FieldAnnotationsScanner;
 import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
@@ -53,8 +52,6 @@ import static org.reflections.vfs.Vfs.UrlType;
  *
  * @author Heiko Braun <hbraun@redhat.com>
  * @author Mike Brock
-
- * @date Aug 3, 2010
  */
 public class MetaDataScanner extends Reflections {
   public static final String CLIENT_PKG_REGEX = ".*(\\.client\\.).*";
@@ -74,7 +71,7 @@ public class MetaDataScanner extends Reflections {
   }
 
   private static Map<String, Set<SortableClassFileWrapper>> annotationsToClassFile = new TreeMap<String, Set<SortableClassFileWrapper>>();
-  
+
   private static class SortableClassFileWrapper implements Comparable<SortableClassFileWrapper> {
     private String name;
     private ClassFile classFile;
@@ -103,8 +100,9 @@ public class MetaDataScanner extends Reflections {
                     new TypeAnnotationsScanner() {
                       @Override
                       public void scan(Object cls) {
-                        final String className = getMetadataAdapter().getClassName(cls);
+                        @SuppressWarnings("unchecked") final String className = getMetadataAdapter().getClassName(cls);
 
+                        //noinspection unchecked
                         for (String annotationType : (List<String>) getMetadataAdapter().getClassAnnotationNames(cls)) {
                           if (acceptResult(annotationType) ||
                                   annotationType.equals(Inherited.class.getName())) { //as an exception, accept Inherited as well
@@ -218,7 +216,7 @@ public class MetaDataScanner extends Reflections {
     else {
       try {
         final MessageDigest md = MessageDigest.getInstance("SHA-256");
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();                                                                               
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         for (SortableClassFileWrapper classFileWrapper : annotationsToClassFile.get(annotation.getName())) {
           byteArrayOutputStream.reset();
           DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
@@ -235,7 +233,6 @@ public class MetaDataScanner extends Reflections {
       }
     }
   }
-
 
 
   public static List<URL> getConfigUrls(ClassLoader loader) {

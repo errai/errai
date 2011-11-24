@@ -5,8 +5,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.common.client.protocols.SerializationParts;
-import org.jboss.errai.common.client.types.MarshallerProvider;
-import org.jboss.errai.common.client.types.DataTypeHelper;
 import org.jboss.errai.marshalling.client.api.exceptions.MarshallingException;
 import org.jboss.errai.marshalling.client.marshallers.MapMarshaller;
 import org.jboss.errai.marshalling.client.marshallers.NullMarshaller;
@@ -24,23 +22,6 @@ public class MarshallerFramework implements EntryPoint {
 
   static {
     marshallerFactory = GWT.create(MarshallerFactory.class);
-
-    DataTypeHelper.setMarshallerProvider(new MarshallerProvider() {
-      @Override
-      public boolean hasMarshaller(String fqcn) {
-        return marshallerFactory.getMarshaller("json", fqcn) != null;
-      }
-
-      @Override
-      public <T> T demarshall(String fqcn, JSONValue o) {
-        return (T) marshallerFactory.getMarshaller("json", fqcn).demarshall(o, new JSONMarshallingSession());
-      }
-
-      @Override
-      public String marshall(String fqcn, Object o) {
-        return marshallerFactory.getMarshaller("json", fqcn).marshall(o, new JSONMarshallingSession());
-      }
-    });
   }
 
   @Override
