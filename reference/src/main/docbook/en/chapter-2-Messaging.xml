@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
-<chapter id="sid-5833085_ReferenceGuide-Messaging">
+<chapter id="sid-5931263">
     
     <title>Messaging</title>
     <para>This section covers the core messaging concepts of the ErraiBus messaging framework.</para>
-    <section id="sid-5833085_ReferenceGuide-MessagingOverview">
+    <para>ErraiBus forms the backbone of the Errai framework's approach to application design. Most importantly, it provides a straight-forward approach to a complex problem space. Providing common APIs across the client and server, developers will have no trouble working with complex messaging scenarios from building instant messaging clients, stock tickers, to monitoring instruments. There's no more messing with RPC APIs, or unweildy AJAX or COMET frameworks. We've built it all in to one, consice messaging framework. It's single-paradigm, and it's fun to work with.</para>
+    <section id="sid-5931265">
       
       <title>Messaging Overview</title>
       <para>It's important to understand the concept of how messaging works in ErraiBus. Service endpoints are given string-based names that are referenced by message senders. There is no difference between sending a message to a client-based service, or sending a message to a server-based service. In fact, a service of the same name may co-exist on both the client and the server and both will receive all messages bound for that service name, whether they are sent from the client or from the server.</para>
       <para>Services are lightweight in ErraiBus, and can be declared liberally and extensively within your application to provide a message-based infrastructure for your web application. It can be tempting to think of ErraiBus simply as a client-server communication platform, but there is a plethora of possibilities for using ErraiBus purely with the GWT client context, such as a way to advertise and expose components dynamically, to get around the lack of reflection in GWT.</para>
       <para>In fact, ErraiBus was originally designed to run completely within the client but quickly evolved into having the capabilities it now has today. So keep that in mind when you run up against problems in the client space that could benefit from runtime federation.</para>
     </section>
-    <section id="sid-5833085_ReferenceGuide-MessageBuilderAPI">
+    <section id="sid-5931280">
       
-      <title>MessageBuilder API</title>
+      <title>Messaging API Basics</title>
       <para>
         The MessageBuilder is the heart of the messaging API in ErraiBus. It provides a fluent / builder API, that is used for constructing messages. All three major message patterns can be constructed from the
         <code>MessageBuilder</code>
@@ -228,7 +229,79 @@ public class HelloWorldService implements MessageCallback {
         .
       </para>
     </section>
-    <section id="sid-5833085_ReferenceGuide-SingleResponseConversations%26PsuedoSynchronousMessaging">
+    <section id="sid-5931306">
+      
+      <title>Handling Errors</title>
+      <para>
+        Asynchronous messaging necessitates the need for asynchronous error handling. Luckily, support for handling errors is built directly into the
+        <code>MessageBuilder</code>
+        API, utilizing the
+        <code>ErrorCallback</code>
+        interface. In the examples shown in previous exceptions, error handing has been glossed over with aubiquitous usage of the
+        <code>noErrorHandling()</code>
+        method while building messaging. We chose to require the explicit use of such a method to remind developers of the fact that they are responsible for their own error handling, requiring you to explicitly make the decision to forego handling potential errors.
+      </para>
+      <para>
+        As a general rule, you should
+        <emphasis role="italics">always handle your errors</emphasis>
+        . It will lead to faster and quicker identification of problems with your applications if you have error handlers, and generally help you build more robust code.
+      </para>
+      <informalexample>
+        <programlisting>MessageBuilder.createMessage()
+    .toSubject("HelloWorldService")
+    .signalling()
+    .with("msg", "Hi there!")
+    .errorsHandledBy(new ErrorCallback() {
+      public boolean error(Message message, Throwable throwable) {
+        throwable.printStackTrace();
+          return true;
+      }
+    })
+    .sendNowWith(dispatcher);</programlisting>
+      </informalexample>
+      <para>The addition of error handling at first may put off developers as it makes code more verbose and less-readable. This is nothing that some good practice can't fix. In fact, you may find cases where the same error handler can appropriately be shared between multiple different calls.</para>
+      <informalexample>
+        <programlisting>ErrorCallback error = new ErrorCallback() {
+  public boolean error(Message message, Throwable throwable) {
+    throwable.printStackTrace();
+    return true;
+  }
+}
+
+MessageBuilder.createMessage()
+  .toSubject("HelloWorldService")
+  .signalling()
+  .with("msg", "Hi there!")
+  .errorsHandledBy(error)
+  .sendNowWith(dispatcher);</programlisting>
+      </informalexample>
+      <para>
+        The error handler is required to return a
+        <code>boolean</code>
+        value. This is to indicate whether or not Errai should perform the default error handling actions it would normally take during a failure. You will almost always want to return
+        <code>true</code>
+        here, unless you are trying to explicitly surpress some undesirably activity by Errai, such as automatic subject-termination in conversations. But this is almost never the case.
+      </para>
+      <para>Errai further provides a subject to subscribe to for handling global errors on the client (such as a disconnected server bus or an invalid response code) that occur outside a regular application message exchange. Subscribing to this subject is useful to detect errors early (e.g. due to failing heartbeat requests). A use case that comes to mind here is activating your application's offline mode.</para>
+      <informalexample>
+        <programlisting>bus.subscribe(DefaultErrorCallback.CLIENT_ERROR_SUBJECT, new MessageCallback() {
+  @Override
+  public void callback(Message message) {
+    try {
+      caught = message.get(Throwable.class, MessageParts.Throwable);
+      throw caught;
+    }
+    catch(TransportIOException e) {
+      // thrown in case the server can't be reached or an unexpected status code was returned
+    }
+    catch (Throwable throwable) {
+      // handle system errors (e.g response marshalling errors) - that of course should never happen :)
+    }
+  }
+});</programlisting>
+      </informalexample>
+    </section>
+    <section id="sid-5931284">
       
       <title>Single-Response Conversations &amp; Psuedo-Synchronous Messaging</title>
       <para>
@@ -258,7 +331,124 @@ public class HelloWorldService implements MessageCallback {
       </informalexample>
       <para>See the next section on how to build conversational services that can respond to such messages.</para>
     </section>
-    <section id="sid-5833085_ReferenceGuide-SenderInferredSubjects">
+    <section id="sid-5931291">
+      
+      <title>Broadcasting</title>
+      <para>Broadcasting messages to all clients listening on a specific subject is quite simple and involves nothing more than forgoing use of the reply API. For instance:</para>
+      <informalexample>
+        <programlisting>MessageBuilder.createMessage().
+    .toSubject("MessageListener")
+    .with("Text", "Hello, from your overlords in the cloud")
+    .noErrorHandling().sendGlobalWith(dispatcher);</programlisting>
+      </informalexample>
+      <para>
+        If sent from the server, all clients currently connected, who are listening to the subject
+        <code>"MessageListener"</code>
+        will receive the message. It's as simple as that.
+      </para>
+    </section>
+    <section id="sid-5931293">
+      
+      <title>Client-to-Client Communication</title>
+      <para>Communication from one client to another client is not directly possible within the bus federation, by design. This isn't to say that it's not possible. But one client cannot see a service within the federation of another client. We institute this limitation as a matter of basic security. But many software engineers will likely find the prospects of such communication appealing, so this section will provide some basic pointers on how to go about accomplishing it.</para>
+      <para>Relay ServicesThe essential architectural thing you'll need to do is create a relay service that runs on the server. Since a service advertised on the server is visible to all clients and all clients are visible to the server, you might already see where we're going with this.</para>
+      <para>By creating a service on the server which accepts messages from clients, you can create a simple protocol on-top of the bus to enable quasi peer-to-peer communication. (We say quasi, because it still needs to be routed through the server)</para>
+      <para>
+        While you can probably imagine simply creating a broadcast-like service which accepts a message from one client and broadcasts it to the rest of the world, it may be less clear how to go about routing from one particular client to another particular client, so we'll focus on that problem. This is covered in
+        <xref linkend="sid-5931301"/>
+      </para>
+    </section>
+    <section id="sid-5931309">
+      
+      <title>Asynchronous Message Tasks</title>
+      <para>
+        In some applications, it may be necessary or desirable to delay transmission of, or continually stream data to a remote client or group of clients (or from a client to the server). In cases like this, you can utilize the
+        <code>replyRepeating()</code>
+        ,
+        <code>replyDelayed()</code>
+        ,
+        <code>sendRepeating()</code>
+        and
+        <code>sendDelayed()</code>
+        methods in the
+        <code>MessageBuilder</code>
+        .
+      </para>
+      <para>
+        Delayed TasksSending a task with a delay is straight forward. Simply utilize the appropriate method (either
+        <code>replyDelayed()</code>
+        or
+        <code>sendDelayed()</code>
+        ).
+      </para>
+      <informalexample>
+        <programlisting>MessageBuilder.createConversation(msg)
+    .toSubject("FunSubject")
+    .signalling()
+    .noErrorHandling()
+    .replyDelayed(TimeUnit.SECONDS, 5); // sends the message after 5 seconds.</programlisting>
+      </informalexample>
+      <para>or</para>
+      <informalexample>
+        <programlisting>MessageBuilder.createMessage()
+     .toSubject("FunSubject")
+     .signalling()
+     .noErrorHandling()
+     .sendDelayed(requestDispatcher, TimeUnit.SECONDS, 5); // sends the message after 5 seconds.</programlisting>
+      </informalexample>
+    </section>
+    <section id="sid-5931311">
+      
+      <title>Repeating Tasks</title>
+      <para>
+        A repeating task is sent using one of the MessageBuilder's
+        <code>repeatXXX()</code>
+        methods. The task will repeat indefinitely until cancelled (see next section).
+      </para>
+      <informalexample>
+        <programlisting>MessageBuilder.createMessage()
+    .toSubject("FunSubject")
+    .signalling()
+    .withProvided("time", new ResourceProvider&lt;String&gt;() {
+       SimpleDateFormat fmt = new SimpleDateFormat("hh:mm:ss");
+     
+       public String get() {
+         return fmt.format(new Date(System.currentTimeMillis());
+       }
+     }
+     .noErrorHandling()
+     .sendRepeatingWith(requestDispatcher, TimeUnit.SECONDS, 1); //sends a message every 1 second</programlisting>
+      </informalexample>
+      <para>
+        The above example sends a message very 1 second with a message part called
+        <code>"time"</code>
+        , containing a formatted time string. Note the use of the
+        <code>withProvided()</code>
+        method; a provided message part is calculated at the time of transmission as opposed to when the message is constructed.
+      </para>
+      <para>
+        Cancelling an Asynchronous TaskA delayed or repeating task can be cancelled by calling the
+        <code>cancel()</code>
+        method of the
+        <code>AsyncTask</code>
+        instance which is returned when creating a task. Reference to the AsyncTask object can be retained and cancelled by any other thread.
+      </para>
+      <informalexample>
+        <programlisting>AsyncTask task = MessageBuilder.createConversation(message)
+  .toSubject("TimeChannel").signalling()
+  .withProvided(TimeServerParts.TimeString, new ResourceProvider&lt;String&gt;() {
+     public String get() {
+       return String.valueOf(System.currentTimeMillis());
+     }
+   }).defaultErrorHandling().replyRepeating(TimeUnit.MILLISECONDS, 100);
+
+    ...
+
+  // cancel the task and interrupt it's thread if necessary.
+  task.cancel(true);</programlisting>
+      </informalexample>
+    </section>
+    <section id="sid-5931289">
       
       <title>Sender Inferred Subjects</title>
       <para>
@@ -292,34 +482,7 @@ public class HelloWorldService implements MessageCallback {
         subject that was provided by the sender, and send the message back to the subject desired by the client on the client that sent the message.
       </para>
     </section>
-    <section id="sid-5833085_ReferenceGuide-Broadcasting">
-      
-      <title>Broadcasting</title>
-      <para>Broadcasting messages to all clients listening on a specific subject is quite simple and involves nothing more than forgoing use of the reply API. For instance:</para>
-      <informalexample>
-        <programlisting>MessageBuilder.createMessage().
-    .toSubject("MessageListener")
-    .with("Text", "Hello, from your overlords in the cloud")
-    .noErrorHandling().sendGlobalWith(dispatcher);</programlisting>
-      </informalexample>
-      <para>
-        If sent from the server, all clients currently connected, who are listening to the subject
-        <code>"MessageListener"</code>
-        will receive the message. It's as simple as that.
-      </para>
-    </section>
-    <section id="sid-5833085_ReferenceGuide-Clienttoclientcommunication">
-      
-      <title>Client-to-Client Communication</title>
-      <para>Communication from one client to another client is not directly possible within the bus federation, by design. This isn't to say that it's not possible. But one client cannot see a service within the federation of another client. We institute this limitation as a matter of basic security. But many software engineers will likely find the prospects of such communication appealing, so this section will provide some basic pointers on how to go about accomplishing it.</para>
-      <para>Relay ServicesThe essential architectural thing you'll need to do is create a relay service that runs on the server. Since a service advertised on the server is visible to all clients and all clients are visible to the server, you might already see where we're going with this.</para>
-      <para>By creating a service on the server which accepts messages from clients, you can create a simple protocol on-top of the bus to enable quasi peer-to-peer communication. (We say quasi, because it still needs to be routed through the server)</para>
-      <para>
-        While you can probably imagine simply creating a broadcast-like service which accepts a message from one client and broadcasts it to the rest of the world, it may be less clear how to go about routing from one particular client to another particular client, so we'll focus on that problem. This is covered in
-        <xref linkend="sid-5931301"/>
-      </para>
-    </section>
-    <section id="sid-5833085_ReferenceGuide-MessageRoutingInformation">
+    <section id="sid-5931301">
       
       <title>Message Routing Information</title>
       <para>Every message that is sent between a local and remote (or server and client) buses contain session routing information. This information is used by the bus to determine what outbound queues to use to deliver the message to, so they will reach their intended recipients. It is possible to manually specify this information to indicate to the bus, where you want a specific message to go.</para>
@@ -371,5 +534,58 @@ public class HelloWorldService implements MessageCallback {
         <code>SessionID</code>
         information is not ever transmitted from bus-to-bus, and therefore is only directly relevant to the proximate bus.
       </para>
+    </section>
+    <section id="sid-5931315">
+      
+      <title>Queue Sessions</title>
+      <para>The ErraiBus maintains it's own seperate session management on-top of the regular HTTP session management. While the queue sessions are tied to, and dependant on HTTP sessions for the most part (meaning they die when HTTP sessions die), they provide extra layers of session tracking to make dealing with complex applications built on Errai easier.</para>
+      <section id="sid-5931315_QueueSessions-Lifecycle">
+        
+        <title>Lifecycle</title>
+        <para>The lifescyle of a session is bound by the underlying HTTP session. It is also bound by activity thresholds. Clients are required to send heartbeat messages every once in a while to maintain their sessions with the server. If a heartbeat message is not received after a certain period of time, the session is terminated and any resources are deallocated.</para>
+      </section>
+      <section id="sid-5931315_QueueSessions-Scopes">
+        
+        <title>Scopes</title>
+        <para>One of the things Errai offers is the concept of session and local scopes.</para>
+        <section id="sid-5931315_QueueSessions-SessionScope">
+          
+          <title>Session Scope</title>
+          <para>A session scope is scoped across all instances of the same session. When a session scope is used, any parameters stored will be accessible and visible by all browser instances and tabs.</para>
+          <para>The SessionContext helper class is used for accessing the session scope.</para>
+          <informalexample>
+            <programlisting>public class TestService implements MessageCallback {
+  public void callback(final Message message) {
+    // obtain a reference to the session context by referencing the incoming message.
+    SessionContext injectionContext = SessionContext.get(message);
+
+    // set an attribute.
+    injectionContext.setAttribute("MyAttribute", "Foo");
+  }
+}</programlisting>
+          </informalexample>
+        </section>
+        <section id="sid-5931315_QueueSessions-LocalScope">
+          
+          <title>Local Scope</title>
+          <para>A local scope is scoped to a single browser instance. But not to a single session.</para>
+          <para>
+            In a browser a local scope would be confined to a tab or a window within a browser. You can store parameters inside a local scope just like with a session by using the
+            <code>LocalContext</code>
+            helper class.
+          </para>
+          <informalexample>
+            <programlisting>public class TestService implements MessageCallback {
+  public void callback(final Message message) {
+    // obtain a reference to the local context by referencing the incoming message.
+    LocalContext injectionContext = LocalContext.get(message);
+
+   // set an attribute.
+    injectionContext.setAttribute("MyAttribute", "Foo");
+  }
+}</programlisting>
+          </informalexample>
+        </section>
+      </section>
     </section>
   </chapter>

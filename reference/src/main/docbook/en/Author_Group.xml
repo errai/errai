@@ -1,13 +1,15 @@
 <?xml version='1.0' encoding='utf-8' ?>
 <!DOCTYPE authorgroup PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <authorgroup>
+
   <author>
-    <firstname>ToDo Dude</firstname>
-    <surname>ToDo McPants</surname>
-    <affiliation>
-      <orgname>ToDo Somewhere</orgname>
-      <orgdiv>ToDo Someone</orgdiv>
-    </affiliation>
-    <email>ToDo Dude.McPants@example.com</email>
+    <firstname>Mike</firstname>
+    <surname>Brock</surname>
+    <email>cbrock@redhat.com</email>
+  </author>
+  <author>
+    <firstname>Christian</firstname>
+    <surname>Sadilek</surname>
+    <email>csadilek@redhat.com</email>
   </author>
 </authorgroup>

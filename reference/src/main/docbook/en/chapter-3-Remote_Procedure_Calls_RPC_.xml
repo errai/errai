@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
-<chapter id="sid-5833085_ReferenceGuide-RemoteProcedureCalls%28RPC%29">
+<chapter id="sid-5931313">
     
     <title>Remote Procedure Calls (RPC)</title>
     <para>ErraiBus supports a high-level RPC layer to make typical client-server RPC communication easy on top of the bus. While it is possible to use ErraiBus without ever using this API, you may find it to be a more useful and concise approach to exposing services to the clients.</para>
@@ -32,7 +32,7 @@ public class MyRemoteServiceImpl implements MyRemoteService {
       <code>@Service</code>
       annotation as described in Section 2.4. The presence of the remote interface tips Errai off as to what you want to do with the class.
     </para>
-    <section id="sid-5833085_ReferenceGuide-Makingcalls">
+    <section id="sid-5931313_RemoteProcedureCalls%28RPC%29-Makingcalls">
       
       <title>Making calls</title>
       <para>
@@ -57,7 +57,7 @@ public class MyRemoteServiceImpl implements MyRemoteService {
       </informalexample>
       <para>The above code will never return a valid result. In fact, it will always return null, false, or 0 depending on the type. This is due to the fact that the method is dispatched asynchronously, as in, it does not wait for a server response before returning control. The reason we chose to do this, as opposed to emulate the native GWT-approach, which requires the implementation of remote and async interfaces, was purely a function of a tradeoff for simplicity.</para>
     </section>
-    <section id="sid-5833085_ReferenceGuide-Handlingexceptions">
+    <section id="sid-5931313_RemoteProcedureCalls%28RPC%29-Handlingexceptions">
       
       <title>Handling exceptions</title>
       <para>
