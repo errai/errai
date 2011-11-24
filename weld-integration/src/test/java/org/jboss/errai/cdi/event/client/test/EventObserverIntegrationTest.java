@@ -49,7 +49,7 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
         finishTest();
       }
     };
-    timer.schedule(20000);
-    delayTestFinish(25000);
+    timer.schedule(55000);
+    delayTestFinish(60000);
   }
 }

@@ -1,11 +1,11 @@
 package org.jboss.errai.cdi.test.stress.client.shared;
 
-import org.jboss.errai.bus.server.annotations.ExposeEntity;
+import org.jboss.errai.common.client.api.annotations.Portable;
 
 /**
  * The tick event that comes from the server.
  */
-@ExposeEntity
+@Portable
 public class TickEvent {
   
     private int id;

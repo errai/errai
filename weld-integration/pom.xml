@@ -179,14 +179,14 @@
             </properties>
 
             <build>
-                <resources>
-                    <resource>
+                <testResources>
+                    <testResource>
                         <directory>src/test/java</directory>
-                    </resource>
-                    <resource>
+                    </testResource>
+                    <testResource>
                         <directory>src/test/resources</directory>
-                    </resource>
-                </resources>
+                    </testResource>
+                </testResources>
                 <plugins>
                     <plugin>
                         <artifactId>maven-compiler-plugin</artifactId>
@@ -207,7 +207,7 @@
                             </additionalClasspathElements>
                             <useManifestOnlyJar>false</useManifestOnlyJar>
                             <forkMode>pertest</forkMode>
-                            <argLine>-Xmx2048m</argLine>
+                            <argLine>-Xmx2048m ${argLine} -Derrai.devel.nocache=true</argLine>
 
                             <systemProperties>
                                 <!-- Must disable long polling for automated tests to succeed -->

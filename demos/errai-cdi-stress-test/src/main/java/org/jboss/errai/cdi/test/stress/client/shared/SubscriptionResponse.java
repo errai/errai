@@ -1,12 +1,12 @@
 package org.jboss.errai.cdi.test.stress.client.shared;
 
-import org.jboss.errai.bus.server.annotations.ExposeEntity;
+import org.jboss.errai.common.client.api.annotations.Portable;
 
 /**
  * The event that comes from the server in response to a
  * {@link SubscriptionRequest} from the client.
  */
-@ExposeEntity
+@Portable
 public class SubscriptionResponse {
   
     private long serverTime;

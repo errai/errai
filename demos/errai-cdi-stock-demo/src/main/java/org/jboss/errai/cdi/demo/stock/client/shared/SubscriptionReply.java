@@ -2,7 +2,7 @@ package org.jboss.errai.cdi.demo.stock.client.shared;
 
 import java.util.List;
 
-import org.jboss.errai.bus.server.annotations.ExposeEntity;
+import org.jboss.errai.common.client.api.annotations.ExposeEntity;
 
 /**
  * Fired in response to a subscription request. Provides new subscribers with an

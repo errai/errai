@@ -57,7 +57,7 @@ public class EventProducerIntegrationTest extends AbstractEventIntegrationTest {
         finishTest();
       }
     };
-    testResultTimer.schedule(20000);
-    delayTestFinish(25000);
+    testResultTimer.schedule(55000);
+    delayTestFinish(60000);
   }
 }

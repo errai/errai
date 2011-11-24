@@ -1,12 +1,12 @@
 package org.jboss.errai.cdi.test.stress.client.shared;
 
-import org.jboss.errai.bus.server.annotations.ExposeEntity;
+import org.jboss.errai.common.client.api.annotations.Portable;
 
 /**
  * Request object sent by the client when it wants a new stream of ticks from
  * the server.
  */
-@ExposeEntity
+@Portable
 public class SubscriptionRequest {
 
   private long clientTimestamp;
