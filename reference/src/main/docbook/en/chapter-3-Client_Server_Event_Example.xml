@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
-<chapter id="sid-5833095_CDIReferenceGuide-ClientServerEventExampleClientServerEventExample">
+<chapter id="sid-5931730">
     
     <title>Client-Server Event Example</title>
     <para>A key feature of the Errai CDI framework is the ability to federate the CDI eventing bus between the client and the server. This permits the observation of server produced events on the client, and vice-versa.</para>

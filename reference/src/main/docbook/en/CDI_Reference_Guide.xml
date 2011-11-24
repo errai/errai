@@ -7,12 +7,7 @@
   <xi:include href="chapter-2-Errai_CDI_Features.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
   <xi:include href="chapter-3-Client_Server_Event_Example.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
   <xi:include href="chapter-4-Deploying_Errai_CDI.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
-  <xi:include href="chapter-5-License_and_EULA.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
-  <xi:include href="chapter-6-CDI_Introduction.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
-  <xi:include href="chapter-7-Errai_CDI_Features.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
-  <xi:include href="chapter-8-Client_Server_Event_Example.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
-  <xi:include href="chapter-9-Deploying_Errai_CDI.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
-  <xi:include href="chapter-10-License.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+  <xi:include href="chapter-5-Errai_CDI_License.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
 
   <xi:include href="Revision_History.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
 </book>

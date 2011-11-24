@@ -5,3 +5,9 @@
 .metadata/*
 *.iml
 target/
+
+*.versionsBackup
+build.log
+classes/
+deploy/
+*Module.JUnit/

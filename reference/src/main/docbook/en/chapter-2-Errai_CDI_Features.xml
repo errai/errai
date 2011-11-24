@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
-<chapter id="sid-5833095_CDIReferenceGuide-ErraiCDIFeatures">
+<chapter id="sid-5931498">
     
     <title>Errai CDI Features</title>
     <para>Beans that are deployed to a CDI container will automatically be registered with Errai and exposed to your GWT client application. So, you can use Errai to communicate between your GWT client components and your CDI backend beans. There are several very easy-to-use options:</para>
@@ -16,7 +16,7 @@
       </listitem>
     </itemizedlist>
     <para>Further, Errai enables you to make use of CDI producer methods and fields in your GWT client!</para>
-    <section id="sid-5833095_CDIReferenceGuide-IntegrationwiththeCDIeventsubsystem">
+    <section id="sid-5931498_ErraiCDIFeatures-IntegrationwiththeCDIeventsubsystem">
       
       <title>Integration with the CDI event subsystem</title>
       <para>
@@ -95,7 +95,7 @@ public class AccountService {
  }
 }</programlisting>
       </example>
-      <section id="sid-5833095_CDIReferenceGuide-Conversationalevents">
+      <section id="sid-5931498_ErraiCDIFeatures-Conversationalevents">
         
         <title>Conversational events</title>
         <para>
@@ -120,7 +120,7 @@ public class SubscriptionService {
         </example>
       </section>
     </section>
-    <section id="sid-5833095_CDIReferenceGuide-RPCStyleInvocationsonCDIbeans">
+    <section id="sid-5931498_ErraiCDIFeatures-RPCStyleInvocationsonCDIbeans">
       
       <title>RPC Style Invocations on CDI beans</title>
       <para>
@@ -129,7 +129,7 @@ public class SubscriptionService {
         .
       </para>
     </section>
-    <section id="sid-5833095_CDIReferenceGuide-Publish%2FSubscribewithCDImanagedcomponents">
+    <section id="sid-5931498_ErraiCDIFeatures-Publish%2FSubscribewithCDImanagedcomponents">
       
       <title>Publish/Subscribe with CDI managed components</title>
       <para>
@@ -142,7 +142,7 @@ public class SubscriptionService {
         .
       </para>
     </section>
-    <section id="sid-5833095_CDIReferenceGuide-CDIProducers">
+    <section id="sid-5931498_ErraiCDIFeatures-CDIProducers">
       
       <title>CDI Producers</title>
       <para>Producer methods and fields act as sources of objects to be injected. They are useful when additional control over object creation is needed before injections can take place e.g. when you need to make a decision at runtime before an object can be created and injected.</para>
