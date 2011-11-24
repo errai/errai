@@ -7,6 +7,23 @@
 .gwt-tmp/
 target/
 classes/
-/tomcat/
+tomcat/
+deploy/
+.errai/
 .DS_Store
+*.releaseBackup
+release.properties
+*.log
 
+/war/
+/errai-bus/war/
+/errai-ioc/war/
+/errai-tools/war/
+*/**/war/AsyncDemo/
+*/**/war/ClientService/
+*/**/war/HelloWorld/
+*/**/war/QueryService/
+*/**/war/RPCDemo/
+*/**/war/Serialization/
+*/**/war/StockDemo/
+*ErraiBusTests.JUnit/
