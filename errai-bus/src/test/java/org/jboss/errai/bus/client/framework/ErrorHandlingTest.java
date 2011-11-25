@@ -73,7 +73,7 @@ public class ErrorHandlingTest extends AbstractErraiTest {
         }
       }
     };
-    t.schedule(30000);
-    delayTestFinish(35000);
+    t.schedule(50000);
+    delayTestFinish(55000);
   }
 }
