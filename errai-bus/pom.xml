@@ -240,6 +240,12 @@
 									<name>org.jboss.errai.bus.do_long_poll</name>
 									<value>false</value>
 								</property>
+								
+								<!-- Disable caching of generated code -->
+								<property>
+                                    <name>errai.devel.nocache</name>
+                                    <value>true</value>
+                                </property>
 							</systemProperties>
 
 							<includes>
