@@ -24,11 +24,14 @@ import javax.inject.Inject;
 
 import org.errai.samples.rpcdemo.client.shared.TestException;
 import org.errai.samples.rpcdemo.client.shared.TestService;
+import org.jboss.errai.bus.client.api.Caller;
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.RemoteCallback;
+import org.jboss.errai.bus.client.api.annotations.ReplyTo;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.ioc.client.api.Callback;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
 import com.google.gwt.core.client.GWT;
@@ -44,15 +47,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 @EntryPoint
 public class RPCDemo {
-  /**
-   * Get an instance of the MessageBus
-   */
-  private MessageBus bus;
-
   @Inject
-  public RPCDemo(MessageBus bus) {
-    this.bus = bus;
-  }
+  private Caller<TestService> testService;
 
   @PostConstruct
   public void init() {
@@ -66,31 +62,32 @@ public class RPCDemo {
 
     checkMemoryButton.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent clickEvent) {
-        MessageBuilder.createCall(new RemoteCallback<Long>() {
+        testService.call(new RemoteCallback<Long>() {
+          @Override
           public void callback(Long response) {
             memoryFreeLabel.setText("Free Memory: " + response);
           }
-        }, TestService.class).getMemoryFree();
+        }).getMemoryFree();
       }
     });
 
     appendTwoStrings.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent clickEvent) {
-        MessageBuilder.createCall(new RemoteCallback<String>() {
+        testService.call(new RemoteCallback<String>() {
           public void callback(String response) {
             appendResult.setText(response);
           }
-        }, TestService.class).append(inputOne.getText(), inputTwo.getText());
+        }).append(inputOne.getText(), inputTwo.getText());
       }
     });
 
     final Button voidReturn = new Button("Test Add", new ClickHandler() {
       public void onClick(ClickEvent clickEvent) {
-        MessageBuilder.createCall(new RemoteCallback<Long>() {
+        testService.call(new RemoteCallback<Long>() {
           public void callback(Long response) {
             appendResult.setText(String.valueOf(response));
           }
-        }, TestService.class).add(Long.parseLong(inputOne.getText()), Long.parseLong(inputTwo.getText()));
+        }).add(Long.parseLong(inputOne.getText()), Long.parseLong(inputTwo.getText()));
       }
     });
 
@@ -119,24 +116,25 @@ public class RPCDemo {
     final Button exception = new Button("Exception", new ClickHandler() {
       public void onClick(ClickEvent clickEvent) {
         MessageBuilder.createCall(
-            new RemoteCallback<Void>() {
-              public void callback(Void response) {
-              }
-            }, 
-            new ErrorCallback() {
-              public boolean error(Message message, Throwable throwable) {
-                try {
-                  throw throwable;
-                }
-                catch (TestException e) {
-                  Window.alert("Success! TestException received from remote call.");
-                }
-                catch (Throwable t) {
-                  GWT.log("An unexpected error has occured", t);
-                }
-                return false;
-              }
-        }, TestService.class).exception();
+                new RemoteCallback<Void>() {
+                  public void callback(Void response) {
+                  }
+                },
+                new ErrorCallback() {
+                  public boolean error(Message message, Throwable throwable) {
+                    try {
+                      throw throwable;
+                    }
+                    catch (TestException e) {
+                      Window.alert("Success! TestException received from remote call.");
+                    }
+                    catch (Throwable t) {
+                      GWT.log("An unexpected error has occured", t);
+                    }
+                    return false;
+                  }
+                }, TestService.class
+        ).exception();
       }
     });
 

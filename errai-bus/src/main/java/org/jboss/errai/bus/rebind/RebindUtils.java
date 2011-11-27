@@ -58,7 +58,7 @@ public class RebindUtils {
         returnStatement = Stmt.load(0).returnValue();
       } 
       else if (MetaClassFactory.get(Boolean.class).isAssignableFrom(method.getReturnType().asBoxed())) {
-        returnStatement = Stmt.load(true).returnValue(); 
+        returnStatement = Stmt.load(false).returnValue();
       }
       else {
         returnStatement = Stmt.load(null).returnValue();

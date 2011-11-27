@@ -32,6 +32,8 @@ import org.jboss.errai.bus.client.framework.MessageProvider;
 
 /**
  * The MessageBuilder API provides a fluent method of building Messages.
+ *
+ * @author Mike Brock
  */
 public class MessageBuilder {
   private static MessageProvider provider = JSONMessage.PROVIDER;

@@ -28,6 +28,8 @@ import static org.jboss.errai.bus.client.api.base.ConversationHelper.makeConvers
 /**
  * The <tt>AbstractMessageBuilder</tt> facilitates the building of a message,
  * and ensures that it is created and used properly.
+ *
+ * @author Mike Brock
  */
 @SuppressWarnings({"unchecked", "ConstantConditions"})
 public class AbstractMessageBuilder<R extends Sendable> {
