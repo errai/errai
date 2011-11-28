@@ -16,34 +16,26 @@
 
 package org.errai.samples.rpcdemo.client.local;
 
-import java.util.Date;
-import java.util.List;
-
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.*;
 import org.errai.samples.rpcdemo.client.shared.TestException;
 import org.errai.samples.rpcdemo.client.shared.TestService;
 import org.jboss.errai.bus.client.api.Caller;
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.RemoteCallback;
-import org.jboss.errai.bus.client.api.annotations.ReplyTo;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.ioc.client.api.Callback;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.VerticalPanel;
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+import java.util.Date;
+import java.util.List;
+
+import static java.lang.Long.parseLong;
 
 @EntryPoint
 public class RPCDemo {
@@ -87,7 +79,7 @@ public class RPCDemo {
           public void callback(Long response) {
             appendResult.setText(String.valueOf(response));
           }
-        }).add(Long.parseLong(inputOne.getText()), Long.parseLong(inputTwo.getText()));
+        }).add(parseLong(inputOne.getText()), parseLong(inputTwo.getText()));
       }
     });
 

@@ -1,0 +1,20 @@
+<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.0//EN"
+        "http://google-web-toolkit.googlecode.com/svn/releases/2.0/distro-source/core/src/gwt-module.dtd">
+<module>
+    <inherits name='com.google.gwt.user.User'/>
+
+    <inherits name='org.timepedia.exporter.Exporter'/>
+
+    <inherits name="org.jboss.errai.bus.ErraiBus" />
+    <inherits name="org.jboss.errai.marshalling.ErraiMarshalling" />
+    <inherits name="org.jboss.errai.common.ErraiCommon" />
+
+    <set-property name="export" value="yes"/>
+
+    <entry-point class="org.jboss.errai.js.client.ErraiJS" />
+
+    <!--
+     Add the cross site linker.
+    -->
+    <!--<add-linker name="xs"/>-->
+</module>

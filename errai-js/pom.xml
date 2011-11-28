@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <name>Errai JS</name>
+    <groupId>org.jboss.errai</groupId>
+    <artifactId>errai-js</artifactId>
+    <version>2.0-SNAPSHOT</version>
+    <description>The Errai JS Library</description>
+    <packaging>jar</packaging>
+
+    <parent>
+        <artifactId>errai-parent</artifactId>
+        <groupId>org.jboss.errai</groupId>
+        <version>2.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.jboss.errai</groupId>
+            <artifactId>errai-bus</artifactId>
+            <version>2.0-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.errai</groupId>
+            <artifactId>errai-codegen</artifactId>
+            <version>2.0-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+
+
+        <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-user</artifactId>
+            <!-- This should not be packaged with the Errai Distro. There are no runtime
+dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-dev</artifactId>
+            <!-- This should not be packaged with the Errai Distro. There are no runtime
+dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.timepedia.exporter</groupId>
+            <artifactId>gwtexporter</artifactId>
+            <version>2.3.0</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>gwt-maven-plugin</artifactId>
+                <version>${gwt.maven}</version>
+                <configuration>
+                    <warSourceDirectory>war</warSourceDirectory>
+                    <hostedWebapp>war</hostedWebapp>
+                    <extraJvmArgs>-Xmx1024m</extraJvmArgs>
+                    <style>DETAILED</style>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

@@ -82,7 +82,8 @@
 		<module>jboss7-support</module>
 		<module>errai-codegen</module>
 		<module>errai-marshalling</module>
-	</modules>
+        <module>errai-js</module>
+    </modules>
 
 	<dependencyManagement>
 		<dependencies>
