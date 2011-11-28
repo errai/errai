@@ -68,7 +68,7 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
     asyncContext.addListener(new AsyncListener() {
       @Override
       public void onTimeout(AsyncEvent event) throws IOException {
-        queue.poll(false, asyncContext.getResponse().getOutputStream());
+        poll(queue, asyncContext);
         asyncContext.complete();
       }
       
@@ -86,10 +86,7 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
       @Override
       public void activate(MessageQueue queue) {
         try {
-          if (queue == null) return;
-          queue.setActivationCallback(null);
-          queue.heartBeat();
-          queue.poll(false, asyncContext.getResponse().getOutputStream());
+         poll(queue, asyncContext);
         }
         catch (final Throwable t) {
           try {
@@ -118,5 +115,12 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
         writeExceptionToOutputStream(response, e);
       }
     }
+  }
+  
+  private void poll(MessageQueue queue, AsyncContext asyncContext) throws IOException {
+    if (queue == null) return;
+    queue.setActivationCallback(null);
+    queue.heartBeat();
+    queue.poll(false, asyncContext.getResponse().getOutputStream());
   }
 }
