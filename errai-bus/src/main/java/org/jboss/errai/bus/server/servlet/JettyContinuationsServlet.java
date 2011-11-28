@@ -58,8 +58,8 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
 
   /**
    * Called by the server (via the <code>service</code> method) to allow a servlet to handle a POST request, by
-   * sending the request
-   * xxxxxxx
+   * sending the request.
+   * 
    *
    * @param httpServletRequest  - object that contains the request the client has made of the servlet
    * @param httpServletResponse - object that contains the response the servlet sends to the client
@@ -102,6 +102,7 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
         return;
       }
 
+      // TODO re-evaluate locking strategy
       synchronized (queue.getActivationLock()) {
         if (wait) {
           final Continuation cont = ContinuationSupport.getContinuation(httpServletRequest, queue);

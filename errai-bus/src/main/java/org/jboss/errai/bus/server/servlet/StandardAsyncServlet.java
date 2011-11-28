@@ -82,30 +82,28 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
       public void onStartAsync(AsyncEvent event) throws IOException {}
     });
 
-    synchronized (queue.getActivationLock()) {
-      queue.setActivationCallback(new QueueActivationCallback() {
-        @Override
-        public void activate(MessageQueue queue) {
+    queue.setActivationCallback(new QueueActivationCallback() {
+      @Override
+      public void activate(MessageQueue queue) {
+        try {
+          if (queue == null) return;
+          queue.setActivationCallback(null);
+          queue.heartBeat();
+          queue.poll(false, asyncContext.getResponse().getOutputStream());
+        }
+        catch (final Throwable t) {
           try {
-            if (queue == null) return;
-            queue.setActivationCallback(null);
-            queue.heartBeat();
-            queue.poll(false, asyncContext.getResponse().getOutputStream());
+            writeExceptionToOutputStream((HttpServletResponse)asyncContext.getResponse(), t);
           }
-          catch (final Throwable t) {
-            try {
-              writeExceptionToOutputStream((HttpServletResponse)asyncContext.getResponse(), t);
-            }
-            catch (IOException e) {
-              throw new RuntimeException("Failed to write exception to output stream", e);
-            }
-          }
-          finally {
-            asyncContext.complete();
+          catch (IOException e) {
+            throw new RuntimeException("Failed to write exception to output stream", e);
           }
         }
-      });
-    }
+        finally {
+          asyncContext.complete();
+        }
+      }
+    });
   }
 
   @Override
