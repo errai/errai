@@ -16,7 +16,6 @@ import com.google.gwt.core.client.GWT;
  */
 public class RestClient {
 
-  // TODO The proxy factory is shared with Errai RPC for now
   private static ProxyProvider proxyProvider = new RemoteServiceProxyFactory();
 
   /**

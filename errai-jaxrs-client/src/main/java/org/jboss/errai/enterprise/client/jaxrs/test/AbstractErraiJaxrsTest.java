@@ -1,9 +1,7 @@
 package org.jboss.errai.enterprise.client.jaxrs.test;
 
 import org.jboss.errai.bus.client.api.RemoteCallback;
-import org.jboss.errai.enterprise.client.jaxrs.JaxrsClientEntryPoint;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
-import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 
 import com.google.gwt.http.client.Response;
 import com.google.gwt.junit.client.GWTTestCase;
@@ -53,17 +51,5 @@ public abstract class AbstractErraiJaxrsTest extends GWTTestCase {
         assertEquals(msg, body, response.getText());
       finishTest();
     }
-  }
-
-  @Override
-  public void gwtSetUp() throws Exception {
-    super.gwtSetUp();
-    
-    // make sure the static initializer runs (the class is loaded)
-    new MarshallerFramework();
-
-    // Unfortunately, GWTTestCase does not call our inherited module's onModuleLoad() methods
-    // http://code.google.com/p/google-web-toolkit/issues/detail?id=3791
-    new JaxrsClientEntryPoint().onModuleLoad();
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, a divison Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.jboss.errai.enterprise.client.jaxrs;
 
-import com.google.gwt.core.client.EntryPoint;
+import org.jboss.errai.ioc.client.api.IOCBootstrapTask;
+import org.jboss.errai.ioc.client.api.TaskOrder;
+
 import com.google.gwt.core.client.GWT;
 
 /**
- * The GWT EntryPoint for the JAX-RS integration.
+ * Bootstrapper for the JAX-RS module.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class JaxrsClientEntryPoint implements EntryPoint {
-  public void onModuleLoad() {
-	  JaxrsProxyLoader proxyLoader = GWT.create(JaxrsProxyLoader.class);
-	  proxyLoader.loadProxies();
+@IOCBootstrapTask(TaskOrder.Before)
+public class JaxrsModuleBootstrapper implements Runnable {
+  @Override
+  public void run() {
+    JaxrsProxyLoader proxyLoader = GWT.create(JaxrsProxyLoader.class);
+    proxyLoader.loadProxies();
   }
 }

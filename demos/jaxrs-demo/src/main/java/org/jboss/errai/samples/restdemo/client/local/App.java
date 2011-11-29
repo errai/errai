@@ -21,10 +21,11 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
+import org.jboss.errai.bus.client.api.Caller;
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
-import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.samples.restdemo.client.shared.Customer;
 import org.jboss.errai.samples.restdemo.client.shared.CustomerService;
@@ -48,6 +49,10 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  */
 @EntryPoint
 public class App {
+  
+  @Inject
+  private Caller<CustomerService> customerService;
+  
   final private FlexTable customersTable = new FlexTable();
   final private TextBox custFirstName = new TextBox();
   final private TextBox custLastName = new TextBox();
@@ -57,7 +62,7 @@ public class App {
 
   final RemoteCallback<Long> creationCallback = new RemoteCallback<Long>() {
     public void callback(Long id) {
-      RestClient.create(CustomerService.class, new RemoteCallback<Customer>() {
+      customerService.call(new RemoteCallback<Customer>() {
         public void callback(Customer customer) {
           addCustomerToTable(customer, customersTable.getRowCount() + 1);
         }
@@ -88,7 +93,7 @@ public class App {
     final Button create = new Button("Create", new ClickHandler() {
       public void onClick(ClickEvent clickEvent) {
         Customer customer = new Customer(custFirstName.getText(), custLastName.getText(), custPostalCode.getText());
-        RestClient.create(CustomerService.class, creationCallback).createCustomer(customer);
+        customerService.call(creationCallback).createCustomer(customer);
       }
     });
 
@@ -122,8 +127,7 @@ public class App {
         }
       }
     };
-
-    RestClient.create(CustomerService.class, listCallback).listAllCustomers();
+    customerService.call(listCallback).listAllCustomers();
   }
 
   private void addCustomerToTable(final Customer customer, int row) {
@@ -141,13 +145,13 @@ public class App {
         customer.setFirstName(firstName.getText());
         customer.setLastName(lastName.getText());
         customer.setPostalCode(postalCode.getText());
-        RestClient.create(CustomerService.class, modificationCallback).updateCustomer(customer.getId(), customer);
+        customerService.call(modificationCallback).updateCustomer(customer.getId(), customer);
       }
     });
 
     Button delete = new Button("Delete", new ClickHandler() {
       public void onClick(ClickEvent clickEvent) {
-        RestClient.create(CustomerService.class, deletionCallback).deleteCustomer(customer.getId());
+        customerService.call(deletionCallback).deleteCustomer(customer.getId());
       }
     });
 
