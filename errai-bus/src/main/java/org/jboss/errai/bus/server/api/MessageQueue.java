@@ -28,6 +28,7 @@ public interface MessageQueue {
 
   boolean offer(Message message);
 
+  // TODO needed?
   void scheduleActivation();
 
   void activity();
