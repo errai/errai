@@ -53,7 +53,56 @@ public class TypeDemarshallers {
         }
       }
     });
+    
+    
+    addDemarshaller(java.lang.Long.class, new Demarshaller() {
+      @Override
+      public Object demarshall(JSONObject o, DecodingContext decodingContext) {
+        return Long.parseLong(o.get("__NumVal").isString().stringValue());
+      }
+    });
 
+    addDemarshaller(java.lang.Double.class, new Demarshaller() {
+      @Override
+      public Object demarshall(JSONObject o, DecodingContext decodingContext) {
+        return o.get("__NumVal").isNumber().doubleValue();
+      }
+    });
+
+    addDemarshaller(java.lang.Float.class, new Demarshaller() {
+      @Override
+      public Object demarshall(JSONObject o, DecodingContext decodingContext) {
+        return new Double(o.get("__NumVal").isNumber().doubleValue()).floatValue();
+      }
+    });
+
+    addDemarshaller(java.lang.Integer.class, new Demarshaller() {
+      @Override
+      public Object demarshall(JSONObject o, DecodingContext decodingContext) {
+        return new Double(o.get("__NumVal").isNumber().doubleValue()).intValue();
+      }
+    });
+
+    addDemarshaller(java.lang.Byte.class, new Demarshaller() {
+      @Override
+      public Object demarshall(JSONObject o, DecodingContext decodingContext) {
+        return new Double(o.get("__NumVal").isNumber().doubleValue()).byteValue();
+      }
+    });
+
+    addDemarshaller(java.lang.Short.class, new Demarshaller() {
+      @Override
+      public Object demarshall(JSONObject o, DecodingContext decodingContext) {
+        return new Double(o.get("__NumVal").isNumber().doubleValue()).shortValue();
+      }
+    });
+
+    addDemarshaller(Character.class, new Demarshaller() {
+      @Override
+      public Object demarshall(JSONObject o, DecodingContext decodingContext) {
+        return o.get("__NumVal").isString().stringValue().charAt(0);
+      }
+    });
 
   }
 

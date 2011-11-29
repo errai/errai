@@ -27,4 +27,5 @@ import org.jboss.errai.bus.server.annotations.Remote;
 public interface TestRPCServiceRemote {
   public boolean isGreaterThan(int a, int b);
   public void exception() throws TestException;
+  public GenericCollectionInEntity genericCollection(GenericCollectionInEntity ent);
 }

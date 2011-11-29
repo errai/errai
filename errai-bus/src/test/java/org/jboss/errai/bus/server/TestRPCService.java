@@ -16,15 +16,11 @@
 
 package org.jboss.errai.bus.server;
 
+import org.jboss.errai.bus.client.tests.support.GenericCollectionInEntity;
 import org.jboss.errai.bus.client.tests.support.TestException;
 import org.jboss.errai.bus.client.tests.support.TestRPCServiceRemote;
 import org.jboss.errai.bus.server.annotations.Service;
 
-/**
- * User: christopherbrock
- * Date: 5-Aug-2010
- * Time: 3:46:09 PM
- */
 @Service
 public class TestRPCService implements TestRPCServiceRemote {
   public boolean isGreaterThan(int a, int b) {
@@ -35,5 +31,10 @@ public class TestRPCService implements TestRPCServiceRemote {
   @Override
   public void exception() throws TestException {
     throw new TestException();
+  }
+
+  @Override
+  public GenericCollectionInEntity genericCollection(GenericCollectionInEntity ent) {
+    return ent;
   }
 }
