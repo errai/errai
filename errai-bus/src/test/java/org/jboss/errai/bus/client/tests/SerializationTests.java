@@ -5,10 +5,7 @@ import java.util.List;
 
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.tests.support.StudyTreeNodeContainer;
-import org.jboss.errai.bus.client.tests.support.TestRPCServiceRemote;
-import org.jboss.errai.bus.client.tests.support.TestSerializationRPCService;
-import org.jboss.errai.bus.client.tests.support.TreeNodeContainer;
+import org.jboss.errai.bus.client.tests.support.*;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -68,7 +65,7 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
   public void testIntegerInCollection() {
     runAfterInit(new Runnable() {
       @Override
@@ -91,7 +88,7 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
   public void testFloatInCollection() {
     runAfterInit(new Runnable() {
       @Override
@@ -107,11 +104,43 @@ public class SerializationTests extends AbstractErraiTest {
         MessageBuilder.createCall(new RemoteCallback<List<Float>>() {
           @Override
           public void callback(List<Float> response) {
-            assertEquals(list, response);
-            finishTest();
+            try {
+              assertEquals(list, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
           }
         }, TestRPCServiceRemote.class).listOfFloat(list);
       }
     });
+  }
+
+  public void testNestedClassSerialization() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final ClassWithNestedClass clazz = new ClassWithNestedClass();
+        clazz.setNested(new ClassWithNestedClass.Nested("foo"));
+
+        MessageBuilder.createCall(new RemoteCallback<ClassWithNestedClass>() {
+          @Override
+          public void callback(ClassWithNestedClass response) {
+            try {
+              assertEquals(clazz, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestRPCServiceRemote.class).nestedClass(clazz);
+      }
+    });
+
+
   }
 }

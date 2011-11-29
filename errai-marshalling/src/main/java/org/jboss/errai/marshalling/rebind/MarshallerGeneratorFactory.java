@@ -171,8 +171,19 @@ public class MarshallerGeneratorFactory {
   private void generateMarshallers() {
     MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
 
-    Set<Class<?>> exposed = new HashSet<Class<?>>(scanner.getTypesAnnotatedWith(Portable.class));
-    exposed.addAll(scanner.getTypesAnnotatedWith(ExposeEntity.class));
+    Set<Class<?>> exposedFromScanner = new HashSet<Class<?>>(scanner.getTypesAnnotatedWith(Portable.class));
+    exposedFromScanner.addAll(scanner.getTypesAnnotatedWith(ExposeEntity.class));
+
+    Set<Class<?>> exposed = new HashSet<Class<?>>();
+
+    for (Class<?> cls : exposedFromScanner) {
+      for (Class<?> decl : cls.getDeclaredClasses()) {
+        if (decl.isEnum()) continue;
+        exposed.add(decl);
+      }
+    }
+
+    exposed.addAll(exposedFromScanner);
     // add all GWT JRE  classes
 
     exposed.add(Throwable.class);
@@ -196,7 +207,7 @@ public class MarshallerGeneratorFactory {
     exposed.add(ConcurrentModificationException.class);
     exposed.add(EmptyStackException.class);
     //exposed.add(MissingResourceException.class);
-   // exposed.add(NoSuchMethodException.class);
+    // exposed.add(NoSuchMethodException.class);
 
 
     for (Class<?> clazz : exposed) {
@@ -216,12 +227,13 @@ public class MarshallerGeneratorFactory {
       constructor.append(loadVariable(varName).assignValue(marshaller));
 
       constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
-              .invoke("put", clazz.getName(), loadVariable(varName)));
+              .invoke("put", clazz.getCanonicalName(), loadVariable(varName)));
 
-      for (String s : mappingContext.getReverseMappingAliasFor(clazz.getName())) {
+      for (String s : mappingContext.getReverseMappingAliasFor(clazz.getCanonicalName())) {
         constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
                 .invoke("put", s, loadVariable(varName)));
       }
+
     }
 
     constructor.finish();

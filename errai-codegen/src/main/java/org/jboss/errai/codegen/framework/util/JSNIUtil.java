@@ -9,7 +9,7 @@ import org.jboss.errai.codegen.framework.meta.MetaParameter;
  */
 public class JSNIUtil {
   public static String fieldAccess(MetaField field) {
-    return "instance.@" + field.getDeclaringClass().getFullyQualifiedName() + "::"
+    return "instance.@" + field.getDeclaringClass().getFullyQualifiedName().replaceAll("\\$", "\\.") + "::"
             + field.getName();
   }
 
@@ -17,7 +17,7 @@ public class JSNIUtil {
     StringBuilder buf = new StringBuilder(
             (method.getReturnType().isVoid() ? "" : "return ") +
                     "instance.@"
-                    + method.getDeclaringClass().getFullyQualifiedName() + "::"
+                    + method.getDeclaringClass().getFullyQualifiedName().replaceAll("\\$", "\\.") + "::"
                     + method.getName() + "(");
 
     for (MetaParameter parm : method.getParameters()) {

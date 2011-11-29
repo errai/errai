@@ -15,7 +15,6 @@ public class ErraiJS implements EntryPoint {
   }
 
   private native void erraiOnLoad() /*-{
-
     $wnd.erraiTypeOf = function (value) {
         var s = typeof value;
         if (s === 'object') {
@@ -30,7 +29,7 @@ public class ErraiJS implements EntryPoint {
             }
         }
         return s;
-    }
+    };
 
     if ($wnd.erraiOnLoad && typeof $wnd.erraiOnLoad == 'function') $wnd.erraiOnLoad();
   }-*/;

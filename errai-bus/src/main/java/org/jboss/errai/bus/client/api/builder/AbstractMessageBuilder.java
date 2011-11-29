@@ -84,8 +84,18 @@ public class AbstractMessageBuilder<R extends Sendable> {
       }
 
       public void reply() {
+        Message incomingMessage = getIncomingMessage();
+
+        if (incomingMessage == null) {
+          throw new IllegalStateException("Cannot reply.  Cannot find incoming message.");
+        }
+
+        if (!incomingMessage.hasResource(RequestDispatcher.class.getName())) {
+          throw new IllegalStateException("Cannot reply.  Cannot find RequestDispatcher resource.");
+        }
+
         RequestDispatcher dispatcher = (RequestDispatcher)
-                getIncomingMessage().getResource(ResourceProvider.class, RequestDispatcher.class.getName()).get();
+                incomingMessage.getResource(ResourceProvider.class, RequestDispatcher.class.getName()).get();
 
         if (dispatcher == null) {
           throw new IllegalStateException("Cannot reply.  Cannot find RequestDispatcher resource.");

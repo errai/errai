@@ -88,4 +88,19 @@ public class MessageFactory {
 
     return msg;
   }
+  
+  private static class DisplayStream extends InputStream {
+    private InputStream in;
+
+    private DisplayStream(InputStream in) {
+      this.in = in;
+    }
+
+    @Override
+    public int read() throws IOException {
+      int i = in.read();
+      System.out.print((char) i);
+      return i;
+    }
+  }
 }

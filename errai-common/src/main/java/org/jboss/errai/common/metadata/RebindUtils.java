@@ -94,6 +94,8 @@ public class RebindUtils {
           = new HashMap<Class<? extends Annotation>, Boolean>();
 
   public static boolean hasClasspathChangedForAnnotatedWith(Set<Class<? extends Annotation>> annotations) {
+    if (Boolean.getBoolean("errai.devel.forcecache")) return true;
+    
     boolean result = false;
     for (Class<? extends Annotation> a : annotations) {
       /**

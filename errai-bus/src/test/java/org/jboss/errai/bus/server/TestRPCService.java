@@ -18,6 +18,7 @@ package org.jboss.errai.bus.server;
 
 import java.util.List;
 
+import org.jboss.errai.bus.client.tests.support.ClassWithNestedClass;
 import org.jboss.errai.bus.client.tests.support.TestException;
 import org.jboss.errai.bus.client.tests.support.TestRPCServiceRemote;
 import org.jboss.errai.bus.server.annotations.Service;
@@ -51,5 +52,10 @@ public class TestRPCService implements TestRPCServiceRemote {
   @Override
   public List<Float> listOfFloat(List<Float> list) {
     return list;
+  }
+
+  @Override
+  public ClassWithNestedClass nestedClass(ClassWithNestedClass clazz) {
+    return clazz;
   }
 }
