@@ -37,16 +37,7 @@ import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.ioc.client.ContextualProviderContext;
 import org.jboss.errai.ioc.client.InterfaceInjectionContext;
-import org.jboss.errai.ioc.client.api.Bootstrapper;
-import org.jboss.errai.ioc.client.api.CodeDecorator;
-import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
-import org.jboss.errai.ioc.client.api.CreatePanel;
-import org.jboss.errai.ioc.client.api.EntryPoint;
-import org.jboss.errai.ioc.client.api.GeneratedBy;
-import org.jboss.errai.ioc.client.api.IOCProvider;
-import org.jboss.errai.ioc.client.api.ToPanel;
-import org.jboss.errai.ioc.client.api.ToRootPanel;
-import org.jboss.errai.ioc.client.api.TypeProvider;
+import org.jboss.errai.ioc.client.api.*;
 import org.jboss.errai.ioc.rebind.AnnotationHandler;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.IOCProcessorFactory;
@@ -86,7 +77,11 @@ public class IOCBootstrapGenerator {
   private String packageFilter = null;
   private boolean useReflectionStubs = false;
   private List<Runnable> deferredTasks = new ArrayList<Runnable>();
-  
+
+  private List<Class<?>> beforeTasks = new ArrayList<Class<?>>();
+  private List<Class<?>> afterTasks = new ArrayList<Class<?>>();
+
+
   private Logger log = LoggerFactory.getLogger(IOCBootstrapGenerator.class);
 
   public static final String QUALIFYING_METADATA_FACTORY_PROPERTY = "errai.ioc.QualifyingMetaDataFactory";
@@ -132,6 +127,7 @@ public class IOCBootstrapGenerator {
     annos.add(RequestScoped.class);
     annos.add(Singleton.class);
     annos.add(EntryPoint.class);
+    annos.add(IOCBootstrapTask.class);
 
     String gen;
     if (RebindUtils.hasClasspathChangedForAnnotatedWith(annos) || !cacheFile.exists()) {
@@ -149,7 +145,7 @@ public class IOCBootstrapGenerator {
 
     return gen;
   }
-  
+
   private String _generate(String packageName, String className) {
     ClassStructureBuilder<?> classStructureBuilder
             = Implementations.implement(Bootstrapper.class, packageName, className);
@@ -215,6 +211,10 @@ public class IOCBootstrapGenerator {
                                   BlockBuilder<?> blockBuilder) {
     blockBuilder.append(Stmt.declareVariable("ctx", InterfaceInjectionContext.class,
             Stmt.newObject(InterfaceInjectionContext.class)));
+
+
+    _doRunnableTasks(beforeTasks, blockBuilder);
+
     MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
 
     procFactory.process(scanner, procContext);
@@ -235,6 +235,8 @@ public class IOCBootstrapGenerator {
       GenUtil.addPrivateAccessStubs(!useReflectionStubs, classBuilder, m);
     }
 
+    _doRunnableTasks(afterTasks, blockBuilder);
+
     blockBuilder.finish();
 
     String generated = classBuilder.toJavaString();
@@ -247,6 +249,17 @@ public class IOCBootstrapGenerator {
 
 
     sourceWriter.print(generated);
+  }
+
+  private static void _doRunnableTasks(Collection<Class<?>> classes, BlockBuilder<?> blockBuilder) {
+    for (Class<?> clazz : classes) {
+      if (!Runnable.class.isAssignableFrom(clazz)) {
+        throw new RuntimeException("annotated @IOCBootstrap task: " + clazz.getName() + " is not of type: "
+                + Runnable.class.getName());
+      }
+
+      blockBuilder.append(Stmt.nestedCall(Stmt.newObject(clazz)).invoke("run"));
+    }
   }
 
   public void addDeferred(Runnable task) {
@@ -298,6 +311,17 @@ public class IOCBootstrapGenerator {
       }
       catch (Exception e) {
         throw new ErraiBootstrapFailure("unable to load IOC Extension Configurator: " + e.getMessage(), e);
+      }
+    }
+
+    Set<Class<?>> bootstrappers = scanner.getTypesAnnotatedWith(IOCBootstrapTask.class);
+    for (Class<?> clazz : bootstrappers) {
+      IOCBootstrapTask task = clazz.getAnnotation(IOCBootstrapTask.class);
+      if (task.value() == TaskOrder.Before) {
+        beforeTasks.add(clazz);
+      }
+      else {
+        afterTasks.add(clazz);
       }
     }
 

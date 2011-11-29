@@ -16,16 +16,16 @@
 
 package org.jboss.errai.ioc.client;
 
-import java.util.Map;
-
-import org.jboss.errai.ioc.client.api.Bootstrapper;
-
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
+import org.jboss.errai.ioc.client.api.Bootstrapper;
+
+import java.util.Map;
 
 public class Container implements EntryPoint {
+
   @Override
   public void onModuleLoad() {
     final Bootstrapper bootstrapper = GWT.create(Bootstrapper.class);
@@ -40,4 +40,5 @@ public class Container implements EntryPoint {
       ctx.getPanels().get(entry.getValue()).add(entry.getKey());
     }
   }
+
 }
