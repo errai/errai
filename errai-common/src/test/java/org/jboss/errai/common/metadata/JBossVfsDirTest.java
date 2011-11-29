@@ -1,6 +1,7 @@
 package org.jboss.errai.common.metadata;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.Closeable;
@@ -18,17 +19,17 @@ import org.junit.Test;
  * Unit testing for Errai's glue between the JBoss VFS and the Reflections VFS.
  * 
  * @author Jonathan Fuerth <jfuerth@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class JBossVfsDirTest {
 
   /**
-   * A new directory created and mounted into the JBoss VFS at {
-   * {@link #getJBossVfsMountPoint()} during setup. Test methods are free to
-   * create and delete entries under this directory at their whim. The whole
-   * directory will be deleted in {@link #teardown()}.
+   * A new directory created and mounted into the JBoss VFS at { {@link #getJBossVfsMountPoint()} during setup. Test
+   * methods are free to create and delete entries under this directory at their whim. The whole directory will be
+   * deleted in {@link #teardown()}.
    */
   private File mountedDir;
-  
+
   /**
    * Handle for unmounting mountedDir at test teardown time.
    */
@@ -51,7 +52,7 @@ public class JBossVfsDirTest {
     mount.close();
     areEmDashAreEff(mountedDir);
   }
-  
+
   @Test
   public void testEmptyVfsDirListing() throws Exception {
     JBossVfsDir jbvd = new JBossVfsDir(getJBossVfsMountPoint().asDirectoryURL());
@@ -68,7 +69,7 @@ public class JBossVfsDirTest {
     new File(mountedDir, "foo").createNewFile();
     new File(mountedDir, "bar").createNewFile();
     new File(mountedDir, "baz").createNewFile();
-    
+
     JBossVfsDir jbvd = new JBossVfsDir(getJBossVfsMountPoint().asDirectoryURL());
     int count = 0;
     for (org.reflections.vfs.Vfs.File reflectionsFile : jbvd.getFiles()) {
@@ -84,7 +85,7 @@ public class JBossVfsDirTest {
   @Test
   public void testNestedEmptyVfsDirListing() throws Exception {
     new File(mountedDir, "deeply/nested/directories").mkdirs();
-    
+
     JBossVfsDir jbvd = new JBossVfsDir(getJBossVfsMountPoint().asDirectoryURL());
     int count = 0;
     for (org.reflections.vfs.Vfs.File reflectionsFile : jbvd.getFiles()) {
@@ -93,13 +94,12 @@ public class JBossVfsDirTest {
     }
     assertEquals("All dirs were empty, but got non-zero count", 0, count);
   }
-  
+
   /**
    * Simple "rm -rf" equivalent, implemented for the 12,433rd time in Java.
    * 
    * @param deleteMe
-   *          The directory to delete. This directory itself and all contents
-   *          will be removed from the filesystem.
+   *          The directory to delete. This directory itself and all contents will be removed from the filesystem.
    */
   private static void areEmDashAreEff(File deleteMe) {
     for (File child : deleteMe.listFiles()) {
@@ -112,13 +112,14 @@ public class JBossVfsDirTest {
     }
     deleteMe.delete();
   }
-  
+
   @Test
   public void testRejectNonJBossVfsUrl() throws Exception {
     try {
       new JBossVfsDir(new File(System.getProperty("java.io.tmpdir")).toURI().toURL());
       fail("Shouldn't have been able to create JBossVfsDir from regular file: URL");
-    } catch (IllegalArgumentException ex) {
+    }
+    catch (IllegalArgumentException ex) {
       // expected outcome
     }
   }
@@ -128,7 +129,8 @@ public class JBossVfsDirTest {
     new File(mountedDir, "foo").createNewFile();
 
     JBossVfsDir jbvd = new JBossVfsDir(getJBossVfsMountPoint().asDirectoryURL());
-    assertEquals("/mnt/foo", jbvd.getFiles().iterator().next().getFullPath());
+    String path = jbvd.getFiles().iterator().next().getFullPath();
+    assertTrue("Wrong path:" + path, path.matches("/([A-Za-z]:/)?mnt/foo"));
   }
 
   @Test
@@ -136,7 +138,8 @@ public class JBossVfsDirTest {
     new File(mountedDir, "foo").createNewFile();
 
     JBossVfsDir jbvd = new JBossVfsDir(getJBossVfsMountPoint().asDirectoryURL());
-    assertEquals("/mnt/foo", jbvd.getFiles().iterator().next().getRelativePath());
+    String path = jbvd.getFiles().iterator().next().getRelativePath();
+    assertTrue("Wrong path:" + path, path.matches("/([A-Za-z]:/)?mnt/foo"));
   }
 
   @Test
