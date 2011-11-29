@@ -86,7 +86,7 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
       @Override
       public void activate(MessageQueue queue) {
         try {
-         poll(queue, asyncContext);
+          poll(queue, asyncContext);
         }
         catch (final Throwable t) {
           try {
