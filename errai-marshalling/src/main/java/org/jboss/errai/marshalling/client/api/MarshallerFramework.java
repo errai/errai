@@ -30,7 +30,7 @@ public class MarshallerFramework implements EntryPoint {
   public void onModuleLoad() {
   }
 
-  public static Object demarshalErraiJSON(JSONObject object) {
+  public static Object demarshalErraiJSON(JSONValue object) {
     JSONMarshallingSession session = new JSONMarshallingSession();
 
     Marshaller<Object, Object> marshaller =
