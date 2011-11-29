@@ -1,5 +1,8 @@
 package org.jboss.errai.enterprise.jaxrs.client.shared;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -13,10 +16,21 @@ import org.jboss.errai.enterprise.jaxrs.client.shared.entity.Entity;
 
 @Path("/test/customtype")
 public interface CustomTypeTestService {
-
+  public static final List<Entity> ENTITIES = new ArrayList<Entity>() {
+    {
+      add(new Entity(1, "entity1"));
+      add(new Entity(2, "entity2"));
+    }
+  };
+  
   @GET
+  @Path("/test/customtype/1")
   @Produces("application/json")
   public Entity getEntity();
+  
+  @GET
+  @Produces("application/json")
+  public List<Entity> getEntities();
   
   @POST
   @Consumes("application/json")

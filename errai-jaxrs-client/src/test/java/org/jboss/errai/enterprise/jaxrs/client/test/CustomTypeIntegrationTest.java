@@ -1,5 +1,7 @@
 package org.jboss.errai.enterprise.jaxrs.client.test;
 
+import java.util.List;
+
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
 import org.jboss.errai.enterprise.jaxrs.client.shared.CustomTypeTestService;
@@ -20,6 +22,12 @@ public class CustomTypeIntegrationTest extends AbstractErraiJaxrsTest {
   public void testGetWithCustomType() {
     RestClient.create(CustomTypeTestService.class,
         new AssertionCallback<Entity>("@GET using custom type failed", new Entity(1, "entity1"))).getEntity();
+  }
+
+  @Test
+  public void testGetWithListOfCustomType() {
+    RestClient.create(CustomTypeTestService.class,
+        new AssertionCallback<List<?>>("@GET using list of custom type failed", CustomTypeTestService.ENTITIES)).getEntities();
   }
 
   @Test

@@ -1,5 +1,7 @@
 package org.jboss.errai.enterprise.jaxrs.server;
 
+import java.util.List;
+
 import org.jboss.errai.enterprise.jaxrs.client.shared.CustomTypeTestService;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.Entity;
 
@@ -26,5 +28,10 @@ public class CustomTypeTestServiceImpl implements CustomTypeTestService {
   @Override
   public Entity deleteEntity(long id) {
     return new Entity(id, "entity");
+  }
+
+  @Override
+  public List<Entity> getEntities() {
+    return ENTITIES;
   }
 }

@@ -6,8 +6,6 @@ import org.jboss.errai.codegen.framework.Variable;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.util.Stmt;
-import org.jboss.errai.common.client.json.JSONEncoderCli;
-import org.jboss.errai.common.client.types.EncodingContext;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 
 import com.google.gwt.json.client.JSONParser;
@@ -46,7 +44,7 @@ public class TypeMarshaller {
     else {
       demarshallingStatement = 
         Stmt.invokeStatic(MarshallerFramework.class, "demarshalErraiJSON", 
-            Stmt.invokeStatic(JSONParser.class, "parse", statement).invoke("isObject"));
+            Stmt.invokeStatic(JSONParser.class, "parseStrict", statement));
     }
     return demarshallingStatement;
   }
