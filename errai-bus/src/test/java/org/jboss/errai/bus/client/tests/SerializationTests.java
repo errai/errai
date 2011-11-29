@@ -140,7 +140,32 @@ public class SerializationTests extends AbstractErraiTest {
         }, TestRPCServiceRemote.class).nestedClass(clazz);
       }
     });
-
-
+  }
+  
+  public void testEmptyWithGenericCollections() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final EntityWithGenericCollections ent = new EntityWithGenericCollections();
+        List<Float> listOffFloats = new ArrayList<Float>();
+        listOffFloats.add(1.0f);
+        listOffFloats.add(1.1f);
+        listOffFloats.add(1.2f);
+        
+        MessageBuilder.createCall(new RemoteCallback<EntityWithGenericCollections>() {
+          @Override
+          public void callback(EntityWithGenericCollections response) {
+            try {
+              assertEquals(ent, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestRPCServiceRemote.class).genericCollections(ent);
+      }
+    });
   }
 }

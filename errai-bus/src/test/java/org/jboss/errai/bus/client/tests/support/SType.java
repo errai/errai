@@ -16,11 +16,11 @@
 
 package org.jboss.errai.bus.client.tests.support;
 
-import org.jboss.errai.common.client.api.annotations.ExposeEntity;
+import org.jboss.errai.common.client.api.annotations.Portable;
 
 import java.util.*;
 
-@ExposeEntity
+@Portable
 public class SType extends STypeSuper {
   private String fieldOne;
   private String fieldTwo;

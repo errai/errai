@@ -32,6 +32,8 @@ public interface TestRPCServiceRemote {
   public List<Long> listOfLong(List<Long> list);
   public List<Integer> listOfInteger(List<Integer> list);
   public List<Float> listOfFloat(List<Float> list);
+
   public ClassWithNestedClass nestedClass(ClassWithNestedClass clazz);
 
+  public EntityWithGenericCollections genericCollections(EntityWithGenericCollections ent);
 }
