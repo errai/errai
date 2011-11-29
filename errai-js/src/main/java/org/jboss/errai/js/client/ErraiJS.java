@@ -15,6 +15,23 @@ public class ErraiJS implements EntryPoint {
   }
 
   private native void erraiOnLoad() /*-{
+
+    $wnd.erraiTypeOf = function (value) {
+        var s = typeof value;
+        if (s === 'object') {
+            if (value) {
+                if (typeof value.length === 'number' &&
+                        !(value.propertyIsEnumerable('length')) &&
+                        typeof value.splice === 'function') {
+                    s = 'array';
+                }
+            } else {
+                s = 'null';
+            }
+        }
+        return s;
+    }
+
     if ($wnd.erraiOnLoad && typeof $wnd.erraiOnLoad == 'function') $wnd.erraiOnLoad();
   }-*/;
 }

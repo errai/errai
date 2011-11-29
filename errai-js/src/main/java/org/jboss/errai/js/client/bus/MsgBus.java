@@ -6,7 +6,6 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.client.protocols.MessageParts;
 import org.jboss.errai.js.client.bus.marshall.MsgTools;
 import org.timepedia.exporter.client.Export;
 import org.timepedia.exporter.client.ExportPackage;
@@ -25,7 +24,7 @@ public class MsgBus implements Exportable {
   }
 
   public void send(String subject, Object value) {
-    bus.send(new CommandMessage().toSubject(subject).set(MessageParts.Value, value));
+    bus.send(CommandMessage.createWithParts(MsgTools.jsObjToMap(value)).toSubject(subject));
   }
 
   public void unsubscribeAll(String subject) {
