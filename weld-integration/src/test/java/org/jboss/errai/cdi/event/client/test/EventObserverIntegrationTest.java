@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jboss.errai.cdi.event.client.EventObserverTestModule;
+import org.jboss.errai.enterprise.client.cdi.api.CDI;
 
 import com.google.gwt.user.client.Timer;
 
@@ -20,7 +21,7 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
   }
 
   public void testBusReadyEventObserver() {
-    runAfterInit(new Runnable() {
+    CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
         assertEquals("Wrong number of BusReadyEvents received:", 1, 
@@ -32,13 +33,13 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
   }
 
   public void testEventObservers() {
-    runAfterInit(new Runnable() {
+    CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
         assertNotNull(EventObserverTestModule.getInstance().getStartEvent());
         EventObserverTestModule.getInstance().start();
       }
-    }, 2000);
+    });
     
     final Timer timer = new Timer() {
       public void run() {

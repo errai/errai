@@ -6,9 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
-import org.jboss.errai.enterprise.client.cdi.api.CDI;
-
-import com.google.gwt.user.client.Timer;
 
 /**
  * Base class for all event integration tests.
@@ -73,31 +70,5 @@ public abstract class AbstractEventIntegrationTest extends AbstractErraiCDITest 
     assertEquals("Wrong events observed for @AC", expectedEvents.get("AC"), actualEvents.get("AC"));
     assertEquals("Wrong events observed for @BC", expectedEvents.get("BC"), actualEvents.get("BC"));
     assertEquals("Wrong events observed for @ABC", expectedEvents.get("ABC"), actualEvents.get("ABC"));
-  }
-
-  /**
-   * Runs the provided Runnable after the CDI client has been initialized.
-   * 
-   * @param r
-   */
-  protected void runAfterInit(final Runnable r) {
-    runAfterInit(r, 1000);
-  }
-
-  protected void runAfterInit(final Runnable r, final int postInitDelay) {
-    Runnable internalRunnable = new Runnable() {
-      @Override
-      public void run() {
-        Timer internalTimer = new Timer() {
-          @Override
-          public void run() {
-            r.run();
-          }
-        };
-        internalTimer.schedule(postInitDelay);
-      }
-    };
-
-    CDI.addPostInitTask(internalRunnable);
   }
 }

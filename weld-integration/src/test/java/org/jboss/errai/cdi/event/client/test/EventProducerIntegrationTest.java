@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jboss.errai.cdi.event.client.EventProducerTestModule;
+import org.jboss.errai.enterprise.client.cdi.api.CDI;
 
 import com.google.gwt.user.client.Timer;
 
@@ -36,7 +37,7 @@ public class EventProducerIntegrationTest extends AbstractEventIntegrationTest {
   }
 
   public void testEventProducers() {
-    runAfterInit(new Runnable() {
+    CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
         if (EventProducerTestModule.getInstance().getBusReadyEventsReceived()) {
@@ -46,7 +47,7 @@ public class EventProducerIntegrationTest extends AbstractEventIntegrationTest {
           fail("Did not receive a BusReadyEvent!");
         }
       }
-    }, 2000);
+    });
     
     final Timer testResultTimer = new Timer() {
       public void run() {
