@@ -206,8 +206,6 @@ public class MarshallerGeneratorFactory {
     exposed.add(UnsupportedEncodingException.class);
     exposed.add(ConcurrentModificationException.class);
     exposed.add(EmptyStackException.class);
-    //exposed.add(MissingResourceException.class);
-    // exposed.add(NoSuchMethodException.class);
 
 
     for (Class<?> clazz : exposed) {
@@ -338,17 +336,6 @@ public class MarshallerGeneratorFactory {
             loadVariable("newArray", loadVariable("i"))
                     .assignValue(Cast.to(outerType,
                             loadVariable("a0").invoke("get", loadVariable("i"))));
-
-//    /**
-//     * Special case for handling char elements.
-//     */
-//    if (outerType.getFullyQualifiedName().equals(Character.class.getName())) {
-//      outerAccessorStatement =
-//              loadVariable("newArray", loadVariable("i"))
-//                      .assignValue(
-//                              Stmt.nestedCall(Cast.to(String.class, loadVariable("a0").invoke("get", loadVariable("i"))))
-//                                      .invoke("charAt", 0));
-//    }
 
 
     final BlockBuilder<?> dmBuilder =

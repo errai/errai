@@ -25,6 +25,11 @@ import org.jboss.errai.marshalling.client.util.MarshallUtil;
 import org.jboss.errai.marshalling.rebind.api.MappingContext;
 import org.jboss.errai.marshalling.rebind.api.MappingStrategy;
 import org.jboss.errai.marshalling.rebind.api.ObjectMapper;
+import org.jboss.errai.marshalling.rebind.api.model.ConstructorMapping;
+import org.jboss.errai.marshalling.rebind.api.model.Mapping;
+import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
+import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
+import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleConstructorMapping;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 
 import java.lang.annotation.Annotation;
@@ -43,8 +48,8 @@ import static org.jboss.errai.codegen.framework.util.Stmt.loadVariable;
 public class DefaultJavaMappingStrategy implements MappingStrategy {
   private MappingContext context;
   private MetaClass toMap;
-  private static Map<String, ConstructorMapping> builtInConstructorMappings
-          = new HashMap<String, ConstructorMapping>();
+
+  private static Map<String, MappingDefinition> mappingDefinitions = new HashMap<String, MappingDefinition>();
 
   static {
     loadDefaultMappings();
@@ -66,14 +71,15 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
   }
 
   private ObjectMapper generateImmutableMapper() {
-    final ConstructorMapping mapping = findUsableConstructorMapping();
+    final MappingDefinition mapping = findUsableMapping();
 
     final List<Statement> marshallers = new ArrayList<Statement>();
-    for (ConstructorFieldMapping m : mapping.getMappings()) {
+
+    for (Mapping m : mapping.getConstructorMapping().getMappings()) {
       if (context.hasProvidedOrGeneratedMarshaller(m.getType())) {
         if (m.getType().isArray()) {
           marshallers.add(context.getArrayMarshallerCallback()
-                  .demarshall(m.getType(), extractJSONObjectProperty(m.getFieldName(), JSONObject.class)));
+                  .demarshall(m.getType(), extractJSONObjectProperty(m.getKey(), JSONObject.class)));
         }
         else {
           marshallers.add(fieldDemarshall(m, JSONObject.class));
@@ -148,7 +154,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                         .append(Stmt.load("null").returnValue()).finish()
         );
 
-        if (mapping.isDemarshallOnly()) {
+        if (!mapping.canMarshal()) {
           marshallMethodBlock.append(Stmt.load(null).returnValue());
         }
         else {
@@ -170,7 +176,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
   }
 
   private ObjectMapper generateJavaBeanMapper() {
-    final BeanMapping mapping = finaUsuableBeanMapping();
+    final MappingDefinition mapping = finaUsuableBeanMapping();
 
     return new ObjectMapper() {
       @Override
@@ -197,28 +203,13 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
         tryBuilder.append(Stmt.declareVariable(JSONObject.class).named("obj")
                 .initializeWith(loadVariable("a0").invoke("isObject")));
 
-        /**
-         * Check to see if value is null. If so, return null.
-         */
-//        tryBuilder.append(
-//                Stmt.if_(Bool.or(Bool.isNull(Stmt.loadVariable("a0")),
-//                        Bool.isNotNull(Stmt.loadVariable("a0").invoke("isNull"))))
-//                        .append(Stmt.load(null).returnValue())
-//                        .finish()
-//                        .else_()
-//                        .append(Stmt.loadVariable("obj").assignValue(Stmt.loadVariable("a0").invoke("isObject")))
-//                        .finish()
-//        );
 
-
-        // String objId = a0.get(SerializationParts.OBJECTID).isString().stringValue();
         tryBuilder.append(Stmt.declareVariable(String.class).named("objId")
                 .initializeWith(loadVariable("obj")
                         .invoke("get", SerializationParts.OBJECT_ID)
                         .invoke("isString").invoke("stringValue")));
 
 
-        // if (a1.hasObjectHash(objId)) { return a1.get(T, objId); }
         tryBuilder.append(
                 Stmt.if_(Bool.expr(loadVariable("a1").invoke("hasObjectHash", loadVariable("objId"))))
                         .append(loadVariable("a1").invoke("getObject", toMap, loadVariable("objId")).returnValue()).finish());
@@ -231,56 +222,70 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
         /**
          * Start binding of fields here.
          */
-        for (MetaField field : mapping.getMappings()) {
+        for (MemberMapping memberMapping : mapping.getMemberMappings()) {
+          Statement bindingStatement;
           Statement val;
-          if (field.getType().isArray()) {
+          if (memberMapping.getType().isArray()) {
             val = context.getArrayMarshallerCallback()
-                    .demarshall(field.getType(), extractJSONObjectProperty(field.getName(), JSONValue.class));
+                    .demarshall(memberMapping.getType(), extractJSONObjectProperty(memberMapping.getKey(), JSONValue.class));
           }
           else {
-            val = fieldDemarshall(field.getName(), MetaClassFactory.get(JSONValue.class), field.getType().asBoxed());
+            val = fieldDemarshall(memberMapping.getKey(), MetaClassFactory.get(JSONValue.class), memberMapping.getType().asBoxed());
           }
 
-          // handle long case -- GWT does not support long in JSNI
-          if (field.isPublic()) {
-            tryBuilder.append(loadVariable("entity").loadField(field.getName()).assignValue(val));
-          }
-          else {
-            Statement bindingStatement;
+          if (memberMapping.getMember() instanceof MetaField) {
+            MetaField field = (MetaField) memberMapping.getMember();
 
-            MetaMethod setterMeth = GenUtil.findCaseInsensitiveMatch(null,
-                    field.getDeclaringClass(), "set" + field.getName(),
-                    field.getType());
-
-            if (setterMeth != null) {
-              // Bind via setter
-              bindingStatement = loadVariable("entity").invoke(setterMeth, val);
-            }
-            else if (field.getType().getCanonicalName().equals("long")) {
-              throw new RuntimeException("cannot support private field marshalling of long type" +
-                      " (not supported by JSNI) for field: "
-                      + field.getDeclaringClass().getFullyQualifiedName() + "#" + field.getName());
+            // handle long case -- GWT does not support long in JSNI
+            if (field.isPublic()) {
+              tryBuilder.append(loadVariable("entity").loadField(field.getName()).assignValue(val));
+              continue;
             }
             else {
-              if (!context.isExposed(field)) {
-                GenUtil.addPrivateAccessStubs(true, context.getClassStructureBuilder(), field);
-                context.markExposed(field);
+              MetaMethod setterMeth = GenUtil.findCaseInsensitiveMatch(null,
+                      field.getDeclaringClass(), "set" + field.getName(),
+                      field.getType());
+
+              if (setterMeth != null) {
+                // Bind via setter
+                bindingStatement = loadVariable("entity").invoke(setterMeth, val);
+              }
+              else if (field.getType().getCanonicalName().equals("long")) {
+                throw new RuntimeException("cannot support private field marshalling of long type" +
+                        " (not supported by JSNI) for field: "
+                        + field.getDeclaringClass().getFullyQualifiedName() + "#" + field.getName());
+              }
+              else {
+                if (!context.isExposed(field)) {
+                  GenUtil.addPrivateAccessStubs(true, context.getClassStructureBuilder(), field);
+                  context.markExposed(field);
+                }
+
+                // Bind via JSNI
+                bindingStatement = Stmt.invokeStatic(context.getGeneratedBootstrapClass(),
+                        GenUtil.getPrivateFieldInjectorName(field),
+                        loadVariable("entity"), val);
               }
 
-              // Bind via JSNI
-              bindingStatement = Stmt.invokeStatic(context.getGeneratedBootstrapClass(),
-                      GenUtil.getPrivateFieldInjectorName(field),
-                      loadVariable("entity"), val);
             }
-
-            tryBuilder.append(
-                    Stmt.if_(Bool.and(
-                            Bool.expr(loadVariable("obj").invoke("containsKey", field.getName())),
-                            Bool.isNull(loadVariable("obj").invoke("get", field.getName()).invoke("isNull"))
-
-                    )).append(bindingStatement).finish());
           }
+          else if (memberMapping.getMember() instanceof MetaMethod) {
+            bindingStatement = loadVariable("entity").invoke(((MetaMethod) memberMapping.getMember()), val);
+          }
+          else {
+            throw new RuntimeException("unknown member mapping type: " + memberMapping.getType());
+          }
+
+
+          tryBuilder.append(
+                  Stmt.if_(Bool.and(
+                          Bool.expr(loadVariable("obj").invoke("containsKey", memberMapping.getKey())),
+                          Bool.isNull(loadVariable("obj").invoke("get", memberMapping.getKey()).invoke("isNull"))
+
+                  )).append(bindingStatement).finish());
+
         }
+
 
         tryBuilder.append(loadVariable("entity").returnValue());
 
@@ -312,8 +317,11 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
     };
   }
 
-  private BeanMapping finaUsuableBeanMapping() {
+  private MappingDefinition finaUsuableBeanMapping() {
     MetaConstructor constructor = toMap.getConstructor(new MetaClass[0]);
+
+    MappingDefinition definition = new MappingDefinition(toMap);
+
     if (constructor == null) {
       throw new InvalidMappingException("cannot find a default, no-argument constructor or field-mapped constructor in: "
               + toMap.getFullyQualifiedName());
@@ -324,7 +332,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
     MetaClass c = toMap;
 
     do {
-      for (MetaField field : c.getDeclaredFields()) {
+      for (final MetaField field : c.getDeclaredFields()) {
         if (field.isTransient() || field.isStatic()) {
           continue;
         }
@@ -337,21 +345,42 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                   + type.getFullyQualifiedName());
         }
 
-        mappings.add(field);
+
+        definition.addMemberMapping(new MemberMapping() {
+          @Override
+          public MetaClassMember getMember() {
+            return field;
+          }
+
+          @Override
+          public String getKey() {
+            return field.getName();
+          }
+
+          @Override
+          public MetaClass getType() {
+            return field.getType();
+          }
+        });
+
+        // mappings.add(field);
       }
     }
     while ((c = c.getSuperClass()) != null);
 
-    return new BeanMapping(mappings);
+    return definition;
+    //  return new BeanMapping(mappings);
   }
 
-  private ConstructorMapping findUsableConstructorMapping() {
-    if (builtInConstructorMappings.containsKey(toMap.getCanonicalName())) {
-      return builtInConstructorMappings.get(toMap.getCanonicalName());
+  private MappingDefinition findUsableMapping() {
+    if (mappingDefinitions.containsKey(toMap.getCanonicalName())) {
+      return mappingDefinitions.get(toMap.getCanonicalName());
     }
 
     Set<MetaConstructor> constructors = new HashSet<MetaConstructor>();
-    List<ConstructorFieldMapping> mappings = new ArrayList<ConstructorFieldMapping>();
+    // List<ConstructorFieldMapping> mappings = new ArrayList<ConstructorFieldMapping>();
+
+    SimpleConstructorMapping simpleConstructorMapping = new SimpleConstructorMapping(toMap);
 
     for (MetaConstructor c : toMap.getConstructors()) {
       if (c.isAnnotationPresent(MappedOrdered.class)) {
@@ -380,8 +409,9 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                           + " refers to a field ('" + fieldName + "') which does not exist in the class: "
                           + toMap.getName());
                 }
+                simpleConstructorMapping.mapParmToIndex(fieldName, i, c.getParameters()[i].getType());
 
-                mappings.add(new ConstructorFieldMapping(fieldName, c.getParameters()[i].getType()));
+                //  mappings.add(new ConstructorFieldMapping(fieldName, c.getParameters()[i].getType()));
               }
             }
           }
@@ -397,7 +427,12 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
       throw new InvalidMappingException("unable to find a usable constructor for: " + toMap.getFullyQualifiedName());
     }
 
-    return new ConstructorMapping(ConstructionType.Mapped, mappings);
+    MappingDefinition definition = new MappingDefinition(toMap);
+    definition.setConstructorMapping(simpleConstructorMapping);
+
+    return definition;
+
+    //  return new AutoConstructorMapping(ConstructionType.Mapped, mappings);
   }
 
   private static enum ConstructionType {
@@ -425,62 +460,72 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
     }
   }
 
-
-  private static class ConstructorMapping {
-    ConstructionType type;
-    List<ConstructorFieldMapping> mappings;
-    private boolean demarshallOnly;
-
-    private ConstructorMapping(ConstructionType type, List<ConstructorFieldMapping> mappings) {
-      this.type = type;
-      this.mappings = mappings;
-    }
-
-    public ConstructionType getType() {
-      return type;
-    }
-
-    public List<ConstructorFieldMapping> getMappings() {
-      return mappings;
-    }
-
-    public boolean isDemarshallOnly() {
-      return demarshallOnly;
-    }
-
-    public void setDemarshallOnly(boolean demarshallOnly) {
-      this.demarshallOnly = demarshallOnly;
-    }
-  }
-
-  private static class ConstructorFieldMapping {
-    String fieldName;
-    MetaClass type;
-
-    private ConstructorFieldMapping(String fieldName, MetaClass type) {
-      this.fieldName = fieldName;
-      this.type = type;
-    }
-
-    public String getFieldName() {
-      return fieldName;
-    }
-
-    public MetaClass getType() {
-      return type;
-    }
-  }
+//
+//  private static class AutoConstructorMapping implements ConstructorMapping {
+//    ConstructionType type;
+//    List<ConstructorFieldMapping> mappings;
+//    private boolean demarshallOnly;
+//
+//    private AutoConstructorMapping(ConstructionType type, List<ConstructorFieldMapping> mappings) {
+//      this.type = type;
+//      this.mappings = mappings;
+//    }
+//
+//    public ConstructionType getType() {
+//      return type;
+//    }
+//
+//    public List<ConstructorFieldMapping> getMappings() {
+//      return mappings;
+//    }
+//
+//    public boolean isDemarshallOnly() {
+//      return demarshallOnly;
+//    }
+//
+//    public void setDemarshallOnly(boolean demarshallOnly) {
+//      this.demarshallOnly = demarshallOnly;
+//    }
+//
+//    @Override
+//    public MetaClass[] getConstructorParmTypes() {
+//      return new MetaClass[0];
+//    }
+//
+//    @Override
+//    public String[] getKeyNames() {
+//      return new String[0];
+//    }
+//  }
+//
+//  private static class ConstructorFieldMapping {
+//    String fieldName;
+//    MetaClass type;
+//
+//    private ConstructorFieldMapping(String fieldName, MetaClass type) {
+//      this.fieldName = fieldName;
+//      this.type = type;
+//    }
+//
+//    public String getFieldName() {
+//      return fieldName;
+//    }
+//
+//    public MetaClass getType() {
+//      return type;
+//    }
+//  }
 
   private boolean isJavaBean(MetaClass toMap) {
     return toMap.getConstructor(new MetaClass[0]) != null;
   }
 
-  public Statement fieldDemarshall(ConstructorFieldMapping mapping, Class<?> fromType) {
+  public Statement fieldDemarshall(Mapping mapping, Class<?> fromType) {
     return fieldDemarshall(mapping, MetaClassFactory.get(fromType));
   }
 
-  public Statement fieldDemarshall(ConstructorFieldMapping mapping, MetaClass fromType) {
-    return fieldDemarshall(mapping.getFieldName(), fromType, mapping.getType());
+  public Statement fieldDemarshall(Mapping mapping, MetaClass fromType) {
+    return fieldDemarshall(mapping.getKey(), fromType, mapping.getType());
   }
 
   public Statement fieldDemarshall(String fieldName, MetaClass fromType, Class<?> toType) {
@@ -498,7 +543,6 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
   public Statement extractJSONObjectProperty(String fieldName, MetaClass fromType) {
     if (fromType.getFullyQualifiedName().equals(JSONValue.class.getName())) {
       return loadVariable("obj").invoke("get", fieldName);
-      // return Stmt.invokeStatic(MarshallUtil.class, "nullSafe_JSONObject", Stmt.loadVariable("a0"), fieldName);
     }
     else {
       return Stmt.nestedCall(Cast.to(fromType, loadVariable("a0"))).invoke("get", fieldName);
@@ -637,15 +681,20 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
   }
 
   private static void loadDefaultMappings() {
-    List<ConstructorFieldMapping> fieldMappings = new ArrayList<ConstructorFieldMapping>();
-    fieldMappings.add(new ConstructorFieldMapping("declaringClass", MetaClassFactory.get(String.class)));
-    fieldMappings.add(new ConstructorFieldMapping("methodName", MetaClassFactory.get(String.class)));
-    fieldMappings.add(new ConstructorFieldMapping("fileName", MetaClassFactory.get(String.class)));
-    fieldMappings.add(new ConstructorFieldMapping("lineNumber", MetaClassFactory.get(Integer.class)));
+    SimpleConstructorMapping simpleConstructorMapping = new SimpleConstructorMapping(StackTraceElement.class);
+    simpleConstructorMapping.mapParmToIndex("declaringClass", 0, String.class);
+    simpleConstructorMapping.mapParmToIndex("methodName", 1, String.class);
+    simpleConstructorMapping.mapParmToIndex("fileName", 2, String.class);
+    simpleConstructorMapping.mapParmToIndex("lineNumber", 3, Integer.class);
 
-    ConstructorMapping mapping = new ConstructorMapping(ConstructionType.Mapped, fieldMappings);
-    mapping.setDemarshallOnly(true);
+    MappingDefinition definition = new MappingDefinition(StackTraceElement.class);
+    definition.setMarshal(false);
+    definition.setConstructorMapping(simpleConstructorMapping);
 
-    builtInConstructorMappings.put(StackTraceElement.class.getCanonicalName(), mapping);
+    addMappingDefinition(definition);
+  }
+
+  public static void addMappingDefinition(MappingDefinition definition) {
+    mappingDefinitions.put(definition.getMappingClass().getFullyQualifiedName(), definition);
   }
 }
