@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.base.QueueStopMessage;
 import org.jboss.errai.bus.server.api.*;
 import org.jboss.errai.bus.server.async.TimedTask;
-import org.jboss.errai.bus.server.io.JSONStreamEncoder;
+import org.jboss.errai.marshalling.server.JSONStreamEncoder;
 import org.mvel2.util.StringAppender;
 
 import java.io.IOException;

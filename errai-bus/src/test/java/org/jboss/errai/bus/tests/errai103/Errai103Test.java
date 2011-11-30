@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@ package org.jboss.errai.bus.tests.errai103;
 
 import junit.framework.TestCase;
 import org.jboss.errai.bus.client.tests.support.SimpleEntity;
-import org.jboss.errai.bus.server.io.JSONDecoder;
-import org.jboss.errai.bus.server.io.JSONEncoder;
+import org.jboss.errai.marshalling.server.JSONDecoder;
+import org.jboss.errai.marshalling.server.JSONEncoder;
 
 import java.util.Date;
 import java.util.HashMap;

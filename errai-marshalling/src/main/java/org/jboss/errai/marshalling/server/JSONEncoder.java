@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.server.io;
+package org.jboss.errai.marshalling.server;
 
-import org.jboss.errai.bus.client.protocols.MessageParts;
+import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.common.client.types.DecodingContext;
 import org.jboss.errai.common.client.types.EncodingContext;
 import org.jboss.errai.common.client.types.TypeHandler;
 import org.jboss.errai.marshalling.client.util.NumbersUtils;
-import org.mvel2.MVEL;
 
-import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;

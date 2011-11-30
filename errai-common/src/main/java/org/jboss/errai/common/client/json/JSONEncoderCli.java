@@ -25,9 +25,6 @@ import java.util.Map;
 public class JSONEncoderCli {
   boolean defer;
 
-  String marshall;
-  private Map<String, String> marshalledTypes;
-
   public String encode(Object v, EncodingContext ctx) {
     return _encode(v, ctx);
   }
@@ -206,10 +203,5 @@ public class JSONEncoderCli {
       if ((i + 1) < array.length) buildCol.append(",");
     }
     return buildCol.append("]").toString();
-  }
-
-
-  public Map<String, String> getMarshalledTypes() {
-    return marshalledTypes;
   }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.ProxyProvider;
 import org.jboss.errai.bus.client.framework.RPCStub;
 import org.jboss.errai.bus.client.framework.RemoteServiceProxyFactory;
-import org.jboss.errai.bus.client.protocols.MessageParts;
+import org.jboss.errai.common.client.protocols.MessageParts;
 
 /**
  * The <tt>AbstractRemoteCallBuilder</tt> facilitates the building of a remote call. Ensures that the remote call is

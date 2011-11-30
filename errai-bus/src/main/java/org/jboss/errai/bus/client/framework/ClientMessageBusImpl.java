@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ package org.jboss.errai.bus.client.framework;
 import static org.jboss.errai.bus.client.json.JSONUtilCli.decodePayload;
 import static org.jboss.errai.bus.client.json.JSONUtilCli.encodeMap;
 import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteSubscribe;
-import static org.jboss.errai.bus.client.protocols.MessageParts.PriorityProcessing;
-import static org.jboss.errai.bus.client.protocols.MessageParts.ReplyTo;
-import static org.jboss.errai.bus.client.protocols.MessageParts.Subject;
+import static org.jboss.errai.common.client.protocols.MessageParts.PriorityProcessing;
+import static org.jboss.errai.common.client.protocols.MessageParts.ReplyTo;
+import static org.jboss.errai.common.client.protocols.MessageParts.Subject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,7 +45,7 @@ import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.NoSubscribersToDeliverTo;
 import org.jboss.errai.bus.client.api.base.TransportIOException;
 import org.jboss.errai.bus.client.protocols.BusCommands;
-import org.jboss.errai.bus.client.protocols.MessageParts;
+import org.jboss.errai.common.client.protocols.MessageParts;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;

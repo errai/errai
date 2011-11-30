@@ -17,7 +17,7 @@
 /* jboss.org */
 package org.jboss.errai.tools.proxy;
 
-import org.jboss.errai.bus.server.io.JSONDecoder;
+import org.jboss.errai.marshalling.server.JSONDecoder;
 
 import java.io.BufferedReader;
 import java.io.IOException;

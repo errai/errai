@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.builder.MessageBuildParms;
-import org.jboss.errai.bus.client.protocols.MessageParts;
+import org.jboss.errai.common.client.protocols.MessageParts;
 
 /**
  * The default error callback implementation, used when {@link MessageBuildParms#defaultErrorHandling()} was invoked. 

@@ -21,7 +21,7 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.protocols.MessageParts;
+import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.tests.support.RandomProvider;
 import org.jboss.errai.bus.client.tests.support.SType;
 import org.jboss.errai.bus.client.tests.support.TestException;

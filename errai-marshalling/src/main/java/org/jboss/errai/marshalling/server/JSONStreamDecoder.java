@@ -15,14 +15,11 @@
  *
  */
 
-package org.jboss.errai.bus.server.io;
+package org.jboss.errai.marshalling.server;
 
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.common.client.types.DecodingContext;
 import org.jboss.errai.common.client.types.UHashMap;
-import org.jboss.errai.common.client.types.UnsatisfiedForwardLookup;
-import org.mvel2.CompileException;
-import org.mvel2.util.StringAppender;
 
 import java.io.*;
 import java.nio.CharBuffer;
@@ -30,8 +27,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
-import static org.jboss.errai.bus.server.io.TypeDemarshallHelper.demarshallAll;
-import static org.jboss.errai.bus.server.io.TypeDemarshallHelper.instantiate;
 import static org.jboss.errai.common.client.protocols.SerializationParts.ENCODED_TYPE;
 
 /**
@@ -121,7 +116,7 @@ public class JSONStreamDecoder {
           if (map && ctx.encodedType) {
             ctx.encodedType = false;
             try {
-              return demarshallAll(ctx.record(collection, decodingContext), decodingContext);
+              return TypeDemarshallHelper.demarshallAll(ctx.record(collection, decodingContext), decodingContext);
             }
             catch (Exception e) {
               e.printStackTrace();

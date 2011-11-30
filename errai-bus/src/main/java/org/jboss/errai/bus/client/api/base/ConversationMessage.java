@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.jboss.errai.bus.client.api.base;
 
 import org.jboss.errai.bus.client.api.BadlyFormedMessageException;
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.protocols.MessageParts;
+import org.jboss.errai.common.client.protocols.MessageParts;
 
 /**
  * A ConversationMessage is a message that is to be routed back to the sending client.  Conceptually, the use of
@@ -36,7 +36,7 @@ import org.jboss.errai.bus.client.protocols.MessageParts;
  *      }
  * }
  * </pre></tt>
- * It is possible for a message sender to specify a {@link org.jboss.errai.bus.client.protocols.MessageParts#ReplyTo}
+ * It is possible for a message sender to specify a {@link org.jboss.errai.common.client.protocols.MessageParts#ReplyTo}
  * message component, which by default will be used to route the message.  We refer to this as a: <em>sender-driven conversation</em>
  * as opposed to a <em>receiver-driven conversation</em> which is demonstrated in the code example above.  The
  * {@link org.jboss.errai.bus.client.framework.MessageBus#conversationWith(Message, org.jboss.errai.bus.client.api.MessageCallback)} convenience method

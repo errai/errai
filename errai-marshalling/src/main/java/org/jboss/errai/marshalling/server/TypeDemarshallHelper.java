@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.server.io;
+package org.jboss.errai.marshalling.server;
 
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.common.client.types.DecodingContext;
-import org.jboss.errai.common.client.types.UHashMap;
 import org.jboss.errai.common.client.types.UnsatisfiedForwardLookup;
 import org.jboss.errai.marshalling.client.util.NumbersUtils;
 import org.mvel2.ConversionHandler;

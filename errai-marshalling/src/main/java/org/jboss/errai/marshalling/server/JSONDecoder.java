@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.server.io;
+package org.jboss.errai.marshalling.server;
 
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.common.client.types.DecodingContext;
 import org.jboss.errai.common.client.types.UHashMap;
-import org.jboss.errai.common.client.types.UnsatisfiedForwardLookup;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,7 +26,6 @@ import java.util.Map;
 
 import static java.lang.Character.isDigit;
 import static java.lang.Character.isJavaIdentifierPart;
-import static org.jboss.errai.bus.server.io.TypeDemarshallHelper.demarshallAll;
 import static org.jboss.errai.common.client.protocols.SerializationParts.ENCODED_TYPE;
 import static org.mvel2.util.ParseTools.handleStringEscapes;
 import static org.mvel2.util.ParseTools.subArray;
@@ -96,7 +94,7 @@ public class JSONDecoder {
           if (map && ctx.encodedType) {
             ctx.encodedType = false;
             try {
-              return demarshallAll(ctx.record(collection, decodingContext), decodingContext);
+              return TypeDemarshallHelper.demarshallAll(ctx.record(collection, decodingContext), decodingContext);
             }
             catch (Exception e) {
               throw new RuntimeException("could not demarshall object", e);

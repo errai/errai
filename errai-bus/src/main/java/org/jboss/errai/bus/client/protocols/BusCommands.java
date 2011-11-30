@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ public enum BusCommands {
    * <thead>
    * <tbody>
    * <tr>
-   * <td>{@link org.jboss.errai.bus.client.protocols.MessageParts#Subject}</td>
+   * <td>{@link org.jboss.errai.common.client.protocols.MessageParts#Subject}</td>
    * <td>{@link String}</td>
    * <td>The name of the subject being subscribed to</td>
    * </tr>
@@ -75,7 +75,7 @@ public enum BusCommands {
    * <thead>
    * <tbody>
    * <tr>
-   * <td>{@link org.jboss.errai.bus.client.protocols.MessageParts#Subject}</td>
+   * <td>{@link org.jboss.errai.common.client.protocols.MessageParts#Subject}</td>
    * <td>{@link String}</td>
    * <td>The name of the subject being subscribed to</td>
    * </tr>

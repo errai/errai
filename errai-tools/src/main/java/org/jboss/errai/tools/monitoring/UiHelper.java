@@ -18,7 +18,7 @@ package org.jboss.errai.tools.monitoring;
 
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
-import org.jboss.errai.bus.server.io.JSONDecoder;
+import org.jboss.errai.marshalling.server.JSONDecoder;
 import org.jboss.errai.bus.server.util.ServerBusUtils;
 
 import javax.swing.*;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,10 @@ package org.jboss.errai.bus.server.io;
 
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.framework.RoutingFlags;
-import org.jboss.errai.bus.client.protocols.MessageParts;
+import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.bus.server.api.QueueSession;
+import org.jboss.errai.marshalling.server.JSONDecoder;
+import org.jboss.errai.marshalling.server.JSONStreamDecoder;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  */
 package org.jboss.errai.bus.server.service.bootstrap;
 
-import org.jboss.errai.bus.server.io.JSONEncoder;
+import org.jboss.errai.marshalling.server.JSONEncoder;
 import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
 
 /**
@@ -23,7 +23,7 @@ import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
  *
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: May 3, 2010
- * @see org.jboss.errai.bus.server.io.JSONEncoder
+ * @see org.jboss.errai.marshalling.server.JSONEncoder
  */
 class RegisterTypes implements BootstrapExecution {
   public void execute(BootstrapContext context) {

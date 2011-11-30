@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.server.io;
+package org.jboss.errai.marshalling.server;
 
 import java.lang.ref.SoftReference;
 import java.util.Map;

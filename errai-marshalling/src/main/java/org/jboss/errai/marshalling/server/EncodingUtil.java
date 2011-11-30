@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.server.io;
-
-import org.mvel2.util.PropertyTools;
+package org.jboss.errai.marshalling.server;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;

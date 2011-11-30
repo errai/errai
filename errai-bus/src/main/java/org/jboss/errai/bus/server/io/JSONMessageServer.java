@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.jboss.errai.bus.server.io;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.base.JSONMessage;
 import org.jboss.errai.bus.client.framework.MessageProvider;
+import org.jboss.errai.marshalling.server.JSONEncoder;
 
 public class JSONMessageServer extends JSONMessage {
   public static final MessageProvider PROVIDER = new MessageProvider() {
