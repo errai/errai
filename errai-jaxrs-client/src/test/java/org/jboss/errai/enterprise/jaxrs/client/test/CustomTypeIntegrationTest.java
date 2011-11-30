@@ -9,6 +9,8 @@ import org.jboss.errai.enterprise.jaxrs.client.shared.entity.Entity;
 import org.junit.Test;
 
 /**
+ * Tests for exchanging objects of custom types.
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class CustomTypeIntegrationTest extends AbstractErraiJaxrsTest {

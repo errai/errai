@@ -3,6 +3,8 @@ package org.jboss.errai.enterprise.jaxrs.server;
 import org.jboss.errai.enterprise.jaxrs.client.shared.HeaderParamTestService;
 
 /**
+ * Implementation of {@link HeaderParamTestService} returning test data.
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class HeaderParamTestServiceImpl implements HeaderParamTestService {

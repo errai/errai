@@ -4,6 +4,11 @@ import java.io.Serializable;
 
 import org.jboss.errai.common.client.api.annotations.Portable;
 
+/**
+ * Simple test entity.
+ * 
+ * @author Christian Sadilek <csadilek@redhat.com>
+ */
 @Portable
 public class Entity implements Serializable {
   private static final long serialVersionUID = 1L;

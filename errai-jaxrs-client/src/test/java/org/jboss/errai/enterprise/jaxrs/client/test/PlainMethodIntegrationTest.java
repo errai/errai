@@ -8,6 +8,8 @@ import org.junit.Test;
 import com.google.gwt.http.client.Response;
 
 /**
+ * Testing all supported HTTP methods.
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class PlainMethodIntegrationTest extends AbstractErraiJaxrsTest {

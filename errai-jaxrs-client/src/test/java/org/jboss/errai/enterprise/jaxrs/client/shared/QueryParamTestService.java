@@ -8,6 +8,11 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 
+/**
+ * This service is used to test support for query parameters (@QueryParam).
+ * 
+ * @author Christian Sadilek <csadilek@redhat.com>
+ */
 @Path("/test/queryparam")
 public interface QueryParamTestService {
 

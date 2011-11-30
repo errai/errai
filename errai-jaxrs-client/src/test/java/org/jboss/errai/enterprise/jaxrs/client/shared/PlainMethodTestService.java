@@ -7,6 +7,11 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 
+/**
+ * This service is used to test all supported HTTP methods.
+ * 
+ * @author Christian Sadilek <csadilek@redhat.com>
+ */
 @Path("/test/method")
 public interface PlainMethodTestService {
 

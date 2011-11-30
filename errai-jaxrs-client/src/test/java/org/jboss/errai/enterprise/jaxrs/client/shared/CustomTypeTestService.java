@@ -14,6 +14,11 @@ import javax.ws.rs.Produces;
 
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.Entity;
 
+/**
+ * This service is used to test sending entities of custom types.
+ * 
+ * @author Christian Sadilek <csadilek@redhat.com>
+ */
 @Path("/test/customtype")
 public interface CustomTypeTestService {
   public static final List<Entity> ENTITIES = new ArrayList<Entity>() {

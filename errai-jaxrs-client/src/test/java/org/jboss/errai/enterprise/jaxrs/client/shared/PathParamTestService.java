@@ -8,6 +8,11 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 
+/**
+ * This service is used to test support for path parameters (@PathParam).
+ * 
+ * @author Christian Sadilek <csadilek@redhat.com>
+ */
 @Path("/test/pathparam")
 public interface PathParamTestService {
 

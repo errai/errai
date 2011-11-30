@@ -8,6 +8,8 @@ import org.junit.Test;
 import com.google.gwt.http.client.Response;
 
 /**
+ * Testing path parameters.
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class PathParamIntegrationTest extends AbstractErraiJaxrsTest {

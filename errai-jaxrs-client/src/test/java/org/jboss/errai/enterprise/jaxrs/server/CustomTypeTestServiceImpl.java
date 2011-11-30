@@ -6,6 +6,8 @@ import org.jboss.errai.enterprise.jaxrs.client.shared.CustomTypeTestService;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.Entity;
 
 /**
+ * Implementation of {@link CustomTypeTestService} returning test data.
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class CustomTypeTestServiceImpl implements CustomTypeTestService {

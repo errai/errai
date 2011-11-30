@@ -8,6 +8,11 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
+/**
+ * This service is used to test content negotiation features.
+ * 
+ * @author Christian Sadilek <csadilek@redhat.com>
+ */
 @Path("/test/contentnegotiation")
 public interface ContentNegotiationTestService {
 

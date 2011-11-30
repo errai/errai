@@ -4,9 +4,14 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ PlainMethodIntegrationTest.class, PathParamIntegrationTest.class,
-    QueryParamIntegrationTest.class, HeaderParamIntegrationTest.class,
-    ContentNegotiationIntegrationTest.class, CustomTypeIntegrationTest.class, ErrorHandlingIntegrationTest.class })
+@Suite.SuiteClasses({
+    ContentNegotiationIntegrationTest.class,
+    CustomTypeIntegrationTest.class,
+    ErrorHandlingIntegrationTest.class,
+    HeaderParamIntegrationTest.class,
+    PathParamIntegrationTest.class,
+    PlainMethodIntegrationTest.class,
+    QueryParamIntegrationTest.class })
 public class AllJaxrsIntegrationTests {
 
 }

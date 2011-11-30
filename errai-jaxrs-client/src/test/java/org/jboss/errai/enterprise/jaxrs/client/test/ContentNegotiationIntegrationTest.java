@@ -6,6 +6,8 @@ import org.jboss.errai.enterprise.jaxrs.client.shared.ContentNegotiationTestServ
 import org.junit.Test;
 
 /**
+ * Testing content negotiation features.
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ContentNegotiationIntegrationTest extends AbstractErraiJaxrsTest {

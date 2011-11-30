@@ -8,6 +8,11 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 
+/**
+ * This service is used to test support for header parameters (@HeaderParam).
+ * 
+ * @author Christian Sadilek <csadilek@redhat.com>
+ */
 @Path("/test/headerparam")
 public interface HeaderParamTestService {
 

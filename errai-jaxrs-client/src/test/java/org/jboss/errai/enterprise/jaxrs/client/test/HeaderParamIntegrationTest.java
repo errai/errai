@@ -8,6 +8,8 @@ import org.junit.Test;
 import com.google.gwt.http.client.Response;
 
 /**
+ * Testing header parameters.
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class HeaderParamIntegrationTest extends AbstractErraiJaxrsTest {
@@ -49,8 +51,8 @@ public class HeaderParamIntegrationTest extends AbstractErraiJaxrsTest {
 
   @Test
   public void testHeadWithHeaderParam() {
-    RestClient.create(HeaderParamTestService.class,
-        new AssertionResponseCallback("@HEAD with @HeaderParam failed", Response.SC_NO_CONTENT)).headWithHeaderParam(
-        "1");
+    RestClient.create(HeaderParamTestService.class, 
+        new AssertionResponseCallback("@HEAD with @HeaderParam failed", Response.SC_NO_CONTENT))
+        .headWithHeaderParam("1");
   }
 }

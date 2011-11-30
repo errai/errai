@@ -3,6 +3,8 @@ package org.jboss.errai.enterprise.jaxrs.server;
 import org.jboss.errai.enterprise.jaxrs.client.shared.QueryParamTestService;
 
 /**
+ * Implementation of {@link QueryParamTestService} returning test data.
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class QueryParamTestServiceImpl implements QueryParamTestService {

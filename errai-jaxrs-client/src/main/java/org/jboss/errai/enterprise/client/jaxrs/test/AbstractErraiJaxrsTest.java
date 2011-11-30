@@ -7,6 +7,8 @@ import com.google.gwt.http.client.Response;
 import com.google.gwt.junit.client.GWTTestCase;
 
 /**
+ * Base class for Errai JAX-RS tests.
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public abstract class AbstractErraiJaxrsTest extends GWTTestCase {
