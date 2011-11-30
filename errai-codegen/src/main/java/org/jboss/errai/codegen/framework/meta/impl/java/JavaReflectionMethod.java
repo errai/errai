@@ -177,4 +177,9 @@ public class JavaReflectionMethod extends MetaMethod {
   public boolean equals(Object o) {
     return o instanceof MetaMethod && GenUtil.equals(this, (MetaMethod) o);
   }
+
+  @Override
+  public Method asMethod() {
+    return method;
+  }
 }

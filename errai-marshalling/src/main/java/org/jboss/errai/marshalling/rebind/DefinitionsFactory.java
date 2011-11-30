@@ -57,6 +57,8 @@ public class DefinitionsFactory {
   }
 
   private static void loadDefaults() {
+
+    /** StackTraceElement **/
     SimpleConstructorMapping stackTraceMapping = new SimpleConstructorMapping(StackTraceElement.class);
     stackTraceMapping.mapParmToIndex("declaringClass", 0, String.class);
     stackTraceMapping.mapParmToIndex("methodName", 1, String.class);
@@ -64,9 +66,15 @@ public class DefinitionsFactory {
     stackTraceMapping.mapParmToIndex("lineNumber", 3, Integer.class);
 
     MappingDefinition stackTraceElementDef = new MappingDefinition(StackTraceElement.class, stackTraceMapping);
-    stackTraceElementDef.setMarshal(false);
+    stackTraceElementDef.addMemberMapping(new ReadMapping(StackTraceElement.class, "fileName", String.class, "getFileName"));
+    stackTraceElementDef.addMemberMapping(new ReadMapping(StackTraceElement.class, "methodName", String.class, "getMethodName"));
+    stackTraceElementDef.addMemberMapping(new ReadMapping(StackTraceElement.class, "lineNumber", Integer.class, "getLineNumber"));
+    stackTraceElementDef.addMemberMapping(new ReadMapping(StackTraceElement.class, "declaringClass", String.class, "getClassName"));
+
     addDefinition(stackTraceElementDef);
 
+
+    /** Throwable **/
     SimpleConstructorMapping throwableMapping = new SimpleConstructorMapping(Throwable.class);
     throwableMapping.mapParmToIndex("message", 0, String.class);
     throwableMapping.mapParmToIndex("cause", 1, Throwable.class);

@@ -16,15 +16,21 @@
 
 package org.jboss.errai.marshalling.server;
 
+import org.jboss.errai.codegen.framework.meta.MetaField;
+import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.common.client.types.DecodingContext;
 import org.jboss.errai.common.client.types.EncodingContext;
 import org.jboss.errai.common.client.types.TypeHandler;
 import org.jboss.errai.marshalling.client.util.NumbersUtils;
+import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
+import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
+import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.sql.Timestamp;
 import java.util.*;
@@ -131,37 +137,73 @@ public class JSONEncoder {
               keyValue(encodeString(OBJECT_ID, ctx), objRef(ctx, o))), ctx);
     }
 
-//    ctx.markEncoded(o);
 
     StringBuilder build = new StringBuilder("{" + encodeCommaSeparatedStrings(ctx,
             keyValue(encodeString(ENCODED_TYPE, ctx), encodeString(cls.getCanonicalName(), ctx)),
             keyValue(encodeString(OBJECT_ID, ctx), encodeString(String.valueOf(ctx.markRef(o)),
                     ctx))));
 
-    final Field[] fields = EncodingUtil.getAllEncodingFields(cls);
-
-
     int i = 0;
-    boolean first = true;
 
-    for (Field field : fields) {
-      if ((field.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
-              || field.isSynthetic()) {
-        continue;
-      }
-      else if (first) {
+    if (DefinitionsFactory.hasDefinition(cls)) {
+      MappingDefinition def = DefinitionsFactory.getDefinition(cls);
+
+      for (MemberMapping mapping : def.getReadableMemberMappings()) {
         build.append(',');
-        first = true;
-      }
 
-      try {
         i++;
-        Object v = field.get(o);
-        build.append(encodeString(field.getName(), ctx)).append(':').append(_encode(v, ctx));
+        Object v;
+
+        if (mapping.getReadingMember() instanceof MetaField) {
+          Field field = ((MetaField) mapping.getReadingMember()).asField();
+
+          try {
+            v = field.get(o);
+          }
+          catch (Exception e) {
+            throw new RuntimeException("error accessing field: " + field, e);
+          }
+        }
+        else {
+          Method method = ((MetaMethod) mapping.getReadingMember()).asMethod();
+
+          try {
+            v = method.invoke(o);
+          }
+          catch (Exception e) {
+            throw new RuntimeException("error calling getter: " + method, e);
+
+          }
+        }
+
+        build.append('\"')
+                .append(mapping.getKey())
+                .append('\"')
+                .append(':')
+                .append(_encode(v, ctx));
       }
-      catch (Throwable t) {
-        System.out.println("failed at encoding: " + field.getName());
-        t.printStackTrace();
+    }
+    else {
+
+      final Field[] fields = EncodingUtil.getAllEncodingFields(cls);
+
+      for (Field field : fields) {
+        if ((field.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
+                || field.isSynthetic()) {
+          continue;
+        }
+
+        build.append(',');
+
+        try {
+          i++;
+          Object v = field.get(o);
+          build.append(encodeString(field.getName(), ctx)).append(':').append(_encode(v, ctx));
+        }
+        catch (Throwable t) {
+          System.out.println("failed at encoding: " + field.getName());
+          t.printStackTrace();
+        }
       }
     }
 

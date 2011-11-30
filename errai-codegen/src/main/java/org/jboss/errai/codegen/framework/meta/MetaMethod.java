@@ -16,6 +16,8 @@
 
 package org.jboss.errai.codegen.framework.meta;
 
+import java.lang.reflect.Method;
+
 public abstract class MetaMethod implements MetaClassMember, MetaGenericDeclaration {
   public abstract String getName();
 
@@ -28,4 +30,8 @@ public abstract class MetaMethod implements MetaClassMember, MetaGenericDeclarat
   public abstract MetaParameter[] getParameters();
 
   public abstract MetaClass[] getCheckedExceptions();
+
+  public Method asMethod() {
+    throw new UnsupportedOperationException();
+  }
 }

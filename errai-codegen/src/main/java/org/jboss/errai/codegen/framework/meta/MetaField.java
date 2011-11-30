@@ -17,6 +17,7 @@
 package org.jboss.errai.codegen.framework.meta;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 
 public abstract class MetaField implements HasAnnotations, MetaClassMember {
   public abstract MetaClass getType();
@@ -35,7 +36,11 @@ public abstract class MetaField implements HasAnnotations, MetaClassMember {
   public int hashCode() {
     return toString().hashCode();
   }
-  
+
+  public Field asField() {
+     throw new UnsupportedOperationException();
+  }
+
   public static class ArrayLengthMetaField extends MetaField {
 
     private MetaClass componentType;
@@ -129,6 +134,6 @@ public abstract class MetaField implements HasAnnotations, MetaClassMember {
       return null;
     }
   }
-  
-  
+
+
 }

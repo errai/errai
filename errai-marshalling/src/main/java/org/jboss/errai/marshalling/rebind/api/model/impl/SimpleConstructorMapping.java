@@ -37,7 +37,7 @@ public class SimpleConstructorMapping implements ConstructorMapping {
   public SimpleConstructorMapping(Class<?> toMap) {
     this(MetaClassFactory.get(toMap));
   }
-  
+
   public SimpleConstructorMapping(MetaClass toMap) {
     this.toMap = toMap;
   }
@@ -80,6 +80,34 @@ public class SimpleConstructorMapping implements ConstructorMapping {
     }
 
     return _mappingsCache = mappings;
+  }
+
+  private Class<?>[] _constructorSignature;
+
+  @Override
+  public Class<?>[] getConstructorSignature() {
+    if (_constructorSignature != null) {
+      return _constructorSignature;
+    }
+
+    Mapping[] ms = getMappings();
+    Class<?>[] sig = new Class<?>[ms.length];
+    int i = 0;
+    for (Mapping m : ms) {
+      sig[i++] = m.getType().asClass();
+    }
+    return _constructorSignature = sig;
+  }
+
+  private MetaConstructor _constructorCache;
+
+  @Override
+  public MetaConstructor getConstructor() {
+    if (_constructorCache != null) {
+      return _constructorCache;
+    }
+
+    return _constructorCache = toMap.getConstructor(getConstructorSignature());
   }
 
   private static class SimpleMapping implements Mapping {

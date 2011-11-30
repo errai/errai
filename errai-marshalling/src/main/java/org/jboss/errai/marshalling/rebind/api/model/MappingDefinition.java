@@ -21,6 +21,7 @@ import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleConstructorMapping;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -72,6 +73,38 @@ public class MappingDefinition {
 
   public List<MemberMapping> getMemberMappings() {
     return memberMappings;
+  }
+  
+  private volatile List<MemberMapping> _readableMemberMappingsCache;
+  
+  public List<MemberMapping> getReadableMemberMappings() {
+    if (_readableMemberMappingsCache != null) {
+      return _readableMemberMappingsCache;
+    }
+    
+    List<MemberMapping> readableMemberMappings = new ArrayList<MemberMapping>();
+    for (MemberMapping memberMapping : memberMappings) {
+      if (memberMapping.canRead()) {
+        readableMemberMappings.add(memberMapping);
+      }
+    }
+    return _readableMemberMappingsCache = Collections.unmodifiableList(readableMemberMappings) ;
+  }
+
+  private volatile List<MemberMapping> _writableMemberMappingsCache;
+
+  public List<MemberMapping> getWritableMemberMappings() {
+    if (_writableMemberMappingsCache != null) {
+      return _writableMemberMappingsCache;
+    }
+
+    List<MemberMapping> writableMemberMappings = new ArrayList<MemberMapping>();
+    for (MemberMapping memberMapping : memberMappings) {
+      if (memberMapping.canWrite()) {
+        writableMemberMappings.add(memberMapping);
+      }
+    }
+    return _writableMemberMappingsCache = Collections.unmodifiableList(writableMemberMappings) ;
   }
 
   public boolean canDemarshal() {

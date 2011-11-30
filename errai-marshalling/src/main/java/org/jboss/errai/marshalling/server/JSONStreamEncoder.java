@@ -16,16 +16,22 @@
 
 package org.jboss.errai.marshalling.server;
 
+import org.jboss.errai.codegen.framework.meta.MetaField;
+import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.common.client.types.DecodingContext;
 import org.jboss.errai.common.client.types.EncodingContext;
 import org.jboss.errai.common.client.types.TypeHandler;
 import org.jboss.errai.marshalling.client.util.NumbersUtils;
+import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
+import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
+import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.sql.Timestamp;
 import java.util.*;
@@ -83,16 +89,7 @@ public class JSONStreamEncoder {
     }
     else if (v.getClass().isArray()) {
       encodeArray(v, outstream, ctx);
-
-      // CDI Integration: Loading entities after the service was initialized
-      // This may cause the client to throw an exception if the entity is not known
-      // TODO: Improve exception handling for these cases
-
-    }/* else if (serializableTypes.contains(v.getClass()) || tHandlers.containsKey(v.getClass())) {
-            return encodeObject(v);
-        } else {
-            throw new RuntimeException("cannot serialize type: " + v.getClass().getName());
-        }  */
+    }
     else if (v instanceof Enum) {
       encodeEnum((Enum) v, outstream, ctx);
     }
@@ -108,6 +105,7 @@ public class JSONStreamEncoder {
     }
 
     Class cls = o.getClass();
+
 
     if (java.util.Date.class.isAssignableFrom(cls)) {
       outstream.write(("{\"__EncodedType\":\"java.util.Date\", \"__ObjectID\":\"" + o.hashCode() + "\", \"Value\":" + ((java.util.Date) o).getTime() + "}").getBytes());
@@ -151,32 +149,75 @@ public class JSONStreamEncoder {
     outstream.write('\"');
     outstream.write(',');
 
-    final Field[] fields = EncodingUtil.getAllEncodingFields(cls);
-
-
     int i = 0;
     boolean first = true;
-    for (Field field : fields) {
-      if ((field.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
-              || field.isSynthetic()) {
-        continue;
-      }
-      else if (!first) {
-        outstream.write(',');
-      }
 
-      try {
+    if (DefinitionsFactory.hasDefinition(cls)) {
+      MappingDefinition def = DefinitionsFactory.getDefinition(cls);
+
+      for (MemberMapping mapping : def.getReadableMemberMappings()) {
+        if (!first) {
+          outstream.write(',');
+        }
+
         i++;
-        Object v = field.get(o);
+        Object v;
+
+        if (mapping.getReadingMember() instanceof MetaField) {
+          Field field = ((MetaField) mapping.getReadingMember()).asField();
+
+          try {
+            v = field.get(o);
+          }
+          catch (Exception e) {
+            throw new RuntimeException("error accessing field: " + field, e);
+          }
+        }
+        else {
+          Method method = ((MetaMethod) mapping.getReadingMember()).asMethod();
+
+          try {
+            v = method.invoke(o);
+          }
+          catch (Exception e) {
+            throw new RuntimeException("error calling getter: " + method, e);
+          }
+        }
+
         outstream.write('\"');
-        outstream.write(field.getName().getBytes());
+        outstream.write(mapping.getKey().getBytes());
         outstream.write('\"');
         outstream.write(':');
         _encode(v, outstream, ctx);
+
         first = false;
       }
-      catch (Exception e) {
-        throw new RuntimeException("error serializing field: " + field, e);
+    }
+    else {
+      final Field[] fields = EncodingUtil.getAllEncodingFields(cls);
+
+      for (Field field : fields) {
+        if ((field.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
+                || field.isSynthetic()) {
+          continue;
+        }
+        else if (!first) {
+          outstream.write(',');
+        }
+
+        try {
+          i++;
+          Object v = field.get(o);
+          outstream.write('\"');
+          outstream.write(field.getName().getBytes());
+          outstream.write('\"');
+          outstream.write(':');
+          _encode(v, outstream, ctx);
+          first = false;
+        }
+        catch (Exception e) {
+          throw new RuntimeException("error serializing field: " + field, e);
+        }
       }
     }
 
@@ -185,6 +226,7 @@ public class JSONStreamEncoder {
     }
 
     outstream.write('}');
+
   }
 
   private static void encodeMap(Map<Object, Object> map, OutputStream outstream, EncodingContext ctx) throws IOException {

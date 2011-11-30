@@ -16,10 +16,16 @@
 
 package org.jboss.errai.codegen.framework.meta;
 
+import java.lang.reflect.Constructor;
+
 public abstract class MetaConstructor extends MetaMethod implements MetaClassMember, MetaGenericDeclaration {
   public abstract MetaParameter[] getParameters();
 
   public abstract MetaType[] getGenericParameterTypes();
 
   public abstract boolean isVarArgs();
+
+  public Constructor asConstructor() {
+    throw new UnsupportedOperationException();
+  }
 }

@@ -16,16 +16,26 @@
 
 package org.jboss.errai.marshalling.server;
 
+import org.jboss.errai.codegen.framework.meta.MetaConstructor;
+import org.jboss.errai.codegen.framework.meta.MetaField;
+import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.common.client.types.DecodingContext;
 import org.jboss.errai.common.client.types.UnsatisfiedForwardLookup;
 import org.jboss.errai.marshalling.client.util.NumbersUtils;
+import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
+import org.jboss.errai.marshalling.rebind.api.model.ConstructorMapping;
+import org.jboss.errai.marshalling.rebind.api.model.Mapping;
+import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
+import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
 import org.mvel2.ConversionHandler;
 import org.mvel2.DataConversion;
 import org.mvel2.MVEL;
 
 import java.io.Serializable;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -59,10 +69,17 @@ public class TypeDemarshallHelper {
 
   private static final Map<Class, Map<String, Serializable>> MVELDencodingCache = new ConcurrentHashMap<Class, Map<String, Serializable>>();
 
-  public static Object instantiate(Map oMap, DecodingContext ctx) {
+  public static Class<?> getClassReference(Map oMap) {
     try {
-            
-      Class clazz = Thread.currentThread().getContextClassLoader().loadClass((String) oMap.get(SerializationParts.ENCODED_TYPE));
+      return Thread.currentThread().getContextClassLoader().loadClass((String) oMap.get(SerializationParts.ENCODED_TYPE));
+    }
+    catch (ClassNotFoundException e) {
+      throw new RuntimeException("could not instantiate class", e);
+    }
+  }
+
+  public static Object instantiate(Class clazz, Map oMap, DecodingContext ctx) {
+    try {
       String objId = (String) oMap.get(SerializationParts.OBJECT_ID);
 
       if (ctx.hasObject(objId)) {
@@ -78,15 +95,12 @@ public class TypeDemarshallHelper {
       else if (java.sql.Date.class.isAssignableFrom(clazz)) {
         return new java.sql.Date(getNumeric(oMap.get("Value")));
       }
-      
+
       Object newInstance = clazz.newInstance();
       if (objId != null) ctx.putObject(objId, newInstance);
-      
+
       return newInstance;
 
-    }
-    catch (ClassNotFoundException e) {
-      e.printStackTrace();
     }
     catch (InstantiationException e) {
       e.printStackTrace();
@@ -131,18 +145,50 @@ public class TypeDemarshallHelper {
                     oMap.get(SerializationParts.NUMERIC_VALUE));
           }
 
-          Object newInstance = instantiate(oMap, ctx);
-          
-          if (ctx.hasUnsatisfiedDependency(o)) {
-            ctx.swapDepReference(o, newInstance);
-          }
+          Class<?> cls = getClassReference(oMap);
+          Object newInstance;
 
           if (oMap.size() == 2 && !oMap.containsKey(SerializationParts.INSTANTIATE_ONLY)) {
-            return newInstance;
+            return instantiate(cls, oMap, ctx);
           }
 
-          for (Field f : EncodingUtil.getAllEncodingFields(newInstance.getClass())) {
-            setProperty(newInstance, f, oMap.get(f.getName()));
+          if (DefinitionsFactory.hasDefinition(cls)) {
+            MappingDefinition definition = DefinitionsFactory.getDefinition(cls);
+
+            ConstructorMapping cMapping;
+            if ((cMapping = definition.getConstructorMapping()) != null) {
+              Constructor c = cMapping.getConstructor().asConstructor();
+              Class<?>[] parmTypes = cMapping.getConstructorSignature();
+
+              Object[] parms = new Object[parmTypes.length];
+              int i = 0;
+              for (Mapping mapping : cMapping.getMappings()) {
+                parms[i++] = oMap.get(mapping.getKey());
+              }
+
+              newInstance = c.newInstance(parms);
+            }
+            else {
+              newInstance = instantiate(cls, oMap, ctx);
+            }
+
+            for (MemberMapping mapping : DefinitionsFactory.getDefinition(newInstance.getClass()).getWritableMemberMappings()) {
+              if (mapping.getBindingMember() instanceof MetaField) {
+                MetaField f = (MetaField) mapping.getBindingMember();
+                setProperty(newInstance, f.asField(), oMap.get(mapping.getKey()));
+              }
+              else {
+                Method m = ((MetaMethod) mapping.getBindingMember()).asMethod();
+                m.invoke(newInstance, oMap.get(mapping.getKey()));
+              }
+            }
+          }
+          else {
+            newInstance = instantiate(cls, oMap, ctx);
+
+            for (Field f : EncodingUtil.getAllEncodingFields(newInstance.getClass())) {
+              setProperty(newInstance, f, oMap.get(f.getName()));
+            }
           }
 
           return newInstance;

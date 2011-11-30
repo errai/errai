@@ -183,4 +183,9 @@ public class JavaReflectionConstructor extends MetaConstructor {
   public boolean equals(Object o) {
     return o instanceof MetaConstructor && GenUtil.equals(this, (MetaConstructor) o);
   }
+
+  @Override
+  public Constructor asConstructor() {
+    return constructor;
+  }
 }
