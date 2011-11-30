@@ -29,7 +29,7 @@ public class StackTraceElementDefinition extends MappingDefinition {
   public StackTraceElementDefinition() {
     super(StackTraceElement.class);
 
-    SimpleConstructorMapping constructorMapping = new SimpleConstructorMapping(StackTraceElement.class);
+    SimpleConstructorMapping constructorMapping = new SimpleConstructorMapping();
     constructorMapping.mapParmToIndex("declaringClass", 0, String.class);
     constructorMapping.mapParmToIndex("methodName", 1, String.class);
     constructorMapping.mapParmToIndex("fileName", 2, String.class);
@@ -37,9 +37,9 @@ public class StackTraceElementDefinition extends MappingDefinition {
 
     setConstructorMapping(constructorMapping);
 
-    addMemberMapping(new ReadMapping(StackTraceElement.class, "fileName", String.class, "getFileName"));
-    addMemberMapping(new ReadMapping(StackTraceElement.class, "methodName", String.class, "getMethodName"));
-    addMemberMapping(new ReadMapping(StackTraceElement.class, "lineNumber", Integer.class, "getLineNumber"));
-    addMemberMapping(new ReadMapping(StackTraceElement.class, "declaringClass", String.class, "getClassName"));
+    addMemberMapping(new ReadMapping("fileName", String.class, "getFileName"));
+    addMemberMapping(new ReadMapping("methodName", String.class, "getMethodName"));
+    addMemberMapping(new ReadMapping("lineNumber", Integer.class, "getLineNumber"));
+    addMemberMapping(new ReadMapping("declaringClass", String.class, "getClassName"));
   }
 }

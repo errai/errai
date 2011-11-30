@@ -42,7 +42,7 @@ public class MappingDefinition {
 
   public MappingDefinition(MetaClass toMap) {
     this.toMap = toMap;
-    this.constructorMapping = new SimpleConstructorMapping(toMap);
+    setConstructorMapping(new SimpleConstructorMapping());
   }
 
   public MappingDefinition(MetaClass toMap, ConstructorMapping cMapping) {
@@ -60,10 +60,12 @@ public class MappingDefinition {
   }
 
   public void setConstructorMapping(ConstructorMapping mapping) {
+    mapping.setMappingClass(toMap);
     constructorMapping = mapping;
   }
 
   public void addMemberMapping(MemberMapping mapping) {
+    mapping.setMappingClass(toMap);
     memberMappings.add(mapping);
   }
 

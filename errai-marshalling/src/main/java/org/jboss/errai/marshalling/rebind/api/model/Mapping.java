@@ -24,4 +24,6 @@ import org.jboss.errai.codegen.framework.meta.MetaClass;
 public interface Mapping {
   public String getKey();
   public MetaClass getType();
+
+  public void setMappingClass(MetaClass clazz);
 }

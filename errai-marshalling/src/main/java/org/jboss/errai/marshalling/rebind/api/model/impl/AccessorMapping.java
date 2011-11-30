@@ -31,26 +31,20 @@ public class AccessorMapping implements MemberMapping {
 
   private MetaClassMember bindingMember;
   private MetaClassMember readingMember;
+  
+  private String setterMethod;
+  private String getterMethod;
 
-  public AccessorMapping(Class<?> toMap, String key, Class<?> type, String setterMethod, String getterMethod) {
-    this(MetaClassFactory.get(toMap), key, MetaClassFactory.get(type), setterMethod, getterMethod);
+  public AccessorMapping(String key, Class<?> type, String setterMethod, String getterMethod) {
+    this(key, MetaClassFactory.get(type), setterMethod, getterMethod);
   }
 
-  public AccessorMapping(MetaClass toMap, String key, MetaClass type, String setterMethod, String getterMethod) {
-    this.toMap = toMap;
+  public AccessorMapping(String key, MetaClass type, String setterMethod, String getterMethod) {
     this.key = key;
     this.type = type;
 
-    bindingMember = toMap.getMethod(setterMethod, type);
-    readingMember = toMap.getMethod(getterMethod, new MetaClass[0]);
-
-    if (bindingMember == null) {
-      throw new RuntimeException("no such setter method: " + toMap.getFullyQualifiedName() + "." + setterMethod);
-    }
-
-    if (readingMember == null) {
-      throw new RuntimeException("no such getter method: " + toMap.getFullyQualifiedName() + "." + getterMethod);
-    }
+    this.setterMethod = setterMethod;
+    this.getterMethod = getterMethod;
   }
 
   @Override
@@ -65,11 +59,31 @@ public class AccessorMapping implements MemberMapping {
 
   @Override
   public MetaClassMember getBindingMember() {
+    if (bindingMember != null) {
+      return bindingMember;
+    }
+
+    bindingMember = toMap.getMethod(setterMethod, type);
+
+    if (bindingMember == null) {
+      throw new RuntimeException("no such setter method: " + toMap.getFullyQualifiedName() + "." + setterMethod);
+    }
+
     return bindingMember;
   }
 
   @Override
   public MetaClassMember getReadingMember() {
+    if (readingMember != null) {
+      return readingMember;
+    }
+
+    readingMember = toMap.getMethod(getterMethod, new MetaClass[0]);
+
+    if (readingMember == null) {
+      throw new RuntimeException("no such getter method: " + toMap.getFullyQualifiedName() + "." + getterMethod);
+    }
+
     return readingMember;
   }
 
@@ -81,5 +95,10 @@ public class AccessorMapping implements MemberMapping {
   @Override
   public boolean canWrite() {
     return true;
+  }
+
+  @Override
+  public void setMappingClass(MetaClass clazz) {
+    this.toMap = clazz;
   }
 }

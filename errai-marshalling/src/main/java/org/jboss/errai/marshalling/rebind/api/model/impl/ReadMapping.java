@@ -26,25 +26,23 @@ import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
  */
 public class ReadMapping implements MemberMapping {
   private MetaClass toMap;
+  
   private String key;
   private MetaClass type;
 
   private MetaClassMember readingMember;
 
-  public ReadMapping(Class<?> toMap, String key, Class<?> type,  String getterMethod) {
-    this(MetaClassFactory.get(toMap), key, MetaClassFactory.get(type), getterMethod);
+  private String getterMethod;
+  
+  public ReadMapping(String key, Class<?> type,  String getterMethod) {
+    this(key, MetaClassFactory.get(type), getterMethod);
   }
 
-  public ReadMapping(MetaClass toMap, String key, MetaClass type, String getterMethod) {
-    this.toMap = toMap;
+  public ReadMapping( String key, MetaClass type, String getterMethod) {
     this.key = key;
     this.type = type;
 
-    readingMember = toMap.getMethod(getterMethod, new MetaClass[0]);
-
-    if (readingMember == null) {
-      throw new RuntimeException("no such getter method: " + toMap.getFullyQualifiedName() + "." + getterMethod);
-    }
+    this.getterMethod = getterMethod;
   }
 
   @Override
@@ -64,6 +62,16 @@ public class ReadMapping implements MemberMapping {
 
   @Override
   public MetaClassMember getReadingMember() {
+    if (readingMember != null) {
+    return readingMember;
+    }
+    
+    readingMember = toMap.getMethod(getterMethod, new MetaClass[0]);
+
+    if (readingMember == null) {
+      throw new RuntimeException("no such getter method: " + toMap.getFullyQualifiedName() + "." + getterMethod);
+    }
+
     return readingMember;
   }
 
@@ -75,5 +83,10 @@ public class ReadMapping implements MemberMapping {
   @Override
   public boolean canWrite() {
     return false;
+  }
+
+  @Override
+  public void setMappingClass(MetaClass clazz) {
+    this.toMap = clazz;
   }
 }

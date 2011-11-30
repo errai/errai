@@ -30,14 +30,14 @@ public class ThrowableDefinition extends MappingDefinition {
   public ThrowableDefinition() {
     super(Throwable.class);
 
-    SimpleConstructorMapping constructorMapping = new SimpleConstructorMapping(Throwable.class);
+    SimpleConstructorMapping constructorMapping = new SimpleConstructorMapping();
     constructorMapping.mapParmToIndex("message", 0, String.class);
     constructorMapping.mapParmToIndex("cause", 1, Throwable.class);
 
     setConstructorMapping(constructorMapping);
 
-    addMemberMapping(new AccessorMapping(Throwable.class, "stackTrace", StackTraceElement[].class, "setStackTrace", "getStackTrace"));
-    addMemberMapping(new ReadMapping(Throwable.class, "message", String.class, "getMessage"));
-    addMemberMapping(new ReadMapping(Throwable.class, "cause", Throwable.class, "getCause"));
+    addMemberMapping(new AccessorMapping("stackTrace", StackTraceElement[].class, "setStackTrace", "getStackTrace"));
+    addMemberMapping(new ReadMapping("message", String.class, "getMessage"));
+    addMemberMapping(new ReadMapping("cause", Throwable.class, "getCause"));
   }
 }

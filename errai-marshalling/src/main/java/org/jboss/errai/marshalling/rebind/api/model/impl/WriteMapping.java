@@ -31,20 +31,16 @@ public class WriteMapping implements MemberMapping {
 
   private MetaClassMember writingMember;
 
-  public WriteMapping(Class<?> toMap, String key, Class<?> type, String getterMethod) {
-    this(MetaClassFactory.get(toMap), key, MetaClassFactory.get(type), getterMethod);
+  private String getterMethod;
+
+  public WriteMapping(String key, Class<?> type, String getterMethod) {
+    this(key, MetaClassFactory.get(type), getterMethod);
   }
 
-  public WriteMapping(MetaClass toMap, String key, MetaClass type, String getterMethod) {
-    this.toMap = toMap;
+  public WriteMapping(String key, MetaClass type, String getterMethod) {
     this.key = key;
     this.type = type;
-
-    writingMember = toMap.getMethod(getterMethod, type);
-
-    if (writingMember == null) {
-      throw new RuntimeException("no such setter method: " + toMap.getFullyQualifiedName() + "." + getterMethod);
-    }
+    this.getterMethod = getterMethod;
   }
 
   @Override
@@ -59,6 +55,16 @@ public class WriteMapping implements MemberMapping {
 
   @Override
   public MetaClassMember getBindingMember() {
+    if (writingMember != null) {
+      return writingMember;
+    }
+
+    writingMember = toMap.getMethod(getterMethod, type);
+
+    if (writingMember == null) {
+      throw new RuntimeException("no such setter method: " + toMap.getFullyQualifiedName() + "." + getterMethod);
+    }
+
     return writingMember;
   }
 
@@ -75,5 +81,10 @@ public class WriteMapping implements MemberMapping {
   @Override
   public boolean canWrite() {
     return true;
+  }
+
+  @Override
+  public void setMappingClass(MetaClass clazz) {
+    this.toMap = clazz;
   }
 }

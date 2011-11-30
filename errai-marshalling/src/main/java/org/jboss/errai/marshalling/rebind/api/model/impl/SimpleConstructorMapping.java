@@ -31,16 +31,7 @@ import java.util.TreeMap;
  * @author Mike Brock
  */
 public class SimpleConstructorMapping implements ConstructorMapping {
-  private MetaClass toMap;
-
-
-  public SimpleConstructorMapping(Class<?> toMap) {
-    this(MetaClassFactory.get(toMap));
-  }
-
-  public SimpleConstructorMapping(MetaClass toMap) {
-    this.toMap = toMap;
-  }
+   private MetaClass toMap;
 
   private Map<Integer, String> parmsToIndexMap = new HashMap<Integer, String>();
   private Map<Integer, MetaClass> indexToType = new TreeMap<Integer, MetaClass>();
@@ -110,7 +101,11 @@ public class SimpleConstructorMapping implements ConstructorMapping {
     return _constructorCache = toMap.getConstructor(getConstructorSignature());
   }
 
-  private static class SimpleMapping implements Mapping {
+  public void setMappingClass(MetaClass toMap) {
+    this.toMap = toMap;
+  }
+
+  private static class SimpleMapping extends AbstractMapping {
     private String key;
     private MetaClass type;
 

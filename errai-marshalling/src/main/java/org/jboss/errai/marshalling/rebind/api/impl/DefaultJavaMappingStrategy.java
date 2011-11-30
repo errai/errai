@@ -394,6 +394,8 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
 
         definition.addMemberMapping(new MemberMapping() {
+          private MetaClass toMap;
+          
           @Override
           public MetaClassMember getBindingMember() {
             return field;
@@ -423,6 +425,11 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
           public boolean canWrite() {
             return true;
           }
+
+          @Override
+          public void setMappingClass(MetaClass clazz) {
+            this.toMap = clazz;
+          }
         });
 
         // mappings.add(field);
@@ -440,7 +447,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
     Set<MetaConstructor> constructors = new HashSet<MetaConstructor>();
 
-    SimpleConstructorMapping simpleConstructorMapping = new SimpleConstructorMapping(toMap);
+    SimpleConstructorMapping simpleConstructorMapping = new SimpleConstructorMapping();
 
     for (MetaConstructor c : toMap.getConstructors()) {
       if (c.isAnnotationPresent(MappedOrdered.class)) {
