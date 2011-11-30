@@ -1,0 +1,45 @@
+/*
+ * Copyright 2011 JBoss, by Red Hat, Inc
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.jboss.errai.marshalling.rebind.mappings.builtin;
+
+import org.jboss.errai.marshalling.rebind.api.CustomMapping;
+import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
+import org.jboss.errai.marshalling.rebind.api.model.impl.ReadMapping;
+import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleConstructorMapping;
+
+/**
+ * @author Mike Brock
+ */
+@CustomMapping
+public class StackTraceElementDefinition extends MappingDefinition {
+  public StackTraceElementDefinition() {
+    super(StackTraceElement.class);
+
+    SimpleConstructorMapping constructorMapping = new SimpleConstructorMapping(StackTraceElement.class);
+    constructorMapping.mapParmToIndex("declaringClass", 0, String.class);
+    constructorMapping.mapParmToIndex("methodName", 1, String.class);
+    constructorMapping.mapParmToIndex("fileName", 2, String.class);
+    constructorMapping.mapParmToIndex("lineNumber", 3, Integer.class);
+
+    setConstructorMapping(constructorMapping);
+
+    addMemberMapping(new ReadMapping(StackTraceElement.class, "fileName", String.class, "getFileName"));
+    addMemberMapping(new ReadMapping(StackTraceElement.class, "methodName", String.class, "getMethodName"));
+    addMemberMapping(new ReadMapping(StackTraceElement.class, "lineNumber", Integer.class, "getLineNumber"));
+    addMemberMapping(new ReadMapping(StackTraceElement.class, "declaringClass", String.class, "getClassName"));
+  }
+}

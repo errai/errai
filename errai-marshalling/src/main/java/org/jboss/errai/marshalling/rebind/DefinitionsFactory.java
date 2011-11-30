@@ -17,6 +17,10 @@
 package org.jboss.errai.marshalling.rebind;
 
 import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.common.metadata.MetaDataProcessor;
+import org.jboss.errai.common.metadata.MetaDataScanner;
+import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.marshalling.rebind.api.CustomMapping;
 import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 import org.jboss.errai.marshalling.rebind.api.model.impl.AccessorMapping;
 import org.jboss.errai.marshalling.rebind.api.model.impl.ReadMapping;
@@ -29,11 +33,11 @@ import java.util.Map;
  * @author Mike Brock
  */
 public class DefinitionsFactory {
-  private static final Map<String, MappingDefinition> MAPPING_DEFINITIONS 
+  private static final Map<String, MappingDefinition> MAPPING_DEFINITIONS
           = new HashMap<String, MappingDefinition>();
 
   static {
-    loadDefaults();
+    loadDefinitions();
   }
 
   public static boolean hasDefinition(MetaClass clazz) {
@@ -43,47 +47,34 @@ public class DefinitionsFactory {
   public static boolean hasDefinition(Class<?> clazz) {
     return MAPPING_DEFINITIONS.containsKey(clazz.getCanonicalName());
   }
-  
+
   public static void addDefinition(MappingDefinition definition) {
-     MAPPING_DEFINITIONS.put(definition.getMappingClass().getCanonicalName(), definition);
+    MAPPING_DEFINITIONS.put(definition.getMappingClass().getCanonicalName(), definition);
   }
 
   public static MappingDefinition getDefinition(MetaClass clazz) {
-     return MAPPING_DEFINITIONS.get(clazz.getCanonicalName());
+    return MAPPING_DEFINITIONS.get(clazz.getCanonicalName());
   }
 
   public static MappingDefinition getDefinition(Class<?> clazz) {
-     return MAPPING_DEFINITIONS.get(clazz.getCanonicalName());
+    return MAPPING_DEFINITIONS.get(clazz.getCanonicalName());
   }
 
-  private static void loadDefaults() {
+  private static void loadDefinitions() {
+    MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
 
-    /** StackTraceElement **/
-    SimpleConstructorMapping stackTraceMapping = new SimpleConstructorMapping(StackTraceElement.class);
-    stackTraceMapping.mapParmToIndex("declaringClass", 0, String.class);
-    stackTraceMapping.mapParmToIndex("methodName", 1, String.class);
-    stackTraceMapping.mapParmToIndex("fileName", 2, String.class);
-    stackTraceMapping.mapParmToIndex("lineNumber", 3, Integer.class);
+    for (Class<?> cls : scanner.getTypesAnnotatedWith(CustomMapping.class)) {
+      if (!MappingDefinition.class.isAssignableFrom(cls)) {
+        throw new RuntimeException("@CustomMapping class: " + cls.getName() + " does not inherit " + MappingDefinition.class.getName());
+      }
 
-    MappingDefinition stackTraceElementDef = new MappingDefinition(StackTraceElement.class, stackTraceMapping);
-    stackTraceElementDef.addMemberMapping(new ReadMapping(StackTraceElement.class, "fileName", String.class, "getFileName"));
-    stackTraceElementDef.addMemberMapping(new ReadMapping(StackTraceElement.class, "methodName", String.class, "getMethodName"));
-    stackTraceElementDef.addMemberMapping(new ReadMapping(StackTraceElement.class, "lineNumber", Integer.class, "getLineNumber"));
-    stackTraceElementDef.addMemberMapping(new ReadMapping(StackTraceElement.class, "declaringClass", String.class, "getClassName"));
-
-    addDefinition(stackTraceElementDef);
-
-
-    /** Throwable **/
-    SimpleConstructorMapping throwableMapping = new SimpleConstructorMapping(Throwable.class);
-    throwableMapping.mapParmToIndex("message", 0, String.class);
-    throwableMapping.mapParmToIndex("cause", 1, Throwable.class);
-
-    MappingDefinition throwableDef = new MappingDefinition(Throwable.class, throwableMapping);
-    throwableDef.addMemberMapping(new AccessorMapping(Throwable.class, "stackTrace", StackTraceElement[].class, "setStackTrace", "getStackTrace"));
-    throwableDef.addMemberMapping(new ReadMapping(Throwable.class, "message", String.class, "getMessage"));
-    throwableDef.addMemberMapping(new ReadMapping(Throwable.class, "cause", Throwable.class, "getCause"));
-    addDefinition(throwableDef);
+      try {
+        MappingDefinition definition = (MappingDefinition) cls.newInstance();
+        addDefinition(definition);
+      }
+      catch (Throwable t) {
+        throw new RuntimeException("Failed to load definition", t);
+      }
+    }
   }
-
 }
