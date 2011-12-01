@@ -17,15 +17,23 @@
 package org.jboss.errai.marshalling.rebind.mappings.builtin;
 
 import org.jboss.errai.marshalling.rebind.api.CustomMapping;
+import org.jboss.errai.marshalling.rebind.api.InheritedMappings;
 import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 import org.jboss.errai.marshalling.rebind.api.model.impl.AccessorMapping;
 import org.jboss.errai.marshalling.rebind.api.model.impl.ReadMapping;
 import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleConstructorMapping;
 
+import java.io.IOException;
+import java.util.EmptyStackException;
+
 /**
  * @author Mike Brock
  */
 @CustomMapping
+@InheritedMappings(
+        {ArithmeticException.class, IOException.class, IllegalArgumentException.class,
+                UnsupportedOperationException.class, EmptyStackException.class}
+)
 public class ThrowableDefinition extends MappingDefinition {
   public ThrowableDefinition() {
     super(Throwable.class);

@@ -173,9 +173,7 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
       return mFld;
     }
     catch (Exception e) {
-
-
-      throw new RuntimeException("Could not get field: " + name, e);
+      return null;
     }
   }
 
@@ -193,7 +191,7 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
       return mFld;
     }
     catch (Exception e) {
-      throw new RuntimeException("Could not get field: " + name, e);
+      return null;
     }
   }
 
@@ -237,7 +235,7 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
       return new JavaReflectionConstructor(getEnclosedMetaObject().getConstructor(parameters));
     }
     catch (Exception e) {
-      throw new RuntimeException("Could not get constructor", e);
+      return null;
     }
   }
 
@@ -247,15 +245,15 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
       return new JavaReflectionConstructor(getEnclosedMetaObject().getDeclaredConstructor(parameters));
     }
     catch (Exception e) {
-      throw new RuntimeException("Could not get constructor", e);
+      return null;
     }
   }
-  
+
   private MetaClass[] _interfacesCache;
 
   @Override
   public MetaClass[] getInterfaces() {
-    if (_interfacesCache != null){
+    if (_interfacesCache != null) {
       return _interfacesCache;
     }
 

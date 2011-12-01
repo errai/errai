@@ -32,7 +32,6 @@ public class MappingDefinition {
   private boolean marshal = true;
   private boolean demarshal = true;
 
-
   private ConstructorMapping constructorMapping;
   private List<MemberMapping> memberMappings = new ArrayList<MemberMapping>();
 
@@ -64,8 +63,17 @@ public class MappingDefinition {
     constructorMapping = mapping;
   }
 
+  public void setInheritedConstructorMapping(ConstructorMapping mapping) {
+    constructorMapping = mapping;
+  }
+
+
   public void addMemberMapping(MemberMapping mapping) {
     mapping.setMappingClass(toMap);
+    memberMappings.add(mapping);
+  }
+  
+  public void addInheritedMapping(MemberMapping mapping) {
     memberMappings.add(mapping);
   }
 

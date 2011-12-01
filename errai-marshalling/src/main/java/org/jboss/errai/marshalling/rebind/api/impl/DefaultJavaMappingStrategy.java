@@ -137,7 +137,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                         .finish()
         );
 
-        // String objId = a0.get(SerializationParts.OBJECTID).isString().stringValue();
+
         methBuilder.append(Stmt.declareVariable(String.class).named("objId")
                 .initializeWith(loadVariable("obj")
                         .invoke("get", SerializationParts.OBJECT_ID)
