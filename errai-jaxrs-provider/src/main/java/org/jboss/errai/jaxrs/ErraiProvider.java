@@ -32,9 +32,9 @@ import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
-import org.jboss.errai.bus.server.io.JSONStreamDecoder;
-import org.jboss.errai.bus.server.io.JSONStreamEncoder;
 import org.jboss.errai.common.client.api.annotations.Portable;
+import org.jboss.errai.marshalling.server.JSONStreamDecoder;
+import org.jboss.errai.marshalling.server.JSONStreamEncoder;
 
 /**
  * Provider for serialization/deserialization of Errai objects.

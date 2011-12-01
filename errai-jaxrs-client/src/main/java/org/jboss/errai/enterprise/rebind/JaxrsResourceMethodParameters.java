@@ -43,8 +43,6 @@ public class JaxrsResourceMethodParameters {
   private Parameter entityParameter;
   private Map<Class<? extends Annotation>, Map<String, List<Parameter>>> parameters;
   
-  private JaxrsResourceMethodParameters() {}
-
   public static JaxrsResourceMethodParameters fromMethod(MetaMethod method) {
     JaxrsResourceMethodParameters params = new JaxrsResourceMethodParameters();
 
