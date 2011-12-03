@@ -1,6 +1,7 @@
 package org.jboss.errai.bus.server.service.metadata;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.Closeable;
@@ -21,7 +22,7 @@ import org.junit.Test;
  * 
  * @author Jonathan Fuerth <jfuerth@redhat.com>
  */
-public class JBossVFSDirTest {
+public class JBossVfsDirTest {
 
   /**
    * A new directory created and mounted into the JBoss VFS at {
@@ -68,7 +69,7 @@ public class JBossVFSDirTest {
   
   @Test
   public void testEmptyVfsDirListing() throws Exception {
-    JBossVFSDIr jbvd = new JBossVFSDIr(getJBossVfsMountPoint().asDirectoryURL());
+    JBossVfsDir jbvd = new JBossVfsDir(getJBossVfsMountPoint().asDirectoryURL());
     int count = 0;
     for (org.reflections.vfs.Vfs.File reflectionsFile : jbvd.getFiles()) {
       System.out.println("Visiting virtual file " + reflectionsFile.getRelativePath());
@@ -83,7 +84,7 @@ public class JBossVFSDirTest {
     new File(mountedDir, "bar").createNewFile();
     new File(mountedDir, "baz").createNewFile();
     
-    JBossVFSDIr jbvd = new JBossVFSDIr(getJBossVfsMountPoint().asDirectoryURL());
+    JBossVfsDir jbvd = new JBossVfsDir(getJBossVfsMountPoint().asDirectoryURL());
     int count = 0;
     for (org.reflections.vfs.Vfs.File reflectionsFile : jbvd.getFiles()) {
       System.out.println("Visiting virtual file " + reflectionsFile.getRelativePath());
@@ -99,7 +100,7 @@ public class JBossVFSDirTest {
   public void testNestedEmptyVfsDirListing() throws Exception {
     new File(mountedDir, "deeply/nested/directories").mkdirs();
     
-    JBossVFSDIr jbvd = new JBossVFSDIr(getJBossVfsMountPoint().asDirectoryURL());
+    JBossVfsDir jbvd = new JBossVfsDir(getJBossVfsMountPoint().asDirectoryURL());
     int count = 0;
     for (org.reflections.vfs.Vfs.File reflectionsFile : jbvd.getFiles()) {
       System.out.println("Visiting virtual file " + reflectionsFile.getRelativePath());
@@ -130,7 +131,7 @@ public class JBossVFSDirTest {
   @Test
   public void testRejectNonJBossVfsUrl() throws Exception {
     try {
-      new JBossVFSDIr(new File(System.getProperty("java.io.tmpdir")).toURI().toURL());
+      new JBossVfsDir(new File(System.getProperty("java.io.tmpdir")).toURI().toURL());
       fail("Shouldn't have been able to create JBossVfsDir from regular file: URL");
     } catch (IllegalArgumentException ex) {
       // expected outcome
@@ -141,23 +142,24 @@ public class JBossVFSDirTest {
   public void testVfsFullPath() throws Exception {
     new File(mountedDir, "foo").createNewFile();
 
-    JBossVFSDIr jbvd = new JBossVFSDIr(getJBossVfsMountPoint().asDirectoryURL());
-    assertEquals("/mnt/foo", jbvd.getFiles().iterator().next().getFullPath());
+    JBossVfsDir jbvd = new JBossVfsDir(getJBossVfsMountPoint().asDirectoryURL());
+    String path = jbvd.getFiles().iterator().next().getFullPath();
+    assertTrue("Wrong path:" + path, path.matches("/([A-Za-z]:/)?mnt/foo"));
   }
 
   @Test
   public void testVfsRelativePath() throws Exception {
     new File(mountedDir, "foo").createNewFile();
 
-    JBossVFSDIr jbvd = new JBossVFSDIr(getJBossVfsMountPoint().asDirectoryURL());
-    assertEquals("/mnt/foo", jbvd.getFiles().iterator().next().getRelativePath());
+    JBossVfsDir jbvd = new JBossVfsDir(getJBossVfsMountPoint().asDirectoryURL());
+    String path = jbvd.getFiles().iterator().next().getRelativePath();
+    assertTrue("Wrong path:" + path, path.matches("/([A-Za-z]:/)?mnt/foo"));
   }
-
   @Test
   public void testVfsFileName() throws Exception {
     new File(mountedDir, "foo").createNewFile();
 
-    JBossVFSDIr jbvd = new JBossVFSDIr(getJBossVfsMountPoint().asDirectoryURL());
+    JBossVfsDir jbvd = new JBossVfsDir(getJBossVfsMountPoint().asDirectoryURL());
     assertEquals("foo", jbvd.getFiles().iterator().next().getName());
   }
 }

@@ -75,7 +75,7 @@ public class VFSUrlType implements Vfs.UrlType {
       if (jbossAS) {
         try {
           if (url.getContent() instanceof VirtualFile) {
-             return new JBossVFSDIr(url);
+             return new JBossVfsDir(url);
           }
         }
         catch (IOException e) {
