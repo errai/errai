@@ -44,7 +44,8 @@
                 <include>org.jboss.errai:errai-tools</include>
                 <include>org.jboss.errai:errai-persistence</include>
                 <include>org.jboss.errai:jboss7-support</include>
-
+                <include>org.jboss.errai:errai-marshalling</include>
+                <include>org.jboss.errai:errai-codegen</include>
             </includes>
         </dependencySet>
         <dependencySet>
