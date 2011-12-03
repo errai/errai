@@ -17,38 +17,18 @@
 package org.jboss.errai.marshalling.client.marshallers;
 
 import com.google.gwt.json.client.JSONValue;
-import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
-import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
-import org.jboss.errai.marshalling.client.util.MarshallUtil;
+import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 @ClientMarshaller
-public class StringMarshaller implements Marshaller<JSONValue, String> {
-  public static final StringMarshaller INSTANCE = new StringMarshaller();
-
+public class StringBufferMarshaller  extends AbstractStringBufferMarshaller<JSONValue> {
   @Override
-  public Class<String> getTypeHandled() {
-    return String.class;
+  public StringBuffer demarshall(JSONValue o, MarshallingSession ctx) {
+    return (o == null || o.isString() == null) ? null : new StringBuffer(o.isString().stringValue());
   }
-
-  @Override
-  public String getEncodingType() {
-    return "json";
-  }
-
-  @Override
-  public String demarshall(JSONValue o, MarshallingSession ctx) {
-    return (o == null || o.isString() == null) ? null : o.isString().stringValue();
-  }
-
-  @Override
-  public String marshall(String o, MarshallingSession ctx) {
-    return o == null ? "null" : "\"" + MarshallUtil.jsonStringEscape(o) + "\"";
-  }
-
 
   @Override
   public boolean handles(JSONValue o) {

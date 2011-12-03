@@ -18,10 +18,7 @@ package org.jboss.errai.bus.server;
 
 import java.util.List;
 
-import org.jboss.errai.bus.client.tests.support.ClassWithNestedClass;
-import org.jboss.errai.bus.client.tests.support.EntityWithGenericCollections;
-import org.jboss.errai.bus.client.tests.support.TestException;
-import org.jboss.errai.bus.client.tests.support.TestRPCServiceRemote;
+import org.jboss.errai.bus.client.tests.support.*;
 import org.jboss.errai.bus.server.annotations.Service;
 
 /**
@@ -63,5 +60,10 @@ public class TestRPCService implements TestRPCServiceRemote {
   @Override
   public EntityWithGenericCollections genericCollections(EntityWithGenericCollections ent) {
     return ent;
+  }
+
+  @Override
+  public EntityWithStringBufferAndStringBuilder testStringBufferAndStringBuilder(EntityWithStringBufferAndStringBuilder entity) {
+    return entity;
   }
 }

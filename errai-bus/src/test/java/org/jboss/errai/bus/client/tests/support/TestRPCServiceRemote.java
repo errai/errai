@@ -36,4 +36,6 @@ public interface TestRPCServiceRemote {
   public ClassWithNestedClass nestedClass(ClassWithNestedClass clazz);
 
   public EntityWithGenericCollections genericCollections(EntityWithGenericCollections ent);
+
+  public EntityWithStringBufferAndStringBuilder testStringBufferAndStringBuilder(EntityWithStringBufferAndStringBuilder entity);
 }

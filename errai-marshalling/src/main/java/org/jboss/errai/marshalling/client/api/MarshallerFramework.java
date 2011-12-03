@@ -17,6 +17,7 @@
 package org.jboss.errai.marshalling.client.api;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -67,8 +68,7 @@ public class MarshallerFramework implements EntryPoint {
     return new ObjectMarshaller().marshall(obj, new JSONMarshallingSession());
   }
 
-  public static class JSONMarshallingSession implements MarshallingSession {
-
+  public static class JSONMarshallingSession extends AbstractMarshallingSession {
     @Override
     public Marshaller<Object, Object> getMarshallerForType(String fqcn) {
       if (fqcn == null) {
@@ -76,11 +76,6 @@ public class MarshallerFramework implements EntryPoint {
       }
 
       return MarshallUtil.notNull("no marshaller for: " + fqcn, marshallerFactory.getMarshaller(null, fqcn));
-    }
-
-    @Override
-    public Marshaller<Object, Object> getArrayMarshallerForType(String fqcn) {
-      return null;
     }
 
     @Override
@@ -140,23 +135,6 @@ public class MarshallerFramework implements EntryPoint {
         return null;
       }
       throw new RuntimeException("unknown type: cannot reverse map value to concrete Java type: " + o);
-    }
-
-    Map<String, Object> objectMap = new HashMap<String, Object>();
-
-    @Override
-    public boolean hasObjectHash(String hashCode) {
-      return objectMap.containsKey(hashCode);
-    }
-
-    @Override
-    public <T> T getObject(Class<T> type, String hashCode) {
-      return (T) objectMap.get(hashCode);
-    }
-
-    @Override
-    public void recordObjectHash(String hashCode, Object instance) {
-      objectMap.put(hashCode, instance);
     }
   }
 

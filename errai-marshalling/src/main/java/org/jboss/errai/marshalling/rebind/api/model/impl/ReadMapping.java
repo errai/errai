@@ -40,7 +40,7 @@ public class ReadMapping implements MemberMapping {
 
   public ReadMapping( String key, MetaClass type, String getterMethod) {
     this.key = key;
-    this.type = type;
+    this.type = type.asBoxed();
 
     this.getterMethod = getterMethod;
   }

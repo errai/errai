@@ -43,7 +43,7 @@ public class SimpleConstructorMapping implements ConstructorMapping {
 
   public void mapParmToIndex(String parm, int index, MetaClass type) {
     parmsToIndexMap.put(index, parm);
-    indexToType.put(index, type);
+    indexToType.put(index, type.asBoxed());
   }
 
 
@@ -111,7 +111,7 @@ public class SimpleConstructorMapping implements ConstructorMapping {
 
     private SimpleMapping(String key, MetaClass type) {
       this.key = key;
-      this.type = type;
+      this.type = type.asBoxed();
     }
 
     @Override

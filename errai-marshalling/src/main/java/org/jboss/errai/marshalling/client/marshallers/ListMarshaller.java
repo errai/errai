@@ -24,16 +24,13 @@ import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
 
-import java.util.AbstractList;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 @ClientMarshaller
-@ImplementationAliases({AbstractList.class, ArrayList.class, LinkedList.class})
+@ImplementationAliases({AbstractList.class, ArrayList.class, LinkedList.class, Vector.class, Stack.class})
 public class ListMarshaller implements Marshaller<JSONValue, List> {
   @Override
   public Class<List> getTypeHandled() {

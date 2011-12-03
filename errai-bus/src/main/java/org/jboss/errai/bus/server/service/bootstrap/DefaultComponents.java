@@ -49,7 +49,7 @@ class DefaultComponents implements BootstrapExecution {
 
     final ErraiServiceConfiguratorImpl config = (ErraiServiceConfiguratorImpl) context.getConfig();
 
-    MessageBuilder.setMessageProvider(JSONMessageServer.PROVIDER);
+   // MessageBuilder.setMessageProvider(JSONMessageServer.PROVIDER);
 
     /*** Authentication Adapter ***/
 

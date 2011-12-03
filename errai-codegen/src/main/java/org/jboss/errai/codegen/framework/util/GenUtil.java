@@ -150,6 +150,9 @@ public class GenUtil {
         return generate(context, input);
       }
     }
+    catch (OutOfScopeException e) {
+      throw e;
+    }
     catch (Throwable t) {
       throw new InvalidTypeException(t);
     }

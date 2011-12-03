@@ -469,14 +469,14 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
               }
               else {
                 MapsTo mapsTo = (MapsTo) a;
-                String fieldName = mapsTo.value();
-
-                if (toMap.getDeclaredField(fieldName) == null) {
-                  throw new InvalidMappingException(MapsTo.class.getCanonicalName()
-                          + " refers to a field ('" + fieldName + "') which does not exist in the class: "
-                          + toMap.getName());
-                }
-                simpleConstructorMapping.mapParmToIndex(fieldName, i, c.getParameters()[i].getType());
+                String key = mapsTo.value();
+//
+//                if (toMap.getDeclaredField(key) == null) {
+//                  throw new InvalidMappingException(MapsTo.class.getCanonicalName()
+//                          + " refers to a field ('" + key + "') which does not exist in the class: "
+//                          + toMap.getName());
+//                }
+                simpleConstructorMapping.mapParmToIndex(key, i, c.getParameters()[i].getType());
               }
             }
           }

@@ -316,37 +316,14 @@ public class JSONDecoder {
               lhs = new JSONDecoder(lhs.toString().substring(SerializationParts.EMBEDDED_JSON.length())).parse();
             }
 
-//            boolean rec = true;
-//            if (lhs instanceof UnsatisfiedForwardLookup) {
-//              ctx.addUnsatisfiedDependency(collection, (UnsatisfiedForwardLookup) lhs);
-//              if (!(rhs instanceof UnsatisfiedForwardLookup)) {
-//                ((UnsatisfiedForwardLookup) lhs).setVal(rhs);
-//                ((UnsatisfiedForwardLookup) lhs).setPath("{}");
-//              }
-//              rec = false;
-//            }
-//            if (rhs instanceof UnsatisfiedForwardLookup) {
-//              ctx.addUnsatisfiedDependency(collection, (UnsatisfiedForwardLookup) rhs);
-//              ((UnsatisfiedForwardLookup) rhs).setKey(lhs);
-//              ((UnsatisfiedForwardLookup) rhs).setPath(String.valueOf(lhs));
-//              rec = false;
-//            }
-//
-//            //noinspection unchecked
-//            if (rec)
             ((Map) collection).put(lhs, rhs);
 
           }
           else {
             if (collection == null) return lhs;
 
-//            if (lhs instanceof UnsatisfiedForwardLookup) {
-//              ctx.addUnsatisfiedDependency(collection, (UnsatisfiedForwardLookup) lhs);
-//            }
-//            else {
             //noinspection unchecked
             ((Collection) collection).add(lhs);
-//            }
           }
         }
 

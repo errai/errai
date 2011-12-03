@@ -14,27 +14,33 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.marshalling.client.api;
+package org.jboss.errai.marshalling.tests.res;
+
+import org.jboss.errai.common.client.api.annotations.Portable;
+
+import java.util.Date;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public interface MarshallingSession {
-  public Marshaller<Object, Object> getMarshallerForType(String fqcn);
+@Portable
+public class EntityToTestC {
+  private StringBuffer stringBuffer;
+  private StringBuilder stringBuilder;
 
-  public String marshall(Object o);
-  
-  public <T> T demarshall(Class<T> clazz, Object o);
-  
-  public String determineTypeFor(String formatType, Object o);
-  
-  public boolean hasObjectHash(Object reference);
-  
-  public boolean hasObjectHash(String hashCode);
-  
-  public <T> T getObject(Class<T> type, String hashCode);
-  
-  public void recordObjectHash(String hashCode, Object instance);
-  
-  public String getObjectHash(Object o);
+  public StringBuffer getStringBuffer() {
+    return stringBuffer;
+  }
+
+  public void setStringBuffer(StringBuffer stringBuffer) {
+    this.stringBuffer = stringBuffer;
+  }
+
+  public StringBuilder getStringBuilder() {
+    return stringBuilder;
+  }
+
+  public void setStringBuilder(StringBuilder stringBuilder) {
+    this.stringBuilder = stringBuilder;
+  }
 }

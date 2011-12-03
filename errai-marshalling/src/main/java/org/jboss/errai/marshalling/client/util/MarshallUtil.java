@@ -19,9 +19,10 @@ package org.jboss.errai.marshalling.client.util;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.common.client.protocols.SerializationParts;
-import org.jboss.errai.common.client.types.EncodingContext;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
+
+import java.util.Map;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -83,6 +84,11 @@ public class MarshallUtil {
     JSONValue v = object.get(SerializationParts.ENCODED_TYPE);
     return !(v == null || v.isString() == null) && cls.getName().equals(v.isString().stringValue());
   }
+  
+  public static boolean handles(Map object, Class<?> cls) {
+    String v = String.valueOf(object.get(SerializationParts.ENCODED_TYPE));
+    return (v != null && cls.getName().equals(String.valueOf(v)));
+  }
 
   public static Marshaller<Object, Object> getQualifiedNumberMarshaller(Object o) {
       final Class<Object> type = (Class<Object>) o.getClass();
@@ -117,4 +123,52 @@ public class MarshallUtil {
   }
 
 
+  public static String jsonStringEscape(final String s) {
+//     return o.replaceAll("\\\\", "\\\\\\\\").replaceAll("[\\\\]{0}\\\"", "\\\\\"");
+
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < s.length(); i++) {
+      char ch = s.charAt(i);
+      switch (ch) {
+        case '"':
+          sb.append("\\\"");
+          break;
+        case '\\':
+          sb.append("\\\\");
+          break;
+        case '\b':
+          sb.append("\\b");
+          break;
+        case '\f':
+          sb.append("\\f");
+          break;
+        case '\n':
+          sb.append("\\n");
+          break;
+        case '\r':
+          sb.append("\\r");
+          break;
+        case '\t':
+          sb.append("\\t");
+          break;
+        case '/':
+          sb.append("\\/");
+          break;
+        default:
+          //Reference: http://www.unicode.org/versions/Unicode5.1.0/
+          if ((ch >= '\u0000' && ch <= '\u001F') || (ch >= '\u007F' && ch <= '\u009F') || (ch >= '\u2000' && ch <= '\u20FF')) {
+            String ss = Integer.toHexString(ch);
+            sb.append("\\u");
+            for (int k = 0; k < 4 - ss.length(); k++) {
+              sb.append('0');
+            }
+            sb.append(ss.toUpperCase());
+          }
+          else {
+            sb.append(ch);
+          }
+      }
+    }
+    return sb.toString();
+  }
 }

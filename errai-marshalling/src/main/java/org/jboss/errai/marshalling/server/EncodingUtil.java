@@ -27,7 +27,8 @@ public class EncodingUtil {
 
     do {
       heirarchy.add(cls.getDeclaredFields());
-    } while ((cls = cls.getSuperclass()) != Object.class);
+    }
+    while ((cls = cls.getSuperclass()) != Object.class);
 
     List<Field> encodingFields = new ArrayList<Field>();
 
@@ -54,4 +55,6 @@ public class EncodingUtil {
       }
     });
   }
+
+
 }

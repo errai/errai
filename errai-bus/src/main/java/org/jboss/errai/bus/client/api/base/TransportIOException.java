@@ -16,11 +16,15 @@
 
 package org.jboss.errai.bus.client.api.base;
 
+import org.jboss.errai.common.client.api.annotations.Portable;
+import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
+
+@Portable
 public class TransportIOException extends Exception {
   private int errorCode;
   private String errorMessage;
 
-  public TransportIOException(String message, int errorCode, String errorMessage) {
+  public TransportIOException(@MapsTo("message") String message, @MapsTo("errorCode") int errorCode, @MapsTo("errorMessage") String errorMessage) {
     super(message);
     this.errorCode = errorCode;
     this.errorMessage = errorMessage;

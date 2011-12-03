@@ -36,8 +36,11 @@ import org.jboss.errai.bus.client.framework.MessageProvider;
  * @author Mike Brock
  */
 public class MessageBuilder {
-  private static MessageProvider provider = JSONMessage.PROVIDER;
-
+  private static MessageProvider provider = new MessageProvider() {
+      public Message get() {
+        return CommandMessage.create();
+      }
+    };
   /**
    * Create a new message.
    *
@@ -128,7 +131,6 @@ public class MessageBuilder {
    * Creates an RPC call with an ErrorCallback.
    *
    * @param callback -
-   * @param errorcallback
    * @param service  -
    * @param <T>      -
    * @param <R>      -

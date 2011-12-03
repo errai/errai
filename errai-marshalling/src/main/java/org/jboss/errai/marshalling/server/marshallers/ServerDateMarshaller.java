@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ *  
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,34 +14,30 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.marshalling.client.marshallers;
+package org.jboss.errai.marshalling.server.marshallers;
 
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.common.client.protocols.SerializationParts;
-import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
-import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
+import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.AbstractDateMarshaller;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
 
 import java.util.Date;
+import java.util.Map;
 
 /**
- * @author Mike Brock <cbrock@redhat.com>
+ * @author Mike Brock
  */
-@ClientMarshaller(multiReferenceable = true)
-public class DateMarshaller extends AbstractDateMarshaller<JSONValue> {
-  @Override
-  public Date demarshall(JSONValue o, MarshallingSession ctx) {
-    if (o.isNull() != null) {
-      return null;
-    }
+@ServerMarshaller(multiReferenceable = true)
+public class ServerDateMarshaller extends AbstractDateMarshaller<Map> {
 
-    return new Date(Long.parseLong(o.isObject().get(SerializationParts.VALUE).isString().stringValue()));
+  @Override
+  public Date demarshall(Map o, MarshallingSession ctx) {
+    return new Date(Long.parseLong(String.valueOf(o.get(SerializationParts.VALUE))));
   }
 
   @Override
-  public boolean handles(JSONValue o) {
-    return MarshallUtil.handles(o.isObject(), getTypeHandled());
+  public boolean handles(Map o) {
+    return MarshallUtil.handles(o, getTypeHandled());
   }
 }

@@ -24,6 +24,7 @@ import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
+import org.jboss.errai.marshalling.client.util.MarshallUtil;
 
 import java.util.AbstractMap;
 import java.util.HashMap;
@@ -93,7 +94,7 @@ public class MapMarshaller implements Marshaller<JSONValue, Map> {
       }
       else if (key != null) {
         buf.append(("\"" + SerializationParts.EMBEDDED_JSON))
-                .append(StringMarshaller.jsonStringEscape(ctx.marshall(key)))
+                .append(MarshallUtil.jsonStringEscape(ctx.marshall(key)))
                 .append("\"");
       }
 

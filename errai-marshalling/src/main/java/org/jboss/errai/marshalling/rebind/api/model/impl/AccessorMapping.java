@@ -41,7 +41,7 @@ public class AccessorMapping implements MemberMapping {
 
   public AccessorMapping(String key, MetaClass type, String setterMethod, String getterMethod) {
     this.key = key;
-    this.type = type;
+    this.type = type.asBoxed();
 
     this.setterMethod = setterMethod;
     this.getterMethod = getterMethod;

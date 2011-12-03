@@ -21,6 +21,7 @@ import org.jboss.errai.bus.client.api.base.JSONMessage;
 import org.jboss.errai.bus.client.framework.MessageProvider;
 import org.jboss.errai.marshalling.server.JSONEncoder;
 
+@Deprecated
 public class JSONMessageServer extends JSONMessage {
   public static final MessageProvider PROVIDER = new MessageProvider() {
     public Message get() {

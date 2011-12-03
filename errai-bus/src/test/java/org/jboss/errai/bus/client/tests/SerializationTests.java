@@ -184,4 +184,29 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
+
+  public void testStringBufferAndStringBuilder() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final EntityWithStringBufferAndStringBuilder ent = new EntityWithStringBufferAndStringBuilder();
+        ent.setStringBuffer(new StringBuffer("foo"));
+        ent.setStringBuilder(new StringBuilder("bar"));
+
+        MessageBuilder.createCall(new RemoteCallback<EntityWithStringBufferAndStringBuilder>() {
+          @Override
+          public void callback(EntityWithStringBufferAndStringBuilder response) {
+            try {
+              assertEquals(ent, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestRPCServiceRemote.class).testStringBufferAndStringBuilder(ent);
+      }
+    });
+  }
 }

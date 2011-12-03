@@ -89,10 +89,9 @@ public class PersistenceConfiguration implements ErraiConfigExtension {
     config.addBinding(ModelAdapter.class, modelAdapterProvider);
 
     final MessageProvider modelAdapterProxy = new MessageProvider() {
-      final MessageProvider delegate = JSONMessageServer.PROVIDER;
-
+      // final MessageProvider delegate = JSONMessageServer.PROVIDER;
       public Message get() {
-        return new MessageModelWrapper(delegate.get(), modelAdapterProvider.get());
+        return new MessageModelWrapper(MessageBuilder.getMessageProvider().get(), modelAdapterProvider.get());
       }
     };
     MessageBuilder.setMessageProvider(modelAdapterProxy);

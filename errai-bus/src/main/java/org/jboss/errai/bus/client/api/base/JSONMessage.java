@@ -23,9 +23,7 @@ import org.jboss.errai.bus.client.api.ResourceProvider;
 import org.jboss.errai.bus.client.framework.MessageProvider;
 import org.jboss.errai.bus.client.framework.RoutingFlags;
 import org.jboss.errai.common.client.protocols.MessageParts;
-import org.jboss.errai.common.client.json.JSONEncoderCli;
 import org.jboss.errai.common.client.types.DecodingContext;
-import org.jboss.errai.common.client.types.EncodingContext;
 import org.jboss.errai.common.client.types.TypeHandlerFactory;
 
 import java.util.Collections;
@@ -72,12 +70,13 @@ import java.util.Map;
  * </pre></tt>
  * Messages may contain serialized objects provided they meet the following criteria:
  * <ol>
- * <li>The class is annotated with {@link org.jboss.errai.bus.server.annotations.ExposeEntity}</li>
+ * <li>The class is annotated with {@link org.jboss.errai.common.client.api.annotations.Portable}</li>
  * <li>The class contains a default, no-argument constructor.
  * </ol>
  *
  * @see ConversationMessage
  */
+@Deprecated
 public class JSONMessage extends CommandMessage implements HasEncoded {
   /* String representation of this message and all it's parts */
   protected StringBuffer buf = new StringBuffer();
@@ -85,8 +84,6 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
   /* First is true if the <tt>buf</tt> is empty */
   protected volatile boolean first = true;
   protected volatile boolean ended = false;
-
-  protected final EncodingContext encodingContext = new EncodingContext();
 
 
   public static final MessageProvider PROVIDER = new MessageProvider() {
@@ -525,7 +522,7 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
    */
   protected void _addObjectPart(String a, Object b) {
     _sep();
-    buf.append('\"').append(a).append('\"').append(':')
-        .append(new JSONEncoderCli().encode(b, encodingContext));
+//    buf.append('\"').append(a).append('\"').append(':')
+//        .append(new JSONEncoderCli().encode(b, encodingContext));
   }
 }

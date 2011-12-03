@@ -65,6 +65,28 @@ public class TypeDemarshallHelper {
         return Number.class.isAssignableFrom(aClass);
       }
     });
+    
+    addConversionHandler(StringBuilder.class, new ConversionHandler() {
+      public Object convertFrom(Object o) {
+      //  if (o instanceof String) o = Long.parseLong((String) o);
+        return new StringBuilder((String) o);
+      }
+
+      public boolean canConvertFrom(Class aClass) {
+        return CharSequence.class.isAssignableFrom(aClass);
+      }
+    });
+
+    addConversionHandler(StringBuffer.class, new ConversionHandler() {
+      public Object convertFrom(Object o) {
+      //  if (o instanceof String) o = Long.parseLong((String) o);
+        return new StringBuffer((String) o);
+      }
+
+      public boolean canConvertFrom(Class aClass) {
+        return CharSequence.class.isAssignableFrom(aClass);
+      }
+    });
   }
 
   private static final Map<Class, Map<String, Serializable>> MVELDencodingCache = new ConcurrentHashMap<Class, Map<String, Serializable>>();

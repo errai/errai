@@ -18,7 +18,6 @@ package org.jboss.errai.marshalling.client.util;
 
 import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.common.client.protocols.SerializationParts;
-import org.jboss.errai.common.client.types.EncodingContext;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
