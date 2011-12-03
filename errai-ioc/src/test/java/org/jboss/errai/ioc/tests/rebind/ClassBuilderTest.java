@@ -402,4 +402,68 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
 
     assertEquals("failed to generate class with JSNI method", CLASS_WITH_JSNI_METHOD, cls);
   }
+  
+  public interface TestInterface {};
+
+  @Test
+  public void testCollidingImportsWithInnerClass() {
+    String cls = ClassBuilder.define("my.test.Clazz")
+        .publicScope()
+        .implementsInterface(org.jboss.errai.ioc.tests.rebind.model.TestInterface.class)
+        .implementsInterface(TestInterface.class)
+        .implementsInterface(Serializable.class)
+        .body()
+        .privateField("name", String.class)
+        .finish()
+        .toJavaString();
+
+    assertEquals("failed to generate class with colliding imports", 
+        CLASS_WITH_COLLIDING_IMPORTS_WITH_INNER_CLASS, cls);
+  }
+
+  @Test
+  public void testCollidingImportsWithInnerClassFirst() {
+    String cls = ClassBuilder.define("my.test.Clazz")
+        .publicScope()
+        .implementsInterface(TestInterface.class)
+        .implementsInterface(org.jboss.errai.ioc.tests.rebind.model.TestInterface.class)
+        .implementsInterface(Serializable.class)
+        .body()
+        .privateField("name", String.class)
+        .finish()
+        .toJavaString();
+
+    assertEquals("failed to generate class with colliding imports",
+        CLASS_WITH_COLLIDING_IMPORTS_WITH_INNER_CLASS_FIRST, cls);
+  }
+
+  @Test
+  public void testCollidingImportsWithJavaLang() {
+    String cls = ClassBuilder.define("my.test.Clazz")
+        .publicScope()
+        .body()
+        .privateField("i", org.jboss.errai.ioc.tests.rebind.model.Integer.class)
+        .finish()
+        .privateField("j", Integer.class)
+        .finish()
+        .toJavaString();
+
+    assertEquals("failed to generate class with colliding imports",
+        CLASS_WITH_COLLIDING_IMPORTS_WITH_JAVA_LANG, cls);
+  }
+  
+  @Test
+  public void testCollidingImportsWithJavaLangFirst() {
+    String cls = ClassBuilder.define("my.test.Clazz")
+        .publicScope()
+        .body()
+        .privateField("i", Integer.class)
+        .finish()
+        .privateField("j", org.jboss.errai.ioc.tests.rebind.model.Integer.class)
+        .finish()
+        .toJavaString();
+
+    assertEquals("failed to generate class with colliding imports",
+        CLASS_WITH_COLLIDING_IMPORTS_WITH_JAVA_LANG_FIRST, cls);
+  }
 }

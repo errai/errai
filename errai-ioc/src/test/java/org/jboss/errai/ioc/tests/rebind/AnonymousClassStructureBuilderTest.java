@@ -128,8 +128,8 @@ public class AnonymousClassStructureBuilderTest extends AbstractStatementBuilder
     assertEquals("failed to generate anonymous class accessing outer class", 
         "package org.foo;\n" +
 
-        "import org.jboss.errai.ioc.tests.rebind.model.Bar;\n" +
         "import org.foo.Outer;\n" +
+        "import org.jboss.errai.ioc.tests.rebind.model.Bar;\n" +
     
         "public class Outer {\n" +
             "public String outerName;\n" +

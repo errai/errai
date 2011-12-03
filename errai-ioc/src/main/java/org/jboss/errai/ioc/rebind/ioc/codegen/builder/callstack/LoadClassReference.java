@@ -59,17 +59,15 @@ public class LoadClassReference extends AbstractCallElement {
     MetaClass erased = metaClass.getErased();
 
     String fqcn = erased.getFullyQualifiedName();
-    String pkg;
-
     int idx = fqcn.lastIndexOf('.');
     if (idx != -1) {
-      pkg = fqcn.substring(0, idx);
 
-      if (context.isAutoImports() && !context.hasClassImport(erased) && !context.hasPackageImport(pkg)) {
-        context.addClassImport(erased);
+      if ((context.isAutoImportActive() || "java.lang".equals(erased.getPackageName())) 
+          && !context.hasImport(erased)) {
+        context.addImport(erased);
       }
 
-      if (context.hasPackageImport(pkg) || context.hasClassImport(erased)) {
+      if (context.hasImport(erased)) {
         fqcn = fqcn.substring(idx + 1);
       }
     }

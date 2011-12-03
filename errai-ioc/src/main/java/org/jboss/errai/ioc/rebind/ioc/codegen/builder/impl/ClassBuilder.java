@@ -95,7 +95,7 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
   }
 
   public ClassBuilder<T> importsClass(MetaClass clazz) {
-    classDefinition.getContext().addClassImport(clazz);
+    classDefinition.getContext().addImport(clazz);
     return this;
   }
 

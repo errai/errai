@@ -19,10 +19,9 @@ package org.jboss.errai.ioc.rebind.ioc.codegen;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.enterprise.util.TypeLiteral;
 
@@ -34,8 +33,8 @@ import org.jboss.errai.ioc.rebind.ioc.codegen.meta.MetaClass;
 /**
  * This class represents a context in which {@link Statement}s are generated.
  * It references its parent context and holds a map of variables to represent
- * a {@link Statement}'s scope. It further supports importing classes and packages
- * to avoid the use of fully qualified class names.
+ * a {@link Statement}'s scope. It further supports imports to avoid the use 
+ * of fully qualified class names.
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -45,21 +44,16 @@ public class Context {
   private Map<String, Variable> variables;
   private Map<String, Label> labels;
 
-  private Set<String> importedPackages;
-  private Set<String> importedClasses;
-  private boolean autoImports = false;
+  private boolean autoImportActive = false;
+  private Map<String, String> imports;
 
-  private Context() {
-    importedPackages = new HashSet<String>();
-    importedPackages.add("java.lang");
-  }
+  private Context() {}
 
   private Context(Context parent) {
     this();
     this.parent = parent;
-    this.autoImports = parent.autoImports;
-    this.importedPackages = parent.importedPackages;
-    this.importedClasses = parent.importedClasses;
+    this.autoImportActive = parent.autoImportActive;
+    this.imports = parent.imports;
   }
 
   public static Context create() {
@@ -109,57 +103,76 @@ public class Context {
     return this;
   }
 
-  public Context addPackageImport(String packageName) {
-    if (packageName == null)
-      return this;
-
-    String pkgName = packageName.trim();
-    if (pkgName.length() == 0)
-      return this;
-
-    for (char c : pkgName.toCharArray()) {
-      if (c != '.' && !Character.isJavaIdentifierPart(c)) {
-        throw new RuntimeException("not a valid package name. " +
-                "(use format: foo.bar.pkg -- do not include '.*' at the end)");
-      }
-    }
-    importedPackages.add(pkgName);
-    return this;
-  }
-
-  public boolean hasPackageImport(String packageName) {
-    return importedPackages != null && importedPackages.contains(packageName);
-  }
-
-  private void initImportedClass() {
-    if (importedClasses == null) {
+  private void initImports() {
+    if (imports == null) {
       Context c = this;
       while (c.parent != null) {
         c = c.parent;
       }
 
-      if (c.importedClasses == null) {
-        c.importedClasses = importedClasses = new LinkedHashSet<String>();
+      if (c.imports == null) {
+        c.imports = imports = new HashMap<String, String>();
       }
       else {
-        importedClasses = c.importedClasses;
+        imports = c.imports;
       }
     }
   }
 
-  public Context addClassImport(MetaClass clazz) {
-    initImportedClass();
-    importedClasses.add(clazz.isArray() ? clazz.getComponentType().getFullyQualifiedName() : clazz
-            .getFullyQualifiedName());
+  public Context addImport(MetaClass clazz) {
+    initImports();
+    
+    if (clazz.isArray()) {
+      clazz = clazz.getComponentType();
+    }
+    
+    if (!imports.containsKey(clazz.getName())) {
+      String imp = getImportForClass(clazz);
+      if (imp != null) {
+        imports.put(clazz.getName(), imp);
+      }
+    }
+
     return this;
   }
 
-  public boolean hasClassImport(MetaClass clazz) {
-    return importedClasses != null && importedClasses.contains(clazz.getFullyQualifiedName());
+  public boolean hasImport(MetaClass clazz) {
+    if (clazz.isArray()) {
+      clazz = clazz.getComponentType();
+    }
+    
+    return imports != null && imports.containsKey(clazz.getName()) &&
+          imports.get(clazz.getName()).equals(getImportForClass(clazz));
   }
 
+  private String getImportForClass(MetaClass clazz) {
+    String imp = null;
+
+    String fqcn = clazz.getCanonicalName();
+    int idx = fqcn.lastIndexOf('.');
+    if (idx != -1) {
+      imp = fqcn.substring(0, idx);
+    }
+
+    return imp;
+  }
+  
+  public Set<String> getRequiredImports() {
+    if (imports == null)
+      return Collections.emptySet();
+
+    Set<String> importedClasses = new TreeSet<String>();
+    for (String className : imports.keySet()) {
+      String packageName = imports.get(className);
+      if (!packageName.equals("java.lang")) {
+        importedClasses.add(packageName + "." + className);
+      }
+    }
+    return importedClasses;
+  }
+  
   public Context autoImport() {
-    this.autoImports = true;
+    this.autoImportActive = true;
     return this;
   }
 
@@ -228,18 +241,7 @@ public class Context {
     return Collections.<String, Variable>unmodifiableMap(variables);
   }
 
-  public Set<String> getImportedPackages() {
-    return importedPackages;
-  }
-
-  public Set<String> getImportedClasses() {
-    if (importedClasses == null)
-      return Collections.emptySet();
-
-    return importedClasses;
-  }
-
-  public boolean isAutoImports() {
-    return autoImports;
+  public boolean isAutoImportActive() {
+    return autoImportActive;
   }
 }

@@ -393,22 +393,11 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     if (!getPackageName().isEmpty() && !isInner)
       headerBuffer.append("package ").append(getPackageName()).append(";\n");
 
-    if (context.getImportedPackages().size() > 1)
+    if (!context.getRequiredImports().isEmpty())
       headerBuffer.append("\n");
 
     if (!isInner) {
-      for (String pkgImports : context.getImportedPackages()) {
-        if (pkgImports.equals("java.lang"))
-          continue;
-        headerBuffer.append("import ").append(pkgImports).append(".*;");
-      }
-    }
-
-    if (!context.getImportedClasses().isEmpty())
-      headerBuffer.append("\n");
-
-    if (!isInner) {
-      for (String cls : context.getImportedClasses()) {
+      for (String cls : context.getRequiredImports()) {
         headerBuffer.append("import ").append(cls).append(";\n");
       }
     }

@@ -419,14 +419,14 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
 
   @Test
   public void testObjectCreationWithParameterizedTypeAndClassImport() {
-    Context c = Context.create().addClassImport(MetaClassFactory.get(List.class));
+    Context c = Context.create().addImport(MetaClassFactory.get(List.class));
     String s = StatementBuilder.create(c).newObject(new TypeLiteral<List<String>>() {}).toJavaString();
     assertEquals("failed to generate new object with parameterized type", "new List<String>()", s);
   }
 
   @Test
   public void testObjectCreationWithFullyQualifiedParameterizedTypeAndClassImport() {
-    Context c = Context.create().addClassImport(MetaClassFactory.get(List.class));
+    Context c = Context.create().addImport(MetaClassFactory.get(List.class));
     String s = StatementBuilder.create(c).newObject(new TypeLiteral<List<Date>>() {}).toJavaString();
     assertEquals("failed to generate new object with parameterized type", "new List<java.util.Date>()", s);
   }
@@ -434,8 +434,8 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   @Test
   public void testObjectCreationWithNestedParameterizedTypeAndClassImports() {
     Context c = Context.create()
-            .addClassImport(MetaClassFactory.get(List.class))
-            .addClassImport(MetaClassFactory.get(Map.class));
+            .addImport(MetaClassFactory.get(List.class))
+            .addImport(MetaClassFactory.get(Map.class));
 
     String s = StatementBuilder.create(c)
             .newObject(new TypeLiteral<List<List<Map<String, Integer>>>>() {}).toJavaString();

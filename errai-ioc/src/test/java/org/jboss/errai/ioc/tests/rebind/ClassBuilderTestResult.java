@@ -216,4 +216,43 @@ public interface ClassBuilderTestResult {
           "     public void someMethod() {\n" +
           "     }\n" +
           " }";
+
+  public static final String CLASS_WITH_COLLIDING_IMPORTS_WITH_INNER_CLASS =
+      "     package my.test;" +
+          "\n" +
+          " import java.io.Serializable;\n" +
+          " import org.jboss.errai.ioc.tests.rebind.model.TestInterface;\n" +
+          "\n" +
+          " public class Clazz implements TestInterface, " +
+          "   org.jboss.errai.ioc.tests.rebind.ClassBuilderTest.TestInterface, Serializable {\n" +
+          "   private String name;\n" +
+          " }";
+
+  public static final String CLASS_WITH_COLLIDING_IMPORTS_WITH_INNER_CLASS_FIRST =
+      "     package my.test;" +
+          "\n" +
+          " import java.io.Serializable;\n" +
+          " import org.jboss.errai.ioc.tests.rebind.ClassBuilderTest.TestInterface;\n" +
+          "\n" +
+          " public class Clazz implements TestInterface, " +
+          "   org.jboss.errai.ioc.tests.rebind.model.TestInterface, Serializable {\n" +
+          "   private String name;\n" +
+          " }";
+
+  public static final String CLASS_WITH_COLLIDING_IMPORTS_WITH_JAVA_LANG =
+      "     package my.test;" +
+          " import org.jboss.errai.ioc.tests.rebind.model.Integer;\n" +
+          "\n" +
+          " public class Clazz {\n " +
+          "   private Integer i;\n" +
+          "   private java.lang.Integer j;\n" +
+          " }";
+
+  public static final String CLASS_WITH_COLLIDING_IMPORTS_WITH_JAVA_LANG_FIRST =
+      "     package my.test;" +
+          "\n" +
+          " public class Clazz {\n " +
+          "   private Integer i;\n" +
+          "   private org.jboss.errai.ioc.tests.rebind.model.Integer j;\n" +
+          " }";
 }
