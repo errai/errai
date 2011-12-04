@@ -17,13 +17,14 @@
 package org.jboss.errai.bus.client.tests.support;
 
 import org.jboss.errai.common.client.api.annotations.ExposeEntity;
+import org.jboss.errai.common.client.api.annotations.Portable;
 
 import java.io.Serializable;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ExposeEntity
+@Portable
 public class TreeNodeContainer implements Serializable {
 
   private static final long serialVersionUID = -432859869954816580L;

@@ -205,7 +205,7 @@ public class TypeDemarshallHelper {
             }
 
             if (!oMap.containsKey(INSTANCE_REFERENCE)) {
-              for (MemberMapping mapping : defs.getDefinition(newInstance.getClass()).getWritableMemberMappings()) {
+              for (MemberMapping mapping : defs.getDefinition(cls).getWritableMemberMappings()) {
                 if (mapping.getBindingMember() instanceof MetaField) {
                   MetaField f = (MetaField) mapping.getBindingMember();
                   setProperty(newInstance, f.asField(), oMap.get(mapping.getKey()));
@@ -243,7 +243,7 @@ public class TypeDemarshallHelper {
       f.set(i, DataConversion.convert(v, f.getType()));
     }
     catch (Exception e) {
-      throw new RuntimeException("could not set field", e);
+      throw new RuntimeException("could not set field (inst=" + i + "; field=" + f + "; val=" + v + ")", e);
     }
   }
 

@@ -16,12 +16,12 @@
 
 package org.jboss.errai.bus.client.tests.support;
 
-import org.jboss.errai.common.client.api.annotations.ExposeEntity;
+import org.jboss.errai.common.client.api.annotations.Portable;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ExposeEntity
+@Portable
 public class StudyTreeNodeContainer extends TreeNodeContainer {
 
   private static final long serialVersionUID = -3415552168669217572L;
