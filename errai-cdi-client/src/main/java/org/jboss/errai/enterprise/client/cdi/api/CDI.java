@@ -171,7 +171,6 @@ public class CDI {
       }
 
       deferredEvents = null;
-      postInitTasks = null;
     }
   }
 
