@@ -29,7 +29,13 @@ import org.jboss.errai.codegen.framework.Variable;
 import org.jboss.errai.codegen.framework.builder.Builder;
 import org.jboss.errai.codegen.framework.builder.callstack.LoadClassReference;
 import org.jboss.errai.codegen.framework.builder.impl.Scope;
-import org.jboss.errai.codegen.framework.meta.*;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
+import org.jboss.errai.codegen.framework.meta.MetaConstructor;
+import org.jboss.errai.codegen.framework.meta.MetaField;
+import org.jboss.errai.codegen.framework.meta.MetaMethod;
+import org.jboss.errai.codegen.framework.meta.MetaParameterizedType;
+import org.jboss.errai.codegen.framework.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.framework.meta.impl.AbstractMetaClass;
 import org.jboss.errai.codegen.framework.util.GenUtil;
 import org.jboss.errai.codegen.framework.util.PrettyPrinter;
@@ -516,7 +522,6 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
       }
     }
 
-
     superClass = (superClass != null) ? superClass : MetaClassFactory.get(Object.class);
     context.addVariable(Variable.create("super", superClass));
 
@@ -529,22 +534,11 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     if (!getPackageName().isEmpty() && !isInner)
       headerBuffer.append("package ").append(getPackageName()).append(";\n");
 
-    if (context.getImportedPackages().size() > 1)
+    if (!context.getRequiredImports().isEmpty())
       headerBuffer.append("\n");
 
     if (!isInner) {
-      for (String pkgImports : context.getImportedPackages()) {
-        if (pkgImports.equals("java.lang"))
-          continue;
-        headerBuffer.append("import ").append(pkgImports).append(".*;");
-      }
-    }
-
-    if (!context.getImportedClasses().isEmpty())
-      headerBuffer.append("\n");
-
-    if (!isInner) {
-      for (String cls : context.getImportedClasses()) {
+      for (String cls : context.getRequiredImports()) {
         headerBuffer.append("import ").append(cls).append(";\n");
       }
     }
@@ -582,6 +576,4 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     }
     return buf.toString();
   }
-
-
 }

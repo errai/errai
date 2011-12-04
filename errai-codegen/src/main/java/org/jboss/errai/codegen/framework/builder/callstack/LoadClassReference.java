@@ -16,6 +16,8 @@
 
 package org.jboss.errai.codegen.framework.builder.callstack;
 
+import java.util.Map;
+
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.RenderCacheStore;
 import org.jboss.errai.codegen.framework.Statement;
@@ -24,10 +26,9 @@ import org.jboss.errai.codegen.framework.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.framework.meta.MetaType;
 import org.jboss.errai.codegen.framework.meta.MetaTypeVariable;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
+ * {@link CallElement} to create a class reference.
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class LoadClassReference extends AbstractCallElement {
@@ -99,17 +100,15 @@ public class LoadClassReference extends AbstractCallElement {
       }
 
       String fqcn = erased.getCanonicalName();
-      String pkg;
-
       int idx = fqcn.lastIndexOf('.');
       if (idx != -1) {
-        pkg = fqcn.substring(0, idx);
 
-        if (context.isAutoImports() && !context.hasClassImport(erased) && !context.hasPackageImport(pkg)) {
-          context.addClassImport(erased);
+        if ((context.isAutoImportActive() || "java.lang".equals(erased.getPackageName())) 
+            && !context.hasImport(erased)) {
+          context.addImport(erased);
         }
 
-        if (context.hasPackageImport(pkg) || context.hasClassImport(erased)) {
+        if (context.hasImport(erased)) {
           fqcn = fqcn.substring(idx + 1);
         }
       }

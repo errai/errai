@@ -16,7 +16,14 @@
 
 package org.jboss.errai.codegen.framework;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import javax.enterprise.util.TypeLiteral;
 
@@ -28,11 +35,13 @@ import org.jboss.errai.codegen.framework.meta.MetaField;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
 
 /**
- * This class represents a context in which {@link Statement}s are generated.
- * It references its parent context and holds a map of variables to represent
- * a {@link Statement}'s scope. It further supports importing classes and packages
- * to avoid the use of fully qualified class names.
- *
+ * This class represents a context in which {@link Statement}s are generated. 
+ * It references its parent context and holds a map of variables to represent 
+ * a {@link Statement}'s scope. It further supports imports to avoid the use 
+ * of fully qualified class names.
+ * 
+ * The rendering cache can be used by {@link Statement}s to improve performance.
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class Context {
@@ -41,28 +50,22 @@ public class Context {
   private Map<String, Variable> variables;
   private Map<String, Label> labels;
 
-  private Set<String> importedPackages;
-  private Set<String> importedClasses;
-  private boolean autoImports = false;
-
+  private boolean autoImportActive = false;
+  private Map<String, String> imports;
   private List<MetaClass> classContexts;
-  
+
   private Map<String, Map<Object, Object>> renderingCache;
 
   private Context() {
-    importedPackages = new HashSet<String>();
-    importedPackages.add("java.lang");
     classContexts = new ArrayList<MetaClass>();
     renderingCache = new HashMap<String, Map<Object, Object>>();
   }
-  
 
   private Context(Context parent) {
     this();
     this.parent = parent;
-    this.autoImports = parent.autoImports;
-    this.importedPackages = parent.importedPackages;
-    this.importedClasses = parent.importedClasses;
+    this.autoImportActive = parent.autoImportActive;
+    this.imports = parent.imports;
     this.renderingCache = parent.renderingCache;
   }
 
@@ -113,60 +116,76 @@ public class Context {
     return this;
   }
 
-  public Context addPackageImport(String packageName) {
-    if (packageName == null)
-      return this;
-
-    String pkgName = packageName.trim();
-    if (pkgName.length() == 0)
-      return this;
-
-    for (char c : pkgName.toCharArray()) {
-      if (c != '.' && !Character.isJavaIdentifierPart(c)) {
-        throw new RuntimeException("not a valid package name. " +
-                "(use format: foo.bar.pkg -- do not include '.*' at the end)");
-      }
-    }
-    importedPackages.add(pkgName);
-    return this;
-  }
-
-  public boolean hasPackageImport(String packageName) {
-    return importedPackages != null && importedPackages.contains(packageName);
-  }
-
-  private void initImportedClass() {
-    if (importedClasses == null) {
+  private void initImports() {
+    if (imports == null) {
       Context c = this;
       while (c.parent != null) {
         c = c.parent;
       }
 
-      if (c.importedClasses == null) {
-        c.importedClasses = importedClasses = new LinkedHashSet<String>();
+      if (c.imports == null) {
+        c.imports = imports = new HashMap<String, String>();
       }
       else {
-        importedClasses = c.importedClasses;
+        imports = c.imports;
       }
     }
   }
 
-  public Context addClassImport(MetaClass clazz) {
-    initImportedClass();
-    importedClasses.add(clazz.isArray() ? clazz.getComponentType().getCanonicalName() : clazz
-            .getCanonicalName());
-    return this;
-  }
-
-  public boolean hasClassImport(MetaClass clazz) {
+  public Context addImport(MetaClass clazz) {
+    initImports();
+    
     if (clazz.isArray()) {
       clazz = clazz.getComponentType();
     }
-    return importedClasses != null && importedClasses.contains(clazz.getCanonicalName());
+    
+    if (!imports.containsKey(clazz.getName())) {
+      String imp = getImportForClass(clazz);
+      if (imp != null) {
+        imports.put(clazz.getName(), imp);
+      }
+    }
+
+    return this;
   }
 
+  public boolean hasImport(MetaClass clazz) {
+    if (clazz.isArray()) {
+      clazz = clazz.getComponentType();
+    }
+    
+    return imports != null && imports.containsKey(clazz.getName()) &&
+          imports.get(clazz.getName()).equals(getImportForClass(clazz));
+  }
+
+  private String getImportForClass(MetaClass clazz) {
+    String imp = null;
+
+    String fqcn = clazz.getCanonicalName();
+    int idx = fqcn.lastIndexOf('.');
+    if (idx != -1) {
+      imp = fqcn.substring(0, idx);
+    }
+
+    return imp;
+  }
+
+  public Set<String> getRequiredImports() {
+    if (imports == null)
+      return Collections.emptySet();
+
+    Set<String> importedClasses = new TreeSet<String>();
+    for (String className : imports.keySet()) {
+      String packageName = imports.get(className);
+      if (!packageName.equals("java.lang")) {
+        importedClasses.add(packageName + "." + className);
+      }
+    }
+    return importedClasses;
+  }
+  
   public Context autoImport() {
-    this.autoImports = true;
+    this.autoImportActive = true;
     return this;
   }
 
@@ -220,7 +239,7 @@ public class Context {
     while ((ctx = ctx.parent) != null);
     return false;
   }
-  
+
   public boolean isNonAmbiguous(String symbol) {
     Context ctx = this;
     int matches = 0;
@@ -234,27 +253,16 @@ public class Context {
 
   public Collection<Variable> getDeclaredVariables() {
     if (variables == null)
-      return Collections.<Variable>emptyList();
+      return Collections.<Variable> emptyList();
 
     return variables.values();
   }
 
   public Map<String, Variable> getVariables() {
     if (variables == null)
-      return Collections.<String, Variable>emptyMap();
+      return Collections.<String, Variable> emptyMap();
 
-    return Collections.<String, Variable>unmodifiableMap(variables);
-  }
-
-  public Set<String> getImportedPackages() {
-    return importedPackages;
-  }
-
-  public Set<String> getImportedClasses() {
-    if (importedClasses == null)
-      return Collections.emptySet();
-
-    return importedClasses;
+    return Collections.<String, Variable> unmodifiableMap(variables);
   }
 
   public void attachClass(MetaClass clazz) {
@@ -266,10 +274,12 @@ public class Context {
     do {
       for (MetaClass clazz : c.classContexts) {
         for (MetaMethod m : clazz.getDeclaredMethods()) {
-          if (m.equals(method)) return true;
+          if (m.equals(method))
+            return true;
         }
       }
-    } while ((c = c.parent) != null);
+    }
+    while ((c = c.parent) != null);
 
     return false;
   }
@@ -279,35 +289,29 @@ public class Context {
     do {
       for (MetaClass clazz : c.classContexts) {
         for (MetaField m : clazz.getDeclaredFields()) {
-          if (m.equals(field)) return true;
+          if (m.equals(field))
+            return true;
         }
       }
-    } while ((c = c.parent) != null);
+    }
+    while ((c = c.parent) != null);
 
     return false;
   }
 
-  public boolean isAutoImports() {
-    return autoImports;
+  public boolean isAutoImportActive() {
+    return autoImportActive;
   }
 
   public boolean hasParent() {
     return parent != null;
   }
-  
-//  public <K, V> Map<K, V> getRenderingCache(Class<K> keyType, Class<V> valType, String topic) {
-//    Map<Object, Object> cacheStore = renderingCache.get(topic);
-//    if (cacheStore == null) {
-//      renderingCache.put(topic, (cacheStore =  (Map<Object, Object>) new HashMap<K, V>()));
-//    }
-//    return (Map<K,V>) cacheStore;
-//  }
-  
+
   public <K, V> Map<K, V> getRenderingCache(RenderCacheStore<K, V> store) {
-    Map<K, V> cacheStore = (Map<K,V>) renderingCache.get(store.getName());
+    Map<K, V> cacheStore = (Map<K, V>) renderingCache.get(store.getName());
     if (cacheStore == null) {
       renderingCache.put(store.getName(), (Map<Object, Object>) (cacheStore = new HashMap<K, V>()));
     }
-    return  cacheStore; 
+    return cacheStore;
   }
 }

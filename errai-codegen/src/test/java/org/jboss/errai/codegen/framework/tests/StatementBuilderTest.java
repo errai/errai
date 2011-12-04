@@ -423,7 +423,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
 
   @Test
   public void testObjectCreationWithParameterizedTypeAndClassImport() {
-    Context c = Context.create().addClassImport(MetaClassFactory.get(List.class));
+    Context c = Context.create().addImport(MetaClassFactory.get(List.class));
     String s = StatementBuilder.create(c).newObject(new TypeLiteral<List<String>>() {
     }).toJavaString();
     assertEquals("failed to generate new object with parameterized type", "new List<String>()", s);
@@ -431,7 +431,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
 
   @Test
   public void testObjectCreationWithFullyQualifiedParameterizedTypeAndClassImport() {
-    Context c = Context.create().addClassImport(MetaClassFactory.get(List.class));
+    Context c = Context.create().addImport(MetaClassFactory.get(List.class));
     String s = StatementBuilder.create(c).newObject(new TypeLiteral<List<Date>>() {
     }).toJavaString();
     assertEquals("failed to generate new object with parameterized type", "new List<java.util.Date>()", s);
@@ -440,8 +440,8 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   @Test
   public void testObjectCreationWithNestedParameterizedTypeAndClassImports() {
     Context c = Context.create()
-            .addClassImport(MetaClassFactory.get(List.class))
-            .addClassImport(MetaClassFactory.get(Map.class));
+            .addImport(MetaClassFactory.get(List.class))
+            .addImport(MetaClassFactory.get(Map.class));
 
     String s = StatementBuilder.create(c)
             .newObject(new TypeLiteral<List<List<Map<String, Integer>>>>() {
@@ -537,48 +537,4 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
       assertEquals("Wrong exception message", "java.lang.String cannot be cast to java.lang.Integer", e.getMessage());
     }
   }
-
-//  @Test
-//  public void testFun100() {
-//    for (int i = 0; i < 100; i++)
-//      testNestedCallsOfFun(100);
-//  }
-//
-//  @Test
-//  public void testFun1000() {
-//    for (int i = 0; i < 1000; i++)
-//      testNestedCallsOfFun(100);
-//  }
-//
-//  @Test
-//  public void testFun10000() {
-//    for (int i = 0; i < 10000; i++)
-//      testNestedCallsOfFun(100);
-//  }
-//
-//  @Test
-//  public void testFun100000() {
-//    for (int i = 0; i < 100000; i++)
-//      testNestedCallsOfFun(100);
-//  }
-//
-//  @Test
-//  public void testFun1000000() {
-//    for (int i = 0; i < 1000000; i++)
-//      testNestedCallsOfFun(100);
-//  }
-//
-//
-//  public void testNestedCallsOfFun(int n) {
-//    Integer[] dim = new Integer[n];
-//
-//    for (int dims = 0; dims < n; dims++) {
-//      dim[dims] = 10;
-//    }
-//
-//    String s = Stmt.newArray(String.class, dim).toJavaString();
-//    System.out.print(s.length() == 0 ? s.charAt(0) : "");
-//
-//  }
-
 }

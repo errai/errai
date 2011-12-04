@@ -105,7 +105,12 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
 
   @Override
   public String getPackageName() {
-    return getEnclosedMetaObject().getPackage().getName();
+    String packageName = null;
+    Package pack = getEnclosedMetaObject().getPackage();
+    if (pack != null) {
+      packageName =  pack.getName();
+    }
+    return packageName;
   }
 
   private static MetaMethod[] fromMethodArray(Method[] methods) {

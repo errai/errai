@@ -31,8 +31,7 @@ public interface ClassBuilderTestResult {
           " }";
 
   public static final String CLASS_IMPLEMENTING_MULTIPLE_INTERFACES =
-      "     package org.foo;" +
-          "\n" +
+      "     package org.foo;\n" +
           " import java.io.Serializable;\n" +
           "\n" +
           " public class Bar implements Serializable, Cloneable {\n" +
@@ -215,5 +214,44 @@ public interface ClassBuilderTestResult {
           " public class BazImpl implements Baz {\n" +
           "     public void someMethod() {\n" +
           "     }\n" +
+          " }";
+
+  public static final String CLASS_WITH_COLLIDING_IMPORTS_WITH_INNER_CLASS =
+      "     package my.test;" +
+          "\n" +
+          " import java.io.Serializable;\n" +
+          " import org.jboss.errai.codegen.framework.tests.model.TestInterface;\n" +
+          "\n" +
+          " public class Clazz implements TestInterface, " +
+          "   org.jboss.errai.codegen.framework.tests.ClassBuilderTest.TestInterface, Serializable {\n" +
+          "   private String name;\n" +
+          " }";
+
+  public static final String CLASS_WITH_COLLIDING_IMPORTS_WITH_INNER_CLASS_FIRST =
+      "     package my.test;" +
+          "\n" +
+          " import java.io.Serializable;\n" +
+          " import org.jboss.errai.codegen.framework.tests.ClassBuilderTest.TestInterface;\n" +
+          "\n" +
+          " public class Clazz implements TestInterface, " +
+          "   org.jboss.errai.codegen.framework.tests.model.TestInterface, Serializable {\n" +
+          "   private String name;\n" +
+          " }";
+
+  public static final String CLASS_WITH_COLLIDING_IMPORTS_WITH_JAVA_LANG =
+      "     package my.test;" +
+          " import org.jboss.errai.codegen.framework.tests.model.Integer;\n" +
+          "\n" +
+          " public class Clazz {\n " +
+          "   private Integer i;\n" +
+          "   private java.lang.Integer j;\n" +
+          " }";
+
+  public static final String CLASS_WITH_COLLIDING_IMPORTS_WITH_JAVA_LANG_FIRST =
+      "     package my.test;" +
+          "\n" +
+          " public class Clazz {\n " +
+          "   private Integer i;\n" +
+          "   private org.jboss.errai.codegen.framework.tests.model.Integer j;\n" +
           " }";
 }
