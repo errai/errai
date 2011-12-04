@@ -68,7 +68,7 @@
                     <groupId>org.jboss.errai</groupId>
                     <artifactId>errai-cdi-jetty</artifactId>
                     <version>${project.version}</version>
-                    <scope>test</scope>
+                    <scope>compile</scope>
                 </dependency>
 
                 <!-- Weld -->
