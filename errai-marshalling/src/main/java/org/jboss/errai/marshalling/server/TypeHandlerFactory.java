@@ -16,7 +16,6 @@
 
 package org.jboss.errai.marshalling.server;
 
-import org.jboss.errai.common.client.types.DecodingContext;
 import org.jboss.errai.common.client.types.TypeHandler;
 
 import java.sql.Timestamp;
@@ -31,39 +30,39 @@ public class TypeHandlerFactory {
   
   static {
     registerHandler(Timestamp.class, new TypeHandler<Timestamp, Long>() {
-      public Long getConverted(Timestamp in, DecodingContext ctx) {
+      public Long getConverted(Timestamp in) {
         return in.getTime();
       }
     });
 
     registerHandler(Character.class, new TypeHandler<Character, String>() {
-      public String getConverted(Character in, DecodingContext ctx) {
+      public String getConverted(Character in) {
         return String.valueOf(in.charValue());
       }
     });
     
     registerHandler(java.sql.Date.class, new TypeHandler<java.sql.Date, Long>() {
-      public Long getConverted(java.sql.Date in, DecodingContext ctx) {
+      public Long getConverted(java.sql.Date in) {
         return in.getTime();
       }
     });
     
     registerHandler(java.util.Date.class, new TypeHandler<java.util.Date, Long>() {
-      public Long getConverted(java.util.Date in, DecodingContext ctx) {
+      public Long getConverted(java.util.Date in) {
         return in.getTime();
       }
     });
 
     registerHandler(StringBuilder.class, new TypeHandler<StringBuffer, String>() {
       @Override
-      public String getConverted(StringBuffer in, DecodingContext decodingContext) {
+      public String getConverted(StringBuffer in) {
         return in.toString();
       }
     });
     
     registerHandler(StringBuilder.class, new TypeHandler<StringBuilder, String>() {
       @Override
-      public String getConverted(StringBuilder in, DecodingContext decodingContext) {
+      public String getConverted(StringBuilder in) {
         return in.toString();
       }
     });

@@ -36,34 +36,6 @@ public class MarshallUtil {
     return obj;
   }
 
-  public static <T> T demarshallCache(Class<T> type, JSONObject jsonObject, MarshallingSession session) {
-    final String hashCode = jsonObject.get(SerializationParts.OBJECT_ID).isNumber().toString();
-
-    if (session.hasObjectHash(hashCode)) {
-      return session.getObject(type, hashCode);
-    }
-
-    final String typeName = jsonObject.get(SerializationParts.ENCODED_TYPE).isString().stringValue();
-    final Object demarshalledInstance = session.getMarshallerForType(typeName).demarshall(jsonObject, session);
-    session.recordObjectHash(hashCode, demarshalledInstance);
-
-    return (T) demarshalledInstance;
-  }
-
-  public static <T> T demarshallCache(Class<T> type, JSONObject jsonObject, MarshallingSession session,
-                                      Marshaller<Object, T> marshaller) {
-    final String hashCode = jsonObject.get(SerializationParts.OBJECT_ID).isNumber().toString();
-
-    if (session.hasObjectHash(hashCode)) {
-      return session.getObject(type, hashCode);
-    }
-
-    final T demarshalledInstance = marshaller.demarshall(jsonObject, session);
-    session.recordObjectHash(hashCode, demarshalledInstance);
-
-    return demarshalledInstance;
-  }
-
   public static JSONValue nullSafe_JSONObject(JSONValue v, String key) {
     if (v == null || v.isObject() == null) {
       return null;

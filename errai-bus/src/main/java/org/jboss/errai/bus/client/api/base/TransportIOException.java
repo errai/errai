@@ -17,6 +17,7 @@
 package org.jboss.errai.bus.client.api.base;
 
 import org.jboss.errai.common.client.api.annotations.Portable;
+import org.jboss.errai.marshalling.client.api.annotations.Key;
 import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 
 @Portable
@@ -30,10 +31,12 @@ public class TransportIOException extends Exception {
     this.errorMessage = errorMessage;
   }
 
-  public int getErrorCode() {
+  @Key("errorCode")
+  public int errorCode() {
     return errorCode;
   }
 
+  @Key("errorMessage")
   public String getErrorMessage() {
     return errorMessage;
   }

@@ -19,6 +19,7 @@ package org.jboss.errai.marshalling.rebind.api.model.impl;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaClassMember;
+import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
 
 /**
@@ -59,7 +60,11 @@ public class WriteMapping implements MemberMapping {
       return writingMember;
     }
 
-    writingMember = toMap.getMethod(getterMethod, type);
+    MetaMethod meth = toMap.getMethod(getterMethod, type);
+
+    meth.asMethod().setAccessible(true);
+
+    writingMember = meth;
 
     if (writingMember == null) {
       throw new RuntimeException("no such setter method: " + toMap.getFullyQualifiedName() + "." + getterMethod);

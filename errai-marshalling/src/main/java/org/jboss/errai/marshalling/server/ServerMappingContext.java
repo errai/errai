@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.common.client.types.handlers.numbers;
+package org.jboss.errai.marshalling.server;
 
-import org.jboss.errai.common.client.types.TypeHandler;
+import org.jboss.errai.marshalling.client.api.MappingContext;
+import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
 
-public class NumberToShort implements TypeHandler<Number, Short> {
-  public Short getConverted(Number in) {
-    return in.shortValue();
-  }
+/**
+ * @author Mike Brock
+ */
+public interface ServerMappingContext extends MappingContext {
+  public DefinitionsFactory getDefinitionsFactory();
 }

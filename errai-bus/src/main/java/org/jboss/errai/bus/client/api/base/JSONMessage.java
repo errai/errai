@@ -23,7 +23,7 @@ import org.jboss.errai.bus.client.api.ResourceProvider;
 import org.jboss.errai.bus.client.framework.MessageProvider;
 import org.jboss.errai.bus.client.framework.RoutingFlags;
 import org.jboss.errai.common.client.protocols.MessageParts;
-import org.jboss.errai.common.client.types.DecodingContext;
+import org.jboss.errai.marshalling.server.DecodingSession;
 import org.jboss.errai.common.client.types.TypeHandlerFactory;
 
 import java.util.Collections;
@@ -286,7 +286,7 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
   public <T> T get(Class<T> type, Enum<?> part) {
     //noinspection unchecked
     Object value = parts.get(part.toString());
-    return value == null ? null : TypeHandlerFactory.convert(value.getClass(), type, value, new DecodingContext());
+    return value == null ? null : TypeHandlerFactory.convert(value.getClass(), type, value);
   }
 
   /**
@@ -302,7 +302,7 @@ public class JSONMessage extends CommandMessage implements HasEncoded {
   public <T> T get(Class<T> type, String part) {
     //noinspection unchecked
     Object value = parts.get(part);
-    return value == null ? null : TypeHandlerFactory.convert(value.getClass(), type, value, new DecodingContext());
+    return value == null ? null : TypeHandlerFactory.convert(value.getClass(), type, value);
   }
 
   /**

@@ -18,6 +18,7 @@ package org.jboss.errai.marshalling.rebind.util;
 
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
+import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.util.GenUtil;
 
 /**
@@ -61,7 +62,23 @@ public class MarshallingGenUtil {
       }
     }
   }
+  
+  public static MetaMethod findGetterMethod(MetaClass cls, String key) {
+    MetaMethod metaMethod = _findGetterMethod("get", cls, key);
+    if (metaMethod != null) return metaMethod;
+    metaMethod = _findGetterMethod("is", cls, key);
+     return metaMethod;
+  }
+  
+  private static MetaMethod _findGetterMethod(String prefix, MetaClass cls, String key) {
+    key = (prefix + key).toUpperCase();
+    
+    for (MetaMethod m : cls.getDeclaredMethods()) {
+      if (m.getName().toUpperCase().equals(key) && m.getParameters().length == 0) {
+        return m;
+      }
+    }
 
-
-
+    return null;
+  }
 }

@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.marshalling.rebind.api.impl;
-
-import org.jboss.errai.marshalling.client.api.Marshaller;
-import org.jboss.errai.marshalling.client.api.MarshallerFactory;
+package org.jboss.errai.marshalling.client.api;
 
 /**
  * @author Mike Brock
  */
-public class ServerMarshallerFactory implements MarshallerFactory{
-  @Override
-  public Marshaller<Object, Object> getMarshaller(String formatType, String encodedType) {
-    return null;
-  }
+public interface MappingContext {
+  public Class<? extends Marshaller> getMarshallerClass(String clazz);
+
+  public void registerMarshaller(String clazzName, Class<? extends Marshaller> clazz);
+
+  public boolean hasMarshaller(String clazzName);
+
+  /**
+   * Indicates whether or not the specified class can be marshalled, whether or not a definition exists.
+   * @return boolean true if marshallable.
+   */
+  public boolean canMarshal(String cls);
 }

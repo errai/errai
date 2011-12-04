@@ -55,7 +55,7 @@ public class ListMarshaller implements Marshaller<JSONValue, List> {
     for (int i = 0; i < jsonArray.size(); i++) {
       JSONValue elem = jsonArray.get(i);
       if (cachedMarshaller == null || !cachedMarshaller.handles(elem)) {
-        cachedMarshaller = ctx.getMarshallerForType(ctx.determineTypeFor(null, elem));
+        cachedMarshaller = ctx.getMarshallerInstance(ctx.determineTypeFor(null, elem));
       }
 
       list.add(cachedMarshaller.demarshall(elem, ctx));
@@ -84,7 +84,7 @@ public class ListMarshaller implements Marshaller<JSONValue, List> {
           cachedMarshaller = MarshallUtil.getQualifiedNumberMarshaller(elem);
         }
         else {
-          cachedMarshaller = ctx.getMarshallerForType(elem.getClass().getName());
+          cachedMarshaller = ctx.getMarshallerInstance(elem.getClass().getName());
         }
       }
 

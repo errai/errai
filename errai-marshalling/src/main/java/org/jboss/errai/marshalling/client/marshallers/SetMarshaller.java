@@ -51,7 +51,7 @@ public class SetMarshaller implements Marshaller<JSONValue, Set> {
     for (int i = 0; i < jsonArray.size(); i++) {
       JSONValue elem = jsonArray.get(i);
       if (cachedMarshaller == null || !cachedMarshaller.handles(elem)) {
-        cachedMarshaller = ctx.getMarshallerForType(ctx.determineTypeFor(null, elem));
+        cachedMarshaller = ctx.getMarshallerInstance(ctx.determineTypeFor(null, elem));
       }
 
       set.add(cachedMarshaller.demarshall(elem, ctx));
@@ -73,7 +73,7 @@ public class SetMarshaller implements Marshaller<JSONValue, Set> {
 
       elem = iter.next();
       if (cachedMarshaller == null) {
-        cachedMarshaller = ctx.getMarshallerForType(elem.getClass().getName());
+        cachedMarshaller = ctx.getMarshallerInstance(elem.getClass().getName());
       }
       buf.append(cachedMarshaller.marshall(elem, ctx));
       if (iter.hasNext()) {

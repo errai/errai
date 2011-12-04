@@ -77,7 +77,7 @@ public class TypeHandlerFactory {
     inheritanceMap.put(List.class, Collection.class);
 
     addHandler(String.class, Character.class, new TypeHandler<String, Character>() {
-      public Character getConverted(String in, DecodingContext ctx) {
+      public Character getConverted(String in) {
         return in.charAt(0);
       }
     });
@@ -91,13 +91,12 @@ public class TypeHandlerFactory {
     return toHandlers;
   }
 
-  public static <T> T convert(final Object value, final Class<T> to, DecodingContext decodingContext) {
+  public static <T> T convert(final Object value, final Class<T> to) {
     if (value == null) return null;
-    return convert(value.getClass(), to, value, decodingContext);
+    return convert(value.getClass(), to, value);
   }
 
-  public static <T> T convert(final Class from, final Class<T> to, final Object value,
-                              DecodingContext decodingContext) {
+  public static <T> T convert(final Class from, final Class<T> to, final Object value) {
     if (value.getClass() == to) return (T) value;
     Map<Class, TypeHandler> toHandlers = getHandler(from);
     if (toHandlers == null) {
@@ -107,12 +106,12 @@ public class TypeHandlerFactory {
          * as such.
          */
         TypeHandler<String, T> th = new TypeHandler<String, T>() {
-          public T getConverted(String in, DecodingContext ctx) {
+          public T getConverted(String in) {
             return (T) Enum.valueOf((Class<? extends Enum>) to, in);
           }
         };
         try {
-          T val = th.getConverted(String.valueOf(value), decodingContext);
+          T val = th.getConverted(String.valueOf(value));
 
           /**
            * If we successfully decoded an enum, then we cache this handler for future
@@ -135,7 +134,7 @@ public class TypeHandlerFactory {
     if (handler == null) {
       return (T) value;
     }
-    return (T) handler.getConverted(value, decodingContext);
+    return (T) handler.getConverted(value);
   }
 
   private static final Map<Class, Map<Class, Boolean>> assignableCache = new HashMap<Class, Map<Class, Boolean>>();

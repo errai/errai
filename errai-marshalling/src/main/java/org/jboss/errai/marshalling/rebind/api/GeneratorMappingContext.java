@@ -23,16 +23,23 @@ import org.jboss.errai.codegen.framework.meta.MetaClassMember;
 import org.jboss.errai.codegen.framework.meta.MetaField;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.util.GenUtil;
+import org.jboss.errai.marshalling.client.api.MappingContext;
 import org.jboss.errai.marshalling.client.api.Marshaller;
+import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
+import org.jboss.errai.marshalling.rebind.DefinitionsFactoryImpl;
+import org.jboss.errai.marshalling.server.ServerMappingContext;
 
 import java.util.*;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public class MappingContext {
+public class GeneratorMappingContext implements ServerMappingContext {
   private Map<String, Class<? extends Marshaller>> registeredMarshallers
           = new HashMap<String, Class<? extends Marshaller>>();
+
+  private final DefinitionsFactory definitionsFactory = new DefinitionsFactoryImpl();
+
   private Set<String> generatedMarshallers = new HashSet<String>();
   private List<String> renderedMarshallers = new ArrayList<String>();
 
@@ -47,9 +54,9 @@ public class MappingContext {
 
   private Set<String> exposedMembers = new HashSet<String>();
 
-  public MappingContext(Context codegenContext, MetaClass generatedBootstrapClass,
-                        ClassStructureBuilder<?> classStructureBuilder,
-                        ArrayMarshallerCallback callback) {
+  public GeneratorMappingContext(Context codegenContext, MetaClass generatedBootstrapClass,
+                                 ClassStructureBuilder<?> classStructureBuilder,
+                                 ArrayMarshallerCallback callback) {
 
     this.codegenContext = codegenContext;
     this.generatedBootstrapClass = generatedBootstrapClass;
@@ -57,21 +64,28 @@ public class MappingContext {
     this.arrayMarshallerCallback = callback;
   }
 
-  public Class<? extends Marshaller> getMarshaller(MetaClass clazz) {
+
+  @Override
+  public DefinitionsFactory getDefinitionsFactory() {
+    return definitionsFactory;
+  }
+
+  public Class<? extends Marshaller> getMarshallerClass(MetaClass clazz) {
     if (clazz.isArray()) {
       clazz = clazz.getOuterComponentType();
     }
 
-    return getMarshaller(clazz.getFullyQualifiedName());
+    return getMarshallerClass(clazz.getFullyQualifiedName());
   }
 
-  private Class<? extends Marshaller> getMarshaller(String clazzName) {
+  public Class<? extends Marshaller> getMarshallerClass(String clazzName) {
     if (mappingAliases.containsKey(clazzName)) {
       clazzName = mappingAliases.get(clazzName);
     }
 
     return registeredMarshallers.get(clazzName);
   }
+
 
   public void registerGeneratedMarshaller(String clazzName) {
     generatedMarshallers.add(clazzName);
@@ -112,7 +126,7 @@ public class MappingContext {
     return generatedMarshallers.contains(clazzName);
   }
 
-  public boolean hasProvidedOrGeneratedMarshaller(MetaClass clazz) {
+  public boolean canMarshal(String clazz) {
     return hasMarshaller(clazz) || hasGeneratedMarshaller(clazz);
   }
 

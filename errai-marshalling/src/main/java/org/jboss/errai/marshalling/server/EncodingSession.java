@@ -19,7 +19,7 @@ package org.jboss.errai.marshalling.server;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.common.client.protocols.SerializationParts;
-import org.jboss.errai.marshalling.client.api.AbstractMarshallingSession;
+import org.jboss.errai.marshalling.client.api.MappingContext;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.exceptions.MarshallingException;
 
@@ -29,12 +29,12 @@ import java.util.Map;
 /**
  * @author Mike Brock
  */
-public class EncodingSession extends AbstractMarshallingSession {
+public class EncodingSession extends AbstractServerMarshallingSession {
   private int escapeMode;
+  private final ServerMappingContext context;
 
-  @Override
-  public Marshaller<Object, Object> getMarshallerForType(String fqcn) {
-    return ServerTypeMarshallerFactory.getMarshaller(fqcn);
+  public EncodingSession(ServerMappingContext context) {
+    this.context = context;
   }
 
   @Override
@@ -43,7 +43,7 @@ public class EncodingSession extends AbstractMarshallingSession {
       return "null";
     }
     else {
-      Marshaller<Object, Object> m = getMarshallerForType(o.getClass().getName());
+      Marshaller<Object, Object> m = getMarshallerInstance(o.getClass().getName());
       if (m == null) {
         throw new MarshallingException("no marshaller for type: " + o.getClass().getName());
       }
@@ -57,7 +57,7 @@ public class EncodingSession extends AbstractMarshallingSession {
       return null;
     }
     else {
-      Marshaller<Object, Object> m = getMarshallerForType(clazz.getName());
+      Marshaller<Object, Object> m = getMarshallerInstance(clazz.getName());
       if (m == null) {
         throw new MarshallingException("no marshaller for type: " + o.getClass().getName());
       }
@@ -96,6 +96,10 @@ public class EncodingSession extends AbstractMarshallingSession {
     throw new RuntimeException("unknown type: cannot reverse map value to concrete Java type: " + o);
   }
 
+  @Override
+  public ServerMappingContext getMappingContext() {
+    return context;
+  }
 
   public boolean isEncoded(Object ref) {
     return hasObjectHash(ref);

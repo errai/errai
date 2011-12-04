@@ -17,15 +17,12 @@
 package org.jboss.errai.marshalling.rebind;
 
 import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaConstructor;
-import org.jboss.errai.codegen.framework.meta.MetaParameter;
 import org.jboss.errai.marshalling.client.api.exceptions.MarshallingException;
-import org.jboss.errai.marshalling.rebind.api.MappingContext;
+import org.jboss.errai.marshalling.rebind.api.GeneratorMappingContext;
 import org.jboss.errai.marshalling.rebind.api.MappingStrategy;
-import org.jboss.errai.marshalling.rebind.api.impl.DefaultJavaMappingStrategy;
+import org.jboss.errai.marshalling.rebind.api.impl.defaultjava.DefaultJavaMappingStrategy;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,7 +36,7 @@ public class MappingStrategyFactory {
           = new HashMap<MetaClass, Class<? extends MappingStrategy>>();
 
 
-  static MappingStrategy createStrategy(final MappingContext context, final MetaClass clazz) {
+  static MappingStrategy createStrategy(final GeneratorMappingContext context, final MetaClass clazz) {
     if (STRATEGIES.containsKey(clazz)) {
       return loadStrategy(STRATEGIES.get(clazz), context, clazz);
     }
@@ -50,7 +47,7 @@ public class MappingStrategyFactory {
   }
 
   private static MappingStrategy loadStrategy(final Class<? extends MappingStrategy> strategy,
-                                              final MappingContext context, final MetaClass clazz) {
+                                              final GeneratorMappingContext context, final MetaClass clazz) {
 
 
     Constructor[] constructors = strategy.getConstructors();
@@ -67,7 +64,7 @@ public class MappingStrategyFactory {
       if (MetaClass.class.isAssignableFrom(parm)) {
         callParameters.add(clazz);
       }
-      else if (MappingContext.class.isAssignableFrom(parm)) {
+      else if (GeneratorMappingContext.class.isAssignableFrom(parm)) {
         callParameters.add(context);
       }
       else {
@@ -85,7 +82,7 @@ public class MappingStrategyFactory {
   }
 
 
-  private static MappingStrategy defaultStrategy(final MappingContext context, final MetaClass clazz) {
+  private static MappingStrategy defaultStrategy(final GeneratorMappingContext context, final MetaClass clazz) {
     return new DefaultJavaMappingStrategy(context, clazz);
   }
 }

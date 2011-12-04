@@ -16,11 +16,9 @@
 
 package org.jboss.errai.marshalling.server;
 
-import org.jboss.errai.codegen.framework.meta.MetaConstructor;
 import org.jboss.errai.codegen.framework.meta.MetaField;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.common.client.protocols.SerializationParts;
-import org.jboss.errai.common.client.types.DecodingContext;
 import org.jboss.errai.common.client.types.UnsatisfiedForwardLookup;
 import org.jboss.errai.marshalling.client.util.NumbersUtils;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
@@ -35,6 +33,7 @@ import org.mvel2.MVEL;
 import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -42,6 +41,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import static org.mvel2.DataConversion.addConversionHandler;
 
 public class TypeDemarshallHelper {
+  public static final String INSTANCE_REFERENCE = "__InstanceReference";
+
   static {
     addConversionHandler(java.sql.Date.class, new ConversionHandler() {
       public Object convertFrom(Object o) {
@@ -65,10 +66,10 @@ public class TypeDemarshallHelper {
         return Number.class.isAssignableFrom(aClass);
       }
     });
-    
+
     addConversionHandler(StringBuilder.class, new ConversionHandler() {
       public Object convertFrom(Object o) {
-      //  if (o instanceof String) o = Long.parseLong((String) o);
+        //  if (o instanceof String) o = Long.parseLong((String) o);
         return new StringBuilder((String) o);
       }
 
@@ -79,7 +80,7 @@ public class TypeDemarshallHelper {
 
     addConversionHandler(StringBuffer.class, new ConversionHandler() {
       public Object convertFrom(Object o) {
-      //  if (o instanceof String) o = Long.parseLong((String) o);
+        //  if (o instanceof String) o = Long.parseLong((String) o);
         return new StringBuffer((String) o);
       }
 
@@ -100,14 +101,18 @@ public class TypeDemarshallHelper {
     }
   }
 
-  public static Object instantiate(Class clazz, Map oMap, DecodingContext ctx) {
+  public static Object instantiate(Map oMap, DecodingSession ctx) {
+    return instantiate(getClassReference(oMap), oMap, ctx);
+  }
+
+  public static Object instantiate(Class clazz, Map oMap, DecodingSession ctx) {
     try {
-      String objId = (String) oMap.get(SerializationParts.OBJECT_ID);
+      String hash = (String) oMap.get(SerializationParts.OBJECT_ID);
 
-      if (ctx.hasObject(objId)) {
-        return ctx.getObject(objId);
+      if (ctx.hasObjectHash(hash)) {
+        return ctx.getObject(Object.class, hash);
       }
-
+      
       if (clazz.isEnum()) {
         return Enum.valueOf(clazz, (String) oMap.get(SerializationParts.ENUM_STRING_VALUE));
       }
@@ -118,24 +123,40 @@ public class TypeDemarshallHelper {
         return new java.sql.Date(getNumeric(oMap.get("Value")));
       }
 
-      Object newInstance = clazz.newInstance();
-      if (objId != null) ctx.putObject(objId, newInstance);
+      DefinitionsFactory defs = ctx.getMappingContext().getDefinitionsFactory();
 
-      return newInstance;
+      Object o;
+      if (defs.hasDefinition(clazz)) {
+        MappingDefinition def = defs.getDefinition(clazz);
 
+        ConstructorMapping cns = def.getConstructorMapping();
+        Mapping[] mappings = cns.getMappings();
+        Object[] parms = new Object[mappings.length];
+
+        for (int i = 0; i < mappings.length; i++) {
+          parms[i] = oMap.get(mappings[i].getKey());
+        }
+
+        o = cns.getConstructor().asConstructor().newInstance(parms);
+      }
+      else {
+        o = clazz.newInstance();
+      }
+      return o;
     }
     catch (InstantiationException e) {
-      e.printStackTrace();
+      throw new RuntimeException("error demarshalling", e);
     }
     catch (IllegalAccessException e) {
-      e.printStackTrace();
+      throw new RuntimeException("error demarshalling", e);
     }
-
-    return null;
+    catch (InvocationTargetException e) {
+      throw new RuntimeException("error demarshalling", e);
+    }
   }
 
 
-  public static Object demarshallAll(Object o, DecodingContext ctx) throws Exception {
+  public static Object demarshallAll(Object o, DecodingSession ctx) throws Exception {
     try {
       if (o instanceof String) {
         return o;
@@ -143,24 +164,15 @@ public class TypeDemarshallHelper {
       }
       else if (o instanceof Collection) {
         ArrayList newList = new ArrayList(((Collection) o).size());
-        Object dep;
         for (Object o2 : ((Collection) o)) {
-          if ((dep = demarshallAll(o2, ctx)) instanceof UnsatisfiedForwardLookup) {
-            ctx.addUnsatisfiedDependency(o, (UnsatisfiedForwardLookup) dep);
-          }
-          else {
-            newList.add(dep);
-          }
-        }
-
-        if (ctx.hasUnsatisfiedDependency(o)) {
-          ctx.swapDepReference(o, newList);
+          newList.add(demarshallAll(o2, ctx));
         }
 
         return newList;
       }
       else if (o instanceof Map) {
         Map<?, ?> oMap = (Map) o;
+
         if (oMap.containsKey(SerializationParts.ENCODED_TYPE)) {
           if (oMap.containsKey(SerializationParts.NUMERIC_VALUE)) {
             return NumbersUtils.getNumber((String) oMap.get(SerializationParts.ENCODED_TYPE),
@@ -174,11 +186,12 @@ public class TypeDemarshallHelper {
             return instantiate(cls, oMap, ctx);
           }
 
-          if (DefinitionsFactory.hasDefinition(cls)) {
-            MappingDefinition definition = DefinitionsFactory.getDefinition(cls);
+          DefinitionsFactory defs = ctx.getMappingContext().getDefinitionsFactory();
+          if (defs.hasDefinition(cls)) {
+            String hash = (String) oMap.get(SerializationParts.OBJECT_ID);
 
             ConstructorMapping cMapping;
-            if ((cMapping = definition.getConstructorMapping()) != null) {
+            if (!ctx.hasObjectHash(hash) && (cMapping = defs.getDefinition(cls).getConstructorMapping()) != null) {
               Constructor c = cMapping.getConstructor().asConstructor();
               Class<?>[] parmTypes = cMapping.getConstructorSignature();
 
@@ -194,22 +207,26 @@ public class TypeDemarshallHelper {
               newInstance = instantiate(cls, oMap, ctx);
             }
 
-            for (MemberMapping mapping : DefinitionsFactory.getDefinition(newInstance.getClass()).getWritableMemberMappings()) {
-              if (mapping.getBindingMember() instanceof MetaField) {
-                MetaField f = (MetaField) mapping.getBindingMember();
-                setProperty(newInstance, f.asField(), oMap.get(mapping.getKey()));
-              }
-              else {
-                Method m = ((MetaMethod) mapping.getBindingMember()).asMethod();
-                m.invoke(newInstance, oMap.get(mapping.getKey()));
+            if (!oMap.containsKey(INSTANCE_REFERENCE)) {
+              for (MemberMapping mapping : defs.getDefinition(newInstance.getClass()).getWritableMemberMappings()) {
+                if (mapping.getBindingMember() instanceof MetaField) {
+                  MetaField f = (MetaField) mapping.getBindingMember();
+                  setProperty(newInstance, f.asField(), oMap.get(mapping.getKey()));
+                }
+                else {
+                  Method m = ((MetaMethod) mapping.getBindingMember()).asMethod();
+                  m.invoke(newInstance, oMap.get(mapping.getKey()));
+                }
               }
             }
           }
           else {
             newInstance = instantiate(cls, oMap, ctx);
 
-            for (Field f : EncodingUtil.getAllEncodingFields(newInstance.getClass())) {
-              setProperty(newInstance, f, oMap.get(f.getName()));
+            if (!oMap.containsKey(INSTANCE_REFERENCE)) {
+              for (Field f : EncodingUtil.getAllEncodingFields(newInstance.getClass())) {
+                setProperty(newInstance, f, oMap.get(f.getName()));
+              }
             }
           }
 
@@ -223,14 +240,6 @@ public class TypeDemarshallHelper {
     }
   }
 
-  @SuppressWarnings({"unchecked"})
-  public static void resolveDependencies(DecodingContext ctx) {
-
-  }
-
-  public static Serializable compileSetExpression(String s) {
-    return MVEL.compileSetExpression(ensureSafe(s));
-  }
 
   public static void setProperty(Object i, Field f, Object v) {
 

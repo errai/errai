@@ -1,0 +1,217 @@
+/*
+ * Copyright 2011 JBoss, by Red Hat, Inc
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *  
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.jboss.errai.marshalling.rebind.api.impl.defaultjava;
+
+import org.jboss.errai.codegen.framework.meta.*;
+import org.jboss.errai.marshalling.client.api.MappingContext;
+import org.jboss.errai.marshalling.client.api.annotations.Key;
+import org.jboss.errai.marshalling.client.api.annotations.MappedOrdered;
+import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
+import org.jboss.errai.marshalling.client.api.exceptions.InvalidMappingException;
+import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
+import org.jboss.errai.marshalling.rebind.api.model.Mapping;
+import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
+import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
+import org.jboss.errai.marshalling.rebind.api.model.impl.ReadMapping;
+import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleConstructorMapping;
+import org.jboss.errai.marshalling.rebind.api.model.impl.WriteMapping;
+import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
+import org.jboss.errai.marshalling.server.ServerMappingContext;
+
+import java.lang.annotation.Annotation;
+import java.util.HashSet;
+import java.util.Set;
+
+/**
+ * @author Mike Brock
+ */
+public class DefaultJavaDefinitionMapper {
+  public static MappingDefinition map(MetaClass toMap, DefinitionsFactory definitionsFactory) {
+    if (definitionsFactory.hasDefinition(toMap)) {
+      return definitionsFactory.getDefinition(toMap);
+    }
+
+    Set<MetaConstructor> constructors = new HashSet<MetaConstructor>();
+
+    SimpleConstructorMapping simpleConstructorMapping = new SimpleConstructorMapping();
+    MappingDefinition definition = new MappingDefinition(toMap);
+
+    for (MetaConstructor c : toMap.getConstructors()) {
+      if (c.isAnnotationPresent(MappedOrdered.class)) {
+        constructors.add(c);
+      }
+      else if (c.getParameters().length != 0) {
+        boolean satisifed = true;
+        FieldScan:
+        for (int i = 0; i < c.getParameters().length; i++) {
+          Annotation[] annotations = c.getParameters()[i].getAnnotations();
+          if (annotations.length == 0) {
+            satisifed = false;
+          }
+          else {
+            for (Annotation a : annotations) {
+              if (!MapsTo.class.isAssignableFrom(a.annotationType())) {
+                satisifed = false;
+                break FieldScan;
+              }
+              else {
+                MapsTo mapsTo = (MapsTo) a;
+                String key = mapsTo.value();
+                simpleConstructorMapping.mapParmToIndex(key, i, c.getParameters()[i].getType());
+              }
+            }
+          }
+        }
+
+        if (satisifed) {
+          constructors.add(c);
+        }
+      }
+    }
+
+    MetaConstructor constructor;
+    if (constructors.isEmpty()) {
+      constructor = toMap.getConstructor(new MetaClass[0]);
+    }
+    else if (constructors.size() > 1) {
+      throw new InvalidMappingException("found more than one matching constructor for mapping: "
+              + toMap.getFullyQualifiedName());
+    }
+    else {
+      constructor = constructors.iterator().next();
+    }
+
+    definition.setConstructorMapping(simpleConstructorMapping);
+
+    Set<String> writeKeys = new HashSet<String>();
+    Set<String> readKeys = new HashSet<String>();
+
+    for (Mapping m : simpleConstructorMapping.getMappings()) {
+      writeKeys.add(m.getKey());
+    }
+
+    for (MetaMethod method : toMap.getDeclaredMethods()) {
+      if (method.isAnnotationPresent(Key.class)) {
+        String key = method.getAnnotation(Key.class).value();
+
+        if (method.getParameters().length == 0) {
+          // assume this is a getter
+
+          definition.addMemberMapping(new ReadMapping(key, method.getReturnType(), method.getName()));
+          readKeys.add(key);
+        }
+        else if (method.getParameters().length == 1) {
+          // assume this is a setter
+
+          definition.addMemberMapping(new WriteMapping(key, method.getParameters()[0].getType(), method.getName()));
+          writeKeys.add(key);
+        }
+        else {
+          throw new InvalidMappingException("annotated @Key method is unrecognizable as a setter or getter: "
+                  + toMap.getFullyQualifiedName() + "#" + method.getName());
+        }
+      }
+    }
+
+
+    if (constructor == null) {
+      throw new InvalidMappingException("cannot find a default, no-argument constructor or field-mapped constructor in: "
+              + toMap.getFullyQualifiedName());
+    }
+
+    MetaClass c = toMap;
+
+    do {
+      for (final MetaField field : c.getDeclaredFields()) {
+        if (definitionsFactory.hasDefinition(field.getDeclaringClass())
+                || field.isTransient() || field.isStatic()) {
+          continue;
+        }
+
+        field.asField().setAccessible(true);
+
+        if (writeKeys.contains(field.getName()) && readKeys.contains(field.getName())) {
+          continue;
+        }
+
+        MetaClass type = field.getType();
+
+        MetaClass compType = type.isArray() ? type.getOuterComponentType().asBoxed() : type.asBoxed();
+        
+        if (!type.isEnum() && !definitionsFactory.isExposedClass(compType.getFullyQualifiedName())) {
+          throw new InvalidMappingException("portable entity " + toMap.getFullyQualifiedName()
+                  + " contains a field (" + field.getName() + ") that is not known to the marshaller: "
+                  + compType.getFullyQualifiedName());
+        }
+
+        /**
+         * This case handles the case where a constructor mapping has mapped the value, and there is no
+         * manually mapped reader on the key.
+         */
+        if (writeKeys.contains(field.getName()) && !readKeys.contains(field.getName())) {
+          MetaMethod getterMethod = MarshallingGenUtil.findGetterMethod(toMap, field.getName());
+
+          if (getterMethod != null) {
+            definition.addMemberMapping(new ReadMapping(field.getName(), field.getType(), getterMethod.getName()));
+            continue;
+          }
+        }
+
+        definition.addMemberMapping(new MemberMapping() {
+          @Override
+          public MetaClassMember getBindingMember() {
+            return field;
+          }
+
+          @Override
+          public MetaClassMember getReadingMember() {
+            return field;
+          }
+
+          @Override
+          public String getKey() {
+            return field.getName();
+          }
+
+          @Override
+          public MetaClass getType() {
+            return field.getType();
+          }
+
+          @Override
+          public boolean canRead() {
+            return true;
+          }
+
+          @Override
+          public boolean canWrite() {
+            return true;
+          }
+
+          @Override
+          public void setMappingClass(MetaClass clazz) {
+          }
+        });
+      }
+    }
+    while ((c = c.getSuperClass()) != null);
+
+    definitionsFactory.mergeDefinition(definition);
+
+    return definition;
+  }
+}

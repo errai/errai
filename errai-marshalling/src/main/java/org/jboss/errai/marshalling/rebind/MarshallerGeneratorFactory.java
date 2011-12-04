@@ -64,7 +64,7 @@ import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 import org.jboss.errai.marshalling.rebind.api.ArrayMarshallerCallback;
-import org.jboss.errai.marshalling.rebind.api.MappingContext;
+import org.jboss.errai.marshalling.rebind.api.GeneratorMappingContext;
 import org.jboss.errai.marshalling.rebind.api.MappingStrategy;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 import org.slf4j.Logger;
@@ -78,7 +78,7 @@ import com.google.gwt.json.client.JSONValue;
 public class MarshallerGeneratorFactory {
   private static final String MARSHALLERS_VAR = "marshallers";
 
-  private MappingContext mappingContext;
+  private GeneratorMappingContext mappingContext;
 
   ClassStructureBuilder<?> classStructureBuilder;
   ConstructorBlockBuilder<?> constructor;
@@ -124,7 +124,7 @@ public class MarshallerGeneratorFactory {
 
     classStructureBuilder = implement(MarshallerFactory.class, packageName, clazzName);
     classContext = ((BuildMetaClass) classStructureBuilder.getClassDefinition()).getContext();
-    mappingContext = new MappingContext(classContext, classStructureBuilder.getClassDefinition(),
+    mappingContext = new GeneratorMappingContext(classContext, classStructureBuilder.getClassDefinition(),
             classStructureBuilder, new ArrayMarshallerCallback() {
       @Override
       public Statement marshal(MetaClass type, Statement value) {

@@ -23,7 +23,7 @@ import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.framework.RoutingFlags;
 import org.jboss.errai.common.client.protocols.MessageParts;
-import org.jboss.errai.common.client.types.DecodingContext;
+import org.jboss.errai.marshalling.server.DecodingSession;
 import org.jboss.errai.common.client.types.TypeHandlerFactory;
 
 import java.util.HashMap;
@@ -67,7 +67,7 @@ import java.util.Map;
  * </pre></tt>
  * Messages may contain serialized objects provided they meet the following criteria:
  * <ol>
- * <li>The class is annotated with {@link org.jboss.errai.bus.server.annotations.ExposeEntity}</li>
+ * <li>The class is annotated with {@link org.jboss.errai.common.client.api.annotations.Portable}</li>
  * <li>The class implements {@link java.io.Serializable}.
  * <li>The class contains a default, no-argument constructor.
  * </ol>
@@ -325,7 +325,7 @@ public class CommandMessage implements Message {
   @SuppressWarnings({"UnusedDeclaration"})
   public <T> T get(Class<T> type, String part) {
     Object value = parts.get(part);
-    return value == null ? null : TypeHandlerFactory.convert(value.getClass(), type, value, new DecodingContext());
+    return value == null ? null : TypeHandlerFactory.convert(value.getClass(), type, value);
   }
 
   /**

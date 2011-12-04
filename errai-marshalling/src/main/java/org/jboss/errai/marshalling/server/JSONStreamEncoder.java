@@ -43,7 +43,7 @@ public class JSONStreamEncoder {
   private static final byte[] NULL_BYTES = "null".getBytes();
 
   public static void encode(Object v, OutputStream outstream) throws IOException {
-    _encode(v, outstream, new EncodingSession());
+    _encode(v, outstream, new EncodingSession(MappingContextSingleton.get()));
   }
 
   private static void _encode(Object v, OutputStream outstream, EncodingSession ctx) throws IOException {
@@ -62,7 +62,7 @@ public class JSONStreamEncoder {
     if (v instanceof Number || v instanceof Boolean || v instanceof Character) {
       if (v instanceof Character) {
         if (qualifiedNumerics) {
-          write(outstream, ctx,  NumbersUtils.qualifiedNumericEncoding(false, "\"" + v + "\""));
+          write(outstream, ctx, NumbersUtils.qualifiedNumericEncoding(false, "\"" + v + "\""));
         }
         else {
           write(outstream, ctx, "\"" + MarshallUtil.jsonStringEscape(v.toString()) + "\"");
@@ -103,8 +103,8 @@ public class JSONStreamEncoder {
     boolean enc = ctx.isEncoded(o);
     String hash = ctx.getObjectHash(o);
 
-    if (ServerTypeMarshallerFactory.hasMarshaller(cls)) {
-      write(outstream, ctx, ServerTypeMarshallerFactory.getMarshaller(cls).marshall(o, ctx));
+    if (ctx.hasMarshaller(cls.getName())) {
+      write(outstream, ctx, ctx.getMarshallerInstance(cls.getName()).marshall(o, ctx));
       return;
     }
 
@@ -123,8 +123,9 @@ public class JSONStreamEncoder {
     int i = 0;
     boolean first = true;
 
-    if (DefinitionsFactory.hasDefinition(cls)) {
-      MappingDefinition def = DefinitionsFactory.getDefinition(cls);
+    DefinitionsFactory defs = ctx.getMappingContext().getDefinitionsFactory();
+    if (defs.hasDefinition(cls)) {
+      MappingDefinition def = defs.getDefinition(cls);
 
       for (MemberMapping mapping : def.getReadableMemberMappings()) {
         if (!first) {
@@ -155,7 +156,7 @@ public class JSONStreamEncoder {
           }
         }
 
-        outstream.write(("\"" + mapping.getKey() + "\"").getBytes());
+        write(outstream, ctx, "\"" + mapping.getKey() + "\"");
         outstream.write(':');
         _encode(v, outstream, ctx);
 

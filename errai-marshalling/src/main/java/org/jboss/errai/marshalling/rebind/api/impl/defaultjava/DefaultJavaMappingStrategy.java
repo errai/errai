@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.marshalling.rebind.api.impl;
+package org.jboss.errai.marshalling.rebind.api.impl.defaultjava;
 
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
@@ -32,27 +32,21 @@ import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
-import org.jboss.errai.marshalling.client.api.annotations.MappedOrdered;
-import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 import org.jboss.errai.marshalling.client.api.exceptions.InvalidMappingException;
 import org.jboss.errai.marshalling.client.api.exceptions.MarshallingException;
 import org.jboss.errai.marshalling.client.api.exceptions.NoAvailableMarshallerException;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
-import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
-import org.jboss.errai.marshalling.rebind.api.MappingContext;
+import org.jboss.errai.marshalling.rebind.api.GeneratorMappingContext;
 import org.jboss.errai.marshalling.rebind.api.MappingStrategy;
 import org.jboss.errai.marshalling.rebind.api.ObjectMapper;
 import org.jboss.errai.marshalling.rebind.api.model.ConstructorMapping;
 import org.jboss.errai.marshalling.rebind.api.model.Mapping;
 import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
-import org.jboss.errai.marshalling.rebind.api.model.impl.AccessorMapping;
-import org.jboss.errai.marshalling.rebind.api.model.impl.ReadMapping;
-import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleConstructorMapping;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 
-import java.lang.annotation.Annotation;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.typeParametersOf;
@@ -65,132 +59,26 @@ import static org.jboss.errai.codegen.framework.util.Stmt.loadVariable;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class DefaultJavaMappingStrategy implements MappingStrategy {
-  private MappingContext context;
+  private GeneratorMappingContext context;
   private MetaClass toMap;
 
-  public DefaultJavaMappingStrategy(MappingContext context, MetaClass toMap) {
+  public DefaultJavaMappingStrategy(GeneratorMappingContext context, MetaClass toMap) {
     this.context = context;
     this.toMap = toMap;
   }
 
   @Override
   public ObjectMapper getMapper() {
-    if (isJavaBean(toMap)) {
-      return generateJavaBeanMapper();
-    }
-    else {
-      return generateImmutableMapper();
-    }
-  }
-
-  private ObjectMapper generateImmutableMapper() {
-    final MappingDefinition mapping = findUsableMapping();
-
-    final List<Statement> marshallers = new ArrayList<Statement>();
-
-    for (Mapping m : mapping.getConstructorMapping().getMappings()) {
-      if (context.hasProvidedOrGeneratedMarshaller(m.getType())) {
-        if (m.getType().isArray()) {
-          marshallers.add(context.getArrayMarshallerCallback()
-                  .demarshall(m.getType(), extractJSONObjectProperty(m.getKey(), JSONObject.class)));
-        }
-        else {
-          marshallers.add(fieldDemarshall(m, JSONObject.class));
-        }
-      }
-      else {
-        throw new MarshallingException("no marshaller for type: " + m.getType());
-      }
-    }
-
-    return new ObjectMapper() {
-      @Override
-      public Statement getMarshaller() {
-        AnonymousClassStructureBuilder classStructureBuilder
-                = Stmt.create(context.getCodegenContext())
-                .newObject(parameterizedAs(Marshaller.class, typeParametersOf(JSONValue.class, toMap))).extend();
-
-        classStructureBuilder.publicOverridesMethod("getTypeHandled")
-                .append(Stmt.load(toMap).returnValue())
-                .finish();
-
-        classStructureBuilder.publicOverridesMethod("getEncodingType")
-                .append(Stmt.load("json").returnValue())
-                .finish();
-
-        BlockBuilder<?> methBuilder =
-                classStructureBuilder.publicOverridesMethod("demarshall",
-                        Parameter.of(Object.class, "a0"), Parameter.of(MarshallingSession.class, "a1"));
-
-        methBuilder.append(Stmt.declareVariable(JSONObject.class).named("obj").finish());
-
-        /**
-         * Check to see if value is null. If so, return null.
-         */
-        methBuilder.append(
-                Stmt.if_(Bool.or(Bool.isNull(loadVariable("a0")),
-                        Bool.isNotNull(loadVariable("a0").invoke("isNull"))))
-                        .append(Stmt.load(null).returnValue())
-                        .finish()
-                        .else_()
-                        .append(loadVariable("obj").assignValue(loadVariable("a0").invoke("isObject")))
-                        .finish()
-        );
-
-
-        methBuilder.append(Stmt.declareVariable(String.class).named("objId")
-                .initializeWith(loadVariable("obj")
-                        .invoke("get", SerializationParts.OBJECT_ID)
-                        .invoke("isString").invoke("stringValue")));
-
-        methBuilder.append(
-                Stmt.if_(Bool.expr(loadVariable("a1").invoke("hasObjectHash", loadVariable("objId"))))
-                        .append(loadVariable("a1").invoke("getObject", toMap, loadVariable("objId"))
-                                .returnValue()).finish());
-
-        methBuilder.append(Stmt.declareVariable(toMap).named("entity")
-                .initializeWith(Stmt.newObject(toMap)
-                        .withParameters(marshallers.toArray(new Object[marshallers.size()]))));
-
-        methBuilder.append(loadVariable("a1").invoke("recordObjectHash",
-                loadVariable("objId"), loadVariable("entity")));
-
-        methBuilder.append(loadVariable("entity").returnValue());
-
-        methBuilder.finish();
-
-        BlockBuilder<?> marshallMethodBlock = classStructureBuilder.publicOverridesMethod("marshall",
-                Parameter.of(Object.class, "a0"), Parameter.of(MarshallingSession.class, "a1"));
-
-        marshallMethodBlock.append(
-                Stmt.if_(Bool.isNull(loadVariable("a0")))
-                        .append(Stmt.load("null").returnValue()).finish()
-        );
-
-        if (!mapping.canMarshal()) {
-          marshallMethodBlock.append(Stmt.load(null).returnValue());
-        }
-        else {
-          marshallToJSON(marshallMethodBlock, toMap, mapping);
-        }
-
-        marshallMethodBlock.finish();
-
-        classStructureBuilder.publicOverridesMethod("handles", Parameter.of(Object.class, "a0"))
-                .append(Stmt.nestedCall(Bool.and(
-                        Bool.notEquals(loadVariable("a0").invoke("isObject"), null),
-                        loadVariable("a0").invoke("isObject").invoke("get", SerializationParts.ENCODED_TYPE)
-                                .invoke("equals", loadVariable("this").invoke("getTypeHandled").invoke("getName"))
-                )).returnValue()).finish();
-
-        return classStructureBuilder.finish();
-      }
-    };
+    return generateJavaBeanMapper();
   }
 
   private ObjectMapper generateJavaBeanMapper() {
-    final MappingDefinition mapping = finaUsuableBeanMapping();
+    final MappingDefinition mapping = context.getDefinitionsFactory().getDefinition(toMap);
 
+    if (mapping == null) {
+      throw new InvalidMappingException("no definition for: " + toMap.getFullyQualifiedName());
+    }
+    
     return new ObjectMapper() {
       @Override
       public Statement getMarshaller() {
@@ -235,7 +123,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
           final List<Statement> marshallers = new ArrayList<Statement>();
 
           for (Mapping m : mapping.getConstructorMapping().getMappings()) {
-            if (context.hasProvidedOrGeneratedMarshaller(m.getType())) {
+            if (context.canMarshal(m.getType().getFullyQualifiedName())) {
               if (m.getType().isArray()) {
                 marshallers.add(context.getArrayMarshallerCallback()
                         .demarshall(m.getType(), extractJSONObjectProperty(m.getKey(), JSONObject.class)));
@@ -362,172 +250,179 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
     };
   }
 
-  private MappingDefinition finaUsuableBeanMapping() {
-    if (DefinitionsFactory.hasDefinition(toMap)) {
-      return DefinitionsFactory.getDefinition(toMap);
-    }
-
-    MetaConstructor constructor = toMap.getConstructor(new MetaClass[0]);
-
-    MappingDefinition definition = new MappingDefinition(toMap);
-
-    if (constructor == null) {
-      throw new InvalidMappingException("cannot find a default, no-argument constructor or field-mapped constructor in: "
-              + toMap.getFullyQualifiedName());
-    }
-
-    MetaClass c = toMap;
-
-    do {
-      for (final MetaField field : c.getDeclaredFields()) {
-        if (field.isTransient() || field.isStatic()) {
-          continue;
-        }
-
-        MetaClass type = field.getType();
-
-        if (!type.isEnum() && !context.hasProvidedOrGeneratedMarshaller(type)) {
-          throw new InvalidMappingException("portable entity " + toMap.getFullyQualifiedName()
-                  + " contains a field (" + field.getName() + ") that is not known to the marshaller: "
-                  + type.getFullyQualifiedName());
-        }
-
-
-        definition.addMemberMapping(new MemberMapping() {
-          private MetaClass toMap;
-          
-          @Override
-          public MetaClassMember getBindingMember() {
-            return field;
-          }
-
-          @Override
-          public MetaClassMember getReadingMember() {
-            return field;
-          }
-
-          @Override
-          public String getKey() {
-            return field.getName();
-          }
-
-          @Override
-          public MetaClass getType() {
-            return field.getType();
-          }
-
-          @Override
-          public boolean canRead() {
-            return true;
-          }
-
-          @Override
-          public boolean canWrite() {
-            return true;
-          }
-
-          @Override
-          public void setMappingClass(MetaClass clazz) {
-            this.toMap = clazz;
-          }
-        });
-
-        // mappings.add(field);
-      }
-    }
-    while ((c = c.getSuperClass()) != null);
-
-    return definition;
-  }
-
-  private MappingDefinition findUsableMapping() {
-    if (DefinitionsFactory.hasDefinition(toMap)) {
-      return DefinitionsFactory.getDefinition(toMap);
-    }
-
-    Set<MetaConstructor> constructors = new HashSet<MetaConstructor>();
-
-    SimpleConstructorMapping simpleConstructorMapping = new SimpleConstructorMapping();
-
-    for (MetaConstructor c : toMap.getConstructors()) {
-      if (c.isAnnotationPresent(MappedOrdered.class)) {
-        constructors.add(c);
-      }
-      else if (c.getParameters().length != 0) {
-        boolean satisifed = true;
-        FieldScan:
-        for (int i = 0; i < c.getParameters().length; i++) {
-          Annotation[] annotations = c.getParameters()[i].getAnnotations();
-          if (annotations.length == 0) {
-            satisifed = false;
-          }
-          else {
-            for (Annotation a : annotations) {
-              if (!MapsTo.class.isAssignableFrom(a.annotationType())) {
-                satisifed = false;
-                break FieldScan;
-              }
-              else {
-                MapsTo mapsTo = (MapsTo) a;
-                String key = mapsTo.value();
+//  private MappingDefinition finaUsuableBeanMapping() {
+//    if (DefinitionsFactory.hasDefinition(toMap)) {
+//      return DefinitionsFactory.getDefinition(toMap);
+//    }
 //
-//                if (toMap.getDeclaredField(key) == null) {
-//                  throw new InvalidMappingException(MapsTo.class.getCanonicalName()
-//                          + " refers to a field ('" + key + "') which does not exist in the class: "
-//                          + toMap.getName());
-//                }
-                simpleConstructorMapping.mapParmToIndex(key, i, c.getParameters()[i].getType());
-              }
-            }
-          }
-        }
+//    Set<MetaConstructor> constructors = new HashSet<MetaConstructor>();
+//
+//    SimpleConstructorMapping simpleConstructorMapping = new SimpleConstructorMapping();
+//    MappingDefinition definition = new MappingDefinition(toMap);
+//
+//    for (MetaConstructor c : toMap.getConstructors()) {
+//      if (c.isAnnotationPresent(MappedOrdered.class)) {
+//        constructors.add(c);
+//      }
+//      else if (c.getParameters().length != 0) {
+//        boolean satisifed = true;
+//        FieldScan:
+//        for (int i = 0; i < c.getParameters().length; i++) {
+//          Annotation[] annotations = c.getParameters()[i].getAnnotations();
+//          if (annotations.length == 0) {
+//            satisifed = false;
+//          }
+//          else {
+//            for (Annotation a : annotations) {
+//              if (!MapsTo.class.isAssignableFrom(a.annotationType())) {
+//                satisifed = false;
+//                break FieldScan;
+//              }
+//              else {
+//                MapsTo mapsTo = (MapsTo) a;
+//                String key = mapsTo.value();
+//                simpleConstructorMapping.mapParmToIndex(key, i, c.getParameters()[i].getType());
+//              }
+//            }
+//          }
+//        }
+//
+//        if (satisifed) {
+//          constructors.add(c);
+//        }
+//      }
+//    }
+//
+//    MetaConstructor constructor;
+//    if (constructors.isEmpty()) {
+//      constructor = toMap.getConstructor(new MetaClass[0]);
+//    }
+//    else if (constructors.size() > 1) {
+//      throw new InvalidMappingException("found more than one matching constructor for mapping: "
+//              + toMap.getFullyQualifiedName());
+//    }
+//    else {
+//      constructor = constructors.iterator().next();
+//    }
+//
+//    definition.setConstructorMapping(simpleConstructorMapping);
+//
+//    Set<String> writeKeys = new HashSet<String>();
+//    Set<String> readKeys = new HashSet<String>();
+//
+//    for (Mapping m : simpleConstructorMapping.getMappings()) {
+//      writeKeys.add(m.getKey());
+//    }
+//
+//    for (MetaMethod method : toMap.getDeclaredMethods()) {
+//      if (method.isAnnotationPresent(Key.class)) {
+//        String key = method.getAnnotation(Key.class).value();
+//
+//        if (method.getParameters().length == 0) {
+//          // assume this is a getter
+//
+//          definition.addMemberMapping(new ReadMapping(key, method.getReturnType(), method.getName()));
+//          readKeys.add(key);
+//        }
+//        else if (method.getParameters().length == 1) {
+//          // assume this is a setter
+//
+//          definition.addMemberMapping(new WriteMapping(key, method.getParameters()[0].getType(), method.getName()));
+//          writeKeys.add(key);
+//        }
+//        else {
+//          throw new InvalidMappingException("annotated @Key method is unrecognizable as a setter or getter: "
+//                  + toMap.getFullyQualifiedName() + "#" + method.getName());
+//        }
+//      }
+//    }
+//
+//
+//    if (constructor == null) {
+//      throw new InvalidMappingException("cannot find a default, no-argument constructor or field-mapped constructor in: "
+//              + toMap.getFullyQualifiedName());
+//    }
+//
+//    MetaClass c = toMap;
+//
+//    do {
+//      for (final MetaField field : c.getDeclaredFields()) {
+//        if (DefinitionsFactory.hasDefinition(field.getDeclaringClass())
+//                || field.isTransient() || field.isStatic()) {
+//          continue;
+//        }
+//
+//        if (writeKeys.contains(field.getName()) && readKeys.contains(field.getName())) {
+//          continue;
+//        }
+//
+//        MetaClass type = field.getType();
+//
+//        if (!type.isEnum() && !context.canMarshal(type)) {
+//          throw new InvalidMappingException("portable entity " + toMap.getFullyQualifiedName()
+//                  + " contains a field (" + field.getName() + ") that is not known to the marshaller: "
+//                  + type.getFullyQualifiedName());
+//        }
+//
+//        /**
+//         * This case handles the case where a constructor mapping has mapped the value, and there is no
+//         * manually mapped reader on the key.
+//         */
+//        if (writeKeys.contains(field.getName()) && !readKeys.contains(field.getName())) {
+//          MetaMethod getterMethod = MarshallingGenUtil.findGetterMethod(toMap, field.getName());
+//
+//          if (getterMethod != null) {
+//            definition.addMemberMapping(new ReadMapping(field.getName(), field.getType(), getterMethod.getName()));
+//            continue;
+//          }
+//        }
+//
+//
+//        definition.addMemberMapping(new MemberMapping() {
+//          @Override
+//          public MetaClassMember getBindingMember() {
+//            return field;
+//          }
+//
+//          @Override
+//          public MetaClassMember getReadingMember() {
+//            return field;
+//          }
+//
+//          @Override
+//          public String getKey() {
+//            return field.getName();
+//          }
+//
+//          @Override
+//          public MetaClass getType() {
+//            return field.getType();
+//          }
+//
+//          @Override
+//          public boolean canRead() {
+//            return true;
+//          }
+//
+//          @Override
+//          public boolean canWrite() {
+//            return true;
+//          }
+//
+//          @Override
+//          public void setMappingClass(MetaClass clazz) {
+//          }
+//        });
+//      }
+//    }
+//    while ((c = c.getSuperClass()) != null);
+//
+//    DefinitionsFactory.mergeDefinition(definition);
+//
+//    return definition;
+//  }
 
-        if (satisifed) {
-          constructors.add(c);
-        }
-      }
-    }
 
-    if (constructors.isEmpty()) {
-      throw new InvalidMappingException("unable to find a usable constructor for: " + toMap.getFullyQualifiedName());
-    }
-
-    MappingDefinition definition = new MappingDefinition(toMap);
-    definition.setConstructorMapping(simpleConstructorMapping);
-
-    return definition;
-
-    //  return new AutoConstructorMapping(ConstructionType.Mapped, mappings);
-  }
-
-  private static enum ConstructionType {
-    Mapped, Custom
-  }
-
-  private static class BeanMapping {
-    List<MetaField> mappings;
-    private boolean usePrivateInjectionOnly = false;
-
-    private BeanMapping(List<MetaField> mappings) {
-      this.mappings = mappings;
-    }
-
-    public List<MetaField> getMappings() {
-      return mappings;
-    }
-
-    public boolean isUsePrivateInjectionOnly() {
-      return usePrivateInjectionOnly;
-    }
-
-    public void setUsePrivateInjectionOnly(boolean usePrivateInjectionOnly) {
-      this.usePrivateInjectionOnly = usePrivateInjectionOnly;
-    }
-  }
-
-  private boolean isJavaBean(MetaClass toMap) {
-    return toMap.getConstructor(new MetaClass[0]) != null;
-  }
 
   public Statement fieldDemarshall(Mapping mapping, Class<?> fromType) {
     return fieldDemarshall(mapping, MetaClassFactory.get(fromType));
@@ -559,7 +454,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
   }
 
   public void marshallToJSON(BlockBuilder<?> builder, MetaClass toType, MappingDefinition definition) {
-    if (!context.hasProvidedOrGeneratedMarshaller(toType)) {
+    if (!context.canMarshal(toType.getFullyQualifiedName())) {
       throw new NoAvailableMarshallerException(toType.getName());
     }
 
@@ -606,8 +501,10 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
       MetaClass targetType = GenUtil.getPrimitiveWrapper(mapping.getType());
 
-      if (!targetType.isEnum() && !context.hasProvidedOrGeneratedMarshaller(targetType)) {
-        throw new NoAvailableMarshallerException(targetType.getFullyQualifiedName());
+      MetaClass compType = targetType.isArray() ? targetType.getOuterComponentType().asBoxed() : targetType.asBoxed();
+
+      if (!targetType.isEnum() && !context.canMarshal(compType.getFullyQualifiedName())) {
+        throw new NoAvailableMarshallerException(compType.getFullyQualifiedName());
       }
 
       Statement valueStatement = valueAccessorFor(mapping.getReadingMember());

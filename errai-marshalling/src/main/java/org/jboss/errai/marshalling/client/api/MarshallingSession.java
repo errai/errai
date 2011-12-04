@@ -20,7 +20,9 @@ package org.jboss.errai.marshalling.client.api;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public interface MarshallingSession {
-  public Marshaller<Object, Object> getMarshallerForType(String fqcn);
+  public MappingContext getMappingContext();
+  
+  public Marshaller<Object, Object> getMarshallerInstance(String fqcn);
 
   public String marshall(Object o);
   

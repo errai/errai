@@ -58,7 +58,7 @@ public class ObjectMarshaller implements Marshaller<JSONValue, Object> {
         return NumbersUtils.getNumber(string.stringValue(), o);
       }
 
-      Marshaller<Object, Object> marshaller = ctx.getMarshallerForType(string.stringValue());
+      Marshaller<Object, Object> marshaller = ctx.getMarshallerInstance(string.stringValue());
 
       if (marshaller == null) {
         throw new RuntimeException("marshalled type is unknown to the demarshall: " + string.stringValue());
@@ -75,7 +75,7 @@ public class ObjectMarshaller implements Marshaller<JSONValue, Object> {
       return null;
     }
 
-    Marshaller<Object, Object> marshaller = ctx.getMarshallerForType(o.getClass().getName());
+    Marshaller<Object, Object> marshaller = ctx.getMarshallerInstance(o.getClass().getName());
 
     if (marshaller == null) {
       throw new RuntimeException("marshalled type is unknown to the demarshall: " + o.getClass().getName());

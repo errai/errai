@@ -60,14 +60,14 @@ public class MapMarshaller implements Marshaller<JSONValue, Map> {
     for (String key : jsonObject.keySet()) {
       if (key.startsWith(SerializationParts.EMBEDDED_JSON)) {
         JSONValue val = JSONParser.parseStrict(key.substring(SerializationParts.EMBEDDED_JSON.length()));
-        demarshalledKey = ctx.getMarshallerForType(ctx.determineTypeFor(null, val)).demarshall(val, ctx);
+        demarshalledKey = ctx.getMarshallerInstance(ctx.determineTypeFor(null, val)).demarshall(val, ctx);
       }
       else {
         demarshalledKey = key;
       }
 
       JSONValue v = jsonObject.get(key);
-      demarshalledValue = ctx.getMarshallerForType(ctx.determineTypeFor(null, v)).demarshall(v, ctx);
+      demarshalledValue = ctx.getMarshallerInstance(ctx.determineTypeFor(null, v)).demarshall(v, ctx);
 
       map.put(demarshalledKey, demarshalledValue);
     }

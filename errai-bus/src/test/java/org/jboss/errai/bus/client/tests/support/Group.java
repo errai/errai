@@ -17,6 +17,7 @@
 package org.jboss.errai.bus.client.tests.support;
 
 import org.jboss.errai.common.client.api.annotations.ExposeEntity;
+import org.jboss.errai.common.client.api.annotations.Portable;
 
 import java.util.List;
 import java.util.Map;
@@ -24,7 +25,7 @@ import java.util.Map;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ExposeEntity
+@Portable
 public class Group {
   private int groupId;
   private String name;

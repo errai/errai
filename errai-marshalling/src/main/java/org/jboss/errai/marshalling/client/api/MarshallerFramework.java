@@ -16,11 +16,11 @@
 
 package org.jboss.errai.marshalling.client.api;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-
+import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONValue;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.exceptions.MarshallingException;
 import org.jboss.errai.marshalling.client.marshallers.MapMarshaller;
@@ -28,10 +28,8 @@ import org.jboss.errai.marshalling.client.marshallers.NullMarshaller;
 import org.jboss.errai.marshalling.client.marshallers.ObjectMarshaller;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
 
-import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONValue;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -69,8 +67,37 @@ public class MarshallerFramework implements EntryPoint {
   }
 
   public static class JSONMarshallingSession extends AbstractMarshallingSession {
+
+    private static final MappingContext mappingContext = new MappingContext() {
+      @Override
+      public Class<? extends Marshaller> getMarshallerClass(String clazz) {
+        throw new UnsupportedOperationException();
+      }
+
+      @Override
+      public void registerMarshaller(String clazzName, Class<? extends Marshaller> clazz) {
+        throw new UnsupportedOperationException();
+      }
+
+      @Override
+      public boolean hasMarshaller(String clazzName) {
+        return marshallerFactory.getMarshaller(clazzName, "json") != null;
+      }
+
+      @Override
+      public boolean canMarshal(String cls) {
+        return marshallerFactory.getMarshaller("json", cls) != null;
+      }
+    };
+
+
     @Override
-    public Marshaller<Object, Object> getMarshallerForType(String fqcn) {
+    public MappingContext getMappingContext() {
+      return mappingContext;
+    }
+
+    @Override
+    public Marshaller<Object, Object> getMarshallerInstance(String fqcn) {
       if (fqcn == null) {
         return NullMarshaller.INSTANCE;
       }
@@ -84,7 +111,7 @@ public class MarshallerFramework implements EntryPoint {
         return "null";
       }
       else {
-        Marshaller<Object, Object> m = getMarshallerForType(o.getClass().getName());
+        Marshaller<Object, Object> m = getMarshallerInstance(o.getClass().getName());
         if (m == null) {
           throw new MarshallingException("no marshaller for type: " + o.getClass().getName());
         }
@@ -98,7 +125,7 @@ public class MarshallerFramework implements EntryPoint {
         return null;
       }
       else {
-        Marshaller<Object, Object> m = getMarshallerForType(clazz.getName());
+        Marshaller<Object, Object> m = getMarshallerInstance(clazz.getName());
         if (m == null) {
           throw new MarshallingException("no marshaller for type: " + o.getClass().getName());
         }

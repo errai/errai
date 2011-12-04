@@ -19,6 +19,7 @@ package org.jboss.errai.marshalling.rebind.api.model.impl;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaClassMember;
+import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
 
 /**
@@ -66,7 +67,11 @@ public class ReadMapping implements MemberMapping {
     return readingMember;
     }
     
-    readingMember = toMap.getMethod(getterMethod, new MetaClass[0]);
+    MetaMethod meth = toMap.getMethod(getterMethod, new MetaClass[0]);
+
+    meth.asMethod().setAccessible(true);
+
+    readingMember = meth;
 
     if (readingMember == null) {
       throw new RuntimeException("no such getter method: " + toMap.getFullyQualifiedName() + "." + getterMethod);

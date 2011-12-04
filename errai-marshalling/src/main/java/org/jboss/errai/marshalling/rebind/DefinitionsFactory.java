@@ -17,108 +17,29 @@
 package org.jboss.errai.marshalling.rebind;
 
 import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.common.metadata.MetaDataProcessor;
-import org.jboss.errai.common.metadata.MetaDataScanner;
-import org.jboss.errai.common.metadata.ScannerSingleton;
-import org.jboss.errai.marshalling.rebind.api.CustomMapping;
-import org.jboss.errai.marshalling.rebind.api.InheritedMappings;
-import org.jboss.errai.marshalling.rebind.api.model.ConstructorMapping;
-import org.jboss.errai.marshalling.rebind.api.model.Mapping;
 import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
-import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
-import org.jboss.errai.marshalling.rebind.api.model.impl.AccessorMapping;
-import org.jboss.errai.marshalling.rebind.api.model.impl.ReadMapping;
-import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleConstructorMapping;
-
-import java.util.*;
 
 /**
  * @author Mike Brock
  */
-public class DefinitionsFactory {
-  private static final Map<String, MappingDefinition> MAPPING_DEFINITIONS
-          = new HashMap<String, MappingDefinition>();
+public interface DefinitionsFactory {
+  boolean hasDefinition(String clazz);
 
-  static {
-    loadDefinitions();
-  }
+  boolean hasDefinition(MetaClass clazz);
 
-  public static boolean hasDefinition(MetaClass clazz) {
-    return MAPPING_DEFINITIONS.containsKey(clazz.getCanonicalName());
-  }
+  boolean hasDefinition(Class<?> clazz);
 
-  public static boolean hasDefinition(Class<?> clazz) {
-    return MAPPING_DEFINITIONS.containsKey(clazz.getCanonicalName());
-  }
 
-  public static void addDefinition(MappingDefinition definition) {
-    MAPPING_DEFINITIONS.put(definition.getMappingClass().getCanonicalName(), definition);
-  }
+  void addDefinition(MappingDefinition definition);
 
-  public static MappingDefinition getDefinition(MetaClass clazz) {
-    return MAPPING_DEFINITIONS.get(clazz.getCanonicalName());
-  }
+  MappingDefinition getDefinition(String clazz);
 
-  public static MappingDefinition getDefinition(Class<?> clazz) {
-    return MAPPING_DEFINITIONS.get(clazz.getCanonicalName());
-  }
+  MappingDefinition getDefinition(MetaClass clazz);
 
-  private static void loadDefinitions() {
-    MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
+  MappingDefinition getDefinition(Class<?> clazz);
 
-    for (Class<?> cls : scanner.getTypesAnnotatedWith(CustomMapping.class)) {
-      if (!MappingDefinition.class.isAssignableFrom(cls)) {
-        throw new RuntimeException("@CustomMapping class: " + cls.getName() + " does not inherit " + MappingDefinition.class.getName());
-      }
 
-      try {
-        MappingDefinition definition = (MappingDefinition) cls.newInstance();
-        addDefinition(definition);
-      }
-      catch (Throwable t) {
-        throw new RuntimeException("Failed to load definition", t);
-      }
-      
-      if (cls.isAnnotationPresent(InheritedMappings.class)) {
-        InheritedMappings inheritedMappings = cls.getAnnotation(InheritedMappings.class);
-        
-        for (Class<?> c : inheritedMappings.value()) {
-          addDefinition(new MappingDefinition(c));
-        }
-      }
-      
-    }
+  void mergeDefinition(MappingDefinition def);
 
-    for (MappingDefinition def : MAPPING_DEFINITIONS.values()) {
-      mergeDefinition(def);
-    }
-  }
-
-  public static void mergeDefinition(MappingDefinition def) {
-    MetaClass cls = def.getMappingClass();
-
-    while ((cls = cls.getSuperClass()) != null) {
-      if (hasDefinition(cls)) {
-        MappingDefinition toMerge = getDefinition(cls);
-
-        Set<String> parentKeys = new HashSet<String>();
-        for (Mapping m : toMerge.getConstructorMapping().getMappings()) parentKeys.add(m.getKey());
-        for (MemberMapping m : toMerge.getMemberMappings()) parentKeys.add(m.getKey());
-
-        Iterator<MemberMapping> defMappings = def.getMemberMappings().iterator();
-        while (defMappings.hasNext()) {
-          if (parentKeys.contains(defMappings.next().getKey())) defMappings.remove();
-        }
-
-        for (MemberMapping memberMapping : toMerge.getMemberMappings()) {
-          def.addInheritedMapping(memberMapping);
-        }
-
-        if (def.getMappingClass().getDeclaredConstructor(toMerge.getConstructorMapping().getConstructorSignature()) != null) {
-          def.setConstructorMapping(toMerge.getConstructorMapping());
-        }
-      }
-    }
-  }
+  boolean isExposedClass(String clazz);
 }
-

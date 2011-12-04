@@ -177,7 +177,7 @@ public class JSONTests extends TestCase {
 
     SType rSType = (SType) result.get("SType");
 
-    System.out.println("rSType:" + rSType);
+ //   System.out.println("rSType:" + rSType);
 
     assertEquals(type, rSType);
   }
