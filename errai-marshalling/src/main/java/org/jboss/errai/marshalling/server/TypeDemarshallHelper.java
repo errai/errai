@@ -128,9 +128,10 @@ public class TypeDemarshallHelper {
         ConstructorMapping cns = def.getConstructorMapping();
         Mapping[] mappings = cns.getMappings();
         Object[] parms = new Object[mappings.length];
+        Class[] elTypes = cns.getConstructorSignature();
 
         for (int i = 0; i < mappings.length; i++) {
-          parms[i] = oMap.get(mappings[i].getKey());
+          parms[i] = DataConversion.convert(oMap.get(mappings[i].getKey()), elTypes[i]);
         }
 
         o = cns.getConstructor().asConstructor().newInstance(parms);
@@ -211,7 +212,7 @@ public class TypeDemarshallHelper {
                 }
                 else {
                   Method m = ((MetaMethod) mapping.getBindingMember()).asMethod();
-                  m.invoke(newInstance, oMap.get(mapping.getKey()));
+                  m.invoke(newInstance, DataConversion.convert(oMap.get(mapping.getKey()), m.getParameterTypes()[0]));
                 }
               }
             }

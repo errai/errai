@@ -66,4 +66,9 @@ public class TestRPCService implements TestRPCServiceRemote {
   public EntityWithStringBufferAndStringBuilder testStringBufferAndStringBuilder(EntityWithStringBufferAndStringBuilder entity) {
     return entity;
   }
+
+  @Override
+  public Throwable testSerializeThrowable(Throwable t) {
+    return t;
+  }
 }

@@ -38,4 +38,6 @@ public interface TestRPCServiceRemote {
   public EntityWithGenericCollections genericCollections(EntityWithGenericCollections ent);
 
   public EntityWithStringBufferAndStringBuilder testStringBufferAndStringBuilder(EntityWithStringBufferAndStringBuilder entity);
+
+  public Throwable testSerializeThrowable(Throwable t);
 }

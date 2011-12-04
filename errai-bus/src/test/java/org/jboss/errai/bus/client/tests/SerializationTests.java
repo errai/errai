@@ -157,7 +157,7 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
   public void testEmptyWithGenericCollections() {
     runAfterInit(new Runnable() {
       @Override
@@ -167,7 +167,7 @@ public class SerializationTests extends AbstractErraiTest {
         listOffFloats.add(1.0f);
         listOffFloats.add(1.1f);
         listOffFloats.add(1.2f);
-        
+
         MessageBuilder.createCall(new RemoteCallback<EntityWithGenericCollections>() {
           @Override
           public void callback(EntityWithGenericCollections response) {
@@ -206,6 +206,66 @@ public class SerializationTests extends AbstractErraiTest {
             }
           }
         }, TestRPCServiceRemote.class).testStringBufferAndStringBuilder(ent);
+      }
+    });
+  }
+
+
+  public void testThrowable() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        final Throwable c = new Throwable("bar");
+        final Throwable t = new Throwable("foo", c);
+
+        final StackTraceElement[] trace = new StackTraceElement[3];
+        trace[0] = new StackTraceElement("DogClass", "bark", "DogoClass.java", 10);
+        trace[1] = new StackTraceElement("KatClass", "meow", "KatClass.java", 43);
+        trace[2] = new StackTraceElement("PigClass", "oink", "PigClass.java", 23);
+
+        t.setStackTrace(trace);
+
+        class EqualTester {
+          public boolean isEqual(Throwable r) {
+            if (r == null) return false;
+            if (!r.getMessage().equals(t.getMessage())) return false;
+
+            StackTraceElement[] st = r.getStackTrace();
+
+            if (st == null || trace.length != st.length) return false;
+
+            for (int i = 0; i < trace.length; i++) {
+              if (!stackTraceEqual(trace[i], st[i])) return false;
+            }
+
+            if (r.getCause() == null) return false;
+            return c.getMessage().equals(r.getCause().getMessage());
+          }
+
+          private boolean stackTraceEqual(StackTraceElement el1, StackTraceElement el2) {
+            if (!el1.getClassName().equals(el2.getClassName())) return false;
+            if (!el1.getFileName().equals(el2.getFileName())) return false;
+            if (el1.getLineNumber() != el2.getLineNumber()) return false;
+            if (!el1.getMethodName().equals(el2.getMethodName())) return false;
+            return true;
+          }
+        }
+
+
+        MessageBuilder.createCall(new RemoteCallback<Throwable>() {
+          @Override
+          public void callback(Throwable response) {
+            try {
+              assertTrue(new EqualTester().isEqual(response));
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestRPCServiceRemote.class).testSerializeThrowable(t);
       }
     });
   }

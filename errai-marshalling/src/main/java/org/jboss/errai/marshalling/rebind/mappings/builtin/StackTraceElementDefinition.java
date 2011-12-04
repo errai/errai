@@ -33,7 +33,7 @@ public class StackTraceElementDefinition extends MappingDefinition {
     constructorMapping.mapParmToIndex("declaringClass", 0, String.class);
     constructorMapping.mapParmToIndex("methodName", 1, String.class);
     constructorMapping.mapParmToIndex("fileName", 2, String.class);
-    constructorMapping.mapParmToIndex("lineNumber", 3, Integer.class);
+    constructorMapping.mapParmToIndex("lineNumber", 3, int.class);
 
     setConstructorMapping(constructorMapping);
 

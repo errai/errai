@@ -78,7 +78,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
     if (mapping == null) {
       throw new InvalidMappingException("no definition for: " + toMap.getFullyQualifiedName());
     }
-    
+
     return new ObjectMapper() {
       @Override
       public Statement getMarshaller() {
@@ -99,6 +99,9 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                         Parameter.of(Object.class, "a0"), Parameter.of(MarshallingSession.class, "a1"));
 
         BlockBuilder<CatchBlockBuilder> tryBuilder = Stmt.try_();
+
+        tryBuilder.append(Stmt.if_(Bool.notEquals(Stmt.loadVariable("a0").invoke("isNull"), null))
+                .append(Stmt.load(null).returnValue()).finish());
 
 
         tryBuilder.append(Stmt.declareVariable(JSONObject.class).named("obj")
@@ -123,17 +126,18 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
           final List<Statement> marshallers = new ArrayList<Statement>();
 
           for (Mapping m : mapping.getConstructorMapping().getMappings()) {
-            if (context.canMarshal(m.getType().getFullyQualifiedName())) {
-              if (m.getType().isArray()) {
+            MetaClass type = m.getType().asBoxed();
+            if (context.canMarshal(type.getFullyQualifiedName())) {
+              if (type.isArray()) {
                 marshallers.add(context.getArrayMarshallerCallback()
-                        .demarshall(m.getType(), extractJSONObjectProperty(m.getKey(), JSONObject.class)));
+                        .demarshall(type, extractJSONObjectProperty(m.getKey(), JSONObject.class)));
               }
               else {
                 marshallers.add(fieldDemarshall(m, JSONObject.class));
               }
             }
             else {
-              throw new MarshallingException("no marshaller for type: " + m.getType());
+              throw new MarshallingException("no marshaller for type: " + type);
             }
           }
 
@@ -250,186 +254,13 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
     };
   }
 
-//  private MappingDefinition finaUsuableBeanMapping() {
-//    if (DefinitionsFactory.hasDefinition(toMap)) {
-//      return DefinitionsFactory.getDefinition(toMap);
-//    }
-//
-//    Set<MetaConstructor> constructors = new HashSet<MetaConstructor>();
-//
-//    SimpleConstructorMapping simpleConstructorMapping = new SimpleConstructorMapping();
-//    MappingDefinition definition = new MappingDefinition(toMap);
-//
-//    for (MetaConstructor c : toMap.getConstructors()) {
-//      if (c.isAnnotationPresent(MappedOrdered.class)) {
-//        constructors.add(c);
-//      }
-//      else if (c.getParameters().length != 0) {
-//        boolean satisifed = true;
-//        FieldScan:
-//        for (int i = 0; i < c.getParameters().length; i++) {
-//          Annotation[] annotations = c.getParameters()[i].getAnnotations();
-//          if (annotations.length == 0) {
-//            satisifed = false;
-//          }
-//          else {
-//            for (Annotation a : annotations) {
-//              if (!MapsTo.class.isAssignableFrom(a.annotationType())) {
-//                satisifed = false;
-//                break FieldScan;
-//              }
-//              else {
-//                MapsTo mapsTo = (MapsTo) a;
-//                String key = mapsTo.value();
-//                simpleConstructorMapping.mapParmToIndex(key, i, c.getParameters()[i].getType());
-//              }
-//            }
-//          }
-//        }
-//
-//        if (satisifed) {
-//          constructors.add(c);
-//        }
-//      }
-//    }
-//
-//    MetaConstructor constructor;
-//    if (constructors.isEmpty()) {
-//      constructor = toMap.getConstructor(new MetaClass[0]);
-//    }
-//    else if (constructors.size() > 1) {
-//      throw new InvalidMappingException("found more than one matching constructor for mapping: "
-//              + toMap.getFullyQualifiedName());
-//    }
-//    else {
-//      constructor = constructors.iterator().next();
-//    }
-//
-//    definition.setConstructorMapping(simpleConstructorMapping);
-//
-//    Set<String> writeKeys = new HashSet<String>();
-//    Set<String> readKeys = new HashSet<String>();
-//
-//    for (Mapping m : simpleConstructorMapping.getMappings()) {
-//      writeKeys.add(m.getKey());
-//    }
-//
-//    for (MetaMethod method : toMap.getDeclaredMethods()) {
-//      if (method.isAnnotationPresent(Key.class)) {
-//        String key = method.getAnnotation(Key.class).value();
-//
-//        if (method.getParameters().length == 0) {
-//          // assume this is a getter
-//
-//          definition.addMemberMapping(new ReadMapping(key, method.getReturnType(), method.getName()));
-//          readKeys.add(key);
-//        }
-//        else if (method.getParameters().length == 1) {
-//          // assume this is a setter
-//
-//          definition.addMemberMapping(new WriteMapping(key, method.getParameters()[0].getType(), method.getName()));
-//          writeKeys.add(key);
-//        }
-//        else {
-//          throw new InvalidMappingException("annotated @Key method is unrecognizable as a setter or getter: "
-//                  + toMap.getFullyQualifiedName() + "#" + method.getName());
-//        }
-//      }
-//    }
-//
-//
-//    if (constructor == null) {
-//      throw new InvalidMappingException("cannot find a default, no-argument constructor or field-mapped constructor in: "
-//              + toMap.getFullyQualifiedName());
-//    }
-//
-//    MetaClass c = toMap;
-//
-//    do {
-//      for (final MetaField field : c.getDeclaredFields()) {
-//        if (DefinitionsFactory.hasDefinition(field.getDeclaringClass())
-//                || field.isTransient() || field.isStatic()) {
-//          continue;
-//        }
-//
-//        if (writeKeys.contains(field.getName()) && readKeys.contains(field.getName())) {
-//          continue;
-//        }
-//
-//        MetaClass type = field.getType();
-//
-//        if (!type.isEnum() && !context.canMarshal(type)) {
-//          throw new InvalidMappingException("portable entity " + toMap.getFullyQualifiedName()
-//                  + " contains a field (" + field.getName() + ") that is not known to the marshaller: "
-//                  + type.getFullyQualifiedName());
-//        }
-//
-//        /**
-//         * This case handles the case where a constructor mapping has mapped the value, and there is no
-//         * manually mapped reader on the key.
-//         */
-//        if (writeKeys.contains(field.getName()) && !readKeys.contains(field.getName())) {
-//          MetaMethod getterMethod = MarshallingGenUtil.findGetterMethod(toMap, field.getName());
-//
-//          if (getterMethod != null) {
-//            definition.addMemberMapping(new ReadMapping(field.getName(), field.getType(), getterMethod.getName()));
-//            continue;
-//          }
-//        }
-//
-//
-//        definition.addMemberMapping(new MemberMapping() {
-//          @Override
-//          public MetaClassMember getBindingMember() {
-//            return field;
-//          }
-//
-//          @Override
-//          public MetaClassMember getReadingMember() {
-//            return field;
-//          }
-//
-//          @Override
-//          public String getKey() {
-//            return field.getName();
-//          }
-//
-//          @Override
-//          public MetaClass getType() {
-//            return field.getType();
-//          }
-//
-//          @Override
-//          public boolean canRead() {
-//            return true;
-//          }
-//
-//          @Override
-//          public boolean canWrite() {
-//            return true;
-//          }
-//
-//          @Override
-//          public void setMappingClass(MetaClass clazz) {
-//          }
-//        });
-//      }
-//    }
-//    while ((c = c.getSuperClass()) != null);
-//
-//    DefinitionsFactory.mergeDefinition(definition);
-//
-//    return definition;
-//  }
-
-
 
   public Statement fieldDemarshall(Mapping mapping, Class<?> fromType) {
     return fieldDemarshall(mapping, MetaClassFactory.get(fromType));
   }
 
   public Statement fieldDemarshall(Mapping mapping, MetaClass fromType) {
-    return fieldDemarshall(mapping.getKey(), fromType, mapping.getType());
+    return fieldDemarshall(mapping.getKey(), fromType, mapping.getType().asBoxed());
   }
 
   public Statement fieldDemarshall(String fieldName, MetaClass fromType, Class<?> toType) {
