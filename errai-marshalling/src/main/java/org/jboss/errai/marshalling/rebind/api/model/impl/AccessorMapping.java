@@ -68,7 +68,7 @@ public class AccessorMapping implements MemberMapping {
 
     meth.asMethod().setAccessible(true);
 
-    readingMember = meth;
+    bindingMember = meth;
 
     if (bindingMember == null) {
       throw new RuntimeException("no such setter method: " + toMap.getFullyQualifiedName() + "." + setterMethod);
