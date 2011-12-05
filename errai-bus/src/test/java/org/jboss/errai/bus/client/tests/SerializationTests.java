@@ -239,16 +239,14 @@ public class SerializationTests extends AbstractErraiTest {
               if (!stackTraceEqual(trace[i], st[i])) return false;
             }
 
-            if (r.getCause() == null) return false;
-            return c.getMessage().equals(r.getCause().getMessage());
+            return r.getCause() != null && c.getMessage().equals(r.getCause().getMessage());
           }
 
           private boolean stackTraceEqual(StackTraceElement el1, StackTraceElement el2) {
-            if (!el1.getClassName().equals(el2.getClassName())) return false;
-            if (!el1.getFileName().equals(el2.getFileName())) return false;
-            if (el1.getLineNumber() != el2.getLineNumber()) return false;
-            if (!el1.getMethodName().equals(el2.getMethodName())) return false;
-            return true;
+            return el1.getClassName().equals(el2.getClassName())
+                    && el1.getFileName().equals(el2.getFileName())
+                    && el1.getLineNumber() == el2.getLineNumber()
+                    && el1.getMethodName().equals(el2.getMethodName());
           }
         }
 
