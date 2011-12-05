@@ -225,8 +225,7 @@ public class HelloWorldService implements MessageCallback {
       </informalexample>
       <para>
         Note that the only difference between the example in the  previous section (2.4) and this is the use of the
-        <code>createConversation()}}method with {{MessageBuilder</code>
-        .
+        <code>createConversation()</code> method with <code>MessageBuilder</code>.
       </para>
     </section>
     <section id="sid-5931306">

@@ -4,15 +4,13 @@
     <title>Errai</title>
     <subtitle>Errai Reference Guide</subtitle>
     <productname>Errai</productname>
-    <productnumber>1.3.1</productnumber>
-    <edition>1.3.1</edition>
-    <pubsnumber>1.3.1</pubsnumber>
+    <productnumber>1.3.2</productnumber>
+    <edition>1.3.2</edition>
+    <pubsnumber>1.3.2</pubsnumber>
     <abstract>
         <para>
             This is the Errai Reference Guide.
         </para>
     </abstract>
-
     <xi:include href="Common_Content/Legal_Notice.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
-    <!-- xi:include href="Author_Group.xml" xmlns:xi="http://www.w3.org/2001/XInclude" /-->
 </bookinfo>
