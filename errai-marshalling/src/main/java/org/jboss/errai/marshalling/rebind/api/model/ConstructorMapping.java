@@ -30,4 +30,5 @@ public interface ConstructorMapping {
   public MetaConstructor getConstructor();
   
   public void setMappingClass(MetaClass clazz);
+  public MetaClass getMappingClass();
  }

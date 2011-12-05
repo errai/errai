@@ -40,4 +40,9 @@ public interface TestRPCServiceRemote {
   public EntityWithStringBufferAndStringBuilder testStringBufferAndStringBuilder(EntityWithStringBufferAndStringBuilder entity);
 
   public Throwable testSerializeThrowable(Throwable t);
+
+  public AssertionError testSerializeAssertionError(AssertionError t);
+
 }
+
+

@@ -98,11 +98,16 @@ public class SimpleConstructorMapping implements ConstructorMapping {
       return _constructorCache;
     }
 
-    return _constructorCache = toMap.getConstructor(getConstructorSignature());
+    return _constructorCache = getMappingClass().getBestMatchingConstructor(getConstructorSignature());
   }
 
   public void setMappingClass(MetaClass toMap) {
     this.toMap = toMap;
+  }
+
+  @Override
+  public MetaClass getMappingClass() {
+    return toMap;
   }
 
   private static class SimpleMapping extends AbstractMapping {

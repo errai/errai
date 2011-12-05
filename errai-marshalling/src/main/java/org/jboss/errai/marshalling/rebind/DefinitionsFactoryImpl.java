@@ -18,6 +18,7 @@ package org.jboss.errai.marshalling.rebind;
 
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
+import org.jboss.errai.codegen.framework.meta.MetaConstructor;
 import org.jboss.errai.common.client.api.annotations.ExposeEntity;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.common.metadata.MetaDataScanner;
@@ -28,9 +29,11 @@ import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 import org.jboss.errai.marshalling.rebind.api.CustomMapping;
 import org.jboss.errai.marshalling.rebind.api.InheritedMappings;
 import org.jboss.errai.marshalling.rebind.api.impl.defaultjava.DefaultJavaDefinitionMapper;
+import org.jboss.errai.marshalling.rebind.api.model.ConstructorMapping;
 import org.jboss.errai.marshalling.rebind.api.model.Mapping;
 import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
+import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleConstructorMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,6 +115,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
         MappingDefinition definition = (MappingDefinition) cls.newInstance();
         addDefinition(definition);
         exposedClassesStr.add(definition.getMappingClass().getFullyQualifiedName());
+        exposedClasses.add(definition.getMappingClass().asClass());
 
         if (log.isDebugEnabled())
           log.debug("loaded custom mapping class: " + cls.getName() + " (for mapping: " + definition.getMappingClass().getFullyQualifiedName() + ")");
@@ -126,6 +130,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
         for (Class<?> c : inheritedMappings.value()) {
           addDefinition(new MappingDefinition(c));
           exposedClassesStr.add(c.getName());
+          exposedClasses.add(c);
 
           if (log.isDebugEnabled())
             log.debug("mapping inherited mapping " + c.getName() + " -> " + cls.getName());
@@ -162,11 +167,8 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       }
     }
 
-
     Set<Class<?>> exposedFromScanner = new HashSet<Class<?>>(scanner.getTypesAnnotatedWith(Portable.class));
     exposedFromScanner.addAll(scanner.getTypesAnnotatedWith(ExposeEntity.class));
-
-    // Set<Class<?>> exposedClasses = new HashSet<Class<?>>();
 
     for (Class<?> cls : exposedFromScanner) {
       for (Class<?> decl : cls.getDeclaredClasses()) {
@@ -176,28 +178,6 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     }
 
     exposedClasses.addAll(exposedFromScanner);
-    // add all GWT JRE  classes
-
-    exposedClasses.add(Throwable.class);
-    exposedClasses.add(NullPointerException.class);
-    exposedClasses.add(RuntimeException.class);
-    exposedClasses.add(Exception.class);
-    exposedClasses.add(ArithmeticException.class);
-    exposedClasses.add(ArrayStoreException.class);
-    exposedClasses.add(AssertionError.class);
-    exposedClasses.add(ClassCastException.class);
-    exposedClasses.add(IllegalArgumentException.class);
-    exposedClasses.add(IndexOutOfBoundsException.class);
-    exposedClasses.add(NegativeArraySizeException.class);
-    exposedClasses.add(NumberFormatException.class);
-    exposedClasses.add(StringIndexOutOfBoundsException.class);
-    exposedClasses.add(UnsupportedOperationException.class);
-    exposedClasses.add(StackTraceElement.class);
-
-    exposedClasses.add(IOException.class);
-    exposedClasses.add(UnsupportedEncodingException.class);
-    exposedClasses.add(ConcurrentModificationException.class);
-    exposedClasses.add(EmptyStackException.class);
 
     for (Class<?> clazz : exposedClasses) {
       exposedClassesStr.add(clazz.getName());
@@ -236,8 +216,30 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
           def.addInheritedMapping(memberMapping);
         }
 
-        if (def.getMappingClass().getDeclaredConstructor(toMerge.getConstructorMapping().getConstructorSignature()) != null) {
-          def.setConstructorMapping(toMerge.getConstructorMapping());
+        if (def.getConstructorMapping().getMappings().length == 0 &&
+                def.getMappingClass().getDeclaredConstructor(toMerge.getConstructorMapping().getConstructorSignature()) != null) {
+
+//          def.setConstructorMapping(toMerge.getConstructorMapping());
+
+          final ConstructorMapping parentConstructorMapping = toMerge.getConstructorMapping();
+          final MetaClass mergingClass = def.getMappingClass();
+
+          def.setInheritedConstructorMapping(new SimpleConstructorMapping() {
+            @Override
+            public Mapping[] getMappings() {
+              return parentConstructorMapping.getMappings();
+            }
+
+            @Override
+            public Class<?>[] getConstructorSignature() {
+              return parentConstructorMapping.getConstructorSignature();
+            }
+
+            @Override
+            public MetaClass getMappingClass() {
+              return mergingClass;
+            }
+          });
         }
         
         if (log.isDebugEnabled())

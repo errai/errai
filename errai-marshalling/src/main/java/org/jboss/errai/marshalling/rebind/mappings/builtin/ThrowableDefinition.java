@@ -22,8 +22,10 @@ import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 import org.jboss.errai.marshalling.rebind.api.model.impl.AccessorMapping;
 import org.jboss.errai.marshalling.rebind.api.model.impl.ReadMapping;
 import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleConstructorMapping;
+import org.jboss.errai.marshalling.rebind.api.model.impl.WriteMapping;
 
 import java.io.IOException;
+import java.util.ConcurrentModificationException;
 import java.util.EmptyStackException;
 
 /**
@@ -32,7 +34,10 @@ import java.util.EmptyStackException;
 @CustomMapping
 @InheritedMappings(
         {ArithmeticException.class, IOException.class, IllegalArgumentException.class,
-                UnsupportedOperationException.class, EmptyStackException.class}
+                UnsupportedOperationException.class, EmptyStackException.class, ArrayStoreException.class,
+        ClassCastException.class, ConcurrentModificationException.class, IndexOutOfBoundsException.class,
+        NegativeArraySizeException.class, NullPointerException.class, StringIndexOutOfBoundsException.class,
+        UnsupportedOperationException.class, AssertionError.class}
 )
 public class ThrowableDefinition extends MappingDefinition {
   public ThrowableDefinition() {
@@ -40,11 +45,12 @@ public class ThrowableDefinition extends MappingDefinition {
 
     SimpleConstructorMapping constructorMapping = new SimpleConstructorMapping();
     constructorMapping.mapParmToIndex("message", 0, String.class);
-    constructorMapping.mapParmToIndex("cause", 1, Throwable.class);
 
     setConstructorMapping(constructorMapping);
 
     addMemberMapping(new AccessorMapping("stackTrace", StackTraceElement[].class, "setStackTrace", "getStackTrace"));
+
+    addMemberMapping(new WriteMapping("cause", Throwable.class, "initCause"));
     addMemberMapping(new ReadMapping("message", String.class, "getMessage"));
     addMemberMapping(new ReadMapping("cause", Throwable.class, "getCause"));
   }

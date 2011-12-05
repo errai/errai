@@ -267,4 +267,60 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
+
+  public void testAssertionError() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        final AssertionError t = new AssertionError("foo");
+
+        final StackTraceElement[] trace = new StackTraceElement[3];
+        trace[0] = new StackTraceElement("DogClass", "bark", "DogoClass.java", 10);
+        trace[1] = new StackTraceElement("KatClass", "meow", "KatClass.java", 43);
+        trace[2] = new StackTraceElement("PigClass", "oink", "PigClass.java", 23);
+
+        t.setStackTrace(trace);
+
+        class EqualTester {
+          public boolean isEqual(AssertionError r) {
+            if (r == null) return false;
+            if (r.getMessage() == null || !r.getMessage().equals(t.getMessage())) return false;
+
+            StackTraceElement[] st = r.getStackTrace();
+
+            if (st == null || trace.length != st.length) return false;
+
+            for (int i = 0; i < trace.length; i++) {
+              if (!stackTraceEqual(trace[i], st[i])) return false;
+            }
+
+            return true;
+          }
+
+          private boolean stackTraceEqual(StackTraceElement el1, StackTraceElement el2) {
+            return el1.getClassName().equals(el2.getClassName())
+                    && el1.getFileName().equals(el2.getFileName())
+                    && el1.getLineNumber() == el2.getLineNumber()
+                    && el1.getMethodName().equals(el2.getMethodName());
+          }
+        }
+
+
+        MessageBuilder.createCall(new RemoteCallback<AssertionError>() {
+          @Override
+          public void callback(AssertionError response) {
+            try {
+              assertTrue(new EqualTester().isEqual(response));
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestRPCServiceRemote.class).testSerializeAssertionError(t);
+      }
+    });
+  }
 }

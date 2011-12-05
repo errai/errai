@@ -71,4 +71,9 @@ public class TestRPCService implements TestRPCServiceRemote {
   public Throwable testSerializeThrowable(Throwable t) {
     return t;
   }
+
+  @Override
+  public AssertionError testSerializeAssertionError(AssertionError t) {
+    return t;
+  }
 }

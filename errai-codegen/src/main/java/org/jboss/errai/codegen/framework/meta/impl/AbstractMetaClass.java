@@ -207,14 +207,23 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
       if (cls != null) {
         Method[] methods = (methodsCallback == null) ? cls.getMethods() : methodsCallback.getMethods();
-        Method m = ParseTools.getBestCandidate(parameters, name, cls, methods, false);
+        Method m = ParseTools.getBestCandidate(parameters, name, cls, methods, true);
         if (m == null) {
           if (isInterface()) {
-            m = ParseTools.getBestCandidate(parameters, name, Object.class, Object.class.getMethods(), false);
+            m = ParseTools.getBestCandidate(parameters, name, Object.class, Object.class.getMethods(), true);
           }
 
           if (m == null) {
-            return null;
+            m = ParseTools.getBestCandidate(parameters, name, cls, methods, false);
+            if (m == null) {
+              if (isInterface()) {
+                m = ParseTools.getBestCandidate(parameters, name, Object.class, Object.class.getMethods(), false);
+              }
+
+              if (m == null) {
+                return null;
+              }
+            }
           }
         }
 //      m = ParseTools.getWidenedTarget(m);
@@ -300,10 +309,13 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   public MetaConstructor getBestMatchingConstructor(Class... parameters) {
     Class<?> cls = asClass();
     if (cls != null) {
-      Constructor c = ParseTools.getBestConstructorCandidate(parameters, cls, false);
-      if (c == null)
-        return null;
-
+      Constructor c = ParseTools.getBestConstructorCandidate(parameters, cls, true);
+      if (c == null) {
+        c = ParseTools.getBestConstructorCandidate(parameters, cls, false);
+        if (c == null) {
+          return null;
+        }
+      }
       MetaClass metaClass = MetaClassFactory.get(cls);
       return metaClass.getConstructor(c.getParameterTypes());
     }
@@ -456,8 +468,9 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return o instanceof AbstractMetaClass && hashString().equals(((AbstractMetaClass) o).hashString());
   }
 
-  
+
   int _hashCode;
+
   @Override
   public int hashCode() {
     if (_hashCode != 0) return _hashCode;
@@ -513,13 +526,13 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
     return _boxedCache = MetaClassFactory.get(ParseTools.boxPrimitive(cls));
   }
-  
+
   private MetaClass _unboxedCache;
 
   @Override
   public MetaClass asUnboxed() {
     if (_unboxedCache != null) return _unboxedCache;
-    
+
     Class<?> cls = asClass();
     if (cls == null)
       return _unboxedCache = this;
@@ -538,12 +551,12 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       return this;
     }
   }
-  
+
   private String _internalNameCache;
 
   public String getInternalName() {
     if (_internalNameCache != null) return _internalNameCache;
-    
+
     String name = getFullyQualifiedName();
 
     String dimString = "";
@@ -636,11 +649,11 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   private MetaClass _outerComponentCache;
-  
+
   @Override
   public MetaClass getOuterComponentType() {
     if (_outerComponentCache != null) return _outerComponentCache;
-    
+
     MetaClass c = this;
     while (c.isArray()) {
       c = c.getComponentType();
