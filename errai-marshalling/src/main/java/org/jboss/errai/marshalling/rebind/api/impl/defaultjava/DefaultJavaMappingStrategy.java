@@ -347,7 +347,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
       if (targetType.isEnum()) {
         sb.append("{\"" + SerializationParts.ENCODED_TYPE
                 + "\":\"" + targetType.getFullyQualifiedName() + "\",\"" + SerializationParts.ENUM_STRING_VALUE + "\":\"")
-                .append(Stmt.nestedCall(valueStatement).invoke("toString")).append("\"}");
+                .append(Stmt.nestedCall(valueStatement).invoke("name")).append("\"}");
 
 
       }

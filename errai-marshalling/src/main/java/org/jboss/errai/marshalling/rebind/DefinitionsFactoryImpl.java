@@ -172,7 +172,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
     for (Class<?> cls : exposedFromScanner) {
       for (Class<?> decl : cls.getDeclaredClasses()) {
-        if (decl.isEnum()) continue;
+        if (decl.isEnum() || decl.isSynthetic()) continue;
         exposedClasses.add(decl);
       }
     }

@@ -168,7 +168,7 @@ public class JSONStreamEncoder {
 
       for (Field field : fields) {
         if ((field.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
-                || field.isSynthetic()) {
+                || field.getType().isSynthetic()) {
           continue;
         }
         else if (!first) {
@@ -252,8 +252,8 @@ public class JSONStreamEncoder {
   }
 
   private static void encodeEnum(Enum enumer, OutputStream outstream, EncodingSession ctx) throws IOException {
-    write(outstream, ctx, "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + enumer.getClass().getName() + "\""
-            + ",\"EnumStringValue\":\"" + enumer.name() + "\"}");
+    write(outstream, ctx, "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + enumer.getDeclaringClass().getName() + "\""
+            + ",\"" + SerializationParts.ENUM_STRING_VALUE + "\":\"" + enumer.name() + "\"}");
   }
 
 
