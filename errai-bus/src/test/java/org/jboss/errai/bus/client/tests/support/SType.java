@@ -49,7 +49,12 @@ public class SType extends STypeSuper {
   private SType[] sTypeArray;
 
   public enum Place {
-    FIRST, SECOND, THIRD
+    FIRST {
+      @Override
+      public String toString() {
+        return "foo";
+      }
+    }, SECOND, THIRD
   }
 
   public String getFieldOne() {
