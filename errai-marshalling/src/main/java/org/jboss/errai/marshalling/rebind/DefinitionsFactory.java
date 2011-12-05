@@ -19,6 +19,8 @@ package org.jboss.errai.marshalling.rebind;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 
+import java.util.Set;
+
 /**
  * @author Mike Brock
  */
@@ -38,8 +40,9 @@ public interface DefinitionsFactory {
 
   MappingDefinition getDefinition(Class<?> clazz);
 
-
   void mergeDefinition(MappingDefinition def);
 
   boolean isExposedClass(String clazz);
+  
+  Set<Class<?>> getExposedClasses();
 }

@@ -49,7 +49,6 @@ public class MappingStrategyFactory {
   private static MappingStrategy loadStrategy(final Class<? extends MappingStrategy> strategy,
                                               final GeneratorMappingContext context, final MetaClass clazz) {
 
-
     Constructor[] constructors = strategy.getConstructors();
     if (constructors.length != 1) {
       throw new MarshallingException("a MappingStrategy should have exactly one constructor");

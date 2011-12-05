@@ -189,45 +189,8 @@ public class MarshallerGeneratorFactory {
   }
 
   private void generateMarshallers() {
-    MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
-
-    Set<Class<?>> exposedFromScanner = new HashSet<Class<?>>(scanner.getTypesAnnotatedWith(Portable.class));
-    exposedFromScanner.addAll(scanner.getTypesAnnotatedWith(ExposeEntity.class));
-
-    Set<Class<?>> exposed = new HashSet<Class<?>>();
-
-    for (Class<?> cls : exposedFromScanner) {
-      for (Class<?> decl : cls.getDeclaredClasses()) {
-        if (decl.isEnum()) continue;
-        exposed.add(decl);
-      }
-    }
-
-    exposed.addAll(exposedFromScanner);
-    // add all GWT JRE  classes
-
-    exposed.add(Throwable.class);
-    exposed.add(NullPointerException.class);
-    exposed.add(RuntimeException.class);
-    exposed.add(Exception.class);
-    exposed.add(ArithmeticException.class);
-    exposed.add(ArrayStoreException.class);
-    exposed.add(AssertionError.class);
-    exposed.add(ClassCastException.class);
-    exposed.add(IllegalArgumentException.class);
-    exposed.add(IndexOutOfBoundsException.class);
-    exposed.add(NegativeArraySizeException.class);
-    exposed.add(NumberFormatException.class);
-    exposed.add(StringIndexOutOfBoundsException.class);
-    exposed.add(UnsupportedOperationException.class);
-    exposed.add(StackTraceElement.class);
-
-    exposed.add(IOException.class);
-    exposed.add(UnsupportedEncodingException.class);
-    exposed.add(ConcurrentModificationException.class);
-    exposed.add(EmptyStackException.class);
-
-
+    final Set<Class<?>> exposed = mappingContext.getDefinitionsFactory().getExposedClasses();
+    
     for (Class<?> clazz : exposed) {
       mappingContext.registerGeneratedMarshaller(clazz.getName());
     }
@@ -251,7 +214,6 @@ public class MarshallerGeneratorFactory {
         constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
                 .invoke("put", s, loadVariable(varName)));
       }
-
     }
 
     constructor.finish();

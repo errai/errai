@@ -40,15 +40,16 @@ import java.util.*;
  * @author Mike Brock
  */
 public class DefinitionsFactoryImpl implements DefinitionsFactory {
-  private final Set<String> exposedClasses = new HashSet<String>();
-   
+  private final Set<Class<?>> exposedClasses = new HashSet<Class<?>>();
+  private final Set<String> exposedClassesStr = new HashSet<String>();
+
   private final Map<String, MappingDefinition> MAPPING_DEFINITIONS
           = new HashMap<String, MappingDefinition>();
 
   public DefinitionsFactoryImpl() {
     loadCustomMappings();
   }
-  
+
   public DefinitionsFactoryImpl(Map<String, MappingDefinition> mappingDefinitions) {
     MAPPING_DEFINITIONS.putAll(mappingDefinitions);
   }
@@ -99,7 +100,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       try {
         MappingDefinition definition = (MappingDefinition) cls.newInstance();
         addDefinition(definition);
-        exposedClasses.add(definition.getMappingClass().getFullyQualifiedName());
+        exposedClassesStr.add(definition.getMappingClass().getFullyQualifiedName());
       }
       catch (Throwable t) {
         throw new RuntimeException("Failed to load definition", t);
@@ -110,7 +111,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
         for (Class<?> c : inheritedMappings.value()) {
           addDefinition(new MappingDefinition(c));
-          exposedClasses.add(c.getName());
+          exposedClassesStr.add(c.getName());
         }
       }
     }
@@ -125,13 +126,11 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       if (Marshaller.class.isAssignableFrom(cls)) {
         try {
           Class<?> type = (Class<?>) Marshaller.class.getMethod("getTypeHandled").invoke(cls.newInstance());
-     //     mappingContext.registerMarshaller(type.getName(), cls.asSubclass(Marshaller.class));
-          exposedClasses.add(type.getName());
-          
+          exposedClassesStr.add(type.getName());
+
           if (cls.isAnnotationPresent(ImplementationAliases.class)) {
             for (Class<?> c : cls.getAnnotation(ImplementationAliases.class).value()) {
-       //       mappingContext.registerMappingAlias(c, type);
-              exposedClasses.add(c.getName());
+              exposedClassesStr.add(c.getName());
             }
           }
         }
@@ -144,50 +143,50 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
                 + " does not implement " + Marshaller.class.getName());
       }
     }
-    
+
 
     Set<Class<?>> exposedFromScanner = new HashSet<Class<?>>(scanner.getTypesAnnotatedWith(Portable.class));
     exposedFromScanner.addAll(scanner.getTypesAnnotatedWith(ExposeEntity.class));
 
-    Set<Class<?>> exposed = new HashSet<Class<?>>();
+    // Set<Class<?>> exposedClasses = new HashSet<Class<?>>();
 
     for (Class<?> cls : exposedFromScanner) {
       for (Class<?> decl : cls.getDeclaredClasses()) {
         if (decl.isEnum()) continue;
-        exposed.add(decl);
+        exposedClasses.add(decl);
       }
     }
 
-    exposed.addAll(exposedFromScanner);
+    exposedClasses.addAll(exposedFromScanner);
     // add all GWT JRE  classes
 
-    exposed.add(Throwable.class);
-    exposed.add(NullPointerException.class);
-    exposed.add(RuntimeException.class);
-    exposed.add(Exception.class);
-    exposed.add(ArithmeticException.class);
-    exposed.add(ArrayStoreException.class);
-    exposed.add(AssertionError.class);
-    exposed.add(ClassCastException.class);
-    exposed.add(IllegalArgumentException.class);
-    exposed.add(IndexOutOfBoundsException.class);
-    exposed.add(NegativeArraySizeException.class);
-    exposed.add(NumberFormatException.class);
-    exposed.add(StringIndexOutOfBoundsException.class);
-    exposed.add(UnsupportedOperationException.class);
-    exposed.add(StackTraceElement.class);
+    exposedClasses.add(Throwable.class);
+    exposedClasses.add(NullPointerException.class);
+    exposedClasses.add(RuntimeException.class);
+    exposedClasses.add(Exception.class);
+    exposedClasses.add(ArithmeticException.class);
+    exposedClasses.add(ArrayStoreException.class);
+    exposedClasses.add(AssertionError.class);
+    exposedClasses.add(ClassCastException.class);
+    exposedClasses.add(IllegalArgumentException.class);
+    exposedClasses.add(IndexOutOfBoundsException.class);
+    exposedClasses.add(NegativeArraySizeException.class);
+    exposedClasses.add(NumberFormatException.class);
+    exposedClasses.add(StringIndexOutOfBoundsException.class);
+    exposedClasses.add(UnsupportedOperationException.class);
+    exposedClasses.add(StackTraceElement.class);
 
-    exposed.add(IOException.class);
-    exposed.add(UnsupportedEncodingException.class);
-    exposed.add(ConcurrentModificationException.class);
-    exposed.add(EmptyStackException.class);
+    exposedClasses.add(IOException.class);
+    exposedClasses.add(UnsupportedEncodingException.class);
+    exposedClasses.add(ConcurrentModificationException.class);
+    exposedClasses.add(EmptyStackException.class);
 
 
-    for (Class<?> clazz : exposed) {
-      exposedClasses.add(clazz.getName());
+    for (Class<?> clazz : exposedClasses) {
+      exposedClassesStr.add(clazz.getName());
     }
 
-    for (Class<?> mappedClass : exposed) {
+    for (Class<?> mappedClass : exposedClasses) {
       addDefinition(DefaultJavaDefinitionMapper.map(MetaClassFactory.get(mappedClass), this));
     }
   }
@@ -227,7 +226,11 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
   @Override
   public boolean isExposedClass(String clazz) {
-    return exposedClasses.contains(clazz);
+    return exposedClassesStr.contains(clazz);
+  }
+
+  public Set<Class<?>> getExposedClasses() {
+    return Collections.unmodifiableSet(exposedClasses);
   }
 }
 
