@@ -31,13 +31,15 @@ import org.jboss.errai.marshalling.rebind.api.impl.defaultjava.DefaultJavaDefini
 import org.jboss.errai.marshalling.rebind.api.model.Mapping;
 import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 /**
- * The default implementation of {@link DefinitionsFactory}. This implementation covers the detection and 
+ * The default implementation of {@link DefinitionsFactory}. This implementation covers the detection and
  * mapping of classes annotated with the {@link Portable} annotation, and custom mappings annotated with
  * {@link CustomMapping}.
  *
@@ -49,6 +51,9 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
   private final Map<String, MappingDefinition> MAPPING_DEFINITIONS
           = new HashMap<String, MappingDefinition>();
+
+  private Logger log = LoggerFactory.getLogger(MarshallerGeneratorFactory.class);
+
 
   public DefinitionsFactoryImpl() {
     loadCustomMappings();
@@ -81,6 +86,8 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
   @Override
   public void addDefinition(MappingDefinition definition) {
     MAPPING_DEFINITIONS.put(definition.getMappingClass().getCanonicalName(), definition);
+    if (log.isDebugEnabled())
+      log.debug("loaded definition: " + definition.getMappingClass().getFullyQualifiedName());
   }
 
   @Override
@@ -105,6 +112,9 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
         MappingDefinition definition = (MappingDefinition) cls.newInstance();
         addDefinition(definition);
         exposedClassesStr.add(definition.getMappingClass().getFullyQualifiedName());
+
+        if (log.isDebugEnabled())
+          log.debug("loaded custom mapping class: " + cls.getName() + " (for mapping: " + definition.getMappingClass().getFullyQualifiedName() + ")");
       }
       catch (Throwable t) {
         throw new RuntimeException("Failed to load definition", t);
@@ -116,6 +126,10 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
         for (Class<?> c : inheritedMappings.value()) {
           addDefinition(new MappingDefinition(c));
           exposedClassesStr.add(c.getName());
+
+          if (log.isDebugEnabled())
+            log.debug("mapping inherited mapping " + c.getName() + " -> " + cls.getName());
+
         }
       }
     }
@@ -185,7 +199,6 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     exposedClasses.add(ConcurrentModificationException.class);
     exposedClasses.add(EmptyStackException.class);
 
-
     for (Class<?> clazz : exposedClasses) {
       exposedClassesStr.add(clazz.getName());
     }
@@ -193,6 +206,8 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     for (Class<?> mappedClass : exposedClasses) {
       addDefinition(DefaultJavaDefinitionMapper.map(MetaClassFactory.get(mappedClass), this));
     }
+
+    log.info("comprehended " + exposedClasses.size() + " classes");
   }
 
 
@@ -224,6 +239,9 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
         if (def.getMappingClass().getDeclaredConstructor(toMerge.getConstructorMapping().getConstructorSignature()) != null) {
           def.setConstructorMapping(toMerge.getConstructorMapping());
         }
+        
+        if (log.isDebugEnabled())
+          log.debug("merged definition " + def.getMappingClass() + " with " + cls.getFullyQualifiedName());
       }
     }
   }

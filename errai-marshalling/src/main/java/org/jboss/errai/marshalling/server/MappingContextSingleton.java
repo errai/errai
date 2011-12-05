@@ -35,6 +35,8 @@ public class MappingContextSingleton {
   private static final ServerMappingContext context;
   private static final Map<String, Class<?>> marshallerMap = new HashMap<String, Class<?>>();
 
+
+
   static {
     context = new ServerMappingContext() {
       private final DefinitionsFactory factory = new DefinitionsFactoryImpl();
