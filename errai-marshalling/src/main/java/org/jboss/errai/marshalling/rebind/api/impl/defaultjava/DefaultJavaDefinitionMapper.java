@@ -17,20 +17,16 @@
 package org.jboss.errai.marshalling.rebind.api.impl.defaultjava;
 
 import org.jboss.errai.codegen.framework.meta.*;
-import org.jboss.errai.marshalling.client.api.MappingContext;
 import org.jboss.errai.marshalling.client.api.annotations.Key;
-import org.jboss.errai.marshalling.client.api.annotations.MappedOrdered;
 import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 import org.jboss.errai.marshalling.client.api.exceptions.InvalidMappingException;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
+import org.jboss.errai.marshalling.rebind.api.model.ConstructorMapping;
 import org.jboss.errai.marshalling.rebind.api.model.Mapping;
 import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
-import org.jboss.errai.marshalling.rebind.api.model.impl.ReadMapping;
-import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleConstructorMapping;
-import org.jboss.errai.marshalling.rebind.api.model.impl.WriteMapping;
+import org.jboss.errai.marshalling.rebind.api.model.impl.*;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
-import org.jboss.errai.marshalling.server.ServerMappingContext;
 
 import java.lang.annotation.Annotation;
 import java.util.HashSet;
@@ -51,10 +47,7 @@ public class DefaultJavaDefinitionMapper {
     MappingDefinition definition = new MappingDefinition(toMap);
 
     for (MetaConstructor c : toMap.getConstructors()) {
-      if (c.isAnnotationPresent(MappedOrdered.class)) {
-        constructors.add(c);
-      }
-      else if (c.getParameters().length != 0) {
+      if (c.getParameters().length != 0) {
         boolean satisifed = true;
         FieldScan:
         for (int i = 0; i < c.getParameters().length; i++) {
@@ -93,9 +86,67 @@ public class DefaultJavaDefinitionMapper {
     }
     else {
       constructor = constructors.iterator().next();
+      simpleConstructorMapping.setConstructor(constructor);
     }
 
-    definition.setConstructorMapping(simpleConstructorMapping);
+    definition.setInstantiationMapping(simpleConstructorMapping);
+
+
+    if (simpleConstructorMapping.getMappings().length == 0) {
+      Set<MetaMethod> factoryMethods = new HashSet<MetaMethod>();
+
+      SimpleFactoryMapping simpleFactoryMapping = new SimpleFactoryMapping();
+      for (MetaMethod method : toMap.getDeclaredMethods()) {
+        if (method.isStatic()) {
+          boolean satisifed = true;
+          FieldScan:
+          for (int i = 0; i < method.getParameters().length; i++) {
+            Annotation[] annotations = method.getParameters()[i].getAnnotations();
+            if (annotations.length == 0) {
+              satisifed = false;
+            }
+            else {
+              for (Annotation a : annotations) {
+                if (!MapsTo.class.isAssignableFrom(a.annotationType())) {
+                  satisifed = false;
+                  break FieldScan;
+                }
+                else {
+                  MapsTo mapsTo = (MapsTo) a;
+                  String key = mapsTo.value();
+                  simpleFactoryMapping.mapParmToIndex(key, i, method.getParameters()[i].getType());
+                }
+              }
+            }
+
+            if (satisifed) {
+              factoryMethods.add(method);
+            }
+          }
+        }
+      }
+
+      if (factoryMethods.size() > 1) {
+        throw new InvalidMappingException("found more than one matching factory method for mapping: "
+                + toMap.getFullyQualifiedName());
+      }
+      else if (factoryMethods.size() == 1) {
+        final MetaMethod meth = factoryMethods.iterator().next();
+        simpleFactoryMapping.setMethod(meth);
+        definition.setInheritedInstantiationMapping(simpleFactoryMapping);
+      }
+    }
+
+    if (definition.getInstantiationMapping() instanceof ConstructorMapping
+            && definition.getInstantiationMapping().getMappings().length == 0) {
+
+      MetaConstructor defaultConstructor = toMap.getDeclaredConstructor();
+      if (defaultConstructor == null || !defaultConstructor.isPublic()) {
+        throw new InvalidMappingException("there is no custom mapping or default no-arg constructor to map: "
+                + toMap.getFullyQualifiedName());
+      }
+    }
+
 
     Set<String> writeKeys = new HashSet<String>();
     Set<String> readKeys = new HashSet<String>();
@@ -128,10 +179,10 @@ public class DefaultJavaDefinitionMapper {
     }
 
 
-    if (constructor == null) {
-      throw new InvalidMappingException("cannot find a default, no-argument constructor or field-mapped constructor in: "
-              + toMap.getFullyQualifiedName());
-    }
+//    if (constructor == null) {
+//      throw new InvalidMappingException("cannot find a default, no-argument constructor or field-mapped constructor in: "
+//              + toMap.getFullyQualifiedName());
+//    }
 
     MetaClass c = toMap;
 
@@ -151,7 +202,7 @@ public class DefaultJavaDefinitionMapper {
         MetaClass type = field.getType();
 
         MetaClass compType = type.isArray() ? type.getOuterComponentType().asBoxed() : type.asBoxed();
-        
+
         if (!type.isEnum() && !definitionsFactory.isExposedClass(compType.getFullyQualifiedName())) {
           throw new InvalidMappingException("portable entity " + toMap.getFullyQualifiedName()
                   + " contains a field (" + field.getName() + ") that is not known to the marshaller: "

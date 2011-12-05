@@ -21,10 +21,7 @@ import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.util.NumbersUtils;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
-import org.jboss.errai.marshalling.rebind.api.model.ConstructorMapping;
-import org.jboss.errai.marshalling.rebind.api.model.Mapping;
-import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
-import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
+import org.jboss.errai.marshalling.rebind.api.model.*;
 import org.mvel2.ConversionHandler;
 import org.mvel2.DataConversion;
 
@@ -108,7 +105,7 @@ public class TypeDemarshallHelper {
       if (ctx.hasObjectHash(hash)) {
         return ctx.getObject(Object.class, hash);
       }
-      
+
       if (clazz.isEnum()) {
         return Enum.valueOf(clazz, (String) oMap.get(SerializationParts.ENUM_STRING_VALUE));
       }
@@ -125,17 +122,21 @@ public class TypeDemarshallHelper {
       if (defs.hasDefinition(clazz)) {
         MappingDefinition def = defs.getDefinition(clazz);
 
-        ConstructorMapping cns = def.getConstructorMapping();
+        InstantiationMapping cns = def.getInstantiationMapping();
         Mapping[] mappings = cns.getMappings();
         Object[] parms = new Object[mappings.length];
-        Class[] elTypes = cns.getConstructorSignature();
+        Class[] elTypes = cns.getSignature();
 
         for (int i = 0; i < mappings.length; i++) {
           parms[i] = DataConversion.convert(oMap.get(mappings[i].getKey()), elTypes[i]);
         }
 
-        o = cns.getConstructor().asConstructor().newInstance(parms);
-   //     System.out.println(o);
+        if (cns instanceof ConstructorMapping) {
+          o = ((ConstructorMapping) cns).getMember().asConstructor().newInstance(parms);
+        }
+        else {
+          o = ((FactoryMapping) cns).getMember().asMethod().invoke(null, parms);
+        }
       }
       else {
         o = clazz.newInstance();
@@ -188,10 +189,10 @@ public class TypeDemarshallHelper {
           if (defs.hasDefinition(cls)) {
             String hash = (String) oMap.get(SerializationParts.OBJECT_ID);
 
-            ConstructorMapping cMapping;
-            if (!ctx.hasObjectHash(hash) && (cMapping = defs.getDefinition(cls).getConstructorMapping()) != null) {
-              Constructor c = cMapping.getConstructor().asConstructor();
-              Class<?>[] parmTypes = cMapping.getConstructorSignature();
+            InstantiationMapping cMapping;
+            if (!ctx.hasObjectHash(hash) && (cMapping = defs.getDefinition(cls).getInstantiationMapping()) != null) {
+              // Constructor c = cMapping.getMember().asConstructor();
+              Class<?>[] parmTypes = cMapping.getSignature();
 
               Object[] parms = new Object[parmTypes.length];
               int i = 0;
@@ -199,7 +200,12 @@ public class TypeDemarshallHelper {
                 parms[i++] = oMap.get(mapping.getKey());
               }
 
-              newInstance = c.newInstance(parms);
+              if (cMapping instanceof ConstructorMapping) {
+                newInstance = ((ConstructorMapping) cMapping).getMember().asConstructor().newInstance(parms);
+              }
+              else {
+                newInstance = ((FactoryMapping) cMapping).getMember().asMethod().invoke(null, parms);
+              }
             }
             else {
               newInstance = instantiate(cls, oMap, ctx);

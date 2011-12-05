@@ -46,7 +46,7 @@ public class ThrowableDefinition extends MappingDefinition {
     SimpleConstructorMapping constructorMapping = new SimpleConstructorMapping();
     constructorMapping.mapParmToIndex("message", 0, String.class);
 
-    setConstructorMapping(constructorMapping);
+    setInstantiationMapping(constructorMapping);
 
     addMemberMapping(new AccessorMapping("stackTrace", StackTraceElement[].class, "setStackTrace", "getStackTrace"));
 

@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ *  
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,17 +14,35 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.marshalling.rebind.api.model;
+package org.jboss.errai.bus.client.tests.support;
 
-import org.jboss.errai.codegen.framework.Statement;
-import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaConstructor;
+import org.jboss.errai.common.client.api.annotations.Portable;
+import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 
 /**
  * @author Mike Brock
  */
-public interface ConstructorMapping extends InstantiationMapping {
-  public MetaConstructor getMember();
+@Portable
+public class FactoryEntity {
+  private String name;
+  private int age;
 
-  public boolean isNoConstruct();
- }
+  private FactoryEntity() {
+  }
+
+  public static FactoryEntity create(@MapsTo("name") String name, @MapsTo("age") int age) {
+    FactoryEntity entity = new FactoryEntity();
+    entity.name = name;
+    entity.age = age;
+    return entity;
+  }
+
+
+  public String getName() {
+    return name;
+  }
+
+  public int getAge() {
+    return age;
+  }
+}

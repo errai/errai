@@ -14,17 +14,43 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.marshalling.rebind.api.model;
+package org.jboss.errai.marshalling.rebind.api.model.impl;
 
-import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaConstructor;
+import org.jboss.errai.marshalling.rebind.api.model.ConstructorMapping;
+import org.jboss.errai.marshalling.rebind.api.model.Mapping;
 
 /**
  * @author Mike Brock
  */
-public interface ConstructorMapping extends InstantiationMapping {
-  public MetaConstructor getMember();
+public class NoConstructMapping implements ConstructorMapping{
+  @Override
+  public Mapping[] getMappings() {
+    return new Mapping[0];
+  }
 
-  public boolean isNoConstruct();
- }
+  @Override
+  public Class<?>[] getSignature() {
+    return new Class<?>[0];
+  }
+
+  @Override
+  public MetaConstructor getMember() {
+    return null;
+  }
+
+  @Override
+  public void setMappingClass(MetaClass clazz) {
+  }
+
+  @Override
+  public MetaClass getMappingClass() {
+    return null;
+  }
+
+  @Override
+  public boolean isNoConstruct() {
+    return true;
+  }
+}

@@ -16,15 +16,11 @@
 
 package org.jboss.errai.marshalling.rebind.api.model;
 
-import org.jboss.errai.codegen.framework.Statement;
-import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaConstructor;
+import org.jboss.errai.codegen.framework.meta.MetaMethod;
 
 /**
  * @author Mike Brock
  */
-public interface ConstructorMapping extends InstantiationMapping {
-  public MetaConstructor getMember();
-
-  public boolean isNoConstruct();
- }
+public interface FactoryMapping extends InstantiationMapping {
+  public MetaMethod getMember();
+}

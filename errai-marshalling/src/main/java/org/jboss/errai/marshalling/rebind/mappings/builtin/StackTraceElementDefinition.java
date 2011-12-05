@@ -35,7 +35,7 @@ public class StackTraceElementDefinition extends MappingDefinition {
     constructorMapping.mapParmToIndex("fileName", 2, String.class);
     constructorMapping.mapParmToIndex("lineNumber", 3, int.class);
 
-    setConstructorMapping(constructorMapping);
+    setInstantiationMapping(constructorMapping);
 
     addMemberMapping(new ReadMapping("fileName", String.class, "getFileName"));
     addMemberMapping(new ReadMapping("methodName", String.class, "getMethodName"));

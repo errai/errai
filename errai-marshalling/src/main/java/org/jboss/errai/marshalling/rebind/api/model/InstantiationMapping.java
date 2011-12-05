@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.marshalling.client.api.annotations;
+package org.jboss.errai.marshalling.rebind.api.model;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaClassMember;
+import org.jboss.errai.codegen.framework.meta.MetaConstructor;
 
 /**
- * @author Mike Brock <cbrock@redhat.com>
+ * @author Mike Brock
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.PARAMETER)
-public @interface MappedOrdered {
+public interface InstantiationMapping {
+  public Mapping[] getMappings();
+  public Class<?>[] getSignature();
+
+  public MetaClassMember getMember();
+
+  public void setMappingClass(MetaClass clazz);
+  public MetaClass getMappingClass();
 }

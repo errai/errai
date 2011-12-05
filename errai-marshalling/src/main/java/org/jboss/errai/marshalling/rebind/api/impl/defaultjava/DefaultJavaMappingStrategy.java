@@ -39,10 +39,7 @@ import org.jboss.errai.marshalling.client.util.MarshallUtil;
 import org.jboss.errai.marshalling.rebind.api.GeneratorMappingContext;
 import org.jboss.errai.marshalling.rebind.api.MappingStrategy;
 import org.jboss.errai.marshalling.rebind.api.ObjectMapper;
-import org.jboss.errai.marshalling.rebind.api.model.ConstructorMapping;
-import org.jboss.errai.marshalling.rebind.api.model.Mapping;
-import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
-import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
+import org.jboss.errai.marshalling.rebind.api.model.*;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 
 import java.util.ArrayList;
@@ -118,14 +115,15 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                 Stmt.if_(Bool.expr(loadVariable("a1").invoke("hasObjectHash", loadVariable("objId"))))
                         .append(loadVariable("a1").invoke("getObject", toMap, loadVariable("objId")).returnValue()).finish());
 
-        ConstructorMapping constructorMapping = mapping.getConstructorMapping();
-        Mapping[] cMappings = constructorMapping.getMappings();
+        InstantiationMapping instantiationMapping = mapping.getInstantiationMapping();
+
+        Mapping[] cMappings = instantiationMapping.getMappings();
         if (cMappings.length > 0) {
           // use constructor mapping.
 
           final List<Statement> marshallers = new ArrayList<Statement>();
 
-          for (Mapping m : mapping.getConstructorMapping().getMappings()) {
+          for (Mapping m : mapping.getInstantiationMapping().getMappings()) {
             MetaClass type = m.getType().asBoxed();
             if (context.canMarshal(type.getFullyQualifiedName())) {
               if (type.isArray()) {
@@ -141,9 +139,16 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
             }
           }
 
-          tryBuilder.append(Stmt.declareVariable(toMap).named("entity")
-                  .initializeWith(Stmt.newObject(toMap)
-                          .withParameters(marshallers.toArray(new Object[marshallers.size()]))));
+          if (instantiationMapping instanceof ConstructorMapping) {
+            tryBuilder.append(Stmt.declareVariable(toMap).named("entity")
+                    .initializeWith(Stmt.newObject(toMap)
+                            .withParameters(marshallers.toArray(new Object[marshallers.size()]))));
+          }
+          else if (instantiationMapping instanceof FactoryMapping) {
+            tryBuilder.append(Stmt.declareVariable(toMap).named("entity")
+                    .initializeWith(Stmt.invokeStatic(toMap, ((FactoryMapping) instantiationMapping).getMember().getName(),
+                            marshallers.toArray(new Object[marshallers.size()]))));
+          }
         }
         else {
           // use default constructor

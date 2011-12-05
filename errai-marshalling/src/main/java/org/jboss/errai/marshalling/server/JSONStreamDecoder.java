@@ -20,7 +20,6 @@ package org.jboss.errai.marshalling.server;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.common.client.types.UHashMap;
 import org.jboss.errai.marshalling.rebind.api.model.Mapping;
-import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 
 import java.io.*;
 import java.nio.CharBuffer;
@@ -398,7 +397,7 @@ public class JSONStreamDecoder {
                  */
 
                 for (Mapping m : decodingContext.getMappingContext()
-                        .getDefinitionsFactory().getDefinition((String) rhs).getConstructorMapping().getMappings()) {
+                        .getDefinitionsFactory().getDefinition((String) rhs).getInstantiationMapping().getMappings()) {
 
                   if (!oMap.containsKey(m.getKey())) {
                     markUnsatisfied(m.getKey());

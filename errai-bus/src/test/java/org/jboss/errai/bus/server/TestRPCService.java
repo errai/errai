@@ -76,4 +76,9 @@ public class TestRPCService implements TestRPCServiceRemote {
   public AssertionError testSerializeAssertionError(AssertionError t) {
     return t;
   }
+
+  @Override
+  public FactoryEntity testFactorySerialization(FactoryEntity e) {
+    return e;
+  }
 }

@@ -32,7 +32,8 @@ public class MappingDefinition {
   private boolean marshal = true;
   private boolean demarshal = true;
 
-  private ConstructorMapping constructorMapping;
+  private InstantiationMapping instantiationMapping;
+
   private List<MemberMapping> memberMappings = new ArrayList<MemberMapping>();
 
   public MappingDefinition(Class<?> toMap) {
@@ -41,32 +42,30 @@ public class MappingDefinition {
 
   public MappingDefinition(MetaClass toMap) {
     this.toMap = toMap;
-    setConstructorMapping(new SimpleConstructorMapping());
+    setInstantiationMapping(new SimpleConstructorMapping());
   }
 
-  public MappingDefinition(MetaClass toMap, ConstructorMapping cMapping) {
+  public MappingDefinition(MetaClass toMap, InstantiationMapping cMapping) {
     this.toMap = toMap;
-    this.constructorMapping = cMapping;
+    this.instantiationMapping = cMapping;
   }
 
-  public MappingDefinition(Class<?> toMap, ConstructorMapping cMapping) {
+  public MappingDefinition(Class<?> toMap, InstantiationMapping cMapping) {
     this(MetaClassFactory.get(toMap), cMapping);
   }
-
 
   public MetaClass getMappingClass() {
     return toMap;
   }
 
-  public void setConstructorMapping(ConstructorMapping mapping) {
+  public void setInstantiationMapping(InstantiationMapping mapping) {
     mapping.setMappingClass(toMap);
-    constructorMapping = mapping;
+    instantiationMapping = mapping;
   }
 
-  public void setInheritedConstructorMapping(ConstructorMapping mapping) {
-    constructorMapping = mapping;
+  public void setInheritedInstantiationMapping(InstantiationMapping mapping) {
+    instantiationMapping = mapping;
   }
-
 
   public void addMemberMapping(MemberMapping mapping) {
     mapping.setMappingClass(toMap);
@@ -77,8 +76,8 @@ public class MappingDefinition {
     memberMappings.add(mapping);
   }
 
-  public ConstructorMapping getConstructorMapping() {
-    return constructorMapping;
+  public InstantiationMapping getInstantiationMapping() {
+    return instantiationMapping;
   }
 
   public List<MemberMapping> getMemberMappings() {

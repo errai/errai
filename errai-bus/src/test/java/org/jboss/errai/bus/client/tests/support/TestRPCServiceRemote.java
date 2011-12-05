@@ -43,6 +43,8 @@ public interface TestRPCServiceRemote {
 
   public AssertionError testSerializeAssertionError(AssertionError t);
 
+  public FactoryEntity testFactorySerialization(FactoryEntity e);
+
 }
 
 

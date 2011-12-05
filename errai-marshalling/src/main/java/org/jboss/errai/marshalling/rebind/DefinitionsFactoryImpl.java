@@ -18,7 +18,6 @@ package org.jboss.errai.marshalling.rebind;
 
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
-import org.jboss.errai.codegen.framework.meta.MetaConstructor;
 import org.jboss.errai.common.client.api.annotations.ExposeEntity;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.common.metadata.MetaDataScanner;
@@ -29,16 +28,11 @@ import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 import org.jboss.errai.marshalling.rebind.api.CustomMapping;
 import org.jboss.errai.marshalling.rebind.api.InheritedMappings;
 import org.jboss.errai.marshalling.rebind.api.impl.defaultjava.DefaultJavaDefinitionMapper;
-import org.jboss.errai.marshalling.rebind.api.model.ConstructorMapping;
-import org.jboss.errai.marshalling.rebind.api.model.Mapping;
-import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
-import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
+import org.jboss.errai.marshalling.rebind.api.model.*;
 import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleConstructorMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 /**
@@ -192,7 +186,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
 
   @Override
-  public void mergeDefinition(MappingDefinition def) {
+  public void mergeDefinition(final MappingDefinition def) {
     MetaClass cls = def.getMappingClass();
 
     while ((cls = cls.getSuperClass()) != null) {
@@ -201,7 +195,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
         Set<String> parentKeys = new HashSet<String>();
 
-        for (Mapping m : toMerge.getConstructorMapping().getMappings())
+        for (Mapping m : toMerge.getInstantiationMapping().getMappings())
           parentKeys.add(m.getKey());
 
         for (MemberMapping m : toMerge.getMemberMappings())
@@ -216,30 +210,22 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
           def.addInheritedMapping(memberMapping);
         }
 
-        if (def.getConstructorMapping().getMappings().length == 0 &&
-                def.getMappingClass().getDeclaredConstructor(toMerge.getConstructorMapping().getConstructorSignature()) != null) {
+        InstantiationMapping instantiationMapping = def.getInstantiationMapping();
+        
+        if (instantiationMapping instanceof  ConstructorMapping &&
+                def.getInstantiationMapping().getMappings().length == 0 &&
+                def.getMappingClass().getDeclaredConstructor(toMerge.getInstantiationMapping().getSignature()) != null) {
 
 //          def.setConstructorMapping(toMerge.getConstructorMapping());
 
-          final ConstructorMapping parentConstructorMapping = toMerge.getConstructorMapping();
+          final ConstructorMapping parentConstructorMapping = (ConstructorMapping) toMerge.getInstantiationMapping();
           final MetaClass mergingClass = def.getMappingClass();
 
-          def.setInheritedConstructorMapping(new SimpleConstructorMapping() {
-            @Override
-            public Mapping[] getMappings() {
-              return parentConstructorMapping.getMappings();
-            }
-
-            @Override
-            public Class<?>[] getConstructorSignature() {
-              return parentConstructorMapping.getConstructorSignature();
-            }
-
-            @Override
-            public MetaClass getMappingClass() {
-              return mergingClass;
-            }
-          });
+          if (parentConstructorMapping instanceof SimpleConstructorMapping) {
+            ConstructorMapping newMapping = ((SimpleConstructorMapping) parentConstructorMapping).getCopyForInheritance();
+            newMapping.setMappingClass(mergingClass);
+            def.setInheritedInstantiationMapping(newMapping);
+          }
         }
         
         if (log.isDebugEnabled())

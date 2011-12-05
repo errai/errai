@@ -18,11 +18,10 @@ package org.jboss.errai.marshalling.rebind.api.model.impl;
 
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
-import org.jboss.errai.codegen.framework.meta.MetaConstructor;
-import org.jboss.errai.marshalling.rebind.api.model.ConstructorMapping;
+import org.jboss.errai.codegen.framework.meta.MetaMethod;
+import org.jboss.errai.marshalling.rebind.api.model.FactoryMapping;
 import org.jboss.errai.marshalling.rebind.api.model.Mapping;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -30,33 +29,22 @@ import java.util.TreeMap;
 /**
  * @author Mike Brock
  */
-public class SimpleConstructorMapping implements ConstructorMapping {
+public class SimpleFactoryMapping implements FactoryMapping {
   private MetaClass toMap;
 
   private Map<Integer, String> parmsToIndexMap = new HashMap<Integer, String>();
   private Map<Integer, MetaClass> indexToType = new TreeMap<Integer, MetaClass>();
 
-  protected MetaConstructor constructor;
+  private MetaMethod method;
 
   public void mapParmToIndex(String parm, int index, Class<?> type) {
-    mapParmToIndex(parm, index, toMap = MetaClassFactory.get(type));
+    mapParmToIndex(parm, index, MetaClassFactory.get(type));
   }
-
 
   public void mapParmToIndex(String parm, int index, MetaClass type) {
     parmsToIndexMap.put(index, parm);
     indexToType.put(index, type);
   }
-
-  public SimpleConstructorMapping getCopyForInheritance() {
-    SimpleConstructorMapping mapping = new SimpleConstructorMapping();
-    mapping.toMap = toMap;
-    mapping.parmsToIndexMap = Collections.unmodifiableMap(parmsToIndexMap);
-    mapping.indexToType = Collections.unmodifiableMap(indexToType);
-
-    return mapping;
-  }
-
 
   public MetaClass[] getConstructorParmTypes() {
     return indexToType.values().toArray(new MetaClass[indexToType.size()]);
@@ -101,24 +89,17 @@ public class SimpleConstructorMapping implements ConstructorMapping {
     return _constructorSignature = sig;
   }
 
-  public void setConstructor(MetaConstructor constructor) {
-    this.constructor = constructor;
+  public void setMethod(MetaMethod method) {
+    this.method = method;
   }
 
   @Override
-  public MetaConstructor getMember() {
-    return constructor;
+  public MetaMethod getMember() {
+    return method;
   }
 
   public void setMappingClass(MetaClass toMap) {
     this.toMap = toMap;
-
-    /**
-     * Initialize the default no-arg constructor if it exists.
-     */
-    if (constructor == null) {
-      constructor = toMap.getBestMatchingConstructor(getSignature());
-    }
   }
 
   @Override
@@ -146,8 +127,4 @@ public class SimpleConstructorMapping implements ConstructorMapping {
     }
   }
 
-  @Override
-  public boolean isNoConstruct() {
-    return false;
-  }
 }

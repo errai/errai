@@ -323,4 +323,37 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
+
+
+  public void testFactorySerialization() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        final FactoryEntity entity = FactoryEntity.create("foobar", 123);
+
+        class EqualTester {
+          public boolean isEqual(FactoryEntity r) {
+            return r != null &&
+                    entity.getName().equals(r.getName()) &&
+                    entity.getAge() == r.getAge();
+          }
+        }
+
+        MessageBuilder.createCall(new RemoteCallback<FactoryEntity>() {
+          @Override
+          public void callback(FactoryEntity response) {
+            try {
+              assertTrue(new EqualTester().isEqual(response));
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestRPCServiceRemote.class).testFactorySerialization(entity);
+      }
+    });
+  }
 }
