@@ -22,27 +22,81 @@ import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 import java.util.Set;
 
 /**
+ * The definitions factory is responsible for loading / registering mapping definitions for entities that will
+ * be marshalled.
+ *
  * @author Mike Brock
  */
 public interface DefinitionsFactory {
+  /**
+   * Returns true if a definition is registered matching fully-qualified class name provided.
+   * @param clazz fully qualified class name.
+   * @return boolean true if defined.
+   */
   boolean hasDefinition(String clazz);
 
+  /**
+   * Return true if a definition is registered for the specified {@link MetaClass}
+   * @param clazz class reference
+   * @return boolean true if defined.
+   */
   boolean hasDefinition(MetaClass clazz);
 
+  /**
+   * Return true if a definition is registered for the specified Class reference.
+   * @param clazz class reference.
+   * @return boolean true if defined.
+   */
   boolean hasDefinition(Class<?> clazz);
 
-
+  /**
+   * Registers a mapping definition with the factory
+   * @param definition a mapping definition
+   */
   void addDefinition(MappingDefinition definition);
 
+  /**
+   * Returns a definition for the fully-qualified class name provided.
+   * @param clazz fully qualified class name.
+   * @return an instance of the mapping definition, if defined. returns null if not defined.
+   */
   MappingDefinition getDefinition(String clazz);
 
+
+  /**
+   * Returns a definition for the specified {@link MetaClass} reference.
+   * @param clazz class reference
+   * @return an instance of the mapping definition, if defined. returns null if not defined.
+   */
   MappingDefinition getDefinition(MetaClass clazz);
 
+  /**
+   * Returns a definition for the sepcified Class reference.
+   * @param clazz class reference
+   * @return an instance of the mapping definition, if defined. returns null if not defined.
+   */
   MappingDefinition getDefinition(Class<?> clazz);
 
+  /**
+   * Merge the specified definition with any existing definitions in the specified definitions class hierarchy.
+   * In general, if a  mapping exists for the parent class of the specified definition, then its mappings
+   * will be merged in -- if they're not covered by the specified mapping. Overloaded constructor mappings will
+   * be detected, if the specified mapping does not define a constructor mapping.
+   * @param def a mapping definition to merge.
+   */
   void mergeDefinition(MappingDefinition def);
 
+  /**
+   * Returns true if the class is exposed for marshalling. This is not the same as whether or not it has a defined
+   * definition.Just that the class is expected to be marshallable.
+   * @param clazz fully qualified class name.
+   * @return boolean true if exposed.
+   */
   boolean isExposedClass(String clazz);
-  
+
+  /**
+   * Returns a set of all exposed classes.
+   * @return a set of exposed classes.
+   */
   Set<Class<?>> getExposedClasses();
 }

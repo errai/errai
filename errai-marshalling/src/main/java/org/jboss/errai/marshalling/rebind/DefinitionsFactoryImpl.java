@@ -37,6 +37,10 @@ import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 /**
+ * The default implementation of {@link DefinitionsFactory}. This implementation covers the detection and 
+ * mapping of classes annotated with the {@link Portable} annotation, and custom mappings annotated with
+ * {@link CustomMapping}.
+ *
  * @author Mike Brock
  */
 public class DefinitionsFactoryImpl implements DefinitionsFactory {
