@@ -13,7 +13,7 @@
     <para>Dependency injection (DI) allows for cleaner and more modular code, by permitting the implementation of decoupled and type-safe components. By using DI, components do not need to be aware of the implementation of provided services. Instead, they merely declare a contract with the container, which in turn provides instances of the services that component depends on.</para>
     <para>A simple example:</para>
     <informalexample>
-      <programlisting>public class MyLittleClass {
+      <programlisting language="java">public class MyLittleClass {
   private final TimeService timeService;
 
   @Inject
@@ -36,7 +36,7 @@
       . In this particular case, we use constructor injection to establish the contract between the container and the component. We can similarly use field injection to the same effect:
     </para>
     <informalexample>
-      <programlisting>public class MyLittleClass {
+      <programlisting language="java">public class MyLittleClass {
   @Inject
   private TimeService timeService;
 
@@ -109,7 +109,7 @@
         <emphasis role="strong">TimeService.java</emphasis>
       </para>
       <informalexample>
-        <programlisting>public interface TimeService {
+        <programlisting language="java">public interface TimeService {
   public String getTime();
 }</programlisting>
       </informalexample>
@@ -117,7 +117,7 @@
         <emphasis role="strong">TimeServiceProvider.java</emphasis>
       </para>
       <informalexample>
-        <programlisting>@IOCProvider
+        <programlisting language="java">@IOCProvider
 @Singleton
 public class TimeServiceProvider implements Provider&lt;TimeService&gt; {
   @Override
@@ -132,7 +132,7 @@ public class TimeServiceProvider implements Provider&lt;TimeService&gt; {
       </informalexample>
       <para>If you are familiar with Guice, this is semantically identical to configuring an injector like so:</para>
       <informalexample>
-        <programlisting>Guice.createInjector(new AbstractModule() {
+        <programlisting language="java">Guice.createInjector(new AbstractModule() {
   public void configure() {
     bind(TimeService.class).toProvider(TimeServiceProvider.class);
   }

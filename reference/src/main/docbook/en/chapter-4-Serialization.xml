@@ -10,7 +10,7 @@
     </para>
     <para>For example:</para>
     <informalexample>
-      <programlisting>@ExposeEntity
+      <programlisting language="java">@ExposeEntity
 public class User implements java.io.Serializable {
   private int userId;
 
