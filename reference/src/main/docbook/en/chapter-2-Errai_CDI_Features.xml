@@ -29,7 +29,7 @@
       <para>Let's take a look at an example.</para>
       <example>
         <title>FraudClient.java</title>
-        <programlisting>public class FraudClient extends LayoutPanel {
+        <programlisting language="java">public class FraudClient extends LayoutPanel {
 
   @Inject
   private Event&lt;AccountActivity&gt; event; (1)
@@ -83,7 +83,7 @@
       <para>To complete the example, let's look at the corresponding server-side CDI bean:</para>
       <example>
         <title>AccountService.java</title>
-        <programlisting>@ApplicationScoped
+        <programlisting language="java">@ApplicationScoped
 public class AccountService {
   
   @Inject @Detected
@@ -105,7 +105,7 @@ public class AccountService {
         </para>
         <example>
           <title>SubscriptionService.java</title>
-          <programlisting>@ApplicationScoped
+          <programlisting language="java">@ApplicationScoped
 public class SubscriptionService {
   
   @Inject
@@ -148,7 +148,7 @@ public class SubscriptionService {
       <para>Producer methods and fields act as sources of objects to be injected. They are useful when additional control over object creation is needed before injections can take place e.g. when you need to make a decision at runtime before an object can be created and injected.</para>
       <example>
         <title>App.java</title>
-        <programlisting>@EntryPoint
+        <programlisting language="java">@EntryPoint
 public class App {
   ...
 
@@ -160,7 +160,7 @@ public class App {
       </example>
       <example>
         <title>MyComposite.java</title>
-        <programlisting>@ApplicationScoped
+        <programlisting language="java">@ApplicationScoped
 public class MyComposite extends Composite {
   
   @Inject @Supported

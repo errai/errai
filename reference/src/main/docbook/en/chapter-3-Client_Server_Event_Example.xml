@@ -7,7 +7,7 @@
     <para>Example server code:</para>
     <example>
       <title>MyServerBean.java</title>
-      <programlisting>@ApplicationScoped
+      <programlisting language="java">@ApplicationScoped
 public class MyServerBean {
   @Inject
   Event&lt;MyResponseEvent&gt; myResponseEvent;
@@ -31,7 +31,7 @@ public class MyServerBean {
     <para>Domain-model:</para>
     <example>
       <title>MyRequestEvent.java</title>
-      <programlisting>@ExposeEntity
+      <programlisting language="java">@ExposeEntity
 public class MyRequestEvent {
   private boolean thankYou;
 
@@ -50,7 +50,7 @@ public class MyRequestEvent {
     </example>
     <example>
       <title>MyResponseEvent.java</title>
-      <programlisting>@ExposeEntity
+      <programlisting language="java">@ExposeEntity
 public class MyResponseEvent {
   private String message;
 
@@ -70,7 +70,7 @@ public class MyResponseEvent {
     <para>Client application logic:</para>
     <example>
       <title>MyClientBean.java</title>
-      <programlisting>@EntryPoint
+      <programlisting language="java">@EntryPoint
 public class MyClientBean {
    @Inject
    Event&lt;MyRequestEvent&gt; requestEvent;
