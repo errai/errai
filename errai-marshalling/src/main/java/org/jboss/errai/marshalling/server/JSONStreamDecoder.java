@@ -20,6 +20,7 @@ package org.jboss.errai.marshalling.server;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.common.client.types.UHashMap;
 import org.jboss.errai.marshalling.rebind.api.model.Mapping;
+import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 
 import java.io.*;
 import java.nio.CharBuffer;
@@ -315,6 +316,7 @@ public class JSONStreamDecoder {
     Object rhs;
     boolean encodedType = false;
     boolean finished = false;
+    boolean noearlyInit = false;
     private Set<String> req;
 
     private Context() {
@@ -362,6 +364,11 @@ public class JSONStreamDecoder {
       req.add(key);
     }
 
+
+    public void setNoearlyInit(boolean noearlyInit) {
+      this.noearlyInit = noearlyInit;
+    }
+
     private boolean initReference(Map map) {
       if (canInitialize()) {
         String hash = (String) map.get(SerializationParts.OBJECT_ID);
@@ -396,19 +403,28 @@ public class JSONStreamDecoder {
                  * the instantiating constructor.
                  */
 
-                for (Mapping m : decodingContext.getMappingContext()
-                        .getDefinitionsFactory().getDefinition((String) rhs).getInstantiationMapping().getMappings()) {
+                MappingDefinition definition = decodingContext.getMappingContext()
+                        .getDefinitionsFactory().getDefinition((String) rhs);
 
-                  if (!oMap.containsKey(m.getKey())) {
-                    markUnsatisfied(m.getKey());
+
+                if (definition.isCachedMarshaller()) {
+                  noearlyInit = true;
+                }
+                else {
+
+                  for (Mapping m : definition.getInstantiationMapping().getMappings()) {
+
+                    if (!oMap.containsKey(m.getKey())) {
+                      markUnsatisfied(m.getKey());
+                    }
                   }
-                }
 
-                if (!oMap.containsKey(SerializationParts.OBJECT_ID)) {
-                  markUnsatisfied(SerializationParts.OBJECT_ID);
-                }
+                  if (!oMap.containsKey(SerializationParts.OBJECT_ID)) {
+                    markUnsatisfied(SerializationParts.OBJECT_ID);
+                  }
 
-                initReference(oMap);
+                  initReference(oMap);
+                }
 
                 ((Map) collection).put(lhs, rhs);
 
@@ -422,7 +438,7 @@ public class JSONStreamDecoder {
 
             ((Map) collection).put(lhs, rhs);
 
-            if (encodedType) {
+            if (!noearlyInit && encodedType) {
               markSatisfied((String) lhs);
               initReference((Map) collection);
             }

@@ -17,6 +17,7 @@
 package org.jboss.errai.marshalling.server;
 
 import org.jboss.errai.marshalling.client.api.MappingContext;
+import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
 
 /**
@@ -24,4 +25,5 @@ import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
  */
 public interface ServerMappingContext extends MappingContext {
   public DefinitionsFactory getDefinitionsFactory();
+
 }

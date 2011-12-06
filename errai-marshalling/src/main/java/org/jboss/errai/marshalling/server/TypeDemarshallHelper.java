@@ -109,18 +109,15 @@ public class TypeDemarshallHelper {
       if (clazz.isEnum()) {
         return Enum.valueOf(clazz, (String) oMap.get(SerializationParts.ENUM_STRING_VALUE));
       }
-      else if (java.util.Date.class.isAssignableFrom(clazz)) {
-        return new java.util.Date(getNumeric(oMap.get("Value")));
-      }
-      else if (java.sql.Date.class.isAssignableFrom(clazz)) {
-        return new java.sql.Date(getNumeric(oMap.get("Value")));
-      }
 
       DefinitionsFactory defs = ctx.getMappingContext().getDefinitionsFactory();
 
       Object o;
       if (defs.hasDefinition(clazz)) {
         MappingDefinition def = defs.getDefinition(clazz);
+        if (def.isCachedMarshaller()) {
+          return def.getMarshallerInstance().demarshall(oMap, ctx);
+        }
 
         InstantiationMapping cns = def.getInstantiationMapping();
         Mapping[] mappings = cns.getMappings();
@@ -189,12 +186,13 @@ public class TypeDemarshallHelper {
           if (defs.hasDefinition(cls)) {
             String hash = (String) oMap.get(SerializationParts.OBJECT_ID);
 
+            MappingDefinition definition = defs.getDefinition(cls);
             InstantiationMapping cMapping;
-            if (!ctx.hasObjectHash(hash) && (cMapping = defs.getDefinition(cls).getInstantiationMapping()) != null) {
-              // Constructor c = cMapping.getMember().asConstructor();
-              Class<?>[] parmTypes = cMapping.getSignature();
+            if (!definition.isCachedMarshaller() && !ctx.hasObjectHash(hash)
+                    && (cMapping = definition.getInstantiationMapping()) != null) {
 
-              Object[] parms = new Object[parmTypes.length];
+              Object[] parms = new Object[cMapping.getMappings().length];
+
               int i = 0;
               for (Mapping mapping : cMapping.getMappings()) {
                 parms[i++] = oMap.get(mapping.getKey());

@@ -86,7 +86,6 @@ public class GeneratorMappingContext implements ServerMappingContext {
     return registeredMarshallers.get(clazzName);
   }
 
-
   public void registerGeneratedMarshaller(String clazzName) {
     generatedMarshallers.add(clazzName);
   }

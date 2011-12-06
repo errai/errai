@@ -16,9 +16,10 @@
 
 package org.jboss.errai.bus.client.tests.support;
 
-import java.util.List;
-
 import org.jboss.errai.bus.server.annotations.Remote;
+
+import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -27,10 +28,13 @@ import org.jboss.errai.bus.server.annotations.Remote;
 @Remote
 public interface TestRPCServiceRemote {
   public boolean isGreaterThan(int a, int b);
+  
   public void exception() throws TestException;
   
   public List<Long> listOfLong(List<Long> list);
+  
   public List<Integer> listOfInteger(List<Integer> list);
+  
   public List<Float> listOfFloat(List<Float> list);
 
   public ClassWithNestedClass nestedClass(ClassWithNestedClass clazz);
@@ -44,6 +48,8 @@ public interface TestRPCServiceRemote {
   public AssertionError testSerializeAssertionError(AssertionError t);
 
   public FactoryEntity testFactorySerialization(FactoryEntity e);
+  
+  public Timestamp testTimestampSerialization(Timestamp queue);
 
 }
 

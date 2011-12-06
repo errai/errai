@@ -14,34 +14,30 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.marshalling.client.marshallers;
+package org.jboss.errai.marshalling.server.marshallers;
 
 import org.jboss.errai.common.client.protocols.SerializationParts;
-import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
+import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.AbstractTimestampMarshaller;
+import org.jboss.errai.marshalling.client.util.MarshallUtil;
 
-import java.util.Date;
+import java.sql.Timestamp;
+import java.util.Map;
 
 /**
  * @author Mike Brock
  */
-public abstract class AbstractDateMarshaller<T> implements Marshaller<T, Date> {
+@ServerMarshaller(multiReferenceable = true)
+public class ServerTimestampMarshaller extends AbstractTimestampMarshaller<Map> {
+
   @Override
-  public Class<Date> getTypeHandled() {
-    return Date.class;
+  public Timestamp demarshall(Map o, MarshallingSession ctx) {
+    return new Timestamp(Long.parseLong(String.valueOf(o.get(SerializationParts.VALUE))));
   }
 
   @Override
-  public String getEncodingType() {
-    return "json";
-  }
-
-  @Override
-  public String marshall(Date o, MarshallingSession ctx) {
-    if (o == null) { return "null"; }
-
-    return "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + Date.class.getName() + "\"," +
-            "\"" + SerializationParts.OBJECT_ID + "\":\"" + o.hashCode() + "\"," +
-            "\"" + SerializationParts.VALUE + "\":\"" + o.getTime() + "\"}";
+  public boolean handles(Map o) {
+    return MarshallUtil.handles(o, getTypeHandled());
   }
 }

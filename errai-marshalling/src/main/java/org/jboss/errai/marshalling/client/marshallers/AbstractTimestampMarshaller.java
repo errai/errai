@@ -20,15 +20,16 @@ import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 
-import java.util.Date;
+import java.sql.Timestamp;
 
 /**
  * @author Mike Brock
  */
-public abstract class AbstractDateMarshaller<T> implements Marshaller<T, Date> {
+public abstract class AbstractTimestampMarshaller<T> implements Marshaller<T, Timestamp> {
+
   @Override
-  public Class<Date> getTypeHandled() {
-    return Date.class;
+  public Class<Timestamp> getTypeHandled() {
+    return Timestamp.class;
   }
 
   @Override
@@ -37,10 +38,12 @@ public abstract class AbstractDateMarshaller<T> implements Marshaller<T, Date> {
   }
 
   @Override
-  public String marshall(Date o, MarshallingSession ctx) {
-    if (o == null) { return "null"; }
+  public String marshall(Timestamp o, MarshallingSession ctx) {
+    if (o == null) {
+      return "null";
+    }
 
-    return "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + Date.class.getName() + "\"," +
+    return "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + Timestamp.class.getName() + "\"," +
             "\"" + SerializationParts.OBJECT_ID + "\":\"" + o.hashCode() + "\"," +
             "\"" + SerializationParts.VALUE + "\":\"" + o.getTime() + "\"}";
   }

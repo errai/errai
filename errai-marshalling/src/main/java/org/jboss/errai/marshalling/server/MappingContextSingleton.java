@@ -23,6 +23,7 @@ import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactoryImpl;
+import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,8 +35,6 @@ import java.util.Set;
 public class MappingContextSingleton {
   private static final ServerMappingContext context;
   private static final Map<String, Class<?>> marshallerMap = new HashMap<String, Class<?>>();
-
-
 
   static {
     context = new ServerMappingContext() {
@@ -52,9 +51,8 @@ public class MappingContextSingleton {
         for (Class<?> m : marshallers) {
           try {
             Marshaller<Object, Object> marshaller = (Marshaller<Object, Object>) m.newInstance();
-
             registerMarshaller(marshaller.getTypeHandled().getName(), (Class<? extends Marshaller>) m);
-
+            factory.addDefinition(new MappingDefinition(marshaller));
           }
           catch (ClassCastException e) {
             throw new RuntimeException("@ServerMarshaller class "

@@ -16,10 +16,11 @@
 
 package org.jboss.errai.bus.server;
 
-import java.util.List;
-
 import org.jboss.errai.bus.client.tests.support.*;
 import org.jboss.errai.bus.server.annotations.Service;
+
+import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -80,5 +81,10 @@ public class TestRPCService implements TestRPCServiceRemote {
   @Override
   public FactoryEntity testFactorySerialization(FactoryEntity e) {
     return e;
+  }
+
+  @Override
+  public Timestamp testTimestampSerialization(Timestamp ts) {
+    return ts;
   }
 }

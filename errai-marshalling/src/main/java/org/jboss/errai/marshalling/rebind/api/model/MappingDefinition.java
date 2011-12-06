@@ -18,6 +18,8 @@ package org.jboss.errai.marshalling.rebind.api.model;
 
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
+import org.jboss.errai.marshalling.client.api.Marshaller;
+import org.jboss.errai.marshalling.rebind.api.model.impl.NoConstructMapping;
 import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleConstructorMapping;
 
 import java.util.ArrayList;
@@ -32,9 +34,18 @@ public class MappingDefinition {
   private boolean marshal = true;
   private boolean demarshal = true;
 
+  private boolean cachedMarshaller;
+  private Marshaller<Object, Object> marshallerInstance;
+
   private InstantiationMapping instantiationMapping;
 
   private List<MemberMapping> memberMappings = new ArrayList<MemberMapping>();
+
+  public MappingDefinition(Marshaller<Object, Object> marshaller) {
+    toMap = MetaClassFactory.get(marshaller.getTypeHandled());
+    setMarshallerInstance(marshaller);
+    instantiationMapping = new NoConstructMapping();
+  }
 
   public MappingDefinition(Class<?> toMap) {
     this(MetaClassFactory.get(toMap));
@@ -71,7 +82,7 @@ public class MappingDefinition {
     mapping.setMappingClass(toMap);
     memberMappings.add(mapping);
   }
-  
+
   public void addInheritedMapping(MemberMapping mapping) {
     memberMappings.add(mapping);
   }
@@ -83,21 +94,21 @@ public class MappingDefinition {
   public List<MemberMapping> getMemberMappings() {
     return memberMappings;
   }
-  
+
   private volatile List<MemberMapping> _readableMemberMappingsCache;
-  
+
   public List<MemberMapping> getReadableMemberMappings() {
     if (_readableMemberMappingsCache != null) {
       return _readableMemberMappingsCache;
     }
-    
+
     List<MemberMapping> readableMemberMappings = new ArrayList<MemberMapping>();
     for (MemberMapping memberMapping : memberMappings) {
       if (memberMapping.canRead()) {
         readableMemberMappings.add(memberMapping);
       }
     }
-    return _readableMemberMappingsCache = Collections.unmodifiableList(readableMemberMappings) ;
+    return _readableMemberMappingsCache = Collections.unmodifiableList(readableMemberMappings);
   }
 
   private volatile List<MemberMapping> _writableMemberMappingsCache;
@@ -113,7 +124,7 @@ public class MappingDefinition {
         writableMemberMappings.add(memberMapping);
       }
     }
-    return _writableMemberMappingsCache = Collections.unmodifiableList(writableMemberMappings) ;
+    return _writableMemberMappingsCache = Collections.unmodifiableList(writableMemberMappings);
   }
 
   public boolean canDemarshal() {
@@ -130,5 +141,22 @@ public class MappingDefinition {
 
   public void setDemarshal(boolean demarshal) {
     this.demarshal = demarshal;
+  }
+
+  public boolean isCachedMarshaller() {
+    return cachedMarshaller;
+  }
+
+  public void setCachedMarshaller(boolean cachedMarshaller) {
+    this.cachedMarshaller = cachedMarshaller;
+  }
+
+  public Marshaller<Object, Object> getMarshallerInstance() {
+    return marshallerInstance;
+  }
+
+  public void setMarshallerInstance(Marshaller<Object, Object> marshallerInstance) {
+    this.marshallerInstance = marshallerInstance;
+    this.cachedMarshaller = marshallerInstance != null;
   }
 }

@@ -28,6 +28,7 @@ public interface MappingContext {
 
   /**
    * Indicates whether or not the specified class can be marshalled, whether or not a definition exists.
+   *
    * @return boolean true if marshallable.
    */
   public boolean canMarshal(String cls);

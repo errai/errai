@@ -16,6 +16,7 @@
 
 package org.jboss.errai.bus.client.tests;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -353,6 +354,38 @@ public class SerializationTests extends AbstractErraiTest {
             }
           }
         }, TestRPCServiceRemote.class).testFactorySerialization(entity);
+      }
+    });
+  }
+
+
+  public void testTimestampSerialization() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        final Timestamp ts = new Timestamp(System.currentTimeMillis());
+
+        class EqualTester {
+          public boolean isEqual(Timestamp r) {
+            return r != null &&
+                    r.equals(ts);
+          }
+        }
+
+        MessageBuilder.createCall(new RemoteCallback<Timestamp>() {
+          @Override
+          public void callback(Timestamp response) {
+            try {
+              assertTrue(new EqualTester().isEqual(response));
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestRPCServiceRemote.class).testTimestampSerialization(ts);
       }
     });
   }

@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,32 +16,30 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
+import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.common.client.protocols.SerializationParts;
-import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
+import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
+import org.jboss.errai.marshalling.client.util.MarshallUtil;
 
-import java.util.Date;
+import java.sql.Timestamp;
 
 /**
  * @author Mike Brock
  */
-public abstract class AbstractDateMarshaller<T> implements Marshaller<T, Date> {
+@ClientMarshaller
+public class TimestampMarshaller extends AbstractTimestampMarshaller<JSONValue> {
   @Override
-  public Class<Date> getTypeHandled() {
-    return Date.class;
+  public Timestamp demarshall(JSONValue o, MarshallingSession ctx) {
+    if (o.isNull() != null) {
+      return null;
+    }
+
+    return new Timestamp(Long.parseLong(o.isObject().get(SerializationParts.VALUE).isString().stringValue()));
   }
 
   @Override
-  public String getEncodingType() {
-    return "json";
-  }
-
-  @Override
-  public String marshall(Date o, MarshallingSession ctx) {
-    if (o == null) { return "null"; }
-
-    return "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + Date.class.getName() + "\"," +
-            "\"" + SerializationParts.OBJECT_ID + "\":\"" + o.hashCode() + "\"," +
-            "\"" + SerializationParts.VALUE + "\":\"" + o.getTime() + "\"}";
+  public boolean handles(JSONValue o) {
+    return MarshallUtil.handles(o.isObject(), getTypeHandled());
   }
 }
