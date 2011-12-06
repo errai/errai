@@ -19,22 +19,22 @@ package org.jboss.errai.marshalling.server.marshallers;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.AbstractDateMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.AbstractSQLDateMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.AbstractTimeMarshaller;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
 
-import java.util.Date;
+import java.sql.Time;
 import java.util.Map;
 
 /**
  * @author Mike Brock
  */
 @ServerMarshaller(multiReferenceable = true)
-public class ServerDateMarshaller extends AbstractDateMarshaller<Map> {
+public class ServerTimeMarshaller extends AbstractTimeMarshaller<Map> {
 
-  //todo: null handling
   @Override
-  public Date demarshall(Map o, MarshallingSession ctx) {
-    return new Date(Long.parseLong(String.valueOf(o.get(SerializationParts.VALUE))));
+  public Time demarshall(Map o, MarshallingSession ctx) {
+    return new Time(Long.parseLong(String.valueOf(o.get(SerializationParts.VALUE))));
   }
 
   @Override

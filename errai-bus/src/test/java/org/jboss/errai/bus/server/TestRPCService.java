@@ -19,6 +19,9 @@ package org.jboss.errai.bus.server;
 import org.jboss.errai.bus.client.tests.support.*;
 import org.jboss.errai.bus.server.annotations.Service;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -86,5 +89,20 @@ public class TestRPCService implements TestRPCServiceRemote {
   @Override
   public Timestamp testTimestampSerialization(Timestamp ts) {
     return ts;
+  }
+
+  @Override
+  public Time testTimeSerialization(Time time) {
+    return time;
+  }
+
+  @Override
+  public BigDecimal testBigDecimalSerialization(BigDecimal time) {
+    return time;
+  }
+
+  @Override
+  public BigInteger testBigIntegerSerialization(BigInteger time) {
+    return time;
   }
 }

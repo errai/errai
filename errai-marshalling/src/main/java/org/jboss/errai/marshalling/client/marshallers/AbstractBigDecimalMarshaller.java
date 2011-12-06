@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,31 +14,34 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.marshalling.server.marshallers;
+package org.jboss.errai.marshalling.client.marshallers;
 
 import org.jboss.errai.common.client.protocols.SerializationParts;
+import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
-import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.AbstractDateMarshaller;
-import org.jboss.errai.marshalling.client.util.MarshallUtil;
 
-import java.util.Date;
-import java.util.Map;
+import java.math.BigDecimal;
 
 /**
  * @author Mike Brock
  */
-@ServerMarshaller(multiReferenceable = true)
-public class ServerDateMarshaller extends AbstractDateMarshaller<Map> {
-
-  //todo: null handling
+public abstract class AbstractBigDecimalMarshaller<T> implements Marshaller<T, BigDecimal> {
   @Override
-  public Date demarshall(Map o, MarshallingSession ctx) {
-    return new Date(Long.parseLong(String.valueOf(o.get(SerializationParts.VALUE))));
+  public Class<BigDecimal> getTypeHandled() {
+    return BigDecimal.class;
   }
 
   @Override
-  public boolean handles(Map o) {
-    return MarshallUtil.handles(o, getTypeHandled());
+  public String getEncodingType() {
+    return "json";
+  }
+
+  @Override
+  public String marshall(BigDecimal o, MarshallingSession ctx) {
+    if (o == null) { return "null"; }
+
+    return "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + BigDecimal.class.getName() + "\"," +
+            "\"" + SerializationParts.OBJECT_ID + "\":\"" + o.hashCode() + "\"," +
+            "\"" + SerializationParts.VALUE + "\":\"" + o.toString() + "\"}";
   }
 }

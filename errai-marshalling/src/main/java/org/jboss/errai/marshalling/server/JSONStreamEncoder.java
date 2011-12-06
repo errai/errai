@@ -30,7 +30,6 @@ import java.io.OutputStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -59,7 +58,8 @@ public class JSONStreamEncoder {
       write(outstream, ctx, "\"" + MarshallUtil.jsonStringEscape(v.toString()) + "\"");
       return;
     }
-    if (v instanceof Number || v instanceof Boolean || v instanceof Character) {
+
+    if (MarshallUtil.isPrimitiveWrapper(v.getClass())) {
       if (v instanceof Character) {
         if (qualifiedNumerics) {
           write(outstream, ctx, NumbersUtils.qualifiedNumericEncoding(false, "\"" + v + "\""));
@@ -112,89 +112,70 @@ public class JSONStreamEncoder {
       /**
        * If this object is referencing a duplicate object in the graph, we only provide an ID reference.
        */
-      write(outstream, ctx, "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + cls.getCanonicalName() + "\",\"" + SerializationParts.OBJECT_ID + "\":\"" + hash + "\"}");
+      write(outstream, ctx, "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + cls.getCanonicalName()
+              + "\",\"" + SerializationParts.OBJECT_ID + "\":\"" + hash + "\"}");
 
       return;
     }
-    else {
-      write(outstream, ctx, "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + cls.getCanonicalName() + "\",\"" + SerializationParts.OBJECT_ID + "\":\"" + hash + "\",");
-    }
 
-    int i = 0;
-    boolean first = true;
 
     DefinitionsFactory defs = ctx.getMappingContext().getDefinitionsFactory();
     if (defs.hasDefinition(cls)) {
       MappingDefinition def = defs.getDefinition(cls);
 
-      for (MemberMapping mapping : def.getReadableMemberMappings()) {
-        if (!first) {
-          outstream.write(',');
-        }
-
-        i++;
-        Object v;
-
-        if (mapping.getReadingMember() instanceof MetaField) {
-          Field field = ((MetaField) mapping.getReadingMember()).asField();
-
-          try {
-            v = field.get(o);
-          }
-          catch (Exception e) {
-            throw new RuntimeException("error accessing field: " + field, e);
-          }
-        }
-        else {
-          Method method = ((MetaMethod) mapping.getReadingMember()).asMethod();
-
-          try {
-            v = method.invoke(o);
-          }
-          catch (Exception e) {
-            throw new RuntimeException("error calling getter: " + method, e);
-          }
-        }
-
-        write(outstream, ctx, "\"" + mapping.getKey() + "\"");
-        outstream.write(':');
-        _encode(v, outstream, ctx);
-
-        first = false;
+      if (def.isCachedMarshaller()) {
+        write(outstream, ctx, def.getMarshallerInstance().marshall(o, ctx));
       }
-    }
-    else {
-      final Field[] fields = EncodingUtil.getAllEncodingFields(cls);
+      else {
+        int i = 0;
+        boolean first = true;
 
-      for (Field field : fields) {
-        if ((field.getModifiers() & (Modifier.TRANSIENT | Modifier.STATIC)) != 0
-                || field.getType().isSynthetic()) {
-          continue;
-        }
-        else if (!first) {
-          outstream.write(',');
-        }
+        write(outstream, ctx, "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + cls.getCanonicalName() + "\",\"" + SerializationParts.OBJECT_ID + "\":\"" + hash + "\",");
 
-        try {
+        for (MemberMapping mapping : def.getReadableMemberMappings()) {
+          if (!first) {
+            outstream.write(',');
+          }
+
           i++;
-          Object v = field.get(o);
-          write(outstream, ctx, "\"" + field.getName() + "\"");
+          Object v;
+
+          if (mapping.getReadingMember() instanceof MetaField) {
+            Field field = ((MetaField) mapping.getReadingMember()).asField();
+
+            try {
+              v = field.get(o);
+            }
+            catch (Exception e) {
+              throw new RuntimeException("error accessing field: " + field, e);
+            }
+          }
+          else {
+            Method method = ((MetaMethod) mapping.getReadingMember()).asMethod();
+
+            try {
+              v = method.invoke(o);
+            }
+            catch (Exception e) {
+              throw new RuntimeException("error calling getter: " + method, e);
+            }
+          }
+
+          write(outstream, ctx, "\"" + mapping.getKey() + "\"");
           outstream.write(':');
           _encode(v, outstream, ctx);
+
           first = false;
+
         }
-        catch (Exception e) {
-          throw new RuntimeException("error serializing field: " + field, e);
+
+        if (i == 0) {
+          write(outstream, ctx, "\"" + SerializationParts.INSTANTIATE_ONLY + "\":true");
         }
+
+        outstream.write('}');
       }
     }
-
-    if (i == 0) {
-      write(outstream, ctx, "\"" + SerializationParts.INSTANTIATE_ONLY + "\":true");
-    }
-
-    outstream.write('}');
-
   }
 
   private static void encodeMap(Map<Object, Object> map, OutputStream outstream, EncodingSession ctx) throws IOException {

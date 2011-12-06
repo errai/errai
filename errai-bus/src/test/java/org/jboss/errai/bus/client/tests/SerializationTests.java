@@ -16,13 +16,16 @@
 
 package org.jboss.errai.bus.client.tests;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.tests.support.*;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -386,6 +389,99 @@ public class SerializationTests extends AbstractErraiTest {
             }
           }
         }, TestRPCServiceRemote.class).testTimestampSerialization(ts);
+      }
+    });
+  }
+
+  public void testTimeSerialization() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        final Time ts = new Time(System.currentTimeMillis());
+
+        class EqualTester {
+          public boolean isEqual(Time r) {
+            return r != null &&
+                    r.equals(ts);
+          }
+        }
+
+        MessageBuilder.createCall(new RemoteCallback<Time>() {
+          @Override
+          public void callback(Time response) {
+            try {
+              assertTrue(new EqualTester().isEqual(response));
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestRPCServiceRemote.class).testTimeSerialization(ts);
+      }
+    });
+  }
+  
+  public void testBigDecimalSerialization() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        final BigDecimal ts = new BigDecimal(((double) System.currentTimeMillis()) * 1.04d);
+
+        class EqualTester {
+          public boolean isEqual(BigDecimal r) {
+            return r != null &&
+                    r.equals(ts);
+          }
+        }
+
+        MessageBuilder.createCall(new RemoteCallback<BigDecimal>() {
+          @Override
+          public void callback(BigDecimal response) {
+            try {
+              assertTrue(new EqualTester().isEqual(response));
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestRPCServiceRemote.class).testBigDecimalSerialization(ts);
+      }
+    });
+  }
+  
+  public void testBigIntegerSerialization() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        final BigInteger ts = new BigInteger(String.valueOf(System.currentTimeMillis()));
+
+        class EqualTester {
+          public boolean isEqual(BigInteger r) {
+            return r != null &&
+                    r.equals(ts);
+          }
+        }
+
+        MessageBuilder.createCall(new RemoteCallback<BigInteger>() {
+          @Override
+          public void callback(BigInteger response) {
+            try {
+              assertTrue(new EqualTester().isEqual(response));
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestRPCServiceRemote.class).testBigIntegerSerialization(ts);
       }
     });
   }

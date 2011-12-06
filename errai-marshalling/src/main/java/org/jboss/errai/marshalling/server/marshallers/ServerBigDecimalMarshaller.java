@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,22 +19,20 @@ package org.jboss.errai.marshalling.server.marshallers;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.AbstractDateMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.AbstractBigDecimalMarshaller;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
 
-import java.util.Date;
+import java.math.BigDecimal;
 import java.util.Map;
 
 /**
  * @author Mike Brock
  */
 @ServerMarshaller(multiReferenceable = true)
-public class ServerDateMarshaller extends AbstractDateMarshaller<Map> {
-
-  //todo: null handling
+public class ServerBigDecimalMarshaller extends AbstractBigDecimalMarshaller<Map> {
   @Override
-  public Date demarshall(Map o, MarshallingSession ctx) {
-    return new Date(Long.parseLong(String.valueOf(o.get(SerializationParts.VALUE))));
+  public BigDecimal demarshall(Map o, MarshallingSession ctx) {
+    return new BigDecimal(String.valueOf(o.get(SerializationParts.VALUE)));
   }
 
   @Override

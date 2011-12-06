@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,31 +14,30 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.marshalling.server.marshallers;
+package org.jboss.errai.marshalling.client.marshallers;
 
+import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
-import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.AbstractDateMarshaller;
-import org.jboss.errai.marshalling.client.util.MarshallUtil;
+import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 
-import java.util.Date;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
 /**
  * @author Mike Brock
  */
-@ServerMarshaller(multiReferenceable = true)
-public class ServerDateMarshaller extends AbstractDateMarshaller<Map> {
-
-  //todo: null handling
+@ClientMarshaller(multiReferenceable = true)
+public class BigIntegerMarshaller extends AbstractBigIntegerMarshaller<JSONValue> {
   @Override
-  public Date demarshall(Map o, MarshallingSession ctx) {
-    return new Date(Long.parseLong(String.valueOf(o.get(SerializationParts.VALUE))));
+  public BigInteger demarshall(JSONValue o, MarshallingSession ctx) {
+
+    return o.isObject() == null ? null :
+            new BigInteger(o.isObject().get(SerializationParts.VALUE).isString().stringValue());
   }
 
   @Override
-  public boolean handles(Map o) {
-    return MarshallUtil.handles(o, getTypeHandled());
+  public boolean handles(JSONValue o) {
+    return false;
   }
 }

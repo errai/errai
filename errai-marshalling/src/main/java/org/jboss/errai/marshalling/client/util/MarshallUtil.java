@@ -22,13 +22,35 @@ import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  * @author Jonathan Fuerth <jfuerth@redhat.com>
  */
 public class MarshallUtil {
+  private static final Set<Class<?>> primitiveWrappers = new HashSet<Class<?>>();
+  static {
+    primitiveWrappers.add(Integer.class);
+    primitiveWrappers.add(Double.class);
+    primitiveWrappers.add(Float.class);
+    primitiveWrappers.add(Short.class);
+    primitiveWrappers.add(Long.class);
+    primitiveWrappers.add(Character.class);
+    primitiveWrappers.add(Byte.class);
+    primitiveWrappers.add(Boolean.class);
+  }
+
+  public static boolean isPrimitiveWrapper(Class<?> cls) {
+    return primitiveWrappers.contains(cls);
+  }
+
+  public static void main(String[] args) {
+    System.out.println(Integer.class.isPrimitive());
+  }
+  
   public static <T> T notNull(String message, T obj) {
     if (obj == null) {
       throw new NullPointerException(message);

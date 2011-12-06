@@ -125,6 +125,8 @@ public class RpcProxyLoaderGenerator extends Generator {
     }
     classBuilder = (ClassStructureBuilder<?>) loadProxies.finish();
 
+    //System.out.println("---proxy---\n" + classBuilder.toJavaString());
+
     return classBuilder.toJavaString();
   }
 }

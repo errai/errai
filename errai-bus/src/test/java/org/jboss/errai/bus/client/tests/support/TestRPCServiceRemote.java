@@ -18,6 +18,9 @@ package org.jboss.errai.bus.client.tests.support;
 
 import org.jboss.errai.bus.server.annotations.Remote;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -49,8 +52,13 @@ public interface TestRPCServiceRemote {
 
   public FactoryEntity testFactorySerialization(FactoryEntity e);
   
-  public Timestamp testTimestampSerialization(Timestamp queue);
+  public Timestamp testTimestampSerialization(Timestamp ts);
 
+  public Time testTimeSerialization(Time time);
+
+  public BigDecimal testBigDecimalSerialization(BigDecimal time);
+
+  public BigInteger testBigIntegerSerialization(BigInteger time);
 }
 
 
