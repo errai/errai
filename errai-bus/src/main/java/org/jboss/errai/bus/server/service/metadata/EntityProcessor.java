@@ -59,7 +59,7 @@ public class EntityProcessor implements MetaDataProcessor {
               Class<?> cls = Class.forName(s.trim());
               log.info("Marked " + cls + " as serializable.");
               config.getSerializableTypes().add(cls);
-              markIfEnumType(cls);
+         //     markIfEnumType(cls);
 
             }
             catch (Exception e) {
@@ -73,6 +73,7 @@ public class EntityProcessor implements MetaDataProcessor {
     }
   }
 
+/**
   private void markIfEnumType(final Class loadClass) {
     if (Enum.class.isAssignableFrom(loadClass)) {
       DataConversion.addConversionHandler(loadClass, new ConversionHandler() {
@@ -86,5 +87,5 @@ public class EntityProcessor implements MetaDataProcessor {
         }
       });
     }
-  }
+  } **/
 }
