@@ -16,6 +16,7 @@
 
 package org.jboss.errai.enterprise.jaxrs.server;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jboss.errai.enterprise.jaxrs.client.shared.CustomTypeTestService;
@@ -50,6 +51,8 @@ public class CustomTypeTestServiceImpl implements CustomTypeTestService {
 
   @Override
   public List<Entity> getEntities() {
-    return ENTITIES;
+    List<Entity> entities = new ArrayList<Entity>();
+    entities.addAll(ENTITIES);
+    return entities;
   }
 }
