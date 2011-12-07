@@ -16,11 +16,12 @@
 
 package org.jboss.errai.marshalling.server.marshallers;
 
+import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.AbstractCollectionMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.AbstractQueueMarshaller;
 import org.jboss.errai.marshalling.server.util.ServerMarshallUtil;
 
 import java.util.*;
@@ -29,8 +30,8 @@ import java.util.*;
  * @author Mike Brock <cbrock@redhat.com>
  */
 @ServerMarshaller
-@ImplementationAliases({Queue.class, LinkedList.class, AbstractQueue.class})
-public class ServerQueueMarshaller extends AbstractCollectionMarshaller<List, Queue> {
+@ImplementationAliases({AbstractQueue.class})
+public class ServerQueueMarshaller extends AbstractQueueMarshaller<Map> {
   @Override
   public Class<Queue> getTypeHandled() {
     return Queue.class;
@@ -42,9 +43,13 @@ public class ServerQueueMarshaller extends AbstractCollectionMarshaller<List, Qu
   }
 
   @Override
-  public Queue demarshall(List o, MarshallingSession ctx) {
+  public Queue demarshall(Map oMap, MarshallingSession ctx) {
+    if (oMap == null) return null;
+    
+    List o = (List) oMap.get(SerializationParts.VALUE);
+    
     if (o == null) return null;
-
+    
     LinkedList<Object> list = new LinkedList<Object>();
     Marshaller<Object, Object> cachedMarshaller = null;
 
@@ -60,7 +65,7 @@ public class ServerQueueMarshaller extends AbstractCollectionMarshaller<List, Qu
   }
 
   @Override
-  public boolean handles(List o) {
+  public boolean handles(Map o) {
     return ServerMarshallUtil.handles(o, getTypeHandled());
   }
 }

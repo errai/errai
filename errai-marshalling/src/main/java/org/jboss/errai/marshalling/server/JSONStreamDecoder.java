@@ -392,10 +392,9 @@ public class JSONStreamDecoder {
               if ((encodedType = ENCODED_TYPE.equals(lhs)) && decodingContext.getMappingContext()
                       .getDefinitionsFactory().hasDefinition((String) rhs)) {
                 /**
-                 * Handle the special case of immutable marshalling. This declared the keys required for
+                 * Handle the special case of immutable marshalling. This declares the keys required for
                  * the instantiating constructor.
                  */
-
                 MappingDefinition definition = decodingContext.getMappingContext()
                         .getDefinitionsFactory().getDefinition((String) rhs);
 

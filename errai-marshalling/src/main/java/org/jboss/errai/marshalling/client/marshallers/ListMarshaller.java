@@ -30,7 +30,7 @@ import java.util.*;
  * @author Mike Brock <cbrock@redhat.com>
  */
 @ClientMarshaller
-@ImplementationAliases({AbstractList.class, ArrayList.class, Vector.class, Stack.class})
+@ImplementationAliases({AbstractList.class, ArrayList.class, Vector.class, Stack.class, LinkedList.class})
 public class ListMarshaller extends AbstractCollectionMarshaller<JSONValue, List> {
   @Override
   public Class<List> getTypeHandled() {

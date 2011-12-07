@@ -23,6 +23,7 @@ import java.math.BigInteger;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Queue;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -59,6 +60,8 @@ public interface TestRPCServiceRemote {
   public BigDecimal testBigDecimalSerialization(BigDecimal time);
 
   public BigInteger testBigIntegerSerialization(BigInteger time);
+  
+  public Queue testQueueSerialization(Queue queue);
 }
 
 

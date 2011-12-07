@@ -41,6 +41,7 @@ public class TypeHandlerFactory {
 
     collectionHandlers.put(Set.class, new CollectionToSet());
     collectionHandlers.put(List.class, new CollectionToList());
+    collectionHandlers.put(Queue.class, new CollectionToQueue());
 
     handlers.put(Collection.class, collectionHandlers);
 

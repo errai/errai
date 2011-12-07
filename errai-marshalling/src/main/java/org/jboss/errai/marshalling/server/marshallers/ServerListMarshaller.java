@@ -29,7 +29,7 @@ import java.util.*;
  * @author Mike Brock <cbrock@redhat.com>
  */
 @ServerMarshaller
-@ImplementationAliases({AbstractList.class, ArrayList.class, Vector.class, Stack.class})
+@ImplementationAliases({AbstractList.class, ArrayList.class, Vector.class, Stack.class, LinkedList.class})
 public class ServerListMarshaller extends AbstractCollectionMarshaller<List, List> {
   @Override
   public Class<List> getTypeHandled() {
@@ -45,7 +45,7 @@ public class ServerListMarshaller extends AbstractCollectionMarshaller<List, Lis
   public List demarshall(List o, MarshallingSession ctx) {
     if (o == null) return null;
 
-    ArrayList<Object> list = new ArrayList<Object>();
+    ArrayList<Object> list = new ArrayList<Object>(o.size());
     Marshaller<Object, Object> cachedMarshaller = null;
 
     for (Object elem : o) {

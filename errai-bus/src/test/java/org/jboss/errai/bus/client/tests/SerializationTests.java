@@ -25,7 +25,9 @@ import java.math.BigInteger;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -482,6 +484,41 @@ public class SerializationTests extends AbstractErraiTest {
             }
           }
         }, TestRPCServiceRemote.class).testBigIntegerSerialization(ts);
+      }
+    });
+  }
+  
+  public void testQueueSerialization() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        final Queue ts = new LinkedList();
+        
+        ts.add("test1");
+        ts.add("test2");
+        ts.add("test3");
+
+        class EqualTester {
+          public boolean isEqual(Queue r) {
+            return r != null &&
+                    r.equals(ts);
+          }
+        }
+
+        MessageBuilder.createCall(new RemoteCallback<Queue>() {
+          @Override
+          public void callback(Queue response) {
+            try {
+              assertTrue(new EqualTester().isEqual(response));
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestRPCServiceRemote.class).testQueueSerialization(ts);
       }
     });
   }

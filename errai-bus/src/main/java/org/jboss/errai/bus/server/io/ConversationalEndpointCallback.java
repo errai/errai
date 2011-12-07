@@ -20,12 +20,16 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
 import org.jboss.errai.bus.client.framework.MessageBus;
+import org.mvel2.ConversionHandler;
+import org.mvel2.DataConversion;
 
 import javax.inject.Provider;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.LinkedList;
+import java.util.Queue;
 
 import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversation;
 import static org.mvel2.DataConversion.canConvert;

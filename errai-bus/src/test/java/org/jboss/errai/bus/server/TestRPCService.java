@@ -24,6 +24,7 @@ import java.math.BigInteger;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Queue;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -104,5 +105,10 @@ public class TestRPCService implements TestRPCServiceRemote {
   @Override
   public BigInteger testBigIntegerSerialization(BigInteger time) {
     return time;
+  }
+
+  @Override
+  public Queue testQueueSerialization(Queue queue) {
+    return queue;
   }
 }

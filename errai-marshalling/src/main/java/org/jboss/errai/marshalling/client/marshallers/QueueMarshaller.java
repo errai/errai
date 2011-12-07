@@ -18,12 +18,14 @@ package org.jboss.errai.marshalling.client.marshallers;
 
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONValue;
+import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 
 import java.util.AbstractQueue;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -31,8 +33,8 @@ import java.util.Queue;
  * @author Mike Brock <cbrock@redhat.com>
  */
 @ClientMarshaller
-@ImplementationAliases({Queue.class, LinkedList.class, AbstractQueue.class})
-public class QueueMarshaller extends AbstractCollectionMarshaller<JSONValue, Queue> {
+@ImplementationAliases({AbstractQueue.class})
+public class QueueMarshaller extends AbstractQueueMarshaller<JSONValue> {
   @Override
   public Class<Queue> getTypeHandled() {
     return Queue.class;
@@ -47,10 +49,14 @@ public class QueueMarshaller extends AbstractCollectionMarshaller<JSONValue, Que
   public Queue demarshall(JSONValue o, MarshallingSession ctx) {
     if (o == null) return null;
 
+    o = o.isObject().get(SerializationParts.VALUE);
+
+    if (o == null) return null;
+
     JSONArray jsonArray = o.isArray();
     if (jsonArray == null) return null;
 
-    Queue<Object> deque = new LinkedList<Object>();
+    Queue<Object> queue = new LinkedList<Object>();
     Marshaller<Object, Object> cachedMarshaller = null;
 
     for (int i = 0; i < jsonArray.size(); i++) {
@@ -59,10 +65,10 @@ public class QueueMarshaller extends AbstractCollectionMarshaller<JSONValue, Que
         cachedMarshaller = ctx.getMarshallerInstance(ctx.determineTypeFor(null, elem));
       }
 
-      deque.add(cachedMarshaller.demarshall(elem, ctx));
+      queue.add(cachedMarshaller.demarshall(elem, ctx));
     }
 
-    return deque;
+    return queue;
   }
 
 

@@ -15,18 +15,32 @@
  */
 package org.jboss.errai.bus.server.service.bootstrap;
 
-import org.jboss.errai.marshalling.server.JSONEncoder;
-import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
+import org.mvel2.ConversionHandler;
+import org.mvel2.DataConversion;
 
-/**
- * Register serializeable types. This configures the JSONEncoder.
- *
- * @author: Heiko Braun <hbraun@redhat.com>
- * @date: May 3, 2010
- * @see org.jboss.errai.marshalling.server.JSONEncoder
- */
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.Queue;
+
 class RegisterTypes implements BootstrapExecution {
   public void execute(BootstrapContext context) {
-    final ErraiServiceConfiguratorImpl config = (ErraiServiceConfiguratorImpl) context.getConfig();
+ //   final ErraiServiceConfiguratorImpl config = (ErraiServiceConfiguratorImpl) context.getConfig();
+
+    DataConversion.addConversionHandler(Queue.class, new ConversionHandler() {
+      @Override
+      public Object convertFrom(Object in) {
+        if (in instanceof Collection) {
+          return new LinkedList((Collection) in);
+        }
+        return null;
+      }
+
+      @Override
+      public boolean canConvertFrom(Class cls) {
+        return Collection.class.isAssignableFrom(cls);
+      }
+    });
   }
+
+
 }

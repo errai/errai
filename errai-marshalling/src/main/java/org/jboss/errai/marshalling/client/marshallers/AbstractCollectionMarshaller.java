@@ -34,8 +34,8 @@ public abstract class AbstractCollectionMarshaller<T, C extends Collection> impl
     return "json";
   }
 
-  @Override
-  public String marshall(Collection o, MarshallingSession ctx) {
+  //@Override
+  public String marshall(C o, MarshallingSession ctx) {
     if (o == null) {
       return "null";
     }
