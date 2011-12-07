@@ -39,39 +39,39 @@ public class EntityProcessor implements MetaDataProcessor<BootstrapContext> {
 
   public void process(BootstrapContext context, MetaDataScanner scanner) {
     final ErraiServiceConfiguratorImpl config = (ErraiServiceConfiguratorImpl) context.getConfig();
-    final Set<Class<?>> entities = scanner.getTypesAnnotatedWith(ExposeEntity.class);
+//    final Set<Class<?>> entities = scanner.getTypesAnnotatedWith(ExposeEntity.class);
+//
+//    for (Class<?> loadClass : entities) {
+//      log.info("Marked " + loadClass + " as serializable.");
+//      config.getSerializableTypes().add(loadClass);
+//      markIfEnumType(loadClass);
+//    }
 
-    for (Class<?> loadClass : entities) {
-      log.info("Marked " + loadClass + " as serializable.");
-      config.getSerializableTypes().add(loadClass);
-      markIfEnumType(loadClass);
-    }
-
-    Properties props = scanner.getProperties("ErraiApp.properties");
-    if (props != null) {
-      log.info("Checking ErraiApp.properties for configured types ...");
-
-      Iterator<Object> it = props.keySet().iterator();
-      while (it.hasNext()) {
-        String key = (String) it.next();
-        if (key.equals(ErraiServiceConfigurator.CONFIG_ERRAI_SERIALIZABLE_TYPE)) {
-          for (String s : props.getProperty(key).split(" ")) {
-            try {
-              Class<?> cls = Class.forName(s.trim());
-              log.info("Marked " + cls + " as serializable.");
-              config.getSerializableTypes().add(cls);
-              markIfEnumType(cls);
-
-            }
-            catch (Exception e) {
-              throw new ErraiBootstrapFailure(e);
-            }
-          }
-
-          break;
-        }
-      }
-    }
+//    Properties props = scanner.getProperties("ErraiApp.properties");
+//    if (props != null) {
+//      log.info("Checking ErraiApp.properties for configured types ...");
+//
+//      Iterator<Object> it = props.keySet().iterator();
+//      while (it.hasNext()) {
+//        String key = (String) it.next();
+//        if (key.equals(ErraiServiceConfigurator.CONFIG_ERRAI_SERIALIZABLE_TYPE)) {
+//          for (String s : props.getProperty(key).split(" ")) {
+//            try {
+//              Class<?> cls = Class.forName(s.trim());
+//              log.info("Marked " + cls + " as serializable.");
+//              config.getSerializableTypes().add(cls);
+//              markIfEnumType(cls);
+//
+//            }
+//            catch (Exception e) {
+//              throw new ErraiBootstrapFailure(e);
+//            }
+//          }
+//
+//          break;
+//        }
+//      }
+//    }
   }
 
   private void markIfEnumType(final Class loadClass) {

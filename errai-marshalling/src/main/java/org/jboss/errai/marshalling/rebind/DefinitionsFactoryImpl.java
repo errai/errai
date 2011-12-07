@@ -31,6 +31,7 @@ import org.jboss.errai.marshalling.rebind.api.InheritedMappings;
 import org.jboss.errai.marshalling.rebind.api.impl.defaultjava.DefaultJavaDefinitionMapper;
 import org.jboss.errai.marshalling.rebind.api.model.*;
 import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleConstructorMapping;
+import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 import org.jboss.errai.marshalling.server.marshallers.DefaultDefinitionMarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,9 +86,6 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
   @Override
   public void addDefinition(MappingDefinition definition) {
-//    if (MAPPING_DEFINITIONS.containsKey(definition.getMappingClass().getCanonicalName())) {
-//      throw new RuntimeException("definition already registered: " + definition.getMappingClass().getCanonicalName());
-//    }
 
     MAPPING_DEFINITIONS.put(definition.getMappingClass().getCanonicalName(), definition);
     if (log.isDebugEnabled())
@@ -143,8 +141,6 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       catch (Throwable t) {
         throw new RuntimeException("Failed to load definition", t);
       }
-
-
     }
 
     for (MappingDefinition def : MAPPING_DEFINITIONS.values()) {
@@ -186,6 +182,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     Set<Class<?>> exposedFromScanner = new HashSet<Class<?>>(scanner.getTypesAnnotatedWith(Portable.class));
     exposedFromScanner.addAll(scanner.getTypesAnnotatedWith(ExposeEntity.class));
 
+
     for (Class<?> cls : exposedFromScanner) {
       for (Class<?> decl : cls.getDeclaredClasses()) {
         if (decl.isEnum() || decl.isSynthetic()) continue;
@@ -195,6 +192,28 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     }
 
     exposedClasses.addAll(exposedFromScanner);
+
+    Properties props = scanner.getProperties("ErraiApp.properties");
+    if (props != null) {
+      log.info("Checking ErraiApp.properties for configured types ...");
+
+      for (Object o : props.keySet()) {
+        String key = (String) o;
+        if (key.equals(MarshallingGenUtil.CONFIG_ERRAI_SERIALIZABLE_TYPE)) {
+          for (String s : props.getProperty(key).split(" ")) {
+            try {
+              Class<?> cls = Class.forName(s.trim());
+              exposedClasses.add(cls);
+            }
+            catch (Exception e) {
+              throw new RuntimeException("could not find class defined in ErraiApp.properties for serialization: " + s);
+            }
+          }
+
+          break;
+        }
+      }
+    }
 
     Map<Class<?>, Class<?>> aliasToMarshaller = new HashMap<Class<?>, Class<?>>();
 
@@ -258,8 +277,6 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
         if (instantiationMapping instanceof ConstructorMapping &&
                 def.getInstantiationMapping().getMappings().length == 0 &&
                 def.getMappingClass().getDeclaredConstructor(toMerge.getInstantiationMapping().getSignature()) != null) {
-
-//          def.setConstructorMapping(toMerge.getConstructorMapping());
 
           final ConstructorMapping parentConstructorMapping = (ConstructorMapping) toMerge.getInstantiationMapping();
           final MetaClass mergingClass = def.getMappingClass();

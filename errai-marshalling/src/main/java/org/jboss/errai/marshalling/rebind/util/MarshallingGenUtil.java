@@ -25,6 +25,8 @@ import org.jboss.errai.codegen.framework.util.GenUtil;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class MarshallingGenUtil {
+  public static final String CONFIG_ERRAI_SERIALIZABLE_TYPE = "errai.bus.serializableTypes";
+
   public static String getVarName(MetaClass clazz) {
     return clazz.isArray()
             ? getArrayVarName(clazz.getOuterComponentType().getCanonicalName())
