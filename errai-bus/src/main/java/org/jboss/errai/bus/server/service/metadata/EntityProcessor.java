@@ -43,7 +43,7 @@ public class EntityProcessor implements MetaDataProcessor {
     for (Class<?> loadClass : entities) {
       log.info("Marked " + loadClass + " as serializable.");
       config.getSerializableTypes().add(loadClass);
-      markIfEnumType(loadClass);
+    //  markIfEnumType(loadClass);
     }
 
     Properties props = scanner.getProperties("ErraiApp.properties");
