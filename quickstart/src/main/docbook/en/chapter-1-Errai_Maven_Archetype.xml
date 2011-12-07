@@ -12,7 +12,7 @@
       <programlisting>mvn archetype:generate \
 -DarchetypeGroupId=org.jboss.errai.archetypes \
 -DarchetypeArtifactId=bus-quickstart \
--DarchetypeVersion=1.3.1.Final\
+-DarchetypeVersion=1.3.2.Final\
 -DarchetypeRepository=https://repository.jboss.org/nexus/content/groups/public/</programlisting>
     </informalexample>
     <para>When invoking the archetype build you will be asked to provide the maven groupId, artifactId and package name your GWT application should use:</para>
@@ -28,13 +28,21 @@ version: 1.0-SNAPSHOT
 package: foo.bar.ui
 Y: :</programlisting>
     </informalexample>
-    <para>What will be created for you, is a maven build structure, including references to the GWT SDK and the Errai dependencies necessary to launch a simple application.</para>
-    <para>In order launch the GWT development mode, change into the project directory (name corresponding to the provided artifactId) and type:</para>
+    <para>You will be left with a maven build structure, including references to the GWT SDK and the Errai dependencies necessary to build, test, package, and launch a simple application.</para>
+    <para>To launch the GWT development mode, change into the project directory (name corresponding to the provided artifactId) and type:</para>
     <informalexample>
       <programlisting>mvn gwt:run</programlisting>
     </informalexample>
+    <para>The example application also comes with an integration test suite that exercises most of its client-side and server-side code. To run the test suite, type:</para>
+    <informalexample>
+      <programlisting>mvn test -Pintegration-test</programlisting>
+    </informalexample>
+    <para>To generate a set of HTML documents under target/site/jacoco/ detailing code coverage of the most recent test run, type:</para>
+    <informalexample>
+      <programlisting>mvn site</programlisting>
+    </informalexample>
     <para>
-      By default the archetype does package the web application for Development Mode execution. If you want to deploy your application to JBoss, you need to execute a clean rebuild using the JBoss profile (e.g.
+      By default the archetype does package the web application for Development Mode execution. To deploy your application to JBoss AS 7, you need to execute a clean rebuild using the JBoss profile (e.g.
       <code>-Pjboss7</code>
       ).
     </para>

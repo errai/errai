@@ -3,14 +3,14 @@
     <name>Errai::Bus::Demos</name>
     <groupId>org.jboss.errai</groupId>
     <artifactId>errai-bus-demos</artifactId>
-    <version>1.3.2-SNAPSHOT</version>
+    <version>1.3.2.Final</version>
     <packaging>pom</packaging>
 
     <!-- Parent -->
     <parent>
         <groupId>org.jboss.errai</groupId>
         <artifactId>errai-parent</artifactId>
-        <version>1.3.2-SNAPSHOT</version>
+        <version>1.3.2.Final</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
