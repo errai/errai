@@ -25,6 +25,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Queue;
+import java.util.Set;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -55,6 +56,11 @@ public class TestRPCService implements TestRPCServiceRemote {
   @Override
   public List<Float> listOfFloat(List<Float> list) {
     return list;
+  }
+
+  @Override
+  public Set<String> aSetOfStrings(Set<String> set) {
+    return set;
   }
 
   @Override

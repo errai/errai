@@ -24,10 +24,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -139,6 +136,36 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
+
+
+  public void testSet() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final Set<String> set = new HashSet<String>();
+
+        set.add("foo");
+        set.add("bar");
+        set.add("foobar");
+        set.add("foobarfoobar");
+
+        MessageBuilder.createCall(new RemoteCallback<Set<String>>() {
+          @Override
+          public void callback(Set<String> response) {
+            try {
+              assertEquals(set, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestRPCServiceRemote.class).aSetOfStrings(set);
+      }
+    });
+  }
+
 
   public void testNestedClassSerialization() {
     runAfterInit(new Runnable() {
@@ -425,7 +452,7 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
   public void testBigDecimalSerialization() {
     runAfterInit(new Runnable() {
       @Override
@@ -456,7 +483,7 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
   public void testBigIntegerSerialization() {
     runAfterInit(new Runnable() {
       @Override
@@ -487,14 +514,14 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
   public void testQueueSerialization() {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
 
         final Queue ts = new LinkedList();
-        
+
         ts.add("test1");
         ts.add("test2");
         ts.add("test3");

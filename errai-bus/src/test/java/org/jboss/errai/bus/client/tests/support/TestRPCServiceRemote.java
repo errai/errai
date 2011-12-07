@@ -24,6 +24,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Queue;
+import java.util.Set;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -40,6 +41,8 @@ public interface TestRPCServiceRemote {
   public List<Integer> listOfInteger(List<Integer> list);
   
   public List<Float> listOfFloat(List<Float> list);
+  
+  public Set<String> aSetOfStrings(Set<String> set);
 
   public ClassWithNestedClass nestedClass(ClassWithNestedClass clazz);
 
