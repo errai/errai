@@ -63,54 +63,55 @@ These steps need to executed for both Errai and Errai-CDI:
    % mvn deploy
 
 1. Tag and push the release to github:
-   % git commit a -m "update to new version x.y.z"
-   % git tag x.y.z.Final
-   % git push origin /branch/
-   % git push origin --tags
-   % git push upstream /branch/
-   % git push upstream --tags
+   * % git commit a -m "update to new version x.y.z"
+   * % git tag x.y.z.Final
+   * % git push origin /branch/
+   * % git push origin --tags
+   * % git push upstream /branch/
+   * % git push upstream --tags
 
 1. Create and upload the a-la-carte binary Errai distribution and docs
-   % mvn install -Pdistro
-   % sftp errai@filemgmt.jboss.org
+   * % mvn install -Pdistro
+   * % sftp errai@filemgmt.jboss.org
    
-   sftp> cd /docs_htdocs/errai
-   sftp> mkdir x.y.z.Final
-   sftp> cd x.y.z.Final
-   sftp> mkdir errai
-   sftp> mkdir errai-cdi
+   * sftp> cd /docs_htdocs/errai
+   * sftp> mkdir x.y.z.Final
+   * sftp> cd x.y.z.Final
+   * sftp> mkdir errai
+   * sftp> mkdir errai-cdi
    
-   sftp> cd /downloads_htdocs/errai/dist
-   sftp> mkdir x.y.z.Final
+   * sftp> cd /downloads_htdocs/errai/dist
+   * sftp> mkdir x.y.z.Final
 
-   % scp errai-x.y.z-Final.zip errai@filemgmt.jboss.org:/downloads_htdocs/errai/dist/x.y.z.Final/
-   % scp errai-cdi-x.y.z-Final.zip errai@filemgmt.jboss.org:/downloads_htdocs/errai/dist/x.y.z.Final/
+   * % scp errai-x.y.z-Final.zip errai@filemgmt.jboss.org:/downloads_htdocs/errai/dist/x.y.z.Final/
+   * % scp errai-cdi-x.y.z-Final.zip errai@filemgmt.jboss.org:/downloads_htdocs/errai/dist/x.y.z.Final/
 
-   Errai docs:
-   % scp -rp . errai@filemgmt.jboss.org:/doc_htdocs/errai/x.y.z.Final/errai/reference
-   % scp -rp . errai@filemgmt.jboss.org:/doc_htdocs/errai/x.y.z.Final/errai/quickstart
-   Download author directory of previous release and upload it to both /reference/html/author and /reference/html_single/author
+   * Errai docs:
+   * % scp -rp . errai@filemgmt.jboss.org:/doc_htdocs/errai/x.y.z.Final/errai/reference
+   * % scp -rp . errai@filemgmt.jboss.org:/doc_htdocs/errai/x.y.z.Final/errai/quickstart
+   * Download author directory of previous release and upload it to both /reference/html/author and /reference/html_single/author
 
-   Errai-CDI docs:
-   % scp -rp . errai@filemgmt.jboss.org:/doc_htdocs/errai/x.y.z.Final/errai-cdi/reference
-   % scp -rp . errai@filemgmt.jboss.org:/doc_htdocs/errai/x.y.z.Final/errai-cdi/quickstart
+   * Errai-CDI docs:
+   * % scp -rp . errai@filemgmt.jboss.org:/doc_htdocs/errai/x.y.z.Final/errai-cdi/reference
+   * % scp -rp . errai@filemgmt.jboss.org:/doc_htdocs/errai/x.y.z.Final/errai-cdi/quickstart
 
-   rename PDFs to Errai[_CDI]_x.y.z.Final_[Reference][Quickstart]_Guide.pdf
+   * rename PDFs to Errai[_CDI]_x.y.z.Final_[Reference][Quickstart]_Guide.pdf
 
 The following steps need to be done only once (cover both Errai and Errai-CDI)
 
 1. Publish new quickstart archetypes to Nexus repo (both snapshots and released version)
-   % cd $somewhere/archetypes
-   % mvn versions:set -DnewVersion=x.y.z.Final
-   Afterward, verify that all subprojects reference the new parent pom's version: find . -name pom.xml | xargs grep x.y.z | grep SNAP
-   % mvn clean install
+   * % cd $somewhere/archetypes
+   * % mvn versions:set -DnewVersion=x.y.z.Final
+   * Afterward, verify that all subprojects reference the new parent pom's version: find . -name pom.xml | xargs grep x.y.z | grep SNAP
+   * % mvn clean install
    
    Now test the archetypes you just installed (use instructions from quickstart guides)
-   - check generated app's pom.xml for correct version
-   - mvn gwt:run
+   * check generated app's pom.xml for correct version
+   * mvn gwt:run
 
    If the above was successful, publish away!
-   % mvn deploy
+   
+1. % mvn deploy
 
 1. Browse to nexus (https://repository.jboss.org/nexus/index.html)
    Find the corresponding staging repository (Sort by repository name)
@@ -119,11 +120,7 @@ The following steps need to be done only once (cover both Errai and Errai-CDI)
    Browse to https://repository.jboss.org/nexus/content/groups/public/org/jboss/errai/ and verify that artifact are present
 
 1. Update http://www.jboss.org/errai/Documentation to provide the download links for
-   the generated/released docs and distribution.
-   
-   Update announcement on welcome page.
-
-   Link: https://www.jboss.org/author/
+   the generated/released docs and distribution. Also update the announcement on the welcome page (https://www.jboss.org/author/)
 
 1. Tweet about the release!
 
