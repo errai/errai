@@ -8,12 +8,12 @@
       <ulink url="https://docs.jboss.org/author/pages/viewpage.action?pageId=5931501">here</ulink>
       are all incorporated into this maven archetype using profiles. It enables execution in Development Mode and supports both packaging for deployment to a Servlet Engine and the JBoss Application Server.
     </para>
-    <para>To begin with we'll create a project layout using a maven build structure, which will provide us with a bare bone project, including all dependencies, which can later on be imported in your IDE of choice.</para>
+    <para>To begin with we'll create a project layout using a maven build structure, which will provide us with a bare bones project, including all dependencies, which can later on be imported in your IDE of choice.</para>
     <informalexample>
       <programlisting>mvn archetype:generate \
 -DarchetypeGroupId=org.jboss.errai.archetypes \
 -DarchetypeArtifactId=cdi-quickstart \
--DarchetypeVersion=1.3.1.Final \
+-DarchetypeVersion=1.3.2.Final \
 -DarchetypeRepository=https://repository.jboss.org/nexus/content/groups/public/</programlisting>
     </informalexample>
     <para>Customize the build properties according to your needs.</para>
@@ -30,13 +30,25 @@ package: com.foo.bar
 Y:</programlisting>
     </informalexample>
     <para>The project will be created in a directory that corresponds to the provided artifactId.</para>
-    <para>Now we have a fully working build environment set up in a few, simple steps. You can already use it to launch the GWT development mode or to package your web application for deployment.</para>
+    <para>In a few simple steps, you have created a build environment that can build, test, package, and launch a simple application. You can now launch GWT development mode, run integration tests with coverage reporting, and package your web application for deployment.</para>
+    <para>To launch the GWT development mode, change into the project directory (name corresponding to the provided artifactId) and type:</para>
     <informalexample>
       <programlisting>mvn gwt:run (launch hosted mode)
-mvn gwt:debug (launch hosted with debug settings)
-mvn install (package and install the web application)</programlisting>
+mvn gwt:debug (launch hosted with debug settings)</programlisting>
     </informalexample>
-    <para>To deploy your application to JBoss, you need to execute a clean rebuild using the JBoss profile (e.g. -Pjboss7)</para>
+    <para>The example application comes with an integration test suite that exercises most of its client-side and server-side code. To run the test suite, type:</para>
+    <informalexample>
+      <programlisting>mvn test -Pintegration-test</programlisting>
+    </informalexample>
+    <para>To generate a set of HTML documents under target/site/jacoco/ detailing code coverage of the most recent test run, type:</para>
+    <informalexample>
+      <programlisting>mvn site</programlisting>
+    </informalexample>
+    <para>
+      By default the archetype does package the web application for Development Mode execution. To deploy your application to JBoss AS 7, you need to execute a clean rebuild using the JBoss profile (e.g.
+      <code>-Pjboss7</code>
+      ).
+    </para>
     <informalexample>
       <programlisting>mvn -Pjboss7 clean install
 cp target/gwt-app.war $JBOSS_HOME/standalone/deployments</programlisting>
