@@ -182,7 +182,6 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     Set<Class<?>> exposedFromScanner = new HashSet<Class<?>>(scanner.getTypesAnnotatedWith(Portable.class));
     exposedFromScanner.addAll(scanner.getTypesAnnotatedWith(ExposeEntity.class));
 
-
     for (Class<?> cls : exposedFromScanner) {
       for (Class<?> decl : cls.getDeclaredClasses()) {
         if (decl.isEnum() || decl.isSynthetic()) continue;
