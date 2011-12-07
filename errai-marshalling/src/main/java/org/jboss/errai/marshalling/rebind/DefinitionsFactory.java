@@ -19,6 +19,7 @@ package org.jboss.errai.marshalling.rebind;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -92,11 +93,20 @@ public interface DefinitionsFactory {
    * @param clazz fully qualified class name.
    * @return boolean true if exposed.
    */
-  boolean isExposedClass(String clazz);
+  boolean isExposedClass(Class<?> clazz);
 
   /**
    * Returns a set of all exposed classes.
    * @return a set of exposed classes.
    */
   Set<Class<?>> getExposedClasses();
+
+  /**
+   * Returns a map of aliases mappers. The keys represent the aliases and values represent the concrete mapping
+   * classes to use as a basis.
+   * @return a map of aliases.
+   */
+  Map<String, String> getMappingAliases();
+
+
 }

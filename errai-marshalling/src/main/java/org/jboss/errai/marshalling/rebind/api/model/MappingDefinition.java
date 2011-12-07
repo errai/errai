@@ -35,6 +35,10 @@ public class MappingDefinition {
   private boolean demarshal = true;
 
   private boolean cachedMarshaller;
+  
+  private Class<? extends Marshaller> clientMarshallerClass;
+  private Class<? extends Marshaller> serverMarshallerClass;
+  
   private Marshaller<Object, Object> marshallerInstance;
 
   private InstantiationMapping instantiationMapping;
@@ -71,6 +75,22 @@ public class MappingDefinition {
 
   public MetaClass getMappingClass() {
     return toMap;
+  }
+
+  public Class<? extends Marshaller> getClientMarshallerClass() {
+    return clientMarshallerClass;
+  }
+
+  public void setClientMarshallerClass(Class<? extends Marshaller> clientMarshallerClass) {
+    this.clientMarshallerClass = clientMarshallerClass;
+  }
+
+  public Class<? extends Marshaller> getServerMarshallerClass() {
+    return serverMarshallerClass;
+  }
+
+  public void setServerMarshallerClass(Class<? extends Marshaller> serverMarshallerClass) {
+    this.serverMarshallerClass = serverMarshallerClass;
   }
 
   public void setInstantiationMapping(InstantiationMapping mapping) {

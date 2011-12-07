@@ -22,8 +22,6 @@ package org.jboss.errai.marshalling.client.api;
 public interface MappingContext {
   public Class<? extends Marshaller> getMarshallerClass(String clazz);
 
-  public void registerMarshaller(String clazzName, Class<? extends Marshaller> clazz);
-
   public boolean hasMarshaller(String clazzName);
 
   /**

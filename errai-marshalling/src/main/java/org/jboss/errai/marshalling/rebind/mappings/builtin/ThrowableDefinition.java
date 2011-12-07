@@ -34,7 +34,7 @@ import java.util.EmptyStackException;
 @CustomMapping
 @InheritedMappings(
         {ArithmeticException.class, IOException.class, IllegalArgumentException.class,
-                UnsupportedOperationException.class, EmptyStackException.class, ArrayStoreException.class,
+                 EmptyStackException.class, ArrayStoreException.class,
         ClassCastException.class, ConcurrentModificationException.class, IndexOutOfBoundsException.class,
         NegativeArraySizeException.class, NullPointerException.class, StringIndexOutOfBoundsException.class,
         UnsupportedOperationException.class, AssertionError.class}

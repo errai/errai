@@ -35,8 +35,6 @@ import java.util.*;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class GeneratorMappingContext implements ServerMappingContext {
-  private Map<String, Class<? extends Marshaller>> registeredMarshallers
-          = new HashMap<String, Class<? extends Marshaller>>();
 
   private final DefinitionsFactory definitionsFactory = new DefinitionsFactoryImpl();
 
@@ -48,9 +46,6 @@ public class GeneratorMappingContext implements ServerMappingContext {
   private MetaClass generatedBootstrapClass;
   private ClassStructureBuilder<?> classStructureBuilder;
   private ArrayMarshallerCallback arrayMarshallerCallback;
-
-  private Map<String, String> mappingAliases = new HashMap<String, String>();
-  private Map<String, List<String>> reverseMappingAlias = new HashMap<String, List<String>>();
 
   private Set<String> exposedMembers = new HashSet<String>();
 
@@ -70,28 +65,16 @@ public class GeneratorMappingContext implements ServerMappingContext {
     return definitionsFactory;
   }
 
-  public Class<? extends Marshaller> getMarshallerClass(MetaClass clazz) {
-    if (clazz.isArray()) {
-      clazz = clazz.getOuterComponentType();
-    }
-
-    return getMarshallerClass(clazz.getFullyQualifiedName());
-  }
-
   public Class<? extends Marshaller> getMarshallerClass(String clazzName) {
-    if (mappingAliases.containsKey(clazzName)) {
-      clazzName = mappingAliases.get(clazzName);
+    if (definitionsFactory.getMappingAliases().containsKey(clazzName)) {
+      clazzName = definitionsFactory.getMappingAliases().get(clazzName);
     }
 
-    return registeredMarshallers.get(clazzName);
+    return definitionsFactory.getDefinition(clazzName).getClientMarshallerClass();
   }
 
   public void registerGeneratedMarshaller(String clazzName) {
     generatedMarshallers.add(clazzName);
-  }
-
-  public void registerMarshaller(String clazzName, Class<? extends Marshaller> clazz) {
-    registeredMarshallers.put(clazzName, clazz);
   }
 
   public boolean hasMarshaller(MetaClass clazz) {
@@ -107,7 +90,7 @@ public class GeneratorMappingContext implements ServerMappingContext {
   }
 
   public boolean hasMarshaller(String clazzName) {
-    return registeredMarshallers.containsKey(clazzName);
+    return definitionsFactory.hasDefinition(clazzName);
   }
 
   public boolean hasGeneratedMarshaller(MetaClass clazz) {
@@ -127,10 +110,6 @@ public class GeneratorMappingContext implements ServerMappingContext {
 
   public boolean canMarshal(String clazz) {
     return hasMarshaller(clazz) || hasGeneratedMarshaller(clazz);
-  }
-
-  public Map<String, Class<? extends Marshaller>> getAllMarshallers() {
-    return Collections.unmodifiableMap(registeredMarshallers);
   }
 
   public Context getCodegenContext() {
@@ -173,26 +152,26 @@ public class GeneratorMappingContext implements ServerMappingContext {
   public boolean isExposed(MetaClassMember member) {
     return exposedMembers.contains(getPrivateMemberName(member));
   }
+//
+//  public void registerMappingAlias(Class<?> from, Class<?> to) {
+//    registerMappingAlias(from.getName(), to.getName());
+//  }
+//
+//  public void registerMappingAlias(String from, String to) {
+//    mappingAliases.put(from, to);
+//
+//    if (!reverseMappingAlias.containsKey(to)) {
+//      reverseMappingAlias.put(to, new ArrayList<String>());
+//    }
+//    reverseMappingAlias.get(to).add(from);
+//  }
 
-  public void registerMappingAlias(Class<?> from, Class<?> to) {
-    registerMappingAlias(from.getName(), to.getName());
-  }
-
-  public void registerMappingAlias(String from, String to) {
-    mappingAliases.put(from, to);
-
-    if (!reverseMappingAlias.containsKey(to)) {
-      reverseMappingAlias.put(to, new ArrayList<String>());
-    }
-    reverseMappingAlias.get(to).add(from);
-  }
-
-  public List<String> getReverseMappingAliasFor(String type) {
-    if (reverseMappingAlias.containsKey(type)) {
-      return reverseMappingAlias.get(type);
-    }
-    else {
-      return Collections.emptyList();
-    }
-  }
+//  public List<String> getReverseMappingAliasFor(String type) {
+//    if (reverseMappingAlias.containsKey(type)) {
+//      return reverseMappingAlias.get(type);
+//    }
+//    else {
+//      return Collections.emptyList();
+//    }
+//  }
 }

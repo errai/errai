@@ -108,7 +108,7 @@ public class MarshallerGeneratorFactory {
       if (Boolean.getBoolean("errai.marshalling.printOut")) {
         System.out.println(gen);
       }
-      
+
       RebindUtils.writeStringToFile(cacheFile, gen);
     }
     else {
@@ -146,7 +146,7 @@ public class MarshallerGeneratorFactory {
       }
     });
 
-    loadMarshallers();
+    //loadMarshallers();
 
     MetaClass javaUtilMap = MetaClassFactory.get(
             new TypeLiteral<Map<String, Marshaller>>() {
@@ -157,21 +157,35 @@ public class MarshallerGeneratorFactory {
 
     constructor = classStructureBuilder.publicConstructor();
 
-    for (Map.Entry<String, Class<? extends Marshaller>> entry : mappingContext.getAllMarshallers().entrySet()) {
-      String varName = getVarName(entry.getKey());
-      String arrayVarName = getArrayVarName(entry.getKey());
-      classStructureBuilder.privateField(varName, entry.getValue()).finish();
-      classStructureBuilder.privateField(arrayVarName, entry.getValue()).finish();
+    for (Class<?> cls : mappingContext.getDefinitionsFactory().getExposedClasses()) {
+      String clsName = cls.getName();
+
+      if (!mappingContext.getDefinitionsFactory().hasDefinition(clsName)) {
+        continue;
+      }
+
+      Class<? extends Marshaller> marshallerCls = mappingContext.getDefinitionsFactory().getDefinition(clsName)
+              .getClientMarshallerClass();
+
+      if (marshallerCls == null) {
+        continue;
+      }
+
+      String varName = getVarName(clsName);
+
+      classStructureBuilder.privateField(varName, marshallerCls).finish();
 
       constructor.append(Stmt.create(classContext)
-              .loadVariable(varName).assignValue(Stmt.newObject(entry.getValue())));
+              .loadVariable(varName).assignValue(Stmt.newObject(marshallerCls)));
 
       constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
-              .invoke("put", entry.getKey(), loadVariable(varName)));
+              .invoke("put", clsName, loadVariable(varName)));
 
-      for (String s : mappingContext.getReverseMappingAliasFor(entry.getKey())) {
-        constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
-                .invoke("put", s, loadVariable(varName)));
+      for (Map.Entry<String, String> aliasEntry : mappingContext.getDefinitionsFactory().getMappingAliases().entrySet()) {
+        if (aliasEntry.getValue().equals(clsName)) {
+          constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
+                  .invoke("put", aliasEntry.getKey(), loadVariable(varName)));
+        }
       }
     }
 
@@ -190,13 +204,17 @@ public class MarshallerGeneratorFactory {
 
   private void generateMarshallers() {
     final Set<Class<?>> exposed = mappingContext.getDefinitionsFactory().getExposedClasses();
-    
+
     for (Class<?> clazz : exposed) {
       mappingContext.registerGeneratedMarshaller(clazz.getName());
     }
 
     for (Class<?> clazz : exposed) {
       if (clazz.isEnum()) continue;
+      
+      if (mappingContext.getDefinitionsFactory().getDefinition(clazz).getClientMarshallerClass() != null) {
+        continue;
+      }
 
       MetaClass metaClazz = MetaClassFactory.get(clazz);
       Statement marshaller = marshal(metaClazz);
@@ -210,9 +228,12 @@ public class MarshallerGeneratorFactory {
       constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
               .invoke("put", clazz.getCanonicalName(), loadVariable(varName)));
 
-      for (String s : mappingContext.getReverseMappingAliasFor(clazz.getCanonicalName())) {
-        constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
-                .invoke("put", s, loadVariable(varName)));
+
+      for (Map.Entry<String, String> aliasEntry : mappingContext.getDefinitionsFactory().getMappingAliases().entrySet()) {
+        if (aliasEntry.getValue().equals(clazz.getName())) {
+          constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
+                  .invoke("put", aliasEntry.getKey(), loadVariable(varName)));
+        }
       }
     }
 
@@ -367,30 +388,30 @@ public class MarshallerGeneratorFactory {
     }
   }
 
-  private void loadMarshallers() {
-    Set<Class<?>> marshallers =
-            ScannerSingleton.getOrCreateInstance().getTypesAnnotatedWith(ClientMarshaller.class);
-
-    for (Class<?> cls : marshallers) {
-      if (Marshaller.class.isAssignableFrom(cls)) {
-        try {
-          Class<?> type = (Class<?>) Marshaller.class.getMethod("getTypeHandled").invoke(cls.newInstance());
-          mappingContext.registerMarshaller(type.getName(), cls.asSubclass(Marshaller.class));
-
-          if (cls.isAnnotationPresent(ImplementationAliases.class)) {
-            for (Class<?> c : cls.getAnnotation(ImplementationAliases.class).value()) {
-              mappingContext.registerMappingAlias(c, type);
-            }
-          }
-        }
-        catch (Throwable t) {
-          throw new RuntimeException("could not instantiate marshaller class: " + cls.getName(), t);
-        }
-      }
-      else {
-        throw new RuntimeException("class annotated with " + ClientMarshaller.class.getCanonicalName()
-                + " does not implement " + Marshaller.class.getName());
-      }
-    }
-  }
+//  private void loadMarshallers() {
+//    Set<Class<?>> marshallers =
+//            ScannerSingleton.getOrCreateInstance().getTypesAnnotatedWith(ClientMarshaller.class);
+//
+//    for (Class<?> cls : marshallers) {
+//      if (Marshaller.class.isAssignableFrom(cls)) {
+//        try {
+//          Class<?> type = (Class<?>) Marshaller.class.getMethod("getTypeHandled").invoke(cls.newInstance());
+//          mappingContext.registerMarshaller(type.getName(), cls.asSubclass(Marshaller.class));
+//
+//          if (cls.isAnnotationPresent(ImplementationAliases.class)) {
+//            for (Class<?> c : cls.getAnnotation(ImplementationAliases.class).value()) {
+//              mappingContext.registerMappingAlias(c, type);
+//            }
+//          }
+//        }
+//        catch (Throwable t) {
+//          throw new RuntimeException("could not instantiate marshaller class: " + cls.getName(), t);
+//        }
+//      }
+//      else {
+//        throw new RuntimeException("class annotated with " + ClientMarshaller.class.getCanonicalName()
+//                + " does not implement " + Marshaller.class.getName());
+//      }
+//    }
+//  }
 }

@@ -75,11 +75,6 @@ public class MarshallerFramework implements EntryPoint {
       }
 
       @Override
-      public void registerMarshaller(String clazzName, Class<? extends Marshaller> clazz) {
-        throw new UnsupportedOperationException();
-      }
-
-      @Override
       public boolean hasMarshaller(String clazzName) {
         return marshallerFactory.getMarshaller(clazzName, "json") != null;
       }

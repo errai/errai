@@ -34,7 +34,7 @@ import java.util.Set;
  */
 public class MappingContextSingleton {
   private static final ServerMappingContext context;
-  private static final Map<String, Class<?>> marshallerMap = new HashMap<String, Class<?>>();
+  //private static final Map<String, Class<?>> marshallerMap = new HashMap<String, Class<?>>();
 
   static {
     context = new ServerMappingContext() {
@@ -51,7 +51,7 @@ public class MappingContextSingleton {
         for (Class<?> m : marshallers) {
           try {
             Marshaller<Object, Object> marshaller = (Marshaller<Object, Object>) m.newInstance();
-            registerMarshaller(marshaller.getTypeHandled().getName(), (Class<? extends Marshaller>) m);
+            //registerMarshaller(marshaller.getTypeHandled().getName(), (Class<? extends Marshaller>) m);
             factory.addDefinition(new MappingDefinition(marshaller));
 
             if (m.isAnnotationPresent(ImplementationAliases.class)) {
@@ -77,17 +77,12 @@ public class MappingContextSingleton {
 
       @Override
       public Class<? extends Marshaller> getMarshallerClass(String clazz) {
-        return (Class<? extends Marshaller>) marshallerMap.get(clazz);
-      }
-
-      @Override
-      public void registerMarshaller(String clazzName, Class<? extends Marshaller> clazz) {
-        marshallerMap.put(clazzName, clazz);
+        return factory.getDefinition(clazz).getServerMarshallerClass();
       }
 
       @Override
       public boolean hasMarshaller(String clazzName) {
-        return marshallerMap.containsKey(clazzName);
+        return factory.hasDefinition(clazzName);
       }
 
       @Override

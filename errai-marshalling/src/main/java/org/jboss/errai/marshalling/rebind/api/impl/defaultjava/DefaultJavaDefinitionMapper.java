@@ -178,12 +178,6 @@ public class DefaultJavaDefinitionMapper {
       }
     }
 
-
-//    if (constructor == null) {
-//      throw new InvalidMappingException("cannot find a default, no-argument constructor or field-mapped constructor in: "
-//              + toMap.getFullyQualifiedName());
-//    }
-
     MetaClass c = toMap;
 
     do {
@@ -203,7 +197,7 @@ public class DefaultJavaDefinitionMapper {
 
         MetaClass compType = type.isArray() ? type.getOuterComponentType().asBoxed() : type.asBoxed();
 
-        if (!type.isEnum() && !definitionsFactory.isExposedClass(compType.getFullyQualifiedName())) {
+        if (!type.isEnum() && !definitionsFactory.isExposedClass(compType.asClass())) {
           throw new InvalidMappingException("portable entity " + toMap.getFullyQualifiedName()
                   + " contains a field (" + field.getName() + ") that is not known to the marshaller: "
                   + compType.getFullyQualifiedName());
