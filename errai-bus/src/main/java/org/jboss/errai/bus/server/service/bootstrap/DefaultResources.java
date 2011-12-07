@@ -34,7 +34,7 @@ import org.jboss.errai.bus.server.util.ServerLaundryList;
  *
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: May 3, 2010
- * @see org.jboss.errai.bus.client.api.ResourceProvider
+ * @see org.jboss.errai.common.client.api.ResourceProvider
  */
 class DefaultResources implements BootstrapExecution {
   public void execute(BootstrapContext context) {

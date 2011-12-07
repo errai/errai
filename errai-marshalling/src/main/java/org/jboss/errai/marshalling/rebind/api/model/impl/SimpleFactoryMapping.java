@@ -17,8 +17,8 @@
 package org.jboss.errai.marshalling.rebind.api.model.impl;
 
 import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
+import org.jboss.errai.codegen.framework.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.marshalling.rebind.api.model.FactoryMapping;
 import org.jboss.errai.marshalling.rebind.api.model.Mapping;
 
@@ -38,7 +38,7 @@ public class SimpleFactoryMapping implements FactoryMapping {
   private MetaMethod method;
 
   public void mapParmToIndex(String parm, int index, Class<?> type) {
-    mapParmToIndex(parm, index, MetaClassFactory.get(type));
+    mapParmToIndex(parm, index, JavaReflectionClass.newUncachedInstance(type));
   }
 
   public void mapParmToIndex(String parm, int index, MetaClass type) {

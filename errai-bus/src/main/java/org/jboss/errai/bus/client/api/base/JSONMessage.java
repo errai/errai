@@ -19,11 +19,10 @@ package org.jboss.errai.bus.client.api.base;
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.HasEncoded;
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.ResourceProvider;
+import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.bus.client.framework.MessageProvider;
 import org.jboss.errai.bus.client.framework.RoutingFlags;
 import org.jboss.errai.common.client.protocols.MessageParts;
-import org.jboss.errai.marshalling.server.DecodingSession;
 import org.jboss.errai.common.client.types.TypeHandlerFactory;
 
 import java.util.Collections;

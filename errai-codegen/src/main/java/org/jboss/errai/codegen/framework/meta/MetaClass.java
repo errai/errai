@@ -16,8 +16,6 @@
 
 package org.jboss.errai.codegen.framework.meta;
 
-import com.google.gwt.core.ext.typeinfo.JClassType;
-
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
@@ -95,10 +93,10 @@ public abstract class MetaClass implements HasAnnotations, MetaType, MetaGeneric
   public abstract boolean isAssignableFrom(Class clazz);
 
   public abstract boolean isAssignableTo(Class clazz);
-
-  public abstract boolean isAssignableFrom(JClassType clazz);
-
-  public abstract boolean isAssignableTo(JClassType clazz);
+//
+//  public abstract boolean isAssignableFrom(JClassType clazz);
+//
+//  public abstract boolean isAssignableTo(JClassType clazz);
 
   public abstract boolean isPrimitive();
 

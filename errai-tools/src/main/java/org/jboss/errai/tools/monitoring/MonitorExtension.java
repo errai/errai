@@ -22,9 +22,9 @@ import org.jboss.errai.bus.client.framework.BusMonitor;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.SubscriptionEvent;
 import org.jboss.errai.bus.server.ServerMessageBusImpl;
-import org.jboss.errai.bus.server.annotations.ExtensionComponent;
-import org.jboss.errai.bus.server.api.ErraiConfig;
-import org.jboss.errai.bus.server.api.ErraiConfigExtension;
+import org.jboss.errai.common.server.api.annotations.ExtensionComponent;
+import org.jboss.errai.common.server.api.ErraiConfig;
+import org.jboss.errai.common.server.api.ErraiConfigExtension;
 
 @ExtensionComponent
 public class MonitorExtension implements ErraiConfigExtension {

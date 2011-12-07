@@ -17,8 +17,7 @@ package org.jboss.errai.bus.server.service.bootstrap;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
-import org.jboss.errai.bus.client.api.ResourceProvider;
-import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
@@ -26,7 +25,6 @@ import org.jboss.errai.bus.server.HttpSessionProvider;
 import org.jboss.errai.bus.server.SimpleDispatcher;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.bus.server.api.SessionProvider;
-import org.jboss.errai.bus.server.io.JSONMessageServer;
 import org.jboss.errai.bus.server.security.auth.AuthenticationAdapter;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;

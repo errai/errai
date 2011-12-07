@@ -17,9 +17,9 @@
 package org.jboss.errai.marshalling.rebind.api.model.impl;
 
 import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaClassMember;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
+import org.jboss.errai.codegen.framework.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
 
 /**
@@ -37,7 +37,7 @@ public class AccessorMapping implements MemberMapping {
   private String getterMethod;
 
   public AccessorMapping(String key, Class<?> type, String setterMethod, String getterMethod) {
-    this(key, MetaClassFactory.get(type), setterMethod, getterMethod);
+    this(key, JavaReflectionClass.newUncachedInstance(type), setterMethod, getterMethod);
   }
 
   public AccessorMapping(String key, MetaClass type, String setterMethod, String getterMethod) {

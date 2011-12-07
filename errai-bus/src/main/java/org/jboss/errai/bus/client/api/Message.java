@@ -19,6 +19,7 @@ package org.jboss.errai.bus.client.api;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.framework.RoutingFlags;
+import org.jboss.errai.common.client.api.ResourceProvider;
 
 import java.io.Serializable;
 import java.util.Map;

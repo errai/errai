@@ -17,8 +17,8 @@
 package org.jboss.errai.marshalling.rebind.api.model.impl;
 
 import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaConstructor;
+import org.jboss.errai.codegen.framework.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.marshalling.rebind.api.model.ConstructorMapping;
 import org.jboss.errai.marshalling.rebind.api.model.Mapping;
 
@@ -39,7 +39,7 @@ public class SimpleConstructorMapping implements ConstructorMapping {
   protected MetaConstructor constructor;
 
   public void mapParmToIndex(String parm, int index, Class<?> type) {
-    mapParmToIndex(parm, index, toMap = MetaClassFactory.get(type));
+    mapParmToIndex(parm, index, toMap = JavaReflectionClass.newUncachedInstance(type));
   }
 
 

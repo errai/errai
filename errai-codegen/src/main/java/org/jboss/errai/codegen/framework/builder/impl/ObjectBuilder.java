@@ -36,6 +36,7 @@ import org.jboss.errai.codegen.framework.exception.UndefinedConstructorException
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaField;
+import org.jboss.errai.codegen.framework.meta.impl.gwt.GWTClass;
 import org.jboss.errai.codegen.framework.util.GenUtil;
 
 import com.google.gwt.core.ext.typeinfo.JClassType;
@@ -90,7 +91,7 @@ public class ObjectBuilder extends AbstractStatementBuilder {
   }
 
   public static ObjectBuilder newInstanceOf(JClassType type) {
-    return newInstanceOf(MetaClassFactory.get(type));
+    return newInstanceOf(GWTClass.newInstance(type));
   }
 
   public static ObjectBuilder newInstanceOf(MetaClass type, Context context) {
@@ -106,7 +107,7 @@ public class ObjectBuilder extends AbstractStatementBuilder {
   }
 
   public static ObjectBuilder newInstanceOf(JClassType type, Context context) {
-    return newInstanceOf(MetaClassFactory.get(type), context);
+    return newInstanceOf(GWTClass.newInstance(type), context);
   }
 
   public static ObjectBuilder newInstanceOf(MetaClass type, Context context, CallElementBuilder callElementBuilder) {
@@ -122,7 +123,7 @@ public class ObjectBuilder extends AbstractStatementBuilder {
   }
 
   public static ObjectBuilder newInstanceOf(JClassType type, Context context, CallElementBuilder callElementBuilder) {
-    return newInstanceOf(MetaClassFactory.get(type), context, callElementBuilder);
+    return newInstanceOf(GWTClass.newInstance(type), context, callElementBuilder);
   }
 
   public StatementEnd withParameters(Object... parameters) {

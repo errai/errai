@@ -25,6 +25,7 @@ import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.dev.cfg.ModuleDef;
 import com.google.gwt.dev.javac.StandardGeneratorContext;
+import org.jboss.errai.codegen.framework.meta.impl.gwt.GWTClass;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCBootstrapGenerator;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
@@ -140,7 +141,7 @@ public class IOCGenerator extends Generator {
 
   public MetaClass getJClassType(Class cls) {
     try {
-      return MetaClassFactory.get(typeOracle.getType(cls.getName()));
+      return GWTClass.newInstance(typeOracle.getType(cls.getName()));
     }
     catch (NotFoundException e) {
       return null;

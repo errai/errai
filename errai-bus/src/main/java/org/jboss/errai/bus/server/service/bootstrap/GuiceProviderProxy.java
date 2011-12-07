@@ -16,7 +16,7 @@
 package org.jboss.errai.bus.server.service.bootstrap;
 
 import com.google.inject.Provider;
-import org.jboss.errai.bus.client.api.ResourceProvider;
+import org.jboss.errai.common.client.api.ResourceProvider;
 
 /**
  * @author: Heiko Braun <hbraun@redhat.com>

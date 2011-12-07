@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.server.api;
+package org.jboss.errai.common.client.api;
 
-import org.jboss.errai.bus.client.api.ResourceProvider;
-
-
-public interface ErraiConfig {
-  public void addBinding(Class<?> type, ResourceProvider provider);
-
-  public void addResourceProvider(String name, ResourceProvider provider);
+/**
+ * Provides injectable resources of type T.
+ *
+ * @param <T> injection target type
+ */
+public interface ResourceProvider<T> {
+  public T get();
 }

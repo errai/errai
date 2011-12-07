@@ -65,7 +65,7 @@ public class GWTField extends MetaField {
 
   @Override
   public MetaClass getType() {
-    return MetaClassFactory.get(field.getType());
+    return GWTClass.newInstance(field.getType());
   }
 
   @Override
@@ -103,7 +103,7 @@ public class GWTField extends MetaField {
 
   @Override
   public MetaClass getDeclaringClass() {
-    return MetaClassFactory.get(field.getEnclosingType());
+    return GWTClass.newInstance(field.getEnclosingType());
   }
 
   @Override

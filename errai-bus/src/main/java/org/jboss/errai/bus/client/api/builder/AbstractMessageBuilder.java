@@ -20,6 +20,7 @@ import org.jboss.errai.bus.client.api.*;
 import org.jboss.errai.bus.client.api.base.*;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
+import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.common.client.protocols.MessageParts;
 
 import static org.jboss.errai.bus.client.api.base.ConversationHelper.createConversationService;

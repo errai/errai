@@ -18,7 +18,6 @@ package org.jboss.errai.marshalling.rebind.api.model;
 
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassMember;
-import org.jboss.errai.codegen.framework.meta.MetaConstructor;
 
 /**
  * @author Mike Brock

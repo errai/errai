@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-package org.errai.samples.helloworld.server;
+package org.jboss.errai.common.server.api.annotations;
 
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.util.SimpleMessage;
-import org.jboss.errai.bus.server.annotations.ApplicationComponent;
-import org.jboss.errai.bus.server.annotations.Service;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-
-@ApplicationComponent
-public class HelloWorldService {
-  @Service("HelloWorldService")
-  public void helloWorld(Message message) {
-    SimpleMessage.send(message, "Hello, World");
-  }
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface ExtensionComponent {
 }

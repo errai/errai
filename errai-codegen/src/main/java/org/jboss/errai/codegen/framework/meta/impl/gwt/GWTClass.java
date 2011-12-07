@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.core.ext.typeinfo.*;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaConstructor;
@@ -27,16 +28,6 @@ import org.jboss.errai.codegen.framework.meta.MetaField;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.framework.meta.impl.AbstractMetaClass;
-
-import com.google.gwt.core.ext.typeinfo.JArrayType;
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.JConstructor;
-import com.google.gwt.core.ext.typeinfo.JField;
-import com.google.gwt.core.ext.typeinfo.JGenericType;
-import com.google.gwt.core.ext.typeinfo.JMethod;
-import com.google.gwt.core.ext.typeinfo.JParameterizedType;
-import com.google.gwt.core.ext.typeinfo.JType;
-import com.google.gwt.core.ext.typeinfo.JTypeParameter;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -55,7 +46,17 @@ public class GWTClass extends AbstractMetaClass<JType> {
   }
 
   public static MetaClass newInstance(JType type) {
-    return MetaClassFactory.get(type);
+    return newUncachedInstance(type);
+  }
+
+
+  public static MetaClass newInstance(TypeOracle oracle, String type) {
+    try {
+      return newUncachedInstance(oracle.getType(type));
+    }
+    catch (NotFoundException e) {
+      return null;
+    }
   }
 
   public static MetaClass newUncachedInstance(JType type) {
@@ -65,6 +66,59 @@ public class GWTClass extends AbstractMetaClass<JType> {
   public static MetaClass newUncachedInstance(JType type, boolean erased) {
     return new GWTClass(type, erased);
   }
+
+
+  public static MetaClass[] fromClassArray(JClassType[] classes) {
+    MetaClass[] newClasses = new MetaClass[classes.length];
+    for (int i = 0; i < classes.length; i++) {
+      newClasses[i] = newInstance(classes[i]);
+    }
+    return newClasses;
+  }
+
+  public static Class<?>[] jParmToClass(JParameter[] parms) throws ClassNotFoundException {
+    Class<?>[] classes = new Class<?>[parms.length];
+    for (int i = 0; i < parms.length; i++) {
+      classes[i] = getPrimitiveOrClass(parms[i]);
+    }
+    return classes;
+  }
+
+  public static Class<?> getPrimitiveOrClass(JParameter parm) throws ClassNotFoundException {
+    JType type = parm.getType();
+    String name = type.isArray() != null ? type.getJNISignature().replace("/", ".") : type.getQualifiedSourceName();
+
+    if (parm.getType().isPrimitive() != null) {
+      char sig = parm.getType().isPrimitive().getJNISignature().charAt(0);
+
+      switch (sig) {
+        case 'Z':
+          return boolean.class;
+        case 'B':
+          return byte.class;
+        case 'C':
+          return char.class;
+        case 'D':
+          return double.class;
+        case 'F':
+          return float.class;
+        case 'I':
+          return int.class;
+        case 'J':
+          return long.class;
+        case 'S':
+          return short.class;
+        case 'V':
+          return void.class;
+        default:
+          return null;
+      }
+    }
+    else {
+      return Class.forName(name, false, Thread.currentThread().getContextClassLoader());
+    }
+  }
+
 
   @Override
   public String getName() {
@@ -215,7 +269,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
       return null;
     }
 
-    return MetaClassFactory.get(type.getSuperclass());
+    return newUncachedInstance(type.getSuperclass());
   }
 
   @Override
@@ -224,7 +278,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
     if (type == null) {
       return null;
     }
-    return MetaClassFactory.get(type.getComponentType());
+    return newUncachedInstance(type.getComponentType());
   }
 
   @Override

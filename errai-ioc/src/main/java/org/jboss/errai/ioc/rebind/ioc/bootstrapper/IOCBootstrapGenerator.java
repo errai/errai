@@ -45,6 +45,7 @@ import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.framework.meta.MetaType;
 import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
+import org.jboss.errai.codegen.framework.meta.impl.gwt.GWTClass;
 import org.jboss.errai.codegen.framework.util.GenUtil;
 import org.jboss.errai.codegen.framework.util.Implementations;
 import org.jboss.errai.codegen.framework.util.Stmt;
@@ -478,7 +479,7 @@ public class IOCBootstrapGenerator {
      */
     Set<Class<?>> generatedBys = scanner.getTypesAnnotatedWith(GeneratedBy.class);
     for (Class<?> clazz : generatedBys) {
-      MetaClass type = MetaClassFactory.get(typeOracle, clazz);
+      MetaClass type = GWTClass.newInstance(typeOracle, clazz.getName());
       GeneratedBy anno = type.getAnnotation(GeneratedBy.class);
       Class<? extends ContextualTypeProvider> injectorClass = anno.value();
 

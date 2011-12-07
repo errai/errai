@@ -53,7 +53,7 @@ public class GWTUtil {
 
   public static MetaType fromType(JType t) {
     if (t.isClassOrInterface() != null) {
-      return MetaClassFactory.get(t.isClassOrInterface());
+      return GWTClass.newInstance(t.isClassOrInterface());
     }
     else if (t.isTypeParameter() != null) {
       return new GWTTypeVariable(t.isTypeParameter());

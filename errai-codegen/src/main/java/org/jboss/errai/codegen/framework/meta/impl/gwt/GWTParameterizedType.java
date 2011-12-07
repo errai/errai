@@ -40,26 +40,26 @@ public class GWTParameterizedType extends AbstractMetaParameterizedType {
   public MetaType[] getTypeParameters() {
     List<MetaType> types = new ArrayList<MetaType>();
     for (JClassType parm : parameterizedType.getTypeArgs()) {
-      types.add(MetaClassFactory.get(parm));
+      types.add(GWTClass.newInstance(parm));
     }
     return types.toArray(new MetaType[types.size()]);
   }
 
   @Override
   public MetaType getOwnerType() {
-    return MetaClassFactory.get(parameterizedType.getEnclosingType());
+    return GWTClass.newInstance(parameterizedType.getEnclosingType());
   }
 
   @Override
   public MetaType getRawType() {
-    return MetaClassFactory.get(parameterizedType.getRawType());
+    return GWTClass.newInstance(parameterizedType.getRawType());
   }
 
   public String toString() {
     StringBuilder buf = new StringBuilder("<");
     JClassType[] parms = parameterizedType.getTypeArgs();
     for (int i = 0; i < parms.length; i++) {
-      buf.append(MetaClassFactory.get(parms[i]).getFullyQualifiedName());
+      buf.append(GWTClass.newInstance(parms[i]).getFullyQualifiedName());
       if (i + 1 < parms.length) buf.append(',');
     }
     return buf.append('>').toString();

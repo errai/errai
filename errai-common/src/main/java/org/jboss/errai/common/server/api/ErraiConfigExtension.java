@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.server.api;
+package org.jboss.errai.common.server.api;
 
 public interface ErraiConfigExtension {
   public void configure(ErraiConfig config);

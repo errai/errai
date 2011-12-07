@@ -52,6 +52,7 @@ import org.jboss.errai.codegen.framework.control.branch.BreakStatement;
 import org.jboss.errai.codegen.framework.control.branch.ContinueStatement;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
+import org.jboss.errai.codegen.framework.meta.impl.gwt.GWTClass;
 
 /**
  * The root of our fluent StatementBuilder API.
@@ -203,7 +204,8 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
       c = MetaClassFactory.get((Class) o);
     }
     else if (o instanceof JClassType) {
-      c = MetaClassFactory.get((JClassType) o);
+      c = GWTClass.newUncachedInstance((JClassType) o);
+   //   c = MetaClassFactory.get((JClassType) o);
     }
     else {
       throw new RuntimeException("unknown class reference type: " + (o == null ? "null" : o.getClass().getName()));

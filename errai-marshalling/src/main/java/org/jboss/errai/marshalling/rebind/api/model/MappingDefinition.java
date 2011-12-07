@@ -17,7 +17,7 @@
 package org.jboss.errai.marshalling.rebind.api.model;
 
 import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
+import org.jboss.errai.codegen.framework.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.rebind.api.model.impl.NoConstructMapping;
 import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleConstructorMapping;
@@ -50,13 +50,13 @@ public class MappingDefinition {
   }
 
   public MappingDefinition(Marshaller<Object, Object> marshaller, Class<?> toMap) {
-    this.toMap = MetaClassFactory.get(toMap);
+    this.toMap = JavaReflectionClass.newUncachedInstance(toMap);
     setMarshallerInstance(marshaller);
     instantiationMapping = new NoConstructMapping();
   }
   
   public MappingDefinition(Class<?> toMap) {
-    this(MetaClassFactory.get(toMap));
+    this(JavaReflectionClass.newUncachedInstance(toMap));
   }
 
   public MappingDefinition(MetaClass toMap) {
@@ -70,7 +70,7 @@ public class MappingDefinition {
   }
 
   public MappingDefinition(Class<?> toMap, InstantiationMapping cMapping) {
-    this(MetaClassFactory.get(toMap), cMapping);
+    this(JavaReflectionClass.newUncachedInstance(toMap), cMapping);
   }
 
   public MetaClass getMappingClass() {

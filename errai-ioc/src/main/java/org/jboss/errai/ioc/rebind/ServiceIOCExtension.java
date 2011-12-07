@@ -18,6 +18,7 @@ package org.jboss.errai.ioc.rebind;
 
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.server.annotations.Service;
+import org.jboss.errai.codegen.framework.meta.impl.gwt.GWTClass;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
@@ -45,7 +46,7 @@ public class ServiceIOCExtension extends IOCDecoratorExtension<Service> {
     /**
      * Get an instance of the message bus.
      */
-    final MetaClass busClass = MetaClassFactory.get(decContext.getInjectionContext()
+    final MetaClass busClass = GWTClass.newInstance(decContext.getInjectionContext()
             .getProcessingContext().loadClassType(MessageBus.class));
 
     final Statement busHandle = ctx.getInjector(busClass).getType(ctx, decContext);

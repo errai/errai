@@ -16,15 +16,11 @@
 
 package org.jboss.errai.marshalling.server;
 
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.AbstractMarshallingSession;
-import org.jboss.errai.marshalling.client.api.MappingContext;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.exceptions.MarshallingException;
 
-import java.util.List;
 import java.util.Map;
 
 /**

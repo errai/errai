@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.meta.MetaParameter;
 import org.jboss.errai.codegen.framework.meta.MetaType;
@@ -48,7 +47,7 @@ public class GWTMethod extends MetaMethod {
       Class<?> cls = Class.forName(method.getEnclosingType().getQualifiedSourceName(), false,
           Thread.currentThread().getContextClassLoader());
 
-      Method meth = cls.getDeclaredMethod(method.getName(), GenUtil.jParmToClass(method.getParameters()));
+      Method meth = cls.getDeclaredMethod(method.getName(), GWTClass.jParmToClass(method.getParameters()));
 
       annotations = meth.getAnnotations();
 
@@ -68,7 +67,7 @@ public class GWTMethod extends MetaMethod {
 
   @Override
   public MetaClass getReturnType() {
-    return MetaClassFactory.get(method.getReturnType());
+    return GWTClass.newInstance(method.getReturnType());
   }
 
   @Override
@@ -102,7 +101,7 @@ public class GWTMethod extends MetaMethod {
 
   @Override
   public MetaClass getDeclaringClass() {
-    return MetaClassFactory.get(method.getEnclosingType());
+    return GWTClass.newInstance(method.getEnclosingType());
   }
 
   @Override
@@ -118,7 +117,7 @@ public class GWTMethod extends MetaMethod {
   public MetaType[] getGenericParameterTypes() {
     List<MetaType> typeList = new ArrayList<MetaType>();
     for (JType type : method.getParameterTypes()) {
-        typeList.add(MetaClassFactory.get(type));
+        typeList.add(GWTClass.newInstance(type));
     }
 
     return typeList.toArray(new MetaType[typeList.size()]);
@@ -126,7 +125,7 @@ public class GWTMethod extends MetaMethod {
 
   @Override
   public MetaClass[] getCheckedExceptions() {
-    return MetaClassFactory.fromClassArray(method.getThrows());
+    return GWTClass.fromClassArray(method.getThrows());
   }
 
   @Override

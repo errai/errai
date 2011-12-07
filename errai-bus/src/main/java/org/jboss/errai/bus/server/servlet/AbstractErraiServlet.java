@@ -27,7 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.jboss.errai.bus.client.api.ResourceProvider;
+import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.client.framework.MessageBus;

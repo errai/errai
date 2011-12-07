@@ -16,7 +16,6 @@
 
 package org.jboss.errai.codegen.framework.meta.impl;
 
-import com.google.gwt.core.ext.typeinfo.JClassType;
 import org.jboss.errai.codegen.framework.meta.*;
 import org.mvel2.util.ParseTools;
 
@@ -444,15 +443,6 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return isAssignableTo(MetaClassFactory.get(clazz));
   }
 
-  @Override
-  public boolean isAssignableTo(JClassType clazz) {
-    return isAssignableFrom(MetaClassFactory.get(clazz));
-  }
-
-  @Override
-  public boolean isAssignableFrom(JClassType clazz) {
-    return isAssignableTo(MetaClassFactory.get(clazz));
-  }
 
   @Override
   public MetaParameterizedType getParameterizedType() {
@@ -502,15 +492,15 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
         cls = null;
       }
     }
-    else if (enclosedMetaObject != null) {
-      try {
-        cls = Class.forName(((JClassType) enclosedMetaObject).getQualifiedSourceName(), false,
-                Thread.currentThread().getContextClassLoader());
-      }
-      catch (ClassNotFoundException e) {
-
-      }
-    }
+//    else if (enclosedMetaObject != null) {
+//      try {
+//        cls = Class.forName(((JClassType) enclosedMetaObject).getQualifiedSourceName(), false,
+//                Thread.currentThread().getContextClassLoader());
+//      }
+//      catch (ClassNotFoundException e) {
+//
+//      }
+//    }
 
     return _asClassCache = cls;
   }

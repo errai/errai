@@ -18,6 +18,7 @@ package org.jboss.errai.marshalling.rebind;
 
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
+import org.jboss.errai.codegen.framework.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.common.client.api.annotations.ExposeEntity;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.common.metadata.MetaDataScanner;
@@ -222,7 +223,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
         aliasToMarshaller.put(mappedClass, portable.aliasOf());
       }
       else if (!hasDefinition(mappedClass)) {
-        MappingDefinition def = DefaultJavaDefinitionMapper.map(MetaClassFactory.get(mappedClass), this);
+        MappingDefinition def = DefaultJavaDefinitionMapper.map(JavaReflectionClass.newUncachedInstance(mappedClass), this);
         def.setMarshallerInstance(new DefaultDefinitionMarshaller(def));
         addDefinition(def);
       }

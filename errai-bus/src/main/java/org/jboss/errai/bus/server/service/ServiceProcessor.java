@@ -19,7 +19,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.api.ResourceProvider;
+import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.bus.client.api.TaskManager;
 import org.jboss.errai.bus.client.api.annotations.Local;
 import org.jboss.errai.bus.client.api.base.TaskManagerFactory;

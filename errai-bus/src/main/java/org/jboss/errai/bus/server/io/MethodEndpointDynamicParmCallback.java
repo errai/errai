@@ -18,7 +18,7 @@ package org.jboss.errai.bus.server.io;
 
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.api.ResourceProvider;
+import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
 import org.jboss.errai.bus.client.api.base.Reply;

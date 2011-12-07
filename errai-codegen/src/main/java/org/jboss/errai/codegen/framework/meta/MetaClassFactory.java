@@ -16,28 +16,21 @@
 
 package org.jboss.errai.codegen.framework.meta;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.util.*;
-
-import javax.enterprise.util.TypeLiteral;
-
 import org.jboss.errai.codegen.framework.*;
 import org.jboss.errai.codegen.framework.builder.callstack.LoadClassReference;
 import org.jboss.errai.codegen.framework.meta.impl.build.*;
-import org.jboss.errai.codegen.framework.meta.impl.gwt.GWTClass;
 import org.jboss.errai.codegen.framework.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.codegen.framework.util.EmptyStatement;
 import org.jboss.errai.codegen.framework.util.GenUtil;
 import org.mvel2.ConversionHandler;
 import org.mvel2.DataConversion;
 
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.JType;
-import com.google.gwt.core.ext.typeinfo.NotFoundException;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import javax.enterprise.util.TypeLiteral;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.*;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -104,18 +97,18 @@ public final class MetaClassFactory {
   public static MetaClass get(String fullyQualifiedClassName) {
     return createOrGet(fullyQualifiedClassName);
   }
+//
+//  public static MetaClass get(TypeOracle typeOracle, String fullyQualifiedClassName) {
+//    return createOrGet(typeOracle, fullyQualifiedClassName);
+//  }
 
-  public static MetaClass get(TypeOracle typeOracle, String fullyQualifiedClassName) {
-    return createOrGet(typeOracle, fullyQualifiedClassName);
-  }
-
-  public static MetaClass get(TypeOracle typeOracle, Class<?> clazz) {
-    return get(typeOracle, clazz.getName());
-  }
-
-  public static MetaClass get(JType clazz) {
-    return createOrGet(clazz);
-  }
+//  public static MetaClass get(TypeOracle typeOracle, Class<?> clazz) {
+//    return get(typeOracle, clazz.getName());
+//  }
+//
+//  public static MetaClass get(JType clazz) {
+//    return createOrGet(clazz);
+//  }
 
   public static MetaClass get(Class<?> clazz) {
     return createOrGet(clazz, false);
@@ -184,13 +177,13 @@ public final class MetaClassFactory {
     return ERASED_CLASS_CACHE.get(fullyQualifiedClassName);
   }
 
-  private static MetaClass createOrGet(TypeOracle oracle, String fullyQualifiedClassName) {
-    if (!ERASED_CLASS_CACHE.containsKey(fullyQualifiedClassName)) {
-      return createOrGet(load(oracle, fullyQualifiedClassName));
-    }
-
-    return ERASED_CLASS_CACHE.get(fullyQualifiedClassName);
-  }
+//  private static MetaClass createOrGet(TypeOracle oracle, String fullyQualifiedClassName) {
+//    if (!ERASED_CLASS_CACHE.containsKey(fullyQualifiedClassName)) {
+//      return createOrGet(load(oracle, fullyQualifiedClassName));
+//    }
+//
+//    return ERASED_CLASS_CACHE.get(fullyQualifiedClassName);
+//  }
 
   private static MetaClass createOrGet(TypeLiteral type) {
     if (type == null) return null;
@@ -206,22 +199,22 @@ public final class MetaClassFactory {
   }
 
 
-  private static MetaClass createOrGet(JType type) {
-    if (type == null) return null;
-
-    if (type.isParameterized() != null) {
-      return GWTClass.newUncachedInstance(type);
-    }
-
-    if (!ERASED_CLASS_CACHE.containsKey(type.getQualifiedSourceName())) {
-      MetaClass gwtClass = GWTClass.newUncachedInstance(type, true);
-
-      addLookups(type, gwtClass);
-      return gwtClass;
-    }
-
-    return ERASED_CLASS_CACHE.get(type.getQualifiedSourceName());
-  }
+//  private static MetaClass createOrGet(JType type) {
+//    if (type == null) return null;
+//
+//    if (type.isParameterized() != null) {
+//      return GWTClass.newUncachedInstance(type);
+//    }
+//
+//    if (!ERASED_CLASS_CACHE.containsKey(type.getQualifiedSourceName())) {
+//      MetaClass gwtClass = GWTClass.newUncachedInstance(type, true);
+//
+//      addLookups(type, gwtClass);
+//      return gwtClass;
+//    }
+//
+//    return ERASED_CLASS_CACHE.get(type.getQualifiedSourceName());
+//  }
 
 
   private static MetaClass createOrGet(Class cls, boolean erased) {
@@ -401,9 +394,9 @@ public final class MetaClassFactory {
     ERASED_CLASS_CACHE.put(cls.getName(), metaClass);
   }
 
-  private static void addLookups(JType cls, MetaClass metaClass) {
-    ERASED_CLASS_CACHE.put(cls.getQualifiedSourceName(), metaClass);
-  }
+//  private static void addLookups(JType cls, MetaClass metaClass) {
+//    ERASED_CLASS_CACHE.put(cls.getQualifiedSourceName(), metaClass);
+//  }
 
   private static void addLookups(String encName, MetaClass metaClass) {
     ERASED_CLASS_CACHE.put(encName, metaClass);
@@ -421,14 +414,14 @@ public final class MetaClassFactory {
     }
   }
 
-  private static JClassType load(TypeOracle oracle, String fullyQualifiedName) {
-    try {
-      return oracle.getType(fullyQualifiedName);
-    }
-    catch (NotFoundException e) {
-      throw new RuntimeException("Could not load class: " + fullyQualifiedName);
-    }
-  }
+//  private static JClassType load(TypeOracle oracle, String fullyQualifiedName) {
+//    try {
+//      return oracle.getType(fullyQualifiedName);
+//    }
+//    catch (NotFoundException e) {
+//      throw new RuntimeException("Could not load class: " + fullyQualifiedName);
+//    }
+//  }
 
   public static MetaClass[] fromClassArray(Class<?>[] classes) {
     MetaClass[] newClasses = new MetaClass[classes.length];
@@ -438,13 +431,13 @@ public final class MetaClassFactory {
     return newClasses;
   }
 
-  public static MetaClass[] fromClassArray(JClassType[] classes) {
-    MetaClass[] newClasses = new MetaClass[classes.length];
-    for (int i = 0; i < classes.length; i++) {
-      newClasses[i] = createOrGet(classes[i]);
-    }
-    return newClasses;
-  }
+//  public static MetaClass[] fromClassArray(JClassType[] classes) {
+//    MetaClass[] newClasses = new MetaClass[classes.length];
+//    for (int i = 0; i < classes.length; i++) {
+//      newClasses[i] = createOrGet(classes[i]);
+//    }
+//    return newClasses;
+//  }
 
   public static Class<?>[] asClassArray(MetaParameter[] parms) {
     MetaType[] type = new MetaType[parms.length];

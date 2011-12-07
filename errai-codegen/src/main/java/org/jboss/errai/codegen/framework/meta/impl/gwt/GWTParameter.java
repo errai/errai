@@ -20,9 +20,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
-import org.jboss.errai.codegen.framework.util.GenUtil;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaClassMember;
 import org.jboss.errai.codegen.framework.meta.MetaConstructor;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
@@ -59,7 +57,7 @@ public class GWTParameter implements MetaParameter {
       Method method = null;
       try {
         method = cls.getDeclaredMethod(jMethod.getName(),
-            GenUtil.jParmToClass(jMethod.getParameters()));
+            GWTClass.jParmToClass(jMethod.getParameters()));
       }
       catch (NoSuchMethodException e) {
         throw new RuntimeException(e);
@@ -95,7 +93,7 @@ public class GWTParameter implements MetaParameter {
 
       Constructor c = null;
       try {
-        c = cls.getConstructor(GenUtil.jParmToClass(jMethod.getParameters()));
+        c = cls.getConstructor(GWTClass.jParmToClass(jMethod.getParameters()));
       }
       catch (NoSuchMethodException e) {
         throw new RuntimeException(e);
@@ -116,7 +114,7 @@ public class GWTParameter implements MetaParameter {
 
   @Override
   public MetaClass getType() {
-    return MetaClassFactory.get(parameter.getType());
+    return GWTClass.newInstance(parameter.getType());
   }
 
   @Override
