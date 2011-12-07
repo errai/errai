@@ -26,7 +26,7 @@ org.jboss.errai.common.client.types.TypeMarshallers.addMarshaller(
 
             try {
 @if{enumType}return new StringBuilder("{\"@{org.jboss.errai.common.client.protocols.SerializationParts.ENCODED_TYPE}\":\"@{canonicalClassName}\",EnumStringValue:\"")
-                .append(o.toString()).append("\"}").toString();@else{}
+                .append(o.name()).append("\"}").toString();@else{}
                 ctx.markEncoded(o);
                 StringBuilder json = new StringBuilder("{\"@{org.jboss.errai.common.client.protocols.SerializationParts.ENCODED_TYPE}\":\"@{canonicalClassName}\",\"@{org.jboss.errai.common.client.protocols.SerializationParts.OBJECT_ID}\":\"" + o.hashCode() + "\"");
                 @if{!fields.isEmpty()}
