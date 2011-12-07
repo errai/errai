@@ -549,4 +549,39 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
+
+  public void testInheritedDefinitionFromExistingParent() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        final CustomList ts = new CustomList();
+
+        ts.add("test1");
+        ts.add("test2");
+        ts.add("test3");
+
+        class EqualTester {
+          public boolean isEqual(List r) {
+            return r != null &&
+                    r.equals(ts);
+          }
+        }
+
+        MessageBuilder.createCall(new RemoteCallback<List>() {
+          @Override
+          public void callback(List response) {
+            try {
+              assertTrue(new EqualTester().isEqual(response));
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestRPCServiceRemote.class).testInheritedDefinitionFromExistingParent(ts);
+      }
+    });
+  }
 }

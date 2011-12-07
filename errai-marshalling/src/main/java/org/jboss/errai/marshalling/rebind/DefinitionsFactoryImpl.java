@@ -190,10 +190,6 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       for (Class<?> decl : cls.getDeclaredClasses()) {
         if (decl.isEnum() || decl.isSynthetic()) continue;
 
-        MappingDefinition def = DefaultJavaDefinitionMapper.map(MetaClassFactory.get(decl), this);
-        def.setMarshallerInstance(new DefaultDefinitionMarshaller(def));
-        addDefinition(def);
-
         exposedClasses.add(decl);
       }
     }
@@ -224,6 +220,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       mappingAliases.put(entry.getKey().getName(), entry.getValue().getName());
 
       MappingDefinition aliasDef = new MappingDefinition(def.getMarshallerInstance(), entry.getKey());
+      aliasDef.setClientMarshallerClass(def.getClientMarshallerClass());
       addDefinition(aliasDef);
     }
 

@@ -65,6 +65,9 @@ public interface TestRPCServiceRemote {
   public BigInteger testBigIntegerSerialization(BigInteger time);
   
   public Queue testQueueSerialization(Queue queue);
+
+  public List testInheritedDefinitionFromExistingParent(List list);
+
 }
 
 

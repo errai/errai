@@ -117,4 +117,9 @@ public class TestRPCService implements TestRPCServiceRemote {
   public Queue testQueueSerialization(Queue queue) {
     return queue;
   }
+
+  @Override
+  public List testInheritedDefinitionFromExistingParent(List list) {
+    return list;
+  }
 }
