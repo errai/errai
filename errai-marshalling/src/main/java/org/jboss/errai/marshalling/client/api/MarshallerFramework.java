@@ -88,8 +88,8 @@ public class MarshallerFramework implements EntryPoint {
       public boolean canMarshal(String cls) {
         return marshallerFactory.getMarshaller("json", cls) != null;
       }
-    };
 
+    };
 
     @Override
     public MappingContext getMappingContext() {

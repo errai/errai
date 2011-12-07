@@ -16,19 +16,16 @@
 
 package org.jboss.errai.marshalling.server;
 
-import org.jboss.errai.codegen.framework.meta.MetaField;
-import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.common.client.protocols.SerializationParts;
-import org.jboss.errai.marshalling.client.util.NumbersUtils;
+import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
 import org.jboss.errai.marshalling.rebind.api.model.*;
+import org.jboss.errai.marshalling.server.api.ServerMarshaller;
 import org.mvel2.ConversionHandler;
 import org.mvel2.DataConversion;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -36,7 +33,11 @@ import java.util.Map;
 import static org.mvel2.DataConversion.addConversionHandler;
 
 public class TypeDemarshallHelper {
-  public static final String INSTANCE_REFERENCE = "__InstanceReference";
+
+  /**
+   * This is a hint for marshallers to detect that they should instantiate only and not wire any further mappings.
+   */
+  public static final String NO_AUTO_WIRE = "__NoAutoWire";
 
   static {
     addConversionHandler(java.sql.Date.class, new ConversionHandler() {
@@ -85,7 +86,7 @@ public class TypeDemarshallHelper {
     });
   }
 
-  public static Class<?> getClassReference(Map oMap) {
+  public static Class getClassReference(Map oMap) {
     try {
       return Thread.currentThread().getContextClassLoader().loadClass((String) oMap.get(SerializationParts.ENCODED_TYPE));
     }
@@ -116,7 +117,8 @@ public class TypeDemarshallHelper {
       if (defs.hasDefinition(clazz)) {
         MappingDefinition def = defs.getDefinition(clazz);
         if (def.isCachedMarshaller()) {
-          return def.getMarshallerInstance().demarshall(oMap, ctx);
+
+          return callMarshaller(def.getMarshallerInstance(), oMap, ctx);
         }
 
         InstantiationMapping cns = def.getInstantiationMapping();
@@ -140,17 +142,20 @@ public class TypeDemarshallHelper {
       }
       return o;
     }
-    catch (InstantiationException e) {
-      throw new RuntimeException("error demarshalling", e);
-    }
-    catch (IllegalAccessException e) {
-      throw new RuntimeException("error demarshalling", e);
-    }
-    catch (InvocationTargetException e) {
+    catch (Throwable e) {
       throw new RuntimeException("error demarshalling", e);
     }
   }
 
+
+  private static Object callMarshaller(Marshaller m, Map oMap, DecodingSession ctx) throws Exception {
+    if (m instanceof ServerMarshaller) {
+      return ((ServerMarshaller) m).demarshallFromMap(oMap, ctx);
+    }
+    else {
+      return m.demarshall(oMap, ctx);
+    }
+  }
 
   public static Object demarshallAll(Object o, DecodingSession ctx) throws Exception {
     try {
@@ -167,74 +172,25 @@ public class TypeDemarshallHelper {
         return newList;
       }
       else if (o instanceof Map) {
-        Map<?, ?> oMap = (Map) o;
+        Map<Object, Object> oMap = (Map) o;
 
-        if (oMap.containsKey(SerializationParts.ENCODED_TYPE)) {
-          if (oMap.containsKey(SerializationParts.NUMERIC_VALUE)) {
-            return NumbersUtils.getNumber((String) oMap.get(SerializationParts.ENCODED_TYPE),
-                    oMap.get(SerializationParts.NUMERIC_VALUE));
-          }
+        Class cls = getClassReference(oMap);
 
-          Class<?> cls = getClassReference(oMap);
-          Object newInstance;
+        if (cls.isEnum()) {
+          return Enum.valueOf(cls, (String) oMap.get(SerializationParts.ENUM_STRING_VALUE));
+        }
 
-          if (oMap.size() == 2 && !oMap.containsKey(SerializationParts.INSTANTIATE_ONLY)) {
-            return instantiate(cls, oMap, ctx);
-          }
+        if (ctx.getMappingContext().getDefinitionsFactory().hasDefinition(cls)) {
+          Marshaller<Object, Object> marshaller = ctx.getMappingContext().getDefinitionsFactory().getDefinition(cls)
+                  .getMarshallerInstance();
 
-          DefinitionsFactory defs = ctx.getMappingContext().getDefinitionsFactory();
-          if (defs.hasDefinition(cls)) {
-            String hash = (String) oMap.get(SerializationParts.OBJECT_ID);
-
-            MappingDefinition definition = defs.getDefinition(cls);
-            InstantiationMapping cMapping;
-            if (!definition.isCachedMarshaller() && !ctx.hasObjectHash(hash)
-                    && (cMapping = definition.getInstantiationMapping()) != null) {
-
-              Object[] parms = new Object[cMapping.getMappings().length];
-
-              int i = 0;
-              for (Mapping mapping : cMapping.getMappings()) {
-                parms[i++] = oMap.get(mapping.getKey());
-              }
-
-              if (cMapping instanceof ConstructorMapping) {
-                newInstance = ((ConstructorMapping) cMapping).getMember().asConstructor().newInstance(parms);
-              }
-              else {
-                newInstance = ((FactoryMapping) cMapping).getMember().asMethod().invoke(null, parms);
-              }
-            }
-            else {
-              newInstance = instantiate(cls, oMap, ctx);
-            }
-
-            if (!oMap.containsKey(INSTANCE_REFERENCE)) {
-              for (MemberMapping mapping : defs.getDefinition(cls).getWritableMemberMappings()) {
-                if (mapping.getBindingMember() instanceof MetaField) {
-                  MetaField f = (MetaField) mapping.getBindingMember();
-                  setProperty(newInstance, f.asField(), oMap.get(mapping.getKey()));
-                }
-                else {
-                  Method m = ((MetaMethod) mapping.getBindingMember()).asMethod();
-                  m.invoke(newInstance, DataConversion.convert(oMap.get(mapping.getKey()), m.getParameterTypes()[0]));
-                }
-              }
-            }
-          }
-          else {
-            newInstance = instantiate(cls, oMap, ctx);
-
-            if (!oMap.containsKey(INSTANCE_REFERENCE)) {
-              for (Field f : EncodingUtil.getAllEncodingFields(newInstance.getClass())) {
-                setProperty(newInstance, f, oMap.get(f.getName()));
-              }
-            }
-          }
-
-          return newInstance;
+          return callMarshaller(marshaller, oMap, ctx);
+        }
+        else {
+          throw new RuntimeException("unknown class to demarshall: " + cls.getName());
         }
       }
+
       return o;
     }
     catch (Exception e) {

@@ -16,13 +16,13 @@
 
 package org.jboss.errai.marshalling.server;
 
-import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.common.metadata.ScannerSingleton;
-import org.jboss.errai.marshalling.client.api.MappingContext;
 import org.jboss.errai.marshalling.client.api.Marshaller;
+import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactoryImpl;
+import org.jboss.errai.marshalling.rebind.api.InheritedMappings;
 import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 
 import java.util.HashMap;
@@ -53,6 +53,12 @@ public class MappingContextSingleton {
             Marshaller<Object, Object> marshaller = (Marshaller<Object, Object>) m.newInstance();
             registerMarshaller(marshaller.getTypeHandled().getName(), (Class<? extends Marshaller>) m);
             factory.addDefinition(new MappingDefinition(marshaller));
+
+            if (m.isAnnotationPresent(ImplementationAliases.class)) {
+              for (Class<?> inherits : m.getAnnotation(ImplementationAliases.class).value()) {
+                factory.addDefinition(new MappingDefinition(marshaller, inherits));
+              }
+            }
           }
           catch (ClassCastException e) {
             throw new RuntimeException("@ServerMarshaller class "

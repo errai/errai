@@ -23,17 +23,19 @@ import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 
-import java.util.*;
+import java.util.AbstractQueue;
+import java.util.LinkedList;
+import java.util.Queue;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 @ClientMarshaller
-@ImplementationAliases({AbstractSet.class, HashSet.class, SortedSet.class, LinkedHashSet.class})
-public class SetMarshaller extends AbstractCollectionMarshaller<JSONValue, Set> {
+@ImplementationAliases({Queue.class, LinkedList.class, AbstractQueue.class})
+public class QueueMarshaller extends AbstractCollectionMarshaller<JSONValue, Queue> {
   @Override
-  public Class<Set> getTypeHandled() {
-    return Set.class;
+  public Class<Queue> getTypeHandled() {
+    return Queue.class;
   }
 
   @Override
@@ -42,10 +44,13 @@ public class SetMarshaller extends AbstractCollectionMarshaller<JSONValue, Set> 
   }
 
   @Override
-  public Set demarshall(JSONValue o, MarshallingSession ctx) {
-    JSONArray jsonArray = o.isArray();
+  public Queue demarshall(JSONValue o, MarshallingSession ctx) {
+    if (o == null) return null;
 
-    Set set = new HashSet<Object>();
+    JSONArray jsonArray = o.isArray();
+    if (jsonArray == null) return null;
+
+    Queue<Object> deque = new LinkedList<Object>();
     Marshaller<Object, Object> cachedMarshaller = null;
 
     for (int i = 0; i < jsonArray.size(); i++) {
@@ -54,11 +59,12 @@ public class SetMarshaller extends AbstractCollectionMarshaller<JSONValue, Set> 
         cachedMarshaller = ctx.getMarshallerInstance(ctx.determineTypeFor(null, elem));
       }
 
-      set.add(cachedMarshaller.demarshall(elem, ctx));
+      deque.add(cachedMarshaller.demarshall(elem, ctx));
     }
 
-    return set;
+    return deque;
   }
+
 
   @Override
   public boolean handles(JSONValue o) {

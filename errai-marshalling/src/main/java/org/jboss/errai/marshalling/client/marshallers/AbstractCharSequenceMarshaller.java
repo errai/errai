@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ *  
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,37 +16,21 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
-import com.google.gwt.json.client.JSONValue;
-import org.jboss.errai.common.client.protocols.SerializationParts;
-import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
+import org.jboss.errai.marshalling.client.util.MarshallUtil;
 
 /**
- * @author Mike Brock <cbrock@redhat.com>
+ * @author Mike Brock
  */
-@ClientMarshaller
-public class DoubleMarshaller extends AbstractNumberMarshaller<JSONValue, Double> {
+public abstract class AbstractCharSequenceMarshaller<T, C extends CharSequence> implements Marshaller<T, C> {
   @Override
-  public Class<Double> getTypeHandled() {
-    return Double.class;
+  public String getEncodingType() {
+    return "json";
   }
 
   @Override
-  public Double demarshall(JSONValue o, MarshallingSession ctx) {
-    if (o == null) {
-      return null;
-    }
-    else if (o.isObject() != null) {
-      return o.isObject().get(SerializationParts.NUMERIC_VALUE).isNumber().doubleValue();
-    }
-    else {
-      return o.isNumber().doubleValue();
-    }
-  }
-
-  @Override
-  public boolean handles(JSONValue o) {
-    return o.isNumber() != null;
+  public String marshall(CharSequence o, MarshallingSession ctx) {
+    return o == null ? "null" : "\"" + MarshallUtil.jsonStringEscape(o.toString()) + "\"";
   }
 }

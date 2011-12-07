@@ -30,6 +30,8 @@ public abstract class AbstractServerMarshallingSession extends AbstractMarshalli
           = new HashMap<String, Marshaller<Object, Object>>();
 
   public Marshaller<Object, Object> getMarshallerInstance(String fqcn) {
+
+
     Marshaller<Object, Object> m = cachedMarshallerInstances.get(fqcn);
     if (m == null) {
       Class<? extends Marshaller> cls = getMappingContext().getMarshallerClass(fqcn);
@@ -46,7 +48,7 @@ public abstract class AbstractServerMarshallingSession extends AbstractMarshalli
     return m;
   }
   
-  protected boolean hasMarshaller(String fqcn) {
+  public boolean hasMarshaller(String fqcn) {
     return getMappingContext().hasMarshaller(fqcn);
   }
 

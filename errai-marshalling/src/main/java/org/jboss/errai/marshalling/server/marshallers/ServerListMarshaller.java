@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.marshalling.client.marshallers;
+package org.jboss.errai.marshalling.server.marshallers;
 
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
-import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
+import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.AbstractCollectionMarshaller;
+import org.jboss.errai.marshalling.server.util.ServerMarshallUtil;
 
 import java.util.*;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ClientMarshaller
-@ImplementationAliases({AbstractSet.class, HashSet.class, SortedSet.class, LinkedHashSet.class})
-public class SetMarshaller extends AbstractCollectionMarshaller<JSONValue, Set> {
+@ServerMarshaller
+@ImplementationAliases({AbstractList.class, ArrayList.class, Vector.class, Stack.class})
+public class ServerListMarshaller extends AbstractCollectionMarshaller<List, List> {
   @Override
-  public Class<Set> getTypeHandled() {
-    return Set.class;
+  public Class<List> getTypeHandled() {
+    return List.class;
   }
 
   @Override
@@ -42,26 +42,25 @@ public class SetMarshaller extends AbstractCollectionMarshaller<JSONValue, Set> 
   }
 
   @Override
-  public Set demarshall(JSONValue o, MarshallingSession ctx) {
-    JSONArray jsonArray = o.isArray();
+  public List demarshall(List o, MarshallingSession ctx) {
+    if (o == null) return null;
 
-    Set set = new HashSet<Object>();
+    ArrayList<Object> list = new ArrayList<Object>();
     Marshaller<Object, Object> cachedMarshaller = null;
 
-    for (int i = 0; i < jsonArray.size(); i++) {
-      JSONValue elem = jsonArray.get(i);
+    for (Object elem : o) {
       if (cachedMarshaller == null || !cachedMarshaller.handles(elem)) {
         cachedMarshaller = ctx.getMarshallerInstance(ctx.determineTypeFor(null, elem));
       }
 
-      set.add(cachedMarshaller.demarshall(elem, ctx));
+      list.add(cachedMarshaller.demarshall(elem, ctx));
     }
 
-    return set;
+    return list;
   }
 
   @Override
-  public boolean handles(JSONValue o) {
-    return o.isArray() != null;
+  public boolean handles(List o) {
+    return ServerMarshallUtil.handles(o, getTypeHandled());
   }
 }

@@ -26,15 +26,10 @@ import org.jboss.errai.marshalling.client.api.MarshallingSession;
  * @author Mike Brock <cbrock@redhat.com>
  */
 @ClientMarshaller
-public class IntegerMarshaller implements Marshaller<JSONValue, Integer> {
+public class IntegerMarshaller extends AbstractNumberMarshaller<JSONValue, Integer> {
   @Override
   public Class<Integer> getTypeHandled() {
     return Integer.class;
-  }
-
-  @Override
-  public String getEncodingType() {
-    return "json";
   }
 
   @Override
@@ -48,11 +43,6 @@ public class IntegerMarshaller implements Marshaller<JSONValue, Integer> {
     else {
       return o == null ? null : new Double(o.isNumber().doubleValue()).intValue();
     }
-  }
-
-  @Override
-  public String marshall(Integer o, MarshallingSession ctx) {
-    return o.toString();
   }
 
   @Override

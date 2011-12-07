@@ -42,11 +42,15 @@ public class MappingDefinition {
   private List<MemberMapping> memberMappings = new ArrayList<MemberMapping>();
 
   public MappingDefinition(Marshaller<Object, Object> marshaller) {
-    toMap = MetaClassFactory.get(marshaller.getTypeHandled());
+    this(marshaller, marshaller.getTypeHandled());
+  }
+
+  public MappingDefinition(Marshaller<Object, Object> marshaller, Class<?> toMap) {
+    this.toMap = MetaClassFactory.get(toMap);
     setMarshallerInstance(marshaller);
     instantiationMapping = new NoConstructMapping();
   }
-
+  
   public MappingDefinition(Class<?> toMap) {
     this(MetaClassFactory.get(toMap));
   }

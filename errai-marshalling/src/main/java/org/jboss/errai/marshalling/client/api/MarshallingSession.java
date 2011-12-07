@@ -39,4 +39,6 @@ public interface MarshallingSession {
   public void recordObjectHash(String hashCode, Object instance);
   
   public String getObjectHash(Object o);
+
+  public boolean isEncoded(Object ref);
 }

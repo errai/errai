@@ -21,6 +21,8 @@ import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.common.client.types.UHashMap;
 import org.jboss.errai.marshalling.rebind.api.model.Mapping;
 import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
+import org.jboss.errai.marshalling.server.marshallers.DefaultDefinitionMarshaller;
+import org.mvel2.util.InternalNumber;
 
 import java.io.*;
 import java.nio.CharBuffer;
@@ -108,8 +110,7 @@ public class JSONStreamDecoder {
           if (map && ctx.encodedType) {
 
             try {
-              Object o = TypeDemarshallHelper.demarshallAll(ctx.record(collection), decodingContext);
-              return o;
+              return TypeDemarshallHelper.demarshallAll(ctx.record(collection), decodingContext);
             }
             catch (Exception e) {
               e.printStackTrace();
@@ -219,11 +220,10 @@ public class JSONStreamDecoder {
   }
 
   public Number parseNumber(char c) throws IOException {
-    long val = 0;
+    double val = 0;
     double dVal = 0;
 
     double factor = 1;
-    boolean dbl = false;
 
     char[] buf = new char[21];
     int len = 0;
@@ -241,10 +241,9 @@ public class JSONStreamDecoder {
     for (int i = len - 1; i != -1; i--) {
       switch (buf[i]) {
         case '.':
-          dVal = ((double) val) / factor;
+          dVal = val / factor;
           val = 0;
           factor = 1;
-          dbl = true;
           continue;
         case '-':
           if (i != 0) {
@@ -283,12 +282,8 @@ public class JSONStreamDecoder {
 
       factor *= 10;
     }
-    if (dbl) {
-      return dVal + val;
-    }
-    else {
-      return val;
-    }
+
+    return dVal + val;
   }
 
   private static boolean isValidNumberPart(char c) {
@@ -372,13 +367,11 @@ public class JSONStreamDecoder {
     private boolean initReference(Map map) {
       if (canInitialize()) {
         String hash = (String) map.get(SerializationParts.OBJECT_ID);
-
-        if (decodingContext.hasObjectHash(hash)) {
-          map.put(TypeDemarshallHelper.INSTANCE_REFERENCE, "");
-        }
-        else {
+        if (!decodingContext.hasObjectHash(hash)) {
+          map.put(TypeDemarshallHelper.NO_AUTO_WIRE, "true");
           decodingContext.recordObjectHash((String) map.get(SerializationParts.OBJECT_ID),
                   TypeDemarshallHelper.instantiate(map, decodingContext));
+          map.remove(TypeDemarshallHelper.NO_AUTO_WIRE);
         }
 
         return finished = true;
@@ -406,12 +399,15 @@ public class JSONStreamDecoder {
                 MappingDefinition definition = decodingContext.getMappingContext()
                         .getDefinitionsFactory().getDefinition((String) rhs);
 
-
-                if (definition.isCachedMarshaller()) {
+                /**
+                 * For custom marshallers -- excluding the default definition marshaller, do not early init
+                 * the references.
+                 */
+                if (definition.isCachedMarshaller()
+                        && !(definition.getMarshallerInstance() instanceof DefaultDefinitionMarshaller)) {
                   noearlyInit = true;
                 }
                 else {
-
                   for (Mapping m : definition.getInstantiationMapping().getMappings()) {
 
                     if (!oMap.containsKey(m.getKey())) {

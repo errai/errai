@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ *  
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,31 +14,30 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.marshalling.client.marshallers;
+package org.jboss.errai.marshalling.server.marshallers;
 
-import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
-import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
+import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.AbstractCharSequenceMarshaller;
+import org.jboss.errai.marshalling.server.util.ServerMarshallUtil;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ClientMarshaller
-public class StringMarshaller extends AbstractCharSequenceMarshaller<JSONValue, String> {
-  public static final StringMarshaller INSTANCE = new StringMarshaller();
-
+@ServerMarshaller
+public class ServerStringMarshaller extends AbstractCharSequenceMarshaller<Object, String> {
   @Override
   public Class<String> getTypeHandled() {
     return String.class;
   }
 
   @Override
-  public String demarshall(JSONValue o, MarshallingSession ctx) {
-    return (o == null || o.isString() == null) ? null : o.isString().stringValue();
+  public String demarshall(Object o, MarshallingSession ctx) {
+    return String.valueOf(o);
   }
 
   @Override
-  public boolean handles(JSONValue o) {
-    return o.isString() != null;
+  public boolean handles(Object o) {
+    return ServerMarshallUtil.handles(o, getTypeHandled());
   }
 }

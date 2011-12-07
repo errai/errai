@@ -30,8 +30,8 @@ import java.util.*;
  * @author Mike Brock <cbrock@redhat.com>
  */
 @ClientMarshaller
-@ImplementationAliases({AbstractList.class, ArrayList.class, LinkedList.class, Vector.class, Stack.class})
-public class ListMarshaller implements Marshaller<JSONValue, List> {
+@ImplementationAliases({AbstractList.class, ArrayList.class, Vector.class, Stack.class})
+public class ListMarshaller extends AbstractCollectionMarshaller<JSONValue, List> {
   @Override
   public Class<List> getTypeHandled() {
     return List.class;
@@ -62,36 +62,6 @@ public class ListMarshaller implements Marshaller<JSONValue, List> {
     }
 
     return list;
-  }
-
-  @Override
-  public String marshall(List o, MarshallingSession ctx) {
-    if (o == null) {
-      return "null";
-    }
-
-    StringBuilder buf = new StringBuilder("[");
-    Marshaller<Object, Object> cachedMarshaller = null;
-    Object elem;
-    for (int i = 0; i < o.size(); i++) {
-      if (i > 0) {
-        buf.append(",");
-      }
-      elem = o.get(i);
-
-      if (cachedMarshaller == null) {
-        if (elem instanceof Number || elem instanceof Boolean || elem instanceof Character) {
-          cachedMarshaller = MarshallUtil.getQualifiedNumberMarshaller(elem);
-        }
-        else {
-          cachedMarshaller = ctx.getMarshallerInstance(elem.getClass().getName());
-        }
-      }
-
-      buf.append(cachedMarshaller.marshall(elem, ctx));
-    }
-
-    return buf.append("]").toString();
   }
 
   @Override

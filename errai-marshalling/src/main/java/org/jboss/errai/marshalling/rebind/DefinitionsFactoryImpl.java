@@ -30,6 +30,7 @@ import org.jboss.errai.marshalling.rebind.api.InheritedMappings;
 import org.jboss.errai.marshalling.rebind.api.impl.defaultjava.DefaultJavaDefinitionMapper;
 import org.jboss.errai.marshalling.rebind.api.model.*;
 import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleConstructorMapping;
+import org.jboss.errai.marshalling.server.marshallers.DefaultDefinitionMarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,6 +83,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
   @Override
   public void addDefinition(MappingDefinition definition) {
+
     MAPPING_DEFINITIONS.put(definition.getMappingClass().getCanonicalName(), definition);
     if (log.isDebugEnabled())
       log.debug("loaded definition: " + definition.getMappingClass().getFullyQualifiedName());
@@ -178,7 +180,9 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     }
 
     for (Class<?> mappedClass : exposedClasses) {
-      addDefinition(DefaultJavaDefinitionMapper.map(MetaClassFactory.get(mappedClass), this));
+      MappingDefinition def = DefaultJavaDefinitionMapper.map(MetaClassFactory.get(mappedClass), this);
+      def.setMarshallerInstance(new DefaultDefinitionMarshaller(def));
+      addDefinition(def);
     }
 
     log.info("comprehended " + exposedClasses.size() + " classes");

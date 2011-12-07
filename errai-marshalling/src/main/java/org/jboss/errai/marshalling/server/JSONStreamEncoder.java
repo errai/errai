@@ -16,20 +16,17 @@
 
 package org.jboss.errai.marshalling.server;
 
-import org.jboss.errai.codegen.framework.meta.MetaField;
-import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.common.client.protocols.SerializationParts;
+import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
 import org.jboss.errai.marshalling.client.util.NumbersUtils;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
-import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
-import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
+import org.jboss.errai.marshalling.server.api.ServerMarshaller;
+import org.jboss.errai.marshalling.server.util.ServerEncodingUtil;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -42,41 +39,39 @@ public class JSONStreamEncoder {
   private static final byte[] NULL_BYTES = "null".getBytes();
 
   public static void encode(Object v, OutputStream outstream) throws IOException {
-    _encode(v, outstream, new EncodingSession(MappingContextSingleton.get()));
+    encode(v, outstream, new EncodingSession(MappingContextSingleton.get()));
   }
 
-  private static void _encode(Object v, OutputStream outstream, EncodingSession ctx) throws IOException {
-    _encode(v, outstream, ctx, false);
+  public static void encode(Object v, OutputStream outstream, EncodingSession ctx) throws IOException {
+    encode(v, outstream, ctx, false);
   }
 
-  private static void _encode(Object v, OutputStream outstream, EncodingSession ctx, boolean qualifiedNumerics) throws IOException {
+  public static void encode(Object v, OutputStream outstream, EncodingSession ctx, boolean qualifiedNumerics)
+          throws IOException {
     if (v == null) {
       outstream.write(NULL_BYTES);
       return;
     }
     else if (v instanceof String) {
-      write(outstream, ctx, "\"" + MarshallUtil.jsonStringEscape(v.toString()) + "\"");
+      ServerEncodingUtil.write(outstream, ctx, "\"" + MarshallUtil.jsonStringEscape(v.toString()) + "\"");
       return;
     }
 
     if (MarshallUtil.isPrimitiveWrapper(v.getClass())) {
       if (v instanceof Character) {
         if (qualifiedNumerics) {
-          write(outstream, ctx, NumbersUtils.qualifiedNumericEncoding(false, "\"" + v + "\""));
+          ServerEncodingUtil.write(outstream, ctx, NumbersUtils.qualifiedNumericEncoding(false, "\"" + v + "\""));
         }
         else {
-          write(outstream, ctx, "\"" + MarshallUtil.jsonStringEscape(v.toString()) + "\"");
+          ServerEncodingUtil.write(outstream, ctx, "\"" + MarshallUtil.jsonStringEscape(v.toString()) + "\"");
         }
       }
       else if (qualifiedNumerics) {
-        write(outstream, ctx, NumbersUtils.qualifiedNumericEncoding(ctx.isEscapeMode(), v));
+        ServerEncodingUtil.write(outstream, ctx, NumbersUtils.qualifiedNumericEncoding(ctx.isEscapeMode(), v));
       }
       else {
         outstream.write(String.valueOf(v).getBytes());
       }
-    }
-    else if (v instanceof Collection) {
-      encodeCollection((Collection) v, outstream, ctx);
     }
     else if (v instanceof Map) {
       //noinspection unchecked
@@ -100,86 +95,24 @@ public class JSONStreamEncoder {
     }
 
     Class cls = o.getClass();
-    boolean enc = ctx.isEncoded(o);
-    String hash = ctx.getObjectHash(o);
-
-    if (ctx.hasMarshaller(cls.getName())) {
-      write(outstream, ctx, ctx.getMarshallerInstance(cls.getName()).marshall(o, ctx));
-      return;
-    }
-
-    if (enc) {
-      /**
-       * If this object is referencing a duplicate object in the graph, we only provide an ID reference.
-       */
-      write(outstream, ctx, "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + cls.getCanonicalName()
-              + "\",\"" + SerializationParts.OBJECT_ID + "\":\"" + hash + "\"}");
-
-      return;
-    }
-
-
     DefinitionsFactory defs = ctx.getMappingContext().getDefinitionsFactory();
-    if (defs.hasDefinition(cls)) {
-      MappingDefinition def = defs.getDefinition(cls);
 
-      if (def.isCachedMarshaller()) {
-        write(outstream, ctx, def.getMarshallerInstance().marshall(o, ctx));
-      }
-      else {
-        int i = 0;
-        boolean first = true;
+    if (!defs.hasDefinition(cls)) {
+      throw new RuntimeException("no available marshaller for: " + cls.getName());
+    }
 
-        write(outstream, ctx, "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + cls.getCanonicalName() + "\",\"" + SerializationParts.OBJECT_ID + "\":\"" + hash + "\",");
-
-        for (MemberMapping mapping : def.getReadableMemberMappings()) {
-          if (!first) {
-            outstream.write(',');
-          }
-
-          i++;
-          Object v;
-
-          if (mapping.getReadingMember() instanceof MetaField) {
-            Field field = ((MetaField) mapping.getReadingMember()).asField();
-
-            try {
-              v = field.get(o);
-            }
-            catch (Exception e) {
-              throw new RuntimeException("error accessing field: " + field, e);
-            }
-          }
-          else {
-            Method method = ((MetaMethod) mapping.getReadingMember()).asMethod();
-
-            try {
-              v = method.invoke(o);
-            }
-            catch (Exception e) {
-              throw new RuntimeException("error calling getter: " + method, e);
-            }
-          }
-
-          write(outstream, ctx, "\"" + mapping.getKey() + "\"");
-          outstream.write(':');
-          _encode(v, outstream, ctx);
-
-          first = false;
-
-        }
-
-        if (i == 0) {
-          write(outstream, ctx, "\"" + SerializationParts.INSTANTIATE_ONLY + "\":true");
-        }
-
-        outstream.write('}');
-      }
+    Marshaller<Object, Object> marshaller = defs.getDefinition(cls).getMarshallerInstance();
+    if (marshaller instanceof ServerMarshaller) {
+      ((ServerMarshaller) marshaller).marshall(outstream, o, ctx);
+    }
+    else {
+      ServerEncodingUtil.write(outstream, ctx, marshaller.marshall(o, ctx));
     }
   }
 
-  private static void encodeMap(Map<Object, Object> map, OutputStream outstream, EncodingSession ctx) throws IOException {
-    //  StringAppender mapBuild = new StringAppender("{");
+  private static void encodeMap(Map<Object, Object> map, OutputStream outstream, EncodingSession ctx)
+          throws IOException {
+
     outstream.write('{');
     boolean first = true;
 
@@ -189,19 +122,19 @@ public class JSONStreamEncoder {
       }
 
       if (!(entry.getKey() instanceof String)) {
-        write(outstream, ctx, '\"');
+        ServerEncodingUtil.write(outstream, ctx, '\"');
         if (!ctx.isEscapeMode()) outstream.write(SerializationParts.EMBEDDED_JSON.getBytes());
         ctx.setEscapeMode();
-        _encode(entry.getKey(), outstream, ctx, true);
+        encode(entry.getKey(), outstream, ctx, true);
         ctx.unsetEscapeMode();
-        write(outstream, ctx, '\"');
+        ServerEncodingUtil.write(outstream, ctx, '\"');
       }
       else {
-        _encode(entry.getKey(), outstream, ctx, true);
+        encode(entry.getKey(), outstream, ctx, true);
       }
 
       outstream.write(':');
-      _encode(entry.getValue(), outstream, ctx);
+      encode(entry.getValue(), outstream, ctx);
 
       first = false;
     }
@@ -212,7 +145,7 @@ public class JSONStreamEncoder {
     outstream.write('[');
     Iterator iter = col.iterator();
     while (iter.hasNext()) {
-      _encode(iter.next(), outstream, ctx, true);
+      encode(iter.next(), outstream, ctx, true);
       if (iter.hasNext()) outstream.write(',');
     }
 
@@ -220,12 +153,10 @@ public class JSONStreamEncoder {
   }
 
   private static void encodeArray(Object array, OutputStream outstream, EncodingSession ctx) throws IOException {
-    // StringAppender buildCol = new StringAppender("[");
-
     outstream.write('[');
     int len = Array.getLength(array);
     for (int i = 0; i < len; i++) {
-      _encode(Array.get(array, i), outstream, ctx, true);
+      encode(Array.get(array, i), outstream, ctx, true);
       if ((i + 1) < len) outstream.write(',');
     }
 
@@ -233,27 +164,10 @@ public class JSONStreamEncoder {
   }
 
   private static void encodeEnum(Enum enumer, OutputStream outstream, EncodingSession ctx) throws IOException {
-    write(outstream, ctx, "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + enumer.getDeclaringClass().getName() + "\""
+    ServerEncodingUtil.write(outstream, ctx, "{\"" + SerializationParts.ENCODED_TYPE + "\":\""
+            + enumer.getDeclaringClass().getName() + "\""
             + ",\"" + SerializationParts.ENUM_STRING_VALUE + "\":\"" + enumer.name() + "\"}");
   }
 
 
-  private static void write(OutputStream stream, EncodingSession ctx, String s) throws IOException {
-    if (ctx.isEscapeMode()) {
-      stream.write(s.replaceAll("\"", "\\\\\"").getBytes());
-    }
-    else {
-      stream.write(s.getBytes());
-    }
-  }
-
-  private static void write(OutputStream stream, EncodingSession ctx, char s) throws IOException {
-    if (ctx.isEscapeMode() && s == '\"') {
-      stream.write("\\\\\"".getBytes());
-
-    }
-    else {
-      stream.write(s);
-    }
-  }
 }

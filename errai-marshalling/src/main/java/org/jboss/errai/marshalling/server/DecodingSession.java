@@ -1,5 +1,6 @@
 package org.jboss.errai.marshalling.server;
 
+import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.common.client.types.UHashMap;
 import org.jboss.errai.common.client.types.UnsatisfiedForwardLookup;
 import org.jboss.errai.marshalling.client.api.AbstractMarshallingSession;
@@ -14,7 +15,7 @@ import java.util.Map;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public class DecodingSession extends AbstractServerMarshallingSession {
+public class DecodingSession extends AbstractMarshallingSession {
   private final ServerMappingContext context;
 
   public DecodingSession(ServerMappingContext context) {
@@ -41,8 +42,20 @@ public class DecodingSession extends AbstractServerMarshallingSession {
   }
 
   @Override
+  public Marshaller<Object, Object> getMarshallerInstance(String fqcn) {
+    return context.getDefinitionsFactory().getDefinition(fqcn).getMarshallerInstance();
+  }
+
+  @Override
   public String determineTypeFor(String formatType, Object o) {
-    throw new UnsupportedOperationException();
+    if (o == null) return null;
+
+    if (o instanceof Map) {
+      return (String) ((Map) o).get(SerializationParts.ENCODED_TYPE);
+    }
+    else {
+      return o.getClass().getName();
+    }
   }
 }
 

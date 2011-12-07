@@ -19,6 +19,7 @@ package org.jboss.errai.marshalling.server;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.common.client.protocols.SerializationParts;
+import org.jboss.errai.marshalling.client.api.AbstractMarshallingSession;
 import org.jboss.errai.marshalling.client.api.MappingContext;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.exceptions.MarshallingException;
@@ -29,7 +30,7 @@ import java.util.Map;
 /**
  * @author Mike Brock
  */
-public class EncodingSession extends AbstractServerMarshallingSession {
+public class EncodingSession extends AbstractMarshallingSession {
   private int escapeMode;
   private final ServerMappingContext context;
 
@@ -67,42 +68,30 @@ public class EncodingSession extends AbstractServerMarshallingSession {
 
   @Override
   public String determineTypeFor(String formatType, Object o) {
-    JSONValue jsonValue = (JSONValue) o;
+    if (o == null) return null;
 
-    if (jsonValue.isObject() != null) {
-      JSONObject jsonObject = jsonValue.isObject();
-      if (jsonObject.containsKey(SerializationParts.ENCODED_TYPE)) {
-        return jsonObject.get(SerializationParts.ENCODED_TYPE).isString().stringValue();
+    if (o instanceof Map) {
+      Map map = (Map) o;
+      if (map.containsKey(SerializationParts.ENCODED_TYPE)) {
+        return (String) map.get(SerializationParts.ENCODED_TYPE);
       }
       else {
         return Map.class.getName();
       }
     }
-    else if (jsonValue.isString() != null) {
-      return String.class.getName();
+    else {
+      return o.getClass().getName();
     }
-    else if (jsonValue.isNumber() != null) {
-      return Double.class.getName();
-    }
-    else if (jsonValue.isBoolean() != null) {
-      return Boolean.class.getName();
-    }
-    else if (jsonValue.isArray() != null) {
-      return List.class.getName();
-    }
-    else if (jsonValue.isNull() != null) {
-      return null;
-    }
-    throw new RuntimeException("unknown type: cannot reverse map value to concrete Java type: " + o);
+  }
+
+  @Override
+  public Marshaller<Object, Object> getMarshallerInstance(String fqcn) {
+    return context.getDefinitionsFactory().getDefinition(fqcn).getMarshallerInstance();
   }
 
   @Override
   public ServerMappingContext getMappingContext() {
     return context;
-  }
-
-  public boolean isEncoded(Object ref) {
-    return hasObjectHash(ref);
   }
 
   public String markReference(Object o) {
@@ -111,7 +100,6 @@ public class EncodingSession extends AbstractServerMarshallingSession {
     }
     return null;
   }
-
 
   public boolean isEscapeMode() {
     return escapeMode != 0;

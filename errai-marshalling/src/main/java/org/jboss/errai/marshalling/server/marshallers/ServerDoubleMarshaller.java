@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ *  
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,39 +14,37 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.marshalling.client.marshallers;
+package org.jboss.errai.marshalling.server.marshallers;
 
-import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.common.client.protocols.SerializationParts;
-import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
-import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
+import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.AbstractNumberMarshaller;
+
+import java.util.Map;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ClientMarshaller
-public class FloatMarshaller extends AbstractNumberMarshaller<JSONValue, Float> {
+@ServerMarshaller
+public class ServerDoubleMarshaller extends AbstractNumberMarshaller<Object, Double> {
   @Override
-  public Class<Float> getTypeHandled() {
-    return Float.class;
+  public Class<Double> getTypeHandled() {
+    return Double.class;
   }
 
   @Override
-  public Float demarshall(JSONValue o, MarshallingSession ctx) {
-    if (o == null) {
-      return null;
-    }
-    else if (o.isObject() != null) {
-      return new Double(o.isObject().get(SerializationParts.NUMERIC_VALUE).isNumber().doubleValue()).floatValue();
+  public Double demarshall(Object o, MarshallingSession ctx) {
+    if (o instanceof Map) {
+      return (Double) ((Map) o).get(SerializationParts.NUMERIC_VALUE);
     }
     else {
-      return new Double(o.isNumber().doubleValue()).floatValue();
+      return (Double) o;
     }
   }
 
   @Override
-  public boolean handles(JSONValue o) {
-    return o.isNumber() != null;
+  public boolean handles(Object o) {
+    return true;
   }
 }

@@ -26,15 +26,10 @@ import org.jboss.errai.marshalling.client.api.MarshallingSession;
  * @author Mike Brock <cbrock@redhat.com>
  */
 @ClientMarshaller
-public class LongMarshaller implements Marshaller<JSONValue, Long> {
+public class LongMarshaller extends AbstractNumberMarshaller<JSONValue, Long> {
   @Override
   public Class<Long> getTypeHandled() {
     return Long.class;
-  }
-
-  @Override
-  public String getEncodingType() {
-    return "json";
   }
 
   @Override
@@ -51,11 +46,6 @@ public class LongMarshaller implements Marshaller<JSONValue, Long> {
     else {
       return null;
     }
-  }
-
-  @Override
-  public String marshall(Long o, MarshallingSession ctx) {
-    return o.toString();
   }
 
   @Override

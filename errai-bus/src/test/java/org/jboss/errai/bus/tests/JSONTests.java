@@ -23,6 +23,7 @@ import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.tests.support.RandomProvider;
 import org.jboss.errai.bus.client.tests.support.SType;
 import org.jboss.errai.bus.client.tests.support.User;
+import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.marshalling.server.JSONEncoder;
 import org.jboss.errai.marshalling.server.JSONDecoder;
 import org.jboss.errai.common.client.protocols.SerializationParts;
@@ -51,7 +52,7 @@ public class JSONTests extends TestCase {
     inputParts.put("Message", "\"Hello, World\"");
     inputParts.put("Sentence", "He said he was \"okay\"!");
     inputParts.put("TestUnterminatedThings", "\" { [ ( ");
-    inputParts.put("Num", 123l);
+    inputParts.put("Num", 123d);
 
     Message msg = MessageBuilder.createMessage().getMessage();
 
@@ -75,7 +76,7 @@ public class JSONTests extends TestCase {
     inputParts.put("Message", "\"Hello, World\"");
     inputParts.put("Sentence", "He said he was \"okay\"!");
     inputParts.put("TestUnterminatedThings", "' \" { [ ( ");
-    inputParts.put("Num", 123l);
+    inputParts.put("Num", 123d);
 
     Message msg = MessageBuilder.createMessage().getMessage();
 
@@ -218,6 +219,7 @@ public class JSONTests extends TestCase {
   }
 
 
+  @Portable
   public static class TType {
     private String fieldOne;
     private String fieldTwo;
