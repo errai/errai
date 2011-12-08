@@ -15,6 +15,7 @@
  */
 package org.jboss.errai.enterprise.rebind;
 
+import org.jboss.errai.codegen.framework.meta.impl.gwt.GWTClass;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.enterprise.client.cdi.api.ConversationContext;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
@@ -45,10 +46,7 @@ public class ConversationExtension extends IOCDecoratorExtension<ConversationCon
   @Override
   public Statement generateDecorator(InjectableInstance<ConversationContext> injectableInstance) {
     final MetaField field = injectableInstance.getField();
-    final JClassType eventClassType = injectableInstance.getInjectionContext().getProcessingContext()
-            .loadClassType(Event.class);
-
-    if (!MetaClassFactory.get(eventClassType).isAssignableFrom(field.getType())) {
+    if (!MetaClassFactory.get(Event.class).isAssignableFrom(field.getType())) {
       throw new RuntimeException("@ConversationContext should be used with type Event");
     }
 
