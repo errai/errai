@@ -584,4 +584,37 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
+
+  public void testNakedEnum() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        final TestEnumA e = TestEnumA.Christian;
+
+
+        class EqualTester {
+          public boolean isEqual(TestEnumA r) {
+            return r != null &&
+                    r.equals(e);
+          }
+        }
+
+        MessageBuilder.createCall(new RemoteCallback<TestEnumA>() {
+          @Override
+          public void callback(TestEnumA response) {
+            try {
+              assertTrue(new EqualTester().isEqual(response));
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestRPCServiceRemote.class).testNakedEnum(e);
+      }
+    });
+  }
+
 }

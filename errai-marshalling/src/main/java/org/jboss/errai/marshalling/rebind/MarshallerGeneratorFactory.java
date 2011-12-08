@@ -193,7 +193,7 @@ public class MarshallerGeneratorFactory {
     }
 
     for (Class<?> clazz : exposed) {
-      if (clazz.isEnum()) continue;
+    //  if (clazz.isEnum()) continue;
       
       if (mappingContext.getDefinitionsFactory().getDefinition(clazz).getClientMarshallerClass() != null) {
         continue;

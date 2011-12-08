@@ -91,6 +91,12 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                 .append(Stmt.load("json").returnValue())
                 .finish();
 
+
+        /**
+         *
+         * DEMARSHALL METHOD
+         *
+         */
         BlockBuilder<?> builder =
                 classStructureBuilder.publicOverridesMethod("demarshall",
                         Parameter.of(Object.class, "a0"), Parameter.of(MarshallingSession.class, "a1"));
@@ -105,59 +111,70 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                 .initializeWith(loadVariable("a0").invoke("isObject")));
 
 
-        tryBuilder.append(Stmt.declareVariable(String.class).named("objId")
-                .initializeWith(loadVariable("obj")
-                        .invoke("get", SerializationParts.OBJECT_ID)
-                        .invoke("isString").invoke("stringValue")));
-
-
-        tryBuilder.append(
-                Stmt.if_(Bool.expr(loadVariable("a1").invoke("hasObjectHash", loadVariable("objId"))))
-                        .append(loadVariable("a1").invoke("getObject", toMap, loadVariable("objId")).returnValue()).finish());
-
-        InstantiationMapping instantiationMapping = mapping.getInstantiationMapping();
-
-        Mapping[] cMappings = instantiationMapping.getMappings();
-        if (cMappings.length > 0) {
-          // use constructor mapping.
-
-          final List<Statement> marshallers = new ArrayList<Statement>();
-
-          for (Mapping m : mapping.getInstantiationMapping().getMappings()) {
-            MetaClass type = m.getType().asBoxed();
-            if (context.canMarshal(type.getFullyQualifiedName())) {
-              if (type.isArray()) {
-                marshallers.add(context.getArrayMarshallerCallback()
-                        .demarshall(type, extractJSONObjectProperty(m.getKey(), JSONObject.class)));
-              }
-              else {
-                marshallers.add(fieldDemarshall(m, JSONObject.class));
-              }
-            }
-            else {
-              throw new MarshallingException("no marshaller for type: " + type);
-            }
-          }
-
-          if (instantiationMapping instanceof ConstructorMapping) {
-            tryBuilder.append(Stmt.declareVariable(toMap).named("entity")
-                    .initializeWith(Stmt.newObject(toMap)
-                            .withParameters(marshallers.toArray(new Object[marshallers.size()]))));
-          }
-          else if (instantiationMapping instanceof FactoryMapping) {
-            tryBuilder.append(Stmt.declareVariable(toMap).named("entity")
-                    .initializeWith(Stmt.invokeStatic(toMap, ((FactoryMapping) instantiationMapping).getMember().getName(),
-                            marshallers.toArray(new Object[marshallers.size()]))));
-          }
+        if (toMap.isEnum()) {
+          tryBuilder.append(Stmt.declareVariable(toMap).named("entity")
+                  .initializeWith(demarshallEnum(Stmt.loadVariable("a0"), toMap)));
         }
         else {
-          // use default constructor
 
-          tryBuilder.append(Stmt.declareVariable(toMap).named("entity").initializeWith(Stmt.nestedCall(Stmt.newObject(toMap))));
+          tryBuilder.append(Stmt.declareVariable(String.class).named("objId")
+                  .initializeWith(loadVariable("obj")
+                          .invoke("get", SerializationParts.OBJECT_ID)
+                          .invoke("isString").invoke("stringValue")));
+
+
+          tryBuilder.append(
+                  Stmt.if_(Bool.expr(loadVariable("a1").invoke("hasObjectHash", loadVariable("objId"))))
+                          .append(loadVariable("a1").invoke("getObject", toMap, loadVariable("objId")).returnValue()).finish());
+
+          InstantiationMapping instantiationMapping = mapping.getInstantiationMapping();
+
+
+          /**
+           * Figure out how to construct this object.
+           */
+          Mapping[] cMappings = instantiationMapping.getMappings();
+          if (cMappings.length > 0) {
+            // use constructor mapping.
+
+            final List<Statement> marshallers = new ArrayList<Statement>();
+
+            for (Mapping m : mapping.getInstantiationMapping().getMappings()) {
+              MetaClass type = m.getType().asBoxed();
+              if (context.canMarshal(type.getFullyQualifiedName())) {
+                if (type.isArray()) {
+                  marshallers.add(context.getArrayMarshallerCallback()
+                          .demarshall(type, extractJSONObjectProperty(m.getKey(), JSONObject.class)));
+                }
+                else {
+                  marshallers.add(fieldDemarshall(m, JSONObject.class));
+                }
+              }
+              else {
+                throw new MarshallingException("no marshaller for type: " + type);
+              }
+            }
+
+            if (instantiationMapping instanceof ConstructorMapping) {
+              tryBuilder.append(Stmt.declareVariable(toMap).named("entity")
+                      .initializeWith(Stmt.newObject(toMap)
+                              .withParameters(marshallers.toArray(new Object[marshallers.size()]))));
+            }
+            else if (instantiationMapping instanceof FactoryMapping) {
+              tryBuilder.append(Stmt.declareVariable(toMap).named("entity")
+                      .initializeWith(Stmt.invokeStatic(toMap, ((FactoryMapping) instantiationMapping).getMember().getName(),
+                              marshallers.toArray(new Object[marshallers.size()]))));
+            }
+          }
+          else {
+            // use default constructor
+
+            tryBuilder.append(Stmt.declareVariable(toMap).named("entity").initializeWith(Stmt.nestedCall(Stmt.newObject(toMap))));
+          }
+
+          tryBuilder.append(loadVariable("a1").invoke("recordObjectHash",
+                  loadVariable("objId"), loadVariable("entity")));
         }
-
-        tryBuilder.append(loadVariable("a1").invoke("recordObjectHash",
-                loadVariable("objId"), loadVariable("entity")));
 
         /**
          * Start binding of fields here.
@@ -240,6 +257,12 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
         builder.append(tryBuilder.finish()).finish();
 
+
+        /**
+         *
+         * MARSHAL METHOD
+         *
+         */
         BlockBuilder<?> marshallMethodBlock = classStructureBuilder.publicOverridesMethod("marshall",
                 Parameter.of(Object.class, "a0"), Parameter.of(MarshallingSession.class, "a1"));
 
@@ -299,6 +322,13 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                     .append(Stmt.load("null").returnValue()).finish()
     );
 
+    if (toMap.isEnum()) {
+      builder.append(Stmt.nestedCall(marshallEnum(newStringBuilder(), Stmt.loadVariable("a0"), toMap))
+              .invoke("toString").returnValue());
+      return;
+    }
+
+
     builder.append(Stmt.declareVariable(String.class).named("objId")
             .initializeWith(Stmt.invokeStatic(String.class, "valueOf", loadVariable("a0").invoke("hashCode"))));
 
@@ -349,11 +379,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
       sb.append("\"" + mapping.getKey() + "\" : ");
 
       if (targetType.isEnum()) {
-        sb.append("{\"" + SerializationParts.ENCODED_TYPE
-                + "\":\"" + targetType.getFullyQualifiedName() + "\",\"" + SerializationParts.ENUM_STRING_VALUE + "\":\"")
-                .append(Stmt.nestedCall(valueStatement).invoke("name")).append("\"}");
-
-
+        marshallEnum(sb, valueStatement, targetType);
       }
       else {
         sb.append(loadVariable(MarshallingGenUtil.getVarName(targetType))
@@ -410,11 +436,24 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
     }
   }
 
+  public Statement demarshallEnum(Statement valueStatement, MetaClass toType) {
+    return Stmt.invokeStatic(Enum.class, "valueOf", toType,
+            Stmt.nestedCall(valueStatement).invoke("isObject").invoke("get",
+                    SerializationParts.ENUM_STRING_VALUE).invoke("isString").invoke("stringValue"));
+  }
+
+  public Implementations.StringBuilderBuilder marshallEnum(Implementations.StringBuilderBuilder sb,
+                                                           Statement valueStatement,
+                                                           MetaClass toType) {
+    return sb.append("{\"" + SerializationParts.ENCODED_TYPE
+            + "\":\"" + toType.getFullyQualifiedName() + "\",\"" + SerializationParts.ENUM_STRING_VALUE + "\":\"")
+            .append(Stmt.nestedCall(valueStatement).invoke("name")).append("\"}");
+  }
+
+
   public Statement unwrapJSON(Statement valueStatement, MetaClass toType) {
     if (toType.isEnum()) {
-      return Stmt.invokeStatic(MarshallUtil.class, "demarshalEnum", toType,
-              Stmt.nestedCall(valueStatement).invoke("isObject"),
-              SerializationParts.ENUM_STRING_VALUE);
+      return demarshallEnum(valueStatement, toType);
     }
     else {
       return Stmt.create(context.getCodegenContext())

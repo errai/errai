@@ -185,7 +185,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
     for (Class<?> cls : exposedFromScanner) {
       for (Class<?> decl : cls.getDeclaredClasses()) {
-        if (decl.isEnum() || decl.isSynthetic()) continue;
+        if (decl.isSynthetic()) continue;
 
         exposedClasses.add(decl);
       }
@@ -218,7 +218,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     Map<Class<?>, Class<?>> aliasToMarshaller = new HashMap<Class<?>, Class<?>>();
 
     for (Class<?> mappedClass : exposedClasses) {
-      if (mappedClass.isEnum() || mappedClass.isSynthetic()) continue;
+      if (mappedClass.isSynthetic()) continue;
 
       Portable portable = mappedClass.getAnnotation(Portable.class);
       if (portable != null && !portable.aliasOf().equals(Object.class)) {

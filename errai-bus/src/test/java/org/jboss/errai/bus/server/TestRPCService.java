@@ -122,4 +122,9 @@ public class TestRPCService implements TestRPCServiceRemote {
   public List testInheritedDefinitionFromExistingParent(List list) {
     return list;
   }
+
+  @Override
+  public TestEnumA testNakedEnum(TestEnumA e) {
+    return e;
+  }
 }

@@ -92,6 +92,11 @@ public class DefaultJavaDefinitionMapper {
     definition.setInstantiationMapping(simpleConstructorMapping);
 
 
+    if (toMap.isEnum()) {
+      return definition;
+    }
+
+
     if (simpleConstructorMapping.getMappings().length == 0) {
       Set<MetaMethod> factoryMethods = new HashSet<MetaMethod>();
 
@@ -146,7 +151,6 @@ public class DefaultJavaDefinitionMapper {
                 + toMap.getFullyQualifiedName());
       }
     }
-
 
     Set<String> writeKeys = new HashSet<String>();
     Set<String> readKeys = new HashSet<String>();

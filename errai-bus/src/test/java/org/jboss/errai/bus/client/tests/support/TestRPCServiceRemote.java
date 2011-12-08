@@ -68,6 +68,7 @@ public interface TestRPCServiceRemote {
 
   public List testInheritedDefinitionFromExistingParent(List list);
 
+  public TestEnumA testNakedEnum(TestEnumA e);
 }
 
 
