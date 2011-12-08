@@ -321,7 +321,6 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
     boolean hasEncoded = false;
 
     int i = 0;
-    MetaClass c = toType;
     for (MemberMapping mapping : definition.getMemberMappings()) {
       if (!mapping.canRead()) {
         continue;
