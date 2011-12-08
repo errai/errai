@@ -24,19 +24,17 @@ import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
  */
 @Portable
 public class FactoryEntity {
-  private String name;
-  private int age;
+  private final String name;
+  private final int age;
 
-  private FactoryEntity() {
+  private FactoryEntity(final String name, final int age) {
+    this.name = name;
+    this.age = age;
   }
 
   public static FactoryEntity create(@MapsTo("name") String name, @MapsTo("age") int age) {
-    FactoryEntity entity = new FactoryEntity();
-    entity.name = name;
-    entity.age = age;
-    return entity;
+    return new FactoryEntity(name, age);
   }
-
 
   public String getName() {
     return name;
