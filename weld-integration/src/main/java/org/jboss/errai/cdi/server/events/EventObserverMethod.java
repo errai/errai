@@ -27,11 +27,11 @@ import javax.enterprise.inject.spi.ObserverMethod;
 
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.cdi.server.ContextManager;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
-import org.jboss.errai.cdi.server.ContextManager;
 
 /**
  * @author Filip Rogaczewski

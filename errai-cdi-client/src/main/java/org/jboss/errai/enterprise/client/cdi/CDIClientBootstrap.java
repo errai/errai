@@ -29,7 +29,10 @@ import org.jboss.errai.enterprise.client.cdi.events.BusReadyEvent;
 import com.google.gwt.core.client.EntryPoint;
 
 /**
- * The GWT entry point
+ * The GWT entry point for the Errai CDI module
+ * 
+ * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class CDIClientBootstrap implements EntryPoint {
   public void onModuleLoad() {
@@ -47,6 +50,7 @@ public class CDIClientBootstrap implements EntryPoint {
       }
     };
 
+    bus.addPostInitTask(busReadyEvent);
 
     bus.subscribe("cdi.event:ClientDispatcher", new MessageCallback() {
       public void callback(Message message) {
@@ -61,14 +65,13 @@ public class CDIClientBootstrap implements EntryPoint {
               }
             });
             break;
-
         }
       }
     });
 
-    /**
+    /*
      * Register an initialization lister to run the bus ready event.  This will be added
-     * post-initalization, so it is designed to fire on bus reconnection events.
+     * post-initialization, so it is designed to fire on bus reconnection events.
      */
     bus.addPostInitTask(new Runnable() {
       public void run() {
@@ -79,8 +82,5 @@ public class CDIClientBootstrap implements EntryPoint {
         });
       }
     });
-
-    bus.addPostInitTask(busReadyEvent);
-
   }
 }
