@@ -69,6 +69,8 @@ public interface TestRPCServiceRemote {
   public List testInheritedDefinitionFromExistingParent(List list);
 
   public TestEnumA testNakedEnum(TestEnumA e);
+  
+  public Boron.Bean testBoron(Boron.Bean b);
 }
 
 

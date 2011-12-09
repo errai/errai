@@ -40,10 +40,6 @@ public final class Segment {
     return start;
   }
 
-  public int getEnd() {
-    return end;
-  }
-
   public int getReadCursor() {
     return read;
   }
@@ -92,21 +88,6 @@ public final class Segment {
 
   public final Condition getDataWaiting() {
     return dataWaiting;
-  }
-
-  public static void main(String[] args) {
-    Segment a = new Segment(1000, 2000);
-    a.read = 1100;
-    a.write = 1200;
-
-    System.out.println("toRead: " + a.getToRead() + "; free=" + a.getFree());
-
-    a = new Segment(1000, 2000);
-    a.read = 1100;
-    a.write = 1100;
-
-    System.out.println("toRead: " + a.getToRead() + "; free=" + a.getFree());
-
   }
 
 }

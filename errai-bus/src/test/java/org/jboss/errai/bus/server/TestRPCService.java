@@ -127,4 +127,9 @@ public class TestRPCService implements TestRPCServiceRemote {
   public TestEnumA testNakedEnum(TestEnumA e) {
     return e;
   }
+
+  @Override
+  public Boron.Bean testBoron(Boron.Bean b) {
+    return b;
+  }
 }

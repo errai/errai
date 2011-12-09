@@ -193,8 +193,8 @@ public class MarshallerGeneratorFactory {
     }
 
     for (Class<?> clazz : exposed) {
-    //  if (clazz.isEnum()) continue;
-      
+      //  if (clazz.isEnum()) continue;
+
       if (mappingContext.getDefinitionsFactory().getDefinition(clazz).getClientMarshallerClass() != null) {
         continue;
       }
@@ -209,7 +209,12 @@ public class MarshallerGeneratorFactory {
       constructor.append(loadVariable(varName).assignValue(marshaller));
 
       constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
-              .invoke("put", clazz.getCanonicalName(), loadVariable(varName)));
+              .invoke("put", clazz.getName(), loadVariable(varName)));
+
+      if (!clazz.getName().equals(clazz.getCanonicalName())) {
+        constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
+                .invoke("put", clazz.getCanonicalName(), loadVariable(varName)));
+      }
 
 
       for (Map.Entry<String, String> aliasEntry : mappingContext.getDefinitionsFactory().getMappingAliases().entrySet()) {

@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.BufferOverflowException;
-import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
@@ -126,14 +125,15 @@ public class TransmissionBuffer implements Buffer {
   }
 
   @Override
-  public void readWait(OutputStream outputStream, Segment segment) throws InterruptedException {
+  public void readWait(final OutputStream outputStream, final Segment segment) throws InterruptedException {
     final ReentrantLock lock = segment.getLock();
     lock.lockInterruptibly();
 
     try {
-      while (true) {
+      for (;;) {
         if (segment.getToRead() != 0) {
           read(outputStream, segment);
+          return;
         }
 
         Condition dataWaiting = segment.getDataWaiting();
@@ -152,9 +152,9 @@ public class TransmissionBuffer implements Buffer {
     }
   }
 
-
   @Override
-  public  void readWait(TimeUnit unit, long time, final OutputStream outputStream, final Segment segment) throws InterruptedException {
+  public  void readWait(final TimeUnit unit, final long time,
+                        final OutputStream outputStream, final Segment segment) throws InterruptedException {
     long nanos = unit.toNanos(time);
     final ReentrantLock lock = segment.getLock();
     lock.lockInterruptibly();
@@ -179,7 +179,6 @@ public class TransmissionBuffer implements Buffer {
           throw e;
         }
       }
-
     }
     finally {
       lock.unlock();
@@ -197,8 +196,8 @@ public class TransmissionBuffer implements Buffer {
   }
 
   @Override
-  public void deallocateSegment(Segment segment) {
-    int segmentNumber = segment.getStart() / segmentSize;
+  public void deallocateSegment(final Segment segment) {
+    final int segmentNumber = segment.getStart() / segmentSize;
     segmentMap[segmentNumber] = 0;
   }
 

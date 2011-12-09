@@ -185,7 +185,9 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
     for (Class<?> cls : exposedFromScanner) {
       for (Class<?> decl : cls.getDeclaredClasses()) {
-        if (decl.isSynthetic()) continue;
+        if (decl.isSynthetic()) {
+          continue;
+        }
 
         exposedClasses.add(decl);
       }

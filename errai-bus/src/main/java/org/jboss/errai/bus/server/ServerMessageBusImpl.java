@@ -21,6 +21,8 @@ import org.jboss.errai.bus.client.api.*;
 import org.jboss.errai.bus.client.api.base.*;
 import org.jboss.errai.bus.client.framework.*;
 import org.jboss.errai.bus.client.protocols.BusCommands;
+import org.jboss.errai.bus.server.io.buffers.Segment;
+import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.bus.server.api.*;
 import org.jboss.errai.bus.server.async.SchedulerService;
@@ -59,6 +61,9 @@ public class ServerMessageBusImpl implements ServerMessageBus {
   private final Map<String, RemoteMessageCallback> remoteSubscriptions = new ConcurrentHashMap<String, RemoteMessageCallback>();
 
   private final Map<QueueSession, MessageQueue> messageQueues = new ConcurrentHashMap<QueueSession, MessageQueue>();
+
+ // private final TransmissionBuffer buffer = new TransmissionBuffer(1024 * 10, 250);
+ // private final Map<QueueSession, Segment> bufferSegments = new ConcurrentHashMap<QueueSession, Segment>();
   private final Map<MessageQueue, List<Message>> deferredQueue = new ConcurrentHashMap<MessageQueue, List<Message>>();
   private final Map<String, QueueSession> sessionLookup = new ConcurrentHashMap<String, QueueSession>();
 

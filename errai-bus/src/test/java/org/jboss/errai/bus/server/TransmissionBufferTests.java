@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -130,7 +129,6 @@ public class TransmissionBufferTests extends TestCase {
   }
 
   final static int SEGMENT_COUNT = 4;
- // final static int THREADCOUNT_FOR_TEST = 50;
 
   public void testMultithreadedBufferUse() {
     final List<Thread> readingThreads = new ArrayList<Thread>();
@@ -163,7 +161,6 @@ public class TransmissionBufferTests extends TestCase {
         }
       });
     }
-
 
     final Set<String> results = new ConcurrentSkipListSet<String>();
 
@@ -201,7 +198,6 @@ public class TransmissionBufferTests extends TestCase {
         }
       });
     }
-
 
     try {
       for (Thread read : readingThreads) {

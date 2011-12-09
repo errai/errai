@@ -617,4 +617,37 @@ public class SerializationTests extends AbstractErraiTest {
     });
   }
 
+  public void testBoron() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        final Boron.Bean boron = new Boron.Bean();
+
+
+        class EqualTester {
+          public boolean isEqual(Boron.Bean r) {
+            return r != null &&
+                    r.equals(boron);
+          }
+        }
+
+        MessageBuilder.createCall(new RemoteCallback<Boron.Bean>() {
+          @Override
+          public void callback(Boron.Bean response) {
+            try {
+              assertTrue(new EqualTester().isEqual(response));
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestRPCServiceRemote.class).testBoron(boron);
+      }
+    });
+  }
+
+
 }
