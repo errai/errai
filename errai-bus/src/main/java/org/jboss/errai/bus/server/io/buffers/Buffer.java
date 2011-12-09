@@ -16,6 +16,7 @@
 
 package org.jboss.errai.bus.server.io.buffers;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.TimeUnit;
@@ -24,12 +25,11 @@ import java.util.concurrent.TimeUnit;
  * @author Mike Brock
  */
 public interface Buffer {
-  public void write(InputStream inputStream, Segment segment);
+  public void write(int writeSize, InputStream inputStream, BufferColor bufferColor) throws IOException;
 
-  public void read(OutputStream outputStream, Segment segment);
-  public void readWait(OutputStream outputStream, Segment segment) throws InterruptedException;
-  public void readWait(TimeUnit unit, long time, OutputStream outputStream, Segment segment) throws InterruptedException;
+  public void read(OutputStream outputStream, BufferColor bufferColor) throws IOException;
 
-  public Segment allocateSegment();
-  public void deallocateSegment(Segment segment);
+  public void readWait(OutputStream outputStream, BufferColor bufferColor) throws IOException, InterruptedException;
+
+  public void readWait(TimeUnit unit, long time, OutputStream outputStream, BufferColor bufferColor) throws IOException, InterruptedException;
 }

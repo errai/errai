@@ -16,11 +16,13 @@
 
 package org.jboss.errai.bus.server.io.buffers;
 
+import javax.swing.text.Segment;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.BufferOverflowException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -38,6 +40,8 @@ public class TransmissionBuffer implements Buffer {
 
   final int segmentSize;
   final int segments;
+
+  private final AtomicInteger sequenceNumber = new AtomicInteger();
 
   public TransmissionBuffer() {
     bufferSize = DEFAULT_BUFFER_SIZE;
@@ -58,66 +62,54 @@ public class TransmissionBuffer implements Buffer {
   }
 
   @Override
-  public  void write(final InputStream inputStream, final Segment segment) {
-    final ReentrantLock lock = segment.getLock();
-    lock.lock();
-    final Condition dataWaiting = segment.getDataWaiting();
+  public void write(final int writeSize, final InputStream inputStream, final BufferColor bufferColor) throws IOException {
+    final int alloc = ((writeSize + 1) / segmentSize) + 1;
+    final int seq = getNextSequence(alloc);
+    final byte color = (byte) bufferColor.getColor();
 
-    try {
-      int free = segment.getFree();
-      int lineSize = segment.getWriteLineSize();
-      int cursor = segment.getWriteCursor();
-
-      try {
-        int read;
-        while ((read = inputStream.read()) != -1) {
-          if (lineSize-- == 0) {
-            cursor = segment.getStart();
-          }
-
-          if (--free == 0) {
-            throw new BufferOverflowException();
-          }
-
-          buffer[cursor++] = (byte) read;
-        }
-      }
-      catch (IOException e) {
-        throw new RuntimeException("error reading", e);
-      }
-
-      segment.setWriteCursor(cursor);
+    /**
+     * Allocate the segments to the this color
+     */
+    for (int i = 0; i < alloc; i++) {
+      segmentMap[(seq + i) % segments] = color;
     }
-    finally {
-      dataWaiting.signal();
-      lock.unlock();
+
+    int writeCursor = seq * segmentSize;
+
+    for (int i = 0; i < writeSize; i++) {
+      buffer[writeCursor++] = (byte) inputStream.read();
     }
+    //append EOF
+    buffer[writeCursor] = -1;
+
+    /**
+     * Wake up any waiting readers.
+     */
+    bufferColor.wake();
   }
 
   @Override
-  public void read(final OutputStream outputStream, final Segment segment) {
-    final ReentrantLock lock = segment.getLock();
+  public void read(final OutputStream outputStream, final BufferColor bufferColor) throws IOException {
+    final ReentrantLock lock = bufferColor.getLock();
     lock.lock();
 
     try {
-      int toRead = segment.getToRead();
-      int lineSize = segment.getReadLineSize();
-      int cursor = segment.getReadCursor();
+      final int color = bufferColor.getColor();
 
-      try {
-        while (toRead-- != 0) {
-          if (lineSize-- == 0) {
-            cursor = segment.getStart();
+      int readSegment;
+      for (;(readSegment = getNextSegment(color, bufferColor.getSequence())) != -1; bufferColor.incrementSequence()) {
+        int readCursor = readSegment * segmentSize;
+        final int endSegment = readCursor + segmentSize;
+
+        for (; readCursor < endSegment; readCursor++) {
+          byte read = buffer[readCursor];
+          if (read == -1) {
+            break;
           }
-
-          outputStream.write(buffer[cursor++]);
+          outputStream.write(read);
         }
       }
-      catch (IOException e) {
-        throw new RuntimeException("error writing", e);
-      }
 
-      segment.setReadCursor(cursor);
     }
     finally {
       lock.unlock();
@@ -125,18 +117,20 @@ public class TransmissionBuffer implements Buffer {
   }
 
   @Override
-  public void readWait(final OutputStream outputStream, final Segment segment) throws InterruptedException {
-    final ReentrantLock lock = segment.getLock();
+  public void readWait(final OutputStream outputStream, final BufferColor bufferColor) throws InterruptedException, IOException {
+    final ReentrantLock lock = bufferColor.getLock();
     lock.lockInterruptibly();
 
     try {
-      for (;;) {
-        if (segment.getToRead() != 0) {
-          read(outputStream, segment);
+      final int color = bufferColor.getColor();
+
+      for (; ; ) {
+        if (getNextSegment(color, bufferColor.getSequence()) != -1) {
+          read(outputStream, bufferColor);
           return;
         }
 
-        Condition dataWaiting = segment.getDataWaiting();
+        Condition dataWaiting = bufferColor.getDataWaiting();
 
         try {
           dataWaiting.await();
@@ -153,18 +147,19 @@ public class TransmissionBuffer implements Buffer {
   }
 
   @Override
-  public  void readWait(final TimeUnit unit, final long time,
-                        final OutputStream outputStream, final Segment segment) throws InterruptedException {
+  public void readWait(final TimeUnit unit, final long time,
+                       final OutputStream outputStream, final BufferColor bufferColor) throws IOException, InterruptedException {
     long nanos = unit.toNanos(time);
-    final ReentrantLock lock = segment.getLock();
+    final ReentrantLock lock = bufferColor.getLock();
     lock.lockInterruptibly();
 
     try {
-      final Condition dataWaiting = segment.getDataWaiting();
+      final int color = bufferColor.getColor();
+      final Condition dataWaiting = bufferColor.getDataWaiting();
 
       for (; ; ) {
-        if (segment.getToRead() > 0) {
-          read(outputStream, segment);
+        if (getNextSegment(color, bufferColor.getSequence()) != -1) {
+          read(outputStream, bufferColor);
           return;
         }
         else if (nanos <= 0) {
@@ -172,7 +167,7 @@ public class TransmissionBuffer implements Buffer {
         }
 
         try {
-         nanos = dataWaiting.awaitNanos(nanos);
+          nanos = dataWaiting.awaitNanos(nanos);
         }
         catch (InterruptedException e) {
           dataWaiting.signal();
@@ -185,28 +180,17 @@ public class TransmissionBuffer implements Buffer {
     }
   }
 
-  @Override
-  public Segment allocateSegment() {
-    final int seg = findEmptySegment();
-    segmentMap[seg] = 1;
-
-    final int segStart = segmentSize * seg;
-
-    return new Segment(segStart, segStart + segmentSize);
-  }
-
-  @Override
-  public void deallocateSegment(final Segment segment) {
-    final int segmentNumber = segment.getStart() / segmentSize;
-    segmentMap[segmentNumber] = 0;
-  }
-
-  private int findEmptySegment() {
-    for (int i = 0; i < segments; i++) {
-      if (segmentMap[i] == 0) {
-        return i;
-      }
+  private int getNextSegment(final int color, final int index) {
+    for (int i = index; i < sequenceNumber.intValue(); i++) {
+      byte seg = segmentMap[i % segments];
+      if (seg == color) return i % segments;
+      else if (seg == 0 || i >= sequenceNumber.intValue()) break;
     }
-    throw new NoSegmentAvailableException("all " + segments + " in use");
+    return -1;
   }
+
+  private int getNextSequence(final int neededSegments) {
+    return (int) sequenceNumber.getAndAdd(neededSegments) % segments;
+  }
+
 }

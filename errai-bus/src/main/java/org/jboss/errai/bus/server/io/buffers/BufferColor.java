@@ -16,70 +16,39 @@
 
 package org.jboss.errai.bus.server.io.buffers;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Mike Brock
  */
-public final class Segment {
-  private final int start;
-  private final int end;
-  private volatile int read;
-  private volatile int write;
+public final class BufferColor {
+  private AtomicInteger sequence = new AtomicInteger();
 
+  private final int color;
   private final ReentrantLock lock = new ReentrantLock(true);
   private final Condition dataWaiting = lock.newCondition();
 
-  public Segment(int start, int end) {
-    this.read = this.write = this.start = start;
-    this.end = end;
+  public BufferColor(int color) {
+    this.color = color;
   }
 
-  public int getStart() {
-    return start;
+  public int getColor() {
+    return color;
   }
 
-  public int getReadCursor() {
-    return read;
+  public int getSequence() {
+    return sequence.intValue();
   }
 
-  public int getWriteCursor() {
-    return write;
+  public void incrementSequence() {
+    sequence.incrementAndGet();
   }
 
-  public void setReadCursor(int read) {
-    this.read = read;
-  }
 
-  public void setWriteCursor(int write) {
-    this.write = write;
-  }
-
-  public int getToRead() {
-    if (read > write) {
-      return (end - read) + (write - start);
-    }
-    else {
-      return write - read;
-    }
-  }
-
-  public int getFree() {
-    if (read < write) {
-      return end - read;
-    }
-    else {
-      return (end - start) - (read - write);
-    }
-  }
-
-  public int getWriteLineSize() {
-    return end - write;
-  }
-
-  public int getReadLineSize() {
-    return end - read;
+  public void setSequence(int s) {
+    sequence.lazySet(s);
   }
 
   public final ReentrantLock getLock() {
@@ -90,5 +59,14 @@ public final class Segment {
     return dataWaiting;
   }
 
+  public void wake() {
+    try {
+      lock.lock();
+      dataWaiting.signal();
+    }
+    finally {
+      lock.unlock();
+    }
+  }
 }
 
