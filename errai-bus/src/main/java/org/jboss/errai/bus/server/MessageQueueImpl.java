@@ -51,9 +51,6 @@ public class MessageQueueImpl implements MessageQueue {
    * done in such large chunks.
    */
   private static final int MAXIMUM_PAYLOAD_SIZE = 25;
-  
-//  private static final long DEFAULT_TRANSMISSION_WINDOW = millis(25);
-//  private static final long MAX_TRANSMISSION_WINDOW = millis(100);
 
   private final QueueSession session;
 
@@ -207,7 +204,7 @@ public class MessageQueueImpl implements MessageQueue {
     }
   }
 
-  private static final byte[] heartBeatBytes = "{ToSubject:\"ClientBus\", CommandType:\"Heartbeat\"}".getBytes();
+  private static final byte[] heartBeatBytes = "{\"ToSubject\":\"ClientBus\",\"CommandType\":\"Heartbeat\"}".getBytes();
 
   /**
    * Inserts the specified message into the queue, and returns true if it was successful

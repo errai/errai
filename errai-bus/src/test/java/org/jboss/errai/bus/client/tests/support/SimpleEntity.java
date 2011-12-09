@@ -16,6 +16,7 @@
 package org.jboss.errai.bus.client.tests.support;
 
 import org.jboss.errai.common.client.api.annotations.ExposeEntity;
+import org.jboss.errai.common.client.api.annotations.Portable;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -24,7 +25,7 @@ import java.io.Serializable;
  * @author Marcin Misiewicz
  */
 @Entity
-@ExposeEntity
+@Portable
 public class SimpleEntity extends AbstractAssignment implements Serializable {
 
   private static final long serialVersionUID = -2024995029998485978L;
