@@ -24,6 +24,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -200,7 +201,7 @@ public class TransmissionBufferTests extends TestCase {
         }
       }
 
-      
+
       List<String> resultList = new ArrayList<String>(buildResultList);
       List<String> log = new ArrayList<String>(writeLog.get(colors.get(i).getColor()));
 
@@ -241,5 +242,88 @@ public class TransmissionBufferTests extends TestCase {
     buffer.dumpSegments();
 
     assertEquals(createCount, count);
+  }
+
+
+  final static int SEGMENT_COUNT = 100;
+
+  public void testMultithreadedBufferUse() throws Exception {
+    final List<Thread> readingThreads = new ArrayList<Thread>();
+
+    final List<BufferColor> segs = new ArrayList<BufferColor>();
+
+    final TransmissionBuffer buffer = new TransmissionBuffer();
+
+    for (int i = 0; i < SEGMENT_COUNT; i++) {
+      segs.add(new BufferColor(i + 1));
+    }
+
+    final String[] writeString = {"<JIMMY>", "<CRAB>", "<KITTY>", "<DOG>"};
+
+    final int threadRunCount = 10000;
+
+    final AtomicInteger totalWrites = new AtomicInteger();
+    final AtomicInteger totalReads = new AtomicInteger();
+    
+    final CountDownLatch latch = new CountDownLatch(threadRunCount);
+
+    ScheduledThreadPoolExecutor exec = new ScheduledThreadPoolExecutor(40);
+
+    for (int i = 0; i < threadRunCount; i++) {
+      final BufferColor toContend = segs.get((int) (Math.random() * 1000) % SEGMENT_COUNT);
+
+      exec.execute(new Runnable() {
+        @Override
+        public void run() {
+          try {
+            String toWrite = writeString[(int) (Math.random() * 1000) % writeString.length];
+            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(toWrite.getBytes());
+            buffer.write(toWrite.length(), byteArrayInputStream, toContend);
+            totalWrites.incrementAndGet();
+            latch.countDown();
+          }
+          catch (IOException e) {
+            e.printStackTrace();
+          }
+        }
+      });
+    }
+
+    /**
+     * Wait a maximum of 20 seconds.
+     */
+    latch.await(20, TimeUnit.SECONDS);
+
+    for (int i = 0; i < SEGMENT_COUNT; i++) {
+      final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+      byteArrayOutputStream.reset();
+      buffer.readWait(TimeUnit.MILLISECONDS, 100, byteArrayOutputStream, segs.get(i));
+
+      String val = new String(byteArrayOutputStream.toByteArray());
+      List<String> buildResultList = new ArrayList<String>();
+
+      int st = 0;
+      for (int c = 0; c < val.length(); c++) {
+        switch (val.charAt(c)) {
+          case '>':
+            c++;
+            buildResultList.add(val.substring(st, st = c));
+        }
+      }
+
+      boolean match;
+      for (String s : buildResultList) {
+        match = false;
+        for (String testString : writeString) {
+          if (s.equals(testString)) match = true;
+        }
+        assertTrue("unrecognized test string: " + s, match);
+      }
+
+
+      totalReads.addAndGet(buildResultList.size());
+    }
+
+    assertEquals(totalWrites.intValue(), totalReads.intValue());
   }
 }

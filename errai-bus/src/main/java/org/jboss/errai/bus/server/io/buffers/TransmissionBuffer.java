@@ -20,6 +20,7 @@ import javax.swing.text.Segment;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -35,7 +36,7 @@ public class TransmissionBuffer implements Buffer {
 
   final int bufferSize;
 
-  final byte[] buffer;
+  final ByteBuffer buffer;
   final byte[] segmentMap;
 
   final int segmentSize;
@@ -48,16 +49,19 @@ public class TransmissionBuffer implements Buffer {
     segments = DEFAULT_BUFFER_SIZE / DEFAULT_SEGMENT_SIZE;
 
     segmentSize = DEFAULT_SEGMENT_SIZE;
-    buffer = new byte[bufferSize];
+    buffer = ByteBuffer.allocateDirect(bufferSize);
     segmentMap = new byte[segments];
   }
 
   public TransmissionBuffer(int segmentSize, int segments) {
-    this.bufferSize = segmentSize * segments;
+    // must pad segment size for size headers -- or the last segment may be odd-sized (that would not be good)
+    this.segmentSize = segmentSize + 4;
+    this.bufferSize = this.segmentSize * segments;
     this.segments = segments;
-    this.segmentSize = segmentSize;
 
-    buffer = new byte[bufferSize];
+
+    buffer = ByteBuffer.allocateDirect(bufferSize);
+
     segmentMap = new byte[segments];
   }
 
@@ -81,19 +85,20 @@ public class TransmissionBuffer implements Buffer {
     int writeCursor = seq * segmentSize;
 
     // encode content length.
-    buffer[writeCursor++] = (byte) ((writeSize >> 24) & 0xFF);
-    buffer[writeCursor++] = (byte) ((writeSize >> 16) & 0xFF);
-    buffer[writeCursor++] = (byte) ((writeSize >> 8) & 0xFF);
-    buffer[writeCursor++] = (byte) (writeSize & 0xFF);
+    writeChunkSize(writeCursor, writeSize);
+
+    writeCursor += 4;
 
     int end = writeCursor + writeSize;
     for (; writeCursor < end && writeCursor < bufferSize; writeCursor++) {
-      buffer[writeCursor] = (byte) inputStream.read();
+      buffer.put(writeCursor, (byte) inputStream.read());
+      //buffer[writeCursor] = (byte) inputStream.read();
     }
 
     if (writeCursor < end) {
       for (int i = 0; i < end - bufferSize; i++) {
-        buffer[i] = (byte) inputStream.read();
+        buffer.put(i, (byte) inputStream.read());
+        //   buffer[i] = (byte) inputStream.read();
       }
     }
 
@@ -106,10 +111,11 @@ public class TransmissionBuffer implements Buffer {
   private void get(int readSegment, final OutputStream outputStream, final BufferColor bufferColor) throws IOException {
     int readCursor = readSegment * segmentSize;
 
-    int readSize = (((((int) buffer[readCursor + 3]) & 0xFF) << 32) +
-            ((((int) buffer[readCursor + 2]) & 0xFF) << 40) +
-            ((((int) buffer[readCursor + 1]) & 0xFF) << 48) +
-            ((((int) buffer[readCursor]) & 0xFF) << 56));
+    if (readCursor == bufferSize) {
+      readCursor = 0;
+    }
+
+    int readSize = readChunkSize(readCursor);
 
     readCursor += 4;
 
@@ -117,12 +123,15 @@ public class TransmissionBuffer implements Buffer {
     final int contiguousSegments = (readSize + 1) / segmentSize + 1;
 
     for (; readCursor < endRead && readCursor < bufferSize; readCursor++) {
-      outputStream.write(buffer[readCursor]);
+      //   outputStream.write(buffer[readCursor]);
+      outputStream.write(buffer.get(readCursor));
     }
 
     if (readCursor < endRead) {
-      for (int i = 0; i < endRead - bufferSize; i++) {
-        outputStream.write(buffer[i]);
+      int remaining = endRead - bufferSize;
+      for (int i = 0; i < remaining; i++) {
+      //  outputStream.write(buffer[i]);
+        outputStream.write(buffer.get(readCursor));
       }
     }
 
@@ -244,12 +253,22 @@ public class TransmissionBuffer implements Buffer {
     return (int) sequenceNumber.getAndAdd(neededSegments) % segments;
   }
 
-  private int readChunkSize(int position) {
-    return (((((int) buffer[position + 3]) & 0xFF) << 32) +
-            ((((int) buffer[position + 2]) & 0xFF) << 40) +
-            ((((int) buffer[position + 1]) & 0xFF) << 48) +
-            ((((int) buffer[position]) & 0xFF) << 56));
+  private void writeChunkSize(int position, int size) {
+//    buffer[position++] = (byte) ((size >> 24) & 0xFF);
+//    buffer[position++] = (byte) ((size >> 16) & 0xFF);
+//    buffer[position++] = (byte) ((size >> 8) & 0xFF);
+//    buffer[position] = (byte) (size & 0xFF);
 
+      buffer.putInt(position, size);
+  }
+
+  private int readChunkSize(int position) {
+//    return (((((int) buffer[position + 3]) & 0xFF) << 32) +
+//            ((((int) buffer[position + 2]) & 0xFF) << 40) +
+//            ((((int) buffer[position + 1]) & 0xFF) << 48) +
+//            ((((int) buffer[position]) & 0xFF) << 56));
+
+    return buffer.getInt(position);
   }
 
   public void dumpSegments() {
@@ -263,7 +282,13 @@ public class TransmissionBuffer implements Buffer {
       int length = readChunkSize(pos);
       build.append("Segment " + i + " <color:" + (int) segmentMap[i] + ";length:" + length + ";location:" + pos + ">");
       pos += 4;
-      build.append("::").append(new String(buffer, pos, length));
+      
+      byte[] buf = new byte[length];
+      for (int x = 0; x < length; x++) {
+        buf[x] = buffer.get(pos + x);
+      }
+
+      build.append("::").append(new String(buf));
       length += 4;
 
       if (length > segmentSize) {
