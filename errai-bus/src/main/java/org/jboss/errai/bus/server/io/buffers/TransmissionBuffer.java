@@ -44,7 +44,7 @@ public class TransmissionBuffer implements Buffer {
 
   private final AtomicLong sequenceNumber = new AtomicLong();
 
-  private final ReadWriteLock segmentTableLock = new ReentrantReadWriteLock();
+ // private final ReadWriteLock segmentTableLock = new ReentrantReadWriteLock();
 
   public TransmissionBuffer() {
     bufferSize = DEFAULT_BUFFER_SIZE;
@@ -84,7 +84,7 @@ public class TransmissionBuffer implements Buffer {
   public void write(final int writeSize, final InputStream inputStream, final BufferColor bufferColor) throws IOException {
     // try to obtain a lock. if it's taken, we can proceed anyways.
     // this is to prevent partial reads of the segmentMap by readers.
-    final boolean haveLock = segmentTableLock.writeLock().tryLock();
+    final boolean haveLock = bufferColor.segmentTableLog.writeLock().tryLock();
     try {
       if (writeSize > bufferSize) {
         throw new RuntimeException("write size larger than buffer can fit");
@@ -109,7 +109,7 @@ public class TransmissionBuffer implements Buffer {
       }
     }
     finally {
-      if (haveLock) segmentTableLock.writeLock().unlock();
+      if (haveLock) bufferColor.segmentTableLog.writeLock().unlock();
     }
     /**
      * Wake up any waiting readers.
@@ -123,7 +123,7 @@ public class TransmissionBuffer implements Buffer {
                     final BufferColor bufferColor, final BufferCallback callback) throws IOException {
     // try to obtain a lock. if it's taken, we can proceed anyways.
     // this is to prevent partial reads of the segmentMap by readers.
-    final boolean haveLock = segmentTableLock.writeLock().tryLock();
+    final boolean haveLock = bufferColor.segmentTableLog.writeLock().tryLock();
     try {
       if (writeSize > bufferSize) {
         throw new RuntimeException("write size larger than buffer can fit");
@@ -149,7 +149,7 @@ public class TransmissionBuffer implements Buffer {
 
     }
     finally {
-      if (haveLock) segmentTableLock.writeLock().unlock();
+      if (haveLock) bufferColor.segmentTableLog.writeLock().unlock();
     }
     /**
      * Wake up any waiting readers.
@@ -331,7 +331,6 @@ public class TransmissionBuffer implements Buffer {
     bufferColor.lock.lockInterruptibly();
 
     try {
-      long seqExtent = sequenceNumber.get();
       long nanos = unit.toNanos(time);
 
       boolean succ = false;
@@ -339,7 +338,7 @@ public class TransmissionBuffer implements Buffer {
 
       int seg;
       for (; ; ) {
-        if ((seg = getNextSegment(bufferColor, bufferColor.getSequence(), seqExtent)) != -1) {
+        if ((seg = getNextSegment(bufferColor, bufferColor.getSequence())) != -1) {
           if (!succ) {
             callback.before(outputStream);
             succ = true;
@@ -359,7 +358,6 @@ public class TransmissionBuffer implements Buffer {
         try {
           nanos = bufferColor.dataWaiting.awaitNanos(nanos);
           callback.before(outputStream);
-          seqExtent = sequenceNumber.get();
           succ = awoken = true;
         }
         catch (InterruptedException e) {
@@ -383,7 +381,7 @@ public class TransmissionBuffer implements Buffer {
   private int getNextSegment(final BufferColor bufferColor, final long index) {
     int delta = 0;
     try {
-      segmentTableLock.readLock().lock();
+      bufferColor.segmentTableLog.readLock().lock();
       final long seq = sequenceNumber.get();
 
       final int color = bufferColor.getColor();
@@ -400,37 +398,12 @@ public class TransmissionBuffer implements Buffer {
       if (delta > 0)
         bufferColor.incrementSequence(delta);
 
-      segmentTableLock.readLock().unlock();
+      bufferColor.segmentTableLog.readLock().unlock();
     }
 
     return -1;
   }
 
-  private int getNextSegment(final BufferColor bufferColor, final long index, final long max) {
-    int delta = 0;
-    try {
-      segmentTableLock.readLock().lock();
-      final long seq = sequenceNumber.get();
-
-      final int color = bufferColor.getColor();
-
-      for (long i = index; i < seq && i < max; i++) {
-        short seg = segmentMap[(int) i % segments];
-        if (seg == color) {
-          return (int) i % segments;
-        }
-        ++delta;
-      }
-    }
-    finally {
-      if (delta > 0)
-        bufferColor.incrementSequence(delta);
-
-      segmentTableLock.readLock().unlock();
-    }
-
-    return -1;
-  }
 
 //  private int getNextSequence(final int neededSegments) {
 //    return (int) sequenceNumber.getAndAdd(neededSegments) % segments;

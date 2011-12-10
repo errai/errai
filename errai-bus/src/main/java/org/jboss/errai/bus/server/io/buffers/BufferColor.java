@@ -19,7 +19,9 @@ package org.jboss.errai.bus.server.io.buffers;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * @author Mike Brock
@@ -28,8 +30,11 @@ public final class BufferColor {
   private final AtomicLong sequence = new AtomicLong();
 
   private final short color;
+
   final ReentrantLock lock = new ReentrantLock(true);
   final Condition dataWaiting = lock.newCondition();
+  final ReadWriteLock segmentTableLog = new ReentrantReadWriteLock(true);
+
 
   public BufferColor(int color) {
     this.color = (short) color;
