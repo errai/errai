@@ -29,6 +29,8 @@ public interface MessageQueue {
 
   boolean offer(Message message) throws IOException;
 
+  void wake();
+
   void setActivationCallback(QueueActivationCallback activationCallback);
 
   QueueActivationCallback getActivationCallback();

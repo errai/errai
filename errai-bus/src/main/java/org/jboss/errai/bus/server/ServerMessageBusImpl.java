@@ -25,6 +25,8 @@ import org.jboss.errai.bus.server.api.*;
 import org.jboss.errai.bus.server.async.SchedulerService;
 import org.jboss.errai.bus.server.async.SimpleSchedulerService;
 import org.jboss.errai.bus.server.async.TimedTask;
+import org.jboss.errai.bus.server.io.BufferHelper;
+import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.common.client.protocols.MessageParts;
@@ -64,9 +66,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
   private final Map<QueueSession, MessageQueue> messageQueues = new ConcurrentHashMap<QueueSession, MessageQueue>();
 
-
-  // private final TransmissionBuffer buffer = new TransmissionBuffer(1024 * 10, 250);
-  // private final Map<QueueSession, BufferColor> bufferSegments = new ConcurrentHashMap<QueueSession, BufferColor>();
   private final Map<MessageQueue, List<Message>> deferredQueue = new ConcurrentHashMap<MessageQueue, List<Message>>();
   private final Map<String, QueueSession> sessionLookup = new ConcurrentHashMap<String, QueueSession>();
 
@@ -490,7 +489,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
   }
 
   private void enqueueForDelivery(final MessageQueue queue, final Message message) {
-
     try {
       if (queue != null && isAnyoneListening(queue, message.getSubject())) {
         queue.offer(message);
@@ -681,8 +679,22 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     private final Queue<MessageQueue> queues = new ConcurrentLinkedQueue<MessageQueue>();
 
     public void callback(Message message) {
-      for (MessageQueue q : queues) {
-        send(q, message, true);
+      if (!queues.isEmpty() && queues.size() == messageQueues.size() && queues.size() > 1) {
+        // all queues are listening to this subject. therefore we can save memory and time by
+        // writing to the broadcast color on the buffer
+        try {
+          BufferHelper.encodeAndWrite(transmissionbuffer, BufferColor.getAllBuffersColor(), message);
+          for (MessageQueue q : queues) q.wake();
+        }
+        catch (IOException e) {
+          throw new RuntimeException("transmission error", e);
+
+        }
+      }
+      else {
+        for (MessageQueue q : queues) {
+          send(q, message, true);
+        }
       }
     }
 

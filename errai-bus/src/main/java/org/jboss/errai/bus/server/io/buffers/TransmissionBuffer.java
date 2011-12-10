@@ -152,7 +152,7 @@ public class TransmissionBuffer implements Buffer {
     /**
      * Wake up any waiting readers.
      */
-    bufferColor.wake();
+    bufferColor.wakeLazy();
   }
 
   private void get(int readSegment, final OutputStream outputStream, final BufferColor bufferColor) throws IOException {
@@ -384,7 +384,7 @@ public class TransmissionBuffer implements Buffer {
 
       for (long i = index; i < seq; i++) {
         short seg = segmentMap[(int) i % segments];
-        if (seg == color) {
+        if (seg == color || seg == Short.MIN_VALUE) {
           return (int) i % segments;
         }
         ++delta;

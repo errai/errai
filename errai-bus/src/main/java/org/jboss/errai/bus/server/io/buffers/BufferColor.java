@@ -26,7 +26,26 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 /**
  * @author Mike Brock
  */
-public final class BufferColor {
+public class BufferColor {
+
+  // an automatic counter to ensure each buffer has a unique color
+  private static final AtomicInteger bufferColorCounter = new AtomicInteger();
+
+  private static final BufferColor allBuffersColor = new BufferColor(Short.MIN_VALUE) {
+    @Override
+    public void wake() {
+      if (lock.tryLock()) {
+        dataWaiting.signalAll();
+        lock.unlock();
+      }
+    }
+  };
+
+
+  /**
+   * start class members *
+   */
+
   private final AtomicLong sequence = new AtomicLong();
 
   private final short color;
@@ -35,14 +54,6 @@ public final class BufferColor {
   final Condition dataWaiting = lock.newCondition();
   final ReadWriteLock segmentTableLog = new ReentrantReadWriteLock(true);
 
-
-  public BufferColor(int color) {
-    this.color = (short) color;
-  }
-
-  public BufferColor(short color) {
-    this.color = color;
-  }
 
   public short getColor() {
     return color;
@@ -56,10 +67,34 @@ public final class BufferColor {
     sequence.addAndGet(delta);
   }
 
+  public void wakeLazy() {
+    if (lock.tryLock()) {
+      dataWaiting.signal();
+      lock.unlock();
+    }
+  }
+
   public void wake() {
     lock.lock();
     dataWaiting.signal();
     lock.unlock();
+  }
+
+  private BufferColor(int color) {
+    this.color = (short) color;
+  }
+
+  private BufferColor(short color) {
+    this.color = color;
+  }
+
+
+  public static BufferColor getNewColor() {
+    return new BufferColor(bufferColorCounter.incrementAndGet());
+  }
+
+  public static BufferColor getAllBuffersColor() {
+    return allBuffersColor;
   }
 }
 

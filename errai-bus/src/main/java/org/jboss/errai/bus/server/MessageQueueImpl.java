@@ -20,6 +20,7 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueActivationCallback;
 import org.jboss.errai.bus.server.api.QueueSession;
+import org.jboss.errai.bus.server.io.BufferHelper;
 import org.jboss.errai.bus.server.io.buffers.BufferCallback;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
@@ -32,6 +33,7 @@ import java.io.OutputStream;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.lang.System.console;
 import static java.lang.System.nanoTime;
 
 /**
@@ -45,8 +47,6 @@ public class MessageQueueImpl implements MessageQueue {
   private static final long TIMEOUT = Boolean.getBoolean("org.jboss.errai.debugmode") ?
           secs(360) : secs(30);
 
-  // an automatic counter to ensure each buffer has a unique color
-  private static final AtomicInteger bufferColorCounter = new AtomicInteger();
 
   private final QueueSession session;
 
@@ -66,41 +66,9 @@ public class MessageQueueImpl implements MessageQueue {
   public MessageQueueImpl(TransmissionBuffer buffer, final QueueSession session) {
     this.buffer = buffer;
     this.session = session;
-    this.bufferColor = new BufferColor(bufferColorCounter.incrementAndGet());
+    this.bufferColor = BufferColor.getNewColor();
   }
 
-  private static class MultiMessageHandlerCallback implements BufferCallback {
-    @Override
-    public void before(OutputStream outstream) throws IOException {
-
-      outstream.write('[');
-    }
-
-    int brackCount;
-    int seg;
-    
-    @Override
-    public int each(int i, OutputStream outstream) throws IOException {
-       switch (i) {
-         case '{':
-           if (++brackCount == 1 && seg != 0) {
-              outstream.write(',');
-           }
-           break;
-         case '}':
-           brackCount--;
-           seg++;
-           break;
-       }
-      return i;
-    }
-
-    @Override
-    public void after(OutputStream outstream) throws IOException {
-      outstream.write(']');
-    }
-  }
-  
   /**
    * Gets the next message to send, and returns the <tt>Payload</tt>, which contains the current messages that
    * need to be sent from the specified bus to another.
@@ -115,10 +83,10 @@ public class MessageQueueImpl implements MessageQueue {
     }
     try {
       if (wait) {
-        buffer.readWaitNoFollow(TimeUnit.SECONDS, 45, outstream, bufferColor, new MultiMessageHandlerCallback());
+        buffer.readWaitNoFollow(TimeUnit.SECONDS, 45, outstream, bufferColor, new BufferHelper.MultiMessageHandlerCallback());
       }
       else {
-        buffer.read(outstream, bufferColor, new MultiMessageHandlerCallback());
+        buffer.read(outstream, bufferColor, new BufferHelper.MultiMessageHandlerCallback());
       }
       messageCount.set(0);
       lastTransmission = nanoTime();
@@ -128,15 +96,6 @@ public class MessageQueueImpl implements MessageQueue {
     }
   }
 
-  private static class StreamWrapper extends ByteArrayOutputStream {
-    StreamWrapper(int size) {
-      super(size);
-    }
-
-    public byte[] getRawArray() {
-      return super.buf;
-    }
-  }
 
   /**
    * Inserts the specified message into the queue, and returns true if it was successful
@@ -149,10 +108,7 @@ public class MessageQueueImpl implements MessageQueue {
       throw new QueueUnavailableException("queue is not available");
     }
 
-    StreamWrapper out = new StreamWrapper(1024);
-    JSONStreamEncoder.encode(message.getParts(), out);
-    
-    buffer.write(out.size(), new ByteArrayInputStream(out.getRawArray(), 0, out.size()), bufferColor);
+    BufferHelper.encodeAndWrite(buffer, bufferColor, message);
 
     if (messageCount.incrementAndGet() > 5 && !lastTransmissionWithin(secs(3))) {
       // disconnect this client
@@ -169,11 +125,16 @@ public class MessageQueueImpl implements MessageQueue {
     return true;
   }
 
-  //
-//  private boolean isHeartbeatNeeded() {
-//    return (nanoTime() - lastTransmission) > HEARTBEAT_PERIOD;
-//  }
-//
+  @Override
+  public void wake() {
+    try {
+      BufferHelper.encodeAndWriteNoop(buffer, bufferColor);
+    }
+    catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
   private boolean lastTransmissionWithin(long nanos) {
     return (nanoTime() - lastTransmission) < nanos;
   }

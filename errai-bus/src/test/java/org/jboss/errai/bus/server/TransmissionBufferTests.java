@@ -33,16 +33,14 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Mike Brock
  */
 public class TransmissionBufferTests extends TestCase {
-  public void testNoop() {
 
-  }
 
   public void testBufferWriteAndRead() {
     TransmissionBuffer buffer = new TransmissionBuffer();
 
     String s = "This is a test";
 
-    BufferColor colorA = new BufferColor(1);
+    BufferColor colorA = BufferColor.getNewColor();
 
 
     try {
@@ -62,7 +60,7 @@ public class TransmissionBufferTests extends TestCase {
   public void testBufferCycle() throws IOException {
     TransmissionBuffer buffer = new TransmissionBuffer(10, 2);
 
-    BufferColor color = new BufferColor(2);
+    BufferColor color = BufferColor.getNewColor();
 
     String s = "12345789";
 
@@ -87,9 +85,9 @@ public class TransmissionBufferTests extends TestCase {
   public void testColorInterleaving() throws IOException {
     TransmissionBuffer buffer = new TransmissionBuffer(10, 20);
 
-    BufferColor colorA = new BufferColor(2);
-    BufferColor colorB = new BufferColor(3);
-    BufferColor colorC = new BufferColor(4);
+    BufferColor colorA = BufferColor.getNewColor();
+    BufferColor colorB = BufferColor.getNewColor();
+    BufferColor colorC = BufferColor.getNewColor();
 
 
     String stringA = "12345678";
@@ -134,7 +132,7 @@ public class TransmissionBufferTests extends TestCase {
     final TransmissionBuffer buffer = new TransmissionBuffer();
 
     for (int i = 0; i < COLOR_COUNT; i++) {
-      colors.add(new BufferColor(i + 1));
+      colors.add(BufferColor.getNewColor());
     }
     final Random random = new Random(2234);
 
@@ -254,10 +252,8 @@ public class TransmissionBufferTests extends TestCase {
   public void testMultithreadedBufferUse() throws Exception {
     final List<BufferColor> segs = new ArrayList<BufferColor>();
     for (int i = 0; i < SEGMENT_COUNT; i++) {
-      segs.add(new BufferColor(i + 1));
+      segs.add(BufferColor.getNewColor());
     }
-
-   // final Random rand = new Random(53932);
 
     final TransmissionBuffer buffer = new TransmissionBuffer(32, 10000);
 
@@ -380,44 +376,6 @@ public class TransmissionBufferTests extends TestCase {
         }
       }
 
-      // buffer.dumpSegments();
-//      List<String> segmentsList = buffer.dumpSegmentsAsList();
-//
-//      int sum = 0;
-//      for (String s : segmentsList) {
-//        int st = -1;
-//        for (int i = 0; i < s.length(); i++) {
-//          if (Character.isDigit(s.charAt(i))) {
-//            if (st == -1) {
-//              st = i;
-//            }
-//          }
-//          else if (st != -1) {
-//            try {
-//              sum += Integer.parseInt(s.substring(st, i));
-//            }
-//            catch (Exception e) {
-//              System.out.println("couldn't parse number: '" + s + "'");
-//            }
-//            break;
-//          }
-//        }
-//
-//        //     System.out.println(s);
-//      }
-//
-//      assertEquals(expectedSum, sum);
-//
-//      System.out.println("\n ****** \n");
-//
-//
-//      for (int i = 0; i < segmentsList.size(); i++) {
-//        if (!auditLog.get(i).equals(segmentsList.get(i))) {
-//          System.out.println("discrepancy at segment:" + i + " expected: " + auditLog.get(i) + "; found: " +
-//                  segmentsList.get(i));
-//        }
-//      }
-
 
       System.out.println("Read / Write Order Analysis --> ");
       for (int i = 0; i < writeAuditLog.size() && i < readAuditLog.size(); i++) {
@@ -441,5 +399,42 @@ public class TransmissionBufferTests extends TestCase {
 
       assertEquals(totalWrites.intValue(), totalReads.intValue());
     }
+  }
+
+  public void testGloballyVisibleColors() throws IOException {
+    BufferColor colorA = BufferColor.getNewColor();
+    BufferColor colorB = BufferColor.getNewColor();
+
+    BufferColor globalColor = BufferColor.getAllBuffersColor();
+
+    TransmissionBuffer buffer = new TransmissionBuffer(10, 20);
+
+    String stringA = "12345678";
+    String stringB = "ABCDEFGH";
+    String stringC = "IJKLMNOP";
+
+
+    long start = System.currentTimeMillis();
+    for (int i = 0; i < 1000000; i++) {
+      ByteArrayInputStream bInputStream = new ByteArrayInputStream(stringA.getBytes());
+      buffer.write(stringA.length(), bInputStream, colorA);
+
+      bInputStream = new ByteArrayInputStream(stringB.getBytes());
+      buffer.write(stringB.length(), bInputStream, colorB);
+
+      bInputStream = new ByteArrayInputStream(stringC.getBytes());
+      buffer.write(stringC.length(), bInputStream, globalColor);
+
+
+      ByteArrayOutputStream bOutputStream = new ByteArrayOutputStream();
+      buffer.read(bOutputStream, colorA);
+      assertEquals(stringA + stringC, new String(bOutputStream.toByteArray()));
+
+      bOutputStream = new ByteArrayOutputStream();
+      buffer.read(bOutputStream, colorB);
+      assertEquals(stringB + stringC, new String(bOutputStream.toByteArray()));
+
+    }
+    System.out.println(System.currentTimeMillis() - start);
   }
 }
