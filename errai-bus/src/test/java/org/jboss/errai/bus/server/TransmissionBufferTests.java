@@ -18,16 +18,12 @@ package org.jboss.errai.bus.server;
 
 import junit.framework.TestCase;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
-import org.jboss.errai.bus.server.io.buffers.NoSegmentAvailableException;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.*;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -83,161 +79,167 @@ public class TransmissionBufferTests extends TestCase {
     }
     System.out.println(System.currentTimeMillis() - start);
   }
-//
-//  public void testSegmentExhaustion() {
-//    TransmissionBuffer buffer = new TransmissionBuffer(10000, 2);
-//    try {
-//      buffer.allocateSegment();
-//      buffer.allocateSegment();
-//      buffer.allocateSegment();
-//    }
-//    catch (NoSegmentAvailableException e) {
-//      e.printStackTrace();
-//      return;
-//    }
-//
-//    fail("should have thrown an exception");
-//  }
-//
-//  public void testDeallocation() {
-//
-//    TransmissionBuffer buffer = new TransmissionBuffer(10000, 2);
-//    try {
-//      buffer.allocateSegment();
-//
-//      BufferColor seg = buffer.allocateSegment();
-//      buffer.deallocateSegment(seg);
-//
-//      seg = buffer.allocateSegment();
-//      buffer.deallocateSegment(seg);
-//
-//      seg = buffer.allocateSegment();
-//      buffer.deallocateSegment(seg);
-//
-//      buffer.allocateSegment();
-//    }
-//    catch (Throwable t) {
-//      fail("through an exception");
-//    }
-//  }
-//
-//  public void testBufferOverflow() {
-//    TransmissionBuffer buffer = new TransmissionBuffer(9, 2);
-//    try {
-//      BufferColor seg = buffer.allocateSegment();
-//
-//      String s = "1234567890";
-//      ByteArrayInputStream bInputStream = new ByteArrayInputStream(s.getBytes());
-//
-//      buffer.write(bInputStream, seg);
-//    }
-//    catch (Throwable t) {
-//      return;
-//    }
-//    fail("should have thrown an exception");
-//  }
-//
-//  final static int SEGMENT_COUNT = 4;
-//
-//  public void testMultithreadedBufferUse() {
-//    final List<Thread> readingThreads = new ArrayList<Thread>();
-//
-//    final List<BufferColor> segs = new ArrayList<BufferColor>();
-//
-//    final TransmissionBuffer buffer = new TransmissionBuffer(1024 * 1024, 4);
-//
-//    for (int i = 0; i < SEGMENT_COUNT; i++) {
-//      segs.add(buffer.allocateSegment());
-//    }
-//
-//    final String writeString = "<WRITE>";
-//
-//    final int threadRunCount = 10000;
-//
-//    final AtomicInteger totalWrites = new AtomicInteger();
-//
-//    ScheduledThreadPoolExecutor exec = new ScheduledThreadPoolExecutor(100);
-//
-//    for (int i = 0; i < threadRunCount; i++) {
-//      final BufferColor toContend = segs.get((int) (Math.random() * 1000) % SEGMENT_COUNT);
-//
-//      exec.execute(new Runnable() {
-//        @Override
-//        public void run() {
-//          ByteArrayInputStream byteArrayOutputStream = new ByteArrayInputStream(writeString.getBytes());
-//          buffer.write(byteArrayOutputStream, toContend);
-//          totalWrites.incrementAndGet();
-//        }
-//      });
-//    }
-//
-//    final Set<String> results = new ConcurrentSkipListSet<String>();
-//
-//    for (int i = 0; i < SEGMENT_COUNT; i++) {
-//      final int idx = i;
-//      readingThreads.add(new Thread() {
-//        final BufferColor toRead = segs.get(idx);
-//        final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-//
-//        final StringBuilder buf = new StringBuilder();
-//
-//        @Override
-//        public void run() {
-//          final long timeout = System.currentTimeMillis() + (1000 * 10);
-//
-//
-//          while (System.currentTimeMillis() < timeout) {
-//            try {
-//              byteArrayOutputStream.reset();
-//              buffer.readWait(TimeUnit.SECONDS, 5, byteArrayOutputStream, toRead);
-//
-//              String s = new String(byteArrayOutputStream.toByteArray());
-//
-//              buf.append(s);
-//            }
-//            catch (InterruptedException e) {
-//              e.printStackTrace();
-//              throw new RuntimeException(e);
-//            }
-//          }
-//
-//          results.add(buf.toString());
-//
-//          System.out.println("Thread has exited");
-//        }
-//      });
-//    }
-//
-//    try {
-//      for (Thread read : readingThreads) {
-//        read.start();
-//      }
-//
-//      for (Thread read : readingThreads) {
-//        read.join();
-//      }
-//    }
-//    catch (InterruptedException e) {
-//      e.printStackTrace();
-//    }
-//
-//    int count = 0;
-//    for (String res : results) {
-//      for (int i = 0; i < res.length(); i += writeString.length()) {
-//        String compare = res.substring(i, i + writeString.length());
-//        if (writeString.equals(compare)) {
-//          count++;
-//        }
-//        else {
-//          throw new RuntimeException("bad string: " + compare);
-//        }
-//      }
-//    }
-//
-//    for (BufferColor seg : segs) {
-//      assertEquals(0, seg.getToRead());
-//    }
-//
-//    assertEquals(totalWrites.intValue(), count);
-//  }
+
+
+  public void testColorInterleaving() throws IOException {
+    TransmissionBuffer buffer = new TransmissionBuffer(10, 20);
+
+    BufferColor colorA = new BufferColor(2);
+    BufferColor colorB = new BufferColor(3);
+    BufferColor colorC = new BufferColor(4);
+
+
+    String stringA = "12345678";
+    String stringB = "ABCDEFGH";
+    String stringC = "IJKLMNOP";
+
+
+    long start = System.currentTimeMillis();
+    for (int i = 0; i < 1000000; i++) {
+      ByteArrayInputStream bInputStream = new ByteArrayInputStream(stringA.getBytes());
+      buffer.write(stringA.length(), bInputStream, colorA);
+
+      bInputStream = new ByteArrayInputStream(stringB.getBytes());
+      buffer.write(stringB.length(), bInputStream, colorB);
+
+      bInputStream = new ByteArrayInputStream(stringC.getBytes());
+      buffer.write(stringC.length(), bInputStream, colorC);
+
+
+      ByteArrayOutputStream bOutputStream = new ByteArrayOutputStream();
+      buffer.read(bOutputStream, colorA);
+      assertEquals(stringA, new String(bOutputStream.toByteArray()));
+
+      bOutputStream = new ByteArrayOutputStream();
+      buffer.read(bOutputStream, colorB);
+      assertEquals(stringB, new String(bOutputStream.toByteArray()));
+
+      bOutputStream = new ByteArrayOutputStream();
+      buffer.read(bOutputStream, colorC);
+      assertEquals(stringC, new String(bOutputStream.toByteArray()));
+
+    }
+    System.out.println(System.currentTimeMillis() - start);
+  }
+
+  final static int COLOR_COUNT = 10;
+
+  public void testAudited() throws Exception {
+
+    final List<BufferColor> colors = new ArrayList<BufferColor>();
+
+    final TransmissionBuffer buffer = new TransmissionBuffer();
+
+    for (int i = 0; i < COLOR_COUNT; i++) {
+      colors.add(new BufferColor(i + 1));
+    }
+    final Random random = new Random(2234);
+
+    final String[] writeString = {"<JIMMY>", "<CRAB>", "<KITTY>", "<DOG>", "<JONATHAN>"};
+
+    final Map<Integer, List<String>> writeLog = new HashMap<Integer, List<String>>();
+
+    final int createCount = 500;
+
+    final AtomicInteger totalWrites = new AtomicInteger();
+
+    List<String> results = Collections.synchronizedList(new ArrayList<String>());
+
+    for (int i = 0; i < createCount; i++) {
+      final BufferColor toContend = colors.get(random.nextInt(COLOR_COUNT));
+      assertNotNull(toContend);
+      new Runnable() {
+        @Override
+        public void run() {
+          try {
+            String toWrite = writeString[random.nextInt(writeString.length)];
+            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(toWrite.getBytes());
+            buffer.write(toWrite.getBytes().length, byteArrayInputStream, toContend);
+            totalWrites.incrementAndGet();
+
+            List<String> stack = writeLog.get(toContend.getColor());
+            if (stack == null) {
+              writeLog.put(toContend.getColor(), stack = new ArrayList<String>());
+            }
+
+            stack.add(toWrite);
+
+            System.out.println("Wrote color " + toContend.getColor() + ": " + toWrite + ". Total writes is now " + totalWrites);
+          }
+          catch (IOException e) {
+            e.printStackTrace();
+          }
+        }
+      }.run();
+    }
+
+    assertEquals(createCount, totalWrites.intValue());
+
+    AtomicInteger resultSequenceNumber = new AtomicInteger();
+
+    for (int i = 0; i < COLOR_COUNT; i++) {
+      resultSequenceNumber.incrementAndGet();
+
+      final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+      byteArrayOutputStream.reset();
+      assertEquals(0, byteArrayOutputStream.size());
+      buffer.read(byteArrayOutputStream, colors.get(i));
+      assertTrue("Expected >0 bytes; got " + byteArrayOutputStream.size(), byteArrayOutputStream.size() > 0);
+
+      String val = new String(byteArrayOutputStream.toByteArray());
+      results.add(val);
+
+      List<String> buildResultList = new ArrayList<String>();
+
+      int st = 0;
+      for (int c = 0; c < val.length(); c++) {
+        switch (val.charAt(c)) {
+          case '>':
+            c++;
+            buildResultList.add(val.substring(st, st = c));
+        }
+      }
+
+      
+      List<String> resultList = new ArrayList<String>(buildResultList);
+      List<String> log = new ArrayList<String>(writeLog.get(colors.get(i).getColor()));
+
+      while (!log.isEmpty() && !resultList.isEmpty()) {
+        String nm = log.remove(0);
+        String test = resultList.remove(0);
+        if (!nm.equals(test)) {
+          System.out.println("[" + resultSequenceNumber + "] expected : " + nm + " -- but found: " + test
+                  + " (color: " + colors.get(i).getColor() + ")");
+
+          System.out.println("  --> log: " + writeLog.get(colors.get(i).getColor()) + " vs result: " + buildResultList);
+        }
+      }
+
+
+      if (!log.isEmpty())
+        System.out.println("[" + resultSequenceNumber + "] results have missing items: " + log
+                + " (color: " + colors.get(i).getColor() + ")");
+
+      if (!resultList.isEmpty())
+        System.out.println("[" + resultSequenceNumber + "] results contain items not logged: " + resultList
+                + " (color: " + colors.get(i).getColor() + ")");
+    }
+
+    assertEquals(COLOR_COUNT, results.size());
+
+    int count = 0;
+    for (String res : results) {
+      for (int i = 0; i < res.length(); i++) {
+        if (res.charAt(i) == '<') count++;
+      }
+
+      System.out.println();
+      System.out.print(res);
+    }
+
+
+    buffer.dumpSegments();
+
+    assertEquals(createCount, count);
+  }
 }

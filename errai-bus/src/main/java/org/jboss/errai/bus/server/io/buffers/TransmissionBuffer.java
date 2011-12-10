@@ -30,8 +30,8 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author Mike Brock
  */
 public class TransmissionBuffer implements Buffer {
-  public static int DEFAULT_BUFFER_SIZE = (1024 * 1024);
-  public static int DEFAULT_MAX_SEGMENTS = 1000;
+  public static int DEFAULT_BUFFER_SIZE = (1024 * 1024) * 5;
+  public static int DEFAULT_SEGMENT_SIZE = 1024 * 8;
 
   final int bufferSize;
 
@@ -41,13 +41,13 @@ public class TransmissionBuffer implements Buffer {
   final int segmentSize;
   final int segments;
 
-  private final AtomicInteger sequenceNumber = new AtomicInteger();
+  private final AtomicLong sequenceNumber = new AtomicLong();
 
   public TransmissionBuffer() {
     bufferSize = DEFAULT_BUFFER_SIZE;
-    segments = DEFAULT_MAX_SEGMENTS;
+    segments = DEFAULT_BUFFER_SIZE / DEFAULT_SEGMENT_SIZE;
 
-    segmentSize = bufferSize / segments;
+    segmentSize = DEFAULT_SEGMENT_SIZE;
     buffer = new byte[bufferSize];
     segmentMap = new byte[segments];
   }
@@ -63,9 +63,13 @@ public class TransmissionBuffer implements Buffer {
 
   @Override
   public void write(final int writeSize, final InputStream inputStream, final BufferColor bufferColor) throws IOException {
-    final int alloc = ((writeSize + 1) / segmentSize) + 1;
+    final int alloc = ((writeSize + 4) / segmentSize) + 1;
     final int seq = getNextSequence(alloc);
     final byte color = (byte) bufferColor.getColor();
+
+    if (writeSize > bufferSize) {
+      throw new RuntimeException("write size larger than buffer can fit");
+    }
 
     /**
      * Allocate the segments to the this color
@@ -76,16 +80,54 @@ public class TransmissionBuffer implements Buffer {
 
     int writeCursor = seq * segmentSize;
 
-    for (int i = 0; i < writeSize; i++) {
-      buffer[writeCursor++] = (byte) inputStream.read();
+    // encode content length.
+    buffer[writeCursor++] = (byte) ((writeSize >> 24) & 0xFF);
+    buffer[writeCursor++] = (byte) ((writeSize >> 16) & 0xFF);
+    buffer[writeCursor++] = (byte) ((writeSize >> 8) & 0xFF);
+    buffer[writeCursor++] = (byte) (writeSize & 0xFF);
+
+    int end = writeCursor + writeSize;
+    for (; writeCursor < end && writeCursor < bufferSize; writeCursor++) {
+      buffer[writeCursor] = (byte) inputStream.read();
     }
-    //append EOF
-    buffer[writeCursor] = -1;
+
+    if (writeCursor < end) {
+      for (int i = 0; i < end - bufferSize; i++) {
+        buffer[i] = (byte) inputStream.read();
+      }
+    }
 
     /**
      * Wake up any waiting readers.
      */
     bufferColor.wake();
+  }
+
+  private void get(int readSegment, final OutputStream outputStream, final BufferColor bufferColor) throws IOException {
+    int readCursor = readSegment * segmentSize;
+
+    int readSize = (((((int) buffer[readCursor + 3]) & 0xFF) << 32) +
+            ((((int) buffer[readCursor + 2]) & 0xFF) << 40) +
+            ((((int) buffer[readCursor + 1]) & 0xFF) << 48) +
+            ((((int) buffer[readCursor]) & 0xFF) << 56));
+
+    readCursor += 4;
+
+    final int endRead = readCursor + readSize;
+    final int contiguousSegments = (readSize + 1) / segmentSize + 1;
+
+    for (; readCursor < endRead && readCursor < bufferSize; readCursor++) {
+      outputStream.write(buffer[readCursor]);
+    }
+
+    if (readCursor < endRead) {
+      for (int i = 0; i < endRead - bufferSize; i++) {
+        outputStream.write(buffer[i]);
+      }
+    }
+
+
+    bufferColor.incrementSequence(contiguousSegments);
   }
 
   @Override
@@ -94,22 +136,11 @@ public class TransmissionBuffer implements Buffer {
     lock.lock();
 
     try {
-      final int color = bufferColor.getColor();
 
       int readSegment;
-      for (;(readSegment = getNextSegment(color, bufferColor.getSequence())) != -1; bufferColor.incrementSequence()) {
-        int readCursor = readSegment * segmentSize;
-        final int endSegment = readCursor + segmentSize;
-
-        for (; readCursor < endSegment; readCursor++) {
-          byte read = buffer[readCursor];
-          if (read == -1) {
-            break;
-          }
-          outputStream.write(read);
-        }
+      while ((readSegment = getNextSegment(bufferColor, bufferColor.getSequence())) != -1) {
+        get(readSegment, outputStream, bufferColor);
       }
-
     }
     finally {
       lock.unlock();
@@ -122,12 +153,12 @@ public class TransmissionBuffer implements Buffer {
     lock.lockInterruptibly();
 
     try {
-      final int color = bufferColor.getColor();
 
       for (; ; ) {
-        if (getNextSegment(color, bufferColor.getSequence()) != -1) {
-          read(outputStream, bufferColor);
-          return;
+        int seg;
+        if ((seg = getNextSegment(bufferColor, bufferColor.getSequence())) != -1) {
+          get(seg, outputStream, bufferColor);
+          continue;
         }
 
         Condition dataWaiting = bufferColor.getDataWaiting();
@@ -154,13 +185,13 @@ public class TransmissionBuffer implements Buffer {
     lock.lockInterruptibly();
 
     try {
-      final int color = bufferColor.getColor();
       final Condition dataWaiting = bufferColor.getDataWaiting();
 
       for (; ; ) {
-        if (getNextSegment(color, bufferColor.getSequence()) != -1) {
-          read(outputStream, bufferColor);
-          return;
+        int seg;
+        if ((seg = getNextSegment(bufferColor, bufferColor.getSequence())) != -1) {
+          get(seg, outputStream, bufferColor);
+          continue;
         }
         else if (nanos <= 0) {
           return;
@@ -180,12 +211,32 @@ public class TransmissionBuffer implements Buffer {
     }
   }
 
-  private int getNextSegment(final int color, final int index) {
-    for (int i = index; i < sequenceNumber.intValue(); i++) {
-      byte seg = segmentMap[i % segments];
-      if (seg == color) return i % segments;
-      else if (seg == 0 || i >= sequenceNumber.intValue()) break;
+  /**
+   * Calculate the next segment.
+   *
+   * @param bufferColor
+   * @param index
+   * @return
+   */
+  private int getNextSegment(final BufferColor bufferColor, final int index) {
+    final int color = bufferColor.getColor();
+    final int seq = sequenceNumber.intValue();
+
+    int delta = 0;
+    try {
+      for (int i = index; i < seq; i++) {
+        byte seg = segmentMap[i % segments];
+        if (seg == color) {
+          return i % segments;
+        }
+        ++delta;
+      }
     }
+    finally {
+      if (delta > 0)
+        bufferColor.incrementSequence(delta);
+    }
+
     return -1;
   }
 
@@ -193,4 +244,36 @@ public class TransmissionBuffer implements Buffer {
     return (int) sequenceNumber.getAndAdd(neededSegments) % segments;
   }
 
+  private int readChunkSize(int position) {
+    return (((((int) buffer[position + 3]) & 0xFF) << 32) +
+            ((((int) buffer[position + 2]) & 0xFF) << 40) +
+            ((((int) buffer[position + 1]) & 0xFF) << 48) +
+            ((((int) buffer[position]) & 0xFF) << 56));
+
+  }
+
+  public void dumpSegments() {
+
+    System.out.println();
+    System.out.println("SEGMENT DUMP");
+
+    for (int i = 0; i < segmentMap.length && i < sequenceNumber.intValue(); i++) {
+      StringBuilder build = new StringBuilder();
+      int pos = i * segmentSize;
+      int length = readChunkSize(pos);
+      build.append("Segment " + i + " <color:" + (int) segmentMap[i] + ";length:" + length + ";location:" + pos + ">");
+      pos += 4;
+      build.append("::").append(new String(buffer, pos, length));
+      length += 4;
+
+      if (length > segmentSize) {
+        int segSpan = (length / segmentSize) + 1;
+
+        i += segSpan;
+      }
+
+      System.out.println(build.toString());
+    }
+
+  }
 }

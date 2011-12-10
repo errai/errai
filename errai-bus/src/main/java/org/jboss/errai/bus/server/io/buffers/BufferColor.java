@@ -17,6 +17,7 @@
 package org.jboss.errai.bus.server.io.buffers;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -24,7 +25,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author Mike Brock
  */
 public final class BufferColor {
-  private AtomicInteger sequence = new AtomicInteger();
+  private final AtomicLong sequence = new AtomicLong();
 
   private final int color;
   private final ReentrantLock lock = new ReentrantLock(true);
@@ -42,13 +43,12 @@ public final class BufferColor {
     return sequence.intValue();
   }
 
-  public void incrementSequence() {
-    sequence.incrementAndGet();
+  public void setSequence(long seq) {
+    sequence.set(seq);
   }
 
-
-  public void setSequence(int s) {
-    sequence.lazySet(s);
+  public void incrementSequence(long delta) {
+    sequence.addAndGet(delta);
   }
 
   public final ReentrantLock getLock() {
