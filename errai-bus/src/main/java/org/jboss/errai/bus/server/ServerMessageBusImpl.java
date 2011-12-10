@@ -162,7 +162,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                   messageQueues.get(session).stopQueue();
                 }
 
-                addQueue(session, queue = new MessageQueueImpl(transmissionbuffer, ServerMessageBusImpl.this, session));
+                addQueue(session, queue = new MessageQueueImpl(transmissionbuffer, session));
 
                 if (deferred != null) {
                   deferredQueue.put(queue, deferred);
@@ -508,6 +508,9 @@ public class ServerMessageBusImpl implements ServerMessageBus {
           });
         }
       }
+    }
+    catch (QueueUnavailableException e) {
+      closeQueue(queue);
     }
     catch (IOException e) {
       throw new RuntimeException("failed to enqueue message for delivery", e);

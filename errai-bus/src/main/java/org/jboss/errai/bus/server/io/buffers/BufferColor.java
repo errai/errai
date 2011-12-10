@@ -43,10 +43,6 @@ public final class BufferColor {
     return sequence.intValue();
   }
 
-  public void setSequence(long seq) {
-    sequence.set(seq);
-  }
-
   public void incrementSequence(long delta) {
     sequence.addAndGet(delta);
   }

@@ -29,14 +29,7 @@ public interface MessageQueue {
 
   boolean offer(Message message) throws IOException;
 
-  // TODO needed?
-  void scheduleActivation();
-
-  void activity();
-
   void setActivationCallback(QueueActivationCallback activationCallback);
-
-  void setSessionControl(SessionControl sessionControl);
 
   QueueActivationCallback getActivationCallback();
 
@@ -45,8 +38,6 @@ public interface MessageQueue {
   void finishInit();
 
   boolean isStale();
-
-  boolean isActive();
 
   boolean isInitialized();
 
@@ -57,6 +48,4 @@ public interface MessageQueue {
   void stopQueue();
 
   Object getActivationLock();
-
-  BufferColor getBufferColor();
 }

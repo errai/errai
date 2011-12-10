@@ -17,8 +17,10 @@
 package org.jboss.errai.bus.server;
 
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.server.api.*;
-import org.jboss.errai.bus.server.async.TimedTask;
+import org.jboss.errai.bus.server.api.MessageQueue;
+import org.jboss.errai.bus.server.api.QueueActivationCallback;
+import org.jboss.errai.bus.server.api.QueueSession;
+import org.jboss.errai.bus.server.io.buffers.BufferCallback;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
 import org.jboss.errai.marshalling.server.JSONStreamEncoder;
@@ -43,37 +45,62 @@ public class MessageQueueImpl implements MessageQueue {
   private static final long TIMEOUT = Boolean.getBoolean("org.jboss.errai.debugmode") ?
           secs(360) : secs(30);
 
+  // an automatic counter to ensure each buffer has a unique color
+  private static final AtomicInteger bufferColorCounter = new AtomicInteger();
+
   private final QueueSession session;
 
+  private volatile boolean initLock = true;
+  private volatile boolean queueRunning = true;
   private volatile long lastTransmission = nanoTime();
-  private long endWindow;
 
-  private boolean queueRunning = true;
-
-  private SessionControl sessionControl;
   private volatile QueueActivationCallback activationCallback;
 
   private final TransmissionBuffer buffer;
   private final BufferColor bufferColor;
 
-  private final ServerMessageBus bus;
-  private volatile TimedTask task;
-
-  private volatile boolean initLock = true;
   private final Object activationLock = new Object();
 
   private final AtomicInteger messageCount = new AtomicInteger();
 
-  private static final AtomicInteger bufferColorCounter = new AtomicInteger();
-
-
-  public MessageQueueImpl(TransmissionBuffer buffer, final ServerMessageBus bus, final QueueSession session) {
+  public MessageQueueImpl(TransmissionBuffer buffer, final QueueSession session) {
     this.buffer = buffer;
-    this.bus = bus;
     this.session = session;
     this.bufferColor = new BufferColor(bufferColorCounter.incrementAndGet());
   }
 
+  private static class MultiMessageHandlerCallback implements BufferCallback {
+    @Override
+    public void before(OutputStream outstream) throws IOException {
+
+      outstream.write('[');
+    }
+
+    int brackCount;
+    int seg;
+    
+    @Override
+    public int each(int i, OutputStream outstream) throws IOException {
+       switch (i) {
+         case '{':
+           if (++brackCount == 1 && seg != 0) {
+              outstream.write(',');
+           }
+           break;
+         case '}':
+           brackCount--;
+           seg++;
+           break;
+       }
+      return i;
+    }
+
+    @Override
+    public void after(OutputStream outstream) throws IOException {
+      outstream.write(']');
+    }
+  }
+  
   /**
    * Gets the next message to send, and returns the <tt>Payload</tt>, which contains the current messages that
    * need to be sent from the specified bus to another.
@@ -83,34 +110,25 @@ public class MessageQueueImpl implements MessageQueue {
    * @param outstream - output stream to write the polling results to.
    */
   public void poll(final boolean wait, final OutputStream outstream) throws IOException {
-
-    checkSession();
-
+    if (!queueRunning) {
+      throw new QueueUnavailableException("queue is not available");
+    }
     try {
-      outstream.write('[');
-
       if (wait) {
-        buffer.readWait(TimeUnit.SECONDS, 45, outstream, bufferColor);
+        buffer.readWaitNoFollow(TimeUnit.SECONDS, 45, outstream, bufferColor, new MultiMessageHandlerCallback());
       }
       else {
-        buffer.read(outstream, bufferColor);
+        buffer.read(outstream, bufferColor, new MultiMessageHandlerCallback());
       }
-
       messageCount.set(0);
-
-      outstream.write(']');
-
+      lastTransmission = nanoTime();
     }
     catch (InterruptedException e) {
       e.printStackTrace();
     }
   }
 
-  //private static final byte[] heartBeatBytes = "{\"ToSubject\":\"ClientBus\",\"CommandType\":\"Heartbeat\"}".getBytes();
-
-
   private static class StreamWrapper extends ByteArrayOutputStream {
-
     StreamWrapper(int size) {
       super(size);
     }
@@ -127,21 +145,20 @@ public class MessageQueueImpl implements MessageQueue {
    * @return true if insertion was successful
    */
   public boolean offer(final Message message) throws IOException {
-
     if (!queueRunning) {
       throw new QueueUnavailableException("queue is not available");
     }
 
-    activity();
-
     StreamWrapper out = new StreamWrapper(1024);
-    if (messageCount.intValue() > 0) {
-      out.write(',');
-    }
     JSONStreamEncoder.encode(message.getParts(), out);
+    
     buffer.write(out.size(), new ByteArrayInputStream(out.getRawArray(), 0, out.size()), bufferColor);
 
-    messageCount.incrementAndGet();
+    if (messageCount.incrementAndGet() > 5 && !lastTransmissionWithin(secs(3))) {
+      // disconnect this client
+      System.out.println("disconnecting dead client");
+      stopQueue();
+    }
 
     if (activationCallback != null) {
       synchronized (activationLock) {
@@ -152,76 +169,13 @@ public class MessageQueueImpl implements MessageQueue {
     return true;
   }
 
-  /**
-   * Schedules the activation, by sending off the queue. All message should be processed and sent once the task is
-   * processed
-   */
-  public void scheduleActivation() {
-    synchronized (activationLock) {
-      bus.getScheduler().addTask(
-              task = new TimedTask() {
-                {
-                  period = -1; // only fire once.
-                  nextRuntime = getEndOfWindow();
-                }
-
-                public void run() {
-                  if (activationCallback != null)
-                    activationCallback.activate(MessageQueueImpl.this);
-
-                  task = null;
-                }
-
-                public boolean isFinished() {
-                  return false;
-                }
-
-                @Override
-                public String toString() {
-                  return "MessageResumer";
-                }
-              }
-      );
-    }
-  }
-
-  private void checkSession() {
-    if (sessionControl != null && !sessionControl.isSessionValid()) {
-      throw new MessageQueueExpired("session has expired");
-    }
-  }
-
-  public void setSessionControl(SessionControl sessionControl) {
-    this.sessionControl = sessionControl;
-  }
-
-  /**
-   * This function indicates activity on the session, so the session knows when the last time there was activity.
-   * The <tt>MessageQueue</tt> relies on this to figure out whether or not to timeout
-   */
-  public void activity() {
-    if (sessionControl != null) sessionControl.activity();
-  }
-
-  private boolean isWindowExceeded() {
-    return nanoTime() > endWindow;
-  }
-
-  private boolean isHeartbeatNeeded() {
-    return (nanoTime() - lastTransmission) > HEARTBEAT_PERIOD;
-  }
-
-  private long getEndOfWindow() {
-    return endWindow - nanoTime();
-  }
-
-  private void descheduleTask() {
-    synchronized (activationLock) {
-      if (task != null) {
-        task.cancel(true);
-        task = null;
-      }
-    }
+  //
+//  private boolean isHeartbeatNeeded() {
+//    return (nanoTime() - lastTransmission) > HEARTBEAT_PERIOD;
+//  }
+//
+  private boolean lastTransmissionWithin(long nanos) {
+    return (nanoTime() - lastTransmission) < nanos;
   }
 
   /**
@@ -255,16 +209,7 @@ public class MessageQueueImpl implements MessageQueue {
    * @return true if the queue is stale
    */
   public boolean isStale() {
-    return !queueRunning || (!isActive() && (nanoTime() - lastTransmission) > TIMEOUT);
-  }
-
-  /**
-   * Returns true if the queue is currently active and polling
-   *
-   * @return true if the queue is actively polling
-   */
-  public boolean isActive() {
-    return true;
+    return !queueRunning || ((nanoTime() - lastTransmission) > TIMEOUT);
   }
 
 
@@ -293,24 +238,26 @@ public class MessageQueueImpl implements MessageQueue {
    * Stops the queue, closes it on the bus and clears it completely
    */
   public void stopQueue() {
-    //  queue.offer(new QueueStopMessage());
+    try {
+      queueRunning = false;
+
+      /**
+       * we write a single byte to the buffer, with the color for this queue. this is to knock any
+       * waiting thread loose and return it to the work pool.
+       */
+      buffer.write(1, new ByteArrayInputStream(new byte[]{-1}), bufferColor);
+    }
+    catch (Exception e) {
+      throw new RuntimeException("error trying to stop queue");
+    }
   }
 
   private static long secs(long secs) {
     return secs * 1000000000;
   }
 
-  private static long millis(long millis) {
-    return millis * 1000000;
-  }
-
   @Override
   public Object getActivationLock() {
     return activationLock;
-  }
-
-  @Override
-  public BufferColor getBufferColor() {
-    return null;
   }
 }
