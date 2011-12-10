@@ -58,15 +58,15 @@ public class TransmissionBufferTests extends TestCase {
   }
 
   public void testBufferCycle() throws IOException {
-    TransmissionBuffer buffer = new TransmissionBuffer(10, 2);
+    TransmissionBuffer buffer = new TransmissionBuffer(10, 5);
 
     BufferColor color = BufferColor.getNewColor();
 
-    String s = "12345789";
+    String s = "12345789012345";
 
 
     long start = System.currentTimeMillis();
-    for (int i = 0; i < 1000000; i++) {
+    for (int i = 0; i < 10000000; i++) {
       ByteArrayInputStream bInputStream = new ByteArrayInputStream(s.getBytes());
       ByteArrayOutputStream bOutputStream = new ByteArrayOutputStream();
 
@@ -436,5 +436,9 @@ public class TransmissionBufferTests extends TestCase {
 
     }
     System.out.println(System.currentTimeMillis() - start);
+  }
+
+  public static void main(String[] args) {
+    System.out.println((int) '}');
   }
 }

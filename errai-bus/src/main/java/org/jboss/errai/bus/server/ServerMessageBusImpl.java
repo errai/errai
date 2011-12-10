@@ -677,9 +677,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
   public class RemoteMessageCallback implements MessageCallback {
     private final Queue<MessageQueue> queues = new ConcurrentLinkedQueue<MessageQueue>();
+    private boolean pipeline;
 
     public void callback(Message message) {
-      if (!queues.isEmpty() && queues.size() == messageQueues.size() && queues.size() > 1) {
+      if (pipeline) {
         // all queues are listening to this subject. therefore we can save memory and time by
         // writing to the broadcast color on the buffer
         try {
@@ -688,7 +689,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
         catch (IOException e) {
           throw new RuntimeException("transmission error", e);
-
         }
       }
       else {
@@ -700,10 +700,12 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     public void addQueue(MessageQueue queue) {
       queues.add(queue);
+      pipeline =  (queues.size() == messageQueues.size());
     }
 
     public void removeQueue(MessageQueue queue) {
       queues.remove(queue);
+      pipeline =  (queues.size() == messageQueues.size());
     }
 
     public Collection<MessageQueue> getQueues() {

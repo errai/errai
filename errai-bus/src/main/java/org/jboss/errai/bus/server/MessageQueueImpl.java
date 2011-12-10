@@ -89,6 +89,7 @@ public class MessageQueueImpl implements MessageQueue {
         buffer.read(outstream, bufferColor, new BufferHelper.MultiMessageHandlerCallback());
       }
       messageCount.set(0);
+      outstream.flush();
       lastTransmission = nanoTime();
     }
     catch (InterruptedException e) {

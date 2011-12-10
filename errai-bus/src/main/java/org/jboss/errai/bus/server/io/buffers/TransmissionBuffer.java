@@ -24,8 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * @author Mike Brock
@@ -176,7 +174,7 @@ public class TransmissionBuffer implements Buffer {
     if (readCursor < endRead) {
       int remaining = endRead - bufferSize;
       for (int i = 0; i < remaining; i++) {
-        outputStream.write(buffer.get(readCursor));
+        outputStream.write(buffer.get(i));
       }
     }
 
@@ -205,7 +203,7 @@ public class TransmissionBuffer implements Buffer {
     if (readCursor < endRead) {
       int remaining = endRead - bufferSize;
       for (int i = 0; i < remaining; i++) {
-        outputStream.write(callback.each(buffer.get(readCursor), outputStream));
+        outputStream.write(callback.each(buffer.get(i), outputStream));
       }
     }
 
@@ -370,8 +368,8 @@ public class TransmissionBuffer implements Buffer {
   /**
    * Calculate the next segment.
    *
-   * @param bufferColor
-   * @param index
+   * @param bufferColor -
+   * @param index -
    * @return
    */
   private int getNextSegment(final BufferColor bufferColor, final long index) {

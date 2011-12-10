@@ -32,14 +32,13 @@ import java.io.OutputStream;
  */
 public class BufferHelper {
   public static class MultiMessageHandlerCallback implements BufferCallback {
-    @Override
-    public void before(OutputStream outstream) throws IOException {
-
-      outstream.write('[');
-    }
-
     int brackCount;
     int seg;
+
+    @Override
+    public void before(OutputStream outstream) throws IOException {
+      outstream.write('[');
+    }
 
     @Override
     public int each(int i, OutputStream outstream) throws IOException {
@@ -50,7 +49,9 @@ public class BufferHelper {
           }
           break;
         case '}':
-          brackCount--;
+          if (--brackCount < 0) {
+            i = ' ';
+          }
           seg++;
           break;
       }
@@ -59,6 +60,9 @@ public class BufferHelper {
 
     @Override
     public void after(OutputStream outstream) throws IOException {
+      if (brackCount == 1) {
+        outstream.write('}');
+      }
       outstream.write(']');
     }
   }
@@ -79,7 +83,7 @@ public class BufferHelper {
     buffer.write(out.size(), new ByteArrayInputStream(out.getRawArray(), 0, out.size()), bufferColor);
   }
 
-  private static final byte[] NOOP_ARRAY = "".getBytes();
+  private static final byte[] NOOP_ARRAY = new byte[0];
   public static void encodeAndWriteNoop(Buffer buffer, BufferColor bufferColor) throws IOException {
     buffer.write(NOOP_ARRAY.length, new ByteArrayInputStream(NOOP_ARRAY), bufferColor);
   }
