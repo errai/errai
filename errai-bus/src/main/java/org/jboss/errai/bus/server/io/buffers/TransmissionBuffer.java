@@ -44,8 +44,6 @@ public class TransmissionBuffer implements Buffer {
 
   private final AtomicLong sequenceNumber = new AtomicLong();
 
- // private final ReadWriteLock segmentTableLock = new ReentrantReadWriteLock();
-
   public TransmissionBuffer() {
     bufferSize = DEFAULT_BUFFER_SIZE;
     segments = DEFAULT_BUFFER_SIZE / DEFAULT_SEGMENT_SIZE;
@@ -293,9 +291,7 @@ public class TransmissionBuffer implements Buffer {
     bufferColor.lock.lockInterruptibly();
 
     try {
-      // long seqExtent = sequenceNumber.get();
       long nanos = unit.toNanos(time);
-
       boolean awoken = false;
 
       for (; ; ) {
@@ -404,17 +400,11 @@ public class TransmissionBuffer implements Buffer {
     return -1;
   }
 
-
-//  private int getNextSequence(final int neededSegments) {
-//    return (int) sequenceNumber.getAndAdd(neededSegments) % segments;
-//  }
-
   private void writeChunkSize(int position, int size) {
     buffer.putInt(position, size);
   }
 
   private int readChunkSize(int position) {
-
     return buffer.getInt(position);
   }
 
