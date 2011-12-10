@@ -17,6 +17,7 @@
 package org.jboss.errai.bus.server.api;
 
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.server.io.buffers.BufferColor;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -26,22 +27,18 @@ import java.util.concurrent.BlockingQueue;
 public interface MessageQueue {
   void poll(boolean wait, OutputStream stream) throws IOException;
 
-  boolean offer(Message message);
+  boolean offer(Message message) throws IOException;
 
   // TODO needed?
   void scheduleActivation();
 
   void activity();
 
-  boolean messagesWaiting();
-
   void setActivationCallback(QueueActivationCallback activationCallback);
 
   void setSessionControl(SessionControl sessionControl);
 
   QueueActivationCallback getActivationCallback();
-
-  BlockingQueue<Message> getQueue();
 
   QueueSession getSession();
 
@@ -55,11 +52,11 @@ public interface MessageQueue {
 
   void heartBeat();
 
-  boolean isWindowPolling();
-
-  void setWindowPolling(boolean windowPolling);
+  boolean messagesWaiting();
 
   void stopQueue();
 
   Object getActivationLock();
+
+  BufferColor getBufferColor();
 }

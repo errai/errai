@@ -16,13 +16,11 @@
 
 package org.jboss.errai.bus.server.io.buffers;
 
-import javax.swing.text.Segment;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
@@ -98,7 +96,6 @@ public class TransmissionBuffer implements Buffer {
     if (writeCursor < end) {
       for (int i = 0; i < end - bufferSize; i++) {
         buffer.put(i, (byte) inputStream.read());
-        //   buffer[i] = (byte) inputStream.read();
       }
     }
 
@@ -130,7 +127,6 @@ public class TransmissionBuffer implements Buffer {
     if (readCursor < endRead) {
       int remaining = endRead - bufferSize;
       for (int i = 0; i < remaining; i++) {
-      //  outputStream.write(buffer[i]);
         outputStream.write(buffer.get(readCursor));
       }
     }
@@ -162,18 +158,24 @@ public class TransmissionBuffer implements Buffer {
     lock.lockInterruptibly();
 
     try {
+      final Condition dataWaiting = bufferColor.getDataWaiting();
+      boolean awoken = false;
 
       for (; ; ) {
         int seg;
         if ((seg = getNextSegment(bufferColor, bufferColor.getSequence())) != -1) {
           get(seg, outputStream, bufferColor);
+          awoken = true;
           continue;
         }
 
-        Condition dataWaiting = bufferColor.getDataWaiting();
+        if (awoken) {
+          return;
+        }
 
         try {
           dataWaiting.await();
+          awoken = true;
         }
         catch (InterruptedException e) {
           dataWaiting.signal();
@@ -195,19 +197,26 @@ public class TransmissionBuffer implements Buffer {
 
     try {
       final Condition dataWaiting = bufferColor.getDataWaiting();
+      boolean awoken = false;
 
       for (; ; ) {
         int seg;
         if ((seg = getNextSegment(bufferColor, bufferColor.getSequence())) != -1) {
           get(seg, outputStream, bufferColor);
+          awoken = true;
           continue;
         }
-        else if (nanos <= 0) {
+
+        if (awoken || nanos <= 0) {
+          System.out.println("return");
           return;
         }
 
         try {
+          System.out.println("awaiting.");
           nanos = dataWaiting.awaitNanos(nanos);
+          awoken = true;
+          System.out.println("woke up");
         }
         catch (InterruptedException e) {
           dataWaiting.signal();
@@ -259,7 +268,7 @@ public class TransmissionBuffer implements Buffer {
 //    buffer[position++] = (byte) ((size >> 8) & 0xFF);
 //    buffer[position] = (byte) (size & 0xFF);
 
-      buffer.putInt(position, size);
+    buffer.putInt(position, size);
   }
 
   private int readChunkSize(int position) {
@@ -282,7 +291,7 @@ public class TransmissionBuffer implements Buffer {
       int length = readChunkSize(pos);
       build.append("Segment " + i + " <color:" + (int) segmentMap[i] + ";length:" + length + ";location:" + pos + ">");
       pos += 4;
-      
+
       byte[] buf = new byte[length];
       for (int x = 0; x < length; x++) {
         buf[x] = buffer.get(pos + x);

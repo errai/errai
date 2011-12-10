@@ -21,10 +21,12 @@ import org.jboss.errai.bus.server.api.QueueSession;
 import org.jboss.errai.bus.server.api.SessionEndEvent;
 import org.jboss.errai.bus.server.api.SessionEndListener;
 import org.jboss.errai.bus.server.api.SessionProvider;
+import org.jboss.errai.bus.server.io.buffers.BufferColor;
 
 import javax.servlet.http.HttpSession;
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * <tt>HttpSessionProvider</tt> implements <tt>SessionProvider</tt> as an <tt>HttpSession</tt>. It provides a getter
@@ -86,6 +88,9 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
     private String remoteQueueID;
     private boolean valid;
     private List<SessionEndListener> sessionEndListeners;
+
+    
+
 
     public HttpSessionWrapper(SessionsContainer container, String sessionId, String remoteQueueID) {
       this.container = container;

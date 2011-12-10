@@ -28,7 +28,7 @@ public final class BufferColor {
   private final AtomicLong sequence = new AtomicLong();
 
   private final int color;
-  private final ReentrantLock lock = new ReentrantLock(true);
+  private final ReentrantLock lock = new ReentrantLock(false);
   private final Condition dataWaiting = lock.newCondition();
 
   public BufferColor(int color) {
@@ -60,13 +60,9 @@ public final class BufferColor {
   }
 
   public void wake() {
-    try {
-      lock.lock();
-      dataWaiting.signal();
-    }
-    finally {
-      lock.unlock();
-    }
+    lock.lock();
+    dataWaiting.signal();
+    lock.unlock();
   }
 }
 

@@ -16,6 +16,8 @@
 
 package org.jboss.errai.bus.server.api;
 
+import org.jboss.errai.bus.server.io.buffers.BufferColor;
+
 import java.util.Collection;
 
 /**
@@ -86,4 +88,4 @@ public interface QueueSession {
    * @param listener The listener to be registered
    */
   public void addSessionEndListener(SessionEndListener listener);
-}
+  }

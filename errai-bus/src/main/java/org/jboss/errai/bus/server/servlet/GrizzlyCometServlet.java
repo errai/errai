@@ -143,9 +143,9 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
             }
           });
 
-          if (!queue.messagesWaiting()) {
+     //     if (!queue.messagesWaiting()) {
             context.setExpirationDelay(45 * 1000);
-          }
+     //     }
         }
         else {
           queue.setActivationCallback(null);

@@ -21,22 +21,24 @@ import org.jboss.errai.bus.client.api.*;
 import org.jboss.errai.bus.client.api.base.*;
 import org.jboss.errai.bus.client.framework.*;
 import org.jboss.errai.bus.client.protocols.BusCommands;
-import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.bus.server.api.*;
 import org.jboss.errai.bus.server.async.SchedulerService;
 import org.jboss.errai.bus.server.async.SimpleSchedulerService;
 import org.jboss.errai.bus.server.async.TimedTask;
+import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
+import org.jboss.errai.common.client.protocols.MessageParts;
 import org.slf4j.Logger;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversation;
-import static org.jboss.errai.common.client.protocols.MessageParts.ReplyTo;
 import static org.jboss.errai.bus.client.protocols.SecurityCommands.MessageNotDelivered;
 import static org.jboss.errai.bus.client.util.ErrorHelper.handleMessageDeliveryFailure;
+import static org.jboss.errai.common.client.protocols.MessageParts.ReplyTo;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -55,13 +57,16 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
   private final List<MessageListener> listeners = new ArrayList<MessageListener>();
 
+  private final TransmissionBuffer transmissionbuffer = new TransmissionBuffer();
+
   private final Map<String, DeliveryPlan> subscriptions = new ConcurrentHashMap<String, DeliveryPlan>();
   private final Map<String, RemoteMessageCallback> remoteSubscriptions = new ConcurrentHashMap<String, RemoteMessageCallback>();
 
   private final Map<QueueSession, MessageQueue> messageQueues = new ConcurrentHashMap<QueueSession, MessageQueue>();
 
- // private final TransmissionBuffer buffer = new TransmissionBuffer(1024 * 10, 250);
- // private final Map<QueueSession, BufferColor> bufferSegments = new ConcurrentHashMap<QueueSession, BufferColor>();
+
+  // private final TransmissionBuffer buffer = new TransmissionBuffer(1024 * 10, 250);
+  // private final Map<QueueSession, BufferColor> bufferSegments = new ConcurrentHashMap<QueueSession, BufferColor>();
   private final Map<MessageQueue, List<Message>> deferredQueue = new ConcurrentHashMap<MessageQueue, List<Message>>();
   private final Map<String, QueueSession> sessionLookup = new ConcurrentHashMap<String, QueueSession>();
 
@@ -157,7 +162,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                   messageQueues.get(session).stopQueue();
                 }
 
-                addQueue(session, queue = new MessageQueueImpl(queueSize, ServerMessageBusImpl.this, session));
+                addQueue(session, queue = new MessageQueueImpl(transmissionbuffer, ServerMessageBusImpl.this, session));
 
                 if (deferred != null) {
                   deferredQueue.put(queue, deferred);
@@ -204,10 +209,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                       .toSubject("ClientBus")
                       .command(BusCommands.FinishStateSync)
                       .noErrorHandling().sendNowWith(ServerMessageBusImpl.this, false);
-              /**
-               * Now the session is established, turn WindowPolling on.
-               */
-              getQueue(session).setWindowPolling(true);
 
               break;
           }
@@ -481,7 +482,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
         catch (QueueOverloadedException e) {
           String queueSessionId = (queue == null || queue.getSession() == null) ?
-              "(no queue session)" : "(session id=" + queue.getSession().getSessionId() + ")";
+                  "(no queue session)" : "(session id=" + queue.getSession().getSessionId() + ")";
           handleMessageDeliveryFailure(ServerMessageBusImpl.this, message, "Queue overloaded " + queueSessionId, e, false);
         }
       }
@@ -490,21 +491,26 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
   private void enqueueForDelivery(final MessageQueue queue, final Message message) {
 
-    if (queue != null && isAnyoneListening(queue, message.getSubject())) {
-      queue.offer(message);
-    }
-    else {
-      if (queue != null && !queue.isInitialized()) {
-        deferDelivery(queue, message);
+    try {
+      if (queue != null && isAnyoneListening(queue, message.getSubject())) {
+        queue.offer(message);
       }
       else {
-        delayOrFail(message, new Runnable() {
-          @Override
-          public void run() {
-            enqueueForDelivery(queue, message);
-          }
-        });
+        if (queue != null && !queue.isInitialized()) {
+          deferDelivery(queue, message);
+        }
+        else {
+          delayOrFail(message, new Runnable() {
+            @Override
+            public void run() {
+              enqueueForDelivery(queue, message);
+            }
+          });
+        }
       }
+    }
+    catch (IOException e) {
+      throw new RuntimeException("failed to enqueue message for delivery", e);
     }
   }
 
@@ -518,27 +524,30 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
   @SuppressWarnings({"SynchronizationOnLocalVariableOrMethodParameter"})
   private void drainDeferredDeliveryQueue(final MessageQueue queue) {
-    synchronized (queue) {
+    try {
+      synchronized (queue) {
+        if (deferredQueue.containsKey(queue)) {
+          List<Message> deferredMessages = deferredQueue.get(queue);
+          Iterator<Message> dmIter = deferredMessages.iterator();
 
-
-      if (deferredQueue.containsKey(queue)) {
-        List<Message> deferredMessages = deferredQueue.get(queue);
-        Iterator<Message> dmIter = deferredMessages.iterator();
-
-        Message m;
-        while (dmIter.hasNext()) {
-          if ((m = dmIter.next()).hasPart(MessageParts.PriorityProcessing.toString())) {
-            queue.offer(m);
-            dmIter.remove();
+          Message m;
+          while (dmIter.hasNext()) {
+            if ((m = dmIter.next()).hasPart(MessageParts.PriorityProcessing.toString())) {
+              queue.offer(m);
+              dmIter.remove();
+            }
           }
-        }
 
-        for (Message message : deferredQueue.get(queue)) {
-          queue.offer(message);
-        }
+          for (Message message : deferredQueue.get(queue)) {
+            queue.offer(message);
+          }
 
-        deferredQueue.remove(queue);
+          deferredQueue.remove(queue);
+        }
       }
+    }
+    catch (IOException e) {
+      throw new RuntimeException("error draining deferred delivery queue", e);
     }
   }
 
@@ -718,18 +727,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
       e.printStackTrace();
       System.out.println("Exception running listeners");
       return;
-    }
-
-
-    /**
-     * Any messages still in the queue for this subject, will now never be delivered.  So we must purge them,
-     * like the unwanted and forsaken messages they are.
-     */
-    Iterator<Message> iter = queue.getQueue().iterator();
-    while (iter.hasNext()) {
-      if (subject.equals(iter.next().getSubject())) {
-        iter.remove();
-      }
     }
   }
 

@@ -16,20 +16,19 @@
 
 package org.jboss.errai.bus.server;
 
-import org.jboss.errai.bus.client.api.HasEncoded;
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.base.QueueStopMessage;
 import org.jboss.errai.bus.server.api.*;
 import org.jboss.errai.bus.server.async.TimedTask;
+import org.jboss.errai.bus.server.io.buffers.BufferColor;
+import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
 import org.jboss.errai.marshalling.server.JSONStreamEncoder;
-import org.mvel2.util.StringAppender;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.lang.System.nanoTime;
 
@@ -44,72 +43,35 @@ public class MessageQueueImpl implements MessageQueue {
   private static final long TIMEOUT = Boolean.getBoolean("org.jboss.errai.debugmode") ?
           secs(360) : secs(30);
 
-  /**
-   * We limit the number of messages in each transmission mostly as a
-   * convenience to the client: everything we send in one go normally has to be
-   * dealt with in the AJAX callback. This can make the UI choppy when work is
-   * done in such large chunks.
-   */
-  private static final int MAXIMUM_PAYLOAD_SIZE = 25;
-
   private final QueueSession session;
 
-  private long transmissionWindow = 40;
   private volatile long lastTransmission = nanoTime();
   private long endWindow;
 
-  private int lastQueueSize = 0;
-  private boolean throttleIncoming = false;
   private boolean queueRunning = true;
 
-  private boolean _windowPolling = false;
-  private boolean windowPolling = false;
-
   private SessionControl sessionControl;
-  private QueueActivationCallback activationCallback;
-  private BlockingQueue<Message> queue;
+  private volatile QueueActivationCallback activationCallback;
 
+  private final TransmissionBuffer buffer;
+  private final BufferColor bufferColor;
 
   private final ServerMessageBus bus;
   private volatile TimedTask task;
 
-  private final Semaphore lock = new Semaphore(1, false);
   private volatile boolean initLock = true;
   private final Object activationLock = new Object();
 
+  private final AtomicInteger messageCount = new AtomicInteger();
 
-  public static class OutputStreamCapture extends OutputStream {
-    private OutputStream wrap;
-    private StringAppender buf = new StringAppender();
+  private static final AtomicInteger bufferColorCounter = new AtomicInteger();
 
 
-    public OutputStreamCapture(OutputStream wrap) {
-      this.wrap = wrap;
-    }
-
-    @Override
-    public void write(int b) throws IOException {
-      buf.append((char) b);
-      wrap.write(b);
-    }
-
-    @Override
-    public String toString() {
-      return buf.toString();
-    }
-  }
-
-  /**
-   * Initializes the message queue with an initial size and a specified bus
-   *
-   * @param queueSize - the size of the queue
-   * @param bus       - the bus that will send the messages
-   * @param session   - the session associated with the queue
-   */
-  public MessageQueueImpl(final int queueSize, final ServerMessageBus bus, final QueueSession session) {
-    this.queue = new LinkedBlockingQueue<Message>(queueSize);
+  public MessageQueueImpl(TransmissionBuffer buffer, final ServerMessageBus bus, final QueueSession session) {
+    this.buffer = buffer;
     this.bus = bus;
     this.session = session;
+    this.bufferColor = new BufferColor(bufferColorCounter.incrementAndGet());
   }
 
   /**
@@ -121,90 +83,42 @@ public class MessageQueueImpl implements MessageQueue {
    * @param outstream - output stream to write the polling results to.
    */
   public void poll(final boolean wait, final OutputStream outstream) throws IOException {
-    if (!queueRunning) {
-      JSONStreamEncoder.encode(new QueueStopMessage().getParts(), outstream);
-      return;
-    }
-
-    Message m = null;
 
     checkSession();
 
-    if (lock.tryAcquire()) {
+    try {
       outstream.write('[');
 
-      int payLoadSize = 0;
-      try {
-
-        if (wait) {
-          m = queue.poll(45, TimeUnit.SECONDS);
-
-        }
-        else {
-          m = queue.poll();
-        }
-
-        if (m instanceof HasEncoded) {
-          outstream.write(((HasEncoded) m).getEncoded().getBytes());
-        }
-        else if (m instanceof QueueStopMessage) {
-          JSONStreamEncoder.encode(m.getParts(), outstream);
-          queueRunning = false;
-          bus.closeQueue(this);
-        }
-        else if (m != null) {
-          JSONStreamEncoder.encode(m.getParts(), outstream);
-        }
-
-        if (_windowPolling) {
-          windowPolling = true;
-          _windowPolling = false;
-        }
-        else if (windowPolling) {
-          while (!queue.isEmpty() && payLoadSize < MAXIMUM_PAYLOAD_SIZE
-                  && !isWindowExceeded()) {
-            outstream.write(',');
-            if ((m = queue.poll()) instanceof HasEncoded) {
-              outstream.write(((HasEncoded) m).getEncoded().getBytes());
-            }
-            else {
-              JSONStreamEncoder.encode(m.getParts(), outstream);
-            }
-            payLoadSize++;
-          }
-        }
-
-        lastQueueSize = queue.size();
-        endWindow = (lastTransmission = nanoTime()) + transmissionWindow;
-
-        if (m == null && isHeartbeatNeeded()) {
-          outstream.write(heartBeatBytes);
-        }
-
-        outstream.write(']');
-        return;
-
+      if (wait) {
+        buffer.readWait(TimeUnit.SECONDS, 45, outstream, bufferColor);
       }
-      catch (InterruptedException e) {
-        e.printStackTrace();
+      else {
+        buffer.read(outstream, bufferColor);
       }
-      finally {
-        lock.release();
-      }
-      if (m == null && isHeartbeatNeeded()) {
-        outstream.write(heartBeatBytes);
-        outstream.write(']');
-      }
+
+      messageCount.set(0);
+
+      outstream.write(']');
 
     }
-    else if (isHeartbeatNeeded()) {
-      outstream.write('[');
-      outstream.write(heartBeatBytes);
-      outstream.write(']');
+    catch (InterruptedException e) {
+      e.printStackTrace();
     }
   }
 
-  private static final byte[] heartBeatBytes = "{\"ToSubject\":\"ClientBus\",\"CommandType\":\"Heartbeat\"}".getBytes();
+  //private static final byte[] heartBeatBytes = "{\"ToSubject\":\"ClientBus\",\"CommandType\":\"Heartbeat\"}".getBytes();
+
+
+  private static class StreamWrapper extends ByteArrayOutputStream {
+
+    StreamWrapper(int size) {
+      super(size);
+    }
+
+    public byte[] getRawArray() {
+      return super.buf;
+    }
+  }
 
   /**
    * Inserts the specified message into the queue, and returns true if it was successful
@@ -212,39 +126,30 @@ public class MessageQueueImpl implements MessageQueue {
    * @param message - the message to insert into the queue
    * @return true if insertion was successful
    */
-  public boolean offer(final Message message) {
+  public boolean offer(final Message message) throws IOException {
 
     if (!queueRunning) {
       throw new QueueUnavailableException("queue is not available");
     }
 
-    boolean b = false;
     activity();
-    try {
-      b = queue.offer(message, 1, TimeUnit.MINUTES);
-    }
-    catch (InterruptedException e) {
-      // fall-through.
-    }
 
-    if (!b) {
-      int oldSize = queue.size();
-      queue.clear();
-      throw new QueueOverloadedException(null, "queue was overloaded for too long. discarding " + oldSize + " undelievered messages.");
+    StreamWrapper out = new StreamWrapper(1024);
+    if (messageCount.intValue() > 0) {
+      out.write(',');
     }
-    else if (activationCallback != null) {
+    JSONStreamEncoder.encode(message.getParts(), out);
+    buffer.write(out.size(), new ByteArrayInputStream(out.getRawArray(), 0, out.size()), bufferColor);
+
+    messageCount.incrementAndGet();
+
+    if (activationCallback != null) {
       synchronized (activationLock) {
-        if (isWindowExceeded()) {
-          descheduleTask();
-          if (activationCallback != null) activationCallback.activate(this);
-        }
-        else if (task == null) {
-          scheduleActivation();
-        }
+        if (activationCallback != null) activationCallback.activate(this);
       }
     }
 
-    return b;
+    return true;
   }
 
   /**
@@ -320,15 +225,6 @@ public class MessageQueueImpl implements MessageQueue {
   }
 
   /**
-   * Returns true if there is a message in the queue
-   *
-   * @return true if the queue is not empty
-   */
-  public boolean messagesWaiting() {
-    return !queue.isEmpty();
-  }
-
-  /**
    * Sets the activation callback function which is called when the queue is scheduled for activation
    *
    * @param activationCallback - new activation callback function
@@ -348,14 +244,6 @@ public class MessageQueueImpl implements MessageQueue {
     return activationCallback;
   }
 
-  /**
-   * Returns the current queue that is storing the messages
-   *
-   * @return the queue containing the messages to be sent
-   */
-  public BlockingQueue<Message> getQueue() {
-    return queue;
-  }
 
   public QueueSession getSession() {
     return session;
@@ -376,12 +264,17 @@ public class MessageQueueImpl implements MessageQueue {
    * @return true if the queue is actively polling
    */
   public boolean isActive() {
-    return lock.availablePermits() == 0;
+    return true;
   }
 
 
   public boolean isInitialized() {
     return !initLock;
+  }
+
+  @Override
+  public boolean messagesWaiting() {
+    return messageCount.intValue() > 0;
   }
 
   /**
@@ -391,23 +284,6 @@ public class MessageQueueImpl implements MessageQueue {
     lastTransmission = nanoTime();
   }
 
-  /**
-   * Returns true if the window is polling
-   *
-   * @return true if the window is polling
-   */
-  public boolean isWindowPolling() {
-    return windowPolling;
-  }
-
-  /**
-   * Sets window polling
-   *
-   * @param windowPolling -
-   */
-  public void setWindowPolling(boolean windowPolling) {
-    this._windowPolling = windowPolling;
-  }
 
   public void finishInit() {
     initLock = false;
@@ -417,7 +293,7 @@ public class MessageQueueImpl implements MessageQueue {
    * Stops the queue, closes it on the bus and clears it completely
    */
   public void stopQueue() {
-    queue.offer(new QueueStopMessage());
+    //  queue.offer(new QueueStopMessage());
   }
 
   private static long secs(long secs) {
@@ -431,5 +307,10 @@ public class MessageQueueImpl implements MessageQueue {
   @Override
   public Object getActivationLock() {
     return activationLock;
+  }
+
+  @Override
+  public BufferColor getBufferColor() {
+    return null;
   }
 }
