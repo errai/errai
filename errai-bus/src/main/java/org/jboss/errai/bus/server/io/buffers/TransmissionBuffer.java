@@ -208,15 +208,12 @@ public class TransmissionBuffer implements Buffer {
         }
 
         if (awoken || nanos <= 0) {
-          System.out.println("return");
           return;
         }
 
         try {
-          System.out.println("awaiting.");
           nanos = dataWaiting.awaitNanos(nanos);
           awoken = true;
-          System.out.println("woke up");
         }
         catch (InterruptedException e) {
           dataWaiting.signal();
