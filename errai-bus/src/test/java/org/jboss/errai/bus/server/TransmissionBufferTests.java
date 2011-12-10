@@ -76,7 +76,9 @@ public class TransmissionBufferTests extends TestCase {
       buffer.read(bOutputStream, color);
 
       assertEquals(s, new String(bOutputStream.toByteArray()));
-
+//      if (i % 1000 == 0) {
+//        System.out.println(i);
+//      }
     }
     System.out.println(System.currentTimeMillis() - start);
   }
@@ -123,7 +125,7 @@ public class TransmissionBufferTests extends TestCase {
     System.out.println(System.currentTimeMillis() - start);
   }
 
-  final static int COLOR_COUNT = 10;
+  final static int COLOR_COUNT = 1;
 
   public void testAudited() throws Exception {
 
@@ -138,9 +140,11 @@ public class TransmissionBufferTests extends TestCase {
 
     final String[] writeString = {"<JIMMY>", "<CRAB>", "<KITTY>", "<DOG>", "<JONATHAN>"};
 
-    final Map<Integer, List<String>> writeLog = new HashMap<Integer, List<String>>();
+
+    final Map<Short, List<String>> writeLog = new HashMap<Short, List<String>>();
 
     final int createCount = 500;
+
 
     final AtomicInteger totalWrites = new AtomicInteger();
 
@@ -248,82 +252,194 @@ public class TransmissionBufferTests extends TestCase {
   final static int SEGMENT_COUNT = 100;
 
   public void testMultithreadedBufferUse() throws Exception {
-    final List<Thread> readingThreads = new ArrayList<Thread>();
-
     final List<BufferColor> segs = new ArrayList<BufferColor>();
-
-    final TransmissionBuffer buffer = new TransmissionBuffer();
-
     for (int i = 0; i < SEGMENT_COUNT; i++) {
       segs.add(new BufferColor(i + 1));
     }
 
-    final String[] writeString = {"<JIMMY>", "<CRAB>", "<KITTY>", "<DOG>"};
+   // final Random rand = new Random(53932);
 
-    final int threadRunCount = 10000;
-
-    final AtomicInteger totalWrites = new AtomicInteger();
-    final AtomicInteger totalReads = new AtomicInteger();
-    
-    final CountDownLatch latch = new CountDownLatch(threadRunCount);
+    final TransmissionBuffer buffer = new TransmissionBuffer(32, 10000);
 
     ScheduledThreadPoolExecutor exec = new ScheduledThreadPoolExecutor(40);
 
-    for (int i = 0; i < threadRunCount; i++) {
-      final BufferColor toContend = segs.get((int) (Math.random() * 1000) % SEGMENT_COUNT);
+    final List<String> writeAuditLog = Collections.synchronizedList(new ArrayList<String>());
+    final List<String> readAuditLog = Collections.synchronizedList(new ArrayList<String>());
 
-      exec.execute(new Runnable() {
-        @Override
-        public void run() {
-          try {
-            String toWrite = writeString[(int) (Math.random() * 1000) % writeString.length];
-            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(toWrite.getBytes());
-            buffer.write(toWrite.length(), byteArrayInputStream, toContend);
-            totalWrites.incrementAndGet();
-            latch.countDown();
-          }
-          catch (IOException e) {
-            e.printStackTrace();
-          }
-        }
-      });
+    final int createCount = 5000;
+    final String[] writeString = new String[createCount];
+
+
+    int expectedSum = 0;
+    for (int i = 0; i < createCount; i++) {
+      writeString[i] = "<:::" + i + ":::>";
+      expectedSum += i;
     }
 
-    /**
-     * Wait a maximum of 20 seconds.
-     */
-    latch.await(20, TimeUnit.SECONDS);
+    for (int outerCount = 0; outerCount < 10; outerCount++) {
+      System.out.println("round " + outerCount);
+      writeAuditLog.clear();
+      readAuditLog.clear();
 
-    for (int i = 0; i < SEGMENT_COUNT; i++) {
-      final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-      byteArrayOutputStream.reset();
-      buffer.readWait(TimeUnit.MILLISECONDS, 100, byteArrayOutputStream, segs.get(i));
 
-      String val = new String(byteArrayOutputStream.toByteArray());
-      List<String> buildResultList = new ArrayList<String>();
+      final AtomicInteger totalWrites = new AtomicInteger();
+      final AtomicInteger totalReads = new AtomicInteger();
 
-      int st = 0;
-      for (int c = 0; c < val.length(); c++) {
-        switch (val.charAt(c)) {
-          case '>':
-            c++;
-            buildResultList.add(val.substring(st, st = c));
+      final CountDownLatch latch = new CountDownLatch(createCount);
+
+      class TestReader {
+        public void read(BufferColor color, boolean wait) throws Exception {
+          final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+          byteArrayOutputStream.reset();
+          if (wait) {
+            buffer.readWait(TimeUnit.MILLISECONDS, 100, byteArrayOutputStream, color);
+          }
+          else {
+            buffer.read(byteArrayOutputStream, color);
+          }
+
+          String val = new String(byteArrayOutputStream.toByteArray());
+          List<String> buildResultList = new ArrayList<String>();
+
+          int st = 0;
+          for (int c = 0; c < val.length(); c++) {
+            switch (val.charAt(c)) {
+              case '>':
+                c++;
+                buildResultList.add(val.substring(st, st = c));
+            }
+          }
+
+          boolean match;
+          for (String s : buildResultList) {
+            match = false;
+            for (String testString : writeString) {
+              if (s.equals(testString)) match = true;
+            }
+            assertTrue("unrecognized test string: " + s, match);
+          }
+
+          readAuditLog.addAll(buildResultList);
+
+          totalReads.addAndGet(buildResultList.size());
         }
       }
 
-      boolean match;
-      for (String s : buildResultList) {
-        match = false;
-        for (String testString : writeString) {
-          if (s.equals(testString)) match = true;
+      final TestReader testReader = new TestReader();
+
+      for (int i = 0; i < createCount; i++) {
+        final int item = i;
+
+        final BufferColor toContend = segs.get(i % SEGMENT_COUNT);
+
+        exec.execute(new Runnable() {
+          @Override
+          public void run() {
+            try {
+              String toWrite = writeString[item];
+              writeAuditLog.add(toWrite);
+              ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(toWrite.getBytes());
+              buffer.write(toWrite.length(), byteArrayInputStream, toContend);
+              totalWrites.incrementAndGet();
+              latch.countDown();
+
+            }
+            catch (IOException e) {
+              e.printStackTrace();
+            }
+          }
+        });
+
+        //    if (i % 5 == 0)
+        exec.execute(new Runnable() {
+          @Override
+          public void run() {
+            try {
+              testReader.read(toContend, true);
+            }
+            catch (Exception e) {
+              e.printStackTrace();
+            }
+          }
+        });
+      }
+
+      /**
+       * Wait a maximum of 20 seconds.
+       */
+      latch.await(20, TimeUnit.SECONDS);
+
+      Thread.sleep(2000);
+
+      for (int i = 0; i < SEGMENT_COUNT; i++) {
+        try {
+          testReader.read(segs.get(i), false);
         }
-        assertTrue("unrecognized test string: " + s, match);
+        catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+
+      // buffer.dumpSegments();
+//      List<String> segmentsList = buffer.dumpSegmentsAsList();
+//
+//      int sum = 0;
+//      for (String s : segmentsList) {
+//        int st = -1;
+//        for (int i = 0; i < s.length(); i++) {
+//          if (Character.isDigit(s.charAt(i))) {
+//            if (st == -1) {
+//              st = i;
+//            }
+//          }
+//          else if (st != -1) {
+//            try {
+//              sum += Integer.parseInt(s.substring(st, i));
+//            }
+//            catch (Exception e) {
+//              System.out.println("couldn't parse number: '" + s + "'");
+//            }
+//            break;
+//          }
+//        }
+//
+//        //     System.out.println(s);
+//      }
+//
+//      assertEquals(expectedSum, sum);
+//
+//      System.out.println("\n ****** \n");
+//
+//
+//      for (int i = 0; i < segmentsList.size(); i++) {
+//        if (!auditLog.get(i).equals(segmentsList.get(i))) {
+//          System.out.println("discrepancy at segment:" + i + " expected: " + auditLog.get(i) + "; found: " +
+//                  segmentsList.get(i));
+//        }
+//      }
+
+
+      System.out.println("Read / Write Order Analysis --> ");
+      for (int i = 0; i < writeAuditLog.size() && i < readAuditLog.size(); i++) {
+        System.out.print(i + " : " + writeAuditLog.get(i) + " = " + readAuditLog.get(i));
+
+        if (writeAuditLog.get(i).equals(readAuditLog.get(i))) {
+          System.out.println();
+        }
+        else {
+          System.out.println(" ** ");
+        }
+      }
+
+      System.out.println("Read / Write Symmetry Analysis --> ");
+      for (String s : writeAuditLog) {
+        if (!readAuditLog.contains(s)) {
+          System.out.println(s + " was written, but never read");
+        }
       }
 
 
-      totalReads.addAndGet(buildResultList.size());
+      assertEquals(totalWrites.intValue(), totalReads.intValue());
     }
-
-    assertEquals(totalWrites.intValue(), totalReads.intValue());
   }
 }

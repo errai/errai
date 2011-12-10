@@ -27,32 +27,28 @@ import java.util.concurrent.locks.ReentrantLock;
 public final class BufferColor {
   private final AtomicLong sequence = new AtomicLong();
 
-  private final int color;
-  private final ReentrantLock lock = new ReentrantLock(false);
-  private final Condition dataWaiting = lock.newCondition();
+  private final short color;
+  final ReentrantLock lock = new ReentrantLock(true);
+  final Condition dataWaiting = lock.newCondition();
 
   public BufferColor(int color) {
+    this.color = (short) color;
+  }
+
+  public BufferColor(short color) {
     this.color = color;
   }
 
-  public int getColor() {
+  public short getColor() {
     return color;
   }
 
-  public int getSequence() {
-    return sequence.intValue();
+  public long getSequence() {
+    return sequence.get();
   }
 
   public void incrementSequence(long delta) {
     sequence.addAndGet(delta);
-  }
-
-  public final ReentrantLock getLock() {
-    return lock;
-  }
-
-  public final Condition getDataWaiting() {
-    return dataWaiting;
   }
 
   public void wake() {
