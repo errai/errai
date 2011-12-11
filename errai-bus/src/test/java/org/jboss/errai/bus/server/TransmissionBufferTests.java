@@ -432,8 +432,4 @@ public class TransmissionBufferTests extends TestCase {
     }
     System.out.println(System.currentTimeMillis() - start);
   }
-
-  public static void main(String[] args) {
-    System.out.println((int) '}');
-  }
 }

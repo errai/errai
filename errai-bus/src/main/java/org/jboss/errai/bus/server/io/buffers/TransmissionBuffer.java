@@ -39,12 +39,12 @@ import java.util.concurrent.atomic.AtomicLong;
  * extent of the buffer, plus the delta from the beginning of the physical buffer in memory to the closest tail.
  * </p>
  *
- * @since Errai v2.0
  * @author Mike Brock
+ * @since Errai v2.0
  */
 public class TransmissionBuffer implements Buffer {
-  public static int DEFAULT_BUFFER_SIZE = (1024 * 1024) * 20;    /* 20 Megabytes */
-  public static int DEFAULT_SEGMENT_SIZE = 1024 * 8;             /* 8 Kilobytes */
+  public static int DEFAULT_BUFFER_SIZE = (1024 * 1024) * 32;    /* 32 Megabytes */
+  public static int DEFAULT_SEGMENT_SIZE = 1024 * 16;             /* 16 Kilobytes */
 
   public static int SEGMENT_HEADER_SIZE = 2;    /* to accomodate a 16-bit short */
 
@@ -109,7 +109,7 @@ public class TransmissionBuffer implements Buffer {
 
 
   /**
-   * Writes from an {@link InputStream} into the buffer using the specified {@parm writeSize} to allocate space
+   * Writes from an {@link InputStream} into the buffer using the specified {@param writeSize} to allocate space
    * in the buffer.
    *
    * @param writeSize   the size in bytes to be allocated.
@@ -131,15 +131,19 @@ public class TransmissionBuffer implements Buffer {
 
     writeCursor += SEGMENT_HEADER_SIZE;
 
+    ByteBuffer dup = buffer.duplicate();
+    dup.position(writeCursor);
+
     // write the data to the buffer.
     int end = writeCursor + writeSize;
     for (; writeCursor < end && writeCursor < bufferSize; writeCursor++) {
-      buffer.put(writeCursor, (byte) inputStream.read());
+      dup.put((byte) inputStream.read());
     }
 
     if (writeCursor < end) {
+      dup.position(0);
       for (int i = 0; i < end - bufferSize; i++) {
-        buffer.put(i, (byte) inputStream.read());
+        dup.put((byte) inputStream.read());
       }
     }
 
@@ -176,6 +180,7 @@ public class TransmissionBuffer implements Buffer {
       while ((read = readNextChunk(head, read, bufferColor, outputStream, null)) != -1)
         lastSeq = read;
 
+      // move the tail sequence for this color up.
       bufferColor.setSequence(lastSeq);
     }
     finally {
@@ -427,9 +432,9 @@ public class TransmissionBuffer implements Buffer {
   /**
    * Allocate space on the segment table for the specified write size of the specified color.
    *
-   * @param writeSize  the size in bytes
-   * @param color      the color of the data
-   * @return           the starting byte in the main buffer where writing may bein
+   * @param writeSize the size in bytes
+   * @param color     the color of the data
+   * @return the starting byte in the main buffer where writing may bein
    */
   private int allocSegmentTable(int writeSize, short color) {
     final int allocSize = ((writeSize + 2) / segmentSize) + 1;
@@ -452,7 +457,7 @@ public class TransmissionBuffer implements Buffer {
    * @param bufferColor the buffer color
    * @param head        the head position to seek up to
    * @param segment     the segment to seek from
-   * @return
+   * @return returns an int representing the initial segment read from (note: not actually implemented yet)
    */
   private int getNextSegment(final BufferColor bufferColor, final int head, final int segment) {
     final int color = bufferColor.getColor();
@@ -516,27 +521,33 @@ public class TransmissionBuffer implements Buffer {
 
       final int endRead = readCursor + readSize;
 
+      ByteBuffer dup = buffer.duplicate();
+
       if (callback == null) {
+      dup.position(readCursor);
+
         for (; readCursor < endRead && readCursor < bufferSize; readCursor++) {
-          outputStream.write(buffer.get(readCursor));
+          outputStream.write(dup.get());
         }
 
         if (readCursor < endRead) {
+          dup.position(0);
           int remaining = endRead - bufferSize;
           for (int i = 0; i < remaining; i++) {
-            outputStream.write(buffer.get(i));
+            outputStream.write(dup.get());
           }
         }
       }
       else {
         for (; readCursor < endRead && readCursor < bufferSize; readCursor++) {
-          outputStream.write(callback.each(buffer.get(readCursor), outputStream));
+          outputStream.write(callback.each(dup.get(), outputStream));
         }
 
         if (readCursor < endRead) {
+          dup.position(0);
           int remaining = endRead - bufferSize;
           for (int i = 0; i < remaining; i++) {
-            outputStream.write(callback.each(buffer.get(i), outputStream));
+            outputStream.write(callback.each(dup.get(), outputStream));
           }
         }
       }
@@ -573,7 +584,6 @@ public class TransmissionBuffer implements Buffer {
   }
 
   public void dumpSegments() {
-
     System.out.println();
     System.out.println("SEGMENT DUMP");
 
@@ -602,6 +612,7 @@ public class TransmissionBuffer implements Buffer {
     }
   }
 
+  @SuppressWarnings("UnusedDeclaration")
   public List<String> dumpSegmentsAsList() {
     List<String> list = new ArrayList<String>();
 
