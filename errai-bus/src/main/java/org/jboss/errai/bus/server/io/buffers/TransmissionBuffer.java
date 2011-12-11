@@ -107,19 +107,6 @@ public class TransmissionBuffer implements Buffer {
     segmentMap = new short[segments];
   }
 
-  private int allocSegmentTable(int writeSize, short color) {
-    final int allocSize = ((writeSize + 2) / segmentSize) + 1;
-
-    int seq = (int) writeSequenceNumber.getAndAdd(allocSize) % segments;
-    /**
-     * Allocate the segments to the this color
-     */
-    for (int i = 0; i < allocSize; i++) {
-      segmentMap[(seq + i) % segments] = color;
-    }
-
-    return seq * segmentSize;
-  }
 
   /**
    * Writes from an {@link InputStream} into the buffer using the specified {@parm writeSize} to allocate space
@@ -435,6 +422,27 @@ public class TransmissionBuffer implements Buffer {
     finally {
       bufferColor.lock.unlock();
     }
+  }
+
+  /**
+   * Allocate space on the segment table for the specified write size of the specified color.
+   *
+   * @param writeSize  the size in bytes
+   * @param color      the color of the data
+   * @return           the starting byte in the main buffer where writing may bein
+   */
+  private int allocSegmentTable(int writeSize, short color) {
+    final int allocSize = ((writeSize + 2) / segmentSize) + 1;
+
+    int seq = (int) writeSequenceNumber.getAndAdd(allocSize) % segments;
+    /**
+     * Allocate the segments to the this color
+     */
+    for (int i = 0; i < allocSize; i++) {
+      segmentMap[(seq + i) % segments] = color;
+    }
+
+    return seq * segmentSize;
   }
 
   /**
