@@ -33,6 +33,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.LockSupport;
 
 /**
  * @author Mike Brock
@@ -41,7 +42,7 @@ public class TransmissionBufferTests extends TestCase {
 
 
   public void testBufferWriteAndRead() {
-    TransmissionBuffer buffer = new TransmissionBuffer();
+    TransmissionBuffer buffer = TransmissionBuffer.create();
 
     String s = "This is a test";
 
@@ -63,7 +64,7 @@ public class TransmissionBufferTests extends TestCase {
   }
 
   public void testBufferCycle() throws IOException {
-    TransmissionBuffer buffer = new TransmissionBuffer(10, 5);
+    TransmissionBuffer buffer = TransmissionBuffer.create(10, 5);
 
     BufferColor color = BufferColor.getNewColor();
 
@@ -84,7 +85,7 @@ public class TransmissionBufferTests extends TestCase {
 
 
   public void testColorInterleaving() throws IOException {
-    TransmissionBuffer buffer = new TransmissionBuffer(10, 20);
+    TransmissionBuffer buffer = TransmissionBuffer.create(10, 20);
 
     BufferColor colorA = BufferColor.getNewColor();
     BufferColor colorB = BufferColor.getNewColor();
@@ -130,7 +131,7 @@ public class TransmissionBufferTests extends TestCase {
 
     final List<BufferColor> colors = new ArrayList<BufferColor>();
 
-    final TransmissionBuffer buffer = new TransmissionBuffer();
+    final TransmissionBuffer buffer = TransmissionBuffer.create();
 
     for (int i = 0; i < COLOR_COUNT; i++) {
       colors.add(BufferColor.getNewColor());
@@ -248,7 +249,7 @@ public class TransmissionBufferTests extends TestCase {
   }
 
   public void testLargeOversizedSegments() {
-    final TransmissionBuffer buffer = new TransmissionBuffer();
+    final TransmissionBuffer buffer = TransmissionBuffer.create();
 
     final BufferColor colorA = BufferColor.getNewColor();
 
@@ -277,37 +278,35 @@ public class TransmissionBufferTests extends TestCase {
     }
   }
 
-  final static int SEGMENT_COUNT = 100;
+  final static int SEGMENT_COUNT = 10;
 
   public void testMultithreadedBufferUse() throws Exception {
-    final TransmissionBuffer buffer = new TransmissionBuffer();
+    final TransmissionBuffer buffer = TransmissionBuffer.create(32, 32000);
 
     final List<BufferColor> segs = new ArrayList<BufferColor>();
     for (int i = 0; i < SEGMENT_COUNT; i++) {
       segs.add(BufferColor.getNewColor());
     }
 
-
-    ScheduledThreadPoolExecutor exec = new ScheduledThreadPoolExecutor(40);
+    ScheduledThreadPoolExecutor exec = new ScheduledThreadPoolExecutor(20);
 
     final List<String> writeAuditLog = Collections.synchronizedList(new ArrayList<String>());
     final List<String> readAuditLog = Collections.synchronizedList(new ArrayList<String>());
 
-    final int createCount = 20000;
+    final int createCount = 10000;
     final String[] writeString = new String[createCount];
 
-
-//    int expectedSum = 0;
     for (int i = 0; i < createCount; i++) {
       writeString[i] = "<:::" + i + ":::>";
-//      expectedSum += i;
     }
 
+    final Random random = new Random(123456);
+
     for (int outerCount = 0; outerCount < 10; outerCount++) {
-      //     System.out.println("round " + outerCount);
+      System.out.println("Running multi-threaded stress test (" + (outerCount + 1) + ") ...");
+
       writeAuditLog.clear();
       readAuditLog.clear();
-
 
       final AtomicInteger totalWrites = new AtomicInteger();
       final AtomicInteger totalReads = new AtomicInteger();
@@ -337,6 +336,14 @@ public class TransmissionBufferTests extends TestCase {
             }
           }
 
+          if (st < val.length()) {
+            fail("malformed data: " + val);
+          }
+
+          if (val.length() > 0 && val.charAt(val.length() - 1) != '>') {
+            fail("malformed data: " + val);
+          }
+
           boolean match;
           for (String s : buildResultList) {
             match = false;
@@ -357,8 +364,6 @@ public class TransmissionBufferTests extends TestCase {
       for (int i = 0; i < createCount; i++) {
         final int item = i;
 
-        final BufferColor toContend = segs.get(i % SEGMENT_COUNT);
-
         exec.execute(new Runnable() {
           @Override
           public void run() {
@@ -366,10 +371,9 @@ public class TransmissionBufferTests extends TestCase {
               String toWrite = writeString[item];
               writeAuditLog.add(toWrite);
               ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(toWrite.getBytes());
-              buffer.write(toWrite.length(), byteArrayInputStream, toContend);
+              buffer.write(toWrite.length(), byteArrayInputStream, segs.get(item % SEGMENT_COUNT));
               totalWrites.incrementAndGet();
               latch.countDown();
-
             }
             catch (IOException e) {
               e.printStackTrace();
@@ -377,26 +381,25 @@ public class TransmissionBufferTests extends TestCase {
           }
         });
 
-        //    if (i % 5 == 0)
+        //   if (i % 5 == 0) {
         exec.execute(new Runnable() {
           @Override
           public void run() {
             try {
-              testReader.read(toContend, true);
+              testReader.read(segs.get(random.nextInt(SEGMENT_COUNT)), true);
             }
             catch (Exception e) {
               e.printStackTrace();
             }
           }
         });
+        //  }
       }
 
       /**
        * Wait a maximum of 20 seconds.
        */
       latch.await(20, TimeUnit.SECONDS);
-
-      Thread.sleep(2000);
 
       for (int i = 0; i < SEGMENT_COUNT; i++) {
         try {
@@ -407,28 +410,73 @@ public class TransmissionBufferTests extends TestCase {
         }
       }
 
+      class ReadWriteOrderAnalysis {
+        public void analyze() {
+          System.out.println("Read / Write Order Analysis ...  ");
+          for (int i = 0; i < writeAuditLog.size() && i < readAuditLog.size(); i++) {
+            System.out.print(i + " : " + writeAuditLog.get(i) + " = " + readAuditLog.get(i));
 
-//      System.out.println("Read / Write Order Analysis --> ");
-//      for (int i = 0; i < writeAuditLog.size() && i < readAuditLog.size(); i++) {
-//       System.out.print(i + " : " + writeAuditLog.get(i) + " = " + readAuditLog.get(i));
-//
-//        if (writeAuditLog.get(i).equals(readAuditLog.get(i))) {
-//          System.out.println();
-//        }
-//        else {
-//          System.out.println(" ** ");
-//        }
-//      }
+            if (writeAuditLog.get(i).equals(readAuditLog.get(i))) {
+              System.out.println();
+            }
+            else {
+              System.out.println(" ** ");
+            }
+          }
+        }
+      }
 
-      System.out.println("Read / Write Symmetry Analysis --> ");
-      for (String s : writeAuditLog) {
-        if (!readAuditLog.contains(s)) {
-          System.out.println(s + " was written, but never read");
+      if (totalWrites.intValue() != totalReads.intValue()) {
+        /**
+         * Double check that there isn't anything un-read.
+         */
+
+        LockSupport.parkNanos(100000);
+
+        for (int i = 0; i < SEGMENT_COUNT; i++) {
+          try {
+            testReader.read(segs.get(i), false);
+          }
+          catch (Exception e) {
+            e.printStackTrace();
+          }
+        }
+
+        if (totalWrites.intValue() != totalReads.intValue()) {
+          new ReadWriteOrderAnalysis().analyze();
+          fail("(" + (outerCount + 1) + ") different number of reads and writes (writes=" + totalWrites + ";reads=" + totalReads + ")");
         }
       }
 
 
       assertEquals(totalWrites.intValue(), totalReads.intValue());
+
+      System.out.println("Read / Write Symmetry Analysis ... ");
+      for (String s : writeAuditLog) {
+        if (!readAuditLog.contains(s)) {
+          Collection<String> leftDiff = new ArrayList<String>(writeAuditLog);
+          leftDiff.removeAll(readAuditLog);
+
+          Collection<String> rightDiff = new ArrayList<String>(readAuditLog);
+          rightDiff.removeAll(writeAuditLog);
+
+          Set<String> uniqueReads = new HashSet<String>(readAuditLog);
+
+          List<String> duplicates = new ArrayList<String>(readAuditLog);
+          if (uniqueReads.size() < readAuditLog.size()) {
+            for (String str : uniqueReads) {
+              duplicates.remove(duplicates.indexOf(str));
+            }
+          }
+
+          new ReadWriteOrderAnalysis().analyze();
+
+          fail(s + " was written, but never read (leftDiff=" + leftDiff + ";rightDiff=" + rightDiff
+                  + ";duplicatesInReadLog=" + duplicates + ")");
+        }
+      }
+
+      System.out.println("Done.\n");
     }
   }
 
@@ -438,7 +486,7 @@ public class TransmissionBufferTests extends TestCase {
 
     BufferColor globalColor = BufferColor.getAllBuffersColor();
 
-    TransmissionBuffer buffer = new TransmissionBuffer(5, 2500);
+    TransmissionBuffer buffer = TransmissionBuffer.create(5, 2500);
 
     String stringA = "12345678";
     String stringB = "ABCDEFGH";

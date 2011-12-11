@@ -22,7 +22,6 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -44,8 +43,8 @@ import java.util.concurrent.atomic.AtomicLong;
  * @since Errai v2.0
  */
 public class TransmissionBuffer implements Buffer {
-  public static int DEFAULT_BUFFER_SIZE = (1024 * 1024) * 32;    /* 32 Megabytes */
   public static int DEFAULT_SEGMENT_SIZE = 1024 * 16;             /* 16 Kilobytes */
+  public static int DEFAULT_BUFFER_SIZE = 2048;                   /* 2048 x 16kb = 32 Megabytes */
 
   public static int SEGMENT_HEADER_SIZE = 4;    /* to accomodate a 16-bit short */
 
@@ -86,28 +85,62 @@ public class TransmissionBuffer implements Buffer {
    */
   private final AtomicLong headSequence = new AtomicLong();
 
-  private ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
+  private TransmissionBuffer(boolean directBuffer, int segmentSize, int segments) {
+    // must pad segment size for size headers -- or the last segment may be odd-sized (that would not be good)
+    this.segmentSize = segmentSize;
+    this.bufferSize = segmentSize * segments;
+    this.segments = segments;
 
-  public TransmissionBuffer() {
-    // a bunch of silly defaults that I made up
-    bufferSize = DEFAULT_BUFFER_SIZE;
-    segments = DEFAULT_BUFFER_SIZE / DEFAULT_SEGMENT_SIZE;
+    if (directBuffer) {
+      buffer = ByteBuffer.allocateDirect(bufferSize);
+    }
+    else {
+      buffer = ByteBuffer.allocate(bufferSize);
+    }
 
-    segmentSize = DEFAULT_SEGMENT_SIZE;
-    buffer = ByteBuffer.allocateDirect(bufferSize);
     segmentMap = new short[segments];
   }
 
-  public TransmissionBuffer(int segmentSize, int segments) {
-    // must pad segment size for size headers -- or the last segment may be odd-sized (that would not be good)
-    this.segmentSize = segmentSize + SEGMENT_HEADER_SIZE;
-    this.bufferSize = this.segmentSize * segments;
-    this.segments = segments;
+  /**
+   * Creates a transmission buffer with the default segment and buffer size, using a regular heap allocated buffer.
+   *
+   * @return an instance of the transmission buffer.
+   */
+  public static TransmissionBuffer create() {
+    return new TransmissionBuffer(false, DEFAULT_SEGMENT_SIZE, DEFAULT_BUFFER_SIZE);
+  }
 
+  /**
+   * Creates a transmission buffer with the default segment and buffer size, using a direct memory buffer.
+   *
+   * @return an instance of the tranmission buffer.
+   */
+  public static TransmissionBuffer createDirect() {
+    return new TransmissionBuffer(true, DEFAULT_SEGMENT_SIZE, DEFAULT_BUFFER_SIZE);
+  }
 
-    buffer = ByteBuffer.allocateDirect(bufferSize);
+  /**
+   * Creates a heap allocated transmission buffer with a specified segment size and segments. The resulting buffer
+   * will be of size: <i>segmentSize * segments</i>.
+   *
+   * @param segmentSize
+   * @param segments
+   * @return
+   */
+  public static TransmissionBuffer create(int segmentSize, int segments) {
+    return new TransmissionBuffer(false, segmentSize, segments);
+  }
 
-    segmentMap = new short[segments];
+  /**
+   * Creates a direct allocated transmission buffer with a custom segment size and segments. The resulting buffer
+   * will be of size: <i>segmentSize * segments</i>.
+   *
+   * @param segmentSize
+   * @param segments
+   * @return
+   */
+  public static TransmissionBuffer createDirect(int segmentSize, int segments) {
+    return new TransmissionBuffer(true, segmentSize, segments);
   }
 
 
@@ -134,7 +167,7 @@ public class TransmissionBuffer implements Buffer {
 
     // write the chunk size header for the data we're about to write.
     //writeChunkSize(writeCursor, writeSize);
-    dup.putInt( writeSize);
+    dup.putInt(writeSize);
 
     writeCursor += SEGMENT_HEADER_SIZE;
 
@@ -442,8 +475,7 @@ public class TransmissionBuffer implements Buffer {
    * @return the starting byte in the main buffer where writing may bein
    */
   private int allocSegmentTable(int writeSize, short color) {
-    final int allocSize = ((writeSize + 2) / segmentSize) + 1;
-
+    int allocSize = ((writeSize + SEGMENT_HEADER_SIZE) / segmentSize) + 1;
     int seq = (int) writeSequenceNumber.getAndAdd(allocSize) % segments;
     /**
      * Allocate the segments to the this color
@@ -528,9 +560,17 @@ public class TransmissionBuffer implements Buffer {
       readCursor += SEGMENT_HEADER_SIZE;
 
       final int endRead = readCursor + readSize;
+      final int maxInitialRead;
+
+      if (endRead < bufferSize) {
+        maxInitialRead = endRead;
+      }
+      else {
+        maxInitialRead = bufferSize;
+      }
 
       if (callback == null) {
-        for (; readCursor < endRead && readCursor < bufferSize; readCursor++) {
+        for (; readCursor < maxInitialRead; readCursor++) {
           outputStream.write(dup.get());
         }
 
@@ -543,7 +583,7 @@ public class TransmissionBuffer implements Buffer {
         }
       }
       else {
-        for (; readCursor < endRead && readCursor < bufferSize; readCursor++) {
+        for (; readCursor < maxInitialRead; readCursor++) {
           outputStream.write(callback.each(dup.get(), outputStream));
         }
 

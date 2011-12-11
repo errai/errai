@@ -59,7 +59,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
   private final List<MessageListener> listeners = new ArrayList<MessageListener>();
 
-  private final TransmissionBuffer transmissionbuffer = new TransmissionBuffer();
+   // 32 kb buffers * 4096 segments = 128 megabytes
+  private final TransmissionBuffer transmissionbuffer = TransmissionBuffer.create((32 * 1024), 4096);
 
   private final Map<String, DeliveryPlan> subscriptions = new ConcurrentHashMap<String, DeliveryPlan>();
   private final Map<String, RemoteMessageCallback> remoteSubscriptions = new ConcurrentHashMap<String, RemoteMessageCallback>();
