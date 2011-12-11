@@ -30,18 +30,20 @@ public interface Buffer {
   public void write(int writeSize, InputStream inputStream, BufferColor bufferColor, BufferCallback callback) throws IOException;
 
 
-  public void read(OutputStream outputStream, BufferColor bufferColor) throws IOException;
+  public int read(OutputStream outputStream, BufferColor bufferColor) throws IOException;
 
-  public void read(OutputStream outputStream, BufferColor bufferColor, BufferCallback callback) throws IOException;
+  public int read(OutputStream outputStream, BufferColor bufferColor, BufferCallback callback) throws IOException;
+
+  public int read(OutputStream outputStream, BufferColor bufferColor, BufferCallback callback, long sequence) throws IOException;
+  
+
+  public int readWait(OutputStream outputStream, BufferColor bufferColor) throws IOException, InterruptedException;
+
+  public int readWait(TimeUnit unit, long time, OutputStream outputStream, BufferColor bufferColor) throws IOException, InterruptedException;
+
+  public int readWait(OutputStream outputStream, BufferColor bufferColor, BufferCallback callback) throws IOException, InterruptedException;
+
+  public int readWait(TimeUnit unit, long time, OutputStream outputStream, BufferColor bufferColor, BufferCallback callback) throws IOException, InterruptedException;
 
 
-  public void readWait(OutputStream outputStream, BufferColor bufferColor) throws IOException, InterruptedException;
-
-  public void readWait(TimeUnit unit, long time, OutputStream outputStream, BufferColor bufferColor) throws IOException, InterruptedException;
-
-  /**
-   * Only read up to the point where the buffer is when this method is called. Do not follow the buffer in real-time.
-   * @param unit
-   */
-  public void readWaitNoFollow(TimeUnit unit, long time, OutputStream outputStream, BufferColor bufferColor, BufferCallback callback) throws IOException, InterruptedException;
 }

@@ -146,6 +146,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
               }
 
               break;
+            case Resend:
+              if (queue == null) return;
+
+            
 
             case ConnectToQueue:
               List<Message> deferred = null;

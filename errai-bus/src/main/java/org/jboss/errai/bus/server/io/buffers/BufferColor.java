@@ -41,7 +41,6 @@ public class BufferColor {
     }
   };
 
-
   /**
    * start class members *
    */
@@ -63,8 +62,8 @@ public class BufferColor {
     return sequence.get();
   }
 
-  public void incrementSequence(long delta) {
-    sequence.addAndGet(delta);
+  public void setSequence(long seq) {
+    sequence.set(seq);
   }
 
   public void wakeLazy() {

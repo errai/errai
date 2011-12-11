@@ -64,9 +64,8 @@ public class TransmissionBufferTests extends TestCase {
 
     String s = "12345789012345";
 
-
     long start = System.currentTimeMillis();
-    for (int i = 0; i < 10000000; i++) {
+    for (int i = 0; i < 1000000; i++) {
       ByteArrayInputStream bInputStream = new ByteArrayInputStream(s.getBytes());
       ByteArrayOutputStream bOutputStream = new ByteArrayOutputStream();
 
@@ -74,9 +73,6 @@ public class TransmissionBufferTests extends TestCase {
       buffer.read(bOutputStream, color);
 
       assertEquals(s, new String(bOutputStream.toByteArray()));
-//      if (i % 1000 == 0) {
-//        System.out.println(i);
-//      }
     }
     System.out.println(System.currentTimeMillis() - start);
   }
@@ -407,7 +403,7 @@ public class TransmissionBufferTests extends TestCase {
 
     BufferColor globalColor = BufferColor.getAllBuffersColor();
 
-    TransmissionBuffer buffer = new TransmissionBuffer(10, 20);
+    TransmissionBuffer buffer = new TransmissionBuffer(5, 2500);
 
     String stringA = "12345678";
     String stringB = "ABCDEFGH";
@@ -415,7 +411,7 @@ public class TransmissionBufferTests extends TestCase {
 
 
     long start = System.currentTimeMillis();
-    for (int i = 0; i < 1000000; i++) {
+    for (int i = 0; i < 10000000; i++) {
       ByteArrayInputStream bInputStream = new ByteArrayInputStream(stringA.getBytes());
       buffer.write(stringA.length(), bInputStream, colorA);
 
@@ -424,7 +420,6 @@ public class TransmissionBufferTests extends TestCase {
 
       bInputStream = new ByteArrayInputStream(stringC.getBytes());
       buffer.write(stringC.length(), bInputStream, globalColor);
-
 
       ByteArrayOutputStream bOutputStream = new ByteArrayOutputStream();
       buffer.read(bOutputStream, colorA);

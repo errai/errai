@@ -33,7 +33,7 @@ public class StockService {
     bus.addSubscribeListener(new SubscribeListener() {
       public void onSubscribe(SubscriptionEvent event) {
         if (event.getSubject().equals("StockClient")) {
-          if (task == null) {
+          if (task == null || task.isCancelled()) {
             task = MessageBuilder.createMessage()
                     .toSubject("StockClient")
                     .command("PriceChange")

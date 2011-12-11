@@ -40,7 +40,8 @@ public class TransmissionBuffer implements Buffer {
   final int segmentSize;
   final int segments;
 
-  private final AtomicLong sequenceNumber = new AtomicLong();
+  private final AtomicLong writeSequenceNumber = new AtomicLong();
+  private final AtomicLong headSequence = new AtomicLong();
 
   public TransmissionBuffer() {
     bufferSize = DEFAULT_BUFFER_SIZE;
@@ -65,7 +66,8 @@ public class TransmissionBuffer implements Buffer {
 
   private int allocSegmentTable(int writeSize, short color) {
     final int allocSize = ((writeSize + 4) / segmentSize) + 1;
-    int seq = (int) sequenceNumber.getAndAdd(allocSize) % segments;
+
+    int seq = (int) writeSequenceNumber.getAndAdd(allocSize) % segments;
     /**
      * Allocate the segments to the this color
      */
@@ -80,36 +82,38 @@ public class TransmissionBuffer implements Buffer {
   public void write(final int writeSize, final InputStream inputStream, final BufferColor bufferColor) throws IOException {
     // try to obtain a lock. if it's taken, we can proceed anyways.
     // this is to prevent partial reads of the segmentMap by readers.
-    final boolean haveLock = bufferColor.segmentTableLog.writeLock().tryLock();
-    try {
-      if (writeSize > bufferSize) {
-        throw new RuntimeException("write size larger than buffer can fit");
-      }
+    //  final boolean haveLock = bufferColor.segmentTableLog.writeLock().tryLock();
+    //   try {
+    if (writeSize > bufferSize) {
+      throw new RuntimeException("write size larger than buffer can fit");
+    }
 
-      int writeCursor = allocSegmentTable(writeSize, bufferColor.getColor());
+    int writeCursor = allocSegmentTable(writeSize, bufferColor.getColor());
 
-      // encode content length.
-      writeChunkSize(writeCursor, writeSize);
+    // encode content length.
+    writeChunkSize(writeCursor, writeSize);
 
-      writeCursor += 4;
+    writeCursor += 4;
 
-      int end = writeCursor + writeSize;
-      for (; writeCursor < end && writeCursor < bufferSize; writeCursor++) {
-        buffer.put(writeCursor, (byte) inputStream.read());
-      }
+    int end = writeCursor + writeSize;
+    for (; writeCursor < end && writeCursor < bufferSize; writeCursor++) {
+      buffer.put(writeCursor, (byte) inputStream.read());
+    }
 
-      if (writeCursor < end) {
-        for (int i = 0; i < end - bufferSize; i++) {
-          buffer.put(i, (byte) inputStream.read());
-        }
+    if (writeCursor < end) {
+      for (int i = 0; i < end - bufferSize; i++) {
+        buffer.put(i, (byte) inputStream.read());
       }
     }
-    finally {
-      if (haveLock) bufferColor.segmentTableLog.writeLock().unlock();
-    }
+//    }
+//    finally {
+//      if (haveLock) bufferColor.segmentTableLog.writeLock().unlock();
+//    }
     /**
      * Wake up any waiting readers.
      */
+
+    headSequence.set(writeSequenceNumber.get());
     bufferColor.wake();
   }
 
@@ -119,164 +123,118 @@ public class TransmissionBuffer implements Buffer {
                     final BufferColor bufferColor, final BufferCallback callback) throws IOException {
     // try to obtain a lock. if it's taken, we can proceed anyways.
     // this is to prevent partial reads of the segmentMap by readers.
-    final boolean haveLock = bufferColor.segmentTableLog.writeLock().tryLock();
-    try {
-      if (writeSize > bufferSize) {
-        throw new RuntimeException("write size larger than buffer can fit");
-      }
-
-      int writeCursor = allocSegmentTable(writeSize, bufferColor.getColor());
-
-      // encode content length.
-      writeChunkSize(writeCursor, writeSize);
-
-      writeCursor += 4;
-
-      int end = writeCursor + writeSize;
-      for (; writeCursor < end && writeCursor < bufferSize; writeCursor++) {
-        buffer.put(writeCursor, (byte) inputStream.read());
-      }
-
-      if (writeCursor < end) {
-        for (int i = 0; i < end - bufferSize; i++) {
-          buffer.put(i, (byte) inputStream.read());
-        }
-      }
-
+//    final boolean haveLock = bufferColor.segmentTableLog.writeLock().tryLock();
+//    try {
+    if (writeSize > bufferSize) {
+      throw new RuntimeException("write size larger than buffer can fit");
     }
-    finally {
-      if (haveLock) bufferColor.segmentTableLog.writeLock().unlock();
+
+    int writeCursor = allocSegmentTable(writeSize, bufferColor.getColor());
+
+    // encode content length.
+    writeChunkSize(writeCursor, writeSize);
+
+    writeCursor += 4;
+
+    int end = writeCursor + writeSize;
+    for (; writeCursor < end && writeCursor < bufferSize; writeCursor++) {
+      buffer.put(writeCursor, (byte) inputStream.read());
     }
+
+    if (writeCursor < end) {
+      for (int i = 0; i < end - bufferSize; i++) {
+        buffer.put(i, (byte) inputStream.read());
+      }
+    }
+
     /**
      * Wake up any waiting readers.
      */
+    headSequence.set(writeSequenceNumber.get());
     bufferColor.wakeLazy();
   }
 
-  private void get(int readSegment, final OutputStream outputStream, final BufferColor bufferColor) throws IOException {
-    int readCursor = readSegment * segmentSize;
-
-    if (readCursor == bufferSize) {
-      readCursor = 0;
-    }
-
-    int readSize = readChunkSize(readCursor);
-
-    readCursor += 4;
-
-    final int endRead = readCursor + readSize;
-    final int contiguousSegments = (readSize + 1) / segmentSize + 1;
-
-    for (; readCursor < endRead && readCursor < bufferSize; readCursor++) {
-      outputStream.write(buffer.get(readCursor));
-    }
-
-    if (readCursor < endRead) {
-      int remaining = endRead - bufferSize;
-      for (int i = 0; i < remaining; i++) {
-        outputStream.write(buffer.get(i));
-      }
-    }
-
-    bufferColor.incrementSequence(contiguousSegments);
-  }
-
-  private void get(int readSegment, final OutputStream outputStream, final BufferColor bufferColor
-          , final BufferCallback callback) throws IOException {
-    int readCursor = readSegment * segmentSize;
-
-    if (readCursor == bufferSize) {
-      readCursor = 0;
-    }
-
-    int readSize = readChunkSize(readCursor);
-
-    readCursor += 4;
-
-    final int endRead = readCursor + readSize;
-    final int contiguousSegments = (readSize + 1) / segmentSize + 1;
-
-    for (; readCursor < endRead && readCursor < bufferSize; readCursor++) {
-      outputStream.write(callback.each(buffer.get(readCursor), outputStream));
-    }
-
-    if (readCursor < endRead) {
-      int remaining = endRead - bufferSize;
-      for (int i = 0; i < remaining; i++) {
-        outputStream.write(callback.each(buffer.get(i), outputStream));
-      }
-    }
-
-    bufferColor.incrementSequence(contiguousSegments);
-  }
 
   @Override
-  public void read(final OutputStream outputStream, final BufferColor bufferColor) throws IOException {
+  public int read(final OutputStream outputStream, final BufferColor bufferColor) throws IOException {
     bufferColor.lock.lock();
 
     try {
-      int readSegment;
-      while ((readSegment = getNextSegment(bufferColor, bufferColor.getSequence())) != -1) {
-        get(readSegment, outputStream, bufferColor);
-      }
+      int head = getHead();
+      long read = bufferColor.getSequence();
+      long lastSeq = read;
+
+      while ((read = readNextChunk(head, read, bufferColor, outputStream, null)) != -1)
+        lastSeq = read;
+
+      bufferColor.setSequence(lastSeq);
     }
     finally {
       bufferColor.lock.unlock();
     }
+    return -1;
   }
 
   @Override
-  public void read(final OutputStream outputStream, final BufferColor bufferColor, final BufferCallback callback) throws IOException {
+  public int read(final OutputStream outputStream, final BufferColor bufferColor, final BufferCallback callback) throws IOException {
+    return read(outputStream, bufferColor, callback, bufferColor.getSequence());
+  }
+
+  @Override
+  public int read(OutputStream outputStream, BufferColor bufferColor, BufferCallback callback, long sequence) throws IOException {
     bufferColor.lock.lock();
 
     try {
-      boolean succ = false;
-      int readSegment;
-      while ((readSegment = getNextSegment(bufferColor, bufferColor.getSequence())) != -1) {
-        if (!succ) {
-          callback.before(outputStream);
-          succ = true;
-        }
-        get(readSegment, outputStream, bufferColor, callback);
-      }
-      if (succ) {
-        callback.after(outputStream);
-      }
+      int head = getHead();
+      long read = bufferColor.getSequence();
+      long lastSeq = read;
+
+      callback.before(outputStream);
+
+      while ((read = readNextChunk(head, read, bufferColor, outputStream, callback)) != -1)
+        lastSeq = read;
+
+      callback.after(outputStream);
+
+      bufferColor.setSequence(lastSeq);
     }
     finally {
       bufferColor.lock.unlock();
     }
+    return -1;
   }
 
-
   @Override
-  public void readWait(final OutputStream outputStream, final BufferColor bufferColor) throws InterruptedException, IOException {
+  public int readWait(final OutputStream outputStream, final BufferColor bufferColor) throws InterruptedException, IOException {
     bufferColor.lock.lockInterruptibly();
 
     try {
-      boolean awoken = false;
+      boolean haveData = false;
+
+      int head = getHead();
+      long read = bufferColor.getSequence();
+      long lastSeq = read;
 
       for (; ; ) {
-        int seg;
-        if ((seg = getNextSegment(bufferColor, bufferColor.getSequence())) != -1) {
-          get(seg, outputStream, bufferColor);
-          awoken = true;
-          continue;
+        while ((read = readNextChunk(head, read, bufferColor, outputStream, null)) != -1) {
+          lastSeq = read;
+          haveData = true;
         }
 
-        if (awoken) {
-          return;
+        if (haveData) {
+          bufferColor.setSequence(lastSeq);
+          return -1;
         }
 
         try {
           bufferColor.dataWaiting.await();
-          awoken = true;
         }
         catch (InterruptedException e) {
           bufferColor.dataWaiting.signal();
           throw e;
         }
       }
+
     }
     finally {
       bufferColor.lock.unlock();
@@ -284,29 +242,33 @@ public class TransmissionBuffer implements Buffer {
   }
 
   @Override
-  public void readWait(final TimeUnit unit, final long time,
-                       final OutputStream outputStream, final BufferColor bufferColor) throws IOException, InterruptedException {
+  public int readWait(final TimeUnit unit, final long time,
+                      final OutputStream outputStream, final BufferColor bufferColor) throws IOException, InterruptedException {
     bufferColor.lock.lockInterruptibly();
 
     try {
+
       long nanos = unit.toNanos(time);
-      boolean awoken = false;
+      boolean haveData = false;
 
       for (; ; ) {
-        int seg;
-        if ((seg = getNextSegment(bufferColor, bufferColor.getSequence())) != -1) {
-          get(seg, outputStream, bufferColor);
-          awoken = true;
-          continue;
+        int head = getHead();
+        long read = bufferColor.getSequence();
+        long lastSeq = read;
+
+        while ((read = readNextChunk(head, read, bufferColor, outputStream, null)) != -1) {
+          lastSeq = read;
+          haveData = true;
         }
 
-        if (awoken || nanos <= 0) {
-          return;
+        // return if data is ready to return or we're timed out.
+        if (haveData || nanos <= 0) {
+          bufferColor.setSequence(lastSeq);
+          return -1;
         }
 
         try {
           nanos = bufferColor.dataWaiting.awaitNanos(nanos);
-          awoken = true;
         }
         catch (InterruptedException e) {
           bufferColor.dataWaiting.signal();
@@ -319,40 +281,46 @@ public class TransmissionBuffer implements Buffer {
     }
   }
 
+
   @Override
-  public void readWaitNoFollow(TimeUnit unit, long time, OutputStream outputStream,
-                               BufferColor bufferColor, BufferCallback callback) throws IOException, InterruptedException {
+  public int readWait(OutputStream outputStream, BufferColor bufferColor, BufferCallback callback) throws IOException, InterruptedException {
+    return readWait(TimeUnit.NANOSECONDS, -1, outputStream, bufferColor, callback);
+  }
+
+  @Override
+  public int readWait(TimeUnit unit, long time, OutputStream outputStream, BufferColor bufferColor, BufferCallback callback) throws IOException, InterruptedException {
     bufferColor.lock.lockInterruptibly();
 
     try {
-      long nanos = unit.toNanos(time);
+      long nanos = time == -1 ? 1 : unit.toNanos(time);
+      boolean havaData = false;
 
-      boolean succ = false;
-      boolean awoken = false;
+      callback.before(outputStream);
 
-      int seg;
       for (; ; ) {
-        if ((seg = getNextSegment(bufferColor, bufferColor.getSequence())) != -1) {
-          if (!succ) {
-            callback.before(outputStream);
-            succ = true;
-          }
+        int head = getHead();
+        long read = bufferColor.getSequence();
+        long lastSeq = read;
 
-          get(seg, outputStream, bufferColor, callback);
-
-          awoken = true;
-          continue;
+        while ((read = readNextChunk(head, read, bufferColor, outputStream, callback)) != -1) {
+          lastSeq = read;
+          havaData = true;
         }
 
-        if (awoken || nanos <= 0) {
+        // return if data is ready to return or we're timed out.
+        if (havaData || nanos <= 0) {
+          bufferColor.setSequence(lastSeq);
           callback.after(outputStream);
-          return;
+          return -1;
         }
 
         try {
-          nanos = bufferColor.dataWaiting.awaitNanos(nanos);
-          callback.before(outputStream);
-          succ = awoken = true;
+          if (time == -1) {
+            bufferColor.dataWaiting.await();
+          }
+          else {
+            nanos = bufferColor.dataWaiting.awaitNanos(nanos);
+          }
         }
         catch (InterruptedException e) {
           bufferColor.dataWaiting.signal();
@@ -365,37 +333,85 @@ public class TransmissionBuffer implements Buffer {
     }
   }
 
-  /**
-   * Calculate the next segment.
-   *
-   * @param bufferColor -
-   * @param index -
-   * @return
-   */
-  private int getNextSegment(final BufferColor bufferColor, final long index) {
-    int delta = 0;
-    try {
-      bufferColor.segmentTableLog.readLock().lock();
-      final long seq = sequenceNumber.get();
+  private int getNextSegment(final BufferColor bufferColor, final int head, final int segment) {
+    final int color = bufferColor.getColor();
 
-      final int color = bufferColor.getColor();
-
-      for (long i = index; i < seq; i++) {
-        short seg = segmentMap[(int) i % segments];
+    if (head > segment) {
+      for (int i = segment; i < head; i++) {
+        short seg = segmentMap[i];
         if (seg == color || seg == Short.MIN_VALUE) {
-          return (int) i % segments;
+          return i;
         }
-        ++delta;
       }
     }
-    finally {
-      if (delta > 0)
-        bufferColor.incrementSequence(delta);
+    else if (head < segment) {
+      /**
+       * Handle loop-around at end of buffer if head is behind us.
+       */
+      for (int i = segment; i < segments; i++) {
+        short seg = segmentMap[i];
+        if (seg == color || seg == Short.MIN_VALUE) {
+          return i;
+        }
+      }
 
-      bufferColor.segmentTableLog.readLock().unlock();
+      for (int i = 0; i < head; i++) {
+        short seg = segmentMap[i];
+        if (seg == color || seg == Short.MIN_VALUE) {
+          return i;
+        }
+      }
     }
 
     return -1;
+  }
+
+  private long readNextChunk(final int head, final long sequence, final BufferColor color,
+                             final OutputStream outputStream, final BufferCallback callback) throws IOException {
+    int segmentToRead = getNextSegment(color, head, (int) sequence % segments);
+    if (segmentToRead != -1) {
+      int readCursor = segmentToRead * segmentSize;
+
+      if (readCursor == bufferSize) {
+        readCursor = 0;
+      }
+
+      final int readSize = readChunkSize(readCursor);
+
+      readCursor += 4;
+
+      final int endRead = readCursor + readSize;
+
+      if (callback == null) {
+        for (; readCursor < endRead && readCursor < bufferSize; readCursor++) {
+          outputStream.write(buffer.get(readCursor));
+        }
+
+        if (readCursor < endRead) {
+          int remaining = endRead - bufferSize;
+          for (int i = 0; i < remaining; i++) {
+            outputStream.write(buffer.get(i));
+          }
+        }
+      }
+      else {
+        for (; readCursor < endRead && readCursor < bufferSize; readCursor++) {
+          outputStream.write(callback.each(buffer.get(readCursor), outputStream));
+        }
+
+        if (readCursor < endRead) {
+          int remaining = endRead - bufferSize;
+          for (int i = 0; i < remaining; i++) {
+            outputStream.write(callback.each(buffer.get(i), outputStream));
+          }
+        }
+      }
+
+      return segmentToRead + ((readSize + 4) / segmentSize + 1);
+    }
+    else {
+      return -1;
+    }
   }
 
   private void writeChunkSize(int position, int size) {
@@ -406,12 +422,16 @@ public class TransmissionBuffer implements Buffer {
     return buffer.getInt(position);
   }
 
+  private int getHead() {
+    return (int) headSequence.get() % segments;
+  }
+
   public void dumpSegments() {
 
     System.out.println();
     System.out.println("SEGMENT DUMP");
 
-    for (int i = 0; i < segmentMap.length && i < sequenceNumber.get(); i++) {
+    for (int i = 0; i < segmentMap.length && i < headSequence.get(); i++) {
       StringBuilder build = new StringBuilder();
       int pos = i * segmentSize;
       int length = readChunkSize(pos);
@@ -439,7 +459,7 @@ public class TransmissionBuffer implements Buffer {
   public List<String> dumpSegmentsAsList() {
     List<String> list = new ArrayList<String>();
 
-    for (int i = 0; i < segmentMap.length && i < sequenceNumber.get(); i++) {
+    for (int i = 0; i < segmentMap.length && i < headSequence.get(); i++) {
       int pos = i * segmentSize;
       int length = readChunkSize(pos);
 

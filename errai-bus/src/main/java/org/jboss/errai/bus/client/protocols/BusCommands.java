@@ -88,6 +88,8 @@ public enum BusCommands {
 
   Disconnect,
 
+  Resend,
+
   SessionExpired,
 
   RemoteMonitorAttach,

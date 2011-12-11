@@ -25,7 +25,7 @@ import java.util.concurrent.BlockingQueue;
 
 
 public interface MessageQueue {
-  void poll(boolean wait, OutputStream stream) throws IOException;
+  int poll(boolean wait, OutputStream stream) throws IOException;
 
   boolean offer(Message message) throws IOException;
 

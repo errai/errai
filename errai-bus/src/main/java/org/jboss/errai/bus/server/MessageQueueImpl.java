@@ -77,16 +77,17 @@ public class MessageQueueImpl implements MessageQueue {
    *                  <tt>RuntimeException</tt> will be thrown if the polling is active already. Concurrent polling is not allowed.
    * @param outstream - output stream to write the polling results to.
    */
-  public void poll(final boolean wait, final OutputStream outstream) throws IOException {
+  public int poll(final boolean wait, final OutputStream outstream) throws IOException {
     if (!queueRunning) {
       throw new QueueUnavailableException("queue is not available");
     }
+    int seg;
     try {
       if (wait) {
-        buffer.readWaitNoFollow(TimeUnit.SECONDS, 45, outstream, bufferColor, new BufferHelper.MultiMessageHandlerCallback());
+       seg = buffer.readWait(TimeUnit.SECONDS, 45, outstream, bufferColor, new BufferHelper.MultiMessageHandlerCallback());
       }
       else {
-        buffer.read(outstream, bufferColor, new BufferHelper.MultiMessageHandlerCallback());
+       seg = buffer.read(outstream, bufferColor, new BufferHelper.MultiMessageHandlerCallback());
       }
       messageCount.set(0);
       outstream.flush();
@@ -94,7 +95,9 @@ public class MessageQueueImpl implements MessageQueue {
     }
     catch (InterruptedException e) {
       e.printStackTrace();
+      seg = -1;
     }
+    return seg;
   }
 
 
