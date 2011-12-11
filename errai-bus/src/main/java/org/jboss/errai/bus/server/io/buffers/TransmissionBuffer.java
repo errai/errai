@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * A ring-based buffer implementation that provided contention-free writing of <i>1..n</i> colors. In this case,
+ * A ring-based buffer implementation that provides contention-free writing of <i>1..n</i> colors. In this case,
  * colors refer to the unique attribute that separates one topic of data from another. Global data, which is visible
  * to all topics may also be written to this buffer.
  * </p>
@@ -126,13 +126,15 @@ public class TransmissionBuffer implements Buffer {
     // allocate space in the buffer to do our writing.
     int writeCursor = allocSegmentTable(writeSize, bufferColor.getColor());
 
+    ByteBuffer dup = buffer.duplicate();
+    dup.position(writeCursor);
+
     // write the chunk size header for the data we're about to write.
-    writeChunkSize(writeCursor, writeSize);
+    //writeChunkSize(writeCursor, writeSize);
+    dup.putShort((short) writeSize);
 
     writeCursor += SEGMENT_HEADER_SIZE;
 
-    ByteBuffer dup = buffer.duplicate();
-    dup.position(writeCursor);
 
     // write the data to the buffer.
     int end = writeCursor + writeSize;
@@ -515,17 +517,16 @@ public class TransmissionBuffer implements Buffer {
         readCursor = 0;
       }
 
-      final int readSize = readChunkSize(readCursor);
+      ByteBuffer dup = buffer.duplicate();
+      dup.position(readCursor);
+
+      final int readSize = dup.getShort();
 
       readCursor += SEGMENT_HEADER_SIZE;
 
       final int endRead = readCursor + readSize;
 
-      ByteBuffer dup = buffer.duplicate();
-
       if (callback == null) {
-      dup.position(readCursor);
-
         for (; readCursor < endRead && readCursor < bufferSize; readCursor++) {
           outputStream.write(dup.get());
         }
