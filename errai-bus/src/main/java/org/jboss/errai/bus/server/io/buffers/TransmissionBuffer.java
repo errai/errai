@@ -47,7 +47,7 @@ public class TransmissionBuffer implements Buffer {
   public static int DEFAULT_BUFFER_SIZE = (1024 * 1024) * 32;    /* 32 Megabytes */
   public static int DEFAULT_SEGMENT_SIZE = 1024 * 16;             /* 16 Kilobytes */
 
-  public static int SEGMENT_HEADER_SIZE = 2;    /* to accomodate a 16-bit short */
+  public static int SEGMENT_HEADER_SIZE = 4;    /* to accomodate a 16-bit short */
 
 
   /**
@@ -134,7 +134,7 @@ public class TransmissionBuffer implements Buffer {
 
     // write the chunk size header for the data we're about to write.
     //writeChunkSize(writeCursor, writeSize);
-    dup.putShort((short) writeSize);
+    dup.putInt( writeSize);
 
     writeCursor += SEGMENT_HEADER_SIZE;
 
@@ -523,7 +523,7 @@ public class TransmissionBuffer implements Buffer {
       ByteBuffer dup = buffer.duplicate();
       dup.position(readCursor);
 
-      final int readSize = dup.getShort();
+      final int readSize = dup.getInt();
 
       readCursor += SEGMENT_HEADER_SIZE;
 

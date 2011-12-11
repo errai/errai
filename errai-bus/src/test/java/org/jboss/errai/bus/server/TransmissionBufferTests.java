@@ -17,13 +17,18 @@
 package org.jboss.errai.bus.server;
 
 import junit.framework.TestCase;
+import org.jboss.errai.bus.client.tests.support.SType;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
+import org.jboss.errai.bus.tests.JSONTests;
+import org.jboss.errai.marshalling.server.JSONEncoder;
+import org.jboss.errai.marshalling.server.JSONStreamEncoder;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -242,16 +247,46 @@ public class TransmissionBufferTests extends TestCase {
     assertEquals(createCount, count);
   }
 
+  public void testLargeOversizedSegments() {
+    final TransmissionBuffer buffer = new TransmissionBuffer();
+
+    final BufferColor colorA = BufferColor.getNewColor();
+
+    SType type = SType.create(new JSONTests.JavaRandomProvider());
+
+    Map<String, Object> vars = new HashMap<String, Object>();
+    vars.put("SType", type);
+
+    String s = JSONEncoder.encode(vars);
+
+    ByteArrayInputStream bInputStream = new ByteArrayInputStream(s.getBytes());
+    ByteArrayOutputStream bOutputStream = new ByteArrayOutputStream();
+
+    try {
+      for (int i = 0; i < 10000; i++) {
+        bInputStream.reset();
+        buffer.write(s.length(), bInputStream, colorA);
+
+        bOutputStream.reset();
+        buffer.read(bOutputStream, colorA);
+        assertEquals(s, new String(bOutputStream.toByteArray()));
+      }
+    }
+    catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
 
   final static int SEGMENT_COUNT = 100;
 
   public void testMultithreadedBufferUse() throws Exception {
+    final TransmissionBuffer buffer = new TransmissionBuffer();
+
     final List<BufferColor> segs = new ArrayList<BufferColor>();
     for (int i = 0; i < SEGMENT_COUNT; i++) {
       segs.add(BufferColor.getNewColor());
     }
 
-    final TransmissionBuffer buffer = new TransmissionBuffer(32, 40000);
 
     ScheduledThreadPoolExecutor exec = new ScheduledThreadPoolExecutor(40);
 
@@ -269,7 +304,7 @@ public class TransmissionBufferTests extends TestCase {
     }
 
     for (int outerCount = 0; outerCount < 10; outerCount++) {
- //     System.out.println("round " + outerCount);
+      //     System.out.println("round " + outerCount);
       writeAuditLog.clear();
       readAuditLog.clear();
 
