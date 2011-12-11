@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * colors refer to the unique attribute that separates one topic of data from another. Global data, which is visible
  * to all topics may also be written to this buffer.
  * </p>
- * Givin the ring-buffer design, data is never de-allocated from the buffer when it is no longer needed. Instead,
+ * Given the ring-buffer design, data is never de-allocated from the buffer when it is no longer needed. Instead,
  * it is assumed that old data will be consumed from the buffer before that space in the buffer is reclaimed.
  * <p/>
  * Since this is a multi-colored buffer, it has multiple tails -- one for each color.
