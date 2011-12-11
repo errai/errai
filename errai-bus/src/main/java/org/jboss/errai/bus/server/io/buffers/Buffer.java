@@ -27,9 +27,6 @@ import java.util.concurrent.TimeUnit;
 public interface Buffer {
   public void write(int writeSize, InputStream inputStream, BufferColor bufferColor) throws IOException;
 
-  public void write(int writeSize, InputStream inputStream, BufferColor bufferColor, BufferCallback callback) throws IOException;
-
-
   public int read(OutputStream outputStream, BufferColor bufferColor) throws IOException;
 
   public int read(OutputStream outputStream, BufferColor bufferColor, BufferCallback callback) throws IOException;
