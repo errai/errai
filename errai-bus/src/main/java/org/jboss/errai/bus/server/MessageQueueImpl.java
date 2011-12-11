@@ -50,8 +50,8 @@ public class MessageQueueImpl implements MessageQueue {
 
   private final QueueSession session;
 
-  private volatile boolean initLock = true;
-  private volatile boolean queueRunning = true;
+  private boolean initLock = true;
+  private boolean queueRunning = true;
   private volatile long lastTransmission = nanoTime();
 
   private volatile QueueActivationCallback activationCallback;

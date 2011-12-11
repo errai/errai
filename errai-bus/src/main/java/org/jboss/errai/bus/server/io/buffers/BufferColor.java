@@ -46,13 +46,9 @@ public class BufferColor {
    */
 
   private final AtomicLong sequence = new AtomicLong();
-
   private final short color;
-
   final ReentrantLock lock = new ReentrantLock(true);
   final Condition dataWaiting = lock.newCondition();
-  final ReadWriteLock segmentTableLog = new ReentrantReadWriteLock(true);
-
 
   public short getColor() {
     return color;
@@ -64,13 +60,6 @@ public class BufferColor {
 
   public void setSequence(long seq) {
     sequence.set(seq);
-  }
-
-  public void wakeLazy() {
-    if (lock.tryLock()) {
-      dataWaiting.signal();
-      lock.unlock();
-    }
   }
 
   public void wake() {

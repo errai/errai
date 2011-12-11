@@ -22,6 +22,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -84,6 +85,8 @@ public class TransmissionBuffer implements Buffer {
    * The visible head sequence number seen by the readers.
    */
   private final AtomicLong headSequence = new AtomicLong();
+
+  private ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
 
   public TransmissionBuffer() {
     // a bunch of silly defaults that I made up
@@ -152,7 +155,7 @@ public class TransmissionBuffer implements Buffer {
     // update the head sequence number.
     headSequence.set(writeSequenceNumber.get());
 
-    // knock! knock! If there is a waiting reader on this color, wake it up.
+    // knock! knock! If there is a waiting reader on this color, wake it up.{
     bufferColor.wake();
   }
 

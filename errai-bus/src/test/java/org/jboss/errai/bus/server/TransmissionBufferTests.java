@@ -251,25 +251,25 @@ public class TransmissionBufferTests extends TestCase {
       segs.add(BufferColor.getNewColor());
     }
 
-    final TransmissionBuffer buffer = new TransmissionBuffer(32, 10000);
+    final TransmissionBuffer buffer = new TransmissionBuffer(32, 40000);
 
     ScheduledThreadPoolExecutor exec = new ScheduledThreadPoolExecutor(40);
 
     final List<String> writeAuditLog = Collections.synchronizedList(new ArrayList<String>());
     final List<String> readAuditLog = Collections.synchronizedList(new ArrayList<String>());
 
-    final int createCount = 5000;
+    final int createCount = 20000;
     final String[] writeString = new String[createCount];
 
 
-    int expectedSum = 0;
+//    int expectedSum = 0;
     for (int i = 0; i < createCount; i++) {
       writeString[i] = "<:::" + i + ":::>";
-      expectedSum += i;
+//      expectedSum += i;
     }
 
     for (int outerCount = 0; outerCount < 10; outerCount++) {
-      System.out.println("round " + outerCount);
+ //     System.out.println("round " + outerCount);
       writeAuditLog.clear();
       readAuditLog.clear();
 
@@ -373,17 +373,17 @@ public class TransmissionBufferTests extends TestCase {
       }
 
 
-      System.out.println("Read / Write Order Analysis --> ");
-      for (int i = 0; i < writeAuditLog.size() && i < readAuditLog.size(); i++) {
-        System.out.print(i + " : " + writeAuditLog.get(i) + " = " + readAuditLog.get(i));
-
-        if (writeAuditLog.get(i).equals(readAuditLog.get(i))) {
-          System.out.println();
-        }
-        else {
-          System.out.println(" ** ");
-        }
-      }
+//      System.out.println("Read / Write Order Analysis --> ");
+//      for (int i = 0; i < writeAuditLog.size() && i < readAuditLog.size(); i++) {
+//       System.out.print(i + " : " + writeAuditLog.get(i) + " = " + readAuditLog.get(i));
+//
+//        if (writeAuditLog.get(i).equals(readAuditLog.get(i))) {
+//          System.out.println();
+//        }
+//        else {
+//          System.out.println(" ** ");
+//        }
+//      }
 
       System.out.println("Read / Write Symmetry Analysis --> ");
       for (String s : writeAuditLog) {
@@ -411,7 +411,7 @@ public class TransmissionBufferTests extends TestCase {
 
 
     long start = System.currentTimeMillis();
-    for (int i = 0; i < 10000000; i++) {
+    for (int i = 0; i < 1000000; i++) {
       ByteArrayInputStream bInputStream = new ByteArrayInputStream(stringA.getBytes());
       buffer.write(stringA.length(), bInputStream, colorA);
 
