@@ -31,22 +31,14 @@ public class BufferColor {
   // an automatic counter to ensure each buffer has a unique color
   private static final AtomicInteger bufferColorCounter = new AtomicInteger();
 
-  private static final BufferColor allBuffersColor = new BufferColor(Short.MIN_VALUE) {
-    @Override
-    public void wake() {
-      if (lock.tryLock()) {
-        dataWaiting.signalAll();
-        lock.unlock();
-      }
-    }
-  };
+  private static final BufferColor allBuffersColor = new BufferColor(Short.MIN_VALUE);
 
   /**
    * start class members *
    */
 
-  private final AtomicLong sequence = new AtomicLong();
-  private final short color;
+  final AtomicLong sequence = new AtomicLong();
+  final short color;
   final ReentrantLock lock = new ReentrantLock(true);
   final Condition dataWaiting = lock.newCondition();
 
@@ -54,13 +46,17 @@ public class BufferColor {
     return color;
   }
 
-  public long getSequence() {
-    return sequence.get();
+//  public long getSequence() {
+//    return sequence.get();
+//  }
+//
+  public AtomicLong getSequence() {
+    return sequence;
   }
 
-  public void setSequence(long seq) {
-    sequence.set(seq);
-  }
+//  public void setSequence(long seq) {
+//    sequence.set(seq);
+//  }
 
   public void wake() {
     lock.lock();

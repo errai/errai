@@ -191,7 +191,7 @@ public class MessageQueueImpl implements MessageQueue {
 
   @Override
   public long getCurrentBufferSequenceNumber() {
-    return bufferColor.getSequence();
+    return bufferColor.getSequence().get();
   }
 
   @Override
