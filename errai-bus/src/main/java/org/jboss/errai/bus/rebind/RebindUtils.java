@@ -54,9 +54,20 @@ public class RebindUtils {
   public static Statement generateProxyMethodReturnStatement(MetaMethod method) {
     Statement returnStatement = null;
     if (!method.getReturnType().equals(MetaClassFactory.get(void.class))) {
+      
+      // if it's a Number and not a BigDecimal or BigInteger
       if (MetaClassFactory.get(Number.class).isAssignableFrom(method.getReturnType().asBoxed())
               && method.getReturnType().asUnboxed().getFullyQualifiedName().indexOf('.') == -1) {
-        returnStatement = Stmt.load(0).returnValue();
+        
+        if (MetaClassFactory.get(Double.class).isAssignableFrom(method.getReturnType().asBoxed())) {
+          returnStatement = Stmt.load(0.0).returnValue();
+        } 
+        else if (MetaClassFactory.get(Float.class).isAssignableFrom(method.getReturnType().asBoxed())) {
+          returnStatement = Stmt.load(0f).returnValue();
+        } 
+        else {
+          returnStatement = Stmt.load(0).returnValue();
+        }
       } 
       else if (MetaClassFactory.get(Boolean.class).isAssignableFrom(method.getReturnType().asBoxed())) {
         returnStatement = Stmt.load(false).returnValue();
