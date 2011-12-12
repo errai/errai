@@ -229,7 +229,7 @@ public class TransmissionBuffer implements Buffer {
 
     if (writeCursor < end) {
       for (int i = 0; i < end - bufferSize; i++) {
-        buffer[writeCursor] = (byte) inputStream.read();
+        buffer[i] = (byte) inputStream.read();
       }
     }
 
