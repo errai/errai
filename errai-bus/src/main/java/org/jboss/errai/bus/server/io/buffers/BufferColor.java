@@ -28,7 +28,6 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * @author Mike Brock
  */
 public class BufferColor {
-
   // an automatic counter to ensure each buffer has a unique color
   private static final AtomicInteger bufferColorCounter = new AtomicInteger();
 
@@ -40,29 +39,19 @@ public class BufferColor {
 
   final AtomicLong sequence = new AtomicLong();
   final short color;
-  final ReentrantLock lock = new ReentrantLock(true);
+  final ReentrantLock lock = new ReentrantLock(false);
   final Condition dataWaiting = lock.newCondition();
 
   public short getColor() {
     return color;
   }
 
-//  public long getSequence() {
-//    return sequence.get();
-//  }
-//
   public AtomicLong getSequence() {
     return sequence;
   }
 
-//  public void setSequence(long seq) {
-//    sequence.set(seq);
-//  }
-
   public void wake() {
-    lock.lock();
     dataWaiting.signal();
-    lock.unlock();
   }
 
   private BufferColor(int color) {

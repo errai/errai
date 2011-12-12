@@ -277,12 +277,21 @@ public class TransmissionBufferTests extends TestCase {
 
   final static int SEGMENT_COUNT = 10;
 
+
+  /**
+   *
+   *
+   * ******
+   *
+   *
+   * @throws Exception
+   */
+
   public void testMultithreadedBufferUse() throws Exception {
     File logFile = new File("multithread_test.log");
     File rawBufferFile = new File("raw_buffer.log");
     if (!logFile.exists()) logFile.createNewFile();
     if (!rawBufferFile.exists()) rawBufferFile.createNewFile();
-
 
     final TransmissionBuffer buffer = TransmissionBuffer.createDirect(32, 32000);
 
@@ -291,16 +300,12 @@ public class TransmissionBufferTests extends TestCase {
 
     final PrintWriter logWriter = new PrintWriter(fileLog);
 
-
     logWriter.println("START SESSION: " + new Date().toString());
     try {
-
-
       final List<BufferColor> segs = new ArrayList<BufferColor>();
       for (int i = 0; i < SEGMENT_COUNT; i++) {
         segs.add(BufferColor.getNewColor());
       }
-
 
       final Collection<String> writeAuditLog = new ConcurrentLinkedQueue<String>();
       final Collection<String> readAuditLog = new ConcurrentLinkedQueue<String>();
@@ -312,12 +317,11 @@ public class TransmissionBufferTests extends TestCase {
         writeString[i] = "<:::" + i + ":::>";
       }
 
-      for (int outerCount = 0; outerCount < 10; outerCount++) {
         ScheduledThreadPoolExecutor exec = new ScheduledThreadPoolExecutor(10);
 
-        logWriter.print("SESSION NUMBER " + outerCount);
+      //  logWriter.print("SESSION NUMBER " + outerCount);
 
-        System.out.println("Running multi-threaded stress test (" + (outerCount + 1) + ") ...");
+        System.out.println("Running multi-threaded stress test ...");
 
         writeAuditLog.clear();
         readAuditLog.clear();
@@ -354,11 +358,11 @@ public class TransmissionBufferTests extends TestCase {
             }
 
             if (st < val.length()) {
-              fail("malformed data: {{" + val + "}}");
+              fail("malformed data: {{" + val + "}} length wrong: (waitread:" + wait + ")");
             }
 
             if (val.length() > 0 && val.charAt(val.length() - 1) != '>') {
-              fail("malformed data: " + val);
+              fail("malformed data: {{" + val +  "}} (waitread:" + wait + ")");
             }
 
             boolean match;
@@ -374,8 +378,6 @@ public class TransmissionBufferTests extends TestCase {
             }
 
             readAuditLog.addAll(buildResultList);
-
-           // totalReads.addAndGet(buildResultList.size());
           }
         }
 
@@ -420,7 +422,7 @@ public class TransmissionBufferTests extends TestCase {
                 totalWrites.incrementAndGet();
                 latch.countDown();
               }
-              catch (IOException e) {
+              catch (Throwable e) {
                 e.printStackTrace();
               }
             }
@@ -462,12 +464,9 @@ public class TransmissionBufferTests extends TestCase {
 
             System.out.println("-----");
 
-            System.out.println("(" + (outerCount + 1) + ") different number of reads and writes (writes=" + totalWrites + ";reads=" + totalReads + ")");
+            System.out.println("different number of reads and writes (writes=" + totalWrites + ";reads=" + totalReads + ")");
           }
         }
-
-
-//        assertEquals(totalWrites.intValue(), totalReads.intValue());
 
         System.out.println("Read / Write Symmetry Analysis ... ");
         for (String s : writeAuditLog) {
@@ -497,7 +496,6 @@ public class TransmissionBufferTests extends TestCase {
         }
 
         System.out.println("Done.\n");
-      }
     }
     finally {
       buffer.dumpSegments(logWriter);
@@ -512,6 +510,13 @@ public class TransmissionBufferTests extends TestCase {
       rawBuffer.close();
     }
   }
+
+  public void testMultiThreadedManyTimes() throws Exception {
+    for (int i = 0; i < 10; i ++) {
+      testMultithreadedBufferUse();
+    }
+  }
+
 
   public void testGloballyVisibleColors() throws IOException {
     BufferColor colorA = BufferColor.getNewColor();

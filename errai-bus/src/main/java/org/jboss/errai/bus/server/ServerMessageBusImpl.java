@@ -746,7 +746,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
   }
 
 
-  private static final Set<String> pipeLineExclusionSet = new HashSet<String>() {
+  private static final Set<String> broadcastExclusionSet = new HashSet<String>() {
     {
       add("ClientBus");
       add("ClientBusErrors");
@@ -769,7 +769,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     synchronized (remoteSubscriptions) {
       rmc = remoteSubscriptions.get(subject);
       if (rmc == null) {
-        rmc = new RemoteMessageCallback(!pipeLineExclusionSet.contains(subject), subject);
+        rmc = new RemoteMessageCallback(!broadcastExclusionSet.contains(subject), subject);
         rmc.addQueue(queue);
 
         isNew = true;
@@ -791,17 +791,17 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     private final String svc;
     private final Set<MessageQueue> queues = Collections.newSetFromMap(new ConcurrentHashMap<MessageQueue, Boolean>());
 
-    private final boolean pipelinable;
-    private final AtomicInteger totalPipelined = new AtomicInteger();
+    private final boolean broadcastable;
+    private final AtomicInteger totalBroadcasted = new AtomicInteger();
 
-    public RemoteMessageCallback(boolean pipelineable, String svc) {
-      this.pipelinable = pipelineable;
+    public RemoteMessageCallback(boolean broadcastable, String svc) {
+      this.broadcastable = broadcastable;
       this.svc = svc;
     }
 
     public void callback(Message message) {
       // do not pipeline if this message is addressed to a specified session.
-      if (pipelinable && !message.isFlagSet(RoutingFlags.NonGlobalRouting)) {
+      if (broadcastable && !message.isFlagSet(RoutingFlags.NonGlobalRouting)) {
         // all queues are listening to this subject. therefore we can save memory and time by
         // writing to the broadcast color on the buffer
         try {
@@ -809,8 +809,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
           BufferHelper.encodeAndWrite(transmissionbuffer, BufferColor.getAllBuffersColor(), message);
           for (MessageQueue q : queues) q.wake();
 
-          if (totalPipelined.incrementAndGet() % 1000 == 0) {
-            log.info("[experimental] " + totalPipelined.get() + " messages have been pipelined to service: " + svc);
+          if (totalBroadcasted.incrementAndGet() % 1000 == 0) {
+            log.info("[experimental] " + totalBroadcasted.get() + " messages have been broadcasted to service: " + svc);
           }
         }
         catch (IOException e) {
