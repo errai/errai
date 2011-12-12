@@ -59,8 +59,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
   private final List<MessageListener> listeners = new ArrayList<MessageListener>();
 
-  // 32 kb buffers * 4096 segments = 128 megabytes
-  private final TransmissionBuffer transmissionbuffer = TransmissionBuffer.create((32 * 1024), 4096);
+  // 16 kb buffers * 8192 segments = 128 megabytes
+  private final TransmissionBuffer transmissionbuffer = TransmissionBuffer.create((16 * 1024), 8192);
 
   private final Map<String, DeliveryPlan> subscriptions = new ConcurrentHashMap<String, DeliveryPlan>();
   private final Map<String, RemoteMessageCallback> remoteSubscriptions = new ConcurrentHashMap<String, RemoteMessageCallback>();
@@ -262,7 +262,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
       public void setExceptionHandler(AsyncExceptionHandler handler) {
       }
 
+      int runCount = 0;
+
       public void run() {
+        runCount++;
         boolean houseKeepingPerformed = false;
         List<MessageQueue> endSessions = new LinkedList<MessageQueue>();
 
@@ -295,9 +298,13 @@ public class ServerMessageBusImpl implements ServerMessageBus {
           deferredQueue.remove(ref);
         }
 
-        BufferStatus stat = bufferStatus();
-        log.info("[experimental] buffer status [bytes free: " + stat.getFreeBytes()
-                + " (" + (stat.getFree() * 100) + "%) tail range: " + stat.getTailRange() + "]");
+
+        if (runCount % 2 == 0) {
+          BufferStatus stat = bufferStatus();
+          log.info("[experimental] buffer status [freebytes: " + stat.getFreeBytes()
+                  + " (" + (stat.getFree() * 100) + "%) tail rng: " + stat.getTailRange() + "; actv tails: "
+                  + stat.getActiveTails() + "]");
+        }
       }
 
       public boolean isFinished() {
@@ -316,11 +323,13 @@ public class ServerMessageBusImpl implements ServerMessageBus {
   private static class BufferStatus {
     private int freeBytes;
     private int tailRange;
+    private int activeTails;
     private float free;
 
-    private BufferStatus(int freeBytes, int tailRange, float free) {
+    private BufferStatus(int freeBytes, int tailRange, int activeTails, float free) {
       this.freeBytes = freeBytes;
       this.tailRange = tailRange;
+      this.activeTails = activeTails;
       this.free = free;
     }
 
@@ -330,6 +339,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     public int getTailRange() {
       return tailRange;
+    }
+
+    public int getActiveTails() {
+      return activeTails;
     }
 
     public float getFree() {
@@ -343,7 +356,15 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     long lowTail = -1;
     long highTail = -1;
+    int activeTails = 0;
+
+    int free;
+    long lowSegBytes = 0;
+    long highSegBytes = 0;
+
+
     for (MessageQueue q : messageQueues.values()) {
+      activeTails++;
       long seq = q.getCurrentBufferSequenceNumber();
       if (lowTail == -1) {
         lowTail = highTail = seq;
@@ -354,22 +375,25 @@ public class ServerMessageBusImpl implements ServerMessageBus {
       }
     }
 
-    long lowSegBytes = (lowTail % transmissionbuffer.getBufferSize()) * transmissionbuffer.getSegmentSize();
-    long highSegBytes = (highTail % transmissionbuffer.getBufferSize()) * transmissionbuffer.getSegmentSize();
+    if (activeTails > 0) {
+      lowSegBytes = (lowTail % transmissionbuffer.getBufferSize()) * transmissionbuffer.getSegmentSize();
+      highSegBytes = (highTail % transmissionbuffer.getBufferSize()) * transmissionbuffer.getSegmentSize();
 
-
-    int free;
-    if (lowSegBytes < headBytes) {
-      free = (int) ((bufSize - headBytes) + lowSegBytes);
-    }
-    else if (lowSegBytes > headBytes) {
-      free = (int) (lowSegBytes - bufSize);
+      if (lowSegBytes < headBytes) {
+        free = (int) ((bufSize - headBytes) + lowSegBytes);
+      }
+      else if (lowSegBytes > headBytes) {
+        free = (int) (lowSegBytes - bufSize);
+      }
+      else {
+        free = bufSize;
+      }
     }
     else {
       free = bufSize;
     }
 
-    return new BufferStatus(free, (int) (highSegBytes - lowSegBytes), ((float) free) / bufSize);
+    return new BufferStatus(free, (int) (highSegBytes - lowSegBytes), activeTails, ((float) free) / bufSize);
   }
 
 
