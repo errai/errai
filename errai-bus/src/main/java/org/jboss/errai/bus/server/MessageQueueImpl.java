@@ -45,7 +45,7 @@ import static java.lang.System.nanoTime;
 public class MessageQueueImpl implements MessageQueue {
   private static final long HEARTBEAT_PERIOD = secs(30);
   private static final long TIMEOUT = Boolean.getBoolean("org.jboss.errai.debugmode") ?
-          secs(360) : secs(10);
+          secs(360) : secs(15);
 
 
   private final QueueSession session;

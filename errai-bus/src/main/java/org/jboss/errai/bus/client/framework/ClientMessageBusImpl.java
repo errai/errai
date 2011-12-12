@@ -77,7 +77,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  * @author Mike Brock
  */
 public class ClientMessageBusImpl implements ClientMessageBus {
-  private static final int HEARTBEAT_DELAY = 20000;
+  private static final int HEARTBEAT_DELAY = 10000;
 
   private String clientId;
 
