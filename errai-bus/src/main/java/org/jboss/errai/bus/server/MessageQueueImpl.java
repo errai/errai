@@ -26,15 +26,13 @@ import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
 import org.jboss.errai.marshalling.server.JSONStreamEncoder;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.lang.System.console;
 import static java.lang.System.nanoTime;
+import static java.lang.System.out;
 
 /**
  * A message queue is keeps track of which messages need to be sent outbound. It keeps track of the amount of messages
@@ -45,7 +43,10 @@ import static java.lang.System.nanoTime;
 public class MessageQueueImpl implements MessageQueue {
   private static final long HEARTBEAT_PERIOD = secs(30);
   private static final long TIMEOUT = Boolean.getBoolean("org.jboss.errai.debugmode") ?
-          secs(360) : secs(15);
+          secs(360) : secs(30);
+
+  private static final long DOWNGRADE_THRESHOLD = Boolean.getBoolean("org.jboss.errai.debugmode") ?
+          secs(360) : secs(10);
 
 
   private final QueueSession session;
@@ -53,6 +54,8 @@ public class MessageQueueImpl implements MessageQueue {
   private boolean initLock = true;
   private boolean queueRunning = true;
   private volatile long lastTransmission = nanoTime();
+
+    private volatile boolean pagedOut = false;
 
   private volatile QueueActivationCallback activationCallback;
 
@@ -81,13 +84,18 @@ public class MessageQueueImpl implements MessageQueue {
     if (!queueRunning) {
       throw new QueueUnavailableException("queue is not available");
     }
+    if (pagedOut) {
+      readInPageFile(outstream);
+      return -1;
+    }
+
     int seg;
     try {
       if (wait) {
-       seg = buffer.readWait(TimeUnit.SECONDS, 45, outstream, bufferColor, new BufferHelper.MultiMessageHandlerCallback());
+        seg = buffer.readWait(TimeUnit.SECONDS, 45, outstream, bufferColor, new BufferHelper.MultiMessageHandlerCallback());
       }
       else {
-       seg = buffer.read(outstream, bufferColor, new BufferHelper.MultiMessageHandlerCallback());
+        seg = buffer.read(outstream, bufferColor, new BufferHelper.MultiMessageHandlerCallback());
       }
       messageCount.set(0);
       outstream.flush();
@@ -116,7 +124,6 @@ public class MessageQueueImpl implements MessageQueue {
 
     if (messageCount.incrementAndGet() > 5 && !lastTransmissionWithin(secs(3))) {
       // disconnect this client
-      System.out.println("disconnecting dead client");
       stopQueue();
     }
 
@@ -129,6 +136,58 @@ public class MessageQueueImpl implements MessageQueue {
     return true;
   }
 
+  private final Object pageLock = new Object();
+
+  @Override
+  public void pageWaitingToDisk() {
+    synchronized (pageLock) {
+      try {
+        File pageFile = new File(getPageFileName());
+        if (!pageFile.exists()) {
+          pageFile.getParentFile().mkdirs();
+          pageFile.createNewFile();
+        }
+        OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(pageFile, true));
+        buffer.read(outputStream, bufferColor);
+        outputStream.flush();
+        outputStream.close();
+
+        pagedOut = true;
+      }
+      catch (IOException e) {
+        throw new RuntimeException("paging error", e);
+      }
+    }
+  }
+
+  private void readInPageFile(OutputStream outputStream) {
+    synchronized (pageLock) {
+      try {
+        File pageFile = new File(getPageFileName());
+        if (!pageFile.exists()) {
+          pagedOut = false;
+        }
+
+        InputStream inputStream = new BufferedInputStream(new FileInputStream(pageFile));
+        int read;
+        while ((read = inputStream.read()) != -1) {
+          outputStream.write(read);
+        }
+        inputStream.close();
+        pageFile.delete();
+        pagedOut = false;
+      }
+      catch (IOException e) {
+        throw new RuntimeException("paging error", e);
+      }
+    }
+  }
+
+  private static final String tempDir = System.getProperty("java.io.tmpdir");
+
+  private String getPageFileName() {
+    return tempDir + "/queueCache/" + session.getSessionId();
+  }
 
   @Override
   public long getCurrentBufferSequenceNumber() {
@@ -184,6 +243,11 @@ public class MessageQueueImpl implements MessageQueue {
   }
 
 
+  @Override
+  public boolean isDowngradeCandidate() {
+    return ((nanoTime() - lastTransmission) > DOWNGRADE_THRESHOLD);
+  }
+
   public boolean isInitialized() {
     return !initLock;
   }
@@ -203,6 +267,22 @@ public class MessageQueueImpl implements MessageQueue {
 
   public void finishInit() {
     initLock = false;
+  }
+
+  @Override
+  public boolean isPaged() {
+    return pagedOut;
+  }
+
+  @Override
+  public void discard() {
+    queueRunning = false;
+    if (pagedOut) {
+      File pageFile = new File(getPageFileName());
+      if (pageFile.exists()) {
+        pageFile.delete();
+      }
+    }
   }
 
   /**

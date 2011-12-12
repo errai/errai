@@ -255,7 +255,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     houseKeeper.addTask(new TimedTask() {
       {
-        this.period = (1000 * 10);
+        this.period = (1000 * 8);
       }
 
       @SuppressWarnings({"UnusedParameters"})
@@ -277,6 +277,15 @@ public class ServerMessageBusImpl implements ServerMessageBus {
               if ((q = iter.next()).isStale()) {
                 iter.remove();
                 endSessions.add(q);
+                
+                log.info("inactive session killed: " + q.getSession().getSessionId());
+              }
+              else if (q.isDowngradeCandidate()) {
+                if (!q.isPaged())
+                  log.info("[experimental] paging data for slow client to disk: " + q.getSession().getSessionId());
+                
+                q.pageWaitingToDisk();
+                
               }
             }
 
@@ -296,6 +305,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
           ServerMessageBusImpl.this.closeQueue(ref);
           ref.getSession().endSession();
           deferredQueue.remove(ref);
+          ref.discard();
         }
 
 
