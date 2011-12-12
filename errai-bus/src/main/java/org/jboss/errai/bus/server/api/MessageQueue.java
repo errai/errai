@@ -28,6 +28,8 @@ public interface MessageQueue {
   int poll(boolean wait, OutputStream stream) throws IOException;
 
   boolean offer(Message message) throws IOException;
+  
+  long getCurrentBufferSequenceNumber();
 
   void wake();
 

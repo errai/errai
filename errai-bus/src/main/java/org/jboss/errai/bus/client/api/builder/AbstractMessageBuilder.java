@@ -20,6 +20,7 @@ import org.jboss.errai.bus.client.api.*;
 import org.jboss.errai.bus.client.api.base.*;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
+import org.jboss.errai.bus.client.framework.RoutingFlags;
 import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.common.client.protocols.MessageParts;
 
@@ -309,6 +310,12 @@ public class AbstractMessageBuilder<R extends Sendable> {
 
       public MessageBuildParms<R> with(String part, Object value) {
         message.set(part, value);
+        return this;
+      }
+
+      @Override
+      public MessageBuildParms<R> flag(RoutingFlags flag) {
+        message.setFlag(flag);
         return this;
       }
 

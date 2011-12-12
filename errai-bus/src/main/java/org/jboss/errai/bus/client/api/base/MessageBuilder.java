@@ -29,6 +29,7 @@ import org.jboss.errai.bus.client.api.builder.MessageBuildSendableWithReply;
 import org.jboss.errai.bus.client.api.builder.MessageBuildSubject;
 import org.jboss.errai.bus.client.api.builder.MessageReplySendable;
 import org.jboss.errai.bus.client.framework.MessageProvider;
+import org.jboss.errai.bus.client.framework.RoutingFlags;
 
 /**
  * The MessageBuilder API provides a fluent method of building Messages.
@@ -74,6 +75,7 @@ public class MessageBuilder {
   @SuppressWarnings({"unchecked"})
   public static MessageBuildSubject<MessageReplySendable> createConversation(Message message) {
     Message newMessage = provider.get();
+    newMessage.setFlag(RoutingFlags.NonGlobalRouting);
     if (newMessage instanceof HasEncoded) {
       return new AbstractMessageBuilder<MessageReplySendable>(new HasEncodedConvMessageWrapper(message, newMessage)).start();
     }

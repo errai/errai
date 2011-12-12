@@ -35,7 +35,7 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversation;
 import static org.jboss.errai.bus.client.protocols.SecurityCommands.MessageNotDelivered;
@@ -59,7 +59,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
   private final List<MessageListener> listeners = new ArrayList<MessageListener>();
 
-   // 32 kb buffers * 4096 segments = 128 megabytes
+  // 32 kb buffers * 4096 segments = 128 megabytes
   private final TransmissionBuffer transmissionbuffer = TransmissionBuffer.create((32 * 1024), 4096);
 
   private final Map<String, DeliveryPlan> subscriptions = new ConcurrentHashMap<String, DeliveryPlan>();
@@ -150,7 +150,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             case Resend:
               if (queue == null) return;
 
-            
 
             case ConnectToQueue:
               List<Message> deferred = null;
@@ -295,6 +294,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
           ref.getSession().endSession();
           deferredQueue.remove(ref);
         }
+
+        BufferStatus stat = bufferStatus();
+        log.info("[experimental] buffer status [bytes free: " + stat.getFreeBytes()
+                + " (" + (stat.getFree() * 100) + "%) tail range: " + stat.getTailRange() + "]");
       }
 
       public boolean isFinished() {
@@ -308,6 +311,65 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     });
 
     houseKeeper.start();
+  }
+
+  private static class BufferStatus {
+    private int freeBytes;
+    private int tailRange;
+    private float free;
+
+    private BufferStatus(int freeBytes, int tailRange, float free) {
+      this.freeBytes = freeBytes;
+      this.tailRange = tailRange;
+      this.free = free;
+    }
+
+    public int getFreeBytes() {
+      return freeBytes;
+    }
+
+    public int getTailRange() {
+      return tailRange;
+    }
+
+    public float getFree() {
+      return free;
+    }
+  }
+
+  private BufferStatus bufferStatus() {
+    int headBytes = transmissionbuffer.getHeadPositionBytes();
+    int bufSize = transmissionbuffer.getBufferSize();
+
+    long lowTail = -1;
+    long highTail = -1;
+    for (MessageQueue q : messageQueues.values()) {
+      long seq = q.getCurrentBufferSequenceNumber();
+      if (lowTail == -1) {
+        lowTail = highTail = seq;
+      }
+      else {
+        if (seq > highTail) highTail = seq;
+        if (seq < lowTail) lowTail = seq;
+      }
+    }
+
+    long lowSegBytes = (lowTail % transmissionbuffer.getBufferSize()) * transmissionbuffer.getSegmentSize();
+    long highSegBytes = (highTail % transmissionbuffer.getBufferSize()) * transmissionbuffer.getSegmentSize();
+
+
+    int free;
+    if (lowSegBytes < headBytes) {
+      free = (int) ((bufSize - headBytes) + lowSegBytes);
+    }
+    else if (lowSegBytes > headBytes) {
+      free = (int) (lowSegBytes - bufSize);
+    }
+    else {
+      free = bufSize;
+    }
+
+    return new BufferStatus(free, (int) (highSegBytes - lowSegBytes), ((float) free) / bufSize);
   }
 
 
@@ -423,9 +485,11 @@ public class ServerMessageBusImpl implements ServerMessageBus {
   public void send(Message message) {
     message.commit();
     if (message.hasResource("Session")) {
+      message.setFlag(RoutingFlags.NonGlobalRouting);
       send(getQueueByMessage(message), message, true);
     }
     else if (message.hasPart(MessageParts.SessionID)) {
+      message.setFlag(RoutingFlags.NonGlobalRouting);
       send(getQueueBySession(message.get(String.class, MessageParts.SessionID)), message, true);
     }
     else {
@@ -582,12 +646,12 @@ public class ServerMessageBusImpl implements ServerMessageBus {
    * @param queue - the message queue to close
    */
   public void closeQueue(MessageQueue queue) {
+    messageQueues.values().remove(queue);
+    sessionLookup.values().remove(queue.getSession());
+
     for (RemoteMessageCallback cb : remoteSubscriptions.values()) {
       cb.removeQueue(queue);
     }
-
-    messageQueues.values().remove(queue);
-    sessionLookup.values().remove(queue.getSession());
 
     fireQueueCloseListeners(new QueueCloseEvent(queue));
   }
@@ -647,6 +711,14 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
   }
 
+
+  private static final Set<String> pipeLineExclusionSet = new HashSet<String>() {
+    {
+      add("ClientBus");
+      add("ClientBusErrors");
+    }
+  };
+
   /**
    * Adds a new remote subscription and fires subscription listeners
    *
@@ -663,7 +735,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     synchronized (remoteSubscriptions) {
       rmc = remoteSubscriptions.get(subject);
       if (rmc == null) {
-        rmc = new RemoteMessageCallback();
+        rmc = new RemoteMessageCallback(!pipeLineExclusionSet.contains(subject), subject);
         rmc.addQueue(queue);
 
         isNew = true;
@@ -680,17 +752,32 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     fireSubscribeListeners(new SubscriptionEvent(true, sessionContext.getSessionId(), rmc.getQueueCount(), isNew, subject));
   }
 
+
   public class RemoteMessageCallback implements MessageCallback {
-    private final Queue<MessageQueue> queues = new ConcurrentLinkedQueue<MessageQueue>();
-    private boolean pipeline;
+    private final String svc;
+    private final Set<MessageQueue> queues = Collections.newSetFromMap(new ConcurrentHashMap<MessageQueue, Boolean>());
+
+    private final boolean pipelinable;
+    private final AtomicInteger totalPipelined = new AtomicInteger();
+
+    public RemoteMessageCallback(boolean pipelineable, String svc) {
+      this.pipelinable = pipelineable;
+      this.svc = svc;
+    }
 
     public void callback(Message message) {
-      if (pipeline) {
+      // do not pipeline if this message is addressed to a specified session.
+      if (pipelinable && !message.isFlagSet(RoutingFlags.NonGlobalRouting)) {
         // all queues are listening to this subject. therefore we can save memory and time by
         // writing to the broadcast color on the buffer
         try {
+
           BufferHelper.encodeAndWrite(transmissionbuffer, BufferColor.getAllBuffersColor(), message);
           for (MessageQueue q : queues) q.wake();
+
+          if (totalPipelined.incrementAndGet() % 1000 == 0) {
+            log.info("[experimental] " + totalPipelined.get() + " messages have been pipelined to service: " + svc);
+          }
         }
         catch (IOException e) {
           throw new RuntimeException("transmission error", e);
@@ -705,12 +792,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     public void addQueue(MessageQueue queue) {
       queues.add(queue);
-      pipeline =  (queues.size() == messageQueues.size());
     }
 
     public void removeQueue(MessageQueue queue) {
       queues.remove(queue);
-      pipeline =  (queues.size() == messageQueues.size());
     }
 
     public Collection<MessageQueue> getQueues() {
@@ -748,7 +833,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     catch (Exception e) {
       e.printStackTrace();
       System.out.println("Exception running listeners");
-      return;
     }
   }
 

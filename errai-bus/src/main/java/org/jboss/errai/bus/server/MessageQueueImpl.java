@@ -129,6 +129,12 @@ public class MessageQueueImpl implements MessageQueue {
     return true;
   }
 
+
+  @Override
+  public long getCurrentBufferSequenceNumber() {
+    return bufferColor.getSequence();
+  }
+
   @Override
   public void wake() {
     try {

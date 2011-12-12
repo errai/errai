@@ -467,6 +467,26 @@ public class TransmissionBuffer implements Buffer {
     }
   }
 
+  @Override
+  public int getHeadPositionBytes() {
+    return getHead() * segmentSize;
+  }
+
+  @Override
+  public int getBufferSize() {
+    return bufferSize;
+  }
+
+  @Override
+  public int getTotalSegments() {
+    return segments;
+  }
+
+  @Override
+  public int getSegmentSize() {
+    return segmentSize;
+  }
+
   /**
    * Allocate space on the segment table for the specified write size of the specified color.
    *
@@ -682,6 +702,5 @@ public class TransmissionBuffer implements Buffer {
       }
     }
     return list;
-
   }
 }

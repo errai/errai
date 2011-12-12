@@ -18,6 +18,7 @@ package org.jboss.errai.bus.client.api.builder;
 
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.framework.RoutingFlags;
 import org.jboss.errai.common.client.api.ResourceProvider;
 
 /**
@@ -44,6 +45,10 @@ public interface MessageBuildParms<R> extends MessageBuild {
    */
   public MessageBuildParms<R> with(String part, Object value);
 
+  
+  public MessageBuildParms<R> flag(RoutingFlags flag);
+  
+  
   /**
    * Sets the message part to the specified value
    *

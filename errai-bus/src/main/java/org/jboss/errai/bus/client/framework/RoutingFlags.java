@@ -20,12 +20,15 @@ package org.jboss.errai.bus.client.framework;
  * Enumeration of flags that can be used when sending messages, to specify how they should be sent
  */
 public enum RoutingFlags {
+  /** This message should not be globally routed **/
   NonGlobalRouting {
     @Override
     public int flag() {
       return 1;
     }
   },
+
+  /** This message has priority and should be processed by the bus before other messages, if other messages are queued **/
   PriorityProcessing {
     @Override
     public int flag() {
@@ -67,7 +70,6 @@ public enum RoutingFlags {
       return 1 << 6;
     }
   };
-
   /**
    * Returns the integer representing the flag
    *

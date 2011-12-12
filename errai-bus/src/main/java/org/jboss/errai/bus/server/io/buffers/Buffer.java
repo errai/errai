@@ -42,5 +42,12 @@ public interface Buffer {
 
   public int readWait(TimeUnit unit, long time, OutputStream outputStream, BufferColor bufferColor, BufferCallback callback) throws IOException, InterruptedException;
 
-
+  public int getHeadPositionBytes();
+  
+  public int getBufferSize();
+  
+  public int getTotalSegments();
+  
+  public int getSegmentSize();
+  
 }
