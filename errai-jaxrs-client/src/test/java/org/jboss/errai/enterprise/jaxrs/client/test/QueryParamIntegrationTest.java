@@ -40,6 +40,13 @@ public class QueryParamIntegrationTest extends AbstractErraiJaxrsTest {
     RestClient.create(QueryParamTestService.class,
         new AssertionCallback<Long>("@GET with @QueryParam failed", 1l)).getWithQueryParam(1l);
   }
+  
+  @Test
+  public void testGetWithEncodedQueryParam() {
+    String queryParamSpecialChars = "?<>!@#$%^\\&*()-+;:''\\/.,";
+    RestClient.create(QueryParamTestService.class, new AssertionCallback<String>("@GET w/ encoded @QueryParam failed",
+        queryParamSpecialChars)).getWithStringQueryParam(queryParamSpecialChars);
+  }
 
   @Test
   public void testGetWithMultipleQueryParams() {

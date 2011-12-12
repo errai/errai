@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 JBoss, a division of Red Hat Hat, Inc
+ * Copyright 2011 JBoss, a division of Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,43 +16,30 @@
 
 package org.jboss.errai.enterprise.jaxrs.client.shared;
 
+import javax.ws.rs.CookieParam;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
-import javax.ws.rs.HEAD;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
 
 /**
- * This service is used to test support for query parameters (@QueryParam).
+ * This service is used to test support for cookie parameters (@CookieParam).
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@Path("/test/queryparam")
-public interface QueryParamTestService {
+@Path("/test/cookieparam")
+public interface CookieParamTestService {
 
   @GET
-  @Path("/1")
-  public long getWithQueryParam(@QueryParam("id") long id);
-
-  @GET
-  @Path("/2")
-  public String getWithStringQueryParam(@QueryParam("id") String id);
-  
-  @GET 
-  @Path("/3")
-  public String getWithMultipleQueryParams(@QueryParam("id1") long id1, @QueryParam("id2") long id2);
+  public int getWithIntegerCookieParam(@CookieParam("myCookie") Integer val);
 
   @POST
-  public long postWithQueryParam(@QueryParam("id") long id);
+  public String postWithStringCookieParam(@CookieParam("myCookie") String val);
 
   @PUT
-  public long putWithQueryParam(@QueryParam("id") long id);
+  public long putWithLongCookieParam(@CookieParam("myCookie") Long val);
 
   @DELETE
-  public long deleteWithQueryParam(@QueryParam("id") long id);
-  
-  @HEAD
-  public void headWithQueryParam(@QueryParam("id") long id);
+  public Double deleteWithDoubleCookieParam(@CookieParam("myCookie") Double val);
 }

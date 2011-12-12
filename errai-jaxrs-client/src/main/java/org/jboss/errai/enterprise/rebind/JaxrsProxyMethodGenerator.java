@@ -106,6 +106,7 @@ public class JaxrsProxyMethodGenerator {
     JaxrsResourceMethodParameters params = resourceMethod.getParameters();
     ContextualStatementBuilder pathValue = Stmt.loadLiteral(resourceMethod.getPath());
 
+    // construct path
     String path =  resourceMethod.getPath();
     if (!path.startsWith("/"))
      path = "/" + path;
@@ -115,12 +116,13 @@ public class JaxrsProxyMethodGenerator {
 
     for (String pathParam : pathParams) {
       pathValue = pathValue.invoke("replaceAll", "\\{" + pathParam + "\\}", 
-          marshal(params.getPathParameter(pathParam)));
+          encodePathParam(marshal(params.getPathParameter(pathParam))));
     }
 
     methodBlock.append(Stmt.declareVariable("url", StringBuilder.class,
         Stmt.newObject(StringBuilder.class).withParameters(pathValue)));
 
+    // construct query
     ContextualStatementBuilder urlBuilder = null;
     if (params.getQueryParameters() != null) {
       urlBuilder = Stmt.loadVariable("url").invoke(APPEND, "?");
@@ -133,12 +135,11 @@ public class JaxrsProxyMethodGenerator {
 
           urlBuilder = urlBuilder.invoke(APPEND, queryParamName);
           urlBuilder = urlBuilder.invoke(APPEND, "=");
-          urlBuilder = urlBuilder.invoke(APPEND, marshal(queryParam));
+          urlBuilder = urlBuilder.invoke(APPEND, encodeQueryParam(marshal(queryParam)));
         }
       }
     }
     
-    // TODO MatrixParams
     if (urlBuilder != null)
       methodBlock.append(urlBuilder);
   }
@@ -167,8 +168,6 @@ public class JaxrsProxyMethodGenerator {
             headerValueBuilder.invoke("toString")));
       }
     }
-    
-    // TODO CookieParams
   }
 
   private void generateRequestBuilder(BlockBuilder<?> methodBlock) {
@@ -235,5 +234,13 @@ public class JaxrsProxyMethodGenerator {
     }
     
     methodBlock.finish();
+  }
+  
+  private Statement encodePathParam(Statement s) {
+    return Stmt.invokeStatic(URL.class, "encodePathSegment", s);
+  }
+  
+  private Statement encodeQueryParam(Statement s) {
+    return Stmt.invokeStatic(URL.class, "encodeQueryString", s);
   }
 }

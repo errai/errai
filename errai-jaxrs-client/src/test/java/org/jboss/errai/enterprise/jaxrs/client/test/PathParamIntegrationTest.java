@@ -22,6 +22,7 @@ import org.jboss.errai.enterprise.jaxrs.client.shared.PathParamTestService;
 import org.junit.Test;
 
 import com.google.gwt.http.client.Response;
+import com.google.gwt.user.client.Cookies;
 
 /**
  * Testing path parameters.
@@ -41,6 +42,13 @@ public class PathParamIntegrationTest extends AbstractErraiJaxrsTest {
         new AssertionCallback<Long>("@GET with @PathParam failed", 1l)).getWithPathParam(1l);
   }
 
+  @Test
+  public void testGetWithEncodedPathParam() {
+    String pathWithSpecialChars = "?<>!@#$%^\\&*()-+;:''\\/.,";
+    RestClient.create(PathParamTestService.class, new AssertionCallback<String>("@GET w/ encoded @PathParam failed",
+        pathWithSpecialChars)).getWithStringPathParam(pathWithSpecialChars);
+  }
+  
   @Test
   public void testGetWithMultiplePathParams() {
     RestClient.create(PathParamTestService.class,

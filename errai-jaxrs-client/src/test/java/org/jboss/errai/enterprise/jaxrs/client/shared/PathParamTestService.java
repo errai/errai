@@ -16,6 +16,7 @@
 
 package org.jboss.errai.enterprise.jaxrs.client.shared;
 
+import javax.ws.rs.CookieParam;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HEAD;
@@ -33,9 +34,13 @@ import javax.ws.rs.PathParam;
 public interface PathParamTestService {
 
   @GET 
-  @Path("/{id}")
+  @Path("/t1/{id}")
   public long getWithPathParam(@PathParam("id") long id);
 
+  @GET 
+  @Path("/t2/{id}")
+  public String getWithStringPathParam(@PathParam("id") String id);
+  
   @GET 
   @Path("/{id1}/{id2}")
   public String getWithMultiplePathParams(@PathParam("id1") long id1, @PathParam("id2") long id2);

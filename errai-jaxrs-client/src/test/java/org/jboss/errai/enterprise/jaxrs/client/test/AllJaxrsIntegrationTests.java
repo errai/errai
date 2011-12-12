@@ -22,6 +22,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
     ContentNegotiationIntegrationTest.class,
+    CookieParamIntegrationTest.class,
     CustomTypeIntegrationTest.class,
     ErrorHandlingIntegrationTest.class,
     HeaderParamIntegrationTest.class,

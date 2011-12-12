@@ -16,6 +16,9 @@
 
 package org.jboss.errai.enterprise.jaxrs.server;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+
 import org.jboss.errai.enterprise.jaxrs.client.shared.PathParamTestService;
 
 /**
@@ -30,6 +33,16 @@ public class PathParamTestServiceImpl implements PathParamTestService {
     return id;
   }
 
+  @Override
+  public String getWithStringPathParam(String id) {
+    try {
+      return URLDecoder.decode(id, "UTF-8");
+    }
+    catch (UnsupportedEncodingException e) {
+      return e.toString();
+    }
+  }
+  
   @Override
   public String getWithMultiplePathParams(long id1, long id2) {
     return "" + id1 + "/" + id2;
