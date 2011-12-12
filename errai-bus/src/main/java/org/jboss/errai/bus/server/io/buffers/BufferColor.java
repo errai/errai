@@ -16,6 +16,7 @@
 
 package org.jboss.errai.bus.server.io.buffers;
 
+import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;

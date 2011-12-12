@@ -282,16 +282,16 @@ public class TransmissionBufferTests extends TestCase {
     File rawBufferFile = new File("raw_buffer.log");
     if (!logFile.exists()) logFile.createNewFile();
     if (!rawBufferFile.exists()) rawBufferFile.createNewFile();
-    
 
-    final TransmissionBuffer buffer = TransmissionBuffer.create(32, 32000);
+
+    final TransmissionBuffer buffer = TransmissionBuffer.createDirect(32, 32000);
 
     OutputStream fileLog = new BufferedOutputStream(new FileOutputStream(logFile, false));
     OutputStream rawBuffer = new BufferedOutputStream(new FileOutputStream(rawBufferFile, false));
-    
+
     final PrintWriter logWriter = new PrintWriter(fileLog);
-    
-    
+
+
     logWriter.println("START SESSION: " + new Date().toString());
     try {
 
@@ -301,7 +301,6 @@ public class TransmissionBufferTests extends TestCase {
         segs.add(BufferColor.getNewColor());
       }
 
-      ScheduledThreadPoolExecutor exec = new ScheduledThreadPoolExecutor(20);
 
       final Collection<String> writeAuditLog = new ConcurrentLinkedQueue<String>();
       final Collection<String> readAuditLog = new ConcurrentLinkedQueue<String>();
@@ -313,9 +312,11 @@ public class TransmissionBufferTests extends TestCase {
         writeString[i] = "<:::" + i + ":::>";
       }
 
-      for (int outerCount = 0; outerCount < 20; outerCount++) {
+      for (int outerCount = 0; outerCount < 10; outerCount++) {
+        ScheduledThreadPoolExecutor exec = new ScheduledThreadPoolExecutor(10);
+
         logWriter.print("SESSION NUMBER " + outerCount);
-        
+
         System.out.println("Running multi-threaded stress test (" + (outerCount + 1) + ") ...");
 
         writeAuditLog.clear();
@@ -330,9 +331,9 @@ public class TransmissionBufferTests extends TestCase {
           volatile boolean running = true;
 
           public void read(BufferColor color, boolean wait) throws Exception {
-            final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             if (wait) {
-              buffer.readWait(TimeUnit.MILLISECONDS, 100, byteArrayOutputStream, color);
+              buffer.readWait(TimeUnit.SECONDS, 1, byteArrayOutputStream, color);
             }
             else {
               buffer.read(byteArrayOutputStream, color);
@@ -346,8 +347,9 @@ public class TransmissionBufferTests extends TestCase {
             int st = 0;
             for (int c = 0; c < val.length(); c++) {
               switch (val.charAt(c)) {
-                case '>':
+                case '>': {
                   buildResultList.add(val.substring(st, st = (c + 1)));
+                }
               }
             }
 
@@ -363,14 +365,17 @@ public class TransmissionBufferTests extends TestCase {
             for (String s : buildResultList) {
               match = false;
               for (String testString : writeString) {
-                if (s.equals(testString)) match = true;
+                if (s.equals(testString)) {
+                  totalReads.incrementAndGet();
+                  match = true;
+                }
               }
               assertTrue("unrecognized test string: {{" + s + "}}", match);
             }
 
             readAuditLog.addAll(buildResultList);
 
-            totalReads.addAndGet(buildResultList.size());
+           // totalReads.addAndGet(buildResultList.size());
           }
         }
 
@@ -396,10 +401,8 @@ public class TransmissionBufferTests extends TestCase {
             }
           };
 
-
           readers[i].start();
         }
-
 
         for (int i = 0; i < createCount; i++) {
           final int item = i;
@@ -410,8 +413,10 @@ public class TransmissionBufferTests extends TestCase {
               try {
                 String toWrite = writeString[item];
                 writeAuditLog.add(toWrite);
+
                 ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(toWrite.getBytes());
                 buffer.write(toWrite.length(), byteArrayInputStream, segs.get(item % SEGMENT_COUNT));
+
                 totalWrites.incrementAndGet();
                 latch.countDown();
               }
@@ -434,30 +439,7 @@ public class TransmissionBufferTests extends TestCase {
           t.join();
         }
 
-//      for (int i = 0; i < SEGMENT_COUNT; i++) {
-//        try {
-//          testReader.read(segs.get(i), false);
-//        }
-//        catch (Exception e) {
-//          e.printStackTrace();
-//        }
-//      }
-
-//        class ReadWriteOrderAnalysis {
-//          public void analyze() {
-//            System.out.println("Read / Write Order Analysis ...  ");
-//            for (int i = 0; i < writeAuditLog.size() && i < readAuditLog.size(); i++) {
-//              System.out.print(i + " : " + writeAuditLog.get(i) + " = " + readAuditLog.get(i));
-//
-//              if (writeAuditLog.get(i).equals(readAuditLog.get(i))) {
-//                System.out.println();
-//              }
-//              else {
-//                System.out.println(" ** ");
-//              }
-//            }
-//          }
-//        }
+        exec.shutdownNow();
 
         if (totalWrites.intValue() != totalReads.intValue()) {
           /**
@@ -476,11 +458,9 @@ public class TransmissionBufferTests extends TestCase {
           }
 
           if (totalWrites.intValue() != totalReads.intValue()) {
-      //      new ReadWriteOrderAnalysis().analyze();
+            //      new ReadWriteOrderAnalysis().analyze();
 
             System.out.println("-----");
-
-//          buffer.dumpSegments();
 
             System.out.println("(" + (outerCount + 1) + ") different number of reads and writes (writes=" + totalWrites + ";reads=" + totalReads + ")");
           }
@@ -507,7 +487,9 @@ public class TransmissionBufferTests extends TestCase {
               }
             }
 
-        //    new ReadWriteOrderAnalysis().analyze();
+            System.out.println("duplicates: " + duplicates);
+
+            //    new ReadWriteOrderAnalysis().analyze();
 
             fail(s + " was written, but never read (leftDiff=" + leftDiff + ";rightDiff=" + rightDiff
                     + ";duplicatesInReadLog=" + duplicates + ")");
@@ -520,12 +502,12 @@ public class TransmissionBufferTests extends TestCase {
     finally {
       buffer.dumpSegments(logWriter);
       buffer.rawDump(rawBuffer);
-      
+
       logWriter.flush();
 
       fileLog.flush();
       fileLog.close();
-      
+
       rawBuffer.flush();
       rawBuffer.close();
     }

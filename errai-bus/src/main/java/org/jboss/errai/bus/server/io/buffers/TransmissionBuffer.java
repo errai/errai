@@ -20,8 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -55,7 +53,8 @@ public class TransmissionBuffer implements Buffer {
   /**
    * The main buffer where the data is stored
    */
-  final ByteBuffer buffer;
+  // final ByteBuffer buffer;
+  final byte[] buffer;
 
   /**
    * The segment map where allocation data is stored
@@ -77,16 +76,45 @@ public class TransmissionBuffer implements Buffer {
    */
   final int segments;
 
-
   /**
    * The internal write sequence number used by the writers to allocate write space within the buffer.
    */
-  private final AtomicLong writeSequenceNumber = new AtomicLong();
+  private final AtomicLong writeSequenceNumber = new AtomicLong() {
+    public volatile long a1
+            ,
+            a2
+            ,
+            a3
+            ,
+            a4
+            ,
+            a5
+            ,
+            a6
+            ,
+            a7 = 7L;
+  };
 
   /**
    * The visible head sequence number seen by the readers.
    */
-  private final AtomicLong headSequence = new AtomicLong();
+  private final AtomicLong headSequence = new AtomicLong() {
+    public volatile long a1
+            ,
+            a2
+            ,
+            a3
+            ,
+            a4
+            ,
+            a5
+            ,
+            a6
+            ,
+            a7 = 7L;
+  };
+
+  private static final Object memBoundary = new Object();
 
   private TransmissionBuffer(boolean directBuffer, int segmentSize, int segments) {
     // must pad segment size for size headers -- or the last segment may be odd-sized (that would not be good)
@@ -95,13 +123,20 @@ public class TransmissionBuffer implements Buffer {
     this.segments = segments;
 
     if (directBuffer) {
-      buffer = ByteBuffer.allocateDirect(bufferSize);
+      // buffer = ByteBuffer.allocateDirect(bufferSize);
     }
     else {
-      buffer = ByteBuffer.wrap(new byte[bufferSize]);
+      // buffer = ByteBuffer.wrap(new byte[bufferSize]);
     }
 
+    buffer = new byte[bufferSize];
+
     segmentMap = new short[segments];
+
+//    locks = new Object[segmentMap.length / 4];
+//    for (int i = 0; i < locks.length; i++) {
+//      locks[i] = new Object();
+//    }
   }
 
   /**
@@ -161,27 +196,17 @@ public class TransmissionBuffer implements Buffer {
     if (writeSize > bufferSize) {
       throw new RuntimeException("write size larger than buffer can fit");
     }
-    ByteBuffer dup = buffer.duplicate();
-
     int allocSize = ((writeSize + SEGMENT_HEADER_SIZE) / segmentSize) + 1;
 
     long head = headSequence.get();
     long writeHead = writeSequenceNumber.getAndAdd(allocSize);
     int seq = (int) writeHead % segments;
 
-    /**
-     * Allocate the segments to the this color
-     */
-    for (int i = 0; i < allocSize; i++) {
-      segmentMap[(seq + i) % segments] = bufferColor.color;
-    }
 
     int writeCursor = seq * segmentSize;
 
-    dup.position(writeCursor);
-
     // write the chunk size header for the data we're about to write
-    dup.putInt(writeSize);
+    writeChunkSize(writeCursor, writeSize);
 
     writeCursor += SEGMENT_HEADER_SIZE;
 
@@ -189,19 +214,28 @@ public class TransmissionBuffer implements Buffer {
     int end = writeCursor + writeSize;
     int initialRead = end > bufferSize ? bufferSize : end;
 
+    long newHead = writeHead + allocSize;
+
+    /*
+    * Allocate the segments to the this color
+    */
+    for (int i = 0; i < allocSize; i++) {
+      segmentMap[(seq + i) % segments] = bufferColor.color;
+    }
+
     for (; writeCursor < initialRead; writeCursor++) {
-      dup.put((byte) inputStream.read());
+      buffer[writeCursor] = (byte) inputStream.read();
     }
 
     if (writeCursor < end) {
-      dup.position(0);
       for (int i = 0; i < end - bufferSize; i++) {
-        dup.put((byte) inputStream.read());
+        buffer[writeCursor] = (byte) inputStream.read();
       }
     }
 
+
     // update the head sequence number.
-    headSequence.compareAndSet(head, writeHead + allocSize);
+    headSequence.set(newHead);
 
     // knock! knock! If there is a waiting reader on this color, wake it up.{
     bufferColor.wake();
@@ -322,6 +356,8 @@ public class TransmissionBuffer implements Buffer {
       boolean haveData = false;
 
       for (; ; ) {
+        LockSupport.parkNanos(1);
+
         int head = (int) headSequence.get() % segments;
         long read = bufferColor.sequence.get();
         long lastSeq = read;
@@ -380,6 +416,8 @@ public class TransmissionBuffer implements Buffer {
       boolean haveData = false;
 
       for (; ; ) {
+        LockSupport.parkNanos(1);
+
         int writeHead = (int) headSequence.get() % segments;
         long read = readTail;
         long lastSeq = read;
@@ -441,7 +479,7 @@ public class TransmissionBuffer implements Buffer {
    * @throws InterruptedException thrown if the monitor is interrupted while waiting to receive dta.
    */
   @Override
-  public int readWait(TimeUnit unit, long time, OutputStream outputStream, BufferColor bufferColor, BufferCallback callback) throws IOException, InterruptedException {
+  public int readWait(TimeUnit unit, long time, OutputStream outputStream, final BufferColor bufferColor, BufferCallback callback) throws IOException, InterruptedException {
     bufferColor.lock.lockInterruptibly();
 
     try {
@@ -452,6 +490,8 @@ public class TransmissionBuffer implements Buffer {
       callback.before(outputStream);
 
       for (; ; ) {
+        LockSupport.parkNanos(1);
+
         int writeHead = (int) headSequence.get() % segments;
         long read = readTail;
         long lastSeq = read;
@@ -568,7 +608,6 @@ public class TransmissionBuffer implements Buffer {
                              final OutputStream outputStream, final BufferCallback callback) throws IOException {
     int segmentToRead = getNextSegment(color, head, (int) sequence % segments);
     if (segmentToRead != -1) {
-      ByteBuffer dup = buffer.asReadOnlyBuffer();
 
       int readCursor = segmentToRead * segmentSize;
 
@@ -576,8 +615,7 @@ public class TransmissionBuffer implements Buffer {
         readCursor = 0;
       }
 
-      dup.position(readCursor);
-      final int readSize = dup.getInt();
+      final int readSize = readChunkSize(readCursor);
 
       readCursor += SEGMENT_HEADER_SIZE;
 
@@ -592,41 +630,29 @@ public class TransmissionBuffer implements Buffer {
       }
 
       if (callback == null) {
-        byte b1, b2;
         for (; readCursor < maxInitialRead; readCursor++) {
-          b1 = dup.get();
-          b2 = dup.get(readCursor);
-
-          if (b1 != b2) {
-            System.out.println("wtf? inconsistent read: " + b1 + " <-> " + b2);
-          }
-
-          outputStream.write(b2);
+          outputStream.write(buffer[readCursor]);
         }
 
-
         if (readCursor < endRead) {
-          dup.position(0);
           int remaining = endRead - bufferSize;
           for (int i = 0; i < remaining; i++) {
-            outputStream.write(dup.get());
+            outputStream.write(buffer[i]);
           }
         }
       }
       else {
         for (; readCursor < maxInitialRead; readCursor++) {
-          outputStream.write(callback.each(dup.get(), outputStream));
+          outputStream.write(callback.each(buffer[readCursor], outputStream));
         }
 
         if (readCursor < endRead) {
-          dup.position(0);
           int remaining = endRead - bufferSize;
           for (int i = 0; i < remaining; i++) {
-            outputStream.write(callback.each(dup.get(), outputStream));
+            outputStream.write(callback.each(buffer[readCursor], outputStream));
           }
         }
       }
-
       return segmentToRead + ((readSize + SEGMENT_HEADER_SIZE) / segmentSize) + 1;
     }
     else {
@@ -641,7 +667,18 @@ public class TransmissionBuffer implements Buffer {
    * @return the size in bytes.
    */
   private int readChunkSize(int position) {
-    return buffer.getInt(position);
+    return (((((int) buffer[position + 3]) & 0xFF) << 32) +
+            ((((int) buffer[position + 2]) & 0xFF) << 40) +
+            ((((int) buffer[position + 1]) & 0xFF) << 48) +
+            ((((int) buffer[position]) & 0xFF) << 56));
+  }
+
+  private void writeChunkSize(int position, int size) {
+    buffer[position++] = (byte) ((size >> 24) & 0xFF);
+    buffer[position++] = (byte) ((size >> 16) & 0xFF);
+    buffer[position++] = (byte) ((size >> 8) & 0xFF);
+    buffer[position] = (byte) (size & 0xFF);
+
   }
 
 
@@ -658,7 +695,7 @@ public class TransmissionBuffer implements Buffer {
 
       byte[] buf = new byte[length];
       for (int x = 0; x < length; x++) {
-        buf[x] = buffer.get(pos + x);
+        buf[x] = buffer[pos + x];
       }
 
       build.append("::'").append(new String(buf)).append("'");
@@ -675,10 +712,10 @@ public class TransmissionBuffer implements Buffer {
   }
 
   public void rawDump(OutputStream stream) throws IOException {
-    ByteBuffer buf = buffer.duplicate();
-    buf.rewind();
-
-    while (buf.hasRemaining()) stream.write(buf.get());
+//    ByteBuffer buf = buffer.duplicate();
+//    buf.rewind();
+//
+//    while (buf.hasRemaining()) stream.write(buf.get());
   }
 
   @SuppressWarnings("UnusedDeclaration")
@@ -693,7 +730,7 @@ public class TransmissionBuffer implements Buffer {
 
       byte[] buf = new byte[length];
       for (int x = 0; x < length; x++) {
-        buf[x] = buffer.get(pos + x);
+        buf[x] = buffer[pos + x];
       }
 
       list.add(new String(buf));
