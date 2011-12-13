@@ -493,6 +493,7 @@ public class TransmissionBuffer implements Buffer {
 
         // return if data is ready to return or we're timed out.
         if (nanos <= 0) {
+          callback.after(outputStream);
           return -1;
         }
 
