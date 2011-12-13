@@ -20,7 +20,7 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.server.io.buffers.Buffer;
 import org.jboss.errai.bus.server.io.buffers.BufferCallback;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
-import org.jboss.errai.marshalling.server.JSONStreamEncoder;
+import org.jboss.errai.marshalling.server.JSONEncoder;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -67,23 +67,12 @@ public class BufferHelper {
     }
   }
 
-  private static class StreamWrapper extends ByteArrayOutputStream {
-    StreamWrapper(int size) {
-      super(size);
-    }
-
-    public byte[] getRawArray() {
-      return super.buf;
-    }
-  }
-
   public static void encodeAndWrite(Buffer buffer, BufferColor bufferColor, Message message) throws IOException {
-    StreamWrapper out = new StreamWrapper(1024);
-    JSONStreamEncoder.encode(message.getParts(), out);
-    buffer.write(out.size(), new ByteArrayInputStream(out.getRawArray(), 0, out.size()), bufferColor);
+    buffer.write(new ByteArrayInputStream(JSONEncoder.encodeToByteArray(message.getParts())), bufferColor);
   }
 
   private static final byte[] NOOP_ARRAY = new byte[0];
+
   public static void encodeAndWriteNoop(Buffer buffer, BufferColor bufferColor) throws IOException {
     buffer.write(NOOP_ARRAY.length, new ByteArrayInputStream(NOOP_ARRAY), bufferColor);
   }

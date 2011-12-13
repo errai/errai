@@ -18,16 +18,34 @@ package org.jboss.errai.marshalling.server;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * Encodes an object into a JSON string
  */
 public class JSONEncoder {
   public static String encode(Object o) {
-    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(1024 * 8);
     try {
       JSONStreamEncoder.encode(o, byteArrayOutputStream);
       return new String(byteArrayOutputStream.toByteArray());
+    }
+    catch (IOException e) {
+      //ignore
+    }
+    return null;
+  }
+
+  public static byte[] encodeToByteArray(Object o) {
+    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(1024 * 8) {
+      @Override
+      public byte[] toByteArray() {
+        return this.buf;
+      }
+    };
+    try {
+      JSONStreamEncoder.encode(o, byteArrayOutputStream);
+      return  byteArrayOutputStream.toByteArray();
     }
     catch (IOException e) {
       //ignore

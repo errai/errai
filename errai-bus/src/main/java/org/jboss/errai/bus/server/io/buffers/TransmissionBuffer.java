@@ -178,6 +178,19 @@ public class TransmissionBuffer implements Buffer {
   }
 
   /**
+   * Writes from the {@link InputStream} into the buffer. Space is allocated and the data expected to be written
+   * by checking the {@link java.io.InputStream#available()} value.
+   *
+   * @param inputStream the input stream to read into the buffer.
+   * @param bufferColor the color of the data to be inserted.
+   * @throws IOException
+   */
+  @Override
+  public void write(InputStream inputStream, BufferColor bufferColor) throws IOException {
+    write(inputStream.available(), inputStream, bufferColor);
+  }
+
+  /**
    * Writes from an {@link InputStream} into the buffer using the specified {@param writeSize} to allocate space
    * in the buffer.
    *
@@ -400,7 +413,7 @@ public class TransmissionBuffer implements Buffer {
 
     try {
       for (; ; ) {
-       // long writeHead = headSequence;
+        // long writeHead = headSequence;
         long read;
 
         if ((read = readNextChunk(headSequence, readTail, bufferColor, outputStream, null)) != -1) {
@@ -469,7 +482,7 @@ public class TransmissionBuffer implements Buffer {
       callback.before(outputStream);
 
       for (; ; ) {
-       // long writeHead = headSequence;
+        // long writeHead = headSequence;
         long read = readTail;
         if ((read = readNextChunk(headSequence, read, bufferColor, outputStream, callback)) != -1) {
           bufferColor.sequence.set(read);
@@ -658,12 +671,12 @@ public class TransmissionBuffer implements Buffer {
 
   private byte getBuf(int idx) {
     return buffer[idx];
-   // return unsafe.getByteVolatile(buffer, rawIntIndex(idx));
+    // return unsafe.getByteVolatile(buffer, rawIntIndex(idx));
   }
 
   private void writeBuf(int idx, byte v) {
     buffer[idx] = v;
-  //  unsafe.putByteVolatile(buffer, rawIntIndex(idx), v);
+    //  unsafe.putByteVolatile(buffer, rawIntIndex(idx), v);
   }
 
   private short getSeg(int idx) {
