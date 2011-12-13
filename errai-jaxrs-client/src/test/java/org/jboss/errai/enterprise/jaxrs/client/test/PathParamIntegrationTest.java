@@ -22,7 +22,6 @@ import org.jboss.errai.enterprise.jaxrs.client.shared.PathParamTestService;
 import org.junit.Test;
 
 import com.google.gwt.http.client.Response;
-import com.google.gwt.user.client.Cookies;
 
 /**
  * Testing path parameters.

@@ -74,7 +74,8 @@ public class JaxrsProxyGenerator {
     generateErrorHandler(classBuilder);
 
     for (MetaMethod method : MetaClassFactory.get(remote).getMethods()) {
-      new JaxrsProxyMethodGenerator(new JaxrsResourceMethod(method, headers, rootResourcePath)).generate(classBuilder);
+      JaxrsResourceMethod resourceMethod = new JaxrsResourceMethod(method, headers, rootResourcePath);
+      new JaxrsProxyMethodGenerator(classBuilder, resourceMethod).generate();
     }
 
     return classBuilder;
@@ -101,7 +102,7 @@ public class JaxrsProxyGenerator {
 
     classBuilder.privateMethod(void.class, "handleError",
         Parameter.of(Throwable.class, "throwable"), Parameter.of(Response.class, "response"))
-        .append(errorHandling)
+          .append(errorHandling)
         .finish();
   }
 }

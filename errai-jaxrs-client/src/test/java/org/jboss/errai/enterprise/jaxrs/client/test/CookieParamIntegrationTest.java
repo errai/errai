@@ -40,6 +40,13 @@ public class CookieParamIntegrationTest extends AbstractErraiJaxrsTest {
     Cookies.setCookie("myCookie", "1701");
     RestClient.create(CookieParamTestService.class,
         new AssertionCallback<Integer>("@GET with @CookieParam failed", 1701)).getWithIntegerCookieParam(null);
+  } 
+  
+  @Test
+  public void testGetWithOverridingCookieParam() {
+    Cookies.setCookie("myCookie", "1701");
+    RestClient.create(CookieParamTestService.class,
+        new AssertionCallback<Integer>("@GET with @CookieParam failed", 1702)).getWithIntegerCookieParam(1702);
   }
 
   @Test
