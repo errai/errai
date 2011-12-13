@@ -136,11 +136,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   /**
    * The unique ID that will sent with the next request.
-   * <p>
+   * <p/>
    * IMPORTANT: only access this member via {@link #getNextRequestNumber()}.
    */
   private int requestNumber = 0;
-  
+
   private boolean disconnected = false;
 
   ProxySettings proxySettings;
@@ -203,7 +203,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             RequestBuilder.GET,
             URL.encode(endpoint) + "?z=" + getNextRequestNumber()
     );
-    
+
     builder.setHeader("Content-Type", "application/json");
     builder.setHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER, clientId);
     return builder;
@@ -551,7 +551,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private void transmitRemote(final String message, final Message txMessage) {
     if (message == null) return;
 
- //  System.out.println("TX: " + message);
+    //  System.out.println("TX: " + message);
 
     try {
       sendBuilder.sendRequest(message, new RequestCallback() {
@@ -1055,9 +1055,20 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     public void onResponseReceived(Request request, Response response) {
       if (response.getStatusCode() != 200) {
-        statusCode = response.getStatusCode();
-        onError(request, new TransportIOException("Unexpected response code", statusCode, response.getStatusText()));
-        return;
+        switch (statusCode = response.getStatusCode()) {
+          case 200:
+          case 300:
+          case 301:
+          case 302:
+          case 303:
+          case 304:
+          case 305:
+          case 307:
+            break;
+          default:
+            onError(request, new TransportIOException("Unexpected response code", statusCode, response.getStatusText()));
+            return;
+        }
       }
 
       if (retries != 0) {
@@ -1288,7 +1299,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private native static Object _subscribe(String subject, MessageCallback callback,
                                           Object subscriberData) /*-{
     return $wnd.PageBus.subscribe(subject, null,
-            function(subject, message) {
+            function (subject, message) {
               callback.@org.jboss.errai.bus.client.api.MessageCallback::callback(Lorg/jboss/errai/bus/client/api/Message;)(@org.jboss.errai.bus.client.json.JSONUtilCli::decodeCommandMessage(Ljava/lang/Object;)(message))
             },
             null);
@@ -1367,7 +1378,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
     }
   }
-  
+
   public int getNextRequestNumber() {
     if (requestNumber == Integer.MAX_VALUE) {
       requestNumber = 0;
