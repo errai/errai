@@ -23,7 +23,6 @@ import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.marshalling.server.JSONEncoder;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -68,7 +67,7 @@ public class BufferHelper {
   }
 
   public static void encodeAndWrite(Buffer buffer, BufferColor bufferColor, Message message) throws IOException {
-    buffer.write(new ByteArrayInputStream(JSONEncoder.encodeToByteArray(message.getParts())), bufferColor);
+    buffer.write(JSONEncoder.encodeToByteArrayInputStream(message.getParts()), bufferColor);
   }
 
   private static final byte[] NOOP_ARRAY = new byte[0];

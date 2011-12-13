@@ -187,6 +187,7 @@ public class TransmissionBuffer implements Buffer {
    */
   @Override
   public void write(InputStream inputStream, BufferColor bufferColor) throws IOException {
+    inputStream.reset();
     write(inputStream.available(), inputStream, bufferColor);
   }
 

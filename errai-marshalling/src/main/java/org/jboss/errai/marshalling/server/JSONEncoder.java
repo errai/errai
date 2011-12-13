@@ -16,6 +16,7 @@
 
 package org.jboss.errai.marshalling.server;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -36,16 +37,22 @@ public class JSONEncoder {
     return null;
   }
 
-  public static byte[] encodeToByteArray(Object o) {
-    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(1024 * 8) {
-      @Override
-      public byte[] toByteArray() {
-        return this.buf;
-      }
-    };
+  final static class UnwrappedByteArrayOutputStream extends ByteArrayOutputStream {
+    UnwrappedByteArrayOutputStream() {
+      super(1024 * 8);
+    }
+
+    @Override
+    public byte[] toByteArray() {
+      return super.buf;
+    }
+  }
+
+  public static ByteArrayInputStream encodeToByteArrayInputStream(Object o) {
+    UnwrappedByteArrayOutputStream byteArrayOutputStream = new UnwrappedByteArrayOutputStream();
     try {
       JSONStreamEncoder.encode(o, byteArrayOutputStream);
-      return  byteArrayOutputStream.toByteArray();
+      return new ByteArrayInputStream(byteArrayOutputStream.toByteArray(), 0, byteArrayOutputStream.size());
     }
     catch (IOException e) {
       //ignore
