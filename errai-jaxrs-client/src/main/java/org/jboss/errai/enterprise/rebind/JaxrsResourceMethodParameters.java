@@ -42,7 +42,7 @@ import org.jboss.errai.codegen.framework.meta.MetaParameter;
 public class JaxrsResourceMethodParameters {
   private Parameter entityParameter;
   private Map<Class<? extends Annotation>, Map<String, List<Parameter>>> parameters;
-  
+
   public static JaxrsResourceMethodParameters fromMethod(MetaMethod method) {
     JaxrsResourceMethodParameters params = new JaxrsResourceMethodParameters();
 
@@ -80,7 +80,7 @@ public class JaxrsResourceMethodParameters {
   private void add(Class<? extends Annotation> type, String name, Parameter value) {
     if (parameters == null)
       parameters = new HashMap<Class<? extends Annotation>, Map<String, List<Parameter>>>();
-    
+
     Map<String, List<Parameter>> params = parameters.get(type);
     if (params == null) {
       parameters.put(type, params = new HashMap<String, List<Parameter>>());
@@ -99,15 +99,7 @@ public class JaxrsResourceMethodParameters {
   }
 
   public Parameter getPathParameter(String name) {
-    Parameter param = null;
-
-    if (getPathParameters() != null) {
-      List<Parameter> params = getPathParameters().get(name);
-      if (params != null && !params.isEmpty()) {
-        param = params.get(0);
-      }
-    }
-
+    Parameter param = getParameterByName(PathParam.class, name);
     if (param == null)
       throw new RuntimeException("No @PathParam found with name:" + name);
 
@@ -134,6 +126,10 @@ public class JaxrsResourceMethodParameters {
     return get(MatrixParam.class);
   }
 
+  public Parameter getMatrixParameter(String name) {
+    return getParameterByName(MatrixParam.class, name);
+  }
+
   public Map<String, List<Parameter>> getFormParameters() {
     return get(FormParam.class);
   }
@@ -141,14 +137,11 @@ public class JaxrsResourceMethodParameters {
   public Map<String, List<Parameter>> getCookieParameters() {
     return get(CookieParam.class);
   }
-
-  private Map<String, List<Parameter>> get(Class<? extends Annotation> type) {
-    if (parameters == null)
-      return null;
-    
-    return parameters.get(type);
-  }
   
+  public Parameter getCookieParameter(String name) {
+    return getParameterByName(CookieParam.class, name);
+  }
+
   public Parameter getEntityParameter() {
     return entityParameter;
   }
@@ -158,5 +151,25 @@ public class JaxrsResourceMethodParameters {
       throw new RuntimeException("Only one non-annotated entity parameter allowed per method:" + method.getName());
     }
     this.entityParameter = entityParameter;
+  }
+
+  private Map<String, List<Parameter>> get(Class<? extends Annotation> type) {
+    if (parameters == null)
+      return null;
+
+    return parameters.get(type);
+  }
+
+  private Parameter getParameterByName(Class<? extends Annotation> type, String name) {
+    Parameter param = null;
+
+    if (get(type) != null) {
+      List<Parameter> params = get(type).get(name);
+      if (params != null && !params.isEmpty()) {
+        param = params.get(0);
+      }
+    }
+    
+    return param;
   }
 }

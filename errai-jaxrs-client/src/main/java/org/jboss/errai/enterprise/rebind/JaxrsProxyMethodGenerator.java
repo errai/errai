@@ -62,8 +62,8 @@ public class JaxrsProxyMethodGenerator {
   public JaxrsProxyMethodGenerator(ClassStructureBuilder<?> classBuilder, JaxrsResourceMethod resourceMethod) {
     this.declaringClass = classBuilder.getClassDefinition();
     this.resourceMethod = resourceMethod;
-    this.methodBlock = classBuilder.publicMethod(resourceMethod.getMethod().getReturnType(), 
-        resourceMethod.getMethod().getName(), 
+    this.methodBlock = classBuilder.publicMethod(resourceMethod.getMethod().getReturnType(),
+        resourceMethod.getMethod().getName(),
         DefParameters.from(resourceMethod.getMethod()).getParameters().toArray(new Parameter[0]));
   }
 
@@ -82,7 +82,7 @@ public class JaxrsProxyMethodGenerator {
     JaxrsResourceMethodParameters params = resourceMethod.getParameters();
     ContextualStatementBuilder pathValue = Stmt.loadLiteral(resourceMethod.getPath());
 
-    // construct path
+    // construct path using @PathParams and @MatrixParams
     String path = resourceMethod.getPath();
     if (!path.startsWith("/"))
       path = "/" + path;
@@ -92,13 +92,20 @@ public class JaxrsProxyMethodGenerator {
 
     for (String pathParam : pathParams) {
       pathValue = pathValue.invoke("replaceAll", "\\{" + pathParam + "\\}",
-          encodePathParam(marshal(params.getPathParameter(pathParam))));
+          encodePath(marshal(params.getPathParameter(pathParam))));
+    }
+
+    if (params.getMatrixParameters() != null) {
+      for (String matrixParamName : params.getMatrixParameters().keySet()) {
+        pathValue = pathValue.invoke("concat", ";" + matrixParamName + "=")
+            .invoke("concat", encodePath(marshal(params.getMatrixParameter(matrixParamName))));
+      }
     }
 
     methodBlock.append(Stmt.declareVariable("url", StringBuilder.class,
         Stmt.newObject(StringBuilder.class).withParameters(pathValue)));
 
-    // construct query
+    // construct query using @QueryParams
     ContextualStatementBuilder urlBuilder = null;
     if (params.getQueryParameters() != null) {
       urlBuilder = Stmt.loadVariable("url").invoke(APPEND, "?");
@@ -109,9 +116,8 @@ public class JaxrsProxyMethodGenerator {
           if (i++ > 0)
             urlBuilder = urlBuilder.invoke(APPEND, "&");
 
-          urlBuilder = urlBuilder.invoke(APPEND, queryParamName);
-          urlBuilder = urlBuilder.invoke(APPEND, "=");
-          urlBuilder = urlBuilder.invoke(APPEND, encodeQueryParam(marshal(queryParam)));
+          urlBuilder = urlBuilder.invoke(APPEND, queryParamName).invoke(APPEND, "=")
+              .invoke(APPEND, encodeQuery(marshal(queryParam)));
         }
       }
     }
@@ -123,11 +129,13 @@ public class JaxrsProxyMethodGenerator {
   private void generateHeaders() {
     JaxrsResourceMethodParameters params = resourceMethod.getParameters();
 
+    // set headers based on method and class
     for (String key : resourceMethod.getHeaders().keySet()) {
       methodBlock.append(Stmt.loadVariable("requestBuilder").invoke("setHeader", key,
           resourceMethod.getHeaders().get(key)));
     }
 
+    // set headers based on @HeaderParams
     if (params.getHeaderParameters() != null) {
       for (String headerParamName : params.getHeaderParameters().keySet()) {
         ContextualStatementBuilder headerValueBuilder = Stmt.nestedCall(Stmt.newObject(StringBuilder.class));
@@ -145,6 +153,7 @@ public class JaxrsProxyMethodGenerator {
       }
     }
 
+    // set cookies based on @CookieParams
     if (params.getCookieParameters() != null) {
       for (String cookieName : params.getCookieParameters().keySet()) {
         Parameter cookieParam = params.getCookieParameters().get(cookieName).get(0);
@@ -173,11 +182,11 @@ public class JaxrsProxyMethodGenerator {
   private void generateRequest() {
     ContextualStatementBuilder sendRequest = Stmt.loadVariable("requestBuilder");
     if (resourceMethod.getParameters().getEntityParameter() == null) {
-      sendRequest = sendRequest.invoke("sendRequest", null, generateRequestCallback());
+      sendRequest = sendRequest.invoke("sendRequest", null, createRequestCallback());
     }
     else {
       Statement body = marshal(resourceMethod.getParameters().getEntityParameter());
-      sendRequest = sendRequest.invoke("sendRequest", body, generateRequestCallback());
+      sendRequest = sendRequest.invoke("sendRequest", body, createRequestCallback());
     }
 
     methodBlock.append(Stmt
@@ -189,7 +198,16 @@ public class JaxrsProxyMethodGenerator {
         .finish());
   }
 
-  private Statement generateRequestCallback() {
+  private void generateReturnStatement() {
+    Statement returnStatement = RebindUtils.generateProxyMethodReturnStatement(resourceMethod.getMethod());
+    if (returnStatement != null) {
+      methodBlock.append(returnStatement);
+    }
+
+    methodBlock.finish();
+  }
+
+  private Statement createRequestCallback() {
     Statement requestCallback = Stmt
         .newObject(RequestCallback.class)
         .extend()
@@ -216,19 +234,10 @@ public class JaxrsProxyMethodGenerator {
     return requestCallback;
   }
 
-  private void generateReturnStatement() {
-    Statement returnStatement = RebindUtils.generateProxyMethodReturnStatement(resourceMethod.getMethod());
-    if (returnStatement != null) {
-      methodBlock.append(returnStatement);
-    }
-
-    methodBlock.finish();
-  }
-  
   private Statement errorHandling() {
     return Stmt.loadStatic(declaringClass, "this").invoke("handleError", Variable.get("throwable"), null);
   }
-  
+
   private Statement responseErrorHandling() {
     return Stmt.loadStatic(declaringClass, "this")
             .invoke("handleError", Variable.get("throwable"), Variable.get("response"));
@@ -253,11 +262,11 @@ public class JaxrsProxyMethodGenerator {
         .finish();
   }
 
-  private Statement encodePathParam(Statement s) {
+  private Statement encodePath(Statement s) {
     return Stmt.invokeStatic(URL.class, "encodePathSegment", s);
   }
 
-  private Statement encodeQueryParam(Statement s) {
+  private Statement encodeQuery(Statement s) {
     return Stmt.invokeStatic(URL.class, "encodeQueryString", s);
   }
 }
