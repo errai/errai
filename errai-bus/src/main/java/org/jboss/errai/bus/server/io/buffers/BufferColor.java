@@ -54,6 +54,10 @@ public class BufferColor {
     dataWaiting.signal();
   }
 
+  public ReentrantLock getLock() {
+    return lock;
+  }
+
   private BufferColor(int color) {
     this.color = (short) color;
   }
@@ -61,7 +65,6 @@ public class BufferColor {
   private BufferColor(short color) {
     this.color = color;
   }
-
 
   public static BufferColor getNewColor() {
     return new BufferColor(bufferColorCounter.incrementAndGet());

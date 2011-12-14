@@ -60,7 +60,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
   private final List<MessageListener> listeners = new ArrayList<MessageListener>();
 
   // 16 kb buffers * 8192 segments = 128 megabytes
-  private final TransmissionBuffer transmissionbuffer = TransmissionBuffer.create((16 * 1024), 8192);
+  private final TransmissionBuffer transmissionbuffer = TransmissionBuffer.create((8 * 1024), 16384);
 
   private final Map<String, DeliveryPlan> subscriptions = new ConcurrentHashMap<String, DeliveryPlan>();
   private final Map<String, RemoteMessageCallback> remoteSubscriptions = new ConcurrentHashMap<String, RemoteMessageCallback>();
@@ -269,6 +269,9 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         boolean houseKeepingPerformed = false;
         List<MessageQueue> endSessions = new LinkedList<MessageQueue>();
 
+
+        int paged = 0, killed = 0;
+
         while (!houseKeepingPerformed) {
           try {
             Iterator<MessageQueue> iter = ServerMessageBusImpl.this.messageQueues.values().iterator();
@@ -277,15 +280,14 @@ public class ServerMessageBusImpl implements ServerMessageBus {
               if ((q = iter.next()).isStale()) {
                 iter.remove();
                 endSessions.add(q);
-                
-                log.info("inactive session killed: " + q.getSession().getSessionId());
+                killed++;
+
+                //        log.info("inactive session killed: " + q.getSession().getSessionId());
               }
               else if (q.isDowngradeCandidate()) {
-                if (!q.isPaged())
-                  log.info("[experimental] paging data for slow client to disk: " + q.getSession().getSessionId());
-                
-                q.pageWaitingToDisk();
-                
+                if (!q.pageWaitingToDisk()) {
+                  paged++;
+                }
               }
             }
 
@@ -294,6 +296,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
           catch (ConcurrentModificationException cme) {
             // fall-through and try again.
           }
+        }
+
+        if (paged > 0 || killed > 0) {
+          log.info("[experimental] killed " + killed + " sessions and paged out " + paged + " queues");
         }
 
 
@@ -309,12 +315,18 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
 
 
+        BufferStatus stat = bufferStatus();
         if (runCount % 2 == 0) {
-          BufferStatus stat = bufferStatus();
+
           log.info("[experimental] buffer status [freebytes: " + stat.getFreeBytes()
                   + " (" + (stat.getFree() * 100) + "%) tail rng: " + stat.getTailRange() + "; actv tails: "
                   + stat.getActiveTails() + "]");
         }
+
+        if (stat.getFree() < 0.50f) {
+          log.warn("[experimental] high load condition detected!");
+        }
+
       }
 
       public boolean isFinished() {

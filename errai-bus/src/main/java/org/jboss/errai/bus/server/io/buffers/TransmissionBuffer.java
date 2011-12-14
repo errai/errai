@@ -78,6 +78,7 @@ public class TransmissionBuffer implements Buffer {
    */
   final int segments;
 
+
   /**
    * The internal write sequence number used by the writers to allocate write space within the buffer.
    */
@@ -102,25 +103,6 @@ public class TransmissionBuffer implements Buffer {
    */
   private volatile long headSequence = 0;
 
-//  private static final Unsafe unsafe;
-//
-//  static {
-//    try {
-//      Field field = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
-//      field.setAccessible(true);
-//      unsafe = (sun.misc.Unsafe) field.get(null);
-//    }
-//    catch (Exception e) {
-//      e.printStackTrace();
-//      throw new AssertionError("unable to obtain access to sun.misc.Unsafe -- this TransmissionBuffer only works on Sun-based JVMs");
-//    }
-//  }
-//
-//  private static final int byteBase = unsafe.arrayBaseOffset(byte[].class);
-//  private static final int byteScale = unsafe.arrayIndexScale(byte[].class);
-//
-//  private static final int shortBase = unsafe.arrayBaseOffset(short[].class);
-//  private static final int shortScale = unsafe.arrayIndexScale(short[].class);
 
   private TransmissionBuffer(boolean directBuffer, int segmentSize, int segments) {
     // must pad segment size for size headers -- or the last segment may be odd-sized (that would not be good)
@@ -128,12 +110,15 @@ public class TransmissionBuffer implements Buffer {
     this.bufferSize = segmentSize * segments;
     this.segments = segments;
 
+
     buffer = new byte[bufferSize];
     writeBuf(0, (byte) 0);
 
     segmentMap = new short[segments];
     writeSeg(0, (short) 0);
+
   }
+
 
   /**
    * Creates a transmission buffer with the default segment and buffer size, using a regular heap allocated buffer.
@@ -165,6 +150,7 @@ public class TransmissionBuffer implements Buffer {
     return new TransmissionBuffer(false, segmentSize, segments);
   }
 
+
   /**
    * Creates a direct allocated transmission buffer with a custom segment size and segments. The resulting buffer
    * will be of size: <i>segmentSize * segments</i>.
@@ -175,6 +161,11 @@ public class TransmissionBuffer implements Buffer {
    */
   public static TransmissionBuffer createDirect(int segmentSize, int segments) {
     return new TransmissionBuffer(true, segmentSize, segments);
+  }
+
+
+  public static TransmissionBuffer create(int segmentSize, int segments, int tailLimit) {
+    return new TransmissionBuffer(false, segmentSize, segments);
   }
 
   /**
@@ -241,8 +232,6 @@ public class TransmissionBuffer implements Buffer {
       }
 
       headSequence = newHead;
-      // knock! knock! If there is a waiting reader on this color, wake it up.{
-
 
       bufferColor.wake();
     }
@@ -367,10 +356,14 @@ public class TransmissionBuffer implements Buffer {
       long readTail = bufferColor.sequence.get();
 
       for (; ; ) {
-        long writeHead = headSequence;
-        long read;
+        long read = readTail;
+        long lastRead = -1;
 
-        if ((read = readNextChunk(writeHead, readTail, bufferColor, outputStream, null)) != -1) {
+        while ((read = readNextChunk(headSequence, read, bufferColor, outputStream, null)) != -1) {
+          lastRead = read;
+        }
+
+        if (lastRead != -1) {
           bufferColor.sequence.set(read);
           return -1;
         }
@@ -414,16 +407,20 @@ public class TransmissionBuffer implements Buffer {
 
     try {
       for (; ; ) {
-        // long writeHead = headSequence;
-        long read;
+        long read = readTail;
+        long lastRead = -1;
 
-        if ((read = readNextChunk(headSequence, readTail, bufferColor, outputStream, null)) != -1) {
-          bufferColor.sequence.set(read);
-          return -1;
+        // assert read != -1;
+
+        while ((read = readNextChunk(headSequence, read, bufferColor, outputStream, null)) != -1) {
+          lastRead = read;
         }
 
         // return if data is ready to return or we're timed out.
-        if (nanos <= 0) {
+        if (nanos <= 0 || lastRead != -1) {
+          if (lastRead != -1) {
+            bufferColor.sequence.set(lastRead);
+          }
           return -1;
         }
 
@@ -483,16 +480,17 @@ public class TransmissionBuffer implements Buffer {
       callback.before(outputStream);
 
       for (; ; ) {
-        // long writeHead = headSequence;
         long read = readTail;
-        if ((read = readNextChunk(headSequence, read, bufferColor, outputStream, callback)) != -1) {
-          bufferColor.sequence.set(read);
-          callback.after(outputStream);
-          return -1;
+        long lastRead = -1;
+        while ((read = readNextChunk(headSequence, read, bufferColor, outputStream, callback)) != -1) {
+          lastRead = read;
         }
 
         // return if data is ready to return or we're timed out.
-        if (nanos <= 0) {
+        if (nanos <= 0 || lastRead != -1) {
+          if (lastRead != -1) {
+            bufferColor.sequence.set(lastRead);
+          }
           callback.after(outputStream);
           return -1;
         }
@@ -514,6 +512,11 @@ public class TransmissionBuffer implements Buffer {
     finally {
       bufferColor.lock.unlock();
     }
+  }
+
+  @Override
+  public long getHeadSequence() {
+    return headSequence;
   }
 
   @Override
@@ -597,6 +600,8 @@ public class TransmissionBuffer implements Buffer {
    */
   private long readNextChunk(final long head, final long sequence, final BufferColor color,
                              final OutputStream outputStream, final BufferCallback callback) throws IOException {
+    assert sequence != -1;
+
     final int segmentToRead = getNextSegment(color, (int) head % segments, (int) sequence % segments);
     if (segmentToRead != -1) {
 

@@ -77,8 +77,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  * @author Mike Brock
  */
 public class ClientMessageBusImpl implements ClientMessageBus {
-  private static final int HEARTBEAT_DELAY = 10000;
-
   private String clientId;
 
   /* The encoded URL to be used for the bus */
@@ -1149,26 +1147,26 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
     }.schedule(5);
 
-    heartBeatTimer =
-            new Timer() {
-              @Override
-              public void run() {
-                if (System.currentTimeMillis() - lastTransmit >= HEARTBEAT_DELAY) {
-                  encodeAndTransmit(MessageBuilder.createMessage().toSubject("ServerBus")
-                          .command(BusCommands.Heartbeat).defaultErrorHandling().getMessage());
-                  schedule(HEARTBEAT_DELAY);
-                }
-                else {
-                  long win = System.currentTimeMillis() - lastTransmit;
-                  int diff = HEARTBEAT_DELAY - (int) win;
-                  if (diff <= 1) diff = 1;
-                  schedule(diff);
-                }
-              }
-            };
-
-
-    heartBeatTimer.scheduleRepeating(HEARTBEAT_DELAY);
+//    heartBeatTimer =
+//            new Timer() {
+//              @Override
+//              public void run() {
+//                if (System.currentTimeMillis() - lastTransmit >= HEARTBEAT_DELAY) {
+//                  encodeAndTransmit(MessageBuilder.createMessage().toSubject("ServerBus")
+//                          .command(BusCommands.Heartbeat).defaultErrorHandling().getMessage());
+//                  schedule(HEARTBEAT_DELAY);
+//                }
+//                else {
+//                  long win = System.currentTimeMillis() - lastTransmit;
+//                  int diff = HEARTBEAT_DELAY - (int) win;
+//                  if (diff <= 1) diff = 1;
+//                  schedule(diff);
+//                }
+//              }
+//            };
+//
+//
+//    heartBeatTimer.scheduleRepeating(HEARTBEAT_DELAY);
   }
 
   /**

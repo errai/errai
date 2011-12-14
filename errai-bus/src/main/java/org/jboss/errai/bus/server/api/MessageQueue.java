@@ -69,9 +69,10 @@ public interface MessageQueue {
   boolean isDowngradeCandidate();
 
   /**
-   * Page any data waiting in this queue to disk.
+   * Page any data waiting in this queue to disk. Returns true if queue has already been paged since last call.
+   *
    */
-  void pageWaitingToDisk();
+  boolean pageWaitingToDisk();
 
   boolean isInitialized();
 
