@@ -225,7 +225,7 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
     }
 
     Message msg = createCommandMessage(sessionProvider.getSession(request.getSession(),
-        request.getHeader(REMOTE_QUEUE_ID_HEADER)), sb.toString());
+        request.getHeader(REMOTE_QUEUE_ID_HEADER)), request, sb.toString());
     if (msg != null) {
       try {
         service.store(msg);

@@ -108,7 +108,7 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
     final QueueSession session = sessionProvider.getSession(request.getSession(),
             request.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
     try {
-      service.store(createCommandMessage(session, request.getInputStream()));
+      service.store(createCommandMessage(session, request));
     }
     catch (Exception e) {
       if (!e.getMessage().contains("expired")) {

@@ -86,7 +86,7 @@ public class WeblogicAsyncServlet extends AbstractErraiServlet {
       buffer.rewind();
     }
 
-    Message m = createCommandMessage(session, sb.toString());
+    Message m = createCommandMessage(session, httpServletRequest, sb.toString());
     if (m != null) {
       try {
         service.store(m);

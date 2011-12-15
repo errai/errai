@@ -20,16 +20,11 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
 import org.jboss.errai.bus.client.framework.MessageBus;
-import org.mvel2.ConversionHandler;
-import org.mvel2.DataConversion;
 
-import javax.inject.Provider;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
-import java.util.LinkedList;
-import java.util.Queue;
 
 import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversation;
 import static org.mvel2.DataConversion.canConvert;
@@ -39,7 +34,7 @@ import static org.mvel2.DataConversion.convert;
  * <tt>ConversationalEndpointCallback</tt> creates a conversation that invokes an endpoint function
  */
 public class ConversationalEndpointCallback implements MessageCallback {
-  private Provider<?> serviceProvider;
+  private ServiceInstanceProvider serviceProvider;
   private Class[] targetTypes;
   private Method method;
   private MessageBus bus;
@@ -51,7 +46,7 @@ public class ConversationalEndpointCallback implements MessageCallback {
    * @param method     - the endpoint function
    * @param bus        - the bus to send the messages on
    */
-  public ConversationalEndpointCallback(Provider<?> genericSvc, Method method, MessageBus bus) {
+  public ConversationalEndpointCallback(ServiceInstanceProvider genericSvc, Method method, MessageBus bus) {
     this.serviceProvider = genericSvc;
     this.targetTypes = (this.method = method).getParameterTypes();
     this.bus = bus;
@@ -105,9 +100,8 @@ public class ConversationalEndpointCallback implements MessageCallback {
     try {
       createConversation(message)
               .subjectProvided()
-              .with("MethodReply", method.invoke(serviceProvider.get(), parms))
+              .with("MethodReply", method.invoke(serviceProvider.get(message), parms))
               .noErrorHandling().sendNowWith(bus);
-
     }
     catch (MessageDeliveryFailure e) {
       throw e;

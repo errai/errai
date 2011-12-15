@@ -18,7 +18,9 @@ package org.jboss.errai.bus.server.service;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.server.io.*;
 import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.bus.client.api.TaskManager;
 import org.jboss.errai.bus.client.api.annotations.Local;
@@ -34,10 +36,6 @@ import org.jboss.errai.bus.server.annotations.Remote;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.annotations.security.RequireAuthentication;
 import org.jboss.errai.bus.server.annotations.security.RequireRoles;
-import org.jboss.errai.bus.server.io.CommandBindingsCallback;
-import org.jboss.errai.bus.server.io.ConversationalEndpointCallback;
-import org.jboss.errai.bus.server.io.EndpointCallback;
-import org.jboss.errai.bus.server.io.RemoteServiceCallback;
 import org.jboss.errai.bus.server.security.auth.rules.RolesRequiredRule;
 import org.jboss.errai.bus.server.service.bootstrap.BootstrapContext;
 import org.jboss.errai.bus.server.service.bootstrap.GuiceProviderProxy;
@@ -167,9 +165,9 @@ public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
         if (method.isAnnotationPresent(Endpoint.class)) {
           epts.put(method.getName(), method.getReturnType() == Void.class ?
               new EndpointCallback(svc, method) :
-              new ConversationalEndpointCallback(new Provider<Object>() {
+              new ConversationalEndpointCallback(new ServiceInstanceProvider() {
                 @Override
-                public Object get() {
+                public Object get(Message message) {
                   return targetService;
                 }
               }, method, context.getBus()));
@@ -234,9 +232,9 @@ public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
     for (Class<?> intf : svc.getClass().getInterfaces()) {
       for (final Method method : intf.getDeclaredMethods()) {
         if (RebindUtils.isMethodInInterface(remoteIface, method)) {
-          epts.put(RebindUtils.createCallSignature(method), new ConversationalEndpointCallback(new Provider<Object>() {
+          epts.put(RebindUtils.createCallSignature(method), new ConversationalEndpointCallback(new ServiceInstanceProvider() {
             @Override
-            public Object get() {
+            public Object get(Message message) {
               return svc;
             }
           }, method, context.getBus()));

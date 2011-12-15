@@ -88,7 +88,7 @@ public class GrizzlyCometServlet extends AbstractErraiServlet {
       buffer.rewind();
     }
 
-    Message msg = createCommandMessage(session, sb.toString());
+    Message msg = createCommandMessage(session, request, sb.toString());
     if (msg != null) {
       try {
         service.store(msg);

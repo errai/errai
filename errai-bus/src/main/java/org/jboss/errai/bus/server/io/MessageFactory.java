@@ -23,6 +23,7 @@ import org.jboss.errai.bus.server.api.QueueSession;
 import org.jboss.errai.marshalling.server.JSONDecoder;
 import org.jboss.errai.marshalling.server.JSONStreamDecoder;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
@@ -53,38 +54,30 @@ public class MessageFactory {
    * @param json    - the string representing the parts of the message
    * @return the message array constructed using the JSON string
    */
-  public static Message createCommandMessage(QueueSession session, String json) {
+  public static Message createCommandMessage(QueueSession session, HttpServletRequest request, String json) {
     if (json.length() == 0) return null;
 
     Map<String, Object> parts = decodeToMap(json);
     parts.remove(MessageParts.SessionID.name());
 
-    Message msg = createWithParts(parts)
-            .setResource("Session", session);
-
-    // experimental feature. does this need to be cleaned?
-    // any chance this leaks the CL?
-    //   msg.setResource("errai.experimental.classLoader", classLoader);
-
-    msg.setFlag(RoutingFlags.FromRemote);
-
-    return msg;
-
+    return from(parts, session, request);
   }
 
-  public static Message createCommandMessage(QueueSession session, InputStream stream) throws IOException {
-    Map<String, Object> parts = (Map<String, Object>) JSONStreamDecoder.decode(stream);
+  public static Message createCommandMessage(QueueSession session, HttpServletRequest request) throws IOException {
+    Map<String, Object> parts = (Map<String, Object>) JSONStreamDecoder.decode(request.getInputStream());
     parts.remove(MessageParts.SessionID.name());
 
     // Expose session and session id
     // CDI ext makes use of it to manage conversation contexts
+
+    return from(parts, session, request);
+  }
+
+  private static Message from(Map<String, Object> parts, QueueSession session, HttpServletRequest request) {
     Message msg = createWithParts(parts)
             .setResource("Session", session)
-            .setResource("SessionID", session.getSessionId());
-
-    // experimental feature. does this need to be cleaned?
-    // any chance this leaks the CL?
-    //   msg.setResource("errai.experimental.classLoader", classLoader);
+            .setResource("SessionID", session.getSessionId())
+            .setResource(HttpServletRequest.class.getName(), request);
 
     msg.setFlag(RoutingFlags.FromRemote);
 

@@ -33,7 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * function to obtain the current session.
  */
 public class HttpSessionProvider implements SessionProvider<HttpSession> {
-  private static final String HTTP_SESS = "org.jboss.errai.QueueSessions";
+  public static final String HTTP_SESS = "org.jboss.errai.QueueSessions";
 
   /**
    * Gets an instance of <tt>QueueSession</tt> using the external session reference given. If there is no available
@@ -51,6 +51,7 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
     QueueSession qs = sc.getSession(remoteQueueID);
     if (qs == null) {
       qs = sc.createSession(externSessRef.getId(), remoteQueueID);
+      qs.setAttribute(HttpSession.class.getName(), externSessRef);
     }
 
     return qs;
@@ -88,8 +89,6 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
     private String remoteQueueID;
     private boolean valid;
     private List<SessionEndListener> sessionEndListeners;
-
-    
 
 
     public HttpSessionWrapper(SessionsContainer container, String sessionId, String remoteQueueID) {

@@ -74,7 +74,7 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
             httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
 
     try {
-      service.store(createCommandMessage(session, httpServletRequest.getInputStream()));
+      service.store(createCommandMessage(session, httpServletRequest));
     }
     catch (Exception e) {
       if (!e.getMessage().contains("expired")) {
