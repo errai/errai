@@ -16,11 +16,10 @@
 
 package org.jboss.errai.bus.client.tests.support;
 
-import org.jboss.errai.common.client.api.annotations.ExposeEntity;
-import org.jboss.errai.common.client.api.annotations.Portable;
-
 import java.util.List;
 import java.util.Map;
+
+import org.jboss.errai.common.client.api.annotations.Portable;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -33,6 +32,13 @@ public class Group {
   private Group subGroup;
   private Map<Group, User> groupUserMap;
 
+  public Group() {}
+  
+  public Group(int id, String name) {
+    this.groupId = id;
+    this.name = name;
+  }
+  
   public int getGroupId() {
     return groupId;
   }

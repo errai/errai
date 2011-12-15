@@ -17,18 +17,25 @@
 
 package org.jboss.errai.marshalling.server;
 
+import static org.jboss.errai.common.client.protocols.SerializationParts.ENCODED_TYPE;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.nio.CharBuffer;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.common.client.types.UHashMap;
 import org.jboss.errai.marshalling.rebind.api.model.Mapping;
 import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 import org.jboss.errai.marshalling.server.marshallers.DefaultDefinitionMarshaller;
-import org.mvel2.util.InternalNumber;
-
-import java.io.*;
-import java.nio.CharBuffer;
-import java.util.*;
-
-import static org.jboss.errai.common.client.protocols.SerializationParts.ENCODED_TYPE;
 
 /**
  * High-performance stream JSON parser. Provides the decoding algorithm to interpret the Errai Wire Protcol,

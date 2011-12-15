@@ -16,18 +16,37 @@
 
 package org.jboss.errai.bus.client.tests;
 
-import org.jboss.errai.bus.client.api.RemoteCallback;
-import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.tests.support.*;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
+
+import org.jboss.errai.bus.client.api.RemoteCallback;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.tests.support.Boron;
+import org.jboss.errai.bus.client.tests.support.ClassWithNestedClass;
+import org.jboss.errai.bus.client.tests.support.CustomList;
+import org.jboss.errai.bus.client.tests.support.EntityWithGenericCollections;
+import org.jboss.errai.bus.client.tests.support.EntityWithStringBufferAndStringBuilder;
+import org.jboss.errai.bus.client.tests.support.FactoryEntity;
+import org.jboss.errai.bus.client.tests.support.Group;
+import org.jboss.errai.bus.client.tests.support.StudyTreeNodeContainer;
+import org.jboss.errai.bus.client.tests.support.TestEnumA;
+import org.jboss.errai.bus.client.tests.support.TestRPCServiceRemote;
+import org.jboss.errai.bus.client.tests.support.TestSerializationRPCService;
+import org.jboss.errai.bus.client.tests.support.TreeNodeContainer;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class SerializationTests extends AbstractErraiTest {
   public static final String ENT_SER1_RESPONSE_SERVICE = "SerializationResponse1";
@@ -206,7 +225,7 @@ public class SerializationTests extends AbstractErraiTest {
         set.add("foo");
         set.add("bar");
         set.add("foobar");
-        set.add("foobarfoobar");
+        set.add("foobar\\foobar");
 
         MessageBuilder.createCall(new RemoteCallback<Set<String>>() {
           @Override
@@ -220,12 +239,193 @@ public class SerializationTests extends AbstractErraiTest {
               fail();
             }
           }
-        }, TestRPCServiceRemote.class).aSetOfStrings(set);
+        }, TestRPCServiceRemote.class).setOfStrings(set);
       }
     });
   }
 
+  public void testMapOfLongToString() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final Map<Long, String> map = new HashMap<Long, String>();
 
+        map.put(1l, "foo");
+        map.put(2l, "bar");
+        map.put(3l, "baz\\qux");
+        
+        MessageBuilder.createCall(new RemoteCallback<Map<Long, String>>() {
+          @Override
+          public void callback(Map<Long, String> response) {
+            try {
+              assertEquals(map, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestRPCServiceRemote.class).mapOfLongToString(map);
+      }
+    });
+  }
+  
+  public void testMapOfLongToListOfStrings() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final Map<Long, List<String>> map = new HashMap<Long, List<String>>();
+
+        List<String> l1 = new ArrayList<String>();
+        l1.add("foo");
+        l1.add("bar");
+        
+        List<String> l2 = new ArrayList<String>();
+        l2.add("baz");
+        l2.add("qux");
+
+        map.put(1l, l1);
+        map.put(2l, l2);
+        
+        MessageBuilder.createCall(new RemoteCallback<Map<Long, List<String>>>() {
+          @Override
+          public void callback(Map<Long, List<String>> response) {
+            try {
+              assertEquals(map, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestRPCServiceRemote.class).mapOfLongToListOfStrings(map);
+      }
+    });
+  }
+
+  public void testMapOfStringToFloat() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final Map<String, Float> map = new HashMap<String, Float>();
+
+        map.put("foo", 1.0f);
+        map.put("bar", 1.1f);
+        map.put("baz", 1.2f);
+        
+        MessageBuilder.createCall(new RemoteCallback<Map<String, Float>>() {
+          @Override
+          public void callback(Map<String, Float> response) {
+            try {
+              assertEquals(map, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestRPCServiceRemote.class).mapOfStringToFloat(map);
+      }
+    });
+  }
+  
+  public void testMapOfStringToListOfDoubles() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final Map<String, List<Double>> map = new HashMap<String, List<Double>>();
+
+        List<Double> l1 = new ArrayList<Double>();
+        l1.add(1.0);
+        l1.add(1.1);
+        
+        List<Double> l2 = new ArrayList<Double>();
+        l2.add(1.2);
+        l2.add(1.3);
+
+        map.put("foo", l1);
+        map.put("bar", l2);
+        
+        MessageBuilder.createCall(new RemoteCallback<Map<String, List<Double>>>() {
+          @Override
+          public void callback(Map<String, List<Double>> response) {
+            try {
+              assertEquals(map, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestRPCServiceRemote.class).mapOfStringToListOfDoubles(map);
+      }
+    });
+  }
+  
+  public void testMapOfCustomTypes() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final Map<Group, Group> map = new HashMap<Group, Group>();
+
+        map.put(new Group(1, "fooKey"), new Group(2, "fooVal"));
+        map.put(new Group(3, "barKey"), new Group(4, "barVal"));
+        
+        MessageBuilder.createCall(new RemoteCallback<Map<Group, Group>>() {
+          @Override
+          public void callback(Map<Group, Group> response) {
+            try {
+              assertEquals(map, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestRPCServiceRemote.class).mapOfCustomTypes(map);
+      }
+    });
+  }
+  
+  public void testMapOfListOfStringsToCustomType() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final Map<List<String>, Group> map = new HashMap<List<String>, Group>();
+
+        List<String> l1 = new ArrayList<String>();
+        l1.add("foo");
+        l1.add("bar");
+        
+        List<String> l2 = new ArrayList<String>();
+        l1.add("baz");
+        l1.add("qux");
+        
+        map.put(l1, new Group(1, "fooGroup"));
+        map.put(l2, new Group(2, "barGroup"));
+        
+        MessageBuilder.createCall(new RemoteCallback<Map<List<String>, Group>>() {
+          @Override
+          public void callback(Map<List<String>, Group> response) {
+            try {
+              assertEquals(map, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestRPCServiceRemote.class).mapOfListOfStringsToCustomType(map);
+      }
+    });
+  }
+  
   public void testNestedClassSerialization() {
     runAfterInit(new Runnable() {
       @Override

@@ -16,12 +16,10 @@
 
 package org.jboss.errai.marshalling.server.util;
 
-import org.jboss.errai.marshalling.client.util.MarshallUtil;
-import org.jboss.errai.marshalling.server.EncodingSession;
-
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Map;
+
+import org.jboss.errai.marshalling.server.EncodingSession;
 
 /**
  * @author Mike Brock

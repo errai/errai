@@ -24,6 +24,7 @@ import java.math.BigInteger;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
@@ -70,10 +71,40 @@ public class TestRPCService implements TestRPCServiceRemote {
   }
 
   @Override
-  public Set<String> aSetOfStrings(Set<String> set) {
+  public Set<String> setOfStrings(Set<String> set) {
     return set;
   }
+  
+  @Override
+  public Map<Long, String> mapOfLongToString(Map<Long, String> map) {
+    return map;
+  }
 
+  @Override
+  public Map<Long, List<String>> mapOfLongToListOfStrings(Map<Long, List<String>> map) {
+    return map;
+  }
+
+  @Override
+  public Map<String, Float> mapOfStringToFloat(Map<String, Float> map) {
+    return map;
+  }
+
+  @Override
+  public Map<String, List<Double>> mapOfStringToListOfDoubles(Map<String, List<Double>> map) {
+    return map;
+  }
+
+  @Override
+  public Map<Group, Group> mapOfCustomTypes(Map<Group, Group> map) {
+    return map;
+  }
+  
+  @Override
+  public Map<List<String>, Group> mapOfListOfStringsToCustomType(Map<List<String>, Group> map) {
+    return map;
+  }
+  
   @Override
   public ClassWithNestedClass nestedClass(ClassWithNestedClass clazz) {
     return clazz;

@@ -16,12 +16,12 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
+import java.util.Collection;
+import java.util.Iterator;
+
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
-
-import java.util.Collection;
-import java.util.Iterator;
 
 /**
  * @author Mike Brock
@@ -34,14 +34,13 @@ public abstract class AbstractCollectionMarshaller<T, C extends Collection> impl
     return "json";
   }
 
-  //@Override
+  // @Override
   public String marshall(C o, MarshallingSession ctx) {
     if (o == null) {
       return "null";
     }
 
     StringBuilder buf = new StringBuilder("[");
-    Marshaller<Object, Object> cachedMarshaller = null;
 
     Iterator<Object> iter = o.iterator();
     Object elem;
@@ -52,19 +51,16 @@ public abstract class AbstractCollectionMarshaller<T, C extends Collection> impl
         buf.append(",");
       }
       elem = iter.next();
-
-      if (cachedMarshaller == null) {
-        if (elem instanceof Number || elem instanceof Boolean || elem instanceof Character) {
-          cachedMarshaller = MarshallUtil.getQualifiedNumberMarshaller(elem);
-        }
-        else {
-          cachedMarshaller = ctx.getMarshallerInstance(elem.getClass().getName());
-        }
+      Marshaller<Object, Object> marshaller = null;
+      if (elem instanceof Number || elem instanceof Boolean || elem instanceof Character) {
+        marshaller = MarshallUtil.getQualifiedNumberMarshaller(elem);
+      }
+      else {
+        marshaller = ctx.getMarshallerInstance(elem.getClass().getName());
       }
 
-      buf.append(cachedMarshaller.marshall(elem, ctx));
+      buf.append(marshaller.marshall(elem, ctx));
     }
-
 
     return buf.append("]").toString();
   }

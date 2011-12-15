@@ -33,9 +33,10 @@ import java.util.Map;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 @ClientMarshaller
-@ImplementationAliases({AbstractMap.class, HashMap.class, LinkedHashMap.class})
+@ImplementationAliases({ AbstractMap.class, HashMap.class, LinkedHashMap.class })
 public class MapMarshaller implements Marshaller<JSONValue, Map> {
   @Override
   public Class<Map> getTypeHandled() {
@@ -50,7 +51,8 @@ public class MapMarshaller implements Marshaller<JSONValue, Map> {
   @Override
   public Map demarshall(JSONValue o, MarshallingSession ctx) {
     JSONObject jsonObject = o.isObject();
-    if (jsonObject == null) return null;
+    if (jsonObject == null)
+      return null;
 
     Map<Object, Object> map = new HashMap<Object, Object>();
     Marshaller<Object, Object> cachedKeyMarshaller = null;
@@ -89,13 +91,22 @@ public class MapMarshaller implements Marshaller<JSONValue, Map> {
       }
       key = entry.getKey();
       val = entry.getValue();
+
+      Marshaller<Object, Object> keyMarshaller = null;
+      Marshaller<Object, Object> valueMarshaller = null;
       if (key instanceof String) {
         buf.append("\"" + key + "\"");
       }
       else if (key != null) {
+        if (key instanceof Number || key instanceof Boolean || key instanceof Character) {
+          keyMarshaller = MarshallUtil.getQualifiedNumberMarshaller(key);
+        }
+        else {
+          keyMarshaller = ctx.getMarshallerInstance(key.getClass().getName());
+        }
         buf.append(("\"" + SerializationParts.EMBEDDED_JSON))
-                .append(MarshallUtil.jsonStringEscape(ctx.marshall(key)))
-                .append("\"");
+            .append(MarshallUtil.jsonStringEscape(keyMarshaller.marshall(key, ctx)))
+            .append("\"");
       }
 
       buf.append(":");
@@ -104,7 +115,13 @@ public class MapMarshaller implements Marshaller<JSONValue, Map> {
         buf.append("null");
       }
       else {
-        buf.append(ctx.marshall(val));
+        if (val instanceof Number || val instanceof Boolean || val instanceof Character) {
+          valueMarshaller = MarshallUtil.getQualifiedNumberMarshaller(val);
+        }
+        else {
+          valueMarshaller = ctx.getMarshallerInstance(val.getClass().getName());
+        }
+        buf.append(valueMarshaller.marshall(val, ctx));
       }
     }
 

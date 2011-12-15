@@ -16,11 +16,11 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
-import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.common.client.protocols.SerializationParts;
-import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
-import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
+import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
+
+import com.google.gwt.json.client.JSONValue;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

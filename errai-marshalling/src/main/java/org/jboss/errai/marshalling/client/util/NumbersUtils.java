@@ -156,8 +156,8 @@ public class NumbersUtils {
     }
   }
 
-  public static String qualifiedNumericEncoding(boolean escaped, Object o) {
-    final String quote = escaped ? "\\" + "\"" : "\"";
+  public static String qualifiedNumericEncoding(Object o) {
+    final String quote =  "\"";
     
     return "{" + quote + SerializationParts.ENCODED_TYPE + quote + ":"
             + quote + (o instanceof String ? Character.class.getName() : o.getClass().getName()) + quote + ", "
