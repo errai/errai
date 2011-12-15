@@ -16,13 +16,13 @@
 
 package org.jboss.errai.marshalling.server.marshallers;
 
+import java.util.Map;
+
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.marshallers.AbstractNumberMarshaller;
 import org.jboss.errai.marshalling.server.util.ServerMarshallUtil;
-
-import java.util.Map;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

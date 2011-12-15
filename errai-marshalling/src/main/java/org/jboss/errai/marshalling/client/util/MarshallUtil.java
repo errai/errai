@@ -95,7 +95,7 @@ public class MarshallUtil {
 
         @Override
         public String marshall(Object o, MarshallingSession ctx) {
-          return NumbersUtils.qualifiedNumericEncoding(false, o);
+          return NumbersUtils.qualifiedNumericEncoding(o);
         }
 
         @Override

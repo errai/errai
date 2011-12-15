@@ -60,14 +60,14 @@ public class JSONStreamEncoder {
     if (MarshallUtil.isPrimitiveWrapper(v.getClass())) {
       if (v instanceof Character) {
         if (qualifiedNumerics) {
-          ServerEncodingUtil.write(outstream, ctx, NumbersUtils.qualifiedNumericEncoding(false, "\"" + v + "\""));
+          ServerEncodingUtil.write(outstream, ctx, NumbersUtils.qualifiedNumericEncoding("\"" + v + "\""));
         }
         else {
           ServerEncodingUtil.write(outstream, ctx, "\"" + MarshallUtil.jsonStringEscape(v.toString()) + "\"");
         }
       }
       else if (qualifiedNumerics) {
-        ServerEncodingUtil.write(outstream, ctx, NumbersUtils.qualifiedNumericEncoding(ctx.isEscapeMode(), v));
+        ServerEncodingUtil.write(outstream, ctx, NumbersUtils.qualifiedNumericEncoding(v));
       }
       else {
         outstream.write(String.valueOf(v).getBytes());
@@ -134,7 +134,7 @@ public class JSONStreamEncoder {
       }
 
       outstream.write(':');
-      encode(entry.getValue(), outstream, ctx);
+      encode(entry.getValue(), outstream, ctx, true);
 
       first = false;
     }

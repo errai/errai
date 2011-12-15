@@ -16,15 +16,16 @@
 
 package org.jboss.errai.bus.client.tests.support;
 
-import org.jboss.errai.bus.server.annotations.Remote;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+
+import org.jboss.errai.bus.server.annotations.Remote;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -46,8 +47,20 @@ public interface TestRPCServiceRemote {
 
   public List<Boolean> listOfBoolean(List<Boolean> list);
 
-  public Set<String> aSetOfStrings(Set<String> set);
+  public Set<String> setOfStrings(Set<String> set);
+  
+  public Map<Long, String> mapOfLongToString(Map<Long, String> map);
+  
+  public Map<Long, List<String>> mapOfLongToListOfStrings(Map<Long, List<String>> map);
 
+  public Map<String, Float> mapOfStringToFloat(Map<String, Float> map);
+  
+  public Map<String, List<Double>> mapOfStringToListOfDoubles(Map<String, List<Double>> map);
+  
+  public Map<List<String>, Group> mapOfListOfStringsToCustomType(Map<List<String>, Group> map);
+  
+  public Map<Group, Group> mapOfCustomTypes(Map<Group, Group> map); 
+  
   public ClassWithNestedClass nestedClass(ClassWithNestedClass clazz);
 
   public EntityWithGenericCollections genericCollections(EntityWithGenericCollections ent);
@@ -76,5 +89,3 @@ public interface TestRPCServiceRemote {
   
   public Boron.Bean testBoron(Boron.Bean b);
 }
-
-
