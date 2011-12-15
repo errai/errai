@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.lang.System.nanoTime;
+import static java.lang.System.out;
 
 /**
  * A message queue is keeps track of which messages need to be sent outbound. It keeps track of the amount of messages
@@ -247,7 +248,14 @@ public class MessageQueueImpl implements MessageQueue {
   @Override
   public void wake() {
     try {
-      BufferHelper.encodeAndWriteNoop(buffer, bufferColor);
+      if (isDirectChannelOpen()) {
+        JSONEncoder.UnwrappedByteArrayOutputStream outputStream = new JSONEncoder.UnwrappedByteArrayOutputStream();
+        buffer.read(outputStream, bufferColor, new BufferHelper.MultiMessageHandlerCallback());
+        directSocketChannel.write(new TextWebSocketFrame(new String(outputStream.toByteArray(), 0, outputStream.size())));
+      }
+      else {
+        BufferHelper.encodeAndWriteNoop(buffer, bufferColor);
+      }
     }
     catch (IOException e) {
       e.printStackTrace();

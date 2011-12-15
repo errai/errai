@@ -827,7 +827,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         try {
 
           BufferHelper.encodeAndWrite(transmissionbuffer, BufferColor.getAllBuffersColor(), message);
-          for (MessageQueue q : queues) q.wake();
+
+          for (MessageQueue q : queues) {
+            q.wake();
+          }
 
           if (totalBroadcasted.incrementAndGet() % 1000 == 0) {
             log.info("[experimental] " + totalBroadcasted.get() + " messages have been broadcasted to service: " + svc);

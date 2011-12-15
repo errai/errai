@@ -37,8 +37,8 @@ public class JSONEncoder {
     return null;
   }
 
-  final static class UnwrappedByteArrayOutputStream extends ByteArrayOutputStream {
-    UnwrappedByteArrayOutputStream() {
+  public final static class UnwrappedByteArrayOutputStream extends ByteArrayOutputStream {
+    public UnwrappedByteArrayOutputStream() {
       super(1024 * 8);
     }
 
