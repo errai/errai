@@ -37,7 +37,6 @@ import org.slf4j.LoggerFactory;
  * @date Sep 28, 2010
  */
 public class ContextManager {
-
   private static final Logger log = LoggerFactory.getLogger(ContextManager.class);
 
   private QueueSessionContext sessionContext;
@@ -48,17 +47,13 @@ public class ContextManager {
 
   private Map<String, ConversationContext> conversationContextStore = new ConcurrentHashMap<String, ConversationContext>();
 
-  private String uuid;
-
   private ThreadLocal<String> threadContextId = new ThreadLocal<String>();
 
   private MessageBus bus;
 
-  public ContextManager(String uuid, BeanManager beanManager, MessageBus bus, QueueSessionContext context) {
+  public ContextManager(BeanManager beanManager, MessageBus bus, QueueSessionContext context) {
 
     this.bus = bus;
-    this.uuid = uuid;
-
     this.requestContext = (BoundRequestContext) Util.lookupCallbackBean(beanManager, BoundRequestContext.class);
 
     this.conversationContext = (BoundConversationContext) Util.lookupCallbackBean(beanManager,

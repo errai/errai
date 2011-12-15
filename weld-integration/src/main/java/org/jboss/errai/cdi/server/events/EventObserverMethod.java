@@ -44,12 +44,10 @@ public class EventObserverMethod implements ObserverMethod {
   private Annotation[] qualifiers;
   private MessageBus bus;
   private String subject;
-  private ContextManager mgr;
 
-  public EventObserverMethod(Class<?> type, MessageBus bus, ContextManager mgr, Annotation... qualifiers) {
+  public EventObserverMethod(Class<?> type, MessageBus bus, Annotation... qualifiers) {
     this.type = type;
     this.bus = bus;
-    this.mgr = mgr;
     this.qualifiers = qualifiers;
     this.subject = CDI.getSubjectNameByType(type);
   }
@@ -82,24 +80,19 @@ public class EventObserverMethod implements ObserverMethod {
     if (!type.isInstance(event))
       return;
 
-    Map<String, Object> ctx = mgr.getRequestContextStore();
+    EventConversationContext.Context ctx = EventConversationContext.get();
     Set<String> qualifiersPart = CDI.getQualifiersPart(qualifiers);
-    Map store = mgr.getRequestContextStore();
 
-    if (store != null && event == store.get(CDIProtocol.OBJECT_REF.name())) {
-      return;
-    }
-
-    if (ctx != null && ctx.containsKey(MessageParts.SessionID.name())) {
+    if (ctx != null && ctx.getSession() != null) {
       if (qualifiersPart != null && !qualifiersPart.isEmpty()) {
         MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
-            .with(MessageParts.SessionID.name(), ctx.get(MessageParts.SessionID.name()))
+            .with(MessageParts.SessionID.name(), ctx.getSession())
             .with(CDIProtocol.TYPE, type.getName()).with(CDIProtocol.QUALIFIERS, qualifiersPart)
             .with(CDIProtocol.OBJECT_REF, event)
                 .flag(RoutingFlags.NonGlobalRouting).noErrorHandling().sendNowWith(bus);
       } else {
         MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
-            .with(MessageParts.SessionID.name(), ctx.get(MessageParts.SessionID.name()))
+            .with(MessageParts.SessionID.name(), ctx.getSession())
             .with(CDIProtocol.TYPE, type.getName()).with(CDIProtocol.OBJECT_REF, event)
                 .flag(RoutingFlags.NonGlobalRouting).noErrorHandling()
             .sendNowWith(bus);

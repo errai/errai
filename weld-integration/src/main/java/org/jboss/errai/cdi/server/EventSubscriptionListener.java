@@ -36,14 +36,12 @@ import org.jboss.errai.cdi.server.events.EventObserverMethod;
 public class EventSubscriptionListener implements SubscribeListener {
   private MessageBus bus;
   private AfterBeanDiscovery abd;
-  private ContextManager mgr;
   private Map<String, List<Annotation[]>> observedEvents;
 
-  public EventSubscriptionListener(AfterBeanDiscovery abd, MessageBus bus, ContextManager mgr,
+  public EventSubscriptionListener(AfterBeanDiscovery abd, MessageBus bus,
       Map<String, List<Annotation[]>> observedEvents) {
     this.abd = abd;
     this.bus = bus;
-    this.mgr = mgr;
     this.observedEvents = observedEvents;
   }
 
@@ -55,10 +53,10 @@ public class EventSubscriptionListener implements SubscribeListener {
     try {
       if (observedEvents.containsKey(name) && event.getCount() == 1 && event.isNew()) {
         final Class<?> type = this.getClass().getClassLoader().loadClass(name);
-        abd.addObserverMethod(new EventObserverMethod(type, bus, mgr));
+        abd.addObserverMethod(new EventObserverMethod(type, bus));
         if (observedEvents != null) {
           for (Annotation[] qualifiers : observedEvents.get(name)) {
-            abd.addObserverMethod(new EventObserverMethod(type, bus, mgr, qualifiers));
+            abd.addObserverMethod(new EventObserverMethod(type, bus, qualifiers));
           }
         }
       }

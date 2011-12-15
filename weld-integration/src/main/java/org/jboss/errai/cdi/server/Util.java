@@ -15,7 +15,13 @@
  */
 package org.jboss.errai.cdi.server;
 
-import java.util.Set;
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.server.annotations.Service;
+import org.jboss.errai.bus.server.service.ErraiService;
+import org.jboss.errai.container.ErraiServiceObjectFactory;
+import org.jboss.errai.container.ServiceFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
@@ -24,14 +30,6 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.naming.Reference;
-
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.bus.server.service.ErraiService;
-import org.jboss.errai.container.ErraiServiceObjectFactory;
-import org.jboss.errai.container.ServiceFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Heiko Braun <hbraun@redhat.com>
@@ -49,25 +47,21 @@ public class Util {
   private static Logger log = LoggerFactory.getLogger("ErraiJNDI");
 
   public static Object lookupCallbackBean(BeanManager beanManager, Class<?> serviceType) {
-    Set<Bean<?>> beans = beanManager.getBeans(serviceType);
-    Bean<?> bean = beanManager.resolve(beans);
+    Bean<?> bean = beanManager.resolve(beanManager.getBeans(serviceType));
 
     if (bean == null) {
       return null;
     }
 
-    CreationalContext<?> context = beanManager.createCreationalContext(bean);
-    return beanManager.getReference(bean, serviceType, context);
+    return beanManager.getReference(bean, serviceType,  beanManager.createCreationalContext(bean));
   }
 
   public static String getSessionId(Message message) {
-    String sessionID = message.getResource(String.class, "SessionID");
-    return sessionID;
+    return  message.getResource(String.class, "SessionID");
   }
 
   public static <T> T lookupRPCBean(BeanManager beanManager, T rpcIntf, Class beanClass) {
-    Set<Bean<?>> beans = beanManager.getBeans(beanClass);
-    Bean<?> bean = beanManager.resolve(beans);
+    Bean<?> bean = beanManager.resolve(beanManager.getBeans(beanClass));
     CreationalContext<?> context = beanManager.createCreationalContext(bean);
     return (T) beanManager.getReference(bean, beanClass, context);
 

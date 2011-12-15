@@ -15,25 +15,20 @@
  */
 package org.jboss.errai.cdi.server;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.enterprise.inject.spi.BeanManager;
-
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RoutingFlags;
 import org.jboss.errai.bus.client.protocols.BusCommands;
+import org.jboss.errai.cdi.server.events.EventConversationContext;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
+
+import javax.enterprise.inject.spi.BeanManager;
+import java.lang.annotation.Annotation;
+import java.util.*;
 
 /**
  * Acts as a bridge between Errai Bus and the CDI event system.<br/>
@@ -42,7 +37,6 @@ import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 public class EventDispatcher implements MessageCallback {
   private BeanManager beanManager;
   private MessageBus bus;
-  private ContextManager ctxMgr;
 
   private Map<Class<?>, Class<?>> conversationalEvents = new HashMap<Class<?>, Class<?>>();
   private Set<Class<?>> conversationalServices = new HashSet<Class<?>>();
@@ -50,11 +44,10 @@ public class EventDispatcher implements MessageCallback {
   private Set<String> observedEvents;
   private Map<String, Annotation> allQualifiers;
 
-  public EventDispatcher(BeanManager beanManager, MessageBus bus, ContextManager ctxMgr, Set<String> observedEvents,
-      Map<String, Annotation> qualifiers) {
+  public EventDispatcher(BeanManager beanManager, MessageBus bus, Set<String> observedEvents,
+                         Map<String, Annotation> qualifiers) {
     this.beanManager = beanManager;
     this.bus = bus;
-    this.ctxMgr = ctxMgr;
     this.observedEvents = observedEvents;
     this.allQualifiers = qualifiers;
   }
@@ -62,6 +55,9 @@ public class EventDispatcher implements MessageCallback {
   // Invoked by Errai
   public void callback(final Message message) {
     try {
+      ScopeUtil.associateRequestContext(message);
+      ScopeUtil.associateSessionContext(message);
+
       /**
        * If the message didn't not come from a remote, we don't handle it.
        */
@@ -69,23 +65,17 @@ public class EventDispatcher implements MessageCallback {
         return;
 
       switch (CDICommands.valueOf(message.getCommandType())) {
-      case CDIEvent:
-        String type = message.get(String.class, CDIProtocol.TYPE);
-        final Class clazz = Thread.currentThread().getContextClassLoader().loadClass(type);
-        final Object o = message.get(Object.class, CDIProtocol.OBJECT_REF);
-
-        try {
-          ctxMgr.activateRequestContext();
-          ctxMgr.activateRequestContextStore();
-          ctxMgr.activateSessionContext(message);
-
-          Map<String, Object> store = ctxMgr.getRequestContextStore();
+        case CDIEvent:
+          String type = message.get(String.class, CDIProtocol.TYPE);
+          final Class clazz = Thread.currentThread().getContextClassLoader().loadClass(type);
+          final Object o = message.get(Object.class, CDIProtocol.OBJECT_REF);
 
           if (conversationalServices.contains(clazz)) {
-            store.put(MessageParts.SessionID.name(), Util.getSessionId(message));
+            EventConversationContext.activate(o, Util.getSessionId(message));
           }
-
-          store.put(CDIProtocol.OBJECT_REF.name(), o);
+          else {
+            EventConversationContext.activate(o);
+          }
 
           Set<String> qualifierNames = message.get(Set.class, CDIProtocol.QUALIFIERS);
           List<Annotation> qualifiers = null;
@@ -103,26 +93,24 @@ public class EventDispatcher implements MessageCallback {
 
           if (qualifiers != null) {
             beanManager.fireEvent(o, qualifiers.toArray(new Annotation[qualifiers.size()]));
-          } else {
+          }
+          else {
             beanManager.fireEvent(o);
           }
 
-        } finally {
-          ctxMgr.deactivateRequestContext();
-        }
+          break;
 
-        break;
+        case AttachRemote:
+          MessageBuilder.createConversation(message).toSubject("cdi.event:ClientDispatcher")
+                  .command(BusCommands.RemoteSubscribe)
+                  .with(MessageParts.Value, observedEvents.toArray(new String[observedEvents.size()])).done().reply();
 
-      case AttachRemote:
-        MessageBuilder.createConversation(message).toSubject("cdi.event:ClientDispatcher")
-            .command(BusCommands.RemoteSubscribe)
-            .with(MessageParts.Value, observedEvents.toArray(new String[observedEvents.size()])).done().reply();
-
-        break;
-      default:
-        throw new IllegalArgumentException("Unknown command type " + message.getCommandType());
+          break;
+        default:
+          throw new IllegalArgumentException("Unknown command type " + message.getCommandType());
       }
-    } catch (Exception e) {
+    }
+    catch (Exception e) {
       throw new RuntimeException("Failed to dispatch CDI Event", e);
     }
   }

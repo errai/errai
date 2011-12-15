@@ -15,36 +15,6 @@
  */
 package org.jboss.errai.cdi.server;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Conversation;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.AfterBeanDiscovery;
-import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AnnotatedType;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.BeforeBeanDiscovery;
-import javax.enterprise.inject.spi.Extension;
-import javax.enterprise.inject.spi.ProcessAnnotatedType;
-import javax.enterprise.inject.spi.ProcessObserverMethod;
-import javax.inject.Inject;
-import javax.inject.Provider;
-import javax.inject.Qualifier;
-
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.builder.AbstractRemoteCallBuilder;
@@ -53,21 +23,41 @@ import org.jboss.errai.bus.client.framework.ProxyProvider;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.util.ErrorHelper;
 import org.jboss.errai.bus.rebind.RebindUtils;
+import org.jboss.errai.bus.server.AsyncDispatcher;
+import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.ServerMessageBusImpl;
+import org.jboss.errai.bus.server.SimpleDispatcher;
 import org.jboss.errai.bus.server.annotations.Command;
 import org.jboss.errai.bus.server.annotations.Remote;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.io.ConversationalEndpointCallback;
 import org.jboss.errai.bus.server.io.RemoteServiceCallback;
+import org.jboss.errai.bus.server.io.ServiceInstanceProvider;
 import org.jboss.errai.bus.server.service.ErraiService;
+import org.jboss.errai.cdi.server.events.ShutdownEventObserver;
 import org.jboss.errai.common.client.api.annotations.ExposeEntity;
 import org.jboss.errai.common.client.api.annotations.Portable;
+import org.jboss.errai.common.client.types.TypeHandlerFactory;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.enterprise.client.cdi.api.Conversational;
-import org.jboss.errai.cdi.server.events.ShutdownEventObserver;
-import org.jboss.errai.common.client.types.TypeHandlerFactory;
+import org.jboss.weld.manager.BeanManagerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.spi.*;
+import javax.inject.Inject;
+import javax.inject.Qualifier;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.*;
+
+import static java.util.ResourceBundle.getBundle;
 
 
 /**
@@ -85,7 +75,7 @@ public class CDIExtensionPoints implements Extension {
 
   private TypeRegistry managedTypes = null;
   private String uuid = null;
-  private ContextManager contextManager;
+  //  private ContextManager contextManager;
   private ErraiService service;
 
   private Map<Class<?>, Class<?>> conversationalObservers = new HashMap<Class<?>, Class<?>>();
@@ -94,6 +84,10 @@ public class CDIExtensionPoints implements Extension {
   private Map<String, Annotation> eventQualifiers = new HashMap<String, Annotation>();
 
   private static final Set<String> vetoClasses;
+
+  private static final String ERRAI_CDI_STANDALONE = "errai.cdi.standalone";
+
+  private boolean standalone = Boolean.getBoolean(ERRAI_CDI_STANDALONE);
 
   static {
     Set<String> veto = new HashSet<String>();
@@ -107,6 +101,38 @@ public class CDIExtensionPoints implements Extension {
   public void beforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
     this.uuid = UUID.randomUUID().toString();
     this.managedTypes = new TypeRegistry();
+
+
+    try {
+      log.info("configuring Errai CDI");
+      ResourceBundle erraiServiceConfig = getBundle("ErraiService");
+      if (erraiServiceConfig.containsKey(ERRAI_CDI_STANDALONE)) {
+        standalone = "true".equals(erraiServiceConfig.getString(ERRAI_CDI_STANDALONE).trim());
+
+        if (standalone) {
+          log.info("Errai CDI running in standalone mode.");
+        }
+        else {
+          log.info("Errai CDI running in add-on mode.");
+        }
+      }
+
+      final String dispatchImplKey = "errai.dispatcher_implementation";
+      if (erraiServiceConfig.containsKey(dispatchImplKey)) {
+        if (AsyncDispatcher.class.getName().equals(erraiServiceConfig.getString(dispatchImplKey))) {
+          throw new ErraiBootstrapFailure("Cannot start Errai CDI. You have have configured the service to use the " +
+                  AsyncDispatcher.class.getName() + " dispatcher implementation. Due to limitations of Weld, you must use the " +
+                  SimpleDispatcher.class.getName() + " in order to use this module.");
+        }
+
+      }
+    }
+    catch (ErraiBootstrapFailure e) {
+      throw e;
+    }
+    catch (Exception e) {
+      throw new ErraiBootstrapFailure("Error reading from configuration. Did you include ErraiService.properties?", e);
+    }
 
     log.info("Created Errai-CDI context: " + uuid);
   }
@@ -155,7 +181,6 @@ public class CDIExtensionPoints implements Extension {
       event.veto();
       //    log.info("Veto " + type);
     }
-
     /**
      * We must scan for Event consumer injection points to build the tables
      */
@@ -268,20 +293,9 @@ public class CDIExtensionPoints implements Extension {
       return;
     }
 
-    QueueSessionContext sessionContext = new QueueSessionContext();
-
-    abd.addContext(sessionContext);
     abd.addBean(new ServiceMetaData(bm, this.service));
-
-    // context handling hooks
-    this.contextManager = new ContextManager(uuid, bm, bus, sessionContext);
-
-    // Custom Reply
-    abd.addBean(new ConversationMetaData(bm, new ErraiConversation((Conversation) Util.lookupCallbackBean(bm,
-            Conversation.class), this.contextManager)));
-
     // event dispatcher
-    EventDispatcher eventDispatcher = new EventDispatcher(bm, bus, this.contextManager, observableEvents.keySet(),
+    EventDispatcher eventDispatcher = new EventDispatcher(bm, bus, observableEvents.keySet(),
             eventQualifiers);
 
     for (Map.Entry<Class<?>, Class<?>> entry : conversationalObservers.entrySet()) {
@@ -292,7 +306,7 @@ public class CDIExtensionPoints implements Extension {
       eventDispatcher.registerConversationalService(entry);
     }
 
-    EventSubscriptionListener listener = new EventSubscriptionListener(abd, bus, contextManager, observableEvents);
+    EventSubscriptionListener listener = new EventSubscriptionListener(abd, bus, observableEvents);
     bus.addSubscribeListener(listener);
 
     // Errai bus injection
@@ -312,6 +326,8 @@ public class CDIExtensionPoints implements Extension {
   }
 
   private void subscribeServices(final BeanManager beanManager, final MessageBus bus) {
+    final BeanManagerImpl weldBeanManager = (BeanManagerImpl) beanManager;
+
     for (Map.Entry<AnnotatedType, List<AnnotatedMethod>> entry : managedTypes.getServiceMethods().entrySet()) {
       final Class<?> type = entry.getKey().getJavaClass();
 
@@ -321,54 +337,26 @@ public class CDIExtensionPoints implements Extension {
 
         final Method callMethod = method.getJavaMember();
 
-        if (isApplicationScoped(entry.getKey())) {
-          /**
-           * Register the endpoint as a ApplicationScoped bean.
-           */
-          bus.subscribe(svcName, new MessageCallback() {
-            volatile Object targetBean;
+        bus.subscribe(svcName, new MessageCallback() {
 
-            public void callback(Message message) {
-              if (targetBean == null) {
-                targetBean = Util.lookupCallbackBean(beanManager, type);
-              }
+          public void callback(Message message) {
+ //           ScopeUtil.associateRequestContext(message);
+ //           ScopeUtil.associateSessionContext(message);
 
-              try {
-                contextManager.activateRequestContext();
-                callMethod.invoke(targetBean, message);
-              }
-              catch (Exception e) {
-                ErrorHelper.sendClientError(bus, message, "Error dispatching service", e);
-              }
-              finally {
-                contextManager.deactivateRequestContext();
-              }
+            Object targetBean = Util.lookupCallbackBean(beanManager, type);
+
+            try {
+              callMethod.invoke(targetBean, message);
             }
-          });
-        }
-        else {
-          /**
-           * Register the endpoint as a passivating scoped bean.
-           */
-          bus.subscribe(svcName, new MessageCallback() {
-            public void callback(Message message) {
-              try {
-                contextManager.activateRequestContext();
-                contextManager.activateSessionContext(message);
-
-                callMethod.invoke(Util.lookupCallbackBean(beanManager, type), message);
-              }
-              catch (Exception e) {
-                ErrorHelper.sendClientError(bus, message, "Error dispatching service", e);
-              }
-              finally {
-                contextManager.deactivateRequestContext();
-              }
+            catch (Exception e) {
+              ErrorHelper.sendClientError(bus, message, "Error dispatching service", e);
             }
-          });
-        }
+          }
+        });
+
       }
     }
+
 
     for (final AnnotatedType<?> type : managedTypes.getServiceEndpoints()) {
       // Discriminate on @Command
@@ -387,51 +375,15 @@ public class CDIExtensionPoints implements Extension {
       log.info("Register MessageCallback: " + type);
       final String subjectName = Util.resolveServiceName(type.getJavaClass());
 
-      if (isApplicationScoped(type)) {
-        /**
-         * Create callback for application scope.
-         */
 
-        bus.subscribe(subjectName, new MessageCallback() {
-          volatile MessageCallback callback;
+      bus.subscribe(subjectName, new MessageCallback() {
 
-          public void callback(final Message message) {
-            if (callback == null) {
-              callback = (MessageCallback) Util.lookupCallbackBean(beanManager, type.getJavaClass());
-            }
+        public void callback(final Message message) {
+          MessageCallback callback = (MessageCallback) Util.lookupCallbackBean(beanManager, type.getJavaClass());
+          callback.callback(message);
+        }
+      });
 
-            contextManager.activateSessionContext(message);
-            contextManager.activateRequestContext();
-            contextManager.activateConversationContext(message);
-            try {
-              callback.callback(message);
-            }
-            finally {
-              contextManager.deactivateRequestContext();
-              contextManager.deactivateConversationContext(message);
-            }
-          }
-        });
-      }
-      else {
-        /**
-         * Map passitivating scope.
-         */
-        bus.subscribe(subjectName, new MessageCallback() {
-          public void callback(final Message message) {
-            contextManager.activateSessionContext(message);
-            contextManager.activateRequestContext();
-            //                        contextManager.activateConversationContext(message);
-            try {
-              ((MessageCallback) Util.lookupCallbackBean(beanManager, type.getJavaClass())).callback(message);
-            }
-            finally {
-              contextManager.deactivateRequestContext();
-              contextManager.deactivateConversationContext(message);
-            }
-          }
-        });
-      }
     }
 
     //todo: needs to be rewritten to support @SessionScoped
@@ -455,11 +407,12 @@ public class CDIExtensionPoints implements Extension {
     for (Class<?> intf : type.getInterfaces()) {
       for (final Method method : intf.getDeclaredMethods()) {
         if (RebindUtils.isMethodInInterface(remoteIface, method)) {
-          epts.put(RebindUtils.createCallSignature(method), new ConversationalEndpointCallback(new Provider<Object>() {
+          epts.put(RebindUtils.createCallSignature(method), new ConversationalEndpointCallback(new ServiceInstanceProvider() {
             @Override
-            public Object get() {
+            public Object get(Message message) {
               return Util.lookupRPCBean(beanManager, remoteIface, type);
             }
+
           }, method, bus));
         }
       }
@@ -468,13 +421,7 @@ public class CDIExtensionPoints implements Extension {
     final RemoteServiceCallback delegate = new RemoteServiceCallback(epts);
     bus.subscribe(remoteIface.getName() + ":RPC", new MessageCallback() {
       public void callback(Message message) {
-        try {
-          CDIExtensionPoints.this.contextManager.activateRequestContext();
-          delegate.callback(message);
-        }
-        finally {
-          CDIExtensionPoints.this.contextManager.deactivateRequestContext();
-        }
+        delegate.callback(message);
       }
     });
 

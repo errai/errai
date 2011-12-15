@@ -61,10 +61,6 @@ public class QueueSessionContext extends AbstractManagedContext implements Sessi
     return sessionContextThreadLocal.get().getAttribute(BeanStore.class, BEAN_STORE_ID);
   }
 
-  public QueueSession getQueueSession() {
-    return sessionContextThreadLocal.get().getSession();
-  }
-
   public Class<? extends Annotation> getScope() {
     return SessionScoped.class;
   }
