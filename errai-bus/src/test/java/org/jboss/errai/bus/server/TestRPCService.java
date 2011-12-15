@@ -58,6 +58,17 @@ public class TestRPCService implements TestRPCServiceRemote {
     return list;
   }
 
+
+  @Override
+  public List<Short> listOfShort(List<Short> list) {
+    return list;
+  }
+
+  @Override
+  public List<Boolean> listOfBoolean(List<Boolean> list) {
+    return list;
+  }
+
   @Override
   public Set<String> aSetOfStrings(Set<String> set) {
     return set;

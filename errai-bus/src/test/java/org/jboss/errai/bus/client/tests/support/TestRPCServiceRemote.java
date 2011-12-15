@@ -41,7 +41,11 @@ public interface TestRPCServiceRemote {
   public List<Integer> listOfInteger(List<Integer> list);
   
   public List<Float> listOfFloat(List<Float> list);
-  
+
+  public List<Short> listOfShort(List<Short> list);
+
+  public List<Boolean> listOfBoolean(List<Boolean> list);
+
   public Set<String> aSetOfStrings(Set<String> set);
 
   public ClassWithNestedClass nestedClass(ClassWithNestedClass clazz);

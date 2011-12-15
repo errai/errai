@@ -42,7 +42,13 @@ public class ServerBooleanMarshaller implements Marshaller<Object, Boolean> {
   @Override
   public Boolean demarshall(Object o, MarshallingSession ctx) {
     if (o instanceof Map) {
-      return Boolean.parseBoolean((String) ((Map)o).get(SerializationParts.NUMERIC_VALUE));
+      Object v = ((Map) o).get(SerializationParts.NUMERIC_VALUE);
+      if (v instanceof Boolean) {
+        return (Boolean) v;
+      }
+      else {
+        return Boolean.parseBoolean(String.valueOf(v));
+      }
     }
     else {
       return (Boolean) o;

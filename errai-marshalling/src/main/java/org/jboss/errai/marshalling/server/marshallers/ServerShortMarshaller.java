@@ -36,7 +36,7 @@ public class ServerShortMarshaller extends AbstractNumberMarshaller<Object, Shor
   @Override
   public Short demarshall(Object o, MarshallingSession ctx) {
     if (o instanceof Map) {
-      return ((Short) ((Map) o).get(SerializationParts.NUMERIC_VALUE)).shortValue();
+      return ((Double) ((Map) o).get(SerializationParts.NUMERIC_VALUE)).shortValue();
     }
     else {
       return (Short) o;

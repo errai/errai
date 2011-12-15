@@ -138,6 +138,65 @@ public class SerializationTests extends AbstractErraiTest {
   }
 
 
+  public void testShortInCollection() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final List<Short> list = new ArrayList<Short>();
+
+        list.add((short) 10);
+        list.add((short) 20);
+        list.add((short) 30);
+        list.add((short) 40);
+        list.add((short) 50);
+
+        MessageBuilder.createCall(new RemoteCallback<List<Float>>() {
+          @Override
+          public void callback(List<Float> response) {
+            try {
+              assertEquals(list, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestRPCServiceRemote.class).listOfShort(list);
+      }
+    });
+  }
+
+  public void testBooleanInCollection() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final List<Boolean> list = new ArrayList<Boolean>();
+
+        list.add(true);
+        list.add(true);
+        list.add(false);
+        list.add(false);
+        list.add(true);
+
+        MessageBuilder.createCall(new RemoteCallback<List<Float>>() {
+          @Override
+          public void callback(List<Float> response) {
+            try {
+              assertEquals(list, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestRPCServiceRemote.class).listOfBoolean(list);
+      }
+    });
+  }
+
+
   public void testSet() {
     runAfterInit(new Runnable() {
       @Override
