@@ -85,5 +85,11 @@ public enum MessageParts {
    * If this attribute is present, the bus should give priority to processing it and not subject it to
    * window matching.
    */
-  PriorityProcessing
+  PriorityProcessing,
+
+
+  /**
+   * Used mainly for web sockets to negotiate which session the web socket is associated with.
+   */
+  ConnectionSessionKey
 }

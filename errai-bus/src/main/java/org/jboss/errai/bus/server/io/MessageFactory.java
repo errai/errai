@@ -63,6 +63,20 @@ public class MessageFactory {
     return from(parts, session, request);
   }
 
+  public static Message createCommandMessage(QueueSession session, String json) {
+    if (json.length() == 0) return null;
+
+    Message msg = createWithParts((Map<String, Object>) JSONDecoder.decode(json))
+            .setResource("Session", session)
+            .setResource("SessionID", session.getSessionId());
+
+    msg.setFlag(RoutingFlags.FromRemote);
+
+    return msg;
+  }
+
+
+
   public static Message createCommandMessage(QueueSession session, HttpServletRequest request) throws IOException {
     Map<String, Object> parts = (Map<String, Object>) JSONStreamDecoder.decode(request.getInputStream());
     parts.remove(MessageParts.SessionID.name());

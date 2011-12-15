@@ -96,5 +96,9 @@ public enum BusCommands {
 
   RemoteMonitorDetach,
 
-  CapabilitiesNotice
+  CapabilitiesNotice,
+
+  WebsocketChannelOpen,
+
+  WebsocketNegotiationFailed
 }

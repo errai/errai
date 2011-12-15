@@ -24,6 +24,7 @@ import org.jboss.errai.bus.client.util.ErrorHelper;
 import org.jboss.errai.bus.server.DefaultTaskManager;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.bus.server.api.SessionProvider;
+import org.jboss.errai.bus.server.io.websockets.WebSocketServer;
 import org.jboss.errai.bus.server.service.bootstrap.BootstrapContext;
 import org.jboss.errai.bus.server.service.bootstrap.OrderedBootstrap;
 
@@ -34,6 +35,7 @@ import org.jboss.errai.bus.server.service.bootstrap.OrderedBootstrap;
 public class ErraiServiceImpl<S> implements ErraiService<S> {
 
   private ServerMessageBus bus;
+
   private ErraiServiceConfigurator config;
 
   private SessionProvider<S> sessionProvider;
@@ -50,13 +52,15 @@ public class ErraiServiceImpl<S> implements ErraiService<S> {
                           final ErraiServiceConfigurator configurator) {
     this.bus = bus;
     this.config = configurator;
-
     boostrap();
   }
 
   private void boostrap() {
     BootstrapContext context = new BootstrapContext(this, bus, config);
     new OrderedBootstrap().execute(context);
+
+    WebSocketServer server = new WebSocketServer(this);
+    server.start();
   }
 
   /**

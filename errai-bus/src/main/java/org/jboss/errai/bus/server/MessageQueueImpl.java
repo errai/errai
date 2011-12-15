@@ -16,26 +16,22 @@
 
 package org.jboss.errai.bus.server;
 
+import io.netty.channel.Channel;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueActivationCallback;
 import org.jboss.errai.bus.server.api.QueueSession;
 import org.jboss.errai.bus.server.io.BufferHelper;
-import org.jboss.errai.bus.server.io.buffers.BufferCallback;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
 import org.jboss.errai.marshalling.server.JSONEncoder;
-import org.jboss.errai.marshalling.server.JSONStreamEncoder;
-import org.slf4j.Logger;
 
 import java.io.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static java.lang.System.console;
 import static java.lang.System.nanoTime;
-import static java.lang.System.out;
-import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * A message queue is keeps track of which messages need to be sent outbound. It keeps track of the amount of messages
@@ -56,7 +52,6 @@ public class MessageQueueImpl implements MessageQueue {
   private boolean initLock = true;
   private boolean queueRunning = true;
   private volatile long lastTransmission = nanoTime();
-
   private volatile boolean pagedOut = false;
 
   private volatile QueueActivationCallback activationCallback;
@@ -64,8 +59,9 @@ public class MessageQueueImpl implements MessageQueue {
   private final TransmissionBuffer buffer;
   private final BufferColor bufferColor;
 
-  private final Object activationLock = new Object();
+  private volatile Channel directSocketChannel;
 
+  private final Object activationLock = new Object();
   private final AtomicInteger messageCount = new AtomicInteger();
 
   public MessageQueueImpl(TransmissionBuffer buffer, final QueueSession session) {
@@ -128,28 +124,33 @@ public class MessageQueueImpl implements MessageQueue {
       throw new QueueUnavailableException("queue is not available");
     }
 
-    if (pagedOut) {
-      synchronized (pageLock) {
-        if (pagedOut) {
-          writeToPageFile(JSONEncoder.encodeToByteArrayInputStream(message.getParts()));
-          return true;
+    if (directSocketChannel != null && directSocketChannel.isConnected()) {
+      directSocketChannel.write(new TextWebSocketFrame("[" + JSONEncoder.encode(message.getParts()) + "]"));
+    }
+    else {
+      if (pagedOut) {
+        synchronized (pageLock) {
+          if (pagedOut) {
+            writeToPageFile(JSONEncoder.encodeToByteArrayInputStream(message.getParts()));
+            return true;
+          }
         }
       }
-    }
 
-    BufferHelper.encodeAndWrite(buffer, bufferColor, message);
+      BufferHelper.encodeAndWrite(buffer, bufferColor, message);
 
-    if (messageCount.incrementAndGet() > 5 && !lastTransmissionWithin(secs(3))) {
-      // disconnect this client
-      stopQueue();
-    }
-
-    if (activationCallback != null) {
-      synchronized (activationLock) {
-        if (activationCallback != null) activationCallback.activate(this);
+      if (messageCount.incrementAndGet() > 5 && !lastTransmissionWithin(secs(3))) {
+        // disconnect this client
+        stopQueue();
       }
-    }
 
+      if (activationCallback != null) {
+        synchronized (activationLock) {
+          if (activationCallback != null) activationCallback.activate(this);
+        }
+      }
+
+    }
     return true;
   }
 
@@ -288,13 +289,13 @@ public class MessageQueueImpl implements MessageQueue {
    * @return true if the queue is stale
    */
   public boolean isStale() {
-    return !queueRunning || ((nanoTime() - lastTransmission) > TIMEOUT);
+    return !isDirectChannelOpen() && (!queueRunning || ((nanoTime() - lastTransmission) > TIMEOUT));
   }
 
 
   @Override
   public boolean isDowngradeCandidate() {
-    return ((nanoTime() - lastTransmission) > DOWNGRADE_THRESHOLD);
+    return !isDirectChannelOpen() && ((nanoTime() - lastTransmission) > DOWNGRADE_THRESHOLD);
   }
 
   public boolean isInitialized() {
@@ -304,6 +305,10 @@ public class MessageQueueImpl implements MessageQueue {
   @Override
   public boolean messagesWaiting() {
     return messageCount.intValue() > 0;
+  }
+
+  private boolean isDirectChannelOpen() {
+    return directSocketChannel != null && directSocketChannel.isOpen();
   }
 
   /**
@@ -359,5 +364,10 @@ public class MessageQueueImpl implements MessageQueue {
   @Override
   public Object getActivationLock() {
     return activationLock;
+  }
+
+  @Override
+  public void setDirectSocketChannel(Channel channel) {
+    this.directSocketChannel = channel;
   }
 }

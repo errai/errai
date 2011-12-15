@@ -16,59 +16,25 @@
 
 package org.jboss.errai.bus.client.framework;
 
-import static org.jboss.errai.bus.client.json.JSONUtilCli.decodePayload;
-import static org.jboss.errai.bus.client.json.JSONUtilCli.encodeMap;
-import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteSubscribe;
-import static org.jboss.errai.common.client.protocols.MessageParts.PriorityProcessing;
-import static org.jboss.errai.common.client.protocols.MessageParts.ReplyTo;
-import static org.jboss.errai.common.client.protocols.MessageParts.Subject;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
-import org.jboss.errai.bus.client.api.HasEncoded;
-import org.jboss.errai.bus.client.api.HookCallback;
-import org.jboss.errai.bus.client.api.InitializationListener;
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.api.MessageListener;
-import org.jboss.errai.bus.client.api.SessionExpirationListener;
-import org.jboss.errai.bus.client.api.SubscribeListener;
-import org.jboss.errai.bus.client.api.UnsubscribeListener;
-import org.jboss.errai.bus.client.api.base.Capabilities;
-import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
-import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.api.base.NoSubscribersToDeliverTo;
-import org.jboss.errai.bus.client.api.base.TransportIOException;
-import org.jboss.errai.bus.client.protocols.BusCommands;
-import org.jboss.errai.common.client.protocols.MessageParts;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.RequestException;
-import com.google.gwt.http.client.RequestTimeoutException;
-import com.google.gwt.http.client.Response;
-import com.google.gwt.http.client.URL;
+import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.ScrollPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.*;
+import org.jboss.errai.bus.client.api.*;
+import org.jboss.errai.bus.client.api.base.*;
+import org.jboss.errai.bus.client.protocols.BusCommands;
+import org.jboss.errai.common.client.protocols.MessageParts;
+
+import java.util.*;
+
+import static org.jboss.errai.bus.client.json.JSONUtilCli.decodePayload;
+import static org.jboss.errai.bus.client.json.JSONUtilCli.encodeMap;
+import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteSubscribe;
+import static org.jboss.errai.common.client.protocols.MessageParts.*;
 
 /**
  * The default client <tt>MessageBus</tt> implementation.  This bus runs in the browser and automatically federates
@@ -78,6 +44,7 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  */
 public class ClientMessageBusImpl implements ClientMessageBus {
   private String clientId;
+  private String sessionId;
 
   /* The encoded URL to be used for the bus */
   String OUT_SERVICE_ENTRY_POINT = "out.erraiBus";
@@ -92,10 +59,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   /* Used to build the HTTP POST request */
   private RequestBuilder sendBuilder;
 
+  private volatile boolean cometChannelOpen = true;
+  private volatile boolean webSocketOpen = false;
+  private Object webSocketChannel;
+
   public final MessageCallback remoteCallback = new RemoteMessageCallback();
 
   private RequestCallback receiveCommCallback = new NoPollRequestCallback();
-
 
   /* Map of subjects to subscriptions  */
   private Map<String, List<Object>> subscriptions;
@@ -137,6 +107,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private int requestNumber = 0;
 
   private boolean disconnected = false;
+
 
   ProxySettings proxySettings;
 
@@ -482,7 +453,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   /**
-   *
    * Checks if subject is already listed in the subscriptions map
    *
    * @param subject - subject to look for
@@ -547,7 +517,19 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private void transmitRemote(final String message, final Message txMessage) {
     if (message == null) return;
 
-  //  System.out.println("TX: " + message);
+    //  System.out.println("TX: " + message);
+
+    if (webSocketOpen) {
+      if (ClientWebSocketChannel.transmitToSocket(webSocketChannel, message)) {
+        return;
+      }
+      else {
+        //disconnected.
+        webSocketOpen = false;
+        webSocketChannel = null;
+      }
+    }
+
 
     try {
       sendBuilder.sendRequest(message, new RequestCallback() {
@@ -601,6 +583,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private void performPoll() {
     try {
+      if (!cometChannelOpen) return;
+
       getRecvBuilder().sendRequest(null, receiveCommCallback);
     }
     catch (RequestTimeoutException e) {
@@ -771,6 +755,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
             for (String capability : capabilites) {
               switch (Capabilities.valueOf(capability)) {
+                case WebSockets:
+                  String webSocketURL = message.get(String.class, "WebSocketURL");
+                  ClientWebSocketChannel.attemptWebSocketConnect(ClientMessageBusImpl.this, webSocketURL);
+                  break;
                 case LongPollAvailable:
                   receiveCommCallback = new LongPollRequestCallback();
                   break;
@@ -801,6 +789,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
               if (s.startsWith("local:")) continue;
               if (!remotes.containsKey(s)) subjects.add(s);
             }
+
+            sessionId = message.get(String.class, MessageParts.ConnectionSessionKey);
 
             remoteSubscribe("ServerBus");
 
@@ -899,6 +889,17 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             init(null);
             setReinit(false);
 
+            break;
+
+          case WebsocketChannelOpen:
+            cometChannelOpen = false;
+            webSocketOpen = true;
+            break;
+
+          case WebsocketNegotiationFailed:
+            webSocketChannel = null;
+            logError("failed to connect to websocket: server rejected request",
+                    message.get(String.class, MessageParts.ErrorMessage), null);
             break;
 
           case Disconnect:
@@ -1035,7 +1036,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             new Timer() {
               @Override
               public void run() {
-                performPoll();
+                  performPoll();
               }
             }.schedule(timeout);
 
@@ -1224,15 +1225,19 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * @throws Exception -
    */
   private void procIncomingPayload(Response response) throws Exception {
-  //  System.out.println("RX: " + response.getText());
+    //  System.out.println("RX: " + response.getText());
+    procPayload(response.getText());
+  }
+
+  public void procPayload(String text) {
     try {
-      for (MarshalledMessage m : decodePayload(response.getText())) {
+      for (MarshalledMessage m : decodePayload(text)) {
         _store(m.getSubject(), m.getMessage());
       }
     }
     catch (RuntimeException e) {
       e.printStackTrace();
-      logError("Error delivering message into bus", response.getText(), e);
+      logError("Error delivering message into bus", text, e);
     }
   }
 
@@ -1360,5 +1365,15 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       requestNumber = 0;
     }
     return requestNumber++;
+  }
+
+
+  public void attachWebSocketChannel(Object o) {
+    String negotiationString = "{\"" + MessageParts.CommandType.name() + "\":\"" + BusCommands.ConnectToQueue.name()
+            + "\", \"" + MessageParts.ConnectionSessionKey + "\":\"" + sessionId + "\"}";
+
+    ClientWebSocketChannel.transmitToSocket(o, negotiationString);
+
+    webSocketChannel = o;
   }
 }

@@ -101,7 +101,10 @@ public interface ServerMessageBus extends MessageBus {
   public boolean hasRemoteSubscription(String sessionId, String subject);
 
   public Map<QueueSession, MessageQueue> getMessageQueues();
-
+  
+  public MessageQueue getQueueBySession(String id);
+  
+  public QueueSession getSessionBySessionId(String id);
 
   /**
    * Stop the MessateBus.

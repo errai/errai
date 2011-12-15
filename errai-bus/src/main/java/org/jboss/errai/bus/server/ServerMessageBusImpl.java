@@ -32,6 +32,7 @@ import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.slf4j.Logger;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -90,6 +91,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
    * <tt>ErraiServiceConfigurator</tt> by declaring it as injection dependencies
    */
   public ServerMessageBusImpl() {
+
     /**
      * Define the default ServerBus service used for intrabus communication.
      */
@@ -124,7 +126,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
             case RemoteUnsubscribe:
               if (queue == null) return;
-
 
               remoteUnsubscribe(session, queue,
                       message.get(String.class, MessageParts.Subject));
@@ -199,7 +200,13 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                       .command(BusCommands.CapabilitiesNotice);
 
               if (ErraiServiceConfigurator.LONG_POLLING) {
-                msg.set("Flags", Capabilities.LongPollAvailable.name());
+                msg.set("Flags", Capabilities.LongPollAvailable.name() + "," + Capabilities.WebSockets.name());
+
+                /**
+                 * Advertise where the client can find a websocket.
+                 */
+                HttpServletRequest request = message.getResource(HttpServletRequest.class, HttpServletRequest.class.getName());
+                msg.set("WebSocketURL", "ws://" + request.getLocalAddr() + ":8081/websocket");
               }
               else {
                 msg.set("Flags", Capabilities.NoLongPollAvailable.name());
@@ -211,6 +218,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
               createConversation(message)
                       .toSubject("ClientBus")
                       .command(BusCommands.FinishStateSync)
+                      .with(MessageParts.ConnectionSessionKey, queue.getSession().getSessionId())
                       .noErrorHandling().sendNowWith(ServerMessageBusImpl.this, false);
 
               break;
@@ -1045,6 +1053,11 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
   public MessageQueue getQueueBySession(String sessionId) {
     return getQueue(sessionLookup.get(sessionId));
+  }
+
+  @Override
+  public QueueSession getSessionBySessionId(String id) {
+    return sessionLookup.get(id);
   }
 
   /**

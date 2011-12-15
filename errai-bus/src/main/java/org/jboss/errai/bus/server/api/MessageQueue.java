@@ -16,6 +16,9 @@
 
 package org.jboss.errai.bus.server.api;
 
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 
@@ -28,6 +31,8 @@ public interface MessageQueue {
   int poll(boolean wait, OutputStream stream) throws IOException;
 
   boolean offer(Message message) throws IOException;
+  
+  void setDirectSocketChannel(Channel channel);
 
   /**
    * Get the current sequence number for the queue.

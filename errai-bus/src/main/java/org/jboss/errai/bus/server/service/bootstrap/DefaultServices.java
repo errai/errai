@@ -18,6 +18,7 @@ package org.jboss.errai.bus.server.service.bootstrap;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.server.io.websockets.WebSocketServer;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
@@ -42,6 +43,8 @@ class DefaultServices implements BootstrapExecution {
     final ServerMessageBus bus = context.getBus();
     final boolean authenticationConfigured =
         context.getConfig().getResource(AuthenticationAdapter.class) != null;
+
+
 
     bus.subscribe(ErraiService.AUTHORIZATION_SVC_SUBJECT, new MessageCallback() {
       public void callback(Message message) {
@@ -129,5 +132,7 @@ class DefaultServices implements BootstrapExecution {
         reply.sendNowWith(bus);
       }
     });
+
+
   }
 }
