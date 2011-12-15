@@ -122,9 +122,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private List<Runnable> postInitTasks = new ArrayList<Runnable>();
   private List<Message> deferredMessages = new ArrayList<Message>();
 
-  /* The timer constantly ensures the client's polling with the server is active */
-  private Timer heartBeatTimer;
-
   /* True if the client's message bus has been initialized */
   private boolean initialized = false;
   private boolean reinit = false;
@@ -485,6 +482,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   /**
+   *
    * Checks if subject is already listed in the subscriptions map
    *
    * @param subject - subject to look for
@@ -549,7 +547,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private void transmitRemote(final String message, final Message txMessage) {
     if (message == null) return;
 
-    //  System.out.println("TX: " + message);
+  //  System.out.println("TX: " + message);
 
     try {
       sendBuilder.sendRequest(message, new RequestCallback() {
@@ -622,34 +620,35 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   public void stop(boolean sendDisconnect) {
-    if (sendDisconnect) {
-      sendBuilder.setHeader("phase", "disconnect");
+    try {
+      if (sendDisconnect) {
+        sendBuilder.setHeader("phase", "disconnect");
 
-      Message m = MessageBuilder.createMessage()
-              .toSubject("ServerBus")
-              .command(BusCommands.Disconnect).getMessage();
+        Message m = MessageBuilder.createMessage()
+                .toSubject("ServerBus")
+                .command(BusCommands.Disconnect).getMessage();
 
-      encodeAndTransmit(m);
-    }
+        encodeAndTransmit(m);
+      }
 
-    unsubscribeAll("ClientBus");
+      unsubscribeAll("ClientBus");
 
-    for (Map.Entry<String, List<Object>> entry : subscriptions.entrySet()) {
-      for (Object o : entry.getValue()) {
-        if (o instanceof MessageCallback) {
-          continue;
+      for (Map.Entry<String, List<Object>> entry : subscriptions.entrySet()) {
+        for (Object o : entry.getValue()) {
+          if (o instanceof MessageCallback) {
+            continue;
+          }
+          _unsubscribe(o);
         }
-        _unsubscribe(o);
       }
     }
-
-    this.remotes.clear();
-
-    this.heartBeatTimer.cancel();
-    this.disconnected = true;
-    this.initialized = false;
-    this.sendBuilder = null;
-    this.postInitTasks.clear();
+    finally {
+      this.remotes.clear();
+      this.disconnected = true;
+      this.initialized = false;
+      this.sendBuilder = null;
+      this.postInitTasks.clear();
+    }
   }
 
   public class RemoteMessageCallback implements MessageCallback {
@@ -991,7 +990,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * @return true if client message bus is initialized.
    */
   public boolean isInitialized() {
-    return initialized;
+    return this.initialized;
   }
 
   int maxRetries = 5;
@@ -1129,7 +1128,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       return;
     }
 
-
     final Timer initialPollTimer = new Timer() {
       @Override
       public void run() {
@@ -1146,27 +1144,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         initialPollTimer.schedule(10);
       }
     }.schedule(5);
-
-//    heartBeatTimer =
-//            new Timer() {
-//              @Override
-//              public void run() {
-//                if (System.currentTimeMillis() - lastTransmit >= HEARTBEAT_DELAY) {
-//                  encodeAndTransmit(MessageBuilder.createMessage().toSubject("ServerBus")
-//                          .command(BusCommands.Heartbeat).defaultErrorHandling().getMessage());
-//                  schedule(HEARTBEAT_DELAY);
-//                }
-//                else {
-//                  long win = System.currentTimeMillis() - lastTransmit;
-//                  int diff = HEARTBEAT_DELAY - (int) win;
-//                  if (diff <= 1) diff = 1;
-//                  schedule(diff);
-//                }
-//              }
-//            };
-//
-//
-//    heartBeatTimer.scheduleRepeating(HEARTBEAT_DELAY);
   }
 
   /**
@@ -1247,6 +1224,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * @throws Exception -
    */
   private void procIncomingPayload(Response response) throws Exception {
+  //  System.out.println("RX: " + response.getText());
     try {
       for (MarshalledMessage m : decodePayload(response.getText())) {
         _store(m.getSubject(), m.getMessage());

@@ -75,7 +75,7 @@ public abstract class AbstractErraiTest extends GWTTestCase {
 
   @Override
   protected void gwtTearDown() throws Exception {
-    bus.stop(true);
+     bus.stop(true);
   }
 
   protected void runAfterInit(final Runnable r) {
