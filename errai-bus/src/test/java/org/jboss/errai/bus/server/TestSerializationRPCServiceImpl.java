@@ -16,11 +16,25 @@
 
 package org.jboss.errai.bus.server;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 
 import javax.inject.Inject;
 
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
+import org.jboss.errai.bus.client.tests.support.Boron;
+import org.jboss.errai.bus.client.tests.support.ClassWithNestedClass;
+import org.jboss.errai.bus.client.tests.support.EntityWithGenericCollections;
+import org.jboss.errai.bus.client.tests.support.EntityWithStringBufferAndStringBuilder;
+import org.jboss.errai.bus.client.tests.support.FactoryEntity;
+import org.jboss.errai.bus.client.tests.support.Group;
+import org.jboss.errai.bus.client.tests.support.TestEnumA;
 import org.jboss.errai.bus.client.tests.support.TestSerializationRPCService;
 import org.jboss.errai.bus.client.tests.support.TreeNodeContainer;
 import org.jboss.errai.bus.server.annotations.Service;
@@ -37,6 +51,137 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
     this.dispatcher = dispatcher;
   }
 
+  @Override
+  public List<Long> listOfLong(List<Long> list) {
+    return list;
+  }
+
+  @Override
+  public List<Integer> listOfInteger(List<Integer> list) {
+    return list;
+  }
+
+  @Override
+  public List<Float> listOfFloat(List<Float> list) {
+    return list;
+  }
+
+
+  @Override
+  public List<Short> listOfShort(List<Short> list) {
+    return list;
+  }
+
+  @Override
+  public List<Boolean> listOfBoolean(List<Boolean> list) {
+    return list;
+  }
+
+  @Override
+  public Set<String> setOfStrings(Set<String> set) {
+    return set;
+  }
+  
+  @Override
+  public Map<Long, String> mapOfLongToString(Map<Long, String> map) {
+    return map;
+  }
+
+  @Override
+  public Map<Long, List<String>> mapOfLongToListOfStrings(Map<Long, List<String>> map) {
+    return map;
+  }
+
+  @Override
+  public Map<String, Float> mapOfStringToFloat(Map<String, Float> map) {
+    return map;
+  }
+
+  @Override
+  public Map<String, List<Double>> mapOfStringToListOfDoubles(Map<String, List<Double>> map) {
+    return map;
+  }
+
+  @Override
+  public Map<Group, Group> mapOfCustomTypes(Map<Group, Group> map) {
+    return map;
+  }
+  
+  @Override
+  public Map<List<String>, Group> mapOfListOfStringsToCustomType(Map<List<String>, Group> map) {
+    return map;
+  }
+  
+  @Override
+  public ClassWithNestedClass nestedClass(ClassWithNestedClass clazz) {
+    return clazz;
+  }
+
+  @Override
+  public EntityWithGenericCollections genericCollections(EntityWithGenericCollections ent) {
+    return ent;
+  }
+
+  @Override
+  public EntityWithStringBufferAndStringBuilder testStringBufferAndStringBuilder(EntityWithStringBufferAndStringBuilder entity) {
+    return entity;
+  }
+
+  @Override
+  public Throwable testSerializeThrowable(Throwable t) {
+    return t;
+  }
+
+  @Override
+  public AssertionError testSerializeAssertionError(AssertionError t) {
+    return t;
+  }
+
+  @Override
+  public FactoryEntity testFactorySerialization(FactoryEntity e) {
+    return e;
+  }
+
+  @Override
+  public Timestamp testTimestampSerialization(Timestamp ts) {
+    return ts;
+  }
+
+  @Override
+  public Time testTimeSerialization(Time time) {
+    return time;
+  }
+
+  @Override
+  public BigDecimal testBigDecimalSerialization(BigDecimal time) {
+    return time;
+  }
+
+  @Override
+  public BigInteger testBigIntegerSerialization(BigInteger time) {
+    return time;
+  }
+
+  @Override
+  public Queue testQueueSerialization(Queue queue) {
+    return queue;
+  }
+
+  @Override
+  public List testInheritedDefinitionFromExistingParent(List list) {
+    return list;
+  }
+
+  @Override
+  public TestEnumA testNakedEnum(TestEnumA e) {
+    return e;
+  }
+
+  @Override
+  public Boron.Bean testPortableInnerClass(Boron.Bean b) {
+    return b;
+  }
+  
   @Override
   public List<TreeNodeContainer> acceptTreeNodeContainers(List<TreeNodeContainer> listOfContainers) {
     int count = 0;

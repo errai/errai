@@ -26,6 +26,8 @@ import java.util.List;
 @Portable
 public class EntityWithGenericCollections {
   private List<Float> listOfFloats;
+  
+  private Object o;
 
   public EntityWithGenericCollections() {
   }
@@ -36,6 +38,14 @@ public class EntityWithGenericCollections {
 
   public void setListOfFloats(List<Float> listOfFloats) {
     this.listOfFloats = listOfFloats;
+  }
+  
+  public Object getObject() {
+    return o;
+  }
+  
+  public void setObject(Object o ){
+    this.o = o;
   }
 
   @Override

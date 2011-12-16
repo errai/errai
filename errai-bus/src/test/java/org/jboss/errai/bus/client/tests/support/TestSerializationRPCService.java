@@ -18,12 +18,71 @@ package org.jboss.errai.bus.client.tests.support;
 
 import org.jboss.errai.bus.server.annotations.Remote;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 @Remote
 public interface TestSerializationRPCService {
+public List<Long> listOfLong(List<Long> list);
+  
+  public List<Integer> listOfInteger(List<Integer> list);
+  
+  public List<Float> listOfFloat(List<Float> list);
+
+  public List<Short> listOfShort(List<Short> list);
+
+  public List<Boolean> listOfBoolean(List<Boolean> list);
+
+  public Set<String> setOfStrings(Set<String> set);
+  
+  public Map<Long, String> mapOfLongToString(Map<Long, String> map);
+  
+  public Map<Long, List<String>> mapOfLongToListOfStrings(Map<Long, List<String>> map);
+
+  public Map<String, Float> mapOfStringToFloat(Map<String, Float> map);
+  
+  public Map<String, List<Double>> mapOfStringToListOfDoubles(Map<String, List<Double>> map);
+  
+  public Map<List<String>, Group> mapOfListOfStringsToCustomType(Map<List<String>, Group> map);
+  
+  public Map<Group, Group> mapOfCustomTypes(Map<Group, Group> map); 
+  
+  public ClassWithNestedClass nestedClass(ClassWithNestedClass clazz);
+
+  public EntityWithGenericCollections genericCollections(EntityWithGenericCollections ent);
+
+  public EntityWithStringBufferAndStringBuilder testStringBufferAndStringBuilder(EntityWithStringBufferAndStringBuilder entity);
+
+  public Throwable testSerializeThrowable(Throwable t);
+
+  public AssertionError testSerializeAssertionError(AssertionError t);
+
+  public FactoryEntity testFactorySerialization(FactoryEntity e);
+  
+  public Timestamp testTimestampSerialization(Timestamp ts);
+
+  public Time testTimeSerialization(Time time);
+
+  public BigDecimal testBigDecimalSerialization(BigDecimal time);
+
+  public BigInteger testBigIntegerSerialization(BigInteger time);
+  
+  public Queue testQueueSerialization(Queue queue);
+
+  public List testInheritedDefinitionFromExistingParent(List list);
+
+  public TestEnumA testNakedEnum(TestEnumA e);
+  
+  public Boron.Bean testPortableInnerClass(Boron.Bean b);
+  
   List<TreeNodeContainer> acceptTreeNodeContainers(List<TreeNodeContainer> listOfContainers);
 }

@@ -40,7 +40,6 @@ import org.jboss.errai.bus.client.tests.support.FactoryEntity;
 import org.jboss.errai.bus.client.tests.support.Group;
 import org.jboss.errai.bus.client.tests.support.StudyTreeNodeContainer;
 import org.jboss.errai.bus.client.tests.support.TestEnumA;
-import org.jboss.errai.bus.client.tests.support.TestRPCServiceRemote;
 import org.jboss.errai.bus.client.tests.support.TestSerializationRPCService;
 import org.jboss.errai.bus.client.tests.support.TreeNodeContainer;
 
@@ -99,7 +98,7 @@ public class SerializationTests extends AbstractErraiTest {
             assertEquals(list, response);
             finishTest();
           }
-        }, TestRPCServiceRemote.class).listOfLong(list);
+        }, TestSerializationRPCService.class).listOfLong(list);
       }
     });
   }
@@ -122,7 +121,7 @@ public class SerializationTests extends AbstractErraiTest {
             assertEquals(list, response);
             finishTest();
           }
-        }, TestRPCServiceRemote.class).listOfInteger(list);
+        }, TestSerializationRPCService.class).listOfInteger(list);
       }
     });
   }
@@ -151,7 +150,7 @@ public class SerializationTests extends AbstractErraiTest {
               fail();
             }
           }
-        }, TestRPCServiceRemote.class).listOfFloat(list);
+        }, TestSerializationRPCService.class).listOfFloat(list);
       }
     });
   }
@@ -181,7 +180,7 @@ public class SerializationTests extends AbstractErraiTest {
               fail();
             }
           }
-        }, TestRPCServiceRemote.class).listOfShort(list);
+        }, TestSerializationRPCService.class).listOfShort(list);
       }
     });
   }
@@ -210,7 +209,7 @@ public class SerializationTests extends AbstractErraiTest {
               fail();
             }
           }
-        }, TestRPCServiceRemote.class).listOfBoolean(list);
+        }, TestSerializationRPCService.class).listOfBoolean(list);
       }
     });
   }
@@ -239,7 +238,7 @@ public class SerializationTests extends AbstractErraiTest {
               fail();
             }
           }
-        }, TestRPCServiceRemote.class).setOfStrings(set);
+        }, TestSerializationRPCService.class).setOfStrings(set);
       }
     });
   }
@@ -266,7 +265,7 @@ public class SerializationTests extends AbstractErraiTest {
               fail();
             }
           }
-        }, TestRPCServiceRemote.class).mapOfLongToString(map);
+        }, TestSerializationRPCService.class).mapOfLongToString(map);
       }
     });
   }
@@ -300,7 +299,7 @@ public class SerializationTests extends AbstractErraiTest {
               fail();
             }
           }
-        }, TestRPCServiceRemote.class).mapOfLongToListOfStrings(map);
+        }, TestSerializationRPCService.class).mapOfLongToListOfStrings(map);
       }
     });
   }
@@ -327,7 +326,7 @@ public class SerializationTests extends AbstractErraiTest {
               fail();
             }
           }
-        }, TestRPCServiceRemote.class).mapOfStringToFloat(map);
+        }, TestSerializationRPCService.class).mapOfStringToFloat(map);
       }
     });
   }
@@ -361,7 +360,7 @@ public class SerializationTests extends AbstractErraiTest {
               fail();
             }
           }
-        }, TestRPCServiceRemote.class).mapOfStringToListOfDoubles(map);
+        }, TestSerializationRPCService.class).mapOfStringToListOfDoubles(map);
       }
     });
   }
@@ -387,7 +386,7 @@ public class SerializationTests extends AbstractErraiTest {
               fail();
             }
           }
-        }, TestRPCServiceRemote.class).mapOfCustomTypes(map);
+        }, TestSerializationRPCService.class).mapOfCustomTypes(map);
       }
     });
   }
@@ -421,7 +420,7 @@ public class SerializationTests extends AbstractErraiTest {
               fail();
             }
           }
-        }, TestRPCServiceRemote.class).mapOfListOfStringsToCustomType(map);
+        }, TestSerializationRPCService.class).mapOfListOfStringsToCustomType(map);
       }
     });
   }
@@ -445,12 +444,12 @@ public class SerializationTests extends AbstractErraiTest {
               fail();
             }
           }
-        }, TestRPCServiceRemote.class).nestedClass(clazz);
+        }, TestSerializationRPCService.class).nestedClass(clazz);
       }
     });
   }
 
-  public void testEmptyWithGenericCollections() {
+  public void testEntityWithGenericCollections() {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
@@ -459,6 +458,32 @@ public class SerializationTests extends AbstractErraiTest {
         listOffFloats.add(1.0f);
         listOffFloats.add(1.1f);
         listOffFloats.add(1.2f);
+
+        ent.setObject(new Group());
+        ent.setListOfFloats(listOffFloats);
+        MessageBuilder.createCall(new RemoteCallback<EntityWithGenericCollections>() {
+          @Override
+          public void callback(EntityWithGenericCollections response) {
+            try {
+              assertEquals(ent, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestSerializationRPCService.class).genericCollections(ent);
+      }
+    });
+  }
+  
+
+  public void testEmptyEntityWithGenericCollections() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final EntityWithGenericCollections ent = new EntityWithGenericCollections();
 
         MessageBuilder.createCall(new RemoteCallback<EntityWithGenericCollections>() {
           @Override
@@ -472,7 +497,7 @@ public class SerializationTests extends AbstractErraiTest {
               fail();
             }
           }
-        }, TestRPCServiceRemote.class).genericCollections(ent);
+        }, TestSerializationRPCService.class).genericCollections(ent);
       }
     });
   }
@@ -497,7 +522,7 @@ public class SerializationTests extends AbstractErraiTest {
               fail();
             }
           }
-        }, TestRPCServiceRemote.class).testStringBufferAndStringBuilder(ent);
+        }, TestSerializationRPCService.class).testStringBufferAndStringBuilder(ent);
       }
     });
   }
@@ -555,7 +580,7 @@ public class SerializationTests extends AbstractErraiTest {
               fail();
             }
           }
-        }, TestRPCServiceRemote.class).testSerializeThrowable(t);
+        }, TestSerializationRPCService.class).testSerializeThrowable(t);
       }
     });
   }
@@ -611,7 +636,7 @@ public class SerializationTests extends AbstractErraiTest {
               fail();
             }
           }
-        }, TestRPCServiceRemote.class).testSerializeAssertionError(t);
+        }, TestSerializationRPCService.class).testSerializeAssertionError(t);
       }
     });
   }
@@ -644,7 +669,7 @@ public class SerializationTests extends AbstractErraiTest {
               fail();
             }
           }
-        }, TestRPCServiceRemote.class).testFactorySerialization(entity);
+        }, TestSerializationRPCService.class).testFactorySerialization(entity);
       }
     });
   }
@@ -676,7 +701,7 @@ public class SerializationTests extends AbstractErraiTest {
               fail();
             }
           }
-        }, TestRPCServiceRemote.class).testTimestampSerialization(ts);
+        }, TestSerializationRPCService.class).testTimestampSerialization(ts);
       }
     });
   }
@@ -707,7 +732,7 @@ public class SerializationTests extends AbstractErraiTest {
               fail();
             }
           }
-        }, TestRPCServiceRemote.class).testTimeSerialization(ts);
+        }, TestSerializationRPCService.class).testTimeSerialization(ts);
       }
     });
   }
@@ -738,7 +763,7 @@ public class SerializationTests extends AbstractErraiTest {
               fail();
             }
           }
-        }, TestRPCServiceRemote.class).testBigDecimalSerialization(ts);
+        }, TestSerializationRPCService.class).testBigDecimalSerialization(ts);
       }
     });
   }
@@ -769,7 +794,7 @@ public class SerializationTests extends AbstractErraiTest {
               fail();
             }
           }
-        }, TestRPCServiceRemote.class).testBigIntegerSerialization(ts);
+        }, TestSerializationRPCService.class).testBigIntegerSerialization(ts);
       }
     });
   }
@@ -804,7 +829,7 @@ public class SerializationTests extends AbstractErraiTest {
               fail();
             }
           }
-        }, TestRPCServiceRemote.class).testQueueSerialization(ts);
+        }, TestSerializationRPCService.class).testQueueSerialization(ts);
       }
     });
   }
@@ -839,7 +864,7 @@ public class SerializationTests extends AbstractErraiTest {
               fail();
             }
           }
-        }, TestRPCServiceRemote.class).testInheritedDefinitionFromExistingParent(ts);
+        }, TestSerializationRPCService.class).testInheritedDefinitionFromExistingParent(ts);
       }
     });
   }
@@ -871,7 +896,7 @@ public class SerializationTests extends AbstractErraiTest {
               fail();
             }
           }
-        }, TestRPCServiceRemote.class).testNakedEnum(e);
+        }, TestSerializationRPCService.class).testNakedEnum(e);
       }
     });
   }
@@ -903,10 +928,8 @@ public class SerializationTests extends AbstractErraiTest {
               fail();
             }
           }
-        }, TestRPCServiceRemote.class).testBoron(boron);
+        }, TestSerializationRPCService.class).testPortableInnerClass(boron);
       }
     });
   }
-
-
 }

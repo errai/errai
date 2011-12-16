@@ -42,10 +42,6 @@ public final class Boron {
 
   public int getY() { return y; }
 
-  /**
-   * Mutable bean-like variant of Boron, until immutable classes can be
-   * serialized by errai.
-   */
   @Portable
   public static final class Bean {
     private int x;

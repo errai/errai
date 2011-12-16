@@ -25,7 +25,7 @@ import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.bus.client.tests.support.RandomProvider;
 import org.jboss.errai.bus.client.tests.support.SType;
 import org.jboss.errai.bus.client.tests.support.TestException;
-import org.jboss.errai.bus.client.tests.support.TestRPCServiceRemote;
+import org.jboss.errai.bus.client.tests.support.TestRPCService;
 import org.jboss.errai.bus.client.tests.support.User;
 
 import com.google.gwt.user.client.Timer;
@@ -189,7 +189,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
   public void testRPC() {
     runAfterInit(new Runnable() {
       public void run() {
-        TestRPCServiceRemote remote = MessageBuilder.createCall(new RemoteCallback<Boolean>() {
+        TestRPCService remote = MessageBuilder.createCall(new RemoteCallback<Boolean>() {
           int count = 0;
 
           public void callback(Boolean response) {
@@ -199,7 +199,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
             assertEquals(3, count); 
             finishTest();
           }
-        }, TestRPCServiceRemote.class);
+        }, TestRPCService.class);
 
         remote.isGreaterThan(10, 5);
         remote.isGreaterThan(5, 1);
@@ -227,7 +227,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
                 return false;
               }
             },
-        TestRPCServiceRemote.class).exception();
+        TestRPCService.class).exception();
       }
     });
     
