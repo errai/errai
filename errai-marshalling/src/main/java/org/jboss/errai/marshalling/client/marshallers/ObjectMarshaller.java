@@ -55,7 +55,7 @@ public class ObjectMarshaller implements Marshaller<JSONValue, Object> {
       }
 
       if (jsObject.containsKey(SerializationParts.NUMERIC_VALUE)) {
-        return NumbersUtils.getNumber(string.stringValue(), o);
+        return NumbersUtils.getNumber(string.stringValue(), jsObject.get(SerializationParts.NUMERIC_VALUE));
       }
 
       Marshaller<Object, Object> marshaller = ctx.getMarshallerInstance(string.stringValue());
@@ -66,6 +66,10 @@ public class ObjectMarshaller implements Marshaller<JSONValue, Object> {
 
       return marshaller.demarshall(o, ctx);
     }
+    else if (o.isString() != null) {
+      return o.isString().stringValue();
+    }
+
     return null;
   }
 
@@ -73,6 +77,10 @@ public class ObjectMarshaller implements Marshaller<JSONValue, Object> {
   public String marshall(Object o, MarshallingSession ctx) {
     if (o == null) {
       return null;
+    }
+
+    if (o instanceof Number && !o.getClass().getName().startsWith("java.math.Big")) {
+      return NumbersUtils.qualifiedNumericEncoding(o);
     }
 
     Marshaller<Object, Object> marshaller = ctx.getMarshallerInstance(o.getClass().getName());

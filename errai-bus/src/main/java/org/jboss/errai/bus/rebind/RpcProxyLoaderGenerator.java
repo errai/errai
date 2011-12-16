@@ -19,10 +19,13 @@ package org.jboss.errai.bus.rebind;
 import java.io.File;
 import java.io.PrintWriter;
 
+import org.jboss.errai.bus.client.ErraiBus;
+import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.bus.client.framework.RpcProxyLoader;
 import org.jboss.errai.bus.server.annotations.Remote;
+import org.jboss.errai.codegen.framework.Cast;
 import org.jboss.errai.codegen.framework.InnerClass;
 import org.jboss.errai.codegen.framework.Parameter;
 import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
@@ -45,12 +48,12 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 /**
  * Generates the implementation of {@link RpcProxyLoader}.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class RpcProxyLoaderGenerator extends Generator {
   private Logger log = LoggerFactory.getLogger(RpcProxyLoaderGenerator.class);
-  
+
   /**
    * Simple name of class to be generated
    */
@@ -65,7 +68,7 @@ public class RpcProxyLoaderGenerator extends Generator {
 
   @Override
   public String generate(TreeLogger logger, GeneratorContext context, String typeName)
-      throws UnableToCompleteException {
+          throws UnableToCompleteException {
     typeOracle = context.getTypeOracle();
 
     try {
@@ -91,39 +94,49 @@ public class RpcProxyLoaderGenerator extends Generator {
   private String generate(String className) {
     File fileCacheDir = RebindUtils.getErraiCacheDir();
     File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + className + ".java");
-    
+
     String gen;
     if (RebindUtils.hasClasspathChangedForAnnotatedWith(Remote.class) || !cacheFile.exists()) {
       log.info("generating rpc proxy loader class.");
       gen = generate();
       RebindUtils.writeStringToFile(cacheFile, gen);
-    } 
+    }
     else {
       log.info("nothing has changed. using cached rpc proxy loader class.");
       gen = RebindUtils.readFileToString(cacheFile);
     }
-    
+
     return gen;
   }
-  
+
   private String generate() {
     MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
-    
+
     ClassStructureBuilder<?> classBuilder = ClassBuilder.implement(RpcProxyLoader.class);
-   
-    MethodBlockBuilder<?> loadProxies = 
-      classBuilder.publicMethod(void.class, "loadProxies", Parameter.of(MessageBus.class, "bus", true));
-    for (Class<?> remote : scanner.getTypesAnnotatedWith(Remote.class, "")) {
-      if (remote.isInterface()) {
+
+    MethodBlockBuilder<?> loadProxies =
+            classBuilder.publicMethod(void.class, "loadProxies", Parameter.of(MessageBus.class, "bus", true));
+    for (Class<?> remote : scanner.getTypesAnnotatedWith(Remote.class)) {
+      if (remote.isInterface() && remote.getPackage().getName().contains(".client.")) {
         // create the remote proxy for this interface
         ClassStructureBuilder<?> remoteProxy = new RpcProxyGenerator(remote).generate();
-        loadProxies.append(new InnerClass((BuildMetaClass)remoteProxy.getClassDefinition()));
-        
-        loadProxies.append(Stmt.invokeStatic(RemoteServiceProxyFactory.class, "addRemoteProxy", 
-            remote, Stmt.newObject(remoteProxy.getClassDefinition())));
+        loadProxies.append(new InnerClass((BuildMetaClass) remoteProxy.getClassDefinition()));
+
+        loadProxies.append(Stmt.invokeStatic(RemoteServiceProxyFactory.class, "addRemoteProxy",
+                remote, Stmt.newObject(remoteProxy.getClassDefinition())));
       }
     }
+
+    loadProxies.append(Stmt.nestedCall(Cast.to(ClientMessageBus.class, Stmt.invokeStatic(ErraiBus.class, "get")))
+            .invoke("voteForInit"));
+
     classBuilder = (ClassStructureBuilder<?>) loadProxies.finish();
-    return classBuilder.toJavaString();
+    String rpc = classBuilder.toJavaString();
+
+//    System.out.println("---RPC Proxies---");
+//    System.out.println(rpc);
+//    System.out.println("-----------------");
+
+    return rpc;
   }
 }

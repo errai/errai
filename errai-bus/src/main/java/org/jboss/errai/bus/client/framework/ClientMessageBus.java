@@ -72,6 +72,7 @@ public interface ClientMessageBus extends MessageBus {
 
   public void addInitializationListener(InitializationListener listener);
 
+  public void voteForInit();
 
   public void init();
 

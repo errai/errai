@@ -28,15 +28,7 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
-import org.jboss.errai.bus.client.tests.support.Boron;
-import org.jboss.errai.bus.client.tests.support.ClassWithNestedClass;
-import org.jboss.errai.bus.client.tests.support.EntityWithGenericCollections;
-import org.jboss.errai.bus.client.tests.support.EntityWithStringBufferAndStringBuilder;
-import org.jboss.errai.bus.client.tests.support.FactoryEntity;
-import org.jboss.errai.bus.client.tests.support.Group;
-import org.jboss.errai.bus.client.tests.support.TestEnumA;
-import org.jboss.errai.bus.client.tests.support.TestSerializationRPCService;
-import org.jboss.errai.bus.client.tests.support.TreeNodeContainer;
+import org.jboss.errai.bus.client.tests.support.*;
 import org.jboss.errai.bus.server.annotations.Service;
 
 /**
@@ -191,5 +183,10 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
     }
 
     return listOfContainers;
+  }
+
+  @Override
+  public EntityWithUnqualifiedFields testEntityWithUnqualifiedFieldTypes(EntityWithUnqualifiedFields e) {
+    return e;
   }
 }

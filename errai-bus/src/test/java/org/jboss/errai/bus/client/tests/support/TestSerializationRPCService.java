@@ -83,6 +83,8 @@ public List<Long> listOfLong(List<Long> list);
   public TestEnumA testNakedEnum(TestEnumA e);
   
   public Boron.Bean testPortableInnerClass(Boron.Bean b);
-  
+
   List<TreeNodeContainer> acceptTreeNodeContainers(List<TreeNodeContainer> listOfContainers);
+
+  public EntityWithUnqualifiedFields testEntityWithUnqualifiedFieldTypes(EntityWithUnqualifiedFields e);
 }
