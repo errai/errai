@@ -25,9 +25,6 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
-import javax.inject.Inject;
-
-import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.tests.support.Boron;
 import org.jboss.errai.bus.client.tests.support.ClassWithNestedClass;
 import org.jboss.errai.bus.client.tests.support.EntityWithGenericCollections;
@@ -44,12 +41,6 @@ import org.jboss.errai.bus.server.annotations.Service;
  */
 @Service
 public class TestSerializationRPCServiceImpl implements TestSerializationRPCService {
-  private RequestDispatcher dispatcher;
-
-  @Inject
-  public TestSerializationRPCServiceImpl(RequestDispatcher dispatcher) {
-    this.dispatcher = dispatcher;
-  }
 
   @Override
   public List<Long> listOfLong(List<Long> list) {

@@ -228,8 +228,6 @@
 						<artifactId>maven-surefire-plugin</artifactId>
 						<configuration>
 							<skipTests>false</skipTests>
-							<!--childDelegation>true</childDelegation> <skipTests>false</skipTests> 
-								<failIfNoTests>true</failIfNoTests> <trimStackTrace>false</trimStackTrace> -->
 							<forkMode>always</forkMode>
 							<argLine>-Xmx2048m ${argLine}</argLine>
 

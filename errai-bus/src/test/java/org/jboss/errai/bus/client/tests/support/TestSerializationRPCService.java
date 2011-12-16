@@ -32,7 +32,8 @@ import java.util.Set;
  */
 @Remote
 public interface TestSerializationRPCService {
-public List<Long> listOfLong(List<Long> list);
+  
+  public List<Long> listOfLong(List<Long> list);
   
   public List<Integer> listOfInteger(List<Integer> list);
   
@@ -84,5 +85,5 @@ public List<Long> listOfLong(List<Long> list);
   
   public Boron.Bean testPortableInnerClass(Boron.Bean b);
   
-  List<TreeNodeContainer> acceptTreeNodeContainers(List<TreeNodeContainer> listOfContainers);
+  public List<TreeNodeContainer> acceptTreeNodeContainers(List<TreeNodeContainer> listOfContainers);
 }
