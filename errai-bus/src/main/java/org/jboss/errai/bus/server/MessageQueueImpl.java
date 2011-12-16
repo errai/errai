@@ -23,6 +23,7 @@ import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueActivationCallback;
 import org.jboss.errai.bus.server.api.QueueSession;
 import org.jboss.errai.bus.server.io.BufferHelper;
+import org.jboss.errai.bus.server.io.buffers.BufferCallback;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
 import org.jboss.errai.marshalling.server.JSONEncoder;
@@ -94,7 +95,7 @@ public class MessageQueueImpl implements MessageQueue {
     if (pagedOut) {
       synchronized (pageLock) {
         if (pagedOut) {
-          readInPageFile(outstream);
+          readInPageFile(outstream, new BufferHelper.MultiMessageHandlerCallback());
           return -1;
         }
       }
@@ -135,10 +136,21 @@ public class MessageQueueImpl implements MessageQueue {
     }
     else {
       if (pagedOut) {
-        synchronized (pageLock) {
-          if (pagedOut) {
-            writeToPageFile(JSONEncoder.encodeToByteArrayInputStream(message.getParts()));
-            return true;
+        try {
+          synchronized (pageLock) {
+            if (pagedOut) {
+              writeToPageFile(JSONEncoder.encodeToByteArrayInputStream(message.getParts()), true);
+              return true;
+            }
+          }
+        }
+        finally {
+          bufferColor.getLock().lock();
+          try {
+            bufferColor.wake();
+          }
+          finally {
+            bufferColor.getLock().unlock();
           }
         }
       }
@@ -168,21 +180,13 @@ public class MessageQueueImpl implements MessageQueue {
       try {
         boolean alreadyPaged = pagedOut;
 
+        OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(getOrCreatePageFile(), alreadyPaged));
+        buffer.read(outputStream, bufferColor);
+        outputStream.flush();
+        outputStream.close();
 
-        bufferColor.getLock().lock();
-        try {
-          OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(getOrCreatePageFile(), true));
-          buffer.read(outputStream, bufferColor);
-          outputStream.flush();
-          outputStream.close();
+        pagedOut = true;
 
-          pagedOut = true;
-
-          bufferColor.wake();
-        }
-        finally {
-          bufferColor.getLock().unlock();
-        }
         return alreadyPaged;
       }
       catch (IOException e) {
@@ -191,9 +195,10 @@ public class MessageQueueImpl implements MessageQueue {
     }
   }
 
-  private void writeToPageFile(InputStream inputStream) {
+  private void writeToPageFile(InputStream inputStream, boolean append) {
+
     try {
-      OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(getOrCreatePageFile(), true));
+      OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(getOrCreatePageFile(), append));
 
       int read;
       while ((read = inputStream.read()) != -1) outputStream.write(read);
@@ -212,11 +217,12 @@ public class MessageQueueImpl implements MessageQueue {
     if (!pageFile.exists()) {
       pageFile.getParentFile().mkdirs();
       pageFile.createNewFile();
+      pageFile.deleteOnExit();
     }
     return pageFile;
   }
 
-  private void readInPageFile(OutputStream outputStream) {
+  private void readInPageFile(OutputStream outputStream, BufferCallback callback) {
     synchronized (pageLock) {
       try {
         if (pagedOut) {
@@ -227,12 +233,17 @@ public class MessageQueueImpl implements MessageQueue {
           }
 
           InputStream inputStream = new BufferedInputStream(new FileInputStream(pageFile));
+
+          callback.before(outputStream);
+
           int read;
           while ((read = inputStream.read()) != -1) {
-            outputStream.write(read);
+            outputStream.write(callback.each(read, outputStream));
           }
           inputStream.close();
-          pageFile.delete();
+
+          callback.after(outputStream);
+
           pagedOut = false;
         }
       }

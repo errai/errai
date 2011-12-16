@@ -104,11 +104,7 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
               .getName()));
     }
 
-    
-    String rx = ((TextWebSocketFrame) frame).getText();
-    System.out.println("RX (websocket): " + rx);
-    
-    Map<String, Object> map = (Map<String, Object>) JSONDecoder.decode(rx);
+    Map<String, Object> map = (Map<String, Object>) JSONDecoder.decode(((TextWebSocketFrame) frame).getText());
     QueueSession session;
 
     if (!activeChannels.containsKey(ctx.getChannel())) {

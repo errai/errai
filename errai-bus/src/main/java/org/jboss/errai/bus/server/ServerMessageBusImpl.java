@@ -611,27 +611,12 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         busMonitor.notifyOutgoingMessageToRemote(queue.getSession().getSessionId(), message);
       }
 
-      asyncEnqueue(queue, message);
+      enqueueForDelivery(queue, message);
     }
     catch (NoSubscribersToDeliverTo nstdt) {
       // catch this so we can get a full trace
       handleMessageDeliveryFailure(this, message, "No subscribers to deliver to", nstdt, false);
     }
-  }
-
-  private void asyncEnqueue(final MessageQueue queue, final Message message) {
-    TaskManagerFactory.get().execute(new Runnable() {
-      public void run() {
-        try {
-          enqueueForDelivery(queue, message);
-        }
-        catch (QueueOverloadedException e) {
-          String queueSessionId = (queue == null || queue.getSession() == null) ?
-                  "(no queue session)" : "(session id=" + queue.getSession().getSessionId() + ")";
-          handleMessageDeliveryFailure(ServerMessageBusImpl.this, message, "Queue overloaded " + queueSessionId, e, false);
-        }
-      }
-    });
   }
 
   private void enqueueForDelivery(final MessageQueue queue, final Message message) {
@@ -845,9 +830,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     public void callback(Message message) {
       // do not pipeline if this message is addressed to a specified session.
       if (broadcastable && !message.isFlagSet(RoutingFlags.NonGlobalRouting)) {
-
-        System.out.println("bcast: " + message.getParts());
-
         // all queues are listening to this subject. therefore we can save memory and time by
         // writing to the broadcast color on the buffer
         try {
