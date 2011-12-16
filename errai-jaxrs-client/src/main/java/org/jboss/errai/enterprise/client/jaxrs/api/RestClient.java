@@ -59,14 +59,12 @@ public class RestClient {
     T svc = proxyProvider.getRemoteProxy(remoteService);
     if (svc == null) {
 
-      // double check that the extensions loader has been bootstrapped
       JaxrsProxyLoader loader = GWT.create(JaxrsProxyLoader.class);
       loader.loadProxies();
 
-      if (proxyProvider.getRemoteProxy(remoteService) == null)
+      svc = proxyProvider.getRemoteProxy(remoteService); 
+      if (svc == null)
         throw new RuntimeException("No proxy found for JAX-RS interface: " + remoteService.getName());
-      else
-        return create(remoteService, callback, errorCallback);
     }
 
     ((RPCStub) svc).setRemoteCallback(callback);
