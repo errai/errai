@@ -31,6 +31,7 @@ import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
+import org.jboss.errai.bus.server.util.SecureHashUtil;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.common.server.api.ErraiConfig;
 import org.slf4j.Logger;
@@ -208,7 +209,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                       .command(BusCommands.CapabilitiesNotice);
 
               StringBuilder capabilitiesBuffer = new StringBuilder();
-              boolean first = false;
+
+              boolean first;
               if (ErraiServiceConfigurator.LONG_POLLING)  {
                 capabilitiesBuffer.append(Capabilities.LongPollAvailable.name());
                 first = false;
@@ -228,8 +230,11 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                  * Advertise where the client can find a websocket.
                  */
                 HttpServletRequest request = message.getResource(HttpServletRequest.class, HttpServletRequest.class.getName());
-                msg.set("WebSocketURL", "ws://" + request.getLocalAddr() + ":8081/websocket");
+                msg.set(MessageParts.WebSocketURL, "ws://" + request.getLocalAddr() + ":8081/websocket");
 
+                String connectionToken = SecureHashUtil.nextSecureHash("SHA-256", session.getSessionId());
+                session.setAttribute(MessageParts.WebSocketToken.name(), connectionToken);
+                msg.set(MessageParts.WebSocketToken, connectionToken);
               }
 
               msg.set("Flags", capabilitiesBuffer.toString());

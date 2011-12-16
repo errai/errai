@@ -104,7 +104,11 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
               .getName()));
     }
 
-    Map<String, Object> map = (Map<String, Object>) JSONDecoder.decode(((TextWebSocketFrame) frame).getText());
+    
+    String rx = ((TextWebSocketFrame) frame).getText();
+    System.out.println("RX (websocket): " + rx);
+    
+    Map<String, Object> map = (Map<String, Object>) JSONDecoder.decode(rx);
     QueueSession session;
 
     if (!activeChannels.containsKey(ctx.getChannel())) {
@@ -114,18 +118,26 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
         String sessionKey = (String) map.get(MessageParts.ConnectionSessionKey.name());
 
         if (sessionKey != null && (session = svc.getBus().getSessionBySessionId(sessionKey)) != null) {
+          String activationKey = session.getAttribute(String.class, MessageParts.WebSocketToken.name());
+          if (activationKey == null || !activationKey.equals(map.get(MessageParts.WebSocketToken.name()))) {
+            sendMessage(ctx, getFailedNegotiation("bad negotiation key"));
+          }
+          else {
+            session.setAttribute(MessageParts.WebSocketToken.name(), null);
+          }
+
           activeChannels.put(ctx.getChannel(), session);
           svc.getBus().getQueueBySession(sessionKey).setDirectSocketChannel(ctx.getChannel());
-          ctx.getChannel().write(new TextWebSocketFrame(getSuccessfulNegotiation()));
+
+          sendMessage(ctx, getSuccessfulNegotiation());
         }
         else {
-          ctx.getChannel().write(new TextWebSocketFrame(getFailedNegotiation("bad session id")));
+          sendMessage(ctx, getFailedNegotiation("bad session id"));
         }
       }
       else {
-        ctx.getChannel().write(new TextWebSocketFrame(getFailedNegotiation("bad command")));
+        sendMessage(ctx, getFailedNegotiation("bad command"));
       }
-
     }
     else {
       session = activeChannels.get(ctx.getChannel());
@@ -156,6 +168,10 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
 
   private String getWebSocketLocation(HttpRequest req) {
     return "ws://" + req.getHeader(HttpHeaders.Names.HOST) + WEBSOCKET_PATH;
+  }
+
+  public static void sendMessage(ChannelHandlerContext ctx, String message) {
+    ctx.getChannel().write(new TextWebSocketFrame(message));
   }
 
   private static String getFailedNegotiation(String error) {

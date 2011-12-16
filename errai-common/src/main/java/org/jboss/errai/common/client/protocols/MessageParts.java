@@ -91,5 +91,9 @@ public enum MessageParts {
   /**
    * Used mainly for web sockets to negotiate which session the web socket is associated with.
    */
-  ConnectionSessionKey
+  ConnectionSessionKey,
+
+  WebSocketURL,
+
+  WebSocketToken
 }

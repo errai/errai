@@ -219,19 +219,21 @@ public class MessageQueueImpl implements MessageQueue {
   private void readInPageFile(OutputStream outputStream) {
     synchronized (pageLock) {
       try {
-        File pageFile = new File(getPageFileName());
-        if (!pageFile.exists()) {
+        if (pagedOut) {
+          File pageFile = new File(getPageFileName());
+          if (!pageFile.exists()) {
+            pagedOut = false;
+          }
+
+          InputStream inputStream = new BufferedInputStream(new FileInputStream(pageFile));
+          int read;
+          while ((read = inputStream.read()) != -1) {
+            outputStream.write(read);
+          }
+          inputStream.close();
+          pageFile.delete();
           pagedOut = false;
         }
-
-        InputStream inputStream = new BufferedInputStream(new FileInputStream(pageFile));
-        int read;
-        while ((read = inputStream.read()) != -1) {
-          outputStream.write(read);
-        }
-        inputStream.close();
-        pageFile.delete();
-        pagedOut = false;
       }
       catch (IOException e) {
         throw new RuntimeException("paging error", e);

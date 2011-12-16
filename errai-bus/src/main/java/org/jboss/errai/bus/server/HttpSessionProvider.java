@@ -21,16 +21,11 @@ import org.jboss.errai.bus.server.api.QueueSession;
 import org.jboss.errai.bus.server.api.SessionEndEvent;
 import org.jboss.errai.bus.server.api.SessionEndListener;
 import org.jboss.errai.bus.server.api.SessionProvider;
-import org.jboss.errai.bus.server.io.buffers.BufferColor;
+import org.jboss.errai.bus.server.util.SecureHashUtil;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.io.File;
 import java.io.Serializable;
-import java.security.MessageDigest;
-import java.security.SecureRandom;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * <tt>HttpSessionProvider</tt> implements <tt>SessionProvider</tt> as an <tt>HttpSession</tt>. It provides a getter
@@ -54,7 +49,7 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
 
     QueueSession qs = sc.getSession(remoteQueueID);
     if (qs == null) {
-      qs = sc.createSession(remoteQueueID);
+      qs = sc.createSession(externSessRef.getId(), remoteQueueID);
       qs.setAttribute(HttpSession.class.getName(), externSessRef);
     }
 
@@ -68,8 +63,8 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
     private Map<String, Object> sharedAttributes = new HashMap<String, Object>();
     private Map<String, QueueSession> queueSessions = new HashMap<String, QueueSession>();
 
-    public QueueSession createSession(String remoteQueueId) {
-      QueueSession qs = new HttpSessionWrapper(this, remoteQueueId);
+    public QueueSession createSession(String httpSessionId, String remoteQueueId) {
+      QueueSession qs = new HttpSessionWrapper(this, remoteQueueId, httpSessionId);
       queueSessions.put(remoteQueueId, qs);
       return qs;
     }
@@ -94,10 +89,10 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
     private boolean valid;
     private List<SessionEndListener> sessionEndListeners;
 
-    public HttpSessionWrapper(SessionsContainer container, String remoteQueueID) {
+    public HttpSessionWrapper(SessionsContainer container, String httpSessionId, String remoteQueueID) {
       this.container = container;
       this.remoteQueueID = remoteQueueID;
-      this.sessionId = generateSessionID();
+      this.sessionId = SecureHashUtil.nextSecureHash("SHA-256", httpSessionId);
     }
 
     public String getSessionId() {
@@ -157,31 +152,5 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
     }
   }
 
-  public static String generateSessionID() {
-    try {
-      final MessageDigest md = MessageDigest.getInstance("SHA-256");
-
-      md.digest(String.valueOf(System.nanoTime()).getBytes());
-      md.digest(System.getProperty("java.class.path").getBytes());
-      md.digest(SecureRandom.getInstance("SHA1PRNG").generateSeed(64));
-
-      return hashToHexString(md.digest());
-    }
-    catch (Exception e) {
-      throw new RuntimeException("failed to generate session id hash", e);
-    }
-  }
-
-  public static String hashToHexString(byte[] hash) {
-    final StringBuilder hexString = new StringBuilder();
-    for (byte mdbyte : hash) {
-      hexString.append(Integer.toHexString(0xFF & mdbyte));
-    }
-    return hexString.toString();
-  }
-
-  public static void main(String[] args) {
-    System.out.println();
-  }
 
 }

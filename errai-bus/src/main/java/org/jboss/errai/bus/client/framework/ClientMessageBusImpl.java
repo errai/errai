@@ -61,6 +61,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private volatile boolean cometChannelOpen = true;
   private volatile boolean webSocketOpen = false;
+  private String webSocketToken;
   private Object webSocketChannel;
 
   public final MessageCallback remoteCallback = new RemoteMessageCallback();
@@ -756,7 +757,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             for (String capability : capabilites) {
               switch (Capabilities.valueOf(capability)) {
                 case WebSockets:
-                  String webSocketURL = message.get(String.class, "WebSocketURL");
+                  String webSocketURL = message.get(String.class, MessageParts.WebSocketURL);
+                  webSocketToken = message.get(String.class, MessageParts.WebSocketToken);
                   ClientWebSocketChannel.attemptWebSocketConnect(ClientMessageBusImpl.this, webSocketURL);
                   break;
                 case LongPollAvailable:
@@ -1036,7 +1038,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             new Timer() {
               @Override
               public void run() {
-                  performPoll();
+                performPoll();
               }
             }.schedule(timeout);
 
@@ -1370,7 +1372,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   public void attachWebSocketChannel(Object o) {
     String negotiationString = "{\"" + MessageParts.CommandType.name() + "\":\"" + BusCommands.ConnectToQueue.name()
-            + "\", \"" + MessageParts.ConnectionSessionKey + "\":\"" + sessionId + "\"}";
+            + "\", \"" + MessageParts.ConnectionSessionKey + "\":\"" + sessionId + "\"" +
+            ",\"" + MessageParts.WebSocketToken + "\":\"" + webSocketToken + "\"}";
 
     ClientWebSocketChannel.transmitToSocket(o, negotiationString);
 
