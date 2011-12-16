@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.cdi.server;
+package org.jboss.errai.cdi.server.events;
 
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
@@ -21,6 +21,8 @@ import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RoutingFlags;
 import org.jboss.errai.bus.client.protocols.BusCommands;
+import org.jboss.errai.cdi.server.ScopeUtil;
+import org.jboss.errai.cdi.server.Util;
 import org.jboss.errai.cdi.server.events.EventConversationContext;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.enterprise.client.cdi.CDICommands;
@@ -72,9 +74,6 @@ public class EventDispatcher implements MessageCallback {
 
           if (conversationalServices.contains(clazz)) {
             EventConversationContext.activate(o, Util.getSessionId(message));
-          }
-          else {
-            EventConversationContext.activate(o);
           }
 
           Set<String> qualifierNames = message.get(Set.class, CDIProtocol.QUALIFIERS);

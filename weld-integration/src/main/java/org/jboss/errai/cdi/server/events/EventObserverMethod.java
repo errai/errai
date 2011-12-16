@@ -27,6 +27,7 @@ import javax.enterprise.inject.spi.ObserverMethod;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RoutingFlags;
+
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
@@ -35,6 +36,7 @@ import org.jboss.errai.enterprise.client.cdi.api.CDI;
 /**
  * @author Filip Rogaczewski
  * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Mike Brock
  */
 public class EventObserverMethod implements ObserverMethod {
 
@@ -61,7 +63,8 @@ public class EventObserverMethod implements ObserverMethod {
   public Set<Annotation> getObservedQualifiers() {
     if (qualifiers != null) {
       return new HashSet<Annotation>(Arrays.asList(qualifiers));
-    } else {
+    }
+    else {
       return new HashSet<Annotation>();
     }
   }
@@ -80,30 +83,42 @@ public class EventObserverMethod implements ObserverMethod {
 
     EventConversationContext.Context ctx = EventConversationContext.get();
     Set<String> qualifiersPart = CDI.getQualifiersPart(qualifiers);
+    
+    if (ctx != null && ctx.getEventObject() == event) {
+      return;
+    }
 
     if (ctx != null && ctx.getSession() != null) {
-      if (qualifiersPart != null && !qualifiersPart.isEmpty()) {
-        MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
-            .with(MessageParts.SessionID.name(), ctx.getSession())
-            .with(CDIProtocol.TYPE, type.getName()).with(CDIProtocol.QUALIFIERS, qualifiersPart)
-            .with(CDIProtocol.OBJECT_REF, event)
-                .flag(RoutingFlags.NonGlobalRouting).noErrorHandling().sendNowWith(bus);
-      } else {
-        MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
-            .with(MessageParts.SessionID.name(), ctx.getSession())
-            .with(CDIProtocol.TYPE, type.getName()).with(CDIProtocol.OBJECT_REF, event)
-                .flag(RoutingFlags.NonGlobalRouting).noErrorHandling()
-            .sendNowWith(bus);
+      try {
+        if (qualifiersPart != null && !qualifiersPart.isEmpty()) {
+          MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
+                  .with(MessageParts.SessionID.name(), ctx.getSession())
+                  .with(CDIProtocol.TYPE, type.getName()).with(CDIProtocol.QUALIFIERS, qualifiersPart)
+                  .with(CDIProtocol.OBJECT_REF, event)
+                  .flag(RoutingFlags.NonGlobalRouting).noErrorHandling().sendNowWith(bus);
+        }
+        else {
+          MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
+                  .with(MessageParts.SessionID.name(), ctx.getSession())
+                  .with(CDIProtocol.TYPE, type.getName()).with(CDIProtocol.OBJECT_REF, event)
+                  .flag(RoutingFlags.NonGlobalRouting).noErrorHandling()
+                  .sendNowWith(bus);
+        }
       }
-    } else {
+      finally {
+        EventConversationContext.deactivate();
+      }
+    }
+    else {
       if (qualifiersPart != null && !qualifiersPart.isEmpty()) {
         MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
-            .with(CDIProtocol.TYPE, type.getName()).with(CDIProtocol.OBJECT_REF, event)
-            .with(CDIProtocol.QUALIFIERS, qualifiersPart).noErrorHandling().sendNowWith(bus);
-      } else {
+                .with(CDIProtocol.TYPE, type.getName()).with(CDIProtocol.OBJECT_REF, event)
+                .with(CDIProtocol.QUALIFIERS, qualifiersPart).noErrorHandling().sendNowWith(bus);
+      }
+      else {
         MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
-            .with(CDIProtocol.TYPE, type.getName()).with(CDIProtocol.OBJECT_REF, event).noErrorHandling()
-            .sendNowWith(bus);
+                .with(CDIProtocol.TYPE, type.getName()).with(CDIProtocol.OBJECT_REF, event).noErrorHandling()
+                .sendNowWith(bus);
       }
     }
   }

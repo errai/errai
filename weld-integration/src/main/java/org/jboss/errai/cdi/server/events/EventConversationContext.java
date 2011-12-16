@@ -19,17 +19,21 @@ package org.jboss.errai.cdi.server.events;
 /**
  * @author Mike Brock
  */
-public  class EventConversationContext {
-  private static final ThreadLocal<Context> threadLocalConversationContext 
+public class EventConversationContext {
+  private static final ThreadLocal<Context> threadLocalConversationContext
           = new ThreadLocal<Context>();
-  
-  
+
+
   public static void activate(Object o, String session) {
     threadLocalConversationContext.set(new Context(o, session));
   }
 
   public static void activate(Object o) {
     threadLocalConversationContext.set(new Context(o, null));
+  }
+
+  public static void deactivate() {
+    threadLocalConversationContext.remove();
   }
 
   public static Context get() {
