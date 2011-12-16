@@ -23,8 +23,12 @@ import org.jboss.errai.bus.server.api.SessionEndListener;
 import org.jboss.errai.bus.server.api.SessionProvider;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.io.File;
 import java.io.Serializable;
+import java.security.MessageDigest;
+import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -50,7 +54,7 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
 
     QueueSession qs = sc.getSession(remoteQueueID);
     if (qs == null) {
-      qs = sc.createSession(externSessRef.getId(), remoteQueueID);
+      qs = sc.createSession(remoteQueueID);
       qs.setAttribute(HttpSession.class.getName(), externSessRef);
     }
 
@@ -64,8 +68,8 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
     private Map<String, Object> sharedAttributes = new HashMap<String, Object>();
     private Map<String, QueueSession> queueSessions = new HashMap<String, QueueSession>();
 
-    public QueueSession createSession(String externalSessionID, String remoteQueueId) {
-      QueueSession qs = new HttpSessionWrapper(this, externalSessionID, remoteQueueId);
+    public QueueSession createSession(String remoteQueueId) {
+      QueueSession qs = new HttpSessionWrapper(this, remoteQueueId);
       queueSessions.put(remoteQueueId, qs);
       return qs;
     }
@@ -90,10 +94,10 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
     private boolean valid;
     private List<SessionEndListener> sessionEndListeners;
 
-
-    public HttpSessionWrapper(SessionsContainer container, String sessionId, String remoteQueueID) {
+    public HttpSessionWrapper(SessionsContainer container, String remoteQueueID) {
       this.container = container;
-      this.sessionId = (this.remoteQueueID = remoteQueueID) + "@" + sessionId;
+      this.remoteQueueID = remoteQueueID;
+      this.sessionId = generateSessionID();
     }
 
     public String getSessionId() {
@@ -145,11 +149,39 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
       SessionEndEvent event = new SessionEndEvent(this);
 
       LaundryListProviderFactory.get().getLaundryList(this)
-          .cleanAll();
+              .cleanAll();
 
-      for (Iterator<SessionEndListener> iter = sessionEndListeners.iterator(); iter.hasNext(); ) {
-        iter.next().onSessionEnd(event);
+      for (SessionEndListener sessionEndListener : sessionEndListeners) {
+        sessionEndListener.onSessionEnd(event);
       }
     }
   }
+
+  public static String generateSessionID() {
+    try {
+      final MessageDigest md = MessageDigest.getInstance("SHA-256");
+
+      md.digest(String.valueOf(System.nanoTime()).getBytes());
+      md.digest(System.getProperty("java.class.path").getBytes());
+      md.digest(SecureRandom.getInstance("SHA1PRNG").generateSeed(64));
+
+      return hashToHexString(md.digest());
+    }
+    catch (Exception e) {
+      throw new RuntimeException("failed to generate session id hash", e);
+    }
+  }
+
+  public static String hashToHexString(byte[] hash) {
+    final StringBuilder hexString = new StringBuilder();
+    for (byte mdbyte : hash) {
+      hexString.append(Integer.toHexString(0xFF & mdbyte));
+    }
+    return hexString.toString();
+  }
+
+  public static void main(String[] args) {
+    System.out.println();
+  }
+
 }
