@@ -16,28 +16,24 @@
 
 package org.jboss.errai.bus.tests;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.MathContext;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-
 import junit.framework.TestCase;
-
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.base.JSONMessage;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.tests.support.RandomProvider;
 import org.jboss.errai.bus.client.tests.support.SType;
-import org.jboss.errai.bus.client.tests.support.TType;
 import org.jboss.errai.bus.client.tests.support.User;
-import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.server.JSONDecoder;
 import org.jboss.errai.marshalling.server.JSONEncoder;
 import org.jboss.errai.marshalling.server.JSONStreamDecoder;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
 
 /**
  * @author Mike Brock
@@ -101,29 +97,29 @@ public class JSONTests extends TestCase {
     }
   }
 
-  public void testMarshalling() {
-    String jsonData = "{\"SType\":{" + SerializationParts.ENCODED_TYPE + " :\"" + TType.class.getName()
-            + "\",startDate:1280250281006,fieldOne:\"One!\",active:true,endDate:1280251281006,fieldTwo:\"Two!!\"}," +
-            "\"ReplyTo\":\"ClientReceiver\",\"ToSubject\":\"TestService1\",__MarshalledTypes:\"SType\"}";
-
-    TType sType = new TType();
-    sType.setActive(true);
-    sType.setFieldOne("One!");
-    sType.setFieldTwo("Two!!");
-    sType.setStartDate(new Date(1280250281006l));
-    sType.setEndDate(new Date(1280251281006l));
-
-    try {
-      ByteArrayInputStream instream = new ByteArrayInputStream(jsonData.getBytes());
-      Map<String, Object> decoded = (Map<String, Object>) JSONStreamDecoder.decode(instream);
-      TType sType1 = (TType) decoded.get("SType");
-      assertTrue(sType.equals(sType1));
-
-    }
-    catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
+//  public void testMarshalling() {
+//    String jsonData = "{\"SType\":{" + SerializationParts.ENCODED_TYPE + " :\"" + TType.class.getName()
+//            + "\",startDate:1280250281006,fieldOne:\"One!\",active:true,endDate:1280251281006,fieldTwo:\"Two!!\"}," +
+//            "\"ReplyTo\":\"ClientReceiver\",\"ToSubject\":\"TestService1\",__MarshalledTypes:\"SType\"}";
+//
+//    TType sType = new TType();
+//    sType.setActive(true);
+//    sType.setFieldOne("One!");
+//    sType.setFieldTwo("Two!!");
+//    sType.setStartDate(new Date(1280250281006l));
+//    sType.setEndDate(new Date(1280251281006l));
+//
+//    try {
+//      ByteArrayInputStream instream = new ByteArrayInputStream(jsonData.getBytes());
+//      Map<String, Object> decoded = (Map<String, Object>) JSONStreamDecoder.decode(instream);
+//      TType sType1 = (TType) decoded.get("SType");
+//      assertTrue(sType.equals(sType1));
+//
+//    }
+//    catch (IOException e) {
+//      e.printStackTrace();
+//    }
+//  }
 
   public static class JavaRandomProvider implements RandomProvider {
     private static char[] CHARS = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q',
