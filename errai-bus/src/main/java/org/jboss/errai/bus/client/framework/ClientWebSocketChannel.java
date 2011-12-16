@@ -33,7 +33,7 @@ public class ClientWebSocketChannel {
         bus.@org.jboss.errai.bus.client.framework.ClientMessageBusImpl::attachWebSocketChannel(Ljava/lang/Object;)(socket);
       };
       socket.onclose = function (event) {
-        return "Closed";
+         // should probably do something here.
       };
     } else {
       return "NotSupported";
