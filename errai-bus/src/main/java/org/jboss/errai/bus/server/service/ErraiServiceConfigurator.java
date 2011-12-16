@@ -28,6 +28,8 @@ public interface ErraiServiceConfigurator {
   public static final String ERRAI_DISPATCHER_IMPLEMENTATION = "errai.dispatcher_implementation";
   public static final String ERRAI_SESSION_PROVIDER_IMPLEMENTATION = "errai.session_provider_implementation";
   public static final String DO_LONG_POLL = "org.jboss.errai.bus.do_long_poll";
+  public static final String ENABLE_WEB_SOCKET_SERVER = "errai.bus.enable_web_socket_server";
+  public static final String WEB_SOCKET_PORT = "errai.bus.web_socket_port";
 
 
   public static boolean HOSTED_MODE_TESTING = Boolean.getBoolean("errai.hosted_mode_testing");
@@ -75,6 +77,22 @@ public interface ErraiServiceConfigurator {
    * @return the property, if it exists, null otherwise
    */
   public String getProperty(String key);
+
+  /**
+   * Gets the property associated with the key. Returns true if the flag is set true, or false if not or
+   * if the property is undefined.
+   * @param key
+   * @return
+   */
+  public boolean getBooleanProperty(String key);
+
+  /**
+   * Gets the property associated with the key. Returns the number if set, or null if not set. Throws
+   * a NumberFormatException if the underlying key is not a number.
+   * @param key
+   * @return
+   */
+  public Integer getIntProperty(String key);
 
 }
 

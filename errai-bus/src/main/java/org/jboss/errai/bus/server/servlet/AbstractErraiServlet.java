@@ -135,11 +135,11 @@ public abstract class AbstractErraiServlet extends HttpServlet {
     return (ErraiService<HttpSession>) Guice.createInjector(new AbstractModule() {
       @SuppressWarnings({"unchecked"})
       public void configure() {
+        bind(ErraiService.class).to(ErraiServiceImpl.class);
+        bind(ErraiServiceConfigurator.class).to(ErraiServiceConfiguratorImpl.class);
         bind(MessageBus.class).to(ServerMessageBusImpl.class);
         bind(ServerMessageBus.class).to(ServerMessageBusImpl.class);
-        bind(ErraiServiceConfigurator.class).to(ErraiServiceConfiguratorImpl.class);
         //  bind(new TypeLiteral<ErraiService<HttpSession>>() {}).to(new TypeLiteral<ErraiServiceImpl<HttpSession>>() {});
-        bind(ErraiService.class).to(ErraiServiceImpl.class);
 
       }
     }).getInstance(ErraiService.class);

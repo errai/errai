@@ -125,6 +125,20 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
     return properties.get(key);
   }
 
+  @Override
+  public boolean getBooleanProperty(String key) {
+    return properties.containsKey(key) && "true".equals(properties.get(key));
+  }
+
+
+  @Override
+  public Integer getIntProperty(String key) {
+    if (properties.containsKey(key)) {
+      return Integer.parseInt(key);
+    }
+    return null;
+  }
+
   /**
    * Gets the resources attached to the specified resource class
    *

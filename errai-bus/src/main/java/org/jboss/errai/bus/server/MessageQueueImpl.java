@@ -26,6 +26,7 @@ import org.jboss.errai.bus.server.io.BufferHelper;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
 import org.jboss.errai.marshalling.server.JSONEncoder;
+import org.slf4j.Logger;
 
 import java.io.*;
 import java.util.concurrent.TimeUnit;
@@ -33,6 +34,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.lang.System.nanoTime;
 import static java.lang.System.out;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * A message queue is keeps track of which messages need to be sent outbound. It keeps track of the amount of messages
@@ -60,10 +62,13 @@ public class MessageQueueImpl implements MessageQueue {
   private final TransmissionBuffer buffer;
   private final BufferColor bufferColor;
 
-  private volatile Channel directSocketChannel;
+  private volatile boolean useDirectSocketChanne = false;
+  private Channel directSocketChannel;
 
   private final Object activationLock = new Object();
   private final AtomicInteger messageCount = new AtomicInteger();
+
+  private Logger log = getLogger(getClass());
 
   public MessageQueueImpl(TransmissionBuffer buffer, final QueueSession session) {
     this.buffer = buffer;
@@ -125,7 +130,7 @@ public class MessageQueueImpl implements MessageQueue {
       throw new QueueUnavailableException("queue is not available");
     }
 
-    if (directSocketChannel != null && directSocketChannel.isConnected()) {
+    if (useDirectSocketChanne && directSocketChannel.isConnected()) {
       directSocketChannel.write(new TextWebSocketFrame("[" + JSONEncoder.encode(message.getParts()) + "]"));
     }
     else {
@@ -316,7 +321,7 @@ public class MessageQueueImpl implements MessageQueue {
   }
 
   private boolean isDirectChannelOpen() {
-    return directSocketChannel != null && directSocketChannel.isOpen();
+    return useDirectSocketChanne && directSocketChannel.isOpen();
   }
 
   /**
@@ -377,5 +382,8 @@ public class MessageQueueImpl implements MessageQueue {
   @Override
   public void setDirectSocketChannel(Channel channel) {
     this.directSocketChannel = channel;
+    this.useDirectSocketChanne = true;
+
+    log.info("queue " + getSession().getSessionId() + " transitioned to direct channel mode.");
   }
 }

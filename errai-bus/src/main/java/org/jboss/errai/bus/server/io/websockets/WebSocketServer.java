@@ -20,9 +20,13 @@ package org.jboss.errai.bus.server.io.websockets;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.jboss.errai.bus.server.service.ErraiService;
+import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
+import org.slf4j.Logger;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
+
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Mike Brock
@@ -30,13 +34,18 @@ import java.util.concurrent.Executors;
 public class WebSocketServer {
 
   private ErraiService svc;
+  private Logger log = getLogger(getClass());
 
   public WebSocketServer(ErraiService bus) {
     this.svc = bus;
   }
 
   public void start() {
-
+    Integer port = svc.getConfiguration().getIntProperty(ErraiServiceConfigurator.WEB_SOCKET_PORT);
+    if (port == null) {
+      port = 8081;
+    }
+    
     // Configure the server.
     ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
             Executors.newCachedThreadPool(), Executors.newCachedThreadPool()));
@@ -45,6 +54,8 @@ public class WebSocketServer {
     bootstrap.setPipelineFactory(new WebSocketServerPipelineFactory(svc));
 
     // Bind and start to accept incoming connections.
-    bootstrap.bind(new InetSocketAddress(8081));
+    bootstrap.bind(new InetSocketAddress(port));
+    
+    log.info("started web socket server on port: " + port);
   }
 }

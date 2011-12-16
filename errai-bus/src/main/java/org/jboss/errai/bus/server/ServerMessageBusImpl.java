@@ -16,6 +16,7 @@
 
 package org.jboss.errai.bus.server;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.jboss.errai.bus.client.api.*;
 import org.jboss.errai.bus.client.api.base.*;
@@ -28,8 +29,10 @@ import org.jboss.errai.bus.server.async.TimedTask;
 import org.jboss.errai.bus.server.io.BufferHelper;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
+import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.common.client.protocols.MessageParts;
+import org.jboss.errai.common.server.api.ErraiConfig;
 import org.slf4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -83,6 +86,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
   private Set<String> reservedNames = new HashSet<String>();
 
+  private final boolean webSocketServer;
+
   /**
    * Sets up the <tt>ServerMessageBusImpl</tt> with the configuration supplied. Also, initializes the bus' callback
    * functions, scheduler, and monitor
@@ -90,8 +95,11 @@ public class ServerMessageBusImpl implements ServerMessageBus {
    * When deploying services on the server-side, it is possible to obtain references to the
    * <tt>ErraiServiceConfigurator</tt> by declaring it as injection dependencies
    */
-  public ServerMessageBusImpl() {
-
+  @Inject
+  public ServerMessageBusImpl(ErraiServiceConfigurator config) {
+    this.webSocketServer = config
+            .getBooleanProperty(ErraiServiceConfigurator.ENABLE_WEB_SOCKET_SERVER);
+    
     /**
      * Define the default ServerBus service used for intrabus communication.
      */
@@ -199,19 +207,32 @@ public class ServerMessageBusImpl implements ServerMessageBus {
               msg.toSubject("ClientBus")
                       .command(BusCommands.CapabilitiesNotice);
 
-              if (ErraiServiceConfigurator.LONG_POLLING) {
-                msg.set("Flags", Capabilities.LongPollAvailable.name() + "," + Capabilities.WebSockets.name());
-
+              StringBuilder capabilitiesBuffer = new StringBuilder();
+              boolean first = false;
+              if (ErraiServiceConfigurator.LONG_POLLING)  {
+                capabilitiesBuffer.append(Capabilities.LongPollAvailable.name());
+                first = false;
+              }
+              else {
+                capabilitiesBuffer.append(Capabilities.NoLongPollAvailable.name());
+                first = false;
+                msg.set("PollFrequency", ErraiServiceConfigurator.HOSTED_MODE_TESTING ? 50 : 250);
+              }
+              
+              if (webSocketServer) {
+                if (!first) {
+                  capabilitiesBuffer.append(',');
+                }
+                capabilitiesBuffer.append(Capabilities.WebSockets.name());
                 /**
                  * Advertise where the client can find a websocket.
                  */
                 HttpServletRequest request = message.getResource(HttpServletRequest.class, HttpServletRequest.class.getName());
                 msg.set("WebSocketURL", "ws://" + request.getLocalAddr() + ":8081/websocket");
+
               }
-              else {
-                msg.set("Flags", Capabilities.NoLongPollAvailable.name());
-                msg.set("PollFrequency", ErraiServiceConfigurator.HOSTED_MODE_TESTING ? 50 : 250);
-              }
+
+              msg.set("Flags", capabilitiesBuffer.toString());
 
               send(msg, false);
 
