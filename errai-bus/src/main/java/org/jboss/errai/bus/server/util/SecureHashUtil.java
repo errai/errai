@@ -45,20 +45,16 @@ public class SecureHashUtil {
     try {
       final MessageDigest md = MessageDigest.getInstance(algorithm);
 
-      md.digest(String.valueOf(System.nanoTime()).getBytes()); 
+      md.update(String.valueOf(System.nanoTime()).getBytes());
 
       if (additionalSeed != null) {
-        md.digest(additionalSeed.getBytes());
+        md.update(additionalSeed.getBytes());
       }
 
       byte[] randBytes = new byte[64];
       random.nextBytes(randBytes);
 
-      md.digest(randBytes);
-      
-      for (int i = 0; i < 1000; i++) {
-        md.digest(md.digest());
-      }
+      md.update(randBytes);
 
       return hashToHexString(md.digest());
     }
@@ -75,7 +71,5 @@ public class SecureHashUtil {
     return hexString.toString();
   }
 
-  public static void main(String[] args) {
-    System.out.println();
-  }
+
 }

@@ -223,6 +223,7 @@ public class MessageQueueImpl implements MessageQueue {
           File pageFile = new File(getPageFileName());
           if (!pageFile.exists()) {
             pagedOut = false;
+            return;
           }
 
           InputStream inputStream = new BufferedInputStream(new FileInputStream(pageFile));

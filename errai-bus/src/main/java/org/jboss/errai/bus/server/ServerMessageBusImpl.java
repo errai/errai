@@ -160,7 +160,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             case Resend:
               if (queue == null) return;
 
-
             case ConnectToQueue:
               List<Message> deferred = null;
               synchronized (messageQueues) {
@@ -315,8 +314,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 iter.remove();
                 endSessions.add(q);
                 killed++;
-
-                //        log.info("inactive session killed: " + q.getSession().getSessionId());
               }
               else if (q.isDowngradeCandidate()) {
                 if (!q.pageWaitingToDisk()) {
@@ -848,6 +845,9 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     public void callback(Message message) {
       // do not pipeline if this message is addressed to a specified session.
       if (broadcastable && !message.isFlagSet(RoutingFlags.NonGlobalRouting)) {
+
+        System.out.println("bcast: " + message.getParts());
+
         // all queues are listening to this subject. therefore we can save memory and time by
         // writing to the broadcast color on the buffer
         try {
