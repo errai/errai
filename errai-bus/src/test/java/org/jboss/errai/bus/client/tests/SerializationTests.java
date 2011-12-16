@@ -31,17 +31,7 @@ import java.util.Set;
 
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.tests.support.Boron;
-import org.jboss.errai.bus.client.tests.support.ClassWithNestedClass;
-import org.jboss.errai.bus.client.tests.support.CustomList;
-import org.jboss.errai.bus.client.tests.support.EntityWithGenericCollections;
-import org.jboss.errai.bus.client.tests.support.EntityWithStringBufferAndStringBuilder;
-import org.jboss.errai.bus.client.tests.support.FactoryEntity;
-import org.jboss.errai.bus.client.tests.support.Group;
-import org.jboss.errai.bus.client.tests.support.StudyTreeNodeContainer;
-import org.jboss.errai.bus.client.tests.support.TestEnumA;
-import org.jboss.errai.bus.client.tests.support.TestSerializationRPCService;
-import org.jboss.errai.bus.client.tests.support.TreeNodeContainer;
+import org.jboss.errai.bus.client.tests.support.*;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -929,6 +919,39 @@ public class SerializationTests extends AbstractErraiTest {
             }
           }
         }, TestSerializationRPCService.class).testPortableInnerClass(boron);
+      }
+    });
+  }
+
+  public void testEntityWithUnqualifiedFields() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        final EntityWithUnqualifiedFields entity = new EntityWithUnqualifiedFields();
+        entity.setField1("foo");
+        entity.setField2(123);
+
+        class EqualTester {
+          public boolean isEqual(EntityWithUnqualifiedFields r) {
+            return r != null &&
+                    r.equals(entity);
+          }
+        }
+
+        MessageBuilder.createCall(new RemoteCallback<EntityWithUnqualifiedFields>() {
+          @Override
+          public void callback(EntityWithUnqualifiedFields response) {
+            try {
+              assertTrue(new EqualTester().isEqual(response));
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestSerializationRPCService.class).testEntityWithUnqualifiedFieldTypes(entity);
       }
     });
   }

@@ -54,7 +54,9 @@ public class SecureHashUtil {
       byte[] randBytes = new byte[64];
       random.nextBytes(randBytes);
 
-      md.update(randBytes);
+      for (int i = 0; i < 1000; i++) {
+        md.update(md.digest());
+      }
 
       return hashToHexString(md.digest());
     }
@@ -64,12 +66,10 @@ public class SecureHashUtil {
   }
 
   public static String hashToHexString(byte[] hash) {
-    final StringBuilder hexString = new StringBuilder();
+    final StringBuilder hexString = new StringBuilder(hash.length);
     for (byte mdbyte : hash) {
       hexString.append(Integer.toHexString(0xFF & mdbyte));
     }
     return hexString.toString();
   }
-
-
 }

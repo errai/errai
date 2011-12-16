@@ -79,7 +79,6 @@ public abstract class AbstractErraiTest extends GWTTestCase {
   }
 
   protected void runAfterInit(final Runnable r) {
-
     Timer t = new Timer() {
       @Override
       public void run() {
@@ -92,7 +91,6 @@ public abstract class AbstractErraiTest extends GWTTestCase {
         }
       }
     };
-
 
     delayTestFinish(90000);
     t.schedule(3000);

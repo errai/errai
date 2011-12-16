@@ -194,6 +194,9 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     }
 
     exposedClasses.addAll(exposedFromScanner);
+    
+    exposedClasses.add(Object.class);
+    
 
     Properties props = scanner.getProperties("ErraiApp.properties");
     if (props != null) {
