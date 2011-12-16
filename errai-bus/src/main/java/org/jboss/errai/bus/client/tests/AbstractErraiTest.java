@@ -79,22 +79,19 @@ public abstract class AbstractErraiTest extends GWTTestCase {
   }
 
   protected void runAfterInit(final Runnable r) {
-
-    Timer t = new Timer() {
+    final Timer t = new Timer() {
       @Override
       public void run() {
-        try {
-          bus.addPostInitTask(r);
-        }
-        catch (Throwable t) {
-          t.printStackTrace();
-          fail(t.getMessage());
+        ClientMessageBus b = (ClientMessageBus) bus;
+        if (b != null && b.isInitialized()) {
+          r.run();
+        } else {
+          // poll again later
+          schedule(500);
         }
       }
     };
-
-
+    t.schedule(100);
     delayTestFinish(90000);
-    t.schedule(3000);
   }
 }

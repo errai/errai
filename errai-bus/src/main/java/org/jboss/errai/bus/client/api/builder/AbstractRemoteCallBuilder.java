@@ -16,6 +16,7 @@
 
 package org.jboss.errai.bus.client.api.builder;
 
+import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
@@ -25,7 +26,10 @@ import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.ProxyProvider;
 import org.jboss.errai.bus.client.framework.RPCStub;
 import org.jboss.errai.bus.client.framework.RemoteServiceProxyFactory;
+import org.jboss.errai.bus.client.framework.RpcProxyLoader;
 import org.jboss.errai.common.client.protocols.MessageParts;
+
+import com.google.gwt.core.client.GWT;
 
 /**
  * The <tt>AbstractRemoteCallBuilder</tt> facilitates the building of a remote call. Ensures that the remote call is
@@ -54,7 +58,13 @@ public class AbstractRemoteCallBuilder {
   public <T, R> T call(final RemoteCallback<R> callback, final ErrorCallback errorCallback, final Class<T> remoteService) {
     T svc = proxyProvider.getRemoteProxy(remoteService);
     if (svc == null) {
-        throw new RuntimeException("No service definition for: " + remoteService.getName());
+        RpcProxyLoader loader = GWT.create(RpcProxyLoader.class);
+        loader.loadProxies(ErraiBus.get());
+      
+        svc = proxyProvider.getRemoteProxy(remoteService);
+        
+        if (svc == null)
+          throw new RuntimeException("No service definition for: " + remoteService.getName());
     }
     
     ((RPCStub) svc).setRemoteCallback(callback);
