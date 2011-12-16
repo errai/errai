@@ -103,7 +103,7 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
       throw new UnsupportedOperationException(String.format("%s frame types not supported", frame.getClass()
               .getName()));
     }
-
+    
     Map<String, Object> map = (Map<String, Object>) JSONDecoder.decode(((TextWebSocketFrame) frame).getText());
     QueueSession session;
 

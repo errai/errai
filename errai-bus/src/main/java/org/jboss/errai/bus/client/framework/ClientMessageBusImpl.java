@@ -238,7 +238,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     addSubscription(subject, _subscribe(subject, new MessageCallback() {
       public void callback(Message message) {
         try {
-          // TODO: performance impact? might be better when decoding the message from the wire
           executeInterceptorStack(true, message);
           callback.callback(message);
         }
@@ -446,11 +445,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private void deliverToShadowSubscriptions(String subject, Message message) {
-//    if (shadowSubscriptions.containsKey(subject)) {
     for (MessageCallback cb : shadowSubscriptions.get(subject)) {
       cb.callback(message);
     }
-//    }
   }
 
   /**
@@ -822,11 +819,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                   return;
                 }
 
-                MessageBuilder.getMessageProvider().get().command(RemoteSubscribe)
-                        .toSubject("ServerBus")
-                        .set(Subject, event.getSubject())
-                        .set(PriorityProcessing, "1")
-                        .sendNowWith(ClientMessageBusImpl.this);
+                if (event.isNew()) {
+                  MessageBuilder.getMessageProvider().get().command(RemoteSubscribe)
+                          .toSubject("ServerBus")
+                          .set(Subject, event.getSubject())
+                          .set(PriorityProcessing, "1")
+                          .sendNowWith(ClientMessageBusImpl.this);
+                }
               }
             });
 
