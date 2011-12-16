@@ -66,12 +66,18 @@ public class MainMonitorGUI extends JFrame implements Attachable {
       return;
     }
 
+    String dispId = String.valueOf(id);
+
+    if (dispId.length() > 16) {
+      dispId = dispId.substring(dispId.length() - 17, dispId.length() - 1);
+    }
+    
     ServerMonitorPanel newServerMonitor = new ServerMonitorPanel(this, new ClientBusProxyImpl(serverBus), valueOf(id));
     newServerMonitor.attach(processor);
 
     remoteBuses.put(id, newServerMonitor);
 
-    tabbedPane1.add(valueOf(id), newServerMonitor.getPanel());
+    tabbedPane1.add(dispId, newServerMonitor.getPanel());
   }
 
   public ServerMonitorPanel getBus(Object id) {
