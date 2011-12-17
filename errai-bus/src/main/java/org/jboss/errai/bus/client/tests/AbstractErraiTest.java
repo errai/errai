@@ -80,6 +80,7 @@ public abstract class AbstractErraiTest extends GWTTestCase {
 
   protected void runAfterInit(final Runnable r) {
     final Timer t = new Timer() {
+
       @Override
       public void run() {
         ClientMessageBus b = (ClientMessageBus) bus;
