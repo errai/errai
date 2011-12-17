@@ -30,6 +30,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.HasEncoded;
 import org.jboss.errai.bus.client.api.HookCallback;
 import org.jboss.errai.bus.client.api.InitializationListener;
@@ -131,6 +132,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private boolean initialized = false;
   private boolean reinit = false;
   private boolean postInit = false;
+  
+  /* Default is 2 -- one for the RPC proxies, and one for the server connection  */
+  private int initVotesRequired = 2;
 
   private long lastTransmit = 0;
 
@@ -628,6 +632,28 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   }
 
+  @Override
+  public void voteForInit() {
+    if (--initVotesRequired == 0) {
+      postInit = true;
+      logAdapter.debug("Executing " + postInitTasks.size() + " post init task(s)");
+      for (Runnable postInitTask : postInitTasks) {
+        try {
+          postInitTask.run();
+        }
+        catch (Throwable t) {
+          t.printStackTrace();
+          throw new RuntimeException("error running task", t);
+        }
+      }
+
+      sendAllDeferred();
+      postInitTasks.clear();
+
+      setInitialized(true);
+    }
+  }
+
   /**
    * Initializes client message bus without a callback function
    */
@@ -663,6 +689,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       this.disconnected = true;
       this.initialized = false;
       this.sendBuilder = null;
+      this.initVotesRequired = 1; // just to reconnect the bus.
       this.postInitTasks.clear();
     }
   }
@@ -887,22 +914,24 @@ public class ClientMessageBusImpl implements ClientMessageBus {
               }
             });
 
-            postInit = true;
-            logAdapter.debug("Executing " + postInitTasks.size() + " post init task(s)");
-            for (Runnable postInitTask : postInitTasks) {
-              try {
-                postInitTask.run();
-              }
-              catch (Throwable t) {
-                t.printStackTrace();
-                throw new RuntimeException("error running task", t);
-              }
-            }
+//            postInit = true;
+//            logAdapter.debug("Executing " + postInitTasks.size() + " post init task(s)");
+//            for (Runnable postInitTask : postInitTasks) {
+//              try {
+//                postInitTask.run();
+//              }
+//              catch (Throwable t) {
+//                t.printStackTrace();
+//                throw new RuntimeException("error running task", t);
+//              }
+//            }
+//
+//            sendAllDeferred();
+//            postInitTasks.clear();
+//
+//            setInitialized(true);
 
-            sendAllDeferred();
-            postInitTasks.clear();
-
-            setInitialized(true);
+            voteForInit();
             break;
 
           case SessionExpired:
@@ -1171,6 +1200,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
     };
 
+    RpcProxyLoader loader = GWT.create(RpcProxyLoader.class);
+    loader.loadProxies(ClientMessageBusImpl.this);
     initialPollTimer.schedule(10);
   }
 

@@ -57,15 +57,8 @@ public class AbstractRemoteCallBuilder {
 
   public <T, R> T call(final RemoteCallback<R> callback, final ErrorCallback errorCallback, final Class<T> remoteService) {
     T svc = proxyProvider.getRemoteProxy(remoteService);
-    if (svc == null) {
-        RpcProxyLoader loader = GWT.create(RpcProxyLoader.class);
-        loader.loadProxies(ErraiBus.get());
-      
-        svc = proxyProvider.getRemoteProxy(remoteService);
-        
-        if (svc == null)
-          throw new RuntimeException("No service definition for: " + remoteService.getName());
-    }
+    if (svc == null)
+      throw new RuntimeException("No service definition for: " + remoteService.getName());
     
     ((RPCStub) svc).setRemoteCallback(callback);
     ((RPCStub) svc).setErrorCallback(errorCallback);

@@ -194,9 +194,10 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object, Obj
         }
       }
 
+
       ServerEncodingUtil.write(outstream, ctx, "\"" + mapping.getKey() + "\"");
       outstream.write(':');
-      JSONStreamEncoder.encode(v, outstream, ctx);
+      JSONStreamEncoder.encode(v, outstream, ctx, mapping.getType().getFullyQualifiedName().equals(Object.class.getName()));
       first = false;
     }
 

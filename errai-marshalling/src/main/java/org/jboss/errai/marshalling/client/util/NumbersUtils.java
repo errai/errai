@@ -166,4 +166,14 @@ public class NumbersUtils {
             + (o instanceof Long ? quote + String.valueOf(o) + quote : String.valueOf(o)) + "}";
 
   }
+  
+  public static String qualifiedStringEncoding(Object o) {
+    final String quote =  "\"";
+
+    return "{" + quote + SerializationParts.ENCODED_TYPE + quote + ":"
+            + quote + (o instanceof String ? Character.class.getName() : o.getClass().getName()) + quote + ", "
+            + quote + SerializationParts.OBJECT_ID + quote + ": " + quote + o.hashCode() + quote + "," +
+            quote + SerializationParts.VALUE + quote + ":" + quote + String.valueOf(o) + quote + "}";
+  }
+
 }
