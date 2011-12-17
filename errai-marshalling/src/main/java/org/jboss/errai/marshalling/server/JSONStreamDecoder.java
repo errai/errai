@@ -207,6 +207,8 @@ public class JSONStreamDecoder {
     switch (c = read()) {
       case '\\':
         return '\\';
+      case '/':
+        return '/';
       case 'b':
         return '\b';
       case 'f':

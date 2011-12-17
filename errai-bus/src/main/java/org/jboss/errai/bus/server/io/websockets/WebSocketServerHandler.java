@@ -28,6 +28,7 @@ import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.server.api.QueueSession;
 import org.jboss.errai.bus.server.io.MessageFactory;
 import org.jboss.errai.bus.server.service.ErraiService;
+import org.jboss.errai.bus.server.util.SecureHashUtil;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.marshalling.server.JSONDecoder;
 
@@ -40,12 +41,17 @@ import static io.netty.handler.codec.http.HttpMethod.GET;
 import static io.netty.handler.codec.http.HttpResponseStatus.FORBIDDEN;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
+
 /**
- * Handles handshakes and messages
+ * The working prototype ErraiBus Websocket Server.
  */
 public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
+  public static final String SESSION_ATTR_WS_STATUS = "WebSocketStatus";
 
-  private static final String WEBSOCKET_PATH = "/websocket";
+  public static final String WEBSOCKET_AWAIT_ACTIVATION = "AwaitingActivation";
+  public static final String WEBSOCKET_ACTIVE = "Active";
+
+  public static final String WEBSOCKET_PATH = "/websocket.bus";
 
   private final Map<Channel, QueueSession> activeChannels = new ConcurrentHashMap<Channel, QueueSession>();
 
@@ -103,27 +109,54 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
       throw new UnsupportedOperationException(String.format("%s frame types not supported", frame.getClass()
               .getName()));
     }
-    
-    Map<String, Object> map = (Map<String, Object>) JSONDecoder.decode(((TextWebSocketFrame) frame).getText());
+
+    @SuppressWarnings("unchecked") Map<String, Object> map
+            = (Map<String, Object>) JSONDecoder.decode(((TextWebSocketFrame) frame).getText());
+
     QueueSession session;
 
+    // this is not an active channel.
     if (!activeChannels.containsKey(ctx.getChannel())) {
       String commandType = (String) map.get(MessageParts.CommandType.name());
 
+      // this client apparently wants to connect.
       if (BusCommands.ConnectToQueue.name().equals(commandType)) {
         String sessionKey = (String) map.get(MessageParts.ConnectionSessionKey.name());
 
+        // has this client already attempted a connection, and is in a wait verify state
         if (sessionKey != null && (session = svc.getBus().getSessionBySessionId(sessionKey)) != null) {
+          if (session.hasAttribute(SESSION_ATTR_WS_STATUS) &&
+                  WEBSOCKET_ACTIVE.equals(session.getAttribute(String.class, SESSION_ATTR_WS_STATUS))) {
+
+            // open the channel
+            activeChannels.put(ctx.getChannel(), session);
+
+            // set the session queue into direct channel mode.
+            svc.getBus().getQueueBySession(sessionKey).setDirectSocketChannel(ctx.getChannel());
+
+            // remove the web socket token so it cannot be re-used for authentication.
+            session.removeAttribute(MessageParts.WebSocketToken.name());
+
+            return;
+          }
+
+          // check the activation key matches what we have in the ssession.
           String activationKey = session.getAttribute(String.class, MessageParts.WebSocketToken.name());
           if (activationKey == null || !activationKey.equals(map.get(MessageParts.WebSocketToken.name()))) {
+            // nope. go away!
             sendMessage(ctx, getFailedNegotiation("bad negotiation key"));
           }
           else {
-            session.setAttribute(MessageParts.WebSocketToken.name(), null);
-          }
+            // the key matches. now we send the reverse challenge to prove this client is actually
+            // already talking to the bus over the COMET channel.
+            String reverseToken = SecureHashUtil.nextSecureHash("SHA-256");
+            session.setAttribute(MessageParts.WebSocketToken.name(), reverseToken);
+            session.setAttribute(SESSION_ATTR_WS_STATUS, WEBSOCKET_AWAIT_ACTIVATION);
 
-          activeChannels.put(ctx.getChannel(), session);
-          svc.getBus().getQueueBySession(sessionKey).setDirectSocketChannel(ctx.getChannel());
+            // send the challenge.
+            sendMessage(ctx, getReverseChallenge(reverseToken));
+            return;
+          }
 
           sendMessage(ctx, getSuccessfulNegotiation());
         }
@@ -134,8 +167,11 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
       else {
         sendMessage(ctx, getFailedNegotiation("bad command"));
       }
+
     }
     else {
+      // this is an active session. send the message.
+
       session = activeChannels.get(ctx.getChannel());
       Message msg = MessageFactory.createCommandMessage(session, ((TextWebSocketFrame) frame).getText());
       svc.store(msg);
@@ -158,6 +194,7 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
 
   @Override
   public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
+    //noinspection ThrowableResultOfMethodCallIgnored
     e.getCause().printStackTrace();
     e.getChannel().close();
   }
@@ -179,6 +216,12 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
   private static String getSuccessfulNegotiation() {
     return "[{\"" + MessageParts.ToSubject.name() + "\":\"ClientBus\", \"" + MessageParts.CommandType.name() + "\":\""
             + BusCommands.WebsocketChannelOpen.name() + "\"}]";
+  }
+
+  private static String getReverseChallenge(String token) {
+    return "[{\"" + MessageParts.ToSubject.name() + "\":\"ClientBus\", \"" + MessageParts.CommandType.name() + "\":\""
+            + BusCommands.WebsocketChannelVerify.name() + "\",\"" + MessageParts.WebSocketToken + "\":\"" +
+            token + "\"}]";
   }
 }
 

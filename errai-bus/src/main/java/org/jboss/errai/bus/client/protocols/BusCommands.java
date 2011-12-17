@@ -98,6 +98,8 @@ public enum BusCommands {
 
   CapabilitiesNotice,
 
+  WebsocketChannelVerify,
+
   WebsocketChannelOpen,
 
   WebsocketNegotiationFailed

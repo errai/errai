@@ -10,10 +10,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
+import java.net.URL;
 import java.security.MessageDigest;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,13 +28,61 @@ import org.slf4j.LoggerFactory;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class RebindUtils {
-  
+
   static Logger logger = LoggerFactory.getLogger(RebindUtils.class);
-  
+
+  private static String hashSeed = "errai";
+
+  private final static Pattern erraiCommonJarFinder = Pattern.compile(".*/errai\\-common.*\\.jar!/META-INF/MANIFEST.MF");
+
+  static {
+    try {
+      Enumeration<URL> resources = MetaDataScanner.class.getClassLoader().getResources("META-INF/MANIFEST.MF");
+      SeedFinder:
+      while (resources.hasMoreElements()) {
+
+        URL url = resources.nextElement();
+        String urlString = url.getFile();
+
+        if (erraiCommonJarFinder.matcher(urlString).matches()) {
+          if (urlString.startsWith("file:")) {
+            urlString = urlString.substring(5);
+          }
+
+          String fileName = urlString.substring(0, urlString.indexOf('!'));
+
+          File file = new File(fileName);
+
+          if (file.exists() && !file.isDirectory()) {
+            ZipInputStream zipInputStream = new ZipInputStream(new BufferedInputStream(new FileInputStream(file)));
+
+            ZipEntry entry;
+            while ((entry = zipInputStream.getNextEntry()) != null) {
+              if (entry.getName().endsWith("MANIFEST.MF")) {
+                hashSeed = String.valueOf(entry.getTime());
+                break SeedFinder;
+              }
+            }
+
+            zipInputStream.close();
+            break;
+          }
+          //   }
+        }
+      }
+
+    }
+    catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
   public static String getClasspathHash() {
     try {
       final MessageDigest md = MessageDigest.getInstance("SHA-256");
       final String classPath = System.getProperty("java.class.path");
+
+      md.update(hashSeed.getBytes());
 
       for (String p : classPath.split(System.getProperty("path.separator"))) {
         _recurseDir(new File(p), new FileVisitor() {
@@ -95,7 +148,7 @@ public class RebindUtils {
 
   public static boolean hasClasspathChangedForAnnotatedWith(Set<Class<? extends Annotation>> annotations) {
     if (Boolean.getBoolean("errai.devel.forcecache")) return true;
-    
+
     boolean result = false;
     for (Class<? extends Annotation> a : annotations) {
       /**
@@ -114,7 +167,7 @@ public class RebindUtils {
               + annoClass.getName().replaceAll("\\.", "_") + ".sha");
 
       MetaDataScanner singleton = ScannerSingleton.getOrCreateInstance();
-      String hash = singleton.getHashForTypesAnnotatedWith(annoClass);
+      String hash = singleton.getHashForTypesAnnotatedWith(hashSeed, annoClass);
 
       if (!hashFile.exists()) {
         writeStringToFile(hashFile, hash);

@@ -27,9 +27,7 @@ import org.reflections.scanners.TypeAnnotationsScanner;
 import org.reflections.util.ConfigurationBuilder;
 import org.reflections.vfs.Vfs;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Inherited;
 import java.lang.reflect.Field;
@@ -39,6 +37,8 @@ import java.net.URLDecoder;
 import java.security.MessageDigest;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import static org.reflections.vfs.Vfs.UrlType;
 
@@ -93,6 +93,7 @@ public class MetaDataScanner extends Reflections {
   }
 
   private static Configuration getConfiguration(List<URL> urls) {
+
     return new ConfigurationBuilder()
             .setUrls(urls)
             .setScanners(
@@ -123,6 +124,8 @@ public class MetaDataScanner extends Reflections {
                     },
                     propScanner
             );
+
+
   }
 
   public static MetaDataScanner createInstance() {
@@ -209,14 +212,23 @@ public class MetaDataScanner extends Reflections {
 
     return types;
   }
+  
+//  public String getHashForTypesAnnotatedWith(Class<? extends Annotation> annotation) {
+//    return getHashForTypesAnnotatedWith(null, annotation);
+//  }
 
-  public String getHashForTypesAnnotatedWith(Class<? extends Annotation> annotation) {
+  public String getHashForTypesAnnotatedWith(String seed, Class<? extends Annotation> annotation) {
     if (!annotationsToClassFile.containsKey(annotation.getName())) {
       return "0";
     }
     else {
       try {
         final MessageDigest md = MessageDigest.getInstance("SHA-256");
+
+        if (seed != null) {
+          md.update(seed.getBytes());
+        }
+
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         for (SortableClassFileWrapper classFileWrapper : annotationsToClassFile.get(annotation.getName())) {
           byteArrayOutputStream.reset();

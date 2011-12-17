@@ -29,11 +29,11 @@ import org.jboss.errai.bus.server.async.TimedTask;
 import org.jboss.errai.bus.server.io.BufferHelper;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
-import org.jboss.errai.bus.server.service.ErraiService;
+import org.jboss.errai.bus.server.io.websockets.WebSocketServer;
+import org.jboss.errai.bus.server.io.websockets.WebSocketServerHandler;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.bus.server.util.SecureHashUtil;
 import org.jboss.errai.common.client.protocols.MessageParts;
-import org.jboss.errai.common.server.api.ErraiConfig;
 import org.slf4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -97,10 +97,14 @@ public class ServerMessageBusImpl implements ServerMessageBus {
    * <tt>ErraiServiceConfigurator</tt> by declaring it as injection dependencies
    */
   @Inject
-  public ServerMessageBusImpl(ErraiServiceConfigurator config) {
+  public ServerMessageBusImpl(final ErraiServiceConfigurator config) {
     this.webSocketServer = config
             .getBooleanProperty(ErraiServiceConfigurator.ENABLE_WEB_SOCKET_SERVER);
     
+    final int webSocketPort = WebSocketServer.getWebSocketPort(config);
+    final String webSocketPath = WebSocketServerHandler.WEBSOCKET_PATH;
+    
+
     /**
      * Define the default ServerBus service used for intrabus communication.
      */
@@ -160,7 +164,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             case Resend:
               if (queue == null) return;
 
-            case ConnectToQueue:
+            case ConnectToQueue: {
               List<Message> deferred = null;
               synchronized (messageQueues) {
                 if (messageQueues.containsKey(session)) {
@@ -210,7 +214,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
               StringBuilder capabilitiesBuffer = new StringBuilder();
 
               boolean first;
-              if (ErraiServiceConfigurator.LONG_POLLING)  {
+              if (ErraiServiceConfigurator.LONG_POLLING) {
                 capabilitiesBuffer.append(Capabilities.LongPollAvailable.name());
                 first = false;
               }
@@ -219,7 +223,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 first = false;
                 msg.set("PollFrequency", ErraiServiceConfigurator.HOSTED_MODE_TESTING ? 50 : 250);
               }
-              
+
               if (webSocketServer) {
                 if (!first) {
                   capabilitiesBuffer.append(',');
@@ -229,7 +233,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                  * Advertise where the client can find a websocket.
                  */
                 HttpServletRequest request = message.getResource(HttpServletRequest.class, HttpServletRequest.class.getName());
-                msg.set(MessageParts.WebSocketURL, "ws://" + request.getLocalAddr() + ":8081/websocket");
+                msg.set(MessageParts.WebSocketURL, "ws://" + request.getLocalAddr()
+                        + ":" + webSocketPort +  webSocketPath);
 
                 String connectionToken = SecureHashUtil.nextSecureHash("SHA-256", session.getSessionId());
                 session.setAttribute(MessageParts.WebSocketToken.name(), connectionToken);
@@ -245,6 +250,27 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                       .command(BusCommands.FinishStateSync)
                       .with(MessageParts.ConnectionSessionKey, queue.getSession().getSessionId())
                       .noErrorHandling().sendNowWith(ServerMessageBusImpl.this, false);
+
+              break;
+            }
+
+            case WebsocketChannelVerify:
+              if (session.hasAttribute(MessageParts.WebSocketToken.name())
+                      && message.hasPart(MessageParts.WebSocketToken)) {
+
+                if (message.get(String.class, MessageParts.WebSocketToken)
+                        .equals(session.getAttribute(String.class, MessageParts.WebSocketToken.name()))) {
+
+                  session.setAttribute(WebSocketServerHandler.SESSION_ATTR_WS_STATUS,
+                          WebSocketServerHandler.WEBSOCKET_ACTIVE);
+                  
+                  createConversation(message)
+                          .toSubject("ClientBus")
+                          .command(BusCommands.WebsocketChannelOpen)
+                          .done().sendNowWith(ServerMessageBusImpl.this, false);
+                }
+
+              }
 
               break;
           }
@@ -344,7 +370,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
           deferredQueue.remove(ref);
           ref.discard();
         }
-
 
         BufferStatus stat = bufferStatus();
         if (runCount % 2 == 0) {

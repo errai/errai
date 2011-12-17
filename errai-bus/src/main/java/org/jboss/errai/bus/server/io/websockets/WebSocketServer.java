@@ -36,16 +36,15 @@ public class WebSocketServer {
   private ErraiService svc;
   private Logger log = getLogger(getClass());
 
-  public WebSocketServer(ErraiService bus) {
-    this.svc = bus;
+  private static final int DEFAULT_PORT = 8085;
+
+  public WebSocketServer(ErraiService svc) {
+    this.svc = svc;
   }
 
   public void start() {
-    Integer port = svc.getConfiguration().getIntProperty(ErraiServiceConfigurator.WEB_SOCKET_PORT);
-    if (port == null) {
-      port = 8081;
-    }
-    
+    int port = getWebSocketPort(svc.getConfiguration());
+
     // Configure the server.
     ServerBootstrap bootstrap = new ServerBootstrap(new NioServerSocketChannelFactory(
             Executors.newCachedThreadPool(), Executors.newCachedThreadPool()));
@@ -55,7 +54,16 @@ public class WebSocketServer {
 
     // Bind and start to accept incoming connections.
     bootstrap.bind(new InetSocketAddress(port));
-    
+
     log.info("started web socket server on port: " + port);
   }
+
+  public static int getWebSocketPort(ErraiServiceConfigurator config) {
+    Integer port = config.getIntProperty(ErraiServiceConfigurator.WEB_SOCKET_PORT);
+    if (port == null) {
+      port = DEFAULT_PORT;
+    }
+    return port;
+  }
+
 }

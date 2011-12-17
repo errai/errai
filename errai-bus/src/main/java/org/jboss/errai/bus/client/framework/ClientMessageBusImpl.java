@@ -229,8 +229,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       return;
     }
 
-    logAdapter.debug("new subscription: " + subject + " -> " + callback);
-
     fireAllSubscribeListeners(subject, local, directSubscribe(subject, callback));
   }
 
@@ -404,14 +402,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * @param message -
    */
   private void encodeAndTransmit(Message message) {
-    //outgoingQueue.add(message);
-//    transmitRemote(message instanceof HasEncoded ?
-//            ((HasEncoded) message).getEncoded() : encodeMap(message.getParts()), message);
-
     transmitRemote(encodeMap(message.getParts()), message);
   }
 
   private void addSubscription(String subject, Object reference) {
+
+
     if (!subscriptions.containsKey(subject)) {
       subscriptions.put(subject, new ArrayList<Object>());
     }
@@ -422,6 +418,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     subscriptions.get(subject).add(reference);
     if (registeredInThisSession != null) registeredInThisSession.get(subject).add(reference);
+
+    log("subscribed to topic: " + subject);
   }
 
   private void addShadowSubscription(String subject, MessageCallback reference) {
@@ -532,7 +530,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
     }
 
-
     try {
       sendBuilder.sendRequest(message, new RequestCallback() {
 
@@ -599,8 +596,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   @Override
   public void voteForInit() {
     if (--initVotesRequired == 0) {
+      log("received final vote for initialization ...");
+      
       postInit = true;
-      logAdapter.debug("Executing " + postInitTasks.size() + " post init task(s)");
+      log("executing " + postInitTasks.size() + " post init task(s)");
       for (Runnable postInitTask : postInitTasks) {
         try {
           postInitTask.run();
@@ -615,6 +614,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       postInitTasks.clear();
 
       setInitialized(true);
+
+      log("bus federation complete. now operating normally.");
+    }
+    else {
+      log("waiting for " + initVotesRequired + " more votes to initialize");
     }
   }
 
@@ -774,6 +778,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             break;
 
           case CapabilitiesNotice:
+            log("received capabilities notice from server. supported capabilities of remote: "
+                    + message.get(String.class, "Flags"));
+
             String[] capabilites = message.get(String.class, "Flags").split(",");
 
             for (String capability : capabilites) {
@@ -781,9 +788,18 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 case WebSockets:
                   String webSocketURL = message.get(String.class, MessageParts.WebSocketURL);
                   webSocketToken = message.get(String.class, MessageParts.WebSocketToken);
-                  ClientWebSocketChannel.attemptWebSocketConnect(ClientMessageBusImpl.this, webSocketURL);
+
+                  log("attempting web sockets connection at URL: " + webSocketURL);
+
+                  Object o = ClientWebSocketChannel.attemptWebSocketConnect(ClientMessageBusImpl.this, webSocketURL);
+
+                  if (o instanceof String) {
+                    log("could not use web sockets. reason: " + o);
+                  }
                   break;
                 case LongPollAvailable:
+
+                  log("initializing long poll subsystem");
                   receiveCommCallback = new LongPollRequestCallback();
                   break;
                 case NoLongPollAvailable:
@@ -807,6 +823,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             if (isInitialized()) {
               return;
             }
+
+            log("received FinishStateSync message. preparing to bring up the federation");
 
             List<String> subjects = new ArrayList<String>();
             for (String s : subscriptions.keySet()) {
@@ -878,23 +896,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
               }
             });
 
-//            postInit = true;
-//            logAdapter.debug("Executing " + postInitTasks.size() + " post init task(s)");
-//            for (Runnable postInitTask : postInitTasks) {
-//              try {
-//                postInitTask.run();
-//              }
-//              catch (Throwable t) {
-//                t.printStackTrace();
-//                throw new RuntimeException("error running task", t);
-//              }
-//            }
-//
-//            sendAllDeferred();
-//            postInitTasks.clear();
-//
-//            setInitialized(true);
-
             voteForInit();
             break;
 
@@ -919,9 +920,25 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
             break;
 
+          case WebsocketChannelVerify:
+            log("received verification token for websocket connection");
+            MessageBuilder.createMessage()
+                    .toSubject("ServerBus")
+                    .command(BusCommands.WebsocketChannelVerify)
+                    .copy(MessageParts.WebSocketToken, message)
+                    .done().sendNowWith(ClientMessageBusImpl.this);
+            break;
+
           case WebsocketChannelOpen:
+
             cometChannelOpen = false;
             webSocketOpen = true;
+
+            // send final message to open the channel
+            ClientWebSocketChannel.transmitToSocket(webSocketChannel, getWebSocketNegotiationString());
+
+            log("web socket channel successfully negotiated. comet channel deactivated.");
+
             break;
 
           case WebsocketNegotiationFailed:
@@ -958,6 +975,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private void sendAllDeferred() {
+    log("transmitting deferred messages now ...");
+    
     for (Iterator<Message> iter = deferredMessages.iterator(); iter.hasNext(); ) {
       Message m = iter.next();
       if (m.hasPart(MessageParts.PriorityProcessing)) {
@@ -981,6 +1000,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    */
   private boolean sendInitialMessage(final HookCallback callback) {
     try {
+      log("sending initial handshake to remote bus");
+
       String initialMessage = "{\"CommandType\":\"ConnectToQueue\",\"ToSubject\":\"ServerBus\"," +
               " \"PriorityProcessing\":\"1\"}";
 
@@ -991,7 +1012,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         public void onResponseReceived(Request request, Response response) {
           try {
             procIncomingPayload(response);
-
+            log("received response from initial handshake. will now attempt federation ... ");
             initializeMessagingBus(callback);
           }
           catch (Exception e) {
@@ -1112,6 +1133,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
 
     public void schedule() {
+      if (!cometChannelOpen) return;
       new Timer() {
         @Override
         public void run() {
@@ -1251,7 +1273,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * @throws Exception -
    */
   private void procIncomingPayload(Response response) throws Exception {
-    //  System.out.println("RX: " + response.getText());
     procPayload(response.getText());
   }
 
@@ -1325,13 +1346,15 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
 
-  public void attachWebSocketChannel(Object o) {
-    String negotiationString = "{\"" + MessageParts.CommandType.name() + "\":\"" + BusCommands.ConnectToQueue.name()
+  private String getWebSocketNegotiationString() {
+    return "{\"" + MessageParts.CommandType.name() + "\":\"" + BusCommands.ConnectToQueue.name()
             + "\", \"" + MessageParts.ConnectionSessionKey + "\":\"" + sessionId + "\"" +
             ",\"" + MessageParts.WebSocketToken + "\":\"" + webSocketToken + "\"}";
+  }
 
-    ClientWebSocketChannel.transmitToSocket(o, negotiationString);
-
+  public void attachWebSocketChannel(Object o) {
+    log("web socket opened. sending negotiation message.");
+    ClientWebSocketChannel.transmitToSocket(o, getWebSocketNegotiationString());
     webSocketChannel = o;
   }
 
@@ -1454,14 +1477,20 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   }
 
-  private native boolean isNativeJavaScriptLoggerSupported() /*-{
+  private static void log(String message) {
+    if (isNativeJavaScriptLoggerSupported()) {
+      nativeLog("[erraibus] " + message);
+    }
+  }
+
+  private static native boolean isNativeJavaScriptLoggerSupported() /*-{
     return ((window.console != null) &&
             (window.console.firebug == null) &&
             (window.console.log != null) &&
             (typeof(window.console.log) == 'function'));
   }-*/;
 
-  private native void nativeLog(String message) /*-{
+  private static native void nativeLog(String message) /*-{
     window.console.log(message);
   }-*/;
 

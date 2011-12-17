@@ -36,8 +36,6 @@ import java.util.concurrent.locks.LockSupport;
  * @author Mike Brock
  */
 public class TransmissionBufferTests extends TestCase {
-
-
   public void testBufferWriteAndRead() {
     TransmissionBuffer buffer = TransmissionBuffer.create();
 

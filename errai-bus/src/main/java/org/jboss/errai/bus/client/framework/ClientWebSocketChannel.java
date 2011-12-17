@@ -35,8 +35,10 @@ public class ClientWebSocketChannel {
       socket.onclose = function (event) {
          // should probably do something here.
       };
+
+      return socket;
     } else {
-      return "NotSupported";
+      return "NotSupportedByBrowser";
     }
 
   }-*/;
