@@ -31,6 +31,7 @@ import org.jboss.errai.bus.server.annotations.Service;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Service
 public class TestSerializationRPCServiceImpl implements TestSerializationRPCService {
@@ -179,6 +180,11 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
 
   @Override
   public EntityWithUnqualifiedFields testEntityWithUnqualifiedFieldTypes(EntityWithUnqualifiedFields e) {
+    return e;
+  }
+
+  @Override
+  public GenericEntity testGenericEntity(GenericEntity e) {
     return e;
   }
 }

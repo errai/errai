@@ -955,4 +955,56 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
+  
+  public void testGenericEntity() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        final GenericEntity<String> entity = new GenericEntity<String>("foo");
+
+        MessageBuilder.createCall(new RemoteCallback<GenericEntity<String>>() {
+          @Override
+          public void callback(GenericEntity<String> response) {
+            try {
+              assertEquals(entity, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestSerializationRPCService.class).testGenericEntity(entity);
+      }
+    });
+  }
+  
+  public void testGenericEntityUsingList() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        List<Group> groups = new ArrayList<Group>();
+        groups.add(new Group(1, "foo"));
+        groups.add(new Group(2, "bar"));
+        
+        final GenericEntity<Group> entity = new GenericEntity<Group>(groups);
+
+        MessageBuilder.createCall(new RemoteCallback<GenericEntity<Group>>() {
+          @Override
+          public void callback(GenericEntity<Group> response) {
+            try {
+              assertEquals(entity, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestSerializationRPCService.class).testGenericEntity(entity);
+      }
+    });
+  }
 }

@@ -29,6 +29,7 @@ import java.util.Set;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Remote
 public interface TestSerializationRPCService {
@@ -88,4 +89,6 @@ public interface TestSerializationRPCService {
   List<TreeNodeContainer> acceptTreeNodeContainers(List<TreeNodeContainer> listOfContainers);
 
   public EntityWithUnqualifiedFields testEntityWithUnqualifiedFieldTypes(EntityWithUnqualifiedFields e);
+  
+  public GenericEntity testGenericEntity(GenericEntity e);
 }
