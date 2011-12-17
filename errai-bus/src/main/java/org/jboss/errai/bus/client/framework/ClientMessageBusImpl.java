@@ -30,6 +30,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.http.client.*;
+import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.HasEncoded;
 import org.jboss.errai.bus.client.api.HookCallback;
@@ -52,24 +56,9 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.http.client.Request;
-import com.google.gwt.http.client.RequestBuilder;
-import com.google.gwt.http.client.RequestCallback;
-import com.google.gwt.http.client.RequestException;
-import com.google.gwt.http.client.RequestTimeoutException;
-import com.google.gwt.http.client.Response;
-import com.google.gwt.http.client.URL;
+
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.ScrollPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
 
 /**
  * The default client <tt>MessageBus</tt> implementation.  This bus runs in the browser and automatically federates
@@ -132,11 +121,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private boolean initialized = false;
   private boolean reinit = false;
   private boolean postInit = false;
-  
+
   /* Default is 2 -- one for the RPC proxies, and one for the server connection  */
   private int initVotesRequired = 2;
-
-  private long lastTransmit = 0;
 
   /**
    * The unique ID that will sent with the next request.
@@ -416,6 +403,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private void directStore(final Message message) {
     String subject = message.getSubject();
+
     Object v = (message instanceof HasEncoded
             ? ((HasEncoded) message).getEncoded() : encodeMap(message.getParts()));
 
@@ -613,8 +601,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     catch (Exception e) {
       callErrorHandler(txMessage, e);
     }
-
-    lastTransmit = System.currentTimeMillis();
   }
 
   private void performPoll() {
@@ -1266,7 +1252,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
 
   private void logError(String message, String additionalDetails, Throwable e) {
-    logAdapter.error(message + "<br/>Additional details:<br/> " + additionalDetails, e);
+    logAdapter.error(message + " -- Additional Details: " + additionalDetails, e);
   }
 
   private void showError(String message, Throwable e) {
@@ -1274,6 +1260,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       errorDialog = new BusErrorDialog();
     }
     errorDialog.addError(message, "", e);
+
+    if (isNativeJavaScriptLoggerSupported()) {
+      nativeLog(message);
+    }
   }
 
   /**
@@ -1348,75 +1338,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     $wnd.PageBus.store(subject, value);
   }-*/;
 
-  class BusErrorDialog extends DialogBox {
-    ScrollPanel scrollPanel;
-    VerticalPanel contentPanel = new VerticalPanel();
-
-    public BusErrorDialog() {
-      setText("Message Bus Error");
-
-      VerticalPanel panel = new VerticalPanel();
-      HorizontalPanel buttonPanel = new HorizontalPanel();
-      buttonPanel.getElement().getStyle().setProperty("backgroundColor", "darkgrey");
-
-      Button clearErrors = new Button("Clear");
-      clearErrors.addClickHandler(new ClickHandler() {
-        public void onClick(ClickEvent event) {
-          contentPanel.clear();
-        }
-      });
-
-      Button closeButton = new Button("Dismiss");
-      closeButton.addClickHandler(new ClickHandler() {
-        public void onClick(ClickEvent event) {
-          errorDialog.hide();
-        }
-      });
-
-      buttonPanel.add(clearErrors);
-      buttonPanel.add(closeButton);
-
-      panel.add(buttonPanel);
-      panel.setCellHorizontalAlignment(buttonPanel, HasHorizontalAlignment.ALIGN_RIGHT);
-
-      Style s = panel.getElement().getStyle();
-
-      s.setProperty("border", "1px");
-      s.setProperty("borderStyle", "solid");
-      s.setProperty("borderColor", "black");
-      s.setProperty("backgroundColor", "lightgrey");
-
-
-      scrollPanel = new ScrollPanel();
-      scrollPanel.setWidth(Window.getClientWidth() * 0.80 + "px");
-      scrollPanel.setHeight("500px");
-      scrollPanel.setAlwaysShowScrollBars(true);
-      panel.add(scrollPanel);
-      scrollPanel.add(contentPanel);
-      add(panel);
-    }
-
-    public void addError(String message, String additionalDetails, Throwable e) {
-      contentPanel.add(new HTML("<strong style='background:red;color:white;'>" + message + "</strong>"));
-
-      StringBuilder buildTrace = new StringBuilder("<tt style=\"font-size:11px;\"><pre>");
-      if (e != null) {
-        buildTrace.append(e.getClass().getName()).append(": ").append(e.getMessage()).append("<br/>");
-        for (StackTraceElement ste : e.getStackTrace()) {
-          buildTrace.append("  ").append(ste.toString()).append("<br/>");
-        }
-      }
-      buildTrace.append("</pre>");
-
-      contentPanel.add(new HTML(buildTrace.toString() + "<br/><strong>Additional Details:</strong>" + additionalDetails + "</tt>"));
-
-      if (!isShowing()) {
-        show();
-        center();
-        getElement().getStyle().setProperty("zIndex", "5000");
-      }
-    }
-  }
 
   public int getNextRequestNumber() {
     if (requestNumber == Integer.MAX_VALUE) {
@@ -1435,4 +1356,135 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     webSocketChannel = o;
   }
+
+
+  /**
+   * The built-in, default error dialog.
+   */
+  class BusErrorDialog extends DialogBox {
+    boolean showErrors = !GWT.isProdMode();
+    Panel contentPanel = new AbsolutePanel();
+
+    public BusErrorDialog() {
+      setModal(true);
+
+      VerticalPanel panel = new VerticalPanel();
+
+      HorizontalPanel titleBar = new HorizontalPanel();
+      titleBar.getElement().getStyle().setProperty("backgroundColor", "darkgrey");
+      titleBar.getElement().getStyle().setWidth(100, Style.Unit.PCT);
+      titleBar.getElement().getStyle().setProperty("borderBottom", "1px solid black");
+      titleBar.getElement().getStyle().setProperty("marginBottom", "5px");
+
+      Label titleBarLabel = new Label("An Error Occurred in the Bus");
+      titleBarLabel.getElement().getStyle().setFontSize(10, Style.Unit.PT);
+      titleBarLabel.getElement().getStyle().setFontWeight(Style.FontWeight.BOLDER);
+      titleBarLabel.getElement().getStyle().setColor("white");
+
+      titleBar.add(titleBarLabel);
+      titleBar.setCellVerticalAlignment(titleBarLabel, HasVerticalAlignment.ALIGN_MIDDLE);
+
+      HorizontalPanel buttonPanel = new HorizontalPanel();
+
+      CheckBox showFurtherErrors = new CheckBox();
+      showFurtherErrors.setValue(showErrors);
+      showFurtherErrors.setText("Show further errors");
+      showFurtherErrors.getElement().getStyle().setFontSize(10, Style.Unit.PT);
+      showFurtherErrors.getElement().getStyle().setColor("white");
+
+      showFurtherErrors.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
+        @Override
+        public void onValueChange(ValueChangeEvent<Boolean> booleanValueChangeEvent) {
+          showErrors = booleanValueChangeEvent.getValue();
+        }
+      });
+
+      Button disconnectFromServer = new Button("Disconnect Bus");
+      disconnectFromServer.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          if (Window.confirm("Are you sure you want to disconnect and de-federate the local bus from the server bus? "
+                  + "This will permanently kill your session. You will need to refresh to reconnect. OK will proceed. Click "
+                  + "Cancel to abort this operation")) {
+            stop(true);
+          }
+        }
+      });
+
+      Button clearErrors = new Button("Clear Log");
+      clearErrors.addClickHandler(new ClickHandler() {
+        public void onClick(ClickEvent event) {
+          contentPanel.clear();
+        }
+      });
+
+      Button closeButton = new Button("Dismiss Error");
+      closeButton.addClickHandler(new ClickHandler() {
+        public void onClick(ClickEvent event) {
+          errorDialog.hide();
+        }
+      });
+
+      buttonPanel.add(showFurtherErrors);
+      buttonPanel.add(disconnectFromServer);
+      buttonPanel.add(clearErrors);
+      buttonPanel.add(closeButton);
+
+      buttonPanel.setCellVerticalAlignment(showFurtherErrors, HasVerticalAlignment.ALIGN_MIDDLE);
+
+      titleBar.add(buttonPanel);
+      titleBar.setCellHorizontalAlignment(buttonPanel, HasHorizontalAlignment.ALIGN_RIGHT);
+
+      panel.add(titleBar);
+
+      Style s = panel.getElement().getStyle();
+
+      s.setProperty("border", "1px");
+      s.setProperty("borderStyle", "solid");
+      s.setProperty("borderColor", "black");
+      s.setProperty("backgroundColor", "#ede0c3");
+
+      contentPanel.setWidth(Window.getClientWidth() * 0.90 + "px");
+      contentPanel.setHeight(Window.getClientHeight() * 0.90 + "px");
+      contentPanel.getElement().getStyle().setProperty("overflow", "auto");
+
+      panel.add(contentPanel);
+      add(panel);
+    }
+
+    public void addError(String message, String additionalDetails, Throwable e) {
+      if (!showErrors) return;
+
+      contentPanel.add(new HTML("<strong style='background:red;color:white;'>" + message + "</strong>"));
+
+      StringBuilder buildTrace = new StringBuilder("<tt style=\"font-size:11px;\"><pre>");
+      if (e != null) {
+        buildTrace.append(e.getClass().getName()).append(": ").append(e.getMessage()).append("<br/>");
+        for (StackTraceElement ste : e.getStackTrace()) {
+          buildTrace.append("  ").append(ste.toString()).append("<br/>");
+        }
+      }
+      buildTrace.append("</pre>");
+
+      contentPanel.add(new HTML(buildTrace.toString() + "<br/><strong>Additional Details:</strong>" + additionalDetails + "</tt>"));
+
+      if (!isShowing()) {
+        show();
+        center();
+        setModal(true);
+      }
+    }
+  }
+
+  private native boolean isNativeJavaScriptLoggerSupported() /*-{
+    return ((window.console != null) &&
+            (window.console.firebug == null) &&
+            (window.console.log != null) &&
+            (typeof(window.console.log) == 'function'));
+  }-*/;
+
+  private native void nativeLog(String message) /*-{
+    window.console.log(message);
+  }-*/;
+
 }
