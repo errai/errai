@@ -48,7 +48,7 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 /**
  * Generates the implementation of {@link RpcProxyLoader}.
- *
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class RpcProxyLoaderGenerator extends Generator {
@@ -110,12 +110,12 @@ public class RpcProxyLoaderGenerator extends Generator {
   }
 
   private String generate() {
-    MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
-
     ClassStructureBuilder<?> classBuilder = ClassBuilder.implement(RpcProxyLoader.class);
 
     MethodBlockBuilder<?> loadProxies =
             classBuilder.publicMethod(void.class, "loadProxies", Parameter.of(MessageBus.class, "bus", true));
+    
+    MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
     for (Class<?> remote : scanner.getTypesAnnotatedWith(Remote.class)) {
       if (remote.isInterface() && remote.getPackage().getName().contains(".client.")) {
         // create the remote proxy for this interface
@@ -131,12 +131,6 @@ public class RpcProxyLoaderGenerator extends Generator {
             .invoke("voteForInit"));
 
     classBuilder = (ClassStructureBuilder<?>) loadProxies.finish();
-    String rpc = classBuilder.toJavaString();
-
-//    System.out.println("---RPC Proxies---");
-//    System.out.println(rpc);
-//    System.out.println("-----------------");
-
-    return rpc;
+    return classBuilder.toJavaString();
   }
 }
