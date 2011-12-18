@@ -242,7 +242,7 @@ public class SerializationTests extends AbstractErraiTest {
         map.put(1l, "foo");
         map.put(2l, "bar");
         map.put(3l, "baz\\qux");
-        
+
         MessageBuilder.createCall(new RemoteCallback<Map<Long, String>>() {
           @Override
           public void callback(Map<Long, String> response) {
@@ -259,7 +259,7 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
   public void testMapOfLongToListOfStrings() {
     runAfterInit(new Runnable() {
       @Override
@@ -269,14 +269,14 @@ public class SerializationTests extends AbstractErraiTest {
         List<String> l1 = new ArrayList<String>();
         l1.add("foo");
         l1.add("bar");
-        
+
         List<String> l2 = new ArrayList<String>();
         l2.add("baz");
         l2.add("qux");
 
         map.put(1l, l1);
         map.put(2l, l2);
-        
+
         MessageBuilder.createCall(new RemoteCallback<Map<Long, List<String>>>() {
           @Override
           public void callback(Map<Long, List<String>> response) {
@@ -303,7 +303,7 @@ public class SerializationTests extends AbstractErraiTest {
         map.put("foo", 1.0f);
         map.put("bar", 1.1f);
         map.put("baz", 1.2f);
-        
+
         MessageBuilder.createCall(new RemoteCallback<Map<String, Float>>() {
           @Override
           public void callback(Map<String, Float> response) {
@@ -320,7 +320,7 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
   public void testMapOfStringToListOfDoubles() {
     runAfterInit(new Runnable() {
       @Override
@@ -330,14 +330,14 @@ public class SerializationTests extends AbstractErraiTest {
         List<Double> l1 = new ArrayList<Double>();
         l1.add(1.0);
         l1.add(1.1);
-        
+
         List<Double> l2 = new ArrayList<Double>();
         l2.add(1.2);
         l2.add(1.3);
 
         map.put("foo", l1);
         map.put("bar", l2);
-        
+
         MessageBuilder.createCall(new RemoteCallback<Map<String, List<Double>>>() {
           @Override
           public void callback(Map<String, List<Double>> response) {
@@ -354,7 +354,7 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
   public void testMapOfCustomTypes() {
     runAfterInit(new Runnable() {
       @Override
@@ -363,7 +363,7 @@ public class SerializationTests extends AbstractErraiTest {
 
         map.put(new Group(1, "fooKey"), new Group(2, "fooVal"));
         map.put(new Group(3, "barKey"), new Group(4, "barVal"));
-        
+
         MessageBuilder.createCall(new RemoteCallback<Map<Group, Group>>() {
           @Override
           public void callback(Map<Group, Group> response) {
@@ -380,7 +380,7 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
   public void testMapOfListOfStringsToCustomType() {
     runAfterInit(new Runnable() {
       @Override
@@ -390,14 +390,14 @@ public class SerializationTests extends AbstractErraiTest {
         List<String> l1 = new ArrayList<String>();
         l1.add("foo");
         l1.add("bar");
-        
+
         List<String> l2 = new ArrayList<String>();
         l1.add("baz");
         l1.add("qux");
-        
+
         map.put(l1, new Group(1, "fooGroup"));
         map.put(l2, new Group(2, "barGroup"));
-        
+
         MessageBuilder.createCall(new RemoteCallback<Map<List<String>, Group>>() {
           @Override
           public void callback(Map<List<String>, Group> response) {
@@ -414,7 +414,7 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
   public void testNestedClassSerialization() {
     runAfterInit(new Runnable() {
       @Override
@@ -467,7 +467,7 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
 
   public void testEmptyEntityWithGenericCollections() {
     runAfterInit(new Runnable() {
@@ -955,7 +955,7 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
   public void testGenericEntity() {
     runAfterInit(new Runnable() {
       @Override
@@ -979,7 +979,7 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
   public void testGenericEntityUsingList() {
     runAfterInit(new Runnable() {
       @Override
@@ -988,7 +988,7 @@ public class SerializationTests extends AbstractErraiTest {
         List<Group> groups = new ArrayList<Group>();
         groups.add(new Group(1, "foo"));
         groups.add(new Group(2, "bar"));
-        
+
         final GenericEntity<Group> entity = new GenericEntity<Group>(groups);
 
         MessageBuilder.createCall(new RemoteCallback<GenericEntity<Group>>() {
@@ -1007,4 +1007,57 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
+
+  public void testByteSerialization() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        final Byte b = (byte) 160;
+
+        MessageBuilder.createCall(new RemoteCallback<Byte>() {
+          @Override
+          public void callback(Byte response) {
+            try {
+              assertEquals(b, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestSerializationRPCService.class).testByte(b);
+      }
+    });
+  }
+
+  public void testListOfBytes() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        final List<Byte> lb = new ArrayList<Byte>();
+        lb.add((byte) 10);
+        lb.add((byte) 20);
+        lb.add((byte) 30);
+        
+
+        MessageBuilder.createCall(new RemoteCallback<List<Byte>>() {
+          @Override
+          public void callback(List<Byte> response) {
+            try {
+              assertEquals(lb, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestSerializationRPCService.class).testListOfBytes(lb);
+      }
+    });
+  }
+
 }

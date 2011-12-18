@@ -77,6 +77,10 @@ public interface TestSerializationRPCService {
   public BigDecimal testBigDecimalSerialization(BigDecimal time);
 
   public BigInteger testBigIntegerSerialization(BigInteger time);
+
+  public Byte testByte(Byte b);
+
+  public List<Byte> testListOfBytes(List<Byte> lb);
   
   public Queue testQueueSerialization(Queue queue);
 

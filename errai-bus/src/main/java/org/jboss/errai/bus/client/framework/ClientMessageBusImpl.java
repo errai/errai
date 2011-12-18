@@ -1310,7 +1310,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     interceptorStack.add(interceptor);
   }
 
-
   private native static void _unsubscribe(Object registrationHandle) /*-{
     $wnd.PageBus.unsubscribe(registrationHandle);
   }-*/;
@@ -1336,7 +1335,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     return txNumber++;
   }
 
-
   private String getWebSocketNegotiationString() {
     return "{\"" + MessageParts.CommandType.name() + "\":\"" + BusCommands.ConnectToQueue.name()
             + "\", \"" + MessageParts.ConnectionSessionKey + "\":\"" + sessionId + "\"" +
@@ -1348,7 +1346,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     ClientWebSocketChannel.transmitToSocket(o, getWebSocketNegotiationString());
     webSocketChannel = o;
   }
-
 
   /**
    * The built-in, default error dialog.
@@ -1501,21 +1498,19 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     };
 
     $wnd.errai_show_error_console = function() {
-      @org.jboss.errai.bus.client.framework.ClientMessageBusImpl::_displayErrorConsole()();
+      @org.jboss.errai.bus.client.framework.ClientMessageBusImpl::_showErrorConsole()();
     }
 
   }-*/;
 
-
   /**
    * Debugging functions.
    */
-
   private static void _displayStatusToLog() {
     ClientMessageBusImpl bus = (ClientMessageBusImpl) ErraiBus.get();
 
     nativeLog("ErraiBus Status");
-    nativeLog("---------------");
+    nativeLog("------------------------------------------------");
     nativeLog("Bus State              : " + (bus.initialized ? "Online/Federated" : "Disconnected"));
     nativeLog("");
     nativeLog("Comet Channel          : " + (bus.cometChannelOpen ? "Active" : "Offline"));
@@ -1531,15 +1526,14 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     nativeLog("Endpoints");
     nativeLog("  Remote (total)       : " + (bus.remotes.size()));
     nativeLog("  Local (total)        : " + (bus.shadowSubscriptions.size()));
-    nativeLog("----------------");
-
+    nativeLog("------------------------------------------------");
   }
   
   private static void _listAvailableServicesToLog() {
     ClientMessageBusImpl bus = (ClientMessageBusImpl) ErraiBus.get();
 
     nativeLog("Service and Routing Table");
-    nativeLog("--------------------------");
+    nativeLog("------------------------------------------------");
     nativeLog("[REMOTES]");
 
     for (String remoteName : bus.remotes.keySet()) {
@@ -1552,10 +1546,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       nativeLog(localName);
     }
 
-    nativeLog("--------------------------");
+    nativeLog("------------------------------------------------");
   }
 
-  private static void _displayErrorConsole() {
+  private static void _showErrorConsole() {
     ClientMessageBusImpl bus = (ClientMessageBusImpl) ErraiBus.get();
     bus.errorDialog.show();
   }

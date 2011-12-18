@@ -42,7 +42,7 @@ public class ByteMarshaller extends AbstractNumberMarshaller<JSONValue, Byte> {
       return null;
     }
     else if (o.isObject() != null) {
-      return Byte.parseByte(o.isObject().get(SerializationParts.NUMERIC_VALUE).isString().stringValue());
+      return new Double(o.isObject().get(SerializationParts.NUMERIC_VALUE).isNumber().doubleValue()).byteValue();
     }
     else if (o.isNumber() != null) {
       return new Double(o.isNumber().doubleValue()).byteValue();

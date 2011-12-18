@@ -51,7 +51,6 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
     return list;
   }
 
-
   @Override
   public List<Short> listOfShort(List<Short> list) {
     return list;
@@ -150,6 +149,16 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
   @Override
   public Queue testQueueSerialization(Queue queue) {
     return queue;
+  }
+
+  @Override
+  public Byte testByte(Byte b) {
+    return b;
+  }
+
+  @Override
+  public List<Byte> testListOfBytes(List<Byte> lb) {
+    return lb;
   }
 
   @Override
