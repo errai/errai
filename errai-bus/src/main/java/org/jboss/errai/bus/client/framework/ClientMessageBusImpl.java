@@ -26,6 +26,7 @@ import com.google.gwt.http.client.*;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
+import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.*;
 import org.jboss.errai.bus.client.api.base.*;
 import org.jboss.errai.bus.client.protocols.BusCommands;
@@ -63,6 +64,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private volatile boolean cometChannelOpen = true;
   private volatile boolean webSocketOpen = false;
+  private String webSocketUrl;
   private String webSocketToken;
   private Object webSocketChannel;
 
@@ -108,17 +110,18 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * <p/>
    * IMPORTANT: only access this member via {@link #getNextRequestNumber()}.
    */
-  private int requestNumber = 0;
+  private int txNumber = 0;
+  private int rxNumber = 0;
+
 
   private boolean disconnected = false;
 
-
-  ProxySettings proxySettings;
-
-  static class ProxySettings {
-    final String url = GWT.getModuleBaseURL() + "proxy";
-    boolean hasProxy = false;
-  }
+//  ProxySettings proxySettings;
+//
+//  static class ProxySettings {
+//    final String url = GWT.getModuleBaseURL() + "proxy";
+//    boolean hasProxy = false;
+//  }
 
   private List<MessageInterceptor> interceptorStack = new LinkedList<MessageInterceptor>();
 
@@ -153,7 +156,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private RequestBuilder getSendBuilder() {
-    String endpoint = proxySettings.hasProxy ? proxySettings.url : OUT_SERVICE_ENTRY_POINT;
+    String endpoint = OUT_SERVICE_ENTRY_POINT;
 
     RequestBuilder builder = new RequestBuilder(
             RequestBuilder.POST,
@@ -167,7 +170,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private RequestBuilder getRecvBuilder() {
-    String endpoint = proxySettings.hasProxy ? proxySettings.url : IN_SERVICE_ENTRY_POINT;
+    String endpoint = IN_SERVICE_ENTRY_POINT;
 
     RequestBuilder builder = new RequestBuilder(
             RequestBuilder.GET,
@@ -703,37 +706,26 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * @param callback - callback function used for to send the initial message to connect to the queue.
    */
   public void init(final HookCallback callback) {
+    declareDebugFunction();
+
+    System.out.println("init()");
+
     if (sendBuilder == null) {
-      proxySettings = new ProxySettings();
-
       if (!GWT.isScript()) {   // Hosted Mode
+        initFields();
+        createRequestBuilders();
 
-        RequestBuilder bootstrap = new RequestBuilder(RequestBuilder.GET, proxySettings.url);
-        try {
-          final boolean isReinit = isReinit();
-
-          bootstrap.sendRequest(null, new RequestCallback() {
-            public void onResponseReceived(Request request, Response response) {
-              if (200 == response.getStatusCode()) {
-                proxySettings.hasProxy = true;
-                logAdapter.debug("Identified proxy at " + proxySettings.url);
-              }
-
-              initFields();
-              createRequestBuilders();
-
-              if (isReinit) setReinit(true);
-              init(callback);
-              setReinit(false);
-            }
-
-            public void onError(Request request, Throwable exception) {
-              throw new RuntimeException("Client bootstrap failed", exception);
-            }
-          });
+        if (isReinit()) {
+          setReinit(true);
+          init(callback);
+          setReinit(false);
+          System.out.println("initA()");
+          return;
         }
-        catch (RequestException e) {
-          logError("Bootstrap proxy settings failed", proxySettings.url, e);
+        else {
+          System.out.println("initB()");
+          init(callback);
+          return;
         }
       }
       else {
@@ -786,12 +778,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             for (String capability : capabilites) {
               switch (Capabilities.valueOf(capability)) {
                 case WebSockets:
-                  String webSocketURL = message.get(String.class, MessageParts.WebSocketURL);
+                  webSocketUrl = message.get(String.class, MessageParts.WebSocketURL);
                   webSocketToken = message.get(String.class, MessageParts.WebSocketToken);
 
-                  log("attempting web sockets connection at URL: " + webSocketURL);
+                  log("attempting web sockets connection at URL: " + webSocketUrl);
 
-                  Object o = ClientWebSocketChannel.attemptWebSocketConnect(ClientMessageBusImpl.this, webSocketURL);
+                  Object o = ClientWebSocketChannel.attemptWebSocketConnect(ClientMessageBusImpl.this, webSocketUrl);
 
                   if (o instanceof String) {
                     log("could not use web sockets. reason: " + o);
@@ -1000,6 +992,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    */
   private boolean sendInitialMessage(final HookCallback callback) {
     try {
+
       log("sending initial handshake to remote bus");
 
       String initialMessage = "{\"CommandType\":\"ConnectToQueue\",\"ToSubject\":\"ServerBus\"," +
@@ -1011,8 +1004,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       initialRequest.sendRequest(initialMessage, new RequestCallback() {
         public void onResponseReceived(Request request, Response response) {
           try {
+            log("received response from initial handshake.");
             procIncomingPayload(response);
-            log("received response from initial handshake. will now attempt federation ... ");
             initializeMessagingBus(callback);
           }
           catch (Exception e) {
@@ -1279,6 +1272,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   public void procPayload(String text) {
     try {
       for (MarshalledMessage m : decodePayload(text)) {
+        rxNumber++;
         _store(m.getSubject(), m.getMessage());
       }
     }
@@ -1339,10 +1333,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
 
   public int getNextRequestNumber() {
-    if (requestNumber == Integer.MAX_VALUE) {
-      requestNumber = 0;
+    if (txNumber == Integer.MAX_VALUE) {
+      txNumber = 0;
     }
-    return requestNumber++;
+    return txNumber++;
   }
 
 
@@ -1499,4 +1493,59 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     window.console.log(message);
   }-*/;
 
+
+  private static native void declareDebugFunction() /*-{
+    $wnd.erraibus_status = function () {
+      @org.jboss.errai.bus.client.framework.ClientMessageBusImpl::displayStatusToLog()();
+    };
+    
+    $wnd.erraibus_listservices = function() {
+      @org.jboss.errai.bus.client.framework.ClientMessageBusImpl::listAvailableServicesToLog()();
+    }
+  }-*/;
+
+
+  private static void displayStatusToLog() {
+    ClientMessageBusImpl bus = (ClientMessageBusImpl) ErraiBus.get();
+
+    nativeLog("ErraiBus Status");
+    nativeLog("---------------");
+    nativeLog("Bus State              : " + (bus.initialized ? "Online/Federated" : "Disconnected"));
+    nativeLog("");
+    nativeLog("Comet Channel          : " + (bus.cometChannelOpen ? "Active" : "Offline"));
+    nativeLog("  Endpoint (RX)        : " + (bus.getRecvBuilder().getUrl()));
+    nativeLog("  Endpoint (TX)        : " + (bus.getSendBuilder().getUrl()));
+    nativeLog("");
+    nativeLog("WebSocket Channel      : " + (bus.webSocketOpen ? "Active" : "Offline"));
+    nativeLog("  Endpoint (RX/TX)     : " + (bus.webSocketUrl));
+    nativeLog("");
+    nativeLog("Total TXs              : " + (bus.txNumber));
+    nativeLog("Total RXs              : " + (bus.rxNumber));
+    nativeLog("");
+    nativeLog("Endpoints");
+    nativeLog("  Remote (total)       : " + (bus.remotes.size()));
+    nativeLog("  Local (total)        : " + (bus.shadowSubscriptions.size()));
+    nativeLog("----------------");
+
+  }
+  
+  private static void listAvailableServicesToLog() {
+    ClientMessageBusImpl bus = (ClientMessageBusImpl) ErraiBus.get();
+
+    nativeLog("Service and Routing Table");
+    nativeLog("--------------------------");
+    nativeLog("[REMOTES]");
+
+    for (String remoteName : bus.remotes.keySet()) {
+      nativeLog(remoteName);
+    }
+
+    nativeLog("[LOCALS]");
+
+    for (String localName: bus.shadowSubscriptions.keySet()) {
+      nativeLog(localName);
+    }
+
+    nativeLog("--------------------------");
+  }
 }

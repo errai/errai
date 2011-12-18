@@ -136,6 +136,7 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
 
             // remove the web socket token so it cannot be re-used for authentication.
             session.removeAttribute(MessageParts.WebSocketToken.name());
+            session.removeAttribute(SESSION_ATTR_WS_STATUS);
 
             return;
           }
