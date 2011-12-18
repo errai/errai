@@ -597,7 +597,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   public void voteForInit() {
     if (--initVotesRequired == 0) {
       log("received final vote for initialization ...");
-      
+
       postInit = true;
       log("executing " + postInitTasks.size() + " post init task(s)");
       for (Runnable postInitTask : postInitTasks) {
@@ -976,7 +976,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private void sendAllDeferred() {
     log("transmitting deferred messages now ...");
-    
+
     for (Iterator<Message> iter = deferredMessages.iterator(); iter.hasNext(); ) {
       Message m = iter.next();
       if (m.hasPart(MessageParts.PriorityProcessing)) {
@@ -1445,9 +1445,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       s.setProperty("borderColor", "black");
       s.setProperty("backgroundColor", "#ede0c3");
 
-      contentPanel.setWidth(Window.getClientWidth() * 0.90 + "px");
-      contentPanel.setHeight(Window.getClientHeight() * 0.90 + "px");
-      contentPanel.getElement().getStyle().setProperty("overflow", "auto");
+      resize();
 
       panel.add(contentPanel);
       add(panel);
@@ -1470,10 +1468,17 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       contentPanel.add(new HTML(buildTrace.toString() + "<br/><strong>Additional Details:</strong>" + additionalDetails + "</tt>"));
 
       if (!isShowing()) {
+        resize();
         show();
         center();
         setModal(true);
       }
+    }
+
+    private void resize() {
+      contentPanel.setWidth(Window.getClientWidth() * 0.90 + "px");
+      contentPanel.setHeight(Window.getClientHeight() * 0.90 + "px");
+      contentPanel.getElement().getStyle().setProperty("overflow", "auto");
     }
   }
 
