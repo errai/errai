@@ -143,7 +143,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   };
 
-  private BusErrorDialog errorDialog;
+  private BusErrorDialog  errorDialog = new BusErrorDialog();
 
   public ClientMessageBusImpl() {
     init();
@@ -1249,9 +1249,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private void showError(String message, Throwable e) {
-    if (errorDialog == null) {
-      errorDialog = new BusErrorDialog();
-    }
     errorDialog.addError(message, "", e);
 
     if (isNativeJavaScriptLoggerSupported()) {
@@ -1495,17 +1492,26 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
 
   private static native void declareDebugFunction() /*-{
-    $wnd.erraibus_status = function () {
-      @org.jboss.errai.bus.client.framework.ClientMessageBusImpl::displayStatusToLog()();
+    $wnd.errai_status = function () {
+      @org.jboss.errai.bus.client.framework.ClientMessageBusImpl::_displayStatusToLog()();
     };
     
-    $wnd.erraibus_listservices = function() {
-      @org.jboss.errai.bus.client.framework.ClientMessageBusImpl::listAvailableServicesToLog()();
+    $wnd.errai_list_services = function() {
+      @org.jboss.errai.bus.client.framework.ClientMessageBusImpl::_listAvailableServicesToLog()();
+    };
+
+    $wnd.errai_show_error_console = function() {
+      @org.jboss.errai.bus.client.framework.ClientMessageBusImpl::_displayErrorConsole()();
     }
+
   }-*/;
 
 
-  private static void displayStatusToLog() {
+  /**
+   * Debugging functions.
+   */
+
+  private static void _displayStatusToLog() {
     ClientMessageBusImpl bus = (ClientMessageBusImpl) ErraiBus.get();
 
     nativeLog("ErraiBus Status");
@@ -1529,7 +1535,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   }
   
-  private static void listAvailableServicesToLog() {
+  private static void _listAvailableServicesToLog() {
     ClientMessageBusImpl bus = (ClientMessageBusImpl) ErraiBus.get();
 
     nativeLog("Service and Routing Table");
@@ -1547,5 +1553,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
 
     nativeLog("--------------------------");
+  }
+
+  private static void _displayErrorConsole() {
+    ClientMessageBusImpl bus = (ClientMessageBusImpl) ErraiBus.get();
+    bus.errorDialog.show();
   }
 }
