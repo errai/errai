@@ -31,9 +31,8 @@ import org.jboss.errai.bus.client.tests.support.User;
 import com.google.gwt.user.client.Timer;
 
 /**
- * User: christopherbrock
- * Date: 26-Jul-2010
- * Time: 3:21:22 PM
+ * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class BusCommunicationTests extends AbstractErraiTest {
   @Override
@@ -190,29 +189,18 @@ public class BusCommunicationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       public void run() {
         TestRPCService remote = MessageBuilder.createCall(new RemoteCallback<Boolean>() {
-          int count = 0;
-
           public void callback(Boolean response) {
-            ++count;
-            System.out.println("response (" + count + ")" + response);
             assertTrue(response);
-            assertEquals(3, count); 
             finishTest();
           }
         }, TestRPCService.class);
 
         remote.isGreaterThan(10, 5);
-        remote.isGreaterThan(5, 1);
-        remote.isGreaterThan(11, 3);
       }
     });
   }
   
-  private Throwable caught = null;
-  private Message message = null;
-  
   public void testRPCThrowingException() {
-    caught = null;
     runAfterInit(new Runnable() {
       public void run() {
         MessageBuilder.createCall(
@@ -221,34 +209,24 @@ public class BusCommunicationTests extends AbstractErraiTest {
               }
             },
             new ErrorCallback() {
-              public boolean error(Message m, Throwable t) {
-                caught = t;
-                message = m;
+              public boolean error(final Message message, final Throwable caught) {
+                assertNotNull("Message is null.", message);
+                assertNotNull("Throwable is null.", caught);
+                
+                try {
+                  throw caught;
+                } 
+                catch(TestException e) {
+                  finishTest();
+                }
+                catch (Throwable throwable) {
+                  fail("Received wrong Throwable.");
+                }
                 return false;
               }
             },
         TestRPCService.class).exception();
       }
     });
-    
-    Timer t = new Timer() {
-      @Override
-      public void run() {
-        assertNotNull("Message is null.", message);
-        assertNotNull("Throwable is null.", caught);
-        
-        try {
-          throw caught;
-        } 
-        catch(TestException e) {
-          finishTest();
-        }
-        catch (Throwable throwable) {
-          fail("Received wrong Throwable.");
-        }
-      }
-    };
-    t.schedule(70000);
-    delayTestFinish(80000);
   }
 }
