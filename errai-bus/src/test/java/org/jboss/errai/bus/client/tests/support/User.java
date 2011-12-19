@@ -21,13 +21,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jboss.errai.common.client.api.annotations.ExposeEntity;
+import org.jboss.errai.common.client.api.annotations.Portable;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ExposeEntity
-public class User {
+@Portable
+public class User extends Person {
   private int id;
   private String name;
   private List<Group> groups;

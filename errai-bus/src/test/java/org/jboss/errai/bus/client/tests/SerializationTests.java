@@ -31,7 +31,21 @@ import java.util.Set;
 
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.tests.support.*;
+import org.jboss.errai.bus.client.tests.support.Boron;
+import org.jboss.errai.bus.client.tests.support.ClassWithNestedClass;
+import org.jboss.errai.bus.client.tests.support.CustomList;
+import org.jboss.errai.bus.client.tests.support.EntityWithGenericCollections;
+import org.jboss.errai.bus.client.tests.support.EntityWithStringBufferAndStringBuilder;
+import org.jboss.errai.bus.client.tests.support.EntityWithSuperClassField;
+import org.jboss.errai.bus.client.tests.support.EntityWithUnqualifiedFields;
+import org.jboss.errai.bus.client.tests.support.FactoryEntity;
+import org.jboss.errai.bus.client.tests.support.GenericEntity;
+import org.jboss.errai.bus.client.tests.support.Group;
+import org.jboss.errai.bus.client.tests.support.Student;
+import org.jboss.errai.bus.client.tests.support.StudyTreeNodeContainer;
+import org.jboss.errai.bus.client.tests.support.TestEnumA;
+import org.jboss.errai.bus.client.tests.support.TestSerializationRPCService;
+import org.jboss.errai.bus.client.tests.support.TreeNodeContainer;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -962,6 +976,11 @@ public class SerializationTests extends AbstractErraiTest {
       public void run() {
 
         final GenericEntity<String> entity = new GenericEntity<String>("foo");
+        
+        List<String> groups = new ArrayList<String>();
+        groups.add("bar");
+        groups.add("baz");
+        entity.setList(groups);
 
         MessageBuilder.createCall(new RemoteCallback<GenericEntity<String>>() {
           @Override
@@ -989,11 +1008,11 @@ public class SerializationTests extends AbstractErraiTest {
         groups.add(new Group(1, "foo"));
         groups.add(new Group(2, "bar"));
         
-        final GenericEntity<Group> entity = new GenericEntity<Group>(groups);
+        final GenericEntity<List<Group>> entity = new GenericEntity<List<Group>>(groups);
 
-        MessageBuilder.createCall(new RemoteCallback<GenericEntity<Group>>() {
+        MessageBuilder.createCall(new RemoteCallback<GenericEntity<List<Group>>>() {
           @Override
-          public void callback(GenericEntity<Group> response) {
+          public void callback(GenericEntity<List<Group>> response) {
             try {
               assertEquals(entity, response);
               finishTest();
@@ -1004,6 +1023,31 @@ public class SerializationTests extends AbstractErraiTest {
             }
           }
         }, TestSerializationRPCService.class).testGenericEntity(entity);
+      }
+    });
+  }
+  
+  public void testEntityWithSuperClassField() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        Student student = new Student(1, "smartStudent");
+        final EntityWithSuperClassField entity = new EntityWithSuperClassField(student);
+
+        MessageBuilder.createCall(new RemoteCallback<EntityWithSuperClassField>() {
+          @Override
+          public void callback(EntityWithSuperClassField response) {
+            try {
+              assertEquals(entity, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestSerializationRPCService.class).testEntityWithSuperClassField(entity);
       }
     });
   }
