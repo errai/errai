@@ -90,7 +90,7 @@ public interface TestSerializationRPCService {
   
   public Boron.Bean testPortableInnerClass(Boron.Bean b);
 
-  List<TreeNodeContainer> acceptTreeNodeContainers(List<TreeNodeContainer> listOfContainers);
+  public List<TreeNodeContainer> acceptTreeNodeContainers(List<TreeNodeContainer> listOfContainers);
 
   public EntityWithUnqualifiedFields testEntityWithUnqualifiedFieldTypes(EntityWithUnqualifiedFields e);
   
