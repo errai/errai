@@ -117,7 +117,7 @@ public class RpcProxyLoaderGenerator extends Generator {
     
     MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
     for (Class<?> remote : scanner.getTypesAnnotatedWith(Remote.class)) {
-      if (remote.isInterface() && remote.getPackage().getName().contains(".client.")) {
+      if (remote.isInterface()) {
         // create the remote proxy for this interface
         ClassStructureBuilder<?> remoteProxy = new RpcProxyGenerator(remote).generate();
         loadProxies.append(new InnerClass((BuildMetaClass) remoteProxy.getClassDefinition()));
