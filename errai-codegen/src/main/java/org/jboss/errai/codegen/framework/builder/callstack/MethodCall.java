@@ -25,6 +25,7 @@ import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.exception.*;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
+import org.jboss.errai.codegen.framework.meta.MetaType;
 import org.jboss.errai.codegen.framework.util.GenUtil;
 
 import java.util.Arrays;
@@ -74,7 +75,7 @@ public class MethodCall extends AbstractCallElement {
       }
 
       callParams = fromStatements(GenUtil.generateCallParameters(method, context, parameters));
-      statement = new MethodInvocation(method, callParams);
+      statement = new MethodInvocation(callType, method, callParams);
       
       resultType = statement.getType();
 

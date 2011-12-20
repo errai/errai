@@ -30,13 +30,16 @@ import org.jboss.errai.codegen.framework.meta.MetaTypeVariable;
  * Represents a method invocation statement.
  *
  * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Mike Brock
  */
 public class MethodInvocation extends AbstractStatement {
+  private final MetaClass inputType;
   private final MetaMethod method;
   private final CallParameters callParameters;
   private Map<String, MetaClass> typeVariables;
 
-  public MethodInvocation(MetaMethod method, CallParameters callParameters) {
+  public MethodInvocation(MetaClass inputType, MetaMethod method, CallParameters callParameters) {
+    this.inputType = inputType;
     this.method = method;
     this.callParameters = callParameters;
   }
@@ -73,6 +76,17 @@ public class MethodInvocation extends AbstractStatement {
 
   // Resolves type variables by inspecting call parameters
   private void resolveTypeVariables() {
+    MetaParameterizedType gSuperClass = inputType.getGenericSuperClass();
+    MetaClass superClass = inputType.getSuperClass();
+
+    if (superClass != null && superClass.getTypeParameters() != null & superClass.getTypeParameters().length > 0
+            && gSuperClass != null && gSuperClass.getTypeParameters().length > 0) {
+      for (int i = 0; i < superClass.getTypeParameters().length; i++) {
+        typeVariables.put(superClass.getTypeParameters()[i].getName(), (MetaClass) gSuperClass.getTypeParameters()[i]);
+      }
+    }
+
+
     int methodParmIndex = 0;
     for (MetaType methodParmType : method.getGenericParameterTypes()) {
       Statement parm = callParameters.getParameters().get(methodParmIndex);

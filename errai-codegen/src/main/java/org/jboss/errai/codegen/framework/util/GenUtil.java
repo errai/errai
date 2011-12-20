@@ -72,14 +72,6 @@ public class GenUtil {
     return statements;
   }
 
-//  private static final RenderCacheStore<MetaParameterizedType, String> DYN_GENERATE_RENDER_CACHE =
-//          new RenderCacheStore<MetaParameterizedType, String>() {
-//            @Override
-//            public String getName() {
-//              return "DYN_GENERATE_RENDER_CACHE";
-//            }
-//          };
-
   public static Statement generate(Context context, Object o) {
 
 
@@ -113,8 +105,8 @@ public class GenUtil {
 
   public static void assertAssignableTypes(MetaClass from, MetaClass to) {
     if (!to.asBoxed().isAssignableFrom(from.asBoxed())) {
-//      throw new InvalidTypeException(to.getFullyQualifiedName() + " is not assignable from "
-//              + from.getFullyQualifiedName());
+      throw new InvalidTypeException(to.getFullyQualifiedName() + " is not assignable from "
+              + from.getFullyQualifiedName());
     }
   }
 
