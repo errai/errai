@@ -71,6 +71,8 @@
         <module>weld-integration</module>
         <module>jboss</module>
         <module>errai-javax-enterprise</module>
+        <module>demos/errai-cdi-stock-demo</module>
+        <module>demos/errai-cdi-tagcloud-demo</module>
     </modules>
 
     <dependencyManagement>
@@ -225,15 +227,6 @@
 
     <build>
         <plugins>
-            <!--plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>gwt-maven-plugin</artifactId>
-                <version>${gwt.maven}</version>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-            </plugin-->
-
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -382,8 +375,8 @@
             <modules>
                 <module>reference</module>
                 <module>quickstart</module>
-                <module>demos/errai-cdi-tagcloud-demo</module>
                 <module>demos/errai-cdi-stock-demo</module>
+                <module>demos/errai-cdi-tagcloud-demo</module>
                 <module>dist</module>
             </modules>
         </profile>

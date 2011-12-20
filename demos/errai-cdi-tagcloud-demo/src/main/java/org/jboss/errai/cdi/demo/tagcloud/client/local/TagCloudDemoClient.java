@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
@@ -29,7 +30,6 @@ import org.jboss.errai.cdi.demo.tagcloud.client.shared.Tag;
 import org.jboss.errai.cdi.demo.tagcloud.client.shared.TagCloud;
 import org.jboss.errai.cdi.demo.tagcloud.client.shared.TagCloudSubscription;
 import org.jboss.errai.cdi.demo.tagcloud.client.shared.Updated;
-import org.jboss.errai.enterprise.client.cdi.events.BusReadyEvent;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
 import com.google.gwt.user.client.ui.Anchor;
@@ -62,7 +62,8 @@ public class TagCloudDemoClient {
   @Inject
   private Event<TagCloudSubscription> subscriptionEvent;
 
-  public void onBusReady(@Observes BusReadyEvent event) {
+  @PostConstruct
+  public void onBusReady() {
     RootPanel.get().add(tagCloudPanel);
     subscriptionEvent.fire(new TagCloudSubscription());
   }
