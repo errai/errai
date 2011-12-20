@@ -16,21 +16,22 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
+import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
+import org.jboss.errai.marshalling.client.api.json.EJArray;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
 
 import java.util.*;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ClientMarshaller
+@ClientMarshaller @ServerMarshaller
 @ImplementationAliases({AbstractSet.class, HashSet.class, SortedSet.class, LinkedHashSet.class})
-public class SetMarshaller extends AbstractCollectionMarshaller<JSONValue, Set> {
+public class SetMarshaller extends AbstractCollectionMarshaller<Set> {
   @Override
   public Class<Set> getTypeHandled() {
     return Set.class;
@@ -42,14 +43,14 @@ public class SetMarshaller extends AbstractCollectionMarshaller<JSONValue, Set> 
   }
 
   @Override
-  public Set demarshall(JSONValue o, MarshallingSession ctx) {
-    JSONArray jsonArray = o.isArray();
+  public Set doDemarshall(EJValue outer, MarshallingSession ctx) {
+    EJArray jsonArray = outer.isArray();
 
     Set set = new HashSet<Object>();
-    Marshaller<Object, Object> cachedMarshaller = null;
+    Marshaller<Object> cachedMarshaller = null;
 
     for (int i = 0; i < jsonArray.size(); i++) {
-      JSONValue elem = jsonArray.get(i);
+      EJValue elem = jsonArray.get(i);
       if (cachedMarshaller == null || !cachedMarshaller.handles(elem)) {
         cachedMarshaller = ctx.getMarshallerInstance(ctx.determineTypeFor(null, elem));
       }
@@ -61,7 +62,7 @@ public class SetMarshaller extends AbstractCollectionMarshaller<JSONValue, Set> 
   }
 
   @Override
-  public boolean handles(JSONValue o) {
+  public boolean handles(EJValue o) {
     return o.isArray() != null;
   }
 }

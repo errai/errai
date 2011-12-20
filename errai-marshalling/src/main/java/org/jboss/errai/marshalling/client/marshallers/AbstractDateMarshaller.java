@@ -25,7 +25,7 @@ import java.util.Date;
 /**
  * @author Mike Brock
  */
-public abstract class AbstractDateMarshaller<T> implements Marshaller<T, Date> {
+public abstract class AbstractDateMarshaller implements Marshaller<Date> {
   @Override
   public Class<Date> getTypeHandled() {
     return Date.class;
@@ -42,6 +42,6 @@ public abstract class AbstractDateMarshaller<T> implements Marshaller<T, Date> {
 
     return "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + Date.class.getName() + "\"," +
             "\"" + SerializationParts.OBJECT_ID + "\":\"" + o.hashCode() + "\"," +
-            "\"" + SerializationParts.VALUE + "\":\"" + o.getTime() + "\"}";
+            "\"" + SerializationParts.QUALIFIED_VALUE + "\":\"" + o.getTime() + "\"}";
   }
 }

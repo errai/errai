@@ -26,13 +26,13 @@ import java.util.Map;
  * @author Mike Brock
  */
 public abstract class AbstractServerMarshallingSession extends AbstractMarshallingSession {
-  private static final Map<String, Marshaller<Object, Object>> cachedMarshallerInstances
-          = new HashMap<String, Marshaller<Object, Object>>();
+  private static final Map<String, Marshaller<Object>> cachedMarshallerInstances
+          = new HashMap<String, Marshaller<Object>>();
 
-  public Marshaller<Object, Object> getMarshallerInstance(String fqcn) {
+  public Marshaller<Object> getMarshallerInstance(String fqcn) {
 
 
-    Marshaller<Object, Object> m = cachedMarshallerInstances.get(fqcn);
+    Marshaller<Object> m = cachedMarshallerInstances.get(fqcn);
     if (m == null) {
       Class<? extends Marshaller> cls = getMappingContext().getMarshallerClass(fqcn);
       if (cls != null) {

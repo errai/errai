@@ -25,11 +25,7 @@ import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
 /**
  * @author Mike Brock
  */
-public class WriteMapping implements MemberMapping {
-  private MetaClass toMap;
-  private String key;
-  private MetaClass type;
-
+public class WriteMapping extends SimpleMapping implements MemberMapping {
   private MetaClassMember writingMember;
 
   private String getterMethod;
@@ -39,8 +35,7 @@ public class WriteMapping implements MemberMapping {
   }
 
   public WriteMapping(String key, MetaClass type, String getterMethod) {
-    this.key = key;
-    this.type = type;
+    super(key, type);
     this.getterMethod = getterMethod;
   }
 
@@ -54,13 +49,17 @@ public class WriteMapping implements MemberMapping {
     return type;
   }
 
+  public void setType(MetaClass type) {
+    this.type = type;
+  }
+
   @Override
   public MetaClassMember getBindingMember() {
     if (writingMember != null) {
       return writingMember;
     }
 
-    MetaMethod meth = toMap.getMethod(getterMethod, type);
+    MetaMethod meth = toMap.getMethod(getterMethod, targetType);
 
     meth.asMethod().setAccessible(true);
 

@@ -72,4 +72,9 @@ public class JavaReflectionParameter implements MetaParameter {
   public MetaClassMember getDeclaringMember() {
     return declaredBy;
   }
+
+  @Override
+  public String toString() {
+    return String.valueOf(type);
+  }
 }

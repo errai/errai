@@ -16,52 +16,39 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
-import java.util.Collection;
-import java.util.Iterator;
-
-import org.jboss.errai.marshalling.client.api.Marshaller;
+import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
-import org.jboss.errai.marshalling.client.util.MarshallUtil;
+import org.jboss.errai.marshalling.client.api.json.EJObject;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
+import org.jboss.errai.marshalling.client.util.EncDecUtil;
+
+import java.util.Collection;
 
 /**
  * @author Mike Brock
  */
-public abstract class AbstractCollectionMarshaller<T, C extends Collection> implements Marshaller<T, C> {
-  public static final StringBufferMarshaller INSTANCE = new StringBufferMarshaller();
+public abstract class AbstractCollectionMarshaller<C extends Collection> extends AbstractBackReferencingMarshaller<C> {
 
   @Override
   public String getEncodingType() {
     return "json";
   }
 
-  // @Override
-  public String marshall(C o, MarshallingSession ctx) {
-    if (o == null) {
-      return "null";
-    }
-
-    StringBuilder buf = new StringBuilder("[");
-
-    Iterator<Object> iter = o.iterator();
-    Object elem;
-
-    int i = 0;
-    while (iter.hasNext()) {
-      if (i++ > 0) {
-        buf.append(",");
-      }
-      elem = iter.next();
-      Marshaller<Object, Object> marshaller = null;
-      if (elem instanceof Number || elem instanceof Boolean || elem instanceof Character) {
-        marshaller = MarshallUtil.getQualifiedNumberMarshaller(elem);
-      }
-      else {
-        marshaller = ctx.getMarshallerInstance(elem.getClass().getName());
-      }
-
-      buf.append(marshaller.marshall(elem, ctx));
-    }
-
-    return buf.append("]").toString();
+  @Override
+  public void doMarshall(StringBuilder buf, C o, MarshallingSession ctx) {
+    EncDecUtil.arrayMarshall(buf, o, ctx);
   }
+
+  @Override
+  public final C demarshall(EJValue o, MarshallingSession ctx) {
+    EJObject obj = o.isObject();
+    if (obj != null) {
+      return doDemarshall(obj.get(SerializationParts.QUALIFIED_VALUE), ctx);
+    }
+    else {
+      return doDemarshall(o, ctx);
+    }
+  }
+  
+  public abstract C doDemarshall(EJValue o, MarshallingSession ctx);
 }

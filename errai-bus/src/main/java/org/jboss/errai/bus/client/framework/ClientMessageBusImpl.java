@@ -31,6 +31,8 @@ import org.jboss.errai.bus.client.api.*;
 import org.jboss.errai.bus.client.api.base.*;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.common.client.protocols.MessageParts;
+import org.jboss.errai.marshalling.client.api.MarshallerFactory;
+import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 
 import java.util.*;
 
@@ -102,7 +104,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private boolean reinit = false;
   private boolean postInit = false;
 
-  /* Default is 2 -- one for the RPC proxies, and one for the server connection  */
+  /* Default is 2 -- one for the RPC proxies,  one for the server connection  */
   private int initVotesRequired = 2;
 
   /**
@@ -143,9 +145,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   };
 
-  private BusErrorDialog  errorDialog = new BusErrorDialog();
+  private BusErrorDialog errorDialog = new BusErrorDialog();
 
   public ClientMessageBusImpl() {
+
+
     init();
   }
 
@@ -520,7 +524,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private void transmitRemote(final String message, final Message txMessage) {
     if (message == null) return;
 
-    //  System.out.println("TX: " + message);
+    System.out.println("TX: " + message);
 
     if (webSocketOpen) {
       if (ClientWebSocketChannel.transmitToSocket(webSocketChannel, message)) {
@@ -707,8 +711,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    */
   public void init(final HookCallback callback) {
     declareDebugFunction();
-
-    System.out.println("init()");
 
     if (sendBuilder == null) {
       if (!GWT.isScript()) {   // Hosted Mode
@@ -1172,6 +1174,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       return;
     }
 
+    RpcProxyLoader loader = GWT.create(RpcProxyLoader.class);
+    loader.loadProxies(ClientMessageBusImpl.this);
+
     final Timer initialPollTimer = new Timer() {
       @Override
       public void run() {
@@ -1179,8 +1184,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
     };
 
-    RpcProxyLoader loader = GWT.create(RpcProxyLoader.class);
-    loader.loadProxies(ClientMessageBusImpl.this);
     initialPollTimer.schedule(10);
   }
 
@@ -1267,6 +1270,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   public void procPayload(String text) {
+    System.out.println("RX: " + text);
+
     try {
       for (MarshalledMessage m : decodePayload(text)) {
         rxNumber++;
@@ -1492,12 +1497,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     $wnd.errai_status = function () {
       @org.jboss.errai.bus.client.framework.ClientMessageBusImpl::_displayStatusToLog()();
     };
-    
-    $wnd.errai_list_services = function() {
+
+    $wnd.errai_list_services = function () {
       @org.jboss.errai.bus.client.framework.ClientMessageBusImpl::_listAvailableServicesToLog()();
     };
 
-    $wnd.errai_show_error_console = function() {
+    $wnd.errai_show_error_console = function () {
       @org.jboss.errai.bus.client.framework.ClientMessageBusImpl::_showErrorConsole()();
     }
 
@@ -1528,7 +1533,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     nativeLog("  Local (total)        : " + (bus.shadowSubscriptions.size()));
     nativeLog("------------------------------------------------");
   }
-  
+
   private static void _listAvailableServicesToLog() {
     ClientMessageBusImpl bus = (ClientMessageBusImpl) ErraiBus.get();
 
@@ -1542,7 +1547,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     nativeLog("[LOCALS]");
 
-    for (String localName: bus.shadowSubscriptions.keySet()) {
+    for (String localName : bus.shadowSubscriptions.keySet()) {
       nativeLog(localName);
     }
 

@@ -16,17 +16,19 @@
 
 package org.jboss.errai.marshalling.client.api;
 
+import org.jboss.errai.marshalling.client.api.json.EJValue;
+
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public interface Marshaller<Z, T> {
+public interface Marshaller<T> {
   Class<T> getTypeHandled();
 
   String getEncodingType();
 
-  T demarshall(Z o, MarshallingSession ctx);
+  T demarshall(EJValue o, MarshallingSession ctx);
 
   String marshall(T o, MarshallingSession ctx);
 
-  boolean handles(Z o);
+  boolean handles(EJValue o);
 }

@@ -89,6 +89,11 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
   public void addDefinition(MappingDefinition definition) {
 
     MAPPING_DEFINITIONS.put(definition.getMappingClass().getCanonicalName(), definition);
+    
+    if (definition.getMappingClass().asUnboxed().isPrimitive()) {
+      MAPPING_DEFINITIONS.put(definition.getMappingClass().asUnboxed().getCanonicalName(), definition);
+    }
+    
     if (log.isDebugEnabled())
       log.debug("loaded definition: " + definition.getMappingClass().getFullyQualifiedName());
   }
@@ -165,6 +170,8 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
               MappingDefinition aliasMappingDef = new MappingDefinition(aliasCls);
               aliasMappingDef.setClientMarshallerClass(marshallerCls.asSubclass(Marshaller.class));
               addDefinition(aliasMappingDef);
+
+
               exposedClasses.add(aliasCls);
               mappingAliases.put(aliasCls.getName(), type.getName());
             }
@@ -194,9 +201,8 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     }
 
     exposedClasses.addAll(exposedFromScanner);
-    
+
     exposedClasses.add(Object.class);
-    
 
     Properties props = scanner.getProperties("ErraiApp.properties");
     if (props != null) {
@@ -219,6 +225,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
         }
       }
     }
+
 
     Map<Class<?>, Class<?>> aliasToMarshaller = new HashMap<Class<?>, Class<?>>();
 
@@ -250,9 +257,68 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       addDefinition(aliasDef);
     }
 
+    // key = all types, value = list of all types which inherit from.
+    Map<String, List<String>> inheritanceMap = new HashMap<String, List<String>>();
+
+    for (Map.Entry<String, MappingDefinition> entry : MAPPING_DEFINITIONS.entrySet()) {
+      checkInheritance(inheritanceMap, entry.getValue().getMappingClass());
+    }
+
+    MetaClass javaLangObjectRef = MetaClassFactory.get(Object.class);
+
+    for (Map.Entry<String, MappingDefinition> entry : MAPPING_DEFINITIONS.entrySet()) {
+      MappingDefinition def = entry.getValue();
+
+      InstantiationMapping instantiationMapping = def.getInstantiationMapping();
+      for (Mapping mapping : instantiationMapping.getMappings()) {
+        if (!isTypeFinal(inheritanceMap, mapping.getType())) {
+          mapping.setType(javaLangObjectRef);
+        }
+      }
+
+      for (Mapping mapping : entry.getValue().getMemberMappings()) {
+        if (!isTypeFinal(inheritanceMap, mapping.getType())) {
+          mapping.setType(javaLangObjectRef);
+        }
+      }
+    }
+
+
     log.info("comprehended " + exposedClasses.size() + " classes");
   }
 
+  private static boolean isTypeFinal(Map<String, List<String>> inheritanceMap, MetaClass type) {
+    List<String> subTypes = inheritanceMap.get(type.getFullyQualifiedName());
+    return subTypes == null || subTypes.isEmpty();
+  }
+
+
+  private static void checkInheritance(Map<String, List<String>> inheritanceMap, MetaClass root) {
+    MetaClass cls = root;
+    String fqcn;
+
+    do {
+      fqcn = cls.getFullyQualifiedName();
+
+      if (cls.getSuperClass() != null)
+        registerInheritance(inheritanceMap, cls.getSuperClass().getFullyQualifiedName(), fqcn);
+
+      for (MetaClass iface : cls.getInterfaces()) {
+        checkInheritance(inheritanceMap, iface);
+      }
+
+    }
+    while ((cls = cls.getSuperClass()) != null && cls.getFullyQualifiedName().equals(Object.class.getName()));
+  }
+
+  static void registerInheritance(Map<String, List<String>> inheritanceMap, String parent, String child) {
+    List<String> subtypes = inheritanceMap.get(parent);
+    if (subtypes == null) {
+      subtypes = new ArrayList<String>();
+      inheritanceMap.put(parent, subtypes);
+    }
+    subtypes.add(child);
+  }
 
   @Override
   public void mergeDefinition(final MappingDefinition def) {

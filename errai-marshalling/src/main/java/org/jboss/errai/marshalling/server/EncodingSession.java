@@ -20,6 +20,7 @@ import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.AbstractMarshallingSession;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.exceptions.MarshallingException;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
 
 import java.util.Map;
 
@@ -40,7 +41,7 @@ public class EncodingSession extends AbstractMarshallingSession {
       return "null";
     }
     else {
-      Marshaller<Object, Object> m = getMarshallerInstance(o.getClass().getName());
+      Marshaller<Object> m = getMarshallerInstance(o.getClass().getName());
       if (m == null) {
         throw new MarshallingException("no marshaller for type: " + o.getClass().getName());
       }
@@ -49,12 +50,12 @@ public class EncodingSession extends AbstractMarshallingSession {
   }
 
   @Override
-  public <T> T demarshall(Class<T> clazz, Object o) {
+  public <T> T demarshall(Class<T> clazz, EJValue o) {
     if (o == null) {
       return null;
     }
     else {
-      Marshaller<Object, Object> m = getMarshallerInstance(clazz.getName());
+      Marshaller<Object> m = getMarshallerInstance(clazz.getName());
       if (m == null) {
         throw new MarshallingException("no marshaller for type: " + o.getClass().getName());
       }
@@ -81,7 +82,7 @@ public class EncodingSession extends AbstractMarshallingSession {
   }
 
   @Override
-  public Marshaller<Object, Object> getMarshallerInstance(String fqcn) {
+  public Marshaller<Object> getMarshallerInstance(String fqcn) {
     return context.getDefinitionsFactory().getDefinition(fqcn).getMarshallerInstance();
   }
 

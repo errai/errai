@@ -33,8 +33,10 @@ import java.util.Set;
 
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.common.client.types.UHashMap;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.rebind.api.model.Mapping;
 import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
+import org.jboss.errai.marshalling.server.json.impl.ErraiJSONValue;
 import org.jboss.errai.marshalling.server.marshallers.DefaultDefinitionMarshaller;
 
 /**
@@ -54,8 +56,6 @@ public class JSONStreamDecoder {
   private int read;
   private boolean initial = true;
 
-  private DecodingSession decodingContext = new DecodingSession(MappingContextSingleton.get());
-
   public JSONStreamDecoder(InputStream inStream) {
     this.buffer = CharBuffer.allocate(25);
     try {
@@ -68,7 +68,7 @@ public class JSONStreamDecoder {
     }
   }
 
-  public static Object decode(InputStream instream) throws IOException {
+  public static EJValue decode(InputStream instream) throws IOException {
     return new JSONStreamDecoder(instream).parse();
   }
 
@@ -90,9 +90,9 @@ public class JSONStreamDecoder {
     return buffer.get();
   }
 
-  public Object parse() {
+  public EJValue parse() {
     try {
-      return _parse(new Context(), null, false);
+      return new ErraiJSONValue(_parse(new Context(), null, false));
     }
     catch (Exception e) {
       throw new RuntimeException(e);
@@ -114,22 +114,7 @@ public class JSONStreamDecoder {
 
         case ']':
         case '}':
-          if (map && ctx.encodedType) {
-
-            try {
-              return TypeDemarshallHelper.demarshallAll(ctx.record(collection), decodingContext);
-            }
-            catch (Exception e) {
-              e.printStackTrace();
-              throw new RuntimeException("Could not demarshall object", e);
-            }
-            finally {
-              ctx.encodedType = false;
-            }
-          }
-          else {
-            return ctx.record(collection);
-          }
+          return ctx.record(collection);
 
         case ',':
           ctx.record(collection);
@@ -180,7 +165,7 @@ public class JSONStreamDecoder {
 
             String s = appender.toString();
 
-            if (s.length() > 4) ctx.addValue(s);
+            if (s.length() > 5) ctx.addValue(s);
             else if ("null".equals(s)) {
               ctx.addValue(null);
             }
@@ -315,13 +300,9 @@ public class JSONStreamDecoder {
     }
   }
 
-  private class Context {
+  private static class Context {
     Object lhs;
     Object rhs;
-    boolean encodedType = false;
-    boolean finished = false;
-    boolean noearlyInit = false;
-    private Set<String> req;
 
     private Context() {
     }
@@ -335,121 +316,14 @@ public class JSONStreamDecoder {
       }
     }
 
-    private Object getValue() {
-      if (rhs != null) {
-        return rhs;
-      }
-      else {
-        return lhs;
-      }
-    }
-
-    private void removeValue() {
-      if (rhs != null) {
-        rhs = null;
-      }
-      else {
-        lhs = null;
-      }
-    }
-
-    private boolean canInitialize() {
-      return !finished && req != null && req.isEmpty();
-    }
-
-    private void markSatisfied(String key) {
-      if (req != null && !req.isEmpty()) {
-        req.remove(key);
-      }
-    }
-
-    private void markUnsatisfied(String key) {
-      if (req == null) req = new HashSet<String>();
-      req.add(key);
-    }
-
-
-    public void setNoearlyInit(boolean noearlyInit) {
-      this.noearlyInit = noearlyInit;
-    }
-
-    private boolean initReference(Map map) {
-      if (canInitialize()) {
-        String hash = (String) map.get(SerializationParts.OBJECT_ID);
-        if (!decodingContext.hasObjectHash(hash)) {
-          map.put(TypeDemarshallHelper.NO_AUTO_WIRE, "true");
-          decodingContext.recordObjectHash((String) map.get(SerializationParts.OBJECT_ID),
-                  TypeDemarshallHelper.instantiate(map, decodingContext));
-          map.remove(TypeDemarshallHelper.NO_AUTO_WIRE);
-        }
-
-        return finished = true;
-      }
-      else {
-        return false;
-      }
-    }
-
     private Object record(Object collection) {
       try {
         if (lhs != null) {
           if (collection instanceof Map) {
-            if (!encodedType) {
-
-              Map oMap = (Map) collection;
-
-              if ((encodedType = ENCODED_TYPE.equals(lhs)) && decodingContext.getMappingContext()
-                      .getDefinitionsFactory().hasDefinition((String) rhs)) {
-                /**
-                 * Handle the special case of immutable marshalling. This declares the keys required for
-                 * the instantiating constructor.
-                 */
-                MappingDefinition definition = decodingContext.getMappingContext()
-                        .getDefinitionsFactory().getDefinition((String) rhs);
-
-                /**
-                 * For custom marshallers -- excluding the default definition marshaller, do not early init
-                 * the references.
-                 */
-                if (definition.isCachedMarshaller()
-                        && !(definition.getMarshallerInstance() instanceof DefaultDefinitionMarshaller)) {
-                  noearlyInit = true;
-                }
-                else {
-                  for (Mapping m : definition.getInstantiationMapping().getMappings()) {
-
-                    if (!oMap.containsKey(m.getKey())) {
-                      markUnsatisfied(m.getKey());
-                    }
-                  }
-
-                  if (!oMap.containsKey(SerializationParts.OBJECT_ID)) {
-                    markUnsatisfied(SerializationParts.OBJECT_ID);
-                  }
-
-                  initReference(oMap);
-                }
-
-                ((Map) collection).put(lhs, rhs);
-
-                return collection;
-              }
-            }
-
-            if (lhs instanceof String && lhs.toString().startsWith(SerializationParts.EMBEDDED_JSON)) {
-              lhs = JSONDecoder.decode(lhs.toString().substring(SerializationParts.EMBEDDED_JSON.length()));
-            }
-
             ((Map) collection).put(lhs, rhs);
-
-            if (!noearlyInit && encodedType) {
-              markSatisfied((String) lhs);
-              initReference((Map) collection);
-            }
           }
           else {
             if (collection == null) return lhs;
-
             ((Collection) collection).add(lhs);
           }
         }
@@ -463,6 +337,4 @@ public class JSONStreamDecoder {
       }
     }
   }
-
-
 }

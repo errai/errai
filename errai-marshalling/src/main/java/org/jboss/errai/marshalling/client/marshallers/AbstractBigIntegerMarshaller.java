@@ -20,13 +20,12 @@ import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 
 /**
  * @author Mike Brock
  */
-public abstract class AbstractBigIntegerMarshaller<T> implements Marshaller<T, BigInteger> {
+public abstract class AbstractBigIntegerMarshaller implements Marshaller<BigInteger> {
   @Override
   public Class<BigInteger> getTypeHandled() {
     return BigInteger.class;
@@ -43,6 +42,6 @@ public abstract class AbstractBigIntegerMarshaller<T> implements Marshaller<T, B
 
     return "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + BigInteger.class.getName() + "\"," +
             "\"" + SerializationParts.OBJECT_ID + "\":\"" + o.hashCode() + "\"," +
-            "\"" + SerializationParts.VALUE + "\":\"" + o.toString() + "\"}";
+            "\"" + SerializationParts.QUALIFIED_VALUE + "\":\"" + o.toString() + "\"}";
   }
 }

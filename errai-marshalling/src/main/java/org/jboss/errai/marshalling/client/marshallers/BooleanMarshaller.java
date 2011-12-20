@@ -16,17 +16,18 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
-import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.common.client.protocols.SerializationParts;
-import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
+import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
+import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ClientMarshaller
-public class BooleanMarshaller implements Marshaller<JSONValue, Boolean> {
+@ClientMarshaller @ServerMarshaller
+public class BooleanMarshaller implements Marshaller<Boolean> {
   @Override
   public Class<Boolean> getTypeHandled() {
     return Boolean.class;
@@ -38,7 +39,7 @@ public class BooleanMarshaller implements Marshaller<JSONValue, Boolean> {
   }
 
   @Override
-  public Boolean demarshall(JSONValue o, MarshallingSession ctx) {
+  public Boolean demarshall(EJValue o, MarshallingSession ctx) {
     if (o.isObject() != null) {
       return o.isObject().get(SerializationParts.NUMERIC_VALUE).isBoolean().booleanValue();
     }
@@ -53,7 +54,7 @@ public class BooleanMarshaller implements Marshaller<JSONValue, Boolean> {
   }
 
   @Override
-  public boolean handles(JSONValue o) {
+  public boolean handles(EJValue o) {
     return o.isBoolean() != null;
   }
 }

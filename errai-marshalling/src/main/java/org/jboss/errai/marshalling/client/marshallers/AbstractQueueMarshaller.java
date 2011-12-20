@@ -19,17 +19,16 @@ package org.jboss.errai.marshalling.client.marshallers;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 
-import java.util.Collection;
 import java.util.Queue;
 
 /**
  * @author Mike Brock
  */
-public abstract class AbstractQueueMarshaller<Z> extends AbstractCollectionMarshaller<Z, Queue> {
+public abstract class AbstractQueueMarshaller extends AbstractCollectionMarshaller<Queue> {
   @Override
-  public String marshall(Queue o, MarshallingSession ctx) {
-    return "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + getTypeHandled().getName() + "\"," +
+  public void doMarshall(StringBuilder buf, Queue o, MarshallingSession ctx) {
+    buf.append("{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + getTypeHandled().getName() + "\"," +
             "\"" + SerializationParts.OBJECT_ID + "\":\"" +  o.hashCode() + "\"," +
-            "\"" + SerializationParts.VALUE + "\":" + super.marshall(o, ctx) + "}";
+            "\"" + SerializationParts.QUALIFIED_VALUE + "\":" + super.marshall(o, ctx) + "}");
   }
 }

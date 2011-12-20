@@ -16,11 +16,11 @@
 
 package org.jboss.errai.marshalling.client.util;
 
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
+import org.jboss.errai.marshalling.client.api.json.EJObject;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -58,24 +58,19 @@ public class MarshallUtil {
     return obj;
   }
 
-  public static JSONValue nullSafe_JSONObject(JSONValue v, String key) {
-    if (v == null || v.isObject() == null) {
-      return null;
-    }
-    else {
-      return v.isObject().get(key);
-    }
-  }
-
-  public static <T extends Enum<T>> T demarshalEnum(Class<T> enumType, JSONObject obj, String name) {
+  public static <T extends Enum<T>> T demarshalEnum(Class<T> enumType, EJObject obj, String name) {
     if (obj == null || !obj.containsKey(name) || obj.get(name).isNull() != null) {
       return null;
     }
     return Enum.valueOf(enumType, obj.get(name).isString().stringValue());
   }
 
-  public static boolean handles(JSONObject object, Class<?> cls) {
-    JSONValue v = object.get(SerializationParts.ENCODED_TYPE);
+  public static boolean handles(EJValue object, Class<?> cls) {
+    return handles(object.isObject(), cls);
+  }
+
+  public static boolean handles(EJObject object, Class<?> cls) {
+    EJValue v = object.get(SerializationParts.ENCODED_TYPE);
     return !(v == null || v.isString() == null) && cls.getName().equals(v.isString().stringValue());
   }
   
@@ -84,12 +79,13 @@ public class MarshallUtil {
     return (v != null && cls.getName().equals(String.valueOf(v)));
   }
 
-  public static Marshaller<Object, Object> getQualifiedNumberMarshaller(Object o) {
+
+  public static Marshaller<Object> getQualifiedNumberMarshaller(Object o) {
       final Class<Object> type = (Class<Object>) o.getClass();
 
-      return new Marshaller<Object, Object>() {
+      return new Marshaller<Object>() {
         @Override
-        public boolean handles(Object o) {
+        public boolean handles(EJValue o) {
           return false;
         }
 
@@ -99,7 +95,7 @@ public class MarshallUtil {
         }
 
         @Override
-        public Object demarshall(Object o, MarshallingSession ctx) {
+        public Object demarshall(EJValue o, MarshallingSession ctx) {
           return null;
         }
 
@@ -113,13 +109,10 @@ public class MarshallUtil {
           return type;
         }
       };
-
   }
-
-
+  
+ 
   public static String jsonStringEscape(final String s) {
-//     return o.replaceAll("\\\\", "\\\\\\\\").replaceAll("[\\\\]{0}\\\"", "\\\\\"");
-
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < s.length(); i++) {
       char ch = s.charAt(i);

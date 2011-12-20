@@ -19,21 +19,22 @@ package org.jboss.errai.marshalling.client.marshallers;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
-
-import com.google.gwt.json.client.JSONValue;
+import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
+import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ClientMarshaller
-public class LongMarshaller extends AbstractNumberMarshaller<JSONValue, Long> {
+@ClientMarshaller @ServerMarshaller
+public class LongMarshaller extends AbstractNumberMarshaller<Long> {
   @Override
   public Class<Long> getTypeHandled() {
     return Long.class;
   }
 
   @Override
-  public Long demarshall(JSONValue o, MarshallingSession ctx) {
+  public Long demarshall(EJValue o, MarshallingSession ctx) {
     if (o.isObject() != null) {
       return Long.parseLong(o.isObject().get(SerializationParts.NUMERIC_VALUE).isString().stringValue());
     }
@@ -49,7 +50,7 @@ public class LongMarshaller extends AbstractNumberMarshaller<JSONValue, Long> {
   }
 
   @Override
-  public boolean handles(JSONValue o) {
+  public boolean handles(EJValue o) {
     return o.isNumber() != null;
   }
 }

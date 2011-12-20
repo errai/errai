@@ -16,27 +16,28 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
-import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
+import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
 
 import java.math.BigDecimal;
 
 /**
  * @author Mike Brock
  */
-@ClientMarshaller(multiReferenceable = true)
-public class BigDecimalMarshaller extends AbstractBigDecimalMarshaller<JSONValue> {
+@ClientMarshaller @ServerMarshaller
+public class BigDecimalMarshaller extends AbstractBigDecimalMarshaller {
   @Override
-  public BigDecimal demarshall(JSONValue o, MarshallingSession ctx) {
+  public BigDecimal demarshall(EJValue o, MarshallingSession ctx) {
 
     return o.isObject() == null ? null :
-            new BigDecimal(o.isObject().get(SerializationParts.VALUE).isString().stringValue());
+            new BigDecimal(o.isObject().get(SerializationParts.QUALIFIED_VALUE).isString().stringValue());
   }
 
   @Override
-  public boolean handles(JSONValue o) {
+  public boolean handles(EJValue o) {
     return false;
   }
 }

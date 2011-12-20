@@ -23,7 +23,7 @@ import org.jboss.errai.marshalling.client.util.MarshallUtil;
 /**
  * @author Mike Brock
  */
-public abstract class AbstractStringBufferMarshaller<T> implements Marshaller<T, StringBuffer> {
+public abstract class AbstractStringBufferMarshaller implements Marshaller<StringBuffer> {
   public static final StringBufferMarshaller INSTANCE = new StringBufferMarshaller();
 
   @Override

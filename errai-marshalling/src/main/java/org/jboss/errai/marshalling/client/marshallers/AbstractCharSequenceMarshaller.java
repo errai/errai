@@ -23,7 +23,7 @@ import org.jboss.errai.marshalling.client.util.MarshallUtil;
 /**
  * @author Mike Brock
  */
-public abstract class AbstractCharSequenceMarshaller<T, C extends CharSequence> implements Marshaller<T, C> {
+public abstract class AbstractCharSequenceMarshaller<C extends CharSequence> implements Marshaller<C> {
   @Override
   public String getEncodingType() {
     return "json";

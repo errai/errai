@@ -16,17 +16,19 @@
 
 package org.jboss.errai.marshalling.client.api;
 
+import org.jboss.errai.marshalling.client.api.json.EJValue;
+
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public interface MarshallingSession {
   public MappingContext getMappingContext();
   
-  public Marshaller<Object, Object> getMarshallerInstance(String fqcn);
+  public Marshaller<Object> getMarshallerInstance(String fqcn);
 
   public String marshall(Object o);
   
-  public <T> T demarshall(Class<T> clazz, Object o);
+  public <T> T demarshall(Class<T> clazz, EJValue o);
   
   public String determineTypeFor(String formatType, Object o);
   

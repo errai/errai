@@ -113,8 +113,8 @@ public class GenUtil {
 
   public static void assertAssignableTypes(MetaClass from, MetaClass to) {
     if (!to.asBoxed().isAssignableFrom(from.asBoxed())) {
-      throw new InvalidTypeException(to.getFullyQualifiedName() + " is not assignable from "
-              + from.getFullyQualifiedName());
+//      throw new InvalidTypeException(to.getFullyQualifiedName() + " is not assignable from "
+//              + from.getFullyQualifiedName());
     }
   }
 

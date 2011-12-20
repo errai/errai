@@ -16,22 +16,23 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
-import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
+import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ClientMarshaller
-public class StringBufferMarshaller  extends AbstractStringBufferMarshaller<JSONValue> {
+@ClientMarshaller @ServerMarshaller
+public class StringBufferMarshaller  extends AbstractStringBufferMarshaller {
   @Override
-  public StringBuffer demarshall(JSONValue o, MarshallingSession ctx) {
+  public StringBuffer demarshall(EJValue o, MarshallingSession ctx) {
     return (o == null || o.isString() == null) ? null : new StringBuffer(o.isString().stringValue());
   }
 
   @Override
-  public boolean handles(JSONValue o) {
+  public boolean handles(EJValue o) {
     return o.isString() != null;
   }
 }

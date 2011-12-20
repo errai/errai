@@ -25,7 +25,7 @@ import java.sql.Timestamp;
 /**
  * @author Mike Brock
  */
-public abstract class AbstractTimestampMarshaller<T> implements Marshaller<T, Timestamp> {
+public abstract class AbstractTimestampMarshaller implements Marshaller<Timestamp> {
 
   @Override
   public Class<Timestamp> getTypeHandled() {
@@ -45,6 +45,6 @@ public abstract class AbstractTimestampMarshaller<T> implements Marshaller<T, Ti
 
     return "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + Timestamp.class.getName() + "\"," +
             "\"" + SerializationParts.OBJECT_ID + "\":\"" + o.hashCode() + "\"," +
-            "\"" + SerializationParts.VALUE + "\":\"" + o.getTime() + "\"}";
+            "\"" + SerializationParts.QUALIFIED_VALUE + "\":\"" + o.getTime() + "\"}";
   }
 }

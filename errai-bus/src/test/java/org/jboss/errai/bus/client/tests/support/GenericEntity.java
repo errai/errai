@@ -32,10 +32,6 @@ public class GenericEntity<T> {
     this.field = field;
   }
   
-  public GenericEntity(List<T> list) {
-    this.list = list;
-  }
-  
   public T getField() {
     return field;
   }

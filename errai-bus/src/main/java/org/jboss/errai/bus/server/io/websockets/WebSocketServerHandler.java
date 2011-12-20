@@ -30,6 +30,8 @@ import org.jboss.errai.bus.server.io.MessageFactory;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.util.SecureHashUtil;
 import org.jboss.errai.common.client.protocols.MessageParts;
+import org.jboss.errai.marshalling.client.api.json.EJObject;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.server.JSONDecoder;
 
 import java.util.Map;
@@ -110,18 +112,17 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
               .getName()));
     }
 
-    @SuppressWarnings("unchecked") Map<String, Object> map
-            = (Map<String, Object>) JSONDecoder.decode(((TextWebSocketFrame) frame).getText());
+    @SuppressWarnings("unchecked") EJObject val = JSONDecoder.decode(((TextWebSocketFrame) frame).getText()).isObject();
 
     QueueSession session;
 
     // this is not an active channel.
     if (!activeChannels.containsKey(ctx.getChannel())) {
-      String commandType = (String) map.get(MessageParts.CommandType.name());
+      String commandType =  val.get(MessageParts.CommandType.name()).isString().stringValue();
 
       // this client apparently wants to connect.
       if (BusCommands.ConnectToQueue.name().equals(commandType)) {
-        String sessionKey = (String) map.get(MessageParts.ConnectionSessionKey.name());
+        String sessionKey = val.get(MessageParts.ConnectionSessionKey.name()).isString().stringValue();
 
         // has this client already attempted a connection, and is in a wait verify state
         if (sessionKey != null && (session = svc.getBus().getSessionBySessionId(sessionKey)) != null) {
@@ -143,7 +144,7 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
 
           // check the activation key matches what we have in the ssession.
           String activationKey = session.getAttribute(String.class, MessageParts.WebSocketToken.name());
-          if (activationKey == null || !activationKey.equals(map.get(MessageParts.WebSocketToken.name()))) {
+          if (activationKey == null || !activationKey.equals(val.get(MessageParts.WebSocketToken.name()).isString().stringValue())) {
             // nope. go away!
             sendMessage(ctx, getFailedNegotiation("bad negotiation key"));
           }

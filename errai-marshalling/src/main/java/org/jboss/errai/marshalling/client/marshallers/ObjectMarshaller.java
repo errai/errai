@@ -16,13 +16,14 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONString;
-import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
+import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
+import org.jboss.errai.marshalling.client.api.json.EJObject;
+import org.jboss.errai.marshalling.client.api.json.EJString;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.util.NumbersUtils;
 
 /**
@@ -30,8 +31,8 @@ import org.jboss.errai.marshalling.client.util.NumbersUtils;
  *
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ClientMarshaller
-public class ObjectMarshaller implements Marshaller<JSONValue, Object> {
+@ClientMarshaller @ServerMarshaller
+public class ObjectMarshaller implements Marshaller<Object> {
   @Override
   public Class<Object> getTypeHandled() {
     return Object.class;
@@ -43,13 +44,13 @@ public class ObjectMarshaller implements Marshaller<JSONValue, Object> {
   }
 
   @Override
-  public Object demarshall(JSONValue o, MarshallingSession ctx) {
+  public Object demarshall(EJValue o, MarshallingSession ctx) {
     if (o.isNull() != null) {
       return null;
     }
     else if (o.isObject() != null) {
-      JSONObject jsObject = o.isObject();
-      JSONString string = jsObject.get(SerializationParts.ENCODED_TYPE).isString();
+      EJObject jsObject = o.isObject();
+      EJString string = jsObject.get(SerializationParts.ENCODED_TYPE).isString();
       if (string == null) {
         throw new RuntimeException("cannot decode unqualified object: " + o);
       }
@@ -58,13 +59,16 @@ public class ObjectMarshaller implements Marshaller<JSONValue, Object> {
         return NumbersUtils.getNumber(string.stringValue(), jsObject.get(SerializationParts.NUMERIC_VALUE));
       }
 
-      Marshaller<Object, Object> marshaller = ctx.getMarshallerInstance(string.stringValue());
+      Marshaller<Object> marshaller = ctx.getMarshallerInstance(string.stringValue());
 
       if (marshaller == null) {
         throw new RuntimeException("marshalled type is unknown to the demarshall: " + string.stringValue());
       }
 
       return marshaller.demarshall(o, ctx);
+    }
+    else if (o.isArray() != null) {
+      return new ListMarshaller().demarshall(o, ctx);
     }
     else if (o.isString() != null) {
       return o.isString().stringValue();
@@ -83,7 +87,7 @@ public class ObjectMarshaller implements Marshaller<JSONValue, Object> {
       return NumbersUtils.qualifiedNumericEncoding(o);
     }
 
-    Marshaller<Object, Object> marshaller = ctx.getMarshallerInstance(o.getClass().getName());
+    Marshaller<Object> marshaller = ctx.getMarshallerInstance(o.getClass().getName());
 
     if (marshaller == null) {
       throw new RuntimeException("marshalled type is unknown to the demarshall: " + o.getClass().getName());
@@ -93,7 +97,7 @@ public class ObjectMarshaller implements Marshaller<JSONValue, Object> {
   }
 
   @Override
-  public boolean handles(JSONValue o) {
+  public boolean handles(EJValue o) {
     return false;
   }
 }

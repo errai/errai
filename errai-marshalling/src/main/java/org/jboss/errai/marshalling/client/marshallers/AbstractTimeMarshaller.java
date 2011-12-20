@@ -25,7 +25,7 @@ import java.sql.Time;
 /**
  * @author Mike Brock
  */
-public abstract class AbstractTimeMarshaller<T> implements Marshaller<T, Time> {
+public abstract class AbstractTimeMarshaller implements Marshaller<Time> {
   @Override
   public Class<Time> getTypeHandled() {
     return Time.class;
@@ -42,6 +42,6 @@ public abstract class AbstractTimeMarshaller<T> implements Marshaller<T, Time> {
 
     return "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + Time.class.getName() + "\"," +
             "\"" + SerializationParts.OBJECT_ID + "\":\"" + o.hashCode() + "\"," +
-            "\"" + SerializationParts.VALUE + "\":\"" + o.getTime() + "\"}";
+            "\"" + SerializationParts.QUALIFIED_VALUE + "\":\"" + o.getTime() + "\"}";
   }
 }

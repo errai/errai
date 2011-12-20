@@ -16,21 +16,21 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
-import com.google.gwt.json.client.JSONValue;
-import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
+import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ClientMarshaller
-public class StringBuilderMarshaller extends AbstractStringBuilderMarshaller<JSONValue> {
+@ClientMarshaller @ServerMarshaller
+public class StringBuilderMarshaller extends AbstractStringBuilderMarshaller {
   public static final StringBuilderMarshaller INSTANCE = new StringBuilderMarshaller();
 
   @Override
-  public StringBuilder demarshall(JSONValue o, MarshallingSession ctx) {
+  public StringBuilder demarshall(EJValue o, MarshallingSession ctx) {
     return (o == null || o.isString() == null) ? null : new StringBuilder(o.isString().stringValue());
   }
 
@@ -40,7 +40,7 @@ public class StringBuilderMarshaller extends AbstractStringBuilderMarshaller<JSO
   }
 
   @Override
-  public boolean handles(JSONValue o) {
+  public boolean handles(EJValue o) {
     return o.isString() != null;
   }
 }

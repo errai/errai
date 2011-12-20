@@ -16,11 +16,15 @@
 
 package org.jboss.errai.marshalling.server;
 
+import com.google.gwt.dev.shell.JsValue;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.Marshaller;
+import org.jboss.errai.marshalling.client.api.json.EJObject;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
 import org.jboss.errai.marshalling.rebind.api.model.*;
 import org.jboss.errai.marshalling.server.api.ServerMarshaller;
+import org.jboss.errai.marshalling.server.json.impl.ErraiJSONValue;
 import org.mvel2.ConversionHandler;
 import org.mvel2.DataConversion;
 
@@ -86,29 +90,29 @@ public class TypeDemarshallHelper {
     });
   }
 
-  public static Class getClassReference(Map oMap) {
+  public static Class getClassReference(EJObject oMap) {
     try {
-      return Thread.currentThread().getContextClassLoader().loadClass((String) oMap.get(SerializationParts.ENCODED_TYPE));
+      return Thread.currentThread().getContextClassLoader().loadClass(oMap.get(SerializationParts.ENCODED_TYPE).isString().stringValue());
     }
     catch (ClassNotFoundException e) {
       throw new RuntimeException("could not instantiate class", e);
     }
   }
 
-  public static Object instantiate(Map oMap, DecodingSession ctx) {
+  public static Object instantiate(EJObject oMap, DecodingSession ctx) {
     return instantiate(getClassReference(oMap), oMap, ctx);
   }
 
-  public static Object instantiate(Class clazz, Map oMap, DecodingSession ctx) {
+  public static Object instantiate(Class clazz, EJObject oMap, DecodingSession ctx) {
     try {
-      String hash = (String) oMap.get(SerializationParts.OBJECT_ID);
+      String hash = oMap.get(SerializationParts.OBJECT_ID).isString().stringValue();
 
       if (ctx.hasObjectHash(hash)) {
         return ctx.getObject(Object.class, hash);
       }
 
       if (clazz.isEnum()) {
-        return Enum.valueOf(clazz, (String) oMap.get(SerializationParts.ENUM_STRING_VALUE));
+        return Enum.valueOf(clazz, oMap.get(SerializationParts.ENUM_STRING_VALUE).isString().stringValue());
       }
 
       DefinitionsFactory defs = ctx.getMappingContext().getDefinitionsFactory();
@@ -118,7 +122,7 @@ public class TypeDemarshallHelper {
         MappingDefinition def = defs.getDefinition(clazz);
         if (def.isCachedMarshaller()) {
 
-          return callMarshaller(def.getMarshallerInstance(), oMap, ctx);
+          return callMarshaller(def.getMarshallerInstance(), new ErraiJSONValue(oMap), ctx);
         }
 
         InstantiationMapping cns = def.getInstantiationMapping();
@@ -148,43 +152,29 @@ public class TypeDemarshallHelper {
   }
 
 
-  private static Object callMarshaller(Marshaller m, Map oMap, DecodingSession ctx) throws Exception {
-    if (m instanceof ServerMarshaller) {
-      return ((ServerMarshaller) m).demarshallFromMap(oMap, ctx);
-    }
-    else {
-      return m.demarshall(oMap, ctx);
-    }
+  private static Object callMarshaller(Marshaller m, EJValue oMap, DecodingSession ctx) throws Exception {
+    return m.demarshall(oMap, ctx);
   }
 
-  public static Object demarshallAll(Object o, DecodingSession ctx) throws Exception {
+  public static Object demarshallAll(EJValue o, DecodingSession ctx) throws Exception {
     try {
-      if (o instanceof String) {
-        return o;
-
+      if (o.isString() != null) {
+        return o.isString().stringValue();
       }
-      else if (o instanceof Collection) {
-        ArrayList newList = new ArrayList(((Collection) o).size());
-        for (Object o2 : ((Collection) o)) {
-          newList.add(demarshallAll(o2, ctx));
-        }
+      else if (o.isObject() != null) {
+        EJObject obj = o.isObject();
 
-        return newList;
-      }
-      else if (o instanceof Map) {
-        Map<Object, Object> oMap = (Map) o;
-
-        Class cls = getClassReference(oMap);
+        Class cls = getClassReference(obj);
 
         if (cls.isEnum()) {
-          return Enum.valueOf(cls, (String) oMap.get(SerializationParts.ENUM_STRING_VALUE));
+          return Enum.valueOf(cls, obj.get(SerializationParts.ENUM_STRING_VALUE).isString().stringValue());
         }
 
         if (ctx.getMappingContext().getDefinitionsFactory().hasDefinition(cls)) {
-          Marshaller<Object, Object> marshaller = ctx.getMappingContext().getDefinitionsFactory().getDefinition(cls)
+          Marshaller<Object> marshaller = ctx.getMappingContext().getDefinitionsFactory().getDefinition(cls)
                   .getMarshallerInstance();
 
-          return callMarshaller(marshaller, oMap, ctx);
+          return callMarshaller(marshaller, o, ctx);
         }
         else {
           throw new RuntimeException("unknown class to demarshall: " + cls.getName());

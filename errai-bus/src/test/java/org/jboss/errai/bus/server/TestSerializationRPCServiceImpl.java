@@ -196,4 +196,9 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
   public GenericEntity testGenericEntity(GenericEntity e) {
     return e;
   }
+
+  @Override
+  public EntityWithSuperClassField testEntityWithSuperClassField(EntityWithSuperClassField e) {
+    return e;
+  }
 }

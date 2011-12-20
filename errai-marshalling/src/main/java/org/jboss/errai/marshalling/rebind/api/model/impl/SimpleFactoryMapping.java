@@ -84,7 +84,7 @@ public class SimpleFactoryMapping implements FactoryMapping {
     Class<?>[] sig = new Class<?>[ms.length];
     int i = 0;
     for (Mapping m : ms) {
-      sig[i++] = m.getType().asClass();
+      sig[i++] = m.getTargetType().asClass();
     }
     return _constructorSignature = sig;
   }
@@ -107,24 +107,6 @@ public class SimpleFactoryMapping implements FactoryMapping {
     return toMap;
   }
 
-  private static class SimpleMapping extends AbstractMapping {
-    private String key;
-    private MetaClass type;
 
-    private SimpleMapping(String key, MetaClass type) {
-      this.key = key;
-      this.type = type;
-    }
-
-    @Override
-    public String getKey() {
-      return key;
-    }
-
-    @Override
-    public MetaClass getType() {
-      return type;
-    }
-  }
 
 }

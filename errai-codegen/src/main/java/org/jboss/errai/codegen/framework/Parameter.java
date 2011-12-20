@@ -95,4 +95,9 @@ public class Parameter extends AbstractStatement implements MetaParameter {
   public <A extends Annotation> A getAnnotation(Class<A> annotation) {
     return null;
   }
+
+  @Override
+  public String toString() {
+    return type.getFullyQualifiedName();
+  }
 }

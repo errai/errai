@@ -16,17 +16,18 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
-import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.common.client.protocols.SerializationParts;
-import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
+import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
+import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ClientMarshaller
-public class ShortMarshaller implements Marshaller<JSONValue, Short> {
+@ClientMarshaller @ServerMarshaller
+public class ShortMarshaller implements Marshaller<Short> {
   @Override
   public Class<Short> getTypeHandled() {
     return Short.class;
@@ -38,15 +39,15 @@ public class ShortMarshaller implements Marshaller<JSONValue, Short> {
   }
 
   @Override
-  public Short demarshall(JSONValue o, MarshallingSession ctx) {
+  public Short demarshall(EJValue o, MarshallingSession ctx) {
     if (o == null) {
       return null;
     }
     else if (o.isObject() != null) {
-      return new Double(o.isObject().get(SerializationParts.NUMERIC_VALUE).isNumber().doubleValue()).shortValue();
+      return o.isObject().get(SerializationParts.NUMERIC_VALUE).isNumber().shortValue();
     }
     else {
-      return new Double(o.isNumber().doubleValue()).shortValue();
+      return o.isNumber().shortValue();
     }
   }
 
@@ -56,7 +57,7 @@ public class ShortMarshaller implements Marshaller<JSONValue, Short> {
   }
 
   @Override
-  public boolean handles(JSONValue o) {
+  public boolean handles(EJValue o) {
     return o.isNumber() != null;
   }
 }

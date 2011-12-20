@@ -131,7 +131,7 @@ public class AnonymousClassStructureBuilderImpl
     MetaMethod method = classDefinition.getSuperClass()
             .getBestMatchingMethod(name, types.toArray(new MetaClass[args.length]));
     if (method == null)
-      throw new UndefinedMethodException("Method not found:" + name);
+      throw new UndefinedMethodException("Method not found:" + name + "(" + types + ")");
 
     return publicOverridesMethod(method, DefParameters.from(method, args));
   }

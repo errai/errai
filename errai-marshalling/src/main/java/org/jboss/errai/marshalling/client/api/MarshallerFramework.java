@@ -16,20 +16,23 @@
 
 package org.jboss.errai.marshalling.client.api;
 
-import java.util.List;
-import java.util.Map;
-
+import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.exceptions.MarshallingException;
+import org.jboss.errai.marshalling.client.api.json.EJObject;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
+import org.jboss.errai.marshalling.client.api.json.impl.gwt.GWTJSON;
 import org.jboss.errai.marshalling.client.marshallers.MapMarshaller;
 import org.jboss.errai.marshalling.client.marshallers.NullMarshaller;
 import org.jboss.errai.marshalling.client.marshallers.ObjectMarshaller;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
 
-import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONValue;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -39,23 +42,36 @@ public class MarshallerFramework implements EntryPoint {
 
   static {
     marshallerFactory = GWT.create(MarshallerFactory.class);
+
+    ParserFactory.registerParser(new Parser() {
+      @Override
+      public EJValue parse(String input) {
+        return GWTJSON.wrap(JSONParser.parseStrict(input));
+      }
+    });
   }
+
 
   @Override
   public void onModuleLoad() {
+
   }
+
+
 
   public static Object demarshalErraiJSON(JSONValue object) {
     JSONMarshallingSession session = new JSONMarshallingSession();
 
-    Marshaller<Object, Object> marshaller =
-            marshallerFactory.getMarshaller(null, session.determineTypeFor(null, object));
+    EJValue o = GWTJSON.wrap(object);
+
+    Marshaller<Object> marshaller =
+            marshallerFactory.getMarshaller(null, session.determineTypeFor(null, o));
 
     if (marshaller == null) {
       throw new RuntimeException("no marshaller available for payload: " + session.determineTypeFor(null, object));
     }
 
-    return marshaller.demarshall(object, session);
+    return marshaller.demarshall(o, session);
   }
 
   public static String marshalErraiJSON(Map<String, Object> map) {
@@ -92,7 +108,7 @@ public class MarshallerFramework implements EntryPoint {
     }
 
     @Override
-    public Marshaller<Object, Object> getMarshallerInstance(String fqcn) {
+    public Marshaller<Object> getMarshallerInstance(String fqcn) {
       if (fqcn == null) {
         return NullMarshaller.INSTANCE;
       }
@@ -106,7 +122,7 @@ public class MarshallerFramework implements EntryPoint {
         return "null";
       }
       else {
-        Marshaller<Object, Object> m = getMarshallerInstance(o.getClass().getName());
+        Marshaller<Object> m = getMarshallerInstance(o.getClass().getName());
         if (m == null) {
           throw new MarshallingException("no marshaller for type: " + o.getClass().getName());
         }
@@ -115,14 +131,14 @@ public class MarshallerFramework implements EntryPoint {
     }
 
     @Override
-    public <T> T demarshall(Class<T> clazz, Object o) {
+    public <T> T demarshall(Class<T> clazz, EJValue o) {
       if (o == null) {
         return null;
       }
       else {
-        Marshaller<Object, Object> m = getMarshallerInstance(clazz.getName());
+        Marshaller<Object> m = getMarshallerInstance(clazz.getName());
         if (m == null) {
-          throw new MarshallingException("no marshaller for type: " + o.getClass().getName());
+          throw new MarshallingException("no marshaller for type: " + clazz.getName());
         }
         return (T) m.demarshall(o, this);
       }
@@ -130,10 +146,10 @@ public class MarshallerFramework implements EntryPoint {
 
     @Override
     public String determineTypeFor(String formatType, Object o) {
-      JSONValue jsonValue = (JSONValue) o;
+      EJValue jsonValue = (EJValue) o;
 
       if (jsonValue.isObject() != null) {
-        JSONObject jsonObject = jsonValue.isObject();
+        EJObject jsonObject = jsonValue.isObject();
         if (jsonObject.containsKey(SerializationParts.ENCODED_TYPE)) {
           return jsonObject.get(SerializationParts.ENCODED_TYPE).isString().stringValue();
         }

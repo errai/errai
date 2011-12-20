@@ -16,17 +16,18 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
-import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.common.client.protocols.SerializationParts;
-import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
+import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
+import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ClientMarshaller
-public class CharacterMarshaller implements Marshaller<JSONValue, Character> {
+@ClientMarshaller @ServerMarshaller
+public class CharacterMarshaller implements Marshaller<Character> {
   @Override
   public Class<Character> getTypeHandled() {
     return Character.class;
@@ -38,7 +39,7 @@ public class CharacterMarshaller implements Marshaller<JSONValue, Character> {
   }
 
   @Override
-  public Character demarshall(JSONValue o, MarshallingSession ctx) {
+  public Character demarshall(EJValue o, MarshallingSession ctx) {
     if (o == null) {
       return null;
     }
@@ -56,7 +57,7 @@ public class CharacterMarshaller implements Marshaller<JSONValue, Character> {
   }
 
   @Override
-  public boolean handles(JSONValue o) {
+  public boolean handles(EJValue o) {
     return o.isString() != null && o.isString().stringValue().length() == 1;
   }
 }

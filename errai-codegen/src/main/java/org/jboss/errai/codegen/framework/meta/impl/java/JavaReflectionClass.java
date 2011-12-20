@@ -108,7 +108,7 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     String packageName = null;
     Package pack = getEnclosedMetaObject().getPackage();
     if (pack != null) {
-      packageName =  pack.getName();
+      packageName = pack.getName();
     }
     return packageName;
   }
@@ -117,7 +117,9 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     List<MetaMethod> methodList = new ArrayList<MetaMethod>();
 
     for (Method m : methods) {
-      methodList.add(new JavaReflectionMethod(m));
+      if (!m.isBridge()) {
+        methodList.add(new JavaReflectionMethod(m));
+      }
     }
 
     return methodList.toArray(new MetaMethod[methodList.size()]);

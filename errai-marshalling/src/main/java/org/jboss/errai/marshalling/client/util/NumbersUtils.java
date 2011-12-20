@@ -18,12 +18,13 @@ package org.jboss.errai.marshalling.client.util;
 
 import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.common.client.protocols.SerializationParts;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class NumbersUtils {
-  public static Object getNumber(String wrapperClassName, JSONValue value) {
+  public static Object getNumber(String wrapperClassName, EJValue value) {
     if (Integer.class.getName().equals(wrapperClassName)) {
       return new Double(value.isNumber().doubleValue()).intValue();
     }
@@ -173,7 +174,7 @@ public class NumbersUtils {
     return "{" + quote + SerializationParts.ENCODED_TYPE + quote + ":"
             + quote + (o instanceof String ? Character.class.getName() : o.getClass().getName()) + quote + ", "
             + quote + SerializationParts.OBJECT_ID + quote + ": " + quote + o.hashCode() + quote + "," +
-            quote + SerializationParts.VALUE + quote + ":" + quote + String.valueOf(o) + quote + "}";
+            quote + SerializationParts.QUALIFIED_VALUE + quote + ":" + quote + String.valueOf(o) + quote + "}";
   }
 
 }

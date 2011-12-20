@@ -93,9 +93,6 @@ public class JSONUtilCli {
         return (Map<String, Object>) MarshallerFramework
                 .demarshalErraiJSON(JSONParser.parseStrict((String) value).isObject());
       }
-      else {
-        throw new RuntimeException("what the hell is this? " + value);
-      }
 
     }
     catch (RuntimeException e) {

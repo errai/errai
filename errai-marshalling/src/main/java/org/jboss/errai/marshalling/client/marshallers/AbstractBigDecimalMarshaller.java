@@ -25,7 +25,7 @@ import java.math.BigDecimal;
 /**
  * @author Mike Brock
  */
-public abstract class AbstractBigDecimalMarshaller<T> implements Marshaller<T, BigDecimal> {
+public abstract class AbstractBigDecimalMarshaller implements Marshaller<BigDecimal> {
   @Override
   public Class<BigDecimal> getTypeHandled() {
     return BigDecimal.class;
@@ -42,6 +42,6 @@ public abstract class AbstractBigDecimalMarshaller<T> implements Marshaller<T, B
 
     return "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + BigDecimal.class.getName() + "\"," +
             "\"" + SerializationParts.OBJECT_ID + "\":\"" + o.hashCode() + "\"," +
-            "\"" + SerializationParts.VALUE + "\":\"" + o.toString() + "\"}";
+            "\"" + SerializationParts.QUALIFIED_VALUE + "\":\"" + o.toString() + "\"}";
   }
 }

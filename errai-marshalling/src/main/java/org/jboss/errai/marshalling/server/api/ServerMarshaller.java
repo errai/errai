@@ -26,8 +26,6 @@ import org.jboss.errai.marshalling.client.api.MarshallingSession;
 /**
  * @author Mike Brock
  */
-public interface ServerMarshaller<T, V> extends Marshaller<T, V> {
-  V demarshallFromMap(Map<Object, Object> oMap, MarshallingSession ctx) throws Exception;
-
+public interface ServerMarshaller<V> extends Marshaller<V> {
   void marshall(OutputStream stream, V o, MarshallingSession ctx) throws IOException;
 }

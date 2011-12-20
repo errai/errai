@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ *  
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,27 +16,36 @@
 
 package org.jboss.errai.marshalling.server.marshallers;
 
-import org.jboss.errai.common.client.protocols.SerializationParts;
+import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
-import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.AbstractBigIntegerMarshaller;
-import org.jboss.errai.marshalling.client.util.MarshallUtil;
-
-import java.math.BigInteger;
-import java.util.Map;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
 
 /**
  * @author Mike Brock
  */
-@ServerMarshaller(multiReferenceable = true)
-public class ServerBigIntegerMarshaller extends AbstractBigIntegerMarshaller<Map> {
+public class RawExtractorMarshaller implements Marshaller<Object> {
   @Override
-  public BigInteger demarshall(Map o, MarshallingSession ctx) {
-    return new BigInteger(String.valueOf(o.get(SerializationParts.VALUE)));
+  public Class<Object> getTypeHandled() {
+    return Object.class;
   }
 
   @Override
-  public boolean handles(Map o) {
-    return MarshallUtil.handles(o, getTypeHandled());
+  public String getEncodingType() {
+    return "json";
+  }
+
+  @Override
+  public Object demarshall(EJValue o, MarshallingSession ctx) {
+    return o.getRawValue();
+  }
+
+  @Override
+  public String marshall(Object o, MarshallingSession ctx) {
+    return null;
+  }
+
+  @Override
+  public boolean handles(EJValue o) {
+    return true;
   }
 }

@@ -20,8 +20,12 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.framework.RoutingFlags;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.bus.server.api.QueueSession;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
+import org.jboss.errai.marshalling.client.marshallers.MapMarshaller;
+import org.jboss.errai.marshalling.server.DecodingSession;
 import org.jboss.errai.marshalling.server.JSONDecoder;
 import org.jboss.errai.marshalling.server.JSONStreamDecoder;
+import org.jboss.errai.marshalling.server.MappingContextSingleton;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -78,7 +82,10 @@ public class MessageFactory {
 
 
   public static Message createCommandMessage(QueueSession session, HttpServletRequest request) throws IOException {
-    Map<String, Object> parts = (Map<String, Object>) JSONStreamDecoder.decode(request.getInputStream());
+    EJValue val = JSONStreamDecoder.decode(request.getInputStream());
+    
+    Map parts = MapMarshaller.INSTANCE.demarshall(val, new DecodingSession(MappingContextSingleton.get()));
+    
     parts.remove(MessageParts.SessionID.name());
 
     // Expose session and session id

@@ -16,14 +16,15 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.common.client.protocols.SerializationParts;
-import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
+import org.jboss.errai.marshalling.client.api.ParserFactory;
+import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
+import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
+import org.jboss.errai.marshalling.client.api.json.EJObject;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
 
 import java.util.AbstractMap;
@@ -36,8 +37,11 @@ import java.util.Map;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @ClientMarshaller
-@ImplementationAliases({ AbstractMap.class, HashMap.class, LinkedHashMap.class })
-public class MapMarshaller implements Marshaller<JSONValue, Map> {
+@ServerMarshaller
+@ImplementationAliases({AbstractMap.class, HashMap.class, LinkedHashMap.class})
+public class MapMarshaller implements Marshaller<Map> {
+  public static final MapMarshaller INSTANCE = new MapMarshaller();
+
   @Override
   public Class<Map> getTypeHandled() {
     return Map.class;
@@ -49,26 +53,23 @@ public class MapMarshaller implements Marshaller<JSONValue, Map> {
   }
 
   @Override
-  public Map demarshall(JSONValue o, MarshallingSession ctx) {
-    JSONObject jsonObject = o.isObject();
+  public Map demarshall(EJValue o, MarshallingSession ctx) {
+    EJObject jsonObject = o.isObject();
     if (jsonObject == null)
       return null;
 
     Map<Object, Object> map = new HashMap<Object, Object>();
-    Marshaller<Object, Object> cachedKeyMarshaller = null;
-    Marshaller<Object, Object> cachedValueMarshaller = null;
-
     Object demarshalledKey, demarshalledValue;
     for (String key : jsonObject.keySet()) {
       if (key.startsWith(SerializationParts.EMBEDDED_JSON)) {
-        JSONValue val = JSONParser.parseStrict(key.substring(SerializationParts.EMBEDDED_JSON.length()));
+        EJValue val = ParserFactory.get().parse(key.substring(SerializationParts.EMBEDDED_JSON.length()));
         demarshalledKey = ctx.getMarshallerInstance(ctx.determineTypeFor(null, val)).demarshall(val, ctx);
       }
       else {
         demarshalledKey = key;
       }
 
-      JSONValue v = jsonObject.get(key);
+      EJValue v = jsonObject.get(key);
       demarshalledValue = ctx.getMarshallerInstance(ctx.determineTypeFor(null, v)).demarshall(v, ctx);
 
       map.put(demarshalledKey, demarshalledValue);
@@ -92,8 +93,8 @@ public class MapMarshaller implements Marshaller<JSONValue, Map> {
       key = entry.getKey();
       val = entry.getValue();
 
-      Marshaller<Object, Object> keyMarshaller = null;
-      Marshaller<Object, Object> valueMarshaller = null;
+      Marshaller<Object> keyMarshaller = null;
+      Marshaller<Object> valueMarshaller = null;
       if (key instanceof String) {
         buf.append("\"" + key + "\"");
       }
@@ -105,8 +106,8 @@ public class MapMarshaller implements Marshaller<JSONValue, Map> {
           keyMarshaller = ctx.getMarshallerInstance(key.getClass().getName());
         }
         buf.append(("\"" + SerializationParts.EMBEDDED_JSON))
-            .append(MarshallUtil.jsonStringEscape(keyMarshaller.marshall(key, ctx)))
-            .append("\"");
+                .append(MarshallUtil.jsonStringEscape(keyMarshaller.marshall(key, ctx)))
+                .append("\"");
       }
 
       buf.append(":");
@@ -129,7 +130,7 @@ public class MapMarshaller implements Marshaller<JSONValue, Map> {
   }
 
   @Override
-  public boolean handles(JSONValue o) {
+  public boolean handles(EJValue o) {
     return o.isArray() != null;
   }
 }

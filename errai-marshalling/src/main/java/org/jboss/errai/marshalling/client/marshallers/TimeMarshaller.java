@@ -16,31 +16,31 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
-import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
+import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
 
-import java.sql.Date;
 import java.sql.Time;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ClientMarshaller(multiReferenceable = true)
-public class TimeMarshaller extends AbstractTimeMarshaller<JSONValue> {
+@ClientMarshaller @ServerMarshaller
+public class TimeMarshaller extends AbstractTimeMarshaller {
 
   @Override
-  public Time demarshall(JSONValue o, MarshallingSession ctx) {
+  public Time demarshall(EJValue o, MarshallingSession ctx) {
     if (o.isNull() != null) return null;
 
     return o.isObject() == null ? null :
-            new Time(Long.parseLong(o.isObject().get(SerializationParts.VALUE).isString().stringValue()));
+            new Time(Long.parseLong(o.isObject().get(SerializationParts.QUALIFIED_VALUE).isString().stringValue()));
   }
 
   @Override
-  public boolean handles(JSONValue o) {
+  public boolean handles(EJValue o) {
     return MarshallUtil.handles(o.isObject(), getTypeHandled());
   }
 }

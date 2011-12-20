@@ -101,7 +101,7 @@ public class JSONStreamEncoder {
       throw new RuntimeException("no available marshaller for: " + cls.getName());
     }
 
-    Marshaller<Object, Object> marshaller = defs.getDefinition(cls).getMarshallerInstance();
+    Marshaller<Object> marshaller = defs.getDefinition(cls).getMarshallerInstance();
     if (marshaller instanceof ServerMarshaller) {
       ((ServerMarshaller) marshaller).marshall(outstream, o, ctx);
     }

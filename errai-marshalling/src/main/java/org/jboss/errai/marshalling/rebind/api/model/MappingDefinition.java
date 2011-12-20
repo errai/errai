@@ -39,17 +39,17 @@ public class MappingDefinition {
   private Class<? extends Marshaller> clientMarshallerClass;
   private Class<? extends Marshaller> serverMarshallerClass;
   
-  private Marshaller<Object, Object> marshallerInstance;
+  private Marshaller<Object> marshallerInstance;
 
   private InstantiationMapping instantiationMapping;
 
   private List<MemberMapping> memberMappings = new ArrayList<MemberMapping>();
 
-  public MappingDefinition(Marshaller<Object, Object> marshaller) {
+  public MappingDefinition(Marshaller<Object> marshaller) {
     this(marshaller, marshaller.getTypeHandled());
   }
 
-  public MappingDefinition(Marshaller<Object, Object> marshaller, Class<?> toMap) {
+  public MappingDefinition(Marshaller<Object> marshaller, Class<?> toMap) {
     this.toMap = JavaReflectionClass.newUncachedInstance(toMap);
     setMarshallerInstance(marshaller);
     instantiationMapping = new NoConstructMapping();
@@ -175,11 +175,11 @@ public class MappingDefinition {
     this.cachedMarshaller = cachedMarshaller;
   }
 
-  public Marshaller<Object, Object> getMarshallerInstance() {
+  public Marshaller<Object> getMarshallerInstance() {
     return marshallerInstance;
   }
 
-  public void setMarshallerInstance(Marshaller<Object, Object> marshallerInstance) {
+  public void setMarshallerInstance(Marshaller<Object> marshallerInstance) {
     this.marshallerInstance = marshallerInstance;
     this.cachedMarshaller = marshallerInstance != null;
   }

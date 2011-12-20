@@ -25,7 +25,7 @@ import java.sql.Date;
 /**
  * @author Mike Brock
  */
-public abstract class AbstractSQLDateMarshaller<T> implements Marshaller<T, java.sql.Date> {
+public abstract class AbstractSQLDateMarshaller implements Marshaller<java.sql.Date> {
   @Override
   public Class<Date> getTypeHandled() {
     return Date.class;
@@ -42,6 +42,6 @@ public abstract class AbstractSQLDateMarshaller<T> implements Marshaller<T, java
 
     return "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + Date.class.getName() + "\"," +
             "\"" + SerializationParts.OBJECT_ID + "\":\"" + o.hashCode() + "\"," +
-            "\"" + SerializationParts.VALUE + "\":\"" + o.getTime() + "\"}";
+            "\"" + SerializationParts.QUALIFIED_VALUE + "\":\"" + o.getTime() + "\"}";
   }
 }

@@ -18,15 +18,15 @@ package org.jboss.errai.marshalling.server;
 
 import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.marshalling.client.api.Marshaller;
+import org.jboss.errai.marshalling.client.api.Parser;
+import org.jboss.errai.marshalling.client.api.ParserFactory;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactoryImpl;
-import org.jboss.errai.marshalling.rebind.api.InheritedMappings;
 import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -34,9 +34,17 @@ import java.util.Set;
  */
 public class MappingContextSingleton {
   private static final ServerMappingContext context;
-  //private static final Map<String, Class<?>> marshallerMap = new HashMap<String, Class<?>>();
 
   static {
+    ParserFactory.registerParser(
+            new Parser() {
+              @Override
+              public EJValue parse(String input) {
+                return JSONDecoder.decode(input);
+              }
+            }
+    );
+
     context = new ServerMappingContext() {
       private final DefinitionsFactory factory = new DefinitionsFactoryImpl();
 
@@ -50,7 +58,7 @@ public class MappingContextSingleton {
 
         for (Class<?> m : marshallers) {
           try {
-            Marshaller<Object, Object> marshaller = (Marshaller<Object, Object>) m.newInstance();
+            Marshaller<Object> marshaller = (Marshaller<Object>) m.newInstance();
             //registerMarshaller(marshaller.getTypeHandled().getName(), (Class<? extends Marshaller>) m);
             factory.addDefinition(new MappingDefinition(marshaller));
 

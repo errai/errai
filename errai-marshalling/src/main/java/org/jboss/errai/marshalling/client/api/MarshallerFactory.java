@@ -26,6 +26,6 @@ public interface MarshallerFactory {
    * @param encodedType The fully-qualified Java class name of the encoded type
    * @return a marshaller instance.
    */
-  Marshaller<Object, Object> getMarshaller(String formatType, String encodedType);
+  Marshaller<Object> getMarshaller(String formatType, String encodedType);
 }
 

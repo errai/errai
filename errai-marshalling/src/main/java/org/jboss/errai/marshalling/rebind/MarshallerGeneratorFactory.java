@@ -16,7 +16,6 @@
 
 package org.jboss.errai.marshalling.rebind;
 
-import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.codegen.framework.Cast;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Parameter;
@@ -37,6 +36,8 @@ import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallerFactory;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
+import org.jboss.errai.marshalling.client.api.json.EJArray;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.rebind.api.ArrayMarshallerCallback;
 import org.jboss.errai.marshalling.rebind.api.GeneratorMappingContext;
 import org.jboss.errai.marshalling.rebind.api.MappingStrategy;
@@ -119,7 +120,7 @@ public class MarshallerGeneratorFactory {
       public Statement demarshall(MetaClass type, Statement value) {
         String variable = createDemarshallerIfNeeded(type);
 
-        value = Stmt.loadVariable(getVarName(List.class)).invoke("demarshall", value, Stmt.loadVariable("a1"));
+//        value = Stmt.loadVariable(getVarName(List.class)).invoke("demarshall", value, Stmt.loadVariable("a1"));
 
         return Stmt.loadVariable(variable).invoke("demarshall", value, Stmt.loadVariable("a1"));
       }
@@ -193,8 +194,6 @@ public class MarshallerGeneratorFactory {
     }
 
     for (Class<?> clazz : exposed) {
-      //  if (clazz.isEnum()) continue;
-
       if (mappingContext.getDefinitionsFactory().getDefinition(clazz).getClientMarshallerClass() != null) {
         continue;
       }
@@ -215,7 +214,6 @@ public class MarshallerGeneratorFactory {
         constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
                 .invoke("put", clazz.getCanonicalName(), loadVariable(varName)));
       }
-
 
       for (Map.Entry<String, String> aliasEntry : mappingContext.getDefinitionsFactory().getMappingAliases().entrySet()) {
         if (aliasEntry.getValue().equals(clazz.getName())) {
@@ -241,7 +239,7 @@ public class MarshallerGeneratorFactory {
 
     if (!arrayMarshallers.contains(varName)) {
       classStructureBuilder.privateField(varName,
-              parameterizedAs(Marshaller.class, typeParametersOf(List.class, type))).finish();
+              parameterizedAs(Marshaller.class, typeParametersOf(type))).finish();
       Statement marshaller = generateArrayMarshaller(type);
       constructor.append(loadVariable(varName).assignValue(marshaller));
 
@@ -263,7 +261,7 @@ public class MarshallerGeneratorFactory {
 
     AnonymousClassStructureBuilder classStructureBuilder
             = Stmt.create(mappingContext.getCodegenContext())
-            .newObject(parameterizedAs(Marshaller.class, typeParametersOf(List.class, arrayType))).extend();
+            .newObject(parameterizedAs(Marshaller.class, typeParametersOf(arrayType))).extend();
 
     MetaClass anonClass = classStructureBuilder.getClassDefinition();
 
@@ -276,15 +274,17 @@ public class MarshallerGeneratorFactory {
             .finish();
 
     BlockBuilder<?> bBuilder = classStructureBuilder.publicOverridesMethod("demarshall",
-            Parameter.of(Object.class, "a0"), Parameter.of(MarshallingSession.class, "a1"));
+            Parameter.of(EJValue.class, "a0"), Parameter.of(MarshallingSession.class, "a1"));
 
     bBuilder.append(
             Stmt.if_(Bool.isNull(loadVariable("a0")))
                     .append(Stmt.load(null).returnValue())
                     .finish()
                     .else_()
+                    .append(Stmt.declareVariable(EJArray.class).named("arr")
+                            .initializeWith(Stmt.loadVariable("a0").invoke("isArray")))
                     .append(Stmt.invokeStatic(anonClass, "_demarshall" + dimensions,
-                            loadVariable("a0"), loadVariable("a1")).returnValue())
+                            loadVariable("arr"), loadVariable("a1")).returnValue())
                     .finish());
     bBuilder.finish();
 
@@ -303,7 +303,7 @@ public class MarshallerGeneratorFactory {
                     .finish()
     );
 
-    classStructureBuilder.publicOverridesMethod("handles", Parameter.of(JSONValue.class, "a0"))
+    classStructureBuilder.publicOverridesMethod("handles", Parameter.of(EJValue.class, "a0"))
             .append(Stmt.load(true).returnValue())
             .finish();
 
@@ -323,15 +323,18 @@ public class MarshallerGeneratorFactory {
       outerType = outerType.asBoxed();
     }
 
+    Statement demarshallerStatement =
+            Stmt.loadVariable(getVarName(outerType)).invoke("demarshall", loadVariable("a0")
+                    .invoke("get", loadVariable("i")), Stmt.loadVariable("a1"));
+
     Statement outerAccessorStatement =
             loadVariable("newArray", loadVariable("i"))
-                    .assignValue(Cast.to(outerType,
-                            loadVariable("a0").invoke("get", loadVariable("i"))));
+                    .assignValue(demarshallerStatement);
 
 
     final BlockBuilder<?> dmBuilder =
             anonBuilder.privateMethod(arrayType, "_demarshall" + dim)
-                    .parameters(List.class, MarshallingSession.class).body();
+                    .parameters(EJArray.class, MarshallingSession.class).body();
 
     dmBuilder.append(Stmt
             .declareVariable(arrayType).named("newArray")
@@ -342,7 +345,7 @@ public class MarshallerGeneratorFactory {
                     : loadVariable("newArray", loadVariable("i")).assignValue(
                     Stmt.invokeStatic(anonBuilder.getClassDefinition(),
                             "_demarshall" + (dim - 1),
-                            Cast.to(List.class, Stmt.loadVariable("a0").invoke("get", Stmt.loadVariable("i"))),
+                            Stmt.loadVariable("a0").invoke("get", Stmt.loadVariable("i")).invoke("isArray"),
                             Stmt.loadVariable("a1"))))
 
             .finish())

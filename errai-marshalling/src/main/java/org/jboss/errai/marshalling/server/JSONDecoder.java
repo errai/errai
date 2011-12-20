@@ -18,6 +18,7 @@ package org.jboss.errai.marshalling.server;
 
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.common.client.types.UHashMap;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -36,7 +37,7 @@ import static org.mvel2.util.ParseTools.subArray;
  * Decodes a JSON string or character array, and provides a proper collection of elements
  */
 public class JSONDecoder {
-  public static Object decode(String o) {
+  public static EJValue decode(String o) {
     return new JSONStreamDecoder(new ByteArrayInputStream(o.getBytes())).parse();
   }
 }

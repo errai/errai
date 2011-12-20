@@ -205,7 +205,14 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       Class<?> cls = asClass();
 
       if (cls != null) {
-        Method[] methods = (methodsCallback == null) ? cls.getMethods() : methodsCallback.getMethods();
+        List<Method> methodList = new ArrayList<Method>();
+        for (Method m : (methodsCallback == null) ? cls.getMethods() : methodsCallback.getMethods()) {
+          if (!m.isBridge()) {
+            methodList.add(m); 
+          }
+        }
+
+        Method[] methods = methodList.toArray(new Method[methodList.size()]);
         Method m = ParseTools.getBestCandidate(parameters, name, cls, methods, true);
         if (m == null) {
           if (isInterface()) {

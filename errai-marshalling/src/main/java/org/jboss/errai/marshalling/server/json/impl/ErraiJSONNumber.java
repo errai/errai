@@ -14,24 +14,42 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.marshalling.server.marshallers;
+package org.jboss.errai.marshalling.server.json.impl;
 
-import org.jboss.errai.marshalling.client.api.MarshallingSession;
-import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.AbstractStringBuilderMarshaller;
+import org.jboss.errai.marshalling.client.api.json.EJNumber;
 
 /**
  * @author Mike Brock
  */
-@ServerMarshaller(multiReferenceable = true)
-public class ServerStringBuilderMarshaller extends AbstractStringBuilderMarshaller<Object> {
-  @Override
-  public StringBuilder demarshall(Object o, MarshallingSession ctx) {
-    return new StringBuilder(String.valueOf(o));
+public class ErraiJSONNumber implements EJNumber {
+  private final Number number;
+
+  public ErraiJSONNumber(Number number) {
+    this.number = number;
   }
 
   @Override
-  public boolean handles(Object o) {
-    return o instanceof String;
+  public double doubleValue() {
+    return number.doubleValue();
+  }
+
+  @Override
+  public int intValue() {
+    return number.intValue();
+  }
+
+  @Override
+  public short shortValue() {
+    return number.shortValue();
+  }
+
+  @Override
+  public byte byteValue() {
+    return number.byteValue();
+  }
+
+  @Override
+  public float floatValue() {
+    return number.floatValue();
   }
 }

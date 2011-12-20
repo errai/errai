@@ -25,11 +25,7 @@ import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
 /**
  * @author Mike Brock
  */
-public class AccessorMapping implements MemberMapping {
-  private MetaClass toMap;
-  private String key;
-  private MetaClass type;
-
+public class AccessorMapping extends SimpleMapping implements MemberMapping {
   private MetaClassMember bindingMember;
   private MetaClassMember readingMember;
   
@@ -41,22 +37,12 @@ public class AccessorMapping implements MemberMapping {
   }
 
   public AccessorMapping(String key, MetaClass type, String setterMethod, String getterMethod) {
-    this.key = key;
-    this.type = type.asBoxed();
+    super(key, type);
 
     this.setterMethod = setterMethod;
     this.getterMethod = getterMethod;
   }
 
-  @Override
-  public String getKey() {
-    return key;
-  }
-
-  @Override
-  public MetaClass getType() {
-    return type;
-  }
 
   @Override
   public MetaClassMember getBindingMember() {
@@ -64,7 +50,7 @@ public class AccessorMapping implements MemberMapping {
       return bindingMember;
     }
 
-    MetaMethod meth = toMap.getMethod(setterMethod, type);
+    MetaMethod meth = toMap.getMethod(setterMethod, targetType);
 
     meth.asMethod().setAccessible(true);
 
@@ -91,9 +77,7 @@ public class AccessorMapping implements MemberMapping {
     
     if (readingMember == null) {
       throw new RuntimeException("no such getter method: " + toMap.getFullyQualifiedName() + "." + getterMethod);
-    }
-
-    
+    } 
     
     return readingMember;
   }
@@ -106,10 +90,5 @@ public class AccessorMapping implements MemberMapping {
   @Override
   public boolean canWrite() {
     return true;
-  }
-
-  @Override
-  public void setMappingClass(MetaClass clazz) {
-    this.toMap = clazz;
   }
 }

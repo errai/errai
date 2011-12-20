@@ -6,6 +6,8 @@ import org.jboss.errai.common.client.types.UnsatisfiedForwardLookup;
 import org.jboss.errai.marshalling.client.api.AbstractMarshallingSession;
 import org.jboss.errai.marshalling.client.api.MappingContext;
 import org.jboss.errai.marshalling.client.api.Marshaller;
+import org.jboss.errai.marshalling.client.api.json.EJObject;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,8 +35,8 @@ public class DecodingSession extends AbstractMarshallingSession {
   }
 
   @Override
-  public <T> T demarshall(Class<T> clazz, Object o) {
-    Marshaller<Object, Object> m = getMarshallerInstance(clazz.getName());
+  public <T> T demarshall(Class<T> clazz, EJValue o) {
+    Marshaller<Object> m = getMarshallerInstance(clazz.getName());
     if (m == null) {
       throw new RuntimeException("no marshaller available for type:" + clazz.getName());
     }
@@ -42,19 +44,40 @@ public class DecodingSession extends AbstractMarshallingSession {
   }
 
   @Override
-  public Marshaller<Object, Object> getMarshallerInstance(String fqcn) {
+  public Marshaller<Object> getMarshallerInstance(String fqcn) {
     return context.getDefinitionsFactory().getDefinition(fqcn).getMarshallerInstance();
   }
 
   @Override
   public String determineTypeFor(String formatType, Object o) {
-    if (o == null) return null;
+    EJValue jsonValue = (EJValue) o;
 
-    if (o instanceof Map) {
-      return (String) ((Map) o).get(SerializationParts.ENCODED_TYPE);
+    if (jsonValue.isObject() != null) {
+      EJObject jsonObject = jsonValue.isObject();
+      if (jsonObject.containsKey(SerializationParts.ENCODED_TYPE)) {
+        return jsonObject.get(SerializationParts.ENCODED_TYPE).isString().stringValue();
+      }
+      else {
+        return Map.class.getName();
+      }
+    }
+    else if (jsonValue.isString() != null) {
+      return String.class.getName();
+    }
+    else if (jsonValue.isNumber() != null) {
+      return Double.class.getName();
+    }
+    else if (jsonValue.isBoolean() != null) {
+      return Boolean.class.getName();
+    }
+    else if (jsonValue.isArray() != null) {
+      return List.class.getName();
+    }
+    else if (jsonValue.isNull() != null) {
+      return null;
     }
     else {
-      return o.getClass().getName();
+      return jsonValue.getRawValue().getClass().getName();
     }
   }
 }

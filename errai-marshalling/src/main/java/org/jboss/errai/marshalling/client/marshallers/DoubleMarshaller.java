@@ -19,21 +19,21 @@ package org.jboss.errai.marshalling.client.marshallers;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
-
-import com.google.gwt.json.client.JSONValue;
+import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ClientMarshaller
-public class DoubleMarshaller extends AbstractNumberMarshaller<JSONValue, Double> {
+@ClientMarshaller @ServerMarshaller
+public class DoubleMarshaller extends AbstractNumberMarshaller<Double> {
   @Override
   public Class<Double> getTypeHandled() {
     return Double.class;
   }
 
   @Override
-  public Double demarshall(JSONValue o, MarshallingSession ctx) {
+  public Double demarshall(EJValue o, MarshallingSession ctx) {
     if (o == null) {
       return null;
     }
@@ -46,7 +46,7 @@ public class DoubleMarshaller extends AbstractNumberMarshaller<JSONValue, Double
   }
 
   @Override
-  public boolean handles(JSONValue o) {
+  public boolean handles(EJValue o) {
     return o.isNumber() != null;
   }
 }

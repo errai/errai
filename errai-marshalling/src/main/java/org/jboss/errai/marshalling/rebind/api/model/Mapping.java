@@ -19,11 +19,31 @@ package org.jboss.errai.marshalling.rebind.api.model;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 
 /**
+ *
+ * <code>
+ *   public class Foo {
+ *     CharSequence o;
+ *   }
+ *
+ *   Foo f = new Foo();
+ *   f.o = "test";
+ *
+ *   targetType = CharSequence
+ *   type = Object
+ *
+ * </code>
+
  * @author Mike Brock
+ *
  */
 public interface Mapping {
   public String getKey();
+
+  public MetaClass getTargetType();
+//  public void setTargetType(MetaClass targetType);
+
   public MetaClass getType();
+  public void setType(MetaClass type);
 
   public void setMappingClass(MetaClass clazz);
 }

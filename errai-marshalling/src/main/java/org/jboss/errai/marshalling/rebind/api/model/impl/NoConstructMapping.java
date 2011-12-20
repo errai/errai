@@ -24,7 +24,7 @@ import org.jboss.errai.marshalling.rebind.api.model.Mapping;
 /**
  * @author Mike Brock
  */
-public class NoConstructMapping implements ConstructorMapping{
+public class NoConstructMapping implements ConstructorMapping {
   @Override
   public Mapping[] getMappings() {
     return new Mapping[0];

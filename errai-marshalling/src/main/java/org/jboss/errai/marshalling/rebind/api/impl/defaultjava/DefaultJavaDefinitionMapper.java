@@ -37,8 +37,8 @@ import java.util.Set;
  */
 public class DefaultJavaDefinitionMapper {
   public static MappingDefinition map(MetaClass toMap, DefinitionsFactory definitionsFactory) {
-    if (definitionsFactory.hasDefinition(toMap)) {
-      return definitionsFactory.getDefinition(toMap);
+    if (definitionsFactory.hasDefinition(toMap.asBoxed())) {
+      return definitionsFactory.getDefinition(toMap.asBoxed());
     }
 
     Set<MetaConstructor> constructors = new HashSet<MetaConstructor>();
@@ -91,11 +91,9 @@ public class DefaultJavaDefinitionMapper {
 
     definition.setInstantiationMapping(simpleConstructorMapping);
 
-
     if (toMap.isEnum()) {
       return definition;
     }
-
 
     if (simpleConstructorMapping.getMappings().length == 0) {
       Set<MetaMethod> factoryMethods = new HashSet<MetaMethod>();
@@ -221,6 +219,9 @@ public class DefaultJavaDefinitionMapper {
         }
 
         definition.addMemberMapping(new MemberMapping() {
+          private MetaClass type = field.getType();
+          private MetaClass targetType = type;
+
           @Override
           public MetaClassMember getBindingMember() {
             return field;
@@ -238,7 +239,17 @@ public class DefaultJavaDefinitionMapper {
 
           @Override
           public MetaClass getType() {
-            return field.getType();
+            return type;
+          }
+
+          @Override
+          public void setType(MetaClass type) {
+            this.type = type;
+          }
+
+          @Override
+          public MetaClass getTargetType() {
+            return targetType;
           }
 
           @Override

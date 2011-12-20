@@ -23,6 +23,8 @@ import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.bus.client.framework.LogAdapter;
 
+import java.io.File;
+
 /**
  * User: christopherbrock
  * Date: 3-Aug-2010
