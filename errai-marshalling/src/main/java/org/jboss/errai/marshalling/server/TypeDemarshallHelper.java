@@ -16,23 +16,17 @@
 
 package org.jboss.errai.marshalling.server;
 
-import com.google.gwt.dev.shell.JsValue;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
 import org.jboss.errai.marshalling.rebind.api.model.*;
-import org.jboss.errai.marshalling.server.api.ServerMarshaller;
 import org.jboss.errai.marshalling.server.json.impl.ErraiJSONValue;
 import org.mvel2.ConversionHandler;
 import org.mvel2.DataConversion;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
 
 import static org.mvel2.DataConversion.addConversionHandler;
 

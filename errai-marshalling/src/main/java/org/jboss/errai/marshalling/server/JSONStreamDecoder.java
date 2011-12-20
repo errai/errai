@@ -92,7 +92,8 @@ public class JSONStreamDecoder {
 
   public EJValue parse() {
     try {
-      return new ErraiJSONValue(_parse(new Context(), null, false));
+      ErraiJSONValue v =  new ErraiJSONValue(_parse(new Context(), null, false));
+      return v;
     }
     catch (Exception e) {
       throw new RuntimeException(e);

@@ -52,7 +52,7 @@ public class GWTJSONValue implements EJValue {
 
   @Override
   public EJNull isNull() {
-    return value == null ? NULL_INSTANCE : null;
+    return value == null || value.isNull() != null ? NULL_INSTANCE : null;
   }
 
   @Override

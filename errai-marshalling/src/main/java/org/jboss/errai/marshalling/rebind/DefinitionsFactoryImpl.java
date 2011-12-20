@@ -77,21 +77,21 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
   @Override
   public boolean hasDefinition(MetaClass clazz) {
-    return hasDefinition(clazz.getCanonicalName());
+    return hasDefinition(clazz.getFullyQualifiedName());
   }
 
   @Override
   public boolean hasDefinition(Class<?> clazz) {
-    return hasDefinition(clazz.getCanonicalName());
+    return hasDefinition(clazz.getName());
   }
 
   @Override
   public void addDefinition(MappingDefinition definition) {
 
-    MAPPING_DEFINITIONS.put(definition.getMappingClass().getCanonicalName(), definition);
+    MAPPING_DEFINITIONS.put(definition.getMappingClass().getFullyQualifiedName(), definition);
     
     if (definition.getMappingClass().asUnboxed().isPrimitive()) {
-      MAPPING_DEFINITIONS.put(definition.getMappingClass().asUnboxed().getCanonicalName(), definition);
+      MAPPING_DEFINITIONS.put(definition.getMappingClass().asUnboxed().getFullyQualifiedName(), definition);
     }
     
     if (log.isDebugEnabled())
@@ -100,12 +100,12 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
   @Override
   public MappingDefinition getDefinition(MetaClass clazz) {
-    return getDefinition(clazz.getCanonicalName());
+    return getDefinition(clazz.getFullyQualifiedName());
   }
 
   @Override
   public MappingDefinition getDefinition(Class<?> clazz) {
-    return getDefinition(clazz.getCanonicalName());
+    return getDefinition(clazz.getName());
   }
 
   private void loadCustomMappings() {
@@ -170,7 +170,6 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
               MappingDefinition aliasMappingDef = new MappingDefinition(aliasCls);
               aliasMappingDef.setClientMarshallerClass(marshallerCls.asSubclass(Marshaller.class));
               addDefinition(aliasMappingDef);
-
 
               exposedClasses.add(aliasCls);
               mappingAliases.put(aliasCls.getName(), type.getName());
@@ -250,7 +249,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
                 + " to " + entry.getValue().getName() + ": the specified alias type does not exist ");
       }
 
-      mappingAliases.put(entry.getKey().getName(), entry.getValue().getName());
+      mappingAliases.put(entry.getKey().getName(), def.getClientMarshallerClass().getName());
 
       MappingDefinition aliasDef = new MappingDefinition(def.getMarshallerInstance(), entry.getKey());
       aliasDef.setClientMarshallerClass(def.getClientMarshallerClass());

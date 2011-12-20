@@ -16,6 +16,7 @@
 
 package org.jboss.errai.marshalling.server;
 
+import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.Parser;
@@ -25,8 +26,11 @@ import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactoryImpl;
+import org.jboss.errai.marshalling.rebind.api.model.Mapping;
 import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
+import org.jboss.errai.marshalling.server.marshallers.DefaultArrayMarshaller;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -50,6 +54,35 @@ public class MappingContextSingleton {
 
       {
         loadMarshallers();
+
+        for (Class<?> cls : factory.getExposedClasses()) {
+          MappingDefinition def = factory.getDefinition(cls);
+
+          for (Mapping m : def.getInstantiationMapping().getMappings()) {
+            if (m.getTargetType().isArray() && !factory.hasDefinition(m.getTargetType())) {
+              MappingDefinition arrayMappingDefinition = new MappingDefinition(m.getTargetType());
+              arrayMappingDefinition.setMarshallerInstance(
+                      new DefaultArrayMarshaller(m.getTargetType(),
+                              factory.getDefinition(m.getTargetType().getOuterComponentType()).getMarshallerInstance())
+              );
+
+              factory.addDefinition(arrayMappingDefinition);
+            }
+          }
+
+          for (Mapping m : def.getMemberMappings()) {
+            if (m.getTargetType().isArray() && !factory.hasDefinition(m.getTargetType())) {
+              MappingDefinition arrayMappingDefinition = new MappingDefinition(m.getTargetType());
+              arrayMappingDefinition.setMarshallerInstance(
+                      new DefaultArrayMarshaller(m.getTargetType(),
+                              factory.getDefinition(m.getTargetType().getOuterComponentType()).getMarshallerInstance())
+              );
+
+              factory.addDefinition(arrayMappingDefinition);
+            }
+          }
+        }
+
       }
 
       private void loadMarshallers() {
@@ -59,7 +92,7 @@ public class MappingContextSingleton {
         for (Class<?> m : marshallers) {
           try {
             Marshaller<Object> marshaller = (Marshaller<Object>) m.newInstance();
-            //registerMarshaller(marshaller.getTypeHandled().getName(), (Class<? extends Marshaller>) m);
+
             factory.addDefinition(new MappingDefinition(marshaller));
 
             if (m.isAnnotationPresent(ImplementationAliases.class)) {
@@ -76,6 +109,24 @@ public class MappingContextSingleton {
             throw new RuntimeException("Error instantiating " + m.getName(), t);
           }
         }
+
+        for (Class<?> exposed : factory.getExposedClasses()) {
+          if (exposed.isAnnotationPresent(Portable.class)) {
+            Portable p = exposed.getAnnotation(Portable.class);
+
+            if (!p.aliasOf().equals(Object.class)) {
+              if (!factory.hasDefinition(p.aliasOf())) {
+                throw new RuntimeException("cannot alias " + exposed.getName() + " to unmapped type: "
+                        + p.aliasOf().getName());
+              }
+
+              factory.getDefinition(exposed)
+                      .setMarshallerInstance(factory.getDefinition(p.aliasOf()).getMarshallerInstance());
+            }
+
+          }
+        }
+
       }
 
       @Override

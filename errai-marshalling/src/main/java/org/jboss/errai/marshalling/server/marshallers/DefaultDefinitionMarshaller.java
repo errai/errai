@@ -42,8 +42,8 @@ import java.lang.reflect.Method;
  * @author Mike Brock
  */
 public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
-  private MappingDefinition definition;
 
+  private MappingDefinition definition;
   public DefaultDefinitionMarshaller(MappingDefinition definition) {
     this.definition = definition;
   }
@@ -67,71 +67,87 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
         EJObject oMap = o.isObject();
 
         Object newInstance;
-        if (oMap.containsKey(SerializationParts.ENCODED_TYPE)) {
+        if (oMap.containsKey(SerializationParts.OBJECT_ID)) {
           if (oMap.containsKey(SerializationParts.NUMERIC_VALUE)) {
             return NumbersUtils.getNumber(oMap.get(SerializationParts.ENCODED_TYPE).isString().stringValue(),
                     oMap.get(SerializationParts.NUMERIC_VALUE));
           }
 
-          String hash = oMap.get(SerializationParts.OBJECT_ID).isString().stringValue();
+          if (oMap.containsKey(SerializationParts.OBJECT_ID)) {
 
-          if (ctx.hasObjectHash(hash)) {
-            newInstance = ctx.getObject(Object.class, hash);
+            String hash = oMap.get(SerializationParts.OBJECT_ID).isString().stringValue();
 
-            /**
-             * If this only contains 2 fields, it is only a graph reference.
-             */
-            if (oMap.size() == 2) {
-              return newInstance;
-            }
-          }
-          else {
-            if (oMap.containsKey(SerializationParts.INSTANTIATE_ONLY)) {
-              return getTypeHandled().newInstance();
-            }
+            if (ctx.hasObjectHash(hash)) {
+              newInstance = ctx.getObject(Object.class, hash);
 
-            InstantiationMapping cMapping = definition.getInstantiationMapping();
-
-            Object[] parms = new Object[cMapping.getMappings().length];
-            Class[] targetTypes = cMapping.getSignature();
-
-            int i = 0;
-            for (Mapping mapping : cMapping.getMappings()) {
-              parms[i] = DataConversion.convert(oMap.get(mapping.getKey()), targetTypes[i++]);
-            }
-
-            if (cMapping instanceof ConstructorMapping) {
-              newInstance = ((ConstructorMapping) cMapping).getMember().asConstructor().newInstance(parms);
+              /**
+               * If this only contains 2 fields, it is only a graph reference.
+               */
+              if (oMap.size() == 2) {
+                return newInstance;
+              }
             }
             else {
-              newInstance = ((FactoryMapping) cMapping).getMember().asMethod().invoke(null, parms);
-            }
-          }
+              if (oMap.containsKey(SerializationParts.INSTANTIATE_ONLY)) {
+                return getTypeHandled().newInstance();
+              }
 
-          /**
-           * In order toa accomedate the demarshaller's support for forward-references, detect the NO_AUTO_WIRE
-           * hint and do not attempt to wire any mappings if its present.
-           */
-          if (!oMap.containsKey(TypeDemarshallHelper.NO_AUTO_WIRE)) {
-            for (MemberMapping mapping : definition.getWritableMemberMappings()) {
-              if (mapping.getBindingMember() instanceof MetaField) {
-                MetaField f = (MetaField) mapping.getBindingMember();
-                TypeDemarshallHelper.setProperty(newInstance, f.asField(),
-                        ctx.demarshall(mapping.getType().asClass(), oMap.get(mapping.getKey())));
+              InstantiationMapping cMapping = definition.getInstantiationMapping();
+
+              Object[] parms = new Object[cMapping.getMappings().length];
+              Class[] targetTypes = cMapping.getSignature();
+
+              int i = 0;
+              for (Mapping mapping : cMapping.getMappings()) {
+                parms[i] = DataConversion.convert(
+                        ctx.demarshall(mapping.getType().asClass(), oMap.get(mapping.getKey())), targetTypes[i++]);
+              }
+
+              if (cMapping instanceof ConstructorMapping) {
+                newInstance = ((ConstructorMapping) cMapping).getMember().asConstructor().newInstance(parms);
               }
               else {
-                Method m = ((MetaMethod) mapping.getBindingMember()).asMethod();
-                m.invoke(newInstance, DataConversion.convert(oMap.get(mapping.getKey()), m.getParameterTypes()[0]));
+                newInstance = ((FactoryMapping) cMapping).getMember().asMethod().invoke(null, parms);
+              }
+            }
+
+            ctx.recordObjectHash(hash, newInstance);
+
+            /**
+             * In order toa accomedate the demarshaller's support for forward-references, detect the NO_AUTO_WIRE
+             * hint and do not attempt to wire any mappings if its present.
+             */
+            if (!oMap.containsKey(TypeDemarshallHelper.NO_AUTO_WIRE)) {
+              for (MemberMapping mapping : definition.getWritableMemberMappings()) {
+                if (mapping.getBindingMember() instanceof MetaField) {
+                  MetaField f = (MetaField) mapping.getBindingMember();
+                  TypeDemarshallHelper.setProperty(newInstance, f.asField(),
+                          ctx.demarshall(mapping.getType().asClass(), oMap.get(mapping.getKey())));
+                }
+                else {
+                  Method m = ((MetaMethod) mapping.getBindingMember()).asMethod();
+                  m.invoke(newInstance, DataConversion.convert(
+                          ctx.demarshall(mapping.getType().asClass(), oMap.get(mapping.getKey())),
+                          m.getParameterTypes()[0]));
+                }
               }
             }
           }
+
+          else {
+            throw new RuntimeException("unknown type to demarshall");
+          }
+
+          return newInstance;
+        }
+        else if (oMap.containsKey(SerializationParts.ENUM_STRING_VALUE)) {
+          return Enum.valueOf(getClassReference(oMap), oMap.get(SerializationParts.ENUM_STRING_VALUE).isString().stringValue());
         }
         else {
-          throw new RuntimeException("unknown type to demarshall");
+          throw new RuntimeException("bad payload");
         }
-
-        return newInstance;
       }
+
       else {
         return o.getRawValue();
       }
@@ -166,7 +182,7 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
       /**
        * If this object is referencing a duplicate object in the graph, we only provide an ID reference.
        */
-      ServerEncodingUtil.write(outstream, ctx, "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + cls.getCanonicalName()
+      ServerEncodingUtil.write(outstream, ctx, "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + cls.getName()
               + "\",\"" + SerializationParts.OBJECT_ID + "\":\"" + hash + "\"}");
 
       return;
@@ -175,7 +191,7 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
     int i = 0;
     boolean first = true;
 
-    ServerEncodingUtil.write(outstream, ctx, "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + cls.getCanonicalName() + "\",\""
+    ServerEncodingUtil.write(outstream, ctx, "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + cls.getName() + "\",\""
             + SerializationParts.OBJECT_ID + "\":\"" + hash + "\",");
 
     for (MemberMapping mapping : definition.getReadableMemberMappings()) {
@@ -219,6 +235,15 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
     }
 
     outstream.write('}');
+  }
+
+  public static Class getClassReference(EJObject oMap) {
+    try {
+      return Thread.currentThread().getContextClassLoader().loadClass(oMap.get(SerializationParts.ENCODED_TYPE).isString().stringValue());
+    }
+    catch (ClassNotFoundException e) {
+      throw new RuntimeException("could not instantiate class", e);
+    }
   }
 
   @Override
