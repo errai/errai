@@ -63,14 +63,14 @@ public class DefaultArrayMarshaller implements Marshaller<Object> {
   }
 
   public Object demarshall(EJValue a0, MarshallingSession a1) {
-    if (a0 == null) {
+    if (a0.isNull() != null) {
       return null;
     }
     else {
       EJArray arr = a0.isArray();
 
       int[] dims = new int[dimensions];
-      dims[dimensions - 1] = arr.size();
+      dims[0] = arr.size();
 
       Object arrayInstance = Array.newInstance(arrayType.getOuterComponentType().asClass(), dims);
       _demarshall(dimensions - 1, arrayInstance, arr, a1);
@@ -91,7 +91,7 @@ public class DefaultArrayMarshaller implements Marshaller<Object> {
     }
   }
 
-  private void _demarshall(int dim, Object arrayInstance, EJArray a0, MarshallingSession a1) {
+  private Object _demarshall(int dim, Object arrayInstance, EJArray a0, MarshallingSession a1) {
     if (dim == 0) {
       for (int i = 0; i < a0.size(); i++) {
         Array.set(arrayInstance, i, outerMarshaller.demarshall(a0.get(i), a1));
@@ -99,12 +99,13 @@ public class DefaultArrayMarshaller implements Marshaller<Object> {
     }
     else {
       for (int i = 0; i < a0.size(); i++) {
-        _demarshall(dim - 1,
+        Array.set(arrayInstance, i, _demarshall(dim - 1,
                 Array.newInstance(arrayType.getOuterComponentType().asClass(), a0.get(i).isArray().size()),
                 a0.get(i).isArray(),
-                a1);
+                a1));
       }
     }
+    return arrayInstance;
   }
 
   private String _marshall(Object a0, MarshallingSession a1) {

@@ -56,10 +56,7 @@ public class ListMarshaller extends AbstractCollectionMarshaller<List> {
     for (int i = 0; i < jsonArray.size(); i++) {
       EJValue elem = jsonArray.get(i);
       if (cachedMarshaller == null || !cachedMarshaller.handles(elem)) {
-        String type = ctx.determineTypeFor(null, elem);
         cachedMarshaller = ctx.getMarshallerInstance(ctx.determineTypeFor(null, elem));
-
-        System.out.println(cachedMarshaller);
       }
 
       list.add(cachedMarshaller.demarshall(elem, ctx));

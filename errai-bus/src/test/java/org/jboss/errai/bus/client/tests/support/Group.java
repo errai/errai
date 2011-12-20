@@ -84,9 +84,6 @@ public class Group {
     return "Group{" +
             "groupId=" + groupId +
             ", name='" + name + '\'' +
-            ", usersInGroup=" + usersInGroup +
-            ", subGroup=" + subGroup +
-            ", groupUserMap=" + groupUserMap +
             '}';
   }
 

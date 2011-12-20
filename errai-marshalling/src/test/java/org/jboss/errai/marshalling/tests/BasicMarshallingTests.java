@@ -14,7 +14,6 @@ public class BasicMarshallingTests {
       String output = new MarshallerGeneratorFactory().generate("org.foo", "MarshallerBootstrapperImpl" );
       System.out.println(output);
     }
-    System.out.println("HAPPY!");
   }
 
   @Test

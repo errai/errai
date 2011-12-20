@@ -44,6 +44,7 @@ import java.lang.reflect.Method;
 public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
 
   private MappingDefinition definition;
+
   public DefaultDefinitionMarshaller(MappingDefinition definition) {
     this.definition = definition;
   }
@@ -89,7 +90,9 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
             }
             else {
               if (oMap.containsKey(SerializationParts.INSTANTIATE_ONLY)) {
-                return getTypeHandled().newInstance();
+                newInstance = getTypeHandled().newInstance();
+                ctx.recordObjectHash(hash, newInstance);
+                return newInstance;
               }
 
               InstantiationMapping cMapping = definition.getInstantiationMapping();
@@ -109,9 +112,10 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
               else {
                 newInstance = ((FactoryMapping) cMapping).getMember().asMethod().invoke(null, parms);
               }
+
+              ctx.recordObjectHash(hash, newInstance);
             }
 
-            ctx.recordObjectHash(hash, newInstance);
 
             /**
              * In order toa accomedate the demarshaller's support for forward-references, detect the NO_AUTO_WIRE

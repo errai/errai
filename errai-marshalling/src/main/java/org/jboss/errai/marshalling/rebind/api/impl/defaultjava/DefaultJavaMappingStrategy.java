@@ -331,14 +331,14 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
    // builder.append(Stmt.declareVariable(String.class).named("objId").finish());
 
     Implementations.StringBuilderBuilder sb = newStringBuilder().append("{")
-            .append(keyValue(SerializationParts.ENCODED_TYPE, string(toType.getName()))).append(",")
+            .append(keyValue(SerializationParts.ENCODED_TYPE, string(toType.getFullyQualifiedName()))).append(",")
             .append(string(SerializationParts.OBJECT_ID) + ":\"").append(loadVariable("objId")).append("\"");
 
     builder.append(
             Stmt.if_(Bool.expr(loadVariable("a1").invoke("hasObjectHash", loadVariable("a0"))))
                     .append(declareVariable(String.class).named("objId").initializeWith(loadVariable("a1").invoke("getObjectHash", Stmt.loadVariable("a0"))))
                     .append(Stmt.nestedCall(newStringBuilder().append("{")
-                            .append(keyValue(SerializationParts.ENCODED_TYPE, string(toType.getName()))).append(",")
+                            .append(keyValue(SerializationParts.ENCODED_TYPE, string(toType.getFullyQualifiedName()))).append(",")
                             .append(string(SerializationParts.OBJECT_ID) + ":\"")
                             .append(loadVariable("objId"))
                             .append("\"}")).invoke("toString").returnValue())

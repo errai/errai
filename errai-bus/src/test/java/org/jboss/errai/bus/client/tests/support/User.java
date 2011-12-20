@@ -101,7 +101,6 @@ public class User extends Person {
     return "User{" +
             "id=" + id +
             ", name='" + name + '\'' +
-            ", groups=" + groups +
             '}';
   }
 

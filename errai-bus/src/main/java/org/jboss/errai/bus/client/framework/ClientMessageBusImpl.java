@@ -524,7 +524,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private void transmitRemote(final String message, final Message txMessage) {
     if (message == null) return;
 
-    System.out.println("TX: " + message);
+   // System.out.println("TX: " + message);
 
     if (webSocketOpen) {
       if (ClientWebSocketChannel.transmitToSocket(webSocketChannel, message)) {
@@ -1270,7 +1270,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   public void procPayload(String text) {
-    System.out.println("RX: " + text);
+ //   System.out.println("RX: " + text);
 
     try {
       for (MarshalledMessage m : decodePayload(text)) {

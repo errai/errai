@@ -57,7 +57,7 @@ public class Group {
 
   @Override
   public String toString() {
-    return "Group:[groupId:" + groupId + ";name:" + name + ";usersInGroup:" + usersInGroup.size() + ";subGroup:" + subGroup.hashCode() + ";groupUserMap:" + groupUserMap.size() + "]";
+    return "Group:[groupId:" + groupId + ";name:" + name + ";usersInGroup:" + usersInGroup.size() + "]";
   }
 
   @Override
