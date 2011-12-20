@@ -71,8 +71,6 @@
         <module>weld-integration</module>
         <module>jboss</module>
         <module>errai-javax-enterprise</module>
-        <module>demos/errai-cdi-stock-demo</module>
-        <module>demos/errai-cdi-tagcloud-demo</module>
     </modules>
 
     <dependencyManagement>
