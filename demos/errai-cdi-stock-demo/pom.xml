@@ -13,7 +13,7 @@
     <version>2.0-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
-  
+
   <properties>
     <errai.version>2.0-SNAPSHOT</errai.version>
     <gwt.version>2.3.0</gwt.version>
@@ -236,6 +236,13 @@
                 </goals>
               </execution>
             </executions>
+          </plugin>
+          <plugin>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>2.5</version>
+            <configuration>
+              <skipTests>false</skipTests>
+            </configuration>
           </plugin>
         </plugins>
       </build>
