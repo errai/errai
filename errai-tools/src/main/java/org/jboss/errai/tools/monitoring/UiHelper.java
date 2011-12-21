@@ -57,13 +57,6 @@ public class UiHelper {
 
     return CommandMessage.createWithParts(parts);
   }
-//
-//  public static Message uglyReEncode(Message message) {
-//    Map<String, Object> parts = (Map<String, Object>) JSONDecoder.decode(ServerBusUtils.encodeJSON(message.getParts()));
-//
-//    Message newMessage = CommandMessage.createWithParts(parts);
-//    return newMessage;
-//  }
 
   public static Message decodeAndDemarshall(String json) {
     Map<String, Object> parts = MapMarshaller.INSTANCE.demarshall(JSONDecoder.decode(json),

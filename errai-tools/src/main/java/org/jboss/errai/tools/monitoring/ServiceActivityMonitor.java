@@ -430,7 +430,6 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
 
       setSize(300, 30);
       searchField = new JTextField();
-      //searchField.setSize(300, 30);
 
       getContentPane().add(searchField);
 
