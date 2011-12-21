@@ -27,7 +27,6 @@ import org.jboss.errai.marshalling.client.util.NumbersUtils;
 import org.jboss.errai.marshalling.rebind.api.model.*;
 import org.jboss.errai.marshalling.server.EncodingSession;
 import org.jboss.errai.marshalling.server.JSONStreamEncoder;
-import org.jboss.errai.marshalling.server.TypeDemarshallHelper;
 import org.jboss.errai.marshalling.server.api.ServerMarshaller;
 import org.jboss.errai.marshalling.server.util.ServerEncodingUtil;
 import org.mvel2.DataConversion;
@@ -47,6 +46,16 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
 
   public DefaultDefinitionMarshaller(MappingDefinition definition) {
     this.definition = definition;
+  }
+
+  public static void setProperty(Object i, Field f, Object v) {
+    try {
+      f.setAccessible(true);
+      f.set(i, DataConversion.convert(v, f.getType()));
+    }
+    catch (Exception e) {
+      throw new RuntimeException("could not set field (inst=" + i + "; field=" + f + "; val=" + v + ")", e);
+    }
   }
 
   @Override
@@ -117,25 +126,20 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
             }
 
 
-            /**
-             * In order toa accomedate the demarshaller's support for forward-references, detect the NO_AUTO_WIRE
-             * hint and do not attempt to wire any mappings if its present.
-             */
-            if (!oMap.containsKey(TypeDemarshallHelper.NO_AUTO_WIRE)) {
-              for (MemberMapping mapping : definition.getWritableMemberMappings()) {
-                if (mapping.getBindingMember() instanceof MetaField) {
-                  MetaField f = (MetaField) mapping.getBindingMember();
-                  TypeDemarshallHelper.setProperty(newInstance, f.asField(),
-                          ctx.demarshall(mapping.getType().asClass(), oMap.get(mapping.getKey())));
-                }
-                else {
-                  Method m = ((MetaMethod) mapping.getBindingMember()).asMethod();
-                  m.invoke(newInstance, DataConversion.convert(
-                          ctx.demarshall(mapping.getType().asClass(), oMap.get(mapping.getKey())),
-                          m.getParameterTypes()[0]));
-                }
+            for (MemberMapping mapping : definition.getWritableMemberMappings()) {
+              if (mapping.getBindingMember() instanceof MetaField) {
+                MetaField f = (MetaField) mapping.getBindingMember();
+                setProperty(newInstance, f.asField(),
+                        ctx.demarshall(mapping.getType().asClass(), oMap.get(mapping.getKey())));
+              }
+              else {
+                Method m = ((MetaMethod) mapping.getBindingMember()).asMethod();
+                m.invoke(newInstance, DataConversion.convert(
+                        ctx.demarshall(mapping.getType().asClass(), oMap.get(mapping.getKey())),
+                        m.getParameterTypes()[0]));
               }
             }
+
           }
 
           else {

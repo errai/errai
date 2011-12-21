@@ -36,11 +36,6 @@ public class SetMarshaller extends AbstractCollectionMarshaller<Set> {
   }
 
   @Override
-  public String getEncodingType() {
-    return "json";
-  }
-
-  @Override
   public Set doDemarshall(EJArray o, MarshallingSession ctx) {
     return marshallToCollection(new HashSet<Object>(o.size()), o, ctx);
   }

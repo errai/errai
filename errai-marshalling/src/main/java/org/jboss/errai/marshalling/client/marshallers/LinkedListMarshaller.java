@@ -35,11 +35,6 @@ public class LinkedListMarshaller extends AbstractCollectionMarshaller<LinkedLis
   }
 
   @Override
-  public String getEncodingType() {
-    return "json";
-  }
-
-  @Override
   public LinkedList doDemarshall(EJArray o, MarshallingSession ctx) {
     return marshallToCollection(new LinkedList<Object>(), o, ctx);
   }
