@@ -46,23 +46,12 @@ public class MarshallUtil {
   public static boolean isPrimitiveWrapper(Class<?> cls) {
     return primitiveWrappers.contains(cls);
   }
-
-  public static void main(String[] args) {
-    System.out.println(Integer.class.isPrimitive());
-  }
   
   public static <T> T notNull(String message, T obj) {
     if (obj == null) {
       throw new NullPointerException(message);
     }
     return obj;
-  }
-
-  public static <T extends Enum<T>> T demarshalEnum(Class<T> enumType, EJObject obj, String name) {
-    if (obj == null || !obj.containsKey(name) || obj.get(name).isNull() != null) {
-      return null;
-    }
-    return Enum.valueOf(enumType, obj.get(name).isString().stringValue());
   }
 
   public static boolean handles(EJValue object, Class<?> cls) {
@@ -73,7 +62,7 @@ public class MarshallUtil {
     EJValue v = object.get(SerializationParts.ENCODED_TYPE);
     return !(v == null || v.isString() == null) && cls.getName().equals(v.isString().stringValue());
   }
-  
+
   public static boolean handles(Map object, Class<?> cls) {
     String v = String.valueOf(object.get(SerializationParts.ENCODED_TYPE));
     return (v != null && cls.getName().equals(String.valueOf(v)));

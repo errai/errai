@@ -74,13 +74,11 @@ public class MarshallingGenUtil {
   
   private static MetaMethod _findGetterMethod(String prefix, MetaClass cls, String key) {
     key = (prefix + key).toUpperCase();
-    
     for (MetaMethod m : cls.getDeclaredMethods()) {
       if (m.getName().toUpperCase().equals(key) && m.getParameters().length == 0) {
         return m;
       }
     }
-
     return null;
   }
 }

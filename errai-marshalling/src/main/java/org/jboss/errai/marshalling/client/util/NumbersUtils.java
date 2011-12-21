@@ -165,16 +165,5 @@ public class NumbersUtils {
             + quote + SerializationParts.OBJECT_ID + quote + ": " + quote + o.hashCode() + quote + "," +
             quote + SerializationParts.NUMERIC_VALUE + quote + ":"
             + (o instanceof Long ? quote + String.valueOf(o) + quote : String.valueOf(o)) + "}";
-
   }
-  
-  public static String qualifiedStringEncoding(Object o) {
-    final String quote =  "\"";
-
-    return "{" + quote + SerializationParts.ENCODED_TYPE + quote + ":"
-            + quote + (o instanceof String ? Character.class.getName() : o.getClass().getName()) + quote + ", "
-            + quote + SerializationParts.OBJECT_ID + quote + ": " + quote + o.hashCode() + quote + "," +
-            quote + SerializationParts.QUALIFIED_VALUE + quote + ":" + quote + String.valueOf(o) + quote + "}";
-  }
-
 }

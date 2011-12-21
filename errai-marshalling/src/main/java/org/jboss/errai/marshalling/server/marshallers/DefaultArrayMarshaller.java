@@ -49,10 +49,7 @@ public class DefaultArrayMarshaller implements Marshaller<Object> {
     }
 
     this.dimensions = dim;
-    
-    
   }
-
 
   public Class<Object> getTypeHandled() {
     return Object.class;
