@@ -43,7 +43,9 @@ public class JaxrsResourceMethod {
     this.method = method;
 
     Path subResourcePath = method.getAnnotation(Path.class);
-    this.path = rootResourcePath + ((subResourcePath != null) ? subResourcePath.value() : "");
+    String fullPath = "/" + rootResourcePath + ((subResourcePath != null) ? subResourcePath.value() : "");
+    this.path = fullPath.replaceAll("//", "/").replaceFirst("/", "");
+    
     this.httpMethod = JaxrsGwtRequestMethodMapper.fromMethod(method);
     this.parameters = JaxrsResourceMethodParameters.fromMethod(method);
     this.methodHeaders = JaxrsHeaders.fromMethod(method);

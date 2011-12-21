@@ -71,4 +71,21 @@ public class RestClient {
     ((RPCStub) svc).setErrorCallback(errorCallback);
     return svc;
   }
+  
+  /**
+   * Returns the configured JAX-RS application root path.
+   * 
+   * @return path with trailing slash, or empty string if undefined or explicitly set to empty
+   */
+  public static native String getJaxRsApplicationRoot() /*-{
+    if ($wnd.erraiJaxRsApplicationRoot === undefined || $wnd.erraiJaxRsApplicationRoot.length === 0) {
+      return ""; 
+    } 
+    else {
+      if ($wnd.erraiJaxRsApplicationRoot.substr(-1) !== "/") {
+        return $wnd.erraiJaxRsApplicationRoot + "/";
+      }
+      return $wnd.erraiJaxRsApplicationRoot;
+    }
+  }-*/;
 }

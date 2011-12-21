@@ -28,6 +28,17 @@ import com.google.gwt.junit.client.GWTTestCase;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public abstract class AbstractErraiJaxrsTest extends GWTTestCase {
+  protected String jaxRsApplicationRoot = "/";
+ 
+  private native void setJaxRsApplicationRoot(String path) /*-{
+    $wnd.erraiJaxRsApplicationRoot = path;
+  }-*/;
+  
+  @Override
+  protected void gwtSetUp() throws Exception {
+    setJaxRsApplicationRoot(jaxRsApplicationRoot);
+    super.gwtSetUp();
+  }
 
   protected class AssertionCallback<T> implements RemoteCallback<T> {
     private String msg;
@@ -56,7 +67,7 @@ public abstract class AbstractErraiJaxrsTest extends GWTTestCase {
       this.statusCode = statusCode;
       delayTestFinish(5000);
     }
-    
+
     public AssertionResponseCallback(String msg, int statusCode, String body) {
       this(msg, statusCode);
       this.body = body;

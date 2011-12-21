@@ -29,7 +29,7 @@ import javax.ws.rs.Path;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@Path("/test/headerparam")
+@Path("test/headerparam")
 public interface HeaderParamTestService {
 
   @GET

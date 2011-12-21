@@ -36,6 +36,7 @@ import org.jboss.errai.codegen.framework.util.Bool;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseException;
+import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.resteasy.specimpl.UriBuilderImpl;
 
 import com.google.gwt.http.client.Request;
@@ -80,15 +81,12 @@ public class JaxrsProxyMethodGenerator {
 
   private void generateUrl() {
     JaxrsResourceMethodParameters params = resourceMethod.getParameters();
-    ContextualStatementBuilder pathValue = Stmt.loadLiteral(resourceMethod.getPath());
 
     // construct path using @PathParams and @MatrixParams
     String path = resourceMethod.getPath();
-    if (!path.startsWith("/"))
-      path = "/" + path;
-
+    ContextualStatementBuilder pathValue = Stmt.loadLiteral(path);
     List<String> pathParams =
-        ((UriBuilderImpl) UriBuilderImpl.fromTemplate(path)).getPathParamNamesInDeclarationOrder();
+        ((UriBuilderImpl) UriBuilderImpl.fromTemplate("/" + path)).getPathParamNamesInDeclarationOrder();
 
     for (String pathParam : pathParams) {
       pathValue = pathValue.invoke("replaceAll", "\\{" + pathParam + "\\}",
@@ -102,13 +100,13 @@ public class JaxrsProxyMethodGenerator {
       }
     }
 
-    methodBlock.append(Stmt.declareVariable("url", StringBuilder.class,
-        Stmt.newObject(StringBuilder.class).withParameters(pathValue)));
+    methodBlock.append(Stmt.declareVariable("url", StringBuilder.class, Stmt.newObject(StringBuilder.class)
+        .withParameters(Stmt.invokeStatic(RestClient.class, "getJaxRsApplicationRoot"))));
 
     // construct query using @QueryParams
-    ContextualStatementBuilder urlBuilder = null;
+    ContextualStatementBuilder urlBuilder = Stmt.loadVariable("url").invoke(APPEND, pathValue);
     if (params.getQueryParameters() != null) {
-      urlBuilder = Stmt.loadVariable("url").invoke(APPEND, "?");
+      urlBuilder = urlBuilder.invoke(APPEND, "?");
 
       int i = 0;
       for (String queryParamName : params.getQueryParameters().keySet()) {

@@ -35,7 +35,7 @@ import org.jboss.errai.enterprise.jaxrs.client.shared.entity.Entity;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@Path("/test/customtype")
+@Path("test/customtype")
 public interface CustomTypeTestService {
   public static final List<Entity> ENTITIES = new ArrayList<Entity>() {
     {
@@ -45,7 +45,7 @@ public interface CustomTypeTestService {
   };
   
   @GET
-  @Path("/test/customtype/1")
+  @Path("/1")
   @Produces("application/json")
   public Entity getEntity();
   
@@ -54,8 +54,8 @@ public interface CustomTypeTestService {
   public List<Entity> getEntities();
   
   @POST
-  @Consumes("application/json")
-  @Produces("application/json")
+  @Consumes("application/entity+json")
+  @Produces("application/entity+json")
   public Entity postEntity(Entity entity);
   
   @PUT

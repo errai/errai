@@ -21,7 +21,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.util.Collection;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
@@ -32,7 +31,6 @@ import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
-import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.marshalling.server.DecodingSession;
 import org.jboss.errai.marshalling.server.JSONStreamDecoder;
 import org.jboss.errai.marshalling.server.JSONStreamEncoder;
@@ -44,18 +42,18 @@ import org.jboss.errai.marshalling.server.MappingContextSingleton;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Provider
-@Produces("application/json")
-@Consumes("application/json")
+@Produces("application/*+json")
+@Consumes("application/*+json")
 public class ErraiProvider implements MessageBodyReader<Object>, MessageBodyWriter<Object> {
 
   @Override
   public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-    return type.isAnnotationPresent(Portable.class) || Collection.class.isAssignableFrom(type);
+    return MappingContextSingleton.get().getDefinitionsFactory().hasDefinition(type);
   }
 
   @Override
   public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-    return type.isAnnotationPresent(Portable.class) || Collection.class.isAssignableFrom(type);
+    return MappingContextSingleton.get().getDefinitionsFactory().hasDefinition(type);
   }
 
   @Override
