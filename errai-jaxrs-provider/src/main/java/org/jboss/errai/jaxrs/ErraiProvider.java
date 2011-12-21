@@ -33,8 +33,10 @@ import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
 import org.jboss.errai.common.client.api.annotations.Portable;
+import org.jboss.errai.marshalling.server.DecodingSession;
 import org.jboss.errai.marshalling.server.JSONStreamDecoder;
 import org.jboss.errai.marshalling.server.JSONStreamEncoder;
+import org.jboss.errai.marshalling.server.MappingContextSingleton;
 
 /**
  * Provider for serialization/deserialization of Errai objects.
@@ -50,7 +52,7 @@ public class ErraiProvider implements MessageBodyReader<Object>, MessageBodyWrit
   public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
     return type.isAnnotationPresent(Portable.class) || Collection.class.isAssignableFrom(type);
   }
-  
+
   @Override
   public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
     return type.isAnnotationPresent(Portable.class) || Collection.class.isAssignableFrom(type);
@@ -65,14 +67,15 @@ public class ErraiProvider implements MessageBodyReader<Object>, MessageBodyWrit
   public void writeTo(Object t, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType,
       MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException,
       WebApplicationException {
-    
+
     JSONStreamEncoder.encode(t, entityStream);
   }
 
   @Override
   public Object readFrom(Class<Object> type, Type genericType, Annotation[] annotations, MediaType mediaType,
       MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws IOException, WebApplicationException {
-  
-    return JSONStreamDecoder.decode(entityStream);
+
+    return MappingContextSingleton.get().getDefinitionsFactory().getDefinition(type).getMarshallerInstance()
+        .demarshall(JSONStreamDecoder.decode(entityStream), new DecodingSession(MappingContextSingleton.get()));
   }
 }
