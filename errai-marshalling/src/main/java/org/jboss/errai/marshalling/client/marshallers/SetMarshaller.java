@@ -16,13 +16,11 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
-import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJArray;
-import org.jboss.errai.marshalling.client.api.json.EJValue;
 
 import java.util.*;
 
@@ -43,26 +41,7 @@ public class SetMarshaller extends AbstractCollectionMarshaller<Set> {
   }
 
   @Override
-  public Set doDemarshall(EJValue outer, MarshallingSession ctx) {
-    EJArray jsonArray = outer.isArray();
-
-    Set set = new HashSet<Object>();
-    Marshaller<Object> cachedMarshaller = null;
-
-    for (int i = 0; i < jsonArray.size(); i++) {
-      EJValue elem = jsonArray.get(i);
-      if (cachedMarshaller == null || !cachedMarshaller.handles(elem)) {
-        cachedMarshaller = ctx.getMarshallerInstance(ctx.determineTypeFor(null, elem));
-      }
-
-      set.add(cachedMarshaller.demarshall(elem, ctx));
-    }
-
-    return set;
-  }
-
-  @Override
-  public boolean handles(EJValue o) {
-    return o.isArray() != null;
+  public Set doDemarshall(EJArray o, MarshallingSession ctx) {
+    return marshallToCollection(new HashSet<Object>(o.size()), o, ctx);
   }
 }

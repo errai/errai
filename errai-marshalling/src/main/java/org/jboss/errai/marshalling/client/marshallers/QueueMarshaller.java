@@ -16,14 +16,11 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
-import org.jboss.errai.common.client.protocols.SerializationParts;
-import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJArray;
-import org.jboss.errai.marshalling.client.api.json.EJValue;
 
 import java.util.AbstractQueue;
 import java.util.LinkedList;
@@ -41,32 +38,7 @@ public class QueueMarshaller extends AbstractCollectionMarshaller<Queue> {
   }
 
   @Override
-  public String getEncodingType() {
-    return "json";
-  }
-
-  @Override
-  public Queue doDemarshall(EJValue o, MarshallingSession ctx) {
-    EJArray jsonArray = o.isArray();
-    if (jsonArray == null) return null;
-
-    Queue<Object> queue = new LinkedList<Object>();
-    Marshaller<Object> cachedMarshaller = null;
-
-    for (int i = 0; i < jsonArray.size(); i++) {
-      EJValue elem = jsonArray.get(i);
-      if (cachedMarshaller == null || !cachedMarshaller.handles(elem)) {
-        cachedMarshaller = ctx.getMarshallerInstance(ctx.determineTypeFor(null, elem));
-      }
-
-      queue.add(cachedMarshaller.demarshall(elem, ctx));
-    }
-
-    return queue;
-  }
-
-  @Override
-  public boolean handles(EJValue o) {
-    return o.isObject() != null && o.isObject().get(SerializationParts.QUALIFIED_VALUE).isArray() != null;
+  public Queue doDemarshall(EJArray o, MarshallingSession ctx) {
+    return marshallToCollection(new LinkedList<Object>(), o, ctx);
   }
 }

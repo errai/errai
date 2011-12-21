@@ -43,10 +43,10 @@ public class ByteMarshaller extends AbstractNumberMarshaller<Byte> {
       return null;
     }
     else if (o.isObject() != null) {
-      return new Double(o.isObject().get(SerializationParts.NUMERIC_VALUE).isNumber().doubleValue()).byteValue();
+      return o.isObject().get(SerializationParts.NUMERIC_VALUE).isNumber().byteValue();
     }
     else if (o.isNumber() != null) {
-      return new Double(o.isNumber().doubleValue()).byteValue();
+      return o.isNumber().byteValue();
     }
     else {
       return Byte.parseByte(o.isString().stringValue());

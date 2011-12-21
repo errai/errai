@@ -16,16 +16,18 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
+import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
+import org.jboss.errai.marshalling.client.util.MarshallUtil;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 @ClientMarshaller @ServerMarshaller
-public class StringMarshaller extends AbstractCharSequenceMarshaller<String> {
+public class StringMarshaller implements Marshaller<String> {
   public static final StringMarshaller INSTANCE = new StringMarshaller();
 
   @Override
@@ -41,5 +43,15 @@ public class StringMarshaller extends AbstractCharSequenceMarshaller<String> {
   @Override
   public boolean handles(EJValue o) {
     return o.isString() != null;
+  }
+
+  @Override
+  public String getEncodingType() {
+    return "json";
+  }
+
+  @Override
+  public String marshall(String o, MarshallingSession ctx) {
+    return o == null ? "null" : "\"" + MarshallUtil.jsonStringEscape(o.toString()) + "\"";
   }
 }

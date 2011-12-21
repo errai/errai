@@ -71,7 +71,6 @@ public class MapMarshaller implements Marshaller<Map> {
 
       EJValue v = jsonObject.get(key);
       demarshalledValue = ctx.getMarshallerInstance(ctx.determineTypeFor(null, v)).demarshall(v, ctx);
-
       map.put(demarshalledKey, demarshalledValue);
     }
     return map;
@@ -93,8 +92,8 @@ public class MapMarshaller implements Marshaller<Map> {
       key = entry.getKey();
       val = entry.getValue();
 
-      Marshaller<Object> keyMarshaller = null;
-      Marshaller<Object> valueMarshaller = null;
+      Marshaller<Object> keyMarshaller;
+      Marshaller<Object> valueMarshaller;
       if (key instanceof String) {
         buf.append("\"" + key + "\"");
       }

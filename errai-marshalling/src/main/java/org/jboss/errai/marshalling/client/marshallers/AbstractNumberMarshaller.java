@@ -32,5 +32,4 @@ public abstract class AbstractNumberMarshaller<C extends Number> implements Mars
   public String marshall(Number o, MarshallingSession ctx) {
     return o == null ? "null" : o.toString();
   }
-
 }

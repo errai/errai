@@ -16,16 +16,20 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
+import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
+import org.jboss.errai.marshalling.client.util.MarshallUtil;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 @ClientMarshaller @ServerMarshaller
-public class StringBufferMarshaller  extends AbstractStringBufferMarshaller {
+public class StringBufferMarshaller implements Marshaller<StringBuffer> {
+  public static final StringBufferMarshaller INSTANCE = new StringBufferMarshaller();
+
   @Override
   public StringBuffer demarshall(EJValue o, MarshallingSession ctx) {
     return (o == null || o.isString() == null) ? null : new StringBuffer(o.isString().stringValue());
@@ -34,5 +38,20 @@ public class StringBufferMarshaller  extends AbstractStringBufferMarshaller {
   @Override
   public boolean handles(EJValue o) {
     return o.isString() != null;
+  }
+
+  @Override
+  public Class<StringBuffer> getTypeHandled() {
+    return StringBuffer.class;
+  }
+
+  @Override
+  public String getEncodingType() {
+    return "json";
+  }
+
+  @Override
+  public String marshall(StringBuffer o, MarshallingSession ctx) {
+    return o == null ? "null" : "\"" + MarshallUtil.jsonStringEscape(o.toString())  + "\"";
   }
 }

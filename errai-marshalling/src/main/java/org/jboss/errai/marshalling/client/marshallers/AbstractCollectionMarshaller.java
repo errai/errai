@@ -17,7 +17,9 @@
 package org.jboss.errai.marshalling.client.marshallers;
 
 import org.jboss.errai.common.client.protocols.SerializationParts;
+import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
+import org.jboss.errai.marshalling.client.api.json.EJArray;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.util.EncDecUtil;
@@ -43,12 +45,37 @@ public abstract class AbstractCollectionMarshaller<C extends Collection> extends
   public final C demarshall(EJValue o, MarshallingSession ctx) {
     EJObject obj = o.isObject();
     if (obj != null) {
-      return doDemarshall(obj.get(SerializationParts.QUALIFIED_VALUE), ctx);
+      EJValue val = obj.get(SerializationParts.QUALIFIED_VALUE);
+
+      if (val.isNull() == null && val.isArray() != null) {
+        return doDemarshall(val.isArray(), ctx);
+      }
     }
-    else {
-      return doDemarshall(o, ctx);
+    else if (o.isNull() == null && o.isArray() != null) {
+      return doDemarshall(o.isArray(), ctx);
     }
+    return null;
   }
-  
-  public abstract C doDemarshall(EJValue o, MarshallingSession ctx);
+
+  public abstract C doDemarshall(EJArray o, MarshallingSession ctx);
+
+  @Override
+  public boolean handles(EJValue o) {
+    return o.isArray() != null;
+  }
+
+  protected <T extends Collection> T marshallToCollection(T collection, EJArray array, MarshallingSession ctx) {
+    Marshaller<Object> cachedMarshaller = null;
+
+    for (int i = 0; i < array.size(); i++) {
+      EJValue elem = array.get(i);
+      if (cachedMarshaller == null || !cachedMarshaller.handles(elem)) {
+        cachedMarshaller = ctx.getMarshallerInstance(ctx.determineTypeFor(null, elem));
+      }
+
+      collection.add(cachedMarshaller.demarshall(elem, ctx));
+    }
+
+    return collection;
+  }
 }

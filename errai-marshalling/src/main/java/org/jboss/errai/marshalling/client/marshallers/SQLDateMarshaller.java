@@ -17,6 +17,7 @@
 package org.jboss.errai.marshalling.client.marshallers;
 
 import org.jboss.errai.common.client.protocols.SerializationParts;
+import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
@@ -29,7 +30,7 @@ import java.sql.Date;
  * @author Mike Brock <cbrock@redhat.com>
  */
 @ClientMarshaller @ServerMarshaller
-public class SQLDateMarshaller extends AbstractSQLDateMarshaller {
+public class SQLDateMarshaller implements Marshaller<Date> {
 
   @Override
   public Date demarshall(EJValue o, MarshallingSession ctx) {
@@ -42,5 +43,24 @@ public class SQLDateMarshaller extends AbstractSQLDateMarshaller {
   @Override
   public boolean handles(EJValue o) {
     return MarshallUtil.handles(o.isObject(), getTypeHandled());
+  }
+
+  @Override
+  public Class<Date> getTypeHandled() {
+    return Date.class;
+  }
+
+  @Override
+  public String getEncodingType() {
+    return "json";
+  }
+
+  @Override
+  public String marshall(Date o, MarshallingSession ctx) {
+    if (o == null) { return "null"; }
+
+    return "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + Date.class.getName() + "\"," +
+            "\"" + SerializationParts.OBJECT_ID + "\":\"" + o.hashCode() + "\"," +
+            "\"" + SerializationParts.QUALIFIED_VALUE + "\":\"" + o.getTime() + "\"}";
   }
 }

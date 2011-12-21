@@ -16,19 +16,22 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
-import org.jboss.errai.common.client.protocols.SerializationParts;
-import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
+import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
+import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
+import org.jboss.errai.marshalling.client.api.json.EJArray;
 
-import java.math.BigInteger;
+import java.util.LinkedList;
 
 /**
- * @author Mike Brock
+ * @author Mike Brock <cbrock@redhat.com>
  */
-public abstract class AbstractBigIntegerMarshaller implements Marshaller<BigInteger> {
+@ClientMarshaller
+@ServerMarshaller
+public class LinkedListMarshaller extends AbstractCollectionMarshaller<LinkedList> {
   @Override
-  public Class<BigInteger> getTypeHandled() {
-    return BigInteger.class;
+  public Class<LinkedList> getTypeHandled() {
+    return LinkedList.class;
   }
 
   @Override
@@ -37,11 +40,7 @@ public abstract class AbstractBigIntegerMarshaller implements Marshaller<BigInte
   }
 
   @Override
-  public String marshall(BigInteger o, MarshallingSession ctx) {
-    if (o == null) { return "null"; }
-
-    return "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + BigInteger.class.getName() + "\"," +
-            "\"" + SerializationParts.OBJECT_ID + "\":\"" + o.hashCode() + "\"," +
-            "\"" + SerializationParts.QUALIFIED_VALUE + "\":\"" + o.toString() + "\"}";
+  public LinkedList doDemarshall(EJArray o, MarshallingSession ctx) {
+    return marshallToCollection(new LinkedList<Object>(), o, ctx);
   }
 }

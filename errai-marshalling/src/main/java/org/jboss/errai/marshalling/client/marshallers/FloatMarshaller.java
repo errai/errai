@@ -38,10 +38,10 @@ public class FloatMarshaller extends AbstractNumberMarshaller<Float> {
       return null;
     }
     else if (o.isObject() != null) {
-      return new Double(o.isObject().get(SerializationParts.NUMERIC_VALUE).isNumber().doubleValue()).floatValue();
+      return o.isObject().get(SerializationParts.NUMERIC_VALUE).isNumber().floatValue();
     }
     else {
-      return new Double(o.isNumber().doubleValue()).floatValue();
+      return o.isNumber().floatValue();
     }
   }
 

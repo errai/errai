@@ -17,6 +17,7 @@
 package org.jboss.errai.marshalling.client.marshallers;
 
 import org.jboss.errai.common.client.protocols.SerializationParts;
+import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
@@ -28,7 +29,7 @@ import java.math.BigInteger;
  * @author Mike Brock
  */
 @ClientMarshaller @ServerMarshaller
-public class BigIntegerMarshaller extends AbstractBigIntegerMarshaller {
+public class BigIntegerMarshaller implements Marshaller<BigInteger> {
   @Override
   public BigInteger demarshall(EJValue o, MarshallingSession ctx) {
 
@@ -39,5 +40,24 @@ public class BigIntegerMarshaller extends AbstractBigIntegerMarshaller {
   @Override
   public boolean handles(EJValue o) {
     return false;
+  }
+
+  @Override
+  public Class<BigInteger> getTypeHandled() {
+    return BigInteger.class;
+  }
+
+  @Override
+  public String getEncodingType() {
+    return "json";
+  }
+
+  @Override
+  public String marshall(BigInteger o, MarshallingSession ctx) {
+    if (o == null) { return "null"; }
+
+    return "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + BigInteger.class.getName() + "\"," +
+            "\"" + SerializationParts.OBJECT_ID + "\":\"" + o.hashCode() + "\"," +
+            "\"" + SerializationParts.QUALIFIED_VALUE + "\":\"" + o.toString() + "\"}";
   }
 }

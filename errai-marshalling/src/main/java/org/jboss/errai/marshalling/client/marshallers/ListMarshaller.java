@@ -16,13 +16,11 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
-import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJArray;
-import org.jboss.errai.marshalling.client.api.json.EJValue;
 
 import java.util.*;
 
@@ -39,36 +37,7 @@ public class ListMarshaller extends AbstractCollectionMarshaller<List> {
   }
 
   @Override
-  public String getEncodingType() {
-    return "json";
+  public List doDemarshall(EJArray o, MarshallingSession ctx) {
+    return marshallToCollection(new ArrayList<Object>(o.size()), o, ctx);
   }
-
-  @Override
-  public List doDemarshall(EJValue o, MarshallingSession ctx) {
-    if (o == null) return null;
-
-    EJArray jsonArray = o.isArray();
-    if (jsonArray == null) return null;
-
-    ArrayList<Object> list = new ArrayList<Object>();
-    Marshaller<Object> cachedMarshaller = null;
-
-    for (int i = 0; i < jsonArray.size(); i++) {
-      EJValue elem = jsonArray.get(i);
-      if (cachedMarshaller == null || !cachedMarshaller.handles(elem)) {
-        cachedMarshaller = ctx.getMarshallerInstance(ctx.determineTypeFor(null, elem));
-      }
-
-      list.add(cachedMarshaller.demarshall(elem, ctx));
-    }
-
-    return list;
-  }
-
-  @Override
-  public boolean handles(EJValue o) {
-    return o.isArray() != null;
-  }
-
-
 }

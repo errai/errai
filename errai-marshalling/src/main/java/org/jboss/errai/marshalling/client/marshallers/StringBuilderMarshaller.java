@@ -16,6 +16,7 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
+import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
@@ -26,7 +27,7 @@ import org.jboss.errai.marshalling.client.util.MarshallUtil;
  * @author Mike Brock <cbrock@redhat.com>
  */
 @ClientMarshaller @ServerMarshaller
-public class StringBuilderMarshaller extends AbstractStringBuilderMarshaller {
+public class StringBuilderMarshaller implements Marshaller<StringBuilder> {
   public static final StringBuilderMarshaller INSTANCE = new StringBuilderMarshaller();
 
   @Override
@@ -34,7 +35,6 @@ public class StringBuilderMarshaller extends AbstractStringBuilderMarshaller {
     return (o == null || o.isString() == null) ? null : new StringBuilder(o.isString().stringValue());
   }
 
-  @Override
   public String marshall(StringBuilder o, MarshallingSession ctx) {
     return o == null ? "null" : "\"" + MarshallUtil.jsonStringEscape(o.toString())  + "\"";
   }
@@ -42,5 +42,15 @@ public class StringBuilderMarshaller extends AbstractStringBuilderMarshaller {
   @Override
   public boolean handles(EJValue o) {
     return o.isString() != null;
+  }
+
+  @Override
+  public Class<StringBuilder> getTypeHandled() {
+    return StringBuilder.class;
+  }
+
+  @Override
+  public String getEncodingType() {
+    return "json";
   }
 }
