@@ -19,17 +19,16 @@ package org.jboss.errai.marshalling.server;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 
 /**
  * Encodes an object into a JSON string
  */
 public class JSONEncoder {
   public static String encode(Object o) {
-    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(1024 * 8);
+    UnwrappedByteArrayOutputStream byteArrayOutputStream = new UnwrappedByteArrayOutputStream();
     try {
       JSONStreamEncoder.encode(o, byteArrayOutputStream);
-      return new String(byteArrayOutputStream.toByteArray());
+      return new String(byteArrayOutputStream.toByteArray(), 0, byteArrayOutputStream.size());
     }
     catch (IOException e) {
       //ignore
