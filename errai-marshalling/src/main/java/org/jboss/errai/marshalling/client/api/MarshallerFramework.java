@@ -107,9 +107,34 @@ public class MarshallerFramework implements EntryPoint {
 
     @Override
     public Marshaller<Object> getMarshallerInstance(String fqcn) {
-//      if (fqcn == null) {
-//        return NullMarshaller.INSTANCE;
-//      }
+      if (fqcn == null) {
+        return new Marshaller<Object>() {
+          @Override
+          public Class<Object> getTypeHandled() {
+            return null;
+          }
+
+          @Override
+          public String getEncodingType() {
+            return null;
+          }
+
+          @Override
+          public Object demarshall(EJValue o, MarshallingSession ctx) {
+            return null;
+          }
+
+          @Override
+          public String marshall(Object o, MarshallingSession ctx) {
+            return "null";
+          }
+
+          @Override
+          public boolean handles(EJValue o) {
+            return false;
+          }
+        };
+      }
 
       return MarshallUtil.notNull("no marshaller for: " + fqcn, marshallerFactory.getMarshaller(null, fqcn));
     }
