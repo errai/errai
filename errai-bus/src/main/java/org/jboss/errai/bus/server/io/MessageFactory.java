@@ -70,7 +70,8 @@ public class MessageFactory {
   public static Message createCommandMessage(QueueSession session, String json) {
     if (json.length() == 0) return null;
 
-    Message msg = createWithParts((Map<String, Object>) JSONDecoder.decode(json))
+    Message msg = createWithParts(MapMarshaller.INSTANCE.demarshall( JSONDecoder.decode(json),
+                new DecodingSession(MappingContextSingleton.get())))
             .setResource("Session", session)
             .setResource("SessionID", session.getSessionId());
 
@@ -82,9 +83,8 @@ public class MessageFactory {
 
 
   public static Message createCommandMessage(QueueSession session, HttpServletRequest request) throws IOException {
-    EJValue val = JSONStreamDecoder.decode(request.getInputStream());
-    
-    Map parts = MapMarshaller.INSTANCE.demarshall(val, new DecodingSession(MappingContextSingleton.get()));
+    Map parts = MapMarshaller.INSTANCE.demarshall( JSONStreamDecoder.decode(request.getInputStream()),
+            new DecodingSession(MappingContextSingleton.get()));
     
     parts.remove(MessageParts.SessionID.name());
 

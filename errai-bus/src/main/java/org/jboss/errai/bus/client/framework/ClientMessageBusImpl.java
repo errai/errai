@@ -531,9 +531,18 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         return;
       }
       else {
+        log("websocket channel is closed. falling back to comet");
         //disconnected.
         webSocketOpen = false;
         webSocketChannel = null;
+        cometChannelOpen = true;
+        
+        if (receiveCommCallback instanceof LongPollRequestCallback) {
+          ((LongPollRequestCallback) receiveCommCallback).schedule();
+        }
+        else if (receiveCommCallback instanceof ShortPollRequestCallback) {
+          ((ShortPollRequestCallback) receiveCommCallback).schedule();
+        }
       }
     }
 

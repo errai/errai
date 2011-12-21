@@ -50,7 +50,6 @@ public class ClientWebSocketChannel {
     }
     else {
       return false;
-
     }
   }-*/;
 }
