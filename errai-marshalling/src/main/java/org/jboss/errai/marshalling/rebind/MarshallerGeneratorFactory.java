@@ -24,6 +24,7 @@ import org.jboss.errai.codegen.framework.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
 import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.ConstructorBlockBuilder;
+import org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
@@ -36,8 +37,10 @@ import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallerFactory;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
+import org.jboss.errai.marshalling.client.api.annotations.AlwaysQualify;
 import org.jboss.errai.marshalling.client.api.json.EJArray;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
+import org.jboss.errai.marshalling.client.marshallers.QualifyingMarshallerWrapper;
 import org.jboss.errai.marshalling.rebind.api.ArrayMarshallerCallback;
 import org.jboss.errai.marshalling.rebind.api.GeneratorMappingContext;
 import org.jboss.errai.marshalling.rebind.api.MappingStrategy;
@@ -120,8 +123,6 @@ public class MarshallerGeneratorFactory {
       public Statement demarshall(MetaClass type, Statement value) {
         String variable = createDemarshallerIfNeeded(type);
 
-//        value = Stmt.loadVariable(getVarName(List.class)).invoke("demarshall", value, Stmt.loadVariable("a1"));
-
         return Stmt.loadVariable(variable).invoke("demarshall", value, Stmt.loadVariable("a1"));
       }
 
@@ -157,10 +158,24 @@ public class MarshallerGeneratorFactory {
 
       String varName = getVarName(clsName);
 
-      classStructureBuilder.privateField(varName, marshallerCls).finish();
 
-      constructor.append(Stmt.create(classContext)
-              .loadVariable(varName).assignValue(Stmt.newObject(marshallerCls)));
+      if (marshallerCls.isAnnotationPresent(AlwaysQualify.class)) {
+        classStructureBuilder.privateField(varName,
+                MetaClassFactory.parameterizedAs(QualifyingMarshallerWrapper.class,
+                        MetaClassFactory.typeParametersOf(cls)))
+                .finish();
+
+        constructor.append(Stmt.create(classContext)
+                .loadVariable(varName).assignValue(
+                        Stmt.newObject(QualifyingMarshallerWrapper.class)
+                                .withParameters(Stmt.newObject(marshallerCls))));
+      }
+      else {
+        classStructureBuilder.privateField(varName, marshallerCls).finish();
+
+        constructor.append(Stmt.create(classContext)
+                .loadVariable(varName).assignValue(Stmt.newObject(marshallerCls)));
+      }
 
       constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
               .invoke("put", clsName, loadVariable(varName)));
@@ -205,7 +220,14 @@ public class MarshallerGeneratorFactory {
 
       classStructureBuilder.privateField(varName, type).finish();
 
-      constructor.append(loadVariable(varName).assignValue(marshaller));
+      if (clazz.isAnnotationPresent(AlwaysQualify.class)) {
+        constructor.append(loadVariable(varName).assignValue(
+                Stmt.newObject(QualifyingMarshallerWrapper.class).withParameters(marshaller)));
+      }
+      else {
+        constructor.append(loadVariable(varName).assignValue(marshaller));
+      }
+
 
       constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
               .invoke("put", clazz.getName(), loadVariable(varName)));

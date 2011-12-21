@@ -17,27 +17,15 @@
 
 package org.jboss.errai.marshalling.server;
 
-import static org.jboss.errai.common.client.protocols.SerializationParts.ENCODED_TYPE;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
+import org.jboss.errai.marshalling.server.json.impl.ErraiJSONValue;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-
-import org.jboss.errai.common.client.protocols.SerializationParts;
-import org.jboss.errai.common.client.types.UHashMap;
-import org.jboss.errai.marshalling.client.api.json.EJValue;
-import org.jboss.errai.marshalling.rebind.api.model.Mapping;
-import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
-import org.jboss.errai.marshalling.server.json.impl.ErraiJSONValue;
-import org.jboss.errai.marshalling.server.marshallers.DefaultDefinitionMarshaller;
 
 /**
  * High-performance stream JSON parser. Provides the decoding algorithm to interpret the Errai Wire Protcol,
@@ -109,7 +97,7 @@ public class JSONStreamDecoder {
           break;
 
         case '{':
-          ctx.addValue(_parse(new Context(), new UHashMap(), true));
+          ctx.addValue(_parse(new Context(), new HashMap(), true));
           break;
 
         case ']':
@@ -214,7 +202,7 @@ public class JSONStreamDecoder {
   }
 
   public Number parseNumber(char c) throws IOException {
-    double val = 0, dVal = 0, factor = 1;
+    double val = 0, dVal = 0, factor = 1, exp = -1;
 
     char[] buf = new char[21];
     int len = 0;
@@ -223,9 +211,25 @@ public class JSONStreamDecoder {
     }
     while ((c = read()) != 0 && isValidNumberPart(c));
 
+    if (c == 'e' || c == 'E') {
+      if ((c = read()) == '+') {
+        c = read();
+      }
+
+      char[] expBuf = new char[4];
+      int expLen = 0;
+      do {
+        expBuf[expLen++] = c;
+      }
+      while ((c = read()) != 0 && isValidNumberPart(c));
+
+      exp = Double.parseDouble(new String(expBuf, 0, expLen));
+    }
+
     if (c != 0) {
       carry = c;
     }
+
 
     if (len == 1 && buf[0] == '-') return null;
 
@@ -274,7 +278,12 @@ public class JSONStreamDecoder {
       factor *= 10;
     }
 
-    return dVal + val;
+    if (exp != -1) {
+      return (dVal + val) * Math.pow(10, exp);
+    }
+    else {
+      return dVal + val;
+    }
   }
 
   private static boolean isValidNumberPart(char c) {

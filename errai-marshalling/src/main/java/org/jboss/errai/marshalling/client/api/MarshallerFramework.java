@@ -18,7 +18,6 @@ package org.jboss.errai.marshalling.client.api;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.common.client.protocols.SerializationParts;
@@ -27,7 +26,6 @@ import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.api.json.impl.gwt.GWTJSON;
 import org.jboss.errai.marshalling.client.marshallers.MapMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.NullMarshaller;
 import org.jboss.errai.marshalling.client.marshallers.ObjectMarshaller;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
 
@@ -109,9 +107,9 @@ public class MarshallerFramework implements EntryPoint {
 
     @Override
     public Marshaller<Object> getMarshallerInstance(String fqcn) {
-      if (fqcn == null) {
-        return NullMarshaller.INSTANCE;
-      }
+//      if (fqcn == null) {
+//        return NullMarshaller.INSTANCE;
+//      }
 
       return MarshallUtil.notNull("no marshaller for: " + fqcn, marshallerFactory.getMarshaller(null, fqcn));
     }

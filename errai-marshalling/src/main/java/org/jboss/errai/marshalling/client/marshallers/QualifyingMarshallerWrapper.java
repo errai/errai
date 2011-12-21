@@ -17,41 +17,45 @@
 package org.jboss.errai.marshalling.client.marshallers;
 
 import org.jboss.errai.common.client.protocols.SerializationParts;
+import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
-import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
-import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
+import org.jboss.errai.marshalling.client.util.EncDecUtil;
 
 /**
- * @author Mike Brock <cbrock@redhat.com>
+ * Used to wrap marshallers annotated with {@link org.jboss.errai.marshalling.client.api.annotations.AlwaysQualify}
+ *
+ * @author Mike Brock
  */
-@ClientMarshaller @ServerMarshaller
-public class CharacterMarshaller extends AbstractJSONMarshaller<Character> {
-  @Override
-  public Class<Character> getTypeHandled() {
-    return Character.class;
+public class QualifyingMarshallerWrapper<T> implements Marshaller<T> {
+  private Marshaller<T> delegate;
+
+  public QualifyingMarshallerWrapper(Marshaller<T> delegate) {
+    this.delegate = delegate;
   }
 
   @Override
-  public Character demarshall(EJValue o, MarshallingSession ctx) {
-    if (o == null) {
-      return null;
-    }
-    else if (o.isObject() != null) {
-      return o.isObject().get(SerializationParts.NUMERIC_VALUE).isString().stringValue().charAt(0);
-    }
-    else {
-      return o.isString().stringValue().charAt(0);
-    }
+  public Class<T> getTypeHandled() {
+    return delegate.getTypeHandled();
   }
 
   @Override
-  public String marshall(Character o, MarshallingSession ctx) {
-    return "\"" + o.toString() + "\"";
+  public String getEncodingType() {
+    return delegate.getEncodingType();
+  }
+
+  @Override
+  public T demarshall(EJValue o, MarshallingSession ctx) {
+    return delegate.demarshall(o.isObject().get(SerializationParts.QUALIFIED_VALUE), ctx);
+  }
+
+  @Override
+  public String marshall(T o, MarshallingSession ctx) {
+    return EncDecUtil.wrapQualified(o, delegate.marshall(o, ctx), ctx);
   }
 
   @Override
   public boolean handles(EJValue o) {
-    return o.isString() != null && o.isString().stringValue().length() == 1;
+    return delegate.handles(o);
   }
 }

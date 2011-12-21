@@ -16,8 +16,10 @@
 
 package org.jboss.errai.marshalling.client.util;
 
+import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
+import org.jboss.errai.marshalling.server.EncodingSession;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -50,5 +52,26 @@ public class EncDecUtil {
       buf.append(marshaller.marshall(elem, ctx));
     }
     buf.append("]");
+  }
+
+  public static String wrapQualified(Object o, String marshalledString, MarshallingSession ctx) {
+    if (o == null) {
+      return "null";
+    }
+
+    final boolean isNew = !ctx.isEncoded(o);
+    final String objId = ctx.getObjectHash(o);
+
+    final StringBuilder buf = new StringBuilder("{\"").append(SerializationParts.ENCODED_TYPE).append("\":\"")
+            .append(o.getClass().getName()).append("\",\"").append(SerializationParts.OBJECT_ID).append("\":\"")
+            .append(objId).append("\"");
+
+    if (!isNew) {
+      return buf.append("}").toString();
+    }
+    else {
+      return buf.append(",\"").append(SerializationParts.QUALIFIED_VALUE).append("\":").append(marshalledString)
+              .append("}").toString();
+    }
   }
 }

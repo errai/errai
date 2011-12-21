@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ *  
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,33 +16,27 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
-import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
-import org.jboss.errai.marshalling.client.api.json.EJValue;
+import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
+import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
+import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
+import org.jboss.errai.marshalling.client.api.json.EJArray;
+
+import java.util.*;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public class NullMarshaller extends AbstractJSONMarshaller<Object> {
-  public static final Marshaller<Object> INSTANCE = new NullMarshaller();
-  
+@ClientMarshaller @ServerMarshaller
+@ImplementationAliases({TreeSet.class})
+public class SortedSetMarshaller extends AbstractCollectionMarshaller<SortedSet> {
   @Override
-  public Class<Object> getTypeHandled() {
-    return Object.class;
+  public Class<SortedSet> getTypeHandled() {
+    return SortedSet.class;
   }
 
   @Override
-  public Object demarshall(EJValue o, MarshallingSession ctx) {
-    return null;
-  }
-
-  @Override
-  public String marshall(Object o, MarshallingSession ctx) {
-    return "null";
-  }
-
-  @Override
-  public boolean handles(EJValue o) {
-    return true;
+  public SortedSet doDemarshall(EJArray o, MarshallingSession ctx) {
+    return marshallToCollection(new TreeSet(), o, ctx);
   }
 }

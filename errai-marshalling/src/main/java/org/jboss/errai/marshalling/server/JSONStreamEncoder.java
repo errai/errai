@@ -73,10 +73,6 @@ public class JSONStreamEncoder {
         outstream.write(String.valueOf(v).getBytes());
       }
     }
-    else if (v instanceof Map) {
-      //noinspection unchecked
-      encodeMap((Map) v, outstream, ctx);
-    }
     else if (v.getClass().isArray()) {
       encodeArray(v, outstream, ctx);
     }
@@ -108,37 +104,6 @@ public class JSONStreamEncoder {
     else {
       ServerEncodingUtil.write(outstream, ctx, marshaller.marshall(o, ctx));
     }
-  }
-
-  private static void encodeMap(Map<Object, Object> map, OutputStream outstream, EncodingSession ctx)
-          throws IOException {
-
-    outstream.write('{');
-    boolean first = true;
-
-    for (Map.Entry<Object, Object> entry : map.entrySet()) {
-      if (!first) {
-        outstream.write(',');
-      }
-
-      if (!(entry.getKey() instanceof String)) {
-        ServerEncodingUtil.write(outstream, ctx, '\"');
-        if (!ctx.isEscapeMode()) outstream.write(SerializationParts.EMBEDDED_JSON.getBytes());
-        ctx.setEscapeMode();
-        encode(entry.getKey(), outstream, ctx, true);
-        ctx.unsetEscapeMode();
-        ServerEncodingUtil.write(outstream, ctx, '\"');
-      }
-      else {
-        encode(entry.getKey(), outstream, ctx, true);
-      }
-
-      outstream.write(':');
-      encode(entry.getValue(), outstream, ctx, true);
-
-      first = false;
-    }
-    outstream.write('}');
   }
 
   private static void encodeArray(Object array, OutputStream outstream, EncodingSession ctx) throws IOException {

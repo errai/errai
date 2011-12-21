@@ -16,29 +16,15 @@
 
 package org.jboss.errai.bus.client.tests;
 
+import org.jboss.errai.bus.client.api.RemoteCallback;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.tests.support.*;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.*;
-
-import org.jboss.errai.bus.client.api.RemoteCallback;
-import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.tests.support.Boron;
-import org.jboss.errai.bus.client.tests.support.ClassWithNestedClass;
-import org.jboss.errai.bus.client.tests.support.CustomList;
-import org.jboss.errai.bus.client.tests.support.EntityWithGenericCollections;
-import org.jboss.errai.bus.client.tests.support.EntityWithStringBufferAndStringBuilder;
-import org.jboss.errai.bus.client.tests.support.EntityWithSuperClassField;
-import org.jboss.errai.bus.client.tests.support.EntityWithUnqualifiedFields;
-import org.jboss.errai.bus.client.tests.support.FactoryEntity;
-import org.jboss.errai.bus.client.tests.support.GenericEntity;
-import org.jboss.errai.bus.client.tests.support.Group;
-import org.jboss.errai.bus.client.tests.support.Student;
-import org.jboss.errai.bus.client.tests.support.StudyTreeNodeContainer;
-import org.jboss.errai.bus.client.tests.support.TestEnumA;
-import org.jboss.errai.bus.client.tests.support.TestSerializationRPCService;
-import org.jboss.errai.bus.client.tests.support.TreeNodeContainer;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -50,6 +36,160 @@ public class SerializationTests extends AbstractErraiTest {
   @Override
   public String getModuleName() {
     return "org.jboss.errai.bus.ErraiBusTests";
+  }
+
+  public void testString() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final String expected = "This is a test string";
+
+        MessageBuilder.createCall(new RemoteCallback<String>() {
+          @Override
+          public void callback(String response) {
+            assertEquals(expected, response);
+            finishTest();
+          }
+        }, TestSerializationRPCService.class).testString(expected);
+      }
+    });
+  }
+
+  public void testInteger() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final int expected = Integer.MAX_VALUE;
+
+        MessageBuilder.createCall(new RemoteCallback<Integer>() {
+          @Override
+          public void callback(Integer response) {
+            assertEquals(expected, response.intValue());
+            finishTest();
+          }
+        }, TestSerializationRPCService.class).testInteger(expected);
+      }
+    });
+  }
+
+  public void testLong() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final long expected = Long.MAX_VALUE;
+
+        MessageBuilder.createCall(new RemoteCallback<Long>() {
+          @Override
+          public void callback(Long response) {
+            assertEquals(expected, response.longValue());
+            finishTest();
+          }
+        }, TestSerializationRPCService.class).testLong(expected);
+      }
+    });
+  }
+
+  public void testDouble() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final double expected = Double.MAX_VALUE;
+
+        MessageBuilder.createCall(new RemoteCallback<Double>() {
+          @Override
+          public void callback(Double response) {
+            assertEquals(expected, response.doubleValue());
+            finishTest();
+          }
+        }, TestSerializationRPCService.class).testDouble(expected);
+      }
+    });
+  }
+
+  public void testFloat() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final float expected = Float.MAX_VALUE;
+
+        MessageBuilder.createCall(new RemoteCallback<Float>() {
+          @Override
+          public void callback(Float response) {
+            assertEquals(expected, response.floatValue());
+            finishTest();
+          }
+        }, TestSerializationRPCService.class).testFloat(expected);
+      }
+    });
+  }
+
+
+  public void testShort() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final short expected = Short.MAX_VALUE;
+
+        MessageBuilder.createCall(new RemoteCallback<Short>() {
+          @Override
+          public void callback(Short response) {
+            assertEquals(expected, response.shortValue());
+            finishTest();
+          }
+        }, TestSerializationRPCService.class).testShort(expected);
+      }
+    });
+  }
+
+  public void testBoolean() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final boolean expected = Boolean.TRUE;
+
+        MessageBuilder.createCall(new RemoteCallback<Boolean>() {
+          @Override
+          public void callback(Boolean response) {
+            assertEquals(expected, response.booleanValue());
+            finishTest();
+          }
+        }, TestSerializationRPCService.class).testBoolean(expected);
+      }
+    });
+  }
+
+  public void testCharacter() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final char expected = 'z';
+
+        MessageBuilder.createCall(new RemoteCallback<Character>() {
+          @Override
+          public void callback(Character response) {
+            assertEquals(expected, response.charValue());
+            finishTest();
+          }
+        }, TestSerializationRPCService.class).testCharacter(expected);
+      }
+    });
+  }
+
+  public void testByte() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final byte expected = (byte) 100;
+
+        MessageBuilder.createCall(new RemoteCallback<Byte>() {
+          @Override
+          public void callback(Byte response) {
+            assertEquals(expected, response.byteValue());
+            finishTest();
+          }
+        }, TestSerializationRPCService.class).testByte(expected);
+      }
+    });
   }
 
   public void testEntitySerialization() {
@@ -271,7 +411,6 @@ public class SerializationTests extends AbstractErraiTest {
   }
 
 
-
   public void testSet() {
     runAfterInit(new Runnable() {
       @Override
@@ -309,7 +448,7 @@ public class SerializationTests extends AbstractErraiTest {
         map.put(1l, "foo");
         map.put(2l, "bar");
         map.put(3l, "baz\\qux");
-        
+
         MessageBuilder.createCall(new RemoteCallback<Map<Long, String>>() {
           @Override
           public void callback(Map<Long, String> response) {
@@ -326,7 +465,7 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
   public void testMapOfLongToListOfStrings() {
     runAfterInit(new Runnable() {
       @Override
@@ -336,14 +475,14 @@ public class SerializationTests extends AbstractErraiTest {
         List<String> l1 = new ArrayList<String>();
         l1.add("foo");
         l1.add("bar");
-        
+
         List<String> l2 = new ArrayList<String>();
         l2.add("baz");
         l2.add("qux");
 
         map.put(1l, l1);
         map.put(2l, l2);
-        
+
         MessageBuilder.createCall(new RemoteCallback<Map<Long, List<String>>>() {
           @Override
           public void callback(Map<Long, List<String>> response) {
@@ -370,7 +509,7 @@ public class SerializationTests extends AbstractErraiTest {
         map.put("foo", 1.0f);
         map.put("bar", 1.1f);
         map.put("baz", 1.2f);
-        
+
         MessageBuilder.createCall(new RemoteCallback<Map<String, Float>>() {
           @Override
           public void callback(Map<String, Float> response) {
@@ -387,7 +526,7 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
   public void testMapOfStringToListOfDoubles() {
     runAfterInit(new Runnable() {
       @Override
@@ -397,14 +536,14 @@ public class SerializationTests extends AbstractErraiTest {
         List<Double> l1 = new ArrayList<Double>();
         l1.add(1.0);
         l1.add(1.1);
-        
+
         List<Double> l2 = new ArrayList<Double>();
         l2.add(1.2);
         l2.add(1.3);
 
         map.put("foo", l1);
         map.put("bar", l2);
-        
+
         MessageBuilder.createCall(new RemoteCallback<Map<String, List<Double>>>() {
           @Override
           public void callback(Map<String, List<Double>> response) {
@@ -421,7 +560,7 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
   public void testMapOfCustomTypes() {
     runAfterInit(new Runnable() {
       @Override
@@ -430,7 +569,7 @@ public class SerializationTests extends AbstractErraiTest {
 
         map.put(new Group(1, "fooKey"), new Group(2, "fooVal"));
         map.put(new Group(3, "barKey"), new Group(4, "barVal"));
-        
+
         MessageBuilder.createCall(new RemoteCallback<Map<Group, Group>>() {
           @Override
           public void callback(Map<Group, Group> response) {
@@ -447,7 +586,7 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
   public void testMapOfListOfStringsToCustomType() {
     runAfterInit(new Runnable() {
       @Override
@@ -457,14 +596,14 @@ public class SerializationTests extends AbstractErraiTest {
         List<String> l1 = new ArrayList<String>();
         l1.add("foo");
         l1.add("bar");
-        
+
         List<String> l2 = new ArrayList<String>();
         l1.add("baz");
         l1.add("qux");
-        
+
         map.put(l1, new Group(1, "fooGroup"));
         map.put(l2, new Group(2, "barGroup"));
-        
+
         MessageBuilder.createCall(new RemoteCallback<Map<List<String>, Group>>() {
           @Override
           public void callback(Map<List<String>, Group> response) {
@@ -481,7 +620,7 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
   public void testNestedClassSerialization() {
     runAfterInit(new Runnable() {
       @Override
@@ -534,7 +673,7 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
 
   public void testEmptyEntityWithGenericCollections() {
     runAfterInit(new Runnable() {
@@ -740,7 +879,7 @@ public class SerializationTests extends AbstractErraiTest {
         final java.util.Date d = new java.util.Date(System.currentTimeMillis());
 
         class EqualTester {
-          public boolean isEqual(java.util.Date  r) {
+          public boolean isEqual(java.util.Date r) {
             return r != null &&
                     r.equals(d);
           }
@@ -748,7 +887,7 @@ public class SerializationTests extends AbstractErraiTest {
 
         MessageBuilder.createCall(new RemoteCallback<java.util.Date>() {
           @Override
-          public void callback(java.util.Date  response) {
+          public void callback(java.util.Date response) {
             try {
               assertTrue(new EqualTester().isEqual(response));
               finishTest();
@@ -772,7 +911,7 @@ public class SerializationTests extends AbstractErraiTest {
         final java.sql.Date d = new java.sql.Date(System.currentTimeMillis());
 
         class EqualTester {
-          public boolean isEqual(java.sql.Date  r) {
+          public boolean isEqual(java.sql.Date r) {
             return r != null &&
                     r.equals(d);
           }
@@ -780,7 +919,7 @@ public class SerializationTests extends AbstractErraiTest {
 
         MessageBuilder.createCall(new RemoteCallback<java.sql.Date>() {
           @Override
-          public void callback(java.sql.Date  response) {
+          public void callback(java.sql.Date response) {
             try {
               assertTrue(new EqualTester().isEqual(response));
               finishTest();
@@ -794,7 +933,6 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-
 
 
   public void testTimestampSerialization() {
@@ -956,6 +1094,137 @@ public class SerializationTests extends AbstractErraiTest {
     });
   }
 
+  public void testPriorityQueueSerialization() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        final Queue ts = new PriorityQueue();
+
+        ts.add("test1");
+        ts.add("test2");
+        ts.add("test3");
+
+        class EqualTester {
+          public boolean isEqual(Queue r) {
+            if (r != null) {
+              if (r.size() == ts.size()) {
+                for (int i = 0; i < r.size(); i++) {
+                  if (!r.poll().equals(ts.poll())) {
+                    return false;
+                  }
+                }
+
+              }
+
+              return true;
+
+            }
+            return false;
+
+          }
+        }
+
+        MessageBuilder.createCall(new RemoteCallback<Queue>() {
+          @Override
+          public void callback(Queue response) {
+            try {
+              assertTrue(new EqualTester().isEqual(response));
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestSerializationRPCService.class).testQueueSerialization(ts);
+      }
+    });
+  }
+
+  public void testSortedMapSerialization() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        final SortedMap ts = new TreeMap();
+
+        ts.put("test1", "a");
+        ts.put("test2", "b");
+        ts.put("test3", "c");
+
+        class EqualTester {
+          public boolean isEqual(SortedMap r) {
+            if (r != null) {
+              if (r.size() == ts.size()) {
+                if (!r.firstKey().equals(ts.firstKey())) {
+                  return false;
+                }
+                else if (!r.lastKey().equals(ts.lastKey())) {
+                  return false;
+                }
+              }
+
+              return true;
+            }
+            return false;
+
+          }
+        }
+
+        MessageBuilder.createCall(new RemoteCallback<SortedMap>() {
+          @Override
+          public void callback(SortedMap response) {
+            try {
+              assertTrue(new EqualTester().isEqual(response));
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestSerializationRPCService.class).testSortedMapSerialization(ts);
+      }
+    });
+  }
+
+  public void testSortedSetSerialization() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        final SortedSet ts = new TreeSet();
+
+        ts.add("test1");
+        ts.add("test2");
+        ts.add("test3");
+
+        class EqualTester {
+          public boolean isEqual(SortedSet r) {
+            return r != null &&
+                    r.equals(ts);
+          }
+        }
+
+        MessageBuilder.createCall(new RemoteCallback<SortedSet>() {
+          @Override
+          public void callback(SortedSet response) {
+            try {
+              assertTrue(new EqualTester().isEqual(response));
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestSerializationRPCService.class).testSortedSetSerialization(ts);
+      }
+    });
+  }
+
+
   public void testInheritedDefinitionFromExistingParent() {
     runAfterInit(new Runnable() {
       @Override
@@ -1087,14 +1356,14 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
   public void testGenericEntity() {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
 
         final GenericEntity<String> entity = new GenericEntity<String>("foo");
-        
+
         List<String> groups = new ArrayList<String>();
         groups.add("bar");
         groups.add("baz");
@@ -1116,7 +1385,7 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
   public void testGenericEntityUsingList() {
     runAfterInit(new Runnable() {
       @Override
@@ -1125,7 +1394,7 @@ public class SerializationTests extends AbstractErraiTest {
         List<Group> groups = new ArrayList<Group>();
         groups.add(new Group(1, "foo"));
         groups.add(new Group(2, "bar"));
-        
+
         final GenericEntity<List<Group>> entity = new GenericEntity<List<Group>>(groups);
 
         MessageBuilder.createCall(new RemoteCallback<GenericEntity<List<Group>>>() {
@@ -1201,7 +1470,6 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-
 
 
   public void testEntityWithSuperClassField() {

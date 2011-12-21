@@ -34,6 +34,51 @@ import org.jboss.errai.bus.server.annotations.Service;
 public class TestSerializationRPCServiceImpl implements TestSerializationRPCService {
 
   @Override
+  public String testString(String str) {
+    return str;
+  }
+
+  @Override
+  public int testInteger(int i) {
+    return i;
+  }
+
+  @Override
+  public long testLong(long l) {
+    return l;
+  }
+
+  @Override
+  public double testDouble(double d) {
+    return d;
+  }
+
+  @Override
+  public float testFloat(float f) {
+    return f;
+  }
+
+  @Override
+  public short testShort(short s) {
+    return s;
+  }
+
+  @Override
+  public boolean testBoolean(boolean b) {
+    return b;
+  }
+
+  @Override
+  public char testCharacter(char c) {
+    return c;
+  }
+
+  @Override
+  public byte testByte(byte b) {
+    return b;
+  }
+
+  @Override
   public List<Long> listOfLong(List<Long> list) {
     return list;
   }
@@ -72,7 +117,7 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
   public Set<String> setOfStrings(Set<String> set) {
     return set;
   }
-  
+
   @Override
   public Map<Long, String> mapOfLongToString(Map<Long, String> map) {
     return map;
@@ -97,12 +142,12 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
   public Map<Group, Group> mapOfCustomTypes(Map<Group, Group> map) {
     return map;
   }
-  
+
   @Override
   public Map<List<String>, Group> mapOfListOfStringsToCustomType(Map<List<String>, Group> map) {
     return map;
   }
-  
+
   @Override
   public ClassWithNestedClass nestedClass(ClassWithNestedClass clazz) {
     return clazz;
@@ -169,8 +214,13 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
   }
 
   @Override
-  public Byte testByte(Byte b) {
-    return b;
+  public SortedMap testSortedMapSerialization(SortedMap sm) {
+    return sm;
+  }
+
+  @Override
+  public SortedSet testSortedSetSerialization(SortedSet sm) {
+    return sm;
   }
 
   @Override
@@ -192,7 +242,7 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
   public Boron.Bean testPortableInnerClass(Boron.Bean b) {
     return b;
   }
-  
+
   @Override
   public List<TreeNodeContainer> acceptTreeNodeContainers(List<TreeNodeContainer> listOfContainers) {
     int count = 0;

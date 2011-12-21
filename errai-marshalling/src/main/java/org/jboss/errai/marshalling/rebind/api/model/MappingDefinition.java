@@ -144,7 +144,7 @@ public class MappingDefinition {
     return marshallerInstance;
   }
 
-  public void setMarshallerInstance(Marshaller<Object> marshallerInstance) {
+  public void setMarshallerInstance(Marshaller marshallerInstance) {
     this.marshallerInstance = marshallerInstance;
     this.cachedMarshaller = marshallerInstance != null;
   }

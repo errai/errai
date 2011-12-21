@@ -20,11 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jboss.errai.codegen.framework.literal.ClassLiteral;
-import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaMethod;
-import org.jboss.errai.codegen.framework.meta.MetaParameterizedType;
-import org.jboss.errai.codegen.framework.meta.MetaType;
-import org.jboss.errai.codegen.framework.meta.MetaTypeVariable;
+import org.jboss.errai.codegen.framework.meta.*;
 
 /**
  * Represents a method invocation statement.
@@ -82,7 +78,12 @@ public class MethodInvocation extends AbstractStatement {
     if (superClass != null && superClass.getTypeParameters() != null & superClass.getTypeParameters().length > 0
             && gSuperClass != null && gSuperClass.getTypeParameters().length > 0) {
       for (int i = 0; i < superClass.getTypeParameters().length; i++) {
-        typeVariables.put(superClass.getTypeParameters()[i].getName(), (MetaClass) gSuperClass.getTypeParameters()[i]);
+        if (gSuperClass.getTypeParameters()[i] instanceof MetaClass) {
+          typeVariables.put(superClass.getTypeParameters()[i].getName(), (MetaClass) gSuperClass.getTypeParameters()[i]);
+        }
+        else if (gSuperClass.getTypeParameters()[i] instanceof MetaWildcardType) {
+          typeVariables.put(superClass.getTypeParameters()[i].getName(), MetaClassFactory.get(Object.class));
+        }
       }
     }
 

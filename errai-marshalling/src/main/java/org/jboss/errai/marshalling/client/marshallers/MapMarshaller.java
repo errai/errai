@@ -27,6 +27,8 @@ import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -39,26 +41,24 @@ import java.util.Map;
 @ClientMarshaller
 @ServerMarshaller
 @ImplementationAliases({AbstractMap.class, HashMap.class, LinkedHashMap.class})
-public class MapMarshaller extends AbstractJSONMarshaller<Map> {
+public class MapMarshaller<T extends Map> extends AbstractJSONMarshaller<T> {
   public static final MapMarshaller INSTANCE = new MapMarshaller();
 
   @Override
-  public Class<Map> getTypeHandled() {
-    return Map.class;
+  public Class<T> getTypeHandled() {
+    return (Class<T>) Map.class;
   }
 
   @Override
-  public String getEncodingType() {
-    return "json";
+  public T demarshall(EJValue o, MarshallingSession ctx) {
+    return doDermashall((T) new HashMap(), o, ctx);
   }
-
-  @Override
-  public Map demarshall(EJValue o, MarshallingSession ctx) {
+  
+  protected T doDermashall(T impl, EJValue o, MarshallingSession ctx) {
     EJObject jsonObject = o.isObject();
     if (jsonObject == null)
       return null;
 
-    Map<Object, Object> map = new HashMap<Object, Object>();
     Object demarshalledKey, demarshalledValue;
     for (String key : jsonObject.keySet()) {
       if (key.startsWith(SerializationParts.EMBEDDED_JSON)) {
@@ -71,13 +71,13 @@ public class MapMarshaller extends AbstractJSONMarshaller<Map> {
 
       EJValue v = jsonObject.get(key);
       demarshalledValue = ctx.getMarshallerInstance(ctx.determineTypeFor(null, v)).demarshall(v, ctx);
-      map.put(demarshalledKey, demarshalledValue);
+      impl.put(demarshalledKey, demarshalledValue);
     }
-    return map;
+    return (T) impl;
   }
 
   @Override
-  public String marshall(Map o, MarshallingSession ctx) {
+  public String marshall(T o, MarshallingSession ctx) {
     if (o == null) {
       return "null";
     }
@@ -115,7 +115,9 @@ public class MapMarshaller extends AbstractJSONMarshaller<Map> {
         buf.append("null");
       }
       else {
-        if (val instanceof Number || val instanceof Boolean || val instanceof Character) {
+        if ((val instanceof Number && !(val instanceof BigInteger || val instanceof BigDecimal))
+                || val instanceof Boolean || val instanceof Character) {
+
           valueMarshaller = MarshallUtil.getQualifiedNumberMarshaller(val);
         }
         else {

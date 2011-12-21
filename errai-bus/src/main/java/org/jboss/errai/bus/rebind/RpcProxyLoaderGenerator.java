@@ -131,6 +131,14 @@ public class RpcProxyLoaderGenerator extends Generator {
             .invoke("voteForInit"));
 
     classBuilder = (ClassStructureBuilder<?>) loadProxies.finish();
-    return classBuilder.toJavaString();
+
+    String generatedStr = classBuilder.toJavaString();
+
+    if (Boolean.getBoolean("errai.marshalling.printOut")) {
+      System.out.println("----[start rpc proxy]---");
+      System.out.println(generatedStr);
+      System.out.println("----[end rpc proxy]-----");
+    }
+    return generatedStr;
   }
 }

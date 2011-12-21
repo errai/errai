@@ -98,9 +98,11 @@ public class ConversationalEndpointCallback implements MessageCallback {
     }
 
     try {
+      Object methReply = method.invoke(serviceProvider.get(message), parms);
+
       createConversation(message)
               .subjectProvided()
-              .with("MethodReply", method.invoke(serviceProvider.get(message), parms))
+              .with("MethodReply", methReply)
               .noErrorHandling().sendNowWith(bus);
     }
     catch (MessageDeliveryFailure e) {

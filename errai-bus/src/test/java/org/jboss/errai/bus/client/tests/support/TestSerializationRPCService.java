@@ -23,10 +23,7 @@ import java.math.BigInteger;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -34,6 +31,24 @@ import java.util.Set;
  */
 @Remote
 public interface TestSerializationRPCService {
+  public String testString(String str);
+  
+  public int testInteger(int i);
+  
+  public long testLong(long l);
+
+  public double testDouble(double d);
+
+  public float testFloat(float f);
+
+  public short testShort(short s);
+
+  public boolean testBoolean(boolean b);
+
+  public char testCharacter(char c);
+
+  public byte testByte(byte b);
+
   
   public List<Long> listOfLong(List<Long> list);
   
@@ -87,11 +102,13 @@ public interface TestSerializationRPCService {
 
   public BigInteger testBigIntegerSerialization(BigInteger time);
 
-  public Byte testByte(Byte b);
-
   public List<Byte> testListOfBytes(List<Byte> lb);
   
   public Queue testQueueSerialization(Queue queue);
+
+  public SortedMap testSortedMapSerialization(SortedMap sm);
+
+  public SortedSet testSortedSetSerialization(SortedSet sm);
 
   public List testInheritedDefinitionFromExistingParent(List list);
 

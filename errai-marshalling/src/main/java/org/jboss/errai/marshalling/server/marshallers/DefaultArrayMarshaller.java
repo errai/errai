@@ -17,16 +17,12 @@
 package org.jboss.errai.marshalling.server.marshallers;
 
 import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaType;
-import org.jboss.errai.codegen.framework.util.GenUtil;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.json.EJArray;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
-import sun.rmi.transport.ObjectTable;
 
 import java.lang.reflect.Array;
-import java.lang.reflect.Type;
 
 /**
  * @author Mike Brock

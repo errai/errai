@@ -16,36 +16,39 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
+import org.apache.commons.collections.map.AbstractSortedMapDecorator;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
+import org.jboss.errai.marshalling.client.api.annotations.AlwaysQualify;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
+import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
-import org.jboss.errai.marshalling.client.util.MarshallUtil;
+import org.jboss.errai.marshalling.client.util.EncDecUtil;
+
+import java.util.Map;
+import java.util.NavigableMap;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ClientMarshaller @ServerMarshaller
-public class StringMarshaller extends AbstractJSONMarshaller<String> {
-  public static final StringMarshaller INSTANCE = new StringMarshaller();
-
-  @Override
-  public Class<String> getTypeHandled() {
-    return String.class;
+@ClientMarshaller
+@ServerMarshaller
+@AlwaysQualify
+@ImplementationAliases({TreeMap.class})
+public class SortedMapMarshaller extends MapMarshaller<SortedMap> {
+  public SortedMapMarshaller() {
+    System.out.println();
   }
 
   @Override
-  public String demarshall(EJValue o, MarshallingSession ctx) {
-    return (o == null || o.isString() == null) ? null : o.isString().stringValue();
+  public Class<SortedMap> getTypeHandled() {
+    return SortedMap.class;
   }
 
   @Override
-  public boolean handles(EJValue o) {
-    return o.isString() != null;
-  }
-
-  @Override
-  public String marshall(String o, MarshallingSession ctx) {
-    return o == null ? "null" : "\"" + MarshallUtil.jsonStringEscape(o.toString()) + "\"";
+  public SortedMap demarshall(EJValue o, MarshallingSession ctx) {
+    return doDermashall(new TreeMap(), o, ctx);
   }
 }

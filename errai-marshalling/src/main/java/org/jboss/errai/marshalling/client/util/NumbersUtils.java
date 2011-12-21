@@ -16,7 +16,6 @@
 
 package org.jboss.errai.marshalling.client.util;
 
-import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 
@@ -67,7 +66,7 @@ public class NumbersUtils {
     else if (value instanceof Long) {
       return getNumber(wrapperClassName, (Long) value);
     }
- 
+
     else {
       throw new RuntimeException("unknown numeric type: " + value);
     }
@@ -158,12 +157,13 @@ public class NumbersUtils {
   }
 
   public static String qualifiedNumericEncoding(Object o) {
-    final String quote =  "\"";
-    
+    final String quote = "\"";
+
     return "{" + quote + SerializationParts.ENCODED_TYPE + quote + ":"
             + quote + (o instanceof String ? Character.class.getName() : o.getClass().getName()) + quote + ", "
             + quote + SerializationParts.OBJECT_ID + quote + ": " + quote + o.hashCode() + quote + "," +
             quote + SerializationParts.NUMERIC_VALUE + quote + ":"
             + (o instanceof Long || o instanceof Character ? quote + String.valueOf(o) + quote : String.valueOf(o)) + "}";
+
   }
 }

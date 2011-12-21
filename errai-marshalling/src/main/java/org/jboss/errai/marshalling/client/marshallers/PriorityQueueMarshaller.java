@@ -19,33 +19,22 @@ package org.jboss.errai.marshalling.client.marshallers;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
-import org.jboss.errai.marshalling.client.api.json.EJValue;
-import org.jboss.errai.marshalling.client.util.MarshallUtil;
+import org.jboss.errai.marshalling.client.api.json.EJArray;
+
+import java.util.PriorityQueue;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 @ClientMarshaller @ServerMarshaller
-public class StringMarshaller extends AbstractJSONMarshaller<String> {
-  public static final StringMarshaller INSTANCE = new StringMarshaller();
-
+public class PriorityQueueMarshaller extends AbstractCollectionMarshaller<PriorityQueue> {
   @Override
-  public Class<String> getTypeHandled() {
-    return String.class;
+  public Class<PriorityQueue> getTypeHandled() {
+    return PriorityQueue.class;
   }
 
   @Override
-  public String demarshall(EJValue o, MarshallingSession ctx) {
-    return (o == null || o.isString() == null) ? null : o.isString().stringValue();
-  }
-
-  @Override
-  public boolean handles(EJValue o) {
-    return o.isString() != null;
-  }
-
-  @Override
-  public String marshall(String o, MarshallingSession ctx) {
-    return o == null ? "null" : "\"" + MarshallUtil.jsonStringEscape(o.toString()) + "\"";
+  public PriorityQueue doDemarshall(EJArray o, MarshallingSession ctx) {
+    return marshallToCollection(new PriorityQueue<Object>(), o, ctx);
   }
 }
