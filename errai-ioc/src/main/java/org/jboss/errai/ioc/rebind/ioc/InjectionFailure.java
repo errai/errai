@@ -67,4 +67,25 @@ public class InjectionFailure extends ErraiBootstrapFailure {
   public void setTarget(String target) {
     this.target = target;
   }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof InjectionFailure)) return false;
+
+    InjectionFailure that = (InjectionFailure) o;
+
+    if (failedDependency != null ? !failedDependency.equals(that.failedDependency) : that.failedDependency != null)
+      return false;
+    if (target != null ? !target.equals(that.target) : that.target != null) return false;
+
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int result = failedDependency != null ? failedDependency.hashCode() : 0;
+    result = 31 * result + (target != null ? target.hashCode() : 0);
+    return result;
+  }
 }

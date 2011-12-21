@@ -22,6 +22,9 @@ public class HappyInspector {
   @Inject
   private GenericServiceClassForLong longService;
 
+  public HappyInspector() {
+  }
+
   public boolean confirmHappiness() {
     return happyService.isHappy();
   }

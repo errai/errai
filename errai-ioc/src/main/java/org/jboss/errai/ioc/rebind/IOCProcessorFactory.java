@@ -24,13 +24,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
@@ -185,7 +179,14 @@ public class IOCProcessorFactory {
     } while (!procEntries.isEmpty() && procEntries.size() < start);
 
     if (!procEntries.isEmpty()) {
-      throw new RuntimeException("unresolved dependencies: " + processingEntries);
+
+      for (ProcessingEntry<?> procEntry : procEntries) {
+        for (InjectionFailure failure : procEntry.getErrorList()) {
+           failure.printStackTrace();
+        }
+      }
+
+      throw new InjectionFailure("unresolved dependencies: " + procEntries);
     }
 
     return true;
@@ -196,6 +197,8 @@ public class IOCProcessorFactory {
     private AnnotationHandler handler;
     private Set<RuleDef> rules;
     private List<ProcessingDelegate<T>> targets = new ArrayList<ProcessingDelegate<T>>();
+    private Set<InjectionFailure> errors = new LinkedHashSet<InjectionFailure>();
+    
 
     private ProcessingEntry(Class<? extends Annotation> annotationClass, AnnotationHandler handler) {
       this.annotationClass = annotationClass;
@@ -212,6 +215,8 @@ public class IOCProcessorFactory {
     public boolean processAllDelegates() {
       int start;
 
+      errors.clear();
+
       do {
         start = targets.size();
 
@@ -222,7 +227,13 @@ public class IOCProcessorFactory {
             if (iterator.next().process()) {
               iterator.remove();
             }
+            else {
+              System.out.println("fail");
+            }
+
           } catch (InjectionFailure f) {
+            errors.add(f);
+            
             // Ignored, see processAll()
           }
         }
@@ -234,6 +245,10 @@ public class IOCProcessorFactory {
 
     public void addProcessingDelegate(ProcessingDelegate<T> delegate) {
       targets.add(delegate);
+    }
+
+    public Collection<InjectionFailure> getErrorList() {
+      return Collections.unmodifiableCollection(errors);
     }
 
     @Override

@@ -115,7 +115,7 @@ public class InjectUtil {
     else {
       // field injection
       if (!hasDefaultConstructor(type))
-        throw new InjectionFailure("there is no default constructor for type: " + type.getFullyQualifiedName());
+        throw new InjectionFailure("there is no public default constructor or suitable injection constructor for type: " + type.getFullyQualifiedName());
 
       return new ConstructionStrategy() {
         @Override
