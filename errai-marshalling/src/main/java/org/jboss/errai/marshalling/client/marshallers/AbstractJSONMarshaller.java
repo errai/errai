@@ -17,32 +17,13 @@
 package org.jboss.errai.marshalling.client.marshallers;
 
 import org.jboss.errai.marshalling.client.api.Marshaller;
-import org.jboss.errai.marshalling.client.api.MarshallingSession;
-import org.jboss.errai.marshalling.client.api.json.EJValue;
 
 /**
- * @author Mike Brock <cbrock@redhat.com>
+ * @author Mike Brock
  */
-public class NullMarshaller extends AbstractJSONMarshaller<Object> {
-  public static final Marshaller<Object> INSTANCE = new NullMarshaller();
-  
+public abstract class AbstractJSONMarshaller<T> implements Marshaller<T> {
   @Override
-  public Class<Object> getTypeHandled() {
-    return Object.class;
-  }
-
-  @Override
-  public Object demarshall(EJValue o, MarshallingSession ctx) {
-    return null;
-  }
-
-  @Override
-  public String marshall(Object o, MarshallingSession ctx) {
-    return "null";
-  }
-
-  @Override
-  public boolean handles(EJValue o) {
-    return true;
+  public String getEncodingType() {
+    return "json";
   }
 }

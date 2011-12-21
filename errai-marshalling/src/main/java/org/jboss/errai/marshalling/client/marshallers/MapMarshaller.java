@@ -39,7 +39,7 @@ import java.util.Map;
 @ClientMarshaller
 @ServerMarshaller
 @ImplementationAliases({AbstractMap.class, HashMap.class, LinkedHashMap.class})
-public class MapMarshaller implements Marshaller<Map> {
+public class MapMarshaller extends AbstractJSONMarshaller<Map> {
   public static final MapMarshaller INSTANCE = new MapMarshaller();
 
   @Override

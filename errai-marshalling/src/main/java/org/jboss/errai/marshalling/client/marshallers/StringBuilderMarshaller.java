@@ -27,7 +27,7 @@ import org.jboss.errai.marshalling.client.util.MarshallUtil;
  * @author Mike Brock <cbrock@redhat.com>
  */
 @ClientMarshaller @ServerMarshaller
-public class StringBuilderMarshaller implements Marshaller<StringBuilder> {
+public class StringBuilderMarshaller extends AbstractJSONMarshaller<StringBuilder> {
   public static final StringBuilderMarshaller INSTANCE = new StringBuilderMarshaller();
 
   @Override
@@ -47,10 +47,5 @@ public class StringBuilderMarshaller implements Marshaller<StringBuilder> {
   @Override
   public Class<StringBuilder> getTypeHandled() {
     return StringBuilder.class;
-  }
-
-  @Override
-  public String getEncodingType() {
-    return "json";
   }
 }

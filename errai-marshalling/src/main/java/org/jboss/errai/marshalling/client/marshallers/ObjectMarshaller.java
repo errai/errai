@@ -32,15 +32,10 @@ import org.jboss.errai.marshalling.client.util.NumbersUtils;
  * @author Mike Brock <cbrock@redhat.com>
  */
 @ClientMarshaller @ServerMarshaller
-public class ObjectMarshaller implements Marshaller<Object> {
+public class ObjectMarshaller extends AbstractJSONMarshaller<Object> {
   @Override
   public Class<Object> getTypeHandled() {
     return Object.class;
-  }
-
-  @Override
-  public String getEncodingType() {
-    return "json";
   }
 
   @Override

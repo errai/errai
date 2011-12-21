@@ -33,11 +33,6 @@ public class ByteMarshaller extends AbstractNumberMarshaller<Byte> {
   }
 
   @Override
-  public String getEncodingType() {
-    return "json";
-  }
-
-  @Override
   public Byte demarshall(EJValue o, MarshallingSession ctx) {
     if (o == null) {
       return null;

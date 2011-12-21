@@ -30,7 +30,7 @@ import java.sql.Timestamp;
  * @author Mike Brock
  */
 @ClientMarshaller @ServerMarshaller
-public class TimestampMarshaller implements Marshaller<Timestamp> {
+public class TimestampMarshaller extends AbstractJSONMarshaller<Timestamp> {
   @Override
   public Timestamp demarshall(EJValue o, MarshallingSession ctx) {
     if (o.isNull() != null) {
@@ -48,11 +48,6 @@ public class TimestampMarshaller implements Marshaller<Timestamp> {
   @Override
   public Class<Timestamp> getTypeHandled() {
     return Timestamp.class;
-  }
-
-  @Override
-  public String getEncodingType() {
-    return "json";
   }
 
   @Override

@@ -30,7 +30,7 @@ import java.util.Date;
  * @author Mike Brock <cbrock@redhat.com>
  */
 @ClientMarshaller @ServerMarshaller
-public class DateMarshaller implements Marshaller<Date> {
+public class DateMarshaller extends AbstractJSONMarshaller<Date> {
   @Override
   public Date demarshall(EJValue o, MarshallingSession ctx) {
     if (o.isNull() != null) {

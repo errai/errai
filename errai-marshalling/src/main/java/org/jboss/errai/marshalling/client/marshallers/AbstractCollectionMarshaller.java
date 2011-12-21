@@ -32,11 +32,6 @@ import java.util.Collection;
 public abstract class AbstractCollectionMarshaller<C extends Collection> extends AbstractBackReferencingMarshaller<C> {
 
   @Override
-  public String getEncodingType() {
-    return "json";
-  }
-
-  @Override
   public void doMarshall(StringBuilder buf, C o, MarshallingSession ctx) {
     EncDecUtil.arrayMarshall(buf, o, ctx);
   }

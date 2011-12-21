@@ -164,6 +164,6 @@ public class NumbersUtils {
             + quote + (o instanceof String ? Character.class.getName() : o.getClass().getName()) + quote + ", "
             + quote + SerializationParts.OBJECT_ID + quote + ": " + quote + o.hashCode() + quote + "," +
             quote + SerializationParts.NUMERIC_VALUE + quote + ":"
-            + (o instanceof Long ? quote + String.valueOf(o) + quote : String.valueOf(o)) + "}";
+            + (o instanceof Long || o instanceof Character ? quote + String.valueOf(o) + quote : String.valueOf(o)) + "}";
   }
 }

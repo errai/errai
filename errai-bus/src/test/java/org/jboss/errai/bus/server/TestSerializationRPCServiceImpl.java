@@ -18,12 +18,9 @@ package org.jboss.errai.bus.server;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
+import java.sql.*;
+import java.util.*;
+import java.util.Date;
 
 import org.jboss.errai.bus.client.tests.support.*;
 
@@ -57,7 +54,17 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
   }
 
   @Override
+  public List<Byte> listOfByte(List<Byte> list) {
+    return list;
+  }
+
+  @Override
   public List<Boolean> listOfBoolean(List<Boolean> list) {
+    return list;
+  }
+
+  @Override
+  public List<Character> listOfCharacters(List<Character> list) {
     return list;
   }
 
@@ -119,6 +126,16 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
   @Override
   public AssertionError testSerializeAssertionError(AssertionError t) {
     return t;
+  }
+
+  @Override
+  public Date testJavaUtilDate(Date d) {
+    return d;
+  }
+
+  @Override
+  public java.sql.Date testJavaSqlDate(java.sql.Date d) {
+    return d;
   }
 
   @Override

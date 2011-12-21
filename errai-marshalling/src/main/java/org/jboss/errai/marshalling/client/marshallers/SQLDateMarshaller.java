@@ -30,7 +30,7 @@ import java.sql.Date;
  * @author Mike Brock <cbrock@redhat.com>
  */
 @ClientMarshaller @ServerMarshaller
-public class SQLDateMarshaller implements Marshaller<Date> {
+public class SQLDateMarshaller extends AbstractJSONMarshaller<Date> {
 
   @Override
   public Date demarshall(EJValue o, MarshallingSession ctx) {
@@ -48,11 +48,6 @@ public class SQLDateMarshaller implements Marshaller<Date> {
   @Override
   public Class<Date> getTypeHandled() {
     return Date.class;
-  }
-
-  @Override
-  public String getEncodingType() {
-    return "json";
   }
 
   @Override

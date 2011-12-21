@@ -31,6 +31,8 @@ import java.util.Set;
 public interface DefinitionsFactory {
   /**
    * Returns true if a definition is registered matching fully-qualified class name provided.
+   * If this DefinitionsFactory has a definition for {@param clazz}, that means it can marshall and demarshall
+   * instances of clazz.
    * @param clazz fully qualified class name.
    * @return boolean true if defined.
    */

@@ -27,7 +27,7 @@ import org.jboss.errai.marshalling.client.util.MarshallUtil;
  * @author Mike Brock <cbrock@redhat.com>
  */
 @ClientMarshaller @ServerMarshaller
-public class StringMarshaller implements Marshaller<String> {
+public class StringMarshaller extends AbstractJSONMarshaller<String> {
   public static final StringMarshaller INSTANCE = new StringMarshaller();
 
   @Override
@@ -43,11 +43,6 @@ public class StringMarshaller implements Marshaller<String> {
   @Override
   public boolean handles(EJValue o) {
     return o.isString() != null;
-  }
-
-  @Override
-  public String getEncodingType() {
-    return "json";
   }
 
   @Override

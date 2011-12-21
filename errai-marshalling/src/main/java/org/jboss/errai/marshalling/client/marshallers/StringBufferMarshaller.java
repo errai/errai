@@ -27,7 +27,7 @@ import org.jboss.errai.marshalling.client.util.MarshallUtil;
  * @author Mike Brock <cbrock@redhat.com>
  */
 @ClientMarshaller @ServerMarshaller
-public class StringBufferMarshaller implements Marshaller<StringBuffer> {
+public class StringBufferMarshaller extends AbstractJSONMarshaller<StringBuffer> {
   public static final StringBufferMarshaller INSTANCE = new StringBufferMarshaller();
 
   @Override
@@ -43,11 +43,6 @@ public class StringBufferMarshaller implements Marshaller<StringBuffer> {
   @Override
   public Class<StringBuffer> getTypeHandled() {
     return StringBuffer.class;
-  }
-
-  @Override
-  public String getEncodingType() {
-    return "json";
   }
 
   @Override

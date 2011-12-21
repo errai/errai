@@ -29,7 +29,7 @@ import java.util.*;
  */
 @ClientMarshaller
 @ServerMarshaller
-@ImplementationAliases({AbstractList.class, ArrayList.class, Vector.class, Stack.class, LinkedList.class})
+@ImplementationAliases({AbstractList.class, ArrayList.class, Vector.class, Stack.class})
 public class ListMarshaller extends AbstractCollectionMarshaller<List> {
   @Override
   public Class<List> getTypeHandled() {

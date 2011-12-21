@@ -77,7 +77,8 @@ public class ObjectExplorer extends JTree {
     model.reload();
   }
 
-  public static DefaultMutableTreeNode nestObject(final ObjectExplorer explorer, DefaultMutableTreeNode node, String field, Object v) {
+  public static DefaultMutableTreeNode nestObject(final ObjectExplorer explorer, DefaultMutableTreeNode node,
+                                                  String field, Object v) {
     if (v == null) return null;
 
     Class cls = v != null ? v.getClass() : Object.class;
@@ -183,7 +184,8 @@ public class ObjectExplorer extends JTree {
     }
   }
 
-  public static boolean renderFieldByType(ObjectExplorer explorer, DefaultMutableTreeNode node, String field, Class clazz, Object v) {
+  public static boolean renderFieldByType(ObjectExplorer explorer, DefaultMutableTreeNode node,
+                                          String field, Class clazz, Object v) {
     if (clazz.isArray()) {
       clazz = ArrayMarker.class;
     }

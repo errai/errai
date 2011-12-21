@@ -29,7 +29,7 @@ import java.math.BigDecimal;
  * @author Mike Brock
  */
 @ClientMarshaller @ServerMarshaller
-public class BigDecimalMarshaller implements Marshaller<BigDecimal> {
+public class BigDecimalMarshaller extends AbstractJSONMarshaller<BigDecimal> {
   @Override
   public BigDecimal demarshall(EJValue o, MarshallingSession ctx) {
 
@@ -45,11 +45,6 @@ public class BigDecimalMarshaller implements Marshaller<BigDecimal> {
   @Override
   public Class<BigDecimal> getTypeHandled() {
     return BigDecimal.class;
-  }
-
-  @Override
-  public String getEncodingType() {
-    return "json";
   }
 
   @Override

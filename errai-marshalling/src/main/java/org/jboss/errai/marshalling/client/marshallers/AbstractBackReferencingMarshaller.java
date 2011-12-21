@@ -23,7 +23,7 @@ import org.jboss.errai.marshalling.client.api.MarshallingSession;
 /**
  * @author Mike Brock
  */
-public abstract class AbstractBackReferencingMarshaller<C> implements Marshaller<C> {
+public abstract class AbstractBackReferencingMarshaller<C> extends AbstractJSONMarshaller<C> {
 
   @Override
   public final String marshall(C o, MarshallingSession ctx) {

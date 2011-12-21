@@ -31,8 +31,6 @@ import java.util.List;
  */
 public class MappingDefinition {
   private MetaClass toMap;
-  private boolean marshal = true;
-  private boolean demarshal = true;
 
   private boolean cachedMarshaller;
   
@@ -140,30 +138,6 @@ public class MappingDefinition {
       }
     }
     return _writableMemberMappingsCache = Collections.unmodifiableList(writableMemberMappings);
-  }
-
-  public boolean canDemarshal() {
-    return demarshal;
-  }
-
-  public boolean canMarshal() {
-    return marshal;
-  }
-
-  public void setMarshal(boolean marshal) {
-    this.marshal = marshal;
-  }
-
-  public void setDemarshal(boolean demarshal) {
-    this.demarshal = demarshal;
-  }
-
-  public boolean isCachedMarshaller() {
-    return cachedMarshaller;
-  }
-
-  public void setCachedMarshaller(boolean cachedMarshaller) {
-    this.cachedMarshaller = cachedMarshaller;
   }
 
   public Marshaller<Object> getMarshallerInstance() {

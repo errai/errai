@@ -27,15 +27,10 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
  * @author Mike Brock <cbrock@redhat.com>
  */
 @ClientMarshaller @ServerMarshaller
-public class ShortMarshaller implements Marshaller<Short> {
+public class ShortMarshaller extends AbstractJSONMarshaller<Short> {
   @Override
   public Class<Short> getTypeHandled() {
     return Short.class;
-  }
-
-  @Override
-  public String getEncodingType() {
-    return "json";
   }
 
   @Override

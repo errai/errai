@@ -20,14 +20,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
 
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
@@ -189,6 +182,35 @@ public class SerializationTests extends AbstractErraiTest {
     });
   }
 
+  public void testByteInCollection() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final List<Byte> list = new ArrayList<Byte>();
+
+        list.add((byte) 10);
+        list.add((byte) 20);
+        list.add((byte) 30);
+        list.add((byte) 40);
+        list.add((byte) 50);
+
+        MessageBuilder.createCall(new RemoteCallback<List<Byte>>() {
+          @Override
+          public void callback(List<Byte> response) {
+            try {
+              assertEquals(list, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestSerializationRPCService.class).listOfByte(list);
+      }
+    });
+  }
+
   public void testBooleanInCollection() {
     runAfterInit(new Runnable() {
       @Override
@@ -217,6 +239,37 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
+
+
+  public void testCharacterInCollection() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final List<Character> list = new ArrayList<Character>();
+
+        list.add('a');
+        list.add('c');
+        list.add('e');
+        list.add('g');
+        list.add('i');
+
+        MessageBuilder.createCall(new RemoteCallback<List<Character>>() {
+          @Override
+          public void callback(List<Character> response) {
+            try {
+              assertEquals(list, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestSerializationRPCService.class).listOfCharacters(list);
+      }
+    });
+  }
+
 
 
   public void testSet() {
@@ -679,6 +732,71 @@ public class SerializationTests extends AbstractErraiTest {
   }
 
 
+  public void testJavaUtilDate() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        final java.util.Date d = new java.util.Date(System.currentTimeMillis());
+
+        class EqualTester {
+          public boolean isEqual(java.util.Date  r) {
+            return r != null &&
+                    r.equals(d);
+          }
+        }
+
+        MessageBuilder.createCall(new RemoteCallback<java.util.Date>() {
+          @Override
+          public void callback(java.util.Date  response) {
+            try {
+              assertTrue(new EqualTester().isEqual(response));
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestSerializationRPCService.class).testJavaUtilDate(d);
+      }
+    });
+  }
+
+
+  public void testJavaSqlDate() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        final java.sql.Date d = new java.sql.Date(System.currentTimeMillis());
+
+        class EqualTester {
+          public boolean isEqual(java.sql.Date  r) {
+            return r != null &&
+                    r.equals(d);
+          }
+        }
+
+        MessageBuilder.createCall(new RemoteCallback<java.sql.Date>() {
+          @Override
+          public void callback(java.sql.Date  response) {
+            try {
+              assertTrue(new EqualTester().isEqual(response));
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestSerializationRPCService.class).testJavaSqlDate(d);
+      }
+    });
+  }
+
+
+
   public void testTimestampSerialization() {
     runAfterInit(new Runnable() {
       @Override
@@ -1054,7 +1172,38 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
+
+  public void testGenericEntityUsingStack() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        Stack<Group> stack = new Stack<Group>();
+        stack.add(new Group(1, "foo"));
+        stack.add(new Group(2, "bar"));
+
+        final GenericEntity<Stack<Group>> entity = new GenericEntity<Stack<Group>>(stack);
+
+        MessageBuilder.createCall(new RemoteCallback<GenericEntity<Set<Group>>>() {
+          @Override
+          public void callback(GenericEntity<Set<Group>> response) {
+            try {
+              assertEquals(entity, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestSerializationRPCService.class).testGenericEntity(entity);
+      }
+    });
+  }
+
+
+
   public void testEntityWithSuperClassField() {
     runAfterInit(new Runnable() {
       @Override

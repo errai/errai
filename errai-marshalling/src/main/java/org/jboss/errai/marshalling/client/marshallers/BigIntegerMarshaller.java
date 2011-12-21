@@ -29,7 +29,7 @@ import java.math.BigInteger;
  * @author Mike Brock
  */
 @ClientMarshaller @ServerMarshaller
-public class BigIntegerMarshaller implements Marshaller<BigInteger> {
+public class BigIntegerMarshaller extends AbstractJSONMarshaller<BigInteger> {
   @Override
   public BigInteger demarshall(EJValue o, MarshallingSession ctx) {
 
@@ -45,11 +45,6 @@ public class BigIntegerMarshaller implements Marshaller<BigInteger> {
   @Override
   public Class<BigInteger> getTypeHandled() {
     return BigInteger.class;
-  }
-
-  @Override
-  public String getEncodingType() {
-    return "json";
   }
 
   @Override

@@ -27,15 +27,10 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
  * @author Mike Brock <cbrock@redhat.com>
  */
 @ClientMarshaller @ServerMarshaller
-public class CharacterMarshaller implements Marshaller<Character> {
+public class CharacterMarshaller extends AbstractJSONMarshaller<Character> {
   @Override
   public Class<Character> getTypeHandled() {
     return Character.class;
-  }
-
-  @Override
-  public String getEncodingType() {
-    return "json";
   }
 
   @Override

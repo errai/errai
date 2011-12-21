@@ -22,12 +22,7 @@ import org.jboss.errai.marshalling.client.api.MarshallingSession;
 /**
  * @author Mike Brock
  */
-public abstract class AbstractNumberMarshaller<C extends Number> implements Marshaller<C> {
-  @Override
-  public String getEncodingType() {
-    return "json";
-  }
-
+public abstract class AbstractNumberMarshaller<C extends Number> extends AbstractJSONMarshaller<C> {
   @Override
   public String marshall(Number o, MarshallingSession ctx) {
     return o == null ? "null" : o.toString();

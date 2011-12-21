@@ -37,6 +37,9 @@ import java.util.regex.PatternSyntaxException;
 import static java.lang.System.currentTimeMillis;
 import static javax.swing.SwingUtilities.invokeLater;
 
+/**
+ * This represents the actual individual service monitoring windows.
+ */
 public class ServiceActivityMonitor extends JFrame implements Attachable {
   private JTable activityTable;
   private JTable detailsTable;

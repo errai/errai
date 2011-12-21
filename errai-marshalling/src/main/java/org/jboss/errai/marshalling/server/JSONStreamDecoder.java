@@ -92,8 +92,7 @@ public class JSONStreamDecoder {
 
   public EJValue parse() {
     try {
-      ErraiJSONValue v =  new ErraiJSONValue(_parse(new Context(), null, false));
-      return v;
+      return new ErraiJSONValue(_parse(new Context(), null, false));
     }
     catch (Exception e) {
       throw new RuntimeException(e);
@@ -215,10 +214,7 @@ public class JSONStreamDecoder {
   }
 
   public Number parseNumber(char c) throws IOException {
-    double val = 0;
-    double dVal = 0;
-
-    double factor = 1;
+    double val = 0, dVal = 0, factor = 1;
 
     char[] buf = new char[21];
     int len = 0;

@@ -20,6 +20,7 @@ import org.jboss.errai.bus.server.annotations.Remote;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.List;
@@ -42,7 +43,11 @@ public interface TestSerializationRPCService {
 
   public List<Short> listOfShort(List<Short> list);
 
+  public List<Byte> listOfByte(List<Byte> list);
+
   public List<Boolean> listOfBoolean(List<Boolean> list);
+
+  public List<Character> listOfCharacters(List<Character> list);
 
   public Set<String> setOfStrings(Set<String> set);
   
@@ -69,6 +74,10 @@ public interface TestSerializationRPCService {
   public AssertionError testSerializeAssertionError(AssertionError t);
 
   public FactoryEntity testFactorySerialization(FactoryEntity e);
+  
+  public java.util.Date testJavaUtilDate(java.util.Date d);
+  
+  public Date testJavaSqlDate(Date d);
   
   public Timestamp testTimestampSerialization(Timestamp ts);
 

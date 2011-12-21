@@ -30,7 +30,7 @@ import java.sql.Time;
  * @author Mike Brock <cbrock@redhat.com>
  */
 @ClientMarshaller @ServerMarshaller
-public class TimeMarshaller implements Marshaller<Time> {
+public class TimeMarshaller extends AbstractJSONMarshaller<Time> {
 
   @Override
   public Time demarshall(EJValue o, MarshallingSession ctx) {
@@ -48,11 +48,6 @@ public class TimeMarshaller implements Marshaller<Time> {
   @Override
   public Class<Time> getTypeHandled() {
     return Time.class;
-  }
-
-  @Override
-  public String getEncodingType() {
-    return "json";
   }
 
   @Override
