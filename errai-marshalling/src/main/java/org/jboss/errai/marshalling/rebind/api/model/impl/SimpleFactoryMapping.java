@@ -106,7 +106,4 @@ public class SimpleFactoryMapping implements FactoryMapping {
   public MetaClass getMappingClass() {
     return toMap;
   }
-
-
-
 }

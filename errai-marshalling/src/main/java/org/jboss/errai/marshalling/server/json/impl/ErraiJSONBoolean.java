@@ -33,6 +33,6 @@ public class ErraiJSONBoolean implements EJBoolean {
 
   @Override
   public boolean booleanValue() {
-    return bool.booleanValue();
+    return bool;
   }
 }

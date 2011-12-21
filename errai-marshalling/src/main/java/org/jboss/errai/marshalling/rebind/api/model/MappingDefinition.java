@@ -64,15 +64,6 @@ public class MappingDefinition {
     setInstantiationMapping(new SimpleConstructorMapping());
   }
 
-  public MappingDefinition(MetaClass toMap, InstantiationMapping cMapping) {
-    this.toMap = toMap;
-    this.instantiationMapping = cMapping;
-  }
-
-  public MappingDefinition(Class<?> toMap, InstantiationMapping cMapping) {
-    this(JavaReflectionClass.newUncachedInstance(toMap), cMapping);
-  }
-
   public MetaClass getMappingClass() {
     return toMap;
   }

@@ -91,13 +91,6 @@ public class EncodingSession extends AbstractMarshallingSession {
     return context;
   }
 
-  public String markReference(Object o) {
-    if (o != null) {
-      return getObjectHash(o);
-    }
-    return null;
-  }
-
   public boolean isEscapeMode() {
     return escapeMode != 0;
   }

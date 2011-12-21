@@ -27,7 +27,6 @@ import java.util.Map;
 public class ErraiJSONValue implements EJValue {
   private final Object obj;
   
-  
   final static EJNull NULL_INSTANCE = new EJNull() {
   };
 

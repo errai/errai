@@ -271,7 +271,6 @@ public class DefaultJavaDefinitionMapper {
     while ((c = c.getSuperClass()) != null);
 
     definitionsFactory.mergeDefinition(definition);
-
     return definition;
   }
 }

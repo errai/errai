@@ -1,16 +1,11 @@
 package org.jboss.errai.marshalling.server;
 
 import org.jboss.errai.common.client.protocols.SerializationParts;
-import org.jboss.errai.common.client.types.UHashMap;
-import org.jboss.errai.common.client.types.UnsatisfiedForwardLookup;
 import org.jboss.errai.marshalling.client.api.AbstractMarshallingSession;
-import org.jboss.errai.marshalling.client.api.MappingContext;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 

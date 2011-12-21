@@ -37,7 +37,6 @@ public class ServerEncodingUtil {
   public static void write(OutputStream stream, EncodingSession ctx, char s) throws IOException {
     if (ctx.isEscapeMode() && s == '\"') {
       stream.write("\\\\\"".getBytes());
-
     }
     else {
       stream.write(s);

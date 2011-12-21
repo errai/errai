@@ -70,9 +70,7 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
 
   @Override
   public Object demarshall(EJValue o, MarshallingSession ctx) {
-
     try {
-
       if (o.isObject() != null) {
         EJObject oMap = o.isObject();
 
@@ -84,7 +82,6 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
           }
 
           if (oMap.containsKey(SerializationParts.OBJECT_ID)) {
-
             String hash = oMap.get(SerializationParts.OBJECT_ID).isString().stringValue();
 
             if (ctx.hasObjectHash(hash)) {
@@ -125,7 +122,6 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
               ctx.recordObjectHash(hash, newInstance);
             }
 
-
             for (MemberMapping mapping : definition.getWritableMemberMappings()) {
               if (mapping.getBindingMember() instanceof MetaField) {
                 MetaField f = (MetaField) mapping.getBindingMember();
@@ -139,9 +135,7 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
                         m.getParameterTypes()[0]));
               }
             }
-
           }
-
           else {
             throw new RuntimeException("unknown type to demarshall");
           }
@@ -230,7 +224,6 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
           throw new RuntimeException("error calling getter: " + method, e);
         }
       }
-
 
       ServerEncodingUtil.write(outstream, ctx, "\"" + mapping.getKey() + "\"");
       outstream.write(':');

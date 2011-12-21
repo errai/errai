@@ -141,17 +141,6 @@ public class JSONStreamEncoder {
     outstream.write('}');
   }
 
-  private static void encodeCollection(Collection col, OutputStream outstream, EncodingSession ctx) throws IOException {
-    outstream.write('[');
-    Iterator iter = col.iterator();
-    while (iter.hasNext()) {
-      encode(iter.next(), outstream, ctx, true);
-      if (iter.hasNext()) outstream.write(',');
-    }
-
-    outstream.write(']');
-  }
-
   private static void encodeArray(Object array, OutputStream outstream, EncodingSession ctx) throws IOException {
     outstream.write('[');
     int len = Array.getLength(array);
@@ -168,6 +157,4 @@ public class JSONStreamEncoder {
             + enumer.getDeclaringClass().getName() + "\""
             + ",\"" + SerializationParts.ENUM_STRING_VALUE + "\":\"" + enumer.name() + "\"}");
   }
-
-
 }
