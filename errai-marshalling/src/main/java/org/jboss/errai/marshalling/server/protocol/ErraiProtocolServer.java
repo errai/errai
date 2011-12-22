@@ -19,13 +19,22 @@ package org.jboss.errai.marshalling.server.protocol;
 import org.jboss.errai.marshalling.client.protocols.ErraiProtocol;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Map;
 
 /**
  * @author Mike Brock
  */
 public class ErraiProtocolServer {
-  public static ByteArrayInputStream encodeToByteArrayInputStream(Map<String, Object> payload) {
+  public static ByteArrayInputStream encodePayloadToByteArrayInputStream(Map<String, Object> payload) {
     return new ByteArrayInputStream(ErraiProtocol.encodePayload(payload).getBytes());
+  }
+
+  public static void encodePayloadToOutputStream(Map<String, Object> payload,
+                                                 OutputStream outputStream) throws IOException{
+    for (byte b : ErraiProtocol.encodePayload(payload).getBytes()) {
+      outputStream.write(b);
+    }
   }
 }

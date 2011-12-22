@@ -140,7 +140,7 @@ public class MessageQueueImpl implements MessageQueue {
         try {
           synchronized (pageLock) {
             if (pagedOut) {
-              writeToPageFile(ErraiProtocolServer.encodeToByteArrayInputStream(message.getParts()), true);
+              writeToPageFile(ErraiProtocolServer.encodePayloadToByteArrayInputStream(message.getParts()), true);
               return true;
             }
           }

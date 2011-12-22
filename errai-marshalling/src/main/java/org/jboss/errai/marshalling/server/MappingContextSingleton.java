@@ -20,6 +20,7 @@ import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.marshalling.client.MarshallingSessionProviderFactory;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.Parser;
@@ -59,7 +60,7 @@ public class MappingContextSingleton {
             }
     );
     
-    ErraiProtocol.setMarshallingSessionProvider(new MarshallingSessionProvider() {
+    MarshallingSessionProviderFactory.setMarshallingSessionProvider(new MarshallingSessionProvider() {
       @Override
       public MarshallingSession getEncoding() {
         return new EncodingSession(get());

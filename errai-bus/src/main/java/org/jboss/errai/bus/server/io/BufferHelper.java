@@ -67,7 +67,7 @@ public class BufferHelper {
   }
 
   public static void encodeAndWrite(Buffer buffer, BufferColor bufferColor, Message message) throws IOException {
-    buffer.write(ErraiProtocolServer.encodeToByteArrayInputStream(message.getParts()), bufferColor);
+    buffer.write(ErraiProtocolServer.encodePayloadToByteArrayInputStream(message.getParts()), bufferColor);
   }
 
   private static final byte[] NOOP_ARRAY = new byte[0];
