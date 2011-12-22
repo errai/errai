@@ -31,12 +31,7 @@ import org.jboss.errai.bus.client.api.*;
 import org.jboss.errai.bus.client.api.base.*;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.common.client.protocols.MessageParts;
-import org.jboss.errai.marshalling.client.MarshallingSessionProviderFactory;
-import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
-import org.jboss.errai.marshalling.client.api.MarshallingSession;
-import org.jboss.errai.marshalling.client.protocols.ErraiProtocol;
-import org.jboss.errai.marshalling.client.protocols.MarshallingSessionProvider;
 
 import java.util.*;
 
@@ -123,27 +118,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private boolean disconnected = false;
 
   static {
-    MarshallingSessionProviderFactory.setMarshallingSessionProvider(new MarshallingSessionProvider() {
-      @Override
-      public MarshallingSession getEncoding() {
-        return new MarshallerFramework.JSONMarshallingSession();
-      }
-
-      @Override
-      public MarshallingSession getDecoding() {
-        return new MarshallerFramework.JSONMarshallingSession();
-      }
-
-      @Override
-      public boolean hasMarshaller(String fqcn) {
-        return MarshallerFramework.getMarshallerFactory().getMarshaller(null, fqcn) != null;
-      }
-
-      @Override
-      public Marshaller getMarshaller(String fqcn) {
-        return MarshallerFramework.getMarshallerFactory().getMarshaller(null, fqcn);
-      }
-    });
+    MarshallerFramework.initializeDefaultSessionProvider();
   }
 
   private List<MessageInterceptor> interceptorStack = new LinkedList<MessageInterceptor>();
@@ -1298,7 +1273,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   public void procPayload(String text) {
-  //   System.out.println("RX: " + text);
+    //   System.out.println("RX: " + text);
 
     try {
       for (MarshalledMessage m : decodePayload(text)) {
