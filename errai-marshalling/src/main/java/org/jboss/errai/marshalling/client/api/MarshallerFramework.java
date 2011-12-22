@@ -54,34 +54,6 @@ public class MarshallerFramework implements EntryPoint {
 
   @Override
   public void onModuleLoad() {
-
-  }
-
-
-
-  public static Object demarshalErraiJSON(JSONValue object) {
-//    JSONMarshallingSession session = new JSONMarshallingSession();
-//
-//    EJValue o = GWTJSON.wrap(object);
-
-
-    return ErraiProtocolEnvelopeMarshaller.INSTANCE.demarshall(GWTJSON.wrap(object), new JSONMarshallingSession());
-//    Marshaller<Object> marshaller =
-//            marshallerFactory.getMarshaller(null, session.determineTypeFor(null, o));
-//
-//    if (marshaller == null) {
-//      throw new RuntimeException("no marshaller available for payload: " + session.determineTypeFor(null, object));
-//    }
-
-//    return marshaller.demarshall(o, session);
-  }
-
-  public static String marshalErraiJSON(Map<String, Object> map) {
-    return ErraiProtocolEnvelopeMarshaller.INSTANCE.marshall(map, new JSONMarshallingSession());
-  }
-
-  public static String marshalErraiJSON(Object obj) {
-    return new ObjectMarshaller().marshall(obj, new JSONMarshallingSession());
   }
 
   public static class JSONMarshallingSession extends AbstractMarshallingSession {

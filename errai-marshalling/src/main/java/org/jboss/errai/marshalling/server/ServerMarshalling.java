@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,26 +14,25 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.marshalling.client.protocols;
+package org.jboss.errai.marshalling.server;
 
+import org.jboss.errai.marshalling.client.Marshalling;
 import org.jboss.errai.marshalling.client.MarshallingSessionProviderFactory;
-import org.jboss.errai.marshalling.client.api.json.EJValue;
-import org.jboss.errai.marshalling.client.marshallers.ErraiProtocolEnvelopeMarshaller;
+import org.jboss.errai.marshalling.client.api.MarshallingSession;
 
-import java.util.Map;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * @author Mike Brock
  */
-public class ErraiProtocol {
-  private static final ErraiProtocolEnvelopeMarshaller protocolMarshaller = new ErraiProtocolEnvelopeMarshaller();
-
-
-  public static String encodePayload(Map<String, Object> message) {
-    return protocolMarshaller.marshall(message, MarshallingSessionProviderFactory.getEncoding());
+public abstract class ServerMarshalling extends Marshalling {
+  public static <T> T fromJSON(InputStream inputStream, Class<T> type) throws IOException {
+    MarshallingSession session = MarshallingSessionProviderFactory.getDecoding();
+    return (T) session.getMarshallerInstance(type.getName()).demarshall(JSONStreamDecoder.decode(inputStream), session);
   }
 
-  public static Map<String, Object> decodePayload(EJValue value) {
-    return protocolMarshaller.demarshall(value, MarshallingSessionProviderFactory.getDecoding());
+  public static Object fromJSON(InputStream inputStream) throws IOException {
+    return fromJSON(inputStream, Object.class);
   }
 }

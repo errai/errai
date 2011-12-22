@@ -230,7 +230,6 @@ public class JSONStreamDecoder {
       carry = c;
     }
 
-
     if (len == 1 && buf[0] == '-') return null;
 
     for (int i = len - 1; i != -1; i--) {
