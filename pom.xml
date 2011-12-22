@@ -81,9 +81,7 @@
 	<modules>
 		<module>errai-common</module>
 		<module>errai-ioc</module>
-		<module>errai-widgets</module>
 		<module>errai-bus</module>
-		<module>errai-persistence</module>
 		<module>errai-tools</module>
 		<module>errai-bus-demos</module>
 		<module>jboss7-support</module>
