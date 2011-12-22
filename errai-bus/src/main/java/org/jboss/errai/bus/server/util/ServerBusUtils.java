@@ -19,8 +19,9 @@ package org.jboss.errai.bus.server.util;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.server.api.QueueSession;
-import org.jboss.errai.marshalling.server.JSONEncoder;
+import org.jboss.errai.marshalling.client.marshallers.ErraiProtocolEnvelopeMarshaller;
 import org.jboss.errai.bus.server.io.MessageFactory;
+import org.jboss.errai.marshalling.client.protocols.ErraiProtocol;
 
 import java.util.Map;
 
@@ -60,8 +61,8 @@ public class ServerBusUtils {
    * @param value - the object to be encoded
    * @return a JSON string representing the object given
    */
-  public static String encodeJSON(Object value) {
-    return JSONEncoder.encode(value);
+  public static String encodeJSON(Map<String, Object> value) {
+    return ErraiProtocol.encodePayload(value);
   }
 
   /**

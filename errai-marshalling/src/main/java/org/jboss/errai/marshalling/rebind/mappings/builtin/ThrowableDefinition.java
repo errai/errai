@@ -37,7 +37,7 @@ import java.util.EmptyStackException;
                  EmptyStackException.class, ArrayStoreException.class,
         ClassCastException.class, ConcurrentModificationException.class, IndexOutOfBoundsException.class,
         NegativeArraySizeException.class, NullPointerException.class, StringIndexOutOfBoundsException.class,
-        UnsupportedOperationException.class, AssertionError.class}
+        UnsupportedOperationException.class, AssertionError.class, RuntimeException.class}
 )
 public class ThrowableDefinition extends MappingDefinition {
   public ThrowableDefinition() {

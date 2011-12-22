@@ -20,6 +20,7 @@ import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.ParserFactory;
+import org.jboss.errai.marshalling.client.api.annotations.AlwaysQualify;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
@@ -40,6 +41,7 @@ import java.util.Map;
  */
 @ClientMarshaller
 @ServerMarshaller
+@AlwaysQualify
 @ImplementationAliases({AbstractMap.class, HashMap.class, LinkedHashMap.class})
 public class MapMarshaller<T extends Map> extends AbstractJSONMarshaller<T> {
   public static final MapMarshaller INSTANCE = new MapMarshaller();
@@ -53,11 +55,15 @@ public class MapMarshaller<T extends Map> extends AbstractJSONMarshaller<T> {
   public T demarshall(EJValue o, MarshallingSession ctx) {
     return doDermashall((T) new HashMap(), o, ctx);
   }
-  
+
   protected T doDermashall(T impl, EJValue o, MarshallingSession ctx) {
     EJObject jsonObject = o.isObject();
     if (jsonObject == null)
       return null;
+
+//    if (jsonObject.containsKey(SerializationParts.QUALIFIED_VALUE)) {
+//      jsonObject = jsonObject.get(SerializationParts.QUALIFIED_VALUE).isObject();
+//    }
 
     Object demarshalledKey, demarshalledValue;
     for (String key : jsonObject.keySet()) {
@@ -78,11 +84,8 @@ public class MapMarshaller<T extends Map> extends AbstractJSONMarshaller<T> {
 
   @Override
   public String marshall(T o, MarshallingSession ctx) {
-    if (o == null) {
-      return "null";
-    }
-    StringBuilder buf = new StringBuilder("{");
-
+    StringBuilder buf = new StringBuilder();
+    buf.append("{");
     Object key, val;
     int i = 0;
     for (Map.Entry<Object, Object> entry : ((Map<Object, Object>) o).entrySet()) {

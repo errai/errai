@@ -13,18 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.bus.server.service.bootstrap;
 
-import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
+package org.jboss.errai.marshalling.server.util;
+
+import java.io.ByteArrayOutputStream;
 
 /**
- * Configure the JSONEncoder
- *
- * @author: Heiko Braun <hbraun@redhat.com>
- * @date: May 3, 2010
- */
-class RegisterEntities implements BootstrapExecution {
-  public void execute(BootstrapContext context) {
-    final ErraiServiceConfiguratorImpl config = (ErraiServiceConfiguratorImpl) context.getConfig();
+* @author Mike Brock
+*/
+public final class UnwrappedByteArrayOutputStream extends ByteArrayOutputStream {
+  public UnwrappedByteArrayOutputStream() {
+    super(1024 * 8);
+  }
+
+  @Override
+  public byte[] toByteArray() {
+    return super.buf;
   }
 }

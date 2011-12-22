@@ -16,13 +16,15 @@
 
 package org.jboss.errai.marshalling.server;
 
+import org.jboss.errai.marshalling.server.util.UnwrappedByteArrayOutputStream;
+
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 /**
  * Encodes an object into a JSON string
  */
+@Deprecated
 public class JSONEncoder {
   public static String encode(Object o) {
     UnwrappedByteArrayOutputStream byteArrayOutputStream = new UnwrappedByteArrayOutputStream();
@@ -34,17 +36,6 @@ public class JSONEncoder {
       //ignore
     }
     return null;
-  }
-
-  public final static class UnwrappedByteArrayOutputStream extends ByteArrayOutputStream {
-    public UnwrappedByteArrayOutputStream() {
-      super(1024 * 8);
-    }
-
-    @Override
-    public byte[] toByteArray() {
-      return super.buf;
-    }
   }
 
   public static ByteArrayInputStream encodeToByteArrayInputStream(Object o) {

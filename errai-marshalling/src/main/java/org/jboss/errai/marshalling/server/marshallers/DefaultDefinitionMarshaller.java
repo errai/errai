@@ -25,8 +25,9 @@ import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.util.NumbersUtils;
 import org.jboss.errai.marshalling.rebind.api.model.*;
+import org.jboss.errai.marshalling.server.DecodingSession;
 import org.jboss.errai.marshalling.server.EncodingSession;
-import org.jboss.errai.marshalling.server.JSONStreamEncoder;
+import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.marshalling.server.api.ServerMarshaller;
 import org.jboss.errai.marshalling.server.util.ServerEncodingUtil;
 import org.mvel2.DataConversion;
@@ -175,8 +176,23 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
   @Override
   public void marshall(OutputStream outstream, Object o, MarshallingSession mSession) throws IOException {
 
+    if (o == null) {
+      outstream.write("null".getBytes());
+      return;
+    }
+
     EncodingSession ctx = (EncodingSession) mSession;
     Class cls = o.getClass();
+
+    if (o instanceof Enum) {
+      Enum enumer = (Enum) o;
+      ServerEncodingUtil.write(outstream, ctx, "{\"" + SerializationParts.ENCODED_TYPE + "\":\""
+              + enumer.getDeclaringClass().getName() + "\""
+              + ",\"" + SerializationParts.ENUM_STRING_VALUE + "\":\"" + enumer.name() + "\"}");
+      return;
+    }
+
+
     boolean enc = ctx.isEncoded(o);
     String hash = ctx.getObjectHash(o);
 
@@ -227,7 +243,12 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
 
       ServerEncodingUtil.write(outstream, ctx, "\"" + mapping.getKey() + "\"");
       outstream.write(':');
-      JSONStreamEncoder.encode(v, outstream, ctx, mapping.getType().getFullyQualifiedName().equals(Object.class.getName()));
+      outstream.write(
+              MappingContextSingleton.get().getDefinitionsFactory()
+                      .getDefinition(mapping.getType()).getMarshallerInstance().marshall(v, ctx)
+                      .getBytes()
+      );
+
       first = false;
     }
 

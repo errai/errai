@@ -21,6 +21,7 @@ import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.marshalling.client.api.Marshaller;
+import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.Parser;
 import org.jboss.errai.marshalling.client.api.ParserFactory;
 import org.jboss.errai.marshalling.client.api.annotations.AlwaysQualify;
@@ -28,7 +29,8 @@ import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.marshallers.QualifyingMarshallerWrapper;
-import org.jboss.errai.marshalling.client.util.EncDecUtil;
+import org.jboss.errai.marshalling.client.protocols.ErraiProtocol;
+import org.jboss.errai.marshalling.client.protocols.MarshallingSessionProvider;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactoryImpl;
@@ -56,6 +58,18 @@ public class MappingContextSingleton {
               }
             }
     );
+    
+    ErraiProtocol.setMarshallingSessionProvider(new MarshallingSessionProvider() {
+      @Override
+      public MarshallingSession getEncoding() {
+        return new EncodingSession(get());
+      }
+
+      @Override
+      public MarshallingSession getDecoding() {
+        return new DecodingSession(get());
+      }
+    });
 
     context = new ServerMappingContext() {
       private final DefinitionsFactory factory = new DefinitionsFactoryImpl();

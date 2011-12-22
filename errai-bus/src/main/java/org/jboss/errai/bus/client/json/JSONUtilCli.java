@@ -24,6 +24,8 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
+import org.jboss.errai.marshalling.client.api.json.impl.gwt.GWTJSON;
+import org.jboss.errai.marshalling.client.protocols.ErraiProtocol;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -83,29 +85,22 @@ public class JSONUtilCli {
   }
 
   @SuppressWarnings({"unchecked"})
-  public static Map<String, Object> decodeMap(Object value) {
-    try {
-      if (value instanceof JSONObject) {
-        return (Map<String, Object>) MarshallerFramework
-                .demarshalErraiJSON((JSONObject) value);
-      }
-      else if (value instanceof String) {
-        return (Map<String, Object>) MarshallerFramework
-                .demarshalErraiJSON(JSONParser.parseStrict((String) value).isObject());
-      }
+  public static Map<String, Object> decodePayload(Object value) {
+    if (value == null) {
+      return null;
+    }
+    if (!(value instanceof JSONObject)) {
+      throw new RuntimeException("bad payload: " + value);
+    }
 
-    }
-    catch (RuntimeException e) {
-      e.printStackTrace();
-    }
-    return null;
+    return ErraiProtocol.decodePayload(GWTJSON.wrap((JSONObject) value));
   }
 
   public static Message decodeCommandMessage(Object value) {
-    return CommandMessage.createWithParts(decodeMap(value));
+    return CommandMessage.createWithParts(decodePayload(value));
   }
 
-  public static String encodeMap(Map<String, Object> map) {
-    return MarshallerFramework.marshalErraiJSON(map);
+  public static String encodePayload(Map<String, Object> map) {
+    return ErraiProtocol.encodePayload(map);
   }
 }

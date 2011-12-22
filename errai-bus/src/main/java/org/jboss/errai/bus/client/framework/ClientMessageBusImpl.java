@@ -31,13 +31,15 @@ import org.jboss.errai.bus.client.api.*;
 import org.jboss.errai.bus.client.api.base.*;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.common.client.protocols.MessageParts;
-import org.jboss.errai.marshalling.client.api.MarshallerFactory;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
+import org.jboss.errai.marshalling.client.api.MarshallingSession;
+import org.jboss.errai.marshalling.client.protocols.ErraiProtocol;
+import org.jboss.errai.marshalling.client.protocols.MarshallingSessionProvider;
 
 import java.util.*;
 
 import static org.jboss.errai.bus.client.json.JSONUtilCli.decodePayload;
-import static org.jboss.errai.bus.client.json.JSONUtilCli.encodeMap;
+import static org.jboss.errai.bus.client.json.JSONUtilCli.encodePayload;
 import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteSubscribe;
 import static org.jboss.errai.common.client.protocols.MessageParts.*;
 
@@ -118,12 +120,19 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private boolean disconnected = false;
 
-//  ProxySettings proxySettings;
-//
-//  static class ProxySettings {
-//    final String url = GWT.getModuleBaseURL() + "proxy";
-//    boolean hasProxy = false;
-//  }
+  static {
+    ErraiProtocol.setMarshallingSessionProvider(new MarshallingSessionProvider() {
+      @Override
+      public MarshallingSession getEncoding() {
+        return new MarshallerFramework.JSONMarshallingSession();
+      }
+
+      @Override
+      public MarshallingSession getDecoding() {
+        return new MarshallerFramework.JSONMarshallingSession();
+      }
+    });
+  }
 
   private List<MessageInterceptor> interceptorStack = new LinkedList<MessageInterceptor>();
 
@@ -148,8 +157,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private BusErrorDialog errorDialog = new BusErrorDialog();
 
   public ClientMessageBusImpl() {
-
-
     init();
   }
 
@@ -388,7 +395,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     String subject = message.getSubject();
 
     Object v = (message instanceof HasEncoded
-            ? ((HasEncoded) message).getEncoded() : encodeMap(message.getParts()));
+            ? ((HasEncoded) message).getEncoded() : encodePayload(message.getParts()));
 
     if (remotes.containsKey(subject)) {
       remotes.get(subject).callback(message);
@@ -409,7 +416,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * @param message -
    */
   private void encodeAndTransmit(Message message) {
-    transmitRemote(encodeMap(message.getParts()), message);
+    transmitRemote(encodePayload(message.getParts()), message);
   }
 
   private void addSubscription(String subject, Object reference) {
@@ -524,7 +531,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private void transmitRemote(final String message, final Message txMessage) {
     if (message == null) return;
 
-  //  System.out.println("TX: " + message);
+    //  System.out.println("TX: " + message);
 
     if (webSocketOpen) {
       if (ClientWebSocketChannel.transmitToSocket(webSocketChannel, message)) {
@@ -536,7 +543,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         webSocketOpen = false;
         webSocketChannel = null;
         cometChannelOpen = true;
-        
+
         if (receiveCommCallback instanceof LongPollRequestCallback) {
           ((LongPollRequestCallback) receiveCommCallback).schedule();
         }
@@ -1279,7 +1286,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   public void procPayload(String text) {
-  //  System.out.println("RX: " + text);
+  //   System.out.println("RX: " + text);
 
     try {
       for (MarshalledMessage m : decodePayload(text)) {

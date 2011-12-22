@@ -18,10 +18,9 @@ package org.jboss.errai.tools.monitoring;
 
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
-import org.jboss.errai.marshalling.client.marshallers.MapMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.ErraiProtocolEnvelopeMarshaller;
 import org.jboss.errai.marshalling.server.DecodingSession;
 import org.jboss.errai.marshalling.server.JSONDecoder;
-import org.jboss.errai.bus.server.util.ServerBusUtils;
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
 
 import javax.swing.*;
@@ -51,15 +50,15 @@ public class UiHelper {
 
   public static Message uglyReEncode(String message) {
     if (message == null) return null;
-    Map<String, Object> parts = (Map<String, Object>)
-            MapMarshaller.INSTANCE.demarshall(JSONDecoder.decode(message),
+    Map<String, Object> parts =
+            ErraiProtocolEnvelopeMarshaller.INSTANCE.demarshall(JSONDecoder.decode(message),
                     new DecodingSession(MappingContextSingleton.get()));
 
     return CommandMessage.createWithParts(parts);
   }
 
   public static Message decodeAndDemarshall(String json) {
-    Map<String, Object> parts = MapMarshaller.INSTANCE.demarshall(JSONDecoder.decode(json),
+    Map<String, Object> parts = ErraiProtocolEnvelopeMarshaller.INSTANCE.demarshall(JSONDecoder.decode(json),
             new DecodingSession(MappingContextSingleton.get()));
     if (parts == null) return CommandMessage.createWithParts(new HashMap());
     return CommandMessage.createWithParts(parts);

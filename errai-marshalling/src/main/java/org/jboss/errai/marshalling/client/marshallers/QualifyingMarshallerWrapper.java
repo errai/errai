@@ -19,8 +19,8 @@ package org.jboss.errai.marshalling.client.marshallers;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
+import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
-import org.jboss.errai.marshalling.client.util.EncDecUtil;
 
 /**
  * Used to wrap marshallers annotated with {@link org.jboss.errai.marshalling.client.api.annotations.AlwaysQualify}
@@ -46,18 +46,42 @@ public class QualifyingMarshallerWrapper<T> implements Marshaller<T> {
 
   @Override
   public T demarshall(EJValue o, MarshallingSession ctx) {
-    try {
-    return o.isNull() != null ? null : delegate.demarshall(o.isObject().get(SerializationParts.QUALIFIED_VALUE), ctx);
-    }
-    catch (NullPointerException e) {
-      e.printStackTrace();
+    if (o.isNull() != null) {
       return null;
     }
+
+    EJObject obj = o.isObject();
+    String objId = obj.get(SerializationParts.OBJECT_ID).isString().stringValue();
+    if (ctx.hasObjectHash(objId)) {
+      //noinspection unchecked
+      return (T) ctx.getObject(Object.class, objId);
+    }
+
+    T val = delegate.demarshall(o.isObject().get(SerializationParts.QUALIFIED_VALUE), ctx);
+    ctx.recordObjectHash(objId, val);
+    return val;
   }
 
   @Override
   public String marshall(T o, MarshallingSession ctx) {
-    return EncDecUtil.wrapQualified(o, delegate.marshall(o, ctx), ctx);
+    if (o == null) {
+      return "null";
+    }
+
+    final boolean isNew = !ctx.isEncoded(o);
+    final String objId = ctx.getObjectHash(o);
+
+    final StringBuilder buf = new StringBuilder("{\"").append(SerializationParts.ENCODED_TYPE).append("\":\"")
+            .append(o.getClass().getName()).append("\",\"").append(SerializationParts.OBJECT_ID).append("\":\"")
+            .append(objId).append("\"");
+
+    if (!isNew) {
+      return buf.append("}").toString();
+    }
+    else {
+      return buf.append(",\"").append(SerializationParts.QUALIFIED_VALUE).append("\":").append(delegate.marshall(o, ctx))
+              .append("}").toString();
+    }
   }
 
   @Override
