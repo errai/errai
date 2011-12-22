@@ -31,10 +31,8 @@ import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 import javax.ws.rs.ext.Provider;
 
-import org.jboss.errai.marshalling.server.DecodingSession;
-import org.jboss.errai.marshalling.server.JSONStreamDecoder;
-import org.jboss.errai.marshalling.server.JSONStreamEncoder;
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
+import org.jboss.errai.marshalling.server.ServerMarshalling;
 
 /**
  * Provider for serialization/deserialization of Errai objects.
@@ -46,14 +44,18 @@ import org.jboss.errai.marshalling.server.MappingContextSingleton;
 @Consumes("application/*+json")
 public class ErraiProvider implements MessageBodyReader<Object>, MessageBodyWriter<Object> {
 
+  static {
+    MappingContextSingleton.get();
+  }
+  
   @Override
   public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-    return MappingContextSingleton.get().getDefinitionsFactory().hasDefinition(type);
+    return ServerMarshalling.canHandle(type);
   }
 
   @Override
   public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
-    return MappingContextSingleton.get().getDefinitionsFactory().hasDefinition(type);
+    return ServerMarshalling.canHandle(type);
   }
 
   @Override
@@ -65,15 +67,14 @@ public class ErraiProvider implements MessageBodyReader<Object>, MessageBodyWrit
   public void writeTo(Object t, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType,
       MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException,
       WebApplicationException {
-
-    JSONStreamEncoder.encode(t, entityStream);
+    
+    entityStream.write(ServerMarshalling.toJSON(t).getBytes());
   }
 
   @Override
   public Object readFrom(Class<Object> type, Type genericType, Annotation[] annotations, MediaType mediaType,
       MultivaluedMap<String, String> httpHeaders, InputStream entityStream) throws IOException, WebApplicationException {
 
-    return MappingContextSingleton.get().getDefinitionsFactory().getDefinition(type).getMarshallerInstance()
-        .demarshall(JSONStreamDecoder.decode(entityStream), new DecodingSession(MappingContextSingleton.get()));
+    return ServerMarshalling.fromJSON(entityStream, type);
   }
 }

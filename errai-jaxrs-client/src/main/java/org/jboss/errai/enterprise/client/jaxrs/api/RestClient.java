@@ -22,16 +22,21 @@ import org.jboss.errai.bus.client.framework.ProxyProvider;
 import org.jboss.errai.bus.client.framework.RPCStub;
 import org.jboss.errai.bus.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.enterprise.client.jaxrs.JaxrsProxyLoader;
+import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 
 import com.google.gwt.core.client.GWT;
 
 /**
- * API for executing HTTP calls based on a JAX-RS resource.
+ * API for executing HTTP calls based on a JAX-RS interface.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class RestClient {
-
+  static {
+    // ensure that the marshalling framework has been initialized
+    MarshallerFramework.initializeDefaultSessionProvider();
+  }
+  
   private static ProxyProvider proxyProvider = new RemoteServiceProxyFactory();
 
   /**

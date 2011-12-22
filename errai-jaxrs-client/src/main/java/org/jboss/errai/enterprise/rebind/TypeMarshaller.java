@@ -22,9 +22,7 @@ import org.jboss.errai.codegen.framework.Variable;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.util.Stmt;
-import org.jboss.errai.marshalling.client.api.MarshallerFramework;
-
-import com.google.gwt.json.client.JSONParser;
+import org.jboss.errai.marshalling.client.Marshalling;
 
 /**
  * Generates the required {@link Statement}s for type marshalling.
@@ -38,12 +36,12 @@ public class TypeMarshaller {
   }
   
   public static Statement marshal(MetaClass type, Statement statement) {
-    Statement marshallingStatement;
+    Statement marshallingStatement = null;
     if (type.asUnboxed().isPrimitive() || type.equals(MetaClassFactory.get(String.class))) {
       marshallingStatement =  PrimitiveTypeMarshaller.marshal(type, statement);
     }
     else {
-      marshallingStatement = Stmt.invokeStatic(MarshallerFramework.class, "marshalErraiJSON", statement);
+      marshallingStatement = Stmt.invokeStatic(Marshalling.class, "toJSON", statement);
     }
     return marshallingStatement;
   }
@@ -53,14 +51,12 @@ public class TypeMarshaller {
   }
   
   public static Statement demarshal(MetaClass type, Statement statement) {
-    Statement demarshallingStatement;
+    Statement demarshallingStatement = null;
     if (type.asUnboxed().isPrimitive() || type.equals(MetaClassFactory.get(String.class))) {
       demarshallingStatement =  PrimitiveTypeMarshaller.demarshal(type, statement);
     }
     else {
-      demarshallingStatement = 
-        Stmt.invokeStatic(MarshallerFramework.class, "demarshalErraiJSON", 
-            Stmt.invokeStatic(JSONParser.class, "parseStrict", statement));
+      demarshallingStatement = Stmt.invokeStatic(Marshalling.class, "fromJSON", statement);
     }
     return demarshallingStatement;
   }
