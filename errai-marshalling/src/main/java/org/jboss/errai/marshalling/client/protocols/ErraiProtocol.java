@@ -23,16 +23,29 @@ import org.jboss.errai.marshalling.client.marshallers.ErraiProtocolEnvelopeMarsh
 import java.util.Map;
 
 /**
+ * A simple convenience class for the client and server bus' to use to encode/decode wire messages.
+ *
  * @author Mike Brock
  */
 public class ErraiProtocol {
   private static final ErraiProtocolEnvelopeMarshaller protocolMarshaller = new ErraiProtocolEnvelopeMarshaller();
 
-
+  /**
+   * Encode a standard Errai Protocol payload of the key-value pairs to be sent across the wire.
+   *
+   * @param message A map of the key-value pairs to be encoded.
+   * @return The encoded JSON
+   */
   public static String encodePayload(Map<String, Object> message) {
     return protocolMarshaller.marshall(message, MarshallingSessionProviderFactory.getEncoding());
   }
 
+  /**
+   * Decode a standard Errai Protocol payload to a Map of key value pairs.
+   *
+   * @param value The root JSON element to start parsing from.
+   * @return The decoded Map.
+   */
   public static Map<String, Object> decodePayload(EJValue value) {
     return protocolMarshaller.demarshall(value, MarshallingSessionProviderFactory.getDecoding());
   }

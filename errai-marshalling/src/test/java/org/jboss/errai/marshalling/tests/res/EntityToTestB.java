@@ -1,7 +1,5 @@
 package org.jboss.errai.marshalling.tests.res;
 
-import org.jboss.errai.common.client.api.annotations.Portable;
-
 import java.util.Date;
 
 /**

@@ -25,7 +25,10 @@ import org.jboss.errai.marshalling.rebind.api.model.ConstructorMapping;
 import org.jboss.errai.marshalling.rebind.api.model.Mapping;
 import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
-import org.jboss.errai.marshalling.rebind.api.model.impl.*;
+import org.jboss.errai.marshalling.rebind.api.model.impl.ReadMapping;
+import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleConstructorMapping;
+import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleFactoryMapping;
+import org.jboss.errai.marshalling.rebind.api.model.impl.WriteMapping;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 
 import java.lang.annotation.Annotation;

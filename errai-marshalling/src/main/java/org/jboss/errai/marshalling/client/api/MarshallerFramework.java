@@ -19,16 +19,11 @@ package org.jboss.errai.marshalling.client.api;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONParser;
-import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.exceptions.MarshallingException;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.api.json.impl.gwt.GWTJSON;
-import org.jboss.errai.marshalling.client.marshallers.ErraiProtocolEnvelopeMarshaller;
-import org.jboss.errai.marshalling.client.marshallers.ObjectMarshaller;
-import org.jboss.errai.marshalling.client.protocols.ErraiProtocol;
-import org.jboss.errai.marshalling.client.protocols.MarshallingSessionProvider;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
 
 import java.util.List;

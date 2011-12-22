@@ -16,8 +16,6 @@
 
 package org.jboss.errai.marshalling.tests.res.shared;
 
-import org.jboss.errai.common.client.api.annotations.Portable;
-
 //@Portable
 public class Item {
   private String itemName;

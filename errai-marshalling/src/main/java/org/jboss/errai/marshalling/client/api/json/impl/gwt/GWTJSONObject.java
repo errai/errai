@@ -17,7 +17,6 @@
 package org.jboss.errai.marshalling.client.api.json.impl.gwt;
 
 import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 
