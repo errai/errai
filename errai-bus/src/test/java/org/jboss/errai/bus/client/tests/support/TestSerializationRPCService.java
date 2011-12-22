@@ -49,7 +49,26 @@ public interface TestSerializationRPCService {
 
   public byte testByte(byte b);
 
-  
+
+  public String[] testStringArray(String[] str);
+
+  public int[] testIntegerArray(int[] i);
+
+  public long[] testLongArray(long[] l);
+
+  public double[] testDoubleArray(double[] d);
+
+  public float[] testFloatArray(float[] f);
+
+  public short[] testShortArray(short[] s);
+
+  public boolean[] testBooleanArray(boolean[] b);
+
+  public char[] testCharacterArray(char[] c);
+
+  public byte[] testByteArray(byte[] b);
+
+
   public List<Long> listOfLong(List<Long> list);
   
   public List<Integer> listOfInteger(List<Integer> list);

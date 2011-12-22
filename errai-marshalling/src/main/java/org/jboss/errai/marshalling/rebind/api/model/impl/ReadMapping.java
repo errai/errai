@@ -27,10 +27,7 @@ import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
  */
 public class ReadMapping extends SimpleMapping implements MemberMapping {
   private MetaClass toMap;
-
-
   private MetaClassMember readingMember;
-
   private String getterMethod;
   
   public ReadMapping(String key, Class<?> type,  String getterMethod) {
@@ -45,16 +42,6 @@ public class ReadMapping extends SimpleMapping implements MemberMapping {
   @Override
   public String getKey() {
     return key;
-  }
-
-  @Override
-  public MetaClass getType() {
-    return type;
-  }
-
-  @Override
-  public void setType(MetaClass type) {
-    this.type = type;
   }
 
   @Override

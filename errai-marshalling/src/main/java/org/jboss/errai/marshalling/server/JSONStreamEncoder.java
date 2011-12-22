@@ -73,9 +73,9 @@ public class JSONStreamEncoder {
         outstream.write(String.valueOf(v).getBytes());
       }
     }
-    else if (v.getClass().isArray()) {
-      encodeArray(v, outstream, ctx);
-    }
+//    else if (v.getClass().isArray()) {
+//      encodeArray(v, outstream, ctx);
+//    }
     else if (v instanceof Enum) {
       encodeEnum((Enum) v, outstream, ctx);
     }

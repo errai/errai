@@ -90,8 +90,8 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
     MAPPING_DEFINITIONS.put(definition.getMappingClass().getFullyQualifiedName(), definition);
     
-    if (definition.getMappingClass().asUnboxed().isPrimitive()) {
-      MAPPING_DEFINITIONS.put(definition.getMappingClass().asUnboxed().getFullyQualifiedName(), definition);
+    if (definition.getMappingClass().isArray() && definition.getMappingClass().getOuterComponentType().isPrimitive()) {
+      MAPPING_DEFINITIONS.put(definition.getMappingClass().getInternalName(), definition);
     }
     
     if (log.isDebugEnabled())

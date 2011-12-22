@@ -28,7 +28,7 @@ import org.jboss.errai.marshalling.client.util.EncDecUtil;
  * @author Mike Brock
  */
 public class QualifyingMarshallerWrapper<T> implements Marshaller<T> {
-  private Marshaller<T> delegate;
+  private final Marshaller<T> delegate;
 
   public QualifyingMarshallerWrapper(Marshaller<T> delegate) {
     this.delegate = delegate;
@@ -46,7 +46,13 @@ public class QualifyingMarshallerWrapper<T> implements Marshaller<T> {
 
   @Override
   public T demarshall(EJValue o, MarshallingSession ctx) {
-    return delegate.demarshall(o.isObject().get(SerializationParts.QUALIFIED_VALUE), ctx);
+    try {
+    return o.isNull() != null ? null : delegate.demarshall(o.isObject().get(SerializationParts.QUALIFIED_VALUE), ctx);
+    }
+    catch (NullPointerException e) {
+      e.printStackTrace();
+      return null;
+    }
   }
 
   @Override

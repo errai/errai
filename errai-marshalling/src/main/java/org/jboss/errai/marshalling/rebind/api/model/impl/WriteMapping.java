@@ -45,15 +45,6 @@ public class WriteMapping extends SimpleMapping implements MemberMapping {
   }
 
   @Override
-  public MetaClass getType() {
-    return type;
-  }
-
-  public void setType(MetaClass type) {
-    this.type = type;
-  }
-
-  @Override
   public MetaClassMember getBindingMember() {
     if (writingMember != null) {
       return writingMember;

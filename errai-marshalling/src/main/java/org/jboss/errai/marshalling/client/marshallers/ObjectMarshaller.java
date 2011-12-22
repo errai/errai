@@ -47,7 +47,7 @@ public class ObjectMarshaller extends AbstractJSONMarshaller<Object> {
       EJObject jsObject = o.isObject();
       EJString string = jsObject.get(SerializationParts.ENCODED_TYPE).isString();
       if (string == null) {
-        throw new RuntimeException("cannot decode unqualified object: " + o);
+        return MapMarshaller.INSTANCE.demarshall(o, ctx);
       }
 
       if (jsObject.containsKey(SerializationParts.NUMERIC_VALUE)) {
@@ -78,7 +78,7 @@ public class ObjectMarshaller extends AbstractJSONMarshaller<Object> {
       return null;
     }
 
-    if (o instanceof Number && !o.getClass().getName().startsWith("java.math.Big")) {
+    if ((o instanceof Number && !o.getClass().getName().startsWith("java.math.Big")) || o instanceof Boolean) {
       return NumbersUtils.qualifiedNumericEncoding(o);
     }
 

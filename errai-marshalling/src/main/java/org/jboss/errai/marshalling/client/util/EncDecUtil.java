@@ -19,6 +19,7 @@ package org.jboss.errai.marshalling.client.util;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
+import org.jboss.errai.marshalling.client.marshallers.QualifyingMarshallerWrapper;
 import org.jboss.errai.marshalling.server.EncodingSession;
 
 import java.util.Collection;
@@ -73,5 +74,15 @@ public class EncDecUtil {
       return buf.append(",\"").append(SerializationParts.QUALIFIED_VALUE).append("\":").append(marshalledString)
               .append("}").toString();
     }
+  }
+
+  /**
+   * Ensure the marshaller is qualified on the wire using a wrapping marshaller.
+   * @param marshaller
+   * @param <T>
+   * @return
+   */
+  public static <T> Marshaller<T> qualifyMarshaller(Marshaller<T> marshaller) {
+    return new QualifyingMarshallerWrapper<T>(marshaller);
   }
 }

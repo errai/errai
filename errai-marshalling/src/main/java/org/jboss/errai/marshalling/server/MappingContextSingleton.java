@@ -28,6 +28,8 @@ import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.marshallers.QualifyingMarshallerWrapper;
+import org.jboss.errai.marshalling.client.util.EncDecUtil;
+import org.jboss.errai.marshalling.client.util.MarshallUtil;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactoryImpl;
 import org.jboss.errai.marshalling.rebind.api.model.Mapping;
@@ -35,8 +37,9 @@ import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 import org.jboss.errai.marshalling.server.marshallers.DefaultArrayMarshaller;
 import org.jboss.errai.marshalling.server.marshallers.DefaultEnumMarshaller;
 
-import java.util.Map;
 import java.util.Set;
+
+import static org.jboss.errai.marshalling.client.util.EncDecUtil.qualifyMarshaller;
 
 /**
  * @author Mike Brock
@@ -67,8 +70,8 @@ public class MappingContextSingleton {
             if (m.getTargetType().isArray() && !factory.hasDefinition(m.getTargetType())) {
               MappingDefinition arrayMappingDefinition = new MappingDefinition(m.getTargetType());
               arrayMappingDefinition.setMarshallerInstance(
-                      new DefaultArrayMarshaller(m.getTargetType(),
-                              factory.getDefinition(m.getTargetType().getOuterComponentType()).getMarshallerInstance())
+                      qualifyMarshaller(new DefaultArrayMarshaller(m.getTargetType(),
+                              factory.getDefinition(m.getTargetType().getOuterComponentType()).getMarshallerInstance()))
               );
 
               factory.addDefinition(arrayMappingDefinition);
@@ -79,8 +82,9 @@ public class MappingContextSingleton {
             if (m.getTargetType().isArray() && !factory.hasDefinition(m.getTargetType())) {
               MappingDefinition arrayMappingDefinition = new MappingDefinition(m.getTargetType());
               arrayMappingDefinition.setMarshallerInstance(
-                      new DefaultArrayMarshaller(m.getTargetType(),
-                              factory.getDefinition(m.getTargetType().getOuterComponentType()).getMarshallerInstance())
+                      qualifyMarshaller(new DefaultArrayMarshaller(m.getTargetType(),
+                              factory.getDefinition(m.getTargetType().getOuterComponentType().asBoxed())
+                                      .getMarshallerInstance()))
               );
 
               factory.addDefinition(arrayMappingDefinition);
@@ -114,8 +118,18 @@ public class MappingContextSingleton {
              * Load the default array marshaller.
              */
             MetaClass arrayType = MetaClassFactory.get(marshaller.getTypeHandled()).asArrayOf(1);
-            if (!factory.hasDefinition(arrayType))  {
-                factory.addDefinition(new MappingDefinition(new DefaultArrayMarshaller(arrayType, marshaller)));
+            if (!factory.hasDefinition(arrayType)) {
+              factory.addDefinition(new MappingDefinition(
+                      qualifyMarshaller(new DefaultArrayMarshaller(arrayType, marshaller))));
+
+              /**
+               * If this a pirmitive wrapper, create a special case for it using the same marshaller.
+               */
+              if (MarshallUtil.isPrimitiveWrapper(marshaller.getTypeHandled())) {
+                factory.addDefinition(new MappingDefinition(
+                        qualifyMarshaller(new DefaultArrayMarshaller(
+                                arrayType.getOuterComponentType().asUnboxed().asArrayOf(1), marshaller))));
+              }
             }
 
           }
@@ -141,14 +155,13 @@ public class MappingContextSingleton {
               factory.getDefinition(exposed)
                       .setMarshallerInstance(factory.getDefinition(p.aliasOf()).getMarshallerInstance());
             }
-            
+
             if (exposed.isEnum()) {
               factory.getDefinition(exposed)
                       .setMarshallerInstance(new DefaultEnumMarshaller(exposed));
             }
           }
         }
-
       }
 
       @Override
