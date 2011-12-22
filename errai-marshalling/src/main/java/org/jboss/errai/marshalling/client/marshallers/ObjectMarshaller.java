@@ -75,7 +75,7 @@ public class ObjectMarshaller extends AbstractJSONMarshaller<Object> {
   @Override
   public String marshall(Object o, MarshallingSession ctx) {
     if (o == null) {
-      return null;
+      return "null";
     }
 
     if ((o instanceof Number && !o.getClass().getName().startsWith("java.math.Big")) || o instanceof Boolean) {

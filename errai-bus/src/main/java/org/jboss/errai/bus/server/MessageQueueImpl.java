@@ -26,7 +26,9 @@ import org.jboss.errai.bus.server.io.BufferHelper;
 import org.jboss.errai.bus.server.io.buffers.BufferCallback;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
-import org.jboss.errai.marshalling.server.JSONEncoder;
+import org.jboss.errai.marshalling.client.protocols.ErraiProtocol;
+import org.jboss.errai.marshalling.server.protocol.ErraiProtocolServer;
+import org.jboss.errai.marshalling.server.util.UnwrappedByteArrayOutputStream;
 import org.slf4j.Logger;
 
 import java.io.*;
@@ -34,7 +36,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.lang.System.nanoTime;
-import static java.lang.System.out;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -132,14 +133,14 @@ public class MessageQueueImpl implements MessageQueue {
     }
 
     if (useDirectSocketChanne && directSocketChannel.isConnected()) {
-      directSocketChannel.write(new TextWebSocketFrame("[" + JSONEncoder.encode(message.getParts()) + "]"));
+      directSocketChannel.write(new TextWebSocketFrame("[" + ErraiProtocol.encodePayload(message.getParts()) + "]"));
     }
     else {
       if (pagedOut) {
         try {
           synchronized (pageLock) {
             if (pagedOut) {
-              writeToPageFile(JSONEncoder.encodeToByteArrayInputStream(message.getParts()), true);
+              writeToPageFile(ErraiProtocolServer.encodeToByteArrayInputStream(message.getParts()), true);
               return true;
             }
           }
@@ -268,7 +269,7 @@ public class MessageQueueImpl implements MessageQueue {
   public void wake() {
     try {
       if (isDirectChannelOpen()) {
-        JSONEncoder.UnwrappedByteArrayOutputStream outputStream = new JSONEncoder.UnwrappedByteArrayOutputStream();
+        UnwrappedByteArrayOutputStream outputStream = new UnwrappedByteArrayOutputStream();
         buffer.read(outputStream, bufferColor, new BufferHelper.MultiMessageHandlerCallback());
         directSocketChannel.write(new TextWebSocketFrame(new String(outputStream.toByteArray(), 0, outputStream.size())));
       }

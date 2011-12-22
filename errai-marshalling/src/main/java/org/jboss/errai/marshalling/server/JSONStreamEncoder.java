@@ -35,6 +35,7 @@ import java.util.Map;
 /**
  * @author Mike Brock
  */
+@Deprecated
 public class JSONStreamEncoder {
   private static final byte[] NULL_BYTES = "null".getBytes();
 

@@ -25,8 +25,10 @@ import org.jboss.errai.marshalling.client.api.exceptions.MarshallingException;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.api.json.impl.gwt.GWTJSON;
-import org.jboss.errai.marshalling.client.marshallers.MapMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.ErraiProtocolEnvelopeMarshaller;
 import org.jboss.errai.marshalling.client.marshallers.ObjectMarshaller;
+import org.jboss.errai.marshalling.client.protocols.ErraiProtocol;
+import org.jboss.errai.marshalling.client.protocols.MarshallingSessionProvider;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
 
 import java.util.List;
@@ -58,22 +60,24 @@ public class MarshallerFramework implements EntryPoint {
 
 
   public static Object demarshalErraiJSON(JSONValue object) {
-    JSONMarshallingSession session = new JSONMarshallingSession();
+//    JSONMarshallingSession session = new JSONMarshallingSession();
+//
+//    EJValue o = GWTJSON.wrap(object);
 
-    EJValue o = GWTJSON.wrap(object);
 
-    Marshaller<Object> marshaller =
-            marshallerFactory.getMarshaller(null, session.determineTypeFor(null, o));
+    return ErraiProtocolEnvelopeMarshaller.INSTANCE.demarshall(GWTJSON.wrap(object), new JSONMarshallingSession());
+//    Marshaller<Object> marshaller =
+//            marshallerFactory.getMarshaller(null, session.determineTypeFor(null, o));
+//
+//    if (marshaller == null) {
+//      throw new RuntimeException("no marshaller available for payload: " + session.determineTypeFor(null, object));
+//    }
 
-    if (marshaller == null) {
-      throw new RuntimeException("no marshaller available for payload: " + session.determineTypeFor(null, object));
-    }
-
-    return marshaller.demarshall(o, session);
+//    return marshaller.demarshall(o, session);
   }
 
   public static String marshalErraiJSON(Map<String, Object> map) {
-    return MapMarshaller.INSTANCE.marshall(map, new JSONMarshallingSession());
+    return ErraiProtocolEnvelopeMarshaller.INSTANCE.marshall(map, new JSONMarshallingSession());
   }
 
   public static String marshalErraiJSON(Object obj) {

@@ -21,7 +21,8 @@ import org.jboss.errai.bus.client.tests.support.RandomProvider;
 import org.jboss.errai.bus.client.tests.support.SType;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
-import org.jboss.errai.marshalling.server.JSONEncoder;
+import org.jboss.errai.marshalling.client.protocols.ErraiProtocol;
+import org.jboss.errai.marshalling.server.MappingContextSingleton;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -38,6 +39,11 @@ import java.util.concurrent.locks.LockSupport;
  * @author Mike Brock
  */
 public class TransmissionBufferTests extends TestCase {
+  static {
+    // make sure protocol provider is initialized;
+    MappingContextSingleton.get();
+  }
+
   public void testBufferWriteAndRead() {
     TransmissionBuffer buffer = TransmissionBuffer.create();
 
@@ -251,7 +257,7 @@ public class TransmissionBufferTests extends TestCase {
     final BufferColor colorA = BufferColor.getNewColor();
 
     SType type = SType.create(new RandomProvider() {
-      private  char[] CHARS = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q',
+      private char[] CHARS = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q',
               'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'};
 
       private Random random = new Random(System.nanoTime());
@@ -285,7 +291,7 @@ public class TransmissionBufferTests extends TestCase {
     Map<String, Object> vars = new HashMap<String, Object>();
     vars.put("SType", type);
 
-    String s = JSONEncoder.encode(vars);
+    String s = ErraiProtocol.encodePayload(vars);
 
     ByteArrayInputStream bInputStream = new ByteArrayInputStream(s.getBytes());
     ByteArrayOutputStream bOutputStream = new ByteArrayOutputStream();
