@@ -156,6 +156,8 @@ public class ErrorHelper {
         "\nerrorMessage: " + errorMessage +
         "\nexception: " + e +
         "\ndisconnect: " + disconnect;
+    
+    if (e != null) e.printStackTrace();
     System.err.println(logMessage);
     
     try {

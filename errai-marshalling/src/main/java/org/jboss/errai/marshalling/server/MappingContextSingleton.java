@@ -16,6 +16,8 @@
 
 package org.jboss.errai.marshalling.server;
 
+import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.marshalling.client.api.Marshaller;
@@ -107,6 +109,15 @@ public class MappingContextSingleton {
                 factory.addDefinition(new MappingDefinition(marshaller, inherits));
               }
             }
+
+            /**
+             * Load the default array marshaller.
+             */
+            MetaClass arrayType = MetaClassFactory.get(marshaller.getTypeHandled()).asArrayOf(1);
+            if (!factory.hasDefinition(arrayType))  {
+                factory.addDefinition(new MappingDefinition(new DefaultArrayMarshaller(arrayType, marshaller)));
+            }
+
           }
           catch (ClassCastException e) {
             throw new RuntimeException("@ServerMarshaller class "

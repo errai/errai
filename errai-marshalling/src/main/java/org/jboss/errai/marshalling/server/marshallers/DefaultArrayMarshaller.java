@@ -28,7 +28,6 @@ import java.lang.reflect.Array;
  * @author Mike Brock
  */
 public class DefaultArrayMarshaller implements Marshaller<Object> {
-
   private final MetaClass arrayType;
   private final Marshaller<Object> outerMarshaller;
   private final int dimensions;
@@ -48,7 +47,7 @@ public class DefaultArrayMarshaller implements Marshaller<Object> {
   }
 
   public Class<Object> getTypeHandled() {
-    return Object.class;
+    return (Class<Object>) arrayType.asClass();
   }
 
   public String getEncodingType() {
@@ -102,7 +101,7 @@ public class DefaultArrayMarshaller implements Marshaller<Object> {
   }
 
   private String _marshall(Object a0, MarshallingSession a1) {
-    StringBuilder builder = new StringBuilder("{ ");
+    StringBuilder builder = new StringBuilder("[");
 
     int length = Array.getLength(a0);
 
@@ -119,10 +118,10 @@ public class DefaultArrayMarshaller implements Marshaller<Object> {
       }
 
       if (i + 1 < length) {
-        builder.append(", ");
+        builder.append(',');
       }
     }
 
-    return builder.append(" }").toString();
+    return builder.append(']').toString();
   }
 }
