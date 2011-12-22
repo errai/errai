@@ -20,10 +20,12 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONParser;
 import org.jboss.errai.common.client.protocols.SerializationParts;
+import org.jboss.errai.marshalling.client.MarshallingSessionProviderFactory;
 import org.jboss.errai.marshalling.client.api.exceptions.MarshallingException;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.api.json.impl.gwt.GWTJSON;
+import org.jboss.errai.marshalling.client.protocols.MarshallingSessionProvider;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
 
 import java.util.List;
@@ -50,6 +52,33 @@ public class MarshallerFramework implements EntryPoint {
   @Override
   public void onModuleLoad() {
   }
+
+  public static void initializeDefaultSessionProvider() {
+    if (!MarshallingSessionProviderFactory.isMarshallingSessionProviderRegistered()) {
+      MarshallingSessionProviderFactory.setMarshallingSessionProvider(new MarshallingSessionProvider() {
+        @Override
+        public MarshallingSession getEncoding() {
+          return new MarshallerFramework.JSONMarshallingSession();
+        }
+
+        @Override
+        public MarshallingSession getDecoding() {
+          return new MarshallerFramework.JSONMarshallingSession();
+        }
+
+        @Override
+        public boolean hasMarshaller(String fqcn) {
+          return MarshallerFramework.getMarshallerFactory().getMarshaller(null, fqcn) != null;
+        }
+
+        @Override
+        public Marshaller getMarshaller(String fqcn) {
+          return MarshallerFramework.getMarshallerFactory().getMarshaller(null, fqcn);
+        }
+      });
+    }
+  }
+
 
   public static class JSONMarshallingSession extends AbstractMarshallingSession {
 
