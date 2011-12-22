@@ -16,6 +16,7 @@
 
 package org.jboss.errai.marshalling.client.protocols;
 
+import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 
 /**
@@ -24,4 +25,6 @@ import org.jboss.errai.marshalling.client.api.MarshallingSession;
 public interface MarshallingSessionProvider {
   public MarshallingSession getEncoding();
   public MarshallingSession getDecoding();
+  public boolean hasMarshaller(String fqcn);
+  public Marshaller getMarshaller(String fqcn);
 }

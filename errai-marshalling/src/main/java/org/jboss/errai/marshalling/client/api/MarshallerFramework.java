@@ -175,4 +175,7 @@ public class MarshallerFramework implements EntryPoint {
     }
   }
 
+  public static MarshallerFactory getMarshallerFactory() {
+    return marshallerFactory;
+  }
 }

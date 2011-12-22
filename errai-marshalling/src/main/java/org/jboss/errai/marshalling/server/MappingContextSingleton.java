@@ -60,17 +60,6 @@ public class MappingContextSingleton {
             }
     );
     
-    MarshallingSessionProviderFactory.setMarshallingSessionProvider(new MarshallingSessionProvider() {
-      @Override
-      public MarshallingSession getEncoding() {
-        return new EncodingSession(get());
-      }
-
-      @Override
-      public MarshallingSession getDecoding() {
-        return new DecodingSession(get());
-      }
-    });
 
     context = new ServerMappingContext() {
       private final DefinitionsFactory factory = new DefinitionsFactoryImpl();
@@ -106,6 +95,30 @@ public class MappingContextSingleton {
             }
           }
         }
+
+
+        MarshallingSessionProviderFactory.setMarshallingSessionProvider(new MarshallingSessionProvider() {
+              @Override
+              public MarshallingSession getEncoding() {
+                return new EncodingSession(get());
+              }
+
+              @Override
+              public MarshallingSession getDecoding() {
+                return new DecodingSession(get());
+              }
+
+              @Override
+              public boolean hasMarshaller(String fqcn) {
+                return factory.hasDefinition(fqcn);
+              }
+
+              @Override
+              public Marshaller getMarshaller(String fqcn) {
+                return factory.getDefinition(fqcn).getMarshallerInstance();
+              }
+            });
+
 
       }
 

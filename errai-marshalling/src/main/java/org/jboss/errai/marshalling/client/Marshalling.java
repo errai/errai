@@ -25,9 +25,8 @@ import java.io.IOException;
  * @author Mike Brock
  */
 public abstract class Marshalling {
-
   public static boolean canHandle(Class<?> type) {
-    return MarshallingSessionProviderFactory.getEncoding().getMarshallerInstance(type.getName()) != null;
+    return MarshallingSessionProviderFactory.getProvider().hasMarshaller(type.getName());
   }
 
   public static String toJSON(Object obj) {

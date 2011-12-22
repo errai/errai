@@ -32,6 +32,7 @@ import org.jboss.errai.bus.client.api.base.*;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.marshalling.client.MarshallingSessionProviderFactory;
+import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.protocols.ErraiProtocol;
@@ -131,6 +132,16 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       @Override
       public MarshallingSession getDecoding() {
         return new MarshallerFramework.JSONMarshallingSession();
+      }
+
+      @Override
+      public boolean hasMarshaller(String fqcn) {
+        return MarshallerFramework.getMarshallerFactory().getMarshaller(null, fqcn) != null;
+      }
+
+      @Override
+      public Marshaller getMarshaller(String fqcn) {
+        return MarshallerFramework.getMarshallerFactory().getMarshaller(null, fqcn);
       }
     });
   }

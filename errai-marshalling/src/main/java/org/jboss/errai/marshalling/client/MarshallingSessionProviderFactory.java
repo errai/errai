@@ -36,6 +36,10 @@ public class MarshallingSessionProviderFactory {
     sessionProvider = provider;
   }
 
+  public static MarshallingSessionProvider getProvider() {
+    return sessionProvider;
+  }
+
   public static MarshallingSession getEncoding() {
     return sessionProvider.getEncoding();
   }
