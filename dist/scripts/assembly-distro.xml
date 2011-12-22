@@ -22,15 +22,13 @@
                 <!-- Errai Libraries -->
                 <include>org.jboss.errai:errai-common</include>
                 <include>org.jboss.errai:errai-bus</include>
-                <include>org.jboss.errai:errai-widgets</include>
                 <include>org.jboss.errai:errai-ioc</include>
                 <include>org.jboss.errai:errai-tools</include>
-                <include>org.jboss.errai:errai-persistence</include>
                 <include>org.jboss.errai:jboss7-support</include>
-				<include>org.jboss.errai:errai-cdi-client</include>
-				<include>org.jboss.errai:errai-javax-enterprise</include>
-				<include>org.jboss.errai:errai-weld-integration</include>
-				<include>org.jboss.errai:errai-cdi-jetty</include>
+		<include>org.jboss.errai:errai-cdi-client</include>
+		<include>org.jboss.errai:errai-javax-enterprise</include>
+		<include>org.jboss.errai:errai-weld-integration</include>
+		<include>org.jboss.errai:errai-cdi-jetty</include>
             </includes>
         </dependencySet>
         <!-- deps/lib -->
