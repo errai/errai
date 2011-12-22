@@ -1,7 +1,5 @@
 package org.jboss.errai.marshalling.tests.res;
 
-import org.jboss.errai.common.client.api.annotations.ExposeEntity;
-
 import java.util.List;
 import java.util.Map;
 

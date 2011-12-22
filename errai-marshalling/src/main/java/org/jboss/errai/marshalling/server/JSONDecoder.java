@@ -16,22 +16,9 @@
 
 package org.jboss.errai.marshalling.server;
 
-import org.jboss.errai.common.client.protocols.SerializationParts;
-import org.jboss.errai.common.client.types.UHashMap;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-
-import static java.lang.Character.isDigit;
-import static java.lang.Character.isJavaIdentifierPart;
-import static org.jboss.errai.common.client.protocols.SerializationParts.ENCODED_TYPE;
-import static org.mvel2.util.ParseTools.handleStringEscapes;
-import static org.mvel2.util.ParseTools.subArray;
 
 /**
  * Decodes a JSON string or character array, and provides a proper collection of elements

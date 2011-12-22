@@ -16,8 +16,6 @@
 
 package org.jboss.errai.marshalling.client.api.json;
 
-import com.google.gwt.json.client.JSONValue;
-
 import java.util.Set;
 
 /**

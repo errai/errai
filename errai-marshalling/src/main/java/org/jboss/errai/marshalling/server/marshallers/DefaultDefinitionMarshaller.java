@@ -25,7 +25,6 @@ import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.util.NumbersUtils;
 import org.jboss.errai.marshalling.rebind.api.model.*;
-import org.jboss.errai.marshalling.server.DecodingSession;
 import org.jboss.errai.marshalling.server.EncodingSession;
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.marshalling.server.api.ServerMarshaller;

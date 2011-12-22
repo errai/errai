@@ -22,9 +22,8 @@ import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
-import org.jboss.errai.common.metadata.RebindUtils;
 
-import java.io.*;
+import java.io.PrintWriter;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

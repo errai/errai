@@ -18,7 +18,10 @@ package org.jboss.errai.marshalling.tests.res;
 
 import org.jboss.errai.common.client.api.annotations.Portable;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 @Portable
 public class SType extends STypeSuper {

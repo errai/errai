@@ -20,7 +20,6 @@ import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.marshallers.QualifyingMarshallerWrapper;
-import org.jboss.errai.marshalling.server.EncodingSession;
 
 import java.util.Collection;
 import java.util.Iterator;

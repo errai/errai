@@ -17,16 +17,9 @@
 package org.jboss.errai.marshalling.rebind;
 
 import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.marshalling.client.api.exceptions.MarshallingException;
 import org.jboss.errai.marshalling.rebind.api.GeneratorMappingContext;
 import org.jboss.errai.marshalling.rebind.api.MappingStrategy;
 import org.jboss.errai.marshalling.rebind.api.impl.defaultjava.DefaultJavaMappingStrategy;
-
-import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

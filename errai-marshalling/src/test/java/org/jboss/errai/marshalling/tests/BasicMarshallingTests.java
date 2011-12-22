@@ -1,6 +1,5 @@
 package org.jboss.errai.marshalling.tests;
 
-import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.marshalling.rebind.MarshallerGeneratorFactory;
 import org.junit.Test;
 
