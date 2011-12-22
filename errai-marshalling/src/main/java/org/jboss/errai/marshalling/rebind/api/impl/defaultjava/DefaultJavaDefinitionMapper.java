@@ -219,7 +219,7 @@ public class DefaultJavaDefinitionMapper {
         }
 
         definition.addMemberMapping(new MemberMapping() {
-          private MetaClass type = field.getType();
+          private MetaClass type = (field.getType().isArray() ? field.getType() : field.getType().asBoxed());
           private MetaClass targetType = type;
 
           @Override

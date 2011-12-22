@@ -46,7 +46,7 @@ public class SimpleMapping implements Mapping {
   }
 
   public void setType(MetaClass type) {
-    this.type = type;
+    this.type = type.asBoxed();
   }
 
   public MetaClass getTargetType() {

@@ -1279,7 +1279,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   public void procPayload(String text) {
- //   System.out.println("RX: " + text);
+  //  System.out.println("RX: " + text);
 
     try {
       for (MarshalledMessage m : decodePayload(text)) {

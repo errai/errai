@@ -5,6 +5,7 @@ import org.jboss.errai.marshalling.client.api.AbstractMarshallingSession;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
+import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 
 import java.util.List;
 import java.util.Map;
@@ -40,7 +41,12 @@ public class DecodingSession extends AbstractMarshallingSession {
 
   @Override
   public Marshaller<Object> getMarshallerInstance(String fqcn) {
-    return context.getDefinitionsFactory().getDefinition(fqcn).getMarshallerInstance();
+    MappingDefinition m = context.getDefinitionsFactory().getDefinition(fqcn);
+    if (m == null) {
+      throw new RuntimeException("no marshalling definition available for type:" + fqcn);
+    }
+
+    return m.getMarshallerInstance();
   }
 
   @Override

@@ -192,6 +192,292 @@ public class SerializationTests extends AbstractErraiTest {
     });
   }
 
+
+  private static String failMessage(Object expect, Object got) {
+    return "expected: " + expect + "; but was: " + got;
+  }
+
+  private static final void assertStringArrayEqual(String[] a, String[] b) {
+    if (a == null || b == null) {
+      assertTrue(failMessage(a, b), a == null && b == null);
+    }
+    else if (a.length != b.length) {
+      fail(failMessage(a, b));
+    }
+
+    for (int i = 0; i < a.length; i++) {
+      assertEquals(a[i], b[i]);
+    }
+  }
+
+  private static final void assertIntArrayEqual(int[] a, int[] b) {
+    if (a == null || b == null) {
+      assertTrue(failMessage(a, b), a == null && b == null);
+    }
+    else if (a.length != b.length) {
+      fail(failMessage(a, b));
+    }
+
+    for (int i = 0; i < a.length; i++) {
+      assertEquals(a[i], b[i]);
+    }
+  }
+
+  private static final void assertLongArrayEqual(long[] a, long[] b) {
+    if (a == null || b == null) {
+      assertTrue(failMessage(a, b), a == null && b == null);
+    }
+    else if (a.length != b.length) {
+      fail(failMessage(a, b));
+    }
+
+    for (int i = 0; i < a.length; i++) {
+      assertEquals(a[i], b[i]);
+    }
+  }
+
+  private static final void assertDoubleArrayEqual(double[] a, double[] b) {
+    if (a == null || b == null) {
+      assertTrue(failMessage(a, b), a == null && b == null);
+    }
+    else if (a.length != b.length) {
+      fail(failMessage(a, b));
+    }
+
+    for (int i = 0; i < a.length; i++) {
+      assertEquals(a[i], b[i]);
+    }
+  }
+
+
+  private static final void assertFloatArrayEqual(float[] a, float[] b) {
+    if (a == null || b == null) {
+      assertTrue(failMessage(a, b), a == null && b == null);
+    }
+    else if (a.length != b.length) {
+      fail(failMessage(a, b));
+    }
+
+    for (int i = 0; i < a.length; i++) {
+      assertEquals(a[i], b[i]);
+    }
+  }
+
+
+  private static final void assertShortArrayEqual(short[] a, short[] b) {
+    if (a == null || b == null) {
+      assertTrue(failMessage(a, b), a == null && b == null);
+    }
+    else if (a.length != b.length) {
+      fail(failMessage(a, b));
+    }
+
+    for (int i = 0; i < a.length; i++) {
+      assertEquals(a[i], b[i]);
+    }
+  }
+
+  private static final void assertBooleanArrayEqual(boolean[] a, boolean[] b) {
+    if (a == null || b == null) {
+      assertTrue(failMessage(a, b), a == null && b == null);
+    }
+    else if (a.length != b.length) {
+      fail(failMessage(a, b));
+    }
+
+    for (int i = 0; i < a.length; i++) {
+      assertEquals(a[i], b[i]);
+    }
+  }
+
+  private static final void assertByteArrayEqual(byte[] a, byte[] b) {
+    if (a == null || b == null) {
+      assertTrue(failMessage(a, b), a == null && b == null);
+    }
+    else if (a.length != b.length) {
+      fail(failMessage(a, b));
+    }
+
+    for (int i = 0; i < a.length; i++) {
+      assertEquals(a[i], b[i]);
+    }
+  }
+
+  private static final void assertCharArrayEqual(char[] a, char[] b) {
+    if (a == null || b == null) {
+      assertTrue(failMessage(a, b), a == null && b == null);
+    }
+    else if (a.length != b.length) {
+      fail(failMessage(a, b));
+    }
+
+    for (int i = 0; i < a.length; i++) {
+      assertEquals(a[i], b[i]);
+    }
+  }
+
+
+
+
+  /**
+   * array tests *
+   */
+
+  public void testStringArray() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final String[] expected = {"This is a test string", "And so is this"};
+
+        MessageBuilder.createCall(new RemoteCallback<String[]>() {
+          @Override
+          public void callback(String[] response) {
+            assertStringArrayEqual(expected, response);
+            finishTest();
+          }
+        }, TestSerializationRPCService.class).testStringArray(expected);
+      }
+    });
+  }
+
+  public void testIntegerArray() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final int[] expected = {Integer.MIN_VALUE, Integer.MAX_VALUE};
+
+        MessageBuilder.createCall(new RemoteCallback<int[]>() {
+          @Override
+          public void callback(int[] response) {
+            assertIntArrayEqual(expected, response);
+            finishTest();
+          }
+        }, TestSerializationRPCService.class).testIntegerArray(expected);
+      }
+    });
+  }
+
+  public void testLongArray() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final long[] expected = {Long.MIN_VALUE, Long.MAX_VALUE};
+
+        MessageBuilder.createCall(new RemoteCallback<long[]>() {
+          @Override
+          public void callback(long[] response) {
+            assertLongArrayEqual(expected, response);
+            finishTest();
+          }
+        }, TestSerializationRPCService.class).testLongArray(expected);
+      }
+    });
+  }
+
+  public void testDoubleArray() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final double[] expected = {Double.MAX_VALUE, Double.MAX_VALUE};
+
+        MessageBuilder.createCall(new RemoteCallback<double[]>() {
+          @Override
+          public void callback(double[] response) {
+            assertDoubleArrayEqual(expected, response);
+            finishTest();
+          }
+        }, TestSerializationRPCService.class).testDoubleArray(expected);
+      }
+    });
+  }
+
+  public void testFloatArray() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final float[] expected = {Float.MIN_VALUE, Float.MAX_VALUE};
+
+        MessageBuilder.createCall(new RemoteCallback<float[]>() {
+          @Override
+          public void callback(float[] response) {
+            assertFloatArrayEqual(expected, response);
+            finishTest();
+          }
+        }, TestSerializationRPCService.class).testFloatArray(expected);
+      }
+    });
+  }
+
+
+  public void testShortArray() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final short[] expected = {Short.MIN_VALUE, Short.MAX_VALUE};
+
+        MessageBuilder.createCall(new RemoteCallback<short[]>() {
+          @Override
+          public void callback(short[] response) {
+            assertShortArrayEqual(expected, response);
+            finishTest();
+          }
+        }, TestSerializationRPCService.class).testShortArray(expected);
+      }
+    });
+  }
+
+  public void testBooleanArray() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final boolean[] expected = {Boolean.FALSE, Boolean.TRUE};
+
+        MessageBuilder.createCall(new RemoteCallback<boolean[]>() {
+          @Override
+          public void callback(boolean[] response) {
+            assertBooleanArrayEqual(expected, response);
+            finishTest();
+          }
+        }, TestSerializationRPCService.class).testBooleanArray(expected);
+      }
+    });
+  }
+
+  public void testCharacterArray() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final char[] expected = {'a', 'z'};
+
+        MessageBuilder.createCall(new RemoteCallback<char[]>() {
+          @Override
+          public void callback(char[] response) {
+            assertCharArrayEqual(expected, response);
+            finishTest();
+          }
+        }, TestSerializationRPCService.class).testCharacterArray(expected);
+      }
+    });
+  }
+
+  public void testByteArray() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final byte[] expected = {(byte) -100, (byte) 100};
+
+        MessageBuilder.createCall(new RemoteCallback<byte[]>() {
+          @Override
+          public void callback(byte[] response) {
+            assertByteArrayEqual(expected, response);
+            finishTest();
+          }
+        }, TestSerializationRPCService.class).testByteArray(expected);
+      }
+    });
+  }
+
+
   public void testEntitySerialization() {
     runAfterInit(new Runnable() {
       @Override

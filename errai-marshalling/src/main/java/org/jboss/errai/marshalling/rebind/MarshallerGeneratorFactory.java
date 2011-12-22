@@ -197,6 +197,14 @@ public class MarshallerGeneratorFactory {
 
     // special support for Object[]
     addArrayMarshaller(MetaClassFactory.get(Object[].class));
+    addArrayMarshaller(MetaClassFactory.get(String[].class));
+    addArrayMarshaller(MetaClassFactory.get(int[].class));
+    addArrayMarshaller(MetaClassFactory.get(long[].class));
+    addArrayMarshaller(MetaClassFactory.get(double[].class));
+    addArrayMarshaller(MetaClassFactory.get(float[].class));
+    addArrayMarshaller(MetaClassFactory.get(short[].class));
+    addArrayMarshaller(MetaClassFactory.get(boolean[].class));
+    addArrayMarshaller(MetaClassFactory.get(byte[].class));
 
     return classStructureBuilder.toJavaString();
   }
@@ -260,10 +268,16 @@ public class MarshallerGeneratorFactory {
     String varName = getVarName(type);
 
     if (!arrayMarshallers.contains(varName)) {
-      classStructureBuilder.privateField(varName,
-              parameterizedAs(Marshaller.class, typeParametersOf(type))).finish();
       Statement marshaller = generateArrayMarshaller(type);
-      constructor.append(loadVariable(varName).assignValue(marshaller));
+
+      classStructureBuilder.privateField(varName,
+              MetaClassFactory.parameterizedAs(QualifyingMarshallerWrapper.class,
+                      MetaClassFactory.typeParametersOf(type)))
+              .finish();
+
+      constructor.append(loadVariable(varName).assignValue(
+              Stmt.newObject(QualifyingMarshallerWrapper.class)
+                      .withParameters(marshaller)));
 
       constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
               .invoke("put", type.getFullyQualifiedName(), loadVariable(varName)));

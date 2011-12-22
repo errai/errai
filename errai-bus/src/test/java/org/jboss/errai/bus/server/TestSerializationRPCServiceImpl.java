@@ -78,6 +78,52 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
     return b;
   }
 
+
+  @Override
+  public String[] testStringArray(String[] str) {
+    return str;
+  }
+
+  @Override
+  public int[] testIntegerArray(int[] i) {
+    return i;
+  }
+
+  @Override
+  public long[] testLongArray(long[] l) {
+    return l;
+  }
+
+  @Override
+  public double[] testDoubleArray(double[] d) {
+    return d;
+  }
+
+  @Override
+  public float[] testFloatArray(float[] f) {
+    return f;
+  }
+
+  @Override
+  public short[] testShortArray(short[] s) {
+    return s;
+  }
+
+  @Override
+  public boolean[] testBooleanArray(boolean[] b) {
+    return b;
+  }
+
+  @Override
+  public char[] testCharacterArray(char[] c) {
+    return c;
+  }
+
+  @Override
+  public byte[] testByteArray(byte[] b) {
+    return b;
+  }
+
   @Override
   public List<Long> listOfLong(List<Long> list) {
     return list;
