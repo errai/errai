@@ -34,10 +34,6 @@ import java.util.TreeMap;
 @AlwaysQualify
 @ImplementationAliases({TreeMap.class})
 public class SortedMapMarshaller extends MapMarshaller<SortedMap> {
-  public SortedMapMarshaller() {
-    System.out.println();
-  }
-
   @Override
   public Class<SortedMap> getTypeHandled() {
     return SortedMap.class;

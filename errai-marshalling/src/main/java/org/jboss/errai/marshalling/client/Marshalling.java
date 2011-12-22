@@ -44,6 +44,7 @@ public abstract class Marshalling {
 
   public static <T> T fromJSON(String json, Class<T> type) {
     MarshallingSession session = MarshallingSessionProviderFactory.getDecoding();
+    System.out.println("JSON IN: " + json);
     return (T) session.getMarshallerInstance(type.getName()).demarshall(ParserFactory.get().parse(json), session);
   }
 
