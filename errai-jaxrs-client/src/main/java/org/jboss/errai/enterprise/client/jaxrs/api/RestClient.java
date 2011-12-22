@@ -88,4 +88,18 @@ public class RestClient {
       return $wnd.erraiJaxRsApplicationRoot;
     }
   }-*/;
+  
+  /**
+   * Configures the JAX-RS application root path;
+   * 
+   * @param root path to use when sending request to the endpoint
+   */
+  public static native void setJaxRsApplicationRoot(String path) /*-{
+    if (path == null) {
+      $wnd.erraiJaxRsApplicationRoot = undefined;
+    }
+    else {
+      $wnd.erraiJaxRsApplicationRoot = path;
+    }
+  }-*/;
 }

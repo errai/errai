@@ -18,6 +18,7 @@ package org.jboss.errai.enterprise.client.jaxrs.test;
 
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
+import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 
 import com.google.gwt.http.client.Response;
 import com.google.gwt.junit.client.GWTTestCase;
@@ -30,13 +31,9 @@ import com.google.gwt.junit.client.GWTTestCase;
 public abstract class AbstractErraiJaxrsTest extends GWTTestCase {
   protected String jaxRsApplicationRoot = "/";
  
-  private native void setJaxRsApplicationRoot(String path) /*-{
-    $wnd.erraiJaxRsApplicationRoot = path;
-  }-*/;
-  
   @Override
   protected void gwtSetUp() throws Exception {
-    setJaxRsApplicationRoot(jaxRsApplicationRoot);
+    RestClient.setJaxRsApplicationRoot(jaxRsApplicationRoot);
     super.gwtSetUp();
   }
 
