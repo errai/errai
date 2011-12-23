@@ -39,7 +39,7 @@ public interface HeaderParamTestService {
   @GET 
   @Path("/2")
   public String getWithMultipleHeaderParams(@HeaderParam("header1") String header1, 
-      @HeaderParam("header2") String header2);
+      @HeaderParam("header2") Float header2);
 
   @POST
   public String postWithHeaderParam(@HeaderParam("header") String header);

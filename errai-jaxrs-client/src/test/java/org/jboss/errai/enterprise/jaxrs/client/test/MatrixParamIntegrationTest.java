@@ -44,7 +44,7 @@ public class MatrixParamIntegrationTest extends AbstractErraiJaxrsTest {
   @Test
   public void testGetWithMatrixParams() {
     RestClient.create(MatrixParamTestService.class,
-        new AssertionCallback<String>("@GET with @MatrixParams failed", "1/2")).getWithMatrixParams("1", "2");
+        new AssertionCallback<String>("@GET with @MatrixParams failed", "1/2")).getWithMatrixParams(1l, 2l);
   }
 
   @Test

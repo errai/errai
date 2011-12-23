@@ -44,17 +44,17 @@ public class PathParamTestServiceImpl implements PathParamTestService {
   }
   
   @Override
-  public String getWithMultiplePathParams(long id1, long id2) {
+  public String getWithMultiplePathParams(int id1, int id2) {
     return "" + id1 + "/" + id2;
   } 
   
   @Override
-  public String getWithReusedPathParam(long id1, long id2) {
+  public String getWithReusedPathParam(double id1, Double id2) {
     return "" + id1 + "/" + id2 + "/" + id1;
   }
   
   @Override
-  public long postWithPathParam(long id) {
+  public Float postWithPathParam(Float id) {
     return id;
   }
 

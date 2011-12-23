@@ -42,15 +42,15 @@ public interface PathParamTestService {
   
   @GET 
   @Path("/{id1}/{id2}")
-  public String getWithMultiplePathParams(@PathParam("id1") long id1, @PathParam("id2") long id2);
+  public String getWithMultiplePathParams(@PathParam("id1") int id1, @PathParam("id2") int id2);
 
   @GET 
   @Path("/{id1}/{id2}/{id1}")
-  public String getWithReusedPathParam(@PathParam("id1") long id1, @PathParam("id2") long id2);
+  public String getWithReusedPathParam(@PathParam("id1") double id1, @PathParam("id2") Double id2);
   
   @POST
   @Path("/{id}")
-  public long postWithPathParam(@PathParam("id") long id);
+  public Float postWithPathParam(@PathParam("id") Float id);
 
   @PUT
   @Path("/{id}")

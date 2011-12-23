@@ -38,7 +38,7 @@ public interface MatrixParamTestService {
   public String getWithSingleMatrixParam(@PathParam("id") String path, @MatrixParam("frist") String first);
 
   @GET 
-  public String getWithMatrixParams(@MatrixParam("first") String first, @MatrixParam("last") String last);
+  public String getWithMatrixParams(@MatrixParam("first") long first, @MatrixParam("last") long last);
 
   @POST
   public String postWithMatrixParams(@MatrixParam("first") String first, @MatrixParam("last") String last);

@@ -49,17 +49,17 @@ public class QueryParamTestServiceImpl implements QueryParamTestService {
   } 
   
   @Override
-  public long postWithQueryParam(long id) {
+  public int postWithQueryParam(int id) {
     return id;
   }
 
   @Override
-  public long putWithQueryParam(long id) {
+  public Double putWithQueryParam(Double id) {
     return id;
   }
 
   @Override
-  public long deleteWithQueryParam(long id) {
+  public short deleteWithQueryParam(short id) {
     return id;
   }
 

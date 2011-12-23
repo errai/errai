@@ -45,13 +45,13 @@ public interface QueryParamTestService {
   public String getWithMultipleQueryParams(@QueryParam("id1") long id1, @QueryParam("id2") long id2);
 
   @POST
-  public long postWithQueryParam(@QueryParam("id") long id);
+  public int postWithQueryParam(@QueryParam("id") int id);
 
   @PUT
-  public long putWithQueryParam(@QueryParam("id") long id);
+  public Double putWithQueryParam(@QueryParam("id") Double id);
 
   @DELETE
-  public long deleteWithQueryParam(@QueryParam("id") long id);
+  public short deleteWithQueryParam(@QueryParam("id") short id);
   
   @HEAD
   public void headWithQueryParam(@QueryParam("id") long id);

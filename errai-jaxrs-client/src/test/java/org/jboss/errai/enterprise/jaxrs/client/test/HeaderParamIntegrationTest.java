@@ -44,7 +44,7 @@ public class HeaderParamIntegrationTest extends AbstractErraiJaxrsTest {
   @Test
   public void testGetWithMultipleHeaderParams() {
     RestClient.create(HeaderParamTestService.class,
-        new AssertionCallback<String>("@GET with @HeaderParams failed", "1/2")).getWithMultipleHeaderParams("1", "2");
+        new AssertionCallback<String>("@GET with @HeaderParams failed", "1/2.0")).getWithMultipleHeaderParams("1", 2.0f);
   }
 
   @Test

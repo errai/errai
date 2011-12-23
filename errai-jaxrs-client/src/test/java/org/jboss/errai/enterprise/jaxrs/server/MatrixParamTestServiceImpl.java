@@ -31,7 +31,7 @@ public class MatrixParamTestServiceImpl implements MatrixParamTestService {
   }
 
   @Override
-  public String getWithMatrixParams(String first, String last) {
+  public String getWithMatrixParams(long first, long last) {
     return first + "/" + last;
   }
 

@@ -31,7 +31,7 @@ public class HeaderParamTestServiceImpl implements HeaderParamTestService {
   }
 
   @Override
-  public String getWithMultipleHeaderParams(String id1, String id2) {
+  public String getWithMultipleHeaderParams(String id1, Float id2) {
     return "" + id1 + "/" + id2;
   } 
   

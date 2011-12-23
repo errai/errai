@@ -51,19 +51,19 @@ public class PathParamIntegrationTest extends AbstractErraiJaxrsTest {
   @Test
   public void testGetWithMultiplePathParams() {
     RestClient.create(PathParamTestService.class,
-        new AssertionCallback<String>("@GET with @PathParams failed", "1/2")).getWithMultiplePathParams(1l, 2l);
+        new AssertionCallback<String>("@GET with @PathParams failed", "1/2")).getWithMultiplePathParams(1, 2);
   }
 
   @Test
   public void testGetWithReusedPathParam() {
     RestClient.create(PathParamTestService.class,
-        new AssertionCallback<String>("@GET with @PathParam failed", "1/2/1")).getWithReusedPathParam(1l, 2l);
+        new AssertionCallback<String>("@GET with @PathParam failed", "1.0/2.0/1.0")).getWithReusedPathParam(1.0, 2.0);
   }
 
   @Test
   public void testPostWithPathParam() {
     RestClient.create(PathParamTestService.class,
-        new AssertionCallback<Long>("@POST with @PathParam failed", 1l)).postWithPathParam(1l);
+        new AssertionCallback<Float>("@POST with @PathParam failed", 1f)).postWithPathParam(1f);
   }
 
   @Test

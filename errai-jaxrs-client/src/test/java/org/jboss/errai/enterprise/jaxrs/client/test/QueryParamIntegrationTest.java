@@ -40,7 +40,7 @@ public class QueryParamIntegrationTest extends AbstractErraiJaxrsTest {
     RestClient.create(QueryParamTestService.class,
         new AssertionCallback<Long>("@GET with @QueryParam failed", 1l)).getWithQueryParam(1l);
   }
-  
+
   @Test
   public void testGetWithEncodedQueryParam() {
     String queryParamSpecialChars = "?<>!@#$%^\\&*()-+;:''\\/.,";
@@ -57,19 +57,19 @@ public class QueryParamIntegrationTest extends AbstractErraiJaxrsTest {
   @Test
   public void testPostWithQueryParam() {
     RestClient.create(QueryParamTestService.class,
-        new AssertionCallback<Long>("@POST with @QueryParam failed", 1l)).postWithQueryParam(1l);
+        new AssertionCallback<Integer>("@POST with @QueryParam failed", 1)).postWithQueryParam(1);
   }
 
   @Test
   public void testPutWithQueryParam() {
     RestClient.create(QueryParamTestService.class,
-        new AssertionCallback<Long>("@PUT with @QueryParam failed", 1l)).putWithQueryParam(1l);
+        new AssertionCallback<Double>("@PUT with @QueryParam failed", 1.0)).putWithQueryParam(1.0);
   }
 
   @Test
   public void testDeleteWithQueryParam() {
     RestClient.create(QueryParamTestService.class,
-        new AssertionCallback<Long>("@DELETE with @QueryParam failed", 1l)).deleteWithQueryParam(1l);
+        new AssertionCallback<Short>("@DELETE with @QueryParam failed", (short) 1)).deleteWithQueryParam((short) 1);
   }
 
   @Test
