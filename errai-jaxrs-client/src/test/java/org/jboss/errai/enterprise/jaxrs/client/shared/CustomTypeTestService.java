@@ -54,9 +54,14 @@ public interface CustomTypeTestService {
   public List<Entity> getEntities();
   
   @POST
+  @Consumes("application/json")
+  @Produces("application/json")
+  public Entity postEntity(Entity entity);
+  
+  @POST
   @Consumes("application/entity+json")
   @Produces("application/entity+json")
-  public Entity postEntity(Entity entity);
+  public Entity postEntityCustomJsonMediaType(Entity entity);
   
   @PUT
   @Consumes("application/json")

@@ -38,6 +38,11 @@ public class CustomTypeTestServiceImpl implements CustomTypeTestService {
   public Entity postEntity(Entity entity) {
     return entity;
   }
+  
+  @Override
+  public Entity postEntityCustomJsonMediaType(Entity entity) {
+    return entity;
+  }
 
   @Override
   public Entity putEntity(Entity entity) {

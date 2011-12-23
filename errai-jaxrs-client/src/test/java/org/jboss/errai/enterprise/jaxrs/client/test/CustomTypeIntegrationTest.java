@@ -49,10 +49,10 @@ public class CustomTypeIntegrationTest extends AbstractErraiJaxrsTest {
   }
 
   @Test
-  public void testPostWithCustomType() {
+  public void testPostEntityCustomJsonMediaType() {
     Entity entity = new Entity(1, "post-entity");
     RestClient.create(CustomTypeTestService.class,
-        new AssertionCallback<Entity>("@POST using custom type failed", entity)).postEntity(entity);
+        new AssertionCallback<Entity>("@POST using custom type failed", entity)).postEntityCustomJsonMediaType(entity);
   }
   
   @Test

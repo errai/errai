@@ -46,7 +46,7 @@ public interface PathParamTestService {
 
   @GET 
   @Path("/{id1}/{id2}/{id1}")
-  public String getWithReusedPathParam(@PathParam("id1") double id1, @PathParam("id2") Double id2);
+  public String getWithReusedPathParam(@PathParam("id1") double id1, @PathParam("id2") double id2);
   
   @POST
   @Path("/{id}")

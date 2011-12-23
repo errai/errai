@@ -49,7 +49,7 @@ public class PathParamTestServiceImpl implements PathParamTestService {
   } 
   
   @Override
-  public String getWithReusedPathParam(double id1, Double id2) {
+  public String getWithReusedPathParam(double id1, double id2) {
     return "" + id1 + "/" + id2 + "/" + id1;
   }
   
