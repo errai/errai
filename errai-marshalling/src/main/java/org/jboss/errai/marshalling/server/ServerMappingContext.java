@@ -24,5 +24,4 @@ import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
  */
 public interface ServerMappingContext extends MappingContext {
   public DefinitionsFactory getDefinitionsFactory();
-
 }

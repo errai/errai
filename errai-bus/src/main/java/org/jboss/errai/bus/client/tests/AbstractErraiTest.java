@@ -16,14 +16,13 @@
 
 package org.jboss.errai.bus.client.tests;
 
-import com.google.gwt.junit.client.GWTTestCase;
-import com.google.gwt.user.client.Timer;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.bus.client.framework.LogAdapter;
 
-import java.io.File;
+import com.google.gwt.junit.client.GWTTestCase;
+import com.google.gwt.user.client.Timer;
 
 /**
  * User: christopherbrock

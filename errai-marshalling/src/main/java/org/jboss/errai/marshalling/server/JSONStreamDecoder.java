@@ -27,6 +27,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.lang.Math.pow;
+
 /**
  * High-performance stream JSON parser. Provides the decoding algorithm to interpret the Errai Wire Protcol,
  * including serializable types.  This parser always assumes the outer payload is a Map. So it probably shouldn't
@@ -62,9 +64,12 @@ public class JSONStreamDecoder {
 
   public char read() throws IOException {
     if (carry != 0) {
-      char c = carry;
-      carry = 0;
-      return c;
+      try {
+        return carry;
+      }
+      finally {
+        carry = 0;
+      }
     }
     if (read <= 0) {
       if (!initial) buffer.rewind();
@@ -80,24 +85,24 @@ public class JSONStreamDecoder {
 
   public EJValue parse() {
     try {
-      return new ErraiJSONValue(_parse(new Context(), null, false));
+      return new ErraiJSONValue(_parse(new Context(), null));
     }
     catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
 
-  private Object _parse(Context ctx, Object collection, boolean map) throws IOException {
+  private Object _parse(Context ctx, Object collection) throws IOException {
     char c;
     StringBuilder appender;
     while ((c = read()) != 0) {
       switch (c) {
         case '[':
-          ctx.addValue(_parse(new Context(), new ArrayList(), false));
+          ctx.addValue(_parse(new Context(), new ArrayList()));
           break;
 
         case '{':
-          ctx.addValue(_parse(new Context(), new HashMap(), true));
+          ctx.addValue(_parse(new Context(), new HashMap()));
           break;
 
         case ']':
@@ -111,7 +116,7 @@ public class JSONStreamDecoder {
         case '"':
         case '\'':
           char term = c;
-          appender = new StringBuilder();
+          appender = new StringBuilder(100);
           StrCapture:
           while ((c = read()) != 0) {
             switch (c) {
@@ -145,7 +150,7 @@ public class JSONStreamDecoder {
             break;
           }
           else if (Character.isJavaIdentifierPart(c)) {
-            appender = new StringBuilder().append(c);
+            appender = new StringBuilder(100).append(c);
 
             while (((c = read()) != 0) && Character.isJavaIdentifierPart(c)) {
               appender.append(c);
@@ -196,13 +201,26 @@ public class JSONStreamDecoder {
         return '\'';
       case '"':
         return '\"';
+      case 'u':
+        //handle unicode
+        char[] unicodeSeq = new char[4];
+        int i = 0;
+        for (; i < 4 && isValidHexPart(c = read()); i++) {
+          unicodeSeq[i] = c;
+        }
+        if (i != 4) {
+          throw new RuntimeException("illegal unicode escape sequence: expected 4 hex characters after \\u");
+        }
+
+        return (char) Integer.decode("0x" + new String(unicodeSeq)).intValue();
+
       default:
         throw new RuntimeException("illegal escape sequence: " + c);
     }
   }
 
-  public Number parseNumber(char c) throws IOException {
-    double val = 0, dVal = 0, factor = 1, exp = -1;
+  public double parseNumber(char c) throws IOException {
+    double val = 0, dVal = 0, factor = 1, exp = 0;
 
     char[] buf = new char[21];
     int len = 0;
@@ -216,21 +234,13 @@ public class JSONStreamDecoder {
         c = read();
       }
 
-      char[] expBuf = new char[4];
-      int expLen = 0;
-      do {
-        expBuf[expLen++] = c;
-      }
-      while ((c = read()) != 0 && isValidNumberPart(c));
-
-      exp = Double.parseDouble(new String(expBuf, 0, expLen));
+      exp = parseNumber(c);
     }
-
-    if (c != 0) {
+    else if (c != 0) {
       carry = c;
     }
 
-    if (len == 1 && buf[0] == '-') return null;
+    if (len == 1 && buf[0] == '-') return -0;
 
     for (int i = len - 1; i != -1; i--) {
       switch (buf[i]) {
@@ -277,8 +287,8 @@ public class JSONStreamDecoder {
       factor *= 10;
     }
 
-    if (exp != -1) {
-      return (dVal + val) * Math.pow(10, exp);
+    if (exp != 0) {
+      return (dVal + val) * pow(10, exp);
     }
     else {
       return dVal + val;
@@ -305,6 +315,32 @@ public class JSONStreamDecoder {
     }
   }
 
+  private static boolean isValidHexPart(char c) {
+    switch (c) {
+      case '.':
+      case '-':
+      case '0':
+      case '1':
+      case '2':
+      case '3':
+      case '4':
+      case '5':
+      case '6':
+      case '7':
+      case '8':
+      case '9':
+      case 'A':
+      case 'B':
+      case 'C':
+      case 'D':
+      case 'E':
+      case 'F':
+        return true;
+      default:
+        return false;
+    }
+  }
+
   private static class Context {
     Object lhs;
     Object rhs;
@@ -321,6 +357,7 @@ public class JSONStreamDecoder {
       }
     }
 
+    @SuppressWarnings("unchecked")
     private Object record(Object collection) {
       try {
         if (lhs != null) {
@@ -333,9 +370,6 @@ public class JSONStreamDecoder {
           }
         }
         return collection;
-      }
-      catch (ClassCastException e) {
-        throw new RuntimeException("error building collection", e);
       }
       finally {
         lhs = rhs = null;

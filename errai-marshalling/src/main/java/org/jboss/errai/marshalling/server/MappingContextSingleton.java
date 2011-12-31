@@ -58,7 +58,6 @@ public class MappingContextSingleton {
               }
             }
     );
-    
 
     context = new ServerMappingContext() {
       private final DefinitionsFactory factory = new DefinitionsFactoryImpl();
@@ -95,7 +94,6 @@ public class MappingContextSingleton {
           }
         }
 
-
         MarshallingSessionProviderFactory.setMarshallingSessionProvider(new MarshallingSessionProvider() {
               @Override
               public MarshallingSession getEncoding() {
@@ -117,8 +115,6 @@ public class MappingContextSingleton {
                 return factory.getDefinition(fqcn).getMarshallerInstance();
               }
             });
-
-
       }
 
       private void loadMarshallers() {

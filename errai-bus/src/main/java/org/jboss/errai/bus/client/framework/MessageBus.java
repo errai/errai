@@ -107,7 +107,9 @@ public interface MessageBus {
    *
    * @param message
    * @param callback
+   * @deprecated use {@link org.jboss.errai.bus.client.api.base.MessageBuilder#createConversation(org.jboss.errai.bus.client.api.Message)}
    */
+  @Deprecated
   public void conversationWith(Message message, MessageCallback callback);
 
   /**

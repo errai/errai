@@ -1450,6 +1450,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     public void addError(String message, String additionalDetails, Throwable e) {
       if (!showErrors) return;
 
+      e.printStackTrace();
       contentPanel.add(new HTML("<strong style='background:red;color:white;'>" + message + "</strong>"));
 
       StringBuilder buildTrace = new StringBuilder("<tt style=\"font-size:11px;\"><pre>");
