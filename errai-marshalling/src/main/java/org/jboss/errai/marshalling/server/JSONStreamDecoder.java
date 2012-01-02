@@ -85,7 +85,8 @@ public class JSONStreamDecoder {
 
   public EJValue parse() {
     try {
-      return new ErraiJSONValue(_parse(new Context(), null));
+
+      return new ErraiJSONValue(_parse(new Context(false), null));
     }
     catch (Exception e) {
       throw new RuntimeException(e);
@@ -98,11 +99,11 @@ public class JSONStreamDecoder {
     while ((c = read()) != 0) {
       switch (c) {
         case '[':
-          ctx.addValue(_parse(new Context(), new ArrayList()));
+          ctx.addValue(_parse(new Context(false), new ArrayList()));
           break;
 
         case '{':
-          ctx.addValue(_parse(new Context(), new HashMap()));
+          ctx.addValue(_parse(new Context(true), new HashMap()));
           break;
 
         case ']':
@@ -146,7 +147,7 @@ public class JSONStreamDecoder {
 
         default:
           if (isValidNumberPart(c)) {
-            ctx.addValue(parseNumber(c));
+            ctx.addValue(parseDouble(c));
             break;
           }
           else if (Character.isJavaIdentifierPart(c)) {
@@ -180,7 +181,7 @@ public class JSONStreamDecoder {
     return ctx.record(collection);
   }
 
-  public char handleEscapeSequence() throws IOException {
+  private char handleEscapeSequence() throws IOException {
     char c;
     switch (c = read()) {
       case '\\':
@@ -219,7 +220,7 @@ public class JSONStreamDecoder {
     }
   }
 
-  public double parseNumber(char c) throws IOException {
+  private double parseDouble(char c) throws IOException {
     double val = 0, dVal = 0, factor = 1, exp = 0;
 
     char[] buf = new char[21];
@@ -234,7 +235,7 @@ public class JSONStreamDecoder {
         c = read();
       }
 
-      exp = parseNumber(c);
+      exp = parseDouble(c);
     }
     else if (c != 0) {
       carry = c;
@@ -344,16 +345,18 @@ public class JSONStreamDecoder {
   private static class Context {
     Object lhs;
     Object rhs;
+    private boolean map;
 
-    private Context() {
+    private Context(boolean map) {
+      this.map = map;
     }
 
-    private Object addValue(Object val) {
+    private void addValue(Object val) {
       if (lhs == null) {
-        return lhs = val;
+        lhs = val;
       }
       else {
-        return rhs = val;
+        rhs = val;
       }
     }
 
@@ -361,7 +364,7 @@ public class JSONStreamDecoder {
     private Object record(Object collection) {
       try {
         if (lhs != null) {
-          if (collection instanceof Map) {
+          if (map) {
             ((Map) collection).put(lhs, rhs);
           }
           else {
