@@ -40,9 +40,9 @@ public class RestClient {
   private static ProxyProvider proxyProvider = new RemoteServiceProxyFactory();
 
   /**
-   * Creates a REST client for the provided JAX-RS resource class/interface.
+   * Creates a REST client for the provided JAX-RS resource interface.
    *
-   * @param remoteService  the remote service class or interface
+   * @param remoteService  the JAX-RS interface
    * @param callback  the asynchronous callback to use
    * @return proxy of the specified remote service type
    */
@@ -51,10 +51,10 @@ public class RestClient {
   }
 
   /**
-   * Creates a REST client for the provided JAX-RS resource class/interface.
+   * Creates a REST client for the provided JAX-RS resource interface.
    * 
-   * @param remoteService  the remote service class or interface
-   * @param baseUrl  the base url overriding the default application root path.
+   * @param remoteService  the JAX-RS interface
+   * @param baseUrl  the base url overriding the default application root path
    * @param callback  the asynchronous callback to use
    * @return proxy of the specified remote service type
    */
@@ -63,9 +63,9 @@ public class RestClient {
   }
   
   /**
-   * Creates a REST client for the provided JAX-RS resource class/interface.
+   * Creates a REST client for the provided JAX-RS resource interface.
    * 
-   * @param remoteService  the remote service class or interface
+   * @param remoteService  the JAX-RS interface
    * @param callback  the asynchronous callback to use 
    * @param errorCallback  the error callback to use
    * @return proxy of the specified remote service type
@@ -76,10 +76,10 @@ public class RestClient {
   }
   
   /**
-   * Creates a REST client for the provided JAX-RS resource class/interface.
+   * Creates a REST client for the provided JAX-RS resource interface.
    * 
-   * @param remoteService  the remote service class or interface
-   * @param baseUrl  the base url overriding the default application root path.
+   * @param remoteService  the JAX-RS interface
+   * @param baseUrl  the base url overriding the default application root path
    * @param callback  the asynchronous callback to use
    * @param errorCallback  the error callback to use
    * @return proxy of the specified remote service type
@@ -126,7 +126,7 @@ public class RestClient {
   }-*/;
   
   /**
-   * Configures the JAX-RS default application root path;
+   * Configures the JAX-RS default application root path.
    * 
    * @param root path to use when sending request to the endpoint
    */
