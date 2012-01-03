@@ -16,18 +16,14 @@
 
 package org.jboss.errai.bus.server.io.buffers;
 
-import sun.misc.Unsafe;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.LockSupport;
 
 /**
  * A ring-based buffer implementation that provides contention-free writing of <i>1..n</i> colors. In this case,
@@ -50,12 +46,11 @@ public class TransmissionBuffer implements Buffer {
   public static int DEFAULT_SEGMENT_SIZE = 1024 * 16;             /* 16 Kilobytes */
   public static int DEFAULT_BUFFER_SIZE = 2048;                   /* 2048 x 16kb = 32 Megabytes */
 
-  public static int SEGMENT_HEADER_SIZE = 4;    /* to accomodate a 16-bit short */
+  public static int SEGMENT_HEADER_SIZE = 4;                      /* to accomodate a 32-bit integer  */
 
   /**
    * The main buffer where the data is stored
    */
-  // final ByteBuffer buffer;
   private final byte[] buffer;
 
   /**
@@ -110,13 +105,11 @@ public class TransmissionBuffer implements Buffer {
     this.bufferSize = segmentSize * segments;
     this.segments = segments;
 
-
     buffer = new byte[bufferSize];
     writeBuf(0, (byte) 0);
 
     segmentMap = new short[segments];
     writeSeg(0, (short) 0);
-
   }
 
 
@@ -161,11 +154,6 @@ public class TransmissionBuffer implements Buffer {
    */
   public static TransmissionBuffer createDirect(int segmentSize, int segments) {
     return new TransmissionBuffer(true, segmentSize, segments);
-  }
-
-
-  public static TransmissionBuffer create(int segmentSize, int segments, int tailLimit) {
-    return new TransmissionBuffer(false, segmentSize, segments);
   }
 
   /**
@@ -240,7 +228,6 @@ public class TransmissionBuffer implements Buffer {
     }
   }
 
-
   /**
    * Reads all the available data of the specified color from the buffer into the provided <tt>OutputStream</tt>
    *
@@ -265,17 +252,16 @@ public class TransmissionBuffer implements Buffer {
     try {
       while ((read = readNextChunk(writeHead, read, bufferColor, outputStream, null)) != -1)
         lastSeq = read;
-
-      // move the tail sequence for this color up.
     }
     finally {
-      // release the read lock on this color/
+      // move the tail sequence for this color up.
       bufferColor.sequence.set(lastSeq);
+
+      // release the read lock on this color/
       bufferColor.lock.unlock();
     }
     return -1;
   }
-
 
   /**
    * Reads all the available data of the specified color from the buffer into the provided <tt>OutputStream</tt>
@@ -409,8 +395,6 @@ public class TransmissionBuffer implements Buffer {
       for (; ; ) {
         long read = readTail;
         long lastRead = -1;
-
-        // assert read != -1;
 
         while ((read = readNextChunk(headSequence, read, bufferColor, outputStream, null)) != -1) {
           lastRead = read;
@@ -572,7 +556,6 @@ public class TransmissionBuffer implements Buffer {
 
       // start from the beginning of the buffer and scan up to the head position.
       for (int i = 0; i < head; i++) {
-        //    short seg = segmentMap[i];
         short seg = getSeg(i);
         if (seg == color || seg == Short.MIN_VALUE) {
           return i;
@@ -600,7 +583,6 @@ public class TransmissionBuffer implements Buffer {
    */
   private long readNextChunk(final long head, final long sequence, final BufferColor color,
                              final OutputStream outputStream, final BufferCallback callback) throws IOException {
-    assert sequence != -1;
 
     final int segmentToRead = getNextSegment(color, (int) head % segments, (int) sequence % segments);
     if (segmentToRead != -1) {
@@ -663,48 +645,34 @@ public class TransmissionBuffer implements Buffer {
    * @return the size in bytes.
    */
   private int readChunkSize(int position) {
-    return (((((int) getBuf(position + 3)) & 0xFF) << 32) +
-            ((((int) getBuf(position + 2)) & 0xFF) << 40) +
-            ((((int) getBuf(position + 1)) & 0xFF) << 48) +
-            ((((int) getBuf(position)) & 0xFF) << 56));
+    return ((((int) getBuf(position + 3)) & 0xFF)) +
+            ((((int) getBuf(position + 2)) & 0xFF) << 8) +
+            ((((int) getBuf(position + 1)) & 0xFF) << 16) +
+            ((((int) getBuf(position)) & 0xFF) << 24);
   }
 
   private void writeChunkSize(int position, int size) {
-    writeBuf(position++, (byte) ((size >> 24) & 0xFF));
-    writeBuf(position++, (byte) ((size >> 16) & 0xFF));
-    writeBuf(position++, (byte) ((size >> 8) & 0xFF));
-    writeBuf(position, (byte) (size & 0xFF));
+    writeBuf(position, (byte) ((size >> 24) & 0xFF));
+    writeBuf(position + 1, (byte) ((size >> 16) & 0xFF));
+    writeBuf(position + 2, (byte) ((size >> 8) & 0xFF));
+    writeBuf(position + 3, (byte) (size & 0xFF));
   }
 
   private byte getBuf(int idx) {
     return buffer[idx];
-    // return unsafe.getByteVolatile(buffer, rawIntIndex(idx));
   }
 
   private void writeBuf(int idx, byte v) {
     buffer[idx] = v;
-    //  unsafe.putByteVolatile(buffer, rawIntIndex(idx), v);
   }
 
   private short getSeg(int idx) {
     return segmentMap[idx];
-//    return unsafe.getShortVolatile(segmentMap, rawShortIndex(idx));
   }
 
   private void writeSeg(int idx, short v) {
     segmentMap[idx] = v;
-//    unsafe.putShortVolatile(segmentMap, rawShortIndex(idx), v);
   }
-
-//
-//  private long rawIntIndex(int i) {
-//    return byteBase + (long) i * byteScale;
-//  }
-//
-//  private long rawShortIndex(int i) {
-//    return shortBase + (long) i * shortScale;
-//  }
-//
 
   public void dumpSegments(PrintWriter writer) {
     writer.println();
@@ -718,9 +686,7 @@ public class TransmissionBuffer implements Buffer {
       pos += SEGMENT_HEADER_SIZE;
 
       byte[] buf = new byte[length];
-      for (int x = 0; x < length; x++) {
-        buf[x] = buffer[pos + x];
-      }
+      System.arraycopy(buffer, pos, buf, 0, length);
 
       build.append("::'").append(new String(buf)).append("'");
       length += SEGMENT_HEADER_SIZE;
@@ -735,13 +701,6 @@ public class TransmissionBuffer implements Buffer {
     }
   }
 
-  public void rawDump(OutputStream stream) throws IOException {
-//    ByteBuffer buf = buffer.duplicate();
-//    buf.rewind();
-//
-//    while (buf.hasRemaining()) stream.write(buf.get());
-  }
-
   @SuppressWarnings("UnusedDeclaration")
   public List<String> dumpSegmentsAsList() {
     List<String> list = new ArrayList<String>();
@@ -753,9 +712,7 @@ public class TransmissionBuffer implements Buffer {
       pos += SEGMENT_HEADER_SIZE;
 
       byte[] buf = new byte[length];
-      for (int x = 0; x < length; x++) {
-        buf[x] = buffer[pos + x];
-      }
+      System.arraycopy(buffer, pos, buf, 0, length);
 
       list.add(new String(buf));
 

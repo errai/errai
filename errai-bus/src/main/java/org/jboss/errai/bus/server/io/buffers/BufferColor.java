@@ -16,13 +16,10 @@
 
 package org.jboss.errai.bus.server.io.buffers;
 
-import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * @author Mike Brock
@@ -34,12 +31,23 @@ public class BufferColor {
   private static final BufferColor allBuffersColor = new BufferColor(Short.MIN_VALUE);
 
   /**
-   * start class members *
+   * The current tail position for this buffer color.
    */
-
   final AtomicLong sequence = new AtomicLong();
+
+  /**
+   * The color.
+   */
   final short color;
+
+  /**
+   * Lock for reads and writes on this buffer color.
+   */
   final ReentrantLock lock = new ReentrantLock(false);
+
+  /**
+   * Condition used for notifying waiting read locks when new data is available.
+   */
   final Condition dataWaiting = lock.newCondition();
 
   public short getColor() {

@@ -151,6 +151,4 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
       }
     }
   }
-
-
 }

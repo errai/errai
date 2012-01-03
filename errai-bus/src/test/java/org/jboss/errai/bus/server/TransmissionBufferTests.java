@@ -532,7 +532,6 @@ public class TransmissionBufferTests extends TestCase {
     }
     finally {
       buffer.dumpSegments(logWriter);
-      buffer.rawDump(rawBuffer);
 
       logWriter.flush();
 
