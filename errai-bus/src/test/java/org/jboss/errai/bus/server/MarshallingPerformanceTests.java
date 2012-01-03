@@ -21,10 +21,7 @@ import org.jboss.errai.bus.client.api.base.TimeUnit;
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.marshalling.server.ServerMarshalling;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,8 +44,8 @@ public class MarshallingPerformanceTests extends TestCase {
     long decTime = 0;
     for (int i = 0; i < TEST_ITERATIONS; i++) {
       long eTime = System.nanoTime();
-      ByteArrayOutputStream outputStream = new ByteArrayOutputStream(128);
-      OutputStreamWriter writer = new OutputStreamWriter(outputStream);
+   //   ByteArrayOutputStream outputStream = new ByteArrayOutputStream(128);
+      StringWriter writer = new StringWriter(128);
 
       Map enc = new HashMap();
       enc.put("CommandType", "ConnectToQueue");
@@ -60,7 +57,7 @@ public class MarshallingPerformanceTests extends TestCase {
       encTime += (System.nanoTime() - eTime);
 
       long dTime = System.nanoTime();
-      payload = (Map) ServerMarshalling.fromJSON(new String(outputStream.toByteArray()));
+      payload = (Map) ServerMarshalling.fromJSON(writer.toString());
       decTime += (System.nanoTime() - dTime);
     }
     time = System.nanoTime() - time;
