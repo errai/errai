@@ -17,6 +17,8 @@
 package org.jboss.errai.codegen.framework.builder.impl;
 
 import org.jboss.errai.codegen.framework.Context;
+import org.jboss.errai.codegen.framework.DefModifiers;
+import org.jboss.errai.codegen.framework.Modifier;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.builder.BuildCallback;
 import org.jboss.errai.codegen.framework.builder.FieldBuildInitializer;
@@ -36,6 +38,7 @@ public class FieldBuilder<T> implements FieldBuildStart<T>, FieldBuildType<T>,
 
   private BuildCallback<T> callback;
   private Scope scope;
+  private DefModifiers modifiers;
   private MetaClass type;
   private String name;
   private Statement initializer;
@@ -63,26 +66,8 @@ public class FieldBuilder<T> implements FieldBuildStart<T>, FieldBuildType<T>,
   }
 
   @Override
-  public FieldBuildType<T> publicScope() {
-    scope = Scope.Public;
-    return this;
-  }
-
-  @Override
-  public FieldBuildType<T> privateScope() {
-    scope = Scope.Private;
-    return this;
-  }
-
-  @Override
-  public FieldBuildType<T> protectedScope() {
-    scope = Scope.Protected;
-    return this;
-  }
-
-  @Override
-  public FieldBuildType<T> packageScope() {
-    scope = Scope.Package;
+  public FieldBuildInitializer<T> modifiers(Modifier... modifiers) {
+    this.modifiers = new DefModifiers(modifiers);
     return this;
   }
 
@@ -117,6 +102,7 @@ public class FieldBuilder<T> implements FieldBuildStart<T>, FieldBuildType<T>,
 
           StringBuilder sbuf = new StringBuilder(scope.getCanonicalName())
                   .append(scope == Scope.Package ? "" : " ")
+                  .append(modifiers != null ? modifiers.toJavaString() + " " : "")
                   .append(LoadClassReference.getClassReference(type, context, type.getTypeParameters() != null))
                   .append(" ").append(name);
 

@@ -95,6 +95,11 @@ public class GeneratorMappingContext implements ServerMappingContext {
     return definitionsFactory.hasDefinition(clazzName);
   }
 
+  @Override
+  public Marshaller<Object> getMarshaller(String clazz) {
+    return null;
+  }
+
   public boolean hasGeneratedMarshaller(MetaClass clazz) {
     if (clazz.isArray()) {
       clazz = clazz.getOuterComponentType();

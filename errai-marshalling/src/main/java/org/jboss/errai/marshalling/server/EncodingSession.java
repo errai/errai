@@ -42,6 +42,7 @@ public class EncodingSession extends AbstractMarshallingSession {
       return "null";
     }
     else {
+  //    Marshaller<Object> m = getMarshallerInstance(o.getClass().getName());
       Marshaller<Object> m = getMarshallerInstance(o.getClass().getName());
       if (m == null) {
         throw new MarshallingException("no marshaller for type: " + o.getClass().getName());
@@ -56,7 +57,8 @@ public class EncodingSession extends AbstractMarshallingSession {
       return null;
     }
     else {
-      Marshaller<Object> m = getMarshallerInstance(clazz.getName());
+      // Marshaller<Object> m = getMarshallerInstance(clazz.getName());
+      Marshaller<Object> m = context.getMarshaller(clazz.getName());
       if (m == null) {
         throw new MarshallingException("no marshaller for type: " + o.getClass().getName());
       }
@@ -84,11 +86,16 @@ public class EncodingSession extends AbstractMarshallingSession {
 
   @Override
   public Marshaller<Object> getMarshallerInstance(String fqcn) {
-    MappingDefinition md = context.getDefinitionsFactory().getDefinition(fqcn);
-    if (md == null) {
+//    MappingDefinition md = context.getDefinitionsFactory().getDefinition(fqcn);
+//    if (md == null) {
+//      throw new RuntimeException("no marshaller available for: " + fqcn);
+//    }
+//    return md.getMarshallerInstance();
+    Marshaller<Object> m = context.getMarshaller(fqcn);
+    if (m == null) {
       throw new RuntimeException("no marshaller available for: " + fqcn);
     }
-    return md.getMarshallerInstance();
+    return m;
   }
 
   @Override

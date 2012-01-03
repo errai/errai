@@ -73,7 +73,6 @@ public class MarshallersGenerator extends Generator {
   }
 
   private String _generate() {
-
-    return new MarshallerGeneratorFactory().generate(packageName, className);
+    return MarshallerGeneratorFactory.getFor(MarshallerOuputTarget.GWT).generate(packageName, className);
   }
 }

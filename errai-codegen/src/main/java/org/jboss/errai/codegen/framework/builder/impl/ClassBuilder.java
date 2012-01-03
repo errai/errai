@@ -22,16 +22,7 @@ import org.jboss.errai.codegen.framework.DefParameters;
 import org.jboss.errai.codegen.framework.Parameter;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.ThrowsDeclaration;
-import org.jboss.errai.codegen.framework.builder.BuildCallback;
-import org.jboss.errai.codegen.framework.builder.ClassDefinitionBuilderAbstractOption;
-import org.jboss.errai.codegen.framework.builder.ClassDefinitionBuilderInterfaces;
-import org.jboss.errai.codegen.framework.builder.ClassDefinitionBuilderScope;
-import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
-import org.jboss.errai.codegen.framework.builder.ConstructorBlockBuilder;
-import org.jboss.errai.codegen.framework.builder.DefaultClassStructureBuilder;
-import org.jboss.errai.codegen.framework.builder.FieldBuildInitializer;
-import org.jboss.errai.codegen.framework.builder.MethodBlockBuilder;
-import org.jboss.errai.codegen.framework.builder.MethodBuildCallback;
+import org.jboss.errai.codegen.framework.builder.*;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
@@ -402,46 +393,46 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
   }
 
   @Override
-  public FieldBuildInitializer<T> publicField(String name, MetaClass type) {
+  public FieldBuildStart<T> publicField(String name, MetaClass type) {
     return genField(Scope.Public, name, type);
   }
 
   @Override
-  public FieldBuildInitializer<T> publicField(String name, Class<?> type) {
+  public FieldBuildStart<T> publicField(String name, Class<?> type) {
     return publicField(name, MetaClassFactory.get(type));
   }
 
   @Override
-  public FieldBuildInitializer<T> privateField(String name, MetaClass type) {
+  public FieldBuildStart<T> privateField(String name, MetaClass type) {
     return genField(Scope.Private, name, type);
   }
 
   @Override
-  public FieldBuildInitializer<T> privateField(String name, Class<?> type) {
+  public FieldBuildStart<T> privateField(String name, Class<?> type) {
     return privateField(name, MetaClassFactory.get(type));
   }
 
   @Override
-  public FieldBuildInitializer<T> protectedField(String name, MetaClass type) {
+  public FieldBuildStart<T> protectedField(String name, MetaClass type) {
     return genField(Scope.Protected, name, type);
   }
 
   @Override
-  public FieldBuildInitializer<T> protectedField(String name, Class<?> type) {
+  public FieldBuildStart<T> protectedField(String name, Class<?> type) {
     return protectedField(name, MetaClassFactory.get(type));
   }
 
   @Override
-  public FieldBuildInitializer<T> packageField(String name, MetaClass type) {
+  public FieldBuildStart<T> packageField(String name, MetaClass type) {
     return genField(Scope.Package, name, type);
   }
 
   @Override
-  public FieldBuildInitializer<T> packageField(String name, Class<?> type) {
+  public FieldBuildStart<T> packageField(String name, Class<?> type) {
     return packageField(name, MetaClassFactory.get(type));
   }
 
-  private FieldBuildInitializer<T> genField(final Scope scope, final String name,
+  private FieldBuildStart<T> genField(final Scope scope, final String name,
                                             final MetaClass type) {
     return new FieldBuilder<T>(new BuildCallback<T>() {
       @Override

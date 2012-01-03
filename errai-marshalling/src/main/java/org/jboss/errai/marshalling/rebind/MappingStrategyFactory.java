@@ -25,56 +25,11 @@ import org.jboss.errai.marshalling.rebind.api.impl.defaultjava.DefaultJavaMappin
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class MappingStrategyFactory {
-//  private static final Map<MetaClass, Class<? extends MappingStrategy>> STRATEGIES
-//          = new HashMap<MetaClass, Class<? extends MappingStrategy>>();
-
-
-  static MappingStrategy createStrategy(final GeneratorMappingContext context, final MetaClass clazz) {
-//    if (STRATEGIES.containsKey(clazz)) {
-//      return loadStrategy(STRATEGIES.get(clazz), context, clazz);
-//    }
-//    else {
-      return defaultStrategy(context, clazz);
-//    }
-
+  static MappingStrategy createStrategy(final boolean gwtTarget, final GeneratorMappingContext context, final MetaClass clazz) {
+    return defaultStrategy(gwtTarget, context, clazz);
   }
 
-//  private static MappingStrategy loadStrategy(final Class<? extends MappingStrategy> strategy,
-//                                              final GeneratorMappingContext context, final MetaClass clazz) {
-//
-//    Constructor[] constructors = strategy.getConstructors();
-//    if (constructors.length != 1) {
-//      throw new MarshallingException("a MappingStrategy should have exactly one constructor");
-//    }
-//
-//    Constructor<? extends MappingStrategy> constructor = constructors[0];
-//    Class<?>[] parms = constructor.getParameterTypes();
-//
-//    List<Object> callParameters = new ArrayList<Object>(parms.length);
-//
-//    for (Class<?> parm : parms) {
-//      if (MetaClass.class.isAssignableFrom(parm)) {
-//        callParameters.add(clazz);
-//      }
-//      else if (GeneratorMappingContext.class.isAssignableFrom(parm)) {
-//        callParameters.add(context);
-//      }
-//      else {
-//        throw new MarshallingException("unrecognized constuctor parameter type"
-//                + parm.getName() + "; for: " + strategy.getName());
-//      }
-//    }
-//
-//    try {
-//      return constructor.newInstance(callParameters.toArray(new Object[callParameters.size()]));
-//    }
-//    catch (Throwable e) {
-//      throw new MarshallingException("could not instantiate mapping strategy", e);
-//    }
-//  }
-
-
-  private static MappingStrategy defaultStrategy(final GeneratorMappingContext context, final MetaClass clazz) {
-    return new DefaultJavaMappingStrategy(context, clazz);
+  private static MappingStrategy defaultStrategy(final boolean gwtTarget, final GeneratorMappingContext context, final MetaClass clazz) {
+    return new DefaultJavaMappingStrategy(gwtTarget, context, clazz);
   }
 }

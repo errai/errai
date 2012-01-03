@@ -20,7 +20,7 @@ package org.jboss.errai.marshalling.client.api;
  * @author Mike Brock
  */
 public interface MappingContext {
-  public Class<? extends Marshaller> getMarshallerClass(String clazz);
+  public Marshaller<Object> getMarshaller(String clazz);
 
   public boolean hasMarshaller(String clazzName);
 

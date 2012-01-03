@@ -32,7 +32,8 @@ public class DecodingSession extends AbstractMarshallingSession {
 
   @Override
   public <T> T demarshall(Class<T> clazz, EJValue o) {
-    Marshaller<Object> m = getMarshallerInstance(clazz.getName());
+   // Marshaller<Object> m = getMarshallerInstance(clazz.getName());
+    Marshaller<Object> m = context.getMarshaller(clazz.getName());
     if (m == null) {
       throw new RuntimeException("no marshaller available for type:" + clazz.getName());
     }
@@ -41,12 +42,14 @@ public class DecodingSession extends AbstractMarshallingSession {
 
   @Override
   public Marshaller<Object> getMarshallerInstance(String fqcn) {
-    MappingDefinition m = context.getDefinitionsFactory().getDefinition(fqcn);
+  //  MappingDefinition m = context.getDefinitionsFactory().getDefinition(fqcn);
+    Marshaller<Object> m = context.getMarshaller(fqcn);
     if (m == null) {
       throw new RuntimeException("no marshalling definition available for type:" + fqcn);
     }
 
-    return m.getMarshallerInstance();
+  //  return m.getMarshallerInstance();
+    return m;
   }
 
   @Override

@@ -16,15 +16,11 @@
 
 package org.jboss.errai.codegen.framework.builder;
 
+import org.jboss.errai.codegen.framework.Modifier;
+
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public interface FieldBuildStart<T> {
-  public FieldBuildType<T> publicScope();
-
-  public FieldBuildType<T> privateScope();
-
-  public FieldBuildType<T> protectedScope();
-
-  public FieldBuildType<T> packageScope();
+public interface FieldBuildStart<T> extends FieldBuildInitializer<T>{
+  public FieldBuildInitializer<T> modifiers(Modifier... modifiers);
 }

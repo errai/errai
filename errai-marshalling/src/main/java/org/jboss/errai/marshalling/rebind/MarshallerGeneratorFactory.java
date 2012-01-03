@@ -77,6 +77,16 @@ public class MarshallerGeneratorFactory {
   private Logger log = LoggerFactory.getLogger(MarshallerGeneratorFactory.class);
 
   long startTime;
+  
+  private MarshallerOuputTarget target;
+
+  private MarshallerGeneratorFactory(MarshallerOuputTarget target) {
+    this.target = target;
+  }
+  
+  public static MarshallerGeneratorFactory getFor(MarshallerOuputTarget target) {
+    return new MarshallerGeneratorFactory(target);
+  }
 
   public String generate(String packageName, String clazzName) {
     File fileCacheDir = RebindUtils.getErraiCacheDir();
@@ -258,7 +268,7 @@ public class MarshallerGeneratorFactory {
   }
 
   private Statement marshal(MetaClass cls) {
-    MappingStrategy strategy = MappingStrategyFactory.createStrategy(mappingContext, cls);
+    MappingStrategy strategy = MappingStrategyFactory.createStrategy(target == MarshallerOuputTarget.GWT, mappingContext, cls);
     if (strategy == null) {
       throw new RuntimeException("no available marshaller for class: " + cls.getName());
     }
@@ -416,30 +426,4 @@ public class MarshallerGeneratorFactory {
     }
   }
 
-//  private void loadMarshallers() {
-//    Set<Class<?>> marshallers =
-//            ScannerSingleton.getOrCreateInstance().getTypesAnnotatedWith(ClientMarshaller.class);
-//
-//    for (Class<?> cls : marshallers) {
-//      if (Marshaller.class.isAssignableFrom(cls)) {
-//        try {
-//          Class<?> type = (Class<?>) Marshaller.class.getMethod("getTypeHandled").invoke(cls.newInstance());
-//          mappingContext.registerMarshaller(type.getName(), cls.asSubclass(Marshaller.class));
-//
-//          if (cls.isAnnotationPresent(ImplementationAliases.class)) {
-//            for (Class<?> c : cls.getAnnotation(ImplementationAliases.class).value()) {
-//              mappingContext.registerMappingAlias(c, type);
-//            }
-//          }
-//        }
-//        catch (Throwable t) {
-//          throw new RuntimeException("could not instantiate marshaller class: " + cls.getName(), t);
-//        }
-//      }
-//      else {
-//        throw new RuntimeException("class annotated with " + ClientMarshaller.class.getCanonicalName()
-//                + " does not implement " + Marshaller.class.getName());
-//      }
-//    }
-//  }
 }

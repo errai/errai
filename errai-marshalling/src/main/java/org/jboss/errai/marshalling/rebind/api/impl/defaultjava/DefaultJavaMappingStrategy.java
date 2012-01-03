@@ -58,8 +58,10 @@ import static org.jboss.errai.codegen.framework.util.Stmt.loadVariable;
 public class DefaultJavaMappingStrategy implements MappingStrategy {
   private GeneratorMappingContext context;
   private MetaClass toMap;
+  private boolean gwtTarget;
 
-  public DefaultJavaMappingStrategy(GeneratorMappingContext context, MetaClass toMap) {
+  public DefaultJavaMappingStrategy(boolean gwtTarget, GeneratorMappingContext context, MetaClass toMap) {
+    this.gwtTarget = gwtTarget;
     this.context = context;
     this.toMap = toMap;
   }
@@ -217,7 +219,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
               }
               else {
                 if (!context.isExposed(field)) {
-                  GenUtil.addPrivateAccessStubs(true, context.getClassStructureBuilder(), field);
+                  GenUtil.addPrivateAccessStubs(gwtTarget, context.getClassStructureBuilder(), field);
                   context.markExposed(field);
                 }
 
@@ -419,7 +421,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
         }
         else {
           if (!context.isExposed(field)) {
-            GenUtil.addPrivateAccessStubs(true, context.getClassStructureBuilder(), field);
+            GenUtil.addPrivateAccessStubs(gwtTarget, context.getClassStructureBuilder(), field);
             context.markExposed(field);
           }
 

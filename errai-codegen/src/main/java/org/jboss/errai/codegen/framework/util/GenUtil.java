@@ -28,6 +28,8 @@ import org.jboss.errai.codegen.framework.literal.LiteralValue;
 import org.jboss.errai.codegen.framework.meta.*;
 import org.mvel2.DataConversion;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.*;
 
 /**
@@ -88,7 +90,7 @@ public class GenUtil {
       }
     }
     else if (o instanceof Statement) {
-     ((Statement) o).generate(context);
+      ((Statement) o).generate(context);
       return (Statement) o;
     }
     else {
@@ -173,35 +175,6 @@ public class GenUtil {
     }
     return metaClasses;
   }
-
-
-//  public static MetaType determineGenericReturnType(MetaMethod method) {
-//    MetaClass returnType = method.getReturnType();
-//
-//    if (method.getGenericReturnType() != null && method.getGenericReturnType() instanceof MetaTypeVariable) {
-//      Map<String, MetaClass> typeVars = determineTypeVariables(method);
-//      MetaTypeVariable typeVar = (MetaTypeVariable) method.getGenericReturnType();
-//      returnType = typeVars.get(typeVar.getName());
-//    }
-//    else {
-//      MetaClass clazz = method.getDeclaringClass();
-//
-//      for (MetaClass iface : clazz.getInterfaces()) {
-//        if (iface.getParameterizedType() != null) {
-//          MetaParameterizedType parameterizedType = iface.getParameterizedType();
-//
-//          for (MetaMethod ifaceMethod : iface.getDeclaredMethods()) {
-//            if (ifaceMethod.getName().equals(method.getName())) {
-//
-//
-//            }
-//          }
-//        }
-//      }
-//    }
-//
-//     return null;
-//  }
 
 
   public static Map<String, MetaClass> determineTypeVariables(MetaMethod method) {
@@ -340,6 +313,82 @@ public class GenUtil {
     return a.getType().isAssignableFrom(b.getType()) || b.getType().isAssignableFrom(a.getType());
   }
 
+
+  private static final String JAVA_REFL_FLD_UTIL_METH = "_getAccessibleField";
+
+  public static void createJavaReflectionFieldInitializerUtilMethod(ClassStructureBuilder<?> classBuilder) {
+
+    if (classBuilder.getClassDefinition().getMethod(JAVA_REFL_FLD_UTIL_METH, Class.class, Field.class) != null) {
+      return;
+    }
+
+    classBuilder.privateMethod(Field.class, "_getAccessibleField").modifiers(Modifier.Static)
+            .parameters(DefParameters.of(Parameter.of(Class.class, "cls"), Parameter.of(String.class, "name")))
+            .body()
+            .append(Stmt.try_()
+                    .append(Stmt.declareVariable("fld", Stmt.loadVariable("cls").invoke("getDeclaredField",
+                            Stmt.loadVariable("name"))))
+                    .append(Stmt.loadVariable("fld").invoke("setAccessible", true))
+                    .append(Stmt.loadVariable("fld").returnValue())
+                    .finish()
+                    .catch_(Throwable.class, "e")
+                    .append(Stmt.loadVariable("e").invoke("printStackTrace"))
+                    .append(Stmt.throw_(RuntimeException.class, Refs.get("e")))
+                    .finish())
+            .finish();
+  }
+
+  private static final String JAVA_REFL_METH_UTIL_METH = "_getAccessibleMethod";
+
+  public static void createJavaReflectionMethodInitializerUtilMethod(
+          ClassStructureBuilder<?> classBuilder) {
+
+    if (classBuilder.getClassDefinition().getMethod(JAVA_REFL_METH_UTIL_METH, Class.class, Method.class) != null) {
+      return;
+    }
+
+    classBuilder.privateMethod(Field.class, JAVA_REFL_METH_UTIL_METH).modifiers(Modifier.Static)
+            .parameters(DefParameters.of(Parameter.of(Class.class, "cls"), Parameter.of(String.class, "name"),
+                    Parameter.of(Class[].class, "parms")))
+            .body()
+            .append(Stmt.try_()
+                    .append(Stmt.declareVariable("meth", Stmt.loadVariable("cls").invoke("getDeclaredMethod",
+                            Stmt.loadVariable("name"), Stmt.loadVariable("parms"))))
+                    .append(Stmt.loadVariable("meth").invoke("setAccessible", true))
+                    .append(Stmt.loadVariable("meth").returnValue())
+                    .finish()
+                    .catch_(Throwable.class, "e")
+                    .append(Stmt.loadVariable("e").invoke("printStackTrace"))
+                    .append(Stmt.throw_(RuntimeException.class, Refs.get("e")))
+                    .finish())
+            .finish();
+  }
+
+  public static String initCachedField(ClassStructureBuilder<?> classBuilder, MetaField f) {
+    createJavaReflectionFieldInitializerUtilMethod(classBuilder);
+
+    String fieldName = getPrivateFieldInjectorName(f) + "_fld";
+    
+    classBuilder.privateField(fieldName, Field.class).modifiers(Modifier.Static)
+            .initializesWith(Stmt.invokeStatic(classBuilder.getClassDefinition(), JAVA_REFL_FLD_UTIL_METH,
+                    f.getDeclaringClass(), f.getName())).finish();
+    
+    return fieldName;
+  }
+
+  public static String initCachedMethod(ClassStructureBuilder<?> classBuilder, MetaMethod m) {
+    createJavaReflectionMethodInitializerUtilMethod(classBuilder);
+    
+    String fieldName =  getPrivateMethodName(m) + "_meth";
+    
+    classBuilder.privateField(fieldName, Method.class).modifiers(Modifier.Static)
+            .initializesWith(Stmt.invokeStatic(classBuilder.getClassDefinition(), JAVA_REFL_METH_UTIL_METH,
+                    m.getDeclaringClass(), m.getName(), MetaClassFactory.asClassArray(m.getParameters()))).finish();
+    
+    return fieldName;
+  }
+
+
   public static void addPrivateAccessStubs(boolean useJSNIStubs, ClassStructureBuilder<?> classBuilder, MetaField f) {
     MetaClass type = f.getType();
     if (type.getCanonicalName().equals("long")) {
@@ -363,16 +412,19 @@ public class GenUtil {
               .finish();
     }
     else {
+      /**
+       * Reflection stubs
+       */
+    
+      String cachedField = initCachedField(classBuilder, f);
+
       classBuilder.privateMethod(void.class, getPrivateFieldInjectorName(f))
               .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance"),
                       Parameter.of(f.getType().isArray() ? f.getType().asBoxed() : f.getType(), "value")))
               .modifiers(Modifier.Static)
               .body()
               .append(Stmt.try_()
-                      .append(Stmt.declareVariable("field", Stmt.load(f.getDeclaringClass().asClass()).invoke("getDeclaredField",
-                              f.getName())))
-                      .append(Stmt.loadVariable("field").invoke("setAccessible", true))
-                      .append(Stmt.loadVariable("field").invoke("set", Refs.get("instance"), Refs.get("value")))
+                      .append(Stmt.loadVariable(cachedField).invoke("set", Refs.get("instance"), Refs.get("value")))
                       .finish()
                       .catch_(Throwable.class, "e")
                       .append(Stmt.loadVariable("e").invoke("printStackTrace"))
@@ -385,10 +437,7 @@ public class GenUtil {
               .modifiers(Modifier.Static)
               .body()
               .append(Stmt.try_()
-                      .append(Stmt.declareVariable("field", Stmt.load(f.getDeclaringClass().asClass()).invoke("getDeclaredField",
-                              f.getName())))
-                      .append(Stmt.loadVariable("field").invoke("setAccessible", true))
-                      .append(Stmt.nestedCall(Cast.to(f.getType(), Stmt.loadVariable("field")
+                      .append(Stmt.nestedCall(Cast.to(f.getType().asBoxed(), Stmt.loadVariable(cachedField)
                               .invoke("get", Refs.get("instance")))).returnValue())
                       .finish()
                       .catch_(Throwable.class, "e")
@@ -461,7 +510,7 @@ public class GenUtil {
   }
 
   public static String getPrivateMethodName(MetaMethod method) {
-    StringBuffer buf = new StringBuffer(method.getDeclaringClass()
+    StringBuilder buf = new StringBuilder(method.getDeclaringClass()
             .getFullyQualifiedName().replaceAll("\\.", "_") + "_" + method.getName());
 
     for (MetaParameter parm : method.getParameters()) {

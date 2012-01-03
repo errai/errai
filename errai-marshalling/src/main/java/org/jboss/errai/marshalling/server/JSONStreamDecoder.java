@@ -23,8 +23,8 @@ import org.jboss.errai.marshalling.server.json.impl.ErraiJSONValue;
 import java.io.*;
 import java.nio.CharBuffer;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static java.lang.Math.pow;
@@ -86,32 +86,32 @@ public class JSONStreamDecoder {
   public EJValue parse() {
     try {
 
-      return new ErraiJSONValue(_parse(new Context(false), null));
+      return new ErraiJSONValue(_parse(new OuterContext()));
     }
     catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
 
-  private Object _parse(Context ctx, Object collection) throws IOException {
+  private Object _parse(Context ctx) throws IOException {
     char c;
     StringBuilder appender;
     while ((c = read()) != 0) {
       switch (c) {
         case '[':
-          ctx.addValue(_parse(new Context(false), new ArrayList()));
+          ctx.addValue(_parse(new ArrayContext(new ArrayList<Object>())));
           break;
 
         case '{':
-          ctx.addValue(_parse(new Context(true), new HashMap()));
+          ctx.addValue(_parse(new ObjectContext(new HashMap<Object, Object>())));
           break;
 
         case ']':
         case '}':
-          return ctx.record(collection);
+          return ctx.record();
 
         case ',':
-          ctx.record(collection);
+          ctx.record();
           break;
 
         case '"':
@@ -178,7 +178,7 @@ public class JSONStreamDecoder {
       }
     }
 
-    return ctx.record(collection);
+    return ctx.record();
   }
 
   private char handleEscapeSequence() throws IOException {
@@ -342,16 +342,70 @@ public class JSONStreamDecoder {
     }
   }
 
-  private static class Context {
-    Object lhs;
-    Object rhs;
-    private boolean map;
-
-    private Context(boolean map) {
-      this.map = map;
+  private static abstract class Context<T> {
+    abstract T record();
+    abstract void addValue(Object val);
+  }
+  
+  private static class OuterContext extends Context<Object> {
+    private Context _wrapped;
+    private Object col;
+    
+    @Override
+    Object record() {
+      return col;
     }
 
-    private void addValue(Object val) {
+    @SuppressWarnings("unchecked")
+    @Override
+    void addValue(Object val) {
+      if (_wrapped == null) {
+        if (val instanceof List) {
+          _wrapped = new ArrayContext((List<Object>) (col = val));
+        }
+        else if (val instanceof Map) {
+          _wrapped = new ObjectContext((Map<Object, Object>) (col = val));
+        }
+        else {
+          throw new RuntimeException("expected list or map but found: " + (val == null ? null : val.getClass().getName()));
+        }
+      }
+      else {
+        _wrapped.addValue(val);
+      }
+    }
+  }
+
+  private static class ArrayContext extends Context<List> {
+    List<Object> collection;
+
+    private ArrayContext(List<Object> collection) {
+      this.collection = collection;
+    }
+
+    @Override
+    void addValue(Object val) {
+      collection.add(val);
+    }
+
+    @Override
+    public List record() {
+      return collection;
+    }
+  }
+
+  private static class ObjectContext extends Context<Map> {
+    protected Object lhs;
+    protected Object rhs;
+
+    Map<Object, Object> collection;
+
+    private ObjectContext(Map<Object, Object> collection) {
+      this.collection = collection;
+    }
+
+    @Override
+    void addValue(Object val) {
       if (lhs == null) {
         lhs = val;
       }
@@ -360,23 +414,11 @@ public class JSONStreamDecoder {
       }
     }
 
-    @SuppressWarnings("unchecked")
-    private Object record(Object collection) {
-      try {
-        if (lhs != null) {
-          if (map) {
-            ((Map) collection).put(lhs, rhs);
-          }
-          else {
-            if (collection == null) return lhs;
-            ((Collection) collection).add(lhs);
-          }
-        }
-        return collection;
-      }
-      finally {
-        lhs = rhs = null;
-      }
+    @Override
+    Map record() {
+      collection.put(lhs, rhs);
+      lhs = rhs = null;
+      return collection;
     }
   }
 }

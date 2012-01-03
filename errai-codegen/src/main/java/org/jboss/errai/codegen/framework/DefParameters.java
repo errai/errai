@@ -83,6 +83,11 @@ public class DefParameters extends AbstractStatement {
 
     return new DefParameters(parms);
   }
+  
+  public static DefParameters of(Parameter... parms) {
+    return new DefParameters(Arrays.asList(parms));
+    
+  }
 
   public static DefParameters none() {
     return new DefParameters(Collections.<Parameter>emptyList());

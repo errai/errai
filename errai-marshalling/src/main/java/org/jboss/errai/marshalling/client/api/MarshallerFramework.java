@@ -84,7 +84,7 @@ public class MarshallerFramework implements EntryPoint {
 
     private static final MappingContext mappingContext = new MappingContext() {
       @Override
-      public Class<? extends Marshaller> getMarshallerClass(String clazz) {
+      public Marshaller<Object> getMarshaller(String clazz) {
         throw new UnsupportedOperationException();
       }
 
@@ -107,36 +107,38 @@ public class MarshallerFramework implements EntryPoint {
 
     @Override
     public Marshaller<Object> getMarshallerInstance(String fqcn) {
-      if (fqcn == null) {
-        return new Marshaller<Object>() {
-          @Override
-          public Class<Object> getTypeHandled() {
-            return null;
-          }
+      return marshallerFactory.getMarshaller(null, fqcn);
 
-          @Override
-          public String getEncodingType() {
-            return null;
-          }
+//      if (fqcn == null) {
+//        return new Marshaller<Object>() {
+//          @Override
+//          public Class<Object> getTypeHandled() {
+//            return null;
+//          }
+//
+//          @Override
+//          public String getEncodingType() {
+//            return null;
+//          }
+//
+//          @Override
+//          public Object demarshall(EJValue o, MarshallingSession ctx) {
+//            return null;
+//          }
+//
+//          @Override
+//          public String marshall(Object o, MarshallingSession ctx) {
+//            return "null";
+//          }
+//
+//          @Override
+//          public boolean handles(EJValue o) {
+//            return false;
+//          }
+//        };
+//      }
 
-          @Override
-          public Object demarshall(EJValue o, MarshallingSession ctx) {
-            return null;
-          }
-
-          @Override
-          public String marshall(Object o, MarshallingSession ctx) {
-            return "null";
-          }
-
-          @Override
-          public boolean handles(EJValue o) {
-            return false;
-          }
-        };
-      }
-
-      return MarshallUtil.notNull("no marshaller for: " + fqcn, marshallerFactory.getMarshaller(null, fqcn));
+//      return MarshallUtil.notNull("no marshaller for: " + fqcn, marshallerFactory.getMarshaller(null, fqcn));
     }
 
     @Override

@@ -23,15 +23,15 @@ import org.jboss.errai.codegen.framework.meta.MetaClass;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface ClassFieldBuilder<T extends ClassStructureBuilder<T>> extends Builder {
-  public FieldBuildInitializer<T> publicField(String name, MetaClass type);
-  public FieldBuildInitializer<T> publicField(String name, Class<?> type);
+  public FieldBuildStart<T> publicField(String name, MetaClass type);
+  public FieldBuildStart<T> publicField(String name, Class<?> type);
 
-  public FieldBuildInitializer<T> privateField(String name, MetaClass type);
-  public FieldBuildInitializer<T> privateField(String name, Class<?> type);
+  public FieldBuildStart<T> privateField(String name, MetaClass type);
+  public FieldBuildStart<T> privateField(String name, Class<?> type);
 
-  public FieldBuildInitializer<T> protectedField(String name, MetaClass type);
-  public FieldBuildInitializer<T> protectedField(String name, Class<?> type);
+  public FieldBuildStart<T> protectedField(String name, MetaClass type);
+  public FieldBuildStart<T> protectedField(String name, Class<?> type);
 
-  public FieldBuildInitializer<T> packageField(String name, MetaClass type);
-  public FieldBuildInitializer<T> packageField(String name, Class<?> type);
+  public FieldBuildStart<T> packageField(String name, MetaClass type);
+  public FieldBuildStart<T> packageField(String name, Class<?> type);
 }
