@@ -48,6 +48,12 @@ public class PlainMethodIntegrationTest extends AbstractErraiJaxrsTest {
   }
   
   @Test
+  public void testGetWithSpecifiedBaseUrl() {
+    RestClient.create(PlainMethodTestService.class, "/",
+        new AssertionResponseCallback("@GET using an overridden root path failed", Response.SC_OK, "get")).get();
+  }
+  
+  @Test
   public void testPostWithRemoteCallback() {
     RestClient.create(PlainMethodTestService.class, 
         new AssertionCallback<String>("@POST without parameters failed", "post")).post();

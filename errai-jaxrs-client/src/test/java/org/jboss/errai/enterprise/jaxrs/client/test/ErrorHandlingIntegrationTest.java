@@ -24,8 +24,10 @@ import org.jboss.errai.enterprise.client.jaxrs.api.ResponseException;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
 import org.jboss.errai.enterprise.jaxrs.client.shared.ErrorHandlingTestService;
+import org.jboss.errai.enterprise.jaxrs.client.shared.PlainMethodTestService;
 import org.junit.Test;
 
+import com.google.gwt.http.client.RequestPermissionException;
 import com.google.gwt.http.client.Response;
 
 /**
@@ -68,6 +70,36 @@ public class ErrorHandlingIntegrationTest extends AbstractErraiJaxrsTest {
         ).error();
 
     delayTestFinish(5000);
+  }
+  
+  @Test
+  public void testErrorHandlingWithInvalidBaseUrl() {
+    delayTestFinish(5000);
+    
+    RestClient.create(PlainMethodTestService.class, "http://somewhere.zzz/invalidpath",
+        new RemoteCallback<Long>() {
+          @Override
+          public void callback(Long response) {
+            fail("Callback should not be invoked");
+          }
+        },
+        new ErrorCallback() {
+          @Override
+          public boolean error(Message message, Throwable throwable) {
+            try {
+              throw throwable;
+            }
+            catch (RequestPermissionException e) {
+              assertEquals("http://somewhere.zzz/invalidpath/test/method", e.getURL());
+              finishTest();
+            }
+            catch (Throwable t) {
+              fail("Expected RequestPermissionException");
+            }
+            return false;
+          }
+        }
+        ).get();
   }
 
   @Test

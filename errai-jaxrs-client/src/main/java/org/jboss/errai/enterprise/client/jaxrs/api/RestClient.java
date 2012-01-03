@@ -19,8 +19,8 @@ package org.jboss.errai.enterprise.client.jaxrs.api;
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.framework.ProxyProvider;
-import org.jboss.errai.bus.client.framework.RPCStub;
 import org.jboss.errai.bus.client.framework.RemoteServiceProxyFactory;
+import org.jboss.errai.enterprise.client.jaxrs.JaxRsProxy;
 import org.jboss.errai.enterprise.client.jaxrs.JaxrsProxyLoader;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 
@@ -41,44 +41,75 @@ public class RestClient {
 
   /**
    * Creates a REST client for the provided JAX-RS resource class/interface.
-   * 
-   * @param callback  the asynchronous callback to use
+   *
    * @param remoteService  the remote service class or interface
+   * @param callback  the asynchronous callback to use
    * @return proxy of the specified remote service type
    */
   public static <T, R> T create(final Class<T> remoteService, final RemoteCallback<R> callback) {
-    return create(remoteService, callback, null);
+    return create(remoteService, null, callback, null);
   }
 
   /**
    * Creates a REST client for the provided JAX-RS resource class/interface.
    * 
+   * @param remoteService  the remote service class or interface
+   * @param baseUrl  the base url overriding the default application root path.
+   * @param callback  the asynchronous callback to use
+   * @return proxy of the specified remote service type
+   */
+  public static <T, R> T create(final Class<T> remoteService, String baseUrl, final RemoteCallback<R> callback) {
+    return create(remoteService, baseUrl, callback, null);
+  }
+  
+  /**
+   * Creates a REST client for the provided JAX-RS resource class/interface.
+   * 
+   * @param remoteService  the remote service class or interface
    * @param callback  the asynchronous callback to use 
    * @param errorCallback  the error callback to use
-   * @param remoteService  the remote service class or interface
    * @return proxy of the specified remote service type
    */
   public static <T, R> T create(final Class<T> remoteService, 
       final RemoteCallback<R> callback, final ErrorCallback errorCallback) {
+    return create(remoteService, null, callback, errorCallback);
+  }
+  
+  /**
+   * Creates a REST client for the provided JAX-RS resource class/interface.
+   * 
+   * @param remoteService  the remote service class or interface
+   * @param baseUrl  the base url overriding the default application root path.
+   * @param callback  the asynchronous callback to use
+   * @param errorCallback  the error callback to use
+   * @return proxy of the specified remote service type
+   */
+  public static <T, R> T create(final Class<T> remoteService, String baseUrl,
+      final RemoteCallback<R> callback, final ErrorCallback errorCallback) {
+
+    if (baseUrl != null && !baseUrl.endsWith("/")) 
+      baseUrl += "/";
     
-    T svc = proxyProvider.getRemoteProxy(remoteService);
-    if (svc == null) {
+    T proxy = proxyProvider.getRemoteProxy(remoteService);
+    if (proxy == null || !(proxy instanceof JaxRsProxy)) {
 
       JaxrsProxyLoader loader = GWT.create(JaxrsProxyLoader.class);
       loader.loadProxies();
 
-      svc = proxyProvider.getRemoteProxy(remoteService); 
-      if (svc == null)
+      proxy = proxyProvider.getRemoteProxy(remoteService); 
+      if (proxy == null || !(proxy instanceof JaxRsProxy))
         throw new RuntimeException("No proxy found for JAX-RS interface: " + remoteService.getName());
     }
 
-    ((RPCStub) svc).setRemoteCallback(callback);
-    ((RPCStub) svc).setErrorCallback(errorCallback);
-    return svc;
+    ((JaxRsProxy) proxy).setRemoteCallback(callback);
+    ((JaxRsProxy) proxy).setErrorCallback(errorCallback);
+    ((JaxRsProxy) proxy).setBaseUrl(baseUrl);
+    return proxy;
   }
   
+  
   /**
-   * Returns the configured JAX-RS application root path.
+   * Returns the configured JAX-RS default application root path.
    * 
    * @return path with trailing slash, or empty string if undefined or explicitly set to empty
    */
@@ -95,7 +126,7 @@ public class RestClient {
   }-*/;
   
   /**
-   * Configures the JAX-RS application root path;
+   * Configures the JAX-RS default application root path;
    * 
    * @param root path to use when sending request to the endpoint
    */

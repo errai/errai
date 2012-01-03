@@ -20,7 +20,6 @@ import javax.ws.rs.Path;
 
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.RemoteCallback;
-import org.jboss.errai.bus.client.framework.RPCStub;
 import org.jboss.errai.codegen.framework.Parameter;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.Variable;
@@ -30,7 +29,9 @@ import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.util.Bool;
 import org.jboss.errai.codegen.framework.util.Stmt;
+import org.jboss.errai.enterprise.client.jaxrs.JaxRsProxy;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
+import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Response;
@@ -56,11 +57,13 @@ public class JaxrsProxyGenerator {
     ClassStructureBuilder<?> classBuilder = ClassBuilder.define(remote.getSimpleName() + "Impl")
         .packageScope()
         .implementsInterface(remote)
-        .implementsInterface(RPCStub.class)
+        .implementsInterface(JaxRsProxy.class)
         .body()
         .privateField("remoteCallback", RemoteCallback.class)
         .finish()
         .privateField("errorCallback", ErrorCallback.class)
+        .finish()
+        .privateField("baseUrl", String.class)
         .finish();
 
     classBuilder.publicMethod(void.class, "setErrorCallback", Parameter.of(ErrorCallback.class, "callback"))
@@ -69,6 +72,21 @@ public class JaxrsProxyGenerator {
 
     classBuilder.publicMethod(void.class, "setRemoteCallback", Parameter.of(RemoteCallback.class, "callback"))
         .append(Stmt.loadClassMember("remoteCallback").assignValue(Variable.get("callback")))
+        .finish();
+
+    classBuilder.publicMethod(void.class, "setBaseUrl", Parameter.of(String.class, "url"))
+        .append(Stmt.loadClassMember("baseUrl").assignValue(Variable.get("url")))
+        .finish();
+
+    classBuilder.publicMethod(String.class, "getBaseUrl")
+        .append(Stmt
+            .if_(Bool.isNotNull(Variable.get("baseUrl")))
+            .append(Stmt.loadVariable("baseUrl").returnValue())
+            .finish()
+            .else_()
+            .append(Stmt.invokeStatic(RestClient.class, "getJaxRsApplicationRoot").returnValue())
+            .finish()
+        )
         .finish();
 
     generateErrorHandler(classBuilder);

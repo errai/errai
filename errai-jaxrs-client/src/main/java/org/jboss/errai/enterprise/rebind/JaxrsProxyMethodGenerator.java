@@ -36,7 +36,6 @@ import org.jboss.errai.codegen.framework.util.Bool;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseException;
-import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.resteasy.specimpl.UriBuilderImpl;
 
 import com.google.gwt.http.client.Request;
@@ -101,7 +100,7 @@ public class JaxrsProxyMethodGenerator {
     }
 
     methodBlock.append(Stmt.declareVariable("url", StringBuilder.class, Stmt.newObject(StringBuilder.class)
-        .withParameters(Stmt.invokeStatic(RestClient.class, "getJaxRsApplicationRoot"))));
+        .withParameters(Stmt.loadVariable("this").invoke("getBaseUrl"))));
 
     // construct query using @QueryParams
     ContextualStatementBuilder urlBuilder = Stmt.loadVariable("url").invoke(APPEND, pathValue);
