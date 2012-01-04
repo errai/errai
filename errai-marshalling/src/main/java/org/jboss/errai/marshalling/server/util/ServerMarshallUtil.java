@@ -95,7 +95,7 @@ public abstract class ServerMarshallUtil {
 
       inputStream.read(classDefinition);
 
-      BootstrapClassloader clsLoader = new BootstrapClassloader(ClassLoader.getSystemClassLoader());
+      BootstrapClassloader clsLoader = new BootstrapClassloader(Thread.currentThread().getContextClassLoader());
 
       Class<? extends MarshallerFactory> mainClass = (Class<? extends MarshallerFactory>) clsLoader
               .defineClassX(packageName + "." + className, classDefinition, 0, classDefinition.length);

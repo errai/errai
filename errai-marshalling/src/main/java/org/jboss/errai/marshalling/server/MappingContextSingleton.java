@@ -58,7 +58,8 @@ public class MappingContextSingleton {
             });
 
     try {
-      marshallerFactory = ServerMarshallUtil.getGeneratedMarshallerFactoryForServer().newInstance();
+      Object o = ServerMarshallUtil.getGeneratedMarshallerFactoryForServer().newInstance();
+      marshallerFactory = (MarshallerFactory) o;
     }
     catch (Throwable t) {
       throw new RuntimeException("failed to generate server-side marshallers", t);
