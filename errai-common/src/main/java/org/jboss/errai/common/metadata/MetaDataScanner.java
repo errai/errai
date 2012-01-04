@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 JBoss, a divison Red Hat, Inc
+ * Copyright 2009 JBoss, a division Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,9 @@
  */
 package org.jboss.errai.common.metadata;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableSet;
-import javassist.bytecode.ClassFile;
-import org.reflections.Configuration;
-import org.reflections.Reflections;
-import org.reflections.scanners.FieldAnnotationsScanner;
-import org.reflections.scanners.MethodAnnotationsScanner;
-import org.reflections.scanners.SubTypesScanner;
-import org.reflections.scanners.TypeAnnotationsScanner;
-import org.reflections.util.ConfigurationBuilder;
-import org.reflections.vfs.Vfs;
-
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Inherited;
 import java.lang.reflect.Field;
@@ -35,24 +25,43 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.security.MessageDigest;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.regex.Pattern;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
-import static org.reflections.vfs.Vfs.UrlType;
+import javassist.bytecode.ClassFile;
+
+import org.reflections.Configuration;
+import org.reflections.Reflections;
+import org.reflections.scanners.FieldAnnotationsScanner;
+import org.reflections.scanners.MethodAnnotationsScanner;
+import org.reflections.scanners.TypeAnnotationsScanner;
+import org.reflections.util.ConfigurationBuilder;
+import org.reflections.vfs.Vfs;
+import org.reflections.vfs.Vfs.UrlType;
+
+import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableSet;
 
 /**
- * Scans component meta data using javassist.
- * The scanner creates a {@link DeploymentContext}
- * that identifies nested subdeployments (i.e. WAR inside EAR) and processes the resulting archive Url's
- * using the <a href="http://code.google.com/p/reflections/">Reflections</a> library.
+ * Scans component meta data. The scanner creates a {@link DeploymentContext} that identifies nested
+ * subdeployments (i.e. WAR inside EAR) and processes the resulting archive Url's using the <a
+ * href="http://code.google.com/p/reflections/">Reflections</a> library.
  * <p/>
  * <p/>
  * The initial set of config Url's (entry points) is discovered through ErraiApp.properties.
- *
+ * 
  * @author Heiko Braun <hbraun@redhat.com>
- * @author Mike Brock
+ * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class MetaDataScanner extends Reflections {
   public static final String CLIENT_PKG_REGEX = ".*(\\.client\\.).*";
@@ -64,14 +73,15 @@ public class MetaDataScanner extends Reflections {
               return file.endsWith(".properties");
             }
           }
-  );
+      );
 
   MetaDataScanner(List<URL> urls) {
     super(getConfiguration(urls));
     scan();
   }
 
-  private static Map<String, Set<SortableClassFileWrapper>> annotationsToClassFile = new TreeMap<String, Set<SortableClassFileWrapper>>();
+  private static Map<String, Set<SortableClassFileWrapper>> annotationsToClassFile =
+      new TreeMap<String, Set<SortableClassFileWrapper>>();
 
   private static class SortableClassFileWrapper implements Comparable<SortableClassFileWrapper> {
     private String name;
@@ -102,18 +112,21 @@ public class MetaDataScanner extends Reflections {
                     new TypeAnnotationsScanner() {
                       @Override
                       public void scan(Object cls) {
-                        @SuppressWarnings("unchecked") final String className = getMetadataAdapter().getClassName(cls);
+                        @SuppressWarnings("unchecked")
+                        final String className = getMetadataAdapter().getClassName(cls);
 
-                        //noinspection unchecked
+                        // noinspection unchecked
                         for (String annotationType : (List<String>) getMetadataAdapter().getClassAnnotationNames(cls)) {
                           if (acceptResult(annotationType) ||
-                                  annotationType.equals(Inherited.class.getName())) { //as an exception, accept Inherited as well
+                                  annotationType.equals(Inherited.class.getName())) { // as an exception, accept
+                                                                                      // Inherited as well
                             getStore().put(annotationType, className);
 
                             if (cls instanceof ClassFile) {
                               Set<SortableClassFileWrapper> classes = annotationsToClassFile.get(annotationType);
                               if (classes == null) {
-                                annotationsToClassFile.put(annotationType, classes = new TreeSet<SortableClassFileWrapper>());
+                                annotationsToClassFile.put(annotationType, classes =
+                                    new TreeSet<SortableClassFileWrapper>());
                               }
                               classes.add(new SortableClassFileWrapper(className, (ClassFile) cls));
                             }
@@ -124,7 +137,6 @@ public class MetaDataScanner extends Reflections {
                     },
                     propScanner
             );
-
 
   }
 
@@ -176,13 +188,11 @@ public class MetaDataScanner extends Reflections {
     return results;
   }
 
-
   public Set<Method> getMethodsAnnotatedWith(Class<? extends Annotation> annotation, String packagePrefix) {
     Set<Method> results = new HashSet<Method>();
     for (Method method : getMethodsAnnotatedWith(annotation)) {
       if (packagePrefix == null || packagePrefix.length() == 0 || method.getDeclaringClass().getName().startsWith
-              (packagePrefix)
-              ) {
+              (packagePrefix)) {
         results.add(method);
       }
     }
@@ -200,8 +210,8 @@ public class MetaDataScanner extends Reflections {
     return results;
   }
 
-  private Map<Class<? extends Annotation>, Set<Class<?>>> _annotationCache
-          = new HashMap<Class<? extends Annotation>, Set<Class<?>>>();
+  private Map<Class<? extends Annotation>, Set<Class<?>>> _annotationCache =
+      new HashMap<Class<? extends Annotation>, Set<Class<?>>>();
 
   @Override
   public Set<Class<?>> getTypesAnnotatedWith(Class<? extends Annotation> annotation) {
@@ -212,10 +222,6 @@ public class MetaDataScanner extends Reflections {
 
     return types;
   }
-  
-//  public String getHashForTypesAnnotatedWith(Class<? extends Annotation> annotation) {
-//    return getHashForTypesAnnotatedWith(null, annotation);
-//  }
 
   public String getHashForTypesAnnotatedWith(String seed, Class<? extends Annotation> annotation) {
     if (!annotationsToClassFile.containsKey(annotation.getName())) {
@@ -247,7 +253,6 @@ public class MetaDataScanner extends Reflections {
     }
   }
 
-
   public static List<URL> getConfigUrls(ClassLoader loader) {
     try {
       Enumeration<URL> configTargets = loader.getResources(ERRAI_CONFIG_STUB_NAME);
@@ -255,11 +260,18 @@ public class MetaDataScanner extends Reflections {
       List<URL> urls = new ArrayList<URL>();
       while (configTargets.hasMoreElements()) {
         String urlString = configTargets.nextElement().toExternalForm();
-        urls.add(new URL(URLDecoder.decode(urlString.substring(0, urlString.indexOf(ERRAI_CONFIG_STUB_NAME)), "utf-8")));
+        urlString = urlString.substring(0, urlString.indexOf(ERRAI_CONFIG_STUB_NAME));
+
+        // The URLs returned by the classloader are UTF-8 encoded. The URLDecoder assumes
+        // a HTML form encoded string, which is why we escape the plus symbols here. Otherwise,
+        // they would be decoded into space characters.
+        // The pound character still must not appear anywhere in the path!
+        urls.add(new URL(URLDecoder.decode(urlString.replaceAll("\\+", "%2b"), "UTF-8")));
       }
       return urls;
     }
     catch (IOException e) {
+      e.printStackTrace();
       throw new RuntimeException("Failed to scan configuration Url's", e);
     }
   }
