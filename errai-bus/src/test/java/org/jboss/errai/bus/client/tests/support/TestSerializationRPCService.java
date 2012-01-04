@@ -134,7 +134,9 @@ public interface TestSerializationRPCService {
   public TestEnumA testNakedEnum(TestEnumA e);
   
   public Boron.Bean testPortableInnerClass(Boron.Bean b);
-
+ 
+  public Koron testKoron(Koron k);
+  
   public List<TreeNodeContainer> acceptTreeNodeContainers(List<TreeNodeContainer> listOfContainers);
 
   public EntityWithUnqualifiedFields testEntityWithUnqualifiedFieldTypes(EntityWithUnqualifiedFields e);

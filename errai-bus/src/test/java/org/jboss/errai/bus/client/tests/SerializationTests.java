@@ -1610,6 +1610,36 @@ public class SerializationTests extends AbstractErraiTest {
     });
   }
 
+  public void testKoron() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final Koron koron = new Koron();
+
+        class EqualTester {
+          public boolean isEqual(Koron r) {
+            return r != null &&
+                    r.equals(koron);
+          }
+        }
+
+        MessageBuilder.createCall(new RemoteCallback<Koron>() {
+          @Override
+          public void callback(Koron response) {
+            try {
+              assertTrue(new EqualTester().isEqual(response));
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestSerializationRPCService.class).testKoron(koron);
+      }
+    });
+  }
+
   public void testEntityWithUnqualifiedFields() {
     runAfterInit(new Runnable() {
       @Override

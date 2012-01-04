@@ -57,7 +57,7 @@ public class ObjectMarshaller extends AbstractJSONMarshaller<Object> {
       Marshaller<Object> marshaller = ctx.getMarshallerInstance(string.stringValue());
 
       if (marshaller == null) {
-        throw new RuntimeException("marshalled type is unknown to the demarshall: " + string.stringValue());
+        throw new RuntimeException("marshalled type is unknown to the marshalling framework: " + string.stringValue());
       }
 
       return marshaller.demarshall(o, ctx);
@@ -85,7 +85,7 @@ public class ObjectMarshaller extends AbstractJSONMarshaller<Object> {
     Marshaller<Object> marshaller = ctx.getMarshallerInstance(o.getClass().getName());
 
     if (marshaller == null) {
-      throw new RuntimeException("marshalled type is unknown to the demarshall: " + o.getClass().getName());
+      throw new RuntimeException("marshalled type is unknown to the marshalling framework: " + o.getClass().getName());
     }
 
     return marshaller.marshall(o, ctx);

@@ -42,13 +42,11 @@ public class DecodingSession extends AbstractMarshallingSession {
 
   @Override
   public Marshaller<Object> getMarshallerInstance(String fqcn) {
-  //  MappingDefinition m = context.getDefinitionsFactory().getDefinition(fqcn);
     Marshaller<Object> m = context.getMarshaller(fqcn);
     if (m == null) {
       throw new RuntimeException("no marshalling definition available for type:" + fqcn);
     }
 
-  //  return m.getMarshallerInstance();
     return m;
   }
 

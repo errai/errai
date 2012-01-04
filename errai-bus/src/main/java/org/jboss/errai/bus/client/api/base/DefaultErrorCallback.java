@@ -26,8 +26,8 @@ import org.jboss.errai.bus.client.api.builder.MessageBuildParms;
 import org.jboss.errai.common.client.protocols.MessageParts;
 
 /**
- * The default error callback implementation, used when {@link MessageBuildParms#defaultErrorHandling()} was invoked. 
- * 
+ * The default error callback implementation, used when {@link MessageBuildParms#defaultErrorHandling()} was invoked.
+ *
  * @author Mike Brock
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -36,60 +36,67 @@ public class DefaultErrorCallback implements ErrorCallback {
   public static final String CLIENT_ERROR_SUBJECT = "ClientBusErrors";
 
   public boolean error(Message message, final Throwable e) {
-    if (e != null) {
-      StringBuilder a =
-          new StringBuilder("<br/>").append(e.getClass().getName()).append(": ").append(e.getMessage()).append("<br/>");
+    try {
+      if (e != null) {
+        StringBuilder a =
+                new StringBuilder("<br/>").append(e.getClass().getName()).append(": ").append(e.getMessage()).append("<br/>");
 
-      // Let's build-up the stacktrace.
-      boolean first = true;
-      for (StackTraceElement sel : e.getStackTrace()) {
-        a.append(first ? "" : "&nbsp;&nbsp;").append(sel.toString()).append("<br/>");
-        first = false;
-      }
-
-      // And add the entire causal chain.
-      Throwable t = e;
-      while ((t = t.getCause()) != null) {
-        first = true;
-        a.append("Caused by:<br/>");
-        for (StackTraceElement sel : t.getStackTrace()) {
+        // Let's build-up the stacktrace.
+        boolean first = true;
+        for (StackTraceElement sel : e.getStackTrace()) {
           a.append(first ? "" : "&nbsp;&nbsp;").append(sel.toString()).append("<br/>");
           first = false;
         }
-      }
 
-      if (message == null) {
-        createMessage(CLIENT_ERROR_SUBJECT)
-            .with(MessageParts.ErrorMessage, e.getMessage())
-            .with("AdditionalDetails", a.toString())
-            .with(MessageParts.Throwable, e)
-            .noErrorHandling().sendNowWith(ErraiBus.get());
+        // And add the entire causal chain.
+        Throwable t = e;
+        while ((t = t.getCause()) != null) {
+          first = true;
+          a.append("Caused by:<br/>");
+          for (StackTraceElement sel : t.getStackTrace()) {
+            a.append(first ? "" : "&nbsp;&nbsp;").append(sel.toString()).append("<br/>");
+            first = false;
+          }
+        }
+
+
+        if (message == null) {
+          createMessage(CLIENT_ERROR_SUBJECT)
+                  .with(MessageParts.ErrorMessage, e.getMessage())
+                  .with("AdditionalDetails", a.toString())
+                  .with(MessageParts.Throwable, e)
+                  .noErrorHandling().sendNowWith(ErraiBus.get());
+        }
+        else {
+          createConversation(message)
+                  .toSubject(CLIENT_ERROR_SUBJECT)
+                  .with(MessageParts.ErrorMessage, e.getMessage())
+                  .with("AdditionalDetails", a.toString())
+                  .with(MessageParts.Throwable, e)
+                  .noErrorHandling().reply();
+        }
       }
       else {
-        createConversation(message)
-            .toSubject(CLIENT_ERROR_SUBJECT)
-            .with(MessageParts.ErrorMessage, e.getMessage())
-            .with("AdditionalDetails", a.toString())
-            .with(MessageParts.Throwable, e)
-            .noErrorHandling().reply();
+        if (message == null) {
+          createMessage(CLIENT_ERROR_SUBJECT)
+                  .with("ErrorMessage", "Null exception reference")
+                  .with("AdditionalDetails", "No additional details")
+                  .noErrorHandling().sendNowWith(ErraiBus.get());
+        }
+        else {
+          createConversation(message)
+                  .toSubject(CLIENT_ERROR_SUBJECT)
+                  .with("ErrorMessage", "Null exception reference")
+                  .with("AdditionalDetails", "No additional details")
+                  .noErrorHandling().reply();
+        }
       }
-    }
-    else {
-      if (message == null) {
-        createMessage(CLIENT_ERROR_SUBJECT)
-            .with("ErrorMessage", "Null exception reference")
-            .with("AdditionalDetails", "No additional details")
-            .noErrorHandling().sendNowWith(ErraiBus.get());
-      }
-      else {
-        createConversation(message)
-            .toSubject(CLIENT_ERROR_SUBJECT)
-            .with("ErrorMessage", "Null exception reference")
-            .with("AdditionalDetails", "No additional details")
-            .noErrorHandling().reply();
-      }
-    }
 
+    }
+    catch (Throwable t) {
+      t.printStackTrace();
+      throw new RuntimeException("could not dispatch wrapped exception to error handler", e);
+    }
     return false;
   }
 }

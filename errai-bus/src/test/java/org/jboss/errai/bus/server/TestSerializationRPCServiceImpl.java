@@ -290,6 +290,11 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
   }
 
   @Override
+  public Koron testKoron(Koron k) {
+    return k;
+  }
+
+  @Override
   public List<TreeNodeContainer> acceptTreeNodeContainers(List<TreeNodeContainer> listOfContainers) {
     int count = 0;
     for (TreeNodeContainer tc : listOfContainers) {
