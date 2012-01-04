@@ -35,35 +35,24 @@ import org.reflections.vfs.ZipDir;
 public class MetaDataScannerTest {
 
   @Test
-  public void testUrlDecodingWithSimpleName() throws Exception {
-    final String jarFileName = "test.jar";
-
-    URL testJarURL = getClass().getClassLoader().getResource(jarFileName);
-    assertNotNull("Jar file not found:" + testJarURL, testJarURL);
-    
-    ClassLoader loader = URLClassLoader.newInstance(new URL[] { testJarURL }, getClass().getClassLoader());
-
-    List<URL> urls = MetaDataScanner.getConfigUrls(loader);
-    
-    String[] segments = urls.get(0).getPath().split("/");
-    assertTrue("No path segments found", segments.length > 0);
-    assertEquals("URL not properly decoded", jarFileName +"!", segments[segments.length - 1]);
-    assertNotNull("Could not open jar", new ZipDir(urls.get(0)).getFiles());
+  public void testJarUrlDecodingWithSimpleName() throws Exception {
+    testJarUrlDecoding("test.jar");
   }
   
   @Test
-  public void testUrlDecodingWithSpecialCharacters() throws Exception {
-    final String jarFileName = "testjar-\u00e4\u00f6\u00e9\u00f8 +abc!@$%^&*()_+}{.jar";
-
+  public void testJarUrlDecodingWithSpecialCharacters() throws Exception {
+    testJarUrlDecoding("testjar-\u00e4\u00f6\u00e9\u00f8 +abc!@$%^&*()_+}{.jar");
+  }
+   
+  private void testJarUrlDecoding(String jarFileName) {
     URL testJarURL = getClass().getClassLoader().getResource(jarFileName);
     assertNotNull("Jar file not found: " + jarFileName, testJarURL);
 
     ClassLoader loader = URLClassLoader.newInstance(new URL[] { testJarURL }, getClass().getClassLoader());
-
     List<URL> urls = MetaDataScanner.getConfigUrls(loader);
-    
     String[] segments = urls.get(0).getPath().split("/");
-    assertTrue("No path segments found", segments.length > 0);
+    
+    assertTrue("No path segments found in URL", segments.length > 0);
     assertEquals("URL not properly decoded", jarFileName +"!", segments[segments.length - 1]);
     assertNotNull("Could not open jar", new ZipDir(urls.get(0)).getFiles());
   }
