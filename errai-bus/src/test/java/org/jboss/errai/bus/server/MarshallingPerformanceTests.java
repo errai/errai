@@ -44,8 +44,7 @@ public class MarshallingPerformanceTests extends TestCase {
     long decTime = 0;
     for (int i = 0; i < TEST_ITERATIONS; i++) {
       long eTime = System.nanoTime();
-   //   ByteArrayOutputStream outputStream = new ByteArrayOutputStream(128);
-      StringWriter writer = new StringWriter(128);
+      StringWriter writer = new StringWriter();
 
       Map enc = new HashMap();
       enc.put("CommandType", "ConnectToQueue");
@@ -81,6 +80,5 @@ public class MarshallingPerformanceTests extends TestCase {
     assertEquals("ConnectToQueue", payload.get("CommandType"));
     assertEquals("ServerBus", payload.get("ToSubject"));
     assertEquals("Hello There!", payload.get("Extra"));
-
   }
 }

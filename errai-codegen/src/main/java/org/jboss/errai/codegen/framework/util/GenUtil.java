@@ -368,23 +368,23 @@ public class GenUtil {
     createJavaReflectionFieldInitializerUtilMethod(classBuilder);
 
     String fieldName = getPrivateFieldInjectorName(f) + "_fld";
-    
+
     classBuilder.privateField(fieldName, Field.class).modifiers(Modifier.Static)
             .initializesWith(Stmt.invokeStatic(classBuilder.getClassDefinition(), JAVA_REFL_FLD_UTIL_METH,
                     f.getDeclaringClass(), f.getName())).finish();
-    
+
     return fieldName;
   }
 
   public static String initCachedMethod(ClassStructureBuilder<?> classBuilder, MetaMethod m) {
     createJavaReflectionMethodInitializerUtilMethod(classBuilder);
-    
-    String fieldName =  getPrivateMethodName(m) + "_meth";
-    
+
+    String fieldName = getPrivateMethodName(m) + "_meth";
+
     classBuilder.privateField(fieldName, Method.class).modifiers(Modifier.Static)
             .initializesWith(Stmt.invokeStatic(classBuilder.getClassDefinition(), JAVA_REFL_METH_UTIL_METH,
                     m.getDeclaringClass(), m.getName(), MetaClassFactory.asClassArray(m.getParameters()))).finish();
-    
+
     return fieldName;
   }
 
@@ -415,8 +415,9 @@ public class GenUtil {
       /**
        * Reflection stubs
        */
-    
+
       String cachedField = initCachedField(classBuilder, f);
+      String setterName = _getReflectionFieldMethSetName(f);
 
       classBuilder.privateMethod(void.class, getPrivateFieldInjectorName(f))
               .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance"),
@@ -424,21 +425,23 @@ public class GenUtil {
               .modifiers(Modifier.Static)
               .body()
               .append(Stmt.try_()
-                      .append(Stmt.loadVariable(cachedField).invoke("set", Refs.get("instance"), Refs.get("value")))
+                      .append(Stmt.loadVariable(cachedField).invoke(setterName, Refs.get("instance"), Refs.get("value")))
                       .finish()
                       .catch_(Throwable.class, "e")
                       .append(Stmt.loadVariable("e").invoke("printStackTrace"))
                       .append(Stmt.throw_(RuntimeException.class, Refs.get("e")))
                       .finish())
               .finish();
+      
+      String getterName = _getReflectionFieldMethGetName(f);
 
       classBuilder.privateMethod(f.getType(), getPrivateFieldInjectorName(f))
               .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance")))
               .modifiers(Modifier.Static)
               .body()
               .append(Stmt.try_()
-                      .append(Stmt.nestedCall(Cast.to(f.getType().asBoxed(), Stmt.loadVariable(cachedField)
-                              .invoke("get", Refs.get("instance")))).returnValue())
+                      .append(Stmt.nestedCall(Cast.to(f.getType(), Stmt.loadVariable(cachedField)
+                              .invoke(getterName, Refs.get("instance")))).returnValue())
                       .finish()
                       .catch_(Throwable.class, "e")
                       .append(Stmt.loadVariable("e").invoke("printStackTrace"))
@@ -447,6 +450,76 @@ public class GenUtil {
               .finish();
     }
   }
+
+
+  private static String _getReflectionFieldMethGetName(MetaField f) {
+    MetaClass t = f.getType();
+
+    if (!t.isPrimitive()) {
+      return "get";
+    }
+    else if (t.getFullyQualifiedName().equals("int")) {
+      return "getInt";
+    }
+    else if (t.getFullyQualifiedName().equals("short")) {
+      return "getShort";
+    }
+    else if (t.getFullyQualifiedName().equals("boolean")) {
+      return "getBoolean";
+    }
+    else if (t.getFullyQualifiedName().equals("double")) {
+      return "getDouble";
+    }
+    else if (t.getFullyQualifiedName().equals("float")) {
+      return "getFloat";
+    }
+    else if (t.getFullyQualifiedName().equals("byte")) {
+      return "getByte";
+    }
+    else if (t.getFullyQualifiedName().equals("long")) {
+      return "getLong";
+    }
+    else if (t.getFullyQualifiedName().equals("char")) {
+      return "getChar";
+    }
+    return null;
+  }
+
+
+
+  private static String _getReflectionFieldMethSetName(MetaField f) {
+    MetaClass t = f.getType();
+
+    if (!t.isPrimitive()) {
+      return "set";
+    }
+    else if (t.getFullyQualifiedName().equals("int")) {
+      return "setInt";
+    }
+    else if (t.getFullyQualifiedName().equals("short")) {
+      return "setShort";
+    }
+    else if (t.getFullyQualifiedName().equals("boolean")) {
+      return "setBoolean";
+    }
+    else if (t.getFullyQualifiedName().equals("double")) {
+      return "setDouble";
+    }
+    else if (t.getFullyQualifiedName().equals("float")) {
+      return "setFloat";
+    }
+    else if (t.getFullyQualifiedName().equals("byte")) {
+      return "setByte";
+    }
+    else if (t.getFullyQualifiedName().equals("long")) {
+      return "setLong";
+    }
+    else if (t.getFullyQualifiedName().equals("char")) {
+      return "setChar";
+    }
+    return null;
+  }
+
 
   public static void addPrivateAccessStubs(boolean useJSNIStubs, ClassStructureBuilder<?> classBuilder, MetaMethod m) {
     List<Parameter> wrapperDefParms = new ArrayList<Parameter>();
@@ -464,6 +537,8 @@ public class GenUtil {
               .finish();
     }
     else {
+      String cachedMethod = initCachedMethod(classBuilder, m);
+
       Object[] args = new Object[methodDefParms.size()];
 
       int i = 0;
@@ -478,13 +553,8 @@ public class GenUtil {
               .body();
 
       BlockBuilder<CatchBlockBuilder> tryBuilder = Stmt.try_();
-      tryBuilder.append(Stmt.declareVariable("method",
-              Stmt.load(m.getDeclaringClass().asClass()).invoke("getDeclaredMethod", m.getName(),
-                      MetaClassFactory.asClassArray(m.getParameters()))))
 
-              .append(Stmt.loadVariable("method").invoke("setAccessible", true));
-
-      ContextualStatementBuilder statementBuilder = Stmt.loadVariable("method")
+      ContextualStatementBuilder statementBuilder = Stmt.loadVariable(cachedMethod)
               .invoke("invoke", Refs.get("instance"), args);
 
       if (m.getReturnType().isVoid()) {
