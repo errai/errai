@@ -19,6 +19,7 @@ package org.jboss.errai.common.metadata;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -50,6 +51,7 @@ public class MetaDataScannerTest {
 
     ClassLoader loader = URLClassLoader.newInstance(new URL[] { testJarURL }, getClass().getClassLoader());
     List<URL> urls = MetaDataScanner.getConfigUrls(loader);
+    assertFalse("No URLs returned", urls.isEmpty());
     String[] segments = urls.get(0).getPath().split("/");
     
     assertTrue("No path segments found in URL", segments.length > 0);

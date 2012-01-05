@@ -52,8 +52,8 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 
 /**
- * Scans component meta data. The scanner creates a {@link DeploymentContext} that identifies nested
- * subdeployments (i.e. WAR inside EAR) and processes the resulting archive Url's using the <a
+ * Scans component meta data. The scanner creates a {@link DeploymentContext} that identifies nested subdeployments
+ * (i.e. WAR inside EAR) and processes the resulting archive Url's using the <a
  * href="http://code.google.com/p/reflections/">Reflections</a> library.
  * <p/>
  * <p/>
@@ -262,9 +262,9 @@ public class MetaDataScanner extends Reflections {
         String urlString = configTargets.nextElement().toExternalForm();
         urlString = urlString.substring(0, urlString.indexOf(ERRAI_CONFIG_STUB_NAME));
 
-        // The URLs returned by the classloader are UTF-8 encoded. The URLDecoder assumes
-        // a HTML form encoded string, which is why we escape the plus symbols here. Otherwise,
-        // they would be decoded into space characters.
+        // URLs returned by the classloader are UTF-8 encoded. The URLDecoder assumes
+        // a HTML form encoded String, which is why we escape the plus symbols here. 
+        // Otherwise, they would be decoded into space characters.
         // The pound character still must not appear anywhere in the path!
         urls.add(new URL(URLDecoder.decode(urlString.replaceAll("\\+", "%2b"), "UTF-8")));
       }
