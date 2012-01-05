@@ -174,8 +174,8 @@
           <artifactId>errai-bus</artifactId>
           <version>${errai.version}</version>
         </dependency>
-        
-         <dependency>
+
+        <dependency>
           <groupId>org.jboss.errai</groupId>
           <artifactId>errai-common</artifactId>
           <version>${errai.version}</version>
