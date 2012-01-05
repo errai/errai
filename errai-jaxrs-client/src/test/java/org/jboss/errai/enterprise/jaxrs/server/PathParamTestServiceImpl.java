@@ -35,12 +35,7 @@ public class PathParamTestServiceImpl implements PathParamTestService {
 
   @Override
   public String getWithStringPathParam(String id) {
-    try {
-      return URLDecoder.decode(id, "UTF-8");
-    }
-    catch (UnsupportedEncodingException e) {
-      return e.toString();
-    }
+    return id;
   }
   
   @Override

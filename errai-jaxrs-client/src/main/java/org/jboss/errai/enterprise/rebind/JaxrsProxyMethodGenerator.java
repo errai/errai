@@ -123,6 +123,15 @@ public class JaxrsProxyMethodGenerator {
       methodBlock.append(urlBuilder);
   }
 
+  private void generateRequestBuilder() {
+    Statement requestBuilder =
+        Stmt.declareVariable("requestBuilder", RequestBuilder.class,
+            Stmt.newObject(RequestBuilder.class)
+                .withParameters(resourceMethod.getHttpMethod(), Stmt.loadVariable("url").invoke("toString")));
+
+    methodBlock.append(requestBuilder);
+  }
+  
   private void generateHeaders() {
     JaxrsResourceMethodParameters params = resourceMethod.getParameters();
 
@@ -163,17 +172,6 @@ public class JaxrsProxyMethodGenerator {
         methodBlock.append(setCookie);
       }
     }
-  }
-
-  private void generateRequestBuilder() {
-    Statement urlEncoder = Stmt.invokeStatic(URL.class, "encode", Stmt.loadVariable("url").invoke("toString"));
-
-    Statement requestBuilder =
-        Stmt.declareVariable("requestBuilder", RequestBuilder.class,
-            Stmt.newObject(RequestBuilder.class)
-                .withParameters(resourceMethod.getHttpMethod(), urlEncoder));
-
-    methodBlock.append(requestBuilder);
   }
 
   private void generateRequest() {

@@ -35,12 +35,13 @@ public class QueryParamTestServiceImpl implements QueryParamTestService {
 
   @Override
   public String getWithStringQueryParam(String id) {
-    try {
+   /* try {
       return URLDecoder.decode(id, "UTF-8");
     }
     catch (UnsupportedEncodingException e) {
       return e.toString();
-    }
+    }*/
+    return id;
   }
   
   @Override
