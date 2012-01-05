@@ -265,6 +265,15 @@
                             <name>log4j.output.dir</name>
                             <value>${project.build.directory}</value>
                         </property>
+
+                        <!--
+                        Do not accidently package server test marshallers when building Errai
+                        -->
+                        <property>
+                            <name>errai.marshalling.server.classOutput.enabled</name>
+                            <value>false</value>
+                        </property>
+
                     </systemProperties>
                 </configuration>
             </plugin>
