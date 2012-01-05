@@ -39,8 +39,6 @@ import org.jboss.errai.codegen.framework.meta.MetaField;
 import org.jboss.errai.codegen.framework.meta.impl.gwt.GWTClass;
 import org.jboss.errai.codegen.framework.util.GenUtil;
 
-import com.google.gwt.core.ext.typeinfo.JClassType;
-
 /**
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -90,10 +88,6 @@ public class ObjectBuilder extends AbstractStatementBuilder {
     return newInstanceOf(MetaClassFactory.get(type));
   }
 
-  public static ObjectBuilder newInstanceOf(JClassType type) {
-    return newInstanceOf(GWTClass.newInstance(type));
-  }
-
   public static ObjectBuilder newInstanceOf(MetaClass type, Context context) {
     return new ObjectBuilder(type, context);
   }
@@ -106,9 +100,6 @@ public class ObjectBuilder extends AbstractStatementBuilder {
     return newInstanceOf(MetaClassFactory.get(type), context);
   }
 
-  public static ObjectBuilder newInstanceOf(JClassType type, Context context) {
-    return newInstanceOf(GWTClass.newInstance(type), context);
-  }
 
   public static ObjectBuilder newInstanceOf(MetaClass type, Context context, CallElementBuilder callElementBuilder) {
     return new ObjectBuilder(type, context, callElementBuilder);
@@ -122,9 +113,6 @@ public class ObjectBuilder extends AbstractStatementBuilder {
     return newInstanceOf(MetaClassFactory.get(type), context, callElementBuilder);
   }
 
-  public static ObjectBuilder newInstanceOf(JClassType type, Context context, CallElementBuilder callElementBuilder) {
-    return newInstanceOf(GWTClass.newInstance(type), context, callElementBuilder);
-  }
 
   public StatementEnd withParameters(Object... parameters) {
     this.parameters = parameters;

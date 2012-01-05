@@ -15,43 +15,43 @@
   -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<name>Errai::Bus</name>
-	<groupId>org.jboss.errai</groupId>
-	<artifactId>errai-bus</artifactId>
-	<version>2.0-SNAPSHOT</version>
-	<packaging>jar</packaging>
-	<description>Errai Bus</description>
-	<url>http://www.jboss.org/errai/erraibus</url>
-	<licenses>
-		<license>
-			<name>The Apache Software License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-			<distribution>repo</distribution>
-		</license>
-	</licenses>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <name>Errai::Bus</name>
+    <groupId>org.jboss.errai</groupId>
+    <artifactId>errai-bus</artifactId>
+    <version>2.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <description>Errai Bus</description>
+    <url>http://www.jboss.org/errai/erraibus</url>
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
-	<!-- Parent -->
-	<parent>
-		<groupId>org.jboss.errai</groupId>
-		<artifactId>errai-parent</artifactId>
-		<version>2.0-SNAPSHOT</version>
-		<relativePath>../pom.xml</relativePath>
-	</parent>
+    <!-- Parent -->
+    <parent>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-parent</artifactId>
+        <version>2.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.jboss.errai</groupId>
-			<artifactId>errai-common</artifactId>
-			<version>${project.parent.version}</version>
-		</dependency>
+    <dependencies>
+        <dependency>
+            <groupId>org.jboss.errai</groupId>
+            <artifactId>errai-common</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
 
-		<dependency>
-			<groupId>org.jboss.errai</groupId>
-			<artifactId>errai-marshalling</artifactId>
-			<version>${project.parent.version}</version>
-		</dependency>
+        <dependency>
+            <groupId>org.jboss.errai</groupId>
+            <artifactId>errai-marshalling</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.jboss.spec.javax.servlet</groupId>
@@ -59,153 +59,153 @@
             <version>1.0.0.Final</version>
             <scope>provided</scope>
         </dependency>
-        
-		<dependency>
-			<groupId>com.google.gwt</groupId>
-			<artifactId>gwt-user</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.google.gwt</groupId>
-			<artifactId>gwt-dev</artifactId>
-			<!-- This should not be packaged with the Errai Distro. There are no runtime 
-				dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
-			<scope>provided</scope>
-		</dependency>
 
-		<dependency>
-			<groupId>org.msgpack</groupId>
-			<artifactId>msgpack</artifactId>
-			<version>0.5.1-devel</version>
-		</dependency>
+        <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-user</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-dev</artifactId>
+            <!-- This should not be packaged with the Errai Distro. There are no runtime
+                      dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
+            <scope>provided</scope>
+        </dependency>
 
-		<dependency>
-			<groupId>javax.validation</groupId>
-			<artifactId>validation-api</artifactId>
-			<version>${validation.api.version}</version>
-		</dependency>
+        <dependency>
+            <groupId>org.msgpack</groupId>
+            <artifactId>msgpack</artifactId>
+            <version>0.5.1-devel</version>
+        </dependency>
 
-		<dependency>
-			<groupId>javax.validation</groupId>
-			<artifactId>validation-api</artifactId>
-			<version>${validation.api.version}</version>
-			<classifier>sources</classifier>
-		</dependency>
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+            <version>${validation.api.version}</version>
+        </dependency>
 
-		<dependency>
-			<groupId>com.google.inject</groupId>
-			<artifactId>guice</artifactId>
-		</dependency>
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+            <version>${validation.api.version}</version>
+            <classifier>sources</classifier>
+        </dependency>
 
-		<dependency>
-			<groupId>javax.inject</groupId>
-			<artifactId>javax.inject</artifactId>
-			<version>1</version>
-		</dependency>
+        <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+        </dependency>
 
-		<dependency>
-			<groupId>org.mvel</groupId>
-			<artifactId>mvel2</artifactId>
-		</dependency>
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+            <version>1</version>
+        </dependency>
 
-		<dependency>
-			<groupId>com.google.code.guice</groupId>
-			<artifactId>guice-servlet</artifactId>
-			<version>2.0</version>
-			<!--<scope>provided</scope> -->
-		</dependency>
+        <dependency>
+            <groupId>org.mvel</groupId>
+            <artifactId>mvel2</artifactId>
+        </dependency>
 
-
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.5.10</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.5.10</version>
-		</dependency>
+        <dependency>
+            <groupId>com.google.code.guice</groupId>
+            <artifactId>guice-servlet</artifactId>
+            <version>2.0</version>
+            <!--<scope>provided</scope> -->
+        </dependency>
 
 
-		<!-- Appserver implementation dependencies -->
-		<dependency>
-			<groupId>org.mortbay.jetty</groupId>
-			<artifactId>jetty</artifactId>
-			<scope>provided</scope>
-			<version>6.1.9</version>
-		</dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.5.10</version>
+        </dependency>
 
-		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>catalina</artifactId>
-			<scope>provided</scope>
-			<version>6.0.20</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.sun.grizzly</groupId>
-			<artifactId>grizzly-comet</artifactId>
-			<scope>provided</scope>
-			<version>1.9.19-beta2</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.sun.grizzly</groupId>
-			<artifactId>grizzly-nio-framework</artifactId>
-			<scope>provided</scope>
-			<version>1.9.19-beta2</version>
-		</dependency>
-
-		<dependency>
-			<groupId>jboss.web</groupId>
-			<artifactId>jbossweb</artifactId>
-			<scope>provided</scope>
-			<version>2.1.6.GA</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.jboss</groupId>
-			<artifactId>jboss-vfs</artifactId>
-			<version>3.0.1.GA</version>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.8.1</version>
-		</dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.5.10</version>
+        </dependency>
 
 
-		<!-- GAE -->
-		<dependency>
-			<groupId>com.google.appengine</groupId>
-			<artifactId>appengine-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
+        <!-- Appserver implementation dependencies -->
+        <dependency>
+            <groupId>org.mortbay.jetty</groupId>
+            <artifactId>jetty</artifactId>
+            <scope>provided</scope>
+            <version>6.1.9</version>
+        </dependency>
 
-		<dependency>
-			<groupId>com.google.appengine</groupId>
-			<artifactId>appengine-api-labs</artifactId>
-			<scope>provided</scope>
-		</dependency>
+        <dependency>
+            <groupId>org.apache.tomcat</groupId>
+            <artifactId>catalina</artifactId>
+            <scope>provided</scope>
+            <version>6.0.20</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.sun.grizzly</groupId>
+            <artifactId>grizzly-comet</artifactId>
+            <scope>provided</scope>
+            <version>1.9.19-beta2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.sun.grizzly</groupId>
+            <artifactId>grizzly-nio-framework</artifactId>
+            <scope>provided</scope>
+            <version>1.9.19-beta2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>jboss.web</groupId>
+            <artifactId>jbossweb</artifactId>
+            <scope>provided</scope>
+            <version>2.1.6.GA</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.jboss</groupId>
+            <artifactId>jboss-vfs</artifactId>
+            <version>3.0.1.GA</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.8.1</version>
+        </dependency>
 
 
-		<dependency>
-			<groupId>javassist</groupId>
-			<artifactId>javassist</artifactId>
-			<version>3.12.1.GA</version>
-		</dependency>
+        <!-- GAE -->
+        <dependency>
+            <groupId>com.google.appengine</groupId>
+            <artifactId>appengine-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.appengine</groupId>
+            <artifactId>appengine-api-labs</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
 
-		<dependency>
-			<groupId>javax.persistence</groupId>
-			<artifactId>persistence-api</artifactId>
-			<version>1.0</version>
-			<scope>test</scope>
-		</dependency>
+        <dependency>
+            <groupId>javassist</groupId>
+            <artifactId>javassist</artifactId>
+            <version>3.12.1.GA</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>javax.persistence</groupId>
+            <artifactId>persistence-api</artifactId>
+            <version>1.0</version>
+            <scope>test</scope>
+        </dependency>
 
 
         <!-- Netty for WebSockets Support -->
@@ -214,63 +214,74 @@
             <groupId>io.netty</groupId>
             <artifactId>netty</artifactId>
             <version>4.0.0.Alpha1-SNAPSHOT</version>
-          </dependency>
+        </dependency>
 
-	</dependencies>
+    </dependencies>
 
 
-	<profiles>
-		<profile>
-			<id>enableTests</id>
-			<build>
-				<plugins>
-					<plugin>
-						<artifactId>maven-surefire-plugin</artifactId>
-						<configuration>
-							<skipTests>false</skipTests>
-							<forkMode>always</forkMode>
-							<argLine>-Xmx2048m ${argLine}</argLine>
+    <profiles>
+        <profile>
+            <id>enableTests</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <skipTests>false</skipTests>
+                            <forkMode>always</forkMode>
+                            <argLine>-Xmx2048m ${argLine}</argLine>
 
-							<additionalClasspathElements>
-								<additionalClasspathElement>${basedir}/test-classes/</additionalClasspathElement>
-								<additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
-							</additionalClasspathElements>
-							<useSystemClassLoader>false</useSystemClassLoader>
+                            <additionalClasspathElements>
+                                <additionalClasspathElement>${basedir}/target/classes/</additionalClasspathElement>
+                                <additionalClasspathElement>${basedir}/test-classes/</additionalClasspathElement>
+                                <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
+                            </additionalClasspathElements>
+                            <useSystemClassLoader>false</useSystemClassLoader>
+                            <useManifestOnlyJar>true</useManifestOnlyJar>
 
-							<systemProperties>
-								<property>
-									<name>java.io.tmpdir</name>
-									<value>${project.build.directory}</value>
-								</property>
-								<property>
-									<name>log4j.output.dir</name>
-									<value>${project.build.directory}</value>
-								</property>
+                            <systemProperties>
+                                <property>
+                                    <name>java.io.tmpdir</name>
+                                    <value>${project.build.directory}</value>
+                                </property>
+                                <property>
+                                    <name>log4j.output.dir</name>
+                                    <value>${project.build.directory}</value>
+                                </property>
 
-								<!-- Must disable long polling for automated tests to succeed -->
-								<property>
-									<name>org.jboss.errai.bus.do_long_poll</name>
-									<value>false</value>
-								</property>
-								
-								<!-- Disable caching of generated code -->
-								<property>
+                                <!--
+                                Do not accidently package server test marshallers when building Errai
+                                -->
+                                <property>
+                                    <name>errai.marshalling.server.classOutput.enabled</name>
+                                    <value>false</value>
+                                </property>
+
+
+                                <!-- Must disable long polling for automated tests to succeed -->
+                                <property>
+                                    <name>org.jboss.errai.bus.do_long_poll</name>
+                                    <value>false</value>
+                                </property>
+
+                                <!-- Disable caching of generated code -->
+                                <property>
                                     <name>errai.devel.nocache</name>
                                     <value>true</value>
                                 </property>
-							</systemProperties>
+                            </systemProperties>
 
-							<includes>
-								<include>**/*Test.java</include>
-								<include>**/*Tests.java</include>
-							</includes>
-							<excludes>
-								<exclude>**/ErraiBusTests.java</exclude>
-							</excludes>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
+                            <includes>
+                                <include>**/*Test.java</include>
+                                <include>**/*Tests.java</include>
+                            </includes>
+                            <excludes>
+                                <exclude>**/ErraiBusTests.java</exclude>
+                            </excludes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

@@ -18,7 +18,6 @@ package org.jboss.errai.codegen.framework.builder.impl;
 
 import javax.enterprise.util.TypeLiteral;
 
-import com.google.gwt.core.ext.typeinfo.JClassType;
 import org.jboss.errai.codegen.framework.BooleanExpression;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Statement;
@@ -202,10 +201,6 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
     }
     else if (o instanceof Class) {
       c = MetaClassFactory.get((Class) o);
-    }
-    else if (o instanceof JClassType) {
-      c = GWTClass.newUncachedInstance((JClassType) o);
-   //   c = MetaClassFactory.get((JClassType) o);
     }
     else {
       throw new RuntimeException("unknown class reference type: " + (o == null ? "null" : o.getClass().getName()));

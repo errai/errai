@@ -22,13 +22,33 @@ import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.marshalling.server.util.ServerMarshallUtil;
 
+import java.io.File;
 import java.io.PrintWriter;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class MarshallersGenerator extends Generator {
+  public static final String SERVER_MARSHALLER_PACKAGE_NAME = "org.jboss.errai.marshalling.server.impl";
+  public static final String SERVER_MARSHALLER_CLASS_NAME = "ServerMarshallingFactoryImpl";
+  private static final String SERVER_MARSHALLER_OUTPUT_DIR_PROP = "errai.marshalling.server.classOutput";
+  private static final String SERVER_MARSHALLER_OUTPUT_ENABLED_PROP = "errai.marshalling.server.classOutput.enabled";
+
+  private static final String SERVER_MARSHALLER_OUTPUT_DIR =
+          System.getProperty(SERVER_MARSHALLER_OUTPUT_DIR_PROP) != null ?
+                  System.getProperty(SERVER_MARSHALLER_OUTPUT_DIR_PROP) :
+                  null;
+
+  private static final boolean SERVER_MARSHALLER_OUTPUT_ENABLED =
+          System.getProperty(SERVER_MARSHALLER_OUTPUT_ENABLED_PROP) == null
+                  || Boolean.getBoolean(SERVER_MARSHALLER_OUTPUT_ENABLED_PROP);
+
+  private static final String[] candidateOutputDirectories = 
+          {"target/classes/", "war/WEB-INF/classes/", "web/WEB-INF/classes/", "target/war/WEB-INF/classes/"};
+  
   /**
    * Simple name of class to be generated
    */
@@ -73,6 +93,39 @@ public class MarshallersGenerator extends Generator {
   }
 
   private String _generate() {
+    if (SERVER_MARSHALLER_OUTPUT_ENABLED) {
+      String serverSideClass = MarshallerGeneratorFactory.getFor(MarshallerOuputTarget.Java)
+              .generate(SERVER_MARSHALLER_PACKAGE_NAME, SERVER_MARSHALLER_CLASS_NAME);
+
+      if (SERVER_MARSHALLER_OUTPUT_DIR != null) {
+        generateServerMarshallers(SERVER_MARSHALLER_OUTPUT_DIR, serverSideClass);  
+      }
+      else {
+        File outputDirCdt;
+        for (String candidate : candidateOutputDirectories) {
+          outputDirCdt = new File(candidate);
+          if (outputDirCdt.exists()) {
+            generateServerMarshallers(outputDirCdt.getAbsolutePath(), serverSideClass);
+            System.out.println("** deposited marshaller class in : " + outputDirCdt.getAbsolutePath());
+          }
+        }
+      }
+    }
+
+
     return MarshallerGeneratorFactory.getFor(MarshallerOuputTarget.GWT).generate(packageName, className);
+  }
+  
+  private void generateServerMarshallers(String dir, String serverSideClass) {
+    File outputDir = new File(dir + File.separator +
+            RebindUtils.packageNameToDirName(SERVER_MARSHALLER_PACKAGE_NAME) + File.separator);
+    outputDir.mkdirs();
+
+    File sourceFile = new File(outputDir.getAbsolutePath() + File.separator + SERVER_MARSHALLER_CLASS_NAME + ".java");
+
+    RebindUtils.writeStringToFile(sourceFile,
+            serverSideClass);
+
+    ServerMarshallUtil.compileClass(sourceFile.getAbsolutePath(), SERVER_MARSHALLER_PACKAGE_NAME, SERVER_MARSHALLER_CLASS_NAME);
   }
 }

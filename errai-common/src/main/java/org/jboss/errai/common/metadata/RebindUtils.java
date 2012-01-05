@@ -221,6 +221,19 @@ public class RebindUtils {
 
     return buf.toString();
   }
+  
+  public static String packageNameToDirName(String pkg) {
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < pkg.length(); i++) {
+      if (pkg.charAt(i) == '.') {
+        sb.append(File.separator);
+      }
+      else {
+        sb.append(pkg.charAt(i));
+      }
+    }
+    return sb.toString();
+  }
 
   private interface FileVisitor {
     public void visit(File f);

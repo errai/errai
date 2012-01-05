@@ -344,13 +344,14 @@ public class JSONStreamDecoder {
 
   private static abstract class Context<T> {
     abstract T record();
+
     abstract void addValue(Object val);
   }
-  
+
   private static class OuterContext extends Context<Object> {
     private Context _wrapped;
     private Object col;
-    
+
     @Override
     Object record() {
       return col;
