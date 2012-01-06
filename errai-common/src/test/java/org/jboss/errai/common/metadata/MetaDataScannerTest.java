@@ -42,7 +42,7 @@ public class MetaDataScannerTest {
   
   @Test
   public void testJarUrlDecodingWithSpecialCharacters() throws Exception {
-    testJarUrlDecoding("testjar-\u00e4\u00f6\u00e9\u00f8 +abc!@$%^&*()_+}{.jar");
+    testJarUrlDecoding("testjar-\u00e4\u00f6\u00e9\u00f8 +abc!@$%^&()_+}{.jar");
   }
    
   private void testJarUrlDecoding(String jarFileName) {
