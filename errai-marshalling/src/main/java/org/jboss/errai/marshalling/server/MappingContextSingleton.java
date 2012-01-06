@@ -72,35 +72,6 @@ public class MappingContextSingleton {
       {
         loadMarshallers();
 
-//        for (Class<?> cls : factory.getExposedClasses()) {
-//          MappingDefinition def = factory.getDefinition(cls);
-//
-//          for (Mapping m : def.getInstantiationMapping().getMappings()) {
-//            if (m.getTargetType().isArray() && !factory.hasDefinition(m.getTargetType())) {
-//              MappingDefinition arrayMappingDefinition = new MappingDefinition(m.getTargetType());
-//              arrayMappingDefinition.setMarshallerInstance(
-//                      qualifyMarshaller(new DefaultArrayMarshaller(m.getTargetType(),
-//                              factory.getDefinition(m.getTargetType().getOuterComponentType()).getMarshallerInstance()))
-//              );
-//
-//              factory.addDefinition(arrayMappingDefinition);
-//            }
-//          }
-//
-//          for (Mapping m : def.getMemberMappings()) {
-//            if (m.getTargetType().isArray() && !factory.hasDefinition(m.getTargetType())) {
-//              MappingDefinition arrayMappingDefinition = new MappingDefinition(m.getTargetType());
-//              arrayMappingDefinition.setMarshallerInstance(
-//                      qualifyMarshaller(new DefaultArrayMarshaller(m.getTargetType(),
-//                              factory.getDefinition(m.getTargetType().getOuterComponentType().asBoxed())
-//                                      .getMarshallerInstance()))
-//              );
-//
-//              factory.addDefinition(arrayMappingDefinition);
-//            }
-//          }
-//        }
-
         MarshallingSessionProviderFactory.setMarshallingSessionProvider(new MarshallingSessionProvider() {
           @Override
           public MarshallingSession getEncoding() {

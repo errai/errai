@@ -41,13 +41,6 @@ public interface ClientMessageBus extends MessageBus {
    */
   public Map<String, List<Object>> getCapturedRegistrations();
 
-  /**
-   * Unregister all registrations in the specified Map.<p/>  It accepts a Map format returned from
-   * {@link #getCapturedRegistrations()}.  See the documentation for that method for more information.
-   *
-   * @param all A map of registrations to deregister.
-   */
-  public void unregisterAll(Map<String, List<Object>> all);
 
   /**
    * Mark the beginning of a new capture context.<p/>  From the point this message is called forward, all

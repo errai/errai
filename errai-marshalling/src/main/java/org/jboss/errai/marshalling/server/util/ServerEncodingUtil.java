@@ -20,6 +20,8 @@ import org.jboss.errai.marshalling.server.EncodingSession;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Mike Brock
@@ -42,5 +44,4 @@ public class ServerEncodingUtil {
       stream.write(s);
     }
   }
-
 }

@@ -29,6 +29,7 @@ import com.google.gwt.user.client.ui.*;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.*;
 import org.jboss.errai.bus.client.api.base.*;
+import org.jboss.errai.bus.client.json.JSONUtilCli;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
@@ -74,7 +75,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private RequestCallback receiveCommCallback = new NoPollRequestCallback();
 
   /* Map of subjects to subscriptions  */
-  private Map<String, List<Object>> subscriptions;
+//  private Map<String, List<Object>> subscriptions;
 
   private Map<String, List<MessageCallback>> shadowSubscriptions =
           new HashMap<String, List<MessageCallback>>();
@@ -186,20 +187,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * @param subject - the subject to have all it's subscriptions removed
    */
   public void unsubscribeAll(String subject) {
-    if (subscriptions.containsKey(subject)) {
-      for (Object o : subscriptions.get(subject)) {
-        if (o instanceof MessageCallback) {
-          continue;
-        }
-
-        _unsubscribe(o);
-      }
-
       fireAllUnSubscribeListeners(subject);
-
-      subscriptions.remove(subject);
-      remoteShadowSubscription(subject);
-    }
+      removeShadowSubscription(subject);
   }
 
   /**
@@ -209,7 +198,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * @param callback - function called when the message is dispatched
    */
   public void subscribe(final String subject, final MessageCallback callback) {
-    addShadowSubscription(subject, callback);
     _subscribe(subject, callback, false);
   }
 
@@ -218,7 +206,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private void _subscribe(final String subject, final MessageCallback callback, final boolean local) {
-    if ("ServerBus".equals(subject) && subscriptions.containsKey("ServerBus")) return;
+    if ("ServerBus".equals(subject) && shadowSubscriptions.containsKey("ServerBus")) return;
 
     if (!postInit) {
       postInitTasks.add(new Runnable() {
@@ -237,7 +225,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private boolean directSubscribe(final String subject, final MessageCallback callback) {
     boolean isNew = !isSubscribed(subject);
 
-    addSubscription(subject, _subscribe(subject, new MessageCallback() {
+    addShadowSubscription(subject, new MessageCallback() {
       public void callback(Message message) {
         try {
           executeInterceptorStack(true, message);
@@ -247,7 +235,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           logError("receiver '" + subject + "' threw an exception", decodeCommandMessage(message), e);
         }
       }
-    }, null));
+    });
 
     return isNew;
   }
@@ -353,7 +341,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           deferredMessages.add(message);
         }
         else {
-          if (!subscriptions.containsKey(message.getSubject())) {
+          if (!hasListeners(message.getSubject())) {
             throw new NoSubscribersToDeliverTo(message.getSubject());
           }
 
@@ -371,6 +359,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   }
 
+  private boolean hasListeners(String subject) {
+    return shadowSubscriptions.containsKey(subject) || remotes.containsKey(subject);
+  }
+
   private void callErrorHandler(final Message message, final Throwable t) {
     if (message.getErrorCallback() != null) {
       message.getErrorCallback().error(message, t);
@@ -381,9 +373,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private void directStore(final Message message) {
     String subject = message.getSubject();
 
-    Object v = (message instanceof HasEncoded
-            ? ((HasEncoded) message).getEncoded() : encodePayload(message.getParts()));
-
     if (remotes.containsKey(subject)) {
       remotes.get(subject).callback(message);
     }
@@ -391,7 +380,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       deliverToShadowSubscriptions(subject, message);
     }
     else {
-      _store(subject, v);
+      throw new NoSubscribersToDeliverTo(subject);
     }
   }
 
@@ -406,26 +395,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     transmitRemote(encodePayload(message.getParts()), message);
   }
 
-  private void addSubscription(String subject, Object reference) {
-
-
-    if (!subscriptions.containsKey(subject)) {
-      subscriptions.put(subject, new ArrayList<Object>());
-    }
-
-    if (registeredInThisSession != null && !registeredInThisSession.containsKey(subject)) {
-      registeredInThisSession.put(subject, new ArrayList<Object>());
-    }
-
-    subscriptions.get(subject).add(reference);
-    if (registeredInThisSession != null) registeredInThisSession.get(subject).add(reference);
-
-    log("subscribed to topic: " + subject);
-  }
-
   private void addShadowSubscription(String subject, MessageCallback reference) {
-    if ("ClientBus".equals(subject)) return;
-
     if (!shadowSubscriptions.containsKey(subject)) {
       shadowSubscriptions.put(subject, new ArrayList<MessageCallback>());
     }
@@ -435,7 +405,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   }
 
-  private void remoteShadowSubscription(String subject) {
+  private void removeShadowSubscription(String subject) {
     shadowSubscriptions.remove(subject);
   }
 
@@ -460,7 +430,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * @return true if the subject is already subscribed
    */
   public boolean isSubscribed(String subject) {
-    return subscriptions.containsKey(subject);
+    return shadowSubscriptions.containsKey(subject);
   }
 
   /**
@@ -490,24 +460,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     registeredInThisSession = null;
   }
 
-  /**
-   * Unregister all registrations in the specified Map.<p/>  It accepts a Map format returned from
-   * {@link #getCapturedRegistrations()}.
-   *
-   * @param all A map of registrations to deregister.
-   */
-  public void unregisterAll(Map<String, List<Object>> all) {
-    for (Map.Entry<String, List<Object>> entry : all.entrySet()) {
-      for (Object o : entry.getValue()) {
-        subscriptions.get(entry.getKey()).remove(o);
-        _unsubscribe(o);
-      }
-
-      if (subscriptions.get(entry.getKey()).isEmpty()) {
-        fireAllUnSubscribeListeners(entry.getKey());
-      }
-    }
-  }
 
   /**
    * Transmits JSON string containing message, using the <tt>sendBuilder</tt>
@@ -652,15 +604,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
 
       unsubscribeAll("ClientBus");
-
-      for (Map.Entry<String, List<Object>> entry : subscriptions.entrySet()) {
-        for (Object o : entry.getValue()) {
-          if (o instanceof MessageCallback) {
-            continue;
-          }
-          _unsubscribe(o);
-        }
-      }
+      shadowSubscriptions.clear();
     }
     finally {
       this.remotes.clear();
@@ -690,7 +634,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     onSubscribeHooks = new ArrayList<SubscribeListener>();
     onUnsubscribeHooks = new ArrayList<UnsubscribeListener>();
-    subscriptions = new HashMap<String, List<Object>>();
+    //subscriptions = new HashMap<String, List<Object>>();
     remotes = new HashMap<String, MessageCallback>();
   }
 
@@ -754,6 +698,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       listener.onInitilization();
     }
 
+    remoteSubscribe("ServerEchoService");
     directSubscribe("ClientBus", new MessageCallback() {
       @SuppressWarnings({"unchecked"})
       public void callback(final Message message) {
@@ -824,7 +769,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             log("received FinishStateSync message. preparing to bring up the federation");
 
             List<String> subjects = new ArrayList<String>();
-            for (String s : subscriptions.keySet()) {
+            for (String s : shadowSubscriptions.keySet()) {
               if (s.startsWith("local:")) continue;
               if (!remotes.containsKey(s)) subjects.add(s);
             }
@@ -968,7 +913,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private void remoteSubscribe(String subject) {
     remotes.put(subject, remoteCallback);
-    addSubscription(subject, remoteCallback);
+  //  addShadowSubscription(subject, remoteCallback);
   }
 
   private void sendAllDeferred() {
@@ -1273,12 +1218,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   public void procPayload(String text) {
-    //   System.out.println("RX: " + text);
 
     try {
       for (MarshalledMessage m : decodePayload(text)) {
         rxNumber++;
-        _store(m.getSubject(), m.getMessage());
+        _store(m.getSubject(), JSONUtilCli.decodeCommandMessage(m.getMessage()));
       }
     }
     catch (RuntimeException e) {
@@ -1318,22 +1262,30 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     interceptorStack.add(interceptor);
   }
 
-  private native static void _unsubscribe(Object registrationHandle) /*-{
-    $wnd.PageBus.unsubscribe(registrationHandle);
-  }-*/;
+  public void _store(String subject, Message msg) {
+    if (shadowSubscriptions.containsKey(subject)) {
+      for (MessageCallback cb : shadowSubscriptions.get(subject)) {
+        cb.callback(msg);
+      }
+    }
+  }
 
-  private native static Object _subscribe(String subject, MessageCallback callback,
-                                          Object subscriberData) /*-{
-    return $wnd.PageBus.subscribe(subject, null,
-            function (subject, message) {
-              callback.@org.jboss.errai.bus.client.api.MessageCallback::callback(Lorg/jboss/errai/bus/client/api/Message;)(@org.jboss.errai.bus.client.json.JSONUtilCli::decodeCommandMessage(Ljava/lang/Object;)(message))
-            },
-            null);
-  }-*/;
-
-  public native static void _store(String subject, Object value) /*-{
-    $wnd.PageBus.store(subject, value);
-  }-*/;
+//  private native static void _unsubscribe(Object registrationHandle) /*-{
+//    $wnd.PageBus.unsubscribe(registrationHandle);
+//  }-*/;
+//
+//  private native static Object _subscribe(String subject, MessageCallback callback,
+//                                          Object subscriberData) /*-{
+//    return $wnd.PageBus.subscribe(subject, null,
+//            function (subject, message) {
+//              callback.@org.jboss.errai.bus.client.api.MessageCallback::callback(Lorg/jboss/errai/bus/client/api/Message;)(@org.jboss.errai.bus.client.json.JSONUtilCli::decodeCommandMessage(Ljava/lang/Object;)(message))
+//            },
+//            null);
+//  }-*/;
+//
+//  public native static void _store(String subject, Object value) /*-{
+//    $wnd.PageBus.store(subject, value);
+//  }-*/;
 
 
   public int getNextRequestNumber() {

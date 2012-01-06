@@ -58,7 +58,7 @@ public abstract class ServerMarshallUtil {
 
     try {
       log.info("searching for marshaller class: " + packageName + "." + className);
-      
+
       return Thread.currentThread().getContextClassLoader().loadClass(packageName + "." + className)
               .asSubclass(MarshallerFactory.class);
 
@@ -76,11 +76,7 @@ public abstract class ServerMarshallUtil {
 
     File sourceFile = new File(directory.getAbsolutePath() + "/" + className + ".java");
 
-    String classBase = directory.getAbsolutePath() + "/" + className;
-
     try {
-      File outFile = new File(classBase + ".class");
-
       if (directory.exists()) {
         for (File file : directory.listFiles()) {
           file.delete();
@@ -171,17 +167,18 @@ public abstract class ServerMarshallUtil {
   public static Class loadClassDefinition(String path, String packageName, String className) throws IOException {
     FileInputStream inputStream = new FileInputStream(path);
     byte[] classDefinition = new byte[inputStream.available()];
-    
+
     String classBase = path.substring(0, path.length() - ".class".length());
-    
+
     inputStream.read(classDefinition);
 
     BootstrapClassloader clsLoader = new BootstrapClassloader("system".equals(classLoadingMode) ?
             ClassLoader.getSystemClassLoader() :
             Thread.currentThread().getContextClassLoader());
 
-    Class<? extends MarshallerFactory> mainClass = (Class<? extends MarshallerFactory>) clsLoader
-            .defineClassX(packageName + "." + className, classDefinition, 0, classDefinition.length);
+    Class<? extends MarshallerFactory> mainClass = clsLoader
+            .defineClassX(packageName + "." + className, classDefinition, 0, classDefinition.length)
+            .asSubclass(MarshallerFactory.class);
 
     inputStream.close();
 
@@ -204,7 +201,7 @@ public abstract class ServerMarshallUtil {
         break;
       }
     }
-    
+
     return mainClass;
   }
 
@@ -237,8 +234,6 @@ public abstract class ServerMarshallUtil {
             if (file != null) {
               cp.append(File.pathSeparator).append(file.getAbsolutePath());
             }
-
-//            }
           }
           catch (Exception e) {
             // Silently ignore wrong manifests on classpath?
