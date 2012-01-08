@@ -15,23 +15,19 @@
  */
 package org.jboss.errai.cdi.server.events;
 
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.enterprise.client.cdi.CDICommands;
+import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
+import org.jboss.errai.enterprise.client.cdi.api.CDI;
 
 import javax.enterprise.event.Reception;
 import javax.enterprise.event.TransactionPhase;
 import javax.enterprise.inject.spi.ObserverMethod;
-
-import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.client.framework.RoutingFlags;
-
-import org.jboss.errai.common.client.protocols.MessageParts;
-import org.jboss.errai.enterprise.client.cdi.CDICommands;
-import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
-import org.jboss.errai.enterprise.client.cdi.api.CDI;
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Filip Rogaczewski
@@ -40,15 +36,17 @@ import org.jboss.errai.enterprise.client.cdi.api.CDI;
  */
 public class EventObserverMethod implements ObserverMethod {
 
-  private Class<?> type;
-  private Annotation[] qualifiers;
-  private MessageBus bus;
-  private String subject;
+  protected final Class<?> type;
+  protected Annotation[] qualifiers;
+  protected Set<String> qualifierForWire;
+  protected MessageBus bus;
+  protected String subject;
 
   public EventObserverMethod(Class<?> type, MessageBus bus, Annotation... qualifiers) {
     this.type = type;
     this.bus = bus;
     this.qualifiers = qualifiers;
+    this.qualifierForWire = CDI.getQualifiersPart(qualifiers);
     this.subject = CDI.getSubjectNameByType(type);
   }
 
@@ -78,48 +76,21 @@ public class EventObserverMethod implements ObserverMethod {
   }
 
   public void notify(Object event) {
-    if (!type.isInstance(event))
-      return;
-
     EventConversationContext.Context ctx = EventConversationContext.get();
-    Set<String> qualifiersPart = CDI.getQualifiersPart(qualifiers);
-    
-    if (ctx != null && ctx.getEventObject() == event) {
-      return;
+    if (ctx != null) {
+      if (ctx.alreadyHandled(event)) return;
+      ctx.record(event);
     }
 
-    if (ctx != null && ctx.getSession() != null) {
-      try {
-        if (qualifiersPart != null && !qualifiersPart.isEmpty()) {
-          MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
-                  .with(MessageParts.SessionID.name(), ctx.getSession())
-                  .with(CDIProtocol.TYPE, type.getName()).with(CDIProtocol.QUALIFIERS, qualifiersPart)
-                  .with(CDIProtocol.OBJECT_REF, event)
-                  .flag(RoutingFlags.NonGlobalRouting).noErrorHandling().sendNowWith(bus);
-        }
-        else {
-          MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
-                  .with(MessageParts.SessionID.name(), ctx.getSession())
-                  .with(CDIProtocol.TYPE, type.getName()).with(CDIProtocol.OBJECT_REF, event)
-                  .flag(RoutingFlags.NonGlobalRouting).noErrorHandling()
-                  .sendNowWith(bus);
-        }
-      }
-      finally {
-        EventConversationContext.deactivate();
-      }
+    if (qualifierForWire != null && !qualifierForWire.isEmpty()) {
+      MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
+              .with(CDIProtocol.TYPE, type.getName()).with(CDIProtocol.OBJECT_REF, event)
+              .with(CDIProtocol.QUALIFIERS, qualifierForWire).noErrorHandling().sendNowWith(bus);
     }
     else {
-      if (qualifiersPart != null && !qualifiersPart.isEmpty()) {
-        MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
-                .with(CDIProtocol.TYPE, type.getName()).with(CDIProtocol.OBJECT_REF, event)
-                .with(CDIProtocol.QUALIFIERS, qualifiersPart).noErrorHandling().sendNowWith(bus);
-      }
-      else {
-        MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
-                .with(CDIProtocol.TYPE, type.getName()).with(CDIProtocol.OBJECT_REF, event).noErrorHandling()
-                .sendNowWith(bus);
-      }
+      MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
+              .with(CDIProtocol.TYPE, type.getName()).with(CDIProtocol.OBJECT_REF, event).noErrorHandling()
+              .sendNowWith(bus);
     }
   }
 }

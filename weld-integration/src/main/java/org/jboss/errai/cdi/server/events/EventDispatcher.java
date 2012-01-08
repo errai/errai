@@ -21,6 +21,7 @@ import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RoutingFlags;
 import org.jboss.errai.bus.client.protocols.BusCommands;
+import org.jboss.errai.bus.server.util.LocalContext;
 import org.jboss.errai.cdi.server.ScopeUtil;
 import org.jboss.errai.cdi.server.Util;
 import org.jboss.errai.cdi.server.events.EventConversationContext;
@@ -37,24 +38,19 @@ import java.util.*;
  * Includes marshalling/unmarshalling of event types.
  */
 public class EventDispatcher implements MessageCallback {
+  private static final String CDI_EVENT_CHANNEL_OPEN = "cdi.event.channel.open";
   private BeanManager beanManager;
-  private MessageBus bus;
-
-  private Map<Class<?>, Class<?>> conversationalEvents = new HashMap<Class<?>, Class<?>>();
-  private Set<Class<?>> conversationalServices = new HashSet<Class<?>>();
 
   private Set<String> observedEvents;
   private Map<String, Annotation> allQualifiers;
 
-  public EventDispatcher(BeanManager beanManager, MessageBus bus, Set<String> observedEvents,
+  public EventDispatcher(BeanManager beanManager, Set<String> observedEvents,
                          Map<String, Annotation> qualifiers) {
     this.beanManager = beanManager;
-    this.bus = bus;
     this.observedEvents = observedEvents;
     this.allQualifiers = qualifiers;
   }
 
-  // Invoked by Errai
   public void callback(final Message message) {
     try {
       ScopeUtil.associateRequestContext(message);
@@ -68,33 +64,39 @@ public class EventDispatcher implements MessageCallback {
 
       switch (CDICommands.valueOf(message.getCommandType())) {
         case CDIEvent:
-          String type = message.get(String.class, CDIProtocol.TYPE);
-          final Class clazz = Thread.currentThread().getContextClassLoader().loadClass(type);
-          final Object o = message.get(Object.class, CDIProtocol.OBJECT_REF);
-
-          if (conversationalServices.contains(clazz)) {
-            EventConversationContext.activate(o, Util.getSessionId(message));
+          if (!"1".equals(LocalContext.get(message).getAttribute(String.class, CDI_EVENT_CHANNEL_OPEN))
+                  || !observedEvents.contains(message.get(String.class, CDIProtocol.TYPE))) {
+            return;
           }
 
-          Set<String> qualifierNames = message.get(Set.class, CDIProtocol.QUALIFIERS);
-          List<Annotation> qualifiers = null;
-          if (qualifierNames != null) {
-            for (String qualifierName : qualifierNames) {
-              if (qualifiers == null) {
-                qualifiers = new ArrayList<Annotation>();
-              }
-              Annotation qualifier = allQualifiers.get(qualifierName);
-              if (qualifier != null) {
-                qualifiers.add(qualifier);
+          final Object o = message.get(Object.class, CDIProtocol.OBJECT_REF);
+          EventConversationContext.activate(o, Util.getSessionId(message));
+          try {
+
+            @SuppressWarnings("unchecked")
+            Set<String> qualifierNames = message.get(Set.class, CDIProtocol.QUALIFIERS);
+            List<Annotation> qualifiers = null;
+            if (qualifierNames != null) {
+              for (String qualifierName : qualifierNames) {
+                if (qualifiers == null) {
+                  qualifiers = new ArrayList<Annotation>();
+                }
+                Annotation qualifier = allQualifiers.get(qualifierName);
+                if (qualifier != null) {
+                  qualifiers.add(qualifier);
+                }
               }
             }
-          }
 
-          if (qualifiers != null) {
-            beanManager.fireEvent(o, qualifiers.toArray(new Annotation[qualifiers.size()]));
+            if (qualifiers != null) {
+              beanManager.fireEvent(o, qualifiers.toArray(new Annotation[qualifiers.size()]));
+            }
+            else {
+              beanManager.fireEvent(o);
+            }
           }
-          else {
-            beanManager.fireEvent(o);
+          finally {
+            EventConversationContext.deactivate();
           }
 
           break;
@@ -104,6 +106,8 @@ public class EventDispatcher implements MessageCallback {
                   .command(BusCommands.RemoteSubscribe)
                   .with(MessageParts.Value, observedEvents.toArray(new String[observedEvents.size()])).done().reply();
 
+          LocalContext.get(message).setAttribute(CDI_EVENT_CHANNEL_OPEN, "1");
+
           break;
         default:
           throw new IllegalArgumentException("Unknown command type " + message.getCommandType());
@@ -112,13 +116,5 @@ public class EventDispatcher implements MessageCallback {
     catch (Exception e) {
       throw new RuntimeException("Failed to dispatch CDI Event", e);
     }
-  }
-
-  public void registerConversationEvent(Class<?> clientEvent, Class<?> serverEvent) {
-    conversationalEvents.put(clientEvent, serverEvent);
-  }
-
-  public void registerConversationalService(Class<?> conversational) {
-    conversationalServices.add(conversational);
   }
 }

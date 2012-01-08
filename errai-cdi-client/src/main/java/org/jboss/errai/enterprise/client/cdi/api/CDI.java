@@ -32,6 +32,8 @@ import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.EventHandler;
 
+import javax.inject.Qualifier;
+
 /**
  * CDI client interface.
  *
@@ -76,6 +78,7 @@ public class CDI {
       for (Annotation qualifier : qualifiers) {
         if (qualifiersPart == null)
           qualifiersPart = new HashSet<String>();
+
         qualifiersPart.add(qualifier.annotationType().getName());
       }
     }
@@ -156,7 +159,7 @@ public class CDI {
   public static void removePostInitTasks() {
     postInitTasks.clear();
   }
-  
+
   public static void activate() {
     if (!active) {
       active = true;

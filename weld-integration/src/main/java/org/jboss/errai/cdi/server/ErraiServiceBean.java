@@ -40,12 +40,12 @@ import org.jboss.errai.bus.server.service.ErraiServiceImpl;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Sep 15, 2010
  */
-public class ServiceMetaData implements Bean {
+public class ErraiServiceBean implements Bean {
 
   final InjectionTarget it;
   final ErraiService delegate;
 
-  public ServiceMetaData(BeanManager bm, ErraiService delegate) {
+  public ErraiServiceBean(BeanManager bm, ErraiService delegate) {
 
     //use this to read annotations of the class
     AnnotatedType at = bm.createAnnotatedType(ErraiServiceImpl.class);

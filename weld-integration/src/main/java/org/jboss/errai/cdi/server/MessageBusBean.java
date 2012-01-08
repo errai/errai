@@ -42,12 +42,12 @@ import org.jboss.errai.bus.server.api.ServerMessageBus;
  * @author: Heiko Braun <hbraun@redhat.com>
  * @date: Sep 15, 2010
  */
-public class MessageBusMetaData implements Bean {
+public class MessageBusBean implements Bean {
 
   // final InjectionTarget it;
   final MessageBus delegate;
 
-  public MessageBusMetaData(BeanManager bm, MessageBus delegate) {
+  public MessageBusBean(BeanManager bm, MessageBus delegate) {
     AnnotatedType at = new AnnotatedType() {
       public Class getJavaClass() {
         return ServerMessageBusImpl.class;

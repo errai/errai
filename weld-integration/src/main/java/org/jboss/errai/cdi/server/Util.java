@@ -17,6 +17,7 @@ package org.jboss.errai.cdi.server;
 
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.server.annotations.Service;
+import org.jboss.errai.bus.server.api.QueueSession;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.container.ErraiServiceObjectFactory;
 import org.jboss.errai.container.ServiceFactory;
@@ -30,6 +31,10 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.naming.Reference;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Heiko Braun <hbraun@redhat.com>
@@ -46,19 +51,20 @@ public class Util {
 
   private static Logger log = LoggerFactory.getLogger("ErraiJNDI");
 
-  public static Object lookupCallbackBean(BeanManager beanManager, Class<?> serviceType) {
+  public static <T> T lookupBean(BeanManager beanManager, Class<T> serviceType) {
     Bean<?> bean = beanManager.resolve(beanManager.getBeans(serviceType));
 
     if (bean == null) {
       return null;
     }
 
-    return beanManager.getReference(bean, serviceType,  beanManager.createCreationalContext(bean));
+    return (T) beanManager.getReference(bean, serviceType, beanManager.createCreationalContext(bean));
   }
 
   public static String getSessionId(Message message) {
-    return  message.getResource(String.class, "SessionID");
+    return message.getResource(String.class, "SessionID");
   }
+
 
   public static <T> T lookupRPCBean(BeanManager beanManager, T rpcIntf, Class beanClass) {
     Bean<?> bean = beanManager.resolve(beanManager.getBeans(beanClass));
@@ -202,5 +208,65 @@ public class Util {
     if (subjectName.equals(""))
       subjectName = type.getSimpleName();
     return subjectName;
+  }
+
+  public static void main(String[] args) {
+    for (int size = 1; size < 100; size++) {
+      System.out.println("size " + size + " --- ");
+      
+      int arrayListScore = 0;
+      int hashSetScore = 0;
+      
+      List a = new ArrayList(size);
+      Set b = new HashSet(size);
+
+      for (int i = 0; i < size; i++) {
+        a.add(i);
+        b.add(i);
+      }
+
+      long f;
+      long s;
+      for (int i = 0; i < 10; i++) {
+        long st = System.nanoTime();
+        for (int x = 0; x < 1000000; x++) {
+          a.contains(250);
+        }
+
+        f = System.nanoTime() - st;
+
+        // System.out.println("ArrayList (ns): " + (System.nanoTime() - st));
+
+        st = System.nanoTime();
+        for (int x = 0; x < 1000000; x++) {
+          b.contains(250);
+        }
+        s = System.nanoTime() - st;
+        
+        
+
+        if (f < s) {
+          arrayListScore++;
+        }
+        else {
+          hashSetScore++;
+        }
+        //   System.out.println("HashSet (ns): " + (System.nanoTime() - st));
+      }
+
+      System.out.print("Score (wins): ArrayList: " + arrayListScore + " vs HashSet: " + hashSetScore + " ");
+    
+      if (arrayListScore > hashSetScore) {
+        System.out.println(" ** ArrayList wins!");
+      }
+      else if (arrayListScore == hashSetScore) {
+        System.out.println(" ** Tie!");
+      }
+      else {
+        System.out.println(" ** HashSet wins!");
+      }
+    }
+    
+
   }
 }

@@ -38,7 +38,6 @@ public class CDITestEventProducerService {
   @Inject @A @B @C
   private Event<String> eventABC;
 
-  @Conversational
   public void start(@Observes StartEvent event) {
     fireAll();
   }

@@ -32,7 +32,7 @@ import org.jboss.errai.cdi.server.events.EventObserverMethod;
  * @author Mike Brock
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@ApplicationScoped
+//@ApplicationScoped
 public class EventSubscriptionListener implements SubscribeListener {
   private MessageBus bus;
   private AfterBeanDiscovery abd;
@@ -46,22 +46,24 @@ public class EventSubscriptionListener implements SubscribeListener {
   }
 
   public void onSubscribe(SubscriptionEvent event) {
-    if (event.isLocalOnly() || !event.isRemote() || !event.getSubject().startsWith("cdi.event:"))
-      return;
-
-    String name = event.getSubject().substring("cdi.event:".length());
-    try {
-      if (observedEvents.containsKey(name) && event.getCount() == 1 && event.isNew()) {
-        final Class<?> type = this.getClass().getClassLoader().loadClass(name);
-        abd.addObserverMethod(new EventObserverMethod(type, bus));
-        if (observedEvents != null) {
-          for (Annotation[] qualifiers : observedEvents.get(name)) {
-            abd.addObserverMethod(new EventObserverMethod(type, bus, qualifiers));
-          }
-        }
-      }
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+//    if (event.isLocalOnly() || !event.isRemote() || !event.getSubject().startsWith("cdi.event:"))
+//      return;
+//
+//    String name = event.getSubject().substring("cdi.event:".length());
+//    try {
+//      if (observedEvents.containsKey(name) && event.getCount() == 1 && event.isNew()) {
+//
+//
+//        final Class<?> type = this.getClass().getClassLoader().loadClass(name);
+//        abd.addObserverMethod(new EventObserverMethod(type, bus));
+//        if (observedEvents != null) {
+//          for (Annotation[] qualifiers : observedEvents.get(name)) {
+//            abd.addObserverMethod(new EventObserverMethod(type, bus, qualifiers));
+//          }
+//        }
+//      }
+//    } catch (Exception e) {
+//      throw new RuntimeException(e);
+//    }
   }
 }

@@ -16,21 +16,17 @@
 
 package org.jboss.errai.enterprise.client.cdi.api;
 
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import javax.interceptor.InterceptorBinding;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * @author Mike Brock .
  */
-@InterceptorBinding
-@Target({METHOD,ElementType.TYPE})
+@Target({ElementType.TYPE})
 @Retention(RUNTIME)
 @Documented
 public @interface Conversational {}
