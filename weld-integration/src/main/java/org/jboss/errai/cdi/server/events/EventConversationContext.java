@@ -16,9 +16,6 @@
 
 package org.jboss.errai.cdi.server.events;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * @author Mike Brock
  */
@@ -42,10 +39,14 @@ public class EventConversationContext {
     return threadLocalConversationContext.get();
   }
 
+  public static boolean isEventObjectInContext(Object event) {
+    Context ctx = get();
+    return ctx != null && event == ctx.getEventObject();
+  }
+
   public static class Context {
     private final Object eventObject;
     private final String session;
-    private final List<Object> alreadyHandled = new ArrayList<Object>(10);
 
     public Context(Object eventObject, String session) {
       this.eventObject = eventObject;
@@ -58,14 +59,6 @@ public class EventConversationContext {
 
     public String getSession() {
       return session;
-    }
-    
-    public void record(Object o) {
-      alreadyHandled.add(o);
-    }
-    
-    public boolean alreadyHandled(Object o) {
-      return o == eventObject || alreadyHandled.contains(o);
     }
   }
 }

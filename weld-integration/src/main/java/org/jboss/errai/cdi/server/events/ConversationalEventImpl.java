@@ -42,7 +42,7 @@ public class ConversationalEventImpl<T> implements ConversationalEvent<T>, Seria
   private Class rawType;
   private BeanManagerImpl manager;
   private Annotation[] qualifiers;
-  private Set<String> qualifiersForWire;
+  private List<String> qualifiersForWire;
   private MessageBus bus;
 
   public static ConversationalEventImpl of(InjectionPoint injectionPoint, BeanManager manager, MessageBus bus) {

@@ -16,6 +16,7 @@
 package org.jboss.errai.enterprise.rebind;
 
 import java.lang.annotation.Annotation;
+import java.util.List;
 import java.util.Set;
 
 import javax.enterprise.event.Observes;
@@ -70,7 +71,7 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
 
     final String subject = CDI.getSubjectNameByType(parmClassName);
     final Annotation[] qualifiers = InjectUtil.extractQualifiers(instance).toArray(new Annotation[0]);
-    final Set<String> qualifierNames = CDI.getQualifiersPart(qualifiers);
+    final List<String> qualifierNames = CDI.getQualifiersPart(qualifiers);
 
     AnonymousClassStructureBuilder callBack = Stmt.newObject(AbstractCDIEventCallback.class).extend();
 

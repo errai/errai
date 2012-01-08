@@ -35,14 +35,13 @@ public class ConversationalEventObserverMethod extends EventObserverMethod {
 
   @Override
   public void notify(Object event) {
+    if (!type.equals(event.getClass())) return;
+
     EventConversationContext.Context ctx = EventConversationContext.get();
     if (ctx != null && ctx.getSession() != null) {
-      if (ctx.alreadyHandled(event)) return;
+      if (ctx.getEventObject() == event) return;
 
-      ctx.record(event);
-
-
-      if (qualifierForWire != null && !qualifierForWire.isEmpty()) {
+      if (!qualifierForWire.isEmpty()) {
         MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
                 .with(MessageParts.SessionID.name(), ctx.getSession())
                 .with(CDIProtocol.TYPE, type.getName()).with(CDIProtocol.QUALIFIERS, qualifierForWire)

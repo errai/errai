@@ -72,12 +72,12 @@ public class CDI {
     return "cdi.event:" + typeName;
   }
 
-  public static Set<String> getQualifiersPart(Annotation[] qualifiers) {
-    Set<String> qualifiersPart = null;
+  public static List<String> getQualifiersPart(Annotation[] qualifiers) {
+    List<String> qualifiersPart = null;
     if (qualifiers != null) {
       for (Annotation qualifier : qualifiers) {
         if (qualifiersPart == null)
-          qualifiersPart = new HashSet<String>();
+          qualifiersPart = new ArrayList<String>(qualifiers.length);
 
         qualifiersPart.add(qualifier.annotationType().getName());
       }
@@ -94,7 +94,7 @@ public class CDI {
     }
 
     String subject = getSubjectNameByType(payload.getClass());
-    Set<String> qualifiersPart = getQualifiersPart(qualifiers);
+    List<String> qualifiersPart = getQualifiersPart(qualifiers);
 
     if (ErraiBus.get().isSubscribed(subject)) {
       if (qualifiersPart != null && !qualifiersPart.isEmpty()) {

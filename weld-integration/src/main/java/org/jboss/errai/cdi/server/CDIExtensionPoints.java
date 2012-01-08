@@ -79,7 +79,7 @@ public class CDIExtensionPoints implements Extension {
   //  private ContextManager contextManager;
   private ErraiService service;
 
-  private List<EventConsumer> eventConsumers = new ArrayList<EventConsumer>();
+  private Set<EventConsumer> eventConsumers = new LinkedHashSet<EventConsumer>();
   // private List<ObserverEndpoint> observerEndpoints = new ArrayList<ObserverEndpoint>();
   private Map<String, Annotation> eventQualifiers = new HashMap<String, Annotation>();
   private Set<String> observableEvents = new HashSet<String>();
@@ -303,18 +303,6 @@ public class CDIExtensionPoints implements Extension {
       }
     }
 
-//    for (ObserverEndpoint oe : observerEndpoints) {
-//      abd.addBean(new ConversationalEventBean(oe.getObservedType(), (BeanManagerImpl) bm, bus));
-
-
-//      if (oe.isConversational()) {
-//        abd.addObserverMethod(new ConversationalEventObserverMethod(oe.getObservedType(), bus, oe.getQualifiers()));
-//      }
-//      else {
-//        abd.addObserverMethod(new EventObserverMethod(oe.getObservedType(), bus, oe.getQualifiers()));
-//      }
-    //  }
-
     // Errai bus injection
     abd.addBean(new MessageBusBean(bm, bus));
 
@@ -531,6 +519,26 @@ public class CDIExtensionPoints implements Extension {
 
     public Annotation[] getQualifiers() {
       return qualifiers;
+    }
+    
+    public String toString() {
+      return "EventConsumer " + eventType + " " + Arrays.toString(qualifiers);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (!(o instanceof EventConsumer)) return false;
+
+      EventConsumer that = (EventConsumer) o;
+
+      return that.toString().equals(toString());
+
+    }
+
+    @Override
+    public int hashCode() {
+      return toString().hashCode();
     }
   }
 

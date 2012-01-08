@@ -67,38 +67,47 @@ public class EventObserverTestModule {
 
   // all the observer methods
   public void onEvent(@Observes String event) {
+    System.out.println("client:onEvent():" + event);
     addReceivedEvent("", event);
   }
 
   public void onEventA(@Observes @A String event) {
+    System.out.println("client:onEventA():" + event);
     addReceivedEvent("A", event);
   }
 
   public void onEventB(@Observes @B String event) {
+    System.out.println("client:onEventB():" + event);
     addReceivedEvent("B", event);
   }
 
   public void onEventC(@Observes @C String event) {
+    System.out.println("client:onEventC():" + event);
     addReceivedEvent("C", event);
   }
 
   public void onEventAB(@Observes @A @B String event) {
+    System.out.println("client:onEventAB():" + event);
     addReceivedEvent("AB", event);
   }
 
   public void onEventBA(@Observes @B @A String event) {
+    System.out.println("client:onEventBA():" + event);
     addReceivedEvent("BA", event);
   }
 
   public void onEventAC(@Observes @A @C String event) {
+    System.out.println("client:onEventAC():" + event);
     addReceivedEvent("AC", event);
   }
 
   public void onEventBC(@Observes @B @C String event) {
+    System.out.println("client:onEventBC():" + event);
     addReceivedEvent("BC", event);
   }
 
   public void onEventABC(@Observes @A @B @C String event) {
+    System.out.println("client:onEventABC():" + event);
     addReceivedEvent("ABC", event);
   }
 
@@ -109,5 +118,7 @@ public class EventObserverTestModule {
     
     events.add(event);
     receivedEvents.put(receiver, events);
+
+    System.out.println("Received Event (Receiver=" + receiver + ";Event=" + event + ")");
   }
 }
