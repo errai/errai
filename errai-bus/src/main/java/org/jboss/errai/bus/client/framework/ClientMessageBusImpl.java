@@ -176,7 +176,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             URL.encode(endpoint) + "?z=" + getNextRequestNumber()
     );
 
-    builder.setHeader("Connection", "keep-alive");
     builder.setHeader("Content-Type", "application/json");
     builder.setHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER, clientId);
     return builder;
@@ -1225,6 +1224,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   public void procPayload(String text) {
 
+  //  System.out.println("RX:" + text);
     try {
       for (MarshalledMessage m : decodePayload(text)) {
         rxNumber++;
