@@ -141,8 +141,8 @@ public class CDIExtensionPoints implements Extension {
   /**
    * Register managed beans as Errai services
    *
-   * @param event
-   * @param <T>
+   * @param event -
+   * @param <T> -
    */
   public <T> void observeResources(@Observes ProcessAnnotatedType<T> event) {
     final AnnotatedType<T> type = event.getAnnotatedType();
@@ -263,16 +263,6 @@ public class CDIExtensionPoints implements Extension {
       }
 
       observableEvents.add(type.getName());
-
-
-//      if (type.isAnnotationPresent(Conversational.class)) {
-//        observerEndpoints.add(
-//                new ObserverEndpoint(true, processObserverMethod.getAnnotatedMethod().getJavaMember(), type));
-//      }
-//      else {
-//        observerEndpoints.add(
-//                new ObserverEndpoint(false, processObserverMethod.getAnnotatedMethod().getJavaMember(), type));
-//      }
     }
   }
 

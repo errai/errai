@@ -28,8 +28,7 @@ import java.lang.annotation.Annotation;
 import java.util.*;
 
 /**
- * @author Filip Rogaczewski
- * @author Christian Sadilek <csadilek@redhat.com>
+ *
  * @author Mike Brock
  */
 public class EventObserverMethod implements ObserverMethod {

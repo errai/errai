@@ -19,6 +19,5 @@ public class CDIServiceLocator implements ServiceLocator {
     CreationalContext<?> context = beanManager.createCreationalContext(bean);
 
     return (ErraiService) beanManager.getReference(bean, ErraiService.class, context);
-
   }
 }

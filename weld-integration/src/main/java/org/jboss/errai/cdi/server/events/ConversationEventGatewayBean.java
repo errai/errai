@@ -36,8 +36,6 @@ public class ConversationEventGatewayBean {
     if (ctx != null && ctx.getSession() != null) {
       String subject = CDI.getSubjectNameByType(wrapper.getEventType());
       try {
-     //   if (ctx.getEventObject() == event) return;
-
         if (wrapper.getQualifierStrings() != null && !wrapper.getQualifierStrings().isEmpty()) {
           MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
                   .with(MessageParts.SessionID.name(), ctx.getSession())
