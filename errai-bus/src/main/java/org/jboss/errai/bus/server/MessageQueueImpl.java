@@ -36,6 +36,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.lang.System.nanoTime;
+import static java.lang.System.setOut;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -110,6 +111,7 @@ public class MessageQueueImpl implements MessageQueue {
       else {
         seg = buffer.read(outstream, bufferColor, new BufferHelper.MultiMessageHandlerCallback());
       }
+
       messageCount.set(0);
       outstream.flush();
     }

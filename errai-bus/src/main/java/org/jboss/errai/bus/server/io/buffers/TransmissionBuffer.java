@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * A ring-based buffer implementation that provides contention-free writing of <i>1..n</i> colors. In this case,
@@ -166,7 +167,6 @@ public class TransmissionBuffer implements Buffer {
    */
   @Override
   public void write(InputStream inputStream, BufferColor bufferColor) throws IOException {
-    inputStream.reset();
     write(inputStream.available(), inputStream, bufferColor);
   }
 
@@ -184,8 +184,8 @@ public class TransmissionBuffer implements Buffer {
     if (writeSize > bufferSize) {
       throw new RuntimeException("write size larger than buffer can fit");
     }
-
-    bufferColor.lock.lock();
+    ReentrantLock lock = bufferColor.lock;
+    lock.lock();
     try {
       final int allocSize = ((writeSize + SEGMENT_HEADER_SIZE) / segmentSize) + 1;
       final long writeHead = writeSequenceNumber.addAndGet(allocSize) - 1;
@@ -220,11 +220,10 @@ public class TransmissionBuffer implements Buffer {
       }
 
       headSequence = newHead;
-
-      bufferColor.wake();
     }
     finally {
-      bufferColor.lock.unlock();
+      bufferColor.wake();
+      lock.unlock();
     }
   }
 
@@ -292,32 +291,33 @@ public class TransmissionBuffer implements Buffer {
    */
   @Override
   public int read(OutputStream outputStream, BufferColor bufferColor, BufferCallback callback, long sequence) throws IOException {
-    // obtain this color's read lock
-    bufferColor.lock.lock();
+    // attempt obtain this color's read lock
+    if (bufferColor.lock.tryLock()) {
 
-    try {
-      // get the current head position.
-      long writeHead = headSequence;
+      try {
+        // get the current head position.
+        long writeHead = headSequence;
 
-      // get the current tail position for this color.
-      long read = bufferColor.sequence.get();
+        // get the current tail position for this color.
+        long read = bufferColor.sequence.get();
 
-      long lastSeq = read;
+        long lastSeq = read;
 
-      // if you need to do something before we write to output, do it now mr. callback.
-      callback.before(outputStream);
+        // if you need to do something before we write to output, do it now mr. callback.
+        callback.before(outputStream);
 
-      while ((read = readNextChunk(writeHead, read, bufferColor, outputStream, callback)) != -1)
-        lastSeq = read;
+        while ((read = readNextChunk(writeHead, read, bufferColor, outputStream, callback)) != -1)
+          lastSeq = read;
 
-      // we're done writing, so do your after thing, mr. callback.
-      callback.after(outputStream);
+        // we're done writing, so do your after thing, mr. callback.
+        callback.after(outputStream);
 
-      bufferColor.sequence.set(lastSeq);
-    }
-    finally {
-      // release the read lock on this color
-      bufferColor.lock.unlock();
+        bufferColor.sequence.set(lastSeq);
+      }
+      finally {
+        // release the read lock on this color
+        bufferColor.lock.unlock();
+      }
     }
     return -1;
   }
@@ -454,8 +454,10 @@ public class TransmissionBuffer implements Buffer {
    * @throws InterruptedException thrown if the monitor is interrupted while waiting to receive dta.
    */
   @Override
-  public int readWait(TimeUnit unit, long time, OutputStream outputStream, final BufferColor bufferColor, BufferCallback callback) throws IOException, InterruptedException {
-    bufferColor.lock.lockInterruptibly();
+  public int readWait(TimeUnit unit, long time, OutputStream outputStream, final BufferColor bufferColor,
+                      BufferCallback callback) throws IOException, InterruptedException {
+    ReentrantLock lock = bufferColor.lock;
+    lock.lockInterruptibly();
 
     try {
       long readTail = bufferColor.sequence.get();
@@ -471,7 +473,7 @@ public class TransmissionBuffer implements Buffer {
         }
 
         // return if data is ready to return or we're timed out.
-        if (nanos <= 0 || lastRead != -1) {
+        if (lastRead != -1 || nanos <= 0) {
           if (lastRead != -1) {
             bufferColor.sequence.set(lastRead);
           }
@@ -480,12 +482,12 @@ public class TransmissionBuffer implements Buffer {
         }
 
         try {
-          if (time == -1) {
-            bufferColor.dataWaiting.await();
-          }
-          else {
-            nanos = bufferColor.dataWaiting.awaitNanos(nanos);
-          }
+//          if (time == -1) {
+//            bufferColor.dataWaiting.await();
+//          }
+//          else {
+          nanos = bufferColor.dataWaiting.awaitNanos(nanos);
+//          }
         }
         catch (InterruptedException e) {
           bufferColor.dataWaiting.signal();
@@ -494,7 +496,7 @@ public class TransmissionBuffer implements Buffer {
       }
     }
     finally {
-      bufferColor.lock.unlock();
+      lock.unlock();
     }
   }
 

@@ -36,10 +36,12 @@ public abstract class AbstractErraiTest extends GWTTestCase {
     System.out.println("REMEMBER! Bus tests will not succeed if: \n" +
         "1. You do not run the unit tests with the flag: -Dorg.jboss.errai.bus.do_long_poll=false \n" +
         "2. You do not have the main and test source directories in the runtime classpath");
+
   }
 
   @Override
   protected void gwtSetUp() throws Exception {
+
     System.out.println("set-up");
     if (bus == null) {
       System.out.println("GET()");

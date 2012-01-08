@@ -176,6 +176,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             URL.encode(endpoint) + "?z=" + getNextRequestNumber()
     );
 
+    builder.setHeader("Connection", "keep-alive");
     builder.setHeader("Content-Type", "application/json");
     builder.setHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER, clientId);
     return builder;
@@ -540,10 +541,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   }
 
+  boolean pollActive = false;
+
   private void performPoll() {
     try {
-      if (!cometChannelOpen) return;
-
+      if (pollActive || !cometChannelOpen) return;
+      pollActive = true;
       getRecvBuilder().sendRequest(null, receiveCommCallback);
     }
     catch (RequestTimeoutException e) {
@@ -552,6 +555,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
     catch (Throwable t) {
       DefaultErrorCallback.INSTANCE.error(null, t);
+    }
+    finally {
+      pollActive = false;
     }
   }
 

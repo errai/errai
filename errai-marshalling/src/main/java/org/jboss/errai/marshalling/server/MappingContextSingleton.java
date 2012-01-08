@@ -67,7 +67,7 @@ public class MappingContextSingleton {
 
     context = new ServerMappingContext() {
 
-      private final DefinitionsFactory factory = new DefinitionsFactoryImpl();
+     // private final DefinitionsFactory factory = new DefinitionsFactoryImpl();
 
       {
         loadMarshallers();
@@ -85,12 +85,12 @@ public class MappingContextSingleton {
 
           @Override
           public boolean hasMarshaller(String fqcn) {
-            return factory.hasDefinition(fqcn);
+            return marshallerFactory.getMarshaller(null, fqcn) != null;
           }
 
           @Override
           public Marshaller getMarshaller(String fqcn) {
-            return factory.getDefinition(fqcn).getMarshallerInstance();
+            return marshallerFactory.getMarshaller(null, fqcn);
           }
         });
       }
@@ -169,7 +169,7 @@ public class MappingContextSingleton {
 
       @Override
       public DefinitionsFactory getDefinitionsFactory() {
-        return factory;
+        return null;
       }
 
       @Override
@@ -180,7 +180,7 @@ public class MappingContextSingleton {
 
       @Override
       public boolean hasMarshaller(String clazzName) {
-        return factory.hasDefinition(clazzName);
+        return marshallerFactory.getMarshaller(null, clazzName) != null;
       }
 
       @Override

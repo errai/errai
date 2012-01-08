@@ -59,12 +59,58 @@ public abstract class ServerMarshallUtil {
     try {
       log.info("searching for marshaller class: " + packageName + "." + className);
 
-      return Thread.currentThread().getContextClassLoader().loadClass(packageName + "." + className)
-              .asSubclass(MarshallerFactory.class);
+      Enumeration<URL> enumeration = Thread.currentThread().getContextClassLoader()
+              .getResources(packageName.replaceAll("\\.", "/") + "/"
+                      + className + ".class");
 
+      List<URL> locations = new ArrayList<URL>();
+      boolean multiple = false;
+      File newest = null;
+      URL url = null;
+      while (enumeration.hasMoreElements()) {
+        if (url != null) {
+          multiple = true;
+//          throw new RuntimeException("Found more than one " + packageName + "." + className
+//                  + " in the classpath! Clear your output directories!");
+        }
+
+        url = enumeration.nextElement();
+
+        locations.add(url);
+
+
+        File file = getFileIfExists(url);
+        if (file != null && (newest == null || file.lastModified() > newest.lastModified())) {
+          newest = file;
+        }
+      }
+
+      if (multiple) {
+        log.warn("*** MULTIPLE VERSIONS OF " + packageName + "." + className + " FOUND IN CLASSPATH: " +
+                "Attempted to guess the newest one based on file dates. But you should clean your output directories");
+
+        for (URL loc : locations) {
+          log.warn(" Ambiguous version -> " + loc.getFile());
+        }
+      }
+
+      if (newest == null) {
+        try {
+          // maybe we're in an appserver with a VFS, so try to load anyways.
+          return Thread.currentThread().getContextClassLoader().loadClass(packageName + "." + className)
+                  .asSubclass(MarshallerFactory.class);
+        }
+        catch (ClassNotFoundException e) {
+          log.warn("could not locate marshaller class. will attempt dynamic generation.");
+        }
+      }
+      else {
+        return loadClassDefinition(newest.getAbsolutePath(), packageName, className);
+      }
     }
-    catch (ClassNotFoundException e) {
-      log.warn("could not locate marshaller class. will attempt dynamic generation.");
+    catch (IOException e) {
+      e.printStackTrace();
+      log.warn("could not read marshaller classes: " + e);
     }
 
 
@@ -74,7 +120,7 @@ public abstract class ServerMarshallUtil {
     File directory =
             new File(System.getProperty("java.io.tmpdir") + "/errai.gen/classes/" + packageName.replaceAll("\\.", "/"));
 
-    File sourceFile = new File(directory.getAbsolutePath() + "/" + className + ".java");
+    File sourceFile = new File(directory.getAbsolutePath() + File.separator + className + ".java");
 
     try {
       if (directory.exists()) {
@@ -93,7 +139,7 @@ public abstract class ServerMarshallUtil {
       outputStream.flush();
       outputStream.close();
 
-      String compiledClassPath = compileClass(sourceFile.getAbsolutePath(), packageName, className);
+      String compiledClassPath = compileClass(directory.getAbsolutePath(), packageName, className);
 
       return loadClassDefinition(compiledClassPath, packageName, className);
     }
@@ -106,14 +152,8 @@ public abstract class ServerMarshallUtil {
 
   public static String compileClass(String sourcePath, String packageName, String className) {
     try {
-
-      File directory =
-              new File(System.getProperty("java.io.tmpdir") + "/errai.gen/classes/" + packageName.replaceAll("\\.", "/"));
-
-
-      String classBase = directory.getAbsolutePath() + "/" + className;
-
-      File outFile = new File(classBase + ".class");
+      File inFile = new File(sourcePath + File.separator + className + ".java");
+      File outFile = new File(sourcePath + File.separator + className + ".class");
 
       ByteArrayOutputStream errorOutputStream = new ByteArrayOutputStream();
       JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
@@ -121,7 +161,7 @@ public abstract class ServerMarshallUtil {
       /**
        * Attempt to run the compiler without any classpath specified.
        */
-      if (compiler.run(null, null, errorOutputStream, sourcePath) != 0) {
+      if (compiler.run(null, null, errorOutputStream, inFile.getAbsolutePath()) != 0) {
         errorOutputStream.reset();
 
         /**
@@ -145,15 +185,16 @@ public abstract class ServerMarshallUtil {
         sb.append(System.getProperty("java.class.path"));
         sb.append(findAllJarsByManifest());
 
-        if (compiler.run(null, null, errorOutputStream, "-cp", sb.toString(), sourcePath) != 0) {
+        if (compiler.run(null, null, errorOutputStream, "-cp", sb.toString(), inFile.getAbsolutePath()) != 0) {
           System.out.println("*** FAILED TO COMPILE MARSHALLER CLASS ***");
           System.out.println("*** Classpath Used: " + sb.toString());
+
+
+          for (byte b : errorOutputStream.toByteArray()) {
+            System.out.print((char) b);
+          }
           return null;
         }
-      }
-
-      for (byte b : errorOutputStream.toByteArray()) {
-        System.out.print((char) b);
       }
 
 

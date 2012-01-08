@@ -26,7 +26,9 @@ import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.marshalling.server.util.ServerMarshallUtil;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Random;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -46,9 +48,9 @@ public class MarshallersGenerator extends Generator {
           System.getProperty(SERVER_MARSHALLER_OUTPUT_ENABLED_PROP) == null
                   || Boolean.getBoolean(SERVER_MARSHALLER_OUTPUT_ENABLED_PROP);
 
-  private static final String[] candidateOutputDirectories = 
-          {"target/classes/", "war/WEB-INF/classes/", "web/WEB-INF/classes/", "target/war/WEB-INF/classes/"};
-  
+  private static final String[] candidateOutputDirectories =
+          {"target/classes/", "war/WEB-INF/classes/", "web/WEB-INF/classes/", "target/war/WEB-INF/classes/", "WEB-INF/classes/"};
+
   /**
    * Simple name of class to be generated
    */
@@ -93,12 +95,40 @@ public class MarshallersGenerator extends Generator {
   }
 
   private String _generate() {
+    boolean junit = false;
+    for (StackTraceElement el : new Throwable().getStackTrace()) {
+      if (el.getClassName().contains("com.google.gwt.junit.client")) {
+        junit = true;
+      }
+    }
+
+    if (junit) {
+      System.out.println("*\n\n\n\n\n\n ******* running inside JUnit! ******** \n\n\n\n\n\n*");
+    }
+
     if (SERVER_MARSHALLER_OUTPUT_ENABLED) {
       String serverSideClass = MarshallerGeneratorFactory.getFor(MarshallerOuputTarget.Java)
               .generate(SERVER_MARSHALLER_PACKAGE_NAME, SERVER_MARSHALLER_CLASS_NAME);
 
-      if (SERVER_MARSHALLER_OUTPUT_DIR != null) {
-        generateServerMarshallers(SERVER_MARSHALLER_OUTPUT_DIR, serverSideClass);  
+
+      if (junit) {
+        Random rand = new Random(System.nanoTime());
+        String tmpLocation = new File(System.getProperty("java.io.tmpdir") + "/" + rand.nextInt(Integer.MAX_VALUE)
+                + "/errai.marshalling/out/").getAbsolutePath();
+        System.out.println("*** using temporary path for JUnit Shell: " + tmpLocation + " ***");
+
+        String toLoad = generateServerMarshallers(tmpLocation, serverSideClass);
+
+        try {
+          ServerMarshallUtil.loadClassDefinition(toLoad, SERVER_MARSHALLER_PACKAGE_NAME, SERVER_MARSHALLER_CLASS_NAME);
+        }
+        catch (IOException e) {
+          throw new RuntimeException("failed to load server marshallers", e);
+        }
+
+      }
+      else if (SERVER_MARSHALLER_OUTPUT_DIR != null) {
+        generateServerMarshallers(SERVER_MARSHALLER_OUTPUT_DIR, serverSideClass);
       }
       else {
         File outputDirCdt;
@@ -115,8 +145,8 @@ public class MarshallersGenerator extends Generator {
 
     return MarshallerGeneratorFactory.getFor(MarshallerOuputTarget.GWT).generate(packageName, className);
   }
-  
-  private void generateServerMarshallers(String dir, String serverSideClass) {
+
+  private String generateServerMarshallers(String dir, String serverSideClass) {
     File outputDir = new File(dir + File.separator +
             RebindUtils.packageNameToDirName(SERVER_MARSHALLER_PACKAGE_NAME) + File.separator);
     outputDir.mkdirs();
@@ -126,6 +156,8 @@ public class MarshallersGenerator extends Generator {
     RebindUtils.writeStringToFile(sourceFile,
             serverSideClass);
 
-    ServerMarshallUtil.compileClass(sourceFile.getAbsolutePath(), SERVER_MARSHALLER_PACKAGE_NAME, SERVER_MARSHALLER_CLASS_NAME);
+    ServerMarshallUtil.compileClass(outputDir.getAbsolutePath(), SERVER_MARSHALLER_PACKAGE_NAME, SERVER_MARSHALLER_CLASS_NAME);
+
+    return new File(outputDir.getAbsolutePath() + File.separator + SERVER_MARSHALLER_CLASS_NAME + ".class").getAbsolutePath();
   }
 }
