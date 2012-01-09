@@ -16,11 +16,9 @@
 
 package org.jboss.errai.cdi.server.events;
 
-import org.jboss.errai.bus.client.framework.MessageBus;
-
-import java.lang.reflect.Type;
 import java.util.List;
-import java.util.Set;
+
+import org.jboss.errai.bus.client.framework.MessageBus;
 
 /**
  * @author Mike Brock

@@ -32,8 +32,6 @@ import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.EventHandler;
 
-import javax.inject.Qualifier;
-
 /**
  * CDI client interface.
  *

@@ -25,7 +25,16 @@ import javax.enterprise.util.TypeLiteral;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.annotations.Local;
 import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.codegen.framework.Context;
+import org.jboss.errai.codegen.framework.Parameter;
+import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.builder.AnonymousClassStructureBuilder;
+import org.jboss.errai.codegen.framework.builder.BlockBuilder;
+import org.jboss.errai.codegen.framework.meta.MetaMethod;
+import org.jboss.errai.codegen.framework.meta.MetaParameter;
+import org.jboss.errai.codegen.framework.util.Bool;
+import org.jboss.errai.codegen.framework.util.Refs;
+import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.enterprise.client.cdi.AbstractCDIEventCallback;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
@@ -33,16 +42,6 @@ import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
-import org.jboss.errai.codegen.framework.Context;
-import org.jboss.errai.codegen.framework.Parameter;
-import org.jboss.errai.codegen.framework.Statement;
-import org.jboss.errai.codegen.framework.builder.BlockBuilder;
-import org.jboss.errai.codegen.framework.builder.impl.AnonymousClassStructureBuilderImpl;
-import org.jboss.errai.codegen.framework.meta.MetaMethod;
-import org.jboss.errai.codegen.framework.meta.MetaParameter;
-import org.jboss.errai.codegen.framework.util.Bool;
-import org.jboss.errai.codegen.framework.util.Refs;
-import org.jboss.errai.codegen.framework.util.Stmt;
 
 /**
  * Generates the boiler plate for @Observes annotations use in GWT clients.<br/>

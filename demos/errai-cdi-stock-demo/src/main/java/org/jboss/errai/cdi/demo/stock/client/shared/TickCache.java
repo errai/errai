@@ -19,18 +19,17 @@ public class TickCache {
    * The entries in this cache.
    */
   private final List<TickBuilder> entries = new LinkedList<TickBuilder>();
-  
+
   /**
-   * The amount of time ticks should be retained within the cache. Default is 3
-   * minutes.
+   * The amount of time ticks should be retained within the cache. Default is 3 minutes.
    */
   private long timeSpan = 3 * 60 * 1000;
-  
+
   /**
-   * Adds the given tick to this cache, pruning ticks that are older than
-   * {@link #timeSpan} milliseconds.
+   * Adds the given tick to this cache, pruning ticks that are older than {@link #timeSpan} milliseconds.
    * 
-   * @param tick The tick to add
+   * @param tick
+   *          The tick to add
    */
   public void add(TickBuilder tick) {
     entries.add(tick);
@@ -38,8 +37,7 @@ public class TickCache {
   }
 
   /**
-   * Removes all leading entries that are older than the time span set on this
-   * cache.
+   * Removes all leading entries that are older than the time span set on this cache.
    */
   private void prune() {
     long cutoff = System.currentTimeMillis() - timeSpan;
@@ -47,7 +45,7 @@ public class TickCache {
       entries.remove(0);
     }
   }
-  
+
   /**
    * Returns an unmodifiable view of this cache's entries.
    */
@@ -61,11 +59,12 @@ public class TickCache {
   @Deprecated
   public void setEntries(List<TickBuilder> newEntries) {
     if (!entries.isEmpty()) {
-      throw new IllegalStateException("This method should only be called by Errai serialization, and only when the cache is empty");
+      throw new IllegalStateException(
+          "This method should only be called by Errai serialization, and only when the cache is empty");
     }
     entries.addAll(newEntries);
   }
-  
+
   /**
    * The amount of time, in milliseconds, ticks are be retained within the cache.
    */
@@ -74,8 +73,7 @@ public class TickCache {
   }
 
   /**
-   * The amount of time, in milliseconds, ticks should be retained within this
-   * cache.
+   * The amount of time, in milliseconds, ticks should be retained within this cache.
    * <p>
    * Default is 3 minutes.
    */
@@ -86,7 +84,8 @@ public class TickCache {
   /**
    * Returns the newest entry in this cache.
    * 
-   * @throws NoSuchElementException if the cache is empty
+   * @throws NoSuchElementException
+   *           if the cache is empty
    */
   public TickBuilder getNewestEntry() {
     return entries.get(entries.size() - 1);

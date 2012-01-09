@@ -109,7 +109,7 @@ public class TagCloudDemoClient {
 
       if (needsRefresh)
         refreshTagCloud();
-      
+
       ageTags();
     }
   }
@@ -196,23 +196,23 @@ public class TagCloudDemoClient {
   }
 
   private native void resize(String tag, String size) /*-{
-    $wnd.$(tag).animate({fontSize: size}, 200, function() {});
-  }-*/;
+                                                      $wnd.$(tag).animate({fontSize: size}, 200, function() {});
+                                                      }-*/;
 
   private native void bounceResize(String tag, String size, String maxSize) /*-{
-    $wnd.$(tag).animate({fontSize: maxSize}, 300, function() {
-      $wnd.$(tag).animate({fontSize: size}, 500, function() {})});
-  }-*/;
+                                                                            $wnd.$(tag).animate({fontSize: maxSize}, 300, function() {
+                                                                            $wnd.$(tag).animate({fontSize: size}, 500, function() {})});
+                                                                            }-*/;
 
   private native void fadeIn(String tag) /*-{
-    $wnd.$(tag).hide().fadeIn(800, function() {});
-  }-*/;
+                                         $wnd.$(tag).hide().fadeIn(800, function() {});
+                                         }-*/;
 
   private native void fadeOut(String tag) /*-{
-    $wnd.$(tag).fadeOut(800, function() {$wnd.$(tag).remove()});
-  }-*/;   
+                                          $wnd.$(tag).fadeOut(800, function() {$wnd.$(tag).remove()});
+                                          }-*/;
 
   private native void remove(String tag) /*-{
-    $wnd.$(tag).remove();
-  }-*/;   
+                                         $wnd.$(tag).remove();
+                                         }-*/;
 }

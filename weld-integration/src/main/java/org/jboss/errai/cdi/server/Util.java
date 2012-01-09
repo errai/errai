@@ -15,14 +15,10 @@
  */
 package org.jboss.errai.cdi.server;
 
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.bus.server.api.QueueSession;
-import org.jboss.errai.bus.server.service.ErraiService;
-import org.jboss.errai.container.ErraiServiceObjectFactory;
-import org.jboss.errai.container.ServiceFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
@@ -31,10 +27,14 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.naming.Reference;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.server.annotations.Service;
+import org.jboss.errai.bus.server.service.ErraiService;
+import org.jboss.errai.container.ErraiServiceObjectFactory;
+import org.jboss.errai.container.ServiceFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Heiko Braun <hbraun@redhat.com>

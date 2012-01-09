@@ -16,10 +16,10 @@
 
 package org.jboss.errai.enterprise.rebind;
 
+import java.lang.annotation.Annotation;
+
 import org.jboss.errai.ioc.rebind.ioc.QualifyingMetadata;
 import org.jboss.errai.ioc.rebind.ioc.QualifyingMetadataFactory;
-
-import java.lang.annotation.Annotation;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

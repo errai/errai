@@ -15,6 +15,40 @@
  */
 package org.jboss.errai.cdi.server;
 
+import static java.util.ResourceBundle.getBundle;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.UUID;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Default;
+import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.BeforeBeanDiscovery;
+import javax.enterprise.inject.spi.Extension;
+import javax.enterprise.inject.spi.ProcessAnnotatedType;
+import javax.enterprise.inject.spi.ProcessObserverMethod;
+import javax.inject.Inject;
+import javax.inject.Qualifier;
+
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.builder.AbstractRemoteCallBuilder;
@@ -34,7 +68,12 @@ import org.jboss.errai.bus.server.io.ConversationalEndpointCallback;
 import org.jboss.errai.bus.server.io.RemoteServiceCallback;
 import org.jboss.errai.bus.server.io.ServiceInstanceProvider;
 import org.jboss.errai.bus.server.service.ErraiService;
-import org.jboss.errai.cdi.server.events.*;
+import org.jboss.errai.cdi.server.events.ConversationalEvent;
+import org.jboss.errai.cdi.server.events.ConversationalEventBean;
+import org.jboss.errai.cdi.server.events.ConversationalEventObserverMethod;
+import org.jboss.errai.cdi.server.events.EventDispatcher;
+import org.jboss.errai.cdi.server.events.EventObserverMethod;
+import org.jboss.errai.cdi.server.events.ShutdownEventObserver;
 import org.jboss.errai.common.client.api.annotations.ExposeEntity;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.common.client.types.TypeHandlerFactory;
@@ -43,22 +82,6 @@ import org.jboss.errai.enterprise.client.cdi.api.Conversational;
 import org.jboss.weld.manager.BeanManagerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Default;
-import javax.enterprise.inject.spi.*;
-import javax.inject.Inject;
-import javax.inject.Qualifier;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.*;
-
-import static java.util.ResourceBundle.getBundle;
 
 
 /**

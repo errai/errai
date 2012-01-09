@@ -87,33 +87,33 @@ public class TagCloudService {
    */
 
   private void updateTags() {
-  /*  
-    Set<ScoredTerm> terms = tweetService.getTopHashTags(MAX_TAGS);
-    Set<Tag> updatedTags = new HashSet<Tag>();
+    /*  
+      Set<ScoredTerm> terms = tweetService.getTopHashTags(MAX_TAGS);
+      Set<Tag> updatedTags = new HashSet<Tag>();
 
-    for (ScoredTerm term : terms) {
-      if (term.term == null || term.frequency <= 0)
-        continue;
+      for (ScoredTerm term : terms) {
+        if (term.term == null || term.frequency <= 0)
+          continue;
 
-      Tag tag = new Tag(term.term, term.frequency);
-      if (!tags.containsKey(tag.getName())) {
-        newTagEvent.fire(tag);
+        Tag tag = new Tag(term.term, term.frequency);
+        if (!tags.containsKey(tag.getName())) {
+          newTagEvent.fire(tag);
+        }
+        else {
+          if (!tag.getFrequency().equals(tags.get(tag.getName()).getFrequency())) {
+            updatedTagEvent.fire(tag);
+          }
+        }
+        tags.put(tag.getName(), tag);
+        updatedTags.add(tag);
       }
-      else {
-        if (!tag.getFrequency().equals(tags.get(tag.getName()).getFrequency())) {
-          updatedTagEvent.fire(tag);
+
+      for (String tag : tags.keySet()) {
+        if (!updatedTags.contains(tags.get(tag))) {
+          tags.remove(tag);
+          deletedTagEvent.fire(new Tag(tag, 0));
         }
       }
-      tags.put(tag.getName(), tag);
-      updatedTags.add(tag);
-    }
-
-    for (String tag : tags.keySet()) {
-      if (!updatedTags.contains(tags.get(tag))) {
-        tags.remove(tag);
-        deletedTagEvent.fire(new Tag(tag, 0));
-      }
-    }
-    */
+      */
   }
 }

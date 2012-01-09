@@ -16,9 +16,9 @@
 
 package org.jboss.errai.cdi.server.events;
 
-import javax.enterprise.event.Event;
-import javax.enterprise.util.TypeLiteral;
 import java.lang.annotation.Annotation;
+
+import javax.enterprise.util.TypeLiteral;
 
 /**
  * @author Mike Brock

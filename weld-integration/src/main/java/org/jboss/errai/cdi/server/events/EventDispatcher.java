@@ -15,23 +15,25 @@
  */
 package org.jboss.errai.cdi.server.events;
 
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.enterprise.inject.spi.BeanManager;
+
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RoutingFlags;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.server.util.LocalContext;
 import org.jboss.errai.cdi.server.ScopeUtil;
 import org.jboss.errai.cdi.server.Util;
-import org.jboss.errai.cdi.server.events.EventConversationContext;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
-
-import javax.enterprise.inject.spi.BeanManager;
-import java.lang.annotation.Annotation;
-import java.util.*;
 
 /**
  * Acts as a bridge between Errai Bus and the CDI event system.<br/>

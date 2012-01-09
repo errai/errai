@@ -28,9 +28,9 @@ import javax.enterprise.inject.spi.BeforeShutdown;
 import javax.enterprise.inject.spi.ObserverMethod;
 
 import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.cdi.server.TypeRegistry;
 import org.jboss.errai.cdi.server.Util;
+import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

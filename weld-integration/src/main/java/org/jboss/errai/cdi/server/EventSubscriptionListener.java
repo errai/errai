@@ -19,13 +19,11 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 
 import org.jboss.errai.bus.client.api.SubscribeListener;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.SubscriptionEvent;
-import org.jboss.errai.cdi.server.events.EventObserverMethod;
 
 /**
  * @author Filip Rogaczewski

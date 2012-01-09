@@ -10,10 +10,10 @@ import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
-import org.jboss.errai.enterprise.client.cdi.events.BusReadyEvent;
 import org.jboss.errai.cdi.client.qualifier.A;
 import org.jboss.errai.cdi.client.qualifier.B;
 import org.jboss.errai.cdi.client.qualifier.C;
+import org.jboss.errai.enterprise.client.cdi.events.BusReadyEvent;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
 /**

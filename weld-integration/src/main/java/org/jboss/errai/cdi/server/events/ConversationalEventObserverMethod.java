@@ -16,14 +16,14 @@
 
 package org.jboss.errai.cdi.server.events;
 
+import java.lang.annotation.Annotation;
+
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RoutingFlags;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
-
-import java.lang.annotation.Annotation;
 
 /**
  * @author Mike Brock

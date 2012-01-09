@@ -39,8 +39,8 @@ import org.jboss.errai.cdi.demo.tagcloud.client.shared.TagCloudSubscription;
 import org.jboss.errai.cdi.demo.tagcloud.client.shared.Updated;
 
 /**
- * A CDI based tag cloud service using random mock data. 
- * This service can be used to test the client in dev mode using jetty.
+ * A CDI based tag cloud service using random mock data. This service can be used to test the client in dev mode using
+ * jetty.
  */
 @ApplicationScoped
 public class MockTagCloudService {
@@ -73,10 +73,12 @@ public class MockTagCloudService {
   @Inject
   private Event<TagCloud> tagCloudEvent;
 
-  @Inject @Updated
+  @Inject
+  @Updated
   private Event<Tag> updatedTagEvent;
 
-  @Inject @New
+  @Inject
+  @New
   private Event<Tag> newTagEvent;
 
   @PostConstruct
@@ -102,7 +104,7 @@ public class MockTagCloudService {
     if (Math.random() > 0.9) {
       // add a random tag
       List<Tag> tags = new ArrayList<Tag>(initialTags);
-      Tag randomTag = new Tag(randomString(tags.get(new Random().nextInt(initialTags.size())).getName()), 
+      Tag randomTag = new Tag(randomString(tags.get(new Random().nextInt(initialTags.size())).getName()),
           (int) Math.ceil(Math.random() * 100));
       initialTags.add(randomTag);
       newTagEvent.fire(randomTag);

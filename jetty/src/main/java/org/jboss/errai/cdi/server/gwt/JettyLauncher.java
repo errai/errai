@@ -15,19 +15,22 @@
  */
 package org.jboss.errai.cdi.server.gwt;
 
-import com.google.gwt.core.ext.ServletContainer;
-import com.google.gwt.core.ext.ServletContainerLauncher;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.UnableToCompleteException;
-import com.google.gwt.dev.shell.jetty.JettyNullLogger;
-import com.google.gwt.dev.util.InstalledHelpInfo;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Iterator;
+
 import org.jboss.errai.bus.server.service.ServiceLocator;
 import org.jboss.errai.bus.server.servlet.AbstractErraiServlet;
 import org.jboss.errai.bus.server.servlet.DefaultBlockingServlet;
 import org.jboss.errai.bus.server.servlet.JettyContinuationsServlet;
 import org.mortbay.component.AbstractLifeCycle;
-import org.mortbay.jetty.*;
+import org.mortbay.jetty.AbstractConnector;
 import org.mortbay.jetty.HttpFields.Field;
+import org.mortbay.jetty.Request;
+import org.mortbay.jetty.RequestLog;
+import org.mortbay.jetty.Response;
+import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.RequestLogHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.webapp.WebAppClassLoader;
@@ -35,10 +38,12 @@ import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.log.Log;
 import org.mortbay.log.Logger;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.util.Iterator;
+import com.google.gwt.core.ext.ServletContainer;
+import com.google.gwt.core.ext.ServletContainerLauncher;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.UnableToCompleteException;
+import com.google.gwt.dev.shell.jetty.JettyNullLogger;
+import com.google.gwt.dev.util.InstalledHelpInfo;
 
 /**
  * A {@link ServletContainerLauncher} for an embedded Jetty server.

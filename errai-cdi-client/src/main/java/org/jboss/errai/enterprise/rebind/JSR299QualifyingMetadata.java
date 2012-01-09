@@ -16,15 +16,16 @@
 
 package org.jboss.errai.enterprise.rebind;
 
-import org.jboss.errai.ioc.rebind.ioc.QualifyingMetadata;
-
-import javax.enterprise.inject.Any;
-import javax.inject.Qualifier;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+
+import javax.enterprise.inject.Any;
+import javax.inject.Qualifier;
+
+import org.jboss.errai.ioc.rebind.ioc.QualifyingMetadata;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
