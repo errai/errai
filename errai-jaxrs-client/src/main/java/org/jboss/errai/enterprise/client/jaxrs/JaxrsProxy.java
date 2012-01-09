@@ -19,7 +19,7 @@ package org.jboss.errai.enterprise.client.jaxrs;
 import org.jboss.errai.bus.client.framework.RPCStub;
 
 /**
- * JAX-RS proxies are basically RPCStubs stored in the same {@see RemoteServiceProxyFactory}.
+ * JAX-RS proxies are basically {@link RPCStub}s stored in the same {@see RemoteServiceProxyFactory}.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -33,7 +33,7 @@ public interface JaxrsProxy extends RPCStub {
   public String getBaseUrl();
   
   /**
-   * Set the base url of the remote service and override the configured default application root path.
+   * Sets the base url of the remote service and overrides the configured default application root path.
    * 
    * @param url  the base url used to contact the remote service
    */

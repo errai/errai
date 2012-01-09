@@ -40,6 +40,7 @@ import com.google.gwt.http.client.RequestBuilder;
  */
 public class JaxrsGwtRequestMethodMapper {
 
+  @SuppressWarnings("serial")
   private static Map<Class<? extends Annotation>, Statement> map =
       new HashMap<Class<? extends Annotation>, Statement>() {
         {
