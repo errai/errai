@@ -30,7 +30,7 @@ import javax.enterprise.inject.spi.ObserverMethod;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.cdi.server.TypeRegistry;
-import org.jboss.errai.cdi.server.Util;
+import org.jboss.errai.cdi.server.CDIServerUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,7 +82,7 @@ public class ShutdownEventObserver implements ObserverMethod {
 
     // unsubscribe bean endpoints        
     for (AnnotatedType<?> svc : managedTypes.getServiceEndpoints()) {
-      String subject = Util.resolveServiceName(svc.getJavaClass());
+      String subject = CDIServerUtil.resolveServiceName(svc.getJavaClass());
       log.debug("Unsubscribe: " + subject);
       bus.unsubscribeAll(subject);
     }

@@ -40,7 +40,7 @@ import java.util.Set;
  * @author Heiko Braun <hbraun@redhat.com>
  * @author Mike Brock <cbrock@redhat.com>
  */
-public class Util {
+public class CDIServerUtil {
   private static final String COMPONENT_CONTEXT = "java:comp/env";
 
   private static final String ERRAI_STANDARD_SERVICE_JNDI = COMPONENT_CONTEXT + "/ErraiService";

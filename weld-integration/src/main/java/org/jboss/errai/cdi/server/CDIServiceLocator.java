@@ -12,7 +12,7 @@ import org.jboss.errai.bus.server.servlet.ServiceLocator;
 public class CDIServiceLocator implements ServiceLocator {
 
   public ErraiService locateService() {
-    BeanManager beanManager = Util.lookupBeanManager();
+    BeanManager beanManager = CDIServerUtil.lookupBeanManager();
 
     Set<Bean<?>> beans = beanManager.getBeans(ErraiService.class);
     Bean<?> bean = beanManager.resolve(beans);

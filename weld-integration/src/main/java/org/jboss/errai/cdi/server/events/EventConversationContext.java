@@ -16,29 +16,68 @@
 
 package org.jboss.errai.cdi.server.events;
 
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.cdi.server.CDIServerUtil;
+
 /**
+ * An context control helper for handling Errai conversations within CDI. Internally, this class uses a 
+ * {@link ThreadLocal} to store its state. Thus, conversational scopes within Errai are dependent upon single-threaded
+ * dispatch within the CDI container. 
+ * 
  * @author Mike Brock
  */
 public class EventConversationContext {
   private static final ThreadLocal<Context> threadLocalConversationContext
           = new ThreadLocal<Context>();
 
-  public static void activate(Object o, String session) {
-    threadLocalConversationContext.set(new Context(o, session));
+  /**
+   * Activate the conversation scope. If there is a currently active scope, it is replaced with this new scope.
+   * 
+   * @param o reference to the event object which is opening the scope.
+   * @param sessionId the bus session ID of the scope.
+   */
+  public static void activate(Object o, String sessionId) {
+    threadLocalConversationContext.set(new Context(o, sessionId));
   }
 
-  public static void activate(Object o) {
-    threadLocalConversationContext.set(new Context(o, null));
+  /**
+   * Activate a conversations scope. If there is a currently active scope, it is replaced with this new scope.
+   * @param sessionId the bus session ID of the scope.
+   */
+  public static void activate(String sessionId) {
+    threadLocalConversationContext.set(new Context(null, sessionId));
   }
 
+  /**
+   * Convenience method to active the conversation scope from a Errai {@code Message} object, by extracting the
+   * session ID referenced within.
+   *
+   * @param message An Errai message.
+   */
+  public static void activate(Message message) {
+    activate(CDIServerUtil.getSessionId(message));
+  }
+
+  /**
+   * Deactivate any current scope.
+   */
   public static void deactivate() {
     threadLocalConversationContext.remove();
   }
 
+  /**
+   * Get the current scope.
+   * @return isntance of the context.
+   */
   public static Context get() {
     return threadLocalConversationContext.get();
   }
 
+  /**
+   * Checks to see if the specified event reference is the same event reference that initiated the conversation.
+   * @param event the event instance
+   * @return boolean indicating if the event object is the same instance
+   */
   public static boolean isEventObjectInContext(Object event) {
     Context ctx = get();
     return ctx != null && event == ctx.getEventObject();

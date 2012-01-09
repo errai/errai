@@ -18,13 +18,11 @@ package org.jboss.errai.cdi.server.events;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RoutingFlags;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.server.util.LocalContext;
 import org.jboss.errai.cdi.server.ScopeUtil;
-import org.jboss.errai.cdi.server.Util;
-import org.jboss.errai.cdi.server.events.EventConversationContext;
+import org.jboss.errai.cdi.server.CDIServerUtil;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
@@ -70,7 +68,7 @@ public class EventDispatcher implements MessageCallback {
           }
 
           final Object o = message.get(Object.class, CDIProtocol.OBJECT_REF);
-          EventConversationContext.activate(o, Util.getSessionId(message));
+          EventConversationContext.activate(o, CDIServerUtil.getSessionId(message));
           try {
 
             @SuppressWarnings("unchecked")

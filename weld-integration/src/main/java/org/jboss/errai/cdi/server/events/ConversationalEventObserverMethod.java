@@ -26,6 +26,10 @@ import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import java.lang.annotation.Annotation;
 
 /**
+ * An implementation of the the CDI SPI {@code ObserverMethod} interface which is used to intercept events within the
+ * CDI container. The purpose of this implementation is to observe an event which is exposed to the bus and
+ * transmit the event "conversationally" to the current client scope </p>
+ *
  * @author Mike Brock
  */
 public class ConversationalEventObserverMethod extends EventObserverMethod {

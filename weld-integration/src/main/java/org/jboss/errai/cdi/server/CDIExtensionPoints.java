@@ -268,7 +268,7 @@ public class CDIExtensionPoints implements Extension {
 
   public void afterBeanDiscovery(@Observes AfterBeanDiscovery abd, BeanManager bm) {
     // Errai Service wrapper
-    this.service = Util.lookupErraiService();
+    this.service = CDIServerUtil.lookupErraiService();
 
     final MessageBus bus = service.getBus();
 
@@ -328,7 +328,7 @@ public class CDIExtensionPoints implements Extension {
             //           ScopeUtil.associateRequestContext(message);
             //           ScopeUtil.associateSessionContext(message);
 
-            Object targetBean = Util.lookupBean(beanManager, type);
+            Object targetBean = CDIServerUtil.lookupBean(beanManager, type);
 
             try {
               callMethod.invoke(targetBean, message);
@@ -356,11 +356,11 @@ public class CDIExtensionPoints implements Extension {
       }
 
       log.info("Register MessageCallback: " + type);
-      final String subjectName = Util.resolveServiceName(type.getJavaClass());
+      final String subjectName = CDIServerUtil.resolveServiceName(type.getJavaClass());
 
       bus.subscribe(subjectName, new MessageCallback() {
         public void callback(final Message message) {
-          MessageCallback callback = (MessageCallback) Util.lookupBean(beanManager, type.getJavaClass());
+          MessageCallback callback = (MessageCallback) CDIServerUtil.lookupBean(beanManager, type.getJavaClass());
           callback.callback(message);
         }
       });
@@ -391,7 +391,7 @@ public class CDIExtensionPoints implements Extension {
           epts.put(RebindUtils.createCallSignature(method), new ConversationalEndpointCallback(new ServiceInstanceProvider() {
             @Override
             public Object get(Message message) {
-              return Util.lookupRPCBean(beanManager, remoteIface, type);
+              return CDIServerUtil.lookupRPCBean(beanManager, remoteIface, type);
             }
 
           }, method, bus));
@@ -434,7 +434,7 @@ public class CDIExtensionPoints implements Extension {
 
     public Object getInvocationTarget() {
       if (null == invocationTarget) {
-        invocationTarget = Util.lookupBean(beanManager, type.getJavaClass());
+        invocationTarget = CDIServerUtil.lookupBean(beanManager, type.getJavaClass());
       }
       return invocationTarget;
     }

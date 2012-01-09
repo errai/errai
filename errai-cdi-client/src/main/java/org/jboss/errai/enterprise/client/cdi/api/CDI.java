@@ -72,6 +72,11 @@ public class CDI {
     return "cdi.event:" + typeName;
   }
 
+  /**
+   * Return a list of string representations for the qualifiers.
+   * @param qualifiers
+   * @return
+   */
   public static List<String> getQualifiersPart(Annotation[] qualifiers) {
     List<String> qualifiersPart = null;
     if (qualifiers != null) {

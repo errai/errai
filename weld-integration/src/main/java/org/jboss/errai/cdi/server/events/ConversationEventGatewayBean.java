@@ -27,6 +27,9 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 
 /**
+ * A gateway for intercepting {@link ConversationalEventWrapper} instances and then passing them into the bus for
+ * transmission to remote clients.
+ *
  * @author Mike Brock
  */
 @ApplicationScoped

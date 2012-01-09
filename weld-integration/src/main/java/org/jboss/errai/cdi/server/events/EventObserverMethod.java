@@ -28,31 +28,54 @@ import java.lang.annotation.Annotation;
 import java.util.*;
 
 /**
- *
+ * An implementation of the the CDI SPI {@code ObserverMethod} interface which is used to intercept events within the 
+ * CDI container. The purpose of this implementation is to observe an event which is exposed to the bus and
+ * transmit the event to all clients listening to this event.</p>
+ * 
+ * For the "conversational" version of this, see {@link ConversationalEventObserverMethod}.
+ * 
  * @author Mike Brock
  */
 public class EventObserverMethod implements ObserverMethod {
 
+  /**
+   * The type of event handled by this ObserverMethod implementation.
+   */
   protected final Class<?> type;
+
+  /**
+   * A set of the qualifiers that this method observers.
+   */
   protected final Set<Annotation> observedQualifiers;
-  protected final Annotation[] qualifiers;
+
+  /**
+   * the qualifiers collection to be used for transmitting the data over the wire. This is represented as a List
+   * merely for internal wire purposes. It does not connote that ordering matters.
+   */
   protected final List<String> qualifierForWire;
+
+  /**
+   * An instance of the MessageBus.
+   */
   protected final MessageBus bus;
+
+  /**
+   * The pre-calculated subject to be used to transmit the event remotely.
+   */
   protected final String subject;
-  protected final String qualifiersString;
 
   public EventObserverMethod(Class<?> type, MessageBus bus, Annotation... qualifiers) {
     this.type = type;
     this.bus = bus;
-    this.qualifiers = qualifiers == null ? new Annotation[0] : qualifiers;
-    this.observedQualifiers = (this.qualifiers.length == 0) ? Collections.<Annotation>emptySet()
-            : Collections.unmodifiableSet(new HashSet<Annotation>(Arrays.asList(qualifiers)));
 
-    // don't be clever and make this an unmodifiableList. Errai Marshalling can't currently deal with it.
-    this.qualifierForWire = (this.qualifiers.length == 0) ? Collections.<String>emptyList()
-            : CDI.getQualifiersPart(qualifiers);
-
-    this.qualifiersString = Arrays.toString(qualifiers);
+    if (qualifiers == null || qualifiers.length == 0) {
+      this.observedQualifiers = Collections.emptySet();
+      this.qualifierForWire = Collections.emptyList();
+    }
+    else {
+      this.observedQualifiers = Collections.unmodifiableSet(new HashSet<Annotation>(Arrays.asList(qualifiers)));
+      this.qualifierForWire = CDI.getQualifiersPart(qualifiers);
+    }
 
     this.subject = CDI.getSubjectNameByType(type);
   }
