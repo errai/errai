@@ -26,12 +26,12 @@ import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.meta.MetaParameter;
 import org.jboss.errai.codegen.framework.meta.MetaType;
 import org.jboss.errai.codegen.framework.meta.MetaTypeVariable;
+import org.jboss.errai.codegen.framework.util.GenUtil;
 
 import com.google.gwt.core.ext.typeinfo.JGenericType;
 import com.google.gwt.core.ext.typeinfo.JMethod;
 import com.google.gwt.core.ext.typeinfo.JParameter;
 import com.google.gwt.core.ext.typeinfo.JType;
-import org.jboss.errai.codegen.framework.util.GenUtil;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

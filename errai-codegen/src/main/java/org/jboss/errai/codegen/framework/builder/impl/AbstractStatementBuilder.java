@@ -24,7 +24,6 @@ import org.jboss.errai.codegen.framework.builder.Builder;
 import org.jboss.errai.codegen.framework.builder.StatementEnd;
 import org.jboss.errai.codegen.framework.builder.callstack.CallElement;
 import org.jboss.errai.codegen.framework.builder.callstack.CallWriter;
-import org.jboss.errai.codegen.framework.exception.*;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.util.GenUtil;
 

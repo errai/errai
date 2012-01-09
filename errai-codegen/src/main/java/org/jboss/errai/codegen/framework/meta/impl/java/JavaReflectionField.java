@@ -20,7 +20,10 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
-import org.jboss.errai.codegen.framework.meta.*;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
+import org.jboss.errai.codegen.framework.meta.MetaField;
+import org.jboss.errai.codegen.framework.meta.MetaType;
 import org.jboss.errai.codegen.framework.util.GenUtil;
 
 public class JavaReflectionField extends MetaField {

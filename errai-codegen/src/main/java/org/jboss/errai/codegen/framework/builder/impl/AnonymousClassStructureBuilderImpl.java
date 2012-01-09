@@ -27,12 +27,12 @@ import org.jboss.errai.codegen.framework.DefParameters;
 import org.jboss.errai.codegen.framework.Parameter;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.Variable;
-import org.jboss.errai.codegen.framework.builder.*;
+import org.jboss.errai.codegen.framework.builder.AnonymousClassStructureBuilder;
+import org.jboss.errai.codegen.framework.builder.BlockBuilder;
+import org.jboss.errai.codegen.framework.builder.BuildCallback;
 import org.jboss.errai.codegen.framework.exception.UndefinedMethodException;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
-import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
-import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaMethod;
 import org.jboss.errai.codegen.framework.util.GenUtil;
 
 /**

@@ -16,16 +16,28 @@
 
 package org.jboss.errai.codegen.framework.meta.impl;
 
-import org.jboss.errai.codegen.framework.meta.*;
-import org.mvel2.util.ParseTools;
+import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.asClassArray;
+import static org.jboss.errai.codegen.framework.util.GenUtil.classToMeta;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.asClassArray;
-import static org.jboss.errai.codegen.framework.util.GenUtil.classToMeta;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
+import org.jboss.errai.codegen.framework.meta.MetaConstructor;
+import org.jboss.errai.codegen.framework.meta.MetaMethod;
+import org.jboss.errai.codegen.framework.meta.MetaParameter;
+import org.jboss.errai.codegen.framework.meta.MetaParameterizedType;
+import org.jboss.errai.codegen.framework.meta.MetaType;
+import org.mvel2.util.ParseTools;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

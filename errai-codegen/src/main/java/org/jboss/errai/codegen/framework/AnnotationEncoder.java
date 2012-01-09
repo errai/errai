@@ -16,18 +16,18 @@
 
 package org.jboss.errai.codegen.framework;
 
-import org.jboss.errai.codegen.framework.builder.AnonymousClassStructureBuilder;
-import org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder;
-import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
-import org.jboss.errai.codegen.framework.util.Stmt;
+import static org.jboss.errai.codegen.framework.util.PrettyPrinter.prettyPrintJava;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import static org.jboss.errai.codegen.framework.util.PrettyPrinter.prettyPrintJava;
+import org.jboss.errai.codegen.framework.builder.AnonymousClassStructureBuilder;
+import org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
+import org.jboss.errai.codegen.framework.util.Stmt;
 
 public class AnnotationEncoder {
   public static Statement encode(final Annotation annotation) {

@@ -26,7 +26,6 @@ import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.Variable;
 import org.jboss.errai.codegen.framework.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.BuildCallback;
-import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.StatementEnd;
 import org.jboss.errai.codegen.framework.builder.callstack.CallWriter;
 import org.jboss.errai.codegen.framework.builder.callstack.DeferredCallElement;
@@ -36,7 +35,6 @@ import org.jboss.errai.codegen.framework.exception.UndefinedConstructorException
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaField;
-import org.jboss.errai.codegen.framework.meta.impl.gwt.GWTClass;
 import org.jboss.errai.codegen.framework.util.GenUtil;
 
 /**

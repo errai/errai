@@ -19,7 +19,6 @@ package org.jboss.errai.codegen.framework.meta.impl.gwt;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaType;
 import org.jboss.errai.codegen.framework.meta.MetaTypeVariable;
 

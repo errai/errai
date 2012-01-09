@@ -21,11 +21,15 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jboss.errai.codegen.framework.meta.*;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaConstructor;
+import org.jboss.errai.codegen.framework.meta.MetaParameter;
+import org.jboss.errai.codegen.framework.meta.MetaType;
+import org.jboss.errai.codegen.framework.meta.MetaTypeVariable;
+import org.jboss.errai.codegen.framework.util.GenUtil;
 
 import com.google.gwt.core.ext.typeinfo.JConstructor;
 import com.google.gwt.core.ext.typeinfo.JParameter;
-import org.jboss.errai.codegen.framework.util.GenUtil;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

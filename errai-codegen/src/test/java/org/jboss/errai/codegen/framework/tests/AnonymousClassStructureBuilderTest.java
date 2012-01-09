@@ -25,7 +25,6 @@ import org.jboss.errai.codegen.framework.Variable;
 import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder;
-import org.jboss.errai.codegen.framework.builder.impl.StatementBuilder;
 import org.jboss.errai.codegen.framework.tests.model.Bar;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.junit.Test;

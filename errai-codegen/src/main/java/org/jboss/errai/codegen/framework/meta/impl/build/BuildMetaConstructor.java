@@ -27,7 +27,11 @@ import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.Variable;
 import org.jboss.errai.codegen.framework.builder.Builder;
 import org.jboss.errai.codegen.framework.builder.impl.Scope;
-import org.jboss.errai.codegen.framework.meta.*;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaConstructor;
+import org.jboss.errai.codegen.framework.meta.MetaParameter;
+import org.jboss.errai.codegen.framework.meta.MetaType;
+import org.jboss.errai.codegen.framework.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.framework.util.GenUtil;
 
 /**

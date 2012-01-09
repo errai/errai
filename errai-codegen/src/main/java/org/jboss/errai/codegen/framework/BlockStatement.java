@@ -16,10 +16,10 @@
 
 package org.jboss.errai.codegen.framework;
 
-import org.jboss.errai.codegen.framework.builder.ClosedBlock;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.jboss.errai.codegen.framework.builder.ClosedBlock;
 
 /**
  * Represents a code block (e.g. a loop body).

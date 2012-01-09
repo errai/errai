@@ -16,21 +16,47 @@
 
 package org.jboss.errai.codegen.framework.util;
 
-import org.jboss.errai.codegen.framework.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.jboss.errai.codegen.framework.Cast;
+import org.jboss.errai.codegen.framework.Context;
+import org.jboss.errai.codegen.framework.DefModifiers;
+import org.jboss.errai.codegen.framework.DefParameters;
+import org.jboss.errai.codegen.framework.Modifier;
+import org.jboss.errai.codegen.framework.Parameter;
+import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.StringStatement;
+import org.jboss.errai.codegen.framework.Variable;
+import org.jboss.errai.codegen.framework.VariableReference;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
 import org.jboss.errai.codegen.framework.builder.CatchBlockBuilder;
 import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.Scope;
-import org.jboss.errai.codegen.framework.exception.*;
+import org.jboss.errai.codegen.framework.exception.InvalidExpressionException;
+import org.jboss.errai.codegen.framework.exception.InvalidTypeException;
+import org.jboss.errai.codegen.framework.exception.OutOfScopeException;
+import org.jboss.errai.codegen.framework.exception.TypeNotIterableException;
+import org.jboss.errai.codegen.framework.exception.UndefinedMethodException;
 import org.jboss.errai.codegen.framework.literal.LiteralFactory;
 import org.jboss.errai.codegen.framework.literal.LiteralValue;
-import org.jboss.errai.codegen.framework.meta.*;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
+import org.jboss.errai.codegen.framework.meta.MetaClassMember;
+import org.jboss.errai.codegen.framework.meta.MetaConstructor;
+import org.jboss.errai.codegen.framework.meta.MetaField;
+import org.jboss.errai.codegen.framework.meta.MetaMethod;
+import org.jboss.errai.codegen.framework.meta.MetaParameter;
+import org.jboss.errai.codegen.framework.meta.MetaParameterizedType;
+import org.jboss.errai.codegen.framework.meta.MetaType;
+import org.jboss.errai.codegen.framework.meta.MetaTypeVariable;
 import org.mvel2.DataConversion;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.*;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

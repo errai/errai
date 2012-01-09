@@ -24,10 +24,8 @@ import java.util.Map;
 
 import org.jboss.errai.codegen.framework.AnnotationEncoder;
 import org.jboss.errai.codegen.framework.Context;
-import org.jboss.errai.codegen.framework.RenderCacheStore;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
-import org.jboss.errai.codegen.framework.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.framework.meta.MetaType;
 
 /**

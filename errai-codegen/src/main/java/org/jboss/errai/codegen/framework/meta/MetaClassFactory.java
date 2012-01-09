@@ -16,21 +16,34 @@
 
 package org.jboss.errai.codegen.framework.meta;
 
-import org.jboss.errai.codegen.framework.*;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.enterprise.util.TypeLiteral;
+
+import org.jboss.errai.codegen.framework.Context;
+import org.jboss.errai.codegen.framework.DefParameters;
+import org.jboss.errai.codegen.framework.Parameter;
+import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.ThrowsDeclaration;
 import org.jboss.errai.codegen.framework.builder.callstack.LoadClassReference;
-import org.jboss.errai.codegen.framework.meta.impl.build.*;
+import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
+import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaConstructor;
+import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaField;
+import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaMethod;
+import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaParameterizedType;
 import org.jboss.errai.codegen.framework.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.codegen.framework.util.EmptyStatement;
 import org.jboss.errai.codegen.framework.util.GenUtil;
 import org.mvel2.ConversionHandler;
 import org.mvel2.DataConversion;
-
-import javax.enterprise.util.TypeLiteral;
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.util.*;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

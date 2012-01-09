@@ -16,6 +16,11 @@
 
 package org.jboss.errai.codegen.framework.builder.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.enterprise.util.TypeLiteral;
+
 import org.jboss.errai.codegen.framework.BlockStatement;
 import org.jboss.errai.codegen.framework.DefModifiers;
 import org.jboss.errai.codegen.framework.DefParameters;
@@ -27,10 +32,6 @@ import org.jboss.errai.codegen.framework.builder.MethodBuildCallback;
 import org.jboss.errai.codegen.framework.literal.LiteralFactory;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
-
-import javax.enterprise.util.TypeLiteral;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>

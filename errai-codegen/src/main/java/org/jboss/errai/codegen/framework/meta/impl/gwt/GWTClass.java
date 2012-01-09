@@ -20,14 +20,25 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gwt.core.ext.typeinfo.*;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaConstructor;
 import org.jboss.errai.codegen.framework.meta.MetaField;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.framework.meta.impl.AbstractMetaClass;
+
+import com.google.gwt.core.ext.typeinfo.JArrayType;
+import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.JConstructor;
+import com.google.gwt.core.ext.typeinfo.JField;
+import com.google.gwt.core.ext.typeinfo.JGenericType;
+import com.google.gwt.core.ext.typeinfo.JMethod;
+import com.google.gwt.core.ext.typeinfo.JParameter;
+import com.google.gwt.core.ext.typeinfo.JParameterizedType;
+import com.google.gwt.core.ext.typeinfo.JType;
+import com.google.gwt.core.ext.typeinfo.JTypeParameter;
+import com.google.gwt.core.ext.typeinfo.NotFoundException;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

@@ -19,12 +19,11 @@ package org.jboss.errai.codegen.framework.meta.impl.gwt;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaType;
+import org.jboss.errai.codegen.framework.meta.impl.AbstractMetaParameterizedType;
 
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.JParameterizedType;
-import org.jboss.errai.codegen.framework.meta.impl.AbstractMetaParameterizedType;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

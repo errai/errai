@@ -18,17 +18,20 @@ package org.jboss.errai.codegen.framework.builder.callstack;
 
 import static org.jboss.errai.codegen.framework.CallParameters.fromStatements;
 
+import java.util.Arrays;
+
 import org.jboss.errai.codegen.framework.CallParameters;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.MethodInvocation;
 import org.jboss.errai.codegen.framework.Statement;
-import org.jboss.errai.codegen.framework.exception.*;
+import org.jboss.errai.codegen.framework.exception.InvalidExpressionException;
+import org.jboss.errai.codegen.framework.exception.InvalidTypeException;
+import org.jboss.errai.codegen.framework.exception.OutOfScopeException;
+import org.jboss.errai.codegen.framework.exception.TypeNotIterableException;
+import org.jboss.errai.codegen.framework.exception.UndefinedMethodException;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
-import org.jboss.errai.codegen.framework.meta.MetaType;
 import org.jboss.errai.codegen.framework.util.GenUtil;
-
-import java.util.Arrays;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
