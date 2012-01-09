@@ -23,7 +23,7 @@ import org.jboss.errai.bus.client.framework.RPCStub;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface JaxRsProxy extends RPCStub {
+public interface JaxrsProxy extends RPCStub {
   
   /**
    * If not set explicitly, the base url is the configured default application root path {@see RestClient}.

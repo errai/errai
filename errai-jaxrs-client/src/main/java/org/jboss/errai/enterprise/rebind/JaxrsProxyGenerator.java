@@ -29,7 +29,7 @@ import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.util.Bool;
 import org.jboss.errai.codegen.framework.util.Stmt;
-import org.jboss.errai.enterprise.client.jaxrs.JaxRsProxy;
+import org.jboss.errai.enterprise.client.jaxrs.JaxrsProxy;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 
@@ -57,7 +57,7 @@ public class JaxrsProxyGenerator {
     ClassStructureBuilder<?> classBuilder = ClassBuilder.define(remote.getSimpleName() + "Impl")
         .packageScope()
         .implementsInterface(remote)
-        .implementsInterface(JaxRsProxy.class)
+        .implementsInterface(JaxrsProxy.class)
         .body()
         .privateField("remoteCallback", RemoteCallback.class)
         .finish()
@@ -84,7 +84,7 @@ public class JaxrsProxyGenerator {
             .append(Stmt.loadVariable("baseUrl").returnValue())
             .finish()
             .else_()
-            .append(Stmt.invokeStatic(RestClient.class, "getJaxRsApplicationRoot").returnValue())
+            .append(Stmt.invokeStatic(RestClient.class, "getApplicationRoot").returnValue())
             .finish()
         )
         .finish();

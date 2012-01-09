@@ -39,25 +39,25 @@ public class ConfigurationTest extends AbstractErraiJaxrsTest {
 
   @Test
   public void testNullApplicationRoot() {
-    RestClient.setJaxRsApplicationRoot(null);
-    assertEquals("", RestClient.getJaxRsApplicationRoot());
+    RestClient.setApplicationRoot(null);
+    assertEquals("", RestClient.getApplicationRoot());
   }
 
   @Test
   public void testEmptyApplicationRoot() {
-    RestClient.setJaxRsApplicationRoot("");
-    assertEquals("", RestClient.getJaxRsApplicationRoot());
+    RestClient.setApplicationRoot("");
+    assertEquals("", RestClient.getApplicationRoot());
   }
 
   @Test
   public void testApplicationRootWithMissingSlash() {
-    RestClient.setJaxRsApplicationRoot("/root");
-    assertEquals("/root/", RestClient.getJaxRsApplicationRoot());
+    RestClient.setApplicationRoot("/root");
+    assertEquals("/root/", RestClient.getApplicationRoot());
   }
 
   @Test
   public void testApplicationRoot() {
-    RestClient.setJaxRsApplicationRoot("http://localhost:8080/root/");
-    assertEquals("http://localhost:8080/root/", RestClient.getJaxRsApplicationRoot());
+    RestClient.setApplicationRoot("http://localhost:8080/root/");
+    assertEquals("http://localhost:8080/root/", RestClient.getApplicationRoot());
   }
 }

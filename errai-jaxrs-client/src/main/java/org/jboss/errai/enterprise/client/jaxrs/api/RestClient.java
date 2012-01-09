@@ -20,7 +20,7 @@ import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.framework.ProxyProvider;
 import org.jboss.errai.bus.client.framework.RemoteServiceProxyFactory;
-import org.jboss.errai.enterprise.client.jaxrs.JaxRsProxy;
+import org.jboss.errai.enterprise.client.jaxrs.JaxrsProxy;
 import org.jboss.errai.enterprise.client.jaxrs.JaxrsProxyLoader;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 
@@ -91,19 +91,19 @@ public class RestClient {
       baseUrl += "/";
     
     T proxy = proxyProvider.getRemoteProxy(remoteService);
-    if (proxy == null || !(proxy instanceof JaxRsProxy)) {
+    if (proxy == null || !(proxy instanceof JaxrsProxy)) {
 
       JaxrsProxyLoader loader = GWT.create(JaxrsProxyLoader.class);
       loader.loadProxies();
 
       proxy = proxyProvider.getRemoteProxy(remoteService); 
-      if (proxy == null || !(proxy instanceof JaxRsProxy))
+      if (proxy == null || !(proxy instanceof JaxrsProxy))
         throw new RuntimeException("No proxy found for JAX-RS interface: " + remoteService.getName());
     }
 
-    ((JaxRsProxy) proxy).setRemoteCallback(callback);
-    ((JaxRsProxy) proxy).setErrorCallback(errorCallback);
-    ((JaxRsProxy) proxy).setBaseUrl(baseUrl);
+    ((JaxrsProxy) proxy).setRemoteCallback(callback);
+    ((JaxrsProxy) proxy).setErrorCallback(errorCallback);
+    ((JaxrsProxy) proxy).setBaseUrl(baseUrl);
     return proxy;
   }
   
@@ -113,7 +113,7 @@ public class RestClient {
    * 
    * @return path with trailing slash, or empty string if undefined or explicitly set to empty
    */
-  public static native String getJaxRsApplicationRoot() /*-{
+  public static native String getApplicationRoot() /*-{
     if ($wnd.erraiJaxRsApplicationRoot === undefined || $wnd.erraiJaxRsApplicationRoot.length === 0) {
       return ""; 
     } 
@@ -130,7 +130,7 @@ public class RestClient {
    * 
    * @param root path to use when sending request to the endpoint
    */
-  public static native void setJaxRsApplicationRoot(String path) /*-{
+  public static native void setApplicationRoot(String path) /*-{
     if (path == null) {
       $wnd.erraiJaxRsApplicationRoot = undefined;
     }

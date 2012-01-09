@@ -33,7 +33,7 @@ public abstract class AbstractErraiJaxrsTest extends GWTTestCase {
  
   @Override
   protected void gwtSetUp() throws Exception {
-    RestClient.setJaxRsApplicationRoot(jaxRsApplicationRoot);
+    RestClient.setApplicationRoot(jaxRsApplicationRoot);
     super.gwtSetUp();
   }
 
