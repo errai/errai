@@ -522,7 +522,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    */
   private void transmitRemote(final String message, final Message txMessage) {
     if (message == null) return;
-
     //  System.out.println("TX: " + message);
 
     if (webSocketOpen) {
@@ -531,6 +530,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
       else {
         log("websocket channel is closed. falling back to comet");
+
         //disconnected.
         webSocketOpen = false;
         webSocketChannel = null;
@@ -538,9 +538,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
         if (receiveCommCallback instanceof LongPollRequestCallback) {
           ((LongPollRequestCallback) receiveCommCallback).schedule();
-        }
-        else if (receiveCommCallback instanceof ShortPollRequestCallback) {
-          ((ShortPollRequestCallback) receiveCommCallback).schedule();
         }
       }
     }
@@ -1296,7 +1293,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   public void procPayload(String text) {
-
   //  System.out.println("RX:" + text);
     try {
       for (MarshalledMessage m : decodePayload(text)) {
@@ -1486,11 +1482,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     public void addError(String message, String additionalDetails, Throwable e) {
       if (!showErrors) return;
 
-      e.printStackTrace();
+
       contentPanel.add(new HTML("<strong style='background:red;color:white;'>" + message + "</strong>"));
 
       StringBuilder buildTrace = new StringBuilder("<tt style=\"font-size:11px;\"><pre>");
       if (e != null) {
+        e.printStackTrace();
         buildTrace.append(e.getClass().getName()).append(": ").append(e.getMessage()).append("<br/>");
         for (StackTraceElement ste : e.getStackTrace()) {
           buildTrace.append("  ").append(ste.toString()).append("<br/>");

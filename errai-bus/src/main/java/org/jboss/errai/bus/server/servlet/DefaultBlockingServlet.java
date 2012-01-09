@@ -91,7 +91,6 @@ public class DefaultBlockingServlet extends AbstractErraiServlet {
         }
 
         sendDisconnectDueToSessionExpiry(outputStream);
-
         return;
       }
 

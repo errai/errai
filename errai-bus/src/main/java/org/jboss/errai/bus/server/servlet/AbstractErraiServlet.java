@@ -51,7 +51,7 @@ import com.google.inject.Guice;
  */
 public abstract class AbstractErraiServlet extends HttpServlet {
   /* New and configured errai service */
-  protected ErraiService<HttpSession> service;
+  protected ErraiService service;
 
   /* A default Http session provider */
   protected SessionProvider<HttpSession> sessionProvider;
