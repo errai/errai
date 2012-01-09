@@ -35,7 +35,6 @@ import org.jboss.errai.cdi.demo.stock.client.shared.SubscriptionReply;
 import org.jboss.errai.cdi.demo.stock.client.shared.SubscriptionRequest;
 import org.jboss.errai.cdi.demo.stock.client.shared.TickBuilder;
 import org.jboss.errai.cdi.demo.stock.client.shared.TickCache;
-import org.jboss.errai.enterprise.client.cdi.api.Conversational;
 
 /**
  * Broadcasts fake price movements to clients.
@@ -65,7 +64,6 @@ public class TickerService {
    * @param subscription
    *          Details of the subscription request. Currently ignored.
    */
-  @Conversational
   public void handleClientSubscription(@Observes SubscriptionRequest subscription) {
     System.out.println("Got a client subscription");
     

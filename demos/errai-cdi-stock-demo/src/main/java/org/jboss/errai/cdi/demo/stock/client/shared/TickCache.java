@@ -5,14 +5,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import org.jboss.errai.common.client.api.annotations.ExposeEntity;
+import org.jboss.errai.common.client.api.annotations.Portable;
 
 /**
  * A cache that can hold ticks over an arbitrary time interval.
  * 
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
-@ExposeEntity
+@Portable
 public class TickCache {
 
   /**

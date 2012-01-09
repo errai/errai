@@ -2,7 +2,8 @@ package org.jboss.errai.cdi.demo.stock.client.shared;
 
 import java.util.List;
 
-import org.jboss.errai.common.client.api.annotations.ExposeEntity;
+import org.jboss.errai.common.client.api.annotations.Portable;
+import org.jboss.errai.enterprise.client.cdi.api.Conversational;
 
 /**
  * Fired in response to a subscription request. Provides new subscribers with an
@@ -10,7 +11,8 @@ import org.jboss.errai.common.client.api.annotations.ExposeEntity;
  * 
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
-@ExposeEntity
+@Portable
+@Conversational
 public class SubscriptionReply {
   
   /**

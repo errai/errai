@@ -2,7 +2,7 @@ package org.jboss.errai.cdi.demo.stock.client.shared;
 
 import java.util.Date;
 
-import org.jboss.errai.common.client.api.annotations.ExposeEntity;
+import org.jboss.errai.common.client.api.annotations.Portable;
 
 /**
  * A mutable representation of a tick (price change) in some tradable
@@ -10,7 +10,7 @@ import org.jboss.errai.common.client.api.annotations.ExposeEntity;
  * 
  * @author jfuerth
  */
-@ExposeEntity
+@Portable
 public class TickBuilder {
 
   private String symbol;

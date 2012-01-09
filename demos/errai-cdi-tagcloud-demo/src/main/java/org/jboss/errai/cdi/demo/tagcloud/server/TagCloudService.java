@@ -81,8 +81,9 @@ public class TagCloudService {
   }
 
   /*
-   * @Conversational public void handleNewSubscription(@Observes TagCloudSubscription subscription) {
-   * tagCloudEvent.fire(new TagCloud(new HashSet<Tag>(tags.values()))); }
+   * public void handleNewSubscription(@Observes TagCloudSubscription subscription) {
+   *  tagCloudEvent.fire(new TagCloud(new HashSet<Tag>(tags.values()))); 
+   * }
    */
 
   private void updateTags() {

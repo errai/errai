@@ -37,7 +37,6 @@ import org.jboss.errai.cdi.demo.tagcloud.client.shared.Tag;
 import org.jboss.errai.cdi.demo.tagcloud.client.shared.TagCloud;
 import org.jboss.errai.cdi.demo.tagcloud.client.shared.TagCloudSubscription;
 import org.jboss.errai.cdi.demo.tagcloud.client.shared.Updated;
-import org.jboss.errai.enterprise.client.cdi.api.Conversational;
 
 /**
  * A CDI based tag cloud service using random mock data. 
@@ -95,7 +94,6 @@ public class MockTagCloudService {
       updater.cancel(true);
   }
 
-  @Conversational
   public void handleNewSubscription(@Observes TagCloudSubscription subscription) {
     tagCloudEvent.fire(new TagCloud(initialTags));
   }
