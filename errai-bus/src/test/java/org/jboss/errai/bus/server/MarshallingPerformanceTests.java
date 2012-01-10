@@ -32,7 +32,7 @@ import java.util.Map;
  */
 public class MarshallingPerformanceTests extends TestCase {
 
-  private static final int TEST_ITERATIONS = 1000000;
+  private static final int TEST_ITERATIONS = 100;
 
   public void testMarshall() throws IOException {
     // ensure the marshalling system has been setup.
