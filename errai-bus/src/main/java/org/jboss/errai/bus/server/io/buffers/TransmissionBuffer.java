@@ -482,12 +482,7 @@ public class TransmissionBuffer implements Buffer {
         }
 
         try {
-//          if (time == -1) {
-//            bufferColor.dataWaiting.await();
-//          }
-//          else {
           nanos = bufferColor.dataWaiting.awaitNanos(nanos);
-//          }
         }
         catch (InterruptedException e) {
           bufferColor.dataWaiting.signal();
