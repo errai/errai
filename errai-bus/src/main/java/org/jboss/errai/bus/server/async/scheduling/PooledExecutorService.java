@@ -25,6 +25,7 @@ import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.jboss.errai.bus.client.api.AsyncTask;
+import org.jboss.errai.bus.client.api.HasAsyncTaskRef;
 import org.jboss.errai.bus.client.api.base.TimeUnit;
 import org.jboss.errai.bus.server.async.InterruptHandle;
 import org.jboss.errai.bus.server.async.TimedTask;
@@ -234,9 +235,15 @@ public class PooledExecutorService implements TaskProvider {
     boolean fired = false;
 
     private SingleFireTask(Runnable runnable) {
-      this.runnable = runnable;
       period = -1;
       nextRuntime = -1;
+      this.runnable = runnable;
+
+      // this must come last, and SingleFireTask must not be subclassed,
+      // lest we leak a ref to a partly constructed object.
+      if (runnable instanceof HasAsyncTaskRef) {
+        ((HasAsyncTaskRef) runnable).setAsyncTask(this);
+      }
     }
 
     @Override
@@ -255,7 +262,7 @@ public class PooledExecutorService implements TaskProvider {
     }
   }
 
-  private static class DelayedTask extends TimedTask {
+  private static final class DelayedTask extends TimedTask {
     private final Runnable runnable;
     private boolean fired = false;
     private volatile Thread runningOn;
@@ -274,9 +281,15 @@ public class PooledExecutorService implements TaskProvider {
           }
         }
       };
-      this.runnable = runnable;
       this.period = -1;
       this.nextRuntime = System.currentTimeMillis() + delayMillis;
+      this.runnable = runnable;
+
+      // this must come last, and DelayedTask must not be subclassed,
+      // lest we leak a ref to a partly constructed object.
+      if (runnable instanceof HasAsyncTaskRef) {
+        ((HasAsyncTaskRef) runnable).setAsyncTask(this);
+      }
     }
 
     @Override
@@ -304,7 +317,7 @@ public class PooledExecutorService implements TaskProvider {
     }
   }
 
-  private static class RepeatingTimedTask extends TimedTask {
+  private static final class RepeatingTimedTask extends TimedTask {
     private final Runnable runnable;
     private volatile Thread runningOn;
 
@@ -322,9 +335,15 @@ public class PooledExecutorService implements TaskProvider {
           }
         }
       };
-      this.runnable = runnable;
       nextRuntime = System.currentTimeMillis() + initialMillis;
       period = intervalMillis;
+      this.runnable = runnable;
+
+      // this must come last, and RepeatingTimedTask must not be subclassed,
+      // lest we leak a ref to a partly constructed object.
+      if (runnable instanceof HasAsyncTaskRef) {
+        ((HasAsyncTaskRef) runnable).setAsyncTask(this);
+      }
     }
 
 

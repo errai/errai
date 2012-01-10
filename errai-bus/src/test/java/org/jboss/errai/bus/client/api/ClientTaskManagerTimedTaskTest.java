@@ -10,8 +10,9 @@ public class ClientTaskManagerTimedTaskTest extends ClientAsyncTaskTest {
   private CountingRunnable latestRunnable;
 
   @Override
-  protected AsyncTask getTaskUnderTest(Runnable task) {
-    latestRunnable = new CountingRunnable(task);
+  protected AsyncTask getTaskUnderTest(CountingRunnable task) {
+    latestRunnable = task;
+    assertEquals("Hey, you can't pass me a used runnable!", 0, task.getRunCount());
     return TaskManagerFactory.get().schedule(TimeUnit.MILLISECONDS, 100, latestRunnable);
   }
 
@@ -22,8 +23,10 @@ public class ClientTaskManagerTimedTaskTest extends ClientAsyncTaskTest {
       @Override
       public void run() {
         if (latestRunnable.getRunCount() > 0) {
+          System.out.println("Task is complete");
           r.run();
         } else {
+          System.out.println("Task still hasn't run");
           schedule(100);
         }
       }

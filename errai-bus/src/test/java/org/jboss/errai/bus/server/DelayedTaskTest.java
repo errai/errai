@@ -19,8 +19,9 @@ public class DelayedTaskTest extends AbstractAsyncTaskTest {
   private CountingRunnable latestRunnable;
 
   @Override
-  protected AsyncTask getTaskUnderTest(Runnable task) {
-    latestRunnable = new CountingRunnable(task);
+  protected AsyncTask getTaskUnderTest(CountingRunnable task) {
+    latestRunnable = task;
+    assertEquals("Hey, you can't pass me a used runnable!", 0, task.getRunCount());
     return service.schedule(task, TimeUnit.MILLISECONDS, 500);
   }
 

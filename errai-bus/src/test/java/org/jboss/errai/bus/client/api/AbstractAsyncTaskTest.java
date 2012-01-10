@@ -14,26 +14,29 @@ public abstract class AbstractAsyncTaskTest extends GWTTestCase {
 
   /**
    * A Runnable implementation whose instances keep track of how many times they
-   * have been run. Optionally wraps a task that runs whenever {@link #run()} is called.
+   * have been run. Optionally wraps a task that runs whenever {@link #run()} is
+   * called. Also implements {@link HasAsyncTaskRef} to make it easier to verify
+   * injection of AsyncTask.
    */
-  public static class CountingRunnable implements Runnable {
+  public static class CountingRunnable implements Runnable, HasAsyncTaskRef {
 
     private volatile int runCount = 0;
-    private final Runnable task;
+    private final Runnable wrappedRunnable;
+    private AsyncTask injectedAsyncTask;
 
     public CountingRunnable() {
       this(null);
     }
 
     public CountingRunnable(Runnable task) {
-      this.task = task;
+      this.wrappedRunnable = task;
     }
 
     @Override
     public void run() {
       try {
-        if (task != null) {
-          task.run();
+        if (wrappedRunnable != null) {
+          wrappedRunnable.run();
         }
       } finally {
         runCount++;
@@ -47,15 +50,18 @@ public abstract class AbstractAsyncTaskTest extends GWTTestCase {
     public int getRunCount() {
       return runCount;
     }
-  }
 
-  /**
-   * A Runnable that does nothing when run.
-   */
-  public static final Runnable NO_OP = new Runnable() {
     @Override
-    public void run() { };
-  };
+    public void setAsyncTask(AsyncTask task) {
+      this.injectedAsyncTask = task;
+    }
+
+    @Override
+    public AsyncTask getAsyncTask() {
+      return injectedAsyncTask;
+    }
+
+  }
 
   /**
    * A Runnable implementation that throws RuntimeException every time it is run.
@@ -64,7 +70,6 @@ public abstract class AbstractAsyncTaskTest extends GWTTestCase {
     @Override
     public void run() { throw new RuntimeException(); };
   };
-
 
   /**
    * This version returns null, which forces GWTTestCase to run the tests in
@@ -78,8 +83,14 @@ public abstract class AbstractAsyncTaskTest extends GWTTestCase {
 
   /**
    * Returns the AsyncTask implementation that should be tested.
+   *
+   * @param task
+   *          the Runnable to pass to the execution system. <b>Note to
+   *          subclassers: this runnable must be passed as-is, without
+   *          wrapping.</b> Tests such as {@link #testAsyncTaskRefInjection}
+   *          depend on it.
    */
-  protected abstract AsyncTask getTaskUnderTest(Runnable task);
+  protected abstract AsyncTask getTaskUnderTest(CountingRunnable task);
 
   /**
    * Runs the given Runnable after the AsyncTask most recently returned from
@@ -90,13 +101,13 @@ public abstract class AbstractAsyncTaskTest extends GWTTestCase {
   protected abstract void runAfterTaskFinished(Runnable r);
 
   public void testCancellationFlag() throws Exception {
-    AsyncTask task = getTaskUnderTest(NO_OP);
+    AsyncTask task = getTaskUnderTest(new CountingRunnable());
     task.cancel(false);
     assertTrue(task.isCancelled());
   }
 
   public void testCancellationFlagOnFailingTest() throws Exception {
-    final AsyncTask task = getTaskUnderTest(BLOW_UP);
+    final AsyncTask task = getTaskUnderTest(new CountingRunnable(BLOW_UP));
     runAfterTaskFinished(new Runnable() {
 
       @Override
@@ -109,7 +120,7 @@ public abstract class AbstractAsyncTaskTest extends GWTTestCase {
   }
 
   public void testExitHandlerRunsImmediatelyOnCancelledTask() throws Exception {
-    AsyncTask task = getTaskUnderTest(NO_OP);
+    AsyncTask task = getTaskUnderTest(new CountingRunnable());
     task.cancel(false);
     CountingRunnable cr = new CountingRunnable();
     task.setExitHandler(cr);
@@ -117,7 +128,7 @@ public abstract class AbstractAsyncTaskTest extends GWTTestCase {
   }
 
   public void testMultipleExitHandlersBeforeTaskFinished() throws Exception {
-    AsyncTask task = getTaskUnderTest(NO_OP);
+    AsyncTask task = getTaskUnderTest(new CountingRunnable());
 
     final CountingRunnable cr1 = new CountingRunnable();
     task.setExitHandler(cr1);
@@ -141,7 +152,7 @@ public abstract class AbstractAsyncTaskTest extends GWTTestCase {
   }
 
   public void testAddExitHandlerBeforeTaskFinished() throws Exception {
-    AsyncTask task = getTaskUnderTest(NO_OP);
+    AsyncTask task = getTaskUnderTest(new CountingRunnable());
 
     final CountingRunnable cr = new CountingRunnable();
     task.setExitHandler(cr);
@@ -157,7 +168,7 @@ public abstract class AbstractAsyncTaskTest extends GWTTestCase {
   }
 
   public void testAddExitHandlerForFailingTask() throws Exception {
-    AsyncTask task = getTaskUnderTest(BLOW_UP);
+    AsyncTask task = getTaskUnderTest(new CountingRunnable(BLOW_UP));
 
     final CountingRunnable cr = new CountingRunnable();
     task.setExitHandler(cr);
@@ -172,4 +183,10 @@ public abstract class AbstractAsyncTaskTest extends GWTTestCase {
     delayTestFinish(5000);
   }
 
+  public void testAsyncTaskRefInjection() throws Exception {
+    CountingRunnable runnable = new CountingRunnable();
+    AsyncTask task = getTaskUnderTest(runnable);
+    assertNotNull("No AsyncTask was injected into runnable", runnable.getAsyncTask());
+    assertSame("Wrong AsyncTask injected into runnable", task, runnable.getAsyncTask());
+  }
 }

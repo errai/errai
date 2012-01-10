@@ -16,12 +16,35 @@
 
 package org.jboss.errai.bus.client.api;
 
+import org.jboss.errai.bus.client.api.base.ClientTaskManager;
+import org.jboss.errai.bus.server.DefaultTaskManager;
+import org.jboss.errai.bus.server.async.scheduling.PooledExecutorService;
+
 /**
- * Marker interface for use by scheduler to assign a reference to the AsyncTask of a Runnable task so it can be
- * internally controlled.
+ * Errai schedulers that accept a Runnable and produce an {@link AsyncTask} will
+ * inject the AsyncTask instance into the runnable if it implements this
+ * interface.
+ *
+ * @see DefaultTaskManager
+ * @see ClientTaskManager
+ * @see PooledExecutorService
  */
 public interface HasAsyncTaskRef extends Runnable {
+
+  /**
+   * Called by Errai scheduler services when they receive this Runnable and
+   * before its run() method is called.
+   *
+   * @param task
+   *          The companion AsyncTask instance that has been created for this
+   *          runnable
+   */
   public void setAsyncTask(AsyncTask task);
 
+  /**
+   * Returns the AsyncTask instance most recently set in
+   * {@link #setAsyncTask(AsyncTask)}, or null if {@code setAsyncTask()} has not
+   * been called yet.
+   */
   public AsyncTask getAsyncTask();
 }
