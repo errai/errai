@@ -16,14 +16,14 @@
 
 package org.jboss.errai.bus.server.api;
 
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.framework.BooleanRoutingRule;
 import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.server.async.SchedulerService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * This interface, <tt>ServerMessageBus</tt>, extends the client's {@link org.jboss.errai.bus.client.framework.MessageBus},
@@ -70,7 +70,7 @@ public interface ServerMessageBus extends MessageBus {
    *
    * @return the <tt>Scheduler</tt> associated with this bus
    */
-  public SchedulerService getScheduler();
+  public ExecutorService getScheduler();
 
   /**
    * Register a {@link org.jboss.errai.bus.server.api.QueueClosedListener} with the bus.
@@ -101,9 +101,9 @@ public interface ServerMessageBus extends MessageBus {
   public boolean hasRemoteSubscription(String sessionId, String subject);
 
   public Map<QueueSession, MessageQueue> getMessageQueues();
-  
+
   public MessageQueue getQueueBySession(String id);
-  
+
   public QueueSession getSessionBySessionId(String id);
 
   /**

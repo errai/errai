@@ -18,12 +18,12 @@ package org.jboss.errai.bus.server;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
 import org.jboss.errai.bus.client.framework.RoutingFlags;
 import org.jboss.errai.bus.client.util.ErrorHelper;
-import org.jboss.errai.bus.server.async.TimedTask;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.slf4j.Logger;
@@ -91,10 +91,7 @@ public class WorkerFactory {
       /**
        * Add a housekeeper task to the bus housekeeper to timeout long-running tasks.
        */
-      busImpl.getScheduler().addTask(new TimedTask() {
-        {
-          period = 1000;
-        }
+      busImpl.getScheduler().scheduleAtFixedRate(new Runnable() {
 
         @Override
         public void run() {
@@ -107,15 +104,10 @@ public class WorkerFactory {
         }
 
         @Override
-        public void setExitHandler(Runnable runnable) {
-          //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        @Override
         public String toString() {
           return "WorkerTimeout";
         }
-      });
+      }, 1, 1, TimeUnit.SECONDS);
     }
 
     startPool();

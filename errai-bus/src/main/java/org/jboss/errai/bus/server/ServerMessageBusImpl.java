@@ -36,6 +36,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -62,9 +65,6 @@ import org.jboss.errai.bus.server.api.QueueCloseEvent;
 import org.jboss.errai.bus.server.api.QueueClosedListener;
 import org.jboss.errai.bus.server.api.QueueSession;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
-import org.jboss.errai.bus.server.async.SchedulerService;
-import org.jboss.errai.bus.server.async.SimpleSchedulerService;
-import org.jboss.errai.bus.server.async.TimedTask;
 import org.jboss.errai.bus.server.io.BufferHelper;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
@@ -104,7 +104,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
   private final List<UnsubscribeListener> unsubscribeListeners = new LinkedList<UnsubscribeListener>();
   private final List<QueueClosedListener> queueClosedListeners = new LinkedList<QueueClosedListener>();
 
-  private final SchedulerService houseKeeper = new SimpleSchedulerService(); // GAESchedulerService.INSTANCE;
+  private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
   private Logger log = getLogger(getClass());
 
@@ -340,10 +340,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
       }
     });
 
-    houseKeeper.addTask(new TimedTask() {
-      {
-        this.period = (1000 * 8);
-      }
+    scheduler.scheduleAtFixedRate(new Runnable() {
 
       int runCount = 0;
 
@@ -414,9 +411,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
       public String toString() {
         return "Bus Housekeeper";
       }
-    });
-
-    houseKeeper.start();
+    }, 8, 8, TimeUnit.SECONDS);
   }
 
   private static class BufferStatus {
@@ -580,17 +575,13 @@ public class ServerMessageBusImpl implements ServerMessageBus {
       message.setResource("retryAttempts", 0);
     }
     message.setResource("retryAttempts", message.getResource(Integer.class, RETRY_COUNT_KEY) + 1);
-    getScheduler().addTaskConcurrently(new TimedTask() {
-      {
-        period = 250;
-      }
+    getScheduler().schedule(new Runnable() {
 
       @Override
       public void run() {
         deliveryTaskRunnable.run();
-        cancel();
       }
-    });
+    }, 250, TimeUnit.MILLISECONDS);
   }
 
   /**
@@ -1139,13 +1130,14 @@ public class ServerMessageBusImpl implements ServerMessageBus {
   }
 
   /**
-   * Gets the scheduler being used for the housekeeping
+   * Gets the scheduler being used within this message bus for housekeeping and
+   * other periodic or deferred tasks.
    *
    * @return the scheduler
    */
   @Override
-  public SchedulerService getScheduler() {
-    return houseKeeper;
+  public ScheduledExecutorService getScheduler() {
+    return scheduler;
   }
 
   @Override
@@ -1193,7 +1185,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
       queue.stopQueue();
     }
 
-    houseKeeper.requestStop();
+    scheduler.shutdown();
   }
 
   public void finishInit() {
