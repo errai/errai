@@ -14,7 +14,7 @@ deploy/
 *.releaseBackup
 release.properties
 *.log
-
+.gwt
 /war/
 /errai-bus/war/
 /errai-ioc/war/
