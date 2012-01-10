@@ -15,14 +15,6 @@
  */
 package org.jboss.errai.enterprise.client.cdi.api;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
@@ -32,7 +24,8 @@ import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.EventHandler;
 
-import javax.inject.Qualifier;
+import java.lang.annotation.Annotation;
+import java.util.*;
 
 /**
  * CDI client interface.
