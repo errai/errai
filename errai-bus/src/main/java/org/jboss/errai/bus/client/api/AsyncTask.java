@@ -16,10 +16,41 @@
 
 package org.jboss.errai.bus.client.api;
 
+/**
+ * A handle representing an asynchronous task that has been submitted to the message bus.
+ */
 public interface AsyncTask {
-  public boolean cancel(boolean interrupt);
 
+  /**
+   * Prevents this task from being scheduled again, optionally interrupting the
+   * task if it is currently running.
+   *
+   * @param interrupt
+   *          if true, and this task is presently being executed,
+   *          {@link Thread#interrupt()} will be called on the thread currently
+   *          executing this task.
+   */
+  public void cancel(boolean interrupt);
+
+  /**
+   * Sets the task that should be run after all executions of this task have
+   * completed. The supplied runnable is guaranteed to be invoked exactly once,
+   * even if this task has already completed or it has been cancelled.
+   *
+   * @param runnable
+   *          the logic to execute when this task has completed all of its
+   *          executions, either because it completed normally, by throwing an
+   *          exception, or because it was cancelled by a call to
+   *          {@link #cancel(boolean)}.
+   */
   public void setExitHandler(Runnable runnable);
 
+  /**
+   * Returns true if {@link #cancel(boolean)} has been called on this task,
+   * whether it was called from user code or from within the framework because
+   * the task threw an exception.
+   *
+   * @return true if this task has been cancelled; false otherwise.
+   */
   public boolean isCancelled();
 }

@@ -16,9 +16,9 @@
 
 package org.jboss.errai.bus.server.async;
 
-import org.jboss.errai.bus.client.api.AsyncTask;
-
 import static java.lang.System.currentTimeMillis;
+
+import org.jboss.errai.bus.client.api.AsyncTask;
 
 /**
  * A <tt>TimedTask</tt> is used for scheduling tasks, and making sure they are run at appropriate times and intervals
@@ -26,7 +26,7 @@ import static java.lang.System.currentTimeMillis;
 public abstract class TimedTask implements Runnable, Comparable<TimedTask>, AsyncTask {
   protected volatile long nextRuntime;
   protected volatile long period;
-  protected volatile boolean cancel = false;
+  protected volatile boolean cancelled = false;
 
   protected volatile InterruptHandle interruptHook;
   protected volatile Runnable exitHandler;
@@ -63,19 +63,12 @@ public abstract class TimedTask implements Runnable, Comparable<TimedTask>, Asyn
     return nextRuntime;
   }
 
-  /**
-   * Disables the task
-   */
-  private void disable(boolean interruptIfActive) {
-    if (interruptIfActive && interruptHook != null)
+  @Override
+  public void cancel(boolean interrupt) {
+    if (interrupt && interruptHook != null)
       interruptHook.sendInterrupt();
 
-    cancel = true;
-  }
-
-  public boolean cancel(boolean interrupt) {
-    disable(interrupt);
-    return true;
+    cancelled = true;
   }
 
   /**
@@ -83,8 +76,9 @@ public abstract class TimedTask implements Runnable, Comparable<TimedTask>, Asyn
    *
    * @return
    */
+  @Override
   public boolean isCancelled() {
-    return cancel;
+    return cancelled;
   }
 
   /**
@@ -112,7 +106,7 @@ public abstract class TimedTask implements Runnable, Comparable<TimedTask>, Asyn
 
   public boolean calculateNextRuntime() {
     synchronized (this) {
-      if (!cancel && period != -1) {
+      if (!cancelled && period != -1) {
         nextRuntime = currentTimeMillis() + period;
         return true;
       }
@@ -126,14 +120,22 @@ public abstract class TimedTask implements Runnable, Comparable<TimedTask>, Asyn
 
   public boolean isDue(long time) {
     synchronized (this) {
-      return !cancel && nextRuntime <= time && nextRuntime != -1;
+      return !cancelled && nextRuntime <= time && nextRuntime != -1;
     }
   }
 
+  @Override
   public void setExitHandler(Runnable runnable) {
+    if (exitHandler != null) {
+      throw new IllegalStateException("Exit handler already set to " + exitHandler);
+    }
     this.exitHandler = runnable;
+    if (!isDue(currentTimeMillis())) {
+      runnable.run();
+    }
   }
 
+  @Override
   public int compareTo(TimedTask o) {
     if (o == this) {
       return 0;

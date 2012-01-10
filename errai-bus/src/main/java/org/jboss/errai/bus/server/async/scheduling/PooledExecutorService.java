@@ -16,18 +16,18 @@
 
 package org.jboss.errai.bus.server.async.scheduling;
 
-import org.jboss.errai.bus.client.api.AsyncTask;
-import org.jboss.errai.bus.client.api.base.TimeUnit;
-import org.jboss.errai.bus.server.async.InterruptHandle;
-import org.jboss.errai.bus.server.async.TimedTask;
+import static java.lang.System.currentTimeMillis;
+import static java.util.concurrent.locks.LockSupport.parkUntil;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static java.lang.System.currentTimeMillis;
-import static java.util.concurrent.locks.LockSupport.parkUntil;
+import org.jboss.errai.bus.client.api.AsyncTask;
+import org.jboss.errai.bus.client.api.base.TimeUnit;
+import org.jboss.errai.bus.server.async.InterruptHandle;
+import org.jboss.errai.bus.server.async.TimedTask;
 
 public class PooledExecutorService implements TaskProvider {
   private final BlockingQueue<TimedTask> queue;
@@ -52,7 +52,7 @@ public class PooledExecutorService implements TaskProvider {
    * Enumeration of possible ways of handling a queue full scenario.
    */
   public enum SaturationPolicy {
-    
+
     /**
      * Runs the task in the calling thread.
      */
@@ -62,7 +62,7 @@ public class PooledExecutorService implements TaskProvider {
         task.run();
       }
     },
-    
+
     /**
      * Throws a RuntimeException when called. The exception message includes
      * {@code task.toString()}, so name your runnables if you'd like nice messages
@@ -114,7 +114,7 @@ public class PooledExecutorService implements TaskProvider {
     if (!queue.offer(new SingleFireTask(runnable))) {
       saturationPolicy.dealWith(runnable);
     }
-    
+
     //    queue.add(new SingleFireTask(runnable));
   }
 
@@ -221,6 +221,7 @@ public class PooledExecutorService implements TaskProvider {
    * @return Runnable task.
    * @throws InterruptedException thrown if the thread waiting on a ready task is interrupted.
    */
+  @Override
   public TimedTask getNextTask() throws InterruptedException {
     if (queue != null)
       return queue.poll(1, java.util.concurrent.TimeUnit.SECONDS);
@@ -245,6 +246,7 @@ public class PooledExecutorService implements TaskProvider {
       }
     }
 
+    @Override
     public void run() {
       synchronized (this) {
         fired = true;
@@ -260,6 +262,7 @@ public class PooledExecutorService implements TaskProvider {
 
     private DelayedTask(Runnable runnable, long delayMillis) {
       this.interruptHook = new InterruptHandle() {
+        @Override
         public void sendInterrupt() {
           try {
             if (runningOn != null)
@@ -276,11 +279,6 @@ public class PooledExecutorService implements TaskProvider {
       this.nextRuntime = System.currentTimeMillis() + delayMillis;
     }
 
-
-    public boolean isFinished() {
-      return nextRuntime == -1;
-    }
-
     @Override
     public boolean isDue(long time) {
       synchronized (this) {
@@ -288,6 +286,7 @@ public class PooledExecutorService implements TaskProvider {
       }
     }
 
+    @Override
     public void run() {
       synchronized (this) {
         fired = true;
@@ -311,6 +310,7 @@ public class PooledExecutorService implements TaskProvider {
 
     private RepeatingTimedTask(Runnable runnable, long initialMillis, long intervalMillis) {
       this.interruptHook = new InterruptHandle() {
+        @Override
         public void sendInterrupt() {
           try {
             if (runningOn != null)
@@ -328,6 +328,7 @@ public class PooledExecutorService implements TaskProvider {
     }
 
 
+    @Override
     public void run() {
       try {
         runningOn = Thread.currentThread();
@@ -335,7 +336,7 @@ public class PooledExecutorService implements TaskProvider {
       }
       finally {
         runningOn = null;
-        if ((cancel || nextRuntime == -1) && exitHandler != null)
+        if ((cancelled || nextRuntime == -1) && exitHandler != null)
           exitHandler.run();
       }
     }
@@ -365,6 +366,7 @@ public class PooledExecutorService implements TaskProvider {
       }
     }
 
+    @Override
     public void start() {
       running = true;
       super.start();

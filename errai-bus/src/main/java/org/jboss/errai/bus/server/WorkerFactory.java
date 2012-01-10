@@ -16,6 +16,9 @@
 
 package org.jboss.errai.bus.server;
 
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
 import org.jboss.errai.bus.client.framework.RoutingFlags;
@@ -25,9 +28,6 @@ import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 
 /**
  * The <tt>WorkerFactory</tt> maintains a pool of <tt>Worker</tt>s, and takes care of running and terminating them
@@ -96,6 +96,7 @@ public class WorkerFactory {
           period = 1000;
         }
 
+        @Override
         public void run() {
           for (Worker w : workerPool) {
             if (!w.isValid()) {
@@ -105,12 +106,9 @@ public class WorkerFactory {
           }
         }
 
+        @Override
         public void setExitHandler(Runnable runnable) {
           //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        public boolean isFinished() {
-          return false;  //To change body of implemented methods use File | Settings | File Templates.
         }
 
         @Override

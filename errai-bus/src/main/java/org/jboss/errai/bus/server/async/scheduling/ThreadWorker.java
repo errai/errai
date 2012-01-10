@@ -55,6 +55,7 @@ public class ThreadWorker implements Runnable {
     return !thread.isAlive();
   }
 
+  @Override
   public void run() {
     TimedTask task = null;
     while (active) {

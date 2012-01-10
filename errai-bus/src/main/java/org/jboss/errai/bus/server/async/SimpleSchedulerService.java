@@ -16,15 +16,14 @@
 
 package org.jboss.errai.bus.server.async;
 
-import org.jboss.errai.bus.client.api.AsyncTask;
-import sun.rmi.transport.ObjectTable;
+import static java.lang.System.currentTimeMillis;
 
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static java.lang.System.currentTimeMillis;
+import org.jboss.errai.bus.client.api.AsyncTask;
 
 /**
  * A basic and efficient scheduler implementation for use by the MessageBus to run housekeeper and other timed
@@ -59,6 +58,7 @@ public class SimpleSchedulerService implements Runnable, SchedulerService {
     }
   }
 
+  @Override
   public void run() {
     synchronized (lock) {
       running = true;
@@ -94,6 +94,7 @@ public class SimpleSchedulerService implements Runnable, SchedulerService {
     if (autoStartStop) init();
   }
 
+  @Override
   public void start() {
     currentThread.start();
   }
@@ -159,12 +160,13 @@ public class SimpleSchedulerService implements Runnable, SchedulerService {
   }
 
   /**
-   * Adds a task to be executed.  Note: In order to remove a task, you must maintain a
-   * reference to the <tt>TimedTask</tt> and set it's nextRuntime value to <tt>-1</tt>.
-   * This will cause the scheduler to automatically remove it.
+   * Adds a task to be executed. To remove the task, keep a reference to the
+   * returned <tt>AsyncTask</tt> and call {@link AsyncTask#cancel(boolean)
+   * cancel()} on it.
    *
    * @param task
    */
+  @Override
   public AsyncTask addTask(final TimedTask task) {
     synchronized (lock) {
       tasks.add(task);
@@ -179,15 +181,18 @@ public class SimpleSchedulerService implements Runnable, SchedulerService {
     return new AsyncTask() {
       private boolean finished = false;
 
-      public boolean cancel(boolean mayInterruptIfRunning) {
+      @Override
+      public void cancel(boolean mayInterruptIfRunning) {
         task.cancel(mayInterruptIfRunning);
-        return finished = true;
+        finished = true;
       }
 
+      @Override
       public void setExitHandler(Runnable runnable) {
 
       }
 
+      @Override
       public boolean isCancelled() {
         return finished;
       }
@@ -203,6 +208,7 @@ public class SimpleSchedulerService implements Runnable, SchedulerService {
     this.autoStartStop = autoStartStop;
   }
 
+  @Override
   public void requestStop() {
     synchronized (lock) {
       currentThread.interrupt();

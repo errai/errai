@@ -16,30 +16,66 @@
 
 package org.jboss.errai.bus.client.framework;
 
+import static org.jboss.errai.bus.client.json.JSONUtilCli.decodePayload;
+import static org.jboss.errai.bus.client.json.JSONUtilCli.encodePayload;
+import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteSubscribe;
+import static org.jboss.errai.common.client.protocols.MessageParts.PriorityProcessing;
+import static org.jboss.errai.common.client.protocols.MessageParts.ReplyTo;
+import static org.jboss.errai.common.client.protocols.MessageParts.Subject;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import org.jboss.errai.bus.client.ErraiBus;
+import org.jboss.errai.bus.client.api.HookCallback;
+import org.jboss.errai.bus.client.api.InitializationListener;
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.MessageListener;
+import org.jboss.errai.bus.client.api.SessionExpirationListener;
+import org.jboss.errai.bus.client.api.SubscribeListener;
+import org.jboss.errai.bus.client.api.UnsubscribeListener;
+import org.jboss.errai.bus.client.api.base.Capabilities;
+import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.api.base.NoSubscribersToDeliverTo;
+import org.jboss.errai.bus.client.api.base.TransportIOException;
+import org.jboss.errai.bus.client.json.JSONUtilCli;
+import org.jboss.errai.bus.client.protocols.BusCommands;
+import org.jboss.errai.common.client.protocols.MessageParts;
+import org.jboss.errai.marshalling.client.api.MarshallerFramework;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.http.client.*;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.RequestException;
+import com.google.gwt.http.client.RequestTimeoutException;
+import com.google.gwt.http.client.Response;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.*;
-import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.api.*;
-import org.jboss.errai.bus.client.api.base.*;
-import org.jboss.errai.bus.client.json.JSONUtilCli;
-import org.jboss.errai.bus.client.protocols.BusCommands;
-import org.jboss.errai.common.client.protocols.MessageParts;
-import org.jboss.errai.marshalling.client.api.MarshallerFramework;
-
-import java.util.*;
-
-import static org.jboss.errai.bus.client.json.JSONUtilCli.decodePayload;
-import static org.jboss.errai.bus.client.json.JSONUtilCli.encodePayload;
-import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteSubscribe;
-import static org.jboss.errai.common.client.protocols.MessageParts.*;
+import com.google.gwt.user.client.ui.AbsolutePanel;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
 
 /**
  * The default client <tt>MessageBus</tt> implementation.  This bus runs in the browser and automatically federates
@@ -125,18 +161,22 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private List<MessageInterceptor> interceptorStack = new LinkedList<MessageInterceptor>();
 
   private LogAdapter logAdapter = new LogAdapter() {
+    @Override
     public void warn(String message) {
       GWT.log("WARN: " + message, null);
     }
 
+    @Override
     public void info(String message) {
       GWT.log("INFO: " + message, null);
     }
 
+    @Override
     public void debug(String message) {
       GWT.log("DEBUG: " + message, null);
     }
 
+    @Override
     public void error(String message, Throwable t) {
       showError(message, t);
     }
@@ -186,6 +226,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    *
    * @param subject - the subject to have all it's subscriptions removed
    */
+  @Override
   public void unsubscribeAll(String subject) {
       fireAllUnSubscribeListeners(subject);
       removeShadowSubscription(subject);
@@ -197,10 +238,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * @param subject  - the subject to add a subscription for
    * @param callback - function called when the message is dispatched
    */
+  @Override
   public void subscribe(final String subject, final MessageCallback callback) {
     _subscribe(subject, callback, false);
   }
 
+  @Override
   public void subscribeLocal(final String subject, final MessageCallback callback) {
     _subscribe(subject, callback, true);
   }
@@ -210,6 +253,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     if (!postInit) {
       postInitTasks.add(new Runnable() {
+        @Override
         public void run() {
           _subscribe(subject, callback, local);
         }
@@ -226,6 +270,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     boolean isNew = !isSubscribed(subject);
 
     addShadowSubscription(subject, new MessageCallback() {
+      @Override
       public void callback(Message message) {
         try {
           executeInterceptorStack(true, message);
@@ -287,12 +332,14 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * @param message  - The message to be sent in the conversation
    * @param callback - The function to be called when the message is received
    */
+  @Override
   public void conversationWith(final Message message, final MessageCallback callback) {
     final String tempSubject = "temp:Reply:" + (++conversationCounter);
 
     message.set(ReplyTo, tempSubject);
 
     subscribe(tempSubject, new MessageCallback() {
+      @Override
       public void callback(Message message) {
         unsubscribeAll(tempSubject);
         callback.callback(message);
@@ -307,6 +354,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    *
    * @param message - The message to be sent.
    */
+  @Override
   public void sendGlobal(Message message) {
     send(message);
   }
@@ -317,6 +365,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * @param message       - the message to be sent
    * @param fireListeners - true if the appropriate listeners should be fired
    */
+  @Override
   public void send(Message message, boolean fireListeners) {
     // TODO: fire listeners?
 
@@ -331,6 +380,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * @throws RuntimeException - if message does not contain a ToSubject field or if the message's callback throws
    *                          an error.
    */
+  @Override
   public void send(final Message message) {
     executeInterceptorStack(false, message);
 
@@ -429,6 +479,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * @param subject - subject to look for
    * @return true if the subject is already subscribed
    */
+  @Override
   public boolean isSubscribed(String subject) {
     return shadowSubscriptions.containsKey(subject);
   }
@@ -441,6 +492,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    *
    * @return A map of registrations captured in the current capture context.
    */
+  @Override
   public Map<String, List<Object>> getCapturedRegistrations() {
     return registeredInThisSession;
   }
@@ -449,6 +501,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * Marks the beginning of a new capture context.<p/>  From this point, the message is called forward, all
    * registration events which occur will be captured.
    */
+  @Override
   public void beginCapture() {
     registeredInThisSession = new HashMap<String, List<Object>>();
   }
@@ -456,10 +509,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   /**
    * End the current capturing context.
    */
+  @Override
   public void endCapture() {
     registeredInThisSession = null;
   }
-
 
   /**
    * Transmits JSON string containing message, using the <tt>sendBuilder</tt>
@@ -495,6 +548,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     try {
       sendBuilder.sendRequest(message, new RequestCallback() {
 
+        @Override
         public void onResponseReceived(Request request, Response response) {
           switch (response.getStatusCode()) {
             case 1:
@@ -528,6 +582,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           }
         }
 
+        @Override
         public void onError(Request request, Throwable exception) {
           if (txMessage.getErrorCallback() == null || txMessage.getErrorCallback().error(txMessage, exception)) {
             logError("Failed to communicate with remote bus", "", exception);
@@ -592,10 +647,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   /**
    * Initializes client message bus without a callback function
    */
+  @Override
   public void init() {
     init(null);
   }
 
+  @Override
   public void stop(boolean sendDisconnect) {
     try {
       if (sendDisconnect) {
@@ -622,6 +679,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   public class RemoteMessageCallback implements MessageCallback {
+    @Override
     public void callback(Message message) {
       encodeAndTransmit(message);
     }
@@ -705,6 +763,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     remoteSubscribe("ServerEchoService");
     directSubscribe("ClientBus", new MessageCallback() {
+      @Override
       @SuppressWarnings({"unchecked"})
       public void callback(final Message message) {
         switch (BusCommands.valueOf(message.getCommandType())) {
@@ -803,6 +862,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
              */
 
             addSubscribeListener(new SubscribeListener() {
+              @Override
               public void onSubscribe(SubscriptionEvent event) {
                 if (event.isLocalOnly() || event.getSubject().startsWith("local:")
                         || remotes.containsKey(event.getSubject())) {
@@ -820,6 +880,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             });
 
             addUnsubscribeListener(new UnsubscribeListener() {
+              @Override
               public void onUnsubscribe(SubscriptionEvent event) {
                 MessageBuilder.getMessageProvider().get().command(BusCommands.RemoteUnsubscribe)
                         .toSubject("ServerBus")
@@ -830,6 +891,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             });
 
             subscribe(DefaultErrorCallback.CLIENT_ERROR_SUBJECT, new MessageCallback() {
+              @Override
               public void callback(Message message) {
                 String errorTo = message.get(String.class, MessageParts.ErrorTo);
                 if (errorTo == null) {
@@ -957,6 +1019,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       initialRequest.setHeader("phase", "connection");
 
       initialRequest.sendRequest(initialMessage, new RequestCallback() {
+        @Override
         public void onResponseReceived(Request request, Response response) {
           try {
             log("received response from initial handshake.");
@@ -970,6 +1033,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           }
         }
 
+        @Override
         public void onError(Request request, Throwable exception) {
           logError("Could not connect to remote bus", "", exception);
         }
@@ -987,6 +1051,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    *
    * @return true if client message bus is initialized.
    */
+  @Override
   public boolean isInitialized() {
     return this.initialized;
   }
@@ -1016,6 +1081,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   protected class LongPollRequestCallback implements RequestCallback {
+    @Override
     public void onError(Request request, Throwable throwable) {
       switch (statusCode) {
         case 1:
@@ -1048,6 +1114,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       DefaultErrorCallback.INSTANCE.error(null, throwable);
     }
 
+    @Override
     public void onResponseReceived(Request request, Response response) {
       if (response.getStatusCode() != 200) {
         switch (statusCode = response.getStatusCode()) {
@@ -1145,6 +1212,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    *
    * @param run a {@link Runnable} task.
    */
+  @Override
   public void addPostInitTask(Runnable run) {
     if (isInitialized()) {
       run.run();
@@ -1153,10 +1221,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     postInitTasks.add(run);
   }
 
+  @Override
   public void addSessionExpirationListener(SessionExpirationListener listener) {
     onSessionExpirationListeners.add(listener);
   }
 
+  @Override
   public void addInitializationListener(InitializationListener listener) {
     onInitializationListeners.add(listener);
   }
@@ -1167,6 +1237,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    *
    * @param listener - listener to accept all messages dispatched
    */
+  @Override
   public void addGlobalListener(MessageListener listener) {
   }
 
@@ -1175,6 +1246,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    *
    * @param listener - subscription listener
    */
+  @Override
   public void addSubscribeListener(SubscribeListener listener) {
     this.onSubscribeHooks.add(listener);
   }
@@ -1184,6 +1256,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    *
    * @param listener - unsubscription listener
    */
+  @Override
   public void addUnsubscribeListener(UnsubscribeListener listener) {
     this.onUnsubscribeHooks.add(listener);
   }
@@ -1237,13 +1310,16 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   }
 
+  @Override
   public void attachMonitor(BusMonitor monitor) {
   }
 
+  @Override
   public void setLogAdapter(LogAdapter logAdapter) {
     this.logAdapter = logAdapter;
   }
 
+  @Override
   public LogAdapter getLogAdapter() {
     return logAdapter;
   }
@@ -1368,6 +1444,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
       Button clearErrors = new Button("Clear Log");
       clearErrors.addClickHandler(new ClickHandler() {
+        @Override
         public void onClick(ClickEvent event) {
           contentPanel.clear();
         }
@@ -1375,6 +1452,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
       Button closeButton = new Button("Dismiss Error");
       closeButton.addClickHandler(new ClickHandler() {
+        @Override
         public void onClick(ClickEvent event) {
           errorDialog.hide();
         }
