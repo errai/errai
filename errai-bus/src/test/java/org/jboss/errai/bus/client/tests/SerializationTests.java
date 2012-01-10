@@ -16,15 +16,43 @@
 
 package org.jboss.errai.bus.client.tests;
 
-import org.jboss.errai.bus.client.api.RemoteCallback;
-import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.tests.support.*;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Queue;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.Stack;
+import java.util.TreeMap;
+import java.util.TreeSet;
+
+import org.jboss.errai.bus.client.api.RemoteCallback;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.tests.support.Boron;
+import org.jboss.errai.bus.client.tests.support.ClassWithNestedClass;
+import org.jboss.errai.bus.client.tests.support.CustomList;
+import org.jboss.errai.bus.client.tests.support.EntityWithGenericCollections;
+import org.jboss.errai.bus.client.tests.support.EntityWithStringBufferAndStringBuilder;
+import org.jboss.errai.bus.client.tests.support.EntityWithSuperClassField;
+import org.jboss.errai.bus.client.tests.support.EntityWithUnqualifiedFields;
+import org.jboss.errai.bus.client.tests.support.FactoryEntity;
+import org.jboss.errai.bus.client.tests.support.GenericEntity;
+import org.jboss.errai.bus.client.tests.support.Group;
+import org.jboss.errai.bus.client.tests.support.Koron;
+import org.jboss.errai.bus.client.tests.support.Student;
+import org.jboss.errai.bus.client.tests.support.StudyTreeNodeContainer;
+import org.jboss.errai.bus.client.tests.support.TestEnumA;
+import org.jboss.errai.bus.client.tests.support.TestSerializationRPCService;
+import org.jboss.errai.bus.client.tests.support.TreeNodeContainer;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -123,7 +151,6 @@ public class SerializationTests extends AbstractErraiTest {
     });
   }
 
-
   public void testShort() {
     runAfterInit(new Runnable() {
       @Override
@@ -192,7 +219,6 @@ public class SerializationTests extends AbstractErraiTest {
     });
   }
 
-
   private static String failMessage(Object expect, Object got) {
     return "expected: " + expect + "; but was: " + got;
   }
@@ -249,7 +275,6 @@ public class SerializationTests extends AbstractErraiTest {
     }
   }
 
-
   private static final void assertFloatArrayEqual(float[] a, float[] b) {
     if (a == null || b == null) {
       assertTrue(failMessage(a, b), a == null && b == null);
@@ -262,7 +287,6 @@ public class SerializationTests extends AbstractErraiTest {
       assertEquals(a[i], b[i]);
     }
   }
-
 
   private static final void assertShortArrayEqual(short[] a, short[] b) {
     if (a == null || b == null) {
@@ -316,9 +340,6 @@ public class SerializationTests extends AbstractErraiTest {
     }
   }
 
-
-
-
   /**
    * array tests *
    */
@@ -327,7 +348,7 @@ public class SerializationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        final String[] expected = {"This is a test string", "And so is this"};
+        final String[] expected = { "This is a test string", "And so is this" };
 
         MessageBuilder.createCall(new RemoteCallback<String[]>() {
           @Override
@@ -344,7 +365,7 @@ public class SerializationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        final int[] expected = {Integer.MIN_VALUE, Integer.MAX_VALUE};
+        final int[] expected = { Integer.MIN_VALUE, Integer.MAX_VALUE };
 
         MessageBuilder.createCall(new RemoteCallback<int[]>() {
           @Override
@@ -361,7 +382,7 @@ public class SerializationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        final long[] expected = {Long.MIN_VALUE, Long.MAX_VALUE};
+        final long[] expected = { Long.MIN_VALUE, Long.MAX_VALUE };
 
         MessageBuilder.createCall(new RemoteCallback<long[]>() {
           @Override
@@ -378,7 +399,7 @@ public class SerializationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        final double[] expected = {Double.MAX_VALUE, Double.MAX_VALUE};
+        final double[] expected = { Double.MAX_VALUE, Double.MAX_VALUE };
 
         MessageBuilder.createCall(new RemoteCallback<double[]>() {
           @Override
@@ -395,7 +416,7 @@ public class SerializationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        final float[] expected = {Float.MIN_VALUE, Float.MAX_VALUE};
+        final float[] expected = { Float.MIN_VALUE, Float.MAX_VALUE };
 
         MessageBuilder.createCall(new RemoteCallback<float[]>() {
           @Override
@@ -408,12 +429,11 @@ public class SerializationTests extends AbstractErraiTest {
     });
   }
 
-
   public void testShortArray() {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        final short[] expected = {Short.MIN_VALUE, Short.MAX_VALUE};
+        final short[] expected = { Short.MIN_VALUE, Short.MAX_VALUE };
 
         MessageBuilder.createCall(new RemoteCallback<short[]>() {
           @Override
@@ -430,7 +450,7 @@ public class SerializationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        final boolean[] expected = {Boolean.FALSE, Boolean.TRUE};
+        final boolean[] expected = { Boolean.FALSE, Boolean.TRUE };
 
         MessageBuilder.createCall(new RemoteCallback<boolean[]>() {
           @Override
@@ -447,7 +467,7 @@ public class SerializationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        final char[] expected = {'a', 'z'};
+        final char[] expected = { 'a', 'z' };
 
         MessageBuilder.createCall(new RemoteCallback<char[]>() {
           @Override
@@ -464,7 +484,7 @@ public class SerializationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        final byte[] expected = {(byte) -100, (byte) 100};
+        final byte[] expected = { (byte) -100, (byte) 100 };
 
         MessageBuilder.createCall(new RemoteCallback<byte[]>() {
           @Override
@@ -476,7 +496,6 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-
 
   public void testEntitySerialization() {
     runAfterInit(new Runnable() {
@@ -578,7 +597,6 @@ public class SerializationTests extends AbstractErraiTest {
     });
   }
 
-
   public void testShortInCollection() {
     runAfterInit(new Runnable() {
       @Override
@@ -666,7 +684,6 @@ public class SerializationTests extends AbstractErraiTest {
     });
   }
 
-
   public void testCharacterInCollection() {
     runAfterInit(new Runnable() {
       @Override
@@ -695,7 +712,6 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-
 
   public void testSet() {
     runAfterInit(new Runnable() {
@@ -960,7 +976,6 @@ public class SerializationTests extends AbstractErraiTest {
     });
   }
 
-
   public void testEmptyEntityWithGenericCollections() {
     runAfterInit(new Runnable() {
       @Override
@@ -1009,7 +1024,6 @@ public class SerializationTests extends AbstractErraiTest {
     });
   }
 
-
   public void testThrowable() {
     runAfterInit(new Runnable() {
       @Override
@@ -1027,15 +1041,19 @@ public class SerializationTests extends AbstractErraiTest {
 
         class EqualTester {
           public boolean isEqual(Throwable r) {
-            if (r == null) return false;
-            if (!r.getMessage().equals(t.getMessage())) return false;
+            if (r == null)
+              return false;
+            if (!r.getMessage().equals(t.getMessage()))
+              return false;
 
             StackTraceElement[] st = r.getStackTrace();
 
-            if (st == null || trace.length != st.length) return false;
+            if (st == null || trace.length != st.length)
+              return false;
 
             for (int i = 0; i < trace.length; i++) {
-              if (!stackTraceEqual(trace[i], st[i])) return false;
+              if (!stackTraceEqual(trace[i], st[i]))
+                return false;
             }
 
             return r.getCause() != null && c.getMessage().equals(r.getCause().getMessage());
@@ -1048,7 +1066,6 @@ public class SerializationTests extends AbstractErraiTest {
                     && el1.getMethodName().equals(el2.getMethodName());
           }
         }
-
 
         MessageBuilder.createCall(new RemoteCallback<Throwable>() {
           @Override
@@ -1083,15 +1100,19 @@ public class SerializationTests extends AbstractErraiTest {
 
         class EqualTester {
           public boolean isEqual(AssertionError r) {
-            if (r == null) return false;
-            if (r.getMessage() == null || !r.getMessage().equals(t.getMessage())) return false;
+            if (r == null)
+              return false;
+            if (r.getMessage() == null || !r.getMessage().equals(t.getMessage()))
+              return false;
 
             StackTraceElement[] st = r.getStackTrace();
 
-            if (st == null || trace.length != st.length) return false;
+            if (st == null || trace.length != st.length)
+              return false;
 
             for (int i = 0; i < trace.length; i++) {
-              if (!stackTraceEqual(trace[i], st[i])) return false;
+              if (!stackTraceEqual(trace[i], st[i]))
+                return false;
             }
 
             return true;
@@ -1104,7 +1125,6 @@ public class SerializationTests extends AbstractErraiTest {
                     && el1.getMethodName().equals(el2.getMethodName());
           }
         }
-
 
         MessageBuilder.createCall(new RemoteCallback<AssertionError>() {
           @Override
@@ -1122,7 +1142,6 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-
 
   public void testFactorySerialization() {
     runAfterInit(new Runnable() {
@@ -1156,7 +1175,6 @@ public class SerializationTests extends AbstractErraiTest {
     });
   }
 
-
   public void testJavaUtilDate() {
     runAfterInit(new Runnable() {
       @Override
@@ -1164,18 +1182,11 @@ public class SerializationTests extends AbstractErraiTest {
 
         final java.util.Date d = new java.util.Date(System.currentTimeMillis());
 
-        class EqualTester {
-          public boolean isEqual(java.util.Date r) {
-            return r != null &&
-                    r.equals(d);
-          }
-        }
-
         MessageBuilder.createCall(new RemoteCallback<java.util.Date>() {
           @Override
           public void callback(java.util.Date response) {
             try {
-              assertTrue(new EqualTester().isEqual(response));
+              assertEquals(d, response);
               finishTest();
             }
             catch (Throwable e) {
@@ -1188,7 +1199,6 @@ public class SerializationTests extends AbstractErraiTest {
     });
   }
 
-
   public void testJavaSqlDate() {
     runAfterInit(new Runnable() {
       @Override
@@ -1196,18 +1206,11 @@ public class SerializationTests extends AbstractErraiTest {
 
         final java.sql.Date d = new java.sql.Date(System.currentTimeMillis());
 
-        class EqualTester {
-          public boolean isEqual(java.sql.Date r) {
-            return r != null &&
-                    r.equals(d);
-          }
-        }
-
         MessageBuilder.createCall(new RemoteCallback<java.sql.Date>() {
           @Override
           public void callback(java.sql.Date response) {
             try {
-              assertTrue(new EqualTester().isEqual(response));
+              assertEquals(d, response);
               finishTest();
             }
             catch (Throwable e) {
@@ -1220,7 +1223,6 @@ public class SerializationTests extends AbstractErraiTest {
     });
   }
 
-
   public void testTimestampSerialization() {
     runAfterInit(new Runnable() {
       @Override
@@ -1228,18 +1230,11 @@ public class SerializationTests extends AbstractErraiTest {
 
         final Timestamp ts = new Timestamp(System.currentTimeMillis());
 
-        class EqualTester {
-          public boolean isEqual(Timestamp r) {
-            return r != null &&
-                    r.equals(ts);
-          }
-        }
-
         MessageBuilder.createCall(new RemoteCallback<Timestamp>() {
           @Override
           public void callback(Timestamp response) {
             try {
-              assertTrue(new EqualTester().isEqual(response));
+              assertEquals(ts, response);
               finishTest();
             }
             catch (Throwable e) {
@@ -1259,18 +1254,11 @@ public class SerializationTests extends AbstractErraiTest {
 
         final Time ts = new Time(System.currentTimeMillis());
 
-        class EqualTester {
-          public boolean isEqual(Time r) {
-            return r != null &&
-                    r.equals(ts);
-          }
-        }
-
         MessageBuilder.createCall(new RemoteCallback<Time>() {
           @Override
           public void callback(Time response) {
             try {
-              assertTrue(new EqualTester().isEqual(response));
+              assertEquals(ts, response);
               finishTest();
             }
             catch (Throwable e) {
@@ -1288,20 +1276,13 @@ public class SerializationTests extends AbstractErraiTest {
       @Override
       public void run() {
 
-        final BigDecimal ts = new BigDecimal(((double) System.currentTimeMillis()) * 1.04d);
-
-        class EqualTester {
-          public boolean isEqual(BigDecimal r) {
-            return r != null &&
-                    r.equals(ts);
-          }
-        }
+        final BigDecimal bd = new BigDecimal(((double) System.currentTimeMillis()) * 1.04d);
 
         MessageBuilder.createCall(new RemoteCallback<BigDecimal>() {
           @Override
           public void callback(BigDecimal response) {
             try {
-              assertTrue(new EqualTester().isEqual(response));
+              assertEquals(bd, response);
               finishTest();
             }
             catch (Throwable e) {
@@ -1309,7 +1290,7 @@ public class SerializationTests extends AbstractErraiTest {
               fail();
             }
           }
-        }, TestSerializationRPCService.class).testBigDecimalSerialization(ts);
+        }, TestSerializationRPCService.class).testBigDecimalSerialization(bd);
       }
     });
   }
@@ -1319,20 +1300,13 @@ public class SerializationTests extends AbstractErraiTest {
       @Override
       public void run() {
 
-        final BigInteger ts = new BigInteger(String.valueOf(System.currentTimeMillis()));
-
-        class EqualTester {
-          public boolean isEqual(BigInteger r) {
-            return r != null &&
-                    r.equals(ts);
-          }
-        }
+        final BigInteger bi = new BigInteger(String.valueOf(System.currentTimeMillis()));
 
         MessageBuilder.createCall(new RemoteCallback<BigInteger>() {
           @Override
           public void callback(BigInteger response) {
             try {
-              assertTrue(new EqualTester().isEqual(response));
+              assertEquals(bi, response);
               finishTest();
             }
             catch (Throwable e) {
@@ -1340,7 +1314,7 @@ public class SerializationTests extends AbstractErraiTest {
               fail();
             }
           }
-        }, TestSerializationRPCService.class).testBigIntegerSerialization(ts);
+        }, TestSerializationRPCService.class).testBigIntegerSerialization(bi);
       }
     });
   }
@@ -1350,24 +1324,16 @@ public class SerializationTests extends AbstractErraiTest {
       @Override
       public void run() {
 
-        final Queue ts = new LinkedList();
+        final Queue<String> queue = new LinkedList<String>();
+        queue.add("test1");
+        queue.add("test2");
+        queue.add("test3");
 
-        ts.add("test1");
-        ts.add("test2");
-        ts.add("test3");
-
-        class EqualTester {
-          public boolean isEqual(Queue r) {
-            return r != null &&
-                    r.equals(ts);
-          }
-        }
-
-        MessageBuilder.createCall(new RemoteCallback<Queue>() {
+        MessageBuilder.createCall(new RemoteCallback<Queue<String>>() {
           @Override
-          public void callback(Queue response) {
+          public void callback(Queue<String> response) {
             try {
-              assertTrue(new EqualTester().isEqual(response));
+              assertEquals(queue, response);
               finishTest();
             }
             catch (Throwable e) {
@@ -1375,7 +1341,7 @@ public class SerializationTests extends AbstractErraiTest {
               fail();
             }
           }
-        }, TestSerializationRPCService.class).testQueueSerialization(ts);
+        }, TestSerializationRPCService.class).testQueueSerialization(queue);
       }
     });
   }
@@ -1385,35 +1351,32 @@ public class SerializationTests extends AbstractErraiTest {
       @Override
       public void run() {
 
-        final Queue ts = new PriorityQueue();
+        final Queue<String> queue = new PriorityQueue<String>();
 
-        ts.add("test1");
-        ts.add("test2");
-        ts.add("test3");
+        queue.add("test1");
+        queue.add("test2");
+        queue.add("test3");
 
         class EqualTester {
-          public boolean isEqual(Queue r) {
+          public boolean isEqual(Queue<String> r) {
             if (r != null) {
-              if (r.size() == ts.size()) {
+              if (r.size() == queue.size()) {
                 for (int i = 0; i < r.size(); i++) {
-                  if (!r.poll().equals(ts.poll())) {
+                  if (!r.poll().equals(queue.poll())) {
                     return false;
                   }
                 }
 
               }
-
               return true;
-
             }
             return false;
-
           }
         }
 
-        MessageBuilder.createCall(new RemoteCallback<Queue>() {
+        MessageBuilder.createCall(new RemoteCallback<Queue<String>>() {
           @Override
-          public void callback(Queue response) {
+          public void callback(Queue<String> response) {
             try {
               assertTrue(new EqualTester().isEqual(response));
               finishTest();
@@ -1423,7 +1386,7 @@ public class SerializationTests extends AbstractErraiTest {
               fail();
             }
           }
-        }, TestSerializationRPCService.class).testQueueSerialization(ts);
+        }, TestSerializationRPCService.class).testQueueSerialization(queue);
       }
     });
   }
@@ -1433,20 +1396,20 @@ public class SerializationTests extends AbstractErraiTest {
       @Override
       public void run() {
 
-        final SortedMap ts = new TreeMap();
+        final SortedMap<String, String> map = new TreeMap<String, String>();
 
-        ts.put("test1", "a");
-        ts.put("test2", "b");
-        ts.put("test3", "c");
+        map.put("test1", "a");
+        map.put("test2", "b");
+        map.put("test3", "c");
 
         class EqualTester {
-          public boolean isEqual(SortedMap r) {
+          public boolean isEqual(SortedMap<String, String> r) {
             if (r != null) {
-              if (r.size() == ts.size()) {
-                if (!r.firstKey().equals(ts.firstKey())) {
+              if (r.size() == map.size()) {
+                if (!r.firstKey().equals(map.firstKey())) {
                   return false;
                 }
-                else if (!r.lastKey().equals(ts.lastKey())) {
+                else if (!r.lastKey().equals(map.lastKey())) {
                   return false;
                 }
               }
@@ -1458,9 +1421,9 @@ public class SerializationTests extends AbstractErraiTest {
           }
         }
 
-        MessageBuilder.createCall(new RemoteCallback<SortedMap>() {
+        MessageBuilder.createCall(new RemoteCallback<SortedMap<String, String>>() {
           @Override
-          public void callback(SortedMap response) {
+          public void callback(SortedMap<String, String> response) {
             try {
               assertTrue(new EqualTester().isEqual(response));
               finishTest();
@@ -1470,7 +1433,7 @@ public class SerializationTests extends AbstractErraiTest {
               fail();
             }
           }
-        }, TestSerializationRPCService.class).testSortedMapSerialization(ts);
+        }, TestSerializationRPCService.class).testSortedMapSerialization(map);
       }
     });
   }
@@ -1480,24 +1443,18 @@ public class SerializationTests extends AbstractErraiTest {
       @Override
       public void run() {
 
-        final SortedSet ts = new TreeSet();
+        final SortedSet<String> set = new TreeSet<String>();
 
-        ts.add("test1");
-        ts.add("test2");
-        ts.add("test3");
+        set.add("test1");
+        set.add("test2");
+        set.add("test3");
 
-        class EqualTester {
-          public boolean isEqual(SortedSet r) {
-            return r != null &&
-                    r.equals(ts);
-          }
-        }
 
-        MessageBuilder.createCall(new RemoteCallback<SortedSet>() {
+        MessageBuilder.createCall(new RemoteCallback<SortedSet<String>>() {
           @Override
-          public void callback(SortedSet response) {
+          public void callback(SortedSet<String> response) {
             try {
-              assertTrue(new EqualTester().isEqual(response));
+              assertEquals(set, response);
               finishTest();
             }
             catch (Throwable e) {
@@ -1505,35 +1462,27 @@ public class SerializationTests extends AbstractErraiTest {
               fail();
             }
           }
-        }, TestSerializationRPCService.class).testSortedSetSerialization(ts);
+        }, TestSerializationRPCService.class).testSortedSetSerialization(set);
       }
     });
   }
-
 
   public void testInheritedDefinitionFromExistingParent() {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
 
-        final CustomList ts = new CustomList();
+        final CustomList customList = new CustomList();
 
-        ts.add("test1");
-        ts.add("test2");
-        ts.add("test3");
-
-        class EqualTester {
-          public boolean isEqual(List r) {
-            return r != null &&
-                    r.equals(ts);
-          }
-        }
+        customList.add("test1");
+        customList.add("test2");
+        customList.add("test3");
 
         MessageBuilder.createCall(new RemoteCallback<List>() {
           @Override
           public void callback(List response) {
             try {
-              assertTrue(new EqualTester().isEqual(response));
+              assertEquals(customList, response);
               finishTest();
             }
             catch (Throwable e) {
@@ -1541,7 +1490,7 @@ public class SerializationTests extends AbstractErraiTest {
               fail();
             }
           }
-        }, TestSerializationRPCService.class).testInheritedDefinitionFromExistingParent(ts);
+        }, TestSerializationRPCService.class).testInheritedDefinitionFromExistingParent(customList);
       }
     });
   }
@@ -1553,19 +1502,11 @@ public class SerializationTests extends AbstractErraiTest {
 
         final TestEnumA e = TestEnumA.Christian;
 
-
-        class EqualTester {
-          public boolean isEqual(TestEnumA r) {
-            return r != null &&
-                    r.equals(e);
-          }
-        }
-
         MessageBuilder.createCall(new RemoteCallback<TestEnumA>() {
           @Override
           public void callback(TestEnumA response) {
             try {
-              assertTrue(new EqualTester().isEqual(response));
+              assertEquals(e, response);
               finishTest();
             }
             catch (Throwable e) {
@@ -1585,19 +1526,11 @@ public class SerializationTests extends AbstractErraiTest {
 
         final Boron.Bean boron = new Boron.Bean();
 
-
-        class EqualTester {
-          public boolean isEqual(Boron.Bean r) {
-            return r != null &&
-                    r.equals(boron);
-          }
-        }
-
         MessageBuilder.createCall(new RemoteCallback<Boron.Bean>() {
           @Override
           public void callback(Boron.Bean response) {
             try {
-              assertTrue(new EqualTester().isEqual(response));
+              assertEquals(boron, response);
               finishTest();
             }
             catch (Throwable e) {
@@ -1616,18 +1549,11 @@ public class SerializationTests extends AbstractErraiTest {
       public void run() {
         final Koron koron = new Koron();
 
-        class EqualTester {
-          public boolean isEqual(Koron r) {
-            return r != null &&
-                    r.equals(koron);
-          }
-        }
-
         MessageBuilder.createCall(new RemoteCallback<Koron>() {
           @Override
           public void callback(Koron response) {
             try {
-              assertTrue(new EqualTester().isEqual(response));
+              assertEquals(koron, response);
               finishTest();
             }
             catch (Throwable e) {
@@ -1649,18 +1575,11 @@ public class SerializationTests extends AbstractErraiTest {
         entity.setField1("foo");
         entity.setField2(123);
 
-        class EqualTester {
-          public boolean isEqual(EntityWithUnqualifiedFields r) {
-            return r != null &&
-                    r.equals(entity);
-          }
-        }
-
         MessageBuilder.createCall(new RemoteCallback<EntityWithUnqualifiedFields>() {
           @Override
           public void callback(EntityWithUnqualifiedFields response) {
             try {
-              assertTrue(new EqualTester().isEqual(response));
+              assertEquals(entity, response);
               finishTest();
             }
             catch (Throwable e) {
@@ -1758,7 +1677,6 @@ public class SerializationTests extends AbstractErraiTest {
     });
   }
 
-
   public void testGenericEntityUsingStack() {
     runAfterInit(new Runnable() {
       @Override
@@ -1786,7 +1704,6 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-
 
   public void testEntityWithSuperClassField() {
     runAfterInit(new Runnable() {
