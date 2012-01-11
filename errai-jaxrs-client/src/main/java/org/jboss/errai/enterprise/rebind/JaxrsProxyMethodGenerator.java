@@ -19,7 +19,8 @@ package org.jboss.errai.enterprise.rebind;
 import static org.jboss.errai.enterprise.rebind.TypeMarshaller.demarshal;
 import static org.jboss.errai.enterprise.rebind.TypeMarshaller.marshal;
 
-import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.jboss.errai.bus.rebind.RebindUtils;
 import org.jboss.errai.codegen.framework.BooleanOperator;
@@ -36,7 +37,6 @@ import org.jboss.errai.codegen.framework.util.Bool;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseException;
-import org.jboss.resteasy.specimpl.UriBuilderImpl;
 
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
@@ -53,8 +53,11 @@ import com.google.gwt.user.client.Cookies;
  */
 public class JaxrsProxyMethodGenerator {
 
-  private static final String APPEND = "append";
+  private static final Pattern PATH_PARAM_PATTERN = 
+    Pattern.compile("(\\{\\s*)(\\w[\\w.-]*)(:\\s*([^{}][^{}]*))*(\\s*\\})");
 
+  private static final String APPEND = "append";
+ 
   private MetaClass declaringClass;
   private JaxrsResourceMethod resourceMethod;
   private BlockBuilder<?> methodBlock;
@@ -84,14 +87,14 @@ public class JaxrsProxyMethodGenerator {
     // construct path using @PathParams and @MatrixParams
     String path = resourceMethod.getPath();
     ContextualStatementBuilder pathValue = Stmt.loadLiteral(path);
-    List<String> pathParams =
-        ((UriBuilderImpl) UriBuilderImpl.fromTemplate("/" + path)).getPathParamNamesInDeclarationOrder();
 
-    for (String pathParam : pathParams) {
-      pathValue = pathValue.invoke("replaceAll", "\\{" + pathParam + "\\}",
+    Matcher matcher = PATH_PARAM_PATTERN.matcher(path);
+    while (matcher.find()) {
+      String pathParam = matcher.group(2);
+      pathValue = pathValue.invoke("replace", "{" + pathParam + "}",
           encodePath(marshal(params.getPathParameter(pathParam))));
     }
-
+    
     if (params.getMatrixParameters() != null) {
       for (String matrixParamName : params.getMatrixParameters().keySet()) {
         pathValue = pathValue.invoke("concat", ";" + matrixParamName + "=")

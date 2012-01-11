@@ -13,7 +13,7 @@
   <dependencies>
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
-      <artifactId>resteasy-jaxrs</artifactId>
+      <artifactId>jaxrs-api</artifactId>
     </dependency>
 
     <dependency>

@@ -93,12 +93,6 @@
     </dependency>
 
     <dependency>
-      <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-jaxrs-provider</artifactId>
-      <version>${version}</version>
-    </dependency>
-
-    <dependency>
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-user</artifactId>
       <scope>provided</scope>
@@ -132,14 +126,21 @@
 
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
-      <artifactId>resteasy-jaxrs</artifactId>
+      <artifactId>jaxrs-api</artifactId>
     </dependency>
 
     <dependency>
-      <groupId>javax.enterprise</groupId>
-      <artifactId>cdi-api</artifactId>
-      <version>1.0-SP4</version>
-      <scope>provided</scope>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-jaxrs-provider</artifactId>
+      <version>${version}</version>
+      <scope>test</scope>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.jboss.resteasy</groupId>
+      <artifactId>resteasy-jaxrs</artifactId>
+      <version>${resteasy.version}</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>

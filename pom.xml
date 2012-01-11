@@ -131,7 +131,7 @@
 
       <dependency>
         <groupId>org.jboss.resteasy</groupId>
-        <artifactId>resteasy-jaxrs</artifactId>
+        <artifactId>jaxrs-api</artifactId>
         <version>${resteasy.version}</version>
       </dependency>
 
@@ -151,9 +151,6 @@
 
   <build>
     <plugins>
-      <!--plugin> <groupId>org.codehaus.mojo</groupId> <artifactId>gwt-maven-plugin</artifactId> 
-        <version>${gwt.maven}</version> <configuration> <skip>true</skip> </configuration> 
-        </plugin -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>

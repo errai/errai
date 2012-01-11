@@ -16,9 +16,6 @@
 
 package org.jboss.errai.enterprise.jaxrs.server;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-
 import org.jboss.errai.enterprise.jaxrs.client.shared.PathParamTestService;
 
 /**
