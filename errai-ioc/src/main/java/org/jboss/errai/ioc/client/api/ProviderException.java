@@ -14,13 +14,24 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.tests.integration.client;
+package org.jboss.errai.ioc.client.api;
 
-import com.google.gwt.core.client.EntryPoint;
-
-public class IOCIntegrationTests implements EntryPoint {
-  @Override
-  public void onModuleLoad() {
+/**
+ * @author Mike Brock
+ */
+public class ProviderException extends InjectionException {
+  public ProviderException() {
   }
 
+  public ProviderException(String message) {
+    super(message);
+  }
+
+  public ProviderException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  public ProviderException(Throwable cause) {
+    super(cause);
+  }
 }

@@ -39,6 +39,9 @@ public class Container implements EntryPoint {
     for (Map.Entry<Widget, String> entry : ctx.getWidgetToPanel().entrySet()) {
       ctx.getPanels().get(entry.getValue()).add(entry.getKey());
     }
+
+
+    System.out.println("BOOTSTRAP DONE!");
   }
 
 }

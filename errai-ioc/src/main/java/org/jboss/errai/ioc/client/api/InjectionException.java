@@ -14,15 +14,26 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.api;
+package org.jboss.errai.ioc.client.api;
 
 /**
- * @author Mike Brock .
+ * @author Mike Brock
  */
-public interface Consumer<T> {
-  public void consume(T value);
+public class InjectionException extends RuntimeException {
 
-  public Class<T> getValueType();
+  public InjectionException() {
+    super();
+  }
 
-  public <U> Consumer<U> select(String subjectName, String replyTo, Class<U> type);
+  public InjectionException(String message) {
+    super(message);
+  }
+
+  public InjectionException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  public InjectionException(Throwable cause) {
+    super(cause);
+  }
 }
