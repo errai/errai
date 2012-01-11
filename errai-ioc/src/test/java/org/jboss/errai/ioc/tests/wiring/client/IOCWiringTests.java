@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,13 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.tests.client.res;
+package org.jboss.errai.ioc.tests.wiring.client;
 
-import org.jboss.errai.ioc.client.api.IOCProvider;
+import com.google.gwt.core.client.EntryPoint;
 
-import javax.inject.Provider;
-
-/**
- * User: christopherbrock
- * Date: 15-Aug-2010
- * Time: 7:54:20 PM
- */
-@IOCProvider
-public class FooServiceProvider implements Provider<FooService> {
+public class IOCWiringTests implements EntryPoint {
   @Override
-  public FooService get() {
-    return new FooService() {
-      @Override
-      public String getMessage() {
-        return "foo";
-      }
-    };
+  public void onModuleLoad() {
   }
+
 }

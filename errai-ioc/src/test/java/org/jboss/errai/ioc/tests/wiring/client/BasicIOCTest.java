@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.tests.client;
+package org.jboss.errai.ioc.tests.wiring.client;
 
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.rebind.IOCTestRunner;
-import org.jboss.errai.ioc.tests.client.res.HappyInspector;
-import org.jboss.errai.ioc.tests.client.res.QualInspector;
-import org.jboss.errai.ioc.tests.client.res.SimpleBean;
-import org.jboss.errai.ioc.tests.client.res.SimpleBean2;
+import org.jboss.errai.ioc.tests.wiring.client.res.HappyInspector;
+import org.jboss.errai.ioc.tests.wiring.client.res.QualInspector;
+import org.jboss.errai.ioc.tests.wiring.client.res.SimpleBean;
+import org.jboss.errai.ioc.tests.wiring.client.res.SimpleBean2;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -31,7 +31,7 @@ public class BasicIOCTest extends IOCClientTestCase {
 
   @Override
   public String getModuleName() {
-    return "org.jboss.errai.ioc.tests.IOCTests";
+    return "org.jboss.errai.ioc.tests.wiring.IOCWiringTests";
   }
 
   @Test

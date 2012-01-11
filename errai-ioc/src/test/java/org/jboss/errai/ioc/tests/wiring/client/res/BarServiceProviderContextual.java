@@ -14,11 +14,25 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.tests.client.res;
+package org.jboss.errai.ioc.tests.wiring.client.res;
+
+import java.lang.annotation.Annotation;
+
+import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
+import org.jboss.errai.ioc.client.api.IOCProvider;
 
 /**
  * @author Mike Brock .
  */
-public interface BarService<T> {
-  public T get();
+@IOCProvider
+public class BarServiceProviderContextual implements ContextualTypeProvider<BarService> {
+  @Override
+  public BarService provide(final Class<?>[] typeargs, Annotation... qualifiers) {
+    return new BarService() {
+      @Override
+      public Object get() {
+        return typeargs[0].getName();
+      }
+    };
+  }
 }

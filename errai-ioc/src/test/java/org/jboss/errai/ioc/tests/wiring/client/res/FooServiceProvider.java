@@ -14,13 +14,26 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.tests.client.res;
+package org.jboss.errai.ioc.tests.wiring.client.res;
+
+import org.jboss.errai.ioc.client.api.IOCProvider;
+
+import javax.inject.Provider;
 
 /**
  * User: christopherbrock
  * Date: 15-Aug-2010
- * Time: 7:53:52 PM
+ * Time: 7:54:20 PM
  */
-public interface FooService {
-  public String getMessage();
+@IOCProvider
+public class FooServiceProvider implements Provider<FooService> {
+  @Override
+  public FooService get() {
+    return new FooService() {
+      @Override
+      public String getMessage() {
+        return "foo";
+      }
+    };
+  }
 }

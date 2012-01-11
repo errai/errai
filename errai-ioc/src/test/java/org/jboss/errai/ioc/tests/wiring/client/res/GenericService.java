@@ -1,4 +1,4 @@
-package org.jboss.errai.ioc.tests.client.res;
+package org.jboss.errai.ioc.tests.wiring.client.res;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

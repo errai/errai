@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 JBoss, by Red Hat, Inc
+ * Copyright 2011 JBoss, a divison Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,13 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.client.api.builtin;
-
-import java.lang.annotation.Annotation;
-
-import org.jboss.errai.bus.client.api.Consumer;
-import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
-import org.jboss.errai.ioc.client.api.IOCProvider;
+package org.jboss.errai.ioc.tests.wiring.client.res;
 
 /**
- * @author Mike Brock .
+ * User: christopherbrock
+ * Date: 15-Aug-2010
+ * Time: 7:53:52 PM
  */
-@IOCProvider
-public class ConsumerProvider implements ContextualTypeProvider<Consumer<?>> {
-  @Override
-  public Consumer<?> provide(Class<?>[] typeargs, Annotation[] qualifiers) {
-    return ErraiMessageConsumer.of(, replyTo);
-  }
+public interface FooService {
+  public String getMessage();
 }
