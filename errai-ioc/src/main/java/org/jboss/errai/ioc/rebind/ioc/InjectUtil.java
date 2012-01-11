@@ -75,6 +75,13 @@ public class InjectUtil {
     final List<InjectionTask> injectionTasks = scanForTasks(injector, ctx, type);
     final List<MetaMethod> postConstructTasks = scanForPostConstruct(type);
 
+    for (Class<? extends Annotation> a : ctx.getDecoratorAnnotationsBy(ElementType.TYPE)) {
+      if (type.isAnnotationPresent(a)) {
+        DecoratorTask task = new DecoratorTask(injector, type, ctx.getDecorator(a));
+        injectionTasks.add(task);
+      }
+    }
+
     if (!constructorInjectionPoints.isEmpty()) {
       if (constructorInjectionPoints.size() > 1) {
         throw new InjectionFailure("more than one constructor in "
@@ -82,13 +89,6 @@ public class InjectUtil {
       }
 
       final MetaConstructor constructor = constructorInjectionPoints.get(0);
-
-      for (Class<? extends Annotation> a : ctx.getDecoratorAnnotationsBy(ElementType.TYPE)) {
-        if (type.isAnnotationPresent(a)) {
-          DecoratorTask task = new DecoratorTask(injector, type, ctx.getDecorator(a));
-          injectionTasks.add(task);
-        }
-      }
 
       return new ConstructionStrategy() {
         @Override

@@ -1,4 +1,4 @@
-package org.jboss.errai.ioc.tests.integration.server;
+package org.jboss.errai.ioc.tests.wiring.server;
 
 import java.util.ArrayList;
 import java.util.List;

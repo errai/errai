@@ -49,6 +49,9 @@ import java.util.*;
 public class DefinitionsFactoryImpl implements DefinitionsFactory {
   private final Set<Class<?>> exposedClasses = new HashSet<Class<?>>();
 
+  /**
+   * Map of aliases to the mapped marshalling type.
+   */
   private final Map<String, String> mappingAliases = new HashMap<String, String>();
 
   private final Map<String, MappingDefinition> MAPPING_DEFINITIONS
@@ -209,7 +212,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
       for (Object o : props.keySet()) {
         String key = (String) o;
-        if (key.equals(MarshallingGenUtil.CONFIG_ERRAI_SERIALIZABLE_TYPE)) {
+        if (key.equals(MarshallingGenUtil.CONFIG_ERRAI_OLD_SERIALIZABLE_TYPE) || key.equals(MarshallingGenUtil.CONFIG_ERRAI_SERIALIZABLE_TYPE)) {
           for (String s : props.getProperty(key).split(" ")) {
             try {
               Class<?> cls = Class.forName(s.trim());
@@ -220,6 +223,27 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
             }
           }
 
+          break;
+        }
+
+        if (key.equals(MarshallingGenUtil.CONFIG_ERRAI_MAPPING_ALIASES)) {
+          for (String s : props.getProperty(key).split(" ")) {
+            try {
+              String[] mapping = s.split("->");
+              
+              if (mapping.length != 2) {
+                throw new RuntimeException("syntax error: mapping for marshalling alias: " + s);
+              }
+
+              Class<?> fromMapping = Class.forName(mapping[0].trim());
+              Class<?> toMapping = Class.forName(mapping[1].trim());
+
+              mappingAliases.put(fromMapping.getName(), toMapping.getName());
+            }
+            catch (Exception e) {
+              throw new RuntimeException("could not find class defined in ErraiApp.properties for mapping: " + s);
+            }
+          }
           break;
         }
       }

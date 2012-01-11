@@ -19,8 +19,11 @@ package org.jboss.errai.ioc.client.api.builtin;
 import java.lang.annotation.Annotation;
 
 import org.jboss.errai.bus.client.api.Consumer;
+import org.jboss.errai.bus.client.api.annotations.ReplyTo;
+import org.jboss.errai.bus.client.api.annotations.ToSubject;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.IOCProvider;
+import org.jboss.errai.ioc.client.api.ProviderException;
 
 /**
  * @author Mike Brock .
@@ -29,6 +32,40 @@ import org.jboss.errai.ioc.client.api.IOCProvider;
 public class ConsumerProvider implements ContextualTypeProvider<Consumer<?>> {
   @Override
   public Consumer<?> provide(Class<?>[] typeargs, Annotation[] qualifiers) {
-    return ErraiMessageConsumer.of(, replyTo);
+    String toSubject = null, replyTo = null;
+    typeargs = typeargs == null ? new Class<?>[0] : typeargs;
+
+    for (Annotation a : qualifiers) {
+      if (a instanceof ToSubject) {
+        toSubject = ((ToSubject) a).value();
+      }
+      else if (a instanceof ReplyTo) {
+        replyTo = ((ReplyTo) a).value();
+      }
+    }
+
+    if (typeargs.length != 1) {
+      throw new ProviderException(PROVIDER_EXCEPTION_ERROR_MSG_BASE + ": Type at injection point must have exactly" +
+              " one type parameter. (found: " + typeargs.length + ")");
+    }
+
+    if (toSubject == null) {
+      throw new ProviderException(PROVIDER_EXCEPTION_ERROR_MSG_BASE + ": Required "
+              + ToSubject.class.getName() + " qualifier missing at injection point.");
+    }
+    if (replyTo == null) {
+      throw new ProviderException(PROVIDER_EXCEPTION_ERROR_MSG_BASE + ": Required "
+              + ReplyTo.class.getName() + " qualifier missing at injection point.");
+    }
+
+    if (typeargs.length != 1) {
+      throw new ProviderException(PROVIDER_EXCEPTION_ERROR_MSG_BASE + ": Type at injection point must have exactly" +
+              " one type parameter. (found: " + typeargs.length + ")");
+    }
+
+    return ErraiMessageConsumer.of(toSubject, replyTo, typeargs[0]);
   }
+
+  private static final String PROVIDER_EXCEPTION_ERROR_MSG_BASE
+          = "Injection of " + Consumer.class.getName() + " implicit bean failed. ";
 }

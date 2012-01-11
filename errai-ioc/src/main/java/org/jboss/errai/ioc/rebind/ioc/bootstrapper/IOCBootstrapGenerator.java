@@ -33,7 +33,9 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
+import org.jboss.errai.bus.client.api.base.ServiceCanceller;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
+import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
@@ -58,15 +60,7 @@ import org.jboss.errai.ioc.client.api.*;
 import org.jboss.errai.ioc.rebind.AnnotationHandler;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.IOCProcessorFactory;
-import org.jboss.errai.ioc.rebind.ioc.ContextualProviderInjector;
-import org.jboss.errai.ioc.rebind.ioc.IOCDecoratorExtension;
-import org.jboss.errai.ioc.rebind.ioc.IOCExtensionConfigurator;
-import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
-import org.jboss.errai.ioc.rebind.ioc.InjectionFailure;
-import org.jboss.errai.ioc.rebind.ioc.Injector;
-import org.jboss.errai.ioc.rebind.ioc.InjectorFactory;
-import org.jboss.errai.ioc.rebind.ioc.ProviderInjector;
-import org.jboss.errai.ioc.rebind.ioc.QualifyingMetadataFactory;
+import org.jboss.errai.ioc.rebind.ioc.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -160,6 +154,8 @@ public class IOCBootstrapGenerator {
       log.info("nothing has changed. using cached IOC bootstrapping class.");
     }
 
+    log.info("using IOC bootstrapping code to: " + cacheFile.getAbsolutePath());
+    
     return gen;
   }
 
@@ -310,6 +306,8 @@ public class IOCBootstrapGenerator {
 
     final MetaClass typeProviderCls = MetaClassFactory.get(TypeProvider.class);
     MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
+    
+
     /*
     * IOCDecoratorExtension.class
     */
@@ -502,6 +500,14 @@ public class IOCBootstrapGenerator {
     procFactory.registerHandler(EntryPoint.class, new AnnotationHandler<EntryPoint>() {
       @Override
       public boolean handle(final InjectableInstance type, EntryPoint annotation, IOCProcessingContext context) {
+        generateWithSingletonSemantics(type.getType());
+        return true;
+      }
+    });
+
+    procFactory.registerHandler(Service.class, new AnnotationHandler<Service>() {
+      @Override
+      public boolean handle(final InjectableInstance type, Service annotation, IOCProcessingContext context) {
         generateWithSingletonSemantics(type.getType());
         return true;
       }
