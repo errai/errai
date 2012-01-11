@@ -19,5 +19,5 @@ package org.jboss.errai.ioc.client.api;
 import java.lang.annotation.Annotation;
 
 public interface ContextualTypeProvider<T> {
-  public T provide(Class[] typeargs, Annotation[] qualifiers);
+  public T provide(Class<?>[] typeargs, Annotation[] qualifiers);
 }

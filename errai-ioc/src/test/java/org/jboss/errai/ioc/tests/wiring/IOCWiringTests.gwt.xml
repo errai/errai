@@ -26,7 +26,7 @@
 
     <set-property name='gwt.logging.logLevel' value='SEVERE'/>
 
-    <entry-point class='org.jboss.errai.ioc.tests.client.IOCTests'/>
+    <entry-point class='org.jboss.errai.ioc.tests.wiring.client.IOCWiringTests'/>
 
     <servlet path='/in.erraiBus' class='org.jboss.errai.bus.server.servlet.DefaultBlockingServlet'/>
 

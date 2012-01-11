@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.tests.client;
+package org.jboss.errai.ioc.tests.integration.client;
 
 import com.google.gwt.core.client.EntryPoint;
 
-public class IOCTests implements EntryPoint {
+public class IOCIntegrationTests implements EntryPoint {
   @Override
   public void onModuleLoad() {
   }

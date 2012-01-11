@@ -17,16 +17,20 @@
 package org.jboss.errai.bus.client.api;
 
 /**
- * Interface for a remote callback that takes any specified type
+ * Interface for a remote callback that takes any specified type. Instances of
+ * RemoteCallback are typically obtained from an injected {@link Caller}.
  *
- * @param <T> - type of response the callback expects
+ * @param <T>
+ *          type of response the callback expects
  */
 public interface RemoteCallback<T> {
 
   /**
-   * Callback function dispatched when the message it is attached to has been sent
+   * Invoked by the RPC proxy after the remote method has been executed and its
+   * response has been received.
    *
-   * @param response - response of any particular type
+   * @param response
+   *          the response returned from the remote call.
    */
   public void callback(T response);
 }

@@ -17,12 +17,46 @@
 package org.jboss.errai.bus.client.api;
 
 /**
+ * An interface that can be used as the injection point for a (probably
+ * generated) proxy that invokes remote methods and gives their return values to
+ * the supplied callbacks.
+ *
  * @author Mike Brock
  */
 public interface Caller<T> {
+
+  /**
+   * Returns an instance of the proxy that can invoke service methods on the
+   * service described by {@code T}.
+   *
+   * @param callback
+   *          the callback to be invoked when the remote call has completed in
+   *          success. In the case of an error, a default error callback will be
+   *          notified. Which one depends on the proxy implementation.
+   *          <p>
+   *          The provided callback must not be null.
+   * @return an instance of the proxy that can invoke service methods on the
+   *         service described by {@code T}.
+   */
   public T call(RemoteCallback<?> callback);
-  
-  public T call(ErrorCallback errorCallback);
-  
+
+  /**
+   * Returns an instance of the proxy that can invoke service methods on the
+   * service described by {@code T}.
+   *
+   * @param callback
+   *          the callback to be invoked when the remote call has completed in
+   *          success. In the case of an error, a default error callback will be
+   *          notified. Which one depends on the proxy implementation.
+   *          <p>
+   *          The callback must not be null.
+   * @param errorCallback
+   *          the callback to be invoked when the remote call has completed
+   *          in failure. No callback is invoked in the case of success.
+   *          <p>
+   *          The provided callback must not be null.
+   * @return an instance of the proxy that can invoke service methods on the
+   *         service described by {@code T}.
+   */
   public T call(RemoteCallback<?> callback, ErrorCallback errorCallback);
 }

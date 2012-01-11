@@ -1,4 +1,4 @@
-package org.jboss.errai.ioc.tests.client.res;
+package org.jboss.errai.ioc.tests.wiring.client.res;
 
 import javax.inject.Qualifier;
 import java.lang.annotation.ElementType;

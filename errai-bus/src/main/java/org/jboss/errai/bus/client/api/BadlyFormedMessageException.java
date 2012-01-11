@@ -17,7 +17,7 @@
 package org.jboss.errai.bus.client.api;
 
 /**
- * An exception thrown when a message has not been properly formed and is therefore, not transmittable.
+ * Thrown when a message has not been properly formed and therefore cannot be transmitted.
  */
 public class BadlyFormedMessageException extends RuntimeException {
   public BadlyFormedMessageException(String message) {

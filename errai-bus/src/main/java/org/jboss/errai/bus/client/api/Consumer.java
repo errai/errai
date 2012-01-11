@@ -22,7 +22,5 @@ package org.jboss.errai.bus.client.api;
 public interface Consumer<T> {
   public void consume(T value);
 
-  public void setToSubject(String subjectName);
-
-  public void setReplyTo(String replyTo);
+  public <U> Consumer<U> select(String subjectName, String replyTo, Class<U> type);
 }
