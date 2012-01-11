@@ -41,10 +41,13 @@ public class ConversationalEndpointCallback implements MessageCallback {
 
   /**
    * Initializes the service, method and bus
-   *
-   * @param genericSvc - the service the bus is subscribed to
-   * @param method     - the endpoint function
-   * @param bus        - the bus to send the messages on
+   * 
+   * @param genericSvc
+   *          - the service the bus is subscribed to
+   * @param method
+   *          - the endpoint function
+   * @param bus
+   *          - the bus to send the messages on
    */
   public ConversationalEndpointCallback(ServiceInstanceProvider genericSvc, Method method, MessageBus bus) {
     this.serviceProvider = genericSvc;
@@ -54,10 +57,11 @@ public class ConversationalEndpointCallback implements MessageCallback {
 
   /**
    * Callback function. Creates the conversation and invokes the endpoint using the message specified
-   *
-   * @param message - the message to initiate the conversation
+   * 
+   * @param message
+   *          - the message to initiate the conversation
    */
-  @SuppressWarnings({"unchecked"})
+  @SuppressWarnings({ "unchecked" })
   public void callback(Message message) {
     Object[] parms = message.get(Object[].class, "MethodParms");
 
@@ -100,10 +104,17 @@ public class ConversationalEndpointCallback implements MessageCallback {
     try {
       Object methReply = method.invoke(serviceProvider.get(message), parms);
 
-      createConversation(message)
+      if (method.getReturnType().equals(void.class)) {
+        createConversation(message)
+            .subjectProvided()
+            .noErrorHandling().sendNowWith(bus);
+      }
+      else {
+        createConversation(message)
               .subjectProvided()
               .with("MethodReply", methReply)
               .noErrorHandling().sendNowWith(bus);
+      }
     }
     catch (MessageDeliveryFailure e) {
       throw e;

@@ -229,4 +229,18 @@ public class BusCommunicationTests extends AbstractErraiTest {
       }
     });
   }
+  
+  public void testRPCReturningVoid() {
+    runAfterInit(new Runnable() {
+      public void run() {
+        MessageBuilder.createCall(
+            new RemoteCallback<Void>() {
+              public void callback(Void response) {
+                finishTest();
+              }
+            },
+        TestRPCService.class).returnVoid();
+      }
+    });
+  }
 }

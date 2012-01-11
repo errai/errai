@@ -35,4 +35,9 @@ public class TestRPCServiceImpl implements TestRPCService {
   public void exception() throws TestException {
     throw new TestException();
   }
+
+  @Override
+  public void returnVoid() {
+    return;
+  }
 }
