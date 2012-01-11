@@ -53,6 +53,8 @@ import com.google.gwt.user.client.Cookies;
  */
 public class JaxrsProxyMethodGenerator {
 
+  // path param examples that are matched by this regex: /{isbn}/aaa{param}bbb/{name}-{zip}/aaa{param:b+}/{many:.*}
+  // whitespaces are tolerated 
   private static final Pattern PATH_PARAM_PATTERN = 
     Pattern.compile("(\\{\\s*)(\\w[\\w.-]*)(:\\s*([^{}][^{}]*))*(\\s*\\})");
 
@@ -245,7 +247,7 @@ public class JaxrsProxyMethodGenerator {
     Statement handleResponse = Stmt.loadStatic(declaringClass, "this").loadField("remoteCallback")
         .invoke("callback", Stmt.loadVariable("response"));
 
-    Statement response = demarshal(resourceMethod.getMethod().getReturnType(),
+    Statement result = demarshal(resourceMethod.getMethod().getReturnType(),
         Stmt.loadVariable("response").invoke("getText"));
 
     Statement handleResult = Stmt
@@ -253,7 +255,7 @@ public class JaxrsProxyMethodGenerator {
         .append(Stmt.loadStatic(declaringClass, "this").loadField("remoteCallback").invoke("callback", Stmt.load(null)))
         .finish()
         .else_()
-        .append(Stmt.loadStatic(declaringClass, "this").loadField("remoteCallback").invoke("callback", response))
+        .append(Stmt.loadStatic(declaringClass, "this").loadField("remoteCallback").invoke("callback", result))
         .finish();
 
     return Stmt
