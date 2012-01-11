@@ -25,8 +25,7 @@ import org.jboss.errai.bus.server.annotations.Remote;
 @Remote
 public interface TestRPCService {
   public boolean isGreaterThan(int a, int b);
-  
   public void exception() throws TestException;
-  
   public void returnVoid();
+  public Person returnNull();
 }

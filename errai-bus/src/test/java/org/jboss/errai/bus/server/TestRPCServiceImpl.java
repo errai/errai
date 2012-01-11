@@ -16,6 +16,7 @@
 
 package org.jboss.errai.bus.server;
 
+import org.jboss.errai.bus.client.tests.support.Person;
 import org.jboss.errai.bus.client.tests.support.TestException;
 import org.jboss.errai.bus.client.tests.support.TestRPCService;
 import org.jboss.errai.bus.server.annotations.Service;
@@ -39,5 +40,10 @@ public class TestRPCServiceImpl implements TestRPCService {
   @Override
   public void returnVoid() {
     return;
+  }
+  
+  @Override
+  public Person returnNull() {
+    return null;
   }
 }

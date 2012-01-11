@@ -144,4 +144,6 @@ public interface TestSerializationRPCService {
   public GenericEntity testGenericEntity(GenericEntity e);
   
   public EntityWithSuperClassField testEntityWithSuperClassField(EntityWithSuperClassField e);
+  
+  public User testEntityWithNullField(User u);
 }

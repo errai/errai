@@ -61,7 +61,12 @@ public abstract class AbstractCollectionMarshaller<C extends Collection> extends
   protected <T extends Collection> T marshallToCollection(T collection, EJArray array, MarshallingSession ctx) {
     for (int i = 0; i < array.size(); i++) {
       EJValue elem = array.get(i);
-      collection.add(ctx.getMarshallerInstance(ctx.determineTypeFor(null, elem)).demarshall(elem, ctx));
+      if (elem.isNull() == null) {
+        collection.add(ctx.getMarshallerInstance(ctx.determineTypeFor(null, elem)).demarshall(elem, ctx));
+      } 
+      else {
+        collection.add(null);
+      }
     }
 
     return collection;

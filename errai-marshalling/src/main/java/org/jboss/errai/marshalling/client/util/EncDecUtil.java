@@ -41,15 +41,21 @@ public class EncDecUtil {
         buf.append(",");
       }
       elem = iter.next();
-      Marshaller<Object> marshaller;
-      if (elem instanceof Number || elem instanceof Boolean || elem instanceof Character) {
-        marshaller = MarshallUtil.getQualifiedNumberMarshaller(elem);
-      }
+      
+      if (elem != null) {
+        Marshaller<Object> marshaller;
+        if (elem instanceof Number || elem instanceof Boolean || elem instanceof Character) {
+          marshaller = MarshallUtil.getQualifiedNumberMarshaller(elem);
+        }
+        else {
+          marshaller = ctx.getMarshallerInstance(elem.getClass().getName());
+        }
+  
+        buf.append(marshaller.marshall(elem, ctx));
+      } 
       else {
-        marshaller = ctx.getMarshallerInstance(elem.getClass().getName());
+        buf.append("null");
       }
-
-      buf.append(marshaller.marshall(elem, ctx));
     }
     buf.append("]");
   }

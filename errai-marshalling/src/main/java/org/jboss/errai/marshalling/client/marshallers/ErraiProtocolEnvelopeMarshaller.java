@@ -29,6 +29,7 @@ import java.util.Map;
 
 /**
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ErraiProtocolEnvelopeMarshaller extends AbstractJSONMarshaller<Map<String, Object>> {
   public static final ErraiProtocolEnvelopeMarshaller INSTANCE = new ErraiProtocolEnvelopeMarshaller();
@@ -50,7 +51,12 @@ public class ErraiProtocolEnvelopeMarshaller extends AbstractJSONMarshaller<Map<
 
     for (String key : jsonObject.keySet()) {
       EJValue v = jsonObject.get(key);
-      impl.put(key, ctx.getMarshallerInstance(ctx.determineTypeFor(null, v)).demarshall(v, ctx));
+      if (v.isNull() == null) {
+        impl.put(key, ctx.getMarshallerInstance(ctx.determineTypeFor(null, v)).demarshall(v, ctx));
+      } 
+      else {
+        impl.put(key, null);   
+      }
     }
     return impl;
   }

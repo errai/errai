@@ -61,10 +61,6 @@ public class MapMarshaller<T extends Map> extends AbstractJSONMarshaller<T> {
     if (jsonObject == null)
       return null;
 
-//    if (jsonObject.containsKey(SerializationParts.QUALIFIED_VALUE)) {
-//      jsonObject = jsonObject.get(SerializationParts.QUALIFIED_VALUE).isObject();
-//    }
-
     Object demarshalledKey, demarshalledValue;
     for (String key : jsonObject.keySet()) {
       if (key.startsWith(SerializationParts.EMBEDDED_JSON)) {
@@ -76,7 +72,12 @@ public class MapMarshaller<T extends Map> extends AbstractJSONMarshaller<T> {
       }
 
       EJValue v = jsonObject.get(key);
-      demarshalledValue = ctx.getMarshallerInstance(ctx.determineTypeFor(null, v)).demarshall(v, ctx);
+      if (v.isNull() == null) {
+       demarshalledValue = ctx.getMarshallerInstance(ctx.determineTypeFor(null, v)).demarshall(v, ctx);
+      } 
+      else {
+        demarshalledValue = null;
+      }
       impl.put(demarshalledKey, demarshalledValue);
     }
     return (T) impl;

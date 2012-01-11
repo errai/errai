@@ -21,14 +21,13 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.common.client.protocols.MessageParts;
+import org.jboss.errai.bus.client.tests.support.Person;
 import org.jboss.errai.bus.client.tests.support.RandomProvider;
 import org.jboss.errai.bus.client.tests.support.SType;
 import org.jboss.errai.bus.client.tests.support.TestException;
 import org.jboss.errai.bus.client.tests.support.TestRPCService;
 import org.jboss.errai.bus.client.tests.support.User;
-
-import com.google.gwt.user.client.Timer;
+import org.jboss.errai.common.client.protocols.MessageParts;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -240,6 +239,21 @@ public class BusCommunicationTests extends AbstractErraiTest {
               }
             },
         TestRPCService.class).returnVoid();
+      }
+    });
+  }
+  
+  public void testRPCReturningNull() {
+    runAfterInit(new Runnable() {
+      public void run() {
+        MessageBuilder.createCall(
+            new RemoteCallback<Person>() {
+              public void callback(Person response) {
+                assertNull(response);
+                finishTest();
+              }
+            },
+        TestRPCService.class).returnNull();
       }
     });
   }

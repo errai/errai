@@ -53,6 +53,7 @@ import org.jboss.errai.bus.client.tests.support.StudyTreeNodeContainer;
 import org.jboss.errai.bus.client.tests.support.TestEnumA;
 import org.jboss.errai.bus.client.tests.support.TestSerializationRPCService;
 import org.jboss.errai.bus.client.tests.support.TreeNodeContainer;
+import org.jboss.errai.bus.client.tests.support.User;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -505,17 +506,18 @@ public class SerializationTests extends AbstractErraiTest {
         testList.add(new TreeNodeContainer(10, "Foo\\", 0));
         testList.add(new TreeNodeContainer(15, "Bar", 10));
         testList.add(new StudyTreeNodeContainer(20, "Foobie", 15, 100));
+        // test for correct serialization of null elements
+        testList.add(null);
 
         MessageBuilder.createCall(new RemoteCallback<List<TreeNodeContainer>>() {
           @Override
           public void callback(List<TreeNodeContainer> response) {
-            if (response.size() == 3) {
-              for (TreeNodeContainer tc : response) {
-                System.out.println(tc);
-              }
-
-              finishTest();
+            assertEquals(4, response.size());
+            for (TreeNodeContainer tc : response) {
+              System.out.println(tc);
             }
+
+            finishTest();
           }
         }, TestSerializationRPCService.class).acceptTreeNodeContainers(testList);
       }
@@ -750,6 +752,7 @@ public class SerializationTests extends AbstractErraiTest {
         map.put(1l, "foo");
         map.put(2l, "bar");
         map.put(3l, "baz\\qux");
+        map.put(4l, null);
 
         MessageBuilder.createCall(new RemoteCallback<Map<Long, String>>() {
           @Override
@@ -1449,7 +1452,6 @@ public class SerializationTests extends AbstractErraiTest {
         set.add("test2");
         set.add("test3");
 
-
         MessageBuilder.createCall(new RemoteCallback<SortedSet<String>>() {
           @Override
           public void callback(SortedSet<String> response) {
@@ -1726,6 +1728,32 @@ public class SerializationTests extends AbstractErraiTest {
             }
           }
         }, TestSerializationRPCService.class).testEntityWithSuperClassField(entity);
+      }
+    });
+  }
+  
+  public void testEntityWithNullField() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        final User u = new User();
+        u.setId(1);
+        u.setName(null);
+        
+        MessageBuilder.createCall(new RemoteCallback<User>() {
+          @Override
+          public void callback(User response) {
+            try {
+              assertEquals(u, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestSerializationRPCService.class).testEntityWithNullField(u);
       }
     });
   }
