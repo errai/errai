@@ -131,7 +131,7 @@ public class JaxrsProxyMethodGenerator {
 
     methodBlock.append(requestBuilder);
   }
-  
+
   private void generateHeaders() {
     JaxrsResourceMethodParameters params = resourceMethod.getParameters();
 
@@ -242,10 +242,16 @@ public class JaxrsProxyMethodGenerator {
     Statement handleResponse = Stmt.loadStatic(declaringClass, "this").loadField("remoteCallback")
         .invoke("callback", Stmt.loadVariable("response"));
 
-    Statement handleResult =
-        Stmt.loadStatic(declaringClass, "this").loadField("remoteCallback")
-            .invoke("callback",
-                demarshal(resourceMethod.getMethod().getReturnType(), Stmt.loadVariable("response").invoke("getText")));
+    Statement response = demarshal(resourceMethod.getMethod().getReturnType(),
+        Stmt.loadVariable("response").invoke("getText"));
+
+    Statement handleResult = Stmt
+        .if_(Bool.equals(Stmt.loadVariable("response").invoke("getStatusCode"), 204))
+        .append(Stmt.loadStatic(declaringClass, "this").loadField("remoteCallback").invoke("callback", Stmt.load(null)))
+        .finish()
+        .else_()
+        .append(Stmt.loadStatic(declaringClass, "this").loadField("remoteCallback").invoke("callback", response))
+        .finish();
 
     return Stmt
         .if_(Bool.instanceOf(Stmt.loadStatic(declaringClass, "this").loadField("remoteCallback"),

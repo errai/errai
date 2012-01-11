@@ -49,10 +49,24 @@ public class CustomTypeIntegrationTest extends AbstractErraiJaxrsTest {
   }
 
   @Test
-  public void testPostEntityCustomJsonMediaType() {
+  public void testPostWithCustomType() {
+    Entity entity = new Entity(1, "post-entity");
+    RestClient.create(CustomTypeTestService.class,
+        new AssertionCallback<Entity>("@POST using custom type failed", entity)).postEntity(entity);
+  }
+  
+  @Test
+  public void testPostWithCustomJsonMediaType() {
     Entity entity = new Entity(1, "post-entity");
     RestClient.create(CustomTypeTestService.class,
         new AssertionCallback<Entity>("@POST using custom type failed", entity)).postEntityCustomJsonMediaType(entity);
+  }
+  
+  @Test
+  public void testPostWithCustomTypeReturningNull() {
+    Entity entity = new Entity(1, "post-entity");
+    RestClient.create(CustomTypeTestService.class,
+        new AssertionCallback<Entity>("@POST using custom type failed", null)).postEntityReturningNull(entity);
   }
   
   @Test
@@ -60,6 +74,13 @@ public class CustomTypeIntegrationTest extends AbstractErraiJaxrsTest {
     Entity entity = new Entity(1, "put-entity");
     RestClient.create(CustomTypeTestService.class,
         new AssertionCallback<Entity>("@PUT using custom type failed", entity)).putEntity(entity);
+  }
+  
+  @Test
+  public void testPutWithCustomTypeReturningVoid() {
+    Entity entity = new Entity(1, "put-entity");
+    RestClient.create(CustomTypeTestService.class,
+        new AssertionCallback<Void>("@PUT using custom type failed", null)).putEntityReturningVoid(entity);
   }
   
   @Test

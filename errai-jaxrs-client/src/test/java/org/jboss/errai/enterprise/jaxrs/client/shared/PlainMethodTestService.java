@@ -34,8 +34,16 @@ public interface PlainMethodTestService {
   @GET 
   public String get();
  
+  @GET
+  @Path("/void")
+  public void getReturningVoid();
+ 
   @POST 
   public String post();
+ 
+  @POST 
+  @Path("/null")
+  public String postReturningNull();
   
   @PUT 
   public String put();

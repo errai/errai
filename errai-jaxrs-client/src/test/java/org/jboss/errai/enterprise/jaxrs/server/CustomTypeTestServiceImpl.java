@@ -40,6 +40,11 @@ public class CustomTypeTestServiceImpl implements CustomTypeTestService {
   }
   
   @Override
+  public Entity postEntityReturningNull(Entity entity) {
+    return null;
+  }
+  
+  @Override
   public Entity postEntityCustomJsonMediaType(Entity entity) {
     return entity;
   }
@@ -47,6 +52,11 @@ public class CustomTypeTestServiceImpl implements CustomTypeTestService {
   @Override
   public Entity putEntity(Entity entity) {
     return entity;
+  }
+  
+  @Override
+  public void putEntityReturningVoid(Entity entity) {
+    return;
   }
 
   @Override

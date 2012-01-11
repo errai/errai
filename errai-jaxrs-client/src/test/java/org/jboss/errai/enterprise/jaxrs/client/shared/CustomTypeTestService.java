@@ -59,6 +59,12 @@ public interface CustomTypeTestService {
   public Entity postEntity(Entity entity);
   
   @POST
+  @Path("/null")
+  @Consumes("application/json")
+  @Produces("application/json")
+  public Entity postEntityReturningNull(Entity entity);
+  
+  @POST
   @Consumes("application/entity+json")
   @Produces("application/entity+json")
   public Entity postEntityCustomJsonMediaType(Entity entity);
@@ -67,6 +73,12 @@ public interface CustomTypeTestService {
   @Consumes("application/json")
   @Produces("application/json")
   public Entity putEntity(Entity entity);
+  
+  @PUT
+  @Path("/void")
+  @Consumes("application/json")
+  @Produces("application/json")
+  public void putEntityReturningVoid(Entity entity);
   
   @DELETE
   @Path("/{id}")

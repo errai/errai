@@ -31,8 +31,18 @@ public class PlainMethodTestServiceImpl implements PlainMethodTestService {
   }
 
   @Override
+  public void getReturningVoid() {
+    return;
+  }
+
+  @Override
   public String post() {
     return "post";
+  }
+  
+  @Override
+  public String postReturningNull() {
+    return null;
   }
 
   @Override

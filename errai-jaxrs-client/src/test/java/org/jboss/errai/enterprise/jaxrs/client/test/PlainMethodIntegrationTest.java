@@ -29,69 +29,81 @@ import com.google.gwt.http.client.Response;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class PlainMethodIntegrationTest extends AbstractErraiJaxrsTest {
-  
+
   @Override
   public String getModuleName() {
     return "org.jboss.errai.enterprise.jaxrs.TestModule";
   }
-  
+
   @Test
   public void testGetWithRemoteCallback() {
-    RestClient.create(PlainMethodTestService.class, 
+    RestClient.create(PlainMethodTestService.class,
         new AssertionCallback<String>("@GET failed", "get")).get();
   }
-  
+
   @Test
   public void testGetWithResponseCallback() {
-    RestClient.create(PlainMethodTestService.class, 
+    RestClient.create(PlainMethodTestService.class,
         new AssertionResponseCallback("@GET using a ResponseCallback failed", Response.SC_OK, "get")).get();
   }
-  
+
   @Test
   public void testGetWithSpecifiedBaseUrl() {
     RestClient.create(PlainMethodTestService.class, "/",
         new AssertionResponseCallback("@GET using an overridden root path failed", Response.SC_OK, "get")).get();
   }
-  
+
+  @Test
+  public void testGetReturningVoid() {
+    RestClient.create(PlainMethodTestService.class, "/",
+        new AssertionCallback<Void>("@GET returning void failed", null)).getReturningVoid();
+  }
+
   @Test
   public void testPostWithRemoteCallback() {
-    RestClient.create(PlainMethodTestService.class, 
+    RestClient.create(PlainMethodTestService.class,
         new AssertionCallback<String>("@POST without parameters failed", "post")).post();
+  }
+
+  @Test
+  public void testPostReturningNull() {
+    RestClient.create(PlainMethodTestService.class,
+        new AssertionCallback<String>("@POST without parameters failed", null)).postReturningNull();
   }
   
   @Test
   public void testPostWithResponseCallback() {
-    RestClient.create(PlainMethodTestService.class, 
+    RestClient.create(PlainMethodTestService.class,
         new AssertionResponseCallback("@POST using a ResponseCallback failed", Response.SC_OK, "post")).post();
   }
-  
+
   @Test
   public void testPutWithRemoteCallback() {
-    RestClient.create(PlainMethodTestService.class, 
+    RestClient.create(PlainMethodTestService.class,
         new AssertionCallback<String>("@PUT without parameters failed", "put")).put();
   }
-  
+
   @Test
   public void testPutWithResponseCallback() {
-    RestClient.create(PlainMethodTestService.class, 
+    RestClient.create(PlainMethodTestService.class,
         new AssertionResponseCallback("@PUT using a ResponseCallback failed", Response.SC_OK, "put")).put();
   }
 
   @Test
   public void testDeleteWithRemoteCallback() {
-    RestClient.create(PlainMethodTestService.class, 
+    RestClient.create(PlainMethodTestService.class,
         new AssertionCallback<String>("@DELETE without parameters failed", "delete")).delete();
   }
-  
+
   @Test
   public void testDeleteWithResponseCallback() {
-    RestClient.create(PlainMethodTestService.class, 
+    RestClient.create(PlainMethodTestService.class,
         new AssertionResponseCallback("@DELETE using a ResponseCallback failed", Response.SC_OK, "delete")).delete();
   }
 
   @Test
   public void testHeadWithResponseCallback() {
-    RestClient.create(PlainMethodTestService.class, 
+    RestClient.create(PlainMethodTestService.class,
         new AssertionResponseCallback("@HEAD using a ResponseCallback failed", Response.SC_OK)).head();
   }
 }
