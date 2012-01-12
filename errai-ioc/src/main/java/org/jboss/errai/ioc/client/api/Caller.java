@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.api;
+package org.jboss.errai.ioc.client.api;
+
+import org.jboss.errai.bus.client.api.ErrorCallback;
+import org.jboss.errai.bus.client.api.RemoteCallback;
 
 /**
  * An interface that can be used as the injection point for a (probably

@@ -16,26 +16,27 @@
 
 package org.jboss.errai.ioc.client.api.builtin;
 
-import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.api.Consumer;
+import org.jboss.errai.ioc.client.api.Sender;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.common.client.protocols.MessageParts;
 
-final class ErraiMessageConsumer<T> implements Consumer<T> {
-  private RequestDispatcher requestDispatcher = ErraiBus.getDispatcher();
+public final class ErraiMessageSender<T> implements Sender<T> {
+  private final RequestDispatcher requestDispatcher;
   private final Class<T> valueType;
   private final String toSubject;
   private final String replyTo;
 
-  private ErraiMessageConsumer(String toSubject, String replyTo, Class<T> valueType) {
+  private ErraiMessageSender(String toSubject, String replyTo, Class<T> valueType, RequestDispatcher dispatcher) {
     this.toSubject = toSubject;
     this.replyTo = replyTo;
     this.valueType = valueType;
+    this.requestDispatcher = dispatcher;
   }
 
-  public static <U> ErraiMessageConsumer<U> of(String toSubject, String replyTo, Class<U> valueType) {
-    return new ErraiMessageConsumer<U>(toSubject, replyTo, valueType);
+  public static <U> ErraiMessageSender<U> of(String toSubject, String replyTo, Class<U> valueType,
+                                               RequestDispatcher dispatcher) {
+    return new ErraiMessageSender<U>(toSubject, replyTo, valueType, dispatcher);
   }
 
   @Override
@@ -55,18 +56,13 @@ final class ErraiMessageConsumer<T> implements Consumer<T> {
     }
   }
 
-  public void setRequestDispatcher(RequestDispatcher dispatcher) {
-    if (requestDispatcher != null) throw new IllegalStateException("requestDispatcher is already set");
-    this.requestDispatcher = dispatcher;
-  }
-
   @Override
   public Class<T> getValueType() {
     return valueType;
   }
 
   @Override
-  public <U> Consumer<U> select(String subjectName, String replyTo, Class<U> valueType) {
-    return of(subjectName, replyTo, valueType);
+  public <U> Sender<U> select(String subjectName, String replyTo, Class<U> valueType) {
+    return of(subjectName, replyTo, valueType, requestDispatcher);
   }
 }

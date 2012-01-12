@@ -44,7 +44,6 @@ import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Provider;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
