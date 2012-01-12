@@ -18,7 +18,7 @@ package org.jboss.errai.ioc.client.api.builtin;
 
 import java.lang.annotation.Annotation;
 
-import org.jboss.errai.bus.client.api.Caller;
+import org.jboss.errai.ioc.client.api.Caller;
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.framework.RPCStub;

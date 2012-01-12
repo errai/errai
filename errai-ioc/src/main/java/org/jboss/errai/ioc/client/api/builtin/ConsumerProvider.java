@@ -18,7 +18,8 @@ package org.jboss.errai.ioc.client.api.builtin;
 
 import java.lang.annotation.Annotation;
 
-import org.jboss.errai.bus.client.api.Consumer;
+import org.jboss.errai.bus.client.ErraiBus;
+import org.jboss.errai.ioc.client.api.Sender;
 import org.jboss.errai.bus.client.api.annotations.ReplyTo;
 import org.jboss.errai.bus.client.api.annotations.ToSubject;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
@@ -29,9 +30,9 @@ import org.jboss.errai.ioc.client.api.ProviderException;
  * @author Mike Brock .
  */
 @IOCProvider
-public class ConsumerProvider implements ContextualTypeProvider<Consumer<?>> {
+public class ConsumerProvider implements ContextualTypeProvider<Sender<?>> {
   @Override
-  public Consumer<?> provide(Class<?>[] typeargs, Annotation[] qualifiers) {
+  public Sender<?> provide(Class<?>[] typeargs, Annotation[] qualifiers) {
     String toSubject = null, replyTo = null;
     typeargs = typeargs == null ? new Class<?>[0] : typeargs;
 
@@ -63,9 +64,9 @@ public class ConsumerProvider implements ContextualTypeProvider<Consumer<?>> {
               " one type parameter. (found: " + typeargs.length + ")");
     }
 
-    return ErraiMessageConsumer.of(toSubject, replyTo, typeargs[0]);
+    return ErraiMessageSender.of(toSubject, replyTo, typeargs[0], ErraiBus.getDispatcher());
   }
 
   private static final String PROVIDER_EXCEPTION_ERROR_MSG_BASE
-          = "Injection of " + Consumer.class.getName() + " implicit bean failed. ";
+          = "Injection of " + Sender.class.getName() + " implicit bean failed. ";
 }

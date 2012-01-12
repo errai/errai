@@ -1,7 +1,7 @@
 package org.jboss.errai.ioc.tests.wiring.client;
 
 import com.google.gwt.user.client.Timer;
-import org.jboss.errai.bus.client.api.Consumer;
+import org.jboss.errai.ioc.client.api.Sender;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.annotations.ReplyTo;
@@ -34,7 +34,7 @@ public class ConsumerTest extends AbstractErraiTest {
     @Inject
     @ToSubject("ListCapitializationService")
     @ReplyTo("ClientListService")
-    Consumer<List<String>> listConsumer;
+    Sender<List<String>> listSender;
   }
 
   @Service
@@ -63,7 +63,7 @@ public class ConsumerTest extends AbstractErraiTest {
         new Timer() {
           @Override
           public void run() {
-            assertNotNull(ConsumerTestInjectionPoint.instance.listConsumer);
+            assertNotNull(ConsumerTestInjectionPoint.instance.listSender);
             finishTest();
           }
         }.schedule(1000);
@@ -79,7 +79,7 @@ public class ConsumerTest extends AbstractErraiTest {
       public void run() {
         List<String> originalList = Arrays.asList("this", "is", "my", "list");
         ClientListService.latestResponse = null;
-        ConsumerTestInjectionPoint.instance.listConsumer.consume(originalList);
+        ConsumerTestInjectionPoint.instance.listSender.consume(originalList);
 
         new Timer() {
           @Override

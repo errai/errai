@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.api;
+package org.jboss.errai.ioc.client.api;
 
 /**
  * @author Mike Brock .
  */
-public interface Consumer<T> {
+public interface Sender<T> {
   public void consume(T value);
 
   public Class<T> getValueType();
 
-  public <U> Consumer<U> select(String subjectName, String replyTo, Class<U> type);
+  public <U> Sender<U> select(String subjectName, String replyTo, Class<U> type);
 }
