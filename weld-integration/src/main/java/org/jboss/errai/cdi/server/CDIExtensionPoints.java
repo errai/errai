@@ -40,6 +40,7 @@ import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.common.client.types.TypeHandlerFactory;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.enterprise.client.cdi.api.Conversational;
+import org.jboss.errai.ioc.client.api.Sender;
 import org.jboss.weld.manager.BeanManagerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,6 +81,8 @@ public class CDIExtensionPoints implements Extension {
   private ErraiService service;
 
   private Set<EventConsumer> eventConsumers = new LinkedHashSet<EventConsumer>();
+  private Set<MessageSender> messageSenders = new LinkedHashSet<MessageSender>();
+  
   // private List<ObserverEndpoint> observerEndpoints = new ArrayList<ObserverEndpoint>();
   private Map<String, Annotation> eventQualifiers = new HashMap<String, Annotation>();
   private Set<String> observableEvents = new HashSet<String>();
@@ -231,6 +234,27 @@ public class CDIExtensionPoints implements Extension {
                     qualifiers.toArray(new Annotation[qualifiers.size()])));
           }
         }
+        else if (Sender.class.isAssignableFrom(f.getType())) {
+          ParameterizedType pType = (ParameterizedType) f.getGenericType();
+
+          Class sendType = (Class) pType.getActualTypeArguments()[0];
+          
+          Set<Annotation> qualifiers = new HashSet<Annotation>();
+
+          /**
+           * Collect Qualifier types for the Event consumer.
+           */
+          for (Annotation annotation : f.getAnnotations()) {
+            if (annotation.annotationType().isAnnotationPresent(Qualifier.class)) {
+              qualifiers.add(annotation);
+              eventQualifiers.put(annotation.annotationType().getName(), annotation);
+            }
+          }
+
+          if (isExposedEntityType(sendType)) {
+           messageSenders.add(new MessageSender(f.getGenericType(), qualifiers));
+          }
+        }
       }
     }
   }
@@ -292,13 +316,19 @@ public class CDIExtensionPoints implements Extension {
         abd.addObserverMethod(new EventObserverMethod(ec.getRawType(), bus, ec.getQualifiers()));
       }
     }
+    
+    for (MessageSender ms : messageSenders) {
+      abd.addBean(new SenderBean(ms.getSenderType(), ms.getQualifiers(), service.getDispatcher()));
+    }
+    
 
     // Errai bus injection
     abd.addBean(new MessageBusBean(bm, bus));
 
     // Support to inject the request dispatcher.
     abd.addBean(new RequestDispatcherMetaData(bm, service.getDispatcher()));
-
+    
+ //   abd.addBean(new SenderBean((BeanManagerImpl) bm, service.getDispatcher()));
 
     // Register observers        
     abd.addObserverMethod(new ShutdownEventObserver(managedTypes, bus, uuid));
@@ -530,6 +560,27 @@ public class CDIExtensionPoints implements Extension {
     public int hashCode() {
       return toString().hashCode();
     }
+  }
+  
+  static class MessageSender {
+    private Type senderType;
+    private Set<Annotation> qualifiers;
+
+    MessageSender (Type senderType, Set<Annotation> qualifiers) {
+      this.senderType = senderType;
+      this.qualifiers = qualifiers;
+    }
+
+
+    public Type getSenderType() {
+      return senderType;
+    }
+
+    public Set<Annotation> getQualifiers() {
+      return qualifiers;
+    }
+
+
   }
 
   private static Annotation[] getQualifiersFromField(Field field) {
