@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 JBoss, a division of Red Hat, Inc
+ * Copyright 2011 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.jboss.errai.enterprise.jaxrs.client.shared.entity.Entity;
  */
 @Path("test/customtype")
 public interface CustomTypeTestService {
+  @SuppressWarnings("serial")
   public static final List<Entity> ENTITIES = new ArrayList<Entity>() {
     {
       add(new Entity(1, "entity1"));

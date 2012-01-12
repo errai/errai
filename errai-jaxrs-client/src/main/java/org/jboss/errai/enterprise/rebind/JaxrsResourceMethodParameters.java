@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 JBoss, a division of Red Hat, Inc
+ * Copyright 2011 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.ws.rs.CookieParam;
 import javax.ws.rs.FormParam;
@@ -40,6 +42,11 @@ import org.jboss.errai.codegen.framework.meta.MetaParameter;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class JaxrsResourceMethodParameters {
+  // path param examples that are matched by this regex: /{isbn}/aaa{param}bbb/{name}-{zip}/aaa{param:b+}/{many:.*}
+  // leading and trailing white spaces are tolerated
+  private static final Pattern PATH_PARAM_PATTERN =
+      Pattern.compile("(\\{\\s*)(\\w[\\w.-]*)(:\\s*([^{}][^{}]*))*(\\s*\\})");
+
   private Parameter entityParameter;
   private Map<Class<? extends Annotation>, Map<String, List<Parameter>>> parameters;
 
@@ -137,7 +144,7 @@ public class JaxrsResourceMethodParameters {
   public Map<String, List<Parameter>> getCookieParameters() {
     return get(CookieParam.class);
   }
-  
+
   public Parameter getCookieParameter(String name) {
     return getParameterByName(CookieParam.class, name);
   }
@@ -169,7 +176,20 @@ public class JaxrsResourceMethodParameters {
         param = params.get(0);
       }
     }
-    
+
     return param;
+  }
+
+  public static List<String> getPathParameterNames(String path) {
+    List<String> pathParamNames = new ArrayList<String>();
+    Matcher matcher = PATH_PARAM_PATTERN.matcher(path);
+
+    while (matcher.find()) {
+      String pathName = matcher.group(2);
+      if (pathName != null)
+        pathParamNames.add(pathName);
+    }
+
+    return pathParamNames;
   }
 }

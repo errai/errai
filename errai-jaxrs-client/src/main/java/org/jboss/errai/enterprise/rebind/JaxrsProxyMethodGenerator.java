@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 JBoss, a division of Red Hat, Inc
+ * Copyright 2011 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,6 @@ package org.jboss.errai.enterprise.rebind;
 
 import static org.jboss.errai.enterprise.rebind.TypeMarshaller.demarshal;
 import static org.jboss.errai.enterprise.rebind.TypeMarshaller.marshal;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.jboss.errai.bus.rebind.RebindUtils;
 import org.jboss.errai.codegen.framework.BooleanOperator;
@@ -52,12 +49,6 @@ import com.google.gwt.user.client.Cookies;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class JaxrsProxyMethodGenerator {
-
-  // path param examples that are matched by this regex: /{isbn}/aaa{param}bbb/{name}-{zip}/aaa{param:b+}/{many:.*}
-  // leading and trailing white spaces are tolerated 
-  private static final Pattern PATH_PARAM_PATTERN = 
-    Pattern.compile("(\\{\\s*)(\\w[\\w.-]*)(:\\s*([^{}][^{}]*))*(\\s*\\})");
-
   private static final String APPEND = "append";
  
   private MetaClass declaringClass;
@@ -74,27 +65,57 @@ public class JaxrsProxyMethodGenerator {
 
   public void generate() {
     if (resourceMethod.getHttpMethod() != null) {
-      generateUrl();
-      generateRequestBuilder();
-      generateHeaders();
       generateRequest();
     }
-
     generateReturnStatement();
   }
 
+  private void generateRequest() {
+    generateRequestBuilder();
+    generateHeaders();
+    
+    ContextualStatementBuilder sendRequest = Stmt.loadVariable("requestBuilder");
+    if (resourceMethod.getParameters().getEntityParameter() == null) {
+      sendRequest = sendRequest.invoke("sendRequest", null, createRequestCallback());
+    }
+    else {
+      Statement body = marshal(resourceMethod.getParameters().getEntityParameter());
+      sendRequest = sendRequest.invoke("sendRequest", body, createRequestCallback());
+    }
+
+    methodBlock.append(Stmt
+        .try_()
+        .append(sendRequest)
+        .finish()
+        .catch_(RequestException.class, "throwable")
+        .append(errorHandling())
+        .finish());
+  }
+  
+  private void generateRequestBuilder() {
+    generateUrl();
+    
+    Statement requestBuilder =
+        Stmt.declareVariable("requestBuilder", RequestBuilder.class,
+            Stmt.newObject(RequestBuilder.class)
+                .withParameters(resourceMethod.getHttpMethod(), Stmt.loadVariable("url").invoke("toString")));
+
+    methodBlock.append(requestBuilder);
+  }
+  
   private void generateUrl() {
+    methodBlock.append(Stmt.declareVariable("url", StringBuilder.class, 
+        Stmt.newObject(StringBuilder.class).withParameters(Stmt.loadVariable("this").invoke("getBaseUrl"))));
+
     JaxrsResourceMethodParameters params = resourceMethod.getParameters();
 
     // construct path using @PathParams and @MatrixParams
     String path = resourceMethod.getPath();
     ContextualStatementBuilder pathValue = Stmt.loadLiteral(path);
 
-    Matcher matcher = PATH_PARAM_PATTERN.matcher(path);
-    while (matcher.find()) {
-      String pathParam = matcher.group(2);
-      pathValue = pathValue.invoke("replace", "{" + pathParam + "}",
-          encodePath(marshal(params.getPathParameter(pathParam))));
+    for (String pathParamName : JaxrsResourceMethodParameters.getPathParameterNames(path)) {
+      pathValue = pathValue.invoke("replace", "{" + pathParamName + "}",
+          encodePath(marshal(params.getPathParameter(pathParamName))));
     }
     
     if (params.getMatrixParameters() != null) {
@@ -103,12 +124,9 @@ public class JaxrsProxyMethodGenerator {
             .invoke("concat", encodePath(marshal(params.getMatrixParameter(matrixParamName))));
       }
     }
-
-    methodBlock.append(Stmt.declareVariable("url", StringBuilder.class, Stmt.newObject(StringBuilder.class)
-        .withParameters(Stmt.loadVariable("this").invoke("getBaseUrl"))));
-
-    // construct query using @QueryParams
     ContextualStatementBuilder urlBuilder = Stmt.loadVariable("url").invoke(APPEND, pathValue);
+    
+    // construct query using @QueryParams
     if (params.getQueryParameters() != null) {
       urlBuilder = urlBuilder.invoke(APPEND, "?");
 
@@ -128,14 +146,6 @@ public class JaxrsProxyMethodGenerator {
       methodBlock.append(urlBuilder);
   }
 
-  private void generateRequestBuilder() {
-    Statement requestBuilder =
-        Stmt.declareVariable("requestBuilder", RequestBuilder.class,
-            Stmt.newObject(RequestBuilder.class)
-                .withParameters(resourceMethod.getHttpMethod(), Stmt.loadVariable("url").invoke("toString")));
-
-    methodBlock.append(requestBuilder);
-  }
 
   private void generateHeaders() {
     JaxrsResourceMethodParameters params = resourceMethod.getParameters();
@@ -177,34 +187,6 @@ public class JaxrsProxyMethodGenerator {
         methodBlock.append(setCookie);
       }
     }
-  }
-
-  private void generateRequest() {
-    ContextualStatementBuilder sendRequest = Stmt.loadVariable("requestBuilder");
-    if (resourceMethod.getParameters().getEntityParameter() == null) {
-      sendRequest = sendRequest.invoke("sendRequest", null, createRequestCallback());
-    }
-    else {
-      Statement body = marshal(resourceMethod.getParameters().getEntityParameter());
-      sendRequest = sendRequest.invoke("sendRequest", body, createRequestCallback());
-    }
-
-    methodBlock.append(Stmt
-        .try_()
-        .append(sendRequest)
-        .finish()
-        .catch_(RequestException.class, "throwable")
-        .append(errorHandling())
-        .finish());
-  }
-
-  private void generateReturnStatement() {
-    Statement returnStatement = RebindUtils.generateProxyMethodReturnStatement(resourceMethod.getMethod());
-    if (returnStatement != null) {
-      methodBlock.append(returnStatement);
-    }
-
-    methodBlock.finish();
   }
 
   private Statement createRequestCallback() {
@@ -274,5 +256,14 @@ public class JaxrsProxyMethodGenerator {
 
   private Statement encodeQuery(Statement s) {
     return Stmt.invokeStatic(URL.class, "encodeQueryString", s);
+  }
+  
+  private void generateReturnStatement() {
+    Statement returnStatement = RebindUtils.generateProxyMethodReturnStatement(resourceMethod.getMethod());
+    if (returnStatement != null) {
+      methodBlock.append(returnStatement);
+    }
+
+    methodBlock.finish();
   }
 }

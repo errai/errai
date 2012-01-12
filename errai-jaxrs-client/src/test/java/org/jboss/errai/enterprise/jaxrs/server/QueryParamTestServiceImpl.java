@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 JBoss, a division of Red Hat Hat, Inc
+ * Copyright 2011 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,6 @@
  */
 
 package org.jboss.errai.enterprise.jaxrs.server;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 
 import org.jboss.errai.enterprise.jaxrs.client.shared.QueryParamTestService;
 
@@ -35,12 +32,6 @@ public class QueryParamTestServiceImpl implements QueryParamTestService {
 
   @Override
   public String getWithStringQueryParam(String id) {
-   /* try {
-      return URLDecoder.decode(id, "UTF-8");
-    }
-    catch (UnsupportedEncodingException e) {
-      return e.toString();
-    }*/
     return id;
   }
   
