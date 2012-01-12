@@ -15,8 +15,12 @@
  */
 package org.jboss.errai.cdi.server.gwt;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
+import java.util.Hashtable;
+
+import javax.naming.Context;
+import javax.naming.Name;
+import javax.naming.spi.ObjectFactory;
+
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.server.ServerMessageBusImpl;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
@@ -27,10 +31,8 @@ import org.jboss.errai.bus.server.service.ErraiServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.naming.Context;
-import javax.naming.Name;
-import javax.naming.spi.ObjectFactory;
-import java.util.Hashtable;
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
 
 /**
  * @author: Heiko Braun <hbraun@redhat.com>

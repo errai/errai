@@ -9,7 +9,6 @@ import org.jboss.errai.cdi.client.qualifier.A;
 import org.jboss.errai.cdi.client.qualifier.B;
 import org.jboss.errai.cdi.client.qualifier.C;
 import org.jboss.errai.cdi.event.client.StartEvent;
-import org.jboss.errai.enterprise.client.cdi.api.Conversational;
 
 @ApplicationScoped
 public class CDITestEventProducerService {

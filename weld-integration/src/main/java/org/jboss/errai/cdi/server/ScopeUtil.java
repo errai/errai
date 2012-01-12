@@ -16,14 +16,13 @@
 
 package org.jboss.errai.cdi.server;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.server.api.QueueSession;
 import org.jboss.weld.Container;
-import org.jboss.weld.context.BoundContext;
 import org.jboss.weld.context.http.HttpRequestContext;
 import org.jboss.weld.context.http.HttpSessionContext;
-
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author Mike Brock

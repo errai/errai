@@ -7,12 +7,12 @@ import org.junit.Test;
 public class TickBuilderTest {
 
   private TickBuilder tick;
-  
+
   @Before
   public void createTickBuilder() {
     tick = new TickBuilder();
   }
-  
+
   @Test
   public void testFormat1Digit2Decimals() {
     tick.setAsk(1);
@@ -68,7 +68,7 @@ public class TickBuilderTest {
     tick.setDecimalPlaces(2);
     Assert.assertEquals("-1.23", tick.getFormattedAsk());
   }
-  
+
   @Test
   public void testChangeNegative() {
     tick.setChange(-123);

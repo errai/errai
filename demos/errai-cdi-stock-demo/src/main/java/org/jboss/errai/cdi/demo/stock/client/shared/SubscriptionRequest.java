@@ -1,11 +1,11 @@
 package org.jboss.errai.cdi.demo.stock.client.shared;
 
-import org.jboss.errai.common.client.api.annotations.ExposeEntity;
+import org.jboss.errai.common.client.api.annotations.Portable;
 
 /**
  * A highly complex subscription event.
  */
-@ExposeEntity
+@Portable
 public class SubscriptionRequest {
 
 }

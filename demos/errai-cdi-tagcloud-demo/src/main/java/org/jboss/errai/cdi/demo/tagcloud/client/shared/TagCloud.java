@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jboss.errai.common.client.api.annotations.Portable;
+import org.jboss.errai.enterprise.client.cdi.api.Conversational;
 
 /**
  * This class represents a tag cloud.
@@ -30,6 +31,7 @@ import org.jboss.errai.common.client.api.annotations.Portable;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Portable
+@Conversational
 public class TagCloud {
   private Map<String, Tag> tags;
   private Integer minFrequency = -1;

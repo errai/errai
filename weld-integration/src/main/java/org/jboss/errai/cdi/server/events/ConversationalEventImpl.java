@@ -16,22 +16,23 @@
 
 package org.jboss.errai.cdi.server.events;
 
-import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.enterprise.client.cdi.api.CDI;
-import org.jboss.errai.enterprise.client.cdi.api.Conversational;
-import org.jboss.weld.manager.BeanManagerImpl;
-
-import javax.enterprise.inject.Default;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.InjectionPoint;
-import javax.enterprise.util.TypeLiteral;
-import javax.inject.Qualifier;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.enterprise.inject.Default;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.InjectionPoint;
+import javax.enterprise.util.TypeLiteral;
+import javax.inject.Qualifier;
+
+import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.enterprise.client.cdi.api.CDI;
+import org.jboss.errai.enterprise.client.cdi.api.Conversational;
+import org.jboss.weld.manager.BeanManagerImpl;
 
 /**
  * @author Mike Brock

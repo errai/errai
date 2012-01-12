@@ -21,6 +21,8 @@ import javax.enterprise.inject.Produces;
 import javax.inject.Singleton;
 
 import org.jboss.errai.bus.rebind.ProcessingContext;
+import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.api.IOCExtension;
 import org.jboss.errai.ioc.rebind.AnnotationHandler;
@@ -33,8 +35,6 @@ import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.Injector;
 import org.jboss.errai.ioc.rebind.ioc.InjectorFactory;
 import org.jboss.errai.ioc.rebind.ioc.TypeInjector;
-import org.jboss.errai.codegen.framework.Statement;
-import org.jboss.errai.codegen.framework.meta.MetaClass;
 
 @IOCExtension
 public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator {

@@ -16,15 +16,15 @@
 
 package org.jboss.errai.cdi.server.events;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
+
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.RoutingFlags;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Observes;
 
 /**
  * A gateway for intercepting {@link ConversationalEventWrapper} instances and then passing them into the bus for
