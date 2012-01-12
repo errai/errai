@@ -54,7 +54,7 @@ import com.google.gwt.user.client.Cookies;
 public class JaxrsProxyMethodGenerator {
 
   // path param examples that are matched by this regex: /{isbn}/aaa{param}bbb/{name}-{zip}/aaa{param:b+}/{many:.*}
-  // whitespaces are tolerated 
+  // leading and trailing white spaces are tolerated 
   private static final Pattern PATH_PARAM_PATTERN = 
     Pattern.compile("(\\{\\s*)(\\w[\\w.-]*)(:\\s*([^{}][^{}]*))*(\\s*\\})");
 
