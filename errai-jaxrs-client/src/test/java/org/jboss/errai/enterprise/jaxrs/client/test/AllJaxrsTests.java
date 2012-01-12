@@ -26,6 +26,7 @@ import org.junit.runners.Suite;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
+    CallerInjectionIntegrationTest.class,
     ConfigurationTest.class,
     ContentNegotiationIntegrationTest.class,
     CookieParamIntegrationTest.class,
@@ -36,6 +37,6 @@ import org.junit.runners.Suite;
     PathParamIntegrationTest.class,
     PlainMethodIntegrationTest.class,
     QueryParamIntegrationTest.class })
-public class AllJaxrsIntegrationTests {
+public class AllJaxrsTests {
 
 }

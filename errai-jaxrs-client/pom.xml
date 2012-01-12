@@ -52,7 +52,7 @@
           </systemProperties>
 
           <includes>
-            <include>**/AllJaxrsIntegrationTests.java</include>
+            <include>**/AllJaxrsTests.java</include>
           </includes>
         </configuration>
       </plugin>

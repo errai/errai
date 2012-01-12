@@ -41,7 +41,7 @@ import com.google.gwt.http.client.RequestBuilder;
 public class JaxrsGwtRequestMethodMapper {
 
   @SuppressWarnings("serial")
-  private static Map<Class<? extends Annotation>, Statement> map =
+  private static final Map<Class<? extends Annotation>, Statement> METHOD_MAP =
       new HashMap<Class<? extends Annotation>, Statement>() {
         {
           put(GET.class, Stmt.loadStatic(RequestBuilder.class, "GET"));
@@ -61,9 +61,9 @@ public class JaxrsGwtRequestMethodMapper {
    */
   public static Statement fromMethod(MetaMethod method) {
     Statement gwtRequestMethod = null;
-    for (Class<? extends Annotation> jaxrsMethod : map.keySet()) {
+    for (Class<? extends Annotation> jaxrsMethod : METHOD_MAP.keySet()) {
       if (method.isAnnotationPresent(jaxrsMethod)) {
-        gwtRequestMethod = map.get(jaxrsMethod);
+        gwtRequestMethod = METHOD_MAP.get(jaxrsMethod);
         break;
       }
     }
