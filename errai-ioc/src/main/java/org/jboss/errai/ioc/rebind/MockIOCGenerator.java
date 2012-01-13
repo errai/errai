@@ -19,6 +19,7 @@ package org.jboss.errai.ioc.rebind;
 
 import org.jboss.errai.ioc.client.api.Bootstrapper;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCBootstrapGenerator;
+import org.jboss.errai.marshalling.server.util.ServerMarshallUtil;
 
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
@@ -78,6 +79,9 @@ public class MockIOCGenerator {
 
       System.out.println("wrote file: " + sourceFile.getAbsolutePath());
 
+    
+      
+
       ByteArrayOutputStream errorOutputStream = new ByteArrayOutputStream();
 
       JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
@@ -88,14 +92,21 @@ public class MockIOCGenerator {
         System.out.print((char) b);
       }
 
-      FileInputStream inputStream = new FileInputStream(outFile);
+      
+      Class<? extends Bootstrapper> bsClass 
+              = ServerMarshallUtil.loadClassDefinition(outFile.getAbsolutePath(), packageName, className);
+      
+      
+      return bsClass;
 
-      byte[] classDefinition = new byte[inputStream.available()];
-
-      inputStream.read(classDefinition);
-
-      return (Class<? extends Bootstrapper>) new BootstrapClassloader(ClassLoader.getSystemClassLoader())
-              .defineClassX(packageName + "." + className, classDefinition, 0, classDefinition.length);
+//      FileInputStream inputStream = new FileInputStream(outFile);
+//
+//      byte[] classDefinition = new byte[inputStream.available()];
+//
+//      inputStream.read(classDefinition);
+//
+//      return (Class<? extends Bootstrapper>) new BootstrapClassloader(ClassLoader.getSystemClassLoader())
+//              .defineClassX(packageName + "." + className, classDefinition, 0, classDefinition.length);
     }
     catch (Exception e) {
       throw new RuntimeException(e);

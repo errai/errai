@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,25 @@
 
 package org.jboss.errai.ioc.tests.wiring.client.res;
 
-import java.lang.annotation.Annotation;
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.server.annotations.Service;
+import org.jboss.errai.common.client.protocols.MessageParts;
 
-import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
-import org.jboss.errai.ioc.client.api.IOCProvider;
+import java.util.List;
 
 /**
- * @author Mike Brock .
- */
-@IOCProvider
-public class BarServiceProviderContextual implements ContextualTypeProvider<BarService> {
+* @author Mike Brock
+*/
+//@Service
+public class ClientListService implements MessageCallback {
+
+  public static List<String> latestResponse;
+
+  @SuppressWarnings("unchecked")
   @Override
-  public BarService provide(final Class<?>[] typeargs, Annotation[] qualifiers) {
-    return new BarService() {
-      @Override
-      public Object get() {
-        return typeargs[0].getName();
-      }
-    };
+  public void callback(Message message) {
+    latestResponse = message.get(List.class, MessageParts.Value);
   }
+
 }

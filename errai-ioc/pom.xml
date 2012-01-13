@@ -113,6 +113,12 @@ runtime dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
                             </additionalClasspathElements>
                             <useSystemClassLoader>false</useSystemClassLoader>
 
+                            <!-- This is required because the BasicIOCTest is run in "simulated client" mode, which
+                                 prevents subsequent tests from succeeding -->
+                            <forkMode>pertest</forkMode>
+
+                            <argLine>-Xmx2048m ${argLine} -Dgwt.gen=/tmp/gwt_test_gen_out/</argLine>
+
                             <systemProperties>
                                 <property>
                                     <name>java.io.tmpdir</name>

@@ -21,6 +21,7 @@ import junit.framework.TestCase;
 import junit.framework.TestResult;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.InterfaceInjectionContext;
+import org.jboss.errai.ioc.client.api.Bootstrapper;
 import org.junit.runner.Description;
 import org.junit.runner.Result;
 import org.junit.runner.Runner;
@@ -141,7 +142,11 @@ public class IOCTestRunner extends ParentRunner<Runner> {
             try {
               MockIOCGenerator mockIOCGenerator = new MockIOCGenerator();
               mockIOCGenerator.setPackageFilter(iocClientTestCase.getModulePackage());
-              return mockIOCGenerator.generate().newInstance().bootstrapContainer();
+              Class<? extends  Bootstrapper> cls = mockIOCGenerator.generate();
+
+              Bootstrapper bs = cls.newInstance();
+
+              return bs.bootstrapContainer();
             }
             catch (Exception e) {
               throw new RuntimeException("failed to run in emulated mode", e);

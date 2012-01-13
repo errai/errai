@@ -373,7 +373,7 @@ public class GenUtil {
       return;
     }
 
-    classBuilder.privateMethod(Field.class, JAVA_REFL_METH_UTIL_METH).modifiers(Modifier.Static)
+    classBuilder.privateMethod(Method.class, JAVA_REFL_METH_UTIL_METH).modifiers(Modifier.Static)
             .parameters(DefParameters.of(Parameter.of(Class.class, "cls"), Parameter.of(String.class, "name"),
                     Parameter.of(Class[].class, "parms")))
             .body()

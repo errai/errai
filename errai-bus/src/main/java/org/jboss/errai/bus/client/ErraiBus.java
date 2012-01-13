@@ -16,7 +16,8 @@
 
 package org.jboss.errai.bus.client;
 
-import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.*;
+import org.jboss.errai.bus.client.framework.BusMonitor;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 
@@ -35,7 +36,60 @@ public class ErraiBus implements EntryPoint {
       bus = GWT.create(MessageBus.class);
     }
     else {
-      bus = null;
+
+      // edge case: in simulated client mode, client code runs in an environment where GWT.isClient() returns false
+      // obviously, this code will not be able to contact the server, but framework code still assumes bus != null
+      bus = new MessageBus() {
+        @Override
+        public void sendGlobal(Message message) {
+
+        }
+
+        @Override
+        public void send(Message message) {
+        }
+
+        @Override
+        public void send(Message message, boolean fireListeners) {
+        }
+
+        @Override
+        public void conversationWith(Message message, MessageCallback callback) {
+        }
+
+        @Override
+        public void subscribe(String subject, MessageCallback receiver) {
+        }
+
+        @Override
+        public void subscribeLocal(String subject, MessageCallback receiver) {
+        }
+
+        @Override
+        public void unsubscribeAll(String subject) {
+        }
+
+        @Override
+        public boolean isSubscribed(String subject) {
+          return false;
+        }
+
+        @Override
+        public void addGlobalListener(MessageListener listener) {
+        }
+
+        @Override
+        public void addSubscribeListener(SubscribeListener listener) {
+        }
+
+        @Override
+        public void addUnsubscribeListener(UnsubscribeListener listener) {
+        }
+
+        @Override
+        public void attachMonitor(BusMonitor monitor) {
+        }
+      };
     }
 
   }

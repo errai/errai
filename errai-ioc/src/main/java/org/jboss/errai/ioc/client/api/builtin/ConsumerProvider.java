@@ -32,7 +32,7 @@ import org.jboss.errai.ioc.client.api.ProviderException;
 @IOCProvider
 public class ConsumerProvider implements ContextualTypeProvider<Sender<?>> {
   @Override
-  public Sender<?> provide(Class<?>[] typeargs, Annotation[] qualifiers) {
+  public Sender provide(Class<?>[] typeargs, Annotation[] qualifiers) {
     String toSubject = null, replyTo = null;
     typeargs = typeargs == null ? new Class<?>[0] : typeargs;
 

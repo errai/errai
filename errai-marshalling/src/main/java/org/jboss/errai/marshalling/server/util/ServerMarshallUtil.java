@@ -217,9 +217,8 @@ public abstract class ServerMarshallUtil {
             ClassLoader.getSystemClassLoader() :
             Thread.currentThread().getContextClassLoader());
 
-    Class<? extends MarshallerFactory> mainClass = clsLoader
-            .defineClassX(packageName + "." + className, classDefinition, 0, classDefinition.length)
-            .asSubclass(MarshallerFactory.class);
+    Class<?> mainClass = clsLoader
+            .defineClassX(packageName + "." + className, classDefinition, 0, classDefinition.length);
 
     inputStream.close();
 

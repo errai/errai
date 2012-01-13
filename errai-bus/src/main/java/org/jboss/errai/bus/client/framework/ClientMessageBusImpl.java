@@ -728,11 +728,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           setReinit(true);
           init(callback);
           setReinit(false);
-          System.out.println("initA()");
           return;
         }
         else {
-          System.out.println("initB()");
           init(callback);
           return;
         }

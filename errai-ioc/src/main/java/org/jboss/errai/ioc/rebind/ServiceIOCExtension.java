@@ -43,13 +43,7 @@ public class ServiceIOCExtension extends IOCDecoratorExtension<Service> {
      */
     decContext.ensureMemberExposed();
 
-    /**
-     * Get an instance of the message bus.
-     */
-    final MetaClass busClass = GWTClass.newInstance(decContext.getInjectionContext()
-            .getProcessingContext().loadClassType(MessageBus.class));
-
-    final Statement busHandle = ctx.getInjector(busClass).getType(ctx, decContext);
+    final Statement busHandle = ctx.getInjector(MessageBus.class).getType(ctx, decContext);
 
     /**
      * Figure out the service name;
