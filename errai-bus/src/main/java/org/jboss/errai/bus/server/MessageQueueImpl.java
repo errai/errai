@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import java.io.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static java.lang.System.nanoTime;
 import static java.lang.System.setOut;
@@ -88,8 +89,6 @@ public class MessageQueueImpl implements MessageQueue {
    * @param outstream - output stream to write the polling results to.
    */
   public int poll(final boolean wait, final OutputStream outstream) throws IOException {
-    System.out.println("poll()");
-
     if (!queueRunning) {
       throw new QueueUnavailableException("queue is not available");
     }
@@ -136,8 +135,6 @@ public class MessageQueueImpl implements MessageQueue {
       throw new QueueUnavailableException("queue is not available");
     }
 
-    System.out.println("offer()");
-
     if (useDirectSocketChanne && directSocketChannel.isConnected()) {
       directSocketChannel.write(new TextWebSocketFrame("[" + ErraiProtocol.encodePayload(message.getParts()) + "]"));
     }
@@ -152,12 +149,13 @@ public class MessageQueueImpl implements MessageQueue {
           }
         }
         finally {
-          bufferColor.getLock().lock();
+          ReentrantLock lock = bufferColor.getLock();
+          lock.lock();
           try {
             bufferColor.wake();
           }
           finally {
-            bufferColor.getLock().unlock();
+            lock.unlock();
           }
         }
       }
@@ -172,15 +170,10 @@ public class MessageQueueImpl implements MessageQueue {
       if (activationCallback != null) {
         synchronized (activationLock) {
           if (activationCallback != null) {
-            System.out.println("activationCallback!");
             activationCallback.activate(this);
-          }
-          else {
-            System.out.println("no activationCallback!");
           }
         }
       }
-
     }
     return true;
   }
@@ -344,9 +337,7 @@ public class MessageQueueImpl implements MessageQueue {
 
   @Override
   public boolean messagesWaiting() {
-    boolean msgWaiting = messageCount.intValue() > 0;
-    System.out.println("messagesWaiting() = " + msgWaiting);
-    return msgWaiting;
+    return messageCount.intValue() > 0;
   }
 
   private boolean isDirectChannelOpen() {
