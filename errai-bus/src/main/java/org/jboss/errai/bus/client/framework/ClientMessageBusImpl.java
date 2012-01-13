@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.api.HookCallback;
 import org.jboss.errai.bus.client.api.InitializationListener;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
@@ -641,14 +640,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   }
 
-  /**
-   * Initializes client message bus without a callback function
-   */
-  @Override
-  public void init() {
-    init(null);
-  }
-
   @Override
   public void stop(boolean sendDisconnect) {
     try {
@@ -713,10 +704,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   /**
    * Initializes the message bus, by subscribing to the ClientBus (to receive subscription messages) and the
    * ClientErrorBus to dispatch errors when called.
-   *
-   * @param callback - callback function used for to send the initial message to connect to the queue.
    */
-  public void init(final HookCallback callback) {
+  public void init() {
     declareDebugFunction();
 
     if (sendBuilder == null) {
@@ -726,12 +715,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
         if (isReinit()) {
           setReinit(true);
-          init(callback);
+          init();
           setReinit(false);
           return;
         }
         else {
-          init(callback);
+          init();
           return;
         }
       }
@@ -919,7 +908,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
             setReinit(true);
 
-            init(null);
+            init();
             setReinit(false);
 
             break;
@@ -968,7 +957,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
      * requests will result in multiple sessions being created.  Which is bad.  Avoid this at all costs.
      * Please.
      */
-    if (!sendInitialMessage(callback)) {
+    if (!sendInitialMessage()) {
       logError("Could not connect to remote bus", "", null);
     }
   }
@@ -999,10 +988,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * Sends the initial message to connect to the queue, to estabish an HTTP session. Otherwise, concurrent
    * requests will result in multiple sessions being created.
    *
-   * @param callback - callback function used for initializing the message bus
    * @return true if initial message was sent successfully.
    */
-  private boolean sendInitialMessage(final HookCallback callback) {
+  private boolean sendInitialMessage() {
     try {
 
       log("sending initial handshake to remote bus");
@@ -1019,7 +1007,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           try {
             log("received response from initial handshake.");
             procIncomingPayload(response);
-            initializeMessagingBus(callback);
+            initializeMessagingBus();
           }
           catch (Exception e) {
             e.printStackTrace();
@@ -1180,11 +1168,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   /**
    * Initializes the message bus by setting up the <tt>recvBuilder</tt> to accept responses. Also, initializes the
    * incoming timer to ensure the client's polling with the server is active.
-   *
-   * @param initCallback - not used
    */
-  @SuppressWarnings({"UnusedDeclaration"})
-  private void initializeMessagingBus(final HookCallback initCallback) {
+  private void initializeMessagingBus() {
     if (disconnected) {
       return;
     }

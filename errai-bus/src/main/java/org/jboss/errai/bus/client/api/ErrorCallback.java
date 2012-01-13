@@ -16,13 +16,27 @@
 
 package org.jboss.errai.bus.client.api;
 
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
 
+/**
+ * Callback interface for failed delivery of specific messages for which an error handler has been provided using the
+ * {@link MessageBuilder} API.
+ * <p>
+ * Errors can also be handled globally by subscribing a regular to the bus topic
+ * DefaultErrorCallback.CLIENT_ERROR_SUBJECT.
+ * 
+ * @author Mike Brock
+ */
 public interface ErrorCallback {
+
   /**
    * Called when an error occurs on the bus.
-   *
-   * @param message   The message for which the failure occured
-   * @param throwable The exception thrown
+   * 
+   * @param message
+   *          The message for which the failure occurred. Never null.
+   * @param throwable
+   *          The exception thrown or null if not available
+   * 
    * @return boolean indicating whether or not the default error handling should be performed.
    */
   public boolean error(Message message, Throwable throwable);

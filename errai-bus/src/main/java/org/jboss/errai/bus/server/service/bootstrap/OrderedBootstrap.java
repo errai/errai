@@ -51,20 +51,13 @@ public class OrderedBootstrap implements BootstrapExecution {
     log.info("Bootstrap Errai");
     log.info("Working directory: " + new File("").getAbsolutePath());
 
-
     try {
       for (BootstrapExecution execution : bootstrap) {
         execution.execute(context);
       }
-
-      // any deferred tasks?
       context.executeDeferred();
-
-      // freeze config
       ((ErraiServiceConfiguratorImpl) context.getConfig()).lockdown();
-
-      log.info("Bootstrap complete. Ready to rumble!");
-
+      log.info("Initialization complete");
     }
     catch (Exception e) {
       e.printStackTrace();
