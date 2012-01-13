@@ -40,7 +40,7 @@ public final class ErraiMessageSender<T> implements Sender<T> {
   }
 
   @Override
-  public void consume(Object value) {
+  public void send(T value) {
     if (replyTo != null) {
       MessageBuilder.createMessage()
           .toSubject(toSubject)
@@ -54,15 +54,5 @@ public final class ErraiMessageSender<T> implements Sender<T> {
           .with(MessageParts.Value, value)
           .done().sendNowWith(requestDispatcher);
     }
-  }
-
-  @Override
-  public Class<T> getValueType() {
-    return valueType;
-  }
-
-  @Override
-  public <U> Sender<U> select(String subjectName, String replyTo, Class<U> valueType) {
-    return of(subjectName, replyTo, valueType, requestDispatcher);
   }
 }

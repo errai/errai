@@ -16,13 +16,36 @@
 
 package org.jboss.errai.ioc.client.api;
 
+import org.jboss.errai.bus.client.api.annotations.ReplyTo;
+import org.jboss.errai.bus.client.api.annotations.ToSubject;
+import org.jboss.errai.common.client.protocols.MessageParts;
+
 /**
- * @author Mike Brock .
+ * An interface that can be used as the injection point for a convenience object that sends single-payload messages to a
+ * given subject.
+ * <p>
+ * Injection of a sender must be qualified with {@link ToSubject} and optionally {@link ReplyTo}.
+ * <p>
+ * Example:
+ * 
+ * <pre>
+ *  {@code @Inject}
+ *  {@code @ToSubject("ListCapitializationService")}
+ *  {@code @ReplyTo("ClientListService")}
+ *  {@code Sender<String> listSender;}
+ * </pre>
+ * 
+ * @author Mike Brock
+ * @author Jonathan Fuerth <jfuerth@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface Sender<T> {
-  public void consume(T value);
 
-  public Class<T> getValueType();
-
-  public <U> Sender<U> select(String subjectName, String replyTo, Class<U> type);
+  /**
+   * Sends the message to the subject specified by {@link ToSubject}.
+   * 
+   * @param value
+   *          the payload of the message stored in {@link MessageParts#Value}
+   */
+  public void send(T value);
 }

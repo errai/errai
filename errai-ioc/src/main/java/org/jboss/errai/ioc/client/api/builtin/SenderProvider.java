@@ -30,7 +30,7 @@ import org.jboss.errai.ioc.client.api.ProviderException;
  * @author Mike Brock .
  */
 @IOCProvider
-public class ConsumerProvider implements ContextualTypeProvider<Sender<?>> {
+public class SenderProvider implements ContextualTypeProvider<Sender<?>> {
   @Override
   public Sender provide(Class<?>[] typeargs, Annotation[] qualifiers) {
     String toSubject = null, replyTo = null;
@@ -54,11 +54,7 @@ public class ConsumerProvider implements ContextualTypeProvider<Sender<?>> {
       throw new ProviderException(PROVIDER_EXCEPTION_ERROR_MSG_BASE + ": Required "
               + ToSubject.class.getName() + " qualifier missing at injection point.");
     }
-    if (replyTo == null) {
-      throw new ProviderException(PROVIDER_EXCEPTION_ERROR_MSG_BASE + ": Required "
-              + ReplyTo.class.getName() + " qualifier missing at injection point.");
-    }
-
+    
     if (typeargs.length != 1) {
       throw new ProviderException(PROVIDER_EXCEPTION_ERROR_MSG_BASE + ": Type at injection point must have exactly" +
               " one type parameter. (found: " + typeargs.length + ")");
@@ -67,6 +63,6 @@ public class ConsumerProvider implements ContextualTypeProvider<Sender<?>> {
     return ErraiMessageSender.of(toSubject, replyTo, typeargs[0], ErraiBus.getDispatcher());
   }
 
-  private static final String PROVIDER_EXCEPTION_ERROR_MSG_BASE
-          = "Injection of " + Sender.class.getName() + " implicit bean failed. ";
+  private static final String PROVIDER_EXCEPTION_ERROR_MSG_BASE = "Injection of " + Sender.class.getName()
+      + " implicit bean failed. ";
 }
