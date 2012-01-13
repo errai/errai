@@ -28,7 +28,6 @@ import org.jboss.errai.marshalling.rebind.api.model.*;
 import org.jboss.errai.marshalling.server.EncodingSession;
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.marshalling.server.api.ServerMarshaller;
-import org.jboss.errai.marshalling.server.util.ServerEncodingUtil;
 import org.mvel2.DataConversion;
 
 import java.io.ByteArrayOutputStream;
@@ -185,9 +184,12 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
 
     if (o instanceof Enum) {
       Enum enumer = (Enum) o;
-      ServerEncodingUtil.write(outstream, ctx, "{\"" + SerializationParts.ENCODED_TYPE + "\":\""
+
+      outstream.write(("{\"" + SerializationParts.ENCODED_TYPE + "\":\""
               + enumer.getDeclaringClass().getName() + "\""
-              + ",\"" + SerializationParts.ENUM_STRING_VALUE + "\":\"" + enumer.name() + "\"}");
+              + ",\"" + SerializationParts.ENUM_STRING_VALUE + "\":\"" + enumer.name() + "\"}")
+              .getBytes());
+
       return;
     }
 
@@ -199,8 +201,9 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
       /**
        * If this object is referencing a duplicate object in the graph, we only provide an ID reference.
        */
-      ServerEncodingUtil.write(outstream, ctx, "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + cls.getName()
-              + "\",\"" + SerializationParts.OBJECT_ID + "\":\"" + hash + "\"}");
+
+      outstream.write(("{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + cls.getName()
+              + "\",\"" + SerializationParts.OBJECT_ID + "\":\"" + hash + "\"}").getBytes());
 
       return;
     }
@@ -208,8 +211,9 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
     int i = 0;
     boolean first = true;
 
-    ServerEncodingUtil.write(outstream, ctx, "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + cls.getName() + "\",\""
-            + SerializationParts.OBJECT_ID + "\":\"" + hash + "\",");
+    outstream.write(("{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + cls.getName() + "\",\""
+            + SerializationParts.OBJECT_ID + "\":\"" + hash + "\",").getBytes());
+
 
     for (MemberMapping mapping : definition.getReadableMemberMappings()) {
       if (!first) {
@@ -240,7 +244,8 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
         }
       }
 
-      ServerEncodingUtil.write(outstream, ctx, "\"" + mapping.getKey() + "\"");
+      outstream.write(("\"" + mapping.getKey() + "\"").getBytes());
+
       outstream.write(':');
       outstream.write(
               MappingContextSingleton.get().getDefinitionsFactory()
@@ -252,7 +257,7 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
     }
 
     if (i == 0) {
-      ServerEncodingUtil.write(outstream, ctx, "\"" + SerializationParts.INSTANTIATE_ONLY + "\":true");
+      outstream.write(("\"" + SerializationParts.INSTANTIATE_ONLY + "\":true").getBytes());
     }
 
     outstream.write('}');

@@ -45,8 +45,6 @@ public interface MessageQueue {
    */
   void wake();
 
-
-
   void setActivationCallback(QueueActivationCallback activationCallback);
 
   QueueActivationCallback getActivationCallback();

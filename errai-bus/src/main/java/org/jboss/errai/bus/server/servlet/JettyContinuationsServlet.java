@@ -107,6 +107,7 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
         if (wait) {
           final Continuation cont = ContinuationSupport.getContinuation(httpServletRequest, queue);
           if (!cont.isResumed() && !queue.messagesWaiting()) {
+            System.out.println("creating activation callback");
             queue.setActivationCallback(new JettyQueueActivationCallback(cont));
             cont.suspend(45 * 1000);
             return;
@@ -174,6 +175,7 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
     }
 
     public void activate(MessageQueue queue) {
+      System.out.println("activating jetty callback");
       queue.setActivationCallback(null);
       cont.resume();
     }
