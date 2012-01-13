@@ -39,6 +39,8 @@ import java.util.Set;
 /**
  * A simple JAAS adapter to provide JAAS-based authentication.  This implementation currently defaults to a
  * property-file based authentication system and is still primarily for prototyping purposes.
+ *
+ * @author Mike Brock
  */
 public class JAASAdapter implements AuthenticationAdapter {
   /**

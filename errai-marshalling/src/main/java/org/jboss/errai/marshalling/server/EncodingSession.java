@@ -29,7 +29,6 @@ import java.util.Map;
  * @author Mike Brock
  */
 public class EncodingSession extends AbstractMarshallingSession {
-  private int escapeMode;
   private final ServerMappingContext context;
 
   public EncodingSession(ServerMappingContext context) {
@@ -42,7 +41,6 @@ public class EncodingSession extends AbstractMarshallingSession {
       return "null";
     }
     else {
-  //    Marshaller<Object> m = getMarshallerInstance(o.getClass().getName());
       Marshaller<Object> m = getMarshallerInstance(o.getClass().getName());
       if (m == null) {
         throw new MarshallingException("no marshaller for type: " + o.getClass().getName());
@@ -57,7 +55,6 @@ public class EncodingSession extends AbstractMarshallingSession {
       return null;
     }
     else {
-      // Marshaller<Object> m = getMarshallerInstance(clazz.getName());
       Marshaller<Object> m = context.getMarshaller(clazz.getName());
       if (m == null) {
         throw new MarshallingException("no marshaller for type: " + o.getClass().getName());
@@ -96,17 +93,5 @@ public class EncodingSession extends AbstractMarshallingSession {
   @Override
   public ServerMappingContext getMappingContext() {
     return context;
-  }
-
-  public boolean isEscapeMode() {
-    return escapeMode != 0;
-  }
-
-  public void setEscapeMode() {
-    escapeMode++;
-  }
-
-  public void unsetEscapeMode() {
-    escapeMode--;
   }
 }

@@ -25,9 +25,8 @@ import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.user.client.Timer;
 
 /**
- * User: christopherbrock
- * Date: 3-Aug-2010
- * Time: 4:40:40 PM
+ * Base test class for testing ErraiBus-based code. Located in the main distribution so it can be extended
+ * by other modules.
  */
 public abstract class AbstractErraiTest extends GWTTestCase {
   protected static ClientMessageBus bus;

@@ -22,11 +22,6 @@ import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
 
 import java.lang.reflect.Method;
 
-/**
- * User: christopherbrock
- * Date: 19-Jul-2010
- * Time: 4:57:59 PM
- */
 public class MethodEndpointCallback implements MessageCallback {
   private Object instance;
   private Method method;

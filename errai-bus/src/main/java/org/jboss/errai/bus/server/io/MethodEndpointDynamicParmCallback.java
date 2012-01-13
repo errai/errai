@@ -27,10 +27,10 @@ import org.jboss.errai.common.client.protocols.MessageParts;
 
 import java.lang.reflect.Method;
 
+
 /**
- * User: christopherbrock
- * Date: 19-Jul-2010
- * Time: 4:57:59 PM
+ *
+ * @author Mike Brock
  */
 public class MethodEndpointDynamicParmCallback implements MessageCallback {
   private final Object instance;

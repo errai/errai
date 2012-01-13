@@ -16,27 +16,32 @@
 
 package org.jboss.errai.ioc.rebind;
 
-import org.jboss.errai.bus.rebind.ProcessingContext;
-import org.jboss.errai.ioc.rebind.ioc.JSR330QualifyingMetadataFactory;
-import org.jboss.errai.ioc.rebind.ioc.QualifyingMetadataFactory;
-import org.jboss.errai.codegen.framework.Context;
-import org.jboss.errai.codegen.framework.Statement;
-import org.jboss.errai.codegen.framework.builder.BlockBuilder;
-import org.jboss.errai.codegen.framework.meta.MetaClass;
-
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.user.rebind.SourceWriter;
+import org.jboss.errai.codegen.framework.Context;
+import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.builder.BlockBuilder;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.JSR330QualifyingMetadataFactory;
+import org.jboss.errai.ioc.rebind.ioc.QualifyingMetadataFactory;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public class IOCProcessingContext extends ProcessingContext {
+public class IOCProcessingContext  {
   protected Context context;
   protected MetaClass bootstrapClass;
   protected BlockBuilder<?> blockBuilder;
   protected String packageFilter;
+
+  protected TreeLogger treeLogger;
+  protected GeneratorContext generatorContext;
+
+  protected SourceWriter writer;
+  protected TypeOracle oracle;
+
   protected QualifyingMetadataFactory qualifyingMetadataFactory = new JSR330QualifyingMetadataFactory();
 
   public IOCProcessingContext(TreeLogger treeLogger,
@@ -46,21 +51,14 @@ public class IOCProcessingContext extends ProcessingContext {
                               Context context,
                               MetaClass bootstrapClass,
                               BlockBuilder<?> blockBuilder) {
-    super(treeLogger, generatorContext, writer, oracle);
+    this.treeLogger = treeLogger;
+    this.generatorContext = generatorContext;
+    this.writer = writer;
     this.context = context;
     this.bootstrapClass = bootstrapClass;
     this.blockBuilder = blockBuilder;
   }
 
-  public IOCProcessingContext(ProcessingContext ctx,
-                              Context context,
-                              MetaClass bootstrapClass,
-                              BlockBuilder<?> blockBuilder) {
-    super(ctx.getTreeLogger(), ctx.getGeneratorContext(), ctx.getWriter(), ctx.getOracle());
-    this.context = context;
-    this.bootstrapClass = bootstrapClass;
-    this.blockBuilder = blockBuilder;
-  }
 
   public BlockBuilder<?> getBlockBuilder() {
     return blockBuilder;
@@ -84,6 +82,23 @@ public class IOCProcessingContext extends ProcessingContext {
 
   public String getPackageFilter() {
     return packageFilter;
+  }
+
+
+  public TreeLogger getTreeLogger() {
+    return treeLogger;
+  }
+
+  public GeneratorContext getGeneratorContext() {
+    return generatorContext;
+  }
+
+  public SourceWriter getWriter() {
+    return writer;
+  }
+
+  public TypeOracle getOracle() {
+    return oracle;
   }
 
   public QualifyingMetadataFactory getQualifyingMetadataFactory() {
