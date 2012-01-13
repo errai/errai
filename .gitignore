@@ -15,9 +15,9 @@ deploy/
 release.properties
 *.log
 .gwt
-/war/
-/errai-bus/war/
-/errai-ioc/war/
+/war/WEB-INF/classes/
+/errai-bus/war/WEB-INF/classes/
+/errai-ioc/war/WEB-INF/classes/
 /errai-tools/war/
 */**/war/AsyncDemo/
 */**/war/ClientService/
