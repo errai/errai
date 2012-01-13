@@ -522,7 +522,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    */
   private void transmitRemote(final String message, final Message txMessage) {
     if (message == null) return;
-    //  System.out.println("TX: " + message);
+     System.out.println("TX: " + message);
 
     if (webSocketOpen) {
       if (ClientWebSocketChannel.transmitToSocket(webSocketChannel, message)) {
@@ -900,6 +900,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
               }
             });
 
+
+            System.out.println("FinishStateSync");
             voteForInit();
             break;
 
@@ -1191,7 +1193,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     RpcProxyLoader loader = GWT.create(RpcProxyLoader.class);
     loader.loadProxies(ClientMessageBusImpl.this);
-    voteForInit();
 
     final Timer initialPollTimer = new Timer() {
       @Override
@@ -1201,6 +1202,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     };
 
     initialPollTimer.schedule(10);
+
+    voteForInit();
   }
 
   /**
@@ -1292,7 +1295,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   public void procPayload(String text) {
-  //  System.out.println("RX:" + text);
+   System.out.println("RX:" + text);
     try {
       for (MarshalledMessage m : decodePayload(text)) {
         rxNumber++;

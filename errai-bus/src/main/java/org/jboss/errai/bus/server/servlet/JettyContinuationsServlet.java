@@ -88,6 +88,7 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
 
     try {
       final MessageQueue queue = service.getBus().getQueue(session);
+      queue.heartBeat();
 
       if (queue == null) {
         switch (getConnectionPhase(httpServletRequest)) {
@@ -106,8 +107,9 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
         final Continuation cont = ContinuationSupport.getContinuation(httpServletRequest, queue);
         if (!cont.isResumed() && !queue.messagesWaiting()) {
           queue.setActivationCallback(new JettyQueueActivationCallback(cont));
-          cont.suspend(45 * 1000);
-          return;
+          if (cont.suspend(30 * 1000)) {
+            return;
+          }
         }
       }
 
@@ -164,7 +166,7 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
   }
 
   private static class JettyQueueActivationCallback implements QueueActivationCallback {
-    private Continuation cont;
+    private final Continuation cont;
 
     private JettyQueueActivationCallback(Continuation cont) {
       this.cont = cont;
@@ -172,6 +174,8 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
 
     public void activate(MessageQueue queue) {
       queue.setActivationCallback(null);
+
+      System.out.println("activate jetty continuation");
       cont.resume();
     }
   }
