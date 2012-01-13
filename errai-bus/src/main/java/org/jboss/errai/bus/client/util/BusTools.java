@@ -20,7 +20,10 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.jboss.errai.bus.client.api.HasEncoded;
+import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
+import org.jboss.errai.marshalling.client.protocols.ErraiProtocol;
 
 public class BusTools {
   public static final Set<String> RESERVED_SERVICES;
@@ -41,5 +44,14 @@ public class BusTools {
 
   public static boolean isReservedName(String name) {
     return RESERVED_SERVICES.contains(name);
+  }
+  
+  public static String encodeMessage(Message message) {
+    if (message instanceof HasEncoded) {
+      return ((HasEncoded) message).getEncoded();
+    }
+    else {
+      return ErraiProtocol.encodePayload(message.getParts());
+    }
   }
 }

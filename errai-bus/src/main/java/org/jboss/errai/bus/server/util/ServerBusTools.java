@@ -6,24 +6,26 @@
  * You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ *  
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.bus.client.framework;
+
+package org.jboss.errai.bus.server.util;
+
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.util.BusTools;
+
+import java.io.ByteArrayInputStream;
 
 /**
- * Clean up entities (Hibernate/JPA) before they get dispatched
- * and merge them back in when received from a GWT application.
- *
- * @author: Heiko Braun <hbraun@redhat.com>
- * @date: Jun 16, 2010
+ * @author Mike Brock
  */
-public interface ModelAdapter {
-  Object clone(Object entity);
-
-  Object merge(Object dto);
+public class ServerBusTools extends BusTools {
+  public static ByteArrayInputStream encodeMessageToByteArrayInputStream(Message message) {
+    return new ByteArrayInputStream(encodeMessage(message).getBytes());
+  }
 }

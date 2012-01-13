@@ -17,7 +17,6 @@
 package org.jboss.errai.bus.client.framework;
 
 import static org.jboss.errai.bus.client.json.JSONUtilCli.decodePayload;
-import static org.jboss.errai.bus.client.json.JSONUtilCli.encodePayload;
 import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteSubscribe;
 import static org.jboss.errai.common.client.protocols.MessageParts.PriorityProcessing;
 import static org.jboss.errai.common.client.protocols.MessageParts.ReplyTo;
@@ -45,6 +44,7 @@ import org.jboss.errai.bus.client.api.base.NoSubscribersToDeliverTo;
 import org.jboss.errai.bus.client.api.base.TransportIOException;
 import org.jboss.errai.bus.client.json.JSONUtilCli;
 import org.jboss.errai.bus.client.protocols.BusCommands;
+import org.jboss.errai.bus.client.util.BusTools;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 
@@ -441,7 +441,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * @param message -
    */
   private void encodeAndTransmit(Message message) {
-    transmitRemote(encodePayload(message.getParts()), message);
+    transmitRemote(BusTools.encodeMessage(message), message);
   }
 
   private void addShadowSubscription(String subject, MessageCallback reference) {
@@ -521,7 +521,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    */
   private void transmitRemote(final String message, final Message txMessage) {
     if (message == null) return;
-    //  System.out.println("TX: " + message);
+     System.out.println("TX: " + message);
 
     if (webSocketOpen) {
       if (ClientWebSocketChannel.transmitToSocket(webSocketChannel, message)) {
@@ -889,6 +889,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
               }
             });
 
+
+            System.out.println("FinishStateSync");
             voteForInit();
             break;
 
@@ -1176,7 +1178,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     RpcProxyLoader loader = GWT.create(RpcProxyLoader.class);
     loader.loadProxies(ClientMessageBusImpl.this);
-    voteForInit();
 
     final Timer initialPollTimer = new Timer() {
       @Override
@@ -1186,6 +1187,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     };
 
     initialPollTimer.schedule(10);
+
+    voteForInit();
   }
 
   /**
@@ -1277,7 +1280,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   public void procPayload(String text) {
-  //  System.out.println("RX:" + text);
+   System.out.println("RX:" + text);
     try {
       for (MarshalledMessage m : decodePayload(text)) {
         rxNumber++;

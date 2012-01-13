@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.api.builder;
+package org.jboss.errai.bus.client.api.base;
 
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.common.client.api.ResourceProvider;
-import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.framework.RoutingFlags;
@@ -27,7 +26,7 @@ import org.jboss.errai.common.client.protocols.MessageParts;
 
 import java.util.Map;
 
-public class ConversationMessageWrapper implements Message {
+class ConversationMessageWrapper implements Message {
   protected Message message;
   protected Message newMessage;
 

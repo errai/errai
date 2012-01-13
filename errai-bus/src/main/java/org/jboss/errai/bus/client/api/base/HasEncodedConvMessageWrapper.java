@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.api.builder;
+package org.jboss.errai.bus.client.api.base;
 
 import org.jboss.errai.bus.client.api.HasEncoded;
 import org.jboss.errai.bus.client.api.Message;
 
 
-public class HasEncodedConvMessageWrapper extends ConversationMessageWrapper implements HasEncoded {
+class HasEncodedConvMessageWrapper extends ConversationMessageWrapper implements HasEncoded {
   public HasEncodedConvMessageWrapper(Message inReplyTo, Message newMessage) {
     super(inReplyTo, newMessage);
   }

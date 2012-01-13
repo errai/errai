@@ -26,15 +26,8 @@ import java.util.Map;
 /**
  * @author Mike Brock
  */
-public class ErraiProtocolServer {
+public class ErraiProtocolServer extends ErraiProtocol{
   public static ByteArrayInputStream encodePayloadToByteArrayInputStream(Map<String, Object> payload) {
-    return new ByteArrayInputStream(ErraiProtocol.encodePayload(payload).getBytes());
-  }
-
-  public static void encodePayloadToOutputStream(Map<String, Object> payload,
-                                                 OutputStream outputStream) throws IOException{
-    for (byte b : ErraiProtocol.encodePayload(payload).getBytes()) {
-      outputStream.write(b);
-    }
+    return new ByteArrayInputStream(encodePayload(payload).getBytes());
   }
 }

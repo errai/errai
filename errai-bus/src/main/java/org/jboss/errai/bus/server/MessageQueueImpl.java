@@ -19,6 +19,7 @@ package org.jboss.errai.bus.server;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.util.BusTools;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueActivationCallback;
 import org.jboss.errai.bus.server.api.QueueSession;
@@ -26,6 +27,7 @@ import org.jboss.errai.bus.server.io.BufferHelper;
 import org.jboss.errai.bus.server.io.buffers.BufferCallback;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
+import org.jboss.errai.bus.server.util.ServerBusTools;
 import org.jboss.errai.marshalling.client.protocols.ErraiProtocol;
 import org.jboss.errai.marshalling.server.protocol.ErraiProtocolServer;
 import org.jboss.errai.marshalling.server.util.UnwrappedByteArrayOutputStream;
@@ -37,7 +39,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static java.lang.System.nanoTime;
-import static java.lang.System.setOut;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
@@ -82,7 +83,11 @@ public class MessageQueueImpl implements MessageQueue {
 
   /**
    * Gets the next message to send, and returns the <tt>Payload</tt>, which contains the current messages that
-   * need to be sent from the specified bus to another.
+   * need to be sent from the specified bus to another.</p>
+   *
+   * Fodod</p>
+   *
+   *
    *
    * @param wait      - boolean is true if we should wait until the queue is ready. In this case, a
    *                  <tt>RuntimeException</tt> will be thrown if the polling is active already. Concurrent polling is not allowed.
@@ -136,14 +141,14 @@ public class MessageQueueImpl implements MessageQueue {
     }
 
     if (useDirectSocketChanne && directSocketChannel.isConnected()) {
-      directSocketChannel.write(new TextWebSocketFrame("[" + ErraiProtocol.encodePayload(message.getParts()) + "]"));
+      directSocketChannel.write(new TextWebSocketFrame("[" + ServerBusTools.encodeMessage(message) + "]"));
     }
     else {
       if (pagedOut) {
         try {
           synchronized (pageLock) {
             if (pagedOut) {
-              writeToPageFile(ErraiProtocolServer.encodePayloadToByteArrayInputStream(message.getParts()), true);
+              writeToPageFile(ServerBusTools.encodeMessageToByteArrayInputStream(message), true);
               return true;
             }
           }
@@ -167,13 +172,7 @@ public class MessageQueueImpl implements MessageQueue {
         stopQueue();
       }
 
-      if (activationCallback != null) {
-        synchronized (activationLock) {
-          if (activationCallback != null) {
-            activationCallback.activate(this);
-          }
-        }
-      }
+      activateActivationCallback();
     }
     return true;
   }
@@ -281,6 +280,8 @@ public class MessageQueueImpl implements MessageQueue {
       else {
         BufferHelper.encodeAndWriteNoop(buffer, bufferColor);
       }
+
+      activateActivationCallback();
     }
     catch (IOException e) {
       e.printStackTrace();
@@ -299,6 +300,16 @@ public class MessageQueueImpl implements MessageQueue {
   public void setActivationCallback(QueueActivationCallback activationCallback) {
     synchronized (activationLock) {
       this.activationCallback = activationCallback;
+    }
+  }
+
+  private void activateActivationCallback() {
+    if (activationCallback != null) {
+      synchronized (activationLock) {
+        if (activationCallback != null) {
+          activationCallback.activate(this);
+        }
+      }
     }
   }
 

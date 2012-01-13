@@ -23,6 +23,7 @@ import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
+import org.jboss.errai.bus.client.util.BusTools;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 import org.jboss.errai.marshalling.client.api.json.impl.gwt.GWTJSON;
 import org.jboss.errai.marshalling.client.protocols.ErraiProtocol;
@@ -98,9 +99,5 @@ public class JSONUtilCli {
 
   public static Message decodeCommandMessage(Object value) {
     return CommandMessage.createWithParts(decodePayload(value));
-  }
-
-  public static String encodePayload(Map<String, Object> map) {
-    return ErraiProtocol.encodePayload(map);
   }
 }

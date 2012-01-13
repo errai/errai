@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.api.builder;
+package org.jboss.errai.bus.client.api.base;
 
 import static org.jboss.errai.bus.client.api.base.ConversationHelper.createConversationService;
 import static org.jboss.errai.bus.client.api.base.ConversationHelper.makeConversational;
@@ -26,13 +26,12 @@ import org.jboss.errai.bus.client.api.Laundry;
 import org.jboss.errai.bus.client.api.LaundryReclaim;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.api.base.AsyncDelegateErrorCallback;
-import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
-import org.jboss.errai.bus.client.api.base.LaundryListProviderFactory;
-import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
-import org.jboss.errai.bus.client.api.base.TaskManagerFactory;
-import org.jboss.errai.bus.client.api.base.TimeUnit;
+import org.jboss.errai.bus.client.api.builder.MessageBuildCommand;
+import org.jboss.errai.bus.client.api.builder.MessageBuildParms;
+import org.jboss.errai.bus.client.api.builder.MessageBuildSendable;
+import org.jboss.errai.bus.client.api.builder.MessageBuildSubject;
+import org.jboss.errai.bus.client.api.builder.MessageReplySendable;
+import org.jboss.errai.bus.client.api.builder.Sendable;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.framework.RoutingFlags;
