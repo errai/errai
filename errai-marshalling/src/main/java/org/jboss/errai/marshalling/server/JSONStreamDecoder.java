@@ -221,7 +221,9 @@ public class JSONStreamDecoder {
   }
 
   private double parseDouble(char c) throws IOException {
-    double val = 0, dVal = 0, factor = 1, exp = 0;
+    double val = 0, dVal = 0, factor = 1;
+
+    int exp = 0;
 
     char[] buf = new char[21];
     int len = 0;
@@ -235,7 +237,7 @@ public class JSONStreamDecoder {
         c = read();
       }
 
-      exp = parseDouble(c);
+      exp = (int) parseDouble(c);
     }
     else if (c != 0) {
       carry = c;
@@ -289,7 +291,7 @@ public class JSONStreamDecoder {
     }
 
     if (exp != 0) {
-      return (dVal + val) * pow(10, exp);
+      return Double.parseDouble((dVal + val) + "E" + exp);
     }
     else {
       return dVal + val;

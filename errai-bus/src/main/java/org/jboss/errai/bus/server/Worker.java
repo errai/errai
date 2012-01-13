@@ -118,9 +118,6 @@ public class Worker extends Thread {
       catch (InterruptedException e) {
         if (!active) return;
       }
-      catch (QueueOverloadedException e) {
-        handleMessageDeliveryFailure(bus, message, "Queue has become saturated/overloaded", e, true);
-      }
       catch (QueueUnavailableException e) {
         e.printStackTrace();
         //  handleMessageDeliveryFailure(bus, message, "Queue is not available", e, true);

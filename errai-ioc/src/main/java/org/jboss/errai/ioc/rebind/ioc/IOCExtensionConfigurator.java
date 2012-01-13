@@ -16,11 +16,11 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
-import org.jboss.errai.bus.rebind.ProcessingContext;
+import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.IOCProcessorFactory;
 
 public interface IOCExtensionConfigurator {
-  public void configure(ProcessingContext context, InjectorFactory injectorFactory, IOCProcessorFactory procFactory);
+  public void configure(IOCProcessingContext context, InjectorFactory injectorFactory, IOCProcessorFactory procFactory);
 
-  public void afterInitialization(ProcessingContext context, InjectorFactory injectorFactory, IOCProcessorFactory procFactory);
+  public void afterInitialization(IOCProcessingContext context, InjectorFactory injectorFactory, IOCProcessorFactory procFactory);
 }

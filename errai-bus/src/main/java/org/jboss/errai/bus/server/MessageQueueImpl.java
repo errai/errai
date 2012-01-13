@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import java.io.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static java.lang.System.nanoTime;
 import static java.lang.System.setOut;
@@ -148,12 +149,13 @@ public class MessageQueueImpl implements MessageQueue {
           }
         }
         finally {
-          bufferColor.getLock().lock();
+          ReentrantLock lock = bufferColor.getLock();
+          lock.lock();
           try {
             bufferColor.wake();
           }
           finally {
-            bufferColor.getLock().unlock();
+            lock.unlock();
           }
         }
       }
@@ -167,10 +169,11 @@ public class MessageQueueImpl implements MessageQueue {
 
       if (activationCallback != null) {
         synchronized (activationLock) {
-          if (activationCallback != null) activationCallback.activate(this);
+          if (activationCallback != null) {
+            activationCallback.activate(this);
+          }
         }
       }
-
     }
     return true;
   }

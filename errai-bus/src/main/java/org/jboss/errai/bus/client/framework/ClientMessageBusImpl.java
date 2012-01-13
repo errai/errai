@@ -1191,6 +1191,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     RpcProxyLoader loader = GWT.create(RpcProxyLoader.class);
     loader.loadProxies(ClientMessageBusImpl.this);
+    voteForInit();
 
     final Timer initialPollTimer = new Timer() {
       @Override
@@ -1345,24 +1346,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
     }
   }
-
-//  private native static void _unsubscribe(Object registrationHandle) /*-{
-//    $wnd.PageBus.unsubscribe(registrationHandle);
-//  }-*/;
-//
-//  private native static Object _subscribe(String subject, MessageCallback callback,
-//                                          Object subscriberData) /*-{
-//    return $wnd.PageBus.subscribe(subject, null,
-//            function (subject, message) {
-//              callback.@org.jboss.errai.bus.client.api.MessageCallback::callback(Lorg/jboss/errai/bus/client/api/Message;)(@org.jboss.errai.bus.client.json.JSONUtilCli::decodeCommandMessage(Ljava/lang/Object;)(message))
-//            },
-//            null);
-//  }-*/;
-//
-//  public native static void _store(String subject, Object value) /*-{
-//    $wnd.PageBus.store(subject, value);
-//  }-*/;
-
 
   public int getNextRequestNumber() {
     if (txNumber == Integer.MAX_VALUE) {

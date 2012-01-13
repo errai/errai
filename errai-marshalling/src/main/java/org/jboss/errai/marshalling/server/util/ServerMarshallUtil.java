@@ -35,6 +35,8 @@ import java.util.jar.JarFile;
 import static org.slf4j.LoggerFactory.getLogger;
 
 /**
+ * Utility which provides convenience methods for generating marshallers for the server-side.
+ *
  * @author Mike Brock
  */
 public abstract class ServerMarshallUtil {
@@ -70,8 +72,6 @@ public abstract class ServerMarshallUtil {
       while (enumeration.hasMoreElements()) {
         if (url != null) {
           multiple = true;
-//          throw new RuntimeException("Found more than one " + packageName + "." + className
-//                  + " in the classpath! Clear your output directories!");
         }
 
         url = enumeration.nextElement();

@@ -139,12 +139,4 @@ public class IOCGenerator extends Generator {
     context.commit(logger, printWriter);
   }
 
-  public MetaClass getJClassType(Class cls) {
-    try {
-      return GWTClass.newInstance(typeOracle.getType(cls.getName()));
-    }
-    catch (NotFoundException e) {
-      return null;
-    }
-  }
 }

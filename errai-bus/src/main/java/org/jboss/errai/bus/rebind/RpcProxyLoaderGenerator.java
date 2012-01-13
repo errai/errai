@@ -127,8 +127,8 @@ public class RpcProxyLoaderGenerator extends Generator {
       }
     }
 
-    loadProxies.append(Stmt.nestedCall(Cast.to(ClientMessageBus.class, Stmt.invokeStatic(ErraiBus.class, "get")))
-            .invoke("voteForInit"));
+//    loadProxies.append(Stmt.nestedCall(Cast.to(ClientMessageBus.class, Stmt.invokeStatic(ErraiBus.class, "get")))
+//            .invoke("voteForInit"));
 
     classBuilder = (ClassStructureBuilder<?>) loadProxies.finish();
 

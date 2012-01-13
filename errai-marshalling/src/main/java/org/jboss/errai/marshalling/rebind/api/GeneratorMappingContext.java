@@ -159,26 +159,4 @@ public class GeneratorMappingContext implements ServerMappingContext {
   public boolean isExposed(MetaClassMember member) {
     return exposedMembers.contains(getPrivateMemberName(member));
   }
-//
-//  public void registerMappingAlias(Class<?> from, Class<?> to) {
-//    registerMappingAlias(from.getName(), to.getName());
-//  }
-//
-//  public void registerMappingAlias(String from, String to) {
-//    mappingAliases.put(from, to);
-//
-//    if (!reverseMappingAlias.containsKey(to)) {
-//      reverseMappingAlias.put(to, new ArrayList<String>());
-//    }
-//    reverseMappingAlias.get(to).add(from);
-//  }
-
-//  public List<String> getReverseMappingAliasFor(String type) {
-//    if (reverseMappingAlias.containsKey(type)) {
-//      return reverseMappingAlias.get(type);
-//    }
-//    else {
-//      return Collections.emptyList();
-//    }
-//  }
 }
