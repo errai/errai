@@ -127,10 +127,6 @@ public class SenderBean implements Bean {
       throw new ProviderException(PROVIDER_EXCEPTION_ERROR_MSG_BASE + ": Required "
               + ToSubject.class.getName() + " qualifier missing at injection point.");
     }
-    if (replyTo == null) {
-      throw new ProviderException(PROVIDER_EXCEPTION_ERROR_MSG_BASE + ": Required "
-              + ReplyTo.class.getName() + " qualifier missing at injection point.");
-    }
 
     return ErraiMessageSender.of(toSubject, replyTo, senderType , dispatcher);
   }
