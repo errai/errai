@@ -17,6 +17,7 @@
 package org.jboss.errai.tools.monitoring;
 
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.util.BusTools;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -28,7 +29,6 @@ import java.util.List;
 import static java.lang.Class.forName;
 import static java.lang.String.valueOf;
 import static java.sql.DriverManager.getConnection;
-import static org.jboss.errai.bus.server.util.ServerBusUtils.encodeJSON;
 
 public class Dataservice implements Attachable {
   Connection c;
@@ -129,7 +129,7 @@ public class Dataservice implements Attachable {
       stmt.setString(3, fromBus);
       stmt.setString(4, toBus);
       stmt.setString(5, service);
-      stmt.setString(6, encodeJSON(message.getParts()));
+      stmt.setString(6, BusTools.encodeMessage(message));
       stmt.execute();
     }
     catch (Throwable e) {

@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ *  
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.marshalling.server.protocol;
+package org.jboss.errai.bus.server.util;
 
-import org.jboss.errai.marshalling.client.protocols.ErraiProtocol;
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.util.BusTools;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Map;
 
 /**
  * @author Mike Brock
  */
-public class ErraiProtocolServer extends ErraiProtocol{
-  public static ByteArrayInputStream encodePayloadToByteArrayInputStream(Map<String, Object> payload) {
-    return new ByteArrayInputStream(encodePayload(payload).getBytes());
+public class ServerBusTools extends BusTools {
+  public static ByteArrayInputStream encodeMessageToByteArrayInputStream(Message message) {
+    return new ByteArrayInputStream(encodeMessage(message).getBytes());
   }
 }

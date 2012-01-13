@@ -19,6 +19,7 @@ package org.jboss.errai.bus.server;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.util.BusTools;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueActivationCallback;
 import org.jboss.errai.bus.server.api.QueueSession;
@@ -26,6 +27,7 @@ import org.jboss.errai.bus.server.io.BufferHelper;
 import org.jboss.errai.bus.server.io.buffers.BufferCallback;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
+import org.jboss.errai.bus.server.util.ServerBusTools;
 import org.jboss.errai.marshalling.client.protocols.ErraiProtocol;
 import org.jboss.errai.marshalling.server.protocol.ErraiProtocolServer;
 import org.jboss.errai.marshalling.server.util.UnwrappedByteArrayOutputStream;
@@ -139,14 +141,14 @@ public class MessageQueueImpl implements MessageQueue {
     }
 
     if (useDirectSocketChanne && directSocketChannel.isConnected()) {
-      directSocketChannel.write(new TextWebSocketFrame("[" + ErraiProtocol.encodePayload(message.getParts()) + "]"));
+      directSocketChannel.write(new TextWebSocketFrame("[" + ServerBusTools.encodeMessage(message) + "]"));
     }
     else {
       if (pagedOut) {
         try {
           synchronized (pageLock) {
             if (pagedOut) {
-              writeToPageFile(ErraiProtocolServer.encodePayloadToByteArrayInputStream(message.getParts()), true);
+              writeToPageFile(ServerBusTools.encodeMessageToByteArrayInputStream(message), true);
               return true;
             }
           }
