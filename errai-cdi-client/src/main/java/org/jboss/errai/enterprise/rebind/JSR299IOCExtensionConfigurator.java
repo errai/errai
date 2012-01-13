@@ -16,11 +16,6 @@
 
 package org.jboss.errai.enterprise.rebind;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Produces;
-import javax.inject.Singleton;
-
-import org.jboss.errai.bus.rebind.ProcessingContext;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.ioc.client.api.EntryPoint;
@@ -29,16 +24,15 @@ import org.jboss.errai.ioc.rebind.AnnotationHandler;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.IOCProcessorFactory;
 import org.jboss.errai.ioc.rebind.Rule;
-import org.jboss.errai.ioc.rebind.ioc.IOCExtensionConfigurator;
-import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
-import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
-import org.jboss.errai.ioc.rebind.ioc.Injector;
-import org.jboss.errai.ioc.rebind.ioc.InjectorFactory;
-import org.jboss.errai.ioc.rebind.ioc.TypeInjector;
+import org.jboss.errai.ioc.rebind.ioc.*;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Produces;
+import javax.inject.Singleton;
 
 @IOCExtension
 public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator {
-  public void configure(final ProcessingContext context, final InjectorFactory injectorFactory,
+  public void configure(final IOCProcessingContext context, final InjectorFactory injectorFactory,
                         final IOCProcessorFactory procFactory) {
 
     procFactory.registerHandler(Produces.class, new AnnotationHandler<Produces>() {
@@ -125,7 +119,7 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
     });
   }
 
-  public void afterInitialization(ProcessingContext context, InjectorFactory injectorFactory,
+  public void afterInitialization(IOCProcessingContext context, InjectorFactory injectorFactory,
                                   IOCProcessorFactory procFactory) {
   }
 }

@@ -27,4 +27,6 @@ public class InjectionIntegrationTest extends IOCClientTestCase {
     assertNotNull("Field injection of BeanB in BeanC failed", InjectionTestModule.getInstance().getBeanC().getBeanB());
     assertNotNull("Constructor injection of BeanD in BeanC", InjectionTestModule.getInstance().getBeanC().getBeanD());
   }
+
+
 }

@@ -19,8 +19,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import org.jboss.errai.bus.server.service.ErraiService;
-import org.jboss.errai.bus.server.service.JNDIServiceLocator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,32 +44,32 @@ public class BootstrapListener implements ServletContextListener {
   private String managedJndiName;
 
   public void contextInitialized(ServletContextEvent event) {
-    final ServletContext context = event.getServletContext();
-    if (null == context.getAttribute("errai")) {
-      synchronized (context) {
-        managedJndiName = context.getInitParameter("jndiName") != null ? context.getInitParameter("jndiName")
-            : DEFAULT_JNDI_NAME;
-
-        ErraiService service = null;
-
-        try {
-          service = new JNDIServiceLocator(managedJndiName).locateService();
-
-          log.info("Service exists. Attaching to " + managedJndiName);
-
-        } catch (Exception e) {
-          // ignore
-        }
-
-        if (null == service) {
-          log.info("Creating new service instance");
-          service = ServiceFactory.create();
-          JBossJNDI.rebind(managedJndiName, service);
-        }
-
-        context.setAttribute("errai", service);
-      }
-    }
+//    final ServletContext context = event.getServletContext();
+//    if (null == context.getAttribute("errai")) {
+//      synchronized (context) {
+//        managedJndiName = context.getInitParameter("jndiName") != null ? context.getInitParameter("jndiName")
+//            : DEFAULT_JNDI_NAME;
+//
+//        ErraiService service = null;
+//
+//        try {
+//          service = new JNDIServiceLocator(managedJndiName).locateService();
+//
+//          log.info("Service exists. Attaching to " + managedJndiName);
+//
+//        } catch (Exception e) {
+//          // ignore
+//        }
+//
+//        if (null == service) {
+//          log.info("Creating new service instance");
+//          service = ServiceFactory.create();
+//          JBossJNDI.rebind(managedJndiName, service);
+//        }
+//
+//        context.setAttribute("errai", service);
+//      }
+//    }
   }
 
   public void contextDestroyed(ServletContextEvent event) {

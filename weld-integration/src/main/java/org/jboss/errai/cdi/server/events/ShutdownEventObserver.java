@@ -64,6 +64,7 @@ public class ShutdownEventObserver implements ObserverMethod {
     return BeforeShutdown.class;
   }
 
+
   public Set<Annotation> getObservedQualifiers() {
     Set<Annotation> qualifiers = new HashSet<Annotation>();
     return qualifiers;
