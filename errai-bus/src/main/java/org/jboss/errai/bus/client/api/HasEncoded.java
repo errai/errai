@@ -16,18 +16,19 @@
 
 package org.jboss.errai.bus.client.api;
 
-
 /**
  * This interface indicates to the bus whether or not the Message being routed already contains a pre-built JSON
- * encoding. It is implemented by the <tt>JSONMessage</tt> class. The main purpose is to accelerate the performance
- * of the message building, so the bus does not need to deconstruct the message. Rather, it indicates that the
- * underlying message has already been constructed.
+ * encoding. Messages that implement this interface have complete control over their own on-the-wire representation.
+ * <p>
+ * As of Errai 2.0, there is no corresponding interface on the message receiver end of the API, so the message's custom
+ * encoding must be consistent with the Errai bus format. Therefore, the only real use case for this functionality is as
+ * a performance optimization for messages that already have a pre-computed JSON representation lying around.
  */
 public interface HasEncoded {
 
   /**
-   * Gets the encoded JSON string
-   *
+   * Gets the encoded JSON string to be used for this message when it is being sent via the Errai bus.
+   * 
    * @return the encoded JSON string
    */
   public String getEncoded();
