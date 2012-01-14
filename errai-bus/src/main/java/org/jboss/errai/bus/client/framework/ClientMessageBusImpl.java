@@ -887,8 +887,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
               }
             });
 
-
-            System.out.println("FinishStateSync");
             voteForInit();
             break;
 
