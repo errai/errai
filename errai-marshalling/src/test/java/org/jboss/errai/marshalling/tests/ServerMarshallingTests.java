@@ -9,6 +9,7 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.junit.Test;
 
+import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -24,8 +25,8 @@ public class ServerMarshallingTests {
     if (value == null) return null;
     return testEncodeDecode((Class<Object>) value.getClass(), value);
   }
-  
-  
+
+
   private <T> T testEncodeDecode(Class<T> type, T value) {
     Marshaller marshaller = MappingContextSingleton.get().getMarshaller(type.getName());
     Assert.assertNotNull("did not find " + type.getName() + " marshaller", marshaller);
@@ -41,9 +42,44 @@ public class ServerMarshallingTests {
 
     Object dec = marshaller.demarshall(encodedNode, decSession);
     Assert.assertTrue("decoded type not an instance of String", type.isAssignableFrom(value.getClass()));
-    Assert.assertEquals(value, dec);
+    assertEquals(value, dec);
 
     return (T) dec;
+  }
+
+  private static void assertEquals(Object a1, Object a2) {
+    if (a1 != null && a2 != null) {
+      if (a1.getClass().isArray()) {
+        if (a2.getClass().isArray()) {
+          assertArrayEquals(a1, a2);
+          return;
+        }
+
+      }
+    }
+
+    Assert.assertEquals(a1, a2);
+  }
+
+  private static void assertArrayEquals(Object array1, Object array2) {
+    int len1 = Array.getLength(array1);
+    int len2 = Array.getLength(array2);
+
+    if (len1 != len2) Assert.failNotEquals("different length arrays!", array1, array2);
+
+    Object el1, el2;
+
+    for (int i = 0; i < len1; i++) {
+      el1 = Array.get(array1, i);
+      el2 = Array.get(array2, i);
+
+      if ((el1 == null || el2 == null) && el1 != null) {
+        Assert.failNotEquals("different values", array1, array2);
+      }
+      else if (el1 != null) {
+        assertEquals(el1, el2);
+      }
+    }
   }
 
   @Test
@@ -54,6 +90,11 @@ public class ServerMarshallingTests {
   @Test
   public void testEscapesInString() {
     testEncodeDecode(String.class, "\n\t\r\n{}{}{}\\}\\{\\]\\[");
+  }
+
+  @Test
+  public void testStringArray() {
+    testEncodeDecode(String[].class, new String[]{"foo", "bar", "superfoobar", "ultrafoobar"});
   }
 
   @Test
@@ -140,7 +181,7 @@ public class ServerMarshallingTests {
   public void testFloatRandomValue() {
     testEncodeDecode(Float.class, new Random(System.currentTimeMillis()).nextFloat());
   }
-  
+
   @Test
   public void testByteMaxValue() {
     testEncodeDecode(Byte.class, Byte.MAX_VALUE);
@@ -190,22 +231,22 @@ public class ServerMarshallingTests {
   public void testSingletonListMarshall() {
     testEncodeDecodeDynamic(Collections.singletonList("foobie"));
   }
-  
+
   @Test
   public void testSetMarshall() {
     testEncodeDecodeDynamic(new HashSet(Arrays.asList("foo", "bar", "sillyhat")));
   }
-  
+
   @Test
   public void testEmptyList() {
     testEncodeDecodeDynamic(Collections.emptyList());
   }
-  
+
   @Test
   public void testEmptySet() {
     testEncodeDecodeDynamic(Collections.emptySet());
   }
-  
+
   @Test
   public void testEmptyMap() {
     testEncodeDecodeDynamic(Collections.emptyMap());
