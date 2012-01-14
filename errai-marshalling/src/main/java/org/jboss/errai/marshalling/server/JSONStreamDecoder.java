@@ -113,7 +113,7 @@ public class JSONStreamDecoder {
         case ',':
           ctx.record();
           break;
-        
+
 
         case '"':
         case '\'':
@@ -222,81 +222,25 @@ public class JSONStreamDecoder {
   }
 
   private double parseDouble(char c) throws IOException {
-    double val = 0, dVal = 0, factor = 1;
-
-    int exp = 0;
-
-    char[] buf = new char[21];
+    char[] buf = new char[25];
     int len = 0;
+    boolean exp = false;
+
     do {
-      buf[len++] = c;
-    }
-    while ((c = read()) != 0 && isValidNumberPart(c));
-
-    if (c == 'e' || c == 'E') {
-      if ((c = read()) == '+') {
-        c = read();
+      do {
+        buf[len++] = c;
       }
-
-      exp = (int) parseDouble(c);
+      while ((c = read()) != 0 && isValidNumberPart(c));
     }
-    else if (c != 0) {
+    while (!exp && (c == 'E' || c == 'e') && (exp = true));
+
+    if (c != 0) {
       carry = c;
     }
 
     if (len == 1 && buf[0] == '-') return -0;
 
-    for (int i = len - 1; i != -1; i--) {
-      switch (buf[i]) {
-        case '.':
-          dVal = val / factor;
-          val = 0;
-          factor = 1;
-          continue;
-        case '-':
-          if (i != 0) {
-            throw new NumberFormatException(new String(buf));
-          }
-          val = -val;
-          break;
-        case '1':
-          val += factor;
-          break;
-        case '2':
-          val += 2 * factor;
-          break;
-        case '3':
-          val += 3 * factor;
-          break;
-        case '4':
-          val += 4 * factor;
-          break;
-        case '5':
-          val += 5 * factor;
-          break;
-        case '6':
-          val += 6 * factor;
-          break;
-        case '7':
-          val += 7 * factor;
-          break;
-        case '8':
-          val += 8 * factor;
-          break;
-        case '9':
-          val += 9 * factor;
-          break;
-      }
-
-      factor *= 10;
-    }
-
-    if (exp != 0) {
-      return Double.parseDouble((dVal + val) + "E" + exp);
-    }
-    else {
-      return dVal + val;
-    }
+    return Double.parseDouble(new String(buf, 0, len));
   }
 
   private static boolean isValidNumberPart(char c) {
@@ -420,7 +364,9 @@ public class JSONStreamDecoder {
 
     @Override
     Map record() {
-      collection.put(lhs, rhs);
+      if (lhs != null) {
+        collection.put(lhs, rhs);
+      }
       lhs = rhs = null;
       return collection;
     }

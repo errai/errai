@@ -9,7 +9,7 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.junit.Test;
 
-import java.util.Random;
+import java.util.*;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -20,10 +20,15 @@ public class ServerMarshallingTests {
     System.setProperty("errai.devel.nocache", "true");
   }
 
-
+  private Object testEncodeDecodeDynamic(Object value) {
+    if (value == null) return null;
+    return testEncodeDecode((Class<Object>) value.getClass(), value);
+  }
+  
+  
   private <T> T testEncodeDecode(Class<T> type, T value) {
     Marshaller marshaller = MappingContextSingleton.get().getMarshaller(type.getName());
-    Assert.assertNotNull("did not find " + String.class.getName() + " marshaller", marshaller);
+    Assert.assertNotNull("did not find " + type.getName() + " marshaller", marshaller);
 
     MarshallingSession encSession = MarshallingSessionProviderFactory.getEncoding();
     String enc = "[" + marshaller.marshall(value, encSession) + "]";
@@ -117,6 +122,11 @@ public class ServerMarshallingTests {
   }
 
   @Test
+  public void testDouble0dot9635950160419999() {
+    testEncodeDecode(Double.class, 0.9635950160419999d);
+  }
+
+  @Test
   public void testFloatMaxValue() {
     testEncodeDecode(Float.class, Float.MAX_VALUE);
   }
@@ -130,7 +140,7 @@ public class ServerMarshallingTests {
   public void testFloatRandomValue() {
     testEncodeDecode(Float.class, new Random(System.currentTimeMillis()).nextFloat());
   }
-
+  
   @Test
   public void testByteMaxValue() {
     testEncodeDecode(Byte.class, Byte.MAX_VALUE);
@@ -167,9 +177,55 @@ public class ServerMarshallingTests {
   }
 
   @Test
-  public void testCharRandomValue() {
-    testEncodeDecode(Character.class, (char) new Random(System.currentTimeMillis()).nextInt(Character.MAX_VALUE));
+  public void testListMarshall() {
+    testEncodeDecodeDynamic(Arrays.asList("foo", "bar", "sillyhat"));
   }
 
+  @Test
+  public void testUnmodifiableListMarshall() {
+    testEncodeDecodeDynamic(Collections.unmodifiableList(Arrays.asList("foo", "bar", "sillyhat")));
+  }
 
+  @Test
+  public void testSingletonListMarshall() {
+    testEncodeDecodeDynamic(Collections.singletonList("foobie"));
+  }
+  
+  @Test
+  public void testSetMarshall() {
+    testEncodeDecodeDynamic(new HashSet(Arrays.asList("foo", "bar", "sillyhat")));
+  }
+  
+  @Test
+  public void testEmptyList() {
+    testEncodeDecodeDynamic(Collections.emptyList());
+  }
+  
+  @Test
+  public void testEmptySet() {
+    testEncodeDecodeDynamic(Collections.emptySet());
+  }
+  
+  @Test
+  public void testEmptyMap() {
+    testEncodeDecodeDynamic(Collections.emptyMap());
+  }
+
+  @Test
+  public void testSynchronizedSortedMap() {
+    TreeMap map = new TreeMap();
+    map.put("a", "a");
+    map.put("b", "b");
+    map.put("c", "c");
+    testEncodeDecodeDynamic(Collections.synchronizedSortedMap(map));
+  }
+
+  @Test
+  public void testSynchronizedMap() {
+    HashMap map = new HashMap();
+    map.put("a", "a");
+    map.put("b", "b");
+    map.put("c", "c");
+    testEncodeDecodeDynamic(Collections.synchronizedMap(map));
+  }
 }

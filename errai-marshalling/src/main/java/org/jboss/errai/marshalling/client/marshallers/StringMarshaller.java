@@ -46,6 +46,6 @@ public class StringMarshaller extends AbstractJSONMarshaller<String> {
 
   @Override
   public String marshall(String o, MarshallingSession ctx) {
-    return o == null ? "null" : "\"" + MarshallUtil.jsonStringEscape(o.toString()) + "\"";
+    return o == null ? "null" : "\"" + MarshallUtil.jsonStringEscape(o) + "\"";
   }
 }
