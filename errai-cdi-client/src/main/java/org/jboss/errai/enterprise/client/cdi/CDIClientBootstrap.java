@@ -16,7 +16,7 @@
 package org.jboss.errai.enterprise.client.cdi;
 
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.api.InitializationListener;
+import org.jboss.errai.bus.client.api.PreInitializationListener;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
@@ -29,7 +29,7 @@ import org.jboss.errai.enterprise.client.cdi.events.BusReadyEvent;
 import com.google.gwt.core.client.EntryPoint;
 
 /**
- * The GWT entry point for the Errai CDI module
+ * The GWT entry point for the Errai CDI module.
  * 
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -75,8 +75,8 @@ public class CDIClientBootstrap implements EntryPoint {
      */
     bus.addPostInitTask(new Runnable() {
       public void run() {
-        bus.addInitializationListener(new InitializationListener() {
-          public void onInitilization() {
+        bus.addPreInitializationListener(new PreInitializationListener() {
+          public void beforeInitialization() {
             bus.addPostInitTask(busReadyEvent);
           }
         });
