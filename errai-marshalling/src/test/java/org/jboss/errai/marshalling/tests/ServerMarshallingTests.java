@@ -21,14 +21,14 @@ public class ServerMarshallingTests {
     System.setProperty("errai.devel.nocache", "true");
   }
 
-  private Object testEncodeDecodeDynamic(Object value) {
-    if (value == null) return null;
-    return testEncodeDecode((Class<Object>) value.getClass(), value);
+  @SuppressWarnings("unchecked")
+  private void testEncodeDecodeDynamic(Object value) {
+    if (value == null) return;
+    testEncodeDecode((Class<Object>) value.getClass(), value);
   }
 
-
-  private <T> T testEncodeDecode(Class<T> type, T value) {
-    Marshaller marshaller = MappingContextSingleton.get().getMarshaller(type.getName());
+  private <T> void testEncodeDecode(Class<T> type, T value) {
+    Marshaller<Object> marshaller = MappingContextSingleton.get().getMarshaller(type.getName());
     Assert.assertNotNull("did not find " + type.getName() + " marshaller", marshaller);
 
     MarshallingSession encSession = MarshallingSessionProviderFactory.getEncoding();
@@ -44,7 +44,6 @@ public class ServerMarshallingTests {
     Assert.assertTrue("decoded type not an instance of String", type.isAssignableFrom(value.getClass()));
     assertEquals(value, dec);
 
-    return (T) dec;
   }
 
   private static void assertEquals(Object a1, Object a2) {
@@ -250,12 +249,12 @@ public class ServerMarshallingTests {
 
   @Test
   public void testUnmodifiableSetMarshall() {
-    testEncodeDecodeDynamic(Collections.unmodifiableSet(new HashSet(Arrays.asList("foo", "bar", "sillyhat"))));
+    testEncodeDecodeDynamic(Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("foo", "bar", "sillyhat"))));
   }
 
   @Test
   public void testUnmodifiableSortedSetMarshall() {
-    testEncodeDecodeDynamic(Collections.unmodifiableSortedSet(new TreeSet(Arrays.asList("foo", "bar", "sillyhat"))));
+    testEncodeDecodeDynamic(Collections.unmodifiableSortedSet(new TreeSet<String>(Arrays.asList("foo", "bar", "sillyhat"))));
   }
 
   @Test
@@ -265,7 +264,7 @@ public class ServerMarshallingTests {
 
   @Test
   public void testSetMarshall() {
-    testEncodeDecodeDynamic(new HashSet(Arrays.asList("foo", "bar", "sillyhat")));
+    testEncodeDecodeDynamic(new HashSet<String>(Arrays.asList("foo", "bar", "sillyhat")));
   }
 
   @Test
@@ -285,7 +284,7 @@ public class ServerMarshallingTests {
 
   @Test
   public void testSynchronizedSortedMap() {
-    TreeMap map = new TreeMap();
+    TreeMap<String, String> map = new TreeMap<String, String>();
     map.put("a", "a");
     map.put("b", "b");
     map.put("c", "c");
@@ -294,7 +293,7 @@ public class ServerMarshallingTests {
 
   @Test
   public void testSynchronizedMap() {
-    HashMap map = new HashMap();
+    HashMap<String, String> map = new HashMap<String, String>();
     map.put("a", "a");
     map.put("b", "b");
     map.put("c", "c");
@@ -303,7 +302,7 @@ public class ServerMarshallingTests {
 
   @Test
   public void testSynchronizedSortedSet() {
-    TreeSet set = new TreeSet();
+    TreeSet<String> set = new TreeSet<String>();
     set.add("a");
     set.add("b");
     set.add("c");
@@ -312,7 +311,7 @@ public class ServerMarshallingTests {
 
   @Test
   public void testSynchronizedSet() {
-    HashSet set = new HashSet();
+    HashSet<String> set = new HashSet<String>();
     set.add("a");
     set.add("b");
     set.add("c");
