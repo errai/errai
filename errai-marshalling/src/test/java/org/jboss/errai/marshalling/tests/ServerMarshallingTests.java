@@ -98,6 +98,27 @@ public class ServerMarshallingTests {
   }
 
   @Test
+  public void testIntegerArray() {
+    testEncodeDecode(Integer[].class, new Integer[]{1, 2, 3, 4, 5, 6, 7, 8, 9});
+  }
+
+  @Test
+  public void testPrimIntegerArray() {
+    testEncodeDecode(int[].class, new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9});
+  }
+
+  @Test
+  public void testLongArray() {
+    testEncodeDecode(Long[].class, new Long[]{1l, 2l, 3l, 4l, 5l, 6l, 7l, 8l, 9l});
+  }
+
+  @Test
+  public void testPrimLongArray() {
+    testEncodeDecode(long[].class, new long[]{1l, 2l, 3l, 4l, 5l, 6l, 7l, 8l, 9l});
+  }
+
+
+  @Test
   public void testIntegerMaxValue() {
     testEncodeDecode(Integer.class, Integer.MAX_VALUE);
   }
@@ -228,6 +249,16 @@ public class ServerMarshallingTests {
   }
 
   @Test
+  public void testUnmodifiableSetMarshall() {
+    testEncodeDecodeDynamic(Collections.unmodifiableSet(new HashSet(Arrays.asList("foo", "bar", "sillyhat"))));
+  }
+
+  @Test
+  public void testUnmodifiableSortedSetMarshall() {
+    testEncodeDecodeDynamic(Collections.unmodifiableSortedSet(new TreeSet(Arrays.asList("foo", "bar", "sillyhat"))));
+  }
+
+  @Test
   public void testSingletonListMarshall() {
     testEncodeDecodeDynamic(Collections.singletonList("foobie"));
   }
@@ -268,5 +299,23 @@ public class ServerMarshallingTests {
     map.put("b", "b");
     map.put("c", "c");
     testEncodeDecodeDynamic(Collections.synchronizedMap(map));
+  }
+
+  @Test
+  public void testSynchronizedSortedSet() {
+    TreeSet set = new TreeSet();
+    set.add("a");
+    set.add("b");
+    set.add("c");
+    testEncodeDecodeDynamic(Collections.synchronizedSortedSet(set));
+  }
+
+  @Test
+  public void testSynchronizedSet() {
+    HashSet set = new HashSet();
+    set.add("a");
+    set.add("b");
+    set.add("c");
+    testEncodeDecodeDynamic(Collections.synchronizedSet(set));
   }
 }

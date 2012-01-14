@@ -217,6 +217,14 @@ public class MarshallerGeneratorFactory {
     addArrayMarshaller(MetaClassFactory.get(boolean[].class));
     addArrayMarshaller(MetaClassFactory.get(byte[].class));
 
+    addArrayMarshaller(MetaClassFactory.get(Integer[].class));
+    addArrayMarshaller(MetaClassFactory.get(Long[].class));
+    addArrayMarshaller(MetaClassFactory.get(Double[].class));
+    addArrayMarshaller(MetaClassFactory.get(Float[].class));
+    addArrayMarshaller(MetaClassFactory.get(Short[].class));
+    addArrayMarshaller(MetaClassFactory.get(Boolean[].class));
+    addArrayMarshaller(MetaClassFactory.get(Byte[].class));
+
     return classStructureBuilder.toJavaString();
   }
 
@@ -292,6 +300,7 @@ public class MarshallerGeneratorFactory {
 
       constructor.append(Stmt.create(classContext).loadVariable(MARSHALLERS_VAR)
               .invoke("put", type.getFullyQualifiedName(), loadVariable(varName)));
+
 
       arrayMarshallers.add(varName);
     }
