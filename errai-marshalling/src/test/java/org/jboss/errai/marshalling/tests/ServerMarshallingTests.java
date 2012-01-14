@@ -43,7 +43,6 @@ public class ServerMarshallingTests {
     Object dec = marshaller.demarshall(encodedNode, decSession);
     Assert.assertTrue("decoded type not an instance of String", type.isAssignableFrom(value.getClass()));
     assertEquals(value, dec);
-
   }
 
   private static void assertEquals(Object a1, Object a2) {

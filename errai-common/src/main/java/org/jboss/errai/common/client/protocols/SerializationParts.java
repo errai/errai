@@ -17,18 +17,18 @@
 package org.jboss.errai.common.client.protocols;
 
 public class SerializationParts {
-  public static final String MARSHALLED_TYPES = "__MarshalledTypes";
-  public static final String ENCODED_TYPE = "__EncodedType";
-  public static final String OBJECT_ID = "__ObjectID";
-  public static final String INSTANTIATE_ONLY = "__InstantiateOnly";
-  public static final String NUMERIC_VALUE = "__NumVal";
-  public static final String QUALIFIED_VALUE = "__Value";
+  public static final String MARSHALLED_TYPES = "^MarshalledTypes";
+  public static final String ENCODED_TYPE = "^EncodedType";
+  public static final String OBJECT_ID = "^ObjectID";
+  public static final String INSTANTIATE_ONLY = "^InstantiateOnly";
+  public static final String NUMERIC_VALUE = "^NumVal";
+  public static final String QUALIFIED_VALUE = "^Value";
 
  // public static final String VALUE = "Value";
 
-  public static final String EMBEDDED_JSON = "${$JSON$}$::";
+  public static final String EMBEDDED_JSON = "^${$JSON$}$::";
 
-  public static final String ENUM_STRING_VALUE = "EnumStringValue";
+  public static final String ENUM_STRING_VALUE = "^EnumStringValue";
 
   private SerializationParts() {
   }
