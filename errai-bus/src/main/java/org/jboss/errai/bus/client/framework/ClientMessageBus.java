@@ -16,7 +16,7 @@
 
 package org.jboss.errai.bus.client.framework;
 
-import org.jboss.errai.bus.client.api.InitializationListener;
+import org.jboss.errai.bus.client.api.PreInitializationListener;
 import org.jboss.errai.bus.client.api.SessionExpirationListener;
 
 import java.util.List;
@@ -54,16 +54,27 @@ public interface ClientMessageBus extends MessageBus {
   public void endCapture();
 
   /**
-   * And a {@link Runnable} initialization task to be executed after the bus has successfuly finished it's
+   * Add a {@link Runnable} initialization task to be executed after the bus has successfuly finished it's
    * initialization and is now communicating with the remote bus.
    *
    * @param run a {@link Runnable} task.
    */
   public void addPostInitTask(Runnable run);
 
+  /**
+   * Adds a {@link SessionExpirationListener} to this bus instance. 
+   * 
+   * @param listener  listener to add, must not be null
+   */
   public void addSessionExpirationListener(SessionExpirationListener listener);
 
-  public void addInitializationListener(InitializationListener listener);
+  /**
+   * Adds a {@link PreInitializationListener} to this bus instance. It will be notified before the bus
+   * initialization starts the first time and on each subsequent reconnect.
+   * 
+   * @param listener  listener to add, must not be null
+   */
+  public void addPreInitializationListener(PreInitializationListener listener);
 
   public void voteForInit();
 

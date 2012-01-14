@@ -17,8 +17,10 @@
 package org.jboss.errai.bus.client.api;
 
 /**
- * @author Mike Brock .
+ * Callback interface that is notified before the bus begins its initialization task. Also called during reconnect.
+ * 
+ * @author Mike Brock
  */
-public interface InitializationListener {
-  public void onInitilization();
+public interface PreInitializationListener {
+  public void beforeInitialization();
 }

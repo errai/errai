@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.api.InitializationListener;
+import org.jboss.errai.bus.client.api.PreInitializationListener;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.MessageListener;
@@ -45,6 +45,7 @@ import org.jboss.errai.bus.client.api.base.TransportIOException;
 import org.jboss.errai.bus.client.json.JSONUtilCli;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.util.BusTools;
+import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 
@@ -117,14 +118,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private Map<String, MessageCallback> remotes;
 
-  /* Outgoing queue of messages to be transmitted */
-  // private final Queue<Message> outgoingQueue = new LinkedList<Message>();
-
-  private List<SessionExpirationListener> onSessionExpirationListeners
+  private List<SessionExpirationListener> sessionExpirationListeners
           = new ArrayList<SessionExpirationListener>();
 
-  private List<InitializationListener> onInitializationListeners
-          = new ArrayList<InitializationListener>();
+  private List<PreInitializationListener> preInitializationListeners
+          = new ArrayList<PreInitializationListener>();
 
   /* Map of subjects to references registered in this session */
   private Map<String, List<Object>> registeredInThisSession = new HashMap<String, List<Object>>();
@@ -521,7 +519,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    */
   private void transmitRemote(final String message, final Message txMessage) {
     if (message == null) return;
-     System.out.println("TX: " + message);
+     //System.out.println("TX: " + message);
 
     if (webSocketOpen) {
       if (ClientWebSocketChannel.transmitToSocket(webSocketChannel, message)) {
@@ -741,8 +739,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     /**
      * Fire initialization listeners now.
      */
-    for (InitializationListener listener : onInitializationListeners) {
-      listener.onInitilization();
+    for (PreInitializationListener listener : preInitializationListeners) {
+      listener.beforeInitialization();
     }
 
     remoteSubscribe("ServerEchoService");
@@ -902,7 +900,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
             if (!isInitialized()) return;
 
-            for (SessionExpirationListener listener : onSessionExpirationListeners) {
+            for (SessionExpirationListener listener : sessionExpirationListeners) {
               listener.onSessionExpire();
             }
 
@@ -1192,7 +1190,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   /**
-   * Add runnable tasks to be run after the message bus is initialized
+   * Add runnable tasks to be run after the message bus is initialized.
    *
    * @param run a {@link Runnable} task.
    */
@@ -1207,12 +1205,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   @Override
   public void addSessionExpirationListener(SessionExpirationListener listener) {
-    onSessionExpirationListeners.add(listener);
+    sessionExpirationListeners.add(Assert.notNull(listener));
   }
 
   @Override
-  public void addInitializationListener(InitializationListener listener) {
-    onInitializationListeners.add(listener);
+  public void addPreInitializationListener(PreInitializationListener listener) {
+    preInitializationListeners.add(Assert.notNull(listener));
   }
 
   /**
@@ -1232,7 +1230,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    */
   @Override
   public void addSubscribeListener(SubscribeListener listener) {
-    this.onSubscribeHooks.add(listener);
+    this.onSubscribeHooks.add(Assert.notNull(listener));
   }
 
   /**
@@ -1280,7 +1278,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   public void procPayload(String text) {
-   System.out.println("RX:" + text);
+   // System.out.println("RX:" + text);
     try {
       for (MarshalledMessage m : decodePayload(text)) {
         rxNumber++;
