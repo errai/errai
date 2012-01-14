@@ -31,7 +31,6 @@ import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.util.SecureHashUtil;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
-import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.server.JSONDecoder;
 
 import java.util.Map;

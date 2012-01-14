@@ -113,6 +113,7 @@ public class JSONStreamDecoder {
         case ',':
           ctx.record();
           break;
+        
 
         case '"':
         case '\'':

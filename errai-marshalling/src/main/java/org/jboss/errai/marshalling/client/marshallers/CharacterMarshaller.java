@@ -21,6 +21,7 @@ import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
+import org.jboss.errai.marshalling.client.util.MarshallUtil;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -47,7 +48,7 @@ public class CharacterMarshaller extends AbstractJSONMarshaller<Character> {
 
   @Override
   public String marshall(Character o, MarshallingSession ctx) {
-    return "\"" + o.toString() + "\"";
+    return "\"" + MarshallUtil.jsonStringEscape(o.toString()) + "\"";
   }
 
   @Override

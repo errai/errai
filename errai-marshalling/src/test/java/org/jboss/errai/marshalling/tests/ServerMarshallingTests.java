@@ -1,20 +1,12 @@
 package org.jboss.errai.marshalling.tests;
 
 import junit.framework.Assert;
-import junit.framework.TestCase;
 import org.jboss.errai.marshalling.client.MarshallingSessionProviderFactory;
 import org.jboss.errai.marshalling.client.api.Marshaller;
-import org.jboss.errai.marshalling.client.api.MarshallerFactory;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.ParserFactory;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
-import org.jboss.errai.marshalling.rebind.MarshallerGeneratorFactory;
-import org.jboss.errai.marshalling.rebind.MarshallerOuputTarget;
-import org.jboss.errai.marshalling.server.EncodingSession;
-import org.jboss.errai.marshalling.server.JSONStreamDecoder;
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
-import org.jboss.errai.marshalling.server.ServerMarshalling;
-import org.jboss.errai.marshalling.server.util.ServerMarshallUtil;
 import org.junit.Test;
 
 import java.util.Random;
@@ -29,7 +21,7 @@ public class ServerMarshallingTests {
   }
 
 
-  private <T> T testEncodeDecocde(Class<T> type, T value) {
+  private <T> T testEncodeDecode(Class<T> type, T value) {
     Marshaller marshaller = MappingContextSingleton.get().getMarshaller(type.getName());
     Assert.assertNotNull("did not find " + String.class.getName() + " marshaller", marshaller);
 
@@ -51,87 +43,133 @@ public class ServerMarshallingTests {
 
   @Test
   public void testString() {
-    testEncodeDecocde(String.class, "ThisIsOurTestString");
+    testEncodeDecode(String.class, "ThisIsOurTestString");
+  }
+
+  @Test
+  public void testEscapesInString() {
+    testEncodeDecode(String.class, "\n\t\r\n{}{}{}\\}\\{\\]\\[");
   }
 
   @Test
   public void testIntegerMaxValue() {
-    testEncodeDecocde(Integer.class, Integer.MAX_VALUE);
+    testEncodeDecode(Integer.class, Integer.MAX_VALUE);
   }
 
   @Test
   public void testIntegerMinValue() {
-    testEncodeDecocde(Integer.class, Integer.MIN_VALUE);
+    testEncodeDecode(Integer.class, Integer.MIN_VALUE);
   }
 
   @Test
   public void testIntegerRandomValue() {
-    testEncodeDecocde(Integer.class, new Random(System.currentTimeMillis()).nextInt(Integer.MAX_VALUE));
+    testEncodeDecode(Integer.class, new Random(System.currentTimeMillis()).nextInt(Integer.MAX_VALUE));
   }
 
   @Test
   public void testShortMinValue() {
-    testEncodeDecocde(Short.class, Short.MAX_VALUE);
+    testEncodeDecode(Short.class, Short.MAX_VALUE);
   }
 
   @Test
   public void testShortMaxValue() {
-    testEncodeDecocde(Short.class, Short.MIN_VALUE);
+    testEncodeDecode(Short.class, Short.MIN_VALUE);
   }
 
   @Test
   public void testShortRandomValue() {
-    testEncodeDecocde(Short.class, (short) new Random(System.currentTimeMillis()).nextInt(Short.MAX_VALUE));
+    testEncodeDecode(Short.class, (short) new Random(System.currentTimeMillis()).nextInt(Short.MAX_VALUE));
   }
 
   @Test
   public void testLongMaxValue() {
-    testEncodeDecocde(Long.class, Long.MAX_VALUE);
+    testEncodeDecode(Long.class, Long.MAX_VALUE);
   }
 
   @Test
   public void testLongMinValue() {
-    testEncodeDecocde(Long.class, Long.MIN_VALUE);
+    testEncodeDecode(Long.class, Long.MIN_VALUE);
   }
 
   @Test
   public void testLong6536000376648360988() {
-    testEncodeDecocde(Long.class, 6536000376648360988L);
+    testEncodeDecode(Long.class, 6536000376648360988L);
   }
 
   @Test
   public void testLongRandomValue() {
-    testEncodeDecocde(Long.class, new Random(System.currentTimeMillis()).nextLong());
+    testEncodeDecode(Long.class, new Random(System.currentTimeMillis()).nextLong());
   }
 
   @Test
   public void testDoubleMaxValue() {
-    testEncodeDecocde(Double.class, Double.MAX_VALUE);
+    testEncodeDecode(Double.class, Double.MAX_VALUE);
   }
 
   @Test
   public void testDoubleMinValue() {
-    testEncodeDecocde(Double.class, Double.MIN_VALUE);
+    testEncodeDecode(Double.class, Double.MIN_VALUE);
   }
 
   @Test
   public void testDoubleRandomValue() {
-    testEncodeDecocde(Double.class, new Random(System.currentTimeMillis()).nextDouble());
+    testEncodeDecode(Double.class, new Random(System.currentTimeMillis()).nextDouble());
   }
 
   @Test
   public void testFloatMaxValue() {
-    testEncodeDecocde(Float.class, Float.MAX_VALUE);
+    testEncodeDecode(Float.class, Float.MAX_VALUE);
   }
 
   @Test
   public void testFloatMinValue() {
-    testEncodeDecocde(Float.class, Float.MIN_VALUE);
+    testEncodeDecode(Float.class, Float.MIN_VALUE);
   }
 
   @Test
   public void testFloatRandomValue() {
-    testEncodeDecocde(Float.class, new Random(System.currentTimeMillis()).nextFloat());
+    testEncodeDecode(Float.class, new Random(System.currentTimeMillis()).nextFloat());
   }
+
+  @Test
+  public void testByteMaxValue() {
+    testEncodeDecode(Byte.class, Byte.MAX_VALUE);
+  }
+
+  @Test
+  public void testByteMinValue() {
+    testEncodeDecode(Byte.class, Byte.MIN_VALUE);
+  }
+
+  @Test
+  public void testByteRandomValue() {
+    testEncodeDecode(Byte.class, (byte) new Random(System.currentTimeMillis()).nextInt());
+  }
+
+  @Test
+  public void testBooleanTrue() {
+    testEncodeDecode(Boolean.class, Boolean.TRUE);
+  }
+
+  @Test
+  public void testBooleanFalse() {
+    testEncodeDecode(Boolean.class, Boolean.FALSE);
+  }
+
+  @Test
+  public void testCharMaxValue() {
+    testEncodeDecode(Character.class, Character.MAX_VALUE);
+  }
+
+  @Test
+  public void testCharMinValue() {
+    testEncodeDecode(Character.class, Character.MIN_VALUE);
+  }
+
+  @Test
+  public void testCharRandomValue() {
+    testEncodeDecode(Character.class, (char) new Random(System.currentTimeMillis()).nextInt(Character.MAX_VALUE));
+  }
+
 
 }
