@@ -369,14 +369,6 @@ public class ServerMarshallingTests {
     }
   }
 
-  @Test
-  public void testSTypeEntity() {
-    SType sType = SType.create(new ServerRandomProvider());
-
-    testEncodeDecodeDynamic(sType);
-
-  }
-
   public interface RandomProvider {
     public boolean nextBoolean();
 
@@ -388,4 +380,14 @@ public class ServerMarshallingTests {
 
     public String randString();
   }
+
+  @Test
+  public void testSTypeEntity() {
+    SType sType = SType.create(new ServerRandomProvider());
+
+    testEncodeDecodeDynamic(sType);
+
+  }
+
+
 }
