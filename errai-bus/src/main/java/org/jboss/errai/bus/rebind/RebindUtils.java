@@ -64,6 +64,9 @@ public class RebindUtils {
         } 
         else if (MetaClassFactory.get(Float.class).isAssignableFrom(method.getReturnType().asBoxed())) {
           returnStatement = Stmt.load(0f).returnValue();
+        }
+        else if (MetaClassFactory.get(Long.class).isAssignableFrom(method.getReturnType().asBoxed())) {
+          returnStatement = Stmt.load(0l).returnValue();
         } 
         else {
           returnStatement = Stmt.load(0).returnValue();
