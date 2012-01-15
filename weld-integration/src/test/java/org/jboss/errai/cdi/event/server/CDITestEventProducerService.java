@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import org.jboss.errai.cdi.client.qualifier.A;
 import org.jboss.errai.cdi.client.qualifier.B;
 import org.jboss.errai.cdi.client.qualifier.C;
+import org.jboss.errai.cdi.event.client.FinishEvent;
 import org.jboss.errai.cdi.event.client.StartEvent;
 
 @ApplicationScoped
@@ -36,6 +37,9 @@ public class CDITestEventProducerService {
 
   @Inject @A @B @C
   private Event<String> eventABC;
+  
+  @Inject
+  private Event<FinishEvent> finishEvent;
 
   public void start(@Observes StartEvent event) {
     fireAll();
@@ -50,6 +54,7 @@ public class CDITestEventProducerService {
     fireAC();
     fireBC();
     fireABC();
+    fireFinish();
   }
 
   public void fire() {
@@ -82,5 +87,9 @@ public class CDITestEventProducerService {
 
   public void fireABC() {
     eventABC.fire("ABC");
+  }
+  
+  public void fireFinish() {
+    finishEvent.fire(new FinishEvent());
   }
 }

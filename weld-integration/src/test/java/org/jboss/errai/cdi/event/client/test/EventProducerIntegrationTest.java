@@ -10,7 +10,7 @@ import com.google.gwt.user.client.Timer;
 
 /**
  * Tests CDI event producers.
- *
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class EventProducerIntegrationTest extends AbstractEventIntegrationTest {
@@ -37,6 +37,16 @@ public class EventProducerIntegrationTest extends AbstractEventIntegrationTest {
   }
 
   public void testEventProducers() {
+    EventProducerTestModule.getInstance().setResultVerifier(new Runnable() {
+      public void run() {
+        Map<String, List<String>> actualEvents = EventProducerTestModule.getInstance().getReceivedEventsOnServer();
+
+        // assert that the server received all events
+        EventProducerIntegrationTest.this.verifyEvents(actualEvents);
+        finishTest();
+      }
+    });
+
     CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
@@ -48,17 +58,7 @@ public class EventProducerIntegrationTest extends AbstractEventIntegrationTest {
         }
       }
     });
-    
-    final Timer testResultTimer = new Timer() {
-      public void run() {
-        Map<String, List<String>> actualEvents = EventProducerTestModule.getInstance().getReceivedEventsOnServer();
 
-        // assert that the server received all events
-        EventProducerIntegrationTest.this.verifyEvents(actualEvents);
-        finishTest();
-      }
-    };
-    testResultTimer.schedule(55000);
-    delayTestFinish(60000);
+    delayTestFinish(240000);
   }
 }

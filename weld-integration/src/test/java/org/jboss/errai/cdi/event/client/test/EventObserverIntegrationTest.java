@@ -24,24 +24,16 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
     CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
-        assertEquals("Wrong number of BusReadyEvents received:", 1, 
+        assertEquals("Wrong number of BusReadyEvents received:", 1,
             EventObserverTestModule.getInstance().getBusReadyEventsReceived());
-        
+
         finishTest();
       }
     });
   }
 
   public void testEventObservers() {
-    CDI.addPostInitTask(new Runnable() {
-      @Override
-      public void run() {
-        assertNotNull(EventObserverTestModule.getInstance().getStartEvent());
-        EventObserverTestModule.getInstance().start();
-      }
-    });
-    
-    final Timer timer = new Timer() {
+    EventObserverTestModule.getInstance().setResultVerifier(new Runnable() {
       public void run() {
         Map<String, List<String>> actualEvents = EventObserverTestModule.getInstance().getReceivedEvents();
 
@@ -49,8 +41,16 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
         EventObserverIntegrationTest.this.verifyEvents(actualEvents);
         finishTest();
       }
-    };
-    timer.schedule(55000);
-    delayTestFinish(60000);
+    });
+
+    CDI.addPostInitTask(new Runnable() {
+      @Override
+      public void run() {
+        assertNotNull(EventObserverTestModule.getInstance().getStartEvent());
+        EventObserverTestModule.getInstance().start();
+      }
+    });
+
+    delayTestFinish(240000);
   }
 }

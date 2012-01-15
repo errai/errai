@@ -26,6 +26,8 @@ public class EventProducerTestModule {
   private boolean busReadyEventReceived = false;
   private static EventProducerTestModule instance;
 
+  private Runnable verifier;
+  
   private Map<String, List<String>> receivedEventsOnServer = new HashMap<String, List<String>>();
 
   @Inject
@@ -51,6 +53,9 @@ public class EventProducerTestModule {
 
   @Inject @A @B @C
   private Event<String> eventABC;
+  
+  @Inject
+  private Event<FinishEvent> finishEvent;
 
   @PostConstruct
   public void doPostConstruct() {
@@ -81,6 +86,7 @@ public class EventProducerTestModule {
     fireAC();
     fireBC();
     fireABC();
+    fireFinishEvent();
   }
 
   public void fire() {
@@ -113,6 +119,10 @@ public class EventProducerTestModule {
 
   public void fireABC() {
     eventABC.fire("ABC");
+  }
+  
+  public void fireFinishEvent() {
+    finishEvent.fire(new FinishEvent());
   }
 
   public Event<String> getEvent() {
@@ -147,7 +157,14 @@ public class EventProducerTestModule {
     return eventABC;
   }
 
+  
   public void collectResults(@Observes ReceivedEvent event) {
+    if (event.getEvent().equals("FINISH")) {
+      if (verifier != null) {
+        verifier.run();
+      } 
+    }
+    
     List<String> events = receivedEventsOnServer.get(event.getReceiver());
     if (events == null)
       events = new ArrayList<String>();
@@ -158,5 +175,9 @@ public class EventProducerTestModule {
 
   public Map<String, List<String>> getReceivedEventsOnServer() {
     return receivedEventsOnServer;
+  }
+  
+  public void setResultVerifier(Runnable verifier) {
+    this.verifier = verifier;
   }
 }

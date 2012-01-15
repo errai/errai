@@ -18,7 +18,7 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
 
 /**
  * Test module used by {@see EventObserverIntegrationTest}.
- *
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @EntryPoint
@@ -26,6 +26,8 @@ public class EventObserverTestModule {
   private int busReadyEventsReceived = 0;
   private static EventObserverTestModule instance;
   private Map<String, List<String>> receivedEvents = new HashMap<String, List<String>>();
+
+  private Runnable verifier;
 
   @Inject
   private Event<StartEvent> startEvent;
@@ -102,12 +104,22 @@ public class EventObserverTestModule {
     addReceivedEvent("ABC", event);
   }
 
+  public void onFinish(@Observes FinishEvent event) {
+    if (verifier != null) {
+      verifier.run();
+    }
+  }
+
   private void addReceivedEvent(String receiver, String event) {
     List<String> events = receivedEvents.get(receiver);
     if (events == null)
       events = new ArrayList<String>();
-    
+
     events.add(event);
     receivedEvents.put(receiver, events);
+  }
+
+  public void setResultVerifier(Runnable verifier) {
+    this.verifier = verifier;
   }
 }

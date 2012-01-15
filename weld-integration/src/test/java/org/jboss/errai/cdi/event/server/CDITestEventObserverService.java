@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import org.jboss.errai.cdi.client.qualifier.A;
 import org.jboss.errai.cdi.client.qualifier.B;
 import org.jboss.errai.cdi.client.qualifier.C;
+import org.jboss.errai.cdi.event.client.FinishEvent;
 import org.jboss.errai.cdi.event.client.ReceivedEvent;
 
 @ApplicationScoped
@@ -18,7 +19,7 @@ public class CDITestEventObserverService {
   @Inject
   // we use this event to report received events back to the client for easier testability
   private Event<ReceivedEvent> receivedEvent;
-
+  
   @PostConstruct
   public void doPostConstruct() {
     instance = this;
@@ -62,5 +63,9 @@ public class CDITestEventObserverService {
 
   public void onEventABC(@Observes @A @B @C String event) {
     receivedEvent.fire(new ReceivedEvent("ABC", event));
+  }
+  
+  public void onFinish(@Observes FinishEvent event) {
+    receivedEvent.fire(new ReceivedEvent("FINISH", "FINISH"));
   }
 }
