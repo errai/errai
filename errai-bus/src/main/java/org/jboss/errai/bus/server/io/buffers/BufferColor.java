@@ -59,7 +59,7 @@ public class BufferColor {
   }
 
   public void wake() {
-    dataWaiting.signal();
+    dataWaiting.signalAll();
   }
 
   public ReentrantLock getLock() {

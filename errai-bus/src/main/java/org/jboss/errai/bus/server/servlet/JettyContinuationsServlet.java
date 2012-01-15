@@ -104,8 +104,9 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
 
 
       if (wait) {
-        final Continuation cont = ContinuationSupport.getContinuation(httpServletRequest, queue);
         synchronized (queue.getActivationLock()) {
+          final Continuation cont = ContinuationSupport.getContinuation(httpServletRequest, queue);
+
           if (!cont.isResumed() && !queue.messagesWaiting()) {
             queue.setActivationCallback(new JettyQueueActivationCallback(cont));
             if (cont.suspend(30 * 1000)) {
@@ -152,19 +153,20 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
       });
 
       stream.write(']');
+
     }
   }
 
-  private static void pollQueue(MessageQueue queue, OutputStream stream,
-                                HttpServletResponse httpServletResponse) throws IOException {
-    if (queue == null) return;
+  private static boolean pollQueue(MessageQueue queue, OutputStream stream,
+                                   HttpServletResponse httpServletResponse) throws IOException {
+    if (queue == null) return false;
     queue.heartBeat();
 
     httpServletResponse.setHeader("Cache-Control", "no-cache");
     httpServletResponse.setHeader("Pragma", "no-cache");
     httpServletResponse.setHeader("Expires", "-1");
     httpServletResponse.setContentType("application/json");
-    queue.poll(false, stream);
+    return queue.poll(false, stream);
   }
 
   private static class JettyQueueActivationCallback implements QueueActivationCallback {

@@ -232,11 +232,11 @@ public class TransmissionBuffer implements Buffer {
    *
    * @param outputStream the <tt>OutputStream</tt> to read into.
    * @param bufferColor  the buffer color
-   * @return returns an int representing the initial segment read from (note: not actually implemented yet)
+   * @return returns a boolean indicating whether or not the cursor advanced.
    * @throws IOException
    */
   @Override
-  public int read(final OutputStream outputStream, final BufferColor bufferColor) throws IOException {
+  public boolean read(final OutputStream outputStream, final BufferColor bufferColor) throws IOException {
     // obtain this color's read lock
     bufferColor.lock.lock();
 
@@ -251,6 +251,9 @@ public class TransmissionBuffer implements Buffer {
     try {
       while ((read = readNextChunk(writeHead, read, bufferColor, outputStream, null)) != -1)
         lastSeq = read;
+      
+      
+      return lastSeq != read;
     }
     finally {
       // move the tail sequence for this color up.
@@ -259,7 +262,7 @@ public class TransmissionBuffer implements Buffer {
       // release the read lock on this color/
       bufferColor.lock.unlock();
     }
-    return -1;
+    
   }
 
   /**
@@ -269,11 +272,11 @@ public class TransmissionBuffer implements Buffer {
    * @param outputStream the <tt>OutputStream</tt> to read into.
    * @param bufferColor  the buffer color
    * @param callback     a callback to be used during the read operation.
-   * @return returns an int representing the initial segment read from (note: not actually implemented yet)
+   * @return returns a boolean indicating whether or not the cursor advanced.
    * @throws IOException
    */
   @Override
-  public int read(final OutputStream outputStream, final BufferColor bufferColor, final BufferCallback callback) throws IOException {
+  public boolean read(final OutputStream outputStream, final BufferColor bufferColor, final BufferCallback callback) throws IOException {
     return read(outputStream, bufferColor, callback, (int) headSequence % segments);
   }
 
@@ -286,11 +289,11 @@ public class TransmissionBuffer implements Buffer {
    * @param bufferColor  the buffer color.
    * @param callback     a callback to be used during the read operation.
    * @param sequence     the sequence number to seek from in the buffer.
-   * @return returns an int representing the initial segment read from (note: not actually implemented yet)
+   * @return returns a boolean indicating whether or not the cursor advanced.
    * @throws IOException
    */
   @Override
-  public int read(OutputStream outputStream, BufferColor bufferColor, BufferCallback callback, long sequence) throws IOException {
+  public boolean read(OutputStream outputStream, BufferColor bufferColor, BufferCallback callback, long sequence) throws IOException {
     // attempt obtain this color's read lock
     if (bufferColor.lock.tryLock()) {
 
@@ -313,13 +316,15 @@ public class TransmissionBuffer implements Buffer {
         callback.after(outputStream);
 
         bufferColor.sequence.set(lastSeq);
+
+        return read != lastSeq;
       }
       finally {
         // release the read lock on this color
         bufferColor.lock.unlock();
       }
     }
-    return -1;
+    return false;
   }
 
 
@@ -329,13 +334,13 @@ public class TransmissionBuffer implements Buffer {
    *
    * @param outputStream the <tt>OutputStream</tt> to read into.
    * @param bufferColor  the buffer color
-   * @return returns an int representing the initial segment read from (note: not actually implemented yet)
+   * @return returns a boolean indicating whether or not the cursor advanced.
    * @throws IOException          an IOException is thrown if there is an inability to read from the buffer or write to
    *                              the specified <tt>OuputStream</tt>
    * @throws InterruptedException thrown if the monitor is interrupted while waiting to receive dta.
    */
   @Override
-  public int readWait(final OutputStream outputStream, final BufferColor bufferColor) throws InterruptedException, IOException {
+  public boolean readWait(final OutputStream outputStream, final BufferColor bufferColor) throws InterruptedException, IOException {
     bufferColor.lock.lockInterruptibly();
 
     try {
@@ -351,7 +356,7 @@ public class TransmissionBuffer implements Buffer {
 
         if (lastRead != -1) {
           bufferColor.sequence.set(read);
-          return -1;
+          return lastRead != read;
         }
 
         try {
@@ -379,13 +384,13 @@ public class TransmissionBuffer implements Buffer {
    * @param time         the amount of time to wait in the specified units
    * @param outputStream the <tt>OutputStream</tt> to write to.
    * @param bufferColor  the buffer color
-   * @return returns an int representing the initial segment read from (note: not actually implemented yet)
+   * @return returns a boolean indicating whether or not the cursor advanced.
    * @throws IOException          an IOException is thrown if there is an inability to read from the buffer or write to
    *                              the specified <tt>OuputStream</tt>
    * @throws InterruptedException thrown if the monitor is interrupted while waiting to receive dta.
    */
   @Override
-  public int readWait(final TimeUnit unit, final long time,
+  public boolean readWait(final TimeUnit unit, final long time,
                       final OutputStream outputStream, final BufferColor bufferColor) throws IOException, InterruptedException {
     bufferColor.lock.lockInterruptibly();
     long readTail = bufferColor.sequence.get();
@@ -405,7 +410,7 @@ public class TransmissionBuffer implements Buffer {
           if (lastRead != -1) {
             bufferColor.sequence.set(lastRead);
           }
-          return -1;
+          return lastRead != read;
         }
 
         try {
@@ -430,13 +435,13 @@ public class TransmissionBuffer implements Buffer {
    *
    * @param outputStream the <tt>OutputStream</tt> to write to.
    * @param bufferColor  the buffer color
-   * @return returns an int representing the initial segment read from (note: not actually implemented yet)
+   * @return returns a boolean indicating whether or not the cursor advanced.
    * @throws IOException          an IOException is thrown if there is an inability to read from the buffer or write to
    *                              the specified <tt>OuputStream</tt>
    * @throws InterruptedException thrown if the monitor is interrupted while waiting to receive dta.
    */
   @Override
-  public int readWait(OutputStream outputStream, BufferColor bufferColor, BufferCallback callback) throws IOException, InterruptedException {
+  public boolean readWait(OutputStream outputStream, BufferColor bufferColor, BufferCallback callback) throws IOException, InterruptedException {
     return readWait(TimeUnit.NANOSECONDS, -1, outputStream, bufferColor, callback);
   }
 
@@ -448,13 +453,13 @@ public class TransmissionBuffer implements Buffer {
    *
    * @param outputStream the <tt>OutputStream</tt> to write to.
    * @param bufferColor  the buffer color
-   * @return returns an int representing the initial segment read from (note: not actually implemented yet)
+   * @return returns a boolean indicating whether or not the cursor advanced.
    * @throws IOException          an IOException is thrown if there is an inability to read from the buffer or write to
    *                              the specified <tt>OuputStream</tt>
    * @throws InterruptedException thrown if the monitor is interrupted while waiting to receive dta.
    */
   @Override
-  public int readWait(TimeUnit unit, long time, OutputStream outputStream, final BufferColor bufferColor,
+  public boolean readWait(TimeUnit unit, long time, OutputStream outputStream, final BufferColor bufferColor,
                       BufferCallback callback) throws IOException, InterruptedException {
     ReentrantLock lock = bufferColor.lock;
     lock.lockInterruptibly();
@@ -478,7 +483,7 @@ public class TransmissionBuffer implements Buffer {
             bufferColor.sequence.set(lastRead);
           }
           callback.after(outputStream);
-          return -1;
+          return lastRead != read;
         }
 
         try {

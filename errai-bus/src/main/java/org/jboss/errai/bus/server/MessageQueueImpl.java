@@ -19,7 +19,6 @@ package org.jboss.errai.bus.server;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.util.BusTools;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueActivationCallback;
 import org.jboss.errai.bus.server.api.QueueSession;
@@ -27,9 +26,8 @@ import org.jboss.errai.bus.server.io.BufferHelper;
 import org.jboss.errai.bus.server.io.buffers.BufferCallback;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
+import org.jboss.errai.bus.server.util.MarkedOutputStream;
 import org.jboss.errai.bus.server.util.ServerBusTools;
-import org.jboss.errai.marshalling.client.protocols.ErraiProtocol;
-import org.jboss.errai.marshalling.server.protocol.ErraiProtocolServer;
 import org.jboss.errai.marshalling.server.util.UnwrappedByteArrayOutputStream;
 import org.slf4j.Logger;
 
@@ -67,7 +65,7 @@ public class MessageQueueImpl implements MessageQueue {
   private final TransmissionBuffer buffer;
   private final BufferColor bufferColor;
 
-  private volatile boolean useDirectSocketChanne = false;
+  private volatile boolean useDirectSocketChannel = false;
   private Channel directSocketChannel;
 
   private final Object activationLock = new Object();
@@ -84,16 +82,14 @@ public class MessageQueueImpl implements MessageQueue {
   /**
    * Gets the next message to send, and returns the <tt>Payload</tt>, which contains the current messages that
    * need to be sent from the specified bus to another.</p>
-   *
+   * <p/>
    * Fodod</p>
-   *
-   *
    *
    * @param wait      - boolean is true if we should wait until the queue is ready. In this case, a
    *                  <tt>RuntimeException</tt> will be thrown if the polling is active already. Concurrent polling is not allowed.
    * @param outstream - output stream to write the polling results to.
    */
-  public int poll(final boolean wait, final OutputStream outstream) throws IOException {
+  public boolean poll(final boolean wait, final OutputStream outstream) throws IOException {
     if (!queueRunning) {
       throw new QueueUnavailableException("queue is not available");
     }
@@ -104,28 +100,33 @@ public class MessageQueueImpl implements MessageQueue {
       synchronized (pageLock) {
         if (pagedOut) {
           readInPageFile(outstream, new BufferHelper.MultiMessageHandlerCallback());
-          return -1;
+          return false;
         }
       }
     }
 
-    int seg;
+    final MarkedOutputStream markedOutputStream = new MarkedOutputStream(outstream);
+
     try {
       if (wait) {
-        seg = buffer.readWait(TimeUnit.SECONDS, 20, outstream, bufferColor, new BufferHelper.MultiMessageHandlerCallback());
+        buffer.readWait(TimeUnit.SECONDS, 20, markedOutputStream, bufferColor, new BufferHelper.MultiMessageHandlerCallback());
       }
       else {
-        seg = buffer.read(outstream, bufferColor, new BufferHelper.MultiMessageHandlerCallback());
+        buffer.read(markedOutputStream, bufferColor, new BufferHelper.MultiMessageHandlerCallback());
       }
 
-      messageCount.set(0);
       outstream.flush();
+      if (markedOutputStream.dataWasWritten()) {
+        messageCount.set(0);
+        return true;
+      }
+
+
     }
     catch (InterruptedException e) {
       e.printStackTrace();
-      seg = -1;
     }
-    return seg;
+    return false;
   }
 
 
@@ -140,40 +141,44 @@ public class MessageQueueImpl implements MessageQueue {
       throw new QueueUnavailableException("queue is not available");
     }
 
-    if (useDirectSocketChanne && directSocketChannel.isConnected()) {
+    if (useDirectSocketChannel && directSocketChannel.isConnected()) {
       directSocketChannel.write(new TextWebSocketFrame("[" + ServerBusTools.encodeMessage(message) + "]"));
     }
     else {
-      if (pagedOut) {
-        try {
-          synchronized (pageLock) {
-            if (pagedOut) {
-              writeToPageFile(ServerBusTools.encodeMessageToByteArrayInputStream(message), true);
-              return true;
+      try {
+        if (pagedOut) {
+          try {
+            synchronized (pageLock) {
+              if (pagedOut) {
+                writeToPageFile(ServerBusTools.encodeMessageToByteArrayInputStream(message), true);
+                return true;
+              }
+            }
+          }
+          finally {
+            ReentrantLock lock = bufferColor.getLock();
+            lock.lock();
+            try {
+              bufferColor.wake();
+            }
+            finally {
+              lock.unlock();
             }
           }
         }
-        finally {
-          ReentrantLock lock = bufferColor.getLock();
-          lock.lock();
-          try {
-            bufferColor.wake();
-          }
-          finally {
-            lock.unlock();
-          }
+
+        BufferHelper.encodeAndWrite(buffer, bufferColor, message);
+
+        if (messageCount.incrementAndGet() > 5 && !lastTransmissionWithin(secs(3))) {
+          // disconnect this client
+          stopQueue();
         }
       }
-
-      BufferHelper.encodeAndWrite(buffer, bufferColor, message);
-
-      if (messageCount.incrementAndGet() > 5 && !lastTransmissionWithin(secs(3))) {
-        // disconnect this client
-        stopQueue();
+      finally {
+        activateActivationCallback();
       }
-
-      activateActivationCallback();
     }
+
     return true;
   }
 
@@ -298,19 +303,19 @@ public class MessageQueueImpl implements MessageQueue {
    * @param activationCallback - new activation callback function
    */
   public void setActivationCallback(QueueActivationCallback activationCallback) {
-    synchronized (activationLock) {
-      this.activationCallback = activationCallback;
-    }
+    //  synchronized (activationLock) {
+    this.activationCallback = activationCallback;
+    //   }
   }
 
   private void activateActivationCallback() {
-    if (activationCallback != null) {
-      synchronized (activationLock) {
-        if (activationCallback != null) {
-          activationCallback.activate(this);
-        }
+//    if (activationCallback != null) {
+    synchronized (activationLock) {
+      if (activationCallback != null) {
+        activationCallback.activate(this);
       }
     }
+    //  }
   }
 
   /**
@@ -352,7 +357,7 @@ public class MessageQueueImpl implements MessageQueue {
   }
 
   private boolean isDirectChannelOpen() {
-    return useDirectSocketChanne && directSocketChannel.isOpen();
+    return useDirectSocketChannel && directSocketChannel.isOpen();
   }
 
   /**
@@ -413,7 +418,7 @@ public class MessageQueueImpl implements MessageQueue {
   @Override
   public void setDirectSocketChannel(Channel channel) {
     this.directSocketChannel = channel;
-    this.useDirectSocketChanne = true;
+    this.useDirectSocketChannel = true;
 
     log.info("queue " + getSession().getSessionId() + " transitioned to direct channel mode.");
   }
