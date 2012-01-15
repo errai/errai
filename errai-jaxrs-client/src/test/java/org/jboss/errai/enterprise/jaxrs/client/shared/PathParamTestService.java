@@ -23,6 +23,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 
 /**
  * This service is used to test support for path parameters (@PathParam).
@@ -30,6 +31,7 @@ import javax.ws.rs.PathParam;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Path("/test/pathparam")
+@Produces("text/plain")
 public interface PathParamTestService {
 
   @GET 

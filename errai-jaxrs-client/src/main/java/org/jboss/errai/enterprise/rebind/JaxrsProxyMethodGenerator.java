@@ -79,7 +79,8 @@ public class JaxrsProxyMethodGenerator {
       sendRequest = sendRequest.invoke("sendRequest", null, createRequestCallback());
     }
     else {
-      Statement body = marshal(resourceMethod.getParameters().getEntityParameter());
+      Statement body = marshal(resourceMethod.getParameters().getEntityParameter(), 
+          resourceMethod.getContentTypeHeader());
       sendRequest = sendRequest.invoke("sendRequest", body, createRequestCallback());
     }
 
@@ -230,7 +231,7 @@ public class JaxrsProxyMethodGenerator {
         .invoke("callback", Stmt.loadVariable("response"));
 
     Statement result = demarshal(resourceMethod.getMethod().getReturnType(),
-        Stmt.loadVariable("response").invoke("getText"));
+        Stmt.loadVariable("response").invoke("getText"), resourceMethod.getAcceptHeader());
 
     Statement handleResult = Stmt
         .if_(Bool.equals(Stmt.loadVariable("response").invoke("getStatusCode"), 204))

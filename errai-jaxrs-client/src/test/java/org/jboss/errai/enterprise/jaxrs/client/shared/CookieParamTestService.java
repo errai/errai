@@ -22,6 +22,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 
 /**
  * This service is used to test support for cookie parameters (@CookieParam).
@@ -29,6 +30,7 @@ import javax.ws.rs.Path;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Path("/test/cookieparam")
+@Produces("text/plain")
 public interface CookieParamTestService {
 
   @GET

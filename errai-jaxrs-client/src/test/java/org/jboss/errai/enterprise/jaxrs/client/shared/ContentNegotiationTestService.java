@@ -35,11 +35,21 @@ public interface ContentNegotiationTestService {
   @GET
   @Produces("text/plain")
   public String getText();
-
-  @GET
-  @Produces("application/xml")
-  public String getXml();
   
+  @GET
+  @Produces("application/json")
+  public String getTextAsJson();
+  
+  @GET
+  @Path("/long")
+  @Produces("text/plain")
+  public long getLong();
+  
+  @GET
+  @Path("/long")
+  @Produces("application/json")
+  public long getLongAsJson();
+    
   @POST
   @Consumes("text/*")
   public String postText(String text);

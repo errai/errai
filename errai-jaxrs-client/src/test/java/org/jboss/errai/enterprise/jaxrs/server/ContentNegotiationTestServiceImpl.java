@@ -31,8 +31,18 @@ public class ContentNegotiationTestServiceImpl implements ContentNegotiationTest
   }
 
   @Override
-  public String getXml() {
-    return "xml";
+  public String getTextAsJson() {
+    return "json";
+  }
+
+  @Override
+  public long getLong() {
+    return 0;
+  }
+
+  @Override
+  public long getLongAsJson() {
+    return 1;
   }
 
   @Override

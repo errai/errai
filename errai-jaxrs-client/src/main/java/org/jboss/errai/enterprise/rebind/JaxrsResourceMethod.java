@@ -79,4 +79,12 @@ public class JaxrsResourceMethod {
     
     return Collections.unmodifiableMap(headers);
   }
+  
+  public String getAcceptHeader() {
+    return getHeaders().get("Accept");
+  }
+  
+  public String getContentTypeHeader() {
+    return getHeaders().get("Content=Type");
+  }
 }
