@@ -7,9 +7,14 @@ import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.ParserFactory;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
+import org.jboss.errai.marshalling.tests.res.SType;
+import org.jboss.errai.marshalling.tests.res.shared.Role;
+import org.jboss.errai.marshalling.tests.res.shared.User;
 import org.junit.Test;
 
 import java.lang.reflect.Array;
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.*;
 
 /**
@@ -315,5 +320,72 @@ public class ServerMarshallingTests {
     set.add("b");
     set.add("c");
     testEncodeDecodeDynamic(Collections.synchronizedSet(set));
+  }
+
+  @Test
+  public void testUserEntity() {
+    User user = new User();
+    user.setUserName("foo");
+    user.setPassword("bar");
+
+    Set<Role> roles = new HashSet<Role>();
+    roles.add(new Role("admin"));
+    roles.add(new Role("users"));
+
+    user.setRoles(roles);
+
+    testEncodeDecodeDynamic(user);
+  }
+
+  class ServerRandomProvider implements RandomProvider {
+    private char[] CHARS = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q',
+            'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'};
+
+    private Random random = new Random(System.nanoTime());
+
+    public boolean nextBoolean() {
+      return random.nextBoolean();
+    }
+
+    public int nextInt(int upper) {
+      return random.nextInt(upper);
+    }
+
+    public double nextDouble() {
+      return new BigDecimal(random.nextDouble(), MathContext.DECIMAL32).doubleValue();
+    }
+
+    public char nextChar() {
+      return CHARS[nextInt(1000) % CHARS.length];
+    }
+
+    public String randString() {
+      StringBuilder builder = new StringBuilder();
+      int len = nextInt(25) + 5;
+      for (int i = 0; i < len; i++) {
+        builder.append(nextChar());
+      }
+      return builder.toString();
+    }
+  }
+
+  @Test
+  public void testSTypeEntity() {
+    SType sType = SType.create(new ServerRandomProvider());
+
+    testEncodeDecodeDynamic(sType);
+
+  }
+
+  public interface RandomProvider {
+    public boolean nextBoolean();
+
+    public int nextInt(int upper);
+
+    public double nextDouble();
+
+    public char nextChar();
+
+    public String randString();
   }
 }

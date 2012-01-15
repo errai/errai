@@ -821,12 +821,13 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
   private DeliveryPlan removeFromDeliveryPlan(final String subject, final MessageCallback receiver) {
     DeliveryPlan plan = subscriptions.get(subject);
+
     if (plan != null) {
-      plan = plan.newDeliveryPlanWithOut(receiver);
-      subscriptions.put(subject, plan);
+      subscriptions.put(subject, plan = plan.newDeliveryPlanWithOut(receiver));
       fireUnsubscribeListeners(
               new SubscriptionEvent(false, "InBus", plan.getTotalReceivers(), false, subject));
     }
+
     return plan;
   }
 
@@ -861,7 +862,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
         remoteSubscriptions.put(subject, rmc);
         createOrAddDeliveryPlan(subject, rmc);
-
       }
       else if (!rmc.contains(queue)) {
         rmc.addQueue(queue);

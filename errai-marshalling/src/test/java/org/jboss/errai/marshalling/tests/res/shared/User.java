@@ -16,9 +16,11 @@
 
 package org.jboss.errai.marshalling.tests.res.shared;
 
+import org.jboss.errai.common.client.api.annotations.Portable;
+
 import java.util.Set;
 
-//@Portable
+@Portable
 public class User {
   private int userId;
   private String userName;
@@ -55,5 +57,28 @@ public class User {
 
   public void setRoles(Set<Role> roles) {
     this.roles = roles;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof User)) return false;
+
+    User user = (User) o;
+
+    return userId == user.userId
+            && !(password != null ? !password.equals(user.password) : user.password != null)
+            && !(roles != null ? !roles.equals(user.roles) : user.roles != null)
+            && !(userName != null ? !userName.equals(user.userName) : user.userName != null);
+
+  }
+
+  @Override
+  public int hashCode() {
+    int result = userId;
+    result = 31 * result + (userName != null ? userName.hashCode() : 0);
+    result = 31 * result + (password != null ? password.hashCode() : 0);
+    result = 31 * result + (roles != null ? roles.hashCode() : 0);
+    return result;
   }
 }

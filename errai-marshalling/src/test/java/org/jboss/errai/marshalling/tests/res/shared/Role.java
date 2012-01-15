@@ -16,9 +16,18 @@
 
 package org.jboss.errai.marshalling.tests.res.shared;
 
-//@Portable
+import org.jboss.errai.common.client.api.annotations.Portable;
+
+@Portable
 public class Role {
   private String roleName;
+
+  public Role() {
+  }
+
+  public Role(String roleName) {
+    this.roleName = roleName;
+  }
 
   public String getRoleName() {
     return roleName;
@@ -26,5 +35,21 @@ public class Role {
 
   public void setRoleName(String roleName) {
     this.roleName = roleName;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof Role)) return false;
+
+    Role role = (Role) o;
+
+    return !(roleName != null ? !roleName.equals(role.roleName) : role.roleName != null);
+
+  }
+
+  @Override
+  public int hashCode() {
+    return roleName != null ? roleName.hashCode() : 0;
   }
 }
