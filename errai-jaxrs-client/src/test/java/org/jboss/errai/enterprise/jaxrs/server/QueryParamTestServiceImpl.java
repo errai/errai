@@ -26,7 +26,7 @@ import org.jboss.errai.enterprise.jaxrs.client.shared.QueryParamTestService;
 public class QueryParamTestServiceImpl implements QueryParamTestService {
 
   @Override
-  public long getWithQueryParam(long id) {
+  public Long getWithQueryParam(long id) {
     return id;
   }
 

@@ -36,7 +36,7 @@ public interface QueryParamTestService {
 
   @GET
   @Path("/1")
-  public long getWithQueryParam(@QueryParam("id") long id);
+  public Long getWithQueryParam(@QueryParam("id") long id);
 
   @GET
   @Path("/2")
