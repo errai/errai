@@ -6,8 +6,6 @@ import java.util.Map;
 import org.jboss.errai.cdi.event.client.EventProducerTestModule;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 
-import com.google.gwt.user.client.Timer;
-
 /**
  * Tests CDI event producers.
  * 
