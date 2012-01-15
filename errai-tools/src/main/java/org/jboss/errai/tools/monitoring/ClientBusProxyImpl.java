@@ -22,6 +22,7 @@ import org.jboss.errai.bus.client.api.SubscribeListener;
 import org.jboss.errai.bus.client.api.UnsubscribeListener;
 import org.jboss.errai.bus.client.framework.BusMonitor;
 import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.framework.Subscription;
 
 public class ClientBusProxyImpl implements MessageBus {
   private MessageBus serverBus;
@@ -42,10 +43,12 @@ public class ClientBusProxyImpl implements MessageBus {
   public void conversationWith(org.jboss.errai.bus.client.api.Message message, MessageCallback callback) {
   }
 
-  public void subscribe(String subject, MessageCallback receiver) {
+  public Subscription subscribe(String subject, MessageCallback receiver) {
+    return null;
   }
 
-  public void subscribeLocal(String subject, MessageCallback receiver) {
+  public Subscription subscribeLocal(String subject, MessageCallback receiver) {
+    return null;
   }
 
   public void unsubscribeAll(String subject) {
