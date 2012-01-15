@@ -22,15 +22,14 @@ public abstract class AbstractEventIntegrationTest extends AbstractErraiCDITest 
    * qualifiers ( @A @B @C ) and test if each observer received its corresponding events,
    * and only those events. The {} empty set is used to describe an event without
    * qualifiers.
-   * <p/>
+   * <p>
    * As per the current spec, less specific observers will be notified as well, meaning
    * that observing a subset of an event's qualifiers is sufficient for receiving the event.
-   * <p/>
+   * <p>
    * Discussions on this subject can be followed here:
    * https://issues.jboss.org/browse/WELD-860
    * https://issues.jboss.org/browse/CDI-7
    * spec: http://docs.jboss.org/cdi/spec/1.0/html/events.html#d0e6742
-   * <p/>
    * <pre>
    * {}     => {}
    * A      => {},A
@@ -41,6 +40,8 @@ public abstract class AbstractEventIntegrationTest extends AbstractErraiCDITest 
    * B,C    => {},B,C,BC
    * A,B,C  => {},A,B,C,AB,BA,BC,AC,ABC
    * </pre>
+   * 
+   * Maps observers to the events they should receive during execution of the tests.
    */
   protected static final Map<String, List<String>> expectedEvents = new HashMap<String, List<String>>() {
     {
@@ -49,6 +50,7 @@ public abstract class AbstractEventIntegrationTest extends AbstractErraiCDITest 
       put("B", Arrays.asList(new String[]{"B", "AB", "BC", "ABC"}));
       put("C", Arrays.asList(new String[]{"C", "AC", "BC", "ABC"}));
       put("AB", Arrays.asList(new String[]{"AB", "ABC"}));
+      put("BA", Arrays.asList(new String[]{"AB", "ABC"}));
       put("AC", Arrays.asList(new String[]{"AC", "ABC"}));
       put("BC", Arrays.asList(new String[]{"BC", "ABC"}));
       put("ABC", Arrays.asList(new String[]{"ABC"}));
@@ -56,11 +58,12 @@ public abstract class AbstractEventIntegrationTest extends AbstractErraiCDITest 
   };
 
   /**
-   * Verify the actual events against the expected events
+   * Verify the actual received events against the expected events
    *
    * @param actualEvents
    */
   protected void verifyEvents(Map<String, List<String>> actualEvents) {
+    // These asserts could be skipped but provide nicer error messages
     assertEquals("Wrong events observed for @{}", expectedEvents.get(""), actualEvents.get(""));
     assertEquals("Wrong events observed for @A", expectedEvents.get("A"), actualEvents.get("A"));
     assertEquals("Wrong events observed for @B", expectedEvents.get("B"), actualEvents.get("B"));
@@ -70,5 +73,8 @@ public abstract class AbstractEventIntegrationTest extends AbstractErraiCDITest 
     assertEquals("Wrong events observed for @AC", expectedEvents.get("AC"), actualEvents.get("AC"));
     assertEquals("Wrong events observed for @BC", expectedEvents.get("BC"), actualEvents.get("BC"));
     assertEquals("Wrong events observed for @ABC", expectedEvents.get("ABC"), actualEvents.get("ABC"));
+
+    // Compare the whole map to make sure we haven't received any additional events 
+    assertEquals("Wrong events observed", expectedEvents, actualEvents);
   }
 }
