@@ -118,7 +118,7 @@ public interface MessageBus {
    * @param subject
    * @param receiver
    */
-  public void subscribe(String subject, MessageCallback receiver);
+  public Subscription subscribe(String subject, MessageCallback receiver);
 
 
   /**
@@ -127,7 +127,7 @@ public interface MessageBus {
    * @param subject
    * @param receiver
    */
-  public void subscribeLocal(String subject, MessageCallback receiver);
+  public Subscription subscribeLocal(String subject, MessageCallback receiver);
 
   /*
   * Unsubscribe all listeners registered for the specified subject.

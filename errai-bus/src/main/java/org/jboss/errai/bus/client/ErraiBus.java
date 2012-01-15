@@ -23,6 +23,7 @@ import org.jboss.errai.bus.client.framework.RequestDispatcher;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import org.jboss.errai.bus.client.framework.Subscription;
 
 /**
  * The main GWT <tt>EntryPoint</tt> class for ErraiBus.  This class also contains a static global reference to the
@@ -58,11 +59,13 @@ public class ErraiBus implements EntryPoint {
         }
 
         @Override
-        public void subscribe(String subject, MessageCallback receiver) {
+        public Subscription subscribe(String subject, MessageCallback receiver) {
+          return null;
         }
 
         @Override
-        public void subscribeLocal(String subject, MessageCallback receiver) {
+        public Subscription subscribeLocal(String subject, MessageCallback receiver) {
+          return null;
         }
 
         @Override

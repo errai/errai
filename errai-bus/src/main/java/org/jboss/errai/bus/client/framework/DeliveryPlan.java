@@ -61,4 +61,20 @@ public class DeliveryPlan {
 
     return new DeliveryPlan(newPlan);
   }
+
+  public DeliveryPlan newDeliveryPlanWithOut(MessageCallback callback) {
+    MessageCallback[] newPlan = new MessageCallback[deliverTo.length - 1];
+
+    boolean found = false;
+    //noinspection ManualArrayCopy
+    for (int i = 0; i < deliverTo.length; i++) {
+      if (deliverTo[i] == callback) {
+        found = true;
+        continue;
+      }
+      newPlan[found ? i - 1 : i] = deliverTo[i];
+    }
+
+    return new DeliveryPlan(newPlan);
+  }
 }

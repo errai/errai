@@ -225,8 +225,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    */
   @Override
   public void unsubscribeAll(String subject) {
-      fireAllUnSubscribeListeners(subject);
-      removeShadowSubscription(subject);
+    fireAllUnSubscribeListeners(subject);
+    removeShadowSubscription(subject);
   }
 
   /**
@@ -236,30 +236,42 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * @param callback - function called when the message is dispatched
    */
   @Override
-  public void subscribe(final String subject, final MessageCallback callback) {
-    _subscribe(subject, callback, false);
+  public Subscription subscribe(final String subject, final MessageCallback callback) {
+    return _subscribe(subject, callback, false);
   }
 
   @Override
-  public void subscribeLocal(final String subject, final MessageCallback callback) {
-    _subscribe(subject, callback, true);
+  public Subscription subscribeLocal(final String subject, final MessageCallback callback) {
+    return _subscribe(subject, callback, true);
   }
 
-  private void _subscribe(final String subject, final MessageCallback callback, final boolean local) {
-    if ("ServerBus".equals(subject) && shadowSubscriptions.containsKey("ServerBus")) return;
+  private Subscription _subscribe(final String subject, final MessageCallback callback, final boolean local) {
+    if ("ServerBus".equals(subject) && shadowSubscriptions.containsKey("ServerBus")) return null;
 
     if (!postInit) {
+      final DeferredSubscription detachedSubscripton = new DeferredSubscription();
+      
       postInitTasks.add(new Runnable() {
         @Override
         public void run() {
-          _subscribe(subject, callback, local);
+          detachedSubscripton.attachSubscription(_subscribe(subject, callback, local));
         }
       });
 
-      return;
+      return detachedSubscripton;
     }
 
     fireAllSubscribeListeners(subject, local, directSubscribe(subject, callback));
+
+    return new Subscription() {
+      @Override
+      public void remove() {
+        List<MessageCallback> cbs = shadowSubscriptions.get(subject);
+        if (cbs != null) {
+          cbs.remove(callback);
+        }
+      }
+    };
   }
 
 
@@ -519,7 +531,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    */
   private void transmitRemote(final String message, final Message txMessage) {
     if (message == null) return;
-     //System.out.println("TX: " + message);
+    //System.out.println("TX: " + message);
 
     if (webSocketOpen) {
       if (ClientWebSocketChannel.transmitToSocket(webSocketChannel, message)) {
@@ -616,15 +628,22 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
       postInit = true;
       log("executing " + postInitTasks.size() + " post init task(s)");
-      for (Runnable postInitTask : postInitTasks) {
-        try {
-          postInitTask.run();
-        }
-        catch (Throwable t) {
-          t.printStackTrace();
-          throw new RuntimeException("error running task", t);
-        }
+
+      Iterator<Runnable> postInitTasksIter = postInitTasks.iterator();
+      while (postInitTasksIter.hasNext()) {
+        postInitTasksIter.next().run();
+        postInitTasksIter.remove();
       }
+
+//      for (Runnable postInitTask : postInitTasks) {
+//        try {
+//          postInitTask.run();
+//        }
+//        catch (Throwable t) {
+//          t.printStackTrace();
+//          throw new RuntimeException("error running task", t);
+//        }
+//      }
 
       sendAllDeferred();
       postInitTasks.clear();
@@ -962,7 +981,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private void remoteSubscribe(String subject) {
     remotes.put(subject, remoteCallback);
-  //  addShadowSubscription(subject, remoteCallback);
+    //  addShadowSubscription(subject, remoteCallback);
   }
 
   private void sendAllDeferred() {
@@ -1276,7 +1295,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   public void procPayload(String text) {
-   // System.out.println("RX:" + text);
+    // System.out.println("RX:" + text);
     try {
       for (MarshalledMessage m : decodePayload(text)) {
         rxNumber++;

@@ -54,11 +54,7 @@ import org.jboss.errai.bus.client.api.base.ConversationMessage;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.NoSubscribersToDeliverTo;
 import org.jboss.errai.bus.client.api.base.RuleDelegateMessageCallback;
-import org.jboss.errai.bus.client.framework.BooleanRoutingRule;
-import org.jboss.errai.bus.client.framework.BusMonitor;
-import org.jboss.errai.bus.client.framework.DeliveryPlan;
-import org.jboss.errai.bus.client.framework.RoutingFlags;
-import org.jboss.errai.bus.client.framework.SubscriptionEvent;
+import org.jboss.errai.bus.client.framework.*;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueCloseEvent;
@@ -260,7 +256,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                  */
                 HttpServletRequest request = message.getResource(HttpServletRequest.class, HttpServletRequest.class.getName());
                 msg.set(MessageParts.WebSocketURL, "ws://" + request.getLocalAddr()
-                        + ":" + webSocketPort +  webSocketPath);
+                        + ":" + webSocketPort + webSocketPath);
 
                 String connectionToken = SecureHashUtil.nextSecureHash("SHA-256", session.getSessionId());
                 session.setAttribute(MessageParts.WebSocketToken.name(), connectionToken);
@@ -777,38 +773,61 @@ public class ServerMessageBusImpl implements ServerMessageBus {
    * @param receiver - the callback function called when a message is dispatched
    */
   @Override
-  public void subscribe(String subject, MessageCallback receiver) {
+  public Subscription subscribe(final String subject, final MessageCallback receiver) {
     if (reservedNames.contains(subject))
       throw new IllegalArgumentException("cannot modify or subscribe to reserved service: " + subject);
 
     DeliveryPlan plan = createOrAddDeliveryPlan(subject, receiver);
 
     fireSubscribeListeners(new SubscriptionEvent(false, null, plan.getTotalReceivers(), true, subject));
+
+    return new Subscription() {
+      @Override
+      public void remove() {
+        removeFromDeliveryPlan(subject, receiver);
+      }
+    };
   }
 
   @Override
-  public void subscribeLocal(String subject, MessageCallback receiver) {
+  public Subscription subscribeLocal(final String subject, final MessageCallback receiver) {
     if (reservedNames.contains(subject))
       throw new IllegalArgumentException("cannot modify or subscribe to reserved service: " + subject);
 
     DeliveryPlan plan = createOrAddDeliveryPlan(subject, receiver);
 
     fireSubscribeListeners(new SubscriptionEvent(false, false, true, true, plan.getTotalReceivers(), "InBus", subject));
+
+    return new Subscription() {
+      @Override
+      public void remove() {
+        removeFromDeliveryPlan(subject, receiver);
+      }
+    };
   }
 
   private DeliveryPlan createOrAddDeliveryPlan(final String subject, final MessageCallback receiver) {
-    synchronized (subscriptions) {
-      DeliveryPlan plan = subscriptions.get(subject);
+    DeliveryPlan plan = subscriptions.get(subject);
 
-      if (plan == null) {
-        subscriptions.put(subject, plan = new DeliveryPlan(new MessageCallback[]{receiver}));
-      }
-      else {
-        subscriptions.put(subject, plan.newDeliveryPlanWith(receiver));
-      }
-
-      return plan;
+    if (plan == null) {
+      subscriptions.put(subject, plan = new DeliveryPlan(new MessageCallback[]{receiver}));
     }
+    else {
+      subscriptions.put(subject, plan.newDeliveryPlanWith(receiver));
+    }
+
+    return plan;
+  }
+
+  private DeliveryPlan removeFromDeliveryPlan(final String subject, final MessageCallback receiver) {
+    DeliveryPlan plan = subscriptions.get(subject);
+    if (plan != null) {
+      plan = plan.newDeliveryPlanWithOut(receiver);
+      subscriptions.put(subject, plan);
+      fireUnsubscribeListeners(
+              new SubscriptionEvent(false, "InBus", plan.getTotalReceivers(), false, subject));
+    }
+    return plan;
   }
 
 
