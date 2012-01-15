@@ -287,7 +287,7 @@ public final class MetaClassFactory {
       buildMetaClass.addTypeVariable(typeVariable);
     }
 
-    buildMetaClass.settParameterizedType(parameterizedType);
+    buildMetaClass.setParameterizedType(parameterizedType);
 
     for (MetaField field : clazz.getFields()) {
       buildMetaClass.addField(new BuildMetaField(buildMetaClass, EmptyStatement.INSTANCE,

@@ -114,7 +114,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
         if (toMap.isEnum()) {
           tryBuilder.append(Stmt.declareVariable(toMap).named("entity")
-                  .initializeWith(demarshallEnum(Stmt.loadVariable("a0"), toMap)));
+                  .initializeWith(demarshallEnum(loadVariable("obj"), toMap)));
         }
         else {
 
@@ -191,7 +191,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
           }
           else {
             val = fieldDemarshall(memberMapping, MetaClassFactory.get(EJObject.class));
-            
+
             //val = fieldDemarshall(memberMapping.getKey(), MetaClassFactory.get(JSONValue.class), memberMapping.getType().asBoxed());
           }
 
@@ -306,7 +306,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
   public Statement extractJSONObjectProperty(String fieldName, MetaClass fromType) {
     if (fromType.getFullyQualifiedName().equals(EJObject.class.getName())) {
-      return loadVariable("obj").invoke("get", fieldName);
+    return loadVariable("obj").invoke("get", fieldName);
     }
     else {
       return Stmt.nestedCall(Cast.to(fromType, loadVariable("a0"))).invoke("get", fieldName);
@@ -329,8 +329,8 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
       return;
     }
 
-    
-   // builder.append(Stmt.declareVariable(String.class).named("objId").finish());
+
+    // builder.append(Stmt.declareVariable(String.class).named("objId").finish());
 
     Implementations.StringBuilderBuilder sb = newStringBuilder().append("{")
             .append(keyValue(SerializationParts.ENCODED_TYPE, string(toType.getFullyQualifiedName()))).append(",")
@@ -440,9 +440,8 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
   }
 
   public Statement demarshallEnum(Statement valueStatement, MetaClass toType) {
-    return Stmt.invokeStatic(Enum.class, "valueOf", toType,
-            Stmt.nestedCall(valueStatement).invoke("isObject").invoke("get",
-                    SerializationParts.ENUM_STRING_VALUE).invoke("isString").invoke("stringValue"));
+    return Stmt.invokeStatic(Enum.class, "valueOf", toType, Stmt.nestedCall(valueStatement)
+            .invoke("get", SerializationParts.ENUM_STRING_VALUE).invoke("isString").invoke("stringValue"));
   }
 
   public Implementations.StringBuilderBuilder marshallEnum(Implementations.StringBuilderBuilder sb,
@@ -456,7 +455,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
   public Statement unwrapJSON(Statement valueStatement, MetaClass toType) {
     if (toType.isEnum()) {
-      return demarshallEnum(valueStatement, toType);
+      return demarshallEnum(Stmt.nestedCall(valueStatement).invoke("isObject"), toType);
     }
     else {
       return Stmt.create(context.getCodegenContext())

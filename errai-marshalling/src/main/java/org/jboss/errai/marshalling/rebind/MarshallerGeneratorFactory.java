@@ -201,7 +201,8 @@ public class MarshallerGeneratorFactory {
 
     generateMarshallers();
 
-    classStructureBuilder.publicMethod(Marshaller.class, "getMarshaller").parameters(String.class, String.class)
+    classStructureBuilder.publicMethod(parameterizedAs(Marshaller.class, typeParametersOf(Object.class)),
+            "getMarshaller").parameters(String.class, String.class)
             .body()
             .append(loadVariable(MARSHALLERS_VAR).invoke("get", loadVariable("a1")).returnValue())
             .finish();

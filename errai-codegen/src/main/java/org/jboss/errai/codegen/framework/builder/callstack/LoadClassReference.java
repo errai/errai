@@ -64,7 +64,7 @@ public class LoadClassReference extends AbstractCallElement {
   }
 
   public static String getClassReference(MetaType metaClass, Context context) {
-    return getClassReference(metaClass, context, false);
+    return getClassReference(metaClass, context, true);
   }
 
 

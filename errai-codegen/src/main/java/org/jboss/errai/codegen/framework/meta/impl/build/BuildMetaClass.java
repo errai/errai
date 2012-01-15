@@ -408,7 +408,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     typeVariables.add(typeVariable);
   }
 
-  public void settParameterizedType(MetaParameterizedType parameterizedType) {
+  public void setParameterizedType(MetaParameterizedType parameterizedType) {
     this.parameterizedType = parameterizedType;
   }
 
