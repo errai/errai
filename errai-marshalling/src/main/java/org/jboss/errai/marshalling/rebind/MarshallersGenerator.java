@@ -103,7 +103,7 @@ public class MarshallersGenerator extends Generator {
     }
 
     if (junit) {
-      System.out.println("*\n\n\n\n\n\n ******* running inside JUnit! ******** \n\n\n\n\n\n*");
+      System.out.println("******** running inside JUnit! ********");
     }
 
     if (SERVER_MARSHALLER_OUTPUT_ENABLED) {
