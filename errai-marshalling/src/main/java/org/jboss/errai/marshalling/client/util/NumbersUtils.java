@@ -156,12 +156,25 @@ public class NumbersUtils {
     }
   }
 
+
+  private final static String quote = "\"";
+
   public static String qualifiedNumericEncoding(Object o) {
-    final String quote = "\"";
+    final String typeName;
+
+    if (o == null) {
+      typeName = Object.class.getName();
+    }
+    else if (o instanceof String) {
+      typeName = Character.class.getName();
+    }
+    else {
+      typeName = o.getClass().getName();
+    }
 
     return "{" + quote + SerializationParts.ENCODED_TYPE + quote + ":"
-            + quote + (o instanceof String ? Character.class.getName() : o.getClass().getName()) + quote + ", "
-            + quote + SerializationParts.OBJECT_ID + quote + ": " + quote + o.hashCode() + quote + "," +
+            + quote + typeName + quote + ", "
+            + quote + SerializationParts.OBJECT_ID + quote + ": " + quote + (o != null ? o.hashCode() : -1) + quote + "," +
             quote + SerializationParts.NUMERIC_VALUE + quote + ":"
             + (o instanceof Long || o instanceof Character ? quote + String.valueOf(o) + quote : String.valueOf(o)) + "}";
 
