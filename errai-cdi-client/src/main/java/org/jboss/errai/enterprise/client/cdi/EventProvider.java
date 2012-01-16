@@ -28,7 +28,7 @@ import org.jboss.errai.ioc.client.ContextualProviderContext;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 
 @IOCProvider
-public class EventProvider implements Provider<Event<?>> {
+public class EventProvider implements Provider<Event> {
   @Inject
   ContextualProviderContext context;
 
