@@ -44,7 +44,7 @@ import java.util.Map;
 @AlwaysQualify
 @ImplementationAliases({AbstractMap.class, HashMap.class, LinkedHashMap.class})
 public class MapMarshaller<T extends Map> extends AbstractJSONMarshaller<T> {
-  public static final MapMarshaller INSTANCE = new MapMarshaller();
+  public static final MapMarshaller<Map<Object, Object>> INSTANCE = new MapMarshaller();
 
   @Override
   public Class<T> getTypeHandled() {

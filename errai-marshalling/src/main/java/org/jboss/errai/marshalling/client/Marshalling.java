@@ -16,10 +16,17 @@
 
 package org.jboss.errai.marshalling.client;
 
+import org.jboss.errai.common.client.protocols.SerializationParts;
+import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.ParserFactory;
+import org.jboss.errai.marshalling.client.marshallers.ListMarshaller;
+import org.jboss.errai.marshalling.client.marshallers.MapMarshaller;
+import org.jboss.errai.marshalling.client.util.NumbersUtils;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Mike Brock
@@ -31,15 +38,30 @@ public abstract class Marshalling {
 
   public static String toJSON(Object obj) {
     if (obj == null) {
-      return "null";
+      return "{\"" + SerializationParts.ENCODED_TYPE + "\":\"java.lang.Object\",\""
+              + SerializationParts.QUALIFIED_VALUE + "\":null}";
     }
 
     MarshallingSession session = MarshallingSessionProviderFactory.getEncoding();
-    return session.getMarshallerInstance(obj.getClass().getName()).marshall(obj, session);
+
+    if (needsQualification(obj)) {
+      return NumbersUtils.qualifiedNumericEncoding(obj);
+    }
+    else {
+      return session.getMarshallerInstance(obj.getClass().getName()).marshall(obj, session);
+    }
   }
 
   public static void toJSON(Appendable appendTo, Object obj) throws IOException {
     appendTo.append(toJSON(obj));
+  }
+
+  public static String toJSON(Map<Object, Object> obj) {
+    return MapMarshaller.INSTANCE.marshall(obj, MarshallingSessionProviderFactory.getEncoding());
+  }
+
+  public static String toJSON(List arr) {
+    return ListMarshaller.INSTANCE.marshall(arr, MarshallingSessionProviderFactory.getEncoding());
   }
 
   public static <T> T fromJSON(String json, Class<T> type) {
@@ -49,5 +71,11 @@ public abstract class Marshalling {
 
   public static Object fromJSON(String json) {
     return fromJSON(json, Object.class);
+  }
+
+  private static boolean needsQualification(Object o) {
+    return o instanceof String
+            || (o instanceof Number && o.getClass().getName().startsWith("java.lang.") && !(o instanceof Long))
+            || o instanceof Boolean || o instanceof Character;
   }
 }

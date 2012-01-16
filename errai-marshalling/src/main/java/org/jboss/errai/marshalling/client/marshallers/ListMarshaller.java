@@ -31,6 +31,8 @@ import java.util.*;
 @ServerMarshaller
 @ImplementationAliases({AbstractList.class, ArrayList.class, Vector.class, Stack.class})
 public class ListMarshaller extends AbstractCollectionMarshaller<List> {
+  public static final ListMarshaller INSTANCE = new ListMarshaller();
+
   @Override
   public Class<List> getTypeHandled() {
     return List.class;

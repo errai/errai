@@ -166,4 +166,5 @@ public class NumbersUtils {
             + (o instanceof Long || o instanceof Character ? quote + String.valueOf(o) + quote : String.valueOf(o)) + "}";
 
   }
+
 }
