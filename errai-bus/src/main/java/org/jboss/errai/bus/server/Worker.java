@@ -18,7 +18,7 @@ package org.jboss.errai.bus.server;
 
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.client.framework.RoutingFlags;
+import org.jboss.errai.bus.client.framework.RoutingFlag;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.slf4j.Logger;
 
@@ -135,7 +135,7 @@ public class Worker extends Thread {
 
 
   public static void deliverToBus(MessageBus bus, Message message) {
-    if (message.isFlagSet(RoutingFlags.NonGlobalRouting)) {
+    if (message.isFlagSet(RoutingFlag.NonGlobalRouting)) {
       bus.send(message);
     }
     else {

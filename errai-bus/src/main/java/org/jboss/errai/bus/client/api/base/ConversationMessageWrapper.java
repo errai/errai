@@ -21,7 +21,7 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
-import org.jboss.errai.bus.client.framework.RoutingFlags;
+import org.jboss.errai.bus.client.framework.RoutingFlag;
 import org.jboss.errai.common.client.protocols.MessageParts;
 
 import java.util.Map;
@@ -49,7 +49,7 @@ class ConversationMessageWrapper implements Message {
     return this;
   }
 
-  public Message command(Enum type) {
+  public Message command(Enum<?> type) {
     newMessage.command(type);
     return this;
   }
@@ -63,17 +63,17 @@ class ConversationMessageWrapper implements Message {
     return this;
   }
 
-  public Message set(Enum part, Object value) {
+  public Message set(Enum<?> part, Object value) {
     newMessage.set(part, value);
     return this;
   }
 
-  public Message setProvidedPart(String part, ResourceProvider provider) {
+  public Message setProvidedPart(String part, ResourceProvider<?> provider) {
     newMessage.setProvidedPart(part, provider);
     return this;
   }
 
-  public Message setProvidedPart(Enum part, ResourceProvider provider) {
+  public Message setProvidedPart(Enum<?> part, ResourceProvider<?> provider) {
     newMessage.setProvidedPart(part, provider);
     return this;
   }
@@ -82,7 +82,7 @@ class ConversationMessageWrapper implements Message {
     return newMessage.hasPart(part);
   }
 
-  public boolean hasPart(Enum part) {
+  public boolean hasPart(Enum<?> part) {
     return newMessage.hasPart(part);
   }
 
@@ -90,7 +90,7 @@ class ConversationMessageWrapper implements Message {
     newMessage.remove(part);
   }
 
-  public void remove(Enum part) {
+  public void remove(Enum<?> part) {
     newMessage.remove(part);
   }
 
@@ -99,7 +99,7 @@ class ConversationMessageWrapper implements Message {
     return this;
   }
 
-  public Message copy(Enum part, Message m) {
+  public Message copy(Enum<?> part, Message m) {
     newMessage.copy(part, m);
     return this;
   }
@@ -114,12 +114,12 @@ class ConversationMessageWrapper implements Message {
     return this;
   }
 
-  public Message addAllProvidedParts(Map<String, ResourceProvider> provided) {
+  public Message addAllProvidedParts(Map<String, ResourceProvider<?>> provided) {
     newMessage.addAllProvidedParts(provided);
     return this;
   }
 
-  public Map<String, ResourceProvider> getProvidedParts() {
+  public Map<String, ResourceProvider<?>> getProvidedParts() {
     return newMessage.getProvidedParts();
   }
 
@@ -166,15 +166,15 @@ class ConversationMessageWrapper implements Message {
     return newMessage.get(type, part);
   }
 
-  public void setFlag(RoutingFlags flag) {
+  public void setFlag(RoutingFlag flag) {
     newMessage.setFlag(flag);
   }
 
-  public void unsetFlag(RoutingFlags flag) {
+  public void unsetFlag(RoutingFlag flag) {
     newMessage.unsetFlag(flag);
   }
 
-  public boolean isFlagSet(RoutingFlags flag) {
+  public boolean isFlagSet(RoutingFlag flag) {
     return newMessage.isFlagSet(flag);
   }
 

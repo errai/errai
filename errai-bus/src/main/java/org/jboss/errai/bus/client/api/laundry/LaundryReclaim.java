@@ -14,8 +14,22 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.api;
+package org.jboss.errai.bus.client.api.laundry;
 
-public interface Laundry {
-  public void clean();
+/**
+ * A handle on a Laundry task.
+ * 
+ * @author Mike Brock
+ * @author Jonathan Fuerth <jfuerth@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
+ */
+public interface LaundryReclaim {
+
+  /**
+   * Removes the associated item from its laundry list.
+   * 
+   * @return true if the item was still in its list and was removed; false if the laundry item was no longer in the
+   *         list, and therefore this call had no effect.
+   */
+  public boolean reclaim();
 }

@@ -22,8 +22,6 @@ import static org.jboss.errai.bus.client.api.base.ConversationHelper.makeConvers
 import org.jboss.errai.bus.client.api.AsyncTask;
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.HasAsyncTaskRef;
-import org.jboss.errai.bus.client.api.Laundry;
-import org.jboss.errai.bus.client.api.LaundryReclaim;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.builder.MessageBuildCommand;
@@ -32,9 +30,12 @@ import org.jboss.errai.bus.client.api.builder.MessageBuildSendable;
 import org.jboss.errai.bus.client.api.builder.MessageBuildSubject;
 import org.jboss.errai.bus.client.api.builder.MessageReplySendable;
 import org.jboss.errai.bus.client.api.builder.Sendable;
+import org.jboss.errai.bus.client.api.laundry.Laundry;
+import org.jboss.errai.bus.client.api.laundry.LaundryListProviderFactory;
+import org.jboss.errai.bus.client.api.laundry.LaundryReclaim;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
-import org.jboss.errai.bus.client.framework.RoutingFlags;
+import org.jboss.errai.bus.client.framework.RoutingFlag;
 import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.common.client.protocols.MessageParts;
 
@@ -262,9 +263,9 @@ public class AbstractMessageBuilder<R extends Sendable> {
         });
 
         if (isConversational) {
+          Object sessionResource = ((ConversationMessageWrapper) message).getIncomingMessage().getResource(Object.class, "Session");
           final LaundryReclaim reclaim =
-                  LaundryListProviderFactory.get().getLaundryList(((ConversationMessageWrapper) message).getIncomingMessage().getResource(Object.class, "Session"))
-                          .addToHamper(new Laundry() {
+                  LaundryListProviderFactory.get().getLaundryList(sessionResource).add(new Laundry() {
                             @Override
                             public void clean() {
                               task.cancel(true);
@@ -353,7 +354,7 @@ public class AbstractMessageBuilder<R extends Sendable> {
       }
 
       @Override
-      public MessageBuildParms<R> flag(RoutingFlags flag) {
+      public MessageBuildParms<R> flag(RoutingFlag flag) {
         message.setFlag(flag);
         return this;
       }

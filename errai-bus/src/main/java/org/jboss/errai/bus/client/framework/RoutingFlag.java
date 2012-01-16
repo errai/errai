@@ -19,7 +19,7 @@ package org.jboss.errai.bus.client.framework;
 /**
  * Enumeration of flags that can be used when sending messages, to specify how they should be sent
  */
-public enum RoutingFlags {
+public enum RoutingFlag {
   /** This message should not be globally routed **/
   NonGlobalRouting {
     @Override

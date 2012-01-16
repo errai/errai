@@ -546,7 +546,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
 
     if (isMonitor()) {
-      if (message.isFlagSet(RoutingFlags.FromRemote)) {
+      if (message.isFlagSet(RoutingFlag.FromRemote)) {
         busMonitor.notifyIncomingMessageFromRemote(
                 message.getResource(QueueSession.class, "Session").getSessionId(), message);
       }
@@ -563,10 +563,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
   }
 
   private void delayOrFail(Message message, final Runnable deliveryTaskRunnable) {
-    if (message.isFlagSet(RoutingFlags.RetryDelivery) && message.getResource(Integer.class, RETRY_COUNT_KEY) > 3) {
+    if (message.isFlagSet(RoutingFlag.RetryDelivery) && message.getResource(Integer.class, RETRY_COUNT_KEY) > 3) {
       throw new NoSubscribersToDeliverTo(message.getSubject());
     }
-    message.setFlag(RoutingFlags.RetryDelivery);
+    message.setFlag(RoutingFlag.RetryDelivery);
     if (!message.hasResource(RETRY_COUNT_KEY)) {
       message.setResource("retryAttempts", 0);
     }
@@ -589,11 +589,11 @@ public class ServerMessageBusImpl implements ServerMessageBus {
   public void send(Message message) {
     message.commit();
     if (message.hasResource("Session")) {
-      message.setFlag(RoutingFlags.NonGlobalRouting);
+      message.setFlag(RoutingFlag.NonGlobalRouting);
       send(getQueueByMessage(message), message, true);
     }
     else if (message.hasPart(MessageParts.SessionID)) {
-      message.setFlag(RoutingFlags.NonGlobalRouting);
+      message.setFlag(RoutingFlag.NonGlobalRouting);
       send(getQueueBySession(message.get(String.class, MessageParts.SessionID)), message, true);
     }
     else {
@@ -887,7 +887,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     @Override
     public void callback(Message message) {
       // do not pipeline if this message is addressed to a specified session.
-      if (broadcastable && !message.isFlagSet(RoutingFlags.NonGlobalRouting)) {
+      if (broadcastable && !message.isFlagSet(RoutingFlag.NonGlobalRouting)) {
         // all queues are listening to this subject. therefore we can save memory and time by
         // writing to the broadcast color on the buffer
         try {

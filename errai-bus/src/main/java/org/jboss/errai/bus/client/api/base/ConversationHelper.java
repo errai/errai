@@ -19,7 +19,7 @@ package org.jboss.errai.bus.client.api.base;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.client.framework.RoutingFlags;
+import org.jboss.errai.bus.client.framework.RoutingFlag;
 import org.jboss.errai.common.client.protocols.MessageParts;
 
 public class ConversationHelper {
@@ -27,11 +27,11 @@ public class ConversationHelper {
 
   public static void makeConversational(Message message, MessageCallback callback) {
     message.setResource(RES_NAME, callback);
-    message.setFlag(RoutingFlags.Conversational);
+    message.setFlag(RoutingFlag.Conversational);
   }
 
   public static void createConversationService(MessageBus bus, Message m) {
-    if (m.isFlagSet(RoutingFlags.Conversational)) {
+    if (m.isFlagSet(RoutingFlag.Conversational)) {
       final String replyService = m.getSubject() + ":RespondTo:" + count();
       bus.subscribe(replyService, m.getResource(MessageCallback.class, RES_NAME));
       bus.subscribe(replyService, new ServiceCanceller(replyService, bus));
