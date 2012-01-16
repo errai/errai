@@ -140,11 +140,11 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
     }
 
     private void fireSessionEndListeners() {
-      if (sessionEndListeners == null) return;
-      SessionEndEvent event = new SessionEndEvent(this);
-
       LaundryListProviderFactory.get().getLaundryList(this)
               .cleanAll();
+
+      if (sessionEndListeners == null) return;
+      SessionEndEvent event = new SessionEndEvent(this);
 
       for (SessionEndListener sessionEndListener : sessionEndListeners) {
         sessionEndListener.onSessionEnd(event);

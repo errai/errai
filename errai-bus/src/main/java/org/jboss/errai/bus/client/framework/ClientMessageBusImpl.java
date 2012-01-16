@@ -377,7 +377,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   @Override
   public void send(Message message, boolean fireListeners) {
     // TODO: fire listeners?
-
     send(message);
   }
 
