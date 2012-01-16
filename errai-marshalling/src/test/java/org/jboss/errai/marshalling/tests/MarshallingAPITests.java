@@ -16,22 +16,16 @@
 
 package org.jboss.errai.marshalling.tests;
 
-import org.jboss.errai.marshalling.client.MarshallingSessionProviderFactory;
-import org.jboss.errai.marshalling.client.api.Marshaller;
-import org.jboss.errai.marshalling.client.api.MarshallingSession;
-import org.jboss.errai.marshalling.client.api.ParserFactory;
-import org.jboss.errai.marshalling.client.api.json.EJValue;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.marshalling.server.ServerMarshalling;
-import org.jboss.errai.marshalling.server.util.ServerMarshallUtil;
 import org.jboss.errai.marshalling.tests.res.shared.Role;
 import org.jboss.errai.marshalling.tests.res.shared.User;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * @author Mike Brock

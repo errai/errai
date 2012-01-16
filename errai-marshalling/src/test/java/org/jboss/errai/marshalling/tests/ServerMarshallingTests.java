@@ -1,21 +1,30 @@
 package org.jboss.errai.marshalling.tests;
 
+import java.lang.reflect.Array;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Random;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+
 import junit.framework.Assert;
+
 import org.jboss.errai.marshalling.client.MarshallingSessionProviderFactory;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.ParserFactory;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
+import org.jboss.errai.marshalling.server.ServerMarshalling;
 import org.jboss.errai.marshalling.tests.res.SType;
 import org.jboss.errai.marshalling.tests.res.shared.Role;
 import org.jboss.errai.marshalling.tests.res.shared.User;
 import org.junit.Test;
-
-import java.lang.reflect.Array;
-import java.math.BigDecimal;
-import java.math.MathContext;
-import java.util.*;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -386,9 +395,33 @@ public class ServerMarshallingTests {
     SType sType = SType.create(new ServerRandomProvider());
 
     testEncodeDecodeDynamic(sType);
+  }  
+
+  @Test
+  public void testPrimitiveIntRoundTrip() {
+    final int val = 1701;
+    String json = ServerMarshalling.toJSON(val);
+    Assert.assertEquals("Failed to marshall/demarshall int", val, ServerMarshalling.fromJSON(json));
   }
-
-
   
-
+  @Test
+  public void testPrimitiveLongRoundTrip() {
+    final long val = 1701l;
+    String json = ServerMarshalling.toJSON(val);
+    Assert.assertEquals("Failed to marshall/demarshall long", val, ServerMarshalling.fromJSON(json));
+  }
+  
+  @Test
+  public void testPrimitiveDoubleRoundTrip() {
+    final double val = 17.01;
+    String json = ServerMarshalling.toJSON(val);
+    Assert.assertEquals("Failed to marshall/demarshall double", val, ServerMarshalling.fromJSON(json));
+  }
+  
+  @Test
+  public void testPrimitiveFloatRoundTrip() {
+    final float val = 1701f;
+    String json = ServerMarshalling.toJSON(val);
+    Assert.assertEquals("Failed to marshall/demarshall float", val, ServerMarshalling.fromJSON(json));
+  }
 }
