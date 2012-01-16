@@ -38,9 +38,6 @@ public class CDIClientBootstrap implements EntryPoint {
   public void onModuleLoad() {
     final ClientMessageBusImpl bus = (ClientMessageBusImpl) ErraiBus.get();
 
-    // conversation interceptor
-    bus.addInterceptor(CDI.CONVERSATION_INTERCEPTOR);
-
     final Runnable busReadyEvent = new Runnable() {
       public void run() {
         MessageBuilder.createMessage().toSubject("cdi.event:Dispatcher").command(CDICommands.AttachRemote).done()

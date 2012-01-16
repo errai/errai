@@ -19,7 +19,6 @@ import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.framework.MessageInterceptor;
 import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.EventHandler;
@@ -37,15 +36,11 @@ import java.util.*;
 public class CDI {
   public static final String DISPATCHER_SUBJECT = "cdi.event:Dispatcher";
 
-  static private Map<String, Conversation> activeConversations = new HashMap<String, Conversation>();
-
   static private Set<String> remoteEvents = new HashSet<String>();
 
   static private boolean active = false;
   static private List<DeferredEvent> deferredEvents = new ArrayList<DeferredEvent>();
   static private List<Runnable> postInitTasks = new ArrayList<Runnable>();
-
-  public static MessageInterceptor CONVERSATION_INTERCEPTOR = new ConversationInterceptor();
 
   public static void handleEvent(final Class<?> type, final EventHandler<Object> handler) {
     ErraiBus.get().subscribe("cdi.event:" + type.getName(), // by convention
@@ -125,15 +120,6 @@ public class CDI {
     return String.valueOf(com.google.gwt.user.client.Random.nextInt(1000)) + "-" + (System.currentTimeMillis() % 1000);
   }
 
-  public static Conversation createConversation(String withSubject) {
-    Conversation conversation = new Conversation(generateId(), withSubject);
-    return conversation;
-  }
-
-  public static Map<String, Conversation> getActiveConversations() {
-    return activeConversations;
-  }
-
   public static void addRemoteEventType(String remoteEvent) {
     remoteEvents.add(remoteEvent);
   }
@@ -184,44 +170,4 @@ public class CDI {
     }
   }
 
-  /**
-   * Decorates a message with the conversation id if required
-   */
-  static class ConversationInterceptor implements MessageInterceptor {
-    public boolean processOutbound(Message message) {
-
-      // skip if none active
-      if (getActiveConversations().isEmpty())
-        return true;
-
-      // internal channel, don't decorate message
-      if (message.hasPart("cdi.internal"))
-        return true;
-
-      // find a conversation handle exist for this subject
-      Set<String> activeConversations = getActiveConversations().keySet();
-      Conversation conversationHandle = null;
-      for (String id : activeConversations) {
-        Conversation c = getActiveConversations().get(id);
-        if (c.getSubject().equals(message.getSubject())) {
-          conversationHandle = c;
-          break;
-        }
-      }
-
-      // if there is a matching active conversation for a particular subject
-      // we attach the conversation id
-      if (conversationHandle != null && conversationHandle.isActive()) {
-        Map<String, Object> parts = new HashMap<String, Object>(getActiveConversations().size());
-        parts.put("cdi.conversation.id", conversationHandle.getId());
-        message.addAllParts(parts);
-      }
-
-      return true;
-    }
-
-    public boolean processInbound(Message message) {
-      return true;
-    }
-  }
 }

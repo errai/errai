@@ -16,16 +16,14 @@
 
 package org.jboss.errai.enterprise.client.cdi;
 
-import java.lang.annotation.Annotation;
+import org.jboss.errai.enterprise.client.cdi.api.CDI;
+import org.jboss.errai.ioc.client.ContextualProviderContext;
+import org.jboss.errai.ioc.client.api.IOCProvider;
 
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.inject.Provider;
-
-import org.jboss.errai.enterprise.client.cdi.api.CDI;
-import org.jboss.errai.enterprise.client.cdi.api.Conversation;
-import org.jboss.errai.ioc.client.ContextualProviderContext;
-import org.jboss.errai.ioc.client.api.IOCProvider;
+import java.lang.annotation.Annotation;
 
 @IOCProvider
 public class EventProvider implements Provider<Event> {
@@ -47,15 +45,11 @@ public class EventProvider implements Provider<Event> {
      */
     return new Event<Object>() {
       private Class<?> eventType = (context.getTypeArguments().length == 1 ? context.getTypeArguments()[0] : Object.class);
-      private Conversation conversation;
       private Annotation[] _qualifiers = context.getQualifiers();
 
       public void fire(Object event) {
         if (event == null)
           return;
-        if (conversation != null && !conversation.isActive()) {
-          conversation.begin();
-        }
 
         CDI.fireEvent(event, _qualifiers);
       }
@@ -76,17 +70,6 @@ public class EventProvider implements Provider<Event> {
 
       public Annotation[] getQualifiers() {
         return _qualifiers;
-      }
-
-      public void registerConversation(Conversation conversation) {
-        endActiveConversation();
-        this.conversation = conversation;
-      }
-
-      public void endActiveConversation() {
-        if (conversation != null && conversation.isActive()) {
-          conversation.end();
-        }
       }
     };
   }
