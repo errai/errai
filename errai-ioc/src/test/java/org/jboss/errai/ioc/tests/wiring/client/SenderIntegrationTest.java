@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
@@ -13,7 +14,6 @@ import org.jboss.errai.bus.client.tests.AbstractErraiTest;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.ioc.client.Container;
-import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.api.Sender;
 
 import com.google.gwt.user.client.Timer;
@@ -25,11 +25,11 @@ public class SenderIntegrationTest extends AbstractErraiTest {
     return "org.jboss.errai.ioc.tests.wiring.IOCWiringTests";
   }
 
-  @EntryPoint
-  public static class ConsumerTestInjectionPoint {
-    static ConsumerTestInjectionPoint instance;
+  @Singleton
+  public static class SenderTestInjectionPoint {
+    static SenderTestInjectionPoint instance;
 
-    public ConsumerTestInjectionPoint() {
+    public SenderTestInjectionPoint() {
       instance = this;
     }
 
@@ -77,7 +77,7 @@ public class SenderIntegrationTest extends AbstractErraiTest {
         new Timer() {
           @Override
           public void run() {
-            assertNotNull(ConsumerTestInjectionPoint.instance.replySender);
+            assertNotNull(SenderTestInjectionPoint.instance.replySender);
             finishTest();
           }
         }.schedule(1000);
@@ -93,7 +93,7 @@ public class SenderIntegrationTest extends AbstractErraiTest {
       public void run() {
         List<String> originalList = Arrays.asList("this", "is", "my", "list");
         ClientListService.latestResponse = null;
-        ConsumerTestInjectionPoint.instance.replySender.send(originalList);
+        SenderTestInjectionPoint.instance.replySender.send(originalList);
 
         new Timer() {
           @Override
@@ -118,7 +118,7 @@ public class SenderIntegrationTest extends AbstractErraiTest {
       public void run() {
         List<String> originalList = Arrays.asList("this", "is", "my", "list");
         TestCompleterService.replyReceived = false;
-        ConsumerTestInjectionPoint.instance.noReplySender.send(originalList);
+        SenderTestInjectionPoint.instance.noReplySender.send(originalList);
 
         new Timer() {
           @Override

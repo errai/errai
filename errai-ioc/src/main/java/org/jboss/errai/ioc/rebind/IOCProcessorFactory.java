@@ -62,6 +62,22 @@ public class IOCProcessorFactory {
       Class<? extends Annotation> aClass = entry.annotationClass;
       Target target = aClass.getAnnotation(Target.class);
 
+      if (target == null) {
+        target = new Target() {
+          @Override
+          public ElementType[] value() {
+            return new ElementType[]
+                    { ElementType.TYPE, ElementType.CONSTRUCTOR, ElementType.FIELD,
+                            ElementType.METHOD, ElementType.FIELD };
+          }
+
+          @Override
+          public Class<? extends Annotation> annotationType() {
+            return Target.class;
+          }
+        };
+      }
+      
       for (ElementType elementType : target.value()) {
         switch (elementType) {
           case TYPE: {

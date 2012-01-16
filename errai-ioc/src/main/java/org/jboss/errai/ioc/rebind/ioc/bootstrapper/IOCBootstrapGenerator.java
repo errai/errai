@@ -155,7 +155,7 @@ public class IOCBootstrapGenerator {
     }
 
     log.info("using IOC bootstrapping code to: " + cacheFile.getAbsolutePath());
-    
+
     return gen;
   }
 
@@ -306,7 +306,7 @@ public class IOCBootstrapGenerator {
 
     final MetaClass typeProviderCls = MetaClassFactory.get(TypeProvider.class);
     MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
-    
+
 
     /*
     * IOCDecoratorExtension.class
@@ -496,6 +496,15 @@ public class IOCBootstrapGenerator {
 
   private void defaultConfigureProcessor() {
     final MetaClass widgetType = MetaClassFactory.get(Widget.class);
+
+
+    procFactory.registerHandler(Singleton.class, new AnnotationHandler<Singleton>() {
+      @Override
+      public boolean handle(final InjectableInstance type, Singleton annotation, IOCProcessingContext context) {
+        generateWithSingletonSemantics(type.getType());
+        return true;
+      }
+    });
 
     procFactory.registerHandler(EntryPoint.class, new AnnotationHandler<EntryPoint>() {
       @Override
