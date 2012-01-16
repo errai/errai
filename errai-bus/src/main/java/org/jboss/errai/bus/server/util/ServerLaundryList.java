@@ -16,11 +16,12 @@
 
 package org.jboss.errai.bus.server.util;
 
-import org.jboss.errai.bus.client.api.Laundry;
-import org.jboss.errai.bus.client.api.LaundryList;
-import org.jboss.errai.bus.client.api.LaundryReclaim;
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.laundry.Laundry;
+import org.jboss.errai.bus.client.api.laundry.LaundryList;
+import org.jboss.errai.bus.client.api.laundry.LaundryReclaim;
 import org.jboss.errai.bus.server.api.QueueSession;
+import org.jboss.errai.common.client.framework.Assert;
 
 import java.util.Iterator;
 import java.util.Queue;
@@ -44,24 +45,29 @@ public class ServerLaundryList implements LaundryList {
   public void cleanAll() {
     Iterator<Laundry> iter = listOfLaundry.iterator();
     while (iter.hasNext()) {
-      iter.next().clean();
+      try {
+        iter.next().clean();
+      }
+      catch (Exception e) {
+        e.printStackTrace();
+      }
       iter.remove();
     }
   }
 
-  public LaundryReclaim addToHamper(final Laundry laundry) {
-    listOfLaundry.add(laundry);
+  public LaundryReclaim add(final Laundry laundry) {
+    listOfLaundry.add(Assert.notNull(laundry));
     return new LaundryReclaim() {
       public boolean reclaim() {
-        return removeFromHamper(laundry);
+        return remove(laundry);
       }
     };
   }
 
-  public boolean removeFromHamper(final Laundry laundry) {
+  public boolean remove(final Laundry laundry) {
     return listOfLaundry.remove(laundry);
   }
-
+  
   @SuppressWarnings({"SynchronizationOnLocalVariableOrMethodParameter"})
   private static ServerLaundryList setup(final LocalContext ctx) {
     ServerLaundryList list;

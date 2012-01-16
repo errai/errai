@@ -14,12 +14,22 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.api;
+package org.jboss.errai.bus.client.api.laundry;
 
-public interface LaundryList {
-  public void cleanAll();
-
-  public LaundryReclaim addToHamper(Laundry laundry);
-
-  public boolean removeFromHamper(Laundry laundry);
+/**
+ * The means of obtaining a {@link LaundryList} instance either on the client or the server.
+ * 
+ * @author Mike Brock
+ * @author Jonathan Fuerth <jfuerth@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
+ */
+public interface LaundryListProvider {
+  
+  /**
+   * Returns the laundry list for the given object, which must be an Errai Bus session.
+   * 
+   * @param ref The Errai Bus session.
+   * @return The {@link LaundryList} for the given session.
+   */
+  public LaundryList getLaundryList(Object ref);
 }

@@ -16,16 +16,22 @@
 
 package org.jboss.errai.bus.server;
 
-import org.jboss.errai.bus.client.api.base.LaundryListProviderFactory;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpSession;
+
+import org.jboss.errai.bus.client.api.laundry.LaundryListProviderFactory;
 import org.jboss.errai.bus.server.api.QueueSession;
 import org.jboss.errai.bus.server.api.SessionEndEvent;
 import org.jboss.errai.bus.server.api.SessionEndListener;
 import org.jboss.errai.bus.server.api.SessionProvider;
 import org.jboss.errai.bus.server.util.SecureHashUtil;
-
-import javax.servlet.http.HttpSession;
-import java.io.Serializable;
-import java.util.*;
+import org.jboss.errai.bus.server.util.ServerLaundryList;
 
 /**
  * <tt>HttpSessionProvider</tt> implements <tt>SessionProvider</tt> as an <tt>HttpSession</tt>. It provides a getter
@@ -140,11 +146,10 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
     }
 
     private void fireSessionEndListeners() {
+      ((ServerLaundryList) LaundryListProviderFactory.get().getLaundryList(this)).cleanAll();
+      
       if (sessionEndListeners == null) return;
       SessionEndEvent event = new SessionEndEvent(this);
-
-      LaundryListProviderFactory.get().getLaundryList(this)
-              .cleanAll();
 
       for (SessionEndListener sessionEndListener : sessionEndListeners) {
         sessionEndListener.onSessionEnd(event);

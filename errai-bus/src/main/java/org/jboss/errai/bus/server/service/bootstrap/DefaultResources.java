@@ -15,11 +15,11 @@
  */
 package org.jboss.errai.bus.server.service.bootstrap;
 
-import org.jboss.errai.bus.client.api.LaundryList;
-import org.jboss.errai.bus.client.api.LaundryListProvider;
 import org.jboss.errai.bus.client.api.TaskManager;
-import org.jboss.errai.bus.client.api.base.LaundryListProviderFactory;
 import org.jboss.errai.bus.client.api.base.TaskManagerFactory;
+import org.jboss.errai.bus.client.api.laundry.LaundryList;
+import org.jboss.errai.bus.client.api.laundry.LaundryListProvider;
+import org.jboss.errai.bus.client.api.laundry.LaundryListProviderFactory;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.framework.TaskManagerProvider;

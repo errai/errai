@@ -14,8 +14,22 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.api;
+package org.jboss.errai.bus.client.api.laundry;
 
-public interface LaundryListProvider<T> {
-  public LaundryList getLaundryList(Object ref);
+/**
+ * Represents a single cleanup task to be executed when a {@link LaundryList} is processed.
+ * 
+ * @author Mike Brock
+ * @author Jonathan Fuerth <jfuerth@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
+ */
+public interface Laundry {
+
+  /**
+   * Performs whatever work is necessary in this cleanup item. Exceptions thrown from this method will be logged by the
+   * framework, but will not otherwise have any effect on the cleanup process.
+   * 
+   * @see LaundryList#cleanAll()
+   */
+  public void clean() throws Exception;
 }

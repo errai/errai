@@ -14,23 +14,28 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.api.base;
+package org.jboss.errai.bus.client.api.laundry;
 
-import org.jboss.errai.bus.client.api.Laundry;
-import org.jboss.errai.bus.client.api.LaundryList;
-import org.jboss.errai.bus.client.api.LaundryListProvider;
-import org.jboss.errai.bus.client.api.LaundryReclaim;
-import org.jboss.errai.bus.client.framework.MessageBus;
 
-import java.util.Iterator;
-import java.util.LinkedList;
 
+/**
+ * 
+ * @author Mike Brock
+ * @author Jonathan Fuerth <jfuerth@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
+ */
 public class LaundryListProviderFactory {
 
   private static final Object lock = new Object();
   private static volatile LaundryListProvider provider;
 
-  public static LaundryListProvider<?> get() {
+  /**
+   * The client and server require different laundry list implementations; this method provides the correct
+   * implementation from wherever is called.
+   * 
+   * @return the laundry list provider
+   */
+  public static LaundryListProvider get() {
     synchronized (lock) {
       if (provider == null) {
         _initForClient();
@@ -40,41 +45,16 @@ public class LaundryListProviderFactory {
   }
 
   private static void _initForClient() {
-    provider = new LaundryListProvider<MessageBus>() {
+    provider = new LaundryListProvider() {
       public LaundryList getLaundryList(Object ref) {
         return ClientLaundryList.INSTANCE;
       }
     };
   }
 
-  private static class ClientLaundryList implements LaundryList {
-    static final LinkedList<Laundry> laundryList = new LinkedList<Laundry>();
-    static final ClientLaundryList INSTANCE = new ClientLaundryList();
-
-
-    public void cleanAll() {
-      Iterator<Laundry> iter = laundryList.iterator();
-      while (iter.hasNext()) {
-        iter.next().clean();
-        iter.remove();
-      }
-    }
-
-    public LaundryReclaim addToHamper(final Laundry laundry) {
-      laundryList.add(laundry);
-
-      return new LaundryReclaim() {
-        public boolean reclaim() {
-          return removeFromHamper(laundry);
-        }
-      };
-    }
-
-    public boolean removeFromHamper(Laundry laundry) {
-      return laundryList.remove(laundry);
-    }
-  }
-
+  /**
+   * For internal use only. Do not call.
+   */
   public static void setLaundryListProvider(LaundryListProvider p) {
     synchronized (lock) {
       if (provider == null) {
