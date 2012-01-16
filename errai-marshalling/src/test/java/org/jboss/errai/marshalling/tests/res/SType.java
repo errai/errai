@@ -17,7 +17,7 @@
 package org.jboss.errai.marshalling.tests.res;
 
 import org.jboss.errai.common.client.api.annotations.Portable;
-import org.jboss.errai.marshalling.tests.ServerMarshallingTests;
+import org.jboss.errai.marshalling.tests.ServerMarshallingTest;
 
 import java.util.*;
 
@@ -325,7 +325,7 @@ public class SType extends STypeSuper {
     return builder.append("]").toString();
   }
 
-  public static SType create(ServerMarshallingTests.RandomProvider random) {
+  public static SType create(ServerMarshallingTest.RandomProvider random) {
     final SType sType1 = randomLeafCreate(random);
     sType1.setActive(true);
     sType1.setEndDate(new Date(System.currentTimeMillis()));
@@ -388,7 +388,7 @@ public class SType extends STypeSuper {
     return sType1;
   }
 
-  private static SType randomLeafCreate(ServerMarshallingTests.RandomProvider random) {
+  private static SType randomLeafCreate(ServerMarshallingTest.RandomProvider random) {
     final SType sType = new SType();
     sType.setSuperValue(random.randString());
     sType.setActive(random.nextBoolean());
@@ -429,15 +429,15 @@ public class SType extends STypeSuper {
   }
 
 
-  private static Date randDateFuture(ServerMarshallingTests.RandomProvider random) {
+  private static Date randDateFuture(ServerMarshallingTest.RandomProvider random) {
     return new Date(System.currentTimeMillis() + random.nextInt(100000));
   }
 
-  private static Date randDatePast(ServerMarshallingTests.RandomProvider random) {
+  private static Date randDatePast(ServerMarshallingTest.RandomProvider random) {
     return new Date(System.currentTimeMillis() - random.nextInt(100000));
   }
 
-  private static Place randPlace(ServerMarshallingTests.RandomProvider random) {
+  private static Place randPlace(ServerMarshallingTest.RandomProvider random) {
     return Place.values()[random.nextInt(100000) % Place.values().length];
   }
 

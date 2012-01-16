@@ -32,6 +32,7 @@ import java.util.Set;
  */
 public class MarshallUtil {
   private static final Set<Class<?>> primitiveWrappers = new HashSet<Class<?>>();
+
   static {
     primitiveWrappers.add(Integer.class);
     primitiveWrappers.add(Double.class);
@@ -46,7 +47,7 @@ public class MarshallUtil {
   public static boolean isPrimitiveWrapper(Class<?> cls) {
     return primitiveWrappers.contains(cls);
   }
-  
+
   public static <T> T notNull(String message, T obj) {
     if (obj == null) {
       throw new NullPointerException(message);
@@ -70,81 +71,103 @@ public class MarshallUtil {
 
 
   public static Marshaller<Object> getQualifiedNumberMarshaller(Object o) {
-      final Class<Object> type = (Class<Object>) o.getClass();
+    final Class<Object> type = (Class<Object>) o.getClass();
 
-      return new Marshaller<Object>() {
-        @Override
-        public boolean handles(EJValue o) {
-          return false;
-        }
+    return new Marshaller<Object>() {
+      @Override
+      public boolean handles(EJValue o) {
+        return false;
+      }
 
-        @Override
-        public String marshall(Object o, MarshallingSession ctx) {
-          return NumbersUtils.qualifiedNumericEncoding(o);
-        }
+      @Override
+      public String marshall(Object o, MarshallingSession ctx) {
+        return NumbersUtils.qualifiedNumericEncoding(o);
+      }
 
-        @Override
-        public Object demarshall(EJValue o, MarshallingSession ctx) {
-          return null;
-        }
+      @Override
+      public Object demarshall(EJValue o, MarshallingSession ctx) {
+        return null;
+      }
 
-        @Override
-        public String getEncodingType() {
-          return "json";
-        }
+      @Override
+      public String getEncodingType() {
+        return "json";
+      }
 
-        @Override
-        public Class<Object> getTypeHandled() {
-          return type;
-        }
-      };
+      @Override
+      public Class<Object> getTypeHandled() {
+        return type;
+      }
+    };
   }
-  
- 
+
+
   public static String jsonStringEscape(final String s) {
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < s.length(); i++) {
-      char ch = s.charAt(i);
-      switch (ch) {
-        case '"':
-          sb.append("\\\"");
-          break;
-        case '\\':
-          sb.append("\\\\");
-          break;
-        case '\b':
-          sb.append("\\b");
-          break;
-        case '\f':
-          sb.append("\\f");
-          break;
-        case '\n':
-          sb.append("\\n");
-          break;
-        case '\r':
-          sb.append("\\r");
-          break;
-        case '\t':
-          sb.append("\\t");
-          break;
-        case '/':
-          sb.append("\\/");
-          break;
-        default:
-          //Reference: http://www.unicode.org/versions/Unicode5.1.0/
-          if ((ch >= '\u0000' && ch <= '\u001F') || (ch >= '\u007F' && ch <= '\u009F') || (ch >= '\u2000' && ch <= '\u20FF')) {
-            String ss = Integer.toHexString(ch);
-            sb.append("\\u");
-            for (int k = 0; k < 4 - ss.length(); k++) {
-              sb.append('0');
-            }
-            sb.append(ss.toUpperCase());
-          }
-          else {
-            sb.append(ch);
-          }
-      }
+      jsonStringEscape(sb, s.charAt(i));
     }
     return sb.toString();
   }
+
+  public static String jsonStringEscape(final char ch) {
+    return jsonStringEscape(new StringBuilder(), ch);
+  }
+  
+  
+  private final int charLowRange = 'a';
+  private static final boolean encodingRequired(char c) {
+    return true;
+  }
+
+  public static String jsonStringEscape(StringBuilder sb, final char ch) {
+    switch (ch) {
+      case '"':
+        sb.append("\\\"");
+        break;
+      case '\\':
+        sb.append("\\\\");
+        break;
+      case '\b':
+        sb.append("\\b");
+        break;
+      case '\f':
+        sb.append("\\f");
+        break;
+      case '\n':
+        sb.append("\\n");
+        break;
+      case '\r':
+        sb.append("\\r");
+        break;
+      case '\t':
+        sb.append("\\t");
+        break;
+      case '/':
+        sb.append("\\/");
+        break;
+      default:
+        if ((ch >= '\u0000' && ch <= '\u001F') || (ch >= '\u007F' && ch <= '\u009F')
+                //  || (ch >= '\u2000' && ch <= '\u20FF')) {
+                || (ch >= '\u2000')) {
+
+          String ss = Integer.toHexString(ch);
+          sb.append("\\u");
+          for (int k = 0; k < 4 - ss.length(); k++) {
+            sb.append('0');
+          }
+          sb.append(ss.toUpperCase());
+        }
+        else {
+          sb.append(ch);
+        }
+    }
+    return sb.toString();
+  }
+
+  public static void main(String[] args) {
+    System.out.println("a");
+  }
+
+
 }

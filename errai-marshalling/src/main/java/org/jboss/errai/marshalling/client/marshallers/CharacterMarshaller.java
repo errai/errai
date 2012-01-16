@@ -48,7 +48,7 @@ public class CharacterMarshaller extends AbstractJSONMarshaller<Character> {
 
   @Override
   public String marshall(Character o, MarshallingSession ctx) {
-    return "\"" + MarshallUtil.jsonStringEscape(o.toString()) + "\"";
+    return "\"" + MarshallUtil.jsonStringEscape(o) + "\"";
   }
 
   @Override

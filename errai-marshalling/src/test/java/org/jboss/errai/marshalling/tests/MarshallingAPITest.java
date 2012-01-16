@@ -36,7 +36,7 @@ import java.util.Set;
 /**
  * @author Mike Brock
  */
-public class MarshallingAPITests {
+public class MarshallingAPITest {
 
   @Before
   public void ensureMarshallingSystemInitialized() {

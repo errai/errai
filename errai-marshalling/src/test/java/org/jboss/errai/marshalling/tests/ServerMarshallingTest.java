@@ -20,7 +20,7 @@ import java.util.*;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public class ServerMarshallingTests {
+public class ServerMarshallingTest {
 
   static {
     System.setProperty("errai.devel.nocache", "true");
@@ -38,6 +38,8 @@ public class ServerMarshallingTests {
 
     MarshallingSession encSession = MarshallingSessionProviderFactory.getEncoding();
     String enc = "[" + marshaller.marshall(value, encSession) + "]";
+
+    System.out.println("Encoded: " + enc);
 
     MarshallingSession decSession = MarshallingSessionProviderFactory.getDecoding();
     EJValue parsedJson = ParserFactory.get().parse(enc);
