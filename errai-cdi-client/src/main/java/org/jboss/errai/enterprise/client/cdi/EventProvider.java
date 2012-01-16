@@ -32,7 +32,8 @@ public class EventProvider implements Provider<Event<?>> {
   @Inject
   ContextualProviderContext context;
 
-  public Event<?> get() {
+  // note: do not parameterize return type to ensure compatibility with generated code
+  public Event get() {
     
     /*
      * If you see a compile error here, ensure that you are using Errai's custom
