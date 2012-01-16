@@ -34,7 +34,7 @@ public class CallerProvider implements ContextualTypeProvider<Caller<?>> {
   private static final RemoteServiceProxyFactory factory = new RemoteServiceProxyFactory();
 
   @Override
-  public Caller<?> provide(final Class<?>[] typeargs, Annotation[] qualifiers) {
+  public Caller provide(final Class<?>[] typeargs, Annotation[] qualifiers) {
     return new Caller<Object>() {
       @Override
       public Object call(RemoteCallback<?> callback) {
