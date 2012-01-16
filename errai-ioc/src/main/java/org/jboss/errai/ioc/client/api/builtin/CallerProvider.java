@@ -30,7 +30,7 @@ import org.jboss.errai.ioc.client.api.IOCProvider;
  * @author Mike Brock
  */
 @IOCProvider
-public class CallerProvider implements ContextualTypeProvider<Caller<?>> {
+public class CallerProvider implements ContextualTypeProvider<Caller> {
   private static final RemoteServiceProxyFactory factory = new RemoteServiceProxyFactory();
 
   @Override
