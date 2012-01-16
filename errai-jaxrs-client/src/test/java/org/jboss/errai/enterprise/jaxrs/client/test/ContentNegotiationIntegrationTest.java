@@ -57,6 +57,17 @@ public class ContentNegotiationIntegrationTest extends AbstractErraiJaxrsTest {
         new AssertionCallback<Long>("@GET producing long application/json failed", 1l)).getLongAsJson();
   }
   
+  public void testGetInt() {
+    RestClient.create(ContentNegotiationTestService.class,
+        new AssertionCallback<Integer>("@GET producing int using text/plain failed", 0)).getInt();
+  }
+
+  @Test
+  public void testGetIntAsJsonUsingCustomMediaType() {
+    RestClient.create(ContentNegotiationTestService.class,
+        new AssertionCallback<Integer>("@GET producing int application/myapp+json failed", 1)).getIntAsJson();
+  }
+  
   @Test
   public void testPostAsText() {
     RestClient.create(ContentNegotiationTestService.class,

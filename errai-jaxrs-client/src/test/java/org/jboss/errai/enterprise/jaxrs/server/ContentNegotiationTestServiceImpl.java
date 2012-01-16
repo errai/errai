@@ -44,6 +44,16 @@ public class ContentNegotiationTestServiceImpl implements ContentNegotiationTest
   public long getLongAsJson() {
     return 1;
   }
+  
+  @Override
+  public int getInt() {
+    return 0;
+  }
+
+  @Override
+  public int getIntAsJson() {
+    return 1;
+  }
 
   @Override
   public String postText(String text) {

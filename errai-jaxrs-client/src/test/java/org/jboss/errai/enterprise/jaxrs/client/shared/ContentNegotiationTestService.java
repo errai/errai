@@ -49,6 +49,16 @@ public interface ContentNegotiationTestService {
   @Path("/long")
   @Produces("application/json")
   public long getLongAsJson();
+  
+  @GET
+  @Path("/int")
+  @Produces("text/plain")
+  public int getInt();
+  
+  @GET
+  @Path("/int")
+  @Produces("application/myapp+json")
+  public int getIntAsJson();
     
   @POST
   @Consumes("text/*")

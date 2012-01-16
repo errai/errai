@@ -22,7 +22,6 @@ import javax.ws.rs.HEAD;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
 /**
@@ -31,7 +30,6 @@ import javax.ws.rs.QueryParam;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Path("/test/queryparam")
-@Produces("text/plain")
 public interface QueryParamTestService {
 
   @GET
