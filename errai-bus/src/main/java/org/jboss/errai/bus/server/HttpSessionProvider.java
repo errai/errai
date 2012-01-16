@@ -25,7 +25,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
-import org.jboss.errai.bus.client.api.base.LaundryListProviderFactory;
+import org.jboss.errai.bus.client.api.laundry.LaundryListProviderFactory;
 import org.jboss.errai.bus.server.api.QueueSession;
 import org.jboss.errai.bus.server.api.SessionEndEvent;
 import org.jboss.errai.bus.server.api.SessionEndListener;
