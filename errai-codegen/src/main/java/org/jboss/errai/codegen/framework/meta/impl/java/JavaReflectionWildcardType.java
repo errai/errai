@@ -40,4 +40,8 @@ public class JavaReflectionWildcardType implements MetaWildcardType {
   public MetaType[] getUpperBounds() {
     return JavaReflectionUtil.fromTypeArray(wildcardType.getUpperBounds());
   }
+  
+  public String toString() {
+    return wildcardType.toString();
+  }
 }

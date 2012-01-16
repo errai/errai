@@ -40,4 +40,9 @@ public class GWTWildcardType implements MetaWildcardType {
   public MetaType[] getUpperBounds() {
     return GWTUtil.fromTypeArray(wildcardType.getUpperBounds());
   }
+
+  @Override
+  public String toString() {
+    return wildcardType.toString();
+  }
 }
