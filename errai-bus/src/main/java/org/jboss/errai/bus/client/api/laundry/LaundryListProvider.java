@@ -17,7 +17,8 @@
 package org.jboss.errai.bus.client.api.laundry;
 
 /**
- * The means of obtaining a {@link LaundryList} instance either on the client or the server.
+ * The means of obtaining a {@link LaundryList} instance either on the client or the server. LaundryListProviders should
+ * be obtained from the {@link LaundryListProviderFactory}.
  * 
  * @author Mike Brock
  * @author Jonathan Fuerth <jfuerth@redhat.com>

@@ -17,7 +17,7 @@
 package org.jboss.errai.bus.server.io;
 
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.framework.RoutingFlags;
+import org.jboss.errai.bus.client.framework.RoutingFlag;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.bus.server.api.QueueSession;
 import org.jboss.errai.marshalling.client.marshallers.ErraiProtocolEnvelopeMarshaller;
@@ -74,7 +74,7 @@ public class MessageFactory {
             .setResource("Session", session)
             .setResource("SessionID", session.getSessionId());
 
-    msg.setFlag(RoutingFlags.FromRemote);
+    msg.setFlag(RoutingFlag.FromRemote);
 
     return msg;
   }
@@ -99,7 +99,7 @@ public class MessageFactory {
             .setResource("SessionID", session.getSessionId())
             .setResource(HttpServletRequest.class.getName(), request);
 
-    msg.setFlag(RoutingFlags.FromRemote);
+    msg.setFlag(RoutingFlag.FromRemote);
 
     return msg;
   }

@@ -35,7 +35,7 @@ import org.jboss.errai.bus.client.api.laundry.LaundryListProviderFactory;
 import org.jboss.errai.bus.client.api.laundry.LaundryReclaim;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
-import org.jboss.errai.bus.client.framework.RoutingFlags;
+import org.jboss.errai.bus.client.framework.RoutingFlag;
 import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.common.client.protocols.MessageParts;
 
@@ -354,7 +354,7 @@ public class AbstractMessageBuilder<R extends Sendable> {
       }
 
       @Override
-      public MessageBuildParms<R> flag(RoutingFlags flag) {
+      public MessageBuildParms<R> flag(RoutingFlag flag) {
         message.setFlag(flag);
         return this;
       }

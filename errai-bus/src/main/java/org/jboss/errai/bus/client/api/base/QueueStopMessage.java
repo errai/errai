@@ -21,7 +21,7 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
-import org.jboss.errai.bus.client.framework.RoutingFlags;
+import org.jboss.errai.bus.client.framework.RoutingFlag;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.common.client.protocols.MessageParts;
 
@@ -74,11 +74,11 @@ public class QueueStopMessage implements Message {
     return null;
   }
 
-  public Message setProvidedPart(String part, ResourceProvider provider) {
+  public Message setProvidedPart(String part, ResourceProvider<?> provider) {
     return null;
   }
 
-  public Message setProvidedPart(Enum<?> part, ResourceProvider provider) {
+  public Message setProvidedPart(Enum<?> part, ResourceProvider<?> provider) {
     return null;
   }
 
@@ -114,7 +114,7 @@ public class QueueStopMessage implements Message {
     return null;
   }
 
-  public Message addAllProvidedParts(Map<String, ResourceProvider> provided) {
+  public Message addAllProvidedParts(Map<String, ResourceProvider<?>> provided) {
     return null;
   }
 
@@ -122,7 +122,7 @@ public class QueueStopMessage implements Message {
     return parts;
   }
 
-  public Map<String, ResourceProvider> getProvidedParts() {
+  public Map<String, ResourceProvider<?>> getProvidedParts() {
     return null;
   }
 
@@ -162,15 +162,15 @@ public class QueueStopMessage implements Message {
     return null;
   }
 
-  public void setFlag(RoutingFlags flag) {
+  public void setFlag(RoutingFlag flag) {
 
   }
 
-  public void unsetFlag(RoutingFlags flag) {
+  public void unsetFlag(RoutingFlag flag) {
 
   }
 
-  public boolean isFlagSet(RoutingFlags flag) {
+  public boolean isFlagSet(RoutingFlag flag) {
     return false;
   }
 

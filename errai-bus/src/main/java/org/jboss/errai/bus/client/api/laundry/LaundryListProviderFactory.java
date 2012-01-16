@@ -16,9 +16,8 @@
 
 package org.jboss.errai.bus.client.api.laundry;
 
-
-
 /**
+ * A factory to create instances of {@link LaundryListProvider}.
  * 
  * @author Mike Brock
  * @author Jonathan Fuerth <jfuerth@redhat.com>
@@ -54,11 +53,12 @@ public class LaundryListProviderFactory {
 
   /**
    * For internal use only. Do not call.
+   * <p>
+   * The first provider given wins. Subsequent calls have no effect.
    */
   public static void setLaundryListProvider(LaundryListProvider p) {
     synchronized (lock) {
       if (provider == null) {
-        // Attempt to initialize the laundrylist provider twice. Will be ignored
         provider = p;
       }
     }

@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
-import org.jboss.errai.bus.client.framework.RoutingFlags;
+import org.jboss.errai.bus.client.framework.RoutingFlag;
 import org.jboss.errai.bus.client.util.ErrorHelper;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
@@ -140,7 +140,7 @@ public class WorkerFactory {
    * @param m - message to be sent
    */
   public void deliver(Message m) throws InterruptedException {
-    m.setFlag(RoutingFlags.NonGlobalRouting);
+    m.setFlag(RoutingFlag.NonGlobalRouting);
     if (messages.offer(m, 30, java.util.concurrent.TimeUnit.SECONDS)) {
       return;
     }

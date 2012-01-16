@@ -26,128 +26,198 @@ import org.jboss.errai.bus.client.api.builder.MessageBuildSendableWithReply;
 import org.jboss.errai.bus.client.api.builder.MessageBuildSubject;
 import org.jboss.errai.bus.client.api.builder.MessageReplySendable;
 import org.jboss.errai.bus.client.framework.MessageProvider;
-import org.jboss.errai.bus.client.framework.RoutingFlags;
+import org.jboss.errai.bus.client.framework.RoutingFlag;
 
 /**
  * The MessageBuilder API provides a fluent method of building Messages.
- *
+ * 
+ * <strong>Example Message:</strong>
+ * 
+ * <pre>
+ * Message m = MessageBuilder
+ *     .createMessage()
+ *     .toSubject(&quot;TheMessageSubject&quot;)
+ *     .withValue(&quot;Hello everyone&quot;).done();
+ * </pre>
+ * <p>
+ * You can transmit a message using the the <tt>sendNowWith(RequestDispatcher)</tt> method by providing an instance of
+ * {@link org.jboss.errai.bus.client.framework.MessageBus}.
+ * <p>
+ * Messages can be constructed using user-defined standard protocols through the use of enumerations. Both
+ * <tt>commandType</tt> and message parts can be defined through the use of enumerations. This helps create
+ * strongly-defined protocols for communicating with services. For instance:
+ * 
+ * <pre>
+ * public enum LoginParts {
+ *    Username, Password
+ * }
+ * </pre>
+ * 
+ * .. and ..
+ * 
+ * <pre>
+ * public enum LoginCommands {
+ *    Login, Logout
+ * }
+ * </pre>
+ * 
+ * A service can then use these enumerations to build and decode messages. For example:
+ * 
+ * <pre>
+ * MessageBuilder
+ *     .createMessage()
+ *     .toSubject(&quot;LoginService&quot;)
+ *     .command(LoginCommands.Login)
+ *     .set(LoginParts.Username, &quot;foo&quot;)
+ *     .set(LoginParts.Password, &quot;bar&quot;)
+ *     .sendNowWith(busInstance);
+ * </pre>
+ * 
+ * Messages may contain serialized objects that are annotated with
+ * {@link org.jboss.errai.common.client.api.annotations.Portable} and can be marshalled by the built-in Errai
+ * marshallers or by user-provided marshallers that have been registered with the system.
+ * 
  * @author Mike Brock
  */
 public class MessageBuilder {
   private static MessageProvider provider = new MessageProvider() {
-      public Message get() {
-        return CommandMessage.create();
-      }
-    };
+    public Message get() {
+      return CommandMessage.create();
+    }
+  };
+
   /**
-   * Create a new message.
-   *
+   * Creates a new message.
+   * 
    * @return a <tt>MessageBuildSubject</tt> which essentially is a <tt>Message</tt>, but ensures that the user
    *         constructs messages properly
    */
-  @SuppressWarnings({"unchecked"})
+  @SuppressWarnings({ "unchecked" })
   public static MessageBuildSubject<MessageBuildSendableWithReply> createMessage() {
     return new AbstractMessageBuilder(provider.get()).start();
   }
-  
+
   /**
-   * Create a new message for the provided subject.
-   *
-   * @param subject - the subject the message should be sent to
+   * Creates a new message for the provided subject.
+   * 
+   * @param subject
+   *          the subject the message should be sent to
    * @return a <tt>MessageBuildSubject</tt> which essentially is a <tt>Message</tt>, but ensures that the user
    *         constructs messages properly
    */
-  @SuppressWarnings({"unchecked"})
+  @SuppressWarnings({ "unchecked" })
   public static MessageBuildCommand<MessageBuildSendableWithReply> createMessage(String subject) {
     return new AbstractMessageBuilder(provider.get()).start().toSubject(subject);
   }
 
   /**
-   * Create a conversational messages
-   *
-   * @param message - reference message to create conversation from
+   * Creates a conversational message.
+   * 
+   * @param message
+   *          reference message to create conversation from
    * @return a <tt>MessageBuildSubject</tt> which essentially is a <tt>Message</tt>, but ensures that the user
    *         constructs messages properly
    */
-  @SuppressWarnings({"unchecked"})
+  @SuppressWarnings({ "unchecked" })
   public static MessageBuildSubject<MessageReplySendable> createConversation(Message message) {
     Message newMessage = provider.get();
-    newMessage.setFlag(RoutingFlags.NonGlobalRouting);
-    if (newMessage instanceof HasEncoded) {
-      return new AbstractMessageBuilder<MessageReplySendable>(new HasEncodedConvMessageWrapper(message, newMessage)).start();
-    }
-    else {
-      return new AbstractMessageBuilder<MessageReplySendable>(new ConversationMessageWrapper(message, newMessage)).start();
-    }
-  }
-  
-  /**
-   * Create a conversational messages for the provided subject
-   *
-   * @param message - reference message to create conversation from
-   * @param subject - the subject the message should be sent to
-   * @return a <tt>MessageBuildSubject</tt> which essentially is a <tt>Message</tt>, but ensures that the user
-   *         constructs messages properly
-   */
-  @SuppressWarnings({"unchecked"})
-  public static MessageBuildCommand<MessageReplySendable> createConversation(Message message, String subject) {
-    Message newMessage = provider.get();
+    newMessage.setFlag(RoutingFlag.NonGlobalRouting);
     if (newMessage instanceof HasEncoded) {
       return new AbstractMessageBuilder<MessageReplySendable>(new HasEncodedConvMessageWrapper(message, newMessage))
-        .start()
-        .toSubject(subject);
+          .start();
     }
     else {
       return new AbstractMessageBuilder<MessageReplySendable>(new ConversationMessageWrapper(message, newMessage))
-        .start()
-      . toSubject(subject);
+          .start();
     }
   }
 
   /**
-   * Creates an <tt>AbstractRemoteCallBuilder</tt> to construct a call
-   *
+   * Creates a conversational message for the provided subject.
+   * 
+   * @param message
+   *          reference message to create conversation from
+   * @param subject
+   *          the subject the message should be sent to
+   * @return a <tt>MessageBuildSubject</tt> which essentially is a <tt>Message</tt>, but ensures that the user
+   *         constructs messages properly
+   */
+  @SuppressWarnings({ "unchecked" })
+  public static MessageBuildCommand<MessageReplySendable> createConversation(Message message, String subject) {
+    Message newMessage = provider.get();
+    if (newMessage instanceof HasEncoded) {
+      return new AbstractMessageBuilder<MessageReplySendable>(new HasEncodedConvMessageWrapper(message, newMessage))
+          .start()
+          .toSubject(subject);
+    }
+    else {
+      return new AbstractMessageBuilder<MessageReplySendable>(new ConversationMessageWrapper(message, newMessage))
+          .start()
+          .toSubject(subject);
+    }
+  }
+
+  /**
+   * Creates an <tt>AbstractRemoteCallBuilder</tt> to construct a call.
+   * 
    * @return an instance of <tt>AbstractRemoteCallBuilder</tt>
    */
   public static AbstractRemoteCallBuilder createCall() {
     return new AbstractRemoteCallBuilder(CommandMessage.create());
   }
-  
+
   /**
-   * Creates an RPC call.
-   *
-   * @param callback -
-   * @param service  -
-   * @param <T>      -
-   * @param <R>      -
-   * @return -
+   * Creates an RPC call, with no error handling.
+   * 
+   * @param callback
+   *          The remote callback that receives the return value from the call. Cannot not be null.
+   * @param service
+   *          The remote interface.
+   * @param <T>
+   *          The type of the remote service.
+   * @param <R>
+   *          The return type of the invoked method.
+   * @return A proxy for the remote service. Methods invoked on this object will communicate with the remote service
+   *         over the message bus.
    */
   public static <R, T> T createCall(RemoteCallback<R> callback, Class<T> service) {
     return new AbstractRemoteCallBuilder(CommandMessage.create()).call(callback, service);
   }
-  
+
   /**
-   * Creates an RPC call with an ErrorCallback.
-   *
-   * @param callback -
-   * @param service  -
-   * @param <T>      -
-   * @param <R>      -
-   * @return -
+   * Creates an RPC call with error handling.
+   * 
+   * @param callback
+   *          The remote callback that receives the return value from the call. Cannot not be null.
+   * @param errorCallback
+   *          The error callback that receives transmission errors and exceptions thrown by the remote service. Cannot not be null.
+   * @param service
+   *          The remote interface.
+   * @param <T>
+   *          The type of the remote service.
+   * @param <R>
+   *          The return type of the invoked method.
+   * @return A proxy for the remote service. Methods invoked on this object will communicate with the remote service
+   *         over the message bus.
    */
   public static <R, T> T createCall(RemoteCallback<R> callback, ErrorCallback errorCallback, Class<T> service) {
     return new AbstractRemoteCallBuilder(CommandMessage.create()).call(callback, errorCallback, service);
   }
 
   /**
-   * Sets the message provide for this instance of <tt>MessageBuilder</tt>
-   *
-   * @param provider - to set this' provider to
+   * Sets the message provider for this instance of <tt>MessageBuilder</tt>.
+   * 
+   * @param provider  to set this' provider to
    */
   public static void setMessageProvider(MessageProvider provider) {
     MessageBuilder.provider = provider;
   }
 
+  /**
+   * Returns the message provider.
+   * 
+   * @return the message provider used by this instance of <tt>MessageBuilder</tt>.
+   */
   public static MessageProvider getMessageProvider() {
     return provider;
   }
