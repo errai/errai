@@ -115,6 +115,9 @@ public class EventObserverTestModule {
     if (events == null)
       events = new ArrayList<String>();
 
+    if (events.contains(event))
+      throw new RuntimeException(receiver + " received " + event + " twice!");
+    
     events.add(event);
     receivedEvents.put(receiver, events);
   }

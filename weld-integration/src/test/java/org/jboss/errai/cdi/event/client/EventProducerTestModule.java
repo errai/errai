@@ -169,6 +169,9 @@ public class EventProducerTestModule {
     if (events == null)
       events = new ArrayList<String>();
     
+    if (events.contains(event))
+      throw new RuntimeException(event.getReceiver() + " received " + event.getEvent() + " twice!");
+    
     events.add(event.getEvent());
     receivedEventsOnServer.put(event.getReceiver(), events);
   }

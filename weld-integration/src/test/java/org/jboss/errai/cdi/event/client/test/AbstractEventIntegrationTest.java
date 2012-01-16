@@ -63,7 +63,7 @@ public abstract class AbstractEventIntegrationTest extends AbstractErraiCDITest 
    * @param actualEvents
    */
   protected void verifyEvents(Map<String, List<String>> actualEvents) {
-    // These asserts could be skipped but provide nicer error messages
+    // These asserts could be combined but provide nicer failure messages this way
     assertEquals("Wrong events observed for @{}", expectedEvents.get(""), actualEvents.get(""));
     assertEquals("Wrong events observed for @A", expectedEvents.get("A"), actualEvents.get("A"));
     assertEquals("Wrong events observed for @B", expectedEvents.get("B"), actualEvents.get("B"));
@@ -73,8 +73,5 @@ public abstract class AbstractEventIntegrationTest extends AbstractErraiCDITest 
     assertEquals("Wrong events observed for @AC", expectedEvents.get("AC"), actualEvents.get("AC"));
     assertEquals("Wrong events observed for @BC", expectedEvents.get("BC"), actualEvents.get("BC"));
     assertEquals("Wrong events observed for @ABC", expectedEvents.get("ABC"), actualEvents.get("ABC"));
-
-    // Compare the whole map to make sure we haven't received any additional events 
-    assertEquals("Wrong events observed", expectedEvents, actualEvents);
   }
 }
