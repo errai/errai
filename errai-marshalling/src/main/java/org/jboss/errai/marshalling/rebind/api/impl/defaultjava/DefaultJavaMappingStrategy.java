@@ -315,7 +315,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
   }
 
   private int calcBufferSize(List<MappingDefinition> stack, MappingDefinition definition) {
-    int bufSize = 512;
+    int bufSize = 128;
 
     if (!stack.contains(definition)) {
       stack.add(definition);

@@ -393,7 +393,12 @@ public class ServerMarshallingTest {
   @Test
   public void testSTypeEntity() {
     SType sType = SType.create(new ServerRandomProvider());
+
+//    long st = System.currentTimeMillis();
+//    for (int i = 0; i < 10000; i++) {
     testEncodeDecodeDynamic(sType);
+    //  }
+//    System.out.println(System.currentTimeMillis() - st);
   }
 
   @Test
