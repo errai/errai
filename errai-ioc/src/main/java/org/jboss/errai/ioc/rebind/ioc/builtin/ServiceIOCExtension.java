@@ -16,6 +16,7 @@
 
 package org.jboss.errai.ioc.rebind.ioc.builtin;
 
+import org.jboss.errai.bus.client.api.annotations.Local;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.codegen.framework.meta.impl.gwt.GWTClass;
@@ -27,6 +28,8 @@ import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.util.Stmt;
+
+import java.lang.annotation.Annotation;
 
 @CodeDecorator
 public class ServiceIOCExtension extends IOCDecoratorExtension<Service> {
@@ -51,7 +54,20 @@ public class ServiceIOCExtension extends IOCDecoratorExtension<Service> {
     final String svcName = decContext.getAnnotation().value().equals("")
             ? decContext.getMemberName() : decContext.getAnnotation().value();
 
-    return Stmt.nestedCall(busHandle)
-            .invoke("subscribe", svcName, decContext.getValueStatement());
+    boolean local = false;
+    for (Annotation a : decContext.getQualifiers()) {
+      if (Local.class.equals(a.annotationType())) {
+        local = true;
+      }
+    }
+
+    if (local) {
+     return Stmt.nestedCall(busHandle)
+             .invoke("subscribeLocal", svcName, decContext.getValueStatement());
+    }
+    else {
+      return Stmt.nestedCall(busHandle)
+              .invoke("subscribe", svcName, decContext.getValueStatement());
+    }
   }
 }

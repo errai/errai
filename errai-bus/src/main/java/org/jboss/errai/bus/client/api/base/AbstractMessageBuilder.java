@@ -125,6 +125,7 @@ public class AbstractMessageBuilder<R extends Sendable> {
         Message msg = getIncomingMessage();
 
         message.copyResource("Session", msg);
+        message.copyResource(RequestDispatcher.class.getName(), msg);
 
         try {
           dispatcher.dispatch(message);

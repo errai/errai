@@ -16,6 +16,7 @@
 
 package org.jboss.errai.bus.client.api.annotations;
 
+import javax.inject.Qualifier;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -34,5 +35,6 @@ import java.lang.annotation.RetentionPolicy;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @java.lang.annotation.Target({ElementType.FIELD, ElementType.TYPE, ElementType.METHOD})
+@Qualifier
 public @interface Local {
 }

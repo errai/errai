@@ -564,7 +564,11 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
   private void delayOrFail(Message message, final Runnable deliveryTaskRunnable) {
     if (message.isFlagSet(RoutingFlag.RetryDelivery) && message.getResource(Integer.class, RETRY_COUNT_KEY) > 3) {
-      throw new NoSubscribersToDeliverTo(message.getSubject());
+      NoSubscribersToDeliverTo ntdt = new NoSubscribersToDeliverTo(message.getSubject());
+      if (message.getErrorCallback() != null) {
+        message.getErrorCallback().error(message, ntdt);
+      }
+      throw ntdt;
     }
     message.setFlag(RoutingFlag.RetryDelivery);
     if (!message.hasResource(RETRY_COUNT_KEY)) {
@@ -575,6 +579,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
       @Override
       public void run() {
+
         deliveryTaskRunnable.run();
       }
     }, 250, TimeUnit.MILLISECONDS);

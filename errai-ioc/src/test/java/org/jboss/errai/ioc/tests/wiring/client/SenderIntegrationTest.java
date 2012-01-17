@@ -6,10 +6,13 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.annotations.Local;
 import org.jboss.errai.bus.client.api.annotations.ReplyTo;
 import org.jboss.errai.bus.client.api.annotations.ToSubject;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.tests.AbstractErraiTest;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.common.client.protocols.MessageParts;
@@ -37,7 +40,7 @@ public class SenderIntegrationTest extends AbstractErraiTest {
     @ToSubject("ListCapitializationService")
     @ReplyTo("ClientListService")
     Sender<List<String>> replySender;
-    
+
     @Inject
     @ToSubject("EmptyReplyService")
     Sender<List<String>> noReplySender;
@@ -53,16 +56,17 @@ public class SenderIntegrationTest extends AbstractErraiTest {
       latestResponse = message.get(List.class, MessageParts.Value);
     }
   }
-  
+
   @Service
   public static class TestCompleterService implements MessageCallback {
     static boolean replyReceived = false;
-    
+
     @Override
     public void callback(Message message) {
       replyReceived = true;
     }
   }
+
 
   @Override
   public void gwtSetUp() throws Exception {
@@ -81,8 +85,6 @@ public class SenderIntegrationTest extends AbstractErraiTest {
             finishTest();
           }
         }.schedule(1000);
-
-
       }
     });
   }
@@ -111,7 +113,7 @@ public class SenderIntegrationTest extends AbstractErraiTest {
       }
     });
   }
-  
+
   public void testSenderWithoutReplyTo() {
     runAfterInit(new Runnable() {
       @Override
@@ -135,5 +137,8 @@ public class SenderIntegrationTest extends AbstractErraiTest {
       }
     });
   }
+
+
+
 
 }
