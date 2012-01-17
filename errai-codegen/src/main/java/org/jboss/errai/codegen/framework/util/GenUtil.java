@@ -176,7 +176,7 @@ public class GenUtil {
   }
 
   public static String classesAsStrings(MetaClass... stmt) {
-    StringBuilder buf = new StringBuilder();
+    StringBuilder buf = new StringBuilder(128);
     for (int i = 0; i < stmt.length; i++) {
       buf.append(stmt[i].getFullyQualifiedName());
       if (i + 1 < stmt.length) {

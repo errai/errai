@@ -32,7 +32,7 @@ public class CallWriter {
   }
 
   public void reset() {
-    buffer = new StringBuilder();
+    buffer = new StringBuilder(128);
   }
 
   public String getCallString() {

@@ -65,7 +65,7 @@ public class AssignmentBuilder implements Statement {
   private String generateIndexes(Context context, Statement[] indexes) {
     if (indexes==null || indexes.length == 0) return "";
    
-    StringBuilder buf = new StringBuilder();
+    StringBuilder buf = new StringBuilder(128);
     for (Statement index : indexes) {
       buf.append("[").append(index.generate(context)).append("]");
     }

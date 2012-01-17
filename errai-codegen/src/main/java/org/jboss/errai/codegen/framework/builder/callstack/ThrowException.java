@@ -47,7 +47,7 @@ public class ThrowException extends AbstractCallElement {
     statement = new AbstractStatement() {
       @Override
       public String generate(Context context) {
-        StringBuilder buf = new StringBuilder();
+        StringBuilder buf = new StringBuilder(64);
         buf.append("throw ");
         if (throwableType != null) {
           buf.append(ObjectBuilder.newInstanceOf(throwableType).withParameters(parameters).generate(context));

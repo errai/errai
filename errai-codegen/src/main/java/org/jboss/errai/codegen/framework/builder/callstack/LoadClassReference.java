@@ -141,7 +141,7 @@ public class LoadClassReference extends AbstractCallElement {
 
     if (result == null) {
 
-      StringBuilder buf = new StringBuilder();
+      StringBuilder buf = new StringBuilder(64);
 
       if (parameterizedType != null && parameterizedType.getTypeParameters().length != 0) {
         buf.append("<");

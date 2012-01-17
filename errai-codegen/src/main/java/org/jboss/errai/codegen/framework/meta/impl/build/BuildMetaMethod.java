@@ -249,7 +249,7 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
     for (Parameter p : defParameters.getParameters()) {
       context.addVariable(Variable.create(p.getName(), p.getType()));
     }
-    StringBuilder buf = new StringBuilder().append(scope.getCanonicalName())
+    StringBuilder buf = new StringBuilder(256).append(scope.getCanonicalName())
             .append(" ");
 
     buf.append(modifiers.toJavaString()).append(" ");

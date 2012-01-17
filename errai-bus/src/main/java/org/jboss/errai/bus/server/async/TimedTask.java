@@ -81,29 +81,6 @@ public abstract class TimedTask implements Runnable, Comparable<TimedTask>, Asyn
     return cancelled;
   }
 
-  /**
-   * Runs the task if the specified time is greater than the tasks runtime, and the task is still enabled. If the
-   * next runtime for the task shall happen before <tt>time</tt>, nothing is done or changed
-   *
-   * @param time - the time in which the task should be run
-   * @return true if the task was run
-   */
-  public boolean runIfDue(long time) {
-    synchronized (this) {
-      if (isDue(time)) {
-        if (nextRuntime == -1) {
-          return false;
-        }
-        calculateNextRuntime();
-        run();
-
-        if (exitHandler != null) exitHandler.run();
-        return true;
-      }
-      return false;
-    }
-  }
-
   public boolean calculateNextRuntime() {
     synchronized (this) {
       if (!cancelled && period != -1) {

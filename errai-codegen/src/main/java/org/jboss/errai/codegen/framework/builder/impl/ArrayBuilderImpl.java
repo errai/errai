@@ -85,7 +85,7 @@ public class ArrayBuilderImpl extends AbstractStatementBuilder implements ArrayB
   public String generate(Context context) {
     if (generatorCache != null) return generatorCache;
 
-    StringBuilder buf = new StringBuilder();
+    StringBuilder buf = new StringBuilder(128);
     buf.append("new ").append(LoadClassReference.getClassReference(componentType, context));
 
     if (values != null) {

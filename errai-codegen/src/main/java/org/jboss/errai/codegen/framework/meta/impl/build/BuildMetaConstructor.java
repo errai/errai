@@ -238,7 +238,7 @@ public class BuildMetaConstructor extends MetaConstructor implements Builder {
       context.addVariable(Variable.create(p.getName(), p.getType()));
     }
 
-    return generatedCache = new StringBuilder().append(scope.getCanonicalName())
+    return generatedCache = new StringBuilder(512).append(scope.getCanonicalName())
             .append(" ")
             .append(declaringClass.getName())
             .append(defParameters.generate(context))

@@ -60,7 +60,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   private String getTypeParmsString(MetaParameterizedType parameterizedType) {
-    StringBuilder buf = new StringBuilder();
+    StringBuilder buf = new StringBuilder(512);
 
     if (parameterizedType != null && parameterizedType.getTypeParameters().length != 0) {
       buf.append("<");

@@ -45,7 +45,7 @@ public class ForeachLoop extends AbstractStatement {
   public String generate(Context context) {
     if (generatedCache != null) return generatedCache;
 
-    StringBuilder buf = new StringBuilder();
+    StringBuilder buf = new StringBuilder(256);
 
     buf.append("for (").append(LoadClassReference.getClassReference(loopVar.getType(), context))
         .append(" ").append(loopVar.getName())

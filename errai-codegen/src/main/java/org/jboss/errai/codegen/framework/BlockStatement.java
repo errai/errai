@@ -49,7 +49,7 @@ public class BlockStatement extends AbstractStatement {
   public String generate(Context context) {
     if (generatedCache != null) return generatedCache;
     
-    StringBuilder buf = new StringBuilder();
+    StringBuilder buf = new StringBuilder(512);
 
     boolean lastIsBlock = false;
     for (Statement statement : statements) {

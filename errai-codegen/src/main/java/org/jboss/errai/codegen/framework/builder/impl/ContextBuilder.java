@@ -115,7 +115,7 @@ public class ContextBuilder implements Builder {
   @Override
   public String toJavaString() {
     Collection<Variable> vars = context.getDeclaredVariables();
-    StringBuilder buf = new StringBuilder();
+    StringBuilder buf = new StringBuilder(128);
 
     for (Variable var : vars) {
       buf.append(var.generate(context)).append(";\n");

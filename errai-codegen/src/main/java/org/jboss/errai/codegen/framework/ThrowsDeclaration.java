@@ -55,7 +55,7 @@ public class ThrowsDeclaration extends AbstractStatement {
   @Override
   public String generate(Context context) {
     if (generatedCache != null) return generatedCache;
-    StringBuilder buf = new StringBuilder();
+    StringBuilder buf = new StringBuilder(128);
     for (int i = 0; i < exceptionTypes.length; i++) {
       if (i == 0) {
         buf.append("throws ");

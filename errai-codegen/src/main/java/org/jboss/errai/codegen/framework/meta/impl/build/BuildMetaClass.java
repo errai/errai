@@ -493,7 +493,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   public String toJavaString() {
     if (generatedCache != null) return generatedCache;
 
-    StringBuilder buf = new StringBuilder();
+    StringBuilder buf = new StringBuilder(512);
 
     context.addVariable(Variable.create("this", this));
 
@@ -529,7 +529,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
 
     buf.append(membersToString());
 
-    StringBuilder headerBuffer = new StringBuilder();
+    StringBuilder headerBuffer = new StringBuilder(128);
 
     if (!getPackageName().isEmpty() && !isInner)
       headerBuffer.append("package ").append(getPackageName()).append(";\n");
@@ -547,7 +547,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   }
 
   public String membersToString() {
-    StringBuilder buf = new StringBuilder();
+    StringBuilder buf = new StringBuilder(512);
     Iterator<? extends Builder> iter = fields.iterator();
     while (iter.hasNext()) {
       buf.append(iter.next().toJavaString());

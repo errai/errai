@@ -50,7 +50,7 @@ public class DefModifiers implements Builder {
 
   @Override
   public String toJavaString() {
-    StringBuilder sbuf = new StringBuilder();
+    StringBuilder sbuf = new StringBuilder(128);
 
     for (Modifier m : modifiers) {
       sbuf.append(m.getCanonicalString()).append(" ");

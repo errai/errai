@@ -61,7 +61,7 @@ public class AnonymousClassStructureBuilderImpl
                 addCallable(new DeferredGenerateCallback() {
                   @Override
                   public String doGenerate(Context context) {
-                    StringBuilder buf = new StringBuilder();
+                    StringBuilder buf = new StringBuilder(256);
                     buf.append("{\n");
                     if (statement != null) {
                       buf.append(statement.generate(Context.create(context))).append("\n");
@@ -97,7 +97,7 @@ public class AnonymousClassStructureBuilderImpl
                       subContext.addVariable(Variable.create(parm.getName(), parm.getType()));
                     }
 
-                    StringBuilder buf = new StringBuilder();
+                    StringBuilder buf = new StringBuilder(256);
                     String returnType = getClassReference(method.getReturnType(), context);
 
                     buf.append("public ").append(returnType)
@@ -167,7 +167,7 @@ public class AnonymousClassStructureBuilderImpl
       Context subContext = Context.create(context);
       subContext.addVariable(Variable.create("this", getClassDefinition()));
 
-      StringBuilder buf = new StringBuilder();
+      StringBuilder buf = new StringBuilder(256);
       for (DeferredGenerateCallback c : callables) {
         buf.append(c.doGenerate(subContext));
         buf.append('\n');
