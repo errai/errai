@@ -27,22 +27,53 @@ public interface MessageBuildSendableDispatcher extends MessageBuildSendable {
 
 
   /**
-   * Sends the message with the specified <tt>RequestDispatcher</tt>
+   * Sends the message with the specified <tt>RequestDispatcher</tt>.
    *
-   * @param viaThis - the dispatcher to send the message with
+   * @param viaThis
+   *          the dispatcher to send the message with, usually obtained in
+   *          client code via Errai IOC dependency injection.
    */
   public void sendNowWith(RequestDispatcher viaThis);
 
   /**
-   * Sends the message globally with the specified <tt>RequestDispatcher</tt>
+   * Sends the message globally with the specified <tt>RequestDispatcher</tt>.
    *
-   * @param viaThis - the dispatcher to send the message with
+   * @param viaThis
+   *          the dispatcher to send the message with, usually obtained in
+   *          client code via Errai IOC dependency injection.
    */
   public void sendGlobalWith(RequestDispatcher viaThis);
 
-
+  /**
+   * Sends the message periodically with the specified
+   * <tt>RequestDispatcher</tt>.
+   *
+   * @param viaThis
+   *          the dispatcher to send the message with, usually obtained in
+   *          client code via Errai IOC dependency injection.
+   * @param unit
+   *          The time unit that {@code interval} should be interpreted as.
+   * @param interval
+   *          The amount of time to wait between message retransmissions (units
+   *          specified by the {@code unit} parameter).
+   * @return A handle on the repeating task which can be used to cancel it.
+   */
   public AsyncTask sendRepeatingWith(RequestDispatcher viaThis, TimeUnit unit, int interval);
 
+  /**
+   * Sends the message after a specified delay with the specified
+   * <tt>RequestDispatcher</tt>.
+   *
+   * @param viaThis
+   *          the dispatcher to send the message with, usually obtained in
+   *          client code via Errai IOC dependency injection.
+   * @param unit
+   *          The time unit that {@code interval} should be interpreted as.
+   * @param interval
+   *          The amount of time to wait before sending the message (units
+   *          specified by the {@code unit} parameter).
+   * @return A handle on the repeating task which can be used to cancel it.
+   */
   public AsyncTask sendDelayedWith(RequestDispatcher viaThis, TimeUnit unit, int interval);
 
 }
