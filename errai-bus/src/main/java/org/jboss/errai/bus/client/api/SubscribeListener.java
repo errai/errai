@@ -16,17 +16,21 @@
 
 package org.jboss.errai.bus.client.api;
 
+import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.SubscriptionEvent;
 
 /**
- * A listener that is fired when a new subscription is registered on the bus.
+ * Callback interface for receiving notifications when a new subscription is
+ * registered on the bus.
+ *
+ * @see MessageBus#addSubscribeListener(SubscribeListener)
  */
 public interface SubscribeListener {
 
   /**
-   * Function is called when a new subscription is registered on the bus
+   * Called when a new subscription is registered on the bus.
    *
-   * @param event - the subscription event that occurred
+   * @param event the subscription event that occurred. Never null.
    */
   public void onSubscribe(SubscriptionEvent event);
 }

@@ -16,11 +16,30 @@
 
 package org.jboss.errai.bus.client.api;
 
+import org.jboss.errai.bus.client.framework.BooleanRoutingRule;
+
+
+// TODO create tests for usage of this interface
+
 /**
- * Listens to a message and makes a routing decision.
- *
- * @see org.jboss.errai.bus.client.framework.BooleanRoutingRule
+ * Callback interface for observing every message on the bus before that message
+ * is sent to any {@link MessageCallback message callbacks}. A MessageListener
+ * can cancel delivery of a message.
+ * <p>
+ * If your goal is to implement security policies around messages to a
+ * particular subject, {@link BooleanRoutingRule} is a better choice than
+ * MessageListener.
  */
 public interface MessageListener {
+
+  /**
+   * Called by the Message Bus before the given message is routed to any
+   * MessageListeners.
+   *
+   * @param message
+   *          The message being processed by the bus.
+   * @return true if delivery of {@code message} should be allowed to proceed;
+   *         false if {@code message} must not be delivered.
+   */
   public boolean handleMessage(Message message);
 }
