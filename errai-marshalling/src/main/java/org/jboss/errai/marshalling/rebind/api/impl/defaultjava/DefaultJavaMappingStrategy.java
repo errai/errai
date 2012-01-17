@@ -49,6 +49,7 @@ import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.typeParame
 import static org.jboss.errai.codegen.framework.util.Implementations.newStringBuilder;
 import static org.jboss.errai.codegen.framework.util.Stmt.declareVariable;
 import static org.jboss.errai.codegen.framework.util.Stmt.loadVariable;
+import static org.jboss.errai.codegen.framework.util.Stmt.newObject;
 
 /**
  * The Errai default Java-to-JSON-to-Java marshaling strategy.
@@ -306,11 +307,40 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
   public Statement extractJSONObjectProperty(String fieldName, MetaClass fromType) {
     if (fromType.getFullyQualifiedName().equals(EJObject.class.getName())) {
-    return loadVariable("obj").invoke("get", fieldName);
+      return loadVariable("obj").invoke("get", fieldName);
     }
     else {
       return Stmt.nestedCall(Cast.to(fromType, loadVariable("a0"))).invoke("get", fieldName);
     }
+  }
+
+  private int calcBufferSize(List<MappingDefinition> stack, MappingDefinition definition) {
+    int bufSize = 512;
+
+    if (!stack.contains(definition)) {
+      stack.add(definition);
+
+      for (MemberMapping mapping : definition.getMemberMappings()) {
+        MappingDefinition def = context.getDefinitionsFactory().getDefinition(mapping.getType());
+
+        if (def == null) {
+          if (mapping.getType().isArray()) {
+            def = context.getDefinitionsFactory().getDefinition(mapping.getType().getOuterComponentType().asBoxed());
+
+            if (def == null) {
+              System.out.println("not found: " + mapping.getType().getOuterComponentType());
+            }
+            
+            bufSize += (calcBufferSize(stack, def)) * 4;
+          }
+
+          continue;
+        }
+
+        bufSize += calcBufferSize(stack, def);
+      }
+    }
+    return bufSize;
   }
 
   public void marshallToJSON(BlockBuilder<?> builder, MetaClass toType, MappingDefinition definition) {
@@ -324,7 +354,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
     );
 
     if (toMap.isEnum()) {
-      builder.append(Stmt.nestedCall(marshallEnum(newStringBuilder(), Stmt.loadVariable("a0"), toMap))
+      builder.append(Stmt.nestedCall(marshallEnum(newStringBuilder(256), Stmt.loadVariable("a0"), toMap))
               .invoke("toString").returnValue());
       return;
     }
@@ -332,15 +362,18 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
     // builder.append(Stmt.declareVariable(String.class).named("objId").finish());
 
-    Implementations.StringBuilderBuilder sb = newStringBuilder().append("{")
-            .append(keyValue(SerializationParts.ENCODED_TYPE, string(toType.getFullyQualifiedName()))).append(",")
-            .append(string(SerializationParts.OBJECT_ID) + ":\"").append(loadVariable("objId")).append("\"");
+    int bufSize = calcBufferSize(new ArrayList<MappingDefinition>(), definition);
+
+
+    Implementations.StringBuilderBuilder sb = newStringBuilder(bufSize)
+            .append("{" + keyValue(SerializationParts.ENCODED_TYPE, string(toType.getFullyQualifiedName())) + "," +
+                    string(SerializationParts.OBJECT_ID) + ":\"").append(loadVariable("objId")).append("\"");
 
     builder.append(
             Stmt.if_(Bool.expr(loadVariable("a1").invoke("hasObjectHash", loadVariable("a0"))))
                     .append(declareVariable(String.class).named("objId").initializeWith(loadVariable("a1").invoke("getObjectHash", Stmt.loadVariable("a0"))))
-                    .append(Stmt.nestedCall(newStringBuilder().append("{")
-                            .append(keyValue(SerializationParts.ENCODED_TYPE, string(toType.getFullyQualifiedName()))).append(",")
+                    .append(Stmt.nestedCall(newStringBuilder(128).append("{"
+                             + keyValue(SerializationParts.ENCODED_TYPE, string(toType.getFullyQualifiedName()))).append(",")
                             .append(string(SerializationParts.OBJECT_ID) + ":\"")
                             .append(loadVariable("objId"))
                             .append("\"}")).invoke("toString").returnValue())

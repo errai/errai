@@ -70,8 +70,12 @@ public class Implementations {
   }
 
   public static StringBuilderBuilder newStringBuilder() {
+    return newStringBuilder(64);
+  }
+  
+  public static StringBuilderBuilder newStringBuilder(int length) {
     final ContextualStatementBuilder statementBuilder
-            = Stmt.nestedCall(Stmt.newObject(StringBuilder.class));
+            = Stmt.nestedCall(Stmt.newObject(StringBuilder.class).withParameters(length));
 
     return new StringBuilderBuilder() {
 

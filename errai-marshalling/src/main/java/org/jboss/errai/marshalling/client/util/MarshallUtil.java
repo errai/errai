@@ -103,7 +103,7 @@ public class MarshallUtil {
 
 
   public static String jsonStringEscape(final String s) {
-    StringBuilder sb = new StringBuilder();
+    StringBuilder sb = new StringBuilder(s.length());
     for (int i = 0; i < s.length(); i++) {
       jsonStringEscape(sb, s.charAt(i));
     }
@@ -111,16 +111,12 @@ public class MarshallUtil {
   }
 
   public static String jsonStringEscape(final char ch) {
-    return jsonStringEscape(new StringBuilder(), ch);
-  }
-  
-  
-  private final int charLowRange = 'a';
-  private static final boolean encodingRequired(char c) {
-    return true;
+    StringBuilder sb = new StringBuilder(5);
+    jsonStringEscape(sb, ch);
+    return sb.toString();
   }
 
-  public static String jsonStringEscape(StringBuilder sb, final char ch) {
+  public static void jsonStringEscape(StringBuilder sb, final char ch) {
     switch (ch) {
       case '"':
         sb.append("\\\"");
@@ -148,7 +144,6 @@ public class MarshallUtil {
         break;
       default:
         if ((ch >= '\u0000' && ch <= '\u001F') || (ch >= '\u007F' && ch <= '\u009F')
-                //  || (ch >= '\u2000' && ch <= '\u20FF')) {
                 || (ch >= '\u2000')) {
 
           String ss = Integer.toHexString(ch);
@@ -162,6 +157,5 @@ public class MarshallUtil {
           sb.append(ch);
         }
     }
-    return sb.toString();
   }
 }

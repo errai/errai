@@ -393,9 +393,8 @@ public class ServerMarshallingTest {
   @Test
   public void testSTypeEntity() {
     SType sType = SType.create(new ServerRandomProvider());
-
     testEncodeDecodeDynamic(sType);
-  }  
+  }
 
   @Test
   public void testPrimitiveIntRoundTrip() {
@@ -403,21 +402,21 @@ public class ServerMarshallingTest {
     String json = ServerMarshalling.toJSON(val);
     Assert.assertEquals("Failed to marshall/demarshall int", val, ServerMarshalling.fromJSON(json));
   }
-  
+
   @Test
   public void testPrimitiveLongRoundTrip() {
     final long val = 1701l;
     String json = ServerMarshalling.toJSON(val);
     Assert.assertEquals("Failed to marshall/demarshall long", val, ServerMarshalling.fromJSON(json));
   }
-  
+
   @Test
   public void testPrimitiveDoubleRoundTrip() {
     final double val = 17.01;
     String json = ServerMarshalling.toJSON(val);
     Assert.assertEquals("Failed to marshall/demarshall double", val, ServerMarshalling.fromJSON(json));
   }
-  
+
   @Test
   public void testPrimitiveFloatRoundTrip() {
     final float val = 1701f;
