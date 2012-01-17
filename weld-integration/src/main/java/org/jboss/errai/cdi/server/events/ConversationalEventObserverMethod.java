@@ -20,7 +20,7 @@ import java.lang.annotation.Annotation;
 
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.client.framework.RoutingFlags;
+import org.jboss.errai.bus.client.framework.RoutingFlag;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
@@ -50,13 +50,13 @@ public class ConversationalEventObserverMethod extends EventObserverMethod {
                 .with(MessageParts.SessionID.name(), ctx.getSession())
                 .with(CDIProtocol.TYPE, type.getName()).with(CDIProtocol.QUALIFIERS, qualifierForWire)
                 .with(CDIProtocol.OBJECT_REF, event)
-                .flag(RoutingFlags.NonGlobalRouting).noErrorHandling().sendNowWith(bus);
+                .flag(RoutingFlag.NonGlobalRouting).noErrorHandling().sendNowWith(bus);
       }
       else {
         MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
                 .with(MessageParts.SessionID.name(), ctx.getSession())
                 .with(CDIProtocol.TYPE, type.getName()).with(CDIProtocol.OBJECT_REF, event)
-                .flag(RoutingFlags.NonGlobalRouting).noErrorHandling()
+                .flag(RoutingFlag.NonGlobalRouting).noErrorHandling()
                 .sendNowWith(bus);
       }
     }
