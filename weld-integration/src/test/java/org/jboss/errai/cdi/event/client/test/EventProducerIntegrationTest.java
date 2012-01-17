@@ -35,7 +35,7 @@ public class EventProducerIntegrationTest extends AbstractEventIntegrationTest {
   }
 
   public void testEventProducers() {
-    EventProducerTestModule.getInstance().setResultVerifier(new Runnable() {
+    final Runnable verifier = new Runnable() {
       public void run() {
         Map<String, List<String>> actualEvents = EventProducerTestModule.getInstance().getReceivedEventsOnServer();
 
@@ -43,12 +43,13 @@ public class EventProducerIntegrationTest extends AbstractEventIntegrationTest {
         EventProducerIntegrationTest.this.verifyEvents(actualEvents);
         finishTest();
       }
-    });
+    };
 
     CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
         if (EventProducerTestModule.getInstance().getBusReadyEventsReceived()) {
+          EventProducerTestModule.getInstance().setResultVerifier(verifier);
           EventProducerTestModule.getInstance().fireAll();
         }
         else {
@@ -57,6 +58,8 @@ public class EventProducerIntegrationTest extends AbstractEventIntegrationTest {
       }
     });
 
+    // only used for the case the {@see FinishEvent} was not received.
+    verifyInBackupTimer(verifier, 120000);
     delayTestFinish(240000);
   }
 }

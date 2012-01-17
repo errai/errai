@@ -31,7 +31,7 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
   }
 
   public void testEventObservers() {
-    EventObserverTestModule.getInstance().setResultVerifier(new Runnable() {
+    final Runnable verifier = new Runnable() {
       public void run() {
         Map<String, List<String>> actualEvents = EventObserverTestModule.getInstance().getReceivedEvents();
 
@@ -39,16 +39,19 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
         EventObserverIntegrationTest.this.verifyEvents(actualEvents);
         finishTest();
       }
-    });
+    };
 
     CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
         assertNotNull(EventObserverTestModule.getInstance().getStartEvent());
+        EventObserverTestModule.getInstance().setResultVerifier(verifier);
         EventObserverTestModule.getInstance().start();
       }
     });
-
+    
+    // only used for the case the {@see FinishEvent} was not received
+    verifyInBackupTimer(verifier, 120000);
     delayTestFinish(240000);
   }
 }
