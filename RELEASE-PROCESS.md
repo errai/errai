@@ -21,7 +21,7 @@ after each step as we go.
 Release Steps
 -------------
 
-These steps need to executed for both Errai and Errai-CDI:
+These steps need to executed for Errai, Errai-CDI and Errai-JAXRS:
 
 1. Run the test suite. Ensure all tests pass.
    % mvn -PenableTests test
