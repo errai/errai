@@ -16,19 +16,45 @@
 
 package org.jboss.errai.bus.client.api.base;
 
+import org.jboss.errai.bus.client.api.AsyncTask;
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.HasAsyncTaskRef;
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.common.client.framework.Assert;
 
+/**
+ * An error callback decorator for repeating tasks which automatically cancels
+ * them when they cause an error. Can also be used on its own, without wrapping
+ * another error callback.
+ */
 public class AsyncDelegateErrorCallback implements ErrorCallback {
-  private HasAsyncTaskRef asyncTaskRef;
-  private ErrorCallback delegate;
+  private final HasAsyncTaskRef asyncTaskRef;
+  private final ErrorCallback delegate;
 
-  public AsyncDelegateErrorCallback(HasAsyncTaskRef ref, ErrorCallback delegate) {
-    this.asyncTaskRef = ref;
+  /**
+   * Creates an error callback that optionally wraps another error callback. In
+   * either case, future executions of the given task will be cancelled.
+   *
+   * @param task
+   *          The task whose failures will be handled by this wrapper callback.
+   *          Must not be null.
+   * @param delegate
+   *          The ErrorCallback that should be wrapped. Can be null, in which
+   *          case errors in executions of {@code task} are logged to System.out.
+   */
+  public AsyncDelegateErrorCallback(HasAsyncTaskRef task, ErrorCallback delegate) {
+    this.asyncTaskRef = Assert.notNull(task);
     this.delegate = delegate;
   }
 
+  /**
+   * Cancels future executions of the task by calling
+   * {@link AsyncTask#cancel(boolean)} on the AsyncTask that controls its execution.
+   *
+   * @return the value returned by the delegate error handler's
+   *         <code>error()</code> method. If there is no delegate, the return
+   *         value is always {@code true}.
+   */
   @Override
   public boolean error(Message message, Throwable throwable) {
     if (asyncTaskRef.getAsyncTask() == null) {
@@ -39,7 +65,7 @@ public class AsyncDelegateErrorCallback implements ErrorCallback {
     }
 
     if (delegate == null) {
-      throwable.printStackTrace();
+      throwable.printStackTrace(System.out);
       return true;
     }
     else {

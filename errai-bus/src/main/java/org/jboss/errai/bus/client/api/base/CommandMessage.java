@@ -16,27 +16,28 @@
 
 package org.jboss.errai.bus.client.api.base;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.framework.RoutingFlag;
+import org.jboss.errai.common.client.api.ResourceProvider;
+import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.common.client.types.TypeHandlerFactory;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * The default implementation of the Message interface. The usual way to create a CommandMessage is through the
  * {@link MessageBuilder} API.
- * <p/>
- * 
+ *
  * @see ConversationMessage
  * @see MessageBuilder
+ * @author Mike Brock
  */
-@SuppressWarnings({ "UnusedDeclaration" })
+@SuppressWarnings({"UnusedDeclarations"})
 public class CommandMessage implements Message {
   protected transient Map<String, ResourceProvider<?>> providedParts;
   protected Map<String, Object> parts;
@@ -45,9 +46,6 @@ public class CommandMessage implements Message {
   protected int routingFlags;
 
   /**
-   * @param commandType
-   *          -
-   * @return -
    * @deprecated Please use the MessageBuilder class.
    */
   @Deprecated
@@ -56,9 +54,6 @@ public class CommandMessage implements Message {
   }
 
   /**
-   * @param commandType
-   *          -
-   * @return -
    * @deprecated Please use the MessageBuilder class.
    */
   @Deprecated
@@ -67,26 +62,52 @@ public class CommandMessage implements Message {
   }
 
   /**
-   * Create a new CommandMessage.
-   * 
-   * @return a new instance of CommandMessage
+   * Creates a new CommandMessage with no parts and no provided parts.
+   *
+   * @return a new instance of CommandMessage.
    */
   static CommandMessage create() {
     return new CommandMessage();
   }
 
   /**
-   * For internal use. This method should not be directly used.
+   * Creates a new CommandMessage with the given parts and no provided parts.
+   * <p>
+   * Note that {@link MessageBuilder} is the preferred API for creating Message
+   * instances.
+   *
+   * @param parts
+   *          The parts that this message should have initially. This map is
+   *          taken as-is. No copy is made. Changes to the provided map will be
+   *          reflected in this message, and additional parts given to this
+   *          message will appear in the provided map.
    */
   public static CommandMessage createWithParts(Map<String, Object> parts) {
-    return new CommandMessage(parts);
+    return new CommandMessage(Assert.notNull(parts));
   }
 
+  /**
+   * Creates a new CommandMessage with the given parts and provided parts.
+   * <p>
+   * Note that {@link MessageBuilder} is the preferred API for creating Message
+   * instances.
+   *
+   * @param parts
+   *          The parts that this message should have initially. This map is
+   *          taken as-is. No copy is made. Changes to the provided map will be
+   *          reflected in this message, and additional parts given to this
+   *          message will appear in the provided map.
+   * @param provided
+   *          The provided parts that this message should have initially. This
+   *          map is taken as-is. No copy is made. Changes to the provided map
+   *          will be reflected in this message, and additional parts given to
+   *          this message will appear in the provided map.
+   */
   public static CommandMessage createWithParts(Map<String, Object> parts, Map<String, ResourceProvider<?>> provided) {
     return new CommandMessage(parts, provided);
   }
 
-  public CommandMessage() {
+  CommandMessage() {
     this.parts = new HashMap<String, Object>();
     this.providedParts = new HashMap<String, ResourceProvider<?>>();
   }
@@ -332,22 +353,6 @@ public class CommandMessage implements Message {
   @Override
   public String toString() {
     return buildDescription();
-  }
-
-  public Map<String, Object> getResources() {
-    return resources;
-  }
-
-  public void setResources(Map<String, Object> resources) {
-    this.resources = resources;
-  }
-
-  public ErrorCallback getErrorsCall() {
-    return errorsCall;
-  }
-
-  public void setErrorsCall(ErrorCallback errorsCall) {
-    this.errorsCall = errorsCall;
   }
 
   public int getRoutingFlags() {

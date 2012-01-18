@@ -29,7 +29,7 @@ import org.jboss.errai.common.client.api.ResourceProvider;
  * <p>
  * Message instances are normally created with the help of {@link MessageBuilder}, but individual Message
  * implementations may also be created directly if desired.
- * 
+ *
  * @author Mike Brock
  * @author Jonathan Fuerth <jfuerth@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -38,7 +38,7 @@ public interface Message {
 
   /**
    * Sets the subject of this message, which is the intended recipient, and returns the message.
-   * 
+   *
    * @param subject
    *          the intended recipient of the message.
    * @return this message.
@@ -47,7 +47,7 @@ public interface Message {
 
   /**
    * Returns the message's subject.
-   * 
+   *
    * @return this message's subject (its intended recipient).
    */
   public String getSubject();
@@ -55,7 +55,7 @@ public interface Message {
   /**
    * Sets the command type for this message. Command is an optional extension for creating services that can respond to
    * different specific commands.
-   * 
+   *
    * @param type
    *          <tt>String</tt> representation of a command type.
    * @return this message.
@@ -65,7 +65,7 @@ public interface Message {
   /**
    * Set the command type for this message. Command is an optional extension for creating services that can respond to
    * different specific commands.
-   * 
+   *
    * @param type
    *          <tt>Enum</tt> representation of a command type.
    * @return this message.
@@ -74,14 +74,14 @@ public interface Message {
 
   /**
    * Returns the command type for this message as a <tt>String</tt>.
-   * 
+   *
    * @return the command type.
    */
   public String getCommandType();
 
   /**
    * Sets a Message part to the specified value.
-   * 
+   *
    * @param part
    *          The <tt>String</tt> name of the message part.
    * @param value
@@ -92,7 +92,7 @@ public interface Message {
 
   /**
    * Sets a Message part to the specified value.
-   * 
+   *
    * @param part
    *          The <tt>Enum</tt> representation of the message part.
    * @param value
@@ -103,7 +103,7 @@ public interface Message {
 
   /**
    * Adds or replaces a message part whose value is recomputed every time the message is sent.
-   * 
+   *
    * @param part
    *          The name of the message part.
    * @param provider
@@ -115,7 +115,7 @@ public interface Message {
 
   /**
    * Adds or replaces a message part whose value is recomputed every time the message is sent.
-   * 
+   *
    * @param part
    *          The <tt>Enum</tt> representation of the message part.
    * @param provider
@@ -127,7 +127,7 @@ public interface Message {
 
   /**
    * Checks if message contains the specified part.
-   * 
+   *
    * @param part
    *          <tt>String</tt> part to check for.
    * @return true if message contains {@code part}.
@@ -136,7 +136,7 @@ public interface Message {
 
   /**
    * Checks if message contains the specified part.
-   * 
+   *
    * @param part
    *          <tt>Enum</tt> part to check for.
    * @return true if message contains {@code part}.
@@ -145,7 +145,7 @@ public interface Message {
 
   /**
    * Removes specified part from the message.
-   * 
+   *
    * @param part
    *          the part to remove.
    */
@@ -153,7 +153,7 @@ public interface Message {
 
   /**
    * Removes specified part from the message.
-   * 
+   *
    * @param part
    *          the part to remove.
    */
@@ -161,47 +161,51 @@ public interface Message {
 
   /**
    * Copies a part of this message to another message.
-   * 
+   *
    * @param part
    *          the part of this message to copy.
    * @param m
-   *          the message to copy the part to.
+   *          the message to copy the part to. Must not be null.
    * @return this message
    */
   public Message copy(String part, Message m);
 
   /**
    * Copies a part of this message to another message.
-   * 
+   *
    * @param part
    *          the part of this message to copy.
    * @param m
-   *          the message to copy the part to.
+   *          the message to copy the part to. Must not be null.
    * @return this message
    */
   public Message copy(Enum<?> part, Message m);
 
   /**
-   * Sets the message to contain the specified parts. Note: This overwrites any existing message contents.
-   * 
+   * Sets the message to contain the specified parts. This overwrites any
+   * existing message contents.
+   * <p>
+   * Implementations may or may not create a defensive copy of the given map.
+   * Check their documentation to be sure.
+   *
    * @param parts
-   *          Parts to be used in the message.
+   *          Parts to be used in the message. Must not be null.
    * @return this message
    */
   public Message setParts(Map<String, Object> parts);
 
   /**
    * Copies in a set of message parts from the provided map.
-   * 
+   *
    * @param parts
-   *          Parts to be added to the message.
+   *          Parts to be added to the message. Must not be null.
    * @return this message
    */
   public Message addAllParts(Map<String, Object> parts);
 
   /**
    * Copies in a set of provided message parts from the provided maps
-   * 
+   *
    * @param provided
    *          provided parts to be added to the message
    * @return this message
@@ -210,21 +214,21 @@ public interface Message {
 
   /**
    * Returns a Map of all the specified parts.
-   * 
+   *
    * @return a Map of the message parts.
    */
   public Map<String, Object> getParts();
 
   /**
    * Returns a Map of all provided parts.
-   * 
+   *
    * @return a Map of the provided message parts.
    */
   public Map<String, ResourceProvider<?>> getProvidedParts();
 
   /**
    * Adds the Map of resources to the message.
-   * 
+   *
    * @param resources
    *          Map of resource
    */
@@ -233,7 +237,7 @@ public interface Message {
   /**
    * Sets a transient resource. A resource is not transmitted beyond the current bus scope. It can be used for managing
    * the lifecycle of a message within a bus.
-   * 
+   *
    * @param key
    *          Name of resource.
    * @param res
@@ -244,7 +248,7 @@ public interface Message {
 
   /**
    * Obtains a transient resource based on the specified key.
-   * 
+   *
    * @param type
    *          type of resource.
    * @param key
@@ -255,7 +259,7 @@ public interface Message {
 
   /**
    * Returns true if the specified transient resource is present.
-   * 
+   *
    * @param key
    *          Name of resource.
    * @return boolean value indicating if the specified resource is present in the message.
@@ -264,7 +268,7 @@ public interface Message {
 
   /**
    * Copies a transient resource to this message from the specified message.
-   * 
+   *
    * @param key  Name of resource.
    * @param m  Message to copy from.
    * @return this message.
@@ -273,7 +277,7 @@ public interface Message {
 
   /**
    * Sets the error callback for this message.
-   * 
+   *
    * @param callback  error callback.
    * @return this message.
    */
@@ -281,7 +285,7 @@ public interface Message {
 
   /**
    * Gets the error callback for this message.
-   * 
+   *
    * @return the error callback
    */
   public ErrorCallback getErrorCallback();
@@ -289,7 +293,7 @@ public interface Message {
   /**
    * Gets the specified message part in the specified type. A <tt>ClassCastException</tt> is thrown if the value cannot
    * be coerced to the specified type.
-   * 
+   *
    * @param type
    *          Type to be returned.
    * @param part
@@ -303,7 +307,7 @@ public interface Message {
   /**
    * Gets the specified message part in the specified type. A <tt>ClassCastException</tt> is thrown if the value cannot
    * be coerced to the specified type.
-   * 
+   *
    * @param type
    *          Type to be returned.
    * @param part
@@ -315,22 +319,22 @@ public interface Message {
   public <T> T get(Class<T> type, Enum<?> part);
 
   /**
-   * Sets the provided flag for this message. 
-   * 
+   * Sets the provided flag for this message.
+   *
    * @param flags  message routing flag
    */
   public void setFlag(RoutingFlag flag);
 
   /**
    * Unsets the provided flag for this message.
-   * 
+   *
    * @param flag  message routing flag
    */
   public void unsetFlag(RoutingFlag flag);
 
   /**
    * Checks if the provided flag is set for this message.
-   * 
+   *
    * @param flag  message routing flag.
    * @return true if the flag is set, otherwise false.
    */
@@ -347,14 +351,14 @@ public interface Message {
   /**
    * Returns true if the message has been committed. Any changes made to a message after it has been committed may not be
    * transmitted.
-   * 
+   *
    * @return returns true if committed.
    */
   public boolean isCommited();
 
   /**
    * Transmits this message to the specified {@link MessageBus} instance.
-   * 
+   *
    * @param viaThis
    *          <tt>MessageBus</tt> instance to send message to
    */
@@ -362,7 +366,7 @@ public interface Message {
 
   /**
    * Transmits this message using the specified {@link org.jboss.errai.bus.client.framework.RequestDispatcher}.
-   * 
+   *
    * @param viaThis
    *          <tt>RequestDispatcher</tt> instance to send message to
    */

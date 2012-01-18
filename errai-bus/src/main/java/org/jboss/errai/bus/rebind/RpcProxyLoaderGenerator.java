@@ -19,13 +19,10 @@ package org.jboss.errai.bus.rebind;
 import java.io.File;
 import java.io.PrintWriter;
 
-import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.bus.client.framework.RpcProxyLoader;
 import org.jboss.errai.bus.server.annotations.Remote;
-import org.jboss.errai.codegen.framework.Cast;
 import org.jboss.errai.codegen.framework.InnerClass;
 import org.jboss.errai.codegen.framework.Parameter;
 import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
@@ -48,7 +45,7 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 /**
  * Generates the implementation of {@link RpcProxyLoader}.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class RpcProxyLoaderGenerator extends Generator {
@@ -114,7 +111,7 @@ public class RpcProxyLoaderGenerator extends Generator {
 
     MethodBlockBuilder<?> loadProxies =
             classBuilder.publicMethod(void.class, "loadProxies", Parameter.of(MessageBus.class, "bus", true));
-    
+
     MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
     for (Class<?> remote : scanner.getTypesAnnotatedWith(Remote.class)) {
       if (remote.isInterface()) {
@@ -126,9 +123,6 @@ public class RpcProxyLoaderGenerator extends Generator {
                 remote, Stmt.newObject(remoteProxy.getClassDefinition())));
       }
     }
-
-//    loadProxies.append(Stmt.nestedCall(Cast.to(ClientMessageBus.class, Stmt.invokeStatic(ErraiBus.class, "get")))
-//            .invoke("voteForInit"));
 
     classBuilder = (ClassStructureBuilder<?>) loadProxies.finish();
 

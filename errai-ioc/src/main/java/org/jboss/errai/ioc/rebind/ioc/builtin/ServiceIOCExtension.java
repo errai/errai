@@ -16,20 +16,17 @@
 
 package org.jboss.errai.ioc.rebind.ioc.builtin;
 
-import org.jboss.errai.bus.client.api.annotations.Local;
+import java.lang.annotation.Annotation;
+
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.codegen.framework.meta.impl.gwt.GWTClass;
+import org.jboss.errai.bus.server.api.Local;
+import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
-import org.jboss.errai.codegen.framework.Statement;
-import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
-import org.jboss.errai.codegen.framework.util.Stmt;
-
-import java.lang.annotation.Annotation;
 
 @CodeDecorator
 public class ServiceIOCExtension extends IOCDecoratorExtension<Service> {

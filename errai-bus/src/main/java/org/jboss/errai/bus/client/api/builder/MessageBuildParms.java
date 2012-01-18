@@ -45,10 +45,10 @@ public interface MessageBuildParms<R> extends MessageBuild {
    */
   public MessageBuildParms<R> with(String part, Object value);
 
-  
+
   public MessageBuildParms<R> flag(RoutingFlag flag);
-  
-  
+
+
   /**
    * Sets the message part to the specified value
    *
@@ -56,12 +56,12 @@ public interface MessageBuildParms<R> extends MessageBuild {
    * @param value - the value of the message part
    * @return the updated instance of <tt>MessageBuildParms</tt>
    */
-  public MessageBuildParms<R> with(Enum part, Object value);
+  public MessageBuildParms<R> with(Enum<?> part, Object value);
 
 
   public MessageBuildParms<R> withProvided(String part, ResourceProvider provider);
 
-  public MessageBuildParms<R> withProvided(Enum part, ResourceProvider provider);
+  public MessageBuildParms<R> withProvided(Enum<?> part, ResourceProvider provider);
 
   /**
    * Copies the message part to the specified message
@@ -79,7 +79,7 @@ public interface MessageBuildParms<R> extends MessageBuild {
    * @param m    - the message
    * @return the updated instance of <tt>MessageBuildParms</tt>
    */
-  public MessageBuildParms<R> copy(Enum part, Message m);
+  public MessageBuildParms<R> copy(Enum<?> part, Message m);
 
   /**
    * Copies the message resource to the specified message

@@ -40,16 +40,15 @@ import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.common.client.protocols.MessageParts;
 
 /**
- * The <tt>AbstractMessageBuilder</tt> facilitates the building of a message,
- * and ensures that it is created and used properly.
+ * Part of the implementation of the fluent API whose entry point is {@link MessageBuilder}.
  *
  * @author Mike Brock
  */
-@SuppressWarnings({"unchecked", "ConstantConditions"})
-public class AbstractMessageBuilder<R extends Sendable> {
+@SuppressWarnings({"ConstantConditions"})
+class DefaultMessageBuilder<R extends Sendable> {
   private final Message message;
 
-  public AbstractMessageBuilder(Message message) {
+  public DefaultMessageBuilder(Message message) {
     this.message = message;
   }
 
@@ -59,8 +58,9 @@ public class AbstractMessageBuilder<R extends Sendable> {
    *
    * @return the <tt>MessageBuildSubject</tt> with the appropriate fields
    *         and functions for the message builder
+   *         @param T the inter
    */
-  public MessageBuildSubject start() {
+  public MessageBuildSubject<R> start() {
     final Sendable sendable = new MessageReplySendable() {
       boolean reply = false;
 
@@ -326,7 +326,7 @@ public class AbstractMessageBuilder<R extends Sendable> {
 
     final MessageBuildCommand<R> parmBuilder = new MessageBuildCommand<R>() {
       @Override
-      public MessageBuildParms<R> command(Enum command) {
+      public MessageBuildParms<R> command(Enum<?> command) {
         message.command(command);
         return this;
       }
@@ -361,7 +361,7 @@ public class AbstractMessageBuilder<R extends Sendable> {
       }
 
       @Override
-      public MessageBuildParms<R> with(Enum part, Object value) {
+      public MessageBuildParms<R> with(Enum<?> part, Object value) {
         message.set(part, value);
         return this;
       }
@@ -373,7 +373,7 @@ public class AbstractMessageBuilder<R extends Sendable> {
       }
 
       @Override
-      public MessageBuildParms<R> withProvided(Enum part, ResourceProvider provider) {
+      public MessageBuildParms<R> withProvided(Enum<?> part, ResourceProvider provider) {
         message.setProvidedPart(part, provider);
         return this;
       }
@@ -385,7 +385,7 @@ public class AbstractMessageBuilder<R extends Sendable> {
       }
 
       @Override
-      public MessageBuildParms<R> copy(Enum part, Message m) {
+      public MessageBuildParms<R> copy(Enum<?> part, Message m) {
         message.copy(part, m);
         return this;
       }
@@ -426,7 +426,7 @@ public class AbstractMessageBuilder<R extends Sendable> {
     };
 
 
-    return new MessageBuildSubject() {
+    return new MessageBuildSubject<R>() {
       @Override
       public MessageBuildCommand<R> toSubject(String subject) {
         message.toSubject(subject);

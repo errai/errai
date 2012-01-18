@@ -22,8 +22,12 @@ import java.util.Map;
 public class RemoteServiceProxyFactory implements ProxyProvider {
   private static Map<Class, Object> remoteProxies = new HashMap<Class, Object>();
 
+  @Override
   @SuppressWarnings({"unchecked"})
   public <T> T getRemoteProxy(Class<T> proxyType) {
+    if (remoteProxies.isEmpty()) {
+      throw new RuntimeException("There are no remote proxies registered yet. If this error is encountered on the server, ");
+    }
     return (T) remoteProxies.get(proxyType);
   }
 

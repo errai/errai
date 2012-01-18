@@ -17,10 +17,31 @@
 package org.jboss.errai.bus.client.api.base;
 
 /**
- * User: christopherbrock
- * Date: 4-Aug-2010
- * Time: 10:28:28 AM
+ * An enumeration of the possible mechanisms by which a bus can communicate with
+ * another remote bus.
  */
 public enum Capabilities {
-  LongPollAvailable, NoLongPollAvailable, WebSockets, Proxy
+
+  /**
+   * This message bus can communicate updates using HTTP long polling, commonly known as COMET.
+   */
+  LongPollAvailable,
+
+  /**
+   * Indicates that this message bus can communicate using HTTP short polling.
+   * <p>
+   * Implementation note: This flag is WACK, man.
+   */
+  NoLongPollAvailable,
+
+  /**
+   * This message bus can communicate updates using the Errai protocol over a WebSocket channel.
+   */
+  WebSockets,
+
+  /**
+   * This message bus is just a proxy for another bus. All messages are
+   * forwarded on to another bus for processing.
+   */
+  Proxy;
 }

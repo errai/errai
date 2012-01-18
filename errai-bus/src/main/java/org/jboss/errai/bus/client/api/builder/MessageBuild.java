@@ -16,17 +16,21 @@
 package org.jboss.errai.bus.client.api.builder;
 
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
 
 /**
- * This interface, <tt>MessageBuild</tt> is the template for creating any message builders. The message builders
+ * Part of the fluent API centered around {@link MessageBuilder}.
+ * <p>
+ * This interface is the template for creating any message builders. The message builders
  * ensure that all messages are properly created with all appropriate fields
  */
 public interface MessageBuild extends Sendable {
 
   /**
-   * Gets the message created
+   * Gets the message created.
    *
-   * @return the message in question
+   * @return the message in question.
    */
+  @Override
   Message getMessage();
 }

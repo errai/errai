@@ -24,10 +24,10 @@ import org.jboss.errai.bus.client.api.base.MessageBuilder;
  * @see MessageBuilder#createCall()
  * @see MessageBuilder#createCall(RemoteCallback, Class)
  * @see MessageBuilder#createCall(RemoteCallback, ErrorCallback, Class)
- * @param <T>
+ * @param <R>
  *          type of response the callback expects. Use {@link Void} for methods returning {@code void}.
  */
-public interface RemoteCallback<T> {
+public interface RemoteCallback<R> {
 
   // TODO consider merging in ErrorCallback here
 
@@ -39,5 +39,5 @@ public interface RemoteCallback<T> {
    *          the response returned from the remote call. Will be null if the
    *          remote method returns null or has a void return type.
    */
-  public void callback(T response);
+  public void callback(R response);
 }

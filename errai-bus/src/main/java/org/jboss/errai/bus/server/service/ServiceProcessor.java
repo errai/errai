@@ -15,16 +15,18 @@
  */
 package org.jboss.errai.bus.server.service;
 
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.server.io.*;
-import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.bus.client.api.TaskManager;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.TaskManagerFactory;
-import org.jboss.errai.bus.client.api.builder.AbstractRemoteCallBuilder;
+import org.jboss.errai.bus.client.api.builder.DefaultRemoteCallBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.ProxyProvider;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
@@ -36,19 +38,24 @@ import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.annotations.security.RequireAuthentication;
 import org.jboss.errai.bus.server.annotations.security.RequireRoles;
 import org.jboss.errai.bus.server.api.Local;
+import org.jboss.errai.bus.server.io.CommandBindingsCallback;
+import org.jboss.errai.bus.server.io.ConversationalEndpointCallback;
+import org.jboss.errai.bus.server.io.EndpointCallback;
+import org.jboss.errai.bus.server.io.RemoteServiceCallback;
+import org.jboss.errai.bus.server.io.ServiceInstanceProvider;
 import org.jboss.errai.bus.server.security.auth.rules.RolesRequiredRule;
 import org.jboss.errai.bus.server.service.bootstrap.BootstrapContext;
 import org.jboss.errai.bus.server.service.bootstrap.GuiceProviderProxy;
+import org.jboss.errai.common.client.api.ResourceProvider;
+import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.common.metadata.MetaDataProcessor;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 /**
  * @author: Heiko Braun <hbraun@redhat.com>
@@ -57,6 +64,7 @@ import java.util.Set;
 public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
   private Logger log = LoggerFactory.getLogger(ServiceProcessor.class);
 
+  @Override
   public void process(final BootstrapContext context, MetaDataScanner reflections) {
     final ErraiServiceConfiguratorImpl config = (ErraiServiceConfiguratorImpl) context.getConfig();
     final Set<Class<?>> services = reflections.getTypesAnnotatedWithExcluding(Service.class, MetaDataScanner.CLIENT_PKG_REGEX);
@@ -158,7 +166,7 @@ public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
       Map<String, MessageCallback> epts = new HashMap<String, MessageCallback>();
 
       final Object targetService = svc;
-      
+
       // we scan for endpoints
       for (final Method method : loadClass.getDeclaredMethods()) {
         if (method.isAnnotationPresent(Endpoint.class)) {
@@ -243,16 +251,15 @@ public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
 
     context.getBus().subscribe(remoteIface.getName() + ":RPC", new RemoteServiceCallback(epts));
 
-    new ProxyProvider() {
-      {
-        AbstractRemoteCallBuilder.setProxyFactory(this);
-      }
 
-      public <T> T getRemoteProxy(Class<T> proxyType) {
-        throw new RuntimeException("This API is not supported in the server-side environment.");
-      }
-    };
-    
+    // note: this method just exists because we want AbstractRemoteCallBuilder to be package private.
+    DefaultRemoteCallBuilder.setProxyFactory(Assert.notNull(new ProxyProvider() {
+          @Override
+          public <T> T getRemoteProxy(Class<T> proxyType) {
+            throw new RuntimeException("There is not yet an available Errai RPC implementation for the server-side environment.");
+          }
+        }));
+
     return svc;
   }
 }
