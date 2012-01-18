@@ -22,6 +22,8 @@ import org.jboss.errai.bus.server.api.ServerMessageBus;
 /**
  * The <tt>ErraiService</tt> is a minimal template for what is needed. It facilitates the ability to store a message,
  * obtain the server bus and configuration
+ *
+ * @param S The type of user session managed by this Errai Service
  */
 public interface ErraiService<S> extends ServiceComposite<S> {
   public static final String AUTHORIZATION_SVC_SUBJECT = "AuthenticationService";

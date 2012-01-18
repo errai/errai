@@ -16,14 +16,15 @@
 
 package org.jboss.errai.bus.server;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import static org.jboss.errai.bus.client.util.ErrorHelper.handleMessageDeliveryFailure;
+
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.server.service.ErraiService;
 
-import static org.jboss.errai.bus.client.util.ErrorHelper.handleMessageDeliveryFailure;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 /**
  * Simple request dispatcher implementation.
@@ -39,6 +40,7 @@ public class SimpleDispatcher implements RequestDispatcher {
     this.bus = svc.getBus();
   }
 
+  @Override
   public void dispatchGlobal(Message message) {
     try {
       bus.sendGlobal(message);
@@ -52,6 +54,7 @@ public class SimpleDispatcher implements RequestDispatcher {
     }
   }
 
+  @Override
   public void dispatch(Message message) {
     try {
       bus.send(message);
@@ -63,9 +66,5 @@ public class SimpleDispatcher implements RequestDispatcher {
       message.setResource("Exception", e.getCause());
       handleMessageDeliveryFailure(bus, message, "Error calling remote service: " + message.getSubject(), e, false);
     }
-  }
-
-  @Override
-  public void stopDispatcher() {
   }
 }
