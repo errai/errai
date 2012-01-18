@@ -63,7 +63,6 @@ public class LocalServiceIntegrationTest extends AbstractErraiTest {
     }
   }
 
-
   public void testLocalSemanticsOnSubject() {
     runAfterInit(new Runnable() {
       @Override
