@@ -16,17 +16,21 @@
 
 package org.jboss.errai.bus.client.api;
 
+import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.SubscriptionEvent;
 
 /**
- * A listener that is fired when a subject is unsubscribed from the bus.
+ * Callback interface for receiving notifications when a subscription is
+ * de-registered on the bus.
+ *
+ * @see MessageBus#addUnsubscribeListener(UnsubscribeListener)
  */
 public interface UnsubscribeListener {
 
   /**
-   * Function is called when a subscription is deregistered from the bus
+   * Called when a subscription is de-registered from the bus.
    *
-   * @param event - the subscription event that occurred
+   * @param event event describing the subscription cancellation.
    */
   public void onUnsubscribe(SubscriptionEvent event);
 }

@@ -1,25 +1,20 @@
 package org.jboss.errai.ioc.tests.wiring.client;
 
-import java.util.Arrays;
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import org.jboss.errai.bus.client.ErraiBus;
+import com.google.gwt.user.client.Timer;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.api.annotations.Local;
-import org.jboss.errai.bus.client.api.annotations.ReplyTo;
-import org.jboss.errai.bus.client.api.annotations.ToSubject;
-import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.tests.AbstractErraiTest;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.ioc.client.Container;
+import org.jboss.errai.ioc.client.api.ReplyTo;
 import org.jboss.errai.ioc.client.api.Sender;
+import org.jboss.errai.ioc.client.api.ToSubject;
 
-import com.google.gwt.user.client.Timer;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.Arrays;
+import java.util.List;
 
 public class SenderIntegrationTest extends AbstractErraiTest {
 

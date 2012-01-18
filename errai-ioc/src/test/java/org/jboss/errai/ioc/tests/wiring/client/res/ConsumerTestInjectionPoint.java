@@ -16,10 +16,10 @@
 
 package org.jboss.errai.ioc.tests.wiring.client.res;
 
-import org.jboss.errai.bus.client.api.annotations.ReplyTo;
-import org.jboss.errai.bus.client.api.annotations.ToSubject;
 import org.jboss.errai.ioc.client.api.EntryPoint;
+import org.jboss.errai.ioc.client.api.ReplyTo;
 import org.jboss.errai.ioc.client.api.Sender;
+import org.jboss.errai.ioc.client.api.ToSubject;
 import org.jboss.errai.ioc.tests.wiring.client.SenderIntegrationTest;
 
 import javax.inject.Inject;

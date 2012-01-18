@@ -30,10 +30,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.api.PreInitializationListener;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.MessageListener;
+import org.jboss.errai.bus.client.api.PreInitializationListener;
 import org.jboss.errai.bus.client.api.SessionExpirationListener;
 import org.jboss.errai.bus.client.api.SubscribeListener;
 import org.jboss.errai.bus.client.api.UnsubscribeListener;
@@ -113,6 +113,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   /* Map of subjects to subscriptions  */
 //  private Map<String, List<Object>> subscriptions;
 
+  // TODO remove "shadow" from everything in this class that has "shadow" in its name
   private Map<String, List<MessageCallback>> shadowSubscriptions =
           new HashMap<String, List<MessageCallback>>();
 
@@ -250,7 +251,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     if (!postInit) {
       final DeferredSubscription detachedSubscripton = new DeferredSubscription();
-      
+
       postInitTasks.add(new Runnable() {
         @Override
         public void run() {
@@ -467,6 +468,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     shadowSubscriptions.remove(subject);
   }
 
+  // TODO delete this method
   private void resubscribeShadowSubcriptions() {
     for (Map.Entry<String, List<MessageCallback>> entry : shadowSubscriptions.entrySet()) {
       for (MessageCallback callback : entry.getValue()) {
@@ -721,6 +723,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * Initializes the message bus, by subscribing to the ClientBus (to receive subscription messages) and the
    * ClientErrorBus to dispatch errors when called.
    */
+  @Override
   public void init() {
     declareDebugFunction();
 

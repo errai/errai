@@ -17,10 +17,26 @@
 package org.jboss.errai.bus.client.api;
 
 /**
- * Callback interface that is notified before the bus begins its initialization task. Also called during reconnect.
- * 
+ * Callback interface that is notified before the client bus begins its
+ * initialization tasks. Also called after the server becomes unreachable, after
+ * {@link SessionExpirationListener SessionExpirationListeners} are notified
+ * that the previous session has expired, but before each time the bus begins an
+ * attempt to reconnect to the server and establish a new session.
+ * <p>
+ * This callback is primarily of use to framework-style extensions to Errai, and
+ * is not expected to be of great value when creating applications directly on
+ * top of Errai.
+ *
+ * @see SessionExpirationListener
+ *
  * @author Mike Brock
  */
 public interface PreInitializationListener {
+
+  /**
+   * Called by the client message bus before it attempts communication with the
+   * server, or after server connectivity has been lost and before a
+   * reconnection attempt is made.
+   */
   public void beforeInitialization();
 }

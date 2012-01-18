@@ -16,9 +16,19 @@
 
 package org.jboss.errai.bus.client.api;
 
+import org.jboss.errai.bus.client.framework.ClientMessageBus;
+
 /**
- * @author Mike Brock .
+ * Callback interface for receiving notifications that the connection to the
+ * server has become unavailable.
+ *
+ * @see ClientMessageBus#addSessionExpirationListener(SessionExpirationListener)
+ * @author Mike Brock
  */
 public interface SessionExpirationListener {
+
+  /**
+   * Called when the server becomes unreachable.
+   */
   public void onSessionExpire();
 }

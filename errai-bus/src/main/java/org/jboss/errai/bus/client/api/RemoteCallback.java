@@ -16,21 +16,28 @@
 
 package org.jboss.errai.bus.client.api;
 
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
+
 /**
- * Interface for a remote callback that takes any specified type. Instances of
- * RemoteCallback are typically obtained from an injected {@link Caller}.
+ * Callback interface for receiving the response of an RPC call.
  *
+ * @see MessageBuilder#createCall()
+ * @see MessageBuilder#createCall(RemoteCallback, Class)
+ * @see MessageBuilder#createCall(RemoteCallback, ErrorCallback, Class)
  * @param <T>
- *          type of response the callback expects
+ *          type of response the callback expects. Use {@link Void} for methods returning {@code void}.
  */
 public interface RemoteCallback<T> {
+
+  // TODO consider merging in ErrorCallback here
 
   /**
    * Invoked by the RPC proxy after the remote method has been executed and its
    * response has been received.
    *
    * @param response
-   *          the response returned from the remote call.
+   *          the response returned from the remote call. Will be null if the
+   *          remote method returns null or has a void return type.
    */
   public void callback(T response);
 }

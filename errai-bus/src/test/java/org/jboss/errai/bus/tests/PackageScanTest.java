@@ -15,75 +15,77 @@
  */
 package org.jboss.errai.bus.tests;
 
-import junit.framework.TestCase;
-import org.jboss.errai.bus.server.annotations.ApplicationComponent;
-import org.jboss.errai.common.server.api.annotations.ExtensionComponent;
-import org.jboss.errai.common.metadata.MetaDataScanner;
-
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import junit.framework.TestCase;
+
+import org.jboss.errai.bus.client.tests.support.FunAnnotatedClientClass;
+import org.jboss.errai.bus.client.tests.support.FunAnnotatedClientClass2;
+import org.jboss.errai.bus.server.annotations.Service;
+import org.jboss.errai.bus.server.api.Local;
+import org.jboss.errai.common.metadata.MetaDataScanner;
+import org.jboss.shrinkwrap.api.ShrinkWrap;
+import org.jboss.shrinkwrap.api.exporter.ExplodedExporter;
+import org.jboss.shrinkwrap.api.exporter.ZipExporter;
+import org.jboss.shrinkwrap.api.spec.EnterpriseArchive;
+import org.jboss.shrinkwrap.api.spec.JavaArchive;
+import org.jboss.shrinkwrap.api.spec.WebArchive;
+
+import com.google.common.io.Files;
+
 /**
  * Test the VFS extensions for Reflections and verify it can read from ear files.
  *
  * @author: Heiko Braun <hbraun@redhat.com>
+ * @author Mike Brock
+ * @author Jonathan Fuerth <jfuerth@redhat.com>>
+ * @author Christian Sadilek <csadilek@redhat.com>>
  * @date: Aug 5, 2010
  */
 public class PackageScanTest extends TestCase {
-  private static String getPackageResourcePath() {
-    URL url = PackageScanTest.class.getClassLoader().getResource("ErraiApp.properties");
-    if (url == null) throw new RuntimeException("Can't find the resource path for the test!");
 
-    File curr = new File(url.getFile());
-    File parent = curr.getParentFile().getParentFile();
+  public void testEarScan() throws Exception {
+    File ear = File.createTempFile("helloworld", ".ear");
 
-    if (parent.getName().endsWith("target")) {
-      parent = parent.getParentFile();
-      parent = new File(parent + "/src/test/");
-    }
+    JavaArchive jarArchive = ShrinkWrap.create(JavaArchive.class, "my-lib-1.0.jar")
+        .addClass(FunAnnotatedClientClass2.class);
+    WebArchive warArchive = ShrinkWrap.create(WebArchive.class, "helloworld.war")
+        .addClasses(FunAnnotatedClientClass.class)
+        .addAsLibrary(jarArchive);
+    EnterpriseArchive earArchive = ShrinkWrap.create(EnterpriseArchive.class)
+        .addAsModule(warArchive);
+    earArchive.as(ZipExporter.class).exportTo(ear, true);
 
-    File resourcesMetadata = new File(parent.getPath() + "/resources_metadata");
+    URL earUrl = new URL(ear.toURI() + "/helloworld.war!/WEB-INF/classes");
+    URL libUrl = new URL(ear.toURI() + "/helloworld.war!/WEB-INF/lib/my-lib-1.0.jar");
 
-    if (!resourcesMetadata.exists())
-      throw new RuntimeException("Can't find the resource path for the test: " + resourcesMetadata.getPath());
+    List<URL> urlList = new ArrayList<URL>();
+    urlList.add(earUrl);
+    urlList.add(libUrl);
 
-    return resourcesMetadata.getPath();
+    MetaDataScanner scanner = createScanner(urlList);
+
+    // nested in ear/war/WEB-INF/classes
+    assertTrue("Didn't find @Local annotated class FunAnnotatedClientClass in ear-war nesting",
+        scanner.getStore().getTypesAnnotatedWith(Local.class.getName())
+            .contains("org.jboss.errai.bus.client.tests.support.FunAnnotatedClientClass"));
+
+    // nested in ear/war/WEB-INF/lib
+    assertTrue("Didn't find @Service annotated class FunAnnotatedClientClass2 in ear-war-jar nesting",
+        scanner.getStore().getTypesAnnotatedWith(Service.class.getName())
+            .contains("org.jboss.errai.bus.client.tests.support.FunAnnotatedClientClass2"));
   }
 
-//  public void testEarScan() throws Exception {
-//    File ear = new File(getPackageResourcePath() + "/helloworld.ear");
-//    assertTrue(ear.exists());
-//    URL earUrl = new URL(ear.toURI().toString() + "/helloworld.war!/WEB-INF/classes");
-//    URL libUrl = new URL(ear.toURI().toString() + "/helloworld.war!/WEB-INF/lib/errai-tools-1.1-SNAPSHOT.jar");
-//
-//    List<URL> urlList = new ArrayList<URL>();
-//    urlList.add(earUrl);
-//    urlList.add(libUrl);
-//
-//    MetaDataScanner scanner = createScanner(urlList);
-//
-//    // nested in ear/war/WEB-INF/classes
-//    Set<String> classesMeta = scanner.getStore().getTypesAnnotatedWith(ApplicationComponent.class.getName());
-//    assertFalse("Cannot find @ApplicationComponent on HelloWorldService", classesMeta.isEmpty());
-//
-//    // nested in ear/war/WEB-INF/lib
-//    Set<String> libMeta = scanner.getStore().getTypesAnnotatedWith(ExtensionComponent.class.getName());
-//    boolean match = false;
-//    for (String className : libMeta) {
-//      if ("org.jboss.errai.tools.monitoring.MonitorExtension".equals(className)) {
-//        match = true;
-//        break;
-//      }
-//    }
-//
-//    assertTrue("Cannot find @ExtensionComponent on MonitorExtension", match);
-//  }
-
   public void testWarScan() throws Exception {
-    File war = new File(getPackageResourcePath() + "/helloworld.war");
+    final File war = File.createTempFile("test", ".war");
+    WebArchive archive = ShrinkWrap.create(WebArchive.class)
+         .addClasses(FunAnnotatedClientClass.class);
+    archive.as(ZipExporter.class).exportTo(war, true);
+
     assertTrue(war.exists());
     URL warUrl = war.toURI().toURL();
 
@@ -91,22 +93,35 @@ public class PackageScanTest extends TestCase {
     urlList.add(warUrl);
     MetaDataScanner scanner = createScanner(urlList);
 
-    Set<String> annotated = scanner.getStore().getTypesAnnotatedWith(ApplicationComponent.class.getName());
-    assertFalse("Cannot find @ApplicationComponent on HelloWorldService", annotated.isEmpty());
+    String annotationToSearchFor = Local.class.getName();
+    Set<String> annotated = scanner.getStore().getTypesAnnotatedWith(annotationToSearchFor);
+    assertFalse("Cannot find " + annotationToSearchFor + " in " + war, annotated.isEmpty());
+    war.delete();
   }
 
-//  public void testExplodedWarScan() throws Exception {
-//    File war = new File(getPackageResourcePath() + "/hello_exp.war");
-//    assertTrue(war.exists());
-//    URL warUrl = new URL(war.toURI().toURL() + "/WEB-INF/classes");
-//
-//    List<URL> urlList = new ArrayList<URL>();
-//    urlList.add(warUrl);
-//    MetaDataScanner scanner = createScanner(urlList);
-//
-//    Set<String> annotated = scanner.getStore().getTypesAnnotatedWith(ApplicationComponent.class.getName());
-//    assertFalse("Cannot find @ApplicationComponent on HelloWorldService", annotated.isEmpty());
-//  }
+  public void testExplodedWarScan() throws Exception {
+    final File warParentDir = Files.createTempDir();
+    assertTrue(warParentDir.isDirectory());
+
+    WebArchive archive = ShrinkWrap.create(WebArchive.class, "explode-me")
+         .addClasses(FunAnnotatedClientClass.class);
+    archive.as(ExplodedExporter.class).exportExploded(warParentDir);
+
+    File warBaseDir = new File(warParentDir, "explode-me");
+    assertTrue("Missing exploded war at " + warBaseDir, new File(warBaseDir, "WEB-INF").isDirectory());
+
+    URL warUrl = new URL(warBaseDir.toURI().toURL() + "/WEB-INF/classes");
+
+    List<URL> urlList = new ArrayList<URL>();
+    urlList.add(warUrl);
+    MetaDataScanner scanner = createScanner(urlList);
+
+    String annotationToSearchFor = Local.class.getName();
+    Set<String> annotated = scanner.getStore().getTypesAnnotatedWith(annotationToSearchFor);
+    assertFalse("Cannot find " + annotationToSearchFor + " in " + warBaseDir, annotated.isEmpty());
+    Files.deleteDirectoryContents(warParentDir);
+    warParentDir.delete();
+  }
 
   private MetaDataScanner createScanner(List<URL> urlList) {
     long s0 = System.currentTimeMillis();

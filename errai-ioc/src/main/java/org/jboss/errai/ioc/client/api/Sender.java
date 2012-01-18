@@ -16,8 +16,6 @@
 
 package org.jboss.errai.ioc.client.api;
 
-import org.jboss.errai.bus.client.api.annotations.ReplyTo;
-import org.jboss.errai.bus.client.api.annotations.ToSubject;
 import org.jboss.errai.common.client.protocols.MessageParts;
 
 /**
