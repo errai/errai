@@ -209,8 +209,6 @@ public interface ClassBuilderTestResult {
   public static final String CLASS_DEFINITION_BY_IMPLEMENTING_INTERFACE =
       "     package org.jboss.errai.codegen.framework.tests.model;\n" +
           "\n" +
-          " import org.jboss.errai.codegen.framework.tests.model.Baz;\n" +
-          "\n" +
           " public class BazImpl implements Baz {\n" +
           "     public void someMethod() {\n" +
           "     }\n" +
