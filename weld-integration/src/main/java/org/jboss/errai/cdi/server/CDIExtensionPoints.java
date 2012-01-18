@@ -51,7 +51,8 @@ import javax.inject.Qualifier;
 
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.api.builder.AbstractRemoteCallBuilder;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.api.builder.DefaultRemoteCallBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.ProxyProvider;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
@@ -76,6 +77,7 @@ import org.jboss.errai.cdi.server.events.EventObserverMethod;
 import org.jboss.errai.cdi.server.events.ShutdownEventObserver;
 import org.jboss.errai.common.client.api.annotations.ExposeEntity;
 import org.jboss.errai.common.client.api.annotations.Portable;
+import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.common.client.types.TypeHandlerFactory;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.enterprise.client.cdi.api.Conversational;
@@ -105,7 +107,7 @@ public class CDIExtensionPoints implements Extension {
 
   private Set<EventConsumer> eventConsumers = new LinkedHashSet<EventConsumer>();
   private Set<MessageSender> messageSenders = new LinkedHashSet<MessageSender>();
-  
+
   // private List<ObserverEndpoint> observerEndpoints = new ArrayList<ObserverEndpoint>();
   private Map<String, Annotation> eventQualifiers = new HashMap<String, Annotation>();
   private Set<String> observableEvents = new HashSet<String>();
@@ -261,7 +263,7 @@ public class CDIExtensionPoints implements Extension {
           ParameterizedType pType = (ParameterizedType) f.getGenericType();
 
           Class sendType = (Class) pType.getActualTypeArguments()[0];
-          
+
           Set<Annotation> qualifiers = new HashSet<Annotation>();
 
           /**
@@ -339,21 +341,21 @@ public class CDIExtensionPoints implements Extension {
         abd.addObserverMethod(new EventObserverMethod(ec.getRawType(), bus, ec.getQualifiers()));
       }
     }
-    
+
     for (MessageSender ms : messageSenders) {
       abd.addBean(new SenderBean(ms.getSenderType(), ms.getQualifiers(), service.getDispatcher()));
     }
-    
+
 
     // Errai bus injection
     abd.addBean(new MessageBusBean(bm, bus));
 
     // Support to inject the request dispatcher.
     abd.addBean(new RequestDispatcherMetaData(bm, service.getDispatcher()));
-    
+
  //   abd.addBean(new SenderBean((BeanManagerImpl) bm, service.getDispatcher()));
 
-    // Register observers        
+    // Register observers
     abd.addObserverMethod(new ShutdownEventObserver(managedTypes, bus, uuid));
 
     // subscribe service and rpc endpoints
@@ -377,6 +379,7 @@ public class CDIExtensionPoints implements Extension {
 
         bus.subscribe(svcName, new MessageCallback() {
 
+          @Override
           public void callback(Message message) {
             //           ScopeUtil.associateRequestContext(message);
             //           ScopeUtil.associateSessionContext(message);
@@ -412,6 +415,7 @@ public class CDIExtensionPoints implements Extension {
       final String subjectName = CDIServerUtil.resolveServiceName(type.getJavaClass());
 
       bus.subscribe(subjectName, new MessageCallback() {
+        @Override
         public void callback(final Message message) {
           MessageCallback callback = (MessageCallback) CDIServerUtil.lookupBean(beanManager, type.getJavaClass());
           callback.callback(message);
@@ -454,20 +458,19 @@ public class CDIExtensionPoints implements Extension {
 
     final RemoteServiceCallback delegate = new RemoteServiceCallback(epts);
     bus.subscribe(remoteIface.getName() + ":RPC", new MessageCallback() {
+      @Override
       public void callback(Message message) {
         delegate.callback(message);
       }
     });
 
-    new ProxyProvider() {
-      {
-        AbstractRemoteCallBuilder.setProxyFactory(this);
-      }
-
-      public <T> T getRemoteProxy(Class<T> proxyType) {
-        throw new RuntimeException("This API is not supported in the server-side environment.");
-      }
-    };
+    // note: this method just exists because we want AbstractRemoteCallBuilder to be package private.
+    DefaultRemoteCallBuilder.setProxyFactory(Assert.notNull(new ProxyProvider() {
+          @Override
+          public <T> T getRemoteProxy(Class<T> proxyType) {
+            throw new RuntimeException("There is not yet an available Errai RPC implementation for the server-side environment.");
+          }
+        }));
   }
 
   private static boolean isApplicationScoped(AnnotatedType type) {
@@ -563,7 +566,8 @@ public class CDIExtensionPoints implements Extension {
     public Annotation[] getQualifiers() {
       return qualifiers;
     }
-    
+
+    @Override
     public String toString() {
       return "EventConsumer " + eventType + " " + Arrays.toString(qualifiers);
     }
@@ -584,7 +588,7 @@ public class CDIExtensionPoints implements Extension {
       return toString().hashCode();
     }
   }
-  
+
   static class MessageSender {
     private Type senderType;
     private Set<Annotation> qualifiers;
