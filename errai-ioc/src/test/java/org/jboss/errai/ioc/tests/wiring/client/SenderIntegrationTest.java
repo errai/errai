@@ -8,13 +8,13 @@ import javax.inject.Singleton;
 
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.api.annotations.ReplyTo;
-import org.jboss.errai.bus.client.api.annotations.ToSubject;
 import org.jboss.errai.bus.client.tests.AbstractErraiTest;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.ioc.client.Container;
+import org.jboss.errai.ioc.client.api.ReplyTo;
 import org.jboss.errai.ioc.client.api.Sender;
+import org.jboss.errai.ioc.client.api.ToSubject;
 
 import com.google.gwt.user.client.Timer;
 

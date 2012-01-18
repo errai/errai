@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.api.annotations;
+package org.jboss.errai.ioc.client.api;
 
-import javax.inject.Qualifier;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+import javax.inject.Qualifier;
+
 /**
- * @author Mike Brock .
+ * A qualifying annotation to be used with the
+ *
+ * @author Mike Brock
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Qualifier
 @java.lang.annotation.Target(ElementType.FIELD)
-public @interface ToSubject {
+public @interface ReplyTo {
   String value();
 }

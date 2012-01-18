@@ -17,7 +17,8 @@ package org.jboss.errai.bus.server.service.bootstrap;
 
 import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
 import org.jboss.errai.bus.server.service.ServiceProcessor;
-import org.jboss.errai.common.metadata.*;
+import org.jboss.errai.common.metadata.MetaDataProcessor;
+import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +30,7 @@ import org.slf4j.LoggerFactory;
 class DiscoverServices implements BootstrapExecution {
   private Logger log = LoggerFactory.getLogger(DiscoverServices.class);
 
+  @Override
   public void execute(final BootstrapContext context) {
     final ErraiServiceConfiguratorImpl config = (ErraiServiceConfiguratorImpl) context.getConfig();
 
@@ -42,7 +44,6 @@ class DiscoverServices implements BootstrapExecution {
       MetaDataProcessor[] processors = new MetaDataProcessor[]{
           new ServiceProcessor(),
           new EntityProcessor(),
-          new ApplicationCompProcessor()
       };
 
       // execute meta data processing
