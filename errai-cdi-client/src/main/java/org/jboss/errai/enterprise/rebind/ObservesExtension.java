@@ -23,8 +23,8 @@ import javax.enterprise.event.Observes;
 import javax.enterprise.util.TypeLiteral;
 
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.annotations.Local;
 import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.server.api.Local;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Parameter;
 import org.jboss.errai.codegen.framework.Statement;
