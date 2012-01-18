@@ -70,5 +70,20 @@
       <version>4.8.1</version>
       <scope>test</scope>
     </dependency>
+    
+    <dependency>
+      <groupId>org.jboss.shrinkwrap</groupId>
+      <artifactId>shrinkwrap-api</artifactId>
+      <version>1.0.0-beta-5</version>
+      <scope>test</scope>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.jboss.shrinkwrap</groupId>
+      <artifactId>shrinkwrap-impl-base</artifactId>
+      <version>1.0.0-beta-5</version>
+      <scope>test</scope>
+    </dependency>
+    
   </dependencies>
 </project>
