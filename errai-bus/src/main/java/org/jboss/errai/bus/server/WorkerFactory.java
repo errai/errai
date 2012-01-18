@@ -194,6 +194,13 @@ public class WorkerFactory {
     }
   }
 
+  public void stopPool() {
+    log.info("stopping workering pool.");
+    for (int i = 0; i < poolSize; i++) {
+      workerPool[i].setActive(false);
+    }
+  }
+  
   private long seconds(int seconds) {
     return seconds * 1000;
   }

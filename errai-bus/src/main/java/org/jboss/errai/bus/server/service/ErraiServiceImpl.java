@@ -27,6 +27,12 @@ import org.jboss.errai.bus.server.api.SessionProvider;
 import org.jboss.errai.bus.server.io.websockets.WebSocketServer;
 import org.jboss.errai.bus.server.service.bootstrap.BootstrapContext;
 import org.jboss.errai.bus.server.service.bootstrap.OrderedBootstrap;
+import org.slf4j.Logger;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Default implementation of the ErraiBus server-side service.
@@ -35,11 +41,11 @@ import org.jboss.errai.bus.server.service.bootstrap.OrderedBootstrap;
 public class ErraiServiceImpl<S> implements ErraiService<S> {
 
   private ServerMessageBus bus;
-
   private ErraiServiceConfigurator config;
-
   private SessionProvider<S> sessionProvider;
   private RequestDispatcher dispatcher;
+  private List<Runnable> shutdownHooks = new ArrayList<Runnable>();
+  private Logger log = getLogger(getClass());
 
   /**
    * Initializes the errai service with a bus and configurator
@@ -96,6 +102,15 @@ public class ErraiServiceImpl<S> implements ErraiService<S> {
   public void stopService() {
     bus.stop();
     DefaultTaskManager.get().requestStop();
+
+    for (Runnable runnable : shutdownHooks) {
+      try {
+        runnable.run();
+      }
+      catch (Throwable e) {
+        log.error("error executing shutdown hook", e);
+      }
+    }
   }
 
   /**
@@ -114,6 +129,11 @@ public class ErraiServiceImpl<S> implements ErraiService<S> {
    */
   public ErraiServiceConfigurator getConfiguration() {
     return config;
+  }
+
+  @Override
+  public void addShutdownHook(Runnable runnable) {
+    shutdownHooks.add(runnable);
   }
 
   public SessionProvider<S> getSessionProvider() {

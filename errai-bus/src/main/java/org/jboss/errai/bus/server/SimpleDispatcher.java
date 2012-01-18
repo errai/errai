@@ -64,4 +64,8 @@ public class SimpleDispatcher implements RequestDispatcher {
       handleMessageDeliveryFailure(bus, message, "Error calling remote service: " + message.getSubject(), e, false);
     }
   }
+
+  @Override
+  public void stopDispatcher() {
+  }
 }

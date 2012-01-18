@@ -49,7 +49,15 @@ public class AsyncDispatcher implements RequestDispatcher {
   public AsyncDispatcher(ErraiService service) {
     this.service = service;
     this.workerFactory = new WorkerFactory(service);
+
+    service.addShutdownHook(new Runnable() {
+      @Override
+      public void run() {
+        workerFactory.stopPool();
+      }
+    });
   }
+
 
   /**
    * Sends the message globally. If the <tt>PriorityProcessing</tt> routing flag is set, then the message is sent

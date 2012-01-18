@@ -116,4 +116,5 @@ public class LocalServiceIntegrationTest extends AbstractErraiTest {
       }
     });
   }
+
 }

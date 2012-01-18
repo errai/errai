@@ -53,6 +53,8 @@ public interface ErraiService<S> extends ServiceComposite<S> {
    */
   public ErraiServiceConfigurator getConfiguration();
 
+  public void addShutdownHook(Runnable runnable);
+
   /**
    * Shut down the entire Errai service.
    */
