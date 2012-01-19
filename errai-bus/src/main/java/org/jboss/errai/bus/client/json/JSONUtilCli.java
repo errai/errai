@@ -16,6 +16,7 @@
 
 package org.jboss.errai.bus.client.json;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
@@ -43,7 +44,20 @@ public class JSONUtilCli {
      * field and send the unparsed JSON object onwards.
      *
      */
-    JSONValue val = JSONParser.parseStrict(value);
+
+
+    JSONValue val = null;
+
+    try {
+      val = JSONParser.parseStrict(value);
+    }
+    catch (ClassCastException e) {
+      if (!GWT.isProdMode()) {
+        System.out.println("*** working around devmode bug ***");
+        val = JSONParser.parseStrict(value);
+      }
+    }
+
     if (val == null) {
       return Collections.emptyList();
     }

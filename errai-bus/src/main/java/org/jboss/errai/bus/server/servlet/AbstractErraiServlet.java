@@ -58,7 +58,7 @@ public abstract class AbstractErraiServlet extends HttpServlet {
 
   protected volatile ClassLoader contextClassLoader;
 
-  protected Logger log = LoggerFactory.getLogger(getClass());
+ // protected Logger log = LoggerFactory.getLogger(getClass());
 
   public enum ConnectionPhase {
     NORMAL, CONNECTING, DISCONNECTING, UNKNOWN

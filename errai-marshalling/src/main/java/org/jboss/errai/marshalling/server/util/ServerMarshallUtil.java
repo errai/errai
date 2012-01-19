@@ -158,6 +158,12 @@ public abstract class ServerMarshallUtil {
       ByteArrayOutputStream errorOutputStream = new ByteArrayOutputStream();
       JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 
+      if (compiler == null) {
+        throw new RuntimeException("Could not locate a compiler. You may be running in a JRE and not a JDK. " +
+                "For the purpose of development mode Errai requires the use of a JDK so it may produce server " +
+                "marshalling code on-the-fly.");
+      }
+
       /**
        * Attempt to run the compiler without any classpath specified.
        */
