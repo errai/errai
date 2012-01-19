@@ -39,11 +39,11 @@ import org.jboss.errai.common.client.types.TypeHandlerFactory;
  */
 @SuppressWarnings({"UnusedDeclarations"})
 public class CommandMessage implements Message {
-  protected transient Map<String, ResourceProvider<?>> providedParts;
-  protected Map<String, Object> parts;
-  protected transient Map<String, Object> resources;
-  protected ErrorCallback errorsCall;
-  protected int routingFlags;
+  transient Map<String, ResourceProvider<?>> providedParts;
+  Map<String, Object> parts;
+  transient Map<String, Object> resources;
+  ErrorCallback errorsCall;
+  int routingFlags;
 
   /**
    * @deprecated Please use the MessageBuilder class.
@@ -353,14 +353,6 @@ public class CommandMessage implements Message {
   @Override
   public String toString() {
     return buildDescription();
-  }
-
-  public int getRoutingFlags() {
-    return routingFlags;
-  }
-
-  public void setRoutingFlags(int routingFlags) {
-    this.routingFlags = routingFlags;
   }
 
   private String buildDescription() {

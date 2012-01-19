@@ -21,26 +21,30 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.common.client.protocols.MessageParts;
 
 /**
- * A ConversationMessage is a message that is to be routed back to the sending client.  Conceptually, the use of
- * ConversationMessage negates the need to manually provide routing information to have a two-way conversation with
- * a client. This is particularly important on the server-side of an application, where most messages sent from
- * the client to a server-side service will necessitate a message back to a client-side service.  ConversationMessage
- * makes this a straight forward process.<br/>
- * <tt><pre>
+ * A ConversationMessage is a message that is to be routed back to the sending client. Conceptually, the use of
+ * ConversationMessage negates the need to manually provide routing information to have a two-way conversation with a
+ * client. This is particularly important on the server-side of an application, where most messages sent from the client
+ * to a server-side service will necessitate a message back to the originating client-side service. ConversationMessage
+ * makes this a straightforward process.
+ * <p>
+ * 
+ * <pre>
  * public class SomeService implements MessageCallback {
- *      public void callback(CommandMessage message) {
- *          ConversationMessage.create(message) // create a ConversationMessage referencing the incoming message
- *              .setSubject("ClientService")    // specify the service on the sending client that should receive the message.
- *              .set("Text", "Hello, World!")
+ *   public void callback(CommandMessage message) {
+ *     ConversationMessage.create(message) // create a ConversationMessage referencing the incoming message
+ *         .setSubject(&quot;ClientService&quot;) // specify the service on the sending client that should receive the message.
+ *         .set(&quot;Text&quot;, &quot;Hello, World!&quot;)
  *              .sendNowWith(messageBusInstance); // send the message.
- *      }
+ *   }
  * }
- * </pre></tt>
+ * </pre>
+ * 
  * It is possible for a message sender to specify a {@link org.jboss.errai.common.client.protocols.MessageParts#ReplyTo}
- * message component, which by default will be used to route the message.  We refer to this as a: <em>sender-driven conversation</em>
- * as opposed to a <em>receiver-driven conversation</em> which is demonstrated in the code example above.  The
- * {@link org.jboss.errai.bus.client.framework.MessageBus#conversationWith(Message, org.jboss.errai.bus.client.api.MessageCallback)} convenience method
- * for having conversations uses sender-driven conversations, for example.
+ * message component, which by default will be used to route the message. We refer to this as a:
+ * <em>sender-driven conversation</em> as opposed to a <em>receiver-driven conversation</em> which is demonstrated in
+ * the code example above. The
+ * {@link org.jboss.errai.bus.client.framework.MessageBus#conversationWith(Message, org.jboss.errai.bus.client.api.MessageCallback)}
+ * convenience method for having conversations uses sender-driven conversations, for example.
  */
 public class ConversationMessage extends CommandMessage {
 
@@ -55,9 +59,9 @@ public class ConversationMessage extends CommandMessage {
   }
 
   /**
-   * Calling this method on this class will always result in a {@link org.jboss.errai.bus.client.api.BadlyFormedMessageException}.
-   * You must call {@link #create(Message)}.
-   *
+   * Calling this method on this class will always result in a
+   * {@link org.jboss.errai.bus.client.api.BadlyFormedMessageException}. You must call {@link #create(Message)}.
+   * 
    * @return - this method will never return.
    */
   static CommandMessage create() {
@@ -66,8 +70,9 @@ public class ConversationMessage extends CommandMessage {
 
   /**
    * Creates a <tt>ConversationMessage</tt> using an incoming message as a reference
-   *
-   * @param inReplyTo - incoming message
+   * 
+   * @param inReplyTo
+   *          - incoming message
    * @return newly created <tt>ConversationMessage</tt>
    */
   public static ConversationMessage create(Message inReplyTo) {
@@ -85,16 +90,19 @@ public class ConversationMessage extends CommandMessage {
 
     if (!inReplyTo.hasResource("Session") && !inReplyTo.hasPart(MessageParts.ReplyTo)) {
       if (!inReplyTo.hasResource("Session") && !inReplyTo.hasPart(MessageParts.ReplyTo)) {
-        throw new RuntimeException("cannot have a conversation. there is no session data or ReplyTo field. Are you sure you referenced an incoming message?");
+        throw new RuntimeException(
+            "cannot have a conversation. there is no session data or ReplyTo field. Are you sure you referenced an incoming message?");
       }
     }
   }
 
   /**
    * Constructs a <tt>ConversationMessage</tt> using a specified type and reference message.
-   *
-   * @param commandType - <tt>Enum</tt> command type
-   * @param inReplyTo   - message to reference
+   * 
+   * @param commandType
+   *          - <tt>Enum</tt> command type
+   * @param inReplyTo
+   *          - message to reference
    */
   public ConversationMessage(Enum commandType, Message inReplyTo) {
     this(inReplyTo);
@@ -103,9 +111,11 @@ public class ConversationMessage extends CommandMessage {
 
   /**
    * Constructs a <tt>ConversationMessage</tt> using a specified type and reference message.
-   *
-   * @param commandType - <tt>String</tt> command type
-   * @param inReplyTo   - message to reference
+   * 
+   * @param commandType
+   *          - <tt>String</tt> command type
+   * @param inReplyTo
+   *          - message to reference
    */
   public ConversationMessage(String commandType, Message inReplyTo) {
     this(inReplyTo);
