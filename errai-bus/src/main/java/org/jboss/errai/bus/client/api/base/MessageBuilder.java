@@ -196,9 +196,9 @@ public class MessageBuilder {
    *          The error callback that receives transmission errors and exceptions thrown by the remote service. Cannot not be null.
    * @param service
    *          The remote interface.
-   * @param T
+   * @param <T>
    *          The type of the remote service.
-   * @param R
+   * @param <R>
    *          The return type of the invoked method.
    * @return A proxy for the remote service. Methods invoked on this object will communicate with the remote service
    *         over the message bus.

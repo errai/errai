@@ -58,7 +58,7 @@ class DefaultMessageBuilder<R extends Sendable> {
    *
    * @return the <tt>MessageBuildSubject</tt> with the appropriate fields
    *         and functions for the message builder
-   *         @param T the inter
+   *         @param <T> the inter
    */
   public MessageBuildSubject<R> start() {
     final Sendable sendable = new MessageReplySendable() {
