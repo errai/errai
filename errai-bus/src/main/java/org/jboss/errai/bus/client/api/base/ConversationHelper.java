@@ -22,15 +22,22 @@ import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RoutingFlag;
 import org.jboss.errai.common.client.protocols.MessageParts;
 
-public class ConversationHelper {
+/**
+ * Utility to create conversational messages on the bus.
+ * 
+ * @author Mike Brock
+ * @author Jonathan Fuerth <jfuerth@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
+ */
+class ConversationHelper {
   private static final String RES_NAME = "MessageReplyCallback";
 
-  public static void makeConversational(Message message, MessageCallback callback) {
+  static void makeConversational(Message message, MessageCallback callback) {
     message.setResource(RES_NAME, callback);
     message.setFlag(RoutingFlag.Conversational);
   }
 
-  public static void createConversationService(MessageBus bus, Message m) {
+  static void createConversationService(MessageBus bus, Message m) {
     if (m.isFlagSet(RoutingFlag.Conversational)) {
       final String replyService = m.getSubject() + ":RespondTo:" + count();
       bus.subscribe(replyService, m.getResource(MessageCallback.class, RES_NAME));
@@ -40,7 +47,6 @@ public class ConversationHelper {
   }
 
   static int counter = 0;
-
   static int count() {
     if (++counter > 1000) {
       return counter = 0;
