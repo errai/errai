@@ -68,8 +68,8 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<gwt.version>2.3.0</gwt.version>
-		<gwt.maven>2.3.0</gwt.maven>
+		<gwt.version>2.4.0</gwt.version>
+		<gwt.maven>2.4.0</gwt.maven>
 		<guice.version>3.0</guice.version>
 		<mvel.version>2.1.Beta6</mvel.version>
 		<mosaic.version>0.4.0-rc4</mosaic.version>
