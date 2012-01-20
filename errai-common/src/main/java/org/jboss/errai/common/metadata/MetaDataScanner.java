@@ -18,6 +18,7 @@ package org.jboss.errai.common.metadata;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Inherited;
 import java.lang.reflect.Field;
@@ -39,6 +40,7 @@ import java.util.regex.Pattern;
 
 import javassist.bytecode.ClassFile;
 
+import org.jboss.errai.common.client.framework.ErraiAppAttribs;
 import org.reflections.Configuration;
 import org.reflections.Reflections;
 import org.reflections.scanners.FieldAnnotationsScanner;
@@ -58,7 +60,7 @@ import com.google.common.collect.ImmutableSet;
  * <p/>
  * <p/>
  * The initial set of config Url's (entry points) is discovered through ErraiApp.properties.
- * 
+ *
  * @author Heiko Braun <hbraun@redhat.com>
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -73,7 +75,7 @@ public class MetaDataScanner extends Reflections {
               return file.endsWith(".properties");
             }
           }
-      );
+  );
 
   MetaDataScanner(List<URL> urls) {
     super(getConfiguration(urls));
@@ -81,7 +83,7 @@ public class MetaDataScanner extends Reflections {
   }
 
   private static Map<String, Set<SortableClassFileWrapper>> annotationsToClassFile =
-      new TreeMap<String, Set<SortableClassFileWrapper>>();
+          new TreeMap<String, Set<SortableClassFileWrapper>>();
 
   private static class SortableClassFileWrapper implements Comparable<SortableClassFileWrapper> {
     private String name;
@@ -119,14 +121,14 @@ public class MetaDataScanner extends Reflections {
                         for (String annotationType : (List<String>) getMetadataAdapter().getClassAnnotationNames(cls)) {
                           if (acceptResult(annotationType) ||
                                   annotationType.equals(Inherited.class.getName())) { // as an exception, accept
-                                                                                      // Inherited as well
+                            // Inherited as well
                             getStore().put(annotationType, className);
 
                             if (cls instanceof ClassFile) {
                               Set<SortableClassFileWrapper> classes = annotationsToClassFile.get(annotationType);
                               if (classes == null) {
                                 annotationsToClassFile.put(annotationType, classes =
-                                    new TreeSet<SortableClassFileWrapper>());
+                                        new TreeSet<SortableClassFileWrapper>());
                               }
                               classes.add(new SortableClassFileWrapper(className, (ClassFile) cls));
                             }
@@ -211,7 +213,7 @@ public class MetaDataScanner extends Reflections {
   }
 
   private Map<Class<? extends Annotation>, Set<Class<?>>> _annotationCache =
-      new HashMap<Class<? extends Annotation>, Set<Class<?>>>();
+          new HashMap<Class<? extends Annotation>, Set<Class<?>>>();
 
   @Override
   public Set<Class<?>> getTypesAnnotatedWith(Class<? extends Annotation> annotation) {
@@ -259,7 +261,31 @@ public class MetaDataScanner extends Reflections {
 
       List<URL> urls = new ArrayList<URL>();
       while (configTargets.hasMoreElements()) {
-        String urlString = configTargets.nextElement().toExternalForm();
+        URL url = configTargets.nextElement();
+
+        try {
+          Properties properties = new Properties();
+          InputStream stream = url.openStream();
+          try {
+            properties.load(stream);
+
+            if (properties.contains(ErraiAppAttribs.JUNIT_PACKAGE_ONLY)) {
+              if ("true".equalsIgnoreCase(String.valueOf(properties.get(ErraiAppAttribs.JUNIT_PACKAGE_ONLY)))) {
+                continue;
+              }
+            }
+          }
+          finally {
+            stream.close();
+          }
+        }
+        catch (IOException e) {
+          System.err.println("could not read properties file");
+          e.printStackTrace();
+        }
+
+
+        String urlString = url.toExternalForm();
         urlString = urlString.substring(0, urlString.indexOf(ERRAI_CONFIG_STUB_NAME));
 
         // URLs returned by the classloader are UTF-8 encoded. The URLDecoder assumes
