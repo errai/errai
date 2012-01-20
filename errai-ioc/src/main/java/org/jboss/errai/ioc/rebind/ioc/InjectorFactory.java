@@ -18,6 +18,9 @@ package org.jboss.errai.ioc.rebind.ioc;
 
 import java.util.List;
 
+import org.jboss.errai.codegen.framework.util.Stmt;
+import org.jboss.errai.common.rebind.EnvironmentUtil;
+import org.jboss.errai.ioc.client.api.TestOnly;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
@@ -39,6 +42,7 @@ public class InjectorFactory {
   }
 
   public Statement generateSingleton(MetaClass type) {
+    
     Injector i = ctx.getInjector(type);
     ctx.registerInjector(i);
     if (i.isInjected()) {

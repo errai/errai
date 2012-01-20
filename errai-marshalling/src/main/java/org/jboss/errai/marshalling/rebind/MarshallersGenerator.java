@@ -23,6 +23,7 @@ import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.common.rebind.EnvironmentUtil;
 import org.jboss.errai.marshalling.server.util.ServerMarshallUtil;
 
 import java.io.File;
@@ -95,12 +96,7 @@ public class MarshallersGenerator extends Generator {
   }
 
   private String _generate() {
-    boolean junit = false;
-    for (StackTraceElement el : new Throwable().getStackTrace()) {
-      if (el.getClassName().contains("com.google.gwt.junit.client")) {
-        junit = true;
-      }
-    }
+    boolean junit = EnvironmentUtil.isGWTJUnitTest();
 
     if (junit) {
       System.out.println("******** running inside JUnit! ********");

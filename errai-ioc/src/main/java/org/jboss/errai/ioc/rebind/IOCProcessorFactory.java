@@ -30,7 +30,10 @@ import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaField;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
+import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.common.metadata.MetaDataScanner;
+import org.jboss.errai.common.rebind.EnvironmentUtil;
+import org.jboss.errai.ioc.client.api.TestOnly;
 import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.InjectionFailure;
 import org.jboss.errai.ioc.rebind.ioc.Injector;
@@ -67,8 +70,8 @@ public class IOCProcessorFactory {
           @Override
           public ElementType[] value() {
             return new ElementType[]
-                    { ElementType.TYPE, ElementType.CONSTRUCTOR, ElementType.FIELD,
-                            ElementType.METHOD, ElementType.FIELD };
+                    {ElementType.TYPE, ElementType.CONSTRUCTOR, ElementType.FIELD,
+                            ElementType.METHOD, ElementType.FIELD};
           }
 
           @Override
@@ -77,7 +80,7 @@ public class IOCProcessorFactory {
           }
         };
       }
-      
+
       for (ElementType elementType : target.value()) {
         switch (elementType) {
           case TYPE: {
@@ -93,6 +96,11 @@ public class IOCProcessorFactory {
                 @Override
                 public boolean process() {
                   final MetaClass type = MetaClassFactory.get(clazz);
+
+                  if (type.isAnnotationPresent(TestOnly.class) && !EnvironmentUtil.isGWTJUnitTest()) {
+                    return true;
+                  }
+
                   injectorFactory.addType(type);
 
                   Injector injector = injectorFactory.getInjectionContext().getInjector(type);
@@ -186,19 +194,20 @@ public class IOCProcessorFactory {
           if (iter.next().processAllDelegates()) {
             iter.remove();
           }
-        } 
+        }
         catch (InjectionFailure f) {
           // We are ignoring this Exception and keep retrying. The problem should go away after
           // all the other dependencies have been processed.
         }
       }
-    } while (!procEntries.isEmpty() && procEntries.size() < start);
+    }
+    while (!procEntries.isEmpty() && procEntries.size() < start);
 
     if (!procEntries.isEmpty()) {
 
       for (ProcessingEntry<?> procEntry : procEntries) {
         for (InjectionFailure failure : procEntry.getErrorList()) {
-           failure.printStackTrace();
+          failure.printStackTrace();
         }
       }
 
@@ -214,7 +223,7 @@ public class IOCProcessorFactory {
     private Set<RuleDef> rules;
     private List<ProcessingDelegate<T>> targets = new ArrayList<ProcessingDelegate<T>>();
     private Set<InjectionFailure> errors = new LinkedHashSet<InjectionFailure>();
-    
+
 
     private ProcessingEntry(Class<? extends Annotation> annotationClass, AnnotationHandler handler) {
       this.annotationClass = annotationClass;
@@ -247,14 +256,16 @@ public class IOCProcessorFactory {
               System.out.println("fail");
             }
 
-          } catch (InjectionFailure f) {
+          }
+          catch (InjectionFailure f) {
             errors.add(f);
-            
+
             // Ignored, see processAll()
           }
         }
 
-      } while (!targets.isEmpty() && targets.size() < start);
+      }
+      while (!targets.isEmpty() && targets.size() < start);
 
       return targets.isEmpty();
     }
