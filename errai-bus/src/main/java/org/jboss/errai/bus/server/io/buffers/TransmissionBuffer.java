@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -52,7 +53,9 @@ public class TransmissionBuffer implements Buffer {
   /**
    * The main buffer where the data is stored
    */
-  private final byte[] buffer;
+  private final ByteBuffer _buffer;
+
+ // private final byte[] buffer;
 
   /**
    * The segment map where allocation data is stored
@@ -106,7 +109,14 @@ public class TransmissionBuffer implements Buffer {
     this.bufferSize = segmentSize * segments;
     this.segments = segments;
 
-    buffer = new byte[bufferSize];
+    if (directBuffer) {
+      this._buffer = ByteBuffer.allocateDirect(bufferSize);
+    }
+    else {
+      this._buffer = ByteBuffer.allocate(bufferSize);
+    }
+
+   // buffer = new byte[bufferSize];
     writeBuf(0, (byte) 0);
 
     segmentMap = new short[segments];
@@ -661,11 +671,13 @@ public class TransmissionBuffer implements Buffer {
   }
 
   private byte getBuf(int idx) {
-    return buffer[idx];
+    return _buffer.get(idx);
+  //  return buffer[idx];
   }
 
   private void writeBuf(int idx, byte v) {
-    buffer[idx] = v;
+    _buffer.put(idx, v);
+  //  buffer[idx] = v;
   }
 
   private short getSeg(int idx) {
@@ -688,7 +700,12 @@ public class TransmissionBuffer implements Buffer {
       pos += SEGMENT_HEADER_SIZE;
 
       byte[] buf = new byte[length];
-      System.arraycopy(buffer, pos, buf, 0, length);
+
+      ByteBuffer dupBuf = _buffer.duplicate();
+      dupBuf.position(pos);
+      dupBuf.put(buf, 0, length);
+
+    //  System.arraycopy(buffer, pos, buf, 0, length);
 
       build.append("::'").append(new String(buf)).append("'");
       length += SEGMENT_HEADER_SIZE;
@@ -714,7 +731,11 @@ public class TransmissionBuffer implements Buffer {
       pos += SEGMENT_HEADER_SIZE;
 
       byte[] buf = new byte[length];
-      System.arraycopy(buffer, pos, buf, 0, length);
+
+      ByteBuffer dupBuf = _buffer.duplicate();
+      dupBuf.position(pos);
+      dupBuf.put(buf, 0, length);
+      //System.arraycopy(buffer, pos, buf, 0, length);
 
       list.add(new String(buf));
 
