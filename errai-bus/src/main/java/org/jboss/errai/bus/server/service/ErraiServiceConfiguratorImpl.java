@@ -134,7 +134,14 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
   @Override
   public Integer getIntProperty(String key) {
     if (properties.containsKey(key)) {
-      return Integer.parseInt(key);
+      String val = properties.get(key);
+      try {
+        return Integer.parseInt(val);
+      }
+      catch (NumberFormatException e) {
+        throw new RuntimeException("expected an integer value for key '" + key + "': but got: "
+                + properties.get(key));
+      }
     }
     return null;
   }

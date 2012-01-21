@@ -173,7 +173,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
       transmissionbuffer = TransmissionBuffer.create(segmentSize, segmentCount);
     }
 
-
     /**
      * Define the default ServerBus service used for intrabus communication.
      */
