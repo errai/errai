@@ -21,7 +21,7 @@ package org.jboss.errai.bus.server.io;
  */
 public abstract class IOConfigAttribs {
   /**
-   * The buffer size is megabytes. If this attribute is specified along with {@link #BUS_BUFFER_SEGMENT_SIZE}
+   * The buffer size in megabytes. If this attribute is specified along with {@link #BUS_BUFFER_SEGMENT_SIZE}
    * then the segment count is inferred by the simple calculation {@code BUF_BUFFER_SIZE / BUS_BUFFER_SEGMENT_SIZE}.
    * If the {@link #BUS_BUFFER_SEGMENT_COUNT} is specified, it will be ignored in the presence of this attribute.
    * <p>
