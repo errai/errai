@@ -135,16 +135,18 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     String allocMode = config.getProperty(IOConfigAttribs.BUF_BUFFER_ALLOCATION_MODE);
 
     if (segmentSize == null) {
-      segmentSize = 8;
+      segmentSize = 8 * 1024;
+    }
+    else {
+      segmentSize = segmentSize * 1024;
     }
 
-    if (segmentCount == null) {
-      if (bufferSize != null) {
-        segmentCount = bufferSize / segmentSize;
-      }
-      else {
-        segmentCount = 16384;
-      }
+    if (bufferSize != null) {
+      segmentCount = (bufferSize * 1024 * 1024) * segmentSize;
+    }
+
+    else if (segmentCount == null) {
+      segmentCount = 16384;
     }
 
     boolean directAlloc;
