@@ -16,12 +16,43 @@
 
 package org.jboss.errai.bus.server;
 
-import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversation;
-import static org.jboss.errai.bus.client.protocols.SecurityCommands.MessageNotDelivered;
-import static org.jboss.errai.bus.client.util.ErrorHelper.handleMessageDeliveryFailure;
-import static org.jboss.errai.common.client.protocols.MessageParts.ReplyTo;
-import static org.slf4j.LoggerFactory.getLogger;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.MessageListener;
+import org.jboss.errai.bus.client.api.SubscribeListener;
+import org.jboss.errai.bus.client.api.UnsubscribeListener;
+import org.jboss.errai.bus.client.api.base.Capabilities;
+import org.jboss.errai.bus.client.api.base.CommandMessage;
+import org.jboss.errai.bus.client.api.base.ConversationMessage;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.api.base.NoSubscribersToDeliverTo;
+import org.jboss.errai.bus.client.api.base.RuleDelegateMessageCallback;
+import org.jboss.errai.bus.client.framework.BooleanRoutingRule;
+import org.jboss.errai.bus.client.framework.BusMonitor;
+import org.jboss.errai.bus.client.framework.DeliveryPlan;
+import org.jboss.errai.bus.client.framework.RoutingFlag;
+import org.jboss.errai.bus.client.framework.Subscription;
+import org.jboss.errai.bus.client.framework.SubscriptionEvent;
+import org.jboss.errai.bus.client.protocols.BusCommands;
+import org.jboss.errai.bus.server.api.MessageQueue;
+import org.jboss.errai.bus.server.api.QueueCloseEvent;
+import org.jboss.errai.bus.server.api.QueueClosedListener;
+import org.jboss.errai.bus.server.api.QueueSession;
+import org.jboss.errai.bus.server.api.ServerMessageBus;
+import org.jboss.errai.bus.server.io.BufferHelper;
+import org.jboss.errai.bus.server.io.IOConfigAttribs;
+import org.jboss.errai.bus.server.io.buffers.BufferColor;
+import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
+import org.jboss.errai.bus.server.io.websockets.WebSocketServer;
+import org.jboss.errai.bus.server.io.websockets.WebSocketServerHandler;
+import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
+import org.jboss.errai.bus.server.util.SecureHashUtil;
+import org.jboss.errai.common.client.protocols.MessageParts;
+import org.slf4j.Logger;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,38 +72,11 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.api.MessageListener;
-import org.jboss.errai.bus.client.api.SubscribeListener;
-import org.jboss.errai.bus.client.api.UnsubscribeListener;
-import org.jboss.errai.bus.client.api.base.Capabilities;
-import org.jboss.errai.bus.client.api.base.CommandMessage;
-import org.jboss.errai.bus.client.api.base.ConversationMessage;
-import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.api.base.NoSubscribersToDeliverTo;
-import org.jboss.errai.bus.client.api.base.RuleDelegateMessageCallback;
-import org.jboss.errai.bus.client.framework.*;
-import org.jboss.errai.bus.client.protocols.BusCommands;
-import org.jboss.errai.bus.server.api.MessageQueue;
-import org.jboss.errai.bus.server.api.QueueCloseEvent;
-import org.jboss.errai.bus.server.api.QueueClosedListener;
-import org.jboss.errai.bus.server.api.QueueSession;
-import org.jboss.errai.bus.server.api.ServerMessageBus;
-import org.jboss.errai.bus.server.io.BufferHelper;
-import org.jboss.errai.bus.server.io.buffers.BufferColor;
-import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
-import org.jboss.errai.bus.server.io.websockets.WebSocketServer;
-import org.jboss.errai.bus.server.io.websockets.WebSocketServerHandler;
-import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
-import org.jboss.errai.bus.server.util.SecureHashUtil;
-import org.jboss.errai.common.client.protocols.MessageParts;
-import org.slf4j.Logger;
-
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
+import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversation;
+import static org.jboss.errai.bus.client.protocols.SecurityCommands.MessageNotDelivered;
+import static org.jboss.errai.bus.client.util.ErrorHelper.handleMessageDeliveryFailure;
+import static org.jboss.errai.common.client.protocols.MessageParts.ReplyTo;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * The <tt>ServerMessageBusImpl</tt> implements the <tt>ServerMessageBus</tt>, making it possible for the server to
@@ -86,7 +90,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
   private final List<MessageListener> listeners = new ArrayList<MessageListener>();
 
   // 16 kb buffers * 8192 segments = 128 megabytes
-  private final TransmissionBuffer transmissionbuffer = TransmissionBuffer.create((8 * 1024), 16384);
+  private final TransmissionBuffer transmissionbuffer;
 
   private final Map<String, DeliveryPlan> subscriptions = new ConcurrentHashMap<String, DeliveryPlan>();
   private final Map<String, RemoteMessageCallback> remoteSubscriptions = new ConcurrentHashMap<String, RemoteMessageCallback>();
@@ -124,6 +128,48 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     final int webSocketPort = WebSocketServer.getWebSocketPort(config);
     final String webSocketPath = WebSocketServerHandler.WEBSOCKET_PATH;
+
+    Integer bufferSize = config.getIntProperty(IOConfigAttribs.BUS_BUFFER_SIZE);
+    Integer segmentSize = config.getIntProperty(IOConfigAttribs.BUS_BUFFER_SEGMENT_SIZE);
+    Integer segmentCount = config.getIntProperty(IOConfigAttribs.BUS_BUFFER_SEGMENT_COUNT);
+    String allocMode = config.getProperty(IOConfigAttribs.BUF_BUFFER_ALLOCATION_MODE);
+
+    if (segmentSize == null) {
+      segmentSize = 8;
+    }
+
+    if (segmentCount == null) {
+      if (bufferSize != null) {
+        segmentCount = bufferSize / segmentSize;
+      }
+      else {
+        segmentCount = 16384;
+      }
+    }
+
+    boolean directAlloc;
+    if (allocMode != null) {
+      if ("direct".equals(allocMode)) {
+        directAlloc = true;
+      }
+      else if ("heap".equals(allocMode)) {
+        directAlloc = false;
+      }
+      else {
+        throw new ErraiBootstrapFailure("unrecognized option for property: "
+                + IOConfigAttribs.BUF_BUFFER_ALLOCATION_MODE);
+      }
+    }
+    else {
+      directAlloc = false;
+    }
+
+    if (directAlloc) {
+      transmissionbuffer = TransmissionBuffer.createDirect(segmentSize, segmentCount);
+    }
+    else {
+      transmissionbuffer = TransmissionBuffer.create(segmentSize, segmentCount);
+    }
 
 
     /**
