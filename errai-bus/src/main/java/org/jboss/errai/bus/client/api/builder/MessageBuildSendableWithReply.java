@@ -19,5 +19,5 @@ package org.jboss.errai.bus.client.api.builder;
 import org.jboss.errai.bus.client.api.MessageCallback;
 
 public interface MessageBuildSendableWithReply extends MessageBuildSendableDispatcher {
-  public MessageBuildSendable repliesTo(MessageCallback callback);
+  public MessageBuildSendableDispatcher repliesTo(MessageCallback callback);
 }

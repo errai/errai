@@ -60,8 +60,6 @@ public class IOCGenerator extends Generator {
           throws UnableToCompleteException {
     typeOracle = context.getTypeOracle();
 
-
-
     /**
      * Try to determine the module package -- hackishly
      */
