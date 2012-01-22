@@ -17,50 +17,51 @@
 package org.jboss.errai.ioc.client.api.builtin;
 
 import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.ioc.client.api.Sender;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.common.client.protocols.MessageParts;
 
 public final class ErraiMessageSender<T> implements Sender<T> {
-  private final RequestDispatcher requestDispatcher;
+  private final MessageBus messageBus;
   private final Class<T> valueType;
   private final String toSubject;
   private final String replyTo;
 
-  private ErraiMessageSender(String toSubject, String replyTo, Class<T> valueType, RequestDispatcher dispatcher) {
+  private ErraiMessageSender(String toSubject, String replyTo, Class<T> valueType, MessageBus messageBus) {
     this.toSubject = toSubject;
     this.replyTo = replyTo;
     this.valueType = valueType;
-    this.requestDispatcher = dispatcher;
+    this.messageBus = messageBus;
   }
 
   public static <U> ErraiMessageSender<U> of(String toSubject, String replyTo, Class<U> valueType,
-                                               RequestDispatcher dispatcher) {
-    return new ErraiMessageSender<U>(toSubject, replyTo, valueType, dispatcher);
+                                             MessageBus messageBus) {
+    return new ErraiMessageSender<U>(toSubject, replyTo, valueType, messageBus);
   }
 
   @Override
   public void send(T value) {
     if (replyTo != null) {
       MessageBuilder.createMessage()
-          .toSubject(toSubject)
-          .with(MessageParts.ReplyTo, replyTo)
-          .with(MessageParts.Value, value)
-          .done().sendNowWith(requestDispatcher);
+              .toSubject(toSubject)
+              .with(MessageParts.ReplyTo, replyTo)
+              .with(MessageParts.Value, value)
+              .done().sendNowWith(messageBus);
     }
     else {
       MessageBuilder.createMessage()
-          .toSubject(toSubject)
-          .with(MessageParts.Value, value)
-          .done().sendNowWith(requestDispatcher);
+              .toSubject(toSubject)
+              .with(MessageParts.Value, value)
+              .done().sendNowWith(messageBus);
     }
   }
-  
+
   public void send(T value, MessageCallback replyTo) {
     MessageBuilder.createMessage()
             .toSubject(toSubject)
             .withValue(value)
-            .done().repliesTo(replyTo).sendNowWith(requestDispatcher);
+            .done().repliesTo(replyTo).sendNowWith(messageBus);
   }
 }
