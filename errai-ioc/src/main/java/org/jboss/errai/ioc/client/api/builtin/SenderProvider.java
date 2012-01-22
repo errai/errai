@@ -16,15 +16,15 @@
 
 package org.jboss.errai.ioc.client.api.builtin;
 
-import java.lang.annotation.Annotation;
-
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.ioc.client.api.Sender;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 import org.jboss.errai.ioc.client.api.ProviderException;
 import org.jboss.errai.ioc.client.api.ReplyTo;
+import org.jboss.errai.ioc.client.api.Sender;
 import org.jboss.errai.ioc.client.api.ToSubject;
+
+import java.lang.annotation.Annotation;
 
 /**
  * @author Mike Brock .
@@ -60,7 +60,7 @@ public class SenderProvider implements ContextualTypeProvider<Sender<?>> {
               " one type parameter. (found: " + typeargs.length + ")");
     }
 
-    return ErraiMessageSender.of(toSubject, replyTo, typeargs[0], ErraiBus.getDispatcher());
+    return ErraiMessageSender.of(toSubject, replyTo, typeargs[0], ErraiBus.get());
   }
 
   private static final String PROVIDER_EXCEPTION_ERROR_MSG_BASE = "Injection of " + Sender.class.getName()

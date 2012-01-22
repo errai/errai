@@ -66,7 +66,7 @@ class DefaultMessageBuilder<R extends Sendable> {
       boolean reply = false;
 
       @Override
-      public MessageBuildSendableDispatcher repliesTo(MessageCallback callback) {
+      public MessageBuildSendable repliesTo(MessageCallback callback) {
         reply = true;
         makeConversational(message, callback);
         return this;
