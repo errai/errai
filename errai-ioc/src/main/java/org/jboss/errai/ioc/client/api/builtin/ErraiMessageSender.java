@@ -16,6 +16,7 @@
 
 package org.jboss.errai.ioc.client.api.builtin;
 
+import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.ioc.client.api.Sender;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
@@ -54,5 +55,12 @@ public final class ErraiMessageSender<T> implements Sender<T> {
           .with(MessageParts.Value, value)
           .done().sendNowWith(requestDispatcher);
     }
+  }
+  
+  public void send(T value, MessageCallback replyTo) {
+    MessageBuilder.createMessage()
+            .toSubject(toSubject)
+            .withValue(value)
+            .done().repliesTo(replyTo).sendNowWith(requestDispatcher);
   }
 }

@@ -27,6 +27,7 @@ import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.builder.MessageBuildCommand;
 import org.jboss.errai.bus.client.api.builder.MessageBuildParms;
 import org.jboss.errai.bus.client.api.builder.MessageBuildSendable;
+import org.jboss.errai.bus.client.api.builder.MessageBuildSendableDispatcher;
 import org.jboss.errai.bus.client.api.builder.MessageBuildSubject;
 import org.jboss.errai.bus.client.api.builder.MessageReplySendable;
 import org.jboss.errai.bus.client.api.builder.Sendable;
@@ -58,14 +59,14 @@ class DefaultMessageBuilder<R extends Sendable> {
    *
    * @return the <tt>MessageBuildSubject</tt> with the appropriate fields
    *         and functions for the message builder
-   *         @param <T> the inter
+   *         @param <R> the inter
    */
   public MessageBuildSubject<R> start() {
     final Sendable sendable = new MessageReplySendable() {
       boolean reply = false;
 
       @Override
-      public MessageBuildSendable repliesTo(MessageCallback callback) {
+      public MessageBuildSendableDispatcher repliesTo(MessageCallback callback) {
         reply = true;
         makeConversational(message, callback);
         return this;
