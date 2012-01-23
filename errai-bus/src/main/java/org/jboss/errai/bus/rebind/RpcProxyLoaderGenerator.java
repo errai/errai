@@ -64,24 +64,39 @@ public class RpcProxyLoaderGenerator extends Generator {
   private TypeOracle typeOracle;
 
   @Override
-  public String generate(TreeLogger logger, GeneratorContext context, String typeName)
+  public String generate(final TreeLogger logger, final GeneratorContext context, final String typeName)
           throws UnableToCompleteException {
-    typeOracle = context.getTypeOracle();
+
+    final Thread rpcGenThread = new Thread() {
+      @Override
+      public void run() {
+        typeOracle = context.getTypeOracle();
+
+        try {
+          JClassType classType = typeOracle.getType(typeName);
+          packageName = classType.getPackage().getName();
+          className = classType.getSimpleSourceName() + "Impl";
+
+          PrintWriter printWriter = context.tryCreate(logger, packageName, className);
+          // If code has not already been generated.
+          if (printWriter != null) {
+            printWriter.append(generate(className));
+            context.commit(logger, printWriter);
+          }
+        }
+        catch (Throwable e) {
+          logger.log(TreeLogger.ERROR, "Error generating extensions", e);
+        }
+      }
+    };
+
+    rpcGenThread.start();
 
     try {
-      JClassType classType = typeOracle.getType(typeName);
-      packageName = classType.getPackage().getName();
-      className = classType.getSimpleSourceName() + "Impl";
-
-      PrintWriter printWriter = context.tryCreate(logger, packageName, className);
-      // If code has not already been generated.
-      if (printWriter != null) {
-        printWriter.append(generate(className));
-        context.commit(logger, printWriter);
-      }
+      rpcGenThread.join();
     }
-    catch (Throwable e) {
-      logger.log(TreeLogger.ERROR, "Error generating extensions", e);
+    catch (Exception e) {
+      e.printStackTrace();
     }
 
     // return the fully qualified name of the class generated

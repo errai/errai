@@ -65,23 +65,39 @@ public class MarshallersGenerator extends Generator {
   private String modulePackage;
 
   @Override
-  public String generate(TreeLogger logger, GeneratorContext context, String typeName) throws UnableToCompleteException {
+  public String generate(final TreeLogger logger, final GeneratorContext context, final String typeName)
+          throws UnableToCompleteException {
+    
+    final Thread marshallGenThread = new Thread() {
+      @Override
+      public void run() {
+        try {
+          typeOracle = context.getTypeOracle();
+
+          JClassType classType = typeOracle.getType(typeName);
+          packageName = classType.getPackage().getName();
+          className = classType.getSimpleSourceName() + "Impl";
+
+          logger.log(TreeLogger.INFO, "Generating Marshallers Bootstrapper...");
+
+          // Generate class source code
+          generateMarshallerBootstrapper(logger, context);
+        }
+        catch (Throwable e) {
+          // record sendNowWith logger that Map generation threw an exception
+          e.printStackTrace();
+          logger.log(TreeLogger.ERROR, "Error generating marshallers", e);
+        }
+      }
+    };
+
+    marshallGenThread.start();
+
     try {
-      typeOracle = context.getTypeOracle();
-
-      JClassType classType = typeOracle.getType(typeName);
-      packageName = classType.getPackage().getName();
-      className = classType.getSimpleSourceName() + "Impl";
-
-      logger.log(TreeLogger.INFO, "Generating Marshallers Bootstrapper...");
-
-      // Generate class source code
-      generateMarshallerBootstrapper(logger, context);
+      marshallGenThread.join();
     }
-    catch (Throwable e) {
-      // record sendNowWith logger that Map generation threw an exception
+    catch (Exception e) {
       e.printStackTrace();
-      logger.log(TreeLogger.ERROR, "Error generating marshallers", e);
     }
 
     // return the fully qualified name of the class generated
