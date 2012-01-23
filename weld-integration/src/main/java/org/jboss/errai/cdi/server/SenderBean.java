@@ -16,11 +16,11 @@
 
 package org.jboss.errai.cdi.server;
 
-import org.jboss.errai.bus.client.api.annotations.ReplyTo;
-import org.jboss.errai.bus.client.api.annotations.ToSubject;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.ioc.client.api.ProviderException;
+import org.jboss.errai.ioc.client.api.ReplyTo;
 import org.jboss.errai.ioc.client.api.Sender;
+import org.jboss.errai.ioc.client.api.ToSubject;
 import org.jboss.errai.ioc.client.api.builtin.ErraiMessageSender;
 import org.jboss.weld.Container;
 import org.jboss.weld.injection.CurrentInjectionPoint;

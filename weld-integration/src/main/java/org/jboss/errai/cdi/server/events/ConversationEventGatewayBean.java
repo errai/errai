@@ -20,7 +20,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.framework.RoutingFlags;
+import org.jboss.errai.bus.client.framework.RoutingFlag;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
@@ -44,13 +44,13 @@ public class ConversationEventGatewayBean {
                   .with(MessageParts.SessionID.name(), ctx.getSession())
                   .with(CDIProtocol.TYPE, wrapper.getEventType().getName()).with(CDIProtocol.QUALIFIERS, wrapper.getQualifierStrings())
                   .with(CDIProtocol.OBJECT_REF, wrapper.getEventObject())
-                  .flag(RoutingFlags.NonGlobalRouting).noErrorHandling().sendNowWith(wrapper.getBus());
+                  .flag(RoutingFlag.NonGlobalRouting).noErrorHandling().sendNowWith(wrapper.getBus());
         }
         else {
           MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
                   .with(MessageParts.SessionID.name(), ctx.getSession())
                   .with(CDIProtocol.TYPE,wrapper.getEventType().getName()).with(CDIProtocol.OBJECT_REF, wrapper.getEventObject())
-                  .flag(RoutingFlags.NonGlobalRouting).noErrorHandling()
+                  .flag(RoutingFlag.NonGlobalRouting).noErrorHandling()
                   .sendNowWith(wrapper.getBus());
         }
       }

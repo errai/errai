@@ -52,13 +52,11 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
         <errai.version>2.0-SNAPSHOT</errai.version>
-
-        <gwt.version>2.3.0</gwt.version>
+        <gwt.version>2.4.0</gwt.version>
         <hsqldb.version>1.8.0.7</hsqldb.version>
         <weld.version>1.1.0.Final</weld.version>
-        <gwt.maven>2.3.0</gwt.maven>
+        <gwt.maven>2.4.0</gwt.maven>
         <mvel.version>2.1.Beta6</mvel.version>
         <jetty.version>6.1.25</jetty.version>
         <slf4j.version>1.5.11</slf4j.version>
