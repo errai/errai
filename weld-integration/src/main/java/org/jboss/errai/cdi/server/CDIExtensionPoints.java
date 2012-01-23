@@ -343,7 +343,7 @@ public class CDIExtensionPoints implements Extension {
     }
 
     for (MessageSender ms : messageSenders) {
-      abd.addBean(new SenderBean(ms.getSenderType(), ms.getQualifiers(), service.getDispatcher()));
+      abd.addBean(new SenderBean(ms.getSenderType(), ms.getQualifiers(), bus));
     }
 
 

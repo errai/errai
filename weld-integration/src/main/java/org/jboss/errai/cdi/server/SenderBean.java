@@ -16,6 +16,7 @@
 
 package org.jboss.errai.cdi.server;
 
+import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.ioc.client.api.ProviderException;
 import org.jboss.errai.ioc.client.api.ReplyTo;
@@ -42,12 +43,12 @@ import java.util.Set;
 public class SenderBean implements Bean {
 
   private Set<Annotation> qualifiers;
-  private final RequestDispatcher dispatcher;
+  private final MessageBus bus;
   private final Set<Type> typesSet;
  
 
-  public SenderBean(Type type, Set<Annotation> qualifiers, RequestDispatcher dispatcher) {
-    this.dispatcher = dispatcher;
+  public SenderBean(Type type, Set<Annotation> qualifiers, MessageBus bus) {
+    this.bus = bus;
     this.qualifiers = qualifiers;
     typesSet = Arrays2.<Type>asSet(type);
   }
@@ -128,7 +129,7 @@ public class SenderBean implements Bean {
               + ToSubject.class.getName() + " qualifier missing at injection point.");
     }
 
-    return ErraiMessageSender.of(toSubject, replyTo, senderType , dispatcher);
+    return ErraiMessageSender.of(toSubject, replyTo, senderType , bus);
   }
   
   private static final String PROVIDER_EXCEPTION_ERROR_MSG_BASE
