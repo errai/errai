@@ -56,57 +56,74 @@ public class IOCGenerator extends Generator {
   }
 
   @Override
-  public String generate(TreeLogger logger, GeneratorContext context, String typeName)
+  public String generate(final TreeLogger logger, final GeneratorContext context, final String typeName)
           throws UnableToCompleteException {
     typeOracle = context.getTypeOracle();
 
-    /**
-     * Try to determine the module package -- hackishly
-     */
-    //TODO: Find a more standard way to do this.
-    try {
-      if (context instanceof StandardGeneratorContext) {
-        StandardGeneratorContext stdContext = (StandardGeneratorContext) context;
-        Field field = StandardGeneratorContext.class.getDeclaredField("module");
-        field.setAccessible(true);
 
-        ModuleDef moduleDef = (ModuleDef) field.get(stdContext);
+    Thread iocGenThread = new Thread() {
+      @Override
+      public void run() {
 
-        String moduleName = moduleDef.getName();
+        /**
+         * Try to determine the module package -- hackishly
+         */
+        //TODO: Find a more standard way to do this.
+        try {
+          if (context instanceof StandardGeneratorContext) {
+            StandardGeneratorContext stdContext = (StandardGeneratorContext) context;
+            Field field = StandardGeneratorContext.class.getDeclaredField("module");
+            field.setAccessible(true);
 
-        for (int i = 0; i < moduleName.length(); i++) {
-          if (moduleName.charAt(i) == '.' && i < moduleName.length()
-                  && Character.isUpperCase(moduleName.charAt(i + 1))) {
-            this.modulePackage = moduleName.substring(0, i);
-            break;
+            ModuleDef moduleDef = (ModuleDef) field.get(stdContext);
+
+            String moduleName = moduleDef.getName();
+
+            for (int i = 0; i < moduleName.length(); i++) {
+              if (moduleName.charAt(i) == '.' && i < moduleName.length()
+                      && Character.isUpperCase(moduleName.charAt(i + 1))) {
+                modulePackage = moduleName.substring(0, i);
+                break;
+              }
+            }
+
+            logger.log(TreeLogger.INFO, "will scan in package: " + modulePackage);
           }
         }
+        catch (Exception e) {
+          throw new RuntimeException("could not determine module package", e);
+          // could not determine package.
+        }
 
-        logger.log(TreeLogger.INFO, "will scan in package: " + modulePackage);
+        try {
+          // get classType and save instance variables
+
+          JClassType classType = typeOracle.getType(typeName);
+          packageName = classType.getPackage().getName();
+          className = classType.getSimpleSourceName() + "Impl";
+
+          logger.log(TreeLogger.INFO, "Generating Extensions Bootstrapper...");
+
+          // Generate class source code
+          generateIOCBootstrapClass(logger, context);
+        }
+        catch (Throwable e) {
+          // record sendNowWith logger that Map generation threw an exception
+          e.printStackTrace();
+          logger.log(TreeLogger.ERROR, "Error generating extensions", e);
+        }
       }
-    }
-    catch (Exception e) { 
-      throw new RuntimeException("could not determine module package", e);
-      // could not determine package.
-    }
+    };
+
+    iocGenThread.start();
 
     try {
-      // get classType and save instance variables
-
-      JClassType classType = typeOracle.getType(typeName);
-      packageName = classType.getPackage().getName();
-      className = classType.getSimpleSourceName() + "Impl";
-
-      logger.log(TreeLogger.INFO, "Generating Extensions Bootstrapper...");
-
-      // Generate class source code
-      generateIOCBootstrapClass(logger, context);
+      iocGenThread.join();
     }
-    catch (Throwable e) {
-      // record sendNowWith logger that Map generation threw an exception
+    catch (Exception e) {
       e.printStackTrace();
-      logger.log(TreeLogger.ERROR, "Error generating extensions", e);
     }
+
 
     // return the fully qualified name of the class generated
     return packageName + "." + className;

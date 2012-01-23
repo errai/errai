@@ -88,7 +88,7 @@ public class MarshallerGeneratorFactory {
     return new MarshallerGeneratorFactory(target);
   }
 
-  public String generate(String packageName, String clazzName) {
+  public String generate(final String packageName, final String clazzName) {
     File fileCacheDir = RebindUtils.getErraiCacheDir();
     File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + clazzName + ".java");
 
