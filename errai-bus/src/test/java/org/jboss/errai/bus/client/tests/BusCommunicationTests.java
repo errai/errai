@@ -57,6 +57,27 @@ public class BusCommunicationTests extends AbstractErraiTest {
     });
   }
   
+  private int replies = 0;
+  public void testBasicRoundTripWithGiantString() {
+    runAfterInit(new Runnable() {
+      public void run() {
+        bus.subscribe("GiantStringClient", new MessageCallback() {
+          public void callback(Message message) {
+            System.out.println(message.get(String.class, "string"));
+            System.out.println(++replies);
+            if (replies == 51)
+              finishTest();
+          }
+        });
+
+        MessageBuilder.createMessage()
+            .toSubject("GiantStringTestService")
+            .with(MessageParts.ReplyTo, "GiantStringClient")
+            .done().sendNowWith(bus);
+      }
+    });
+  }
+  
   public void testBasicRoundTripWithoutToSubjectCall() {
     runAfterInit(new Runnable() {
       public void run() {
