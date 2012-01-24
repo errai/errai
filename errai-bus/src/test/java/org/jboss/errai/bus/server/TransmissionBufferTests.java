@@ -39,10 +39,6 @@ import java.util.concurrent.locks.LockSupport;
  * @author Mike Brock
  */
 public class TransmissionBufferTests extends TestCase {
-  static {
-    // make sure protocol provider is initialized;
-    MappingContextSingleton.get();
-  }
 
   public void testBufferWriteAndRead() {
     TransmissionBuffer buffer = TransmissionBuffer.create();
@@ -252,6 +248,9 @@ public class TransmissionBufferTests extends TestCase {
   }
 
   public void testLargeOversizedSegments() {
+
+    MappingContextSingleton.get();
+
     final TransmissionBuffer buffer = TransmissionBuffer.create();
 
     final BufferColor colorA = BufferColor.getNewColor();
@@ -585,5 +584,57 @@ public class TransmissionBufferTests extends TestCase {
     }
     System.out.println(System.currentTimeMillis() - start);
   }
+
+  public static String createGiantString() {
+    int size = TransmissionBuffer.DEFAULT_SEGMENT_SIZE * 3;
+    StringBuilder sb = new StringBuilder(size + 10);
+    int i = 0;
+    while (sb.length() < size) {
+      sb.append(String.format("%10d,", i++));
+    }
+    return sb.toString();
+  }
+
+  public void testExtremelyLargeSegmentsInterleavedWithSmallSegments() throws IOException {
+    TransmissionBuffer buffer = TransmissionBuffer.create();
+
+    BufferColor globalColor = BufferColor.getAllBuffersColor();
+
+    BufferColor red = BufferColor.getNewColor();
+
+    StringBuilder sb = new StringBuilder();
+
+    for (int i = 0; i < 1; i++) {
+      String s = createGiantString();
+      sb.append(s);
+      ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(s.getBytes());
+
+      buffer.write(byteArrayInputStream.available(), byteArrayInputStream, globalColor);
+    }
+
+    String s = "this is a short string";
+    ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(s.getBytes());
+    sb.append(s);
+
+    buffer.write(byteArrayInputStream.available(), byteArrayInputStream, globalColor);
+
+    byteArrayInputStream.reset();
+
+    StringBuilder out = new StringBuilder();
+
+    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+   // for (int i = 0; i < 5; i++) {
+      buffer.read(byteArrayOutputStream, red);
+   // }
+
+    for (byte b : byteArrayOutputStream.toByteArray()) {
+      out.append((char) b);
+    }
+
+    assertEquals(sb.toString(), out.toString());
+
+  }
+
 
 }
