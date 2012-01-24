@@ -57,7 +57,7 @@ public class ServerMarshallingTest {
     EJValue encodedNode = parsedJson.isArray().get(0);
 
     Object dec = marshaller.demarshall(encodedNode, decSession);
-    Assert.assertTrue("decoded type not an instance of String", type.isAssignableFrom(value.getClass()));
+    Assert.assertTrue("decoded type not an instance of " + value.getClass(), type.isAssignableFrom(value.getClass()));
     assertEquals(value, dec);
   }
 
@@ -354,22 +354,27 @@ public class ServerMarshallingTest {
 
     private Random random = new Random(System.nanoTime());
 
+    @Override
     public boolean nextBoolean() {
       return random.nextBoolean();
     }
 
+    @Override
     public int nextInt(int upper) {
       return random.nextInt(upper);
     }
 
+    @Override
     public double nextDouble() {
       return new BigDecimal(random.nextDouble(), MathContext.DECIMAL32).doubleValue();
     }
 
+    @Override
     public char nextChar() {
       return CHARS[nextInt(1000) % CHARS.length];
     }
 
+    @Override
     public String randString() {
       StringBuilder builder = new StringBuilder();
       int len = nextInt(25) + 5;

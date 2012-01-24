@@ -16,14 +16,19 @@
 
 package org.jboss.errai.bus.client.tests.support;
 
-import org.jboss.errai.bus.server.annotations.Remote;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
+
+import org.jboss.errai.bus.server.annotations.Remote;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -32,9 +37,9 @@ import java.util.*;
 @Remote
 public interface TestSerializationRPCService {
   public String testString(String str);
-  
+
   public int testInteger(int i);
-  
+
   public long testLong(long l);
 
   public double testDouble(double d);
@@ -70,9 +75,9 @@ public interface TestSerializationRPCService {
 
 
   public List<Long> listOfLong(List<Long> list);
-  
+
   public List<Integer> listOfInteger(List<Integer> list);
-  
+
   public List<Float> listOfFloat(List<Float> list);
 
   public List<Short> listOfShort(List<Short> list);
@@ -84,19 +89,19 @@ public interface TestSerializationRPCService {
   public List<Character> listOfCharacters(List<Character> list);
 
   public Set<String> setOfStrings(Set<String> set);
-  
+
   public Map<Long, String> mapOfLongToString(Map<Long, String> map);
-  
+
   public Map<Long, List<String>> mapOfLongToListOfStrings(Map<Long, List<String>> map);
 
   public Map<String, Float> mapOfStringToFloat(Map<String, Float> map);
-  
+
   public Map<String, List<Double>> mapOfStringToListOfDoubles(Map<String, List<Double>> map);
-  
+
   public Map<List<String>, Group> mapOfListOfStringsToCustomType(Map<List<String>, Group> map);
-  
-  public Map<Group, Group> mapOfCustomTypes(Map<Group, Group> map); 
-  
+
+  public Map<Group, Group> mapOfCustomTypes(Map<Group, Group> map);
+
   public ClassWithNestedClass nestedClass(ClassWithNestedClass clazz);
 
   public EntityWithGenericCollections genericCollections(EntityWithGenericCollections ent);
@@ -108,11 +113,11 @@ public interface TestSerializationRPCService {
   public AssertionError testSerializeAssertionError(AssertionError t);
 
   public FactoryEntity testFactorySerialization(FactoryEntity e);
-  
+
   public java.util.Date testJavaUtilDate(java.util.Date d);
-  
+
   public Date testJavaSqlDate(Date d);
-  
+
   public Timestamp testTimestampSerialization(Timestamp ts);
 
   public Time testTimeSerialization(Time time);
@@ -122,7 +127,7 @@ public interface TestSerializationRPCService {
   public BigInteger testBigIntegerSerialization(BigInteger time);
 
   public List<Byte> testListOfBytes(List<Byte> lb);
-  
+
   public Queue testQueueSerialization(Queue queue);
 
   public SortedMap testSortedMapSerialization(SortedMap sm);
@@ -132,18 +137,21 @@ public interface TestSerializationRPCService {
   public List testInheritedDefinitionFromExistingParent(List list);
 
   public TestEnumA testNakedEnum(TestEnumA e);
-  
+
   public Boron.Bean testPortableInnerClass(Boron.Bean b);
- 
+
   public Koron testKoron(Koron k);
-  
+
+  public TestingTickCache testMoron(TestingTickCache moron);
+
   public List<TreeNodeContainer> acceptTreeNodeContainers(List<TreeNodeContainer> listOfContainers);
 
   public EntityWithUnqualifiedFields testEntityWithUnqualifiedFieldTypes(EntityWithUnqualifiedFields e);
-  
+
   public GenericEntity testGenericEntity(GenericEntity e);
-  
+
   public EntityWithSuperClassField testEntityWithSuperClassField(EntityWithSuperClassField e);
-  
+
   public User testEntityWithNullField(User u);
+
 }

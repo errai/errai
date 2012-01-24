@@ -52,6 +52,8 @@ import org.jboss.errai.bus.client.tests.support.Student;
 import org.jboss.errai.bus.client.tests.support.StudyTreeNodeContainer;
 import org.jboss.errai.bus.client.tests.support.TestEnumA;
 import org.jboss.errai.bus.client.tests.support.TestSerializationRPCService;
+import org.jboss.errai.bus.client.tests.support.TestingTick;
+import org.jboss.errai.bus.client.tests.support.TestingTickCache;
 import org.jboss.errai.bus.client.tests.support.TreeNodeContainer;
 import org.jboss.errai.bus.client.tests.support.User;
 
@@ -1279,7 +1281,7 @@ public class SerializationTests extends AbstractErraiTest {
       @Override
       public void run() {
 
-        final BigDecimal bd = new BigDecimal(((double) System.currentTimeMillis()) * 1.04d);
+        final BigDecimal bd = new BigDecimal(System.currentTimeMillis() * 1.04d);
 
         MessageBuilder.createCall(new RemoteCallback<BigDecimal>() {
           @Override
@@ -1568,6 +1570,29 @@ public class SerializationTests extends AbstractErraiTest {
     });
   }
 
+  public void testMoron() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final TestingTickCache moron = new TestingTickCache(new LinkedList<TestingTick>());
+
+        MessageBuilder.createCall(new RemoteCallback<TestingTickCache>() {
+          @Override
+          public void callback(TestingTickCache response) {
+            try {
+              assertEquals(moron, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestSerializationRPCService.class).testMoron(moron);
+      }
+    });
+  }
+
   public void testEntityWithUnqualifiedFields() {
     runAfterInit(new Runnable() {
       @Override
@@ -1731,7 +1756,7 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
-  
+
   public void testEntityWithNullField() {
     runAfterInit(new Runnable() {
       @Override
@@ -1740,7 +1765,7 @@ public class SerializationTests extends AbstractErraiTest {
         final User u = new User();
         u.setId(1);
         u.setName(null);
-        
+
         MessageBuilder.createCall(new RemoteCallback<User>() {
           @Override
           public void callback(User response) {
