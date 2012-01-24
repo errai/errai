@@ -1,24 +1,28 @@
 package org.jboss.errai.cdi.demo.stock.client.shared;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.ConcurrentModificationException;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Queue;
 
 import org.jboss.errai.common.client.api.annotations.Portable;
+import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 
 /**
  * A cache that can hold ticks over an arbitrary time interval.
- * 
+ *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
 @Portable
-public class TickCache {
+public class TickCache implements Iterable<Tick> {
 
   /**
-   * The entries in this cache.
+   * The entries in this cache. On the server side, we inject a
+   * ConcurrentLinkedQueue, which supports simultaneous iteration and
+   * modification (because CDI events are dispatched asynchronously).
+   * On the client, it's a plain old LinkedList.
    */
-  private final List<TickBuilder> entries = new LinkedList<TickBuilder>();
+  private final Queue<Tick> entries;
 
   /**
    * The amount of time ticks should be retained within the cache. Default is 3 minutes.
@@ -26,13 +30,23 @@ public class TickCache {
   private long timeSpan = 3 * 60 * 1000;
 
   /**
+   * The entry most recently added to this cache.
+   */
+  private Tick newestEntry;
+
+  public TickCache(@MapsTo("entries") Queue<Tick> queueImpl) {
+    entries = queueImpl;
+  }
+
+  /**
    * Adds the given tick to this cache, pruning ticks that are older than {@link #timeSpan} milliseconds.
-   * 
+   *
    * @param tick
    *          The tick to add
    */
-  public void add(TickBuilder tick) {
+  public void add(Tick tick) {
     entries.add(tick);
+    newestEntry = tick;
     prune();
   }
 
@@ -41,28 +55,19 @@ public class TickCache {
    */
   private void prune() {
     long cutoff = System.currentTimeMillis() - timeSpan;
-    while (entries.size() > 0 && entries.get(0).getTime().getTime() < cutoff) {
-      entries.remove(0);
+    while ((!entries.isEmpty()) && entries.element().getTime().getTime() < cutoff) {
+      entries.remove();
     }
   }
 
   /**
-   * Returns an unmodifiable view of this cache's entries.
+   * Returns an iterator over this cache's entries. The returned iterator will
+   * not throw {@link ConcurrentModificationException} even if entries are added
+   * to the cache during iteration.
    */
-  public List<TickBuilder> getEntries() {
-    return Collections.unmodifiableList(entries);
-  }
-
-  /**
-   * Provided for the benefit of Errai serialization. Do not call directly.
-   */
-  @Deprecated
-  public void setEntries(List<TickBuilder> newEntries) {
-    if (!entries.isEmpty()) {
-      throw new IllegalStateException(
-          "This method should only be called by Errai serialization, and only when the cache is empty");
-    }
-    entries.addAll(newEntries);
+  @Override
+  public Iterator<Tick> iterator() {
+    return entries.iterator();
   }
 
   /**
@@ -83,11 +88,11 @@ public class TickCache {
 
   /**
    * Returns the newest entry in this cache.
-   * 
+   *
    * @throws NoSuchElementException
    *           if the cache is empty
    */
-  public TickBuilder getNewestEntry() {
-    return entries.get(entries.size() - 1);
+  public Tick getNewestEntry() {
+    return newestEntry;
   }
 }

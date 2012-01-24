@@ -5,3 +5,7 @@
 .metadata/*
 *.iml
 target/
+.errai
+*.versionsBackup
+gwt-unitCache
+*.JUnit

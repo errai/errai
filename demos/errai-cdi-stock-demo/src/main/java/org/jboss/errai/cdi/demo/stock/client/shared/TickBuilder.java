@@ -1,138 +1,75 @@
 package org.jboss.errai.cdi.demo.stock.client.shared;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
-import org.jboss.errai.common.client.api.annotations.Portable;
-
 /**
- * A mutable representation of a tick (price change) in some tradable instrument.
- * 
- * @author jfuerth
+ * Mutable companion class to {@link Tick}. Useful for constructing ticks in a
+ * more obvious way than the megaconstructor on that class.
+ *
+ * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
-@Portable
 public class TickBuilder {
 
   private String symbol;
-
-  // XXX these want to be BigDecimals, but serialization
-  // doesn't support those yet. See ERRAI-141.
-  private long bid;
-  private long ask;
-  private long change;
-
-  private int decimalPlaces;
-
-  private Date time;
-
+  private BigDecimal price = BigDecimal.ZERO;
+  private BigDecimal change = BigDecimal.ZERO;
+  private Date time = new Date();
   private String currencyCode = "USD";
 
-  public TickBuilder() {
-
+  /**
+   * Creates a TickBuilder with all fields set to their defaults.
+   */
+  public TickBuilder(String symbol) {
+    this.symbol = symbol;
   }
 
   public String getSymbol() {
     return symbol;
   }
 
-  public void setSymbol(String symbol) {
-    this.symbol = symbol;
+  public BigDecimal getPrice() {
+    return price;
   }
 
-  public long getBid() {
-    return bid;
-  }
-
-  public void setBid(long bid) {
-    this.bid = bid;
-  }
-
-  public long getAsk() {
-    return ask;
-  }
-
-  public void setAsk(long ask) {
-    this.ask = ask;
-  }
-
-  public long getChange() {
+  public BigDecimal getChange() {
     return change;
-  }
-
-  public void setChange(long change) {
-    this.change = change;
-  }
-
-  public int getDecimalPlaces() {
-    return decimalPlaces;
-  }
-
-  public void setDecimalPlaces(int decimalPlaces) {
-    this.decimalPlaces = decimalPlaces;
-  }
-
-  public String getCurrencyCode() {
-    return currencyCode;
-  }
-
-  public void setCurrencyCode(String currencyCode) {
-    this.currencyCode = currencyCode;
   }
 
   public Date getTime() {
     return time;
   }
 
-  public void setTime(Date time) {
+  public String getCurrencyCode() {
+    return currencyCode;
+  }
+
+  public TickBuilder symbol(String symbol) {
+    this.symbol = symbol;
+    return this;
+  }
+
+  public TickBuilder price(BigDecimal price) {
+    this.price = price;
+    return this;
+  }
+
+  public TickBuilder change(BigDecimal change) {
+    this.change = change;
+    return this;
+  }
+
+  public TickBuilder time(Date time) {
     this.time = time;
+    return this;
   }
 
-  public String getFormattedBid() {
-    return formatNumber(bid);
+  public TickBuilder currencyCode(String currencyCode) {
+    this.currencyCode = currencyCode;
+    return this;
   }
 
-  public String getFormattedAsk() {
-    return formatNumber(ask);
-  }
-
-  public String getFormattedChange() {
-    return (change >= 0 ? "+" : "") + formatNumber(change);
-  }
-
-  /**
-   * Puts a decimal place at the right spot in the number, adding leading zeroes if necessary.
-   * <p>
-   * This routine is not locale-sensitive, because GWT does not provide a number formatting API that works on both the
-   * client and the server.
-   * 
-   * @param num
-   *          The number to format (eg, the bid, ask, or change of this tick)
-   * @return A formatted representation of the number
-   */
-  private String formatNumber(long num) {
-    StringBuilder sb = new StringBuilder(String.valueOf(Math.abs(num)));
-    int len = sb.length();
-
-    if (len == decimalPlaces) {
-      sb.insert(0, "0.");
-    }
-    else if (len < decimalPlaces) {
-      for (int i = 0; i < decimalPlaces - len; i++) {
-        sb.insert(0, "0");
-      }
-      sb.insert(0, "0.");
-    }
-    else {
-      sb.insert(len - decimalPlaces, '.');
-    }
-
-    if (num < 0) {
-      sb.insert(0, '-');
-    }
-    return sb.toString();
-  }
-
-  @Override
-  public String toString() {
-    return symbol + ": " + getFormattedBid() + "/" + getFormattedAsk() + " (" + getFormattedChange() + ")";
+  public Tick toTick() {
+    return new Tick(symbol, price, change, time, currencyCode);
   }
 }

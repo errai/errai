@@ -3,7 +3,6 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <name>Errai::CDI::Stock Ticker Demo</name>
-  <groupId>org.jboss.errai</groupId>
   <artifactId>errai-cdi-demos-stock</artifactId>
   <packaging>war</packaging>
 
@@ -16,10 +15,10 @@
 
   <properties>
     <errai.version>2.0-SNAPSHOT</errai.version>
-    <gwt.version>2.3.0</gwt.version>
+    <gwt.version>2.4.0</gwt.version>
+    <gwt.maven>2.4.0</gwt.maven>
     <hsqldb.version>1.8.0.7</hsqldb.version>
     <weld.version>1.1.0.Final</weld.version>
-    <gwt.maven>2.3.0</gwt.maven>
     <mvel.version>2.1.Beta6</mvel.version>
     <jetty.version>6.1.25</jetty.version>
     <slf4j.version>1.5.11</slf4j.version>
@@ -534,23 +533,6 @@
           <groupId>org.mvel</groupId>
           <artifactId>mvel2</artifactId>
           <version>${mvel.version}</version>
-        </dependency>
-
-        <dependency>
-          <groupId>org.jboss.errai</groupId>
-          <artifactId>errai-ioc</artifactId>
-          <exclusions>
-            <exclusion>
-              <artifactId>jsr250-api</artifactId>
-              <groupId>javax.annotation</groupId>
-            </exclusion>
-            <exclusion>
-              <artifactId>javax.inject</artifactId>
-              <groupId>javax.inject</groupId>
-            </exclusion>
-          </exclusions>
-          <scope>provided</scope>
-          <version>${errai.version}</version>
         </dependency>
 
         <dependency>

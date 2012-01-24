@@ -1,86 +1,78 @@
 package org.jboss.errai.cdi.demo.stock.client.shared;
 
+import java.math.BigDecimal;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 public class TickBuilderTest {
 
-  private TickBuilder tick;
+  private TickBuilder tb;
 
   @Before
   public void createTickBuilder() {
-    tick = new TickBuilder();
+    tb = new TickBuilder("XXX");
   }
 
   @Test
   public void testFormat1Digit2Decimals() {
-    tick.setAsk(1);
-    tick.setDecimalPlaces(2);
-    Assert.assertEquals("0.01", tick.getFormattedAsk());
+    tb.price(new BigDecimal("0.01"));
+    Assert.assertEquals("0.01", tb.toTick().getFormattedPrice());
   }
 
   @Test
   public void testFormat3Digits10Decimals() {
-    tick.setAsk(123);
-    tick.setDecimalPlaces(10);
-    Assert.assertEquals("0.0000000123", tick.getFormattedAsk());
+    tb.price(new BigDecimal("0.0000000123"));
+    Assert.assertEquals("0.0000000123", tb.toTick().getFormattedPrice());
   }
 
   @Test
   public void testFormat0With2Decimals() {
-    tick.setAsk(0);
-    tick.setDecimalPlaces(2);
-    Assert.assertEquals("0.00", tick.getFormattedAsk());
+    tb.price(new BigDecimal("0.00"));
+    Assert.assertEquals("0.00", tb.toTick().getFormattedPrice());
   }
 
   @Test
   public void testFormat2Digit2Decimals() {
-    tick.setAsk(12);
-    tick.setDecimalPlaces(2);
-    Assert.assertEquals("0.12", tick.getFormattedAsk());
+    tb.price(new BigDecimal("0.12"));
+    Assert.assertEquals("0.12", tb.toTick().getFormattedPrice());
   }
 
   @Test
   public void testFormat3Digits2Decimals() {
-    tick.setAsk(123);
-    tick.setDecimalPlaces(2);
-    Assert.assertEquals("1.23", tick.getFormattedAsk());
+    tb.price(new BigDecimal("1.23"));
+    Assert.assertEquals("1.23", tb.toTick().getFormattedPrice());
   }
 
   @Test
   public void testFormat1Digit2DecimalsNegative() {
-    tick.setAsk(-1);
-    tick.setDecimalPlaces(2);
-    Assert.assertEquals("-0.01", tick.getFormattedAsk());
+    tb.price(new BigDecimal("-0.01"));
+    Assert.assertEquals("-0.01", tb.toTick().getFormattedPrice());
   }
 
   @Test
   public void testFormat2Digit2DecimalsNegative() {
-    tick.setAsk(-12);
-    tick.setDecimalPlaces(2);
-    Assert.assertEquals("-0.12", tick.getFormattedAsk());
+    tb.price(new BigDecimal("-0.12"));
+    Assert.assertEquals("-0.12", tb.toTick().getFormattedPrice());
   }
 
   @Test
   public void testFormat3Digits2DecimalsNegative() {
-    tick.setAsk(-123);
-    tick.setDecimalPlaces(2);
-    Assert.assertEquals("-1.23", tick.getFormattedAsk());
+    tb.price(new BigDecimal("-1.23"));
+    Assert.assertEquals("-1.23", tb.toTick().getFormattedPrice());
   }
 
   @Test
   public void testChangeNegative() {
-    tick.setChange(-123);
-    tick.setDecimalPlaces(2);
-    Assert.assertEquals("-1.23", tick.getFormattedChange());
+    tb.change(new BigDecimal("-1.23"));
+    Assert.assertEquals("-1.23", tb.toTick().getFormattedChange());
   }
 
   @Test
   public void testChangePositive() {
-    tick.setChange(123);
-    tick.setDecimalPlaces(2);
-    Assert.assertEquals("+1.23", tick.getFormattedChange());
+    tb.change(new BigDecimal("1.23"));
+    Assert.assertEquals("+1.23", tb.toTick().getFormattedChange());
   }
 
 }

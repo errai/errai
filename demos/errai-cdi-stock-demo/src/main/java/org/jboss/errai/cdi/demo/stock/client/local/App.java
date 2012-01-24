@@ -24,7 +24,7 @@ import javax.inject.Inject;
 
 import org.jboss.errai.cdi.demo.stock.client.shared.SubscriptionReply;
 import org.jboss.errai.cdi.demo.stock.client.shared.SubscriptionRequest;
-import org.jboss.errai.cdi.demo.stock.client.shared.TickBuilder;
+import org.jboss.errai.cdi.demo.stock.client.shared.Tick;
 import org.jboss.errai.cdi.demo.stock.client.shared.TickCache;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
@@ -76,7 +76,7 @@ public class App {
   /**
    * Handles completion of the subscription request by creating all the stock info divs, pre-filling them with tick
    * history, and rendering their charts.
-   * 
+   *
    * @param subscriptionReply
    *          The subscription reply message from the server (contains tick history)
    */
@@ -85,7 +85,7 @@ public class App {
       chartTimeSpan = cache.getTimeSpan(); // XXX assumption is that all charts have same time span
       DivElement stockBoxDiv = getStockBoxDiv(cache.getNewestEntry());
       JsArray<JsArrayNumber> history = getChartData(stockBoxDiv);
-      for (TickBuilder t : cache.getEntries()) {
+      for (Tick t : cache) {
         addTick(history, t);
       }
       long endTime = cache.getNewestEntry().getTime().getTime();
@@ -99,11 +99,11 @@ public class App {
    * <p>
    * This method doesn't do anything (it just returns immediately) until after
    * {@link #subscriptionCompleted(SubscriptionReply)} has been called.
-   * 
+   *
    * @param tick
    *          The tick that just happened
    */
-  public void tickHappened(@Observes TickBuilder tick) {
+  public void tickHappened(@Observes Tick tick) {
     if (!registrationComplete)
       return;
     try {
@@ -124,11 +124,11 @@ public class App {
         el.setInnerText(tick.getSymbol());
       }
       else if (el.getClassName().contains("bidAsk")) {
-        el.setInnerText(tick.getFormattedBid() + "/" + tick.getFormattedAsk());
+        el.setInnerText(tick.getFormattedPrice());
       }
       else if (el.getClassName().contains("change")) {
         el.setInnerText(tick.getFormattedChange());
-        String strobeCssColor = tick.getChange() >= 0 ? "rgb(40, 155, 40)" : "rgb(155, 40, 40)";
+        String strobeCssColor = tick.getChange().signum() >= 0 ? "rgb(40, 155, 40)" : "rgb(155, 40, 40)";
         strobe(el, strobeCssColor, "rgb(0, 0, 0)");
       }
       else if (el.getClassName().contains("time")) {
@@ -146,7 +146,7 @@ public class App {
   /**
    * Strobes the foreground color of the given element. This feat is accomplished using jQuery's animate() method
    * together with the jquery-color plugin.
-   * 
+   *
    * @param el
    *          The element whose colour to strobe
    * @param strobeCssColor
@@ -156,26 +156,26 @@ public class App {
    *          is already in the process of animating)
    */
   private native void strobe(Element el, String strobeCssColor, String normalCssColor) /*-{
-                                                                                       var $ = $wnd.jQuery;
-                                                                                       $(el).css({
-                                                                                       color: $.Color(strobeCssColor)
-                                                                                       });
-                                                                                       $(el).animate({
-                                                                                       color: $.Color(normalCssColor)
-                                                                                       }, { duration: 1000, queue: false } );
-                                                                                       }-*/;
+    var $ = $wnd.jQuery;
+    $(el).css({
+      color: $.Color(strobeCssColor)
+    });
+    $(el).animate({
+      color: $.Color(normalCssColor)
+    }, { duration: 1000, queue: false } );
+  }-*/;
 
   /**
    * Returns the HTML div element that contains all the information about the given tick's stock. If the document
    * doesn't have a div for that stock yet, one will be created from the prototype, appended to the document, and
    * returned.
-   * 
+   *
    * @param tick
    *          The tick for which you want to obtain a stock box.
    * @return The div within the current document that contains all the information about the given tick's stock. It will
    *         have been freshly cloned from the prototype if necessary.
    */
-  private DivElement getStockBoxDiv(TickBuilder tick) {
+  private DivElement getStockBoxDiv(Tick tick) {
     Document document = RootPanel.getBodyElement().getOwnerDocument();
 
     // find our stock box, creating if necessary
@@ -191,8 +191,8 @@ public class App {
 
   /**
    * Redraws the chart using the current data that's available. You can add to that data by calling
-   * {@link #getChartData(DivElement, String, TickBuilder[])}.
-   * 
+   * {@link #getChartData(DivElement, String, Tick[])}.
+   *
    * @param stockBoxDiv
    *          The div element that contains the stock information.
    * @param startTime
@@ -201,19 +201,19 @@ public class App {
    *          The latest point in time to display on the chart's x-axis
    */
   private native void redrawChart(DivElement stockBoxDiv, double startTime, double endTime) /*-{
-                                                                                            var $ = $wnd.jQuery;
-                                                                                            
-                                                                                            var tickData = $(stockBoxDiv).data("tickData");
-                                                                                            var chartDiv = $(stockBoxDiv).find(".chart");
-                                                                                            $.plot(chartDiv, [ tickData ], { xaxis: { mode: "time", min: startTime, max: endTime } });
-                                                                                            }-*/;
+    var $ = $wnd.jQuery;
+
+    var tickData = $(stockBoxDiv).data("tickData");
+    var chartDiv = $(stockBoxDiv).find(".chart");
+    $.plot(chartDiv, [ tickData ], { xaxis: { mode: "time", min: startTime, max: endTime } });
+  }-*/;
 
   /**
    * Returns the JavaScript array that contains the tick data for the given div element, creating it if necessary. The
    * data array is invisible to the user, but it is used in the rendering of the tick history chart.
-   * 
+   *
    * @see #redrawChart(DivElement)
-   * 
+   *
    * @param stockBoxDiv
    *          The div that the data is attached to.
    * @return The array of chart data that gets plotted by {@link #redrawChart(DivElement)}. Each entry is an array in
@@ -221,53 +221,52 @@ public class App {
    *         persist, but they will only appear in the rendered chart after a call to {@link #redrawChart(DivElement)}.
    */
   private native JsArray<JsArrayNumber> getChartData(DivElement stockBoxDiv) /*-{
-                                                                             var $ = $wnd.jQuery;
-                                                                             
-                                                                             // we store the tick history as data on the element for several reasons:
-                                                                             // * no need to reparse JSON on every chart update
-                                                                             // * keeping it in a Java Map keyed on symbol requires horrible JavaScript code for accessing it
-                                                                             // * the data is removed exactly when we can't use it anymore (because the stock info div is gone)
+    var $ = $wnd.jQuery;
 
-                                                                             var tickData = $(stockBoxDiv).data("tickData");
-                                                                             if (tickData == null) {
-                                                                             tickData = [];
-                                                                             $(stockBoxDiv).data("tickData", tickData);
-                                                                             }
-                                                                             return tickData;
-                                                                             }-*/;
+    // we store the tick history as data on the element for several reasons:
+    // * no need to reparse JSON on every chart update
+    // * keeping it in a Java Map keyed on symbol requires horrible JavaScript code for accessing it
+    // * the data is removed exactly when we can't use it anymore (because the stock info div is gone)
+
+    var tickData = $(stockBoxDiv).data("tickData");
+    if (tickData == null) {
+      tickData = [];
+      $(stockBoxDiv).data("tickData", tickData);
+    }
+    return tickData;
+  }-*/;
 
   /**
    * Adds the given tick data to the given history array.
-   * 
+   *
    * @param history
    *          The array to insert into. Normally this is an array obtained from
-   *          {@link #getChartData(DivElement, String, TickBuilder[])}.
+   *          {@link #getChartData(DivElement, String, Tick[])}.
    * @param tick
    *          The tick to add to the given history array.
    */
-  private void addTick(JsArray<JsArrayNumber> history, TickBuilder tick) {
-    addTick(history, tick.getTime().getTime(), tick.getAsk() * Math.pow(10, -tick.getDecimalPlaces()), chartTimeSpan);
+  private void addTick(JsArray<JsArrayNumber> history, Tick tick) {
+    addTick(history, tick.getTime().getTime(), tick.getPrice().doubleValue(), chartTimeSpan);
   }
 
   /**
-   * Adds the given tick data to the given history array. This is a subroutine of {@link #addTick(JsArray, TickBuilder)}
-   * .
-   * 
+   * Adds the given tick data to the given history array. This is a subroutine of {@link #addTick(JsArray, Tick)}.
+   *
    * @param history
    *          The array to insert into. Normally this is an array obtained from
-   *          {@link #getChartData(DivElement, String, TickBuilder[])}.
+   *          {@link #getChartData(DivElement, String, Tick[])}.
    * @param time
    *          The {@link System#currentTimeMillis()} time expressed as a double
    * @param price
    *          The stock price in dollars at the given time
    */
   private native void addTick(JsArray<JsArrayNumber> history, double time, double price, double pruneThreshold) /*-{
-                                                                                                                history.push([time, price]);
+    history.push([time, price]);
 
-                                                                                                                // prune entries too old to be visible
-                                                                                                                var startTime = time - pruneThreshold;
-                                                                                                                while (history[0][0] < startTime) {
-                                                                                                                history.shift();
-                                                                                                                }
-                                                                                                                }-*/;
+    // prune entries too old to be visible
+    var startTime = time - pruneThreshold;
+    while (history[0][0] < startTime) {
+      history.shift();
+    }
+  }-*/;
 }

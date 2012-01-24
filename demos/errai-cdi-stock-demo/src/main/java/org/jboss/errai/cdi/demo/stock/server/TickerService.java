@@ -15,6 +15,8 @@
  */
 package org.jboss.errai.cdi.demo.stock.server;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -22,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -33,6 +36,7 @@ import javax.inject.Inject;
 
 import org.jboss.errai.cdi.demo.stock.client.shared.SubscriptionReply;
 import org.jboss.errai.cdi.demo.stock.client.shared.SubscriptionRequest;
+import org.jboss.errai.cdi.demo.stock.client.shared.Tick;
 import org.jboss.errai.cdi.demo.stock.client.shared.TickBuilder;
 import org.jboss.errai.cdi.demo.stock.client.shared.TickCache;
 
@@ -43,7 +47,7 @@ import org.jboss.errai.cdi.demo.stock.client.shared.TickCache;
 public class TickerService {
 
   @Inject
-  private Event<TickBuilder> tickEvent;
+  private Event<Tick> tickEvent;
 
   @Inject
   Event<SubscriptionReply> subscriptionEvent;
@@ -60,7 +64,7 @@ public class TickerService {
   /**
    * Clients have to contact this service before they can receive events from it. In fact, the service doesn't get
    * created until the first client contacts it.
-   * 
+   *
    * @param subscription
    *          Details of the subscription request. Currently ignored.
    */
@@ -86,7 +90,7 @@ public class TickerService {
     // bootstrap the list of symbols
     String[] symbols = new String[] { "ABC", "DEF", "GHI", "JKL", "MNO", "PQR", "STU.V", "WXY.Z" };
     for (String symbol : symbols) {
-      TickCache tickCache = new TickCache();
+      TickCache tickCache = new TickCache(new LinkedBlockingQueue<Tick>());
       tickCache.add(generateBootstrapTick(symbol));
       tickCaches.put(symbol, tickCache);
     }
@@ -101,12 +105,8 @@ public class TickerService {
           System.out.println("blam");
           e.printStackTrace();
         }
-        finally {
-          System.out.println("done");
-        }
       }
     }, 0, 250, TimeUnit.MILLISECONDS);
-    System.out.println("PostConstruct finished");
   }
 
   private void generateTicks() {
@@ -115,31 +115,27 @@ public class TickerService {
         continue;
       }
       TickCache tickCache = tickEntry.getValue();
-      TickBuilder newTick = generateTick(tickCache.getNewestEntry());
+      Tick newTick = generateTick(tickCache.getNewestEntry());
       tickCache.add(newTick);
       tickEvent.fire(newTick);
     }
   }
 
-  private TickBuilder generateTick(TickBuilder oldTick) {
-    TickBuilder newTick = new TickBuilder();
-    newTick.setSymbol(oldTick.getSymbol());
-    newTick.setTime(new Date());
-    long change = (long) (random.nextGaussian() * (oldTick.getAsk() / 1000));
-    newTick.setAsk(oldTick.getAsk() + change);
-    newTick.setBid(newTick.getAsk() - (random.nextInt((int) (newTick.getAsk() / 1000))));
-    newTick.setChange(newTick.getAsk() - oldTick.getAsk());
-    newTick.setDecimalPlaces(2);
-    return newTick;
+  private Tick generateTick(Tick oldTick) {
+    BigDecimal change = new BigDecimal(random.nextGaussian() * (oldTick.getPrice().doubleValue() / 1000), FOUR_DIGITS_PRECISION);
+    TickBuilder newTick = new TickBuilder(oldTick.getSymbol())
+      .time(new Date())
+      .price(oldTick.getPrice().add(change))
+      .change(change);
+    return newTick.toTick();
   }
 
-  private TickBuilder generateBootstrapTick(String symbol) {
-    TickBuilder tick = new TickBuilder();
-    tick.setSymbol(symbol);
-    tick.setTime(new Date());
-    tick.setAsk((long) (random.nextDouble() * 150000));
-    tick.setBid(tick.getAsk() - (tick.getAsk() / 1000));
-    tick.setDecimalPlaces(2);
-    return tick;
+  private static final MathContext FOUR_DIGITS_PRECISION = new MathContext(4);
+
+  private Tick generateBootstrapTick(String symbol) {
+    return new TickBuilder(symbol)
+      .time(new Date())
+      .price(new BigDecimal(random.nextDouble() * 150, FOUR_DIGITS_PRECISION))
+      .toTick();
   }
 }
