@@ -3,7 +3,7 @@ package org.jboss.errai.demo.busstress.client.shared;
 import java.util.Date;
 
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.protocols.MessageParts;
+import org.jboss.errai.common.client.protocols.MessageParts;
 
 /**
  * This is the data model object for the run statistics of one stress testing
