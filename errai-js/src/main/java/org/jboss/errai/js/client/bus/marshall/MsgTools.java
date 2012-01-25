@@ -52,7 +52,12 @@ public abstract class MsgTools {
       var v = object[item];
 
       if ($wnd.erraiTypeOf(v) == "array") {
-        v = @org.jboss.errai.js.client.bus.marshall.MsgTools::listMarshall([Ljava/lang/Object;)(v);
+        if (object["^EncodedType"] == "[Ljava.lang.Object;") {
+          v = @org.jboss.errai.js.client.bus.marshall.MsgTools::objectMarshall([Ljava/lang/Object;)(v);
+        }
+        else {
+          v = @org.jboss.errai.js.client.bus.marshall.MsgTools::listMarshall([Ljava/lang/Object;)(v);
+        }
       }
       else if (!(typeof v == "string" || typeof v == "number" || typeof v == "object")) {
         v = @org.jboss.errai.js.client.bus.marshall.MsgTools::wrapMap(Ljava/lang/Object;)(v);
@@ -75,5 +80,9 @@ public abstract class MsgTools {
       }
     }
     return list;
+  }
+  
+  public static Object[] objectMarshall(Object[] oArray) {
+    return oArray;
   }
 }
