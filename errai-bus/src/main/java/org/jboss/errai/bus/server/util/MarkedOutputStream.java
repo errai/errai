@@ -43,4 +43,5 @@ public class MarkedOutputStream extends OutputStream {
   public int getBytesWritten() {
     return read;
   }
+
 }

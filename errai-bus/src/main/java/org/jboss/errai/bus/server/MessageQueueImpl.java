@@ -47,10 +47,10 @@ import static org.slf4j.LoggerFactory.getLogger;
  */
 public class MessageQueueImpl implements MessageQueue {
   private static final long TIMEOUT = Boolean.getBoolean("org.jboss.errai.debugmode") ?
-          secs(360) : secs(60);
+          secs(1600) : secs(60);
 
   private static final long DOWNGRADE_THRESHOLD = Boolean.getBoolean("org.jboss.errai.debugmode") ?
-          secs(360) : secs(5);
+          secs(1600) : secs(10);
 
 
   private final QueueSession session;
@@ -95,7 +95,6 @@ public class MessageQueueImpl implements MessageQueue {
     }
 
     lastTransmission = nanoTime();
-
     if (pagedOut) {
       synchronized (pageLock) {
         if (pagedOut) {
@@ -109,7 +108,8 @@ public class MessageQueueImpl implements MessageQueue {
 
     try {
       if (wait) {
-        buffer.readWait(TimeUnit.SECONDS, 20, markedOutputStream, bufferColor, new BufferHelper.MultiMessageHandlerCallback());
+        buffer.readWait(TimeUnit.SECONDS, 20, markedOutputStream, bufferColor,
+                new BufferHelper.MultiMessageHandlerCallback());
       }
       else {
         buffer.read(markedOutputStream, bufferColor, new BufferHelper.MultiMessageHandlerCallback());
@@ -120,12 +120,11 @@ public class MessageQueueImpl implements MessageQueue {
         messageCount.set(0);
         return true;
       }
-
-
     }
     catch (InterruptedException e) {
       e.printStackTrace();
     }
+
     return false;
   }
 

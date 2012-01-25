@@ -624,15 +624,75 @@ public class TransmissionBufferTests extends TestCase {
 
     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
-   // for (int i = 0; i < 5; i++) {
-      buffer.read(byteArrayOutputStream, red);
-   // }
+    // for (int i = 0; i < 5; i++) {
+    buffer.read(byteArrayOutputStream, red);
+    // }
 
     for (byte b : byteArrayOutputStream.toByteArray()) {
       out.append((char) b);
     }
 
     assertEquals(sb.toString(), out.toString());
+  }
+
+  public void testContendedReads() throws IOException, InterruptedException {
+    final TransmissionBuffer buffer = TransmissionBuffer.create();
+
+    BufferColor globalColor = BufferColor.getAllBuffersColor();
+
+    final BufferColor red = BufferColor.getNewColor();
+
+
+    Thread[] threads = new Thread[2];
+    class Runstatus {
+      boolean run = true;
+    }
+
+    final Runstatus runstatus = new Runstatus();
+
+
+    for (int i = 0; i < threads.length; i++) {
+      threads[i] = new Thread() {
+        @Override
+        public void run() {
+          try {
+            while (runstatus.run) {
+              ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+              buffer.readWait(TimeUnit.MILLISECONDS, 100, byteArrayOutputStream, red);
+
+              StringBuilder out = new StringBuilder();
+
+              for (byte b : byteArrayOutputStream.toByteArray()) {
+                out.append((char) b);
+              }
+
+              String s = out.toString();
+
+              if (s.length() != 0)
+                System.out.println("<<" + out.toString() + ">>");
+
+            }
+          }
+          catch (Throwable t) {
+            t.printStackTrace();
+          }
+        }
+      };
+    }
+
+
+    for (Thread thread : threads) {
+      thread.start();
+    }
+
+
+    String s = "this is a short string";
+    ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(s.getBytes());
+    buffer.write(byteArrayInputStream.available(), byteArrayInputStream, red);
+
+
+    Thread.sleep(2000);
 
   }
 

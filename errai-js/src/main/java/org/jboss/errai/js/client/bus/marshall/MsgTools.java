@@ -17,6 +17,7 @@
 package org.jboss.errai.js.client.bus.marshall;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArray;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +54,7 @@ public abstract class MsgTools {
 
       if ($wnd.erraiTypeOf(v) == "array") {
         if (object["^EncodedType"] == "[Ljava.lang.Object;") {
-          v = @org.jboss.errai.js.client.bus.marshall.MsgTools::objectMarshall([Ljava/lang/Object;)(v);
+          v = @org.jboss.errai.js.client.bus.marshall.MsgTools::objectMarshall(Ljava/lang/Object;)(v);
         }
         else {
           v = @org.jboss.errai.js.client.bus.marshall.MsgTools::listMarshall([Ljava/lang/Object;)(v);
@@ -82,7 +83,12 @@ public abstract class MsgTools {
     return list;
   }
   
-  public static Object[] objectMarshall(Object[] oArray) {
-    return oArray;
+  public static Object[] objectMarshall(Object o) {
+    JsArray oArray = (JsArray) o;
+    Object[] array = new Object[oArray.length()];
+    for (int i = 0; i < array.length; i++) {
+      array[i] = oArray.get(i);
+    }
+    return array;
   }
 }

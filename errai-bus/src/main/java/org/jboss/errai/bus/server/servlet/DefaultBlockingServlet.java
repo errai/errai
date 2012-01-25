@@ -70,7 +70,7 @@ public class DefaultBlockingServlet extends AbstractErraiServlet {
 
     service.store(createCommandMessage(session, httpServletRequest));
 
-   pollForMessages(session, httpServletRequest, httpServletResponse, false);
+    pollForMessages(session, httpServletRequest, httpServletResponse, false);
   }
 
   private void pollForMessages(QueueSession session, HttpServletRequest httpServletRequest,
@@ -105,5 +105,4 @@ public class DefaultBlockingServlet extends AbstractErraiServlet {
       writeExceptionToOutputStream(httpServletResponse, t);
     }
   }
-
 }

@@ -197,7 +197,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     RequestBuilder builder = new RequestBuilder(
             RequestBuilder.POST,
-            URL.encode(endpoint)
+            URL.encode(endpoint) + "?z=" + getNextRequestNumber()
     );
 
     builder.setHeader("Content-Type", "application/json");
@@ -1571,7 +1571,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     nativeLog("[LOCALS]");
 
     for (String localName : bus.shadowSubscriptions.keySet()) {
-      nativeLog(localName);
+      nativeLog(localName + " (" + bus.shadowSubscriptions.get(localName).size() + ")");
     }
 
     nativeLog("------------------------------------------------");
