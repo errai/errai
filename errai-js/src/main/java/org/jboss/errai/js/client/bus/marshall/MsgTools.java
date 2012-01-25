@@ -54,7 +54,7 @@ public abstract class MsgTools {
       if ($wnd.erraiTypeOf(v) == "array") {
         v = @org.jboss.errai.js.client.bus.marshall.MsgTools::listMarshall([Ljava/lang/Object;)(v);
       }
-      else if (!(typeof v == "string" || typeof v == "number")) {
+      else if (!(typeof v == "string" || typeof v == "number" || typeof v == "object")) {
         v = @org.jboss.errai.js.client.bus.marshall.MsgTools::wrapMap(Ljava/lang/Object;)(v);
       }
 

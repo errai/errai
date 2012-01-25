@@ -48,6 +48,8 @@ public class ServerMarshallingTest {
     MarshallingSession encSession = MarshallingSessionProviderFactory.getEncoding();
     String enc = "[" + marshaller.marshall(value, encSession) + "]";
 
+    System.out.println("encoded: " + enc);
+
     MarshallingSession decSession = MarshallingSessionProviderFactory.getDecoding();
     EJValue parsedJson = ParserFactory.get().parse(enc);
     Assert.assertTrue("expected outer JSON to be array", parsedJson.isArray() != null);

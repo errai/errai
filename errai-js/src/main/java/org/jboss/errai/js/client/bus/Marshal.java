@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.framework;
+package org.jboss.errai.js.client.bus;
 
-import org.jboss.errai.bus.client.api.ErrorCallback;
-import org.jboss.errai.bus.client.api.RemoteCallback;
+import org.jboss.errai.marshalling.client.Marshalling;
+import org.timepedia.exporter.client.Export;
+import org.timepedia.exporter.client.ExportPackage;
 
-import java.lang.annotation.Annotation;
-
-public interface RPCStub {
-  public void setRemoteCallback(RemoteCallback callback);
-
-  public void setErrorCallback(ErrorCallback callback);
-
-  public void setQualifiers(Annotation[] annotations);
+/**
+ * @author Mike Brock
+ */
+@Export
+@ExportPackage("errai")
+public class Marshal {
+  public Object demarshall(String str) {
+    return Marshalling.fromJSON(str);
+  }
 }

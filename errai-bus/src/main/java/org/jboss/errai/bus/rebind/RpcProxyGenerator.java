@@ -16,6 +16,7 @@
 
 package org.jboss.errai.bus.rebind;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +35,7 @@ import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.util.Bool;
 import org.jboss.errai.codegen.framework.util.Stmt;
+import org.jboss.errai.common.client.protocols.MessageParts;
 
 /**
  * Generates an Errai RPC remote proxy.
@@ -84,6 +86,22 @@ public class RpcProxyGenerator {
     
     BlockBuilder<?> methodBlock =
       classBuilder.publicMethod(method.getReturnType(), method.getName(), parms);
+//
+//    MessageBuilder.createMessage()
+//            .toSubject("foo")
+//            .command("comm")
+//            .with("Qualifiers", new Annotation[0])
+//            .with("MethodParms", new Object[0])
+//            .errorsHandledBy().repliesTo()
+//
+//
+//            method.getAnnotations();
+//
+//
+//    Stmt.invokeStatic(MessageBuilder.class, "createMessage")
+//            .invoke("toSubject", remote.getName())
+//            .invoke("command", RebindUtils.createCallSignature(method))
+//            .invoke("with", MessageParts.ErrorTo.name(), )
     
     methodBlock.append(
       Stmt
