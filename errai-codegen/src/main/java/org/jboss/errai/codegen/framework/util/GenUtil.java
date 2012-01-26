@@ -458,7 +458,7 @@ public class GenUtil {
                       .append(Stmt.throw_(RuntimeException.class, Refs.get("e")))
                       .finish())
               .finish();
-      
+
       String getterName = _getReflectionFieldMethGetName(f);
 
       classBuilder.privateMethod(f.getType(), getPrivateFieldInjectorName(f))
@@ -510,7 +510,6 @@ public class GenUtil {
     }
     return null;
   }
-
 
 
   private static String _getReflectionFieldMethSetName(MetaField f) {
@@ -644,6 +643,17 @@ public class GenUtil {
       }
     }
     return clazz;
+  }
+
+  public static boolean isPrimitiveWrapper(MetaClass clazz) {
+    return Integer.class.getName().equals(clazz.getFullyQualifiedName())
+            || Boolean.class.getName().equals(clazz.getFullyQualifiedName())
+            || Long.class.getName().equals(clazz.getFullyQualifiedName())
+            || Double.class.getName().equals(clazz.getFullyQualifiedName())
+            || Float.class.getName().equals(clazz.getFullyQualifiedName())
+            || Short.class.getName().equals(clazz.getFullyQualifiedName())
+            || Character.class.getName().equals(clazz.getFullyQualifiedName())
+            || Byte.class.getName().equals(clazz.getFullyQualifiedName());
   }
 
   public static int getArrayDimensions(MetaClass type) {

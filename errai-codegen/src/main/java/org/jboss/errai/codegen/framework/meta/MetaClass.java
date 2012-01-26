@@ -130,5 +130,7 @@ public abstract class MetaClass implements HasAnnotations, MetaType, MetaGeneric
 
   public abstract MetaClass getErased();
 
+  public abstract boolean isPrimitiveWrapper();
+
   public abstract Class<?> asClass();
 }

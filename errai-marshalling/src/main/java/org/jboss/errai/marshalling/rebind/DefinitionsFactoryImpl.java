@@ -90,11 +90,15 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
   @Override
   public void addDefinition(MappingDefinition definition) {
-
+    
     MAPPING_DEFINITIONS.put(definition.getMappingClass().getFullyQualifiedName(), definition);
     
     if (definition.getMappingClass().isArray() && definition.getMappingClass().getOuterComponentType().isPrimitive()) {
       MAPPING_DEFINITIONS.put(definition.getMappingClass().getInternalName(), definition);
+    }
+    
+    if (definition.getMappingClass().isPrimitiveWrapper()) {
+      MAPPING_DEFINITIONS.put(definition.getMappingClass().asUnboxed().getInternalName(), definition);
     }
     
     if (log.isDebugEnabled())
@@ -103,7 +107,11 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
   @Override
   public MappingDefinition getDefinition(MetaClass clazz) {
-    return getDefinition(clazz.getFullyQualifiedName());
+    MappingDefinition def = getDefinition(clazz.getFullyQualifiedName());
+    if (def == null) {
+      def = getDefinition(clazz.getInternalName());
+    }
+    return def;
   }
 
   @Override

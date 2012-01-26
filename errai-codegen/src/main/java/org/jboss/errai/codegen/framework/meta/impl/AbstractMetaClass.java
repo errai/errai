@@ -37,6 +37,7 @@ import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.meta.MetaParameter;
 import org.jboss.errai.codegen.framework.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.framework.meta.MetaType;
+import org.jboss.errai.codegen.framework.util.GenUtil;
 import org.mvel2.util.ParseTools;
 
 /**
@@ -559,6 +560,13 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     catch (Exception e) {
       return this;
     }
+  }
+
+  private Boolean _isPrimitiveWrapper;
+
+  @Override
+  public boolean isPrimitiveWrapper() {
+    return _isPrimitiveWrapper != null ? _isPrimitiveWrapper : (_isPrimitiveWrapper = GenUtil.isPrimitiveWrapper(this));
   }
 
   private String _internalNameCache;

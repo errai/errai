@@ -17,9 +17,11 @@
 package org.jboss.errai.marshalling.rebind.api.impl.defaultjava;
 
 import org.jboss.errai.codegen.framework.meta.*;
+import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.annotations.Key;
 import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 import org.jboss.errai.marshalling.client.api.exceptions.InvalidMappingException;
+import org.jboss.errai.marshalling.client.util.EncDecUtil;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
 import org.jboss.errai.marshalling.rebind.api.model.ConstructorMapping;
 import org.jboss.errai.marshalling.rebind.api.model.Mapping;
@@ -30,6 +32,7 @@ import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleConstructorMappin
 import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleFactoryMapping;
 import org.jboss.errai.marshalling.rebind.api.model.impl.WriteMapping;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
+import org.jboss.errai.marshalling.server.marshallers.DefaultArrayMarshaller;
 
 import java.lang.annotation.Annotation;
 import java.util.HashSet;
@@ -199,7 +202,6 @@ public class DefaultJavaDefinitionMapper {
         }
 
         MetaClass type = field.getType();
-
         MetaClass compType = type.isArray() ? type.getOuterComponentType().asBoxed() : type.asBoxed();
 
         if (!type.isEnum() && !definitionsFactory.isExposedClass(compType.asClass())) {
