@@ -20,6 +20,7 @@ import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.VariableReference;
 import org.jboss.errai.codegen.framework.exception.InvalidTypeException;
+import org.jboss.errai.codegen.framework.exception.OutOfScopeException;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.util.GenUtil;
@@ -34,6 +35,8 @@ public class LoadVariable extends AbstractCallElement {
   private String variableName;
   private Object[] indexes;
   private boolean classMember;
+
+  private final RuntimeException blame = new RuntimeException("Problem was caused by this call");
 
   public LoadVariable(String variableName, Object... indexes) {
     this.variableName = variableName;
@@ -54,7 +57,13 @@ public class LoadVariable extends AbstractCallElement {
       idx[i] = GenUtil.convert(context, GenUtil.generate(context, this.indexes[i]), MetaClassFactory.get(Integer.class));
     }
 
-    final VariableReference ref = context.getVariable(variableName);
+    final VariableReference ref;
+    try {
+      ref = context.getVariable(variableName);
+    } catch (OutOfScopeException e) {
+      e.initCause(blame);
+      throw e;
+    }
 
     if (idx.length > 0) {
       if (!ref.getType().isArray()) {
@@ -74,14 +83,14 @@ public class LoadVariable extends AbstractCallElement {
       }
 
       String generatedCache;
-      
+
       @Override
       public String generate(Context context) {
         if (generatedCache != null) return generatedCache;
-        
+
         StringBuilder buf = new StringBuilder((classMember
                 && !context.isNonAmbiguous(ref.getName()) ? "this." : "") + getName());
-        
+
         for (Statement s : idx) {
           buf.append('[').append(s.generate(context)).append(']');
         }
@@ -92,7 +101,7 @@ public class LoadVariable extends AbstractCallElement {
       @Override
       public MetaClass getType() {
         MetaClass ret;
-        
+
         int dims = GenUtil.getArrayDimensions(ref.getType());
 
         if (ref.getType().isArray() && idx.length > 0) {
@@ -107,7 +116,7 @@ public class LoadVariable extends AbstractCallElement {
         else {
           ret = ref.getType();
         }
-        
+
         return ret;
       }
     };
