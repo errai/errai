@@ -90,7 +90,7 @@ import java.util.Set;
 
 /**
  * The main generator class for the Errai IOC system.
- *
+ * 
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class IOCBootstrapGenerator {
@@ -101,7 +101,7 @@ public class IOCBootstrapGenerator {
   InjectorFactory injectFactory;
   IOCProcessorFactory procFactory;
 
-  private String packageFilter = null;
+  private List<String> packages = null;
   private boolean useReflectionStubs = false;
   private List<Runnable> deferredTasks = new ArrayList<Runnable>();
 
@@ -140,8 +140,15 @@ public class IOCBootstrapGenerator {
     this.logger = logger;
   }
 
-  public IOCBootstrapGenerator() {
+  public IOCBootstrapGenerator(TypeOracle typeOracle,
+      GeneratorContext context,
+      TreeLogger logger,
+      List<String> packages) {
+    this(typeOracle, context, logger);
+    this.packages = packages;
   }
+
+  public IOCBootstrapGenerator() {}
 
   public String generate(String packageName, String className) {
     File fileCacheDir = RebindUtils.getErraiCacheDir();
@@ -175,8 +182,8 @@ public class IOCBootstrapGenerator {
   }
 
   private String _generate(String packageName, String className) {
-    ClassStructureBuilder<?> classStructureBuilder
-            = Implementations.implement(Bootstrapper.class, packageName, className);
+    ClassStructureBuilder<?> classStructureBuilder =
+        Implementations.implement(Bootstrapper.class, packageName, className);
 
     BuildMetaClass bootStrapClass = (BuildMetaClass) classStructureBuilder.getClassDefinition();
     Context buildContext = bootStrapClass.getContext();
@@ -222,7 +229,7 @@ public class IOCBootstrapGenerator {
       }
     }
 
-    procContext.setPackageFilter(packageFilter);
+    procContext.setPackages(packages);
 
     defaultConfigureProcessor();
 
@@ -234,12 +241,10 @@ public class IOCBootstrapGenerator {
     return sourceWriter.toString();
   }
 
-
   private void generateExtensions(SourceWriter sourceWriter, ClassStructureBuilder<?> classBuilder,
                                   BlockBuilder<?> blockBuilder) {
     blockBuilder.append(Stmt.declareVariable("ctx", InterfaceInjectionContext.class,
             Stmt.newObject(InterfaceInjectionContext.class)));
-
 
     _doRunnableTasks(beforeTasks, blockBuilder);
 
@@ -274,7 +279,6 @@ public class IOCBootstrapGenerator {
       System.out.println(generated);
       System.out.println("<---Emitting Class----");
     }
-
 
     sourceWriter.print(generated);
   }
@@ -321,7 +325,6 @@ public class IOCBootstrapGenerator {
 
     final MetaClass typeProviderCls = MetaClassFactory.get(TypeProvider.class);
     MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
-
 
     /*
     * IOCDecoratorExtension.class
@@ -376,12 +379,12 @@ public class IOCBootstrapGenerator {
             throw new ErraiBootstrapFailure("code decorator must extend IOCDecoratorExtension<@AnnotationType>");
           }
 
-          //noinspection unchecked
+          // noinspection unchecked
           annoType = ((Class) pType.getActualTypeArguments()[0]).asSubclass(Annotation.class);
         }
 
         injectFactory.getInjectionContext().registerDecorator(
-                decoratorClass.getConstructor(new Class[]{Class.class}).newInstance(annoType));
+                decoratorClass.getConstructor(new Class[] { Class.class }).newInstance(annoType));
       }
       catch (Exception e) {
         throw new ErraiBootstrapFailure("unable to load code decorator: " + e.getMessage(), e);
@@ -439,7 +442,7 @@ public class IOCBootstrapGenerator {
                     + type.getFullyQualifiedName());
           }
 
-          //todo: check for nested type parameters
+          // todo: check for nested type parameters
           MetaType typeParm = pType.getTypeParameters()[0];
           if (typeParm instanceof MetaParameterizedType) {
             bindType = (MetaClass) ((MetaParameterizedType) typeParm).getRawType();
@@ -464,7 +467,7 @@ public class IOCBootstrapGenerator {
                     + type.getFullyQualifiedName());
           }
 
-          //todo: check for nested type parameters
+          // todo: check for nested type parameters
           bindType = (MetaClass) pType.getTypeParameters()[0];
         }
       }
@@ -497,7 +500,8 @@ public class IOCBootstrapGenerator {
       Class<? extends ContextualTypeProvider> injectorClass = anno.value();
 
       try {
-        injectFactory.addInjector(new ContextualProviderInjector(type, MetaClassFactory.get(injectorClass), procContext));
+        injectFactory
+            .addInjector(new ContextualProviderInjector(type, MetaClassFactory.get(injectorClass), procContext));
       }
       catch (Exception e) {
         throw new ErraiBootstrapFailure("could not load injector: " + e.getMessage(), e);
@@ -511,7 +515,6 @@ public class IOCBootstrapGenerator {
 
   private void defaultConfigureProcessor() {
     final MetaClass widgetType = MetaClassFactory.get(Widget.class);
-
 
     procFactory.registerHandler(Singleton.class, new AnnotationHandler<Singleton>() {
       @Override
@@ -546,7 +549,8 @@ public class IOCBootstrapGenerator {
           addDeferred(new Runnable() {
             @Override
             public void run() {
-              context.getWriter().println("ctx.addToRootPanel(" + generateWithSingletonSemantics(type.getType()) + ");");
+              context.getWriter()
+                  .println("ctx.addToRootPanel(" + generateWithSingletonSemantics(type.getType()) + ");");
             }
           });
         }
@@ -568,8 +572,10 @@ public class IOCBootstrapGenerator {
           addDeferred(new Runnable() {
             @Override
             public void run() {
-              context.getWriter().println("ctx.registerPanel(\"" + (annotation.value().equals("")
-                      ? type.getType().getName() : annotation.value()) + "\", " + generateInjectors(type.getType()) + ");");
+              context.getWriter().println(
+                  "ctx.registerPanel(\"" + (annotation.value().equals("")
+                      ? type.getType().getName() : annotation.value()) + "\", " + generateInjectors(type.getType())
+                      + ");");
             }
           });
         }
@@ -608,8 +614,8 @@ public class IOCBootstrapGenerator {
   public void setUseReflectionStubs(boolean useReflectionStubs) {
     this.useReflectionStubs = useReflectionStubs;
   }
-
-  public void setPackageFilter(String packageFilter) {
-    this.packageFilter = packageFilter;
+  
+  public void setPackages(List<String> packages) {
+    this.packages = packages;
   }
 }

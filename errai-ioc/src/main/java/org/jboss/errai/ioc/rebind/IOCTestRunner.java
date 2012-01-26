@@ -140,12 +140,18 @@ public class IOCTestRunner extends ParentRunner<Runner> {
           @Override
           public InterfaceInjectionContext bootstrap() {
             try {
-              MockIOCGenerator mockIOCGenerator = new MockIOCGenerator();
-              mockIOCGenerator.setPackageFilter(iocClientTestCase.getModulePackage());
+              String rootPackage = iocClientTestCase.getModulePackage();
+              List<String> packages = new ArrayList<String>();
+              for (Package p : Package.getPackages()) {
+                String packageName = p.getName();
+                if (packageName.startsWith(rootPackage)) {
+                  packages.add(packageName);
+                }
+              }
+              MockIOCGenerator mockIOCGenerator = new MockIOCGenerator(packages);
+              
               Class<? extends  Bootstrapper> cls = mockIOCGenerator.generate();
-
               Bootstrapper bs = cls.newInstance();
-
               return bs.bootstrapContainer();
             }
             catch (Exception e) {

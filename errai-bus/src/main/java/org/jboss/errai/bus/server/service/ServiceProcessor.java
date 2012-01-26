@@ -24,7 +24,6 @@ import java.util.Set;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.TaskManager;
-import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.TaskManagerFactory;
 import org.jboss.errai.bus.client.api.builder.DefaultRemoteCallBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
@@ -63,11 +62,14 @@ import com.google.inject.Injector;
  */
 public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
   private Logger log = LoggerFactory.getLogger(ServiceProcessor.class);
+  
+  // TODO need to exclude client classes based on GWT module definition
+  private static final String CLIENT_PKG_REGEX = ".*(\\.client\\.).*";
 
   @Override
   public void process(final BootstrapContext context, MetaDataScanner reflections) {
     final ErraiServiceConfiguratorImpl config = (ErraiServiceConfiguratorImpl) context.getConfig();
-    final Set<Class<?>> services = reflections.getTypesAnnotatedWithExcluding(Service.class, MetaDataScanner.CLIENT_PKG_REGEX);
+    final Set<Class<?>> services = reflections.getTypesAnnotatedWithExcluding(Service.class, CLIENT_PKG_REGEX);
 
     for (Class<?> loadClass : services) {
       Object svc = null;

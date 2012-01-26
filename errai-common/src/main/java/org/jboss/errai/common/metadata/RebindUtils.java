@@ -10,10 +10,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.security.MessageDigest;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -23,6 +26,11 @@ import java.util.zip.ZipInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.typeinfo.JPackage;
+import com.google.gwt.dev.cfg.ModuleDef;
+import com.google.gwt.dev.javac.StandardGeneratorContext;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -248,5 +256,39 @@ public class RebindUtils {
     else {
       visitor.visit(f);
     }
+  }
+
+  /**
+   * Returns the list of packages that are specified by the GWT module .xml config file. This should ensure that we only
+   * try to generate IOC code for those classes that will be deployed to the client.
+   */
+  public static List<String> findClientPackages(final GeneratorContext context, final TreeLogger logger) {
+    List<String> packages = new ArrayList<String>();
+    try {
+      StandardGeneratorContext stdContext = (StandardGeneratorContext) context;
+      Field field = StandardGeneratorContext.class.getDeclaredField("module");
+      field.setAccessible(true);
+      ModuleDef moduleDef = (ModuleDef) field.get(stdContext);
+
+      // moduleName looks like "com.foo.xyz.MyModule" and we just want the package part
+      // for tests .JUnit is appended to the module name by GWT
+      String moduleName = moduleDef.getCanonicalName().replace(".JUnit", "");
+      String modulePackage = moduleName.substring(0, moduleName.lastIndexOf('.'));
+      
+      JPackage[] jpackages = context.getTypeOracle().getPackages();
+      for (JPackage p : jpackages) {
+        String packageName = p.getName();
+        if (packageName != null && packageName.startsWith(modulePackage)) {
+          packages.add(packageName);
+        }
+      }
+  
+      logger.log(TreeLogger.INFO, "will scan in package: " + modulePackage);
+    }
+    catch (Exception e) {
+      throw new RuntimeException("could not determine module package", e);
+    }
+  
+    return packages;
   }
 }

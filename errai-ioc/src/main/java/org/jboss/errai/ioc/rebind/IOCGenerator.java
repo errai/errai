@@ -16,85 +16,42 @@
 
 package org.jboss.errai.ioc.rebind;
 
+import java.io.PrintWriter;
+
+import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCBootstrapGenerator;
+
 import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
-import com.google.gwt.dev.cfg.ModuleDef;
-import com.google.gwt.dev.javac.StandardGeneratorContext;
-import org.jboss.errai.codegen.framework.meta.impl.gwt.GWTClass;
-import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCBootstrapGenerator;
-import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
-
-import java.io.PrintWriter;
-import java.lang.reflect.Field;
 
 /**
  * The main generator class for the errai-ioc framework.
+ * 
+ * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class IOCGenerator extends Generator {
-  /**
-   * Simple name of class to be generated
-   */
   private String className = null;
-
-  /**
-   * Package name of class to be generated
-   */
   private String packageName = null;
   private TypeOracle typeOracle;
 
-  private String modulePackage;
-
   public static final boolean isDebugCompile = Boolean.getBoolean("errai.ioc.debug");
 
-  public IOCGenerator() {
-  }
+  public IOCGenerator() {}
 
   @Override
   public String generate(final TreeLogger logger, final GeneratorContext context, final String typeName)
           throws UnableToCompleteException {
-    typeOracle = context.getTypeOracle();
 
+    typeOracle = context.getTypeOracle();
 
     Thread iocGenThread = new Thread() {
       @Override
       public void run() {
-
-        /**
-         * Try to determine the module package -- hackishly
-         */
-        //TODO: Find a more standard way to do this.
-        try {
-          if (context instanceof StandardGeneratorContext) {
-            StandardGeneratorContext stdContext = (StandardGeneratorContext) context;
-            Field field = StandardGeneratorContext.class.getDeclaredField("module");
-            field.setAccessible(true);
-
-            ModuleDef moduleDef = (ModuleDef) field.get(stdContext);
-
-            String moduleName = moduleDef.getName();
-
-            for (int i = 0; i < moduleName.length(); i++) {
-              if (moduleName.charAt(i) == '.' && i < moduleName.length()
-                      && Character.isUpperCase(moduleName.charAt(i + 1))) {
-                modulePackage = moduleName.substring(0, i);
-                break;
-              }
-            }
-
-            logger.log(TreeLogger.INFO, "will scan in package: " + modulePackage);
-          }
-        }
-        catch (Exception e) {
-          throw new RuntimeException("could not determine module package", e);
-          // could not determine package.
-        }
-
         try {
           // get classType and save instance variables
 
@@ -124,34 +81,30 @@ public class IOCGenerator extends Generator {
       e.printStackTrace();
     }
 
-
     // return the fully qualified name of the class generated
     return packageName + "." + className;
   }
 
   /**
-   * Generate source code for new class. Class extends
-   * <code>HashMap</code>.
-   *
-   * @param logger  Logger object
-   * @param context Generator context
+   * Generate source code for new class. Class extends <code>HashMap</code>.
+   * 
+   * @param logger
+   *          Logger object
+   * @param context
+   *          Generator context
    */
   private void generateIOCBootstrapClass(TreeLogger logger, GeneratorContext context) {
     // get print writer that receives the source code
     PrintWriter printWriter = context.tryCreate(logger, packageName, className);
-    // print writer if null, source code has ALREADY been generated,
 
-    if (printWriter == null) return;
+    // if null, source code has ALREADY been generated,
+    if (printWriter == null)
+      return;
 
-    IOCBootstrapGenerator iocBootstrapGenerator = new IOCBootstrapGenerator(typeOracle, context, logger);
-    if (modulePackage != null && modulePackage.length() != 0) {
-      iocBootstrapGenerator.setPackageFilter(modulePackage);
-    }
-
+    IOCBootstrapGenerator iocBootstrapGenerator = new IOCBootstrapGenerator(typeOracle, context, logger, 
+        RebindUtils.findClientPackages(context, logger));
 
     printWriter.append(iocBootstrapGenerator.generate(packageName, className));
-    // commit generated class
     context.commit(logger, printWriter);
   }
-
 }

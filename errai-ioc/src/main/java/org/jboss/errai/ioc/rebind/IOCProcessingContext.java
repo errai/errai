@@ -16,16 +16,19 @@
 
 package org.jboss.errai.ioc.rebind;
 
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
-import com.google.gwt.user.rebind.SourceWriter;
+import java.util.List;
+
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.ioc.JSR330QualifyingMetadataFactory;
 import org.jboss.errai.ioc.rebind.ioc.QualifyingMetadataFactory;
+
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import com.google.gwt.user.rebind.SourceWriter;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -34,7 +37,7 @@ public class IOCProcessingContext  {
   protected Context context;
   protected MetaClass bootstrapClass;
   protected BlockBuilder<?> blockBuilder;
-  protected String packageFilter;
+  protected List<String> packages;
 
   protected TreeLogger treeLogger;
   protected GeneratorContext generatorContext;
@@ -76,14 +79,13 @@ public class IOCProcessingContext  {
     return context;
   }
 
-  public void setPackageFilter(String packageFilter) {
-    this.packageFilter = packageFilter;
+  public void setPackages(List<String> packages) {
+    this.packages = packages;
   }
 
-  public String getPackageFilter() {
-    return packageFilter;
+  public List<String> getPackages() {
+    return packages;
   }
-
 
   public TreeLogger getTreeLogger() {
     return treeLogger;

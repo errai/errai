@@ -66,7 +66,6 @@ import com.google.common.collect.ImmutableSet;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class MetaDataScanner extends Reflections {
-  public static final String CLIENT_PKG_REGEX = ".*(\\.client\\.).*";
   public static final String ERRAI_CONFIG_STUB_NAME = "ErraiApp.properties";
 
   private static final PropertyScanner propScanner = new PropertyScanner(
@@ -180,32 +179,30 @@ public class MetaDataScanner extends Reflections {
     return ImmutableSet.copyOf(forNames(result));
   }
 
-  public Set<Class<?>> getTypesAnnotatedWith(Class<? extends Annotation> annotation, String packagePrefix) {
+  public Set<Class<?>> getTypesAnnotatedWith(Class<? extends Annotation> annotation, List<String> packages) {
     Set<Class<?>> results = new HashSet<Class<?>>();
     for (Class<?> cls : getTypesAnnotatedWith(annotation)) {
-      if (packagePrefix == null || packagePrefix.length() == 0 || cls.getName().startsWith(packagePrefix)) {
+      if (packages.contains(cls.getPackage().getName())) {
         results.add(cls);
       }
     }
     return results;
   }
 
-  public Set<Method> getMethodsAnnotatedWith(Class<? extends Annotation> annotation, String packagePrefix) {
+  public Set<Method> getMethodsAnnotatedWith(Class<? extends Annotation> annotation, List<String> packages) {
     Set<Method> results = new HashSet<Method>();
     for (Method method : getMethodsAnnotatedWith(annotation)) {
-      if (packagePrefix == null || packagePrefix.length() == 0 || method.getDeclaringClass().getName().startsWith
-              (packagePrefix)) {
+      if (packages.contains(method.getDeclaringClass().getPackage().getName())) {
         results.add(method);
       }
     }
     return results;
   }
 
-  public Set<Field> getFieldsAnnotatedWith(Class<? extends Annotation> annotation, String packagePrefix) {
+  public Set<Field> getFieldsAnnotatedWith(Class<? extends Annotation> annotation, List<String> packages) {
     Set<Field> results = new HashSet<Field>();
     for (Field field : getFieldsAnnotatedWith(annotation)) {
-      if (packagePrefix == null || packagePrefix.length() == 0 || field.getDeclaringClass().getName()
-              .startsWith(packagePrefix)) {
+      if (packages.contains(field.getDeclaringClass().getPackage().getName())) {
         results.add(field);
       }
     }
@@ -287,7 +284,6 @@ public class MetaDataScanner extends Reflections {
 
         String urlString = url.toExternalForm();
         urlString = urlString.substring(0, urlString.indexOf(ERRAI_CONFIG_STUB_NAME));
-
         // URLs returned by the classloader are UTF-8 encoded. The URLDecoder assumes
         // a HTML form encoded String, which is why we escape the plus symbols here. 
         // Otherwise, they would be decoded into space characters.

@@ -84,12 +84,8 @@ public class IOCProcessorFactory {
       for (ElementType elementType : target.value()) {
         switch (elementType) {
           case TYPE: {
-            Set<Class<?>> classes = scanner.getTypesAnnotatedWith(aClass, context.getPackageFilter());
+            Set<Class<?>> classes = scanner.getTypesAnnotatedWith(aClass, context.getPackages());
             for (final Class<?> clazz : classes) {
-              if (clazz.getPackage().getName().contains("server")) {
-                continue;
-              }
-
               final Annotation aInstance = clazz.getAnnotation(aClass);
 
               entry.addProcessingDelegate(new ProcessingDelegate<MetaClass>() {
@@ -118,7 +114,7 @@ public class IOCProcessorFactory {
           break;
 
           case METHOD: {
-            Set<Method> methods = scanner.getMethodsAnnotatedWith(aClass, context.getPackageFilter());
+            Set<Method> methods = scanner.getMethodsAnnotatedWith(aClass, context.getPackages());
 
             for (Method method : methods) {
               final Annotation aInstance = method.getAnnotation(aClass);
@@ -146,7 +142,7 @@ public class IOCProcessorFactory {
           }
 
           case FIELD: {
-            Set<Field> fields = scanner.getFieldsAnnotatedWith(aClass, context.getPackageFilter());
+            Set<Field> fields = scanner.getFieldsAnnotatedWith(aClass, context.getPackages());
 
             for (Field method : fields) {
               final Annotation aInstance = method.getAnnotation(aClass);
