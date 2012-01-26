@@ -4,6 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jboss.errai.ioc.rebind.MockIOCGenerator;
 import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependenciesException;
 import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependency;
@@ -26,8 +29,11 @@ public class InvalidProducerIntegrationTest {
   @Test
   public void testInvalidProducerWithMissingQualifier() throws InstantiationException, IllegalAccessException {
     try {
-      MockIOCGenerator mockIOCGenerator = new MockIOCGenerator();
-      mockIOCGenerator.setPackageFilter("org.jboss.errai.cdi.invalid.producer");
+      List<String> packages = new ArrayList<String>();
+      packages.add("org.jboss.errai.cdi.invalid.producer");
+      packages.add("org.jboss.errai.cdi.invalid.producer.client");
+
+      MockIOCGenerator mockIOCGenerator = new MockIOCGenerator(packages);
       mockIOCGenerator.generate().newInstance().bootstrapContainer();
       fail("Expected an UnsatisfiedDependenciesException");
     }
