@@ -16,25 +16,31 @@
 
 package org.jboss.errai.marshalling.rebind;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Random;
+
+import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.common.rebind.EnvironmentUtil;
+import org.jboss.errai.marshalling.server.util.ServerMarshallUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
-import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.common.rebind.EnvironmentUtil;
-import org.jboss.errai.marshalling.server.util.ServerMarshallUtil;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Random;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class MarshallersGenerator extends Generator {
+
+  private static final Logger logger = LoggerFactory.getLogger(Generator.class);
+
   public static final String SERVER_MARSHALLER_PACKAGE_NAME = "org.jboss.errai.marshalling.server.impl";
   public static final String SERVER_MARSHALLER_CLASS_NAME = "ServerMarshallingFactoryImpl";
   private static final String SERVER_MARSHALLER_OUTPUT_DIR_PROP = "errai.marshalling.server.classOutput";
@@ -46,8 +52,7 @@ public class MarshallersGenerator extends Generator {
                   null;
 
   private static final boolean SERVER_MARSHALLER_OUTPUT_ENABLED =
-          System.getProperty(SERVER_MARSHALLER_OUTPUT_ENABLED_PROP) == null
-                  || Boolean.getBoolean(SERVER_MARSHALLER_OUTPUT_ENABLED_PROP);
+          Boolean.valueOf(System.getProperty(SERVER_MARSHALLER_OUTPUT_ENABLED_PROP, "true"));
 
   private static final String[] candidateOutputDirectories =
           {"target/classes/", "war/WEB-INF/classes/", "web/WEB-INF/classes/", "target/war/WEB-INF/classes/", "WEB-INF/classes/"};
@@ -67,7 +72,7 @@ public class MarshallersGenerator extends Generator {
   @Override
   public String generate(final TreeLogger logger, final GeneratorContext context, final String typeName)
           throws UnableToCompleteException {
-    
+
     final Thread marshallGenThread = new Thread() {
       @Override
       public void run() {
@@ -143,12 +148,16 @@ public class MarshallersGenerator extends Generator {
         generateServerMarshallers(SERVER_MARSHALLER_OUTPUT_DIR, serverSideClass);
       }
       else {
+        logger.debug("Searching candidate output directories for generated marshallers");
         File outputDirCdt;
         for (String candidate : candidateOutputDirectories) {
           outputDirCdt = new File(candidate);
           if (outputDirCdt.exists()) {
+            logger.debug("   " + outputDirCdt + " exists!");
             generateServerMarshallers(outputDirCdt.getAbsolutePath(), serverSideClass);
             System.out.println("** deposited marshaller class in : " + outputDirCdt.getAbsolutePath());
+          } else {
+            logger.debug("   " + outputDirCdt + " does not exist");
           }
         }
       }

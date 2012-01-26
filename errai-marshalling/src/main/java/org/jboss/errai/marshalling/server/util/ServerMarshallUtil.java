@@ -16,23 +16,30 @@
 
 package org.jboss.errai.marshalling.server.util;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.jar.JarFile;
+
+import javax.tools.JavaCompiler;
+import javax.tools.ToolProvider;
+
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.marshalling.client.api.MarshallerFactory;
 import org.jboss.errai.marshalling.rebind.MarshallerGeneratorFactory;
 import org.jboss.errai.marshalling.rebind.MarshallerOuputTarget;
 import org.jboss.errai.marshalling.rebind.MarshallersGenerator;
 import org.slf4j.Logger;
-
-import javax.tools.JavaCompiler;
-import javax.tools.ToolProvider;
-import java.io.*;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.jar.JarFile;
-
-import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Utility which provides convenience methods for generating marshallers for the server-side.
@@ -61,23 +68,21 @@ public abstract class ServerMarshallUtil {
     try {
       log.info("searching for marshaller class: " + packageName + "." + className);
 
-      Enumeration<URL> enumeration = Thread.currentThread().getContextClassLoader()
-              .getResources(packageName.replaceAll("\\.", "/") + "/"
-                      + className + ".class");
-
+      final String classResource = packageName.replaceAll("\\.", "/") + "/" + className + ".class";
       List<URL> locations = new ArrayList<URL>();
+
+      // look for the class in every classloader we can think of. For example, current thread
+      // classloading works in Jetty but not JBoss AS 7.
+      locations.addAll(Collections.list(Thread.currentThread().getContextClassLoader().getResources(classResource)));
+      locations.addAll(Collections.list(ServerMarshallUtil.class.getClassLoader().getResources(classResource)));
+      locations.addAll(Collections.list(ClassLoader.getSystemResources(classResource)));
+
       boolean multiple = false;
       File newest = null;
-      URL url = null;
-      while (enumeration.hasMoreElements()) {
+      for (URL url : locations) {
         if (url != null) {
           multiple = true;
         }
-
-        url = enumeration.nextElement();
-
-        locations.add(url);
-
 
         File file = getFileIfExists(url);
         if (file != null && (newest == null || file.lastModified() > newest.lastModified())) {
@@ -282,7 +287,7 @@ public abstract class ServerMarshallUtil {
             }
           }
           catch (Exception e) {
-            // Silently ignore wrong manifests on classpath?
+            log.info("Ignoring classpath entry with invalid manifest", e);
           }
           finally {
             if (is != null) is.close();
@@ -292,6 +297,7 @@ public abstract class ServerMarshallUtil {
     }
     catch (IOException e1) {
       // Silently ignore wrong manifests on classpath?
+      log.info("Failed to build classpath using manifest discovery. Expect compile failures...", e1);
     }
 
     return cp.toString();
