@@ -39,6 +39,10 @@ import java.util.concurrent.locks.LockSupport;
  * @author Mike Brock
  */
 public class TransmissionBufferTests extends TestCase {
+  static {
+    // make sure protocol provider is initialized;
+    MappingContextSingleton.get();
+  }
 
   public void testBufferWriteAndRead() {
     TransmissionBuffer buffer = TransmissionBuffer.create();
@@ -248,9 +252,6 @@ public class TransmissionBufferTests extends TestCase {
   }
 
   public void testLargeOversizedSegments() {
-
-    MappingContextSingleton.get();
-
     final TransmissionBuffer buffer = TransmissionBuffer.create();
 
     final BufferColor colorA = BufferColor.getNewColor();
