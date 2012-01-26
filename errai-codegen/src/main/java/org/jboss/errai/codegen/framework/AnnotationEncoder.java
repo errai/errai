@@ -22,6 +22,11 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import org.jboss.errai.codegen.framework.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder;
@@ -46,7 +51,16 @@ public class AnnotationEncoder {
 
         Class<? extends Annotation> annoClass = annotation.getClass();
 
-        for (Method method : annoClass.getDeclaredMethods()) {
+        List<Method> sortedMethods = Arrays.asList(annoClass.getDeclaredMethods());
+        Collections.sort(sortedMethods, new Comparator<Method>() {
+                    @Override
+                    public int compare(Method m1, Method m2) {
+                        return m1.getName().compareTo(m2.getName());
+                    }
+            
+        });
+        
+        for (Method method : sortedMethods) {
           if (((method.getModifiers() & (Modifier.PRIVATE | Modifier.PROTECTED)) == 0)
                   && (!"equals".equals(method.getName()) && !"hashCode".equals(method.getName()))) {
             try {

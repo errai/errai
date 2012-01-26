@@ -36,15 +36,15 @@ public class AnnotationEncoderTest extends AbstractStatementBuilderTest {
     String enc = AnnotationEncoder.encode(PostConstruct.class.getAnnotation(Target.class)).generate(null);
 
     assertEquals("new java.lang.annotation.Target() { " +
-            "public java.lang.annotation.ElementType[] value() { " +
-            " return new java.lang.annotation.ElementType[] { " +
-            " java.lang.annotation.ElementType.METHOD }; " +
+            "public Class annotationType() { " +
+            " return java.lang.annotation.Target.class; " +
             "} " +
             "public String toString() { " +
             " return \"@java.lang.annotation.Target(value=[METHOD])\"; " +
             "} " +
-            "public Class annotationType() { " +
-            " return java.lang.annotation.Target.class; " +
+            "public java.lang.annotation.ElementType[] value() { " +
+            " return new java.lang.annotation.ElementType[] { " +
+            " java.lang.annotation.ElementType.METHOD }; " +
             "} " +
             "}", enc);
   }
@@ -54,9 +54,6 @@ public class AnnotationEncoderTest extends AbstractStatementBuilderTest {
     String enc = AnnotationEncoder.encode(MyBean.class.getAnnotation(MyTestAnnotation.class)).generate(null);
 
     assertEquals("new org.jboss.errai.codegen.framework.tests.model.MyTestAnnotation() { " +
-            "public String toString() { " +
-            "    return \"@org.jboss.errai.codegen.framework.tests.model.MyTestAnnotation(foo=barfoo, testEum=FOURTH)\"; " +
-            "} " +
             "public Class annotationType() { " +
             "    return org.jboss.errai.codegen.framework.tests.model.MyTestAnnotation.class; " +
             "} " +
@@ -66,7 +63,9 @@ public class AnnotationEncoderTest extends AbstractStatementBuilderTest {
             "public org.jboss.errai.codegen.framework.tests.model.TEnum testEum() { " +
             "    return org.jboss.errai.codegen.framework.tests.model.TEnum.FOURTH; " +
             "} " +
-
+            "public String toString() { " +
+            "    return \"@org.jboss.errai.codegen.framework.tests.model.MyTestAnnotation(foo=barfoo, testEum=FOURTH)\"; " +
+            "} " +
             "}", enc);
   }
 }
