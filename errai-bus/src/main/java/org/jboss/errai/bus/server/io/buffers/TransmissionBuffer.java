@@ -102,7 +102,6 @@ public class TransmissionBuffer implements Buffer {
    */
   private volatile long headSequence = 1;
 
-
   private TransmissionBuffer(boolean directBuffer, int segmentSize, int segments) {
     // must pad segment size for size headers -- or the last segment may be odd-sized (that would not be good)
     this.segmentSize = segmentSize;
@@ -259,17 +258,16 @@ public class TransmissionBuffer implements Buffer {
     long read = bufferColor.sequence.get();
     long lastSeq = read;
 
-
     try {
       while ((read = readNextChunk(writeHead, read, bufferColor, outputStream, null)) != -1)
         lastSeq = read;
-
 
       return lastSeq != read;
     }
     finally {
       // move the tail sequence for this color up.
-      bufferColor.sequence.set(lastSeq);
+      if (lastSeq != -1)
+        bufferColor.sequence.set(lastSeq);
 
       // release the read lock on this color/
       bufferColor.lock.unlock();
@@ -327,7 +325,8 @@ public class TransmissionBuffer implements Buffer {
         // we're done writing, so do your after thing, mr. callback.
         callback.after(outputStream);
 
-        bufferColor.sequence.set(lastSeq);
+        if (lastSeq != -1)
+          bufferColor.sequence.set(lastSeq);
 
         return read != lastSeq;
       }
@@ -367,7 +366,7 @@ public class TransmissionBuffer implements Buffer {
         }
 
         if (lastRead != -1) {
-          bufferColor.sequence.set(read);
+          bufferColor.sequence.set(lastRead);
           return lastRead != read;
         }
 
@@ -404,13 +403,13 @@ public class TransmissionBuffer implements Buffer {
   @Override
   public boolean readWait(final TimeUnit unit, final long time,
                           final OutputStream outputStream, final BufferColor bufferColor) throws IOException, InterruptedException {
-    bufferColor.lock.lockInterruptibly();
-    long readTail = bufferColor.sequence.get();
+    final ReentrantLock lock = bufferColor.getLock();
+    lock.lockInterruptibly();
     long nanos = unit.toNanos(time);
 
     try {
       for (; ; ) {
-        long read = readTail;
+        long read =  bufferColor.sequence.get();
         long lastRead = -1;
 
         while ((read = readNextChunk(headSequence, read, bufferColor, outputStream, null)) != -1) {
@@ -473,7 +472,7 @@ public class TransmissionBuffer implements Buffer {
   @Override
   public boolean readWait(TimeUnit unit, long time, OutputStream outputStream, final BufferColor bufferColor,
                           BufferCallback callback) throws IOException, InterruptedException {
-    ReentrantLock lock = bufferColor.lock;
+    final ReentrantLock lock = bufferColor.lock;
     lock.lockInterruptibly();
 
     try {
@@ -645,13 +644,13 @@ public class TransmissionBuffer implements Buffer {
           }
         }
       }
-      int seq = segmentToRead + ((readSize + SEGMENT_HEADER_SIZE) / segmentSize) + 1;
-      if (seq > head) {
-        return -1;
-      }
-      else {
-        return seq;
-      }
+      return segmentToRead + ((readSize + SEGMENT_HEADER_SIZE) / segmentSize) + 1;
+//      if (seq > head) {
+//        return -1;
+//      }
+//      else {
+      //       return seq;
+//      }
     }
     else {
       return -1;
