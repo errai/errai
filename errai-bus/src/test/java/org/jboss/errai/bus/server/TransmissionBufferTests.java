@@ -624,9 +624,9 @@ public class TransmissionBufferTests extends TestCase {
 
     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
-    // for (int i = 0; i < 5; i++) {
-    buffer.read(byteArrayOutputStream, red);
-    // }
+   // for (int i = 0; i < 5; i++) {
+      buffer.read(byteArrayOutputStream, red);
+   // }
 
     for (byte b : byteArrayOutputStream.toByteArray()) {
       out.append((char) b);
@@ -667,10 +667,7 @@ public class TransmissionBufferTests extends TestCase {
                 out.append((char) b);
               }
 
-              String s = out.toString();
-
-              if (s.length() != 0)
-                System.out.println("<<" + out.toString() + ">>");
+              System.out.println("<<" + out.toString() + ">>");
 
             }
           }
@@ -690,6 +687,8 @@ public class TransmissionBufferTests extends TestCase {
     String s = "this is a short string";
     ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(s.getBytes());
     buffer.write(byteArrayInputStream.available(), byteArrayInputStream, red);
+
+
 
 
     Thread.sleep(2000);
