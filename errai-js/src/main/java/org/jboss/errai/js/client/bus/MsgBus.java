@@ -22,6 +22,7 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.json.JSONUtilCli;
 import org.jboss.errai.js.client.bus.marshall.MsgTools;
 import org.timepedia.exporter.client.Export;
 import org.timepedia.exporter.client.ExportPackage;
@@ -45,6 +46,10 @@ public class MsgBus implements Exportable {
 
   public void unsubscribeAll(String subject) {
     bus.unsubscribeAll(subject);
+  }
+
+  public void automarshal(boolean auto) {
+    JSONUtilCli.setAutoDemarshall(auto);
   }
 
   private static final class JsFunctionMessageCallback implements MessageCallback {

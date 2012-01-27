@@ -25,8 +25,10 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.client.util.BusTools;
+import org.jboss.errai.marshalling.client.MarshallingSessionProviderFactory;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 import org.jboss.errai.marshalling.client.api.json.impl.gwt.GWTJSON;
+import org.jboss.errai.marshalling.client.marshallers.ErraiProtocolEnvelopeNoAutoMarshaller;
 import org.jboss.errai.marshalling.client.protocols.ErraiProtocol;
 
 import java.util.ArrayList;
@@ -35,6 +37,8 @@ import java.util.List;
 import java.util.Map;
 
 public class JSONUtilCli {
+  private static boolean autoDemarshall = true;
+
   public static List<MarshalledMessage> decodePayload(String value) {
     if (value == null || value.trim().length() == 0) return Collections.emptyList();
 
@@ -108,10 +112,20 @@ public class JSONUtilCli {
       throw new RuntimeException("bad payload: " + value);
     }
 
-    return ErraiProtocol.decodePayload(GWTJSON.wrap((JSONObject) value));
+    if (autoDemarshall) {
+      return ErraiProtocol.decodePayload(GWTJSON.wrap((JSONObject) value));
+    }
+    else {
+      return ErraiProtocolEnvelopeNoAutoMarshaller.INSTANCE.demarshall(
+              GWTJSON.wrap((JSONObject) value), MarshallingSessionProviderFactory.getEncoding());
+    }
   }
 
   public static Message decodeCommandMessage(Object value) {
     return CommandMessage.createWithParts(decodePayload(value));
+  }
+
+  public static void setAutoDemarshall(boolean autoDemarshall1) {
+    autoDemarshall = autoDemarshall;
   }
 }
