@@ -101,8 +101,8 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       MAPPING_DEFINITIONS.put(definition.getMappingClass().asUnboxed().getInternalName(), definition);
     }
     
-    if (log.isDebugEnabled())
-      log.debug("loaded definition: " + definition.getMappingClass().getFullyQualifiedName());
+  //  if (log.isDebugEnabled())
+      log.info("loaded definition: " + definition.getMappingClass().getFullyQualifiedName());
   }
 
   @Override

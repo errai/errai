@@ -39,7 +39,6 @@ import org.jboss.errai.marshalling.rebind.DefinitionsFactoryImpl;
 import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
 import org.jboss.errai.marshalling.server.marshallers.DefaultArrayMarshaller;
-import org.jboss.errai.marshalling.server.marshallers.DefaultDefinitionMarshaller;
 import org.jboss.errai.marshalling.server.marshallers.DefaultEnumMarshaller;
 import org.jboss.errai.marshalling.server.util.ServerMarshallUtil;
 
@@ -212,8 +211,10 @@ public class MappingContextSingleton {
           if (exposed.isAnnotationPresent(Portable.class)) {
             Portable p = exposed.getAnnotation(Portable.class);
 
-            MappingDefinition def = factory.getDefinition(exposed);
-            def.setMarshallerInstance(new DefaultDefinitionMarshaller(def));
+//            MappingDefinition def = factory.getDefinition(exposed);
+//            def.setMarshallerInstance(new DefaultDefinitionMarshaller(def));
+
+
 
             if (!p.aliasOf().equals(Object.class)) {
               if (!factory.hasDefinition(p.aliasOf())) {
@@ -240,7 +241,7 @@ public class MappingContextSingleton {
                 if (!factory.hasDefinition(type.getInternalName())) {
                   Marshaller<Object> marshaller = factory.getDefinition(compType).getMarshallerInstance();
 
-                  def = new MappingDefinition(EncDecUtil.qualifyMarshaller(
+                  MappingDefinition def = new MappingDefinition(EncDecUtil.qualifyMarshaller(
                           new DefaultArrayMarshaller(type, marshaller)));
 
                   factory.addDefinition(def);
