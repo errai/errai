@@ -29,6 +29,8 @@
 
     <entry-point class="org.jboss.errai.js.client.ErraiJS" />
 
+    <set-property name="user.agent" value="safari"/>
+
     <!--
      Add the cross site linker.
     -->

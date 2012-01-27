@@ -17,6 +17,8 @@
 package org.jboss.errai.bus.client.framework;
 
 import static org.jboss.errai.bus.client.json.JSONUtilCli.decodePayload;
+import static org.jboss.errai.bus.client.json.JSONUtilCli.log;
+import static org.jboss.errai.bus.client.json.JSONUtilCli.nativeLog;
 import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteSubscribe;
 import static org.jboss.errai.common.client.protocols.MessageParts.PriorityProcessing;
 import static org.jboss.errai.common.client.protocols.MessageParts.ReplyTo;
@@ -539,7 +541,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         return;
       }
       else {
-        log("websocket channel is closed. falling back to comet");
+        JSONUtilCli.log("websocket channel is closed. falling back to comet");
 
         //disconnected.
         webSocketOpen = false;
@@ -625,10 +627,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   @Override
   public void voteForInit() {
     if (--initVotesRequired == 0) {
-      log("received final vote for initialization ...");
+      JSONUtilCli.log("received final vote for initialization ...");
 
       postInit = true;
-      log("executing " + postInitTasks.size() + " post init task(s)");
+      JSONUtilCli.log("executing " + postInitTasks.size() + " post init task(s)");
 
       Iterator<Runnable> postInitTasksIter = postInitTasks.iterator();
       while (postInitTasksIter.hasNext()) {
@@ -651,10 +653,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
       setInitialized(true);
 
-      log("bus federation complete. now operating normally.");
+      JSONUtilCli.log("bus federation complete. now operating normally.");
     }
     else {
-      log("waiting for " + initVotesRequired + " more votes to initialize");
+      JSONUtilCli.log("waiting for " + initVotesRequired + " more votes to initialize");
     }
   }
 
@@ -769,204 +771,210 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       @Override
       @SuppressWarnings({"unchecked"})
       public void callback(final Message message) {
-        switch (BusCommands.valueOf(message.getCommandType())) {
-          case RemoteSubscribe:
-            if (message.hasPart("SubjectsList")) {
-              for (String subject : (List<String>) message.get(List.class, "SubjectsList")) {
+        try {
+          switch (BusCommands.valueOf(message.getCommandType())) {
+            case RemoteSubscribe:
+
+              if (message.hasPart("SubjectsList")) {
+                for (String subject : (List<String>) message.get(List.class, "SubjectsList")) {
+                  remoteSubscribe(subject);
+                }
+              }
+              else {
+                String subject = message.get(String.class, Subject);
                 remoteSubscribe(subject);
               }
-            }
-            else {
-              String subject = message.get(String.class, Subject);
-              remoteSubscribe(subject);
-            }
-            break;
+              break;
 
-          case RemoteUnsubscribe:
-            unsubscribeAll(message.get(String.class, Subject));
-            break;
+            case RemoteUnsubscribe:
+              unsubscribeAll(message.get(String.class, Subject));
+              break;
 
-          case CapabilitiesNotice:
-            log("received capabilities notice from server. supported capabilities of remote: "
-                    + message.get(String.class, "Flags"));
+            case CapabilitiesNotice:
+              JSONUtilCli.log("received capabilities notice from server. supported capabilities of remote: "
+                      + message.get(String.class, "Flags"));
 
-            String[] capabilites = message.get(String.class, "Flags").split(",");
+              String[] capabilites = message.get(String.class, "Flags").split(",");
 
-            for (String capability : capabilites) {
-              switch (Capabilities.valueOf(capability)) {
-                case WebSockets:
-                  webSocketUrl = message.get(String.class, MessageParts.WebSocketURL);
-                  webSocketToken = message.get(String.class, MessageParts.WebSocketToken);
+              for (String capability : capabilites) {
+                switch (Capabilities.valueOf(capability)) {
+                  case WebSockets:
+                    webSocketUrl = message.get(String.class, MessageParts.WebSocketURL);
+                    webSocketToken = message.get(String.class, MessageParts.WebSocketToken);
 
-                  log("attempting web sockets connection at URL: " + webSocketUrl);
+                    JSONUtilCli.log("attempting web sockets connection at URL: " + webSocketUrl);
 
-                  Object o = ClientWebSocketChannel.attemptWebSocketConnect(ClientMessageBusImpl.this, webSocketUrl);
+                    Object o = ClientWebSocketChannel.attemptWebSocketConnect(ClientMessageBusImpl.this, webSocketUrl);
 
-                  if (o instanceof String) {
-                    log("could not use web sockets. reason: " + o);
-                  }
-                  break;
-                case LongPollAvailable:
+                    if (o instanceof String) {
+                      JSONUtilCli.log("could not use web sockets. reason: " + o);
+                    }
+                    break;
+                  case LongPollAvailable:
 
-                  log("initializing long poll subsystem");
-                  receiveCommCallback = new LongPollRequestCallback();
-                  break;
-                case NoLongPollAvailable:
-                  receiveCommCallback = new ShortPollRequestCallback();
-                  if (message.hasPart("PollFrequency")) {
-                    POLL_FREQUENCY = message.get(Integer.class, "PollFrequency");
-                  }
-                  else {
-                    POLL_FREQUENCY = 500;
-                  }
-                  break;
-              }
-            }
-
-            break;
-
-          case RemoteMonitorAttach:
-            break;
-
-          case FinishStateSync:
-            if (isInitialized()) {
-              return;
-            }
-
-            log("received FinishStateSync message. preparing to bring up the federation");
-
-            List<String> subjects = new ArrayList<String>();
-            for (String s : shadowSubscriptions.keySet()) {
-              if (s.startsWith("local:")) continue;
-              if (!remotes.containsKey(s)) subjects.add(s);
-            }
-
-            sessionId = message.get(String.class, MessageParts.ConnectionSessionKey);
-
-            remoteSubscribe("ServerBus");
-
-            MessageBuilder.createMessage()
-                    .toSubject("ServerBus")
-                    .command(RemoteSubscribe)
-                    .with("SubjectsList", subjects)
-                    .with(PriorityProcessing, "1")
-                    .noErrorHandling()
-                    .sendNowWith(ClientMessageBusImpl.this);
-
-
-            MessageBuilder.createMessage()
-                    .toSubject("ServerBus")
-                    .command(BusCommands.FinishStateSync)
-                    .with(PriorityProcessing, "1")
-                    .noErrorHandling().sendNowWith(ClientMessageBusImpl.this);
-
-            /**
-             * ... also send RemoteUnsubscribe signals.
-             */
-
-            addSubscribeListener(new SubscribeListener() {
-              @Override
-              public void onSubscribe(SubscriptionEvent event) {
-                if (event.isLocalOnly() || event.getSubject().startsWith("local:")
-                        || remotes.containsKey(event.getSubject())) {
-                  return;
+                    JSONUtilCli.log("initializing long poll subsystem");
+                    receiveCommCallback = new LongPollRequestCallback();
+                    break;
+                  case NoLongPollAvailable:
+                    receiveCommCallback = new ShortPollRequestCallback();
+                    if (message.hasPart("PollFrequency")) {
+                      POLL_FREQUENCY = message.get(Integer.class, "PollFrequency");
+                    }
+                    else {
+                      POLL_FREQUENCY = 500;
+                    }
+                    break;
                 }
+              }
 
-                if (event.isNew()) {
-                  MessageBuilder.getMessageProvider().get().command(RemoteSubscribe)
+              break;
+
+            case RemoteMonitorAttach:
+              break;
+
+            case FinishStateSync:
+              if (isInitialized()) {
+                return;
+              }
+
+              JSONUtilCli.log("received FinishStateSync message. preparing to bring up the federation");
+
+              List<String> subjects = new ArrayList<String>();
+              for (String s : shadowSubscriptions.keySet()) {
+                if (s.startsWith("local:")) continue;
+                if (!remotes.containsKey(s)) subjects.add(s);
+              }
+
+              sessionId = message.get(String.class, MessageParts.ConnectionSessionKey);
+
+              remoteSubscribe("ServerBus");
+
+              MessageBuilder.createMessage()
+                      .toSubject("ServerBus")
+                      .command(RemoteSubscribe)
+                      .with("SubjectsList", subjects)
+                      .with(PriorityProcessing, "1")
+                      .noErrorHandling()
+                      .sendNowWith(ClientMessageBusImpl.this);
+
+
+              MessageBuilder.createMessage()
+                      .toSubject("ServerBus")
+                      .command(BusCommands.FinishStateSync)
+                      .with(PriorityProcessing, "1")
+                      .noErrorHandling().sendNowWith(ClientMessageBusImpl.this);
+
+              /**
+               * ... also send RemoteUnsubscribe signals.
+               */
+
+              addSubscribeListener(new SubscribeListener() {
+                @Override
+                public void onSubscribe(SubscriptionEvent event) {
+                  if (event.isLocalOnly() || event.getSubject().startsWith("local:")
+                          || remotes.containsKey(event.getSubject())) {
+                    return;
+                  }
+
+                  if (event.isNew()) {
+                    MessageBuilder.getMessageProvider().get().command(RemoteSubscribe)
+                            .toSubject("ServerBus")
+                            .set(Subject, event.getSubject())
+                            .set(PriorityProcessing, "1")
+                            .sendNowWith(ClientMessageBusImpl.this);
+                  }
+                }
+              });
+
+              addUnsubscribeListener(new UnsubscribeListener() {
+                @Override
+                public void onUnsubscribe(SubscriptionEvent event) {
+                  MessageBuilder.getMessageProvider().get().command(BusCommands.RemoteUnsubscribe)
                           .toSubject("ServerBus")
                           .set(Subject, event.getSubject())
                           .set(PriorityProcessing, "1")
                           .sendNowWith(ClientMessageBusImpl.this);
                 }
-              }
-            });
+              });
 
-            addUnsubscribeListener(new UnsubscribeListener() {
-              @Override
-              public void onUnsubscribe(SubscriptionEvent event) {
-                MessageBuilder.getMessageProvider().get().command(BusCommands.RemoteUnsubscribe)
-                        .toSubject("ServerBus")
-                        .set(Subject, event.getSubject())
-                        .set(PriorityProcessing, "1")
-                        .sendNowWith(ClientMessageBusImpl.this);
-              }
-            });
-
-            subscribe(DefaultErrorCallback.CLIENT_ERROR_SUBJECT, new MessageCallback() {
-              @Override
-              public void callback(Message message) {
-                String errorTo = message.get(String.class, MessageParts.ErrorTo);
-                if (errorTo == null) {
-                  logError(message.get(String.class, "ErrorMessage"),
-                          message.get(String.class, "AdditionalDetails"), null);
+              subscribe(DefaultErrorCallback.CLIENT_ERROR_SUBJECT, new MessageCallback() {
+                @Override
+                public void callback(Message message) {
+                  String errorTo = message.get(String.class, MessageParts.ErrorTo);
+                  if (errorTo == null) {
+                    logError(message.get(String.class, "ErrorMessage"),
+                            message.get(String.class, "AdditionalDetails"), null);
+                  }
+                  else {
+                    message.toSubject(errorTo);
+                    message.sendNowWith(ClientMessageBusImpl.this);
+                  }
                 }
-                else {
-                  message.toSubject(errorTo);
-                  message.sendNowWith(ClientMessageBusImpl.this);
-                }
+              });
+
+              voteForInit();
+              break;
+
+            case SessionExpired:
+              if (isReinit()) {
+                showError("Session was terminated and could not be re-established", null);
+                return;
               }
-            });
 
-            voteForInit();
-            break;
+              if (!isInitialized()) return;
 
-          case SessionExpired:
-            if (isReinit()) {
-              showError("Session was terminated and could not be re-established", null);
-              return;
-            }
+              for (SessionExpirationListener listener : sessionExpirationListeners) {
+                listener.onSessionExpire();
+              }
 
-            if (!isInitialized()) return;
+              stop(false);
 
-            for (SessionExpirationListener listener : sessionExpirationListeners) {
-              listener.onSessionExpire();
-            }
+              setReinit(true);
 
-            stop(false);
+              init();
+              setReinit(false);
 
-            setReinit(true);
+              break;
 
-            init();
-            setReinit(false);
+            case WebsocketChannelVerify:
+              JSONUtilCli.log("received verification token for websocket connection");
+              MessageBuilder.createMessage()
+                      .toSubject("ServerBus")
+                      .command(BusCommands.WebsocketChannelVerify)
+                      .copy(MessageParts.WebSocketToken, message)
+                      .done().sendNowWith(ClientMessageBusImpl.this);
+              break;
 
-            break;
+            case WebsocketChannelOpen:
 
-          case WebsocketChannelVerify:
-            log("received verification token for websocket connection");
-            MessageBuilder.createMessage()
-                    .toSubject("ServerBus")
-                    .command(BusCommands.WebsocketChannelVerify)
-                    .copy(MessageParts.WebSocketToken, message)
-                    .done().sendNowWith(ClientMessageBusImpl.this);
-            break;
+              cometChannelOpen = false;
+              webSocketOpen = true;
 
-          case WebsocketChannelOpen:
+              // send final message to open the channel
+              ClientWebSocketChannel.transmitToSocket(webSocketChannel, getWebSocketNegotiationString());
 
-            cometChannelOpen = false;
-            webSocketOpen = true;
+              JSONUtilCli.log("web socket channel successfully negotiated. comet channel deactivated.");
 
-            // send final message to open the channel
-            ClientWebSocketChannel.transmitToSocket(webSocketChannel, getWebSocketNegotiationString());
+              break;
 
-            log("web socket channel successfully negotiated. comet channel deactivated.");
+            case WebsocketNegotiationFailed:
+              webSocketChannel = null;
+              logError("failed to connect to websocket: server rejected request",
+                      message.get(String.class, MessageParts.ErrorMessage), null);
+              break;
 
-            break;
+            case Disconnect:
+              stop(false);
 
-          case WebsocketNegotiationFailed:
-            webSocketChannel = null;
-            logError("failed to connect to websocket: server rejected request",
-                    message.get(String.class, MessageParts.ErrorMessage), null);
-            break;
-
-          case Disconnect:
-            stop(false);
-
-            if (message.hasPart("Reason")) {
-              logError("The bus was disconnected by the server", "Reason: "
-                      + message.get(String.class, "Reason"), null);
-            }
-            break;
+              if (message.hasPart("Reason")) {
+                logError("The bus was disconnected by the server", "Reason: "
+                        + message.get(String.class, "Reason"), null);
+              }
+              break;
+          }
+        }
+        catch (Throwable t) {
+          log("exception in 'ClientBus': " + t.getMessage() + ": " + "(Command:" + message.getCommandType() + ")");
         }
       }
     });
@@ -987,7 +995,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private void sendAllDeferred() {
-    log("transmitting deferred messages now ...");
+    JSONUtilCli.log("transmitting deferred messages now ...");
 
     for (Iterator<Message> iter = deferredMessages.iterator(); iter.hasNext(); ) {
       Message m = iter.next();
@@ -1012,7 +1020,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private boolean sendInitialMessage() {
     try {
 
-      log("sending initial handshake to remote bus");
+      JSONUtilCli.log("sending initial handshake to remote bus");
 
       String initialMessage = "{\"CommandType\":\"ConnectToQueue\",\"ToSubject\":\"ServerBus\"," +
               " \"PriorityProcessing\":\"1\"}";
@@ -1024,7 +1032,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         @Override
         public void onResponseReceived(Request request, Response response) {
           try {
-            log("received response from initial handshake.");
+            JSONUtilCli.log("received response from initial handshake.");
             procIncomingPayload(response);
             initializeMessagingBus();
           }
@@ -1281,7 +1289,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private void showError(String message, Throwable e) {
     errorDialog.addError(message, "", e);
 
-    if (isNativeJavaScriptLoggerSupported()) {
+    if (JSONUtilCli.isNativeJavaScriptLoggerSupported()) {
       nativeLog(message);
     }
   }
@@ -1306,7 +1314,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
     catch (RuntimeException e) {
       e.printStackTrace();
-      logError("Error delivering message into bus", text, e);
+      logError("Error delivering message into bus: " + e.getMessage(), text, e);
     }
   }
 
@@ -1366,7 +1374,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   public void attachWebSocketChannel(Object o) {
-    log("web socket opened. sending negotiation message.");
+    JSONUtilCli.log("web socket opened. sending negotiation message.");
     ClientWebSocketChannel.transmitToSocket(o, getWebSocketNegotiationString());
     webSocketChannel = o;
   }
@@ -1497,23 +1505,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       contentPanel.getElement().getStyle().setProperty("overflow", "auto");
     }
   }
-
-  private static void log(String message) {
-    if (isNativeJavaScriptLoggerSupported()) {
-      nativeLog("[erraibus] " + message);
-    }
-  }
-
-  private static native boolean isNativeJavaScriptLoggerSupported() /*-{
-    return ((window.console != null) &&
-            (window.console.firebug == null) &&
-            (window.console.log != null) &&
-            (typeof(window.console.log) == 'function'));
-  }-*/;
-
-  private static native void nativeLog(String message) /*-{
-    window.console.log(message);
-  }-*/;
 
 
   private static native void declareDebugFunction() /*-{

@@ -26,7 +26,6 @@ import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.api.json.impl.gwt.GWTJSON;
 import org.jboss.errai.marshalling.client.protocols.MarshallingSessionProvider;
-import org.jboss.errai.marshalling.client.util.MarshallUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -36,6 +35,7 @@ import java.util.Map;
  */
 public class MarshallerFramework implements EntryPoint {
   private static MarshallerFactory marshallerFactory;
+  private static boolean automarshal = true;
 
   static {
     marshallerFactory = GWT.create(MarshallerFactory.class);
@@ -85,7 +85,7 @@ public class MarshallerFramework implements EntryPoint {
     private static final MappingContext mappingContext = new MappingContext() {
       @Override
       public Marshaller<Object> getMarshaller(String clazz) {
-        throw new UnsupportedOperationException();
+        return marshallerFactory.getMarshaller("json", clazz);
       }
 
       @Override
@@ -107,38 +107,41 @@ public class MarshallerFramework implements EntryPoint {
 
     @Override
     public Marshaller<Object> getMarshallerInstance(String fqcn) {
-      return marshallerFactory.getMarshaller(null, fqcn);
+      if (automarshal) {
+        return marshallerFactory.getMarshaller(null, fqcn);
+      }
+      else {
+        Marshaller<Object> m = marshallerFactory.getMarshaller(null, fqcn);
+        if (m == null) {
+          m = new Marshaller<Object>() {
+            @Override
+            public Class<Object> getTypeHandled() {
+              return Object.class;
+            }
 
-//      if (fqcn == null) {
-//        return new Marshaller<Object>() {
-//          @Override
-//          public Class<Object> getTypeHandled() {
-//            return null;
-//          }
-//
-//          @Override
-//          public String getEncodingType() {
-//            return null;
-//          }
-//
-//          @Override
-//          public Object demarshall(EJValue o, MarshallingSession ctx) {
-//            return null;
-//          }
-//
-//          @Override
-//          public String marshall(Object o, MarshallingSession ctx) {
-//            return "null";
-//          }
-//
-//          @Override
-//          public boolean handles(EJValue o) {
-//            return false;
-//          }
-//        };
-//      }
+            @Override
+            public String getEncodingType() {
+              return "json";
+            }
 
-//      return MarshallUtil.notNull("no marshaller for: " + fqcn, marshallerFactory.getMarshaller(null, fqcn));
+            @Override
+            public Object demarshall(EJValue o, MarshallingSession ctx) {
+              return o.getRawValue().toString();
+            }
+
+            @Override
+            public String marshall(Object o, MarshallingSession ctx) {
+              return "\"MarshallingNotSupported\"";
+            }
+
+            @Override
+            public boolean handles(EJValue o) {
+              return false;
+            }
+          };
+        }
+        return m;
+      }
     }
 
     @Override
@@ -199,6 +202,14 @@ public class MarshallerFramework implements EntryPoint {
       }
       throw new RuntimeException("unknown type: cannot reverse map value to concrete Java type: " + o);
     }
+  }
+
+  public static void setAutomarshal(boolean auto) {
+    automarshal = auto;
+  }
+
+  public static boolean isAutomarshal() {
+    return automarshal;
   }
 
   public static MarshallerFactory getMarshallerFactory() {
