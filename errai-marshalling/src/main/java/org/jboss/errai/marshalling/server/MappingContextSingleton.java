@@ -39,10 +39,10 @@ import org.jboss.errai.marshalling.rebind.DefinitionsFactoryImpl;
 import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
 import org.jboss.errai.marshalling.server.marshallers.DefaultArrayMarshaller;
+import org.jboss.errai.marshalling.server.marshallers.DefaultDefinitionMarshaller;
 import org.jboss.errai.marshalling.server.marshallers.DefaultEnumMarshaller;
 import org.jboss.errai.marshalling.server.util.ServerMarshallUtil;
 
-import java.lang.reflect.Field;
 import java.util.Set;
 
 /**
@@ -68,8 +68,8 @@ public class MappingContextSingleton {
     catch (Throwable t) {
       sContext = loadDynamicMarshallers();
     }
-    // sContext = loadDynamicMarshallers();
 
+//    sContext = loadDynamicMarshallers();
     context = sContext;
   }
 
@@ -212,6 +212,9 @@ public class MappingContextSingleton {
           if (exposed.isAnnotationPresent(Portable.class)) {
             Portable p = exposed.getAnnotation(Portable.class);
 
+            MappingDefinition def = factory.getDefinition(exposed);
+            def.setMarshallerInstance(new DefaultDefinitionMarshaller(def));
+
             if (!p.aliasOf().equals(Object.class)) {
               if (!factory.hasDefinition(p.aliasOf())) {
                 throw new RuntimeException("cannot alias " + exposed.getName() + " to unmapped type: "
@@ -237,7 +240,7 @@ public class MappingContextSingleton {
                 if (!factory.hasDefinition(type.getInternalName())) {
                   Marshaller<Object> marshaller = factory.getDefinition(compType).getMarshallerInstance();
 
-                  MappingDefinition def = new MappingDefinition(EncDecUtil.qualifyMarshaller(
+                  def = new MappingDefinition(EncDecUtil.qualifyMarshaller(
                           new DefaultArrayMarshaller(type, marshaller)));
 
                   factory.addDefinition(def);
