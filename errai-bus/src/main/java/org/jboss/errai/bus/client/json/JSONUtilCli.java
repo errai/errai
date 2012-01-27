@@ -116,6 +116,7 @@ public class JSONUtilCli {
       return ErraiProtocol.decodePayload(GWTJSON.wrap((JSONObject) value));
     }
     else {
+      nativeLog("using no-auto envelope demarshaller");
       return ErraiProtocolEnvelopeNoAutoMarshaller.INSTANCE.demarshall(
               GWTJSON.wrap((JSONObject) value), MarshallingSessionProviderFactory.getEncoding());
     }
@@ -128,4 +129,9 @@ public class JSONUtilCli {
   public static void setAutoDemarshall(boolean autoDemarshall1) {
     autoDemarshall = autoDemarshall1;
   }
+
+  private static native void nativeLog(String message) /*-{
+    window.console.log(message);
+  }-*/;
+
 }

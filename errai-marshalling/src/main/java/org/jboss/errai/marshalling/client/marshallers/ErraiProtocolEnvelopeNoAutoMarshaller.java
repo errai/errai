@@ -52,7 +52,14 @@ public class ErraiProtocolEnvelopeNoAutoMarshaller extends AbstractJSONMarshalle
     for (String key : jsonObject.keySet()) {
       EJValue v = jsonObject.get(key);
       if (v.isNull() == null) {
-        impl.put(key, ctx.getMarshallerInstance(ctx.determineTypeFor(null, v)).demarshall(v, ctx));
+        String type = ctx.determineTypeFor(null, v);
+
+        if (type == null) {
+          impl.put(key, v.toString());
+        }
+        else {
+          impl.put(key, ctx.getMarshallerInstance(type).demarshall(v, ctx));
+        }
       }
       else {
         impl.put(key, null);
@@ -97,8 +104,6 @@ public class ErraiProtocolEnvelopeNoAutoMarshaller extends AbstractJSONMarshalle
           else {
             valueMarshaller = ctx.getMarshallerInstance(val.getClass().getName());
           }
-
-
         }
         buf.append(valueMarshaller.marshall(val, ctx));
       }
