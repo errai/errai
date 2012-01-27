@@ -126,6 +126,6 @@ public class JSONUtilCli {
   }
 
   public static void setAutoDemarshall(boolean autoDemarshall1) {
-    autoDemarshall = autoDemarshall;
+    autoDemarshall = autoDemarshall1;
   }
 }
