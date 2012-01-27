@@ -20,8 +20,13 @@ import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
 
 import java.io.IOException;
 
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -31,9 +36,50 @@ import org.jboss.errai.bus.server.api.QueueSession;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 
 /**
- * The default DefaultBlockingServlet which provides the HTTP-protocol gateway between the server bus and the client buses.
+ * The default DefaultBlockingServlet which provides the HTTP-protocol gateway
+ * between the server bus and the client buses.
+ *
+ * <h2>Configuration</h2>
+ *
+ * The DefaultBlockingServlet, as its name suggests, is normally configured as
+ * an HTTP Servlet in the <code>web.xml</code> file:
+ *
+ * <pre>
+ * {@code <servlet>}
+ *   {@code <servlet-name>ErraiServlet</servlet-name>}
+ *   {@code <servlet-class>org.jboss.errai.bus.server.servlet.DefaultBlockingServlet</servlet-class>}
+ *   {@code <load-on-startup>1</load-on-startup>}
+ * {@code </servlet>}
+ *
+ * {@code <servlet-mapping>}
+ *   {@code <servlet-name>ErraiServlet</servlet-name>}
+ *   {@code <url-pattern>*.erraiBus</url-pattern>}
+ * {@code </servlet-mapping>}
+ * </pre>
+ *
+ * Alternatively, the DefaultBlockingServlet can be deployed as a Servlet
+ * Filter. This may be necessary in cases where an existing filter is configured
+ * in the web application, and that filter interferes with the Errai Bus
+ * requests. In this case, configuring DefaultBlockingServlet to handle
+ * {@code *.erraiBus} requests ahead of other filters in web.xml will solve the
+ * problem:
+ *
+ * <pre>
+ * {@code <filter>}
+ *   {@code <filter-name>ErraiServlet</filter-name>}
+ *   {@code <filter-class>org.jboss.errai.bus.server.servlet.DefaultBlockingServlet</filter-class>}
+ * {@code </filter>}
+ *
+ * {@code <filter-mapping>}
+ *   {@code <filter-name>ErraiServlet</filter-name>}
+ *   {@code <url-pattern>*.erraiBus</url-pattern>}
+ * {@code </filter-mapping>}
+ *
+ * {@code <!-- other filter-mapping and servlet-mapping elements go here -->}
+ * </pre>
  */
-public class DefaultBlockingServlet extends AbstractErraiServlet {
+
+public class DefaultBlockingServlet extends AbstractErraiServlet implements Filter {
 
 
   /**
@@ -104,5 +150,22 @@ public class DefaultBlockingServlet extends AbstractErraiServlet {
       t.printStackTrace();
       writeExceptionToOutputStream(httpServletResponse, t);
     }
+  }
+
+  @Override
+  public void init(FilterConfig filterConfig) throws ServletException {
+    init(filterConfig.getServletContext(), filterConfig.getInitParameter("service-locator"));
+  }
+
+  /**
+   * Services this request in the same way as it would be serviced if configured
+   * as a Servlet. Does not invoke any filters further down the chain. See the
+   * class-level comment for the reason why this servlet might be configured as a
+   * filter.
+   */
+  @Override
+  public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+      throws IOException, ServletException {
+    service(request, response);
   }
 }

@@ -27,7 +27,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.client.framework.MessageBus;
@@ -39,8 +38,7 @@ import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
 import org.jboss.errai.bus.server.service.ErraiServiceImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jboss.errai.common.client.api.ResourceProvider;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -82,13 +80,26 @@ public abstract class AbstractErraiServlet extends HttpServlet {
 
   @Override
   public void init(ServletConfig config) throws ServletException {
+    init(config.getServletContext(), config.getInitParameter("service-locator"));
+  }
 
-    final ServletContext context = config.getServletContext();
+  /**
+   * Common initialization logic that works for both Servlets and Filters.
+   *
+   * @param context
+   *          The ServletContext of the web application.
+   * @param serviceLocatorClass
+   *          The value of the (Servlet or Filter) init parameter
+   *          <code>"service-locator"</code>. If specified, it must be the
+   *          fully-qualified name of a class that implements
+   *          {@link ServiceLocator}. If null, the service locator is built by a
+   *          call to {@link #buildService()}.
+   */
+  protected void init(final ServletContext context, String serviceLocatorClass) {
     service = (ErraiService) context.getAttribute("errai");
     if (null == service) {
       synchronized (context) {
         // Build or lookup service
-        String serviceLocatorClass = config.getInitParameter("service-locator");
         if (serviceLocatorClass != null) {
           // locate externally created service instance, i.e. CDI
           try {
@@ -110,6 +121,7 @@ public abstract class AbstractErraiServlet extends HttpServlet {
 
         service.getConfiguration().getResourceProviders()
                 .put("errai.experimental.classLoader", new ResourceProvider<ClassLoader>() {
+                  @Override
                   public ClassLoader get() {
                     return contextClassLoader;
                   }
@@ -117,13 +129,14 @@ public abstract class AbstractErraiServlet extends HttpServlet {
 
         service.getConfiguration().getResourceProviders()
                 .put("errai.experimental.servletContext", new ResourceProvider<ServletContext>() {
+                  @Override
                   public ServletContext get() {
                     return context;
                   }
                 });
 
         // store it in servlet context
-        config.getServletContext().setAttribute("errai", service);
+        context.setAttribute("errai", service);
       }
     }
 
@@ -137,7 +150,8 @@ public abstract class AbstractErraiServlet extends HttpServlet {
 
   @SuppressWarnings({"unchecked"})
   protected ErraiService<HttpSession> buildService() {
-    return (ErraiService<HttpSession>) Guice.createInjector(new AbstractModule() {
+    return Guice.createInjector(new AbstractModule() {
+      @Override
       @SuppressWarnings({"unchecked"})
       public void configure() {
         bind(ErraiService.class).to(ErraiServiceImpl.class);
@@ -188,10 +202,12 @@ public abstract class AbstractErraiServlet extends HttpServlet {
     stream.write('[');
 
     writeToOutputStream(stream, new MarshalledMessage() {
+      @Override
       public String getSubject() {
         return DefaultErrorCallback.CLIENT_ERROR_SUBJECT;
       }
 
+      @Override
       public Object getMessage() {
         StringBuilder b = new StringBuilder("{\"ErrorMessage\":\"").append(t.getMessage()).append("\"," +
                 "\"AdditionalDetails\":\"");
@@ -209,10 +225,12 @@ public abstract class AbstractErraiServlet extends HttpServlet {
 
   protected void sendDisconnectWithReason(OutputStream stream, final String reason) throws IOException {
     writeToOutputStream(stream, new MarshalledMessage() {
+      @Override
       public String getSubject() {
         return "ClientBus";
       }
 
+      @Override
       public Object getMessage() {
         return reason != null ? "{\"ToSubject\":\"ClientBus\", \"CommandType\":\"" + BusCommands.Disconnect + "\"," +
                 "\"Reason\":\"" + reason + "\"}"
@@ -224,10 +242,12 @@ public abstract class AbstractErraiServlet extends HttpServlet {
 
   protected void sendDisconnectDueToSessionExpiry(OutputStream stream) throws IOException {
     writeToOutputStream(stream, new MarshalledMessage() {
+      @Override
       public String getSubject() {
         return "ClientBus";
       }
 
+      @Override
       public Object getMessage() {
         return "{\"ToSubject\":\"ClientBus\", \"CommandType\":\"" + BusCommands.SessionExpired + "\"}";
       }
