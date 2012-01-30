@@ -103,7 +103,7 @@ public class JaxrsProxyLoaderGenerator extends Generator {
     ClassStructureBuilder<?> classBuilder = ClassBuilder.implement(JaxrsProxyLoader.class);
 
     MethodBlockBuilder<?> loadProxies = classBuilder.publicMethod(void.class, "loadProxies");
-    for (Class<?> remote : scanner.getTypesAnnotatedWith(Path.class, RebindUtils.findClientPackages(context, logger))) {
+    for (Class<?> remote : scanner.getTypesAnnotatedWith(Path.class, RebindUtils.findTranslatablePackages(context))) {
       if (remote.isInterface()) {
         // create the remote proxy for this interface
         ClassStructureBuilder<?> remoteProxy = new JaxrsProxyGenerator(remote).generate();
