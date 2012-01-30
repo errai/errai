@@ -102,7 +102,7 @@ public class IOCGenerator extends Generator {
       return;
 
     IOCBootstrapGenerator iocBootstrapGenerator = new IOCBootstrapGenerator(typeOracle, context, logger, 
-        RebindUtils.findClientPackages(context, logger));
+        RebindUtils.findTranslatablePackages(context));
 
     printWriter.append(iocBootstrapGenerator.generate(packageName, className));
     context.commit(logger, printWriter);
