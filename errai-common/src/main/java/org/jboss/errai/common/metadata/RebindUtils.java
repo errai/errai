@@ -259,10 +259,9 @@ public class RebindUtils {
   }
 
   /**
-   * Returns the list of packages that are specified by the GWT module .xml config file. This should ensure that we only
-   * try to generate IOC code for those classes that will be deployed to the client.
+   * Returns the list of translatable packages in the module that caused the generator to run (the module under compilation).
    */
-  public static List<String> findClientPackages(final GeneratorContext context, final TreeLogger logger) {
+  public static List<String> findTranslatablePackagesInModule(final GeneratorContext context) {
     List<String> packages = new ArrayList<String>();
     try {
       StandardGeneratorContext stdContext = (StandardGeneratorContext) context;
@@ -275,20 +274,29 @@ public class RebindUtils {
       String moduleName = moduleDef.getCanonicalName().replace(".JUnit", "");
       String modulePackage = moduleName.substring(0, moduleName.lastIndexOf('.'));
       
-      JPackage[] jpackages = context.getTypeOracle().getPackages();
-      for (JPackage p : jpackages) {
-        String packageName = p.getName();
+      for (String packageName : findTranslatablePackages(context)) {
         if (packageName != null && packageName.startsWith(modulePackage)) {
           packages.add(packageName);
         }
       }
-  
-      logger.log(TreeLogger.INFO, "will scan in package: " + modulePackage);
     }
     catch (Exception e) {
       throw new RuntimeException("could not determine module package", e);
     }
   
+    return packages;
+  }
+  
+  /**
+   * Returns a list of all translatable packages accessible to the module under compilation (including inherited modules).
+   */
+  public static List<String> findTranslatablePackages(final GeneratorContext context) {
+    List<String> packages = new ArrayList<String>();
+    JPackage[] jpackages = context.getTypeOracle().getPackages();
+    for (JPackage p : jpackages) {
+        packages.add(p.getName());
+    }
+    
     return packages;
   }
 }
