@@ -146,7 +146,6 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
             addDefinition(aliasMappingDef);
 
             exposedClasses.add(c);
-            mappingAliases.put(c.getName(), cls.getName());
 
             if (log.isDebugEnabled())
               log.debug("mapping inherited mapping " + c.getName() + " -> " + cls.getName());
