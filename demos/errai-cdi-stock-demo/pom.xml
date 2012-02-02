@@ -287,20 +287,6 @@
         </dependency>
 
         <dependency>
-          <groupId>org.hibernate</groupId>
-          <artifactId>hibernate-core</artifactId>
-          <version>3.6.3.Final</version>
-          <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-          <groupId>org.hibernate</groupId>
-          <artifactId>hibernate-entitymanager</artifactId>
-          <version>3.6.3.Final</version>
-          <scope>provided</scope>
-        </dependency>
-
-        <dependency>
           <groupId>dom4j</groupId>
           <artifactId>dom4j</artifactId>
           <version>1.6</version>

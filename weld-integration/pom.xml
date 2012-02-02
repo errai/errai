@@ -33,7 +33,6 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
-                <jboss.version>5.1.0.GA</jboss.version>
                 <profile.testOutputDirectory>target/test-classes</profile.testOutputDirectory>
             </properties>
 
@@ -106,22 +105,6 @@
                     <groupId>javax.validation</groupId>
                     <artifactId>validation-api</artifactId>
                     <classifier>sources</classifier>
-                    <scope>provided</scope>
-                </dependency>
-
-                <!-- JBOSS -->
-                <dependency>
-                    <groupId>org.jboss.jbossas</groupId>
-                    <artifactId>jboss-as-system-jmx</artifactId>
-                    <version>${jboss.version}</version>
-                    <scope>provided</scope>
-                </dependency>
-
-                <dependency>
-                    <groupId>org.jboss.jbossas</groupId>
-                    <artifactId>jboss-as-client</artifactId>
-                    <version>${jboss.version}</version>
-                    <type>pom</type>
                     <scope>provided</scope>
                 </dependency>
 
@@ -257,12 +240,6 @@
                     <artifactId>junit</artifactId>
                     <version>4.8.1</version>
                     <scope>compile</scope>
-                </dependency>
-                <dependency>
-                    <groupId>org.jboss.ejb3</groupId>
-                    <artifactId>jboss-ejb3-api</artifactId>
-                    <scope>provided</scope>
-                    <version>3.1.0</version>
                 </dependency>
 
                 <!-- Errai Core -->
