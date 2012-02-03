@@ -134,7 +134,8 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
         exposedClasses.add(definition.getMappingClass().asClass());
 
         if (log.isDebugEnabled())
-          log.debug("loaded custom mapping class: " + cls.getName() + " (for mapping: " + definition.getMappingClass().getFullyQualifiedName() + ")");
+          log.debug("loaded custom mapping class: " + cls.getName() + " (for mapping: "
+                  + definition.getMappingClass().getFullyQualifiedName() + ")");
 
 
         if (cls.isAnnotationPresent(InheritedMappings.class)) {
@@ -219,7 +220,8 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
       for (Object o : props.keySet()) {
         String key = (String) o;
-        if (key.equals(MarshallingGenUtil.CONFIG_ERRAI_OLD_SERIALIZABLE_TYPE) || key.equals(MarshallingGenUtil.CONFIG_ERRAI_SERIALIZABLE_TYPE)) {
+        if (key.equals(MarshallingGenUtil.CONFIG_ERRAI_OLD_SERIALIZABLE_TYPE)
+                || key.equals(MarshallingGenUtil.CONFIG_ERRAI_SERIALIZABLE_TYPE)) {
           for (String s : props.getProperty(key).split(" ")) {
             try {
               Class<?> cls = Class.forName(s.trim());
@@ -267,7 +269,8 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
         aliasToMarshaller.put(mappedClass, portable.aliasOf());
       }
       else if (!hasDefinition(mappedClass)) {
-        MappingDefinition def = DefaultJavaDefinitionMapper.map(JavaReflectionClass.newUncachedInstance(mappedClass), this);
+        MappingDefinition def = DefaultJavaDefinitionMapper.map(JavaReflectionClass.newUncachedInstance(mappedClass),
+                this);
         def.setMarshallerInstance(new DefaultDefinitionMarshaller(def));
         addDefinition(def);
       }
@@ -379,13 +382,15 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
         if (instantiationMapping instanceof ConstructorMapping &&
                 def.getInstantiationMapping().getMappings().length == 0 &&
-                def.getMappingClass().getDeclaredConstructor(toMerge.getInstantiationMapping().getSignature()) != null) {
+                def.getMappingClass().getDeclaredConstructor(toMerge.getInstantiationMapping().getSignature()) != null)
+        {
 
           final ConstructorMapping parentConstructorMapping = (ConstructorMapping) toMerge.getInstantiationMapping();
           final MetaClass mergingClass = def.getMappingClass();
 
           if (parentConstructorMapping instanceof SimpleConstructorMapping) {
-            ConstructorMapping newMapping = ((SimpleConstructorMapping) parentConstructorMapping).getCopyForInheritance();
+            ConstructorMapping newMapping = ((SimpleConstructorMapping) parentConstructorMapping)
+                    .getCopyForInheritance();
             newMapping.setMappingClass(mergingClass);
             def.setInheritedInstantiationMapping(newMapping);
           }

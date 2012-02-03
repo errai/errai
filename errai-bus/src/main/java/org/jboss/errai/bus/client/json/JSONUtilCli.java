@@ -43,8 +43,6 @@ public class JSONUtilCli {
      * field and send the unparsed JSON object onwards.
      *
      */
-
-
     JSONValue val = null;
 
     try {
