@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<chapter id="sid-5931722">
+    
+    <title>CDI Introduction</title>
+    <para>CDI (Contexts and Dependency Injection) is the Jave EE standard (JSR-299) for handling dependency injection. In addition to dependency injection, the standard encompasses component lifecycle, application configuration, call-interception and a decoupled, type-safe eventing specification.</para>
+    <para>The Errai CDI extension implements a subset of the specification for use inside of client-side applications within Errai, as well as additional capabilities such as distributed eventing.</para>
+    <para>Errai CDI does not currently implement all life cycles specified in JSR-299 or interceptors. These deficiencies may be addressed in future versions.</para>
+    <important>
+      <para>
+        The Errai CDI extension itself is implemented on top of the
+        <ulink url="https://docs.jboss.org/author/pages/viewpage.action?pageId=5931397">Errai IOC</ulink>
+        Framework, which itself implements the JSR-330 specification. Inclusion of the CDI module your GWT project will result in the extensions automatically being loaded and made available to your application.
+      </para>
+    </important>
+  </chapter>
