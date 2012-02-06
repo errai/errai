@@ -26,5 +26,5 @@ public interface RPCStub {
 
   public void setErrorCallback(ErrorCallback callback);
 
-//  public void setQualifiers(Annotation[] annotations);
+  public void setQualifiers(Annotation[] annotations);
 }

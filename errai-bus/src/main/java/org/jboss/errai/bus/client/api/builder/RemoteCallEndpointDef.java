@@ -16,6 +16,8 @@
 
 package org.jboss.errai.bus.client.api.builder;
 
+import java.lang.annotation.Annotation;
+
 /**
  * This interface, <tt>RemoteCallEndpointDef</tt> is a template for creating a remote call endpoint. It ensures that
  * the endpoint is constructed properly
@@ -38,4 +40,14 @@ public interface RemoteCallEndpointDef {
    * @return an instance of <tt>RemoteCallResponseDef</tt>
    */
   public RemoteCallResponseDef endpoint(String endPointName, Object... args);
+
+  /**
+   * Sets the endpoint for a message using the specified name
+   *
+   * @param endPointName - name of endpoint
+   * @param qualifiers   - qualifiers to transmit along with the call
+   * @param args         - the parameters for the endpoint function
+   * @return an instance of <tt>RemoteCallResponseDef</tt>
+   */
+  public RemoteCallResponseDef endpoint(String endPointName, Annotation[] qualifiers, Object... args);
 }

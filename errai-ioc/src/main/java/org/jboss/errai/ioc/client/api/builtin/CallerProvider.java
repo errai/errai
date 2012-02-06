@@ -34,12 +34,13 @@ public class CallerProvider implements ContextualTypeProvider<Caller> {
   private static final RemoteServiceProxyFactory factory = new RemoteServiceProxyFactory();
 
   @Override
-  public Caller provide(final Class<?>[] typeargs, Annotation[] qualifiers) {
+  public Caller provide(final Class<?>[] typeargs, final Annotation[] qualifiers) {
     return new Caller<Object>() {
       @Override
       public Object call(RemoteCallback<?> callback) {
         Object proxy = factory.getRemoteProxy(typeargs[0]);
         ((RPCStub) proxy).setRemoteCallback(callback);
+        ((RPCStub) proxy).setQualifiers(qualifiers);
         return proxy;
       }
 
@@ -48,6 +49,7 @@ public class CallerProvider implements ContextualTypeProvider<Caller> {
         Object proxy = factory.getRemoteProxy(typeargs[0]);
         ((RPCStub) proxy).setRemoteCallback(callback);
         ((RPCStub) proxy).setErrorCallback(errorCallback);
+        ((RPCStub) proxy).setQualifiers(qualifiers);
         return proxy;
       }
     };

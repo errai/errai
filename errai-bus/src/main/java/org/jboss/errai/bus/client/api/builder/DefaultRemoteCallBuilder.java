@@ -28,6 +28,8 @@ import org.jboss.errai.bus.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.common.client.protocols.MessageParts;
 
+import java.lang.annotation.Annotation;
+
 /**
  * The <tt>AbstractRemoteCallBuilder</tt> facilitates the building of a remote call. Ensures that the remote call is
  * constructed properly
@@ -61,7 +63,19 @@ public class DefaultRemoteCallBuilder {
     ((RPCStub) svc).setErrorCallback(errorCallback);
     return svc;
   }
-
+//
+//  public <T, R> T call(final RemoteCallback<R> callback, final ErrorCallback errorCallback, final Class<T> remoteService, final Annotation[] qualifiers) {
+//    T svc = proxyProvider.getRemoteProxy(remoteService);
+//    if (svc == null)
+//      throw new RuntimeException("No service definition for: " + remoteService.getName());
+//
+//    ((RPCStub) svc).setRemoteCallback(callback);
+//    ((RPCStub) svc).setErrorCallback(errorCallback);
+//    ((RPCStub) svc).setQualifiers(qualifiers);
+//    return svc;
+//  }
+//
+//
   /**
    * Only intended for use by generated code. Use
    * {@link #call(RemoteCallback, Class)} or
@@ -151,6 +165,16 @@ public class DefaultRemoteCallBuilder {
       @Override
       public RemoteCallResponseDef endpoint(String endPointName) {
         message.command(endPointName);
+        return respondDef;
+      }
+
+      @Override
+      public RemoteCallResponseDef endpoint(String endPointName, Annotation[] qualifiers, Object... args) {
+        message.command(endPointName);
+
+        if (qualifiers != null) message.set("Qualifiers", qualifiers);
+        if (args != null) message.set("MethodParms", args);
+
         return respondDef;
       }
 
