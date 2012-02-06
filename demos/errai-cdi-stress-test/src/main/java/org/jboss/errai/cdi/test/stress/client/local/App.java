@@ -67,18 +67,18 @@ public class App {
   private final IntegerBox burstInterval = new IntegerBox();
   private final IntegerBox messagesPerBurst = new IntegerBox();
   private final IntegerBox payloadSize = new IntegerBox();
-  
+
   /** The tick most recently received from the server */
   private TickEvent lastTickEvent;
-  
+
   /**
    * Log of gaps in the tick stream (where a tick was received with an ID more
    * than 1 greater than the previous tick).
    */
   private final List<TickStreamDiscontinuity> tickStreamGaps = new ArrayList<TickStreamDiscontinuity>();
-  
+
   private final HTML tickStreamGapLabel = new HTML();
-  
+
   @PostConstruct
   public void buildUI() {
     Grid confGrid = new Grid(2, 4);
@@ -90,7 +90,7 @@ public class App {
     confGrid.setWidget(1, 2, payloadSize);
     Button setConfigButton = new Button("Set Configuration");
     confGrid.setWidget(1, 3, setConfigButton);
-    
+
     setConfigButton.addClickHandler(new ClickHandler() {
       @Override
       public void onClick(ClickEvent event) {
@@ -106,14 +106,14 @@ public class App {
       }
     });
     RootPanel.get().add(confGrid);
-    
+
     Grid p = new Grid(2, 4);
     p.setCellPadding(5);
     p.setText(0, 0, "Registration Latency (ms)");
     p.setText(0, 1, "Last Tick Timestamp");
     p.setText(0, 2, "Last Tick ID");
     p.setText(0, 3, "Last Tick Age (ms)");
-    
+
     p.setWidget(1, 0, initialLatencyLabel);
     p.setWidget(1, 1, lastTickTimeLabel);
     p.setWidget(1, 2, lastTickIdLabel);
@@ -121,7 +121,7 @@ public class App {
     RootPanel.get().add(p);
 
     RootPanel.get().add(tickStreamGapLabel);
-    
+
     subscriptionEvent.fire(new SubscriptionRequest(System.currentTimeMillis()));
   }
 
@@ -135,7 +135,7 @@ public class App {
     messagesPerBurst.setValue(cr.getMessageCount());
     payloadSize.setValue(cr.getPayloadSize());
   }
-  
+
   public void tick(@Observes final TickEvent tick) {
     try {
       long age = System.currentTimeMillis() - tick.getServerTime();

@@ -31,7 +31,6 @@ import org.jboss.errai.cdi.test.stress.client.shared.ConfigurationRequest;
 import org.jboss.errai.cdi.test.stress.client.shared.SubscriptionRequest;
 import org.jboss.errai.cdi.test.stress.client.shared.SubscriptionResponse;
 import org.jboss.errai.cdi.test.stress.client.shared.TickEvent;
-import org.jboss.errai.enterprise.client.cdi.api.Conversational;
 
 /**
  * A very simple CDI based service.
@@ -43,7 +42,7 @@ public class SimpleCDIService {
    * The ID of the next event that will be created.
    */
   private final AtomicInteger nextEventId = new AtomicInteger();
-  
+
   @Inject
   private Event<TickEvent> tickEvent;
 
@@ -52,7 +51,7 @@ public class SimpleCDIService {
 
   @Inject
   private Event<ConfigurationRequest> configurationChangeEvent;
-  
+
   private final ScheduledExecutorService tickMaker = Executors.newSingleThreadScheduledExecutor();
 
   /**
@@ -68,7 +67,7 @@ public class SimpleCDIService {
    * should be treated as immutable.
    */
   private ConfigurationRequest currentConfiguration;
-  
+
   @SuppressWarnings("unused")
   @PostConstruct
   private void setup() {
@@ -78,15 +77,14 @@ public class SimpleCDIService {
     cr.setMessageCount(10);
     applyConfiguration(cr);
   }
-  
-  @Conversational
+
   public void handleSubscriptionRequest(@Observes SubscriptionRequest req) {
     long offset = System.currentTimeMillis() - req.getClientTimestamp();
     System.out.println("Got a subscription request. Client's time offset is " + offset + "ms.");
     responseEvent.fire(new SubscriptionResponse(System.currentTimeMillis()));
     configurationChangeEvent.fire(currentConfiguration);
   }
-  
+
   public void applyConfiguration(@Observes final ConfigurationRequest config) {
     if (currentTicker != null) {
       currentTicker.cancel(false);
@@ -98,7 +96,7 @@ public class SimpleCDIService {
       sb.append((char) ('a' + i % 26));
     }
     final String payload = sb.toString();
-    
+
     currentTicker = tickMaker.scheduleAtFixedRate(new Runnable() {
       @Override
       public void run() {
@@ -114,8 +112,9 @@ public class SimpleCDIService {
         }
       }
     }, 0, config.getMessageInterval(), TimeUnit.MILLISECONDS);
-    
+
     new Thread() {
+      @Override
       public void run() {
         try {
           currentTicker.get();
@@ -127,7 +126,7 @@ public class SimpleCDIService {
         }
       };
     }.start();
-    
+
     currentConfiguration = config;
   }
 }

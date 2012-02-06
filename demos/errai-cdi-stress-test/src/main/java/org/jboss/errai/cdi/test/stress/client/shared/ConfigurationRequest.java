@@ -1,6 +1,7 @@
 package org.jboss.errai.cdi.test.stress.client.shared;
 
 import org.jboss.errai.common.client.api.annotations.Portable;
+import org.jboss.errai.enterprise.client.cdi.api.Conversational;
 
 /**
  * Request object sent by the client when it wants a new stream of ticks from
@@ -13,24 +14,24 @@ import org.jboss.errai.common.client.api.annotations.Portable;
  * "leave the current message interval and count as is, and change the message
  * size to 1000 bytes."
  */
-@Portable
+@Portable @Conversational
 public class ConfigurationRequest {
 
   /**
    * Number of milliseconds between message bursts.
    */
   private int messageInterval = -1;
-  
+
   /**
    * Number of messages per message burst.
    */
   private int messageCount = -1;
-  
+
   /**
    * Number of extra payload bytes to attach to each message in a burst.
    */
   private int payloadSize = -1;
-  
+
   /**
    * Creates a new ConfigurationRequest object with all properties set to -1.
    */
