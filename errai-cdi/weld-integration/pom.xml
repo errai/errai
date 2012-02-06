@@ -123,6 +123,19 @@
                 </dependency>
 
                 <dependency>
+                    <!-- After the CDI project merge-into-parent, the JBossJNDI class in
+                         this project wouldn't compile in Eclipse anymore. This dependency
+                         fixes the compile error without changing the semantics of the build
+                         result. However, we don't know if webapps have access to this library
+                         or not in AS7. On further testing, we may find that it's necessary
+                         to scope this as compile rather than provided. -->
+                    <groupId>org.jboss</groupId>
+                    <artifactId>jboss-common-core</artifactId>
+                    <version>2.2.14.GA</version>
+                    <scope>provided</scope>
+                </dependency>
+
+                <dependency>
                     <groupId>org.jboss.errai</groupId>
                     <artifactId>errai-javax-enterprise</artifactId>
                     <version>${project.version}</version>
