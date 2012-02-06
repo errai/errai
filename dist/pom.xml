@@ -33,55 +33,55 @@
 		<dependency>
 			<groupId>org.jboss.errai</groupId>
 			<artifactId>errai-common</artifactId>
-			<version>${version}</version>
+			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.jboss.errai</groupId>
 			<artifactId>errai-bus</artifactId>
-			<version>${version}</version>
+			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.jboss.errai</groupId>
 			<artifactId>errai-ioc</artifactId>
-			<version>${version}</version>
+			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.jboss.errai</groupId>
 			<artifactId>jboss7-support</artifactId>
-			<version>${version}</version>
+			<version>${project.version}</version>
 		</dependency>
 		
 		<dependency>
 			<groupId>org.jboss.errai</groupId>
 			<artifactId>errai-tools</artifactId>
-			<version>${version}</version>
+			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.jboss.errai</groupId>
 			<artifactId>errai-cdi-client</artifactId>
-			<version>${version}</version>
+			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.jboss.errai</groupId>
 			<artifactId>errai-javax-enterprise</artifactId>
-			<version>${version}</version>
+			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.jboss.errai</groupId>
 			<artifactId>errai-weld-integration</artifactId>
-			<version>${version}</version>
+			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.jboss.errai</groupId>
 			<artifactId>errai-cdi-jetty</artifactId>
-			<version>${version}</version>
+			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 
@@ -102,7 +102,7 @@
 							<goal>single</goal>
 						</goals>
 						<configuration>
-							<finalName>errai-cdi-${version}</finalName>
+							<finalName>errai-cdi-${project.version}</finalName>
 							<ignoreDirFormatExtensions>true</ignoreDirFormatExtensions>
 							<appendAssemblyId>false</appendAssemblyId>
 							<descriptors>
