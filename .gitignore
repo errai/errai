@@ -27,3 +27,5 @@ release.properties
 */**/war/Serialization/
 */**/war/StockDemo/
 *ErraiBusTests.JUnit/
+*.JUnit/
+gwt-unitCache/
