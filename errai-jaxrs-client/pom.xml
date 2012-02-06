@@ -8,7 +8,6 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.jboss.errai</groupId>
   <artifactId>errai-jaxrs-client</artifactId>
   <name>Errai::JAX-RS::Client</name>
 
@@ -132,7 +131,7 @@
     <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-jaxrs-provider</artifactId>
-      <version>${version}</version>
+      <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
     
