@@ -26,7 +26,7 @@
         <format>zip</format>
     </formats>
     <includeBaseDirectory>true</includeBaseDirectory>
-    <baseDirectory>errai-${version}</baseDirectory>
+    <baseDirectory>errai-${project.version}</baseDirectory>
 
     <!-- Dependency Sets -->
     <dependencySets>
@@ -44,6 +44,12 @@
                 <include>org.jboss.errai:jboss7-support</include>
                 <include>org.jboss.errai:errai-marshalling</include>
                 <include>org.jboss.errai:errai-codegen</include>
+                <include>org.jboss.errai:errai-cdi-client</include>
+                <include>org.jboss.errai:errai-javax-enterprise</include>
+                <include>org.jboss.errai:errai-weld-integration</include>
+                <include>org.jboss.errai:errai-cdi-jetty</include>
+                <include>org.jboss.errai:errai-jaxrs-client</include>
+                <include>org.jboss.errai:errai-jaxrs-provider</include>
             </includes>
         </dependencySet>
         <dependencySet>
@@ -73,15 +79,24 @@
             <outputDirectory>docs/quickstart</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>../errai-bus-demos/</directory>
-            <outputDirectory>examples/</outputDirectory>
+            <directory>../errai-bus/demos/</directory>
+            <outputDirectory>bus-examples/</outputDirectory>
             <excludes>
                 <exclude>pom.xml</exclude>
                 <exclude>**/*.iml</exclude>
+                <exclude>**/gwt-unitCache/**</exclude>
+                <exclude>**/.settings/**</exclude>
+                <exclude>**/.classpath</exclude>
+                <exclude>**/.project</exclude>
+                <exclude>**/.gitignore</exclude>
+                <exclude>**/.gwt/**</exclude>
+                <exclude>**/.errai/**</exclude>
+                <exclude>**/*.JUnit/**</exclude>
                 <exclude>**/target/**</exclude>
                 <exclude>**/WEB-INF/lib/**</exclude>
                 <exclude>**/WEB-INF/classes/**</exclude>
 
+                <exclude>**/war/App/**</exclude>
                 <exclude>**/war/AsyncDemo/**</exclude>
                 <exclude>**/war/ClientService/**</exclude>
                 <exclude>**/war/HelloWorld/**</exclude>
@@ -89,6 +104,49 @@
                 <exclude>**/war/RPCDemo/**</exclude>
                 <exclude>**/war/Serialization/**</exclude>
                 <exclude>**/war/StockDemo/**</exclude>
+            </excludes>
+        </fileSet>
+        <fileSet>
+            <directory>../errai-cdi/demos/</directory>
+            <outputDirectory>cdi-examples/</outputDirectory>
+            <excludes>
+                <exclude>pom.xml</exclude>
+                <exclude>**/*.iml</exclude>
+                <exclude>**/gwt-unitCache/**</exclude>
+                <exclude>**/.settings/**</exclude>
+                <exclude>**/.classpath</exclude>
+                <exclude>**/.project</exclude>
+                <exclude>**/.gitignore</exclude>
+                <exclude>**/.gwt/**</exclude>
+                <exclude>**/.errai/**</exclude>
+                <exclude>**/*.JUnit/**</exclude>
+                <exclude>**/target/**</exclude>
+                <exclude>**/WEB-INF/lib/**</exclude>
+                <exclude>**/WEB-INF/classes/**</exclude>
+
+                <exclude>**/war/TagCloudDemo/**</exclude>
+                <exclude>**/war/app/**</exclude>
+            </excludes>
+        </fileSet>
+        <fileSet>
+            <directory>../errai-jaxrs/demos/</directory>
+            <outputDirectory>jaxrs-examples/</outputDirectory>
+            <excludes>
+                <exclude>pom.xml</exclude>
+                <exclude>**/*.iml</exclude>
+                <exclude>**/gwt-unitCache/**</exclude>
+                <exclude>**/.settings/**</exclude>
+                <exclude>**/.classpath</exclude>
+                <exclude>**/.project</exclude>
+                <exclude>**/.gitignore</exclude>
+                <exclude>**/.gwt/**</exclude>
+                <exclude>**/.errai/**</exclude>
+                <exclude>**/*.JUnit/**</exclude>
+                <exclude>**/target/**</exclude>
+                <exclude>**/WEB-INF/lib/**</exclude>
+                <exclude>**/WEB-INF/classes/**</exclude>
+
+                <exclude>**/war/RestDemo/**</exclude>
             </excludes>
         </fileSet>
     </fileSets>

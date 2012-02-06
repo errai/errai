@@ -4,7 +4,7 @@
   <groupId>org.jboss.errai</groupId>
   <artifactId>errai-cdi-demos-tagcloud</artifactId>
   <packaging>war</packaging>
-  <name>Errai::CDI::Tag Cloud Demo</name>
+  <name>Errai::CDI::Demos::Tag Cloud</name>
 
   <parent>
     <groupId>org.jboss.errai</groupId>
