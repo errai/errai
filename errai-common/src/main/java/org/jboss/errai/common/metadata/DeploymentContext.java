@@ -15,13 +15,18 @@
  */
 package org.jboss.errai.common.metadata;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * DeploymentContext and {@link PackagingUtil}
@@ -67,9 +72,8 @@ public class DeploymentContext {
 
     List<URL> superAndSubContexts = new ArrayList<URL>();
 
-    Iterator it = subContexts.keySet().iterator();
-    while (it.hasNext()) {
-      File unzipped = subContexts.get(it.next());
+    for (Map.Entry<String, File> entry : subContexts.entrySet()) {
+      File unzipped = entry.getValue();
       try {
         superAndSubContexts.add(unzipped.toURI().toURL());
       }
