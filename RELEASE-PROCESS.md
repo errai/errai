@@ -21,10 +21,8 @@ after each step as we go.
 Release Steps
 -------------
 
-These steps need to executed for Errai, Errai-CDI and Errai-JAXRS:
-
 1. Run the test suite. Ensure all tests pass.
-   % mvn -PenableTests test
+   % mvn -Pintegration-test test
    
 1. Export docbook from confluence for /reference
    * https://docs.jboss.org/author/spaces/jboss_docbook_tools/exportandpostprocessConfigure.action?spaceKey=ERRAI&pageId=5833085

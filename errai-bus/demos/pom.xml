@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <name>Errai::Bus::Demos</name>
+    <artifactId>errai-bus-demos</artifactId>
+    <packaging>pom</packaging>
+
+    <!-- Parent -->
+    <parent>
+        <groupId>org.jboss.errai</groupId>
+        <artifactId>errai-parent</artifactId>
+        <version>2.0-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
+    <modules>
+        <module>asyncdemo</module>
+        <module>clientservice</module>
+        <module>helloworld</module>
+        <module>queryservice</module>
+        <module>serialization</module>
+        <module>rpcdemo</module>
+        <module>stockdemo</module>
+        <module>bus-stress-test</module>
+  </modules>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.jboss.errai</groupId>
+            <artifactId>errai-bus</artifactId>
+            <version>${version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-user</artifactId>
+            <!-- This should not be packaged with the Errai Distro.  There are no runtime dependencies on it
+                 and it breaks deployment on JBoss AS and Tomcat -->
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-dev</artifactId>
+            <!-- This should not be packaged with the Errai Distro.  There are no runtime dependencies on it
+                 and it breaks deployment on JBoss AS and Tomcat -->
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+            <classifier>sources</classifier>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>gwt-maven-plugin</artifactId>
+                <version>${gwt.maven}</version>
+                <configuration>
+                    <warSourceDirectory>war</warSourceDirectory>
+                    <hostedWebapp>war</hostedWebapp>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

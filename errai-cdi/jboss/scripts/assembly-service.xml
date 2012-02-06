@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<assembly xmlns="http://maven.apache.org/POM/4.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/assembly-1.1.0-SNAPSHOT.xsd">
+
+    <id>errai.cdi.service</id>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <baseDirectory>errai-cdi-jboss-${project.version}</baseDirectory>
+
+    <!-- Dependency Sets -->
+    <dependencySets>
+        <dependencySet>
+            <outputFileNameMapping>${artifact.artifactId}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <unpack>false</unpack>
+            <scope>test</scope>
+            <!--excludes></excludes-->
+            <outputDirectory>lib</outputDirectory>
+        </dependencySet>
+    </dependencySets>
+
+    <files>
+        <file>
+            <source>src/main/resources/META-INF/jboss-beans.xml</source>
+            <outputDirectory>META-INF</outputDirectory>
+            <filtered>false</filtered>
+        </file>
+        <file>
+            <source>src/main/resources/META-INF/jboss-structure.xml</source>
+            <outputDirectory>META-INF</outputDirectory>
+            <filtered>false</filtered>
+        </file>
+        <file>
+            <source>src/main/resources/ErraiService.properties</source>
+            <outputDirectory>/</outputDirectory>
+            <filtered>false</filtered>
+        </file>
+        <file>
+            <source>src/main/resources/login.config</source>
+            <outputDirectory>/</outputDirectory>
+            <filtered>false</filtered>
+        </file>
+        <file>
+            <source>src/main/resources/users.properties</source>
+            <outputDirectory>/</outputDirectory>
+            <filtered>false</filtered>
+        </file>
+        <file>
+            <source>src/main/resources/roles.properties</source>
+            <outputDirectory>/</outputDirectory>
+            <filtered>false</filtered>
+        </file>
+    </files>
+
+</assembly>

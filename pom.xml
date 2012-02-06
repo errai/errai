@@ -45,6 +45,9 @@
 			<name>Christian Sadilek</name>
 		</developer>
 		<developer>
+			<name>Jonathan Fuerth</name>
+		</developer>
+		<developer>
 			<name>Heiko Braun</name>
 		</developer>
 	</developers>
@@ -82,12 +85,14 @@
 		<module>errai-common</module>
 		<module>errai-ioc</module>
 		<module>errai-bus</module>
+        <module>errai-bus/demos</module>
 		<module>errai-tools</module>
-		<module>errai-bus-demos</module>
-		<module>jboss7-support</module>
 		<module>errai-codegen</module>
 		<module>errai-marshalling</module>
         <module>errai-js</module>
+        <module>errai-cdi</module>
+        <module>errai-jaxrs</module>
+        <module>jboss7-support</module>
     </modules>
 
 	<dependencyManagement>
@@ -365,7 +370,7 @@
 	<!-- Profiles -->
 	<profiles>
 		<profile>
-			<id>enableTests</id>
+			<id>integration-test</id>
 			<build>
 				<plugins>
 					<plugin>
@@ -398,15 +403,6 @@
 				<module>reference</module>
 				<module>quickstart</module>
 				<module>dist</module>
-			</modules>
-		</profile>
-
-		<profile>
-			<id>core-libs</id>
-			<modules>
-				<module>errai-common</module>
-				<module>errai-bus</module>
-				<module>errai-ioc</module>
 			</modules>
 		</profile>
 	</profiles>
