@@ -67,16 +67,16 @@ public class EventDispatcher implements MessageCallback {
       switch (CDICommands.valueOf(message.getCommandType())) {
         case CDIEvent:
           if (!"1".equals(LocalContext.get(message).getAttribute(String.class, CDI_EVENT_CHANNEL_OPEN))
-                  || !observedEvents.contains(message.get(String.class, CDIProtocol.TYPE))) {
+                  || !observedEvents.contains(message.get(String.class, CDIProtocol.BeanType))) {
             return;
           }
 
-          final Object o = message.get(Object.class, CDIProtocol.OBJECT_REF);
+          final Object o = message.get(Object.class, CDIProtocol.BeanReference);
           EventConversationContext.activate(o, CDIServerUtil.getSessionId(message));
           try {
 
             @SuppressWarnings("unchecked")
-            Set<String> qualifierNames = message.get(Set.class, CDIProtocol.QUALIFIERS);
+            Set<String> qualifierNames = message.get(Set.class, CDIProtocol.Qualifiers);
             List<Annotation> qualifiers = null;
             if (qualifierNames != null) {
               for (String qualifierName : qualifierNames) {

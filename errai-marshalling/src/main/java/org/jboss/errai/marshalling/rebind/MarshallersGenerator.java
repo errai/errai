@@ -73,39 +73,26 @@ public class MarshallersGenerator extends Generator {
   public String generate(final TreeLogger logger, final GeneratorContext context, final String typeName)
           throws UnableToCompleteException {
 
-    final Thread marshallGenThread = new Thread() {
-      @Override
-      public void run() {
-        try {
-          typeOracle = context.getTypeOracle();
-
-          JClassType classType = typeOracle.getType(typeName);
-          packageName = classType.getPackage().getName();
-          className = classType.getSimpleSourceName() + "Impl";
-
-          logger.log(TreeLogger.INFO, "Generating Marshallers Bootstrapper...");
-
-          // Generate class source code
-          generateMarshallerBootstrapper(logger, context);
-        }
-        catch (Throwable e) {
-          // record sendNowWith logger that Map generation threw an exception
-          e.printStackTrace();
-          logger.log(TreeLogger.ERROR, "Error generating marshallers", e);
-        }
-      }
-    };
-
-    marshallGenThread.start();
 
     try {
-      marshallGenThread.join();
+      typeOracle = context.getTypeOracle();
+
+      JClassType classType = typeOracle.getType(typeName);
+      packageName = classType.getPackage().getName();
+      className = classType.getSimpleSourceName() + "Impl";
+
+      logger.log(TreeLogger.INFO, "Generating Marshallers Bootstrapper...");
+
+      // Generate class source code
+      generateMarshallerBootstrapper(logger, context);
     }
-    catch (Exception e) {
+    catch (Throwable e) {
+      // record sendNowWith logger that Map generation threw an exception
       e.printStackTrace();
+      logger.log(TreeLogger.ERROR, "Error generating marshallers", e);
     }
 
-    // return the fully qualified name of the class generated
+   // return the fully qualified name of the class generated
     return packageName + "." + className;
   }
 
@@ -156,7 +143,8 @@ public class MarshallersGenerator extends Generator {
             logger.debug("   " + outputDirCdt + " exists!");
             generateServerMarshallers(outputDirCdt.getAbsolutePath(), serverSideClass);
             System.out.println("** deposited marshaller class in : " + outputDirCdt.getAbsolutePath());
-          } else {
+          }
+          else {
             logger.debug("   " + outputDirCdt + " does not exist");
           }
         }

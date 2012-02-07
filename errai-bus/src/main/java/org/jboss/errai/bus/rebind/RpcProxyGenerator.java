@@ -92,23 +92,6 @@ public class RpcProxyGenerator {
 
     BlockBuilder<?> methodBlock =
             classBuilder.publicMethod(method.getReturnType(), method.getName(), parms);
-//
-//    MessageBuilder.createMessage()
-//            .toSubject("foo")
-//            .command("comm")
-//            .with("Qualifiers", new Annotation[0])
-//            .with("MethodParms", new Object[0])
-//            .errorsHandledBy().repliesTo()
-//
-//
-//            method.getAnnotations();
-//
-//
-//    Stmt.invokeStatic(MessageBuilder.class, "createMessage")
-//            .invoke("toSubject", remote.getName())
-//            .invoke("command", RebindUtils.createCallSignature(method))
-//            .invoke("with", MessageParts.ErrorTo.name(), )
-
     methodBlock.append(
             Stmt
                     .if_(Bool.equals(Variable.get("errorCallback"), null))

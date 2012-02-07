@@ -29,6 +29,8 @@ import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.common.client.protocols.MessageParts;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The <tt>AbstractRemoteCallBuilder</tt> facilitates the building of a remote call. Ensures that the remote call is
@@ -63,32 +65,19 @@ public class DefaultRemoteCallBuilder {
     ((RPCStub) svc).setErrorCallback(errorCallback);
     return svc;
   }
-//
-//  public <T, R> T call(final RemoteCallback<R> callback, final ErrorCallback errorCallback, final Class<T> remoteService, final Annotation[] qualifiers) {
-//    T svc = proxyProvider.getRemoteProxy(remoteService);
-//    if (svc == null)
-//      throw new RuntimeException("No service definition for: " + remoteService.getName());
-//
-//    ((RPCStub) svc).setRemoteCallback(callback);
-//    ((RPCStub) svc).setErrorCallback(errorCallback);
-//    ((RPCStub) svc).setQualifiers(qualifiers);
-//    return svc;
-//  }
-//
-//
+
   /**
    * Only intended for use by generated code. Use
    * {@link #call(RemoteCallback, Class)} or
    * {@link #call(RemoteCallback, ErrorCallback, Class)} from handwritten code.
-   * <p>
+   * <p/>
    * Creates, implements and returns an instance of
    * <tt>RemoteCallEndpointDef</tt> and all applicable arguments, which should
    * be instantiated after this call to <tt>serviceName</tt>. The endpoint
    * allows a function from a service to be called directly, rather than waiting
    * for a response to a message.
    *
-   * @param serviceName
-   *          the service to call, and create a remote call endpoint for
+   * @param serviceName the service to call, and create a remote call endpoint for
    * @return the remote call endpoint.
    */
   public RemoteCallEndpointDef call(final String serviceName) {
@@ -101,17 +90,17 @@ public class DefaultRemoteCallBuilder {
         Integer id = null;
         if (remoteCallback != null) {
           final String replyTo = message.getSubject() + "." + message.getCommandType() +
-            ":RespondTo:" + (id = uniqueNumber());
+                  ":RespondTo:" + (id = uniqueNumber());
 
           if (remoteCallback != null) {
             bus.subscribe(replyTo,
-              new MessageCallback() {
-                @Override
-                public void callback(Message message) {
-                  bus.unsubscribeAll(replyTo);
-                  remoteCallback.callback(message.get(responseType, "MethodReply"));
-                }
-              }
+                    new MessageCallback() {
+                      @Override
+                      public void callback(Message message) {
+                        bus.unsubscribeAll(replyTo);
+                        remoteCallback.callback(message.get(responseType, "MethodReply"));
+                      }
+                    }
             );
             message.set(MessageParts.ReplyTo, replyTo);
           }
@@ -119,17 +108,17 @@ public class DefaultRemoteCallBuilder {
 
         if (message.getErrorCallback() != null) {
           final String errorTo = message.getSubject() + "." + message.getCommandType() +
-            ":Errors:" + ((id == null) ? uniqueNumber() : id);
+                  ":Errors:" + ((id == null) ? uniqueNumber() : id);
 
-            bus.subscribe(errorTo,
-              new MessageCallback() {
-                @Override
-                public void callback(Message m) {
-                  bus.unsubscribeAll(errorTo);
-                  message.getErrorCallback().error(message, m.get(Throwable.class, MessageParts.Throwable));
-                }
-              }
-            );
+          bus.subscribe(errorTo,
+                  new MessageCallback() {
+                    @Override
+                    public void callback(Message m) {
+                      bus.unsubscribeAll(errorTo);
+                      message.getErrorCallback().error(message, m.get(Throwable.class, MessageParts.Throwable));
+                    }
+                  }
+          );
           message.set(MessageParts.ErrorTo, errorTo);
         }
 
@@ -172,7 +161,14 @@ public class DefaultRemoteCallBuilder {
       public RemoteCallResponseDef endpoint(String endPointName, Annotation[] qualifiers, Object... args) {
         message.command(endPointName);
 
-        if (qualifiers != null) message.set("Qualifiers", qualifiers);
+        if (qualifiers != null) {
+          List<String> qualNames = new ArrayList<String>(qualifiers.length);
+          for (Annotation a : qualifiers) {
+            qualNames.add(a.annotationType().getName());
+          }
+
+          message.set("Qualifiers", qualNames);
+        }
         if (args != null) message.set("MethodParms", args);
 
         return respondDef;
@@ -197,8 +193,7 @@ public class DefaultRemoteCallBuilder {
    * that provides an alternative remoting mechanism, there is never a need to
    * call this method.
    *
-   * @param provider
-   *          The ProxyProvider that provides RPC proxies to message builders. Not null.
+   * @param provider The ProxyProvider that provides RPC proxies to message builders. Not null.
    */
   public static void setProxyFactory(ProxyProvider provider) {
     proxyProvider = Assert.notNull(provider);

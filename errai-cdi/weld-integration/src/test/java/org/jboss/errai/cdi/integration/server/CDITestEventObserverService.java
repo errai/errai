@@ -1,4 +1,4 @@
-package org.jboss.errai.cdi.event.server;
+package org.jboss.errai.cdi.integration.server;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -9,8 +9,8 @@ import javax.inject.Inject;
 import org.jboss.errai.cdi.client.qualifier.A;
 import org.jboss.errai.cdi.client.qualifier.B;
 import org.jboss.errai.cdi.client.qualifier.C;
-import org.jboss.errai.cdi.event.client.FinishEvent;
-import org.jboss.errai.cdi.event.client.ReceivedEvent;
+import org.jboss.errai.cdi.integration.client.FinishEvent;
+import org.jboss.errai.cdi.integration.client.ReceivedEvent;
 
 @ApplicationScoped
 public class CDITestEventObserverService {

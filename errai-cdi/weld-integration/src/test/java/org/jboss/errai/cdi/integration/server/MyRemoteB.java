@@ -13,8 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.enterprise.client.cdi;
 
-public enum CDIProtocol {
-  BeanType, Qualifiers, BeanReference
+package org.jboss.errai.cdi.integration.server;
+
+import org.jboss.errai.bus.server.annotations.Service;
+import org.jboss.errai.cdi.client.qualifier.B;
+import org.jboss.errai.cdi.integration.client.MyRemote;
+
+import javax.enterprise.context.ApplicationScoped;
+
+/**
+ * @author Mike Brock
+ */
+@B
+@Service
+@ApplicationScoped
+public class MyRemoteB implements MyRemote {
+  @Override
+  public String call(String callString) {
+    return callString + "B";
+  }
 }

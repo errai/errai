@@ -1,9 +1,9 @@
-package org.jboss.errai.cdi.event.client.test;
+package org.jboss.errai.cdi.integration.client.test;
 
 import java.util.List;
 import java.util.Map;
 
-import org.jboss.errai.cdi.event.client.EventObserverTestModule;
+import org.jboss.errai.cdi.integration.client.EventObserverTestModule;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 
 /**
@@ -15,7 +15,7 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
 
   @Override
   public String getModuleName() {
-    return "org.jboss.errai.cdi.event.EventObserverTestModule";
+    return "org.jboss.errai.cdi.integration.EventObserverTestModule";
   }
 
   public void testBusReadyEventObserver() {

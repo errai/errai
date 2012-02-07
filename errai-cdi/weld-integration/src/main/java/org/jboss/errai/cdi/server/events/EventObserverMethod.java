@@ -110,12 +110,12 @@ public class EventObserverMethod implements ObserverMethod {
 
     if (!qualifierForWire.isEmpty()) {
       MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
-              .with(CDIProtocol.TYPE, type.getName()).with(CDIProtocol.OBJECT_REF, event)
-              .with(CDIProtocol.QUALIFIERS, qualifierForWire).noErrorHandling().sendNowWith(bus);
+              .with(CDIProtocol.BeanType, type.getName()).with(CDIProtocol.BeanReference, event)
+              .with(CDIProtocol.Qualifiers, qualifierForWire).noErrorHandling().sendNowWith(bus);
     }
     else {
       MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
-              .with(CDIProtocol.TYPE, type.getName()).with(CDIProtocol.OBJECT_REF, event).noErrorHandling()
+              .with(CDIProtocol.BeanType, type.getName()).with(CDIProtocol.BeanReference, event).noErrorHandling()
               .sendNowWith(bus);
     }
   }
