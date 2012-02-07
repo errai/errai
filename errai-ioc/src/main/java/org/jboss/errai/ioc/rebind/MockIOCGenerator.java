@@ -28,6 +28,7 @@ import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 
 import org.jboss.errai.common.client.framework.Assert;
+import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCBootstrapGenerator;
 import org.jboss.errai.marshalling.server.util.ServerMarshallUtil;
@@ -70,7 +71,7 @@ public class MockIOCGenerator {
 
     try {
       File directory =
-              new File(System.getProperty("java.io.tmpdir") + "/out/classes/" + packageName.replaceAll("\\.", "/"));
+              new File(RebindUtils.getTempDirectory() + "/ioc/classes/" + packageName.replaceAll("\\.", "/"));
 
       File sourceFile = new File(directory.getAbsolutePath() + "/" + className + ".java");
       File outFile = new File(directory.getAbsolutePath() + "/" + className + ".class");

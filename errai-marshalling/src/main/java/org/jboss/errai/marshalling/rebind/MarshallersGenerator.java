@@ -118,8 +118,7 @@ public class MarshallersGenerator extends Generator {
 
       if (junit) {
         Random rand = new Random(System.nanoTime());
-        String tmpLocation = new File(System.getProperty("java.io.tmpdir") + "/" + rand.nextInt(Integer.MAX_VALUE)
-                + "/errai.marshalling/out/").getAbsolutePath();
+        String tmpLocation = new File(RebindUtils.getTempDirectory() + "/errai.marshalling/out/").getAbsolutePath();
         System.out.println("*** using temporary path for JUnit Shell: " + tmpLocation + " ***");
 
         String toLoad = generateServerMarshallers(tmpLocation, serverSideClass);
@@ -141,7 +140,7 @@ public class MarshallersGenerator extends Generator {
         for (String candidate : candidateOutputDirectories) {
           outputDirCdt = new File(candidate);
           if (outputDirCdt.exists()) {
-            logger.debug("   " + outputDirCdt + " exists!");
+            logger.info("   found '" + outputDirCdt + "' output directory");
             generateServerMarshallers(outputDirCdt.getAbsolutePath(), serverSideClass);
             System.out.println("** deposited marshaller class in : " + outputDirCdt.getAbsolutePath());
           }
@@ -150,6 +149,9 @@ public class MarshallersGenerator extends Generator {
           }
         }
       }
+    }
+    else {
+      logger.info("not emitting server marshaller class");
     }
 
 

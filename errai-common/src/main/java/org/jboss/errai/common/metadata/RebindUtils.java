@@ -85,7 +85,29 @@ public class RebindUtils {
     }
   }
 
+  private static volatile String _tempDirectory;
+
+  public static String getTempDirectory() {
+    if (_tempDirectory != null) {
+      return _tempDirectory;
+    }
+
+    File file = new File(System.getProperty("java.io.tmpdir") + "/errai/" + getClasspathHash() + "/");
+
+    if (!file.exists()) {
+      file.mkdirs();
+    }
+
+    return file.getAbsolutePath();
+  }
+
+  private static volatile String _classpathHashCache;
+
   public static String getClasspathHash() {
+    if (_hasClasspathChanged != null) {
+      return _classpathHashCache;
+    }
+
     try {
       final MessageDigest md = MessageDigest.getInstance("SHA-256");
       final String classPath = System.getProperty("java.class.path");
@@ -103,7 +125,7 @@ public class RebindUtils {
         });
       }
 
-      return hashToHexString(md.digest());
+      return _classpathHashCache = hashToHexString(md.digest());
     }
     catch (Exception e) {
       throw new RuntimeException("failed to generate hash for classpath fingerprint", e);
@@ -229,7 +251,7 @@ public class RebindUtils {
 
     return buf.toString();
   }
-  
+
   public static String packageNameToDirName(String pkg) {
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < pkg.length(); i++) {
@@ -273,7 +295,7 @@ public class RebindUtils {
       // for tests .JUnit is appended to the module name by GWT
       String moduleName = moduleDef.getCanonicalName().replace(".JUnit", "");
       String modulePackage = moduleName.substring(0, moduleName.lastIndexOf('.'));
-      
+
       for (String packageName : findTranslatablePackages(context)) {
         if (packageName != null && packageName.startsWith(modulePackage)) {
           packages.add(packageName);
@@ -283,10 +305,10 @@ public class RebindUtils {
     catch (Exception e) {
       throw new RuntimeException("could not determine module package", e);
     }
-  
+
     return packages;
   }
-  
+
   /**
    * Returns a list of all translatable packages accessible to the module under compilation (including inherited modules).
    */
@@ -294,9 +316,9 @@ public class RebindUtils {
     List<String> packages = new ArrayList<String>();
     JPackage[] jpackages = context.getTypeOracle().getPackages();
     for (JPackage p : jpackages) {
-        packages.add(p.getName());
+      packages.add(p.getName());
     }
-    
+
     return packages;
   }
 }

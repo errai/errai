@@ -35,6 +35,7 @@ import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 
 import org.jboss.errai.common.metadata.MetaDataScanner;
+import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.marshalling.client.api.MarshallerFactory;
 import org.jboss.errai.marshalling.rebind.MarshallerGeneratorFactory;
 import org.jboss.errai.marshalling.rebind.MarshallerOuputTarget;
@@ -123,7 +124,7 @@ public abstract class ServerMarshallUtil {
             .generate(packageName, className);
 
     File directory =
-            new File(System.getProperty("java.io.tmpdir") + "/errai.gen/classes/" + packageName.replaceAll("\\.", "/"));
+            new File(RebindUtils.getTempDirectory() + "/errai.gen/classes/" + packageName.replaceAll("\\.", "/"));
 
     File sourceFile = new File(directory.getAbsolutePath() + File.separator + className + ".java");
 

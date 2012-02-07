@@ -17,6 +17,7 @@
 package org.jboss.errai.bus.server.util;
 
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
+import org.jboss.errai.common.metadata.RebindUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -91,7 +92,7 @@ public class ConfigUtil extends AbstractConfigBase {
     for (File f : scanAreas.values()) {
       f.delete();
     }
-    new File(System.getProperty("java.io.tmpdir") + "/" + tmpUUID).delete();
+    new File(RebindUtils.getTempDirectory() + "/" + tmpUUID).delete();
     scanAreas = null;
     scanCache = null;
   }

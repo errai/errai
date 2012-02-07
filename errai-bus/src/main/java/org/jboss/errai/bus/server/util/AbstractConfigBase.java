@@ -15,6 +15,7 @@
  */
 package org.jboss.errai.bus.server.util;
 
+import org.jboss.errai.common.metadata.RebindUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -234,7 +235,7 @@ public abstract class AbstractConfigBase {
 
   protected static File expandZipEntry(ZipInputStream stream, ZipEntry entry) {
 
-    String tmpDir = System.getProperty("java.io.tmpdir") + "/" + tmpUUID;
+    String tmpDir = RebindUtils.getTempDirectory() + "/" + tmpUUID;
     int idx = entry.getName().lastIndexOf('/');
     String tmpFileName = tmpDir + "/" + entry.getName().substring(idx == -1 ? 0 : idx);
     try {
