@@ -63,16 +63,13 @@ public class DefaultRemoteCallBuilder {
   }
 
   /**
-   * Only intended for use by generated code. Use
-   * {@link #call(RemoteCallback, Class)} or
+   * Only intended for use by generated code. Use {@link #call(RemoteCallback, Class)} or
    * {@link #call(RemoteCallback, ErrorCallback, Class)} from handwritten code.
    * <p>
-   * Creates, implements and returns an instance of
-   * <tt>RemoteCallEndpointDef</tt> and all applicable arguments, which should
-   * be instantiated after this call to <tt>serviceName</tt>. The endpoint
-   * allows a function from a service to be called directly, rather than waiting
-   * for a response to a message.
-   *
+   * Creates, implements and returns an instance of <tt>RemoteCallEndpointDef</tt> and all applicable arguments, which
+   * should be instantiated after this call to <tt>serviceName</tt>. The endpoint allows a function from a service to be
+   * called directly, rather than waiting for a response to a message.
+   * 
    * @param serviceName
    *          the service to call, and create a remote call endpoint for
    * @return the remote call endpoint.
@@ -85,37 +82,42 @@ public class DefaultRemoteCallBuilder {
       @Override
       public void sendNowWith(final MessageBus bus) {
         Integer id = null;
-        if (remoteCallback != null) {
-          final String replyTo = message.getSubject() + "." + message.getCommandType() +
-            ":RespondTo:" + (id = uniqueNumber());
 
-          if (remoteCallback != null) {
-            bus.subscribe(replyTo,
+        final String replyTo =
+            message.getSubject() + "." + message.getCommandType() + ":RespondTo:" + (id = uniqueNumber());
+
+        final String errorTo =
+            message.getSubject() + "." + message.getCommandType() + ":Errors:" + ((id == null) ? uniqueNumber() : id);
+
+        if (remoteCallback != null) {
+          bus.subscribe(replyTo,
               new MessageCallback() {
                 @Override
                 public void callback(Message message) {
                   bus.unsubscribeAll(replyTo);
+                  if (DefaultRemoteCallBuilder.this.message.getErrorCallback() != null) {
+                    bus.unsubscribeAll(errorTo);
+                  }
                   remoteCallback.callback(message.get(responseType, "MethodReply"));
                 }
               }
-            );
-            message.set(MessageParts.ReplyTo, replyTo);
-          }
+          );
+          message.set(MessageParts.ReplyTo, replyTo);
         }
 
         if (message.getErrorCallback() != null) {
-          final String errorTo = message.getSubject() + "." + message.getCommandType() +
-            ":Errors:" + ((id == null) ? uniqueNumber() : id);
-
-            bus.subscribe(errorTo,
+          bus.subscribe(errorTo,
               new MessageCallback() {
                 @Override
                 public void callback(Message m) {
                   bus.unsubscribeAll(errorTo);
+                  if (remoteCallback != null) {
+                    bus.unsubscribeAll(replyTo);
+                  }
                   message.getErrorCallback().error(message, m.get(Throwable.class, MessageParts.Throwable));
                 }
               }
-            );
+          );
           message.set(MessageParts.ErrorTo, errorTo);
         }
 
@@ -157,7 +159,8 @@ public class DefaultRemoteCallBuilder {
       @Override
       public RemoteCallResponseDef endpoint(String endPointName, Object... args) {
         message.command(endPointName);
-        if (args != null) message.set("MethodParms", args);
+        if (args != null)
+          message.set("MethodParms", args);
         return respondDef;
       }
     };
@@ -168,11 +171,10 @@ public class DefaultRemoteCallBuilder {
   }
 
   /**
-   * Sets the proxy provider factory that is used by MessageBuilder and friends
-   * for creating remote proxies. Unless you are creating an Errai extension
-   * that provides an alternative remoting mechanism, there is never a need to
-   * call this method.
-   *
+   * Sets the proxy provider factory that is used by MessageBuilder and friends for creating remote proxies. Unless you
+   * are creating an Errai extension that provides an alternative remoting mechanism, there is never a need to call this
+   * method.
+   * 
    * @param provider
    *          The ProxyProvider that provides RPC proxies to message builders. Not null.
    */
