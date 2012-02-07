@@ -101,7 +101,7 @@ public class MarshallerGeneratorFactory {
       log.info("generating marshalling class...");
       long st = System.currentTimeMillis();
       gen = _generate(packageName, clazzName);
-      log.info("generated marshalling class in " + (System.currentTimeMillis() - st) + "ms");
+      log.info("generated marshalling class in " + (System.currentTimeMillis() - st) + "ms.");
 
       if (Boolean.getBoolean("errai.marshalling.printOut")) {
         System.out.println(gen);

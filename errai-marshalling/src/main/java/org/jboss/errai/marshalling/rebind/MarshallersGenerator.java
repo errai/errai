@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Random;
 
+import com.google.gwt.core.ext.BadPropertyValueException;
+import com.google.gwt.core.ext.ConfigurationProperty;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.rebind.EnvironmentUtil;
 import org.jboss.errai.marshalling.server.util.ServerMarshallUtil;
@@ -58,6 +60,49 @@ public class MarshallersGenerator extends Generator {
           {"target/classes/", "war/WEB-INF/classes/", "web/WEB-INF/classes/", "target/war/WEB-INF/classes/",
                   "WEB-INF/classes/", "src/main/webapp/WEB-INF/classes/"};
 
+  private static final DiscoveryStrategy[] rootDiscoveryStrategies;
+
+  static {
+    rootDiscoveryStrategies = new DiscoveryStrategy[]{
+            new DiscoveryStrategy() {
+              @Override
+              public String getCandidate(GeneratorContext context, DiscoveryVeto veto) {
+                try {
+                  ConfigurationProperty prop = context.getPropertyOracle().getConfigurationProperty("errai-module-path-append");
+
+                  if (prop.getValues().isEmpty()) {
+                    logger.warn("property in gwt.xml file 'errai-module-path-prepend' is undefined");
+                    veto.veto();
+                    return null;
+                  }
+
+                  return prop.getValues().get(0);
+
+                }
+                catch (BadPropertyValueException e) {
+                  veto.veto();
+                  return null;
+                }
+
+              }
+            } ,
+            new DiscoveryStrategy() {
+              @Override
+              public String getCandidate(GeneratorContext context, DiscoveryVeto veto) {
+                // try the CWD
+                return new File("").getAbsolutePath();
+              }
+            }
+            ,
+            new DiscoveryStrategy() {
+              @Override
+              public String getCandidate(GeneratorContext context, DiscoveryVeto veto) {
+                return RebindUtils.guessWorkingDirectoryForModule(context);
+              }
+            }
+    };
+  }
+
   /**
    * Simple name of class to be generated
    */
@@ -93,28 +138,28 @@ public class MarshallersGenerator extends Generator {
       logger.log(TreeLogger.ERROR, "Error generating marshallers", e);
     }
 
-   // return the fully qualified name of the class generated
+    // return the fully qualified name of the class generated
     return packageName + "." + className;
   }
 
   public void generateMarshallerBootstrapper(TreeLogger logger, GeneratorContext context) {
     PrintWriter printWriter = context.tryCreate(logger, packageName, className);
     if (printWriter == null) return;
-    printWriter.write(_generate());
+    printWriter.write(_generate(context));
     context.commit(logger, printWriter);
   }
 
-  private String _generate() {
+  private String _generate(GeneratorContext context) {
     boolean junit = EnvironmentUtil.isGWTJUnitTest();
 
     if (junit) {
       System.out.println("******** running inside JUnit! ********");
     }
 
+
     if (SERVER_MARSHALLER_OUTPUT_ENABLED) {
       String serverSideClass = MarshallerGeneratorFactory.getFor(MarshallerOuputTarget.Java)
               .generate(SERVER_MARSHALLER_PACKAGE_NAME, SERVER_MARSHALLER_CLASS_NAME);
-
 
       if (junit) {
         Random rand = new Random(System.nanoTime());
@@ -133,19 +178,42 @@ public class MarshallersGenerator extends Generator {
       }
       else if (SERVER_MARSHALLER_OUTPUT_DIR != null) {
         generateServerMarshallers(SERVER_MARSHALLER_OUTPUT_DIR, serverSideClass);
+        logger.info("** deposited marshaller class in : " + new File(SERVER_MARSHALLER_OUTPUT_DIR).getAbsolutePath());
       }
       else {
         logger.debug("Searching candidate output directories for generated marshallers");
         File outputDirCdt;
-        for (String candidate : candidateOutputDirectories) {
-          outputDirCdt = new File(candidate);
-          if (outputDirCdt.exists()) {
-            logger.info("   found '" + outputDirCdt + "' output directory");
-            generateServerMarshallers(outputDirCdt.getAbsolutePath(), serverSideClass);
-            System.out.println("** deposited marshaller class in : " + outputDirCdt.getAbsolutePath());
-          }
-          else {
-            logger.debug("   " + outputDirCdt + " does not exist");
+
+        Strategies:
+        for (DiscoveryStrategy strategy : rootDiscoveryStrategies) {
+          for (String candidate : candidateOutputDirectories) {
+            class DiscoveryVetoImpl implements DiscoveryVeto {
+              boolean vetoed = false;
+
+              @Override
+              public void veto() {
+                this.vetoed = true;
+              }
+            }
+
+            DiscoveryVetoImpl discoveryVeto = new DiscoveryVetoImpl();
+
+            String rootPath = strategy.getCandidate(context, discoveryVeto);
+
+            if (discoveryVeto.vetoed) {
+              continue Strategies;
+            }
+
+            outputDirCdt = new File(rootPath + candidate);
+            if (outputDirCdt.exists()) {
+              logger.info("   found '" + outputDirCdt + "' output directory");
+              generateServerMarshallers(outputDirCdt.getAbsolutePath(), serverSideClass);
+              logger.info("** deposited marshaller class in : " + outputDirCdt.getAbsolutePath());
+              break Strategies;
+            }
+            else {
+              logger.debug("   " + outputDirCdt + " does not exist");
+            }
           }
         }
       }
@@ -157,6 +225,15 @@ public class MarshallersGenerator extends Generator {
 
     return MarshallerGeneratorFactory.getFor(MarshallerOuputTarget.GWT).generate(packageName, className);
   }
+
+  interface DiscoveryVeto {
+    public void veto();
+  }
+
+  interface DiscoveryStrategy {
+    public String getCandidate(GeneratorContext context, DiscoveryVeto veto);
+  }
+
 
   private String generateServerMarshallers(String dir, String serverSideClass) {
     File outputDir = new File(dir + File.separator +

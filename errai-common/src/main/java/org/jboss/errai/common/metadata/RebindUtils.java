@@ -16,6 +16,7 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,6 +24,7 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.jboss.errai.common.rebind.EnvironmentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +44,7 @@ public class RebindUtils {
   private static String hashSeed = "errai20-a";
 
   private final static Pattern erraiCommonJarFinder = Pattern.compile(".*/errai\\-common.*\\.jar!/META-INF/MANIFEST.MF");
+
 
   static {
     try {
@@ -279,6 +282,59 @@ public class RebindUtils {
       visitor.visit(f);
     }
   }
+
+  public static String guessWorkingDirectoryForModule(final GeneratorContext context) {
+    if (context == null) {
+      logger.warn("could not determine module location, using CWD (no context)");
+      return new File("").getAbsolutePath() + "/";
+    }
+    try {
+      List<URL> configUrls = MetaDataScanner.getConfigUrls();
+
+      Set<String> candidateRoots = new HashSet<String>();
+      String workingDir = new File("").getAbsolutePath();
+
+      for (URL url : configUrls) {
+        String filePath = url.getFile();
+        if (filePath.startsWith(workingDir) && filePath.indexOf('!') == -1) {
+          int start = workingDir.length() + 1;
+          int firstSubDir = -1;
+          for (int i = start; i < filePath.length(); i++) {
+            if (filePath.charAt(i) == File.separatorChar) {
+              firstSubDir = i;
+              break;
+            }
+          }
+
+          if (firstSubDir != -1) {
+            String candidate = workingDir + "/" + filePath.substring(start, firstSubDir) + "/";
+            candidateRoots.add(candidate);
+          }
+        }
+      }
+
+
+      if (candidateRoots.isEmpty()) {
+        logger.warn("could not determine module location, using CWD");
+        return new File("").getAbsolutePath() + "/";
+      }
+      else if (candidateRoots.size() != 1) {
+        for (String res : candidateRoots) {
+          logger.warn(" Multiple Possible Roots for Project -> " + res);
+        }
+
+        throw new RuntimeException("ambiguous module locations for GWT module (specify path property for module)");
+      }
+      else {
+        return candidateRoots.iterator().next();
+      }
+    }
+    catch (Exception e) {
+      throw new RuntimeException("could not determine module package", e);
+
+    }
+  }
+
 
   /**
    * Returns the list of translatable packages in the module that caused the generator to run (the module under compilation).
