@@ -48,14 +48,14 @@ public class ConversationalEventObserverMethod extends EventObserverMethod {
       if (!qualifierForWire.isEmpty()) {
         MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
                 .with(MessageParts.SessionID.name(), ctx.getSession())
-                .with(CDIProtocol.TYPE, type.getName()).with(CDIProtocol.QUALIFIERS, qualifierForWire)
-                .with(CDIProtocol.OBJECT_REF, event)
+                .with(CDIProtocol.BeanType, type.getName()).with(CDIProtocol.Qualifiers, qualifierForWire)
+                .with(CDIProtocol.BeanReference, event)
                 .flag(RoutingFlag.NonGlobalRouting).noErrorHandling().sendNowWith(bus);
       }
       else {
         MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
                 .with(MessageParts.SessionID.name(), ctx.getSession())
-                .with(CDIProtocol.TYPE, type.getName()).with(CDIProtocol.OBJECT_REF, event)
+                .with(CDIProtocol.BeanType, type.getName()).with(CDIProtocol.BeanReference, event)
                 .flag(RoutingFlag.NonGlobalRouting).noErrorHandling()
                 .sendNowWith(bus);
       }

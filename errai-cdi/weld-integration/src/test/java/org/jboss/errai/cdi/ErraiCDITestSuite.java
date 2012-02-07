@@ -1,7 +1,7 @@
 package org.jboss.errai.cdi;
 
-import org.jboss.errai.cdi.event.client.test.EventObserverIntegrationTest;
-import org.jboss.errai.cdi.event.client.test.EventProducerIntegrationTest;
+import org.jboss.errai.cdi.integration.client.test.EventObserverIntegrationTest;
+import org.jboss.errai.cdi.integration.client.test.EventProducerIntegrationTest;
 import org.jboss.errai.cdi.invalid.producer.client.test.InvalidProducerIntegrationTest;
 import org.jboss.errai.cdi.producer.client.test.ProducerIntegrationTest;
 import org.junit.runner.RunWith;

@@ -1,9 +1,9 @@
-package org.jboss.errai.cdi.event.client.test;
+package org.jboss.errai.cdi.integration.client.test;
 
 import java.util.List;
 import java.util.Map;
 
-import org.jboss.errai.cdi.event.client.EventProducerTestModule;
+import org.jboss.errai.cdi.integration.client.EventProducerTestModule;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 
 /**
@@ -15,7 +15,7 @@ public class EventProducerIntegrationTest extends AbstractEventIntegrationTest {
 
   @Override
   public String getModuleName() {
-    return "org.jboss.errai.cdi.event.EventProducerTestModule";
+    return "org.jboss.errai.cdi.integration.EventProducerTestModule";
   }
 
   @Override

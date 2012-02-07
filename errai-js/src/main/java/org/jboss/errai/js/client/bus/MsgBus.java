@@ -24,6 +24,7 @@ import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.json.JSONUtilCli;
 import org.jboss.errai.js.client.bus.marshall.MsgTools;
+import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 import org.timepedia.exporter.client.Export;
 import org.timepedia.exporter.client.ExportPackage;
 import org.timepedia.exporter.client.Exportable;
@@ -49,7 +50,7 @@ public class MsgBus implements Exportable {
   }
 
   public void automarshal(boolean auto) {
-    JSONUtilCli.setAutoDemarshall(auto);
+    MarshallerFramework.setAutomarshal(auto);
   }
 
   private static final class JsFunctionMessageCallback implements MessageCallback {

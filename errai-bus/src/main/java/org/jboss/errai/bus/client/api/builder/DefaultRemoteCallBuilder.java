@@ -28,6 +28,10 @@ import org.jboss.errai.bus.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.common.client.protocols.MessageParts;
 
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * The <tt>AbstractRemoteCallBuilder</tt> facilitates the building of a remote call. Ensures that the remote call is
  * constructed properly
@@ -153,6 +157,23 @@ public class DefaultRemoteCallBuilder {
       @Override
       public RemoteCallResponseDef endpoint(String endPointName) {
         message.command(endPointName);
+        return respondDef;
+      }
+
+      @Override
+      public RemoteCallResponseDef endpoint(String endPointName, Annotation[] qualifiers, Object... args) {
+        message.command(endPointName);
+
+        if (qualifiers != null) {
+          List<String> qualNames = new ArrayList<String>(qualifiers.length);
+          for (Annotation a : qualifiers) {
+            qualNames.add(a.annotationType().getName());
+          }
+
+          message.set("Qualifiers", qualNames);
+        }
+        if (args != null) message.set("MethodParms", args);
+
         return respondDef;
       }
 

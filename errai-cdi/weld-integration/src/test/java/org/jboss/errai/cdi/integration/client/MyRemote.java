@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ *  
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.framework;
+package org.jboss.errai.cdi.integration.client;
 
-import org.jboss.errai.bus.client.api.ErrorCallback;
-import org.jboss.errai.bus.client.api.RemoteCallback;
+import org.jboss.errai.bus.server.annotations.Remote;
 
-import java.lang.annotation.Annotation;
-
-public interface RPCStub {
-  public void setRemoteCallback(RemoteCallback callback);
-
-  public void setErrorCallback(ErrorCallback callback);
-
-  public void setQualifiers(Annotation[] annotations);
+/**
+ * @author Mike Brock
+ */
+@Remote
+public interface MyRemote {
+  public String call(String callString);
 }

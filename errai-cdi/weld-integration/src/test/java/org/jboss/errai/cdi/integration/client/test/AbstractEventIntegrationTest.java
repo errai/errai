@@ -1,4 +1,4 @@
-package org.jboss.errai.cdi.event.client.test;
+package org.jboss.errai.cdi.integration.client.test;
 
 import java.util.Arrays;
 import java.util.HashMap;

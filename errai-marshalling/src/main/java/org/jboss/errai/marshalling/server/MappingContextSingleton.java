@@ -42,6 +42,7 @@ import org.jboss.errai.marshalling.server.marshallers.DefaultArrayMarshaller;
 import org.jboss.errai.marshalling.server.marshallers.DefaultEnumMarshaller;
 import org.jboss.errai.marshalling.server.util.ServerMarshallUtil;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -49,7 +50,6 @@ import java.util.Set;
  */
 public class MappingContextSingleton {
   private static final ServerMappingContext context;
-  // private static final MarshallerFactory marshallerFactory;
 
   static {
     ParserFactory.registerParser(
@@ -62,13 +62,17 @@ public class MappingContextSingleton {
 
     ServerMappingContext sContext;
     try {
-      sContext = loadPrecompiledMarshallers();
+      if (Boolean.getBoolean("errai.marshalling.no_ss_codegen")) {
+        sContext = loadDynamicMarshallers();
+      }
+      else {
+        sContext = loadPrecompiledMarshallers();
+      }
     }
     catch (Throwable t) {
       sContext = loadDynamicMarshallers();
     }
 
-//    sContext = loadDynamicMarshallers();
     context = sContext;
   }
 
@@ -211,11 +215,6 @@ public class MappingContextSingleton {
           if (exposed.isAnnotationPresent(Portable.class)) {
             Portable p = exposed.getAnnotation(Portable.class);
 
-//            MappingDefinition def = factory.getDefinition(exposed);
-//            def.setMarshallerInstance(new DefaultDefinitionMarshaller(def));
-
-
-
             if (!p.aliasOf().equals(Object.class)) {
               if (!factory.hasDefinition(p.aliasOf())) {
                 throw new RuntimeException("cannot alias " + exposed.getName() + " to unmapped type: "
@@ -250,6 +249,15 @@ public class MappingContextSingleton {
             }
           }
         }
+        
+        for (Map.Entry<String, String> entry : factory.getMappingAliases().entrySet()) {
+          MappingDefinition def = factory.getDefinition(entry.getValue());
+          MappingDefinition aliasDef = new MappingDefinition(MetaClassFactory.get(entry.getKey()));
+          aliasDef.setMarshallerInstance(def.getMarshallerInstance());
+
+          factory.addDefinition(aliasDef);
+        }
+
       }
 
       @Override

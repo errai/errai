@@ -46,7 +46,7 @@ public class CDI {
     ErraiBus.get().subscribe("cdi.event:" + type.getName(), // by convention
             new MessageCallback() {
               public void callback(Message message) {
-                Object response = message.get(type, CDIProtocol.OBJECT_REF);
+                Object response = message.get(type, CDIProtocol.BeanReference);
                 handler.handleEvent(response);
               }
             });
@@ -92,12 +92,12 @@ public class CDI {
     if (ErraiBus.get().isSubscribed(subject)) {
       if (qualifiersPart != null && !qualifiersPart.isEmpty()) {
         MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
-                .with(CDIProtocol.TYPE, payload.getClass().getName()).with(CDIProtocol.OBJECT_REF, payload)
-                .with(CDIProtocol.QUALIFIERS, qualifiersPart).noErrorHandling().sendNowWith(ErraiBus.get());
+                .with(CDIProtocol.BeanType, payload.getClass().getName()).with(CDIProtocol.BeanReference, payload)
+                .with(CDIProtocol.Qualifiers, qualifiersPart).noErrorHandling().sendNowWith(ErraiBus.get());
       }
       else {
         MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
-                .with(CDIProtocol.TYPE, payload.getClass().getName()).with(CDIProtocol.OBJECT_REF, payload)
+                .with(CDIProtocol.BeanType, payload.getClass().getName()).with(CDIProtocol.BeanReference, payload)
                 .noErrorHandling().sendNowWith(ErraiBus.get());
       }
     }
@@ -105,12 +105,12 @@ public class CDI {
     if (remoteEvents.contains(payload.getClass().getName())) {
       if (qualifiersPart != null && !qualifiersPart.isEmpty()) {
         MessageBuilder.createMessage().toSubject(DISPATCHER_SUBJECT).command(CDICommands.CDIEvent)
-                .with(CDIProtocol.TYPE, payload.getClass().getName()).with(CDIProtocol.OBJECT_REF, payload)
-                .with(CDIProtocol.QUALIFIERS, qualifiersPart).noErrorHandling().sendNowWith(ErraiBus.get());
+                .with(CDIProtocol.BeanType, payload.getClass().getName()).with(CDIProtocol.BeanReference, payload)
+                .with(CDIProtocol.Qualifiers, qualifiersPart).noErrorHandling().sendNowWith(ErraiBus.get());
       }
       else {
         MessageBuilder.createMessage().toSubject(DISPATCHER_SUBJECT).command(CDICommands.CDIEvent)
-                .with(CDIProtocol.TYPE, payload.getClass().getName()).with(CDIProtocol.OBJECT_REF, payload)
+                .with(CDIProtocol.BeanType, payload.getClass().getName()).with(CDIProtocol.BeanReference, payload)
                 .noErrorHandling().sendNowWith(ErraiBus.get());
       }
     }

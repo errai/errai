@@ -15,43 +15,8 @@
  */
 package org.jboss.errai.cdi.server;
 
-import static java.util.ResourceBundle.getBundle;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.UUID;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Default;
-import javax.enterprise.inject.spi.AfterBeanDiscovery;
-import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AnnotatedType;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.BeforeBeanDiscovery;
-import javax.enterprise.inject.spi.Extension;
-import javax.enterprise.inject.spi.ProcessAnnotatedType;
-import javax.enterprise.inject.spi.ProcessObserverMethod;
-import javax.inject.Inject;
-import javax.inject.Qualifier;
-
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.builder.DefaultRemoteCallBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.ProxyProvider;
@@ -79,12 +44,46 @@ import org.jboss.errai.common.client.api.annotations.ExposeEntity;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.common.client.types.TypeHandlerFactory;
+import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.enterprise.client.cdi.api.Conversational;
 import org.jboss.errai.ioc.client.api.Sender;
 import org.jboss.weld.manager.BeanManagerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Default;
+import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.BeforeBeanDiscovery;
+import javax.enterprise.inject.spi.Extension;
+import javax.enterprise.inject.spi.ProcessAnnotatedType;
+import javax.enterprise.inject.spi.ProcessObserverMethod;
+import javax.inject.Inject;
+import javax.inject.Qualifier;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.UUID;
+
+import static java.util.ResourceBundle.getBundle;
 
 
 /**
@@ -108,8 +107,9 @@ public class CDIExtensionPoints implements Extension {
   private Set<EventConsumer> eventConsumers = new LinkedHashSet<EventConsumer>();
   private Set<MessageSender> messageSenders = new LinkedHashSet<MessageSender>();
 
-  // private List<ObserverEndpoint> observerEndpoints = new ArrayList<ObserverEndpoint>();
   private Map<String, Annotation> eventQualifiers = new HashMap<String, Annotation>();
+  private Map<String, Annotation> beanQualifiers = new HashMap<String, Annotation>();
+
   private Set<String> observableEvents = new HashSet<String>();
 
   private static final Set<String> vetoClasses;
@@ -170,10 +170,16 @@ public class CDIExtensionPoints implements Extension {
    * Register managed beans as Errai services
    *
    * @param event -
-   * @param <T> -
+   * @param <T>   -
    */
   public <T> void observeResources(@Observes ProcessAnnotatedType<T> event) {
     final AnnotatedType<T> type = event.getAnnotatedType();
+
+    for (Annotation a : type.getJavaClass().getAnnotations()) {
+      if (a.annotationType().isAnnotationPresent(Qualifier.class)) {
+        beanQualifiers.put(a.annotationType().getName(), a);
+      }
+    }
 
     // services
     if (type.isAnnotationPresent(Service.class)) {
@@ -277,7 +283,7 @@ public class CDIExtensionPoints implements Extension {
           }
 
           if (isExposedEntityType(sendType)) {
-           messageSenders.add(new MessageSender(f.getGenericType(), qualifiers));
+            messageSenders.add(new MessageSender(f.getGenericType(), qualifiers));
           }
         }
       }
@@ -353,7 +359,7 @@ public class CDIExtensionPoints implements Extension {
     // Support to inject the request dispatcher.
     abd.addBean(new RequestDispatcherMetaData(bm, service.getDispatcher()));
 
- //   abd.addBean(new SenderBean((BeanManagerImpl) bm, service.getDispatcher()));
+    //   abd.addBean(new SenderBean((BeanManagerImpl) bm, service.getDispatcher()));
 
     // Register observers
     abd.addObserverMethod(new ShutdownEventObserver(managedTypes, bus, uuid));
@@ -366,7 +372,6 @@ public class CDIExtensionPoints implements Extension {
   }
 
   private void subscribeServices(final BeanManager beanManager, final MessageBus bus) {
-//    final BeanManagerImpl weldBeanManager = (BeanManagerImpl) beanManager;
 
     for (Map.Entry<AnnotatedType, List<AnnotatedMethod>> entry : managedTypes.getServiceMethods().entrySet()) {
       final Class<?> type = entry.getKey().getJavaClass();
@@ -381,9 +386,6 @@ public class CDIExtensionPoints implements Extension {
 
           @Override
           public void callback(Message message) {
-            //           ScopeUtil.associateRequestContext(message);
-            //           ScopeUtil.associateSessionContext(message);
-
             Object targetBean = CDIServerUtil.lookupBean(beanManager, type);
 
             try {
@@ -417,7 +419,8 @@ public class CDIExtensionPoints implements Extension {
       bus.subscribe(subjectName, new MessageCallback() {
         @Override
         public void callback(final Message message) {
-          MessageCallback callback = (MessageCallback) CDIServerUtil.lookupBean(beanManager, type.getJavaClass());
+          MessageCallback callback = (MessageCallback) CDIServerUtil.lookupBean(beanManager,
+                  type.getJavaClass());
           callback.callback(message);
         }
       });
@@ -448,7 +451,17 @@ public class CDIExtensionPoints implements Extension {
           epts.put(RebindUtils.createCallSignature(method), new ConversationalEndpointCallback(new ServiceInstanceProvider() {
             @Override
             public Object get(Message message) {
-              return CDIServerUtil.lookupRPCBean(beanManager, remoteIface, type);
+              if (message.hasPart(CDIProtocol.Qualifiers)) {
+                List<String> quals = message.get(List.class, CDIProtocol.Qualifiers);
+                Annotation[] qualAnnos = new Annotation[quals.size()];
+                for (int i = 0; i < quals.size(); i++) {
+                  qualAnnos[i] = beanQualifiers.get(quals.get(i));
+                }
+                return CDIServerUtil.lookupRPCBean(beanManager, remoteIface, remoteIface, qualAnnos);
+              }
+              else {
+                return CDIServerUtil.lookupRPCBean(beanManager, remoteIface, type, null);
+              }
             }
 
           }, method, bus));
@@ -466,64 +479,15 @@ public class CDIExtensionPoints implements Extension {
 
     // note: this method just exists because we want AbstractRemoteCallBuilder to be package private.
     DefaultRemoteCallBuilder.setProxyFactory(Assert.notNull(new ProxyProvider() {
-          @Override
-          public <T> T getRemoteProxy(Class<T> proxyType) {
-            throw new RuntimeException("There is not yet an available Errai RPC implementation for the server-side environment.");
-          }
-        }));
+      @Override
+      public <T> T getRemoteProxy(Class<T> proxyType) {
+        throw new RuntimeException("There is not yet an available Errai RPC implementation for the server-side environment.");
+      }
+    }));
   }
 
   private static boolean isApplicationScoped(AnnotatedType type) {
     return type.isAnnotationPresent(ApplicationScoped.class);
-  }
-
-  class BeanLookup {
-    private BeanManager beanManager;
-    private AnnotatedType<?> type;
-
-    private Object invocationTarget;
-
-    BeanLookup(AnnotatedType<?> type, BeanManager bm) {
-      this.type = type;
-      this.beanManager = bm;
-    }
-
-    public Object getInvocationTarget() {
-      if (null == invocationTarget) {
-        invocationTarget = CDIServerUtil.lookupBean(beanManager, type.getJavaClass());
-      }
-      return invocationTarget;
-    }
-  }
-
-  static class ObserverEndpoint {
-    private boolean conversational;
-    private Method method;
-    private Class<?> observedType;
-    private Annotation[] qualifiers;
-
-    ObserverEndpoint(boolean conversational, Method method, Class<?> observedType) {
-      this.conversational = conversational;
-      this.method = method;
-      this.observedType = observedType;
-      this.qualifiers = getQualifiersFromObserverMethod(method);
-    }
-
-    public boolean isConversational() {
-      return conversational;
-    }
-
-    public Method getMethod() {
-      return method;
-    }
-
-    public Class<?> getObservedType() {
-      return observedType;
-    }
-
-    public Annotation[] getQualifiers() {
-      return qualifiers;
-    }
   }
 
   static class EventConsumer {
@@ -593,7 +557,7 @@ public class CDIExtensionPoints implements Extension {
     private Type senderType;
     private Set<Annotation> qualifiers;
 
-    MessageSender (Type senderType, Set<Annotation> qualifiers) {
+    MessageSender(Type senderType, Set<Annotation> qualifiers) {
       this.senderType = senderType;
       this.qualifiers = qualifiers;
     }

@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.framework;
+package org.jboss.errai.cdi.integration.server;
 
-import org.jboss.errai.bus.client.api.ErrorCallback;
-import org.jboss.errai.bus.client.api.RemoteCallback;
+import org.jboss.errai.bus.server.annotations.Service;
+import org.jboss.errai.cdi.client.qualifier.B;
+import org.jboss.errai.cdi.integration.client.MyRemote;
 
-import java.lang.annotation.Annotation;
+import javax.enterprise.context.ApplicationScoped;
 
-public interface RPCStub {
-  public void setRemoteCallback(RemoteCallback callback);
-
-  public void setErrorCallback(ErrorCallback callback);
-
-  public void setQualifiers(Annotation[] annotations);
+/**
+ * @author Mike Brock
+ */
+@B
+@Service
+@ApplicationScoped
+public class MyRemoteB implements MyRemote {
+  @Override
+  public String call(String callString) {
+    return callString + "B";
+  }
 }

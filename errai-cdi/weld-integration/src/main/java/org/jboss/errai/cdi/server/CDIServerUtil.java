@@ -15,6 +15,7 @@
  */
 package org.jboss.errai.cdi.server;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -66,8 +67,8 @@ public class CDIServerUtil {
   }
 
 
-  public static <T> T lookupRPCBean(BeanManager beanManager, T rpcIntf, Class beanClass) {
-    Bean<?> bean = beanManager.resolve(beanManager.getBeans(beanClass));
+  public static <T> T lookupRPCBean(BeanManager beanManager, T rpcIntf, Class beanClass, Annotation[] annotations) {
+    Bean<?> bean = beanManager.resolve(beanManager.getBeans(beanClass, annotations));
     CreationalContext<?> context = beanManager.createCreationalContext(bean);
     return (T) beanManager.getReference(bean, beanClass, context);
 

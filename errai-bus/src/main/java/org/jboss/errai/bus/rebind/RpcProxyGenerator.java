@@ -52,22 +52,28 @@ public class RpcProxyGenerator {
 
   public ClassStructureBuilder<?> generate() {
     ClassStructureBuilder<?> classBuilder = ClassBuilder.define(remote.getSimpleName() + "Impl")
-        .packageScope()
-        .implementsInterface(remote)
-        .implementsInterface(RPCStub.class)
-        .body()
-        .privateField("remoteCallback", RemoteCallback.class)
-        .finish()
-        .privateField("errorCallback", ErrorCallback.class)
-        .finish();
+            .packageScope()
+            .implementsInterface(remote)
+            .implementsInterface(RPCStub.class)
+            .body()
+            .privateField("remoteCallback", RemoteCallback.class)
+            .finish()
+            .privateField("errorCallback", ErrorCallback.class)
+            .finish()
+            .privateField("qualifiers", Annotation[].class)
+            .finish();
 
     classBuilder.publicMethod(void.class, "setErrorCallback", Parameter.of(ErrorCallback.class, "callback"))
-        .append(Stmt.loadClassMember("errorCallback").assignValue(Variable.get("callback")))
-        .finish();
+            .append(Stmt.loadClassMember("errorCallback").assignValue(Variable.get("callback")))
+            .finish();
 
     classBuilder.publicMethod(void.class, "setRemoteCallback", Parameter.of(RemoteCallback.class, "callback"))
-        .append(Stmt.loadClassMember("remoteCallback").assignValue(Variable.get("callback")))
-        .finish();
+            .append(Stmt.loadClassMember("remoteCallback").assignValue(Variable.get("callback")))
+            .finish();
+
+    classBuilder.publicMethod(void.class, "setQualifiers", Parameter.of(Annotation[].class, "quals"))
+            .append(Stmt.loadClassMember("qualifiers").assignValue(Variable.get("quals")))
+    .finish();
 
     for (MetaMethod method : MetaClassFactory.get(remote).getMethods()) {
       generateMethod(classBuilder, method);
@@ -83,50 +89,33 @@ public class RpcProxyGenerator {
     for (Parameter parm : parms) {
       parmVars.add(Stmt.loadVariable(parm.getName()));
     }
-    
+
     BlockBuilder<?> methodBlock =
-      classBuilder.publicMethod(method.getReturnType(), method.getName(), parms);
-//
-//    MessageBuilder.createMessage()
-//            .toSubject("foo")
-//            .command("comm")
-//            .with("Qualifiers", new Annotation[0])
-//            .with("MethodParms", new Object[0])
-//            .errorsHandledBy().repliesTo()
-//
-//
-//            method.getAnnotations();
-//
-//
-//    Stmt.invokeStatic(MessageBuilder.class, "createMessage")
-//            .invoke("toSubject", remote.getName())
-//            .invoke("command", RebindUtils.createCallSignature(method))
-//            .invoke("with", MessageParts.ErrorTo.name(), )
-    
+            classBuilder.publicMethod(method.getReturnType(), method.getName(), parms);
     methodBlock.append(
-      Stmt
-        .if_(Bool.equals(Variable.get("errorCallback"), null))
-        .append(Stmt
-            .invokeStatic(MessageBuilder.class, "createCall")
-            .invoke("call", remote.getName())
-            .invoke("endpoint", RebindUtils.createCallSignature(method), 
-                Stmt.newArray(Object.class).initialize(parmVars.toArray()))
-            .invoke("respondTo", method.getReturnType().asBoxed(), Stmt.loadVariable("remoteCallback"))
-            .invoke("defaultErrorHandling")
-            .invoke("sendNowWith", Stmt.loadVariable("bus")))
-        .finish()
-        .else_()
-        .append(Stmt
-            .invokeStatic(MessageBuilder.class, "createCall")
-            .invoke("call", remote.getName())
-            .invoke("endpoint", RebindUtils.createCallSignature(method), 
-                Stmt.newArray(Object.class).initialize(parmVars.toArray()))
-            .invoke("respondTo", method.getReturnType().asBoxed(), Stmt.loadVariable("remoteCallback"))
-            .invoke("errorsHandledBy",Stmt.loadVariable("errorCallback"))
-            .invoke("sendNowWith", Stmt.loadVariable("bus")))
-        .finish()
+            Stmt
+                    .if_(Bool.equals(Variable.get("errorCallback"), null))
+                    .append(Stmt
+                            .invokeStatic(MessageBuilder.class, "createCall")
+                            .invoke("call", remote.getName())
+                            .invoke("endpoint", RebindUtils.createCallSignature(method), Stmt.loadClassMember("qualifiers"),
+                                    Stmt.newArray(Object.class).initialize(parmVars.toArray()))
+                            .invoke("respondTo", method.getReturnType().asBoxed(), Stmt.loadVariable("remoteCallback"))
+                            .invoke("defaultErrorHandling")
+                            .invoke("sendNowWith", Stmt.loadVariable("bus")))
+                    .finish()
+                    .else_()
+                    .append(Stmt
+                            .invokeStatic(MessageBuilder.class, "createCall")
+                            .invoke("call", remote.getName())
+                            .invoke("endpoint", RebindUtils.createCallSignature(method), Stmt.loadClassMember("qualifiers"),
+                                    Stmt.newArray(Object.class).initialize(parmVars.toArray()))
+                            .invoke("respondTo", method.getReturnType().asBoxed(), Stmt.loadVariable("remoteCallback"))
+                            .invoke("errorsHandledBy", Stmt.loadVariable("errorCallback"))
+                            .invoke("sendNowWith", Stmt.loadVariable("bus")))
+                    .finish()
     );
-    
+
     Statement returnStmt = RebindUtils.generateProxyMethodReturnStatement(method);
     if (returnStmt != null) {
       methodBlock.append(returnStmt);

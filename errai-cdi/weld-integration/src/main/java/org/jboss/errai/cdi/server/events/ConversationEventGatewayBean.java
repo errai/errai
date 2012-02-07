@@ -42,14 +42,14 @@ public class ConversationEventGatewayBean {
         if (wrapper.getQualifierStrings() != null && !wrapper.getQualifierStrings().isEmpty()) {
           MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
                   .with(MessageParts.SessionID.name(), ctx.getSession())
-                  .with(CDIProtocol.TYPE, wrapper.getEventType().getName()).with(CDIProtocol.QUALIFIERS, wrapper.getQualifierStrings())
-                  .with(CDIProtocol.OBJECT_REF, wrapper.getEventObject())
+                  .with(CDIProtocol.BeanType, wrapper.getEventType().getName()).with(CDIProtocol.Qualifiers, wrapper.getQualifierStrings())
+                  .with(CDIProtocol.BeanReference, wrapper.getEventObject())
                   .flag(RoutingFlag.NonGlobalRouting).noErrorHandling().sendNowWith(wrapper.getBus());
         }
         else {
           MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
                   .with(MessageParts.SessionID.name(), ctx.getSession())
-                  .with(CDIProtocol.TYPE,wrapper.getEventType().getName()).with(CDIProtocol.OBJECT_REF, wrapper.getEventObject())
+                  .with(CDIProtocol.BeanType,wrapper.getEventType().getName()).with(CDIProtocol.BeanReference, wrapper.getEventObject())
                   .flag(RoutingFlag.NonGlobalRouting).noErrorHandling()
                   .sendNowWith(wrapper.getBus());
         }
