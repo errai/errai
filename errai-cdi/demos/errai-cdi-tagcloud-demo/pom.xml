@@ -657,12 +657,6 @@
           <scope>provided</scope>
           <version>${jetty.version}</version>
         </dependency>
-
-        <dependency>
-          <groupId>org.jboss.seam.solder</groupId>
-          <artifactId>seam-solder</artifactId>
-          <version>3.0.0.CR4</version>
-        </dependency>
       </dependencies>
 
       <build>
