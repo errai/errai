@@ -55,7 +55,8 @@ public class MarshallersGenerator extends Generator {
           Boolean.valueOf(System.getProperty(SERVER_MARSHALLER_OUTPUT_ENABLED_PROP, "true"));
 
   private static final String[] candidateOutputDirectories =
-          {"target/classes/", "war/WEB-INF/classes/", "web/WEB-INF/classes/", "target/war/WEB-INF/classes/", "WEB-INF/classes/"};
+          {"target/classes/", "war/WEB-INF/classes/", "web/WEB-INF/classes/", "target/war/WEB-INF/classes/",
+                  "WEB-INF/classes/", "src/main/webapp/WEB-INF/classes/"};
 
   /**
    * Simple name of class to be generated
