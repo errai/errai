@@ -24,7 +24,11 @@ import com.google.gwt.json.client.JSONValue;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
+import org.jboss.errai.bus.client.util.BusTools;
+import org.jboss.errai.marshalling.client.MarshallingSessionProviderFactory;
+import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 import org.jboss.errai.marshalling.client.api.json.impl.gwt.GWTJSON;
+import org.jboss.errai.marshalling.client.marshallers.ErraiProtocolEnvelopeNoAutoMarshaller;
 import org.jboss.errai.marshalling.client.protocols.ErraiProtocol;
 
 import java.util.ArrayList;
@@ -33,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 
 public class JSONUtilCli {
+  private static boolean autoDemarshall = true;
 
   public static List<MarshalledMessage> decodePayload(String value) {
     if (value == null || value.trim().length() == 0) return Collections.emptyList();
@@ -43,6 +48,8 @@ public class JSONUtilCli {
      * field and send the unparsed JSON object onwards.
      *
      */
+
+
     JSONValue val = null;
 
     try {
@@ -80,23 +87,6 @@ public class JSONUtilCli {
     }
   }
 
-  public static void log(String message) {
-    if (isNativeJavaScriptLoggerSupported()) {
-      nativeLog("[erraibus] " + message);
-    }
-  }
-
-  public static native boolean isNativeJavaScriptLoggerSupported() /*-{
-    return ((window.console != null) &&
-            (window.console.firebug == null) &&
-            (window.console.log != null) &&
-            (typeof(window.console.log) == 'function'));
-  }-*/;
-
-  public static native void nativeLog(String message) /*-{
-    window.console.log(message);
-  }-*/;
-
   public static class MarshalledMessageImpl implements MarshalledMessage {
     public final JSONObject o;
 
@@ -122,10 +112,26 @@ public class JSONUtilCli {
       throw new RuntimeException("bad payload: " + value);
     }
 
-    return ErraiProtocol.decodePayload(GWTJSON.wrap((JSONObject) value));
+    if (autoDemarshall) {
+      return ErraiProtocol.decodePayload(GWTJSON.wrap((JSONObject) value));
+    }
+    else {
+      nativeLog("using no-auto envelope demarshaller");
+      return ErraiProtocolEnvelopeNoAutoMarshaller.INSTANCE.demarshall(
+              GWTJSON.wrap((JSONObject) value), MarshallingSessionProviderFactory.getEncoding());
+    }
   }
 
   public static Message decodeCommandMessage(Object value) {
     return CommandMessage.createWithParts(decodePayload(value));
   }
+
+  public static void setAutoDemarshall(boolean autoDemarshall1) {
+    autoDemarshall = autoDemarshall1;
+  }
+
+  private static native void nativeLog(String message) /*-{
+    window.console.log(message);
+  }-*/;
+
 }
