@@ -36,6 +36,21 @@ public enum MessageParts {
   Subject,
 
   /**
+   * A list of subjects.
+   */
+  SubjectsList,
+
+  /**
+   * A list of capabilities (comma-seperate string) of the capabilities of the remote bus.
+   */
+  CapabilitiesFlags,
+
+  /**
+   * The frequency with which short-polling clients should poll the remote bus.
+   */
+  PollFrequency,
+
+  /**
    * Default value payload. Used mostly for higher-level APIs.
    */
   Value,
@@ -65,6 +80,11 @@ public enum MessageParts {
    * Specifies an error message.
    */
   ErrorMessage,
+
+  /**
+   * Additional details associated with an error message (for instance: stack trace information)
+   */
+  AdditionalDetails,
 
   /**
    * Specifies the subject to send error messages to.

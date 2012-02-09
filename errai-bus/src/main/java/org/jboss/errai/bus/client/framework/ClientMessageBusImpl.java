@@ -247,7 +247,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private Subscription _subscribe(final String subject, final MessageCallback callback, final boolean local) {
-    if ("ServerBus".equals(subject) && shadowSubscriptions.containsKey("ServerBus")) return null;
+    if (BuiltInServices.ServerBus.name().equals(subject) && shadowSubscriptions.containsKey(BuiltInServices.ServerBus.name())) return null;
 
     if (!postInit) {
       final DeferredSubscription detachedSubscripton = new DeferredSubscription();
@@ -636,16 +636,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         postInitTasksIter.remove();
       }
 
-//      for (Runnable postInitTask : postInitTasks) {
-//        try {
-//          postInitTask.run();
-//        }
-//        catch (Throwable t) {
-//          t.printStackTrace();
-//          throw new RuntimeException("error running task", t);
-//        }
-//      }
-
       sendAllDeferred();
       postInitTasks.clear();
 
@@ -665,13 +655,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         sendBuilder.setHeader("phase", "disconnect");
 
         Message m = MessageBuilder.createMessage()
-                .toSubject("ServerBus")
+                .toSubject(BuiltInServices.ServerBus.name())
                 .command(BusCommands.Disconnect).getMessage();
 
         encodeAndTransmit(m);
       }
 
-      unsubscribeAll("ClientBus");
+      unsubscribeAll(BuiltInServices.ClientBus.name());
       shadowSubscriptions.clear();
     }
     finally {
@@ -703,7 +693,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     onSubscribeHooks = new ArrayList<SubscribeListener>();
     onUnsubscribeHooks = new ArrayList<UnsubscribeListener>();
-    //subscriptions = new HashMap<String, List<Object>>();
     remotes = new HashMap<String, MessageCallback>();
   }
 
@@ -764,15 +753,15 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       listener.beforeInitialization();
     }
 
-    remoteSubscribe("ServerEchoService");
-    directSubscribe("ClientBus", new MessageCallback() {
+    remoteSubscribe(BuiltInServices.ServerEchoService.name());
+    directSubscribe(BuiltInServices.ClientBus.name(), new MessageCallback() {
       @Override
       @SuppressWarnings({"unchecked"})
       public void callback(final Message message) {
         switch (BusCommands.valueOf(message.getCommandType())) {
           case RemoteSubscribe:
-            if (message.hasPart("SubjectsList")) {
-              for (String subject : (List<String>) message.get(List.class, "SubjectsList")) {
+            if (message.hasPart(MessageParts.SubjectsList)) {
+              for (String subject : (List<String>) message.get(List.class, MessageParts.SubjectsList)) {
                 remoteSubscribe(subject);
               }
             }
@@ -788,9 +777,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
           case CapabilitiesNotice:
             log("received capabilities notice from server. supported capabilities of remote: "
-                    + message.get(String.class, "Flags"));
+                    + message.get(String.class, MessageParts.CapabilitiesFlags));
 
-            String[] capabilites = message.get(String.class, "Flags").split(",");
+            String[] capabilites = message.get(String.class, MessageParts.CapabilitiesFlags).split(",");
 
             for (String capability : capabilites) {
               switch (Capabilities.valueOf(capability)) {
@@ -813,8 +802,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                   break;
                 case NoLongPollAvailable:
                   receiveCommCallback = new ShortPollRequestCallback();
-                  if (message.hasPart("PollFrequency")) {
-                    POLL_FREQUENCY = message.get(Integer.class, "PollFrequency");
+                  if (message.hasPart(MessageParts.PollFrequency)) {
+                    POLL_FREQUENCY = message.get(Integer.class, MessageParts.PollFrequency);
                   }
                   else {
                     POLL_FREQUENCY = 500;
@@ -843,19 +832,19 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
             sessionId = message.get(String.class, MessageParts.ConnectionSessionKey);
 
-            remoteSubscribe("ServerBus");
+            remoteSubscribe(BuiltInServices.ServerBus.name());
 
             MessageBuilder.createMessage()
-                    .toSubject("ServerBus")
+                    .toSubject(BuiltInServices.ServerBus.name())
                     .command(RemoteSubscribe)
-                    .with("SubjectsList", subjects)
+                    .with(MessageParts.SubjectsList, subjects)
                     .with(PriorityProcessing, "1")
                     .noErrorHandling()
                     .sendNowWith(ClientMessageBusImpl.this);
 
 
             MessageBuilder.createMessage()
-                    .toSubject("ServerBus")
+                    .toSubject(BuiltInServices.ServerBus.name())
                     .command(BusCommands.FinishStateSync)
                     .with(PriorityProcessing, "1")
                     .noErrorHandling().sendNowWith(ClientMessageBusImpl.this);
@@ -863,7 +852,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             /**
              * ... also send RemoteUnsubscribe signals.
              */
-
             addSubscribeListener(new SubscribeListener() {
               @Override
               public void onSubscribe(SubscriptionEvent event) {
@@ -874,7 +862,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
                 if (event.isNew()) {
                   MessageBuilder.getMessageProvider().get().command(RemoteSubscribe)
-                          .toSubject("ServerBus")
+                          .toSubject(BuiltInServices.ServerBus.name())
                           .set(Subject, event.getSubject())
                           .set(PriorityProcessing, "1")
                           .sendNowWith(ClientMessageBusImpl.this);
@@ -886,7 +874,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
               @Override
               public void onUnsubscribe(SubscriptionEvent event) {
                 MessageBuilder.getMessageProvider().get().command(BusCommands.RemoteUnsubscribe)
-                        .toSubject("ServerBus")
+                        .toSubject(BuiltInServices.ServerBus.name())
                         .set(Subject, event.getSubject())
                         .set(PriorityProcessing, "1")
                         .sendNowWith(ClientMessageBusImpl.this);
@@ -898,8 +886,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
               public void callback(Message message) {
                 String errorTo = message.get(String.class, MessageParts.ErrorTo);
                 if (errorTo == null) {
-                  logError(message.get(String.class, "ErrorMessage"),
-                          message.get(String.class, "AdditionalDetails"), null);
+                  logError(message.get(String.class, MessageParts.ErrorMessage),
+                          message.get(String.class, MessageParts.AdditionalDetails), null);
                 }
                 else {
                   message.toSubject(errorTo);
@@ -935,7 +923,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           case WebsocketChannelVerify:
             log("received verification token for websocket connection");
             MessageBuilder.createMessage()
-                    .toSubject("ServerBus")
+                    .toSubject(BuiltInServices.ServerBus.name())
                     .command(BusCommands.WebsocketChannelVerify)
                     .copy(MessageParts.WebSocketToken, message)
                     .done().sendNowWith(ClientMessageBusImpl.this);

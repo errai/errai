@@ -30,6 +30,7 @@ import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.NoSubscribersToDeliverTo;
 import org.jboss.errai.bus.client.api.base.RuleDelegateMessageCallback;
 import org.jboss.errai.bus.client.framework.BooleanRoutingRule;
+import org.jboss.errai.bus.client.framework.BuiltInServices;
 import org.jboss.errai.bus.client.framework.BusMonitor;
 import org.jboss.errai.bus.client.framework.DeliveryPlan;
 import org.jboss.errai.bus.client.framework.RoutingFlag;
@@ -50,6 +51,7 @@ import org.jboss.errai.bus.server.io.websockets.WebSocketServerHandler;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.bus.server.util.SecureHashUtil;
 import org.jboss.errai.common.client.protocols.MessageParts;
+import org.jboss.errai.common.client.protocols.Resources;
 import org.slf4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
@@ -176,7 +178,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     /**
      * Define the default ServerBus service used for intrabus communication.
      */
-    subscribe("ServerBus", new MessageCallback() {
+    subscribe(BuiltInServices.ServerBus.name(), new MessageCallback() {
       @Override
       @SuppressWarnings({"unchecked", "SynchronizationOnLocalVariableOrMethodParameter"})
       public void callback(Message message) {
@@ -194,8 +196,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             case RemoteSubscribe:
               if (queue == null) return;
 
-              if (message.hasPart("SubjectsList")) {
-                for (String subject : (List<String>) message.get(List.class, "SubjectsList")) {
+              if (message.hasPart(MessageParts.SubjectsList)) {
+                for (String subject : (List<String>) message.get(List.class, MessageParts.SubjectsList)) {
                   remoteSubscribe(session, queue, subject);
                 }
               }
@@ -253,7 +255,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                   deferredQueue.put(queue, deferred);
                 }
 
-                remoteSubscribe(session, queue, "ClientBus");
+                remoteSubscribe(session, queue, BuiltInServices.ClientBus.name());
               }
 
               if (isMonitor()) {
@@ -270,14 +272,14 @@ public class ServerMessageBusImpl implements ServerMessageBus {
               }
 
               createConversation(message)
-                      .toSubject("ClientBus")
+                      .toSubject(BuiltInServices.ClientBus.name())
                       .command(BusCommands.RemoteSubscribe)
-                      .with("SubjectsList", subjects)
+                      .with(MessageParts.SubjectsList, subjects)
                       .with(MessageParts.PriorityProcessing, "1")
                       .noErrorHandling().sendNowWith(ServerMessageBusImpl.this, false);
 
               CommandMessage msg = ConversationMessage.create(message);
-              msg.toSubject("ClientBus")
+              msg.toSubject(BuiltInServices.ClientBus.name())
                       .command(BusCommands.CapabilitiesNotice);
 
               StringBuilder capabilitiesBuffer = new StringBuilder();
@@ -290,7 +292,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
               else {
                 capabilitiesBuffer.append(Capabilities.NoLongPollAvailable.name());
                 first = false;
-                msg.set("PollFrequency", ErraiServiceConfigurator.HOSTED_MODE_TESTING ? 50 : 250);
+                msg.set(MessageParts.PollFrequency, ErraiServiceConfigurator.HOSTED_MODE_TESTING ? 50 : 250);
               }
 
               if (webSocketServer) {
@@ -310,12 +312,12 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 msg.set(MessageParts.WebSocketToken, connectionToken);
               }
 
-              msg.set("Flags", capabilitiesBuffer.toString());
+              msg.set(MessageParts.CapabilitiesFlags, capabilitiesBuffer.toString());
 
               send(msg, false);
 
               createConversation(message)
-                      .toSubject("ClientBus")
+                      .toSubject(BuiltInServices.ClientBus.name())
                       .command(BusCommands.FinishStateSync)
                       .with(MessageParts.ConnectionSessionKey, queue.getSession().getSessionId())
                       .noErrorHandling().sendNowWith(ServerMessageBusImpl.this, false);
@@ -334,7 +336,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                           WebSocketServerHandler.WEBSOCKET_ACTIVE);
 
                   createConversation(message)
-                          .toSubject("ClientBus")
+                          .toSubject(BuiltInServices.ClientBus.name())
                           .command(BusCommands.WebsocketChannelOpen)
                           .done().sendNowWith(ServerMessageBusImpl.this, false);
                 }
@@ -359,7 +361,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
           if (messageQueues.isEmpty()) return;
 
           MessageBuilder.createMessage()
-                  .toSubject("ClientBus")
+                  .toSubject(BuiltInServices.ClientBus.name())
                   .command(BusCommands.RemoteSubscribe)
                   .with(MessageParts.Subject, event.getSubject())
                   .noErrorHandling().sendGlobalWith(ServerMessageBusImpl.this);
@@ -375,7 +377,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
           if (messageQueues.isEmpty()) return;
 
           MessageBuilder.createMessage()
-                  .toSubject("ClientBus")
+                  .toSubject(BuiltInServices.ClientBus.name())
                   .command(BusCommands.RemoteUnsubscribe)
                   .with(MessageParts.Subject, event.getSubject())
                   .noErrorHandling().sendGlobalWith(ServerMessageBusImpl.this);
@@ -549,7 +551,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
   }
 
 
-  private static final String RETRY_COUNT_KEY = "retryAttempts";
+//  private static final String RETRY_COUNT_KEY = "retryAttempts";
 
   /**
    * Sends a message globally to all subscriptions containing the same subject as the specified message.
@@ -573,7 +575,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
 
     if (!fireGlobalMessageListeners(message)) {
-      if (message.hasPart(ReplyTo) && message.hasResource("Session")) {
+      if (message.hasPart(ReplyTo) && message.hasResource(Resources.Session.name())) {
         /**
          * Inform the sender that we did not dispatchGlobal the message.
          */
@@ -595,7 +597,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     if (isMonitor()) {
       if (message.isFlagSet(RoutingFlag.FromRemote)) {
         busMonitor.notifyIncomingMessageFromRemote(
-                message.getResource(QueueSession.class, "Session").getSessionId(), message);
+                message.getResource(QueueSession.class, Resources.Session.name()).getSessionId(), message);
       }
       else {
         if (subscriptions.containsKey(subject)) {
@@ -610,7 +612,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
   }
 
   private void delayOrFail(Message message, final Runnable deliveryTaskRunnable) {
-    if (message.isFlagSet(RoutingFlag.RetryDelivery) && message.getResource(Integer.class, RETRY_COUNT_KEY) > 3) {
+    if (message.isFlagSet(RoutingFlag.RetryDelivery)
+            && message.getResource(Integer.class, Resources.RetryAttempts.name()) > 3) {
       NoSubscribersToDeliverTo ntdt = new NoSubscribersToDeliverTo(message.getSubject());
       if (message.getErrorCallback() != null) {
         message.getErrorCallback().error(message, ntdt);
@@ -618,10 +621,11 @@ public class ServerMessageBusImpl implements ServerMessageBus {
       throw ntdt;
     }
     message.setFlag(RoutingFlag.RetryDelivery);
-    if (!message.hasResource(RETRY_COUNT_KEY)) {
-      message.setResource("retryAttempts", 0);
+    if (!message.hasResource(Resources.RetryAttempts.name())) {
+      message.setResource(Resources.RetryAttempts.name(), 0);
     }
-    message.setResource("retryAttempts", message.getResource(Integer.class, RETRY_COUNT_KEY) + 1);
+    message.setResource(Resources.RetryAttempts.name(),
+            message.getResource(Integer.class, Resources.RetryAttempts.name()) + 1);
     getScheduler().schedule(new Runnable() {
 
       @Override
@@ -640,7 +644,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
   @Override
   public void send(Message message) {
     message.commit();
-    if (message.hasResource("Session")) {
+    if (message.hasResource(Resources.Session.name())) {
       message.setFlag(RoutingFlag.NonGlobalRouting);
       send(getQueueByMessage(message), message, true);
     }
@@ -662,7 +666,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
   @Override
   public void send(Message message, boolean fireListeners) {
     message.commit();
-    if (!message.hasResource("Session")) {
+    if (!message.hasResource(Resources.Session.name())) {
       handleMessageDeliveryFailure(this, message, "cannot automatically route message. no session contained in message.", null, false);
     }
 
@@ -886,8 +890,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
   private static final Set<String> broadcastExclusionSet = new HashSet<String>() {
     {
-      add("ClientBus");
-      add("ClientBusErrors");
+      add(BuiltInServices.ClientBus.name());
+      add(BuiltInServices.ClientBusErrors.name());
     }
   };
 
@@ -1170,7 +1174,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
   }
 
   private static QueueSession getSession(Message message) {
-    return message.getResource(QueueSession.class, "Session");
+    return message.getResource(QueueSession.class, Resources.Session.name());
   }
 
   private MessageQueue getQueueByMessage(Message message) {
