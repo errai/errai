@@ -307,11 +307,13 @@ public class RebindUtils {
           }
 
           if (firstSubDir != -1) {
-            String candidate = workingDir + "/" + filePath.substring(start, firstSubDir) + "/";
+            filePath = filePath.substring(start, firstSubDir) + "/";
 
             if (filePath.startsWith("target/") || filePath.startsWith("out/") || filePath.startsWith("build/")) {
               continue;
             }
+
+            String candidate = workingDir + "/" + filePath;
 
             candidateRoots.add(candidate);
           }
