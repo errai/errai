@@ -110,11 +110,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private RequestCallback receiveCommCallback = new NoPollRequestCallback();
 
-  /* Map of subjects to subscriptions  */
-//  private Map<String, List<Object>> subscriptions;
-
-  // TODO remove "shadow" from everything in this class that has "shadow" in its name
-  private Map<String, List<MessageCallback>> shadowSubscriptions =
+  private Map<String, List<MessageCallback>> subscriptions =
           new HashMap<String, List<MessageCallback>>();
 
   private Map<String, MessageCallback> remotes;
@@ -247,19 +243,19 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private Subscription _subscribe(final String subject, final MessageCallback callback, final boolean local) {
-    if (BuiltInServices.ServerBus.name().equals(subject) && shadowSubscriptions.containsKey(BuiltInServices.ServerBus.name())) return null;
+    if (BuiltInServices.ServerBus.name().equals(subject) && subscriptions.containsKey(BuiltInServices.ServerBus.name())) return null;
 
     if (!postInit) {
-      final DeferredSubscription detachedSubscripton = new DeferredSubscription();
+      final DeferredSubscription deferredSubscription = new DeferredSubscription();
 
       postInitTasks.add(new Runnable() {
         @Override
         public void run() {
-          detachedSubscripton.attachSubscription(_subscribe(subject, callback, local));
+          deferredSubscription.attachSubscription(_subscribe(subject, callback, local));
         }
       });
 
-      return detachedSubscripton;
+      return deferredSubscription;
     }
 
     fireAllSubscribeListeners(subject, local, directSubscribe(subject, callback));
@@ -267,7 +263,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     return new Subscription() {
       @Override
       public void remove() {
-        List<MessageCallback> cbs = shadowSubscriptions.get(subject);
+        List<MessageCallback> cbs = subscriptions.get(subject);
         if (cbs != null) {
           cbs.remove(callback);
         }
@@ -419,7 +415,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private boolean hasListeners(String subject) {
-    return shadowSubscriptions.containsKey(subject) || remotes.containsKey(subject);
+    return subscriptions.containsKey(subject) || remotes.containsKey(subject);
   }
 
   private void callErrorHandler(final Message message, final Throwable t) {
@@ -435,7 +431,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     if (remotes.containsKey(subject)) {
       remotes.get(subject).callback(message);
     }
-    else if (shadowSubscriptions.containsKey(subject)) {
+    else if (subscriptions.containsKey(subject)) {
       deliverToShadowSubscriptions(subject, message);
     }
     else {
@@ -455,22 +451,22 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private void addShadowSubscription(String subject, MessageCallback reference) {
-    if (!shadowSubscriptions.containsKey(subject)) {
-      shadowSubscriptions.put(subject, new ArrayList<MessageCallback>());
+    if (!subscriptions.containsKey(subject)) {
+      subscriptions.put(subject, new ArrayList<MessageCallback>());
     }
 
-    if (!shadowSubscriptions.get(subject).contains(reference)) {
-      shadowSubscriptions.get(subject).add(reference);
+    if (!subscriptions.get(subject).contains(reference)) {
+      subscriptions.get(subject).add(reference);
     }
   }
 
   private void removeShadowSubscription(String subject) {
-    shadowSubscriptions.remove(subject);
+    subscriptions.remove(subject);
   }
 
   // TODO delete this method
   private void resubscribeShadowSubcriptions() {
-    for (Map.Entry<String, List<MessageCallback>> entry : shadowSubscriptions.entrySet()) {
+    for (Map.Entry<String, List<MessageCallback>> entry : subscriptions.entrySet()) {
       for (MessageCallback callback : entry.getValue()) {
         _subscribe(entry.getKey(), callback, false);
       }
@@ -478,7 +474,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private void deliverToShadowSubscriptions(String subject, Message message) {
-    for (MessageCallback cb : shadowSubscriptions.get(subject)) {
+    for (MessageCallback cb : subscriptions.get(subject)) {
       cb.callback(message);
     }
   }
@@ -491,7 +487,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    */
   @Override
   public boolean isSubscribed(String subject) {
-    return shadowSubscriptions.containsKey(subject);
+    return subscriptions.containsKey(subject);
   }
 
   /**
@@ -662,7 +658,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
 
       unsubscribeAll(BuiltInServices.ClientBus.name());
-      shadowSubscriptions.clear();
+      subscriptions.clear();
     }
     finally {
       this.remotes.clear();
@@ -825,7 +821,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             log("received FinishStateSync message. preparing to bring up the federation");
 
             List<String> subjects = new ArrayList<String>();
-            for (String s : shadowSubscriptions.keySet()) {
+            for (String s : subscriptions.keySet()) {
               if (s.startsWith("local:")) continue;
               if (!remotes.containsKey(s)) subjects.add(s);
             }
@@ -1333,8 +1329,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   public void _store(String subject, Message msg) {
-    if (shadowSubscriptions.containsKey(subject)) {
-      for (MessageCallback cb : shadowSubscriptions.get(subject)) {
+    if (subscriptions.containsKey(subject)) {
+      for (MessageCallback cb : subscriptions.get(subject)) {
         cb.callback(msg);
       }
     }
@@ -1541,7 +1537,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     nativeLog("");
     nativeLog("Endpoints");
     nativeLog("  Remote (total)       : " + (bus.remotes.size()));
-    nativeLog("  Local (total)        : " + (bus.shadowSubscriptions.size()));
+    nativeLog("  Local (total)        : " + (bus.subscriptions.size()));
     nativeLog("------------------------------------------------");
   }
 
@@ -1558,8 +1554,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     nativeLog("[LOCALS]");
 
-    for (String localName : bus.shadowSubscriptions.keySet()) {
-      nativeLog(localName + " (" + bus.shadowSubscriptions.get(localName).size() + ")");
+    for (String localName : bus.subscriptions.keySet()) {
+      nativeLog(localName + " (" + bus.subscriptions.get(localName).size() + ")");
     }
 
     nativeLog("------------------------------------------------");

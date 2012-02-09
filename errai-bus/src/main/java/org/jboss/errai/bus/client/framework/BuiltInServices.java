@@ -20,5 +20,23 @@ package org.jboss.errai.bus.client.framework;
  * @author Mike Brock
  */
 public enum BuiltInServices {
-  ClientBus, ServerBus, ClientBusErrors, ServerEchoService
+  /**
+   * The standard service name for client buses
+   */
+  ClientBus,
+
+  /**
+   * The standard service name for server buses
+   */
+  ServerBus,
+
+  /**
+   * The standard service name for error handling on client.
+   */
+  ClientBusErrors,
+
+  /**
+   * The standard server echo service.
+   */
+  ServerEchoService
 }
