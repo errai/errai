@@ -404,6 +404,13 @@ public class ServerMarshallingTest {
 //    long st = System.currentTimeMillis();
 //    for (int i = 0; i < 10000; i++) {
     testEncodeDecodeDynamic(sType);
+
+
+    MappingContextSingleton.get();
+    String json = ServerMarshalling.toJSON(sType);
+
+    System.out.println(json);
+
     //  }
 //    System.out.println(System.currentTimeMillis() - st);
   }

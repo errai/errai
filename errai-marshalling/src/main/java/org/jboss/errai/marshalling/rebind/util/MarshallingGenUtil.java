@@ -38,7 +38,7 @@ public class MarshallingGenUtil {
     return clazz.isArray()
             ? getArrayVarName(clazz.getOuterComponentType().getFullyQualifiedName())
             + "_D" + GenUtil.getArrayDimensions(clazz)
-            : getVarName(clazz.getFullyQualifiedName());
+            : getVarName(clazz.asBoxed().getFullyQualifiedName());
   }
 
   public static String getVarName(Class<?> clazz) {

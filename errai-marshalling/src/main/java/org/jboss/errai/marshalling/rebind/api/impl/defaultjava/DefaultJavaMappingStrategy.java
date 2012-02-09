@@ -209,7 +209,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                       field.getDeclaringClass(), "set" + field.getName(),
                       field.getType());
 
-              if (setterMeth != null) {
+              if (setterMeth != null && !setterMeth.isPrivate()) {
                 // Bind via setter
                 bindingStatement = loadVariable("entity").invoke(setterMeth, val);
               }
@@ -292,7 +292,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
   }
 
   public Statement fieldDemarshall(Mapping mapping, MetaClass fromType) {
-    Statement statement = unwrapJSON(extractJSONObjectProperty(mapping.getKey(), fromType), mapping.getType().asBoxed());
+    Statement statement = unwrapJSON(extractJSONObjectProperty(mapping.getKey(), fromType), mapping.getType());
     if (!mapping.getTargetType().equals(mapping.getType())) {
       return Cast.to(mapping.getTargetType(), statement);
     }

@@ -42,7 +42,7 @@ import java.util.Set;
  * @author Mike Brock
  */
 public class DefaultJavaDefinitionMapper {
-  public static MappingDefinition map(MetaClass toMap, DefinitionsFactory definitionsFactory) {
+  public static MappingDefinition map(final MetaClass toMap, final DefinitionsFactory definitionsFactory) {
     if (definitionsFactory.hasDefinition(toMap.asBoxed())) {
       return definitionsFactory.getDefinition(toMap.asBoxed());
     }
@@ -224,7 +224,7 @@ public class DefaultJavaDefinitionMapper {
         }
 
         definition.addMemberMapping(new MemberMapping() {
-          private MetaClass type = (field.getType().isArray() ? field.getType() : field.getType().asBoxed());
+          private MetaClass type = (field.getType().isArray() ? field.getType() : field.getType());
           private MetaClass targetType = type;
 
           @Override
@@ -269,6 +269,11 @@ public class DefaultJavaDefinitionMapper {
 
           @Override
           public void setMappingClass(MetaClass clazz) {
+          }
+
+          @Override
+          public String toString() {
+            return toMap.getFullyQualifiedName() + "#" + field.getName();
           }
         });
       }

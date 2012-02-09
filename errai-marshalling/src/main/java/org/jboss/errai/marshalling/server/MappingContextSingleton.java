@@ -70,6 +70,8 @@ public class MappingContextSingleton {
       }
     }
     catch (Throwable t) {
+      t.printStackTrace();
+      
       sContext = loadDynamicMarshallers();
     }
 

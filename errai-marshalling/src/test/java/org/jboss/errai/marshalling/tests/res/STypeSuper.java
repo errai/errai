@@ -23,6 +23,7 @@ package org.jboss.errai.marshalling.tests.res;
  */
 public class STypeSuper {
   private String superValue;
+  private int version = 0;
 
   public String getSuperValue() {
     return superValue;
@@ -39,9 +40,15 @@ public class STypeSuper {
 
     STypeSuper that = (STypeSuper) o;
 
-    if (superValue != null ? !superValue.equals(that.superValue) : that.superValue != null) return false;
+    return !(superValue != null ? !superValue.equals(that.superValue) : that.superValue != null);
+  }
 
-    return true;
+  private void setVersion(final int version) {
+    this.version = version;
+  }
+
+  public int getVersion() {
+    return version;
   }
 
   @Override
