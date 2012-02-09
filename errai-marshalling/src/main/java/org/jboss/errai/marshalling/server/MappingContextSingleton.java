@@ -29,6 +29,7 @@ import org.jboss.errai.marshalling.client.api.ParserFactory;
 import org.jboss.errai.marshalling.client.api.annotations.AlwaysQualify;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
+import org.jboss.errai.marshalling.client.api.exceptions.MarshallingException;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.marshallers.QualifyingMarshallerWrapper;
 import org.jboss.errai.marshalling.client.protocols.MarshallingSessionProvider;
@@ -71,7 +72,7 @@ public class MappingContextSingleton {
     }
     catch (Throwable t) {
       t.printStackTrace();
-      
+
       sContext = loadDynamicMarshallers();
     }
 
@@ -251,7 +252,7 @@ public class MappingContextSingleton {
             }
           }
         }
-        
+
         for (Map.Entry<String, String> entry : factory.getMappingAliases().entrySet()) {
           MappingDefinition def = factory.getDefinition(entry.getValue());
           MappingDefinition aliasDef = new MappingDefinition(MetaClassFactory.get(entry.getKey()));
@@ -269,7 +270,13 @@ public class MappingContextSingleton {
 
       @Override
       public Marshaller<Object> getMarshaller(String clazz) {
-        return factory.getDefinition(clazz).getMarshallerInstance();
+        MappingDefinition def = factory.getDefinition(clazz);
+
+        if (def == null) {
+          throw new MarshallingException("class is not available to the marshaller framework: " + clazz);
+        }
+
+        return def.getMarshallerInstance();
       }
 
       @Override
