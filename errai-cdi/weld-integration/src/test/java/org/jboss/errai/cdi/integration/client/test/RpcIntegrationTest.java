@@ -17,25 +17,25 @@
 package org.jboss.errai.cdi.integration.client.test;
 
 import org.jboss.errai.bus.client.api.RemoteCallback;
-import org.jboss.errai.cdi.integration.client.ClientRPCBean;
+import org.jboss.errai.cdi.integration.client.RpcTestBean;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 
 /**
  * @author Mike Brock
  */
-public class CDIRPCTest extends AbstractErraiCDITest {
+public class RpcIntegrationTest extends AbstractErraiCDITest {
 
   @Override
   public String getModuleName() {
-    return "org.jboss.errai.cdi.integration.CDIRPCTestModule";
+    return "org.jboss.errai.cdi.integration.RpcTestModule";
   }
 
-  public void testRPCCallToCDIBean1() {
+  public void testRPCCallToCDIBeanQualifiedWithA() {
     CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
-        ClientRPCBean.getInstance().callRemoteCallerA(new RemoteCallback<String>() {
+        RpcTestBean.getInstance().callRemoteCallerA(new RemoteCallback<String>() {
           @Override
           public void callback(String response) {
             assertEquals("fooA", response);
@@ -49,11 +49,11 @@ public class CDIRPCTest extends AbstractErraiCDITest {
     delayTestFinish(60000);
   }
 
-  public void testRPCCallToCDIBean2() {
+  public void testRPCCallToCDIBeanQualifiedWithB() {
     CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
-        ClientRPCBean.getInstance().callRemoteCallerB(new RemoteCallback<String>() {
+        RpcTestBean.getInstance().callRemoteCallerB(new RemoteCallback<String>() {
           @Override
           public void callback(String response) {
             assertEquals("barB", response);
@@ -64,7 +64,22 @@ public class CDIRPCTest extends AbstractErraiCDITest {
     });
 
     delayTestFinish(60000);
-
   }
+  
+  public void testRPCCallToUnqualifiedCDIBean() {
+    CDI.addPostInitTask(new Runnable() {
+      @Override
+      public void run() {
+        RpcTestBean.getInstance().callRemoteCaller(new RemoteCallback<String>() {
+          @Override
+          public void callback(String response) {
+            assertEquals("bar", response);
+            finishTest();
+          }
+        }, "bar");
+      }
+    });
 
+    delayTestFinish(60000);
+  }
 }

@@ -12,7 +12,7 @@ import org.jboss.errai.cdi.integration.client.FinishEvent;
 import org.jboss.errai.cdi.integration.client.StartEvent;
 
 @ApplicationScoped
-public class CDITestEventProducerService {
+public class CdiTestEventProducerService {
 
   @Inject
   private Event<String> event;

@@ -68,7 +68,14 @@ public class CDIServerUtil {
 
 
   public static <T> T lookupRPCBean(BeanManager beanManager, T rpcIntf, Class beanClass, Annotation[] annotations) {
-    Bean<?> bean = beanManager.resolve(beanManager.getBeans(beanClass, annotations));
+    Bean<?> bean = null; 
+      
+    if (annotations != null) {
+      bean = beanManager.resolve(beanManager.getBeans(beanClass, annotations));
+    } else {
+      bean = beanManager.resolve(beanManager.getBeans(beanClass));
+    }
+      
     CreationalContext<?> context = beanManager.createCreationalContext(bean);
     return (T) beanManager.getReference(bean, beanClass, context);
 

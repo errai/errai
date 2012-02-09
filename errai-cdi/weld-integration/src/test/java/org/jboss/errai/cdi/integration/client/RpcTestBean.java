@@ -29,8 +29,11 @@ import javax.inject.Inject;
  * @author Mike Brock
  */
 @ApplicationScoped
-public class ClientRPCBean {
+public class RpcTestBean {
 
+  @Inject
+  private Caller<MyRemote> myRemoteCaller;
+  
   @Inject @A
   private Caller<MyRemote> myRemoteCallerA;
   
@@ -38,11 +41,15 @@ public class ClientRPCBean {
   private Caller<MyRemote> myRemoteCallerB;
 
 
-  private static ClientRPCBean instance;
+  private static RpcTestBean instance;
 
   @PostConstruct
   public void init() {
     instance = this;
+  }
+  
+  public void callRemoteCaller(RemoteCallback<String> callback, String val) {
+    myRemoteCaller.call(callback).call(val);
   }
   
   public void callRemoteCallerA(RemoteCallback<String> callback, String val) {
@@ -53,7 +60,7 @@ public class ClientRPCBean {
     myRemoteCallerB.call(callback).call(val);
   }
 
-  public static ClientRPCBean getInstance() {
+  public static RpcTestBean getInstance() {
     return instance;
   }
 }

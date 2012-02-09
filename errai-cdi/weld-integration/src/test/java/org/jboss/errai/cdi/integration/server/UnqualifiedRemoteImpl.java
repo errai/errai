@@ -16,21 +16,16 @@
 
 package org.jboss.errai.cdi.integration.server;
 
-import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.cdi.client.qualifier.A;
-import org.jboss.errai.cdi.integration.client.MyRemote;
-
 import javax.enterprise.context.ApplicationScoped;
 
-/**
- * @author Mike Brock
- */
-@A
+import org.jboss.errai.bus.server.annotations.Service;
+import org.jboss.errai.cdi.integration.client.MyRemote;
+
 @Service
 @ApplicationScoped
-public class MyRemoteA implements MyRemote {
+public class UnqualifiedRemoteImpl implements MyRemote {
   @Override
   public String call(String callString) {
-    return callString + "A";
+    return callString;
   }
 }

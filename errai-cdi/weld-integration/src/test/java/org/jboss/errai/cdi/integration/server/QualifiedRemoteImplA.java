@@ -17,7 +17,7 @@
 package org.jboss.errai.cdi.integration.server;
 
 import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.cdi.client.qualifier.B;
+import org.jboss.errai.cdi.client.qualifier.A;
 import org.jboss.errai.cdi.integration.client.MyRemote;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -25,12 +25,12 @@ import javax.enterprise.context.ApplicationScoped;
 /**
  * @author Mike Brock
  */
-@B
+@A
 @Service
 @ApplicationScoped
-public class MyRemoteB implements MyRemote {
+public class QualifiedRemoteImplA implements MyRemote {
   @Override
   public String call(String callString) {
-    return callString + "B";
+    return callString + "A";
   }
 }
