@@ -39,7 +39,7 @@ public interface RemoteCallEndpointDef {
    * @param args         - the parameters for the endpoint function
    * @return an instance of <tt>RemoteCallResponseDef</tt>
    */
-  public RemoteCallResponseDef endpoint(String endPointName, Object... args);
+  public RemoteCallResponseDef endpoint(String endPointName, Object[] args);
 
   /**
    * Sets the endpoint for a message using the specified name
@@ -49,5 +49,5 @@ public interface RemoteCallEndpointDef {
    * @param args         - the parameters for the endpoint function
    * @return an instance of <tt>RemoteCallResponseDef</tt>
    */
-  public RemoteCallResponseDef endpoint(String endPointName, Annotation[] qualifiers, Object... args);
+  public RemoteCallResponseDef endpoint(String endPointName, Annotation[] qualifiers, Object[] args);
 }

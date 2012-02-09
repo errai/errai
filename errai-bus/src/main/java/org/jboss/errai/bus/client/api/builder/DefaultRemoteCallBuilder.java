@@ -161,7 +161,7 @@ public class DefaultRemoteCallBuilder {
       }
 
       @Override
-      public RemoteCallResponseDef endpoint(String endPointName, Annotation[] qualifiers, Object... args) {
+      public RemoteCallResponseDef endpoint(String endPointName, Annotation[] qualifiers, Object[] args) {
         message.command(endPointName);
 
         if (qualifiers != null) {
@@ -178,7 +178,7 @@ public class DefaultRemoteCallBuilder {
       }
 
       @Override
-      public RemoteCallResponseDef endpoint(String endPointName, Object... args) {
+      public RemoteCallResponseDef endpoint(String endPointName, Object[] args) {
         message.command(endPointName);
         if (args != null)
           message.set("MethodParms", args);
