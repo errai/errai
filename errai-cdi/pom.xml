@@ -60,7 +60,7 @@
         <errai.version>2.0-SNAPSHOT</errai.version>
         <gwt.version>2.4.0</gwt.version>
         <hsqldb.version>1.8.0.7</hsqldb.version>
-        <weld.version>1.1.0.Final</weld.version>
+        <weld.version>1.1.5.Final</weld.version>
         <gwt.maven>2.4.0</gwt.maven>
         <mvel.version>2.1.Beta8</mvel.version>
         <jetty.version>6.1.25</jetty.version>
