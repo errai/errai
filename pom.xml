@@ -77,7 +77,7 @@
 		<mvel.version>2.1.Beta8</mvel.version>
 		<mosaic.version>0.4.0-rc4</mosaic.version>
 		<appengine.version>1.3.5</appengine.version>
-		<reflections.version>0.9.6_jboss_errai_r2</reflections.version>
+		<reflections.version>0.9.6_jboss_errai_r3-SNAPSHOT</reflections.version>
 		<validation.api.version>1.0.0.GA</validation.api.version>
 	</properties>
 

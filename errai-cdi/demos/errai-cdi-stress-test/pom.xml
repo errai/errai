@@ -19,7 +19,7 @@
 		<gwt.maven.version>2.3.0</gwt.maven.version>
 		<mvel.version>2.1.Beta6</mvel.version>
 		<jetty.version>6.1.25</jetty.version>
-		<slf4j.version>1.5.11</slf4j.version>
+		<slf4j.version>1.6.1</slf4j.version>
 		<uel.impl.version>2.1.2-b04</uel.impl.version>
 		<webDescriptor>jetty</webDescriptor>
 	</properties>
@@ -305,9 +305,9 @@
 					<scope>provided</scope>
 				</dependency>
 				<dependency>
-					<groupId>javassist</groupId>
+					<groupId>org.javassist</groupId>
 					<artifactId>javassist</artifactId>
-					<version>3.12.1.GA</version>
+					<version>3.15.0-GA</version>
 					<scope>provided</scope>
 				</dependency>
 
@@ -514,9 +514,9 @@
 				</dependency>
 
 				<dependency>
-					<groupId>javassist</groupId>
+	               <groupId>org.javassist</groupId>
 					<artifactId>javassist</artifactId>
-					<version>3.12.1.GA</version>
+					<version>3.15.0-GA</version>
 					<scope>provided</scope>
 				</dependency>
 
@@ -724,9 +724,9 @@
 				</dependency>
 
 				<dependency>
-					<groupId>javassist</groupId>
+                    <groupId>org.javassist</groupId>
 					<artifactId>javassist</artifactId>
-					<version>3.12.1.GA</version>
+					<version>3.15.0-GA</version>
 					<scope>provided</scope>
 				</dependency>
 
@@ -941,9 +941,9 @@
 				</dependency>
 
 				<dependency>
-					<groupId>javassist</groupId>
+                    <groupId>org.javassist</groupId>
 					<artifactId>javassist</artifactId>
-					<version>3.12.1.GA</version>
+					<version>3.15.0-GA</version>
 					<scope>provided</scope>
 				</dependency>
 

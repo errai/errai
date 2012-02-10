@@ -37,7 +37,7 @@
                     <artifactId>dom4j</artifactId>
                 </exclusion>
                 <exclusion>
-                    <groupId>javassist</groupId>
+                    <groupId>org.javassist</groupId>
                     <artifactId>javassist</artifactId>
                 </exclusion>
             </exclusions>
@@ -115,7 +115,7 @@
                             <artifactId>dom4j</artifactId>
                         </exclusion>
                         <exclusion>
-                            <groupId>javassist</groupId>
+                            <groupId>org.javassist</groupId>
                             <artifactId>javassist</artifactId>
                         </exclusion>
                     </exclusions>
