@@ -60,13 +60,10 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
   private Logger log = LoggerFactory.getLogger(MarshallerGeneratorFactory.class);
 
 
-  public DefinitionsFactoryImpl() {
+  DefinitionsFactoryImpl() {
     loadCustomMappings();
   }
 
-  public DefinitionsFactoryImpl(Map<String, MappingDefinition> mappingDefinitions) {
-    MAPPING_DEFINITIONS.putAll(mappingDefinitions);
-  }
 
   @Override
   public boolean hasDefinition(String clazz) {

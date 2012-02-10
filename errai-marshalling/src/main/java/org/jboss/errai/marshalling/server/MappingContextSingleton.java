@@ -37,6 +37,7 @@ import org.jboss.errai.marshalling.client.util.EncDecUtil;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactoryImpl;
+import org.jboss.errai.marshalling.rebind.DefinitionsFactorySingleton;
 import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
 import org.jboss.errai.marshalling.server.marshallers.DefaultArrayMarshaller;
@@ -127,7 +128,7 @@ public class MappingContextSingleton {
 
       @Override
       public DefinitionsFactory getDefinitionsFactory() {
-        return null;
+        return DefinitionsFactorySingleton.get();
       }
 
       @Override
@@ -151,7 +152,7 @@ public class MappingContextSingleton {
 
     return new ServerMappingContext() {
 
-      private final DefinitionsFactory factory = new DefinitionsFactoryImpl();
+      private final DefinitionsFactory factory = DefinitionsFactorySingleton.get();
 
       {
         loadMarshallers();

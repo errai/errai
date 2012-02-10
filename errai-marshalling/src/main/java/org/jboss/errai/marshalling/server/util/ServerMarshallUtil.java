@@ -26,9 +26,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.jar.JarFile;
 
 import javax.tools.JavaCompiler;
@@ -121,7 +125,7 @@ public abstract class ServerMarshallUtil {
 
 
     final String classStr = MarshallerGeneratorFactory.getFor(MarshallerOuputTarget.Java)
-              .generate(packageName, className);
+            .generate(packageName, className);
 
     File directory =
             new File(RebindUtils.getTempDirectory() + "/errai.gen/classes/" + packageName.replaceAll("\\.", "/"));
@@ -331,5 +335,83 @@ public abstract class ServerMarshallUtil {
       return file;
     }
     return null;
+  }
+
+  public static Set<File> findMatchingOutputDirectoryByModel(Map<String, String> toMatch, File from) {
+    HashSet<File> matching = new HashSet<File>();
+    _findMatchingOutputDirectoryByModel(matching, toMatch, from);
+    return matching;
+  }
+
+  private static void _findMatchingOutputDirectoryByModel(Set<File> matching, Map<String, String> toMatch, File from) {
+    if (from.isDirectory()) {
+      for (File file : from.listFiles()) {
+        int currMatch = matching.size();
+        _findMatchingOutputDirectoryByModel(matching, toMatch, file);
+        if (matching.size() > currMatch) {
+          break;
+        }
+      }
+    }
+    else {
+      String name = from.getName();
+      if (name.endsWith(".class") && toMatch.containsKey(name = name.substring(0, name.length() - 6))) {
+        String full = toMatch.get(name);
+        ReverseMatchResult res = reversePathMatch(full, from);
+
+        if (res.isMatch()) {
+          matching.add(res.getMatchRoot());
+        }
+      }
+    }
+  }
+
+
+  private static ReverseMatchResult reversePathMatch(String fqcn, File location) {
+    List<String> stk = new ArrayList<String>(Arrays.asList(fqcn.split("\\.")));
+
+    File curr = location;
+
+    if (!stk.isEmpty()) {
+      // remove the last element -- as that would be the file name.
+      stk.remove(stk.size() - 1);
+    }
+
+    while (!stk.isEmpty()) {
+      String el = stk.remove(stk.size() - 1);
+      curr = curr.getParentFile();
+      if (curr == null || !curr.getName().equals(el)) {
+        break;
+      }
+    }
+
+    if (curr != null) {
+      curr = curr.getParentFile();
+    }
+
+    if (stk.isEmpty()) {
+      return new ReverseMatchResult(true, curr);
+    }
+    else {
+      return new ReverseMatchResult(false, curr);
+    }
+  }
+
+  private static class ReverseMatchResult {
+    private final boolean match;
+    private final File matchRoot;
+
+    private ReverseMatchResult(boolean match, File matchRoot) {
+      this.match = match;
+      this.matchRoot = matchRoot;
+    }
+
+    public boolean isMatch() {
+      return match;
+    }
+
+    public File getMatchRoot() {
+      return matchRoot;
+    }
   }
 }

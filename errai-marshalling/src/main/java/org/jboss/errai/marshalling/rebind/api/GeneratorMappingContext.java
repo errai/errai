@@ -26,6 +26,7 @@ import org.jboss.errai.codegen.framework.util.GenUtil;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactoryImpl;
+import org.jboss.errai.marshalling.rebind.DefinitionsFactorySingleton;
 import org.jboss.errai.marshalling.server.ServerMappingContext;
 
 import java.util.ArrayList;
@@ -38,7 +39,7 @@ import java.util.Set;
  */
 public class GeneratorMappingContext implements ServerMappingContext {
 
-  private final DefinitionsFactory definitionsFactory = new DefinitionsFactoryImpl();
+  private final DefinitionsFactory definitionsFactory = DefinitionsFactorySingleton.get();
 
   private Set<String> generatedMarshallers = new HashSet<String>();
   private List<String> renderedMarshallers = new ArrayList<String>();

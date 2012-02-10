@@ -282,6 +282,8 @@ public class RebindUtils {
       visitor.visit(f);
     }
   }
+  
+  private static final String[] moduleRootExclusions = {"target/", "out/", "build/", "src/", "war/", "exploded/"};
 
   public static String guessWorkingDirectoryForModule(final GeneratorContext context) {
     if (context == null) {
@@ -294,7 +296,7 @@ public class RebindUtils {
       Set<String> candidateRoots = new HashSet<String>();
       String workingDir = new File("").getAbsolutePath();
 
-      for (URL url : configUrls) {
+      Pathcheck: for (URL url : configUrls) {
         String filePath = url.getFile();
         if (filePath.startsWith(workingDir) && filePath.indexOf('!') == -1) {
           int start = workingDir.length() + 1;
@@ -309,8 +311,8 @@ public class RebindUtils {
           if (firstSubDir != -1) {
             filePath = filePath.substring(start, firstSubDir) + "/";
 
-            if (filePath.startsWith("target/") || filePath.startsWith("out/") || filePath.startsWith("build/")) {
-              continue;
+            for (String excl: moduleRootExclusions) {
+              if (filePath.startsWith(excl)) continue Pathcheck;
             }
 
             String candidate = workingDir + "/" + filePath;
