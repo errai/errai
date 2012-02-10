@@ -47,6 +47,8 @@ public class ShortMarshaller extends AbstractJSONMarshaller<Short> {
 
   @Override
   public String marshall(Short o, MarshallingSession ctx) {
+    if (o == null)
+      return null;
     return o.toString();
   }
 

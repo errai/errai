@@ -16,12 +16,13 @@
 
 package org.jboss.errai.marshalling.tests.res.shared;
 
-import org.jboss.errai.common.client.api.annotations.Portable;
-
 import java.util.Set;
+
+import org.jboss.errai.common.client.api.annotations.Portable;
 
 @Portable
 public class User {
+
   private int userId;
   private String userName;
   private String password;

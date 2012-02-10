@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,6 +21,7 @@ import java.util.Set;
 
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.marshalling.server.ServerMarshalling;
+import org.jboss.errai.marshalling.tests.res.shared.NullBoxedNatives;
 import org.jboss.errai.marshalling.tests.res.shared.Role;
 import org.jboss.errai.marshalling.tests.res.shared.User;
 import org.junit.Assert;
@@ -54,6 +55,11 @@ public class MarshallingAPITest {
   }
 
   @Test
+  public void testNullLong() {
+    testEncodeDecode((Long) null);
+  }
+
+  @Test
   public void testQualifiedShort() {
     testEncodeDecode((short) 123);
   }
@@ -83,7 +89,6 @@ public class MarshallingAPITest {
     testEncodeDecode('a');
   }
 
-
   @Test
   public void testUserEntity() {
     User user = new User();
@@ -97,5 +102,11 @@ public class MarshallingAPITest {
     user.setRoles(roles);
 
     testEncodeDecode(user);
+  }
+
+  @Test
+  public void testEntityWithNullBoxedNatives() {
+    NullBoxedNatives entity = new NullBoxedNatives();
+    testEncodeDecode(entity);
   }
 }

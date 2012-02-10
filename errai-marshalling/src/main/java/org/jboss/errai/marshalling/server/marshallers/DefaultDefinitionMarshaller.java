@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,6 +16,12 @@
 
 package org.jboss.errai.marshalling.server.marshallers;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
 import org.jboss.errai.codegen.framework.meta.MetaField;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.common.client.protocols.SerializationParts;
@@ -24,17 +30,16 @@ import org.jboss.errai.marshalling.client.api.exceptions.MarshallingException;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.util.NumbersUtils;
-import org.jboss.errai.marshalling.rebind.api.model.*;
+import org.jboss.errai.marshalling.rebind.api.model.ConstructorMapping;
+import org.jboss.errai.marshalling.rebind.api.model.FactoryMapping;
+import org.jboss.errai.marshalling.rebind.api.model.InstantiationMapping;
+import org.jboss.errai.marshalling.rebind.api.model.Mapping;
+import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
+import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
 import org.jboss.errai.marshalling.server.EncodingSession;
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.marshalling.server.api.ServerMarshaller;
 import org.mvel2.DataConversion;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 
 /**
  * @author Mike Brock
@@ -154,7 +159,7 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
       }
     }
     catch (Exception e) {
-      throw new MarshallingException(e);
+      throw new MarshallingException("Failed to demarshall an instance of " + definition.getMappingClass(), e);
     }
   }
 
