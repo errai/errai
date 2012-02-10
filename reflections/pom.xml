@@ -22,9 +22,9 @@
 
         <!-- actually needed only when scanning is done. if using {@link Reflections.collect()} javassist is not needed -->
         <dependency>
-            <groupId>javassist</groupId>
+            <groupId>org.javassist</groupId>
             <artifactId>javassist</artifactId>
-            <version>3.12.1.GA</version>
+            <version>3.15.0-GA</version>
         </dependency>
 
         <dependency>
