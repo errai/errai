@@ -218,6 +218,8 @@ public abstract class ServerMarshallUtil {
   }
 
   public static Class loadClassDefinition(String path, String packageName, String className) throws IOException {
+    if (path == null) return null;
+
     FileInputStream inputStream = new FileInputStream(path);
     byte[] classDefinition = new byte[inputStream.available()];
 

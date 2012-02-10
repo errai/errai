@@ -42,15 +42,20 @@ import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
 import org.jboss.errai.marshalling.server.marshallers.DefaultArrayMarshaller;
 import org.jboss.errai.marshalling.server.marshallers.DefaultEnumMarshaller;
 import org.jboss.errai.marshalling.server.util.ServerMarshallUtil;
+import org.slf4j.Logger;
 
 import java.util.Map;
 import java.util.Set;
+
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * @author Mike Brock
  */
 public class MappingContextSingleton {
   private static final ServerMappingContext context;
+  private static Logger log = getLogger("ErraiMarshalling");
+
 
   static {
     ParserFactory.registerParser(
@@ -62,21 +67,30 @@ public class MappingContextSingleton {
             });
 
     ServerMappingContext sContext;
+
     try {
       if (Boolean.getBoolean("errai.marshalling.no_ss_codegen")) {
         sContext = loadDynamicMarshallers();
+        System.out.println("test");
       }
       else {
-        sContext = loadPrecompiledMarshallers();
+        try {
+          sContext = loadPrecompiledMarshallers();
+        }
+        catch (Throwable t) {
+          log.error("failed to load static marshallers", t);
+          log.info("failing over to dynamic marshallers ... performance may be affected.");
+          sContext = loadDynamicMarshallers();
+        }
       }
     }
     catch (Throwable t) {
       t.printStackTrace();
-
-      sContext = loadDynamicMarshallers();
+      sContext = null;
     }
 
     context = sContext;
+
   }
 
   public static ServerMappingContext loadPrecompiledMarshallers() throws Exception {
@@ -260,7 +274,6 @@ public class MappingContextSingleton {
 
           factory.addDefinition(aliasDef);
         }
-
       }
 
       @Override

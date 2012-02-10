@@ -99,6 +99,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     
     if (definition.getMappingClass().isPrimitiveWrapper()) {
       MAPPING_DEFINITIONS.put(definition.getMappingClass().asUnboxed().getInternalName(), definition);
+      MAPPING_DEFINITIONS.put(definition.getMappingClass().asUnboxed().getFullyQualifiedName(), definition);
     }
     
   //  if (log.isDebugEnabled())
@@ -283,7 +284,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
                 + " to " + entry.getValue().getName() + ": the specified alias type does not exist ");
       }
 
-      mappingAliases.put(entry.getKey().getName(), def.getClientMarshallerClass().getName());
+    //  mappingAliases.put(entry.getKey().getName(), def.getClientMarshallerClass().getName());
 
       MappingDefinition aliasDef = new MappingDefinition(def.getMarshallerInstance(), entry.getKey());
       aliasDef.setClientMarshallerClass(def.getClientMarshallerClass());

@@ -16,9 +16,9 @@
 
 package org.jboss.errai.marshalling.server.marshallers;
 
+import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
-import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 
 /**
@@ -42,25 +42,33 @@ public class DefaultEnumMarshaller implements Marshaller<Enum> {
   }
 
   public Enum demarshall(EJValue a0, MarshallingSession a1) {
-       try {
-         if (a0.isNull() != null) {
-           return null;
-         }
-         EJObject obj = a0.isObject();
-         Enum entity = Enum.valueOf(enumType, a0.isObject().get("EnumStringValue").isString().stringValue());
-         return entity;
-       } catch (Throwable t) {
-         t.printStackTrace();
-         throw new RuntimeException("error demarshalling entity: org.jboss.errai.bus.client.tests.support.TestEnumA", t);
-       }
-     }
+    try {
+      if (a0.isNull() != null) {
+        return null;
+      }
+      return Enum.valueOf(enumType, a0.isObject().get(SerializationParts.ENUM_STRING_VALUE).isString().stringValue());
+    }
+    catch (Throwable t) {
+      t.printStackTrace();
+      throw new RuntimeException("error demarshalling enum: " + enumType.getName(), t);
+    }
+  }
 
-     public String marshall(Enum a0, MarshallingSession a1) {
-       if (a0 == null) {
-         return "null";
-       }
-       return new StringBuilder().append("{\"__EncodedType\":\"org.jboss.errai.bus.client.tests.support.TestEnumA\",\"EnumStringValue\":\"").append(a0.name()).append("\"}").toString();
-     }
+  public String marshall(Enum a0, MarshallingSession a1) {
+    if (a0 == null) {
+      return "null";
+    }
+
+    if (a1.hasObjectHash(a0)) {
+      return new StringBuilder().append("{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + enumType.getName()
+              + "\",\"" + SerializationParts.OBJECT_ID + "\":\"").append(a1.getObjectHash(a0)).append("\"}").toString();
+    }
+
+    return new StringBuilder().append("{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + enumType.getName()
+            + "\","
+            + "\"" + SerializationParts.OBJECT_ID + "\":\"" + a1.getObjectHash(a0) + "\""
+            + ",\"" + SerializationParts.ENUM_STRING_VALUE + "\":\"").append(a0.name()).append("\"}").toString();
+  }
 
   @Override
   public boolean handles(EJValue o) {
