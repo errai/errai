@@ -64,28 +64,28 @@ public class MarshallersGenerator extends Generator {
 
   static {
     rootDiscoveryStrategies = new DiscoveryStrategy[]{
-            new DiscoveryStrategy() {
-              @Override
-              public String getCandidate(GeneratorContext context, DiscoveryVeto veto) {
-                try {
-                  ConfigurationProperty prop = context.getPropertyOracle().getConfigurationProperty("errai-module-path-append");
-
-                  if (prop.getValues().isEmpty()) {
-                    logger.warn("property in gwt.xml file 'errai-module-path-prepend' is undefined");
-                    veto.veto();
-                    return null;
-                  }
-
-                  return prop.getValues().get(0);
-
-                }
-                catch (BadPropertyValueException e) {
-                  veto.veto();
-                  return null;
-                }
-
-              }
-            } ,
+//            new DiscoveryStrategy() {
+//              @Override
+//              public String getCandidate(GeneratorContext context, DiscoveryVeto veto) {
+//                try {
+//                  ConfigurationProperty prop = context.getPropertyOracle().getConfigurationProperty("errai-module-path-append");
+//
+//                  if (prop.getValues().isEmpty()) {
+//                    logger.warn("property in gwt.xml file 'errai-module-path-prepend' is undefined");
+//                    veto.veto();
+//                    return null;
+//                  }
+//
+//                  return prop.getValues().get(0);
+//
+//                }
+//                catch (BadPropertyValueException e) {
+//                  veto.veto();
+//                  return null;
+//                }
+//
+//              }
+//            } ,
             new DiscoveryStrategy() {
               @Override
               public String getCandidate(GeneratorContext context, DiscoveryVeto veto) {
@@ -162,7 +162,6 @@ public class MarshallersGenerator extends Generator {
               .generate(SERVER_MARSHALLER_PACKAGE_NAME, SERVER_MARSHALLER_CLASS_NAME);
 
       if (junit) {
-        Random rand = new Random(System.nanoTime());
         String tmpLocation = new File(RebindUtils.getTempDirectory() + "/errai.marshalling/out/").getAbsolutePath();
         System.out.println("*** using temporary path for JUnit Shell: " + tmpLocation + " ***");
 
@@ -184,9 +183,14 @@ public class MarshallersGenerator extends Generator {
         logger.debug("Searching candidate output directories for generated marshallers");
         File outputDirCdt;
 
+        boolean marshallerDeposited = false;
+        
+        
         Strategies:
         for (DiscoveryStrategy strategy : rootDiscoveryStrategies) {
           for (String candidate : candidateOutputDirectories) {
+            logger.info("considering '" + candidate + "' as module output path ...");
+            
             class DiscoveryVetoImpl implements DiscoveryVeto {
               boolean vetoed = false;
 
@@ -209,6 +213,7 @@ public class MarshallersGenerator extends Generator {
               logger.info("   found '" + outputDirCdt + "' output directory");
               generateServerMarshallers(outputDirCdt.getAbsolutePath(), serverSideClass);
               logger.info("** deposited marshaller class in : " + outputDirCdt.getAbsolutePath());
+              marshallerDeposited = true;
               break Strategies;
             }
             else {
@@ -216,6 +221,12 @@ public class MarshallersGenerator extends Generator {
             }
           }
         }
+        
+        if (!marshallerDeposited) {
+          logger.warn(" *** the server marshaller was not deposited into your build output!\n" +
+                  "   A target output could not be resolved through configuration or auto-detection!");
+        }
+        
       }
     }
     else {
