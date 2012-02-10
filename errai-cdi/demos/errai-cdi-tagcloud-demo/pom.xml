@@ -17,7 +17,7 @@
     <errai.version>2.0-SNAPSHOT</errai.version>
     <gwt.version>2.3.0</gwt.version>
     <gwt.maven>2.3.0</gwt.maven>
-    <weld.version>1.1.0.Final</weld.version>
+    <weld.version>1.1.5.Final</weld.version>
     <uel.impl.version>2.1.2-b04</uel.impl.version>
     <mvel.version>2.1.Beta6</mvel.version>
     <jetty.version>6.1.25</jetty.version>
