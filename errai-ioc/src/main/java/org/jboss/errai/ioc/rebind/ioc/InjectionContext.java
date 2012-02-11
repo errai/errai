@@ -319,6 +319,10 @@ public class InjectionContext {
     return Collections.unmodifiableCollection(privateMethodsToExpose);
   }
 
+  public boolean hasType(MetaClass cls) {
+    return injectors.containsKey(cls);
+  }
+
   public IOCProcessingContext getProcessingContext() {
     return processingContext;
   }

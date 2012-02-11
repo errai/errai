@@ -16,8 +16,12 @@
 
 package org.jboss.errai.enterprise.rebind;
 
+import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.JPackage;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
+import org.jboss.errai.codegen.framework.meta.impl.gwt.GWTClass;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.api.IOCExtension;
 import org.jboss.errai.ioc.rebind.AnnotationHandler;
@@ -27,6 +31,7 @@ import org.jboss.errai.ioc.rebind.Rule;
 import org.jboss.errai.ioc.rebind.ioc.*;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Produces;
 import javax.inject.Singleton;
 
@@ -117,6 +122,35 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
         return true;
       }
     });
+
+    procFactory.registerHandler(Dependent.class, new AnnotationHandler<Dependent>() {
+      public boolean handle(InjectableInstance instance, Dependent annotation, IOCProcessingContext context) {
+        InjectionContext injectionContext = injectorFactory.getInjectionContext();
+        TypeInjector i = (TypeInjector) instance.getInjector();
+
+        if (!i.isInjected()) {
+          // instantiate the bean.
+          //  i.setSingleton(true);
+          i.getType(injectionContext, null);
+          injectionContext.registerInjector(i);
+        }
+        return true;
+      }
+    });
+
+    for (JPackage pkg : context.getGeneratorContext().getTypeOracle().getPackages()) {
+      for (JClassType type : pkg.getTypes()) {
+        MetaClass metaClass = GWTClass.newInstance(type);
+
+        if (injectorFactory.hasType(metaClass)) {
+          System.out.println("*type already registered*");
+          continue;
+        }
+        System.out.println(">" + metaClass);
+        injectorFactory.addType(metaClass);
+      }
+    }
+
   }
 
   public void afterInitialization(IOCProcessingContext context, InjectorFactory injectorFactory,

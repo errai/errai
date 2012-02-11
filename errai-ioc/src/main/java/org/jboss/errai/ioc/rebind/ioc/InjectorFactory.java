@@ -57,6 +57,10 @@ public class InjectorFactory {
     ctx.registerInjector(new TypeInjector(type, ctx.getProcessingContext()));
   }
 
+  public boolean hasType(MetaClass type) {
+    return ctx.hasType(type);
+  }
+
   public void addInjector(Injector injector) {
     ctx.registerInjector(injector);
   }
