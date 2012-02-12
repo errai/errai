@@ -26,7 +26,7 @@ import org.jboss.errai.enterprise.client.cdi.api.CDI;
 /**
  * @author Mike Brock
  */
-public class InjectionIntegrationTest extends AbstractErraiCDITest {
+public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
 
   @Override
   public String getModuleName() {
