@@ -121,7 +121,7 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
 
   @Override
   public boolean isAbstract() {
-    return false;
+    return modifiers.hasModifier(Modifier.Abstract);
   }
 
   @Override
@@ -141,12 +141,12 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
 
   @Override
   public boolean isFinal() {
-    return false;
+    return modifiers.hasModifier(Modifier.Final);
   }
 
   @Override
   public boolean isStatic() {
-    return false;
+    return modifiers.hasModifier(Modifier.Static);
   }
 
   @Override
@@ -166,7 +166,7 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
 
   @Override
   public boolean isSynchronized() {
-    return false;
+    return modifiers.hasModifier(Modifier.Synchronized);
   }
 
   @Override

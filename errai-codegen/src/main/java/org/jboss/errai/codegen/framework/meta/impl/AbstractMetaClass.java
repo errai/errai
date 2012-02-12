@@ -18,6 +18,7 @@ package org.jboss.errai.codegen.framework.meta.impl;
 
 import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.asClassArray;
 import static org.jboss.errai.codegen.framework.util.GenUtil.classToMeta;
+import static org.jboss.errai.codegen.framework.util.GenUtil.findCaseInsensitiveMatch;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -178,10 +179,15 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   @Override
   public MetaMethod getBestMatchingMethod(String name, Class... parameters) {
-    MetaMethod meth = getBestMatchingMethod(null, name, parameters);
-    if (meth == null) {
-      meth = getMethod(name, parameters);
+    MetaMethod meth = getMethod(name, parameters);
+    if (meth == null || meth.isStatic()) {
+      meth = null;
     }
+
+    if (meth == null) {
+      meth = getBestMatchingMethod(null, name, parameters);
+    }
+
     return meth;
   }
 
@@ -192,12 +198,20 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   @Override
   public MetaMethod getBestMatchingStaticMethod(String name, Class... parameters) {
-    return getBestMatchingMethod(new GetMethodsCallback() {
-      @Override
-      public Method[] getMethods() {
-        return fromMetaMethod(getStaticMethods());
-      }
-    }, name, parameters);
+    MetaMethod meth = getMethod(name, parameters);
+    if (meth == null || !meth.isStatic()) {
+      meth = null;
+    }
+
+    if (meth == null) {
+      meth = getBestMatchingMethod(new GetMethodsCallback() {
+        @Override
+        public Method[] getMethods() {
+          return fromMetaMethod(getStaticMethods());
+        }
+      }, name, parameters);
+    }
+    return meth;
   }
 
   @Override
@@ -225,7 +239,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
         List<Method> methodList = new ArrayList<Method>();
         for (Method m : (methodsCallback == null) ? cls.getMethods() : methodsCallback.getMethods()) {
           if (!m.isBridge()) {
-            methodList.add(m); 
+            methodList.add(m);
           }
         }
 

@@ -77,13 +77,13 @@ public class MarshallerGeneratorFactory {
   private Logger log = LoggerFactory.getLogger(MarshallerGeneratorFactory.class);
 
   long startTime;
-  
+
   private MarshallerOuputTarget target;
 
   private MarshallerGeneratorFactory(MarshallerOuputTarget target) {
     this.target = target;
   }
-  
+
   public static MarshallerGeneratorFactory getFor(MarshallerOuputTarget target) {
     return new MarshallerGeneratorFactory(target);
   }
@@ -400,7 +400,7 @@ public class MarshallerGeneratorFactory {
     dmBuilder.append(autoForLoop("i", Stmt.loadVariable("newArray").loadField("length"))
             .append(dim == 1 ? outerAccessorStatement
                     : loadVariable("newArray", loadVariable("i")).assignValue(
-                    Stmt.invokeStatic(anonBuilder.getClassDefinition(),
+                    Stmt.loadVariable("this").invoke(
                             "_demarshall" + (dim - 1),
                             Stmt.loadVariable("a0").invoke("get", Stmt.loadVariable("i")).invoke("isArray"),
                             Stmt.loadVariable("a1"))))
@@ -425,7 +425,7 @@ public class MarshallerGeneratorFactory {
                                             Stmt.loadVariable("a0", Stmt.loadVariable("i")),
                                             Stmt.loadVariable("a1"))
                             :
-                            Stmt.invokeStatic(anonBuilder.getClassDefinition(),
+                            Stmt.loadVariable("this").invoke(
                                     "_marshall" + (dim - 1), Stmt.loadVariable("a0", Stmt.loadVariable("i")), loadVariable("a1"))))
                     .finish())
             .append(Stmt.loadVariable("sb").invoke("append", "]").invoke("toString").returnValue())

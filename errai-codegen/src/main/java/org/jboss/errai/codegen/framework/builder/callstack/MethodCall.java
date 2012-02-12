@@ -67,6 +67,7 @@ public class MethodCall extends AbstractCallElement {
               : callType.getBestMatchingMethod(methodName, parameterTypes);
 
       if (method == null) {
+        callType.getBestMatchingMethod(methodName, parameterTypes);
         throw new UndefinedMethodException(statement.getType(), methodName, parameterTypes);
       }
 

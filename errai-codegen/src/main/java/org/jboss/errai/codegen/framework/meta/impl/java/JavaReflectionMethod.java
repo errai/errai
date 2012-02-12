@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.jboss.errai.codegen.framework.meta.MetaClass;
@@ -181,5 +182,10 @@ public class JavaReflectionMethod extends MetaMethod {
   @Override
   public Method asMethod() {
     return method;
+  }
+
+  @Override
+  public String toString() {
+    return getName() + "(" + Arrays.toString(parameters) + ")";
   }
 }
