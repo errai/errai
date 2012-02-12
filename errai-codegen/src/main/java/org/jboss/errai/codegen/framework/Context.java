@@ -127,12 +127,11 @@ public class Context {
       }
 
       if (importsMap == null) {
-        importsMap = new HashMap<String, String>();
+        imports = importsMap = new HashMap<String, String>();
 
         c = this;
         while (c.parent != null) {
-          c.imports = importsMap;
-          c = c.parent;
+          (c = c.parent).imports = importsMap;
         }
       }
       else {
