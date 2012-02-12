@@ -272,10 +272,9 @@ public final class MetaClassFactory {
   }
 
   public static MetaClass parameterizedAs(MetaClass clazz, MetaParameterizedType parameterizedType) {
-    BuildMetaClass buildMetaClass = new BuildMetaClass(Context.create());
+    BuildMetaClass buildMetaClass = new BuildMetaClass(Context.create(), clazz.getFullyQualifiedName());
 
     buildMetaClass.setReifiedFormOf(clazz);
-    buildMetaClass.setClassName(clazz.getFullyQualifiedName());
     buildMetaClass.setAbstract(clazz.isAbstract());
     buildMetaClass.setFinal(clazz.isFinal());
     buildMetaClass.setInterface(clazz.isInterface());

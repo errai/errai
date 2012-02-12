@@ -25,7 +25,7 @@ import org.jboss.errai.codegen.framework.meta.*;
 
 /**
  * {@link CallElement} to create a class reference.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class LoadClassReference extends AbstractCallElement {
@@ -77,52 +77,58 @@ public class LoadClassReference extends AbstractCallElement {
     Map<MetaType, String> cacheStore = context.getRenderingCache(CLASS_LITERAL_RENDER_CACHE);
 
     String result = cacheStore.get(metaClass);
+
     if (result == null) {
 
+      result = _getClassReference(metaClass, context, typeParms);
 
-      MetaClass erased;
-      if (metaClass instanceof MetaClass) {
-        erased = ((MetaClass) metaClass).getErased();
-      }
-      else if (metaClass instanceof MetaParameterizedType) {
-        MetaParameterizedType parameterizedType = (MetaParameterizedType) metaClass;
-        return parameterizedType.toString();
-      }
-      else if (metaClass instanceof MetaTypeVariable) {
-        MetaTypeVariable parameterizedType = (MetaTypeVariable) metaClass;
-        return parameterizedType.getName();
-      }
-      else if (metaClass instanceof MetaWildcardType) {
-        MetaWildcardType wildCardType = (MetaWildcardType) metaClass;
-        return wildCardType.toString();
-      }
-      else {
-        throw new RuntimeException("unknown class reference type: " + metaClass);
-      }
-
-      String fqcn = erased.getCanonicalName();
-      int idx = fqcn.lastIndexOf('.');
-      if (idx != -1) {
-
-        if ((context.isAutoImportActive() || "java.lang".equals(erased.getPackageName())) 
-            && !context.hasImport(erased)) {
-          context.addImport(erased);
-        }
-
-        if (context.hasImport(erased)) {
-          fqcn = fqcn.substring(idx + 1);
-        }
-      }
-
-      StringBuilder buf = new StringBuilder(fqcn);
-      if (typeParms) {
-        buf.append(getClassReferencesForParameterizedTypes(((MetaClass) metaClass).getParameterizedType(), context));
-      }
-
-      result = buf.toString();
       cacheStore.put(metaClass, result);
     }
     return result;
+  }
+
+  private static String _getClassReference(MetaType metaClass, Context context, boolean typeParms) {
+
+    MetaClass erased;
+    if (metaClass instanceof MetaClass) {
+      erased = ((MetaClass) metaClass).getErased();
+    }
+    else if (metaClass instanceof MetaParameterizedType) {
+      MetaParameterizedType parameterizedType = (MetaParameterizedType) metaClass;
+      return parameterizedType.toString();
+    }
+    else if (metaClass instanceof MetaTypeVariable) {
+      MetaTypeVariable parameterizedType = (MetaTypeVariable) metaClass;
+      return parameterizedType.getName();
+    }
+    else if (metaClass instanceof MetaWildcardType) {
+      MetaWildcardType wildCardType = (MetaWildcardType) metaClass;
+      return wildCardType.toString();
+    }
+    else {
+      throw new RuntimeException("unknown class reference type: " + metaClass);
+    }
+
+    String fqcn = erased.getCanonicalName();
+    int idx = fqcn.lastIndexOf('.');
+    if (idx != -1) {
+
+      if ((context.isAutoImportActive() || "java.lang".equals(erased.getPackageName()))
+              && !context.hasImport(erased)) {
+        context.addImport(erased);
+      }
+
+      if (context.hasImport(erased)) {
+        fqcn = fqcn.substring(idx + 1);
+      }
+    }
+
+    StringBuilder buf = new StringBuilder(fqcn);
+    if (typeParms) {
+      buf.append(getClassReferencesForParameterizedTypes(((MetaClass) metaClass).getParameterizedType(), context));
+    }
+
+    return buf.toString();
   }
 
   private static final RenderCacheStore<MetaParameterizedType, String> PARMTYPE_LITERAL_RENDER_CACHE =

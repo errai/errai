@@ -52,8 +52,7 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
   protected BuildMetaClass classDefinition;
 
   ClassBuilder(String className, MetaClass parent, Context context) {
-    this.classDefinition = new BuildMetaClass(context);
-    this.classDefinition.setClassName(className);
+    this.classDefinition = new BuildMetaClass(context, className);
     this.classDefinition.setSuperClass(parent);
     context.attachClass(classDefinition);
   }

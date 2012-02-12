@@ -17,6 +17,9 @@
 package org.jboss.errai.codegen.framework.literal;
 
 import org.jboss.errai.codegen.framework.Context;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
+import org.mvel2.util.NullType;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -31,5 +34,10 @@ public class NullLiteral extends LiteralValue<Object> {
   @Override
   public String getCanonicalString(Context context) {
     return "null";
+  }
+
+  @Override
+  public MetaClass getType() {
+    return MetaClassFactory.get(NullType.class);
   }
 }

@@ -39,6 +39,7 @@ import org.jboss.errai.codegen.framework.meta.MetaParameter;
 import org.jboss.errai.codegen.framework.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.framework.meta.MetaType;
 import org.jboss.errai.codegen.framework.util.GenUtil;
+import org.mvel2.util.NullType;
 import org.mvel2.util.ParseTools;
 
 /**
@@ -413,12 +414,16 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   private Set<MetaClass> POS_ASSIGNABLE_CACHE = new HashSet<MetaClass>();
   private Set<MetaClass> NEG_ASSIGNABLE_CACHE = new HashSet<MetaClass>();
+  
+  private static final MetaClass NULL_TYPE = MetaClassFactory.get(NullType.class);
 
   @Override
   public boolean isAssignableFrom(MetaClass clazz) {
     if (POS_ASSIGNABLE_CACHE.contains(clazz)) return true;
     if (NEG_ASSIGNABLE_CACHE.contains(clazz)) return false;
 
+    if (!isPrimitive() && NULL_TYPE.equals(clazz)) return true;
+    
     MetaClass cls;
 
     if (equals(cls = MetaClassFactory.get(Object.class))) {

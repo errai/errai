@@ -87,6 +87,10 @@ public class Variable extends AbstractStatement {
     return variable;
   }
 
+  public static Variable from(VariableReference ref) {
+    return new Variable(ref.getName(), ref.getType());
+  }
+  
   public static Variable create(String name, Class<?> type) {
     return new Variable(name, MetaClassFactory.get(type));
   }

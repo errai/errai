@@ -115,6 +115,13 @@ public class JaxrsProxyLoaderGenerator extends Generator {
     }
     classBuilder = (ClassStructureBuilder<?>) loadProxies.finish();
     
-    return classBuilder.toJavaString();
+    String out = classBuilder.toJavaString();
+
+    if (Boolean.getBoolean("errai.codegen.printOut")) {
+      System.out.println("---JAX-RS Proxy-->");
+      System.out.println(out);
+      System.out.println("<--JAX-RS Proxy---");
+    }
+    return out;
   }
 }

@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -52,12 +53,12 @@ public class Context {
 
   private boolean autoImportActive = false;
   private Map<String, String> imports;
-  private List<MetaClass> classContexts;
+  private Set<MetaClass> classContexts;
 
   private Map<String, Map<Object, Object>> renderingCache;
 
   private Context() {
-    classContexts = new ArrayList<MetaClass>();
+    classContexts = new HashSet<MetaClass>();
     renderingCache = new HashMap<String, Map<Object, Object>>();
   }
 

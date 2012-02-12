@@ -16,12 +16,6 @@
 
 package org.jboss.errai.codegen.framework.meta.impl.build;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-
 import org.jboss.errai.codegen.framework.BlockStatement;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.DefParameters;
@@ -39,6 +33,12 @@ import org.jboss.errai.codegen.framework.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.framework.meta.impl.AbstractMetaClass;
 import org.jboss.errai.codegen.framework.util.GenUtil;
 import org.jboss.errai.codegen.framework.util.PrettyPrinter;
+
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -66,17 +66,17 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   private List<MetaTypeVariable> typeVariables = new ArrayList<MetaTypeVariable>();
   private MetaClass reifiedFormOf;
 
-  public BuildMetaClass(Context context) {
+  public BuildMetaClass(Context context, String name) {
     super(null);
+    this.className = name;
     this.context = Context.create(context);
     this.context.addVariable(Variable.create("this", this));
     context.attachClass(this);
   }
 
   private BuildMetaClass shallowCopy() {
-    BuildMetaClass copy = new BuildMetaClass(context);
+    BuildMetaClass copy = new BuildMetaClass(context, className);
 
-    copy.className = className;
     copy.superClass = superClass;
     copy.interfaces = interfaces;
 
@@ -329,10 +329,10 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   public MetaTypeVariable[] getTypeParameters() {
     return typeVariables.toArray(new MetaTypeVariable[typeVariables.size()]);
   }
-
-  public void setClassName(String className) {
-    this.className = className;
-  }
+//
+//  public void setClassName(String className) {
+//    this.className = className;
+//  }
 
   public void setSuperClass(MetaClass superClass) {
     this.superClass = superClass;
@@ -496,7 +496,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
 
     StringBuilder buf = new StringBuilder(512);
 
- //   context.addVariable(Variable.create("this", this));
+    context.addVariable(Variable.create("this", this));
 
     buf.append("\n");
 
@@ -546,17 +546,18 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
         else {
           String pkg = getPackageName();
           if (cls.startsWith(pkg)) {
-            if (cls.substring(pkg.length() + 1).indexOf('.') == -1)  {
+            if (cls.substring(pkg.length() + 1).indexOf('.') == -1) {
               continue;
             }
           }
         }
-        
+
         headerBuffer.append("import ").append(cls).append(";\n");
       }
     }
 
     return generatedCache = PrettyPrinter.prettyPrintJava(headerBuffer.toString() + buf.append("}\n").toString());
+
   }
 
   public String membersToString() {
@@ -588,5 +589,69 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
         buf.append("\n");
     }
     return buf.toString();
+  }
+
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof BuildMetaClass)) return false;
+    if (!super.equals(o)) return false;
+
+    BuildMetaClass that = (BuildMetaClass) o;
+
+    if (dimensions != that.dimensions) return false;
+    if (isAbstract != that.isAbstract) return false;
+    if (isArray != that.isArray) return false;
+    if (isFinal != that.isFinal) return false;
+    if (isInner != that.isInner) return false;
+    if (isInterface != that.isInterface) return false;
+    if (isStatic != that.isStatic) return false;
+    if (!Arrays.equals(_constructorsCache, that._constructorsCache)) return false;
+    if (!Arrays.equals(_fieldsCache, that._fieldsCache)) return false;
+    if (!Arrays.equals(_methodsCache, that._methodsCache)) return false;
+    if (_nameCache != null ? !_nameCache.equals(that._nameCache) : that._nameCache != null) return false;
+    if (className != null ? !className.equals(that.className) : that.className != null) return false;
+    if (constructors != null ? !constructors.equals(that.constructors) : that.constructors != null) return false;
+    if (context != null ? !context.equals(that.context) : that.context != null) return false;
+    if (fields != null ? !fields.equals(that.fields) : that.fields != null) return false;
+    if (generatedCache != null ? !generatedCache.equals(that.generatedCache) : that.generatedCache != null)
+      return false;
+    if (interfaces != null ? !interfaces.equals(that.interfaces) : that.interfaces != null) return false;
+    if (methods != null ? !methods.equals(that.methods) : that.methods != null) return false;
+    if (reifiedFormOf != null ? !reifiedFormOf.equals(that.reifiedFormOf) : that.reifiedFormOf != null) return false;
+    if (scope != that.scope) return false;
+    if (superClass != null ? !superClass.equals(that.superClass) : that.superClass != null) return false;
+    if (typeVariables != null ? !typeVariables.equals(that.typeVariables) : that.typeVariables != null) return false;
+
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    int result = super.hashCode();
+    result = 31 * result + (context != null ? context.hashCode() : 0);
+    result = 31 * result + (className != null ? className.hashCode() : 0);
+    result = 31 * result + (superClass != null ? superClass.hashCode() : 0);
+    result = 31 * result + (interfaces != null ? interfaces.hashCode() : 0);
+    result = 31 * result + (scope != null ? scope.hashCode() : 0);
+    result = 31 * result + (isArray ? 1 : 0);
+    result = 31 * result + dimensions;
+    result = 31 * result + (isInterface ? 1 : 0);
+    result = 31 * result + (isAbstract ? 1 : 0);
+    result = 31 * result + (isFinal ? 1 : 0);
+    result = 31 * result + (isStatic ? 1 : 0);
+    result = 31 * result + (isInner ? 1 : 0);
+    result = 31 * result + (methods != null ? methods.hashCode() : 0);
+    result = 31 * result + (fields != null ? fields.hashCode() : 0);
+    result = 31 * result + (constructors != null ? constructors.hashCode() : 0);
+    result = 31 * result + (typeVariables != null ? typeVariables.hashCode() : 0);
+    result = 31 * result + (reifiedFormOf != null ? reifiedFormOf.hashCode() : 0);
+    result = 31 * result + (_nameCache != null ? _nameCache.hashCode() : 0);
+    result = 31 * result + (_methodsCache != null ? Arrays.hashCode(_methodsCache) : 0);
+    result = 31 * result + (_fieldsCache != null ? Arrays.hashCode(_fieldsCache) : 0);
+    result = 31 * result + (_constructorsCache != null ? Arrays.hashCode(_constructorsCache) : 0);
+    result = 31 * result + (generatedCache != null ? generatedCache.hashCode() : 0);
+    return result;
   }
 }

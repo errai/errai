@@ -30,7 +30,7 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 /**
  * The main generator class for the errai-ioc framework.
- * 
+ *
  * @author Mike Brock
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -41,7 +41,8 @@ public class IOCGenerator extends Generator {
 
   public static final boolean isDebugCompile = Boolean.getBoolean("errai.ioc.debug");
 
-  public IOCGenerator() {}
+  public IOCGenerator() {
+  }
 
   @Override
   public String generate(final TreeLogger logger, final GeneratorContext context, final String typeName)
@@ -87,11 +88,9 @@ public class IOCGenerator extends Generator {
 
   /**
    * Generate source code for new class. Class extends <code>HashMap</code>.
-   * 
-   * @param logger
-   *          Logger object
-   * @param context
-   *          Generator context
+   *
+   * @param logger  Logger object
+   * @param context Generator context
    */
   private void generateIOCBootstrapClass(TreeLogger logger, GeneratorContext context) {
     // get print writer that receives the source code
@@ -101,10 +100,18 @@ public class IOCGenerator extends Generator {
     if (printWriter == null)
       return;
 
-    IOCBootstrapGenerator iocBootstrapGenerator = new IOCBootstrapGenerator(typeOracle, context, logger, 
-        RebindUtils.findTranslatablePackages(context));
+    IOCBootstrapGenerator iocBootstrapGenerator = new IOCBootstrapGenerator(typeOracle, context, logger,
+            RebindUtils.findTranslatablePackages(context));
 
-    printWriter.append(iocBootstrapGenerator.generate(packageName, className));
+    String out = iocBootstrapGenerator.generate(packageName, className);
+
+    if (Boolean.getBoolean("errai.codegen.printOut")) {
+      System.out.println("---IOC Bootstrapper--->");
+      System.out.println(out);
+      System.out.println("<--IOC bootstrapper---");
+    }
+
+    printWriter.append(out);
     context.commit(logger, printWriter);
   }
 }
