@@ -496,7 +496,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
 
     StringBuilder buf = new StringBuilder(512);
 
-    context.addVariable(Variable.create("this", this));
+ //   context.addVariable(Variable.create("this", this));
 
     buf.append("\n");
 

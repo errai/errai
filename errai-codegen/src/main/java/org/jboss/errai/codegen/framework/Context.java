@@ -35,13 +35,13 @@ import org.jboss.errai.codegen.framework.meta.MetaField;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
 
 /**
- * This class represents a context in which {@link Statement}s are generated. 
- * It references its parent context and holds a map of variables to represent 
- * a {@link Statement}'s scope. It further supports imports to avoid the use 
+ * This class represents a context in which {@link Statement}s are generated.
+ * It references its parent context and holds a map of variables to represent
+ * a {@link Statement}'s scope. It further supports imports to avoid the use
  * of fully qualified class names.
- * 
+ * <p/>
  * The rendering cache can be used by {@link Statement}s to improve performance.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class Context {
@@ -119,26 +119,35 @@ public class Context {
   private void initImports() {
     if (imports == null) {
       Context c = this;
+      Map<String, String> importsMap = null;
+
       while (c.parent != null) {
         c = c.parent;
+        if (c.imports != null) importsMap = c.imports;
       }
 
-      if (c.imports == null) {
-        c.imports = imports = new HashMap<String, String>();
+      if (importsMap == null) {
+        importsMap = new HashMap<String, String>();
+
+        c = this;
+        while (c.parent != null) {
+          c.imports = importsMap;
+          c = c.parent;
+        }
       }
       else {
-        imports = c.imports;
+        imports = importsMap;
       }
     }
   }
 
   public Context addImport(MetaClass clazz) {
     initImports();
-    
+
     if (clazz.isArray()) {
       clazz = clazz.getComponentType();
     }
-    
+
     if (!imports.containsKey(clazz.getName())) {
       String imp = getImportForClass(clazz);
       if (imp != null) {
@@ -153,9 +162,9 @@ public class Context {
     if (clazz.isArray()) {
       clazz = clazz.getComponentType();
     }
-    
+
     return imports != null && imports.containsKey(clazz.getName()) &&
-          imports.get(clazz.getName()).equals(getImportForClass(clazz));
+            imports.get(clazz.getName()).equals(getImportForClass(clazz));
   }
 
   private String getImportForClass(MetaClass clazz) {
@@ -183,7 +192,7 @@ public class Context {
     }
     return importedClasses;
   }
-  
+
   public Context autoImport() {
     this.autoImportActive = true;
     return this;
@@ -253,16 +262,16 @@ public class Context {
 
   public Collection<Variable> getDeclaredVariables() {
     if (variables == null)
-      return Collections.<Variable> emptyList();
+      return Collections.<Variable>emptyList();
 
     return variables.values();
   }
 
   public Map<String, Variable> getVariables() {
     if (variables == null)
-      return Collections.<String, Variable> emptyMap();
+      return Collections.<String, Variable>emptyMap();
 
-    return Collections.<String, Variable> unmodifiableMap(variables);
+    return Collections.<String, Variable>unmodifiableMap(variables);
   }
 
   public void attachClass(MetaClass clazz) {
