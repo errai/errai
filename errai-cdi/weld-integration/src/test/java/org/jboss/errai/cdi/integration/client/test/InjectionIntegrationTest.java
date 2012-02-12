@@ -33,7 +33,6 @@ public class InjectionIntegrationTest extends AbstractErraiCDITest {
     return "org.jboss.errai.cdi.integration.InjectionTests";
   }
 
-
   public void testDependentBeanScope() {
     CDI.addPostInitTask(new Runnable() {
       @Override
@@ -53,5 +52,4 @@ public class InjectionIntegrationTest extends AbstractErraiCDITest {
 
     delayTestFinish(60000);
   }
-
 }

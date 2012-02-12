@@ -178,7 +178,11 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   @Override
   public MetaMethod getBestMatchingMethod(String name, Class... parameters) {
-    return getBestMatchingMethod(null, name, parameters);
+    MetaMethod meth = getBestMatchingMethod(null, name, parameters);
+    if (meth == null) {
+      meth = getMethod(name, parameters);
+    }
+    return meth;
   }
 
   @Override
@@ -240,7 +244,10 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
               }
 
               if (m == null) {
-                return getMethod(name, parameters);
+                return null;
+//                meth = ;
+//                if (meth == null || meth.isStatic()) return null;
+//                return meth;
               }
             }
           }
@@ -273,7 +280,6 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     }
 
     return staticMethodCache = methods.toArray(new MetaMethod[methods.size()]);
-
   }
 
   private static final Map<MetaMethod[], Method[]> METAMETHOD_TO_METHOD_CACHE = new HashMap<MetaMethod[], Method[]>();
@@ -518,16 +524,6 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
         // ignore.
       }
     }
-
-//    else if (enclosedMetaObject != null) {
-//      try {
-//        cls = Class.forName(((JClassType) enclosedMetaObject).getQualifiedSourceName(), false,
-//                Thread.currentThread().getContextClassLoader());
-//      }
-//      catch (ClassNotFoundException e) {
-//
-//      }
-//    }
 
     return _asClassCache = cls;
   }
