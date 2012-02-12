@@ -57,6 +57,11 @@ public class QualifiedTypeInjectorDelegate extends Injector {
   }
 
   @Override
+  public boolean isPseudo() {
+    return delegate.isPseudo();
+  }
+
+  @Override
   public String getVarName() {
     return delegate.getVarName();
   }

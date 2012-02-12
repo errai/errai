@@ -36,30 +36,7 @@ public class GWTField extends MetaField {
 
   GWTField(JField field) {
     this.field = field;
-
-    try {
-      Class<?> cls = Class.forName(field.getEnclosingType().getQualifiedSourceName(), false,
-          Thread.currentThread().getContextClassLoader());
-
-      Field fld;
-      try {
-        fld = cls.getDeclaredField(field.getName());
-      }
-      catch (NoSuchFieldException e) {
-        try {
-          fld = cls.getField(field.getName());
-        }
-        catch (NoSuchFieldException e2) {
-          throw new RuntimeException("could not find field: "
-              + field.getName() + "; in class: " + cls.getCanonicalName());
-        }
-      }
-      annotations = fld.getAnnotations();
-
-    }
-    catch (ClassNotFoundException e) {
-      throw new RuntimeException(e);
-    }
+    this.annotations = field.getAnnotations();
   }
 
   @Override

@@ -280,7 +280,13 @@ public class GWTClass extends AbstractMetaClass<JType> {
       return null;
     }
 
-    return newUncachedInstance(type.getSuperclass());
+    type = type.getSuperclass();
+    
+    if (type == null) {
+      return null;
+    }
+
+    return newUncachedInstance(type);
   }
 
   @Override
@@ -295,16 +301,21 @@ public class GWTClass extends AbstractMetaClass<JType> {
   @Override
   public Annotation[] getAnnotations() {
     if (annotationsCache == null) {
-      try {
-        Class<?> cls = Class.forName(getEnclosedMetaObject().getQualifiedSourceName(), false,
-                Thread.currentThread().getContextClassLoader());
+//      try {
+//        Class<?> cls = Class.forName(getEnclosedMetaObject().getQualifiedSourceName(), false,
+//                Thread.currentThread().getContextClassLoader());
 
-        annotationsCache = cls.getAnnotations();
 
-      }
-      catch (ClassNotFoundException e) {
-        e.printStackTrace();
-      }
+
+        annotationsCache = getEnclosedMetaObject().isClassOrInterface().getAnnotations();
+        if (annotationsCache == null) {
+          annotationsCache = new Annotation[0];
+        }
+//
+//      }
+//      catch (ClassNotFoundException e) {
+//        e.printStackTrace();
+//      }
     }
 
     return annotationsCache;

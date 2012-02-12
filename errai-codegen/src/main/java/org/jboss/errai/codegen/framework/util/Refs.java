@@ -72,6 +72,11 @@ public abstract class Refs {
       public MetaClass getType() {
         return type;
       }
+
+      @Override
+      public String toString() {
+        return "[var-ref:" + name + "::" + type + "]";
+      }
     };
 
   }

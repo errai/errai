@@ -40,7 +40,6 @@ public class RpcTestBean {
   @Inject @B
   private Caller<MyRemote> myRemoteCallerB;
 
-
   private static RpcTestBean instance;
 
   @PostConstruct

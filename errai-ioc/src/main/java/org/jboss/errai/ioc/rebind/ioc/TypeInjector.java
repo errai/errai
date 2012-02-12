@@ -18,6 +18,7 @@ package org.jboss.errai.ioc.rebind.ioc;
 
 
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -33,9 +34,14 @@ public class TypeInjector extends Injector {
   protected final MetaClass type;
   protected boolean injected;
   protected boolean singleton;
+  protected boolean psuedo;
   protected String varName;
 
   public TypeInjector(MetaClass type, IOCProcessingContext context) {
+     this(type, context, new Annotation[0]);
+  }
+
+  public TypeInjector(MetaClass type, IOCProcessingContext context, Annotation[] additionalQualifiers) {
     this.type = type;
     this.singleton = type.isAnnotationPresent(Singleton.class)
             || type.isAnnotationPresent(com.google.inject.Singleton.class)
@@ -46,10 +52,15 @@ public class TypeInjector extends Injector {
     try {
       Set<Annotation> qualifiers = new HashSet<Annotation>();
       qualifiers.addAll(InjectUtil.extractQualifiersFromType(type));
+      qualifiers.addAll(Arrays.asList(additionalQualifiers));
 
       if (!qualifiers.isEmpty()) {
+
+
+        
         qualifyingMetadata = context.getQualifyingMetadataFactory().createFrom(qualifiers.toArray(new
                 Annotation[qualifiers.size()]));
+
       }
       else {
         qualifyingMetadata = context.getQualifyingMetadataFactory().createDefaultMetadata();
@@ -95,6 +106,15 @@ public class TypeInjector extends Injector {
 
   public void setSingleton(boolean singleton) {
     this.singleton = singleton;
+  }
+
+
+  public boolean isPseudo() {
+    return psuedo;
+  }
+
+  public void setPsuedo(boolean psuedo) {
+    this.psuedo = psuedo;
   }
 
   @Override

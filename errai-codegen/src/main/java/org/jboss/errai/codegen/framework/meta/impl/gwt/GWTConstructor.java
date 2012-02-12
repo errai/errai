@@ -42,22 +42,7 @@ public class GWTConstructor extends MetaConstructor {
   public GWTConstructor(JConstructor c) {
     this.constructor = c;
     this.declaringClass = GWTClass.newInstance(c.getEnclosingType());
-
-    try {
-      Class<?> cls = Class.forName(c.getEnclosingType().getQualifiedSourceName(), false,
-              Thread.currentThread().getContextClassLoader());
-
-      Constructor constr = cls.getConstructor(GWTClass.jParmToClass(c.getParameters()));
-
-      annotations = constr.getAnnotations();
-
-    }
-    catch (ClassNotFoundException e) {
-      e.printStackTrace();
-    }
-    catch (NoSuchMethodException e) {
-      e.printStackTrace();
-    }
+    this.annotations = constructor.getAnnotations();
   }
 
   @Override

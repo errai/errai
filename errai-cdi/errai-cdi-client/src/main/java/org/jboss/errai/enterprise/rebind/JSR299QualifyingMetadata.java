@@ -32,7 +32,7 @@ import org.jboss.errai.ioc.rebind.ioc.QualifyingMetadata;
  */
 public class JSR299QualifyingMetadata implements QualifyingMetadata {
   private Set<Annotation> qualifiers;
-  private static Any ANY_INSTANCE = new Any() {
+  public static Any ANY_INSTANCE = new Any() {
     @Override
     public Class<? extends Annotation> annotationType() {
       return Any.class;

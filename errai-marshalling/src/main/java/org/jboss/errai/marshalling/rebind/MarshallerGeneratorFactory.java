@@ -340,7 +340,7 @@ public class MarshallerGeneratorFactory {
                     .else_()
                     .append(Stmt.declareVariable(EJArray.class).named("arr")
                             .initializeWith(Stmt.loadVariable("a0").invoke("isArray")))
-                    .append(Stmt.invokeStatic(anonClass, "_demarshall" + dimensions,
+                    .append(Stmt.nestedCall(Stmt.loadVariable("this")).invoke("_demarshall" + dimensions,
                             loadVariable("arr"), loadVariable("a1")).returnValue())
                     .finish());
     bBuilder.finish();
@@ -355,7 +355,7 @@ public class MarshallerGeneratorFactory {
                     .append(Stmt.load(null).returnValue())
                     .finish()
                     .else_()
-                    .append(Stmt.invokeStatic(anonClass, "_marshall" + dimensions,
+                    .append(Stmt.nestedCall(Stmt.loadVariable("this")).invoke("_marshall" + dimensions,
                             loadVariable("a0"), loadVariable("a1")).returnValue())
                     .finish()
     );

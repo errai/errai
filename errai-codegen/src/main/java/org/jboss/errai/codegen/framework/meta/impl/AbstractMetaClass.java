@@ -240,12 +240,11 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
               }
 
               if (m == null) {
-                return null;
+                return getMethod(name, parameters);
               }
             }
           }
         }
-//      m = ParseTools.getWidenedTarget(m);
         meth = getMethod(name, m.getParameterTypes());
       }
       else {
@@ -254,7 +253,6 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
       subMap.put(parmKey, meth);
     }
-
 
     return meth;
   }
@@ -512,6 +510,15 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
         cls = null;
       }
     }
+    else {
+      try {
+        cls = Thread.currentThread().getContextClassLoader().loadClass(getFullyQualifiedName());
+      }
+      catch (ClassNotFoundException e) {
+        // ignore.
+      }
+    }
+
 //    else if (enclosedMetaObject != null) {
 //      try {
 //        cls = Class.forName(((JClassType) enclosedMetaObject).getQualifiedSourceName(), false,

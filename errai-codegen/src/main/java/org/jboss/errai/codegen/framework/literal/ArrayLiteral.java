@@ -92,7 +92,11 @@ public class ArrayLiteral extends LiteralValue<Object> {
 
     for (int i = 0; i < length; i++) {
       element = Array.get(arrayInstance, i);
-      if (element.getClass().isArray()) {
+
+      if (element == null) {
+        builder.append("null");
+      }
+      else if (element.getClass().isArray()) {
         builder.append(renderInlineArrayLiteral(context, element));
 
       }

@@ -40,38 +40,7 @@ public class GWTParameter implements MetaParameter {
   GWTParameter(JParameter parameter, MetaMethod declaredBy) {
     this.parameter = parameter;
     this.declaredBy = declaredBy;
-
-    try {
-      Class<?> cls = Class.forName(parameter.getEnclosingMethod().getEnclosingType().getQualifiedSourceName(),
-          false, Thread.currentThread().getContextClassLoader());
-
-      JAbstractMethod jMethod = parameter.getEnclosingMethod();
-
-      int index = -1;
-      for (int i = 0; i < jMethod.getParameters().length; i++) {
-        if (jMethod.getParameters()[i].getName().equals(parameter.getName())) {
-          index = i;
-        }
-      }
-
-      Method method = null;
-      try {
-        method = cls.getDeclaredMethod(jMethod.getName(),
-            GWTClass.jParmToClass(jMethod.getParameters()));
-      }
-      catch (NoSuchMethodException e) {
-        throw new RuntimeException(e);
-      }
-      catch (ClassNotFoundException e) {
-        throw new RuntimeException(e);
-      }
-
-      annotations = method.getParameterAnnotations()[index];
-
-    }
-    catch (ClassNotFoundException e) {
-      e.printStackTrace();
-    }
+    annotations = parameter.getAnnotations();
   }
 
   GWTParameter(JParameter parameter, MetaConstructor declaredBy) {
@@ -80,7 +49,7 @@ public class GWTParameter implements MetaParameter {
 
     try {
       Class<?> cls = Class.forName(parameter.getEnclosingMethod().getEnclosingType().getQualifiedSourceName(),
-          false, Thread.currentThread().getContextClassLoader());
+              false, Thread.currentThread().getContextClassLoader());
 
       JAbstractMethod jMethod = parameter.getEnclosingMethod();
 

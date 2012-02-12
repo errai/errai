@@ -29,12 +29,16 @@ import org.junit.runner.RunWith;
 @RunWith(IOCTestRunner.class)
 public class BasicIOCTest extends IOCClientTestCase {
 
+  static {
+    // Force classloading of SimpleBean so the package is discovered.
+    Class<?> cls = SimpleBean.class;
+  }
+  
   @Override
   public String getModuleName() {
     return "org.jboss.errai.ioc.tests.wiring.IOCWiringTests";
   }
 
-  @Test
   public void testBasicInjectionScenarios() {
     SimpleBean simpleBean = SimpleBean.TEST_INSTANCE;
     assertNotNull(simpleBean);

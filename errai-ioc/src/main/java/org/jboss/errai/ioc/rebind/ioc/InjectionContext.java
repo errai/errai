@@ -169,11 +169,24 @@ public class InjectionContext {
       }
     }
     else {
-      for (Injector inj : injectorList) {
+      Iterator<Injector> iter = injectorList.iterator();
+      boolean noAdd = false;
+      
+      while (iter.hasNext()) {
+        Injector inj = iter.next();
         if (type.isAssignableFrom(inj.getInjectedType()) && inj.metadataMatches(injector)) {
-          return;
+          noAdd = true;
+        }
+
+        if (inj.isPseudo()) {
+          iter.remove();
         }
       }
+
+      if (noAdd) {
+        return;
+      }
+
     }
 
     injectorList.add(injector);
@@ -260,7 +273,8 @@ public class InjectionContext {
           iter.remove();
         }
       }
-    } while (!toExecute.isEmpty() && toExecute.size() < start);
+    }
+    while (!toExecute.isEmpty() && toExecute.size() < start);
 
     if (!toExecute.isEmpty()) {
       UnsatisfiedDependencies unsatisfiedDependencies = new UnsatisfiedDependencies();

@@ -18,6 +18,8 @@ package org.jboss.errai.cdi.integration.client.test;
 
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.cdi.integration.client.RpcTestBean;
+import org.jboss.errai.cdi.integration.client.eg.BeanA;
+import org.jboss.errai.cdi.integration.client.eg.BeanB;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 
@@ -65,7 +67,7 @@ public class RpcIntegrationTest extends AbstractErraiCDITest {
 
     delayTestFinish(60000);
   }
-  
+
   public void testRPCCallToUnqualifiedCDIBean() {
     CDI.addPostInitTask(new Runnable() {
       @Override

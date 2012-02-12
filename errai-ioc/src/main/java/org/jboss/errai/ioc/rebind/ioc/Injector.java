@@ -37,6 +37,8 @@ public abstract class Injector {
 
   public abstract boolean isSingleton();
 
+  public abstract boolean isPseudo();
+
   public abstract String getVarName();
 
   public abstract MetaClass getInjectedType();

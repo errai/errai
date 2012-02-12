@@ -212,7 +212,7 @@ public class IOCProcessorFactory {
 
     return true;
   }
-
+  
   private class ProcessingEntry<T> implements Comparable<ProcessingEntry> {
     private Class<? extends Annotation> annotationClass;
     private AnnotationHandler handler;

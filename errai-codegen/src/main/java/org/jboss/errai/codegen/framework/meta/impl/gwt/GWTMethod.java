@@ -42,22 +42,7 @@ public class GWTMethod extends MetaMethod {
 
   GWTMethod(JMethod method) {
     this.method = method;
-
-    try {
-      Class<?> cls = Class.forName(method.getEnclosingType().getQualifiedSourceName(), false,
-          Thread.currentThread().getContextClassLoader());
-
-      Method meth = cls.getDeclaredMethod(method.getName(), GWTClass.jParmToClass(method.getParameters()));
-
-      annotations = meth.getAnnotations();
-
-    }
-    catch (ClassNotFoundException e) {
-      e.printStackTrace();
-    }
-    catch (NoSuchMethodException e) {
-      e.printStackTrace();
-    }
+    annotations = method.getAnnotations();
   }
 
   @Override
@@ -117,7 +102,7 @@ public class GWTMethod extends MetaMethod {
   public MetaType[] getGenericParameterTypes() {
     List<MetaType> typeList = new ArrayList<MetaType>();
     for (JType type : method.getParameterTypes()) {
-        typeList.add(GWTClass.newInstance(type));
+      typeList.add(GWTClass.newInstance(type));
     }
 
     return typeList.toArray(new MetaType[typeList.size()]);

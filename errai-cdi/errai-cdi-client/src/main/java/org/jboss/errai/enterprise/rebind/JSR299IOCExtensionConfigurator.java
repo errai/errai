@@ -20,7 +20,6 @@ import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.JPackage;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.impl.gwt.GWTClass;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.api.IOCExtension;
@@ -32,8 +31,11 @@ import org.jboss.errai.ioc.rebind.ioc.*;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Produces;
+import javax.inject.Scope;
 import javax.inject.Singleton;
+import java.lang.annotation.Annotation;
 
 @IOCExtension
 public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator {
@@ -80,6 +82,11 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
 
           @Override
           public boolean isSingleton() {
+            return false;
+          }
+
+          @Override
+          public boolean isPseudo() {
             return false;
           }
 
@@ -138,20 +145,42 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
       }
     });
 
-    for (JPackage pkg : context.getGeneratorContext().getTypeOracle().getPackages()) {
-      for (JClassType type : pkg.getTypes()) {
-        MetaClass metaClass = GWTClass.newInstance(type);
+    if (context.getGeneratorContext() != null && context.getGeneratorContext().getTypeOracle() != null) {
+      for (JPackage pkg : context.getGeneratorContext().getTypeOracle().getPackages()) {
+        TypeScan: for (JClassType type : pkg.getTypes()) {
+          if (type.isAbstract() || type.isInterface() != null
+                  || !type.isDefaultInstantiable() || type.getQualifiedSourceName().startsWith("java.")) continue;
 
-        if (injectorFactory.hasType(metaClass)) {
-          System.out.println("*type already registered*");
-          continue;
+          
+          Annotation[] annos = type.getAnnotations();
+          for (Annotation a : type.getAnnotations()) {
+            if (a.annotationType().isAnnotationPresent(Scope.class)) {
+              continue TypeScan;
+            }
+          }
+          
+          MetaClass metaClass = GWTClass.newInstance(type);
+
+          if (injectorFactory.hasType(metaClass)) {
+            continue;
+          }
+          
+//          TypeInjector inj = new TypeInjector(metaClass, context);
+//          inj.setPsuedo(true);
+//          injectorFactory.addInjector(inj);
+          
+          injectorFactory.addPsuedoScopeForType(metaClass);
         }
-        System.out.println(">" + metaClass);
-        injectorFactory.addType(metaClass);
       }
     }
-
   }
+  
+  private static final Dependent DEPENDENT_INSTANCE = new Dependent() {
+    @Override
+    public Class<? extends Annotation> annotationType() {
+      return Dependent.class;
+    }
+  };
 
   public void afterInitialization(IOCProcessingContext context, InjectorFactory injectorFactory,
                                   IOCProcessorFactory procFactory) {

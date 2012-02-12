@@ -178,6 +178,11 @@ public class ContextualProviderInjector extends TypeInjector {
     }
 
     @Override
+    public boolean isPseudo() {
+      return false;
+    }
+
+    @Override
     public String getVarName() {
       return null;
     }

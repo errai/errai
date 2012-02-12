@@ -57,6 +57,12 @@ public class InjectorFactory {
     ctx.registerInjector(new TypeInjector(type, ctx.getProcessingContext()));
   }
 
+  public void addPsuedoScopeForType(MetaClass type) {
+    TypeInjector inj = new TypeInjector(type, ctx.getProcessingContext());
+    inj.setPsuedo(true);
+    ctx.registerInjector(inj);
+  }
+
   public boolean hasType(MetaClass type) {
     return ctx.hasType(type);
   }
