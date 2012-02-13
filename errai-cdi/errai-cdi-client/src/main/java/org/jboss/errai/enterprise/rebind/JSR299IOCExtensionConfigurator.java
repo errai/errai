@@ -17,6 +17,7 @@
 package org.jboss.errai.enterprise.rebind;
 
 import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.JConstructor;
 import com.google.gwt.core.ext.typeinfo.JPackage;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
@@ -33,6 +34,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Produces;
+import javax.inject.Inject;
 import javax.inject.Scope;
 import javax.inject.Singleton;
 import java.lang.annotation.Annotation;
@@ -149,8 +151,21 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
       for (JPackage pkg : context.getGeneratorContext().getTypeOracle().getPackages()) {
         TypeScan: for (JClassType type : pkg.getTypes()) {
           if (type.isAbstract() || type.isInterface() != null
-                  || !type.isDefaultInstantiable() || type.getQualifiedSourceName().startsWith("java.")) continue;
+                  || type.getQualifiedSourceName().startsWith("java.")) continue;
 
+          if (!type.isDefaultInstantiable()) {
+            boolean hasInjectableConstructor = false;
+            for (JConstructor c : type.getConstructors()) {
+              if (c.isAnnotationPresent(Inject.class)) {
+                hasInjectableConstructor = true;
+                break;
+              }
+            }
+
+            if (!hasInjectableConstructor) {
+              continue;
+            }
+          }
           
           Annotation[] annos = type.getAnnotations();
           for (Annotation a : type.getAnnotations()) {
@@ -164,10 +179,6 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
           if (injectorFactory.hasType(metaClass)) {
             continue;
           }
-          
-//          TypeInjector inj = new TypeInjector(metaClass, context);
-//          inj.setPsuedo(true);
-//          injectorFactory.addInjector(inj);
           
           injectorFactory.addPsuedoScopeForType(metaClass);
         }
