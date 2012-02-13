@@ -19,7 +19,7 @@ package org.jboss.errai.cdi.integration.server;
 import javax.enterprise.context.ApplicationScoped;
 
 import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.cdi.integration.client.MyRemote;
+import org.jboss.errai.cdi.integration.client.shared.MyRemote;
 
 @Service
 @ApplicationScoped

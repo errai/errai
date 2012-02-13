@@ -14,21 +14,14 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.cdi.integration.client.eg;
+package org.jboss.errai.cdi.integration.client.shared;
+
+import org.jboss.errai.bus.server.annotations.Remote;
 
 /**
  * @author Mike Brock
  */
-public class BeanB {
-  static int instanceCount = 0;
-
-  private int instance;
-  
-  public BeanB() {
-    instance = instanceCount++;
-  }
-  
-  public int getInstance() {
-    return instance;
-  }
+@Remote
+public interface MyRemote {
+  public String call(String callString);
 }

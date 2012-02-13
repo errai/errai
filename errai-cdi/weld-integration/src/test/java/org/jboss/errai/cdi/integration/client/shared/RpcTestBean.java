@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.cdi.integration.client;
+package org.jboss.errai.cdi.integration.client.shared;
 
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.cdi.client.qualifier.A;

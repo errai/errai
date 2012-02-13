@@ -16,10 +16,8 @@
 
 package org.jboss.errai.cdi.integration.client.test;
 
-import org.jboss.errai.bus.client.api.RemoteCallback;
-import org.jboss.errai.cdi.integration.client.RpcTestBean;
-import org.jboss.errai.cdi.integration.client.eg.BeanA;
-import org.jboss.errai.cdi.integration.client.eg.BeanB;
+import org.jboss.errai.cdi.integration.client.shared.ApplicationScopedBean;
+import org.jboss.errai.cdi.integration.client.shared.DependentScopedBean;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 
@@ -37,11 +35,11 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
     CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
-        BeanA beanA = BeanA.getInstance();
+        ApplicationScopedBean beanA = ApplicationScopedBean.getInstance();
 
-        BeanB b1 = beanA.getBean1();
-        BeanB b2 = beanA.getBean2();
-        BeanB b3 = beanA.getBean3();
+        DependentScopedBean b1 = beanA.getBean1();
+        DependentScopedBean b2 = beanA.getBean2();
+        DependentScopedBean b3 = beanA.getBean3();
 
         assertTrue(b2.getInstance() > b1.getInstance());
         assertTrue(b3.getInstance() > b2.getInstance());

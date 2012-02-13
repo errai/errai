@@ -9,8 +9,8 @@ import javax.inject.Inject;
 import org.jboss.errai.cdi.client.qualifier.A;
 import org.jboss.errai.cdi.client.qualifier.B;
 import org.jboss.errai.cdi.client.qualifier.C;
-import org.jboss.errai.cdi.integration.client.FinishEvent;
-import org.jboss.errai.cdi.integration.client.ReceivedEvent;
+import org.jboss.errai.cdi.integration.client.shared.FinishEvent;
+import org.jboss.errai.cdi.integration.client.shared.ReceivedEvent;
 
 @ApplicationScoped
 public class CdiTestEventObserverService {

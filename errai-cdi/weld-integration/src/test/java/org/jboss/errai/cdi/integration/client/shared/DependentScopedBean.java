@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ *  
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,42 +14,21 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.cdi.integration.client.eg;
-
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+package org.jboss.errai.cdi.integration.client.shared;
 
 /**
  * @author Mike Brock
  */
-@ApplicationScoped
-public class BeanA {
-  @Inject BeanB bean1;
-  @Inject BeanB bean2;
-  @Inject @Dependent BeanB bean3;
+public class DependentScopedBean {
+  static int instanceCount = 0;
 
-  private static BeanA inst;
-
-  @PostConstruct
-  public void init() {
-    inst = this;
+  private int instance;
+  
+  public DependentScopedBean() {
+    instance = instanceCount++;
   }
   
-  public BeanB getBean1() {
-    return bean1;
-  }
-
-  public BeanB getBean2() {
-    return bean2;
-  }
-
-  public BeanB getBean3() {
-    return bean3;
-  }
-
-  public static BeanA getInstance() {
-    return inst;
+  public int getInstance() {
+    return instance;
   }
 }

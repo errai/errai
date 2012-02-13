@@ -14,23 +14,42 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.cdi.integration.server;
+package org.jboss.errai.cdi.integration.client.shared;
 
-import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.cdi.client.qualifier.A;
-import org.jboss.errai.cdi.integration.client.shared.MyRemote;
-
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 
 /**
  * @author Mike Brock
  */
-@A
-@Service
 @ApplicationScoped
-public class QualifiedRemoteImplA implements MyRemote {
-  @Override
-  public String call(String callString) {
-    return callString + "A";
+public class ApplicationScopedBean {
+  @Inject DependentScopedBean bean1;
+  @Inject DependentScopedBean bean2;
+  @Inject @Dependent DependentScopedBean bean3;
+
+  private static ApplicationScopedBean inst;
+
+  @PostConstruct
+  public void init() {
+    inst = this;
+  }
+  
+  public DependentScopedBean getBean1() {
+    return bean1;
+  }
+
+  public DependentScopedBean getBean2() {
+    return bean2;
+  }
+
+  public DependentScopedBean getBean3() {
+    return bean3;
+  }
+
+  public static ApplicationScopedBean getInstance() {
+    return inst;
   }
 }
