@@ -54,7 +54,7 @@
     <gwt.maven>2.4.0</gwt.maven>
     <mvel.version>2.1.Beta6</mvel.version>
     <jetty.version>6.1.25</jetty.version>
-    <slf4j.version>1.5.11</slf4j.version>
+    <slf4j.version>1.6.1</slf4j.version>
     <validation.api.version>1.0.0.GA</validation.api.version>
     <resteasy.version>2.2.1.GA</resteasy.version>
   </properties>

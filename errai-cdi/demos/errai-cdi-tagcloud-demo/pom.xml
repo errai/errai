@@ -1,7 +1,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.jboss.errai</groupId>
   <artifactId>errai-cdi-demos-tagcloud</artifactId>
   <packaging>war</packaging>
   <name>Errai::CDI::Demos::Tag Cloud</name>
@@ -16,7 +15,7 @@
   <properties>
     <errai.version>2.0-SNAPSHOT</errai.version>
     <gwt.version>2.4.0</gwt.version>
-    <gwt.maven>2.3.0</gwt.maven>
+    <gwt.maven>2.4.0</gwt.maven>
     <weld.version>1.1.5.Final</weld.version>
     <uel.impl.version>2.1.2-b04</uel.impl.version>
     <mvel.version>2.1.Beta6</mvel.version>
@@ -46,7 +45,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>3.8.1</version>
+      <version>4.8.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>

@@ -16,7 +16,7 @@
 		<gwt.version>2.4.0</gwt.version>
 		<hsqldb.version>1.8.0.7</hsqldb.version>
 		<weld.version>1.1.5.Final</weld.version>
-		<gwt.maven.version>2.3.0</gwt.maven.version>
+		<gwt.maven.version>2.4.0</gwt.maven.version>
 		<mvel.version>2.1.Beta6</mvel.version>
 		<jetty.version>6.1.25</jetty.version>
 		<slf4j.version>1.6.1</slf4j.version>
@@ -48,7 +48,7 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>3.8.1</version>
+			<version>4.8.1</version>
 			<scope>test</scope>
 		</dependency>
 
