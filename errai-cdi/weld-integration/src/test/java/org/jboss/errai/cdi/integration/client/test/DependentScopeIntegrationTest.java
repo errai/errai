@@ -18,6 +18,7 @@ package org.jboss.errai.cdi.integration.client.test;
 
 import org.jboss.errai.cdi.integration.client.shared.ApplicationScopedBean;
 import org.jboss.errai.cdi.integration.client.shared.DependentScopedBean;
+import org.jboss.errai.cdi.integration.client.shared.DependentScopedBeanWithDependencies;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 
@@ -40,9 +41,14 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
         DependentScopedBean b1 = beanA.getBean1();
         DependentScopedBean b2 = beanA.getBean2();
         DependentScopedBean b3 = beanA.getBean3();
+        DependentScopedBeanWithDependencies b4 = beanA.getBeanWithDependencies();
 
-        assertTrue(b2.getInstance() > b1.getInstance());
-        assertTrue(b3.getInstance() > b2.getInstance());
+        assertTrue("dependent scoped semantics broken", b2.getInstance() > b1.getInstance());
+        assertTrue("dependent scoped semantics broken", b3.getInstance() > b2.getInstance());
+
+        assertNotNull("dependent scoped bean with injections was not injected", b4);
+        assertNotNull("dependent scoped beans own injections not injected", b4.getBean());
+        assertTrue("dependent scoped semantics broken", b4.getBean().getInstance() > b3.getInstance());
 
         finishTest();
       }

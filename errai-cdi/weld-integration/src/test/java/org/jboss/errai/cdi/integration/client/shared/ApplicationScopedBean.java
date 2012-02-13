@@ -28,7 +28,11 @@ import javax.inject.Inject;
 public class ApplicationScopedBean {
   @Inject DependentScopedBean bean1;
   @Inject DependentScopedBean bean2;
+
+  // the dependent qualification is optional -- this just confirms it doesn't break when used.
   @Inject @Dependent DependentScopedBean bean3;
+  
+  @Inject @Dependent DependentScopedBeanWithDependencies beanWithDependencies;
 
   private static ApplicationScopedBean inst;
 
@@ -47,6 +51,10 @@ public class ApplicationScopedBean {
 
   public DependentScopedBean getBean3() {
     return bean3;
+  }
+
+  public DependentScopedBeanWithDependencies getBeanWithDependencies() {
+    return beanWithDependencies;
   }
 
   public static ApplicationScopedBean getInstance() {
