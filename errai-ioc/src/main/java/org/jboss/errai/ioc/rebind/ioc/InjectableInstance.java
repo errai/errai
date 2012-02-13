@@ -26,6 +26,7 @@ import java.util.List;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.literal.LiteralFactory;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaClassMember;
 import org.jboss.errai.codegen.framework.meta.MetaConstructor;
 import org.jboss.errai.codegen.framework.meta.MetaField;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
@@ -141,6 +142,11 @@ public class InjectableInstance<T extends Annotation> {
 
   public void ensureMemberExposed() {
     switch (taskType) {
+      case Parameter:
+        if (parm.getDeclaringMember() instanceof MetaMethod) {
+          MetaMethod declMeth = (MetaMethod) parm.getDeclaringMember();
+          injectionContext.addExposedMethod(declMeth);
+        }
       case PrivateMethod:
         injectionContext.addExposedMethod(method);
         break;
@@ -197,6 +203,48 @@ public class InjectableInstance<T extends Annotation> {
 
       default:
         return LiteralFactory.getLiteral(null);
+    }
+  }
+
+  public Statement callOrBind(Statement... values) {
+    MetaMethod meth = method;
+    switch (taskType) {
+      case PrivateField:
+        Statement[] args = new Statement[values.length + 1];
+        args[0] = Refs.get(injector.getVarName());
+        System.arraycopy(values, 0, args, 1, values.length);
+
+        return Stmt.invokeStatic(injectionContext.getProcessingContext().getBootstrapClass(),
+                getPrivateFieldInjectorName(field), args);
+
+      case Field:
+        return Stmt.loadVariable(injector.getVarName()).loadField(field.getName()).assignValue(values[0]);
+
+      case Parameter:
+        if (parm.getDeclaringMember() instanceof MetaMethod) {
+          meth = (MetaMethod) parm.getDeclaringMember();
+        }
+        else {
+          throw new RuntimeException("cannot call task on element: " + parm.getDeclaringMember());
+        }
+
+      case Method:
+      case StaticMethod:
+      case PrivateMethod:
+        args = new Statement[values.length + 1];
+        args[0] = Refs.get(injector.getVarName());
+        System.arraycopy(values, 0, args, 1, values.length);
+
+        if (!meth.isPublic()) {
+          return Stmt.invokeStatic(injectionContext.getProcessingContext().getBootstrapClass(),
+                  getPrivateMethodName(meth), args);
+        }
+        else {
+          return Stmt.loadVariable(injector.getVarName()).invoke(meth, values);
+        }
+
+      default:
+        throw new RuntimeException("cannot call tasktype: " + taskType);
     }
   }
 
