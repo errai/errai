@@ -30,11 +30,10 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
  */
 
 @EntryPoint
-public class SimpleBean {
+public class SimpleBean extends SimpleSuperBean {
   public static SimpleBean TEST_INSTANCE;
 
-  @Inject
-  public RequestDispatcher dispatcher;
+
   @Inject
   public MessageBus bus;
 

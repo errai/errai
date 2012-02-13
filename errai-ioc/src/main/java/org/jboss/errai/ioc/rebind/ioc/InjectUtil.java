@@ -192,10 +192,13 @@ public class InjectUtil {
       }
     }
 
-    for (MetaField field : type.getDeclaredFields()) {
+    MetaClass visit = type;
+    
+    do {
+    for (MetaField field : visit.getDeclaredFields()) {
       if (isInjectionPoint(field)) {
         if (!field.isPublic()) {
-          MetaMethod meth = type.getMethod(ReflectionUtil.getSetter(field.getName()),
+          MetaMethod meth = visit.getMethod(ReflectionUtil.getSetter(field.getName()),
                   field.getType());
 
           if (meth == null) {
@@ -231,7 +234,7 @@ public class InjectUtil {
       }
     }
 
-    for (MetaMethod meth : type.getDeclaredMethods()) {
+    for (MetaMethod meth : visit.getDeclaredMethods()) {
       if (isInjectionPoint(meth)) {
         accumulator.add(new InjectionTask(injector, meth));
       }
@@ -260,6 +263,7 @@ public class InjectUtil {
         }
       }
     }
+    } while ((visit = visit.getSuperClass()) != null);
 
     return accumulator;
   }
