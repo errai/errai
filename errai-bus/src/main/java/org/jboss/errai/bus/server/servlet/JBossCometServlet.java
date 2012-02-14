@@ -254,13 +254,11 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
 
         public void activate(MessageQueue queue) {
           if (resumed) {
-            //            log.info("Blocking");
             return;
           }
           resumed = true;
           queue.setActivationCallback(null);
 
-          //     log.info("Attempt to resume queue: " + queue.hashCode());
           try {
             Set<HttpEvent> activeSessEvents;
             QueueSession session;
