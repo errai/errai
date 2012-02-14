@@ -16,9 +16,9 @@
 
 package org.jboss.errai.bus.client.tests.support;
 
-import org.jboss.errai.common.client.api.annotations.ExposeEntity;
+import org.jboss.errai.common.client.api.annotations.Portable;
 
-@ExposeEntity
+@Portable
 public class TestException extends RuntimeException {
 
 }

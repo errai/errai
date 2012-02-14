@@ -133,15 +133,6 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
 
     procFactory.registerHandler(Dependent.class, new AnnotationHandler<Dependent>() {
       public boolean handle(InjectableInstance instance, Dependent annotation, IOCProcessingContext context) {
-        InjectionContext injectionContext = injectorFactory.getInjectionContext();
-        TypeInjector i = (TypeInjector) instance.getInjector();
-
-        if (!i.isInjected()) {
-          // instantiate the bean.
-          //  i.setSingleton(true);
-          i.getType(injectionContext, null);
-          injectionContext.registerInjector(i);
-        }
         return true;
       }
     });
@@ -185,13 +176,6 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
       }
     }
   }
-  
-  private static final Dependent DEPENDENT_INSTANCE = new Dependent() {
-    @Override
-    public Class<? extends Annotation> annotationType() {
-      return Dependent.class;
-    }
-  };
 
   public void afterInitialization(IOCProcessingContext context, InjectorFactory injectorFactory,
                                   IOCProcessorFactory procFactory) {

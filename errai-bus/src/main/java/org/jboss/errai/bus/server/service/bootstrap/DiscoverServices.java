@@ -43,7 +43,6 @@ class DiscoverServices implements BootstrapExecution {
       // setup processors which are applied to the meta data
       MetaDataProcessor[] processors = new MetaDataProcessor[]{
           new ServiceProcessor(),
-          new EntityProcessor(),
       };
 
       // execute meta data processing

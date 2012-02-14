@@ -29,7 +29,6 @@ import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.framework.util.Bool;
 import org.jboss.errai.codegen.framework.util.GenUtil;
 import org.jboss.errai.codegen.framework.util.Stmt;
-import org.jboss.errai.common.client.api.annotations.ExposeEntity;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.marshalling.client.api.Marshaller;
@@ -94,7 +93,6 @@ public class MarshallerGeneratorFactory {
 
     final Set<Class<? extends Annotation>> annos = new HashSet<Class<? extends Annotation>>();
     annos.add(Portable.class);
-    annos.add(ExposeEntity.class);
 
     String gen;
     if (RebindUtils.hasClasspathChangedForAnnotatedWith(annos) || !cacheFile.exists()) {

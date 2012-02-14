@@ -16,9 +16,9 @@
 
 package org.errai.samples.stockdemo.client.shared;
 
-import org.jboss.errai.common.client.api.annotations.ExposeEntity;
+import org.jboss.errai.common.client.api.annotations.Portable;
 
-@ExposeEntity
+@Portable
 public class Stock {
   private String ticker;
   private String companyName;
