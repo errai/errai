@@ -1,36 +1,20 @@
 <?xml version='1.0' encoding='utf-8' ?>
-<!--
-  ~ Copyright 2011 JBoss, by Red Hat, Inc
-  ~
-  ~ Licensed under the Apache License, Version 2.0 (the "License");
-  ~ you may not use this file except in compliance with the License.
-  ~ You may obtain a copy of the License at
-  ~
-  ~    http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~ Unless required by applicable law or agreed to in writing, software
-  ~ distributed under the License is distributed on an "AS IS" BASIS,
-  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~ See the License for the specific language governing permissions and
-  ~ limitations under the License.
-  -->
-
 <!DOCTYPE appendix PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
-<appendix id="app-Revision_History-Quickstart_Guide">
+<appendix id="app-Revision_History-Reference_Guide">
   <title>Revision History</title>
   <simpara>
     <revhistory>
       <revision>
-        <revnumber>ToDo 0-0</revnumber>
-        <date>ToDo Wed Jan 19 2011</date>
+        <revnumber></revnumber>
+        <date></date>
         <author>
-          <firstname>ToDo Dude</firstname>
-          <surname>ToDo McPants</surname>
-          <email>ToDo Dude.McPants@example.com</email>
+          <firstname></firstname>
+          <surname></surname>
+          <email></email>
         </author>
         <revdescription>
           <simplelist>
-            <member>ToDo Initial creation of book</member>
+            <member></member>
           </simplelist>
         </revdescription>
       </revision>

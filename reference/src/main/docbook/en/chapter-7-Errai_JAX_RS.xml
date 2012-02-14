@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<chapter id="sid-19398997">
+    
+    <title>Errai JAX-RS</title>
+    <para>
+      JAX-RS (Java API for RESTful Web Services) is a Java EE standard (JSR-311) for implementing REST-based Web services in Java. Errai JAX-RS brings this standard to the browser and simplifies the integration of REST-based services in GWT client applications. Errai can generate proxies based on JAX-RS interfaces which will handle all the underlying communication and serialization logic. All that's left to do is to invoke a Java method. We have provided a Maven archetype which will create a fully function CRUD application using JAX-RS. See the
+      <ulink url="https://docs.jboss.org/author/pages/viewpage.action?pageId=5833096">Quickstart Guide</ulink>
+      for details.
+    </para>
+    <section id="sid-9470107">
+      
+      <title>Creating Requests</title>
+      <para>The JAX-RS interface needs to be visible to the GWT compiler and should therefore reside within the client packages (e.g. client.shared).</para>
+      <para>Assuming the following simple JAX-RS interface should be used:</para>
+      <example>
+        <title>CustomerService.java</title>
+        <programlisting language="java">@Path("customers")
+public interface CustomerService {
+  @GET
+  @Produces("application/json")
+  public List&lt;Customer&gt; listAllCustomers();
+  
+  @POST
+  @Consumes("application/json")
+  @Produces("text/plain")
+  public long createCustomer(Customer customer);
+}</programlisting>
+      </example>
+      <para>
+        To create a request on the client, all that needs to be done is to invoke
+        <code>RestClient.create()</code>
+        , thereby providing the JAX-RS interface, a response callback and to invoke the corresponding interface method:
+      </para>
+      <example>
+        <title>App.java</title>
+        <programlisting language="java">...
+Button create = new Button("Create", new ClickHandler() {
+  public void onClick(ClickEvent clickEvent) {
+    Customer customer = new Customer(firstName, lastName, postalCode);
+    RestClient.create(CustomerService.class, callback).createCustomer(customer);
+  }
+});
+...</programlisting>
+      </example>
+      <para>
+        For details on the callback mechanism see
+        <xref linkend="sid-9470124"/>
+        .
+      </para>
+      <section id="sid-9470107_CreatingRequests-ProxyInjection">
+        
+        <title>Proxy Injection</title>
+        <para>
+          Injectable proxies can be used as an alternative to calling
+          <code>RestClient.create()</code>
+          .
+        </para>
+        <informalexample>
+          <programlisting language="java">@Inject
+private Caller&lt;CustomerService&gt; customerService;</programlisting>
+        </informalexample>
+        <para>
+          To create a request, the callback objects need to be provided to the
+          <code>call</code>
+          method before the corresponding interface method is invoked.
+        </para>
+        <informalexample>
+          <programlisting language="java">customerService.call(callback).deleteCustomer(customerId);</programlisting>
+        </informalexample>
+      </section>
+    </section>
+    <section id="sid-9470124">
+      
+      <title>Handling Responses</title>
+      <para>
+        An instance of Errai's
+        <code>RemoteCallback</code>
+        has to be passed to the
+        <code>RestClient.create()</code>
+        call, which will provide access to the JAX-RS resource method's result:
+      </para>
+      <informalexample>
+        <programlisting language="java">RemoteCallback&lt;Long&gt; callback = new RemoteCallback&lt;Long&gt;() {
+  public void callback(Long id) {
+    Window.alert("Customer created with ID: " + id);
+  }
+};</programlisting>
+      </informalexample>
+      <para>
+        A special case of this
+        <code>RemoteCallback</code>
+        is the
+        <code>ResponseCallback</code>
+        which provides access to the
+        <code>Response</code>
+        object representing the underlying HTTP response. This is useful when more details of the HTTP response are needed, such as headers, the status code, etc. This
+        <code>ResponseCallback</code>
+        can be provided as an alternative to the
+        <code>RemoteCallback</code>
+        for the method result.
+      </para>
+      <informalexample>
+        <programlisting language="java">ResponseCallback callback = new ResponseCallback() {
+  public void callback(Response response) {
+    Window.alert("HTTP status code: " + response.getStatusCode());
+    Window.alert("HTTP response body: " + response.getText());
+  }
+};</programlisting>
+      </informalexample>
+      <para>
+        For handling errors, Errai's error callback mechanism can be reused and an instance of
+        <code>ErrorCallback</code>
+        can optionally be passed to the
+        <code>RestClient.create()</code>
+        call. In case of an HTTP error, the
+        <code>ResponseException</code>
+        provides access to the
+        <code>Response</code>
+        object. All other
+        <code>Throwables</code>
+        indicate a communication problem.
+      </para>
+      <informalexample>
+        <programlisting language="java">ErrorCallback errorCallback = new ErrorCallback() {
+  public boolean error(Message message, Throwable throwable) {
+    try {
+      throw throwable;
+    }
+    catch (ResponseException e) {
+      Response response = e.getResponse();
+      // process unexpected response
+      response.getStatusCode();
+    }
+    catch (Throwable t) {
+      // process unexpected error (e.g. a network problem)
+    }
+    return false;
+  }
+};</programlisting>
+      </informalexample>
+    </section>
+    <section id="sid-9470133">
+      
+      <title>Wire Format</title>
+      <para>
+        Errai's JSON format will be used to serialize/deserialize your custom types. See
+        <xref linkend="sid-5931328"/>
+        for details. A future extension to Errai's marshaller capabilities will support pluggable/custom serializers. So in the near future you will have the flexibility to use your own wire format.
+      </para>
+    </section>
+    <section id="sid-9470135">
+      
+      <title>Errai JAX-RS Configuration</title>
+      <para>
+        All paths specified using the
+        <code>@Path</code>
+        annotation on JAX-RS interfaces are by definition relative paths. Therefore, by default, it is assumed that the JAX-RS endpoints can be found at the specified paths relative to the GWT client application's context path.
+      </para>
+      <para>To configure a relative or absolute root path, the following JavaScript variable can be set in either</para>
+      <para>the host HTML page</para>
+      <informalexample>
+        <programlisting>&lt;script type="text/javascript"&gt;
+  erraiJaxRsApplicationRoot = "/MyJaxRsEndpointPath";
+&lt;/script&gt;</programlisting>
+      </informalexample>
+      <para>or by using a JSNI method:</para>
+      <informalexample>
+        <programlisting language="java">private native void setMyJaxRsAppRoot(String path) /*-{
+  $wnd.erraiJaxRsApplicationRoot = path;
+}-*/;</programlisting>
+      </informalexample>
+      <para>or by simply invoking:</para>
+      <informalexample>
+        <programlisting language="java">RestClient.setApplicationRoot("/MyJaxRsEndpointPath");</programlisting>
+      </informalexample>
+      <para>The root path will be prepended to all paths specified on the JAX-RS interfaces. It serves as the base URL for all requests sent from the client.</para>
+    </section>
+  </chapter>

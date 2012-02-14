@@ -1,24 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  ~ Copyright 2011 JBoss, by Red Hat, Inc
-  ~
-  ~ Licensed under the Apache License, Version 2.0 (the "License");
-  ~ you may not use this file except in compliance with the License.
-  ~ You may obtain a copy of the License at
-  ~
-  ~    http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~ Unless required by applicable law or agreed to in writing, software
-  ~ distributed under the License is distributed on an "AS IS" BASIS,
-  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~ See the License for the specific language governing permissions and
-  ~ limitations under the License.
-  -->
-
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
-<chapter id="sid-5833096_QuickstartGuide-MavenArchetype">
+<chapter id="sid-9470150">
     
-    <title>Maven Archetype</title>
+    <title>Errai Maven Archetype</title>
     <para>
       In order to get you going quickly, we've provided a project archetype, that allows you to create a project skeleton similiar to the one we use for building the examples. It's based on the maven archetype plugin
       <ulink url="http://maven.apache.org/plugins/maven-archetype-plugin/"/>
@@ -28,8 +12,8 @@
       <programlisting>mvn archetype:generate \
 -DarchetypeGroupId=org.jboss.errai.archetypes \
 -DarchetypeArtifactId=bus-quickstart \
--DarchetypeVersion=1.3.0.CR1 \
--DarchetypeRepository=https://repository.jboss.org/nexus/content/repositories/snapshots/</programlisting>
+-DarchetypeVersion=1.3.2.Final \
+-DarchetypeRepository=https://repository.jboss.org/nexus/content/groups/public/</programlisting>
     </informalexample>
     <para>When invoking the archetype build you will be asked to provide the maven groupId, artifactId and package name your GWT application should use:</para>
     <informalexample>
@@ -44,13 +28,21 @@ version: 1.0-SNAPSHOT
 package: foo.bar.ui
 Y: :</programlisting>
     </informalexample>
-    <para>What will be created for you, is a maven build structure, including references to the GWT SDK and the Errai dependencies necessary to launch a simple application.</para>
-    <para>In order launch the GWT development mode, change into the project directory (name corresponding to the provided artifactId) and type:</para>
+    <para>You will be left with a maven build structure, including references to the GWT SDK and the Errai dependencies necessary to build, test, package, and launch a simple application.</para>
+    <para>To launch the GWT development mode, change into the project directory (name corresponding to the provided artifactId) and type:</para>
     <informalexample>
       <programlisting>mvn gwt:run</programlisting>
     </informalexample>
+    <para>The example application also comes with an integration test suite that exercises most of its client-side and server-side code. To run the test suite, type:</para>
+    <informalexample>
+      <programlisting>mvn test -Pintegration-test</programlisting>
+    </informalexample>
+    <para>To generate a set of HTML documents under target/site/jacoco/ detailing code coverage of the most recent test run, type:</para>
+    <informalexample>
+      <programlisting>mvn site</programlisting>
+    </informalexample>
     <para>
-      By default the archetype does package the web application for Development Mode execution. If you want to deploy your application to JBoss, you need to execute a clean rebuild using the JBoss profile (e.g.
+      By default the archetype does package the web application for Development Mode execution. To deploy your application to JBoss AS 7, you need to execute a clean rebuild using the JBoss profile (e.g.
       <code>-Pjboss7</code>
       ).
     </para>

@@ -1,0 +1,355 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<chapter id="sid-5931328">
+    
+    <title>Marshalling</title>
+    <para>Errai includes a comprehensive marshalling framework which permits the serialization of domain objects between the browser and the server. From the perspective of GWT, this is a complete replacement for the provided GWT serialization facilities and offers a great deal more flexibility. You are be able to map both application-specific domain model, as well as preexisting model, including model from third-party libraries using the custom definitions API.</para>
+    <section id="sid-5931328_Marshalling-MappingYourDomain">
+      
+      <title>Mapping Your Domain</title>
+      <para>All classes that you intend to be marshalled between the client and the server must be exposed to the marshalling framework. There are several ways you can do it and this section will take you through the different approaches you can take to fit your needs.</para>
+      <section id="sid-5931328_Marshalling-@Portable">
+        
+        <title>@Portable</title>
+        <para>
+          The simplest and most straight-forward way to map your domain entities is to annotate it with the
+          <code>org.jboss.errai.common.client.api.annotations.Portable</code>
+          annotation. Doing so will cause the marshalling system to discover the entities at both compile-time and runtime to produce the marshalling code and definitions to marshal and de-marshal the objects.
+        </para>
+        <para>
+          The mapping strategy that will be used depends on how much information you provide about your model up-front. If you simply annotate a domain object with
+          <code>@Portable</code>
+          and do nothing else, the marshalling system will use and exhaustive strategy to determine how to construct and deconstruct the object.
+        </para>
+        <para>Let's take a look at how this works.</para>
+        <section id="sid-5931328_Marshalling-ASimpleEntity">
+          
+          <title>A Simple Entity</title>
+          <informalexample>
+            <programlisting language="java">@Portable
+public class Person {
+  private String name;
+  private int age;
+  
+  public Person() {
+  }
+
+  public Person(String name, int age) {
+    this.name = name;
+    this.age = age;
+  }
+
+  public String getName() { 
+    return name;
+  }
+
+  public int getAge() {
+    return age; 
+  }
+}</programlisting>
+          </informalexample>
+          <para>This is a pretty vanilla domain object. Note the default, public, no-argument constructor. In this case, it will be necessary to have one explicitly declared. But notice we have no setters. In this case, the marshaler will rely on private field access to write the values on each side of the marshalling transaction. For simple domain objects, this is both nice and convenient. But you may want to make the class immutable and have a constructor enforce invariance. See the next section for that.</para>
+        </section>
+        <section id="sid-5931328_Marshalling-ImmutableObjects">
+          
+          <title>Immutable Objects</title>
+          <para>Immutability is almost always a good practice, and the marshalling system provides you a straight forward way to tell it how to marshal and de-marshal objects which enforce an immutable contract. Let's modify our example from the previous section.</para>
+          <informalexample>
+            <programlisting language="java">@Portable
+public class Person {
+  private final String name;
+  private final int age;
+  
+  public Person(@MapsTo("name") String name, @MapsTo("age") int age) {
+    this.name = name;
+    this.age = age;
+  }
+
+  public String getName() { 
+    return name;
+  }
+
+  public int getAge() {
+    return age; 
+  }
+}</programlisting>
+          </informalexample>
+          <para>
+            Here we have set both of the class fields final. By doing so, we had to remove our default constructor. But that's okay, because we have annotated the remaining constructor's parameters using the
+            <code>org.jboss.errai.marshalling.client.api.annotations.MapsTo</code>
+            annotation.
+          </para>
+          <para>
+            By doing this, we have told the marshaling system, for instance, that the first parameter of the constructor maps to the property
+            <code>name</code>
+            . Which in this case, defaults to the name of the corresponding field. This may not always be the case – as will be explored in the section on custom definitions. But for now that's a safe assumption.
+          </para>
+          <para>Another good practice is to use a factory pattern to enforce invariance. Once again, let's modify our example.</para>
+          <informalexample>
+            <programlisting language="java">@Portable
+public class Person {
+  private final String name;
+  private final int age;
+  
+  private Person(String name, int age) {
+    this.name = name;
+    this.age = age;
+  }
+  
+  public static Person createPerson(@MapsTo("name") String name, @MapsTo("age") int age) {
+    return new Person(name, age);
+  }
+
+  public String getName() { 
+    return name;
+  }
+
+  public int getAge() {
+    return age; 
+  }
+}</programlisting>
+          </informalexample>
+          <para>
+            Here we have made our only declared constructor private, and created a static factory method. Notice that we've simply used the same
+            <code>@MapsTo</code>
+            annotation in the same way we did on the constructor from our previous example. The marshaller will see this method and know that it should use it to construct the object.
+          </para>
+        </section>
+        <section id="sid-5931328_Marshalling-ManualMapping">
+          
+          <title>Manual Mapping</title>
+          <para>Some classes may be out of your control, making it impossible to annotate them for auto-discovery by the marshalling framework. For cases such as this, there are two approaches which can be undertaken to include these classes in your application.</para>
+          <para>
+            The first approach is the easiest, but is contingent on whether or not the class is directly exposed to the GWT compiler. That means, the classes must be part of a GWT module and within the GWT client packages. See the GWT documentation on
+            <ulink url="http://code.google.com/webtoolkit/doc/latest/DevGuideCodingBasicsClient.html">Client-Side Code</ulink>
+            for information on this.
+          </para>
+          <section id="sid-5931328_Marshalling-MappingExistingClientClasses">
+            
+            <title>Mapping Existing Client Classes</title>
+            <para>
+              If you client-exposed classes that cannot be annotated with the
+              <code>@Portable</code>
+              annotation, you may manually map these classes so that the marshaller framework will comprehend and produce marshallers for them.
+            </para>
+            <para>
+              To do this, you may specify them in your
+              <emphasis role="strong">ErraiApp.properties</emphasis>
+              file, using the {{errai.marshalling.serializableTypes} attribute with a whitespace separated list of classes to make portable.
+            </para>
+            <example>
+              <title>Example ErraiApp.properties defining portable classes.</title>
+              <programlisting>errai.marshalling.serializableTypes=org.foo.client.UserEntity \
+                                    org.foo.client.GroupEntity \
+                                    org.abcinc.model.client.Profile</programlisting>
+            </example>
+          </section>
+          <section id="sid-5931328_Marshalling-AliasedMappingsofExistingInterfaceContracts">
+            
+            <title>Aliased Mappings of Existing Interface Contracts</title>
+            <para>
+              The marshalling framework supports and promotes the concept of marshalling by interface contract, where possible. For instance, the framework ships with a marshaller which can marshall data to and from the
+              <code>java.util.List</code>
+              interface. Instead of having custom marshallers for classes such as
+              <code>ArrayList</code>
+              and
+              <code>LinkedList</code>
+              , by default, these implementations are merely aliased to the
+              <code>java.util.List</code>
+              } marshaller.
+            </para>
+            <para>
+              There are two distinct ways to go about doing this. The most straightforward is to specify which marshaller to alias when declaring your class is
+              <code>@Portable</code>
+              .
+            </para>
+            <informalexample>
+              <programlisting language="java">package org.foo.client;
+
+@Portable(aliasOf = java.util.List.class)
+public MyListImpl extends ArrayList {
+  // .. //
+}</programlisting>
+            </informalexample>
+            <para>
+              In the case of this example, the marshaller will not attempt to comprehend your class. Instead, it will merely rely on the
+              <code>java.util.List</code>
+              marshaller to dematerialize and serialize instances of this type onto the wire.
+            </para>
+            <para>
+              If for some reason it is not feasible to annotate the class, directly, you may specify the mapping in the
+              <emphasis role="strong">ErraiApp.properties</emphasis>
+              file using the
+              <code>errai.marshalling.mappingAliases</code>
+              attribute.
+            </para>
+            <informalexample>
+              <programlisting>errai.marshalling.mappingAliases=org.foo.client.MyListImpl-&gt;java.uti.List \
+                                 org.foo.client.MyMapImpl-&gt;java.util.Map</programlisting>
+            </informalexample>
+            <para>The list of classes is whitespace-separated so that it may be split across lines.</para>
+            <para>
+              The example above shows the equivalent mapping for the
+              <code>MyListImpl</code>
+              class from the previous example, as well as a mapping of a class to the
+              <code>java.util.Map</code>
+              marshaller.
+            </para>
+            <para>
+              The syntax of the mapping is as follows:
+              <code>&lt;class_to_map&gt;</code>
+              <emphasis role="strong">-&gt;</emphasis>
+              <code>&lt;contract_to_map_to&gt;</code>
+              .
+            </para>
+            <important>
+              <title>Aliases do not inherit functionality!</title>
+              <para>When you alias a class to another marshalling contract, extended functionality of the aliased class will not be available upon deserialization. For this you must provide custom marshallers for those classes.</para>
+            </important>
+          </section>
+        </section>
+      </section>
+      <section id="sid-5931328_Marshalling-ManualClassMapping">
+        
+        <title>Manual Class Mapping</title>
+        <para>Although the default marshalling strategies in Errai Marshalling will suit the vast majority of use cases, there may be situations where it is necessary to manually map your classes into the marshalling framework to teach it how to construct and deconstruct your objects.</para>
+        <para>
+          This is accomplished by specifying
+          <code>MappingDefinition</code>
+          classes which inform the framework exactly how to read and write state in the process of constructing and deconstructing objects.
+        </para>
+        <section id="sid-5931328_Marshalling-MappingDefinition">
+          
+          <title>MappingDefinition</title>
+          <para>
+            All manual mappings should extend the
+            <code>org.jboss.errai.marshalling.rebind.api.model.MappingDefinition</code>
+            class. This is base metadata class which contains data on exactly how the marshaller can deconstruct and construct objects.
+          </para>
+          <para>Consider the following class:</para>
+          <informalexample>
+            <programlisting language="java">public class MySuperCustomEntity {
+   private final String mySuperName;
+   private String mySuperNickname;
+
+   public MySuperCustomEntity(String mySuperName) {
+     this.mySuperName = mySuperName;;
+   }
+
+   public String getMySuperName() {
+     return this.mySuperName;
+   } 
+
+   public void setMySuperNickname(String mySuperNickname) {
+     this.mySuperNickname = mySuperNickname;
+   }
+
+   public String getMySuperNickname() {
+     return this.mySuperNickname;
+   }
+}</programlisting>
+          </informalexample>
+          <para>Let us construct this object like so:</para>
+          <informalexample>
+            <programlisting language="java">MySuperCustomEntity entity = new MySuperCustomEntity("Coolio");
+  entity.setSuperNickname("coo");</programlisting>
+          </informalexample>
+          <para>
+            It is clear that we may rely on this object's two getter methods to extract the totality of its state. But due to the fact that the
+            <code>mySuperName</code>
+            field is final, the only way to properly construct this object is to call its only public constructor and pass in the desired value of
+            <code>mySuperName</code>
+            .
+          </para>
+          <para>Let us consider how we could go about telling the marshalling framework to pull this off:</para>
+          <informalexample>
+            <programlisting language="java">@CustomMapping
+public MySuperCustomEntityMapping extends MappingDefinition {
+  public MySuperCustomEntityMapping() {
+    super(MySuperCustomEntity.class);                                                          // (1)
+
+    SimpleConstructorMapping cnsMapping = new SimpleConstructorMapping(); 
+    cnsMapping.mapParmToIndex("mySuperName", 0, String.class);                                 // (2)
+
+    setInstantiationMapping(cnsMapping);
+
+    addMemberMapping(new WriteMapping("mySuperNickname", String.class, "setMySuperNickname")); // (3)
+    
+    addMemberMapping(new ReadMapping("mySuperName", String.class, "getMySuperName"));          // (4)
+    addMemberMapping(new ReadMapping("mySuperNickname", String.class, "getMySuperNickname"));  // (5)
+  }
+}</programlisting>
+          </informalexample>
+          <para>
+            And that's it. This describes to the marshalling framework how it should go about constructing and deconstructing
+            <code>MySuperCustomEntity</code>
+            .
+          </para>
+          <para>Paying attention to our annotating comments, let's describe what we've done here.</para>
+          <orderedlist>
+            <listitem>
+              <para>
+                Call the constructor in
+                <code>MappingDefinition</code>
+                passing our reference to the class we are mapping.
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Using the
+                <code>SimpleConstructorMapping</code>
+                class, we have indicated that a custom constructor will be needed to instantiate this class. We have called the
+                <code>mapParmToIndex</code>
+                method with three parameters. The first,
+                <code>"mySupername"</code>
+                describes the class field that we are targeting. The second parameter, the integer
+                <code>0</code>
+                indicates the parameter index of the constructor arguments that we'll be providing the value for the aforementioned field – in this case the first and only, and the final parameter
+                <code>String.class</code>
+                tells the marshalling framework which marshalling contract to use in order to de-marshall the value.
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Using the
+                <code>WriteMapping</code>
+                class, we have indicated to the marshaller framework how to write the
+                <code>"mySuperNickname"</code>
+                field, using the
+                <code>String.class</code>
+                marshaller, and using the setter method
+                <code>setMySuperNickname</code>
+                .
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Using the
+                <code>ReadMapping</code>
+                class, we have indicated to the marshaller framework how to read the
+                <code>"mySuperName"</code>
+                field, using the
+                <code>String.class</code>
+                marshaller, and using the getter method
+                <code>getMySuperName</code>
+                .
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Using the
+                <code>ReadMapping</code>
+                class, we have indicated to the marshaller framework how to read the
+                <code>"mySuperNickname"</code>
+                field, using the
+                <code>String.class</code>
+                marshaller, and using the getter method
+                <code>getMySuperNickname</code>
+                .
+              </para>
+            </listitem>
+          </orderedlist>
+        </section>
+      </section>
+    </section>
+  </chapter>
