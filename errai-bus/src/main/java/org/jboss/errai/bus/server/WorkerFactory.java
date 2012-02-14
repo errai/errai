@@ -16,12 +16,15 @@
 
 package org.jboss.errai.bus.server;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
 import org.jboss.errai.bus.client.framework.RoutingFlag;
 import org.jboss.errai.bus.client.util.ErrorHelper;
@@ -198,11 +201,11 @@ public class WorkerFactory {
   public void stopPool() {
     synchronized (this) {
 
-      log.info("stopping workering pool.");
+      log.info("stopping worker pool.");
       for (int i = 0; i < poolSize; i++) {
         workerPool[i].setActive(false);
+        workerPool[i].interrupt();
       }
-
 
       Thread shutdownThread = new Thread() {
         @Override
@@ -233,7 +236,7 @@ public class WorkerFactory {
         shutdownThread.join();
       }
       catch (InterruptedException e) {
-        System.err.println("was interuppted waiting to shutdown async worker pool");
+        System.err.println("was interrupted waiting to shutdown async worker pool");
         e.printStackTrace();
       }
     }
