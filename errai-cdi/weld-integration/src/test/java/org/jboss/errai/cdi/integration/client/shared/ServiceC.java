@@ -20,7 +20,9 @@ package org.jboss.errai.cdi.integration.client.shared;
  * @author Mike Brock
  */
 public class ServiceC {
-  private String name = "Service!";
+  private static int count = 0;
+  
+  private String name = "Service:" + (count++);
 
   public String getName() {
     return name;

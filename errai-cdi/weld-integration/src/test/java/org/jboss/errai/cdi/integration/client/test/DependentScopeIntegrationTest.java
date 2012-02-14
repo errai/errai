@@ -19,9 +19,16 @@ package org.jboss.errai.cdi.integration.client.test;
 import org.jboss.errai.cdi.integration.client.shared.ApplicationScopedBean;
 import org.jboss.errai.cdi.integration.client.shared.DependentScopedBean;
 import org.jboss.errai.cdi.integration.client.shared.DependentScopedBeanWithDependencies;
+import org.jboss.errai.cdi.integration.client.shared.ServiceA;
+import org.jboss.errai.cdi.integration.client.shared.ServiceB;
+import org.jboss.errai.cdi.integration.client.shared.ServiceC;
+import org.jboss.errai.cdi.integration.client.shared.TestBean;
 import org.jboss.errai.cdi.integration.client.shared.TestOuterBean;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Mike Brock
@@ -65,8 +72,33 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
       @Override
       public void run() {
         TestOuterBean outBean = TestOuterBean.getInstance();
+        
+        assertNotNull("outer bean was null", outBean);
 
-        System.out.println(outBean);
+        TestBean testBean = outBean.getTestBean();
+        assertNotNull("outBean.getTestBean() returned null", testBean);
+        
+        ServiceA serviceA = testBean.getServiceA();
+        ServiceB serviceB = testBean.getServiceB();
+        ServiceC serviceC = testBean.getServiceC();
+        
+        assertNotNull("serviceA is null", serviceA);
+        assertNotNull("serviceB is null", serviceB);
+        assertNotNull("serviceC is null", serviceC);
+
+        ServiceC serviceC1 = serviceA.getServiceC();
+        ServiceC serviceC2 = serviceB.getServiceC();
+         
+        assertNotNull("serviceC in serviceA is null", serviceC1);
+        assertNotNull("serviceC in serviceB is null", serviceC2);
+
+        Set<String> testDependentScope = new HashSet<String>();
+        testDependentScope.add(serviceC.getName());
+        testDependentScope.add(serviceC1.getName());
+        testDependentScope.add(serviceC2.getName());
+
+        assertEquals("ServiceC should have been instantiated 3 times", 3, testDependentScope.size());
+
         finishTest();
       }
     });
