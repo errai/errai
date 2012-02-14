@@ -96,8 +96,6 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
                             Stmt.loadClassMember("qualifiers").invoke("equals", Refs.get("msgQualifiers")),
                             Bool.and(Bool.equals(Refs.get("msgQualifiers"), null),
                                     Stmt.loadClassMember("qualifiers").invoke("isEmpty"))))
-//            .append(Stmt.loadVariable(instance.getInjector().getVarName()).invoke(method.getName(),
-//                Stmt.loadVariable("message").invoke("get", parm.getType().asClass(), CDIProtocol.BeanReference)))
                     .append(instance.callOrBind(Stmt.loadVariable("message").invoke("get", parm.getType().asClass(), CDIProtocol.BeanReference)))
                     .finish());
 

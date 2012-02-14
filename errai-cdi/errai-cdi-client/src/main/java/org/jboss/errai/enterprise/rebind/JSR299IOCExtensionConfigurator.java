@@ -32,6 +32,7 @@ import org.jboss.errai.ioc.rebind.ioc.*;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
+import javax.enterprise.context.NormalScope;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
@@ -123,8 +124,6 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
         TypeInjector i = (TypeInjector) instance.getInjector();
 
         if (!i.isInjected()) {
-          // instantiate the bean.
-        //  injectionContext.registerInjector(i);
           i.setSingleton(true);
           i.getType(injectionContext, null);
         }
@@ -167,9 +166,10 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
             }
           }
           
-          Annotation[] annos = type.getAnnotations();
           for (Annotation a : type.getAnnotations()) {
-            if (a.annotationType().isAnnotationPresent(Scope.class)) {
+            Class<? extends Annotation> annoClass = a.annotationType();
+            if (annoClass.isAnnotationPresent(Scope.class)
+                    || annoClass.isAnnotationPresent(NormalScope.class)) {
               continue TypeScan;
             }
           }
