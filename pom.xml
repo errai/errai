@@ -15,300 +15,311 @@
   ~ limitations under the License.
   -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<name>Errai</name>
-	<groupId>org.jboss.errai</groupId>
-	<artifactId>errai-parent</artifactId>
-	<version>2.0-SNAPSHOT</version>
-	<packaging>pom</packaging>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <name>Errai</name>
+    <groupId>org.jboss.errai</groupId>
+    <artifactId>errai-parent</artifactId>
+    <version>2.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
 
-	<url>http://jboss.org/errai/errai</url>
+    <url>http://jboss.org/errai/errai</url>
 
-	<licenses>
-		<license>
-			<name>The Apache Software License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-			<distribution>repo</distribution>
-		</license>
-	</licenses>
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
-	<description>
+    <description>
         A GWT framework.
     </description>
 
-	<developers>
-		<developer>
-			<name>Mike Brock</name>
-		</developer>
-		<developer>
-			<name>Christian Sadilek</name>
-		</developer>
-		<developer>
-			<name>Jonathan Fuerth</name>
-		</developer>
-		<developer>
-			<name>Heiko Braun</name>
-		</developer>
-	</developers>
+    <developers>
+        <developer>
+            <name>Mike Brock</name>
+        </developer>
+        <developer>
+            <name>Christian Sadilek</name>
+        </developer>
+        <developer>
+            <name>Jonathan Fuerth</name>
+        </developer>
+        <developer>
+            <name>Heiko Braun</name>
+        </developer>
+    </developers>
 
-	<scm>
-		<connection>scm:git:git@github.com:errai/errai.git</connection>
-		<developerConnection>scm:git:git@github.com:errai/errai.git</developerConnection>
-		<url>scm:git:git@github.com:errai/errai.git</url>
-	</scm>
+    <scm>
+        <connection>scm:git:git@github.com:errai/errai.git</connection>
+        <developerConnection>scm:git:git@github.com:errai/errai.git</developerConnection>
+        <url>scm:git:git@github.com:errai/errai.git</url>
+    </scm>
 
-	<organization>
-		<name>JBoss, a division of Red Hat</name>
-		<url>http://www.jboss.org</url>
-	</organization>
+    <organization>
+        <name>JBoss, a division of Red Hat</name>
+        <url>http://www.jboss.org</url>
+    </organization>
 
-	<!-- IssueManagement -->
-	<issueManagement>
-		<system>jira</system>
-		<url>http://jira.jboss.org/jira/browse/ERRAI</url>
-	</issueManagement>
+    <!-- IssueManagement -->
+    <issueManagement>
+        <system>jira</system>
+        <url>http://jira.jboss.org/jira/browse/ERRAI</url>
+    </issueManagement>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<gwt.version>2.4.0</gwt.version>
-		<gwt.maven>2.4.0</gwt.maven>
-		<guice.version>3.0</guice.version>
-		<mvel.version>2.1.Beta8</mvel.version>
-		<mosaic.version>0.4.0-rc4</mosaic.version>
-		<appengine.version>1.3.5</appengine.version>
-		<reflections.version>0.9.6_jboss_errai_r3-SNAPSHOT</reflections.version>
-		<validation.api.version>1.0.0.GA</validation.api.version>
-	</properties>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <gwt.version>2.4.0</gwt.version>
+        <gwt.maven>2.4.0</gwt.maven>
+        <guice.version>3.0</guice.version>
+        <mvel.version>2.1.Beta8</mvel.version>
+        <mosaic.version>0.4.0-rc4</mosaic.version>
+        <appengine.version>1.3.5</appengine.version>
+        <reflections.version>0.9.6_jboss_errai_r3-SNAPSHOT</reflections.version>
+        <validation.api.version>1.0.0.GA</validation.api.version>
+    </properties>
 
-	<modules>
-		<module>errai-common</module>
-		<module>errai-ioc</module>
-		<module>errai-bus</module>
+    <modules>
+        <module>errai-common</module>
+        <module>errai-ioc</module>
+        <module>errai-bus</module>
         <module>errai-bus/demos</module>
-		<module>errai-tools</module>
-		<module>errai-codegen</module>
-		<module>errai-marshalling</module>
+        <module>errai-tools</module>
+        <module>errai-codegen</module>
+        <module>errai-marshalling</module>
         <module>errai-js</module>
         <module>errai-cdi</module>
         <module>errai-jaxrs</module>
         <module>jboss7-support</module>
     </modules>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>com.google.gwt</groupId>
-				<artifactId>gwt-user</artifactId>
-				<version>${gwt.version}</version>
-			</dependency>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.google.gwt</groupId>
+                <artifactId>gwt-user</artifactId>
+                <version>${gwt.version}</version>
+            </dependency>
 
-			<dependency>
-				<groupId>com.google.gwt</groupId>
-				<artifactId>gwt-dev</artifactId>
-				<version>${gwt.version}</version>
-			</dependency>
+            <dependency>
+                <groupId>com.google.gwt</groupId>
+                <artifactId>gwt-dev</artifactId>
+                <version>${gwt.version}</version>
+            </dependency>
 
-			<dependency>
-				<groupId>javax.validation</groupId>
-				<artifactId>validation-api</artifactId>
-				<version>${validation.api.version}</version>
-			</dependency>
+            <dependency>
+                <groupId>javax.validation</groupId>
+                <artifactId>validation-api</artifactId>
+                <version>${validation.api.version}</version>
+            </dependency>
 
-			<dependency>
-				<groupId>javax.validation</groupId>
-				<artifactId>validation-api</artifactId>
-				<version>${validation.api.version}</version>
-				<classifier>sources</classifier>
-			</dependency>
+            <dependency>
+                <groupId>javax.validation</groupId>
+                <artifactId>validation-api</artifactId>
+                <version>${validation.api.version}</version>
+                <classifier>sources</classifier>
+            </dependency>
 
-			<dependency>
-				<groupId>com.google.inject</groupId>
-				<artifactId>guice</artifactId>
-				<version>3.0</version>
+            <dependency>
+                <groupId>com.google.inject</groupId>
+                <artifactId>guice</artifactId>
+                <version>3.0</version>
 
-				<exclusions>
-					<exclusion>
-						<groupId>javax.inject</groupId>
-						<artifactId>javax.inject</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.inject</groupId>
+                        <artifactId>javax.inject</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.google.guava</groupId>
+                        <artifactId>guava</artifactId>
+                    </exclusion>
+                </exclusions>
 
-			<dependency>
-				<groupId>org.mvel</groupId>
-				<artifactId>mvel2</artifactId>
-				<version>${mvel.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>javax.persistence</groupId>
-				<artifactId>persistence-api</artifactId>
-				<version>1.0</version>
-			</dependency>
+            </dependency>
 
-			<dependency>
-				<groupId>com.google.appengine</groupId>
-				<artifactId>appengine-api</artifactId>
-				<version>${appengine.version}</version>
-				<scope>provided</scope>
-			</dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>10.0.1</version>
+            </dependency>
 
-			<dependency>
-				<groupId>com.google.appengine</groupId>
-				<artifactId>appengine-api-labs</artifactId>
-				<version>${appengine.version}</version>
-				<scope>provided</scope>
-			</dependency>
+            <dependency>
+                <groupId>org.mvel</groupId>
+                <artifactId>mvel2</artifactId>
+                <version>${mvel.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.persistence</groupId>
+                <artifactId>persistence-api</artifactId>
+                <version>1.0</version>
+            </dependency>
 
-			<dependency>
-				<groupId>org.reflections</groupId>
-				<artifactId>reflections</artifactId>
-				<version>${reflections.version}</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
+            <dependency>
+                <groupId>com.google.appengine</groupId>
+                <artifactId>appengine-api</artifactId>
+                <version>${appengine.version}</version>
+                <scope>provided</scope>
+            </dependency>
 
-	<build>
-		<!-- include module descriptors from src/main/java in order not to break 
-			the Intellij GWT plugin -->
-		<resources>
-			<resource>
-				<directory>src/main/java</directory>
-			</resource>
-			<resource>
-				<directory>src/main/resources</directory>
-			</resource>
-		</resources>
+            <dependency>
+                <groupId>com.google.appengine</groupId>
+                <artifactId>appengine-api-labs</artifactId>
+                <version>${appengine.version}</version>
+                <scope>provided</scope>
+            </dependency>
 
-		<plugins>
-			<plugin>
-				<groupId>org.jboss.errai</groupId>
-				<artifactId>jacoco-gwt-maven-plugin</artifactId>
-				<version>0.5.4-SNAPSHOT</version>
-				<executions>
-					<execution>
-						<id>jacoco-initialize</id>
-						<phase>initialize</phase>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>jacoco-site</id>
-						<phase>site</phase>
-						<goals>
-							<goal>report</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
+            <dependency>
+                <groupId>org.reflections</groupId>
+                <artifactId>reflections</artifactId>
+                <version>${reflections.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-install-plugin</artifactId>
-				<version>2.3</version>
-			</plugin>
+    <build>
+        <!-- include module descriptors from src/main/java in order not to break
+                the Intellij GWT plugin -->
+        <resources>
+            <resource>
+                <directory>src/main/java</directory>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-deploy-plugin</artifactId>
-				<version>2.5</version>
-			</plugin>
+        <plugins>
+            <plugin>
+                <groupId>org.jboss.errai</groupId>
+                <artifactId>jacoco-gwt-maven-plugin</artifactId>
+                <version>0.5.4-SNAPSHOT</version>
+                <executions>
+                    <execution>
+                        <id>jacoco-initialize</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>jacoco-site</id>
+                        <phase>site</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-war-plugin</artifactId>
-				<version>2.1-beta-1</version>
-			</plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <version>2.3</version>
+            </plugin>
 
-			<plugin>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>2.5</version>
-				<configuration>
-					<skipTests>true</skipTests>
-				</configuration>
-			</plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>2.5</version>
+            </plugin>
 
-			<plugin>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.2</version>
-				<configuration>
-					<archive>
-						<manifest>
-							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-						</manifest>
-					</archive>
-				</configuration>
-			</plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.1-beta-1</version>
+            </plugin>
 
-			<plugin>
-				<artifactId>maven-source-plugin</artifactId>
-				<version>2.1.2</version>
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.5</version>
+                <configuration>
+                    <skipTests>true</skipTests>
+                </configuration>
+            </plugin>
 
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
-				</configuration>
-			</plugin>
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.2</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-release-plugin</artifactId>
-				<version>2.0-beta-9</version>
-			</plugin>
+            <plugin>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.1.2</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 
-			<plugin>
-				<artifactId>maven-clean-plugin</artifactId>
-				<version>2.4.1</version>
-				<configuration>
-					<filesets>
-						<fileset>
-							<directory>.errai</directory>
-						</fileset>
-					</filesets>
-				</configuration>
-			</plugin>
-		</plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
 
-		<!-- PluginManagement -->
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-compiler-plugin</artifactId>
-					<version>2.0.2.SP1</version>
-				</plugin>
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>org.codehaus.mojo</groupId>
-										<artifactId>gwt-maven-plugin</artifactId>
-										<versionRange>[2.3.0,)</versionRange>
-										<goals>
-											<goal>resources</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<execute />
-									</action>
-								</pluginExecution>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.0-beta-9</version>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>2.4.1</version>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>.errai</directory>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
+        </plugins>
+
+        <!-- PluginManagement -->
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>2.0.2.SP1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.eclipse.m2e</groupId>
+                    <artifactId>lifecycle-mapping</artifactId>
+                    <version>1.0.0</version>
+                    <configuration>
+                        <lifecycleMappingMetadata>
+                            <pluginExecutions>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>org.codehaus.mojo</groupId>
+                                        <artifactId>gwt-maven-plugin</artifactId>
+                                        <versionRange>[2.3.0,)</versionRange>
+                                        <goals>
+                                            <goal>resources</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <execute/>
+                                    </action>
+                                </pluginExecution>
                                 <pluginExecution>
                                     <pluginExecutionFilter>
                                         <groupId>org.jacoco</groupId>
@@ -319,7 +330,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore />
+                                        <ignore/>
                                     </action>
                                 </pluginExecution>
                                 <pluginExecution>
@@ -332,179 +343,179 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore />
+                                        <ignore/>
                                     </action>
                                 </pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
+                            </pluginExecutions>
+                        </lifecycleMappingMetadata>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
 
-	</build>
+    </build>
 
-	<!-- Reporting -->
-	<reporting>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.8</version>
-				<configuration>
-					<aggregate>true</aggregate>
-					<show>public</show>
+    <!-- Reporting -->
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.8</version>
+                <configuration>
+                    <aggregate>true</aggregate>
+                    <show>public</show>
 
-					<groups>
-						<group>
-							<title>Bus</title>
-							<packages>org.jboss.errai.bus.*</packages>
-						</group>
-					</groups>
-					<subpackages>
-						org.jboss.errai.bus.client.api:org.jboss.errai.bus.client.framework
+                    <groups>
+                        <group>
+                            <title>Bus</title>
+                            <packages>org.jboss.errai.bus.*</packages>
+                        </group>
+                    </groups>
+                    <subpackages>
+                        org.jboss.errai.bus.client.api:org.jboss.errai.bus.client.framework
                     </subpackages>
-				</configuration>
-			</plugin>
-		</plugins>
+                </configuration>
+            </plugin>
+        </plugins>
 
-	</reporting>
+    </reporting>
 
-	<!-- Profiles -->
-	<profiles>
-		<profile>
-			<id>integration-test</id>
-			<build>
-				<plugins>
-					<plugin>
-						<artifactId>maven-surefire-plugin</artifactId>
-						<configuration>
-							<skipTests>false</skipTests>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
+    <!-- Profiles -->
+    <profiles>
+        <profile>
+            <id>integration-test</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <skipTests>false</skipTests>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
 
-		<profile>
-			<id>quick-hosted-mode</id>
-			<activation>
-				<property>
-					<name>hosted</name>
-				</property>
-			</activation>
-			<properties>
-				<google.webtoolkit.compileSkip>true</google.webtoolkit.compileSkip>
-				<o>true</o>
-				<!-- offline -->
-			</properties>
-		</profile>
+        <profile>
+            <id>quick-hosted-mode</id>
+            <activation>
+                <property>
+                    <name>hosted</name>
+                </property>
+            </activation>
+            <properties>
+                <google.webtoolkit.compileSkip>true</google.webtoolkit.compileSkip>
+                <o>true</o>
+                <!-- offline -->
+            </properties>
+        </profile>
 
-		<profile>
-			<id>distro</id>
-			<modules>
-				<module>reference</module>
-				<module>quickstart</module>
-				<module>dist</module>
-			</modules>
-		</profile>
-	</profiles>
+        <profile>
+            <id>distro</id>
+            <modules>
+                <module>reference</module>
+                <module>quickstart</module>
+                <module>dist</module>
+            </modules>
+        </profile>
+    </profiles>
 
-	<!-- Repositories -->
-	<repositories>
-		<repository>
-			<id>jboss-public-repository-group</id>
-			<name>JBoss Public Maven Repository Group</name>
-			<url>https://repository.jboss.org/nexus/content/groups/public/</url>
-			<layout>default</layout>
-			<releases>
-				<updatePolicy>always</updatePolicy>
-			</releases>
-		</repository>
-		<repository>
-			<id>gilead-repo</id>
-			<name>Gilead Maven Repo</name>
-			<url>http://gilead.svn.sourceforge.net/svnroot/gilead/gilead/maven-repo/</url>
-			<layout>default</layout>
-		</repository>
-		<repository>
-			<id>gilead-snapshots-repo</id>
-			<name>Gilean Maven Snapshots Repo</name>
-			<url>http://gilead.svn.sourceforge.net/svnroot/gilead/gilead/maven-snapshots-repo/</url>
-			<layout>default</layout>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
+    <!-- Repositories -->
+    <repositories>
+        <repository>
+            <id>jboss-public-repository-group</id>
+            <name>JBoss Public Maven Repository Group</name>
+            <url>https://repository.jboss.org/nexus/content/groups/public/</url>
+            <layout>default</layout>
+            <releases>
+                <updatePolicy>always</updatePolicy>
+            </releases>
+        </repository>
+        <repository>
+            <id>gilead-repo</id>
+            <name>Gilead Maven Repo</name>
+            <url>http://gilead.svn.sourceforge.net/svnroot/gilead/gilead/maven-repo/</url>
+            <layout>default</layout>
+        </repository>
+        <repository>
+            <id>gilead-snapshots-repo</id>
+            <name>Gilean Maven Snapshots Repo</name>
+            <url>http://gilead.svn.sourceforge.net/svnroot/gilead/gilead/maven-snapshots-repo/</url>
+            <layout>default</layout>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
 
-		<repository>
-			<id>reflections-repo</id>
-			<name>Reflections Maven2 Repository</name>
-			<url>http://reflections.googlecode.com/svn/repo</url>
-		</repository>
+        <repository>
+            <id>reflections-repo</id>
+            <name>Reflections Maven2 Repository</name>
+            <url>http://reflections.googlecode.com/svn/repo</url>
+        </repository>
 
-		<repository>
-			<id>codehaus.org</id>
-			<name>Codehaus Maven Repository</name>
-			<url>http://repository.codehaus.org/</url>
-		</repository>
+        <repository>
+            <id>codehaus.org</id>
+            <name>Codehaus Maven Repository</name>
+            <url>http://repository.codehaus.org/</url>
+        </repository>
 
-		<repository>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<id>codehaus.org-snapshots</id>
-			<name>Codehaus Snapshots Maven Repository</name>
-			<url>http://snapshots.repository.codehaus.org/</url>
-		</repository>
+        <repository>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <id>codehaus.org-snapshots</id>
+            <name>Codehaus Snapshots Maven Repository</name>
+            <url>http://snapshots.repository.codehaus.org/</url>
+        </repository>
 
-		<repository>
-			<id>maven-central</id>
-			<name>Maven Central</name>
-			<url>http://repo1.maven.org/</url>
-		</repository>
+        <repository>
+            <id>maven-central</id>
+            <name>Maven Central</name>
+            <url>http://repo1.maven.org/</url>
+        </repository>
 
-		<repository>
-			<id>msgpack.org</id>
-			<name>MessagePack Repository for Maven</name>
-			<url>http://msgpack.org/maven2/</url>
-		</repository>
-	</repositories>
+        <repository>
+            <id>msgpack.org</id>
+            <name>MessagePack Repository for Maven</name>
+            <url>http://msgpack.org/maven2/</url>
+        </repository>
+    </repositories>
 
-	<pluginRepositories>
-		<pluginRepository>
-			<id>jboss-public-repository-group</id>
-			<name>JBoss Public Maven Repository Group</name>
-			<url>https://repository.jboss.org/nexus/content/groups/public/</url>
-			<layout>default</layout>
-			<releases>
-				<updatePolicy>never</updatePolicy>
-			</releases>
-			<snapshots>
-				<updatePolicy>never</updatePolicy>
-			</snapshots>
-		</pluginRepository>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>jboss-public-repository-group</id>
+            <name>JBoss Public Maven Repository Group</name>
+            <url>https://repository.jboss.org/nexus/content/groups/public/</url>
+            <layout>default</layout>
+            <releases>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+            <snapshots>
+                <updatePolicy>never</updatePolicy>
+            </snapshots>
+        </pluginRepository>
 
-		<pluginRepository>
-			<id>jacoco-snapshot-repository</id>
-			<name>JaCoCo Snapshot Build Repository</name>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-			<layout>default</layout>
-		</pluginRepository>
-	</pluginRepositories>
+        <pluginRepository>
+            <id>jacoco-snapshot-repository</id>
+            <name>JaCoCo Snapshot Build Repository</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <layout>default</layout>
+        </pluginRepository>
+    </pluginRepositories>
 
-	<!-- DistributionManagement -->
-	<distributionManagement>
-		<repository>
-			<id>jboss-releases-repository</id>
-			<name>JBoss Releases Repository</name>
-			<url>https://repository.jboss.org/nexus/service/local/staging/deploy/maven2/</url>
-		</repository>
+    <!-- DistributionManagement -->
+    <distributionManagement>
+        <repository>
+            <id>jboss-releases-repository</id>
+            <name>JBoss Releases Repository</name>
+            <url>https://repository.jboss.org/nexus/service/local/staging/deploy/maven2/</url>
+        </repository>
 
-		<snapshotRepository>
-			<id>jboss-snapshots-repository</id>
-			<name>JBoss Snapshots Repository</name>
-			<url>https://repository.jboss.org/nexus/content/repositories/snapshots/</url>
-		</snapshotRepository>
-	</distributionManagement>
+        <snapshotRepository>
+            <id>jboss-snapshots-repository</id>
+            <name>JBoss Snapshots Repository</name>
+            <url>https://repository.jboss.org/nexus/content/repositories/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
 </project>

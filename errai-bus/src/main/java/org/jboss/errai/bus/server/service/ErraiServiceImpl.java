@@ -18,6 +18,7 @@ package org.jboss.errai.bus.server.service;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.apache.log4j.LogManager;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.util.ErrorHelper;

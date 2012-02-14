@@ -158,8 +158,6 @@ public abstract class AbstractErraiServlet extends HttpServlet {
         bind(ErraiServiceConfigurator.class).to(ErraiServiceConfiguratorImpl.class);
         bind(MessageBus.class).to(ServerMessageBusImpl.class);
         bind(ServerMessageBus.class).to(ServerMessageBusImpl.class);
-        //  bind(new TypeLiteral<ErraiService<HttpSession>>() {}).to(new TypeLiteral<ErraiServiceImpl<HttpSession>>() {});
-
       }
     }).getInstance(ErraiService.class);
   }
