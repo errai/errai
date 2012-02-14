@@ -224,6 +224,12 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
             + BusCommands.WebsocketChannelVerify.name() + "\",\"" + MessageParts.WebSocketToken + "\":\"" +
             token + "\"}]";
   }
+  
+  public void stop() {
+    for (Channel channel : activeChannels.keySet()) {
+      channel.close();
+    }
+  }
 }
 
 

@@ -30,9 +30,11 @@ import org.jboss.errai.bus.server.service.ErraiService;
  */
 public class WebSocketServerPipelineFactory implements ChannelPipelineFactory {
   private ErraiService svc;
+  private WebSocketServerHandler webSocketServerHandler;
 
   public WebSocketServerPipelineFactory(ErraiService service) {
     this.svc = service;
+    this.webSocketServerHandler = new WebSocketServerHandler(svc);
   }
 
   public ChannelPipeline getPipeline() throws Exception {
@@ -41,8 +43,11 @@ public class WebSocketServerPipelineFactory implements ChannelPipelineFactory {
     pipeline.addLast("decoder", new HttpRequestDecoder());
     pipeline.addLast("aggregator", new HttpChunkAggregator(65536));
     pipeline.addLast("encoder", new HttpResponseEncoder());
-    pipeline.addLast("handler", new WebSocketServerHandler(svc));
+    pipeline.addLast("handler", webSocketServerHandler);
     return pipeline;
+  }
 
+  public WebSocketServerHandler getWebSocketServerHandler() {
+    return webSocketServerHandler;
   }
 }
