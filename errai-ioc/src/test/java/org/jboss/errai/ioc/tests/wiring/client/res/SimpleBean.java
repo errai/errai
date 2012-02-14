@@ -47,6 +47,10 @@ public class SimpleBean extends SimpleSuperBean {
 
   private RequestDispatcher dispatcher4;
   private MessageBus bus4;
+  
+  @Inject ServiceA svcA;
+  @Inject ServiceB svcB;
+  
 
   @Inject
   public SimpleBean(RequestDispatcher dispatcher3, MessageBus bus3) {

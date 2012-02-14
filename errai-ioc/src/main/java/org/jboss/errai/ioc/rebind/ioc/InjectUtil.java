@@ -25,9 +25,11 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -68,6 +70,8 @@ public class InjectUtil {
 
   private static final AtomicInteger counter = new AtomicInteger(0);
 
+  public static final Map<String, Throwable> injectedVars = new LinkedHashMap<String, Throwable>();
+
   public static ConstructionStrategy getConstructionStrategy(final Injector injector, final InjectionContext ctx) {
     final MetaClass type = injector.getInjectedType();
 
@@ -92,10 +96,21 @@ public class InjectUtil {
 
       return new ConstructionStrategy() {
         @Override
-        public void generateConstructor() {
+        public void generateConstructor(ConstructionStatusCallback callback) {
           Statement[] parameterStatements = resolveInjectionDependencies(constructor.getParameters(), ctx, constructor);
+          if (injector.isSingleton() && injector.isInjected()) return;
 
           IOCProcessingContext processingContext = ctx.getProcessingContext();
+
+          if (injectedVars.containsKey(injector.getVarName())) {
+            System.out.println("duplicate var! " + injector.getVarName() + " -- original trace -->");
+            injectedVars.get(injector.getVarName()).printStackTrace();
+
+            System.out.println(" -- current trace -->");
+            new Throwable().printStackTrace();
+          }
+          injectedVars.put(injector.getVarName(), new Throwable());
+
 
           processingContext.append(
                   Stmt.declareVariable(type)
@@ -105,11 +120,14 @@ public class InjectUtil {
                                   .newObject(type)
                                   .withParameters(parameterStatements))
           );
+          callback.callback(true);
+
 
           handleInjectionTasks(ctx, injectionTasks);
 
           doPostConstruct(ctx, injector, postConstructTasks);
         }
+
       };
     }
     else {
@@ -119,8 +137,20 @@ public class InjectUtil {
 
       return new ConstructionStrategy() {
         @Override
-        public void generateConstructor() {
+        public void generateConstructor(ConstructionStatusCallback callback) {
+          if (injector.isSingleton() && injector.isInjected()) return;
+
+
           IOCProcessingContext processingContext = ctx.getProcessingContext();
+
+          if (injectedVars.containsKey(injector.getVarName())) {
+            System.out.println("duplicate var! " + injector.getVarName() + " -- original trace -->");
+            injectedVars.get(injector.getVarName()).printStackTrace();
+
+            System.out.println(" -- current trace -->");
+            new Throwable().printStackTrace();
+          }
+          injectedVars.put(injector.getVarName(), new Throwable());
 
           processingContext.append(
                   Stmt.declareVariable(type)
@@ -129,6 +159,7 @@ public class InjectUtil {
                           .initializeWith(Stmt.newObject(type))
 
           );
+          callback.callback(true);
 
           handleInjectionTasks(ctx, injectionTasks);
 
@@ -193,77 +224,78 @@ public class InjectUtil {
     }
 
     MetaClass visit = type;
-    
-    do {
-    for (MetaField field : visit.getDeclaredFields()) {
-      if (isInjectionPoint(field)) {
-        if (!field.isPublic()) {
-          MetaMethod meth = visit.getMethod(ReflectionUtil.getSetter(field.getName()),
-                  field.getType());
 
-          if (meth == null) {
-            InjectionTask task = new InjectionTask(injector, field);
-            accumulator.add(task);
+    do {
+      for (MetaField field : visit.getDeclaredFields()) {
+        if (isInjectionPoint(field)) {
+          if (!field.isPublic()) {
+            MetaMethod meth = visit.getMethod(ReflectionUtil.getSetter(field.getName()),
+                    field.getType());
+
+            if (meth == null) {
+              InjectionTask task = new InjectionTask(injector, field);
+              accumulator.add(task);
+            }
+            else {
+              InjectionTask task = new InjectionTask(injector, meth);
+              task.setField(field);
+              accumulator.add(task);
+            }
+
           }
           else {
-            InjectionTask task = new InjectionTask(injector, meth);
-            task.setField(field);
-            accumulator.add(task);
-          }
-
-        }
-        else {
-          accumulator.add(new InjectionTask(injector, field));
-        }
-      }
-
-      ElementType[] elTypes;
-      for (Class<? extends Annotation> a : decorators) {
-        elTypes = a.isAnnotationPresent(Target.class) ? a.getAnnotation(Target.class).value()
-                : new ElementType[]{ElementType.FIELD};
-
-        for (ElementType elType : elTypes) {
-          switch (elType) {
-            case FIELD:
-              if (field.isAnnotationPresent(a)) {
-                accumulator.add(new DecoratorTask(injector, field, ctx.getDecorator(a)));
-              }
-              break;
+            accumulator.add(new InjectionTask(injector, field));
           }
         }
-      }
-    }
 
-    for (MetaMethod meth : visit.getDeclaredMethods()) {
-      if (isInjectionPoint(meth)) {
-        accumulator.add(new InjectionTask(injector, meth));
-      }
+        ElementType[] elTypes;
+        for (Class<? extends Annotation> a : decorators) {
+          elTypes = a.isAnnotationPresent(Target.class) ? a.getAnnotation(Target.class).value()
+                  : new ElementType[]{ElementType.FIELD};
 
-      ElementType[] elTypes;
-      for (Class<? extends Annotation> a : decorators) {
-        elTypes = a.isAnnotationPresent(Target.class) ? a.getAnnotation(Target.class).value()
-                : new ElementType[]{ElementType.FIELD};
-
-        for (ElementType elType : elTypes) {
-          switch (elType) {
-            case METHOD:
-              if (meth.isAnnotationPresent(a)) {
-                accumulator.add(new DecoratorTask(injector, meth, ctx.getDecorator(a)));
-              }
-              break;
-            case PARAMETER:
-              for (MetaParameter parameter : meth.getParameters()) {
-                if (parameter.isAnnotationPresent(a)) {
-                  DecoratorTask task = new DecoratorTask(injector, parameter, ctx.getDecorator(a));
-                  task.setMethod(meth);
-                  accumulator.add(task);
+          for (ElementType elType : elTypes) {
+            switch (elType) {
+              case FIELD:
+                if (field.isAnnotationPresent(a)) {
+                  accumulator.add(new DecoratorTask(injector, field, ctx.getDecorator(a)));
                 }
-              }
+                break;
+            }
+          }
+        }
+      }
+
+      for (MetaMethod meth : visit.getDeclaredMethods()) {
+        if (isInjectionPoint(meth)) {
+          accumulator.add(new InjectionTask(injector, meth));
+        }
+
+        ElementType[] elTypes;
+        for (Class<? extends Annotation> a : decorators) {
+          elTypes = a.isAnnotationPresent(Target.class) ? a.getAnnotation(Target.class).value()
+                  : new ElementType[]{ElementType.FIELD};
+
+          for (ElementType elType : elTypes) {
+            switch (elType) {
+              case METHOD:
+                if (meth.isAnnotationPresent(a)) {
+                  accumulator.add(new DecoratorTask(injector, meth, ctx.getDecorator(a)));
+                }
+                break;
+              case PARAMETER:
+                for (MetaParameter parameter : meth.getParameters()) {
+                  if (parameter.isAnnotationPresent(a)) {
+                    DecoratorTask task = new DecoratorTask(injector, parameter, ctx.getDecorator(a));
+                    task.setMethod(meth);
+                    accumulator.add(task);
+                  }
+                }
+            }
           }
         }
       }
     }
-    } while ((visit = visit.getSuperClass()) != null);
+    while ((visit = visit.getSuperClass()) != null);
 
     return accumulator;
   }

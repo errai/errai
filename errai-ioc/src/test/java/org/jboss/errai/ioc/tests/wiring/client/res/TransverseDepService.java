@@ -14,9 +14,20 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.rebind.ioc;
+package org.jboss.errai.ioc.tests.wiring.client.res;
 
+import org.jboss.errai.ioc.client.api.EntryPoint;
 
-public interface ConstructionStrategy {
-  public void generateConstructor(ConstructionStatusCallback callback);
+import javax.enterprise.context.ApplicationScoped;
+
+/**
+ * @author Mike Brock
+ */
+@EntryPoint
+public class TransverseDepService {
+  private final String name = "I'm a Service!";
+
+  public String getName() {
+    return name;
+  }
 }

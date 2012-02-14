@@ -14,9 +14,17 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.rebind.ioc;
+package org.jboss.errai.ioc.tests.wiring.client.res;
 
+import org.jboss.errai.ioc.client.api.EntryPoint;
 
-public interface ConstructionStrategy {
-  public void generateConstructor(ConstructionStatusCallback callback);
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
+/**
+ * @author Mike Brock
+ */
+@EntryPoint
+public class ServiceB {
+  @Inject TransverseDepService svc;
 }

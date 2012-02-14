@@ -16,7 +16,9 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
-
-public interface ConstructionStrategy {
-  public void generateConstructor(ConstructionStatusCallback callback);
+/**
+ * @author Mike Brock
+ */
+public interface ConstructionStatusCallback {
+  public void callback(boolean constructed);
 }

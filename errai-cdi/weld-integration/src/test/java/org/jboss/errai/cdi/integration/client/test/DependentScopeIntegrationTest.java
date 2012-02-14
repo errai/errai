@@ -19,6 +19,7 @@ package org.jboss.errai.cdi.integration.client.test;
 import org.jboss.errai.cdi.integration.client.shared.ApplicationScopedBean;
 import org.jboss.errai.cdi.integration.client.shared.DependentScopedBean;
 import org.jboss.errai.cdi.integration.client.shared.DependentScopedBeanWithDependencies;
+import org.jboss.errai.cdi.integration.client.shared.TestOuterBean;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 
@@ -33,6 +34,8 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
   }
 
   public void testDependentBeanScope() {
+    delayTestFinish(60000);
+
     CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
@@ -54,6 +57,20 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
       }
     });
 
+  }
+
+  public void testDependentScopesWithTransverseDependentBeans() {
     delayTestFinish(60000);
+    CDI.addPostInitTask(new Runnable() {
+      @Override
+      public void run() {
+        TestOuterBean outBean = TestOuterBean.getInstance();
+
+        System.out.println(outBean);
+        finishTest();
+      }
+    });
+
+
   }
 }

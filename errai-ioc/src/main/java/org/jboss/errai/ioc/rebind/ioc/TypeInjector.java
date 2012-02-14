@@ -38,7 +38,7 @@ public class TypeInjector extends Injector {
   protected String varName;
 
   public TypeInjector(MetaClass type, IOCProcessingContext context) {
-     this(type, context, new Annotation[0]);
+    this(type, context, new Annotation[0]);
   }
 
   public TypeInjector(MetaClass type, IOCProcessingContext context, Annotation[] additionalQualifiers) {
@@ -56,8 +56,6 @@ public class TypeInjector extends Injector {
 
       if (!qualifiers.isEmpty()) {
 
-
-        
         qualifyingMetadata = context.getQualifyingMetadataFactory().createFrom(qualifiers.toArray(new
                 Annotation[qualifiers.size()]));
 
@@ -82,9 +80,13 @@ public class TypeInjector extends Injector {
       }
     }
 
-    InjectUtil.getConstructionStrategy(this, injectContext).generateConstructor();
+    InjectUtil.getConstructionStrategy(this, injectContext).generateConstructor(new ConstructionStatusCallback() {
+      @Override
+      public void callback(boolean constructed) {
+        injected = true;
+      }
+    });
 
-    injected = true;
 
     return Refs.get(varName);
   }

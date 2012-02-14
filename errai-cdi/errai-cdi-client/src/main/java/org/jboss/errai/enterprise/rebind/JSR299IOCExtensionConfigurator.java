@@ -124,9 +124,9 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
 
         if (!i.isInjected()) {
           // instantiate the bean.
+        //  injectionContext.registerInjector(i);
           i.setSingleton(true);
           i.getType(injectionContext, null);
-          injectionContext.registerInjector(i);
         }
         return true;
       }

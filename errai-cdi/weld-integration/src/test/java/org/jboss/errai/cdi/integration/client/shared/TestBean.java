@@ -14,9 +14,29 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.rebind.ioc;
+package org.jboss.errai.cdi.integration.client.shared;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
-public interface ConstructionStrategy {
-  public void generateConstructor(ConstructionStatusCallback callback);
+/**
+ * @author Mike Brock
+ */
+@ApplicationScoped
+public class TestBean {
+  @Inject private ServiceA serviceA;
+  @Inject private ServiceB serviceB;
+  @Inject private ServiceC serviceC;
+
+  public ServiceA getServiceA() {
+    return serviceA;
+  }
+
+  public ServiceB getServiceB() {
+    return serviceB;
+  }
+
+  public ServiceC getServiceC() {
+    return serviceC;
+  }
 }
