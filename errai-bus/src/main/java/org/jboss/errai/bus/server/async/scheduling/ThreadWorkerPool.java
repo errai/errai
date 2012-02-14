@@ -93,6 +93,7 @@ public class ThreadWorkerPool {
 
             anyActive = false;
             for (ThreadWorker worker : workers) {
+
               if (!worker.isStopped()) {
                 anyActive = true;
               }
