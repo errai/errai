@@ -3,10 +3,31 @@
 
 	<groupId>org.reflections</groupId>
 	<artifactId>reflections-parent</artifactId>
-    <version>0.9.7_jboss_errai_r4-SNAPSHOT</version>
+    <version>0.9.6_jboss_errai_r3</version>
 	<packaging>pom</packaging>
 
     <name>Reflections parent</name>
+
+
+    <url>http://jboss.org/errai/errai</url>
+
+    <licenses>
+        <license>
+            <name>DO WHAT THE F#*@ YOU WANT TO PUBLIC LICENSE</name>
+            <url>https://raw.github.com/errai/Reflections/master/reflections/COPYING.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <description>
+        Reflections framework
+    </description>
+
+    <developers>
+        <developer>
+            <name>Various Persons</name>
+        </developer>
+    </developers>
 
     <modules>
 		<module>reflections</module>
