@@ -202,4 +202,8 @@ public class DefaultRemoteCallBuilder {
   public static void setProxyFactory(ProxyProvider provider) {
     proxyProvider = Assert.notNull(provider);
   }
+
+  public static void destroyProxyFactory() {
+    proxyProvider = null;
+  }
 }

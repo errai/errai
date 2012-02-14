@@ -120,7 +120,7 @@ public class ErraiServiceImpl<S> implements ErraiService<S> {
     dispatcher = null;
     shutdownHooks = null;
 
-    DefaultRemoteCallBuilder.setProxyFactory(null);
+    DefaultRemoteCallBuilder.destroyProxyFactory();
   }
 
   /**
