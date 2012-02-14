@@ -39,6 +39,7 @@ public class Worker extends Thread {
   private long timeout;
 
   private volatile boolean active = true;
+  private volatile boolean exited = false;
   private volatile long workExpiry;
   private volatile Message message;
 
@@ -111,12 +112,16 @@ public class Worker extends Thread {
             workExpiry = 0;
           }
           if (!active) {
+            exited = true;
             return;
           }
         }
       }
       catch (InterruptedException e) {
-        if (!active) return;
+        if (!active) {
+          exited = true;
+          return;
+        }
       }
       catch (QueueUnavailableException e) {
         e.printStackTrace();
@@ -141,5 +146,9 @@ public class Worker extends Thread {
     else {
       bus.sendGlobal(message);
     }
+  }
+
+  public boolean isStopped() {
+    return exited;
   }
 }

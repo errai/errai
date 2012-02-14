@@ -16,8 +16,10 @@
 
 package org.jboss.errai.bus.server.async.scheduling;
 
+import javax.swing.plaf.metal.MetalBorders;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.locks.LockSupport;
 
 public class ThreadWorkerPool {
   /**
@@ -79,6 +81,40 @@ public class ThreadWorkerPool {
 
       for (ThreadWorker worker : workers)
         worker.requestStop();
+
+
+      Thread shutdownThread = new Thread() {
+        @Override
+        public void run() {
+          boolean allStopped = false;
+          boolean anyActive;
+          while (!allStopped) {
+            LockSupport.parkNanos(1000);
+
+            anyActive = false;
+            for (ThreadWorker worker : workers) {
+              if (!worker.isStopped()) {
+                anyActive = true;
+              }
+            }
+
+            if (!anyActive) {
+              allStopped = true;
+            }
+          }
+        }
+      };
+
+      shutdownThread.setPriority(Thread.MIN_PRIORITY);
+      shutdownThread.start();
+
+      try {
+        shutdownThread.join();
+      }
+      catch (InterruptedException e) {
+        System.err.println("was interuppted waiting to shutdown thread worker pool");
+        e.printStackTrace();
+      }
     }
   }
 }

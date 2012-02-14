@@ -111,6 +111,12 @@ public class ErraiServiceImpl<S> implements ErraiService<S> {
         log.error("error executing shutdown hook", e);
       }
     }
+    
+    bus = null;
+    config = null;
+    sessionProvider = null;
+    dispatcher = null;
+    shutdownHooks = null;
   }
 
   /**

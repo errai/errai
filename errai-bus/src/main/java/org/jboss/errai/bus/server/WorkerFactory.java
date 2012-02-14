@@ -19,6 +19,7 @@ package org.jboss.errai.bus.server;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
 
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
@@ -158,7 +159,7 @@ public class WorkerFactory {
 
   private void sendDeliveryFailure(Message m) {
     MessageDeliveryFailure mdf
-        = new MessageDeliveryFailure("could not deliver message because the outgoing queue is full");
+            = new MessageDeliveryFailure("could not deliver message because the outgoing queue is full");
 
     if (m.getErrorCallback() == null || m.getErrorCallback().error(m, mdf)) {
       ErrorHelper.sendClientError(svc.getBus(), m, mdf.getMessage(), mdf);
@@ -195,12 +196,50 @@ public class WorkerFactory {
   }
 
   public void stopPool() {
-    log.info("stopping workering pool.");
-    for (int i = 0; i < poolSize; i++) {
-      workerPool[i].setActive(false);
+    synchronized (this) {
+
+      log.info("stopping workering pool.");
+      for (int i = 0; i < poolSize; i++) {
+        workerPool[i].setActive(false);
+      }
+
+
+      Thread shutdownThread = new Thread() {
+        @Override
+        public void run() {
+          boolean allStopped = false;
+          boolean anyActive;
+          while (!allStopped) {
+            LockSupport.parkNanos(1000);
+
+            anyActive = false;
+            for (Worker worker : workerPool) {
+              if (!worker.isStopped()) {
+                anyActive = true;
+              }
+            }
+
+            if (!anyActive) {
+              allStopped = true;
+            }
+          }
+        }
+      };
+
+      shutdownThread.setPriority(Thread.MIN_PRIORITY);
+      shutdownThread.start();
+
+      try {
+        shutdownThread.join();
+      }
+      catch (InterruptedException e) {
+        System.err.println("was interuppted waiting to shutdown async worker pool");
+        e.printStackTrace();
+      }
     }
+
   }
-  
+
   private long seconds(int seconds) {
     return seconds * 1000;
   }

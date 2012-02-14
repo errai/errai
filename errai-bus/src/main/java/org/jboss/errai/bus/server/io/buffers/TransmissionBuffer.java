@@ -692,6 +692,10 @@ public class TransmissionBuffer implements Buffer {
     segmentMap[idx] = v;
   }
 
+  public void clear() {
+    _buffer.clear();
+  }
+
   public void dumpSegments(PrintWriter writer) {
     writer.println();
     writer.println("SEGMENT DUMP");

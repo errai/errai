@@ -1261,6 +1261,12 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
 
     scheduler.shutdown();
+
+    transmissionbuffer.clear();
+    subscriptions.clear();
+    remoteSubscriptions.clear();
+    deferredQueue.clear();
+    sessionLookup.clear();
   }
 
   public void finishInit() {

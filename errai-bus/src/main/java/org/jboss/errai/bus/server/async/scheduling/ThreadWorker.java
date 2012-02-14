@@ -25,6 +25,7 @@ public class ThreadWorker implements Runnable {
   private final ErrorCallback errorCallback;
 
   private volatile boolean active = false;
+  private volatile boolean isStopped = false;
 
   public ThreadWorker(TaskProvider pool) {
     this.thread = new Thread(this, "ExecutorPoolWorker");
@@ -73,6 +74,7 @@ public class ThreadWorker implements Runnable {
            * If the thread has been marked inactive, terminate now.  Otherwise continue along
            * normally.
            */
+          isStopped = true;
           return;
         }
       }
@@ -93,9 +95,14 @@ public class ThreadWorker implements Runnable {
         }
       }
     }
+    isStopped = true;
   }
 
   public Thread.State getThreadState() {
     return thread.getState();
+  }
+
+  public boolean isStopped() {
+    return isStopped;
   }
 }
