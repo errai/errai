@@ -64,6 +64,8 @@ public class WebSocketServer {
         bootstrap.releaseExternalResources();
         factory.getWebSocketServerHandler().stop();
         server.close();
+        svc = null;
+        log.info("web socket server stopped.");
       }
     });
 
