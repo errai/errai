@@ -56,7 +56,7 @@ function windowTitle()
 
 <TR>
 <TD BGCOLOR="white" CLASS="NavBarCell2"><FONT SIZE="-2">
-&nbsp;<A HREF="../../../org/reflections/serializers/Serializer.html" title="interface in org.reflections.serializers"><B>PREV CLASS</B></A>&nbsp;
+&nbsp;<A HREF="../../../org/reflections/serializers/Serializer.html" title="interface in org.jboss.errai.reflections.serializers"><B>PREV CLASS</B></A>&nbsp;
 &nbsp;NEXT CLASS</FONT></TD>
 <TD BGCOLOR="white" CLASS="NavBarCell2"><FONT SIZE="-2">
   <A HREF="../../../index.html?org/reflections/serializers/XmlSerializer.html" target="_top"><B>FRAMES</B></A>  &nbsp;
@@ -89,19 +89,19 @@ DETAIL:&nbsp;FIELD&nbsp;|&nbsp;<A HREF="#constructor_detail">CONSTR</A>&nbsp;|&n
 <!-- ======== START OF CLASS DATA ======== -->
 <H2>
 <FONT SIZE="-1">
-org.reflections.serializers</FONT>
+    org.jboss.errai.reflections.serializers</FONT>
 <BR>
 Class XmlSerializer</H2>
 <PRE>
 java.lang.Object
-  <IMG SRC="../../../resources/inherit.gif" ALT="extended by "><B>org.reflections.serializers.XmlSerializer</B>
+  <IMG SRC="../../../resources/inherit.gif" ALT="extended by "><B>org.jboss.errai.reflections.serializers.XmlSerializer</B>
 </PRE>
 <DL>
-<DT><B>All Implemented Interfaces:</B> <DD><A HREF="../../../org/reflections/serializers/Serializer.html" title="interface in org.reflections.serializers">Serializer</A></DD>
+<DT><B>All Implemented Interfaces:</B> <DD><A HREF="../../../org/reflections/serializers/Serializer.html" title="interface in org.jboss.errai.reflections.serializers">Serializer</A></DD>
 </DL>
 <HR>
 <DL>
-<DT><PRE>public class <B>XmlSerializer</B><DT>extends java.lang.Object<DT>implements <A HREF="../../../org/reflections/serializers/Serializer.html" title="interface in org.reflections.serializers">Serializer</A></DL>
+<DT><PRE>public class <B>XmlSerializer</B><DT>extends java.lang.Object<DT>implements <A HREF="../../../org/reflections/serializers/Serializer.html" title="interface in org.jboss.errai.reflections.serializers">Serializer</A></DL>
 </PRE>
 
 <P>
@@ -109,15 +109,15 @@ serialization of Reflections to xml
 
  <p>an example of produced xml:
  <pre>
- &#60?xml version="1.0" encoding="UTF-8"?>
+ &amp;amp;amp;#60?xml version=&amp;amp;quot;1.0&amp;amp;quot; encoding=&amp;amp;quot;UTF-8&amp;amp;quot;?&amp;amp;gt;
 
- &#60Reflections>
-  &#60org.reflections.scanners.MethodAnnotationsScanner>
-      &#60entry>
-          &#60key>org.reflections.TestModel$AM1&#60/key>
-          &#60values>
-              &#60value>org.reflections.TestModel$C4.m3()&#60/value>
-              &#60value>org.reflections.TestModel$C4.m1(int[][], java.lang.String[][])&#60/value>
+ &amp;amp;amp;#60Reflections&amp;amp;gt;
+  &amp;amp;amp;#60org.reflectiorg.jboss.errai.reflectionsthodAnnotationsScanner&amp;amp;gt;
+      &amp;amp;amp;#60entry&amp;amp;gt;
+          &amp;amp;amp;#60key&amp;amp;gt;org.reflections.TestModel$AM1&amp;amp;org.jboss.errai.reflections
+          &amp;amp;amp;#60values&amp;amp;gt;
+              &amp;amp;amp;#60value&amp;amp;gt;org.reflections.TestModel$C4.m3()&amp;amp;amp;#60/value&amp;amp;gt;
+              &amp;amp;amp;#60value&amp;amp;gt;org.jboss.errai.reflections.TestModel$C4.m1(int[][], java.lang.String[][])&amp;amp;amp;#60/value&amp;amp;gt;
  ...
  </pre>
 <P>
@@ -153,7 +153,7 @@ serialization of Reflections to xml
 </TR>
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
-<CODE>&nbsp;<A HREF="../../../org/reflections/Reflections.html" title="class in org.reflections">Reflections</A></CODE></FONT></TD>
+<CODE>&nbsp;<A HREF="../../../org/reflections/Reflections.html" title="class in org.jboss.errai.reflections">Reflections</A></CODE></FONT></TD>
 <TD><CODE><B><A HREF="../../../org/reflections/serializers/XmlSerializer.html#read(java.io.InputStream)">read</A></B>(java.io.InputStream&nbsp;inputStream)</CODE>
 
 <BR>
@@ -162,7 +162,7 @@ serialization of Reflections to xml
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
 <CODE>&nbsp;java.io.File</CODE></FONT></TD>
-<TD><CODE><B><A HREF="../../../org/reflections/serializers/XmlSerializer.html#save(org.reflections.Reflections, java.lang.String)">save</A></B>(<A HREF="../../../org/reflections/Reflections.html" title="class in org.reflections">Reflections</A>&nbsp;reflections,
+<TD><CODE><B><A HREF="../../../org/reflections/serializers/XmlSerializer.html#save(org.reflections.Reflections, java.lang.String)">save</A></B>(<A HREF="../../../org/reflections/Reflections.html" title="class in org.jboss.errai.reflections">Reflections</A>&nbsp;reflections,
      java.lang.String&nbsp;filename)</CODE>
 
 <BR>
@@ -171,7 +171,7 @@ serialization of Reflections to xml
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
 <CODE>&nbsp;java.lang.String</CODE></FONT></TD>
-<TD><CODE><B><A HREF="../../../org/reflections/serializers/XmlSerializer.html#toString(org.reflections.Reflections)">toString</A></B>(<A HREF="../../../org/reflections/Reflections.html" title="class in org.reflections">Reflections</A>&nbsp;reflections)</CODE>
+<TD><CODE><B><A HREF="../../../org/reflections/serializers/XmlSerializer.html#toString(org.reflections.Reflections)">toString</A></B>(<A HREF="../../../org/reflections/Reflections.html" title="class in org.jboss.errai.reflections">Reflections</A>&nbsp;reflections)</CODE>
 
 <BR>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;returns a string serialization of the given Reflections instance</TD>
@@ -219,13 +219,13 @@ public <B>XmlSerializer</B>()</PRE>
 <A NAME="read(java.io.InputStream)"><!-- --></A><H3>
 read</H3>
 <PRE>
-public <A HREF="../../../org/reflections/Reflections.html" title="class in org.reflections">Reflections</A> <B>read</B>(java.io.InputStream&nbsp;inputStream)</PRE>
+public <A HREF="../../../org/reflections/Reflections.html" title="class in org.jboss.errai.reflections">Reflections</A> <B>read</B>(java.io.InputStream&nbsp;inputStream)</PRE>
 <DL>
 <DD><B>Description copied from interface: <CODE><A HREF="../../../org/reflections/serializers/Serializer.html#read(java.io.InputStream)">Serializer</A></CODE></B></DD>
 <DD>reads the input stream into a new Reflections instance, populating it's store
 <P>
 <DD><DL>
-<DT><B>Specified by:</B><DD><CODE><A HREF="../../../org/reflections/serializers/Serializer.html#read(java.io.InputStream)">read</A></CODE> in interface <CODE><A HREF="../../../org/reflections/serializers/Serializer.html" title="interface in org.reflections.serializers">Serializer</A></CODE></DL>
+<DT><B>Specified by:</B><DD><CODE><A HREF="../../../org/reflections/serializers/Serializer.html#read(java.io.InputStream)">read</A></CODE> in interface <CODE><A HREF="../../../org/reflections/serializers/Serializer.html" title="interface in org.jboss.errai.reflections.serializers">Serializer</A></CODE></DL>
 </DD>
 <DD><DL>
 </DL>
@@ -236,14 +236,14 @@ public <A HREF="../../../org/reflections/Reflections.html" title="class in org.r
 <A NAME="save(org.reflections.Reflections, java.lang.String)"><!-- --></A><H3>
 save</H3>
 <PRE>
-public java.io.File <B>save</B>(<A HREF="../../../org/reflections/Reflections.html" title="class in org.reflections">Reflections</A>&nbsp;reflections,
+public java.io.File <B>save</B>(<A HREF="../../../org/reflections/Reflections.html" title="class in org.jboss.errai.reflections">Reflections</A>&nbsp;reflections,
                          java.lang.String&nbsp;filename)</PRE>
 <DL>
 <DD><B>Description copied from interface: <CODE><A HREF="../../../org/reflections/serializers/Serializer.html#save(org.reflections.Reflections, java.lang.String)">Serializer</A></CODE></B></DD>
 <DD>saves a Reflections instance into the given filename
 <P>
 <DD><DL>
-<DT><B>Specified by:</B><DD><CODE><A HREF="../../../org/reflections/serializers/Serializer.html#save(org.reflections.Reflections, java.lang.String)">save</A></CODE> in interface <CODE><A HREF="../../../org/reflections/serializers/Serializer.html" title="interface in org.reflections.serializers">Serializer</A></CODE></DL>
+<DT><B>Specified by:</B><DD><CODE><A HREF="../../../org/reflections/serializers/Serializer.html#save(org.reflections.Reflections, java.lang.String)">save</A></CODE> in interface <CODE><A HREF="../../../org/reflections/serializers/Serializer.html" title="interface in org.jboss.errai.reflections.serializers">Serializer</A></CODE></DL>
 </DD>
 <DD><DL>
 </DL>
@@ -254,13 +254,13 @@ public java.io.File <B>save</B>(<A HREF="../../../org/reflections/Reflections.ht
 <A NAME="toString(org.reflections.Reflections)"><!-- --></A><H3>
 toString</H3>
 <PRE>
-public java.lang.String <B>toString</B>(<A HREF="../../../org/reflections/Reflections.html" title="class in org.reflections">Reflections</A>&nbsp;reflections)</PRE>
+public java.lang.String <B>toString</B>(<A HREF="../../../org/reflections/Reflections.html" title="class in org.jboss.errai.reflections">Reflections</A>&nbsp;reflections)</PRE>
 <DL>
 <DD><B>Description copied from interface: <CODE><A HREF="../../../org/reflections/serializers/Serializer.html#toString(org.reflections.Reflections)">Serializer</A></CODE></B></DD>
 <DD>returns a string serialization of the given Reflections instance
 <P>
 <DD><DL>
-<DT><B>Specified by:</B><DD><CODE><A HREF="../../../org/reflections/serializers/Serializer.html#toString(org.reflections.Reflections)">toString</A></CODE> in interface <CODE><A HREF="../../../org/reflections/serializers/Serializer.html" title="interface in org.reflections.serializers">Serializer</A></CODE></DL>
+<DT><B>Specified by:</B><DD><CODE><A HREF="../../../org/reflections/serializers/Serializer.html#toString(org.reflections.Reflections)">toString</A></CODE> in interface <CODE><A HREF="../../../org/reflections/serializers/Serializer.html" title="interface in org.jboss.errai.reflections.serializers">Serializer</A></CODE></DL>
 </DD>
 <DD><DL>
 </DL>
@@ -297,7 +297,7 @@ public java.lang.String <B>toString</B>(<A HREF="../../../org/reflections/Reflec
 
 <TR>
 <TD BGCOLOR="white" CLASS="NavBarCell2"><FONT SIZE="-2">
-&nbsp;<A HREF="../../../org/reflections/serializers/Serializer.html" title="interface in org.reflections.serializers"><B>PREV CLASS</B></A>&nbsp;
+&nbsp;<A HREF="../../../org/reflections/serializers/Serializer.html" title="interface in org.jboss.errai.reflections.serializers"><B>PREV CLASS</B></A>&nbsp;
 &nbsp;NEXT CLASS</FONT></TD>
 <TD BGCOLOR="white" CLASS="NavBarCell2"><FONT SIZE="-2">
   <A HREF="../../../index.html?org/reflections/serializers/XmlSerializer.html" target="_top"><B>FRAMES</B></A>  &nbsp;

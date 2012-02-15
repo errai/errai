@@ -56,8 +56,8 @@ function windowTitle()
 
 <TR>
 <TD BGCOLOR="white" CLASS="NavBarCell2"><FONT SIZE="-2">
-&nbsp;<A HREF="../../../org/reflections/vfs/UrlTypeVFS.html" title="class in org.reflections.vfs"><B>PREV CLASS</B></A>&nbsp;
-&nbsp;<A HREF="../../../org/reflections/vfs/Vfs.DefaultUrlTypes.html" title="enum in org.reflections.vfs"><B>NEXT CLASS</B></A></FONT></TD>
+&nbsp;<A HREF="../../../org/reflections/vfs/UrlTypeVFS.html" title="class in org.jboss.errai.reflections.vfs"><B>PREV CLASS</B></A>&nbsp;
+&nbsp;<A HREF="../../../org/reflections/vfs/Vfs.DefaultUrlTypes.html" title="enum in org.jboss.errai.reflections.vfs"><B>NEXT CLASS</B></A></FONT></TD>
 <TD BGCOLOR="white" CLASS="NavBarCell2"><FONT SIZE="-2">
   <A HREF="../../../index.html?org/reflections/vfs/Vfs.html" target="_top"><B>FRAMES</B></A>  &nbsp;
 &nbsp;<A HREF="Vfs.html" target="_top"><B>NO FRAMES</B></A>  &nbsp;
@@ -89,12 +89,12 @@ DETAIL:&nbsp;FIELD&nbsp;|&nbsp;<A HREF="#constructor_detail">CONSTR</A>&nbsp;|&n
 <!-- ======== START OF CLASS DATA ======== -->
 <H2>
 <FONT SIZE="-1">
-org.reflections.vfs</FONT>
+    org.jboss.errai.reflections.vfs</FONT>
 <BR>
 Class Vfs</H2>
 <PRE>
 java.lang.Object
-  <IMG SRC="../../../resources/inherit.gif" ALT="extended by "><B>org.reflections.vfs.Vfs</B>
+  <IMG SRC="../../../resources/inherit.gif" ALT="extended by "><B>org.jboss.errai.reflections.vfs.Vfs</B>
 </PRE>
 <HR>
 <DL>
@@ -103,8 +103,8 @@ java.lang.Object
 
 <P>
 a simple virtual file system bridge
- <p>use the <A HREF="../../../org/reflections/vfs/Vfs.html#fromURL(java.net.URL)"><CODE>fromURL(java.net.URL)</CODE></A> to get a <A HREF="../../../org/reflections/vfs/Vfs.Dir.html" title="interface in org.reflections.vfs"><CODE>Vfs.Dir</CODE></A>
- and than use <A HREF="../../../org/reflections/vfs/Vfs.Dir.html#getFiles()"><CODE>Vfs.Dir.getFiles()</CODE></A> to iterate over it's <A HREF="../../../org/reflections/vfs/Vfs.File.html" title="interface in org.reflections.vfs"><CODE>Vfs.File</CODE></A>
+ <p>use the <A HREF="../../../org/reflections/vfs/Vfs.html#fromURL(java.net.URL)"><CODE>fromURL(java.net.URL)</CODE></A> to get a <A HREF="../../../org/reflections/vfs/Vfs.Dir.html" title="interface in org.jboss.errai.reflections.vfs"><CODE>Vfs.Dir</CODE></A>
+ and than use <A HREF="../../../org/reflections/vfs/Vfs.Dir.html#getFiles()"><CODE>Vfs.Dir.getFiles()</CODE></A> to iterate over it's <A HREF="../../../org/reflections/vfs/Vfs.File.html" title="interface in org.jboss.errai.reflections.vfs"><CODE>Vfs.File</CODE></A>
  <p>for example:
  <pre>
       Vfs.Dir dir = Vfs.fromURL(url);
@@ -115,8 +115,8 @@ a simple virtual file system bridge
  </pre>
  <p>use <A HREF="../../../org/reflections/vfs/Vfs.html#findFiles(java.util.Collection, com.google.common.base.Predicate)"><CODE>findFiles(java.util.Collection, com.google.common.base.Predicate)</CODE></A> to get an
  iteration of files matching given name predicate over given list of urls
- <p><p><A HREF="../../../org/reflections/vfs/Vfs.html#fromURL(java.net.URL)"><CODE>fromURL(java.net.URL)</CODE></A> uses static <A HREF="../../../org/reflections/vfs/Vfs.DefaultUrlTypes.html" title="enum in org.reflections.vfs"><CODE>Vfs.DefaultUrlTypes</CODE></A> to resolves URLs
- and it can be plugged in with <A HREF="../../../org/reflections/vfs/Vfs.html#addDefaultURLTypes(org.reflections.vfs.Vfs.UrlType)"><CODE>addDefaultURLTypes(org.reflections.vfs.Vfs.UrlType)</CODE></A> or <A HREF="../../../org/reflections/vfs/Vfs.html#setDefaultURLTypes(java.util.List)"><CODE>setDefaultURLTypes(java.util.List)</CODE></A>.
+ <p><p><A HREF="../../../org/reflections/vfs/Vfs.html#fromURL(java.net.URL)"><CODE>fromURL(java.net.URL)</CODE></A> uses static <A HREF="../../../org/reflections/vfs/Vfs.DefaultUrlTypes.html" title="enum in org.jboss.errai.reflections.vfs"><CODE>Vfs.DefaultUrlTypes</CODE></A> to resolves URLs
+ and it can be plugged in with <A HREF="../../../org/reflections/vfs/Vfs.html#addDefaultURLTypes(org.reflections.vfs.Vfs.UrlType)"><CODE>addDefaultURLTypes(org.jboss.errai.reflections.vfs.Vfs.UrlType)</CODE></A> or <A HREF="../../../org/reflections/vfs/Vfs.html#setDefaultURLTypes(java.util.List)"><CODE>setDefaultURLTypes(java.util.List)</CODE></A>.
  <p>for example:
  <pre>
       Vfs.addDefaultURLTypes(new Vfs.UrlType() {
@@ -147,7 +147,7 @@ a simple virtual file system bridge
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
 <CODE>static&nbsp;class</CODE></FONT></TD>
-<TD><CODE><B><A HREF="../../../org/reflections/vfs/Vfs.DefaultUrlTypes.html" title="enum in org.reflections.vfs">Vfs.DefaultUrlTypes</A></B></CODE>
+<TD><CODE><B><A HREF="../../../org/reflections/vfs/Vfs.DefaultUrlTypes.html" title="enum in org.jboss.errai.reflections.vfs">Vfs.DefaultUrlTypes</A></B></CODE>
 
 <BR>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default url types used by <A HREF="../../../org/reflections/vfs/Vfs.html#fromURL(java.net.URL)"><CODE>fromURL(java.net.URL)</CODE></A></TD>
@@ -155,7 +155,7 @@ a simple virtual file system bridge
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
 <CODE>static&nbsp;interface</CODE></FONT></TD>
-<TD><CODE><B><A HREF="../../../org/reflections/vfs/Vfs.Dir.html" title="interface in org.reflections.vfs">Vfs.Dir</A></B></CODE>
+<TD><CODE><B><A HREF="../../../org/reflections/vfs/Vfs.Dir.html" title="interface in org.jboss.errai.reflections.vfs">Vfs.Dir</A></B></CODE>
 
 <BR>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;an abstract vfs dir</TD>
@@ -163,7 +163,7 @@ a simple virtual file system bridge
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
 <CODE>static&nbsp;interface</CODE></FONT></TD>
-<TD><CODE><B><A HREF="../../../org/reflections/vfs/Vfs.File.html" title="interface in org.reflections.vfs">Vfs.File</A></B></CODE>
+<TD><CODE><B><A HREF="../../../org/reflections/vfs/Vfs.File.html" title="interface in org.jboss.errai.reflections.vfs">Vfs.File</A></B></CODE>
 
 <BR>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;an abstract vfs file</TD>
@@ -171,7 +171,7 @@ a simple virtual file system bridge
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
 <CODE>static&nbsp;interface</CODE></FONT></TD>
-<TD><CODE><B><A HREF="../../../org/reflections/vfs/Vfs.UrlType.html" title="interface in org.reflections.vfs">Vfs.UrlType</A></B></CODE>
+<TD><CODE><B><A HREF="../../../org/reflections/vfs/Vfs.UrlType.html" title="interface in org.jboss.errai.reflections.vfs">Vfs.UrlType</A></B></CODE>
 
 <BR>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a matcher and factory for a url</TD>
@@ -205,33 +205,33 @@ a simple virtual file system bridge
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
 <CODE>static&nbsp;void</CODE></FONT></TD>
-<TD><CODE><B><A HREF="../../../org/reflections/vfs/Vfs.html#addDefaultURLTypes(org.reflections.vfs.Vfs.UrlType)">addDefaultURLTypes</A></B>(<A HREF="../../../org/reflections/vfs/Vfs.UrlType.html" title="interface in org.reflections.vfs">Vfs.UrlType</A>&nbsp;urlType)</CODE>
+<TD><CODE><B><A HREF="../../../org/reflections/vfs/Vfs.html#addDefaultURLTypes(org.reflections.vfs.Vfs.UrlType)">addDefaultURLTypes</A></B>(<A HREF="../../../org/reflections/vfs/Vfs.UrlType.html" title="interface in org.jboss.errai.reflections.vfs">Vfs.UrlType</A>&nbsp;urlType)</CODE>
 
 <BR>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;add a static default url types.</TD>
 </TR>
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
-<CODE>static&nbsp;java.lang.Iterable&lt;<A HREF="../../../org/reflections/vfs/Vfs.File.html" title="interface in org.reflections.vfs">Vfs.File</A>&gt;</CODE></FONT></TD>
+<CODE>static&nbsp;java.lang.Iterable&lt;<A HREF="../../../org/reflections/vfs/Vfs.File.html" title="interface in org.jboss.errai.reflections.vfs">Vfs.File</A>&gt;</CODE></FONT></TD>
 <TD><CODE><B><A HREF="../../../org/reflections/vfs/Vfs.html#findFiles(java.util.Collection, com.google.common.base.Predicate)">findFiles</A></B>(java.util.Collection&lt;java.net.URL&gt;&nbsp;inUrls,
-          com.google.common.base.Predicate&lt;<A HREF="../../../org/reflections/vfs/Vfs.File.html" title="interface in org.reflections.vfs">Vfs.File</A>&gt;&nbsp;filePredicate)</CODE>
+          com.google.common.base.Predicate&lt;<A HREF="../../../org/reflections/vfs/Vfs.File.html" title="interface in org.jboss.errai.reflections.vfs">Vfs.File</A>&gt;&nbsp;filePredicate)</CODE>
 
 <BR>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return an iterable of all <A HREF="../../../org/reflections/vfs/Vfs.File.html" title="interface in org.reflections.vfs"><CODE>Vfs.File</CODE></A> in given urls, matching filePredicate</TD>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return an iterable of all <A HREF="../../../org/reflections/vfs/Vfs.File.html" title="interface in org.jboss.errai.reflections.vfs"><CODE>Vfs.File</CODE></A> in given urls, matching filePredicate</TD>
 </TR>
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
-<CODE>static&nbsp;java.lang.Iterable&lt;<A HREF="../../../org/reflections/vfs/Vfs.File.html" title="interface in org.reflections.vfs">Vfs.File</A>&gt;</CODE></FONT></TD>
+<CODE>static&nbsp;java.lang.Iterable&lt;<A HREF="../../../org/reflections/vfs/Vfs.File.html" title="interface in org.jboss.errai.reflections.vfs">Vfs.File</A>&gt;</CODE></FONT></TD>
 <TD><CODE><B><A HREF="../../../org/reflections/vfs/Vfs.html#findFiles(java.util.Collection, java.lang.String, com.google.common.base.Predicate)">findFiles</A></B>(java.util.Collection&lt;java.net.URL&gt;&nbsp;inUrls,
           java.lang.String&nbsp;packagePrefix,
           com.google.common.base.Predicate&lt;java.lang.String&gt;&nbsp;nameFilter)</CODE>
 
 <BR>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return an iterable of all <A HREF="../../../org/reflections/vfs/Vfs.File.html" title="interface in org.reflections.vfs"><CODE>Vfs.File</CODE></A> in given urls, starting with given packagePrefix and matching nameFilter</TD>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return an iterable of all <A HREF="../../../org/reflections/vfs/Vfs.File.html" title="interface in org.jboss.errai.reflections.vfs"><CODE>Vfs.File</CODE></A> in given urls, starting with given packagePrefix and matching nameFilter</TD>
 </TR>
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
-<CODE>static&nbsp;<A HREF="../../../org/reflections/vfs/Vfs.Dir.html" title="interface in org.reflections.vfs">Vfs.Dir</A></CODE></FONT></TD>
+<CODE>static&nbsp;<A HREF="../../../org/reflections/vfs/Vfs.Dir.html" title="interface in org.jboss.errai.reflections.vfs">Vfs.Dir</A></CODE></FONT></TD>
 <TD><CODE><B><A HREF="../../../org/reflections/vfs/Vfs.html#fromURL(java.net.URL)">fromURL</A></B>(java.net.URL&nbsp;url)</CODE>
 
 <BR>
@@ -239,25 +239,25 @@ a simple virtual file system bridge
 </TR>
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
-<CODE>static&nbsp;<A HREF="../../../org/reflections/vfs/Vfs.Dir.html" title="interface in org.reflections.vfs">Vfs.Dir</A></CODE></FONT></TD>
+<CODE>static&nbsp;<A HREF="../../../org/reflections/vfs/Vfs.Dir.html" title="interface in org.jboss.errai.reflections.vfs">Vfs.Dir</A></CODE></FONT></TD>
 <TD><CODE><B><A HREF="../../../org/reflections/vfs/Vfs.html#fromURL(java.net.URL, java.util.List)">fromURL</A></B>(java.net.URL&nbsp;url,
-        java.util.List&lt;<A HREF="../../../org/reflections/vfs/Vfs.UrlType.html" title="interface in org.reflections.vfs">Vfs.UrlType</A>&gt;&nbsp;urlTypes)</CODE>
+        java.util.List&lt;<A HREF="../../../org/reflections/vfs/Vfs.UrlType.html" title="interface in org.jboss.errai.reflections.vfs">Vfs.UrlType</A>&gt;&nbsp;urlTypes)</CODE>
 
 <BR>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tries to create a Dir from the given url, using the given urlTypes</TD>
 </TR>
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
-<CODE>static&nbsp;<A HREF="../../../org/reflections/vfs/Vfs.Dir.html" title="interface in org.reflections.vfs">Vfs.Dir</A></CODE></FONT></TD>
+<CODE>static&nbsp;<A HREF="../../../org/reflections/vfs/Vfs.Dir.html" title="interface in org.jboss.errai.reflections.vfs">Vfs.Dir</A></CODE></FONT></TD>
 <TD><CODE><B><A HREF="../../../org/reflections/vfs/Vfs.html#fromURL(java.net.URL, org.reflections.vfs.Vfs.UrlType...)">fromURL</A></B>(java.net.URL&nbsp;url,
-        <A HREF="../../../org/reflections/vfs/Vfs.UrlType.html" title="interface in org.reflections.vfs">Vfs.UrlType</A>...&nbsp;urlTypes)</CODE>
+        <A HREF="../../../org/reflections/vfs/Vfs.UrlType.html" title="interface in org.jboss.errai.reflections.vfs">Vfs.UrlType</A>...&nbsp;urlTypes)</CODE>
 
 <BR>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tries to create a Dir from the given url, using the given urlTypes</TD>
 </TR>
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
-<CODE>static&nbsp;java.util.List&lt;<A HREF="../../../org/reflections/vfs/Vfs.UrlType.html" title="interface in org.reflections.vfs">Vfs.UrlType</A>&gt;</CODE></FONT></TD>
+<CODE>static&nbsp;java.util.List&lt;<A HREF="../../../org/reflections/vfs/Vfs.UrlType.html" title="interface in org.jboss.errai.reflections.vfs">Vfs.UrlType</A>&gt;</CODE></FONT></TD>
 <TD><CODE><B><A HREF="../../../org/reflections/vfs/Vfs.html#getDefaultUrlTypes()">getDefaultUrlTypes</A></B>()</CODE>
 
 <BR>
@@ -274,7 +274,7 @@ a simple virtual file system bridge
 <TR BGCOLOR="white" CLASS="TableRowColor">
 <TD ALIGN="right" VALIGN="top" WIDTH="1%"><FONT SIZE="-1">
 <CODE>static&nbsp;void</CODE></FONT></TD>
-<TD><CODE><B><A HREF="../../../org/reflections/vfs/Vfs.html#setDefaultURLTypes(java.util.List)">setDefaultURLTypes</A></B>(java.util.List&lt;<A HREF="../../../org/reflections/vfs/Vfs.UrlType.html" title="interface in org.reflections.vfs">Vfs.UrlType</A>&gt;&nbsp;urlTypes)</CODE>
+<TD><CODE><B><A HREF="../../../org/reflections/vfs/Vfs.html#setDefaultURLTypes(java.util.List)">setDefaultURLTypes</A></B>(java.util.List&lt;<A HREF="../../../org/reflections/vfs/Vfs.UrlType.html" title="interface in org.jboss.errai.reflections.vfs">Vfs.UrlType</A>&gt;&nbsp;urlTypes)</CODE>
 
 <BR>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sets the static default url types.</TD>
@@ -322,7 +322,7 @@ public <B>Vfs</B>()</PRE>
 <A NAME="getDefaultUrlTypes()"><!-- --></A><H3>
 getDefaultUrlTypes</H3>
 <PRE>
-public static java.util.List&lt;<A HREF="../../../org/reflections/vfs/Vfs.UrlType.html" title="interface in org.reflections.vfs">Vfs.UrlType</A>&gt; <B>getDefaultUrlTypes</B>()</PRE>
+public static java.util.List&lt;<A HREF="../../../org/reflections/vfs/Vfs.UrlType.html" title="interface in org.jboss.errai.reflections.vfs">Vfs.UrlType</A>&gt; <B>getDefaultUrlTypes</B>()</PRE>
 <DL>
 <DD>the default url types that will be used when issuing <A HREF="../../../org/reflections/vfs/Vfs.html#fromURL(java.net.URL)"><CODE>fromURL(java.net.URL)</CODE></A>
 <P>
@@ -335,7 +335,7 @@ public static java.util.List&lt;<A HREF="../../../org/reflections/vfs/Vfs.UrlTyp
 <A NAME="setDefaultURLTypes(java.util.List)"><!-- --></A><H3>
 setDefaultURLTypes</H3>
 <PRE>
-public static void <B>setDefaultURLTypes</B>(java.util.List&lt;<A HREF="../../../org/reflections/vfs/Vfs.UrlType.html" title="interface in org.reflections.vfs">Vfs.UrlType</A>&gt;&nbsp;urlTypes)</PRE>
+public static void <B>setDefaultURLTypes</B>(java.util.List&lt;<A HREF="../../../org/reflections/vfs/Vfs.UrlType.html" title="interface in org.jboss.errai.reflections.vfs">Vfs.UrlType</A>&gt;&nbsp;urlTypes)</PRE>
 <DL>
 <DD>sets the static default url types. can be used to statically plug in urlTypes
 <P>
@@ -348,7 +348,7 @@ public static void <B>setDefaultURLTypes</B>(java.util.List&lt;<A HREF="../../..
 <A NAME="addDefaultURLTypes(org.reflections.vfs.Vfs.UrlType)"><!-- --></A><H3>
 addDefaultURLTypes</H3>
 <PRE>
-public static void <B>addDefaultURLTypes</B>(<A HREF="../../../org/reflections/vfs/Vfs.UrlType.html" title="interface in org.reflections.vfs">Vfs.UrlType</A>&nbsp;urlType)</PRE>
+public static void <B>addDefaultURLTypes</B>(<A HREF="../../../org/reflections/vfs/Vfs.UrlType.html" title="interface in org.jboss.errai.reflections.vfs">Vfs.UrlType</A>&nbsp;urlType)</PRE>
 <DL>
 <DD>add a static default url types. can be used to statically plug in urlTypes
 <P>
@@ -361,7 +361,7 @@ public static void <B>addDefaultURLTypes</B>(<A HREF="../../../org/reflections/v
 <A NAME="fromURL(java.net.URL)"><!-- --></A><H3>
 fromURL</H3>
 <PRE>
-public static <A HREF="../../../org/reflections/vfs/Vfs.Dir.html" title="interface in org.reflections.vfs">Vfs.Dir</A> <B>fromURL</B>(java.net.URL&nbsp;url)</PRE>
+public static <A HREF="../../../org/reflections/vfs/Vfs.Dir.html" title="interface in org.jboss.errai.reflections.vfs">Vfs.Dir</A> <B>fromURL</B>(java.net.URL&nbsp;url)</PRE>
 <DL>
 <DD>tries to create a Dir from the given url, using the defaultUrlTypes
 <P>
@@ -374,8 +374,8 @@ public static <A HREF="../../../org/reflections/vfs/Vfs.Dir.html" title="interfa
 <A NAME="fromURL(java.net.URL, java.util.List)"><!-- --></A><H3>
 fromURL</H3>
 <PRE>
-public static <A HREF="../../../org/reflections/vfs/Vfs.Dir.html" title="interface in org.reflections.vfs">Vfs.Dir</A> <B>fromURL</B>(java.net.URL&nbsp;url,
-                              java.util.List&lt;<A HREF="../../../org/reflections/vfs/Vfs.UrlType.html" title="interface in org.reflections.vfs">Vfs.UrlType</A>&gt;&nbsp;urlTypes)</PRE>
+public static <A HREF="../../../org/reflections/vfs/Vfs.Dir.html" title="interface in org.jboss.errai.reflections.vfs">Vfs.Dir</A> <B>fromURL</B>(java.net.URL&nbsp;url,
+                              java.util.List&lt;<A HREF="../../../org/reflections/vfs/Vfs.UrlType.html" title="interface in org.jboss.errai.reflections.vfs">Vfs.UrlType</A>&gt;&nbsp;urlTypes)</PRE>
 <DL>
 <DD>tries to create a Dir from the given url, using the given urlTypes
 <P>
@@ -388,8 +388,8 @@ public static <A HREF="../../../org/reflections/vfs/Vfs.Dir.html" title="interfa
 <A NAME="fromURL(java.net.URL, org.reflections.vfs.Vfs.UrlType...)"><!-- --></A><H3>
 fromURL</H3>
 <PRE>
-public static <A HREF="../../../org/reflections/vfs/Vfs.Dir.html" title="interface in org.reflections.vfs">Vfs.Dir</A> <B>fromURL</B>(java.net.URL&nbsp;url,
-                              <A HREF="../../../org/reflections/vfs/Vfs.UrlType.html" title="interface in org.reflections.vfs">Vfs.UrlType</A>...&nbsp;urlTypes)</PRE>
+public static <A HREF="../../../org/reflections/vfs/Vfs.Dir.html" title="interface in org.jboss.errai.reflections.vfs">Vfs.Dir</A> <B>fromURL</B>(java.net.URL&nbsp;url,
+                              <A HREF="../../../org/reflections/vfs/Vfs.UrlType.html" title="interface in org.jboss.errai.reflections.vfs">Vfs.UrlType</A>...&nbsp;urlTypes)</PRE>
 <DL>
 <DD>tries to create a Dir from the given url, using the given urlTypes
 <P>
@@ -402,10 +402,10 @@ public static <A HREF="../../../org/reflections/vfs/Vfs.Dir.html" title="interfa
 <A NAME="findFiles(java.util.Collection, com.google.common.base.Predicate)"><!-- --></A><H3>
 findFiles</H3>
 <PRE>
-public static java.lang.Iterable&lt;<A HREF="../../../org/reflections/vfs/Vfs.File.html" title="interface in org.reflections.vfs">Vfs.File</A>&gt; <B>findFiles</B>(java.util.Collection&lt;java.net.URL&gt;&nbsp;inUrls,
-                                                     com.google.common.base.Predicate&lt;<A HREF="../../../org/reflections/vfs/Vfs.File.html" title="interface in org.reflections.vfs">Vfs.File</A>&gt;&nbsp;filePredicate)</PRE>
+public static java.lang.Iterable&lt;<A HREF="../../../org/reflections/vfs/Vfs.File.html" title="interface in org.jboss.errai.reflections.vfs">Vfs.File</A>&gt; <B>findFiles</B>(java.util.Collection&lt;java.net.URL&gt;&nbsp;inUrls,
+                                                     com.google.common.base.Predicate&lt;<A HREF="../../../org/reflections/vfs/Vfs.File.html" title="interface in org.jboss.errai.reflections.vfs">Vfs.File</A>&gt;&nbsp;filePredicate)</PRE>
 <DL>
-<DD>return an iterable of all <A HREF="../../../org/reflections/vfs/Vfs.File.html" title="interface in org.reflections.vfs"><CODE>Vfs.File</CODE></A> in given urls, matching filePredicate
+<DD>return an iterable of all <A HREF="../../../org/reflections/vfs/Vfs.File.html" title="interface in org.jboss.errai.reflections.vfs"><CODE>Vfs.File</CODE></A> in given urls, matching filePredicate
 <P>
 <DD><DL>
 </DL>
@@ -416,11 +416,11 @@ public static java.lang.Iterable&lt;<A HREF="../../../org/reflections/vfs/Vfs.Fi
 <A NAME="findFiles(java.util.Collection, java.lang.String, com.google.common.base.Predicate)"><!-- --></A><H3>
 findFiles</H3>
 <PRE>
-public static java.lang.Iterable&lt;<A HREF="../../../org/reflections/vfs/Vfs.File.html" title="interface in org.reflections.vfs">Vfs.File</A>&gt; <B>findFiles</B>(java.util.Collection&lt;java.net.URL&gt;&nbsp;inUrls,
+public static java.lang.Iterable&lt;<A HREF="../../../org/reflections/vfs/Vfs.File.html" title="interface in org.jboss.errai.reflections.vfs">Vfs.File</A>&gt; <B>findFiles</B>(java.util.Collection&lt;java.net.URL&gt;&nbsp;inUrls,
                                                      java.lang.String&nbsp;packagePrefix,
                                                      com.google.common.base.Predicate&lt;java.lang.String&gt;&nbsp;nameFilter)</PRE>
 <DL>
-<DD>return an iterable of all <A HREF="../../../org/reflections/vfs/Vfs.File.html" title="interface in org.reflections.vfs"><CODE>Vfs.File</CODE></A> in given urls, starting with given packagePrefix and matching nameFilter
+<DD>return an iterable of all <A HREF="../../../org/reflections/vfs/Vfs.File.html" title="interface in org.jboss.errai.reflections.vfs"><CODE>Vfs.File</CODE></A> in given urls, starting with given packagePrefix and matching nameFilter
 <P>
 <DD><DL>
 </DL>
@@ -468,8 +468,8 @@ public static java.lang.String <B>normalizePath</B>(java.net.URL&nbsp;url)</PRE>
 
 <TR>
 <TD BGCOLOR="white" CLASS="NavBarCell2"><FONT SIZE="-2">
-&nbsp;<A HREF="../../../org/reflections/vfs/UrlTypeVFS.html" title="class in org.reflections.vfs"><B>PREV CLASS</B></A>&nbsp;
-&nbsp;<A HREF="../../../org/reflections/vfs/Vfs.DefaultUrlTypes.html" title="enum in org.reflections.vfs"><B>NEXT CLASS</B></A></FONT></TD>
+&nbsp;<A HREF="../../../org/reflections/vfs/UrlTypeVFS.html" title="class in org.jboss.errai.reflections.vfs"><B>PREV CLASS</B></A>&nbsp;
+&nbsp;<A HREF="../../../org/reflections/vfs/Vfs.DefaultUrlTypes.html" title="enum in org.jboss.errai.reflections.vfs"><B>NEXT CLASS</B></A></FONT></TD>
 <TD BGCOLOR="white" CLASS="NavBarCell2"><FONT SIZE="-2">
   <A HREF="../../../index.html?org/reflections/vfs/Vfs.html" target="_top"><B>FRAMES</B></A>  &nbsp;
 &nbsp;<A HREF="Vfs.html" target="_top"><B>NO FRAMES</B></A>  &nbsp;

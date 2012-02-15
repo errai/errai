@@ -1,9 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.reflections</groupId>
+        <groupId>org.jboss.errai.reflections</groupId>
         <artifactId>reflections-parent</artifactId>
-        <version>0.9.6_jboss_errai_r4-SNAPSHOT</version>
+        <version>2.0-SNAPSHOT</version>
+        <relativePath>../</relativePath>
     </parent>
 
     <artifactId>reflections-maven</artifactId>
@@ -12,9 +13,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.reflections</groupId>
+            <groupId>org.jboss.errai.reflections</groupId>
             <artifactId>reflections</artifactId>
-            <version>0.9.6_jboss_errai_r4-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jfrog.maven.annomojo</groupId>
@@ -29,23 +30,6 @@
         </dependency>
     </dependencies>
 
-    <build>
-        <plugins>
-            <!--<plugin>-->
-                <!--<groupId>org.apache.maven.plugins</groupId>-->
-                <!--<artifactId>maven-plugin-plugin</artifactId>-->
-                <!--<version>2.6</version>-->
-                <!--<dependencies>-->
-                    <!--<dependency>-->
-                        <!--<groupId>org.jfrog.maven.annomojo</groupId>-->
-                        <!--<artifactId>maven-plugin-anno</artifactId>-->
-                        <!--<version>1.4.0</version>-->
-                        <!--<scope>runtime</scope>-->
-                    <!--</dependency>-->
-                <!--</dependencies>-->
-            <!--</plugin>-->
-        </plugins>
-    </build>
 
     <repositories>
         <repository>

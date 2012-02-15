@@ -88,14 +88,14 @@ DETAIL:&nbsp;FIELD&nbsp;|&nbsp;<A HREF="#constructor_detail">CONSTR</A>&nbsp;|&n
 <!-- ======== START OF CLASS DATA ======== -->
 <H2>
 <FONT SIZE="-1">
-org.reflections.maven.plugin</FONT>
+    org.jboss.errai.reflections.maven.plugin</FONT>
 <BR>
 Class ReflectionsMojo</H2>
 <PRE>
 java.lang.Object
   <IMG SRC="../../../../resources/inherit.gif" ALT="extended by ">org.jfrog.jade.plugins.common.injectable.MvnInjectableSupport
       <IMG SRC="../../../../resources/inherit.gif" ALT="extended by ">org.jfrog.jade.plugins.common.injectable.MvnInjectableMojoSupport
-          <IMG SRC="../../../../resources/inherit.gif" ALT="extended by "><B>org.reflections.maven.plugin.ReflectionsMojo</B>
+          <IMG SRC="../../../../resources/inherit.gif" ALT="extended by "><B>org.jboss.errai.reflections.maven.plugin.ReflectionsMojo</B>
 </PRE>
 <DL>
 <DT><B>All Implemented Interfaces:</B> <DD>org.apache.maven.plugin.ContextEnabled, org.apache.maven.plugin.Mojo, org.jfrog.jade.plugins.common.injectable.MvnInjectable</DD>
@@ -134,12 +134,12 @@ maven plugin for Reflections
  <li><A HREF="../../../../org/reflections/maven/plugin/ReflectionsMojo.html#scanners"><CODE>scanners</CODE></A> - a comma separated list of scanner classes,
  defaults to "org.reflections.scanners.TypeAnnotationsScanner, org.reflections.scanners.SubTypesScanner"
  <li><A HREF="../../../../org/reflections/maven/plugin/ReflectionsMojo.html#includeExclude"><CODE>includeExclude</CODE></A> - a comma separated list of include exclude filters,
- to be used with <A HREF="http://code.google.com/p/reflections//apidocs/org/reflections/util/FilterBuilder.html?is-external=true" title="class or interface in org.reflections.util"><CODE>FilterBuilder</CODE></A> to filter the inputs and the results of all scanners,
+ to be used with <A HREF="http://code.google.com/p/reflections//apidocs/org/reflections/util/FilterBuilder.html?is-external=true" title="class or interface in org.jboss.errai.reflections.util"><CODE>FilterBuilder</CODE></A> to filter the inputs and the results of all scanners,
  defaults to "-java., -javax., -sun., -com.sun."
  <li><A HREF="../../../../org/reflections/maven/plugin/ReflectionsMojo.html#destinations"><CODE>destinations</CODE></A> - a comma separated list of destinations to save metadata to,
  defaults to ${project.build.outputDirectory}/META-INF/reflections/${project.artifactId}-reflections.xml
  <li><A HREF="../../../../org/reflections/maven/plugin/ReflectionsMojo.html#serializer"><CODE>serializer</CODE></A> - fully qualified name of the serializer to be used for saving,
- defaults to <A HREF="http://code.google.com/p/reflections//apidocs/org/reflections/serializers/XmlSerializer.html?is-external=true" title="class or interface in org.reflections.serializers"><CODE>XmlSerializer</CODE></A>
+ defaults to <A HREF="http://code.google.com/p/reflections//apidocs/org/reflections/serializers/XmlSerializer.html?is-external=true" title="class or interface in org.jboss.errai.reflections.serializers"><CODE>XmlSerializer</CODE></A>
  <li><A HREF="../../../../org/reflections/maven/plugin/ReflectionsMojo.html#parallel"><CODE>parallel</CODE></A> - indicates whether to use parallel scanning of classes, using j.u.c FixedThreadPool,
  defaults to false
 <P>
