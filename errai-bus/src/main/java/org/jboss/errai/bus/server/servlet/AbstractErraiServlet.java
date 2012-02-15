@@ -42,6 +42,7 @@ import org.jboss.errai.common.client.api.ResourceProvider;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
+import org.jboss.errai.common.metadata.ScannerSingleton;
 
 /**
  * The <tt>AbstractErraiServlet</tt> provides a starting point for creating Http-protocol gateway between the server
@@ -56,10 +57,14 @@ public abstract class AbstractErraiServlet extends HttpServlet {
 
   protected volatile ClassLoader contextClassLoader;
 
- // protected Logger log = LoggerFactory.getLogger(getClass());
+  // protected Logger log = LoggerFactory.getLogger(getClass());
 
   public enum ConnectionPhase {
     NORMAL, CONNECTING, DISCONNECTING, UNKNOWN
+  }
+
+  static {
+    ScannerSingleton.class.getName();
   }
 
   public static ConnectionPhase getConnectionPhase(HttpServletRequest request) {
@@ -86,14 +91,12 @@ public abstract class AbstractErraiServlet extends HttpServlet {
   /**
    * Common initialization logic that works for both Servlets and Filters.
    *
-   * @param context
-   *          The ServletContext of the web application.
-   * @param serviceLocatorClass
-   *          The value of the (Servlet or Filter) init parameter
-   *          <code>"service-locator"</code>. If specified, it must be the
-   *          fully-qualified name of a class that implements
-   *          {@link ServiceLocator}. If null, the service locator is built by a
-   *          call to {@link #buildService()}.
+   * @param context             The ServletContext of the web application.
+   * @param serviceLocatorClass The value of the (Servlet or Filter) init parameter
+   *                            <code>"service-locator"</code>. If specified, it must be the
+   *                            fully-qualified name of a class that implements
+   *                            {@link ServiceLocator}. If null, the service locator is built by a
+   *                            call to {@link #buildService()}.
    */
   protected void init(final ServletContext context, String serviceLocatorClass) {
     service = (ErraiService) context.getAttribute("errai");

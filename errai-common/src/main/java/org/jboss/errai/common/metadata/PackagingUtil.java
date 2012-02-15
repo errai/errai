@@ -74,7 +74,8 @@ public class PackagingUtil {
     do {
       start = new File(rootPath);
       rootPath = rootPath.substring(0, (pivotPoint = rootPath.lastIndexOf("/")) < 0 ? 0 : pivotPoint);
-    } while (!start.exists() && pivotPoint > 0);
+    }
+    while (!start.exists() && pivotPoint > 0);
 
     return start;
   }
@@ -89,7 +90,9 @@ public class PackagingUtil {
        */
       if (!ctx.hasProcessed(file)) {
         ctx.markProcessed(file);
-        PackagingUtil.processNestedZip(file, ctx);
+        if (file.getName().endsWith(".ear")){
+          PackagingUtil.processNestedZip(file, ctx);
+        }
       }
     }
   }

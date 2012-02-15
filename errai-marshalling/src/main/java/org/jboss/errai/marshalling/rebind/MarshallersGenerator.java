@@ -66,12 +66,14 @@ public class MarshallersGenerator extends Generator {
 
   private static final DiscoveryStrategy[] rootDiscoveryStrategies;
 
+  private static Logger log = LoggerFactory.getLogger(MarshallersGenerator.class);
+
+
   static {
     rootDiscoveryStrategies = new DiscoveryStrategy[]{
             new DiscoveryStrategy() {
               @Override
               public Set<String> getCandidate(GeneratorContext context, DiscoveryContext discoveryContext) {
-                System.out.println("first strategy...");
                 ServerMappingContext ctx = MappingContextSingleton.get();
 
                 Map<String, String> matchNames = new HashMap<String, String>();
@@ -86,12 +88,12 @@ public class MarshallersGenerator extends Generator {
 
                 if (!roots.isEmpty()) {
                   for (File file : roots) {
-                    System.out.println(" ** signature matched root! " + file.getAbsolutePath());
+                    log.info(" ** signature matched root! " + file.getAbsolutePath());
                   }
                   discoveryContext.resultsAbsolute();
                 }
                 else {
-                  System.out.println(" ** NO ROOTS FOUND!");
+                  log.warn(" ** NO ROOTS FOUND!");
                   discoveryContext.veto();
                 }
 

@@ -66,6 +66,14 @@ public abstract class ServerMarshallUtil {
     }
   }
 
+  private static List<String> urlToFile(Enumeration<URL> urls) {
+    ArrayList<String> files = new ArrayList<String>();
+    while (urls.hasMoreElements()) {
+      files.add(urls.nextElement().getFile());
+    }
+    return files;
+  }
+
   public static Class<? extends MarshallerFactory> getGeneratedMarshallerFactoryForServer() {
     String packageName = MarshallersGenerator.SERVER_MARSHALLER_PACKAGE_NAME;
     String className = MarshallersGenerator.SERVER_MARSHALLER_CLASS_NAME;
@@ -74,33 +82,28 @@ public abstract class ServerMarshallUtil {
       log.info("searching for marshaller class: " + packageName + "." + className);
 
       final String classResource = packageName.replaceAll("\\.", "/") + "/" + className + ".class";
-      List<URL> locations = new ArrayList<URL>();
+      Set<String> locations = new HashSet<String>();
 
       // look for the class in every classloader we can think of. For example, current thread
       // classloading works in Jetty but not JBoss AS 7.
-      locations.addAll(Collections.list(Thread.currentThread().getContextClassLoader().getResources(classResource)));
-      locations.addAll(Collections.list(ServerMarshallUtil.class.getClassLoader().getResources(classResource)));
-      locations.addAll(Collections.list(ClassLoader.getSystemResources(classResource)));
+      locations.addAll(urlToFile(Thread.currentThread().getContextClassLoader().getResources(classResource)));
+      locations.addAll(urlToFile(ServerMarshallUtil.class.getClassLoader().getResources(classResource)));
+      locations.addAll(urlToFile(ClassLoader.getSystemResources(classResource)));
 
-      boolean multiple = false;
       File newest = null;
-      for (URL url : locations) {
-        if (url != null) {
-          multiple = true;
-        }
-
+      for (String url : locations) {
         File file = getFileIfExists(url);
         if (file != null && (newest == null || file.lastModified() > newest.lastModified())) {
           newest = file;
         }
       }
 
-      if (multiple) {
+      if (locations.size() > 1) {
         log.warn("*** MULTIPLE VERSIONS OF " + packageName + "." + className + " FOUND IN CLASSPATH: " +
                 "Attempted to guess the newest one based on file dates. But you should clean your output directories");
 
-        for (URL loc : locations) {
-          log.warn(" Ambiguous version -> " + loc.getFile());
+        for (String loc : locations) {
+          log.warn(" Ambiguous version -> " + loc);
         }
       }
 
@@ -189,7 +192,7 @@ public abstract class ServerMarshallUtil {
         List<File> classpathElements = new ArrayList<File>(configUrls.size());
 
         for (URL url : configUrls) {
-          File file = getFileIfExists(url);
+          File file = getFileIfExists(url.getFile());
           if (file != null) {
             classpathElements.add(file);
           }
@@ -288,7 +291,7 @@ public abstract class ServerMarshallUtil {
           try {
             URL url = (URL) resEnum.nextElement();
 
-            File file = getFileIfExists(url);
+            File file = getFileIfExists(url.getFile());
             if (file != null) {
               cp.append(File.pathSeparator).append(file.getAbsolutePath());
             }
@@ -310,8 +313,8 @@ public abstract class ServerMarshallUtil {
     return cp.toString();
   }
 
-  private static File getFileIfExists(URL url) {
-    String path = url.getFile();
+  private static File getFileIfExists(String path) {
+ //   String path = url.getFile();
 
     if (path.startsWith("file:")) {
       path = path.substring(5);

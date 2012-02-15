@@ -423,7 +423,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
 
         if (paged > 0 || killed > 0) {
-          log.info("[experimental] killed " + killed + " sessions and paged out " + paged + " queues");
+          log.debug("[bus] killed " + killed + " sessions and paged out " + paged + " queues");
         }
 
 
@@ -441,13 +441,13 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         BufferStatus stat = bufferStatus();
         if (runCount % 2 == 0) {
 
-          log.info("[experimental] buffer status [freebytes: " + stat.getFreeBytes()
+          log.debug("[bus] buffer status [freebytes: " + stat.getFreeBytes()
                   + " (" + (stat.getFree() * 100) + "%) tail rng: " + stat.getTailRange() + "; actv tails: "
                   + stat.getActiveTails() + "]");
         }
 
         if (stat.getFree() < 0.50f) {
-          log.warn("[experimental] high load condition detected!");
+          log.debug("[bus] high load condition detected!");
         }
 
       }

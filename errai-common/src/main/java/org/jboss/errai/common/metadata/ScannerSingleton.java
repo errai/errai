@@ -15,18 +15,46 @@
  */
 package org.jboss.errai.common.metadata;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.FutureTask;
+
 /**
  * Shared scanner instance used with {@link com.google.gwt.core.ext.Generator}'s
  *
- * @author: Heiko Braun <hbraun@redhat.com>
- * @date: Aug 4, 2010
+ * @author Heiko Braun
+ * @author Mike Brock
  */
 public class ScannerSingleton {
-  private static MetaDataScanner scanner;
+  private static volatile MetaDataScanner scanner;
+
+  private static final FutureTask<MetaDataScanner> future = new FutureTask<MetaDataScanner>(
+          new Callable<MetaDataScanner>() {
+            @Override
+            public MetaDataScanner call() throws Exception {
+              return MetaDataScanner.createInstance();
+            }
+          }
+  );
+
+  static {
+    Thread thread = new Thread(future);
+    thread.start();
+  }
+
+  private static final Object lock = new Object();
 
   public static MetaDataScanner getOrCreateInstance() {
-    if (null == scanner)
-      scanner = MetaDataScanner.createInstance();
-    return scanner;
+    synchronized (lock) {
+      if (scanner == null) {
+        try {
+          scanner = future.get();
+        }
+        catch (Throwable t) {
+          t.printStackTrace();
+          throw new RuntimeException("failed to load class metadata", t);
+        }
+      }
+      return scanner;
+    }
   }
 }

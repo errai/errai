@@ -43,6 +43,7 @@ import javassist.bytecode.ClassFile;
 import org.jboss.errai.common.client.framework.ErraiAppAttribs;
 import org.reflections.Configuration;
 import org.reflections.Reflections;
+import org.reflections.adapters.MetadataAdapter;
 import org.reflections.scanners.FieldAnnotationsScanner;
 import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
@@ -81,7 +82,7 @@ public class MetaDataScanner extends Reflections {
     scan();
   }
 
-  private static Map<String, Set<SortableClassFileWrapper>> annotationsToClassFile =
+  private static final Map<String, Set<SortableClassFileWrapper>> annotationsToClassFile =
           new TreeMap<String, Set<SortableClassFileWrapper>>();
 
   private static class SortableClassFileWrapper implements Comparable<SortableClassFileWrapper> {
@@ -114,10 +115,12 @@ public class MetaDataScanner extends Reflections {
                       @Override
                       public void scan(Object cls) {
                         @SuppressWarnings("unchecked")
-                        final String className = getMetadataAdapter().getClassName(cls);
+                        MetadataAdapter adapter = getMetadataAdapter();
+
+                        final String className = adapter.getClassName(cls);
 
                         // noinspection unchecked
-                        for (String annotationType : (List<String>) getMetadataAdapter().getClassAnnotationNames(cls)) {
+                        for (String annotationType : (List<String>) adapter.getClassAnnotationNames(cls)) {
                           if (acceptResult(annotationType) ||
                                   annotationType.equals(Inherited.class.getName())) { // as an exception, accept
                             // Inherited as well
