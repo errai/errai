@@ -15,9 +15,9 @@
  */
 package org.jboss.errai.common.metadata;
 
-import org.reflections.vfs.SystemDir;
-import org.reflections.vfs.Vfs;
-import org.reflections.vfs.ZipDir;
+import org.jboss.errai.reflections.vfs.SystemDir;
+import org.jboss.errai.reflections.vfs.Vfs;
+import org.jboss.errai.reflections.vfs.ZipDir;
 
 import java.io.File;
 import java.net.URL;

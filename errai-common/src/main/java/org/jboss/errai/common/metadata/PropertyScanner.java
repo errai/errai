@@ -16,8 +16,9 @@
 package org.jboss.errai.common.metadata;
 
 import com.google.common.base.Predicate;
-import org.reflections.scanners.AbstractScanner;
-import org.reflections.vfs.Vfs;
+import org.jboss.errai.reflections.scanners.AbstractScanner;
+import org.jboss.errai.reflections.vfs.Vfs;
+
 
 import java.io.IOException;
 import java.util.HashMap;

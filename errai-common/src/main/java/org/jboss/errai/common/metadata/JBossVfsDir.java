@@ -7,10 +7,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.jboss.errai.reflections.vfs.Vfs;
 import org.jboss.vfs.VirtualFile;
-import org.reflections.vfs.Vfs;
-import org.reflections.vfs.Vfs.File;
-
 import com.google.common.collect.AbstractIterator;
 
 /**
@@ -54,7 +52,7 @@ public class JBossVfsDir implements Vfs.Dir {
         return new AbstractIterator<Vfs.File>() {
 
           @Override
-          protected File computeNext() {
+          protected Vfs.File computeNext() {
             while (!toVisit.isEmpty()) {
               final VirtualFile nextFile = toVisit.remove(toVisit.size() - 1);
               if (nextFile.isDirectory()) {

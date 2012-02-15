@@ -41,18 +41,17 @@ import java.util.regex.Pattern;
 import javassist.bytecode.ClassFile;
 
 import org.jboss.errai.common.client.framework.ErraiAppAttribs;
-import org.reflections.Configuration;
-import org.reflections.Reflections;
-import org.reflections.adapters.MetadataAdapter;
-import org.reflections.scanners.FieldAnnotationsScanner;
-import org.reflections.scanners.MethodAnnotationsScanner;
-import org.reflections.scanners.TypeAnnotationsScanner;
-import org.reflections.util.ConfigurationBuilder;
-import org.reflections.vfs.Vfs;
-import org.reflections.vfs.Vfs.UrlType;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
+import org.jboss.errai.reflections.Configuration;
+import org.jboss.errai.reflections.Reflections;
+import org.jboss.errai.reflections.adapters.MetadataAdapter;
+import org.jboss.errai.reflections.scanners.FieldAnnotationsScanner;
+import org.jboss.errai.reflections.scanners.MethodAnnotationsScanner;
+import org.jboss.errai.reflections.scanners.TypeAnnotationsScanner;
+import org.jboss.errai.reflections.util.ConfigurationBuilder;
+import org.jboss.errai.reflections.vfs.Vfs;
 
 /**
  * Scans component meta data. The scanner creates a {@link DeploymentContext} that identifies nested subdeployments
@@ -160,7 +159,7 @@ public class MetaDataScanner extends Reflections {
   }
 
   private static void registerUrlTypeHandlers() {
-    List<UrlType> urlTypes = Vfs.getDefaultUrlTypes();
+    List<Vfs.UrlType> urlTypes = Vfs.getDefaultUrlTypes();
     urlTypes.add(new VfsUrlType());
     urlTypes.add(new WarUrlType());
 
