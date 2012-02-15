@@ -29,12 +29,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.jboss.errai.reflections.vfs.Vfs;
+import org.jboss.errai.reflections.vfs.ZipDir;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.junit.Test;
-import org.reflections.vfs.Vfs;
-import org.reflections.vfs.ZipDir;
 
 /**
  * Tests for {@link MetaDataScanner}.

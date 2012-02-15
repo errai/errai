@@ -57,7 +57,7 @@ public class JBossVfsDirTest {
   public void testEmptyVfsDirListing() throws Exception {
     JBossVfsDir jbvd = new JBossVfsDir(getJBossVfsMountPoint().asDirectoryURL());
     int count = 0;
-    for (org.reflections.vfs.Vfs.File reflectionsFile : jbvd.getFiles()) {
+    for (org.jboss.errai.reflections.vfs.Vfs.File reflectionsFile : jbvd.getFiles()) {
       System.out.println("Visiting virtual file " + reflectionsFile.getRelativePath());
       count++;
     }
@@ -72,7 +72,7 @@ public class JBossVfsDirTest {
 
     JBossVfsDir jbvd = new JBossVfsDir(getJBossVfsMountPoint().asDirectoryURL());
     int count = 0;
-    for (org.reflections.vfs.Vfs.File reflectionsFile : jbvd.getFiles()) {
+    for (org.jboss.errai.reflections.vfs.Vfs.File reflectionsFile : jbvd.getFiles()) {
       System.out.println("Visiting virtual file " + reflectionsFile.getRelativePath());
       count++;
     }
@@ -88,7 +88,7 @@ public class JBossVfsDirTest {
 
     JBossVfsDir jbvd = new JBossVfsDir(getJBossVfsMountPoint().asDirectoryURL());
     int count = 0;
-    for (org.reflections.vfs.Vfs.File reflectionsFile : jbvd.getFiles()) {
+    for (org.jboss.errai.reflections.vfs.Vfs.File reflectionsFile : jbvd.getFiles()) {
       System.out.println("Visiting virtual file " + reflectionsFile.getRelativePath());
       count++;
     }
