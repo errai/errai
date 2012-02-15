@@ -51,9 +51,9 @@
     </dependency>
 
     <dependency>
-      <groupId>org.reflections</groupId>
+      <groupId>org.jboss.errai.reflections</groupId>
       <artifactId>reflections</artifactId>
-      <version>${reflections.version}</version>
+      <version>${project.version}</version>
       <exclusions>
         <exclusion>
           <groupId>javax.servlet</groupId>
