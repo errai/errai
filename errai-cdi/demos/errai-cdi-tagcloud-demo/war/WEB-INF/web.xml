@@ -22,7 +22,7 @@
 	</servlet-mapping>
 	
 	<listener>
-        <listener-class>org.jboss.errai.container.DevModeCDIBootstrap</listener-class>
+        <listener-class>org.jboss.errai.container.CDIServletStateListener</listener-class>
     </listener>
 
     <resource-env-ref>

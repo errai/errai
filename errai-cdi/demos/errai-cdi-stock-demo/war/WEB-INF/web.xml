@@ -29,7 +29,7 @@
         <listener-class>org.jboss.weld.environment.servlet.Listener</listener-class>
         -->
 
-        <listener-class>org.jboss.errai.container.DevModeCDIBootstrap</listener-class>
+        <listener-class>org.jboss.errai.container.CDIServletStateListener</listener-class>
     </listener>
 
     <resource-env-ref>

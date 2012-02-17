@@ -40,8 +40,8 @@ import org.slf4j.LoggerFactory;
 /**
  * @author Pete Muir
  */
-public class DevModeCDIBootstrap extends ForwardingServletListener {
-  private static final Logger log = LoggerFactory.getLogger(DevModeCDIBootstrap.class);
+public class CDIServletStateListener extends ForwardingServletListener {
+  private static final Logger log = LoggerFactory.getLogger(CDIServletStateListener.class);
 
   private static final String BOOTSTRAP_IMPL_CLASS_NAME = "org.jboss.weld.bootstrap.WeldBootstrap";
   private static final String WELD_LISTENER_CLASS_NAME = "org.jboss.weld.servlet.WeldListener";
@@ -55,7 +55,7 @@ public class DevModeCDIBootstrap extends ForwardingServletListener {
   private final transient ServletListener weldListener;
   private WeldManager manager;
 
-  public DevModeCDIBootstrap() {
+  public CDIServletStateListener() {
     try {
       bootstrap = Reflections.newInstance(BOOTSTRAP_IMPL_CLASS_NAME);
     } catch (IllegalArgumentException e) {
@@ -166,22 +166,6 @@ public class DevModeCDIBootstrap extends ForwardingServletListener {
 
     // Push the manager into the servlet context so we can access in JSF
     sce.getServletContext().setAttribute(BEAN_MANAGER_ATTRIBUTE_NAME, manager);
-
-    /*if (JspFactory.getDefaultFactory() != null)
-    {
-        JspApplicationContext jspApplicationContext = JspFactory.getDefaultFactory().getJspApplicationContext(sce.getServletContext());
-
-        // Register the ELResolver with JSP
-        jspApplicationContext.addELResolver(manager.getELResolver());
-
-        // Register ELContextListener with JSP
-        jspApplicationContext.addELContextListener(Reflections.<ELContextListener>
-                newInstance("org.jboss.weld.el.WeldELContextListener"));
-
-        // Push the wrapped expression factory into the servlet context so that Tomcat or Jetty can hook it in using a container code
-        sce.getServletContext().setAttribute(EXPRESSION_FACTORY_NAME,
-                manager.wrapExpressionFactory(jspApplicationContext.getExpressionFactory()));
-    } */
 
     bootstrap.deployBeans().endInitialization();
     super.contextInitialized(sce);
