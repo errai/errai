@@ -70,9 +70,11 @@ public class JSR330QualifyingMetadata implements QualifyingMetadata {
     return qualifiers.isEmpty() ? null : new JSR330QualifyingMetadata(qualifiers);
   }
 
+  private static final JSR330QualifyingMetadata DEFAULT = new JSR330QualifyingMetadata(
+          Collections.<Annotation>singleton(ANY_INSTANCE));
+
   static JSR330QualifyingMetadata createDefaultQualifyingMetaData() {
-    return new JSR330QualifyingMetadata(
-            Collections.<Annotation>singleton(ANY_INSTANCE));
+    return DEFAULT;
   }
 
   @Override

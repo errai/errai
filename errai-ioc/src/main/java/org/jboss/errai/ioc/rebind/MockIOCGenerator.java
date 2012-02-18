@@ -67,7 +67,7 @@ public class MockIOCGenerator {
       }
     };
 
-    System.out.println(classStr);
+   // System.out.println(classStr);
 
     try {
       File directory =

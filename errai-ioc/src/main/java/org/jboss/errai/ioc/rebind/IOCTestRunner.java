@@ -226,7 +226,11 @@ public class IOCTestRunner extends ParentRunner<Runner> {
 
               Class<? extends Bootstrapper> cls = mockIOCGenerator.generate();
               Bootstrapper bs = cls.newInstance();
-              return bs.bootstrapContainer();
+
+              long tm = System.currentTimeMillis();
+              InterfaceInjectionContext ctx = bs.bootstrapContainer();
+              System.out.println("bootstrapped simulated container in " + (System.currentTimeMillis() - tm) + "ms");
+              return ctx;
             }
             catch (Exception e) {
               throw new RuntimeException("failed to run in emulated mode", e);

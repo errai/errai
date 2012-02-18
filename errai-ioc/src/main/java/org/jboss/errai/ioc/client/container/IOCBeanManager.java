@@ -42,7 +42,7 @@ public class IOCBeanManager {
    * @param instance   the instance reference
    * @param qualifiers any qualifiers
    */
-  public void registerBean(final Class<Object> type, final Object instance, final Annotation... qualifiers) {
+  public void registerBean(final Class<Object> type, final Object instance, final Annotation[] qualifiers) {
     registerBean(IOCBean.newBean(type, qualifiers, instance));
   }
 

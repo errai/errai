@@ -278,11 +278,11 @@ public class IOCBootstrapGenerator {
 
     String generated = classBuilder.toJavaString();
 
-    if (Boolean.getBoolean("errai.ioc.generator.print_out_result")) {
-      System.out.println("----Emitting Class--->\n\n");
-      System.out.println(generated);
-      System.out.println("<---Emitting Class----");
-    }
+//    if (Boolean.getBoolean("errai.ioc.generator.print_out_result")) {
+//      System.out.println("----Emitting Class--->\n\n");
+//      System.out.println(generated);
+//      System.out.println("<---Emitting Class----");
+//    }
 
     sourceWriter.print(generated);
   }

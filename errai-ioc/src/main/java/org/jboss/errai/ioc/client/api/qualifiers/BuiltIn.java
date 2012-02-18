@@ -16,10 +16,21 @@
 
 package org.jboss.errai.ioc.client.api.qualifiers;
 
+import java.lang.annotation.Annotation;
+
 /**
  * @author Mike Brock
  */
 public final class BuiltIn {
   private BuiltIn() {
   }
+  
+  public static final Any ANY_INSTANCE = new Any() {
+    @Override
+    public Class<? extends Annotation> annotationType() {
+      return Any.class;
+    }
+  };
+  
+  public static final Annotation[] DEFAULT_ANY_QUALIFIERS = new Annotation[] { ANY_INSTANCE };
 }
