@@ -47,7 +47,7 @@ public class InterfaceInjectionContext {
     this.widgetToPanel = widgetToPanel;
   }
 
-  public void addBean(Class<?> type, Object instance, Annotation... qualifiers) {
+  public void addBean(Class<Object> type, Object instance, Annotation... qualifiers) {
     manager.registerBean(type, instance, qualifiers);
   }
   
