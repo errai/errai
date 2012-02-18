@@ -14,35 +14,11 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.cdi.integration.client.shared;
-
-import org.jboss.errai.ioc.client.api.AfterInitialization;
-import org.jboss.errai.ioc.client.api.InitBallot;
-
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+package org.jboss.errai.ioc.client.api;
 
 /**
  * @author Mike Brock
  */
-@ApplicationScoped
-public class ServiceB {
-  @Inject ServiceC serviceC;
-
-  @Inject InitBallot<ServiceB> ballot;
-
-  @PostConstruct
-  public void doVote() {
-    ballot.voteForInit();
-  }
-
-  @AfterInitialization
-  public void afterInit() {
-    System.out.println("AFTER INIT!");
-  }
-
-  public ServiceC getServiceC() {
-    return serviceC;
-  }
+public interface InitBallot<T> {
+  public void voteForInit();
 }

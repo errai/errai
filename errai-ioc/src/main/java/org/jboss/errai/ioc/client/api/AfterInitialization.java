@@ -14,35 +14,17 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.cdi.integration.client.shared;
+package org.jboss.errai.ioc.client.api;
 
-import org.jboss.errai.ioc.client.api.AfterInitialization;
-import org.jboss.errai.ioc.client.api.InitBallot;
-
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * @author Mike Brock
  */
-@ApplicationScoped
-public class ServiceB {
-  @Inject ServiceC serviceC;
-
-  @Inject InitBallot<ServiceB> ballot;
-
-  @PostConstruct
-  public void doVote() {
-    ballot.voteForInit();
-  }
-
-  @AfterInitialization
-  public void afterInit() {
-    System.out.println("AFTER INIT!");
-  }
-
-  public ServiceC getServiceC() {
-    return serviceC;
-  }
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface AfterInitialization {
 }

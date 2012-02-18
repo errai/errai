@@ -42,9 +42,11 @@ import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.NoSubscribersToDeliverTo;
 import org.jboss.errai.bus.client.api.base.TransportIOException;
+import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.bus.client.json.JSONUtilCli;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.util.BusTools;
+import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
@@ -135,7 +137,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private boolean postInit = false;
 
   /* Default is 2 -- one for the RPC proxies,  one for the server connection  */
-  private int initVotesRequired = 2;
+//  private int initVotesRequired = 2;
 
   /**
    * The unique ID that will sent with the next request.
@@ -149,7 +151,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private boolean disconnected = false;
 
   static {
-    MarshallerFramework.initializeDefaultSessionProvider();
+    MarshallerFramework.initializeDefaultSessionProvider();;
   }
 
   private List<MessageInterceptor> interceptorStack = new LinkedList<MessageInterceptor>();
@@ -179,6 +181,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private BusErrorDialog errorDialog = new BusErrorDialog();
 
   public ClientMessageBusImpl() {
+    InitVotes.waitFor(ClientMessageBusImpl.class);
+    InitVotes.waitFor(RpcProxyLoader.class);
+
     init();
   }
 
@@ -535,7 +540,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         return;
       }
       else {
-        log("websocket channel is closed. falling back to comet");
+        LogUtil.log("websocket channel is closed. falling back to comet");
 
         //disconnected.
         webSocketOpen = false;
@@ -619,32 +624,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   @Override
-  public void voteForInit() {
-    if (--initVotesRequired == 0) {
-      log("received final vote for initialization ...");
-
-      postInit = true;
-      log("executing " + postInitTasks.size() + " post init task(s)");
-
-      Iterator<Runnable> postInitTasksIter = postInitTasks.iterator();
-      while (postInitTasksIter.hasNext()) {
-        postInitTasksIter.next().run();
-        postInitTasksIter.remove();
-      }
-
-      sendAllDeferred();
-      postInitTasks.clear();
-
-      setInitialized(true);
-
-      log("bus federation complete. now operating normally.");
-    }
-    else {
-      log("waiting for " + initVotesRequired + " more votes to initialize");
-    }
-  }
-
-  @Override
   public void stop(boolean sendDisconnect) {
     try {
       if (sendDisconnect) {
@@ -665,8 +644,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       this.disconnected = true;
       this.initialized = false;
       this.sendBuilder = null;
-      this.initVotesRequired = 1; // just to reconnect the bus.
+    //  this.initVotesRequired = 1; // just to reconnect the bus.
       this.postInitTasks.clear();
+
+      InitVotes.reset();
+      InitVotes.waitFor(ClientMessageBusImpl.class);
     }
   }
 
@@ -710,6 +692,14 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    */
   @Override
   public void init() {
+    InitVotes.registerInitCallback(new Runnable() {
+      @Override
+      public void run() {
+         completeInit();
+      }
+    });
+
+
     declareDebugFunction();
 
     if (sendBuilder == null) {
@@ -772,7 +762,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             break;
 
           case CapabilitiesNotice:
-            log("received capabilities notice from server. supported capabilities of remote: "
+            LogUtil.log("received capabilities notice from server. supported capabilities of remote: "
                     + message.get(String.class, MessageParts.CapabilitiesFlags));
 
             String[] capabilites = message.get(String.class, MessageParts.CapabilitiesFlags).split(",");
@@ -783,17 +773,17 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                   webSocketUrl = message.get(String.class, MessageParts.WebSocketURL);
                   webSocketToken = message.get(String.class, MessageParts.WebSocketToken);
 
-                  log("attempting web sockets connection at URL: " + webSocketUrl);
+                  LogUtil.log("attempting web sockets connection at URL: " + webSocketUrl);
 
                   Object o = ClientWebSocketChannel.attemptWebSocketConnect(ClientMessageBusImpl.this, webSocketUrl);
 
                   if (o instanceof String) {
-                    log("could not use web sockets. reason: " + o);
+                    LogUtil.log("could not use web sockets. reason: " + o);
                   }
                   break;
                 case LongPollAvailable:
 
-                  log("initializing long poll subsystem");
+                  LogUtil.log("initializing long poll subsystem");
                   receiveCommCallback = new LongPollRequestCallback();
                   break;
                 case NoLongPollAvailable:
@@ -818,7 +808,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
               return;
             }
 
-            log("received FinishStateSync message. preparing to bring up the federation");
+            LogUtil.log("received FinishStateSync message. preparing to bring up the federation");
 
             List<String> subjects = new ArrayList<String>();
             for (String s : subscriptions.keySet()) {
@@ -892,7 +882,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
               }
             });
 
-            voteForInit();
+            InitVotes.voteFor(ClientMessageBusImpl.class);
             break;
 
           case SessionExpired:
@@ -917,7 +907,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             break;
 
           case WebsocketChannelVerify:
-            log("received verification token for websocket connection");
+            LogUtil.log("received verification token for websocket connection");
             MessageBuilder.createMessage()
                     .toSubject(BuiltInServices.ServerBus.name())
                     .command(BusCommands.WebsocketChannelVerify)
@@ -933,7 +923,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             // send final message to open the channel
             ClientWebSocketChannel.transmitToSocket(webSocketChannel, getWebSocketNegotiationString());
 
-            log("web socket channel successfully negotiated. comet channel deactivated.");
+            LogUtil.log("web socket channel successfully negotiated. comet channel deactivated.");
 
             break;
 
@@ -965,13 +955,33 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   }
 
+  private void completeInit() {
+    LogUtil.log("received final vote for initialization ...");
+
+    postInit = true;
+    LogUtil.log("executing " + postInitTasks.size() + " post init task(s)");
+
+    Iterator<Runnable> postInitTasksIter = postInitTasks.iterator();
+    while (postInitTasksIter.hasNext()) {
+      postInitTasksIter.next().run();
+      postInitTasksIter.remove();
+    }
+
+    sendAllDeferred();
+    postInitTasks.clear();
+
+    setInitialized(true);
+
+    LogUtil.log("bus federation complete. now operating normally.");
+  }
+
   private void remoteSubscribe(String subject) {
     remotes.put(subject, remoteCallback);
     //  addShadowSubscription(subject, remoteCallback);
   }
 
   private void sendAllDeferred() {
-    log("transmitting deferred messages now ...");
+    LogUtil.log("transmitting deferred messages now ...");
 
     for (Iterator<Message> iter = deferredMessages.iterator(); iter.hasNext(); ) {
       Message m = iter.next();
@@ -996,7 +1006,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private boolean sendInitialMessage() {
     try {
 
-      log("sending initial handshake to remote bus");
+      LogUtil.log("sending initial handshake to remote bus");
 
       String initialMessage = "{\"CommandType\":\"ConnectToQueue\",\"ToSubject\":\"ServerBus\"," +
               " \"PriorityProcessing\":\"1\"}";
@@ -1008,7 +1018,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         @Override
         public void onResponseReceived(Request request, Response response) {
           try {
-            log("received response from initial handshake.");
+            LogUtil.log("received response from initial handshake.");
             procIncomingPayload(response);
             initializeMessagingBus();
           }
@@ -1187,9 +1197,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
     };
 
-    initialPollTimer.schedule(10);
+    InitVotes.voteFor(RpcProxyLoader.class);
 
-    voteForInit();
+    initialPollTimer.schedule(10);
   }
 
   /**
@@ -1265,8 +1275,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private void showError(String message, Throwable e) {
     errorDialog.addError(message, "", e);
 
-    if (isNativeJavaScriptLoggerSupported()) {
-      nativeLog(message);
+    if (LogUtil.isNativeJavaScriptLoggerSupported()) {
+      LogUtil.nativeLog(message);
     }
   }
 
@@ -1350,7 +1360,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   public void attachWebSocketChannel(Object o) {
-    log("web socket opened. sending negotiation message.");
+    LogUtil.log("web socket opened. sending negotiation message.");
     ClientWebSocketChannel.transmitToSocket(o, getWebSocketNegotiationString());
     webSocketChannel = o;
   }
@@ -1482,23 +1492,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   }
 
-  private static void log(String message) {
-    if (isNativeJavaScriptLoggerSupported()) {
-      nativeLog("[erraibus] " + message);
-    }
-  }
-
-  private static native boolean isNativeJavaScriptLoggerSupported() /*-{
-    return ((window.console != null) &&
-            (window.console.firebug == null) &&
-            (window.console.log != null) &&
-            (typeof(window.console.log) == 'function'));
-  }-*/;
-
-  private static native void nativeLog(String message) /*-{
-    window.console.log(message);
-  }-*/;
-
 
   private static native void declareDebugFunction() /*-{
     $wnd.errai_status = function () {
@@ -1521,44 +1514,44 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private static void _displayStatusToLog() {
     ClientMessageBusImpl bus = (ClientMessageBusImpl) ErraiBus.get();
 
-    nativeLog("ErraiBus Status");
-    nativeLog("------------------------------------------------");
-    nativeLog("Bus State              : " + (bus.initialized ? "Online/Federated" : "Disconnected"));
-    nativeLog("");
-    nativeLog("Comet Channel          : " + (bus.cometChannelOpen ? "Active" : "Offline"));
-    nativeLog("  Endpoint (RX)        : " + (bus.getRecvBuilder().getUrl()));
-    nativeLog("  Endpoint (TX)        : " + (bus.getSendBuilder().getUrl()));
-    nativeLog("");
-    nativeLog("WebSocket Channel      : " + (bus.webSocketOpen ? "Active" : "Offline"));
-    nativeLog("  Endpoint (RX/TX)     : " + (bus.webSocketUrl));
-    nativeLog("");
-    nativeLog("Total TXs              : " + (bus.txNumber));
-    nativeLog("Total RXs              : " + (bus.rxNumber));
-    nativeLog("");
-    nativeLog("Endpoints");
-    nativeLog("  Remote (total)       : " + (bus.remotes.size()));
-    nativeLog("  Local (total)        : " + (bus.subscriptions.size()));
-    nativeLog("------------------------------------------------");
+    LogUtil.nativeLog("ErraiBus Status");
+    LogUtil.nativeLog("------------------------------------------------");
+    LogUtil.nativeLog("Bus State              : " + (bus.initialized ? "Online/Federated" : "Disconnected"));
+    LogUtil.nativeLog("");
+    LogUtil.nativeLog("Comet Channel          : " + (bus.cometChannelOpen ? "Active" : "Offline"));
+    LogUtil.nativeLog("  Endpoint (RX)        : " + (bus.getRecvBuilder().getUrl()));
+    LogUtil.nativeLog("  Endpoint (TX)        : " + (bus.getSendBuilder().getUrl()));
+    LogUtil.nativeLog("");
+    LogUtil.nativeLog("WebSocket Channel      : " + (bus.webSocketOpen ? "Active" : "Offline"));
+    LogUtil.nativeLog("  Endpoint (RX/TX)     : " + (bus.webSocketUrl));
+    LogUtil.nativeLog("");
+    LogUtil.nativeLog("Total TXs              : " + (bus.txNumber));
+    LogUtil.nativeLog("Total RXs              : " + (bus.rxNumber));
+    LogUtil.nativeLog("");
+    LogUtil.nativeLog("Endpoints");
+    LogUtil.nativeLog("  Remote (total)       : " + (bus.remotes.size()));
+    LogUtil.nativeLog("  Local (total)        : " + (bus.subscriptions.size()));
+    LogUtil.nativeLog("------------------------------------------------");
   }
 
   private static void _listAvailableServicesToLog() {
     ClientMessageBusImpl bus = (ClientMessageBusImpl) ErraiBus.get();
 
-    nativeLog("Service and Routing Table");
-    nativeLog("------------------------------------------------");
-    nativeLog("[REMOTES]");
+    LogUtil.nativeLog("Service and Routing Table");
+    LogUtil.nativeLog("------------------------------------------------");
+    LogUtil.nativeLog("[REMOTES]");
 
     for (String remoteName : bus.remotes.keySet()) {
-      nativeLog(remoteName);
+      LogUtil.nativeLog(remoteName);
     }
 
-    nativeLog("[LOCALS]");
+    LogUtil.nativeLog("[LOCALS]");
 
     for (String localName : bus.subscriptions.keySet()) {
-      nativeLog(localName + " (" + bus.subscriptions.get(localName).size() + ")");
+      LogUtil.nativeLog(localName + " (" + bus.subscriptions.get(localName).size() + ")");
     }
 
-    nativeLog("------------------------------------------------");
+    LogUtil.nativeLog("------------------------------------------------");
   }
 
   private static void _showErrorConsole() {
