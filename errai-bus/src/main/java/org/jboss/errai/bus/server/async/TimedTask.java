@@ -18,7 +18,7 @@ package org.jboss.errai.bus.server.async;
 
 import static java.lang.System.currentTimeMillis;
 
-import org.jboss.errai.bus.client.api.AsyncTask;
+import org.jboss.errai.common.client.api.tasks.AsyncTask;
 
 /**
  * A <tt>TimedTask</tt> is used for scheduling tasks, and making sure they are run at appropriate times and intervals

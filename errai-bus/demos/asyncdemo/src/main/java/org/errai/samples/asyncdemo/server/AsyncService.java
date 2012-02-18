@@ -18,12 +18,12 @@ package org.errai.samples.asyncdemo.server;
 
 import java.util.regex.Pattern;
 
-import org.jboss.errai.bus.client.api.AsyncTask;
+import org.jboss.errai.common.client.api.tasks.AsyncTask;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.api.base.TimeUnit;
+import org.jboss.errai.common.client.util.TimeUnit;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.util.LocalContext;
 

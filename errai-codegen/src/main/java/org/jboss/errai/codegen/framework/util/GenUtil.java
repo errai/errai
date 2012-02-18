@@ -369,7 +369,7 @@ public class GenUtil {
   public static void createJavaReflectionMethodInitializerUtilMethod(
           ClassStructureBuilder<?> classBuilder) {
 
-    if (classBuilder.getClassDefinition().getMethod(JAVA_REFL_METH_UTIL_METH, Class.class, Method.class) != null) {
+    if (classBuilder.getClassDefinition().getMethod(JAVA_REFL_METH_UTIL_METH, Class.class, String.class, Class[].class) != null) {
       return;
     }
 

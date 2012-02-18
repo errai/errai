@@ -33,7 +33,7 @@ public class BasicIOCTest extends IOCClientTestCase {
     // Force classloading of SimpleBean so the package is discovered.
     Class<?> cls = SimpleBean.class;
   }
-  
+
   @Override
   public String getModuleName() {
     return "org.jboss.errai.ioc.tests.wiring.IOCWiringTests";

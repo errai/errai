@@ -14,15 +14,8 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.api.builder;
+package org.jboss.errai.common.client.api.tasks;
 
-import org.jboss.errai.common.client.api.tasks.AsyncTask;
-import org.jboss.errai.common.client.util.TimeUnit;
-
-public interface MessageReplySendable extends MessageBuildSendableWithReply {
-  public void reply();
-
-  public AsyncTask replyRepeating(TimeUnit unit, int interval);
-
-  public AsyncTask replyDelayed(TimeUnit unit, int interval);
+public interface TaskManagerProvider {
+  public TaskManager get();
 }

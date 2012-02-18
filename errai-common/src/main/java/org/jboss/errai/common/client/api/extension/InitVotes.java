@@ -17,6 +17,9 @@
 package org.jboss.errai.common.client.api.extension;
 
 import com.google.gwt.user.client.Timer;
+import org.jboss.errai.common.client.api.tasks.AsyncTask;
+import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
+import org.jboss.errai.common.client.util.TimeUnit;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -47,22 +50,15 @@ public final class InitVotes {
 
   private static int timeoutMillis = 5000;
 
-  private static Timer initTimeout = new Timer() {
-    @Override
-    public void run() {
-      log("components failed to initialize");
-      for (String comp : waitForSet) {
-        log("   [failed] -> " + comp);
-      }
-    }
-  };
+  private static AsyncTask initTimeout;
+
 
   /**
    * Resets the state, clearing all current waiting votes and disarming the startup process. Calling <tt>reset()</tt>
    * does not however clear out any initialization callbacks registered with {@link #registerInitCallback(Runnable)}.
    */
   public static void reset() {
-    initTimeout.cancel();
+    if (initTimeout != null && !initTimeout.isCancelled()) initTimeout.cancel(true);
     waitForSet.clear();
     armed = false;
   }
@@ -149,12 +145,20 @@ public final class InitVotes {
 
   private static void beginInit() {
     armed = true;
-    initTimeout.schedule(timeoutMillis);
+    initTimeout = TaskManagerFactory.get().schedule(TimeUnit.MILLISECONDS, timeoutMillis, new Runnable() {
+      @Override
+      public void run() {
+        log("components failed to initialize");
+        for (String comp : waitForSet) {
+          log("   [failed] -> " + comp);
+        }
+      }
+    });
   }
 
   private static void finishInit() {
     armed = false;
-    initTimeout.cancel();
+    if (initTimeout != null && !initTimeout.isCancelled()) initTimeout.cancel(true);
 
     Iterator<Runnable> iter = oneTimeInitCallbacks.iterator();
     while (iter.hasNext()) {

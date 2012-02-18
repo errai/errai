@@ -4,7 +4,7 @@
  * http://creativecommons.org/licenses/publicdomain
  */
 
-package org.jboss.errai.bus.client.api.base;
+package org.jboss.errai.common.client.util;
 
 /**
  * A <tt>TimeUnit</tt> represents time durations at a given unit of

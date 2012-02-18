@@ -17,14 +17,12 @@
 package org.jboss.errai.bus.server;
 
 import junit.framework.TestCase;
-import org.jboss.errai.bus.client.api.base.TimeUnit;
+import org.jboss.errai.common.client.util.TimeUnit;
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.marshalling.server.ServerMarshalling;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -32,7 +30,7 @@ import java.util.Map;
  */
 public class MarshallingPerformanceTests extends TestCase {
 
-  private static final int TEST_ITERATIONS = 1000000;
+  private static final int TEST_ITERATIONS = 10000;
 
   public void testMarshall() throws IOException {
     // ensure the marshalling system has been setup.

@@ -24,6 +24,10 @@ import org.jboss.errai.bus.client.framework.LogAdapter;
 import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.user.client.Timer;
 import org.jboss.errai.common.client.api.extension.InitVotes;
+import org.jboss.errai.common.client.api.tasks.ClientTaskManager;
+import org.jboss.errai.common.client.api.tasks.TaskManager;
+import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
+import org.jboss.errai.common.client.api.tasks.TaskManagerProvider;
 
 /**
  * Base test class for testing ErraiBus-based code. Located in the main distribution so it can be extended
@@ -34,15 +38,35 @@ public abstract class AbstractErraiTest extends GWTTestCase {
 
   static {
     System.out.println("REMEMBER! Bus tests will not succeed if: \n" +
-        "1. You do not run the unit tests with the flag: -Dorg.jboss.errai.bus.do_long_poll=false \n" +
-        "2. You do not have the main and test source directories in the runtime classpath");
+            "1. You do not run the unit tests with the flag: -Dorg.jboss.errai.bus.do_long_poll=false \n" +
+            "2. You do not have the main and test source directories in the runtime classpath");
 
   }
+
+  private boolean init = false;
 
   @Override
   protected void gwtSetUp() throws Exception {
     InitVotes.setTimeoutMillis(60000);
-    
+
+    InitVotes.registerOneTimeInitCallback(new Runnable() {
+      @Override
+      public void run() {
+        init = true;
+      }
+    });
+
+    if (!(TaskManagerFactory.get() instanceof ClientTaskManager)) {
+      TaskManagerFactory.setTaskManagerProvider(new TaskManagerProvider() {
+        private ClientTaskManager clientTaskManager = new ClientTaskManager();
+
+        @Override
+        public TaskManager get() {
+          return clientTaskManager;
+        }
+      });
+    }
+
     System.out.println("set-up");
     if (bus == null) {
       System.out.println("GET()");
@@ -79,7 +103,7 @@ public abstract class AbstractErraiTest extends GWTTestCase {
 
   @Override
   protected void gwtTearDown() throws Exception {
-     bus.stop(true);
+    bus.stop(true);
   }
 
   protected void runAfterInit(final Runnable r) {
@@ -87,10 +111,10 @@ public abstract class AbstractErraiTest extends GWTTestCase {
 
       @Override
       public void run() {
-        ClientMessageBus b = (ClientMessageBus) bus;
-        if (b != null && b.isInitialized()) {
+        if (init) {
           r.run();
-        } else {
+        }
+        else {
           // poll again later
           schedule(500);
         }

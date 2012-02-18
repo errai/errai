@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.api.base;
+package org.jboss.errai.common.client.api.tasks;
 
-import org.jboss.errai.bus.client.api.AsyncTask;
-import org.jboss.errai.bus.client.api.HasAsyncTaskRef;
-import org.jboss.errai.bus.client.api.TaskManager;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.user.client.Timer;
+import org.jboss.errai.common.client.util.TimeUnit;
 
 /**
  * The client-side implementation of {@link TaskManager}.

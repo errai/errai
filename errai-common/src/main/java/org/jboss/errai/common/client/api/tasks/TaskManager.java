@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.api;
+package org.jboss.errai.common.client.api.tasks;
 
-import org.jboss.errai.bus.client.api.base.TimeUnit;
+
+import org.jboss.errai.common.client.util.TimeUnit;
 
 /**
  * A deferred, delayed, and periodic scheduling facility that has

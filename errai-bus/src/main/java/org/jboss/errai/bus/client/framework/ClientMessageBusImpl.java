@@ -16,41 +16,6 @@
 
 package org.jboss.errai.bus.client.framework;
 
-import static org.jboss.errai.bus.client.json.JSONUtilCli.decodePayload;
-import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteSubscribe;
-import static org.jboss.errai.common.client.protocols.MessageParts.PriorityProcessing;
-import static org.jboss.errai.common.client.protocols.MessageParts.ReplyTo;
-import static org.jboss.errai.common.client.protocols.MessageParts.Subject;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
-import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.api.MessageListener;
-import org.jboss.errai.bus.client.api.PreInitializationListener;
-import org.jboss.errai.bus.client.api.SessionExpirationListener;
-import org.jboss.errai.bus.client.api.SubscribeListener;
-import org.jboss.errai.bus.client.api.UnsubscribeListener;
-import org.jboss.errai.bus.client.api.base.Capabilities;
-import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
-import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.api.base.NoSubscribersToDeliverTo;
-import org.jboss.errai.bus.client.api.base.TransportIOException;
-import org.jboss.errai.common.client.api.extension.InitVotes;
-import org.jboss.errai.bus.client.json.JSONUtilCli;
-import org.jboss.errai.bus.client.protocols.BusCommands;
-import org.jboss.errai.bus.client.util.BusTools;
-import org.jboss.errai.common.client.util.LogUtil;
-import org.jboss.errai.common.client.framework.Assert;
-import org.jboss.errai.common.client.protocols.MessageParts;
-import org.jboss.errai.marshalling.client.api.MarshallerFramework;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -78,6 +43,40 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import org.jboss.errai.bus.client.ErraiBus;
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.MessageListener;
+import org.jboss.errai.bus.client.api.PreInitializationListener;
+import org.jboss.errai.bus.client.api.SessionExpirationListener;
+import org.jboss.errai.bus.client.api.SubscribeListener;
+import org.jboss.errai.bus.client.api.UnsubscribeListener;
+import org.jboss.errai.bus.client.api.base.Capabilities;
+import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.api.base.NoSubscribersToDeliverTo;
+import org.jboss.errai.bus.client.api.base.TransportIOException;
+import org.jboss.errai.bus.client.json.JSONUtilCli;
+import org.jboss.errai.bus.client.protocols.BusCommands;
+import org.jboss.errai.bus.client.util.BusTools;
+import org.jboss.errai.common.client.api.extension.InitVotes;
+import org.jboss.errai.common.client.framework.Assert;
+import org.jboss.errai.common.client.protocols.MessageParts;
+import org.jboss.errai.common.client.util.LogUtil;
+import org.jboss.errai.marshalling.client.api.MarshallerFramework;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import static org.jboss.errai.bus.client.json.JSONUtilCli.decodePayload;
+import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteSubscribe;
+import static org.jboss.errai.common.client.protocols.MessageParts.PriorityProcessing;
+import static org.jboss.errai.common.client.protocols.MessageParts.ReplyTo;
+import static org.jboss.errai.common.client.protocols.MessageParts.Subject;
 
 /**
  * The default client <tt>MessageBus</tt> implementation.  This bus runs in the browser and automatically federates
@@ -115,7 +114,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private Map<String, List<MessageCallback>> subscriptions =
           new HashMap<String, List<MessageCallback>>();
 
+  private Map<String, List<MessageCallback>> localSubscriptions =
+          new HashMap<String, List<MessageCallback>>();
+
   private Map<String, MessageCallback> remotes;
+
 
   private List<SessionExpirationListener> sessionExpirationListeners
           = new ArrayList<SessionExpirationListener>();
@@ -151,7 +154,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private boolean disconnected = false;
 
   static {
-    MarshallerFramework.initializeDefaultSessionProvider();;
+    MarshallerFramework.initializeDefaultSessionProvider();
+    ;
   }
 
   private List<MessageInterceptor> interceptorStack = new LinkedList<MessageInterceptor>();
@@ -228,7 +232,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   @Override
   public void unsubscribeAll(String subject) {
     fireAllUnSubscribeListeners(subject);
-    removeShadowSubscription(subject);
+    removeSubscriptionTopic(subject);
   }
 
   /**
@@ -248,7 +252,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private Subscription _subscribe(final String subject, final MessageCallback callback, final boolean local) {
-    if (BuiltInServices.ServerBus.name().equals(subject) && subscriptions.containsKey(BuiltInServices.ServerBus.name())) return null;
+    if (BuiltInServices.ServerBus.name().equals(subject) && subscriptions.containsKey(BuiltInServices.ServerBus.name()))
+      return null;
 
     if (!postInit) {
       final DeferredSubscription deferredSubscription = new DeferredSubscription();
@@ -263,12 +268,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       return deferredSubscription;
     }
 
-    fireAllSubscribeListeners(subject, local, directSubscribe(subject, callback));
+    fireAllSubscribeListeners(subject, local, directSubscribe(subject, callback, local));
 
     return new Subscription() {
       @Override
       public void remove() {
-        List<MessageCallback> cbs = subscriptions.get(subject);
+        List<MessageCallback> cbs = local ? localSubscriptions.get(subject) : subscriptions.get(subject);
         if (cbs != null) {
           cbs.remove(callback);
         }
@@ -277,10 +282,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
 
-  private boolean directSubscribe(final String subject, final MessageCallback callback) {
+  private boolean directSubscribe(final String subject, final MessageCallback callback, boolean local) {
     boolean isNew = !isSubscribed(subject);
 
-    addShadowSubscription(subject, new MessageCallback() {
+    MessageCallback cb = new MessageCallback() {
       @Override
       public void callback(Message message) {
         try {
@@ -291,7 +296,14 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           logError("receiver '" + subject + "' threw an exception", decodeCommandMessage(message), e);
         }
       }
-    });
+    };
+
+    if (local) {
+      addLocalSubscriptionEntry(subject, cb);
+    }
+    else {
+      addSubscriptionEntry(subject, cb);
+    }
 
     return isNew;
   }
@@ -420,7 +432,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private boolean hasListeners(String subject) {
-    return subscriptions.containsKey(subject) || remotes.containsKey(subject);
+    return subscriptions.containsKey(subject)
+            || remotes.containsKey(subject)
+            || localSubscriptions.containsKey(subject);
   }
 
   private void callErrorHandler(final Message message, final Throwable t) {
@@ -437,7 +451,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       remotes.get(subject).callback(message);
     }
     else if (subscriptions.containsKey(subject)) {
-      deliverToShadowSubscriptions(subject, message);
+      deliverToSubscriptions(subscriptions, subject, message);
+    }
+    else if (localSubscriptions.containsKey(subject)) {
+      deliverToSubscriptions(localSubscriptions, subject, message);
     }
     else {
       throw new NoSubscribersToDeliverTo(subject);
@@ -455,7 +472,17 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     transmitRemote(BusTools.encodeMessage(message), message);
   }
 
-  private void addShadowSubscription(String subject, MessageCallback reference) {
+  private void addSubscriptionEntry(String subject, MessageCallback reference) {
+    _addCallbackEntry(subscriptions, subject, reference);
+  }
+
+
+  private void addLocalSubscriptionEntry(String subject, MessageCallback reference) {
+    _addCallbackEntry(localSubscriptions, subject, reference);
+  }
+
+  private static void _addCallbackEntry(Map<String, List<MessageCallback>> subscriptions, String subject,
+                                        MessageCallback reference) {
     if (!subscriptions.containsKey(subject)) {
       subscriptions.put(subject, new ArrayList<MessageCallback>());
     }
@@ -465,7 +492,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   }
 
-  private void removeShadowSubscription(String subject) {
+
+  private void removeSubscriptionTopic(String subject) {
     subscriptions.remove(subject);
   }
 
@@ -478,7 +506,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   }
 
-  private void deliverToShadowSubscriptions(String subject, Message message) {
+  private static void deliverToSubscriptions(Map<String, List<MessageCallback>> subscriptions,
+                                             String subject, Message message) {
     for (MessageCallback cb : subscriptions.get(subject)) {
       cb.callback(message);
     }
@@ -644,7 +673,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       this.disconnected = true;
       this.initialized = false;
       this.sendBuilder = null;
-    //  this.initVotesRequired = 1; // just to reconnect the bus.
+      //  this.initVotesRequired = 1; // just to reconnect the bus.
       this.postInitTasks.clear();
 
       InitVotes.reset();
@@ -695,7 +724,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     InitVotes.registerInitCallback(new Runnable() {
       @Override
       public void run() {
-         completeInit();
+        completeInit();
       }
     });
 
@@ -943,7 +972,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             break;
         }
       }
-    });
+    }, false);
 
     /**
      * Send initial message to connect to the queue, to establish an HTTP session. Otherwise, concurrent

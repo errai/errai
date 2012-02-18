@@ -17,9 +17,8 @@
 package org.jboss.errai.bus.tests;
 
 import junit.framework.TestCase;
-import org.jboss.errai.bus.client.api.base.TimeUnit;
+import org.jboss.errai.common.client.util.TimeUnit;
 import org.jboss.errai.bus.server.async.scheduling.PooledExecutorService;
-import org.junit.Ignore;
 
 import java.util.ArrayList;
 import java.util.Arrays;

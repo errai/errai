@@ -24,9 +24,9 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.jboss.errai.bus.client.api.AsyncTask;
-import org.jboss.errai.bus.client.api.HasAsyncTaskRef;
-import org.jboss.errai.bus.client.api.base.TimeUnit;
+import org.jboss.errai.common.client.api.tasks.AsyncTask;
+import org.jboss.errai.common.client.api.tasks.HasAsyncTaskRef;
+import org.jboss.errai.common.client.util.TimeUnit;
 import org.jboss.errai.bus.server.async.InterruptHandle;
 import org.jboss.errai.bus.server.async.TimedTask;
 

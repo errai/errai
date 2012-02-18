@@ -19,6 +19,11 @@ package org.jboss.errai.ioc.rebind;
 import com.google.gwt.junit.JUnitShell;
 import junit.framework.TestCase;
 import junit.framework.TestResult;
+import org.jboss.errai.common.client.api.tasks.AsyncTask;
+import org.jboss.errai.common.client.api.tasks.TaskManager;
+import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
+import org.jboss.errai.common.client.api.tasks.TaskManagerProvider;
+import org.jboss.errai.common.client.util.TimeUnit;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.InterfaceInjectionContext;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
@@ -33,6 +38,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -134,6 +143,71 @@ public class IOCTestRunner extends ParentRunner<Runner> {
     final IOCClientTestCase iocClientTestCase = (IOCClientTestCase) getInstance();
 
     if (SIMULATED) {
+      TaskManagerFactory.setTaskManagerProvider(new TaskManagerProvider() {
+        ScheduledExecutorService service = Executors.newScheduledThreadPool(1);
+
+        @Override
+        public TaskManager get() {
+          return new TaskManager() {
+            @Override
+            public void execute(Runnable task) {
+              service.execute(task);
+            }
+
+            @Override
+            public AsyncTask scheduleRepeating(TimeUnit unit, int interval, Runnable task) {
+              final ScheduledFuture<?> future =
+                      service.scheduleAtFixedRate(task, unit.toMillis(interval), 0,
+                              java.util.concurrent.TimeUnit.MILLISECONDS);
+
+
+              return new AsyncTask() {
+                @Override
+                public void cancel(boolean interrupt) {
+                  future.cancel(true);
+                }
+
+                @Override
+                public void setExitHandler(Runnable runnable) {
+                }
+
+                @Override
+                public boolean isCancelled() {
+                  return future.isCancelled();
+                }
+              };
+            }
+
+            @Override
+            public AsyncTask schedule(TimeUnit unit, int interval, Runnable task) {
+              final ScheduledFuture<?> future =
+                      service.schedule(task, unit.toMillis(interval), java.util.concurrent.TimeUnit.MILLISECONDS);
+
+
+              return new AsyncTask() {
+                @Override
+                public void cancel(boolean interrupt) {
+                  future.cancel(true);
+                }
+
+                @Override
+                public void setExitHandler(Runnable runnable) {
+                }
+
+                @Override
+                public boolean isCancelled() {
+                  return future.isCancelled();
+                }
+              };
+            }
+
+            @Override
+            public void requestStop() {
+            }
+          };
+        }
+      });
+
 
       if (instance instanceof IOCClientTestCase) {
         iocClientTestCase.setInitializer(new IOCClientTestCase.ContainerBootstrapper() {
@@ -149,8 +223,8 @@ public class IOCTestRunner extends ParentRunner<Runner> {
                 }
               }
               MockIOCGenerator mockIOCGenerator = new MockIOCGenerator(packages);
-              
-              Class<? extends  Bootstrapper> cls = mockIOCGenerator.generate();
+
+              Class<? extends Bootstrapper> cls = mockIOCGenerator.generate();
               Bootstrapper bs = cls.newInstance();
               return bs.bootstrapContainer();
             }

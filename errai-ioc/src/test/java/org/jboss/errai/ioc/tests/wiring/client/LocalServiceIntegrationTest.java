@@ -26,21 +26,16 @@ import org.jboss.errai.bus.server.api.Local;
 import org.jboss.errai.ioc.client.Container;
 
 import com.google.gwt.user.client.Timer;
+import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
 
 /**
  * @author Mike Brock
  */
-public class LocalServiceIntegrationTest extends AbstractErraiTest {
+public class LocalServiceIntegrationTest extends AbstractErraiIOCTest {
 
   @Override
   public String getModuleName() {
     return "org.jboss.errai.ioc.tests.wiring.IOCWiringTests";
-  }
-
-  @Override
-  public void gwtSetUp() throws Exception {
-    super.gwtSetUp();
-    new Container().onModuleLoad();
   }
 
   @Service

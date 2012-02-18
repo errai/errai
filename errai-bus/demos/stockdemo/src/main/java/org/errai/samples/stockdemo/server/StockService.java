@@ -3,12 +3,12 @@ package org.errai.samples.stockdemo.server;
 import com.google.inject.Inject;
 
 import org.errai.samples.stockdemo.client.shared.Stock;
-import org.jboss.errai.bus.client.api.AsyncTask;
+import org.jboss.errai.common.client.api.tasks.AsyncTask;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.bus.client.api.SubscribeListener;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.api.base.TimeUnit;
+import org.jboss.errai.common.client.util.TimeUnit;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.framework.SubscriptionEvent;

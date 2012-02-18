@@ -4,8 +4,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import org.jboss.errai.bus.client.api.AbstractAsyncTaskTest;
-import org.jboss.errai.bus.client.api.AsyncTask;
-import org.jboss.errai.bus.client.api.base.TimeUnit;
+import org.jboss.errai.common.client.api.tasks.AsyncTask;
+import org.jboss.errai.common.client.util.TimeUnit;
 import org.jboss.errai.bus.server.async.scheduling.PooledExecutorService;
 
 /**

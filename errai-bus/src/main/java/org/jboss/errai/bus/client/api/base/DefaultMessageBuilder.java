@@ -19,15 +19,14 @@ package org.jboss.errai.bus.client.api.base;
 import static org.jboss.errai.bus.client.api.base.ConversationHelper.createConversationService;
 import static org.jboss.errai.bus.client.api.base.ConversationHelper.makeConversational;
 
-import org.jboss.errai.bus.client.api.AsyncTask;
+import org.jboss.errai.common.client.api.tasks.AsyncTask;
 import org.jboss.errai.bus.client.api.ErrorCallback;
-import org.jboss.errai.bus.client.api.HasAsyncTaskRef;
+import org.jboss.errai.common.client.api.tasks.HasAsyncTaskRef;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.builder.MessageBuildCommand;
 import org.jboss.errai.bus.client.api.builder.MessageBuildParms;
 import org.jboss.errai.bus.client.api.builder.MessageBuildSendable;
-import org.jboss.errai.bus.client.api.builder.MessageBuildSendableDispatcher;
 import org.jboss.errai.bus.client.api.builder.MessageBuildSubject;
 import org.jboss.errai.bus.client.api.builder.MessageReplySendable;
 import org.jboss.errai.bus.client.api.builder.Sendable;
@@ -38,7 +37,9 @@ import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.framework.RoutingFlag;
 import org.jboss.errai.common.client.api.ResourceProvider;
+import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
 import org.jboss.errai.common.client.protocols.MessageParts;
+import org.jboss.errai.common.client.util.TimeUnit;
 
 /**
  * Part of the implementation of the fluent API whose entry point is {@link MessageBuilder}.

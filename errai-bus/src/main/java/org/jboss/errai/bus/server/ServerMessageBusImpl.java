@@ -357,15 +357,13 @@ public class ServerMessageBusImpl implements ServerMessageBus {
       @Override
       public void onSubscribe(SubscriptionEvent event) {
         if (event.isLocalOnly() || event.isRemote() || event.getSubject().startsWith("local:")) return;
-        synchronized (messageQueues) {
-          if (messageQueues.isEmpty()) return;
 
-          MessageBuilder.createMessage()
-                  .toSubject(BuiltInServices.ClientBus.name())
-                  .command(BusCommands.RemoteSubscribe)
-                  .with(MessageParts.Subject, event.getSubject())
-                  .noErrorHandling().sendGlobalWith(ServerMessageBusImpl.this);
-        }
+        MessageBuilder.createMessage()
+                .toSubject(BuiltInServices.ClientBus.name())
+                .command(BusCommands.RemoteSubscribe)
+                .with(MessageParts.Subject, event.getSubject())
+                .noErrorHandling().sendGlobalWith(ServerMessageBusImpl.this);
+
       }
     });
 
@@ -373,15 +371,13 @@ public class ServerMessageBusImpl implements ServerMessageBus {
       @Override
       public void onUnsubscribe(SubscriptionEvent event) {
         if (event.isLocalOnly() || event.isRemote() || event.getSubject().startsWith("local:")) return;
-        synchronized (messageQueues) {
-          if (messageQueues.isEmpty()) return;
+        if (messageQueues.isEmpty()) return;
 
-          MessageBuilder.createMessage()
-                  .toSubject(BuiltInServices.ClientBus.name())
-                  .command(BusCommands.RemoteUnsubscribe)
-                  .with(MessageParts.Subject, event.getSubject())
-                  .noErrorHandling().sendGlobalWith(ServerMessageBusImpl.this);
-        }
+        MessageBuilder.createMessage()
+                .toSubject(BuiltInServices.ClientBus.name())
+                .command(BusCommands.RemoteUnsubscribe)
+                .with(MessageParts.Subject, event.getSubject())
+                .noErrorHandling().sendGlobalWith(ServerMessageBusImpl.this);
       }
     });
 
@@ -608,6 +604,9 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     if (subscriptions.containsKey(subject)) {
       subscriptions.get(subject).deliver(message);
+    }
+    else if (subscriptions.containsKey("local:".concat(subject))) {
+      subscriptions.get("local:".concat(subject)).deliver(message);
     }
   }
 
@@ -850,14 +849,16 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     if (reservedNames.contains(subject))
       throw new IllegalArgumentException("cannot modify or subscribe to reserved service: " + subject);
 
-    DeliveryPlan plan = createOrAddDeliveryPlan(subject, receiver);
+    final String toSubscribe = "local:".concat(subject);
+    
+    DeliveryPlan plan = createOrAddDeliveryPlan(toSubscribe, receiver);
 
-    fireSubscribeListeners(new SubscriptionEvent(false, false, true, true, plan.getTotalReceivers(), "InBus", subject));
+    fireSubscribeListeners(new SubscriptionEvent(false, false, true, true, plan.getTotalReceivers(), "InBus", toSubscribe));
 
     return new Subscription() {
       @Override
       public void remove() {
-        removeFromDeliveryPlan(subject, receiver);
+        removeFromDeliveryPlan(toSubscribe, receiver);
       }
     };
   }

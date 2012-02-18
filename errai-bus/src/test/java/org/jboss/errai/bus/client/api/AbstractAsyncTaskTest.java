@@ -1,6 +1,8 @@
 package org.jboss.errai.bus.client.api;
 
 import com.google.gwt.junit.client.GWTTestCase;
+import org.jboss.errai.common.client.api.tasks.AsyncTask;
+import org.jboss.errai.common.client.api.tasks.HasAsyncTaskRef;
 
 /**
  * Abstract test that covers the contract of the AsyncTask interface. Tests for
@@ -94,7 +96,7 @@ public abstract class AbstractAsyncTaskTest extends GWTTestCase {
 
   /**
    * Runs the given Runnable after the AsyncTask most recently returned from
-   * {@link #getTaskUnderTest(Runnable)} has completed.
+   * {@link #getTaskUnderTest(CountingRunnable)} has completed.
    *
    * @param r
    */

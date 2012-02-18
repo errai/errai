@@ -3,20 +3,19 @@ package org.jboss.errai.ioc.tests.wiring.client;
 import com.google.gwt.user.client.Timer;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.tests.AbstractErraiTest;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.common.client.protocols.MessageParts;
-import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.api.ReplyTo;
 import org.jboss.errai.ioc.client.api.Sender;
 import org.jboss.errai.ioc.client.api.ToSubject;
+import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Arrays;
 import java.util.List;
 
-public class SenderIntegrationTest extends AbstractErraiTest {
+public class SenderIntegrationTest extends AbstractErraiIOCTest {
 
   @Override
   public String getModuleName() {
@@ -60,13 +59,6 @@ public class SenderIntegrationTest extends AbstractErraiTest {
     public void callback(Message message) {
       replyReceived = true;
     }
-  }
-
-
-  @Override
-  public void gwtSetUp() throws Exception {
-    super.gwtSetUp();
-    new Container().onModuleLoad();
   }
 
   public void testSenderWasInjected() {
@@ -132,8 +124,6 @@ public class SenderIntegrationTest extends AbstractErraiTest {
       }
     });
   }
-
-
 
 
 }

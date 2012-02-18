@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.api;
+package org.jboss.errai.common.client.api.tasks;
 
-import org.jboss.errai.bus.client.api.base.ClientTaskManager;
-import org.jboss.errai.bus.server.DefaultTaskManager;
-import org.jboss.errai.bus.server.async.scheduling.PooledExecutorService;
 
 /**
  * Errai schedulers that accept a Runnable and produce an {@link AsyncTask} will
  * inject the AsyncTask instance into the runnable if it implements this
  * interface.
  *
- * @see DefaultTaskManager
- * @see ClientTaskManager
- * @see PooledExecutorService
+ * @see org.jboss.errai.common.client.api.tasks.ClientTaskManager
  */
 public interface HasAsyncTaskRef extends Runnable {
 

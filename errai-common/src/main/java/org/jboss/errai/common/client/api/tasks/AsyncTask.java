@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.api;
+package org.jboss.errai.common.client.api.tasks;
 
 /**
  * A handle representing an asynchronous task that has been submitted to the message bus.

@@ -16,8 +16,8 @@
 
 package org.jboss.errai.bus.client.api.builder;
 
-import org.jboss.errai.bus.client.api.AsyncTask;
-import org.jboss.errai.bus.client.api.base.TimeUnit;
+import org.jboss.errai.common.client.api.tasks.AsyncTask;
+import org.jboss.errai.common.client.util.TimeUnit;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 
 /**

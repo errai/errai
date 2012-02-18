@@ -16,6 +16,8 @@
 
 package org.jboss.errai.common.client.util;
 
+import com.google.gwt.core.client.GWT;
+
 /**
  * @author Mike Brock
  */
@@ -24,7 +26,7 @@ public final class LogUtil {
   }
 
   public static void log(String message) {
-    if (isNativeJavaScriptLoggerSupported()) {
+    if (GWT.isClient() && isNativeJavaScriptLoggerSupported()) {
       nativeLog("[errai] " + message);
     }
     else {

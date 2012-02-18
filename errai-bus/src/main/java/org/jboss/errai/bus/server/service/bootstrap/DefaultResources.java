@@ -15,14 +15,14 @@
  */
 package org.jboss.errai.bus.server.service.bootstrap;
 
-import org.jboss.errai.bus.client.api.TaskManager;
-import org.jboss.errai.bus.client.api.base.TaskManagerFactory;
+import org.jboss.errai.common.client.api.tasks.TaskManager;
+import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
 import org.jboss.errai.bus.client.api.laundry.LaundryList;
 import org.jboss.errai.bus.client.api.laundry.LaundryListProvider;
 import org.jboss.errai.bus.client.api.laundry.LaundryListProviderFactory;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
-import org.jboss.errai.bus.client.framework.TaskManagerProvider;
+import org.jboss.errai.common.client.api.tasks.TaskManagerProvider;
 import org.jboss.errai.bus.server.DefaultTaskManager;
 import org.jboss.errai.bus.server.api.QueueSession;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;

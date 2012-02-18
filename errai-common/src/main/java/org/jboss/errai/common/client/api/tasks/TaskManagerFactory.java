@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.api.base;
-
-import org.jboss.errai.bus.client.api.TaskManager;
-import org.jboss.errai.bus.client.framework.TaskManagerProvider;
+package org.jboss.errai.common.client.api.tasks;
 
 public class TaskManagerFactory {
 

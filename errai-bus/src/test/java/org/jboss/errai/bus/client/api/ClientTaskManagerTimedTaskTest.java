@@ -1,7 +1,8 @@
 package org.jboss.errai.bus.client.api;
 
-import org.jboss.errai.bus.client.api.base.TaskManagerFactory;
-import org.jboss.errai.bus.client.api.base.TimeUnit;
+import org.jboss.errai.common.client.api.tasks.AsyncTask;
+import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
+import org.jboss.errai.common.client.util.TimeUnit;
 
 import com.google.gwt.user.client.Timer;
 

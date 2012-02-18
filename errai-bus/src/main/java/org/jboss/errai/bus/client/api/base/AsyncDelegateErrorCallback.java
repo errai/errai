@@ -16,9 +16,8 @@
 
 package org.jboss.errai.bus.client.api.base;
 
-import org.jboss.errai.bus.client.api.AsyncTask;
 import org.jboss.errai.bus.client.api.ErrorCallback;
-import org.jboss.errai.bus.client.api.HasAsyncTaskRef;
+import org.jboss.errai.common.client.api.tasks.HasAsyncTaskRef;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.common.client.framework.Assert;
 
@@ -49,7 +48,7 @@ public class AsyncDelegateErrorCallback implements ErrorCallback {
 
   /**
    * Cancels future executions of the task by calling
-   * {@link AsyncTask#cancel(boolean)} on the AsyncTask that controls its execution.
+   * {@link org.jboss.errai.common.client.api.tasks.AsyncTask#cancel(boolean)} on the AsyncTask that controls its execution.
    *
    * @return the value returned by the delegate error handler's
    *         <code>error()</code> method. If there is no delegate, the return

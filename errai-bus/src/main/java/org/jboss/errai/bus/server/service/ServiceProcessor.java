@@ -23,8 +23,8 @@ import java.util.Set;
 
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.api.TaskManager;
-import org.jboss.errai.bus.client.api.base.TaskManagerFactory;
+import org.jboss.errai.common.client.api.tasks.TaskManager;
+import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
 import org.jboss.errai.bus.client.api.builder.DefaultRemoteCallBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.ProxyProvider;
@@ -62,7 +62,7 @@ import com.google.inject.Injector;
  */
 public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
   private Logger log = LoggerFactory.getLogger(ServiceProcessor.class);
-  
+
   // TODO need to exclude client classes based on GWT module definition
   private static final String CLIENT_PKG_REGEX = ".*(\\.client\\.).*";
 
@@ -134,7 +134,12 @@ public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
 
         if (commandPoints.isEmpty()) {
           // Subscribe the service to the bus.
-          context.getBus().subscribe(svcName, (MessageCallback) svc);
+          if (local) {
+            context.getBus().subscribeLocal(svcName, (MessageCallback) svc);
+          }
+          else {
+            context.getBus().subscribe(svcName, (MessageCallback) svc);
+          }
         }
 
         RolesRequiredRule rule = null;
@@ -173,13 +178,13 @@ public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
       for (final Method method : loadClass.getDeclaredMethods()) {
         if (method.isAnnotationPresent(Endpoint.class)) {
           epts.put(method.getName(), method.getReturnType() == Void.class ?
-              new EndpointCallback(svc, method) :
-              new ConversationalEndpointCallback(new ServiceInstanceProvider() {
-                @Override
-                public Object get(Message message) {
-                  return targetService;
-                }
-              }, method, context.getBus()));
+                  new EndpointCallback(svc, method) :
+                  new ConversationalEndpointCallback(new ServiceInstanceProvider() {
+                    @Override
+                    public Object get(Message message) {
+                      return targetService;
+                    }
+                  }, method, context.getBus()));
         }
       }
 
@@ -256,11 +261,11 @@ public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
 
     // note: this method just exists because we want AbstractRemoteCallBuilder to be package private.
     DefaultRemoteCallBuilder.setProxyFactory(Assert.notNull(new ProxyProvider() {
-          @Override
-          public <T> T getRemoteProxy(Class<T> proxyType) {
-            throw new RuntimeException("There is not yet an available Errai RPC implementation for the server-side environment.");
-          }
-        }));
+      @Override
+      public <T> T getRemoteProxy(Class<T> proxyType) {
+        throw new RuntimeException("There is not yet an available Errai RPC implementation for the server-side environment.");
+      }
+    }));
 
     return svc;
   }
