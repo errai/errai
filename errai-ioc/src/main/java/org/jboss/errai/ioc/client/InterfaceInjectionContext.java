@@ -16,15 +16,20 @@
 
 package org.jboss.errai.ioc.client;
 
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
+import org.jboss.errai.ioc.client.container.IOCBeanManager;
+import org.jboss.errai.ioc.client.container.IOC;
+
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
-
 public class InterfaceInjectionContext {
+  private IOCBeanManager manager;
+  
   private List<Widget> toRootPanel;
   private Map<String, Panel> panels;
   private Map<Widget, String> widgetToPanel;
@@ -33,6 +38,7 @@ public class InterfaceInjectionContext {
     toRootPanel = new ArrayList<Widget>();
     panels = new HashMap<String, Panel>();
     widgetToPanel = new HashMap<Widget, String>();
+    manager = IOC.getBeanManager();
   }
 
   public InterfaceInjectionContext(List<Widget> toRootPanel, Map<String, Panel> panels, Map<Widget, String> widgetToPanel) {
@@ -41,6 +47,10 @@ public class InterfaceInjectionContext {
     this.widgetToPanel = widgetToPanel;
   }
 
+  public void addBean(Class<?> type, Object instance, Annotation... qualifiers) {
+    manager.registerBean(type, instance, qualifiers);
+  }
+  
   public void addToRootPanel(Widget w) {
     toRootPanel.add(w);
   }

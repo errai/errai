@@ -23,10 +23,10 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
+import org.jboss.errai.bus.client.api.Local;
 import org.jboss.errai.bus.client.tests.support.FunAnnotatedClientClass;
 import org.jboss.errai.bus.client.tests.support.FunAnnotatedClientClass2;
 import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.bus.server.api.Local;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.exporter.ExplodedExporter;

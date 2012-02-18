@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.rebind.ioc;
-
-import java.lang.annotation.Annotation;
+package org.jboss.errai.ioc.client.api.qualifiers;
 
 /**
  * @author Mike Brock
  */
-public interface QualifyingMetadata {
-  public boolean doesSatisfy(QualifyingMetadata metadata);
-  
-  public Annotation[] getQualifiers();
+public final class BuiltIn {
+  private BuiltIn() {
+  }
 }

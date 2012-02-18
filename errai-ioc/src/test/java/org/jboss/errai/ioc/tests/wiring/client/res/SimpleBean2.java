@@ -28,8 +28,6 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
  */
 @EntryPoint
 public class SimpleBean2 {
-  public static SimpleBean2 TEST_INSTANCE;
-
   private final FooService svc;
   private final BarService<String> bSvc;
 
@@ -49,10 +47,5 @@ public class SimpleBean2 {
 
   public BarService<String> getbSvc() {
     return bSvc;
-  }
-
-  @PostConstruct
-  public void doPostConstruct() {
-    TEST_INSTANCE = this;
   }
 }

@@ -102,7 +102,7 @@ public class MarshallerGeneratorFactory {
       log.info("generated marshalling class in " + (System.currentTimeMillis() - st) + "ms.");
 
       if (Boolean.getBoolean("errai.codegen.printOut")) {
-        System.out.println(gen);
+    //    System.out.println(gen);
       }
 
       RebindUtils.writeStringToFile(cacheFile, gen);

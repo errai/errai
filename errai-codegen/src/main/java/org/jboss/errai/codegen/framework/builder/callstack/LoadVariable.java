@@ -40,7 +40,7 @@ public class LoadVariable extends AbstractCallElement {
 
   public LoadVariable(String variableName, Object... indexes) {
     this.variableName = variableName;
-    this.indexes = indexes;
+    this.indexes = indexes == null ? new Object[0] : indexes;
   }
 
   public LoadVariable(String variableName, boolean classMember, Object... indexes) {

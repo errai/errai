@@ -18,6 +18,7 @@ package org.jboss.errai.ioc.rebind.ioc;
 
 import java.lang.annotation.Annotation;
 
+import org.jboss.errai.codegen.framework.builder.BlockBuilder;
 import org.jboss.errai.codegen.framework.meta.*;
 import org.jboss.errai.ioc.client.ContextualProviderContext;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
@@ -94,7 +95,7 @@ public class ContextualProviderInjector extends TypeInjector {
         if (argType instanceof MetaClass) {
           typeArgsClasses[i] = (MetaClass) argType;
         }
-        else if(argType instanceof MetaParameterizedType) {
+        else if (argType instanceof MetaParameterizedType) {
           typeArgsClasses[i] = (MetaClass) ((MetaParameterizedType) argType).getRawType();
         }
       }
@@ -103,7 +104,7 @@ public class ContextualProviderInjector extends TypeInjector {
       Annotation[] qualifiers = injectableInstance.getQualifiers();
 
       if (providerInjector.getInjectedType().isAssignableTo(Provider.class)) {
-        contextInjector = new ContextualProviderContextInjector(qualifiers, typeArgs);
+        contextInjector = new ContextualProviderContextInjector(type, qualifiers, typeArgs);
         injectContext.registerInjector(contextInjector);
 
         statement = Stmt.nestedCall(providerInjector.getType(injectContext, injectableInstance))
@@ -138,13 +139,15 @@ public class ContextualProviderInjector extends TypeInjector {
   }
 
   private static class ContextualProviderContextInjector extends Injector {
+    private MetaClass type;
     private Annotation[] annotations = new Annotation[0];
     private MetaType[] typeArguments = new MetaType[0];
 
     private ContextualProviderContextInjector() {
     }
 
-    private ContextualProviderContextInjector(Annotation[] annotations, MetaType[] typeArguments) {
+    private ContextualProviderContextInjector(MetaClass type, Annotation[] annotations, MetaType[] typeArguments) {
+      this.type = type;
       this.annotations = annotations;
       this.typeArguments = typeArguments;
     }
@@ -162,8 +165,15 @@ public class ContextualProviderInjector extends TypeInjector {
               .finish();
     }
 
+
     @Override
     public Statement getType(InjectionContext injectContext, InjectableInstance injectableInstance) {
+      Statement val = _getType(injectContext, injectableInstance);
+      registerWithBeanManager(injectContext, val);
+      return val;
+    }
+
+    private Statement _getType(InjectionContext injectContext, InjectableInstance injectableInstance) {
       return instantiateOnly(injectContext, injectableInstance);
     }
 
@@ -190,6 +200,21 @@ public class ContextualProviderInjector extends TypeInjector {
     @Override
     public MetaClass getInjectedType() {
       return MetaClassFactory.get(ContextualProviderContext.class);
+    }
+
+    private void registerWithBeanManager(InjectionContext context, Statement val) {
+      if (useBeanManager) {
+        BlockBuilder<?> b = context.getProcessingContext().getBlockBuilder();
+
+        QualifyingMetadata md = qualifyingMetadata;
+        if (md == null) {
+          md = context.getProcessingContext().getQualifyingMetadataFactory().createDefaultMetadata();
+        }
+
+        b.append(Stmt.loadVariable(context.getProcessingContext().getContextVariableReference())
+                .invoke("addBean", type, val, md.getQualifiers()));
+
+      }
     }
   }
 }

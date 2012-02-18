@@ -31,12 +31,9 @@ public class LifecycleBean {
   @Inject private InitBallot<LifecycleBean> ballot;
   private boolean afterInitCalled;
 
-  private static LifecycleBean INSTANCE;
-
   @PostConstruct
   public void postConstruct() {
     ballot.voteForInit();
-    INSTANCE = this;
   }
 
   @AfterInitialization
@@ -52,7 +49,4 @@ public class LifecycleBean {
     return afterInitCalled;
   }
 
-  public static LifecycleBean getInstance() {
-    return INSTANCE;
-  }
 }

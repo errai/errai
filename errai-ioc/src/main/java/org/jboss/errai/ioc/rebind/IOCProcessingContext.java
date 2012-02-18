@@ -20,8 +20,12 @@ import java.util.List;
 
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.Variable;
+import org.jboss.errai.codegen.framework.VariableReference;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.util.Refs;
+import org.jboss.errai.ioc.client.InterfaceInjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.JSR330QualifyingMetadataFactory;
 import org.jboss.errai.ioc.rebind.ioc.QualifyingMetadataFactory;
 
@@ -44,6 +48,8 @@ public class IOCProcessingContext  {
 
   protected SourceWriter writer;
   protected TypeOracle oracle;
+  
+  protected Variable contextVariable = Variable.create("ctx", InterfaceInjectionContext.class);
 
   protected QualifyingMetadataFactory qualifyingMetadataFactory = new JSR330QualifyingMetadataFactory();
 
@@ -101,6 +107,14 @@ public class IOCProcessingContext  {
 
   public TypeOracle getOracle() {
     return oracle;
+  }
+
+  public Variable getContextVariable() {
+    return contextVariable;
+  }
+  
+  public VariableReference getContextVariableReference() {
+    return contextVariable.getReference();
   }
 
   public QualifyingMetadataFactory getQualifyingMetadataFactory() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,24 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.errai.cdi.server;
 
-import javax.enterprise.util.AnnotationLiteral;
-import javax.inject.Named;
+package org.jboss.errai.ioc.client.api.qualifiers;
 
 /**
- * @author: Heiko Braun <hbraun@redhat.com>
- * @date: Oct 5, 2010
+ * @author Mike Brock
  */
-public class NamedQualifier extends AnnotationLiteral<Named> implements Named {
-
-  String value;
-
-  public NamedQualifier(String value) {
-    this.value = value;
-  }
-
-  public String value() {
-    return value;
-  }
+public @interface Any {
 }

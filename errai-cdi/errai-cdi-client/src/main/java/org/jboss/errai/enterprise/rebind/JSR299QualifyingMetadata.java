@@ -25,6 +25,7 @@ import java.util.Set;
 import javax.enterprise.inject.Any;
 import javax.inject.Qualifier;
 
+import org.jboss.errai.ioc.rebind.ioc.JSR330QualifyingMetadata;
 import org.jboss.errai.ioc.rebind.ioc.QualifyingMetadata;
 
 /**
@@ -81,6 +82,11 @@ public class JSR299QualifyingMetadata implements QualifyingMetadata {
   }
 
   @Override
+  public Annotation[] getQualifiers() {
+    return qualifiers.toArray(new Annotation[qualifiers.size()]);
+  }
+
+  @Override
   public String toString() {
     StringBuilder buf = new StringBuilder();
 
@@ -90,4 +96,22 @@ public class JSR299QualifyingMetadata implements QualifyingMetadata {
 
     return buf.toString();
   }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof QualifyingMetadata)) return false;
+
+    QualifyingMetadata that = (JSR330QualifyingMetadata) o;
+
+    return doesSatisfy(that);
+  }
+
+  @Override
+  public int hashCode() {
+    return qualifiers != null ? qualifiers.hashCode() : 0;
+  }
+
 }
+
+

@@ -103,6 +103,16 @@ public class InjectionContext {
     return false;
   }
 
+  public List<Injector> getAllInjectors() {
+    List<Injector> allInjectors = new ArrayList<Injector>();
+    for (List<Injector> injectorList : injectors.values()) {
+      for (Injector injector : injectorList) {
+        allInjectors.add(injector);
+      }
+    }
+    return allInjectors;
+  }
+
   public Injector getInjector(Class<?> injectorType) {
     return getInjector(MetaClassFactory.get(injectorType));
   }
@@ -171,7 +181,7 @@ public class InjectionContext {
     else {
       Iterator<Injector> iter = injectorList.iterator();
       boolean noAdd = false;
-      
+
       while (iter.hasNext()) {
         Injector inj = iter.next();
         if (type.isAssignableFrom(inj.getInjectedType()) && inj.metadataMatches(injector)) {

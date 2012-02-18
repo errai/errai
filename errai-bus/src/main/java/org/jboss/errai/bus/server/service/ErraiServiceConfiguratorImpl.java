@@ -31,7 +31,6 @@ import static java.util.ResourceBundle.getBundle;
  * Default implementation of the ErraiBus server-side configurator.
  */
 public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
-
   private ServerMessageBus bus;
   private MetaDataScanner scanner;
   private Map<String, String> properties;
@@ -39,7 +38,6 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
   private Map<Class<?>, ResourceProvider> extensionBindings;
   private Map<String, ResourceProvider> resourceProviders;
   private Set<Class> serializableTypes;
-
 
   /**
    * Initializes the <tt>ErraiServiceConfigurator</tt> with a specified <tt>ServerMessageBus</tt>
@@ -57,12 +55,9 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
   }
 
   // lockdown the configuration so it can't be modified.
-
   public void lockdown() {
-
     properties = Collections.unmodifiableMap(properties);
     extensionBindings = Collections.unmodifiableMap(extensionBindings);
-    //  resourceProviders = Collections.unmodifiableMap(resourceProviders);
     serializableTypes = Collections.unmodifiableSet(serializableTypes);
   }
 

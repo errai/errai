@@ -149,6 +149,12 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
   }
 
   @Override
+  public StatementBuilder declareVariable(String name, MetaClass type, Object initialization) {
+    Variable v = Variable.create(name, type, initialization);
+    return declareVariable(v);
+  }
+
+  @Override
   public StatementBuilder declareVariable(String name, Class<?> type, Object initialization) {
     Variable v = Variable.create(name, type, initialization);
     return declareVariable(v);

@@ -14,15 +14,22 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.rebind.ioc;
-
-import java.lang.annotation.Annotation;
+package org.jboss.errai.ioc.client.container;
 
 /**
  * @author Mike Brock
  */
-public interface QualifyingMetadata {
-  public boolean doesSatisfy(QualifyingMetadata metadata);
-  
-  public Annotation[] getQualifiers();
+public class IOCResolutionException extends RuntimeException {
+
+  public IOCResolutionException(String message) {
+    super(message);
+  }
+
+  public IOCResolutionException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
+  public IOCResolutionException(Throwable cause) {
+    super(cause);
+  }
 }

@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.jboss.errai.bus.client.api.Local;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.common.client.api.tasks.TaskManager;
@@ -36,7 +37,6 @@ import org.jboss.errai.bus.server.annotations.Remote;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.annotations.security.RequireAuthentication;
 import org.jboss.errai.bus.server.annotations.security.RequireRoles;
-import org.jboss.errai.bus.server.api.Local;
 import org.jboss.errai.bus.server.io.CommandBindingsCallback;
 import org.jboss.errai.bus.server.io.ConversationalEndpointCallback;
 import org.jboss.errai.bus.server.io.EndpointCallback;

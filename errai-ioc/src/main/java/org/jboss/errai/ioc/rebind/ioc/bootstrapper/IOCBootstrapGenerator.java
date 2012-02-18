@@ -90,7 +90,7 @@ import java.util.Set;
 
 /**
  * The main generator class for the Errai IOC system.
- * 
+ *
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class IOCBootstrapGenerator {
@@ -141,14 +141,15 @@ public class IOCBootstrapGenerator {
   }
 
   public IOCBootstrapGenerator(TypeOracle typeOracle,
-      GeneratorContext context,
-      TreeLogger logger,
-      List<String> packages) {
+                               GeneratorContext context,
+                               TreeLogger logger,
+                               List<String> packages) {
     this(typeOracle, context, logger);
     this.packages = packages;
   }
 
-  public IOCBootstrapGenerator() {}
+  public IOCBootstrapGenerator() {
+  }
 
   public String generate(String packageName, String className) {
     File fileCacheDir = RebindUtils.getErraiCacheDir();
@@ -183,7 +184,7 @@ public class IOCBootstrapGenerator {
 
   private String _generate(String packageName, String className) {
     ClassStructureBuilder<?> classStructureBuilder =
-        Implementations.implement(Bootstrapper.class, packageName, className);
+            Implementations.implement(Bootstrapper.class, packageName, className);
 
     BuildMetaClass bootStrapClass = (BuildMetaClass) classStructureBuilder.getClassDefinition();
     Context buildContext = bootStrapClass.getContext();
@@ -243,8 +244,10 @@ public class IOCBootstrapGenerator {
 
   private void generateExtensions(SourceWriter sourceWriter, ClassStructureBuilder<?> classBuilder,
                                   BlockBuilder<?> blockBuilder) {
-    blockBuilder.append(Stmt.declareVariable("ctx", InterfaceInjectionContext.class,
-            Stmt.newObject(InterfaceInjectionContext.class)));
+    blockBuilder.append(
+            Stmt.declareVariable(procContext.getContextVariableReference().getType()).asFinal()
+                    .named(procContext.getContextVariableReference().getName())
+                    .initializeWith(Stmt.newObject(InterfaceInjectionContext.class)));
 
     _doRunnableTasks(beforeTasks, blockBuilder);
 
@@ -255,7 +258,7 @@ public class IOCBootstrapGenerator {
 
     runAllDeferred();
 
-    blockBuilder.append(Stmt.loadVariable("ctx").returnValue());
+    blockBuilder.append(Stmt.loadVariable(procContext.getContextVariableReference()).returnValue());
 
     Collection<MetaField> privateFields = injectFactory.getInjectionContext().getPrivateFieldsToExpose();
     for (MetaField f : privateFields) {
@@ -269,6 +272,7 @@ public class IOCBootstrapGenerator {
     }
 
     _doRunnableTasks(afterTasks, blockBuilder);
+
 
     blockBuilder.finish();
 
@@ -384,7 +388,7 @@ public class IOCBootstrapGenerator {
         }
 
         injectFactory.getInjectionContext().registerDecorator(
-                decoratorClass.getConstructor(new Class[] { Class.class }).newInstance(annoType));
+                decoratorClass.getConstructor(new Class[]{Class.class}).newInstance(annoType));
       }
       catch (Exception e) {
         throw new ErraiBootstrapFailure("unable to load code decorator: " + e.getMessage(), e);
@@ -501,7 +505,7 @@ public class IOCBootstrapGenerator {
 
       try {
         injectFactory
-            .addInjector(new ContextualProviderInjector(type, MetaClassFactory.get(injectorClass), procContext));
+                .addInjector(new ContextualProviderInjector(type, MetaClassFactory.get(injectorClass), procContext));
       }
       catch (Exception e) {
         throw new ErraiBootstrapFailure("could not load injector: " + e.getMessage(), e);
@@ -550,7 +554,7 @@ public class IOCBootstrapGenerator {
             @Override
             public void run() {
               context.getWriter()
-                  .println("ctx.addToRootPanel(" + generateWithSingletonSemantics(type.getType()) + ");");
+                      .println("ctx.addToRootPanel(" + generateWithSingletonSemantics(type.getType()) + ");");
             }
           });
         }
@@ -573,9 +577,9 @@ public class IOCBootstrapGenerator {
             @Override
             public void run() {
               context.getWriter().println(
-                  "ctx.registerPanel(\"" + (annotation.value().equals("")
-                      ? type.getType().getName() : annotation.value()) + "\", " + generateInjectors(type.getType())
-                      + ");");
+                      "ctx.registerPanel(\"" + (annotation.value().equals("")
+                              ? type.getType().getName() : annotation.value()) + "\", " + generateInjectors(type.getType())
+                              + ");");
             }
           });
         }
@@ -614,7 +618,7 @@ public class IOCBootstrapGenerator {
   public void setUseReflectionStubs(boolean useReflectionStubs) {
     this.useReflectionStubs = useReflectionStubs;
   }
-  
+
   public void setPackages(List<String> packages) {
     this.packages = packages;
   }

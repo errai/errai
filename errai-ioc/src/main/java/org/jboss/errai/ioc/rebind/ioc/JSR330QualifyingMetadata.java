@@ -16,6 +16,8 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
+import org.jboss.errai.ioc.client.api.qualifiers.Any;
+
 import javax.inject.Qualifier;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
@@ -29,10 +31,7 @@ import java.util.Set;
 public class JSR330QualifyingMetadata implements QualifyingMetadata {
   private Set<Annotation> qualifiers;
 
-  private static @interface Any {
-  }
-
-  private static Annotation ANY_INSTANCE = new Annotation() {
+  public static Annotation ANY_INSTANCE = new Annotation() {
     @Override
     public Class<? extends Annotation> annotationType() {
       return Any.class;
@@ -77,6 +76,11 @@ public class JSR330QualifyingMetadata implements QualifyingMetadata {
   }
 
   @Override
+  public Annotation[] getQualifiers() {
+    return qualifiers.toArray(new Annotation[qualifiers.size()]);
+  }
+
+  @Override
   public String toString() {
     StringBuilder buf = new StringBuilder();
 
@@ -85,5 +89,20 @@ public class JSR330QualifyingMetadata implements QualifyingMetadata {
     }
 
     return buf.toString();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof QualifyingMetadata)) return false;
+
+    QualifyingMetadata that = (JSR330QualifyingMetadata) o;
+
+    return doesSatisfy(that);
+  }
+
+  @Override
+  public int hashCode() {
+    return qualifiers != null ? qualifiers.hashCode() : 0;
   }
 }

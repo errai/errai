@@ -17,18 +17,19 @@
 package org.jboss.errai.ioc.rebind.ioc;
 
 
+import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.builder.BlockBuilder;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.util.Refs;
+import org.jboss.errai.codegen.framework.util.Stmt;
+import org.jboss.errai.ioc.client.api.EntryPoint;
+import org.jboss.errai.ioc.rebind.IOCProcessingContext;
+
+import javax.inject.Singleton;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-
-import javax.inject.Singleton;
-
-import org.jboss.errai.ioc.client.api.EntryPoint;
-import org.jboss.errai.ioc.rebind.IOCProcessingContext;
-import org.jboss.errai.codegen.framework.Statement;
-import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.util.Refs;
 
 public class TypeInjector extends Injector {
   protected final MetaClass type;
@@ -71,6 +72,12 @@ public class TypeInjector extends Injector {
 
   @Override
   public Statement getType(InjectionContext injectContext, InjectableInstance injectableInstance) {
+    Statement val = _getType(injectContext);
+    registerWithBeanManager(injectContext, val);
+    return val;
+  }
+
+  private Statement _getType(InjectionContext injectContext) {
     if (isInjected()) {
       if (isSingleton()) {
         return Refs.get(varName);
@@ -127,5 +134,14 @@ public class TypeInjector extends Injector {
   @Override
   public MetaClass getInjectedType() {
     return type;
+  }
+
+  private void registerWithBeanManager(InjectionContext context, Statement valueRef) {
+    if (useBeanManager) {
+      BlockBuilder<?> b = context.getProcessingContext().getBlockBuilder();
+
+      b.append(Stmt.loadVariable(context.getProcessingContext().getContextVariableReference())
+              .invoke("addBean", type, valueRef, qualifyingMetadata.getQualifiers()));
+    }
   }
 }

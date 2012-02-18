@@ -29,11 +29,6 @@ public class HappyInspector {
     return happyService.isHappy();
   }
 
-  @PostConstruct
-  public void init() {
-    INSTANCE = this;
-  }
-
   public GenericService<Integer> getIntegerService() {
     return integerService;
   }
@@ -45,6 +40,4 @@ public class HappyInspector {
   public GenericServiceClassForLong getLongService() {
     return longService;
   }
-
-  public static HappyInspector INSTANCE;
 }

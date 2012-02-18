@@ -16,6 +16,8 @@
 
 package org.jboss.errai.ioc.tests.wiring.client;
 
+import org.jboss.errai.ioc.client.container.IOCBeanManager;
+import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
 import org.jboss.errai.ioc.tests.wiring.client.res.LifecycleBean;
 
@@ -33,7 +35,8 @@ public class LifecycleExtensionsTest extends AbstractErraiIOCTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        LifecycleBean lifecycleBean = LifecycleBean.getInstance();
+        LifecycleBean lifecycleBean = IOC.getBeanManager()
+                .lookupBean(LifecycleBean.class).getInstance();
 
         assertNotNull("LifecycleBean is null", lifecycleBean);
         assertNotNull("Ballot was not injected into LifecycleBean", lifecycleBean.getBallot());

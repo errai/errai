@@ -18,12 +18,12 @@ package org.jboss.errai.ioc.tests.wiring.client;
 
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
+import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.rebind.IOCTestRunner;
 import org.jboss.errai.ioc.tests.wiring.client.res.HappyInspector;
 import org.jboss.errai.ioc.tests.wiring.client.res.QualInspector;
 import org.jboss.errai.ioc.tests.wiring.client.res.SimpleBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.SimpleBean2;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(IOCTestRunner.class)
@@ -40,7 +40,8 @@ public class BasicIOCTest extends IOCClientTestCase {
   }
 
   public void testBasicInjectionScenarios() {
-    SimpleBean simpleBean = SimpleBean.TEST_INSTANCE;
+    //  SimpleBean simpleBean = SimpleBean.TEST_INSTANCE;
+    SimpleBean simpleBean = IOC.getBeanManager().lookupBean(SimpleBean.class).getInstance();
     assertNotNull(simpleBean);
 
     assertEquals(ErraiBus.get(), simpleBean.getBus());
@@ -55,18 +56,20 @@ public class BasicIOCTest extends IOCClientTestCase {
   }
 
   public void testInjectionFromProvider() {
-    SimpleBean2 simpleBean2 = SimpleBean2.TEST_INSTANCE;
+    SimpleBean2 simpleBean2 = IOC.getBeanManager().lookupBean(SimpleBean2.class).getInstance();
+
     assertEquals("FOO", simpleBean2.getMessage());
   }
 
   public void testInjectionFromProviderContextual() {
-    SimpleBean2 simpleBean2 = SimpleBean2.TEST_INSTANCE;
+    SimpleBean2 simpleBean2 = IOC.getBeanManager().lookupBean(SimpleBean2.class).getInstance();
+
     assertEquals("FOO", simpleBean2.getMessage());
     assertEquals("java.lang.String", simpleBean2.getbSvc().get());
   }
 
   public void testInterfaceResolution() {
-    HappyInspector happyInspector = HappyInspector.INSTANCE;
+    HappyInspector happyInspector = IOC.getBeanManager().lookupBean(HappyInspector.class).getInstance();
     assertTrue(happyInspector.confirmHappiness());
 
     assertNotNull(happyInspector.getStringService());

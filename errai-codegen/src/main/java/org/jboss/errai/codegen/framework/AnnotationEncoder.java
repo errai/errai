@@ -64,6 +64,7 @@ public class AnnotationEncoder {
           if (((method.getModifiers() & (Modifier.PRIVATE | Modifier.PROTECTED)) == 0)
                   && (!"equals".equals(method.getName()) && !"hashCode".equals(method.getName()))) {
             try {
+              method.setAccessible(true);
               builder.publicOverridesMethod(method.getName())
                       .append(Stmt.load(method.invoke(annotation)).returnValue()).finish();
             }

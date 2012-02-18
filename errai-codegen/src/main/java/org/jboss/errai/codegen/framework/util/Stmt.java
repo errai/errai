@@ -21,6 +21,8 @@ import javax.enterprise.util.TypeLiteral;
 import org.jboss.errai.codegen.framework.BooleanExpression;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.Variable;
+import org.jboss.errai.codegen.framework.VariableReference;
 import org.jboss.errai.codegen.framework.builder.ArrayInitializationBuilder;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
 import org.jboss.errai.codegen.framework.builder.CaseBlockBuilder;
@@ -106,6 +108,10 @@ public class Stmt {
     return StatementBuilder.create().declareVariable(type);
   }
 
+  public static StatementBuilder declareVariable(VariableReference reference) {
+    return StatementBuilder.create().declareVariable(reference.getName(), reference.getType());
+  }
+
   public static StatementBuilder declareVariable(String name, Class<?> type) {
     return StatementBuilder.create().declareVariable(name, type);
   }
@@ -118,12 +124,20 @@ public class Stmt {
     return StatementBuilder.create().declareVariable(name, initialization);
   }
 
+  public static StatementBuilder declareVariable(VariableReference ref, Object initialization) {
+    return StatementBuilder.create().declareVariable(ref.getName(), ref.getType(), initialization);
+  }
+
   public static StatementBuilder declareVariable(String name, Class<?> type, Object initialization) {
     return StatementBuilder.create().declareVariable(name, type, initialization);
   }
 
   public static StatementBuilder declareVariable(String name, TypeLiteral<?> type, Object initialization) {
     return StatementBuilder.create().declareVariable(name, type, initialization);
+  }
+  
+  public static VariableReferenceContextualStatementBuilder loadVariable(VariableReference reference) {
+    return loadVariable(reference.getName(), reference.getIndexes());
   }
 
   public static VariableReferenceContextualStatementBuilder loadVariable(String name, Object... indexes) {

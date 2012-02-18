@@ -49,6 +49,7 @@ public interface StatementBegin extends ArrayBuilder, LoopBuilder, IfBlockBuilde
   public StatementBuilder declareVariable(String name, Class<?> type);
   public StatementBuilder declareVariable(String name, TypeLiteral<?> type);
   public StatementBuilder declareVariable(String name, Object initialization);
+  public StatementBuilder declareVariable(String name, MetaClass type, Object initialization);
   public StatementBuilder declareVariable(String name, Class<?> type, Object initialization);
   public StatementBuilder declareVariable(String name, TypeLiteral<?> type, Object initialization);
 

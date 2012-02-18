@@ -17,13 +17,11 @@
 package org.jboss.errai.ioc.tests.wiring.client;
 
 import org.jboss.errai.bus.client.ErraiBus;
+import org.jboss.errai.bus.client.api.Local;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.tests.AbstractErraiTest;
 import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.bus.server.api.Local;
-import org.jboss.errai.ioc.client.Container;
 
 import com.google.gwt.user.client.Timer;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;

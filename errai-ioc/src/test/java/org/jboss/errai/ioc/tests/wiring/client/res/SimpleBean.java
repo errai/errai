@@ -31,8 +31,6 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
 
 @EntryPoint
 public class SimpleBean extends SimpleSuperBean {
-  public static SimpleBean TEST_INSTANCE;
-
 
   @Inject
   public MessageBus bus;
@@ -123,10 +121,5 @@ public class SimpleBean extends SimpleSuperBean {
   @Inject
   public void setBus4(MessageBus bus4) {
     this.bus4 = bus4;
-  }
-
-  @PostConstruct
-  public void doPostConstruct() {
-    TEST_INSTANCE = this;
   }
 }

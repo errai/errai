@@ -18,9 +18,9 @@ package org.jboss.errai.ioc.rebind.ioc.builtin;
 
 import java.lang.annotation.Annotation;
 
+import org.jboss.errai.bus.client.api.Local;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.bus.server.api.Local;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.ioc.client.api.CodeDecorator;

@@ -21,6 +21,8 @@ import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaParameterizedType;
 
 public abstract class Injector {
+  protected boolean useBeanManager = !Boolean.getBoolean("errai.ioc.no_bean_manager");
+  
   protected QualifyingMetadata qualifyingMetadata;
 
   protected MetaParameterizedType qualifyingTypeInformation;
