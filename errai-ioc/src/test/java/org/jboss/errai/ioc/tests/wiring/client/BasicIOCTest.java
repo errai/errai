@@ -40,7 +40,6 @@ public class BasicIOCTest extends IOCClientTestCase {
   }
 
   public void testBasicInjectionScenarios() {
-    //  SimpleBean simpleBean = SimpleBean.TEST_INSTANCE;
     SimpleBean simpleBean = IOC.getBeanManager().lookupBean(SimpleBean.class).getInstance();
     assertNotNull(simpleBean);
 
