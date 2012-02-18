@@ -19,6 +19,7 @@ package org.jboss.errai.marshalling.client.api;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.json.client.JSONParser;
+import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.MarshallingSessionProviderFactory;
 import org.jboss.errai.marshalling.client.api.exceptions.MarshallingException;
@@ -38,6 +39,7 @@ public class MarshallerFramework implements EntryPoint {
   private static boolean automarshal = true;
 
   static {
+    InitVotes.waitFor(MarshallerFramework.class);
     marshallerFactory = GWT.create(MarshallerFactory.class);
 
     ParserFactory.registerParser(new Parser() {
@@ -46,6 +48,8 @@ public class MarshallerFramework implements EntryPoint {
         return GWTJSON.wrap(JSONParser.parseStrict(input));
       }
     });
+
+    InitVotes.voteFor(MarshallerFramework.class);
   }
 
 

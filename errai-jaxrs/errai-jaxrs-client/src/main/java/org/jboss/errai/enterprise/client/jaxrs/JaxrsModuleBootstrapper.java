@@ -16,6 +16,7 @@
 
 package org.jboss.errai.enterprise.client.jaxrs;
 
+import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.ioc.client.api.IOCBootstrapTask;
 import org.jboss.errai.ioc.client.api.TaskOrder;
 
@@ -30,7 +31,9 @@ import com.google.gwt.core.client.GWT;
 public class JaxrsModuleBootstrapper implements Runnable {
   @Override
   public void run() {
+    InitVotes.waitFor(JaxrsModuleBootstrapper.class);
     JaxrsProxyLoader proxyLoader = GWT.create(JaxrsProxyLoader.class);
     proxyLoader.loadProxies();
+    InitVotes.voteFor(JaxrsModuleBootstrapper.class);
   }
 }
