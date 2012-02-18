@@ -17,6 +17,8 @@
 package org.jboss.errai.ioc.client.container;
 
 /**
+ * An exception that is thrown if a bean cannot be resolved.
+ *
  * @author Mike Brock
  */
 public class IOCResolutionException extends RuntimeException {

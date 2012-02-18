@@ -26,16 +26,32 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * A simple bean manager provided by the Errai IOC framework. The manager provides access to all of the wired beans
+ * and their instances. Since the actual wiring code is generated, the bean manager is populated by the generated
+ * code at bootstrap time.
+ *
  * @author Mike Brock
  */
 public class IOCBeanManager {
   private Map<Class<?>, List<IOCBean>> beanMap = new HashMap<Class<?>, List<IOCBean>>();
 
-  public void registerBean(Class<?> type, Object instance, Annotation... qualifiers) {
-    registerBean(new IOCBean(type, qualifiers, instance));
+  /**
+   * Register a bean with the manager. This is called by the generated code to advertise the bean.
+   *
+   * @param type       the bean type
+   * @param instance   the instance reference
+   * @param qualifiers any qualifiers
+   */
+  public void registerBean(final Class<Object> type, final Object instance, final Annotation... qualifiers) {
+    registerBean(IOCBean.newBean(type, qualifiers, instance));
   }
 
-  public void registerBean(IOCBean bean) {
+  /**
+   * Register a bean with the manager.
+   *
+   * @param bean an {@link IOCBean} reference
+   */
+  public void registerBean(final IOCBean bean) {
     List<IOCBean> beans = beanMap.get(bean);
     if (beans == null) {
       beanMap.put(bean.getType(), beans = new ArrayList<IOCBean>());
@@ -43,6 +59,13 @@ public class IOCBeanManager {
     beans.add(bean);
   }
 
+  /**
+   * Looks up all beans of the specified type.
+   *
+   * @param type The type of the bean
+   * @return A list of all the beans that match the specified type. Returns an empty list if there is
+   *         no matching type.
+   */
   public List<IOCBean> lookupBeans(Class<?> type) {
     List<IOCBean> beanList = beanMap.get(type);
     if (beanList == null) {
@@ -53,6 +76,17 @@ public class IOCBeanManager {
     }
   }
 
+  /**
+   * Looks up a bean reference based on type and qualifiers. Returns <tt>null</tt> if there is no type associated
+   * with the specified
+   *
+   * @param type       The type of the bean
+   * @param qualifiers qualifiers to match
+   * @param <T>        The type of the bean
+   * @return An instance of the {@link IOCBean} for the matching type and qualifiers. Returns null if there is
+   *         no matching type. Throws an {@link IOCResolutionException} if there is a matching type but none of the
+   *         qualifiers match or if more than one bean  matches.
+   */
   public <T> IOCBean<T> lookupBean(Class<T> type, Annotation... qualifiers) {
     List<IOCBean> beanList = beanMap.get(type);
     if (beanList == null) {
@@ -64,10 +98,7 @@ public class IOCBeanManager {
     }
 
     Set<Annotation> qualSet = new HashSet<Annotation>();
-    for (Annotation a : qualifiers) {
-      qualSet.add(a);
-    }
-
+    Collections.addAll(qualSet, qualifiers);
 
     List<IOCBean> matching = new ArrayList<IOCBean>();
 

@@ -22,6 +22,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
+ * Represents a bean inside the container, capturing the type, qualifiers and instance reference for the bean.
+ *
  * @author Mike Brock
  */
 public class IOCBean<T> {
@@ -29,17 +31,42 @@ public class IOCBean<T> {
   private final Set<Annotation> qualifiers;
   private final T instance;
 
-  public IOCBean(Class<T> type, Annotation[] qualifiers, T instance) {
+  private IOCBean(Class<T> type, Annotation[] qualifiers, T instance) {
     this.type = type;
     this.qualifiers = new HashSet<Annotation>();
-    Collections.addAll(this.qualifiers, qualifiers);
+    if (qualifiers != null) {
+      Collections.addAll(this.qualifiers, qualifiers);
+    }
     this.instance = instance;
   }
 
+  /**
+   * Creates a new IOC Bean reference
+   *
+   * @param type       The type of a bean
+   * @param qualifiers The qualifiers of the bean.
+   * @param instance   The instance of the bean.
+   * @param <T>        The type of the bean
+   * @return A new instance of <tt>IOCBean</tt>
+   */
+  public static <T> IOCBean<T> newBean(Class<T> type, Annotation[] qualifiers, T instance) {
+    return new IOCBean<T>(type, qualifiers, instance);
+  }
+
+  /**
+   * Returns the absolute type of the bean
+   *
+   * @return a class representing the absolute type of the bean
+   */
   public Class<?> getType() {
     return type;
   }
 
+  /**
+   * Returns a set of qualifiers associated with this bean
+   *
+   * @return A set of qualifiers. Returns an empty set if none.
+   */
   public Set<Annotation> getQualifiers() {
     return qualifiers;
   }
@@ -47,7 +74,13 @@ public class IOCBean<T> {
   public T getInstance() {
     return instance;
   }
-  
+
+  /**
+   * Returns true if the underlying bean contains all of the annotations specified.
+   *
+   * @param annotations a set of annotations to compare
+   * @return true if matches
+   */
   public boolean matches(Set<Annotation> annotations) {
     return qualifiers.containsAll(annotations);
   }

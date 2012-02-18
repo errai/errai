@@ -17,6 +17,8 @@
 package org.jboss.errai.ioc.client.container;
 
 /**
+ * A simple utility class which provides a static reference in the client to the bean manager.
+ *
  * @author Mike Brock
  */
 public final class IOC {
@@ -25,6 +27,12 @@ public final class IOC {
 
   private static final IOCBeanManager manager = new IOCBeanManager();
 
+  /**
+   * Returns a reference to the bean manager in the client.
+   *
+   * @return the singleton instance of the client bean manager.
+   * @see IOCBeanManager
+   */
   public static IOCBeanManager getBeanManager() {
     return manager;
   }
