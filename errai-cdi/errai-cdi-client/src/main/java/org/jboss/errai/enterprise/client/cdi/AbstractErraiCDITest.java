@@ -16,6 +16,7 @@
 
 package org.jboss.errai.enterprise.client.cdi;
 
+import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
 
@@ -32,6 +33,8 @@ public abstract class AbstractErraiCDITest extends GWTTestCase {
 
   @Override
   public void gwtSetUp() throws Exception {
+    InitVotes.setTimeoutMillis(60000);
+
     super.gwtSetUp();
 
     CDI.removePostInitTasks();

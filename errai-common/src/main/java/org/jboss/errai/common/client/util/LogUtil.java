@@ -25,10 +25,10 @@ public final class LogUtil {
 
   public static void log(String message) {
     if (isNativeJavaScriptLoggerSupported()) {
-      nativeLog("[erraibus] " + message);
+      nativeLog("[errai] " + message);
     }
     else {
-      System.out.println("[erraibus] " + message);
+      System.out.println("[errai] " + message);
     }
   }
 

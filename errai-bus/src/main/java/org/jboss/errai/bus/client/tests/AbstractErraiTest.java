@@ -23,6 +23,7 @@ import org.jboss.errai.bus.client.framework.LogAdapter;
 
 import com.google.gwt.junit.client.GWTTestCase;
 import com.google.gwt.user.client.Timer;
+import org.jboss.errai.common.client.api.extension.InitVotes;
 
 /**
  * Base test class for testing ErraiBus-based code. Located in the main distribution so it can be extended
@@ -40,7 +41,8 @@ public abstract class AbstractErraiTest extends GWTTestCase {
 
   @Override
   protected void gwtSetUp() throws Exception {
-
+    InitVotes.setTimeoutMillis(60000);
+    
     System.out.println("set-up");
     if (bus == null) {
       System.out.println("GET()");

@@ -20,6 +20,7 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
+import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
 
 import java.util.Map;
@@ -28,6 +29,8 @@ public class Container implements EntryPoint {
 
   @Override
   public void onModuleLoad() {
+    InitVotes.waitFor(Container.class);
+
     final Bootstrapper bootstrapper = GWT.create(Bootstrapper.class);
     final RootPanel rootPanel = RootPanel.get();
     final InterfaceInjectionContext ctx = bootstrapper.bootstrapContainer();
@@ -39,5 +42,7 @@ public class Container implements EntryPoint {
     for (Map.Entry<Widget, String> entry : ctx.getWidgetToPanel().entrySet()) {
       ctx.getPanels().get(entry.getValue()).add(entry.getKey());
     }
+
+    InitVotes.voteFor(Container.class);
   }
 }
