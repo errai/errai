@@ -5,10 +5,11 @@ import java.util.Map;
 
 import org.jboss.errai.cdi.integration.client.EventProducerTestModule;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
+import org.jboss.errai.ioc.client.container.IOC;
 
 /**
  * Tests CDI event producers.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class EventProducerIntegrationTest extends AbstractEventIntegrationTest {
@@ -24,20 +25,28 @@ public class EventProducerIntegrationTest extends AbstractEventIntegrationTest {
   }
 
   public void testInjectedEvents() {
-    assertNotNull(EventProducerTestModule.getInstance().getEvent());
-    assertNotNull(EventProducerTestModule.getInstance().getEventA());
-    assertNotNull(EventProducerTestModule.getInstance().getEventB());
-    assertNotNull(EventProducerTestModule.getInstance().getEventC());
-    assertNotNull(EventProducerTestModule.getInstance().getEventAB());
-    assertNotNull(EventProducerTestModule.getInstance().getEventAC());
-    assertNotNull(EventProducerTestModule.getInstance().getEventBC());
-    assertNotNull(EventProducerTestModule.getInstance().getEventABC());
+    EventProducerTestModule module =
+            IOC.getBeanManager().lookupBean(EventProducerTestModule.class)
+                    .getInstance();
+
+    assertNotNull(module.getEvent());
+    assertNotNull(module.getEventA());
+    assertNotNull(module.getEventB());
+    assertNotNull(module.getEventC());
+    assertNotNull(module.getEventAB());
+    assertNotNull(module.getEventAC());
+    assertNotNull(module.getEventBC());
+    assertNotNull(module.getEventABC());
   }
 
   public void testEventProducers() {
     final Runnable verifier = new Runnable() {
       public void run() {
-        Map<String, List<String>> actualEvents = EventProducerTestModule.getInstance().getReceivedEventsOnServer();
+        EventProducerTestModule module =
+                IOC.getBeanManager().lookupBean(EventProducerTestModule.class)
+                        .getInstance();
+
+        Map<String, List<String>> actualEvents = module.getReceivedEventsOnServer();
 
         // assert that the server received all events
         EventProducerIntegrationTest.this.verifyEvents(actualEvents);
@@ -48,9 +57,13 @@ public class EventProducerIntegrationTest extends AbstractEventIntegrationTest {
     CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
-        if (EventProducerTestModule.getInstance().getBusReadyEventsReceived()) {
-          EventProducerTestModule.getInstance().setResultVerifier(verifier);
-          EventProducerTestModule.getInstance().fireAll();
+        EventProducerTestModule module =
+                IOC.getBeanManager().lookupBean(EventProducerTestModule.class)
+                        .getInstance();
+
+        if (module.getBusReadyEventsReceived()) {
+          module.setResultVerifier(verifier);
+          module.fireAll();
         }
         else {
           fail("Did not receive a BusReadyEvent!");

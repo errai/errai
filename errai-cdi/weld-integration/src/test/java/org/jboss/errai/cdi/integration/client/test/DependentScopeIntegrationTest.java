@@ -26,6 +26,7 @@ import org.jboss.errai.cdi.integration.client.shared.TestBean;
 import org.jboss.errai.cdi.integration.client.shared.TestOuterBean;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
+import org.jboss.errai.ioc.client.container.IOC;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -46,7 +47,8 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
     CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
-        ApplicationScopedBean beanA = ApplicationScopedBean.getInstance();
+        ApplicationScopedBean beanA = IOC.getBeanManager()
+                .lookupBean(ApplicationScopedBean.class).getInstance();
 
         DependentScopedBean b1 = beanA.getBean1();
         DependentScopedBean b2 = beanA.getBean2();
@@ -71,7 +73,8 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
     CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
-        TestOuterBean outBean = TestOuterBean.getInstance();
+        TestOuterBean outBean = IOC.getBeanManager()
+                .lookupBean(TestOuterBean.class).getInstance();
         
         assertNotNull("outer bean was null", outBean);
 

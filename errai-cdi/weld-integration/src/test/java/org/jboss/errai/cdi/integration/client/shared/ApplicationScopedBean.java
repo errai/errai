@@ -34,12 +34,6 @@ public class ApplicationScopedBean {
   
   @Inject @Dependent DependentScopedBeanWithDependencies beanWithDependencies;
 
-  private static ApplicationScopedBean inst;
-
-  @PostConstruct
-  public void init() {
-    inst = this;
-  }
   
   public DependentScopedBean getBean1() {
     return bean1;
@@ -55,9 +49,5 @@ public class ApplicationScopedBean {
 
   public DependentScopedBeanWithDependencies getBeanWithDependencies() {
     return beanWithDependencies;
-  }
-
-  public static ApplicationScopedBean getInstance() {
-    return inst;
   }
 }

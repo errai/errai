@@ -3,6 +3,7 @@ package org.jboss.errai.cdi.producer.client.test;
 
 import org.jboss.errai.cdi.producer.client.ProducerTestModule;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
+import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.rebind.IOCTestRunner;
 import org.junit.runner.RunWith;
 
@@ -20,36 +21,46 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
   }
 
   public void testInjectionUsingProducerField() {
-    assertEquals("Failed to inject produced @A", 
-        ProducerTestModule.getInstance().getNumberA(),
-        ProducerTestModule.getInstance().getTestBean().getIntegerA());
-  }
-  
-  public void testInjectionUsingProducerMethod() {
-    assertEquals("Failed to inject produced @B", 
-        ProducerTestModule.getInstance().getNumberB(), 
-        ProducerTestModule.getInstance().getTestBean().getIntegerB());
-  }
-  
-  public void testInjectionUsingDependentProducerMethods() {
-    assertEquals("Failed to inject produced @C", 
-        ProducerTestModule.getInstance().getNumberC(), 
-        ProducerTestModule.getInstance().getTestBean().getIntegerC());
+    ProducerTestModule module = IOC.getBeanManager().lookupBean(ProducerTestModule.class).getInstance();
 
-    assertEquals("Failed to inject produced String depending on @C", 
-        ProducerTestModule.getInstance().getNumberC().toString(),
-        ProducerTestModule.getInstance().getTestBean().getProducedString());
+    assertEquals("Failed to inject produced @A",
+            module.getNumberA(),
+            module.getTestBean().getIntegerA());
   }
-  
+
+  public void testInjectionUsingProducerMethod() {
+    ProducerTestModule module = IOC.getBeanManager().lookupBean(ProducerTestModule.class).getInstance();
+
+    assertEquals("Failed to inject produced @B",
+            module.getNumberB(),
+            module.getTestBean().getIntegerB());
+  }
+
+  public void testInjectionUsingDependentProducerMethods() {
+    ProducerTestModule module = IOC.getBeanManager().lookupBean(ProducerTestModule.class).getInstance();
+
+    assertEquals("Failed to inject produced @C",
+            module.getNumberC(),
+            module.getTestBean().getIntegerC());
+
+    assertEquals("Failed to inject produced String depending on @C",
+            module.getNumberC().toString(),
+            module.getTestBean().getProducedString());
+  }
+
   public void testAnyQualifiedInjection() {
-    assertEquals("Failed to inject produced @D @E as @Any", 
-        ProducerTestModule.getInstance().getFloatDE(), 
-        ProducerTestModule.getInstance().getTestBean().getUnqualifiedFloat());
+    ProducerTestModule module = IOC.getBeanManager().lookupBean(ProducerTestModule.class).getInstance();
+
+    assertEquals("Failed to inject produced @D @E as @Any",
+            module.getFloatDE(),
+            module.getTestBean().getUnqualifiedFloat());
   }
-  
+
   public void testSubsetQualifiedInjection() {
-    assertEquals("Failed to inject produced @D @E as @D", 
-        ProducerTestModule.getInstance().getFloatDE(), 
-        ProducerTestModule.getInstance().getTestBean().getFloatD());
-  }  
+    ProducerTestModule module = IOC.getBeanManager().lookupBean(ProducerTestModule.class).getInstance();
+
+    assertEquals("Failed to inject produced @D @E as @D",
+            module.getFloatDE(),
+            module.getTestBean().getFloatD());
+  }
 }

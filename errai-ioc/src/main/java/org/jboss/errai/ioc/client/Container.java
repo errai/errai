@@ -26,7 +26,6 @@ import org.jboss.errai.ioc.client.api.Bootstrapper;
 import java.util.Map;
 
 public class Container implements EntryPoint {
-
   @Override
   public void onModuleLoad() {
     InitVotes.waitFor(Container.class);

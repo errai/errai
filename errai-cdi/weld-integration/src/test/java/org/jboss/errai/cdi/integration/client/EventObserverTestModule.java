@@ -33,15 +33,6 @@ public class EventObserverTestModule extends EventTestObserverSuperClass {
   @Inject
   private Event<StartEvent> startEvent;
 
-  @PostConstruct
-  public void doPostConstruct() {
-    instance = this;
-  }
-
-  public static EventObserverTestModule getInstance() {
-    return instance;
-  }
-
   public int getBusReadyEventsReceived() {
     return busReadyEventsReceived;
   }

@@ -27,21 +27,7 @@ import javax.inject.Inject;
 public class TestOuterBean {
   @Inject TestBean testBean;
 
-  private static TestOuterBean INSTANCE;
-  
   public TestBean getTestBean() {
     return testBean;
   }
-
-  @PostConstruct
-  public void init() {
-    INSTANCE = this;
-  }
-
-  public static TestOuterBean getInstance() {
-    return INSTANCE;
-  }
-
-  
-  
 }

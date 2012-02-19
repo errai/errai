@@ -3,6 +3,7 @@ package org.jboss.errai.cdi.injection.client.test;
 
 import org.jboss.errai.cdi.injection.client.InjectionTestModule;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
+import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.rebind.IOCTestRunner;
 import org.junit.runner.RunWith;
 
@@ -20,11 +21,16 @@ public class InjectionIntegrationTest extends IOCClientTestCase {
   }
 
   public void testInjections() {
-    assertNotNull("Field injection of BeanA failed", InjectionTestModule.getInstance().getBeanA());
-    assertNotNull("Field injection of BeanB in BeanA failed", InjectionTestModule.getInstance().getBeanA().getBeanB());
+    InjectionTestModule module = IOC.getBeanManager()
+            .lookupBean(InjectionTestModule.class).getInstance();
+
+    assertNotNull("Field injection of BeanA failed", module.getBeanA());
+    assertNotNull("Field injection of BeanB in BeanA failed", module.getBeanA().getBeanB());
     
-    assertNotNull("Field injection of BeanC failed", InjectionTestModule.getInstance().getBeanC());
-    assertNotNull("Field injection of BeanB in BeanC failed", InjectionTestModule.getInstance().getBeanC().getBeanB());
-    assertNotNull("Constructor injection of BeanD in BeanC", InjectionTestModule.getInstance().getBeanC().getBeanD());
+    assertNotNull("Field injection of BeanC failed", module.getBeanC());
+    assertNotNull("Field injection of BeanB in BeanC failed", module.getBeanC().getBeanB());
+    assertNotNull("Constructor injection of BeanD in BeanC", module.getBeanC().getBeanD());
+
+    assertTrue("PostConstruct on InjectionTestModule did not fire", module.isPostConstructFired());
   }
 }

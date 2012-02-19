@@ -68,15 +68,6 @@ public class ProducerTestModule {
     return floatDE;
   }
 
-  @PostConstruct
-  public void doPostConstruct() {
-    instance = this;
-  }
-
-  public static ProducerTestModule getInstance() {
-    return instance;
-  }
-
   public ProducerDependentTestBean getTestBean() {
     return testBean;
   }

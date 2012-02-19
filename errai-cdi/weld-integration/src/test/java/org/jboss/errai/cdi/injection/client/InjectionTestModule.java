@@ -12,7 +12,8 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
  */
 @EntryPoint
 public class InjectionTestModule {
-  private static InjectionTestModule instance;
+
+  private boolean postConstructFired;
 
   @Inject
   private InjectionDependentTestBeanA beanA;
@@ -22,11 +23,7 @@ public class InjectionTestModule {
   
   @PostConstruct
   public void doPostConstruct() {
-    instance = this;
-  }
-
-  public static InjectionTestModule getInstance() {
-    return instance;
+    postConstructFired = true;
   }
 
   public InjectionDependentTestBeanA getBeanA() {
@@ -35,5 +32,9 @@ public class InjectionTestModule {
 
   public InjectionDependentTestBeanC getBeanC() {
     return beanC;
+  }
+
+  public boolean isPostConstructFired() {
+    return postConstructFired;
   }
 }

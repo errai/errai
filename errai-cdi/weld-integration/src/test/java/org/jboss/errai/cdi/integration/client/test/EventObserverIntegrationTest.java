@@ -5,10 +5,11 @@ import java.util.Map;
 
 import org.jboss.errai.cdi.integration.client.EventObserverTestModule;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
+import org.jboss.errai.ioc.client.container.IOC;
 
 /**
  * Tests CDI event observers.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
@@ -22,8 +23,12 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
     CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
+        EventObserverTestModule module =
+                IOC.getBeanManager().lookupBean(EventObserverTestModule.class)
+                        .getInstance();
+
         assertEquals("Wrong number of BusReadyEvents received:", 1,
-            EventObserverTestModule.getInstance().getBusReadyEventsReceived());
+                module.getBusReadyEventsReceived());
 
         finishTest();
       }
@@ -33,7 +38,11 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
   public void testEventObservers() {
     final Runnable verifier = new Runnable() {
       public void run() {
-        Map<String, List<String>> actualEvents = EventObserverTestModule.getInstance().getReceivedEvents();
+        EventObserverTestModule module
+                = IOC.getBeanManager().lookupBean(EventObserverTestModule.class)
+                .getInstance();
+
+        Map<String, List<String>> actualEvents = module.getReceivedEvents();
 
         // assert that client received all events
         EventObserverIntegrationTest.this.verifyEvents(actualEvents);
@@ -44,12 +53,16 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
     CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
-        assertNotNull(EventObserverTestModule.getInstance().getStartEvent());
-        EventObserverTestModule.getInstance().setResultVerifier(verifier);
-        EventObserverTestModule.getInstance().start();
+        EventObserverTestModule module
+                = IOC.getBeanManager().lookupBean(EventObserverTestModule.class)
+                .getInstance();
+
+        assertNotNull(module.getStartEvent());
+        module.setResultVerifier(verifier);
+        module.start();
       }
     });
-    
+
     // only used for the case the {@see FinishEvent} was not received
     verifyInBackupTimer(verifier, 120000);
     delayTestFinish(240000);
