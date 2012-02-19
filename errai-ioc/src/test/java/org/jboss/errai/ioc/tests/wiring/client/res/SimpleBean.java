@@ -48,6 +48,13 @@ public class SimpleBean extends SimpleSuperBean {
   
   @Inject ServiceA svcA;
   @Inject ServiceB svcB;
+
+  private boolean postConstructCalled = true;
+
+  @PostConstruct
+  private void init() {
+    postConstructCalled = true;
+  }
   
 
   @Inject
@@ -121,5 +128,9 @@ public class SimpleBean extends SimpleSuperBean {
   @Inject
   public void setBus4(MessageBus bus4) {
     this.bus4 = bus4;
+  }
+
+  public boolean isPostConstructCalled() {
+    return postConstructCalled;
   }
 }

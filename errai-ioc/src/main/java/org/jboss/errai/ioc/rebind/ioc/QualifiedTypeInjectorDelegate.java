@@ -17,16 +17,20 @@
 package org.jboss.errai.ioc.rebind.ioc;
 
 import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.builder.BlockBuilder;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaParameterizedType;
+import org.jboss.errai.codegen.framework.util.Stmt;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class QualifiedTypeInjectorDelegate extends Injector {
+  private MetaClass type;
   private Injector delegate;
 
-  public QualifiedTypeInjectorDelegate(Injector delegate, MetaParameterizedType parameterizedType) {
+  public QualifiedTypeInjectorDelegate(MetaClass type, Injector delegate, MetaParameterizedType parameterizedType) {
+    this.type = type;
     this.delegate = delegate;
     this.qualifyingTypeInformation = parameterizedType;
   }
@@ -38,11 +42,17 @@ public class QualifiedTypeInjectorDelegate extends Injector {
 
   @Override
   public Statement getType(InjectableInstance injectableInstance) {
-    return delegate.getType(injectableInstance);
+    return getType(injectableInstance.getInjectionContext(), injectableInstance);
   }
 
   @Override
   public Statement getType(InjectionContext injectContext, InjectableInstance injectableInstance) {
+    Statement val = _getType(injectContext, injectableInstance);
+    registerWithBeanManager(injectableInstance.getInjectionContext(), val);
+    return val;
+  }
+
+  public Statement _getType(InjectionContext injectContext, InjectableInstance injectableInstance) {
     return delegate.getType(injectContext, injectableInstance);
   }
 
@@ -84,5 +94,19 @@ public class QualifiedTypeInjectorDelegate extends Injector {
   @Override
   public void setQualifyingMetadata(QualifyingMetadata qualifyingMetadata) {
     delegate.setQualifyingMetadata(qualifyingMetadata);
+  }
+
+  private void registerWithBeanManager(InjectionContext context, Statement valueRef) {
+    if (useBeanManager) {
+      BlockBuilder<?> b = context.getProcessingContext().getBlockBuilder();
+
+      QualifyingMetadata md = qualifyingMetadata;
+      if (md == null) {
+        md = context.getProcessingContext().getQualifyingMetadataFactory().createDefaultMetadata();
+      }
+
+      b.append(Stmt.loadVariable(context.getProcessingContext().getContextVariableReference())
+              .invoke("addBean", type, valueRef, md.getQualifiers()));
+    }
   }
 }

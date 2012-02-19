@@ -52,6 +52,8 @@ public class BasicIOCTest extends IOCClientTestCase {
     assertNotNull(simpleBean.getDispatcher2());
     assertNotNull(simpleBean.getDispatcher3());
     assertNotNull(simpleBean.getDispatcher4());
+
+    assertTrue("@PostConstruct method not called", simpleBean.isPostConstructCalled());
   }
 
   public void testInjectionFromProvider() {

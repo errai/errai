@@ -175,7 +175,7 @@ public class InjectionContext {
       injectors.put(type.getErased(), injectorList = new ArrayList<Injector>());
 
       for (MetaClass iface : type.getInterfaces()) {
-        _registerInjector(iface, new QualifiedTypeInjectorDelegate(injector, iface.getParameterizedType()));
+        _registerInjector(iface, new QualifiedTypeInjectorDelegate(iface, injector, iface.getParameterizedType()));
       }
     }
     else {
