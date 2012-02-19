@@ -16,6 +16,9 @@
 
 package org.jboss.errai.ioc.rebind;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.jboss.errai.codegen.framework.Context;
@@ -42,6 +45,8 @@ public class IOCProcessingContext  {
   protected MetaClass bootstrapClass;
   protected BlockBuilder<?> blockBuilder;
   protected List<String> packages;
+  
+  protected List<Statement> appendToEnd;
 
   protected TreeLogger treeLogger;
   protected GeneratorContext generatorContext;
@@ -66,6 +71,7 @@ public class IOCProcessingContext  {
     this.context = context;
     this.bootstrapClass = bootstrapClass;
     this.blockBuilder = blockBuilder;
+    this.appendToEnd = new ArrayList<Statement>();
   }
 
 
@@ -77,6 +83,14 @@ public class IOCProcessingContext  {
     return blockBuilder.append(statement);
   }
 
+  public void appendToEnd(Statement statement) {
+    appendToEnd.add(statement);
+  }
+  
+  public List<Statement> getAppendToEnd() {
+    return Collections.unmodifiableList(appendToEnd);
+  }
+  
   public MetaClass getBootstrapClass() {
     return bootstrapClass;
   }

@@ -138,10 +138,12 @@ public class TypeInjector extends Injector {
 
   private void registerWithBeanManager(InjectionContext context, Statement valueRef) {
     if (useBeanManager) {
-      BlockBuilder<?> b = context.getProcessingContext().getBlockBuilder();
-
-      b.append(Stmt.loadVariable(context.getProcessingContext().getContextVariableReference())
-              .invoke("addBean", type, valueRef, qualifyingMetadata.render()));
+      if (InjectUtil.checkIfTypeNeedsAddingToBeanStore(context, this)) {
+        context.getProcessingContext().appendToEnd(
+                Stmt.loadVariable(context.getProcessingContext().getContextVariableReference())
+                        .invoke("addBean", type, valueRef, qualifyingMetadata.render())
+        );
+      }
     }
   }
 }

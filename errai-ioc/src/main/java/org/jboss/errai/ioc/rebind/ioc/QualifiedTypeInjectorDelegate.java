@@ -17,7 +17,6 @@
 package org.jboss.errai.ioc.rebind.ioc;
 
 import org.jboss.errai.codegen.framework.Statement;
-import org.jboss.errai.codegen.framework.builder.BlockBuilder;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.framework.util.Stmt;
@@ -98,15 +97,17 @@ public class QualifiedTypeInjectorDelegate extends Injector {
 
   private void registerWithBeanManager(InjectionContext context, Statement valueRef) {
     if (useBeanManager) {
-      BlockBuilder<?> b = context.getProcessingContext().getBlockBuilder();
+      if (InjectUtil.checkIfTypeNeedsAddingToBeanStore(context, this)) {
 
-      QualifyingMetadata md = delegate.getQualifyingMetadata();
-      if (md == null) {
-        md = context.getProcessingContext().getQualifyingMetadataFactory().createDefaultMetadata();
+        QualifyingMetadata md = delegate.getQualifyingMetadata();
+        if (md == null) {
+          md = context.getProcessingContext().getQualifyingMetadataFactory().createDefaultMetadata();
+        }
+
+        context.getProcessingContext().appendToEnd(
+                Stmt.loadVariable(context.getProcessingContext().getContextVariableReference())
+                        .invoke("addBean", type, valueRef, md.render()));
       }
-
-      b.append(Stmt.loadVariable(context.getProcessingContext().getContextVariableReference())
-              .invoke("addBean", type, valueRef, md.render()));
     }
   }
 }

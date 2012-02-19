@@ -667,4 +667,27 @@ public class InjectUtil {
       return Class.forName(name, false, Thread.currentThread().getContextClassLoader());
     }
   }
+
+  private static final String BEAN_INJECTOR_STORE = "InjectorBeanManagerStore";
+  /**
+   * A utility to get or create the store whereby the code that binds beans to the client 
+   * bean manager can keep track of what it has already bound.
+   * @return
+   */
+  public static Set<Injector> getBeanInjectionTrackStore(InjectionContext context) {
+    Set<Injector> store = (Set<Injector>) context.getAttribute(BEAN_INJECTOR_STORE);
+    if (store == null) {
+      context.setAttribute(BEAN_INJECTOR_STORE, store = new HashSet<Injector>());
+    }
+    return store;
+  }
+  
+  public static boolean checkIfTypeNeedsAddingToBeanStore(InjectionContext context, Injector injector) {
+    Set<Injector> store = getBeanInjectionTrackStore(context);
+    if (store.contains(injector)) {
+      return false;
+    }
+    store.add(injector);
+    return true;
+  }
 }

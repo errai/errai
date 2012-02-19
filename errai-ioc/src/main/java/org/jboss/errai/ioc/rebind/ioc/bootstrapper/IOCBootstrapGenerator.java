@@ -257,6 +257,10 @@ public class IOCBootstrapGenerator {
     procFactory.processAll();
 
     runAllDeferred();
+    
+    for (Statement stmt : procContext.getAppendToEnd()) {
+      blockBuilder.append(stmt);
+    }
 
     blockBuilder.append(Stmt.loadVariable(procContext.getContextVariableReference()).returnValue());
 
@@ -274,6 +278,7 @@ public class IOCBootstrapGenerator {
     _doRunnableTasks(afterTasks, blockBuilder);
 
 
+    
     blockBuilder.finish();
 
     String generated = classBuilder.toJavaString();

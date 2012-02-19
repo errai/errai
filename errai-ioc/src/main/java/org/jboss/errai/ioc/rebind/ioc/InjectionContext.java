@@ -22,6 +22,7 @@ import java.lang.annotation.Target;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -52,6 +53,8 @@ public class InjectionContext {
 
   private Collection<MetaField> privateFieldsToExpose = new LinkedHashSet<MetaField>();
   private Collection<MetaMethod> privateMethodsToExpose = new LinkedHashSet<MetaMethod>();
+
+  private Map<String, Object> attributeMap = new HashMap<String, Object>();
 
   public InjectionContext(IOCProcessingContext processingContext) {
     this.processingContext = processingContext;
@@ -349,5 +352,17 @@ public class InjectionContext {
 
   public IOCProcessingContext getProcessingContext() {
     return processingContext;
+  }
+
+  public void setAttribute(String name, Object value) {
+    attributeMap.put(name, value);
+  }
+
+  public Object getAttribute(String name) {
+    return attributeMap.get(name);
+  }
+
+  public boolean hasAttribute(String name) {
+    return attributeMap.containsKey(name);
   }
 }

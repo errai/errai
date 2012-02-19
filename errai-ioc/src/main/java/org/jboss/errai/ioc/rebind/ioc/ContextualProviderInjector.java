@@ -204,16 +204,18 @@ public class ContextualProviderInjector extends TypeInjector {
 
     private void registerWithBeanManager(InjectionContext context, Statement val) {
       if (useBeanManager) {
-        BlockBuilder<?> b = context.getProcessingContext().getBlockBuilder();
 
-        QualifyingMetadata md = qualifyingMetadata;
-        if (md == null) {
-          md = context.getProcessingContext().getQualifyingMetadataFactory().createDefaultMetadata();
+        if (InjectUtil.checkIfTypeNeedsAddingToBeanStore(context, this)) {
+
+          QualifyingMetadata md = qualifyingMetadata;
+          if (md == null) {
+            md = context.getProcessingContext().getQualifyingMetadataFactory().createDefaultMetadata();
+          }
+
+          context.getProcessingContext().appendToEnd(
+                  Stmt.loadVariable(context.getProcessingContext().getContextVariableReference())
+                          .invoke("addBean", type, val, md.render()));
         }
-
-        b.append(Stmt.loadVariable(context.getProcessingContext().getContextVariableReference())
-                .invoke("addBean", type, val, md.render()));
-
       }
     }
   }
