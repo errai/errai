@@ -16,7 +16,10 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
-import org.jboss.errai.ioc.client.api.qualifiers.Any;
+import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.literal.LiteralFactory;
+import org.jboss.errai.codegen.framework.util.Stmt;
+import org.jboss.errai.ioc.client.api.qualifiers.BuiltInQualifiers;
 
 import javax.inject.Qualifier;
 import java.lang.annotation.Annotation;
@@ -31,15 +34,19 @@ import java.util.Set;
 public class JSR330QualifyingMetadata implements QualifyingMetadata {
   private Set<Annotation> qualifiers;
 
-  public static Annotation ANY_INSTANCE = new Annotation() {
-    @Override
-    public Class<? extends Annotation> annotationType() {
-      return Any.class;
-    }
-  };
 
   public JSR330QualifyingMetadata(Collection<Annotation> qualifiers) {
     this.qualifiers = Collections.unmodifiableSet(new HashSet<Annotation>(qualifiers));
+  }
+
+  @Override
+  public Statement render() {
+    if (this == DEFAULT) {
+      return Stmt.loadStatic(BuiltInQualifiers.class, "DEFAULT_QUALIFIERS");
+    }
+    else {
+      return LiteralFactory.getLiteral(qualifiers.toArray(new Annotation[qualifiers.size()]));
+    }
   }
 
   @Override
@@ -48,9 +55,9 @@ public class JSR330QualifyingMetadata implements QualifyingMetadata {
       JSR330QualifyingMetadata comparable = (JSR330QualifyingMetadata) metadata;
 
       return ((comparable.qualifiers.size() == 1
-              && comparable.qualifiers.contains(ANY_INSTANCE))
+              && comparable.qualifiers.contains(BuiltInQualifiers.ANY_INSTANCE))
               || qualifiers.size() == 1
-              && qualifiers.contains(ANY_INSTANCE)
+              && qualifiers.contains(BuiltInQualifiers.ANY_INSTANCE)
               || qualifiers.containsAll(comparable.qualifiers));
     }
     else return metadata == null;
@@ -71,7 +78,7 @@ public class JSR330QualifyingMetadata implements QualifyingMetadata {
   }
 
   private static final JSR330QualifyingMetadata DEFAULT = new JSR330QualifyingMetadata(
-          Collections.<Annotation>singleton(ANY_INSTANCE));
+          Collections.<Annotation>singleton(BuiltInQualifiers.ANY_INSTANCE));
 
   static JSR330QualifyingMetadata createDefaultQualifyingMetaData() {
     return DEFAULT;

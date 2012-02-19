@@ -100,13 +100,13 @@ public class QualifiedTypeInjectorDelegate extends Injector {
     if (useBeanManager) {
       BlockBuilder<?> b = context.getProcessingContext().getBlockBuilder();
 
-      QualifyingMetadata md = qualifyingMetadata;
+      QualifyingMetadata md = delegate.getQualifyingMetadata();
       if (md == null) {
         md = context.getProcessingContext().getQualifyingMetadataFactory().createDefaultMetadata();
       }
 
       b.append(Stmt.loadVariable(context.getProcessingContext().getContextVariableReference())
-              .invoke("addBean", type, valueRef, md.getQualifiers()));
+              .invoke("addBean", type, valueRef, md.render()));
     }
   }
 }

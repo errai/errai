@@ -16,6 +16,8 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
+import org.jboss.errai.codegen.framework.Statement;
+
 import java.lang.annotation.Annotation;
 
 /**
@@ -23,6 +25,8 @@ import java.lang.annotation.Annotation;
  */
 public interface QualifyingMetadata {
   public boolean doesSatisfy(QualifyingMetadata metadata);
+  
+  public Statement render();
   
   public Annotation[] getQualifiers();
 }

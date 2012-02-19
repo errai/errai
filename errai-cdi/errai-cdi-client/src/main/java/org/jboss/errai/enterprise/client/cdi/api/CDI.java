@@ -23,6 +23,7 @@ import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.EventHandler;
 
+import javax.enterprise.inject.Any;
 import java.lang.annotation.Annotation;
 import java.util.*;
 
@@ -35,6 +36,19 @@ import java.util.*;
  */
 public class CDI {
   public static final String DISPATCHER_SUBJECT = "cdi.event:Dispatcher";
+  
+  public static Any ANY_INSTANCE = new Any() {
+    @Override
+    public Class<? extends Annotation> annotationType() {
+      return Any.class;
+    }
+
+    public String toString() {
+      return "@Any";
+    }
+  };
+  
+  public static final Annotation[] DEFAULT_QUALIFIERS = new Annotation[] { ANY_INSTANCE };
 
   static private Set<String> remoteEvents = new HashSet<String>();
 

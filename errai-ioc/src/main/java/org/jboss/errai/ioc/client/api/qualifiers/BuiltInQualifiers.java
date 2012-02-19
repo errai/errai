@@ -21,8 +21,8 @@ import java.lang.annotation.Annotation;
 /**
  * @author Mike Brock
  */
-public final class BuiltIn {
-  private BuiltIn() {
+public final class BuiltInQualifiers {
+  private BuiltInQualifiers() {
   }
   
   public static final Any ANY_INSTANCE = new Any() {
@@ -32,5 +32,5 @@ public final class BuiltIn {
     }
   };
   
-  public static final Annotation[] DEFAULT_ANY_QUALIFIERS = new Annotation[] { ANY_INSTANCE };
+  public static final Annotation[] DEFAULT_QUALIFIERS = new Annotation[] { ANY_INSTANCE };
 }

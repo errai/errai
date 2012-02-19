@@ -212,7 +212,7 @@ public class ContextualProviderInjector extends TypeInjector {
         }
 
         b.append(Stmt.loadVariable(context.getProcessingContext().getContextVariableReference())
-                .invoke("addBean", type, val, md.getQualifiers()));
+                .invoke("addBean", type, val, md.render()));
 
       }
     }

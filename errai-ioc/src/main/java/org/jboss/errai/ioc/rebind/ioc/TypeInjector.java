@@ -141,7 +141,7 @@ public class TypeInjector extends Injector {
       BlockBuilder<?> b = context.getProcessingContext().getBlockBuilder();
 
       b.append(Stmt.loadVariable(context.getProcessingContext().getContextVariableReference())
-              .invoke("addBean", type, valueRef, qualifyingMetadata.getQualifiers()));
+              .invoke("addBean", type, valueRef, qualifyingMetadata.render()));
     }
   }
 }

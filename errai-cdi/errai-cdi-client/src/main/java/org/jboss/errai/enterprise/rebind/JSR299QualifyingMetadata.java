@@ -25,6 +25,10 @@ import java.util.Set;
 import javax.enterprise.inject.Any;
 import javax.inject.Qualifier;
 
+import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.literal.LiteralFactory;
+import org.jboss.errai.codegen.framework.util.Stmt;
+import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.rebind.ioc.JSR330QualifyingMetadata;
 import org.jboss.errai.ioc.rebind.ioc.QualifyingMetadata;
 
@@ -33,19 +37,21 @@ import org.jboss.errai.ioc.rebind.ioc.QualifyingMetadata;
  */
 public class JSR299QualifyingMetadata implements QualifyingMetadata {
   private Set<Annotation> qualifiers;
-  public static Any ANY_INSTANCE = new Any() {
-    @Override
-    public Class<? extends Annotation> annotationType() {
-      return Any.class;
-    }
 
-    public String toString() {
-      return "@Any";
-    }
-  };
+
 
   public JSR299QualifyingMetadata(Collection<Annotation> qualifiers) {
     this.qualifiers = Collections.unmodifiableSet(new HashSet<Annotation>(qualifiers));
+  }
+
+  @Override
+  public Statement render() {
+    if (this == DEFAULT_METADATA) {
+      return Stmt.loadStatic(CDI.class, "DEFAULT_QUALIFIERS");
+    }
+    else {
+      return LiteralFactory.getLiteral(qualifiers.toArray(new Annotation[qualifiers.size()]));
+    }
   }
 
   @Override
@@ -54,15 +60,15 @@ public class JSR299QualifyingMetadata implements QualifyingMetadata {
       JSR299QualifyingMetadata comparable = (JSR299QualifyingMetadata) metadata;
 
       return ((comparable.qualifiers.size() == 1
-              && comparable.qualifiers.contains(ANY_INSTANCE))
+              && comparable.qualifiers.contains(CDI.ANY_INSTANCE))
               || qualifiers.size() == 1
-              && qualifiers.contains(ANY_INSTANCE)
+              && qualifiers.contains(CDI.ANY_INSTANCE)
               || qualifiers.containsAll(comparable.qualifiers));
     }
     else return metadata == null;
   }
 
-  static JSR299QualifyingMetadata createFromAnnotations(Annotation[] annotations) {
+  static QualifyingMetadata createFromAnnotations(Annotation[] annotations) {
     if (annotations == null || annotations.length == 0) return createDefaultQualifyingMetaData();
 
     Set<Annotation> qualifiers = new HashSet<Annotation>();
@@ -76,9 +82,11 @@ public class JSR299QualifyingMetadata implements QualifyingMetadata {
     return qualifiers.isEmpty() ? null : new JSR299QualifyingMetadata(qualifiers);
   }
 
-  static JSR299QualifyingMetadata createDefaultQualifyingMetaData() {
-    return new JSR299QualifyingMetadata(
-            Collections.<Annotation>singleton(ANY_INSTANCE));
+  private static final QualifyingMetadata DEFAULT_METADATA = new JSR299QualifyingMetadata(
+              Collections.<Annotation>singleton(CDI.ANY_INSTANCE));
+
+  static QualifyingMetadata createDefaultQualifyingMetaData() {
+    return DEFAULT_METADATA;
   }
 
   @Override
