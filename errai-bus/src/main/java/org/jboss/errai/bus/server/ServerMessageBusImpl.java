@@ -384,6 +384,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     scheduler.scheduleAtFixedRate(new Runnable() {
 
       int runCount = 0;
+      boolean lastWasEmpty = false;
 
       @Override
       public void run() {
@@ -435,12 +436,21 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         }
 
         BufferStatus stat = bufferStatus();
-        if (runCount % 2 == 0) {
-
-          log.debug("[bus] buffer status [freebytes: " + stat.getFreeBytes()
-                  + " (" + (stat.getFree() * 100) + "%) tail rng: " + stat.getTailRange() + "; actv tails: "
-                  + stat.getActiveTails() + "]");
+        if (stat.getFree() == 1.0f) {
+          if (lastWasEmpty) {
+            return;
+          }
+          else {
+            lastWasEmpty = true;
+          }
         }
+        else {
+          lastWasEmpty = false;
+        }
+
+        log.debug("[bus] buffer status [freebytes: " + stat.getFreeBytes()
+                + " (" + (stat.getFree() * 100) + "%) tail rng: " + stat.getTailRange() + "; actv tails: "
+                + stat.getActiveTails() + "]");
 
         if (stat.getFree() < 0.50f) {
           log.debug("[bus] high load condition detected!");
@@ -847,7 +857,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
       throw new IllegalArgumentException("cannot modify or subscribe to reserved service: " + subject);
 
     final String toSubscribe = "local:".concat(subject);
-    
+
     DeliveryPlan plan = createOrAddDeliveryPlan(toSubscribe, receiver);
 
     fireSubscribeListeners(new SubscriptionEvent(false, false, true, true, plan.getTotalReceivers(), "InBus", toSubscribe));
