@@ -70,6 +70,7 @@ public class MarshallersGenerator extends Generator {
 
 
   static {
+    // define the strategies which will be used to figure out where to desposit the server-side marshaller
     rootDiscoveryStrategies = new DiscoveryStrategy[]{
             new DiscoveryStrategy() {
               @Override
@@ -133,16 +134,13 @@ public class MarshallersGenerator extends Generator {
    * Package name of class to be generated
    */
   private String packageName = null;
-  private TypeOracle typeOracle;
-  private String modulePackage;
 
   @Override
   public String generate(final TreeLogger logger, final GeneratorContext context, final String typeName)
           throws UnableToCompleteException {
 
-
     try {
-      typeOracle = context.getTypeOracle();
+      TypeOracle typeOracle = context.getTypeOracle();
 
       JClassType classType = typeOracle.getType(typeName);
       packageName = classType.getPackage().getName();
@@ -174,9 +172,8 @@ public class MarshallersGenerator extends Generator {
     boolean junit = EnvironmentUtil.isGWTJUnitTest();
 
     if (junit) {
-      System.out.println("******** running inside JUnit! ********");
+      log.info("*** running inside JUnit! ***");
     }
-
 
     if (SERVER_MARSHALLER_OUTPUT_ENABLED) {
       String serverSideClass = MarshallerGeneratorFactory.getFor(MarshallerOuputTarget.Java)
@@ -184,7 +181,7 @@ public class MarshallersGenerator extends Generator {
 
       if (junit) {
         String tmpLocation = new File(RebindUtils.getTempDirectory() + "/errai.marshalling/out/").getAbsolutePath();
-        System.out.println("*** using temporary path for JUnit Shell: " + tmpLocation + " ***");
+        log.info("*** using temporary path for JUnit Shell: " + tmpLocation + " ***");
 
         String toLoad = generateServerMarshallers(tmpLocation, serverSideClass);
 
@@ -220,7 +217,6 @@ public class MarshallersGenerator extends Generator {
             this.absolute = true;
           }
         }
-
 
         Strategies:
         for (DiscoveryStrategy strategy : rootDiscoveryStrategies) {
@@ -262,7 +258,6 @@ public class MarshallersGenerator extends Generator {
     else {
       logger.info("not emitting server marshaller class");
     }
-
 
     return MarshallerGeneratorFactory.getFor(MarshallerOuputTarget.GWT).generate(packageName, className);
   }

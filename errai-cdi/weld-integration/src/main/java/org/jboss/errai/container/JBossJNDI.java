@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  */
 class JBossJNDI {
 
-  private static final Logger log = LoggerFactory.getLogger("Errai");
+  private static final Logger log = LoggerFactory.getLogger(JBossJNDI.class);
 
   public static void rebind(String jndiName, Object service) {
     try {

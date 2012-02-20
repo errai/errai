@@ -326,7 +326,7 @@ public class CDIExtensionPoints implements Extension {
 
     final MessageBus bus = service.getBus();
 
-    if (bus.isSubscribed(CDI.DISPATCHER_SUBJECT)) {
+    if (bus.isSubscribed(CDI.SERVER_DISPATCHER_SUBJECT)) {
       return;
     }
 
@@ -367,7 +367,7 @@ public class CDIExtensionPoints implements Extension {
     subscribeServices(bm, bus);
 
     // subscribe event dispatcher
-    bus.subscribe(CDI.DISPATCHER_SUBJECT, eventDispatcher);
+    bus.subscribe(CDI.SERVER_DISPATCHER_SUBJECT, eventDispatcher);
   }
 
   private void subscribeServices(final BeanManager beanManager, final MessageBus bus) {

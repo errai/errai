@@ -38,8 +38,7 @@ import org.slf4j.LoggerFactory;
  * Observes CDI {@link javax.enterprise.inject.spi.BeforeShutdown} events and unsubcribes
  * previously registered subjects with the {@link org.jboss.errai.bus.client.framework.MessageBus}
  *
- * @author: Heiko Braun <hbraun@redhat.com>
- * @date: Sep 15, 2010
+ * @author Heiko Braun <hbraun@redhat.com>
  */
 @ApplicationScoped
 public class ShutdownEventObserver implements ObserverMethod {
@@ -95,6 +94,6 @@ public class ShutdownEventObserver implements ObserverMethod {
     }
 
     // unsubscribe event dispatcher endpoint
-    bus.unsubscribeAll(CDI.DISPATCHER_SUBJECT);
+    bus.unsubscribeAll(CDI.SERVER_DISPATCHER_SUBJECT);
   }
 }

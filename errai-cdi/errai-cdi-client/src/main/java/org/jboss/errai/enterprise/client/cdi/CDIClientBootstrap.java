@@ -22,6 +22,7 @@ import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.bus.client.protocols.BusCommands;
+import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.enterprise.client.cdi.events.BusReadyEvent;
@@ -36,11 +37,12 @@ import com.google.gwt.core.client.EntryPoint;
  */
 public class CDIClientBootstrap implements EntryPoint {
   public void onModuleLoad() {
+    InitVotes.waitFor(CDIClientBootstrap.class);
     final ClientMessageBusImpl bus = (ClientMessageBusImpl) ErraiBus.get();
 
     final Runnable busReadyEvent = new Runnable() {
       public void run() {
-        MessageBuilder.createMessage().toSubject("cdi.event:Dispatcher").command(CDICommands.AttachRemote).done()
+        MessageBuilder.createMessage().toSubject(CDI.SERVER_DISPATCHER_SUBJECT).command(CDICommands.AttachRemote).done()
                 .sendNowWith(bus);
 
         CDI.fireEvent(new BusReadyEvent());
@@ -49,7 +51,7 @@ public class CDIClientBootstrap implements EntryPoint {
 
     bus.addPostInitTask(busReadyEvent);
 
-    bus.subscribe("cdi.event:ClientDispatcher", new MessageCallback() {
+    bus.subscribe(CDI.CLIENT_DISPATCHER_SUBJECT, new MessageCallback() {
       public void callback(Message message) {
         switch (BusCommands.valueOf(message.getCommandType())) {
           case RemoteSubscribe:
@@ -79,5 +81,6 @@ public class CDIClientBootstrap implements EntryPoint {
         });
       }
     });
+    InitVotes.voteFor(CDIClientBootstrap.class);
   }
 }

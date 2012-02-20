@@ -546,9 +546,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     // no configuration in current implementation
   }
 
-
-//  private static final String RETRY_COUNT_KEY = "retryAttempts";
-
   /**
    * Sends a message globally to all subscriptions containing the same subject as the specified message.
    *

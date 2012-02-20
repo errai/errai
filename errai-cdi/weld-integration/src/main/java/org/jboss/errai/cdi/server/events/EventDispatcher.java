@@ -34,6 +34,7 @@ import org.jboss.errai.cdi.server.ScopeUtil;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
+import org.jboss.errai.enterprise.client.cdi.api.CDI;
 
 /**
  * Acts as a bridge between Errai Bus and the CDI event system.<br/>
@@ -104,7 +105,7 @@ public class EventDispatcher implements MessageCallback {
           break;
 
         case AttachRemote:
-          MessageBuilder.createConversation(message).toSubject("cdi.event:ClientDispatcher")
+          MessageBuilder.createConversation(message).toSubject(CDI.CLIENT_DISPATCHER_SUBJECT)
                   .command(BusCommands.RemoteSubscribe)
                   .with(MessageParts.Value, observedEvents.toArray(new String[observedEvents.size()])).done().reply();
 
