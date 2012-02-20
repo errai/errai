@@ -672,6 +672,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       this.remotes.clear();
       this.disconnected = true;
       this.initialized = false;
+      this.postInit = false;
       this.sendBuilder = null;
       //  this.initVotesRequired = 1; // just to reconnect the bus.
       this.postInitTasks.clear();
@@ -721,7 +722,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    */
   @Override
   public void init() {
-    InitVotes.registerInitCallback(new Runnable() {
+    InitVotes.registerOneTimeInitCallback(new Runnable() {
       @Override
       public void run() {
         completeInit();
@@ -985,23 +986,26 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private void completeInit() {
-    LogUtil.log("received final vote for initialization ...");
+    if (!postInit) {
+      postInit = true;
 
-    postInit = true;
-    LogUtil.log("executing " + postInitTasks.size() + " post init task(s)");
+      LogUtil.log("received final vote for initialization ...");
 
-    Iterator<Runnable> postInitTasksIter = postInitTasks.iterator();
-    while (postInitTasksIter.hasNext()) {
-      postInitTasksIter.next().run();
-      postInitTasksIter.remove();
+      LogUtil.log("executing " + postInitTasks.size() + " post init task(s)");
+
+      Iterator<Runnable> postInitTasksIter = postInitTasks.iterator();
+      while (postInitTasksIter.hasNext()) {
+        postInitTasksIter.next().run();
+        postInitTasksIter.remove();
+      }
+
+      sendAllDeferred();
+      postInitTasks.clear();
+
+      setInitialized(true);
+
+      LogUtil.log("bus federation complete. now operating normally.");
     }
-
-    sendAllDeferred();
-    postInitTasks.clear();
-
-    setInitialized(true);
-
-    LogUtil.log("bus federation complete. now operating normally.");
   }
 
   private void remoteSubscribe(String subject) {
