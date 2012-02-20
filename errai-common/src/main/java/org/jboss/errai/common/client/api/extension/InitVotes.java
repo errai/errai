@@ -16,6 +16,7 @@
 
 package org.jboss.errai.common.client.api.extension;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Timer;
 import org.jboss.errai.common.client.api.tasks.AsyncTask;
 import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
@@ -48,7 +49,7 @@ public final class InitVotes {
   private static boolean armed = false;
   private static final Set<String> waitForSet = new HashSet<String>();
 
-  private static int timeoutMillis = 5000;
+  private static int timeoutMillis = !GWT.isProdMode() ? 60000 : 5000;
 
   private static AsyncTask initTimeout;
 
