@@ -25,8 +25,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 /**
- * @author: Heiko Braun <hbraun@redhat.com>
- * @date: Jul 13, 2010
+ * @author Heiko Braun
  */
 public abstract class AbstractConfigBase {
   public static final String ERRAI_CONFIG_STUB_NAME = "ErraiApp.properties";

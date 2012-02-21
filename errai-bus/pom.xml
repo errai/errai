@@ -215,7 +215,7 @@
         <!-- Netty for WebSockets Support -->
 
         <dependency>
-            <groupId>io.netty</groupId>
+            <groupId>org.jboss.errai.io.netty</groupId>
             <artifactId>netty</artifactId>
             <version>4.0.0.Alpha1-SNAPSHOT</version>
         </dependency>

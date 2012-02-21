@@ -89,7 +89,7 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
       wsFactory.sendUnsupportedWebSocketVersionResponse(ctx.getChannel());
     }
     else {
-      this.handshaker.performOpeningHandshake(ctx.getChannel(), req);
+      this.handshaker.handshake(ctx.getChannel(), req);
     }
   }
 
@@ -99,7 +99,7 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
     if (frame instanceof CloseWebSocketFrame) {
       activeChannels.remove(ctx.getChannel());
 
-      this.handshaker.performClosingHandshake(ctx.getChannel(), (CloseWebSocketFrame) frame);
+      this.handshaker.close(ctx.getChannel(), (CloseWebSocketFrame) frame);
       return;
     }
     if (frame instanceof PingWebSocketFrame) {

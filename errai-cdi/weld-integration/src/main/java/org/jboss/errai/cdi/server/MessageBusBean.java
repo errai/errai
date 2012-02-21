@@ -43,8 +43,6 @@ import org.jboss.errai.bus.server.api.ServerMessageBus;
  * @date: Sep 15, 2010
  */
 public class MessageBusBean implements Bean {
-
-  // final InjectionTarget it;
   final MessageBus delegate;
 
   public MessageBusBean(BeanManager bm, MessageBus delegate) {
