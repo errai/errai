@@ -28,8 +28,6 @@ import java.util.Iterator;
  * @author Mike Brock
  */
 public class EncDecUtil {
-
-
   public static void arrayMarshall(StringBuilder buf, Collection o, MarshallingSession ctx) {
     buf.append("[");
     Iterator iter = o.iterator();
@@ -60,26 +58,6 @@ public class EncDecUtil {
     buf.append("]");
   }
 
-  public static String wrapQualified(Object o, String marshalledString, MarshallingSession ctx) {
-    if (o == null) {
-      return "null";
-    }
-
-    final boolean isNew = !ctx.isEncoded(o);
-    final String objId = ctx.getObjectHash(o);
-
-    final StringBuilder buf = new StringBuilder("{\"").append(SerializationParts.ENCODED_TYPE).append("\":\"")
-            .append(o.getClass().getName()).append("\",\"").append(SerializationParts.OBJECT_ID).append("\":\"")
-            .append(objId).append("\"");
-
-    if (!isNew) {
-      return buf.append("}").toString();
-    }
-    else {
-      return buf.append(",\"").append(SerializationParts.QUALIFIED_VALUE).append("\":").append(marshalledString)
-              .append("}").toString();
-    }
-  }
 
   /**
    * Ensure the marshaller is qualified on the wire using a wrapping marshaller.
