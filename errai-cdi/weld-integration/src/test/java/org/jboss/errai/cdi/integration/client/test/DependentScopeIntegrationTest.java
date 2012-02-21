@@ -38,7 +38,7 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
 
   @Override
   public String getModuleName() {
-    return "org.jboss.errai.cdi.integration.InjectionTests";
+    return "org.jboss.errai.cdi.integration.InjectionTestModule";
   }
 
   public void testDependentBeanScope() {

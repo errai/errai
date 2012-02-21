@@ -1,11 +1,8 @@
 package org.jboss.errai.cdi.integration.client;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
@@ -26,8 +23,6 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
 @EntryPoint
 public class EventObserverTestModule extends EventTestObserverSuperClass {
   private int busReadyEventsReceived = 0;
-  private static EventObserverTestModule instance;
-
   private Runnable verifier;
 
   @Inject
@@ -96,8 +91,6 @@ public class EventObserverTestModule extends EventTestObserverSuperClass {
       verifier.run();
     }
   }
-
-
 
   public void setResultVerifier(Runnable verifier) {
     this.verifier = verifier;

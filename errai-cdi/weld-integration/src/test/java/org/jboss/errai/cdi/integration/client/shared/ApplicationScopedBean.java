@@ -16,7 +16,6 @@
 
 package org.jboss.errai.cdi.integration.client.shared;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;

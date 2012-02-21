@@ -16,19 +16,26 @@
 
 package org.jboss.errai.cdi.integration.server;
 
-import javax.enterprise.context.ApplicationScoped;
-
-import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.cdi.integration.client.shared.MyRemote;
+import javax.interceptor.AroundInvoke;
+import javax.interceptor.Interceptor;
+import javax.interceptor.InvocationContext;
 
 /**
+ * Simple interceptor for testing purposes. Takes the first parameter and assumes
+ * it's a String to append "_intercepted".
+ * 
+ * Bound to {@link InterceptedRpc}.
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@Service
-@ApplicationScoped
-public class UnqualifiedRemoteImpl implements MyRemote {
-  @Override
-  public String call(String callString) {
-    return callString;
-  }
+@InterceptedRpc
+@Interceptor
+public class RpcInterceptor {
+    @AroundInvoke 
+    public Object aroundInvoke(InvocationContext ctx) throws Exception {
+      String parm = (String) ctx.getParameters()[0];
+      parm += "_intercepted";
+      ctx.setParameters(new Object[]{parm});
+      return ctx.proceed();
+    }
 }

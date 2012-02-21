@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ *  
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,21 +14,15 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.cdi.integration.server;
+package org.jboss.errai.cdi.integration.client.shared;
 
-import javax.enterprise.context.ApplicationScoped;
-
-import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.cdi.integration.client.shared.MyRemote;
+import org.jboss.errai.bus.server.annotations.Remote;
 
 /**
+ * @author Mike Brock
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@Service
-@ApplicationScoped
-public class UnqualifiedRemoteImpl implements MyRemote {
-  @Override
-  public String call(String callString) {
-    return callString;
-  }
+@Remote
+public interface MyInterceptedRemote {
+  public String interceptedCall(String callString);
 }

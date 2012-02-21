@@ -27,12 +27,16 @@ import javax.inject.Inject;
 
 /**
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 @ApplicationScoped
 public class RpcTestBean {
 
   @Inject
   private Caller<MyRemote> myRemoteCaller;
+  
+  @Inject
+  private Caller<MyInterceptedRemote> myInterceptedRemoteCaller;
   
   @Inject @A
   private Caller<MyRemote> myRemoteCallerA;
@@ -49,6 +53,10 @@ public class RpcTestBean {
   
   public void callRemoteCaller(RemoteCallback<String> callback, String val) {
     myRemoteCaller.call(callback).call(val);
+  }
+  
+  public void callInterceptedRemoteCaller(RemoteCallback<String> callback, String val) {
+    myInterceptedRemoteCaller.call(callback).interceptedCall(val);
   }
   
   public void callRemoteCallerA(RemoteCallback<String> callback, String val) {

@@ -16,19 +16,21 @@
 
 package org.jboss.errai.cdi.integration.server;
 
-import javax.enterprise.context.ApplicationScoped;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.cdi.integration.client.shared.MyRemote;
+import javax.interceptor.InterceptorBinding;
 
 /**
+ * Simple interceptor binding for testing purposes. Methods annotated with this type will be intercepted by
+ * {@link RpcInterceptor}.
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@Service
-@ApplicationScoped
-public class UnqualifiedRemoteImpl implements MyRemote {
-  @Override
-  public String call(String callString) {
-    return callString;
-  }
+@InterceptorBinding
+@Target({ ElementType.METHOD, ElementType.TYPE })
+@Retention(RetentionPolicy.RUNTIME)
+public @interface InterceptedRpc {
 }

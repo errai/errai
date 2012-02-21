@@ -23,6 +23,7 @@ import org.jboss.errai.enterprise.client.cdi.api.CDI;
 
 /**
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class RpcIntegrationTest extends AbstractErraiCDITest {
 
@@ -31,7 +32,7 @@ public class RpcIntegrationTest extends AbstractErraiCDITest {
     return "org.jboss.errai.cdi.integration.RpcTestModule";
   }
 
-  public void testRPCCallToCDIBeanQualifiedWithA() {
+  public void testRPCToCDIBeanQualifiedWithA() {
     CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
@@ -49,7 +50,7 @@ public class RpcIntegrationTest extends AbstractErraiCDITest {
     delayTestFinish(60000);
   }
 
-  public void testRPCCallToCDIBeanQualifiedWithB() {
+  public void testRPCToCDIBeanQualifiedWithB() {
     CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
@@ -66,7 +67,7 @@ public class RpcIntegrationTest extends AbstractErraiCDITest {
     delayTestFinish(60000);
   }
 
-  public void testRPCCallToUnqualifiedCDIBean() {
+  public void testRPCToUnqualifiedCDIBean() {
     CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
@@ -77,6 +78,23 @@ public class RpcIntegrationTest extends AbstractErraiCDITest {
             finishTest();
           }
         }, "bar");
+      }
+    });
+
+    delayTestFinish(60000);
+  }
+  
+  public void testInterceptedRPC() {
+    CDI.addPostInitTask(new Runnable() {
+      @Override
+      public void run() {
+        RpcTestBean.getInstance().callInterceptedRemoteCaller(new RemoteCallback<String>() {
+          @Override
+          public void callback(String response) {
+            assertEquals("foo_intercepted", response);
+            finishTest();
+          }
+        }, "foo");
       }
     });
 

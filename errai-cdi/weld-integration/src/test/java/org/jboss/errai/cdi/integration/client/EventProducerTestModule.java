@@ -24,10 +24,8 @@ import java.util.Map;
 @EntryPoint
 public class EventProducerTestModule {
   private boolean busReadyEventReceived = false;
-  private static EventProducerTestModule instance;
-
   private Runnable verifier;
-
+  
   private Map<String, List<String>> receivedEventsOnServer = new HashMap<String, List<String>>();
 
   @Inject

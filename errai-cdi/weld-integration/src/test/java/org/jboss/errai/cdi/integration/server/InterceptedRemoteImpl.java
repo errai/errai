@@ -19,16 +19,18 @@ package org.jboss.errai.cdi.integration.server;
 import javax.enterprise.context.ApplicationScoped;
 
 import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.cdi.integration.client.shared.MyRemote;
+import org.jboss.errai.cdi.integration.client.shared.MyInterceptedRemote;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Service
 @ApplicationScoped
-public class UnqualifiedRemoteImpl implements MyRemote {
+public class InterceptedRemoteImpl implements MyInterceptedRemote {
+  
   @Override
-  public String call(String callString) {
+  @InterceptedRpc
+  public String interceptedCall(String callString) {
     return callString;
   }
 }

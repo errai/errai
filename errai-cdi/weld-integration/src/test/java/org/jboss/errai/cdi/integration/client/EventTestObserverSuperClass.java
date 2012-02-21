@@ -42,8 +42,8 @@ public abstract class EventTestObserverSuperClass {
 
 
   // all the observer methods
+  @SuppressWarnings("unused")
   private void onEvent(@Observes String event) {
     addReceivedEvent("", event);
   }
-
 }
