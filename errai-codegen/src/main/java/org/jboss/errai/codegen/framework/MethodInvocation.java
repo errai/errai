@@ -16,9 +16,6 @@
 
 package org.jboss.errai.codegen.framework;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.jboss.errai.codegen.framework.literal.ClassLiteral;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
@@ -27,6 +24,10 @@ import org.jboss.errai.codegen.framework.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.framework.meta.MetaType;
 import org.jboss.errai.codegen.framework.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.framework.meta.MetaWildcardType;
+import org.mvel2.util.NullType;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Represents a method invocation statement.
@@ -69,6 +70,15 @@ public class MethodInvocation extends AbstractStatement {
       if (typeVariables.containsKey(typeVar.getName())) {
         returnType = typeVariables.get(typeVar.getName());
       }
+      else {
+        // returning NullType as a stand-in for an unbounded wildcard type since this is a parameterized method
+        // and there is not RHS qualification for the parameter.
+        //
+        // ie when calling GWT.create() and assigning it to a concrete type.
+        //
+        // TODO: might be worth flushing this out for clarify in the future.
+        return MetaClassFactory.get(NullType.class);
+      }
     }
 
     assert returnType != null;
@@ -92,7 +102,6 @@ public class MethodInvocation extends AbstractStatement {
         }
       }
     }
-
 
     int methodParmIndex = 0;
     for (MetaType methodParmType : method.getGenericParameterTypes()) {

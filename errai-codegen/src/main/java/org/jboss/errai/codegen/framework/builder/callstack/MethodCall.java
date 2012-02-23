@@ -80,7 +80,7 @@ public class MethodCall extends AbstractCallElement {
 
       callParams = fromStatements(GenUtil.generateCallParameters(method, context, parameters));
       statement = new MethodInvocation(callType, method, callParams);
-      
+
       resultType = statement.getType();
 
       nextOrReturn(writer, context, statement);

@@ -46,7 +46,7 @@ public class LiteralFactory {
         result = new LiteralValue<MetaType>((MetaType) o) {
           @Override
           public String getCanonicalString(Context context) {
-            return getClassReference((MetaClass) o, context) + ".class";
+            return getClassReference((MetaClass) o, context, true) + ".class";
           }
         };
       }
@@ -108,6 +108,9 @@ public class LiteralFactory {
     }
     else if (o instanceof Class) {
       return new ClassLiteral((Class) o);
+    }
+    else if (o instanceof MetaClass) {
+      return new MetaClassLiteral((MetaClass) o);
     }
     else if (o.getClass().isArray()) {
       return new ArrayLiteral(o);

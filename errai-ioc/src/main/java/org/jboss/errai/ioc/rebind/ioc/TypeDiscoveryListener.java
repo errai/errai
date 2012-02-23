@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ *  
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.codegen.framework.builder;
+package org.jboss.errai.ioc.rebind.ioc;
+
+import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 
 /**
- * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Mike Brock
  */
-public interface ClassDefinitionBuilderAbstractOption<T extends ClassStructureBuilder<T>>
-    extends ClassDefinitionBuilderInterfaces<T> {
-
-  public ClassDefinitionBuilderInterfaces<ClassStructureBuilderAbstractMethodOption> abstractClass();
-
-  public ClassDefinitionBuilderInterfaces<ClassStructureBuilderAbstractMethodOption> interfaceDefinition();
+public interface TypeDiscoveryListener {
+  public void onDiscovery(IOCProcessingContext context, InjectionPoint injectionPoint);
 }

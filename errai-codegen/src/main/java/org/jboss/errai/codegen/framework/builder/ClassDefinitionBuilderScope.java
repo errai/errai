@@ -20,11 +20,11 @@ package org.jboss.errai.codegen.framework.builder;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public interface ClassDefinitionBuilderScope<T extends ClassStructureBuilder<T>> {
-  public ClassDefinitionBuilderAbstractOption<T> publicScope();
+  public ClassDefinitionStaticOption<T> publicScope();
 
-  public ClassDefinitionBuilderAbstractOption<T> privateScope();
+  public ClassDefinitionStaticOption<T> privateScope();
 
-  public ClassDefinitionBuilderAbstractOption<T> protectedScope();
+  public ClassDefinitionStaticOption<T> protectedScope();
 
-  public ClassDefinitionBuilderAbstractOption<T> packageScope();
+  public ClassDefinitionStaticOption<T> packageScope();
 }

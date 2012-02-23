@@ -41,7 +41,7 @@ import org.jboss.errai.codegen.framework.meta.impl.AbstractMetaClass;
 public class JavaReflectionClass extends AbstractMetaClass<Class> {
   private Annotation[] _annotationsCache;
 
-  private JavaReflectionClass(Class clazz, boolean erased) {
+  protected JavaReflectionClass(Class clazz, boolean erased) {
     this(clazz, null, erased);
   }
 

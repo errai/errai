@@ -79,10 +79,7 @@ public class LoadClassReference extends AbstractCallElement {
     String result = cacheStore.get(metaClass);
 
     if (result == null) {
-
       result = _getClassReference(metaClass, context, typeParms);
-
-      cacheStore.put(metaClass, result);
     }
     return result;
   }

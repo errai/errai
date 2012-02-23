@@ -26,7 +26,9 @@ import org.jboss.errai.codegen.framework.builder.BuildCallback;
 import org.jboss.errai.codegen.framework.builder.ClassDefinitionBuilderAbstractOption;
 import org.jboss.errai.codegen.framework.builder.ClassDefinitionBuilderInterfaces;
 import org.jboss.errai.codegen.framework.builder.ClassDefinitionBuilderScope;
+import org.jboss.errai.codegen.framework.builder.ClassDefinitionStaticOption;
 import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
+import org.jboss.errai.codegen.framework.builder.ClassStructureBuilderAbstractMethodOption;
 import org.jboss.errai.codegen.framework.builder.ConstructorBlockBuilder;
 import org.jboss.errai.codegen.framework.builder.DefaultClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.FieldBuildStart;
@@ -46,7 +48,7 @@ import org.jboss.errai.codegen.framework.util.GenUtil;
  */
 public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
         ClassDefinitionBuilderScope<T>,
-        ClassDefinitionBuilderAbstractOption<T>,
+        ClassDefinitionStaticOption<T>,
         ClassStructureBuilder<T> {
 
   protected BuildMetaClass classDefinition;
@@ -92,6 +94,13 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
     return new ClassBuilderAbstractMethodOption(this, classDefinition.getContext());
   }
 
+  @Override
+  public ClassDefinitionBuilderInterfaces<ClassStructureBuilderAbstractMethodOption> interfaceDefinition() {
+    classDefinition.setInterface(true);
+    return new ClassBuilderAbstractMethodOption(this, classDefinition.getContext());
+
+  }
+
   public ClassBuilder<T> importsClass(Class<?> clazz) {
     return importsClass(MetaClassFactory.get(clazz));
   }
@@ -122,26 +131,32 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
   }
 
   @Override
-  public ClassDefinitionBuilderAbstractOption<T> publicScope() {
+  public ClassDefinitionStaticOption<T> publicScope() {
     classDefinition.setScope(Scope.Public);
     return this;
   }
 
   @Override
-  public ClassDefinitionBuilderAbstractOption<T> privateScope() {
+  public ClassDefinitionStaticOption<T> privateScope() {
     classDefinition.setScope(Scope.Private);
     return this;
   }
 
   @Override
-  public ClassDefinitionBuilderAbstractOption<T> protectedScope() {
+  public ClassDefinitionStaticOption<T> protectedScope() {
     classDefinition.setScope(Scope.Protected);
     return this;
   }
 
   @Override
-  public ClassDefinitionBuilderAbstractOption<T> packageScope() {
+  public ClassDefinitionStaticOption<T> packageScope() {
     classDefinition.setScope(Scope.Package);
+    return this;
+  }
+
+  @Override
+  public ClassDefinitionBuilderAbstractOption<T> staticClass() {
+    classDefinition.setStatic(true);
     return this;
   }
 
@@ -459,7 +474,7 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
     }, scope, type, name);
   }
 
-  public MetaClass getClassDefinition() {
+  public BuildMetaClass getClassDefinition() {
     return classDefinition;
   }
 

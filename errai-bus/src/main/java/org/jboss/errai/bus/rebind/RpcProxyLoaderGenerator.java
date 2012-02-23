@@ -132,7 +132,7 @@ public class RpcProxyLoaderGenerator extends Generator {
       if (remote.isInterface()) {
         // create the remote proxy for this interface
         ClassStructureBuilder<?> remoteProxy = new RpcProxyGenerator(remote).generate();
-        loadProxies.append(new InnerClass((BuildMetaClass) remoteProxy.getClassDefinition()));
+        loadProxies.append(new InnerClass(remoteProxy.getClassDefinition()));
 
         loadProxies.append(Stmt.invokeStatic(RemoteServiceProxyFactory.class, "addRemoteProxy",
                 remote, Stmt.newObject(remoteProxy.getClassDefinition())));

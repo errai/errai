@@ -16,9 +16,13 @@
 
 package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import com.google.gwt.uibinder.client.UiBinder;
+import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.uibinder.client.UiTemplate;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.rebind.SourceWriter;
 import com.google.gwt.user.rebind.StringSourceWriter;
@@ -26,9 +30,14 @@ import com.google.inject.servlet.RequestScoped;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.codegen.framework.Context;
+import org.jboss.errai.codegen.framework.InnerClass;
+import org.jboss.errai.codegen.framework.Parameter;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
 import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
+import org.jboss.errai.codegen.framework.builder.impl.ClassBuilder;
+import org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder;
+import org.jboss.errai.codegen.framework.literal.LiteralFactory;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaField;
@@ -39,6 +48,7 @@ import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.framework.meta.impl.gwt.GWTClass;
 import org.jboss.errai.codegen.framework.util.GenUtil;
 import org.jboss.errai.codegen.framework.util.Implementations;
+import org.jboss.errai.codegen.framework.util.Refs;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.RebindUtils;
@@ -53,10 +63,12 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.api.GeneratedBy;
 import org.jboss.errai.ioc.client.api.IOCBootstrapTask;
 import org.jboss.errai.ioc.client.api.IOCProvider;
+import org.jboss.errai.ioc.client.api.PackageTarget;
 import org.jboss.errai.ioc.client.api.TaskOrder;
 import org.jboss.errai.ioc.client.api.ToPanel;
 import org.jboss.errai.ioc.client.api.ToRootPanel;
 import org.jboss.errai.ioc.client.api.TypeProvider;
+import org.jboss.errai.ioc.client.api.builtin.UiBinderProvider;
 import org.jboss.errai.ioc.rebind.AnnotationHandler;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.IOCProcessorFactory;
@@ -65,10 +77,12 @@ import org.jboss.errai.ioc.rebind.ioc.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.IOCExtensionConfigurator;
 import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.InjectionFailure;
+import org.jboss.errai.ioc.rebind.ioc.InjectionPoint;
 import org.jboss.errai.ioc.rebind.ioc.Injector;
 import org.jboss.errai.ioc.rebind.ioc.InjectorFactory;
 import org.jboss.errai.ioc.rebind.ioc.ProviderInjector;
 import org.jboss.errai.ioc.rebind.ioc.QualifyingMetadataFactory;
+import org.jboss.errai.ioc.rebind.ioc.TypeDiscoveryListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,6 +123,8 @@ public class IOCBootstrapGenerator {
   private List<Class<?>> afterTasks = new ArrayList<Class<?>>();
 
   private Logger log = LoggerFactory.getLogger(IOCBootstrapGenerator.class);
+
+  private static final boolean SIMULATED_CLIENT = Boolean.getBoolean("errai.ioc.debug.simulated_client");
 
   public static final String QUALIFYING_METADATA_FACTORY_PROPERTY = "errai.ioc.QualifyingMetaDataFactory";
 
@@ -257,7 +273,7 @@ public class IOCBootstrapGenerator {
     procFactory.processAll();
 
     runAllDeferred();
-    
+
     for (Statement stmt : procContext.getAppendToEnd()) {
       blockBuilder.append(stmt);
     }
@@ -278,18 +294,9 @@ public class IOCBootstrapGenerator {
     _doRunnableTasks(afterTasks, blockBuilder);
 
 
-    
     blockBuilder.finish();
 
-    String generated = classBuilder.toJavaString();
-
-//    if (Boolean.getBoolean("errai.ioc.generator.print_out_result")) {
-//      System.out.println("----Emitting Class--->\n\n");
-//      System.out.println(generated);
-//      System.out.println("<---Emitting Class----");
-//    }
-
-    sourceWriter.print(generated);
+    sourceWriter.print(classBuilder.toJavaString());
   }
 
   private static void _doRunnableTasks(Collection<Class<?>> classes, BlockBuilder<?> blockBuilder) {
@@ -524,6 +531,77 @@ public class IOCBootstrapGenerator {
 
   private void defaultConfigureProcessor() {
     final MetaClass widgetType = MetaClassFactory.get(Widget.class);
+
+    procContext.registerTypeDiscoveryListener(new TypeDiscoveryListener() {
+      @Override
+      public void onDiscovery(final IOCProcessingContext context, final InjectionPoint injectionPoint) {
+        if (injectionPoint.getType().isAssignableFrom(UiBinder.class)) {
+          MetaClass uiBinderParameterized = MetaClassFactory.parameterizedAs(UiBinder.class,
+                  MetaClassFactory
+                          .typeParametersOf(injectionPoint.getType().getParameterizedType().getTypeParameters()[0],
+                                  injectionPoint.getEnclosingType()));
+
+          BuildMetaClass uiBinderBoilerPlaterIface = ClassBuilder.define(injectionPoint.getEnclosingType().getName()
+                  + "UiBinder", uiBinderParameterized)
+                  .publicScope().staticClass().interfaceDefinition()
+                  .body().getClassDefinition();
+
+          UiTemplate handler = new UiTemplate() {
+            @Override
+            public String value() {
+              return injectionPoint.getEnclosingType().getFullyQualifiedName() + ".ui.xml";
+            }
+
+            @Override
+            public Class<? extends Annotation> annotationType() {
+              return UiTemplate.class;
+            }
+          };
+
+          PackageTarget packageTarget = new PackageTarget() {
+            @Override
+            public String value() {
+              return injectionPoint.getEnclosingType().getPackageName();
+            }
+
+            @Override
+            public Class<? extends Annotation> annotationType() {
+              return PackageTarget.class;
+            }
+          };
+
+          uiBinderBoilerPlaterIface.addAnnotation(handler);
+          uiBinderBoilerPlaterIface.addAnnotation(packageTarget);
+
+          context.getBootstrapClass().addInnerClass(new InnerClass(uiBinderBoilerPlaterIface));
+
+          String varName = "uiBinderInst_" + injectionPoint.getEnclosingType().getFullyQualifiedName()
+                  .replaceAll("\\.", "_");
+
+          if (Boolean.getBoolean("errai.simulatedClient")) {
+            context.append(Stmt.declareVariable(UiBinder.class).named(varName).initializeWith(
+                    ObjectBuilder.newInstanceOf(uiBinderBoilerPlaterIface)
+                            .extend()
+                            .publicOverridesMethod("createAndBindUi", Parameter.of(injectionPoint.getEnclosingType(), "w"))
+                            .append(Stmt.loadLiteral(null).returnValue())
+                            .finish().finish()
+            )
+            );
+
+          }
+          else {
+
+            context.append(Stmt.declareVariable(UiBinder.class).named(varName).initializeWith(
+                    Stmt.invokeStatic(GWT.class, "create", LiteralFactory.getLiteral(uiBinderBoilerPlaterIface))
+            ));
+          }
+
+          context.append(Stmt.invokeStatic(UiBinderProvider.class, "registerBinder",
+                  injectionPoint.getEnclosingType(), Refs.get(varName)));
+        }
+
+      }
+    });
 
     procFactory.registerHandler(Singleton.class, new AnnotationHandler<Singleton>() {
       @Override

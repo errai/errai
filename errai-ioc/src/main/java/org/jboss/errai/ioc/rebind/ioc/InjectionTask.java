@@ -73,6 +73,8 @@ public class InjectionTask {
     InjectableInstance<? extends Annotation> injectableInstance
             = new InjectableInstance(null, injectType, constructor, method, field, type, parm, injector, ctx);
 
+    ctx.getProcessingContext().handleDiscoveryOfType(injectableInstance);
+
     Injector inj;
     QualifyingMetadata qualifyingMetadata = processingContext.getQualifyingMetadataFactory()
             .createFrom(injectableInstance.getQualifiers());

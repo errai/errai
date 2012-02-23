@@ -232,18 +232,71 @@ public abstract class ServerMarshallUtil {
 
     String classBase = path.substring(0, path.length() - ".class".length());
 
+    BootstrapClassloader clsLoader = new BootstrapClassloader(new File(path).getParentFile().getAbsolutePath(),
+            "system".equals(classLoadingMode) ?
+                    ClassLoader.getSystemClassLoader() :
+                    Thread.currentThread().getContextClassLoader());
+
     inputStream.read(classDefinition);
 
-    BootstrapClassloader clsLoader = new BootstrapClassloader("system".equals(classLoadingMode) ?
-            ClassLoader.getSystemClassLoader() :
-            Thread.currentThread().getContextClassLoader());
+    for (File file : new File(path).getParentFile().listFiles()) {
+      if (file.getName().startsWith(className + "$")) {
+        String s = file.getName();
+        s = s.substring(s.indexOf('$') + 1, s.lastIndexOf('.'));
+
+        String fqcn = packageName + "." + className + "$" + s;
+
+        Class cls = null;
+        try {
+          cls = clsLoader.loadClass(fqcn);
+        }
+        catch (ClassNotFoundException e) {
+        }
+
+        if (cls != null) continue;
+
+        String innerClassBaseName = classBase + "$" + s;
+        File innerClass = new File(innerClassBaseName + ".class");
+        if (innerClass.exists()) {
+          try {
+            inputStream = new FileInputStream(innerClass);
+            classDefinition = new byte[inputStream.available()];
+            inputStream.read(classDefinition);
+
+            clsLoader.defineClassX(fqcn, classDefinition, 0, classDefinition.length);
+          }
+          finally {
+            inputStream.close();
+          }
+        }
+        else {
+          break;
+        }
+      }
+
+    }
+
 
     Class<?> mainClass = clsLoader
             .defineClassX(packageName + "." + className, classDefinition, 0, classDefinition.length);
 
     inputStream.close();
 
+
     for (int i = 1; i < Integer.MAX_VALUE; i++) {
+
+      String fqcn = packageName + "." + className + "$" + i;
+
+      Class cls = null;
+      try {
+        cls = clsLoader.loadClass(fqcn);
+      }
+      catch (ClassNotFoundException e) {
+      }
+
+      if (cls != null) continue;
+
+
       String innerClassBaseName = classBase + "$" + i;
       File innerClass = new File(innerClassBaseName + ".class");
       if (innerClass.exists()) {
@@ -252,7 +305,7 @@ public abstract class ServerMarshallUtil {
           classDefinition = new byte[inputStream.available()];
           inputStream.read(classDefinition);
 
-          clsLoader.defineClassX(packageName + "." + className + "$" + i, classDefinition, 0, classDefinition.length);
+          clsLoader.defineClassX(fqcn, classDefinition, 0, classDefinition.length);
         }
         finally {
           inputStream.close();
@@ -267,12 +320,50 @@ public abstract class ServerMarshallUtil {
   }
 
   private static class BootstrapClassloader extends ClassLoader {
-    private BootstrapClassloader(ClassLoader classLoader) {
+    private String searchPath;
+
+    private BootstrapClassloader(String searchPath, ClassLoader classLoader) {
       super(classLoader);
+      this.searchPath = searchPath;
     }
 
     public Class<?> defineClassX(String className, byte[] b, int off, int len) {
       return super.defineClass(className, b, off, len);
+    }
+
+    @Override
+    protected Class<?> findClass(String name) throws ClassNotFoundException {
+      try {
+        return super.findClass(name);
+      }
+      catch (ClassNotFoundException e) {
+        try {
+          FileInputStream inputStream = null;
+          byte[] classDefinition;
+
+
+          File innerClass = new File(searchPath + "/" + name.substring(name.lastIndexOf('.') + 1) + ".class");
+          if (innerClass.exists()) {
+            try {
+              inputStream = new FileInputStream(innerClass);
+              classDefinition = new byte[inputStream.available()];
+              inputStream.read(classDefinition);
+
+              return defineClassX(name, classDefinition, 0, classDefinition.length);
+            }
+            finally {
+              if (inputStream != null) inputStream.close();
+            }
+
+          }
+        }
+        catch (IOException e2) {
+          throw new RuntimeException("failed to load class: " + name, e2);
+        }
+
+
+      }
+      throw new ClassNotFoundException(name);
     }
   }
 
@@ -314,7 +405,7 @@ public abstract class ServerMarshallUtil {
   }
 
   private static File getFileIfExists(String path) {
- //   String path = url.getFile();
+    //   String path = url.getFile();
 
     if (path.startsWith("file:")) {
       path = path.substring(5);
@@ -417,4 +508,5 @@ public abstract class ServerMarshallUtil {
       return matchRoot;
     }
   }
+
 }

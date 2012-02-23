@@ -33,6 +33,7 @@ import org.jboss.errai.codegen.framework.builder.BuildCallback;
 import org.jboss.errai.codegen.framework.exception.UndefinedMethodException;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
+import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.framework.util.GenUtil;
 
 /**
@@ -188,7 +189,7 @@ public class AnonymousClassStructureBuilderImpl
   }
 
 
-  public MetaClass getClassDefinition() {
+  public BuildMetaClass getClassDefinition() {
     return classDefinition;
   }
 }

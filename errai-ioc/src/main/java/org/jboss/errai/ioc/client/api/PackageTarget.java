@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ *  
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.codegen.framework.builder;
+package org.jboss.errai.ioc.client.api;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Mike Brock
  */
-public interface ClassDefinitionBuilderAbstractOption<T extends ClassStructureBuilder<T>>
-    extends ClassDefinitionBuilderInterfaces<T> {
-
-  public ClassDefinitionBuilderInterfaces<ClassStructureBuilderAbstractMethodOption> abstractClass();
-
-  public ClassDefinitionBuilderInterfaces<ClassStructureBuilderAbstractMethodOption> interfaceDefinition();
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface PackageTarget {
+  String value();
 }

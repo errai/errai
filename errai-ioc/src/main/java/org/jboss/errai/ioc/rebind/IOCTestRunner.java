@@ -74,8 +74,14 @@ public class IOCTestRunner extends ParentRunner<Runner> {
 
             try {
               if (SIMULATED) {
-                iocClientTestCase.gwtSetUp();
-                method.invoke(getInstance());
+                System.setProperty("errai.simulatedClient", "true");
+                try {
+                  iocClientTestCase.gwtSetUp();
+                  method.invoke(getInstance());
+                }
+                finally {
+                  System.setProperty("errai.simulatedClient", "false");
+                }
               }
               else {
                 iocClientTestCase.setName(method.getName());

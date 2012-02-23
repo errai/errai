@@ -16,7 +16,7 @@
 
 package org.jboss.errai.codegen.framework.builder;
 
-import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -25,5 +25,5 @@ import org.jboss.errai.codegen.framework.meta.MetaClass;
 public interface ClassStructureBuilder<T extends ClassStructureBuilder<T>> extends ClassMethodBuilder<T>,
         ClassConstructorBuilder<T>, ClassFieldBuilder<T>, Builder {
 
-  public MetaClass getClassDefinition();
+  public BuildMetaClass getClassDefinition();
 }

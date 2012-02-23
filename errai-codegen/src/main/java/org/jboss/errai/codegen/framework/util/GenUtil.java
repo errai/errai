@@ -56,6 +56,7 @@ import org.jboss.errai.codegen.framework.meta.MetaParameter;
 import org.jboss.errai.codegen.framework.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.framework.meta.MetaType;
 import org.jboss.errai.codegen.framework.meta.MetaTypeVariable;
+import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
 import org.mvel2.DataConversion;
 
 /**
@@ -101,8 +102,6 @@ public class GenUtil {
   }
 
   public static Statement generate(Context context, Object o) {
-
-
     if (o instanceof VariableReference) {
       return context.getVariable(((VariableReference) o).getName());
     }
@@ -152,6 +151,10 @@ public class GenUtil {
           assertAssignableTypes(((Statement) input).getType(), targetType);
           return (Statement) input;
         }
+      }
+
+      if (input instanceof BuildMetaClass) {
+        return generate(context, input);
       }
 
       if (Object.class.getName().equals(targetType.getFullyQualifiedName())) {

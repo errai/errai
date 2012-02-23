@@ -42,7 +42,7 @@ public class MockIOCGenerator {
   public MockIOCGenerator(List<String> packages) {
     this.packages = Assert.notNull(packages);
   }
-  
+
   public Class<? extends Bootstrapper> generate() {
     String packageName = Bootstrapper.class.getPackage().getName();
     String className = "MockBootstrapperImpl";
@@ -51,23 +51,7 @@ public class MockIOCGenerator {
     bootstrapGenerator.setUseReflectionStubs(true);
     bootstrapGenerator.setPackages(packages);
 
-
     final String classStr = bootstrapGenerator.generate(packageName, className);
-
-    InputStream inStream = new InputStream() {
-      int cursor = 0;
-
-      @Override
-      public int read() throws IOException {
-        if (cursor == classStr.length()) {
-          return -1;
-        }
-
-        return classStr.charAt(cursor++);
-      }
-    };
-
-   // System.out.println(classStr);
 
     try {
       File directory =
@@ -91,9 +75,6 @@ public class MockIOCGenerator {
 
       System.out.println("wrote file: " + sourceFile.getAbsolutePath());
 
-    
-      
-
       ByteArrayOutputStream errorOutputStream = new ByteArrayOutputStream();
 
       JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
@@ -104,21 +85,11 @@ public class MockIOCGenerator {
         System.out.print((char) b);
       }
 
-      
-      Class<? extends Bootstrapper> bsClass 
+      Class<? extends Bootstrapper> bsClass
               = ServerMarshallUtil.loadClassDefinition(outFile.getAbsolutePath(), packageName, className);
-      
-      
+
       return bsClass;
 
-//      FileInputStream inputStream = new FileInputStream(outFile);
-//
-//      byte[] classDefinition = new byte[inputStream.available()];
-//
-//      inputStream.read(classDefinition);
-//
-//      return (Class<? extends Bootstrapper>) new BootstrapClassloader(ClassLoader.getSystemClassLoader())
-//              .defineClassX(packageName + "." + className, classDefinition, 0, classDefinition.length);
     }
     catch (Exception e) {
       throw new RuntimeException(e);

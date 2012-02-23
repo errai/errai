@@ -16,17 +16,9 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
-import static org.jboss.errai.codegen.framework.util.GenUtil.getPrivateFieldInjectorName;
-import static org.jboss.errai.codegen.framework.util.GenUtil.getPrivateMethodName;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.util.List;
-
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.literal.LiteralFactory;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaClassMember;
 import org.jboss.errai.codegen.framework.meta.MetaConstructor;
 import org.jboss.errai.codegen.framework.meta.MetaField;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
@@ -34,29 +26,19 @@ import org.jboss.errai.codegen.framework.meta.MetaParameter;
 import org.jboss.errai.codegen.framework.util.Refs;
 import org.jboss.errai.codegen.framework.util.Stmt;
 
-public class InjectableInstance<T extends Annotation> {
-  private T annotation;
-  private TaskType taskType;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.util.List;
 
-  private MetaConstructor constructor;
-  private MetaMethod method;
-  private MetaField field;
-  private MetaClass type;
-  private MetaParameter parm;
-  private Injector injector;
-  private InjectionContext injectionContext;
+import static org.jboss.errai.codegen.framework.util.GenUtil.getPrivateFieldInjectorName;
+import static org.jboss.errai.codegen.framework.util.GenUtil.getPrivateMethodName;
+
+public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> {
 
   public InjectableInstance(T annotation, TaskType taskType, MetaConstructor constructor, MetaMethod method,
                             MetaField field, MetaClass type, MetaParameter parm, Injector injector, InjectionContext injectionContext) {
-    this.annotation = annotation;
-    this.taskType = taskType;
-    this.constructor = constructor;
-    this.method = method;
-    this.field = field;
-    this.type = type;
-    this.parm = parm;
-    this.injector = injector;
-    this.injectionContext = injectionContext;
+
+    super(annotation, taskType, constructor, method, field, type, parm, injector, injectionContext);
   }
 
   public static <T extends Annotation> InjectableInstance<T> getTypeInjectedInstance(T annotation,
@@ -102,58 +84,6 @@ public class InjectableInstance<T extends Annotation> {
             field.getDeclaringClass(),
             null, injector, context);
 
-  }
-
-  public T getAnnotation() {
-    return annotation;
-  }
-
-  public MetaConstructor getConstructor() {
-    return constructor;
-  }
-
-  public TaskType getTaskType() {
-    return taskType;
-  }
-
-  public MetaMethod getMethod() {
-    return method;
-  }
-
-  public MetaField getField() {
-    return field;
-  }
-
-  public MetaClass getType() {
-    return type;
-  }
-
-  public MetaParameter getParm() {
-    return parm;
-  }
-
-  public Injector getInjector() {
-    return injector;
-  }
-
-  public InjectionContext getInjectionContext() {
-    return injectionContext;
-  }
-
-  public void ensureMemberExposed() {
-    switch (taskType) {
-      case Parameter:
-        if (parm.getDeclaringMember() instanceof MetaMethod) {
-          MetaMethod declMeth = (MetaMethod) parm.getDeclaringMember();
-          injectionContext.addExposedMethod(declMeth);
-        }
-      case PrivateMethod:
-        injectionContext.addExposedMethod(method);
-        break;
-      case PrivateField:
-        injectionContext.addExposedField(field);
-        break;
-    }
   }
 
   /**
@@ -248,55 +178,5 @@ public class InjectableInstance<T extends Annotation> {
     }
   }
 
-  public String getMemberName() {
-    switch (taskType) {
-      case PrivateField:
-        return getPrivateFieldInjectorName(field) + "(" + injector.getVarName() + ")";
 
-      case Field:
-        return field.getName();
-
-      case Parameter:
-      case StaticMethod:
-      case PrivateMethod:
-      case Method:
-        return method.getName();
-
-      case Type:
-        return type.getName();
-
-      default:
-        return null;
-    }
-  }
-
-  public Annotation[] getQualifiers() {
-    List<Annotation> annotations;
-    switch (taskType) {
-      case PrivateField:
-      case Field:
-        annotations = InjectUtil.extractQualifiersFromField(field);
-        return annotations.toArray(new Annotation[annotations.size()]);
-
-      case Parameter:
-        annotations = InjectUtil.extractQualifiersFromParameter(parm);
-        return annotations.toArray(new Annotation[annotations.size()]);
-
-      case PrivateMethod:
-      case Method:
-        annotations = InjectUtil.extractQualifiersFromMethod(method);
-        return annotations.toArray(new Annotation[annotations.size()]);
-
-      case Type:
-        annotations = InjectUtil.extractQualifiersFromType(type);
-        return annotations.toArray(new Annotation[annotations.size()]);
-
-      default:
-        return new Annotation[0];
-    }
-  }
-
-  public Annotation[] getAnnotations(Field field) {
-    return field == null ? null : field.getAnnotations();
-  }
 }

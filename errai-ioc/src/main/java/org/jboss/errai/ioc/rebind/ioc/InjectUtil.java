@@ -521,8 +521,6 @@ public class InjectUtil {
         jMethodParms[i] = parameters[i].getType();
       }
 
-      // MetaMethod observesMethod = jType.getMethod(method.getName(), jMethodParms);
-
       for (Class<?> qualifier : getQualifiersCache()) {
         if (parameters[eventParamIndex]
                 .isAnnotationPresent(qualifier.asSubclass(Annotation.class))) {

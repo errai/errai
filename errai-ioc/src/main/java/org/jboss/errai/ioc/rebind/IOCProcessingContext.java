@@ -16,37 +16,38 @@
 
 package org.jboss.errai.ioc.rebind;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import com.google.gwt.user.rebind.SourceWriter;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.Variable;
 import org.jboss.errai.codegen.framework.VariableReference;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.util.Refs;
+import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.ioc.client.InterfaceInjectionContext;
+import org.jboss.errai.ioc.rebind.ioc.InjectionPoint;
 import org.jboss.errai.ioc.rebind.ioc.JSR330QualifyingMetadataFactory;
 import org.jboss.errai.ioc.rebind.ioc.QualifyingMetadataFactory;
+import org.jboss.errai.ioc.rebind.ioc.TypeDiscoveryListener;
 
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
-import com.google.gwt.user.rebind.SourceWriter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class IOCProcessingContext  {
   protected Context context;
-  protected MetaClass bootstrapClass;
+  protected BuildMetaClass bootstrapClass;
   protected BlockBuilder<?> blockBuilder;
   protected List<String> packages;
   
   protected List<Statement> appendToEnd;
+  protected List<TypeDiscoveryListener> typeDiscoveryListeners;
 
   protected TreeLogger treeLogger;
   protected GeneratorContext generatorContext;
@@ -63,7 +64,7 @@ public class IOCProcessingContext  {
                               SourceWriter writer,
                               TypeOracle oracle,
                               Context context,
-                              MetaClass bootstrapClass,
+                              BuildMetaClass bootstrapClass,
                               BlockBuilder<?> blockBuilder) {
     this.treeLogger = treeLogger;
     this.generatorContext = generatorContext;
@@ -72,6 +73,7 @@ public class IOCProcessingContext  {
     this.bootstrapClass = bootstrapClass;
     this.blockBuilder = blockBuilder;
     this.appendToEnd = new ArrayList<Statement>();
+    this.typeDiscoveryListeners = new ArrayList<TypeDiscoveryListener>();
   }
 
 
@@ -91,7 +93,7 @@ public class IOCProcessingContext  {
     return Collections.unmodifiableList(appendToEnd);
   }
   
-  public MetaClass getBootstrapClass() {
+  public BuildMetaClass getBootstrapClass() {
     return bootstrapClass;
   }
 
@@ -137,5 +139,15 @@ public class IOCProcessingContext  {
 
   public void setQualifyingMetadataFactory(QualifyingMetadataFactory qualifyingMetadataFactory) {
     this.qualifyingMetadataFactory = qualifyingMetadataFactory;
+  }
+
+  public void registerTypeDiscoveryListener(TypeDiscoveryListener discoveryListener) {
+    this.typeDiscoveryListeners.add(discoveryListener);
+  }
+
+  public void handleDiscoveryOfType(InjectionPoint injectionPoint) {
+    for (TypeDiscoveryListener listener : typeDiscoveryListeners) {
+      listener.onDiscovery(this, injectionPoint);
+    }
   }
 }

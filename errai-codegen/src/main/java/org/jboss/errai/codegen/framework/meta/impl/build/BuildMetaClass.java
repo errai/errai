@@ -19,10 +19,12 @@ package org.jboss.errai.codegen.framework.meta.impl.build;
 import org.jboss.errai.codegen.framework.BlockStatement;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.DefParameters;
+import org.jboss.errai.codegen.framework.InnerClass;
 import org.jboss.errai.codegen.framework.Variable;
 import org.jboss.errai.codegen.framework.builder.Builder;
 import org.jboss.errai.codegen.framework.builder.callstack.LoadClassReference;
 import org.jboss.errai.codegen.framework.builder.impl.Scope;
+import org.jboss.errai.codegen.framework.literal.AnnotationLiteral;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaConstructor;
@@ -60,6 +62,8 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   private boolean isStatic;
   private boolean isInner;
 
+  private List<Annotation> annotations = new ArrayList<Annotation>();
+  private List<InnerClass> innerClasses = new ArrayList<InnerClass>();
   private List<BuildMetaMethod> methods = new ArrayList<BuildMetaMethod>();
   private List<BuildMetaField> fields = new ArrayList<BuildMetaField>();
   private List<BuildMetaConstructor> constructors = new ArrayList<BuildMetaConstructor>();
@@ -322,7 +326,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
 
   @Override
   public Annotation[] getAnnotations() {
-    return new Annotation[0];
+    return annotations.toArray(new Annotation[annotations.size()]);
   }
 
   @Override
@@ -384,6 +388,14 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
 
   public Context getContext() {
     return context;
+  }
+  
+  public void addAnnotation(Annotation annotation) {
+    annotations.add(annotation);
+  }
+  
+  public void addInnerClass(InnerClass innerClass) {
+    innerClasses.add(innerClass);
   }
 
   public void addInterface(MetaClass interfaceClass) {
@@ -498,6 +510,13 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
 
     context.addVariable(Variable.create("this", this));
 
+    for (Annotation a : annotations) {
+      buf.append(new AnnotationLiteral(a).getCanonicalString(context));
+      buf.append(" ");
+    }
+    
+    if (!annotations.isEmpty()) buf.append("\n");
+    
     buf.append("\n");
 
     buf.append(scope.getCanonicalName());
@@ -506,7 +525,16 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
       buf.append(" abstract");
     }
 
-    buf.append(" class ").append(getName());
+    if (isStatic) {
+      buf.append(" static");
+    }
+    
+    if (isInterface()) {
+      buf.append(" interface ").append(getName());
+    }
+    else {
+      buf.append(" class ").append(getName());
+    }
 
     if (getSuperClass() != null) {
       buf.append(" extends ").append(LoadClassReference.getClassReference(getSuperClass(), context));
@@ -568,10 +596,19 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
       if (iter.hasNext())
         buf.append("\n");
     }
-
+    
     if (!fields.isEmpty())
       buf.append("\n");
 
+    Iterator<InnerClass> innerClassIterator = innerClasses.iterator();
+    while (innerClassIterator.hasNext()) {
+      buf.append(innerClassIterator.next().generate(context));
+      if (innerClassIterator.hasNext()) buf.append("\n");
+    }
+    
+    if (!innerClasses.isEmpty())
+      buf.append("\n");
+    
     iter = constructors.iterator();
     while (iter.hasNext()) {
       buf.append(iter.next().toJavaString());

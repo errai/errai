@@ -27,7 +27,7 @@ import org.jboss.errai.ioc.tests.wiring.client.res.SimpleBean2;
 import org.junit.runner.RunWith;
 
 @RunWith(IOCTestRunner.class)
-public class BasicIOCTest extends IOCClientTestCase {
+public class  BasicIOCTest extends IOCClientTestCase {
 
   static {
     // Force classloading of SimpleBean so the package is discovered.

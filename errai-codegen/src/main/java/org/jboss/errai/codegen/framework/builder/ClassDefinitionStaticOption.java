@@ -17,12 +17,10 @@
 package org.jboss.errai.codegen.framework.builder;
 
 /**
- * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Mike Brock
  */
-public interface ClassDefinitionBuilderAbstractOption<T extends ClassStructureBuilder<T>>
-    extends ClassDefinitionBuilderInterfaces<T> {
+public interface ClassDefinitionStaticOption<T extends ClassStructureBuilder<T>>
+        extends ClassDefinitionBuilderAbstractOption<T> {
 
-  public ClassDefinitionBuilderInterfaces<ClassStructureBuilderAbstractMethodOption> abstractClass();
-
-  public ClassDefinitionBuilderInterfaces<ClassStructureBuilderAbstractMethodOption> interfaceDefinition();
+  public ClassDefinitionBuilderAbstractOption<T> staticClass();
 }
