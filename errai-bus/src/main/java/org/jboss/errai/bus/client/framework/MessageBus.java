@@ -43,7 +43,8 @@ import org.jboss.errai.bus.client.api.*;
  * <p/>
  * Services always live on the bus with which they a registered.  When a new registration occurs, the service
  * becomes generally available across the entire context.  This is accomplished by notifying the proximate bus--
- * in real-time--that a subscription has been created with a {@link org.jboss.errai.bus.client.protocols.BusCommands#RemoteSubscribe}
+ * in real-time--that a subscription has been created with a
+ * {@link org.jboss.errai.bus.client.protocols.BusCommands#RemoteSubscribe}
  * command containing the subject that has just become routable.  Likewise, when a subject is unsubscribed, an
  * {@link org.jboss.errai.bus.client.protocols.BusCommands#RemoteUnsubscribe} is sent.
  * <p/>
@@ -58,7 +59,8 @@ import org.jboss.errai.bus.client.api.*;
  * );
  * </code></pre>
  * The API for creating services is heterogeneous in both client and server code.  The only semantic difference involves
- * obtaining an instance of the <tt>MessageBus</tt> which is done using the {@link org.jboss.errai.bus.client.ErraiBus#get()} method in client code,
+ * obtaining an instance of the <tt>MessageBus</tt> which is done using the
+ * {@link org.jboss.errai.bus.client.ErraiBus#get()} method in client code,
  * and by default, is provided by the container using dependency injection in the server code.  For example:
  * <p/>
  * <pre><code>

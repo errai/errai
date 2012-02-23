@@ -110,8 +110,6 @@ public class IOCBootstrapGenerator {
 
   private Logger log = LoggerFactory.getLogger(IOCBootstrapGenerator.class);
 
-  private static final boolean SIMULATED_CLIENT = Boolean.getBoolean("errai.ioc.debug.simulated_client");
-
   public static final String QUALIFYING_METADATA_FACTORY_PROPERTY = "errai.ioc.QualifyingMetaDataFactory";
 
   TreeLogger logger = new TreeLogger() {
@@ -188,7 +186,7 @@ public class IOCBootstrapGenerator {
     ClassStructureBuilder<?> classStructureBuilder =
             Implementations.implement(Bootstrapper.class, packageName, className);
 
-    BuildMetaClass bootStrapClass = (BuildMetaClass) classStructureBuilder.getClassDefinition();
+    BuildMetaClass bootStrapClass = classStructureBuilder.getClassDefinition();
     Context buildContext = bootStrapClass.getContext();
 
     BlockBuilder<?> blockBuilder =
@@ -324,7 +322,6 @@ public class IOCBootstrapGenerator {
   }
 
   public void initializeProviders() {
-
     final MetaClass typeProviderCls = MetaClassFactory.get(TypeProvider.class);
     MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
 
@@ -517,7 +514,6 @@ public class IOCBootstrapGenerator {
 
   private void defaultConfigureProcessor() {
     final MetaClass widgetType = MetaClassFactory.get(Widget.class);
-
 
 
     procFactory.registerHandler(Singleton.class, new AnnotationHandler<Singleton>() {

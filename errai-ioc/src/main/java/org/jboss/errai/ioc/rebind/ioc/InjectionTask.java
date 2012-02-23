@@ -33,7 +33,7 @@ import org.jboss.errai.codegen.framework.util.Refs;
 import org.jboss.errai.codegen.framework.util.Stmt;
 
 public class InjectionTask {
-  protected final TaskType injectType;
+  protected final TaskType taskType;
   protected final Injector injector;
 
   protected MetaConstructor constructor;
@@ -43,25 +43,25 @@ public class InjectionTask {
   protected MetaParameter parm;
 
   public InjectionTask(Injector injector, MetaField field) {
-    this.injectType = !field.isPublic() ? TaskType.PrivateField : TaskType.Field;
+    this.taskType = !field.isPublic() ? TaskType.PrivateField : TaskType.Field;
     this.injector = injector;
     this.field = field;
   }
 
   public InjectionTask(Injector injector, MetaMethod method) {
-    this.injectType = !method.isPublic() ? TaskType.PrivateMethod : TaskType.Method;
+    this.taskType = !method.isPublic() ? TaskType.PrivateMethod : TaskType.Method;
     this.injector = injector;
     this.method = method;
   }
 
   public InjectionTask(Injector injector, MetaParameter parm) {
-    this.injectType = TaskType.Parameter;
+    this.taskType = TaskType.Parameter;
     this.injector = injector;
     this.parm = parm;
   }
 
   public InjectionTask(Injector injector, MetaClass type) {
-    this.injectType = TaskType.Type;
+    this.taskType = TaskType.Type;
     this.injector = injector;
     this.type = type;
   }
@@ -70,16 +70,13 @@ public class InjectionTask {
   public boolean doTask(InjectionContext ctx) {
     IOCProcessingContext processingContext = ctx.getProcessingContext();
 
-    InjectableInstance<? extends Annotation> injectableInstance
-            = new InjectableInstance(null, injectType, constructor, method, field, type, parm, injector, ctx);
-
-    ctx.getProcessingContext().handleDiscoveryOfType(injectableInstance);
+    InjectableInstance injectableInstance = getInjectableInstance(ctx);
 
     Injector inj;
     QualifyingMetadata qualifyingMetadata = processingContext.getQualifyingMetadataFactory()
             .createFrom(injectableInstance.getQualifiers());
 
-    switch (injectType) {
+    switch (taskType) {
       case Type:
         ctx.getQualifiedInjector(type, qualifyingMetadata);
         break;
@@ -128,6 +125,8 @@ public class InjectionTask {
 
       case PrivateMethod: {
         for (MetaParameter parm : method.getParameters()) {
+          ctx.getProcessingContext().handleDiscoveryOfType(
+                  new InjectableInstance(null, TaskType.Parameter, null, method, null, parm.getType(), parm, injector, ctx));
           if (!ctx.isInjectableQualified(parm.getType(), qualifyingMetadata)) {
             return false;
           }
@@ -148,6 +147,9 @@ public class InjectionTask {
 
       case Method:
         for (MetaParameter parm : method.getParameters()) {
+          ctx.getProcessingContext().handleDiscoveryOfType(
+                  new InjectableInstance(null, TaskType.Parameter, null, method, null, parm.getType(), parm, injector, ctx));
+
           if (!ctx.isInjectableQualified(parm.getType(), qualifyingMetadata)) {
             return false;
           }
@@ -164,8 +166,26 @@ public class InjectionTask {
     return true;
   }
 
-  public TaskType getInjectType() {
-    return injectType;
+
+  private InjectableInstance getInjectableInstance(InjectionContext ctx) {
+    InjectableInstance<? extends Annotation> injectableInstance
+            = new InjectableInstance(null, taskType, constructor, method, field, type, parm, injector, ctx);
+
+    switch (taskType) {
+      case Method:
+      case StaticMethod:
+      case PrivateMethod:
+        break;
+
+      default:
+        ctx.getProcessingContext().handleDiscoveryOfType(injectableInstance);
+    }
+
+    return injectableInstance;
+  }
+
+  public TaskType getTaskType() {
+    return taskType;
   }
 
   public Injector getInjector() {
@@ -191,7 +211,7 @@ public class InjectionTask {
   }
 
   public String toString() {
-    switch (injectType) {
+    switch (taskType) {
       case Type:
         return type.getFullyQualifiedName();
       case Method:

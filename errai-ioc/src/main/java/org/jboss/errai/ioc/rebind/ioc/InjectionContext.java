@@ -292,7 +292,7 @@ public class InjectionContext {
     if (!toExecute.isEmpty()) {
       UnsatisfiedDependencies unsatisfiedDependencies = new UnsatisfiedDependencies();
       for (InjectionTask task : toExecute) {
-        switch (task.getInjectType()) {
+        switch (task.getTaskType()) {
           case PrivateField:
           case Field:
             unsatisfiedDependencies.addUnsatisfiedDependency(

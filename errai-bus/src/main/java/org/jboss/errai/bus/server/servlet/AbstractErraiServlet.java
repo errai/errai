@@ -74,7 +74,7 @@ public abstract class AbstractErraiServlet extends HttpServlet {
       if ("connection".equals(phase)) {
         return ConnectionPhase.CONNECTING;
       }
-      else if ("disconnect".equals(phase)) {
+      if ("disconnect".equals(phase)) {
         return ConnectionPhase.DISCONNECTING;
       }
 

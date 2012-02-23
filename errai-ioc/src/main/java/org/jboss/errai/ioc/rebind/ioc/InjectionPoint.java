@@ -85,8 +85,8 @@ public class InjectionPoint<T> {
         return type = field.getType();
       case PrivateMethod:
       case StaticMethod:
-      case Method:
-        return type = method.getReturnType();
+      case Parameter:
+        return type = parm.getType();
       case Type:
         return type;
       default:

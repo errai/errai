@@ -53,7 +53,7 @@ public class DecoratorTask extends InjectionTask {
     Annotation anno = null;
 
     for (IOCDecoratorExtension<? extends Annotation> dec : IOCExtensions) {
-      switch (injectType) {
+      switch (taskType) {
         case PrivateField:
         case Field:
           anno = field.getAnnotation(dec.decoratesWith());
@@ -74,7 +74,7 @@ public class DecoratorTask extends InjectionTask {
 
       }
 
-      Statement stmt = dec.generateDecorator(new InjectableInstance(anno, injectType, constructor, method, field, type,
+      Statement stmt = dec.generateDecorator(new InjectableInstance(anno, taskType, constructor, method, field, type,
               parm, injector, ctx));
 
       ctx.getProcessingContext().append(stmt);
