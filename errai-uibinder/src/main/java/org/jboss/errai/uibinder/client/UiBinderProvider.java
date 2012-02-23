@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.client.api.builtin;
+package org.jboss.errai.uibinder.client;
 
 import com.google.gwt.uibinder.client.UiBinder;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;

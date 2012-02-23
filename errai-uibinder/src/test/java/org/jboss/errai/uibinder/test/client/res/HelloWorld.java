@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.tests.wiring.client.res;
+package org.jboss.errai.uibinder.test.client.res;
 
 import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.SpanElement;

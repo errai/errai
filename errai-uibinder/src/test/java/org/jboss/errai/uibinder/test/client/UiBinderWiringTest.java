@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.tests.wiring.client;
+package org.jboss.errai.uibinder.test.client;
 
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
-import org.jboss.errai.ioc.tests.wiring.client.res.HelloWorld;
+import org.jboss.errai.uibinder.test.client.res.HelloWorld;
 
 /**
  * @author Mike Brock
@@ -27,7 +27,7 @@ public class UiBinderWiringTest extends AbstractErraiIOCTest {
 
   @Override
   public String getModuleName() {
-    return "org.jboss.errai.ioc.tests.wiring.IOCWiringTests";
+    return "org.jboss.errai.uibinder.test.UIBinderWiringTests";
   }
 
   public void testUiBinderWiring() {

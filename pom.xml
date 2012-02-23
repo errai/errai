@@ -93,6 +93,7 @@
         <module>errai-cdi</module>
         <module>errai-jaxrs</module>
         <module>jboss7-support</module>
+        <module>errai-uibinder</module>
     </modules>
 
     <dependencyManagement>
