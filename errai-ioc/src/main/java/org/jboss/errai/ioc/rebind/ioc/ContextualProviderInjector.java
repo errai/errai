@@ -66,7 +66,7 @@ public class ContextualProviderInjector extends TypeInjector {
     }
 
     Statement statement;
-    Injector contextInjector = null;
+    Injector contextInjector;
 
     if (pType == null) {
       if (providerInjector.getInjectedType().isAssignableTo(Provider.class)) {

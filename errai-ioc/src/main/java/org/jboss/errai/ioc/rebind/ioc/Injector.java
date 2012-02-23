@@ -55,7 +55,7 @@ public abstract class Injector {
             null)
             || !(qualifyingTypeInformation == null || (injector != null && injector.qualifyingTypeInformation ==
             null))
-            && qualifyingTypeInformation.isAssignableFrom(injector.qualifyingTypeInformation));
+            && injector != null && qualifyingTypeInformation.isAssignableFrom(injector.qualifyingTypeInformation));
   }
 
   public boolean matches(MetaParameterizedType parameterizedType, QualifyingMetadata qualifyingMetadata) {
