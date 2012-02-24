@@ -33,7 +33,7 @@ import java.util.Set;
  * @author Mike Brock
  */
 public class IOCBeanManager {
-  private Map<Class<?>, List<IOCBean>> beanMap = new HashMap<Class<?>, List<IOCBean>>();
+  private Map<Class<?>, List<IOCBeanDef>> beanMap = new HashMap<Class<?>, List<IOCBeanDef>>();
 
   /**
    * Register a bean with the manager. This is called by the generated code to advertise the bean.
@@ -42,19 +42,24 @@ public class IOCBeanManager {
    * @param instance   the instance reference
    * @param qualifiers any qualifiers
    */
-  public void registerBean(final Class<Object> type, final Object instance, final Annotation[] qualifiers) {
-    registerBean(IOCBean.newBean(type, qualifiers, instance));
+  public void registerSingletonBean(final Class<Object> type, final Object instance, final Annotation[] qualifiers) {
+    registerBean(IOCSingletonBean.newBean(type, qualifiers, instance));
+  }
+  
+  public void registerDependentBean(final Class<Object> type, final CreationalCallback<Object> callback,
+                                    final Annotation[] qualifiers) {
+    registerBean(IOCDependentBean.newBean(type, qualifiers, callback));
   }
 
   /**
    * Register a bean with the manager.
    *
-   * @param bean an {@link IOCBean} reference
+   * @param bean an {@link IOCSingletonBean} reference
    */
-  public void registerBean(final IOCBean bean) {
-    List<IOCBean> beans = beanMap.get(bean);
+  public void registerBean(final IOCBeanDef bean) {
+    List<IOCBeanDef> beans = beanMap.get(bean);
     if (beans == null) {
-      beanMap.put(bean.getType(), beans = new ArrayList<IOCBean>());
+      beanMap.put(bean.getType(), beans = new ArrayList<IOCBeanDef>());
     }
     beans.add(bean);
   }
@@ -66,8 +71,8 @@ public class IOCBeanManager {
    * @return A list of all the beans that match the specified type. Returns an empty list if there is
    *         no matching type.
    */
-  public List<IOCBean> lookupBeans(Class<?> type) {
-    List<IOCBean> beanList = beanMap.get(type);
+  public List<IOCBeanDef> lookupBeans(Class<?> type) {
+    List<IOCBeanDef> beanList = beanMap.get(type);
     if (beanList == null) {
       return Collections.emptyList();
     }
@@ -83,12 +88,12 @@ public class IOCBeanManager {
    * @param type       The type of the bean
    * @param qualifiers qualifiers to match
    * @param <T>        The type of the bean
-   * @return An instance of the {@link IOCBean} for the matching type and qualifiers. Returns null if there is
+   * @return An instance of the {@link IOCSingletonBean} for the matching type and qualifiers. Returns null if there is
    *         no matching type. Throws an {@link IOCResolutionException} if there is a matching type but none of the
    *         qualifiers match or if more than one bean  matches.
    */
-  public <T> IOCBean<T> lookupBean(Class<T> type, Annotation... qualifiers) {
-    List<IOCBean> beanList = beanMap.get(type);
+  public <T> IOCBeanDef<T> lookupBean(Class<T> type, Annotation... qualifiers) {
+    List<IOCBeanDef> beanList = beanMap.get(type);
     if (beanList == null) {
       return null;
     }
@@ -100,9 +105,9 @@ public class IOCBeanManager {
     Set<Annotation> qualSet = new HashSet<Annotation>();
     Collections.addAll(qualSet, qualifiers);
 
-    List<IOCBean> matching = new ArrayList<IOCBean>();
+    List<IOCBeanDef> matching = new ArrayList<IOCBeanDef>();
 
-    for (IOCBean iocBean : beanList) {
+    for (IOCBeanDef iocBean : beanList) {
       if (iocBean.matches(qualSet)) {
         matching.add(iocBean);
       }

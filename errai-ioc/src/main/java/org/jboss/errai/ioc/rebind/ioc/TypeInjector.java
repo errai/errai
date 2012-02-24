@@ -18,11 +18,15 @@ package org.jboss.errai.ioc.rebind.ioc;
 
 
 import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
+import org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.util.Refs;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.ioc.client.api.EntryPoint;
+import org.jboss.errai.ioc.client.container.CreationalCallback;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 
 import javax.inject.Singleton;
@@ -87,6 +91,16 @@ public class TypeInjector extends Injector {
       }
     }
 
+    IOCProcessingContext ctx = injectContext.getProcessingContext();
+
+    MetaClass creationCallbackRef
+            = MetaClassFactory.parameterizedAs(CreationalCallback.class, MetaClassFactory.typeParametersOf(type));
+
+    BlockBuilder<AnonymousClassStructureBuilder> callbackBuilder = ObjectBuilder.newInstanceOf(creationCallbackRef).extend()
+            .publicOverridesMethod("getInstance");
+
+    ctx.pushBlockBuilder(callbackBuilder);
+
     InjectUtil.getConstructionStrategy(this, injectContext).generateConstructor(new ConstructionStatusCallback() {
       @Override
       public void callback(boolean constructed) {
@@ -94,8 +108,26 @@ public class TypeInjector extends Injector {
       }
     });
 
+    ctx.append(Stmt.loadVariable(varName).returnValue());
 
-    return Refs.get(varName);
+    ctx.popBlockBuilder();
+
+    String creationalCallbackVar = "create_" + varName;
+
+    ctx.globalAppend(Stmt.declareVariable(creationCallbackRef).asFinal().named(creationalCallbackVar)
+            .initializeWith(callbackBuilder.finish().finish()));
+
+    if (isSingleton()) {
+
+      ctx.globalAppend(Stmt.declareVariable(type).asFinal().named(varName)
+              .initializeWith(Stmt.loadVariable(creationalCallbackVar).invoke("getInstance")));
+
+      return Refs.get(varName);
+    }
+    else {
+      varName = creationalCallbackVar;
+      return Stmt.loadVariable(varName).invoke("getInstance");
+    }
   }
 
   @Override
@@ -139,10 +171,17 @@ public class TypeInjector extends Injector {
   private void registerWithBeanManager(InjectionContext context, Statement valueRef) {
     if (useBeanManager) {
       if (InjectUtil.checkIfTypeNeedsAddingToBeanStore(context, this)) {
-        context.getProcessingContext().appendToEnd(
-                Stmt.loadVariable(context.getProcessingContext().getContextVariableReference())
-                        .invoke("addBean", type, valueRef, qualifyingMetadata.render())
-        );
+        if (isSingleton()) {
+          context.getProcessingContext().appendToEnd(
+                  Stmt.loadVariable(context.getProcessingContext().getContextVariableReference())
+                          .invoke("addSingletonBean", type, valueRef, qualifyingMetadata.render())
+          );
+        }
+        else {
+          context.getProcessingContext().appendToEnd(
+                  Stmt.loadVariable(context.getProcessingContext().getContextVariableReference())
+                          .invoke("addDependentBean", type, Refs.get(varName), qualifyingMetadata.render()));
+        }
       }
     }
   }

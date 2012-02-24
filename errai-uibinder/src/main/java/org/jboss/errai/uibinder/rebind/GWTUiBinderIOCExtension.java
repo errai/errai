@@ -102,7 +102,7 @@ public class GWTUiBinderIOCExtension implements IOCExtensionConfigurator {
                   .replaceAll("\\.", "_");
 
           if (Boolean.getBoolean("errai.simulatedClient")) {
-            context.append(Stmt.declareVariable(UiBinder.class).named(varName).initializeWith(
+            context.globalAppend(Stmt.declareVariable(UiBinder.class).named(varName).initializeWith(
                     ObjectBuilder.newInstanceOf(uiBinderBoilerPlaterIface)
                             .extend()
                             .publicOverridesMethod("createAndBindUi", Parameter.of(injectionPoint.getEnclosingType(), "w"))
@@ -114,12 +114,12 @@ public class GWTUiBinderIOCExtension implements IOCExtensionConfigurator {
           }
           else {
 
-            context.append(Stmt.declareVariable(UiBinder.class).named(varName).initializeWith(
+            context.globalAppend(Stmt.declareVariable(UiBinder.class).named(varName).initializeWith(
                     Stmt.invokeStatic(GWT.class, "create", LiteralFactory.getLiteral(uiBinderBoilerPlaterIface))
             ));
           }
 
-          context.append(Stmt.invokeStatic(UiBinderProvider.class, "registerBinder",
+          context.globalAppend(Stmt.invokeStatic(UiBinderProvider.class, "registerBinder",
                   injectionPoint.getEnclosingType(), Refs.get(varName)));
         }
         else if (injectionPoint.getType().isAssignableTo(SafeHtmlTemplates.class)) {

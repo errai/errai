@@ -111,7 +111,6 @@ public class InjectUtil {
           }
           injectedVars.put(injector.getVarName(), new Throwable());
 
-
           processingContext.append(
                   Stmt.declareVariable(type)
                           .asFinal()
@@ -121,7 +120,6 @@ public class InjectUtil {
                                   .withParameters(parameterStatements))
           );
           callback.callback(true);
-
 
           handleInjectionTasks(ctx, injectionTasks);
 
@@ -133,13 +131,13 @@ public class InjectUtil {
     else {
       // field injection
       if (!hasDefaultConstructor(type))
-        throw new InjectionFailure("there is no public default constructor or suitable injection constructor for type: " + type.getFullyQualifiedName());
+        throw new InjectionFailure("there is no public default constructor or suitable injection constructor for type: "
+                + type.getFullyQualifiedName());
 
       return new ConstructionStrategy() {
         @Override
         public void generateConstructor(ConstructionStatusCallback callback) {
           if (injector.isSingleton() && injector.isInjected()) return;
-
 
           IOCProcessingContext processingContext = ctx.getProcessingContext();
 

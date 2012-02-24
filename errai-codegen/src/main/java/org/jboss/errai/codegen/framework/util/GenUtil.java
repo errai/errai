@@ -39,6 +39,7 @@ import org.jboss.errai.codegen.framework.builder.CatchBlockBuilder;
 import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.Scope;
+import org.jboss.errai.codegen.framework.exception.GenerationException;
 import org.jboss.errai.codegen.framework.exception.InvalidExpressionException;
 import org.jboss.errai.codegen.framework.exception.InvalidTypeException;
 import org.jboss.errai.codegen.framework.exception.OutOfScopeException;
@@ -716,6 +717,9 @@ public class GenUtil {
       throw e;
     }
     catch (TypeNotIterableException e) {
+      throw e;
+    }
+    catch (GenerationException e) {
       throw e;
     }
     catch (Throwable e) {

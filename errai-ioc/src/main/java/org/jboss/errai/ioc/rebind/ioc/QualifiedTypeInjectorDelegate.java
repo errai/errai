@@ -106,7 +106,7 @@ public class QualifiedTypeInjectorDelegate extends Injector {
 
         context.getProcessingContext().appendToEnd(
                 Stmt.loadVariable(context.getProcessingContext().getContextVariableReference())
-                        .invoke("addBean", type, valueRef, md.render()));
+                        .invoke("addSingletonBean", type, valueRef, md.render()));
       }
     }
   }

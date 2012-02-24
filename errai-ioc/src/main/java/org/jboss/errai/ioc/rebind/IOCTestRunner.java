@@ -19,6 +19,7 @@ package org.jboss.errai.ioc.rebind;
 import com.google.gwt.junit.JUnitShell;
 import junit.framework.TestCase;
 import junit.framework.TestResult;
+import org.jboss.errai.codegen.framework.exception.GenerationException;
 import org.jboss.errai.common.client.api.tasks.AsyncTask;
 import org.jboss.errai.common.client.api.tasks.TaskManager;
 import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
@@ -87,6 +88,9 @@ public class IOCTestRunner extends ParentRunner<Runner> {
                 iocClientTestCase.setName(method.getName());
                 JUnitShell.runTest(iocClientTestCase, result);
               }
+            }
+            catch (GenerationException e) {
+              notifier.fireTestFailure(new Failure(description, e));
             }
             catch (InvocationTargetException e) {
               notifier.fireTestFailure(new Failure(description, e.getTargetException()));
@@ -237,6 +241,9 @@ public class IOCTestRunner extends ParentRunner<Runner> {
               InterfaceInjectionContext ctx = bs.bootstrapContainer();
               System.out.println("bootstrapped simulated container in " + (System.currentTimeMillis() - tm) + "ms");
               return ctx;
+            }
+            catch (GenerationException e) {
+              throw e;
             }
             catch (Exception e) {
               throw new RuntimeException("failed to run in emulated mode", e);

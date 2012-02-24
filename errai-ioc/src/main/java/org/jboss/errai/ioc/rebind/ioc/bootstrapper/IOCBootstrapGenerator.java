@@ -194,8 +194,7 @@ public class IOCBootstrapGenerator {
 
     SourceWriter sourceWriter = new StringSourceWriter();
 
-    procContext = new IOCProcessingContext(logger, context, sourceWriter,
-            typeOracle, buildContext, bootStrapClass, blockBuilder);
+    procContext = new IOCProcessingContext(logger, context, sourceWriter, buildContext, bootStrapClass, blockBuilder);
 
     injectFactory = new InjectorFactory(procContext);
     procFactory = new IOCProcessorFactory(injectFactory);

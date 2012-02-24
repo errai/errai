@@ -170,13 +170,13 @@ public class AnonymousClassStructureBuilderImpl
 
       StringBuilder buf = new StringBuilder(256);
       for (DeferredGenerateCallback c : callables) {
-        buf.append(c.doGenerate(subContext));
-        buf.append('\n');
+
+        buf.append(c.doGenerate(subContext).trim()).append('\n');
       }
 
-      buf.append(classDefinition.membersToString());
+      buf.append(classDefinition.membersToString().trim());
 
-      return generatedCache = buf.toString();
+      return generatedCache = buf.toString().trim();
     }
     catch (Exception e) {
       GenUtil.throwIfUnhandled("while generating: " + classDefinition.getFullyQualifiedName(), e);

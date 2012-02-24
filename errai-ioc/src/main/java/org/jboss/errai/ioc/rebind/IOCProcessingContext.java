@@ -18,14 +18,12 @@ package org.jboss.errai.ioc.rebind;
 
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.user.rebind.SourceWriter;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.Variable;
 import org.jboss.errai.codegen.framework.VariableReference;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
-import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.ioc.client.InterfaceInjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.InjectionPoint;
@@ -36,6 +34,7 @@ import org.jboss.errai.ioc.rebind.ioc.TypeDiscoveryListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Stack;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -43,7 +42,7 @@ import java.util.List;
 public class IOCProcessingContext  {
   protected Context context;
   protected BuildMetaClass bootstrapClass;
-  protected BlockBuilder<?> blockBuilder;
+  protected Stack<BlockBuilder<?>> blockBuilder;
   protected List<String> packages;
   
   protected List<Statement> appendToEnd;
@@ -53,8 +52,7 @@ public class IOCProcessingContext  {
   protected GeneratorContext generatorContext;
 
   protected SourceWriter writer;
-  protected TypeOracle oracle;
-  
+
   protected Variable contextVariable = Variable.create("ctx", InterfaceInjectionContext.class);
 
   protected QualifyingMetadataFactory qualifyingMetadataFactory = new JSR330QualifyingMetadataFactory();
@@ -62,7 +60,6 @@ public class IOCProcessingContext  {
   public IOCProcessingContext(TreeLogger treeLogger,
                               GeneratorContext generatorContext,
                               SourceWriter writer,
-                              TypeOracle oracle,
                               Context context,
                               BuildMetaClass bootstrapClass,
                               BlockBuilder<?> blockBuilder) {
@@ -71,18 +68,33 @@ public class IOCProcessingContext  {
     this.writer = writer;
     this.context = context;
     this.bootstrapClass = bootstrapClass;
-    this.blockBuilder = blockBuilder;
+
+    this.blockBuilder = new Stack<BlockBuilder<?>>();
+    this.blockBuilder.push(blockBuilder);
+
     this.appendToEnd = new ArrayList<Statement>();
     this.typeDiscoveryListeners = new ArrayList<TypeDiscoveryListener>();
   }
 
 
   public BlockBuilder<?> getBlockBuilder() {
-    return blockBuilder;
+    return blockBuilder.peek();
   }
 
   public BlockBuilder<?> append(Statement statement) {
-    return blockBuilder.append(statement);
+    return getBlockBuilder().append(statement);
+  }
+
+  public BlockBuilder<?> globalAppend(Statement statement) {
+    return blockBuilder.get(0).append(statement);
+  }
+
+  public void pushBlockBuilder(BlockBuilder<?> blockBuilder) {
+    this.blockBuilder.push(blockBuilder);
+  }
+
+  public void popBlockBuilder() {
+    this.blockBuilder.pop();
   }
 
   public void appendToEnd(Statement statement) {
@@ -119,10 +131,6 @@ public class IOCProcessingContext  {
 
   public SourceWriter getWriter() {
     return writer;
-  }
-
-  public TypeOracle getOracle() {
-    return oracle;
   }
 
   public Variable getContextVariable() {

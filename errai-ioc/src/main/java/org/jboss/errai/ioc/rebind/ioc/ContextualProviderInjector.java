@@ -121,7 +121,7 @@ public class ContextualProviderInjector extends TypeInjector {
 
     if (singleton) {
       if (!injected) {
-        injectContext.getProcessingContext().append(Stmt.declareVariable(type).named(varName)
+        injectContext.getProcessingContext().globalAppend(Stmt.declareVariable(type).named(varName)
                 .initializeWith(statement));
       }
       statement = Refs.get(varName);
@@ -214,7 +214,7 @@ public class ContextualProviderInjector extends TypeInjector {
 
           context.getProcessingContext().appendToEnd(
                   Stmt.loadVariable(context.getProcessingContext().getContextVariableReference())
-                          .invoke("addBean", type, val, md.render()));
+                          .invoke("addSingletonBean", type, val, md.render()));
         }
       }
     }
