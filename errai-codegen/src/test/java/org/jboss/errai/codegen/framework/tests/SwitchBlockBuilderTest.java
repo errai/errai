@@ -16,10 +16,12 @@
 
 package org.jboss.errai.codegen.framework.tests;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.builder.impl.StatementBuilder;
+import org.jboss.errai.codegen.framework.exception.GenerationException;
 import org.jboss.errai.codegen.framework.exception.InvalidTypeException;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.junit.Test;
@@ -42,8 +44,8 @@ public class SwitchBlockBuilderTest extends AbstractStatementBuilderTest impleme
           .toJavaString();
       fail("expected InvalidTypeException");
     }
-    catch (InvalidTypeException e) {
-      // expected
+    catch (GenerationException e) {
+       assertTrue("Expected InvalidTypeException", ExceptionUtil.isIntermediateCause(e, InvalidTypeException.class));
     }
   }
 
@@ -58,8 +60,8 @@ public class SwitchBlockBuilderTest extends AbstractStatementBuilderTest impleme
           .toJavaString();
       fail("expected InvalidTypeException");
     }
-    catch (InvalidTypeException e) {
-      // expected
+    catch (GenerationException e) {
+       assertTrue("Expected InvalidTypeException", ExceptionUtil.isIntermediateCause(e, InvalidTypeException.class));
     }
   }
 
@@ -74,8 +76,8 @@ public class SwitchBlockBuilderTest extends AbstractStatementBuilderTest impleme
           .toJavaString();
       fail("expected InvalidTypeException");
     }
-    catch (InvalidTypeException e) {
-      // expected
+    catch (GenerationException e) {
+       assertTrue("Expected InvalidTypeException", ExceptionUtil.isIntermediateCause(e, InvalidTypeException.class));
     }
   }
 

@@ -36,6 +36,7 @@ import org.jboss.errai.codegen.framework.Variable;
 import org.jboss.errai.codegen.framework.VariableReference;
 import org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.StatementBuilder;
+import org.jboss.errai.codegen.framework.exception.GenerationException;
 import org.jboss.errai.codegen.framework.exception.InvalidTypeException;
 import org.jboss.errai.codegen.framework.exception.OutOfScopeException;
 import org.jboss.errai.codegen.framework.literal.LiteralFactory;
@@ -180,8 +181,10 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
       StatementBuilder.create().loadVariable("n").toJavaString();
       fail("Expected OutOfScopeException");
     }
-    catch (OutOfScopeException oose) {
+    catch (GenerationException e) {
       // expected
+      assertTrue("Expected OutOfScopeException", ExceptionUtil.isIntermediateCause(e, OutOfScopeException.class));
+
     }
   }
 
@@ -370,8 +373,8 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
 
       fail("Expected InvalidTypeExcpetion");
     }
-    catch (InvalidTypeException ite) {
-      // Expected, variable is not an array.
+    catch (GenerationException e) {
+       assertTrue("Expected InvalidTypeException", ExceptionUtil.isIntermediateCause(e, InvalidTypeException.class));
     }
   }
 
@@ -387,8 +390,8 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
               .toJavaString();
       fail("Expected InvalidTypeExcpetion");
     }
-    catch (InvalidTypeException ite) {
-      // Expected, indexes are no integers
+    catch (GenerationException e) {
+       assertTrue("Expected InvalidTypeException", ExceptionUtil.isIntermediateCause(e, InvalidTypeException.class));
     }
   }
 
@@ -477,8 +480,8 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
       StatementBuilder.create().declareVariable("t", Integer.class).throw_("t").toJavaString();
       fail("expected InvalidTypeException");
     }
-    catch (InvalidTypeException e) {
-      // expected
+    catch (GenerationException e) {
+       assertTrue("Expected InvalidTypeException", ExceptionUtil.isIntermediateCause(e, InvalidTypeException.class));
     }
   }
 
@@ -488,8 +491,8 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
       StatementBuilder.create().throw_("t").toJavaString();
       fail("expected OutOfScopeException");
     }
-    catch (OutOfScopeException e) {
-      // expected
+    catch (GenerationException e) {
+       assertTrue("Expected OutOfScopeException", ExceptionUtil.isIntermediateCause(e, OutOfScopeException.class));
     }
   }
 

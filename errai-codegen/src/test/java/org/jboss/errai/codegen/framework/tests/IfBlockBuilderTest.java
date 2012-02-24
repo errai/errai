@@ -25,6 +25,7 @@ import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Variable;
 import org.jboss.errai.codegen.framework.builder.impl.ContextBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.StatementBuilder;
+import org.jboss.errai.codegen.framework.exception.GenerationException;
 import org.jboss.errai.codegen.framework.exception.InvalidExpressionException;
 import org.jboss.errai.codegen.framework.exception.InvalidTypeException;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
@@ -250,7 +251,9 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
 
       fail("Expected InvalidTypeException");
     }
-    catch (InvalidTypeException e) {
+    catch (GenerationException e) {
+      assertTrue("expected InvalidTypeException", ExceptionUtil.getRootCause(e) instanceof InvalidTypeException);
+      
       // expected
     }
 
@@ -264,8 +267,8 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
 
       fail("Expected InvalidTypeException");
     }
-    catch (InvalidTypeException e) {
-      // expected
+    catch (GenerationException e) {
+      assertTrue("expected InvalidTypeException", ExceptionUtil.getRootCause(e) instanceof InvalidTypeException);
     }
   }
 
@@ -281,8 +284,8 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
 
       fail("Expected InvalidExpressionException");
     }
-    catch (InvalidExpressionException e) {
-      assertTrue("Wrong exception thrown", e.getMessage().contains(String.class.getName()));
+    catch (GenerationException e) {
+      assertTrue("Wrong exception thrown", e.getCause().getMessage().contains(String.class.getName()));
     }
   }
 
