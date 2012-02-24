@@ -38,6 +38,7 @@ public class UiBinderWiringTest extends AbstractErraiIOCTest {
 
         assertNotNull("binder null!", helloWorld.getBinder());
         assertNotNull("ui element null", helloWorld.getNameSpan());
+        assertNotNull("safe templates field is null", helloWorld.getSafeTemplates());
 
         finishTest();
       }

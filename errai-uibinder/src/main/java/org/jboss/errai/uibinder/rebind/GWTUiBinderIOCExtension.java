@@ -17,10 +17,13 @@
 package org.jboss.errai.uibinder.rebind;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
+import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiTemplate;
 import org.jboss.errai.codegen.framework.InnerClass;
 import org.jboss.errai.codegen.framework.Parameter;
+import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.framework.literal.LiteralFactory;
@@ -31,6 +34,9 @@ import org.jboss.errai.codegen.framework.util.Refs;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.ioc.client.api.IOCExtension;
 import org.jboss.errai.ioc.client.api.PackageTarget;
+import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
+import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
+import org.jboss.errai.ioc.rebind.ioc.Injector;
 import org.jboss.errai.uibinder.client.UiBinderProvider;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.IOCProcessorFactory;
@@ -47,78 +53,137 @@ import java.lang.annotation.Annotation;
 @IOCExtension
 public class GWTUiBinderIOCExtension implements IOCExtensionConfigurator {
   @Override
-  public void configure(IOCProcessingContext context, InjectorFactory injectorFactory, IOCProcessorFactory procFactory) {
+  public void configure(final IOCProcessingContext context, final InjectorFactory injectorFactory, final IOCProcessorFactory procFactory) {
 
     context.registerTypeDiscoveryListener(new TypeDiscoveryListener() {
-       @Override
-       public void onDiscovery(final IOCProcessingContext context, final InjectionPoint injectionPoint) {
-         if (injectionPoint.getType().isAssignableFrom(UiBinder.class)) {
-           MetaClass uiBinderParameterized = MetaClassFactory.parameterizedAs(UiBinder.class,
-                   MetaClassFactory
-                           .typeParametersOf(injectionPoint.getType().getParameterizedType().getTypeParameters()[0],
-                                   injectionPoint.getEnclosingType()));
+      @Override
+      public void onDiscovery(final IOCProcessingContext context, final InjectionPoint injectionPoint) {
+        if (injectionPoint.getType().isAssignableFrom(UiBinder.class)) {
+          MetaClass uiBinderParameterized = MetaClassFactory.parameterizedAs(UiBinder.class,
+                  MetaClassFactory
+                          .typeParametersOf(injectionPoint.getType().getParameterizedType().getTypeParameters()[0],
+                                  injectionPoint.getEnclosingType()));
 
-           BuildMetaClass uiBinderBoilerPlaterIface = ClassBuilder.define(injectionPoint.getEnclosingType().getName()
-                   + "UiBinder", uiBinderParameterized)
-                   .publicScope().staticClass().interfaceDefinition()
-                   .body().getClassDefinition();
+          BuildMetaClass uiBinderBoilerPlaterIface = ClassBuilder.define(injectionPoint.getEnclosingType().getName()
+                  + "UiBinder", uiBinderParameterized)
+                  .publicScope().staticClass().interfaceDefinition()
+                  .body().getClassDefinition();
 
-           UiTemplate handler = new UiTemplate() {
-             @Override
-             public String value() {
-               return injectionPoint.getEnclosingType().getFullyQualifiedName() + ".ui.xml";
-             }
+          UiTemplate handler = new UiTemplate() {
+            @Override
+            public String value() {
+              return injectionPoint.getEnclosingType().getFullyQualifiedName() + ".ui.xml";
+            }
 
-             @Override
-             public Class<? extends Annotation> annotationType() {
-               return UiTemplate.class;
-             }
-           };
+            @Override
+            public Class<? extends Annotation> annotationType() {
+              return UiTemplate.class;
+            }
+          };
 
-           PackageTarget packageTarget = new PackageTarget() {
-             @Override
-             public String value() {
-               return injectionPoint.getEnclosingType().getPackageName();
-             }
+          PackageTarget packageTarget = new PackageTarget() {
+            @Override
+            public String value() {
+              return injectionPoint.getEnclosingType().getPackageName();
+            }
 
-             @Override
-             public Class<? extends Annotation> annotationType() {
-               return PackageTarget.class;
-             }
-           };
+            @Override
+            public Class<? extends Annotation> annotationType() {
+              return PackageTarget.class;
+            }
+          };
 
-           uiBinderBoilerPlaterIface.addAnnotation(handler);
-           uiBinderBoilerPlaterIface.addAnnotation(packageTarget);
+          uiBinderBoilerPlaterIface.addAnnotation(handler);
+          uiBinderBoilerPlaterIface.addAnnotation(packageTarget);
 
-           context.getBootstrapClass().addInnerClass(new InnerClass(uiBinderBoilerPlaterIface));
+          context.getBootstrapClass().addInnerClass(new InnerClass(uiBinderBoilerPlaterIface));
 
-           String varName = "uiBinderInst_" + injectionPoint.getEnclosingType().getFullyQualifiedName()
-                   .replaceAll("\\.", "_");
+          String varName = "uiBinderInst_" + injectionPoint.getEnclosingType().getFullyQualifiedName()
+                  .replaceAll("\\.", "_");
 
-           if (Boolean.getBoolean("errai.simulatedClient")) {
-             context.append(Stmt.declareVariable(UiBinder.class).named(varName).initializeWith(
-                     ObjectBuilder.newInstanceOf(uiBinderBoilerPlaterIface)
-                             .extend()
-                             .publicOverridesMethod("createAndBindUi", Parameter.of(injectionPoint.getEnclosingType(), "w"))
-                             .append(Stmt.loadLiteral(null).returnValue())
-                             .finish().finish()
-             )
-             );
+          if (Boolean.getBoolean("errai.simulatedClient")) {
+            context.append(Stmt.declareVariable(UiBinder.class).named(varName).initializeWith(
+                    ObjectBuilder.newInstanceOf(uiBinderBoilerPlaterIface)
+                            .extend()
+                            .publicOverridesMethod("createAndBindUi", Parameter.of(injectionPoint.getEnclosingType(), "w"))
+                            .append(Stmt.loadLiteral(null).returnValue())
+                            .finish().finish()
+            )
+            );
 
-           }
-           else {
+          }
+          else {
 
-             context.append(Stmt.declareVariable(UiBinder.class).named(varName).initializeWith(
-                     Stmt.invokeStatic(GWT.class, "create", LiteralFactory.getLiteral(uiBinderBoilerPlaterIface))
-             ));
-           }
+            context.append(Stmt.declareVariable(UiBinder.class).named(varName).initializeWith(
+                    Stmt.invokeStatic(GWT.class, "create", LiteralFactory.getLiteral(uiBinderBoilerPlaterIface))
+            ));
+          }
 
-           context.append(Stmt.invokeStatic(UiBinderProvider.class, "registerBinder",
-                   injectionPoint.getEnclosingType(), Refs.get(varName)));
-         }
+          context.append(Stmt.invokeStatic(UiBinderProvider.class, "registerBinder",
+                  injectionPoint.getEnclosingType(), Refs.get(varName)));
+        }
+        else if (injectionPoint.getType().isAssignableTo(SafeHtmlTemplates.class)) {
+          final String varName = "safeTemplateInst_" + injectionPoint.getEnclosingType().getFullyQualifiedName()
+                  .replaceAll("\\.", "_");
 
-       }
-     });
+          if (Boolean.getBoolean("errai.simulatedClient")) {
+            context.append(Stmt.declareVariable(SafeHtmlTemplates.class).named(varName).initializeWith(
+                    ObjectBuilder.newInstanceOf(injectionPoint.getType())
+                            .extend()
+                            .publicOverridesMethod("link", Parameter.of(SafeUri.class, "safe"),
+                                    Parameter.of(String.class, "str"))
+                            .append(Stmt.loadLiteral(null).returnValue())
+                            .finish().finish()
+            )
+            );
+
+          }
+          else {
+            context.append(Stmt.declareVariable(injectionPoint.getType()).named(varName).initializeWith(
+                    Stmt.invokeStatic(GWT.class, "create", LiteralFactory.getLiteral(injectionPoint.getType()))
+            ));
+          }
+
+          injectorFactory.addInjector(new Injector() {
+            @Override
+            public Statement instantiateOnly(InjectionContext injectContext, InjectableInstance injectableInstance) {
+              return Refs.get(varName);
+            }
+
+            @Override
+            public Statement getType(InjectionContext injectContext, InjectableInstance injectableInstance) {
+              return Refs.get(varName);
+            }
+
+            @Override
+            public boolean isInjected() {
+              return false;
+            }
+
+            @Override
+            public boolean isSingleton() {
+              return false;
+            }
+
+            @Override
+            public boolean isPseudo() {
+              return false;
+            }
+
+            @Override
+            public String getVarName() {
+              return varName;
+            }
+
+            @Override
+            public MetaClass getInjectedType() {
+              return injectionPoint.getType();
+            }
+          });
+        }
+
+      }
+    });
   }
 
   @Override
