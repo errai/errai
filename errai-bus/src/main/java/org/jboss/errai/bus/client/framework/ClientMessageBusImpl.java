@@ -1222,6 +1222,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     RpcProxyLoader loader = GWT.create(RpcProxyLoader.class);
     loader.loadProxies(ClientMessageBusImpl.this);
+    InitVotes.voteFor(RpcProxyLoader.class);
 
     final Timer initialPollTimer = new Timer() {
       @Override
@@ -1230,7 +1231,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
     };
 
-    InitVotes.voteFor(RpcProxyLoader.class);
 
     initialPollTimer.schedule(10);
   }

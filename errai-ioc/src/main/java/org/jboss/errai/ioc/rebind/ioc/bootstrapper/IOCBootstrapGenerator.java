@@ -261,6 +261,10 @@ public class IOCBootstrapGenerator {
       blockBuilder.append(stmt);
     }
 
+    for (Statement stmt : procContext.getPostConstructStatements()) {
+      blockBuilder.append(stmt);
+    }
+
     blockBuilder.append(Stmt.loadVariable(procContext.getContextVariableReference()).returnValue());
 
     Collection<MetaField> privateFields = injectFactory.getInjectionContext().getPrivateFieldsToExpose();

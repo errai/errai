@@ -118,8 +118,19 @@ public final class InitVotes {
     waitForSet.remove(topic);
 
     if (armed && waitForSet.isEmpty()) {
-      finishInit();
+      initWindow();
     }
+  }
+
+  private static void initWindow() {
+    TaskManagerFactory.get().schedule(TimeUnit.MILLISECONDS, 50, new Runnable() {
+        @Override
+        public void run() {
+           if (armed && waitForSet.isEmpty()) {
+              finishInit();
+           }
+        }
+      });
   }
 
   /**
@@ -149,6 +160,8 @@ public final class InitVotes {
     initTimeout = TaskManagerFactory.get().schedule(TimeUnit.MILLISECONDS, timeoutMillis, new Runnable() {
       @Override
       public void run() {
+        if (waitForSet.isEmpty()) return;
+
         log("components failed to initialize");
         for (String comp : waitForSet) {
           log("   [failed] -> " + comp);

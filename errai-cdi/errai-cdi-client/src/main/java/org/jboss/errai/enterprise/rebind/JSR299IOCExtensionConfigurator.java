@@ -133,6 +133,10 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
 
     procFactory.registerHandler(Dependent.class, new AnnotationHandler<Dependent>() {
       public boolean handle(InjectableInstance instance, Dependent annotation, IOCProcessingContext context) {
+        InjectionContext injectionContext = injectorFactory.getInjectionContext();
+        TypeInjector i = (TypeInjector) instance.getInjector();
+        i.getType(injectionContext, null);
+        
         return true;
       }
     });

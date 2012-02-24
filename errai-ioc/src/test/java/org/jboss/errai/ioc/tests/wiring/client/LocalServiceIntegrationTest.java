@@ -26,6 +26,8 @@ import org.jboss.errai.bus.server.annotations.Service;
 import com.google.gwt.user.client.Timer;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
 
+import javax.inject.Singleton;
+
 /**
  * @author Mike Brock
  */
@@ -36,6 +38,7 @@ public class LocalServiceIntegrationTest extends AbstractErraiIOCTest {
     return "org.jboss.errai.ioc.tests.wiring.IOCWiringTests";
   }
 
+  @Singleton
   @Service
   @Local
   public static class LocalTestCompleteService implements MessageCallback {
@@ -47,6 +50,7 @@ public class LocalServiceIntegrationTest extends AbstractErraiIOCTest {
     }
   }
 
+  @Singleton
   @Service
   public static class LocalTestCompleteServiceConfirmation implements MessageCallback {
     static boolean worked = false;

@@ -34,6 +34,7 @@ import org.jboss.errai.ioc.rebind.ioc.TypeDiscoveryListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.ListResourceBundle;
 import java.util.Stack;
 
 /**
@@ -46,6 +47,8 @@ public class IOCProcessingContext  {
   protected List<String> packages;
   
   protected List<Statement> appendToEnd;
+  protected List<Statement> postConstructStatements;
+  
   protected List<TypeDiscoveryListener> typeDiscoveryListeners;
 
   protected TreeLogger treeLogger;
@@ -73,6 +76,7 @@ public class IOCProcessingContext  {
     this.blockBuilder.push(blockBuilder);
 
     this.appendToEnd = new ArrayList<Statement>();
+    this.postConstructStatements = new ArrayList<Statement>();
     this.typeDiscoveryListeners = new ArrayList<TypeDiscoveryListener>();
   }
 
@@ -100,9 +104,17 @@ public class IOCProcessingContext  {
   public void appendToEnd(Statement statement) {
     appendToEnd.add(statement);
   }
+
+  public void addPostConstructStatement(Statement statement) {
+    postConstructStatements.add(statement);
+  }
   
   public List<Statement> getAppendToEnd() {
     return Collections.unmodifiableList(appendToEnd);
+  }
+  
+  public List<Statement> getPostConstructStatements() {
+   return Collections.unmodifiableList(postConstructStatements);
   }
   
   public BuildMetaClass getBootstrapClass() {

@@ -40,6 +40,7 @@ public class SenderIntegrationTest extends AbstractErraiIOCTest {
     Sender<List<String>> noReplySender;
   }
 
+  @Singleton
   @Service
   public static class ClientListService implements MessageCallback {
     static List<String> latestResponse;
@@ -51,6 +52,7 @@ public class SenderIntegrationTest extends AbstractErraiIOCTest {
     }
   }
 
+  @Singleton
   @Service
   public static class TestCompleterService implements MessageCallback {
     static boolean replyReceived = false;

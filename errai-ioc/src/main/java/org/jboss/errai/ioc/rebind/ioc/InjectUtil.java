@@ -204,7 +204,7 @@ public class InjectUtil {
             stmt = Stmt.loadVariable(injector.getVarName()).invoke(meth.getName());
           }
 
-          processingContext.append(stmt);
+          processingContext.addPostConstructStatement(stmt);
         }
       });
 
@@ -665,9 +665,11 @@ public class InjectUtil {
   }
 
   private static final String BEAN_INJECTOR_STORE = "InjectorBeanManagerStore";
+
   /**
-   * A utility to get or create the store whereby the code that binds beans to the client 
+   * A utility to get or create the store whereby the code that binds beans to the client
    * bean manager can keep track of what it has already bound.
+   *
    * @return
    */
   public static Set<Injector> getBeanInjectionTrackStore(InjectionContext context) {
@@ -677,7 +679,7 @@ public class InjectUtil {
     }
     return store;
   }
-  
+
   public static boolean checkIfTypeNeedsAddingToBeanStore(InjectionContext context, Injector injector) {
     Set<Injector> store = getBeanInjectionTrackStore(context);
     if (store.contains(injector)) {
