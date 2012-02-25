@@ -99,15 +99,6 @@ public class InjectUtil {
 
           IOCProcessingContext processingContext = ctx.getProcessingContext();
 
-//          if (injectedVars.containsKey(injector.getVarName())) {
-//            System.out.println("duplicate var! " + injector.getVarName() + " -- original trace -->");
-//            injectedVars.get(injector.getVarName()).printStackTrace();
-//
-//            System.out.println(" -- current trace -->");
-//            new Throwable().printStackTrace();
-//          }
-//          injectedVars.put(injector.getVarName(), new Throwable());
-
           processingContext.append(
                   Stmt.declareVariable(type)
                           .asFinal()
@@ -137,15 +128,6 @@ public class InjectUtil {
           if (injector.isSingleton() && injector.isInjected()) return;
 
           IOCProcessingContext processingContext = ctx.getProcessingContext();
-
-//          if (injectedVars.containsKey(injector.getVarName())) {
-//            System.out.println("duplicate var! " + injector.getVarName() + " -- original trace -->");
-//            injectedVars.get(injector.getVarName()).printStackTrace();
-//
-//            System.out.println(" -- current trace -->");
-//            new Throwable().printStackTrace();
-//          }
-//          injectedVars.put(injector.getVarName(), new Throwable());
 
           processingContext.append(
                   Stmt.declareVariable(type)
