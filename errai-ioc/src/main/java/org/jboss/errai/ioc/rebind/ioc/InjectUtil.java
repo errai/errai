@@ -16,30 +16,10 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
-import java.lang.annotation.Annotation;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import javax.inject.Qualifier;
-
-import org.jboss.errai.common.metadata.ScannerSingleton;
-import org.jboss.errai.codegen.framework.util.GenUtil;
-import org.jboss.errai.ioc.rebind.IOCProcessingContext;
+import com.google.gwt.core.ext.typeinfo.JField;
+import com.google.gwt.core.ext.typeinfo.JMethod;
+import com.google.gwt.core.ext.typeinfo.JParameter;
+import com.google.gwt.core.ext.typeinfo.JType;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.DefParameters;
 import org.jboss.errai.codegen.framework.Statement;
@@ -50,17 +30,34 @@ import org.jboss.errai.codegen.framework.meta.MetaConstructor;
 import org.jboss.errai.codegen.framework.meta.MetaField;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.meta.MetaParameter;
+import org.jboss.errai.codegen.framework.util.GenUtil;
 import org.jboss.errai.codegen.framework.util.Refs;
 import org.jboss.errai.codegen.framework.util.Stmt;
+import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.mvel2.util.ReflectionUtil;
 import org.mvel2.util.StringAppender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gwt.core.ext.typeinfo.JField;
-import com.google.gwt.core.ext.typeinfo.JMethod;
-import com.google.gwt.core.ext.typeinfo.JParameter;
-import com.google.gwt.core.ext.typeinfo.JType;
+import javax.annotation.PostConstruct;
+import javax.enterprise.inject.New;
+import javax.inject.Inject;
+import javax.inject.Qualifier;
+import java.lang.annotation.Annotation;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class InjectUtil {
   private static final Logger log = LoggerFactory.getLogger(InjectUtil.class);
@@ -70,7 +67,7 @@ public class InjectUtil {
 
   private static final AtomicInteger counter = new AtomicInteger(0);
 
-  public static final Map<String, Throwable> injectedVars = new LinkedHashMap<String, Throwable>();
+  //public static final Map<String, Throwable> injectedVars = new LinkedHashMap<String, Throwable>();
 
   public static ConstructionStrategy getConstructionStrategy(final Injector injector, final InjectionContext ctx) {
     final MetaClass type = injector.getInjectedType();
@@ -102,14 +99,14 @@ public class InjectUtil {
 
           IOCProcessingContext processingContext = ctx.getProcessingContext();
 
-          if (injectedVars.containsKey(injector.getVarName())) {
-            System.out.println("duplicate var! " + injector.getVarName() + " -- original trace -->");
-            injectedVars.get(injector.getVarName()).printStackTrace();
-
-            System.out.println(" -- current trace -->");
-            new Throwable().printStackTrace();
-          }
-          injectedVars.put(injector.getVarName(), new Throwable());
+//          if (injectedVars.containsKey(injector.getVarName())) {
+//            System.out.println("duplicate var! " + injector.getVarName() + " -- original trace -->");
+//            injectedVars.get(injector.getVarName()).printStackTrace();
+//
+//            System.out.println(" -- current trace -->");
+//            new Throwable().printStackTrace();
+//          }
+//          injectedVars.put(injector.getVarName(), new Throwable());
 
           processingContext.append(
                   Stmt.declareVariable(type)
@@ -141,14 +138,14 @@ public class InjectUtil {
 
           IOCProcessingContext processingContext = ctx.getProcessingContext();
 
-          if (injectedVars.containsKey(injector.getVarName())) {
-            System.out.println("duplicate var! " + injector.getVarName() + " -- original trace -->");
-            injectedVars.get(injector.getVarName()).printStackTrace();
-
-            System.out.println(" -- current trace -->");
-            new Throwable().printStackTrace();
-          }
-          injectedVars.put(injector.getVarName(), new Throwable());
+//          if (injectedVars.containsKey(injector.getVarName())) {
+//            System.out.println("duplicate var! " + injector.getVarName() + " -- original trace -->");
+//            injectedVars.get(injector.getVarName()).printStackTrace();
+//
+//            System.out.println(" -- current trace -->");
+//            new Throwable().printStackTrace();
+//          }
+//          injectedVars.put(injector.getVarName(), new Throwable());
 
           processingContext.append(
                   Stmt.declareVariable(type)
@@ -446,6 +443,7 @@ public class InjectUtil {
 
       qualifiersCache.addAll(ScannerSingleton.getOrCreateInstance()
               .getTypesAnnotatedWith(Qualifier.class));
+      qualifiersCache.add(New.class);
     }
 
     return qualifiersCache;

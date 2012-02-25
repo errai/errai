@@ -30,6 +30,8 @@ public class InjectionIntegrationTest extends IOCClientTestCase {
     assertNotNull("Field injection of BeanC failed", module.getBeanC());
     assertNotNull("Field injection of BeanB in BeanC failed", module.getBeanC().getBeanB());
     assertNotNull("Constructor injection of BeanD in BeanC", module.getBeanC().getBeanD());
+    
+    assertFalse("BeanC1 should be @New instance", module.getBeanC() == module.getBeanC1());
 
     assertTrue("PostConstruct on InjectionTestModule did not fire", module.isPostConstructFired());
   }

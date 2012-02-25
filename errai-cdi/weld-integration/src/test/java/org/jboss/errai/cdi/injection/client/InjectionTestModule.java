@@ -1,6 +1,7 @@
 package org.jboss.errai.cdi.injection.client;
 
 import javax.annotation.PostConstruct;
+import javax.enterprise.inject.New;
 import javax.inject.Inject;
 
 import org.jboss.errai.ioc.client.api.EntryPoint;
@@ -20,6 +21,9 @@ public class InjectionTestModule {
 
   @Inject
   private InjectionDependentTestBeanC beanC;
+
+  @Inject @New
+  private InjectionDependentTestBeanC beacC1;
   
   @PostConstruct
   public void doPostConstruct() {
@@ -32,6 +36,10 @@ public class InjectionTestModule {
 
   public InjectionDependentTestBeanC getBeanC() {
     return beanC;
+  }
+
+  public InjectionDependentTestBeanC getBeanC1() {
+    return beacC1;
   }
 
   public boolean isPostConstructFired() {
