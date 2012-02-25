@@ -7,9 +7,12 @@ import org.jboss.errai.ioc.client.api.TaskOrder;
  * @author Mike Brock
  */
 @IOCBootstrapTask(TaskOrder.Before)
-public class FooRunnable implements Runnable {
+public class BeforeTask implements Runnable {
+  public static boolean ran = false;
+
   @Override
   public void run() {
-    System.out.println("yay!");
+    ran = true;
+    TestResultsSingleton.addItem(BeforeTask.class);
   }
 }

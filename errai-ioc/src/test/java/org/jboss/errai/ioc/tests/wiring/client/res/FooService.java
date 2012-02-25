@@ -16,11 +16,6 @@
 
 package org.jboss.errai.ioc.tests.wiring.client.res;
 
-/**
- * User: christopherbrock
- * Date: 15-Aug-2010
- * Time: 7:53:52 PM
- */
 public interface FooService {
   public String getMessage();
 }

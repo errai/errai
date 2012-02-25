@@ -23,11 +23,6 @@ import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
-/**
- * User: christopherbrock
- * Date: 14-Aug-2010
- * Time: 6:59:45 PM
- */
 
 @EntryPoint
 public class SimpleBean extends SimpleSuperBean {
@@ -56,7 +51,6 @@ public class SimpleBean extends SimpleSuperBean {
     postConstructCalled = true;
   }
   
-
   @Inject
   public SimpleBean(RequestDispatcher dispatcher3, MessageBus bus3) {
     this.dispatcher3 = dispatcher3;
@@ -132,5 +126,13 @@ public class SimpleBean extends SimpleSuperBean {
 
   public boolean isPostConstructCalled() {
     return postConstructCalled;
+  }
+
+  public ServiceA getSvcA() {
+    return svcA;
+  }
+
+  public ServiceB getSvcB() {
+    return svcB;
   }
 }

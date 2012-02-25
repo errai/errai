@@ -265,7 +265,7 @@ public class IOCBootstrapGenerator {
       blockBuilder.append(stmt);
     }
 
-    blockBuilder.append(Stmt.loadVariable(procContext.getContextVariableReference()).returnValue());
+
 
     Collection<MetaField> privateFields = injectFactory.getInjectionContext().getPrivateFieldsToExpose();
     for (MetaField f : privateFields) {
@@ -280,6 +280,7 @@ public class IOCBootstrapGenerator {
 
     _doRunnableTasks(afterTasks, blockBuilder);
 
+    blockBuilder.append(Stmt.loadVariable(procContext.getContextVariableReference()).returnValue());
 
     blockBuilder.finish();
 

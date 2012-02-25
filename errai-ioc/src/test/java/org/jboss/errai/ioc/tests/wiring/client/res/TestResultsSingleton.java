@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ *  
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,28 +16,24 @@
 
 package org.jboss.errai.ioc.tests.wiring.client.res;
 
-import org.jboss.errai.ioc.client.api.EntryPoint;
-import org.jboss.errai.ioc.client.api.ReplyTo;
-import org.jboss.errai.ioc.client.api.Sender;
-import org.jboss.errai.ioc.client.api.ToSubject;
-import org.jboss.errai.ioc.tests.wiring.client.SenderIntegrationTest;
-
-import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
-* @author Mike Brock
-*/
-//@EntryPoint
-public class ConsumerTestInjectionPoint {
-  public static ConsumerTestInjectionPoint instance;
-
-  public ConsumerTestInjectionPoint() {
-    instance = this;
+ * @author Mike Brock
+ */
+public final class TestResultsSingleton {
+  private TestResultsSingleton() {
   }
-
-  @Inject
-  @ToSubject("ListCapitializationService")
-  @ReplyTo("ClientListService")
-  public Sender<List<String>> listSender;
+  
+  private static final List<Class<?>> itemsRun = new ArrayList<Class<?>>();
+  
+  public static void addItem(Class<?> cls) {
+    itemsRun.add(cls);
+  }
+  
+  public static List<Class<?>> getItemsRun() {
+    return Collections.unmodifiableList(itemsRun);
+  }
 }

@@ -21,11 +21,7 @@ import javax.inject.Inject;
 
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
-/**
- * User: christopherbrock
- * Date: 15-Aug-2010
- * Time: 8:26:12 PM
- */
+
 @EntryPoint
 public class SimpleBean2 {
   private final FooService svc;
