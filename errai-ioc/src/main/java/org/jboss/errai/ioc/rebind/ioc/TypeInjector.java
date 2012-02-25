@@ -26,14 +26,17 @@ import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.util.Refs;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.ioc.client.api.EntryPoint;
+import org.jboss.errai.ioc.client.api.qualifiers.Any;
 import org.jboss.errai.ioc.client.container.CreationalCallback;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 
 import javax.inject.Singleton;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 
 public class TypeInjector extends Injector {
   protected final MetaClass type;
@@ -76,18 +79,35 @@ public class TypeInjector extends Injector {
 
   @Override
   public Statement getType(InjectionContext injectContext, InjectableInstance injectableInstance) {
-    Statement val = _getType(injectContext);
+    Statement val = _getType(injectContext, injectableInstance);
     registerWithBeanManager(injectContext, val);
     return val;
   }
 
-  private Statement _getType(InjectionContext injectContext) {
+  private Statement _getType(InjectionContext injectContext, InjectableInstance injectableInstance) {
     if (isInjected()) {
       if (isSingleton()) {
         return Refs.get(varName);
       }
       else {
-        varName = InjectUtil.getNewVarName();
+        /**
+         * Ensure each permutation of qualifier meta data results in a unique wiring scenario
+         */
+        final Set<Annotation> fromCompare = new HashSet<Annotation>(Arrays.asList(qualifyingMetadata.getQualifiers()));
+        final Set<Annotation> toCompare;
+        if (injectableInstance == null
+                || injectableInstance.getQualifiers() == null
+                || injectableInstance.getQualifiers().length == 0) {
+          toCompare = new HashSet<Annotation>(Arrays.asList(injectContext.getProcessingContext()
+                  .getQualifyingMetadataFactory().createDefaultMetadata().getQualifiers()));
+        }
+        else {
+          toCompare = new HashSet<Annotation>(Arrays.asList(injectableInstance.getQualifiers()));
+        }
+
+        if (fromCompare.equals(toCompare)) {
+          return Stmt.loadVariable(varName).invoke("getInstance");
+        }
       }
     }
 
@@ -112,7 +132,7 @@ public class TypeInjector extends Injector {
 
     ctx.popBlockBuilder();
 
-    String creationalCallbackVar = "create_" + varName;
+    String creationalCallbackVar = InjectUtil.getNewVarName();
 
     ctx.globalAppend(Stmt.declareVariable(creationCallbackRef).asFinal().named(creationalCallbackVar)
             .initializeWith(callbackBuilder.finish().finish()));

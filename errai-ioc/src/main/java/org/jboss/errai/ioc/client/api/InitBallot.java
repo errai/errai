@@ -17,11 +17,18 @@
 package org.jboss.errai.ioc.client.api;
 
 /**
- * An InitBallot is injected by the container into a bean which declares a dependency on it. By doing so, the bean
+ * An <tt>InitBallot</tt> is injected by the container into a bean which declares a dependency on it. By doing so, the bean
  * enjoins itself into the startup contract of the framework services. Thus, it is expected to call {@link #voteForInit()}
  * to indicate that it is okay to proceed with initialization. The class must be parameterized with a class which
  * represents the startup dependency.
+ * <p>
+ * The container imposes a fixed amount of time for which there must be a call to {@link #voteForInit()}. If the call
+ * is not made within this time period, then the dependency will be deemed unsatisified and the container will produce
+ * an error.
  *
+ * @param <T> A type reference to be used to uniquely identify the dependency. This is typically the same class
+ *           which declares the <tt>InitBallot</tt>, but not necessarily. If more than component injects an
+ *           <tt>InitBallot</tt> with the same type parameter, they will all represent the same dependency.
  * @author Mike Brock
  */
 public interface InitBallot<T> {

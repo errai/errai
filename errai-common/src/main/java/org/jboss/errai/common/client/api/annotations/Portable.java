@@ -16,5 +16,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface Portable {
+  /**
+   * Indicate that the annotated class should be treated as an alias of an existing marshalling mapping, and should
+   * not be directly mapped itself.
+   * @return
+   */
   Class<?> aliasOf() default Object.class;
 }

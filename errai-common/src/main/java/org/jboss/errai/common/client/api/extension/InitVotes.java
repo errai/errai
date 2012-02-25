@@ -88,7 +88,7 @@ public final class InitVotes {
    * @see #voteFor(Class)
    */
   public static void waitFor(final Class<?> clazz) {
-    log("Wait For: " + clazz.getName());
+    log("wait for: " + clazz.getName());
     waitFor(clazz.getName());
   }
 
@@ -107,11 +107,10 @@ public final class InitVotes {
    * @param clazz a class reference
    */
   public static void voteFor(final Class<?> clazz) {
-    log("Vote For: " + clazz.getName());
+    log("vote For: " + clazz.getName());
     voteFor(clazz.getName());
-    for (String waitFor : waitForSet) {
-      log("  Still Waiting For -> " + waitFor);
-    }
+    if (!waitForSet.isEmpty())
+      log("  still waiting for -> " + waitForSet);
   }
 
   private static void voteFor(String topic) {
@@ -124,13 +123,13 @@ public final class InitVotes {
 
   private static void initWindow() {
     TaskManagerFactory.get().schedule(TimeUnit.MILLISECONDS, 50, new Runnable() {
-        @Override
-        public void run() {
-           if (armed && waitForSet.isEmpty()) {
-              finishInit();
-           }
+      @Override
+      public void run() {
+        if (armed && waitForSet.isEmpty()) {
+          finishInit();
         }
-      });
+      }
+    });
   }
 
   /**
