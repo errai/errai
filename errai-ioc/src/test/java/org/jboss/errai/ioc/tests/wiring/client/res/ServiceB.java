@@ -27,4 +27,8 @@ import javax.inject.Inject;
 @EntryPoint
 public class ServiceB {
   @Inject TransverseDepService svc;
+
+  public TransverseDepService getSvc() {
+    return svc;
+  }
 }

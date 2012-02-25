@@ -16,25 +16,19 @@
 
 package org.jboss.errai.ioc.tests.wiring.client.res;
 
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.common.client.protocols.MessageParts;
-
-import java.util.List;
+import org.jboss.errai.ioc.client.api.IOCBootstrapTask;
+import org.jboss.errai.ioc.client.api.TaskOrder;
 
 /**
-* @author Mike Brock
-*/
-//@Service
-public class ClientListService implements MessageCallback {
+ * @author Mike Brock
+ */
+@IOCBootstrapTask(TaskOrder.After)
+public class AfterTask implements Runnable {
+  public static boolean ran = false;
 
-  public static List<String> latestResponse;
-
-  @SuppressWarnings("unchecked")
   @Override
-  public void callback(Message message) {
-    latestResponse = message.get(List.class, MessageParts.Value);
+  public void run() {
+    ran = true;
+    TestResultsSingleton.addItem(AfterTask.class);
   }
-
 }

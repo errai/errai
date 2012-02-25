@@ -25,7 +25,7 @@ import javax.enterprise.context.ApplicationScoped;
  */
 @EntryPoint
 public class TransverseDepService {
-  private final String name = "I'm a Service!";
+  private static final String name = "I'm a Service!";
 
   public String getName() {
     return name;

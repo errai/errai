@@ -20,11 +20,17 @@ import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.rebind.IOCTestRunner;
+import org.jboss.errai.ioc.tests.wiring.client.res.AfterTask;
+import org.jboss.errai.ioc.tests.wiring.client.res.BeforeTask;
 import org.jboss.errai.ioc.tests.wiring.client.res.HappyInspector;
 import org.jboss.errai.ioc.tests.wiring.client.res.QualInspector;
 import org.jboss.errai.ioc.tests.wiring.client.res.SimpleBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.SimpleBean2;
+import org.jboss.errai.ioc.tests.wiring.client.res.TestResultsSingleton;
+import org.jboss.errai.ioc.tests.wiring.client.res.TransverseDepService;
 import org.junit.runner.RunWith;
+
+import java.util.List;
 
 @RunWith(IOCTestRunner.class)
 public class  BasicIOCTest extends IOCClientTestCase {
@@ -52,6 +58,16 @@ public class  BasicIOCTest extends IOCClientTestCase {
     assertNotNull(simpleBean.getDispatcher2());
     assertNotNull(simpleBean.getDispatcher3());
     assertNotNull(simpleBean.getDispatcher4());
+
+    TransverseDepService transverseDepService = IOC.getBeanManager().lookupBean(TransverseDepService.class).getInstance();
+
+    assertNotNull("svcA is null", simpleBean.getSvcA());
+    assertNotNull("svcB is null", simpleBean.getSvcB());
+    assertTrue("injection of TransverseDepService into svcA returned different instance!",
+            simpleBean.getSvcA().getSvc() == transverseDepService);
+
+    assertTrue("injection of TransverseDepService into svcB returned different instance!",
+                simpleBean.getSvcB().getSvc() == transverseDepService);
 
     assertTrue("@PostConstruct method not called", simpleBean.isPostConstructCalled());
   }
@@ -88,5 +104,15 @@ public class  BasicIOCTest extends IOCClientTestCase {
 
     assertTrue(qualInspector.getaQualService().get() instanceof Integer);
     assertTrue(qualInspector.getbQualService().get() instanceof String);
+  }
+  
+  public void testIOCTasks() {
+    assertTrue("BeforeTask did not run", BeforeTask.ran);
+    assertTrue("AfterTask did not run", AfterTask.ran);
+
+    List<Class<?>> results = TestResultsSingleton.getItemsRun();
+    assertTrue("BeforeTask did not run before AfterTask!",
+            results.indexOf(BeforeTask.class) < results.indexOf(AfterTask.class));
+    
   }
 }

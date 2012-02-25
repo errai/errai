@@ -6,7 +6,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 /**
- * @author Mike Brock <cbrock@redhat.com>
+ * @author Mike Brock
  */
 @EntryPoint
 public class QualInspector {
