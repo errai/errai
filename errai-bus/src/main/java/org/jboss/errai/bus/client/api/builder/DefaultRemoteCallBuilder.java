@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The <tt>AbstractRemoteCallBuilder</tt> facilitates the building of a remote call. Ensures that the remote call is
+ * The <tt>DefaultRemoteCallBuilder</tt> facilitates the building of a remote call. Ensures that the remote call is
  * constructed properly
  */
 public class DefaultRemoteCallBuilder {

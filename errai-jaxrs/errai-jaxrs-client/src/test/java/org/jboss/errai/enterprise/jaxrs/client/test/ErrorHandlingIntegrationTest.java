@@ -145,4 +145,35 @@ public class ErrorHandlingIntegrationTest extends AbstractErraiJaxrsTest {
 
     delayTestFinish(5000);
   }
+  
+  @Test
+  public void testErrorHandlingUsingSpecifiedSuccessCodes() {
+    RestClient.create(PlainMethodTestService.class,
+        new ResponseCallback() {
+          @Override
+          public void callback(Response response) {
+            fail("Callback should not be invoked");
+          }
+        },
+        new ErrorCallback() {
+          @Override
+          public boolean error(Message message, Throwable throwable) {
+            try {
+              throw throwable;
+            }
+            catch (ResponseException e) {
+              // expected: Specified CREATED and NO_CONTENT as success codes but OK was returned
+              assertEquals("Wrong status code received", Response.SC_OK, e.getResponse().getStatusCode());
+              finishTest();
+            }
+            catch (Throwable t) {
+              fail("Expected ResponseException");
+            }
+            return false;
+          }
+        },
+        Response.SC_CREATED, Response.SC_NO_CONTENT).get();
+
+    delayTestFinish(5000);
+  }
 }

@@ -16,8 +16,6 @@
 
 package org.jboss.errai.bus.client.framework;
 
-import com.google.gwt.core.client.GWT;
-
 import java.util.HashMap;
 import java.util.Map;
 

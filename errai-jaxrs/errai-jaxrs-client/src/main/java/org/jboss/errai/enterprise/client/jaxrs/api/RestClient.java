@@ -16,6 +16,9 @@
 
 package org.jboss.errai.enterprise.client.jaxrs.api;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.framework.ProxyProvider;
@@ -40,52 +43,58 @@ public class RestClient {
   private static ProxyProvider proxyProvider = new RemoteServiceProxyFactory();
 
   /**
-   * Creates a REST client for the provided JAX-RS resource interface.
+   * Creates a client/proxy for the provided JAX-RS resource interface.
    *
    * @param remoteService  the JAX-RS interface
    * @param callback  the asynchronous callback to use
+   * @param successCodes  optional HTTP status codes used to determine if the request was successful
    * @return proxy of the specified remote service type
    */
-  public static <T, R> T create(final Class<T> remoteService, final RemoteCallback<R> callback) {
-    return create(remoteService, null, callback, null);
+  public static <T, R> T create(final Class<T> remoteService, final RemoteCallback<R> callback,
+      int... successCodes) {
+    return create(remoteService, null, callback, null, successCodes);
   }
 
   /**
-   * Creates a REST client for the provided JAX-RS resource interface.
+   * Creates a client/proxy for the provided JAX-RS resource interface.
    * 
    * @param remoteService  the JAX-RS interface
    * @param baseUrl  the base url overriding the default application root path
    * @param callback  the asynchronous callback to use
+   * @param successCodes  optional HTTP status codes used to determine if the request was successful
    * @return proxy of the specified remote service type
    */
-  public static <T, R> T create(final Class<T> remoteService, String baseUrl, final RemoteCallback<R> callback) {
-    return create(remoteService, baseUrl, callback, null);
+  public static <T, R> T create(final Class<T> remoteService, String baseUrl, final RemoteCallback<R> callback, 
+      int... successCodes) {
+    return create(remoteService, baseUrl, callback, null, successCodes);
   }
   
   /**
-   * Creates a REST client for the provided JAX-RS resource interface.
+   * Creates a client/proxy for the provided JAX-RS resource interface.
    * 
    * @param remoteService  the JAX-RS interface
    * @param callback  the asynchronous callback to use 
    * @param errorCallback  the error callback to use
+   * @param successCodes  optional HTTP status codes used to determine if the request was successful
    * @return proxy of the specified remote service type
    */
-  public static <T, R> T create(final Class<T> remoteService, 
-      final RemoteCallback<R> callback, final ErrorCallback errorCallback) {
-    return create(remoteService, null, callback, errorCallback);
+  public static <T, R> T create(final Class<T> remoteService, final RemoteCallback<R> callback,
+      final ErrorCallback errorCallback, int... successCodes) {
+    return create(remoteService, null, callback, errorCallback, successCodes);
   }
   
   /**
-   * Creates a REST client for the provided JAX-RS resource interface.
+   * Creates a client/proxy for the provided JAX-RS resource interface.
    * 
    * @param remoteService  the JAX-RS interface
    * @param baseUrl  the base url overriding the default application root path
    * @param callback  the asynchronous callback to use
    * @param errorCallback  the error callback to use
+   * @param successCodes  optional HTTP status codes used to determine if the request was successful
    * @return proxy of the specified remote service type
    */
-  public static <T, R> T create(final Class<T> remoteService, String baseUrl,
-      final RemoteCallback<R> callback, final ErrorCallback errorCallback) {
+  public static <T, R> T create(final Class<T> remoteService, String baseUrl, final RemoteCallback<R> callback, 
+      final ErrorCallback errorCallback, int... successCodes) {
 
     if (baseUrl != null && !baseUrl.endsWith("/")) 
       baseUrl += "/";
@@ -101,12 +110,21 @@ public class RestClient {
         throw new RuntimeException("No proxy found for JAX-RS interface: " + remoteService.getName());
     }
 
+    // Can't use ArrayUtils (class has to be translatable).
+    List<Integer> codes = null;
+    if (successCodes.length > 0) {
+      codes = new ArrayList<Integer>();
+      for (int code : successCodes) {
+        codes.add(code);
+      }
+    }
+    
     ((JaxrsProxy) proxy).setRemoteCallback(callback);
     ((JaxrsProxy) proxy).setErrorCallback(errorCallback);
     ((JaxrsProxy) proxy).setBaseUrl(baseUrl);
+    ((JaxrsProxy) proxy).setSuccessCodes(codes);
     return proxy;
   }
-  
   
   /**
    * Returns the configured JAX-RS default application root path.
@@ -128,7 +146,7 @@ public class RestClient {
   /**
    * Configures the JAX-RS default application root path.
    * 
-   * @param root path to use when sending request to the endpoint
+   * @param root path to use when sending requests to the JAX-RS endpoint
    */
   public static native void setApplicationRoot(String path) /*-{
     if (path == null) {

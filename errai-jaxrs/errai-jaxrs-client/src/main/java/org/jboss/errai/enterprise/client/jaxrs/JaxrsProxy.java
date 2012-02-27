@@ -16,10 +16,12 @@
 
 package org.jboss.errai.enterprise.client.jaxrs;
 
+import java.util.List;
+
 import org.jboss.errai.bus.client.framework.RPCStub;
 
 /**
- * JAX-RS proxies are basically {@link RPCStub}s stored in the same {@see RemoteServiceProxyFactory}.
+ * JAX-RS proxies are basically {@link RPCStub}s managed by the same {@see RemoteServiceProxyFactory}.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -38,4 +40,11 @@ public interface JaxrsProxy extends RPCStub {
    * @param url  the base url used to contact the remote service
    */
   public void setBaseUrl(String url);
+  
+  /**
+   * Sets a list of HTTP status codes that will be used to determine whether a request was successful or not.
+   * 
+   * @param codes  list of HTTP status codes
+   */
+  public void setSuccessCodes(List<Integer> codes);
 }

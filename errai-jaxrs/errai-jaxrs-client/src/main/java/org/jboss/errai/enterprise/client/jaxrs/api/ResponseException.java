@@ -23,7 +23,7 @@ import com.google.gwt.http.client.Response;
  *  
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class ResponseException extends Exception {
+public class ResponseException extends RuntimeException {
   private static final long serialVersionUID = 1L;
 
   private Response response;

@@ -191,6 +191,8 @@ public class JaxrsProxyMethodGenerator {
   }
 
   private Statement createRequestCallback() {
+    Statement statusCode = Stmt.loadVariable("response").invoke("getStatusCode");
+    
     Statement requestCallback = Stmt
         .newObject(RequestCallback.class)
         .extend()
@@ -200,9 +202,17 @@ public class JaxrsProxyMethodGenerator {
         .finish()
         .publicOverridesMethod("onResponseReceived", Parameter.of(Request.class, "request"),
             Parameter.of(Response.class, "response"))
-        .append(Stmt.if_(Bool.and(
-                Bool.greaterThanOrEqual(Stmt.loadVariable("response").invoke("getStatusCode"), 200),
-                Bool.lessThan(Stmt.loadVariable("response").invoke("getStatusCode"), 300)))
+        .append(Stmt.if_(
+                Bool.and(
+                    Bool.or(
+                        Bool.isNull(Stmt.loadStatic(declaringClass, "this").loadField("successCodes")),
+                        Stmt.loadStatic(declaringClass, "this").loadField("successCodes").invoke("contains", statusCode)
+                    ),
+                    Bool.and(
+                        Bool.greaterThanOrEqual(statusCode, 200),
+                        Bool.lessThan(statusCode, 300))
+                     )
+                   )
             .append(responseHandling())
             .finish()
             .else_()
