@@ -16,6 +16,8 @@
 
 package org.jboss.errai.ioc.rebind;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaField;
@@ -50,7 +52,8 @@ import static org.jboss.errai.ioc.rebind.ioc.InjectableInstance.getTypeInjectedI
 public class IOCProcessorFactory {
   private SortedSet<ProcessingEntry> processingEntries = new TreeSet<ProcessingEntry>();
   private Set<ProcessingDelegate> delegates = new LinkedHashSet<ProcessingDelegate>();
-
+  private Multimap<MetaClass, MetaClass> reverseDependenciesMap = HashMultimap.create();
+  
   private InjectorFactory injectorFactory;
 
   public IOCProcessorFactory(InjectorFactory factory) {
@@ -123,6 +126,11 @@ public class IOCProcessorFactory {
                   return entry.handler.handle(injectableInstance, anno, context);
                 }
 
+                @Override
+                public MetaClass getType() {
+                  return type;
+                }
+
                 public String toString() {
                   return clazz.getName() + " => " + getRequiredDependencies();
                 }
@@ -171,6 +179,11 @@ public class IOCProcessorFactory {
 
 
                   return entry.handler.handle(injectableInstance, anno, context);
+                }
+
+                @Override
+                public MetaClass getType() {
+                  return type;
                 }
 
                 public String toString() {
@@ -223,6 +236,11 @@ public class IOCProcessorFactory {
                   return entry.handler.handle(injectableInstance, anno, context);
                 }
 
+                @Override
+                public MetaClass getType() {
+                  return type;
+                }
+
                 public String toString() {
                   return type.getFullyQualifiedName() + " => " + getRequiredDependencies();
                 }
@@ -244,6 +262,15 @@ public class IOCProcessorFactory {
         }
       }
     }
+    
+    for (ProcessingDelegate<?> del : delegates) {
+      for (RequiredDependency requiredDependency : del.getRequiredDependencies()) {
+        reverseDependenciesMap.put(requiredDependency.getType(), del.getType());
+      }
+    }
+
+
+    
   }
 
   public boolean processAll() {
@@ -406,6 +433,8 @@ public class IOCProcessorFactory {
 
   private static interface ProcessingDelegate<T> {
     public boolean process();
+
+    public MetaClass getType();
 
     public Set<RequiredDependency> getRequiredDependencies();
   }
