@@ -16,6 +16,7 @@
 
 package org.jboss.errai.ioc.client.api;
 
+import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.common.client.protocols.MessageParts;
 
@@ -50,14 +51,37 @@ public interface Sender<T> {
 
   /**
    * Sends the message to the subject specified by {@link ToSubject}.
+   * 
+   * @param value
+   *          the payload of the message stored in {@link MessageParts#Value}
+   *          
+   * @param errorCallback
+   *          a callback to be registered to handle errors when sending the message          
+   */
+  public void send(T value, ErrorCallback errorCallback);
+  
+  /**
+   * Sends the message to the subject specified by {@link ToSubject}.
    *
    * @param value
    *          the payload of the message stored in {@link MessageParts#Value}
    *
    * @param replyTo
-   *          a callback to be registered to handle a reply from the remote service.
+   *          a callback to be registered to handle a reply from the remote service
    */
   public void send(T value, MessageCallback replyTo);
-
-
+  
+  /**
+   * Sends the message to the subject specified by {@link ToSubject}.
+   *
+   * @param value
+   *          the payload of the message stored in {@link MessageParts#Value}
+   *
+   * @param replyTo
+   *          a callback to be registered to handle a reply from the remote service
+   *          
+   * @param errorCallback
+   *          a callback to be registered to handle errors when sending the message          
+   */
+  public void send(T value, MessageCallback replyTo, ErrorCallback errorCallback);
 }

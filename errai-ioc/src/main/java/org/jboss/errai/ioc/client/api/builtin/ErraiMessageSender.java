@@ -16,12 +16,12 @@
 
 package org.jboss.errai.ioc.client.api.builtin;
 
+import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.ioc.client.api.Sender;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.framework.RequestDispatcher;
+import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.common.client.protocols.MessageParts;
+import org.jboss.errai.ioc.client.api.Sender;
 
 public final class ErraiMessageSender<T> implements Sender<T> {
   private final MessageBus messageBus;
@@ -58,10 +58,38 @@ public final class ErraiMessageSender<T> implements Sender<T> {
     }
   }
 
+  @Override
+  public void send(T value, ErrorCallback errorCallback) {
+    if (replyTo != null) {
+      MessageBuilder.createMessage()
+              .toSubject(toSubject)
+              .with(MessageParts.ReplyTo, replyTo)
+              .with(MessageParts.Value, value)
+              .errorsHandledBy(errorCallback)
+              .sendNowWith(messageBus);
+    }
+    else {
+      MessageBuilder.createMessage()
+              .toSubject(toSubject)
+              .with(MessageParts.Value, value)
+              .errorsHandledBy(errorCallback)
+              .sendNowWith(messageBus);
+    }
+  }
+
   public void send(T value, MessageCallback replyTo) {
     MessageBuilder.createMessage()
-            .toSubject(toSubject)
-            .withValue(value)
-            .done().repliesTo(replyTo).sendNowWith(messageBus);
+        .toSubject(toSubject)
+        .withValue(value)
+        .done().repliesTo(replyTo).sendNowWith(messageBus);
+  }
+
+  @Override
+  public void send(T value, MessageCallback replyTo, ErrorCallback errorCallback) {
+    MessageBuilder.createMessage()
+        .toSubject(toSubject)
+        .withValue(value)
+        .errorsHandledBy(errorCallback)
+        .repliesTo(replyTo).sendNowWith(messageBus);
   }
 }

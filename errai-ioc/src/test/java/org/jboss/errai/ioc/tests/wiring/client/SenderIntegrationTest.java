@@ -1,8 +1,15 @@
 package org.jboss.errai.ioc.tests.wiring.client;
 
-import com.google.gwt.user.client.Timer;
+import java.util.Arrays;
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.base.NoSubscribersToDeliverTo;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.ioc.client.api.ReplyTo;
@@ -10,10 +17,7 @@ import org.jboss.errai.ioc.client.api.Sender;
 import org.jboss.errai.ioc.client.api.ToSubject;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.util.Arrays;
-import java.util.List;
+import com.google.gwt.user.client.Timer;
 
 public class SenderIntegrationTest extends AbstractErraiIOCTest {
 
@@ -38,6 +42,10 @@ public class SenderIntegrationTest extends AbstractErraiIOCTest {
     @Inject
     @ToSubject("EmptyReplyService")
     Sender<List<String>> noReplySender;
+    
+    @Inject
+    @ToSubject("NonExistingService")
+    Sender<List<String>> brokenSender;
   }
 
   @Singleton
@@ -126,6 +134,31 @@ public class SenderIntegrationTest extends AbstractErraiIOCTest {
       }
     });
   }
-
-
+  
+  public void testSenderWithErrorCallback() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        List<String> originalList = Arrays.asList("this", "is", "my", "list");
+        ClientListService.latestResponse = null;
+        SenderTestInjectionPoint.instance.brokenSender.send(originalList, 
+            new ErrorCallback() {
+              @Override
+              public boolean error(Message message, Throwable throwable) {
+                assertNotNull("Throwable is null.", throwable);
+                try {
+                  throw throwable;
+                } 
+                catch(NoSubscribersToDeliverTo e) {
+                  finishTest();
+                }
+                catch (Throwable t) {
+                  fail("Received wrong Throwable!");
+                }
+                return false;
+              }
+            });
+      }
+    });
+  }
 }
