@@ -92,11 +92,11 @@ public class TypeInjector extends Injector {
         if (!hasNewQualifier(injectableInstance)) {
           return Refs.get(varName);
         }
-        else {
+        else if (creationalCallbackVarName != null) {
           return Stmt.loadVariable(creationalCallbackVarName).invoke("getInstance");
         }
       }
-      else {
+      else if (creationalCallbackVarName != null) {
         /**
          * Ensure each permutation of qualifier meta data results in a unique wiring scenario
          */

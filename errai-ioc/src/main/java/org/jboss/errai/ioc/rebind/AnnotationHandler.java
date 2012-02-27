@@ -17,9 +17,12 @@
 package org.jboss.errai.ioc.rebind;
 
 import java.lang.annotation.Annotation;
+import java.util.Set;
 
 import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
 
 public interface AnnotationHandler<T extends Annotation> {
+  public Set<RequiredDependency> checkDependencies(InjectableInstance instance, T annotation, IOCProcessingContext context);
+
   public boolean handle(InjectableInstance instance, T annotation, IOCProcessingContext context);
 }

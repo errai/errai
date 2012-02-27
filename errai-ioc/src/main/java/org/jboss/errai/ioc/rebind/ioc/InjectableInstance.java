@@ -177,6 +177,4 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
         throw new RuntimeException("cannot call tasktype: " + taskType);
     }
   }
-
-
 }

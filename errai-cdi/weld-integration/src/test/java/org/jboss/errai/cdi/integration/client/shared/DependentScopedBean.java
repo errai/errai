@@ -16,6 +16,8 @@
 
 package org.jboss.errai.cdi.integration.client.shared;
 
+import javax.inject.Inject;
+
 /**
  * @author Mike Brock
  */
@@ -23,7 +25,7 @@ public class DependentScopedBean {
   static int instanceCount = 0;
 
   private int instance;
-  
+
   public DependentScopedBean() {
     instance = instanceCount++;
   }

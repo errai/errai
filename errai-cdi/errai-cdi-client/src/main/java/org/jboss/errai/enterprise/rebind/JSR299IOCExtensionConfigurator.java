@@ -27,6 +27,8 @@ import org.jboss.errai.ioc.client.api.IOCExtension;
 import org.jboss.errai.ioc.rebind.AnnotationHandler;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.IOCProcessorFactory;
+import org.jboss.errai.ioc.rebind.JSR330AnnotationHandler;
+import org.jboss.errai.ioc.rebind.RequiredDependency;
 import org.jboss.errai.ioc.rebind.Rule;
 import org.jboss.errai.ioc.rebind.ioc.*;
 
@@ -39,6 +41,9 @@ import javax.inject.Inject;
 import javax.inject.Scope;
 import javax.inject.Singleton;
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Set;
 
 @IOCExtension
 public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator {
@@ -46,6 +51,14 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
                         final IOCProcessorFactory procFactory) {
 
     procFactory.registerHandler(Produces.class, new AnnotationHandler<Produces>() {
+
+      @Override
+      public Set<RequiredDependency> checkDependencies(InjectableInstance instance, Produces annotation,
+                                                       IOCProcessingContext context) {
+        
+        return Collections.singleton(new RequiredDependency(instance.getType(), Arrays.asList(instance.getQualifiers())));
+      }
+
       @Override
       public boolean handle(final InjectableInstance instance, final Produces annotation,
                             final IOCProcessingContext context) {
@@ -118,7 +131,7 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
       }
     }, Rule.after(EntryPoint.class, ApplicationScoped.class, Singleton.class));
 
-    procFactory.registerHandler(ApplicationScoped.class, new AnnotationHandler<ApplicationScoped>() {
+    procFactory.registerHandler(ApplicationScoped.class, new JSR330AnnotationHandler<ApplicationScoped>() {
       public boolean handle(InjectableInstance instance, ApplicationScoped annotation, IOCProcessingContext context) {
         InjectionContext injectionContext = injectorFactory.getInjectionContext();
         TypeInjector i = (TypeInjector) instance.getInjector();
@@ -131,7 +144,7 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
       }
     });
 
-    procFactory.registerHandler(Dependent.class, new AnnotationHandler<Dependent>() {
+    procFactory.registerHandler(Dependent.class, new JSR330AnnotationHandler<Dependent>() {
       public boolean handle(InjectableInstance instance, Dependent annotation, IOCProcessingContext context) {
         InjectionContext injectionContext = injectorFactory.getInjectionContext();
         TypeInjector i = (TypeInjector) instance.getInjector();

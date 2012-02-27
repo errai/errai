@@ -60,6 +60,7 @@ import org.jboss.errai.ioc.client.api.TypeProvider;
 import org.jboss.errai.ioc.rebind.AnnotationHandler;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.IOCProcessorFactory;
+import org.jboss.errai.ioc.rebind.JSR330AnnotationHandler;
 import org.jboss.errai.ioc.rebind.ioc.ContextualProviderInjector;
 import org.jboss.errai.ioc.rebind.ioc.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.IOCExtensionConfigurator;
@@ -520,7 +521,7 @@ public class IOCBootstrapGenerator {
     final MetaClass widgetType = MetaClassFactory.get(Widget.class);
 
 
-    procFactory.registerHandler(Singleton.class, new AnnotationHandler<Singleton>() {
+    procFactory.registerHandler(Singleton.class, new JSR330AnnotationHandler<Singleton>() {
       @Override
       public boolean handle(final InjectableInstance type, Singleton annotation, IOCProcessingContext context) {
         generateWithSingletonSemantics(type.getType());
@@ -528,7 +529,7 @@ public class IOCBootstrapGenerator {
       }
     });
 
-    procFactory.registerHandler(EntryPoint.class, new AnnotationHandler<EntryPoint>() {
+    procFactory.registerHandler(EntryPoint.class, new JSR330AnnotationHandler<EntryPoint>() {
       @Override
       public boolean handle(final InjectableInstance type, EntryPoint annotation, IOCProcessingContext context) {
         generateWithSingletonSemantics(type.getType());
@@ -536,7 +537,7 @@ public class IOCBootstrapGenerator {
       }
     });
 
-    procFactory.registerHandler(Service.class, new AnnotationHandler<Service>() {
+    procFactory.registerHandler(Service.class, new JSR330AnnotationHandler<Service>() {
       @Override
       public boolean handle(final InjectableInstance type, Service annotation, IOCProcessingContext context) {
         generateWithSingletonSemantics(type.getType());
@@ -544,7 +545,7 @@ public class IOCBootstrapGenerator {
       }
     });
 
-    procFactory.registerHandler(ToRootPanel.class, new AnnotationHandler<ToRootPanel>() {
+    procFactory.registerHandler(ToRootPanel.class, new JSR330AnnotationHandler<ToRootPanel>() {
       @Override
       public boolean handle(final InjectableInstance type, final ToRootPanel annotation,
                             final IOCProcessingContext context) {
@@ -567,7 +568,7 @@ public class IOCBootstrapGenerator {
       }
     });
 
-    procFactory.registerHandler(CreatePanel.class, new AnnotationHandler<CreatePanel>() {
+    procFactory.registerHandler(CreatePanel.class, new JSR330AnnotationHandler<CreatePanel>() {
       @Override
       public boolean handle(final InjectableInstance type, final CreatePanel annotation,
                             final IOCProcessingContext context) {
@@ -591,7 +592,7 @@ public class IOCBootstrapGenerator {
       }
     });
 
-    procFactory.registerHandler(ToPanel.class, new AnnotationHandler<ToPanel>() {
+    procFactory.registerHandler(ToPanel.class, new JSR330AnnotationHandler<ToPanel>() {
       @Override
       public boolean handle(final InjectableInstance type, final ToPanel annotation,
                             final IOCProcessingContext context) {

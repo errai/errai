@@ -67,8 +67,6 @@ public class InjectUtil {
 
   private static final AtomicInteger counter = new AtomicInteger(0);
 
-  //public static final Map<String, Throwable> injectedVars = new LinkedHashMap<String, Throwable>();
-
   public static ConstructionStrategy getConstructionStrategy(final Injector injector, final InjectionContext ctx) {
     final MetaClass type = injector.getInjectedType();
 
