@@ -105,7 +105,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
         BlockBuilder<CatchBlockBuilder> tryBuilder = Stmt.try_();
 
-        tryBuilder.append(Stmt.if_(Bool.notEquals(Stmt.loadVariable("a0").invoke("isNull"), null))
+        tryBuilder.append(Stmt.if_(Bool.expr(Stmt.loadVariable("a0").invoke("isNull")))
                 .append(Stmt.load(null).returnValue()).finish());
 
 
@@ -243,7 +243,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
           tryBuilder.append(
                   Stmt.if_(Bool.and(
                           Bool.expr(loadVariable("obj").invoke("containsKey", memberMapping.getKey())),
-                          Bool.isNull(loadVariable("obj").invoke("get", memberMapping.getKey()).invoke("isNull"))
+                          Bool.notExpr(loadVariable("obj").invoke("get", memberMapping.getKey()).invoke("isNull"))
 
                   )).append(bindingStatement).finish());
 
@@ -330,7 +330,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
             if (def == null) {
               System.out.println("not found: " + mapping.getType().getOuterComponentType());
             }
-            
+
             bufSize += (calcBufferSize(stack, def)) * 4;
           }
 
@@ -373,7 +373,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
             Stmt.if_(Bool.expr(loadVariable("a1").invoke("hasObjectHash", loadVariable("a0"))))
                     .append(declareVariable(String.class).named("objId").initializeWith(loadVariable("a1").invoke("getObjectHash", Stmt.loadVariable("a0"))))
                     .append(Stmt.nestedCall(newStringBuilder(128).append("{"
-                             + keyValue(SerializationParts.ENCODED_TYPE, string(toType.getFullyQualifiedName()))).append(",")
+                            + keyValue(SerializationParts.ENCODED_TYPE, string(toType.getFullyQualifiedName()))).append(",")
                             .append(string(SerializationParts.OBJECT_ID) + ":\"")
                             .append(loadVariable("objId"))
                             .append("\"}")).invoke("toString").returnValue())

@@ -32,7 +32,7 @@ import java.sql.Timestamp;
 public class TimestampMarshaller extends AbstractJSONMarshaller<Timestamp> {
   @Override
   public Timestamp demarshall(EJValue o, MarshallingSession ctx) {
-    if (o.isNull() != null) {
+    if (o.isNull()) {
       return null;
     }
 

@@ -72,7 +72,7 @@ public class MapMarshaller<T extends Map> extends AbstractJSONMarshaller<T> {
       }
 
       EJValue v = jsonObject.get(key);
-      if (v.isNull() == null) {
+      if (!v.isNull()) {
        demarshalledValue = ctx.getMarshallerInstance(ctx.determineTypeFor(null, v)).demarshall(v, ctx);
       } 
       else {

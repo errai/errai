@@ -36,7 +36,7 @@ public class StringMarshaller extends AbstractJSONMarshaller<String> {
 
   @Override
   public String demarshall(EJValue o, MarshallingSession ctx) {
-    return (o == null || o.isString() == null) ? null : o.isString().stringValue();
+    return (o.isNull() || o.isString() == null) ? null : o.isString().stringValue();
   }
 
   @Override

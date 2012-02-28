@@ -51,7 +51,7 @@ public class ErraiProtocolEnvelopeNoAutoMarshaller extends AbstractJSONMarshalle
 
     for (String key : jsonObject.keySet()) {
       EJValue v = jsonObject.get(key);
-      if (v.isNull() == null) {
+      if (!v.isNull()) {
         String type = ctx.determineTypeFor(null, v);
 
         if (type == null) {

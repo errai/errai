@@ -31,6 +31,7 @@ import java.math.BigInteger;
 public class BigIntegerMarshaller extends AbstractJSONMarshaller<BigInteger> {
   @Override
   public BigInteger demarshall(EJValue o, MarshallingSession ctx) {
+    if (o.isNull()) return null;
 
     return o.isObject() == null ? null :
             new BigInteger(o.isObject().get(SerializationParts.QUALIFIED_VALUE).isString().stringValue());

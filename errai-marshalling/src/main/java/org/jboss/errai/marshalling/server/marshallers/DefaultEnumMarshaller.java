@@ -43,7 +43,7 @@ public class DefaultEnumMarshaller implements Marshaller<Enum> {
 
   public Enum demarshall(EJValue a0, MarshallingSession a1) {
     try {
-      if (a0.isNull() != null) {
+      if (a0.isNull()) {
         return null;
       }
       return Enum.valueOf(enumType, a0.isObject().get(SerializationParts.ENUM_STRING_VALUE).isString().stringValue());

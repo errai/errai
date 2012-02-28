@@ -34,7 +34,7 @@ public class IntegerMarshaller extends AbstractNumberMarshaller<Integer> {
 
   @Override
   public Integer demarshall(EJValue o, MarshallingSession ctx) {
-    if (o == null) {
+    if (o.isNull()) {
       return null;
     }
     else if (o.isObject() != null) {

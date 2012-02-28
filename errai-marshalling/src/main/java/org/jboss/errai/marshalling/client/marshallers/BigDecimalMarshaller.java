@@ -27,10 +27,12 @@ import java.math.BigDecimal;
 /**
  * @author Mike Brock
  */
-@ClientMarshaller @ServerMarshaller
+@ClientMarshaller
+@ServerMarshaller
 public class BigDecimalMarshaller extends AbstractJSONMarshaller<BigDecimal> {
   @Override
   public BigDecimal demarshall(EJValue o, MarshallingSession ctx) {
+    if (o.isNull()) return null;
 
     return o.isObject() == null ? null :
             new BigDecimal(o.isObject().get(SerializationParts.QUALIFIED_VALUE).isString().stringValue());
@@ -48,7 +50,9 @@ public class BigDecimalMarshaller extends AbstractJSONMarshaller<BigDecimal> {
 
   @Override
   public String marshall(BigDecimal o, MarshallingSession ctx) {
-    if (o == null) { return "null"; }
+    if (o == null) {
+      return "null";
+    }
 
     return "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + BigDecimal.class.getName() + "\"," +
             "\"" + SerializationParts.OBJECT_ID + "\":\"" + o.hashCode() + "\"," +

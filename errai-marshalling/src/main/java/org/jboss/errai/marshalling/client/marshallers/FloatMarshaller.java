@@ -34,7 +34,7 @@ public class FloatMarshaller extends AbstractNumberMarshaller<Float> {
 
   @Override
   public Float demarshall(EJValue o, MarshallingSession ctx) {
-    if (o == null) {
+    if (o.isNull()) {
       return null;
     }
     else if (o.isObject() != null) {

@@ -201,7 +201,7 @@ public class MarshallerFramework implements EntryPoint {
       else if (jsonValue.isArray() != null) {
         return List.class.getName();
       }
-      else if (jsonValue.isNull() != null) {
+      else if (jsonValue.isNull()) {
         return null;
       }
       throw new RuntimeException("unknown type: cannot reverse map value to concrete Java type: " + o);

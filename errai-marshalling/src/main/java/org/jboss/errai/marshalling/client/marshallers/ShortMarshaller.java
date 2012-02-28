@@ -34,7 +34,7 @@ public class ShortMarshaller extends AbstractJSONMarshaller<Short> {
 
   @Override
   public Short demarshall(EJValue o, MarshallingSession ctx) {
-    if (o == null) {
+    if (o.isNull()) {
       return null;
     }
     else if (o.isObject() != null) {

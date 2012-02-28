@@ -40,7 +40,7 @@ public class ObjectMarshaller extends AbstractJSONMarshaller<Object> {
 
   @Override
   public Object demarshall(EJValue o, MarshallingSession ctx) {
-    if (o.isNull() != null) {
+    if (o.isNull()) {
       return null;
     }
     else if (o.isObject() != null) {

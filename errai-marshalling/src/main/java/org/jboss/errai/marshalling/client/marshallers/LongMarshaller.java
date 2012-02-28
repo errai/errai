@@ -36,9 +36,11 @@ public class LongMarshaller extends AbstractNumberMarshaller<Long> {
 
   @Override
   public Long demarshall(EJValue o, MarshallingSession ctx) {
-    if (o.isObject() != null && o.isNull() == null) {
+    if (o.isNull()) return null;
+
+    if (o.isObject() != null) {
       EJValue numValue = o.isObject().get(SerializationParts.NUMERIC_VALUE);
-      if (numValue.isNull() != null) {
+      if (numValue.isNull()) {
         return null;
       }
       return Long.parseLong(numValue.isString().stringValue());

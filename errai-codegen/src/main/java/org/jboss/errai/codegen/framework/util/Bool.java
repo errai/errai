@@ -18,8 +18,11 @@ package org.jboss.errai.codegen.framework.util;
 
 import org.jboss.errai.codegen.framework.BooleanExpression;
 import org.jboss.errai.codegen.framework.BooleanOperator;
+import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.builder.impl.BooleanExpressionBuilder;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -38,47 +41,61 @@ public class Bool {
   public static BooleanExpression expr(Statement lhs) {
     return BooleanExpressionBuilder.create(lhs);
   }
-  
+
+  public static BooleanExpression notExpr(final Statement lhs) {
+    return BooleanExpressionBuilder.create(new Statement() {
+      @Override
+      public String generate(Context context) {
+        return "!" + lhs.generate(context);
+      }
+
+      @Override
+      public MetaClass getType() {
+        return MetaClassFactory.get(Boolean.class);
+      }
+    });
+  }
+
   public static BooleanExpression equals(Object lhs, Object rhs) {
     return BooleanExpressionBuilder.create(lhs, BooleanOperator.Equals, rhs);
   }
-  
+
   public static BooleanExpression notEquals(Object lhs, Object rhs) {
     return BooleanExpressionBuilder.create(lhs, BooleanOperator.NotEquals, rhs);
   }
-  
+
   public static BooleanExpression or(Object lhs, Object rhs) {
     return BooleanExpressionBuilder.create(lhs, BooleanOperator.Or, rhs);
   }
-  
+
   public static BooleanExpression and(Object lhs, Object rhs) {
     return BooleanExpressionBuilder.create(lhs, BooleanOperator.And, rhs);
   }
-  
+
   public static BooleanExpression instanceOf(Object lhs, Object rhs) {
     return BooleanExpressionBuilder.create(lhs, BooleanOperator.InstanceOf, rhs);
   }
-  
+
   public static BooleanExpression greaterThanOrEqual(Object lhs, Object rhs) {
     return BooleanExpressionBuilder.create(lhs, BooleanOperator.GreaterThanOrEqual, rhs);
   }
-  
+
   public static BooleanExpression greaterThan(Object lhs, Object rhs) {
     return BooleanExpressionBuilder.create(lhs, BooleanOperator.GreaterThan, rhs);
   }
-  
+
   public static BooleanExpression lessThanOrEqual(Object lhs, Object rhs) {
     return BooleanExpressionBuilder.create(lhs, BooleanOperator.LessThanOrEqual, rhs);
   }
-  
+
   public static BooleanExpression lessThan(Object lhs, Object rhs) {
     return BooleanExpressionBuilder.create(lhs, BooleanOperator.LessThan, rhs);
   }
-  
+
   public static BooleanExpression isNotNull(Object test) {
     return Bool.notEquals(test, null);
   }
-  
+
   public static BooleanExpression isNull(Object test) {
     return Bool.equals(test, null);
   }

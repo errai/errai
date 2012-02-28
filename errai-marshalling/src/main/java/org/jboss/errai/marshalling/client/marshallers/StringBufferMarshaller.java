@@ -31,7 +31,7 @@ public class StringBufferMarshaller extends AbstractJSONMarshaller<StringBuffer>
 
   @Override
   public StringBuffer demarshall(EJValue o, MarshallingSession ctx) {
-    return (o == null || o.isString() == null) ? null : new StringBuffer(o.isString().stringValue());
+    return (o.isNull() || o.isString() == null) ? null : new StringBuffer(o.isString().stringValue());
   }
 
   @Override

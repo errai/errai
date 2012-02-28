@@ -51,7 +51,7 @@ public class ErraiProtocolEnvelopeMarshaller extends AbstractJSONMarshaller<Map<
 
     for (String key : jsonObject.keySet()) {
       EJValue v = jsonObject.get(key);
-      if (v.isNull() == null) {
+      if (!v.isNull()) {
         impl.put(key, ctx.getMarshallerInstance(ctx.determineTypeFor(null, v)).demarshall(v, ctx));
       } 
       else {

@@ -32,7 +32,7 @@ import java.util.Date;
 public class DateMarshaller extends AbstractJSONMarshaller<Date> {
   @Override
   public Date demarshall(EJValue o, MarshallingSession ctx) {
-    if (o.isNull() != null) {
+    if (o.isNull()) {
       return null;
     }
 

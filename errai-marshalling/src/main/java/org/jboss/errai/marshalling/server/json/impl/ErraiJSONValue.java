@@ -51,8 +51,8 @@ public class ErraiJSONValue implements EJValue {
   }
 
   @Override
-  public EJNull isNull() {
-    return obj == null ? NULL_INSTANCE : null;
+  public boolean isNull() {
+    return obj == null;
   }
 
   @Override

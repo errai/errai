@@ -22,7 +22,6 @@ import org.jboss.errai.common.client.api.annotations.Portable;
 
 @Portable
 public class GenericEntity<T> {
-
   T field;
   List<T> list;
 

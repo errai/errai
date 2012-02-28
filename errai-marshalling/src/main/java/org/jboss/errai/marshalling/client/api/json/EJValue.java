@@ -25,7 +25,7 @@ public interface EJValue {
   
   public EJNumber isNumber();
   
-  public EJNull isNull();
+  public boolean isNull();
   
   public EJObject isObject();
   

@@ -55,7 +55,7 @@ public class DefaultArrayMarshaller implements Marshaller<Object> {
   }
 
   public Object demarshall(EJValue a0, MarshallingSession a1) {
-    if (a0.isNull() != null) {
+    if (a0.isNull()) {
       return null;
     }
     else {

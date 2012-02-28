@@ -31,7 +31,7 @@ public class StringBuilderMarshaller extends AbstractJSONMarshaller<StringBuilde
 
   @Override
   public StringBuilder demarshall(EJValue o, MarshallingSession ctx) {
-    return (o == null || o.isString() == null) ? null : new StringBuilder(o.isString().stringValue());
+    return (o.isNull() || o.isString() == null) ? null : new StringBuilder(o.isString().stringValue());
   }
 
   public String marshall(StringBuilder o, MarshallingSession ctx) {

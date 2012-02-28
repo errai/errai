@@ -34,7 +34,7 @@ public class DoubleMarshaller extends AbstractNumberMarshaller<Double> {
 
   @Override
   public Double demarshall(EJValue o, MarshallingSession ctx) {
-    if (o == null) {
+    if (o.isNull()) {
       return null;
     }
     else if (o.isObject() != null) {

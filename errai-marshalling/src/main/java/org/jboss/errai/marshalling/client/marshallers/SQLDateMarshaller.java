@@ -33,7 +33,7 @@ public class SQLDateMarshaller extends AbstractJSONMarshaller<Date> {
 
   @Override
   public Date demarshall(EJValue o, MarshallingSession ctx) {
-    if (o.isNull() != null) return null;
+    if (o.isNull()) return null;
 
     return o.isObject() == null ? null :
             new Date(Long.parseLong(o.isObject().get(SerializationParts.QUALIFIED_VALUE).isString().stringValue()));

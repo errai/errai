@@ -35,7 +35,7 @@ public class CharacterMarshaller extends AbstractJSONMarshaller<Character> {
 
   @Override
   public Character demarshall(EJValue o, MarshallingSession ctx) {
-    if (o == null) {
+    if (o.isNull()) {
       return null;
     }
     else if (o.isObject() != null) {

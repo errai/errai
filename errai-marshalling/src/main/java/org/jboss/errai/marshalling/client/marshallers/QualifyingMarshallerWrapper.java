@@ -46,7 +46,7 @@ public class QualifyingMarshallerWrapper<T> implements Marshaller<T> {
 
   @Override
   public T demarshall(EJValue o, MarshallingSession ctx) {
-    if (o.isNull() != null) {
+    if (o.isNull()) {
       return null;
     }
 

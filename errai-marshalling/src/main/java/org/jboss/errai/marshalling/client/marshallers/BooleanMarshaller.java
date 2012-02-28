@@ -34,7 +34,10 @@ public class BooleanMarshaller extends AbstractJSONMarshaller<Boolean> {
 
   @Override
   public Boolean demarshall(EJValue o, MarshallingSession ctx) {
-    if (o.isObject() != null) {
+    if (o.isNull()) {
+      return null;
+    }
+    else if (o.isObject() != null) {
       return o.isObject().get(SerializationParts.NUMERIC_VALUE).isBoolean().booleanValue();
     }
     else {

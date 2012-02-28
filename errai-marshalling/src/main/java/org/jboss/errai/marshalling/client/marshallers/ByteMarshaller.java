@@ -34,7 +34,7 @@ public class ByteMarshaller extends AbstractNumberMarshaller<Byte> {
 
   @Override
   public Byte demarshall(EJValue o, MarshallingSession ctx) {
-    if (o == null) {
+    if (o.isNull()) {
       return null;
     }
     else if (o.isObject() != null) {

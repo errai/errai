@@ -33,7 +33,7 @@ public class TimeMarshaller extends AbstractJSONMarshaller<Time> {
 
   @Override
   public Time demarshall(EJValue o, MarshallingSession ctx) {
-    if (o.isNull() != null) return null;
+    if (o.isNull()) return null;
 
     return o.isObject() == null ? null :
             new Time(Long.parseLong(o.isObject().get(SerializationParts.QUALIFIED_VALUE).isString().stringValue()));

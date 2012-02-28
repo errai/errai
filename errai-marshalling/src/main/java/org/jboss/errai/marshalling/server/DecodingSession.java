@@ -75,7 +75,7 @@ public class DecodingSession extends AbstractMarshallingSession {
     else if (jsonValue.isArray() != null) {
       return List.class.getName();
     }
-    else if (jsonValue.isNull() != null) {
+    else if (jsonValue.isNull()) {
       return null;
     }
     else {
