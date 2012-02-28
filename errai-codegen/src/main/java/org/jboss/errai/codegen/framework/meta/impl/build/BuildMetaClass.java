@@ -16,6 +16,12 @@
 
 package org.jboss.errai.codegen.framework.meta.impl.build;
 
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+
 import org.jboss.errai.codegen.framework.BlockStatement;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.DefParameters;
@@ -35,12 +41,6 @@ import org.jboss.errai.codegen.framework.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.framework.meta.impl.AbstractMetaClass;
 import org.jboss.errai.codegen.framework.util.GenUtil;
 import org.jboss.errai.codegen.framework.util.PrettyPrinter;
-
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

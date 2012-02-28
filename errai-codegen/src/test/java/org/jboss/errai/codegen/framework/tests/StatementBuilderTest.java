@@ -184,7 +184,6 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
     catch (GenerationException e) {
       // expected
       assertTrue("Expected OutOfScopeException", ExceptionUtil.isIntermediateCause(e, OutOfScopeException.class));
-
     }
   }
 

@@ -17,7 +17,6 @@
 package org.jboss.errai.codegen.framework.meta.impl.gwt;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 

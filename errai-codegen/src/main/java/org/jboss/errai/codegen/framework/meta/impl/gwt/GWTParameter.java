@@ -18,7 +18,6 @@ package org.jboss.errai.codegen.framework.meta.impl.gwt;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassMember;

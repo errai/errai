@@ -21,7 +21,11 @@ import java.util.Map;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.RenderCacheStore;
 import org.jboss.errai.codegen.framework.Statement;
-import org.jboss.errai.codegen.framework.meta.*;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaParameterizedType;
+import org.jboss.errai.codegen.framework.meta.MetaType;
+import org.jboss.errai.codegen.framework.meta.MetaTypeVariable;
+import org.jboss.errai.codegen.framework.meta.MetaWildcardType;
 
 /**
  * {@link CallElement} to create a class reference.

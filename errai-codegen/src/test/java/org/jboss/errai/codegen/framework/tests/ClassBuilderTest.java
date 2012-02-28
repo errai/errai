@@ -250,10 +250,10 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
       fail("exprected UndefinedMethodException");
     }
     catch (GenerationException e) {
+      // expected
       assertTrue("cause is not UndefinedMethodException", e.getCause() instanceof UndefinedMethodException);
       
       UndefinedMethodException udme = (UndefinedMethodException) e.getCause();
-      // expected
       assertEquals("Wrong exception thrown", udme.getMethodName(), "foo");
     }
   }
@@ -291,11 +291,10 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
       fail("exprected UndefinedMethodException");
     }
     catch (GenerationException e) {
+      // expected
       assertTrue("cause is not UndefinedMethodException", e.getCause() instanceof UndefinedMethodException);
 
       UndefinedMethodException udme = (UndefinedMethodException) e.getCause();
-
-      // expected
       assertEquals("Wrong exception thrown", udme.getMethodName(), "undefinedMethod");
     }
   }

@@ -16,12 +16,6 @@
 
 package org.jboss.errai.codegen.framework.literal;
 
-import org.jboss.errai.codegen.framework.Context;
-import org.jboss.errai.codegen.framework.builder.callstack.LoadClassReference;
-import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
-import org.jboss.errai.codegen.framework.util.Stmt;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -32,6 +26,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+
+import org.jboss.errai.codegen.framework.Context;
+import org.jboss.errai.codegen.framework.builder.callstack.LoadClassReference;
+import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 
 /**
  * @author Mike Brock
