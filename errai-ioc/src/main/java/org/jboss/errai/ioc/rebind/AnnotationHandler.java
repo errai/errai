@@ -17,6 +17,7 @@
 package org.jboss.errai.ioc.rebind;
 
 import java.lang.annotation.Annotation;
+import java.util.List;
 import java.util.Set;
 
 import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;

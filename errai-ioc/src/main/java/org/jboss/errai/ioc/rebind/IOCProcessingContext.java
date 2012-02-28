@@ -31,24 +31,27 @@ import org.jboss.errai.ioc.rebind.ioc.JSR330QualifyingMetadataFactory;
 import org.jboss.errai.ioc.rebind.ioc.QualifyingMetadataFactory;
 import org.jboss.errai.ioc.rebind.ioc.TypeDiscoveryListener;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ListResourceBundle;
+import java.util.Set;
 import java.util.Stack;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public class IOCProcessingContext  {
+public class IOCProcessingContext {
   protected Context context;
   protected BuildMetaClass bootstrapClass;
   protected Stack<BlockBuilder<?>> blockBuilder;
   protected List<String> packages;
-  
+
   protected List<Statement> appendToEnd;
   protected List<Statement> postConstructStatements;
-  
+
   protected List<TypeDiscoveryListener> typeDiscoveryListeners;
 
   protected TreeLogger treeLogger;
@@ -59,6 +62,8 @@ public class IOCProcessingContext  {
   protected Variable contextVariable = Variable.create("ctx", InterfaceInjectionContext.class);
 
   protected QualifyingMetadataFactory qualifyingMetadataFactory = new JSR330QualifyingMetadataFactory();
+
+  protected Set<Class<? extends Annotation>> singletonScopes;
 
   public IOCProcessingContext(TreeLogger treeLogger,
                               GeneratorContext generatorContext,
@@ -78,8 +83,23 @@ public class IOCProcessingContext  {
     this.appendToEnd = new ArrayList<Statement>();
     this.postConstructStatements = new ArrayList<Statement>();
     this.typeDiscoveryListeners = new ArrayList<TypeDiscoveryListener>();
+    this.singletonScopes = new HashSet<Class<? extends Annotation>>();
   }
 
+  public void addSingletonScopeAnnotation(Class<? extends Annotation> annotation) {
+    this.singletonScopes.add(annotation);
+  }
+
+  public boolean isSingletonScope(Class<? extends Annotation> annotation) {
+    return this.singletonScopes.contains(annotation);
+  }
+
+  public boolean isSingletonScope(Annotation[] annotations) {
+    for (Annotation a : annotations) {
+      if (isSingletonScope(a.annotationType())) return true;
+    }
+    return false;
+  }
 
   public BlockBuilder<?> getBlockBuilder() {
     return blockBuilder.peek();
@@ -108,15 +128,15 @@ public class IOCProcessingContext  {
   public void addPostConstructStatement(Statement statement) {
     postConstructStatements.add(statement);
   }
-  
+
   public List<Statement> getAppendToEnd() {
     return Collections.unmodifiableList(appendToEnd);
   }
-  
+
   public List<Statement> getPostConstructStatements() {
-   return Collections.unmodifiableList(postConstructStatements);
+    return Collections.unmodifiableList(postConstructStatements);
   }
-  
+
   public BuildMetaClass getBootstrapClass() {
     return bootstrapClass;
   }
@@ -148,7 +168,7 @@ public class IOCProcessingContext  {
   public Variable getContextVariable() {
     return contextVariable;
   }
-  
+
   public VariableReference getContextVariableReference() {
     return contextVariable.getReference();
   }

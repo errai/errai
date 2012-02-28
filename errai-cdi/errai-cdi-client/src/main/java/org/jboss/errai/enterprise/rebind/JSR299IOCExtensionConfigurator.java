@@ -23,6 +23,8 @@ import com.google.gwt.core.ext.typeinfo.JPackage;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.impl.gwt.GWTClass;
+import org.jboss.errai.common.metadata.MetaDataScanner;
+import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.api.IOCExtension;
 import org.jboss.errai.ioc.rebind.AnnotationHandler;
@@ -30,6 +32,7 @@ import org.jboss.errai.ioc.rebind.DependencyControl;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.IOCProcessorFactory;
 import org.jboss.errai.ioc.rebind.JSR330AnnotationHandler;
+import org.jboss.errai.ioc.rebind.JSR330ProvidedClassAnnotationHandler;
 import org.jboss.errai.ioc.rebind.Rule;
 import org.jboss.errai.ioc.rebind.SortUnit;
 import org.jboss.errai.ioc.rebind.ioc.*;
@@ -44,12 +47,15 @@ import javax.inject.Singleton;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @IOCExtension
 public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator {
   public void configure(final IOCProcessingContext context, final InjectorFactory injectorFactory,
                         final IOCProcessorFactory procFactory) {
+    
+    context.addSingletonScopeAnnotation(ApplicationScoped.class);
 
     procFactory.registerHandler(Produces.class, new JSR330AnnotationHandler<Produces>() {
       //
@@ -128,6 +134,7 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
 
         return true;
       }
+
     }, Rule.after(EntryPoint.class, ApplicationScoped.class, Singleton.class));
 
     procFactory.registerHandler(ApplicationScoped.class, new JSR330AnnotationHandler<ApplicationScoped>() {

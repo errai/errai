@@ -196,7 +196,6 @@ public class IOCBootstrapGenerator {
     SourceWriter sourceWriter = new StringSourceWriter();
 
     procContext = new IOCProcessingContext(logger, context, sourceWriter, buildContext, bootStrapClass, blockBuilder);
-
     injectFactory = new InjectorFactory(procContext);
     procFactory = new IOCProcessorFactory(injectFactory);
 
@@ -520,6 +519,9 @@ public class IOCBootstrapGenerator {
   private void defaultConfigureProcessor() {
     final MetaClass widgetType = MetaClassFactory.get(Widget.class);
 
+    procContext.addSingletonScopeAnnotation(Singleton.class);
+    procContext.addSingletonScopeAnnotation(EntryPoint.class);
+    procContext.addSingletonScopeAnnotation(Service.class);
 
     procFactory.registerHandler(Singleton.class, new JSR330AnnotationHandler<Singleton>() {
       @Override

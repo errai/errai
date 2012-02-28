@@ -105,7 +105,26 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
         finishTest();
       }
     });
+  }
 
+  public void testDependentScopeDoesNotViolateBroaderApplicationScope() {
+    delayTestFinish(60000);
+    CDI.addPostInitTask(new Runnable() {
+      @Override
+      public void run() {
+        ApplicationScopedBean applicationScopedBean = IOC.getBeanManager()
+                .lookupBean(ApplicationScopedBean.class).getInstance();
 
+        assertNotNull("ApplicationScopedBean was null", applicationScopedBean);
+
+        ServiceC serviceC = IOC.getBeanManager()
+                .lookupBean(ServiceC.class).getInstance();
+
+        assertSame("ApplicationScopedBean should be same instance even in dependent scoped",
+                serviceC.getBean(), applicationScopedBean);
+        
+        finishTest();
+      }
+    });
   }
 }

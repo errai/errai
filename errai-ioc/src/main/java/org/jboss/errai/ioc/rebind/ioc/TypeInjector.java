@@ -30,6 +30,7 @@ import org.jboss.errai.ioc.client.api.qualifiers.Any;
 import org.jboss.errai.ioc.client.container.CreationalCallback;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.New;
 import javax.inject.Singleton;
 import java.lang.annotation.Annotation;
@@ -53,10 +54,7 @@ public class TypeInjector extends Injector {
 
   public TypeInjector(MetaClass type, IOCProcessingContext context, Annotation[] additionalQualifiers) {
     this.type = type;
-    this.singleton = type.isAnnotationPresent(Singleton.class)
-            || type.isAnnotationPresent(com.google.inject.Singleton.class)
-            || type.isAnnotationPresent(EntryPoint.class);
-
+    this.singleton = context.isSingletonScope(type.getAnnotations());
     this.varName = InjectUtil.getNewVarName();
 
     try {

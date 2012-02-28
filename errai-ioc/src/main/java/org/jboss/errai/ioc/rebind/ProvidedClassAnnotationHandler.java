@@ -14,25 +14,14 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.cdi.integration.client.shared;
+package org.jboss.errai.ioc.rebind;
 
-import javax.inject.Inject;
+import java.lang.annotation.Annotation;
+import java.util.Set;
 
 /**
  * @author Mike Brock
  */
-public class ServiceC {
-  private static int count = 0;
-  
-  private String name = "Service:" + (count++);
-  
-  @Inject ApplicationScopedBean bean;
-
-  public ApplicationScopedBean getBean() {
-    return bean;
-  }
-
-  public String getName() {
-    return name;
-  }
+public interface ProvidedClassAnnotationHandler<T extends Annotation> extends AnnotationHandler<T> {
+  public Set<Class<?>> getClasses();
 }

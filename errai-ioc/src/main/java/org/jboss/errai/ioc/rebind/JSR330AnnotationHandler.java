@@ -69,10 +69,6 @@ public abstract class JSR330AnnotationHandler<T extends Annotation> implements A
     }
     while ((mc = mc.getSuperClass()) != null);
 
-    for (SortUnit unit : dependencies) {
-       control.addType(unit.getType());
-    }
-
     return Collections.unmodifiableSet(dependencies);
   }
 }
