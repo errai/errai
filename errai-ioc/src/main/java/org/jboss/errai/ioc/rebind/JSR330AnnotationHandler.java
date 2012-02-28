@@ -26,6 +26,7 @@ import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
 
 import javax.inject.Inject;
 import java.lang.annotation.Annotation;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -33,25 +34,27 @@ import java.util.Set;
  * @author Mike Brock
  */
 public abstract class JSR330AnnotationHandler<T extends Annotation> implements AnnotationHandler<T> {
-  @Override
-  public Set<RequiredDependency> checkDependencies(InjectableInstance instance, T annotation,
-                                                   IOCProcessingContext context) {
 
-    Set<RequiredDependency> dependencies = new HashSet<RequiredDependency>();
+  @Override
+  public Set<SortUnit> checkDependencies(DependencyControl control, InjectableInstance instance,
+                                         T annotation,
+                                         IOCProcessingContext context) {
+
+    Set<SortUnit> dependencies = new HashSet<SortUnit>();
 
     MetaClass mc = instance.getType();
 
     do {
       for (MetaField field : mc.getDeclaredFields()) {
         if (field.isAnnotationPresent(Inject.class)) {
-          dependencies.add(new RequiredDependency(field.getType(), InjectUtil.extractQualifiersFromField(field)));
+          dependencies.add(new SortUnit(field.getType(), InjectUtil.extractQualifiersFromField(field)));
         }
       }
       
       for (MetaMethod method : mc.getDeclaredMethods()) {
         if (method.isAnnotationPresent(Inject.class)) {
           for (MetaParameter parm : method.getParameters()) {
-            dependencies.add(new RequiredDependency(parm.getType(), InjectUtil.extractQualifiersFromParameter(parm)));
+            dependencies.add(new SortUnit(parm.getType(), InjectUtil.extractQualifiersFromParameter(parm)));
           }
         }
       }
@@ -59,8 +62,7 @@ public abstract class JSR330AnnotationHandler<T extends Annotation> implements A
       for (MetaConstructor constructor : mc.getConstructors()) {
         if (constructor.isAnnotationPresent(Inject.class)) {
           for (MetaParameter parm : constructor.getParameters()) {
-            dependencies.add(new RequiredDependency(parm.getType(), InjectUtil.extractQualifiersFromParameter(parm),
-                    DependencyPolicy.BeforeMandatory));
+            dependencies.add(new SortUnit(parm.getType(), InjectUtil.extractQualifiersFromParameter(parm)));
           }
         }
       }
@@ -68,6 +70,6 @@ public abstract class JSR330AnnotationHandler<T extends Annotation> implements A
     }
     while ((mc = mc.getSuperClass()) != null);
 
-    return dependencies;
+    return Collections.unmodifiableSet(dependencies);
   }
 }

@@ -16,6 +16,7 @@
 
 package org.jboss.errai.enterprise.rebind;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.JConstructor;
 import com.google.gwt.core.ext.typeinfo.JPackage;
@@ -25,24 +26,24 @@ import org.jboss.errai.codegen.framework.meta.impl.gwt.GWTClass;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.api.IOCExtension;
 import org.jboss.errai.ioc.rebind.AnnotationHandler;
+import org.jboss.errai.ioc.rebind.DependencyControl;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.IOCProcessorFactory;
 import org.jboss.errai.ioc.rebind.JSR330AnnotationHandler;
-import org.jboss.errai.ioc.rebind.RequiredDependency;
 import org.jboss.errai.ioc.rebind.Rule;
+import org.jboss.errai.ioc.rebind.SortUnit;
 import org.jboss.errai.ioc.rebind.ioc.*;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.NormalScope;
-import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Scope;
 import javax.inject.Singleton;
 import java.lang.annotation.Annotation;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 @IOCExtension
@@ -50,14 +51,16 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
   public void configure(final IOCProcessingContext context, final InjectorFactory injectorFactory,
                         final IOCProcessorFactory procFactory) {
 
-    procFactory.registerHandler(Produces.class, new AnnotationHandler<Produces>() {
-
+    procFactory.registerHandler(Produces.class, new JSR330AnnotationHandler<Produces>() {
+      //
       @Override
-      public Set<RequiredDependency> checkDependencies(InjectableInstance instance, Produces annotation,
-                                                       IOCProcessingContext context) {
-        
-        return Collections.singleton(new RequiredDependency(instance.getType(), Arrays.asList(instance.getQualifiers())));
+      public Set<SortUnit> checkDependencies(DependencyControl control, InjectableInstance instance, Produces annotation,
+                                             IOCProcessingContext context) {
+
+        control.masqueradeAs(instance.getElementTypeOrMethodReturnType());
+        return Collections.singleton(new SortUnit(instance.getEnclosingType(), true));
       }
+
 
       @Override
       public boolean handle(final InjectableInstance instance, final Produces annotation,
@@ -70,10 +73,6 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
           case PrivateMethod:
             instance.ensureMemberExposed();
 
-          default:
-            if (!instance.getInjectionContext().isInjectable(instance.getType())) {
-              return false;
-            }
         }
 
         injectorFactory.addInjector(new Injector() {
@@ -149,14 +148,15 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
         InjectionContext injectionContext = injectorFactory.getInjectionContext();
         TypeInjector i = (TypeInjector) instance.getInjector();
         i.getType(injectionContext, null);
-        
+
         return true;
       }
     });
 
     if (context.getGeneratorContext() != null && context.getGeneratorContext().getTypeOracle() != null) {
       for (JPackage pkg : context.getGeneratorContext().getTypeOracle().getPackages()) {
-        TypeScan: for (JClassType type : pkg.getTypes()) {
+        TypeScan:
+        for (JClassType type : pkg.getTypes()) {
           if (type.isAbstract() || type.isInterface() != null
                   || type.getQualifiedSourceName().startsWith("java.")) continue;
 
@@ -173,7 +173,7 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
               continue;
             }
           }
-          
+
           for (Annotation a : type.getAnnotations()) {
             Class<? extends Annotation> annoClass = a.annotationType();
             if (annoClass.isAnnotationPresent(Scope.class)
@@ -181,13 +181,13 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
               continue TypeScan;
             }
           }
-          
+
           MetaClass metaClass = GWTClass.newInstance(type);
 
           if (injectorFactory.hasType(metaClass)) {
             continue;
           }
-          
+
           injectorFactory.addPsuedoScopeForType(metaClass);
         }
       }

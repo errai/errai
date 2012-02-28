@@ -19,7 +19,7 @@ public class TopologicalSort {
     List<V> sorted = new ArrayList<V>(g.getNodes().size());
 
 //  S <- Set of all nodes with no outgoing edges
-    Set<V> s = new HashSet<V>();
+    Set<V> s = findNodesWithNoOutgoingEdges(g);
 
 //  for each node n in S do
     Set<V> visited = new HashSet<V>();

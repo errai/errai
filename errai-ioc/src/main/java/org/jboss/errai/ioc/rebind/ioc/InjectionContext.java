@@ -193,6 +193,7 @@ public class InjectionContext {
 
         if (inj.isPseudo()) {
           iter.remove();
+          noAdd = false;
         }
       }
 

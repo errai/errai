@@ -20,8 +20,6 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
  */
 @EntryPoint
 public class ProducerTestModule {
-  private static ProducerTestModule instance;
-
   @Inject
   private ProducerDependentTestBean testBean;
 

@@ -254,7 +254,7 @@ public class IOCBootstrapGenerator {
     MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
 
     procFactory.process(scanner, procContext);
-    procFactory.processAll();
+   // procFactory.processAll();
 
     runAllDeferred();
 

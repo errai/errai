@@ -90,7 +90,25 @@ public class InjectionPoint<T> {
       case Type:
         return type;
       default:
-        throw new RuntimeException("unsupported operation: getEncodingType for task: " + taskType);
+        throw new RuntimeException("unsupported operation: getType for task: " + taskType);
+    }
+  }
+  
+  public MetaClass getElementTypeOrMethodReturnType() {
+    switch (taskType) {
+      case PrivateField:
+      case Field:
+        return type = field.getType();
+      case PrivateMethod:
+      case StaticMethod:
+      case Method:
+        return type = method.getReturnType();
+      case Parameter:
+        return type = parm.getType();
+      case Type:
+        return type;
+      default:
+        throw new RuntimeException("unsupported operation: getType for task: " + taskType);
     }
   }
 

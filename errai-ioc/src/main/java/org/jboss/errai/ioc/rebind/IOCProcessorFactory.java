@@ -22,6 +22,8 @@ import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaField;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
+import org.jboss.errai.common.client.graph.Digraph;
+import org.jboss.errai.common.client.graph.TopologicalSort;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.rebind.EnvironmentUtil;
 import org.jboss.errai.ioc.client.api.TestOnly;
@@ -29,6 +31,7 @@ import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.InjectionFailure;
 import org.jboss.errai.ioc.rebind.ioc.Injector;
 import org.jboss.errai.ioc.rebind.ioc.InjectorFactory;
+import org.jboss.errai.ioc.rebind.ioc.util.WiringUtil;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
@@ -40,8 +43,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -51,9 +56,9 @@ import static org.jboss.errai.ioc.rebind.ioc.InjectableInstance.getTypeInjectedI
 
 public class IOCProcessorFactory {
   private SortedSet<ProcessingEntry> processingEntries = new TreeSet<ProcessingEntry>();
-  private Set<ProcessingDelegate> delegates = new LinkedHashSet<ProcessingDelegate>();
-  private Multimap<MetaClass, MetaClass> reverseDependenciesMap = HashMultimap.create();
-  
+  private Map<SortUnit, SortUnit> delegates = new LinkedHashMap<SortUnit, SortUnit>();
+  private Multimap<SortUnit, SortUnit> reverseDependenciesMap = HashMultimap.create();
+
   private InjectorFactory injectorFactory;
 
   public IOCProcessorFactory(InjectorFactory factory) {
@@ -66,6 +71,18 @@ public class IOCProcessorFactory {
 
   public void registerHandler(Class<? extends Annotation> annotation, AnnotationHandler handler, List<RuleDef> rules) {
     processingEntries.add(new ProcessingEntry(annotation, handler, rules));
+  }
+
+  private void addToDelegates(SortUnit unit) {
+    if (delegates.containsKey(unit)) {
+      SortUnit existing = delegates.get(unit);
+      for (Object o : unit.getItems()) {
+        existing.addItem(o);
+      }
+    }
+    else {
+      delegates.put(unit, unit);
+    }
   }
 
   @SuppressWarnings({"unchecked"})
@@ -93,7 +110,18 @@ public class IOCProcessorFactory {
         };
       }
 
+      class DependencyControlImpl implements DependencyControl {
+        private MetaClass masqueradeClass;
+
+        @Override
+        public void masqueradeAs(MetaClass clazz) {
+          masqueradeClass = clazz;
+        }
+      }
+
       for (ElementType elementType : target.value()) {
+        final DependencyControlImpl dependencyControl = new DependencyControlImpl();
+
         switch (elementType) {
           case TYPE: {
             Set<Class<?>> classes = scanner.getTypesAnnotatedWith(aClass, context.getPackages());
@@ -101,24 +129,26 @@ public class IOCProcessorFactory {
               final Annotation anno = clazz.getAnnotation(aClass);
 
               final MetaClass type = MetaClassFactory.get(clazz);
+              dependencyControl.masqueradeAs(type);
 
               if (type.isAnnotationPresent(TestOnly.class) && !EnvironmentUtil.isGWTJUnitTest()) {
                 continue;
               }
 
-              injectorFactory.addType(type);
 
               ProcessingDelegate<MetaClass> del = new ProcessingDelegate<MetaClass>() {
                 @Override
-                public Set<RequiredDependency> getRequiredDependencies() {
+                public Set<SortUnit> getRequiredDependencies() {
                   final InjectableInstance injectableInstance
                           = getTypeInjectedInstance(anno, type, null, injectorFactory.getInjectionContext());
 
-                  return entry.handler.checkDependencies(injectableInstance, anno, context);
+                  return entry.handler.checkDependencies(dependencyControl, injectableInstance, anno, context);
                 }
 
                 @Override
                 public boolean process() {
+                  injectorFactory.addType(type);
+
                   Injector injector = injectorFactory.getInjectionContext().getInjector(type);
                   final InjectableInstance injectableInstance
                           = getTypeInjectedInstance(anno, type, injector, injectorFactory.getInjectionContext());
@@ -126,26 +156,23 @@ public class IOCProcessorFactory {
                   return entry.handler.handle(injectableInstance, anno, context);
                 }
 
-                @Override
                 public MetaClass getType() {
                   return type;
-                }
-
-                public String toString() {
-                  return clazz.getName() + " => " + getRequiredDependencies();
                 }
 
                 public boolean equals(Object o) {
                   return o != null && toString().equals(o.toString());
                 }
 
-                public int hashCode() {
-                  return 32 * toString().hashCode();
+
+                public String toString() {
+                  return clazz.getName();
                 }
               };
 
               entry.addProcessingDelegate(del);
-              delegates.add(del);
+              Set<SortUnit> requiredDependencies = del.getRequiredDependencies();
+              addToDelegates(new SortUnit(dependencyControl.masqueradeClass, del, requiredDependencies));
             }
           }
           break;
@@ -158,20 +185,23 @@ public class IOCProcessorFactory {
               final MetaClass type = MetaClassFactory.get(method.getDeclaringClass());
               final MetaMethod metaMethod = MetaClassFactory.get(method);
 
-              injectorFactory.addType(type);
+              dependencyControl.masqueradeAs(type);
+
 
               ProcessingDelegate<MetaField> del = new ProcessingDelegate<MetaField>() {
                 @Override
-                public Set<RequiredDependency> getRequiredDependencies() {
+                public Set<SortUnit> getRequiredDependencies() {
                   final InjectableInstance injectableInstance
                           = getMethodInjectedInstance(anno, metaMethod, null,
                           injectorFactory.getInjectionContext());
 
-                  return entry.handler.checkDependencies(injectableInstance, anno, context);
+                  return entry.handler.checkDependencies(dependencyControl, injectableInstance, anno, context);
                 }
 
                 @Override
                 public boolean process() {
+                  injectorFactory.addType(type);
+
                   Injector injector = injectorFactory.getInjectionContext().getInjector(type);
                   final InjectableInstance injectableInstance
                           = getMethodInjectedInstance(anno, metaMethod, injector,
@@ -181,29 +211,27 @@ public class IOCProcessorFactory {
                   return entry.handler.handle(injectableInstance, anno, context);
                 }
 
-                @Override
                 public MetaClass getType() {
                   return type;
-                }
-
-                public String toString() {
-                  return type.getFullyQualifiedName() + " => " + getRequiredDependencies();
                 }
 
                 public boolean equals(Object o) {
                   return o != null && toString().equals(o.toString());
                 }
 
-                public int hashCode() {
-                  return 32 * toString().hashCode();
+
+                public String toString() {
+                  return type.getFullyQualifiedName();
                 }
+
               };
 
               entry.addProcessingDelegate(del);
-              delegates.add(del);
-
+              Set<SortUnit> requiredDependencies = del.getRequiredDependencies();
+              addToDelegates(new SortUnit(dependencyControl.masqueradeClass, del, requiredDependencies));
             }
           }
+          break;
 
           case FIELD: {
             Set<Field> fields = scanner.getFieldsAnnotatedWith(aClass, context.getPackages());
@@ -213,21 +241,23 @@ public class IOCProcessorFactory {
 
               final MetaClass type = MetaClassFactory.get(method.getDeclaringClass());
               final MetaField metaField = MetaClassFactory.get(method);
+              dependencyControl.masqueradeAs(type);
 
-              injectorFactory.addType(type);
 
               ProcessingDelegate<MetaField> del = new ProcessingDelegate<MetaField>() {
                 @Override
-                public Set<RequiredDependency> getRequiredDependencies() {
+                public Set<SortUnit> getRequiredDependencies() {
                   final InjectableInstance injectableInstance
                           = InjectableInstance.getFieldInjectedInstance(anno, metaField, null,
                           injectorFactory.getInjectionContext());
 
-                  return entry.handler.checkDependencies(injectableInstance, anno, context);
+                  return entry.handler.checkDependencies(dependencyControl, injectableInstance, anno, context);
                 }
 
                 @Override
                 public boolean process() {
+                  injectorFactory.addType(type);
+
                   Injector injector = injectorFactory.getInjectionContext().getInjector(type);
                   final InjectableInstance injectableInstance
                           = InjectableInstance.getFieldInjectedInstance(anno, metaField, injector,
@@ -236,80 +266,68 @@ public class IOCProcessorFactory {
                   return entry.handler.handle(injectableInstance, anno, context);
                 }
 
-                @Override
                 public MetaClass getType() {
                   return type;
-                }
-
-                public String toString() {
-                  return type.getFullyQualifiedName() + " => " + getRequiredDependencies();
                 }
 
                 public boolean equals(Object o) {
                   return o != null && toString().equals(o.toString());
                 }
 
-                public int hashCode() {
-                  return 32 * toString().hashCode();
+
+                public String toString() {
+                  return type.getFullyQualifiedName();
                 }
 
               };
 
               entry.addProcessingDelegate(del);
-              delegates.add(del);
+              Set<SortUnit> requiredDependencies = del.getRequiredDependencies();
+              addToDelegates(new SortUnit(dependencyControl.masqueradeClass, del, requiredDependencies));
             }
           }
         }
       }
     }
-    
-    for (ProcessingDelegate<?> del : delegates) {
-      for (RequiredDependency requiredDependency : del.getRequiredDependencies()) {
-        reverseDependenciesMap.put(requiredDependency.getType(), del.getType());
+
+    for (SortUnit del : delegates.keySet()) {
+      for (SortUnit requiredDependency : del.getDependencies()) {
+        reverseDependenciesMap.put(requiredDependency, del);
+      }
+    }
+
+    Digraph<SortUnit> processingDelegateDigraph = new Digraph<SortUnit>() {
+      @Override
+      public Set<SortUnit> getNodes() {
+        return delegates.keySet();
+      }
+
+      @Override
+      public Set<SortUnit> nodesReferencedFrom(SortUnit fromNode) {
+        return fromNode.getDependencies();
+      }
+
+      @Override
+      public Set<SortUnit> nodesReferencing(SortUnit toNode) {
+        return new HashSet<SortUnit>(reverseDependenciesMap.get(toNode));
+      }
+    };
+
+
+//    List<SortUnit> list = TopologicalSort.topologicalSort(processingDelegateDigraph);
+//    Collections.reverse(list);
+
+    List<SortUnit> list = WiringUtil.worstSortAlgorithmEver(delegates.keySet());
+
+    for (SortUnit unit : list) {
+      for (Object item : unit.getItems()) {
+        if (item instanceof ProcessingDelegate) {
+          ((ProcessingDelegate) item).process();
+        }
       }
     }
   }
 
-  public boolean processAll() {
-    int start;
-
-    List<ProcessingEntry> procEntries = new ArrayList<ProcessingEntry>(processingEntries);
-
-    // The logic below processes the procEntries list in multiple passes, because the entries
-    // are not ordered according to their dependencies.
-    // TODO we should consider replacing this logic by applying an a priori topological sort for processing entries.
-    do {
-      start = procEntries.size();
-
-      Iterator<ProcessingEntry> iter = procEntries.iterator();
-
-      while (iter.hasNext()) {
-        try {
-          if (iter.next().processAllDelegates()) {
-            iter.remove();
-          }
-        }
-        catch (InjectionFailure f) {
-          // We are ignoring this Exception and keep retrying. The problem should go away after
-          // all the other dependencies have been processed.
-        }
-      }
-    }
-    while (!procEntries.isEmpty() && procEntries.size() < start);
-
-    if (!procEntries.isEmpty()) {
-
-      for (ProcessingEntry<?> procEntry : procEntries) {
-        for (InjectionFailure failure : procEntry.getErrorList()) {
-          failure.printStackTrace();
-        }
-      }
-
-      throw new InjectionFailure("unresolved dependencies: " + procEntries);
-    }
-
-    return true;
-  }
 
   private class ProcessingEntry<T> implements Comparable<ProcessingEntry> {
     private Class<? extends Annotation> annotationClass;
@@ -349,14 +367,9 @@ public class IOCProcessorFactory {
             if (delegate.process()) {
               iterator.remove();
             }
-            else {
-              System.out.println("fail");
-            }
-
           }
           catch (InjectionFailure f) {
             errors.add(f);
-
             // Ignored, see processAll()
           }
         }
@@ -431,8 +444,6 @@ public class IOCProcessorFactory {
   private static interface ProcessingDelegate<T> {
     public boolean process();
 
-    public MetaClass getType();
-
-    public Set<RequiredDependency> getRequiredDependencies();
+    public Set<SortUnit> getRequiredDependencies();
   }
 }
