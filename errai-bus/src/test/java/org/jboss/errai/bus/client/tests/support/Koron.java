@@ -30,6 +30,18 @@ public class Koron {
    private List<Integer> sameList = someList;
    private List<Integer> otherList = new ArrayList<Integer>();
 
+  public List<Integer> getSomeList() {
+    return someList;
+  }
+
+  public List<Integer> getSameList() {
+    return sameList;
+  }
+
+  public List<Integer> getOtherList() {
+    return otherList;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;

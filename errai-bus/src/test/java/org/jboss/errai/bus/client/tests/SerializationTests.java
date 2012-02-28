@@ -1558,6 +1558,9 @@ public class SerializationTests extends AbstractErraiTest {
           public void callback(Koron response) {
             try {
               assertEquals(koron, response);
+              assertSame("someList is different from sameList", response.getSomeList(), response.getSameList());
+              assertNotSame("otherList is not different from someList", response.getSomeList(), response.getOtherList());
+
               finishTest();
             }
             catch (Throwable e) {

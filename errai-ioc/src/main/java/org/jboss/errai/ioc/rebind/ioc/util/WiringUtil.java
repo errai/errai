@@ -26,16 +26,19 @@ import java.util.List;
  * @author Mike Brock
  */
 public class WiringUtil {
-  public static List<SortUnit> worstSortAlgorithmEver(Collection<SortUnit> in) {
+  public static List<SortUnit> worstSortAlgorithmEver(final Collection<SortUnit> in) {
     List<SortUnit> newList = new ArrayList<SortUnit>(in);
 
+    // perform fist pass.
     _worstSort(newList);
+
+    // perform second pass.
     _worstSort(newList);
 
     return newList;
   }
   
-  private static void _worstSort(List<SortUnit> newList) {
+  private static void _worstSort(final List<SortUnit> newList) {
     for (int i = 0; i < newList.size(); i++) {
       SortUnit s = newList.get(i);
       for (int y = i; y < newList.size(); y++) {

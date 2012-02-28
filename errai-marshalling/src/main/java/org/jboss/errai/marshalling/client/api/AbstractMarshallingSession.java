@@ -17,13 +17,14 @@
 package org.jboss.errai.marshalling.client.api;
 
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Map;
 
 /**
  * @author Mike Brock
  */
 public abstract class AbstractMarshallingSession implements MarshallingSession {
-  private Map<Object, Integer> objects = new HashMap<Object, Integer>();
+  private Map<Object, Integer> objects = new IdentityHashMap<Object, Integer>();
   private Map<String, Object> objectMap = new HashMap<String, Object>();
 
   @Override

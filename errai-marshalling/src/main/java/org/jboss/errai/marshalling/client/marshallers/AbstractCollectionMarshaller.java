@@ -36,8 +36,9 @@ public abstract class AbstractCollectionMarshaller<C extends Collection> extends
   }
 
   @Override
-  public final C demarshall(EJValue o, MarshallingSession ctx) {
+  public final C doDemarshall(EJValue o, MarshallingSession ctx) {
     EJObject obj = o.isObject();
+
     if (obj != null) {
       EJValue val = obj.get(SerializationParts.QUALIFIED_VALUE);
 
@@ -51,6 +52,7 @@ public abstract class AbstractCollectionMarshaller<C extends Collection> extends
     return null;
   }
 
+
   public abstract C doDemarshall(EJArray o, MarshallingSession ctx);
 
   @Override
@@ -59,6 +61,8 @@ public abstract class AbstractCollectionMarshaller<C extends Collection> extends
   }
 
   protected <T extends Collection> T marshallToCollection(T collection, EJArray array, MarshallingSession ctx) {
+    
+    
     for (int i = 0; i < array.size(); i++) {
       EJValue elem = array.get(i);
       if (elem.isNull() == null) {

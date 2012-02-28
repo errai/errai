@@ -23,4 +23,5 @@ import org.jboss.errai.codegen.framework.meta.MetaClass;
  */
 public interface DependencyControl {
   public void masqueradeAs(MetaClass clazz);
+  public void addType(MetaClass clazz);
 }

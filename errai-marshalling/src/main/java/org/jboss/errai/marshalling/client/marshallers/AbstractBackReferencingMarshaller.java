@@ -18,6 +18,8 @@ package org.jboss.errai.marshalling.client.marshallers;
 
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
+import org.jboss.errai.marshalling.client.api.json.EJObject;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
 
 /**
  * @author Mike Brock
@@ -47,4 +49,23 @@ public abstract class AbstractBackReferencingMarshaller<C> extends AbstractJSONM
   }
 
   public abstract void doMarshall(StringBuilder buf, C o, MarshallingSession ctx);
+
+  @Override
+  public C demarshall(EJValue o, MarshallingSession ctx) {
+    EJObject obj = o.isObject();
+    if (obj == null) {
+      return doDemarshall(o, ctx);
+    }
+    
+    String objId = obj.get(SerializationParts.OBJECT_ID).isString().stringValue();
+    if (ctx.hasObjectHash(objId)) {
+      return (C) ctx.getObject(Object.class, objId);
+    }
+    
+    C val = doDemarshall(o, ctx);
+    ctx.recordObjectHash(objId, val);
+    return val;
+  }
+  
+  public abstract C doDemarshall(EJValue o, MarshallingSession ctx);
 }
