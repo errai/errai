@@ -112,10 +112,10 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
       fail("expected UndefinedMethodException");
     }
     catch (GenerationException e) {
-      assertTrue("Expected UndefinedMethodException", e.getCause() instanceof UndefinedMethodException);
       // expected
+      assertTrue("Expected UndefinedMethodException", e.getCause() instanceof UndefinedMethodException);
+      
       UndefinedMethodException udme = (UndefinedMethodException) e.getCause();
-
       assertEquals("Wrong exception thrown", udme.getMethodName(), "undefinedMethod");
     }
   }
@@ -134,10 +134,10 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
       fail("expected UndefinedMethodException");
     }
     catch (GenerationException e) {
-      Throwable c = ExceptionUtil.getRootCause(e);
-
-      assertTrue("Expected UndefinedMethodException", c instanceof UndefinedMethodException);
       // expected
+      Throwable c = ExceptionUtil.getRootCause(e);
+      assertTrue("Expected UndefinedMethodException", c instanceof UndefinedMethodException);
+      
       UndefinedMethodException udme = (UndefinedMethodException) c;
       assertEquals("Wrong exception thrown", udme.getMethodName(), "undefinedMethod");
     }
@@ -174,8 +174,9 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
       fail("expected OutOfScopeException");
     }
     catch (GenerationException e) {
-      assertTrue("Expected OutOfScopeException", e.getCause() instanceof OutOfScopeException);
       // expected
+      assertTrue("Expected OutOfScopeException", e.getCause() instanceof OutOfScopeException);
+      
       OutOfScopeException oose = (OutOfScopeException) e.getCause();
       assertTrue(oose.getMessage().contains("param2"));
     }
@@ -270,8 +271,9 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
       fail("expected UndefinedMethodException");
     }
     catch (GenerationException e) {
-      assertTrue("Expected UndefinedMethodException", e.getCause() instanceof UndefinedMethodException);
       // expected
+      assertTrue("Expected UndefinedMethodException", e.getCause() instanceof UndefinedMethodException);
+      
       UndefinedMethodException udme = (UndefinedMethodException) e.getCause();
       assertEquals("Wrong exception details", udme.getMethodName(), "intValue");
     }
@@ -303,6 +305,7 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
       fail("expected InvalidTypeException");
     }
     catch (GenerationException e) {
+      // expected
       assertTrue("Expected InvalidTypeException", e.getCause() instanceof InvalidTypeException);
     }
   }

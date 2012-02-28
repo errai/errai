@@ -21,7 +21,6 @@ import javax.enterprise.util.TypeLiteral;
 import org.jboss.errai.codegen.framework.BooleanExpression;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Statement;
-import org.jboss.errai.codegen.framework.Variable;
 import org.jboss.errai.codegen.framework.VariableReference;
 import org.jboss.errai.codegen.framework.builder.ArrayInitializationBuilder;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;

@@ -16,11 +16,11 @@
 
 package org.jboss.errai.codegen.framework.literal;
 
+import static org.jboss.errai.codegen.framework.builder.callstack.LoadClassReference.getClassReference;
+
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
-
-import static org.jboss.errai.codegen.framework.builder.callstack.LoadClassReference.getClassReference;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

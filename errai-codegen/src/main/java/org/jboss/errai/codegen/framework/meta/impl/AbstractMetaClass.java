@@ -18,7 +18,6 @@ package org.jboss.errai.codegen.framework.meta.impl;
 
 import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.asClassArray;
 import static org.jboss.errai.codegen.framework.util.GenUtil.classToMeta;
-import static org.jboss.errai.codegen.framework.util.GenUtil.findCaseInsensitiveMatch;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;

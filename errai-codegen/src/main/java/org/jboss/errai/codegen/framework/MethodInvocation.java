@@ -16,6 +16,9 @@
 
 package org.jboss.errai.codegen.framework;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.jboss.errai.codegen.framework.literal.ClassLiteral;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
@@ -25,9 +28,6 @@ import org.jboss.errai.codegen.framework.meta.MetaType;
 import org.jboss.errai.codegen.framework.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.framework.meta.MetaWildcardType;
 import org.mvel2.util.NullType;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Represents a method invocation statement.

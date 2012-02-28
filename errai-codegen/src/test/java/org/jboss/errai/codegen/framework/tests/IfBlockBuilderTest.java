@@ -252,9 +252,8 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
       fail("Expected InvalidTypeException");
     }
     catch (GenerationException e) {
-      assertTrue("expected InvalidTypeException", ExceptionUtil.getRootCause(e) instanceof InvalidTypeException);
-      
       // expected
+      assertTrue("expected InvalidTypeException", ExceptionUtil.getRootCause(e) instanceof InvalidTypeException);
     }
 
     try {
@@ -285,6 +284,9 @@ public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements 
       fail("Expected InvalidExpressionException");
     }
     catch (GenerationException e) {
+      // expected
+      assertTrue("Expected InvalidExpressionException", 
+          ExceptionUtil.isIntermediateCause(e, InvalidExpressionException.class));
       assertTrue("Wrong exception thrown", e.getCause().getMessage().contains(String.class.getName()));
     }
   }

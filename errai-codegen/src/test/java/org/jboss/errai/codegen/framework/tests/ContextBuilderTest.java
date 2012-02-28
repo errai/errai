@@ -155,7 +155,6 @@ public class ContextBuilderTest extends AbstractStatementBuilderTest {
     catch (GenerationException e) {
       // expected
       assertTrue("Expected InvalidTypeException", e.getCause() instanceof InvalidTypeException);
-      
     }
 
     try {
@@ -165,7 +164,6 @@ public class ContextBuilderTest extends AbstractStatementBuilderTest {
     }
     catch (GenerationException e) {
       // expected
-
       assertTrue("Expected InvalidTypeException", e.getCause() instanceof InvalidTypeException);
     }
   }
