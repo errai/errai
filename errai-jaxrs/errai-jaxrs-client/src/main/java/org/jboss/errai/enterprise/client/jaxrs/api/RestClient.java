@@ -21,7 +21,7 @@ import java.util.List;
 
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.RemoteCallback;
-import org.jboss.errai.bus.client.framework.ProxyProvider;
+import org.jboss.errai.bus.client.framework.ProxyFactory;
 import org.jboss.errai.bus.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.enterprise.client.jaxrs.JaxrsProxy;
 import org.jboss.errai.enterprise.client.jaxrs.JaxrsProxyLoader;
@@ -40,7 +40,7 @@ public class RestClient {
     MarshallerFramework.initializeDefaultSessionProvider();
   }
   
-  private static ProxyProvider proxyProvider = new RemoteServiceProxyFactory();
+  private static ProxyFactory proxyProvider = new RemoteServiceProxyFactory();
 
   /**
    * Creates a client/proxy for the provided JAX-RS resource interface.
@@ -111,18 +111,17 @@ public class RestClient {
     }
 
     // Can't use ArrayUtils (class has to be translatable).
-    List<Integer> codes = null;
     if (successCodes.length > 0) {
-      codes = new ArrayList<Integer>();
+      List<Integer> codes = new ArrayList<Integer>();
       for (int code : successCodes) {
         codes.add(code);
       }
+      ((JaxrsProxy) proxy).setSuccessCodes(codes);
     }
     
     ((JaxrsProxy) proxy).setRemoteCallback(callback);
     ((JaxrsProxy) proxy).setErrorCallback(errorCallback);
     ((JaxrsProxy) proxy).setBaseUrl(baseUrl);
-    ((JaxrsProxy) proxy).setSuccessCodes(codes);
     return proxy;
   }
   

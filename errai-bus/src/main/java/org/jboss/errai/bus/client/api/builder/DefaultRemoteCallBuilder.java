@@ -22,7 +22,7 @@ import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.client.framework.ProxyProvider;
+import org.jboss.errai.bus.client.framework.ProxyFactory;
 import org.jboss.errai.bus.client.framework.RPCStub;
 import org.jboss.errai.bus.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.common.client.framework.Assert;
@@ -37,7 +37,7 @@ import java.util.List;
  * constructed properly
  */
 public class DefaultRemoteCallBuilder {
-  private static ProxyProvider proxyProvider = new RemoteServiceProxyFactory();
+  private static ProxyFactory proxyFactory = new RemoteServiceProxyFactory();
 
   /* Used to generate a unique number */
   private volatile static int callCounter = 0;
@@ -57,7 +57,7 @@ public class DefaultRemoteCallBuilder {
   }
 
   public <T, R> T call(final RemoteCallback<R> callback, final ErrorCallback errorCallback, final Class<T> remoteService) {
-    T svc = proxyProvider.getRemoteProxy(remoteService);
+    T svc = proxyFactory.getRemoteProxy(remoteService);
     if (svc == null)
       throw new RuntimeException("No service definition for: " + remoteService.getName());
 
@@ -199,11 +199,11 @@ public class DefaultRemoteCallBuilder {
    * @param provider
    *          The ProxyProvider that provides RPC proxies to message builders. Not null.
    */
-  public static void setProxyFactory(ProxyProvider provider) {
-    proxyProvider = Assert.notNull(provider);
+  public static void setProxyFactory(ProxyFactory provider) {
+    proxyFactory = Assert.notNull(provider);
   }
 
   public static void destroyProxyFactory() {
-    proxyProvider = null;
+    proxyFactory = null;
   }
 }

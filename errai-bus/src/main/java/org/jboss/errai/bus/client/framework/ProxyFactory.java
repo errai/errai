@@ -16,15 +16,6 @@
 
 package org.jboss.errai.bus.client.framework;
 
-/**
- * Provider for generated proxies.
- * 
- * @author Christian Sadilek <csadilek@redhat.com>
- */
-public interface ProxyProvider {
-
-  /**
-   * @return proxy
-   */
-  public Object getProxy();
+public interface ProxyFactory {
+  public <T> T getRemoteProxy(Class<T> proxyType);
 }

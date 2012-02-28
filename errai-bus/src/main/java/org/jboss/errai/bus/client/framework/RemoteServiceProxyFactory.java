@@ -19,19 +19,25 @@ package org.jboss.errai.bus.client.framework;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RemoteServiceProxyFactory implements ProxyProvider {
-  private static Map<Class, Object> remoteProxies = new HashMap<Class, Object>();
+/**
+ * {@link ProxyFactory} storing {@link ProxyProvider}s for generated remote proxies.
+ * 
+ * @author Christian Sadilek <csadilek@redhat.com>
+ */
+public class RemoteServiceProxyFactory implements ProxyFactory {
+  private static Map<Class<?>, ProxyProvider> remoteProxyProviders = new HashMap<Class<?>, ProxyProvider>();
 
   @Override
-  @SuppressWarnings({"unchecked"})
+  @SuppressWarnings({ "unchecked" })
   public <T> T getRemoteProxy(Class<T> proxyType) {
-    if (remoteProxies.isEmpty()) {
-      throw new RuntimeException("There are no remote proxies registered yet. If this error is encountered on the server, ");
+    if (remoteProxyProviders.isEmpty()) {
+      throw new RuntimeException(
+          "There are no proxy providers registered yet. If this error is encountered on the server, ");
     }
-    return (T) remoteProxies.get(proxyType);
+    return (T) remoteProxyProviders.get(proxyType).getProxy();
   }
 
-  public static void addRemoteProxy(Class proxyType, Object proxy) {
-    remoteProxies.put(proxyType, proxy);
+  public static void addRemoteProxy(Class<?> proxyType, ProxyProvider proxy) {
+    remoteProxyProviders.put(proxyType, proxy);
   }
 }

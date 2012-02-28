@@ -21,11 +21,14 @@ import java.io.PrintWriter;
 
 import javax.ws.rs.Path;
 
+import org.jboss.errai.bus.client.framework.ProxyProvider;
 import org.jboss.errai.bus.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.codegen.framework.InnerClass;
+import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.ClassBuilder;
+import org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.common.metadata.MetaDataScanner;
@@ -109,8 +112,15 @@ public class JaxrsProxyLoaderGenerator extends Generator {
         ClassStructureBuilder<?> remoteProxy = new JaxrsProxyGenerator(remote).generate();
         loadProxies.append(new InnerClass((BuildMetaClass) remoteProxy.getClassDefinition()));
 
-        loadProxies.append(Stmt.invokeStatic(RemoteServiceProxyFactory.class, "addRemoteProxy",
-            remote, Stmt.newObject(remoteProxy.getClassDefinition())));
+        // create the proxy provider
+        Statement proxyProvider = ObjectBuilder.newInstanceOf(ProxyProvider.class)
+          .extend()
+          .publicOverridesMethod("getProxy")
+          .append(Stmt.nestedCall(Stmt.newObject(remoteProxy.getClassDefinition())).returnValue())
+          .finish()
+          .finish();
+        
+        loadProxies.append(Stmt.invokeStatic(RemoteServiceProxyFactory.class, "addRemoteProxy", remote, proxyProvider));
       }
     }
     classBuilder = (ClassStructureBuilder<?>) loadProxies.finish();

@@ -28,7 +28,7 @@ import org.jboss.errai.common.client.api.tasks.TaskManager;
 import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
 import org.jboss.errai.bus.client.api.builder.DefaultRemoteCallBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.client.framework.ProxyProvider;
+import org.jboss.errai.bus.client.framework.ProxyFactory;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.rebind.RebindUtils;
 import org.jboss.errai.bus.server.annotations.Command;
@@ -260,7 +260,7 @@ public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
 
 
     // note: this method just exists because we want AbstractRemoteCallBuilder to be package private.
-    DefaultRemoteCallBuilder.setProxyFactory(Assert.notNull(new ProxyProvider() {
+    DefaultRemoteCallBuilder.setProxyFactory(Assert.notNull(new ProxyFactory() {
       @Override
       public <T> T getRemoteProxy(Class<T> proxyType) {
         throw new RuntimeException("There is not yet an available Errai RPC implementation for the server-side environment.");

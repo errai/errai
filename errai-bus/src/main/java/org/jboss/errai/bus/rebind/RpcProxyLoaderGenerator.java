@@ -20,15 +20,17 @@ import java.io.File;
 import java.io.PrintWriter;
 
 import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.framework.ProxyProvider;
 import org.jboss.errai.bus.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.bus.client.framework.RpcProxyLoader;
 import org.jboss.errai.bus.server.annotations.Remote;
 import org.jboss.errai.codegen.framework.InnerClass;
 import org.jboss.errai.codegen.framework.Parameter;
+import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.ClassBuilder;
-import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
+import org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.RebindUtils;
@@ -67,38 +69,24 @@ public class RpcProxyLoaderGenerator extends Generator {
   public String generate(final TreeLogger logger, final GeneratorContext context, final String typeName)
           throws UnableToCompleteException {
 
-    final Thread rpcGenThread = new Thread() {
-      @Override
-      public void run() {
-        typeOracle = context.getTypeOracle();
-
-        try {
-          JClassType classType = typeOracle.getType(typeName);
-          packageName = classType.getPackage().getName();
-          className = classType.getSimpleSourceName() + "Impl";
-
-          PrintWriter printWriter = context.tryCreate(logger, packageName, className);
-          // If code has not already been generated.
-          if (printWriter != null) {
-            printWriter.append(generate(className));
-            context.commit(logger, printWriter);
-          }
-        }
-        catch (Throwable e) {
-          logger.log(TreeLogger.ERROR, "Error generating extensions", e);
-        }
-      }
-    };
-
-    rpcGenThread.start();
-
+    typeOracle = context.getTypeOracle();
+  
     try {
-      rpcGenThread.join();
+      JClassType classType = typeOracle.getType(typeName);
+      packageName = classType.getPackage().getName();
+      className = classType.getSimpleSourceName() + "Impl";
+  
+      PrintWriter printWriter = context.tryCreate(logger, packageName, className);
+      // If code has not already been generated.
+      if (printWriter != null) {
+        printWriter.append(generate(className));
+        context.commit(logger, printWriter);
+      }
     }
-    catch (Exception e) {
-      e.printStackTrace();
+    catch (Throwable e) {
+      logger.log(TreeLogger.ERROR, "Error generating extensions", e);
     }
-
+      
     // return the fully qualified name of the class generated
     return packageName + "." + className;
   }
@@ -134,8 +122,15 @@ public class RpcProxyLoaderGenerator extends Generator {
         ClassStructureBuilder<?> remoteProxy = new RpcProxyGenerator(remote).generate();
         loadProxies.append(new InnerClass(remoteProxy.getClassDefinition()));
 
-        loadProxies.append(Stmt.invokeStatic(RemoteServiceProxyFactory.class, "addRemoteProxy",
-                remote, Stmt.newObject(remoteProxy.getClassDefinition())));
+        // create the proxy provider
+        Statement proxyProvider = ObjectBuilder.newInstanceOf(ProxyProvider.class)
+          .extend()
+          .publicOverridesMethod("getProxy")
+          .append(Stmt.nestedCall(Stmt.newObject(remoteProxy.getClassDefinition())).returnValue())
+          .finish()
+          .finish();
+        
+        loadProxies.append(Stmt.invokeStatic(RemoteServiceProxyFactory.class, "addRemoteProxy", remote, proxyProvider));
       }
     }
 

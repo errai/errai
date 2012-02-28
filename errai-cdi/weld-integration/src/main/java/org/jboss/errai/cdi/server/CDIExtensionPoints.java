@@ -19,7 +19,7 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.builder.DefaultRemoteCallBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.client.framework.ProxyProvider;
+import org.jboss.errai.bus.client.framework.ProxyFactory;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.client.util.ErrorHelper;
 import org.jboss.errai.bus.rebind.RebindUtils;
@@ -477,7 +477,7 @@ public class CDIExtensionPoints implements Extension {
     });
 
     // note: this method just exists because we want AbstractRemoteCallBuilder to be package private.
-    DefaultRemoteCallBuilder.setProxyFactory(Assert.notNull(new ProxyProvider() {
+    DefaultRemoteCallBuilder.setProxyFactory(Assert.notNull(new ProxyFactory() {
       @Override
       public <T> T getRemoteProxy(Class<T> proxyType) {
         throw new RuntimeException("There is not yet an available Errai RPC implementation for the server-side environment.");
