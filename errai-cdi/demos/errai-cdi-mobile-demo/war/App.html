@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Errai CDI Orientation Events</title>
+    <link rel="stylesheet" type="text/css" href="App.css">    
+    <script type="text/javascript" language="javascript" src="app/app.nocache.js"></script>    
+    
+    <!-- Vertical centering in CSS is so obtuse, I had to look this up! Thanks go to http://www.pmob.co.uk/search-this/center1.htm -->
+    <style type="text/css">
+html,body {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	background: black;
+	text-align: center;
+	min-width: 626px;
+	min-height: 400px;
+}
+
+#vertical {
+	position: absolute;
+	top: 50%;
+	margin-top: -198px; /* half main element''s height*/
+	left: 0;
+	width: 100%;
+}
+
+#horiz {
+	margin-left: auto;
+	margin-right: auto;
+	height: 394px;
+}
+
+#rotateMe {
+	background: #ddd;
+	margin: 0 auto;
+	font-size: x-large;
+	width: 50%;
+	height: 100%;
+	border-radius: 6px;
+	border: 3px solid white;
+}
+</style>
+</head>
+<body style="text-align: center; ">
+
+<div id="rootPanel"></div>
+
+<div id="vertical">
+	<div id="horiz">
+    	<div id="rotateMe">
+    	   Rotate me!
+    	</div>
+	</div>
+</div>
+
+</body>
+</html>
