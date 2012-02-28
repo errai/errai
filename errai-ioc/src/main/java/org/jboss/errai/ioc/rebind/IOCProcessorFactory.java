@@ -314,10 +314,10 @@ public class IOCProcessorFactory {
     };
 
 
-//    List<SortUnit> list = TopologicalSort.topologicalSort(processingDelegateDigraph);
-//    Collections.reverse(list);
+    List<SortUnit> list = TopologicalSort.topologicalSort(processingDelegateDigraph);
+    Collections.reverse(list);
 
-    List<SortUnit> list = WiringUtil.worstSortAlgorithmEver(delegates.keySet());
+//    List<SortUnit> list = WiringUtil.worstSortAlgorithmEver(delegates.keySet());
 
     for (SortUnit unit : list) {
       for (Object item : unit.getItems()) {
