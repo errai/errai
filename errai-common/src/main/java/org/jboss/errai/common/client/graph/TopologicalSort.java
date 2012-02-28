@@ -58,7 +58,7 @@ public class TopologicalSort {
   public static <V> Set<V> findNodesWithNoOutgoingEdges(Digraph<V> g) {
     Set<V> s = new HashSet<V>();
     for (V node : g.getNodes()) {
-      if (g.nodesReferencing(node).isEmpty()) {
+      if (g.nodesReferencedFrom(node).isEmpty()) {
         s.add(node);
       }
     }
