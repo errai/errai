@@ -20,7 +20,9 @@ import org.jboss.errai.ioc.rebind.SortUnit;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Mike Brock
@@ -28,28 +30,32 @@ import java.util.List;
 public class WiringUtil {
   public static List<SortUnit> worstSortAlgorithmEver(final Collection<SortUnit> in) {
     List<SortUnit> newList = new ArrayList<SortUnit>(in);
-
     // perform fist pass.
-    _worstSort(newList);
-
-    // perform second pass.
     _worstSort(newList);
 
     return newList;
   }
-  
+
   private static void _worstSort(final List<SortUnit> newList) {
-    for (int i = 0; i < newList.size(); i++) {
+    for (int i = 0; i < newList.size(); ) {
       SortUnit s = newList.get(i);
-      for (int y = i; y < newList.size(); y++) {
+      boolean adv = true;
+      for (int y = i + 1; y < newList.size(); y++) {
         SortUnit c = newList.get(y);
-        
-        if (s == c) {
-          continue;
+
+        if (s != c && s.getDependencies().contains(c)) {
+           newList.add(i, newList.remove(y));
+          adv = false;
+          
+          for (SortUnit chk : s.getDependencies()) {
+            if (chk.equals(c) && chk.isHard()) {
+              adv = true;
+            }
+          }
         }
-        if (s.getDependencies().contains(c)) {
-          newList.add(i, newList.remove(y));
-        }
+      }
+      if (adv) {
+        i++;
       }
     }
   }

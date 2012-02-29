@@ -42,7 +42,7 @@ public class SortUnit {
     this.type = type;
     this.dependencies = Collections.emptySet();
     this.items = new ArrayList<Object>();
-    this.hard = true;
+    this.hard = hard;
   }
 
   public SortUnit(MetaClass type, Object item) {
