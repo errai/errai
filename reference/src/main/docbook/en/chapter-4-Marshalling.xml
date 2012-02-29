@@ -26,7 +26,7 @@
           
           <title>A Simple Entity</title>
           <informalexample>
-            <programlisting>@Portable
+            <programlisting language="java">@Portable
 public class Person {
   private String name;
   private int age;
@@ -55,7 +55,7 @@ public class Person {
           <title>Immutable Objects</title>
           <para>Immutability is almost always a good practice, and the marshalling system provides you a straight forward way to tell it how to marshal and de-marshal objects which enforce an immutable contract. Let's modify our example from the previous section.</para>
           <informalexample>
-            <programlisting>@Portable
+            <programlisting language="java">@Portable
 public class Person {
   private final String name;
   private final int age;
@@ -86,7 +86,7 @@ public class Person {
           </para>
           <para>Another good practice is to use a factory pattern to enforce invariance. Once again, let's modify our example.</para>
           <informalexample>
-            <programlisting>@Portable
+            <programlisting language="java">@Portable
 public class Person {
   private final String name;
   private final int age;
@@ -139,7 +139,7 @@ public class Person {
             </para>
             <example>
               <title>Example ErraiApp.properties defining portable classes.</title>
-              <programlisting>errai.marshalling.serializableTypes=org.foo.client.UserEntity \
+              <programlisting language="java">errai.marshalling.serializableTypes=org.foo.client.UserEntity \
                                     org.foo.client.GroupEntity \
                                     org.abcinc.model.client.Profile</programlisting>
             </example>
@@ -164,7 +164,7 @@ public class Person {
               .
             </para>
             <informalexample>
-              <programlisting>package org.foo.client;
+              <programlisting language="java">package org.foo.client;
 
 @Portable(aliasOf = java.util.List.class)
 public MyListImpl extends ArrayList {
@@ -184,7 +184,7 @@ public MyListImpl extends ArrayList {
               attribute.
             </para>
             <informalexample>
-              <programlisting>errai.marshalling.mappingAliases=org.foo.client.MyListImpl-&gt;java.uti.List \
+              <programlisting language="java">errai.marshalling.mappingAliases=org.foo.client.MyListImpl-&gt;java.uti.List \
                                  org.foo.client.MyMapImpl-&gt;java.util.Map</programlisting>
             </informalexample>
             <para>The list of classes is whitespace-separated so that it may be split across lines.</para>
@@ -228,7 +228,7 @@ public MyListImpl extends ArrayList {
           </para>
           <para>Consider the following class:</para>
           <informalexample>
-            <programlisting>public class MySuperCustomEntity {
+            <programlisting language="java">public class MySuperCustomEntity {
    private final String mySuperName;
    private String mySuperNickname;
 
@@ -251,7 +251,7 @@ public MyListImpl extends ArrayList {
           </informalexample>
           <para>Let us construct this object like so:</para>
           <informalexample>
-            <programlisting>MySuperCustomEntity entity = new MySuperCustomEntity("Coolio");
+            <programlisting language="java">MySuperCustomEntity entity = new MySuperCustomEntity("Coolio");
   entity.setSuperNickname("coo");</programlisting>
           </informalexample>
           <para>
@@ -263,7 +263,7 @@ public MyListImpl extends ArrayList {
           </para>
           <para>Let us consider how we could go about telling the marshalling framework to pull this off:</para>
           <informalexample>
-            <programlisting>@CustomMapping
+            <programlisting language="java">@CustomMapping
 public MySuperCustomEntityMapping extends MappingDefinition {
   public MySuperCustomEntityMapping() {
     super(MySuperCustomEntity.class);                                                          // (1)
@@ -367,7 +367,7 @@ public MySuperCustomEntityMapping extends MappingDefinition {
         </para>
         <example>
           <title>DataMarshaller.java from the built-in marshallers</title>
-          <programlisting>@ClientMarshaller @ServerMarshaller
+          <programlisting language="java">@ClientMarshaller @ServerMarshaller
 public class DateMarshaller extends AbstractJSONMarshaller&lt;Date&gt; {
   @Override
   public Date demarshall(EJValue o, MarshallingSession ctx) {

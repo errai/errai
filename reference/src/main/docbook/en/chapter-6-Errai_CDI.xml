@@ -70,7 +70,7 @@
       </para>
       <example>
         <title>Example dependent scoped bean</title>
-        <programlisting>public void MyDependentScopedBean {
+        <programlisting language="java">public void MyDependentScopedBean {
   private final Date createdDate;
 
   public MyDependentScopedBean {
@@ -80,7 +80,7 @@
       </example>
       <example>
         <title>Example ApplicationScoped bean</title>
-        <programlisting>@ApplicationScoped
+        <programlisting language="java">@ApplicationScoped
 public void MyClientBean {
   @Inject MyDependentScopedBean bean;
 
@@ -101,7 +101,7 @@ public void MyClientBean {
       <para>Let's take a look at an example.</para>
       <example>
         <title>FraudClient.java</title>
-        <programlisting>public class FraudClient extends LayoutPanel {
+        <programlisting language="java">public class FraudClient extends LayoutPanel {
 
   @Inject
   private Event&lt;AccountActivity&gt; event; (1)
@@ -155,7 +155,7 @@ public void MyClientBean {
       <para>To complete the example, let's look at the corresponding server-side CDI bean:</para>
       <example>
         <title>AccountService.java</title>
-        <programlisting>@ApplicationScoped
+        <programlisting language="java">@ApplicationScoped
 public class AccountService {
   
   @Inject @Detected
@@ -177,7 +177,7 @@ public class AccountService {
         </para>
         <example>
           <title>SubscriptionService.java</title>
-          <programlisting>@ApplicationScoped
+          <programlisting language="java">@ApplicationScoped
 public class SubscriptionService {
   
   @Inject
@@ -196,7 +196,7 @@ public class SubscriptionService {
         </para>
         <example>
           <title>Document.java</title>
-          <programlisting>@Conversational @Portable
+          <programlisting language="java">@Conversational @Portable
 public class Document {
    // code here
 }</programlisting>
@@ -218,7 +218,7 @@ public class Document {
         <para>Example server code:</para>
         <example>
           <title>MyServerBean.java</title>
-          <programlisting>@ApplicationScoped
+          <programlisting language="java">@ApplicationScoped
 public class MyServerBean {
   @Inject
   Event&lt;MyResponseEvent&gt; myResponseEvent;
@@ -242,7 +242,7 @@ public class MyServerBean {
         <para>Domain-model:</para>
         <example>
           <title>MyRequestEvent.java</title>
-          <programlisting>@Portable
+          <programlisting language="java">@Portable
 public class MyRequestEvent {
   private boolean thankYou;
 
@@ -261,7 +261,7 @@ public class MyRequestEvent {
         </example>
         <example>
           <title>MyResponseEvent.java</title>
-          <programlisting>@Portable
+          <programlisting language="java">@Portable
 public class MyResponseEvent {
   private String message;
 
@@ -281,7 +281,7 @@ public class MyResponseEvent {
         <para>Client application logic:</para>
         <example>
           <title>MyClientBean.java</title>
-          <programlisting>@EntryPoint
+          <programlisting language="java">@EntryPoint
 public class MyClientBean {
    @Inject
    Event&lt;MyRequestEvent&gt; requestEvent;
@@ -322,7 +322,7 @@ public class MyClientBean {
       <para>Producer methods and fields act as sources of objects to be injected. They are useful when additional control over object creation is needed before injections can take place e.g. when you need to make a decision at runtime before an object can be created and injected.</para>
       <example>
         <title>App.java</title>
-        <programlisting>@EntryPoint
+        <programlisting language="java">@EntryPoint
 public class App {
   ...
 
@@ -334,7 +334,7 @@ public class App {
       </example>
       <example>
         <title>MyComposite.java</title>
-        <programlisting>@ApplicationScoped
+        <programlisting language="java">@ApplicationScoped
 public class MyComposite extends Composite {
   
   @Inject @Supported
@@ -434,7 +434,7 @@ public class MyComposite extends Composite {
           <code>ErraiService.properties</code>
         </para>
         <informalexample>
-          <programlisting>errai.auto_discover_services=false</programlisting>
+          <programlisting language="java">errai.auto_discover_services=false</programlisting>
         </informalexample>
       </section>
     </section>

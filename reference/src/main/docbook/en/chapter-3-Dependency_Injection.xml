@@ -13,7 +13,7 @@
     <para>Dependency injection (DI) allows for cleaner and more modular code, by permitting the implementation of decoupled and type-safe components. By using DI, components do not need to be aware of the implementation of provided services. Instead, they merely declare a contract with the container, which in turn provides instances of the services that component depends on.</para>
     <para>A simple example:</para>
     <informalexample>
-      <programlisting>public class MyLittleClass {
+      <programlisting language="java">public class MyLittleClass {
   private final TimeService timeService;
 
   @Inject
@@ -36,7 +36,7 @@
       . In this particular case, we use constructor injection to establish the contract between the container and the component. We can similarly use field injection to the same effect:
     </para>
     <informalexample>
-      <programlisting>public class MyLittleClass {
+      <programlisting language="java">public class MyLittleClass {
   @Inject
   private TimeService timeService;
 
@@ -53,7 +53,7 @@
       or the Errai DI container will not acknowledge the type as a bean.
     </para>
     <informalexample>
-      <programlisting>@ApplicationScoped
+      <programlisting language="java">@ApplicationScoped
 public class TimeService {
 }</programlisting>
     </informalexample>
@@ -124,7 +124,7 @@ public class TimeService {
         <emphasis role="strong">TimeService.java</emphasis>
       </para>
       <informalexample>
-        <programlisting>public interface TimeService {
+        <programlisting language="java">public interface TimeService {
   public String getTime();
 }</programlisting>
       </informalexample>
@@ -132,7 +132,7 @@ public class TimeService {
         <emphasis role="strong">TimeServiceProvider.java</emphasis>
       </para>
       <informalexample>
-        <programlisting>@IOCProvider
+        <programlisting language="java">@IOCProvider
 @Singleton
 public class TimeServiceProvider implements Provider&lt;TimeService&gt; {
   @Override
@@ -147,7 +147,7 @@ public class TimeServiceProvider implements Provider&lt;TimeService&gt; {
       </informalexample>
       <para>If you are familiar with Guice, this is semantically identical to configuring an injector like so:</para>
       <informalexample>
-        <programlisting>Guice.createInjector(new AbstractModule() {
+        <programlisting language="java">Guice.createInjector(new AbstractModule() {
   public void configure() {
     bind(TimeService.class).toProvider(TimeServiceProvider.class);
   }
@@ -218,7 +218,7 @@ public class TimeServiceProvider implements Provider&lt;TimeService&gt; {
           </para>
           <example>
             <title>A simple message receiving service</title>
-            <programlisting>@Service
+            <programlisting language="java">@Service
 public class MyService implements MessageCallback {
   public void callback(Message message) {
     // ... //
@@ -228,7 +228,7 @@ public class MyService implements MessageCallback {
           <para>Or like so ...</para>
           <example>
             <title>Mapping a callback from a field of a bean</title>
-            <programlisting>@Singleton
+            <programlisting language="java">@Singleton
 public class MyAppBean {
    @Service("MyService")
    private final MessageCallback myService = new MesageCallback() {
@@ -252,7 +252,7 @@ public class MyAppBean {
           </para>
           <example>
             <title>A local only service</title>
-            <programlisting>@Service @Local
+            <programlisting language="java">@Service @Local
 public class MyLocalService implements MessageCallback {
   public void callback(Message message) {
     // ... //
@@ -275,7 +275,7 @@ public class MyLocalService implements MessageCallback {
           </para>
           <example>
             <title>Injecting a MessageBus</title>
-            <programlisting>@Inject MessageBus bus;</programlisting>
+            <programlisting language="java">@Inject MessageBus bus;</programlisting>
           </example>
         </section>
         <section id="sid-20938800_ClientComponents-RequestDispatcher">
@@ -292,7 +292,7 @@ public class MyLocalService implements MessageCallback {
           </para>
           <example>
             <title>Injecting a RequestDispatcher</title>
-            <programlisting>@Inject RequestDispatcher dispatcher;</programlisting>
+            <programlisting language="java">@Inject RequestDispatcher dispatcher;</programlisting>
           </example>
         </section>
         <section id="sid-20938800_ClientComponents-Caller%3C%3F%3E">
@@ -306,7 +306,7 @@ public class MyLocalService implements MessageCallback {
           <para>For example:</para>
           <example>
             <title>An example Caller&lt;?&gt; proxy</title>
-            <programlisting>public void MyClientBean {
+            <programlisting language="java">public void MyClientBean {
   @Inject
   private Caller&lt;MyRpcInterface&gt; rpcCaller;
  
@@ -346,7 +346,7 @@ public class MyLocalService implements MessageCallback {
           </para>
           <example>
             <title>Using an InitBallot to Control Startup</title>
-            <programlisting>@Singleton
+            <programlisting language="java">@Singleton
 public class MyClientBean {
   @Inject InitBallot&lt;MyClientBean&gt; ballot;
 
@@ -373,7 +373,7 @@ public class MyClientBean {
           </para>
           <example>
             <title>Using @AfterInitialization to do something after startup</title>
-            <programlisting>@Singleton
+            <programlisting language="java">@Singleton
 public class MyClientBean {
   @AfterInitialization
   public void doStuffAfterInit() {
@@ -395,7 +395,7 @@ public class MyClientBean {
       <para>As you might expect, you can inject the bean manager into any of your managed beans.</para>
       <example>
         <title>Injecting the client-side bean manager</title>
-        <programlisting>public MyManagedBean {
+        <programlisting language="java">public MyManagedBean {
   @Inject IOCBeanManager manager;
    
   // class body 
@@ -417,7 +417,7 @@ public class MyClientBean {
       </para>
       <example>
         <title>Example lookup of a bean</title>
-        <programlisting>public MyManagedBean {
+        <programlisting language="java">public MyManagedBean {
   @Inject IOCBeanManager manager;
    
   public void lookupBean() {
@@ -440,7 +440,7 @@ public class MyClientBean {
       </para>
       <example>
         <title>Looking up beans with qualifiers</title>
-        <programlisting>MyQualifier qual = new MyQualifier() {
+        <programlisting language="java">MyQualifier qual = new MyQualifier() {
   public annotationType() {
     return MyQualifier.class;
   }
