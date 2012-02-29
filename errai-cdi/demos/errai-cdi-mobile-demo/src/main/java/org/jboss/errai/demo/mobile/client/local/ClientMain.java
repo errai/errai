@@ -69,9 +69,10 @@ public class ClientMain {
     Element rotateMe = Document.get().getElementById("rotateMe-" + e.getClientId());
     if (rotateMe == null) {
       // must be a new client! We will clone the template for this new client.
-      Element template = Document.get().getElementById("rotateMe");
+      Element template = Document.get().getElementById("rotateMeTemplate");
       rotateMe = (Element) template.cloneNode(true);
-      RootPanel.getBodyElement().appendChild(rotateMe);
+      rotateMe.setId("rotateMe-" + e.getClientId());
+      template.getParentElement().appendChild(rotateMe);
     }
     String transform = "rotate(" + e.getX() + "deg)";
 

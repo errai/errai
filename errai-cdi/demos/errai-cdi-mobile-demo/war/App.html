@@ -2,8 +2,7 @@
 <html>
 <head>
     <title>Errai CDI Orientation Events</title>
-    <link rel="stylesheet" type="text/css" href="App.css">    
-    <script type="text/javascript" language="javascript" src="app/app.nocache.js"></script>    
+    <script type="text/javascript" language="javascript" src="org.jboss.errai.demo.mobile.ErraiCdiMobileDemo/org.jboss.errai.demo.mobile.ErraiCdiMobileDemo.nocache.js"></script>    
     
     <!-- Vertical centering in CSS is so obtuse, I had to look this up! Thanks go to http://www.pmob.co.uk/search-this/center1.htm -->
     <style type="text/css">
@@ -14,6 +13,7 @@ html,body {
 }
 
 body {
+    font-family: Arial, sans-serif;
 	background: black;
 	text-align: center;
 	min-width: 626px;
@@ -34,7 +34,7 @@ body {
 	height: 394px;
 }
 
-#rotateMe {
+.rotateBox {
 	background: #ddd;
 	margin: 0 auto;
 	font-size: x-large;
@@ -43,6 +43,12 @@ body {
 	border-radius: 6px;
 	border: 3px solid white;
 }
+
+/* The template itself should not display! */
+#rotateMeTemplate {
+    display: none;
+}
+
 </style>
 </head>
 <body style="text-align: center; ">
@@ -51,7 +57,7 @@ body {
 
 <div id="vertical">
 	<div id="horiz">
-    	<div id="rotateMe">
+    	<div id="rotateMeTemplate" class="rotateBox">
     	   Rotate me!
     	</div>
 	</div>
