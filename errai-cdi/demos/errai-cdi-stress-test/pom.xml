@@ -1,18 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<name>Errai::CDI::Demos::Stress Test</name>
-	<groupId>org.jboss.errai</groupId>
-	<artifactId>errai-cdi-stress-test</artifactId>
-	<packaging>war</packaging>
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>errai-cdi-demos-stress-test</artifactId>
+  <packaging>war</packaging>
+  <name>Errai::CDI::Demos::Stress Test</name>
 
-	<version>2.0-SNAPSHOT</version>
+  <parent>
+    <groupId>org.jboss.errai</groupId>
+    <artifactId>cdi-integration-parent</artifactId>
+    <version>2.0.Beta2</version>
+    <relativePath>../../pom.xml</relativePath>
+  </parent>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<errai.version>2.0-SNAPSHOT</errai.version>
-		<errai-jms.version>1.1-SNAPSHOT</errai-jms.version>
 		<gwt.version>2.4.0</gwt.version>
 		<hsqldb.version>1.8.0.7</hsqldb.version>
 		<weld.version>1.1.5.Final</weld.version>
@@ -70,7 +72,7 @@
 		<dependency>
 			<groupId>org.jboss.errai</groupId>
 			<artifactId>errai-bus</artifactId>
-			<version>${errai.version}</version>
+			<version>${project.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>javax.inject</groupId>
@@ -85,7 +87,7 @@
 		<dependency>
 			<groupId>org.jboss.errai</groupId>
 			<artifactId>errai-ioc</artifactId>
-			<version>${errai.version}</version>
+			<version>${project.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>javax.inject</groupId>
@@ -100,7 +102,7 @@
 		<dependency>
 			<groupId>org.jboss.errai</groupId>
 			<artifactId>errai-tools</artifactId>
-			<version>${errai.version}</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.mvel</groupId>
@@ -112,26 +114,26 @@
 		<dependency>
 			<groupId>org.jboss.errai</groupId>
 			<artifactId>errai-cdi-client</artifactId>
-			<version>${errai.version}</version>
+			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.jboss.errai</groupId>
 			<artifactId>errai-javax-enterprise</artifactId>
-			<version>${errai.version}</version>
+			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.jboss.errai</groupId>
 			<artifactId>errai-weld-integration</artifactId>
-			<version>${errai.version}</version>
+			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.jboss.errai</groupId>
 			<artifactId>errai-cdi-jetty</artifactId>
-			<version>${errai.version}</version>
+			<version>${project.version}</version>
 		</dependency>
 
 		<!-- CDI Development Utils -->
@@ -267,7 +269,7 @@
 							<groupId>javax.inject</groupId>
 						</exclusion>
 					</exclusions>
-					<version>${errai.version}</version>
+					<version>${project.version}</version>
 				</dependency>
 
 				<dependency>
@@ -338,41 +340,41 @@
 						</exclusion>
 					</exclusions>
 					<scope>provided</scope>
-					<version>${errai.version}</version>
+					<version>${project.version}</version>
 				</dependency>
 
 				<dependency>
 					<groupId>org.jboss.errai</groupId>
 					<artifactId>errai-tools</artifactId>
 					<scope>provided</scope>
-					<version>${errai.version}</version>
+					<version>${project.version}</version>
 				</dependency>
 
 				<dependency>
 					<groupId>org.jboss.errai</groupId>
 					<artifactId>errai-cdi-client</artifactId>
-					<version>${errai.version}</version>
+					<version>${project.version}</version>
 					<!--<scope>provided</scope> -->
 				</dependency>
 
 				<dependency>
 					<groupId>org.jboss.errai</groupId>
 					<artifactId>errai-javax-enterprise</artifactId>
-					<version>${errai.version}</version>
+					<version>${project.version}</version>
 					<scope>provided</scope>
 				</dependency>
 
 				<dependency>
 					<groupId>org.jboss.errai</groupId>
 					<artifactId>errai-weld-integration</artifactId>
-					<version>${errai.version}</version>
+					<version>${project.version}</version>
 				</dependency>
 
 				<!-- exclude development tools -->
 				<dependency>
 					<groupId>org.jboss.errai</groupId>
 					<artifactId>errai-cdi-jetty</artifactId>
-					<version>${errai.version}</version>
+					<version>${project.version}</version>
 					<scope>provided</scope>
 				</dependency>
 
@@ -503,7 +505,7 @@
 							<groupId>javax.inject</groupId>
 						</exclusion>
 					</exclusions>
-					<version>${errai.version}</version>
+					<version>${project.version}</version>
 				</dependency>
 
 				<dependency>
@@ -540,40 +542,40 @@
 						</exclusion>
 					</exclusions>
 					<scope>provided</scope>
-					<version>${errai.version}</version>
+					<version>${project.version}</version>
 				</dependency>
 
 				<dependency>
 					<groupId>org.jboss.errai</groupId>
 					<artifactId>errai-tools</artifactId>
 					<scope>provided</scope>
-					<version>${errai.version}</version>
+					<version>${project.version}</version>
 				</dependency>
 
 				<dependency>
 					<groupId>org.jboss.errai</groupId>
 					<artifactId>errai-cdi-client</artifactId>
-					<version>${errai.version}</version>
+					<version>${project.version}</version>
 					<!--<scope>provided</scope> -->
 				</dependency>
 
 				<dependency>
 					<groupId>org.jboss.errai</groupId>
 					<artifactId>errai-javax-enterprise</artifactId>
-					<version>${errai.version}</version>
+					<version>${project.version}</version>
 					<scope>provided</scope>
 				</dependency>
 
 				<dependency>
 					<groupId>org.jboss.errai</groupId>
 					<artifactId>errai-weld-integration</artifactId>
-					<version>${errai.version}</version>
+					<version>${project.version}</version>
 				</dependency>
 				<!-- Exclude development tools -->
 				<dependency>
 					<groupId>org.jboss.errai</groupId>
 					<artifactId>errai-cdi-jetty</artifactId>
-					<version>${errai.version}</version>
+					<version>${project.version}</version>
 					<scope>provided</scope>
 				</dependency>
 
@@ -617,7 +619,7 @@
 				<dependency>
 					<groupId>org.jboss.errai</groupId>
 					<artifactId>jboss7-support</artifactId>
-					<version>${errai.version}</version>
+					<version>${project.version}</version>
 				</dependency>
 
 				<!-- Jetty is used for testing only -->
@@ -713,7 +715,7 @@
 							<groupId>javax.inject</groupId>
 						</exclusion>
 					</exclusions>
-					<version>${errai.version}</version>
+					<version>${project.version}</version>
 				</dependency>
 
 				<dependency>
@@ -750,40 +752,40 @@
 						</exclusion>
 					</exclusions>
 					<scope>provided</scope>
-					<version>${errai.version}</version>
+					<version>${project.version}</version>
 				</dependency>
 
 				<dependency>
 					<groupId>org.jboss.errai</groupId>
 					<artifactId>errai-tools</artifactId>
 					<scope>provided</scope>
-					<version>${errai.version}</version>
+					<version>${project.version}</version>
 				</dependency>
 
 				<dependency>
 					<groupId>org.jboss.errai</groupId>
 					<artifactId>errai-cdi-client</artifactId>
-					<version>${errai.version}</version>
+					<version>${project.version}</version>
 					<!--<scope>provided</scope> -->
 				</dependency>
 
 				<dependency>
 					<groupId>org.jboss.errai</groupId>
 					<artifactId>errai-javax-enterprise</artifactId>
-					<version>${errai.version}</version>
+					<version>${project.version}</version>
 					<scope>provided</scope>
 				</dependency>
 
 				<dependency>
 					<groupId>org.jboss.errai</groupId>
 					<artifactId>errai-weld-integration</artifactId>
-					<version>${errai.version}</version>
+					<version>${project.version}</version>
 				</dependency>
 				<!-- Exclude development tools -->
 				<dependency>
 					<groupId>org.jboss.errai</groupId>
 					<artifactId>errai-cdi-jetty</artifactId>
-					<version>${errai.version}</version>
+					<version>${project.version}</version>
 					<scope>provided</scope>
 				</dependency>
 
@@ -827,7 +829,7 @@
 				<dependency>
 					<groupId>org.jboss.errai</groupId>
 					<artifactId>jboss7-support</artifactId>
-					<version>${errai.version}</version>
+					<version>${project.version}</version>
 				</dependency>
 
 				<!-- Jetty is used for testing only -->
@@ -930,7 +932,7 @@
 							<groupId>javax.inject</groupId>
 						</exclusion>
 					</exclusions>
-					<version>${errai.version}</version>
+					<version>${project.version}</version>
 				</dependency>
 
 				<dependency>
@@ -967,40 +969,40 @@
 						</exclusion>
 					</exclusions>
 					<scope>provided</scope>
-					<version>${errai.version}</version>
+					<version>${project.version}</version>
 				</dependency>
 
 				<dependency>
 					<groupId>org.jboss.errai</groupId>
 					<artifactId>errai-tools</artifactId>
 					<scope>provided</scope>
-					<version>${errai.version}</version>
+					<version>${project.version}</version>
 				</dependency>
 
 				<dependency>
 					<groupId>org.jboss.errai</groupId>
 					<artifactId>errai-cdi-client</artifactId>
-					<version>${errai.version}</version>
+					<version>${project.version}</version>
 					<!--<scope>provided</scope> -->
 				</dependency>
 
 				<dependency>
 					<groupId>org.jboss.errai</groupId>
 					<artifactId>errai-javax-enterprise</artifactId>
-					<version>${errai.version}</version>
+					<version>${project.version}</version>
 					<scope>provided</scope>
 				</dependency>
 
 				<dependency>
 					<groupId>org.jboss.errai</groupId>
 					<artifactId>errai-weld-integration</artifactId>
-					<version>${errai.version}</version>
+					<version>${project.version}</version>
 				</dependency>
 				<!-- Exclude development tools -->
 				<dependency>
 					<groupId>org.jboss.errai</groupId>
 					<artifactId>errai-cdi-jetty</artifactId>
-					<version>${errai.version}</version>
+					<version>${project.version}</version>
 					<scope>provided</scope>
 				</dependency>
 
@@ -1044,7 +1046,7 @@
 				<dependency>
 					<groupId>org.jboss.errai</groupId>
 					<artifactId>jboss7-support</artifactId>
-					<version>${errai.version}</version>
+					<version>${project.version}</version>
 				</dependency>
 
 				<!-- Jetty is used for testing only -->
