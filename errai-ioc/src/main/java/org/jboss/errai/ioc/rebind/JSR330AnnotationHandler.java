@@ -78,11 +78,11 @@ public abstract class JSR330AnnotationHandler<T extends Annotation> implements A
     return Collections.unmodifiableSet(dependencies);
   }
 
-  private static Set<SortUnit> fillInInterface(Class cls) {
+  private static <T> Set<SortUnit> fillInInterface(Class<T> cls) {
     if (cls.isInterface()) {
-      Set<Class> subTypes = ScannerSingleton.getOrCreateInstance().getSubTypesOf(cls);
+      Set<Class<? extends T>> subTypes = ScannerSingleton.getOrCreateInstance().getSubTypesOf(cls);
       Set<SortUnit> sortUnits = new HashSet<SortUnit>();
-      for (Class c : subTypes) {
+      for (Class<? extends T> c : subTypes) {
         sortUnits.add(new SortUnit(MetaClassFactory.get(c)));
       }
 

@@ -26,7 +26,7 @@
           
           <title>A Simple Entity</title>
           <informalexample>
-            <programlisting language="java">@Portable
+            <programlisting>@Portable
 public class Person {
   private String name;
   private int age;
@@ -55,7 +55,7 @@ public class Person {
           <title>Immutable Objects</title>
           <para>Immutability is almost always a good practice, and the marshalling system provides you a straight forward way to tell it how to marshal and de-marshal objects which enforce an immutable contract. Let's modify our example from the previous section.</para>
           <informalexample>
-            <programlisting language="java">@Portable
+            <programlisting>@Portable
 public class Person {
   private final String name;
   private final int age;
@@ -86,7 +86,7 @@ public class Person {
           </para>
           <para>Another good practice is to use a factory pattern to enforce invariance. Once again, let's modify our example.</para>
           <informalexample>
-            <programlisting language="java">@Portable
+            <programlisting>@Portable
 public class Person {
   private final String name;
   private final int age;
@@ -164,7 +164,7 @@ public class Person {
               .
             </para>
             <informalexample>
-              <programlisting language="java">package org.foo.client;
+              <programlisting>package org.foo.client;
 
 @Portable(aliasOf = java.util.List.class)
 public MyListImpl extends ArrayList {
@@ -228,7 +228,7 @@ public MyListImpl extends ArrayList {
           </para>
           <para>Consider the following class:</para>
           <informalexample>
-            <programlisting language="java">public class MySuperCustomEntity {
+            <programlisting>public class MySuperCustomEntity {
    private final String mySuperName;
    private String mySuperNickname;
 
@@ -251,7 +251,7 @@ public MyListImpl extends ArrayList {
           </informalexample>
           <para>Let us construct this object like so:</para>
           <informalexample>
-            <programlisting language="java">MySuperCustomEntity entity = new MySuperCustomEntity("Coolio");
+            <programlisting>MySuperCustomEntity entity = new MySuperCustomEntity("Coolio");
   entity.setSuperNickname("coo");</programlisting>
           </informalexample>
           <para>
@@ -263,7 +263,7 @@ public MyListImpl extends ArrayList {
           </para>
           <para>Let us consider how we could go about telling the marshalling framework to pull this off:</para>
           <informalexample>
-            <programlisting language="java">@CustomMapping
+            <programlisting>@CustomMapping
 public MySuperCustomEntityMapping extends MappingDefinition {
   public MySuperCustomEntityMapping() {
     super(MySuperCustomEntity.class);                                                          // (1)
@@ -350,6 +350,81 @@ public MySuperCustomEntityMapping extends MappingDefinition {
             </listitem>
           </orderedlist>
         </section>
+      </section>
+      <section id="sid-5931328_Marshalling-CustomMarshallers">
+        
+        <title>Custom Marshallers</title>
+        <para>
+          There is another approach to extending the marshalling functionality that doesn't involve mapping rules, and that is to implement your own
+          <code>Marshaller</code>
+          class.  This gives you complete control over the parsing and emission of the JSON structure.
+        </para>
+        <para>The implementation of marshallers is made relatively straight forward by the fact that both the server and the client share the same JSON parsing API.</para>
+        <para>
+          Consider the included
+          <code>java.util.Date</code>
+          marshaller that comes built-in to the marshalling framework:
+        </para>
+        <example>
+          <title>DataMarshaller.java from the built-in marshallers</title>
+          <programlisting>@ClientMarshaller @ServerMarshaller
+public class DateMarshaller extends AbstractJSONMarshaller&lt;Date&gt; {
+  @Override
+  public Date demarshall(EJValue o, MarshallingSession ctx) {
+    // check if the JSON element is null
+    if (o.isNull() != null) {
+      // if the JSON element is null, so is our object!
+      return null;
+    }
+
+    // instantiate our Data!
+    return new Date(Long.parseLong(o.isObject().get(SerializationParts.QUALIFIED_VALUE).isString().stringValue()));
+  }
+
+  @Override
+  public boolean handles(EJValue o) {
+    // check that this marshaller can be used for this type
+    return MarshallUtil.handles(o.isObject(), getTypeHandled());
+  }
+
+  @Override
+  public Class&lt;Date&gt; getTypeHandled() {
+    return Date.class;
+  }
+
+  @Override
+  public String marshall(Date o, MarshallingSession ctx) {
+    // if the object is null, we encode "null"
+    if (o == null) { return "null"; }
+
+    // return the JSON representation of the object
+    return "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + Date.class.getName() + "\"," +
+            "\"" + SerializationParts.OBJECT_ID + "\":\"" + o.hashCode() + "\"," +
+            "\"" + SerializationParts.QUALIFIED_VALUE + "\":\"" + o.getTime() + "\"}";
+  }
+}</programlisting>
+        </example>
+        <para>
+          The class is annotated with both
+          <code>@ClientMarshaller</code>
+          and
+          <code>@ServerMarshaller</code>
+          indicating that this class should be used for both marshalling on the client and on the server. We have extended
+          <code>AbstractJSONMarshaller&lt;T&gt;</code>
+          which simply implements the
+          <code>getEncodingType()</code>
+          method for us.
+        </para>
+        <para>
+          The
+          <code>demarshall()</code>
+          method does what its name implies: it is responsible for demarshalling the object from JSON and turning it back into a Java object.
+        </para>
+        <para>
+          The
+          <code>marshall()</code>
+          method does the opposite, and encodes the object into JSON for transmission on the wire.
+        </para>
       </section>
     </section>
   </chapter>

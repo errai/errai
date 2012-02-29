@@ -4,7 +4,7 @@
   <xi:include href="Book_Info.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
   <xi:include href="Preface.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
   <xi:include href="chapter-1-Introduction.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
-  <xi:include href="chapter-2-ErraiBus.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+  <xi:include href="chapter-2-Messaging.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
   <xi:include href="chapter-3-Dependency_Injection.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
   <xi:include href="chapter-4-Marshalling.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
   <xi:include href="chapter-5-Remote_Procedure_Calls_RPC_.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
@@ -12,10 +12,11 @@
   <xi:include href="chapter-7-Errai_JAX_RS.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
   <xi:include href="chapter-8-Configuration.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
   <xi:include href="chapter-9-Debugging_Errai_Applications.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
-  <xi:include href="chapter-10-Downloads.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
-  <xi:include href="chapter-11-Sources.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
-  <xi:include href="chapter-12-Reporting_problems.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
-  <xi:include href="chapter-13-Errai_License.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+  <xi:include href="chapter-10-Upgrade_Guide.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+  <xi:include href="chapter-11-Downloads.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+  <xi:include href="chapter-12-Sources.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+  <xi:include href="chapter-13-Reporting_problems.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
+  <xi:include href="chapter-14-Errai_License.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
 
   <xi:include href="Revision_History.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
 </book>

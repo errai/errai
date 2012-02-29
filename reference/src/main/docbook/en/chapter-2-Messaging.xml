@@ -2,7 +2,7 @@
 <!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="sid-5931263">
     
-    <title>ErraiBus</title>
+    <title>Messaging</title>
     <para>This section covers the core messaging concepts of the ErraiBus messaging framework.</para>
     <para>ErraiBus forms the backbone of the Errai framework's approach to application design. Most importantly, it provides a straight-forward approach to a complex problem space. Providing common APIs across the client and server, developers will have no trouble working with complex messaging scenarios from building instant messaging clients, stock tickers, to monitoring instruments. There's no more messing with RPC APIs, or unweildy AJAX or COMET frameworks. We've built it all in to one, consice messaging framework. It's single-paradigm, and it's fun to work with.</para>
     <section id="sid-5931265">
@@ -37,7 +37,7 @@
           . In this simple example we send it to the subject 'HelloWorldService'.
         </para>
         <informalexample>
-          <programlisting language="java">public class HelloWorld implements EntryPoint {
+          <programlisting>public class HelloWorld implements EntryPoint {
 
   // Get an instance of the RequestDispatcher
   private RequestDispatcher dispatcher = ErraiBus.getDispatcher();
@@ -111,7 +111,7 @@
         <title>Recieving Messages on the Server Bus / Server Services</title>
         <para>Every message has a sender and at least one receiver. A receiver is as it sounds--it receives the message and does something with it. Implementing a receiver (also referred to as a service) is as simple as implementing our standard MessageCallback interface, which is used pervasively across, both client and server code. Let's begin with server side component that receives messages:</para>
         <informalexample>
-          <programlisting language="java">@Service
+          <programlisting>@Service
   public class HelloWorldService implements MessageCallback {
     public void callback(Message message) {
       System.out.println("Hello, World!");
@@ -133,7 +133,7 @@
           ':
         </para>
         <informalexample>
-          <programlisting language="java">@Service
+          <programlisting>@Service
 public class HelloWorldService implements MessageCallback {
 
   private RequestDispatcher dispatcher;
@@ -191,7 +191,7 @@ public class HelloWorldService implements MessageCallback {
         <title>Receiving Messages on the Client Bus/ Client Services</title>
         <para>Messages can be received asynchronously and arbitriraily by declaring callback services within the client bus. As ErraiBus maintains an open COMET channel at all times, these messages are delivered in real time to the client as they are sent. This provides built-in push messaging for all client services.</para>
         <informalexample>
-          <programlisting language="java">public class HelloWorld implements EntryPoint {
+          <programlisting>public class HelloWorld implements EntryPoint {
 
   private MessageBus bus = ErraiBus.get();
 
@@ -224,7 +224,7 @@ public class HelloWorldService implements MessageCallback {
         <para>ConversationsConversations are message exchanges which are between a single client and a service. They are a fundmentally important concept in ErraiBus, since by default, a message will be broadcast to all client services listening on a particular channel.</para>
         <para>When you create a reply with an incoming message, you ensure that the message you are sending back is received by the same client which sent the incoming message. A simple example:</para>
         <informalexample>
-          <programlisting language="java">@Service
+          <programlisting>@Service
 public class HelloWorldService implements MessageCallback {
   public void callback(CommandMessage message) {
     // Send a message to the 'HelloWorldClient' on the client that sent us the
@@ -265,7 +265,7 @@ public class HelloWorldService implements MessageCallback {
         . It will lead to faster and quicker identification of problems with your applications if you have error handlers, and generally help you build more robust code.
       </para>
       <informalexample>
-        <programlisting language="java">MessageBuilder.createMessage()
+        <programlisting>MessageBuilder.createMessage()
     .toSubject("HelloWorldService")
     .signalling()
     .with("msg", "Hi there!")
@@ -279,7 +279,7 @@ public class HelloWorldService implements MessageCallback {
       </informalexample>
       <para>The addition of error handling at first may put off developers as it makes code more verbose and less-readable. This is nothing that some good practice can't fix. In fact, you may find cases where the same error handler can appropriately be shared between multiple different calls.</para>
       <informalexample>
-        <programlisting language="java">ErrorCallback error = new ErrorCallback() {
+        <programlisting>ErrorCallback error = new ErrorCallback() {
   public boolean error(Message message, Throwable throwable) {
     throwable.printStackTrace();
     return true;
@@ -302,7 +302,7 @@ MessageBuilder.createMessage()
       </para>
       <para>Errai further provides a subject to subscribe to for handling global errors on the client (such as a disconnected server bus or an invalid response code) that occur outside a regular application message exchange. Subscribing to this subject is useful to detect errors early (e.g. due to failing heartbeat requests). A use case that comes to mind here is activating your application's offline mode.</para>
       <informalexample>
-        <programlisting language="java">bus.subscribe(DefaultErrorCallback.CLIENT_ERROR_SUBJECT, new MessageCallback() {
+        <programlisting>bus.subscribe(DefaultErrorCallback.CLIENT_ERROR_SUBJECT, new MessageCallback() {
   @Override
   public void callback(Message message) {
     try {
@@ -337,7 +337,7 @@ MessageBuilder.createMessage()
         API after specifying the error handling of the message.
       </para>
       <informalexample>
-        <programlisting language="java">MessageBuilder.createMessage()
+        <programlisting>MessageBuilder.createMessage()
   .toSubject("ConversationalService").signalling()
   .with("SomeField", someValue)
   .noErrorHandling()
@@ -354,7 +354,7 @@ MessageBuilder.createMessage()
       <title>Broadcasting</title>
       <para>Broadcasting messages to all clients listening on a specific subject is quite simple and involves nothing more than forgoing use of the reply API. For instance:</para>
       <informalexample>
-        <programlisting language="java">MessageBuilder.createMessage().
+        <programlisting>MessageBuilder.createMessage().
     .toSubject("MessageListener")
     .with("Text", "Hello, from your overlords in the cloud")
     .noErrorHandling().sendGlobalWith(dispatcher);</programlisting>
@@ -404,7 +404,7 @@ MessageBuilder.createMessage()
         ).
       </para>
       <informalexample>
-        <programlisting language="java">MessageBuilder.createConversation(msg)
+        <programlisting>MessageBuilder.createConversation(msg)
     .toSubject("FunSubject")
     .signalling()
     .noErrorHandling()
@@ -412,7 +412,7 @@ MessageBuilder.createMessage()
       </informalexample>
       <para>or</para>
       <informalexample>
-        <programlisting language="java">MessageBuilder.createMessage()
+        <programlisting>MessageBuilder.createMessage()
      .toSubject("FunSubject")
      .signalling()
      .noErrorHandling()
@@ -428,7 +428,7 @@ MessageBuilder.createMessage()
         methods. The task will repeat indefinitely until cancelled (see next section).
       </para>
       <informalexample>
-        <programlisting language="java">MessageBuilder.createMessage()
+        <programlisting>MessageBuilder.createMessage()
     .toSubject("FunSubject")
     .signalling()
     .withProvided("time", new ResourceProvider&lt;String&gt;() {
@@ -456,7 +456,7 @@ MessageBuilder.createMessage()
         instance which is returned when creating a task. Reference to the AsyncTask object can be retained and cancelled by any other thread.
       </para>
       <informalexample>
-        <programlisting language="java">AsyncTask task = MessageBuilder.createConversation(message)
+        <programlisting>AsyncTask task = MessageBuilder.createConversation(message)
   .toSubject("TimeChannel").signalling()
   .withProvided(TimeServerParts.TimeString, new ResourceProvider&lt;String&gt;() {
      public String get() {
@@ -480,7 +480,7 @@ MessageBuilder.createMessage()
       </para>
       <para>Consider the following client side code:</para>
       <informalexample>
-        <programlisting language="java">MessageBuilder.createMessage()
+        <programlisting>MessageBuilder.createMessage()
     .toSubject("ObjectService").signalling()
     .with(MessageParts.ReplyTo, "ClientEndpoint")
     .noErrorHandling().sendNowWith(dispatcher);</programlisting>
@@ -491,7 +491,7 @@ MessageBuilder.createMessage()
         ):
       </para>
       <informalexample>
-        <programlisting language="java">MessageBuilder.createConversation(message)
+        <programlisting>MessageBuilder.createConversation(message)
     .subjectProvided().signalling()
     .with("Records", records)
     .noErrorHandling().reply();</programlisting>
@@ -516,7 +516,7 @@ MessageBuilder.createMessage()
         from a message so that you may use it for routing. For example:
       </para>
       <informalexample>
-        <programlisting language="java">...
+        <programlisting>...
   public void callback(Message message) {
     String sessionId = ServerBusUtils.getSessionId(message);
 
@@ -534,7 +534,7 @@ MessageBuilder.createMessage()
         as a  MessagePart to indicate to the bus where you want the message to go.
       </para>
       <informalexample>
-        <programlisting language="java">MessageBuilder.createMessage()
+        <programlisting>MessageBuilder.createMessage()
     .toSubject("ClientMessageListener")
     .signalling()
     .with(MessageParts.SessionID, sessionId)
@@ -576,7 +576,7 @@ MessageBuilder.createMessage()
           <para>A session scope is scoped across all instances of the same session. When a session scope is used, any parameters stored will be accessible and visible by all browser instances and tabs.</para>
           <para>The SessionContext helper class is used for accessing the session scope.</para>
           <informalexample>
-            <programlisting language="java">public class TestService implements MessageCallback {
+            <programlisting>public class TestService implements MessageCallback {
   public void callback(final Message message) {
     // obtain a reference to the session context by referencing the incoming message.
     SessionContext injectionContext = SessionContext.get(message);
@@ -597,7 +597,7 @@ MessageBuilder.createMessage()
             helper class.
           </para>
           <informalexample>
-            <programlisting language="java">public class TestService implements MessageCallback {
+            <programlisting>public class TestService implements MessageCallback {
   public void callback(final Message message) {
     // obtain a reference to the local context by referencing the incoming message.
     LocalContext injectionContext = LocalContext.get(message);

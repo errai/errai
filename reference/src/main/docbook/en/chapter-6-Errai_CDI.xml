@@ -15,34 +15,93 @@
     </important>
     <section id="sid-5931498">
       
-      <title>Errai CDI Features</title>
-      <para>Beans that are deployed to a CDI container will automatically be registered with Errai and exposed to your GWT client application. So, you can use Errai to communicate between your GWT client components and your CDI backend beans. There are several very easy-to-use options:</para>
-      <itemizedlist>
+      <title>CDI Overview</title>
+      <para>Beans that are deployed to a CDI container will automatically be registered with Errai and exposed to your GWT client application. So, you can use Errai to communicate between your GWT client components and your CDI backend beans.</para>
+      <para>Errai CDI based applications use the same annotation-driven programming model as server-side CDI components, with some notable limitations.</para>
+      <orderedlist>
         <listitem>
-          <para>Wiring up your GWT application with the CDI event subsystem</para>
+          <para>There is no support for CDI interceptors in the client. Although this is planned in a future release.</para>
         </listitem>
         <listitem>
-          <para>RPC style invocations on beans through a typed interface</para>
+          <para>Passivating scopes are not supported.</para>
         </listitem>
         <listitem>
-          <para>Access beans in a publish/subscribe manner</para>
+          <para>The JSR-299 SPI is not supported for client side code. Although writing extensions for the client side container is possible via the Errai IOC Extensions API.</para>
         </listitem>
-      </itemizedlist>
-      <para>Further, Errai enables you to make use of CDI producer methods and fields in your GWT client!</para>
-      <section id="sid-5931498_ErraiCDIFeatures-IntegrationwiththeCDIeventsubsystem">
+      </orderedlist>
+      <section id="sid-5931498_CDIOverview-RPCStyleInvocationsonCDIbeans">
         
-        <title>Integration with the CDI event subsystem</title>
+        <title>RPC Style Invocations on CDI beans</title>
         <para>
-          Any CDI managed component may produce and consume
-          <ulink url="http://docs.jboss.org/weld/reference/latest/en-US/html/events.html">events</ulink>
-          . This allows beans to interact in a completely decoupled fashion. Beans consume events by registering for a particular event type and optional qualifiers. The Errai CDI extension simply extends this concept into the client tier. A GWT client application can simply register an
-          <code>Observer</code>
-          for a particular event type and thus receive events that are produced on the server-side. Likewise and using the same API, GWT clients can produce events that are consumed by a server-side observer.
+          When choosing RPC style invocations on beans, you basically rely on a typed java interface the CDI managed bean needs to expose. A GWT client component can then create an invocation proxy based on this interface. For more information see
+          <link linkend="sid-5931313">chapter on RPC mechanism</link>
+          .
         </para>
-        <para>Let's take a look at an example.</para>
-        <example>
-          <title>FraudClient.java</title>
-          <programlisting language="java">public class FraudClient extends LayoutPanel {
+      </section>
+      <section id="sid-5931498_CDIOverview-Publish%2FSubscribewithCDImanagedcomponents">
+        
+        <title>Publish/Subscribe with CDI managed components</title>
+        <para>
+          If you choose publish/subscribe then your CDI bean needs to implement the
+          <code>MessageCallback</code>
+          interface, as described in chapter
+          <xref linkend="sid-5931263"/>
+          . Any bean exposed in this way can be accessed through the
+          <link linkend="sid-5931280">MessageBuilderAPI</link>
+          .
+        </para>
+      </section>
+    </section>
+    <section id="sid-21758052">
+      
+      <title>Beans and Scopes</title>
+      <para>
+        In Errai CDI, all client types are valid bean types if they are default constructable or can have construction dependencies satisfied. These unqualified beans belong the dependent pseudo-scope. See:
+        <ulink url="http://docs.jboss.org/weld/reference/latest/en-US/html/scopescontexts.html#d0e1997">Dependent Psuedo-Scope from CDI Documentation</ulink>
+      </para>
+      <para>
+        Additionally, beans may be qualified as
+        <code>@ApplicationScoped</code>
+        ,
+        <code>@Singleton</code>
+        or
+        <code>@EntryPoint</code>
+        . Although these three scopes are supported for completeness and conformance to the specification, within the client they effectively result in behavior that is identical.
+      </para>
+      <example>
+        <title>Example dependent scoped bean</title>
+        <programlisting>public void MyDependentScopedBean {
+  private final Date createdDate;
+
+  public MyDependentScopedBean {
+    createdDate = new Date();
+  }  
+}</programlisting>
+      </example>
+      <example>
+        <title>Example ApplicationScoped bean</title>
+        <programlisting>@ApplicationScoped
+public void MyClientBean {
+  @Inject MyDependentScopedBean bean;
+
+  // ... //
+}</programlisting>
+      </example>
+    </section>
+    <section id="sid-21758054">
+      
+      <title>Events</title>
+      <para>
+        Any CDI managed component may produce and consume
+        <ulink url="http://docs.jboss.org/weld/reference/latest/en-US/html/events.html">events</ulink>
+        . This allows beans to interact in a completely decoupled fashion. Beans consume events by registering for a particular event type and optional qualifiers. The Errai CDI extension simply extends this concept into the client tier. A GWT client application can simply register an
+        <code>Observer</code>
+        for a particular event type and thus receive events that are produced on the server-side. Likewise and using the same API, GWT clients can produce events that are consumed by a server-side observer.
+      </para>
+      <para>Let's take a look at an example.</para>
+      <example>
+        <title>FraudClient.java</title>
+        <programlisting>public class FraudClient extends LayoutPanel {
 
   @Inject
   private Event&lt;AccountActivity&gt; event; (1)
@@ -69,34 +128,34 @@
     responsePanel.setText("Fraud detected: " + fraudEvent.getTimestamp());
   }
 }</programlisting>
-        </example>
-        <para>Two things are noteworthy in this example:</para>
-        <orderedlist>
-          <listitem>
-            <para>
-              Injection of an
-              <code>Event</code>
-              dispatcher proxy
-            </para>
-          </listitem>
-          <listitem>
-            <para>
-              Creation of an
-              <code>Observer</code>
-              method for a particular event type
-            </para>
-          </listitem>
-        </orderedlist>
-        <para>
-          The event dispatcher is responsible for sending events created on the client-side to the server-side event subsystem (CDI container). This means any event that is fired through a dispatcher will eventually be consumed by a CDI managed bean, if there is an corresponding
-          <code>Observer</code>
-          registered for it on the server side.
-        </para>
-        <para>In order to consume events that are created on the server-side you need to declare an client-side observer method for a particular event type. In case an event is fired on the server this method will be invoked with an event instance of type you declared.</para>
-        <para>To complete the example, let's look at the corresponding server-side CDI bean:</para>
-        <example>
-          <title>AccountService.java</title>
-          <programlisting language="java">@ApplicationScoped
+      </example>
+      <para>Two things are noteworthy in this example:</para>
+      <orderedlist>
+        <listitem>
+          <para>
+            Injection of an
+            <code>Event</code>
+            dispatcher proxy
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Creation of an
+            <code>Observer</code>
+            method for a particular event type
+          </para>
+        </listitem>
+      </orderedlist>
+      <para>
+        The event dispatcher is responsible for sending events created on the client-side to the server-side event subsystem (CDI container). This means any event that is fired through a dispatcher will eventually be consumed by a CDI managed bean, if there is an corresponding
+        <code>Observer</code>
+        registered for it on the server side.
+      </para>
+      <para>In order to consume events that are created on the server-side you need to declare an client-side observer method for a particular event type. In case an event is fired on the server this method will be invoked with an event instance of type you declared.</para>
+      <para>To complete the example, let's look at the corresponding server-side CDI bean:</para>
+      <example>
+        <title>AccountService.java</title>
+        <programlisting>@ApplicationScoped
 public class AccountService {
   
   @Inject @Detected
@@ -107,18 +166,18 @@ public class AccountService {
     event.fire(fraud);
  }
 }</programlisting>
-        </example>
-        <section id="sid-5931498_ErraiCDIFeatures-Conversationalevents">
-          
-          <title>Conversational events</title>
-          <para>
-            A server can address a single client in response to an event annotating event types as
-            <code>@Conversational</code>
-            . Consider a service that responds to a subscription event.
-          </para>
-          <example>
-            <title>SubscriptionService.java</title>
-            <programlisting language="java">@ApplicationScoped
+      </example>
+      <section id="sid-21758054_Events-Conversationalevents">
+        
+        <title>Conversational events</title>
+        <para>
+          A server can address a single client in response to an event annotating event types as
+          <code>@Conversational</code>
+          . Consider a service that responds to a subscription event.
+        </para>
+        <example>
+          <title>SubscriptionService.java</title>
+          <programlisting>@ApplicationScoped
 public class SubscriptionService {
   
   @Inject
@@ -129,96 +188,37 @@ public class SubscriptionService {
     welcomeEvent.fire(docs);
  }
 }</programlisting>
-          </example>
-          <para>
-            And the
-            <code>Document</code>
-            class would be annotated like so:
-          </para>
-          <example>
-            <title>Document.java</title>
-            <programlisting language="java">@Conversational @Portable
+        </example>
+        <para>
+          And the
+          <code>Document</code>
+          class would be annotated like so:
+        </para>
+        <example>
+          <title>Document.java</title>
+          <programlisting>@Conversational @Portable
 public class Document {
    // code here
 }</programlisting>
-          </example>
-          <para>
-            As such, when
-            <code>Document</code>
-            events are fired, they will be limited in scope to the initiating conversational contents – which are implicitly inferred by the caller. So only the client which fired the
-            <code>Subscription</code>
-            event will receive the fired
-            <code>Document</code>
-            event.
-          </para>
-        </section>
-      </section>
-      <section id="sid-5931498_ErraiCDIFeatures-RPCStyleInvocationsonCDIbeans">
-        
-        <title>RPC Style Invocations on CDI beans</title>
-        <para>
-          When choosing RPC style invocations on beans, you basically rely on a typed java interface the CDI managed bean needs to expose. A GWT client component can then create an invocation proxy based on this interface. For more information see
-          <link linkend="sid-5931313">chapter on RPC mechanism</link>
-          .
-        </para>
-      </section>
-      <section id="sid-5931498_ErraiCDIFeatures-Publish%2FSubscribewithCDImanagedcomponents">
-        
-        <title>Publish/Subscribe with CDI managed components</title>
-        <para>
-          If you choose publish/subscribe then your CDI bean needs to implement the
-          <code>MessageCallback</code>
-          interface, as described in chapter
-          <xref linkend="sid-5931263"/>
-          . Any bean exposed in this way can be accessed through the
-          <link linkend="sid-5931280">MessageBuilderAPI</link>
-          .
-        </para>
-      </section>
-      <section id="sid-5931498_ErraiCDIFeatures-CDIProducers">
-        
-        <title>CDI Producers</title>
-        <para>Producer methods and fields act as sources of objects to be injected. They are useful when additional control over object creation is needed before injections can take place e.g. when you need to make a decision at runtime before an object can be created and injected.</para>
-        <example>
-          <title>App.java</title>
-          <programlisting language="java">@EntryPoint
-public class App {
-  ...
-
-  @Produces @Supported
-  public MyBaseWidget createWidget() {
-    return (Canvas.isSupported()) ? new MyHtml5Widget() : new MyDefaultWidget();
-  }
-}</programlisting>
-        </example>
-        <example>
-          <title>MyComposite.java</title>
-          <programlisting language="java">@ApplicationScoped
-public class MyComposite extends Composite {
-  
-  @Inject @Supported
-  public MyBaseWidget widget;
-
-  ...
-}</programlisting>
         </example>
         <para>
-          For more information on CDI producers, see the
-          <ulink url="http://docs.jboss.org/cdi/spec/1.0/html/">CDI specification</ulink>
-          and the
-          <ulink url="http://seamframework.org/Weld/WeldDocumentation">WELD reference documentation</ulink>
-          .
+          As such, when
+          <code>Document</code>
+          events are fired, they will be limited in scope to the initiating conversational contents – which are implicitly inferred by the caller. So only the client which fired the
+          <code>Subscription</code>
+          event will receive the fired
+          <code>Document</code>
+          event.
         </para>
       </section>
-    </section>
-    <section id="sid-5931730">
-      
-      <title>Client-Server Event Example</title>
-      <para>A key feature of the Errai CDI framework is the ability to federate the CDI eventing bus between the client and the server. This permits the observation of server produced events on the client, and vice-versa.</para>
-      <para>Example server code:</para>
-      <example>
-        <title>MyServerBean.java</title>
-        <programlisting language="java">@ApplicationScoped
+      <section id="sid-21758054_Events-ClientServerEventExample">
+        
+        <title>Client-Server Event Example</title>
+        <para>A key feature of the Errai CDI framework is the ability to federate the CDI eventing bus between the client and the server. This permits the observation of server produced events on the client, and vice-versa.</para>
+        <para>Example server code:</para>
+        <example>
+          <title>MyServerBean.java</title>
+          <programlisting>@ApplicationScoped
 public class MyServerBean {
   @Inject
   Event&lt;MyResponseEvent&gt; myResponseEvent;
@@ -238,11 +238,11 @@ public class MyServerBean {
     myResponseEvent.fire(response);
   }
 }</programlisting>
-      </example>
-      <para>Domain-model:</para>
-      <example>
-        <title>MyRequestEvent.java</title>
-        <programlisting language="java">@Portable
+        </example>
+        <para>Domain-model:</para>
+        <example>
+          <title>MyRequestEvent.java</title>
+          <programlisting>@Portable
 public class MyRequestEvent {
   private boolean thankYou;
 
@@ -258,10 +258,10 @@ public class MyRequestEvent {
     return thankYou;
   }
 }</programlisting>
-      </example>
-      <example>
-        <title>MyResponseEvent.java</title>
-        <programlisting language="java">@Portable
+        </example>
+        <example>
+          <title>MyResponseEvent.java</title>
+          <programlisting>@Portable
 public class MyResponseEvent {
   private String message;
 
@@ -277,11 +277,11 @@ public class MyResponseEvent {
     return message;
   }
 }</programlisting>
-      </example>
-      <para>Client application logic:</para>
-      <example>
-        <title>MyClientBean.java</title>
-        <programlisting language="java">@EntryPoint
+        </example>
+        <para>Client application logic:</para>
+        <example>
+          <title>MyClientBean.java</title>
+          <programlisting>@EntryPoint
 public class MyClientBean {
    @Inject
    Event&lt;MyRequestEvent&gt; requestEvent;
@@ -313,7 +313,43 @@ public class MyClientBean {
      RootPanel.get().add(vPanel);
    }
 }</programlisting>
+        </example>
+      </section>
+    </section>
+    <section id="sid-21758062">
+      
+      <title>Producers</title>
+      <para>Producer methods and fields act as sources of objects to be injected. They are useful when additional control over object creation is needed before injections can take place e.g. when you need to make a decision at runtime before an object can be created and injected.</para>
+      <example>
+        <title>App.java</title>
+        <programlisting>@EntryPoint
+public class App {
+  ...
+
+  @Produces @Supported
+  public MyBaseWidget createWidget() {
+    return (Canvas.isSupported()) ? new MyHtml5Widget() : new MyDefaultWidget();
+  }
+}</programlisting>
       </example>
+      <example>
+        <title>MyComposite.java</title>
+        <programlisting>@ApplicationScoped
+public class MyComposite extends Composite {
+  
+  @Inject @Supported
+  public MyBaseWidget widget;
+
+  ...
+}</programlisting>
+      </example>
+      <para>
+        For more information on CDI producers, see the
+        <ulink url="http://docs.jboss.org/cdi/spec/1.0/html/">CDI specification</ulink>
+        and the
+        <ulink url="http://seamframework.org/Weld/WeldDocumentation">WELD reference documentation</ulink>
+        .
+      </para>
     </section>
     <section id="sid-5931501">
       
@@ -354,7 +390,7 @@ public class MyClientBean {
           <programlisting>&lt;web-app&gt;
   ...
   &lt;listener&gt;
-    &lt;listener-class&gt;org.jboss.errai.container.DevModeCDIBootstrap&lt;/listener-class&gt;
+    &lt;listener-class&gt;org.jboss.errai.container.CDIServletStateListener&lt;/listener-class&gt;
   &lt;/listener&gt;
  
   &lt;resource-env-ref&gt;

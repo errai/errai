@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<chapter id="sid-21627124">
+    
+    <title>Errai Kitchen Sink Maven Archetype</title>
+    <para>The Errai Kitchen Sink archetype generates a project that uses everything but the kitchen sink: annotation-driven CDI and Java Bean Validation on both the client and server, plus JPA and JAX-RS on the server side. It also demonstrates usage of Errai RPC and GWT UiBinder.</para>
+    <para>
+      <emphasis role="strong">Note:</emphasis>
+      Unlike the other Errai Archetypes, this Kitchen Sink archetype creates a project that only works with JBoss AS 7. Although this project could be made to work on other servers, the POM would be quite unwieldy if it included profiles for Tomcat and Jetty.
+    </para>
+    <para>
+      Here's how to create a project layout using a maven build structure, which will provide us with a bare bones project, including all dependencies, which you can import into your IDE of choice. You will need to have
+      <ulink url="http://maven.apache.org/download.html">Maven 3</ulink>
+      installed in order to execute this command successfully:
+    </para>
+    <informalexample>
+      <programlisting>mvn archetype:generate \
+-DarchetypeGroupId=org.jboss.errai.archetypes \
+-DarchetypeArtifactId=kitchensink-quickstart \
+-DarchetypeVersion=2.0-SNAPSHOT \
+-DarchetypeRepository=https://repository.jboss.org/nexus/content/groups/public/</programlisting>
+    </informalexample>
+    <para>Customize the build properties according to your needs.</para>
+    <informalexample>
+      <programlisting>Define value for property 'groupId': : foo.bar
+Define value for property 'artifactId': : my-kitchen-sink
+Define value for property 'version': 1.0-SNAPSHOT:
+Define value for property 'package': foo.bar: com.foo.bar
+Confirm properties configuration:
+groupId: foo.bar
+artifactId: my-kitchen-sink
+version: 1.0-SNAPSHOT
+package: com.foo.bar
+Y:</programlisting>
+    </informalexample>
+    <para>The project will be created in a directory that corresponds to the provided artifactId.</para>
+    <para>In a few simple steps, you have created a build environment that can build, test, package, and launch a simple application. You can now launch GWT development mode, run integration tests with coverage reporting, and package your web application for deployment.</para>
+    <para>To get your app running in JBoss AS 7, ensure there is a local instance of JBoss AS 7.1 or newer running locally, then type:</para>
+    <informalexample>
+      <programlisting>mvn package
+mvn jboss-as:deploy</programlisting>
+    </informalexample>
+    <para>
+      You can then try out the app by pointing your web browser at
+      <ulink url="http://localhost:8080/artifactId/"/>
+      (where
+      <emphasis role="italics">artifactId</emphasis>
+      is the artifactId you gave when generating the project.)
+    </para>
+    <para>To launch the app in GWT development mode, keep JBoss AS running, change into the project directory (name corresponding to the provided artifactId) and type:</para>
+    <informalexample>
+      <programlisting>mvn gwt:run (launch hosted mode)
+mvn gwt:debug (launch hosted with debug settings)</programlisting>
+    </informalexample>
+    <para>Please remember that in this project, Dev Mode's built-in Jetty server is disabled. Your app must be up and running on JBoss AS 7 as outlined in the previous step.</para>
+    <note>
+      <title>Importing the project into eclipse</title>
+      <para>
+        The setup instructions for Eclipse can be found in the Errai
+        <ulink url="http://community.jboss.org/wiki/WorkingwithGWTCDIandErrai">WIKI</ulink>
+        .
+      </para>
+    </note>
+  </chapter>

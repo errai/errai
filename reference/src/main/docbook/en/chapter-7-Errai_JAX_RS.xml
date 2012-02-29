@@ -15,16 +15,16 @@
       <para>Assuming the following simple JAX-RS interface should be used:</para>
       <example>
         <title>CustomerService.java</title>
-        <programlisting language="java">@Path("customers")
+        <programlisting>@Path("customers")
 public interface CustomerService {
-  @GET
-  @Produces("application/json")
-  public List&lt;Customer&gt; listAllCustomers();
-  
-  @POST
-  @Consumes("application/json")
-  @Produces("text/plain")
-  public long createCustomer(Customer customer);
+  @GET
+  @Produces("application/json")
+  public List&lt;Customer&gt; listAllCustomers();
+
+  @POST
+  @Consumes("application/json")
+  @Produces("text/plain")
+  public long createCustomer(Customer customer);
 }</programlisting>
       </example>
       <para>
@@ -34,7 +34,7 @@ public interface CustomerService {
       </para>
       <example>
         <title>App.java</title>
-        <programlisting language="java">...
+        <programlisting>...
 Button create = new Button("Create", new ClickHandler() {
   public void onClick(ClickEvent clickEvent) {
     Customer customer = new Customer(firstName, lastName, postalCode);
@@ -57,7 +57,7 @@ Button create = new Button("Create", new ClickHandler() {
           .
         </para>
         <informalexample>
-          <programlisting language="java">@Inject
+          <programlisting>@Inject
 private Caller&lt;CustomerService&gt; customerService;</programlisting>
         </informalexample>
         <para>
@@ -66,7 +66,7 @@ private Caller&lt;CustomerService&gt; customerService;</programlisting>
           method before the corresponding interface method is invoked.
         </para>
         <informalexample>
-          <programlisting language="java">customerService.call(callback).deleteCustomer(customerId);</programlisting>
+          <programlisting>customerService.call(callback).listAllCustomers();</programlisting>
         </informalexample>
       </section>
     </section>
@@ -75,13 +75,19 @@ private Caller&lt;CustomerService&gt; customerService;</programlisting>
       <title>Handling Responses</title>
       <para>
         An instance of Errai's
-        <code>RemoteCallback</code>
+        <code>RemoteCallback&lt;T&gt;</code>
         has to be passed to the
         <code>RestClient.create()</code>
-        call, which will provide access to the JAX-RS resource method's result:
+        call, which will provide access to the JAX-RS resource method's result.
+        <code>T</code>
+        is the return type of the JAX-RS resource method. In the example below it's just a
+        <code>Long</code>
+        representing a customer ID, but it can be any serializable type (see
+        <xref linkend="sid-5931328"/>
+        ).
       </para>
       <informalexample>
-        <programlisting language="java">RemoteCallback&lt;Long&gt; callback = new RemoteCallback&lt;Long&gt;() {
+        <programlisting>RemoteCallback&lt;Long&gt; callback = new RemoteCallback&lt;Long&gt;() {
   public void callback(Long id) {
     Window.alert("Customer created with ID: " + id);
   }
@@ -101,7 +107,7 @@ private Caller&lt;CustomerService&gt; customerService;</programlisting>
         for the method result.
       </para>
       <informalexample>
-        <programlisting language="java">ResponseCallback callback = new ResponseCallback() {
+        <programlisting>ResponseCallback callback = new ResponseCallback() {
   public void callback(Response response) {
     Window.alert("HTTP status code: " + response.getStatusCode());
     Window.alert("HTTP response body: " + response.getText());
@@ -122,7 +128,7 @@ private Caller&lt;CustomerService&gt; customerService;</programlisting>
         indicate a communication problem.
       </para>
       <informalexample>
-        <programlisting language="java">ErrorCallback errorCallback = new ErrorCallback() {
+        <programlisting>ErrorCallback errorCallback = new ErrorCallback() {
   public boolean error(Message message, Throwable throwable) {
     try {
       throw throwable;
@@ -166,13 +172,13 @@ private Caller&lt;CustomerService&gt; customerService;</programlisting>
       </informalexample>
       <para>or by using a JSNI method:</para>
       <informalexample>
-        <programlisting language="java">private native void setMyJaxRsAppRoot(String path) /*-{
+        <programlisting>private native void setMyJaxRsAppRoot(String path) /*-{
   $wnd.erraiJaxRsApplicationRoot = path;
 }-*/;</programlisting>
       </informalexample>
       <para>or by simply invoking:</para>
       <informalexample>
-        <programlisting language="java">RestClient.setApplicationRoot("/MyJaxRsEndpointPath");</programlisting>
+        <programlisting>RestClient.setApplicationRoot("/MyJaxRsEndpointPath");</programlisting>
       </informalexample>
       <para>The root path will be prepended to all paths specified on the JAX-RS interfaces. It serves as the base URL for all requests sent from the client.</para>
     </section>

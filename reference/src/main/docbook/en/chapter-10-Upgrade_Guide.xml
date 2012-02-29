@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<chapter id="sid-21758202">
+    
+    <title>Upgrade Guide</title>
+    <para>
+      This chapter contains important information for migrating to newer versions of Errai. If you experience any problems, don't hesitate to get in touch with us. See
+      <xref linkend="sid-5833089"/>
+      .
+    </para>
+    <section id="sid-21758204">
+      
+      <title>Upgrading from 1.x to 2.0</title>
+      <para>
+        The first issues that will arise after replacing the jars or after changing the version numbers in the
+        <code>pom.xml</code>
+        are unresolved package imports. This is due to refactorings that became necessary when the project grew. Most of these import problems can be resolved automatically by modern IDEs (Organize Imports). So, this should replace
+        <code>org.jboss.errai.bus.client.protocols.*</code>
+        with
+        <code>org.jboss.errai.common.client.protocols.*</code>
+        for example.
+      </para>
+      <para>The following is a list of manual steps that have to be carried out when upgrading:</para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            @ExposedEntity became @Portable (
+            <code>org.jboss.errai.common.client.api.annotations.Portable</code>
+            ). See
+            <xref linkend="sid-5931328"/>
+            for details.
+          </para>
+        </listitem>
+      </itemizedlist>
+      <itemizedlist>
+        <listitem>
+          <para>
+            Errai CDI projects must now use the
+            <code>SimpleDispatcher</code>
+            instead of the
+            <code>AsynDispatcher</code>
+            . This has to be configured in
+            <xref linkend="sid-5931338"/>
+            .
+          </para>
+        </listitem>
+      </itemizedlist>
+      <itemizedlist>
+        <listitem>
+          <para>
+            The bootstrap listener (configured in
+            <code>WEB-INF/web.xml</code>
+            ) for Errai CDI has changed (
+            <code>org.jboss.errai.container.DevModeCDIBootstrap</code>
+            is now
+            <code>org.jboss.errai.container.CDIServletStateListener</code>
+            ).
+          </para>
+        </listitem>
+      </itemizedlist>
+      <itemizedlist>
+        <listitem>
+          <para>gwt 2.3.0 or newer must be used and replace older versions.</para>
+        </listitem>
+      </itemizedlist>
+      <itemizedlist>
+        <listitem>
+          <para>mvel2 2.1.Beta8 or newer must be used and replace older versions.</para>
+        </listitem>
+      </itemizedlist>
+      <itemizedlist>
+        <listitem>
+          <para>weld 1.1.5.Final or newer must be used and replace older versions.</para>
+        </listitem>
+      </itemizedlist>
+      <itemizedlist>
+        <listitem>
+          <para>slf4j 1.6.1 or newer must be used and replace older versions.</para>
+        </listitem>
+      </itemizedlist>
+      <itemizedlist>
+        <listitem>
+          <para>This step can be skipped if Maven is used to build the project. If the project is NOT built using Maven, the following jar files have to be added manually to project's build/class path: errai-common-2.x.jar, errai-marshalling-2.x.jar, errai-codegen-2.x.jar, netty-4.0.0.Alpha1.errai.r1.jar.</para>
+        </listitem>
+      </itemizedlist>
+      <itemizedlist>
+        <listitem>
+          <para>
+            If the project was built using an early version of an Errai archetype the configuration of the maven-gwt-plugin has to be modified to contain the
+            <code>&lt;hostedWebapp&gt;path-to-your-standard-webapp-folder&lt;/hostedWebapp&gt;</code>
+            . This is usually either
+            <code>war</code>
+            or
+            <code>src/main/webapp</code>
+            .
+          </para>
+        </listitem>
+      </itemizedlist>
+    </section>
+  </chapter>
