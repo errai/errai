@@ -17,10 +17,12 @@
 package org.jboss.errai.ioc.rebind;
 
 import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaConstructor;
 import org.jboss.errai.codegen.framework.meta.MetaField;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.meta.MetaParameter;
+import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
 
@@ -46,14 +48,17 @@ public abstract class JSR330AnnotationHandler<T extends Annotation> implements A
     do {
       for (MetaField field : mc.getDeclaredFields()) {
         if (field.isAnnotationPresent(Inject.class)) {
+
           dependencies.add(new SortUnit(field.getType(), InjectUtil.extractQualifiersFromField(field)));
+          dependencies.addAll(fillInInterface(field.getType().asClass()));
         }
       }
-      
+
       for (MetaMethod method : mc.getDeclaredMethods()) {
         if (method.isAnnotationPresent(Inject.class)) {
           for (MetaParameter parm : method.getParameters()) {
             dependencies.add(new SortUnit(parm.getType(), InjectUtil.extractQualifiersFromParameter(parm)));
+            dependencies.addAll(fillInInterface(parm.getType().asClass()));
           }
         }
       }
@@ -62,6 +67,7 @@ public abstract class JSR330AnnotationHandler<T extends Annotation> implements A
         if (constructor.isAnnotationPresent(Inject.class)) {
           for (MetaParameter parm : constructor.getParameters()) {
             dependencies.add(new SortUnit(parm.getType(), InjectUtil.extractQualifiersFromParameter(parm)));
+            dependencies.addAll(fillInInterface(parm.getType().asClass()));
           }
         }
       }
@@ -70,5 +76,21 @@ public abstract class JSR330AnnotationHandler<T extends Annotation> implements A
     while ((mc = mc.getSuperClass()) != null);
 
     return Collections.unmodifiableSet(dependencies);
+  }
+
+  private static Set<SortUnit> fillInInterface(Class cls) {
+    if (cls.isInterface()) {
+      Set<Class> subTypes = ScannerSingleton.getOrCreateInstance().getSubTypesOf(cls);
+      Set<SortUnit> sortUnits = new HashSet<SortUnit>();
+      for (Class c : subTypes) {
+        sortUnits.add(new SortUnit(MetaClassFactory.get(c)));
+      }
+
+      return sortUnits;
+    }
+    else {
+      return Collections.emptySet();
+    }
+
   }
 }
