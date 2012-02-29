@@ -35,6 +35,7 @@ import org.jboss.errai.codegen.framework.util.Refs;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
+import org.jboss.errai.marshalling.rebind.MarshallerGeneratorFactory;
 import org.mvel2.util.ReflectionUtil;
 import org.mvel2.util.StringAppender;
 import org.slf4j.Logger;
@@ -60,12 +61,14 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class InjectUtil {
-  private static final Logger log = LoggerFactory.getLogger(InjectUtil.class);
 
   private static final Class[] injectionAnnotations
           = {Inject.class, com.google.inject.Inject.class};
 
   private static final AtomicInteger counter = new AtomicInteger(0);
+
+  private static Logger log = LoggerFactory.getLogger("errai-ioc");
+
 
   public static ConstructionStrategy getConstructionStrategy(final Injector injector, final InjectionContext ctx) {
     final MetaClass type = injector.getInjectedType();
@@ -148,6 +151,9 @@ public class InjectUtil {
                                            List<InjectionTask> tasks) {
     for (InjectionTask task : tasks) {
       if (!task.doTask(ctx)) {
+        log.warn("your object graph has cyclical dependencies. use of dependent scope and @New may not " +
+                "produce properly initalized objects for: " + task.getInjector().getInjectedType().getFullyQualifiedName() + "\n" +
+        "\t Offending node: " + task);
         ctx.deferTask(task);
       }
     }
