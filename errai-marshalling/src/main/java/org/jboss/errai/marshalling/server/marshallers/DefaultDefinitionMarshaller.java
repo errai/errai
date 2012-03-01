@@ -177,7 +177,7 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
 
 
   @Override
-  public void marshall(OutputStream outstream, Object o, MarshallingSession mSession) throws IOException {
+  public void marshall(final OutputStream outstream, Object o, MarshallingSession mSession) throws IOException {
 
     if (o == null) {
       outstream.write("null".getBytes());

@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarFile;
+import java.util.regex.Pattern;
 
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
@@ -152,7 +153,8 @@ public abstract class ServerMarshallUtil {
       outputStream.flush();
       outputStream.close();
 
-      String compiledClassPath = compileClass(directory.getAbsolutePath(), packageName, className);
+      String compiledClassPath = compileClass(directory.getAbsolutePath(), packageName, className,
+              directory.getAbsolutePath());
 
       return loadClassDefinition(compiledClassPath, packageName, className);
     }
@@ -163,10 +165,10 @@ public abstract class ServerMarshallUtil {
 
   }
 
-  public static String compileClass(String sourcePath, String packageName, String className) {
+  public static String compileClass(String sourcePath, String packageName, String className, String outputPath) {
     try {
       File inFile = new File(sourcePath + File.separator + className + ".java");
-      File outFile = new File(sourcePath + File.separator + className + ".class");
+      //  File outFile = new File(sourcePath + File.separator + className + ".class");
 
       ByteArrayOutputStream errorOutputStream = new ByteArrayOutputStream();
       JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
@@ -177,10 +179,24 @@ public abstract class ServerMarshallUtil {
                 "marshalling code on-the-fly.");
       }
 
+      File classOutputDir = new File(outputPath
+              + File.separatorChar + RebindUtils.packageNameToDirName(packageName)
+              + File.separatorChar).getAbsoluteFile();
+
+      // delete any marshaller classes already there
+      Pattern matcher = Pattern.compile("^" + className + "(\\.|$).*class$");
+      if (classOutputDir.exists()) {
+        for (File file : classOutputDir.listFiles()){
+          if (matcher.matcher(file.getName()).matches()) {
+            file.delete();
+          }
+        }
+      }
+
       /**
        * Attempt to run the compiler without any classpath specified.
        */
-      if (compiler.run(null, null, errorOutputStream, inFile.getAbsolutePath()) != 0) {
+      if (compiler.run(null, null, errorOutputStream, "-d", outputPath, inFile.getAbsolutePath()) != 0) {
         errorOutputStream.reset();
 
         /**
@@ -204,7 +220,7 @@ public abstract class ServerMarshallUtil {
         sb.append(System.getProperty("java.class.path"));
         sb.append(findAllJarsByManifest());
 
-        if (compiler.run(null, null, errorOutputStream, "-cp", sb.toString(), inFile.getAbsolutePath()) != 0) {
+        if (compiler.run(null, null, errorOutputStream, "-d", outputPath, "-cp", sb.toString(), inFile.getAbsolutePath()) != 0) {
           System.out.println("*** FAILED TO COMPILE MARSHALLER CLASS ***");
           System.out.println("*** Classpath Used: " + sb.toString());
 
@@ -217,7 +233,8 @@ public abstract class ServerMarshallUtil {
       }
 
 
-      return outFile.getAbsolutePath();
+      return new File(classOutputDir.getAbsolutePath() + File.separatorChar
+              + className + ".class").getAbsolutePath();
     }
     catch (Exception e) {
       throw new RuntimeException(e);
@@ -436,7 +453,7 @@ public abstract class ServerMarshallUtil {
     _findAllMatching(matching, fileName, from);
     return matching;
   }
-  
+
   public static void _findAllMatching(HashSet<File> matching, String fileName, File from) {
     if (from.isDirectory()) {
       for (File file : from.listFiles()) {
@@ -449,7 +466,7 @@ public abstract class ServerMarshallUtil {
       }
     }
   }
-  
+
   public static Set<File> findMatchingOutputDirectoryByModel(Map<String, String> toMatch, File from) {
     HashSet<File> matching = new HashSet<File>();
     _findMatchingOutputDirectoryByModel(matching, toMatch, from);

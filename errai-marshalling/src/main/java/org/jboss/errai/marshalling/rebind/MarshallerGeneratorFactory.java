@@ -119,7 +119,7 @@ public class MarshallerGeneratorFactory {
     startTime = System.currentTimeMillis();
 
     classStructureBuilder = implement(MarshallerFactory.class, packageName, clazzName);
-    classContext = ((BuildMetaClass) classStructureBuilder.getClassDefinition()).getContext();
+    classContext = classStructureBuilder.getClassDefinition().getContext();
     mappingContext = new GeneratorMappingContext(classContext, classStructureBuilder.getClassDefinition(),
             classStructureBuilder, new ArrayMarshallerCallback() {
       @Override

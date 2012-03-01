@@ -229,6 +229,8 @@ public class MarshallersGenerator extends Generator {
     printWriter.write(_generate(context));
     context.commit(logger, printWriter);
   }
+  
+  private static final String sourceOutputTemp = RebindUtils.getTempDirectory() + "/errai.marshalling/gen/";
 
   private String _generate(GeneratorContext context) {
     boolean junit = EnvironmentUtil.isGWTJUnitTest();
@@ -242,10 +244,10 @@ public class MarshallersGenerator extends Generator {
               .generate(SERVER_MARSHALLER_PACKAGE_NAME, SERVER_MARSHALLER_CLASS_NAME);
 
       if (junit) {
-        String tmpLocation = new File(RebindUtils.getTempDirectory() + "/errai.marshalling/out/").getAbsolutePath();
+        String tmpLocation = new File(sourceOutputTemp).getAbsolutePath();
         log.info("*** using temporary path for JUnit Shell: " + tmpLocation + " ***");
 
-        String toLoad = generateServerMarshallers(tmpLocation, serverSideClass);
+        String toLoad = generateServerMarshallers(tmpLocation, serverSideClass, tmpLocation);
 
         try {
           ServerMarshallUtil.loadClassDefinition(toLoad, SERVER_MARSHALLER_PACKAGE_NAME, SERVER_MARSHALLER_CLASS_NAME);
@@ -256,7 +258,7 @@ public class MarshallersGenerator extends Generator {
 
       }
       else if (SERVER_MARSHALLER_OUTPUT_DIR != null) {
-        generateServerMarshallers(SERVER_MARSHALLER_OUTPUT_DIR, serverSideClass);
+        generateServerMarshallers(sourceOutputTemp, serverSideClass, SERVER_MARSHALLER_OUTPUT_DIR);
         logger.info("** deposited marshaller class in : " + new File(SERVER_MARSHALLER_OUTPUT_DIR).getAbsolutePath());
       }
       else {
@@ -296,7 +298,7 @@ public class MarshallersGenerator extends Generator {
               if (outputDirCdt.exists()) {
                 logger.info("   found '" + outputDirCdt + "' output directory");
 
-                generateServerMarshallers(outputDirCdt.getAbsolutePath(), serverSideClass);
+                generateServerMarshallers(sourceOutputTemp, serverSideClass, outputDirCdt.getAbsolutePath());
                 logger.info("** deposited marshaller class in : " + outputDirCdt.getAbsolutePath());
                 deposits++;
               }
@@ -334,17 +336,22 @@ public class MarshallersGenerator extends Generator {
   }
 
 
-  private String generateServerMarshallers(String dir, String serverSideClass) {
-    File outputDir = new File(dir + File.separator +
+  private String generateServerMarshallers(String sourceDir, String serverSideClass, String outputPath) {
+    File outputDir = new File(sourceDir + File.separator +
             RebindUtils.packageNameToDirName(SERVER_MARSHALLER_PACKAGE_NAME) + File.separator);
+    
+    File classOutputPath = new File(outputPath);
+
     outputDir.mkdirs();
 
     File sourceFile = new File(outputDir.getAbsolutePath() + File.separator + SERVER_MARSHALLER_CLASS_NAME + ".java");
 
-    RebindUtils.writeStringToFile(sourceFile,
-            serverSideClass);
+    RebindUtils.writeStringToFile(sourceFile, serverSideClass);
 
-    ServerMarshallUtil.compileClass(outputDir.getAbsolutePath(), SERVER_MARSHALLER_PACKAGE_NAME, SERVER_MARSHALLER_CLASS_NAME);
+    ServerMarshallUtil.compileClass(outputDir.getAbsolutePath(), 
+            SERVER_MARSHALLER_PACKAGE_NAME,
+            SERVER_MARSHALLER_CLASS_NAME,
+            classOutputPath.getAbsolutePath());
 
     return new File(outputDir.getAbsolutePath() + File.separator + SERVER_MARSHALLER_CLASS_NAME + ".class").getAbsolutePath();
   }

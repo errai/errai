@@ -33,6 +33,13 @@
     <build>
         <finalName>${project.artifactId}</finalName>
         <outputDirectory>war/WEB-INF/classes</outputDirectory>
+
+        <resources>
+            <resource>
+                <directory>src/main/java</directory>
+            </resource>
+        </resources>
+
         <plugins>
 
             <plugin>
@@ -61,6 +68,7 @@
                 <artifactId>maven-war-plugin</artifactId>
                 <configuration>
                     <warSourceDirectory>war</warSourceDirectory>
+                    <webappDirectory>war</webappDirectory>
                     <webXml>${webXmlPath}</webXml>
                     <packagingExcludes>**/javax/**/*.*,**/client/local/**/*.class</packagingExcludes>
                 </configuration>
