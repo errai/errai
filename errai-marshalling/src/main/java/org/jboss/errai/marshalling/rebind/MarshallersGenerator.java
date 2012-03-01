@@ -77,59 +77,54 @@ public class MarshallersGenerator extends Generator {
               @Override
               public Set<String> getCandidate(GeneratorContext context, DiscoveryContext veto) {
                 File cwd = new File("").getAbsoluteFile();
-                Set<File> matching = ServerMarshallUtil.findAllMatching("class_list.txt", cwd);
+                Set<File> matching = ServerMarshallUtil.findAllMatching("classlist.mf", cwd);
                 Set<String> candidateDirectories = new HashSet<String>();
 
                 veto.resultsAbsolute();
 
                 if (!matching.isEmpty()) {
-                  if (matching.size() == 1) {
-                    File match = matching.iterator().next();
-                    candidateDirectories.add(match.getParentFile().getAbsolutePath());
+
+                  class Candidate {
+                    int score;
+                    File root;
                   }
-                  else {
-                    class Candidate {
-                      int score;
-                      File root;
+
+                  Candidate bestCandidate = null;
+                  String gwtModuleName = RebindUtils.getModuleName(context);
+
+                  if (gwtModuleName != null) {
+
+                    if (gwtModuleName.endsWith(".JUnit")) {
+                      gwtModuleName = gwtModuleName.substring(0, gwtModuleName.length() - 6);
+                    }
+                    gwtModuleName = gwtModuleName.substring(0, gwtModuleName.lastIndexOf('.'));
+
+                    for (File f : matching) {
+                      Candidate candidate = new Candidate();
+                      candidate.root = f.getParentFile();
+
+                      Set<String> clazzes = ClassListReader.getClassSetFromFile(f);
+
+                      for (String fqcn : clazzes) {
+
+                        try {
+                          JClassType type = context.getTypeOracle().findType(fqcn);
+
+                          if (type != null && fqcn.startsWith(gwtModuleName)) {
+                            candidate.score++;
+                          }
+                        }
+                        catch (Throwable e) {
+                        }
+                      }
+
+                      if (candidate.score > 0 && (bestCandidate == null || candidate.score > bestCandidate.score)) {
+                        bestCandidate = candidate;
+                      }
                     }
 
-                    Candidate bestCandidate = null;
-                    String gwtModuleName = RebindUtils.getModuleName(context);
-
-                    if (gwtModuleName != null) {
-
-                      if (gwtModuleName.endsWith(".JUnit")) {
-                        gwtModuleName = gwtModuleName.substring(0, gwtModuleName.length() - 6);
-                      }
-                      gwtModuleName = gwtModuleName.substring(0, gwtModuleName.lastIndexOf('.'));
-
-                      for (File f : matching) {
-                        Candidate candidate = new Candidate();
-                        candidate.root = f.getParentFile();
-
-                        Set<String> clazzes = ClassListReader.getClassSetFromFile(f);
-
-                        for (String fqcn : clazzes) {
-
-                          try {
-                            JClassType type = context.getTypeOracle().findType(fqcn);
-
-                            if (type != null && fqcn.startsWith(gwtModuleName)) {
-                              candidate.score++;
-                            }
-                          }
-                          catch (Throwable e) {
-                          }
-                        }
-
-                        if (candidate.score > 0 && (bestCandidate == null || candidate.score > bestCandidate.score)) {
-                          bestCandidate = candidate;
-                        }
-                      }
-
-                      if (bestCandidate != null) {
-                        candidateDirectories.add(bestCandidate.root.getAbsolutePath());
-                      }
+                    if (bestCandidate != null) {
+                      candidateDirectories.add(bestCandidate.root.getAbsolutePath());
                     }
                   }
                 }

@@ -55,7 +55,7 @@ public class ModuleAnnotationProcessor extends AbstractProcessor {
         final FileObject fo = processingEnv.getFiler().createResource(
                 StandardLocation.CLASS_OUTPUT,
                 "",
-                "class_list.txt",
+                "classlist.mf",
                 null);
 
         Writer writer = fo.openWriter();
@@ -66,8 +66,9 @@ public class ModuleAnnotationProcessor extends AbstractProcessor {
         e.printStackTrace();
       }
 
+      return true;
     }
     return false;
-
   }
+
 }
