@@ -46,7 +46,7 @@ public class LiteralFactory {
         result = new LiteralValue<MetaType>((MetaType) o) {
           @Override
           public String getCanonicalString(Context context) {
-            return getClassReference((MetaClass) o, context, true) + ".class";
+            return getClassReference((MetaClass) o, context, false) + ".class";
           }
         };
       }

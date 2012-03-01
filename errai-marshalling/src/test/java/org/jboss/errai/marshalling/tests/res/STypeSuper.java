@@ -16,14 +16,10 @@
 
 package org.jboss.errai.marshalling.tests.res;
 
-/**
- * User: christopherbrock
- * Date: 11-Aug-2010
- * Time: 11:11:00 AM
- */
-public class STypeSuper {
+public class STypeSuper<T> {
   private String superValue;
   private int version = 0;
+  private T value;
 
   public String getSuperValue() {
     return superValue;
@@ -31,6 +27,14 @@ public class STypeSuper {
 
   public void setSuperValue(String superValue) {
     this.superValue = superValue;
+  }
+
+  public T getValue() {
+    return value;
+  }
+
+  public void setValue(T value) {
+    this.value = value;
   }
 
   @Override

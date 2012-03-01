@@ -1,5 +1,6 @@
 package org.jboss.errai.marshalling.tests;
 
+import java.io.File;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -33,6 +34,7 @@ public class ServerMarshallingTest {
 
   static {
     System.setProperty("errai.devel.nocache", "true");
+    System.out.println("Working Dir: " + new File("").getAbsoluteFile().getAbsolutePath());
   }
 
   @SuppressWarnings("unchecked")
@@ -404,7 +406,6 @@ public class ServerMarshallingTest {
 //    long st = System.currentTimeMillis();
 //    for (int i = 0; i < 10000; i++) {
     testEncodeDecodeDynamic(sType);
-
 
     MappingContextSingleton.get();
     String json = ServerMarshalling.toJSON(sType);

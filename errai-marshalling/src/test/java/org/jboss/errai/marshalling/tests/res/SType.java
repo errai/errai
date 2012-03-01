@@ -22,7 +22,7 @@ import org.jboss.errai.marshalling.tests.ServerMarshallingTest;
 import java.util.*;
 
 @Portable
-public class SType extends STypeSuper {
+public class SType extends STypeSuper<Long> {
   private String fieldOne;
   private String fieldTwo;
   private Date startDate;
@@ -222,6 +222,10 @@ public class SType extends STypeSuper {
 
     SType sType = (SType) o;
 
+    if (getSuperValue() != null ? !getSuperValue().equals(sType.getSuperValue()) : sType.getSuperValue() != null) return false;
+    if (getValue() != null ? !getValue().equals(sType.getValue()) : sType.getValue() != null) return false;
+
+
     if (place != sType.place) return false;
     if (byteValue != sType.byteValue) return false;
     if (charValue != sType.charValue) return false;
@@ -293,6 +297,7 @@ public class SType extends STypeSuper {
   public String toString() {
     return new StringBuilder("{")
         .append(" superValue: " + super.getSuperValue() + ",\n")
+        .append("  value: " + super.getValue() + ",\n")
         .append(" fieldOne: " + fieldOne + ",\n")
         .append(" fieldTwo: " + fieldTwo + ",\n")
         .append(" startDate: " + startDate + ",\n")
@@ -391,6 +396,7 @@ public class SType extends STypeSuper {
   private static SType randomLeafCreate(ServerMarshallingTest.RandomProvider random) {
     final SType sType = new SType();
     sType.setSuperValue(random.randString());
+    sType.setValue(10L);
     sType.setActive(random.nextBoolean());
     sType.setFieldOne(random.randString());
     sType.setFieldTwo(random.randString());

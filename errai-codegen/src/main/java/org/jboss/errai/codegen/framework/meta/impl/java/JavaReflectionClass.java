@@ -38,6 +38,9 @@ import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.framework.meta.impl.AbstractMetaClass;
 
+import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.typeParametersOf;
+
 public class JavaReflectionClass extends AbstractMetaClass<Class> {
   private Annotation[] _annotationsCache;
 
@@ -283,7 +286,12 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
 
   @Override
   public MetaClass getSuperClass() {
-    return MetaClassFactory.get(getEnclosedMetaObject().getSuperclass());
+    if (getGenericSuperClass() != null) {
+      return parameterizedAs(getEnclosedMetaObject().getSuperclass(), typeParametersOf(getGenericSuperClass().getTypeParameters()));
+    }
+    else {
+      return MetaClassFactory.get(getEnclosedMetaObject().getSuperclass());
+    }
   }
 
   @Override

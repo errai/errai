@@ -39,6 +39,8 @@ import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaConstructor;
 import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaField;
 import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaMethod;
 import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaParameterizedType;
+import org.jboss.errai.codegen.framework.meta.impl.build.ShadowBuildMetaField;
+import org.jboss.errai.codegen.framework.meta.impl.build.ShadowBuildMetaMethod;
 import org.jboss.errai.codegen.framework.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.codegen.framework.util.EmptyStatement;
 import org.jboss.errai.codegen.framework.util.GenUtil;
@@ -288,12 +290,12 @@ public final class MetaClassFactory {
 
     buildMetaClass.setParameterizedType(parameterizedType);
 
-    for (MetaField field : clazz.getFields()) {
-      buildMetaClass.addField(new BuildMetaField(buildMetaClass, EmptyStatement.INSTANCE,
-              GenUtil.scopeOf(field), field.getType(), field.getName()));
+    for (MetaField field : clazz.getDeclaredFields()) {
+      buildMetaClass.addField(new ShadowBuildMetaField(buildMetaClass, EmptyStatement.INSTANCE,
+              GenUtil.scopeOf(field), field.getType(), field.getName(), field));
     }
 
-    for (MetaConstructor c : clazz.getConstructors()) {
+    for (MetaConstructor c : clazz.getDeclaredConstructors()) {
       BuildMetaConstructor newConstructor = new BuildMetaConstructor(buildMetaClass, EmptyStatement.INSTANCE,
               GenUtil.scopeOf(c),
               DefParameters.from(c));
@@ -302,7 +304,7 @@ public final class MetaClassFactory {
       buildMetaClass.addConstructor(newConstructor);
     }
 
-    for (MetaMethod method : clazz.getMethods()) {
+    for (MetaMethod method : clazz.getDeclaredMethods()) {
       MetaClass returnType = method.getReturnType();
       if (method.getGenericReturnType() instanceof MetaTypeVariable) {
         MetaTypeVariable typeVariable = (MetaTypeVariable) method.getGenericReturnType();
@@ -335,10 +337,10 @@ public final class MetaClassFactory {
         i++;
       }
 
-      BuildMetaMethod newMethod = new BuildMetaMethod(buildMetaClass, EmptyStatement.INSTANCE,
+      BuildMetaMethod newMethod = new ShadowBuildMetaMethod(buildMetaClass, EmptyStatement.INSTANCE,
               GenUtil.scopeOf(method), GenUtil.modifiersOf(method), method.getName(), returnType,
               method.getGenericReturnType(),
-              DefParameters.fromParameters(parameters), ThrowsDeclaration.of(method.getCheckedExceptions()));
+              DefParameters.fromParameters(parameters), ThrowsDeclaration.of(method.getCheckedExceptions()), method);
 
       newMethod.setReifiedFormOf(method);
 

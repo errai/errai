@@ -352,7 +352,7 @@ public class GenUtil {
       return;
     }
 
-    classBuilder.privateMethod(Field.class, "_getAccessibleField").modifiers(Modifier.Static)
+    classBuilder.privateMethod(Field.class, JAVA_REFL_FLD_UTIL_METH).modifiers(Modifier.Static)
             .parameters(DefParameters.of(Parameter.of(Class.class, "cls"), Parameter.of(String.class, "name")))
             .body()
             .append(Stmt.try_()
