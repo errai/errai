@@ -26,6 +26,9 @@ import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.common.client.api.proxy.Proxy;
 
+import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.typeParametersOf;
+
 /**
  * @author Mike Brock
  */
@@ -41,7 +44,7 @@ public class ProxyMaker {
     }
 
     ClassStructureBuilder builder = ClassBuilder.define(proxyClassName, toProxy).publicScope()
-            .implementsInterface(Proxy.class)
+            .implementsInterface(parameterizedAs(Proxy.class, typeParametersOf(toProxy)))
             .body();
 
     String proxyVar = "_proxy";
@@ -69,6 +72,8 @@ public class ProxyMaker {
       methBody.finish();
     }
     
+    builder.publicMethod(void.class, "setProxiedInstance").parameters(DefParameters.of(Parameter.of(toProxy, "proxy")))
+            .append(Stmt.loadVariable(proxyVar).assignValue(Stmt.loadVariable("proxy"))).finish();
 
     return builder.getClassDefinition();
   }

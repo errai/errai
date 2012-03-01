@@ -165,7 +165,7 @@ public class AnonymousClassStructureBuilderImpl
       if (callables == null)
         return null;
 
-      Context subContext = Context.create(classDefinition.getContext());
+      Context subContext = Context.create(context);
       subContext.addVariable(Variable.create("this", getClassDefinition()));
 
       StringBuilder buf = new StringBuilder(256);
