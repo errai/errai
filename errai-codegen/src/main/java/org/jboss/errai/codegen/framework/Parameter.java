@@ -55,6 +55,19 @@ public class Parameter extends AbstractStatement implements MetaParameter {
     return new Parameter(MetaClassFactory.get(type), name, isFinal);
   }
 
+  public static Parameter[] of (MetaParameter[] parameters) {
+    Parameter[] ps = new Parameter[parameters.length];
+    for (int i = 0; i < ps.length; i++) {
+      String name = parameters[i].getName();
+      if (name == null) {
+        name = "a" + i;
+      }
+      
+      ps[i] = Parameter.of(parameters[i].getType(), name);
+    }
+    return ps;
+  }
+  
   String generatedCache;
 
   @Override

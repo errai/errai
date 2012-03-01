@@ -279,6 +279,7 @@ public final class MetaClassFactory {
     buildMetaClass.setReifiedFormOf(clazz);
     buildMetaClass.setAbstract(clazz.isAbstract());
     buildMetaClass.setFinal(clazz.isFinal());
+    buildMetaClass.setStatic(clazz.isStatic());
     buildMetaClass.setInterface(clazz.isInterface());
     buildMetaClass.setInterfaces(Arrays.asList(clazz.getInterfaces()));
     buildMetaClass.setScope(GenUtil.scopeOf(clazz));
@@ -291,8 +292,15 @@ public final class MetaClassFactory {
     buildMetaClass.setParameterizedType(parameterizedType);
 
     for (MetaField field : clazz.getDeclaredFields()) {
-      buildMetaClass.addField(new ShadowBuildMetaField(buildMetaClass, EmptyStatement.INSTANCE,
-              GenUtil.scopeOf(field), field.getType(), field.getName(), field));
+      BuildMetaField bmf = new ShadowBuildMetaField(buildMetaClass, EmptyStatement.INSTANCE,
+              GenUtil.scopeOf(field), field.getType(), field.getName(), field);
+
+      bmf.setFinal(field.isFinal());
+      bmf.setStatic(field.isStatic());
+      bmf.setVolatile(field.isVolatile());
+      bmf.setTransient(field.isTransient());
+
+      buildMetaClass.addField(bmf);
     }
 
     for (MetaConstructor c : clazz.getDeclaredConstructors()) {

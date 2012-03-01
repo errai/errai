@@ -165,16 +165,15 @@ public class AnonymousClassStructureBuilderImpl
       if (callables == null)
         return null;
 
-      Context subContext = Context.create(context);
+      Context subContext = Context.create(classDefinition.getContext());
       subContext.addVariable(Variable.create("this", getClassDefinition()));
 
       StringBuilder buf = new StringBuilder(256);
-      for (DeferredGenerateCallback c : callables) {
+      buf.append(classDefinition.membersToString().trim()).append("\n");
 
+      for (DeferredGenerateCallback c : callables) {
         buf.append(c.doGenerate(subContext).trim()).append('\n');
       }
-
-      buf.append(classDefinition.membersToString().trim());
 
       return generatedCache = buf.toString().trim();
     }
