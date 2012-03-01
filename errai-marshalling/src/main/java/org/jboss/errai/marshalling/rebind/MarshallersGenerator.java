@@ -98,7 +98,7 @@ public class MarshallersGenerator extends Generator {
 
                     if (gwtModuleName != null) {
 
-                      if (gwtModuleName.endsWith(".JUnit"))  {
+                      if (gwtModuleName.endsWith(".JUnit")) {
                         gwtModuleName = gwtModuleName.substring(0, gwtModuleName.length() - 6);
                       }
                       gwtModuleName = gwtModuleName.substring(0, gwtModuleName.lastIndexOf('.'));
@@ -301,15 +301,9 @@ public class MarshallersGenerator extends Generator {
               if (outputDirCdt.exists()) {
                 logger.info("   found '" + outputDirCdt + "' output directory");
 
-                if (new File(outputDirCdt.getAbsolutePath() + "/" + serverSideClass).exists()) {
-                  logger.info(" ** marshaller found (skipping): " + outputDirCdt.getAbsolutePath());
-                }
-                else {
-                  generateServerMarshallers(outputDirCdt.getAbsolutePath(), serverSideClass);
-                  logger.info("** deposited marshaller class in : " + outputDirCdt.getAbsolutePath());
-                  deposits++;
-                }
-
+                generateServerMarshallers(outputDirCdt.getAbsolutePath(), serverSideClass);
+                logger.info("** deposited marshaller class in : " + outputDirCdt.getAbsolutePath());
+                deposits++;
               }
               else {
                 logger.debug("   " + outputDirCdt + " does not exist");
