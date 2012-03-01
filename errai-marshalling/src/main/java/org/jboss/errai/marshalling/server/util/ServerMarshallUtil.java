@@ -431,6 +431,25 @@ public abstract class ServerMarshallUtil {
     return null;
   }
 
+  public static Set<File> findAllMatching(String fileName, File from) {
+    HashSet<File> matching = new HashSet<File>();
+    _findAllMatching(matching, fileName, from);
+    return matching;
+  }
+  
+  public static void _findAllMatching(HashSet<File> matching, String fileName, File from) {
+    if (from.isDirectory()) {
+      for (File file : from.listFiles()) {
+        _findAllMatching(matching, fileName, file);
+      }
+    }
+    else {
+      if (fileName.equals(from.getName())) {
+        matching.add(from);
+      }
+    }
+  }
+  
   public static Set<File> findMatchingOutputDirectoryByModel(Map<String, String> toMatch, File from) {
     HashSet<File> matching = new HashSet<File>();
     _findMatchingOutputDirectoryByModel(matching, toMatch, from);
