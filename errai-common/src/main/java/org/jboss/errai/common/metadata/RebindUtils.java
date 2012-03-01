@@ -343,6 +343,21 @@ public class RebindUtils {
 
     }
   }
+  
+  
+  public static String getModuleName(final GeneratorContext context) {
+    try {
+      StandardGeneratorContext standardGeneratorContext = 
+              (StandardGeneratorContext) context;
+      Field field = StandardGeneratorContext.class.getDeclaredField("module");
+      field.setAccessible(true);
+      ModuleDef moduleDef = (ModuleDef) field.get(standardGeneratorContext);
+      return moduleDef.getCanonicalName();
+                 }
+    catch (Throwable t) {
+      return null;
+    }
+  }
 
 
   /**

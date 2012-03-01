@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.common.rebind.ClassListReader;
 import org.jboss.errai.common.rebind.EnvironmentUtil;
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.marshalling.server.ServerMappingContext;
@@ -72,6 +73,72 @@ public class MarshallersGenerator extends Generator {
   static {
     // define the strategies which will be used to figure out where to desposit the server-side marshaller
     rootDiscoveryStrategies = new DiscoveryStrategy[]{
+            new DiscoveryStrategy() {
+              @Override
+              public Set<String> getCandidate(GeneratorContext context, DiscoveryContext veto) {
+                File cwd = new File("").getAbsoluteFile();
+                Set<File> matching = ServerMarshallUtil.findAllMatching("class_list.txt", cwd);
+                Set<String> candidateDirectories = new HashSet<String>();
+
+                veto.resultsAbsolute();
+
+                if (!matching.isEmpty()) {
+                  if (matching.size() == 1) {
+                    File match = matching.iterator().next();
+                    candidateDirectories.add(match.getParentFile().getAbsolutePath());
+                  }
+                  else {
+                    class Candidate {
+                      int score;
+                      File root;
+                    }
+
+                    Candidate bestCandidate = null;
+                    String gwtModuleName = RebindUtils.getModuleName(context);
+
+                    if (gwtModuleName != null) {
+
+                      if (gwtModuleName.endsWith(".JUnit"))  {
+                        gwtModuleName = gwtModuleName.substring(0, gwtModuleName.length() - 6);
+                      }
+                      gwtModuleName = gwtModuleName.substring(0, gwtModuleName.lastIndexOf('.'));
+
+                      for (File f : matching) {
+                        Candidate candidate = new Candidate();
+                        candidate.root = f.getParentFile();
+
+                        Set<String> clazzes = ClassListReader.getClassSetFromFile(f);
+
+                        for (String fqcn : clazzes) {
+
+                          try {
+                            JClassType type = context.getTypeOracle().findType(fqcn);
+
+                            if (type != null && fqcn.startsWith(gwtModuleName)) {
+                              candidate.score++;
+                            }
+                          }
+                          catch (Throwable e) {
+                          }
+                        }
+
+                        if (candidate.score > 0 && (bestCandidate == null || candidate.score > bestCandidate.score)) {
+                          bestCandidate = candidate;
+                        }
+                      }
+
+                      if (bestCandidate != null) {
+                        candidateDirectories.add(bestCandidate.root.getAbsolutePath());
+                      }
+                    }
+                  }
+                }
+
+                return candidateDirectories;
+              }
+            }
+            ,
+
             new DiscoveryStrategy() {
               @Override
               public Set<String> getCandidate(GeneratorContext context, DiscoveryContext discoveryContext) {
@@ -201,8 +268,6 @@ public class MarshallersGenerator extends Generator {
         logger.debug("Searching candidate output directories for generated marshallers");
         File outputDirCdt;
 
-        boolean marshallerDeposited = false;
-
         class DiscoveryContextImpl implements DiscoveryContext {
           boolean vetoed = false;
           boolean absolute = false;
@@ -218,6 +283,9 @@ public class MarshallersGenerator extends Generator {
           }
         }
 
+        int deposits = 0;
+
+
         Strategies:
         for (DiscoveryStrategy strategy : rootDiscoveryStrategies) {
           DiscoveryContextImpl discoveryContext = new DiscoveryContextImpl();
@@ -232,9 +300,15 @@ public class MarshallersGenerator extends Generator {
               outputDirCdt = new File(rootPath + "/" + candidate).getAbsoluteFile();
               if (outputDirCdt.exists()) {
                 logger.info("   found '" + outputDirCdt + "' output directory");
-                generateServerMarshallers(outputDirCdt.getAbsolutePath(), serverSideClass);
-                logger.info("** deposited marshaller class in : " + outputDirCdt.getAbsolutePath());
-                marshallerDeposited = true;
+
+                if (new File(outputDirCdt.getAbsolutePath() + "/" + serverSideClass).exists()) {
+                  logger.info(" ** marshaller found (skipping): " + outputDirCdt.getAbsolutePath());
+                }
+                else {
+                  generateServerMarshallers(outputDirCdt.getAbsolutePath(), serverSideClass);
+                  logger.info("** deposited marshaller class in : " + outputDirCdt.getAbsolutePath());
+                  deposits++;
+                }
 
               }
               else {
@@ -242,17 +316,15 @@ public class MarshallersGenerator extends Generator {
               }
             }
           }
-
-          if (marshallerDeposited) {
+          if (deposits > 0) {
             break;
           }
         }
 
-        if (!marshallerDeposited) {
+        if (deposits == 0) {
           logger.warn(" *** the server marshaller was not deposited into your build output!\n" +
                   "   A target output could not be resolved through configuration or auto-detection!");
         }
-
       }
     }
     else {
