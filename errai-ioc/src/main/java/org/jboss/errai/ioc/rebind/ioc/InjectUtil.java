@@ -22,7 +22,11 @@ import com.google.gwt.core.ext.typeinfo.JParameter;
 import com.google.gwt.core.ext.typeinfo.JType;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.DefParameters;
+import org.jboss.errai.codegen.framework.Parameter;
 import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.builder.AnonymousClassStructureBuilder;
+import org.jboss.errai.codegen.framework.builder.BlockBuilder;
+import org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaClassMember;
@@ -34,6 +38,7 @@ import org.jboss.errai.codegen.framework.util.GenUtil;
 import org.jboss.errai.codegen.framework.util.Refs;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.ioc.client.container.InitializationCallback;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.marshalling.rebind.MarshallerGeneratorFactory;
 import org.mvel2.util.ReflectionUtil;
@@ -59,6 +64,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.typeParametersOf;
 
 public class InjectUtil {
 
@@ -177,21 +185,41 @@ public class InjectUtil {
         ctx.addExposedMethod(meth);
       }
 
-      ctx.deferRunnableTask(new Runnable() {
-        @Override
-        public void run() {
-          Statement stmt;
+//      ctx.deferRunnableTask(new Runnable() {
+//        @Override
+//        public void run() {
+
+          MetaClass initializationCallbackType =
+                  parameterizedAs(InitializationCallback.class, typeParametersOf(injector.getInjectedType()));
+
+          BlockBuilder<AnonymousClassStructureBuilder> initMeth
+                  = ObjectBuilder.newInstanceOf(initializationCallbackType).extend()
+                  .publicOverridesMethod("init", Parameter.of(injector.getInjectedType(), "obj"));
+
+
           if (!meth.isPublic()) {
-            stmt = Stmt.invokeStatic(ctx.getProcessingContext().getBootstrapClass(),
-                    GenUtil.getPrivateMethodName(meth), Refs.get(injector.getVarName()));
+            initMeth.append(Stmt.invokeStatic(ctx.getProcessingContext().getBootstrapClass(),
+                    GenUtil.getPrivateMethodName(meth), Refs.get("obj")));
           }
           else {
-            stmt = Stmt.loadVariable(injector.getVarName()).invoke(meth.getName());
+            initMeth.append(Stmt.loadVariable("obj").invoke(meth.getName()));
           }
 
-          processingContext.addPostConstructStatement(stmt);
-        }
-      });
+          AnonymousClassStructureBuilder classStructureBuilder = initMeth.finish();
+          
+          IOCProcessingContext pc = ctx.getProcessingContext();
+
+          final String varName = "init_" + injector.getVarName();
+          injector.setPostInitCallbackVar(varName);
+          
+          pc.globalAppend(Stmt.declareVariable(initializationCallbackType).asFinal().named(varName)
+                  .initializeWith(classStructureBuilder.finish()));
+          
+          Statement postConstructCall = Stmt.loadVariable(varName).invoke("init", Refs.get(injector.getVarName()));
+
+          processingContext.addPostConstructStatement(postConstructCall);
+//        }
+//      });
 
     }
   }
@@ -344,7 +372,7 @@ public class InjectUtil {
   }
 
   public static Injector getInjectorOrProxy(InjectionContext ctx,
-                                      MetaClass clazz, QualifyingMetadata qualifyingMetadata) {
+                                            MetaClass clazz, QualifyingMetadata qualifyingMetadata) {
 
     if (ctx.isInjectableQualified(clazz, qualifyingMetadata)) {
       return ctx.getQualifiedInjector(clazz, qualifyingMetadata);

@@ -204,8 +204,15 @@ public class ContextualProviderInjector extends TypeInjector {
 
     private void registerWithBeanManager(InjectionContext context, Statement val) {
       if (useBeanManager) {
-
         if (InjectUtil.checkIfTypeNeedsAddingToBeanStore(context, this)) {
+          Statement initCallbackRef;
+          if (getPostInitCallbackVar() == null) {
+            initCallbackRef = Stmt.load(null);
+          }
+          else {
+            initCallbackRef = Stmt.loadVariable(getPostInitCallbackVar());
+          }
+
 
           QualifyingMetadata md = qualifyingMetadata;
           if (md == null) {
@@ -214,7 +221,7 @@ public class ContextualProviderInjector extends TypeInjector {
 
           context.getProcessingContext().appendToEnd(
                   Stmt.loadVariable(context.getProcessingContext().getContextVariableReference())
-                          .invoke("addSingletonBean", type, val, md.render()));
+                          .invoke("addSingletonBean", type, val, md.render(), initCallbackRef));
         }
       }
     }

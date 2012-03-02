@@ -21,6 +21,7 @@ import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.ioc.client.container.CreationalCallback;
 import org.jboss.errai.ioc.client.container.IOCBeanManager;
 import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.ioc.client.container.InitializationCallback;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -48,12 +49,14 @@ public class InterfaceInjectionContext {
     this.widgetToPanel = widgetToPanel;
   }
 
-  public void addSingletonBean(Class type, Object instance, Annotation[] qualifiers) {
-    manager.registerSingletonBean(type, instance, qualifiers);
+  public void addSingletonBean(Class type, Object instance, Annotation[] qualifiers,
+                               InitializationCallback initCallback) {
+    manager.registerSingletonBean(type, instance, qualifiers, initCallback);
   }
   
-  public void addDependentBean(Class type, CreationalCallback callback, Annotation[] qualifiers) {
-    manager.registerDependentBean(type, callback, qualifiers);
+  public void addDependentBean(Class type, CreationalCallback callback, Annotation[] qualifiers,
+                               InitializationCallback initCallback) {
+    manager.registerDependentBean(type, callback, qualifiers, initCallback);
   }
   
   public void addToRootPanel(Widget w) {

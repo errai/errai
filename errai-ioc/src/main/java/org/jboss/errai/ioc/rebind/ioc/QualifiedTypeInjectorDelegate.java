@@ -98,6 +98,13 @@ public class QualifiedTypeInjectorDelegate extends Injector {
   private void registerWithBeanManager(InjectionContext context, Statement valueRef) {
     if (useBeanManager) {
       if (InjectUtil.checkIfTypeNeedsAddingToBeanStore(context, this)) {
+        Statement initCallbackRef;
+        if (getPostInitCallbackVar() == null) {
+          initCallbackRef = Stmt.load(null);
+        }
+        else {
+          initCallbackRef = Stmt.loadVariable(getPostInitCallbackVar());
+        }
 
         QualifyingMetadata md = delegate.getQualifyingMetadata();
         if (md == null) {
@@ -106,7 +113,7 @@ public class QualifiedTypeInjectorDelegate extends Injector {
 
         context.getProcessingContext().appendToEnd(
                 Stmt.loadVariable(context.getProcessingContext().getContextVariableReference())
-                        .invoke("addSingletonBean", type, valueRef, md.render()));
+                        .invoke("addSingletonBean", type, valueRef, md.render(), initCallbackRef));
       }
     }
   }

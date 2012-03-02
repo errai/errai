@@ -25,23 +25,32 @@ import java.util.HashSet;
  */
 public class IOCDependentBean<T> extends AbstractIOCBean<T> {
   private CreationalCallback<T> creationalCallback;
-  
-  private IOCDependentBean(Class<T> type, Annotation[] qualifiers, CreationalCallback<T> creationalCallback) {
+  private InitializationCallback<T> initializationCallback;
+
+  private IOCDependentBean(Class<T> type, Annotation[] qualifiers,
+                           CreationalCallback<T> creationalCallback,
+                           InitializationCallback<T> initializationCallback) {
     this.type = type;
     this.qualifiers = new HashSet<Annotation>();
     if (qualifiers != null) {
       Collections.addAll(this.qualifiers, qualifiers);
     }
     this.creationalCallback = creationalCallback;
+    this.initializationCallback = initializationCallback;
   }
 
   public static <T> IOCBeanDef<T> newBean(Class<T> type, Annotation[] qualifiers,
-                                                CreationalCallback<T> callback) {
-    return new IOCDependentBean<T>(type, qualifiers, callback);
+                                          CreationalCallback<T> callback,
+                                          InitializationCallback<T> initializationCallback) {
+    return new IOCDependentBean<T>(type, qualifiers, callback, initializationCallback);
   }
 
   @Override
   public T getInstance() {
-    return creationalCallback.getInstance();
+    T inst = creationalCallback.getInstance();
+    if (initializationCallback != null) {
+      initializationCallback.init(inst);
+    }
+    return inst;
   }
 }

@@ -24,15 +24,14 @@ public abstract class Injector {
   protected boolean useBeanManager = !Boolean.getBoolean("errai.ioc.no_bean_manager");
   
   protected QualifyingMetadata qualifyingMetadata;
-
   protected MetaParameterizedType qualifyingTypeInformation;
+  protected String postInitCallbackVar = null;
 
   public abstract Statement instantiateOnly(InjectionContext injectContext, InjectableInstance injectableInstance);
 
   public Statement getType(InjectableInstance injectableInstance) {
     return getType(injectableInstance.getInjectionContext(), injectableInstance);
   }
-
   public abstract Statement getType(InjectionContext injectContext, InjectableInstance injectableInstance);
 
   public abstract boolean isInjected();
@@ -44,6 +43,14 @@ public abstract class Injector {
   public abstract String getVarName();
 
   public abstract MetaClass getInjectedType();
+  
+  public String getPostInitCallbackVar() {
+    return postInitCallbackVar;
+  }
+  
+  public void setPostInitCallbackVar(String var) {
+    this.postInitCallbackVar = var;
+  }
 
   public boolean metadataMatches(Injector injector) {
     boolean meta = (injector == null && qualifyingMetadata == null) ||

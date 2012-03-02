@@ -26,7 +26,6 @@ import java.util.HashSet;
  * @author Mike Brock
  */
 public class IOCSingletonBean<T> extends AbstractIOCBean<T> {
-
   private final T instance;
 
   private IOCSingletonBean(Class<T> type, Annotation[] qualifiers, T instance) {

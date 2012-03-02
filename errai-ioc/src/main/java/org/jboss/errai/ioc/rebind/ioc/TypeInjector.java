@@ -218,16 +218,26 @@ public class TypeInjector extends Injector {
   private void registerWithBeanManager(InjectionContext context, Statement valueRef) {
     if (useBeanManager) {
       if (InjectUtil.checkIfTypeNeedsAddingToBeanStore(context, this)) {
+        Statement initCallbackRef;
+        if (getPostInitCallbackVar() == null) {
+          initCallbackRef = Stmt.load(null);
+        }
+        else {
+          initCallbackRef = Stmt.loadVariable(getPostInitCallbackVar());
+        }
+        
         if (isSingleton()) {
           context.getProcessingContext().appendToEnd(
                   Stmt.loadVariable(context.getProcessingContext().getContextVariableReference())
-                          .invoke("addSingletonBean", type, valueRef, qualifyingMetadata.render())
+                          .invoke("addSingletonBean", type, valueRef, 
+                                  qualifyingMetadata.render(), initCallbackRef)
           );
         }
         else {
           context.getProcessingContext().appendToEnd(
                   Stmt.loadVariable(context.getProcessingContext().getContextVariableReference())
-                          .invoke("addDependentBean", type, Refs.get(creationalCallbackVarName), qualifyingMetadata.render()));
+                          .invoke("addDependentBean", type, Refs.get(creationalCallbackVarName), 
+                                  qualifyingMetadata.render(), initCallbackRef));
         }
       }
     }

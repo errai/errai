@@ -42,13 +42,16 @@ public class IOCBeanManager {
    * @param instance   the instance reference
    * @param qualifiers any qualifiers
    */
-  public void registerSingletonBean(final Class<Object> type, final Object instance, final Annotation[] qualifiers) {
+  public void registerSingletonBean(final Class<Object> type, final Object instance,
+                                    final Annotation[] qualifiers,
+                                    final InitializationCallback initCallback) {
     registerBean(IOCSingletonBean.newBean(type, qualifiers, instance));
   }
   
   public void registerDependentBean(final Class<Object> type, final CreationalCallback<Object> callback,
-                                    final Annotation[] qualifiers) {
-    registerBean(IOCDependentBean.newBean(type, qualifiers, callback));
+                                    final Annotation[] qualifiers,
+                                    final InitializationCallback<Object> initCallback) {
+    registerBean(IOCDependentBean.newBean(type, qualifiers, callback, initCallback));
   }
 
   /**
