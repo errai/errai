@@ -76,7 +76,7 @@ public class MessageQueueImpl implements MessageQueue {
   public MessageQueueImpl(TransmissionBuffer buffer, final QueueSession session) {
     this.buffer = buffer;
     this.session = session;
-    this.bufferColor = BufferColor.getNewColor();
+    this.bufferColor = BufferColor.getNewColorFromHead(buffer);
   }
 
   /**

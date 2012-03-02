@@ -78,6 +78,12 @@ public class BufferColor {
     return new BufferColor(bufferColorCounter.incrementAndGet());
   }
 
+  public static BufferColor getNewColorFromHead(TransmissionBuffer buffer) {
+    final BufferColor color = getNewColor();
+    color.sequence.set(buffer.getHeadSequence());
+    return color;
+  }
+
   public static BufferColor getAllBuffersColor() {
     return allBuffersColor;
   }
