@@ -45,24 +45,25 @@ public class ClientMain {
       public void run() {
         orientationDetector.setClientId(welcomeDialog.getNameBoxContents());
         RootPanel.get().remove(welcomeDialog);
+
+        // TODO: could block startup using InitBallot/voteForInit()
+        GWT.log("Starting to poll for readiness! Orientation detector: " + orientationDetector);
+        // poll for readiness; when it's ready, start watching device orientation.
+        Timer t = new Timer() {
+          @Override
+          public void run() {
+            GWT.log("Orientation detector: " + orientationDetector);
+            if (orientationDetector.isReady()) {
+              orientationDetector.startFiringOrientationEvents();
+            } else {
+              schedule(100);
+            }
+          }
+        };
+        t.schedule(100);
       }
     });
     RootPanel.get().add(welcomeDialog);
-
-    GWT.log("Starting to poll for readiness! Orientation detector: " + orientationDetector);
-    // poll for readiness; when it's ready, start watching device orientation.
-    Timer t = new Timer() {
-      @Override
-      public void run() {
-        GWT.log("Orientation detector: " + orientationDetector);
-        if (orientationDetector.isReady()) {
-          orientationDetector.startFiringOrientationEvents();
-        } else {
-          schedule(100);
-        }
-      }
-    };
-    t.schedule(100);
   }
 
   public void visualizeOrientationEvent(OrientationEvent e) {

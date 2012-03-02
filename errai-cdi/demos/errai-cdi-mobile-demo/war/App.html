@@ -10,6 +10,7 @@ html,body {
 	height: 100%;
 	margin: 0;
 	padding: 0;
+	color: white;
 }
 
 body {
@@ -26,6 +27,7 @@ body {
 	margin-top: -198px; /* half main element''s height*/
 	left: 0;
 	width: 100%;
+	z-index: -100;
 }
 
 #horiz {
@@ -53,10 +55,9 @@ body {
 </head>
 <body style="text-align: center; ">
 
-<div id="rootPanel"></div>
-
 <div id="vertical">
 	<div id="horiz">
+        <div id="rootPanel"></div>
     	<div id="rotateMeTemplate" class="rotateBox">
     	   Rotate me!
     	</div>

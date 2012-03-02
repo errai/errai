@@ -14,14 +14,31 @@ import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 @Portable
 public class AllClientOrientations {
 
+  private static int nextInstanceId = 0;
+  private static synchronized int nextId() {
+    return nextInstanceId++;
+  }
+
   private final List<OrientationEvent> clientOrientations;
+  private final int instanceId;
+
+  public AllClientOrientations(List<OrientationEvent> clientOrientations) {
+    this.clientOrientations = clientOrientations;
+    instanceId = nextId();
+  }
 
   public AllClientOrientations(
-      @MapsTo("clientOrientations") List<OrientationEvent> clientOrientations) {
+      @MapsTo("clientOrientations") List<OrientationEvent> clientOrientations,
+      @MapsTo("instanceId") int instanceId) {
     this.clientOrientations = clientOrientations;
+    this.instanceId = instanceId;
   }
 
   public List<OrientationEvent> getClientOrientations() {
     return clientOrientations;
+  }
+
+  public int getInstanceId() {
+    return instanceId;
   }
 }
