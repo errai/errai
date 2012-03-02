@@ -40,7 +40,6 @@ import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.ioc.client.container.InitializationCallback;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
-import org.jboss.errai.marshalling.rebind.MarshallerGeneratorFactory;
 import org.mvel2.util.ReflectionUtil;
 import org.mvel2.util.StringAppender;
 import org.slf4j.Logger;
@@ -159,9 +158,11 @@ public class InjectUtil {
                                            List<InjectionTask> tasks) {
     for (InjectionTask task : tasks) {
       if (!task.doTask(ctx)) {
-        log.warn("your object graph has cyclical dependencies. use of dependent scope and @New may not " +
+        log.warn("your object graph has cyclical dependencies and the cycle could not be proxied. use of the @Dependent scope and @New qualifier may not " +
                 "produce properly initalized objects for: " + task.getInjector().getInjectedType().getFullyQualifiedName() + "\n" +
-                "\t Offending node: " + task);
+                "\t Offending node: " + task + "\n" +
+                "\t Note          : this issue can be resolved by making "
+                + task.getInjector().getInjectedType().getFullyQualifiedName() + " proxyable. Introduce a default no-arg constructor and make sure the class is non-final.");
 
 
         ctx.deferTask(task);
@@ -185,42 +186,35 @@ public class InjectUtil {
         ctx.addExposedMethod(meth);
       }
 
-//      ctx.deferRunnableTask(new Runnable() {
-//        @Override
-//        public void run() {
+      MetaClass initializationCallbackType =
+              parameterizedAs(InitializationCallback.class, typeParametersOf(injector.getInjectedType()));
 
-          MetaClass initializationCallbackType =
-                  parameterizedAs(InitializationCallback.class, typeParametersOf(injector.getInjectedType()));
-
-          BlockBuilder<AnonymousClassStructureBuilder> initMeth
-                  = ObjectBuilder.newInstanceOf(initializationCallbackType).extend()
-                  .publicOverridesMethod("init", Parameter.of(injector.getInjectedType(), "obj"));
+      BlockBuilder<AnonymousClassStructureBuilder> initMeth
+              = ObjectBuilder.newInstanceOf(initializationCallbackType).extend()
+              .publicOverridesMethod("init", Parameter.of(injector.getInjectedType(), "obj"));
 
 
-          if (!meth.isPublic()) {
-            initMeth.append(Stmt.invokeStatic(ctx.getProcessingContext().getBootstrapClass(),
-                    GenUtil.getPrivateMethodName(meth), Refs.get("obj")));
-          }
-          else {
-            initMeth.append(Stmt.loadVariable("obj").invoke(meth.getName()));
-          }
+      if (!meth.isPublic()) {
+        initMeth.append(Stmt.invokeStatic(ctx.getProcessingContext().getBootstrapClass(),
+                GenUtil.getPrivateMethodName(meth), Refs.get("obj")));
+      }
+      else {
+        initMeth.append(Stmt.loadVariable("obj").invoke(meth.getName()));
+      }
 
-          AnonymousClassStructureBuilder classStructureBuilder = initMeth.finish();
-          
-          IOCProcessingContext pc = ctx.getProcessingContext();
+      AnonymousClassStructureBuilder classStructureBuilder = initMeth.finish();
 
-          final String varName = "init_" + injector.getVarName();
-          injector.setPostInitCallbackVar(varName);
-          
-          pc.globalAppend(Stmt.declareVariable(initializationCallbackType).asFinal().named(varName)
-                  .initializeWith(classStructureBuilder.finish()));
-          
-          Statement postConstructCall = Stmt.loadVariable(varName).invoke("init", Refs.get(injector.getVarName()));
+      IOCProcessingContext pc = ctx.getProcessingContext();
 
-          processingContext.addPostConstructStatement(postConstructCall);
-//        }
-//      });
+      final String varName = "init_" + injector.getVarName();
+      injector.setPostInitCallbackVar(varName);
 
+      pc.globalAppend(Stmt.declareVariable(initializationCallbackType).asFinal().named(varName)
+              .initializeWith(classStructureBuilder.finish()));
+
+      Statement postConstructCall = Stmt.loadVariable(varName).invoke("init", Refs.get(injector.getVarName()));
+
+      processingContext.addPostConstructStatement(postConstructCall);
     }
   }
 
