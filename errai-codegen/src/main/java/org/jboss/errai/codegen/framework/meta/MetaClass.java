@@ -122,6 +122,8 @@ public abstract class MetaClass implements HasAnnotations, MetaType, MetaGeneric
 
   public abstract boolean isVoid();
 
+  public abstract boolean isDefaultInstantiable();
+
   public abstract MetaClass asBoxed();
 
   public abstract MetaClass asUnboxed();

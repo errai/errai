@@ -72,5 +72,11 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
     assertEquals(bean.getFloatD(), module.getTestBean().getFloatD());
     assertEquals(bean.getIntegerA(), module.getTestBean().getIntegerA());
     assertEquals(bean.getIntegerB(), module.getTestBean().getIntegerB());
+    
+    String val = "TestFieldABC";
+    
+    bean.setTestField(val);
+    
+    assertEquals(val, module.getTestBean().getTestField());
   }
 }

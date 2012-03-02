@@ -32,6 +32,8 @@ public class ProducerDependentTestBean {
   @Inject @D
   Float dFloat;
 
+  String testField;
+  
   public Integer getIntegerA() {
     return aInteger;
   }
@@ -54,5 +56,13 @@ public class ProducerDependentTestBean {
   
   public Float getFloatD() {
     return dFloat;
+  }
+
+  public String getTestField() {
+    return testField;
+  }
+
+  public void setTestField(String testField) {
+    this.testField = testField;
   }
 }

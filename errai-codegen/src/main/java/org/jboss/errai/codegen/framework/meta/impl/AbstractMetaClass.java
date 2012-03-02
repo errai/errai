@@ -487,6 +487,12 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
 
   @Override
+  public boolean isDefaultInstantiable() {
+    MetaConstructor c = getConstructor(new MetaClass[0]);
+    return c != null && c.isPublic();
+  }
+
+  @Override
   public MetaParameterizedType getParameterizedType() {
     return parameterizedType;
   }

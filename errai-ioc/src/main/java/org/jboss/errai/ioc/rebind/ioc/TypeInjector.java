@@ -17,6 +17,7 @@
 package org.jboss.errai.ioc.rebind.ioc;
 
 
+import org.jboss.errai.codegen.framework.ProxyMaker;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
@@ -159,7 +160,7 @@ public class TypeInjector extends Injector {
       ProxyInjector proxyInjector = (ProxyInjector) injectContext.getProxiedInjector(type, qualifyingMetadata);
       if (!proxyInjector.isProxied()) {
         injectContext.getProcessingContext().globalAppend(Stmt.loadVariable(proxyInjector.getVarName())
-                .invoke("setProxiedInstance", retVal));
+                .invoke(ProxyMaker.PROXY_BIND_METHOD, retVal));
         proxyInjector.setProxied(true);
       }
     }

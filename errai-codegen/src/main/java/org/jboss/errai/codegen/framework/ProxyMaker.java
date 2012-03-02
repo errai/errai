@@ -25,10 +25,8 @@ import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.framework.util.Stmt;
-import org.jboss.errai.common.client.api.proxy.Proxy;
 
-import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.parameterizedAs;
-import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.typeParametersOf;
+import java.util.List;
 
 /**
  * @author Mike Brock
@@ -38,14 +36,20 @@ public class ProxyMaker {
     return makeProxy(proxyClassName, MetaClassFactory.get(cls));
   }
   
+  public static final String PROXY_BIND_METHOD = "__$setProxiedInstance$";
+  
   public static BuildMetaClass makeProxy(String proxyClassName, MetaClass toProxy) {
     if (toProxy.isFinal()) {
       throw new UnproxyableClassException(toProxy.getFullyQualifiedName()
               + " is an unproxiable class because it is final");
     }
+    if (!toProxy.isDefaultInstantiable()) {
+      throw new UnproxyableClassException(toProxy.getFullyQualifiedName() + " must have a default no-arg constructor");
+    }
+
 
     ClassStructureBuilder builder = ClassBuilder.define(proxyClassName, toProxy).publicScope()
-            .implementsInterface(parameterizedAs(Proxy.class, typeParametersOf(toProxy)))
+    //        .implementsInterface(parameterizedAs(Proxy.class, typeParametersOf(toProxy)))
             .body();
 
     String proxyVar = "_proxy";
@@ -55,13 +59,15 @@ public class ProxyMaker {
     for (MetaMethod method : toProxy.getMethods()) {
       if (method.getDeclaringClass().getFullyQualifiedName().equals("java.lang.Object")) continue;
       
-      Parameter[] parms = Parameter.of(method.getParameters());
-      BlockBuilder methBody = builder.publicMethod(method.getReturnType(), method.getName()).parameters(DefParameters.from(method))
+      DefParameters defParameters = DefParameters.from(method);
+      BlockBuilder methBody = builder.publicMethod(method.getReturnType(), method.getName()).parameters(defParameters)
               .body();
 
-      Statement[] statementVars = new Statement[parms.length];
-      for (int i = 0; i < parms.length; i++) {
-        statementVars[i] = Stmt.loadVariable(parms[i].getName());
+      List<Parameter> parms = defParameters.getParameters();
+
+      Statement[] statementVars = new Statement[parms.size()];
+      for (int i = 0; i < parms.size(); i++) {
+        statementVars[i] = Stmt.loadVariable(parms.get(i).getName());
       }
 
       if (method.getReturnType().isVoid()) {
@@ -73,7 +79,7 @@ public class ProxyMaker {
       methBody.finish();
     }
     
-    builder.publicMethod(void.class, "setProxiedInstance").parameters(DefParameters.of(Parameter.of(toProxy, "proxy")))
+    builder.publicMethod(void.class, PROXY_BIND_METHOD).parameters(DefParameters.of(Parameter.of(toProxy, "proxy")))
             .append(Stmt.loadVariable(proxyVar).assignValue(Stmt.loadVariable("proxy"))).finish();
 
     return builder.getClassDefinition();
