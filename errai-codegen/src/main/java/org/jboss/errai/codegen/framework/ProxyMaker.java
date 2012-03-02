@@ -19,6 +19,7 @@ package org.jboss.errai.codegen.framework;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
 import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.ClassBuilder;
+import org.jboss.errai.codegen.framework.exception.UnproxyableClassException;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
@@ -39,7 +40,7 @@ public class ProxyMaker {
   
   public static BuildMetaClass makeProxy(String proxyClassName, MetaClass toProxy) {
     if (toProxy.isFinal()) {
-      throw new IllegalStateException(toProxy.getFullyQualifiedName()
+      throw new UnproxyableClassException(toProxy.getFullyQualifiedName()
               + " is an unproxiable class because it is final");
     }
 

@@ -1,6 +1,7 @@
 package org.jboss.errai.cdi.producer.client.test;
 
 
+import org.jboss.errai.cdi.producer.client.ProducerDependentTestBean;
 import org.jboss.errai.cdi.producer.client.ProducerTestModule;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.container.IOC;
@@ -62,5 +63,14 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
     assertEquals("Failed to inject produced @D @E as @D",
             module.getFloatDE(),
             module.getTestBean().getFloatD());
+  }
+  
+  public void testCyclicalDependencyWasSatisfied() {
+    ProducerDependentTestBean bean = IOC.getBeanManager().lookupBean(ProducerDependentTestBean.class).getInstance();
+    ProducerTestModule module = IOC.getBeanManager().lookupBean(ProducerTestModule.class).getInstance();
+
+    assertEquals(bean.getFloatD(), module.getTestBean().getFloatD());
+    assertEquals(bean.getIntegerA(), module.getTestBean().getIntegerA());
+    assertEquals(bean.getIntegerB(), module.getTestBean().getIntegerB());
   }
 }

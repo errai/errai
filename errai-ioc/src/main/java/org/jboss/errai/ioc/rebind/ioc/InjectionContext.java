@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import org.jboss.errai.codegen.framework.util.GenUtil;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
@@ -45,7 +47,10 @@ import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedMethod;
 
 public class InjectionContext {
   private IOCProcessingContext processingContext;
+
   private Map<MetaClass, List<Injector>> injectors = new LinkedHashMap<MetaClass, List<Injector>>();
+  private Multimap<MetaClass, Injector> proxiedInjectors = HashMultimap.create();
+
   private Map<Class<? extends Annotation>, List<IOCDecoratorExtension>> decorators = new LinkedHashMap<Class<? extends Annotation>, List<IOCDecoratorExtension>>();
   private Map<ElementType, Set<Class<? extends Annotation>>> decoratorsByElementType = new LinkedHashMap<ElementType, Set<Class<? extends Annotation>>>();
   private List<InjectionTask> deferredInjectionTasks = new ArrayList<InjectionTask>();
@@ -58,6 +63,36 @@ public class InjectionContext {
 
   public InjectionContext(IOCProcessingContext processingContext) {
     this.processingContext = processingContext;
+  }
+
+  public Injector getProxiedInjector(MetaClass type, QualifyingMetadata metadata) {
+    if (metadata == null) {
+      metadata = processingContext.getQualifyingMetadataFactory().createDefaultMetadata();
+    }
+
+    //todo: figure out why I was doing this.
+    MetaClass erased = type.getErased();
+    Collection<Injector> injs = proxiedInjectors.get(erased);
+    List<Injector> matching = new ArrayList<Injector>();
+
+    if (injs != null) {
+      for (Injector inj : injs) {
+        if (inj.matches(type.getParameterizedType(), metadata)) {
+          matching.add(inj);
+        }
+      }
+    }
+
+    if (matching.isEmpty()) {
+      throw new InjectionFailure(erased);
+    }
+    else if (matching.size() > 1) {
+      throw new InjectionFailure("ambiguous injection type (multiple injectors resolved): " + erased
+              .getFullyQualifiedName() + (metadata == null ? "" : metadata.toString()));
+    }
+    else {
+      return matching.get(0);
+    }
   }
 
   public Injector getQualifiedInjector(MetaClass type, QualifyingMetadata metadata) {
@@ -94,7 +129,21 @@ public class InjectionContext {
     return isInjectableQualified(injectorType, null);
   }
 
+  public void addProxiedInjector(ProxyInjector proxyInjector) {
+    proxiedInjectors.put(proxyInjector.getInjectedType(), proxyInjector);
+  }
 
+  public boolean isProxiedInjectorAvailable(MetaClass injectorType, QualifyingMetadata qualifyingMetadata) {
+    if (proxiedInjectors.containsKey(injectorType.getErased())) {
+      for (Injector inj : injectors.get(injectorType.getErased())) {
+        if (inj.matches(injectorType.getParameterizedType(), qualifyingMetadata)) {
+          return !(inj.isSingleton() && !inj.isInjected());
+        }
+      }
+    }
+    return false; 
+  }
+  
   public boolean isInjectableQualified(MetaClass injectorType, QualifyingMetadata qualifyingMetadata) {
     if (injectors.containsKey(injectorType.getErased())) {
       for (Injector inj : injectors.get(injectorType.getErased())) {

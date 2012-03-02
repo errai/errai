@@ -137,21 +137,34 @@ public class TypeInjector extends Injector {
 
     ctx.popBlockBuilder();
 
-    creationalCallbackVarName  = InjectUtil.getNewVarName();
+    creationalCallbackVarName = InjectUtil.getNewVarName();
 
     ctx.globalAppend(Stmt.declareVariable(creationCallbackRef).asFinal().named(creationalCallbackVarName)
             .initializeWith(callbackBuilder.finish().finish()));
+
+    Statement retVal;
 
     if (isSingleton()) {
 
       ctx.globalAppend(Stmt.declareVariable(type).asFinal().named(varName)
               .initializeWith(Stmt.loadVariable(creationalCallbackVarName).invoke("getInstance")));
 
-      return Refs.get(varName);
+      retVal = Refs.get(varName);
     }
     else {
-      return Stmt.loadVariable(creationalCallbackVarName).invoke("getInstance");
+      retVal = Stmt.loadVariable(creationalCallbackVarName).invoke("getInstance");
     }
+
+    if (injectContext.isProxiedInjectorAvailable(type, qualifyingMetadata)) {
+      ProxyInjector proxyInjector = (ProxyInjector) injectContext.getProxiedInjector(type, qualifyingMetadata);
+      if (!proxyInjector.isProxied()) {
+        injectContext.getProcessingContext().globalAppend(Stmt.loadVariable(proxyInjector.getVarName())
+                .invoke("setProxiedInstance", retVal));
+        proxyInjector.setProxied(true);
+      }
+    }
+
+    return retVal;
   }
 
   private static boolean hasNewQualifier(InjectableInstance instance) {

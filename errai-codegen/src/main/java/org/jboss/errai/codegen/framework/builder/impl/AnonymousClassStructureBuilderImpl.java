@@ -166,6 +166,11 @@ public class AnonymousClassStructureBuilderImpl
         return null;
 
       Context subContext = Context.create(context);
+      
+      for (Variable v : classDefinition.getContext().getDeclaredVariables()) {
+        subContext.addVariable(v);
+      }
+      
       subContext.addVariable(Variable.create("this", getClassDefinition()));
 
       StringBuilder buf = new StringBuilder(256);

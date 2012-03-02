@@ -22,6 +22,9 @@ import static org.jboss.errai.ioc.rebind.ioc.InjectUtil.resolveInjectionDependen
 
 import java.lang.annotation.Annotation;
 
+import org.jboss.errai.codegen.framework.InnerClass;
+import org.jboss.errai.codegen.framework.ProxyMaker;
+import org.jboss.errai.codegen.framework.exception.UnproxyableClassException;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
@@ -31,6 +34,7 @@ import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.meta.MetaParameter;
 import org.jboss.errai.codegen.framework.util.Refs;
 import org.jboss.errai.codegen.framework.util.Stmt;
+import org.slf4j.impl.StaticMarkerBinder;
 
 public class InjectionTask {
   protected final TaskType taskType;
@@ -72,9 +76,10 @@ public class InjectionTask {
 
     InjectableInstance injectableInstance = getInjectableInstance(ctx);
 
-    Injector inj;
+    //  Injector inj;
     QualifyingMetadata qualifyingMetadata = processingContext.getQualifyingMetadataFactory()
             .createFrom(injectableInstance.getQualifiers());
+    Statement val;
 
     switch (taskType) {
       case Type:
@@ -82,21 +87,17 @@ public class InjectionTask {
         break;
 
       case PrivateField: {
-        if (!ctx.isInjectableQualified(field.getType(), qualifyingMetadata)) {
+        try {
+          val = getInjectorOrProxy(ctx, field.getType(), qualifyingMetadata);
+        }
+        catch (UnproxyableClassException e) {
           return false;
         }
 
-        try {
-          inj = ctx.getQualifiedInjector(field.getType(), qualifyingMetadata);
-        }
-        catch (InjectionFailure e) {
-          e.setTarget(toString());
-          throw e;
-        }
 
         processingContext.append(
                 Stmt.invokeStatic(processingContext.getBootstrapClass(), getPrivateFieldInjectorName(field),
-                        Refs.get(injector.getVarName()), inj.getType(ctx, injectableInstance))
+                        Refs.get(injector.getVarName()), val)
         );
 
         ctx.addExposedField(field);
@@ -104,21 +105,14 @@ public class InjectionTask {
       }
 
       case Field:
-        if (!ctx.isInjectableQualified(field.getType(), qualifyingMetadata)) {
+        try {
+          val = getInjectorOrProxy(ctx, field.getType(), qualifyingMetadata);
+        }
+        catch (UnproxyableClassException e) {
           return false;
         }
-
-        try {
-          inj = ctx.getQualifiedInjector(field.getType(), qualifyingMetadata);
-        }
-        catch (InjectionFailure e) {
-          e.setTarget(toString());
-          throw e;
-        }
-
         processingContext.append(
-                Stmt.loadVariable(injector.getVarName()).loadField(field.getName()).assignValue(inj.getType(ctx,
-                        injectableInstance))
+                Stmt.loadVariable(injector.getVarName()).loadField(field.getName()).assignValue(val)
         );
 
         break;
@@ -166,6 +160,28 @@ public class InjectionTask {
     return true;
   }
 
+  private Statement getInjectorOrProxy(InjectionContext ctx,
+                                       MetaClass clazz, QualifyingMetadata qualifyingMetadata) {
+
+    InjectableInstance injectableInstance = getInjectableInstance(ctx);
+
+    if (ctx.isInjectableQualified(clazz, qualifyingMetadata)) {
+
+      if (ctx.isProxiedInjectorAvailable(clazz, qualifyingMetadata)) {
+        ProxyInjector proxyInjector = (ProxyInjector) ctx.getProxiedInjector(clazz, qualifyingMetadata);
+        return proxyInjector.getType(ctx, injectableInstance);
+      }
+      else {
+        return ctx.getQualifiedInjector(clazz, qualifyingMetadata).getType(ctx, injectableInstance);
+      }
+
+    }
+    else {
+      ProxyInjector proxyInjector = new ProxyInjector(ctx.getProcessingContext(), clazz, qualifyingMetadata);
+      ctx.addProxiedInjector(proxyInjector);
+      return proxyInjector.getType(ctx, injectableInstance);
+    }
+  }
 
   private InjectableInstance getInjectableInstance(InjectionContext ctx) {
     InjectableInstance<? extends Annotation> injectableInstance

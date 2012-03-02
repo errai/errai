@@ -64,7 +64,6 @@ public class ModuleAnnotationProcessor extends AbstractProcessor {
         e.printStackTrace();
       }
 
-      return true;
     }
     return false;
   }

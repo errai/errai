@@ -517,7 +517,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       return _asClassCache;
     }
 
-    Class<?> cls = null;
+    Class<?> cls = NullType.class;
 
     if (enclosedMetaObject instanceof Class) {
       cls = (Class<?>) enclosedMetaObject;

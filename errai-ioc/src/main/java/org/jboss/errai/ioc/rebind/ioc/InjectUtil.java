@@ -153,7 +153,9 @@ public class InjectUtil {
       if (!task.doTask(ctx)) {
         log.warn("your object graph has cyclical dependencies. use of dependent scope and @New may not " +
                 "produce properly initalized objects for: " + task.getInjector().getInjectedType().getFullyQualifiedName() + "\n" +
-        "\t Offending node: " + task);
+                "\t Offending node: " + task);
+
+
         ctx.deferTask(task);
       }
     }
@@ -341,6 +343,19 @@ public class InjectUtil {
     return newArray;
   }
 
+  public static Injector getInjectorOrProxy(InjectionContext ctx,
+                                      MetaClass clazz, QualifyingMetadata qualifyingMetadata) {
+
+    if (ctx.isInjectableQualified(clazz, qualifyingMetadata)) {
+      return ctx.getQualifiedInjector(clazz, qualifyingMetadata);
+    }
+    else {
+      ProxyInjector proxyInjector = new ProxyInjector(ctx.getProcessingContext(), clazz, qualifyingMetadata);
+      ctx.addProxiedInjector(proxyInjector);
+      return proxyInjector;
+    }
+  }
+
   public static Statement[] resolveInjectionDependencies(MetaParameter[] parms, InjectionContext ctx,
                                                          MetaMethod method) {
 
@@ -350,7 +365,7 @@ public class InjectUtil {
     for (int i = 0; i < parmTypes.length; i++) {
       Injector injector;
       try {
-        injector = ctx.getQualifiedInjector(parmTypes[i],
+        injector = getInjectorOrProxy(ctx, parmTypes[i],
                 ctx.getProcessingContext().getQualifyingMetadataFactory().createFrom(parms[i].getAnnotations()));
       }
       catch (InjectionFailure e) {
@@ -376,7 +391,7 @@ public class InjectUtil {
     for (int i = 0; i < parmTypes.length; i++) {
       Injector injector;
       try {
-        injector = ctx.getQualifiedInjector(parmTypes[i],
+        injector = getInjectorOrProxy(ctx, parmTypes[i],
                 ctx.getProcessingContext().getQualifyingMetadataFactory().createFrom(parms[i].getAnnotations()));
       }
       catch (InjectionFailure e) {
