@@ -19,6 +19,7 @@ package org.jboss.errai.ioc.rebind.ioc;
 import org.jboss.errai.codegen.framework.InnerClass;
 import org.jboss.errai.codegen.framework.ProxyMaker;
 import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.builder.impl.Scope;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.framework.util.Stmt;
@@ -39,6 +40,8 @@ public class ProxyInjector extends Injector {
     this.qualifyingMetadata = metadata;
     String proxyClassName = proxiedType.getFullyQualifiedName().replaceAll("\\.", "_") + "_" + varName;
     this.proxyClass = ProxyMaker.makeProxy(proxyClassName, proxiedType);
+    this.proxyClass.setStatic(true);
+    this.proxyClass.setScope(Scope.Package);
     
     context.getBootstrapClass()
             .addInnerClass(new InnerClass(proxyClass));
