@@ -24,6 +24,7 @@ import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.Variable;
 import org.jboss.errai.codegen.framework.VariableReference;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.ioc.client.InterfaceInjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.InjectionPoint;
@@ -48,12 +49,12 @@ public class IOCProcessingContext {
   protected BuildMetaClass bootstrapClass;
   protected Stack<BlockBuilder<?>> blockBuilder;
   protected List<String> packages;
-
   protected List<Statement> appendToEnd;
   protected List<Statement> postConstructStatements;
-
   protected List<TypeDiscoveryListener> typeDiscoveryListeners;
 
+  protected Set<MetaClass> discovered = new HashSet<MetaClass>();
+  
   protected TreeLogger treeLogger;
   protected GeneratorContext generatorContext;
 
@@ -186,8 +187,10 @@ public class IOCProcessingContext {
   }
 
   public void handleDiscoveryOfType(InjectionPoint injectionPoint) {
+    if (discovered.contains(injectionPoint.getType())) return;
     for (TypeDiscoveryListener listener : typeDiscoveryListeners) {
       listener.onDiscovery(this, injectionPoint);
     }
+    discovered.add(injectionPoint.getType());
   }
 }

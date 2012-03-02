@@ -34,16 +34,16 @@ import org.jboss.errai.codegen.framework.util.Refs;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.ioc.client.api.IOCExtension;
 import org.jboss.errai.ioc.client.api.PackageTarget;
-import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
-import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
-import org.jboss.errai.ioc.rebind.ioc.Injector;
-import org.jboss.errai.uibinder.client.UiBinderProvider;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.IOCProcessorFactory;
 import org.jboss.errai.ioc.rebind.ioc.IOCExtensionConfigurator;
+import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
+import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.InjectionPoint;
+import org.jboss.errai.ioc.rebind.ioc.Injector;
 import org.jboss.errai.ioc.rebind.ioc.InjectorFactory;
 import org.jboss.errai.ioc.rebind.ioc.TypeDiscoveryListener;
+import org.jboss.errai.uibinder.client.UiBinderProvider;
 
 import java.lang.annotation.Annotation;
 
@@ -123,63 +123,67 @@ public class GWTUiBinderIOCExtension implements IOCExtensionConfigurator {
                   injectionPoint.getEnclosingType(), Refs.get(varName)));
         }
         else if (injectionPoint.getType().isAssignableTo(SafeHtmlTemplates.class)) {
-          final String varName = "safeTemplateInst_" + injectionPoint.getEnclosingType().getFullyQualifiedName()
-                  .replaceAll("\\.", "_");
+          if (!injectorFactory.hasType(injectionPoint.getType())) {
 
-          if (Boolean.getBoolean("errai.simulatedClient")) {
-            context.append(Stmt.declareVariable(SafeHtmlTemplates.class).named(varName).initializeWith(
-                    ObjectBuilder.newInstanceOf(injectionPoint.getType())
-                            .extend()
-                            .publicOverridesMethod("link", Parameter.of(SafeUri.class, "safe"),
-                                    Parameter.of(String.class, "str"))
-                            .append(Stmt.loadLiteral(null).returnValue())
-                            .finish().finish()
-            )
-            );
+            final String varName = "safeTemplateInst_" + injectionPoint.getEnclosingType().getFullyQualifiedName()
+                    .replaceAll("\\.", "_");
 
+            if (Boolean.getBoolean("errai.simulatedClient")) {
+              context.append(Stmt.declareVariable(SafeHtmlTemplates.class).named(varName).initializeWith(
+                      ObjectBuilder.newInstanceOf(injectionPoint.getType())
+                              .extend()
+                              .publicOverridesMethod("link", Parameter.of(SafeUri.class, "safe"),
+                                      Parameter.of(String.class, "str"))
+                              .append(Stmt.loadLiteral(null).returnValue())
+                              .finish().finish()
+              )
+              );
+
+            }
+            else {
+              context.append(Stmt.declareVariable(injectionPoint.getType()).named(varName).initializeWith(
+                      Stmt.invokeStatic(GWT.class, "create", LiteralFactory.getLiteral(injectionPoint.getType()))
+              ));
+            }
+
+
+            injectorFactory.addInjector(new Injector() {
+              @Override
+              public Statement instantiateOnly(InjectionContext injectContext, InjectableInstance injectableInstance) {
+                return Refs.get(varName);
+              }
+
+              @Override
+              public Statement getType(InjectionContext injectContext, InjectableInstance injectableInstance) {
+                return Refs.get(varName);
+              }
+
+              @Override
+              public boolean isInjected() {
+                return false;
+              }
+
+              @Override
+              public boolean isSingleton() {
+                return false;
+              }
+
+              @Override
+              public boolean isPseudo() {
+                return false;
+              }
+
+              @Override
+              public String getVarName() {
+                return varName;
+              }
+
+              @Override
+              public MetaClass getInjectedType() {
+                return injectionPoint.getType();
+              }
+            });
           }
-          else {
-            context.append(Stmt.declareVariable(injectionPoint.getType()).named(varName).initializeWith(
-                    Stmt.invokeStatic(GWT.class, "create", LiteralFactory.getLiteral(injectionPoint.getType()))
-            ));
-          }
-
-          injectorFactory.addInjector(new Injector() {
-            @Override
-            public Statement instantiateOnly(InjectionContext injectContext, InjectableInstance injectableInstance) {
-              return Refs.get(varName);
-            }
-
-            @Override
-            public Statement getType(InjectionContext injectContext, InjectableInstance injectableInstance) {
-              return Refs.get(varName);
-            }
-
-            @Override
-            public boolean isInjected() {
-              return false;
-            }
-
-            @Override
-            public boolean isSingleton() {
-              return false;
-            }
-
-            @Override
-            public boolean isPseudo() {
-              return false;
-            }
-
-            @Override
-            public String getVarName() {
-              return varName;
-            }
-
-            @Override
-            public MetaClass getInjectedType() {
-              return injectionPoint.getType();
-            }
-          });
         }
 
       }
