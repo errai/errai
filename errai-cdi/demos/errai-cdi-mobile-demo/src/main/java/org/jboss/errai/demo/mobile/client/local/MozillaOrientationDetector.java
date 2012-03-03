@@ -23,8 +23,8 @@ public class MozillaOrientationDetector extends OrientationDetector {
       return;
     }
     var listener = function(e) {
-      this.@org.jboss.errai.demo.mobile.client.local.MozillaOrientationDetector::fireOrientationEvent(DDDD)(
-          e.x * 90.0, e.y * -90.0, 0, new Date().milliseconds);
+      this.@org.jboss.errai.demo.mobile.client.local.MozillaOrientationDetector::fireOrientationEvent(DDD)(
+          e.x * 90.0, e.y * -90.0, 0);
     };
     this.@org.jboss.errai.demo.mobile.client.local.MozillaOrientationDetector::listener = listener;
     $wnd.addEventListener('MozOrientation', listener, false);

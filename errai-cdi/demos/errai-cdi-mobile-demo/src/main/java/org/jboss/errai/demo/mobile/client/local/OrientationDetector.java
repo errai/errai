@@ -6,6 +6,20 @@ import org.jboss.errai.demo.mobile.client.shared.OrientationEvent;
 
 public abstract class OrientationDetector {
 
+  /**
+   * Don't try to fire a CDI OrientationEvent event more than once every 250ms.
+   * <p>
+   * TODO we should remove this once the bus supports coalescing events!
+   */
+  private long minEventInterval = 250;
+
+  /**
+   * The time we last fired an OrientationEvent.
+   * <p>
+   * TODO we should remove this once the bus supports coalescing events!
+   */
+  private long lastEventFireTime;
+
   protected Event<OrientationEvent> orientationEventSource;
 
   /**
@@ -31,6 +45,11 @@ public abstract class OrientationDetector {
    * orientation.
    */
   protected void fireOrientationEvent(double x, double y, double z) {
+    long now = System.currentTimeMillis();
+    if (now - lastEventFireTime < minEventInterval) {
+      return;
+    }
+    lastEventFireTime = now;
     orientationEventSource.fire(new OrientationEvent(clientId, x, y, z));
   }
 
