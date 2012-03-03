@@ -16,8 +16,6 @@
 
 package org.jboss.errai.bus.client.api;
 
-import org.jboss.errai.bus.server.api.SessionEndEvent;
-
 public interface SessionEndListener {
   public void onSessionEnd(SessionEndEvent event);
 }
