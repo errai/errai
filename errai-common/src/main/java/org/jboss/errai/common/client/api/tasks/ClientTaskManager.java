@@ -73,7 +73,7 @@ public class ClientTaskManager implements TaskManager {
     private boolean isCancelled;
 
     /**
-     * Don't call this. Use {@link #create(Runnable, Timer)}.
+     * Don't call this. Use {@link #create(Runnable, org.jboss.errai.common.client.api.tasks.ClientTaskManager.TaskManagerTimer)}.
      *
      * @param task
      * @param timer
@@ -128,7 +128,7 @@ public class ClientTaskManager implements TaskManager {
 
     @Override
     public boolean isCancelled() {
-      return timer.isCancelled();
+      return finished || timer.isCancelled();
     }
 
     private boolean isFinished() {
@@ -150,7 +150,7 @@ public class ClientTaskManager implements TaskManager {
 
   /**
    * A GWT Timer implementation that has a public flag indicating if
-   * {@link #cancel(boolean)} has been called.
+   * {@link #cancel()})} has been called.
    * <p>
    * This Timer class only allows a single call to either {@link #schedule(int)}
    * or {@link #scheduleRepeating(int)}. Further attempts to schedule the call

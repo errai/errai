@@ -47,11 +47,14 @@ public final class InitVotes {
   private static final List<Runnable> oneTimeInitCallbacks = new ArrayList<Runnable>();
 
   private static boolean armed = false;
+  private static boolean initComplete = false;
   private static final Set<String> waitForSet = new HashSet<String>();
 
   private static int timeoutMillis = !GWT.isProdMode() ? 60000 : 5000;
 
-  private static AsyncTask initTimeout;
+  private static volatile AsyncTask initTimeout;
+
+  private static final Object lock = new Object();
 
 
   /**
@@ -59,9 +62,12 @@ public final class InitVotes {
    * does not however clear out any initialization callbacks registered with {@link #registerInitCallback(Runnable)}.
    */
   public static void reset() {
-    if (initTimeout != null && !initTimeout.isCancelled()) initTimeout.cancel(true);
-    waitForSet.clear();
-    armed = false;
+    synchronized (lock) {
+      cancelFailTimer();
+      oneTimeInitCallbacks.clear();
+      waitForSet.clear();
+      initComplete = armed = false;
+    }
   }
 
   /**
@@ -88,15 +94,26 @@ public final class InitVotes {
    * @see #voteFor(Class)
    */
   public static void waitFor(final Class<?> clazz) {
-    log("wait for: " + clazz.getName());
     waitFor(clazz.getName());
   }
 
   private static void waitFor(String topic) {
-    if (!armed && waitForSet.isEmpty()) {
-      beginInit();
+    synchronized (lock) {
+      if (waitForSet.contains(topic)) return;
+
+      log("wait for: " + topic);
+
+      if (initComplete) {
+        throw new RuntimeException("attempt to call waitFor() after initialization complete. " +
+                "InitVotes.reset() must first be called.");
+      }
+
+      if (!armed && waitForSet.isEmpty()) {
+        beginInit();
+      }
+
+      waitForSet.add(topic);
     }
-    waitForSet.add(topic);
   }
 
   /**
@@ -107,29 +124,39 @@ public final class InitVotes {
    * @param clazz a class reference
    */
   public static void voteFor(final Class<?> clazz) {
-    log("vote For: " + clazz.getName());
     voteFor(clazz.getName());
-    if (!waitForSet.isEmpty())
-      log("  still waiting for -> " + waitForSet);
+
   }
 
   private static void voteFor(String topic) {
-    waitForSet.remove(topic);
+    synchronized (lock) {
+      log("vote For: " + topic);
 
-    if (armed && waitForSet.isEmpty()) {
-      initWindow();
+      waitForSet.remove(topic);
+
+      if (!waitForSet.isEmpty())
+        log("  still waiting for -> " + waitForSet);
+
+      if (armed && waitForSet.isEmpty()) {
+        initWindow();
+      }
     }
   }
 
   private static void initWindow() {
-    TaskManagerFactory.get().schedule(TimeUnit.MILLISECONDS, 50, new Runnable() {
-      @Override
-      public void run() {
-        if (armed && waitForSet.isEmpty()) {
-          finishInit();
+    synchronized (lock) {
+      cancelFailTimer();
+      TaskManagerFactory.get().schedule(TimeUnit.MILLISECONDS, 50, new Runnable() {
+        @Override
+        public void run() {
+          cancelFailTimer();
+          if (armed && waitForSet.isEmpty()) {
+            finishInit();
+          }
         }
-      }
-    });
+      });
+    }
+
   }
 
   /**
@@ -140,7 +167,9 @@ public final class InitVotes {
    * @param runnable a callback to execute
    */
   public static void registerInitCallback(final Runnable runnable) {
-    initCallbacks.add(runnable);
+    synchronized (lock) {
+      initCallbacks.add(runnable);
+    }
   }
 
   /**
@@ -151,40 +180,67 @@ public final class InitVotes {
    * @param runnable a callback to execute
    */
   public static void registerOneTimeInitCallback(final Runnable runnable) {
-    oneTimeInitCallbacks.add(runnable);
+    synchronized (lock) {
+      oneTimeInitCallbacks.add(runnable);
+    }
   }
 
   private static void beginInit() {
-    armed = true;
-    initTimeout = TaskManagerFactory.get().schedule(TimeUnit.MILLISECONDS, timeoutMillis, new Runnable() {
-      @Override
-      public void run() {
-        if (waitForSet.isEmpty()) return;
-
-        log("components failed to initialize");
-        for (String comp : waitForSet) {
-          log("   [failed] -> " + comp);
-        }
+    synchronized (lock) {
+      if (armed) {
+        throw new RuntimeException("attempt to arm voting process more than once.");
       }
-    });
+
+      if (initComplete) {
+        throw new RuntimeException("cannot begin new initialization vote. InitVotes.reset() must first be called.");
+      }
+
+      armed = true;
+
+      initTimeout = TaskManagerFactory.get().schedule(TimeUnit.MILLISECONDS, timeoutMillis, new Runnable() {
+        @Override
+        public void run() {
+          synchronized (lock) {
+            if (waitForSet.isEmpty() || !armed) return;
+
+            log("components failed to initialize");
+            for (String comp : waitForSet) {
+              log("   [failed] -> " + comp);
+            }
+          }
+        }
+      });
+    }
   }
 
   private static void finishInit() {
-    armed = false;
-    if (initTimeout != null && !initTimeout.isCancelled()) initTimeout.cancel(true);
+    synchronized (lock) {
+      armed = false;
+      cancelFailTimer();
 
-    Iterator<Runnable> iter = oneTimeInitCallbacks.iterator();
-    while (iter.hasNext()) {
-      try {
-        iter.next().run();
+      Iterator<Runnable> iter = oneTimeInitCallbacks.iterator();
+      while (iter.hasNext()) {
+        try {
+          iter.next().run();
+        }
+        finally {
+          iter.remove();
+        }
       }
-      finally {
-        iter.remove();
+
+      for (Runnable callback : initCallbacks) {
+        callback.run();
       }
+
+      initComplete = true;
     }
+  }
 
-    for (Runnable callback : initCallbacks) {
-      callback.run();
+  private static void cancelFailTimer() {
+    synchronized (lock) {
+      if (initTimeout != null && !initTimeout.isCancelled()) {
+        initTimeout.cancel(true);
+      }
     }
   }
 }

@@ -47,6 +47,7 @@ public abstract class AbstractErraiTest extends GWTTestCase {
 
   @Override
   protected void gwtSetUp() throws Exception {
+    InitVotes.reset();
     InitVotes.setTimeoutMillis(60000);
 
     InitVotes.registerOneTimeInitCallback(new Runnable() {

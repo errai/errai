@@ -193,8 +193,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private BusErrorDialog errorDialog = new BusErrorDialog();
 
   public ClientMessageBusImpl() {
-    InitVotes.waitFor(ClientMessageBusImpl.class);
-    InitVotes.waitFor(RpcProxyLoader.class);
+
 
     init();
   }
@@ -779,11 +778,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       this.initialized = false;
       this.postInit = false;
       this.sendBuilder = null;
-      //  this.initVotesRequired = 1; // just to reconnect the bus.
       this.postInitTasks.clear();
 
       InitVotes.reset();
-      InitVotes.waitFor(ClientMessageBusImpl.class);
     }
   }
 
@@ -827,12 +824,17 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    */
   @Override
   public void init() {
-    InitVotes.registerOneTimeInitCallback(new Runnable() {
-      @Override
-      public void run() {
-        completeInit();
-      }
-    });
+    if (!reinit) {
+      InitVotes.waitFor(ClientMessageBusImpl.class);
+      InitVotes.waitFor(RpcProxyLoader.class);
+
+      InitVotes.registerOneTimeInitCallback(new Runnable() {
+        @Override
+        public void run() {
+          completeInit();
+        }
+      });
+    }
 
 
     declareDebugFunction();
