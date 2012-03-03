@@ -33,7 +33,6 @@ public abstract class AbstractErraiCDITest extends GWTTestCase {
 
   @Override
   public void gwtSetUp() throws Exception {
-    InitVotes.reset();
     InitVotes.setTimeoutMillis(60000);
 
     super.gwtSetUp();

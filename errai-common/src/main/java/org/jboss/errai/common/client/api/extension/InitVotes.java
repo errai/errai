@@ -47,7 +47,6 @@ public final class InitVotes {
   private static final List<Runnable> oneTimeInitCallbacks = new ArrayList<Runnable>();
 
   private static boolean armed = false;
-  private static boolean initComplete = false;
   private static final Set<String> waitForSet = new HashSet<String>();
 
   private static int timeoutMillis = !GWT.isProdMode() ? 60000 : 5000;
@@ -66,7 +65,7 @@ public final class InitVotes {
       cancelFailTimer();
       oneTimeInitCallbacks.clear();
       waitForSet.clear();
-      initComplete = armed = false;
+      armed = false;
     }
   }
 
@@ -102,11 +101,6 @@ public final class InitVotes {
       if (waitForSet.contains(topic)) return;
 
       log("wait for: " + topic);
-
-      if (initComplete) {
-        throw new RuntimeException("attempt to call waitFor() after initialization complete. " +
-                "InitVotes.reset() must first be called.");
-      }
 
       if (!armed && waitForSet.isEmpty()) {
         beginInit();
@@ -191,10 +185,6 @@ public final class InitVotes {
         throw new RuntimeException("attempt to arm voting process more than once.");
       }
 
-      if (initComplete) {
-        throw new RuntimeException("cannot begin new initialization vote. InitVotes.reset() must first be called.");
-      }
-
       armed = true;
 
       initTimeout = TaskManagerFactory.get().schedule(TimeUnit.MILLISECONDS, timeoutMillis, new Runnable() {
@@ -231,8 +221,6 @@ public final class InitVotes {
       for (Runnable callback : initCallbacks) {
         callback.run();
       }
-
-      initComplete = true;
     }
   }
 

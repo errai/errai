@@ -24,6 +24,7 @@ import org.jboss.errai.cdi.integration.client.shared.ServiceB;
 import org.jboss.errai.cdi.integration.client.shared.ServiceC;
 import org.jboss.errai.cdi.integration.client.shared.TestBean;
 import org.jboss.errai.cdi.integration.client.shared.TestOuterBean;
+import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.container.IOC;
@@ -75,23 +76,23 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
       public void run() {
         TestOuterBean outBean = IOC.getBeanManager()
                 .lookupBean(TestOuterBean.class).getInstance();
-        
+
         assertNotNull("outer bean was null", outBean);
 
         TestBean testBean = outBean.getTestBean();
         assertNotNull("outBean.getTestBean() returned null", testBean);
-        
+
         ServiceA serviceA = testBean.getServiceA();
         ServiceB serviceB = testBean.getServiceB();
         ServiceC serviceC = testBean.getServiceC();
-        
+
         assertNotNull("serviceA is null", serviceA);
         assertNotNull("serviceB is null", serviceB);
         assertNotNull("serviceC is null", serviceC);
 
         ServiceC serviceC1 = serviceA.getServiceC();
         ServiceC serviceC2 = serviceB.getServiceC();
-         
+
         assertNotNull("serviceC in serviceA is null", serviceC1);
         assertNotNull("serviceC in serviceB is null", serviceC2);
 
@@ -112,6 +113,7 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
     CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
+
         ApplicationScopedBean applicationScopedBean = IOC.getBeanManager()
                 .lookupBean(ApplicationScopedBean.class).getInstance();
 
@@ -122,7 +124,7 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
 
         assertSame("ApplicationScopedBean should be same instance even in dependent scoped",
                 serviceC.getBean(), applicationScopedBean);
-        
+
         finishTest();
       }
     });
