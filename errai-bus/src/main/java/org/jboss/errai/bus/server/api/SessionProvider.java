@@ -16,6 +16,8 @@
 
 package org.jboss.errai.bus.server.api;
 
+import org.jboss.errai.bus.client.api.QueueSession;
+
 /**
  * This interface, <tt>SessionProvider</tt>, is a template for creating a session provider based on the type of
  * session specified

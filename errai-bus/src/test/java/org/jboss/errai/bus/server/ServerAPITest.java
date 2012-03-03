@@ -16,11 +16,11 @@
 
 package org.jboss.errai.bus.server;
 
+import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.laundry.Laundry;
 import org.jboss.errai.bus.client.api.laundry.LaundryList;
 import org.jboss.errai.bus.client.api.laundry.LaundryListProvider;
 import org.jboss.errai.bus.client.api.laundry.LaundryListProviderFactory;
-import org.jboss.errai.bus.server.api.QueueSession;
 import org.jboss.errai.bus.server.mock.MockHttpSession;
 import org.jboss.errai.bus.server.util.SecureHashUtil;
 import org.jboss.errai.bus.server.util.ServerLaundryList;

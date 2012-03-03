@@ -48,6 +48,8 @@ import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.MessageListener;
 import org.jboss.errai.bus.client.api.PreInitializationListener;
+import org.jboss.errai.bus.client.api.QueueSession;
+import org.jboss.errai.bus.client.api.SessionEndListener;
 import org.jboss.errai.bus.client.api.SessionExpirationListener;
 import org.jboss.errai.bus.client.api.SubscribeListener;
 import org.jboss.errai.bus.client.api.UnsubscribeListener;
@@ -59,6 +61,7 @@ import org.jboss.errai.bus.client.api.base.TransportIOException;
 import org.jboss.errai.bus.client.json.JSONUtilCli;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.client.util.BusTools;
+import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.common.client.protocols.MessageParts;
@@ -66,11 +69,14 @@ import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 
 import static org.jboss.errai.bus.client.json.JSONUtilCli.decodePayload;
 import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteSubscribe;
@@ -133,6 +139,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 * initialization and is now communicating with the remote bus. */
   private List<Runnable> postInitTasks = new ArrayList<Runnable>();
   private List<Message> deferredMessages = new ArrayList<Message>();
+  private Queue<Message> toSendBuffer = new LinkedList<Message>();
+
 
   /* True if the client's message bus has been initialized */
   private boolean initialized = false;
@@ -149,13 +157,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    */
   private int txNumber = 0;
   private int rxNumber = 0;
+  private long lastTx = System.currentTimeMillis();
 
 
   private boolean disconnected = false;
 
   static {
     MarshallerFramework.initializeDefaultSessionProvider();
-    ;
   }
 
   private List<MessageInterceptor> interceptorStack = new LinkedList<MessageInterceptor>();
@@ -394,6 +402,62 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     send(message);
   }
 
+  private static final ResourceProvider<RequestDispatcher> dispatcherProvider
+          = new ResourceProvider<RequestDispatcher>() {
+    @Override
+    public RequestDispatcher get() {
+      return ErraiBus.getDispatcher();
+    }
+  };
+
+  private static final QueueSession sessionPlaceHolder = new QueueSession() {
+    private Map<String, Object> attributes = new HashMap<String, Object>();
+
+    @Override
+    public String getSessionId() {
+      return "<InBus>";
+    }
+
+    @Override
+    public boolean isValid() {
+      return true;
+    }
+
+    @Override
+    public boolean endSession() {
+      return false;
+    }
+
+    @Override
+    public void setAttribute(String attribute, Object value) {
+      attributes.put(attribute, value);
+    }
+
+    @Override
+    public <T> T getAttribute(Class<T> type, String attribute) {
+      return (T) attributes.get(attribute);
+    }
+
+    @Override
+    public Collection<String> getAttributeNames() {
+      return attributes.keySet();
+    }
+
+    @Override
+    public boolean hasAttribute(String attribute) {
+      return attributes.containsKey(attribute);
+    }
+
+    @Override
+    public boolean removeAttribute(String attribute) {
+      return attributes.remove(attribute) != null;
+    }
+
+    @Override
+    public void addSessionEndListener(SessionEndListener listener) {
+    }
+  };
+
   /**
    * Sends the message using it's encoded subject. If the bus has not been initialized, it will be added to
    * <tt>postInitTasks</tt>.
@@ -404,6 +468,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    */
   @Override
   public void send(final Message message) {
+    message.setResource(RequestDispatcher.class.getName(), dispatcherProvider);
+    message.setResource("Session", sessionPlaceHolder);
+
     executeInterceptorStack(false, message);
 
     message.commit();
@@ -461,6 +528,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   }
 
+  boolean txActive = false;
+
+  private boolean throttleOutgoing() {
+    return (System.currentTimeMillis() - lastTx) < 150;
+  }
+
 
   /**
    * Add message to the queue that remotely transmits messages to the server.
@@ -468,8 +541,22 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    *
    * @param message -
    */
-  private void encodeAndTransmit(Message message) {
-    transmitRemote(BusTools.encodeMessage(message), message);
+  private void encodeAndTransmit(final Message message) {
+    if (initialized && !message.hasPart(MessageParts.PriorityProcessing)
+            && (!toSendBuffer.isEmpty() || throttleOutgoing())) {
+      toSendBuffer.offer(message);
+      if (!txActive && toSendBuffer.size() == 1) {
+        new Timer() {
+          @Override
+          public void run() {
+            transmitRemote(BusTools.encodeMessages(toSendBuffer), new ArrayList<Message>(toSendBuffer));
+          }
+        }.schedule(150);
+      }
+    }
+    else {
+      transmitRemote(BusTools.encodeMessage(message), Collections.singletonList(message));
+    }
   }
 
   private void addSubscriptionEntry(String subject, MessageCallback reference) {
@@ -557,87 +644,104 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   /**
    * Transmits JSON string containing message, using the <tt>sendBuilder</tt>
    *
-   * @param message   - JSON string representation of message
-   * @param txMessage - Message reference.
+   * @param message    - JSON string representation of message
+   * @param txMessages - Messages reference.
    */
-  private void transmitRemote(final String message, final Message txMessage) {
+  private void transmitRemote(final String message, final List<Message> txMessages) {
     if (message == null) return;
-    //System.out.println("TX: " + message);
+    //   System.out.println("TX: " + message);
+    try {
+      txActive = true;
 
-    if (webSocketOpen) {
-      if (ClientWebSocketChannel.transmitToSocket(webSocketChannel, message)) {
-        return;
-      }
-      else {
-        LogUtil.log("websocket channel is closed. falling back to comet");
+      if (webSocketOpen) {
+        if (ClientWebSocketChannel.transmitToSocket(webSocketChannel, message)) {
+          return;
+        }
+        else {
+          LogUtil.log("websocket channel is closed. falling back to comet");
 
-        //disconnected.
-        webSocketOpen = false;
-        webSocketChannel = null;
-        cometChannelOpen = true;
+          //disconnected.
+          webSocketOpen = false;
+          webSocketChannel = null;
+          cometChannelOpen = true;
 
-        if (receiveCommCallback instanceof LongPollRequestCallback) {
-          ((LongPollRequestCallback) receiveCommCallback).schedule();
+          if (receiveCommCallback instanceof LongPollRequestCallback) {
+            ((LongPollRequestCallback) receiveCommCallback).schedule();
+          }
         }
       }
-    }
 
-    try {
-      sendBuilder.sendRequest(message, new RequestCallback() {
+      try {
+        sendBuilder.sendRequest(message, new RequestCallback() {
 
-        @Override
-        public void onResponseReceived(Request request, Response response) {
-          switch (response.getStatusCode()) {
-            case 1:
-            case 404:
-            case 408:
-            case 502:
-            case 503:
-            case 504: {
-              // Sending the message failed.
-              // Although the response may still be valid
-              // Handle it gracefully
-              //noinspection ThrowableInstanceNeverThrown
+          @Override
+          public void onResponseReceived(Request request, Response response) {
+            switch (response.getStatusCode()) {
+              case 1:
+              case 404:
+              case 408:
+              case 502:
+              case 503:
+              case 504: {
+                // Sending the message failed.
+                // Although the response may still be valid
+                // Handle it gracefully
+                //noinspection ThrowableInstanceNeverThrown
 
-              TransportIOException tioe = new TransportIOException(response.getText(), response.getStatusCode(),
-                      "Failure communicating with server");
+                TransportIOException tioe = new TransportIOException(response.getText(), response.getStatusCode(),
+                        "Failure communicating with server");
 
-              callErrorHandler(txMessage, tioe);
-              return;
+                for (Message txM : txMessages) {
+                  callErrorHandler(txM, tioe);
+                }
+                return;
+              }
+            }
+
+            /**
+             * If the server bus returned us some client-destined messages
+             * in response to our send, handle them now.
+             */
+            try {
+              procIncomingPayload(response);
+            }
+            catch (Throwable e) {
+              for (Message txM : txMessages) {
+                callErrorHandler(txM, e);
+              }
+            }
+            finally {
+              lastTx = System.currentTimeMillis();
             }
           }
 
-          /**
-           * If the server bus returned us some client-destined messages
-           * in response to our send, handle them now.
-           */
-          try {
-            procIncomingPayload(response);
+          @Override
+          public void onError(Request request, Throwable exception) {
+            for (Message txM : txMessages) {
+              if (txM.getErrorCallback() == null || txM.getErrorCallback().error(txM, exception)) {
+                logError("Failed to communicate with remote bus", "", exception);
+              }
+            }
           }
-          catch (Throwable e) {
-            callErrorHandler(txMessage, e);
-          }
+        });
+      }
+      catch (Exception e) {
+        for (Message txM : txMessages) {
+          callErrorHandler(txM, e);
         }
-
-        @Override
-        public void onError(Request request, Throwable exception) {
-          if (txMessage.getErrorCallback() == null || txMessage.getErrorCallback().error(txMessage, exception)) {
-            logError("Failed to communicate with remote bus", "", exception);
-          }
-        }
-      });
+      }
     }
-    catch (Exception e) {
-      callErrorHandler(txMessage, e);
+    finally {
+      txActive = false;
     }
   }
 
-  boolean pollActive = false;
+  boolean rxActive = false;
 
   private void performPoll() {
     try {
-      if (pollActive || !cometChannelOpen) return;
-      pollActive = true;
+      if (rxActive || !cometChannelOpen) return;
+      rxActive = true;
       getRecvBuilder().sendRequest(null, receiveCommCallback);
     }
     catch (RequestTimeoutException e) {
@@ -648,7 +752,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       DefaultErrorCallback.INSTANCE.error(null, t);
     }
     finally {
-      pollActive = false;
+      rxActive = false;
     }
   }
 
@@ -660,7 +764,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
         Message m = MessageBuilder.createMessage()
                 .toSubject(BuiltInServices.ServerBus.name())
-                .command(BusCommands.Disconnect).getMessage();
+                .command(BusCommands.Disconnect).getMessage()
+                .set(MessageParts.PriorityProcessing, "1");
 
         encodeAndTransmit(m);
       }
@@ -1324,7 +1429,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   public void procPayload(String text) {
-  //  System.out.println("RX:" + text);
+    //   System.out.println("RX:" + text);
     try {
       for (MarshalledMessage m : decodePayload(text)) {
         rxNumber++;

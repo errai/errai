@@ -18,6 +18,7 @@ package org.jboss.errai.bus.client.util;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Queue;
 import java.util.Set;
 
 import org.jboss.errai.bus.client.api.HasEncoded;
@@ -53,5 +54,19 @@ public class BusTools {
     else {
       return ErraiProtocol.encodePayload(message.getParts());
     }
+  }
+  
+  public static String encodeMessages(Queue<Message> messages) {
+    StringBuilder sbuf = new StringBuilder("[");
+    boolean first = true;
+    Message m;
+    while ((m = messages.poll()) != null) {
+      if (!first) {
+        sbuf.append(',');
+      }
+      sbuf.append(encodeMessage(m));
+      first = false;
+    }
+    return sbuf.append("]").toString();
   }
 }

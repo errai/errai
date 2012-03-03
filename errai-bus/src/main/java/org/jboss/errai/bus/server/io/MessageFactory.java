@@ -17,9 +17,11 @@
 package org.jboss.errai.bus.server.io;
 
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.framework.RoutingFlag;
 import org.jboss.errai.common.client.protocols.MessageParts;
-import org.jboss.errai.bus.server.api.QueueSession;
+import org.jboss.errai.marshalling.client.api.json.EJArray;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.marshallers.ErraiProtocolEnvelopeMarshaller;
 import org.jboss.errai.marshalling.client.marshallers.MapMarshaller;
 import org.jboss.errai.marshalling.server.DecodingSession;
@@ -29,6 +31,9 @@ import org.jboss.errai.marshalling.server.MappingContextSingleton;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import static org.jboss.errai.bus.client.api.base.CommandMessage.createWithParts;
@@ -54,6 +59,7 @@ public class MessageFactory {
    * parts depending on the string
    *
    * @param session - the queue session in which the message exists
+   * @param request -
    * @param json    - the string representing the parts of the message
    * @return the message array constructed using the JSON string
    */
@@ -66,11 +72,12 @@ public class MessageFactory {
     return from(parts, session, request);
   }
 
+  @SuppressWarnings("unchecked")
   public static Message createCommandMessage(QueueSession session, String json) {
     if (json.length() == 0) return null;
 
-    Message msg = createWithParts(MapMarshaller.INSTANCE.demarshall( JSONDecoder.decode(json),
-                new DecodingSession(MappingContextSingleton.get())))
+    Message msg = createWithParts(MapMarshaller.INSTANCE.demarshall(JSONDecoder.decode(json),
+            new DecodingSession(MappingContextSingleton.get())))
             .setResource("Session", session)
             .setResource("SessionID", session.getSessionId());
 
@@ -80,27 +87,36 @@ public class MessageFactory {
   }
 
 
-
-  public static Message createCommandMessage(QueueSession session, HttpServletRequest request) throws IOException {
-    Map parts = ErraiProtocolEnvelopeMarshaller.INSTANCE.demarshall(JSONStreamDecoder.decode(request.getInputStream()),
-            new DecodingSession(MappingContextSingleton.get()));
-    
-    parts.remove(MessageParts.SessionID.name());
-
-    // Expose session and session id
-    // CDI ext makes use of it to manage conversation contexts
-
-    return from(parts, session, request);
+  public static List<Message> createCommandMessage(QueueSession session, HttpServletRequest request) throws IOException {
+    EJValue value = JSONStreamDecoder.decode(request.getInputStream());
+    if (value.isObject() != null) {
+      return Collections.singletonList(from(getParts(value), session, request));
+    }
+    else if (value.isArray() != null) {
+      EJArray arr = value.isArray();
+      List<Message> messages = new ArrayList<Message>(arr.size());
+      for (int i = 0; i < arr.size(); i++) {
+        messages.add(from(getParts(arr.get(i)), session, request));
+      }
+      return messages;
+    }
+    else {
+      throw new RuntimeException("bad payload");
+    }
   }
 
-  private static Message from(Map<String, Object> parts, QueueSession session, HttpServletRequest request) {
+  private static Map getParts(EJValue value) {
+    return ErraiProtocolEnvelopeMarshaller.INSTANCE.demarshall(value,
+            new DecodingSession(MappingContextSingleton.get()));
+  }
+
+  @SuppressWarnings("unchecked")
+  private static Message from(Map parts, QueueSession session, HttpServletRequest request) {
     Message msg = createWithParts(parts)
             .setResource("Session", session)
             .setResource("SessionID", session.getSessionId())
             .setResource(HttpServletRequest.class.getName(), request);
-
     msg.setFlag(RoutingFlag.FromRemote);
-
     return msg;
   }
 }

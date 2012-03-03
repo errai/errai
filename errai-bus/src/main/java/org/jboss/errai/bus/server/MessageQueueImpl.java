@@ -19,9 +19,9 @@ package org.jboss.errai.bus.server;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueActivationCallback;
-import org.jboss.errai.bus.server.api.QueueSession;
 import org.jboss.errai.bus.server.io.BufferHelper;
 import org.jboss.errai.bus.server.io.buffers.BufferCallback;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
@@ -420,5 +420,12 @@ public class MessageQueueImpl implements MessageQueue {
     this.useDirectSocketChannel = true;
 
     log.info("queue " + getSession().getSessionId() + " transitioned to direct channel mode.");
+  }
+
+  @Override
+  public String toString() {
+    return "MessageQueueImpl{" +
+            "session=" + session +
+            '}';
   }
 }

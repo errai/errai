@@ -32,6 +32,7 @@ import org.jboss.errai.bus.server.service.bootstrap.OrderedBootstrap;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -100,6 +101,12 @@ public class ErraiServiceImpl<S> implements ErraiService<S> {
     }
   }
 
+  @Override
+  public void store(Collection<Message> messages) {
+    for (Message m : messages) {
+      store(m);
+    }
+  }
 
   public void stopService() {
     bus.stop();

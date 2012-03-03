@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.server.api;
-
-import org.jboss.errai.bus.server.io.buffers.BufferColor;
+package org.jboss.errai.bus.client.api;
 
 import java.util.Collection;
 

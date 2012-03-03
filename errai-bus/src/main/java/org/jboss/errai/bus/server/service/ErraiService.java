@@ -19,6 +19,8 @@ package org.jboss.errai.bus.server.service;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
 
+import java.util.Collection;
+
 /**
  * The <tt>ErraiService</tt> is a minimal template for what is needed. It facilitates the ability to store a message,
  * obtain the server bus and configuration
@@ -39,6 +41,12 @@ public interface ErraiService<S> extends ServiceComposite<S> {
    * @param message - the message to store
    */
   public void store(Message message);
+
+  /**
+   * Stores a collection of messages/
+   * @param messages
+   */
+  public void store(Collection<Message> messages);
 
   /**
    * Retrieves the server message bus employed by this service

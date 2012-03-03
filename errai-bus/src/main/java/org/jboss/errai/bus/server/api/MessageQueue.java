@@ -17,14 +17,11 @@
 package org.jboss.errai.bus.server.api;
 
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.server.io.buffers.BufferColor;
+import org.jboss.errai.bus.client.api.QueueSession;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.concurrent.BlockingQueue;
 
 
 public interface MessageQueue {

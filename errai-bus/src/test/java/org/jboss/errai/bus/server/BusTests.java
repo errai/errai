@@ -17,8 +17,8 @@
 package org.jboss.errai.bus.server;
 
 import junit.framework.TestCase;
-import org.jboss.errai.bus.server.api.QueueSession;
-import org.jboss.errai.bus.server.api.SessionEndListener;
+import org.jboss.errai.bus.client.api.QueueSession;
+import org.jboss.errai.bus.client.api.SessionEndListener;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
 

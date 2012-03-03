@@ -25,10 +25,10 @@ import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
+import org.jboss.errai.bus.client.api.QueueSession;
+import org.jboss.errai.bus.client.api.SessionEndListener;
 import org.jboss.errai.bus.client.api.laundry.LaundryListProviderFactory;
-import org.jboss.errai.bus.server.api.QueueSession;
 import org.jboss.errai.bus.server.api.SessionEndEvent;
-import org.jboss.errai.bus.server.api.SessionEndListener;
 import org.jboss.errai.bus.server.api.SessionProvider;
 import org.jboss.errai.bus.server.util.SecureHashUtil;
 import org.jboss.errai.bus.server.util.ServerLaundryList;
@@ -154,6 +154,37 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
       for (SessionEndListener sessionEndListener : sessionEndListeners) {
         sessionEndListener.onSessionEnd(event);
       }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (!(o instanceof HttpSessionWrapper)) return false;
+
+      HttpSessionWrapper that = (HttpSessionWrapper) o;
+
+      if (valid != that.valid) return false;
+      if (remoteQueueID != null ? !remoteQueueID.equals(that.remoteQueueID) : that.remoteQueueID != null) return false;
+      if (sessionId != null ? !sessionId.equals(that.sessionId) : that.sessionId != null) return false;
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      int result = (sessionId != null ? sessionId.hashCode() : 0);
+      result = 31 * result + (remoteQueueID != null ? remoteQueueID.hashCode() : 0);
+      result = 31 * result + (valid ? 1 : 0);
+      return result;
+    }
+
+    @Override
+    public String toString() {
+      return "HttpSessionWrapper{" +
+              ", sessionId='" + sessionId + '\'' +
+              ", remoteQueueID='" + remoteQueueID + '\'' +
+              ", valid=" + valid +
+              '}';
     }
   }
 }

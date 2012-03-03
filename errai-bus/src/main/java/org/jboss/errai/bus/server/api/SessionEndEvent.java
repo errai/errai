@@ -16,6 +16,8 @@
 
 package org.jboss.errai.bus.server.api;
 
+import org.jboss.errai.bus.client.api.QueueSession;
+
 public class SessionEndEvent {
   private QueueSession session;
 

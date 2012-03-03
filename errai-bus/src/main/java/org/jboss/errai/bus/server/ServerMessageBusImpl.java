@@ -21,6 +21,7 @@ import com.google.inject.Singleton;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.MessageListener;
+import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.SubscribeListener;
 import org.jboss.errai.bus.client.api.UnsubscribeListener;
 import org.jboss.errai.bus.client.api.base.Capabilities;
@@ -40,7 +41,6 @@ import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueCloseEvent;
 import org.jboss.errai.bus.server.api.QueueClosedListener;
-import org.jboss.errai.bus.server.api.QueueSession;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.bus.server.io.BufferHelper;
 import org.jboss.errai.bus.server.io.IOConfigAttribs;
@@ -229,6 +229,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 queue = (MessageQueueImpl) messageQueues.get(session);
                 queue.stopQueue();
                 closeQueue(queue);
+                session.endSession();
               }
 
               break;
@@ -1187,9 +1188,13 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
   private MessageQueue getQueueByMessage(Message message) {
     MessageQueue queue = getQueue(getSession(message));
-    if (queue == null)
-      throw new QueueUnavailableException("no queue available to send. (queue or session may have expired)");
-    return queue;
+    if (queue == null) {
+      throw new QueueUnavailableException("no queue available to send. (queue or session may have expired): " +
+              "(session id: " + getSession(message).getSessionId() + ")");
+    }
+    else {
+      return queue;
+    }
   }
 
   @Override

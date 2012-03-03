@@ -16,6 +16,7 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
+import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
@@ -50,12 +51,13 @@ public class ErraiProtocolEnvelopeMarshaller extends AbstractJSONMarshaller<Map<
       return null;
 
     for (String key : jsonObject.keySet()) {
+      if (MessageParts.SessionID.name().equals(key)) continue;
       EJValue v = jsonObject.get(key);
       if (!v.isNull()) {
         impl.put(key, ctx.getMarshallerInstance(ctx.determineTypeFor(null, v)).demarshall(v, ctx));
-      } 
+      }
       else {
-        impl.put(key, null);   
+        impl.put(key, null);
       }
     }
     return impl;
@@ -73,6 +75,8 @@ public class ErraiProtocolEnvelopeMarshaller extends AbstractJSONMarshaller<Map<
         buf.append(",");
       }
       key = entry.getKey();
+      if (MessageParts.SessionID.name().equals(key)) continue;
+
       val = entry.getValue();
 
       Marshaller<Object> valueMarshaller;

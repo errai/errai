@@ -17,10 +17,10 @@
 package org.jboss.errai.bus.server.util;
 
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.laundry.Laundry;
 import org.jboss.errai.bus.client.api.laundry.LaundryList;
 import org.jboss.errai.bus.client.api.laundry.LaundryReclaim;
-import org.jboss.errai.bus.server.api.QueueSession;
 import org.jboss.errai.common.client.framework.Assert;
 
 import java.util.Iterator;

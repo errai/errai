@@ -16,11 +16,11 @@
 
 package org.jboss.errai.bus.server;
 
+import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.common.client.api.tasks.AsyncTask;
 import org.jboss.errai.common.client.api.tasks.HasAsyncTaskRef;
 import org.jboss.errai.common.client.api.tasks.TaskManager;
 import org.jboss.errai.common.client.util.TimeUnit;
-import org.jboss.errai.bus.server.api.QueueSession;
 import org.jboss.errai.bus.server.async.scheduling.PooledExecutorService;
 
 public class DefaultTaskManager implements TaskManager {
