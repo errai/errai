@@ -548,6 +548,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         new Timer() {
           @Override
           public void run() {
+            if (!initialized) return;
             transmitRemote(BusTools.encodeMessages(toSendBuffer), new ArrayList<Message>(toSendBuffer));
           }
         }.schedule(150);
@@ -773,6 +774,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       subscriptions.clear();
     }
     finally {
+      this.lastTx = 0;
+      this.toSendBuffer.clear();
+      this.txActive = false;
+      this.rxActive = false;
+
       this.remotes.clear();
       this.disconnected = true;
       this.initialized = false;
@@ -884,6 +890,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         switch (BusCommands.valueOf(message.getCommandType())) {
           case RemoteSubscribe:
             if (message.hasPart(MessageParts.SubjectsList)) {
+              LogUtil.log("remote services available: " + message.get(List.class, MessageParts.SubjectsList));
+
               for (String subject : (List<String>) message.get(List.class, MessageParts.SubjectsList)) {
                 remoteSubscribe(subject);
               }
@@ -945,81 +953,91 @@ public class ClientMessageBusImpl implements ClientMessageBus {
               return;
             }
 
-            LogUtil.log("received FinishStateSync message. preparing to bring up the federation");
-
-            List<String> subjects = new ArrayList<String>();
-            for (String s : subscriptions.keySet()) {
-              if (s.startsWith("local:")) continue;
-              if (!remotes.containsKey(s)) subjects.add(s);
-            }
-
-            sessionId = message.get(String.class, MessageParts.ConnectionSessionKey);
-
-            remoteSubscribe(BuiltInServices.ServerBus.name());
-
-            MessageBuilder.createMessage()
-                    .toSubject(BuiltInServices.ServerBus.name())
-                    .command(RemoteSubscribe)
-                    .with(MessageParts.SubjectsList, subjects)
-                    .with(PriorityProcessing, "1")
-                    .noErrorHandling()
-                    .sendNowWith(ClientMessageBusImpl.this);
-
-
-            MessageBuilder.createMessage()
-                    .toSubject(BuiltInServices.ServerBus.name())
-                    .command(BusCommands.FinishStateSync)
-                    .with(PriorityProcessing, "1")
-                    .noErrorHandling().sendNowWith(ClientMessageBusImpl.this);
-
-            /**
-             * ... also send RemoteUnsubscribe signals.
-             */
-            addSubscribeListener(new SubscribeListener() {
+            new Timer() {
               @Override
-              public void onSubscribe(SubscriptionEvent event) {
-                if (event.isLocalOnly() || event.getSubject().startsWith("local:")
-                        || remotes.containsKey(event.getSubject())) {
-                  return;
+              public void run() {
+                LogUtil.log("received FinishStateSync message. preparing to bring up the federation");
+
+                List<String> subjects = new ArrayList<String>();
+                for (String s : subscriptions.keySet()) {
+                  if (s.startsWith("local:")) continue;
+                  if (!remotes.containsKey(s)) subjects.add(s);
                 }
 
-                if (event.isNew()) {
-                  MessageBuilder.getMessageProvider().get().command(RemoteSubscribe)
-                          .toSubject(BuiltInServices.ServerBus.name())
-                          .set(Subject, event.getSubject())
-                          .set(PriorityProcessing, "1")
-                          .sendNowWith(ClientMessageBusImpl.this);
-                }
-              }
-            });
+                sessionId = message.get(String.class, MessageParts.ConnectionSessionKey);
 
-            addUnsubscribeListener(new UnsubscribeListener() {
-              @Override
-              public void onUnsubscribe(SubscriptionEvent event) {
-                MessageBuilder.getMessageProvider().get().command(BusCommands.RemoteUnsubscribe)
+                remoteSubscribe(BuiltInServices.ServerBus.name());
+
+                MessageBuilder.createMessage()
                         .toSubject(BuiltInServices.ServerBus.name())
-                        .set(Subject, event.getSubject())
-                        .set(PriorityProcessing, "1")
+                        .command(RemoteSubscribe)
+                        .with(MessageParts.SubjectsList, subjects)
+                        .with(PriorityProcessing, "1")
+                        .noErrorHandling()
                         .sendNowWith(ClientMessageBusImpl.this);
-              }
-            });
 
-            subscribe(DefaultErrorCallback.CLIENT_ERROR_SUBJECT, new MessageCallback() {
-              @Override
-              public void callback(Message message) {
-                String errorTo = message.get(String.class, MessageParts.ErrorTo);
-                if (errorTo == null) {
-                  logError(message.get(String.class, MessageParts.ErrorMessage),
-                          message.get(String.class, MessageParts.AdditionalDetails), null);
-                }
-                else {
-                  message.toSubject(errorTo);
-                  message.sendNowWith(ClientMessageBusImpl.this);
-                }
-              }
-            });
 
-            InitVotes.voteFor(ClientMessageBusImpl.class);
+                MessageBuilder.createMessage()
+                        .toSubject(BuiltInServices.ServerBus.name())
+                        .command(BusCommands.FinishStateSync)
+                        .with(PriorityProcessing, "1")
+                        .noErrorHandling().sendNowWith(ClientMessageBusImpl.this);
+
+                /**
+                 * ... also send RemoteUnsubscribe signals.
+                 */
+                addSubscribeListener(new SubscribeListener() {
+                  @Override
+                  public void onSubscribe(SubscriptionEvent event) {
+                    if (event.isLocalOnly() || event.getSubject().startsWith("local:")
+                            || remotes.containsKey(event.getSubject())) {
+                      return;
+                    }
+
+                    if (event.isNew()) {
+                      MessageBuilder.getMessageProvider().get().command(RemoteSubscribe)
+                              .toSubject(BuiltInServices.ServerBus.name())
+                              .set(Subject, event.getSubject())
+                              .set(PriorityProcessing, "1")
+                              .sendNowWith(ClientMessageBusImpl.this);
+                    }
+                  }
+                });
+
+                addUnsubscribeListener(new UnsubscribeListener() {
+                  @Override
+                  public void onUnsubscribe(SubscriptionEvent event) {
+                    MessageBuilder.getMessageProvider().get().command(BusCommands.RemoteUnsubscribe)
+                            .toSubject(BuiltInServices.ServerBus.name())
+                            .set(Subject, event.getSubject())
+                            .set(PriorityProcessing, "1")
+                            .sendNowWith(ClientMessageBusImpl.this);
+                  }
+                });
+
+                subscribe(DefaultErrorCallback.CLIENT_ERROR_SUBJECT, new MessageCallback() {
+                  @Override
+                  public void callback(Message message) {
+                    String errorTo = message.get(String.class, MessageParts.ErrorTo);
+                    if (errorTo == null) {
+                      logError(message.get(String.class, MessageParts.ErrorMessage),
+                              message.get(String.class, MessageParts.AdditionalDetails), null);
+                    }
+                    else {
+                      message.toSubject(errorTo);
+                      message.sendNowWith(ClientMessageBusImpl.this);
+                    }
+                  }
+                });
+
+                InitVotes.voteFor(ClientMessageBusImpl.class);
+
+
+                // end of FinishStateSync Timer
+              }
+            }.schedule(5);
+
+
             break;
 
           case SessionExpired:

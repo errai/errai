@@ -351,7 +351,7 @@ public class SerializationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        final String[] expected = { "This is a test string", "And so is this" };
+        final String[] expected = {"This is a test string", "And so is this"};
 
         MessageBuilder.createCall(new RemoteCallback<String[]>() {
           @Override
@@ -368,7 +368,7 @@ public class SerializationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        final int[] expected = { Integer.MIN_VALUE, Integer.MAX_VALUE };
+        final int[] expected = {Integer.MIN_VALUE, Integer.MAX_VALUE};
 
         MessageBuilder.createCall(new RemoteCallback<int[]>() {
           @Override
@@ -385,7 +385,7 @@ public class SerializationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        final long[] expected = { Long.MIN_VALUE, Long.MAX_VALUE };
+        final long[] expected = {Long.MIN_VALUE, Long.MAX_VALUE};
 
         MessageBuilder.createCall(new RemoteCallback<long[]>() {
           @Override
@@ -402,7 +402,7 @@ public class SerializationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        final double[] expected = { Double.MAX_VALUE, Double.MAX_VALUE };
+        final double[] expected = {Double.MAX_VALUE, Double.MAX_VALUE};
 
         MessageBuilder.createCall(new RemoteCallback<double[]>() {
           @Override
@@ -419,7 +419,7 @@ public class SerializationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        final float[] expected = { Float.MIN_VALUE, Float.MAX_VALUE };
+        final float[] expected = {Float.MIN_VALUE, Float.MAX_VALUE};
 
         MessageBuilder.createCall(new RemoteCallback<float[]>() {
           @Override
@@ -436,7 +436,7 @@ public class SerializationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        final short[] expected = { Short.MIN_VALUE, Short.MAX_VALUE };
+        final short[] expected = {Short.MIN_VALUE, Short.MAX_VALUE};
 
         MessageBuilder.createCall(new RemoteCallback<short[]>() {
           @Override
@@ -453,7 +453,7 @@ public class SerializationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        final boolean[] expected = { Boolean.FALSE, Boolean.TRUE };
+        final boolean[] expected = {Boolean.FALSE, Boolean.TRUE};
 
         MessageBuilder.createCall(new RemoteCallback<boolean[]>() {
           @Override
@@ -470,7 +470,7 @@ public class SerializationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        final char[] expected = { 'a', 'z' };
+        final char[] expected = {'a', 'z'};
 
         MessageBuilder.createCall(new RemoteCallback<char[]>() {
           @Override
@@ -487,7 +487,7 @@ public class SerializationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        final byte[] expected = { (byte) -100, (byte) 100 };
+        final byte[] expected = {(byte) -100, (byte) 100};
 
         MessageBuilder.createCall(new RemoteCallback<byte[]>() {
           @Override
@@ -688,34 +688,6 @@ public class SerializationTests extends AbstractErraiTest {
     });
   }
 
-  public void testCharacterInCollection() {
-    runAfterInit(new Runnable() {
-      @Override
-      public void run() {
-        final List<Character> list = new ArrayList<Character>();
-
-        list.add('a');
-        list.add('c');
-        list.add('e');
-        list.add('g');
-        list.add('i');
-
-        MessageBuilder.createCall(new RemoteCallback<List<Character>>() {
-          @Override
-          public void callback(List<Character> response) {
-            try {
-              assertEquals(list, response);
-              finishTest();
-            }
-            catch (Throwable e) {
-              e.printStackTrace();
-              fail();
-            }
-          }
-        }, TestSerializationRPCService.class).listOfCharacters(list);
-      }
-    });
-  }
 
   public void testSet() {
     runAfterInit(new Runnable() {
@@ -741,6 +713,36 @@ public class SerializationTests extends AbstractErraiTest {
             }
           }
         }, TestSerializationRPCService.class).setOfStrings(set);
+      }
+    });
+  }
+
+
+  public void testCharacterInCollection() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final List<Character> list = new ArrayList<Character>();
+
+        list.add('a');
+        list.add('c');
+        list.add('e');
+        list.add('g');
+        list.add('i');
+
+        MessageBuilder.createCall(new RemoteCallback<List<Character>>() {
+          @Override
+          public void callback(List<Character> response) {
+            try {
+              assertEquals(list, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestSerializationRPCService.class).listOfCharacters(list);
       }
     });
   }

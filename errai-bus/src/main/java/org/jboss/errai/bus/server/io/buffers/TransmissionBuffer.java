@@ -100,7 +100,7 @@ public class TransmissionBuffer implements Buffer {
   /**
    * The visible head sequence number seen by the readers.
    */
-  private volatile long headSequence = 1;
+  private volatile long headSequence = 0;
 
   private TransmissionBuffer(boolean directBuffer, int segmentSize, int segments) {
     // must pad segment size for size headers -- or the last segment may be odd-sized (that would not be good)
