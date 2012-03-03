@@ -1172,43 +1172,6 @@
         </configuration>
       </plugin>
       <plugin>
-        <artifactId>maven-clean-plugin</artifactId>
-        <version>2.2</version>
-        <configuration>
-          <skip>true</skip>
-        </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>clean.war</id>
-            <phase>clean</phase>
-            <configuration>
-              <tasks>
-                <!-- The gwt-maven-plugin use the war source folder as its 
-                  build directory. We need to cleanup after we run the plugin and remove all 
-                  GWT related artifacts that are required to run the hosted mode. -->
-                <delete dir="war/WEB-INF/classes" />
-                <delete dir="war/WEB-INF/lib" />
-                <delete dir="war/META-INF" />
-                <delete file="war/WEB-INF/web.xml" />
-                <delete dir="war/app" />
-                <delete dir="target" />
-
-                <copy file="src/${webDescriptor}/web.xml" toDir="war/WEB-INF" />
-              </tasks>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>2.3.2</version>
         <configuration>
@@ -1216,6 +1179,31 @@
           <target>1.6</target>
         </configuration>
       </plugin>
+      <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-clean-plugin</artifactId>
+            <version>2.4.1</version>
+    
+            <configuration>
+                <filesets>
+                    <fileset>
+                        <directory>.errai</directory>
+                    </fileset>
+                    <fileset>
+                        <directory>.gwt</directory>
+                    </fileset>
+                    <fileset>
+                        <directory>src/main/gwt-unitCache</directory>
+                    </fileset>
+                    <fileset>
+                        <directory>war/org.jboss.errai.demo.mobile.ErraiCdiMobileDemo</directory>
+                    </fileset>
+                    <fileset>
+                        <directory>war/WEB-INF/deploy</directory>
+                    </fileset>
+                </filesets>
+            </configuration>
+        </plugin>
     </plugins>
 
     <pluginManagement>

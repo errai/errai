@@ -20,6 +20,7 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
 import org.jboss.errai.demo.mobile.client.shared.AllClientOrientations;
+import org.jboss.errai.demo.mobile.client.shared.Disconnected;
 import org.jboss.errai.demo.mobile.client.shared.OrientationEvent;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
@@ -44,7 +45,7 @@ public class ClientMain {
       @Override
       public void run() {
         orientationDetector.setClientId(welcomeDialog.getNameBoxContents());
-        RootPanel.get().remove(welcomeDialog);
+        RootPanel.get("rootPanel").remove(welcomeDialog);
 
         // TODO: could block startup using InitBallot/voteForInit()
         GWT.log("Starting to poll for readiness! Orientation detector: " + orientationDetector);
@@ -63,7 +64,7 @@ public class ClientMain {
         t.schedule(100);
       }
     });
-    RootPanel.get().add(welcomeDialog);
+    RootPanel.get("rootPanel").add(welcomeDialog);
   }
 
   public void visualizeOrientationEvent(OrientationEvent e) {
@@ -73,6 +74,7 @@ public class ClientMain {
       Element template = Document.get().getElementById("rotateMeTemplate");
       rotateMe = (Element) template.cloneNode(true);
       rotateMe.setId("rotateMe-" + e.getClientId());
+      rotateMe.setInnerText(e.getClientId());
       template.getParentElement().appendChild(rotateMe);
     }
     String transform = "rotate(" + e.getX() + "deg)";
@@ -87,6 +89,13 @@ public class ClientMain {
   public void onAllClientOrientationsUpdate(@Observes AllClientOrientations aco) {
     for (OrientationEvent e : aco.getClientOrientations()) {
       visualizeOrientationEvent(e);
+    }
+  }
+
+  public void onClientDisconnect(@Observes @Disconnected OrientationEvent e) {
+    Element rotateMe = Document.get().getElementById("rotateMe-" + e.getClientId());
+    if (rotateMe != null) {
+      rotateMe.getParentElement().removeChild(rotateMe);
     }
   }
 }

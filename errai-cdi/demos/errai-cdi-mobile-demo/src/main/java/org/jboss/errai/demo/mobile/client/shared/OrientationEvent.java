@@ -10,19 +10,17 @@ public class OrientationEvent {
   private final double x;
   private final double y;
   private final double z;
-  private final long timestamp;
+  private transient final long timestamp = System.currentTimeMillis();
 
   public OrientationEvent(
       @MapsTo("clientId") String clientId,
       @MapsTo("x") double x,
       @MapsTo("y") double y,
-      @MapsTo("z") double z,
-      @MapsTo("timestamp") long timestamp) {
+      @MapsTo("z") double z) {
     this.clientId = clientId;
     this.x = x;
     this.y = y;
     this.z = z;
-    this.timestamp = timestamp;
   }
 
   public String getClientId() {

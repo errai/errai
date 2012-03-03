@@ -5,6 +5,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
+import org.jboss.errai.demo.mobile.client.shared.Ongoing;
 import org.jboss.errai.demo.mobile.client.shared.OrientationEvent;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 
@@ -14,7 +15,7 @@ import com.google.gwt.core.client.GWT;
 @Singleton
 public class OrientationDetectorProvider implements Provider<OrientationDetector> {
 
-  @Inject Event<OrientationEvent> orientationEventSource;
+  @Inject @Ongoing Event<OrientationEvent> orientationEventSource;
 
   @Override
   public OrientationDetector get() {

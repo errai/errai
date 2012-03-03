@@ -23,8 +23,8 @@ public class PhoneGapOrientationDetector extends OrientationDetector {
 
   this.@org.jboss.errai.demo.mobile.client.local.PhoneGapOrientationDetector::watchID = $wnd.navigator.accelerometer.watchAcceleration(
     function(acceleration) {
-      this.@org.jboss.errai.demo.mobile.client.local.PhoneGapOrientationDetector::fireOrientationEvent(DDDD)(
-          acceleration.x, acceleration.y, acceleration.z, acceleration.timestamp);
+      this.@org.jboss.errai.demo.mobile.client.local.PhoneGapOrientationDetector::fireOrientationEvent(DDD)(
+          acceleration.x, acceleration.y, acceleration.z);
     },
     function() {
       $wnd.alert("Accelerometer not supported");

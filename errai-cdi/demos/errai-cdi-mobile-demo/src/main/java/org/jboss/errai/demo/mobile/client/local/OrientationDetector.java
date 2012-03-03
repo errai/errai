@@ -30,8 +30,8 @@ public abstract class OrientationDetector {
    * meant to be called by the browser-specific logic that detects the device
    * orientation.
    */
-  protected void fireOrientationEvent(double x, double y, double z, double timestamp) {
-    orientationEventSource.fire(new OrientationEvent(clientId, x, y, z, (long) timestamp));
+  protected void fireOrientationEvent(double x, double y, double z) {
+    orientationEventSource.fire(new OrientationEvent(clientId, x, y, z));
   }
 
   /**
