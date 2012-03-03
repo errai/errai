@@ -128,7 +128,7 @@ public class ClientTaskManager implements TaskManager {
 
     @Override
     public boolean isCancelled() {
-      return finished || timer.isCancelled();
+      return timer.isCancelled();
     }
 
     private boolean isFinished() {
