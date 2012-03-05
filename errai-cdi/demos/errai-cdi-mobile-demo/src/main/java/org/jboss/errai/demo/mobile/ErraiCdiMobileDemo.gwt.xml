@@ -7,6 +7,9 @@
     <inherits name="org.jboss.errai.ioc.Container"/>
     <inherits name="org.jboss.errai.enterprise.CDI"/>
     
+    <public path="resources"></public>
+    <stylesheet src="style.css"/>
+    
     <!-- Default is to assume HTML 5 device orientation support -->
     <replace-with class="org.jboss.errai.demo.mobile.client.local.Html5OrientationDetector">
       <when-type-is class="org.jboss.errai.demo.mobile.client.local.OrientationDetector"/>

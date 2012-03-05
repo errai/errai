@@ -65,6 +65,7 @@ public class ClientMain {
       }
     });
     RootPanel.get("rootPanel").add(welcomeDialog);
+    welcomeDialog.nameBox.setFocus(true);
   }
 
   public void visualizeOrientationEvent(OrientationEvent e) {

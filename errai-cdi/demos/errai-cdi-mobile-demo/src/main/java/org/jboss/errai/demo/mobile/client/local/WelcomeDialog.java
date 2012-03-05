@@ -4,6 +4,8 @@ import org.jboss.errai.common.client.framework.Assert;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -29,7 +31,26 @@ public class WelcomeDialog extends Composite {
     initWidget(uiBinder.createAndBindUi(this));
   }
 
+  /**
+   * Aliases typing Enter in the name box to the same as pressing the "Go"
+   * button.
+   *
+   * @param event
+   *          The key event. The value {@code event.getNativeKeyCode()} is
+   *          compared against {@code KeyCodes.KEY_ENTER}.
+   */
+  @UiHandler("nameBox")
+  void onNameBoxKeypress(KeyUpEvent event) {
+    if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+      onGoButtonClick(null);
+    }
+  }
 
+  /**
+   * Runs the {@code afterNameGivenAction}.
+   *
+   * @param event Ignored. Can be null.
+   */
   @UiHandler("goButton")
   void onGoButtonClick(ClickEvent event) {
     afterNameGivenAction.run();

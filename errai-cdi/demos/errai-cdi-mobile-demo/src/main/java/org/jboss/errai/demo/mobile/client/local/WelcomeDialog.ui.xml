@@ -15,29 +15,13 @@
     }
   </ui:style>
   <g:HTMLPanel>
-  <g:DecoratorPanel>
-  	<g:Grid>
-  		<g:row>
-  			<g:customCell>
-  				<g:Label text="Hi There!" horizontalAlignment="ALIGN_CENTER" styleName="{style.greeting}"/>
-  			</g:customCell>
-  		</g:row>
-  		<g:row>
-  			<g:customCell>
-  				<g:Label text="To get started, just tell us your name and then press Go" horizontalAlignment="ALIGN_CENTER"/>
-  			</g:customCell>
-  		</g:row>
-  		<g:row>
-  			<g:customCell>
-  				<g:TextBox maxLength="20" alignment="CENTER" ui:field="nameBox" textAlignment="ALIGN_CENTER" styleName="{style.greetingTextBox}"/>
-  			</g:customCell>
-  		</g:row>
-  		<g:row>
-  			<g:customCell>
-  				<g:Button text="Go" ui:field="goButton"/>
-  			</g:customCell>
-  		</g:row>
-  </g:Grid>
+  <g:DecoratorPanel styleName="loginPanel">
+  	<g:VerticalPanel horizontalAlignment="ALIGN_CENTER">
+  		<g:Label text="Hi There!" horizontalAlignment="ALIGN_CENTER" styleName="{style.greeting}"/>
+  		<g:Label text="To get started, just tell us your name and then press Go" horizontalAlignment="ALIGN_CENTER"/>
+  		<g:TextBox maxLength="20" alignment="CENTER" ui:field="nameBox" textAlignment="ALIGN_CENTER" styleName="{style.greetingTextBox}"/>
+  		<g:Button text="Go" ui:field="goButton"/>
+  	</g:VerticalPanel>
   </g:DecoratorPanel>
   
   </g:HTMLPanel>
