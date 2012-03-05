@@ -254,6 +254,13 @@ public abstract class ServerMarshallUtil {
                     ClassLoader.getSystemClassLoader() :
                     Thread.currentThread().getContextClassLoader());
 
+    try {
+      return clsLoader.loadClass(packageName + "." + className);
+    }
+    catch (Throwable t) {
+      // fall through
+    }
+
     inputStream.read(classDefinition);
 
     for (File file : new File(path).getParentFile().listFiles()) {
