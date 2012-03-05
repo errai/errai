@@ -74,7 +74,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.enterprise.context.SessionScoped;
+import javax.enterprise.inject.Default;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
@@ -163,6 +165,8 @@ public class IOCBootstrapGenerator {
     annos.add(Singleton.class);
     annos.add(EntryPoint.class);
     annos.add(IOCBootstrapTask.class);
+    annos.add(Dependent.class);
+    annos.add(Default.class);
 
     String gen;
     if (RebindUtils.hasClasspathChangedForAnnotatedWith(annos) || !cacheFile.exists()) {

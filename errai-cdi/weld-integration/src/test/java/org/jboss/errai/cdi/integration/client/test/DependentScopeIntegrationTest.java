@@ -24,6 +24,7 @@ import org.jboss.errai.cdi.integration.client.shared.ServiceB;
 import org.jboss.errai.cdi.integration.client.shared.ServiceC;
 import org.jboss.errai.cdi.integration.client.shared.TestBean;
 import org.jboss.errai.cdi.integration.client.shared.TestOuterBean;
+import org.jboss.errai.cdi.integration.client.shared.UnreferencedDependentRootBean;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
@@ -128,5 +129,22 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
         finishTest();
       }
     });
+  }
+
+  public void testUnreferencedDependentRootBeanAccessible() {
+    delayTestFinish(60000);
+    CDI.addPostInitTask(new Runnable() {
+      @Override
+      public void run() {
+
+        UnreferencedDependentRootBean applicationScopedBean = IOC.getBeanManager()
+                .lookupBean(UnreferencedDependentRootBean.class).getInstance();
+
+        assertNotNull("UnreferencedDependentRootBean was null", applicationScopedBean);
+
+        finishTest();
+      }
+    });
+
   }
 }

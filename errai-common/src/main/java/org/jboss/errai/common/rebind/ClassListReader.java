@@ -29,8 +29,7 @@ import java.util.Set;
  */
 public class ClassListReader {
   public static Set<String> getClassSetFromFile(File file) {
-    InputStream inputStream = null
-            ;
+    InputStream inputStream = null;
     try {
       inputStream = new BufferedInputStream(new FileInputStream(file));
 

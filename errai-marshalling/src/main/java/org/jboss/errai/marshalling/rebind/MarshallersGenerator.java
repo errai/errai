@@ -69,7 +69,6 @@ public class MarshallersGenerator extends Generator {
 
   private static Logger log = LoggerFactory.getLogger(MarshallersGenerator.class);
 
-
   static {
     // define the strategies which will be used to figure out where to desposit the server-side marshaller
     rootDiscoveryStrategies = new DiscoveryStrategy[]{
@@ -133,7 +132,6 @@ public class MarshallersGenerator extends Generator {
               }
             }
             ,
-
             new DiscoveryStrategy() {
               @Override
               public Set<String> getCandidate(GeneratorContext context, DiscoveryContext discoveryContext) {
