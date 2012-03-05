@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,27 +16,10 @@
 
 package org.jboss.errai.cdi.integration.client.shared;
 
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
-
 /**
  * @author Mike Brock
  */
-@Dependent
-public class UnreferencedDependentRootBean {
-  public String name = "test";
-
-  @Inject
-  InterfaceContainerClass.SomeInterface beanB;
-
-  public UnreferencedDependentRootBean() {
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public InterfaceContainerClass.SomeInterface getBeanB() {
-    return beanB;
+public class InterfaceContainerClass {
+  public interface SomeInterface {
   }
 }

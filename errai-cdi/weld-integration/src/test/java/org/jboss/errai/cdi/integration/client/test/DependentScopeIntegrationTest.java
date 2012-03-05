@@ -131,6 +131,11 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
     });
   }
 
+  /**
+   * Tests that a dependent scoped bean, which is not referenced by other beans, is accessible from the BeanManager.
+   * Additionally, this test also ensures that a dependent scoped bean is resolveable behind an interface that
+   * it implements and that the interface is an innerclass of another bean.
+   */
   public void testUnreferencedDependentRootBeanAccessible() {
     delayTestFinish(60000);
     CDI.addPostInitTask(new Runnable() {
@@ -141,10 +146,10 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
                 .lookupBean(UnreferencedDependentRootBean.class).getInstance();
 
         assertNotNull("UnreferencedDependentRootBean was null", applicationScopedBean);
+        assertNotNull("Dependent injection was null", applicationScopedBean.getBeanB());
 
         finishTest();
       }
     });
-
   }
 }

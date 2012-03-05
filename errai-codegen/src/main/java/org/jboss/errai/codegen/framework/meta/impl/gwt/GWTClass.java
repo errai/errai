@@ -138,7 +138,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
 
   @Override
   public String getFullyQualifiedName() {
-    return getEnclosedMetaObject().getQualifiedSourceName();
+    return getEnclosedMetaObject().getQualifiedBinaryName();
   }
 
   @Override
