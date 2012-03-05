@@ -30,6 +30,7 @@ import org.jboss.errai.codegen.framework.exception.OutOfScopeException;
 import org.jboss.errai.codegen.framework.exception.TypeNotIterableException;
 import org.jboss.errai.codegen.framework.exception.UndefinedMethodException;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.util.GenUtil;
 
@@ -59,7 +60,7 @@ public class MethodCall extends AbstractCallElement {
       CallParameters callParams = fromStatements(GenUtil.generateCallParameters(context, parameters));
 
       statement.generate(context);
-      
+
       MetaClass callType = statement.getType();
 
       MetaClass[] parameterTypes = callParams.getParameterTypes();
@@ -86,7 +87,7 @@ public class MethodCall extends AbstractCallElement {
       nextOrReturn(writer, context, statement);
     }
     catch (OutOfScopeException e) {
-     throw e;
+      throw e;
     }
     catch (InvalidExpressionException e) {
       throw e;
@@ -103,6 +104,18 @@ public class MethodCall extends AbstractCallElement {
     catch (Exception e) {
       throw new RuntimeException("error generating method call for: " + methodName
               + "(" + Arrays.toString(parameters) + ")", e);
+
+//      nextOrReturn(writer, context, new Statement() {
+//        @Override
+//        public String generate(Context context) {
+//          return methodName + "(" + Arrays.toString(parameters) + ")";
+//        }
+//
+//        @Override
+//        public MetaClass getType() {
+//          return MetaClassFactory.get(Object.class);
+//        }
+//      });
     }
   }
 

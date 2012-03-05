@@ -16,20 +16,23 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
-import java.lang.annotation.Annotation;
-
-import org.jboss.errai.codegen.framework.builder.BlockBuilder;
-import org.jboss.errai.codegen.framework.meta.*;
-import org.jboss.errai.ioc.client.ContextualProviderContext;
-import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
+import org.jboss.errai.codegen.framework.meta.MetaField;
+import org.jboss.errai.codegen.framework.meta.MetaParameter;
+import org.jboss.errai.codegen.framework.meta.MetaParameterizedType;
+import org.jboss.errai.codegen.framework.meta.MetaType;
 import org.jboss.errai.codegen.framework.meta.impl.java.JavaReflectionField;
 import org.jboss.errai.codegen.framework.meta.impl.java.JavaReflectionParameterizedType;
 import org.jboss.errai.codegen.framework.util.Refs;
 import org.jboss.errai.codegen.framework.util.Stmt;
+import org.jboss.errai.ioc.client.ContextualProviderContext;
+import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 
 import javax.inject.Provider;
+import java.lang.annotation.Annotation;
 
 public class ContextualProviderInjector extends TypeInjector {
   private final Injector providerInjector;

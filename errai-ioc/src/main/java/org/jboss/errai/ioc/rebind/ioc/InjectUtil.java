@@ -174,7 +174,17 @@ public class InjectUtil {
                                       final Injector injector,
                                       final List<MetaMethod> postConstructTasks) {
 
+    if (postConstructTasks.isEmpty()) return;
+
     final IOCProcessingContext processingContext = ctx.getProcessingContext();
+
+    final MetaClass initializationCallbackType =
+            parameterizedAs(InitializationCallback.class, typeParametersOf(injector.getInjectedType()));
+
+    final BlockBuilder<AnonymousClassStructureBuilder> initMeth
+            = ObjectBuilder.newInstanceOf(initializationCallbackType).extend()
+            .publicOverridesMethod("init", Parameter.of(injector.getInjectedType(), "obj"));
+
 
     for (final MetaMethod meth : postConstructTasks) {
       if (meth.getParameters().length != 0) {
@@ -186,13 +196,6 @@ public class InjectUtil {
         ctx.addExposedMethod(meth);
       }
 
-      MetaClass initializationCallbackType =
-              parameterizedAs(InitializationCallback.class, typeParametersOf(injector.getInjectedType()));
-
-      BlockBuilder<AnonymousClassStructureBuilder> initMeth
-              = ObjectBuilder.newInstanceOf(initializationCallbackType).extend()
-              .publicOverridesMethod("init", Parameter.of(injector.getInjectedType(), "obj"));
-
 
       if (!meth.isPublic()) {
         initMeth.append(Stmt.invokeStatic(ctx.getProcessingContext().getBootstrapClass(),
@@ -201,21 +204,27 @@ public class InjectUtil {
       else {
         initMeth.append(Stmt.loadVariable("obj").invoke(meth.getName()));
       }
-
-      AnonymousClassStructureBuilder classStructureBuilder = initMeth.finish();
-
-      IOCProcessingContext pc = ctx.getProcessingContext();
-
-      final String varName = "init_" + injector.getVarName();
-      injector.setPostInitCallbackVar(varName);
-
-      pc.globalAppend(Stmt.declareVariable(initializationCallbackType).asFinal().named(varName)
-              .initializeWith(classStructureBuilder.finish()));
-
-      Statement postConstructCall = Stmt.loadVariable(varName).invoke("init", Refs.get(injector.getVarName()));
-
-      processingContext.addPostConstructStatement(postConstructCall);
     }
+
+    ctx.deferRunnableTask(new Runnable() {
+      @Override
+      public void run() {
+
+        final String varName = "init_" + injector.getVarName();
+        injector.setPostInitCallbackVar(varName);
+
+        AnonymousClassStructureBuilder classStructureBuilder = initMeth.finish();
+
+        IOCProcessingContext pc = ctx.getProcessingContext();
+
+        pc.globalAppend(Stmt.declareVariable(initializationCallbackType).asFinal().named(varName)
+                .initializeWith(classStructureBuilder.finish()));
+
+        Statement postConstructCall = Stmt.loadVariable(varName).invoke("init", Refs.get(injector.getVarName()));
+
+        processingContext.addPostConstructStatement(postConstructCall);
+      }
+    });
   }
 
   private static List<InjectionTask> scanForTasks(Injector injector, InjectionContext ctx, MetaClass type) {
@@ -320,11 +329,17 @@ public class InjectUtil {
   private static List<MetaMethod> scanForPostConstruct(MetaClass type) {
     final List<MetaMethod> accumulator = new LinkedList<MetaMethod>();
 
-    for (MetaMethod meth : type.getDeclaredMethods()) {
-      if (meth.isAnnotationPresent(PostConstruct.class)) {
-        accumulator.add(meth);
+    MetaClass clazz = type;
+    do {
+      for (MetaMethod meth : clazz.getDeclaredMethods()) {
+        if (meth.isAnnotationPresent(PostConstruct.class)) {
+          accumulator.add(meth);
+        }
       }
     }
+    while ((clazz = clazz.getSuperClass()) != null);
+
+    Collections.reverse(accumulator);
 
     return accumulator;
   }

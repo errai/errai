@@ -215,8 +215,10 @@ public class Context {
     }
     while (found == null && (ctx = ctx.parent) != null);
 
-    if (found == null)
-      throw new OutOfScopeException((mustBeClassMember) ? "this." + name : name);
+    if (found == null) {
+     throw new OutOfScopeException((mustBeClassMember) ? "this." + name : name);
+//      return Variable.create(name, Object.class).getReference();
+    }
 
     return found.getReference();
   }

@@ -16,22 +16,20 @@
 
 package org.jboss.errai.enterprise.client.cdi;
 
-import org.jboss.errai.enterprise.client.cdi.api.CDI;
-import org.jboss.errai.ioc.client.ContextualProviderContext;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.IOCProvider;
-import org.jboss.errai.ioc.client.api.InitBallot;
+import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.ioc.client.container.IOCBeanDef;
 
-import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.inject.Provider;
+import javax.enterprise.inject.Instance;
 import java.lang.annotation.Annotation;
+import java.util.Iterator;
 
 @IOCProvider
-public class EventProvider implements ContextualTypeProvider<Event> {
+public class InstanceProvider implements ContextualTypeProvider<Instance> {
 
   @Override
-  public Event provide(final Class<?>[] typeargs, final Annotation[] qualifiers) {
+  public Instance provide(final Class<?>[] typeargs, final Annotation[] qualifiers) {
 
     /*
     * If you see a compile error here, ensure that you are using Errai's custom
@@ -43,36 +41,44 @@ public class EventProvider implements ContextualTypeProvider<Event> {
     * clobbered your errai-javax-enterprise source folder settings. To fix your
     * setup, see the README in the root of errai-javax-enterprise.
     */
-
-
-    return new Event<Object>() {
-      private Class<?> eventType = (typeargs.length == 1 ? typeargs[0] : Object.class);
-      private Annotation[] _qualifiers = qualifiers;
-
-      public void fire(Object event) {
-        if (event == null)
-          return;
-
-        CDI.fireEvent(event, _qualifiers);
+    return new Instance<Object>() {
+      @Override
+      public Instance<Object> select(Annotation... qualifiers) {
+        throw new RuntimeException("unsupported");
       }
 
       @Override
-      public Event<Object> select(Annotation... qualifiers) {
-        throw new RuntimeException("use of event selectors is unsupported");
+      public <U extends Object> Instance<U> select(Class<U> subtype, Annotation... qualifiers) {
+        throw new RuntimeException("unsupported");
       }
 
       @Override
-      public <U extends Object> Event<U> select(Class<U> subtype, Annotation... qualifiers) {
-        throw new RuntimeException("use of event selectors is unsupported");
+      public boolean isUnsatisfied() {
+        return false;
       }
 
-      public Class getEventType() {
-        return eventType;
+      @Override
+      public boolean isAmbiguous() {
+        return false;
       }
 
-      public Annotation[] getQualifiers() {
-        return _qualifiers;
+      @Override
+      public Iterator<Object> iterator() {
+        throw new RuntimeException("unsupported");
+
+      }
+
+      @Override
+      public Object get() {
+        IOCBeanDef bean = IOC.getBeanManager().lookupBean(typeargs[0], qualifiers);
+        if (bean == null) {
+          return null;
+        }
+        else {
+          return bean.getInstance();
+        }
       }
     };
+
   }
 }
