@@ -51,7 +51,7 @@
             The bootstrap listener (configured in
             <code>WEB-INF/web.xml</code>
             ) for Errai CDI has changed (
-            <code>org.jboss.errai.container.DevModeCDIBootstrap</code>
+            <code>org.jboss.errai.container.CDIServletStateListener</code>
             is now
             <code>org.jboss.errai.container.CDIServletStateListener</code>
             ).

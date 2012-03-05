@@ -22,6 +22,9 @@ import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.server.mock.MockErraiServiceConfigurator;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+
 /**
  * @author Mike Brock
  */
@@ -41,7 +44,7 @@ public class BusPerformanceTests extends TestCase {
     ServerMessageBusImpl bus = new ServerMessageBusImpl(new MockErraiServiceConfigurator());
     bus.subscribe("Foo", callback);
 
-    int iterations = 10000000;
+    int iterations = 25000000;
 
     long start = System.currentTimeMillis();
     for (int i = 0; i < iterations; i++) {
@@ -50,10 +53,14 @@ public class BusPerformanceTests extends TestCase {
               .done().sendNowWith(bus);
     }
     long time = System.currentTimeMillis() - start;
-    
-    System.out.println("tps: " + (iterations / (time / 1000d)));
+
+    NumberFormat nf = new DecimalFormat("###,###.###");
+
+    System.out.println("Total Test Time    : " + nf.format(time / 1000d) + " seconds.");
+    System.out.println("Total Messages Sent: " + nf.format(iterations));
+    System.out.println("Total Messages Rcvd: " + nf.format(callback.calls));
+    System.out.println("Transaction Rate   : " + nf.format(iterations / (time / 1000d)) + " per second.");
 
     assertEquals(iterations, callback.calls);
-
   }
 }

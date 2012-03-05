@@ -34,13 +34,18 @@ public class StressTestClient extends Composite {
   @UiField IntegerBox messageSize;
   @UiField Label messageSizeError;
 
+  @UiField IntegerBox messageMultiplier;
+
+
   @UiField Button startButton;
+
   @UiHandler("startButton")
   public void onStartButtonClick(ClickEvent click) {
     restart();
   }
 
   @UiField Button stopButton;
+
   @UiHandler("stopButton")
   void onStopButtonClick(ClickEvent event) {
     stopIfRunning();
@@ -84,28 +89,41 @@ public class StressTestClient extends Composite {
     }
     messageValue = sb.toString();
 
+    if (messageMultiplier.getValue() == null || messageMultiplier.getValue() < 1) {
+      messageMultiplier.setValue(1);
+    }
+
+    final int multipler = messageMultiplier.getValue();
+
     sendTimer = new Timer() {
       private boolean hasStarted;
 
-      @Override public void run() {
+      @Override
+      public void run() {
         hasStarted = true;
-        MessageBuildSendable sendable = MessageBuilder.createMessage()
-        .toSubject("StressTestService")
-        .withValue(messageValue)
-        .done()
-        .repliesTo(new MessageCallback() {
-          @Override
-          public void callback(Message message) {
-            stats.registerReceivedMessage(message);
-            statsPanel.updateStatsLabels(stats);
-          }
-        });
-        sendable.sendNowWith(bus);
-        stats.registerSentMessage(sendable.getMessage());
+
+        for (int i = 0; i < multipler; i++) {
+          MessageBuildSendable sendable = MessageBuilder.createMessage()
+                  .toSubject("StressTestService")
+                  .withValue(messageValue)
+                  .done()
+                  .repliesTo(new MessageCallback() {
+                    @Override
+                    public void callback(Message message) {
+                      stats.registerReceivedMessage(message);
+                      statsPanel.updateStatsLabels(stats);
+                    }
+                  });
+          sendable.sendNowWith(bus);
+
+          stats.registerSentMessage(sendable.getMessage());
+        }
+
         statsPanel.updateStatsLabels(stats);
       }
 
-      @Override public void cancel() {
+      @Override
+      public void cancel() {
         super.cancel();
         if (hasStarted) {
           stats.registerTestFinishing();
