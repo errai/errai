@@ -552,7 +552,7 @@ public class GenUtil {
 
   public static void addPrivateAccessStubs(boolean useJSNIStubs, ClassStructureBuilder<?> classBuilder, MetaMethod m) {
     List<Parameter> wrapperDefParms = new ArrayList<Parameter>();
-    wrapperDefParms.add(Parameter.of(m.getDeclaringClass(), "instance"));
+    wrapperDefParms.add(Parameter.of(m.getDeclaringClass().getErased(), "instance"));
     List<Parameter> methodDefParms = DefParameters.from(m).getParameters();
 
     wrapperDefParms.addAll(methodDefParms);

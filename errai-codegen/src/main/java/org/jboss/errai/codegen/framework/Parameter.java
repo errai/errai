@@ -76,7 +76,7 @@ public class Parameter extends AbstractStatement implements MetaParameter {
       return generatedCache;
 
     generatedCache = (isFinal) ? Modifier.Final.getCanonicalString() + " " : "";
-    return generatedCache += LoadClassReference.getClassReference(type, context) + " " + name;
+    return generatedCache += LoadClassReference.getClassReference(type, context, false) + " " + name;
   }
 
   @Override

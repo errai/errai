@@ -41,7 +41,7 @@ public class RebindUtils {
 
   static Logger logger = LoggerFactory.getLogger(RebindUtils.class);
 
-  private static String hashSeed = "errai20-a";
+  private static String hashSeed = "errai20-bx1";
 
   private final static Pattern erraiCommonJarFinder = Pattern.compile(".*/errai\\-common.*\\.jar!/META-INF/MANIFEST.MF");
 

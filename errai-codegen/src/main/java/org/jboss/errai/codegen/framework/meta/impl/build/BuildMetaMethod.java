@@ -254,7 +254,7 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
 
     buf.append(modifiers.toJavaString()).append(" ");
 
-    buf.append(LoadClassReference.getClassReference(returnType, context))
+    buf.append(LoadClassReference.getClassReference(returnType, context, false))
             .append(" ")
             .append(name)
             .append(defParameters.generate(context));
