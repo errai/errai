@@ -49,7 +49,6 @@ public class InstanceInjectionIntegrationTest extends AbstractErraiCDITest {
         Instance<DependentBeanA> instanceDependentBeanA = testBean.getInjectDependentBeanA();
         assertNotNull("InstanceTestBean.Instance<DependentBeanA> is null", instanceDependentBeanA);
 
-
         ApplicationScopedBeanA a = instanceApplicationScopedBean.get();
         assertNotNull(a);
 

@@ -23,6 +23,7 @@ import org.jboss.errai.ioc.client.container.IOCBeanDef;
 
 import javax.enterprise.inject.Instance;
 import java.lang.annotation.Annotation;
+import java.util.Collections;
 import java.util.Iterator;
 
 @IOCProvider
@@ -41,44 +42,53 @@ public class InstanceProvider implements ContextualTypeProvider<Instance> {
     * clobbered your errai-javax-enterprise source folder settings. To fix your
     * setup, see the README in the root of errai-javax-enterprise.
     */
-    return new Instance<Object>() {
-      @Override
-      public Instance<Object> select(Annotation... qualifiers) {
-        throw new RuntimeException("unsupported");
+
+    return new InstanceImpl(typeargs[0], qualifiers);
+  }
+
+  static class InstanceImpl<U> implements Instance<Object> {
+    private final Class type;
+    private final Annotation[] qualifiers;
+
+    InstanceImpl(Class type, Annotation[] qualifiers) {
+      this.type = type;
+      this.qualifiers = qualifiers;
+    }
+
+    @Override
+    public Instance<Object> select(Annotation... qualifiers) {
+      return new InstanceImpl(type, qualifiers);
+    }
+
+    @Override
+    public <U extends Object> Instance<U> select(Class<U> subtype, Annotation... qualifiers) {
+      return new InstanceImpl(type, qualifiers);
+    }
+
+    @Override
+    public boolean isUnsatisfied() {
+      return false;
+    }
+
+    @Override
+    public boolean isAmbiguous() {
+      return false;
+    }
+
+    @Override
+    public Iterator<Object> iterator() {
+      return Collections.emptyList().iterator();
+    }
+
+    @Override
+    public Object get() {
+      IOCBeanDef bean = IOC.getBeanManager().lookupBean(type, qualifiers);
+      if (bean == null) {
+        return null;
       }
-
-      @Override
-      public <U extends Object> Instance<U> select(Class<U> subtype, Annotation... qualifiers) {
-        throw new RuntimeException("unsupported");
+      else {
+        return bean.getInstance();
       }
-
-      @Override
-      public boolean isUnsatisfied() {
-        return false;
-      }
-
-      @Override
-      public boolean isAmbiguous() {
-        return false;
-      }
-
-      @Override
-      public Iterator<Object> iterator() {
-        throw new RuntimeException("unsupported");
-
-      }
-
-      @Override
-      public Object get() {
-        IOCBeanDef bean = IOC.getBeanManager().lookupBean(typeargs[0], qualifiers);
-        if (bean == null) {
-          return null;
-        }
-        else {
-          return bean.getInstance();
-        }
-      }
-    };
-
+    }
   }
 }
