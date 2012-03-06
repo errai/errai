@@ -25,9 +25,10 @@ import org.jboss.errai.ioc.client.api.InitBallot;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 import javax.inject.Provider;
+import javax.inject.Singleton;
 import java.lang.annotation.Annotation;
 
-@IOCProvider
+@IOCProvider @Singleton
 public class EventProvider implements ContextualTypeProvider<Event> {
 
   @Override

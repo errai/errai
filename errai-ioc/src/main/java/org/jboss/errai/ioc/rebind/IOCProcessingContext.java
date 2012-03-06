@@ -61,7 +61,7 @@ public class IOCProcessingContext {
 
   protected SourceWriter writer;
 
-  protected Variable contextVariable = Variable.create("ctx", InterfaceInjectionContext.class);
+  protected Variable contextVariable = Variable.create("injContext", InterfaceInjectionContext.class);
 
   protected QualifyingMetadataFactory qualifyingMetadataFactory = new JSR330QualifyingMetadataFactory();
 

@@ -21,8 +21,10 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.jboss.errai.codegen.framework.Cast;
 import org.jboss.errai.codegen.framework.Context;
@@ -58,6 +60,7 @@ import org.jboss.errai.codegen.framework.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.framework.meta.MetaType;
 import org.jboss.errai.codegen.framework.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
+import org.jboss.errai.codegen.framework.meta.impl.java.JavaReflectionClass;
 import org.mvel2.DataConversion;
 
 /**
@@ -65,6 +68,12 @@ import org.mvel2.DataConversion;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class GenUtil {
+  private static final boolean PERMISSIVE_MODE = Boolean.getBoolean("errai.codegen.permissive");
+
+  public static boolean isPermissiveMode() {
+    return PERMISSIVE_MODE;
+  }
+
   public static Statement[] generateCallParameters(Context context, Object... parameters) {
     Statement[] statements = new Statement[parameters.length];
 
@@ -112,7 +121,12 @@ public class GenUtil {
         return v.getReference();
       }
       else {
-        throw new OutOfScopeException("variable cannot be referenced from this scope: " + v.getName());
+        if (isPermissiveMode()) {
+          return v.getReference();
+        }
+        else {
+          throw new OutOfScopeException("variable cannot be referenced from this scope: " + v.getName());
+        }
       }
     }
     else if (o instanceof Statement) {
@@ -130,11 +144,28 @@ public class GenUtil {
     if (!cls.isArray() && !Iterable.class.isAssignableFrom(cls))
       throw new TypeNotIterableException(statement.generate(Context.create()));
   }
+  
+  private static final Set<String> classAliases = new HashSet<String>() {
+    {
+      add(JavaReflectionClass.class.getName());
+      add(Class.class.getName()); 
+    }
+  };
+         
+  
 
   public static void assertAssignableTypes(MetaClass from, MetaClass to) {
     if (!to.asBoxed().isAssignableFrom(from.asBoxed())) {
-      throw new InvalidTypeException(to.getFullyQualifiedName() + " is not assignable from "
-              + from.getFullyQualifiedName());
+      if (!isPermissiveMode()) {
+        if (classAliases.contains(from.getFullyQualifiedName()) && classAliases.contains(to.getFullyQualifiedName())) {
+          // handle convertability between MetaClass API and java Class reference.
+          return;
+        }
+        
+        
+        throw new InvalidTypeException(to.getFullyQualifiedName() + " is not assignable from "
+                + from.getFullyQualifiedName());
+      }
     }
   }
 

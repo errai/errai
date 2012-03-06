@@ -48,6 +48,10 @@ public class LiteralFactory {
           public String getCanonicalString(Context context) {
             return getClassReference((MetaClass) o, context, false) + ".class";
           }
+          
+          public String toString() {
+            return o.toString() + ".class";
+          }
         };
       }
       else if (o instanceof Annotation) {

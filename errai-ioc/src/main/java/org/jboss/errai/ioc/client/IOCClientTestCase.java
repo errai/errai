@@ -26,11 +26,11 @@ import org.jboss.errai.ioc.client.api.Bootstrapper;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public abstract class IOCClientTestCase extends GWTTestCase {
-  private ContainerBootstrapper initializer = new ContainerBootstrapper() {
+  private  ContainerBootstrapper initializer = new ContainerBootstrapper() {
+
     @Override
     public InterfaceInjectionContext bootstrap() {
-      Bootstrapper bootstrapper = GWT.create(Bootstrapper.class);
-      return bootstrapper.bootstrapContainer();
+        return new Container().boostrapContainer();
     }
   };
 

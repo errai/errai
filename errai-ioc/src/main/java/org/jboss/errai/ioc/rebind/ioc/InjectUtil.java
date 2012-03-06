@@ -209,20 +209,25 @@ public class InjectUtil {
         }
       }
 
-      ctx.deferRunnableTask(new Runnable() {
-        @Override
-        public void run() {
-          AnonymousClassStructureBuilder classStructureBuilder = initMeth.finish();
+//      ctx.deferRunnableTask(new Runnable() {
+//        @Override
+//        public void run() {
+      AnonymousClassStructureBuilder classStructureBuilder = initMeth.finish();
 
-          IOCProcessingContext pc = ctx.getProcessingContext();
+      IOCProcessingContext pc = ctx.getProcessingContext();
 
-          pc.globalAppend(Stmt.declareVariable(initializationCallbackType).asFinal().named(varName)
-                  .initializeWith(classStructureBuilder.finish()));
+      pc.globalAppend(Stmt.declareVariable(initializationCallbackType).asFinal().named(varName)
+              .initializeWith(classStructureBuilder.finish()));
 
-          Statement postConstructCall = Stmt.loadVariable(varName).invoke("init", Refs.get(injector.getVarName()));
-          processingContext.addPostConstructStatement(postConstructCall);
-        }
-      });
+      pc.append(Stmt.loadVariable("context").invoke("addInitializationCallback",
+              Refs.get(injector.getVarName()), Refs.get(varName)));
+
+
+//          Statement postConstructCall = Stmt.loadVariable(varName).invoke("init", Refs.get(injector.getVarName()));
+      //         processingContext.addPostConstructStatement(postConstructCall);
+
+
+//      });
     }
     else {
       for (final MetaMethod meth : postConstructTasks) {

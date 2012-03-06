@@ -19,6 +19,6 @@ package org.jboss.errai.ioc.client.container;
 /**
  * @author Mike Brock
  */
-public interface CreationalCallback<T> {
-  public T getInstance(CreationalContext context);
+public interface ProxyResolver<T> {
+  public void resolve(T t);
 }

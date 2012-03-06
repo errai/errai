@@ -37,6 +37,7 @@ public class WiringUtil {
   }
 
   private static void _worstSort(final List<SortUnit> newList) {
+    int noSortCount = 0;
     for (int i = 0; i < newList.size(); ) {
       SortUnit s = newList.get(i);
       boolean adv = true;
@@ -54,8 +55,12 @@ public class WiringUtil {
           }
         }
       }
-      if (adv) {
+      if (adv || noSortCount > 1) {
         i++;
+        noSortCount = 0;
+      }
+      else {
+        noSortCount++;
       }
     }
   }

@@ -14,11 +14,19 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.client.container;
+package org.jboss.errai.cdi.integration.client.shared;
+
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 
 /**
  * @author Mike Brock
  */
-public interface CreationalCallback<T> {
-  public T getInstance(CreationalContext context);
+@Dependent
+public class DependentBeanCycleB {
+  @Inject DependentBeanCycleA dependentBeanCycleA;
+
+  public DependentBeanCycleA getDependentBeanCycleA() {
+    return dependentBeanCycleA;
+  }
 }

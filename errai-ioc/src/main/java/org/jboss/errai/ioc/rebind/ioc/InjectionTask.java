@@ -175,24 +175,24 @@ public class InjectionTask {
       }
 
     }
-    else if (ctx.getProcessingContext().isSingletonScope(clazz.getAnnotations())) {
+    else {
       ProxyInjector proxyInjector = new ProxyInjector(ctx.getProcessingContext(), clazz, qualifyingMetadata);
       ctx.addProxiedInjector(proxyInjector);
       return proxyInjector.getType(ctx, injectableInstance);
     }
-    else {
-      switch (taskType) {
-        case Method:
-        case PrivateMethod:
-          throw UnsatisfiedDependenciesException.createWithSingleMethodFailure(method,
-                  injectableInstance.getEnclosingType(), clazz, "(possible graph cycle on non-normal scope)");
-        case Field:
-        case PrivateField:
-        default:
-          throw UnsatisfiedDependenciesException.createWithSingleFieldFailure(field,
-                  injectableInstance.getEnclosingType(), clazz, "(possible graph cycle on non-normal scope)");
-      }
-    }
+//    else {
+//      switch (taskType) {
+//        case Method:
+//        case PrivateMethod:
+//          throw UnsatisfiedDependenciesException.createWithSingleMethodFailure(method,
+//                  injectableInstance.getEnclosingType(), clazz, "(possible graph cycle on non-normal scope)");
+//        case Field:
+//        case PrivateField:
+//        default:
+//          throw UnsatisfiedDependenciesException.createWithSingleFieldFailure(field,
+//                  injectableInstance.getEnclosingType(), clazz, "(possible graph cycle on non-normal scope)");
+//      }
+//    }
   }
 
   private InjectableInstance getInjectableInstance(InjectionContext ctx) {

@@ -26,10 +26,12 @@ import org.jboss.errai.bus.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 
+import javax.inject.Singleton;
+
 /**
  * @author Mike Brock
  */
-@IOCProvider
+@IOCProvider @Singleton
 public class CallerProvider implements ContextualTypeProvider<Caller> {
   private static final RemoteServiceProxyFactory factory = new RemoteServiceProxyFactory();
 

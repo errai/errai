@@ -19,6 +19,7 @@ package org.jboss.errai.ioc.client;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.ioc.client.container.CreationalCallback;
+import org.jboss.errai.ioc.client.container.CreationalContext;
 import org.jboss.errai.ioc.client.container.IOCBeanManager;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.InitializationCallback;
@@ -31,6 +32,7 @@ import java.util.Map;
 
 public class InterfaceInjectionContext {
   private IOCBeanManager manager;
+  private CreationalContext rootContext = new CreationalContext();
   
   private List<Widget> toRootPanel;
   private Map<String, Panel> panels;
@@ -81,5 +83,9 @@ public class InterfaceInjectionContext {
 
   public Map<Widget, String> getWidgetToPanel() {
     return widgetToPanel;
+  }
+
+  public CreationalContext getRootContext() {
+    return rootContext;
   }
 }

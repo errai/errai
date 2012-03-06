@@ -18,6 +18,7 @@ package org.jboss.errai.ioc.client.test;
 
 import com.google.gwt.core.client.GWT;
 import org.jboss.errai.bus.client.tests.AbstractErraiTest;
+import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
 
 /**
@@ -28,8 +29,7 @@ public abstract class AbstractErraiIOCTest extends AbstractErraiTest {
   @Override
   protected void gwtSetUp() throws Exception {
     super.gwtSetUp();
-    Bootstrapper bootstrapper = GWT.create(Bootstrapper.class);
-    bootstrapper.bootstrapContainer();
+    new Container().boostrapContainer();
   }
 }
 

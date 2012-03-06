@@ -39,7 +39,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -239,6 +238,8 @@ public class IOCTestRunner extends ParentRunner<Runner> {
 
               long tm = System.currentTimeMillis();
               InterfaceInjectionContext ctx = bs.bootstrapContainer();
+              ctx.getRootContext().finish();
+
               System.out.println("bootstrapped simulated container in " + (System.currentTimeMillis() - tm) + "ms");
               return ctx;
             }

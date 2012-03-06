@@ -47,10 +47,9 @@ public class IOCDependentBean<T> extends AbstractIOCBean<T> {
 
   @Override
   public T getInstance() {
-    T inst = creationalCallback.getInstance();
-    if (initializationCallback != null) {
-      initializationCallback.init(inst);
-    }
+    CreationalContext context = new CreationalContext();
+    T inst = creationalCallback.getInstance(context);
+    context.finish();
     return inst;
   }
 }

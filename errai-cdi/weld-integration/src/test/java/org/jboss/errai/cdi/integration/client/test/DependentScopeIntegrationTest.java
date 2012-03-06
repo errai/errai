@@ -17,6 +17,9 @@
 package org.jboss.errai.cdi.integration.client.test;
 
 import org.jboss.errai.cdi.integration.client.shared.ApplicationScopedBean;
+import org.jboss.errai.cdi.integration.client.shared.ApplicationScopedBeanB;
+import org.jboss.errai.cdi.integration.client.shared.DependentBeanCycleA;
+import org.jboss.errai.cdi.integration.client.shared.DependentBeanCycleB;
 import org.jboss.errai.cdi.integration.client.shared.DependentScopedBean;
 import org.jboss.errai.cdi.integration.client.shared.DependentScopedBeanWithDependencies;
 import org.jboss.errai.cdi.integration.client.shared.ServiceA;
@@ -152,4 +155,23 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
       }
     });
   }
+
+  public void testDependentBeanCycle() {
+    delayTestFinish(60000);
+    CDI.addPostInitTask(new Runnable() {
+      @Override
+      public void run() {
+
+        ApplicationScopedBeanB bean = IOC.getBeanManager()
+                .lookupBean(ApplicationScopedBeanB.class).getInstance();
+
+        assertNotNull("DependentBeanCycleA was null", bean);
+        assertNotNull("dependentScopedBean.dependentBeanCycleB injection was null",
+                bean.getDependentBeanCycleA());
+
+        finishTest();
+      }
+    });
+  }
+
 }

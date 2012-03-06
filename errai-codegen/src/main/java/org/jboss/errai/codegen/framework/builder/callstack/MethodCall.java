@@ -36,6 +36,7 @@ import org.jboss.errai.codegen.framework.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.framework.meta.MetaType;
 import org.jboss.errai.codegen.framework.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.framework.util.GenUtil;
+import sun.security.provider.PolicyParser;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -72,26 +73,31 @@ public class MethodCall extends AbstractCallElement {
 
       if (method == null) {
         callType.getBestMatchingMethod(methodName, parameterTypes);
-           throw new UndefinedMethodException(statement.getType(), methodName, parameterTypes);
-//        dummyReturn(writer, context);
-//        return;
+
+        if (GenUtil.isPermissiveMode()) {
+          dummyReturn(writer, context);
+          return;
+        }
+        else {
+          throw new UndefinedMethodException(statement.getType(), methodName, parameterTypes);
+        }
       }
 
       if (method.getGenericParameterTypes() != null) {
         MetaType[] genTypes = method.getGenericParameterTypes();
         for (int i = 0; i < genTypes.length; i++) {
-           if (genTypes[i] instanceof MetaParameterizedType) {
-             if (parameters[i] instanceof MetaClass) {
-               MetaType type = ((MetaParameterizedType) genTypes[i]).getTypeParameters()[0];
-               if (type instanceof MetaTypeVariable) {
-                 writer.recordTypeParm(((MetaTypeVariable) type).getName(), (MetaClass) parameters[i]);
-               }
-             }
-           }
+          if (genTypes[i] instanceof MetaParameterizedType) {
+            if (parameters[i] instanceof MetaClass) {
+              MetaType type = ((MetaParameterizedType) genTypes[i]).getTypeParameters()[0];
+              if (type instanceof MetaTypeVariable) {
+                writer.recordTypeParm(((MetaTypeVariable) type).getName(), (MetaClass) parameters[i]);
+              }
+            }
+          }
         }
-        
+
       }
-      
+
       /**
        * If the method is within the calling scope, we can strip the qualifying reference.
        */
@@ -148,7 +154,15 @@ public class MethodCall extends AbstractCallElement {
     nextOrReturn(writer, context, new Statement() {
       @Override
       public String generate(Context context) {
-        return methodName + "(" + Arrays.toString(parameters) + ")";
+        StringBuilder parms = new StringBuilder();
+        for (int i = 0; i < parameters.length; i++) {
+          parms.append(GenUtil.generate(context, parameters[i]));
+          if (i + 1 < parameters.length) parms.append(", ");
+        }
+        
+        
+        
+        return methodName + "(" + parms.toString() + ")";
       }
 
       @Override

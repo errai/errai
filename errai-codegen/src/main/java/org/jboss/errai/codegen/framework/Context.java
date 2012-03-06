@@ -32,6 +32,7 @@ import org.jboss.errai.codegen.framework.exception.OutOfScopeException;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaField;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
+import org.jboss.errai.codegen.framework.util.GenUtil;
 
 /**
  * This class represents a context in which {@link Statement}s are generated.
@@ -216,8 +217,12 @@ public class Context {
     while (found == null && (ctx = ctx.parent) != null);
 
     if (found == null) {
-     throw new OutOfScopeException((mustBeClassMember) ? "this." + name : name);
-//      return Variable.create(name, Object.class).getReference();
+      if (GenUtil.isPermissiveMode()) {
+        return Variable.create(name, Object.class).getReference();
+      }
+      else {
+        throw new OutOfScopeException((mustBeClassMember) ? "this." + name : name);
+      }
     }
 
     return found.getReference();

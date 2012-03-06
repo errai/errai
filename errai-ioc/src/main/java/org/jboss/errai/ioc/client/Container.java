@@ -22,26 +22,41 @@ import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
+import org.jboss.errai.ioc.client.container.CreationalContext;
 
 import java.util.Map;
 
 public class Container implements EntryPoint {
   @Override
   public void onModuleLoad() {
-    InitVotes.waitFor(Container.class);
+    boostrapContainer();
+  }
 
-    final Bootstrapper bootstrapper = GWT.create(Bootstrapper.class);
-    final RootPanel rootPanel = RootPanel.get();
-    final InterfaceInjectionContext ctx = bootstrapper.bootstrapContainer();
+  public InterfaceInjectionContext boostrapContainer() {
+    try {
+      InitVotes.waitFor(Container.class);
 
-    for (Widget w : ctx.getToRootPanel()) {
-      rootPanel.add(w);
+      final Bootstrapper bootstrapper = GWT.create(Bootstrapper.class);
+      final RootPanel rootPanel = RootPanel.get();
+      final InterfaceInjectionContext ctx = bootstrapper.bootstrapContainer();
+
+      CreationalContext rootContext = ctx.getRootContext();
+      rootContext.finish();
+
+      for (Widget w : ctx.getToRootPanel()) {
+        rootPanel.add(w);
+      }
+
+      for (Map.Entry<Widget, String> entry : ctx.getWidgetToPanel().entrySet()) {
+        ctx.getPanels().get(entry.getValue()).add(entry.getKey());
+      }
+
+      InitVotes.voteFor(Container.class);
+      return ctx;
     }
-
-    for (Map.Entry<Widget, String> entry : ctx.getWidgetToPanel().entrySet()) {
-      ctx.getPanels().get(entry.getValue()).add(entry.getKey());
+    catch (Throwable t) {
+      t.printStackTrace();
+      throw new RuntimeException("critical error in IOC container bootstrap", t);
     }
-
-    InitVotes.voteFor(Container.class);
   }
 }

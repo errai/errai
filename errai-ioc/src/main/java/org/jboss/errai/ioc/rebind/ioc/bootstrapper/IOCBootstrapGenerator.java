@@ -57,6 +57,7 @@ import org.jboss.errai.ioc.client.api.TaskOrder;
 import org.jboss.errai.ioc.client.api.ToPanel;
 import org.jboss.errai.ioc.client.api.ToRootPanel;
 import org.jboss.errai.ioc.client.api.TypeProvider;
+import org.jboss.errai.ioc.client.container.CreationalContext;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.IOCProcessorFactory;
 import org.jboss.errai.ioc.rebind.JSR330AnnotationHandler;
@@ -250,6 +251,11 @@ public class IOCBootstrapGenerator {
             Stmt.declareVariable(procContext.getContextVariableReference().getType()).asFinal()
                     .named(procContext.getContextVariableReference().getName())
                     .initializeWith(Stmt.newObject(InterfaceInjectionContext.class)));
+
+    blockBuilder.append(Stmt.declareVariable(CreationalContext.class)
+            .named("context")
+            .initializeWith(Stmt.loadVariable(procContext.getContextVariableReference().getName())
+                    .invoke("getRootContext")));
 
     _doRunnableTasks(beforeTasks, blockBuilder);
 
