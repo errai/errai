@@ -17,8 +17,12 @@
 package org.jboss.errai.ioc.client.container;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -28,8 +32,8 @@ public class CreationalContext {
   private Map<Object, InitializationCallback> initializationCallbacks =
           new IdentityHashMap<Object, InitializationCallback>();
 
-  private Map<BeanRef, ProxyResolver> unresolvedProxies = new HashMap<BeanRef, ProxyResolver>();
-  private Map<BeanRef, Object> wired = new HashMap<BeanRef, Object>();
+  private Map<BeanRef, List<ProxyResolver>> unresolvedProxies = new HashMap<BeanRef, List<ProxyResolver>>();
+  private Map<BeanRef, Object> wired = new LinkedHashMap<BeanRef, Object>();
 
   public CreationalContext() {
   }
@@ -41,9 +45,14 @@ public class CreationalContext {
   public void addBean(Object beanInstance, Class<?> beanType, Annotation[] qualifiers) {
     wired.put(new BeanRef(beanType, qualifiers), beanInstance);
   }
-  
+
   public void addUnresolvedProxy(ProxyResolver proxyResolver, Class<?> beanType, Annotation[] qualifiers) {
-    unresolvedProxies.put(new BeanRef(beanType, qualifiers), proxyResolver);
+    BeanRef ref = new BeanRef(beanType, qualifiers);
+    List<ProxyResolver> resolverList = unresolvedProxies.get(ref);
+    if (resolverList == null) {
+      unresolvedProxies.put(ref, resolverList = new ArrayList<ProxyResolver>());
+    }
+    resolverList.add(proxyResolver);
   }
 
   public Object getUnresolvedProxy(Class<?> beanType, Annotation[] qualifiers) {
@@ -62,8 +71,35 @@ public class CreationalContext {
   }
 
   private void resolveAllProxies() {
-    for (Map.Entry<BeanRef, ProxyResolver> entry : unresolvedProxies.entrySet()) {
-      entry.getValue().resolve(wired.get(entry.getKey()));
+
+    Iterator<Map.Entry<BeanRef, List<ProxyResolver>>> unresolvedIterator = unresolvedProxies.entrySet().iterator();
+    while (unresolvedIterator.hasNext()) {
+      Map.Entry<BeanRef, List<ProxyResolver>> entry = unresolvedIterator.next();
+      if (wired.containsKey(entry.getKey())) {
+        for (ProxyResolver pr : entry.getValue()) {
+          pr.resolve(wired.get(entry.getKey()));
+        }
+
+        unresolvedIterator.remove();
+      }
+      else {
+        Object bean = IOC.getBeanManager().lookupBean(entry.getKey().getClazz(), entry.getKey().getAnnotations())
+                .getInstance(this);
+
+        if (bean != null) {
+          for (ProxyResolver pr : entry.getValue()) {
+            pr.resolve(bean);
+          }
+          
+          unresolvedIterator.remove();
+        }
+      }
+    }
+
+    if (!unresolvedProxies.isEmpty()) {
+      for (Map.Entry<BeanRef, List<ProxyResolver>> entry : unresolvedProxies.entrySet()) {
+        System.out.println("unresolved proxy: " + entry.getKey());
+      }
     }
   }
 }

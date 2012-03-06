@@ -51,6 +51,11 @@ public class IOCSingletonBean<T> extends AbstractIOCBean<T> {
   }
 
 
+  @Override
+  public T getInstance(CreationalContext context) {
+    return instance;
+  }
+
   public T getInstance() {
     return instance;
   }

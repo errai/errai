@@ -51,6 +51,6 @@ public class AfterInitializationExtension extends IOCDecoratorExtension<AfterIni
             .finish()
             .finish();
 
-    return Stmt.create(ctx).invokeStatic(InitVotes.class, "registerInitCallback", callbackStmt);
+    return Stmt.create(ctx).invokeStatic(InitVotes.class, "registerOneTimeInitCallback", callbackStmt);
   }
 }

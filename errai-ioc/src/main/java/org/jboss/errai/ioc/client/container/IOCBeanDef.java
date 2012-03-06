@@ -26,6 +26,8 @@ public interface IOCBeanDef<T> {
   public Class<T> getType();
 
   public T getInstance();
+  
+  T getInstance(CreationalContext context);
 
   public Set<Annotation> getQualifiers();
 

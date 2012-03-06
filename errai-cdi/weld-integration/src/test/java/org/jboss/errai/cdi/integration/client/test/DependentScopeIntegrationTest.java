@@ -46,6 +46,12 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
     return "org.jboss.errai.cdi.integration.InjectionTestModule";
   }
 
+  @Override
+  public void gwtSetUp() throws Exception {
+    super.gwtSetUp();
+    DependentBeanCycleB.instanceCount = 1;
+  }
+
   public void testDependentBeanScope() {
     delayTestFinish(60000);
 
@@ -158,20 +164,26 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
 
   public void testDependentBeanCycle() {
     delayTestFinish(60000);
-    CDI.addPostInitTask(new Runnable() {
+
+    InitVotes.registerInitCallback(new Runnable() {
       @Override
       public void run() {
-
         ApplicationScopedBeanB bean = IOC.getBeanManager()
                 .lookupBean(ApplicationScopedBeanB.class).getInstance();
 
         assertNotNull("DependentBeanCycleA was null", bean);
         assertNotNull("dependentScopedBean.dependentBeanCycleB injection was null",
                 bean.getDependentBeanCycleA());
+        assertNotNull("dependentScopedBean.dependentBeanCycleB.dependentBeanCycleA was null",
+                bean.getDependentBeanCycleA().getDependentBeanCycleB());
+        assertEquals("there should have been only one instantiation of DependentBeanCycleB",
+                1, bean.getDependentBeanCycleA().getDependentBeanCycleB().getInstance());
 
         finishTest();
+
       }
     });
+
   }
 
 }

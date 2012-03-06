@@ -53,6 +53,14 @@ public final class BeanRef {
     return annos;
   }
 
+  public Class<?> getClazz() {
+    return clazz;
+  }
+
+  public Annotation[] getAnnotations() {
+    return annotations.toArray(new Annotation[annotations.size()]);
+  }
+
   private static class AnnotationHashWapper implements Annotation {
     private final Annotation _delegate;
     private final Class<?> type;
@@ -109,5 +117,13 @@ public final class BeanRef {
     int result = clazz != null ? clazz.hashCode() : 0;
     result = 31 * result + (annotations != null ? annotations.hashCode() : 0);
     return result;
+  }
+
+  @Override
+  public String toString() {
+    return "BeanRef{" +
+            "clazz=" + clazz +
+            ", annotations=" + annotations +
+            '}';
   }
 }

@@ -177,7 +177,7 @@ public class InjectUtil {
     if (postConstructTasks.isEmpty()) return;
 
 
-    if (injector.isSingleton()) {
+//    if (injector.isSingleton()) {
       final IOCProcessingContext processingContext = ctx.getProcessingContext();
 
       final MetaClass initializationCallbackType =
@@ -228,27 +228,27 @@ public class InjectUtil {
 
 
 //      });
-    }
-    else {
-      for (final MetaMethod meth : postConstructTasks) {
-        if (meth.getParameters().length != 0) {
-          throw new InjectionFailure("PostConstruct method must be public and contain no parameters: "
-                  + injector.getInjectedType().getFullyQualifiedName() + "." + meth.getName());
-        }
-
-        if (!meth.isPublic()) {
-          ctx.addExposedMethod(meth);
-        }
-
-        if (!meth.isPublic()) {
-          ctx.getProcessingContext().append(Stmt.invokeStatic(ctx.getProcessingContext().getBootstrapClass(),
-                  GenUtil.getPrivateMethodName(meth), Refs.get(injector.getVarName())));
-        }
-        else {
-          ctx.getProcessingContext().append(Stmt.loadVariable(injector.getVarName()).invoke(meth.getName()));
-        }
-      }
-    }
+//    }
+//    else {
+//      for (final MetaMethod meth : postConstructTasks) {
+//        if (meth.getParameters().length != 0) {
+//          throw new InjectionFailure("PostConstruct method must be public and contain no parameters: "
+//                  + injector.getInjectedType().getFullyQualifiedName() + "." + meth.getName());
+//        }
+//
+//        if (!meth.isPublic()) {
+//          ctx.addExposedMethod(meth);
+//        }
+//
+//        if (!meth.isPublic()) {
+//          ctx.getProcessingContext().append(Stmt.invokeStatic(ctx.getProcessingContext().getBootstrapClass(),
+//                  GenUtil.getPrivateMethodName(meth), Refs.get(injector.getVarName())));
+//        }
+//        else {
+//          ctx.getProcessingContext().append(Stmt.loadVariable(injector.getVarName()).invoke(meth.getName()));
+//        }
+//      }
+//    }
   }
 
   private static List<InjectionTask> scanForTasks(Injector injector, InjectionContext ctx, MetaClass type) {

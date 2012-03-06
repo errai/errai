@@ -16,6 +16,7 @@
 
 package org.jboss.errai.cdi.integration.client.shared;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
@@ -26,7 +27,25 @@ import javax.inject.Inject;
 public class DependentBeanCycleB {
   @Inject DependentBeanCycleA dependentBeanCycleA;
 
+  public DependentBeanCycleB() {
+    new Throwable().printStackTrace();
+    System.out.print("instantiated!");
+  }
+
+  public static int instanceCount = 1;
+  
+  private int instance;
+
+  @PostConstruct
+  private void postConstruct() {
+    instance = instanceCount++;
+  }
+
   public DependentBeanCycleA getDependentBeanCycleA() {
     return dependentBeanCycleA;
+  }
+
+  public int getInstance() {
+    return instance;
   }
 }
