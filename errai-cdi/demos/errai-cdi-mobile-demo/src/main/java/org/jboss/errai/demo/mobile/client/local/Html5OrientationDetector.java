@@ -31,7 +31,7 @@ public class Html5OrientationDetector extends OrientationDetector {
 
     var listener = function(e) {
       var alpha = e.alpha ? e.alpha : 0;
-      that.@org.jboss.errai.demo.mobile.client.local.Html5OrientationDetector::fire(DDD)(e.gamma, e.beta, alpha);
+      that.@org.jboss.errai.demo.mobile.client.local.Html5OrientationDetector::fire(DDD)(e.beta, e.gamma, alpha);
     };
     this.@org.jboss.errai.demo.mobile.client.local.Html5OrientationDetector::listener = listener;
     $wnd.addEventListener('deviceorientation', listener, false);

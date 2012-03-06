@@ -205,6 +205,14 @@
       <artifactId>jboss-logging</artifactId>
       <version>3.0.0.Beta4</version>
     </dependency>
+
+    <!-- We syntax-highlight the Java sources at compile time (they are linked from the svg) -->
+    <dependency>
+      <groupId>net.sf.squirrel-sql.thirdparty-non-maven</groupId>
+      <artifactId>ostermiller-syntax</artifactId>
+      <version>1.1.1</version>
+      <scope>compile</scope>
+    </dependency>
   </dependencies>
 
   <profiles>
@@ -637,6 +645,14 @@
                   <Dependencies>org.jboss.as.naming,org.jboss.as.server,org.jboss.msc</Dependencies>
                 </manifestEntries>
               </archive>
+
+              <!-- Copying the source code for the "about this app" functionality -->
+              <webResources>
+                <resource>
+                  <directory>src/main/java</directory>
+                  <targetPath>about/java-sources</targetPath>
+                </resource>
+              </webResources>
             </configuration>
           </plugin>
 
@@ -847,6 +863,14 @@
                   <Dependencies>org.jboss.as.naming,org.jboss.as.server,org.jboss.msc</Dependencies>
                 </manifestEntries>
               </archive>
+              
+              <!-- Copying the source code for the "about this app" functionality -->
+              <webResources>
+                <resource>
+                  <directory>src/main/java</directory>
+                  <targetPath>about/java-sources</targetPath>
+                </resource>
+              </webResources>
             </configuration>
           </plugin>
 
@@ -887,6 +911,14 @@
               <webXml>src/jetty/web.xml</webXml>
               <packagingExcludes>**/javax/**/*.*,**/client/local/**/*.class</packagingExcludes>
               <outputDirectory>deployments</outputDirectory>
+              
+              <!-- Copying the source code for the "about this app" functionality -->
+              <webResources>
+                <resource>
+                  <directory>src/main/java</directory>
+                  <targetPath>about/java-sources</targetPath>
+                </resource>
+              </webResources>
             </configuration>
           </plugin>
 
@@ -1081,6 +1113,14 @@
                   <Dependencies>org.jboss.as.naming,org.jboss.as.server,org.jboss.msc</Dependencies>
                 </manifestEntries>
               </archive>
+
+              <!-- Copying the source code for the "about this app" functionality -->
+              <webResources>
+                <resource>
+                  <directory>src/main/java</directory>
+                  <targetPath>about/java-sources</targetPath>
+                </resource>
+              </webResources>
             </configuration>
           </plugin>
 
@@ -1169,6 +1209,13 @@
           <webXml>src/jetty/web.xml</webXml>
           <packagingExcludes>**/javax/**/*.*,**/client/local/**/*.class</packagingExcludes>
 
+          <!-- Copying the source code for the "about this app" functionality -->
+          <webResources>
+            <resource>
+              <directory>src/main/java</directory>
+              <targetPath>about/java-sources</targetPath>
+            </resource>
+          </webResources>
         </configuration>
       </plugin>
       <plugin>
@@ -1204,6 +1251,27 @@
                 </filesets>
             </configuration>
         </plugin>
+        
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>exec-maven-plugin</artifactId>
+          <version>1.2.1</version>
+          <executions>
+            <execution>
+              <phase>generate-resources</phase>
+              <goals>
+                <goal>java</goal>
+              </goals>
+              <configuration>
+                <mainClass>org.jboss.errai.demo.mobile.about.SyntaxHighlight</mainClass>
+                <arguments>
+                  <argument>src/main/java</argument>
+                  <argument>war/about/java-sources</argument>
+                </arguments>
+              </configuration>
+            </execution>
+          </executions>  
+        </plugin>  
     </plugins>
 
     <pluginManagement>
@@ -1226,6 +1294,19 @@
                   </pluginExecutionFilter>
                   <action>
                     <execute />
+                  </action>
+                </pluginExecution>
+                <pluginExecution>
+                  <pluginExecutionFilter>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <versionRange>[1.2.1,)</versionRange>
+                    <goals>
+                      <goal>java</goal>
+                    </goals>
+                  </pluginExecutionFilter>
+                  <action>
+                    <ignore></ignore>
                   </action>
                 </pluginExecution>
               </pluginExecutions>

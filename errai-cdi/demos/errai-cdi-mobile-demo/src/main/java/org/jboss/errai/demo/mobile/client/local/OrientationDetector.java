@@ -11,7 +11,7 @@ public abstract class OrientationDetector {
    * <p>
    * TODO we should remove this once the bus supports coalescing events!
    */
-  private long minEventInterval = 250;
+  private long minEventInterval = 175;
 
   /**
    * The time we last fired an OrientationEvent.

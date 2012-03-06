@@ -75,16 +75,26 @@ public class ClientMain {
       Element template = Document.get().getElementById("rotateMeTemplate");
       rotateMe = (Element) template.cloneNode(true);
       rotateMe.setId("rotateMe-" + e.getClientId());
-      rotateMe.setInnerText(e.getClientId());
+      rotateMe.getFirstChildElement().setInnerText(e.getClientId());
       template.getParentElement().appendChild(rotateMe);
     }
-    String transform = "rotate(" + e.getX() + "deg)";
+
+    String transform = "rotateX(" + (e.getX() - 90.0) + "deg) " + "rotateY(" + (-e.getY()) + "deg)";
+
+    // rotating the main rectangle with the compass direction is annoying,
+    // because then what you see on screen doesn't relate to what how you see
+    // your phone in front of you. So we rotate a compass rose instead:
+    String compassTransform = "rotate( " + (360.0 - e.getZ()) + "deg)";
 
     // could use deferred binding for this, but it's probably overkill
     rotateMe.getStyle().setProperty("MozTransform", transform);
     rotateMe.getStyle().setProperty("WebkitTransform", transform);
     rotateMe.getStyle().setProperty("transform", transform);
-    GWT.log("Transform: " + transform + "; rotateMe=" + rotateMe);
+
+    Element rotateMeCompass = rotateMe.getFirstChildElement().getNextSiblingElement();
+    rotateMeCompass.getStyle().setProperty("MozTransform", compassTransform);
+    rotateMeCompass.getStyle().setProperty("WebkitTransform", compassTransform);
+    rotateMeCompass.getStyle().setProperty("transform", compassTransform);
   }
 
   public void onAllClientOrientationsUpdate(@Observes AllClientOrientations aco) {
