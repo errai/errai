@@ -151,6 +151,10 @@ public class GenUtil {
       add(Class.class.getName()); 
     }
   };
+  
+  public static void addClassAlias(Class cls) {
+    classAliases.add(cls.getName());
+  }
          
   
 

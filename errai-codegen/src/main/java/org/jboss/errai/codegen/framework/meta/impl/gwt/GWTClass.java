@@ -39,12 +39,17 @@ import com.google.gwt.core.ext.typeinfo.JType;
 import com.google.gwt.core.ext.typeinfo.JTypeParameter;
 import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import org.jboss.errai.codegen.framework.util.GenUtil;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class GWTClass extends AbstractMetaClass<JType> {
   private Annotation[] annotationsCache;
+
+  static {
+    GenUtil.addClassAlias(GWTClass.class);
+  }
 
   private GWTClass(JType classType, boolean erased) {
     super(classType);
@@ -281,7 +286,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
     }
 
     type = type.getSuperclass();
-    
+
     if (type == null) {
       return null;
     }
@@ -306,11 +311,10 @@ public class GWTClass extends AbstractMetaClass<JType> {
 //                Thread.currentThread().getContextClassLoader());
 
 
-
-        annotationsCache = getEnclosedMetaObject().isClassOrInterface().getAnnotations();
-        if (annotationsCache == null) {
-          annotationsCache = new Annotation[0];
-        }
+      annotationsCache = getEnclosedMetaObject().isClassOrInterface().getAnnotations();
+      if (annotationsCache == null) {
+        annotationsCache = new Annotation[0];
+      }
 //
 //      }
 //      catch (ClassNotFoundException e) {
