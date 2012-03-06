@@ -102,20 +102,20 @@ public class MethodCall extends AbstractCallElement {
       throw e;
     }
     catch (Exception e) {
-//      throw new RuntimeException("error generating method call for: " + methodName
-//              + "(" + Arrays.toString(parameters) + ")", e);
+      throw new RuntimeException("error generating method call for: " + methodName
+              + "(" + Arrays.toString(parameters) + ")", e);
 
-      nextOrReturn(writer, context, new Statement() {
-        @Override
-        public String generate(Context context) {
-          return methodName + "(" + Arrays.toString(parameters) + ")";
-        }
-
-        @Override
-        public MetaClass getType() {
-          return MetaClassFactory.get(Object.class);
-        }
-      });
+//      nextOrReturn(writer, context, new Statement() {
+//        @Override
+//        public String generate(Context context) {
+//          return methodName + "(" + Arrays.toString(parameters) + ")";
+//        }
+//
+//        @Override
+//        public MetaClass getType() {
+//          return MetaClassFactory.get(Object.class);
+//        }
+//      });
     }
   }
 
