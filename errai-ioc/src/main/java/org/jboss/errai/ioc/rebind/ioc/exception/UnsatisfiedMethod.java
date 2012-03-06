@@ -30,13 +30,23 @@ public class UnsatisfiedMethod extends UnsatisfiedDependency {
     super(enclosingType, injectedType);
     this.method = method;
   }
-  
+
+  public UnsatisfiedMethod(MetaMethod method, MetaClass enclosingType, MetaClass injectedType, String message) {
+    super(enclosingType, injectedType, message);
+    this.method = method;
+  }
+
   @Override
   public String toString() {
     StringBuilder sbuf = new StringBuilder();
     sbuf.append(super.toString());
     sbuf.append(" - setter ").append(method)
       .append(" could not be satisified for type: ").append(injectedType.getFullyQualifiedName()).append("\n");
+
+    if (message.length() > 0) {
+      sbuf.append("  Message: ").append(message).append("\n");
+    }
+
     return sbuf.toString();
   }
 

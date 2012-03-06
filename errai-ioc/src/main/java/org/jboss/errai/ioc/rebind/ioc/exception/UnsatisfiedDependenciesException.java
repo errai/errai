@@ -16,6 +16,10 @@
 
 package org.jboss.errai.ioc.rebind.ioc.exception;
 
+import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaField;
+import org.jboss.errai.codegen.framework.meta.MetaMethod;
+
 import java.util.List;
 
 /**
@@ -23,14 +27,31 @@ import java.util.List;
  */
 public class UnsatisfiedDependenciesException extends RuntimeException {
   private static final long serialVersionUID = 1L;
-  
+
   private UnsatisfiedDependencies unsatisfiedDependencies;
-  
+
+  public static UnsatisfiedDependenciesException createWithSingleFieldFailure(MetaField field, MetaClass enclosingType,
+                                                                              MetaClass injectedType, String message) {
+    UnsatisfiedDependencies unsatisfiedDependencies1 = new UnsatisfiedDependencies();
+    UnsatisfiedDependency dependency = new UnsatisfiedField(field, enclosingType, injectedType, message);
+    unsatisfiedDependencies1.addUnsatisfiedDependency(dependency);
+    return new UnsatisfiedDependenciesException(unsatisfiedDependencies1);
+  }
+
+  public static UnsatisfiedDependenciesException createWithSingleMethodFailure(MetaMethod method, MetaClass enclosingType,
+                                                                                MetaClass injectedType, String message) {
+      UnsatisfiedDependencies unsatisfiedDependencies1 = new UnsatisfiedDependencies();
+      UnsatisfiedDependency dependency = new UnsatisfiedMethod(method, enclosingType, injectedType, message);
+      unsatisfiedDependencies1.addUnsatisfiedDependency(dependency);
+      return new UnsatisfiedDependenciesException(unsatisfiedDependencies1);
+    }
+
+
   public UnsatisfiedDependenciesException(UnsatisfiedDependencies unsatisfiedDependencies) {
     super(unsatisfiedDependencies.toString());
     this.unsatisfiedDependencies = unsatisfiedDependencies;
-  } 
-  
+  }
+
   public List<UnsatisfiedDependency> getUnsatisfiedDependencies() {
     return unsatisfiedDependencies.get();
   }

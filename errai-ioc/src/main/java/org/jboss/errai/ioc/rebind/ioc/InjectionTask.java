@@ -34,6 +34,7 @@ import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.meta.MetaParameter;
 import org.jboss.errai.codegen.framework.util.Refs;
 import org.jboss.errai.codegen.framework.util.Stmt;
+import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependenciesException;
 import org.slf4j.impl.StaticMarkerBinder;
 
 public class InjectionTask {
@@ -165,7 +166,6 @@ public class InjectionTask {
     InjectableInstance injectableInstance = getInjectableInstance(ctx);
 
     if (ctx.isInjectableQualified(clazz, qualifyingMetadata)) {
-
       if (ctx.isProxiedInjectorAvailable(clazz, qualifyingMetadata)) {
         ProxyInjector proxyInjector = (ProxyInjector) ctx.getProxiedInjector(clazz, qualifyingMetadata);
         return proxyInjector.getType(ctx, injectableInstance);
@@ -175,10 +175,23 @@ public class InjectionTask {
       }
 
     }
-    else {
+    else if (ctx.getProcessingContext().isSingletonScope(clazz.getAnnotations())) {
       ProxyInjector proxyInjector = new ProxyInjector(ctx.getProcessingContext(), clazz, qualifyingMetadata);
       ctx.addProxiedInjector(proxyInjector);
       return proxyInjector.getType(ctx, injectableInstance);
+    }
+    else {
+      switch (taskType) {
+        case Method:
+        case PrivateMethod:
+          throw UnsatisfiedDependenciesException.createWithSingleMethodFailure(method,
+                  injectableInstance.getEnclosingType(), clazz, "(possible graph cycle on non-normal scope)");
+        case Field:
+        case PrivateField:
+        default:
+          throw UnsatisfiedDependenciesException.createWithSingleFieldFailure(field,
+                  injectableInstance.getEnclosingType(), clazz, "(possible graph cycle on non-normal scope)");
+      }
     }
   }
 

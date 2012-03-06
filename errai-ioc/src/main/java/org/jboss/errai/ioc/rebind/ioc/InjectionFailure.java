@@ -28,6 +28,12 @@ public class InjectionFailure extends ErraiBootstrapFailure {
     super(message);
   }
 
+  public InjectionFailure(String message, MetaClass failed) {
+      super(message);
+      this.failedDependency = failed;
+    }
+
+
   public InjectionFailure(MetaClass failedDependency) {
     this.failedDependency = failedDependency;
   }
