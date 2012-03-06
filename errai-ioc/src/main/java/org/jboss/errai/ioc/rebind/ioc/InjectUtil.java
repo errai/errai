@@ -185,6 +185,8 @@ public class InjectUtil {
             = ObjectBuilder.newInstanceOf(initializationCallbackType).extend()
             .publicOverridesMethod("init", Parameter.of(injector.getInjectedType(), "obj"));
 
+    final String varName = "init_" + injector.getVarName();
+    injector.setPostInitCallbackVar(varName);
 
     for (final MetaMethod meth : postConstructTasks) {
       if (meth.getParameters().length != 0) {
@@ -210,8 +212,6 @@ public class InjectUtil {
       @Override
       public void run() {
 
-        final String varName = "init_" + injector.getVarName();
-        injector.setPostInitCallbackVar(varName);
 
         AnonymousClassStructureBuilder classStructureBuilder = initMeth.finish();
 
@@ -220,9 +220,11 @@ public class InjectUtil {
         pc.globalAppend(Stmt.declareVariable(initializationCallbackType).asFinal().named(varName)
                 .initializeWith(classStructureBuilder.finish()));
 
-        Statement postConstructCall = Stmt.loadVariable(varName).invoke("init", Refs.get(injector.getVarName()));
+        if (injector.isSingleton()) {
+          Statement postConstructCall = Stmt.loadVariable(varName).invoke("init", Refs.get(injector.getVarName()));
 
-        processingContext.addPostConstructStatement(postConstructCall);
+          processingContext.addPostConstructStatement(postConstructCall);
+        }
       }
     });
   }

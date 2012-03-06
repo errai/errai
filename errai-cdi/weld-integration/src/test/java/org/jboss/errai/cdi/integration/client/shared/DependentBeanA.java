@@ -16,6 +16,7 @@
 
 package org.jboss.errai.cdi.integration.client.shared;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
 
 /**
@@ -25,7 +26,17 @@ import javax.enterprise.context.Dependent;
 public class DependentBeanA {
   private static int instanceCount = 0;
 
+  private boolean postConstr;
   private int instanceId = instanceCount++;
+
+  @PostConstruct
+  public void postConstrA() {
+    postConstr = true;
+  }
+
+  public boolean isPostConstr() {
+    return postConstr;
+  }
 
   public int getInstanceId() {
     return instanceId;
