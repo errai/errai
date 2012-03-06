@@ -16,11 +16,19 @@
 
 package org.jboss.errai.codegen.framework.builder.callstack;
 
+import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
+import org.mvel2.util.NullType;
+
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class CallWriter {
   private StringBuilder buffer;
+  private Map<String, MetaClass> typeParmCapture = new HashMap<String, MetaClass>();
 
   public CallWriter() {
     reset();
@@ -37,5 +45,14 @@ public class CallWriter {
 
   public String getCallString() {
     return buffer.toString();
+  }
+
+  public void recordTypeParm(String var, MetaClass type) {
+    this.typeParmCapture.put(var, type);
+  }
+
+  public MetaClass getTypeParm(String var) {
+    return typeParmCapture.get(var);
+
   }
 }

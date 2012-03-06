@@ -229,7 +229,12 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
   public void setThrowsDeclaration(ThrowsDeclaration throwsDeclaration) {
     this.throwsDeclaration = throwsDeclaration;
   }
-  
+
+  @Override
+  public boolean isVarArgs() {
+    return false;
+  }
+
   public boolean isReifiedForm() {
     return reifiedFormOf != null;
   }

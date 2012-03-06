@@ -22,6 +22,7 @@ import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.builder.impl.Scope;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
+import org.jboss.errai.codegen.framework.util.Refs;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 
@@ -94,4 +95,5 @@ public class ProxyInjector extends Injector {
   public void setProxied(boolean proxied) {
     this.proxied = proxied;
   }
+
 }

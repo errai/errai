@@ -31,6 +31,8 @@ public abstract class MetaMethod implements MetaClassMember, MetaGenericDeclarat
 
   public abstract MetaClass[] getCheckedExceptions();
 
+  public abstract boolean isVarArgs();
+
   public Method asMethod() {
     throw new UnsupportedOperationException();
   }

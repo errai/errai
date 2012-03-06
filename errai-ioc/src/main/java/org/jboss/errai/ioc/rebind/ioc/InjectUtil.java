@@ -176,57 +176,74 @@ public class InjectUtil {
 
     if (postConstructTasks.isEmpty()) return;
 
-    final IOCProcessingContext processingContext = ctx.getProcessingContext();
 
-    final MetaClass initializationCallbackType =
-            parameterizedAs(InitializationCallback.class, typeParametersOf(injector.getInjectedType()));
+    if (injector.isSingleton()) {
+      final IOCProcessingContext processingContext = ctx.getProcessingContext();
 
-    final BlockBuilder<AnonymousClassStructureBuilder> initMeth
-            = ObjectBuilder.newInstanceOf(initializationCallbackType).extend()
-            .publicOverridesMethod("init", Parameter.of(injector.getInjectedType(), "obj"));
+      final MetaClass initializationCallbackType =
+              parameterizedAs(InitializationCallback.class, typeParametersOf(injector.getInjectedType()));
 
-    final String varName = "init_" + injector.getVarName();
-    injector.setPostInitCallbackVar(varName);
+      final BlockBuilder<AnonymousClassStructureBuilder> initMeth
+              = ObjectBuilder.newInstanceOf(initializationCallbackType).extend()
+              .publicOverridesMethod("init", Parameter.of(injector.getInjectedType(), "obj"));
 
-    for (final MetaMethod meth : postConstructTasks) {
-      if (meth.getParameters().length != 0) {
-        throw new InjectionFailure("PostConstruct method must be public and contain no parameters: "
-                + injector.getInjectedType().getFullyQualifiedName() + "." + meth.getName());
-      }
+      final String varName = "init_" + injector.getVarName();
+      injector.setPostInitCallbackVar(varName);
 
-      if (!meth.isPublic()) {
-        ctx.addExposedMethod(meth);
-      }
+      for (final MetaMethod meth : postConstructTasks) {
+        if (meth.getParameters().length != 0) {
+          throw new InjectionFailure("PostConstruct method must be public and contain no parameters: "
+                  + injector.getInjectedType().getFullyQualifiedName() + "." + meth.getName());
+        }
 
+        if (!meth.isPublic()) {
+          ctx.addExposedMethod(meth);
+        }
 
-      if (!meth.isPublic()) {
-        initMeth.append(Stmt.invokeStatic(ctx.getProcessingContext().getBootstrapClass(),
-                GenUtil.getPrivateMethodName(meth), Refs.get("obj")));
-      }
-      else {
-        initMeth.append(Stmt.loadVariable("obj").invoke(meth.getName()));
-      }
-    }
-
-    ctx.deferRunnableTask(new Runnable() {
-      @Override
-      public void run() {
-
-
-        AnonymousClassStructureBuilder classStructureBuilder = initMeth.finish();
-
-        IOCProcessingContext pc = ctx.getProcessingContext();
-
-        pc.globalAppend(Stmt.declareVariable(initializationCallbackType).asFinal().named(varName)
-                .initializeWith(classStructureBuilder.finish()));
-
-        if (injector.isSingleton()) {
-          Statement postConstructCall = Stmt.loadVariable(varName).invoke("init", Refs.get(injector.getVarName()));
-
-          processingContext.addPostConstructStatement(postConstructCall);
+        if (!meth.isPublic()) {
+          initMeth.append(Stmt.invokeStatic(ctx.getProcessingContext().getBootstrapClass(),
+                  GenUtil.getPrivateMethodName(meth), Refs.get("obj")));
+        }
+        else {
+          initMeth.append(Stmt.loadVariable("obj").invoke(meth.getName()));
         }
       }
-    });
+
+      ctx.deferRunnableTask(new Runnable() {
+        @Override
+        public void run() {
+          AnonymousClassStructureBuilder classStructureBuilder = initMeth.finish();
+
+          IOCProcessingContext pc = ctx.getProcessingContext();
+
+          pc.globalAppend(Stmt.declareVariable(initializationCallbackType).asFinal().named(varName)
+                  .initializeWith(classStructureBuilder.finish()));
+
+          Statement postConstructCall = Stmt.loadVariable(varName).invoke("init", Refs.get(injector.getVarName()));
+          processingContext.addPostConstructStatement(postConstructCall);
+        }
+      });
+    }
+    else {
+      for (final MetaMethod meth : postConstructTasks) {
+        if (meth.getParameters().length != 0) {
+          throw new InjectionFailure("PostConstruct method must be public and contain no parameters: "
+                  + injector.getInjectedType().getFullyQualifiedName() + "." + meth.getName());
+        }
+
+        if (!meth.isPublic()) {
+          ctx.addExposedMethod(meth);
+        }
+
+        if (!meth.isPublic()) {
+          ctx.getProcessingContext().append(Stmt.invokeStatic(ctx.getProcessingContext().getBootstrapClass(),
+                  GenUtil.getPrivateMethodName(meth), Refs.get(injector.getVarName())));
+        }
+        else {
+          ctx.getProcessingContext().append(Stmt.loadVariable(injector.getVarName()).invoke(meth.getName()));
+        }
+      }
+    }
   }
 
   private static List<InjectionTask> scanForTasks(Injector injector, InjectionContext ctx, MetaClass type) {
@@ -503,7 +520,10 @@ public class InjectUtil {
   }
 
   public static Annotation[] extractQualifiersAsArray(InjectableInstance<?> injectableInstance) {
-    List<Annotation> annos = extractQualifiers(injectableInstance);
+    return qualifierListToArray(extractQualifiers(injectableInstance));
+  }
+
+  public static Annotation[] qualifierListToArray(List<Annotation> annos) {
     return annos.toArray(new Annotation[annos.size()]);
   }
 

@@ -76,7 +76,7 @@ public class GenUtil {
   }
 
   public static Statement[] generateCallParameters(MetaMethod method, Context context, Object... parameters) {
-    if (parameters.length != method.getParameters().length) {
+    if (parameters.length != method.getParameters().length && !method.isVarArgs()) {
       throw new UndefinedMethodException("Wrong number of parameters");
     }
 

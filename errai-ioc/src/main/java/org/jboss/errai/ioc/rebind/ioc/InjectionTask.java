@@ -94,7 +94,6 @@ public class InjectionTask {
           return false;
         }
 
-
         processingContext.append(
                 Stmt.invokeStatic(processingContext.getBootstrapClass(), getPrivateFieldInjectorName(field),
                         Refs.get(injector.getVarName()), val)

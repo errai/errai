@@ -19,6 +19,7 @@ package org.jboss.errai.codegen.framework;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jboss.errai.codegen.framework.builder.callstack.CallWriter;
 import org.jboss.errai.codegen.framework.literal.ClassLiteral;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
@@ -40,11 +41,13 @@ public class MethodInvocation extends AbstractStatement {
   private final MetaMethod method;
   private final CallParameters callParameters;
   private Map<String, MetaClass> typeVariables;
+  private CallWriter writer;
 
-  public MethodInvocation(MetaClass inputType, MetaMethod method, CallParameters callParameters) {
+  public MethodInvocation(CallWriter writer, MetaClass inputType, MetaMethod method, CallParameters callParameters) {
     this.inputType = inputType;
     this.method = method;
     this.callParameters = callParameters;
+    this.writer = writer;
   }
 
   String generatedCache;
@@ -70,6 +73,9 @@ public class MethodInvocation extends AbstractStatement {
       if (typeVariables.containsKey(typeVar.getName())) {
         returnType = typeVariables.get(typeVar.getName());
       }
+      else if (writer.getTypeParm(typeVar.getName()) != null) {
+        returnType = writer.getTypeParm(typeVar.getName());
+      }
       else {
         // returning NullType as a stand-in for an unbounded wildcard type since this is a parameterized method
         // and there is not RHS qualification for the parameter.
@@ -94,11 +100,18 @@ public class MethodInvocation extends AbstractStatement {
     if (superClass != null && superClass.getTypeParameters() != null & superClass.getTypeParameters().length > 0
             && gSuperClass != null && gSuperClass.getTypeParameters().length > 0) {
       for (int i = 0; i < superClass.getTypeParameters().length; i++) {
+        String varName = superClass.getTypeParameters()[i].getName();
         if (gSuperClass.getTypeParameters()[i] instanceof MetaClass) {
-          typeVariables.put(superClass.getTypeParameters()[i].getName(), (MetaClass) gSuperClass.getTypeParameters()[i]);
+          typeVariables.put(varName, (MetaClass) gSuperClass.getTypeParameters()[i]);
         }
         else if (gSuperClass.getTypeParameters()[i] instanceof MetaWildcardType) {
-          typeVariables.put(superClass.getTypeParameters()[i].getName(), MetaClassFactory.get(Object.class));
+          typeVariables.put(varName, MetaClassFactory.get(Object.class));
+        }
+        else {
+          MetaClass clazz = writer.getTypeParm(varName);
+          if (clazz != null) {
+            typeVariables.put(varName, clazz);
+          }
         }
       }
     }

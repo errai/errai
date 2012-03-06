@@ -29,6 +29,7 @@ import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.api.qualifiers.Any;
 import org.jboss.errai.ioc.client.container.CreationalCallback;
+import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -153,6 +154,9 @@ public class TypeInjector extends Injector {
       retVal = Refs.get(varName);
     }
     else {
+//      retVal = Stmt.invokeStatic(IOC.class, "getBeanManager").invoke("lookupBean", type)
+//              .invoke("getInstance");
+      
       retVal = Stmt.loadVariable(creationalCallbackVarName).invoke("getInstance");
     }
 

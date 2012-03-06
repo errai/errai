@@ -163,6 +163,11 @@ public class GWTMethod extends MetaMethod {
   }
 
   @Override
+  public boolean isVarArgs() {
+    return method.isVarArgs();
+  }
+
+  @Override
   public MetaTypeVariable[] getTypeParameters() {
     return GWTUtil.fromTypeVariable(method.getTypeParameters());
   }

@@ -63,6 +63,9 @@ public class InstanceInjectionIntegrationTest extends AbstractErraiCDITest {
         assertNotSame(b, b1);
         assertTrue(b1.isPostConstr());
 
+        assertNotNull(b1.getBeanB());
+        assertTrue(b1.getBeanB().isPostConstr());
+
         finishTest();
       }
     });

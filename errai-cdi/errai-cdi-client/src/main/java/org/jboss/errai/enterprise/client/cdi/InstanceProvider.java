@@ -29,7 +29,7 @@ import java.util.Iterator;
 public class InstanceProvider implements ContextualTypeProvider<Instance> {
 
   @Override
-  public Instance provide(final Class<?>[] typeargs, final Annotation[] qualifiers) {
+  public Instance provide(final Class[] typeargs, final Annotation[] qualifiers) {
 
     /*
     * If you see a compile error here, ensure that you are using Errai's custom

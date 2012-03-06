@@ -32,6 +32,9 @@ import org.jboss.errai.codegen.framework.exception.UndefinedMethodException;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
+import org.jboss.errai.codegen.framework.meta.MetaParameterizedType;
+import org.jboss.errai.codegen.framework.meta.MetaType;
+import org.jboss.errai.codegen.framework.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.framework.util.GenUtil;
 
 /**
@@ -69,9 +72,26 @@ public class MethodCall extends AbstractCallElement {
 
       if (method == null) {
         callType.getBestMatchingMethod(methodName, parameterTypes);
-        throw new UndefinedMethodException(statement.getType(), methodName, parameterTypes);
+           throw new UndefinedMethodException(statement.getType(), methodName, parameterTypes);
+//        dummyReturn(writer, context);
+//        return;
       }
 
+      if (method.getGenericParameterTypes() != null) {
+        MetaType[] genTypes = method.getGenericParameterTypes();
+        for (int i = 0; i < genTypes.length; i++) {
+           if (genTypes[i] instanceof MetaParameterizedType) {
+             if (parameters[i] instanceof MetaClass) {
+               MetaType type = ((MetaParameterizedType) genTypes[i]).getTypeParameters()[0];
+               if (type instanceof MetaTypeVariable) {
+                 writer.recordTypeParm(((MetaTypeVariable) type).getName(), (MetaClass) parameters[i]);
+               }
+             }
+           }
+        }
+        
+      }
+      
       /**
        * If the method is within the calling scope, we can strip the qualifying reference.
        */
@@ -80,7 +100,7 @@ public class MethodCall extends AbstractCallElement {
       }
 
       callParams = fromStatements(GenUtil.generateCallParameters(method, context, parameters));
-      statement = new MethodInvocation(callType, method, callParams);
+      statement = new MethodInvocation(writer, callType, method, callParams);
 
       resultType = statement.getType();
 
@@ -122,5 +142,19 @@ public class MethodCall extends AbstractCallElement {
   @Override
   public String toString() {
     return "[[MethodCall<" + methodName + "(" + Arrays.toString(parameters) + ")>]" + next + "]";
+  }
+
+  private void dummyReturn(CallWriter writer, Context context) {
+    nextOrReturn(writer, context, new Statement() {
+      @Override
+      public String generate(Context context) {
+        return methodName + "(" + Arrays.toString(parameters) + ")";
+      }
+
+      @Override
+      public MetaClass getType() {
+        return MetaClassFactory.get(Object.class);
+      }
+    });
   }
 }

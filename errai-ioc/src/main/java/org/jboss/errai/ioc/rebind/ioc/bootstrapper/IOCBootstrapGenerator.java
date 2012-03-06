@@ -57,7 +57,6 @@ import org.jboss.errai.ioc.client.api.TaskOrder;
 import org.jboss.errai.ioc.client.api.ToPanel;
 import org.jboss.errai.ioc.client.api.ToRootPanel;
 import org.jboss.errai.ioc.client.api.TypeProvider;
-import org.jboss.errai.ioc.rebind.AnnotationHandler;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.IOCProcessorFactory;
 import org.jboss.errai.ioc.rebind.JSR330AnnotationHandler;
@@ -257,7 +256,7 @@ public class IOCBootstrapGenerator {
     MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
 
     procFactory.process(scanner, procContext);
-   // procFactory.processAll();
+    // procFactory.processAll();
 
     runAllDeferred();
 
@@ -265,10 +264,13 @@ public class IOCBootstrapGenerator {
       blockBuilder.append(stmt);
     }
 
-    for (Statement stmt : procContext.getPostConstructStatements()) {
+    for (Statement stmt : procContext.getStaticInstantiationStatements()) {
       blockBuilder.append(stmt);
     }
 
+    for (Statement stmt : procContext.getStaticPostConstructStatements()) {
+      blockBuilder.append(stmt);
+    }
 
 
     Collection<MetaField> privateFields = injectFactory.getInjectionContext().getPrivateFieldsToExpose();
