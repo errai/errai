@@ -83,14 +83,17 @@ public class CreationalContext {
         unresolvedIterator.remove();
       }
       else {
-
         boolean satisfied = true;
-        for (ProxyResolver pr : entry.getValue()) {
+        Iterator<ProxyResolver> prIterator = entry.getValue().iterator();
+        while (prIterator.hasNext()) {
+          ProxyResolver pr = prIterator.next();
+
           Object bean = IOC.getBeanManager().lookupBean(entry.getKey().getClazz(), entry.getKey().getAnnotations())
                   .getInstance(this);
 
           if (bean != null) {
             pr.resolve(bean);
+            prIterator.remove();
           }
           else {
             satisfied = false;
