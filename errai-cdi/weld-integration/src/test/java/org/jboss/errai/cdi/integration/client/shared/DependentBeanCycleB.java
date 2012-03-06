@@ -27,11 +27,6 @@ import javax.inject.Inject;
 public class DependentBeanCycleB {
   @Inject DependentBeanCycleA dependentBeanCycleA;
 
-  public DependentBeanCycleB() {
-    new Throwable().printStackTrace();
-    System.out.print("instantiated!");
-  }
-
   public static int instanceCount = 1;
   
   private int instance;

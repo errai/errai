@@ -83,16 +83,22 @@ public class CreationalContext {
         unresolvedIterator.remove();
       }
       else {
-        Object bean = IOC.getBeanManager().lookupBean(entry.getKey().getClazz(), entry.getKey().getAnnotations())
-                .getInstance(this);
 
-        if (bean != null) {
-          for (ProxyResolver pr : entry.getValue()) {
+        boolean satisfied = true;
+        for (ProxyResolver pr : entry.getValue()) {
+          Object bean = IOC.getBeanManager().lookupBean(entry.getKey().getClazz(), entry.getKey().getAnnotations())
+                  .getInstance(this);
+
+          if (bean != null) {
             pr.resolve(bean);
           }
-          
-          unresolvedIterator.remove();
+          else {
+            satisfied = false;
+          }
         }
+
+        if (satisfied)
+          unresolvedIterator.remove();
       }
     }
 
