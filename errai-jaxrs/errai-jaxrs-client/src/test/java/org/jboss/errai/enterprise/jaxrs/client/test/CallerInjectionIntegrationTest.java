@@ -23,6 +23,7 @@ import org.jboss.errai.enterprise.client.jaxrs.api.ResponseException;
 import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
 import org.jboss.errai.enterprise.jaxrs.client.TestModule;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.Entity;
+import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
 import org.junit.Test;
 
@@ -43,8 +44,7 @@ public class CallerInjectionIntegrationTest extends AbstractErraiJaxrsTest {
 
   @Override
   protected void gwtSetUp() throws Exception {
-    Bootstrapper bootstrapper = GWT.create(Bootstrapper.class);
-    bootstrapper.bootstrapContainer();
+    new Container().boostrapContainer();
     super.gwtSetUp();
   }
 
