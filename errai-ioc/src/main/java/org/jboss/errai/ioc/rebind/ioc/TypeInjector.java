@@ -119,9 +119,9 @@ public class TypeInjector extends Injector {
     MetaClass creationCallbackRef
             = MetaClassFactory.parameterizedAs(CreationalCallback.class, MetaClassFactory.typeParametersOf(type));
 
-    BlockBuilder<AnonymousClassStructureBuilder> callbackBuilder = ObjectBuilder.newInstanceOf(creationCallbackRef).extend()
+    final BlockBuilder<AnonymousClassStructureBuilder> callbackBuilder = ObjectBuilder.newInstanceOf(creationCallbackRef).extend()
             .publicOverridesMethod("getInstance", Parameter.of(CreationalContext.class, "context"));
-    
+
     callbackBuilder.append(Stmt.declareVariable(Class.class).named("beanType").initializeWith(Stmt.load(type)));
     callbackBuilder.append(Stmt.declareVariable(Annotation[].class).named("qualifiers")
             .initializeWith(Stmt.load(qualifyingMetadata.getQualifiers())));
@@ -131,6 +131,8 @@ public class TypeInjector extends Injector {
     InjectUtil.getConstructionStrategy(this, injectContext).generateConstructor(new ConstructionStatusCallback() {
       @Override
       public void callback(boolean constructed) {
+        callbackBuilder.append(Stmt.loadVariable("context").invoke("addBean", Refs.get(varName), Refs.get("beanType"),
+                Refs.get("qualifiers")));
         injected = true;
       }
     });
@@ -169,8 +171,6 @@ public class TypeInjector extends Injector {
       }
     }
 
-    callbackBuilder.append(Stmt.loadVariable("context").invoke("addBean", Refs.get(varName), Refs.get("beanType"),
-            Refs.get("qualifiers")));
 
     callbackBuilder.append(Stmt.loadVariable(varName).returnValue());
 

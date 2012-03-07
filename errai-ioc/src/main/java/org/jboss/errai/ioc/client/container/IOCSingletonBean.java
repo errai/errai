@@ -53,7 +53,9 @@ public class IOCSingletonBean<T> extends AbstractIOCBean<T> {
 
   @Override
   public T getInstance(CreationalContext context) {
-    return instance;
+    T t = getInstance();
+    context.addBean(t, type, qualifiers.toArray(new Annotation[qualifiers.size()]));
+    return t;
   }
 
   public T getInstance() {

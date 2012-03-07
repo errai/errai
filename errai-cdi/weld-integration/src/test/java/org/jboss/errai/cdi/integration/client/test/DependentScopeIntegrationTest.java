@@ -48,8 +48,9 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
 
   @Override
   public void gwtSetUp() throws Exception {
-    super.gwtSetUp();
     DependentBeanCycleB.instanceCount = 1;
+
+    super.gwtSetUp();
   }
 
   public void testDependentBeanScope() {
@@ -162,28 +163,63 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
     });
   }
 
-  public void testDependentBeanCycle() {
+  public void testDependentBeanCycleFromApplicationScopedRoot() {
     delayTestFinish(60000);
 
-    InitVotes.registerInitCallback(new Runnable() {
+    InitVotes.registerOneTimeInitCallback(new Runnable() {
       @Override
       public void run() {
         ApplicationScopedBeanB bean = IOC.getBeanManager()
                 .lookupBean(ApplicationScopedBeanB.class).getInstance();
 
         assertNotNull("DependentBeanCycleA was null", bean);
-        assertNotNull("dependentScopedBean.dependentBeanCycleB injection was null",
+        assertNotNull("dependentScopedBean.dependentBeanCycleA injection was null",
+                bean.getDependentBeanCycleA());
+        assertNotNull("dependentScopedBean.dependentBeanCycleA.dependentBeanCycleB was null",
+                bean.getDependentBeanCycleA().getDependentBeanCycleB());
+        assertEquals("there should have been only one instantiation of DependentBeanCycleB",
+                1, bean.getDependentBeanCycleA().getDependentBeanCycleB().getInstance());
+
+        finishTest();
+      }
+    });
+  }
+
+  public void testDependentBeanCycleFromDependentRoot() {
+    delayTestFinish(60000);
+
+    InitVotes.registerOneTimeInitCallback(new Runnable() {
+      @Override
+      public void run() {
+        DependentBeanCycleB.instanceCount = 1;
+
+        DependentBeanCycleB bean = IOC.getBeanManager()
+                .lookupBean(DependentBeanCycleB.class).getInstance();
+
+        assertNotNull("bean was null", bean);
+        assertNotNull("bean.dependentBeanCycleA injection was null",
                 bean.getDependentBeanCycleA());
         assertNotNull("dependentScopedBean.dependentBeanCycleB.dependentBeanCycleA was null",
                 bean.getDependentBeanCycleA().getDependentBeanCycleB());
         assertEquals("there should have been only one instantiation of DependentBeanCycleB",
                 1, bean.getDependentBeanCycleA().getDependentBeanCycleB().getInstance());
 
-        finishTest();
+        DependentBeanCycleB.instanceCount = 1;
 
+        DependentBeanCycleA beanA = IOC.getBeanManager()
+                .lookupBean(DependentBeanCycleA.class).getInstance();
+
+        assertNotNull("beanA was null", beanA);
+        assertNotNull("dependentScopedBean.dependentBeanCycleB injection was null",
+                beanA.getDependentBeanCycleB());
+        assertNotNull("dependentScopedBean.dependentBeanCycleB.dependentBeanCycleA was null",
+                beanA.getDependentBeanCycleB().getDependentBeanCycleA());
+        assertEquals("there should have been only two instantiations of DependentBeanCycleB",
+                1, beanA.getDependentBeanCycleB().getDependentBeanCycleA().getDependentBeanCycleB().getInstance());
+
+        finishTest();
       }
     });
-
   }
 
 }

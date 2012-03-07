@@ -43,7 +43,11 @@ public class CreationalContext {
   }
 
   public void addBean(Object beanInstance, Class<?> beanType, Annotation[] qualifiers) {
-    wired.put(new BeanRef(beanType, qualifiers), beanInstance);
+    BeanRef ref = new BeanRef(beanType, qualifiers);
+
+    if (!wired.containsKey(ref)) {
+      wired.put(new BeanRef(beanType, qualifiers), beanInstance);
+    }
   }
 
   public void addUnresolvedProxy(ProxyResolver proxyResolver, Class<?> beanType, Annotation[] qualifiers) {
@@ -71,6 +75,7 @@ public class CreationalContext {
   }
 
   private void resolveAllProxies() {
+    boolean beansResolved = false;
 
     Iterator<Map.Entry<BeanRef, List<ProxyResolver>>> unresolvedIterator = unresolvedProxies.entrySet().iterator();
     while (unresolvedIterator.hasNext()) {
@@ -83,31 +88,25 @@ public class CreationalContext {
         unresolvedIterator.remove();
       }
       else {
-        boolean satisfied = true;
-        Iterator<ProxyResolver> prIterator = new ArrayList<ProxyResolver>(entry.getValue()).iterator();
-        while (prIterator.hasNext()) {
-          ProxyResolver pr = prIterator.next();
+        Object bean = IOC.getBeanManager().lookupBean(entry.getKey().getClazz(), entry.getKey().getAnnotations())
+                .getInstance(this);
 
-          Object bean = IOC.getBeanManager().lookupBean(entry.getKey().getClazz(), entry.getKey().getAnnotations())
-                  .getInstance(this);
+        if (bean != null) {
+          if (!wired.containsKey(entry.getKey())) {
+            addBean(bean, entry.getKey().getClazz(), entry.getKey().getAnnotations());
+          }
 
-          if (bean != null) {
-            pr.resolve(bean);
-            prIterator.remove();
-          }
-          else {
-            satisfied = false;
-          }
+          beansResolved = true;
         }
-
-        if (satisfied)
-          unresolvedIterator.remove();
       }
     }
 
-    if (!unresolvedProxies.isEmpty()) {
+    if (beansResolved) {
+      resolveAllProxies();
+    }
+    else if (!unresolvedProxies.isEmpty()) {
       for (Map.Entry<BeanRef, List<ProxyResolver>> entry : unresolvedProxies.entrySet()) {
-        System.out.println("unresolved proxy: " + entry.getKey());
+        throw new RuntimeException("unresolved proxy: " + entry.getKey());
       }
     }
   }
