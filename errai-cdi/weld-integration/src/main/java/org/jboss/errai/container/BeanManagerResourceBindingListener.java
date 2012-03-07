@@ -26,7 +26,6 @@ import javax.naming.Reference;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
-import org.jboss.weld.resources.ManagerObjectFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,22 +35,21 @@ import org.slf4j.LoggerFactory;
  * read-write naming director, so a listener will suffice.
  * 
  * @author Dan Allen
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class BeanManagerResourceBindingListener implements ServletContextListener {
   private static final Logger log = LoggerFactory.getLogger(BeanManagerResourceBindingListener.class);
 
   private static final String RESOURCES_CONTEXT = "java:comp/env";
-
   private static final String BEAN_MANAGER_JNDI_NAME = "BeanManager";
-
   private static final String QUALIFIED_BEAN_MANAGER_JNDI_NAME = RESOURCES_CONTEXT + "/" + BEAN_MANAGER_JNDI_NAME;
+  private static final String BEAN_MANAGER_OBJECT_FACTORY = "org.jboss.weld.resources.ManagerObjectFactory";
 
   public void contextInitialized(ServletContextEvent sce) {
-    try {
+   try {
       InitialContext ctx = new InitialContext();
       boolean present = false;
       try {
-
         NamingEnumeration<NameClassPair> entries = ctx.list(RESOURCES_CONTEXT);
         while (entries.hasMoreElements()) {
           NameClassPair e = entries.next();
@@ -62,13 +60,13 @@ public class BeanManagerResourceBindingListener implements ServletContextListene
         }
       }
       catch (NamingException e) {
-        log.info("Could not perform lookup to detect BeanManager reference in JNDI: " + e.getExplanation());
+        log.info("Could not read context " + RESOURCES_CONTEXT + ": Trying to create it!");
         try {
           Context compCtx = (Context) ctx.lookup("java:comp");
           compCtx.createSubcontext("env");
         }
         catch (Exception ex) {
-          log.info("Could not create env context!");
+          throw new RuntimeException("Could not create context:" + RESOURCES_CONTEXT);
         }
       }
 
@@ -76,22 +74,22 @@ public class BeanManagerResourceBindingListener implements ServletContextListene
         try {
           // we rebind just in case it really is there and we just couldn't read it
           ctx.rebind(QUALIFIED_BEAN_MANAGER_JNDI_NAME,
-                     new Reference(BeanManager.class.getName(), ManagerObjectFactory.class.getName(), null));
+                     new Reference(BeanManager.class.getName(), BEAN_MANAGER_OBJECT_FACTORY, null));
           log.info("BeanManager reference bound to " + QUALIFIED_BEAN_MANAGER_JNDI_NAME);
         }
         catch (NamingException e) {
-          log.warn("Could not bind BeanManager reference to JNDI: "
+          throw new RuntimeException("Could not bind BeanManager reference to JNDI: "
               + e.getExplanation()
               + " \n"
-              + "If the naming context is read-only, you may need to use configuration to bind the entry, " +
+              + "If the naming context is read-only, you may need to use a configuration to bind the BeanManager instead, " +
                   "such as Tomcat's context.xml or Jetty's jetty-web.xml.");
         }
       }
-    }
-    catch (NamingException e) {
-      log.warn("Could not create InitialContext to check for BeanManager reference in JNDI: " + e.getExplanation());
-    }
+   }
+   catch (NamingException e) {
+      throw new RuntimeException("Could not create InitialContext to bind BeanManager reference in JNDI: " + e.getExplanation());
+   }
   }
 
-  public void contextDestroyed(ServletContextEvent arg0) {}
+  public void contextDestroyed(ServletContextEvent sce) {}
 }
