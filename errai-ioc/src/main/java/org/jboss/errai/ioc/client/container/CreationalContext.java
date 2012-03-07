@@ -84,7 +84,7 @@ public class CreationalContext {
       }
       else {
         boolean satisfied = true;
-        Iterator<ProxyResolver> prIterator = entry.getValue().iterator();
+        Iterator<ProxyResolver> prIterator = new ArrayList<ProxyResolver>(entry.getValue()).iterator();
         while (prIterator.hasNext()) {
           ProxyResolver pr = prIterator.next();
 

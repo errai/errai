@@ -27,5 +27,5 @@ public abstract class AbstractCDIEventCallback implements MessageCallback {
   /**
    * The qualifiers a message must contain to be propagated.
    */
-  protected Set<String> qualifiers = new HashSet<String>();
+  protected Set<String> qualifierSet = new HashSet<String>();
 }

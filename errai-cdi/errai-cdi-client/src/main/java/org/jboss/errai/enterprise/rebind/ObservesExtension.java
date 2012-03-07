@@ -82,7 +82,7 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
     if (qualifierNames != null) {
       callBackBlock = callBack.initialize();
       for (String qualifierName : qualifierNames) {
-        callBackBlock.append(Stmt.loadClassMember("qualifiers").invoke("add", qualifierName));
+        callBackBlock.append(Stmt.loadClassMember("qualifierSet").invoke("add", qualifierName));
       }
       callBack = callBackBlock.finish();
     }
@@ -93,9 +93,9 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
                     Stmt.loadVariable("message").invoke("get", Set.class, CDIProtocol.Qualifiers)))
             .append(Stmt
                     .if_(Bool.or(
-                            Stmt.loadClassMember("qualifiers").invoke("equals", Refs.get("msgQualifiers")),
+                            Stmt.loadClassMember("qualifierSet").invoke("equals", Refs.get("msgQualifiers")),
                             Bool.and(Bool.equals(Refs.get("msgQualifiers"), null),
-                                    Stmt.loadClassMember("qualifiers").invoke("isEmpty"))))
+                                    Stmt.loadClassMember("qualifierSet").invoke("isEmpty"))))
                     .append(instance.callOrBind(Stmt.loadVariable("message").invoke("get", parm.getType().asClass(), CDIProtocol.BeanReference)))
                     .finish());
 
