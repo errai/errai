@@ -52,10 +52,14 @@ public class BeanManagerResourceBindingListener implements ServletContextListene
       try {
         NamingEnumeration<NameClassPair> entries = ctx.list(RESOURCES_CONTEXT);
         while (entries.hasMoreElements()) {
-          NameClassPair e = entries.next();
-          if (e.getName().equals(BEAN_MANAGER_JNDI_NAME) && e.getClassName().equals(BeanManager.class)) {
-            present = true;
-            break;
+          try {
+            NameClassPair e = entries.next();
+            if (e.getName().equals(BEAN_MANAGER_JNDI_NAME) && e.getClassName().equals(BeanManager.class)) {
+              present = true;
+              break;
+            }
+          } catch (Exception e) {
+            log.info("Problem when interating through " + RESOURCES_CONTEXT, e);
           }
         }
       }
@@ -66,7 +70,7 @@ public class BeanManagerResourceBindingListener implements ServletContextListene
           compCtx.createSubcontext("env");
         }
         catch (Exception ex) {
-          throw new RuntimeException("Could not create context:" + RESOURCES_CONTEXT);
+          log.error("Could not create context:" + RESOURCES_CONTEXT);
         }
       }
 
