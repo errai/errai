@@ -32,6 +32,8 @@ public class BeanInjectSelf {
   public BeanInjectSelf() {
   }
 
+  // it makes me angry that I actually had to support this to be consistent with the JSR-299 TCK.
+  // in fact, I find it absurd that I'm not throwing an exception right now.
   @Inject
   public BeanInjectSelf(BeanInjectSelf selfRefProxy) {
     this.self = selfRefProxy;
