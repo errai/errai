@@ -8,9 +8,9 @@
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="1498.2312"
-   height="614.63751"
-   viewBox="0 0 1198.585 491.71001"
+   width="780"
+   height="256"
+   viewBox="0 0 624.00003 204.80001"
    version="1.1"
    id="svg3556"
    inkscape:version="0.48.2 r9819"
@@ -40,11 +40,11 @@
      inkscape:window-height="712"
      id="namedview4085"
      showgrid="false"
-     inkscape:zoom="1.9516147"
-     inkscape:cx="926.46386"
-     inkscape:cy="367.79383"
+     inkscape:zoom="1.45"
+     inkscape:cx="442.74283"
+     inkscape:cy="161.41187"
      inkscape:window-x="61"
-     inkscape:window-y="128"
+     inkscape:window-y="124"
      inkscape:window-maximized="0"
      inkscape:current-layer="svg3556"
      fit-margin-top="0.6"
@@ -515,8 +515,9 @@
        inkscape:label="Drop shadow"
        width="1.5"
        height="1.5"
-       x="-.25"
-       y="-.25">
+       x="-0.25"
+       y="-0.25"
+       color-interpolation-filters="sRGB">
       <feGaussianBlur
          id="feGaussianBlur5023"
          in="SourceAlpha"
@@ -548,8 +549,9 @@
        inkscape:label="Drop shadow"
        width="1.5"
        height="1.5"
-       x="-.25"
-       y="-.25">
+       x="-0.25"
+       y="-0.25"
+       color-interpolation-filters="sRGB">
       <feGaussianBlur
          id="feGaussianBlur5037"
          in="SourceAlpha"
@@ -581,8 +583,9 @@
        inkscape:label="Drop shadow"
        width="1.5"
        height="1.5"
-       x="-.25"
-       y="-.25">
+       x="-0.25"
+       y="-0.25"
+       color-interpolation-filters="sRGB">
       <feGaussianBlur
          id="feGaussianBlur5051"
          in="SourceAlpha"
@@ -614,8 +617,9 @@
        inkscape:label="Drop shadow"
        width="1.5"
        height="1.5"
-       x="-.25"
-       y="-.25">
+       x="-0.25"
+       y="-0.25"
+       color-interpolation-filters="sRGB">
       <feGaussianBlur
          id="feGaussianBlur5065"
          in="SourceAlpha"
@@ -647,8 +651,9 @@
        inkscape:label="Drop shadow"
        width="1.5"
        height="1.5"
-       x="-.25"
-       y="-.25">
+       x="-0.25"
+       y="-0.25"
+       color-interpolation-filters="sRGB">
       <feGaussianBlur
          id="feGaussianBlur5079"
          in="SourceAlpha"
@@ -680,8 +685,9 @@
        inkscape:label="Drop shadow"
        width="1.5"
        height="1.5"
-       x="-.25"
-       y="-.25">
+       x="-0.25"
+       y="-0.25"
+       color-interpolation-filters="sRGB">
       <feGaussianBlur
          id="feGaussianBlur5093"
          in="SourceAlpha"
@@ -713,8 +719,9 @@
        inkscape:label="Drop shadow"
        width="1.5"
        height="1.5"
-       x="-.25"
-       y="-.25">
+       x="-0.25"
+       y="-0.25"
+       color-interpolation-filters="sRGB">
       <feGaussianBlur
          id="feGaussianBlur5107"
          in="SourceAlpha"
@@ -746,8 +753,9 @@
        inkscape:label="Drop shadow"
        width="1.5"
        height="1.5"
-       x="-.25"
-       y="-.25">
+       x="-0.25"
+       y="-0.25"
+       color-interpolation-filters="sRGB">
       <feGaussianBlur
          id="feGaussianBlur5121"
          in="SourceAlpha"
@@ -779,8 +787,9 @@
        inkscape:label="Drop shadow"
        width="1.5"
        height="1.5"
-       x="-.25"
-       y="-.25">
+       x="-0.25"
+       y="-0.25"
+       color-interpolation-filters="sRGB">
       <feGaussianBlur
          id="feGaussianBlur5135"
          in="SourceAlpha"
@@ -812,8 +821,9 @@
        inkscape:label="Drop shadow"
        width="1.5"
        height="1.5"
-       x="-.25"
-       y="-.25">
+       x="-0.25"
+       y="-0.25"
+       color-interpolation-filters="sRGB">
       <feGaussianBlur
          id="feGaussianBlur5149"
          in="SourceAlpha"
@@ -845,8 +855,9 @@
        inkscape:label="Drop shadow"
        width="1.5"
        height="1.5"
-       x="-.25"
-       y="-.25">
+       x="-0.25"
+       y="-0.25"
+       color-interpolation-filters="sRGB">
       <feGaussianBlur
          id="feGaussianBlur5163"
          in="SourceAlpha"
@@ -878,8 +889,9 @@
        inkscape:label="Drop shadow"
        width="1.5"
        height="1.5"
-       x="-.25"
-       y="-.25">
+       x="-0.25"
+       y="-0.25"
+       color-interpolation-filters="sRGB">
       <feGaussianBlur
          id="feGaussianBlur5177"
          in="SourceAlpha"
@@ -911,8 +923,9 @@
        inkscape:label="Drop shadow"
        width="1.5"
        height="1.5"
-       x="-.25"
-       y="-.25">
+       x="-0.25"
+       y="-0.25"
+       color-interpolation-filters="sRGB">
       <feGaussianBlur
          id="feGaussianBlur5191"
          in="SourceAlpha"
@@ -945,16 +958,17 @@
      id="path3691"
      d="m 687.38104,8.1685391 339.99996,0 0,300.0000009 -339.99996,0 z m 0,0"
      style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1;filter:url(#filter5175)"
-     transform="matrix(0.89427418,0,0,0.94439472,-2.5023525,-2.3781394)" />
+     transform="matrix(0.60074505,0,0,0.63441445,-2.8385889,-1.8907038)" />
   <path
      inkscape:connector-curvature="0"
      id="path3691-5"
      d="m 11.244806,10.472508 559.907654,0 0,300.000002 -559.907654,0 z m 0,0"
      style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:2.56654429;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1;filter:url(#filter5189)"
-     transform="matrix(0.89427418,0,0,0.94439472,-2.5023525,-2.3781394)" />
+     transform="matrix(0.60074505,0,0,0.63441445,-2.8385889,-1.8907038)" />
   <a
-     xlink:href="java-sources/org/jboss/errai/demo/mobile/client/shared/OrientationEvent.java"
-     transform="matrix(0.89427418,0,0,0.94439472,-120.99368,-86.193173)"
+     xlink:href="java-sources/org/jboss/errai/demo/mobile/client/shared/OrientationEvent.java.html"
+     target="_parent"
+     transform="matrix(0.60074505,0,0,0.63441445,-82.437311,-58.194984)"
      id="a5275">
     <g
        style="filter:url(#filter5049)"
@@ -1036,21 +1050,22 @@
   </a>
   <g
      id="g4880"
-     transform="matrix(0.89427418,0,0,0.94439472,-120.99368,-86.193173)">
+     transform="matrix(0.60074505,0,0,0.63441445,-82.437311,-58.194984)">
     <path
-       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1;"
+       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1"
        d="m 280.88886,256.91854 114.51952,0"
        id="path3719"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1;"
+       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1"
        d="m 387.64666,261.91854 10,-5 -10,-5"
        id="path3721"
        inkscape:connector-curvature="0" />
   </g>
   <a
-     xlink:href="java-sources/org/jboss/errai/demo/mobile/client/local/Html5OrientationDetector.java"
-     transform="matrix(0.89427418,0,0,0.94439472,-120.99368,-86.193173)"
+     xlink:href="java-sources/org/jboss/errai/demo/mobile/client/local/Html5OrientationDetector.java.html"
+     target="_parent"
+     transform="matrix(0.60074505,0,0,0.63441445,-82.437311,-58.194984)"
      id="a5203">
     <g
        style="filter:url(#filter5021)"
@@ -1269,7 +1284,7 @@
   <g
      id="g4901"
      style="filter:url(#filter5077)"
-     transform="matrix(0.89427418,0,0,0.94439472,-120.99368,-86.193173)">
+     transform="matrix(0.60074505,0,0,0.63441445,-82.437311,-58.194984)">
     <path
        style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1"
        d="m 599.88104,136.91854 80,0 0,240 -80,0 z m 0,0"
@@ -1403,50 +1418,58 @@
          height="302" />
     </g>
   </g>
-  <g
-     id="g4897"
-     transform="matrix(0.89427418,0,0,0.94439472,-120.99368,-86.193173)">
-    <path
-       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1;"
-       d="m 519.88104,256.91854 74.6289,0"
-       id="path3823"
-       inkscape:connector-curvature="0" />
-    <path
-       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1;"
-       d="m 586.74822,261.91854 10,-5 -10,-5"
-       id="path3825"
-       inkscape:connector-curvature="0" />
-  </g>
-  <g
-     id="g3827"
-     style="fill:#000000;fill-opacity:1"
-     transform="matrix(0.89427418,0,0,0.94439472,3.2040435,4.391791)">
-    <use
-       height="302"
-       width="1021"
-       id="use3829"
-       y="159.44922"
-       x="410.0625"
-       xlink:href="#glyph0-25" />
-    <use
-       height="302"
-       width="1021"
-       id="use3831"
-       y="159.44922"
-       x="418.16797"
-       xlink:href="#glyph0-18" />
-    <use
-       height="302"
-       width="1021"
-       id="use3833"
-       y="159.44922"
-       x="423.69531"
-       xlink:href="#glyph0-6" />
-  </g>
+  <a
+     xlink:href="java-sources/org/jboss/errai/demo/mobile/client/local/OrientationDetector.java.html"
+     target="_parent"
+     id="a7587">
+    <g
+       id="g7578">
+      <g
+         id="g4897"
+         transform="matrix(0.60074505,0,0,0.63441445,-82.437311,-58.194984)">
+        <path
+           style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1"
+           d="m 519.88104,256.91854 74.6289,0"
+           id="path3823"
+           inkscape:connector-curvature="0" />
+        <path
+           style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1"
+           d="m 586.74822,261.91854 10,-5 -10,-5"
+           id="path3825"
+           inkscape:connector-curvature="0" />
+      </g>
+      <g
+         id="g3827"
+         style="fill:#000000;fill-opacity:1"
+         transform="matrix(0.60074505,0,0,0.63441445,0.99478982,2.6571207)">
+        <use
+           height="302"
+           width="1021"
+           id="use3829"
+           y="159.44922"
+           x="410.0625"
+           xlink:href="#glyph0-25" />
+        <use
+           height="302"
+           width="1021"
+           id="use3831"
+           y="159.44922"
+           x="418.16797"
+           xlink:href="#glyph0-18" />
+        <use
+           height="302"
+           width="1021"
+           id="use3833"
+           y="159.44922"
+           x="423.69531"
+           xlink:href="#glyph0-6" />
+      </g>
+    </g>
+  </a>
   <g
      id="g3835"
      style="fill:#000000;fill-opacity:1"
-     transform="matrix(0.89427418,0,0,0.94439472,3.2040435,4.391791)">
+     transform="matrix(0.60074505,0,0,0.63441445,0.99478982,2.6571207)">
     <use
        height="302"
        width="1021"
@@ -1528,7 +1551,7 @@
   <g
      id="g3859"
      style="fill:#000000;fill-opacity:1"
-     transform="matrix(0.89427418,0,0,0.94439472,3.2040435,4.391791)">
+     transform="matrix(0.60074505,0,0,0.63441445,0.99478982,2.6571207)">
     <use
        height="302"
        width="1021"
@@ -1575,7 +1598,7 @@
   <g
      id="g4927"
      style="filter:url(#filter5105)"
-     transform="matrix(0.89427418,0,0,0.94439472,-120.99368,-86.193173)">
+     transform="matrix(0.60074505,0,0,0.63441445,-82.437311,-58.194984)">
     <path
        style="fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1"
        d="m 839.88104,136.91854 80,0 0,240 -80,0 z m 0,0"
@@ -1711,14 +1734,14 @@
   </g>
   <g
      id="g4923"
-     transform="matrix(0.89427418,0,0,0.94439472,-120.99368,-86.193173)">
+     transform="matrix(0.60074505,0,0,0.63441445,-82.437311,-58.194984)">
     <path
-       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1;"
+       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1"
        d="m 679.88104,256.91854 154.70704,0"
        id="path3915"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1;"
+       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1"
        d="m 826.82636,261.91854 10,-5 -10,-5"
        id="path3917"
        inkscape:connector-curvature="0" />
@@ -1726,7 +1749,7 @@
   <g
      id="g3919"
      style="fill:#000000;fill-opacity:1"
-     transform="matrix(0.89427418,0,0,0.94439472,3.2040435,4.391791)">
+     transform="matrix(0.60074505,0,0,0.63441445,0.99478982,2.6571207)">
     <use
        height="302"
        width="1021"
@@ -1785,8 +1808,9 @@
        xlink:href="#glyph0-17" />
   </g>
   <a
-     xlink:href="java-sources/org/jboss/errai/demo/mobile/server/OrientationDataSatellite.java"
-     transform="matrix(0.89427418,0,0,0.94439472,-120.99368,-86.193173)"
+     xlink:href="java-sources/org/jboss/errai/demo/mobile/server/OrientationDataSatellite.java.html"
+     target="_parent"
+     transform="matrix(0.60074505,0,0,0.63441445,-82.437311,-58.194984)"
      id="a5289">
     <g
        style="filter:url(#filter5133)"
@@ -1887,14 +1911,14 @@
   </a>
   <g
      id="g4949"
-     transform="matrix(0.89427418,0,0,0.94439472,-120.99368,-86.193173)">
+     transform="matrix(0.60074505,0,0,0.63441445,-82.437311,-58.194984)">
     <path
-       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1;"
+       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1"
        d="m 920.8615,243.25838 73.76954,-24.58984"
        id="path3963"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1;"
+       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1"
        d="m 988.84584,225.86776 7.9063,-7.90626 -11.0664,-1.582"
        id="path3965"
        inkscape:connector-curvature="0" />
@@ -1902,7 +1926,7 @@
   <g
      id="g3967"
      style="fill:#000000;fill-opacity:1"
-     transform="matrix(0.89427418,0,0,0.94439472,3.2040435,4.391791)">
+     transform="matrix(0.60074505,0,0,0.63441445,0.99478982,2.6571207)">
     <use
        height="302"
        width="1021"
@@ -1977,7 +2001,7 @@
   <g
      id="g3989"
      style="fill:#000000;fill-opacity:1"
-     transform="matrix(0.89427418,0,0,0.94439472,3.2040435,4.391791)">
+     transform="matrix(0.60074505,0,0,0.63441445,0.99478982,2.6571207)">
     <use
        height="302"
        width="1021"
@@ -2022,8 +2046,9 @@
        xlink:href="#glyph1-7" />
   </g>
   <a
-     xlink:href="java-sources/org/jboss/errai/demo/mobile/client/shared/AllClientOrientations.java"
-     transform="matrix(0.89427418,0,0,0.94439472,-120.99368,-86.193173)"
+     xlink:href="java-sources/org/jboss/errai/demo/mobile/client/shared/AllClientOrientations.java.html"
+     target="_parent"
+     transform="matrix(0.60074505,0,0,0.63441445,-82.437311,-58.194984)"
      id="a5306">
     <g
        style="filter:url(#filter5161)"
@@ -2248,14 +2273,14 @@
   </a>
   <g
      id="g4969"
-     transform="matrix(0.89427418,0,0,0.94439472,-120.99368,-86.193173)">
+     transform="matrix(0.60074505,0,0,0.63441445,-82.437311,-58.194984)">
     <path
-       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1;"
+       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1"
        d="m 1059.881,237.8951 0,34.55078"
        id="path4067"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1;"
+       style="fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1"
        d="m 1054.881,264.68416 5,10 5,-10"
        id="path4069"
        inkscape:connector-curvature="0" />
@@ -2263,7 +2288,7 @@
   <g
      id="g4071"
      style="fill:#000000;fill-opacity:1"
-     transform="matrix(0.89427418,0,0,0.94439472,3.2040435,4.391791)">
+     transform="matrix(0.60074505,0,0,0.63441445,0.99478982,2.6571207)">
     <use
        height="302"
        width="1021"
