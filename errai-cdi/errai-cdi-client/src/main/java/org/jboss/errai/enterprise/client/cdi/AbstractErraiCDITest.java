@@ -41,9 +41,7 @@ public abstract class AbstractErraiCDITest extends GWTTestCase {
     CDI.removePostInitTasks();
 
     new Container().onModuleLoad();
-    
-//    Bootstrapper bootstrapper = GWT.create(Bootstrapper.class);
-//    bootstrapper.bootstrapContainer();
+
 
     // Unfortunately, GWTTestCase does not call our inherited module's onModuleLoad() methods
     // http://code.google.com/p/google-web-toolkit/issues/detail?id=3791

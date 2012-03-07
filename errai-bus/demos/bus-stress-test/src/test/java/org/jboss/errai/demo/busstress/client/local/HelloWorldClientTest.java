@@ -1,6 +1,7 @@
 package org.jboss.errai.demo.busstress.client.local;
 
 import org.jboss.errai.bus.client.tests.AbstractErraiTest;
+import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
 
 import com.google.gwt.core.client.GWT;
@@ -19,8 +20,7 @@ public class HelloWorldClientTest extends AbstractErraiTest {
 
     // We need to bootstrap the IoC container manually because GWTTestCase
     // doesn't call onModuleLoad() for us.
-    Bootstrapper bootstrapper = GWT.create(Bootstrapper.class);
-    bootstrapper.bootstrapContainer();
+    new Container().boostrapContainer();
   }
 
   public void testSendMessage() throws Exception {
@@ -32,6 +32,7 @@ public class HelloWorldClientTest extends AbstractErraiTest {
 
         // send a message using the bus (it is now initialized)
         client.messageInterval.setValue(10);
+        client.messageMultiplier.setValue(1);
         client.messageSize.setValue(100);
         client.onStartButtonClick(null);
 
