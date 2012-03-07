@@ -71,13 +71,15 @@ public class ErraiProtocolEnvelopeMarshaller extends AbstractJSONMarshaller<Map<
     Object key, val;
     int i = 0;
     for (Map.Entry<String, Object> entry : o.entrySet()) {
+      key = entry.getKey();
+      val = entry.getValue();
+
+      if (MessageParts.SessionID.name().equals(key)) continue;
+
       if (i++ > 0) {
         buf.append(",");
       }
-      key = entry.getKey();
-      if (MessageParts.SessionID.name().equals(key)) continue;
 
-      val = entry.getValue();
 
       Marshaller<Object> valueMarshaller;
       buf.append("\"" + key + "\"");

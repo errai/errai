@@ -5,6 +5,7 @@ import javax.inject.Inject;
 
 import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
 import com.google.gwt.user.client.Timer;
@@ -61,6 +62,12 @@ public class ErraiIocTestHelper {
    *          the web page.
    */
   public static void afterBusInitialized(final Runnable runnable) {
+    InitVotes.registerOneTimeInitCallback(new Runnable() {
+      @Override
+      public void run() {
+
+      }
+    });
     final Timer t = new Timer() {
       @Override
       public void run() {
