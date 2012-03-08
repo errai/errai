@@ -52,7 +52,7 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
   private MetaClass returnType;
   private DefParameters defParameters;
 
-  private MetaType genericReturnType;
+//  private MetaType genericReturnType;
   private List<MetaType> genericParameterTypes;
 
   private ThrowsDeclaration throwsDeclaration;
@@ -78,7 +78,6 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
     this.returnType = returnType;
     this.defParameters = defParameters;
     this.throwsDeclaration = throwsDeclaration;
- //   this.genericReturnType = genericReturnType;
   }
 
   @Override
@@ -91,9 +90,10 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
     return returnType;
   }
 
+  // don't try to support this for now.
   @Override
   public MetaType getGenericReturnType() {
-    return genericReturnType;
+    return null;
   }
 
   @Override
@@ -212,7 +212,7 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
   }
 
   public void setGenericReturnType(MetaType genericReturnType) {
-    this.genericReturnType = genericReturnType;
+ //   this.genericReturnType = genericReturnType;
   }
 
   public void setGenericParameterTypes(List<MetaType> genericParameterTypes) {
