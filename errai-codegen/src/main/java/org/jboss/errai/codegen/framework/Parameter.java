@@ -89,6 +89,10 @@ public class Parameter extends AbstractStatement implements MetaParameter {
     return name;
   }
 
+  public boolean isFinal() {
+    return isFinal;
+  }
+
   @Override
   public MetaClassMember getDeclaringMember() {
     return null;

@@ -67,6 +67,9 @@ public interface StatementBegin extends ArrayBuilder, LoopBuilder, IfBlockBuilde
 
   public ContextualStatementBuilder nestedCall(Statement statement);
 
+  public ContextualStatementBuilder castTo(Class<?> type, Statement statement);
+  public ContextualStatementBuilder castTo(MetaClass type, Statement statement);
+
   public ObjectBuilder newObject(Class<?> type);
   public ObjectBuilder newObject(MetaClass type);
   public ObjectBuilder newObject(TypeLiteral<?> type);

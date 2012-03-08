@@ -44,6 +44,14 @@ public class BlockStatement extends AbstractStatement {
     return this;
   }
 
+  public void insertBefore(Statement statement) {
+    if (statement != null) {
+      int pos = statements.size() == 0 ? 0 : statements.size() - 1;
+      statements.add(pos, statement);
+    }
+
+  }
+  
   String generatedCache;
   @Override
   public String generate(Context context) {

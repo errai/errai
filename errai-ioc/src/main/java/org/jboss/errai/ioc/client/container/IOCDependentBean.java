@@ -57,7 +57,7 @@ public class IOCDependentBean<T> extends AbstractIOCBean<T> {
   @Override
   public T getInstance(CreationalContext context) {
     T inst = creationalCallback.getInstance(context);
-    context.addBean(inst, type, qualifiers.toArray(new Annotation[qualifiers.size()]));
+//    context.addBean(inst, type, qualifiers.toArray(new Annotation[qualifiers.size()]));
     return inst;
   }
 }

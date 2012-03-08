@@ -16,6 +16,7 @@
 
 package org.jboss.errai.ioc.client.container;
 
+import javax.enterprise.inject.spi.Bean;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,20 +43,46 @@ public class CreationalContext {
     initializationCallbacks.put(beanInstance, callback);
   }
 
-  public void addBean(Object beanInstance, Class<?> beanType, Annotation[] qualifiers) {
-    BeanRef ref = new BeanRef(beanType, qualifiers);
+  public BeanRef getBeanReference(Class<?> beanType, Annotation[] qualifiers) {
+    return new BeanRef(beanType, qualifiers);
+  }
 
+  public boolean hasBean(BeanRef ref) {
+    return wired.containsKey(ref);
+  }
+
+  public Object getBeanInstance(BeanRef ref) {
+    return wired.get(ref);
+  }
+
+  public void addBean(BeanRef ref, Object instance) {
     if (!wired.containsKey(ref)) {
-      wired.put(new BeanRef(beanType, qualifiers), beanInstance);
+      wired.put(ref, instance);
+    }
+  }
+
+  public void addBean(Object beanInstance, Class<?> beanType, Annotation[] qualifiers) {
+    addBean(getBeanReference(beanType, qualifiers), beanInstance);
+  }
+
+  public <T> T getInstanceOrNew(CreationalCallback<T> context, Class<?> beanType, Annotation[] qualifiers) {
+    BeanRef ref = getBeanReference(beanType, qualifiers);
+
+    if (wired.containsKey(ref)) {
+      return (T) wired.get(ref);
+    }
+    else {
+      return context.getInstance(this);
     }
   }
 
   public void addUnresolvedProxy(ProxyResolver proxyResolver, Class<?> beanType, Annotation[] qualifiers) {
-    BeanRef ref = new BeanRef(beanType, qualifiers);
+    BeanRef ref = getBeanReference(beanType, qualifiers);
     List<ProxyResolver> resolverList = unresolvedProxies.get(ref);
     if (resolverList == null) {
       unresolvedProxies.put(ref, resolverList = new ArrayList<ProxyResolver>());
     }
+
     resolverList.add(proxyResolver);
   }
 

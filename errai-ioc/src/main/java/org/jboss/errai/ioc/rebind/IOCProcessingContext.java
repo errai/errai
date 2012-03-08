@@ -46,7 +46,10 @@ import java.util.Stack;
 public class IOCProcessingContext {
   protected Context context;
   protected BuildMetaClass bootstrapClass;
+
   protected Stack<BlockBuilder<?>> blockBuilder;
+  protected BlockBuilder<?> proxyBuilder;
+
   protected List<String> packages;
   protected List<Statement> appendToEnd;
   
@@ -104,12 +107,24 @@ public class IOCProcessingContext {
     return false;
   }
 
+  public BlockBuilder<?> getProxyBuilder() {
+    return proxyBuilder;
+  }
+
+  public void setProxyBuilder(BlockBuilder<?> proxyBuilder) {
+    this.proxyBuilder = proxyBuilder;
+  }
+
   public BlockBuilder<?> getBlockBuilder() {
     return blockBuilder.peek();
   }
 
   public BlockBuilder<?> append(Statement statement) {
     return getBlockBuilder().append(statement);
+  }
+  
+  public void globalInsertBefore(Statement statement) {
+    blockBuilder.get(0).insertBefore(statement);
   }
 
   public BlockBuilder<?> globalAppend(Statement statement) {

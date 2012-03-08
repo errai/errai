@@ -19,6 +19,7 @@ package org.jboss.errai.codegen.framework.builder.impl;
 import javax.enterprise.util.TypeLiteral;
 
 import org.jboss.errai.codegen.framework.BooleanExpression;
+import org.jboss.errai.codegen.framework.Cast;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.Variable;
@@ -351,4 +352,13 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
     appendCallElement(new BranchCallElement(new ContinueStatement(label)));
     return this;
   }
+
+  public ContextualStatementBuilder castTo(Class<?> type, Statement statement) {
+    return nestedCall(Cast.to(type, statement));
+  }
+
+  public ContextualStatementBuilder castTo(MetaClass type, Statement statement) {
+    return nestedCall(Cast.to(type, statement));
+  }
+
 }

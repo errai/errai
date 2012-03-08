@@ -24,6 +24,9 @@ import org.jboss.errai.codegen.framework.Statement;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface BlockBuilder<T> extends Finishable<T> {
+  public void insertBefore(Statement stmt);
+  public void insertBefore(InnerClass innerClass);
+
   public BlockBuilder<T> append(Statement stmt);
   public BlockBuilder<T> append(InnerClass innerClass);
 }

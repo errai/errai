@@ -171,28 +171,31 @@ public class InjectionTask {
         return proxyInjector.getType(ctx, injectableInstance);
       }
       else {
+        Injector inj = ctx.getQualifiedInjector(clazz, qualifyingMetadata);
+
+        /**
+         * Special handling for cycles. If two beans directly depend on each other. We shimmy in a call to the
+         * binding reference to check the context for the instance to avoid a hanging duplicate reference.
+         */
+        if (ctx.cycles(injectableInstance.getEnclosingType(), clazz) && inj instanceof TypeInjector) {
+          TypeInjector typeInjector = (TypeInjector) inj;
+
+          return Stmt.loadVariable("context").invoke("getInstanceOrNew",
+                  Refs.get(typeInjector.getCreationalCallbackVarName()),
+                  inj.getInjectedType(), inj.getQualifyingMetadata().getQualifiers());
+        }
+
         return ctx.getQualifiedInjector(clazz, qualifyingMetadata).getType(ctx, injectableInstance);
       }
 
     }
     else {
+      ctx.recordCycle(clazz, injectableInstance.getEnclosingType());
+
       ProxyInjector proxyInjector = new ProxyInjector(ctx.getProcessingContext(), clazz, qualifyingMetadata);
       ctx.addProxiedInjector(proxyInjector);
       return proxyInjector.getType(ctx, injectableInstance);
     }
-//    else {
-//      switch (taskType) {
-//        case Method:
-//        case PrivateMethod:
-//          throw UnsatisfiedDependenciesException.createWithSingleMethodFailure(method,
-//                  injectableInstance.getEnclosingType(), clazz, "(possible graph cycle on non-normal scope)");
-//        case Field:
-//        case PrivateField:
-//        default:
-//          throw UnsatisfiedDependenciesException.createWithSingleFieldFailure(field,
-//                  injectableInstance.getEnclosingType(), clazz, "(possible graph cycle on non-normal scope)");
-//      }
-//    }
   }
 
   private InjectableInstance getInjectableInstance(InjectionContext ctx) {

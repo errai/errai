@@ -50,6 +50,7 @@ public class InjectionContext {
 
   private Map<MetaClass, List<Injector>> injectors = new LinkedHashMap<MetaClass, List<Injector>>();
   private Multimap<MetaClass, Injector> proxiedInjectors = HashMultimap.create();
+  private Multimap<MetaClass, MetaClass> cyclingTypes = HashMultimap.create();
 
   private Map<Class<? extends Annotation>, List<IOCDecoratorExtension>> decorators = new LinkedHashMap<Class<? extends Annotation>, List<IOCDecoratorExtension>>();
   private Map<ElementType, Set<Class<? extends Annotation>>> decoratorsByElementType = new LinkedHashMap<ElementType, Set<Class<? extends Annotation>>>();
@@ -123,6 +124,14 @@ public class InjectionContext {
     else {
       return matching.get(0);
     }
+  }
+  
+  public void recordCycle(MetaClass from, MetaClass to) {
+    cyclingTypes.put(from, to);
+  }
+
+  public boolean cycles(MetaClass from, MetaClass to) {
+    return cyclingTypes.containsEntry(from, to);
   }
 
   public boolean isInjectable(MetaClass injectorType) {

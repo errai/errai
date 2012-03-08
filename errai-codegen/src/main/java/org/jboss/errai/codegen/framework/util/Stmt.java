@@ -175,6 +175,14 @@ public class Stmt {
     return StatementBuilder.create().loadStatic(clazz, fieldName);
   }
 
+  public static ContextualStatementBuilder castTo(Class<?> clazz, Statement stmt) {
+    return StatementBuilder.create().castTo(clazz, stmt);
+  }
+
+  public static ContextualStatementBuilder castTo(MetaClass clazz, Statement stmt) {
+    return StatementBuilder.create().castTo(clazz, stmt);
+  }
+
   public static ContextualStatementBuilder nestedCall(Statement statement) {
     return StatementBuilder.create().nestedCall(statement);
   }

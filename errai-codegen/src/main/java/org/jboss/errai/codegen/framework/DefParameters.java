@@ -51,7 +51,7 @@ public class DefParameters extends AbstractStatement {
 
     int i = 0;
     for (MetaParameter parm : method.getParameters()) {
-      parameters.add(Parameter.of(parm.getType(), mergeNames[i++].getName()));
+      parameters.add(Parameter.of(parm.getType(), mergeNames[i].getName(), mergeNames[i++].isFinal()));
     }
     return new DefParameters(parameters);
   }

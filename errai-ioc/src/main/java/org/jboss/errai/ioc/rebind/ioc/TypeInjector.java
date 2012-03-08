@@ -26,8 +26,10 @@ import org.jboss.errai.codegen.framework.builder.BlockBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
+import org.jboss.errai.codegen.framework.util.Bool;
 import org.jboss.errai.codegen.framework.util.Refs;
 import org.jboss.errai.codegen.framework.util.Stmt;
+import org.jboss.errai.ioc.client.container.BeanRef;
 import org.jboss.errai.ioc.client.container.CreationalCallback;
 import org.jboss.errai.ioc.client.container.CreationalContext;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
@@ -37,6 +39,12 @@ import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+
+import static org.jboss.errai.codegen.framework.util.Bool.expr;
+import static org.jboss.errai.codegen.framework.util.Stmt.castTo;
+import static org.jboss.errai.codegen.framework.util.Stmt.declareVariable;
+import static org.jboss.errai.codegen.framework.util.Stmt.if_;
+import static org.jboss.errai.codegen.framework.util.Stmt.loadVariable;
 
 public class TypeInjector extends Injector {
   protected final MetaClass type;
@@ -89,7 +97,7 @@ public class TypeInjector extends Injector {
           return Refs.get(varName);
         }
         else if (creationalCallbackVarName != null) {
-          return Stmt.loadVariable(creationalCallbackVarName).invoke("getInstance", Refs.get("context"));
+          return loadVariable(creationalCallbackVarName).invoke("getInstance", Refs.get("context"));
         }
       }
       else if (creationalCallbackVarName != null) {
@@ -109,7 +117,7 @@ public class TypeInjector extends Injector {
         }
 
         if (fromCompare.equals(toCompare)) {
-          return Stmt.loadVariable(creationalCallbackVarName).invoke("getInstance", Refs.get("context"));
+          return loadVariable(creationalCallbackVarName).invoke("getInstance", Refs.get("context"));
         }
       }
     }
@@ -120,10 +128,10 @@ public class TypeInjector extends Injector {
             = MetaClassFactory.parameterizedAs(CreationalCallback.class, MetaClassFactory.typeParametersOf(type));
 
     final BlockBuilder<AnonymousClassStructureBuilder> callbackBuilder = ObjectBuilder.newInstanceOf(creationCallbackRef).extend()
-            .publicOverridesMethod("getInstance", Parameter.of(CreationalContext.class, "context"));
+            .publicOverridesMethod("getInstance", Parameter.of(CreationalContext.class, "context", true));
 
-    callbackBuilder.append(Stmt.declareVariable(Class.class).named("beanType").initializeWith(Stmt.load(type)));
-    callbackBuilder.append(Stmt.declareVariable(Annotation[].class).named("qualifiers")
+    callbackBuilder.append(declareVariable(Class.class).named("beanType").initializeWith(Stmt.load(type)));
+    callbackBuilder.append(declareVariable(Annotation[].class).named("qualifiers")
             .initializeWith(Stmt.load(qualifyingMetadata.getQualifiers())));
 
     ctx.pushBlockBuilder(callbackBuilder);
@@ -131,48 +139,45 @@ public class TypeInjector extends Injector {
     InjectUtil.getConstructionStrategy(this, injectContext).generateConstructor(new ConstructionStatusCallback() {
       @Override
       public void callback(boolean constructed) {
-        callbackBuilder.append(Stmt.loadVariable("context").invoke("addBean", Refs.get(varName), Refs.get("beanType"),
-                Refs.get("qualifiers")));
+        callbackBuilder.append(declareVariable(BeanRef.class).named("beanRef")
+                .initializeWith(loadVariable("context").invoke("getBeanReference", Refs.get("beanType"),
+                        Refs.get("qualifiers"))));
+
+        callbackBuilder.append(loadVariable("context").invoke("addBean", Refs.get("beanRef"), Refs.get(varName)));
         injected = true;
       }
     });
-
 
     ctx.popBlockBuilder();
 
     creationalCallbackVarName = InjectUtil.getNewVarName();
 
-    ctx.globalAppend(Stmt.declareVariable(creationCallbackRef).asFinal().named(creationalCallbackVarName)
+    ctx.globalAppend(declareVariable(creationCallbackRef).asFinal().named(creationalCallbackVarName)
             .initializeWith(callbackBuilder.finish().finish()));
 
     Statement retVal;
 
     if (isSingleton()) {
-      ctx.globalAppend(Stmt.declareVariable(type).asFinal().named(varName)
-              .initializeWith(Stmt.loadVariable(creationalCallbackVarName).invoke("getInstance",
+      ctx.globalAppend(declareVariable(type).asFinal().named(varName)
+              .initializeWith(loadVariable(creationalCallbackVarName).invoke("getInstance",
                       Refs.get("context"))));
 
       retVal = Refs.get(varName);
     }
     else {
-      retVal = Stmt.loadVariable(creationalCallbackVarName).invoke("getInstance", Refs.get("context"));
+      retVal = loadVariable(creationalCallbackVarName).invoke("getInstance", Refs.get("context"));
     }
 
     if (injectContext.isProxiedInjectorAvailable(type, qualifyingMetadata)) {
       ProxyInjector proxyInjector = (ProxyInjector) injectContext.getProxiedInjector(type, qualifyingMetadata);
       if (!proxyInjector.isProxied()) {
-//        callbackBuilder.append(
-//                Stmt.nestedCall(Cast.to(proxyInjector.getProxyClass(), Stmt.loadVariable("context").invoke("getUnresolvedProxy",
-//                        type, qualifyingMetadata.getQualifiers())))
-//                        .invoke(ProxyMaker.PROXY_BIND_METHOD, Refs.get(varName)));
         proxyInjector.setProxied(true);
         proxyInjector.setProxyStatement(retVal);
-
+        ctx.setProxyBuilder(null);
       }
     }
 
-
-    callbackBuilder.append(Stmt.loadVariable(varName).returnValue());
+    callbackBuilder.append(loadVariable(varName).returnValue());
 
     return retVal;
   }
@@ -224,6 +229,10 @@ public class TypeInjector extends Injector {
     return type;
   }
 
+  public String getCreationalCallbackVarName() {
+    return creationalCallbackVarName;
+  }
+
   private void registerWithBeanManager(InjectionContext context, Statement valueRef) {
     if (useBeanManager) {
       if (InjectUtil.checkIfTypeNeedsAddingToBeanStore(context, this)) {
@@ -232,19 +241,19 @@ public class TypeInjector extends Injector {
           initCallbackRef = Stmt.load(null);
         }
         else {
-          initCallbackRef = Stmt.loadVariable(getPostInitCallbackVar());
+          initCallbackRef = loadVariable(getPostInitCallbackVar());
         }
 
         if (isSingleton()) {
           context.getProcessingContext().appendToEnd(
-                  Stmt.loadVariable(context.getProcessingContext().getContextVariableReference())
+                  loadVariable(context.getProcessingContext().getContextVariableReference())
                           .invoke("addSingletonBean", type, valueRef,
                                   qualifyingMetadata.render(), initCallbackRef)
           );
         }
         else {
           context.getProcessingContext().appendToEnd(
-                  Stmt.loadVariable(context.getProcessingContext().getContextVariableReference())
+                  loadVariable(context.getProcessingContext().getContextVariableReference())
                           .invoke("addDependentBean", type, Refs.get(creationalCallbackVarName),
                                   qualifyingMetadata.render(), initCallbackRef));
         }
