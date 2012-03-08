@@ -17,18 +17,14 @@
 package org.jboss.errai.ioc.rebind.ioc;
 
 
-import org.jboss.errai.codegen.framework.Cast;
 import org.jboss.errai.codegen.framework.Parameter;
-import org.jboss.errai.codegen.framework.ProxyMaker;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
-import org.jboss.errai.codegen.framework.util.Bool;
 import org.jboss.errai.codegen.framework.util.Refs;
-import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.ioc.client.container.BeanRef;
 import org.jboss.errai.ioc.client.container.CreationalCallback;
 import org.jboss.errai.ioc.client.container.CreationalContext;
@@ -40,10 +36,11 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.jboss.errai.codegen.framework.util.Bool.expr;
-import static org.jboss.errai.codegen.framework.util.Stmt.castTo;
+import static org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder.newInstanceOf;
+import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.typeParametersOf;
 import static org.jboss.errai.codegen.framework.util.Stmt.declareVariable;
-import static org.jboss.errai.codegen.framework.util.Stmt.if_;
+import static org.jboss.errai.codegen.framework.util.Stmt.load;
 import static org.jboss.errai.codegen.framework.util.Stmt.loadVariable;
 
 public class TypeInjector extends Injector {
@@ -124,15 +121,14 @@ public class TypeInjector extends Injector {
 
     IOCProcessingContext ctx = injectContext.getProcessingContext();
 
-    MetaClass creationCallbackRef
-            = MetaClassFactory.parameterizedAs(CreationalCallback.class, MetaClassFactory.typeParametersOf(type));
+    MetaClass creationCallbackRef = parameterizedAs(CreationalCallback.class, typeParametersOf(type));
 
-    final BlockBuilder<AnonymousClassStructureBuilder> callbackBuilder = ObjectBuilder.newInstanceOf(creationCallbackRef).extend()
+    final BlockBuilder<AnonymousClassStructureBuilder> callbackBuilder = newInstanceOf(creationCallbackRef).extend()
             .publicOverridesMethod("getInstance", Parameter.of(CreationalContext.class, "context", true));
 
-    callbackBuilder.append(declareVariable(Class.class).named("beanType").initializeWith(Stmt.load(type)));
+    callbackBuilder.append(declareVariable(Class.class).named("beanType").initializeWith(load(type)));
     callbackBuilder.append(declareVariable(Annotation[].class).named("qualifiers")
-            .initializeWith(Stmt.load(qualifyingMetadata.getQualifiers())));
+            .initializeWith(load(qualifyingMetadata.getQualifiers())));
 
     ctx.pushBlockBuilder(callbackBuilder);
 
@@ -173,7 +169,6 @@ public class TypeInjector extends Injector {
       if (!proxyInjector.isProxied()) {
         proxyInjector.setProxied(true);
         proxyInjector.setProxyStatement(retVal);
-        ctx.setProxyBuilder(null);
       }
     }
 
@@ -238,7 +233,7 @@ public class TypeInjector extends Injector {
       if (InjectUtil.checkIfTypeNeedsAddingToBeanStore(context, this)) {
         Statement initCallbackRef;
         if (getPostInitCallbackVar() == null) {
-          initCallbackRef = Stmt.load(null);
+          initCallbackRef = load(null);
         }
         else {
           initCallbackRef = loadVariable(getPostInitCallbackVar());

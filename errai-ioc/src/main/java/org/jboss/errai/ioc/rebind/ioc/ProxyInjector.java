@@ -35,6 +35,12 @@ import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.typeParametersOf;
+import static org.jboss.errai.codegen.framework.util.Stmt.declareVariable;
+import static org.jboss.errai.codegen.framework.util.Stmt.loadVariable;
+import static org.jboss.errai.codegen.framework.util.Stmt.newObject;
+
 /**
  * @author Mike Brock
  */
@@ -72,25 +78,22 @@ public class ProxyInjector extends Injector {
     if (!isInjected()) {
       IOCProcessingContext pCtx = injectContext.getProcessingContext();
 
-      pCtx.append(Stmt.declareVariable(proxyClass).asFinal().named(varName).initializeWith(Stmt.newObject(proxyClass)));
+      pCtx.append(declareVariable(proxyClass).asFinal().named(varName).initializeWith(newObject(proxyClass)));
 
-      MetaClass proxyResolverRef = MetaClassFactory.parameterizedAs(ProxyResolver.class,
-              MetaClassFactory.typeParametersOf(proxiedType));
+      MetaClass proxyResolverRef = parameterizedAs(ProxyResolver.class, typeParametersOf(proxiedType));
 
-      BlockBuilder<AnonymousClassStructureBuilder> builder = Stmt.newObject(proxyResolverRef)
+      BlockBuilder<AnonymousClassStructureBuilder> builder = newObject(proxyResolverRef)
               .extend().publicOverridesMethod("resolve", Parameter.of(proxiedType, "obj"));
 
-      injectContext.getProcessingContext().setProxyBuilder(builder);
-
-      Statement proxyResolver = builder.append(Stmt.loadVariable(varName)
+      Statement proxyResolver = builder.append(loadVariable(varName)
               .invoke(ProxyMaker.PROXY_BIND_METHOD, Refs.get("obj"))).finish().finish();
 
-      pCtx.append(Stmt.loadVariable("context").invoke("addUnresolvedProxy", proxyResolver,
+      pCtx.append(loadVariable("context").invoke("addUnresolvedProxy", proxyResolver,
               proxiedType, qualifyingMetadata.getQualifiers()));
       isInjected = true;
 
     }
-    return !proxied ? Stmt.loadVariable(varName) : proxyStatement;
+    return !proxied ? loadVariable(varName) : proxyStatement;
   }
 
   @Override

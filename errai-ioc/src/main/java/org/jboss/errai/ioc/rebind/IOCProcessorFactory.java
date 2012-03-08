@@ -52,7 +52,6 @@ import static org.jboss.errai.ioc.rebind.ioc.util.WiringUtil.worstSortAlgorithmE
 public class IOCProcessorFactory {
   private SortedSet<ProcessingEntry> processingEntries = new TreeSet<ProcessingEntry>();
   private Map<SortUnit, SortUnit> delegates = new LinkedHashMap<SortUnit, SortUnit>();
-//  private Multimap<SortUnit, SortUnit> reverseDependenciesMap = HashMultimap.create();
 
   private InjectorFactory injectorFactory;
 

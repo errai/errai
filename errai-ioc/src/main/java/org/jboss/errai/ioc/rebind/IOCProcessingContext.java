@@ -48,7 +48,6 @@ public class IOCProcessingContext {
   protected BuildMetaClass bootstrapClass;
 
   protected Stack<BlockBuilder<?>> blockBuilder;
-  protected BlockBuilder<?> proxyBuilder;
 
   protected List<String> packages;
   protected List<Statement> appendToEnd;
@@ -105,14 +104,6 @@ public class IOCProcessingContext {
       if (isSingletonScope(a.annotationType())) return true;
     }
     return false;
-  }
-
-  public BlockBuilder<?> getProxyBuilder() {
-    return proxyBuilder;
-  }
-
-  public void setProxyBuilder(BlockBuilder<?> proxyBuilder) {
-    this.proxyBuilder = proxyBuilder;
   }
 
   public BlockBuilder<?> getBlockBuilder() {
