@@ -18,6 +18,7 @@ package org.jboss.errai.cdi.integration.client.test;
 
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.cdi.integration.client.shared.RpcTestBean;
+import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 
@@ -33,7 +34,7 @@ public class RpcIntegrationTest extends AbstractErraiCDITest {
   }
 
   public void testRPCToCDIBeanQualifiedWithA() {
-    CDI.addPostInitTask(new Runnable() {
+    InitVotes.registerOneTimeInitCallback(new Runnable() {
       @Override
       public void run() {
         RpcTestBean.getInstance().callRemoteCallerA(new RemoteCallback<String>() {
@@ -51,7 +52,7 @@ public class RpcIntegrationTest extends AbstractErraiCDITest {
   }
 
   public void testRPCToCDIBeanQualifiedWithB() {
-    CDI.addPostInitTask(new Runnable() {
+    InitVotes.registerOneTimeInitCallback(new Runnable() {
       @Override
       public void run() {
         RpcTestBean.getInstance().callRemoteCallerB(new RemoteCallback<String>() {
@@ -68,7 +69,7 @@ public class RpcIntegrationTest extends AbstractErraiCDITest {
   }
 
   public void testRPCToUnqualifiedCDIBean() {
-    CDI.addPostInitTask(new Runnable() {
+    InitVotes.registerOneTimeInitCallback(new Runnable() {
       @Override
       public void run() {
         RpcTestBean.getInstance().callRemoteCaller(new RemoteCallback<String>() {
@@ -85,7 +86,7 @@ public class RpcIntegrationTest extends AbstractErraiCDITest {
   }
   
   public void testInterceptedRPC() {
-    CDI.addPostInitTask(new Runnable() {
+    InitVotes.registerOneTimeInitCallback(new Runnable() {
       @Override
       public void run() {
         RpcTestBean.getInstance().callInterceptedRemoteCaller(new RemoteCallback<String>() {

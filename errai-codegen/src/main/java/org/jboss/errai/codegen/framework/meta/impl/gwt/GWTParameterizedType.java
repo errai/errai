@@ -19,6 +19,7 @@ package org.jboss.errai.codegen.framework.meta.impl.gwt;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import org.jboss.errai.codegen.framework.meta.MetaType;
 import org.jboss.errai.codegen.framework.meta.impl.AbstractMetaParameterizedType;
 
@@ -30,35 +31,37 @@ import com.google.gwt.core.ext.typeinfo.JParameterizedType;
  */
 public class GWTParameterizedType extends AbstractMetaParameterizedType {
   private JParameterizedType parameterizedType;
+  private TypeOracle oracle;
 
-  public GWTParameterizedType(JParameterizedType parameterizedType) {
+  public GWTParameterizedType(TypeOracle oracle, JParameterizedType parameterizedType) {
     this.parameterizedType = parameterizedType;
+    this.oracle = oracle;
   }
 
   @Override
   public MetaType[] getTypeParameters() {
     List<MetaType> types = new ArrayList<MetaType>();
     for (JClassType parm : parameterizedType.getTypeArgs()) {
-      types.add(GWTClass.newInstance(parm));
+      types.add(GWTClass.newInstance(oracle, parm));
     }
     return types.toArray(new MetaType[types.size()]);
   }
 
   @Override
   public MetaType getOwnerType() {
-    return GWTClass.newInstance(parameterizedType.getEnclosingType());
+    return GWTClass.newInstance(oracle, parameterizedType.getEnclosingType());
   }
 
   @Override
   public MetaType getRawType() {
-    return GWTClass.newInstance(parameterizedType.getRawType());
+    return GWTClass.newInstance(oracle, parameterizedType.getRawType());
   }
 
   public String toString() {
     StringBuilder buf = new StringBuilder("<");
     JClassType[] parms = parameterizedType.getTypeArgs();
     for (int i = 0; i < parms.length; i++) {
-      buf.append(GWTClass.newInstance(parms[i]).getFullyQualifiedName());
+      buf.append(GWTClass.newInstance(oracle, parms[i]).getFullyQualifiedName());
       if (i + 1 < parms.length) buf.append(',');
     }
     return buf.append('>').toString();

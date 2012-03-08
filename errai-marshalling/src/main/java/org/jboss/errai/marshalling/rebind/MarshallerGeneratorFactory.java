@@ -96,6 +96,8 @@ public class MarshallerGeneratorFactory {
 
     String gen;
     if (RebindUtils.hasClasspathChangedForAnnotatedWith(annos) || !cacheFile.exists()) {
+      MetaClassFactory.emptyCache();
+
       log.info("generating marshalling class...");
       long st = System.currentTimeMillis();
       gen = _generate(packageName, clazzName);
@@ -346,7 +348,7 @@ public class MarshallerGeneratorFactory {
     arrayDemarshallCode(toMap, dimensions, classStructureBuilder);
 
     BlockBuilder<?> marshallMethodBlock = classStructureBuilder.publicOverridesMethod("marshall",
-            Parameter.of(Object.class, "a0"), Parameter.of(MarshallingSession.class, "a1"));
+            Parameter.of(toMap.asArrayOf(dimensions), "a0"), Parameter.of(MarshallingSession.class, "a1"));
 
     marshallMethodBlock.append(
             Stmt.if_(Bool.isNull(loadVariable("a0")))

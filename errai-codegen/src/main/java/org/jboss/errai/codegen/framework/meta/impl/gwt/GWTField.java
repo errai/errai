@@ -18,6 +18,7 @@ package org.jboss.errai.codegen.framework.meta.impl.gwt;
 
 import java.lang.annotation.Annotation;
 
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaField;
 import org.jboss.errai.codegen.framework.meta.MetaType;
@@ -32,15 +33,17 @@ import com.google.gwt.core.ext.typeinfo.JGenericType;
 public class GWTField extends MetaField {
   private JField field;
   private Annotation[] annotations;
+  private TypeOracle oracle;
 
-  GWTField(JField field) {
+  GWTField(TypeOracle oracle, JField field) {
+    this.oracle = oracle;
     this.field = field;
     this.annotations = field.getAnnotations();
   }
 
   @Override
   public MetaClass getType() {
-    return GWTClass.newInstance(field.getType());
+    return GWTClass.newInstance(oracle, field.getType());
   }
 
   @Override
@@ -70,7 +73,7 @@ public class GWTField extends MetaField {
   public MetaType getGenericType() {
     JGenericType genericType = field.getType().isGenericType();
     if (genericType != null) {
-      return new GWTGenericDeclaration(genericType);
+      return new GWTGenericDeclaration(oracle, genericType);
     }
     return null;
   }
@@ -78,7 +81,7 @@ public class GWTField extends MetaField {
 
   @Override
   public MetaClass getDeclaringClass() {
-    return GWTClass.newInstance(field.getEnclosingType());
+    return GWTClass.newInstance(oracle, field.getEnclosingType());
   }
 
   @Override

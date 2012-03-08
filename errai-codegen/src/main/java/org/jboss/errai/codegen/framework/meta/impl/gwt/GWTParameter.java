@@ -19,6 +19,7 @@ package org.jboss.errai.codegen.framework.meta.impl.gwt;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassMember;
 import org.jboss.errai.codegen.framework.meta.MetaConstructor;
@@ -35,16 +36,19 @@ public class GWTParameter implements MetaParameter {
   private JParameter parameter;
   private Annotation[] annotations;
   private MetaClassMember declaredBy;
+  private TypeOracle oracle;
 
-  GWTParameter(JParameter parameter, MetaMethod declaredBy) {
+  GWTParameter(TypeOracle oracle, JParameter parameter, MetaMethod declaredBy) {
     this.parameter = parameter;
     this.declaredBy = declaredBy;
     annotations = parameter.getAnnotations();
+    this.oracle = oracle;
   }
 
-  GWTParameter(JParameter parameter, MetaConstructor declaredBy) {
+  GWTParameter(TypeOracle oracle,JParameter parameter, MetaConstructor declaredBy) {
     this.parameter = parameter;
     this.declaredBy = declaredBy;
+    this.oracle = oracle;
 
     try {
       Class<?> cls = Class.forName(parameter.getEnclosingMethod().getEnclosingType().getQualifiedSourceName(),
@@ -82,7 +86,7 @@ public class GWTParameter implements MetaParameter {
 
   @Override
   public MetaClass getType() {
-    return GWTClass.newInstance(parameter.getType());
+    return GWTClass.newInstance(oracle, parameter.getType());
   }
 
   @Override

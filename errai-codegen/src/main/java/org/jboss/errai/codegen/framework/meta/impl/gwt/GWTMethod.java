@@ -20,6 +20,8 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.core.ext.typeinfo.JTypeParameter;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.meta.MetaParameter;
@@ -38,10 +40,13 @@ import com.google.gwt.core.ext.typeinfo.JType;
 public class GWTMethod extends MetaMethod {
   private JMethod method;
   private Annotation[] annotations;
+  private TypeOracle oracle;
 
-  GWTMethod(JMethod method) {
+  GWTMethod(TypeOracle oracle, JMethod method) {
     this.method = method;
     annotations = method.getAnnotations();
+    this.oracle = oracle;
+
   }
 
   @Override
@@ -51,7 +56,7 @@ public class GWTMethod extends MetaMethod {
 
   @Override
   public MetaClass getReturnType() {
-    return GWTClass.newInstance(method.getReturnType());
+    return GWTClass.newInstance(oracle, method.getReturnType());
   }
 
   @Override
@@ -59,7 +64,7 @@ public class GWTMethod extends MetaMethod {
     List<MetaParameter> parameterList = new ArrayList<MetaParameter>();
 
     for (JParameter jParameter : method.getParameters()) {
-      parameterList.add(new GWTParameter(jParameter, this));
+      parameterList.add(new GWTParameter(oracle, jParameter, this));
     }
 
     return parameterList.toArray(new MetaParameter[parameterList.size()]);
@@ -85,14 +90,14 @@ public class GWTMethod extends MetaMethod {
 
   @Override
   public MetaClass getDeclaringClass() {
-    return GWTClass.newInstance(method.getEnclosingType());
+    return GWTClass.newInstance(oracle, method.getEnclosingType());
   }
 
   @Override
   public MetaType getGenericReturnType() {
-    JGenericType type = method.getReturnType().isGenericType();
+    JTypeParameter type = method.getReturnType().isTypeParameter();
     if (type != null) {
-      return new GWTGenericDeclaration(type);
+      return new GWTTypeVariable(oracle, type);
     }
     return null;
   }
@@ -100,8 +105,8 @@ public class GWTMethod extends MetaMethod {
   @Override
   public MetaType[] getGenericParameterTypes() {
     List<MetaType> typeList = new ArrayList<MetaType>();
-    for (JType type : method.getParameterTypes()) {
-      typeList.add(GWTClass.newInstance(type));
+    for (JParameter parm : method.getParameters()) {
+      typeList.add(GWTUtil.fromType(oracle, parm.getType()));
     }
 
     return typeList.toArray(new MetaType[typeList.size()]);
@@ -109,7 +114,7 @@ public class GWTMethod extends MetaMethod {
 
   @Override
   public MetaClass[] getCheckedExceptions() {
-    return GWTClass.fromClassArray(method.getThrows());
+    return GWTClass.fromClassArray(oracle, method.getThrows());
   }
 
   @Override
@@ -169,7 +174,7 @@ public class GWTMethod extends MetaMethod {
 
   @Override
   public MetaTypeVariable[] getTypeParameters() {
-    return GWTUtil.fromTypeVariable(method.getTypeParameters());
+    return GWTUtil.fromTypeVariable(oracle, method.getTypeParameters());
   }
 
   @Override

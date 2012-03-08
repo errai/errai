@@ -68,6 +68,7 @@ import org.jboss.errai.reflections.vfs.Vfs;
 public class MetaDataScanner extends Reflections {
   public static final String ERRAI_CONFIG_STUB_NAME = "ErraiApp.properties";
 
+
   private static final PropertyScanner propScanner = new PropertyScanner(
           new Predicate<String>() {
             public boolean apply(String file) {

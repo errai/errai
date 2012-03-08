@@ -45,6 +45,7 @@ public class CDIClientBootstrap implements EntryPoint {
         MessageBuilder.createMessage().toSubject(CDI.SERVER_DISPATCHER_SUBJECT).command(CDICommands.AttachRemote).done()
                 .sendNowWith(bus);
 
+        InitVotes.waitFor(CDI.class);
         CDI.fireEvent(new BusReadyEvent());
       }
     };
@@ -61,6 +62,7 @@ public class CDIClientBootstrap implements EntryPoint {
               @Override
               public void run() {
                 CDI.activate();
+                InitVotes.voteFor(CDI.class);
               }
             });
             break;

@@ -16,26 +16,15 @@
 
 package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
-import java.io.File;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.context.SessionScoped;
-import javax.enterprise.inject.Default;
-import javax.inject.Inject;
-import javax.inject.Provider;
-import javax.inject.Singleton;
-
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.rebind.SourceWriter;
+import com.google.gwt.user.rebind.StringSourceWriter;
+import com.google.inject.Singleton;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.codegen.framework.Context;
@@ -50,6 +39,7 @@ import org.jboss.errai.codegen.framework.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.framework.meta.MetaType;
 import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.framework.meta.impl.gwt.GWTClass;
+import org.jboss.errai.codegen.framework.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.codegen.framework.util.GenUtil;
 import org.jboss.errai.codegen.framework.util.Implementations;
 import org.jboss.errai.codegen.framework.util.Stmt;
@@ -86,12 +76,23 @@ import org.jboss.errai.ioc.rebind.ioc.QualifyingMetadataFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
-import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.rebind.SourceWriter;
-import com.google.gwt.user.rebind.StringSourceWriter;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.context.RequestScoped;
+import javax.enterprise.context.SessionScoped;
+import javax.enterprise.inject.Default;
+import javax.inject.Inject;
+import javax.inject.Provider;
+import java.io.File;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
 
 /**
  * The main generator class for the Errai IOC system.
@@ -171,18 +172,33 @@ public class IOCBootstrapGenerator {
     annos.add(Default.class);
 
     String gen;
-    if (RebindUtils.hasClasspathChangedForAnnotatedWith(annos) || !cacheFile.exists()) {
-      log.info("generating IOC bootstrapping class...");
-      long st = System.currentTimeMillis();
-      gen = _generate(packageName, className);
-      log.info("generated IOC bootstrapping class in " + (System.currentTimeMillis() - st) + "ms");
+//    if (RebindUtils.hasClasspathChangedForAnnotatedWith(annos) || !cacheFile.exists()) {
+    MetaClassFactory.emptyCache();
 
-      RebindUtils.writeStringToFile(cacheFile, gen);
+    if (typeOracle != null) {
+      for (JClassType type : typeOracle.getTypes()) {
+        if (type.isAnnotation() != null) {
+          MetaClassFactory.pushCache(JavaReflectionClass
+                  .newUncachedInstance(MetaClassFactory.loadClass(type.getQualifiedBinaryName())));
+        }
+        else {
+          MetaClassFactory.pushCache(GWTClass.newInstance(typeOracle, type));
+        }
+      }
     }
-    else {
-      gen = RebindUtils.readFileToString(cacheFile);
-      log.info("nothing has changed. using cached IOC bootstrapping class.");
-    }
+
+
+    log.info("generating IOC bootstrapping class...");
+    long st = System.currentTimeMillis();
+    gen = _generate(packageName, className);
+    log.info("generated IOC bootstrapping class in " + (System.currentTimeMillis() - st) + "ms");
+
+    RebindUtils.writeStringToFile(cacheFile, gen);
+//    }
+//    else {
+//      gen = RebindUtils.readFileToString(cacheFile);
+//      log.info("nothing has changed. using cached IOC bootstrapping class.");
+//    }
 
     log.info("using IOC bootstrapping code to: " + cacheFile.getAbsolutePath());
 

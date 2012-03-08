@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaConstructor;
 import org.jboss.errai.codegen.framework.meta.MetaParameter;
@@ -37,11 +38,13 @@ public class GWTConstructor extends MetaConstructor {
   private JConstructor constructor;
   private MetaClass declaringClass;
   private Annotation[] annotations;
+  private TypeOracle oracle;
 
-  public GWTConstructor(JConstructor c) {
+  public GWTConstructor(TypeOracle oracle, JConstructor c) {
     this.constructor = c;
-    this.declaringClass = GWTClass.newInstance(c.getEnclosingType());
+    this.declaringClass = GWTClass.newInstance(oracle, c.getEnclosingType());
     this.annotations = constructor.getAnnotations();
+    this.oracle = oracle;
   }
 
   @Override
@@ -49,7 +52,7 @@ public class GWTConstructor extends MetaConstructor {
     List<MetaParameter> parameterList = new ArrayList<MetaParameter>();
 
     for (JParameter jParameter : constructor.getParameters()) {
-      parameterList.add(new GWTParameter(jParameter, this));
+      parameterList.add(new GWTParameter(oracle, jParameter, this));
     }
 
     return parameterList.toArray(new MetaParameter[parameterList.size()]);
@@ -160,7 +163,7 @@ public class GWTConstructor extends MetaConstructor {
 
   @Override
   public MetaTypeVariable[] getTypeParameters() {
-    return GWTUtil.fromTypeVariable(constructor.getTypeParameters());
+    return GWTUtil.fromTypeVariable(oracle, constructor.getTypeParameters());
   }
 
   @Override

@@ -52,7 +52,6 @@ import org.mvel2.DataConversion;
  */
 public final class MetaClassFactory {
   static {
-
     DataConversion.addConversionHandler(Class.class, new ConversionHandler() {
       @Override
       public Object convertFrom(Object in) {
@@ -102,31 +101,25 @@ public final class MetaClassFactory {
     });
   }
 
-  private static final Map<String, MetaClass> ERASED_CLASS_CACHE = new HashMap<String, MetaClass>();
-  private static final Map<Class, MetaClass> CLASS_CACHE = new HashMap<Class, MetaClass>();
+  private static final Map<String, MetaClass> PRIMARY_CLASS_CACHE = new HashMap<String, MetaClass>(1000);
+  private static final Map<String, MetaClass> ERASED_CLASS_CACHE = new HashMap<String, MetaClass>(1000);
+  // private static final Map<Class, MetaClass> CLASS_CACHE = new HashMap<Class, MetaClass>();
+
+  public static void pushCache(MetaClass clazz) {
+    PRIMARY_CLASS_CACHE.put(clazz.getFullyQualifiedName(), clazz);
+  }
 
   public static MetaClass get(String fullyQualifiedClassName, boolean erased) {
-    return createOrGet(load(fullyQualifiedClassName), erased);
+    return createOrGet(fullyQualifiedClassName, erased);
   }
 
   public static MetaClass get(String fullyQualifiedClassName) {
     return createOrGet(fullyQualifiedClassName);
   }
-//
-//  public static MetaClass get(TypeOracle typeOracle, String fullyQualifiedClassName) {
-//    return createOrGet(typeOracle, fullyQualifiedClassName);
-//  }
-
-//  public static MetaClass get(TypeOracle typeOracle, Class<?> clazz) {
-//    return get(typeOracle, clazz.getName());
-//  }
-//
-//  public static MetaClass get(JType clazz) {
-//    return createOrGet(clazz);
-//  }
 
   public static MetaClass get(Class<?> clazz) {
-    return createOrGet(clazz, false);
+    if (clazz == null) return null;
+    return createOrGet(clazz.getName(), false);
   }
 
   public static MetaClass getArrayOf(Class<?> clazz, int dims) {
@@ -142,7 +135,7 @@ public final class MetaClassFactory {
     if (dims.length == 0) {
       dims = new int[1];
     }
-    return createOrGet(Array.newInstance(clazz, dims).getClass(), false);
+    return JavaReflectionClass.newInstance(Array.newInstance(clazz, dims).getClass());
   }
 
   public static MetaClass get(Class<?> clazz, Type type) {
@@ -162,7 +155,7 @@ public final class MetaClassFactory {
   }
 
   public static Statement getAsStatement(Class<?> clazz) {
-    final MetaClass metaClass = createOrGet(clazz, false);
+    final MetaClass metaClass = createOrGet(clazz.getName(), false);
     return new Statement() {
       @Override
       public String generate(Context context) {
@@ -186,7 +179,7 @@ public final class MetaClassFactory {
 
   private static MetaClass createOrGet(String fullyQualifiedClassName) {
     if (!ERASED_CLASS_CACHE.containsKey(fullyQualifiedClassName)) {
-      return createOrGet(load(fullyQualifiedClassName), false);
+      return createOrGet(fullyQualifiedClassName, false);
     }
 
     return ERASED_CLASS_CACHE.get(fullyQualifiedClassName);
@@ -232,20 +225,20 @@ public final class MetaClassFactory {
 //  }
 
 
-  private static MetaClass createOrGet(Class cls, boolean erased) {
-    if (cls == null) return null;
+  private static MetaClass createOrGet(String clsName, boolean erased) {
+    if (clsName == null) return null;
 
     MetaClass mCls;
     if (erased) {
-      mCls = ERASED_CLASS_CACHE.get(cls.getName());
+      mCls = ERASED_CLASS_CACHE.get(clsName);
       if (mCls == null) {
-        ERASED_CLASS_CACHE.put(cls.getName(), mCls = JavaReflectionClass.newUncachedInstance(cls, erased));
+        ERASED_CLASS_CACHE.put(clsName, mCls = JavaReflectionClass.newUncachedInstance(loadClass(clsName), erased));
       }
     }
     else {
-      mCls = CLASS_CACHE.get(cls);
+      mCls = PRIMARY_CLASS_CACHE.get(clsName);
       if (mCls == null) {
-        CLASS_CACHE.put(cls, mCls = JavaReflectionClass.newUncachedInstance(cls, erased));
+        PRIMARY_CLASS_CACHE.put(clsName, mCls = JavaReflectionClass.newUncachedInstance(loadClass(clsName), erased));
       }
     }
     return mCls;
@@ -274,6 +267,20 @@ public final class MetaClassFactory {
   }
 
   public static MetaClass parameterizedAs(MetaClass clazz, MetaParameterizedType parameterizedType) {
+    return cloneToBuildMetaClass(clazz, parameterizedType);
+  }
+
+  public static MetaClass erasedVersionOf(MetaClass clazz) {
+    BuildMetaClass mc = cloneToBuildMetaClass(clazz);
+    mc.setParameterizedType(null);
+    return mc;
+  }
+
+  private static BuildMetaClass cloneToBuildMetaClass(MetaClass clazz) {
+    return cloneToBuildMetaClass(clazz, null);
+  }
+
+  private static BuildMetaClass cloneToBuildMetaClass(MetaClass clazz, MetaParameterizedType parameterizedType) {
     BuildMetaClass buildMetaClass = new BuildMetaClass(Context.create(), clazz.getFullyQualifiedName());
 
     buildMetaClass.setReifiedFormOf(clazz);
@@ -289,7 +296,12 @@ public final class MetaClassFactory {
       buildMetaClass.addTypeVariable(typeVariable);
     }
 
-    buildMetaClass.setParameterizedType(parameterizedType);
+    if (parameterizedType != null) {
+      buildMetaClass.setParameterizedType(parameterizedType);
+    }
+    else {
+      buildMetaClass.setParameterizedType(clazz.getParameterizedType());
+    }
 
     for (MetaField field : clazz.getDeclaredFields()) {
       BuildMetaField bmf = new ShadowBuildMetaField(buildMetaClass, EmptyStatement.INSTANCE,
@@ -424,42 +436,42 @@ public final class MetaClassFactory {
     ERASED_CLASS_CACHE.put(encName, metaClass);
   }
 
-  public static int LOAD_CALL_COUNT = 0;
 
-  private static Class<?> load(String fullyQualifiedName) {
+  private static Map<String, Class<?>> PRIMITIVE_LOOKUP = new HashMap<String, Class<?>>() {
+    {
+      put("void", void.class);
+      put("boolean", boolean.class);
+      put("int", int.class);
+      put("long", long.class);
+      put("float", float.class);
+      put("double", double.class);
+      put("short", short.class);
+      put("byte", byte.class);
+      put("char", char.class);
+    }
+  };
+
+  public static Class<?> loadClass(String fullyQualifiedName) {
     try {
-      LOAD_CALL_COUNT++;
-      return Class.forName(fullyQualifiedName, false, Thread.currentThread().getContextClassLoader());
+      Class<?> cls = PRIMITIVE_LOOKUP.get(fullyQualifiedName);
+      if (cls == null) {
+        cls = Class.forName(fullyQualifiedName, false, Thread.currentThread().getContextClassLoader());
+      }
+      return cls;
     }
     catch (ClassNotFoundException e) {
       throw new RuntimeException("Could not load class: " + fullyQualifiedName);
     }
   }
 
-//  private static JClassType load(TypeOracle oracle, String fullyQualifiedName) {
-//    try {
-//      return oracle.getType(fullyQualifiedName);
-//    }
-//    catch (NotFoundException e) {
-//      throw new RuntimeException("Could not load class: " + fullyQualifiedName);
-//    }
-//  }
 
   public static MetaClass[] fromClassArray(Class<?>[] classes) {
     MetaClass[] newClasses = new MetaClass[classes.length];
     for (int i = 0; i < classes.length; i++) {
-      newClasses[i] = createOrGet(classes[i], false);
+      newClasses[i] = createOrGet(classes[i].getName(), false);
     }
     return newClasses;
   }
-
-//  public static MetaClass[] fromClassArray(JClassType[] classes) {
-//    MetaClass[] newClasses = new MetaClass[classes.length];
-//    for (int i = 0; i < classes.length; i++) {
-//      newClasses[i] = createOrGet(classes[i]);
-//    }
-//    return newClasses;
-//  }
 
   public static Class<?>[] asClassArray(MetaParameter[] parms) {
     MetaType[] type = new MetaType[parms.length];
@@ -480,5 +492,10 @@ public final class MetaClassFactory {
       }
     }
     return newClasses;
+  }
+
+  public static void emptyCache() {
+    PRIMARY_CLASS_CACHE.clear();
+    ERASED_CLASS_CACHE.clear();
   }
 }

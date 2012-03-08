@@ -16,6 +16,7 @@
 
 package org.jboss.errai.codegen.framework.util;
 
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 import org.jboss.errai.codegen.framework.Cast;
 import org.jboss.errai.codegen.framework.Context;
@@ -62,6 +64,9 @@ import org.jboss.errai.codegen.framework.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.framework.meta.impl.java.JavaReflectionClass;
 import org.mvel2.DataConversion;
+import org.mvel2.util.NullType;
+
+import static org.mvel2.DataConversion.canConvert;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -155,8 +160,6 @@ public class GenUtil {
   public static void addClassAlias(Class cls) {
     classAliases.add(cls.getName());
   }
-         
-  
 
   public static void assertAssignableTypes(MetaClass from, MetaClass to) {
     if (!to.asBoxed().isAssignableFrom(from.asBoxed())) {
@@ -760,5 +763,155 @@ public class GenUtil {
     catch (Throwable e) {
       throw new RuntimeException("generation failure at: " + error, e);
     }
+  }
+
+  public static MetaMethod getBestCandidate(MetaClass[] arguments, String method, MetaClass decl, MetaMethod[] methods,
+                                            boolean classTarget) {
+      if (methods.length == 0) {
+        return null;
+      }
+
+      MetaParameter[] parmTypes;
+      MetaMethod bestCandidate = null;
+      int bestScore = 0;
+      int score = 0;
+      boolean retry = false;
+
+      do {
+        for (MetaMethod meth : methods) {
+          if (classTarget && (meth.isStatic())) continue;
+
+          if (method.equals(meth.getName())) {
+            boolean isVarArgs = meth.isVarArgs();
+            if ((parmTypes = meth.getParameters()).length != arguments.length && !isVarArgs) {
+              continue;
+            }
+            else if (arguments.length == 0 && parmTypes.length == 0) {
+              bestCandidate = meth;
+              break;
+            }
+
+            for (int i = 0; i != arguments.length; i++) {
+              MetaClass actualParamType;
+              if (isVarArgs && !arguments[arguments.length -1].isArray() &&  i >= parmTypes.length-1)
+                actualParamType = parmTypes[parmTypes.length-1].getType().getComponentType();
+              else
+                actualParamType = parmTypes[i].getType();
+
+              if (arguments[i] == null) {
+                if (!actualParamType.isPrimitive()) {
+                  score += 6;
+                }
+                else {
+                  score = 0;
+                  break;
+                }
+              }
+              else if (actualParamType.equals(arguments[i])) {
+                score += 7;
+              }
+              else if (actualParamType.isPrimitive() && actualParamType.asBoxed().equals(arguments[i])) {
+                score += 6;
+              }
+              else if (arguments[i].isPrimitive() && arguments[i].asUnboxed().equals(actualParamType)) {
+                score += 6;
+              }
+              else if (actualParamType.isAssignableFrom(arguments[i])) {
+                score += 5;
+              }
+              else if (isNumericallyCoercible(arguments[i], actualParamType)) {
+                score += 4;
+              }
+              else if (actualParamType.asBoxed().isAssignableFrom(arguments[i].asBoxed())
+                  && !Object_MetaClass.equals(arguments[i])) {
+                score += 3 + scoreInterface(actualParamType, arguments[i]);
+              }
+              else if (canConvert(actualParamType, arguments[i])) {
+                if (actualParamType.isArray() && arguments[i].isArray()) score += 1;
+                else if (actualParamType.equals(char_MetaClass) && arguments[i].equals(String_MetaClass)) score += 1;
+
+                score += 1;
+              }
+              else if (actualParamType.equals(Object_MetaClass) || arguments[i].equals(NullType_MetaClass)) {
+                score += 1;
+              }
+              else {
+                score = 0;
+                break;
+              }
+            }
+
+            if (score != 0 && score > bestScore) {
+              bestCandidate = meth;
+              bestScore = score;
+            }
+            score = 0;
+          }
+        }
+
+        if (!retry && bestCandidate == null && decl.isInterface()) {
+          MetaMethod[] objMethods = Object_MetaClass.getMethods();
+          MetaMethod[] nMethods = new MetaMethod[methods.length + objMethods.length];
+          for (int i = 0; i < methods.length; i++) {
+            nMethods[i] = methods[i];
+          }
+
+          for (int i = 0; i < objMethods.length; i++) {
+            nMethods[i + methods.length] = objMethods[i];
+          }
+          methods = nMethods;
+
+          retry = true;
+        }
+        else {
+          break;
+        }
+      }
+      while (true);
+
+      return bestCandidate;
+    }
+
+  private static final MetaClass Number_MetaClass = MetaClassFactory.get(Number.class);
+  private static final MetaClass Object_MetaClass = MetaClassFactory.get(Object.class);
+  private static final MetaClass NullType_MetaClass = MetaClassFactory.get(NullType.class);
+  private static final MetaClass char_MetaClass = MetaClassFactory.get(char.class);
+  private static final MetaClass String_MetaClass = MetaClassFactory.get(String.class);
+
+  
+  public static boolean canConvert(MetaClass to, MetaClass from) {
+    try {
+      Class<?> fromClazz = from.asClass();
+      Class<?> toClass = to.asClass();
+      
+      return DataConversion.canConvert(toClass, fromClazz);
+    }
+    catch (Throwable t) {
+      return false;
+    }
+  }
+
+  public static boolean isNumericallyCoercible(MetaClass target, MetaClass parm) {
+    MetaClass boxedTarget = target.isPrimitive() ? target.asBoxed() : target;
+
+    if (boxedTarget != null && Number_MetaClass.isAssignableFrom(target)) {
+      if ((boxedTarget = parm.isPrimitive() ? parm.asBoxed() : parm) != null) {
+        return Number_MetaClass.isAssignableFrom(boxedTarget);
+      }
+    }
+    return false;
+  }
+
+  public static int scoreInterface(MetaClass parm, MetaClass arg) {
+    if (parm.isInterface()) {
+      MetaClass[] iface = arg.getInterfaces();
+      if (iface != null) {
+        for (MetaClass c : iface) {
+          if (c == parm) return 1;
+          else if (parm.isAssignableFrom(c)) return scoreInterface(parm, arg.getSuperClass());
+        }
+      }
+    }
+    return 0;
   }
 }

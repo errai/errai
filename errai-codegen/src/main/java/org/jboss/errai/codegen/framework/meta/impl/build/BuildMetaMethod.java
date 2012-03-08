@@ -78,6 +78,7 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
     this.returnType = returnType;
     this.defParameters = defParameters;
     this.throwsDeclaration = throwsDeclaration;
+ //   this.genericReturnType = genericReturnType;
   }
 
   @Override

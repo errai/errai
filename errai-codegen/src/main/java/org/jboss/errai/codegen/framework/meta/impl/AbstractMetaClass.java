@@ -185,8 +185,18 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       meth = null;
     }
 
+    MetaClass[] mcParms = new MetaClass[parameters.length];
+    for (int i = 0; i < parameters.length; i++) {
+      mcParms[i] = MetaClassFactory.get(parameters[i]);
+    }
+
     if (meth == null) {
-      meth = getBestMatchingMethod(null, name, parameters);
+      meth = getBestMatchingMethod(new GetMethodsCallback() {
+        @Override
+        public MetaMethod[] getMethods() {
+          return AbstractMetaClass.this.getMethods();
+        }
+      }, name, mcParms);
     }
 
     return meth;
@@ -194,7 +204,12 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   @Override
   public MetaMethod getBestMatchingMethod(String name, MetaClass... parameters) {
-    return getBestMatchingMethod(name, asClassArray(parameters));
+    return getBestMatchingMethod(new GetMethodsCallback() {
+      @Override
+      public MetaMethod[] getMethods() {
+        return AbstractMetaClass.this.getMethods();
+      }
+    }, name, parameters);
   }
 
   @Override
@@ -204,13 +219,18 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       meth = null;
     }
 
+    MetaClass[] mcParms = new MetaClass[parameters.length];
+    for (int i = 0; i < parameters.length; i++) {
+      mcParms[i] = MetaClassFactory.get(parameters[i]);
+    }
+
     if (meth == null) {
       meth = getBestMatchingMethod(new GetMethodsCallback() {
         @Override
-        public Method[] getMethods() {
-          return fromMetaMethod(getStaticMethods());
+        public MetaMethod[] getMethods() {
+          return getStaticMethods();
         }
-      }, name, parameters);
+      }, name, mcParms);
     }
     return meth;
   }
@@ -221,62 +241,58 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   private static interface GetMethodsCallback {
-    Method[] getMethods();
+    MetaMethod[] getMethods();
   }
 
-  private MetaMethod getBestMatchingMethod(GetMethodsCallback methodsCallback, String name, Class... parameters) {
-    Map<String, MetaMethod> subMap;
-    MetaMethod meth;
-    if ((subMap = METHOD_MATCH_CACHE.get(name)) == null) {
-      METHOD_MATCH_CACHE.put(name, subMap = new HashMap<String, MetaMethod>());
-    }
+  private MetaMethod getBestMatchingMethod(GetMethodsCallback methodsCallback, String name, MetaClass... parameters) {
+    return GenUtil.getBestCandidate(parameters, name, this, methodsCallback.getMethods(), false);
 
-    String parmKey = Arrays.toString(parameters);
 
-    if ((meth = subMap.get(parmKey)) == null) {
-      Class<?> cls = asClass();
-
-      if (cls != null) {
-        List<Method> methodList = new ArrayList<Method>();
-        for (Method m : (methodsCallback == null) ? cls.getMethods() : methodsCallback.getMethods()) {
-          if (!m.isBridge()) {
-            methodList.add(m);
-          }
-        }
-
-        Method[] methods = methodList.toArray(new Method[methodList.size()]);
-        Method m = ParseTools.getBestCandidate(parameters, name, cls, methods, true);
-        if (m == null) {
-          if (isInterface()) {
-            m = ParseTools.getBestCandidate(parameters, name, Object.class, Object.class.getMethods(), true);
-          }
-
-          if (m == null) {
-            m = ParseTools.getBestCandidate(parameters, name, cls, methods, false);
-            if (m == null) {
-              if (isInterface()) {
-                m = ParseTools.getBestCandidate(parameters, name, Object.class, Object.class.getMethods(), false);
-              }
-
-              if (m == null) {
-                return null;
-//                meth = ;
-//                if (meth == null || meth.isStatic()) return null;
-//                return meth;
-              }
-            }
-          }
-        }
-        meth = getMethod(name, m.getParameterTypes());
-      }
-      else {
-        meth = getMethod(name, parameters);
-      }
-
-      subMap.put(parmKey, meth);
-    }
-
-    return meth;
+//
+//    if ((meth = subMap.get(parmKey)) == null) {
+//      Class<?> cls = asClass();
+//
+//      if (cls != null) {
+//        List<Method> methodList = new ArrayList<Method>();
+//        for (Method m : (methodsCallback == null) ? cls.getMethods() : methodsCallback.getMethods()) {
+//          if (!m.isBridge()) {
+//            methodList.add(m);
+//          }
+//        }
+//
+//        Method[] methods = methodList.toArray(new Method[methodList.size()]);
+//        Method m = ParseTools.getBestCandidate(parameters, name, cls, methods, true);
+//        if (m == null) {
+//          if (isInterface()) {
+//            m = ParseTools.getBestCandidate(parameters, name, Object.class, Object.class.getMethods(), true);
+//          }
+//
+//          if (m == null) {
+//            m = ParseTools.getBestCandidate(parameters, name, cls, methods, false);
+//            if (m == null) {
+//              if (isInterface()) {
+//                m = ParseTools.getBestCandidate(parameters, name, Object.class, Object.class.getMethods(), false);
+//              }
+//
+//              if (m == null) {
+//                return null;
+////                meth = ;
+////                if (meth == null || meth.isStatic()) return null;
+////                return meth;
+//              }
+//            }
+//          }
+//        }
+//        meth = getMethod(name, m.getParameterTypes());
+//      }
+//      else {
+//        meth = getMethod(name, parameters);
+//      }
+//
+//      subMap.put(parmKey, meth);
+//    }
+//
+//    return meth;
   }
 
   private MetaMethod[] staticMethodCache;
@@ -411,17 +427,17 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     }
     return _hashString;
   }
-  
+
   private Set<MetaClass> POS_ASSIGNABLE_CACHE = new HashSet<MetaClass>();
   private Set<MetaClass> NEG_ASSIGNABLE_CACHE = new HashSet<MetaClass>();
-  
+
   private static final MetaClass NULL_TYPE = MetaClassFactory.get(NullType.class);
 
   @Override
   public boolean isAssignableFrom(MetaClass clazz) {
     if (POS_ASSIGNABLE_CACHE.contains(clazz)) return true;
     if (NEG_ASSIGNABLE_CACHE.contains(clazz)) return false;
-    
+
     if (!isPrimitive() && NULL_TYPE.equals(clazz)) return true;
 
     MetaClass cls;

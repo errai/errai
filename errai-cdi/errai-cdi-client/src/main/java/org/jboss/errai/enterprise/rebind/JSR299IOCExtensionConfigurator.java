@@ -189,7 +189,7 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
             }
           }
 
-          MetaClass metaClass = GWTClass.newInstance(type);
+          MetaClass metaClass = GWTClass.newInstance(type.getOracle(), type);
 
           if (injectorFactory.hasType(metaClass)) {
             continue;

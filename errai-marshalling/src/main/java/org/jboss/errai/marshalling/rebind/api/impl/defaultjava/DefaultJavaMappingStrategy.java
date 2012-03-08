@@ -268,7 +268,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
          *
          */
         BlockBuilder<?> marshallMethodBlock = classStructureBuilder.publicOverridesMethod("marshall",
-                Parameter.of(Object.class, "a0"), Parameter.of(MarshallingSession.class, "a1"));
+                Parameter.of(toMap, "a0"), Parameter.of(MarshallingSession.class, "a1"));
 
         marshallToJSON(marshallMethodBlock, toMap, mapping);
 

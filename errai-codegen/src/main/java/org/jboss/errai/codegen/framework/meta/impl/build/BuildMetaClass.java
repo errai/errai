@@ -389,11 +389,11 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   public Context getContext() {
     return context;
   }
-  
+
   public void addAnnotation(Annotation annotation) {
     annotations.add(annotation);
   }
-  
+
   public void addInnerClass(InnerClass innerClass) {
     innerClasses.add(innerClass);
   }
@@ -439,38 +439,44 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
 
   @Override
   public MetaMethod getBestMatchingMethod(String name, Class... parameters) {
-    return isReifiedForm() ? findReifiedVersion(reifiedFormOf.getBestMatchingMethod(name, parameters))
-            : super.getBestMatchingMethod(name, parameters);
+//    return isReifiedForm() ? findReifiedVersion(reifiedFormOf.getBestMatchingMethod(name, parameters))
+//            : super.getBestMatchingMethod(name, parameters);
+    return super.getBestMatchingMethod(name, parameters);
   }
 
   @Override
   public MetaMethod getBestMatchingMethod(String name, MetaClass... parameters) {
-    return isReifiedForm() ? findReifiedVersion(reifiedFormOf.getBestMatchingMethod(name, parameters))
-            : super.getBestMatchingMethod(name, parameters);
+//    return isReifiedForm() ? findReifiedVersion(reifiedFormOf.getBestMatchingMethod(name, parameters))
+//            : super.getBestMatchingMethod(name, parameters);
+    return super.getBestMatchingMethod(name, parameters);
   }
 
   @Override
   public MetaMethod getBestMatchingStaticMethod(String name, Class... parameters) {
-    return isReifiedForm() ? findReifiedVersion(reifiedFormOf.getBestMatchingStaticMethod(name, parameters))
-            : super.getBestMatchingStaticMethod(name, parameters);
+//    return isReifiedForm() ? findReifiedVersion(reifiedFormOf.getBestMatchingStaticMethod(name, parameters))
+//            : super.getBestMatchingStaticMethod(name, parameters);
+    return super.getBestMatchingStaticMethod(name, parameters);
   }
 
   @Override
   public MetaMethod getBestMatchingStaticMethod(String name, MetaClass... parameters) {
-    return isReifiedForm() ? findReifiedVersion(reifiedFormOf.getBestMatchingStaticMethod(name, parameters))
-            : super.getBestMatchingStaticMethod(name, parameters);
+//    return isReifiedForm() ? findReifiedVersion(reifiedFormOf.getBestMatchingStaticMethod(name, parameters))
+//            : super.getBestMatchingStaticMethod(name, parameters);
+    return super.getBestMatchingStaticMethod(name, parameters);
   }
 
   @Override
   public MetaConstructor getBestMatchingConstructor(Class... parameters) {
-    return isReifiedForm() ? findReifiedVersion(reifiedFormOf.getBestMatchingConstructor(parameters))
-            : super.getBestMatchingConstructor(parameters);
+//    return isReifiedForm() ? findReifiedVersion(reifiedFormOf.getBestMatchingConstructor(parameters))
+//            : super.getBestMatchingConstructor(parameters);
+    return super.getBestMatchingConstructor(parameters);
   }
 
   @Override
   public MetaConstructor getBestMatchingConstructor(MetaClass... parameters) {
-    return isReifiedForm() ? findReifiedVersion(reifiedFormOf.getBestMatchingConstructor(parameters))
-            : super.getBestMatchingConstructor(parameters);
+//    return isReifiedForm() ? findReifiedVersion(reifiedFormOf.getBestMatchingConstructor(parameters))
+//            : super.getBestMatchingConstructor(parameters);
+    return super.getBestMatchingConstructor(parameters);
   }
 
   private MetaMethod findReifiedVersion(MetaMethod formOf) {
@@ -514,9 +520,9 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
       buf.append(new AnnotationLiteral(a).getCanonicalString(context));
       buf.append(" ");
     }
-    
+
     if (!annotations.isEmpty()) buf.append("\n");
-    
+
     buf.append("\n");
 
     buf.append(scope.getCanonicalName());
@@ -528,7 +534,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     if (isStatic) {
       buf.append(" static");
     }
-    
+
     if (isInterface()) {
       buf.append(" interface ").append(getName());
     }
@@ -596,7 +602,7 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
       if (iter.hasNext())
         buf.append("\n");
     }
-    
+
     if (!fields.isEmpty())
       buf.append("\n");
 
@@ -605,10 +611,10 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
       buf.append(innerClassIterator.next().generate(context));
       if (innerClassIterator.hasNext()) buf.append("\n");
     }
-    
+
     if (!innerClasses.isEmpty())
       buf.append("\n");
-    
+
     iter = constructors.iterator();
     while (iter.hasNext()) {
       buf.append(iter.next().toJavaString());

@@ -189,6 +189,8 @@ public class RebindUtils {
        */
       if (hasClasspathChangedForAnnotatedWith(a)) result = true;
     }
+
+
     return result;
   }
 

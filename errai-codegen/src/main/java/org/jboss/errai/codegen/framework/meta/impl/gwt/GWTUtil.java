@@ -19,6 +19,7 @@ package org.jboss.errai.codegen.framework.meta.impl.gwt;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import org.jboss.errai.codegen.framework.meta.MetaType;
 import org.jboss.errai.codegen.framework.meta.MetaTypeVariable;
 
@@ -29,47 +30,47 @@ import com.google.gwt.core.ext.typeinfo.JTypeParameter;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class GWTUtil {
-  public static MetaTypeVariable[] fromTypeVariable(JTypeParameter[] typeParameters) {
+  public static MetaTypeVariable[] fromTypeVariable(TypeOracle oracle, JTypeParameter[] typeParameters) {
     List<MetaTypeVariable> typeVariableList = new ArrayList<MetaTypeVariable>();
 
     for (JTypeParameter typeVariable : typeParameters) {
-      typeVariableList.add(new GWTTypeVariable(typeVariable));
+      typeVariableList.add(new GWTTypeVariable(oracle, typeVariable));
     }
 
     return typeVariableList.toArray(new MetaTypeVariable[typeVariableList.size()]);
   }
 
 
-  public static MetaType[] fromTypeArray(JType[] types) {
+  public static MetaType[] fromTypeArray(TypeOracle oracle, JType[] types) {
     List<MetaType> typeList = new ArrayList<MetaType>();
 
     for (JType t : types) {
-      typeList.add(fromType(t));
+      typeList.add(fromType(oracle, t));
     }
 
     return typeList.toArray(new MetaType[types.length]);
   }
 
-  public static MetaType fromType(JType t) {
-    if (t.isClassOrInterface() != null) {
-      return GWTClass.newInstance(t.isClassOrInterface());
+  public static MetaType fromType(TypeOracle oracle, JType t) {
+    if (t.isTypeParameter() != null) {
+      return new GWTTypeVariable(oracle, t.isTypeParameter());
     }
-    else if (t.isTypeParameter() != null) {
-      return new GWTTypeVariable(t.isTypeParameter());
+    else if (t.isClassOrInterface() != null) {
+      return GWTClass.newInstance(oracle, t.isClassOrInterface());
     }
     else if (t.isGenericType() != null) {
       if (t.isArray() != null) {
-        return new GWTGenericArrayType(t.isGenericType());
+        return new GWTGenericArrayType(oracle, t.isGenericType());
       }
       else {
-        return new GWTGenericDeclaration(t.isGenericType());
+        return new GWTGenericDeclaration(oracle, t.isGenericType());
       }
     }
     else if (t.isParameterized() != null) {
-      return new GWTParameterizedType(t.isParameterized());
+      return new GWTParameterizedType(oracle, t.isParameterized());
     }
     else if (t.isWildcard() != null) {
-      return new GWTWildcardType(t.isWildcard());
+      return new GWTWildcardType(oracle, t.isWildcard());
     }
     else {
       return null;

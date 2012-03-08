@@ -19,6 +19,7 @@ package org.jboss.errai.codegen.framework.meta.impl.gwt;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import org.jboss.errai.codegen.framework.meta.MetaGenericDeclaration;
 import org.jboss.errai.codegen.framework.meta.MetaTypeVariable;
 
@@ -30,8 +31,10 @@ import com.google.gwt.core.ext.typeinfo.JTypeParameter;
  */
 public class GWTGenericDeclaration implements MetaGenericDeclaration {
   private JGenericType genericType;
+  private TypeOracle oracle;
 
-  public GWTGenericDeclaration(JGenericType genericType) {
+  public GWTGenericDeclaration(TypeOracle oracle, JGenericType genericType) {
+    this.oracle = oracle;
     this.genericType = genericType;
   }
 
@@ -40,7 +43,7 @@ public class GWTGenericDeclaration implements MetaGenericDeclaration {
     List<MetaTypeVariable> typeVariables = new ArrayList<MetaTypeVariable>();
 
     for (JTypeParameter typeParameter : genericType.getTypeParameters()) {
-      typeVariables.add(new GWTTypeVariable(typeParameter));
+      typeVariables.add(new GWTTypeVariable(oracle, typeParameter));
     }
 
     return typeVariables.toArray(new MetaTypeVariable[typeVariables.size()]);

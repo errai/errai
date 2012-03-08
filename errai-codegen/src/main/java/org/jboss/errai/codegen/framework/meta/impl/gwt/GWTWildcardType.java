@@ -16,6 +16,7 @@
 
 package org.jboss.errai.codegen.framework.meta.impl.gwt;
 
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import org.jboss.errai.codegen.framework.meta.MetaType;
 import org.jboss.errai.codegen.framework.meta.MetaWildcardType;
 
@@ -26,19 +27,21 @@ import com.google.gwt.core.ext.typeinfo.JWildcardType;
  */
 public class GWTWildcardType implements MetaWildcardType {
   private JWildcardType wildcardType;
+  private TypeOracle oracle;
 
-  public GWTWildcardType(JWildcardType wildcardType) {
+  public GWTWildcardType(TypeOracle oracle, JWildcardType wildcardType) {
     this.wildcardType = wildcardType;
+    this.oracle = oracle;
   }
 
   @Override
   public MetaType[] getLowerBounds() {
-    return GWTUtil.fromTypeArray(wildcardType.getLowerBounds());
+    return GWTUtil.fromTypeArray(oracle, wildcardType.getLowerBounds());
   }
 
   @Override
   public MetaType[] getUpperBounds() {
-    return GWTUtil.fromTypeArray(wildcardType.getUpperBounds());
+    return GWTUtil.fromTypeArray(oracle, wildcardType.getUpperBounds());
   }
 
   @Override

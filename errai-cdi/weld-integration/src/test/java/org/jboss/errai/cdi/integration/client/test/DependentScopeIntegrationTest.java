@@ -56,7 +56,7 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
   public void testDependentBeanScope() {
     delayTestFinish(60000);
 
-    CDI.addPostInitTask(new Runnable() {
+    InitVotes.registerOneTimeInitCallback(new Runnable() {
       @Override
       public void run() {
         ApplicationScopedBean beanA = IOC.getBeanManager()
@@ -82,7 +82,7 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
 
   public void testDependentScopesWithTransverseDependentBeans() {
     delayTestFinish(60000);
-    CDI.addPostInitTask(new Runnable() {
+    InitVotes.registerOneTimeInitCallback(new Runnable() {
       @Override
       public void run() {
         TestOuterBean outBean = IOC.getBeanManager()
@@ -121,7 +121,7 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
 
   public void testDependentScopeDoesNotViolateBroaderApplicationScope() {
     delayTestFinish(60000);
-    CDI.addPostInitTask(new Runnable() {
+    InitVotes.registerOneTimeInitCallback(new Runnable() {
       @Override
       public void run() {
 
@@ -148,7 +148,7 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
    */
   public void testUnreferencedDependentRootBeanAccessible() {
     delayTestFinish(60000);
-    CDI.addPostInitTask(new Runnable() {
+    InitVotes.registerOneTimeInitCallback(new Runnable() {
       @Override
       public void run() {
 
