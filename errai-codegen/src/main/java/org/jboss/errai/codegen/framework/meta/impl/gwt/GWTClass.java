@@ -188,11 +188,15 @@ public class GWTClass extends AbstractMetaClass<JType> {
     if (type == null) {
       return null;
     }
-
-    meths.addAll(Arrays.asList(getDeclaredMethods()));
+    
+    for (JMethod jMethod : getEnclosedMetaObject().isClassOrInterface().getMethods()) {
+      if (!jMethod.isPrivate()) {
+        meths.add(new GWTMethod(oracle, jMethod));
+      }
+    }
 
     for (JClassType iface : type.getImplementedInterfaces()) {
-      meths.addAll(Arrays.asList(GWTClass.newInstance(oracle, iface).getDeclaredMethods()));
+      meths.addAll(Arrays.asList(GWTClass.newInstance(oracle, iface).getMethods()));
     }
 
     return meths.toArray(new MetaMethod[meths.size()]);
