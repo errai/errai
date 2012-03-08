@@ -16,6 +16,7 @@
 <h1>How does it work?</h1>
 
 <h2>Client-to-server</h2>
+<p><em>Note: some of the boxes in the flowchart are hyperlinks to the associated source code.</em></p>
 <iframe src="client_to_server.svg"><a href="client_to_server.svg">Click Here for Flow Diagram</a></iframe>
 <ol>
 		<li>The browser periodically generates deviceorientation events,
@@ -35,9 +36,28 @@
 	</ol>
 
 <h2>Server-to-client</h2>
+<p><em>Note: some of the boxes in the flowchart are hyperlinks to the associated source code.</em></p>
 <iframe src="server_to_client.svg"><a href="server_to_client.svg">Click Here for Flow Diagram</a></iframe>
+	<ol>
+		<li>A timer on the server periodically fires, initiating the
+			process of firing the aggregated set of all known client orientations
+			(<a
+			href="java-sources/org/jboss/errai/demo/mobile/client/shared/AllClientOrientations.java.html">AllClientOrientations</a>)
+			as a CDI event. (We also weed out clients who we haven't heard from
+			in the past couple of seconds at this point).
+		<li>The server-side ErraiBus routes this event to every connected
+			client, because they all have CDI Observers for the
+			AllClientOrientations event.
+		<li>On the client, the client-side MessageBus delivers the <a
+			href="java-sources/org/jboss/errai/demo/mobile/client/shared/AllClientOrientations.java.html">AllClientOrientations</a>
+			event to the client-side code.
+		<li>The client-side code updates the DOM with the new client
+			orientations using a CSS3 perspective transform. (Each client is
+			represented by a &lt;div&gt; element to which the transform is
+			applied.)
+	</ol>
 
-<h1>Why is this awesome?</h1>
+	<h1>Why is this awesome?</h1>
 
 <p>There are lots of reasons, really:
 <ul>
