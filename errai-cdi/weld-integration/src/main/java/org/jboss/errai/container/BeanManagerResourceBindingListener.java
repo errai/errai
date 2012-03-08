@@ -45,6 +45,8 @@ public class BeanManagerResourceBindingListener implements ServletContextListene
   private static final String QUALIFIED_BEAN_MANAGER_JNDI_NAME = RESOURCES_CONTEXT + "/" + BEAN_MANAGER_JNDI_NAME;
   private static final String BEAN_MANAGER_OBJECT_FACTORY = "org.jboss.weld.resources.ManagerObjectFactory";
 
+  private boolean bound = false;
+  
   public void contextInitialized(ServletContextEvent sce) {
    try {
       InitialContext ctx = new InitialContext();
@@ -79,6 +81,7 @@ public class BeanManagerResourceBindingListener implements ServletContextListene
           // we rebind just in case it really is there and we just couldn't read it
           ctx.rebind(QUALIFIED_BEAN_MANAGER_JNDI_NAME,
                      new Reference(BeanManager.class.getName(), BEAN_MANAGER_OBJECT_FACTORY, null));
+          bound = true;
           log.info("BeanManager reference bound to " + QUALIFIED_BEAN_MANAGER_JNDI_NAME);
         }
         catch (NamingException e) {
@@ -95,5 +98,16 @@ public class BeanManagerResourceBindingListener implements ServletContextListene
    }
   }
 
-  public void contextDestroyed(ServletContextEvent sce) {}
+  public void contextDestroyed(ServletContextEvent sce) {
+    if (bound) {
+      try {
+        InitialContext ctx = new InitialContext();
+        ctx.unbind(QUALIFIED_BEAN_MANAGER_JNDI_NAME);
+        log.info("Successfully unbound BeanManager reference.");
+      } 
+      catch (NamingException e) {
+        log.warn("Failed to unbind BeanManager reference!");
+      }
+    }
+  }
 }
