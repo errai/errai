@@ -24,7 +24,6 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.rebind.SourceWriter;
 import com.google.gwt.user.rebind.StringSourceWriter;
-import com.google.inject.Singleton;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.codegen.framework.Context;
@@ -83,6 +82,7 @@ import javax.enterprise.context.SessionScoped;
 import javax.enterprise.inject.Default;
 import javax.inject.Inject;
 import javax.inject.Provider;
+import javax.inject.Singleton;
 import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
@@ -172,7 +172,6 @@ public class IOCBootstrapGenerator {
     annos.add(Default.class);
 
     String gen;
-//    if (RebindUtils.hasClasspathChangedForAnnotatedWith(annos) || !cacheFile.exists()) {
     MetaClassFactory.emptyCache();
 
     if (typeOracle != null) {
@@ -187,18 +186,12 @@ public class IOCBootstrapGenerator {
       }
     }
 
-
     log.info("generating IOC bootstrapping class...");
     long st = System.currentTimeMillis();
     gen = _generate(packageName, className);
     log.info("generated IOC bootstrapping class in " + (System.currentTimeMillis() - st) + "ms");
 
     RebindUtils.writeStringToFile(cacheFile, gen);
-//    }
-//    else {
-//      gen = RebindUtils.readFileToString(cacheFile);
-//      log.info("nothing has changed. using cached IOC bootstrapping class.");
-//    }
 
     log.info("using IOC bootstrapping code to: " + cacheFile.getAbsolutePath());
 
