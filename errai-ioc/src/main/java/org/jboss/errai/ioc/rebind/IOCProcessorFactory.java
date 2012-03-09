@@ -357,7 +357,6 @@ public class IOCProcessorFactory {
 
     Set<SortUnit> requiredDependencies = del.getRequiredDependencies();
     addToDelegates(new SortUnit(((DependencyControlImpl) dependencyControl).masqueradeClass, del, requiredDependencies));
-
   }
 
   private class ProcessingEntry<T> implements Comparable<ProcessingEntry> {

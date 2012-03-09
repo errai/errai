@@ -16,22 +16,65 @@
 
 package org.jboss.errai.ioc.rebind.ioc.util;
 
+import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.ioc.rebind.SortUnit;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
  * @author Mike Brock
  */
 public class WiringUtil {
+
+  public static Collection<SortUnit> consolidateSortUnits(final Collection<SortUnit> in) {
+    Map<MetaClass, SortUnit> sortUnitMap = new HashMap<MetaClass, SortUnit>(in.size() * 2);
+    List<SortUnit> consolidatedList = new ArrayList<SortUnit>(in.size());
+
+    SortUnit masterSU;
+    for (SortUnit su : in) {
+      masterSU = sortUnitMap.get(su.getType());
+      if (masterSU == su) continue;
+
+      if (masterSU != null) {
+        for (Object item : su.getItems()) {
+          masterSU.addItem(item);
+        }
+      }
+      else {
+        sortUnitMap.put(su.getType(), su);
+      }
+    }
+
+    // second pass to re-reference dependencies
+    for (SortUnit su : in) {
+      Set<SortUnit> newDependencySet = new HashSet<SortUnit>();
+      for (SortUnit dep : su.getDependencies()) {
+        masterSU = sortUnitMap.get(dep.getType());
+        if (masterSU == null) {
+          masterSU = dep;
+        }
+
+        newDependencySet.add(masterSU);
+      }
+      consolidatedList.add(new SortUnit(su.getType(), su.getItems(), newDependencySet, su.isHard()));
+    }
+
+    return consolidatedList;
+  }
+
   public static List<SortUnit> worstSortAlgorithmEver(final Collection<SortUnit> in) {
-    List<SortUnit> newList = new ArrayList<SortUnit>(in);
-    // perform fist pass.
+    List<SortUnit> newList = new ArrayList<SortUnit>(consolidateSortUnits(in));
+
     _worstSort(newList);
+
+    Collections.sort(newList);
 
     return newList;
   }
@@ -45,9 +88,9 @@ public class WiringUtil {
         SortUnit c = newList.get(y);
 
         if (s != c && s.getDependencies().contains(c)) {
-           newList.add(i, newList.remove(y));
+          newList.add(i, newList.remove(y));
           adv = false;
-          
+
           for (SortUnit chk : s.getDependencies()) {
             if (chk.equals(c) && chk.isHard()) {
               adv = true;
@@ -64,4 +107,6 @@ public class WiringUtil {
       }
     }
   }
+
+
 }

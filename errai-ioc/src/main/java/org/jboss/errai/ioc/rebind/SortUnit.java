@@ -26,7 +26,7 @@ import java.util.Set;
 /**
  * @author Mike Brock
  */
-public class SortUnit {
+public class SortUnit implements Comparable<SortUnit> {
   private MetaClass type;
   private List<Object> items;
   private Set<SortUnit> dependencies;
@@ -58,6 +58,13 @@ public class SortUnit {
     this.dependencies = dependencies;
   }
 
+  public SortUnit(MetaClass type, List<Object> items, Set<SortUnit> dependencies, boolean hard) {
+    this.type = type;
+    this.items = items;
+    this.dependencies = dependencies;
+    this.hard = hard;
+  }
+
   public void addItem(Object item) {
     items.add(item);
   }
@@ -74,8 +81,39 @@ public class SortUnit {
     return dependencies;
   }
 
+  public void setHard(boolean hard) {
+    this.hard = hard;
+  }
+
   public boolean isHard() {
     return hard;
+  }
+
+
+  public int getDepth() {
+    int depth = 0;
+    for (SortUnit su : getDependencies()) {
+      if (su.equals(this)) continue;
+
+      int d = _getDepth(this, 1, su);
+      if (d > depth) {
+        depth = d;
+      }
+    }
+    return depth;
+  }
+
+  private static int _getDepth(SortUnit outer, int depth, SortUnit su) {
+    for (SortUnit dep : su.getDependencies()) {
+      if (dep.equals(outer)) continue;
+
+      int d = _getDepth(outer, depth + 1, dep);
+      if (d > depth) {
+        depth = d;
+      }
+    }
+    return depth;
+
   }
 
   @Override
@@ -90,6 +128,18 @@ public class SortUnit {
     return true;
   }
 
+  @Override
+  public int compareTo(SortUnit o) {
+    if (o.getDependencies().contains(this) || getDependencies().contains(o)) {
+      return 0;
+    }
+    else if (o.getDepth() < getDepth()) {
+      return 1;
+    }
+    else {
+      return 0;
+    }
+  }
 
   @Override
   public int hashCode() {
@@ -99,6 +149,6 @@ public class SortUnit {
 
   @Override
   public String toString() {
-    return type.toString() + " => " + dependencies;
+    return " (depth:" + getDepth() + ")" + type.toString() + " => " + dependencies;
   }
 }
