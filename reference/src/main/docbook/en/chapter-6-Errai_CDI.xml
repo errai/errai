@@ -434,7 +434,7 @@ public class MyComposite extends Composite {
           <code>ErraiService.properties</code>
         </para>
         <informalexample>
-          <programlisting language="java">errai.auto_discover_services=false</programlisting>
+          <programlisting>errai.auto_discover_services=false</programlisting>
         </informalexample>
       </section>
     </section>

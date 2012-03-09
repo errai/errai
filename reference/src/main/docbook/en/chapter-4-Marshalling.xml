@@ -139,7 +139,7 @@ public class Person {
             </para>
             <example>
               <title>Example ErraiApp.properties defining portable classes.</title>
-              <programlisting language="java">errai.marshalling.serializableTypes=org.foo.client.UserEntity \
+              <programlisting>errai.marshalling.serializableTypes=org.foo.client.UserEntity \
                                     org.foo.client.GroupEntity \
                                     org.abcinc.model.client.Profile</programlisting>
             </example>
@@ -184,7 +184,7 @@ public MyListImpl extends ArrayList {
               attribute.
             </para>
             <informalexample>
-              <programlisting language="java">errai.marshalling.mappingAliases=org.foo.client.MyListImpl-&gt;java.uti.List \
+              <programlisting>errai.marshalling.mappingAliases=org.foo.client.MyListImpl-&gt;java.uti.List \
                                  org.foo.client.MyMapImpl-&gt;java.util.Map</programlisting>
             </informalexample>
             <para>The list of classes is whitespace-separated so that it may be split across lines.</para>

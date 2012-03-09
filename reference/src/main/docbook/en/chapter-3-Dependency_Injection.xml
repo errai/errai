@@ -4,7 +4,7 @@
     
     <title>Dependency Injection</title>
     <para>
-      The core Errai IOC module implements a subset of the
+      The core Errai IOC module implements the
       <emphasis role="italics">
         <ulink url="http://download.oracle.com/otndocs/jcp/dependency_injection-1.0-final-oth-JSpec/">JSR-330 Dependency Injection</ulink>
       </emphasis>

@@ -509,6 +509,19 @@ MessageBuilder.createMessage()
       <title>Message Routing Information</title>
       <para>Every message that is sent between a local and remote (or server and client) buses contain session routing information. This information is used by the bus to determine what outbound queues to use to deliver the message to, so they will reach their intended recipients. It is possible to manually specify this information to indicate to the bus, where you want a specific message to go.</para>
       <para>
+        You can obtain the
+        <code>SessionID</code>
+        directly from a
+        <code>Message</code>
+        by getting the
+        <code>QueueSession</code>
+        resource:
+      </para>
+      <informalexample>
+        <programlisting language="java">QueueSession sess = message.getResource(QueueSession.class, Resources.Session.name());
+   String sessionId = sess.getSessionId();</programlisting>
+      </informalexample>
+      <para>
         The utility class
         <code>org.jboss.errai.bus.server.util.ServerBusUtils</code>
         contains a utility method for extracting the String-based SessionID which is used to identify the message queue associated with any particular client. You may use this method to extract the
@@ -518,7 +531,8 @@ MessageBuilder.createMessage()
       <informalexample>
         <programlisting language="java">...
   public void callback(Message message) {
-    String sessionId = ServerBusUtils.getSessionId(message);
+   QueueSession sess = message.getResource(QueueSession.class, Resources.Session.name());
+   String sessionId = sess.getSessionId();
 
     // Record this sessionId somewhere.
     ...

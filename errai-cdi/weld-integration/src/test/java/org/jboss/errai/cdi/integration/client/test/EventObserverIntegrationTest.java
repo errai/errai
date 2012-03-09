@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.jboss.errai.cdi.integration.client.EventObserverTestModule;
-import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.container.IOC;
 
@@ -21,7 +20,7 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
   }
 
   public void testBusReadyEventObserver() {
-    InitVotes.registerOneTimeInitCallback(new Runnable() {
+    CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
         EventObserverTestModule module =
