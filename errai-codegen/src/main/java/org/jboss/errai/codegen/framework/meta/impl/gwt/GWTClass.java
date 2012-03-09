@@ -66,9 +66,6 @@ public class GWTClass extends AbstractMetaClass<JType> {
   protected GWTClass(TypeOracle oracle, JType classType, boolean erased) {
     super(classType);
     this.oracle = oracle;
-    if (getName().equals("T extends Object")) {
-      System.out.println("WTF");
-    }
     
     JParameterizedType parameterizedType = classType.isParameterized();
     if (!erased) {

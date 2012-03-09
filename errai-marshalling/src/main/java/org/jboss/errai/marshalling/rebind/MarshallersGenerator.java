@@ -216,6 +216,7 @@ public class MarshallersGenerator extends Generator {
       MetaClassFactory.emptyCache();
       if (typeOracle != null) {
         Set<String> translatable = RebindUtils.findTranslatablePackages(context);
+        translatable.remove("java.lang");
 
         for (JClassType type : typeOracle.getTypes()) {
           if (!translatable.contains(type.getPackage().getName())) continue;
@@ -253,7 +254,7 @@ public class MarshallersGenerator extends Generator {
   private static final String sourceOutputTemp = RebindUtils.getTempDirectory() + "/errai.marshalling/gen/";
 
   private String _generate(GeneratorContext context) {
-    boolean junitOrDevMode = EnvironmentUtil.isGWTJUnitTest() || EnvironmentUtil.isDevMode();
+    boolean junitOrDevMode = EnvironmentUtil.isGWTJUnitTest();
 
     if (SERVER_MARSHALLER_OUTPUT_ENABLED) {
       String serverSideClass = MarshallerGeneratorFactory.getFor(MarshallerOuputTarget.Java)

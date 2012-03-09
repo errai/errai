@@ -177,10 +177,11 @@ public class IOCBootstrapGenerator {
     MetaClassFactory.emptyCache();
     if (typeOracle != null) {
       Set<String> translatable = RebindUtils.findTranslatablePackages(context);
+      translatable.remove("java.lang");
+
 
       for (JClassType type : typeOracle.getTypes()) {
         if (!translatable.contains(type.getPackage().getName())) continue;
-        ;
 
 //        if (type instanceof JRealClassType) continue;
 

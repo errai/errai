@@ -466,7 +466,7 @@ public class GenUtil {
     if (useJSNIStubs) {
       classBuilder.privateMethod(void.class, getPrivateFieldInjectorName(f))
               .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance"),
-                      //            Parameter.of(type.isArray() ? type.asBoxed() : type, "value")))
+//                                  Parameter.of(type.isArray() ? type.asBoxed() : type, "value")))
                       Parameter.of(type, "value")))
 
               .modifiers(Modifier.Static, Modifier.JSNI)
@@ -491,7 +491,9 @@ public class GenUtil {
 
       classBuilder.privateMethod(void.class, getPrivateFieldInjectorName(f))
               .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance"),
-                      Parameter.of(f.getType().isArray() ? f.getType().asBoxed() : f.getType(), "value")))
+//                      Parameter.of(f.getType().isArray() ? f.getType().asBoxed() : f.getType(), "value")))
+                      Parameter.of(f.getType(), "value")))
+
               .modifiers(Modifier.Static)
               .body()
               .append(Stmt.try_()
