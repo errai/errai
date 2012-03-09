@@ -1258,7 +1258,7 @@
           <version>1.2.1</version>
           <executions>
             <execution>
-              <phase>generate-resources</phase>
+              <phase>prepare-package</phase>
               <goals>
                 <goal>java</goal>
               </goals>

@@ -15,6 +15,9 @@
  */
 package org.jboss.errai.demo.mobile.client.local;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.annotation.PostConstruct;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
@@ -24,6 +27,8 @@ import org.jboss.errai.demo.mobile.client.shared.Disconnected;
 import org.jboss.errai.demo.mobile.client.shared.OrientationEvent;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
+import com.google.gwt.animation.client.AnimationScheduler;
+import com.google.gwt.animation.client.AnimationScheduler.AnimationCallback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
@@ -38,6 +43,9 @@ public class ClientMain {
 
   @Inject OrientationDetector orientationDetector;
   private WelcomeDialog welcomeDialog;
+  private final Map<String, PerspectiveAnimator> animators = new HashMap<String, PerspectiveAnimator>();
+
+  private final AnimationScheduler animScheduler = AnimationScheduler.get();
 
   @PostConstruct
   public void init() {
@@ -66,6 +74,16 @@ public class ClientMain {
     });
     RootPanel.get("rootPanel").add(welcomeDialog);
     welcomeDialog.nameBox.setFocus(true);
+
+    animScheduler.requestAnimationFrame(new AnimationCallback() {
+      @Override
+      public void execute(double timestamp) {
+        for (PerspectiveAnimator animator : animators.values()) {
+          animator.nextFrame();
+        }
+        animScheduler.requestAnimationFrame(this);
+      }
+    });
   }
 
   public void visualizeOrientationEvent(OrientationEvent e) {
@@ -79,22 +97,13 @@ public class ClientMain {
       template.getParentElement().appendChild(rotateMe);
     }
 
-    String transform = "rotateX(" + (e.getX() - 90.0) + "deg) " + "rotateY(" + (-e.getY()) + "deg)";
+    PerspectiveAnimator animator = animators.get(e.getClientId());
+    if (animator == null) {
+      animator = new PerspectiveAnimator(rotateMe);
+      animators.put(e.getClientId(), animator);
+    }
 
-    // rotating the main rectangle with the compass direction is annoying,
-    // because then what you see on screen doesn't relate to what how you see
-    // your phone in front of you. So we rotate a compass rose instead:
-    String compassTransform = "rotate( " + (360.0 - e.getZ()) + "deg)";
-
-    // could use deferred binding for this, but it's probably overkill
-    rotateMe.getStyle().setProperty("MozTransform", transform);
-    rotateMe.getStyle().setProperty("WebkitTransform", transform);
-    rotateMe.getStyle().setProperty("transform", transform);
-
-    Element rotateMeCompass = rotateMe.getFirstChildElement().getNextSiblingElement();
-    rotateMeCompass.getStyle().setProperty("MozTransform", compassTransform);
-    rotateMeCompass.getStyle().setProperty("WebkitTransform", compassTransform);
-    rotateMeCompass.getStyle().setProperty("transform", compassTransform);
+    animator.updateTargets(e);
   }
 
   public void onAllClientOrientationsUpdate(@Observes AllClientOrientations aco) {
@@ -108,5 +117,6 @@ public class ClientMain {
     if (rotateMe != null) {
       rotateMe.getParentElement().removeChild(rotateMe);
     }
+    animators.remove(e.getClientId());
   }
 }
