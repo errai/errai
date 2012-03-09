@@ -66,16 +66,15 @@ Release Steps
    * Afterward, verify that all subprojects reference the new parent pom's version: find . -name pom.xml | xargs grep x.y.z | grep SNAP
    * % mvn clean install
    
-   
-   !!Note that the kitschensink archetype is tested automatically. For the test to work AS7 has to be running!!
+      !!Note that the kitschensink archetype is tested automatically. For the test to work AS7 has to be running!!
 
-   Now test the archetypes you just installed (use instructions from quickstart guides)
+      Now test the archetypes you just installed (use instructions from quickstart guides)
    * check generated app's pom.xml for correct version
    * mvn gwt:run
    
 1. % mvn deploy -Dmaven.test.skip=true
 
-The next step has to be done for both Errai and its archetypes!
+   The next step has to be done for both Errai and its archetypes!
 1. Tag and push the release to github:
    * % git commit a -m "update to new version x.y.z"
    * % git tag x.y.z.Final
