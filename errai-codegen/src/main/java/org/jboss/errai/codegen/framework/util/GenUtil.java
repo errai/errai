@@ -149,14 +149,14 @@ public class GenUtil {
     if (!cls.isArray() && !Iterable.class.isAssignableFrom(cls))
       throw new TypeNotIterableException(statement.generate(Context.create()));
   }
-  
+
   private static final Set<String> classAliases = new HashSet<String>() {
     {
       add(JavaReflectionClass.class.getName());
-      add(Class.class.getName()); 
+      add(Class.class.getName());
     }
   };
-  
+
   public static void addClassAlias(Class cls) {
     classAliases.add(cls.getName());
   }
@@ -168,8 +168,8 @@ public class GenUtil {
           // handle convertability between MetaClass API and java Class reference.
           return;
         }
-        
-        
+
+
         throw new InvalidTypeException(to.getFullyQualifiedName() + " is not assignable from "
                 + from.getFullyQualifiedName());
       }
@@ -466,7 +466,9 @@ public class GenUtil {
     if (useJSNIStubs) {
       classBuilder.privateMethod(void.class, getPrivateFieldInjectorName(f))
               .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance"),
-                      Parameter.of(type.isArray() ? type.asBoxed() : type, "value")))
+                      //            Parameter.of(type.isArray() ? type.asBoxed() : type, "value")))
+                      Parameter.of(type, "value")))
+
               .modifiers(Modifier.Static, Modifier.JSNI)
               .body()
               .append(new StringStatement(JSNIUtil.fieldAccess(f) + " = value"))
@@ -767,110 +769,110 @@ public class GenUtil {
 
   public static MetaMethod getBestCandidate(MetaClass[] arguments, String method, MetaClass decl, MetaMethod[] methods,
                                             boolean classTarget) {
-      if (methods.length == 0) {
-        return null;
-      }
+    if (methods.length == 0) {
+      return null;
+    }
 
-      MetaParameter[] parmTypes;
-      MetaMethod bestCandidate = null;
-      int bestScore = 0;
-      int score = 0;
-      boolean retry = false;
+    MetaParameter[] parmTypes;
+    MetaMethod bestCandidate = null;
+    int bestScore = 0;
+    int score = 0;
+    boolean retry = false;
 
-      do {
-        for (MetaMethod meth : methods) {
-          if (classTarget && (meth.isStatic())) continue;
+    do {
+      for (MetaMethod meth : methods) {
+        if (classTarget && (meth.isStatic())) continue;
 
-          if (method.equals(meth.getName())) {
-            boolean isVarArgs = meth.isVarArgs();
-            if ((parmTypes = meth.getParameters()).length != arguments.length && !isVarArgs) {
-              continue;
-            }
-            else if (arguments.length == 0 && parmTypes.length == 0) {
-              bestCandidate = meth;
-              break;
-            }
+        if (method.equals(meth.getName())) {
+          boolean isVarArgs = meth.isVarArgs();
+          if ((parmTypes = meth.getParameters()).length != arguments.length && !isVarArgs) {
+            continue;
+          }
+          else if (arguments.length == 0 && parmTypes.length == 0) {
+            bestCandidate = meth;
+            break;
+          }
 
-            for (int i = 0; i != arguments.length; i++) {
-              MetaClass actualParamType;
-              if (isVarArgs && !arguments[arguments.length -1].isArray() &&  i >= parmTypes.length-1)
-                actualParamType = parmTypes[parmTypes.length-1].getType().getComponentType();
-              else
-                actualParamType = parmTypes[i].getType();
+          for (int i = 0; i != arguments.length; i++) {
+            MetaClass actualParamType;
+            if (isVarArgs && !arguments[arguments.length - 1].isArray() && i >= parmTypes.length - 1)
+              actualParamType = parmTypes[parmTypes.length - 1].getType().getComponentType();
+            else
+              actualParamType = parmTypes[i].getType();
 
-              if (arguments[i] == null) {
-                if (!actualParamType.isPrimitive()) {
-                  score += 6;
-                }
-                else {
-                  score = 0;
-                  break;
-                }
-              }
-              else if (actualParamType.equals(arguments[i])) {
-                score += 7;
-              }
-              else if (actualParamType.isPrimitive() && actualParamType.asBoxed().equals(arguments[i])) {
+            if (arguments[i] == null) {
+              if (!actualParamType.isPrimitive()) {
                 score += 6;
-              }
-              else if (arguments[i].isPrimitive() && arguments[i].asUnboxed().equals(actualParamType)) {
-                score += 6;
-              }
-              else if (actualParamType.isAssignableFrom(arguments[i])) {
-                score += 5;
-              }
-              else if (isNumericallyCoercible(arguments[i], actualParamType)) {
-                score += 4;
-              }
-              else if (actualParamType.asBoxed().isAssignableFrom(arguments[i].asBoxed())
-                  && !Object_MetaClass.equals(arguments[i])) {
-                score += 3 + scoreInterface(actualParamType, arguments[i]);
-              }
-              else if (canConvert(actualParamType, arguments[i])) {
-                if (actualParamType.isArray() && arguments[i].isArray()) score += 1;
-                else if (actualParamType.equals(char_MetaClass) && arguments[i].equals(String_MetaClass)) score += 1;
-
-                score += 1;
-              }
-              else if (actualParamType.equals(Object_MetaClass) || arguments[i].equals(NullType_MetaClass)) {
-                score += 1;
               }
               else {
                 score = 0;
                 break;
               }
             }
-
-            if (score != 0 && score > bestScore) {
-              bestCandidate = meth;
-              bestScore = score;
+            else if (actualParamType.equals(arguments[i])) {
+              score += 7;
             }
-            score = 0;
-          }
-        }
+            else if (actualParamType.isPrimitive() && actualParamType.asBoxed().equals(arguments[i])) {
+              score += 6;
+            }
+            else if (arguments[i].isPrimitive() && arguments[i].asUnboxed().equals(actualParamType)) {
+              score += 6;
+            }
+            else if (actualParamType.isAssignableFrom(arguments[i])) {
+              score += 5;
+            }
+            else if (isNumericallyCoercible(arguments[i], actualParamType)) {
+              score += 4;
+            }
+            else if (actualParamType.asBoxed().isAssignableFrom(arguments[i].asBoxed())
+                    && !Object_MetaClass.equals(arguments[i])) {
+              score += 3 + scoreInterface(actualParamType, arguments[i]);
+            }
+            else if (canConvert(actualParamType, arguments[i])) {
+              if (actualParamType.isArray() && arguments[i].isArray()) score += 1;
+              else if (actualParamType.equals(char_MetaClass) && arguments[i].equals(String_MetaClass)) score += 1;
 
-        if (!retry && bestCandidate == null && decl.isInterface()) {
-          MetaMethod[] objMethods = Object_MetaClass.getMethods();
-          MetaMethod[] nMethods = new MetaMethod[methods.length + objMethods.length];
-          for (int i = 0; i < methods.length; i++) {
-            nMethods[i] = methods[i];
+              score += 1;
+            }
+            else if (actualParamType.equals(Object_MetaClass) || arguments[i].equals(NullType_MetaClass)) {
+              score += 1;
+            }
+            else {
+              score = 0;
+              break;
+            }
           }
 
-          for (int i = 0; i < objMethods.length; i++) {
-            nMethods[i + methods.length] = objMethods[i];
+          if (score != 0 && score > bestScore) {
+            bestCandidate = meth;
+            bestScore = score;
           }
-          methods = nMethods;
-
-          retry = true;
-        }
-        else {
-          break;
+          score = 0;
         }
       }
-      while (true);
 
-      return bestCandidate;
+      if (!retry && bestCandidate == null && decl.isInterface()) {
+        MetaMethod[] objMethods = Object_MetaClass.getMethods();
+        MetaMethod[] nMethods = new MetaMethod[methods.length + objMethods.length];
+        for (int i = 0; i < methods.length; i++) {
+          nMethods[i] = methods[i];
+        }
+
+        for (int i = 0; i < objMethods.length; i++) {
+          nMethods[i + methods.length] = objMethods[i];
+        }
+        methods = nMethods;
+
+        retry = true;
+      }
+      else {
+        break;
+      }
     }
+    while (true);
+
+    return bestCandidate;
+  }
 
   private static final MetaClass Number_MetaClass = MetaClassFactory.get(Number.class);
   private static final MetaClass Object_MetaClass = MetaClassFactory.get(Object.class);
@@ -878,12 +880,12 @@ public class GenUtil {
   private static final MetaClass char_MetaClass = MetaClassFactory.get(char.class);
   private static final MetaClass String_MetaClass = MetaClassFactory.get(String.class);
 
-  
+
   public static boolean canConvert(MetaClass to, MetaClass from) {
     try {
       Class<?> fromClazz = from.asClass();
       Class<?> toClass = to.asClass();
-      
+
       return DataConversion.canConvert(toClass, fromClazz);
     }
     catch (Throwable t) {

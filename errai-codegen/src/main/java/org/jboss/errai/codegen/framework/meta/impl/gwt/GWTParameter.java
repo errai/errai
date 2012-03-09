@@ -59,7 +59,7 @@ public class GWTParameter implements MetaParameter {
 
   @Override
   public MetaClass getType() {
-    return GWTClass.newInstance(oracle, parameter.getType());
+    return GWTUtil.eraseOrReturn(oracle, parameter.getType());
   }
 
   @Override

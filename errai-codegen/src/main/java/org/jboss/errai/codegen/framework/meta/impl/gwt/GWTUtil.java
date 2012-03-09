@@ -19,7 +19,10 @@ package org.jboss.errai.codegen.framework.meta.impl.gwt;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.core.ext.typeinfo.JArrayType;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaType;
 import org.jboss.errai.codegen.framework.meta.MetaTypeVariable;
 
@@ -51,12 +54,40 @@ public class GWTUtil {
     return typeList.toArray(new MetaType[types.length]);
   }
 
+  private static JType getRootComponentType(JArrayType type) {
+    JType root = null;
+    while (type.getComponentType() != null) {
+      if (type.getComponentType().isArray() != null) {
+        type = type.getComponentType().isArray();
+      }
+      else {
+        root = type.getComponentType();
+        break;
+      }
+
+    }
+    return root;
+  }
+
+  public static MetaClass eraseOrReturn(TypeOracle oracle, JType t) {
+
+    if (t.isArray() != null) {
+      JType root = getRootComponentType(t.isArray());
+      if (root.isTypeParameter() != null) {
+        return MetaClassFactory.get(Object.class);
+      }
+    }
+    if (t.isTypeParameter() != null) {
+      return MetaClassFactory.get(Object.class);
+    }
+    else {
+      return GWTClass.newInstance(oracle, t);
+    }
+  }
+
   public static MetaType fromType(TypeOracle oracle, JType t) {
     if (t.isTypeParameter() != null) {
       return new GWTTypeVariable(oracle, t.isTypeParameter());
-    }
-    else if (t.isClassOrInterface() != null) {
-      return GWTClass.newInstance(oracle, t.isClassOrInterface());
     }
     else if (t.isGenericType() != null) {
       if (t.isArray() != null) {
@@ -71,6 +102,9 @@ public class GWTUtil {
     }
     else if (t.isWildcard() != null) {
       return new GWTWildcardType(oracle, t.isWildcard());
+    }
+    else if (t.isClassOrInterface() != null) {
+      return GWTClass.newInstance(oracle, t.isClassOrInterface());
     }
     else {
       return null;

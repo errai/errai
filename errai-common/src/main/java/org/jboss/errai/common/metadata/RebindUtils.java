@@ -365,8 +365,8 @@ public class RebindUtils {
   /**
    * Returns the list of translatable packages in the module that caused the generator to run (the module under compilation).
    */
-  public static List<String> findTranslatablePackagesInModule(final GeneratorContext context) {
-    List<String> packages = new ArrayList<String>();
+  public static Set<String> findTranslatablePackagesInModule(final GeneratorContext context) {
+    Set<String> packages = new HashSet<String>();
     try {
       StandardGeneratorContext stdContext = (StandardGeneratorContext) context;
       Field field = StandardGeneratorContext.class.getDeclaredField("module");
@@ -394,8 +394,8 @@ public class RebindUtils {
   /**
    * Returns a list of all translatable packages accessible to the module under compilation (including inherited modules).
    */
-  public static List<String> findTranslatablePackages(final GeneratorContext context) {
-    List<String> packages = new ArrayList<String>();
+  public static Set<String> findTranslatablePackages(final GeneratorContext context) {
+    Set<String> packages = new HashSet<String>();
     JPackage[] jpackages = context.getTypeOracle().getPackages();
     for (JPackage p : jpackages) {
       packages.add(p.getName());

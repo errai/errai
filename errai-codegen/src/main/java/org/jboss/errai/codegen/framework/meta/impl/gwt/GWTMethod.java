@@ -20,9 +20,11 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.core.ext.typeinfo.JArrayType;
 import com.google.gwt.core.ext.typeinfo.JTypeParameter;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.meta.MetaParameter;
 import org.jboss.errai.codegen.framework.meta.MetaType;
@@ -54,9 +56,10 @@ public class GWTMethod extends MetaMethod {
     return method.getName();
   }
 
+
   @Override
   public MetaClass getReturnType() {
-    return GWTClass.newInstance(oracle, method.getReturnType());
+    return GWTUtil.eraseOrReturn(oracle, method.getReturnType());
   }
 
   @Override

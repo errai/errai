@@ -27,6 +27,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -182,7 +183,7 @@ public class MetaDataScanner extends Reflections {
     return ImmutableSet.copyOf(forNames(result));
   }
 
-  public Set<Class<?>> getTypesAnnotatedWith(Class<? extends Annotation> annotation, List<String> packages) {
+  public Set<Class<?>> getTypesAnnotatedWith(Class<? extends Annotation> annotation, Collection<String> packages) {
     Set<Class<?>> results = new HashSet<Class<?>>();
     for (Class<?> cls : getTypesAnnotatedWith(annotation)) {
       if (packages.contains(cls.getPackage().getName())) {
@@ -192,7 +193,7 @@ public class MetaDataScanner extends Reflections {
     return results;
   }
 
-  public Set<Method> getMethodsAnnotatedWith(Class<? extends Annotation> annotation, List<String> packages) {
+  public Set<Method> getMethodsAnnotatedWith(Class<? extends Annotation> annotation, Collection<String> packages) {
     Set<Method> results = new HashSet<Method>();
     for (Method method : getMethodsAnnotatedWith(annotation)) {
       if (packages.contains(method.getDeclaringClass().getPackage().getName())) {
@@ -202,7 +203,7 @@ public class MetaDataScanner extends Reflections {
     return results;
   }
 
-  public Set<Field> getFieldsAnnotatedWith(Class<? extends Annotation> annotation, List<String> packages) {
+  public Set<Field> getFieldsAnnotatedWith(Class<? extends Annotation> annotation, Collection<String> packages) {
     Set<Field> results = new HashSet<Field>();
     for (Field field : getFieldsAnnotatedWith(annotation)) {
       if (packages.contains(field.getDeclaringClass().getPackage().getName())) {

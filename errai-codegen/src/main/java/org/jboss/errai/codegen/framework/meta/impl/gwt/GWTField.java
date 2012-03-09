@@ -43,7 +43,7 @@ public class GWTField extends MetaField {
 
   @Override
   public MetaClass getType() {
-    return GWTClass.newInstance(oracle, field.getType());
+    return GWTUtil.eraseOrReturn(oracle, field.getType());
   }
 
   @Override

@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.ext.typeinfo.JRealClassType;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.impl.gwt.GWTClass;
@@ -214,8 +215,10 @@ public class MarshallersGenerator extends Generator {
 
       MetaClassFactory.emptyCache();
       if (typeOracle != null) {
+        Set<String> translatable = RebindUtils.findTranslatablePackages(context);
+
         for (JClassType type : typeOracle.getTypes()) {
-          if (type instanceof JRealClassType) continue;
+          if (!translatable.contains(type.getPackage().getName())) continue;
 
           if (type.isAnnotation() != null) {
             MetaClassFactory.pushCache(JavaReflectionClass
@@ -250,19 +253,15 @@ public class MarshallersGenerator extends Generator {
   private static final String sourceOutputTemp = RebindUtils.getTempDirectory() + "/errai.marshalling/gen/";
 
   private String _generate(GeneratorContext context) {
-    boolean junit = EnvironmentUtil.isGWTJUnitTest();
-
-    if (junit) {
-      log.info("*** running inside JUnit! ***");
-    }
+    boolean junitOrDevMode = EnvironmentUtil.isGWTJUnitTest() || EnvironmentUtil.isDevMode();
 
     if (SERVER_MARSHALLER_OUTPUT_ENABLED) {
       String serverSideClass = MarshallerGeneratorFactory.getFor(MarshallerOuputTarget.Java)
               .generate(SERVER_MARSHALLER_PACKAGE_NAME, SERVER_MARSHALLER_CLASS_NAME);
 
-      if (junit) {
+      if (junitOrDevMode) {
         String tmpLocation = new File(sourceOutputTemp).getAbsolutePath();
-        log.info("*** using temporary path for JUnit Shell: " + tmpLocation + " ***");
+        log.info("*** using temporary path: " + tmpLocation + " ***");
 
         String toLoad = generateServerMarshallers(tmpLocation, serverSideClass, tmpLocation);
 

@@ -108,7 +108,7 @@ public class IOCBootstrapGenerator {
   InjectorFactory injectFactory;
   IOCProcessorFactory procFactory;
 
-  private List<String> packages = null;
+  private Collection<String> packages = null;
   private boolean useReflectionStubs = false;
   private List<Runnable> deferredTasks = new ArrayList<Runnable>();
 
@@ -150,7 +150,7 @@ public class IOCBootstrapGenerator {
   public IOCBootstrapGenerator(TypeOracle typeOracle,
                                GeneratorContext context,
                                TreeLogger logger,
-                               List<String> packages) {
+                               Collection<String> packages) {
     this(typeOracle, context, logger);
     this.packages = packages;
   }
@@ -176,8 +176,13 @@ public class IOCBootstrapGenerator {
 
     MetaClassFactory.emptyCache();
     if (typeOracle != null) {
+      Set<String> translatable = RebindUtils.findTranslatablePackages(context);
+
       for (JClassType type : typeOracle.getTypes()) {
-        if (type instanceof JRealClassType) continue;
+        if (!translatable.contains(type.getPackage().getName())) continue;
+        ;
+
+//        if (type instanceof JRealClassType) continue;
 
         if (type.isAnnotation() != null) {
           MetaClassFactory.pushCache(JavaReflectionClass
@@ -196,7 +201,7 @@ public class IOCBootstrapGenerator {
 
     RebindUtils.writeStringToFile(cacheFile, gen);
 
-    log.info("using IOC bootstrapping code to: " + cacheFile.getAbsolutePath());
+    log.info("using IOC bootstrapping code at: " + cacheFile.getAbsolutePath());
 
     return gen;
   }

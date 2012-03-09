@@ -162,7 +162,14 @@ public class LoadClassReference extends AbstractCallElement {
             buf.append(getClassReferencesForParameterizedTypes(parameterizedTypeParemeter, context));
           }
           else {
-            buf.append(getClassReference(typeParameter, context));
+            // fix to a weirdness in the GWT deferred bining API;
+            String ref = getClassReference(typeParameter, context);
+            if ("Object".equals(ref)) {
+              //ignore;
+              return "";
+            }
+
+            buf.append(ref);
           }
 
           if (i + 1 < parameterizedType.getTypeParameters().length)

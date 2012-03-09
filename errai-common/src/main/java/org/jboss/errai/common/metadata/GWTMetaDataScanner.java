@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -37,17 +38,17 @@ public class GWTMetaDataScanner extends MetaDataScanner {
   }
 
   @Override
-  public Set<Field> getFieldsAnnotatedWith(Class<? extends Annotation> annotation, List<String> packages) {
+  public Set<Field> getFieldsAnnotatedWith(Class<? extends Annotation> annotation, Collection<String> packages) {
     return super.getFieldsAnnotatedWith(annotation, packages);
   }
 
   @Override
-  public Set<Method> getMethodsAnnotatedWith(Class<? extends Annotation> annotation, List<String> packages) {
+  public Set<Method> getMethodsAnnotatedWith(Class<? extends Annotation> annotation, Collection<String> packages) {
     return super.getMethodsAnnotatedWith(annotation, packages);
   }
 
   @Override
-  public Set<Class<?>> getTypesAnnotatedWith(Class<? extends Annotation> annotation, List<String> packages) {
+  public Set<Class<?>> getTypesAnnotatedWith(Class<? extends Annotation> annotation, Collection<String> packages) {
     return super.getTypesAnnotatedWith(annotation, packages);
   }
 

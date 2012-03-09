@@ -29,4 +29,12 @@ public abstract class EnvironmentUtil {
     return false;
   }
 
+  public static boolean isDevMode() {
+    for (StackTraceElement el : new Throwable().getStackTrace()) {
+      if (el.getClassName().contains("com.google.gwt.dev.shell.OophmSessionHandler")) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

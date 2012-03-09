@@ -42,7 +42,7 @@ public class GWTParameterizedType extends AbstractMetaParameterizedType {
   public MetaType[] getTypeParameters() {
     List<MetaType> types = new ArrayList<MetaType>();
     for (JClassType parm : parameterizedType.getTypeArgs()) {
-      types.add(GWTClass.newInstance(oracle, parm));
+      types.add(GWTUtil.eraseOrReturn(oracle, parm));
     }
     return types.toArray(new MetaType[types.size()]);
   }
@@ -61,7 +61,7 @@ public class GWTParameterizedType extends AbstractMetaParameterizedType {
     StringBuilder buf = new StringBuilder("<");
     JClassType[] parms = parameterizedType.getTypeArgs();
     for (int i = 0; i < parms.length; i++) {
-      buf.append(GWTClass.newInstance(oracle, parms[i]).getFullyQualifiedName());
+      buf.append(GWTUtil.eraseOrReturn(oracle, parms[i]).getFullyQualifiedName());
       if (i + 1 < parms.length) buf.append(',');
     }
     return buf.append('>').toString();

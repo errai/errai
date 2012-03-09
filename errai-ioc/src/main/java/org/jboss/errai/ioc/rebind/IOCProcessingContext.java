@@ -34,6 +34,7 @@ import org.jboss.errai.ioc.rebind.ioc.TypeDiscoveryListener;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -49,7 +50,7 @@ public class IOCProcessingContext {
 
   protected Stack<BlockBuilder<?>> blockBuilder;
 
-  protected List<String> packages;
+  protected Collection<String> packages;
   protected List<Statement> appendToEnd;
   
   protected List<Statement> staticInstantiationStatements;
@@ -162,11 +163,11 @@ public class IOCProcessingContext {
     return context;
   }
 
-  public void setPackages(List<String> packages) {
+  public void setPackages(Collection<String> packages) {
     this.packages = packages;
   }
 
-  public List<String> getPackages() {
+  public Collection<String> getPackages() {
     return packages;
   }
 

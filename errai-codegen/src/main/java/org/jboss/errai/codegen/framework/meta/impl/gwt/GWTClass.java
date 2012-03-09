@@ -66,6 +66,10 @@ public class GWTClass extends AbstractMetaClass<JType> {
   protected GWTClass(TypeOracle oracle, JType classType, boolean erased) {
     super(classType);
     this.oracle = oracle;
+    if (getName().equals("T extends Object")) {
+      System.out.println("WTF");
+    }
+    
     JParameterizedType parameterizedType = classType.isParameterized();
     if (!erased) {
       if (parameterizedType != null) {
@@ -75,14 +79,14 @@ public class GWTClass extends AbstractMetaClass<JType> {
   }
 
   public static MetaClass newInstance(TypeOracle oracle, JType type) {
-    if (type instanceof JRealClassType) {
-      try {
-        return MetaClassFactory.get(type.getQualifiedBinaryName());
-      }
-      catch (Throwable t) {
-        // fall-through;
-      }
-    }
+//    if (type instanceof JRealClassType) {
+//      try {
+//        return MetaClassFactory.get(type.getQualifiedBinaryName());
+//      }
+//      catch (Throwable t) {
+//        // fall-through;
+//      }
+//    }
 
     return newUncachedInstance(oracle, type);
   }
@@ -97,27 +101,27 @@ public class GWTClass extends AbstractMetaClass<JType> {
   }
 
   public static MetaClass newUncachedInstance(TypeOracle oracle, JType type) {
-    if (type instanceof JRealClassType) {
-      try {
-        return JavaReflectionClass.newUncachedInstance(MetaClassFactory.loadClass(type.getQualifiedBinaryName()));
-      }
-      catch (Throwable t) {
-        // fall-through;
-      }
-    }
+//    if (type instanceof JRealClassType) {
+//      try {
+//        return JavaReflectionClass.newUncachedInstance(MetaClassFactory.loadClass(type.getQualifiedBinaryName()));
+//      }
+//      catch (Throwable t) {
+//        // fall-through;
+//      }
+//    }
 
     return new GWTClass(oracle, type, false);
   }
 
   public static MetaClass newUncachedInstance(TypeOracle oracle, JType type, boolean erased) {
-    if (type instanceof JRealClassType) {
-      try {
-        return MetaClassFactory.get(type.getQualifiedBinaryName(), erased);
-      }
-      catch (Throwable t) {
-        // fall-through
-      }
-    }
+//    if (type instanceof JRealClassType) {
+//      try {
+//        return MetaClassFactory.get(type.getQualifiedBinaryName(), erased);
+//      }
+//      catch (Throwable t) {
+//        // fall-through
+//      }
+//    }
 
     return new GWTClass(oracle, type, erased);
   }
@@ -240,15 +244,19 @@ public class GWTClass extends AbstractMetaClass<JType> {
       return null;
     }
 
-    for (JMethod jMethod : getEnclosedMetaObject().isClassOrInterface().getMethods()) {
-      if (!jMethod.isPrivate()) {
-        meths.add(new GWTMethod(oracle, jMethod));
+
+    do {
+      for (JMethod jMethod : type.getMethods()) {
+        if (!jMethod.isPrivate()) {
+          meths.add(new GWTMethod(oracle, jMethod));
+        }
+      }
+
+      for (JClassType iface : type.getImplementedInterfaces()) {
+        meths.addAll(Arrays.asList(GWTClass.newInstance(oracle, iface).getMethods()));
       }
     }
-
-    for (JClassType iface : type.getImplementedInterfaces()) {
-      meths.addAll(Arrays.asList(GWTClass.newInstance(oracle, iface).getMethods()));
-    }
+    while ((type = type.getSuperclass()) != null);
 
     return meths.toArray(new MetaMethod[meths.size()]);
   }
