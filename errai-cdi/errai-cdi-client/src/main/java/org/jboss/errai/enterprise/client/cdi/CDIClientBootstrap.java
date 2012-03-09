@@ -62,7 +62,6 @@ public class CDIClientBootstrap implements EntryPoint {
               @Override
               public void run() {
                 CDI.activate();
-                InitVotes.voteFor(CDI.class);
               }
             });
             break;

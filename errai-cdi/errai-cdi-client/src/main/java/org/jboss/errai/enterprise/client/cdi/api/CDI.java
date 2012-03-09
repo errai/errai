@@ -17,6 +17,7 @@ package org.jboss.errai.enterprise.client.cdi.api;
 
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 
@@ -162,6 +163,8 @@ public class CDI {
         r.run();
       }
 
+      InitVotes.voteFor(CDI.class);
+
       deferredEvents = null;
     }
   }
@@ -175,5 +178,4 @@ public class CDI {
       this.annotations = annotations;
     }
   }
-
 }

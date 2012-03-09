@@ -124,9 +124,9 @@ public final class InitVotes {
 
   private static void voteFor(String topic) {
     synchronized (lock) {
-      log("vote For: " + topic);
-
-      waitForSet.remove(topic);
+      if (waitForSet.remove(topic)) {
+        log("vote For: " + topic);
+      }
 
       if (!waitForSet.isEmpty())
         log("  still waiting for -> " + waitForSet);
