@@ -20,6 +20,7 @@ package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.JRealClassType;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.rebind.SourceWriter;
@@ -172,10 +173,12 @@ public class IOCBootstrapGenerator {
     annos.add(Default.class);
 
     String gen;
-    MetaClassFactory.emptyCache();
 
+    MetaClassFactory.emptyCache();
     if (typeOracle != null) {
       for (JClassType type : typeOracle.getTypes()) {
+        if (type instanceof JRealClassType) continue;
+
         if (type.isAnnotation() != null) {
           MetaClassFactory.pushCache(JavaReflectionClass
                   .newUncachedInstance(MetaClassFactory.loadClass(type.getQualifiedBinaryName())));

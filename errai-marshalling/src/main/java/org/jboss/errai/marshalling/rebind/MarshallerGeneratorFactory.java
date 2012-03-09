@@ -16,6 +16,7 @@
 
 package org.jboss.errai.marshalling.rebind;
 
+import com.google.gwt.core.ext.typeinfo.JClassType;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Parameter;
 import org.jboss.errai.codegen.framework.Statement;
@@ -26,6 +27,8 @@ import org.jboss.errai.codegen.framework.builder.ConstructorBlockBuilder;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
+import org.jboss.errai.codegen.framework.meta.impl.gwt.GWTClass;
+import org.jboss.errai.codegen.framework.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.codegen.framework.util.Bool;
 import org.jboss.errai.codegen.framework.util.GenUtil;
 import org.jboss.errai.codegen.framework.util.Stmt;
@@ -95,8 +98,8 @@ public class MarshallerGeneratorFactory {
     annos.add(Portable.class);
 
     String gen;
-    if (RebindUtils.hasClasspathChangedForAnnotatedWith(annos) || !cacheFile.exists()) {
-      MetaClassFactory.emptyCache();
+
+//    if (RebindUtils.hasClasspathChangedForAnnotatedWith(annos) || !cacheFile.exists()) {
 
       log.info("generating marshalling class...");
       long st = System.currentTimeMillis();
@@ -108,11 +111,11 @@ public class MarshallerGeneratorFactory {
       }
 
       RebindUtils.writeStringToFile(cacheFile, gen);
-    }
-    else {
-      gen = RebindUtils.readFileToString(cacheFile);
-      log.info("nothing has changed. using cached marshaller factory class.");
-    }
+//    }
+//    else {
+//      gen = RebindUtils.readFileToString(cacheFile);
+//      log.info("nothing has changed. using cached marshaller factory class.");
+//    }
 
     return gen;
   }

@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -437,7 +438,7 @@ public final class MetaClassFactory {
   }
 
 
-  private static Map<String, Class<?>> PRIMITIVE_LOOKUP = new HashMap<String, Class<?>>() {
+  public static Map<String, Class<?>> PRIMITIVE_LOOKUP = Collections.unmodifiableMap(new HashMap<String, Class<?>>() {
     {
       put("void", void.class);
       put("boolean", boolean.class);
@@ -449,7 +450,8 @@ public final class MetaClassFactory {
       put("byte", byte.class);
       put("char", char.class);
     }
-  };
+  });
+
 
   public static Class<?> loadClass(String fullyQualifiedName) {
     try {

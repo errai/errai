@@ -245,8 +245,12 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   private MetaMethod getBestMatchingMethod(GetMethodsCallback methodsCallback, String name, MetaClass... parameters) {
-    return GenUtil.getBestCandidate(parameters, name, this, methodsCallback.getMethods(), false);
-
+    MetaMethod meth =  GenUtil.getBestCandidate(parameters, name, this, methodsCallback.getMethods(), false);
+    if (meth == null) {
+      meth =  GenUtil.getBestCandidate(parameters, name, this, methodsCallback.getMethods(), false);
+    }
+    return meth;
+    
 
 //
 //    if ((meth = subMap.get(parmKey)) == null) {
@@ -540,7 +544,11 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       return _asClassCache;
     }
 
-    Class<?> cls = NullType.class;
+    
+    Class<?> cls = MetaClassFactory.PRIMITIVE_LOOKUP.get(getFullyQualifiedName());
+    if (cls == null) {
+      cls = NullType.class;
+    }
 
     if (enclosedMetaObject instanceof Class) {
       cls = (Class<?>) enclosedMetaObject;

@@ -25,6 +25,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gwt.core.ext.typeinfo.JRealClassType;
+import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
+import org.jboss.errai.codegen.framework.meta.impl.gwt.GWTClass;
+import org.jboss.errai.codegen.framework.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.rebind.ClassListReader;
 import org.jboss.errai.common.rebind.EnvironmentUtil;
@@ -208,6 +212,21 @@ public class MarshallersGenerator extends Generator {
 
       logger.log(TreeLogger.INFO, "Generating Marshallers Bootstrapper...");
 
+      MetaClassFactory.emptyCache();
+      if (typeOracle != null) {
+        for (JClassType type : typeOracle.getTypes()) {
+          if (type instanceof JRealClassType) continue;
+
+          if (type.isAnnotation() != null) {
+            MetaClassFactory.pushCache(JavaReflectionClass
+                    .newUncachedInstance(MetaClassFactory.loadClass(type.getQualifiedBinaryName())));
+          }
+          else {
+            MetaClassFactory.pushCache(GWTClass.newInstance(typeOracle, type));
+          }
+        }
+      }
+
       // Generate class source code
       generateMarshallerBootstrapper(logger, context);
     }
@@ -227,7 +246,7 @@ public class MarshallersGenerator extends Generator {
     printWriter.write(_generate(context));
     context.commit(logger, printWriter);
   }
-  
+
   private static final String sourceOutputTemp = RebindUtils.getTempDirectory() + "/errai.marshalling/gen/";
 
   private String _generate(GeneratorContext context) {
@@ -337,7 +356,7 @@ public class MarshallersGenerator extends Generator {
   private String generateServerMarshallers(String sourceDir, String serverSideClass, String outputPath) {
     File outputDir = new File(sourceDir + File.separator +
             RebindUtils.packageNameToDirName(SERVER_MARSHALLER_PACKAGE_NAME) + File.separator);
-    
+
     File classOutputPath = new File(outputPath);
 
     outputDir.mkdirs();
@@ -346,7 +365,7 @@ public class MarshallersGenerator extends Generator {
 
     RebindUtils.writeStringToFile(sourceFile, serverSideClass);
 
-    ServerMarshallUtil.compileClass(outputDir.getAbsolutePath(), 
+    ServerMarshallUtil.compileClass(outputDir.getAbsolutePath(),
             SERVER_MARSHALLER_PACKAGE_NAME,
             SERVER_MARSHALLER_CLASS_NAME,
             classOutputPath.getAbsolutePath());

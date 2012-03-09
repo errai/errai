@@ -35,6 +35,7 @@ import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 import org.jboss.errai.marshalling.server.marshallers.DefaultArrayMarshaller;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -194,8 +195,11 @@ public class DefaultJavaDefinitionMapper {
                 || field.isTransient() || field.isStatic()) {
           continue;
         }
-
-        field.asField().setAccessible(true);
+        
+        Field fld = field.asField();
+        if (fld != null) {
+          fld.setAccessible(true);
+        }
 
         if (writeKeys.contains(field.getName()) && readKeys.contains(field.getName())) {
           continue;

@@ -38,7 +38,7 @@ public abstract class MetaField implements HasAnnotations, MetaClassMember {
   }
 
   public Field asField() {
-     throw new UnsupportedOperationException();
+     return null;
   }
 
   public static class ArrayLengthMetaField extends MetaField {

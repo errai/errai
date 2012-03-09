@@ -49,34 +49,7 @@ public class GWTParameter implements MetaParameter {
     this.parameter = parameter;
     this.declaredBy = declaredBy;
     this.oracle = oracle;
-
-    try {
-      Class<?> cls = Class.forName(parameter.getEnclosingMethod().getEnclosingType().getQualifiedSourceName(),
-              false, Thread.currentThread().getContextClassLoader());
-
-      JAbstractMethod jMethod = parameter.getEnclosingMethod();
-
-      int index = -1;
-      for (int i = 0; i < jMethod.getParameters().length; i++) {
-        if (jMethod.getParameters()[i].getName().equals(parameter.getName())) {
-          index = i;
-        }
-      }
-
-      Constructor c = null;
-      try {
-        c = cls.getConstructor(GWTClass.jParmToClass(jMethod.getParameters()));
-      }
-      catch (NoSuchMethodException e) {
-        throw new RuntimeException(e);
-      }
-
-      annotations = c.getParameterAnnotations()[index];
-
-    }
-    catch (ClassNotFoundException e) {
-      e.printStackTrace();
-    }
+    this.annotations = parameter.getAnnotations();
   }
 
   @Override

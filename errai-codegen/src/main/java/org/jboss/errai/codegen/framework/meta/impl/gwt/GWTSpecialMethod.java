@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ *  
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,63 +16,64 @@
 
 package org.jboss.errai.codegen.framework.meta.impl.gwt;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
-
-import com.google.gwt.core.ext.typeinfo.JTypeParameter;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import org.jboss.errai.codegen.framework.DefModifiers;
+import org.jboss.errai.codegen.framework.Modifier;
+import org.jboss.errai.codegen.framework.builder.impl.Scope;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.meta.MetaParameter;
 import org.jboss.errai.codegen.framework.meta.MetaType;
 import org.jboss.errai.codegen.framework.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.framework.util.GenUtil;
 
-import com.google.gwt.core.ext.typeinfo.JGenericType;
-import com.google.gwt.core.ext.typeinfo.JMethod;
-import com.google.gwt.core.ext.typeinfo.JParameter;
-import com.google.gwt.core.ext.typeinfo.JType;
+import java.lang.annotation.Annotation;
 
 /**
- * @author Mike Brock <cbrock@redhat.com>
+ * @author Mike Brock
  */
-public class GWTMethod extends MetaMethod {
-  private JMethod method;
-  private Annotation[] annotations;
-  private TypeOracle oracle;
+public class GWTSpecialMethod extends MetaMethod {
+  private DefModifiers modifiers;
+  private Scope scope;
+  private GWTClass declaringClass;
+  private MetaClass returnType;
+  private String methodName;
+  private MetaParameter[] parameters;
 
-  GWTMethod(TypeOracle oracle, JMethod method) {
-    this.method = method;
-    annotations = method.getAnnotations();
-    this.oracle = oracle;
+  GWTSpecialMethod(GWTClass declaringClass, DefModifiers modifiers, Scope scope,
+                   Class returnType, String methodName, MetaParameter... parameters) {
+    this(declaringClass, modifiers, scope, MetaClassFactory.get(returnType), methodName, parameters);
+  }
 
+  GWTSpecialMethod(GWTClass declaringClass, DefModifiers modifiers, Scope scope,
+                   MetaClass returnType, String methodName, MetaParameter... parameters) {
+    this.declaringClass = declaringClass;
+    this.modifiers = modifiers;
+    this.scope = scope;
+    this.returnType = returnType;
+    this.methodName = methodName;
+    this.parameters = parameters;
   }
 
   @Override
   public String getName() {
-    return method.getName();
+    return methodName;
   }
 
   @Override
   public MetaClass getReturnType() {
-    return GWTClass.newInstance(oracle, method.getReturnType());
+    return returnType;
   }
 
   @Override
   public MetaParameter[] getParameters() {
-    List<MetaParameter> parameterList = new ArrayList<MetaParameter>();
-
-    for (JParameter jParameter : method.getParameters()) {
-      parameterList.add(new GWTParameter(oracle, jParameter, this));
-    }
-
-    return parameterList.toArray(new MetaParameter[parameterList.size()]);
+    return parameters;
   }
 
   @Override
   public Annotation[] getAnnotations() {
-    return annotations == null ? new Annotation[0] : annotations;
+    return new Annotation[0];
   }
 
   @Override
@@ -90,61 +91,53 @@ public class GWTMethod extends MetaMethod {
 
   @Override
   public MetaClass getDeclaringClass() {
-    return GWTClass.newInstance(oracle, method.getEnclosingType());
+    return declaringClass;
   }
 
   @Override
   public MetaType getGenericReturnType() {
-    JTypeParameter type = method.getReturnType().isTypeParameter();
-    if (type != null) {
-      return new GWTTypeVariable(oracle, type);
-    }
     return null;
   }
 
   @Override
   public MetaType[] getGenericParameterTypes() {
-    List<MetaType> typeList = new ArrayList<MetaType>();
-    for (JParameter parm : method.getParameters()) {
-      typeList.add(GWTUtil.fromType(oracle, parm.getType()));
-    }
-
-    return typeList.toArray(new MetaType[typeList.size()]);
+    return new MetaType[0];
   }
 
   @Override
   public MetaClass[] getCheckedExceptions() {
-    return GWTClass.fromClassArray(oracle, method.getThrows());
+    return new MetaClass[0];
   }
 
   @Override
   public boolean isAbstract() {
-    return method.isAbstract();
+    return modifiers.hasModifier(Modifier.Abstract);
   }
 
   @Override
   public boolean isPublic() {
-    return method.isPublic();
+    return scope == Scope.Public;
   }
 
   @Override
   public boolean isPrivate() {
-    return method.isPrivate();
+    return scope == Scope.Private;
   }
 
   @Override
   public boolean isProtected() {
-    return method.isProtected();
+    return scope == Scope.Protected;
   }
 
   @Override
   public boolean isFinal() {
-    return method.isFinal();
+    return modifiers.hasModifier(Modifier.Final);
   }
 
   @Override
   public boolean isStatic() {
-    return method.isStatic();
+    return modifiers.hasModifier(Modifier.Static);
+
   }
 
   @Override
@@ -169,12 +162,12 @@ public class GWTMethod extends MetaMethod {
 
   @Override
   public boolean isVarArgs() {
-    return method.isVarArgs();
+    return false;
   }
 
   @Override
   public MetaTypeVariable[] getTypeParameters() {
-    return GWTUtil.fromTypeVariable(oracle, method.getTypeParameters());
+    return new MetaTypeVariable[0];
   }
 
   @Override
@@ -182,10 +175,4 @@ public class GWTMethod extends MetaMethod {
     return o instanceof MetaMethod && GenUtil.equals(this, (MetaMethod) o);
   }
 
-  @Override
-  public String toString() {
-    return "GWTMethod{" +
-            "method=" + method +
-            '}';
-  }
 }

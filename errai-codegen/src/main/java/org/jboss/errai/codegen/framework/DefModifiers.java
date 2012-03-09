@@ -34,6 +34,13 @@ public class DefModifiers implements Builder {
   public DefModifiers(Modifier... modifiers) {
     addModifiers(modifiers);
   }
+  
+  public static DefModifiers of(Modifier... modifiers) {
+    DefModifiers m = new DefModifiers();
+    m.addModifiers(modifiers);
+    return m;
+  }
+  
 
   public static DefModifiers none() {
     return new DefModifiers();
