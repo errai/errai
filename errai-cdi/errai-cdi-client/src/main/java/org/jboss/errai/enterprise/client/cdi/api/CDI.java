@@ -163,10 +163,10 @@ public class CDI {
         r.run();
       }
 
-      InitVotes.voteFor(CDI.class);
 
       deferredEvents = null;
     }
+    InitVotes.voteFor(CDI.class);
   }
 
   static class DeferredEvent {
