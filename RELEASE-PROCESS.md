@@ -94,16 +94,11 @@ Release Steps
    * sftp> mkdir x.y.z.Final
 
    * % scp errai-x.y.z-Final.zip errai@filemgmt.jboss.org:/downloads_htdocs/errai/dist/x.y.z.Final/
-   * % scp errai-cdi-x.y.z-Final.zip errai@filemgmt.jboss.org:/downloads_htdocs/errai/dist/x.y.z.Final/
 
    * Errai docs:
-   * % scp -rp . errai@filemgmt.jboss.org:/doc_htdocs/errai/x.y.z.Final/errai/reference
-   * % scp -rp . errai@filemgmt.jboss.org:/doc_htdocs/errai/x.y.z.Final/errai/quickstart
+   * % scp -rp . errai@filemgmt.jboss.org:/docs_htdocs/errai/x.y.z.Final/errai/reference
+   * % scp -rp . errai@filemgmt.jboss.org:/docs_htdocs/errai/x.y.z.Final/errai/quickstart
    * Download author directory of previous release and upload it to both /reference/html/author and /reference/html_single/author
-
-   * Errai-CDI docs:
-   * % scp -rp . errai@filemgmt.jboss.org:/doc_htdocs/errai/x.y.z.Final/errai-cdi/reference
-   * % scp -rp . errai@filemgmt.jboss.org:/doc_htdocs/errai/x.y.z.Final/errai-cdi/quickstart
 
    * rename PDFs to Errai[_CDI]_x.y.z.Final_[Reference][Quickstart]_Guide.pdf
 
@@ -119,7 +114,7 @@ Release Steps
 
 1. Tweet about the release!
 
-1. reset all versions of Errai and Errai-CDI to x.y.z+1-SNAPSHOT, commit and push to upstream
+1. reset all versions to x.y.z+1-SNAPSHOT, commit and push to upstream
 
 === You're done! Congrats! You deserve beer! ===
 
