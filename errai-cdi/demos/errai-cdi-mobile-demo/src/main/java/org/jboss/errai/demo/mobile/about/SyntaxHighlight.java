@@ -19,7 +19,16 @@ public class SyntaxHighlight {
   private final File targetBaseDir;
 
   public static void main(String[] args) throws IOException, InvocationTargetException, CompileException {
-     new SyntaxHighlight(new File(args[0]), new File(args[1])).run();
+    if (args.length != 2) {
+      throw new IllegalArgumentException("SyntaxHighlight requires exactly two arguments: source directory and target directory");
+    }
+    if (args[0] == null) {
+      throw new IllegalArgumentException("Null source directory argument not allowed");
+    }
+    if (args[1] == null) {
+      throw new IllegalArgumentException("Null target directory argument not allowed");
+    }
+    new SyntaxHighlight(new File(args[0]), new File(args[1])).run();
   }
 
   public SyntaxHighlight(File sourceBaseDir, File targetBaseDir) {
