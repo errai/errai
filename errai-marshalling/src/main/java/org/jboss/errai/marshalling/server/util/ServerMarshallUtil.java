@@ -27,7 +27,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
@@ -207,12 +206,14 @@ public abstract class ServerMarshallUtil {
         List<URL> configUrls = MetaDataScanner.getConfigUrls();
         List<File> classpathElements = new ArrayList<File>(configUrls.size());
 
+        log.debug(">>> Searching for all jars by " + MetaDataScanner.ERRAI_CONFIG_STUB_NAME);
         for (URL url : configUrls) {
           File file = getFileIfExists(url.getFile());
           if (file != null) {
             classpathElements.add(file);
           }
         }
+        log.debug("<<< Done searching for all jars by " + MetaDataScanner.ERRAI_CONFIG_STUB_NAME);
 
         for (File file : classpathElements)
           sb.append(file.getAbsolutePath()).append(File.pathSeparator);
@@ -394,6 +395,7 @@ public abstract class ServerMarshallUtil {
   private static String findAllJarsByManifest() {
     StringBuilder cp = new StringBuilder();
     try {
+      log.debug(">>> Searching for all jars by " + JarFile.MANIFEST_NAME);
       Enumeration[] enumers = new Enumeration[]
               {
                       Thread.currentThread().getContextClassLoader().getResources(JarFile.MANIFEST_NAME),
@@ -423,13 +425,15 @@ public abstract class ServerMarshallUtil {
     catch (IOException e1) {
       // Silently ignore wrong manifests on classpath?
       log.info("Failed to build classpath using manifest discovery. Expect compile failures...", e1);
+    } finally {
+      log.debug("<<< Done searching for all jars by " + JarFile.MANIFEST_NAME);
     }
 
     return cp.toString();
   }
 
   private static File getFileIfExists(String path) {
-    //   String path = url.getFile();
+    final String originalPath = path;
 
     if (path.startsWith("file:")) {
       path = path.substring(5);
@@ -450,7 +454,14 @@ public abstract class ServerMarshallUtil {
 
     File file = new File(path);
     if (file.exists()) {
+      if (log.isDebugEnabled()) {
+        log.debug("   EXISTS: " + originalPath + " -> " + file.getAbsolutePath());
+      }
       return file;
+    }
+
+    if (log.isDebugEnabled()) {
+      log.debug("  !EXISTS: " + originalPath + " -> " + file.getAbsolutePath());
     }
     return null;
   }
