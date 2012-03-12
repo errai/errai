@@ -19,6 +19,7 @@ package org.jboss.errai.ioc.rebind.ioc.exception;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaField;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
+import org.jboss.errai.codegen.framework.meta.MetaParameter;
 
 import java.util.List;
 
@@ -38,6 +39,13 @@ public class UnsatisfiedDependenciesException extends RuntimeException {
     return new UnsatisfiedDependenciesException(unsatisfiedDependencies1);
   }
 
+  public static UnsatisfiedDependenciesException createWithSingleParameterFailure(MetaParameter parm, MetaClass enclosingType,
+                                                                                MetaClass injectedType, String message) {
+      UnsatisfiedDependencies unsatisfiedDependencies1 = new UnsatisfiedDependencies();
+      UnsatisfiedDependency dependency = new UnsatisfiedParameter(parm, enclosingType, injectedType, message);
+      unsatisfiedDependencies1.addUnsatisfiedDependency(dependency);
+      return new UnsatisfiedDependenciesException(unsatisfiedDependencies1);
+    }
   public static UnsatisfiedDependenciesException createWithSingleMethodFailure(MetaMethod method, MetaClass enclosingType,
                                                                                 MetaClass injectedType, String message) {
       UnsatisfiedDependencies unsatisfiedDependencies1 = new UnsatisfiedDependencies();

@@ -16,26 +16,26 @@
 
 package org.jboss.errai.enterprise.rebind;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.JConstructor;
 import com.google.gwt.core.ext.typeinfo.JPackage;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.impl.gwt.GWTClass;
-import org.jboss.errai.common.metadata.MetaDataScanner;
-import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.api.IOCExtension;
-import org.jboss.errai.ioc.rebind.AnnotationHandler;
 import org.jboss.errai.ioc.rebind.DependencyControl;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.IOCProcessorFactory;
 import org.jboss.errai.ioc.rebind.JSR330AnnotationHandler;
-import org.jboss.errai.ioc.rebind.JSR330ProvidedClassAnnotationHandler;
 import org.jboss.errai.ioc.rebind.Rule;
 import org.jboss.errai.ioc.rebind.SortUnit;
-import org.jboss.errai.ioc.rebind.ioc.*;
+import org.jboss.errai.ioc.rebind.ioc.IOCExtensionConfigurator;
+import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
+import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
+import org.jboss.errai.ioc.rebind.ioc.Injector;
+import org.jboss.errai.ioc.rebind.ioc.InjectorFactory;
+import org.jboss.errai.ioc.rebind.ioc.TypeInjector;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
@@ -46,8 +46,6 @@ import javax.inject.Scope;
 import javax.inject.Singleton;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @IOCExtension

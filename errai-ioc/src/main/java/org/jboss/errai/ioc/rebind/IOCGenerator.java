@@ -19,6 +19,7 @@ package org.jboss.errai.ioc.rebind;
 import java.io.PrintWriter;
 
 import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.common.rebind.EnvUtil;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCBootstrapGenerator;
 
 import com.google.gwt.core.ext.Generator;
@@ -40,6 +41,7 @@ public class IOCGenerator extends Generator {
   private TypeOracle typeOracle;
 
   public static final boolean isDebugCompile = Boolean.getBoolean("errai.ioc.debug");
+  public static final boolean isTestMode = EnvUtil.isJUnitTest();
 
   public IOCGenerator() {
   }

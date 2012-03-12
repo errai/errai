@@ -13,7 +13,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.net.URL;
 import java.security.MessageDigest;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,12 +23,10 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.jboss.errai.common.rebind.EnvironmentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.typeinfo.JPackage;
 import com.google.gwt.dev.cfg.ModuleDef;
 import com.google.gwt.dev.javac.StandardGeneratorContext;

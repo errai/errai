@@ -26,6 +26,7 @@ public abstract class Injector {
   protected QualifyingMetadata qualifyingMetadata;
   protected MetaParameterizedType qualifyingTypeInformation;
   protected String postInitCallbackVar = null;
+  protected boolean alternative;
 
   public abstract Statement instantiateOnly(InjectionContext injectContext, InjectableInstance injectableInstance);
 
@@ -43,7 +44,12 @@ public abstract class Injector {
   public abstract String getVarName();
 
   public abstract MetaClass getInjectedType();
-  
+
+  public boolean isAlternative() {
+    return alternative;
+  }
+
+
   public String getPostInitCallbackVar() {
     return postInitCallbackVar;
   }

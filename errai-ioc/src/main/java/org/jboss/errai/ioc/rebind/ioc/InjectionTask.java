@@ -16,17 +16,8 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
-import static org.jboss.errai.codegen.framework.util.GenUtil.getPrivateFieldInjectorName;
-import static org.jboss.errai.codegen.framework.util.GenUtil.getPrivateMethodName;
-import static org.jboss.errai.ioc.rebind.ioc.InjectUtil.resolveInjectionDependencies;
-
-import java.lang.annotation.Annotation;
-
-import org.jboss.errai.codegen.framework.InnerClass;
-import org.jboss.errai.codegen.framework.ProxyMaker;
-import org.jboss.errai.codegen.framework.exception.UnproxyableClassException;
-import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.exception.UnproxyableClassException;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaConstructor;
 import org.jboss.errai.codegen.framework.meta.MetaField;
@@ -34,8 +25,14 @@ import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.meta.MetaParameter;
 import org.jboss.errai.codegen.framework.util.Refs;
 import org.jboss.errai.codegen.framework.util.Stmt;
+import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependenciesException;
-import org.slf4j.impl.StaticMarkerBinder;
+
+import java.lang.annotation.Annotation;
+
+import static org.jboss.errai.codegen.framework.util.GenUtil.getPrivateFieldInjectorName;
+import static org.jboss.errai.codegen.framework.util.GenUtil.getPrivateMethodName;
+import static org.jboss.errai.ioc.rebind.ioc.InjectUtil.resolveInjectionDependencies;
 
 public class InjectionTask {
   protected final TaskType taskType;
@@ -91,8 +88,19 @@ public class InjectionTask {
         try {
           val = getInjectorOrProxy(ctx, field.getType(), qualifyingMetadata);
         }
+        catch (InjectionFailure e) {
+          throw UnsatisfiedDependenciesException.createWithSingleFieldFailure(field, field.getDeclaringClass(),
+                  field.getType(), e.getMessage());
+        }
         catch (UnproxyableClassException e) {
-          return false;
+          String err = "your object graph has cyclical dependencies and the cycle could not be proxied. use of the @Dependent scope and @New qualifier may not " +
+                  "produce properly initalized objects for: " + getInjector().getInjectedType().getFullyQualifiedName() + "\n" +
+                  "\t Offending node: " + toString() + "\n" +
+                  "\t Note          : this issue can be resolved by making "
+                  + getInjector().getInjectedType().getFullyQualifiedName() + " proxyable. Introduce a default no-arg constructor and make sure the class is non-final.";
+
+          throw UnsatisfiedDependenciesException.createWithSingleFieldFailure(field, field.getDeclaringClass(),
+                  field.getType(), err);
         }
 
         processingContext.append(

@@ -20,7 +20,6 @@ package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.JRealClassType;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.rebind.SourceWriter;
@@ -56,6 +55,7 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.api.GeneratedBy;
 import org.jboss.errai.ioc.client.api.IOCBootstrapTask;
 import org.jboss.errai.ioc.client.api.IOCProvider;
+import org.jboss.errai.ioc.client.api.TestMock;
 import org.jboss.errai.ioc.client.api.TaskOrder;
 import org.jboss.errai.ioc.client.api.ToPanel;
 import org.jboss.errai.ioc.client.api.ToRootPanel;
@@ -118,6 +118,7 @@ public class IOCBootstrapGenerator {
   private Logger log = LoggerFactory.getLogger(IOCBootstrapGenerator.class);
 
   public static final String QUALIFYING_METADATA_FACTORY_PROPERTY = "errai.ioc.QualifyingMetaDataFactory";
+  public static final String ENABLED_ALTERNATIVES_PROPERTY = "errai.ioc.enabled.alternatives";
 
   TreeLogger logger = new TreeLogger() {
     @Override
@@ -182,9 +183,6 @@ public class IOCBootstrapGenerator {
 
       for (JClassType type : typeOracle.getTypes()) {
         if (!translatable.contains(type.getPackage().getName())) continue;
-
-//        if (type instanceof JRealClassType) continue;
-
         if (type.isAnnotation() != null) {
           MetaClassFactory.pushCache(JavaReflectionClass
                   .newUncachedInstance(MetaClassFactory.loadClass(type.getQualifiedBinaryName())));
@@ -225,6 +223,8 @@ public class IOCBootstrapGenerator {
 
     MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
     Properties props = scanner.getProperties("ErraiApp.properties");
+
+
     if (props != null) {
       logger.log(TreeLogger.Type.INFO, "Checking ErraiApp.properties for configured types ...");
 
@@ -248,6 +248,12 @@ public class IOCBootstrapGenerator {
           }
           catch (IllegalAccessException e) {
             e.printStackTrace();
+          }
+        }
+        else if (key.equals(ENABLED_ALTERNATIVES_PROPERTY)) {
+          String[] alternatives = String.valueOf(props.get(ENABLED_ALTERNATIVES_PROPERTY)).split("\\s");
+          for (String alternative : alternatives) {
+            injectFactory.getInjectionContext().addEnabledAlternative(alternative.trim());
           }
         }
       }
@@ -282,7 +288,6 @@ public class IOCBootstrapGenerator {
     MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
 
     procFactory.process(scanner, procContext);
-    // procFactory.processAll();
 
     runAllDeferred();
 
@@ -554,6 +559,14 @@ public class IOCBootstrapGenerator {
     procContext.addSingletonScopeAnnotation(Singleton.class);
     procContext.addSingletonScopeAnnotation(EntryPoint.class);
     procContext.addSingletonScopeAnnotation(Service.class);
+
+    procFactory.registerHandler(TestMock.class, new JSR330AnnotationHandler<TestMock>() {
+      @Override
+      public boolean handle(InjectableInstance instance, TestMock annotation, IOCProcessingContext context) {
+        injectFactory.getInjectionContext().addReplacementType(instance.getEnclosingType().getFullyQualifiedName());
+        return false;
+      }
+    });
 
     procFactory.registerHandler(Singleton.class, new JSR330AnnotationHandler<Singleton>() {
       @Override

@@ -30,6 +30,7 @@ import org.jboss.errai.ioc.client.container.CreationalCallback;
 import org.jboss.errai.ioc.client.container.CreationalContext;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 
+import javax.enterprise.inject.Alternative;
 import javax.enterprise.inject.New;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
@@ -58,6 +59,7 @@ public class TypeInjector extends Injector {
   public TypeInjector(MetaClass type, IOCProcessingContext context, Annotation[] additionalQualifiers) {
     this.type = type;
     this.singleton = context.isSingletonScope(type.getAnnotations());
+    this.alternative = type.isAnnotationPresent(Alternative.class);
     this.varName = InjectUtil.getNewVarName();
 
     try {
@@ -66,7 +68,6 @@ public class TypeInjector extends Injector {
       qualifiers.addAll(Arrays.asList(additionalQualifiers));
 
       if (!qualifiers.isEmpty()) {
-
         qualifyingMetadata = context.getQualifyingMetadataFactory().createFrom(qualifiers.toArray(new
                 Annotation[qualifiers.size()]));
 
@@ -254,5 +255,10 @@ public class TypeInjector extends Injector {
         }
       }
     }
+  }
+
+  @Override
+  public String toString() {
+    return type.getFullyQualifiedName() + " [qualifiers: " + qualifyingMetadata.toString() + "]";
   }
 }

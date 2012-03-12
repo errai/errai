@@ -117,4 +117,14 @@ public class QualifiedTypeInjectorDelegate extends Injector {
       }
     }
   }
+
+  @Override
+  public boolean isAlternative() {
+    return delegate.isAlternative();
+  }
+
+  @Override
+  public String toString() {
+    return delegate.toString();
+  }
 }

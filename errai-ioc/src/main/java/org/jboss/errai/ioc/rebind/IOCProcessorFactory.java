@@ -21,7 +21,8 @@ import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaField;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.common.metadata.MetaDataScanner;
-import org.jboss.errai.common.rebind.EnvironmentUtil;
+import org.jboss.errai.common.rebind.EnvUtil;
+import org.jboss.errai.ioc.client.api.TestMock;
 import org.jboss.errai.ioc.client.api.TestOnly;
 import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.InjectionFailure;
@@ -211,9 +212,12 @@ public class IOCProcessorFactory {
 
     dependencyControl.masqueradeAs(type);
 
-    if (type.isAnnotationPresent(TestOnly.class) && !EnvironmentUtil.isGWTJUnitTest()) {
-      return;
+    if (!IOCGenerator.isTestMode) {
+      if (type.isAnnotationPresent(TestOnly.class) || type.isAnnotationPresent(TestMock.class)) {
+        return;
+      }
     }
+
 
     ProcessingDelegate<MetaClass> del = new ProcessingDelegate<MetaClass>() {
       @Override

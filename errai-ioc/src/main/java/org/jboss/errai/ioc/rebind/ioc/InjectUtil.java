@@ -27,6 +27,7 @@ import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder;
+import org.jboss.errai.codegen.framework.exception.UnproxyableClassException;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaClassMember;
@@ -40,6 +41,7 @@ import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.ioc.client.container.InitializationCallback;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
+import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependenciesException;
 import org.mvel2.util.ReflectionUtil;
 import org.mvel2.util.StringAppender;
 import org.slf4j.Logger;
@@ -158,11 +160,11 @@ public class InjectUtil {
                                            List<InjectionTask> tasks) {
     for (InjectionTask task : tasks) {
       if (!task.doTask(ctx)) {
-        log.warn("your object graph has cyclical dependencies and the cycle could not be proxied. use of the @Dependent scope and @New qualifier may not " +
-                "produce properly initalized objects for: " + task.getInjector().getInjectedType().getFullyQualifiedName() + "\n" +
-                "\t Offending node: " + task + "\n" +
-                "\t Note          : this issue can be resolved by making "
-                + task.getInjector().getInjectedType().getFullyQualifiedName() + " proxyable. Introduce a default no-arg constructor and make sure the class is non-final.");
+//        log.warn("your object graph has cyclical dependencies and the cycle could not be proxied. use of the @Dependent scope and @New qualifier may not " +
+//                "produce properly initalized objects for: " + task.getInjector().getInjectedType().getFullyQualifiedName() + "\n" +
+//                "\t Offending node: " + task + "\n" +
+//                "\t Note          : this issue can be resolved by making "
+//                + task.getInjector().getInjectedType().getFullyQualifiedName() + " proxyable. Introduce a default no-arg constructor and make sure the class is non-final.");
 
 
         ctx.deferTask(task);
@@ -213,16 +215,8 @@ public class InjectUtil {
     pc.globalInsertBefore(Stmt.declareVariable(initializationCallbackType).asFinal().named(varName)
             .initializeWith(classStructureBuilder.finish()));
 
-
-//    if (pc.getProxyBuilder() != null) {
-//      // put this call inside the proxy resolver
-//      pc.getProxyBuilder().append(Stmt.loadVariable("context").invoke("addInitializationCallback",
-//              Refs.get(injector.getVarName()), Refs.get(varName)));
-//    }
-//    else {
-      pc.append(Stmt.loadVariable("context").invoke("addInitializationCallback",
-              Refs.get(injector.getVarName()), Refs.get(varName)));
-//    }
+    pc.append(Stmt.loadVariable("context").invoke("addInitializationCallback",
+            Refs.get(injector.getVarName()), Refs.get(varName)));
   }
 
   private static List<InjectionTask> scanForTasks(Injector injector, InjectionContext ctx, MetaClass type) {
@@ -428,6 +422,16 @@ public class InjectUtil {
       try {
         injector = getInjectorOrProxy(ctx, parmTypes[i],
                 ctx.getProcessingContext().getQualifyingMetadataFactory().createFrom(parms[i].getAnnotations()));
+      }
+      catch (UnproxyableClassException e) {
+        String err = "your object graph has cyclical dependencies and the cycle could not be proxied. use of the @Dependent scope and @New qualifier may not " +
+                "produce properly initalized objects for: " + parmTypes[i].getFullyQualifiedName() + "\n" +
+                "\t Offending node: " + constructor.getDeclaringClass().getFullyQualifiedName() + "\n" +
+                "\t Note          : this issue can be resolved by making "
+                + parmTypes[i].getFullyQualifiedName() + " proxyable. Introduce a default no-arg constructor and make sure the class is non-final.";
+
+        throw UnsatisfiedDependenciesException.createWithSingleParameterFailure(parms[i], constructor.getDeclaringClass(),
+               parms[i].getType(), err);
       }
       catch (InjectionFailure e) {
         e.setTarget(constructor.getDeclaringClass() + "." + DefParameters.from(constructor)

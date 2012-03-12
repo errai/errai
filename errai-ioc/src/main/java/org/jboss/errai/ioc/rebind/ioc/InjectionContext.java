@@ -16,6 +16,21 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
+import org.jboss.errai.codegen.framework.meta.MetaField;
+import org.jboss.errai.codegen.framework.meta.MetaMethod;
+import org.jboss.errai.codegen.framework.util.GenUtil;
+import org.jboss.errai.common.rebind.EnvUtil;
+import org.jboss.errai.ioc.rebind.IOCGenerator;
+import org.jboss.errai.ioc.rebind.IOCProcessingContext;
+import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependencies;
+import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependenciesException;
+import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedField;
+import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedMethod;
+
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
@@ -32,25 +47,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-import org.jboss.errai.codegen.framework.util.GenUtil;
-import org.jboss.errai.ioc.rebind.IOCProcessingContext;
-import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
-import org.jboss.errai.codegen.framework.meta.MetaField;
-import org.jboss.errai.codegen.framework.meta.MetaMethod;
-import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependencies;
-import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependenciesException;
-import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedField;
-import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedMethod;
-
 public class InjectionContext {
   private IOCProcessingContext processingContext;
 
   private Map<MetaClass, List<Injector>> injectors = new LinkedHashMap<MetaClass, List<Injector>>();
   private Multimap<MetaClass, Injector> proxiedInjectors = HashMultimap.create();
   private Multimap<MetaClass, MetaClass> cyclingTypes = HashMultimap.create();
+
+  private Set<String> enabledAlternatives = new HashSet<String>();
+  private Set<String> enabledReplacements = new HashSet<String>();
 
   private Map<Class<? extends Annotation>, List<IOCDecoratorExtension>> decorators = new LinkedHashMap<Class<? extends Annotation>, List<IOCDecoratorExtension>>();
   private Map<ElementType, Set<Class<? extends Annotation>>> decoratorsByElementType = new LinkedHashMap<ElementType, Set<Class<? extends Annotation>>>();
@@ -101,15 +106,19 @@ public class InjectionContext {
       metadata = processingContext.getQualifyingMetadataFactory().createDefaultMetadata();
     }
 
-    //todo: figure out why I was doing this.
     MetaClass erased = type.getErased();
     List<Injector> injs = injectors.get(erased);
     List<Injector> matching = new ArrayList<Injector>();
+
+    boolean alternativeBeans = true;
 
     if (injs != null) {
       for (Injector inj : injs) {
         if (inj.matches(type.getParameterizedType(), metadata)) {
           matching.add(inj);
+          if (alternativeBeans && !inj.isAlternative()) {
+            alternativeBeans = false;
+          }
         }
       }
     }
@@ -118,14 +127,46 @@ public class InjectionContext {
       throw new InjectionFailure(erased);
     }
     else if (matching.size() > 1) {
-      throw new InjectionFailure("ambiguous injection type (multiple injectors resolved): " + erased
-              .getFullyQualifiedName() + (metadata == null ? "" : metadata.toString()));
+      if (alternativeBeans) {
+        Iterator<Injector> matchIter = matching.iterator();
+        while (matchIter.hasNext()) {
+          if (!enabledAlternatives.contains(matchIter.next().getInjectedType().getFullyQualifiedName())) {
+            matchIter.remove();
+          }
+        }
+      }
+
+      if (IOCGenerator.isTestMode && !enabledReplacements.isEmpty()) {
+        for (Injector inj : matching) {
+          if (enabledReplacements.contains(inj.getInjectedType().getFullyQualifiedName())) {
+            return inj;
+          }
+        }
+      }
+
+      if (matching.isEmpty()) {
+        throw new InjectionFailure(erased);
+      }
+      else if (matching.size() == 1) {
+        return matching.get(0);
+      }
+
+      StringBuilder buf = new StringBuilder();
+      for (Injector inj : matching) {
+        buf.append("     matching> ").append(inj.toString()).append("\n");
+      }
+
+      buf.append("  Note: configure an alternative to take precedence or remove all but one matching bean.");
+
+      throw new InjectionFailure("ambiguous injection type (multiple injectors resolved): "
+              + erased.getFullyQualifiedName() + " " + (metadata == null ? "" : metadata.toString()) + ":\n" +
+              buf.toString());
     }
     else {
       return matching.get(0);
     }
   }
-  
+
   public void recordCycle(MetaClass from, MetaClass to) {
     cyclingTypes.put(from, to);
   }
@@ -150,9 +191,9 @@ public class InjectionContext {
         }
       }
     }
-    return false; 
+    return false;
   }
-  
+
   public boolean isInjectableQualified(MetaClass injectorType, QualifyingMetadata qualifyingMetadata) {
     if (injectors.containsKey(injectorType.getErased())) {
       for (Injector inj : injectors.get(injectorType.getErased())) {
@@ -227,19 +268,19 @@ public class InjectionContext {
   }
 
   public void registerInjector(Injector injector) {
-    _registerInjector(injector.getInjectedType(), injector);
+    _registerInjector(injector.getInjectedType(), injector, true);
   }
 
-  private void _registerInjector(MetaClass type, Injector injector) {
+  private void _registerInjector(MetaClass type, Injector injector, boolean allowOverride) {
     List<Injector> injectorList = injectors.get(type.getErased());
     if (injectorList == null) {
       injectors.put(type.getErased(), injectorList = new ArrayList<Injector>());
 
       for (MetaClass iface : type.getInterfaces()) {
-        _registerInjector(iface, new QualifiedTypeInjectorDelegate(iface, injector, iface.getParameterizedType()));
+        _registerInjector(iface, new QualifiedTypeInjectorDelegate(iface, injector, iface.getParameterizedType()), false);
       }
     }
-    else {
+    else if (allowOverride) {
       Iterator<Injector> iter = injectorList.iterator();
       boolean noAdd = false;
 
@@ -411,6 +452,16 @@ public class InjectionContext {
 
   public IOCProcessingContext getProcessingContext() {
     return processingContext;
+  }
+
+  public void addEnabledAlternative(String name) {
+    enabledAlternatives.add(name);
+  }
+
+  public void addReplacementType(String name) {
+    if (!enabledReplacements.add(name)) {
+      throw new RuntimeException("ambiguous replacement type: " + name);
+    }
   }
 
   public void setAttribute(String name, Object value) {
