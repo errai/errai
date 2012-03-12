@@ -1,0 +1,4 @@
+war/WEB-INF/lib/
+war/app
+war/org.jboss.errai.demo.mobile.ErraiCdiMobileDemo/
+war/about/java-sources/org
