@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.jboss.errai.bus.client.framework;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import org.jboss.errai.common.client.framework.Assert;
 
 /**
  * {@link ProxyFactory} storing {@link ProxyProvider}s for generated remote proxies.
@@ -30,14 +31,29 @@ public class RemoteServiceProxyFactory implements ProxyFactory {
   @Override
   @SuppressWarnings({ "unchecked" })
   public <T> T getRemoteProxy(Class<T> proxyType) {
+    Assert.notNull(proxyType);
+    
     if (remoteProxyProviders.isEmpty()) {
-      throw new RuntimeException(
-          "There are no proxy providers registered yet. If this error is encountered on the server, ");
+      throw new RuntimeException("There are no proxy providers registered yet.");
     }
-    return (T) remoteProxyProviders.get(proxyType).getProxy();
+    
+    ProxyProvider proxyProvider = remoteProxyProviders.get(proxyType);
+    if (proxyProvider == null) {
+      throw new RuntimeException("No proxy provider found for type:"+proxyType.getName());
+    }
+    
+    Object proxy = proxyProvider.getProxy();
+    if (proxy == null) {
+      throw new RuntimeException("No proxy instance provided for: " + proxyType.getName());
+    }
+    
+    return (T) proxy;
   }
 
-  public static void addRemoteProxy(Class<?> proxyType, ProxyProvider proxy) {
-    remoteProxyProviders.put(proxyType, proxy);
+  public static void addRemoteProxy(Class<?> proxyType, ProxyProvider proxyProvider) {
+    Assert.notNull(proxyType);
+    Assert.notNull(proxyProvider);
+    
+    remoteProxyProviders.put(proxyType, proxyProvider);
   }
 }
