@@ -31,6 +31,7 @@ import java.lang.annotation.Target;
  * normal resolution rules, including the use of qualifiers.
  *
  * @author Mike Brock
+ * @author Christian Sadilek
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
