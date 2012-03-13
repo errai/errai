@@ -2,9 +2,7 @@ package org.jboss.errai.cdi.producer.client;
 
 import java.util.Random;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.inject.Produces;
-import javax.inject.Inject;
 
 import org.jboss.errai.cdi.client.qualifier.A;
 import org.jboss.errai.cdi.client.qualifier.B;

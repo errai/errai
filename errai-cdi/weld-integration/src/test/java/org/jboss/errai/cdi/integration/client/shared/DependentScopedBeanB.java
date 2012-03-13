@@ -16,7 +16,6 @@
 
 package org.jboss.errai.cdi.integration.client.shared;
 
-import javax.enterprise.context.Dependent;
 
 /**
  * @author Mike Brock

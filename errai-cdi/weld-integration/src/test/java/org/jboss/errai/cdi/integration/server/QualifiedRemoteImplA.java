@@ -16,11 +16,11 @@
 
 package org.jboss.errai.cdi.integration.server;
 
+import javax.enterprise.context.ApplicationScoped;
+
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.cdi.client.qualifier.A;
 import org.jboss.errai.cdi.integration.client.shared.MyRemote;
-
-import javax.enterprise.context.ApplicationScoped;
 
 /**
  * @author Mike Brock

@@ -6,7 +6,6 @@ import org.jboss.errai.cdi.producer.client.ProducerTestModule;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.rebind.IOCTestRunner;
-import org.junit.Before;
 import org.junit.runner.RunWith;
 
 /**
@@ -25,30 +24,26 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
   ProducerTestModule module;
   ProducerDependentTestBean testBean;
 
-  public void setValues() {
+  @Override
+  public void gwtSetUp() throws Exception {
+    super.gwtSetUp();
     module = IOC.getBeanManager().lookupBean(ProducerTestModule.class).getInstance();
     testBean = IOC.getBeanManager().lookupBean(ProducerDependentTestBean.class).getInstance();
   }
-
+  
   public void testInjectionUsingProducerField() {
-    setValues();
-
     assertEquals("Failed to inject produced @A",
             module.getNumberA(),
             testBean.getIntegerA());
   }
 
   public void testInjectionUsingProducerMethod() {
-    setValues();
-
     assertEquals("Failed to inject produced @B",
             module.getNumberB(),
             testBean.getIntegerB());
   }
 
   public void testInjectionUsingDependentProducerMethods() {
-    setValues();
-
     assertEquals("Failed to inject produced @C",
             module.getNumberC(),
             testBean.getIntegerC());
@@ -59,32 +54,24 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
   }
 
   public void testAnyQualifiedInjection() {
-    setValues();
-
     assertEquals("Failed to inject produced @D @E as @Any",
             module.getFloatDE(),
             testBean.getUnqualifiedFloat());
   }
 
   public void testSubsetQualifiedInjection() {
-    setValues();
-
     assertEquals("Failed to inject produced @D @E as @D",
             module.getFloatDE(),
             testBean.getFloatD());
   }
 
   public void testCyclicalDependencyWasSatisfied() {
-    setValues();
-
     assertEquals(testBean.getFloatD(), testBean.getFloatD());
     assertEquals(testBean.getIntegerA(), testBean.getIntegerA());
     assertEquals(testBean.getIntegerB(), testBean.getIntegerB());
 
     String val = "TestFieldABC";
-
     testBean.setTestField(val);
-
     assertEquals(val, testBean.getTestField());
   }
 }

@@ -16,11 +16,12 @@
 
 package org.jboss.errai.cdi.integration.client;
 
-import javax.enterprise.event.Observes;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.enterprise.event.Observes;
 
 /**
  * @author Mike Brock

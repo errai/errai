@@ -16,26 +16,10 @@
 
 package org.jboss.errai.cdi.integration.client.test;
 
-import org.jboss.errai.cdi.integration.client.shared.ApplicationScopedBean;
-import org.jboss.errai.cdi.integration.client.shared.ApplicationScopedBeanB;
 import org.jboss.errai.cdi.integration.client.shared.BeanInjectSelf;
-import org.jboss.errai.cdi.integration.client.shared.DependentBeanCycleA;
-import org.jboss.errai.cdi.integration.client.shared.DependentBeanCycleB;
-import org.jboss.errai.cdi.integration.client.shared.DependentScopedBean;
-import org.jboss.errai.cdi.integration.client.shared.DependentScopedBeanWithDependencies;
-import org.jboss.errai.cdi.integration.client.shared.ServiceA;
-import org.jboss.errai.cdi.integration.client.shared.ServiceB;
-import org.jboss.errai.cdi.integration.client.shared.ServiceC;
-import org.jboss.errai.cdi.integration.client.shared.TestBean;
-import org.jboss.errai.cdi.integration.client.shared.TestOuterBean;
-import org.jboss.errai.cdi.integration.client.shared.UnreferencedDependentRootBean;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
-import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.container.IOC;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * @author Mike Brock
