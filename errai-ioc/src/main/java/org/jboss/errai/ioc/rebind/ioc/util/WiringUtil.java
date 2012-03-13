@@ -60,10 +60,15 @@ public class WiringUtil {
         if (masterSU == null) {
           masterSU = dep;
         }
+        else if (dep.isHard()) {
+          // must preserve the integrity of hard dependencies.
+          masterSU = new SortUnit(dep.getType(), masterSU.getItems(), masterSU.getDependencies(), true);
+        }
 
         newDependencySet.add(masterSU);
       }
-      consolidatedList.add(new SortUnit(su.getType(), su.getItems(), newDependencySet, su.isHard()));
+      
+      consolidatedList.add(new SortUnit(su.getType(), su.getItems(), newDependencySet, false));
     }
 
     return consolidatedList;
@@ -73,7 +78,6 @@ public class WiringUtil {
     List<SortUnit> newList = new ArrayList<SortUnit>(consolidateSortUnits(in));
 
     _worstSort(newList);
-
     Collections.sort(newList);
 
     return newList;
@@ -107,6 +111,5 @@ public class WiringUtil {
       }
     }
   }
-
 
 }

@@ -99,6 +99,11 @@ public class IOCProcessorFactory {
         tasksStack.push(new TreeSet<ProcessingEntry>());
       }
       tasksStack.peek().add(new ProcessingEntry(annotation, new ProvidedClassAnnotationHandler() {
+
+        @Override
+        public void registerMetadata(InjectableInstance instance, Annotation annotation, IOCProcessingContext context) {
+        }
+
         @Override
         public Set<Class> getClasses() {
           return Collections.singleton(clazz);
@@ -217,13 +222,13 @@ public class IOCProcessorFactory {
         return;
       }
     }
-
+    final InjectableInstance injectableInstance
+            = getTypeInjectedInstance(anno, type, null, injectorFactory.getInjectionContext());
 
     ProcessingDelegate<MetaClass> del = new ProcessingDelegate<MetaClass>() {
       @Override
       public Set<SortUnit> getRequiredDependencies() {
-        final InjectableInstance injectableInstance
-                = getTypeInjectedInstance(anno, type, null, injectorFactory.getInjectionContext());
+
 
         return entry.handler.checkDependencies(dependencyControl, injectableInstance, anno, context);
       }
@@ -253,6 +258,8 @@ public class IOCProcessorFactory {
       }
     };
 
+    entry.handler.registerMetadata(injectableInstance, anno, context);
+
     Set<SortUnit> requiredDependencies = del.getRequiredDependencies();
     addToDelegates(new SortUnit(((DependencyControlImpl) dependencyControl).masqueradeClass, del, requiredDependencies));
   }
@@ -269,12 +276,14 @@ public class IOCProcessorFactory {
 
     dependencyControl.masqueradeAs(type);
 
+    final InjectableInstance injectableInstance
+            = getMethodInjectedInstance(anno, metaMethod, null,
+            injectorFactory.getInjectionContext());
+
+
     ProcessingDelegate<MetaField> del = new ProcessingDelegate<MetaField>() {
       @Override
       public Set<SortUnit> getRequiredDependencies() {
-        final InjectableInstance injectableInstance
-                = getMethodInjectedInstance(anno, metaMethod, null,
-                injectorFactory.getInjectionContext());
 
         return entry.handler.checkDependencies(dependencyControl, injectableInstance, anno, context);
       }
@@ -306,6 +315,8 @@ public class IOCProcessorFactory {
       }
 
     };
+
+    entry.handler.registerMetadata(injectableInstance, anno, context);
 
     Set<SortUnit> requiredDependencies = del.getRequiredDependencies();
     addToDelegates(new SortUnit(((DependencyControlImpl) dependencyControl).masqueradeClass, del, requiredDependencies));
@@ -341,6 +352,8 @@ public class IOCProcessorFactory {
         final InjectableInstance injectableInstance
                 = InjectableInstance.getFieldInjectedInstance(anno, metaField, injector,
                 injectorFactory.getInjectionContext());
+
+        entry.handler.registerMetadata(injectableInstance, anno, context);
 
         return entry.handler.handle(injectableInstance, anno, context);
       }

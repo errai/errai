@@ -68,11 +68,13 @@ import org.jboss.errai.ioc.rebind.ioc.ContextualProviderInjector;
 import org.jboss.errai.ioc.rebind.ioc.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.IOCExtensionConfigurator;
 import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
+import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.InjectionFailure;
 import org.jboss.errai.ioc.rebind.ioc.Injector;
 import org.jboss.errai.ioc.rebind.ioc.InjectorFactory;
 import org.jboss.errai.ioc.rebind.ioc.ProviderInjector;
 import org.jboss.errai.ioc.rebind.ioc.QualifyingMetadataFactory;
+import org.jboss.errai.ioc.rebind.ioc.TypeInjector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -289,6 +291,10 @@ public class IOCBootstrapGenerator {
 
     procFactory.process(scanner, procContext);
 
+    for (Injector inj : procContext.getToInstantiate()) {
+      inj.getType(injectFactory.getInjectionContext(), null);
+    }
+
     runAllDeferred();
 
     for (Statement stmt : procContext.getAppendToEnd()) {
@@ -350,6 +356,7 @@ public class IOCBootstrapGenerator {
     injectFactory.addType(type);
   }
 
+  @Deprecated
   public Statement generateWithSingletonSemantics(final MetaClass visit) {
     return injectFactory.generateSingleton(visit);
   }
@@ -571,7 +578,9 @@ public class IOCBootstrapGenerator {
     procFactory.registerHandler(Singleton.class, new JSR330AnnotationHandler<Singleton>() {
       @Override
       public boolean handle(final InjectableInstance type, Singleton annotation, IOCProcessingContext context) {
-        generateWithSingletonSemantics(type.getType());
+        Injector injector = injectFactory.getInjectionContext().getInjector(type.getType());
+        injector.setSingleton(true);
+        context.instantiateBean(injector);
         return true;
       }
     });
@@ -579,7 +588,10 @@ public class IOCBootstrapGenerator {
     procFactory.registerHandler(EntryPoint.class, new JSR330AnnotationHandler<EntryPoint>() {
       @Override
       public boolean handle(final InjectableInstance type, EntryPoint annotation, IOCProcessingContext context) {
-        generateWithSingletonSemantics(type.getType());
+        Injector injector = injectFactory.getInjectionContext().getInjector(type.getType());
+        injector.setSingleton(true);
+        context.instantiateBean(injector);
+
         return true;
       }
     });
@@ -587,7 +599,9 @@ public class IOCBootstrapGenerator {
     procFactory.registerHandler(Service.class, new JSR330AnnotationHandler<Service>() {
       @Override
       public boolean handle(final InjectableInstance type, Service annotation, IOCProcessingContext context) {
-        generateWithSingletonSemantics(type.getType());
+        Injector injector = injectFactory.getInjectionContext().getInjector(type.getType());
+        injector.setSingleton(true);
+        context.instantiateBean(injector);
         return true;
       }
     });

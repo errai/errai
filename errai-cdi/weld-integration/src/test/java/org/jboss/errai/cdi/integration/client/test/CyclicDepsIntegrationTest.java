@@ -17,6 +17,7 @@
 package org.jboss.errai.cdi.integration.client.test;
 
 import org.jboss.errai.cdi.integration.client.shared.BeanInjectSelf;
+import org.jboss.errai.cdi.integration.client.shared.ConsumerBeanA;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
@@ -48,6 +49,23 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
         assertNotNull(beanA);
         assertNotNull(beanA.getSelf());
         assertEquals(beanA.getInstance(), beanA.getSelf().getInstance());
+
+        finishTest();
+      }
+    });
+  }
+
+  public void testCycleOnProducerBean() {
+    delayTestFinish(60000);
+
+    InitVotes.registerOneTimeInitCallback(new Runnable() {
+      @Override
+      public void run() {
+        ConsumerBeanA consumerBeanA = IOC.getBeanManager()
+                .lookupBean(ConsumerBeanA.class).getInstance();
+
+        assertNotNull(consumerBeanA);
+        assertNotNull(consumerBeanA.getFoo());
 
         finishTest();
       }

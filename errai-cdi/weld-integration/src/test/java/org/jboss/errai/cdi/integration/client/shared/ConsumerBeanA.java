@@ -14,22 +14,25 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.codegen.framework.exception;
+package org.jboss.errai.cdi.integration.client.shared;
 
-import org.jboss.errai.codegen.framework.meta.MetaClass;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 /**
  * @author Mike Brock
  */
-public class UnproxyableClassException extends RuntimeException{
-  private MetaClass clazz;
+@ApplicationScoped
+public class ConsumerBeanA {
+  @Inject Foo foo;
+  @Inject ProducerBeanA producerBeanA;
 
-  public UnproxyableClassException(MetaClass clazz, String message) {
-    super(message);
-    this.clazz = clazz;
+  public Foo getFoo() {
+    return foo;
   }
 
-  public MetaClass getUnproxyableClass() {
-    return clazz;
+  public ProducerBeanA getProducerBeanA() {
+    return producerBeanA;
   }
 }

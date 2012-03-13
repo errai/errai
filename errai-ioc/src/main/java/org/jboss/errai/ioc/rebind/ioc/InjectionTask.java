@@ -97,7 +97,7 @@ public class InjectionTask {
                   "produce properly initalized objects for: " + getInjector().getInjectedType().getFullyQualifiedName() + "\n" +
                   "\t Offending node: " + toString() + "\n" +
                   "\t Note          : this issue can be resolved by making "
-                  + getInjector().getInjectedType().getFullyQualifiedName() + " proxyable. Introduce a default no-arg constructor and make sure the class is non-final.";
+                  + e.getUnproxyableClass().getFullyQualifiedName() + " proxyable. Introduce a default no-arg constructor and make sure the class is non-final.";
 
           throw UnsatisfiedDependenciesException.createWithSingleFieldFailure(field, field.getDeclaringClass(),
                   field.getType(), err);

@@ -96,10 +96,6 @@ public class ProxyInjector extends Injector {
     return !proxied ? loadVariable(varName) : proxyStatement;
   }
 
-  @Override
-  public boolean isInjected() {
-    return isInjected;
-  }
 
   @Override
   public boolean isSingleton() {

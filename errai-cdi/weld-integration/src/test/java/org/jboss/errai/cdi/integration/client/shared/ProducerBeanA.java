@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ *  
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,22 +14,32 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.codegen.framework.exception;
+package org.jboss.errai.cdi.integration.client.shared;
 
-import org.jboss.errai.codegen.framework.meta.MetaClass;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Produces;
+import javax.inject.Inject;
 
 /**
  * @author Mike Brock
  */
-public class UnproxyableClassException extends RuntimeException{
-  private MetaClass clazz;
+@ApplicationScoped
+public class ProducerBeanA {
+  private Foo foo = new Foo("barz");
 
-  public UnproxyableClassException(MetaClass clazz, String message) {
-    super(message);
-    this.clazz = clazz;
+  @Inject
+  private ConsumerBeanA consumerBeanA;
+  
+  @Produces
+  public Foo produceFoo() {
+    return foo;
   }
 
-  public MetaClass getUnproxyableClass() {
-    return clazz;
+  public Foo getFoo() {
+    return foo;
+  }
+
+  public ConsumerBeanA getConsumerBeanA() {
+    return consumerBeanA;
   }
 }

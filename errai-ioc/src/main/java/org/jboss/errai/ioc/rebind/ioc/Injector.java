@@ -22,38 +22,77 @@ import org.jboss.errai.codegen.framework.meta.MetaParameterizedType;
 
 public abstract class Injector {
   protected boolean useBeanManager = !Boolean.getBoolean("errai.ioc.no_bean_manager");
-  
+
   protected QualifyingMetadata qualifyingMetadata;
   protected MetaParameterizedType qualifyingTypeInformation;
   protected String postInitCallbackVar = null;
+
   protected boolean alternative;
+  protected boolean injected;
+  protected boolean singleton;
+  protected boolean psuedo;
+  protected boolean provider;
+  
+  protected MetaClass enclosingType;
 
   public abstract Statement instantiateOnly(InjectionContext injectContext, InjectableInstance injectableInstance);
 
   public Statement getType(InjectableInstance injectableInstance) {
     return getType(injectableInstance.getInjectionContext(), injectableInstance);
   }
+
   public abstract Statement getType(InjectionContext injectContext, InjectableInstance injectableInstance);
 
-  public abstract boolean isInjected();
-
-  public abstract boolean isSingleton();
-
-  public abstract boolean isPseudo();
-
-  public abstract String getVarName();
-
-  public abstract MetaClass getInjectedType();
 
   public boolean isAlternative() {
     return alternative;
   }
 
+  public boolean isInjected() {
+    return  injected;
+  }
+
+  public boolean isSingleton() {
+    return singleton;
+  }
+
+  public boolean isPseudo() {
+    return psuedo;
+  }
+
+  public boolean isProvider() {
+    return provider;
+  }
+
+  public MetaClass getEnclosingType() {
+    return enclosingType;
+  }
+
+  public void setAlternative(boolean alternative) {
+    this.alternative = alternative;
+  }
+
+  public void setInjected(boolean injected) {
+    this.injected = injected;
+  }
+
+  public void setSingleton(boolean singleton) {
+    this.singleton = singleton;
+  }
+
+  public void setPsuedo(boolean psuedo) {
+    this.psuedo = psuedo;
+  }
+
+  public abstract String getVarName();
+
+  public abstract MetaClass getInjectedType();
+
 
   public String getPostInitCallbackVar() {
     return postInitCallbackVar;
   }
-  
+
   public void setPostInitCallbackVar(String var) {
     this.postInitCallbackVar = var;
   }

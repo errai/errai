@@ -28,6 +28,7 @@ import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.ioc.client.InterfaceInjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.InjectionPoint;
+import org.jboss.errai.ioc.rebind.ioc.Injector;
 import org.jboss.errai.ioc.rebind.ioc.JSR330QualifyingMetadataFactory;
 import org.jboss.errai.ioc.rebind.ioc.QualifyingMetadataFactory;
 import org.jboss.errai.ioc.rebind.ioc.TypeDiscoveryListener;
@@ -56,6 +57,8 @@ public class IOCProcessingContext {
   protected List<Statement> staticInstantiationStatements;
   protected List<Statement> staticPostConstructStatements;
   protected List<TypeDiscoveryListener> typeDiscoveryListeners;
+  
+  protected List<Injector> toInstantiate;
 
   protected Set<MetaClass> discovered = new HashSet<MetaClass>();
   
@@ -90,6 +93,7 @@ public class IOCProcessingContext {
     this.staticPostConstructStatements = new ArrayList<Statement>();
     this.typeDiscoveryListeners = new ArrayList<TypeDiscoveryListener>();
     this.singletonScopes = new HashSet<Class<? extends Annotation>>();
+    this.toInstantiate = new ArrayList<Injector>();
   }
 
   public void addSingletonScopeAnnotation(Class<? extends Annotation> annotation) {
@@ -142,6 +146,10 @@ public class IOCProcessingContext {
   public void addPostConstructStatement(Statement statement) {
     staticPostConstructStatements.add(statement);
   }
+  
+  public void instantiateBean(Injector injector) {
+    toInstantiate.add(injector);
+  }
 
   public List<Statement> getAppendToEnd() {
     return Collections.unmodifiableList(appendToEnd);
@@ -153,6 +161,10 @@ public class IOCProcessingContext {
 
   public List<Statement> getStaticPostConstructStatements() {
     return Collections.unmodifiableList(staticPostConstructStatements);
+  }
+
+  public List<Injector> getToInstantiate() {
+    return Collections.unmodifiableList(toInstantiate);
   }
 
   public BuildMetaClass getBootstrapClass() {

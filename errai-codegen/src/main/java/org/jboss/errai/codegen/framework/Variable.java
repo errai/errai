@@ -30,7 +30,7 @@ import org.jboss.errai.codegen.framework.util.GenUtil;
  * This class represents a variable.
  * 
  * Note that initialization using {@link LiteralValue}s takes effect immediately,
- * initialization using {@ link Statement}s needs to be deferred to generation time.
+ * initialization using {@link Statement}s needs to be deferred to generation time.
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  */

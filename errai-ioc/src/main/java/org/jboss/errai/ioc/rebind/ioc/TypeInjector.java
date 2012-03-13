@@ -46,9 +46,6 @@ import static org.jboss.errai.codegen.framework.util.Stmt.loadVariable;
 
 public class TypeInjector extends Injector {
   protected final MetaClass type;
-  protected boolean injected;
-  protected boolean singleton;
-  protected boolean psuedo;
   protected String varName;
   protected String creationalCallbackVarName;
 
@@ -190,16 +187,6 @@ public class TypeInjector extends Injector {
   @Override
   public Statement instantiateOnly(InjectionContext injectContext, InjectableInstance injectableInstance) {
     return getType(injectContext, injectableInstance);
-  }
-
-  @Override
-  public boolean isInjected() {
-    return injected;
-  }
-
-  @Override
-  public boolean isSingleton() {
-    return singleton;
   }
 
   public void setSingleton(boolean singleton) {

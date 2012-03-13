@@ -52,7 +52,7 @@ import java.util.Set;
 public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator {
   public void configure(final IOCProcessingContext context, final InjectorFactory injectorFactory,
                         final IOCProcessorFactory procFactory) {
-    
+
     context.addSingletonScopeAnnotation(ApplicationScoped.class);
 
     procFactory.registerHandler(Produces.class, new JSR330AnnotationHandler<Produces>() {
@@ -64,7 +64,6 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
         control.masqueradeAs(instance.getElementTypeOrMethodReturnType());
         return Collections.singleton(new SortUnit(instance.getEnclosingType(), true));
       }
-
 
       @Override
       public boolean handle(final InjectableInstance instance, final Produces annotation,
@@ -79,9 +78,12 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
 
         }
 
+
         injectorFactory.addInjector(new Injector() {
           {
             super.qualifyingMetadata = JSR299QualifyingMetadata.createFromAnnotations(instance.getQualifiers());
+            this.provider = true;
+            this.enclosingType = instance.getEnclosingType();
           }
 
           @Override
@@ -130,20 +132,18 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
           }
         });
 
+
         return true;
       }
 
-    }, Rule.after(EntryPoint.class, ApplicationScoped.class, Singleton.class));
+    }, Rule.before(EntryPoint.class, ApplicationScoped.class, Singleton.class));
 
     procFactory.registerHandler(ApplicationScoped.class, new JSR330AnnotationHandler<ApplicationScoped>() {
       public boolean handle(InjectableInstance instance, ApplicationScoped annotation, IOCProcessingContext context) {
-        InjectionContext injectionContext = injectorFactory.getInjectionContext();
         TypeInjector i = (TypeInjector) instance.getInjector();
+        i.setSingleton(true);
 
-        if (!i.isInjected()) {
-          i.setSingleton(true);
-          i.getType(injectionContext, null);
-        }
+        context.instantiateBean(i);
         return true;
       }
     });

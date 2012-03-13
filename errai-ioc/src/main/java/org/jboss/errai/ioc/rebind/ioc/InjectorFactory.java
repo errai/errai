@@ -38,6 +38,7 @@ public class InjectorFactory {
     return ctx.getInjector(type).getType(ctx, null);
   }
 
+  @Deprecated
   public Statement generateSingleton(MetaClass type) {
     
     Injector i = ctx.getInjector(type);

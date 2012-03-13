@@ -123,9 +123,8 @@ public class SortUnit implements Comparable<SortUnit> {
 
     SortUnit sortUnit = (SortUnit) o;
 
-    if (type != null ? !type.equals(sortUnit.type) : sortUnit.type != null) return false;
+    return !(type != null ? !type.equals(sortUnit.type) : sortUnit.type != null);
 
-    return true;
   }
 
   @Override
@@ -143,8 +142,7 @@ public class SortUnit implements Comparable<SortUnit> {
 
   @Override
   public int hashCode() {
-    int result = type != null ? type.hashCode() : 0;
-    return result;
+    return type != null ? type.hashCode() : 0;
   }
 
   @Override

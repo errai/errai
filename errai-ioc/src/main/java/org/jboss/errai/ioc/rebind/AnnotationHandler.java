@@ -26,5 +26,7 @@ public interface AnnotationHandler<T extends Annotation> {
   public Set<SortUnit> checkDependencies(DependencyControl control,
                                          InjectableInstance instance, T annotation, IOCProcessingContext context);
 
+  public void registerMetadata(InjectableInstance instance, T annotation, IOCProcessingContext context);
+
   public boolean handle(InjectableInstance instance, T annotation, IOCProcessingContext context);
 }

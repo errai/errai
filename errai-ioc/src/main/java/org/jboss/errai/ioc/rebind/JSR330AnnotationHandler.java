@@ -38,6 +38,10 @@ import java.util.Set;
 public abstract class JSR330AnnotationHandler<T extends Annotation> implements AnnotationHandler<T> {
 
   @Override
+  public void registerMetadata(InjectableInstance instance, T annotation, IOCProcessingContext context) {
+  }
+
+  @Override
   public Set<SortUnit> checkDependencies(DependencyControl control, InjectableInstance instance,
                                          T annotation,
                                          IOCProcessingContext context) {
