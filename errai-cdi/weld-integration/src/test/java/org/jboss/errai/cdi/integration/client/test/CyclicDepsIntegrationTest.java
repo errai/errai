@@ -18,6 +18,7 @@ package org.jboss.errai.cdi.integration.client.test;
 
 import org.jboss.errai.cdi.integration.client.shared.BeanInjectSelf;
 import org.jboss.errai.cdi.integration.client.shared.ConsumerBeanA;
+import org.jboss.errai.cdi.integration.client.shared.CycleNodeA;
 import org.jboss.errai.cdi.integration.client.shared.DependentBeanInjectSelf;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
@@ -38,6 +39,28 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
   @Override
   public void gwtSetUp() throws Exception {
     super.gwtSetUp();
+  }
+
+  public void testBasicDependencyCycle() {
+    delayTestFinish(60000);
+
+    registerOneTimeInitCallback(new Runnable() {
+      @Override
+      public void run() {
+        CycleNodeA nodeA = IOC.getBeanManager()
+                .lookupBean(CycleNodeA.class).getInstance();
+
+        assertNotNull(nodeA);
+        assertNotNull(nodeA.getCycleNodeB());
+        assertNotNull(nodeA.getCycleNodeB().getCycleNodeC());
+        assertNotNull(nodeA.getCycleNodeB().getCycleNodeC().getCycleNodeA());
+        assertEquals("CycleNodeA is a different instance at different points in the graph",
+                nodeA.getNodeId(), nodeA.getCycleNodeB().getCycleNodeC().getCycleNodeA().getNodeId());
+
+        finishTest();
+      }
+    });
+
   }
 
   public void testBeanInjectsIntoSelf() {
