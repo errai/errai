@@ -94,6 +94,7 @@
         <module>errai-jaxrs</module>
         <module>jboss7-support</module>
         <module>errai-uibinder</module>
+        <module>errai-jpa</module>
     </modules>
 
     <dependencyManagement>
