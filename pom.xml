@@ -286,7 +286,17 @@
                 <configuration>
                     <filesets>
                         <fileset>
-                            <directory>.errai</directory>
+                            <directory>${basedir}</directory>
+                            <includes>
+                                <include>www-test/**</include>
+                                <include>.gwt/**</include>
+                                <include>.errai/**</include>
+                                <include>war/WEB-INF/deploy/**</include>
+                                <include>war/WEB-INF/lib/**</include>
+                                <include>src/main/webapp/WEB-INF/deploy/**</include>
+                                <include>**/gwt-unitCache/**</include>
+                                <include>**/*.JUnit/**</include>
+                            </includes>
                         </fileset>
                     </filesets>
                 </configuration>

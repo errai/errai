@@ -1179,13 +1179,6 @@
 
 				</configuration>
 			</plugin>
-			<plugin>
-				<artifactId>maven-clean-plugin</artifactId>
-				<version>2.2</version>
-				<configuration>
-					<skip>true</skip>
-				</configuration>
-			</plugin>
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -1197,16 +1190,7 @@
 						<phase>clean</phase>
 						<configuration>
 							<tasks>
-								<!-- The gwt-maven-plugin use the war source folder as it's build 
-									directory. We need to cleanup after we'd run the plugin and remove all GWT 
-									related artifacts that are required to run the hosted mode. -->
-								<delete dir="war/WEB-INF/classes" />
-								<delete dir="war/WEB-INF/lib" />
-								<delete dir="war/META-INF" />
-								<delete file="war/WEB-INF/web.xml" />
-								<delete dir="war/app" />
-								<delete dir="target" />
-
+								<!-- FIXME this should be done as an additional resource in the maven-war-plugin -->
 								<copy file="src/${webDescriptor}/web.xml" toDir="war/WEB-INF" />
 							</tasks>
 						</configuration>
