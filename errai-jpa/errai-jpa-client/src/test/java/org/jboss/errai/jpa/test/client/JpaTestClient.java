@@ -23,6 +23,6 @@ public class JpaTestClient {
 
   @PostConstruct
   public void storeAlbums() {
-
+    System.out.println("JpaTestClient postconstruct");
   }
 }
