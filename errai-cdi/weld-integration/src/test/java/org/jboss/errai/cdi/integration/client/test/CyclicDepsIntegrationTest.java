@@ -18,9 +18,12 @@ package org.jboss.errai.cdi.integration.client.test;
 
 import org.jboss.errai.cdi.integration.client.shared.BeanInjectSelf;
 import org.jboss.errai.cdi.integration.client.shared.ConsumerBeanA;
+import org.jboss.errai.cdi.integration.client.shared.DependentBeanInjectSelf;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.ioc.client.container.IOC;
+
+import static org.jboss.errai.common.client.api.extension.InitVotes.registerOneTimeInitCallback;
 
 /**
  * @author Mike Brock
@@ -40,7 +43,7 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
   public void testBeanInjectsIntoSelf() {
     delayTestFinish(60000);
 
-    InitVotes.registerOneTimeInitCallback(new Runnable() {
+    registerOneTimeInitCallback(new Runnable() {
       @Override
       public void run() {
         BeanInjectSelf beanA = IOC.getBeanManager()
@@ -55,10 +58,29 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
     });
   }
 
+
+  public void testDependentBeanInjectsIntoSelf() {
+    delayTestFinish(60000);
+
+    registerOneTimeInitCallback(new Runnable() {
+      @Override
+      public void run() {
+        DependentBeanInjectSelf beanA = IOC.getBeanManager()
+                .lookupBean(DependentBeanInjectSelf.class).getInstance();
+
+        assertNotNull(beanA);
+        assertNotNull(beanA.getSelf());
+        assertEquals(beanA.getInstance(), beanA.getSelf().getInstance());
+
+        finishTest();
+      }
+    });
+  }
+
   public void testCycleOnProducerBeans() {
     delayTestFinish(60000);
 
-    InitVotes.registerOneTimeInitCallback(new Runnable() {
+    registerOneTimeInitCallback(new Runnable() {
       @Override
       public void run() {
         ConsumerBeanA consumerBeanA = IOC.getBeanManager()

@@ -117,6 +117,7 @@ public class TypeInjector extends Injector {
       }
     }
 
+
     IOCProcessingContext ctx = injectContext.getProcessingContext();
 
     MetaClass creationCallbackRef = parameterizedAs(CreationalCallback.class, typeParametersOf(type));
@@ -129,6 +130,8 @@ public class TypeInjector extends Injector {
             .initializeWith(load(qualifyingMetadata.getQualifiers())));
 
     ctx.pushBlockBuilder(callbackBuilder);
+
+    creationalCallbackVarName = InjectUtil.getNewVarName();
 
     InjectUtil.getConstructionStrategy(this, injectContext).generateConstructor(new ConstructionStatusCallback() {
       @Override
@@ -144,7 +147,6 @@ public class TypeInjector extends Injector {
 
     ctx.popBlockBuilder();
 
-    creationalCallbackVarName = InjectUtil.getNewVarName();
 
     ctx.globalAppend(declareVariable(creationCallbackRef).asFinal().named(creationalCallbackVarName)
             .initializeWith(callbackBuilder.finish().finish()));
@@ -172,6 +174,9 @@ public class TypeInjector extends Injector {
 
     callbackBuilder.append(loadVariable(varName).returnValue());
 
+    if (!isSingleton()) {
+      injected = false;
+    }
     return retVal;
   }
 

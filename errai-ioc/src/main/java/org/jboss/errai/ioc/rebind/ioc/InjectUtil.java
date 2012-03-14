@@ -372,11 +372,24 @@ public class InjectUtil {
     return newArray;
   }
 
-  public static Injector getInjectorOrProxy(InjectionContext ctx,
+  public static Injector getInjectorOrProxy(MetaClass injectTo, InjectionContext ctx,
                                             MetaClass clazz, QualifyingMetadata qualifyingMetadata) {
 
+    Injector inj = null;
     if (ctx.isInjectableQualified(clazz, qualifyingMetadata)) {
-      return ctx.getQualifiedInjector(clazz, qualifyingMetadata);
+      inj = ctx.getQualifiedInjector(clazz, qualifyingMetadata);
+    }
+
+    QualifyingMetadata toMetaData = qualifyingMetaDataFrom(ctx, extractQualifiersFromType(injectTo));
+
+    // special handling for the JSR-299 TCK scenario where a dependent bean injects itself.
+    if (inj != null && inj.isDependent()
+            && injectTo.isAssignableFrom(clazz) && qualifyingMetadata.doesSatisfy(toMetaData)) {
+      inj = null;
+    }
+
+    if (inj != null) {
+      return inj;
     }
     else {
       ProxyInjector proxyInjector = new ProxyInjector(ctx.getProcessingContext(), clazz, qualifyingMetadata);
@@ -394,7 +407,7 @@ public class InjectUtil {
     for (int i = 0; i < parmTypes.length; i++) {
       Injector injector;
       try {
-        injector = getInjectorOrProxy(ctx, parmTypes[i],
+        injector = getInjectorOrProxy(method.getDeclaringClass(), ctx, parmTypes[i],
                 ctx.getProcessingContext().getQualifyingMetadataFactory().createFrom(parms[i].getAnnotations()));
       }
       catch (InjectionFailure e) {
@@ -420,7 +433,7 @@ public class InjectUtil {
     for (int i = 0; i < parmTypes.length; i++) {
       Injector injector;
       try {
-        injector = getInjectorOrProxy(ctx, parmTypes[i],
+        injector = getInjectorOrProxy(constructor.getDeclaringClass(), ctx, parmTypes[i],
                 ctx.getProcessingContext().getQualifyingMetadataFactory().createFrom(parms[i].getAnnotations()));
       }
       catch (UnproxyableClassException e) {
@@ -431,7 +444,7 @@ public class InjectUtil {
                 + parmTypes[i].getFullyQualifiedName() + " proxyable. Introduce a default no-arg constructor and make sure the class is non-final.";
 
         throw UnsatisfiedDependenciesException.createWithSingleParameterFailure(parms[i], constructor.getDeclaringClass(),
-               parms[i].getType(), err);
+                parms[i].getType(), err);
       }
       catch (InjectionFailure e) {
         e.setTarget(constructor.getDeclaringClass() + "." + DefParameters.from(constructor)
@@ -607,6 +620,12 @@ public class InjectUtil {
       log.error("Problem reading qualifiersCache for " + type, e);
     }
     return qualifiers;
+
+  }
+
+  public static QualifyingMetadata qualifyingMetaDataFrom(InjectionContext ctx, List<Annotation> qualifiers) {
+    return ctx.getProcessingContext()
+            .getQualifyingMetadataFactory().createFrom(qualifiers.toArray(new Annotation[qualifiers.size()]));
 
   }
 

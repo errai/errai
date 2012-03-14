@@ -56,6 +56,10 @@ public abstract class Injector {
     return singleton;
   }
 
+  public boolean isDependent() {
+    return !singleton;
+  }
+
   public boolean isPseudo() {
     return psuedo;
   }
