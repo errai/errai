@@ -78,7 +78,6 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
 
         }
 
-
         injectorFactory.addInjector(new Injector() {
           {
             super.qualifyingMetadata = JSR299QualifyingMetadata.createFromAnnotations(instance.getQualifiers());

@@ -50,11 +50,12 @@ public class ProxyInjector extends Injector {
   
   private Statement proxyStatement;
  
-  private List<Statement> proxyCloseStatements = new ArrayList<Statement>();
-  
+//  private List<Statement> proxyCloseStatements = new ArrayList<Statement>();
+
+  private BlockBuilder<AnonymousClassStructureBuilder> proxyResolverBody;
+
   private final MetaClass proxiedType;
   private final BuildMetaClass proxyClass;
-  private boolean isInjected;
 
   public ProxyInjector(IOCProcessingContext context, MetaClass proxiedType, QualifyingMetadata metadata) {
     this.proxiedType = proxiedType;
@@ -82,15 +83,18 @@ public class ProxyInjector extends Injector {
 
       MetaClass proxyResolverRef = parameterizedAs(ProxyResolver.class, typeParametersOf(proxiedType));
 
-      BlockBuilder<AnonymousClassStructureBuilder> builder = newObject(proxyResolverRef)
+      proxyResolverBody = newObject(proxyResolverRef)
               .extend().publicOverridesMethod("resolve", Parameter.of(proxiedType, "obj"));
 
-      Statement proxyResolver = builder.append(loadVariable(varName)
+
+
+      Statement proxyResolver = proxyResolverBody.append(loadVariable(varName)
               .invoke(ProxyMaker.PROXY_BIND_METHOD, Refs.get("obj"))).finish().finish();
 
       pCtx.append(loadVariable("context").invoke("addUnresolvedProxy", proxyResolver,
               proxiedType, qualifyingMetadata.getQualifiers()));
-      isInjected = true;
+
+      injected = true;
 
     }
     return !proxied ? loadVariable(varName) : proxyStatement;
@@ -130,11 +134,7 @@ public class ProxyInjector extends Injector {
   }
   
   public void addProxyCloseStatement(Statement statement) {
-    this.proxyCloseStatements.add(statement);
-  }
-
-  public List<Statement> getProxyCloseStatements() {
-    return proxyCloseStatements;
+    proxyResolverBody.append(statement);
   }
 
   public BuildMetaClass getProxyClass() {

@@ -55,7 +55,7 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
     });
   }
 
-  public void testCycleOnProducerBean() {
+  public void testCycleOnProducerBeans() {
     delayTestFinish(60000);
 
     InitVotes.registerOneTimeInitCallback(new Runnable() {
@@ -66,14 +66,21 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
 
         assertNotNull(consumerBeanA);
         assertNotNull(consumerBeanA.getFoo());
+
         assertEquals("barz", consumerBeanA.getFoo().getName());
+
         assertNotNull(consumerBeanA.getProducerBeanA());
         assertNotNull(consumerBeanA.getProducerBeanA().getConsumerBeanA());
         assertEquals("barz", consumerBeanA.getProducerBeanA().getConsumerBeanA().getFoo().getName());
 
+        assertNotNull(consumerBeanA.getBar());
+        assertEquals("fooz", consumerBeanA.getBar().getName());
+        assertNotNull(consumerBeanA.getProducerBeanA().getConsumerBeanA().getBar());
+        assertEquals("fooz", consumerBeanA.getProducerBeanA().getConsumerBeanA().getBar().getName());
+
         finishTest();
       }
     });
-
   }
+
 }

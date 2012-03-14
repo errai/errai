@@ -16,6 +16,7 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
+import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.exception.UnproxyableClassException;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
@@ -103,10 +104,18 @@ public class InjectionTask {
                   field.getType(), err);
         }
 
-        processingContext.append(
-                Stmt.invokeStatic(processingContext.getBootstrapClass(), getPrivateFieldInjectorName(field),
-                        Refs.get(injector.getVarName()), val)
-        );
+        if (val instanceof HandleInProxy) {
+          ((HandleInProxy) val).getProxyInjector().addProxyCloseStatement(
+                          Stmt.invokeStatic(processingContext.getBootstrapClass(), getPrivateFieldInjectorName(field),
+                                  Refs.get(injector.getVarName()), val)
+                  );
+        }
+        else {
+          processingContext.append(
+                  Stmt.invokeStatic(processingContext.getBootstrapClass(), getPrivateFieldInjectorName(field),
+                          Refs.get(injector.getVarName()), val)
+          );
+        }
 
         ctx.addExposedField(field);
         break;
@@ -193,7 +202,20 @@ public class InjectionTask {
                   inj.getInjectedType(), inj.getQualifyingMetadata().getQualifiers());
         }
 
-        return ctx.getQualifiedInjector(clazz, qualifyingMetadata).getType(ctx, injectableInstance);
+        Statement retStatement = ctx.getQualifiedInjector(clazz, qualifyingMetadata).getType(ctx, injectableInstance);
+
+        if (inj.isProvider() && inj.getEnclosingType() != null &&
+                ctx.isProxiedInjectorRegistered(inj.getEnclosingType(),
+                        ctx.getProcessingContext().getQualifyingMetadataFactory().createDefaultMetadata())) {
+
+          ProxyInjector proxyInjector = (ProxyInjector) ctx.getProxiedInjector(inj.getEnclosingType(),
+                  ctx.getProcessingContext().getQualifyingMetadataFactory().createDefaultMetadata());
+
+          return new HandleInProxy(proxyInjector, retStatement);
+        }
+
+
+        return retStatement;
       }
 
     }
@@ -263,5 +285,29 @@ public class InjectionTask {
     }
 
     return null;
+  }
+
+  private static class HandleInProxy implements Statement {
+    private final ProxyInjector proxyInjector;
+    private final Statement wrapped;
+
+    private HandleInProxy(ProxyInjector proxyInjector1, Statement wrapped) {
+      this.proxyInjector = proxyInjector1;
+      this.wrapped = wrapped;
+    }
+
+    public ProxyInjector getProxyInjector() {
+      return proxyInjector;
+    }
+
+    @Override
+    public String generate(Context context) {
+      return wrapped.generate(context);
+    }
+
+    @Override
+    public MetaClass getType() {
+      return wrapped.getType();
+    }
   }
 }

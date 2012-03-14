@@ -16,31 +16,17 @@
 
 package org.jboss.errai.cdi.integration.client.shared;
 
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Produces;
-import javax.inject.Inject;
-
 /**
  * @author Mike Brock
  */
-@ApplicationScoped
-public class ConsumerBeanA {
-  @Inject Foo foo;
-  @Inject ProducerBeanA producerBeanA;
+public class Bar {
+  private String name;
 
-  private Bar bar = new Bar("fooz");
-
-  @Produces
-  public Bar getBar() {
-    return bar;
+  public Bar(String name) {
+    this.name = name;
   }
 
-  public Foo getFoo() {
-    return foo;
-  }
-
-  public ProducerBeanA getProducerBeanA() {
-    return producerBeanA;
+  public String getName() {
+    return name;
   }
 }

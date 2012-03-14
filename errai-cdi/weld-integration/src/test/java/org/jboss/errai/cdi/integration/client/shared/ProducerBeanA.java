@@ -29,6 +29,9 @@ public class ProducerBeanA {
 
   @Inject
   private ConsumerBeanA consumerBeanA;
+
+  @Inject
+  private Bar bar;
   
   @Produces
   public Foo produceFoo() {
@@ -37,6 +40,10 @@ public class ProducerBeanA {
 
   public Foo getFoo() {
     return foo;
+  }
+
+  public Bar getBar() {
+    return bar;
   }
 
   public ConsumerBeanA getConsumerBeanA() {

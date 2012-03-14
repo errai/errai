@@ -183,6 +183,17 @@ public class InjectionContext {
     proxiedInjectors.put(proxyInjector.getInjectedType(), proxyInjector);
   }
 
+  public boolean isProxiedInjectorRegistered(MetaClass injectorType, QualifyingMetadata qualifyingMetadata){
+    if (proxiedInjectors.containsKey(injectorType.getErased())) {
+      for (Injector inj : injectors.get(injectorType.getErased())) {
+        if (inj.matches(injectorType.getParameterizedType(), qualifyingMetadata)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   public boolean isProxiedInjectorAvailable(MetaClass injectorType, QualifyingMetadata qualifyingMetadata) {
     if (proxiedInjectors.containsKey(injectorType.getErased())) {
       for (Injector inj : injectors.get(injectorType.getErased())) {

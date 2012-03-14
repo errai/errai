@@ -27,8 +27,6 @@ import org.jboss.errai.codegen.framework.util.Refs;
 import org.jboss.errai.codegen.framework.util.Stmt;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.util.List;
 
 import static org.jboss.errai.codegen.framework.util.GenUtil.getPrivateFieldInjectorName;
 import static org.jboss.errai.codegen.framework.util.GenUtil.getPrivateMethodName;
@@ -93,14 +91,17 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
    * @return
    */
   public Statement getValueStatement() {
+    final Injector targetInjector
+            = isProxy() ? injectionContext.getProxiedInjector(getEnclosingType(), getQualifyingMetadata()) : injector;
+
     Statement[] stmt;
     switch (taskType) {
       case PrivateField:
         return Stmt.invokeStatic(injectionContext.getProcessingContext().getBootstrapClass(),
-                getPrivateFieldInjectorName(field), Refs.get(injector.getVarName()));
+                getPrivateFieldInjectorName(field), Refs.get(targetInjector.getVarName()));
 
       case Field:
-        return Stmt.loadVariable(injector.getVarName()).loadField(field.getName());
+        return Stmt.loadVariable(targetInjector.getVarName()).loadField(field.getName());
 
       case PrivateMethod:
         if (method.getReturnType().isVoid()) {
@@ -110,7 +111,7 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
         MetaParameter[] methParms = method.getParameters();
         Statement[] resolveParmsDeps = InjectUtil.resolveInjectionDependencies(methParms, injectionContext, method);
         stmt = new Statement[methParms.length + 1];
-        stmt[0] = Refs.get(injector.getVarName());
+        stmt[0] = Refs.get(targetInjector.getVarName());
         System.arraycopy(resolveParmsDeps, 0, stmt, 1, methParms.length);
 
         //todo: this
@@ -120,7 +121,7 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
       case Method:
         stmt = InjectUtil.resolveInjectionDependencies(method.getParameters(), injectionContext, method);
 
-        return Stmt.loadVariable(injector.getVarName()).invoke(method, stmt);
+        return Stmt.loadVariable(targetInjector.getVarName()).invoke(method, stmt);
 
       case StaticMethod:
         stmt = InjectUtil.resolveInjectionDependencies(method.getParameters(), injectionContext, method);
@@ -129,7 +130,7 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
 
       case Parameter:
       case Type:
-        return Refs.get(injector.getVarName());
+        return Refs.get(targetInjector.getVarName());
 
       default:
         return LiteralFactory.getLiteral(null);
@@ -137,18 +138,21 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
   }
 
   public Statement callOrBind(Statement... values) {
+    final Injector targetInjector
+            = isProxy() ? injectionContext.getProxiedInjector(getEnclosingType(), getQualifyingMetadata()) : injector;
+
     MetaMethod meth = method;
     switch (taskType) {
       case PrivateField:
         Statement[] args = new Statement[values.length + 1];
-        args[0] = Refs.get(injector.getVarName());
+        args[0] = Refs.get(targetInjector.getVarName());
         System.arraycopy(values, 0, args, 1, values.length);
 
         return Stmt.invokeStatic(injectionContext.getProcessingContext().getBootstrapClass(),
                 getPrivateFieldInjectorName(field), args);
 
       case Field:
-        return Stmt.loadVariable(injector.getVarName()).loadField(field.getName()).assignValue(values[0]);
+        return Stmt.loadVariable(targetInjector.getVarName()).loadField(field.getName()).assignValue(values[0]);
 
       case Parameter:
         if (parm.getDeclaringMember() instanceof MetaMethod) {
@@ -162,7 +166,7 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
       case StaticMethod:
       case PrivateMethod:
         args = new Statement[values.length + 1];
-        args[0] = Refs.get(injector.getVarName());
+        args[0] = Refs.get(targetInjector.getVarName());
         System.arraycopy(values, 0, args, 1, values.length);
 
         if (!meth.isPublic()) {
@@ -170,7 +174,7 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
                   getPrivateMethodName(meth), args);
         }
         else {
-          return Stmt.loadVariable(injector.getVarName()).invoke(meth, values);
+          return Stmt.loadVariable(targetInjector.getVarName()).invoke(meth, values);
         }
 
       default:

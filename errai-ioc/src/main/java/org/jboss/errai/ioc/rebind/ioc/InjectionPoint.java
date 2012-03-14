@@ -44,7 +44,7 @@ public class InjectionPoint<T> {
   protected InjectionContext injectionContext;
 
   public InjectionPoint(T annotation, TaskType taskType, MetaConstructor constructor, MetaMethod method,
-                            MetaField field, MetaClass type, MetaParameter parm, Injector injector, InjectionContext injectionContext) {
+                        MetaField field, MetaClass type, MetaParameter parm, Injector injector, InjectionContext injectionContext) {
     this.annotation = annotation;
     this.taskType = taskType;
     this.constructor = constructor;
@@ -93,7 +93,7 @@ public class InjectionPoint<T> {
         throw new RuntimeException("unsupported operation: getType for task: " + taskType);
     }
   }
-  
+
   public MetaClass getElementTypeOrMethodReturnType() {
     switch (taskType) {
       case PrivateField:
@@ -161,18 +161,20 @@ public class InjectionPoint<T> {
         return null;
     }
   }
-  
+
   public MetaClass getEnclosingType() {
     switch (taskType) {
       case PrivateField:
       case Field:
         return field.getDeclaringClass();
       case PrivateMethod:
-      case StaticMethod:        
+      case StaticMethod:
       case Method:
         return method.getDeclaringClass();
       case Type:
         return type;
+      case Parameter:
+        return parm.getType();
       default:
         throw new RuntimeException("unsupported operation: getEncodingType for task: " + taskType);
     }
@@ -204,7 +206,27 @@ public class InjectionPoint<T> {
     }
   }
 
+  public QualifyingMetadata getQualifyingMetadata() {
+    return injectionContext.getProcessingContext().getQualifyingMetadataFactory().createFrom(getQualifiers());
+  }
+
   public Annotation[] getAnnotations(Field field) {
     return field == null ? null : field.getAnnotations();
+  }
+
+  private Boolean _isProxyCache;
+
+  public boolean isProxy() {
+    if (_isProxyCache != null) return _isProxyCache;
+    try {
+      return _isProxyCache = injectionContext.isProxiedInjectorRegistered(getEnclosingType(), getQualifyingMetadata());
+    }
+    catch (InjectionFailure e) {
+      return _isProxyCache = false;
+    }
+  }
+
+  public ProxyInjector getProxyInjector() {
+    return (ProxyInjector) injectionContext.getProxiedInjector(getEnclosingType(), getQualifyingMetadata());
   }
 }
