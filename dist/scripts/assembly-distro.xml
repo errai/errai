@@ -126,6 +126,8 @@
 
                 <exclude>**/war/TagCloudDemo/**</exclude>
                 <exclude>**/war/app/**</exclude>
+                <exclude>**/war/org.jboss.errai.demo.mobile.ErraiCdiMobileDemo/**</exclude>
+                <exclude>**/war/contacts/**</exclude>
             </excludes>
         </fileSet>
         <fileSet>

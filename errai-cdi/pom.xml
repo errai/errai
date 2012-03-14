@@ -74,6 +74,7 @@
         <module>jboss</module>
         <module>errai-javax-enterprise</module>
         <module>demos/errai-cdi-mobile-demo</module>
+        <module>demos/errai-cdi-mvp-demo</module>
         <module>demos/errai-cdi-stock-demo</module>
         <module>demos/errai-cdi-tagcloud-demo</module>
         <module>demos/errai-cdi-stress-test</module>
