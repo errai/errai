@@ -39,8 +39,6 @@ public class ProviderInjector extends TypeInjector {
       return Refs.get(getVarName());
     }
 
-    injected = true;
-
     if (providerInjector.getInjectedType().isAssignableTo(Provider.class)) {
       return Stmt.nestedCall(providerInjector.getType(injectContext, injectableInstance))
               .invoke("get");
@@ -53,7 +51,11 @@ public class ProviderInjector extends TypeInjector {
 
   @Override
   public Statement instantiateOnly(InjectionContext injectContext, InjectableInstance injectableInstance) {
-    injected = true;
     return providerInjector.getType(injectContext, injectableInstance);
+  }
+
+  @Override
+  public boolean isInjected() {
+    return true;
   }
 }

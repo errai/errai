@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,24 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.tests.wiring.client.res;
+package org.jboss.errai.cdi.integration.client.shared.scenario;
 
-import org.jboss.errai.ioc.client.api.IOCProvider;
+import com.google.gwt.event.shared.HandlerManager;
+import org.jboss.errai.ioc.client.api.Caller;
 
-import javax.inject.Provider;
-import javax.inject.Singleton;
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 
-@IOCProvider @Singleton
-public class FooServiceProvider implements Provider<FooService> {
-  @Override
-  public FooService get() {
-    return new FooService() {
-      @Override
-      public String getMessage() {
-        return "foo";
-      }
-    };
+/**
+ * @author Mike Brock
+ */
+//@Dependent
+public class ContactsPresenter {
+
+  @Inject
+  private HandlerManager eventBus;
+
+  public HandlerManager getEventBus() {
+    return eventBus;
   }
 }

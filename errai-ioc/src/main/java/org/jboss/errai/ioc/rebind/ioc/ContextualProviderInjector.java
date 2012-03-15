@@ -40,6 +40,7 @@ public class ContextualProviderInjector extends TypeInjector {
   public ContextualProviderInjector(MetaClass type, MetaClass providerType, IOCProcessingContext context) {
     super(type, context);
     this.providerInjector = new TypeInjector(providerType, context);
+    injected = true;
   }
 
   @Override
@@ -130,10 +131,10 @@ public class ContextualProviderInjector extends TypeInjector {
       statement = Refs.get(varName);
     }
 
-    injected = true;
-
     return statement;
   }
+
+
 
   @Override
   public Statement instantiateOnly(InjectionContext injectContext, InjectableInstance injectableInstance) {
@@ -182,7 +183,7 @@ public class ContextualProviderInjector extends TypeInjector {
 
     @Override
     public boolean isInjected() {
-      return false;
+      return true;
     }
 
     @Override

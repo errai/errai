@@ -191,7 +191,7 @@ public class InjectUtil {
 
     for (final MetaMethod meth : postConstructTasks) {
       if (meth.getParameters().length != 0) {
-        throw new InjectionFailure("PostConstruct method must be public and contain no parameters: "
+        throw new InjectionFailure("PostConstruct method must contain no parameters: "
                 + injector.getInjectedType().getFullyQualifiedName() + "." + meth.getName());
       }
 

@@ -27,6 +27,7 @@ import org.jboss.errai.codegen.framework.meta.MetaParameter;
 import org.jboss.errai.codegen.framework.util.Refs;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
+import org.jboss.errai.ioc.rebind.ioc.exception.NonFatalFailedDependency;
 import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependenciesException;
 
 import java.lang.annotation.Annotation;
@@ -89,6 +90,9 @@ public class InjectionTask {
         try {
           val = getInjectorOrProxy(ctx, field.getType(), qualifyingMetadata);
         }
+        catch (NonFatalFailedDependency e) {
+          return false;
+        }
         catch (InjectionFailure e) {
           throw UnsatisfiedDependenciesException.createWithSingleFieldFailure(field, field.getDeclaringClass(),
                   field.getType(), e.getMessage());
@@ -106,9 +110,9 @@ public class InjectionTask {
 
         if (val instanceof HandleInProxy) {
           ((HandleInProxy) val).getProxyInjector().addProxyCloseStatement(
-                          Stmt.invokeStatic(processingContext.getBootstrapClass(), getPrivateFieldInjectorName(field),
-                                  Refs.get(injector.getVarName()), val)
-                  );
+                  Stmt.invokeStatic(processingContext.getBootstrapClass(), getPrivateFieldInjectorName(field),
+                          Refs.get(injector.getVarName()), val)
+          );
         }
         else {
           processingContext.append(
@@ -217,9 +221,36 @@ public class InjectionTask {
 
         return retStatement;
       }
-
     }
     else {
+      //todo: refactor the InjectionContext to provide a cleaner API for interface delegates
+      try {
+        // handle the case that this is an auto resolved interface
+        Injector inj = ctx.getQualifiedInjector(clazz, qualifyingMetadata);
+        if (inj instanceof QualifiedTypeInjectorDelegate) {
+          return inj.getType(ctx, injectableInstance);
+        }
+        else if (inj != null) {
+          Statement retStatement = inj.getType(ctx, injectableInstance);
+
+          if (inj.isProvider() && inj.getEnclosingType() != null &&
+                  ctx.isProxiedInjectorRegistered(inj.getEnclosingType(),
+                          ctx.getProcessingContext().getQualifyingMetadataFactory().createDefaultMetadata())) {
+
+            ProxyInjector proxyInjector = (ProxyInjector) ctx.getProxiedInjector(inj.getEnclosingType(),
+                    ctx.getProcessingContext().getQualifyingMetadataFactory().createDefaultMetadata());
+
+            return new HandleInProxy(proxyInjector, retStatement);
+          }
+
+          return retStatement;
+        }
+
+      }
+      catch (Exception e) {
+        // fall through for now and assume a proxy is needed.
+      }
+
       ctx.recordCycle(clazz, injectableInstance.getEnclosingType());
 
       ProxyInjector proxyInjector = new ProxyInjector(ctx.getProcessingContext(), clazz, qualifyingMetadata);

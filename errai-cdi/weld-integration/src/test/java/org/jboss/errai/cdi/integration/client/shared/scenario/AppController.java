@@ -14,40 +14,41 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.cdi.integration.client.shared;
+package org.jboss.errai.cdi.integration.client.shared.scenario;
 
-
-import org.jboss.errai.ioc.client.api.AfterInitialization;
+import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.ui.HasWidgets;
+import org.jboss.errai.ioc.client.container.IOCBeanManager;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 
 /**
  * @author Mike Brock
  */
-@ApplicationScoped
-public class ConsumerBeanA {
-  @Inject Foo foo;
-  @Inject ProducerBeanA producerBeanA;
+//@ApplicationScoped
+public class AppController {
+  @Inject
+  private IOCBeanManager manager;
 
-  private Bar bar = new Bar("fooz");
+  @Inject
+  private HandlerManager eventBus;
 
-  @AfterInitialization
-  public void afterInit() {
-    System.out.println("BLAH!");
+  private HasWidgets container;
+
+  public void go(HasWidgets container) {
+    this.container = container;
   }
 
-  @Produces
-  public Bar getBar() {
-    return bar;
+  public IOCBeanManager getManager() {
+    return manager;
   }
 
-  public Foo getFoo() {
-    return foo;
+  public HandlerManager getEventBus() {
+    return eventBus;
   }
 
-  public ProducerBeanA getProducerBeanA() {
-    return producerBeanA;
+  public HasWidgets getContainer() {
+    return container;
   }
 }

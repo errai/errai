@@ -580,7 +580,7 @@ public class IOCBootstrapGenerator {
       public boolean handle(final InjectableInstance type, Singleton annotation, IOCProcessingContext context) {
         Injector injector = injectFactory.getInjectionContext().getInjector(type.getType());
         injector.setSingleton(true);
-        context.instantiateBean(injector);
+        injector.getType(injectFactory.getInjectionContext(), null);
         return true;
       }
     });
@@ -590,8 +590,7 @@ public class IOCBootstrapGenerator {
       public boolean handle(final InjectableInstance type, EntryPoint annotation, IOCProcessingContext context) {
         Injector injector = injectFactory.getInjectionContext().getInjector(type.getType());
         injector.setSingleton(true);
-        context.instantiateBean(injector);
-
+        injector.getType(injectFactory.getInjectionContext(), null);
         return true;
       }
     });
@@ -601,7 +600,7 @@ public class IOCBootstrapGenerator {
       public boolean handle(final InjectableInstance type, Service annotation, IOCProcessingContext context) {
         Injector injector = injectFactory.getInjectionContext().getInjector(type.getType());
         injector.setSingleton(true);
-        context.instantiateBean(injector);
+        injector.getType(injectFactory.getInjectionContext(), null);
         return true;
       }
     });

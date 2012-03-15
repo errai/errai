@@ -460,7 +460,7 @@ public class CDIExtensionPoints implements Extension {
                 return CDIServerUtil.lookupRPCBean(beanManager, remoteIface, remoteIface, qualAnnos);
               }
               else {
-                return CDIServerUtil.lookupRPCBean(beanManager, remoteIface, type, null);
+                return CDIServerUtil.lookupRPCBean(beanManager, remoteIface, remoteIface, null);
               }
             }
 

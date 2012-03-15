@@ -185,7 +185,7 @@ public class InjectionContext {
 
   public boolean isProxiedInjectorRegistered(MetaClass injectorType, QualifyingMetadata qualifyingMetadata){
     if (proxiedInjectors.containsKey(injectorType.getErased())) {
-      for (Injector inj : injectors.get(injectorType.getErased())) {
+      for (Injector inj : proxiedInjectors.get(injectorType.getErased())) {
         if (inj.matches(injectorType.getParameterizedType(), qualifyingMetadata)) {
           return true;
         }
@@ -198,7 +198,18 @@ public class InjectionContext {
     if (proxiedInjectors.containsKey(injectorType.getErased())) {
       for (Injector inj : injectors.get(injectorType.getErased())) {
         if (inj.matches(injectorType.getParameterizedType(), qualifyingMetadata)) {
-          return !(inj.isSingleton() && !inj.isInjected());
+          return inj.isInjected();
+        }
+      }
+    }
+    return false;
+  }
+
+  public boolean isInjectorRegistered(MetaClass injectorType, QualifyingMetadata qualifyingMetadata) {
+    if (injectors.containsKey(injectorType.getErased())) {
+      for (Injector inj : injectors.get(injectorType.getErased())) {
+        if (inj.matches(injectorType.getParameterizedType(), qualifyingMetadata)) {
+          return true;
         }
       }
     }
@@ -209,7 +220,8 @@ public class InjectionContext {
     if (injectors.containsKey(injectorType.getErased())) {
       for (Injector inj : injectors.get(injectorType.getErased())) {
         if (inj.matches(injectorType.getParameterizedType(), qualifyingMetadata)) {
-          return !(inj.isSingleton() && !inj.isInjected());
+       //   return !(inj.isSingleton() && !inj.isInjected());
+          return inj.isInjected();
         }
       }
     }

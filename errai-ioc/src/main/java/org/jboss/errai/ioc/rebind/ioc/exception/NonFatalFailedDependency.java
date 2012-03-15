@@ -14,40 +14,28 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.cdi.integration.client.shared;
+package org.jboss.errai.ioc.rebind.ioc.exception;
 
-
-import org.jboss.errai.ioc.client.api.AfterInitialization;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Produces;
-import javax.inject.Inject;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.QualifyingMetadata;
 
 /**
  * @author Mike Brock
  */
-@ApplicationScoped
-public class ConsumerBeanA {
-  @Inject Foo foo;
-  @Inject ProducerBeanA producerBeanA;
+public class NonFatalFailedDependency extends RuntimeException {
+  private final MetaClass type;
+  private final QualifyingMetadata metadata;
 
-  private Bar bar = new Bar("fooz");
-
-  @AfterInitialization
-  public void afterInit() {
-    System.out.println("BLAH!");
+  public NonFatalFailedDependency(MetaClass type, QualifyingMetadata metadata) {
+    this.type = type;
+    this.metadata = metadata;
   }
 
-  @Produces
-  public Bar getBar() {
-    return bar;
+  public MetaClass getType() {
+    return type;
   }
 
-  public Foo getFoo() {
-    return foo;
-  }
-
-  public ProducerBeanA getProducerBeanA() {
-    return producerBeanA;
+  public QualifyingMetadata getMetadata() {
+    return metadata;
   }
 }

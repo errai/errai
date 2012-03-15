@@ -33,14 +33,14 @@ import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.get;
 /**
  * @author Mike Brock
  */
-public class SortAlgoTests extends TestCase {
+public class BasicSortAlgoTests extends TestCase {
 
   final SortUnit su1 = sortUnitOf(Foo.class, sortUnitOf(Bar.class));
   final SortUnit su2 = sortUnitOf(Bar.class, hardDep(Foo.class));
   final SortUnit su3 = sortUnitOf(Outer.class, sortUnitOf(Foo.class), sortUnitOf(Bar.class));
   final SortUnit su4 = sortUnitOf(Integer.class, sortUnitOf(Foo.class));
 
-  public void testSort1() {
+  public void testBasicSort() {
 
     List<SortUnit> sorted1 = WiringUtil.worstSortAlgorithmEver(asList(su2, su1, su3, su4));
     List<SortUnit> sorted2 = WiringUtil.worstSortAlgorithmEver(asList(su1, su2, su4, su3));

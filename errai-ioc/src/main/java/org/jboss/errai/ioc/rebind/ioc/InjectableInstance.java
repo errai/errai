@@ -25,6 +25,7 @@ import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.meta.MetaParameter;
 import org.jboss.errai.codegen.framework.util.Refs;
 import org.jboss.errai.codegen.framework.util.Stmt;
+import org.jboss.errai.ioc.rebind.ioc.exception.NonFatalFailedDependency;
 
 import java.lang.annotation.Annotation;
 
@@ -92,7 +93,8 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
    */
   public Statement getValueStatement() {
     final Injector targetInjector
-            = isProxy() ? injectionContext.getProxiedInjector(getEnclosingType(), getQualifyingMetadata()) : injector;
+            = isProxy() ? injectionContext.getProxiedInjector(getEnclosingType(), getQualifyingMetadata()) :
+            injectionContext.getQualifiedInjector(getEnclosingType(), getQualifyingMetadata());
 
     Statement[] stmt;
     switch (taskType) {
@@ -139,7 +141,8 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
 
   public Statement callOrBind(Statement... values) {
     final Injector targetInjector
-            = isProxy() ? injectionContext.getProxiedInjector(getEnclosingType(), getQualifyingMetadata()) : injector;
+            //      = isProxy() ? injectionContext.getProxiedInjector(getEnclosingType(), getQualifyingMetadata()) : injector;
+            = injector;
 
     MetaMethod meth = method;
     switch (taskType) {

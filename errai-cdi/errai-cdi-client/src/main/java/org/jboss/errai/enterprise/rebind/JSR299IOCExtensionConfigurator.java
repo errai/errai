@@ -33,8 +33,10 @@ import org.jboss.errai.ioc.rebind.SortUnit;
 import org.jboss.errai.ioc.rebind.ioc.IOCExtensionConfigurator;
 import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
+import org.jboss.errai.ioc.rebind.ioc.InjectionPoint;
 import org.jboss.errai.ioc.rebind.ioc.Injector;
 import org.jboss.errai.ioc.rebind.ioc.InjectorFactory;
+import org.jboss.errai.ioc.rebind.ioc.TypeDiscoveryListener;
 import org.jboss.errai.ioc.rebind.ioc.TypeInjector;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -46,6 +48,7 @@ import javax.inject.Scope;
 import javax.inject.Singleton;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 @IOCExtension
@@ -56,18 +59,11 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
     context.addSingletonScopeAnnotation(ApplicationScoped.class);
 
     procFactory.registerHandler(Produces.class, new JSR330AnnotationHandler<Produces>() {
+
       //
       @Override
-      public Set<SortUnit> checkDependencies(DependencyControl control, InjectableInstance instance, Produces annotation,
-                                             IOCProcessingContext context) {
-
-        control.masqueradeAs(instance.getElementTypeOrMethodReturnType());
-        return Collections.singleton(new SortUnit(instance.getEnclosingType(), true));
-      }
-
-      @Override
-      public boolean handle(final InjectableInstance instance, final Produces annotation,
-                            final IOCProcessingContext context) {
+      public Set<SortUnit> checkDependencies(DependencyControl control, final InjectableInstance instance, Produces annotation,
+                                             final IOCProcessingContext context) {
 
         switch (instance.getTaskType()) {
           case Type:
@@ -83,6 +79,20 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
             super.qualifyingMetadata = JSR299QualifyingMetadata.createFromAnnotations(instance.getQualifiers());
             this.provider = true;
             this.enclosingType = instance.getEnclosingType();
+
+            if (injectorFactory.getInjectionContext().isInjectorRegistered(enclosingType, qualifyingMetadata)) {
+              setInjected(true);
+            }
+            else {
+              context.registerTypeDiscoveryListener(new TypeDiscoveryListener() {
+                @Override
+                public void onDiscovery(IOCProcessingContext context, InjectionPoint injectionPoint) {
+                  if (injectionPoint.getEnclosingType().equals(enclosingType)) {
+                    setInjected(true);
+                  }
+                }
+              });
+            }
           }
 
           @Override
@@ -93,11 +103,6 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
           @Override
           public Statement getType(InjectionContext injectContext, InjectableInstance injectableInstance) {
             return instance.getValueStatement();
-          }
-
-          @Override
-          public boolean isInjected() {
-            return true;
           }
 
           @Override
@@ -132,6 +137,14 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
         });
 
 
+        control.masqueradeAs(instance.getElementTypeOrMethodReturnType());
+        return Collections.singleton(new SortUnit(instance.getEnclosingType(), true));
+      }
+
+      @Override
+      public boolean handle(final InjectableInstance instance, final Produces annotation,
+                            final IOCProcessingContext context) {
+
         return true;
       }
 
@@ -139,10 +152,11 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
 
     procFactory.registerHandler(ApplicationScoped.class, new JSR330AnnotationHandler<ApplicationScoped>() {
       public boolean handle(InjectableInstance instance, ApplicationScoped annotation, IOCProcessingContext context) {
+        InjectionContext injectionContext = injectorFactory.getInjectionContext();
         TypeInjector i = (TypeInjector) instance.getInjector();
         i.setSingleton(true);
 
-        context.instantiateBean(i);
+        i.getType(injectionContext, null);
         return true;
       }
     });
@@ -152,7 +166,6 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
         InjectionContext injectionContext = injectorFactory.getInjectionContext();
         TypeInjector i = (TypeInjector) instance.getInjector();
         i.getType(injectionContext, null);
-
         return true;
       }
     });

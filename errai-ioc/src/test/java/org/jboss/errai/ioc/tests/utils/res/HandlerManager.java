@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,10 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.tests.wiring.client.res;
+package org.jboss.errai.ioc.tests.utils.res;
 
-import org.jboss.errai.ioc.client.api.IOCProvider;
-
-import javax.inject.Provider;
-import javax.inject.Singleton;
-
-@IOCProvider @Singleton
-public class FooServiceProvider implements Provider<FooService> {
-  @Override
-  public FooService get() {
-    return new FooService() {
-      @Override
-      public String getMessage() {
-        return "foo";
-      }
-    };
-  }
+/**
+ * @author Mike Brock
+ */
+public class HandlerManager {
 }

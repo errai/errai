@@ -174,9 +174,6 @@ public class TypeInjector extends Injector {
 
     callbackBuilder.append(loadVariable(varName).returnValue());
 
-    if (!isSingleton()) {
-      injected = false;
-    }
     return retVal;
   }
 

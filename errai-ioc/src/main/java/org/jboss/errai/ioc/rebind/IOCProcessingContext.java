@@ -148,7 +148,7 @@ public class IOCProcessingContext {
   }
   
   public void instantiateBean(Injector injector) {
-    toInstantiate.add(injector);
+   toInstantiate.add(injector);
   }
 
   public List<Statement> getAppendToEnd() {
