@@ -55,6 +55,14 @@ public class RpcContext {
   }
 
   /**
+   * Removes the resources associated with the current thread.
+   */
+  public static void remove() {
+    threadLocalHttpSession.remove();
+    threadLocalServletRequest.remove();
+  }
+  
+  /**
    * @return the HTTP session object associated with this {@see Thread}
    */
   public static HttpSession getHttpSession() {

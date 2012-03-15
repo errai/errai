@@ -126,6 +126,9 @@ public class ConversationalEndpointCallback implements MessageCallback {
     }
     catch (Exception e) {
       throw new MessageDeliveryFailure("error invoking endpoint", e);
+    } 
+    finally {
+      RpcContext.remove();
     }
   }
 }

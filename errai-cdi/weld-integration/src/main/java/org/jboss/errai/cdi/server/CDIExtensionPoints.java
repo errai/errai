@@ -37,7 +37,6 @@ import java.util.UUID;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Default;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
@@ -85,7 +84,6 @@ import org.jboss.weld.manager.BeanManagerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Extension points to the CDI container.
  * Makes Errai components available as CDI beans (i.e. the message bus)
@@ -101,8 +99,7 @@ public class CDIExtensionPoints implements Extension {
 
   private TypeRegistry managedTypes = null;
   private String uuid = null;
-  //  private ContextManager contextManager;
-  private ErraiService service;
+  private ErraiService<?> service;
 
   private Set<EventConsumer> eventConsumers = new LinkedHashSet<EventConsumer>();
   private Set<MessageSender> messageSenders = new LinkedHashSet<MessageSender>();
@@ -130,7 +127,6 @@ public class CDIExtensionPoints implements Extension {
   public void beforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
     this.uuid = UUID.randomUUID().toString();
     this.managedTypes = new TypeRegistry();
-
 
     try {
       log.info("configuring Errai CDI");
@@ -191,15 +187,16 @@ public class CDIExtensionPoints implements Extension {
         isRpc = intf.isAnnotationPresent(Remote.class);
 
         if (isRpc) {
-          log.debug("Identified Errai RPC interface: " + intf + " on " + type);
-          managedTypes.addRPCEndpoint(intf, type);
+          log.info("Identified RPC interface: " + intf + " on " + type);
+          if (!managedTypes.getRemoteInterfaces().contains(intf)) {
+            managedTypes.addRemoteInterface(intf);
+          }
         }
       }
 
       if (!isRpc) {
         managedTypes.addServiceEndpoint(type);
       }
-
     }
     else {
       for (AnnotatedMethod method : type.getMethods()) {
@@ -352,14 +349,11 @@ public class CDIExtensionPoints implements Extension {
       abd.addBean(new SenderBean(ms.getSenderType(), ms.getQualifiers(), bus));
     }
 
-
     // Errai bus injection
     abd.addBean(new MessageBusBean(bm, bus));
 
     // Support to inject the request dispatcher.
     abd.addBean(new RequestDispatcherMetaData(bm, service.getDispatcher()));
-
-    //   abd.addBean(new SenderBean((BeanManagerImpl) bm, service.getDispatcher()));
 
     // Register observers
     abd.addObserverMethod(new ShutdownEventObserver(managedTypes, bus, uuid));
@@ -424,48 +418,36 @@ public class CDIExtensionPoints implements Extension {
           callback.callback(message);
         }
       });
-
     }
 
-    //todo: needs to be rewritten to support @SessionScoped
-    for (final Class<?> rpcIntf : managedTypes.getRpcEndpoints().keySet()) {
-      final AnnotatedType type = managedTypes.getRpcEndpoints().get(rpcIntf);
-      final Class beanClass = type.getJavaClass();
-
-      log.info("Register RPC Endpoint: " + type + "(" + rpcIntf + ")");
-
-      // TODO: Copied from errai internals, refactor at some point
-      createRPCScaffolding(rpcIntf, beanClass, bus, beanManager);
+    for (final Class<?> rpcIntf : managedTypes.getRemoteInterfaces()) {
+      createRPCScaffolding(rpcIntf, bus, beanManager);
     }
   }
 
-  private void createRPCScaffolding(final Class remoteIface, final Class<?> type, final MessageBus bus,
-                                    final BeanManager beanManager) {
-
+  private void createRPCScaffolding(final Class remoteIface, final MessageBus bus, final BeanManager beanManager) {
     Map<String, MessageCallback> epts = new HashMap<String, MessageCallback>();
 
     // beware of classloading issues. better reflect on the actual instance
-    for (Class<?> intf : type.getInterfaces()) {
-      for (final Method method : intf.getDeclaredMethods()) {
-        if (RebindUtils.isMethodInInterface(remoteIface, method)) {
-          epts.put(RebindUtils.createCallSignature(method), new ConversationalEndpointCallback(new ServiceInstanceProvider() {
-            @Override
-            public Object get(Message message) {
-              if (message.hasPart(CDIProtocol.Qualifiers)) {
-                List<String> quals = message.get(List.class, CDIProtocol.Qualifiers);
-                Annotation[] qualAnnos = new Annotation[quals.size()];
-                for (int i = 0; i < quals.size(); i++) {
-                  qualAnnos[i] = beanQualifiers.get(quals.get(i));
-                }
-                return CDIServerUtil.lookupRPCBean(beanManager, remoteIface, remoteIface, qualAnnos);
+    for (final Method method : remoteIface.getDeclaredMethods()) {
+      if (RebindUtils.isMethodInInterface(remoteIface, method)) {
+        epts.put(RebindUtils.createCallSignature(method), new ConversationalEndpointCallback(new ServiceInstanceProvider() {
+          @Override
+          public Object get(Message message) {
+            if (message.hasPart(CDIProtocol.Qualifiers)) {
+              List<String> quals = message.get(List.class, CDIProtocol.Qualifiers);
+              Annotation[] qualAnnos = new Annotation[quals.size()];
+              for (int i = 0; i < quals.size(); i++) {
+                qualAnnos[i] = beanQualifiers.get(quals.get(i));
               }
-              else {
-                return CDIServerUtil.lookupRPCBean(beanManager, remoteIface, remoteIface, null);
-              }
+              return CDIServerUtil.lookupRPCBean(beanManager, remoteIface, qualAnnos);
             }
+            else {
+              return CDIServerUtil.lookupRPCBean(beanManager, remoteIface, null);
+            }
+          }
 
-          }, method, bus));
-        }
+        }, method, bus));
       }
     }
 
@@ -544,7 +526,6 @@ public class CDIExtensionPoints implements Extension {
       EventConsumer that = (EventConsumer) o;
 
       return that.toString().equals(toString());
-
     }
 
     @Override
@@ -570,46 +551,5 @@ public class CDIExtensionPoints implements Extension {
     public Set<Annotation> getQualifiers() {
       return qualifiers;
     }
-
-
   }
-
-  private static Annotation[] getQualifiersFromField(Field field) {
-    List<Annotation> qualifiers = new ArrayList<Annotation>();
-    for (Annotation a : field.getDeclaredAnnotations()) {
-      if (!a.getClass().isAnnotationPresent(Qualifier.class)
-              || a instanceof Default)
-        continue;
-
-      qualifiers.add(a);
-    }
-    return qualifiers.toArray(new Annotation[qualifiers.size()]);
-  }
-
-
-  private static Annotation[] getQualifiersFromObserverMethod(Method method) {
-    for (Annotation[] annotations : method.getParameterAnnotations()) {
-      boolean isObserverType = false;
-      for (Annotation a : annotations) {
-        if (a instanceof Observes) {
-          isObserverType = true;
-          break;
-        }
-      }
-
-      if (isObserverType) {
-        List<Annotation> qualifiers = new ArrayList<Annotation>();
-        for (Annotation a : annotations) {
-          if (!a.annotationType().isAnnotationPresent(Qualifier.class)
-                  || a instanceof Default) continue;
-
-          qualifiers.add(a);
-        }
-        return qualifiers.toArray(new Annotation[qualifiers.size()]);
-      }
-    }
-    return new Annotation[0];
-  }
-
-
 }

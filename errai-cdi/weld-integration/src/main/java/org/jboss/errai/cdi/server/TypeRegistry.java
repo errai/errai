@@ -17,8 +17,10 @@ package org.jboss.errai.cdi.server;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
@@ -29,13 +31,13 @@ import javax.enterprise.inject.spi.AnnotatedType;
  *
  * @author Heiko Braun <hbraun@redhat.com>
  * @author Mike Brock
- * @date: Sep 15, 2010
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class TypeRegistry {
 
   private List<AnnotatedType> serviceEndpoints = new ArrayList<AnnotatedType>();
   private Map<AnnotatedType, List<AnnotatedMethod>> serviceMethods = new HashMap<AnnotatedType, List<AnnotatedMethod>>();
-  private Map<Class<?>, AnnotatedType> rpcEndpoints = new HashMap<Class<?>, AnnotatedType>();
+  private Set<Class<?>> remoteInterfaces = new HashSet<Class<?>>();
 
   public void addServiceEndpoint(AnnotatedType service) {
     serviceEndpoints.add(service);
@@ -48,8 +50,8 @@ public class TypeRegistry {
     serviceMethods.get(service).add(method);
   }
 
-  public void addRPCEndpoint(Class<?> intf, AnnotatedType endpoint) {
-    rpcEndpoints.put(intf, endpoint);
+  public void addRemoteInterface(Class<?> intf) {
+    remoteInterfaces.add(intf);
   }
 
   public List<AnnotatedType> getServiceEndpoints() {
@@ -60,8 +62,8 @@ public class TypeRegistry {
     return serviceMethods;
   }
 
-  public Map<Class<?>, AnnotatedType> getRpcEndpoints() {
-    return rpcEndpoints;
+  public Set<Class<?>> getRemoteInterfaces() {
+    return remoteInterfaces;
   }
 
 }

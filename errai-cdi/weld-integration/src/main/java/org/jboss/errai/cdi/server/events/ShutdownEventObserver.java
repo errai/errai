@@ -87,7 +87,7 @@ public class ShutdownEventObserver implements ObserverMethod {
       bus.unsubscribeAll(subject);
     }
 
-    for (Class<?> rpcIntf : managedTypes.getRpcEndpoints().keySet()) {
+    for (Class<?> rpcIntf : managedTypes.getRemoteInterfaces()) {
       String rpcSubjectName = rpcIntf.getName() + ":RPC";
       log.debug("Unsubscribe: " + rpcSubjectName);
       bus.unsubscribeAll(rpcSubjectName);

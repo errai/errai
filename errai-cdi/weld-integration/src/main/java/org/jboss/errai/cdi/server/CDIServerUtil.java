@@ -63,12 +63,13 @@ public class CDIServerUtil {
   }
 
 
-  public static <T> T lookupRPCBean(BeanManager beanManager, T rpcIntf, Class beanClass, Annotation[] annotations) {
+  public static <T> T lookupRPCBean(BeanManager beanManager, Class beanClass, Annotation[] annotations) {
     Bean<?> bean = null; 
       
     if (annotations != null) {
       bean = beanManager.resolve(beanManager.getBeans(beanClass, annotations));
-    } else {
+    } 
+    else {
       bean = beanManager.resolve(beanManager.getBeans(beanClass));
     }
       
