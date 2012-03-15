@@ -32,7 +32,7 @@ public class RpcIntegrationTest extends AbstractErraiCDITest {
     return "org.jboss.errai.cdi.integration.RpcTestModule";
   }
 
-  public void testRPCToCDIBeanQualifiedWithA() {
+  public void testRpcToCDIBeanQualifiedWithA() {
     InitVotes.registerOneTimeInitCallback(new Runnable() {
       @Override
       public void run() {
@@ -50,7 +50,7 @@ public class RpcIntegrationTest extends AbstractErraiCDITest {
     delayTestFinish(60000);
   }
 
-  public void testRPCToCDIBeanQualifiedWithB() {
+  public void testRpcToCDIBeanQualifiedWithB() {
     InitVotes.registerOneTimeInitCallback(new Runnable() {
       @Override
       public void run() {
@@ -67,7 +67,7 @@ public class RpcIntegrationTest extends AbstractErraiCDITest {
     delayTestFinish(60000);
   }
 
-  public void testRPCToUnqualifiedCDIBean() {
+  public void testRpcToUnqualifiedCDIBean() {
     InitVotes.registerOneTimeInitCallback(new Runnable() {
       @Override
       public void run() {
@@ -84,7 +84,7 @@ public class RpcIntegrationTest extends AbstractErraiCDITest {
     delayTestFinish(60000);
   }
   
-  public void testInterceptedRPC() {
+  public void testInterceptedRpc() {
     InitVotes.registerOneTimeInitCallback(new Runnable() {
       @Override
       public void run() {
@@ -98,6 +98,27 @@ public class RpcIntegrationTest extends AbstractErraiCDITest {
       }
     });
 
+    delayTestFinish(60000);
+  }
+  
+  public void testRpcAccesssingHttpSession() {
+    InitVotes.registerOneTimeInitCallback(new Runnable() {
+      @Override
+      public void run() {
+        RpcTestBean.getInstance().callSetSessionAttribute(new RemoteCallback<Void>() {
+          @Override
+          public void callback(Void response) {
+            RpcTestBean.getInstance().callGetSessionAttribute(new RemoteCallback<String>() {
+              public void callback(String response) {
+                assertEquals("success", response);
+                finishTest();
+              }
+            }, "test");
+          }
+        }, "test", "success");
+      }
+    });
+    
     delayTestFinish(60000);
   }
 }

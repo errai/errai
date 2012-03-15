@@ -38,6 +38,9 @@ public class RpcTestBean {
   @Inject
   private Caller<MyInterceptedRemote> myInterceptedRemoteCaller;
   
+  @Inject
+  private Caller<MySessionAttributeSettingRemote> mySessionAttributeSettingRemoteCaller;
+  
   @Inject @A
   private Caller<MyRemote> myRemoteCallerA;
   
@@ -67,6 +70,14 @@ public class RpcTestBean {
     myRemoteCallerB.call(callback).call(val);
   }
 
+  public void callSetSessionAttribute(RemoteCallback<Void> callback, String key, String value) {
+     mySessionAttributeSettingRemoteCaller.call(callback).setSessionAttribute(key, value);
+  }
+  
+  public void callGetSessionAttribute(RemoteCallback<String> callback, String key) {
+    mySessionAttributeSettingRemoteCaller.call(callback).getSessionAttribute(key);
+ }
+  
   public static RpcTestBean getInstance() {
     return instance;
   }

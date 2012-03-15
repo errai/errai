@@ -22,6 +22,7 @@ import org.jboss.errai.bus.server.annotations.Remote;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Remote
-public interface MyInterceptedRemote {
-  public String interceptedCall(String callString);
+public interface MySessionAttributeSettingRemote {
+  public void setSessionAttribute(String key, String value);
+  public String getSessionAttribute(String key);
 }
