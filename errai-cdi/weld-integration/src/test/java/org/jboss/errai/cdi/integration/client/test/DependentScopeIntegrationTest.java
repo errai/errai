@@ -25,6 +25,7 @@ import org.jboss.errai.cdi.integration.client.shared.DependentBeanCycleA;
 import org.jboss.errai.cdi.integration.client.shared.DependentBeanCycleB;
 import org.jboss.errai.cdi.integration.client.shared.DependentScopedBean;
 import org.jboss.errai.cdi.integration.client.shared.DependentScopedBeanWithDependencies;
+import org.jboss.errai.cdi.integration.client.shared.LincolnCat;
 import org.jboss.errai.cdi.integration.client.shared.ServiceA;
 import org.jboss.errai.cdi.integration.client.shared.ServiceB;
 import org.jboss.errai.cdi.integration.client.shared.ServiceC;
@@ -237,6 +238,26 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
 
         assertTrue("predestroy method not called!", bean.isDestroyed());
         assertTrue("predestroy method not called", bean.getTestDestroyB().isDestroyed());
+
+        finishTest();
+      }
+    });
+  }
+
+  public void testDependentBeanWithProducerDependency() {
+    delayTestFinish(60000);
+
+    InitVotes.registerOneTimeInitCallback(new Runnable() {
+
+      @Override
+      public void run() {
+        LincolnCat bean = IOC.getBeanManager()
+                .lookupBean(LincolnCat.class).getInstance();
+
+
+        assertNotNull("no instance returned for bean", bean);
+        assertNotNull("value not injected", bean.getBar());
+        assertEquals("wrong value injected", "bar", bean.getBar());
 
         finishTest();
       }
