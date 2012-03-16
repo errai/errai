@@ -17,45 +17,24 @@
 package org.jboss.errai.cdi.integration.client.shared;
 
 import javax.annotation.PreDestroy;
-import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 /**
  * @author Mike Brock
  */
-@ApplicationScoped
-public class ApplicationScopedBean {
-  @Inject DependentScopedBean bean1;
-  @Inject DependentScopedBean bean2;
-
-  // the dependent qualification is optional -- this just confirms it doesn't break when used.
-  @Inject @Dependent DependentScopedBean bean3;
-  
-  @Inject @Dependent DependentScopedBeanWithDependencies beanWithDependencies;
-
+@Dependent
+public class DepScopedBeanWithASBeanDep {
+  @Inject ApplicationScopedBean applicationScopedBean;
   private boolean preDestroyCalled = false;
-
-
-  public DependentScopedBean getBean1() {
-    return bean1;
-  }
-
-  public DependentScopedBean getBean2() {
-    return bean2;
-  }
-
-  public DependentScopedBean getBean3() {
-    return bean3;
-  }
-
-  public DependentScopedBeanWithDependencies getBeanWithDependencies() {
-    return beanWithDependencies;
-  }
 
   @PreDestroy
   private void preDestroy() {
     preDestroyCalled = true;
+  }
+
+  public ApplicationScopedBean getApplicationScopedBean() {
+    return applicationScopedBean;
   }
 
   public boolean isPreDestroyCalled() {

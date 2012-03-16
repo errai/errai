@@ -21,6 +21,7 @@ import java.util.Set;
 
 import org.jboss.errai.cdi.integration.client.shared.ApplicationScopedBean;
 import org.jboss.errai.cdi.integration.client.shared.ApplicationScopedBeanB;
+import org.jboss.errai.cdi.integration.client.shared.DepScopedBeanWithASBeanDep;
 import org.jboss.errai.cdi.integration.client.shared.DependentBeanCycleA;
 import org.jboss.errai.cdi.integration.client.shared.DependentBeanCycleB;
 import org.jboss.errai.cdi.integration.client.shared.DependentScopedBean;
@@ -254,7 +255,6 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
         LincolnCat bean = IOC.getBeanManager()
                 .lookupBean(LincolnCat.class).getInstance();
 
-
         assertNotNull("no instance returned for bean", bean);
         assertNotNull("value not injected", bean.getBar());
         assertEquals("wrong value injected", "bar", bean.getBar());
@@ -262,5 +262,28 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
         finishTest();
       }
     });
+  }
+
+  public void testDependentScopedBeanWithAppScopedDependencyDestroy() {
+    InitVotes.registerOneTimeInitCallback(new Runnable() {
+
+      @Override
+      public void run() {
+        DepScopedBeanWithASBeanDep bean = IOC.getBeanManager()
+                .lookupBean(DepScopedBeanWithASBeanDep.class).getInstance();
+
+        assertNotNull("no instance returned for bean", bean);
+        assertNotNull("ApplicationScopedBean not injected", bean.getApplicationScopedBean());
+
+        IOC.getBeanManager().destroyBean(bean);
+
+        assertTrue("pre-destroy method not called", bean.isPreDestroyCalled());
+        assertFalse("ApplicationScopedBean's predestruct method must NOT be called",
+                bean.getApplicationScopedBean().isPreDestroyCalled());
+
+        finishTest();
+      }
+    });
+
   }
 }

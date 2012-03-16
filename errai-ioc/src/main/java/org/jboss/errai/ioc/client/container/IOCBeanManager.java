@@ -88,18 +88,9 @@ public class IOCBeanManager {
     }
   }
 
-
   void addProxyReference(Object proxyRef, Object realRef) {
     proxyLookupForManagedBeans.put(proxyRef, realRef);
   }
-
-//  void addDestructionCallback(Object ref, DestructionCallback callback) {
-//    List<DestructionCallback> list = activeManagedBeans.get(ref);
-//    if (list == null) {
-//      activeManagedBeans.put(ref, list = new ArrayList<DestructionCallback>());
-//    }
-//    list.add(callback);
-//  }
 
   void addDestructionCallbacks(Object ref, Map<Object, DestructionCallback> callbacks) {
     activeManagedBeans.put(ref, callbacks);
