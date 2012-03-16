@@ -21,9 +21,7 @@ import org.jboss.errai.codegen.framework.Parameter;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
-import org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.util.Refs;
 import org.jboss.errai.ioc.client.container.BeanRef;
 import org.jboss.errai.ioc.client.container.CreationalCallback;
@@ -57,7 +55,7 @@ public class TypeInjector extends Injector {
     this.type = type;
     this.singleton = context.isSingletonScope(type.getAnnotations());
     this.alternative = type.isAnnotationPresent(Alternative.class);
-    this.varName = InjectUtil.getNewVarName();
+    this.varName = InjectUtil.getNewInjectorName();
 
     try {
       Set<Annotation> qualifiers = new HashSet<Annotation>();
@@ -131,7 +129,7 @@ public class TypeInjector extends Injector {
 
     ctx.pushBlockBuilder(callbackBuilder);
 
-    creationalCallbackVarName = InjectUtil.getNewVarName();
+    creationalCallbackVarName = InjectUtil.getNewInjectorName();
 
     InjectUtil.getConstructionStrategy(this, injectContext).generateConstructor(new ConstructionStatusCallback() {
       @Override

@@ -30,17 +30,27 @@ import java.util.Map;
  * @author Mike Brock
  */
 public class CreationalContext {
+  private final IOCBeanManager beanManager;
   private Map<Object, InitializationCallback> initializationCallbacks =
           new IdentityHashMap<Object, InitializationCallback>();
 
   private Map<BeanRef, List<ProxyResolver>> unresolvedProxies = new HashMap<BeanRef, List<ProxyResolver>>();
   private Map<BeanRef, Object> wired = new LinkedHashMap<BeanRef, Object>();
 
-  public CreationalContext() {
+  public CreationalContext(IOCBeanManager beanManager) {
+    this.beanManager = beanManager;
   }
 
   public void addInitializationCallback(Object beanInstance, InitializationCallback callback) {
     initializationCallbacks.put(beanInstance, callback);
+  }
+
+  public void addDestructionCallback(Object beanInstance, DestructionCallback callback) {
+    beanManager.addDestructionCallback(beanInstance, callback);
+  }
+
+  public void addProxyReference(Object proxyRef, Object realRef) {
+    beanManager.addProxyReference(proxyRef, realRef);
   }
 
   public BeanRef getBeanReference(Class<?> beanType, Annotation[] qualifiers) {

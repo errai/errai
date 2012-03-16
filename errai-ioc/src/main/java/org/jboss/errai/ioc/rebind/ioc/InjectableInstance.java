@@ -140,9 +140,7 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
   }
 
   public Statement callOrBind(Statement... values) {
-    final Injector targetInjector
-            //      = isProxy() ? injectionContext.getProxiedInjector(getEnclosingType(), getQualifyingMetadata()) : injector;
-            = injector;
+    final Injector targetInjector = injector;
 
     MetaMethod meth = method;
     switch (taskType) {

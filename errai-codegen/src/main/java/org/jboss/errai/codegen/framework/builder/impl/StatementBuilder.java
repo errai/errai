@@ -353,6 +353,26 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
     return this;
   }
 
+  @Override
+  public StatementEnd returnVoid() {
+    return new StatementEnd() {
+      @Override
+      public String toJavaString() {
+        return "return";
+      }
+
+      @Override
+      public String generate(Context context) {
+        return toJavaString();
+      }
+
+      @Override
+      public MetaClass getType() {
+        return MetaClassFactory.get(void.class);
+      }
+    };
+  }
+
   public ContextualStatementBuilder castTo(Class<?> type, Statement statement) {
     return nestedCall(Cast.to(type, statement));
   }

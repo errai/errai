@@ -17,6 +17,7 @@
 package org.jboss.errai.ioc.tests.wiring.client.res;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.jboss.errai.bus.client.framework.MessageBus;
@@ -44,13 +45,19 @@ public class SimpleBean extends SimpleSuperBean {
   @Inject ServiceA svcA;
   @Inject ServiceB svcB;
 
-  private boolean postConstructCalled = true;
+  private boolean postConstructCalled = false;
+  private boolean preDestroyCalled = false;
 
   @PostConstruct
   private void init() {
     postConstructCalled = true;
   }
-  
+
+  @PreDestroy
+  public void destroy() {
+    preDestroyCalled = true;;
+  }
+
   @Inject
   public SimpleBean(RequestDispatcher dispatcher3, MessageBus bus3) {
     this.dispatcher3 = dispatcher3;

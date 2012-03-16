@@ -16,8 +16,10 @@
 package org.jboss.errai.enterprise.rebind;
 
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.enterprise.event.Observes;
 import javax.enterprise.util.TypeLiteral;
@@ -25,11 +27,14 @@ import javax.enterprise.util.TypeLiteral;
 import org.jboss.errai.bus.client.api.Local;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.framework.Subscription;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Parameter;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
+import org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.meta.MetaParameter;
 import org.jboss.errai.codegen.framework.util.Bool;
@@ -39,9 +44,13 @@ import org.jboss.errai.enterprise.client.cdi.AbstractCDIEventCallback;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
+import org.jboss.errai.ioc.client.container.DestructionCallback;
 import org.jboss.errai.ioc.rebind.ioc.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
+
+import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.typeParametersOf;
 
 /**
  * Generates the boiler plate for @Observes annotations use in GWT clients.<br/>
@@ -53,13 +62,14 @@ import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
  */
 @CodeDecorator
 public class ObservesExtension extends IOCDecoratorExtension<Observes> {
+  private final AtomicInteger counter = new AtomicInteger();
 
   public ObservesExtension(Class<Observes> decoratesWith) {
     super(decoratesWith);
   }
 
   @Override
-  public Statement generateDecorator(InjectableInstance<Observes> instance) {
+  public List<? extends Statement> generateDecorator(InjectableInstance<Observes> instance) {
     final Context ctx = instance.getInjectionContext().getProcessingContext().getContext();
     final MetaMethod method = instance.getMethod();
     final MetaParameter parm = instance.getParm();
@@ -99,6 +109,24 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
                     .append(instance.callOrBind(Stmt.loadVariable("message").invoke("get", parm.getType().asClass(), CDIProtocol.BeanReference)))
                     .finish());
 
-    return Stmt.create(ctx).nestedCall(bus).invoke(subscribeMethodName, subject, callBackBlock.finish().finish());
+    // create the destruction callback to deregister the service when the bean is destroyed.
+    final String subscrVar = InjectUtil.getUniqueVarName();
+
+    Statement subscribeStatement =
+            Stmt.declareVariable(Subscription.class).asFinal().named(subscrVar)
+                    .initializeWith(Stmt.create(ctx).nestedCall(bus).invoke(subscribeMethodName, subject, callBackBlock.finish().finish()));
+
+    final MetaClass destructionCallbackType =
+            parameterizedAs(DestructionCallback.class, typeParametersOf(instance.getEnclosingType()));
+
+    final BlockBuilder<AnonymousClassStructureBuilder> destroyMeth
+            = ObjectBuilder.newInstanceOf(destructionCallbackType).extend()
+            .publicOverridesMethod("destroy", Parameter.of(instance.getEnclosingType(), "obj", true))
+            .append(Stmt.loadVariable(subscrVar).invoke("remove"));
+
+    Statement descrCallback = Stmt.create().loadVariable("context").invoke("addDestructionCallback",
+            instance.getInjector().getVarName(), destroyMeth.finish().finish());
+
+    return Arrays.asList(subscribeStatement, descrCallback);
   }
 }

@@ -39,6 +39,7 @@ import org.jboss.errai.codegen.framework.util.GenUtil;
 import org.jboss.errai.codegen.framework.util.Refs;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.ioc.client.container.DestructionCallback;
 import org.jboss.errai.ioc.client.container.InitializationCallback;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependenciesException;
@@ -48,6 +49,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.enterprise.inject.New;
 import javax.inject.Inject;
 import javax.inject.Qualifier;
@@ -74,7 +76,8 @@ public class InjectUtil {
   private static final Class[] injectionAnnotations
           = {Inject.class, com.google.inject.Inject.class};
 
-  private static final AtomicInteger counter = new AtomicInteger(0);
+  private static final AtomicInteger injectorCounter = new AtomicInteger(0);
+  private static final AtomicInteger uniqueCounter = new AtomicInteger(0);
 
   private static Logger log = LoggerFactory.getLogger("errai-ioc");
 
@@ -85,6 +88,7 @@ public class InjectUtil {
     final List<MetaConstructor> constructorInjectionPoints = scanForConstructorInjectionPoints(type);
     final List<InjectionTask> injectionTasks = scanForTasks(injector, ctx, type);
     final List<MetaMethod> postConstructTasks = scanForPostConstruct(type);
+    final List<MetaMethod> preDestroyTasks = scanForPreDestroy(type);
 
     for (Class<? extends Annotation> a : ctx.getDecoratorAnnotationsBy(ElementType.TYPE)) {
       if (type.isAnnotationPresent(a)) {
@@ -122,6 +126,7 @@ public class InjectUtil {
           handleInjectionTasks(ctx, injectionTasks);
 
           doPostConstruct(ctx, injector, postConstructTasks);
+          doPreDestroy(ctx, injector, preDestroyTasks);
         }
 
       };
@@ -151,6 +156,7 @@ public class InjectUtil {
           handleInjectionTasks(ctx, injectionTasks);
 
           doPostConstruct(ctx, injector, postConstructTasks);
+          doPreDestroy(ctx, injector, preDestroyTasks);
         }
       };
     }
@@ -160,17 +166,11 @@ public class InjectUtil {
                                            List<InjectionTask> tasks) {
     for (InjectionTask task : tasks) {
       if (!task.doTask(ctx)) {
-//        log.warn("your object graph has cyclical dependencies and the cycle could not be proxied. use of the @Dependent scope and @New qualifier may not " +
-//                "produce properly initalized objects for: " + task.getInjector().getInjectedType().getFullyQualifiedName() + "\n" +
-//                "\t Offending node: " + task + "\n" +
-//                "\t Note          : this issue can be resolved by making "
-//                + task.getInjector().getInjectedType().getFullyQualifiedName() + " proxyable. Introduce a default no-arg constructor and make sure the class is non-final.");
-
-
         ctx.deferTask(task);
       }
     }
   }
+
 
   private static void doPostConstruct(final InjectionContext ctx,
                                       final Injector injector,
@@ -216,6 +216,53 @@ public class InjectUtil {
             .initializeWith(classStructureBuilder.finish()));
 
     pc.append(Stmt.loadVariable("context").invoke("addInitializationCallback",
+            Refs.get(injector.getVarName()), Refs.get(varName)));
+  }
+
+  private static void doPreDestroy(final InjectionContext ctx,
+                                   final Injector injector,
+                                   final List<MetaMethod> preDestroyTasks) {
+
+    if (preDestroyTasks.isEmpty()) return;
+
+
+    final MetaClass destructionCallbackType =
+            parameterizedAs(DestructionCallback.class, typeParametersOf(injector.getInjectedType()));
+
+    final BlockBuilder<AnonymousClassStructureBuilder> initMeth
+            = ObjectBuilder.newInstanceOf(destructionCallbackType).extend()
+            .publicOverridesMethod("destroy", Parameter.of(injector.getInjectedType(), "obj", true));
+
+    final String varName = "destroy_" + injector.getVarName();
+    injector.setPreDestroyCallbackVar(varName);
+
+    for (final MetaMethod meth : preDestroyTasks) {
+      if (meth.getParameters().length != 0) {
+        throw new InjectionFailure("@PreDestroy method must contain no parameters: "
+                + injector.getInjectedType().getFullyQualifiedName() + "." + meth.getName());
+      }
+
+      if (!meth.isPublic()) {
+        ctx.addExposedMethod(meth);
+      }
+
+      if (!meth.isPublic()) {
+        initMeth.append(Stmt.invokeStatic(ctx.getProcessingContext().getBootstrapClass(),
+                GenUtil.getPrivateMethodName(meth), Refs.get("obj")));
+      }
+      else {
+        initMeth.append(Stmt.loadVariable("obj").invoke(meth.getName()));
+      }
+    }
+
+    AnonymousClassStructureBuilder classStructureBuilder = initMeth.finish();
+
+    IOCProcessingContext pc = ctx.getProcessingContext();
+
+    pc.globalInsertBefore(Stmt.declareVariable(destructionCallbackType).asFinal().named(varName)
+            .initializeWith(classStructureBuilder.finish()));
+
+    pc.append(Stmt.loadVariable("context").invoke("addDestructionCallback",
             Refs.get(injector.getVarName()), Refs.get(varName)));
   }
 
@@ -319,12 +366,21 @@ public class InjectUtil {
   }
 
   private static List<MetaMethod> scanForPostConstruct(MetaClass type) {
+    return scanForAnnotatedMethod(type, PostConstruct.class);
+  }
+
+
+  private static List<MetaMethod> scanForPreDestroy(MetaClass type) {
+    return scanForAnnotatedMethod(type, PreDestroy.class);
+  }
+
+  public static List<MetaMethod> scanForAnnotatedMethod(MetaClass type, Class<? extends Annotation> annoClass) {
     final List<MetaMethod> accumulator = new LinkedList<MetaMethod>();
 
     MetaClass clazz = type;
     do {
       for (MetaMethod meth : clazz.getDeclaredMethods()) {
-        if (meth.isAnnotationPresent(PostConstruct.class)) {
+        if (meth.isAnnotationPresent(annoClass)) {
           accumulator.add(meth);
         }
       }
@@ -335,6 +391,7 @@ public class InjectUtil {
 
     return accumulator;
   }
+
 
   @SuppressWarnings({"unchecked"})
   private static boolean isInjectionPoint(MetaField field) {
@@ -482,9 +539,13 @@ public class InjectUtil {
     return appender.toString();
   }
 
-  public static String getNewVarName() {
-    String var = "inj" + counter.addAndGet(1);
+  public static String getNewInjectorName() {
+    String var = "inj" + injectorCounter.addAndGet(1);
     return var;
+  }
+
+  public static String getUniqueVarName() {
+     return "var" + uniqueCounter.addAndGet(1);
   }
 
   private static Set<Class<?>> qualifiersCache;

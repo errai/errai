@@ -74,10 +74,10 @@ public class DecoratorTask extends InjectionTask {
 
       }
 
-      Statement stmt = dec.generateDecorator(new InjectableInstance(anno, taskType, constructor, method, field, type,
-              parm, injector, ctx));
-
-      ctx.getProcessingContext().append(stmt);
+      for (Statement stmt : dec.generateDecorator(new InjectableInstance(anno, taskType, constructor, method, field, type,
+              parm, injector, ctx))) {
+        ctx.getProcessingContext().append(stmt);
+      }
     }
     return true;
   }

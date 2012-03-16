@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,6 +36,9 @@ import java.util.Set;
 public class IOCBeanManager {
   private Map<Class<?>, List<IOCBeanDef>> beanMap = new HashMap<Class<?>, List<IOCBeanDef>>();
 
+  private Map<Object, List<DestructionCallback>> activeManagedBeans = new IdentityHashMap<Object, List<DestructionCallback>>();
+  private Map<Object, Object> proxyLookupForManagedBeans = new IdentityHashMap<Object, Object>();
+
   /**
    * Register a bean with the manager. This is called by the generated code to advertise the bean.
    *
@@ -45,13 +49,53 @@ public class IOCBeanManager {
   public void registerSingletonBean(final Class<Object> type, final Object instance,
                                     final Annotation[] qualifiers,
                                     final InitializationCallback initCallback) {
-    registerBean(IOCSingletonBean.newBean(type, qualifiers, instance));
+    registerBean(IOCSingletonBean.newBean(this, type, qualifiers, instance));
   }
-  
+
   public void registerDependentBean(final Class<Object> type, final CreationalCallback<Object> callback,
                                     final Annotation[] qualifiers,
                                     final InitializationCallback<Object> initCallback) {
-    registerBean(IOCDependentBean.newBean(type, qualifiers, callback, initCallback));
+    registerBean(IOCDependentBean.newBean(this, type, qualifiers, callback, initCallback));
+  }
+
+
+  public void destroyBean(Object ref) {
+    final Object _target;
+
+    if (proxyLookupForManagedBeans.containsKey(ref)) {
+      _target = proxyLookupForManagedBeans.get(ref);
+    }
+    else {
+      _target = ref;
+    }
+
+    List<DestructionCallback> destructionCallbackList = activeManagedBeans.get(_target);
+    if (destructionCallbackList != null) {
+      for (DestructionCallback callback : destructionCallbackList) {
+        callback.destroy(_target);
+      }
+    }
+
+    if (ref != _target) {
+      activeManagedBeans.get(ref);
+      proxyLookupForManagedBeans.get(_target);
+    }
+    else {
+      activeManagedBeans.remove(_target);
+    }
+  }
+
+
+  void addProxyReference(Object proxyRef, Object realRef) {
+    proxyLookupForManagedBeans.put(proxyRef, realRef);
+  }
+
+  void addDestructionCallback(Object ref, DestructionCallback callback) {
+    List<DestructionCallback> list = activeManagedBeans.get(ref);
+    if (list == null) {
+      activeManagedBeans.put(ref, list = new ArrayList<DestructionCallback>());
+    }
+    list.add(callback);
   }
 
   /**

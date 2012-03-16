@@ -17,16 +17,30 @@
 package org.jboss.errai.ioc.rebind.ioc.builtin;
 
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import org.jboss.errai.bus.client.api.Local;
 import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.framework.Subscription;
 import org.jboss.errai.bus.server.annotations.Service;
+import org.jboss.errai.codegen.framework.Parameter;
 import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.builder.AnonymousClassStructureBuilder;
+import org.jboss.errai.codegen.framework.builder.BlockBuilder;
+import org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
+import org.jboss.errai.ioc.client.container.DestructionCallback;
 import org.jboss.errai.ioc.rebind.ioc.IOCDecoratorExtension;
+import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
+
+import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.typeParametersOf;
 
 @CodeDecorator
 public class ServiceIOCExtension extends IOCDecoratorExtension<Service> {
@@ -35,7 +49,7 @@ public class ServiceIOCExtension extends IOCDecoratorExtension<Service> {
   }
 
   @Override
-  public Statement generateDecorator(InjectableInstance<Service> decContext) {
+  public List<? extends Statement> generateDecorator(InjectableInstance<Service> decContext) {
     final InjectionContext ctx = decContext.getInjectionContext();
 
     /**
@@ -58,13 +72,35 @@ public class ServiceIOCExtension extends IOCDecoratorExtension<Service> {
       }
     }
 
+    final String varName = InjectUtil.getUniqueVarName();
+
+    Statement subscribeStatement;
+
     if (local) {
-     return Stmt.nestedCall(busHandle)
-             .invoke("subscribeLocal", svcName, decContext.getValueStatement());
+      subscribeStatement = Stmt.nestedCall(busHandle)
+              .invoke("subscribeLocal", svcName, decContext.getValueStatement());
     }
     else {
-      return Stmt.nestedCall(busHandle)
+      subscribeStatement = Stmt.nestedCall(busHandle)
               .invoke("subscribe", svcName, decContext.getValueStatement());
     }
+
+    Statement declareVar = Stmt.declareVariable(Subscription.class).asFinal().named(varName)
+            .initializeWith(subscribeStatement);
+
+    final MetaClass destructionCallbackType =
+            parameterizedAs(DestructionCallback.class, typeParametersOf(decContext.getEnclosingType()));
+
+    // register a destructor to unregister the service when the bean is destroyed.
+    final BlockBuilder<AnonymousClassStructureBuilder> destroyMeth
+            = ObjectBuilder.newInstanceOf(destructionCallbackType).extend()
+            .publicOverridesMethod("destroy", Parameter.of(decContext.getEnclosingType(), "obj", true))
+            .append(Stmt.loadVariable(varName).invoke("remove"));
+
+    Statement descrCallback = Stmt.create().loadVariable("context").invoke("addDestructionCallback",
+            decContext.getInjector().getVarName(), destroyMeth.finish().finish());
+
+
+    return Arrays.asList(declareVar, descrCallback);
   }
 }

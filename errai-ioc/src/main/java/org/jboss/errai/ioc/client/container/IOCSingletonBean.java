@@ -16,6 +16,7 @@
 
 package org.jboss.errai.ioc.client.container;
 
+import javax.enterprise.inject.spi.BeanManager;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.HashSet;
@@ -26,9 +27,11 @@ import java.util.HashSet;
  * @author Mike Brock
  */
 public class IOCSingletonBean<T> extends AbstractIOCBean<T> {
+  private final IOCBeanManager beanManager;
   private final T instance;
 
-  private IOCSingletonBean(Class<T> type, Annotation[] qualifiers, T instance) {
+  private IOCSingletonBean(IOCBeanManager beanManager, Class<T> type, Annotation[] qualifiers, T instance) {
+    this.beanManager = beanManager;
     this.type = type;
     this.qualifiers = new HashSet<Annotation>();
     if (qualifiers != null) {
@@ -46,8 +49,8 @@ public class IOCSingletonBean<T> extends AbstractIOCBean<T> {
    * @param <T>        The type of the bean
    * @return A new instance of <tt>IOCSingletonBean</tt>
    */
-  public static <T> IOCBeanDef<T> newBean(Class<T> type, Annotation[] qualifiers, T instance) {
-    return new IOCSingletonBean<T>(type, qualifiers, instance);
+  public static <T> IOCBeanDef<T> newBean(IOCBeanManager beanManager, Class<T> type, Annotation[] qualifiers, T instance) {
+    return new IOCSingletonBean<T>(beanManager, type, qualifiers, instance);
   }
 
 

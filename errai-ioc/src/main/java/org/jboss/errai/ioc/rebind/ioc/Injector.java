@@ -26,6 +26,7 @@ public abstract class Injector {
   protected QualifyingMetadata qualifyingMetadata;
   protected MetaParameterizedType qualifyingTypeInformation;
   protected String postInitCallbackVar = null;
+  protected String preDestroyCallbackVar = null;
 
   protected boolean alternative;
   protected boolean injected;
@@ -99,6 +100,14 @@ public abstract class Injector {
 
   public void setPostInitCallbackVar(String var) {
     this.postInitCallbackVar = var;
+  }
+
+  public String getPreDestroyCallbackVar() {
+    return preDestroyCallbackVar;
+  }
+
+  public void setPreDestroyCallbackVar(String preDestroyCallbackVar) {
+    this.preDestroyCallbackVar = preDestroyCallbackVar;
   }
 
   public boolean metadataMatches(Injector injector) {

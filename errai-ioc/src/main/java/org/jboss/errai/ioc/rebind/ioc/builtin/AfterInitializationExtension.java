@@ -27,6 +27,9 @@ import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.rebind.ioc.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * @author Mike Brock
  */
@@ -37,7 +40,7 @@ public class AfterInitializationExtension extends IOCDecoratorExtension<AfterIni
   }
 
   @Override
-  public Statement generateDecorator(InjectableInstance<AfterInitialization> instance) {
+  public List<? extends Statement> generateDecorator(InjectableInstance<AfterInitialization> instance) {
     final Context ctx = instance.getInjectionContext().getProcessingContext().getContext();
     final MetaMethod method = instance.getMethod();
 
@@ -51,6 +54,7 @@ public class AfterInitializationExtension extends IOCDecoratorExtension<AfterIni
             .finish()
             .finish();
 
-    return Stmt.create(ctx).invokeStatic(InitVotes.class, "registerOneTimeInitCallback", callbackStmt);
+    return Collections.singletonList(Stmt.create(ctx)
+            .invokeStatic(InitVotes.class, "registerOneTimeInitCallback", callbackStmt));
   }
 }

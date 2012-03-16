@@ -24,16 +24,11 @@ import org.jboss.errai.codegen.framework.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.Scope;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
-import org.jboss.errai.codegen.framework.meta.MetaType;
 import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.framework.util.Refs;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.ioc.client.container.ProxyResolver;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.typeParametersOf;
@@ -46,10 +41,10 @@ import static org.jboss.errai.codegen.framework.util.Stmt.newObject;
  */
 public class ProxyInjector extends Injector {
   private boolean proxied;
-  private final String varName = InjectUtil.getNewVarName();
-  
+  private final String varName = InjectUtil.getNewInjectorName();
+
   private Statement proxyStatement;
- 
+
 //  private List<Statement> proxyCloseStatements = new ArrayList<Statement>();
 
   private BlockBuilder<AnonymousClassStructureBuilder> proxyResolverBody;
@@ -86,10 +81,10 @@ public class ProxyInjector extends Injector {
       proxyResolverBody = newObject(proxyResolverRef)
               .extend().publicOverridesMethod("resolve", Parameter.of(proxiedType, "obj"));
 
-
-
       Statement proxyResolver = proxyResolverBody.append(loadVariable(varName)
               .invoke(ProxyMaker.PROXY_BIND_METHOD, Refs.get("obj"))).finish().finish();
+
+      proxyResolverBody.append(Stmt.loadVariable("context").invoke("addProxyReference", Refs.get(varName), Refs.get("obj")));
 
       pCtx.append(loadVariable("context").invoke("addUnresolvedProxy", proxyResolver,
               proxiedType, qualifyingMetadata.getQualifiers()));
@@ -132,7 +127,7 @@ public class ProxyInjector extends Injector {
   public void setProxyStatement(Statement proxyStatement) {
     this.proxyStatement = proxyStatement;
   }
-  
+
   public void addProxyCloseStatement(Statement statement) {
     proxyResolverBody.append(statement);
   }

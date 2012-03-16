@@ -42,9 +42,12 @@ import org.jboss.errai.codegen.framework.exception.OutOfScopeException;
 import org.jboss.errai.codegen.framework.literal.LiteralFactory;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.tests.model.Foo;
+import org.jboss.errai.codegen.framework.util.Bool;
+import org.jboss.errai.codegen.framework.util.Refs;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.junit.Assert;
 import org.junit.Test;
+import sun.net.smtp.SmtpClient;
 
 /**
  * Tests the {@link StatementBuilder} API.
@@ -373,7 +376,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
       fail("Expected InvalidTypeExcpetion");
     }
     catch (GenerationException e) {
-       assertTrue("Expected InvalidTypeException", ExceptionUtil.isIntermediateCause(e, InvalidTypeException.class));
+      assertTrue("Expected InvalidTypeException", ExceptionUtil.isIntermediateCause(e, InvalidTypeException.class));
     }
   }
 
@@ -390,7 +393,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
       fail("Expected InvalidTypeExcpetion");
     }
     catch (GenerationException e) {
-       assertTrue("Expected InvalidTypeException", ExceptionUtil.isIntermediateCause(e, InvalidTypeException.class));
+      assertTrue("Expected InvalidTypeException", ExceptionUtil.isIntermediateCause(e, InvalidTypeException.class));
     }
   }
 
@@ -480,7 +483,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
       fail("expected InvalidTypeException");
     }
     catch (GenerationException e) {
-       assertTrue("Expected InvalidTypeException", ExceptionUtil.isIntermediateCause(e, InvalidTypeException.class));
+      assertTrue("Expected InvalidTypeException", ExceptionUtil.isIntermediateCause(e, InvalidTypeException.class));
     }
   }
 
@@ -491,7 +494,7 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
       fail("expected OutOfScopeException");
     }
     catch (GenerationException e) {
-       assertTrue("Expected OutOfScopeException", ExceptionUtil.isIntermediateCause(e, OutOfScopeException.class));
+      assertTrue("Expected OutOfScopeException", ExceptionUtil.isIntermediateCause(e, OutOfScopeException.class));
     }
   }
 
@@ -538,5 +541,18 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
       //expected
       assertEquals("Wrong exception message", "java.lang.String cannot be cast to java.lang.Integer", e.getMessage());
     }
+  }
+
+  @Test
+  public void testReturnVoid() {
+    Context ctx = Context.create();
+    ctx.addVariable(Variable.create("foo", Object.class));
+
+    Statement stmt = Stmt.if_(Bool.isNull(Refs.get("foo")))
+            .append(Stmt.returnVoid()).finish();
+
+    assertEquals("failed to generate return statement", "if (foo == null) {\n" +
+            "  return;\n" +
+            "}", stmt.generate(ctx));
   }
 }

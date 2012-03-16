@@ -14,32 +14,11 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.cdi.integration.client.shared;
-
-import javax.annotation.PreDestroy;
-import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
+package org.jboss.errai.ioc.client.container;
 
 /**
  * @author Mike Brock
  */
-@Dependent
-public class DependentBeanCycleA {
-  @Inject DependentBeanCycleB dependentBeanCycleB;
-
-  public boolean preDestroyCalled = false;
-
-  public DependentBeanCycleB getDependentBeanCycleB() {
-    return dependentBeanCycleB;
-  }
-
-  @PreDestroy
-  private void preDestruct() {
-    preDestroyCalled = true;
-  }
-
-
-  public boolean isPreDestroyCalled() {
-    return preDestroyCalled;
-  }
+public interface DestructionCallback<T> {
+  public void destroy(T bean);
 }

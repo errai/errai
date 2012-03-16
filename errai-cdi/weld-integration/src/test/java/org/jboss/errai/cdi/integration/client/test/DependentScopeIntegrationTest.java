@@ -220,4 +220,23 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
     });
   }
 
+
+  public void testDependentBeanCycleWithPreDestroy() {
+    delayTestFinish(60000);
+
+    registerOneTimeInitCallback(new Runnable() {
+
+      @Override
+      public void run() {
+        DependentBeanCycleA bean = IOC.getBeanManager()
+                .lookupBean(DependentBeanCycleA.class).getInstance();
+
+        IOC.getBeanManager().destroyBean(bean);
+
+        assertTrue("predestroy method not called!", bean.isPreDestroyCalled());
+
+        finishTest();
+      }
+    });
+  }
 }

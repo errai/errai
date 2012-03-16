@@ -84,4 +84,6 @@ public interface StatementBegin extends ArrayBuilder, LoopBuilder, IfBlockBuilde
   
   public StatementEnd continue_();
   public StatementEnd continue_(String label);
+
+  public StatementEnd returnVoid();
 }

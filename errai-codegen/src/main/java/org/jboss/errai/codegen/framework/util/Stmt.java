@@ -226,4 +226,8 @@ public class Stmt {
   public static StatementEnd continue_(String label) {
     return StatementBuilder.create().continue_(label);
   }
+
+  public static StatementEnd returnVoid() {
+    return StatementBuilder.create().returnVoid();
+  }
 }
