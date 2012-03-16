@@ -17,6 +17,7 @@
 package org.jboss.errai.cdi.integration.client.shared;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Produces;
 
 /**
@@ -25,5 +26,7 @@ import javax.enterprise.inject.Produces;
 @ApplicationScoped
 public class LincolnFoo {
   @Produces
-  @LincolnBar public String getBar() {  return "bar";  }
+  @Dependent
+  @LincolnBar
+  public String getBar() {  return "bar";  }
 }
