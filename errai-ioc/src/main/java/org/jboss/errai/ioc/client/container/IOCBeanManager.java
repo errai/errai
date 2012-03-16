@@ -36,8 +36,11 @@ import java.util.Set;
 public class IOCBeanManager {
   private Map<Class<?>, List<IOCBeanDef>> beanMap = new HashMap<Class<?>, List<IOCBeanDef>>();
 
-  private Map<Object, List<DestructionCallback>> activeManagedBeans = new IdentityHashMap<Object, List<DestructionCallback>>();
+  private Map<Object, Map<Object, DestructionCallback>> activeManagedBeans
+          = new IdentityHashMap<Object, Map<Object, DestructionCallback>>();
   private Map<Object, Object> proxyLookupForManagedBeans = new IdentityHashMap<Object, Object>();
+
+
 
   /**
    * Register a bean with the manager. This is called by the generated code to advertise the bean.
@@ -69,10 +72,10 @@ public class IOCBeanManager {
       _target = ref;
     }
 
-    List<DestructionCallback> destructionCallbackList = activeManagedBeans.get(_target);
+    Map<Object, DestructionCallback> destructionCallbackList = activeManagedBeans.get(_target);
     if (destructionCallbackList != null) {
-      for (DestructionCallback callback : destructionCallbackList) {
-        callback.destroy(_target);
+      for (Map.Entry<Object, DestructionCallback> entry : destructionCallbackList.entrySet()) {
+        entry.getValue().destroy(entry.getKey());
       }
     }
 
@@ -90,12 +93,16 @@ public class IOCBeanManager {
     proxyLookupForManagedBeans.put(proxyRef, realRef);
   }
 
-  void addDestructionCallback(Object ref, DestructionCallback callback) {
-    List<DestructionCallback> list = activeManagedBeans.get(ref);
-    if (list == null) {
-      activeManagedBeans.put(ref, list = new ArrayList<DestructionCallback>());
-    }
-    list.add(callback);
+//  void addDestructionCallback(Object ref, DestructionCallback callback) {
+//    List<DestructionCallback> list = activeManagedBeans.get(ref);
+//    if (list == null) {
+//      activeManagedBeans.put(ref, list = new ArrayList<DestructionCallback>());
+//    }
+//    list.add(callback);
+//  }
+
+  void addDestructionCallbacks(Object ref, Map<Object, DestructionCallback> callbacks) {
+    activeManagedBeans.put(ref, callbacks);
   }
 
   /**

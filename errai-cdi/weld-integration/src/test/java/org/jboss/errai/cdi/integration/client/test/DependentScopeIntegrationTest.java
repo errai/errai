@@ -29,8 +29,10 @@ import org.jboss.errai.cdi.integration.client.shared.ServiceA;
 import org.jboss.errai.cdi.integration.client.shared.ServiceB;
 import org.jboss.errai.cdi.integration.client.shared.ServiceC;
 import org.jboss.errai.cdi.integration.client.shared.TestBean;
+import org.jboss.errai.cdi.integration.client.shared.TestDestroyA;
 import org.jboss.errai.cdi.integration.client.shared.TestOuterBean;
 import org.jboss.errai.cdi.integration.client.shared.UnreferencedDependentRootBean;
+import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.container.IOC;
@@ -224,16 +226,17 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
   public void testDependentBeanCycleWithPreDestroy() {
     delayTestFinish(60000);
 
-    registerOneTimeInitCallback(new Runnable() {
+    InitVotes.registerOneTimeInitCallback(new Runnable() {
 
       @Override
       public void run() {
-        DependentBeanCycleA bean = IOC.getBeanManager()
-                .lookupBean(DependentBeanCycleA.class).getInstance();
+        TestDestroyA bean = IOC.getBeanManager()
+                .lookupBean(TestDestroyA.class).getInstance();
 
         IOC.getBeanManager().destroyBean(bean);
 
-        assertTrue("predestroy method not called!", bean.isPreDestroyCalled());
+        assertTrue("predestroy method not called!", bean.isDestroyed());
+        assertTrue("predestroy method not called", bean.getTestDestroyB().isDestroyed());
 
         finishTest();
       }

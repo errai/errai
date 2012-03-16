@@ -16,7 +16,6 @@
 
 package org.jboss.errai.cdi.integration.client.shared;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -25,32 +24,22 @@ import javax.inject.Inject;
  * @author Mike Brock
  */
 @Dependent
-public class DependentBeanCycleB {
-  @Inject DependentBeanCycleA dependentBeanCycleA;
+public class TestDestroyA {
+  private boolean isDestroyed = false;
 
-  public static int instanceCount = 1;
-  private int instance;
-  private boolean preDestroy = false;
-
-  @PostConstruct
-  private void postConstruct() {
-    instance = instanceCount++;
-  }
+  @Inject
+  private TestDestroyB testDestroyB;
 
   @PreDestroy
-  public void preDestroy() {
-    preDestroy = true;
+  private void destroy() {
+    isDestroyed = true;
   }
 
-  public DependentBeanCycleA getDependentBeanCycleA() {
-    return dependentBeanCycleA;
+  public TestDestroyB getTestDestroyB() {
+    return testDestroyB;
   }
 
-  public int getInstance() {
-    return instance;
-  }
-
-  public boolean isPreDestroy() {
-    return preDestroy;
+  public boolean isDestroyed() {
+    return isDestroyed;
   }
 }

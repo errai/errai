@@ -31,6 +31,7 @@ import org.jboss.errai.codegen.framework.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.util.Refs;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.client.container.DestructionCallback;
@@ -98,7 +99,7 @@ public class ServiceIOCExtension extends IOCDecoratorExtension<Service> {
             .append(Stmt.loadVariable(varName).invoke("remove"));
 
     Statement descrCallback = Stmt.create().loadVariable("context").invoke("addDestructionCallback",
-            decContext.getInjector().getVarName(), destroyMeth.finish().finish());
+            Refs.get(decContext.getInjector().getVarName()), destroyMeth.finish().finish());
 
 
     return Arrays.asList(declareVar, descrCallback);

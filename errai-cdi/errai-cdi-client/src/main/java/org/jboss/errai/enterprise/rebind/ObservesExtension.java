@@ -125,7 +125,7 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
             .append(Stmt.loadVariable(subscrVar).invoke("remove"));
 
     Statement descrCallback = Stmt.create().loadVariable("context").invoke("addDestructionCallback",
-            instance.getInjector().getVarName(), destroyMeth.finish().finish());
+            Refs.get(instance.getInjector().getVarName()), destroyMeth.finish().finish());
 
     return Arrays.asList(subscribeStatement, descrCallback);
   }
