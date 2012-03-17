@@ -21,6 +21,7 @@ import org.jboss.errai.codegen.framework.meta.MetaConstructor;
 import org.jboss.errai.codegen.framework.meta.MetaField;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.meta.MetaParameter;
+import org.jboss.errai.codegen.framework.util.PrivateAccessType;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -125,6 +126,10 @@ public class InjectionPoint<T> {
   }
 
   public void ensureMemberExposed() {
+    ensureMemberExposed(PrivateAccessType.Both);
+  }
+
+  public void ensureMemberExposed(PrivateAccessType accessType) {
     switch (taskType) {
       case Parameter:
         if (parm.getDeclaringMember() instanceof MetaMethod) {
@@ -135,7 +140,7 @@ public class InjectionPoint<T> {
         injectionContext.addExposedMethod(method);
         break;
       case PrivateField:
-        injectionContext.addExposedField(field);
+        injectionContext.addExposedField(field, accessType);
         break;
     }
   }

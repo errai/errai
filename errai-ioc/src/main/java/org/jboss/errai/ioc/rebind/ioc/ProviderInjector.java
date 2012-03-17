@@ -31,11 +31,14 @@ public class ProviderInjector extends TypeInjector {
   private boolean provided = false;
   private boolean standardProvider = false;
 
-  public ProviderInjector(MetaClass type, MetaClass providerType, IOCProcessingContext context) {
-    super(type, context);
-    this.providerInjector = new TypeInjector(providerType, context);
+  public ProviderInjector(MetaClass type, MetaClass providerType, InjectorFactory factory) {
+    super(type, factory.getInjectionContext().getProcessingContext());
+    this.providerInjector = new TypeInjector(providerType, factory.getInjectionContext().getProcessingContext());
+    factory.addInjector(providerInjector);
+
     this.standardProvider = providerInjector.getInjectedType().isAssignableTo(Provider.class);
-    this.singleton = context.isSingletonScope(providerType.getAnnotations());
+    this.singleton = factory.getInjectionContext().getProcessingContext()
+            .isSingletonScope(providerType.getAnnotations());
     this.alternative = type.isAnnotationPresent(Alternative.class);
     this.injected = true;
   }

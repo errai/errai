@@ -33,17 +33,16 @@ import java.lang.annotation.Annotation;
 
 public class ContextualProviderInjector extends TypeInjector {
   private final Injector providerInjector;
-  private boolean provided = false;
 
-  public ContextualProviderInjector(MetaClass type, MetaClass providerType, IOCProcessingContext context) {
-    super(type, context);
-    this.providerInjector = new TypeInjector(providerType, context);
-    this.singleton = context.isSingletonScope(providerType.getAnnotations());
+  public ContextualProviderInjector(MetaClass type, MetaClass providerType, InjectorFactory factory) {
+    super(type, factory.getInjectionContext().getProcessingContext());
+    this.providerInjector = new TypeInjector(providerType, factory.getInjectionContext().getProcessingContext());
+    factory.addInjector(providerInjector);
+
+    this.singleton = factory.getInjectionContext().getProcessingContext()
+            .isSingletonScope(providerType.getAnnotations());
     this.alternative = providerType.isAnnotationPresent(Alternative.class);
-
     injected = true;
-    provided = false;
-
   }
 
   @Override
@@ -90,28 +89,30 @@ public class ContextualProviderInjector extends TypeInjector {
 
     Annotation[] qualifiers = injectableInstance.getQualifiers();
 
-    statement = Stmt.nestedCall(providerInjector.getType(injectContext, injectableInstance))
-            .invoke("provide", typeArgsClasses, qualifiers.length != 0 ? qualifiers : null);
 
-//    if (singleton) {
-//      if (!provided) {
+    if (providerInjector.isSingleton()) {
+      if (!providerInjector.isInjected()) {
+
+
+        providerInjector.getType(injectContext, injectableInstance);
 //        injectContext.getProcessingContext().globalAppend(Stmt.declareVariable(type).asFinal().named(getVarName())
-//                .initializeWith(statement));
-//      }
-//      else {
-//        statement = Stmt.loadVariable(getVarName());
-//      }
-//    }
-//
-//    provided = true;
+//                .initializeWith(providerInjector.getType(injectContext, injectableInstance)));
 
-    return statement;
+      }
+      return Stmt.loadVariable(providerInjector.getVarName()).invoke("provide", typeArgsClasses, qualifiers.length != 0 ? qualifiers : null);
+    }
+    else {
+//      provided = true;
+      return Stmt.nestedCall(providerInjector.getType(injectContext, injectableInstance))
+              .invoke("provide", typeArgsClasses, qualifiers.length != 0 ? qualifiers : null);
+    }
+
+
   }
 
 
   @Override
   public Statement instantiateOnly(InjectionContext injectContext, InjectableInstance injectableInstance) {
-    provided = true;
     return providerInjector.getType(injectContext, injectableInstance);
   }
 

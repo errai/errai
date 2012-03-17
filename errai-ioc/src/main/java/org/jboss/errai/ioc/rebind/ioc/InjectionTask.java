@@ -24,6 +24,7 @@ import org.jboss.errai.codegen.framework.meta.MetaConstructor;
 import org.jboss.errai.codegen.framework.meta.MetaField;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.meta.MetaParameter;
+import org.jboss.errai.codegen.framework.util.PrivateAccessType;
 import org.jboss.errai.codegen.framework.util.Refs;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
@@ -121,7 +122,7 @@ public class InjectionTask {
           );
         }
 
-        ctx.addExposedField(field);
+        ctx.addExposedField(field, PrivateAccessType.Write);
         break;
       }
 

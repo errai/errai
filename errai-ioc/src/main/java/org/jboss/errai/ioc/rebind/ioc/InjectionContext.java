@@ -23,6 +23,7 @@ import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaField;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.util.GenUtil;
+import org.jboss.errai.codegen.framework.util.PrivateAccessType;
 import org.jboss.errai.ioc.rebind.IOCGenerator;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependencies;
@@ -61,7 +62,7 @@ public class InjectionContext {
   private List<InjectionTask> deferredInjectionTasks = new ArrayList<InjectionTask>();
   protected List<Runnable> deferredTasks = new ArrayList<Runnable>();
 
-  private Collection<MetaField> privateFieldsToExpose = new LinkedHashSet<MetaField>();
+  private Map<MetaField, PrivateAccessType> privateFieldsToExpose = new HashMap<MetaField, PrivateAccessType>();
   private Collection<MetaMethod> privateMethodsToExpose = new LinkedHashSet<MetaMethod>();
 
   private Map<String, Object> attributeMap = new HashMap<String, Object>();
@@ -184,7 +185,7 @@ public class InjectionContext {
     proxiedInjectors.put(proxyInjector.getInjectedType(), proxyInjector);
   }
 
-  public boolean isProxiedInjectorRegistered(MetaClass injectorType, QualifyingMetadata qualifyingMetadata){
+  public boolean isProxiedInjectorRegistered(MetaClass injectorType, QualifyingMetadata qualifyingMetadata) {
     if (proxiedInjectors.containsKey(injectorType.getErased())) {
       for (Injector inj : proxiedInjectors.get(injectorType.getErased())) {
         if (inj.matches(injectorType.getParameterizedType(), qualifyingMetadata)) {
@@ -446,21 +447,35 @@ public class InjectionContext {
   }
 
   public void addExposedField(MetaField field) {
-    String fieldSignature = GenUtil.getPrivateFieldInjectorName(field);
-    if (exposedMembers.contains(fieldSignature)) return;
-    exposedMembers.add(fieldSignature);
-    privateFieldsToExpose.add(field);
+    addExposedField(field, PrivateAccessType.Both);
   }
+
+
+  public void addExposedField(MetaField field, PrivateAccessType accessType) {
+    String fieldSignature = GenUtil.getPrivateFieldInjectorName(field);
+    if (!exposedMembers.contains(fieldSignature)) {
+      exposedMembers.add(fieldSignature);
+    }
+    else {
+      accessType = PrivateAccessType.Both;
+    }
+    privateFieldsToExpose.put(field, accessType);
+  }
+
 
   public void addExposedMethod(MetaMethod method) {
     String methodSignature = GenUtil.getPrivateMethodName(method);
-    if (exposedMembers.contains(methodSignature)) return;
-    exposedMembers.add(methodSignature);
+    if (!exposedMembers.contains(methodSignature)) {
+      exposedMembers.add(methodSignature);
+    }
+    else {
+      return;
+    }
     privateMethodsToExpose.add(method);
   }
 
-  public Collection<MetaField> getPrivateFieldsToExpose() {
-    return Collections.unmodifiableCollection(privateFieldsToExpose);
+  public Map<MetaField, PrivateAccessType> getPrivateFieldsToExpose() {
+    return Collections.unmodifiableMap(privateFieldsToExpose);
   }
 
   public Collection<MetaMethod> getPrivateMethodsToExpose() {

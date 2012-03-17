@@ -38,6 +38,7 @@ import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.meta.MetaParameter;
 import org.jboss.errai.codegen.framework.util.Bool;
+import org.jboss.errai.codegen.framework.util.PrivateAccessType;
 import org.jboss.errai.codegen.framework.util.Refs;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.enterprise.client.cdi.AbstractCDIEventCallback;
@@ -75,7 +76,7 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
     final MetaParameter parm = instance.getParm();
 
     if (!method.isPublic()) {
-      instance.ensureMemberExposed();
+      instance.ensureMemberExposed(PrivateAccessType.Write);
     }
 
     final String parmClassName = parm.getType().getFullyQualifiedName();

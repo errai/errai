@@ -41,6 +41,7 @@ import org.jboss.errai.codegen.framework.meta.impl.gwt.GWTClass;
 import org.jboss.errai.codegen.framework.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.codegen.framework.util.GenUtil;
 import org.jboss.errai.codegen.framework.util.Implementations;
+import org.jboss.errai.codegen.framework.util.PrivateAccessType;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.RebindUtils;
@@ -94,6 +95,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -310,9 +312,9 @@ public class IOCBootstrapGenerator {
     }
 
 
-    Collection<MetaField> privateFields = injectFactory.getInjectionContext().getPrivateFieldsToExpose();
-    for (MetaField f : privateFields) {
-      GenUtil.addPrivateAccessStubs(!useReflectionStubs, classBuilder, f);
+    Map<MetaField, PrivateAccessType> privateFields = injectFactory.getInjectionContext().getPrivateFieldsToExpose();
+    for (Map.Entry<MetaField, PrivateAccessType> f : privateFields.entrySet()) {
+      GenUtil.addPrivateAccessStubs(f.getValue(), !useReflectionStubs, classBuilder, f.getKey());
     }
 
     Collection<MetaMethod> privateMethods = injectFactory.getInjectionContext().getPrivateMethodsToExpose();
@@ -471,10 +473,10 @@ public class IOCBootstrapGenerator {
           }
 
           if (isContextual) {
-            injectFactory.addInjector(new ContextualProviderInjector(bindType, type, procContext));
+            injectFactory.addInjector(new ContextualProviderInjector(bindType, type, injectFactory));
           }
           else {
-            injectFactory.addInjector(new ProviderInjector(bindType, type, procContext));
+            injectFactory.addInjector(new ProviderInjector(bindType, type, injectFactory));
           }
           break;
         }
@@ -528,10 +530,10 @@ public class IOCBootstrapGenerator {
 
       Injector injector;
       if (contextual) {
-        injector = new ContextualProviderInjector(finalBindType, type, procContext);
+        injector = new ContextualProviderInjector(finalBindType, type, injectFactory);
       }
       else {
-        injector = new ProviderInjector(finalBindType, type, procContext);
+        injector = new ProviderInjector(finalBindType, type, injectFactory);
       }
 
       injectFactory.addInjector(injector);
@@ -548,7 +550,7 @@ public class IOCBootstrapGenerator {
 
       try {
         injectFactory
-                .addInjector(new ContextualProviderInjector(type, MetaClassFactory.get(injectorClass), procContext));
+                .addInjector(new ContextualProviderInjector(type, MetaClassFactory.get(injectorClass), injectFactory));
       }
       catch (Exception e) {
         throw new ErraiBootstrapFailure("could not load injector: " + e.getMessage(), e);

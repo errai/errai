@@ -22,6 +22,7 @@ import com.google.gwt.core.ext.typeinfo.JPackage;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.impl.gwt.GWTClass;
+import org.jboss.errai.codegen.framework.util.PrivateAccessType;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.api.IOCExtension;
 import org.jboss.errai.ioc.rebind.DependencyControl;
@@ -70,7 +71,7 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
             break;
           case PrivateField:
           case PrivateMethod:
-            instance.ensureMemberExposed();
+            instance.ensureMemberExposed(PrivateAccessType.Write);
 
         }
 
