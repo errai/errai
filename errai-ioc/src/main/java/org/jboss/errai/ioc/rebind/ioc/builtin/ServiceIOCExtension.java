@@ -18,7 +18,6 @@ package org.jboss.errai.ioc.rebind.ioc.builtin;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.jboss.errai.bus.client.api.Local;
@@ -58,7 +57,7 @@ public class ServiceIOCExtension extends IOCDecoratorExtension<Service> {
      */
     decContext.ensureMemberExposed();
 
-    final Statement busHandle = ctx.getInjector(MessageBus.class).getType(ctx, decContext);
+    final Statement busHandle = ctx.getInjector(MessageBus.class).getBeanInstance(ctx, decContext);
 
     /**
      * Figure out the service name;

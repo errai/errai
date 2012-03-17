@@ -21,13 +21,12 @@ import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaField;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.common.metadata.MetaDataScanner;
-import org.jboss.errai.common.rebind.EnvUtil;
 import org.jboss.errai.ioc.client.api.TestMock;
 import org.jboss.errai.ioc.client.api.TestOnly;
 import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
+import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.InjectionFailure;
 import org.jboss.errai.ioc.rebind.ioc.Injector;
-import org.jboss.errai.ioc.rebind.ioc.InjectorFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
@@ -54,10 +53,10 @@ public class IOCProcessorFactory {
   private SortedSet<ProcessingEntry> processingEntries = new TreeSet<ProcessingEntry>();
   private Map<SortUnit, SortUnit> delegates = new LinkedHashMap<SortUnit, SortUnit>();
 
-  private InjectorFactory injectorFactory;
+  private InjectionContext injectionContext;
 
-  public IOCProcessorFactory(InjectorFactory factory) {
-    this.injectorFactory = factory;
+  public IOCProcessorFactory(InjectionContext injectionContext) {
+    this.injectionContext = injectionContext;
   }
 
   public void registerHandler(Class<? extends Annotation> annotation, AnnotationHandler handler) {
@@ -223,7 +222,7 @@ public class IOCProcessorFactory {
       }
     }
     final InjectableInstance injectableInstance
-            = getTypeInjectedInstance(anno, type, null, injectorFactory.getInjectionContext());
+            = getTypeInjectedInstance(anno, type, null, injectionContext);
 
     ProcessingDelegate<MetaClass> del = new ProcessingDelegate<MetaClass>() {
       @Override
@@ -235,11 +234,11 @@ public class IOCProcessorFactory {
 
       @Override
       public boolean process() {
-        injectorFactory.addType(type);
+        injectionContext.addType(type);
 
-        Injector injector = injectorFactory.getInjectionContext().getInjector(type);
+        Injector injector = injectionContext.getInjector(type);
         final InjectableInstance injectableInstance
-                = getTypeInjectedInstance(anno, type, injector, injectorFactory.getInjectionContext());
+                = getTypeInjectedInstance(anno, type, injector, injectionContext);
 
         return entry.handler.handle(injectableInstance, anno, context);
       }
@@ -278,7 +277,7 @@ public class IOCProcessorFactory {
 
     final InjectableInstance injectableInstance
             = getMethodInjectedInstance(anno, metaMethod, null,
-            injectorFactory.getInjectionContext());
+            injectionContext);
 
 
     ProcessingDelegate<MetaField> del = new ProcessingDelegate<MetaField>() {
@@ -290,12 +289,12 @@ public class IOCProcessorFactory {
 
       @Override
       public boolean process() {
-        injectorFactory.addType(type);
+        injectionContext.addType(type);
 
-        Injector injector = injectorFactory.getInjectionContext().getInjector(type);
+        Injector injector = injectionContext.getInjector(type);
         final InjectableInstance injectableInstance
                 = getMethodInjectedInstance(anno, metaMethod, injector,
-                injectorFactory.getInjectionContext());
+                injectionContext);
 
 
         return entry.handler.handle(injectableInstance, anno, context);
@@ -339,19 +338,19 @@ public class IOCProcessorFactory {
       public Set<SortUnit> getRequiredDependencies() {
         final InjectableInstance injectableInstance
                 = InjectableInstance.getFieldInjectedInstance(anno, metaField, null,
-                injectorFactory.getInjectionContext());
+                injectionContext);
 
         return entry.handler.checkDependencies(dependencyControl, injectableInstance, anno, context);
       }
 
       @Override
       public boolean process() {
-        injectorFactory.addType(type);
+        injectionContext.addType(type);
 
-        Injector injector = injectorFactory.getInjectionContext().getInjector(type);
+        Injector injector = injectionContext.getInjector(type);
         final InjectableInstance injectableInstance
                 = InjectableInstance.getFieldInjectedInstance(anno, metaField, injector,
-                injectorFactory.getInjectionContext());
+                injectionContext);
 
         entry.handler.registerMetadata(injectableInstance, anno, context);
 

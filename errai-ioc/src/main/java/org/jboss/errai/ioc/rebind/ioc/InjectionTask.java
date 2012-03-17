@@ -149,9 +149,11 @@ public class InjectionTask {
         }
 
         Statement[] smts = resolveInjectionDependencies(method.getParameters(), ctx, method);
-        Statement[] parms = new Statement[smts.length];
+        Statement[] parms = new Statement[smts.length + 1];
         parms[0] = Refs.get(injector.getVarName());
         System.arraycopy(smts, 0, parms, 1, smts.length);
+
+        injectableInstance.getInjectionContext().addExposedMethod(method);
 
         processingContext.append(
                 Stmt.invokeStatic(processingContext.getBootstrapClass(), getPrivateMethodName(method),
@@ -188,27 +190,21 @@ public class InjectionTask {
     InjectableInstance injectableInstance = getInjectableInstance(ctx);
 
     if (ctx.isInjectableQualified(clazz, qualifyingMetadata)) {
-      if (ctx.isProxiedInjectorAvailable(clazz, qualifyingMetadata)) {
-        ProxyInjector proxyInjector = (ProxyInjector) ctx.getProxiedInjector(clazz, qualifyingMetadata);
-        return proxyInjector.getType(ctx, injectableInstance);
+      Injector inj = ctx.getQualifiedInjector(clazz, qualifyingMetadata);
+
+      /**
+       * Special handling for cycles. If two beans directly depend on each other. We shimmy in a call to the
+       * binding reference to check the context for the instance to avoid a hanging duplicate reference.
+       */
+      if (ctx.cycles(injectableInstance.getEnclosingType(), clazz) && inj instanceof TypeInjector) {
+        TypeInjector typeInjector = (TypeInjector) inj;
+
+        return Stmt.loadVariable("context").invoke("getInstanceOrNew",
+                Refs.get(typeInjector.getCreationalCallbackVarName()),
+                inj.getInjectedType(), inj.getQualifyingMetadata().getQualifiers());
       }
-      else {
-        Injector inj = ctx.getQualifiedInjector(clazz, qualifyingMetadata);
 
-        /**
-         * Special handling for cycles. If two beans directly depend on each other. We shimmy in a call to the
-         * binding reference to check the context for the instance to avoid a hanging duplicate reference.
-         */
-        if (ctx.cycles(injectableInstance.getEnclosingType(), clazz) && inj instanceof TypeInjector) {
-          TypeInjector typeInjector = (TypeInjector) inj;
-
-          return Stmt.loadVariable("context").invoke("getInstanceOrNew",
-                  Refs.get(typeInjector.getCreationalCallbackVarName()),
-                  inj.getInjectedType(), inj.getQualifyingMetadata().getQualifiers());
-        }
-
-       return ctx.getQualifiedInjector(clazz, qualifyingMetadata).getType(ctx, injectableInstance);
-      }
+      return ctx.getQualifiedInjector(clazz, qualifyingMetadata).getBeanInstance(ctx, injectableInstance);
     }
     else {
       //todo: refactor the InjectionContext to provide a cleaner API for interface delegates
@@ -216,10 +212,10 @@ public class InjectionTask {
         // handle the case that this is an auto resolved interface
         Injector inj = ctx.getQualifiedInjector(clazz, qualifyingMetadata);
         if (inj instanceof QualifiedTypeInjectorDelegate) {
-          return inj.getType(ctx, injectableInstance);
+          return inj.getBeanInstance(ctx, injectableInstance);
         }
         else if (inj != null) {
-          Statement retStatement = inj.getType(ctx, injectableInstance);
+          Statement retStatement = inj.getBeanInstance(ctx, injectableInstance);
 
           if (inj.isProvider() && inj.getEnclosingType() != null &&
                   ctx.isProxiedInjectorRegistered(inj.getEnclosingType(),
@@ -243,7 +239,7 @@ public class InjectionTask {
 
       ProxyInjector proxyInjector = new ProxyInjector(ctx.getProcessingContext(), clazz, qualifyingMetadata);
       ctx.addProxiedInjector(proxyInjector);
-      return proxyInjector.getType(ctx, injectableInstance);
+      return proxyInjector.getBeanInstance(ctx, injectableInstance);
     }
   }
 

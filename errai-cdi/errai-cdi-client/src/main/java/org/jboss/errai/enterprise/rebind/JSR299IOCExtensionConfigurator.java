@@ -36,7 +36,6 @@ import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.InjectionPoint;
 import org.jboss.errai.ioc.rebind.ioc.Injector;
-import org.jboss.errai.ioc.rebind.ioc.InjectorFactory;
 import org.jboss.errai.ioc.rebind.ioc.TypeDiscoveryListener;
 import org.jboss.errai.ioc.rebind.ioc.TypeInjector;
 
@@ -49,12 +48,11 @@ import javax.inject.Scope;
 import javax.inject.Singleton;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 @IOCExtension
 public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator {
-  public void configure(final IOCProcessingContext context, final InjectorFactory injectorFactory,
+  public void configure(final IOCProcessingContext context, final InjectionContext injectionContext,
                         final IOCProcessorFactory procFactory) {
 
     context.addSingletonScopeAnnotation(ApplicationScoped.class);
@@ -74,13 +72,13 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
 
         }
 
-        injectorFactory.addInjector(new Injector() {
+        injectionContext.registerInjector(new Injector() {
           {
             super.qualifyingMetadata = JSR299QualifyingMetadata.createFromAnnotations(instance.getQualifiers());
             this.provider = true;
             this.enclosingType = instance.getEnclosingType();
 
-            if (injectorFactory.getInjectionContext().isInjectorRegistered(enclosingType, qualifyingMetadata)) {
+            if (injectionContext.isInjectorRegistered(enclosingType, qualifyingMetadata)) {
               setInjected(true);
             }
             else {
@@ -101,7 +99,7 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
           }
 
           @Override
-          public Statement getType(InjectionContext injectContext, InjectableInstance injectableInstance) {
+          public Statement getBeanInstance(InjectionContext injectContext, InjectableInstance injectableInstance) {
             return instance.getValueStatement();
           }
 
@@ -151,21 +149,19 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
     }, Rule.before(EntryPoint.class, ApplicationScoped.class, Singleton.class));
 
     procFactory.registerHandler(ApplicationScoped.class, new JSR330AnnotationHandler<ApplicationScoped>() {
-      public boolean handle(InjectableInstance instance, ApplicationScoped annotation, IOCProcessingContext context) {
-        InjectionContext injectionContext = injectorFactory.getInjectionContext();
+      public boolean handle(InjectableInstance instance, ApplicationScoped annotation, IOCProcessingContext context) {;
         TypeInjector i = (TypeInjector) instance.getInjector();
         i.setSingleton(true);
 
-        i.getType(injectionContext, null);
+        i.getBeanInstance(injectionContext, null);
         return true;
       }
     });
 
     procFactory.registerHandler(Dependent.class, new JSR330AnnotationHandler<Dependent>() {
       public boolean handle(InjectableInstance instance, Dependent annotation, IOCProcessingContext context) {
-        InjectionContext injectionContext = injectorFactory.getInjectionContext();
         TypeInjector i = (TypeInjector) instance.getInjector();
-        i.getType(injectionContext, null);
+        i.getBeanInstance(injectionContext, null);
         return true;
       }
     });
@@ -201,17 +197,17 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
 
           MetaClass metaClass = GWTClass.newInstance(type.getOracle(), type);
 
-          if (injectorFactory.hasType(metaClass)) {
+          if (injectionContext.hasType(metaClass)) {
             continue;
           }
 
-          injectorFactory.addPsuedoScopeForType(metaClass);
+          injectionContext.addPsuedoScopeForType(metaClass);
         }
       }
     }
   }
 
-  public void afterInitialization(IOCProcessingContext context, InjectorFactory injectorFactory,
+  public void afterInitialization(IOCProcessingContext context, InjectionContext injectorFactory,
                                   IOCProcessorFactory procFactory) {
   }
 }

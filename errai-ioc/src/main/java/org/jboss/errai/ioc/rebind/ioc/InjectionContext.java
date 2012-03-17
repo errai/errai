@@ -74,10 +74,6 @@ public class InjectionContext {
   }
 
   public Injector getProxiedInjector(MetaClass type, QualifyingMetadata metadata) {
-    if (metadata == null) {
-      metadata = processingContext.getQualifyingMetadataFactory().createDefaultMetadata();
-    }
-
     //todo: figure out why I was doing this.
     MetaClass erased = type.getErased();
     Collection<Injector> injs = proxiedInjectors.get(erased);
@@ -104,10 +100,6 @@ public class InjectionContext {
   }
 
   public Injector getQualifiedInjector(MetaClass type, QualifyingMetadata metadata) {
-    if (metadata == null) {
-      metadata = processingContext.getQualifyingMetadataFactory().createDefaultMetadata();
-    }
-
     MetaClass erased = type.getErased();
     List<Injector> injs = injectors.get(erased);
     List<Injector> matching = new ArrayList<Injector>();
@@ -177,10 +169,6 @@ public class InjectionContext {
     return cyclingTypes.containsEntry(from, to);
   }
 
-  public boolean isInjectable(MetaClass injectorType) {
-    return isInjectableQualified(injectorType, null);
-  }
-
   public void addProxiedInjector(ProxyInjector proxyInjector) {
     proxiedInjectors.put(proxyInjector.getInjectedType(), proxyInjector);
   }
@@ -229,16 +217,6 @@ public class InjectionContext {
     return false;
   }
 
-  public List<Injector> getAllInjectors() {
-    List<Injector> allInjectors = new ArrayList<Injector>();
-    for (List<Injector> injectorList : injectors.values()) {
-      for (Injector injector : injectorList) {
-        allInjectors.add(injector);
-      }
-    }
-    return allInjectors;
-  }
-
   public Injector getInjector(Class<?> injectorType) {
     return getInjector(MetaClassFactory.get(injectorType));
   }
@@ -279,16 +257,6 @@ public class InjectionContext {
     }
 
     return injectorList.get(0);
-  }
-
-  public List<Injector> getInjectorsByType(Class<? extends Injector> injectorType) {
-    List<Injector> injs = new LinkedList<Injector>();
-    for (List<Injector> inj : injectors.values()) {
-      if (injectorType.isAssignableFrom(inj.getClass())) {
-        injs.addAll(inj);
-      }
-    }
-    return injs;
   }
 
   public void registerInjector(Injector injector) {
@@ -336,16 +304,6 @@ public class InjectionContext {
     decorators.get(iocExtension.decoratesWith()).add(iocExtension);
   }
 
-  public void deregisterInjector(Injector injector) {
-    List<Injector> injectorList = injectors.get(injector.getInjectedType());
-    if (injectorList != null) {
-      injectorList.remove(injector);
-
-      if (injectorList.isEmpty()) {
-        injectors.remove(injector.getInjectedType());
-      }
-    }
-  }
 
   public Set<Class<? extends Annotation>> getDecoratorAnnotations() {
     return Collections.unmodifiableSet(decorators.keySet());
@@ -368,14 +326,6 @@ public class InjectionContext {
     else {
       return Collections.emptySet();
     }
-  }
-
-
-  public boolean hasDecoratorsAssociated(ElementType type, Annotation a) {
-    if (decoratorsByElementType.size() == 0) {
-      sortDecorators();
-    }
-    return decoratorsByElementType.containsKey(type) && decoratorsByElementType.get(type).contains(a);
   }
 
   private void sortDecorators() {
@@ -485,6 +435,17 @@ public class InjectionContext {
   public boolean hasType(MetaClass cls) {
     return injectors.containsKey(cls);
   }
+
+  public void addType(MetaClass type) {
+    registerInjector(new TypeInjector(type, getProcessingContext()));
+  }
+
+  public void addPsuedoScopeForType(MetaClass type) {
+    TypeInjector inj = new TypeInjector(type, getProcessingContext());
+    inj.setPsuedo(true);
+    registerInjector(inj);
+  }
+
 
   public IOCProcessingContext getProcessingContext() {
     return processingContext;

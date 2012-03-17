@@ -21,9 +21,11 @@ import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.rebind.IOCTestRunner;
 import org.jboss.errai.ioc.tests.wiring.client.res.AfterTask;
+import org.jboss.errai.ioc.tests.wiring.client.res.BeanManagerDependentBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.BeforeTask;
 import org.jboss.errai.ioc.tests.wiring.client.res.HappyInspector;
 import org.jboss.errai.ioc.tests.wiring.client.res.QualInspector;
+import org.jboss.errai.ioc.tests.wiring.client.res.SetterInjectionBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.SimpleBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.SimpleBean2;
 import org.jboss.errai.ioc.tests.wiring.client.res.TestResultsSingleton;
@@ -72,6 +74,15 @@ public class  BasicIOCTest extends IOCClientTestCase {
     assertTrue("@PostConstruct method not called", simpleBean.isPostConstructCalled());
   }
 
+  public void testSetterMethodInjection() {
+    SetterInjectionBean bean = IOC.getBeanManager().lookupBean(SetterInjectionBean.class)
+            .getInstance();
+
+    assertNotNull(bean);
+    assertNotNull(bean.getServiceA());
+    assertNotNull(bean.getServiceB());
+  }
+
   public void testInjectionFromProvider() {
     SimpleBean2 simpleBean2 = IOC.getBeanManager().lookupBean(SimpleBean2.class).getInstance();
 
@@ -114,5 +125,12 @@ public class  BasicIOCTest extends IOCClientTestCase {
     assertTrue("BeforeTask did not run before AfterTask!",
             results.indexOf(BeforeTask.class) < results.indexOf(AfterTask.class));
     
+  }
+  
+  public void testBeanManagerInjectable() {
+    BeanManagerDependentBean bean = IOC.getBeanManager().lookupBean(BeanManagerDependentBean.class)
+            .getInstance();
+    
+    assertSame(IOC.getBeanManager(), bean.getBeanManager());
   }
 }

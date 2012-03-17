@@ -22,11 +22,7 @@ import org.jboss.errai.codegen.framework.meta.MetaField;
 import org.jboss.errai.codegen.framework.meta.MetaParameter;
 import org.jboss.errai.codegen.framework.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.framework.meta.MetaType;
-import org.jboss.errai.codegen.framework.meta.impl.java.JavaReflectionField;
-import org.jboss.errai.codegen.framework.meta.impl.java.JavaReflectionParameterizedType;
-import org.jboss.errai.codegen.framework.util.Refs;
 import org.jboss.errai.codegen.framework.util.Stmt;
-import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 
 import javax.enterprise.inject.Alternative;
 import java.lang.annotation.Annotation;
@@ -34,19 +30,19 @@ import java.lang.annotation.Annotation;
 public class ContextualProviderInjector extends TypeInjector {
   private final Injector providerInjector;
 
-  public ContextualProviderInjector(MetaClass type, MetaClass providerType, InjectorFactory factory) {
-    super(type, factory.getInjectionContext().getProcessingContext());
-    this.providerInjector = new TypeInjector(providerType, factory.getInjectionContext().getProcessingContext());
-    factory.addInjector(providerInjector);
+  public ContextualProviderInjector(MetaClass type, MetaClass providerType, InjectionContext context) {
+    super(type, context.getProcessingContext());
+    this.providerInjector = new TypeInjector(providerType,context.getProcessingContext());
+    context.registerInjector(providerInjector);
 
-    this.singleton = factory.getInjectionContext().getProcessingContext()
+    this.singleton = context.getProcessingContext()
             .isSingletonScope(providerType.getAnnotations());
     this.alternative = providerType.isAnnotationPresent(Alternative.class);
     injected = true;
   }
 
   @Override
-  public Statement getType(InjectionContext injectContext, InjectableInstance injectableInstance) {
+  public Statement getBeanInstance(InjectionContext injectContext, InjectableInstance injectableInstance) {
     MetaClass type = null;
     MetaParameterizedType pType = null;
 
@@ -57,10 +53,6 @@ public class ContextualProviderInjector extends TypeInjector {
         type = field.getType();
 
         pType = type.getParameterizedType();
-        // TODO refactor!
-        if (pType == null && field instanceof JavaReflectionField) {
-          pType = (JavaReflectionParameterizedType) field.getGenericType();
-        }
         break;
 
       case Parameter:
@@ -70,8 +62,6 @@ public class ContextualProviderInjector extends TypeInjector {
         pType = type.getParameterizedType();
         break;
     }
-
-    Statement statement;
 
     MetaType[] typeArgs = pType.getTypeParameters();
     MetaClass[] typeArgsClasses = new MetaClass[typeArgs.length];
@@ -91,29 +81,18 @@ public class ContextualProviderInjector extends TypeInjector {
 
 
     if (providerInjector.isSingleton()) {
-      if (!providerInjector.isInjected()) {
-
-
-        providerInjector.getType(injectContext, injectableInstance);
-//        injectContext.getProcessingContext().globalAppend(Stmt.declareVariable(type).asFinal().named(getVarName())
-//                .initializeWith(providerInjector.getType(injectContext, injectableInstance)));
-
-      }
       return Stmt.loadVariable(providerInjector.getVarName()).invoke("provide", typeArgsClasses, qualifiers.length != 0 ? qualifiers : null);
     }
     else {
-//      provided = true;
-      return Stmt.nestedCall(providerInjector.getType(injectContext, injectableInstance))
+      return Stmt.nestedCall(providerInjector.getBeanInstance(injectContext, injectableInstance))
               .invoke("provide", typeArgsClasses, qualifiers.length != 0 ? qualifiers : null);
     }
-
-
   }
 
 
   @Override
   public Statement instantiateOnly(InjectionContext injectContext, InjectableInstance injectableInstance) {
-    return providerInjector.getType(injectContext, injectableInstance);
+    return providerInjector.getBeanInstance(injectContext, injectableInstance);
   }
 
 }

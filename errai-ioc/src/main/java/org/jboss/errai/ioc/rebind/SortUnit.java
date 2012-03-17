@@ -27,15 +27,16 @@ import java.util.Set;
  * @author Mike Brock
  */
 public class SortUnit implements Comparable<SortUnit> {
-  private MetaClass type;
-  private List<Object> items;
-  private Set<SortUnit> dependencies;
-  private boolean hard;
+  private final MetaClass type;
+  private final List<Object> items;
+  private final Set<SortUnit> dependencies;
+  private final boolean hard;
 
   public SortUnit(MetaClass type) {
     this.type = type;
     this.dependencies = Collections.emptySet();
     this.items = new ArrayList<Object>();
+    this.hard = false;
   }
 
   public SortUnit(MetaClass type, boolean hard) {
@@ -56,6 +57,7 @@ public class SortUnit implements Comparable<SortUnit> {
       this.items.add(item);
     }
     this.dependencies = dependencies;
+    this.hard = false;
   }
 
   public SortUnit(MetaClass type, List<Object> items, Set<SortUnit> dependencies, boolean hard) {
@@ -81,14 +83,9 @@ public class SortUnit implements Comparable<SortUnit> {
     return dependencies;
   }
 
-  public void setHard(boolean hard) {
-    this.hard = hard;
-  }
-
   public boolean isHard() {
     return hard;
   }
-
 
   public int getDepth() {
     int depth = 0;

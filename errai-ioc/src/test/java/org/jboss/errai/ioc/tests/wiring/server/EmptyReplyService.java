@@ -5,6 +5,8 @@ import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.server.annotations.Service;
 
+import java.io.File;
+
 /**
  * A service that replies to TestCompleterService with an empty message.
  *
@@ -12,6 +14,9 @@ import org.jboss.errai.bus.server.annotations.Service;
  */
 @Service
 public class EmptyReplyService implements MessageCallback {
+  public EmptyReplyService() {
+    System.out.println("Working dir: " + new File("").getAbsoluteFile().getAbsolutePath());
+  }
 
   @Override
   public void callback(Message message) {

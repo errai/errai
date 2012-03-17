@@ -21,6 +21,8 @@ import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
 import org.jboss.errai.ioc.tests.wiring.client.res.AlternativeBeanA;
 import org.jboss.errai.ioc.tests.wiring.client.res.AlternativeDependentBean;
 
+import java.io.File;
+
 /**
  * @author Mike Brock
  */

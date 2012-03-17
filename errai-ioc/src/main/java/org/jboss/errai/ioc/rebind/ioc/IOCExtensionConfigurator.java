@@ -20,7 +20,7 @@ import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.IOCProcessorFactory;
 
 public interface IOCExtensionConfigurator {
-  public void configure(IOCProcessingContext context, InjectorFactory injectorFactory, IOCProcessorFactory procFactory);
+  public void configure(IOCProcessingContext context, InjectionContext injectionContext, IOCProcessorFactory procFactory);
 
-  public void afterInitialization(IOCProcessingContext context, InjectorFactory injectorFactory, IOCProcessorFactory procFactory);
+  public void afterInitialization(IOCProcessingContext context, InjectionContext injectionContext, IOCProcessorFactory procFactory);
 }

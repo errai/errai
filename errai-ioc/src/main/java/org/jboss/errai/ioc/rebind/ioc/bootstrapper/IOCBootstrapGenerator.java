@@ -51,15 +51,12 @@ import org.jboss.errai.ioc.client.InterfaceInjectionContext;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
-import org.jboss.errai.ioc.client.api.CreatePanel;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.api.GeneratedBy;
 import org.jboss.errai.ioc.client.api.IOCBootstrapTask;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 import org.jboss.errai.ioc.client.api.TestMock;
 import org.jboss.errai.ioc.client.api.TaskOrder;
-import org.jboss.errai.ioc.client.api.ToPanel;
-import org.jboss.errai.ioc.client.api.ToRootPanel;
 import org.jboss.errai.ioc.client.api.TypeProvider;
 import org.jboss.errai.ioc.client.container.CreationalContext;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
@@ -72,10 +69,8 @@ import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.InjectionFailure;
 import org.jboss.errai.ioc.rebind.ioc.Injector;
-import org.jboss.errai.ioc.rebind.ioc.InjectorFactory;
 import org.jboss.errai.ioc.rebind.ioc.ProviderInjector;
 import org.jboss.errai.ioc.rebind.ioc.QualifyingMetadataFactory;
-import org.jboss.errai.ioc.rebind.ioc.TypeInjector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,7 +104,7 @@ public class IOCBootstrapGenerator {
   TypeOracle typeOracle;
   GeneratorContext context;
 
-  InjectorFactory injectFactory;
+  InjectionContext injectionContext;
   IOCProcessorFactory procFactory;
 
   private Collection<String> packages = null;
@@ -222,8 +217,8 @@ public class IOCBootstrapGenerator {
     SourceWriter sourceWriter = new StringSourceWriter();
 
     procContext = new IOCProcessingContext(logger, context, sourceWriter, buildContext, bootStrapClass, blockBuilder);
-    injectFactory = new InjectorFactory(procContext);
-    procFactory = new IOCProcessorFactory(injectFactory);
+    injectionContext = new InjectionContext(procContext);
+    procFactory = new IOCProcessorFactory(injectionContext);
 
     MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
     Properties props = scanner.getProperties("ErraiApp.properties");
@@ -257,7 +252,7 @@ public class IOCBootstrapGenerator {
         else if (key.equals(ENABLED_ALTERNATIVES_PROPERTY)) {
           String[] alternatives = String.valueOf(props.get(ENABLED_ALTERNATIVES_PROPERTY)).split("\\s");
           for (String alternative : alternatives) {
-            injectFactory.getInjectionContext().addEnabledAlternative(alternative.trim());
+            injectionContext.addEnabledAlternative(alternative.trim());
           }
         }
       }
@@ -294,7 +289,7 @@ public class IOCBootstrapGenerator {
     procFactory.process(scanner, procContext);
 
     for (Injector inj : procContext.getToInstantiate()) {
-      inj.getType(injectFactory.getInjectionContext(), null);
+      inj.getBeanInstance(injectionContext, null);
     }
 
     runAllDeferred();
@@ -312,12 +307,12 @@ public class IOCBootstrapGenerator {
     }
 
 
-    Map<MetaField, PrivateAccessType> privateFields = injectFactory.getInjectionContext().getPrivateFieldsToExpose();
+    Map<MetaField, PrivateAccessType> privateFields = injectionContext.getPrivateFieldsToExpose();
     for (Map.Entry<MetaField, PrivateAccessType> f : privateFields.entrySet()) {
       GenUtil.addPrivateAccessStubs(f.getValue(), !useReflectionStubs, classBuilder, f.getKey());
     }
 
-    Collection<MetaMethod> privateMethods = injectFactory.getInjectionContext().getPrivateMethodsToExpose();
+    Collection<MetaMethod> privateMethods = injectionContext.getPrivateMethodsToExpose();
 
     for (MetaMethod m : privateMethods) {
       GenUtil.addPrivateAccessStubs(!useReflectionStubs, classBuilder, m);
@@ -348,28 +343,16 @@ public class IOCBootstrapGenerator {
   }
 
   private void runAllDeferred() {
-    injectFactory.getInjectionContext().runAllDeferred();
+    injectionContext.runAllDeferred();
 
     for (Runnable r : deferredTasks)
       r.run();
   }
 
   public void addType(final MetaClass type) {
-    injectFactory.addType(type);
+    injectionContext.addType(type);
   }
 
-  @Deprecated
-  public Statement generateWithSingletonSemantics(final MetaClass visit) {
-    return injectFactory.generateSingleton(visit);
-  }
-
-  public Statement generateInjectors(final MetaClass visit) {
-    return injectFactory.generate(visit);
-  }
-
-  public String generateAllProviders() {
-    return injectFactory.generateAllProviders();
-  }
 
   public void initializeProviders() {
     final MetaClass typeProviderCls = MetaClassFactory.get(TypeProvider.class);
@@ -387,7 +370,7 @@ public class IOCBootstrapGenerator {
 
         IOCExtensionConfigurator configurator = configuratorClass.newInstance();
 
-        configurator.configure(procContext, injectFactory, procFactory);
+        configurator.configure(procContext, injectionContext, procFactory);
 
         extensionConfigurators.add(configurator);
       }
@@ -432,7 +415,7 @@ public class IOCBootstrapGenerator {
           annoType = ((Class) pType.getActualTypeArguments()[0]).asSubclass(Annotation.class);
         }
 
-        injectFactory.getInjectionContext().registerDecorator(
+        injectionContext.registerDecorator(
                 decoratorClass.getConstructor(new Class[]{Class.class}).newInstance(annoType));
       }
       catch (Exception e) {
@@ -451,7 +434,7 @@ public class IOCBootstrapGenerator {
       boolean contextual = false;
       for (MetaClass iface : type.getInterfaces()) {
         if (iface.getFullyQualifiedName().equals(Provider.class.getName())) {
-          injectFactory.addType(type);
+          injectionContext.addType(type);
 
           MetaParameterizedType pType = iface.getParameterizedType();
           MetaType typeParm = pType.getTypeParameters()[0];
@@ -473,10 +456,10 @@ public class IOCBootstrapGenerator {
           }
 
           if (isContextual) {
-            injectFactory.addInjector(new ContextualProviderInjector(bindType, type, injectFactory));
+            injectionContext.registerInjector(new ContextualProviderInjector(bindType, type, injectionContext));
           }
           else {
-            injectFactory.addInjector(new ProviderInjector(bindType, type, injectFactory));
+            injectionContext.registerInjector(new ProviderInjector(bindType, type, injectionContext));
           }
           break;
         }
@@ -530,13 +513,13 @@ public class IOCBootstrapGenerator {
 
       Injector injector;
       if (contextual) {
-        injector = new ContextualProviderInjector(finalBindType, type, injectFactory);
+        injector = new ContextualProviderInjector(finalBindType, type, injectionContext);
       }
       else {
-        injector = new ProviderInjector(finalBindType, type, injectFactory);
+        injector = new ProviderInjector(finalBindType, type, injectionContext);
       }
 
-      injectFactory.addInjector(injector);
+      injectionContext.registerInjector(injector);
     }
 
     /**
@@ -549,8 +532,7 @@ public class IOCBootstrapGenerator {
       Class<? extends ContextualTypeProvider> injectorClass = anno.value();
 
       try {
-        injectFactory
-                .addInjector(new ContextualProviderInjector(type, MetaClassFactory.get(injectorClass), injectFactory));
+        injectionContext.registerInjector(new ContextualProviderInjector(type, MetaClassFactory.get(injectorClass), injectionContext));
       }
       catch (Exception e) {
         throw new ErraiBootstrapFailure("could not load injector: " + e.getMessage(), e);
@@ -558,7 +540,7 @@ public class IOCBootstrapGenerator {
     }
 
     for (IOCExtensionConfigurator extensionConfigurator : extensionConfigurators) {
-      extensionConfigurator.afterInitialization(procContext, injectFactory, procFactory);
+      extensionConfigurator.afterInitialization(procContext, injectionContext, procFactory);
     }
   }
 
@@ -572,7 +554,7 @@ public class IOCBootstrapGenerator {
     procFactory.registerHandler(TestMock.class, new JSR330AnnotationHandler<TestMock>() {
       @Override
       public boolean handle(InjectableInstance instance, TestMock annotation, IOCProcessingContext context) {
-        injectFactory.getInjectionContext().addReplacementType(instance.getEnclosingType().getFullyQualifiedName());
+        injectionContext.addReplacementType(instance.getEnclosingType().getFullyQualifiedName());
         return false;
       }
     });
@@ -580,9 +562,9 @@ public class IOCBootstrapGenerator {
     procFactory.registerHandler(Singleton.class, new JSR330AnnotationHandler<Singleton>() {
       @Override
       public boolean handle(final InjectableInstance type, Singleton annotation, IOCProcessingContext context) {
-        Injector injector = injectFactory.getInjectionContext().getInjector(type.getType());
+        Injector injector = injectionContext.getInjector(type.getType());
         injector.setSingleton(true);
-        injector.getType(injectFactory.getInjectionContext(), null);
+        injector.getBeanInstance(injectionContext, null);
         return true;
       }
     });
@@ -590,9 +572,9 @@ public class IOCBootstrapGenerator {
     procFactory.registerHandler(EntryPoint.class, new JSR330AnnotationHandler<EntryPoint>() {
       @Override
       public boolean handle(final InjectableInstance type, EntryPoint annotation, IOCProcessingContext context) {
-        Injector injector = injectFactory.getInjectionContext().getInjector(type.getType());
+        Injector injector = injectionContext.getInjector(type.getType());
         injector.setSingleton(true);
-        injector.getType(injectFactory.getInjectionContext(), null);
+        injector.getBeanInstance(injectionContext, null);
         return true;
       }
     });
@@ -600,82 +582,13 @@ public class IOCBootstrapGenerator {
     procFactory.registerHandler(Service.class, new JSR330AnnotationHandler<Service>() {
       @Override
       public boolean handle(final InjectableInstance type, Service annotation, IOCProcessingContext context) {
-        Injector injector = injectFactory.getInjectionContext().getInjector(type.getType());
+        Injector injector = injectionContext.getInjector(type.getType());
         injector.setSingleton(true);
-        injector.getType(injectFactory.getInjectionContext(), null);
+        injector.getBeanInstance(injectionContext, null);
         return true;
       }
     });
 
-    procFactory.registerHandler(ToRootPanel.class, new JSR330AnnotationHandler<ToRootPanel>() {
-      @Override
-      public boolean handle(final InjectableInstance type, final ToRootPanel annotation,
-                            final IOCProcessingContext context) {
-        if (widgetType.isAssignableFrom(type.getType())) {
-
-          addDeferred(new Runnable() {
-            @Override
-            public void run() {
-              context.getWriter()
-                      .println("ctx.addToRootPanel(" + generateWithSingletonSemantics(type.getType()) + ");");
-            }
-          });
-        }
-        else {
-          throw new InjectionFailure("type declares @" + annotation.getClass().getSimpleName()
-                  + "  but does not extend type Widget: " + type.getType().getFullyQualifiedName());
-        }
-
-        return true;
-      }
-    });
-
-    procFactory.registerHandler(CreatePanel.class, new JSR330AnnotationHandler<CreatePanel>() {
-      @Override
-      public boolean handle(final InjectableInstance type, final CreatePanel annotation,
-                            final IOCProcessingContext context) {
-        if (widgetType.isAssignableFrom(type.getType())) {
-
-          addDeferred(new Runnable() {
-            @Override
-            public void run() {
-              context.getWriter().println(
-                      "ctx.registerPanel(\"" + (annotation.value().equals("")
-                              ? type.getType().getName() : annotation.value()) + "\", " + generateInjectors(type.getType())
-                              + ");");
-            }
-          });
-        }
-        else {
-          throw new InjectionFailure("type declares @" + annotation.getClass().getSimpleName()
-                  + "  but does not extend type Widget: " + type.getType().getFullyQualifiedName());
-        }
-        return true;
-      }
-    });
-
-    procFactory.registerHandler(ToPanel.class, new JSR330AnnotationHandler<ToPanel>() {
-      @Override
-      public boolean handle(final InjectableInstance type, final ToPanel annotation,
-                            final IOCProcessingContext context) {
-        if (widgetType.isAssignableFrom(type.getType())) {
-
-          addDeferred(new Runnable() {
-            @Override
-            public void run() {
-              context.getWriter()
-                      .println("ctx.widgetToPanel(" + generateWithSingletonSemantics(type.getType())
-                              + ", \"" + annotation.value() + "\");");
-            }
-          });
-        }
-        else {
-          throw new InjectionFailure("type declares @" + annotation.getClass().getSimpleName()
-                  + "  but does not extend type Widget: " + type.getType().getFullyQualifiedName());
-        }
-        return true;
-      }
-    });
   }
 
   public void setUseReflectionStubs(boolean useReflectionStubs) {

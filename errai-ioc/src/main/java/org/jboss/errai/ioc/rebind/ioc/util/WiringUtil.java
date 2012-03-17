@@ -41,15 +41,7 @@ public class WiringUtil {
     for (SortUnit su : in) {
       masterSU = sortUnitMap.get(su.getType());
       if (masterSU == su) continue;
-
-      if (masterSU != null) {
-        for (Object item : su.getItems()) {
-          masterSU.addItem(item);
-        }
-      }
-      else {
-        sortUnitMap.put(su.getType(), su);
-      }
+      sortUnitMap.put(su.getType(), su);
     }
 
     // second pass to re-reference dependencies
@@ -67,7 +59,7 @@ public class WiringUtil {
 
         newDependencySet.add(masterSU);
       }
-      
+
       consolidatedList.add(new SortUnit(su.getType(), su.getItems(), newDependencySet, false));
     }
 

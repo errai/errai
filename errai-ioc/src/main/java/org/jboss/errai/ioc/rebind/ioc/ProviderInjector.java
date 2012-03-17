@@ -16,10 +16,8 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
-import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.util.Refs;
 import org.jboss.errai.codegen.framework.util.Stmt;
 
 import javax.enterprise.inject.Alternative;
@@ -31,20 +29,20 @@ public class ProviderInjector extends TypeInjector {
   private boolean provided = false;
   private boolean standardProvider = false;
 
-  public ProviderInjector(MetaClass type, MetaClass providerType, InjectorFactory factory) {
-    super(type, factory.getInjectionContext().getProcessingContext());
-    this.providerInjector = new TypeInjector(providerType, factory.getInjectionContext().getProcessingContext());
-    factory.addInjector(providerInjector);
+  public ProviderInjector(MetaClass type, MetaClass providerType, InjectionContext context) {
+    super(type, context.getProcessingContext());
+    this.providerInjector = new TypeInjector(providerType, context.getProcessingContext());
+    context.registerInjector(providerInjector);
 
     this.standardProvider = providerInjector.getInjectedType().isAssignableTo(Provider.class);
-    this.singleton = factory.getInjectionContext().getProcessingContext()
+    this.singleton = context.getProcessingContext()
             .isSingletonScope(providerType.getAnnotations());
     this.alternative = type.isAnnotationPresent(Alternative.class);
     this.injected = true;
   }
 
   @Override
-  public Statement getType(InjectionContext injectContext, InjectableInstance injectableInstance) {
+  public Statement getBeanInstance(InjectionContext injectContext, InjectableInstance injectableInstance) {
     if (isSingleton() && provided) {
       if (standardProvider) {
         return Stmt.loadVariable(providerInjector.getVarName()).invoke("get");
@@ -54,21 +52,21 @@ public class ProviderInjector extends TypeInjector {
       }
     }
 
-    //provided = true;
+    provided = true;
 
     if (standardProvider) {
-      return Stmt.nestedCall(providerInjector.getType(injectContext, injectableInstance))
+      return Stmt.nestedCall(providerInjector.getBeanInstance(injectContext, injectableInstance))
               .invoke("get");
     }
     else {
-      return Stmt.nestedCall(providerInjector.getType(injectContext, injectableInstance))
+      return Stmt.nestedCall(providerInjector.getBeanInstance(injectContext, injectableInstance))
               .invoke("provide");
     }
   }
 
   @Override
   public Statement instantiateOnly(InjectionContext injectContext, InjectableInstance injectableInstance) {
-    return providerInjector.getType(injectContext, injectableInstance);
+    return providerInjector.getBeanInstance(injectContext, injectableInstance);
   }
 
 }

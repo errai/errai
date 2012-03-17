@@ -41,18 +41,18 @@ public class QualifiedTypeInjectorDelegate extends Injector {
 
   @Override
   public Statement getType(InjectableInstance injectableInstance) {
-    return getType(injectableInstance.getInjectionContext(), injectableInstance);
+    return getBeanInstance(injectableInstance.getInjectionContext(), injectableInstance);
   }
 
   @Override
-  public Statement getType(InjectionContext injectContext, InjectableInstance injectableInstance) {
+  public Statement getBeanInstance(InjectionContext injectContext, InjectableInstance injectableInstance) {
     Statement val = _getType(injectContext, injectableInstance);
     registerWithBeanManager(injectableInstance.getInjectionContext(), val);
     return val;
   }
 
   public Statement _getType(InjectionContext injectContext, InjectableInstance injectableInstance) {
-    return delegate.getType(injectContext, injectableInstance);
+    return delegate.getBeanInstance(injectContext, injectableInstance);
   }
 
   @Override

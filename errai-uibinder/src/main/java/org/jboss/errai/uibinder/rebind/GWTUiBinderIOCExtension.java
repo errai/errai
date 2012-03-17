@@ -41,7 +41,6 @@ import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.InjectionPoint;
 import org.jboss.errai.ioc.rebind.ioc.Injector;
-import org.jboss.errai.ioc.rebind.ioc.InjectorFactory;
 import org.jboss.errai.ioc.rebind.ioc.TypeDiscoveryListener;
 import org.jboss.errai.uibinder.client.UiBinderProvider;
 
@@ -145,14 +144,14 @@ public class GWTUiBinderIOCExtension implements IOCExtensionConfigurator {
           }
 
 
-          injectorFactory.addInjector(new Injector() {
+          injectorFactory.getCtx().registerInjector(new Injector() {
             @Override
             public Statement instantiateOnly(InjectionContext injectContext, InjectableInstance injectableInstance) {
               return Refs.get(varName);
             }
 
             @Override
-            public Statement getType(InjectionContext injectContext, InjectableInstance injectableInstance) {
+            public Statement getBeanInstance(InjectionContext injectContext, InjectableInstance injectableInstance) {
               return Refs.get(varName);
             }
 

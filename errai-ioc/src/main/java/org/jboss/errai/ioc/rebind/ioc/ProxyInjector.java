@@ -66,11 +66,11 @@ public class ProxyInjector extends Injector {
 
   @Override
   public Statement instantiateOnly(InjectionContext injectContext, InjectableInstance injectableInstance) {
-    return getType(injectContext, injectableInstance);
+    return getBeanInstance(injectContext, injectableInstance);
   }
 
   @Override
-  public Statement getType(InjectionContext injectContext, InjectableInstance injectableInstance) {
+  public Statement getBeanInstance(InjectionContext injectContext, InjectableInstance injectableInstance) {
     if (!isInjected()) {
       IOCProcessingContext pCtx = injectContext.getProcessingContext();
 

@@ -39,10 +39,10 @@ public abstract class Injector {
   public abstract Statement instantiateOnly(InjectionContext injectContext, InjectableInstance injectableInstance);
 
   public Statement getType(InjectableInstance injectableInstance) {
-    return getType(injectableInstance.getInjectionContext(), injectableInstance);
+    return getBeanInstance(injectableInstance.getInjectionContext(), injectableInstance);
   }
 
-  public abstract Statement getType(InjectionContext injectContext, InjectableInstance injectableInstance);
+  public abstract Statement getBeanInstance(InjectionContext injectContext, InjectableInstance injectableInstance);
 
 
   public boolean isAlternative() {

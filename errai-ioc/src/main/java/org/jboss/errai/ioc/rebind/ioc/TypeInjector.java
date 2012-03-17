@@ -77,7 +77,7 @@ public class TypeInjector extends Injector {
   }
 
   @Override
-  public Statement getType(InjectionContext injectContext, InjectableInstance injectableInstance) {
+  public Statement getBeanInstance(InjectionContext injectContext, InjectableInstance injectableInstance) {
     Statement val = _getType(injectContext, injectableInstance);
     registerWithBeanManager(injectContext, val);
     return val;
@@ -186,7 +186,7 @@ public class TypeInjector extends Injector {
 
   @Override
   public Statement instantiateOnly(InjectionContext injectContext, InjectableInstance injectableInstance) {
-    return getType(injectContext, injectableInstance);
+    return getBeanInstance(injectContext, injectableInstance);
   }
 
   public void setSingleton(boolean singleton) {

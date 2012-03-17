@@ -16,10 +16,6 @@
 
 package org.jboss.errai.ioc.rebind.ioc;
 
-import com.google.gwt.core.ext.typeinfo.JField;
-import com.google.gwt.core.ext.typeinfo.JMethod;
-import com.google.gwt.core.ext.typeinfo.JParameter;
-import com.google.gwt.core.ext.typeinfo.JType;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.DefParameters;
 import org.jboss.errai.codegen.framework.Parameter;
@@ -29,7 +25,6 @@ import org.jboss.errai.codegen.framework.builder.BlockBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.framework.exception.UnproxyableClassException;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaClassMember;
 import org.jboss.errai.codegen.framework.meta.MetaConstructor;
 import org.jboss.errai.codegen.framework.meta.MetaField;
@@ -55,10 +50,7 @@ import javax.inject.Inject;
 import javax.inject.Qualifier;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -447,10 +439,10 @@ public class InjectUtil {
     QualifyingMetadata toMetaData = qualifyingMetaDataFrom(ctx, extractQualifiersFromType(injectTo));
 
     // special handling for the JSR-299 TCK scenario where a dependent bean injects itself.
-    if (inj != null && inj.isDependent()
-            && injectTo.isAssignableFrom(clazz) && qualifyingMetadata.doesSatisfy(toMetaData)) {
-      inj = null;
-    }
+//    if (inj != null && inj.isDependent()
+//            && injectTo.isAssignableFrom(clazz) && qualifyingMetadata.doesSatisfy(toMetaData)) {
+//      inj = null;
+//    }
 
     if (inj != null) {
       return inj;
@@ -484,7 +476,7 @@ public class InjectUtil {
       @SuppressWarnings({"unchecked"}) InjectableInstance injectableInstance
               = new InjectableInstance(null, TaskType.Method, null, method, null, null, parms[i], injector, ctx);
 
-      parmValues[i] = injector.getType(ctx, injectableInstance);
+      parmValues[i] = injector.getBeanInstance(ctx, injectableInstance);
     }
 
     return parmValues;
@@ -520,7 +512,7 @@ public class InjectUtil {
       @SuppressWarnings({"unchecked"}) InjectableInstance injectableInstance
               = new InjectableInstance(null, TaskType.Parameter, constructor, null, null, null, parms[i], injector, ctx);
 
-      parmValues[i] = injector.getType(ctx, injectableInstance);
+      parmValues[i] = injector.getBeanInstance(ctx, injectableInstance);
     }
 
     return parmValues;
@@ -532,7 +524,7 @@ public class InjectUtil {
     Statement[] parmValues = new Statement[parmTypes.length];
 
     for (int i = 0; i < parmTypes.length; i++) {
-      parmValues[i] = ctx.getInjector(parmTypes[i]).getType(ctx, injectableInstance);
+      parmValues[i] = ctx.getInjector(parmTypes[i]).getBeanInstance(ctx, injectableInstance);
     }
 
     return parmValues;
@@ -569,27 +561,6 @@ public class InjectUtil {
     }
 
     return qualifiersCache;
-  }
-
-  public static Set<Class<?>> getKnownAnnotationsCache() {
-    if (annotationsCache == null) {
-      annotationsCache = new HashSet<Class<?>>();
-
-      ScannerSingleton.getOrCreateInstance();
-
-      annotationsCache.addAll(ScannerSingleton.getOrCreateInstance()
-              .getTypesAnnotatedWith(Retention.class));
-    }
-
-    return annotationsCache;
-  }
-
-  public static Annotation[] extractQualifiersAsArray(InjectableInstance<?> injectableInstance) {
-    return qualifierListToArray(extractQualifiers(injectableInstance));
-  }
-
-  public static Annotation[] qualifierListToArray(List<Annotation> annos) {
-    return annos.toArray(new Annotation[annos.size()]);
   }
 
   public static List<Annotation> extractQualifiers(InjectableInstance<? extends Annotation> injectableInstance) {
@@ -696,101 +667,6 @@ public class InjectUtil {
     return ctx.getProcessingContext()
             .getQualifyingMetadataFactory().createFrom(qualifiers.toArray(new Annotation[qualifiers.size()]));
 
-  }
-
-  public static Class<?> loadClass(String name) {
-    try {
-      return Class.forName(name);
-    }
-    catch (UnsupportedOperationException e) {
-      // ignore
-    }
-    catch (Throwable e) {
-      // ignore
-    }
-    return null;
-  }
-
-  public static Field loadField(JField field) {
-    Class<?> cls = loadClass(field.getEnclosingType().getQualifiedSourceName());
-    if (cls == null) return null;
-    try {
-      return cls.getField(field.getName());
-    }
-    catch (NoSuchFieldException e) {
-    }
-    return null;
-  }
-
-  public static Method loadMethod(JMethod method) {
-    Class<?> cls = loadClass(method.getEnclosingType().getQualifiedSourceName());
-    if (cls == null) return null;
-
-    JParameter[] jparms = method.getParameters();
-    Class[] parms = new Class[jparms.length];
-
-    for (int i = 0; i < jparms.length; i++) {
-      parms[i] = loadClass(jparms[i].getType().isClassOrInterface().getQualifiedSourceName());
-    }
-
-    try {
-      return cls.getMethod(method.getName(), parms);
-    }
-    catch (NoSuchMethodException e) {
-      e.printStackTrace();
-    }
-    return null;
-  }
-
-  public static Class<?>[] jParmToClass(JParameter[] parms) throws ClassNotFoundException {
-    Class<?>[] classes = new Class<?>[parms.length];
-    for (int i = 0; i < parms.length; i++) {
-      classes[i] = getPrimitiveOrClass(parms[i]);
-    }
-    return classes;
-  }
-
-  public static MetaClass[] classToMeta(Class<?>[] types) {
-    MetaClass[] metaClasses = new MetaClass[types.length];
-    for (int i = 0; i < types.length; i++) {
-      metaClasses[i] = MetaClassFactory.get(types[i]);
-    }
-    return metaClasses;
-  }
-
-  public static Class<?> getPrimitiveOrClass(JParameter parm) throws ClassNotFoundException {
-    JType type = parm.getType();
-    String name = type.isArray() != null ? type.getJNISignature().replace("/", ".") : type.getQualifiedSourceName();
-
-    if (parm.getType().isPrimitive() != null) {
-      char sig = parm.getType().isPrimitive().getJNISignature().charAt(0);
-
-      switch (sig) {
-        case 'Z':
-          return boolean.class;
-        case 'B':
-          return byte.class;
-        case 'C':
-          return char.class;
-        case 'D':
-          return double.class;
-        case 'F':
-          return float.class;
-        case 'I':
-          return int.class;
-        case 'J':
-          return long.class;
-        case 'S':
-          return short.class;
-        case 'V':
-          return void.class;
-        default:
-          return null;
-      }
-    }
-    else {
-      return Class.forName(name, false, Thread.currentThread().getContextClassLoader());
-    }
   }
 
   private static final String BEAN_INJECTOR_STORE = "InjectorBeanManagerStore";
