@@ -17,6 +17,7 @@
 package org.jboss.errai.codegen.framework.meta;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 public abstract class MetaMethod implements MetaClassMember, MetaGenericDeclaration {
   public abstract String getName();
@@ -33,6 +34,22 @@ public abstract class MetaMethod implements MetaClassMember, MetaGenericDeclarat
 
   public abstract boolean isVarArgs();
 
+  private String _hashString;
+  public String hashString() { 
+  if (_hashString != null) return _hashString;
+    return _hashString = MetaMethod.class + ":" 
+            + getDeclaringClass().getFullyQualifiedName() + "." + getName() 
+            + "(" + Arrays.toString(getParameters()) + ")";
+  }
+  
+  public int hashCode() {
+    return hashString().hashCode() * 31;
+  }
+  
+  public boolean equals(Object o) {
+    return o instanceof MetaMethod && ((MetaMethod)o).hashString().equals(hashString());
+  }
+  
   public Method asMethod() {
     throw new UnsupportedOperationException();
   }

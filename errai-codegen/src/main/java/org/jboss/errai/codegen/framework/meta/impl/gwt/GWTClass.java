@@ -223,7 +223,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
     if (type != null) {
 
       meths.add(new GWTSpecialMethod(this, DefModifiers.none(), Scope.Public, String.class, "name"));
-      meths.add(new GWTSpecialMethod(this, DefModifiers.none(), Scope.Public, Enum.class, "valueOf", Parameter.of(String.class, "p")));
+      meths.add(new GWTSpecialMethod(this, DefModifiers.none(), Scope.Public, Enum.class, "valueOf", Parameter.of(String.class, "p").getMetaParameter()));
       meths.add(new GWTSpecialMethod(this, DefModifiers.none(), Scope.Public, Enum[].class, "values"));
 
     }

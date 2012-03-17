@@ -32,14 +32,29 @@ public abstract class MetaField implements HasAnnotations, MetaClassMember {
   public String toString() {
     return MetaField.class.getName() + ":" + getDeclaringClass().getFullyQualifiedName() + "." + getName();
   }
+  
+  private String _hashString;
+  public String hashString() {
+    if (_hashString != null) return _hashString;
+    return _hashString = MetaField.class.getName()
+            + ":" + getDeclaringClass().getFullyQualifiedName() + "." + getName() + "::" + getType().getFullyQualifiedName();
+  }
 
   public int hashCode() {
-    return toString().hashCode();
+    return hashString().hashCode();
+  }
+
+
+  @Override
+  public boolean equals(Object o) {
+    return o instanceof MetaField && ((MetaField) o).hashString().equals(hashString());
   }
 
   public Field asField() {
      return null;
   }
+
+
 
   public static class ArrayLengthMetaField extends MetaField {
 

@@ -32,7 +32,7 @@ import com.google.gwt.core.ext.typeinfo.JParameter;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public class GWTParameter implements MetaParameter {
+public class GWTParameter extends MetaParameter {
   private JParameter parameter;
   private Annotation[] annotations;
   private MetaClassMember declaredBy;

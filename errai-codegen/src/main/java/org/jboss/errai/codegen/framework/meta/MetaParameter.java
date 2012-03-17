@@ -16,13 +16,31 @@
 
 package org.jboss.errai.codegen.framework.meta;
 
+import org.omg.CORBA.PUBLIC_MEMBER;
+
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public interface MetaParameter extends HasAnnotations {
-  public String getName();
+public abstract class MetaParameter implements HasAnnotations {
+  public abstract String getName();
 
-  public MetaClass getType();
+  public abstract MetaClass getType();
 
-  public MetaClassMember getDeclaringMember();
+  public abstract MetaClassMember getDeclaringMember();
+
+  private String _hashString;
+
+  public String hashString() {
+    if (_hashString != null) return _hashString;
+    return _hashString = MetaParameter.class.getName() + ":" + getName() + ":"
+            + getType().getFullyQualifiedName();
+  }
+  
+  public int hashCode() {
+    return hashString().hashCode() * 31;
+  }
+  
+  public boolean equals(Object o) {
+    return o instanceof  MetaParameter && ((MetaParameter) o).hashString().equals(hashString());
+  }
 }

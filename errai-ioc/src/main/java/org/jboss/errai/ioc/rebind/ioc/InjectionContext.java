@@ -400,13 +400,11 @@ public class InjectionContext {
     addExposedField(field, PrivateAccessType.Both);
   }
 
-
   public void addExposedField(MetaField field, PrivateAccessType accessType) {
-    String fieldSignature = GenUtil.getPrivateFieldInjectorName(field);
-    if (!exposedMembers.contains(fieldSignature)) {
-      exposedMembers.add(fieldSignature);
+    if (!privateFieldsToExpose.containsKey(field)) {
+      privateFieldsToExpose.put(field, accessType);
     }
-    else {
+    else if (privateFieldsToExpose.get(field) != accessType){
       accessType = PrivateAccessType.Both;
     }
     privateFieldsToExpose.put(field, accessType);

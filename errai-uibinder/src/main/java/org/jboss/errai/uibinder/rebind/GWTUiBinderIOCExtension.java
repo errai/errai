@@ -52,7 +52,7 @@ import java.lang.annotation.Annotation;
 @IOCExtension
 public class GWTUiBinderIOCExtension implements IOCExtensionConfigurator {
   @Override
-  public void configure(final IOCProcessingContext context, final InjectorFactory injectorFactory, final IOCProcessorFactory procFactory) {
+  public void configure(final IOCProcessingContext context, final InjectionContext injectionContext, final IOCProcessorFactory procFactory) {
 
     context.registerTypeDiscoveryListener(new TypeDiscoveryListener() {
       @Override
@@ -144,7 +144,7 @@ public class GWTUiBinderIOCExtension implements IOCExtensionConfigurator {
           }
 
 
-          injectorFactory.getCtx().registerInjector(new Injector() {
+          injectionContext.registerInjector(new Injector() {
             @Override
             public Statement instantiateOnly(InjectionContext injectContext, InjectableInstance injectableInstance) {
               return Refs.get(varName);
@@ -187,6 +187,6 @@ public class GWTUiBinderIOCExtension implements IOCExtensionConfigurator {
   }
 
   @Override
-  public void afterInitialization(IOCProcessingContext context, InjectorFactory injectorFactory, IOCProcessorFactory procFactory) {
+  public void afterInitialization(IOCProcessingContext context, InjectionContext injectionContext, IOCProcessorFactory procFactory) {
   }
 }

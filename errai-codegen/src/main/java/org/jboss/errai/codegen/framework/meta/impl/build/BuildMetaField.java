@@ -184,10 +184,4 @@ public class BuildMetaField extends MetaField implements Builder {
 
     return statement.generate(declaringClass.getContext());
   }
-
-  @Override
-  public boolean equals(Object o) {
-    return o instanceof MetaField && GenUtil.equals(this, (MetaField) o);
-  }
-
 }

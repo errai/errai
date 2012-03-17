@@ -347,7 +347,6 @@ public class GenUtil {
   }
 
   public static boolean equals(MetaConstructor a, MetaConstructor b) {
-//    if (!a.getName().equals(b.getName())) return false;
     if (a.getParameters().length != b.getParameters().length) {
       return false;
     }
@@ -455,7 +454,6 @@ public class GenUtil {
 
     return fieldName;
   }
-
 
   public static void addPrivateAccessStubs(boolean useJSNIStubs,
                                            ClassStructureBuilder<?> classBuilder,

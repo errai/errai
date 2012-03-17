@@ -180,11 +180,6 @@ public class JavaReflectionMethod extends MetaMethod {
   }
 
   @Override
-  public boolean equals(Object o) {
-    return o instanceof MetaMethod && GenUtil.equals(this, (MetaMethod) o);
-  }
-
-  @Override
   public Method asMethod() {
     return method;
   }
