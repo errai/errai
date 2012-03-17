@@ -61,7 +61,6 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
 
     procFactory.registerHandler(Produces.class, new JSR330AnnotationHandler<Produces>() {
 
-      //
       @Override
       public Set<SortUnit> checkDependencies(DependencyControl control, final InjectableInstance instance, Produces annotation,
                                              final IOCProcessingContext context) {
@@ -71,7 +70,7 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
             break;
           case PrivateField:
           case PrivateMethod:
-            instance.ensureMemberExposed(PrivateAccessType.Write);
+            instance.ensureMemberExposed(PrivateAccessType.Read);
 
         }
 
