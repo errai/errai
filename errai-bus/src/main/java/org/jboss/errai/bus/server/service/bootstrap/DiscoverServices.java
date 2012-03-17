@@ -52,7 +52,7 @@ class DiscoverServices implements BootstrapExecution {
 
     }
     else {
-      log.info("auto-discovery of services disabled.");
+      log.debug("auto-discovery of services disabled.");
     }
   }
 

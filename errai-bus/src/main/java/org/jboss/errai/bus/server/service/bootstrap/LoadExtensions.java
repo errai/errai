@@ -54,7 +54,7 @@ public class LoadExtensions implements BootstrapExecution {
     }
     if (autoScanModules) {
 
-      log.info("searching for Errai extensions ...");
+      log.info("searching for errai extensions ...");
 
       final ErraiConfig erraiConfig = new ErraiConfig() {
         public void addBinding(Class<?> type, ResourceProvider provider) {
@@ -66,7 +66,7 @@ public class LoadExtensions implements BootstrapExecution {
         }
 
         public void addSerializableType(Class<?> type) {
-          log.info("marked " + type + " as serializable.");
+          log.debug("marked " + type + " as serializable.");
           loadedComponents.add(type.getName());
           config.getSerializableTypes().add(type);
         }
@@ -112,7 +112,7 @@ public class LoadExtensions implements BootstrapExecution {
               create.run();
             }
             catch (CreationException e) {
-              log.info("extension " + clazz.getName() + " cannot be bound yet, deferring ...");
+              log.debug("extension " + clazz.getName() + " cannot be bound yet, deferring ...");
               context.defer(create);
             }
 
@@ -122,12 +122,6 @@ public class LoadExtensions implements BootstrapExecution {
           }
         }
       }
-
-      for (Class bindingType : config.getExtensionBindings().keySet()) {
-        log.info("added extension binding: " + bindingType.getName());
-      }
-
-   //   log.info("total extension binding: " + config.getExtensionBindings().keySet().size());
 
     }
     else {

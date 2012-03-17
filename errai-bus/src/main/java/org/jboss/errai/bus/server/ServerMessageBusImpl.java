@@ -963,8 +963,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             q.wake();
           }
 
-          if (totalBroadcasted.incrementAndGet() % 1000 == 0) {
-            log.info(totalBroadcasted.get() + " messages have been broadcasted to service: " + svc);
+          if (log.isDebugEnabled() && totalBroadcasted.incrementAndGet() % 1000 == 0) {
+            log.debug(totalBroadcasted.get() + " messages have been broadcasted to service: " + svc);
           }
         }
         catch (IOException e) {

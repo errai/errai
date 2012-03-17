@@ -1116,7 +1116,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
       LogUtil.log("received final vote for initialization ...");
 
-      LogUtil.log("executing " + postInitTasks.size() + " post init task(s)");
+      if (!postInitTasks.isEmpty())
+        LogUtil.log("executing " + postInitTasks.size() + " post init task(s)");
 
       Iterator<Runnable> postInitTasksIter = postInitTasks.iterator();
       while (postInitTasksIter.hasNext()) {
@@ -1139,7 +1140,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private void sendAllDeferred() {
-    LogUtil.log("transmitting deferred messages now ...");
+    if (!deferredMessages.isEmpty())
+      LogUtil.log("transmitting deferred messages now ...");
 
     for (Iterator<Message> iter = deferredMessages.iterator(); iter.hasNext(); ) {
       Message m = iter.next();

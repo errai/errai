@@ -110,7 +110,7 @@ public class CDIServerUtil {
     }
 
     if (ctx != null) {
-      log.info("searching to see if ErraiService is already bound...");
+      log.debug("searching to see if ErraiService is already bound...");
 
       if ((errai = _lookupErraiService(ctx)) != null) {
         bound = true;
@@ -157,7 +157,7 @@ public class CDIServerUtil {
     ErraiService errai;
     try {
       errai = (ErraiService) ctx.lookup(addr);
-      log.info("found ErraiService bound at: " + addr);
+      log.debug("found ErraiService bound at: " + addr);
 
       return errai;
     }

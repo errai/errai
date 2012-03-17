@@ -129,16 +129,16 @@ public class CDIExtensionPoints implements Extension {
     this.managedTypes = new TypeRegistry();
 
     try {
-      log.info("configuring Errai CDI");
+      log.info("starting errai cdi ...");
       ResourceBundle erraiServiceConfig = getBundle("ErraiService");
       if (erraiServiceConfig.containsKey(ERRAI_CDI_STANDALONE)) {
         standalone = "true".equals(erraiServiceConfig.getString(ERRAI_CDI_STANDALONE).trim());
 
         if (standalone) {
-          log.info("Errai CDI running in standalone mode.");
+          log.info("errai cdi running in standalone mode.");
         }
         else {
-          log.info("Errai CDI running in add-on mode.");
+          log.info("errai cdi running as regular extension.");
         }
       }
 
@@ -159,7 +159,7 @@ public class CDIExtensionPoints implements Extension {
       throw new ErraiBootstrapFailure("Error reading from configuration. Did you include ErraiService.properties?", e);
     }
 
-    log.info("Created Errai-CDI context: " + uuid);
+    log.debug("Created errai cdi context: " + uuid);
   }
 
   /**
@@ -187,7 +187,6 @@ public class CDIExtensionPoints implements Extension {
         isRpc = intf.isAnnotationPresent(Remote.class);
 
         if (isRpc) {
-          log.info("Identified RPC interface: " + intf + " on " + type);
           if (!managedTypes.getRemoteInterfaces().contains(intf)) {
             managedTypes.addRemoteInterface(intf);
           }
@@ -407,7 +406,6 @@ public class CDIExtensionPoints implements Extension {
         }
       }
 
-      log.info("Register MessageCallback: " + type);
       final String subjectName = CDIServerUtil.resolveServiceName(type.getJavaClass());
 
       bus.subscribe(subjectName, new MessageCallback() {

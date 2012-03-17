@@ -224,7 +224,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
     Properties props = scanner.getProperties("ErraiApp.properties");
     if (props != null) {
-      log.info("Checking ErraiApp.properties for configured types ...");
+      log.debug("checking ErraiApp.properties for configured types ...");
 
       for (Object o : props.keySet()) {
         String key = (String) o;
@@ -324,8 +324,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       }
     }
 
-
-    log.info("comprehended " + exposedClasses.size() + " classes");
+    log.debug("comprehended " + exposedClasses.size() + " classes");
   }
 
   private static boolean isTypeFinal(Map<String, List<String>> inheritanceMap, MetaClass type) {

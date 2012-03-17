@@ -82,7 +82,7 @@ public class WorkerFactory {
 
     this.messages = new ArrayBlockingQueue<Message>(deliveryQueueSize);
 
-    log.info("initializing async worker pools (poolSize: " + poolSize + "; workerTimeout: " + workerTimeout + ")");
+    log.debug("initializing async worker pools (poolSize: " + poolSize + "; workerTimeout: " + workerTimeout + ")");
 
     this.workerPool = new Worker[poolSize];
 
@@ -192,7 +192,7 @@ public class WorkerFactory {
    * Starts execution of all the threads in the pool of threads
    */
   public void startPool() {
-    log.info("starting worker pool.");
+    log.debug("starting worker pool.");
     for (int i = 0; i < poolSize; i++) {
       workerPool[i].start();
     }

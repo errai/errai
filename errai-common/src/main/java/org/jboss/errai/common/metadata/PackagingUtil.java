@@ -53,7 +53,7 @@ public class PackagingUtil {
       }
     }
 
-    log.info("identifying deployment type for uri: " + actualFilePath);
+    log.debug("identifying deployment type for uri: " + actualFilePath);
 
     return findActualDeploymentFile(new File(actualFilePath));
   }

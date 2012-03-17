@@ -59,7 +59,7 @@ public class ServiceObjectFactory implements ObjectFactory {
             }
           }).getInstance(ErraiService.class);
 
-      log.info("Creating service instance for development mode: " + serviceSingleton);
+      log.info("creating service instance for development mode: " + serviceSingleton);
     }
   }
 
