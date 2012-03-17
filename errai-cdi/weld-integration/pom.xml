@@ -203,7 +203,7 @@
                             </additionalClasspathElements>
                             <useManifestOnlyJar>false</useManifestOnlyJar>
                             <forkMode>pertest</forkMode>
-                            <argLine>-Xmx2048m ${argLine} -Derrai.devel.nocache=true -Dgwt.args='-testBeginTimeout 5'</argLine>
+                            <argLine>-Xmx2048m -Derrai.devel.nocache=true -Dgwt.args='-testBeginTimeout 5'</argLine>
 
                             <systemProperties>
                                 <!-- Must disable long polling for automated tests to succeed -->

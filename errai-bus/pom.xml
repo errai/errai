@@ -225,7 +225,7 @@
                         <configuration>
                             <skipTests>false</skipTests>
                             <forkMode>always</forkMode>
-                            <argLine>-Xmx2048m ${argLine} -Dgwt.args='-testBeginTimeout 5'</argLine>
+                            <argLine>-Xmx2048m -Dgwt.args='-testBeginTimeout 5'</argLine>
 
                             <additionalClasspathElements>
                                 <additionalClasspathElement>${basedir}/target/classes/</additionalClasspathElement>
