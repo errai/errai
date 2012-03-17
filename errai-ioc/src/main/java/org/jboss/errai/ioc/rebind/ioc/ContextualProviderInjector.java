@@ -17,9 +17,7 @@
 package org.jboss.errai.ioc.rebind.ioc;
 
 import org.jboss.errai.codegen.framework.Statement;
-import org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaField;
 import org.jboss.errai.codegen.framework.meta.MetaParameter;
 import org.jboss.errai.codegen.framework.meta.MetaParameterizedType;
@@ -28,19 +26,24 @@ import org.jboss.errai.codegen.framework.meta.impl.java.JavaReflectionField;
 import org.jboss.errai.codegen.framework.meta.impl.java.JavaReflectionParameterizedType;
 import org.jboss.errai.codegen.framework.util.Refs;
 import org.jboss.errai.codegen.framework.util.Stmt;
-import org.jboss.errai.ioc.client.ContextualProviderContext;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 
-import javax.inject.Provider;
+import javax.enterprise.inject.Alternative;
 import java.lang.annotation.Annotation;
 
 public class ContextualProviderInjector extends TypeInjector {
   private final Injector providerInjector;
+  private boolean provided = false;
 
   public ContextualProviderInjector(MetaClass type, MetaClass providerType, IOCProcessingContext context) {
     super(type, context);
     this.providerInjector = new TypeInjector(providerType, context);
+    this.singleton = context.isSingletonScope(providerType.getAnnotations());
+    this.alternative = providerType.isAnnotationPresent(Alternative.class);
+
     injected = true;
+    provided = false;
+
   }
 
   @Override
@@ -70,164 +73,46 @@ public class ContextualProviderInjector extends TypeInjector {
     }
 
     Statement statement;
-    Injector contextInjector;
 
-    if (pType == null) {
-      if (providerInjector.getInjectedType().isAssignableTo(Provider.class)) {
-        contextInjector = new ContextualProviderContextInjector();
-        injectContext.registerInjector(contextInjector);
+    MetaType[] typeArgs = pType.getTypeParameters();
+    MetaClass[] typeArgsClasses = new MetaClass[typeArgs.length];
 
-        statement = Stmt.nestedCall(providerInjector.getType(injectContext, injectableInstance))
-                .invoke("get");
+    for (int i = 0; i < typeArgs.length; i++) {
+      MetaType argType = typeArgs[i];
 
-        injectContext.deregisterInjector(contextInjector);
+      if (argType instanceof MetaClass) {
+        typeArgsClasses[i] = (MetaClass) argType;
       }
-      else {
-
-        statement = Stmt.nestedCall(providerInjector.getType(injectContext, injectableInstance))
-                .invoke("provide", new Class[0]);
-      }
-
-    }
-    else {
-      MetaType[] typeArgs = pType.getTypeParameters();
-      MetaClass[] typeArgsClasses = new MetaClass[typeArgs.length];
-
-      for (int i = 0; i < typeArgs.length; i++) {
-        MetaType argType = typeArgs[i];
-
-        if (argType instanceof MetaClass) {
-          typeArgsClasses[i] = (MetaClass) argType;
-        }
-        else if (argType instanceof MetaParameterizedType) {
-          typeArgsClasses[i] = (MetaClass) ((MetaParameterizedType) argType).getRawType();
-        }
-      }
-
-
-      Annotation[] qualifiers = injectableInstance.getQualifiers();
-
-      if (providerInjector.getInjectedType().isAssignableTo(Provider.class)) {
-        contextInjector = new ContextualProviderContextInjector(type, qualifiers, typeArgs);
-        injectContext.registerInjector(contextInjector);
-
-        statement = Stmt.nestedCall(providerInjector.getType(injectContext, injectableInstance))
-                .invoke("get");
-
-        injectContext.deregisterInjector(contextInjector);
-      }
-      else {
-        statement = Stmt.nestedCall(providerInjector.getType(injectContext, injectableInstance))
-                .invoke("provide", typeArgsClasses, qualifiers.length != 0 ? qualifiers : null);
-
+      else if (argType instanceof MetaParameterizedType) {
+        typeArgsClasses[i] = (MetaClass) ((MetaParameterizedType) argType).getRawType();
       }
     }
 
-    if (singleton) {
-      if (!injected) {
-        injectContext.getProcessingContext().globalAppend(Stmt.declareVariable(type).named(varName)
-                .initializeWith(statement));
-      }
-      statement = Refs.get(varName);
-    }
+    Annotation[] qualifiers = injectableInstance.getQualifiers();
+
+    statement = Stmt.nestedCall(providerInjector.getType(injectContext, injectableInstance))
+            .invoke("provide", typeArgsClasses, qualifiers.length != 0 ? qualifiers : null);
+
+//    if (singleton) {
+//      if (!provided) {
+//        injectContext.getProcessingContext().globalAppend(Stmt.declareVariable(type).asFinal().named(getVarName())
+//                .initializeWith(statement));
+//      }
+//      else {
+//        statement = Stmt.loadVariable(getVarName());
+//      }
+//    }
+//
+//    provided = true;
 
     return statement;
   }
 
 
-
   @Override
   public Statement instantiateOnly(InjectionContext injectContext, InjectableInstance injectableInstance) {
-    injected = true;
+    provided = true;
     return providerInjector.getType(injectContext, injectableInstance);
   }
 
-  private static class ContextualProviderContextInjector extends Injector {
-    private MetaClass type;
-    private Annotation[] annotations = new Annotation[0];
-    private MetaType[] typeArguments = new MetaType[0];
-
-    private ContextualProviderContextInjector() {
-    }
-
-    private ContextualProviderContextInjector(MetaClass type, Annotation[] annotations, MetaType[] typeArguments) {
-      this.type = type;
-      this.annotations = annotations;
-      this.typeArguments = typeArguments;
-    }
-
-    @Override
-    public Statement instantiateOnly(InjectionContext injectContext, InjectableInstance injectableInstance) {
-      return ObjectBuilder.newInstanceOf(ContextualProviderContext.class)
-              .extend()
-              .publicOverridesMethod("getQualifiers")
-              .append(Stmt.load(annotations).returnValue())
-              .finish()
-              .publicOverridesMethod("getTypeArguments")
-              .append(Stmt.load(MetaClassFactory.asClassArray(typeArguments)).returnValue())
-              .finish()
-              .finish();
-    }
-
-
-    @Override
-    public Statement getType(InjectionContext injectContext, InjectableInstance injectableInstance) {
-      Statement val = _getType(injectContext, injectableInstance);
-      registerWithBeanManager(injectContext, val);
-      return val;
-    }
-
-    private Statement _getType(InjectionContext injectContext, InjectableInstance injectableInstance) {
-      return instantiateOnly(injectContext, injectableInstance);
-    }
-
-    @Override
-    public boolean isInjected() {
-      return true;
-    }
-
-    @Override
-    public boolean isSingleton() {
-      return false;
-    }
-
-    @Override
-    public boolean isPseudo() {
-      return false;
-    }
-
-    @Override
-    public String getVarName() {
-      return null;
-    }
-
-    @Override
-    public MetaClass getInjectedType() {
-      return MetaClassFactory.get(ContextualProviderContext.class);
-    }
-
-    private void registerWithBeanManager(InjectionContext context, Statement val) {
-      if (useBeanManager) {
-        if (InjectUtil.checkIfTypeNeedsAddingToBeanStore(context, this)) {
-          Statement initCallbackRef;
-          if (getPostInitCallbackVar() == null) {
-            initCallbackRef = Stmt.load(null);
-          }
-          else {
-            initCallbackRef = Stmt.loadVariable(getPostInitCallbackVar());
-          }
-
-
-          QualifyingMetadata md = qualifyingMetadata;
-          if (md == null) {
-            md = context.getProcessingContext().getQualifyingMetadataFactory().createDefaultMetadata();
-          }
-
-          context.getProcessingContext().appendToEnd(
-                  Stmt.loadVariable(context.getProcessingContext().getContextVariableReference())
-                          .invoke("addSingletonBean", type, val, md.render(), initCallbackRef));
-        }
-      }
-    }
-  }
 }

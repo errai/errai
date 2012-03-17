@@ -22,24 +22,38 @@ import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.util.Refs;
 import org.jboss.errai.codegen.framework.util.Stmt;
 
+import javax.enterprise.inject.Alternative;
 import javax.inject.Provider;
 
 
 public class ProviderInjector extends TypeInjector {
   private final Injector providerInjector;
+  private boolean provided = false;
+  private boolean standardProvider = false;
 
   public ProviderInjector(MetaClass type, MetaClass providerType, IOCProcessingContext context) {
     super(type, context);
     this.providerInjector = new TypeInjector(providerType, context);
+    this.standardProvider = providerInjector.getInjectedType().isAssignableTo(Provider.class);
+    this.singleton = context.isSingletonScope(providerType.getAnnotations());
+    this.alternative = type.isAnnotationPresent(Alternative.class);
+    this.injected = true;
   }
 
   @Override
   public Statement getType(InjectionContext injectContext, InjectableInstance injectableInstance) {
-    if (isSingleton() && isInjected()) {
-      return Refs.get(getVarName());
+    if (isSingleton() && provided) {
+      if (standardProvider) {
+        return Stmt.loadVariable(providerInjector.getVarName()).invoke("get");
+      }
+      else {
+        return Stmt.loadVariable(providerInjector.getVarName()).invoke("provide");
+      }
     }
 
-    if (providerInjector.getInjectedType().isAssignableTo(Provider.class)) {
+    //provided = true;
+
+    if (standardProvider) {
       return Stmt.nestedCall(providerInjector.getType(injectContext, injectableInstance))
               .invoke("get");
     }
@@ -54,8 +68,4 @@ public class ProviderInjector extends TypeInjector {
     return providerInjector.getType(injectContext, injectableInstance);
   }
 
-  @Override
-  public boolean isInjected() {
-    return true;
-  }
 }

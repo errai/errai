@@ -22,11 +22,12 @@ import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanDef;
 
 import javax.enterprise.inject.Instance;
+import javax.inject.Singleton;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.Iterator;
 
-@IOCProvider
+@IOCProvider @Singleton
 public class InstanceProvider implements ContextualTypeProvider<Instance> {
 
   @Override

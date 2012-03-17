@@ -206,20 +206,7 @@ public class InjectionTask {
                   inj.getInjectedType(), inj.getQualifyingMetadata().getQualifiers());
         }
 
-        Statement retStatement = ctx.getQualifiedInjector(clazz, qualifyingMetadata).getType(ctx, injectableInstance);
-
-        if (inj.isProvider() && inj.getEnclosingType() != null &&
-                ctx.isProxiedInjectorRegistered(inj.getEnclosingType(),
-                        ctx.getProcessingContext().getQualifyingMetadataFactory().createDefaultMetadata())) {
-
-          ProxyInjector proxyInjector = (ProxyInjector) ctx.getProxiedInjector(inj.getEnclosingType(),
-                  ctx.getProcessingContext().getQualifyingMetadataFactory().createDefaultMetadata());
-
-          return new HandleInProxy(proxyInjector, retStatement);
-        }
-
-
-        return retStatement;
+       return ctx.getQualifiedInjector(clazz, qualifyingMetadata).getType(ctx, injectableInstance);
       }
     }
     else {

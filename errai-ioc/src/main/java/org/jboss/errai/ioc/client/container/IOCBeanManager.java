@@ -62,6 +62,11 @@ public class IOCBeanManager {
   }
 
 
+  /**
+   * Destroy a bean and all other beans associated with its creational context in the bean manager.
+   *
+   * @param ref the instance reference of the bean
+   */
   public void destroyBean(Object ref) {
     final Object _target;
 

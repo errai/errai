@@ -23,7 +23,6 @@ import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaField;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.util.GenUtil;
-import org.jboss.errai.common.rebind.EnvUtil;
 import org.jboss.errai.ioc.rebind.IOCGenerator;
 import org.jboss.errai.ioc.rebind.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependencies;
@@ -66,6 +65,8 @@ public class InjectionContext {
   private Collection<MetaMethod> privateMethodsToExpose = new LinkedHashSet<MetaMethod>();
 
   private Map<String, Object> attributeMap = new HashMap<String, Object>();
+
+  private Set<String> exposedMembers = new HashSet<String>();
 
   public InjectionContext(IOCProcessingContext processingContext) {
     this.processingContext = processingContext;
@@ -147,7 +148,7 @@ public class InjectionContext {
       if (matching.isEmpty()) {
         throw new InjectionFailure(erased);
       }
-      else if (matching.size() == 1) {
+      if (matching.size() == 1) {
         return matching.get(0);
       }
 
@@ -220,7 +221,6 @@ public class InjectionContext {
     if (injectors.containsKey(injectorType.getErased())) {
       for (Injector inj : injectors.get(injectorType.getErased())) {
         if (inj.matches(injectorType.getParameterizedType(), qualifyingMetadata)) {
-       //   return !(inj.isSingleton() && !inj.isInjected());
           return inj.isInjected();
         }
       }
@@ -273,7 +273,7 @@ public class InjectionContext {
       throw new InjectionFailure("ambiguous injection type (multiple injectors resolved): "
               + erased.getFullyQualifiedName());
     }
-    else if (injectorList.isEmpty()) {
+    if (injectorList.isEmpty()) {
       throw new InjectionFailure("could not resolve type for injection: " + erased.getFullyQualifiedName());
     }
 
@@ -444,8 +444,6 @@ public class InjectionContext {
       runnable.run();
     }
   }
-
-  private Set<String> exposedMembers = new HashSet<String>();
 
   public void addExposedField(MetaField field) {
     String fieldSignature = GenUtil.getPrivateFieldInjectorName(field);

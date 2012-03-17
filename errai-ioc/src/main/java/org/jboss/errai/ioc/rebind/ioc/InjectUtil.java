@@ -81,7 +81,6 @@ public class InjectUtil {
 
   private static Logger log = LoggerFactory.getLogger("errai-ioc");
 
-
   public static ConstructionStrategy getConstructionStrategy(final Injector injector, final InjectionContext ctx) {
     final MetaClass type = injector.getInjectedType();
 
@@ -171,13 +170,18 @@ public class InjectUtil {
     }
   }
 
-
+  /**
+   * Render the post construct InitializationCallback
+   *
+   * @param ctx
+   * @param injector
+   * @param postConstructTasks
+   */
   private static void doPostConstruct(final InjectionContext ctx,
                                       final Injector injector,
                                       final List<MetaMethod> postConstructTasks) {
 
     if (postConstructTasks.isEmpty()) return;
-
 
     final MetaClass initializationCallbackType =
             parameterizedAs(InitializationCallback.class, typeParametersOf(injector.getInjectedType()));
@@ -189,24 +193,7 @@ public class InjectUtil {
     final String varName = "init_" + injector.getVarName();
     injector.setPostInitCallbackVar(varName);
 
-    for (final MetaMethod meth : postConstructTasks) {
-      if (meth.getParameters().length != 0) {
-        throw new InjectionFailure("PostConstruct method must contain no parameters: "
-                + injector.getInjectedType().getFullyQualifiedName() + "." + meth.getName());
-      }
-
-      if (!meth.isPublic()) {
-        ctx.addExposedMethod(meth);
-      }
-
-      if (!meth.isPublic()) {
-        initMeth.append(Stmt.invokeStatic(ctx.getProcessingContext().getBootstrapClass(),
-                GenUtil.getPrivateMethodName(meth), Refs.get("obj")));
-      }
-      else {
-        initMeth.append(Stmt.loadVariable("obj").invoke(meth.getName()));
-      }
-    }
+    renderLifeCycleEvents(PostConstruct.class, injector, ctx, initMeth, postConstructTasks);
 
     AnonymousClassStructureBuilder classStructureBuilder = initMeth.finish();
 
@@ -219,6 +206,13 @@ public class InjectUtil {
             Refs.get(injector.getVarName()), Refs.get(varName)));
   }
 
+  /**
+   * Render the pre destroy DestructionCallback
+   *
+   * @param ctx
+   * @param injector
+   * @param preDestroyTasks
+   */
   private static void doPreDestroy(final InjectionContext ctx,
                                    final Injector injector,
                                    final List<MetaMethod> preDestroyTasks) {
@@ -236,24 +230,7 @@ public class InjectUtil {
     final String varName = "destroy_" + injector.getVarName();
     injector.setPreDestroyCallbackVar(varName);
 
-    for (final MetaMethod meth : preDestroyTasks) {
-      if (meth.getParameters().length != 0) {
-        throw new InjectionFailure("@PreDestroy method must contain no parameters: "
-                + injector.getInjectedType().getFullyQualifiedName() + "." + meth.getName());
-      }
-
-      if (!meth.isPublic()) {
-        ctx.addExposedMethod(meth);
-      }
-
-      if (!meth.isPublic()) {
-        initMeth.append(Stmt.invokeStatic(ctx.getProcessingContext().getBootstrapClass(),
-                GenUtil.getPrivateMethodName(meth), Refs.get("obj")));
-      }
-      else {
-        initMeth.append(Stmt.loadVariable("obj").invoke(meth.getName()));
-      }
-    }
+    renderLifeCycleEvents(PreDestroy.class, injector, ctx, initMeth, preDestroyTasks);
 
     AnonymousClassStructureBuilder classStructureBuilder = initMeth.finish();
 
@@ -264,6 +241,33 @@ public class InjectUtil {
 
     pc.append(Stmt.loadVariable("context").invoke("addDestructionCallback",
             Refs.get(injector.getVarName()), Refs.get(varName)));
+  }
+
+  private static void renderLifeCycleEvents(Class<? extends Annotation> type, Injector injector,
+                                            InjectionContext ctx, BlockBuilder<?> body, List<MetaMethod> methods) {
+    for (MetaMethod meth : methods) {
+      renderLifeCycleMethodCall(type, injector, ctx, body, meth);
+    }
+  }
+
+  private static void renderLifeCycleMethodCall(Class<? extends Annotation> type, Injector injector,
+                                                InjectionContext ctx, BlockBuilder<?> body, MetaMethod meth) {
+    if (meth.getParameters().length != 0) {
+      throw new InjectionFailure(type.getCanonicalName() + " method must contain no parameters: "
+              + injector.getInjectedType().getFullyQualifiedName() + "." + meth.getName());
+    }
+
+    if (!meth.isPublic()) {
+      ctx.addExposedMethod(meth);
+    }
+
+    if (!meth.isPublic()) {
+      body.append(Stmt.invokeStatic(ctx.getProcessingContext().getBootstrapClass(),
+              GenUtil.getPrivateMethodName(meth), Refs.get("obj")));
+    }
+    else {
+      body.append(Stmt.loadVariable("obj").invoke(meth.getName()));
+    }
   }
 
   private static List<InjectionTask> scanForTasks(Injector injector, InjectionContext ctx, MetaClass type) {
@@ -436,6 +440,9 @@ public class InjectUtil {
     if (ctx.isInjectableQualified(clazz, qualifyingMetadata)) {
       inj = ctx.getQualifiedInjector(clazz, qualifyingMetadata);
     }
+    else {
+      System.out.println();
+    }
 
     QualifyingMetadata toMetaData = qualifyingMetaDataFrom(ctx, extractQualifiersFromType(injectTo));
 
@@ -449,6 +456,7 @@ public class InjectUtil {
       return inj;
     }
     else {
+
       ProxyInjector proxyInjector = new ProxyInjector(ctx.getProcessingContext(), clazz, qualifyingMetadata);
       ctx.addProxiedInjector(proxyInjector);
       return proxyInjector;
@@ -545,7 +553,7 @@ public class InjectUtil {
   }
 
   public static String getUniqueVarName() {
-     return "var" + uniqueCounter.addAndGet(1);
+    return "var" + uniqueCounter.addAndGet(1);
   }
 
   private static Set<Class<?>> qualifiersCache;
