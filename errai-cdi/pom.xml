@@ -239,6 +239,7 @@
                     <skipTests>true</skipTests>
                     <failIfNoTests>false</failIfNoTests>
                     <trimStackTrace>false</trimStackTrace>
+                    <argLine>-Xmx2048m ${argLine} -Dgwt.args='-testBeginTimeout 5'</argLine>
                     <systemProperties>
                         <property>
                             <name>log4j.output.dir</name>
