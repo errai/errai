@@ -76,7 +76,6 @@ public class IOCGenerator extends Generator {
     };
 
     iocGenThread.start();
-
     try {
       iocGenThread.join();
     }
