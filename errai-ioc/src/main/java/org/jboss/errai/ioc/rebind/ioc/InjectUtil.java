@@ -477,7 +477,8 @@ public class InjectUtil {
     MetaClass[] parmTypes = parametersToClassTypeArray(parms);
     Statement[] parmValues = new Statement[parmTypes.length];
 
-    for (int i = 0; i < parmTypes.length; i++) {
+    for (int i = 0; i < parmTypes.length; i++
+            ) {
       Injector injector;
       try {
         injector = getInjectorOrProxy(ctx, parmTypes[i],
@@ -508,16 +509,6 @@ public class InjectUtil {
     return parmValues;
   }
 
-
-  public static String commaDelimitedList(Context context, Statement[] parts) {
-    StringAppender appender = new StringAppender();
-    for (int i = 0; i < parts.length; i++) {
-      appender.append(parts[i].generate(context));
-      if ((i + 1) < parts.length) appender.append(", ");
-    }
-    return appender.toString();
-  }
-
   public static String getNewInjectorName() {
     String var = "inj" + injectorCounter.addAndGet(1);
     return var;
@@ -526,8 +517,6 @@ public class InjectUtil {
   public static String getUniqueVarName() {
     return "var" + uniqueCounter.addAndGet(1);
   }
-
-  private static Set<Class<?>> qualifiersCache;
 
   public static List<Annotation> extractQualifiers(InjectableInstance<? extends Annotation> injectableInstance) {
     switch (injectableInstance.getTaskType()) {
@@ -552,13 +541,6 @@ public class InjectUtil {
       }
     }
     return Collections.unmodifiableList(quals);
-  }
-
-
-  public static QualifyingMetadata qualifyingMetaDataFrom(InjectionContext ctx, List<Annotation> qualifiers) {
-    return ctx.getProcessingContext()
-            .getQualifyingMetadataFactory().createFrom(qualifiers.toArray(new Annotation[qualifiers.size()]));
-
   }
 
   private static final String BEAN_INJECTOR_STORE = "InjectorBeanManagerStore";
