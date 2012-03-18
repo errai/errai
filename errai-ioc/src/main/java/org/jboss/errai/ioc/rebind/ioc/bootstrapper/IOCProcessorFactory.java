@@ -23,7 +23,6 @@ import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.ioc.client.api.TestMock;
 import org.jboss.errai.ioc.client.api.TestOnly;
-import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
 import org.jboss.errai.ioc.rebind.ioc.extension.AnnotationHandler;
 import org.jboss.errai.ioc.rebind.ioc.extension.DependencyControl;
 import org.jboss.errai.ioc.rebind.ioc.extension.ProvidedClassAnnotationHandler;
@@ -41,7 +40,6 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -53,6 +51,7 @@ import static org.jboss.errai.ioc.rebind.ioc.graph.GraphSort.sortGraph;
 import static org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance.getMethodInjectedInstance;
 import static org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance.getTypeInjectedInstance;
 
+@SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
 public class IOCProcessorFactory {
   private SortedSet<ProcessingEntry> processingEntries = new TreeSet<ProcessingEntry>();
   private Map<SortUnit, SortUnit> delegates = new LinkedHashMap<SortUnit, SortUnit>();
@@ -124,7 +123,6 @@ public class IOCProcessorFactory {
       }));
     }
   }
-
 
   @SuppressWarnings({"unchecked"})
   public void process(final MetaDataScanner scanner, final IOCProcessingContext context) {
@@ -208,7 +206,8 @@ public class IOCProcessorFactory {
   }
 
 
-  private void handleType(final ProcessingEntry<?> entry,
+  @SuppressWarnings("unchecked")
+  private void handleType(final ProcessingEntry entry,
                           final DependencyControl dependencyControl,
                           final Class<?> clazz,
                           final Class<? extends Annotation> aClass,
@@ -228,11 +227,9 @@ public class IOCProcessorFactory {
     final InjectableInstance injectableInstance
             = getTypeInjectedInstance(anno, type, null, injectionContext);
 
-    ProcessingDelegate<MetaClass> del = new ProcessingDelegate<MetaClass>() {
+    ProcessingDelegate del = new ProcessingDelegate() {
       @Override
       public Set<SortUnit> getRequiredDependencies() {
-
-
         return entry.handler.checkDependencies(dependencyControl, injectableInstance, anno, context);
       }
 
@@ -247,14 +244,9 @@ public class IOCProcessorFactory {
         return entry.handler.handle(injectableInstance, anno, context);
       }
 
-      public MetaClass getType() {
-        return type;
-      }
-
       public boolean equals(Object o) {
         return o != null && toString().equals(o.toString());
       }
-
 
       public String toString() {
         return clazz.getName();
@@ -267,7 +259,8 @@ public class IOCProcessorFactory {
     addToDelegates(new SortUnit(((DependencyControlImpl) dependencyControl).masqueradeClass, del, requiredDependencies));
   }
 
-  private void handleMethod(final ProcessingEntry<?> entry,
+  @SuppressWarnings("unchecked")
+  private void handleMethod(final ProcessingEntry entry,
                             final DependencyControl dependencyControl,
                             final Method method,
                             final Class<? extends Annotation> annoClass,
@@ -284,10 +277,9 @@ public class IOCProcessorFactory {
             injectionContext);
 
 
-    ProcessingDelegate<MetaField> del = new ProcessingDelegate<MetaField>() {
+    ProcessingDelegate del = new ProcessingDelegate() {
       @Override
       public Set<SortUnit> getRequiredDependencies() {
-
         return entry.handler.checkDependencies(dependencyControl, injectableInstance, anno, context);
       }
 
@@ -304,19 +296,14 @@ public class IOCProcessorFactory {
         return entry.handler.handle(injectableInstance, anno, context);
       }
 
-      public MetaClass getType() {
-        return type;
-      }
-
+      @Override
       public boolean equals(Object o) {
         return o != null && toString().equals(o.toString());
       }
 
-
       public String toString() {
         return type.getFullyQualifiedName();
       }
-
     };
 
     entry.handler.registerMetadata(injectableInstance, anno, context);
@@ -325,7 +312,7 @@ public class IOCProcessorFactory {
     addToDelegates(new SortUnit(((DependencyControlImpl) dependencyControl).masqueradeClass, del, requiredDependencies));
   }
 
-  private void handleField(final ProcessingEntry<?> entry,
+  private void handleField(final ProcessingEntry entry,
                            final DependencyControl dependencyControl,
                            final Field field,
                            final Class<? extends Annotation> annoClass,
@@ -337,7 +324,8 @@ public class IOCProcessorFactory {
 
     dependencyControl.masqueradeAs(type);
 
-    ProcessingDelegate<MetaField> del = new ProcessingDelegate<MetaField>() {
+    ProcessingDelegate del = new ProcessingDelegate() {
+      @SuppressWarnings("unchecked")
       @Override
       public Set<SortUnit> getRequiredDependencies() {
         final InjectableInstance injectableInstance
@@ -347,6 +335,7 @@ public class IOCProcessorFactory {
         return entry.handler.checkDependencies(dependencyControl, injectableInstance, anno, context);
       }
 
+      @SuppressWarnings("unchecked")
       @Override
       public boolean process() {
         injectionContext.addType(type);
@@ -361,14 +350,9 @@ public class IOCProcessorFactory {
         return entry.handler.handle(injectableInstance, anno, context);
       }
 
-      public MetaClass getType() {
-        return type;
-      }
-
       public boolean equals(Object o) {
         return o != null && toString().equals(o.toString());
       }
-
 
       public String toString() {
         return type.getFullyQualifiedName();
@@ -379,11 +363,10 @@ public class IOCProcessorFactory {
     addToDelegates(new SortUnit(((DependencyControlImpl) dependencyControl).masqueradeClass, del, requiredDependencies));
   }
 
-  private class ProcessingEntry<T> implements Comparable<ProcessingEntry> {
+  private class ProcessingEntry implements Comparable<ProcessingEntry> {
     private Class<? extends Annotation> annotationClass;
     private AnnotationHandler handler;
     private Set<RuleDef> rules;
-    private Set<InjectionFailure> errors = new LinkedHashSet<InjectionFailure>();
 
     private ProcessingEntry(Class<? extends Annotation> annotationClass, AnnotationHandler handler) {
       this.annotationClass = annotationClass;
@@ -414,7 +397,8 @@ public class IOCProcessorFactory {
         }
       }
       else if (processingEntry.rules != null) {
-        for (RuleDef def : (Set<RuleDef>) processingEntry.rules) {
+        //noinspection unchecked
+        for (RuleDef def : processingEntry.rules) {
           if (!def.getRelAnnotation().equals(annotationClass)) {
             continue;
           }
@@ -431,13 +415,12 @@ public class IOCProcessorFactory {
       return -1;
     }
 
-
     public String toString() {
       return "Scope:" + annotationClass.getName();
     }
   }
 
-  private static interface ProcessingDelegate<T> {
+  private static interface ProcessingDelegate {
     public boolean process();
 
     public Set<SortUnit> getRequiredDependencies();

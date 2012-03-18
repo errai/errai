@@ -32,6 +32,7 @@ import java.util.List;
 /**
  * @author Mike Brock
  */
+@SuppressWarnings("UnusedDeclaration")
 @CodeDecorator
 public class AfterInitializationExtension extends IOCDecoratorExtension<AfterInitialization> {
   public AfterInitializationExtension(Class<AfterInitialization> decoratesWith) {

@@ -54,20 +54,20 @@ import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.api.IOCBootstrapTask;
 import org.jboss.errai.ioc.client.api.IOCProvider;
-import org.jboss.errai.ioc.client.api.TestMock;
 import org.jboss.errai.ioc.client.api.TaskOrder;
+import org.jboss.errai.ioc.client.api.TestMock;
 import org.jboss.errai.ioc.client.api.TypeProvider;
 import org.jboss.errai.ioc.client.container.CreationalContext;
+import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
+import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
+import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
 import org.jboss.errai.ioc.rebind.ioc.extension.JSR330AnnotationHandler;
 import org.jboss.errai.ioc.rebind.ioc.injector.AbstractInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.ContextualProviderInjector;
-import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
-import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
+import org.jboss.errai.ioc.rebind.ioc.injector.ProviderInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
-import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
-import org.jboss.errai.ioc.rebind.ioc.injector.ProviderInjector;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadataFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,7 +107,6 @@ public class IOCBootstrapGenerator {
 
   private Collection<String> packages = null;
   private boolean useReflectionStubs = false;
-  private List<Runnable> deferredTasks = new ArrayList<Runnable>();
 
   private List<Class<?>> beforeTasks = new ArrayList<Class<?>>();
   private List<Class<?>> afterTasks = new ArrayList<Class<?>>();
@@ -338,9 +337,6 @@ public class IOCBootstrapGenerator {
 
   private void runAllDeferred() {
     injectionContext.runAllDeferred();
-
-    for (Runnable r : deferredTasks)
-      r.run();
   }
 
   public void initializeProviders() {

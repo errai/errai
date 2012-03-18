@@ -27,12 +27,11 @@ import org.jboss.errai.codegen.framework.builder.BlockBuilder;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.ioc.client.InterfaceInjectionContext;
-import org.jboss.errai.ioc.rebind.ioc.injector.AbstractInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionPoint;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.TypeDiscoveryListener;
 import org.jboss.errai.ioc.rebind.ioc.metadata.JSR330QualifyingMetadataFactory;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadataFactory;
-import org.jboss.errai.ioc.rebind.ioc.injector.api.TypeDiscoveryListener;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -170,16 +169,13 @@ public class IOCProcessingContext {
     return packages;
   }
 
+  @SuppressWarnings("UnusedDeclaration")
   public TreeLogger getTreeLogger() {
     return treeLogger;
   }
 
   public GeneratorContext getGeneratorContext() {
     return generatorContext;
-  }
-
-  public Variable getContextVariable() {
-    return contextVariable;
   }
 
   public VariableReference getContextVariableReference() {

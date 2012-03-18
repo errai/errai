@@ -35,19 +35,17 @@ import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.ioc.client.container.DestructionCallback;
 import org.jboss.errai.ioc.client.container.InitializationCallback;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
+import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
+import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependenciesException;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.ConstructionStatusCallback;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.ConstructionStrategy;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.DecoratorTask;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionTask;
-import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.TaskType;
-import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
-import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependenciesException;
+import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 import org.mvel2.util.ReflectionUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -74,8 +72,6 @@ public class InjectUtil {
 
   private static final AtomicInteger injectorCounter = new AtomicInteger(0);
   private static final AtomicInteger uniqueCounter = new AtomicInteger(0);
-
-  private static Logger log = LoggerFactory.getLogger("errai-ioc");
 
   public static ConstructionStrategy getConstructionStrategy(final Injector injector, final InjectionContext ctx) {
     final MetaClass type = injector.getInjectedType();
@@ -169,9 +165,9 @@ public class InjectUtil {
   /**
    * Render the post construct InitializationCallback
    *
-   * @param ctx
-   * @param injector
-   * @param postConstructTasks
+   * @param ctx -
+   * @param injector -
+   * @param postConstructTasks -
    */
   private static void doPostConstruct(final InjectionContext ctx,
                                       final Injector injector,
@@ -205,9 +201,9 @@ public class InjectUtil {
   /**
    * Render the pre destroy DestructionCallback
    *
-   * @param ctx
-   * @param injector
-   * @param preDestroyTasks
+   * @param ctx -
+   * @param injector -
+   * @param preDestroyTasks -
    */
   private static void doPreDestroy(final InjectionContext ctx,
                                    final Injector injector,
@@ -369,7 +365,6 @@ public class InjectUtil {
     return scanForAnnotatedMethod(type, PostConstruct.class);
   }
 
-
   private static List<MetaMethod> scanForPreDestroy(MetaClass type) {
     return scanForAnnotatedMethod(type, PreDestroy.class);
   }
@@ -391,7 +386,6 @@ public class InjectUtil {
 
     return accumulator;
   }
-
 
   @SuppressWarnings({"unchecked"})
   private static boolean isInjectionPoint(MetaField field) {
@@ -436,7 +430,6 @@ public class InjectUtil {
     if (ctx.isInjectableQualified(clazz, qualifyingMetadata)) {
       inj = ctx.getQualifiedInjector(clazz, qualifyingMetadata);
     }
-
 
     if (inj != null) {
       return inj;
@@ -514,8 +507,7 @@ public class InjectUtil {
   }
 
   public static String getNewInjectorName() {
-    String var = "inj" + injectorCounter.addAndGet(1);
-    return var;
+    return "inj" + injectorCounter.addAndGet(1);
   }
 
   public static String getUniqueVarName() {
@@ -553,10 +545,10 @@ public class InjectUtil {
    * A utility to get or create the store whereby the code that binds beans to the client
    * bean manager can keep track of what it has already bound.
    *
-   * @return
+   * @return -
    */
   public static Set<Injector> getBeanInjectionTrackStore(InjectionContext context) {
-    Set<Injector> store = (Set<Injector>) context.getAttribute(BEAN_INJECTOR_STORE);
+    @SuppressWarnings("unchecked") Set<Injector> store = (Set<Injector>) context.getAttribute(BEAN_INJECTOR_STORE);
     if (store == null) {
       context.setAttribute(BEAN_INJECTOR_STORE, store = new HashSet<Injector>());
     }

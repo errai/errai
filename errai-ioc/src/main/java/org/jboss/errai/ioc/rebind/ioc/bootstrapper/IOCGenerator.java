@@ -40,7 +40,6 @@ public class IOCGenerator extends Generator {
   private String packageName = null;
   private TypeOracle typeOracle;
 
-  public static final boolean isDebugCompile = Boolean.getBoolean("errai.ioc.debug");
   public static final boolean isTestMode = EnvUtil.isJUnitTest();
 
   public IOCGenerator() {

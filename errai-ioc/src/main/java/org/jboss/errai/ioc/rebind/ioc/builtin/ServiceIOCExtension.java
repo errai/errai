@@ -42,6 +42,7 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.typeParametersOf;
 
+@SuppressWarnings("UnusedDeclaration")
 @CodeDecorator
 public class ServiceIOCExtension extends IOCDecoratorExtension<Service> {
   public ServiceIOCExtension(Class<Service> decoratesWith) {

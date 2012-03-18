@@ -19,6 +19,7 @@ package org.jboss.errai.ioc.rebind.ioc.exception;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 
+@SuppressWarnings("UnusedDeclaration")
 public class InjectionFailure extends ErraiBootstrapFailure {
   private MetaClass failedDependency;
 
@@ -81,11 +82,9 @@ public class InjectionFailure extends ErraiBootstrapFailure {
 
     InjectionFailure that = (InjectionFailure) o;
 
-    if (failedDependency != null ? !failedDependency.equals(that.failedDependency) : that.failedDependency != null)
-      return false;
-    if (target != null ? !target.equals(that.target) : that.target != null) return false;
+    return !(failedDependency != null ? !failedDependency.equals(that.failedDependency) : that.failedDependency != null)
+            && !(target != null ? !target.equals(that.target) : that.target != null);
 
-    return true;
   }
 
   @Override
