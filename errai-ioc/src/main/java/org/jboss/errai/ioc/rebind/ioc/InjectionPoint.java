@@ -190,20 +190,20 @@ public class InjectionPoint<T> {
     switch (taskType) {
       case PrivateField:
       case Field:
-        annotations = InjectUtil.extractQualifiersFromField(field);
+        annotations = InjectUtil.getQualifiersFromAnnotations(field.getAnnotations());
         return annotations.toArray(new Annotation[annotations.size()]);
 
       case Parameter:
-        annotations = InjectUtil.extractQualifiersFromParameter(parm);
+        annotations = InjectUtil.getQualifiersFromAnnotations(parm.getAnnotations());
         return annotations.toArray(new Annotation[annotations.size()]);
 
       case PrivateMethod:
       case Method:
-        annotations = InjectUtil.extractQualifiersFromMethod(method);
+        annotations = InjectUtil.getQualifiersFromAnnotations(method.getAnnotations());
         return annotations.toArray(new Annotation[annotations.size()]);
 
       case Type:
-        annotations = InjectUtil.extractQualifiersFromType(type);
+        annotations = InjectUtil.getQualifiersFromAnnotations(type.getAnnotations());
         return annotations.toArray(new Annotation[annotations.size()]);
 
       default:

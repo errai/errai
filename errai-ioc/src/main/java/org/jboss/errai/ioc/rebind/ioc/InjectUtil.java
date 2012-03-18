@@ -425,24 +425,14 @@ public class InjectUtil {
     return newArray;
   }
 
-  public static Injector getInjectorOrProxy(MetaClass injectTo, InjectionContext ctx,
+  public static Injector getInjectorOrProxy(InjectionContext ctx,
                                             MetaClass clazz, QualifyingMetadata qualifyingMetadata) {
 
     Injector inj = null;
     if (ctx.isInjectableQualified(clazz, qualifyingMetadata)) {
       inj = ctx.getQualifiedInjector(clazz, qualifyingMetadata);
     }
-    else {
-      System.out.println();
-    }
 
-    QualifyingMetadata toMetaData = qualifyingMetaDataFrom(ctx, extractQualifiersFromType(injectTo));
-
-    // special handling for the JSR-299 TCK scenario where a dependent bean injects itself.
-//    if (inj != null && inj.isDependent()
-//            && injectTo.isAssignableFrom(clazz) && qualifyingMetadata.doesSatisfy(toMetaData)) {
-//      inj = null;
-//    }
 
     if (inj != null) {
       return inj;
@@ -464,7 +454,7 @@ public class InjectUtil {
     for (int i = 0; i < parmTypes.length; i++) {
       Injector injector;
       try {
-        injector = getInjectorOrProxy(method.getDeclaringClass(), ctx, parmTypes[i],
+        injector = getInjectorOrProxy(ctx, parmTypes[i],
                 ctx.getProcessingContext().getQualifyingMetadataFactory().createFrom(parms[i].getAnnotations()));
       }
       catch (InjectionFailure e) {
@@ -490,7 +480,7 @@ public class InjectUtil {
     for (int i = 0; i < parmTypes.length; i++) {
       Injector injector;
       try {
-        injector = getInjectorOrProxy(constructor.getDeclaringClass(), ctx, parmTypes[i],
+        injector = getInjectorOrProxy(ctx, parmTypes[i],
                 ctx.getProcessingContext().getQualifyingMetadataFactory().createFrom(parms[i].getAnnotations()));
       }
       catch (UnproxyableClassException e) {
@@ -518,17 +508,6 @@ public class InjectUtil {
     return parmValues;
   }
 
-  public static Statement[] resolveInjectionDependencies(MetaParameter[] parms,
-                                                         InjectionContext ctx, InjectableInstance injectableInstance) {
-    MetaClass[] parmTypes = parametersToClassTypeArray(parms);
-    Statement[] parmValues = new Statement[parmTypes.length];
-
-    for (int i = 0; i < parmTypes.length; i++) {
-      parmValues[i] = ctx.getInjector(parmTypes[i]).getBeanInstance(ctx, injectableInstance);
-    }
-
-    return parmValues;
-  }
 
   public static String commaDelimitedList(Context context, Statement[] parts) {
     StringAppender appender = new StringAppender();
@@ -549,119 +528,32 @@ public class InjectUtil {
   }
 
   private static Set<Class<?>> qualifiersCache;
-  private static Set<Class<?>> annotationsCache;
-
-  public static Set<Class<?>> getQualifiersCache() {
-    if (qualifiersCache == null) {
-      qualifiersCache = new LinkedHashSet<Class<?>>();
-
-      qualifiersCache.addAll(ScannerSingleton.getOrCreateInstance()
-              .getTypesAnnotatedWith(Qualifier.class));
-      qualifiersCache.add(New.class);
-    }
-
-    return qualifiersCache;
-  }
 
   public static List<Annotation> extractQualifiers(InjectableInstance<? extends Annotation> injectableInstance) {
     switch (injectableInstance.getTaskType()) {
       case Field:
-        return extractQualifiersFromField(injectableInstance.getField());
+        return getQualifiersFromAnnotations(injectableInstance.getField().getAnnotations());
       case Method:
-        return extractQualifiersFromMethod(injectableInstance.getMethod());
+        return getQualifiersFromAnnotations(injectableInstance.getMethod().getAnnotations());
       case Parameter:
-        return extractQualifiersFromParameter(injectableInstance.getParm());
+        return getQualifiersFromAnnotations(injectableInstance.getParm().getAnnotations());
       case Type:
-        return extractQualifiersFromType(injectableInstance.getType());
+        return getQualifiersFromAnnotations(injectableInstance.getType().getAnnotations());
       default:
         return Collections.emptyList();
     }
   }
-
-  public static List<Annotation> extractQualifiersFromMethod(final MetaMethod method) {
-    List<Annotation> qualifiers = new ArrayList<Annotation>();
-
-    for (Class<?> annotation : getQualifiersCache()) {
-      if (method.isAnnotationPresent(annotation.asSubclass(Annotation.class))) {
-        qualifiers.add(method.getAnnotation(annotation.asSubclass(Annotation.class)));
+  
+  public static List<Annotation> getQualifiersFromAnnotations(Annotation[] annotations) {
+    List<Annotation> quals = new ArrayList<Annotation>();
+    for (Annotation a : annotations) {
+      if (a.annotationType().isAnnotationPresent(Qualifier.class)) {
+        quals.add(a);
       }
     }
-
-    return qualifiers;
+    return Collections.unmodifiableList(quals);
   }
 
-  public static List<Annotation> extractQualifiersFromParameter(final MetaParameter parm) {
-    List<Annotation> qualifiers = new ArrayList<Annotation>();
-
-    try {
-      final MetaClassMember member = parm.getDeclaringMember();
-      MetaParameter[] parameters;
-
-      if (member instanceof MetaMethod) {
-        parameters = ((MetaMethod) member).getParameters();
-      }
-      else {
-        parameters = ((MetaConstructor) member).getParameters();
-      }
-
-      MetaClass[] jMethodParms = new MetaClass[parameters.length];
-      int eventParamIndex = 0;
-      for (int i = 0; i < parameters.length; i++) {
-        if (parameters[i].getName().equals(parm.getName())) {
-          eventParamIndex = i;
-        }
-        jMethodParms[i] = parameters[i].getType();
-      }
-
-      for (Class<?> qualifier : getQualifiersCache()) {
-        if (parameters[eventParamIndex]
-                .isAnnotationPresent(qualifier.asSubclass(Annotation.class))) {
-          qualifiers.add(parameters[eventParamIndex]
-                  .getAnnotation(qualifier.asSubclass(Annotation.class)));
-        }
-      }
-    }
-    catch (Exception e) {
-      log.error("Problem reading qualifiersCache for " + parm.getDeclaringMember().getDeclaringClass(), e);
-    }
-
-    return qualifiers;
-  }
-
-  public static List<Annotation> extractQualifiersFromField(MetaField field) {
-    List<Annotation> qualifiers = new ArrayList<Annotation>();
-
-    try {
-      // find all qualifiersCache of the event field
-      //   JField jEventField = injectionPoint.getField();
-
-      for (Class<?> qualifier : getQualifiersCache()) {
-        if (field.isAnnotationPresent(qualifier.asSubclass(Annotation.class))) {
-          qualifiers.add(field.getAnnotation(qualifier.asSubclass(Annotation.class)));
-        }
-      }
-    }
-    catch (Exception e) {
-      log.error("Problem reading qualifiersCache for " + field, e);
-    }
-    return qualifiers;
-  }
-
-  public static List<Annotation> extractQualifiersFromType(MetaClass type) {
-    List<Annotation> qualifiers = new ArrayList<Annotation>();
-    try {
-      for (Class<?> qualifier : getQualifiersCache()) {
-        if (type.isAnnotationPresent(qualifier.asSubclass(Annotation.class))) {
-          qualifiers.add(type.getAnnotation(qualifier.asSubclass(Annotation.class)));
-        }
-      }
-    }
-    catch (Exception e) {
-      log.error("Problem reading qualifiersCache for " + type, e);
-    }
-    return qualifiers;
-
-  }
 
   public static QualifyingMetadata qualifyingMetaDataFrom(InjectionContext ctx, List<Annotation> qualifiers) {
     return ctx.getProcessingContext()

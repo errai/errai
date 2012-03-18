@@ -53,7 +53,7 @@ public abstract class JSR330AnnotationHandler<T extends Annotation> implements A
       for (MetaField field : mc.getDeclaredFields()) {
         if (field.isAnnotationPresent(Inject.class)) {
 
-          dependencies.add(new SortUnit(field.getType(), InjectUtil.extractQualifiersFromField(field)));
+          dependencies.add(new SortUnit(field.getType(), InjectUtil.getQualifiersFromAnnotations(field.getAnnotations())));
           dependencies.addAll(fillInInterface(field.getType().asClass()));
         }
       }
@@ -61,7 +61,7 @@ public abstract class JSR330AnnotationHandler<T extends Annotation> implements A
       for (MetaMethod method : mc.getDeclaredMethods()) {
         if (method.isAnnotationPresent(Inject.class)) {
           for (MetaParameter parm : method.getParameters()) {
-            dependencies.add(new SortUnit(parm.getType(), InjectUtil.extractQualifiersFromParameter(parm)));
+            dependencies.add(new SortUnit(parm.getType(), InjectUtil.getQualifiersFromAnnotations(parm.getAnnotations())));
             dependencies.addAll(fillInInterface(parm.getType().asClass()));
           }
         }
@@ -70,7 +70,7 @@ public abstract class JSR330AnnotationHandler<T extends Annotation> implements A
       for (MetaConstructor constructor : mc.getConstructors()) {
         if (constructor.isAnnotationPresent(Inject.class)) {
           for (MetaParameter parm : constructor.getParameters()) {
-            dependencies.add(new SortUnit(parm.getType(), InjectUtil.extractQualifiersFromParameter(parm)));
+            dependencies.add(new SortUnit(parm.getType(), InjectUtil.getQualifiersFromAnnotations(parm.getAnnotations())));
             dependencies.addAll(fillInInterface(parm.getType().asClass()));
           }
         }

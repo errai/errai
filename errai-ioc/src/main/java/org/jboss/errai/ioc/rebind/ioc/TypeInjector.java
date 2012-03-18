@@ -59,7 +59,7 @@ public class TypeInjector extends Injector {
 
     try {
       Set<Annotation> qualifiers = new HashSet<Annotation>();
-      qualifiers.addAll(InjectUtil.extractQualifiersFromType(type));
+      qualifiers.addAll(InjectUtil.getQualifiersFromAnnotations(type.getAnnotations()));
       qualifiers.addAll(Arrays.asList(additionalQualifiers));
 
       if (!qualifiers.isEmpty()) {
