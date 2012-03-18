@@ -14,39 +14,35 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.enterprise.rebind;
+package org.jboss.errai.ioc.rebind.ioc.metadata;
 
+import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.literal.LiteralFactory;
+import org.jboss.errai.codegen.framework.util.Stmt;
+import org.jboss.errai.ioc.client.api.qualifiers.BuiltInQualifiers;
+
+import javax.inject.Qualifier;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.inject.Qualifier;
-
-import org.jboss.errai.codegen.framework.Statement;
-import org.jboss.errai.codegen.framework.literal.LiteralFactory;
-import org.jboss.errai.codegen.framework.util.Stmt;
-import org.jboss.errai.enterprise.client.cdi.api.CDI;
-import org.jboss.errai.ioc.rebind.ioc.metadata.JSR330QualifyingMetadata;
-import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
-
 /**
- * @author Mike Brock <cbrock@redhat.com>
+ * @author Mike Brock .
  */
-public class JSR299QualifyingMetadata implements QualifyingMetadata {
+public class JSR330QualifyingMetadata implements QualifyingMetadata {
   private Set<Annotation> qualifiers;
 
 
-
-  public JSR299QualifyingMetadata(Collection<Annotation> qualifiers) {
+  public JSR330QualifyingMetadata(Collection<Annotation> qualifiers) {
     this.qualifiers = Collections.unmodifiableSet(new HashSet<Annotation>(qualifiers));
   }
 
   @Override
   public Statement render() {
-    if (this == DEFAULT_METADATA) {
-      return Stmt.loadStatic(CDI.class, "DEFAULT_QUALIFIERS");
+    if (this == DEFAULT) {
+      return Stmt.loadStatic(BuiltInQualifiers.class, "DEFAULT_QUALIFIERS");
     }
     else {
       return LiteralFactory.getLiteral(qualifiers.toArray(new Annotation[qualifiers.size()]));
@@ -55,19 +51,19 @@ public class JSR299QualifyingMetadata implements QualifyingMetadata {
 
   @Override
   public boolean doesSatisfy(QualifyingMetadata metadata) {
-    if (metadata instanceof JSR299QualifyingMetadata) {
-      JSR299QualifyingMetadata comparable = (JSR299QualifyingMetadata) metadata;
+    if (metadata instanceof JSR330QualifyingMetadata) {
+      JSR330QualifyingMetadata comparable = (JSR330QualifyingMetadata) metadata;
 
       return ((comparable.qualifiers.size() == 1
-              && comparable.qualifiers.contains(CDI.ANY_INSTANCE))
+              && comparable.qualifiers.contains(BuiltInQualifiers.ANY_INSTANCE))
               || qualifiers.size() == 1
-              && qualifiers.contains(CDI.ANY_INSTANCE)
+              && qualifiers.contains(BuiltInQualifiers.ANY_INSTANCE)
               || qualifiers.containsAll(comparable.qualifiers));
     }
     else return metadata == null;
   }
 
-  static QualifyingMetadata createFromAnnotations(Annotation[] annotations) {
+  static JSR330QualifyingMetadata createFromAnnotations(Annotation[] annotations) {
     if (annotations == null || annotations.length == 0) return createDefaultQualifyingMetaData();
 
     Set<Annotation> qualifiers = new HashSet<Annotation>();
@@ -78,14 +74,14 @@ public class JSR299QualifyingMetadata implements QualifyingMetadata {
       }
     }
 
-    return qualifiers.isEmpty() ? null : new JSR299QualifyingMetadata(qualifiers);
+    return qualifiers.isEmpty() ? null : new JSR330QualifyingMetadata(qualifiers);
   }
 
-  private static final QualifyingMetadata DEFAULT_METADATA = new JSR299QualifyingMetadata(
-              Collections.<Annotation>singleton(CDI.ANY_INSTANCE));
+  private static final JSR330QualifyingMetadata DEFAULT = new JSR330QualifyingMetadata(
+          Collections.<Annotation>singleton(BuiltInQualifiers.ANY_INSTANCE));
 
-  static QualifyingMetadata createDefaultQualifyingMetaData() {
-    return DEFAULT_METADATA;
+  static JSR330QualifyingMetadata createDefaultQualifyingMetaData() {
+    return DEFAULT;
   }
 
   @Override
@@ -118,7 +114,4 @@ public class JSR299QualifyingMetadata implements QualifyingMetadata {
   public int hashCode() {
     return qualifiers != null ? qualifiers.hashCode() : 0;
   }
-
 }
-
-

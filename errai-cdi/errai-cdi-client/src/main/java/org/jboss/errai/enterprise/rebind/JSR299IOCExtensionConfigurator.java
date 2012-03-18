@@ -25,19 +25,19 @@ import org.jboss.errai.codegen.framework.meta.impl.gwt.GWTClass;
 import org.jboss.errai.codegen.framework.util.PrivateAccessType;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.api.IOCExtension;
-import org.jboss.errai.ioc.rebind.DependencyControl;
-import org.jboss.errai.ioc.rebind.IOCProcessingContext;
-import org.jboss.errai.ioc.rebind.IOCProcessorFactory;
-import org.jboss.errai.ioc.rebind.JSR330AnnotationHandler;
-import org.jboss.errai.ioc.rebind.Rule;
-import org.jboss.errai.ioc.rebind.SortUnit;
-import org.jboss.errai.ioc.rebind.ioc.IOCExtensionConfigurator;
-import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
-import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
-import org.jboss.errai.ioc.rebind.ioc.InjectionPoint;
-import org.jboss.errai.ioc.rebind.ioc.Injector;
-import org.jboss.errai.ioc.rebind.ioc.TypeDiscoveryListener;
-import org.jboss.errai.ioc.rebind.ioc.TypeInjector;
+import org.jboss.errai.ioc.rebind.ioc.extension.DependencyControl;
+import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
+import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessorFactory;
+import org.jboss.errai.ioc.rebind.ioc.extension.JSR330AnnotationHandler;
+import org.jboss.errai.ioc.rebind.ioc.extension.Rule;
+import org.jboss.errai.ioc.rebind.ioc.graph.SortUnit;
+import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionPoint;
+import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.TypeDiscoveryListener;
+import org.jboss.errai.ioc.rebind.ioc.injector.TypeInjector;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
@@ -91,11 +91,6 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
                 }
               });
             }
-          }
-
-          @Override
-          public Statement instantiateOnly(InjectionContext injectContext, InjectableInstance injectableInstance) {
-            return instance.getValueStatement();
           }
 
           @Override

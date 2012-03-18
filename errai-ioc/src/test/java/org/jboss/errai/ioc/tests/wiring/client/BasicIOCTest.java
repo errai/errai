@@ -19,7 +19,7 @@ package org.jboss.errai.ioc.tests.wiring.client;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.rebind.IOCTestRunner;
+import org.jboss.errai.ioc.rebind.ioc.test.harness.IOCTestRunner;
 import org.jboss.errai.ioc.tests.wiring.client.res.AfterTask;
 import org.jboss.errai.ioc.tests.wiring.client.res.BeanManagerDependentBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.BeforeTask;

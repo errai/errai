@@ -34,14 +34,14 @@ import org.jboss.errai.codegen.framework.util.Refs;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.ioc.client.api.IOCExtension;
 import org.jboss.errai.ioc.client.api.PackageTarget;
-import org.jboss.errai.ioc.rebind.IOCProcessingContext;
-import org.jboss.errai.ioc.rebind.IOCProcessorFactory;
-import org.jboss.errai.ioc.rebind.ioc.IOCExtensionConfigurator;
-import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
-import org.jboss.errai.ioc.rebind.ioc.InjectionContext;
-import org.jboss.errai.ioc.rebind.ioc.InjectionPoint;
-import org.jboss.errai.ioc.rebind.ioc.Injector;
-import org.jboss.errai.ioc.rebind.ioc.TypeDiscoveryListener;
+import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
+import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessorFactory;
+import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionPoint;
+import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.TypeDiscoveryListener;
 import org.jboss.errai.uibinder.client.UiBinderProvider;
 
 import java.lang.annotation.Annotation;
@@ -145,11 +145,6 @@ public class GWTUiBinderIOCExtension implements IOCExtensionConfigurator {
 
 
           injectionContext.registerInjector(new Injector() {
-            @Override
-            public Statement instantiateOnly(InjectionContext injectContext, InjectableInstance injectableInstance) {
-              return Refs.get(varName);
-            }
-
             @Override
             public Statement getBeanInstance(InjectionContext injectContext, InjectableInstance injectableInstance) {
               return Refs.get(varName);

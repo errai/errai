@@ -7,7 +7,7 @@ import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jboss.errai.ioc.rebind.MockIOCGenerator;
+import org.jboss.errai.ioc.rebind.ioc.test.harness.MockIOCGenerator;
 import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependenciesException;
 import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependency;
 import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedField;

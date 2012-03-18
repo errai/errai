@@ -14,24 +14,14 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.enterprise.rebind;
+package org.jboss.errai.ioc.rebind.ioc.extension;
 
 import java.lang.annotation.Annotation;
 
-import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
-import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadataFactory;
-
 /**
- * @author Mike Brock <cbrock@redhat.com>
+ * @author Mike Brock
  */
-public class JSR299QualfyingMetadataFactory implements QualifyingMetadataFactory {
-  @Override
-  public QualifyingMetadata createFrom(Annotation[] annotations) {
-    return JSR299QualifyingMetadata.createFromAnnotations(annotations);
-  }
-
-  @Override
-  public QualifyingMetadata createDefaultMetadata() {
-    return JSR299QualifyingMetadata.createDefaultQualifyingMetaData();
-  }
+public abstract class JSR330ProvidedClassAnnotationHandler<T extends Annotation>
+        extends JSR330AnnotationHandler<T>
+        implements ProvidedClassAnnotationHandler<T> {
 }

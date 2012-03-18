@@ -5,7 +5,7 @@ import org.jboss.errai.cdi.producer.client.ProducerDependentTestBean;
 import org.jboss.errai.cdi.producer.client.ProducerTestModule;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.rebind.IOCTestRunner;
+import org.jboss.errai.ioc.rebind.ioc.test.harness.IOCTestRunner;
 import org.junit.runner.RunWith;
 
 /**

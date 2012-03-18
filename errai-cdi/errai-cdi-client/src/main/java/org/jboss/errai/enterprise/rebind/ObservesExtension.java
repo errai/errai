@@ -46,9 +46,9 @@ import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.client.container.DestructionCallback;
-import org.jboss.errai.ioc.rebind.ioc.IOCDecoratorExtension;
-import org.jboss.errai.ioc.rebind.ioc.InjectUtil;
-import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
+import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
+import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 
 import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.typeParametersOf;
@@ -80,7 +80,7 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
     }
 
     final String parmClassName = parm.getType().getFullyQualifiedName();
-    final Statement bus = instance.getInjectionContext().getInjector(MessageBus.class).getType(instance);
+    final Statement bus = instance.getInjectionContext().getInjector(MessageBus.class).getBeanInstance(instance);
     final String subscribeMethodName = method.isAnnotationPresent(Local.class) ? "subscribeLocal" : "subscribe";
 
     final String subject = CDI.getSubjectNameByType(parmClassName);

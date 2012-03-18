@@ -18,8 +18,8 @@ package org.jboss.errai.ioc.tests.utils;
 
 import junit.framework.TestCase;
 import org.jboss.errai.ioc.client.container.IOCBeanManager;
-import org.jboss.errai.ioc.rebind.SortUnit;
-import org.jboss.errai.ioc.rebind.ioc.util.WiringUtil;
+import org.jboss.errai.ioc.rebind.ioc.graph.SortUnit;
+import org.jboss.errai.ioc.rebind.ioc.graph.GraphSort;
 import org.jboss.errai.ioc.tests.utils.res.AppController;
 import org.jboss.errai.ioc.tests.utils.res.Contacts;
 import org.jboss.errai.ioc.tests.utils.res.ContactsPresenter;
@@ -51,7 +51,7 @@ public class ComplexScenarioAlgoTests extends TestCase {
 
     for (int i = 0; i < 10000; i++) {
       Collections.shuffle(toSort);
-      sorted = WiringUtil.worstSortAlgorithmEver(toSort);
+      sorted = GraphSort.sortGraph(toSort);
       assertTrue(comesBefore(sorted, contactsSU, handlerMgrSU));
     }
   }

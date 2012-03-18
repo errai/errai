@@ -17,8 +17,8 @@
 package org.jboss.errai.ioc.tests.utils;
 
 import junit.framework.TestCase;
-import org.jboss.errai.ioc.rebind.SortUnit;
-import org.jboss.errai.ioc.rebind.ioc.util.WiringUtil;
+import org.jboss.errai.ioc.rebind.ioc.graph.SortUnit;
+import org.jboss.errai.ioc.rebind.ioc.graph.GraphSort;
 import org.jboss.errai.ioc.tests.utils.res.Bar;
 import org.jboss.errai.ioc.tests.utils.res.Foo;
 import org.jboss.errai.ioc.tests.utils.res.Outer;
@@ -42,10 +42,10 @@ public class BasicSortAlgoTests extends TestCase {
 
   public void testBasicSort() {
 
-    List<SortUnit> sorted1 = WiringUtil.worstSortAlgorithmEver(asList(su2, su1, su3, su4));
-    List<SortUnit> sorted2 = WiringUtil.worstSortAlgorithmEver(asList(su1, su2, su4, su3));
-    List<SortUnit> sorted3 = WiringUtil.worstSortAlgorithmEver(asList(su3, su4, su1, su2));
-    List<SortUnit> sorted4 = WiringUtil.worstSortAlgorithmEver(asList(su4, su1, su3, su2));
+    List<SortUnit> sorted1 = GraphSort.sortGraph(asList(su2, su1, su3, su4));
+    List<SortUnit> sorted2 = GraphSort.sortGraph(asList(su1, su2, su4, su3));
+    List<SortUnit> sorted3 = GraphSort.sortGraph(asList(su3, su4, su1, su2));
+    List<SortUnit> sorted4 = GraphSort.sortGraph(asList(su4, su1, su3, su2));
 
     doAssertionsForScenario1(sorted1);
     doAssertionsForScenario1(sorted2);

@@ -14,28 +14,14 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.rebind.ioc.exception;
+package org.jboss.errai.ioc.rebind.ioc.extension;
 
-import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
+import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
+import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessorFactory;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 
-/**
- * @author Mike Brock
- */
-public class NonFatalFailedDependency extends RuntimeException {
-  private final MetaClass type;
-  private final QualifyingMetadata metadata;
+public interface IOCExtensionConfigurator {
+  public void configure(IOCProcessingContext context, InjectionContext injectionContext, IOCProcessorFactory procFactory);
 
-  public NonFatalFailedDependency(MetaClass type, QualifyingMetadata metadata) {
-    this.type = type;
-    this.metadata = metadata;
-  }
-
-  public MetaClass getType() {
-    return type;
-  }
-
-  public QualifyingMetadata getMetadata() {
-    return metadata;
-  }
+  public void afterInitialization(IOCProcessingContext context, InjectionContext injectionContext, IOCProcessorFactory procFactory);
 }
