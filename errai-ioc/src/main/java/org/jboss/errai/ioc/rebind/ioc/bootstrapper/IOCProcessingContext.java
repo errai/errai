@@ -54,13 +54,10 @@ public class IOCProcessingContext {
 
   protected Collection<String> packages;
   protected List<Statement> appendToEnd;
-  
   protected List<Statement> staticInstantiationStatements;
   protected List<Statement> staticPostConstructStatements;
   protected List<TypeDiscoveryListener> typeDiscoveryListeners;
-  
   protected List<Injector> toInstantiate;
-
   protected Set<MetaClass> discovered = new HashSet<MetaClass>();
   
   protected TreeLogger treeLogger;

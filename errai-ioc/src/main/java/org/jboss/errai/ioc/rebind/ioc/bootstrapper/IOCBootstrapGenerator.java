@@ -52,7 +52,6 @@ import org.jboss.errai.ioc.client.api.Bootstrapper;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.EntryPoint;
-import org.jboss.errai.ioc.client.api.GeneratedBy;
 import org.jboss.errai.ioc.client.api.IOCBootstrapTask;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 import org.jboss.errai.ioc.client.api.TestMock;
@@ -337,21 +336,12 @@ public class IOCBootstrapGenerator {
     }
   }
 
-  public void addDeferred(Runnable task) {
-    deferredTasks.add(task);
-  }
-
   private void runAllDeferred() {
     injectionContext.runAllDeferred();
 
     for (Runnable r : deferredTasks)
       r.run();
   }
-
-  public void addType(final MetaClass type) {
-    injectionContext.addType(type);
-  }
-
 
   public void initializeProviders() {
     final MetaClass typeProviderCls = MetaClassFactory.get(TypeProvider.class);
@@ -521,22 +511,6 @@ public class IOCBootstrapGenerator {
       injectionContext.registerInjector(injector);
     }
 
-    /**
-     * GeneratedBy.class
-     */
-    Set<Class<?>> generatedBys = scanner.getTypesAnnotatedWith(GeneratedBy.class);
-    for (Class<?> clazz : generatedBys) {
-      MetaClass type = GWTClass.newInstance(typeOracle, clazz.getName());
-      GeneratedBy anno = type.getAnnotation(GeneratedBy.class);
-      Class<? extends ContextualTypeProvider> injectorClass = anno.value();
-
-      try {
-        injectionContext.registerInjector(new ContextualProviderInjector(type, MetaClassFactory.get(injectorClass), injectionContext));
-      }
-      catch (Exception e) {
-        throw new ErraiBootstrapFailure("could not load injector: " + e.getMessage(), e);
-      }
-    }
 
     for (IOCExtensionConfigurator extensionConfigurator : extensionConfigurators) {
       extensionConfigurator.afterInitialization(procContext, injectionContext, procFactory);
