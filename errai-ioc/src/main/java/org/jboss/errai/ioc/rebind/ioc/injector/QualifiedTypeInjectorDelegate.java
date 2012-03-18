@@ -27,14 +27,14 @@ import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public class QualifiedTypeInjectorDelegate extends Injector {
+public class QualifiedTypeInjectorDelegate implements Injector {
   private MetaClass type;
   private Injector delegate;
 
   public QualifiedTypeInjectorDelegate(MetaClass type, Injector delegate, MetaParameterizedType parameterizedType) {
     this.type = type;
     this.delegate = delegate;
-    this.qualifyingTypeInformation = parameterizedType;
+    delegate.setQualifyingTypeInformation(parameterizedType);
   }
 
   @Override
@@ -52,6 +52,7 @@ public class QualifiedTypeInjectorDelegate extends Injector {
   public boolean isInjected() {
     return delegate.isInjected();
   }
+
 
   @Override
   public boolean isSingleton() {
@@ -84,30 +85,83 @@ public class QualifiedTypeInjectorDelegate extends Injector {
   }
 
   @Override
+  public Statement getBeanInstance(InjectableInstance injectableInstance) {
+    return delegate.getBeanInstance(injectableInstance);
+  }
+
+  @Override
+  public boolean isDependent() {
+    return delegate.isDependent();
+  }
+
+  @Override
+  public boolean isProvider() {
+    return delegate.isProvider();
+  }
+
+  @Override
+  public MetaClass getEnclosingType() {
+    return delegate.getEnclosingType();
+  }
+
+  @Override
+  public String getPostInitCallbackVar() {
+    return delegate.getPostInitCallbackVar();
+  }
+
+  @Override
+  public String getPreDestroyCallbackVar() {
+    return delegate.getPreDestroyCallbackVar();
+  }
+
+  @Override
+  public boolean matches(MetaParameterizedType parameterizedType, QualifyingMetadata qualifyingMetadata) {
+    return delegate.matches(parameterizedType, qualifyingMetadata);
+  }
+
+  @Override
+  public MetaParameterizedType getQualifyingTypeInformation() {
+    return delegate.getQualifyingTypeInformation();
+  }
+
+  @Override
+  public void setQualifyingTypeInformation(MetaParameterizedType qualifyingTypeInformation) {
+    delegate.setQualifyingTypeInformation(qualifyingTypeInformation);
+  }
+
+  @Override
   public void setQualifyingMetadata(QualifyingMetadata qualifyingMetadata) {
     delegate.setQualifyingMetadata(qualifyingMetadata);
   }
 
+  @Override
+  public void setPostInitCallbackVar(String var) {
+    delegate.setPostInitCallbackVar(var);
+  }
+
+  @Override
+  public void setPreDestroyCallbackVar(String preDestroyCallbackVar) {
+    delegate.setPreDestroyCallbackVar(preDestroyCallbackVar);
+  }
+
   private void registerWithBeanManager(InjectionContext context, Statement valueRef) {
-    if (useBeanManager) {
-      if (InjectUtil.checkIfTypeNeedsAddingToBeanStore(context, this)) {
-        Statement initCallbackRef;
-        if (getPostInitCallbackVar() == null) {
-          initCallbackRef = Stmt.load(null);
-        }
-        else {
-          initCallbackRef = Stmt.loadVariable(getPostInitCallbackVar());
-        }
-
-        QualifyingMetadata md = delegate.getQualifyingMetadata();
-        if (md == null) {
-          md = context.getProcessingContext().getQualifyingMetadataFactory().createDefaultMetadata();
-        }
-
-        context.getProcessingContext().appendToEnd(
-                Stmt.loadVariable(context.getProcessingContext().getContextVariableReference())
-                        .invoke("addSingletonBean", type, valueRef, md.render(), initCallbackRef));
+    if (InjectUtil.checkIfTypeNeedsAddingToBeanStore(context, this)) {
+      Statement initCallbackRef;
+      if (getPostInitCallbackVar() == null) {
+        initCallbackRef = Stmt.load(null);
       }
+      else {
+        initCallbackRef = Stmt.loadVariable(getPostInitCallbackVar());
+      }
+
+      QualifyingMetadata md = delegate.getQualifyingMetadata();
+      if (md == null) {
+        md = context.getProcessingContext().getQualifyingMetadataFactory().createDefaultMetadata();
+      }
+
+      context.getProcessingContext().appendToEnd(
+              Stmt.loadVariable(context.getProcessingContext().getContextVariableReference())
+                      .invoke("addSingletonBean", type, valueRef, md.render(), initCallbackRef));
     }
   }
 

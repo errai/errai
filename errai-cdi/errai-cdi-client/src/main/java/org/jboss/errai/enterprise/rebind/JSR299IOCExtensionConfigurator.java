@@ -32,10 +32,10 @@ import org.jboss.errai.ioc.rebind.ioc.extension.JSR330AnnotationHandler;
 import org.jboss.errai.ioc.rebind.ioc.extension.Rule;
 import org.jboss.errai.ioc.rebind.ioc.graph.SortUnit;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
+import org.jboss.errai.ioc.rebind.ioc.injector.AbstractInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionPoint;
-import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.TypeDiscoveryListener;
 import org.jboss.errai.ioc.rebind.ioc.injector.TypeInjector;
 
@@ -72,7 +72,7 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
 
         }
 
-        injectionContext.registerInjector(new Injector() {
+        injectionContext.registerInjector(new AbstractInjector() {
           {
             super.qualifyingMetadata = JSR299QualifyingMetadata.createFromAnnotations(instance.getQualifiers());
             this.provider = true;

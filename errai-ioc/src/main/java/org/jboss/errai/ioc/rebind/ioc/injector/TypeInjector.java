@@ -45,7 +45,7 @@ import static org.jboss.errai.codegen.framework.util.Stmt.declareVariable;
 import static org.jboss.errai.codegen.framework.util.Stmt.load;
 import static org.jboss.errai.codegen.framework.util.Stmt.loadVariable;
 
-public class TypeInjector extends Injector {
+public class TypeInjector extends AbstractInjector {
   protected final MetaClass type;
   protected String varName;
   protected String creationalCallbackVarName;

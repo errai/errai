@@ -27,7 +27,7 @@ import javax.inject.Provider;
 
 
 public class ProviderInjector extends TypeInjector {
-  private final Injector providerInjector;
+  private final AbstractInjector providerInjector;
   private boolean provided = false;
   private boolean standardProvider = false;
 

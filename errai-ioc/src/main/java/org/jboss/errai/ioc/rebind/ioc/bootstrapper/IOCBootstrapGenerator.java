@@ -60,13 +60,14 @@ import org.jboss.errai.ioc.client.api.TaskOrder;
 import org.jboss.errai.ioc.client.api.TypeProvider;
 import org.jboss.errai.ioc.client.container.CreationalContext;
 import org.jboss.errai.ioc.rebind.ioc.extension.JSR330AnnotationHandler;
+import org.jboss.errai.ioc.rebind.ioc.injector.AbstractInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.ContextualProviderInjector;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
+import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
-import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.injector.ProviderInjector;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadataFactory;
 import org.slf4j.Logger;
@@ -509,7 +510,7 @@ public class IOCBootstrapGenerator {
 
       final MetaClass finalBindType = bindType;
 
-      Injector injector;
+      AbstractInjector injector;
       if (contextual) {
         injector = new ContextualProviderInjector(finalBindType, type, injectionContext);
       }
@@ -561,7 +562,6 @@ public class IOCBootstrapGenerator {
       @Override
       public boolean handle(final InjectableInstance type, Singleton annotation, IOCProcessingContext context) {
         Injector injector = injectionContext.getInjector(type.getType());
-        injector.setSingleton(true);
         injector.getBeanInstance(injectionContext, null);
         return true;
       }
@@ -571,7 +571,6 @@ public class IOCBootstrapGenerator {
       @Override
       public boolean handle(final InjectableInstance type, EntryPoint annotation, IOCProcessingContext context) {
         Injector injector = injectionContext.getInjector(type.getType());
-        injector.setSingleton(true);
         injector.getBeanInstance(injectionContext, null);
         return true;
       }
@@ -581,7 +580,6 @@ public class IOCBootstrapGenerator {
       @Override
       public boolean handle(final InjectableInstance type, Service annotation, IOCProcessingContext context) {
         Injector injector = injectionContext.getInjector(type.getType());
-        injector.setSingleton(true);
         injector.getBeanInstance(injectionContext, null);
         return true;
       }

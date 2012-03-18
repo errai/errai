@@ -27,8 +27,9 @@ import org.jboss.errai.codegen.framework.builder.BlockBuilder;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.ioc.client.InterfaceInjectionContext;
-import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionPoint;
+import org.jboss.errai.ioc.rebind.ioc.injector.AbstractInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionPoint;
 import org.jboss.errai.ioc.rebind.ioc.metadata.JSR330QualifyingMetadataFactory;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadataFactory;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.TypeDiscoveryListener;
@@ -138,18 +139,7 @@ public class IOCProcessingContext {
   public void appendToEnd(Statement statement) {
     appendToEnd.add(statement);
   }
-  
-  public void addStaticInstantiationStatement(Statement statement) {
-    staticInstantiationStatements.add(statement);
-  }
 
-  public void addPostConstructStatement(Statement statement) {
-    staticPostConstructStatements.add(statement);
-  }
-  
-  public void instantiateBean(Injector injector) {
-   toInstantiate.add(injector);
-  }
 
   public List<Statement> getAppendToEnd() {
     return Collections.unmodifiableList(appendToEnd);
@@ -189,10 +179,6 @@ public class IOCProcessingContext {
 
   public GeneratorContext getGeneratorContext() {
     return generatorContext;
-  }
-
-  public SourceWriter getWriter() {
-    return writer;
   }
 
   public Variable getContextVariable() {

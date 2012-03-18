@@ -138,7 +138,7 @@ public class CDIServletStateListener extends ForwardingServletListener {
     }
 
     if (jetty) {
-      // Try pushing a Jetty Injector into the servlet context
+      // Try pushing a Jetty AbstractInjector into the servlet context
       try {
         Class<?> clazz = Reflections.classForName(JettyWeldInjector.class.getName());
         Object injector = clazz.getConstructor(WeldManager.class).newInstance(manager);

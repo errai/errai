@@ -42,7 +42,7 @@ import static org.jboss.errai.codegen.framework.util.Stmt.newObject;
 /**
  * @author Mike Brock
  */
-public class ProxyInjector extends Injector {
+public class ProxyInjector extends AbstractInjector {
   private boolean proxied;
   private final String varName = InjectUtil.getNewInjectorName();
 
