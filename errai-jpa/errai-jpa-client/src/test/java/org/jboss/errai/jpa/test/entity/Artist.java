@@ -5,9 +5,8 @@ import java.util.Set;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 
-import org.jboss.errai.ioc.client.api.TestOnly;
-
-@TestOnly @Entity
+//TODO annotate with @TestOnly after merging in the fix from master branch
+@Entity
 public class Artist {
 
   private String name;

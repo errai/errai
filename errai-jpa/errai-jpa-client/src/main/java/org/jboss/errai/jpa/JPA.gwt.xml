@@ -7,8 +7,11 @@
   <super-source path="api"/>
   <source path="client" />
 
-  <generate-with class="org.jboss.errai.jpa.gen.PersisterGenerator">
-    <when-type-is class="org.jboss.errai.jpa.gen.ErraiEntityManager" />
+  <generate-with class="org.jboss.errai.jpa.gen.ErraiEntityManagerGenerator">
+
+    <!-- Could use when-type-assignable to javax.persistence.EntityManager, but this
+         could give us better interop with other frameworks that try to do the same -->
+    <when-type-is class="org.jboss.errai.jpa.client.local.ErraiEntityManager" />
   </generate-with>
 
 </module>
