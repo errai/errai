@@ -1617,6 +1617,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
       panel.add(contentPanel);
       add(panel);
+
+      getElement().getStyle().setZIndex(16777271);
     }
 
     public void addError(String message, String additionalDetails, Throwable e) {
