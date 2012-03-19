@@ -61,18 +61,6 @@ public class InterfaceInjectionContext {
                                InitializationCallback initCallback) {
     manager.registerDependentBean(type, callback, qualifiers, initCallback);
   }
-  
-  public void addToRootPanel(Widget w) {
-    toRootPanel.add(w);
-  }
-
-  public void registerPanel(String panelName, Panel panel) {
-    panels.put(panelName, panel);
-  }
-
-  public void widgetToPanel(Widget widget, String panelName) {
-    widgetToPanel.put(widget, panelName);
-  }
 
   public List<Widget> getToRootPanel() {
     return toRootPanel;
