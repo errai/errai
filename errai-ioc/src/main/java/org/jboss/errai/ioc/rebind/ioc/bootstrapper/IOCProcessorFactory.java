@@ -252,6 +252,11 @@ public class IOCProcessorFactory {
       }
 
       @Override
+      public boolean equals(Object o) {
+        return o != null && toString().equals(o.toString());
+      }
+
+      @Override
       public String toString() {
         return clazz.getName();
       }
