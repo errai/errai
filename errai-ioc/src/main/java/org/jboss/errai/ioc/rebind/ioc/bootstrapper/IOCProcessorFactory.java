@@ -16,21 +16,9 @@
 
 package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
-import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
-import org.jboss.errai.codegen.framework.meta.MetaField;
-import org.jboss.errai.codegen.framework.meta.MetaMethod;
-import org.jboss.errai.common.metadata.MetaDataScanner;
-import org.jboss.errai.ioc.client.api.TestMock;
-import org.jboss.errai.ioc.client.api.TestOnly;
-import org.jboss.errai.ioc.rebind.ioc.extension.AnnotationHandler;
-import org.jboss.errai.ioc.rebind.ioc.extension.DependencyControl;
-import org.jboss.errai.ioc.rebind.ioc.extension.ProvidedClassAnnotationHandler;
-import org.jboss.errai.ioc.rebind.ioc.extension.RuleDef;
-import org.jboss.errai.ioc.rebind.ioc.graph.SortUnit;
-import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
-import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
-import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
+import static org.jboss.errai.ioc.rebind.ioc.graph.GraphSort.sortGraph;
+import static org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance.getMethodInjectedInstance;
+import static org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance.getTypeInjectedInstance;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
@@ -47,9 +35,23 @@ import java.util.SortedSet;
 import java.util.Stack;
 import java.util.TreeSet;
 
-import static org.jboss.errai.ioc.rebind.ioc.graph.GraphSort.sortGraph;
-import static org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance.getMethodInjectedInstance;
-import static org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance.getTypeInjectedInstance;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
+import org.jboss.errai.codegen.framework.meta.MetaField;
+import org.jboss.errai.codegen.framework.meta.MetaMethod;
+import org.jboss.errai.common.metadata.MetaDataScanner;
+import org.jboss.errai.ioc.client.api.TestMock;
+import org.jboss.errai.ioc.client.api.TestOnly;
+import org.jboss.errai.ioc.rebind.ioc.extension.AnnotationHandler;
+import org.jboss.errai.ioc.rebind.ioc.extension.DependencyControl;
+import org.jboss.errai.ioc.rebind.ioc.extension.ProvidedClassAnnotationHandler;
+import org.jboss.errai.ioc.rebind.ioc.extension.RuleDef;
+import org.jboss.errai.ioc.rebind.ioc.graph.SortUnit;
+import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
+
+import com.google.gwt.core.ext.TreeLogger.Type;
 
 @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
 public class IOCProcessorFactory {
@@ -221,6 +223,7 @@ public class IOCProcessorFactory {
 
     if (!IOCGenerator.isTestMode) {
       if (type.isAnnotationPresent(TestOnly.class) || type.isAnnotationPresent(TestMock.class)) {
+        context.treeLogger.log(Type.DEBUG, "Skipping test-only type " + type.getFullyQualifiedName());
         return;
       }
     }
@@ -244,10 +247,11 @@ public class IOCProcessorFactory {
         return entry.handler.handle(injectableInstance, anno, context);
       }
 
-      public boolean equals(Object o) {
-        return o != null && toString().equals(o.toString());
+      public MetaClass getType() {
+        return type;
       }
 
+      @Override
       public String toString() {
         return clazz.getName();
       }
@@ -296,11 +300,16 @@ public class IOCProcessorFactory {
         return entry.handler.handle(injectableInstance, anno, context);
       }
 
+      public MetaClass getType() {
+        return type;
+      }
+
       @Override
       public boolean equals(Object o) {
         return o != null && toString().equals(o.toString());
       }
 
+      @Override
       public String toString() {
         return type.getFullyQualifiedName();
       }
@@ -350,10 +359,12 @@ public class IOCProcessorFactory {
         return entry.handler.handle(injectableInstance, anno, context);
       }
 
+      @Override
       public boolean equals(Object o) {
         return o != null && toString().equals(o.toString());
       }
 
+      @Override
       public String toString() {
         return type.getFullyQualifiedName();
       }
@@ -415,6 +426,7 @@ public class IOCProcessorFactory {
       return -1;
     }
 
+    @Override
     public String toString() {
       return "Scope:" + annotationClass.getName();
     }

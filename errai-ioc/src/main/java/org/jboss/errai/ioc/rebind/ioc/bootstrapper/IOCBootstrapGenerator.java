@@ -17,13 +17,27 @@
 package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
 
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
-import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.user.rebind.SourceWriter;
-import com.google.gwt.user.rebind.StringSourceWriter;
+import java.io.File;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.context.RequestScoped;
+import javax.enterprise.context.SessionScoped;
+import javax.enterprise.inject.Default;
+import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.inject.Singleton;
+
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.codegen.framework.Context;
@@ -72,25 +86,13 @@ import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadataFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.context.SessionScoped;
-import javax.enterprise.inject.Default;
-import javax.inject.Inject;
-import javax.inject.Provider;
-import javax.inject.Singleton;
-import java.io.File;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.rebind.SourceWriter;
+import com.google.gwt.user.rebind.StringSourceWriter;
 
 /**
  * The main generator class for the Errai IOC system.
@@ -176,14 +178,19 @@ public class IOCBootstrapGenerator {
       Set<String> translatable = RebindUtils.findTranslatablePackages(context);
       translatable.remove("java.lang");
 
-
       for (JClassType type : typeOracle.getTypes()) {
-        if (!translatable.contains(type.getPackage().getName())) continue;
+        if (!translatable.contains(type.getPackage().getName())) {
+          logger.log(com.google.gwt.core.ext.TreeLogger.Type.DEBUG, "Skipping non-translatable " + type.getQualifiedSourceName());
+          continue;
+        }
+
         if (type.isAnnotation() != null) {
+          logger.log(com.google.gwt.core.ext.TreeLogger.Type.DEBUG, "Caching annotation type " + type.getQualifiedSourceName());
           MetaClassFactory.pushCache(JavaReflectionClass
                   .newUncachedInstance(MetaClassFactory.loadClass(type.getQualifiedBinaryName())));
         }
         else {
+          logger.log(com.google.gwt.core.ext.TreeLogger.Type.DEBUG, "Caching translatable type " + type.getQualifiedSourceName());
           MetaClassFactory.pushCache(GWTClass.newInstance(typeOracle, type));
         }
       }
@@ -204,6 +211,8 @@ public class IOCBootstrapGenerator {
   private String _generate(String packageName, String className) {
     ClassStructureBuilder<?> classStructureBuilder =
             Implementations.implement(Bootstrapper.class, packageName, className);
+
+    logger.log(com.google.gwt.core.ext.TreeLogger.Type.DEBUG, "Generating IOC Bootstrapper " + packageName + "." + className);
 
     BuildMetaClass bootStrapClass = classStructureBuilder.getClassDefinition();
     Context buildContext = bootStrapClass.getContext();
