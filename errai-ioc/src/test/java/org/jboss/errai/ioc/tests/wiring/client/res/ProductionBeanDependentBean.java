@@ -19,14 +19,22 @@ package org.jboss.errai.ioc.tests.wiring.client.res;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.jboss.errai.ioc.client.api.Caller;
+
 /**
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Singleton
 public class ProductionBeanDependentBean {
   @Inject MockableCommonInterface mockableCommonInterface;
-
+  @Inject Caller<HappyService> mockableCaller;
+  
   public MockableCommonInterface getMockableCommonInterface() {
     return mockableCommonInterface;
+  }
+  
+  public Caller<HappyService> getMockableCaller() {
+    return mockableCaller;
   }
 }

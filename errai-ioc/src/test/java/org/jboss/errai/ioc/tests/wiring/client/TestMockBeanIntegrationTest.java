@@ -16,14 +16,14 @@
 
 package org.jboss.errai.ioc.tests.wiring.client;
 
+import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
-import org.jboss.errai.ioc.tests.wiring.client.res.AlternativeBeanA;
-import org.jboss.errai.ioc.tests.wiring.client.res.AlternativeDependentBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.MockProductionBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.ProductionBeanDependentBean;
 
 /**
+ * @author Christian Sadilek <csadilek@redhat.com>
  * @author Mike Brock
  */
 public class TestMockBeanIntegrationTest extends AbstractErraiIOCTest {
@@ -49,4 +49,24 @@ public class TestMockBeanIntegrationTest extends AbstractErraiIOCTest {
     });
   }
 
+  public void testMockedCallerInjection() throws Exception {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        ProductionBeanDependentBean bean = IOC.getBeanManager()
+                .lookupBean(ProductionBeanDependentBean.class).getInstance();
+
+        assertNotNull(bean);
+        assertNotNull(bean.getMockableCaller());
+        bean.getMockableCaller().call(new RemoteCallback<Boolean> () {
+          @Override
+          public void callback(Boolean response) {
+            // response should come from HappyServiceMockedCallerProvider
+            assertTrue(response);
+            finishTest();
+          }
+        }).isHappy();
+      }
+    });
+  }
 }
