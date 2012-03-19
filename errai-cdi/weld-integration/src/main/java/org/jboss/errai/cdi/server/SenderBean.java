@@ -129,7 +129,7 @@ public class SenderBean implements Bean {
               + ToSubject.class.getName() + " qualifier missing at injection point.");
     }
 
-    return ErraiMessageSender.of(toSubject, replyTo, senderType , bus);
+    return ErraiMessageSender.of(toSubject, replyTo, bus);
   }
   
   private static final String PROVIDER_EXCEPTION_ERROR_MSG_BASE
