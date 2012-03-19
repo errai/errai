@@ -28,7 +28,7 @@ import org.jboss.errai.codegen.framework.util.GenUtil;
 
 /**
  * This class represents a variable.
- * <p/>
+ * <p>
  * Note that initialization using {@link LiteralValue}s takes effect immediately,
  * initialization using {@link Statement}s needs to be deferred to generation time.
  *
@@ -137,10 +137,29 @@ public class Variable extends AbstractStatement {
       }
 
       @Override
-      public Statement getValue() {
-        return null;
+      public MetaClass getType() {
+        // note this is just a sensible default for the benefit of permissive generation mode
+        return MetaClassFactory.get(Object.class);
       }
 
+      @Override
+      public Statement getValue() {
+        return new Statement() {
+
+          @Override
+          public MetaClass getType() {
+            // note this is just a sensible default for the benefit of permissive generation mode
+            return MetaClassFactory.get(Object.class);
+          }
+
+          @Override
+          public String generate(Context context) {
+            return name;
+          }
+        };
+      }
+
+      @Override
       public String toString() {
         return name;
       }
@@ -164,6 +183,7 @@ public class Variable extends AbstractStatement {
         return value;
       }
 
+      @Override
       public String toString() {
         return name;
       }
