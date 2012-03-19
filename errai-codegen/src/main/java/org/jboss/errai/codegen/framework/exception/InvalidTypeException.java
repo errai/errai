@@ -19,7 +19,7 @@ package org.jboss.errai.codegen.framework.exception;
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class InvalidTypeException extends RuntimeException {
+public class InvalidTypeException extends GenerationException {
   private static final long serialVersionUID = 1L;
 
   public InvalidTypeException() {

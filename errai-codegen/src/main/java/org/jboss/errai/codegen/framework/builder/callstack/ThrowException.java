@@ -21,6 +21,7 @@ import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.VariableReference;
 import org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder;
+import org.jboss.errai.codegen.framework.exception.GenerationException;
 import org.jboss.errai.codegen.framework.exception.InvalidTypeException;
 
 /**
@@ -28,7 +29,7 @@ import org.jboss.errai.codegen.framework.exception.InvalidTypeException;
  */
 public class ThrowException extends AbstractCallElement {
   private String exceptionVariableName;
-  
+
   private Class<? extends Throwable> throwableType;
   private Object[] parameters;
 
@@ -47,21 +48,28 @@ public class ThrowException extends AbstractCallElement {
     statement = new AbstractStatement() {
       @Override
       public String generate(Context context) {
-        StringBuilder buf = new StringBuilder(64);
-        buf.append("throw ");
-        if (throwableType != null) {
-          buf.append(ObjectBuilder.newInstanceOf(throwableType).withParameters(parameters).generate(context));
-        }
-        else {
-          VariableReference exceptionVar = context.getVariable(exceptionVariableName);
-          if (!exceptionVar.getType().isAssignableTo(Throwable.class)) {
-            throw new InvalidTypeException("Variable " + exceptionVariableName + " is not a Throwable");
+        StringBuilder buf = new StringBuilder();
+        try {
+          buf.append("throw ");
+          if (throwableType != null) {
+            buf.append(ObjectBuilder.newInstanceOf(throwableType).withParameters(parameters).generate(context));
           }
-          buf.append(exceptionVar.generate(context));
+          else {
+            VariableReference exceptionVar = context.getVariable(exceptionVariableName);
+            if (!exceptionVar.getType().isAssignableTo(Throwable.class)) {
+              throw new InvalidTypeException("Variable " + exceptionVariableName + " is not a Throwable");
+            }
+            buf.append(exceptionVar.generate(context));
+          }
         }
+        catch (GenerationException e) {
+          blameAndRethrow(e);
+        }
+        
         return buf.toString();
       }
     };
+    
     writer.reset();
     writer.append(statement.generate(context));
   }

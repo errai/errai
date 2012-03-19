@@ -21,7 +21,7 @@ import org.jboss.errai.codegen.framework.meta.MetaClass;
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class UndefinedConstructorException extends RuntimeException {
+public class UndefinedConstructorException extends GenerationException {
   private static final long serialVersionUID = 1L;
 
   private MetaClass type;

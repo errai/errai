@@ -24,7 +24,6 @@ import org.jboss.errai.codegen.framework.builder.Builder;
 import org.jboss.errai.codegen.framework.builder.StatementEnd;
 import org.jboss.errai.codegen.framework.builder.callstack.CallElement;
 import org.jboss.errai.codegen.framework.builder.callstack.CallWriter;
-import org.jboss.errai.codegen.framework.exception.GenerationException;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.util.GenUtil;
 
@@ -72,39 +71,7 @@ public abstract class AbstractStatementBuilder implements Statement, Builder, St
   }
 
   public void appendCallElement(final CallElement element) {
-    final Throwable callSite = new Throwable();
-
-    final CallElement wrapperElement = new CallElement() {
-      @Override
-      public void handleCall(CallWriter writer, Context context, Statement statement) {
-        try {
-          element.handleCall(writer, context, statement);
-        }
-        catch (GenerationException e) {
-          throw e;
-        }
-        catch (Throwable t) {
-          throw new GenerationException(callSite, "Error Building Statement", t);
-        }
-      }
-
-      @Override
-      public CallElement setNext(CallElement el) {
-        return element.setNext(el);
-      }
-
-      @Override
-      public CallElement getNext() {
-        return element.getNext();
-      }
-
-      @Override
-      public MetaClass getResultType() {
-        return element.getResultType();
-      }
-    };
-
-    callElementBuilder.appendCallElement(wrapperElement);
+    callElementBuilder.appendCallElement(element);
   }
 
   @Override

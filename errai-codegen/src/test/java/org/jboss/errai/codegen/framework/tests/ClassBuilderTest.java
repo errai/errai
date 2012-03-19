@@ -16,7 +16,6 @@
 
 package org.jboss.errai.codegen.framework.tests;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.Serializable;
@@ -27,7 +26,6 @@ import org.jboss.errai.codegen.framework.Parameter;
 import org.jboss.errai.codegen.framework.Variable;
 import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.ClassBuilder;
-import org.jboss.errai.codegen.framework.exception.GenerationException;
 import org.jboss.errai.codegen.framework.exception.UndefinedMethodException;
 import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.framework.tests.model.Baz;
@@ -249,11 +247,8 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
           .toJavaString();
       fail("exprected UndefinedMethodException");
     }
-    catch (GenerationException e) {
+    catch (UndefinedMethodException udme) {
       // expected
-      assertTrue("cause is not UndefinedMethodException", e.getCause() instanceof UndefinedMethodException);
-      
-      UndefinedMethodException udme = (UndefinedMethodException) e.getCause();
       assertEquals("Wrong exception thrown", udme.getMethodName(), "foo");
     }
   }
@@ -290,11 +285,8 @@ public class ClassBuilderTest extends AbstractStatementBuilderTest implements Cl
           .toJavaString();
       fail("exprected UndefinedMethodException");
     }
-    catch (GenerationException e) {
+    catch (UndefinedMethodException udme) {
       // expected
-      assertTrue("cause is not UndefinedMethodException", e.getCause() instanceof UndefinedMethodException);
-
-      UndefinedMethodException udme = (UndefinedMethodException) e.getCause();
       assertEquals("Wrong exception thrown", udme.getMethodName(), "undefinedMethod");
     }
   }

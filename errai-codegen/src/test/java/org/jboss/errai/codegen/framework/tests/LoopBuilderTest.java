@@ -32,7 +32,6 @@ import org.jboss.errai.codegen.framework.Variable;
 import org.jboss.errai.codegen.framework.builder.Builder;
 import org.jboss.errai.codegen.framework.builder.impl.ContextBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.StatementBuilder;
-import org.jboss.errai.codegen.framework.exception.GenerationException;
 import org.jboss.errai.codegen.framework.exception.InvalidExpressionException;
 import org.jboss.errai.codegen.framework.exception.InvalidTypeException;
 import org.jboss.errai.codegen.framework.exception.OutOfScopeException;
@@ -102,9 +101,8 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
 
       fail("Expected OutOfScopeException");
     }
-    catch (GenerationException e) {
+    catch (OutOfScopeException e) {
       // expected
-      assertTrue("expected OutOfScopeException", ExceptionUtil.isIntermediateCause(e, OutOfScopeException.class));
     }
   }
 
@@ -128,9 +126,8 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
 
       fail("Expected InvalidTypeException");
     }
-    catch (GenerationException e) {
+    catch (InvalidTypeException e) {
       // expected
-      assertTrue("expected InvalidTypeException", ExceptionUtil.isIntermediateCause(e, InvalidTypeException.class));
     }
   }
 
@@ -167,9 +164,8 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
 
       fail("Expected TypeNotIterableException");
     }
-    catch (GenerationException e) {
+    catch (TypeNotIterableException e) {
       // expected
-      assertTrue("expected TypeNotIterableException", ExceptionUtil.isIntermediateCause(e, TypeNotIterableException.class));
     }
   }
 
@@ -219,9 +215,8 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
           .while_().finish().toJavaString();
       fail("Expected InvalidTypeException");
     }
-    catch (GenerationException e) {
+    catch (InvalidTypeException e) {
       // expected
-      assertTrue("expected InvalidTypeException", ExceptionUtil.isIntermediateCause(e, InvalidTypeException.class));
     }
 
     try {
@@ -234,13 +229,9 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
 
       fail("Expected InvalidExpressionException");
     }
-    catch (GenerationException e) {
+    catch (InvalidExpressionException iee) {
       // expected
-      assertTrue("expected InvalidExpressionException", ExceptionUtil.isIntermediateCause(e, InvalidExpressionException.class));
-
-      InvalidExpressionException ie = (InvalidExpressionException) ExceptionUtil
-              .getIntermediateCause(e, InvalidExpressionException.class);
-      assertTrue("Wrong exception thrown", ie.getMessage().contains(String.class.getName()));
+      assertTrue("Wrong exception thrown", iee.getMessage().contains(String.class.getName()));
     }
   }
 
@@ -567,9 +558,8 @@ public class LoopBuilderTest extends AbstractStatementBuilderTest implements Loo
           .toJavaString();
       fail("expected OutOfScopeException");
     }
-    catch (GenerationException e) {
+    catch (OutOfScopeException e) {
       // expected
-      assertTrue("expected OutOfScopeException", ExceptionUtil.isIntermediateCause(e, OutOfScopeException.class));
     }
   }
 }

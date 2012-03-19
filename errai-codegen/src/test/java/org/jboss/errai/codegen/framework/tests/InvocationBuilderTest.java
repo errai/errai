@@ -29,7 +29,6 @@ import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Variable;
 import org.jboss.errai.codegen.framework.builder.impl.ContextBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.StatementBuilder;
-import org.jboss.errai.codegen.framework.exception.GenerationException;
 import org.jboss.errai.codegen.framework.exception.InvalidTypeException;
 import org.jboss.errai.codegen.framework.exception.OutOfScopeException;
 import org.jboss.errai.codegen.framework.exception.UndefinedMethodException;
@@ -111,11 +110,8 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
               .toJavaString();
       fail("expected UndefinedMethodException");
     }
-    catch (GenerationException e) {
+    catch (UndefinedMethodException udme) {
       // expected
-      assertTrue("Expected UndefinedMethodException", e.getCause() instanceof UndefinedMethodException);
-      
-      UndefinedMethodException udme = (UndefinedMethodException) e.getCause();
       assertEquals("Wrong exception thrown", udme.getMethodName(), "undefinedMethod");
     }
   }
@@ -133,12 +129,8 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
               .toJavaString();
       fail("expected UndefinedMethodException");
     }
-    catch (GenerationException e) {
+    catch (UndefinedMethodException udme) {
       // expected
-      Throwable c = ExceptionUtil.getRootCause(e);
-      assertTrue("Expected UndefinedMethodException", c instanceof UndefinedMethodException);
-      
-      UndefinedMethodException udme = (UndefinedMethodException) c;
       assertEquals("Wrong exception thrown", udme.getMethodName(), "undefinedMethod");
     }
   }
@@ -153,10 +145,8 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
               .toJavaString();
       fail("expected OutOfScopeException");
     }
-    catch (GenerationException e) {
-      assertTrue("Expected OutOfScopeException", e.getCause() instanceof OutOfScopeException);
+    catch (OutOfScopeException oose) {
       // expected
-      OutOfScopeException oose = (OutOfScopeException) e.getCause();
       assertTrue("Wrong exception thrown", oose.getMessage().contains("injector"));
     }
   }
@@ -173,11 +163,8 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
               .toJavaString();
       fail("expected OutOfScopeException");
     }
-    catch (GenerationException e) {
+    catch (OutOfScopeException oose) {
       // expected
-      assertTrue("Expected OutOfScopeException", e.getCause() instanceof OutOfScopeException);
-      
-      OutOfScopeException oose = (OutOfScopeException) e.getCause();
       assertTrue(oose.getMessage().contains("param2"));
     }
   }
@@ -270,11 +257,8 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
               .toJavaString();
       fail("expected UndefinedMethodException");
     }
-    catch (GenerationException e) {
+    catch (UndefinedMethodException udme) {
       // expected
-      assertTrue("Expected UndefinedMethodException", e.getCause() instanceof UndefinedMethodException);
-      
-      UndefinedMethodException udme = (UndefinedMethodException) e.getCause();
       assertEquals("Wrong exception details", udme.getMethodName(), "intValue");
     }
   }
@@ -297,16 +281,16 @@ public class InvocationBuilderTest extends AbstractStatementBuilderTest {
 
     try {
       StatementBuilder.create(Context.create().autoImport())
-              .declareVariable("list", new TypeLiteral<List<String>>() {
-              })
+              .declareVariable("list", new TypeLiteral<List<String>>() {})
               .declareVariable("n", Integer.class,
                       StatementBuilder.create().invokeStatic(Foo.class, "bar", Variable.get("list")))
               .toJavaString();
       fail("expected InvalidTypeException");
     }
-    catch (GenerationException e) {
+    catch (InvalidTypeException e) {
       // expected
-      assertTrue("Expected InvalidTypeException", e.getCause() instanceof InvalidTypeException);
+      assertEquals("Wrong exception message", 
+          "java.lang.Integer is not assignable from java.lang.String", e.getMessage());
     }
   }
 

@@ -18,6 +18,7 @@ package org.jboss.errai.codegen.framework.builder.callstack;
 
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.exception.GenerationException;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 
 /**
@@ -28,17 +29,24 @@ public abstract class AbstractCallElement implements CallElement {
   protected CallElement next;
   protected MetaClass resultType = null;
 
-  public void nextOrReturn(CallWriter writer, Context ctx, Statement statement) {
-    if (statement != null) {
-      if (!writer.getCallString().isEmpty()) {
-        writer.append(".");
-      }
-      writer.append(statement.generate(ctx));
-      resultType = statement.getType();
-    }
+  protected final RuntimeException blame = new RuntimeException("Problem was caused by this call");
 
-    if (next != null) {
-      getNext().handleCall(writer, ctx, statement);
+  public void nextOrReturn(CallWriter writer, Context ctx, Statement statement) {
+    try {
+      if (statement != null) {
+        if (!writer.getCallString().isEmpty()) {
+          writer.append(".");
+        }
+        writer.append(statement.generate(ctx));
+        resultType = statement.getType();
+      }
+
+      if (next != null) {
+        getNext().handleCall(writer, ctx, statement);
+      }
+    }
+    catch (GenerationException e) {
+      blameAndRethrow(e);
     }
   }
 
@@ -54,7 +62,8 @@ public abstract class AbstractCallElement implements CallElement {
 
   public static void append(CallElement start, CallElement last) {
     CallElement el = start;
-    while (el.getNext() != null) el = el.getNext();
+    while (el.getNext() != null)
+      el = el.getNext();
 
     el.setNext(last);
   }
@@ -67,5 +76,12 @@ public abstract class AbstractCallElement implements CallElement {
   @Override
   public String toString() {
     return "[CallElement<" + next + ">]";
+  }
+
+  protected void blameAndRethrow(GenerationException e) {
+    if (e.getCause() == null) {
+      e.initCause(blame);
+    }
+    throw e;
   }
 }

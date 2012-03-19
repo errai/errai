@@ -38,7 +38,7 @@ public class DeclareVariable extends AbstractCallElement {
     if (next == null) {
       writer.append(";");
     }
-    
+
     nextOrReturn(writer, context, null);
   }
 

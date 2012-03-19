@@ -20,8 +20,10 @@ import org.jboss.errai.codegen.framework.meta.MetaClass;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class UndefinedFieldException extends RuntimeException {
+public class UndefinedFieldException extends GenerationException {
+  private static final long serialVersionUID = 1L;
 
   private String fieldName;
   private MetaClass declaringClass;

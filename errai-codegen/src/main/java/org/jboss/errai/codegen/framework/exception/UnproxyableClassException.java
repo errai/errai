@@ -20,8 +20,11 @@ import org.jboss.errai.codegen.framework.meta.MetaClass;
 
 /**
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class UnproxyableClassException extends RuntimeException{
+public class UnproxyableClassException extends GenerationException {
+  private static final long serialVersionUID = 1L;
+
   private MetaClass clazz;
 
   public UnproxyableClassException(MetaClass clazz, String message) {
