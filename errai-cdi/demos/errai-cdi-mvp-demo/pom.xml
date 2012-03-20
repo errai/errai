@@ -1283,7 +1283,6 @@
                 Manual:1"' -->
               <argLine>-Xmx2048m ${argLine}</argLine>
 
-
               <systemProperties>
                 <!-- Must disable long polling for automated tests to succeed -->
                 <property>
@@ -1585,29 +1584,6 @@
           <source>1.6</source>
           <target>1.6</target>
         </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>org.jboss.errai</groupId>
-        <artifactId>jacoco-gwt-maven-plugin</artifactId>
-        <version>0.5.4.201202141554</version>
-
-        <executions>
-          <execution>
-            <id>jacoco-gwt-prepare-agent</id>
-            <phase>initialize</phase>
-            <goals>
-              <goal>prepare-agent</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>jacoco-gwt-report</id>
-            <phase>site</phase>
-            <goals>
-              <goal>report</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
     <pluginManagement>
