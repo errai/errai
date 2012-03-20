@@ -16,6 +16,7 @@
 package org.jboss.errai.cdi.server;
 
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
 
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
@@ -64,15 +65,15 @@ public class CDIServerUtil {
 
 
   public static <T> T lookupRPCBean(BeanManager beanManager, Class beanClass, Annotation[] annotations) {
-    Bean<?> bean = null; 
-      
+    Bean<?> bean = null;
+
     if (annotations != null) {
       bean = beanManager.resolve(beanManager.getBeans(beanClass, annotations));
-    } 
+    }
     else {
       bean = beanManager.resolve(beanManager.getBeans(beanClass));
     }
-      
+
     CreationalContext<?> context = beanManager.createCreationalContext(bean);
     return (T) beanManager.getReference(bean, beanClass, context);
 
@@ -183,26 +184,32 @@ public class CDIServerUtil {
     }
   }
 
-  public static BeanManager lookupBeanManager() {
-    InitialContext ctx = null;
+  /**
+   * Attempts to get a reference to the CDI BeanManager by searching for it in
+   * in the JNDI InitialContext. Several locations are searched.
+   *
+   * @return The BeanManager that was retrieved from JNDI. Never null.
+   * @throws NamingException
+   *           If the BeanManager could not be found at any of the possible JNDI
+   *           paths.
+   */
+  public static BeanManager lookupBeanManager() throws NamingException {
+    final String[] names = { BEAN_MANAGER_JNDI, BEAN_MANAGER_FALLBACK_JNDI };
+
     BeanManager bm = null;
 
-    try {
-      ctx = new InitialContext();
-      bm = (BeanManager) ctx.lookup(BEAN_MANAGER_JNDI);
-    }
-    catch (NamingException e) {
-
-      if (ctx != null) {
-        try {
-          bm = (BeanManager) ctx.lookup(BEAN_MANAGER_FALLBACK_JNDI); // development mode
-        }
-        catch (NamingException e1) {
-        }
+    InitialContext ctx = new InitialContext();
+    for (String name : names) {
+      try {
+        bm = (BeanManager) ctx.lookup(name);
       }
+      catch (NamingException e) {
+        // allow loop to try again
+      }
+    }
 
-      if (null == bm)
-        throw new RuntimeException("Failed to locate BeanManager", e);
+    if (bm == null) {
+      throw new NamingException("Failed to locate the CDI BeanManager under any of the JNDI names: " + Arrays.toString(names));
     }
 
     return bm;
