@@ -28,6 +28,7 @@ import org.jboss.errai.codegen.framework.Variable;
 import org.jboss.errai.codegen.framework.builder.Builder;
 import org.jboss.errai.codegen.framework.builder.impl.Scope;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaClassMember;
 import org.jboss.errai.codegen.framework.meta.MetaConstructor;
 import org.jboss.errai.codegen.framework.meta.MetaParameter;
 import org.jboss.errai.codegen.framework.meta.MetaType;
@@ -68,7 +69,7 @@ public class BuildMetaConstructor extends MetaConstructor implements Builder {
     this.body = body;
     this.defParameters = defParameters;
   }
-  
+
   public BuildMetaConstructor(BuildMetaClass declaringClass, Statement body, Scope scope, DefParameters defParameters) {
     this.context = Context.create(declaringClass.getContext());
     this.declaringClass = declaringClass;
@@ -79,9 +80,47 @@ public class BuildMetaConstructor extends MetaConstructor implements Builder {
 
   @Override
   public MetaParameter[] getParameters() {
-    return defParameters == null ?
-            new MetaParameter[0] : defParameters.getParameters()
-            .toArray(new MetaParameter[defParameters.getParameters().size()]);
+    if (defParameters == null) {
+      return new MetaParameter[0];
+    }
+    else {
+      List<MetaParameter> metaParameterList = new ArrayList<MetaParameter>();
+      for (final Parameter p : defParameters.getParameters()) {
+
+        metaParameterList.add(new MetaParameter() {
+          @Override
+          public String getName() {
+            return p.getName();
+          }
+
+          @Override
+          public MetaClass getType() {
+            return p.getType();
+          }
+
+          @Override
+          public MetaClassMember getDeclaringMember() {
+            return BuildMetaConstructor.this;
+          }
+
+          @Override
+          public Annotation[] getAnnotations() {
+            return new Annotation[0];
+          }
+
+          @Override
+          public boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
+            return false;
+          }
+
+          @Override
+          public <A extends Annotation> A getAnnotation(Class<A> annotation) {
+            return null;
+          }
+        });
+      }
+      return metaParameterList.toArray(new MetaParameter[metaParameterList.size()]);
+    }
   }
 
   @Override
@@ -229,7 +268,7 @@ public class BuildMetaConstructor extends MetaConstructor implements Builder {
   }
 
   String generatedCache;
-  
+
   @Override
   public String toJavaString() {
     if (generatedCache != null) return generatedCache;

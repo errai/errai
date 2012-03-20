@@ -25,20 +25,18 @@ import org.jboss.errai.ioc.client.api.Sender;
 
 public final class ErraiMessageSender<T> implements Sender<T> {
   private final MessageBus messageBus;
-  private final Class<T> valueType;
   private final String toSubject;
   private final String replyTo;
 
-  private ErraiMessageSender(String toSubject, String replyTo, Class<T> valueType, MessageBus messageBus) {
+  private ErraiMessageSender(String toSubject, String replyTo, MessageBus messageBus) {
     this.toSubject = toSubject;
     this.replyTo = replyTo;
-    this.valueType = valueType;
     this.messageBus = messageBus;
   }
 
-  public static <U> ErraiMessageSender<U> of(String toSubject, String replyTo, Class<U> valueType,
+  public static <U> ErraiMessageSender<U> of(String toSubject, String replyTo,
                                              MessageBus messageBus) {
-    return new ErraiMessageSender<U>(toSubject, replyTo, valueType, messageBus);
+    return new ErraiMessageSender<U>(toSubject, replyTo, messageBus);
   }
 
   @Override

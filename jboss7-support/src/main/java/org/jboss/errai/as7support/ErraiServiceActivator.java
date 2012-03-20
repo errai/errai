@@ -34,7 +34,7 @@ public class ErraiServiceActivator implements ServiceActivator {
   @Override
   public void activate(ServiceActivatorContext serviceActivatorContext) throws ServiceRegistryException {
 
-    log.info("JBoss AS 7 Service Activator initialized ...");
+    log.info("JBoss AS 7 service activator initialized ...");
 
     final ServiceName bindingServiceName = ContextNames.GLOBAL_CONTEXT_SERVICE_NAME
             .append("ErraiService");
@@ -81,9 +81,9 @@ public class ErraiServiceActivator implements ServiceActivator {
       builder.install();
     }
     catch (DuplicateServiceException dse) {
-      log.info("Service already registered.");
+      log.debug("service already registered.");
     }
 
-    log.info("bound errai service to JNDI context: java:global/ErraiService");
+    log.debug("bound errai service to JNDI context: java:global/ErraiService");
   }
 }

@@ -17,6 +17,7 @@
 package org.jboss.errai.codegen.framework.meta.impl.build;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jboss.errai.codegen.framework.Context;
@@ -31,6 +32,7 @@ import org.jboss.errai.codegen.framework.builder.Builder;
 import org.jboss.errai.codegen.framework.builder.callstack.LoadClassReference;
 import org.jboss.errai.codegen.framework.builder.impl.Scope;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaClassMember;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.meta.MetaParameter;
 import org.jboss.errai.codegen.framework.meta.MetaType;
@@ -52,13 +54,13 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
   private MetaClass returnType;
   private DefParameters defParameters;
 
-//  private MetaType genericReturnType;
+  //  private MetaType genericReturnType;
   private List<MetaType> genericParameterTypes;
 
   private ThrowsDeclaration throwsDeclaration;
 
   private MetaMethod reifiedFormOf;
-  
+
   public BuildMetaMethod(BuildMetaClass declaringClass,
                          Statement body,
                          Scope scope,
@@ -108,7 +110,42 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
   public MetaParameter[] getParameters() {
     List<Parameter> parameters = defParameters.getParameters();
     if (parameters != null) {
-      return defParameters.getParameters().toArray(new MetaParameter[defParameters.getParameters().size()]);
+      List<MetaParameter> metaParameterList = new ArrayList<MetaParameter>();
+      for (final Parameter p : parameters) {
+        metaParameterList.add(new MetaParameter() {
+          @Override
+          public String getName() {
+            return p.getName();
+          }
+
+          @Override
+          public MetaClass getType() {
+            return p.getType();
+          }
+
+          @Override
+          public MetaClassMember getDeclaringMember() {
+            return BuildMetaMethod.this;
+          }
+
+          @Override
+          public Annotation[] getAnnotations() {
+            return new Annotation[0];
+          }
+
+          @Override
+          public boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
+            return false;
+          }
+
+          @Override
+          public <A extends Annotation> A getAnnotation(Class<A> annotation) {
+            return null;
+          }
+        });
+      }
+
+      return metaParameterList.toArray(new MetaParameter[metaParameterList.size()]);
     }
     else {
       return new MetaParameter[0];
@@ -212,7 +249,7 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
   }
 
   public void setGenericReturnType(MetaType genericReturnType) {
- //   this.genericReturnType = genericReturnType;
+    //   this.genericReturnType = genericReturnType;
   }
 
   public void setGenericParameterTypes(List<MetaType> genericParameterTypes) {
@@ -251,7 +288,7 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
   @Override
   public String toJavaString() {
     this.context = Context.create(declaringClass.getContext());
-    
+
     for (Parameter p : defParameters.getParameters()) {
       context.addVariable(Variable.create(p.getName(), p.getType()));
     }
@@ -281,11 +318,6 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
     }
 
     return buf.toString();
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    return o instanceof MetaMethod && GenUtil.equals(this, (MetaMethod) o);
   }
 
   public String toString() {

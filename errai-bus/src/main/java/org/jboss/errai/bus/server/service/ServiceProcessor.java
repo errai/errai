@@ -111,7 +111,7 @@ public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
       }
       else if (MessageCallback.class.isAssignableFrom(loadClass)) {
         final Class<? extends MessageCallback> clazz = loadClass.asSubclass(MessageCallback.class);
-        log.info("discovered service: " + clazz.getName());
+        log.debug("discovered service: " + clazz.getName());
         try {
           svc = Guice.createInjector(new AbstractModule() {
             @Override

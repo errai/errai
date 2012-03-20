@@ -134,8 +134,4 @@ public class GWTField extends MetaField {
     return false;
   }
 
-  @Override
-  public boolean equals(Object o) {
-    return o instanceof MetaField && GenUtil.equals(this, (MetaField) o);
-  }
 }

@@ -16,7 +16,6 @@
 
 package org.jboss.errai.cdi.integration.client.shared;
 
-import javax.inject.Inject;
 
 /**
  * @author Mike Brock

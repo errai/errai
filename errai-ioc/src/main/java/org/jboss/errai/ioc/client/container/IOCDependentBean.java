@@ -24,12 +24,14 @@ import java.util.HashSet;
  * @author Mike Brock
  */
 public class IOCDependentBean<T> extends AbstractIOCBean<T> {
+  private IOCBeanManager beanManager;
   private CreationalCallback<T> creationalCallback;
   private InitializationCallback<T> initializationCallback;
 
-  private IOCDependentBean(Class<T> type, Annotation[] qualifiers,
+  private IOCDependentBean(IOCBeanManager beanManager, Class<T> type, Annotation[] qualifiers,
                            CreationalCallback<T> creationalCallback,
                            InitializationCallback<T> initializationCallback) {
+    this.beanManager = beanManager;
     this.type = type;
     this.qualifiers = new HashSet<Annotation>();
     if (qualifiers != null) {
@@ -39,15 +41,15 @@ public class IOCDependentBean<T> extends AbstractIOCBean<T> {
     this.initializationCallback = initializationCallback;
   }
 
-  public static <T> IOCBeanDef<T> newBean(Class<T> type, Annotation[] qualifiers,
+  public static <T> IOCBeanDef<T> newBean(IOCBeanManager beanManager, Class<T> type, Annotation[] qualifiers,
                                           CreationalCallback<T> callback,
                                           InitializationCallback<T> initializationCallback) {
-    return new IOCDependentBean<T>(type, qualifiers, callback, initializationCallback);
+    return new IOCDependentBean<T>(beanManager, type, qualifiers, callback, initializationCallback);
   }
 
   @Override
   public T getInstance() {
-    CreationalContext context = new CreationalContext();
+    CreationalContext context = new CreationalContext(beanManager);
     T t = getInstance(context);
     context.finish();
     return t;

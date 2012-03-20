@@ -66,7 +66,7 @@ public class BootstrapContext {
   }
 
   void executeDeferred() {
-    log.info("Running deferred bootstrap tasks ...");
+    log.debug("running deferred bootstrap tasks ...");
 
     while (!deferredTasks.isEmpty()) {
       Runnable task = deferredTasks.pop();

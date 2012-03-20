@@ -28,9 +28,9 @@ import org.jboss.errai.codegen.framework.util.GenUtil;
 
 /**
  * This class represents a variable.
- * 
+ * <p>
  * Note that initialization using {@link LiteralValue}s takes effect immediately,
- * initialization using {@ link Statement}s needs to be deferred to generation time.
+ * initialization using {@link Statement}s needs to be deferred to generation time.
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -51,7 +51,7 @@ public class Variable extends AbstractStatement {
 
   private Variable(String name, MetaClass type, Object initialization) {
     this(name, type);
-    
+
     LiteralValue<?> val = LiteralFactory.isLiteral(initialization);
     if (val != null) {
       this.type = (type == null) ? val.getType() : type;
@@ -66,7 +66,7 @@ public class Variable extends AbstractStatement {
   public void initialize(Object initializationValue) {
     this.initialization = initializationValue;
   }
-  
+
   private MetaClass inferType(Context context, Object initialization) {
     Statement initStatement = GenUtil.generate(context, initialization);
     MetaClass inferredType = (initStatement != null) ? initStatement.getType() : null;
@@ -90,7 +90,7 @@ public class Variable extends AbstractStatement {
   public static Variable from(VariableReference ref) {
     return new Variable(ref.getName(), ref.getType());
   }
-  
+
   public static Variable create(String name, Class<?> type) {
     return new Variable(name, MetaClassFactory.get(type));
   }
@@ -140,6 +140,11 @@ public class Variable extends AbstractStatement {
       public Statement getValue() {
         return null;
       }
+
+      @Override
+      public String toString() {
+        return name;
+      }
     };
   }
 
@@ -147,7 +152,7 @@ public class Variable extends AbstractStatement {
     return new VariableReference() {
       @Override
       public String getName() {
-        return  name;
+        return name;
       }
 
       @Override
@@ -158,6 +163,11 @@ public class Variable extends AbstractStatement {
       @Override
       public Statement getValue() {
         return value;
+      }
+
+      @Override
+      public String toString() {
+        return name;
       }
     };
   }
@@ -175,11 +185,11 @@ public class Variable extends AbstractStatement {
     return value;
   }
 
-  
+
   public boolean isFinal() {
     return isFinal;
   }
-  
+
   private String hashString;
 
   private String hashString() {
@@ -206,11 +216,11 @@ public class Variable extends AbstractStatement {
   }
 
   String generatedCache;
-  
+
   @Override
   public String generate(Context context) {
     if (generatedCache != null) return generatedCache;
-    
+
     if (initialization != null) {
       this.type = (type == null) ? inferType(context, initialization) : type;
       this.value = GenUtil.convert(context, initialization, type);

@@ -43,7 +43,7 @@ public abstract class AbstractConfigBase {
     List<String> cache = scanCache.get(context);
 
     if (cache == null) {
-      log.info("caching context '" + context + "'");
+      log.debug("caching context '" + context + "'");
       scanCache.put(context, cache = new LinkedList<String>());
     }
 

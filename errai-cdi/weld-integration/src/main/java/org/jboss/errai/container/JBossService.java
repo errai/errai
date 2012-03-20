@@ -35,7 +35,7 @@ public class JBossService {
   private String jndiName;
 
   public void start() {
-    log.info("Starting Errai Service");
+    log.info("starting errai service");
 
     this.service = ServiceFactory.create();
 
@@ -43,7 +43,7 @@ public class JBossService {
   }
 
   public void stop() {
-    log.info("Shutdown Errai Service");
+    log.info("shutdown errai service");
     JBossJNDI.unbind(jndiName);
   }
 

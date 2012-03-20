@@ -79,7 +79,7 @@ public abstract class ServerMarshallUtil {
     String className = MarshallersGenerator.SERVER_MARSHALLER_CLASS_NAME;
 
     try {
-      log.info("searching for marshaller class: " + packageName + "." + className);
+      log.debug("searching for marshaller class: " + packageName + "." + className);
 
       final String classResource = packageName.replaceAll("\\.", "/") + "/" + className + ".class";
       Set<String> locations = new HashSet<String>();
@@ -414,7 +414,7 @@ public abstract class ServerMarshallUtil {
             }
           }
           catch (Exception e) {
-            log.info("Ignoring classpath entry with invalid manifest", e);
+            log.warn("ignoring classpath entry with invalid manifest", e);
           }
           finally {
             if (is != null) is.close();
@@ -424,7 +424,7 @@ public abstract class ServerMarshallUtil {
     }
     catch (IOException e1) {
       // Silently ignore wrong manifests on classpath?
-      log.info("Failed to build classpath using manifest discovery. Expect compile failures...", e1);
+      log.warn("failed to build classpath using manifest discovery. Expect compile failures...", e1);
     } finally {
       log.debug("<<< Done searching for all jars by " + JarFile.MANIFEST_NAME);
     }

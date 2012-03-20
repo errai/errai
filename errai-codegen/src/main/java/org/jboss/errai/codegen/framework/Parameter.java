@@ -28,7 +28,7 @@ import org.jboss.errai.codegen.framework.meta.MetaParameter;
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class Parameter extends AbstractStatement implements MetaParameter {
+public class Parameter extends AbstractStatement {
   private MetaClass type;
   private String name;
   private boolean isFinal;
@@ -84,37 +84,54 @@ public class Parameter extends AbstractStatement implements MetaParameter {
     return type;
   }
 
-  @Override
-  public String getName() {
-    return name;
-  }
-
   public boolean isFinal() {
     return isFinal;
   }
 
-  @Override
-  public MetaClassMember getDeclaringMember() {
-    return null;
+  public String getName() {
+    return name;
   }
 
-  @Override
   public Annotation[] getAnnotations() {
     return new Annotation[0];
   }
 
   @Override
-  public boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
-    return false;
-  }
-
-  @Override
-  public <A extends Annotation> A getAnnotation(Class<A> annotation) {
-    return null;
-  }
-
-  @Override
   public String toString() {
     return type.getFullyQualifiedName();
+  }
+
+  public MetaParameter getMetaParameter() {
+    return new MetaParameter() {
+      @Override
+      public String getName() {
+        return name;
+      }
+
+      @Override
+      public MetaClass getType() {
+        return type;
+      }
+
+      @Override
+      public MetaClassMember getDeclaringMember() {
+        return null;
+      }
+
+      @Override
+      public Annotation[] getAnnotations() {
+        return new Annotation[0];
+      }
+
+      @Override
+      public boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
+        return false;
+      }
+
+      @Override
+      public <A extends Annotation> A getAnnotation(Class<A> annotation) {
+        return null;
+      }
+    };
   }
 }

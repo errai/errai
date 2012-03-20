@@ -16,31 +16,50 @@
 
 package org.jboss.errai.ioc.client.container;
 
+
+import com.google.gwt.dev.util.collect.IdentityHashSet;
+
 import javax.enterprise.inject.spi.Bean;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Mike Brock
  */
 public class CreationalContext {
+  private final IOCBeanManager beanManager;
   private Map<Object, InitializationCallback> initializationCallbacks =
           new IdentityHashMap<Object, InitializationCallback>();
+
+  private Map<Object, DestructionCallback> destructionCallbacks =
+          new IdentityHashMap<Object, DestructionCallback>();
 
   private Map<BeanRef, List<ProxyResolver>> unresolvedProxies = new HashMap<BeanRef, List<ProxyResolver>>();
   private Map<BeanRef, Object> wired = new LinkedHashMap<BeanRef, Object>();
 
-  public CreationalContext() {
+  public CreationalContext(IOCBeanManager beanManager) {
+    this.beanManager = beanManager;
   }
 
   public void addInitializationCallback(Object beanInstance, InitializationCallback callback) {
     initializationCallbacks.put(beanInstance, callback);
+  }
+
+  public void addDestructionCallback(Object beanInstance, DestructionCallback callback) {
+    destructionCallbacks.put(beanInstance, callback);
+    beanManager.addDestructionCallbacks(beanInstance, destructionCallbacks);
+  }
+
+  public void addProxyReference(Object proxyRef, Object realRef) {
+    beanManager.addProxyReference(proxyRef, realRef);
   }
 
   public BeanRef getBeanReference(Class<?> beanType, Annotation[] qualifiers) {

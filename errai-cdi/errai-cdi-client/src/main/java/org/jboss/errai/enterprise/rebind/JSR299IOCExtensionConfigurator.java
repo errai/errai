@@ -16,26 +16,28 @@
 
 package org.jboss.errai.enterprise.rebind;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.JConstructor;
 import com.google.gwt.core.ext.typeinfo.JPackage;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.impl.gwt.GWTClass;
-import org.jboss.errai.common.metadata.MetaDataScanner;
-import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.codegen.framework.util.PrivateAccessType;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.api.IOCExtension;
-import org.jboss.errai.ioc.rebind.AnnotationHandler;
-import org.jboss.errai.ioc.rebind.DependencyControl;
-import org.jboss.errai.ioc.rebind.IOCProcessingContext;
-import org.jboss.errai.ioc.rebind.IOCProcessorFactory;
-import org.jboss.errai.ioc.rebind.JSR330AnnotationHandler;
-import org.jboss.errai.ioc.rebind.JSR330ProvidedClassAnnotationHandler;
-import org.jboss.errai.ioc.rebind.Rule;
-import org.jboss.errai.ioc.rebind.SortUnit;
-import org.jboss.errai.ioc.rebind.ioc.*;
+import org.jboss.errai.ioc.rebind.ioc.extension.DependencyControl;
+import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
+import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessorFactory;
+import org.jboss.errai.ioc.rebind.ioc.extension.JSR330AnnotationHandler;
+import org.jboss.errai.ioc.rebind.ioc.extension.Rule;
+import org.jboss.errai.ioc.rebind.ioc.graph.SortUnit;
+import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
+import org.jboss.errai.ioc.rebind.ioc.injector.AbstractInjector;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionPoint;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.TypeDiscoveryListener;
+import org.jboss.errai.ioc.rebind.ioc.injector.TypeInjector;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
@@ -46,59 +48,54 @@ import javax.inject.Scope;
 import javax.inject.Singleton;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @IOCExtension
 public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator {
-  public void configure(final IOCProcessingContext context, final InjectorFactory injectorFactory,
+  public void configure(final IOCProcessingContext context, final InjectionContext injectionContext,
                         final IOCProcessorFactory procFactory) {
-    
+
     context.addSingletonScopeAnnotation(ApplicationScoped.class);
 
     procFactory.registerHandler(Produces.class, new JSR330AnnotationHandler<Produces>() {
-      //
-      @Override
-      public Set<SortUnit> checkDependencies(DependencyControl control, InjectableInstance instance, Produces annotation,
-                                             IOCProcessingContext context) {
-
-        control.masqueradeAs(instance.getElementTypeOrMethodReturnType());
-        return Collections.singleton(new SortUnit(instance.getEnclosingType(), true));
-      }
-
 
       @Override
-      public boolean handle(final InjectableInstance instance, final Produces annotation,
-                            final IOCProcessingContext context) {
+      public Set<SortUnit> checkDependencies(DependencyControl control, final InjectableInstance instance, Produces annotation,
+                                             final IOCProcessingContext context) {
 
         switch (instance.getTaskType()) {
           case Type:
             break;
           case PrivateField:
           case PrivateMethod:
-            instance.ensureMemberExposed();
+            instance.ensureMemberExposed(PrivateAccessType.Read);
 
         }
 
-        injectorFactory.addInjector(new Injector() {
+        injectionContext.registerInjector(new AbstractInjector() {
           {
             super.qualifyingMetadata = JSR299QualifyingMetadata.createFromAnnotations(instance.getQualifiers());
+            this.provider = true;
+            this.enclosingType = instance.getEnclosingType();
+
+            if (injectionContext.isInjectorRegistered(enclosingType, qualifyingMetadata)) {
+              setInjected(true);
+            }
+            else {
+              context.registerTypeDiscoveryListener(new TypeDiscoveryListener() {
+                @Override
+                public void onDiscovery(IOCProcessingContext context, InjectionPoint injectionPoint) {
+                  if (injectionPoint.getEnclosingType().equals(enclosingType)) {
+                    setInjected(true);
+                  }
+                }
+              });
+            }
           }
 
           @Override
-          public Statement instantiateOnly(InjectionContext injectContext, InjectableInstance injectableInstance) {
+          public Statement getBeanInstance(InjectionContext injectContext, InjectableInstance injectableInstance) {
             return instance.getValueStatement();
-          }
-
-          @Override
-          public Statement getType(InjectionContext injectContext, InjectableInstance injectableInstance) {
-            return instance.getValueStatement();
-          }
-
-          @Override
-          public boolean isInjected() {
-            return true;
           }
 
           @Override
@@ -132,30 +129,34 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
           }
         });
 
+
+        control.masqueradeAs(instance.getElementTypeOrMethodReturnType());
+        return Collections.singleton(new SortUnit(instance.getEnclosingType(), true));
+      }
+
+      @Override
+      public boolean handle(final InjectableInstance instance, final Produces annotation,
+                            final IOCProcessingContext context) {
+
         return true;
       }
 
-    }, Rule.after(EntryPoint.class, ApplicationScoped.class, Singleton.class));
+    }, Rule.before(EntryPoint.class, ApplicationScoped.class, Singleton.class));
 
     procFactory.registerHandler(ApplicationScoped.class, new JSR330AnnotationHandler<ApplicationScoped>() {
-      public boolean handle(InjectableInstance instance, ApplicationScoped annotation, IOCProcessingContext context) {
-        InjectionContext injectionContext = injectorFactory.getInjectionContext();
+      public boolean handle(InjectableInstance instance, ApplicationScoped annotation, IOCProcessingContext context) {;
         TypeInjector i = (TypeInjector) instance.getInjector();
+        i.setSingleton(true);
 
-        if (!i.isInjected()) {
-          i.setSingleton(true);
-          i.getType(injectionContext, null);
-        }
+        i.getBeanInstance(injectionContext, null);
         return true;
       }
     });
 
     procFactory.registerHandler(Dependent.class, new JSR330AnnotationHandler<Dependent>() {
       public boolean handle(InjectableInstance instance, Dependent annotation, IOCProcessingContext context) {
-        InjectionContext injectionContext = injectorFactory.getInjectionContext();
         TypeInjector i = (TypeInjector) instance.getInjector();
-        i.getType(injectionContext, null);
-
+        i.getBeanInstance(injectionContext, null);
         return true;
       }
     });
@@ -191,17 +192,17 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
 
           MetaClass metaClass = GWTClass.newInstance(type.getOracle(), type);
 
-          if (injectorFactory.hasType(metaClass)) {
+          if (injectionContext.hasType(metaClass)) {
             continue;
           }
 
-          injectorFactory.addPsuedoScopeForType(metaClass);
+          injectionContext.addPsuedoScopeForType(metaClass);
         }
       }
     }
   }
 
-  public void afterInitialization(IOCProcessingContext context, InjectorFactory injectorFactory,
+  public void afterInitialization(IOCProcessingContext context, InjectionContext injectorFactory,
                                   IOCProcessorFactory procFactory) {
   }
 }

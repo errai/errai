@@ -86,7 +86,7 @@ public class Worker extends Thread {
     interrupt();
 
     if (!isInterrupted() && workExpiry != 0) {
-      log.info("failed to interrupt worker.");
+      log.warn("failed to interrupt worker:" + this.toString());
     }
     else {
       workExpiry = 0;

@@ -36,12 +36,14 @@ import org.jboss.errai.codegen.framework.Variable;
 import org.jboss.errai.codegen.framework.VariableReference;
 import org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.StatementBuilder;
-import org.jboss.errai.codegen.framework.exception.GenerationException;
 import org.jboss.errai.codegen.framework.exception.InvalidTypeException;
 import org.jboss.errai.codegen.framework.exception.OutOfScopeException;
+import org.jboss.errai.codegen.framework.exception.UndefinedFieldException;
 import org.jboss.errai.codegen.framework.literal.LiteralFactory;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.tests.model.Foo;
+import org.jboss.errai.codegen.framework.util.Bool;
+import org.jboss.errai.codegen.framework.util.Refs;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.junit.Assert;
 import org.junit.Test;
@@ -181,9 +183,8 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
       StatementBuilder.create().loadVariable("n").toJavaString();
       fail("Expected OutOfScopeException");
     }
-    catch (GenerationException e) {
+    catch (OutOfScopeException e) {
       // expected
-      assertTrue("Expected OutOfScopeException", ExceptionUtil.isIntermediateCause(e, OutOfScopeException.class));
     }
   }
 
@@ -368,12 +369,11 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
               .loadVariable("twoDimArray", 1, 2)
               .assignValue("test")
               .toJavaString();
-      System.out.println(s);
 
       fail("Expected InvalidTypeExcpetion");
     }
-    catch (GenerationException e) {
-       assertTrue("Expected InvalidTypeException", ExceptionUtil.isIntermediateCause(e, InvalidTypeException.class));
+    catch (InvalidTypeException e) {
+      // Expected, variable is not an array.
     }
   }
 
@@ -389,8 +389,8 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
               .toJavaString();
       fail("Expected InvalidTypeExcpetion");
     }
-    catch (GenerationException e) {
-       assertTrue("Expected InvalidTypeException", ExceptionUtil.isIntermediateCause(e, InvalidTypeException.class));
+    catch (InvalidTypeException e) {
+      // Expected, indexes are no integers
     }
   }
 
@@ -476,22 +476,27 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
   @Test
   public void testThrowExceptionUsingInvalidVariable() {
     try {
-      StatementBuilder.create().declareVariable("t", Integer.class).throw_("t").toJavaString();
+      StatementBuilder.create()
+          .declareVariable("t", Integer.class)
+          .throw_("t")
+          .toJavaString();
       fail("expected InvalidTypeException");
     }
-    catch (GenerationException e) {
-       assertTrue("Expected InvalidTypeException", ExceptionUtil.isIntermediateCause(e, InvalidTypeException.class));
+    catch (InvalidTypeException e) {
+      // expected
     }
   }
 
   @Test
   public void testThrowExceptionUsingUndefinedVariable() {
     try {
-      StatementBuilder.create().throw_("t").toJavaString();
+      StatementBuilder.create()
+          .throw_("t")
+          .toJavaString();
       fail("expected OutOfScopeException");
     }
-    catch (GenerationException e) {
-       assertTrue("Expected OutOfScopeException", ExceptionUtil.isIntermediateCause(e, OutOfScopeException.class));
+    catch (OutOfScopeException e) {
+      // expected
     }
   }
 
@@ -513,6 +518,22 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
 
     assertEquals("failed to generate nested field assignment",
             "new Foo().bar.name = \"test\";", s);
+  }
+  
+  @Test
+  public void testAssignInvalidField() {
+    try {
+      String s = Stmt.create(Context.create().autoImport()).nestedCall(
+          Stmt.newObject(Foo.class))
+            .loadField("invalid")
+            .assignValue("test")
+            .toJavaString();
+      
+      fail("expected UndefinedFieldException");
+    }
+    catch (UndefinedFieldException e) {
+      // expected
+    }
   }
 
   @Test
@@ -538,5 +559,18 @@ public class StatementBuilderTest extends AbstractStatementBuilderTest {
       //expected
       assertEquals("Wrong exception message", "java.lang.String cannot be cast to java.lang.Integer", e.getMessage());
     }
+  }
+
+  @Test
+  public void testReturnVoid() {
+    Context ctx = Context.create();
+    ctx.addVariable(Variable.create("foo", Object.class));
+
+    Statement stmt = Stmt.if_(Bool.isNull(Refs.get("foo")))
+            .append(Stmt.returnVoid()).finish();
+
+    assertEquals("failed to generate return statement", "if (foo == null) {\n" +
+            "  return;\n" +
+            "}", stmt.generate(ctx));
   }
 }

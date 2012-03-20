@@ -26,7 +26,7 @@ import org.mvel2.util.ReflectionUtil;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public class JavaReflectionParameter implements MetaParameter {
+public class JavaReflectionParameter extends MetaParameter {
   private String name;
   private MetaClass type;
   private Annotation[] annotations;

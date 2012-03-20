@@ -16,7 +16,6 @@
 
 package org.jboss.errai.codegen.framework.util;
 
-import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -26,7 +25,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.WeakHashMap;
 
 import org.jboss.errai.codegen.framework.Cast;
 import org.jboss.errai.codegen.framework.Context;
@@ -44,7 +42,6 @@ import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.Scope;
 import org.jboss.errai.codegen.framework.exception.GenerationException;
-import org.jboss.errai.codegen.framework.exception.InvalidExpressionException;
 import org.jboss.errai.codegen.framework.exception.InvalidTypeException;
 import org.jboss.errai.codegen.framework.exception.OutOfScopeException;
 import org.jboss.errai.codegen.framework.exception.TypeNotIterableException;
@@ -65,8 +62,6 @@ import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.framework.meta.impl.java.JavaReflectionClass;
 import org.mvel2.DataConversion;
 import org.mvel2.util.NullType;
-
-import static org.mvel2.DataConversion.canConvert;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -107,10 +102,10 @@ public class GenUtil {
       try {
         statements[i] = convert(context, parameter, methParms[i++].getType());
       }
-      catch (InvalidTypeException e) {
-        throw new RuntimeException("in method call: "
+      catch (GenerationException t) {
+        throw new GenerationException("in method call: "
                 + method.getDeclaringClass().getFullyQualifiedName()
-                + "." + method.getName() + "(" + Arrays.toString(methParms) + ")", e);
+                + "." + method.getName() + "(" + Arrays.toString(methParms) + ")");
       }
     }
     return statements;
@@ -186,20 +181,20 @@ public class GenUtil {
           if ("null".equals(((Statement) input).generate(context))) {
             return (Statement) input;
           }
-
+  
           assertAssignableTypes(((Statement) input).getType(), targetType);
           return (Statement) input;
         }
       }
-
+  
       if (input instanceof BuildMetaClass) {
         return generate(context, input);
       }
-
+  
       if (Object.class.getName().equals(targetType.getFullyQualifiedName())) {
         return generate(context, input);
       }
-
+  
       Class<?> inputClass = input == null ? Object.class : input.getClass();
       Class<?> targetClass = targetType.asBoxed().asClass();
       if (DataConversion.canConvert(targetClass, inputClass)) {
@@ -209,11 +204,8 @@ public class GenUtil {
         return generate(context, input);
       }
     }
-    catch (OutOfScopeException e) {
-      throw e;
-    }
-    catch (Throwable t) {
-      throw new InvalidTypeException(t);
+    catch (NumberFormatException nfe) {
+      throw new InvalidTypeException(nfe);
     }
   }
 
@@ -347,7 +339,6 @@ public class GenUtil {
   }
 
   public static boolean equals(MetaConstructor a, MetaConstructor b) {
-//    if (!a.getName().equals(b.getName())) return false;
     if (a.getParameters().length != b.getParameters().length) {
       return false;
     }
@@ -456,30 +447,44 @@ public class GenUtil {
     return fieldName;
   }
 
+  public static void addPrivateAccessStubs(boolean useJSNIStubs,
+                                           ClassStructureBuilder<?> classBuilder,
+                                           MetaField f) {
+    addPrivateAccessStubs(PrivateAccessType.Both, useJSNIStubs, classBuilder, f);
+  }
 
-  public static void addPrivateAccessStubs(boolean useJSNIStubs, ClassStructureBuilder<?> classBuilder, MetaField f) {
+  public static void addPrivateAccessStubs(PrivateAccessType accessType,
+                                           boolean useJSNIStubs,
+                                           ClassStructureBuilder<?> classBuilder,
+                                           MetaField f) {
     MetaClass type = f.getType();
     if (type.getCanonicalName().equals("long")) {
       type = type.asBoxed();
     }
 
+    boolean read = accessType == PrivateAccessType.Read || accessType == PrivateAccessType.Both;
+    boolean write = accessType == PrivateAccessType.Write || accessType == PrivateAccessType.Both;
+
     if (useJSNIStubs) {
-      classBuilder.privateMethod(void.class, getPrivateFieldInjectorName(f))
-              .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance"),
-//                                  Parameter.of(type.isArray() ? type.asBoxed() : type, "value")))
-                      Parameter.of(type, "value")))
+      if (write) {
+        classBuilder.privateMethod(void.class, getPrivateFieldInjectorName(f))
+                .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance"),
+                        Parameter.of(type, "value")))
 
-              .modifiers(Modifier.Static, Modifier.JSNI)
-              .body()
-              .append(new StringStatement(JSNIUtil.fieldAccess(f) + " = value"))
-              .finish();
+                .modifiers(Modifier.Static, Modifier.JSNI)
+                .body()
+                .append(new StringStatement(JSNIUtil.fieldAccess(f) + " = value"))
+                .finish();
+      }
 
-      classBuilder.privateMethod(type, getPrivateFieldInjectorName(f))
-              .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance")))
-              .modifiers(Modifier.Static, Modifier.JSNI)
-              .body()
-              .append(new StringStatement("return " + JSNIUtil.fieldAccess(f)))
-              .finish();
+      if (read) {
+        classBuilder.privateMethod(type, getPrivateFieldInjectorName(f))
+                .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance")))
+                .modifiers(Modifier.Static, Modifier.JSNI)
+                .body()
+                .append(new StringStatement("return " + JSNIUtil.fieldAccess(f)))
+                .finish();
+      }
     }
     else {
       /**
@@ -489,37 +494,40 @@ public class GenUtil {
       String cachedField = initCachedField(classBuilder, f);
       String setterName = _getReflectionFieldMethSetName(f);
 
-      classBuilder.privateMethod(void.class, getPrivateFieldInjectorName(f))
-              .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance"),
-//                      Parameter.of(f.getType().isArray() ? f.getType().asBoxed() : f.getType(), "value")))
-                      Parameter.of(f.getType(), "value")))
+      if (write) {
+        classBuilder.privateMethod(void.class, getPrivateFieldInjectorName(f))
+                .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance"),
+                        Parameter.of(f.getType(), "value")))
 
-              .modifiers(Modifier.Static)
-              .body()
-              .append(Stmt.try_()
-                      .append(Stmt.loadVariable(cachedField).invoke(setterName, Refs.get("instance"), Refs.get("value")))
-                      .finish()
-                      .catch_(Throwable.class, "e")
-                      .append(Stmt.loadVariable("e").invoke("printStackTrace"))
-                      .append(Stmt.throw_(RuntimeException.class, Refs.get("e")))
-                      .finish())
-              .finish();
+                .modifiers(Modifier.Static)
+                .body()
+                .append(Stmt.try_()
+                        .append(Stmt.loadVariable(cachedField).invoke(setterName, Refs.get("instance"), Refs.get("value")))
+                        .finish()
+                        .catch_(Throwable.class, "e")
+                        .append(Stmt.loadVariable("e").invoke("printStackTrace"))
+                        .append(Stmt.throw_(RuntimeException.class, Refs.get("e")))
+                        .finish())
+                .finish();
+      }
 
       String getterName = _getReflectionFieldMethGetName(f);
 
-      classBuilder.privateMethod(f.getType(), getPrivateFieldInjectorName(f))
-              .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance")))
-              .modifiers(Modifier.Static)
-              .body()
-              .append(Stmt.try_()
-                      .append(Stmt.nestedCall(Cast.to(f.getType(), Stmt.loadVariable(cachedField)
-                              .invoke(getterName, Refs.get("instance")))).returnValue())
-                      .finish()
-                      .catch_(Throwable.class, "e")
-                      .append(Stmt.loadVariable("e").invoke("printStackTrace"))
-                      .append(Stmt.throw_(RuntimeException.class, Refs.get("e")))
-                      .finish())
-              .finish();
+      if (read) {
+        classBuilder.privateMethod(f.getType(), getPrivateFieldInjectorName(f))
+                .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance")))
+                .modifiers(Modifier.Static)
+                .body()
+                .append(Stmt.try_()
+                        .append(Stmt.nestedCall(Cast.to(f.getType(), Stmt.loadVariable(cachedField)
+                                .invoke(getterName, Refs.get("instance")))).returnValue())
+                        .finish()
+                        .catch_(Throwable.class, "e")
+                        .append(Stmt.loadVariable("e").invoke("printStackTrace"))
+                        .append(Stmt.throw_(RuntimeException.class, Refs.get("e")))
+                        .finish())
+                .finish();
+      }
     }
   }
 
@@ -745,21 +753,6 @@ public class GenUtil {
   public static void throwIfUnhandled(String error, Throwable t) {
     try {
       throw t;
-    }
-    catch (OutOfScopeException e) {
-      throw e;
-    }
-    catch (InvalidExpressionException e) {
-      throw e;
-    }
-    catch (InvalidTypeException e) {
-      throw e;
-    }
-    catch (UndefinedMethodException e) {
-      throw e;
-    }
-    catch (TypeNotIterableException e) {
-      throw e;
     }
     catch (GenerationException e) {
       throw e;

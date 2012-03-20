@@ -16,12 +16,12 @@
 
 package org.jboss.errai.cdi.integration.client.shared;
 
-import org.jboss.errai.ioc.client.api.AfterInitialization;
-import org.jboss.errai.ioc.client.api.InitBallot;
-
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+
+import org.jboss.errai.ioc.client.api.AfterInitialization;
+import org.jboss.errai.ioc.client.api.InitBallot;
 
 /**
  * @author Mike Brock

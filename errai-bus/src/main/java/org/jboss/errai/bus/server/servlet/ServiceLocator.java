@@ -19,5 +19,14 @@ package org.jboss.errai.bus.server.servlet;
 import org.jboss.errai.bus.server.service.ErraiService;
 
 public interface ServiceLocator {
+
+  /**
+   * Attempts to get a reference to the ErraiService in an environment-specific
+   * manner. For example, one implementation uses the CDI BeanManager.
+   *
+   * @return The BeanManager that located. Never null.
+   * @throws RuntimeException
+   *           If the BeanManager could not be found.
+   */
   ErraiService locateService();
 }

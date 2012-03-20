@@ -22,7 +22,7 @@
 
     <entry-point class='org.jboss.errai.ioc.client.Container'/>
 
-    <generate-with class="org.jboss.errai.ioc.rebind.IOCGenerator">
+    <generate-with class="org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCGenerator">
         <when-type-assignable
                 class="org.jboss.errai.ioc.client.api.Bootstrapper"/>
     </generate-with>

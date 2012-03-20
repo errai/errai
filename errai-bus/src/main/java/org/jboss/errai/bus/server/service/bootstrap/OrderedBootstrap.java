@@ -48,8 +48,7 @@ public class OrderedBootstrap implements BootstrapExecution {
   }
 
   public void execute(final BootstrapContext context) {
-    log.info("Bootstrap Errai");
-    log.info("Working directory: " + new File("").getAbsolutePath());
+    log.info("starting errai bus ...");
 
     try {
       for (BootstrapExecution execution : bootstrap) {
@@ -57,11 +56,11 @@ public class OrderedBootstrap implements BootstrapExecution {
       }
       context.executeDeferred();
       ((ErraiServiceConfiguratorImpl) context.getConfig()).lockdown();
-      log.info("Initialization complete");
+      log.info("errai bus started.");
     }
     catch (Exception e) {
       e.printStackTrace();
-      throw new RuntimeException("Server bootstrap failed", e);
+      throw new RuntimeException("server bootstrap failed", e);
     }
   }
 }

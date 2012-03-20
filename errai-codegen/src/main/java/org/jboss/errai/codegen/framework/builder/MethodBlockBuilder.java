@@ -28,12 +28,4 @@ public interface MethodBlockBuilder<T> extends BlockBuilder<T>,
 
   public BlockBuilder<T> throws_(MetaClass... exceptions);
 
-//  @Override
-//  public MethodBlockBuilder<T> modifiers(Modifier... modifiers);
-
-  @Override
-  public BlockBuilder<T> body();
-
-  @Override
-  public T finish();
 }

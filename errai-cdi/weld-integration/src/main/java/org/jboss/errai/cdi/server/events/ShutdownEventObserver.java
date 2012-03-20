@@ -78,18 +78,18 @@ public class ShutdownEventObserver implements ObserverMethod {
   }
 
   public void notify(Object o) {
-    log.info("Shutdown Errai-CDI context: " + uuid);
+    log.debug("stopped errai cdi context: " + uuid);
 
     // unsubscribe bean endpoints        
     for (AnnotatedType<?> svc : managedTypes.getServiceEndpoints()) {
       String subject = CDIServerUtil.resolveServiceName(svc.getJavaClass());
-      log.debug("Unsubscribe: " + subject);
+      log.debug("unsubscribe: " + subject);
       bus.unsubscribeAll(subject);
     }
 
-    for (Class<?> rpcIntf : managedTypes.getRpcEndpoints().keySet()) {
+    for (Class<?> rpcIntf : managedTypes.getRemoteInterfaces()) {
       String rpcSubjectName = rpcIntf.getName() + ":RPC";
-      log.debug("Unsubscribe: " + rpcSubjectName);
+      log.debug("unsubscribe: " + rpcSubjectName);
       bus.unsubscribeAll(rpcSubjectName);
     }
 

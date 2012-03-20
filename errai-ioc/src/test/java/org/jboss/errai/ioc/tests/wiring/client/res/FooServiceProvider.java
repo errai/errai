@@ -19,13 +19,9 @@ package org.jboss.errai.ioc.tests.wiring.client.res;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 
 import javax.inject.Provider;
+import javax.inject.Singleton;
 
-/**
- * User: christopherbrock
- * Date: 15-Aug-2010
- * Time: 7:54:20 PM
- */
-@IOCProvider
+@IOCProvider @Singleton
 public class FooServiceProvider implements Provider<FooService> {
   @Override
   public FooService get() {

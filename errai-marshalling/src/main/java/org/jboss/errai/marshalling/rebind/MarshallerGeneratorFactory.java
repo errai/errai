@@ -99,8 +99,6 @@ public class MarshallerGeneratorFactory {
 
     String gen;
 
-//    if (RebindUtils.hasClasspathChangedForAnnotatedWith(annos) || !cacheFile.exists()) {
-
       log.info("generating marshalling class...");
       long st = System.currentTimeMillis();
       gen = _generate(packageName, clazzName);
@@ -111,11 +109,6 @@ public class MarshallerGeneratorFactory {
       }
 
       RebindUtils.writeStringToFile(cacheFile, gen);
-//    }
-//    else {
-//      gen = RebindUtils.readFileToString(cacheFile);
-//      log.info("nothing has changed. using cached marshaller factory class.");
-//    }
 
     return gen;
   }

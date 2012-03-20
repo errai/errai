@@ -221,7 +221,7 @@ public class Context {
         return Variable.create(name, Object.class).getReference();
       }
       else {
-        throw new OutOfScopeException((mustBeClassMember) ? "this." + name : name);
+        throw new OutOfScopeException((mustBeClassMember) ? "this." + name : name + " not found");
       }
     }
 

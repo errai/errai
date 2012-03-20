@@ -35,7 +35,7 @@ class AuthenticationRules implements BootstrapExecution {
     final ErraiServiceConfigurator config = context.getConfig();
 
     if (config.hasProperty(requireAuthenticationForAll) && "true".equals(config.getProperty(requireAuthenticationForAll))) {
-      log.info("authentication for all requests required, adding rule ... ");
+      log.debug("authentication for all requests required, adding rule ... ");
       context.getBus().addRule("AuthorizationService", new RolesRequiredRule(new HashSet<Object>(), context.getBus()));
     }
   }

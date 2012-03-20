@@ -1,0 +1,11 @@
+src/main/webapp/WEB-INF/classes
+src/main/webapp/WEB-INF/lib
+src/main/webapp/contacts
+src/main/gwt-unitCache
+.classpath
+.errai
+.settings
+.war
+.project
+target
+*.launch

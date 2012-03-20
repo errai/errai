@@ -21,6 +21,7 @@ import java.util.Map;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.RenderCacheStore;
 import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.exception.GenerationException;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.framework.meta.MetaType;
@@ -43,7 +44,12 @@ public class LoadClassReference extends AbstractCallElement {
   public void handleCall(CallWriter writer, Context context, Statement statement) {
     writer.reset();
 
-    nextOrReturn(writer, context, new ClassReference(metaClass));
+    try {
+      nextOrReturn(writer, context, new ClassReference(metaClass));
+    } 
+    catch (GenerationException e) {
+      blameAndRethrow(e);
+    }
   }
 
   public static class ClassReference implements Statement {

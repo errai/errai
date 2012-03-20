@@ -16,26 +16,13 @@
 
 package org.jboss.errai.cdi.integration.client.test;
 
-import org.jboss.errai.cdi.integration.client.shared.ApplicationScopedBean;
-import org.jboss.errai.cdi.integration.client.shared.ApplicationScopedBeanB;
 import org.jboss.errai.cdi.integration.client.shared.BeanInjectSelf;
-import org.jboss.errai.cdi.integration.client.shared.DependentBeanCycleA;
-import org.jboss.errai.cdi.integration.client.shared.DependentBeanCycleB;
-import org.jboss.errai.cdi.integration.client.shared.DependentScopedBean;
-import org.jboss.errai.cdi.integration.client.shared.DependentScopedBeanWithDependencies;
-import org.jboss.errai.cdi.integration.client.shared.ServiceA;
-import org.jboss.errai.cdi.integration.client.shared.ServiceB;
-import org.jboss.errai.cdi.integration.client.shared.ServiceC;
-import org.jboss.errai.cdi.integration.client.shared.TestBean;
-import org.jboss.errai.cdi.integration.client.shared.TestOuterBean;
-import org.jboss.errai.cdi.integration.client.shared.UnreferencedDependentRootBean;
-import org.jboss.errai.common.client.api.extension.InitVotes;
+import org.jboss.errai.cdi.integration.client.shared.ConsumerBeanA;
+import org.jboss.errai.cdi.integration.client.shared.CycleNodeA;
+import org.jboss.errai.cdi.integration.client.shared.DependentBeanInjectSelf;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.container.IOC;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * @author Mike Brock
@@ -52,10 +39,32 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
     super.gwtSetUp();
   }
 
+  public void testBasicDependencyCycle() {
+    delayTestFinish(60000);
+
+    CDI.addPostInitTask(new Runnable() {
+      @Override
+      public void run() {
+        CycleNodeA nodeA = IOC.getBeanManager()
+                .lookupBean(CycleNodeA.class).getInstance();
+
+        assertNotNull(nodeA);
+        assertNotNull(nodeA.getCycleNodeB());
+        assertNotNull(nodeA.getCycleNodeB().getCycleNodeC());
+        assertNotNull(nodeA.getCycleNodeB().getCycleNodeC().getCycleNodeA());
+        assertEquals("CycleNodeA is a different instance at different points in the graph",
+                nodeA.getNodeId(), nodeA.getCycleNodeB().getCycleNodeC().getCycleNodeA().getNodeId());
+
+        finishTest();
+      }
+    });
+
+  }
+
   public void testBeanInjectsIntoSelf() {
     delayTestFinish(60000);
 
-    InitVotes.registerOneTimeInitCallback(new Runnable() {
+    CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
         BeanInjectSelf beanA = IOC.getBeanManager()
@@ -68,6 +77,53 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
         finishTest();
       }
     });
-
   }
+
+
+  public void testDependentBeanInjectsIntoSelf() {
+    delayTestFinish(60000);
+
+    CDI.addPostInitTask(new Runnable() {
+      @Override
+      public void run() {
+        DependentBeanInjectSelf beanA = IOC.getBeanManager()
+                .lookupBean(DependentBeanInjectSelf.class).getInstance();
+
+        assertNotNull(beanA);
+        assertNotNull(beanA.getSelf());
+        assertEquals(beanA.getInstance(), beanA.getSelf().getInstance());
+
+        finishTest();
+      }
+    });
+  }
+
+  public void testCycleOnProducerBeans() {
+    delayTestFinish(60000);
+
+    CDI.addPostInitTask(new Runnable() {
+      @Override
+      public void run() {
+        ConsumerBeanA consumerBeanA = IOC.getBeanManager()
+                .lookupBean(ConsumerBeanA.class).getInstance();
+
+        assertNotNull(consumerBeanA);
+        assertNotNull(consumerBeanA.getFoo());
+
+        assertEquals("barz", consumerBeanA.getFoo().getName());
+
+        assertNotNull(consumerBeanA.getProducerBeanA());
+        assertNotNull(consumerBeanA.getProducerBeanA().getConsumerBeanA());
+        assertEquals("barz", consumerBeanA.getProducerBeanA().getConsumerBeanA().getFoo().getName());
+
+        assertNotNull(consumerBeanA.getBar());
+        assertEquals("fooz", consumerBeanA.getBar().getName());
+        assertNotNull(consumerBeanA.getProducerBeanA().getConsumerBeanA().getBar());
+        assertEquals("fooz", consumerBeanA.getProducerBeanA().getConsumerBeanA().getBar().getName());
+
+        finishTest();
+      }
+    });
+  }
+
 }

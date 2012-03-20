@@ -47,7 +47,8 @@ public class LoadField extends AbstractCallElement {
     }
 
     if (field == null) {
-      throw new UndefinedFieldException(fieldName, statement.getType());
+      UndefinedFieldException ufe = new UndefinedFieldException(fieldName, statement.getType());
+      blameAndRethrow(ufe);
     }
 
     final String currCallString = writer.getCallString();

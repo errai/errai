@@ -32,7 +32,7 @@ import java.util.Map;
 
 public class InterfaceInjectionContext {
   private IOCBeanManager manager;
-  private CreationalContext rootContext = new CreationalContext();
+  private CreationalContext rootContext;
   
   private List<Widget> toRootPanel;
   private Map<String, Panel> panels;
@@ -43,6 +43,7 @@ public class InterfaceInjectionContext {
     panels = new HashMap<String, Panel>();
     widgetToPanel = new HashMap<Widget, String>();
     manager = IOC.getBeanManager();
+    rootContext = new CreationalContext(manager);
   }
 
   public InterfaceInjectionContext(List<Widget> toRootPanel, Map<String, Panel> panels, Map<Widget, String> widgetToPanel) {

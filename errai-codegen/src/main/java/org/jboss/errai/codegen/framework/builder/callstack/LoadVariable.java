@@ -19,8 +19,8 @@ package org.jboss.errai.codegen.framework.builder.callstack;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.VariableReference;
+import org.jboss.errai.codegen.framework.exception.GenerationException;
 import org.jboss.errai.codegen.framework.exception.InvalidTypeException;
-import org.jboss.errai.codegen.framework.exception.OutOfScopeException;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.util.GenUtil;
@@ -36,8 +36,6 @@ public class LoadVariable extends AbstractCallElement {
   private Object[] indexes;
   private boolean classMember;
 
-  private final RuntimeException blame = new RuntimeException("Problem was caused by this call");
-
   public LoadVariable(String variableName, Object... indexes) {
     this.variableName = variableName;
     this.indexes = indexes == null ? new Object[0] : indexes;
@@ -52,78 +50,76 @@ public class LoadVariable extends AbstractCallElement {
   public void handleCall(CallWriter writer, Context context, Statement statement) {
     writer.reset();
 
-    final Statement[] idx = new Statement[this.indexes.length];
-    for (int i = 0; i < idx.length; i++) {
-      idx[i] = GenUtil.convert(context, GenUtil.generate(context, this.indexes[i]), MetaClassFactory.get(Integer.class));
-    }
-
-    final VariableReference ref;
     try {
-      ref = context.getVariable(variableName);
-    } catch (OutOfScopeException e) {
-      e.initCause(blame);
-      throw e;
-    }
-
-    if (idx.length > 0) {
-      if (!ref.getType().isArray()) {
-        throw new InvalidTypeException("attempt to use indexed accessor on non-array type: " + ref);
+      final Statement[] idx = new Statement[this.indexes.length];
+      for (int i = 0; i < idx.length; i++) {
+        idx[i] = GenUtil.convert(context, GenUtil.generate(context, this.indexes[i]), MetaClassFactory.get(Integer.class));
       }
-    }
-
-    final Statement stmt = new VariableReference() {
-      @Override
-      public String getName() {
-        return ref.getName();
-      }
-
-      @Override
-      public Statement getValue() {
-        return ref.getValue();
-      }
-
-      String generatedCache;
-
-      @Override
-      public String generate(Context context) {
-        if (generatedCache != null) return generatedCache;
-
-        StringBuilder buf = new StringBuilder((classMember
-                && !context.isNonAmbiguous(ref.getName()) ? "this." : "") + getName());
-
-        for (Statement s : idx) {
-          buf.append('[').append(s.generate(context)).append(']');
+  
+      final VariableReference ref = context.getVariable(variableName);
+  
+      if (idx.length > 0) {
+        if (!ref.getType().isArray()) {
+          throw new InvalidTypeException("attempt to use indexed accessor on non-array type: " + ref);
         }
-
-        return generatedCache = buf.toString();
       }
-
-      @Override
-      public MetaClass getType() {
-        MetaClass ret;
-
-        int dims = GenUtil.getArrayDimensions(ref.getType());
-
-        if (ref.getType().isArray() && idx.length > 0) {
-          int newDims = dims - idx.length;
-          if (newDims > 0) {
-            ret = ref.getType().getOuterComponentType().asArrayOf(dims - idx.length);
+  
+      final Statement stmt = new VariableReference() {
+        @Override
+        public String getName() {
+          return ref.getName();
+        }
+  
+        @Override
+        public Statement getValue() {
+          return ref.getValue();
+        }
+  
+        String generatedCache;
+  
+        @Override
+        public String generate(Context context) {
+          if (generatedCache != null) return generatedCache;
+  
+          StringBuilder buf = new StringBuilder((classMember
+                  && !context.isNonAmbiguous(ref.getName()) ? "this." : "") + getName());
+  
+          for (Statement s : idx) {
+            buf.append('[').append(s.generate(context)).append(']');
+          }
+  
+          return generatedCache = buf.toString();
+        }
+  
+        @Override
+        public MetaClass getType() {
+          MetaClass ret;
+  
+          int dims = GenUtil.getArrayDimensions(ref.getType());
+  
+          if (ref.getType().isArray() && idx.length > 0) {
+            int newDims = dims - idx.length;
+            if (newDims > 0) {
+              ret = ref.getType().getOuterComponentType().asArrayOf(dims - idx.length);
+            }
+            else {
+              ret = ref.getType().getOuterComponentType();
+            }
           }
           else {
-            ret = ref.getType().getOuterComponentType();
+            ret = ref.getType();
           }
+  
+          return ret;
         }
-        else {
-          ret = ref.getType();
-        }
-
-        return ret;
-      }
-    };
-
-    ref.setIndexes(idx);
-
-    nextOrReturn(writer, context, stmt);
+      };
+  
+      ref.setIndexes(idx);
+      nextOrReturn(writer, context, stmt);
+    } 
+    catch (GenerationException e) {
+      blameAndRethrow(e);
+    }
   }
 
   @Override

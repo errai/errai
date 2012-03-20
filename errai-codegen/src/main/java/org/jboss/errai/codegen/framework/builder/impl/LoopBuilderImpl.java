@@ -36,6 +36,7 @@ import org.jboss.errai.codegen.framework.control.DoWhileLoop;
 import org.jboss.errai.codegen.framework.control.ForLoop;
 import org.jboss.errai.codegen.framework.control.ForeachLoop;
 import org.jboss.errai.codegen.framework.control.WhileLoop;
+import org.jboss.errai.codegen.framework.exception.GenerationException;
 import org.jboss.errai.codegen.framework.literal.NullLiteral;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
@@ -70,11 +71,11 @@ public class LoopBuilderImpl extends AbstractStatementBuilder implements Context
     appendCallElement(new DeferredCallElement(new DeferredCallback() {
       @Override
       public void doDeferred(CallWriter writer, Context context, Statement statement) {
-        GenUtil.assertIsIterable(statement);
-        Variable loopVar = createForEachLoopVar(statement, loopVarName, loopVarType);
-        String collection = writer.getCallString();
-        writer.reset();
-        writer.append(new ForeachLoop(loopVar, collection, body).generate(Context.create(context)));
+          GenUtil.assertIsIterable(statement);
+          Variable loopVar = createForEachLoopVar(statement, loopVarName, loopVarType);
+          String collection = writer.getCallString();
+          writer.reset();
+          writer.append(new ForeachLoop(loopVar, collection, body).generate(Context.create(context)));
       }
     }));
 

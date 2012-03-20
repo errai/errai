@@ -16,25 +16,28 @@
 
 package org.jboss.errai.cdi.integration.client.test;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.jboss.errai.cdi.integration.client.shared.ApplicationScopedBean;
 import org.jboss.errai.cdi.integration.client.shared.ApplicationScopedBeanB;
+import org.jboss.errai.cdi.integration.client.shared.DepScopedBeanWithASBeanDep;
 import org.jboss.errai.cdi.integration.client.shared.DependentBeanCycleA;
 import org.jboss.errai.cdi.integration.client.shared.DependentBeanCycleB;
 import org.jboss.errai.cdi.integration.client.shared.DependentScopedBean;
 import org.jboss.errai.cdi.integration.client.shared.DependentScopedBeanWithDependencies;
+import org.jboss.errai.cdi.integration.client.shared.LincolnCat;
 import org.jboss.errai.cdi.integration.client.shared.ServiceA;
 import org.jboss.errai.cdi.integration.client.shared.ServiceB;
 import org.jboss.errai.cdi.integration.client.shared.ServiceC;
 import org.jboss.errai.cdi.integration.client.shared.TestBean;
+import org.jboss.errai.cdi.integration.client.shared.TestDestroyA;
 import org.jboss.errai.cdi.integration.client.shared.TestOuterBean;
 import org.jboss.errai.cdi.integration.client.shared.UnreferencedDependentRootBean;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.container.IOC;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * @author Mike Brock
@@ -56,7 +59,7 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
   public void testDependentBeanScope() {
     delayTestFinish(60000);
 
-    InitVotes.registerOneTimeInitCallback(new Runnable() {
+    CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
         ApplicationScopedBean beanA = IOC.getBeanManager()
@@ -82,7 +85,7 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
 
   public void testDependentScopesWithTransverseDependentBeans() {
     delayTestFinish(60000);
-    InitVotes.registerOneTimeInitCallback(new Runnable() {
+    CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
         TestOuterBean outBean = IOC.getBeanManager()
@@ -121,10 +124,9 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
 
   public void testDependentScopeDoesNotViolateBroaderApplicationScope() {
     delayTestFinish(60000);
-    InitVotes.registerOneTimeInitCallback(new Runnable() {
+    CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
-
         ApplicationScopedBean applicationScopedBean = IOC.getBeanManager()
                 .lookupBean(ApplicationScopedBean.class).getInstance();
 
@@ -148,7 +150,7 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
    */
   public void testUnreferencedDependentRootBeanAccessible() {
     delayTestFinish(60000);
-    InitVotes.registerOneTimeInitCallback(new Runnable() {
+    CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
 
@@ -166,7 +168,7 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
   public void testDependentBeanCycleFromApplicationScopedRoot() {
     delayTestFinish(60000);
 
-    InitVotes.registerOneTimeInitCallback(new Runnable() {
+    CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
         ApplicationScopedBeanB bean = IOC.getBeanManager()
@@ -188,7 +190,7 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
   public void testDependentBeanCycleFromDependentRoot() {
     delayTestFinish(60000);
 
-    InitVotes.registerOneTimeInitCallback(new Runnable() {
+    CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
         DependentBeanCycleB.instanceCount = 1;
@@ -222,4 +224,66 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
     });
   }
 
+
+  public void testDependentBeanCycleWithPreDestroy() {
+    delayTestFinish(60000);
+
+    InitVotes.registerOneTimeInitCallback(new Runnable() {
+
+      @Override
+      public void run() {
+        TestDestroyA bean = IOC.getBeanManager()
+                .lookupBean(TestDestroyA.class).getInstance();
+
+        IOC.getBeanManager().destroyBean(bean);
+
+        assertTrue("predestroy method not called!", bean.isDestroyed());
+        assertTrue("predestroy method not called", bean.getTestDestroyB().isDestroyed());
+
+        finishTest();
+      }
+    });
+  }
+
+  public void testDependentBeanWithProducerDependency() {
+    delayTestFinish(60000);
+
+    InitVotes.registerOneTimeInitCallback(new Runnable() {
+
+      @Override
+      public void run() {
+        LincolnCat bean = IOC.getBeanManager()
+                .lookupBean(LincolnCat.class).getInstance();
+
+        assertNotNull("no instance returned for bean", bean);
+        assertNotNull("value not injected", bean.getBar());
+        assertEquals("wrong value injected", "bar", bean.getBar());
+
+        finishTest();
+      }
+    });
+  }
+
+  public void testDependentScopedBeanWithAppScopedDependencyDestroy() {
+    InitVotes.registerOneTimeInitCallback(new Runnable() {
+
+      @Override
+      public void run() {
+        DepScopedBeanWithASBeanDep bean = IOC.getBeanManager()
+                .lookupBean(DepScopedBeanWithASBeanDep.class).getInstance();
+
+        assertNotNull("no instance returned for bean", bean);
+        assertNotNull("ApplicationScopedBean not injected", bean.getApplicationScopedBean());
+
+        IOC.getBeanManager().destroyBean(bean);
+
+        assertTrue("pre-destroy method not called", bean.isPreDestroyCalled());
+        assertFalse("ApplicationScopedBean's predestruct method must NOT be called",
+                bean.getApplicationScopedBean().isPreDestroyCalled());
+
+        finishTest();
+      }
+    });
+
+  }
 }

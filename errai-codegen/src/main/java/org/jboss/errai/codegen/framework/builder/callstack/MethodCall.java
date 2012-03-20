@@ -24,10 +24,7 @@ import org.jboss.errai.codegen.framework.CallParameters;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.MethodInvocation;
 import org.jboss.errai.codegen.framework.Statement;
-import org.jboss.errai.codegen.framework.exception.InvalidExpressionException;
-import org.jboss.errai.codegen.framework.exception.InvalidTypeException;
-import org.jboss.errai.codegen.framework.exception.OutOfScopeException;
-import org.jboss.errai.codegen.framework.exception.TypeNotIterableException;
+import org.jboss.errai.codegen.framework.exception.GenerationException;
 import org.jboss.errai.codegen.framework.exception.UndefinedMethodException;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
@@ -36,7 +33,6 @@ import org.jboss.errai.codegen.framework.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.framework.meta.MetaType;
 import org.jboss.errai.codegen.framework.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.framework.util.GenUtil;
-import sun.security.provider.PolicyParser;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -79,7 +75,9 @@ public class MethodCall extends AbstractCallElement {
           return;
         }
         else {
-          throw new UndefinedMethodException(statement.getType(), methodName, parameterTypes);
+          UndefinedMethodException udme = new UndefinedMethodException(statement.getType(), methodName, parameterTypes);
+          udme.initCause(blame);
+          throw udme;
         }
       }
 
@@ -95,7 +93,6 @@ public class MethodCall extends AbstractCallElement {
             }
           }
         }
-
       }
 
       /**
@@ -112,36 +109,12 @@ public class MethodCall extends AbstractCallElement {
 
       nextOrReturn(writer, context, statement);
     }
-    catch (OutOfScopeException e) {
-      throw e;
-    }
-    catch (InvalidExpressionException e) {
-      throw e;
-    }
-    catch (InvalidTypeException e) {
-      throw e;
-    }
-    catch (UndefinedMethodException e) {
-      throw e;
-    }
-    catch (TypeNotIterableException e) {
-      throw e;
+    catch (GenerationException ge) {
+      blameAndRethrow(ge);
     }
     catch (Exception e) {
       throw new RuntimeException("error generating method call for: " + methodName
               + "(" + Arrays.toString(parameters) + ")", e);
-
-//      nextOrReturn(writer, context, new Statement() {
-//        @Override
-//        public String generate(Context context) {
-//          return methodName + "(" + Arrays.toString(parameters) + ")";
-//        }
-//
-//        @Override
-//        public MetaClass getType() {
-//          return MetaClassFactory.get(Object.class);
-//        }
-//      });
     }
   }
 

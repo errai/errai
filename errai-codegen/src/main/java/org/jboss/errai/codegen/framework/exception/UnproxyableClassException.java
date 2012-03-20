@@ -16,16 +16,23 @@
 
 package org.jboss.errai.codegen.framework.exception;
 
+import org.jboss.errai.codegen.framework.meta.MetaClass;
+
 /**
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class UnproxyableClassException extends RuntimeException{
+public class UnproxyableClassException extends GenerationException {
+  private static final long serialVersionUID = 1L;
 
-  public UnproxyableClassException(String message) {
+  private MetaClass clazz;
+
+  public UnproxyableClassException(MetaClass clazz, String message) {
     super(message);
+    this.clazz = clazz;
   }
 
-  public UnproxyableClassException(String message, Throwable cause) {
-    super(message, cause);
+  public MetaClass getUnproxyableClass() {
+    return clazz;
   }
 }

@@ -19,17 +19,20 @@ package org.jboss.errai.ioc.rebind.ioc.builtin;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
-import org.jboss.errai.codegen.framework.meta.MetaParameter;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.ioc.client.api.AfterInitialization;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
-import org.jboss.errai.ioc.rebind.ioc.IOCDecoratorExtension;
-import org.jboss.errai.ioc.rebind.ioc.InjectableInstance;
+import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Mike Brock
  */
+@SuppressWarnings("UnusedDeclaration")
 @CodeDecorator
 public class AfterInitializationExtension extends IOCDecoratorExtension<AfterInitialization> {
   public AfterInitializationExtension(Class<AfterInitialization> decoratesWith) {
@@ -37,7 +40,7 @@ public class AfterInitializationExtension extends IOCDecoratorExtension<AfterIni
   }
 
   @Override
-  public Statement generateDecorator(InjectableInstance<AfterInitialization> instance) {
+  public List<? extends Statement> generateDecorator(InjectableInstance<AfterInitialization> instance) {
     final Context ctx = instance.getInjectionContext().getProcessingContext().getContext();
     final MetaMethod method = instance.getMethod();
 
@@ -51,6 +54,7 @@ public class AfterInitializationExtension extends IOCDecoratorExtension<AfterIni
             .finish()
             .finish();
 
-    return Stmt.create(ctx).invokeStatic(InitVotes.class, "registerOneTimeInitCallback", callbackStmt);
+    return Collections.singletonList(Stmt.create(ctx)
+            .invokeStatic(InitVotes.class, "registerOneTimeInitCallback", callbackStmt));
   }
 }

@@ -4,7 +4,7 @@ package org.jboss.errai.cdi.injection.client.test;
 import org.jboss.errai.cdi.injection.client.InjectionTestModule;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.rebind.IOCTestRunner;
+import org.jboss.errai.ioc.rebind.ioc.test.harness.IOCTestRunner;
 import org.junit.runner.RunWith;
 
 /**

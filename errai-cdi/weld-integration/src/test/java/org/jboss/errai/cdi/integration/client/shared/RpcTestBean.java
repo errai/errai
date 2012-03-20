@@ -16,14 +16,14 @@
 
 package org.jboss.errai.cdi.integration.client.shared;
 
+import javax.annotation.PostConstruct;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.cdi.client.qualifier.A;
 import org.jboss.errai.cdi.client.qualifier.B;
 import org.jboss.errai.ioc.client.api.Caller;
-
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 
 /**
  * @author Mike Brock
@@ -37,6 +37,9 @@ public class RpcTestBean {
   
   @Inject
   private Caller<MyInterceptedRemote> myInterceptedRemoteCaller;
+  
+  @Inject
+  private Caller<MySessionAttributeSettingRemote> mySessionAttributeSettingRemoteCaller;
   
   @Inject @A
   private Caller<MyRemote> myRemoteCallerA;
@@ -67,6 +70,14 @@ public class RpcTestBean {
     myRemoteCallerB.call(callback).call(val);
   }
 
+  public void callSetSessionAttribute(RemoteCallback<Void> callback, String key, String value) {
+     mySessionAttributeSettingRemoteCaller.call(callback).setSessionAttribute(key, value);
+  }
+  
+  public void callGetSessionAttribute(RemoteCallback<String> callback, String key) {
+    mySessionAttributeSettingRemoteCaller.call(callback).getSessionAttribute(key);
+ }
+  
   public static RpcTestBean getInstance() {
     return instance;
   }

@@ -18,6 +18,7 @@ package org.jboss.errai.codegen.framework.builder.callstack;
 
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.exception.GenerationException;
 
 /**
  * An element for deferring and offloading validation and generation work for building the
@@ -34,11 +35,16 @@ public class DeferredCallElement extends AbstractCallElement {
 
   @Override
   public void handleCall(CallWriter writer, Context context, Statement statement) {
-    callback.doDeferred(writer, context, statement);
-
-    if (next != null) {
-      writer.append(".");
-      getNext().handleCall(writer, context, statement);
+    try {
+      callback.doDeferred(writer, context, statement);
+  
+      if (next != null) {
+        writer.append(".");
+        getNext().handleCall(writer, context, statement);
+      }
+    } 
+    catch (GenerationException e) {
+      blameAndRethrow(e);
     }
   }
 

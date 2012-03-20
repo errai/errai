@@ -16,19 +16,20 @@
 
 package org.jboss.errai.bus.server.io;
 
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
-import org.jboss.errai.bus.client.framework.MessageBus;
+import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversation;
+import static org.mvel2.DataConversion.canConvert;
+import static org.mvel2.DataConversion.convert;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
 
-import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversation;
-import static org.mvel2.DataConversion.canConvert;
-import static org.mvel2.DataConversion.convert;
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
+import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.server.api.RpcContext;
 
 /**
  * <tt>ConversationalEndpointCallback</tt> creates a conversation that invokes an endpoint function
@@ -102,6 +103,7 @@ public class ConversationalEndpointCallback implements MessageCallback {
     }
 
     try {
+      RpcContext.set(message);
       Object methReply = method.invoke(serviceProvider.get(message), parms);
 
       if (method.getReturnType().equals(void.class)) {
@@ -124,6 +126,9 @@ public class ConversationalEndpointCallback implements MessageCallback {
     }
     catch (Exception e) {
       throw new MessageDeliveryFailure("error invoking endpoint", e);
+    } 
+    finally {
+      RpcContext.remove();
     }
   }
 }

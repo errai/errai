@@ -18,7 +18,6 @@ package org.jboss.errai.cdi.integration.client.test;
 
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.cdi.integration.client.shared.RpcTestBean;
-import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 
@@ -33,8 +32,8 @@ public class RpcIntegrationTest extends AbstractErraiCDITest {
     return "org.jboss.errai.cdi.integration.RpcTestModule";
   }
 
-  public void testRPCToCDIBeanQualifiedWithA() {
-    InitVotes.registerOneTimeInitCallback(new Runnable() {
+  public void testRpcToCDIBeanQualifiedWithA() {
+    CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
         RpcTestBean.getInstance().callRemoteCallerA(new RemoteCallback<String>() {
@@ -51,8 +50,8 @@ public class RpcIntegrationTest extends AbstractErraiCDITest {
     delayTestFinish(60000);
   }
 
-  public void testRPCToCDIBeanQualifiedWithB() {
-    InitVotes.registerOneTimeInitCallback(new Runnable() {
+  public void testRpcToCDIBeanQualifiedWithB() {
+    CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
         RpcTestBean.getInstance().callRemoteCallerB(new RemoteCallback<String>() {
@@ -68,8 +67,8 @@ public class RpcIntegrationTest extends AbstractErraiCDITest {
     delayTestFinish(60000);
   }
 
-  public void testRPCToUnqualifiedCDIBean() {
-    InitVotes.registerOneTimeInitCallback(new Runnable() {
+  public void testRpcToUnqualifiedCDIBean() {
+    CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
         RpcTestBean.getInstance().callRemoteCaller(new RemoteCallback<String>() {
@@ -85,8 +84,8 @@ public class RpcIntegrationTest extends AbstractErraiCDITest {
     delayTestFinish(60000);
   }
   
-  public void testInterceptedRPC() {
-    InitVotes.registerOneTimeInitCallback(new Runnable() {
+  public void testInterceptedRpc() {
+    CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
         RpcTestBean.getInstance().callInterceptedRemoteCaller(new RemoteCallback<String>() {
@@ -99,6 +98,27 @@ public class RpcIntegrationTest extends AbstractErraiCDITest {
       }
     });
 
+    delayTestFinish(60000);
+  }
+  
+  public void testRpcAccesssingHttpSession() {
+    CDI.addPostInitTask(new Runnable() {
+      @Override
+      public void run() {
+        RpcTestBean.getInstance().callSetSessionAttribute(new RemoteCallback<Void>() {
+          @Override
+          public void callback(Void response) {
+            RpcTestBean.getInstance().callGetSessionAttribute(new RemoteCallback<String>() {
+              public void callback(String response) {
+                assertEquals("success", response);
+                finishTest();
+              }
+            }, "test");
+          }
+        }, "test", "success");
+      }
+    });
+    
     delayTestFinish(60000);
   }
 }

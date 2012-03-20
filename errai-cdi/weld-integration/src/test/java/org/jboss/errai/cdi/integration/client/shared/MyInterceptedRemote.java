@@ -19,7 +19,6 @@ package org.jboss.errai.cdi.integration.client.shared;
 import org.jboss.errai.bus.server.annotations.Remote;
 
 /**
- * @author Mike Brock
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Remote

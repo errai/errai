@@ -16,15 +16,14 @@
 
 package org.jboss.errai.cdi.integration.client.test;
 
+import javax.enterprise.inject.Instance;
+
 import org.jboss.errai.cdi.integration.client.shared.ApplicationScopedBeanA;
 import org.jboss.errai.cdi.integration.client.shared.DependentBeanA;
 import org.jboss.errai.cdi.integration.client.shared.InstanceTestBean;
-import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.container.IOC;
-
-import javax.enterprise.inject.Instance;
 
 /**
  * @author Mike Brock
@@ -37,7 +36,7 @@ public class InstanceInjectionIntegrationTest extends AbstractErraiCDITest {
 
   public void testInstanceInjections() {
     delayTestFinish(60000);
-    InitVotes.registerOneTimeInitCallback(new Runnable() {
+    CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
         InstanceTestBean testBean = IOC.getBeanManager().lookupBean(InstanceTestBean.class).getInstance();

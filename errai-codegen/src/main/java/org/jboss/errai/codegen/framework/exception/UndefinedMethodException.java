@@ -22,7 +22,7 @@ import org.jboss.errai.codegen.framework.util.GenUtil;
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class UndefinedMethodException extends RuntimeException {
+public class UndefinedMethodException extends GenerationException {
   private static final long serialVersionUID = 1L;
 
   private MetaClass declaringClass;
@@ -43,11 +43,6 @@ public class UndefinedMethodException extends RuntimeException {
     this.declaringClass = declaringClass;
     this.methodName = methodName;
     this.parameterTypes = parameterTypes;
-  }
-
-  @Override
-  public String toString() {
-    return getMessage();
   }
 
   public MetaClass getDeclaringClass() {

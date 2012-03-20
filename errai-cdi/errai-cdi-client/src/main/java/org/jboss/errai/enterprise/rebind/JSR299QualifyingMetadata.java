@@ -22,15 +22,14 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.enterprise.inject.Any;
 import javax.inject.Qualifier;
 
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.literal.LiteralFactory;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
-import org.jboss.errai.ioc.rebind.ioc.JSR330QualifyingMetadata;
-import org.jboss.errai.ioc.rebind.ioc.QualifyingMetadata;
+import org.jboss.errai.ioc.rebind.ioc.metadata.JSR330QualifyingMetadata;
+import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

@@ -58,9 +58,6 @@ public class DefaultRemoteCallBuilder {
 
   public <T, R> T call(final RemoteCallback<R> callback, final ErrorCallback errorCallback, final Class<T> remoteService) {
     T svc = proxyFactory.getRemoteProxy(remoteService);
-    if (svc == null)
-      throw new RuntimeException("No service definition for: " + remoteService.getName());
-
     ((RPCStub) svc).setRemoteCallback(callback);
     ((RPCStub) svc).setErrorCallback(errorCallback);
     return svc;

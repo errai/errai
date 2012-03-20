@@ -1167,52 +1167,27 @@
           <target>1.6</target>
         </configuration>
       </plugin>
+      
       <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-clean-plugin</artifactId>
-            <version>2.4.1</version>
-    
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.2.1</version>
+        <executions>
+          <execution>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>java</goal>
+            </goals>
             <configuration>
-                <filesets>
-                    <fileset>
-                        <directory>.errai</directory>
-                    </fileset>
-                    <fileset>
-                        <directory>.gwt</directory>
-                    </fileset>
-                    <fileset>
-                        <directory>src/main/gwt-unitCache</directory>
-                    </fileset>
-                    <fileset>
-                        <directory>war/org.jboss.errai.demo.mobile.ErraiCdiMobileDemo</directory>
-                    </fileset>
-                    <fileset>
-                        <directory>war/WEB-INF/deploy</directory>
-                    </fileset>
-                </filesets>
+              <mainClass>org.jboss.errai.demo.mobile.about.SyntaxHighlight</mainClass>
+              <arguments>
+                <argument>${project.build.sourceDirectory}</argument>
+                <argument>${project.projectDirectory}/war/about/java-sources</argument>
+              </arguments>
             </configuration>
-        </plugin>
-        
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>exec-maven-plugin</artifactId>
-          <version>1.2.1</version>
-          <executions>
-            <execution>
-              <phase>prepare-package</phase>
-              <goals>
-                <goal>java</goal>
-              </goals>
-              <configuration>
-                <mainClass>org.jboss.errai.demo.mobile.about.SyntaxHighlight</mainClass>
-                <arguments>
-                  <argument>${project.build.sourceDirectory}</argument>
-                  <argument>${project.projectDirectory}/war/about/java-sources</argument>
-                </arguments>
-              </configuration>
-            </execution>
-          </executions>  
-        </plugin>  
+          </execution>
+        </executions>  
+      </plugin>  
     </plugins>
 
     <pluginManagement>

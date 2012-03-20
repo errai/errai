@@ -30,19 +30,9 @@ public final class BeanRef {
   private final Class<?> clazz;
   private final Set<Annotation> annotations;
 
-  public BeanRef(Class<?> clazz) {
-    this.clazz = clazz;
-    this.annotations = Collections.emptySet();
-  }
-
   public BeanRef(Class<?> clazz, Annotation[] annotations) {
     this.clazz = clazz;
     this.annotations = new HashSet<Annotation>(wrapAnnotations(Arrays.asList(annotations)));
-  }
-
-  public BeanRef(Class<?> clazz, Set<Annotation> annotations) {
-    this.clazz = clazz;
-    this.annotations = wrapAnnotations(annotations);
   }
 
   private static Set<Annotation> wrapAnnotations(Collection<Annotation> list) {
@@ -97,7 +87,6 @@ public final class BeanRef {
       return _delegate.annotationType();
     }
   }
-
 
   @Override
   public boolean equals(Object o) {

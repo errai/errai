@@ -37,7 +37,7 @@ class JBossJNDI {
     try {
       InitialContext rootCtx = new InitialContext();
       Name fullName = rootCtx.getNameParser("").parse(jndiName);
-      log.info("Bound to " + fullName);
+      log.debug("bound to " + fullName);
       NonSerializableFactory.rebind(fullName, service, true);
     } catch (NamingException e) {
       throw new RuntimeException("Failed to bind " + service, e);

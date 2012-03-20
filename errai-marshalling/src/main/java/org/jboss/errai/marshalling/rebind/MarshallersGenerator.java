@@ -25,14 +25,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.ext.typeinfo.JRealClassType;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.impl.gwt.GWTClass;
 import org.jboss.errai.codegen.framework.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.rebind.ClassListReader;
-import org.jboss.errai.common.rebind.EnvironmentUtil;
+import org.jboss.errai.common.rebind.EnvUtil;
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.marshalling.server.ServerMappingContext;
 import org.jboss.errai.marshalling.server.util.ServerMarshallUtil;
@@ -254,7 +252,7 @@ public class MarshallersGenerator extends Generator {
   private static final String sourceOutputTemp = RebindUtils.getTempDirectory() + "/errai.marshalling/gen/";
 
   private String _generate(GeneratorContext context) {
-    boolean junitOrDevMode = EnvironmentUtil.isGWTJUnitTest();
+    boolean junitOrDevMode = EnvUtil.isJUnitTest();
 
     if (SERVER_MARSHALLER_OUTPUT_ENABLED) {
       String serverSideClass = MarshallerGeneratorFactory.getFor(MarshallerOuputTarget.Java)

@@ -18,10 +18,12 @@ package org.jboss.errai.codegen.framework.builder.callstack;
 
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.exception.GenerationException;
 import org.jboss.errai.codegen.framework.util.GenUtil;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class DynamicLoad extends AbstractCallElement {
   private Object value;
@@ -32,7 +34,12 @@ public class DynamicLoad extends AbstractCallElement {
 
   @Override
   public void handleCall(CallWriter writer, Context context, Statement statement) {
-    nextOrReturn(writer, context, GenUtil.generate(context, value));
+    try {
+      nextOrReturn(writer, context, GenUtil.generate(context, value));
+    }
+    catch (GenerationException e) {
+      blameAndRethrow(e);
+    }
   }
 
   @Override

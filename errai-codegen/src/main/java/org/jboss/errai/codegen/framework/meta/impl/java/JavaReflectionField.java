@@ -127,11 +127,6 @@ public class JavaReflectionField extends MetaField {
   }
 
   @Override
-  public boolean equals(Object o) {
-    return o instanceof MetaField && GenUtil.equals(this, (MetaField) o);
-  }
-
-  @Override
   public Field asField() {
     return field;
   }

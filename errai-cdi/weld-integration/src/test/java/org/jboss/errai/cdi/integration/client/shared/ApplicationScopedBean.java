@@ -16,6 +16,7 @@
 
 package org.jboss.errai.cdi.integration.client.shared;
 
+import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -33,7 +34,9 @@ public class ApplicationScopedBean {
   
   @Inject @Dependent DependentScopedBeanWithDependencies beanWithDependencies;
 
-  
+  private boolean preDestroyCalled = false;
+
+
   public DependentScopedBean getBean1() {
     return bean1;
   }
@@ -48,5 +51,14 @@ public class ApplicationScopedBean {
 
   public DependentScopedBeanWithDependencies getBeanWithDependencies() {
     return beanWithDependencies;
+  }
+
+  @PreDestroy
+  private void preDestroy() {
+    preDestroyCalled = true;
+  }
+
+  public boolean isPreDestroyCalled() {
+    return preDestroyCalled;
   }
 }

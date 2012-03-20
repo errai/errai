@@ -19,6 +19,7 @@ package org.jboss.errai.codegen.framework.builder.callstack;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.control.AbstractConditionalBlock;
+import org.jboss.errai.codegen.framework.exception.GenerationException;
 
 /**
  * A {@link CallElement} for conditional blocks. It can only be the last
@@ -35,13 +36,18 @@ public class ConditionalBlockCallElement extends AbstractCallElement {
 
   @Override
   public void handleCall(CallWriter writer, Context context, Statement lhs) {
-    if (lhs != null) {
-      // The LHS value is on the current callstack. So we grab the value from there at generation time.
-      conditionalBlock.getCondition().setLhs(lhs);
-      conditionalBlock.getCondition().setLhsExpr(writer.getCallString());
+    try {
+      if (lhs != null) {
+        // The LHS value is on the current callstack. So we grab the value from there at generation time.
+        conditionalBlock.getCondition().setLhs(lhs);
+        conditionalBlock.getCondition().setLhsExpr(writer.getCallString());
+      }
+      writer.reset();
+      writer.append(conditionalBlock.generate(Context.create(context)));
+    } 
+    catch(GenerationException e) {
+      blameAndRethrow(e);
     }
-    writer.reset();
-    writer.append(conditionalBlock.generate(Context.create(context)));
   }
 
   @Override

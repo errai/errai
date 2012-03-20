@@ -40,11 +40,12 @@ public class ProxyMaker {
   
   public static BuildMetaClass makeProxy(String proxyClassName, MetaClass toProxy) {
     if (toProxy.isFinal()) {
-      throw new UnproxyableClassException(toProxy.getFullyQualifiedName()
+      throw new UnproxyableClassException(toProxy, toProxy.getFullyQualifiedName()
               + " is an unproxiable class because it is final");
     }
     if (!toProxy.isDefaultInstantiable()) {
-      throw new UnproxyableClassException(toProxy.getFullyQualifiedName() + " must have a default no-arg constructor");
+      throw new UnproxyableClassException(toProxy, toProxy.getFullyQualifiedName() + " must have a default " +
+              "no-arg constructor");
     }
 
 
@@ -57,7 +58,8 @@ public class ProxyMaker {
     builder.privateField(proxyVar, toProxy).finish();
 
     for (MetaMethod method : toProxy.getMethods()) {
-      if (method.getDeclaringClass().getFullyQualifiedName().equals("java.lang.Object")) continue;
+      if (method.isAbstract() || method.isSynthetic() ||
+              method.getDeclaringClass().getFullyQualifiedName().equals("java.lang.Object")) continue;
       
       DefParameters defParameters = DefParameters.from(method);
       BlockBuilder methBody = builder.publicMethod(method.getReturnType(), method.getName()).parameters(defParameters)

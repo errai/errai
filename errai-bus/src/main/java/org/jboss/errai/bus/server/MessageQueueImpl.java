@@ -419,7 +419,7 @@ public class MessageQueueImpl implements MessageQueue {
     this.directSocketChannel = channel;
     this.useDirectSocketChannel = true;
 
-    log.info("queue " + getSession().getSessionId() + " transitioned to direct channel mode.");
+    log.debug("queue " + getSession().getSessionId() + " transitioned to direct channel mode.");
   }
 
   @Override

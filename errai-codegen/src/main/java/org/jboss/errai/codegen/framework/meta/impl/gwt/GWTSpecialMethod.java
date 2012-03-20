@@ -169,10 +169,4 @@ public class GWTSpecialMethod extends MetaMethod {
   public MetaTypeVariable[] getTypeParameters() {
     return new MetaTypeVariable[0];
   }
-
-  @Override
-  public boolean equals(Object o) {
-    return o instanceof MetaMethod && GenUtil.equals(this, (MetaMethod) o);
-  }
-
 }

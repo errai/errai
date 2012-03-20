@@ -18,6 +18,7 @@ package org.jboss.errai.codegen.framework.builder.callstack;
 
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.exception.GenerationException;
 import org.jboss.errai.codegen.framework.literal.LiteralFactory;
 
 /**
@@ -33,7 +34,12 @@ public class LoadLiteral extends AbstractCallElement {
   @Override
   public void handleCall(CallWriter writer, Context context, Statement statement) {
     writer.reset();
-    nextOrReturn(writer, context, LiteralFactory.getLiteral(literalValue));
+    try {
+      nextOrReturn(writer, context, LiteralFactory.getLiteral(literalValue));
+    }
+    catch (GenerationException e) {
+      blameAndRethrow(e);
+    }
   }
 
   @Override

@@ -18,34 +18,24 @@ package org.jboss.errai.codegen.framework.exception;
 
 /**
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class GenerationException extends RuntimeException {
-  private Throwable callSiteReference;
+  private static final long serialVersionUID = 1L;
 
-  public GenerationException(Throwable callSite, String message, Throwable cause) {
-    super(message, cause);
-    this.callSiteReference = callSite;
+  public GenerationException() {
+    super();
   }
 
-
-
-  @Override
-  public String toString() {
-    StringBuilder out = new StringBuilder();
-
-    boolean externalApi = false;
-    
-    for (StackTraceElement el : callSiteReference.getStackTrace()) {
-      if (!externalApi && !el.getClassName().startsWith("org.jboss.errai.codegen.framework")) {
-        externalApi = true;
-        out.append("API Callsite Trace for Error: ").append(getCause().getMessage()).append("\n");
-      }
-
-      if (externalApi) {
-        out.append("\t").append("at ").append(el.toString()).append("\n");
-      }
-    }
-
-    return out.append("---").toString();
+  public GenerationException(String msg) {
+    super(msg);
+  }
+  
+  public GenerationException(Throwable t) {
+    super(t);
+  }
+  
+  public GenerationException(String message, Throwable cause) {
+    super(message, cause);
   }
 }

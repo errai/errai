@@ -115,7 +115,7 @@ runtime dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
                                  prevents subsequent tests from succeeding -->
                             <forkMode>pertest</forkMode>
 
-                            <argLine>-Xmx2048m ${argLine} -Dgwt.gen=/tmp/gwt_test_gen_out/</argLine>
+                            <argLine>-Xmx2048m -Dgwt.gen=/tmp/gwt_test_gen_out/ -Dgwt.args='-testBeginTimeout 5'</argLine>
 
                             <systemProperties>
                                 <property>

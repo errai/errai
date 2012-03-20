@@ -54,15 +54,15 @@ public class SenderProvider implements ContextualTypeProvider<Sender<?>> {
       throw new ProviderException(PROVIDER_EXCEPTION_ERROR_MSG_BASE + ": Required "
               + ToSubject.class.getName() + " qualifier missing at injection point.");
     }
-    
+
     if (typeargs.length != 1) {
       throw new ProviderException(PROVIDER_EXCEPTION_ERROR_MSG_BASE + ": Type at injection point must have exactly" +
               " one type parameter. (found: " + typeargs.length + ")");
     }
 
-    return ErraiMessageSender.of(toSubject, replyTo, typeargs[0], ErraiBus.get());
+    return ErraiMessageSender.of(toSubject, replyTo, ErraiBus.get());
   }
 
   private static final String PROVIDER_EXCEPTION_ERROR_MSG_BASE = "Injection of " + Sender.class.getName()
-      + " implicit bean failed. ";
+          + " implicit bean failed. ";
 }

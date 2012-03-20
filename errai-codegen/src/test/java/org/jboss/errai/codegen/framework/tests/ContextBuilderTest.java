@@ -29,7 +29,6 @@ import org.jboss.errai.codegen.framework.Variable;
 import org.jboss.errai.codegen.framework.VariableReference;
 import org.jboss.errai.codegen.framework.builder.impl.ContextBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder;
-import org.jboss.errai.codegen.framework.exception.GenerationException;
 import org.jboss.errai.codegen.framework.exception.InvalidTypeException;
 import org.jboss.errai.codegen.framework.literal.LiteralFactory;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
@@ -152,9 +151,8 @@ public class ContextBuilderTest extends AbstractStatementBuilderTest {
           .toJavaString();
       fail("Expected InvalidTypeException");
     }
-    catch (GenerationException e) {
+    catch (InvalidTypeException e) {
       // expected
-      assertTrue("Expected InvalidTypeException", e.getCause() instanceof InvalidTypeException);
     }
 
     try {
@@ -162,9 +160,8 @@ public class ContextBuilderTest extends AbstractStatementBuilderTest {
           .toJavaString();
       fail("Expected InvalidTypeException");
     }
-    catch (GenerationException e) {
+    catch (InvalidTypeException e) {
       // expected
-      assertTrue("Expected InvalidTypeException", e.getCause() instanceof InvalidTypeException);
     }
   }
 

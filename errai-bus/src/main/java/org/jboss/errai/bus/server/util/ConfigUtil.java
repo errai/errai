@@ -88,7 +88,6 @@ public class ConfigUtil extends AbstractConfigBase {
   public static void cleanupStartupTempFiles() {
     if (scanAreas == null) return;
 
-    log.info("Cleaning up ...");
     for (File f : scanAreas.values()) {
       f.delete();
     }
