@@ -41,7 +41,6 @@ public class IOCBeanManager {
   private Map<Object, Object> proxyLookupForManagedBeans = new IdentityHashMap<Object, Object>();
 
 
-
   /**
    * Register a bean with the manager. This is called by the generated code to advertise the bean.
    *
@@ -49,16 +48,24 @@ public class IOCBeanManager {
    * @param instance   the instance reference
    * @param qualifiers any qualifiers
    */
-  public void registerSingletonBean(final Class<Object> type, final Object instance,
-                                    final Annotation[] qualifiers,
-                                    final InitializationCallback initCallback) {
-    registerBean(IOCSingletonBean.newBean(this, type, qualifiers, instance));
+  private void registerSingletonBean(final Class<Object> type, final CreationalCallback<Object> callback,
+                                     final Object instance, final Annotation[] qualifiers) {
+    registerBean(IOCSingletonBean.newBean(this, type, qualifiers, callback, instance));
   }
 
-  public void registerDependentBean(final Class<Object> type, final CreationalCallback<Object> callback,
-                                    final Annotation[] qualifiers,
-                                    final InitializationCallback<Object> initCallback) {
-    registerBean(IOCDependentBean.newBean(this, type, qualifiers, callback, initCallback));
+  private void registerDependentBean(final Class<Object> type, final CreationalCallback<Object> callback,
+                                     final Annotation[] qualifiers) {
+    registerBean(IOCDependentBean.newBean(this, type, qualifiers, callback));
+  }
+
+  public void addBean(final Class<Object> type, final CreationalCallback<Object> callback,
+                      final Object instance, final Annotation[] qualifiers) {
+    if (instance != null) {
+      registerSingletonBean(type, callback, instance, qualifiers);
+    }
+    else {
+      registerDependentBean(type, callback, qualifiers);
+    }
   }
 
 
@@ -107,10 +114,11 @@ public class IOCBeanManager {
    * @param bean an {@link IOCSingletonBean} reference
    */
   public void registerBean(final IOCBeanDef bean) {
-    List<IOCBeanDef> beans = beanMap.get(bean);
+    List<IOCBeanDef> beans = beanMap.get(bean.getType());
     if (beans == null) {
       beanMap.put(bean.getType(), beans = new ArrayList<IOCBeanDef>());
     }
+
     beans.add(bean);
   }
 
@@ -172,5 +180,9 @@ public class IOCBeanManager {
     else {
       return matching.get(0);
     }
+  }
+
+  void destroyAllBeans() {
+    beanMap = new HashMap<Class<?>, List<IOCBeanDef>>();
   }
 }

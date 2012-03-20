@@ -48,7 +48,6 @@ import static org.jboss.errai.codegen.framework.util.Stmt.loadVariable;
 public class TypeInjector extends AbstractInjector {
   protected final MetaClass type;
   protected String varName;
-  protected String creationalCallbackVarName;
 
   public TypeInjector(MetaClass type, IOCProcessingContext context) {
     this(type, context, new Annotation[0]);
@@ -207,33 +206,5 @@ public class TypeInjector extends AbstractInjector {
 
   public String getCreationalCallbackVarName() {
     return creationalCallbackVarName;
-  }
-
-  private void registerWithBeanManager(InjectionContext context, Statement valueRef) {
-    if (useBeanManager) {
-      if (InjectUtil.checkIfTypeNeedsAddingToBeanStore(context, this)) {
-        Statement initCallbackRef;
-        if (getPostInitCallbackVar() == null) {
-          initCallbackRef = load(null);
-        }
-        else {
-          initCallbackRef = loadVariable(getPostInitCallbackVar());
-        }
-
-        if (isSingleton()) {
-          context.getProcessingContext().appendToEnd(
-                  loadVariable(context.getProcessingContext().getContextVariableReference())
-                          .invoke("addSingletonBean", type, valueRef,
-                                  qualifyingMetadata.render(), initCallbackRef)
-          );
-        }
-        else {
-          context.getProcessingContext().appendToEnd(
-                  loadVariable(context.getProcessingContext().getContextVariableReference())
-                          .invoke("addDependentBean", type, Refs.get(creationalCallbackVarName),
-                                  qualifyingMetadata.render(), initCallbackRef));
-        }
-      }
-    }
   }
 }

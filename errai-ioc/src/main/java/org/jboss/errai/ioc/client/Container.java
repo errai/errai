@@ -18,13 +18,10 @@ package org.jboss.errai.ioc.client;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
 import org.jboss.errai.ioc.client.container.CreationalContext;
-
-import java.util.Map;
+import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 
 public class Container implements EntryPoint {
   @Override
@@ -32,24 +29,16 @@ public class Container implements EntryPoint {
     boostrapContainer();
   }
 
-  public InterfaceInjectionContext boostrapContainer() {
+  public BootstrapperInjectionContext boostrapContainer() {
     try {
       InitVotes.waitFor(Container.class);
 
       final Bootstrapper bootstrapper = GWT.create(Bootstrapper.class);
-      final RootPanel rootPanel = RootPanel.get();
-      final InterfaceInjectionContext ctx = bootstrapper.bootstrapContainer();
+      new IOCBeanManagerLifecycle().resetBeanManager();
+      final BootstrapperInjectionContext ctx = bootstrapper.bootstrapContainer();
 
       CreationalContext rootContext = ctx.getRootContext();
       rootContext.finish();
-
-      for (Widget w : ctx.getToRootPanel()) {
-        rootPanel.add(w);
-      }
-
-      for (Map.Entry<Widget, String> entry : ctx.getWidgetToPanel().entrySet()) {
-        ctx.getPanels().get(entry.getValue()).add(entry.getKey());
-      }
 
       InitVotes.voteFor(Container.class);
       return ctx;

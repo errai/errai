@@ -16,27 +16,19 @@
 
 package org.jboss.errai.ioc.client.container;
 
-import javax.enterprise.inject.spi.BeanManager;
 import java.lang.annotation.Annotation;
-import java.util.Collections;
-import java.util.HashSet;
 
 /**
  * Represents a bean inside the container, capturing the type, qualifiers and instance reference for the bean.
  *
  * @author Mike Brock
  */
-public class IOCSingletonBean<T> extends AbstractIOCBean<T> {
-  private final IOCBeanManager beanManager;
+public class IOCSingletonBean<T> extends IOCDependentBean<T> {
   private final T instance;
 
-  private IOCSingletonBean(IOCBeanManager beanManager, Class<T> type, Annotation[] qualifiers, T instance) {
-    this.beanManager = beanManager;
-    this.type = type;
-    this.qualifiers = new HashSet<Annotation>();
-    if (qualifiers != null) {
-      Collections.addAll(this.qualifiers, qualifiers);
-    }
+  private IOCSingletonBean(IOCBeanManager beanManager, Class<T> type, Annotation[] qualifiers,
+                           CreationalCallback<T> callback, T instance) {
+    super(beanManager, type, qualifiers, callback);
     this.instance = instance;
   }
 
@@ -49,22 +41,19 @@ public class IOCSingletonBean<T> extends AbstractIOCBean<T> {
    * @param <T>        The type of the bean
    * @return A new instance of <tt>IOCSingletonBean</tt>
    */
-  public static <T> IOCBeanDef<T> newBean(IOCBeanManager beanManager, Class<T> type, Annotation[] qualifiers, T instance) {
-    return new IOCSingletonBean<T>(beanManager, type, qualifiers, instance);
+  public static <T> IOCBeanDef<T> newBean(IOCBeanManager beanManager, Class<T> type, Annotation[] qualifiers,
+                                          CreationalCallback<T> callback, T instance) {
+    return new IOCSingletonBean<T>(beanManager, type, qualifiers, callback, instance);
   }
-
 
   @Override
   public T getInstance(CreationalContext context) {
-    T t = getInstance();
-//    context.addBean(t, type, qualifiers.toArray(new Annotation[qualifiers.size()]));
-    return t;
+    return getInstance();
   }
 
   public T getInstance() {
     return instance;
   }
-
 
   @Override
   public boolean equals(Object o) {

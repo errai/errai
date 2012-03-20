@@ -26,7 +26,7 @@ import org.jboss.errai.codegen.framework.VariableReference;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
-import org.jboss.errai.ioc.client.InterfaceInjectionContext;
+import org.jboss.errai.ioc.client.BootstrapperInjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionPoint;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.TypeDiscoveryListener;
@@ -64,7 +64,7 @@ public class IOCProcessingContext {
 
   protected SourceWriter writer;
 
-  protected Variable contextVariable = Variable.create("injContext", InterfaceInjectionContext.class);
+  protected Variable contextVariable = Variable.create("injContext", BootstrapperInjectionContext.class);
 
   protected QualifyingMetadataFactory qualifyingMetadataFactory = new JSR330QualifyingMetadataFactory();
 

@@ -275,7 +275,10 @@ public class InjectionContext {
       injectors.put(type.getErased(), injectorList = new ArrayList<Injector>());
 
       for (MetaClass iface : type.getInterfaces()) {
-        _registerInjector(iface, new QualifiedTypeInjectorDelegate(iface, injector, iface.getParameterizedType()), false);
+        QualifiedTypeInjectorDelegate injectorDelegate
+                = new QualifiedTypeInjectorDelegate(iface, injector, iface.getParameterizedType());
+
+        _registerInjector(iface, injectorDelegate, false);
       }
     }
     else if (allowOverride) {

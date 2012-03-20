@@ -60,8 +60,8 @@ import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.ioc.client.BootstrapperInjectionContext;
 import org.jboss.errai.ioc.client.ContextualProviderContext;
-import org.jboss.errai.ioc.client.InterfaceInjectionContext;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
@@ -218,7 +218,7 @@ public class IOCBootstrapGenerator {
     Context buildContext = bootStrapClass.getContext();
 
     BlockBuilder<?> blockBuilder =
-            classStructureBuilder.publicMethod(InterfaceInjectionContext.class, "bootstrapContainer");
+            classStructureBuilder.publicMethod(BootstrapperInjectionContext.class, "bootstrapContainer");
 
     SourceWriter sourceWriter = new StringSourceWriter();
 
@@ -281,7 +281,7 @@ public class IOCBootstrapGenerator {
     blockBuilder.append(
             Stmt.declareVariable(procContext.getContextVariableReference().getType()).asFinal()
                     .named(procContext.getContextVariableReference().getName())
-                    .initializeWith(Stmt.newObject(InterfaceInjectionContext.class)));
+                    .initializeWith(Stmt.newObject(BootstrapperInjectionContext.class)));
 
     blockBuilder.append(Stmt.declareVariable(CreationalContext.class)
             .named("context")

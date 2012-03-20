@@ -1,6 +1,7 @@
 package org.jboss.errai.cdi;
 
 import org.jboss.errai.cdi.injection.client.test.InjectionIntegrationTest;
+import org.jboss.errai.cdi.integration.client.test.BeanManagerIntegrationTest;
 import org.jboss.errai.cdi.integration.client.test.CyclicDepsIntegrationTest;
 import org.jboss.errai.cdi.integration.client.test.DependentScopeIntegrationTest;
 import org.jboss.errai.cdi.integration.client.test.EventObserverIntegrationTest;
@@ -16,6 +17,7 @@ import org.junit.runners.Suite;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
+        BeanManagerIntegrationTest.class,
         DependentScopeIntegrationTest.class,
         CyclicDepsIntegrationTest.class,
         EventObserverIntegrationTest.class,

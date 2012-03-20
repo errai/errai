@@ -25,8 +25,8 @@ import org.jboss.errai.common.client.api.tasks.TaskManager;
 import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
 import org.jboss.errai.common.client.api.tasks.TaskManagerProvider;
 import org.jboss.errai.common.client.util.TimeUnit;
+import org.jboss.errai.ioc.client.BootstrapperInjectionContext;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
-import org.jboss.errai.ioc.client.InterfaceInjectionContext;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
 import org.junit.runner.Description;
 import org.junit.runner.Result;
@@ -221,7 +221,7 @@ public class IOCTestRunner extends ParentRunner<Runner> {
       if (instance instanceof IOCClientTestCase) {
         iocClientTestCase.setInitializer(new IOCClientTestCase.ContainerBootstrapper() {
           @Override
-          public InterfaceInjectionContext bootstrap() {
+          public BootstrapperInjectionContext bootstrap() {
             try {
               String rootPackage = iocClientTestCase.getModulePackage();
               List<String> packages = new ArrayList<String>();
@@ -237,7 +237,7 @@ public class IOCTestRunner extends ParentRunner<Runner> {
               Bootstrapper bs = cls.newInstance();
 
               long tm = System.currentTimeMillis();
-              InterfaceInjectionContext ctx = bs.bootstrapContainer();
+              BootstrapperInjectionContext ctx = bs.bootstrapContainer();
               ctx.getRootContext().finish();
 
               System.out.println("bootstrapped simulated container in " + (System.currentTimeMillis() - tm) + "ms");
