@@ -28,6 +28,7 @@ import org.jboss.errai.common.client.util.TimeUnit;
 import org.jboss.errai.ioc.client.BootstrapperInjectionContext;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
+import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
 import org.junit.runner.Description;
 import org.junit.runner.Result;
 import org.junit.runner.Runner;
@@ -237,6 +238,7 @@ public class IOCTestRunner extends ParentRunner<Runner> {
               Bootstrapper bs = cls.newInstance();
 
               long tm = System.currentTimeMillis();
+              new IOCBeanManagerLifecycle().resetBeanManager();
               BootstrapperInjectionContext ctx = bs.bootstrapContainer();
               ctx.getRootContext().finish();
 

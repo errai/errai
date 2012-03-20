@@ -30,7 +30,6 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
     CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
-
         IOCBeanDef<ApplicationScopedBean> bean = IOC.getBeanManager().lookupBean(ApplicationScopedBean.class);
         assertNotNull(bean);
         finishTest();
