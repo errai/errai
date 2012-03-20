@@ -137,26 +137,8 @@ public class Variable extends AbstractStatement {
       }
 
       @Override
-      public MetaClass getType() {
-        // note this is just a sensible default for the benefit of permissive generation mode
-        return MetaClassFactory.get(Object.class);
-      }
-
-      @Override
       public Statement getValue() {
-        return new Statement() {
-
-          @Override
-          public MetaClass getType() {
-            // note this is just a sensible default for the benefit of permissive generation mode
-            return MetaClassFactory.get(Object.class);
-          }
-
-          @Override
-          public String generate(Context context) {
-            return name;
-          }
-        };
+        return null;
       }
 
       @Override
