@@ -123,7 +123,11 @@ public class CreationalContext {
   private void resolveAllProxies() {
     boolean beansResolved = false;
 
-    Iterator<Map.Entry<BeanRef, List<ProxyResolver>>> unresolvedIterator = unresolvedProxies.entrySet().iterator();
+    Iterator<Map.Entry<BeanRef, List<ProxyResolver>>> unresolvedIterator
+            = new HashMap<BeanRef, List<ProxyResolver>>(unresolvedProxies).entrySet().iterator();
+
+    int initialSize = unresolvedProxies.size();
+
     while (unresolvedIterator.hasNext()) {
       Map.Entry<BeanRef, List<ProxyResolver>> entry = unresolvedIterator.next();
       if (wired.containsKey(entry.getKey())) {
@@ -147,10 +151,11 @@ public class CreationalContext {
       }
     }
 
+
     if (beansResolved) {
       resolveAllProxies();
     }
-    else if (!unresolvedProxies.isEmpty()) {
+    else if (!unresolvedProxies.isEmpty() && initialSize != unresolvedProxies.size()) {
       for (Map.Entry<BeanRef, List<ProxyResolver>> entry : unresolvedProxies.entrySet()) {
         throw new RuntimeException("unresolved proxy: " + entry.getKey());
       }

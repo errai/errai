@@ -74,6 +74,37 @@ public class  BasicIOCTest extends IOCClientTestCase {
     assertTrue("@PostConstruct method not called", simpleBean.isPostConstructCalled());
   }
 
+  public void testNewInstanceFromSingleton() {
+    SimpleBean simpleBean1 = IOC.getBeanManager().lookupBean(SimpleBean.class).getInstance();
+    assertNotNull(simpleBean1);
+
+    SimpleBean simpleBean2 = IOC.getBeanManager().lookupBean(SimpleBean.class).newInstance();
+
+    assertNotSame("should have gotten new instance", simpleBean1, simpleBean2);
+
+    assertEquals(ErraiBus.get(), simpleBean2.getBus());
+    assertEquals(ErraiBus.get(), simpleBean2.getBus2());
+    assertEquals(ErraiBus.get(), simpleBean2.getBus3());
+    assertEquals(ErraiBus.get(), simpleBean2.getBus4());
+
+    assertNotNull(simpleBean2.getDispatcher());
+    assertNotNull(simpleBean2.getDispatcher2());
+    assertNotNull(simpleBean2.getDispatcher3());
+    assertNotNull(simpleBean2.getDispatcher4());
+
+    TransverseDepService transverseDepService = IOC.getBeanManager().lookupBean(TransverseDepService.class).getInstance();
+
+    assertNotNull("svcA is null", simpleBean2.getSvcA());
+    assertNotNull("svcB is null", simpleBean2.getSvcB());
+    assertTrue("injection of TransverseDepService into svcA returned different instance!",
+            simpleBean2.getSvcA().getSvc() == transverseDepService);
+
+    assertTrue("injection of TransverseDepService into svcB returned different instance!",
+                simpleBean2.getSvcB().getSvc() == transverseDepService);
+
+    assertTrue("@PostConstruct method not called", simpleBean2.isPostConstructCalled());
+  }
+
   public void testSetterMethodInjection() {
     SetterInjectionBean bean = IOC.getBeanManager().lookupBean(SetterInjectionBean.class)
             .getInstance();
