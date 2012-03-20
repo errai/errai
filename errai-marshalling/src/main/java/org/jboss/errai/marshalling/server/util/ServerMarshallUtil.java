@@ -24,6 +24,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,6 +40,9 @@ import java.util.regex.Pattern;
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 
+import org.eclipse.jdt.core.compiler.CompilationProgress;
+import org.eclipse.jdt.core.compiler.batch.BatchCompiler;
+import org.eclipse.jdt.internal.compiler.batch.Main;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.marshalling.client.api.MarshallerFactory;
@@ -160,9 +165,55 @@ public abstract class ServerMarshallUtil {
     catch (IOException e) {
       throw new RuntimeException("failed to generate class ", e);
     }
-
-
   }
+
+  private static interface CompilerAdapter {
+    int compile(OutputStream out, OutputStream errors, String outputPath, String toCompile, String classpath);
+  }
+
+  public static class JDKCompiler implements CompilerAdapter {
+    final JavaCompiler compiler;
+
+    public JDKCompiler(JavaCompiler compiler) {
+      this.compiler = compiler;
+    }
+
+    @Override
+    public int compile(OutputStream out, OutputStream errors, String outputPath, String toCompile, String classpath) {
+      return compiler.run(null, out, errors, "-d", outputPath, toCompile);
+    }
+  }
+
+  public static class JDTCompiler implements CompilerAdapter {
+    @Override
+    public int compile(OutputStream out, OutputStream errors, String outputPath, String toCompile, String classpath) {
+      return BatchCompiler.compile("-classpath " + classpath + " -d " + outputPath + " -source 1.6 " + toCompile, new PrintWriter(out), new PrintWriter(errors),
+              new CompilationProgress() {
+                @Override
+                public void begin(int remainingWork) {
+                }
+
+                @Override
+                public void done() {
+                }
+
+                @Override
+                public boolean isCanceled() {
+                  return false;
+                }
+
+                @Override
+                public void setTaskName(String name) {
+                }
+
+                @Override
+                public void worked(int workIncrement, int remainingWork) {
+                }
+              }) ? 0 : -1;
+
+    }
+  }
+
 
   public static String compileClass(String sourcePath, String packageName, String className, String outputPath) {
     try {
@@ -171,11 +222,13 @@ public abstract class ServerMarshallUtil {
 
       ByteArrayOutputStream errorOutputStream = new ByteArrayOutputStream();
       JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+      CompilerAdapter adapter;
 
       if (compiler == null) {
-        throw new RuntimeException("Could not locate a compiler. You may be running in a JRE and not a JDK. " +
-                "For the purpose of development mode Errai requires the use of a JDK so it may produce server " +
-                "marshalling code on-the-fly.");
+        adapter = new JDTCompiler();
+      }
+      else {
+        adapter = new JDKCompiler(compiler);
       }
 
       File classOutputDir = new File(outputPath
@@ -192,10 +245,13 @@ public abstract class ServerMarshallUtil {
         }
       }
 
+      //       if (compiler.run(null, null, errorOutputStream, "-d", outputPath, inFile.getAbsolutePath()) != 0) {
+
+
       /**
        * Attempt to run the compiler without any classpath specified.
        */
-      if (compiler.run(null, null, errorOutputStream, "-d", outputPath, inFile.getAbsolutePath()) != 0) {
+      if (adapter.compile(System.out, errorOutputStream, outputPath, inFile.getAbsolutePath(), "") != 0) {
         errorOutputStream.reset();
 
         /**
@@ -221,7 +277,8 @@ public abstract class ServerMarshallUtil {
         sb.append(System.getProperty("java.class.path"));
         sb.append(findAllJarsByManifest());
 
-        if (compiler.run(null, null, errorOutputStream, "-d", outputPath, "-cp", sb.toString(), inFile.getAbsolutePath()) != 0) {
+        if (adapter.compile(System.out, errorOutputStream, outputPath, inFile.getAbsolutePath(), sb.toString()) != 0) {
+//        if (compiler.run(null, null, errorOutputStream, "-d", outputPath, "-cp", sb.toString(), inFile.getAbsolutePath()) != 0) {
           System.out.println("*** FAILED TO COMPILE MARSHALLER CLASS ***");
           System.out.println("*** Classpath Used: " + sb.toString());
 

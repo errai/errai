@@ -45,7 +45,7 @@ public class ContextualProviderInjector extends TypeInjector {
 
   @Override
   public Statement getBeanInstance(InjectionContext injectContext, InjectableInstance injectableInstance) {
-    MetaClass type = null;
+    MetaClass type;
     MetaParameterizedType pType = null;
 
     switch (injectableInstance.getTaskType()) {
@@ -82,7 +82,7 @@ public class ContextualProviderInjector extends TypeInjector {
     Annotation[] qualifiers = injectableInstance.getQualifiers();
 
 
-    if (providerInjector.isSingleton()) {
+    if (providerInjector.isSingleton() && providerInjector.isInjected()) {
       return Stmt.loadVariable(providerInjector.getVarName()).invoke("provide", typeArgsClasses, qualifiers.length != 0 ? qualifiers : null);
     }
     else {

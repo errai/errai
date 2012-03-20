@@ -49,6 +49,11 @@
             <version>1.0-SP4</version>
             <!--<scope>provided</scope>-->
         </dependency>
+        <!--<dependency>-->
+        	<!--<groupId>org.eclipse.jdt.core.compiler</groupId>-->
+        	<!--<artifactId>ecj</artifactId>-->
+        	<!--<version>3.7.1</version>-->
+        <!--</dependency>-->
 
 
         <dependency>
