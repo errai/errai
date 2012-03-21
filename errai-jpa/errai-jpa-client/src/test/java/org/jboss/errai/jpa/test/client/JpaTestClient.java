@@ -5,9 +5,9 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
 import org.jboss.errai.ioc.client.api.EntryPoint;
+import org.jboss.errai.ioc.client.api.TestOnly;
 
-// TODO annotate with @TestOnly after merging in the fix from master branch
-@EntryPoint
+@TestOnly @EntryPoint
 public class JpaTestClient {
 
   static JpaTestClient INSTANCE;

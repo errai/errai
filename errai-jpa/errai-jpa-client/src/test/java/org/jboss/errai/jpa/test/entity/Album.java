@@ -7,8 +7,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
-//TODO annotate with @TestOnly after merging in the fix from master branch
-@Entity
+import org.jboss.errai.ioc.client.api.TestOnly;
+
+@TestOnly @Entity
 public class Album {
 
   @GeneratedValue

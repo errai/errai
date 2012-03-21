@@ -47,7 +47,7 @@ public class ErraiEntityManagerGenerator extends Generator {
       ContextualStatementBuilder entityAsItsOwnType = Stmt.castTo(entityType, Stmt.loadVariable("entity"));
       mpm.append(Stmt.if_(Bool.instanceOf(Variable.get("entity"), MetaClassFactory.getAsStatement(entityType)))
           .append(Stmt.loadStatic(classBuilder.getClassDefinition(), "this").invoke(pemName, entityAsItsOwnType))
-          // TODO: generate return statement here (need updates from master branch)
+          .append(Stmt.returnVoid())
           .finish());
     }
 
