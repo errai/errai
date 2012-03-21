@@ -21,7 +21,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-
+/**
+ * Specifies the annotated bean is an application entry-point, and should be instantiated when the application is
+ * loaded.
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface EntryPoint {

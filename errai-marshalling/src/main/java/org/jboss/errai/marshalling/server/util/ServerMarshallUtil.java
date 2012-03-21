@@ -180,7 +180,7 @@ public abstract class ServerMarshallUtil {
 
     @Override
     public int compile(OutputStream out, OutputStream errors, String outputPath, String toCompile, String classpath) {
-      return compiler.run(null, out, errors, "-d", outputPath, toCompile);
+      return compiler.run(null, out, errors, "-classpath", classpath, "-d", outputPath, toCompile);
     }
   }
 
@@ -238,56 +238,47 @@ public abstract class ServerMarshallUtil {
       // delete any marshaller classes already there
       Pattern matcher = Pattern.compile("^" + className + "(\\.|$).*class$");
       if (classOutputDir.exists()) {
-        for (File file : classOutputDir.listFiles()){
+        for (File file : classOutputDir.listFiles()) {
           if (matcher.matcher(file.getName()).matches()) {
             file.delete();
           }
         }
       }
 
-      //       if (compiler.run(null, null, errorOutputStream, "-d", outputPath, inFile.getAbsolutePath()) != 0) {
 
+      StringBuilder sb = new StringBuilder();
+
+      List<URL> configUrls = MetaDataScanner.getConfigUrls();
+      List<File> classpathElements = new ArrayList<File>(configUrls.size());
+
+      log.debug(">>> Searching for all jars by " + MetaDataScanner.ERRAI_CONFIG_STUB_NAME);
+      for (URL url : configUrls) {
+        File file = getFileIfExists(url.getFile());
+        if (file != null) {
+          classpathElements.add(file);
+        }
+      }
+      log.debug("<<< Done searching for all jars by " + MetaDataScanner.ERRAI_CONFIG_STUB_NAME);
+
+      for (File file : classpathElements)
+        sb.append(file.getAbsolutePath()).append(File.pathSeparator);
+
+      sb.append(System.getProperty("java.class.path"));
+      sb.append(findAllJarsByManifest());
 
       /**
        * Attempt to run the compiler without any classpath specified.
        */
-      if (adapter.compile(System.out, errorOutputStream, outputPath, inFile.getAbsolutePath(), "") != 0) {
-        errorOutputStream.reset();
+      if (adapter.compile(System.out, errorOutputStream, outputPath, inFile.getAbsolutePath(), sb.toString()) != 0) {
 
-        /**
-         * That didn't work. Let's try and figure out the classpath.
-         */
-        StringBuilder sb = new StringBuilder();
+        System.out.println("*** FAILED TO COMPILE MARSHALLER CLASS ***");
+        System.out.println("*** Classpath Used: " + sb.toString());
 
-        List<URL> configUrls = MetaDataScanner.getConfigUrls();
-        List<File> classpathElements = new ArrayList<File>(configUrls.size());
 
-        log.debug(">>> Searching for all jars by " + MetaDataScanner.ERRAI_CONFIG_STUB_NAME);
-        for (URL url : configUrls) {
-          File file = getFileIfExists(url.getFile());
-          if (file != null) {
-            classpathElements.add(file);
-          }
+        for (byte b : errorOutputStream.toByteArray()) {
+          System.out.print((char) b);
         }
-        log.debug("<<< Done searching for all jars by " + MetaDataScanner.ERRAI_CONFIG_STUB_NAME);
-
-        for (File file : classpathElements)
-          sb.append(file.getAbsolutePath()).append(File.pathSeparator);
-
-        sb.append(System.getProperty("java.class.path"));
-        sb.append(findAllJarsByManifest());
-
-        if (adapter.compile(System.out, errorOutputStream, outputPath, inFile.getAbsolutePath(), sb.toString()) != 0) {
-//        if (compiler.run(null, null, errorOutputStream, "-d", outputPath, "-cp", sb.toString(), inFile.getAbsolutePath()) != 0) {
-          System.out.println("*** FAILED TO COMPILE MARSHALLER CLASS ***");
-          System.out.println("*** Classpath Used: " + sb.toString());
-
-
-          for (byte b : errorOutputStream.toByteArray()) {
-            System.out.print((char) b);
-          }
-          return null;
-        }
+        return null;
       }
 
 
@@ -482,7 +473,8 @@ public abstract class ServerMarshallUtil {
     catch (IOException e1) {
       // Silently ignore wrong manifests on classpath?
       log.warn("failed to build classpath using manifest discovery. Expect compile failures...", e1);
-    } finally {
+    }
+    finally {
       log.debug("<<< Done searching for all jars by " + JarFile.MANIFEST_NAME);
     }
 

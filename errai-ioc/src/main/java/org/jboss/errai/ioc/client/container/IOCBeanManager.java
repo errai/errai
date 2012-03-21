@@ -18,6 +18,7 @@ package org.jboss.errai.ioc.client.container;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -129,7 +130,7 @@ public class IOCBeanManager {
    * @return A list of all the beans that match the specified type. Returns an empty list if there is
    *         no matching type.
    */
-  public List<IOCBeanDef> lookupBeans(Class<?> type) {
+  public Collection<IOCBeanDef> lookupBeans(Class<?> type) {
     List<IOCBeanDef> beanList = beanMap.get(type);
     if (beanList == null) {
       return Collections.emptyList();

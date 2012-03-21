@@ -20,18 +20,47 @@ import java.lang.annotation.Annotation;
 import java.util.Set;
 
 /**
+ * Represents a bean definition within the bean manager.
+ *
  * @author Mike Brock
  */
 public interface IOCBeanDef<T> {
   public Class<T> getType();
 
+  /**
+   * Returns an instance of the bean within the active scope.
+   *
+   * @return The bean instance.
+   */
   public T getInstance();
 
+  /**
+   * Returns an instance of the bean within the active scope, using the specified CreationalContext.
+   *
+   * @param context
+   * @return
+   */
   T getInstance(CreationalContext context);
 
+  /**
+   * Returns a new instance of the bean.
+   *
+   * @return
+   */
   public T newInstance();
 
+  /**
+   * Returns any qualifiers associated with the bean.
+   * @return
+   */
   public Set<Annotation> getQualifiers();
 
+
+  /**
+   * Returns true if the beans qualifiers match the specified set of qualifiers.
+   *
+   * @param annotations the qualifiers to compare
+   * @return returns whether or not the bean matches the set of qualifiers
+   */
   public boolean matches(Set<Annotation> annotations);
 }
