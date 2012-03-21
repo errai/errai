@@ -138,30 +138,12 @@ public class IOCProcessorFactory {
   }
 
   private void inferHandlers() {
+
+    // handle producers first.
     for (final Map.Entry<WiringElementType, Class<? extends Annotation>> entry : injectionContext.getAllElementMappings()) {
       switch (entry.getKey()) {
-        case DependentBean:
-        case SingletonBean:
-          registerHandler(entry.getValue(), new JSR330AnnotationHandler() {
-            @Override
-            public boolean handle(final InjectableInstance type, Annotation annotation, IOCProcessingContext context) {
-              injectionContext.getInjector(type.getType()).getBeanInstance(injectionContext, null);
-              return true;
-            }
-          });
-          break;
-        case TestMockBean:
-          registerHandler(entry.getValue(), new JSR330AnnotationHandler() {
-            @Override
-            public boolean handle(InjectableInstance instance, Annotation annotation, IOCProcessingContext context) {
-              injectionContext.addReplacementType(instance.getEnclosingType().getFullyQualifiedName());
-              return false;
-            }
-          });
-          break;
         case ProducerElement:
           registerHandler(entry.getValue(), new JSR330AnnotationHandler() {
-
             @Override
             public Set<SortUnit> getDependencies(DependencyControl control, final InjectableInstance instance, Annotation annotation,
                                                  final IOCProcessingContext context) {
@@ -244,14 +226,34 @@ public class IOCProcessorFactory {
               return true;
             }
 
-          }, Rule.before(EntryPoint.class, ApplicationScoped.class, Singleton.class));
+          });
           break;
-
-
       }
-
     }
 
+    for (final Map.Entry<WiringElementType, Class<? extends Annotation>> entry : injectionContext.getAllElementMappings()) {
+      switch (entry.getKey()) {
+        case DependentBean:
+        case SingletonBean:
+          registerHandler(entry.getValue(), new JSR330AnnotationHandler() {
+            @Override
+            public boolean handle(final InjectableInstance type, Annotation annotation, IOCProcessingContext context) {
+              injectionContext.getInjector(type.getType()).getBeanInstance(injectionContext, null);
+              return true;
+            }
+          });
+          break;
+        case TestMockBean:
+          registerHandler(entry.getValue(), new JSR330AnnotationHandler() {
+            @Override
+            public boolean handle(InjectableInstance instance, Annotation annotation, IOCProcessingContext context) {
+              injectionContext.addReplacementType(instance.getEnclosingType().getFullyQualifiedName());
+              return false;
+            }
+          });
+          break;
+      }
+    }
   }
 
   @SuppressWarnings({"unchecked"})
