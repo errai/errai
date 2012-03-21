@@ -442,7 +442,7 @@ public class IOCBootstrapGenerator {
 
           boolean isContextual = false;
           for (MetaField field : type.getDeclaredFields()) {
-            if (field.isAnnotationPresent(Inject.class)
+            if (injectionContext.isElementType(WiringElementType.InjectionPoint, field)
                     && field.getType().isAssignableTo(ContextualProviderContext.class)) {
 
               isContextual = true;
