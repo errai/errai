@@ -245,8 +245,7 @@ public abstract class ServerMarshallUtil {
         }
       }
 
-
-      StringBuilder sb = new StringBuilder();
+      final StringBuilder sb = new StringBuilder(4096);
 
       List<URL> configUrls = MetaDataScanner.getConfigUrls();
       List<File> classpathElements = new ArrayList<File>(configUrls.size());
@@ -273,7 +272,6 @@ public abstract class ServerMarshallUtil {
 
         System.out.println("*** FAILED TO COMPILE MARSHALLER CLASS ***");
         System.out.println("*** Classpath Used: " + sb.toString());
-
 
         for (byte b : errorOutputStream.toByteArray()) {
           System.out.print((char) b);

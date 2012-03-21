@@ -286,6 +286,8 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
         assertFalse("ApplicationScopedBean's predestruct method must NOT be called",
                 bean.getApplicationScopedBean().isPreDestroyCalled());
 
+        assertFalse("bean should no longer be managed", IOC.getBeanManager().isManaged(bean));
+
         finishTest();
       }
     });
