@@ -226,7 +226,7 @@ public class IOCProcessorFactory {
               return true;
             }
 
-          });
+          }, Rule.before(injectionContext.getAnnotationsForElementType(WiringElementType.SingletonBean)));
           break;
       }
     }
