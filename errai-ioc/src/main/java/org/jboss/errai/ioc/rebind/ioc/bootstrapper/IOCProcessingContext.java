@@ -68,8 +68,6 @@ public class IOCProcessingContext {
 
   protected QualifyingMetadataFactory qualifyingMetadataFactory = new JSR330QualifyingMetadataFactory();
 
-  protected Set<Class<? extends Annotation>> singletonScopes;
-
   public IOCProcessingContext(TreeLogger treeLogger,
                               GeneratorContext generatorContext,
                               SourceWriter writer,
@@ -89,23 +87,7 @@ public class IOCProcessingContext {
     this.staticInstantiationStatements = new ArrayList<Statement>();
     this.staticPostConstructStatements = new ArrayList<Statement>();
     this.typeDiscoveryListeners = new ArrayList<TypeDiscoveryListener>();
-    this.singletonScopes = new HashSet<Class<? extends Annotation>>();
     this.toInstantiate = new ArrayList<Injector>();
-  }
-
-  public void addSingletonScopeAnnotation(Class<? extends Annotation> annotation) {
-    this.singletonScopes.add(annotation);
-  }
-
-  public boolean isSingletonScope(Class<? extends Annotation> annotation) {
-    return this.singletonScopes.contains(annotation);
-  }
-
-  public boolean isSingletonScope(Annotation[] annotations) {
-    for (Annotation a : annotations) {
-      if (isSingletonScope(a.annotationType())) return true;
-    }
-    return false;
   }
 
   public BlockBuilder<?> getBlockBuilder() {

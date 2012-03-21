@@ -30,6 +30,7 @@ import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.ConstructionStatusCallback;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 
 import javax.enterprise.inject.Alternative;
 import javax.enterprise.inject.New;
@@ -49,14 +50,17 @@ public class TypeInjector extends AbstractInjector {
   protected final MetaClass type;
   protected String varName;
 
-  public TypeInjector(MetaClass type, IOCProcessingContext context) {
+  public TypeInjector(MetaClass type, InjectionContext context) {
     this(type, context, new Annotation[0]);
   }
 
-  public TypeInjector(MetaClass type, IOCProcessingContext context, Annotation[] additionalQualifiers) {
+  public TypeInjector(MetaClass type, InjectionContext context, Annotation[] additionalQualifiers) {
     this.type = type;
-    this.singleton = context.isSingletonScope(type.getAnnotations());
-    this.alternative = type.isAnnotationPresent(Alternative.class);
+
+    // check to see if this is a singleton and/or alternative bean
+    this.singleton = context.isElementType(WiringElementType.SingletonBean, type);
+    this.alternative = context.isElementType(WiringElementType.AlternativeBean, type);
+
     this.varName = InjectUtil.getNewInjectorName();
 
     Set<Annotation> qualifiers = new HashSet<Annotation>();
@@ -64,12 +68,12 @@ public class TypeInjector extends AbstractInjector {
     qualifiers.addAll(Arrays.asList(additionalQualifiers));
 
     if (!qualifiers.isEmpty()) {
-      qualifyingMetadata = context.getQualifyingMetadataFactory().createFrom(qualifiers.toArray(new
+      qualifyingMetadata = context.getProcessingContext().getQualifyingMetadataFactory().createFrom(qualifiers.toArray(new
               Annotation[qualifiers.size()]));
 
     }
     else {
-      qualifyingMetadata = context.getQualifyingMetadataFactory().createDefaultMetadata();
+      qualifyingMetadata = context.getProcessingContext().getQualifyingMetadataFactory().createDefaultMetadata();
     }
   }
 

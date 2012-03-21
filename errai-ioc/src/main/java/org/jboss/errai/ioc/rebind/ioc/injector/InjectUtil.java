@@ -24,6 +24,7 @@ import org.jboss.errai.codegen.framework.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.framework.exception.UnproxyableClassException;
+import org.jboss.errai.codegen.framework.meta.HasAnnotations;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaConstructor;
 import org.jboss.errai.codegen.framework.meta.MetaField;
@@ -44,12 +45,12 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionTask;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.TaskType;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 import org.mvel2.util.ReflectionUtil;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.inject.Inject;
 import javax.inject.Qualifier;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
@@ -67,8 +68,6 @@ import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.typeParame
 
 public class InjectUtil {
 
-  private static final Class[] injectionAnnotations
-          = {Inject.class, com.google.inject.Inject.class};
 
   private static final AtomicInteger injectorCounter = new AtomicInteger(0);
   private static final AtomicInteger uniqueCounter = new AtomicInteger(0);
@@ -76,7 +75,7 @@ public class InjectUtil {
   public static ConstructionStrategy getConstructionStrategy(final Injector injector, final InjectionContext ctx) {
     final MetaClass type = injector.getInjectedType();
 
-    final List<MetaConstructor> constructorInjectionPoints = scanForConstructorInjectionPoints(type);
+    final List<MetaConstructor> constructorInjectionPoints = scanForConstructorInjectionPoints(ctx, type);
     final List<InjectionTask> injectionTasks = scanForTasks(injector, ctx, type);
     final List<MetaMethod> postConstructTasks = scanForPostConstruct(type);
     final List<MetaMethod> preDestroyTasks = scanForPreDestroy(type);
@@ -165,8 +164,8 @@ public class InjectUtil {
   /**
    * Render the post construct InitializationCallback
    *
-   * @param ctx -
-   * @param injector -
+   * @param ctx                -
+   * @param injector           -
    * @param postConstructTasks -
    */
   private static void doPostConstruct(final InjectionContext ctx,
@@ -201,8 +200,8 @@ public class InjectUtil {
   /**
    * Render the pre destroy DestructionCallback
    *
-   * @param ctx -
-   * @param injector -
+   * @param ctx             -
+   * @param injector        -
    * @param preDestroyTasks -
    */
   private static void doPreDestroy(final InjectionContext ctx,
@@ -276,7 +275,7 @@ public class InjectUtil {
 
     do {
       for (MetaField field : visit.getDeclaredFields()) {
-        if (isInjectionPoint(field)) {
+        if (isInjectionPoint(ctx, field)) {
           if (!field.isPublic()) {
             MetaMethod meth = visit.getMethod(ReflectionUtil.getSetter(field.getName()),
                     field.getType());
@@ -315,7 +314,7 @@ public class InjectUtil {
       }
 
       for (MetaMethod meth : visit.getDeclaredMethods()) {
-        if (isInjectionPoint(meth)) {
+        if (isInjectionPoint(ctx, meth)) {
           accumulator.add(new InjectionTask(injector, meth));
         }
 
@@ -349,11 +348,11 @@ public class InjectUtil {
     return accumulator;
   }
 
-  private static List<MetaConstructor> scanForConstructorInjectionPoints(MetaClass type) {
+  private static List<MetaConstructor> scanForConstructorInjectionPoints(InjectionContext ctx, MetaClass type) {
     final List<MetaConstructor> accumulator = new LinkedList<MetaConstructor>();
 
     for (MetaConstructor cns : type.getConstructors()) {
-      if (isInjectionPoint(cns)) {
+      if (isInjectionPoint(ctx, cns)) {
         accumulator.add(cns);
       }
     }
@@ -388,28 +387,10 @@ public class InjectUtil {
   }
 
   @SuppressWarnings({"unchecked"})
-  private static boolean isInjectionPoint(MetaField field) {
-    for (Class<? extends Annotation> ann : injectionAnnotations) {
-      if (field.isAnnotationPresent(ann)) return true;
-    }
-    return false;
+  private static boolean isInjectionPoint(InjectionContext context, HasAnnotations hasAnnotations) {
+    return context.isElementType(WiringElementType.InjectionPoint, hasAnnotations);
   }
 
-  @SuppressWarnings({"unchecked"})
-  private static boolean isInjectionPoint(MetaMethod meth) {
-    for (Class<? extends Annotation> ann : injectionAnnotations) {
-      if (meth.isAnnotationPresent(ann)) return true;
-    }
-    return false;
-  }
-
-  @SuppressWarnings({"unchecked"})
-  private static boolean isInjectionPoint(MetaConstructor constructor) {
-    for (Class<? extends Annotation> ann : injectionAnnotations) {
-      if (constructor.isAnnotationPresent(ann)) return true;
-    }
-    return false;
-  }
 
   private static boolean hasDefaultConstructor(MetaClass type) {
     return type.getConstructor(new MetaClass[0]) != null;
@@ -528,7 +509,7 @@ public class InjectUtil {
         return Collections.emptyList();
     }
   }
-  
+
   public static List<Annotation> getQualifiersFromAnnotations(Annotation[] annotations) {
     List<Annotation> quals = new ArrayList<Annotation>();
     for (Annotation a : annotations) {

@@ -105,10 +105,6 @@ public class CreationalContext {
     resolverList.add(proxyResolver);
   }
 
-  public Object getUnresolvedProxy(Class<?> beanType, Annotation[] qualifiers) {
-    return unresolvedProxies.get(new BeanRef(beanType, qualifiers));
-  }
-
   public void finish() {
     resolveAllProxies();
     fireAllInitCallbacks();

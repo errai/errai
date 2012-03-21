@@ -21,6 +21,7 @@ import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 
 import javax.enterprise.inject.Alternative;
 import javax.inject.Provider;
@@ -32,14 +33,13 @@ public class ProviderInjector extends TypeInjector {
   private boolean standardProvider = false;
 
   public ProviderInjector(MetaClass type, MetaClass providerType, InjectionContext context) {
-    super(type, context.getProcessingContext());
-    this.providerInjector = new TypeInjector(providerType, context.getProcessingContext());
+    super(type, context);
+    this.providerInjector = new TypeInjector(providerType, context);
     context.registerInjector(providerInjector);
 
     this.standardProvider = providerInjector.getInjectedType().isAssignableTo(Provider.class);
-    this.singleton = context.getProcessingContext()
-            .isSingletonScope(providerType.getAnnotations());
-    this.alternative = type.isAnnotationPresent(Alternative.class);
+    this.singleton = context.isElementType(WiringElementType.SingletonBean, providerType);
+    this.alternative = context.isElementType(WiringElementType.AlternativeBean, type);
     this.injected = true;
   }
 

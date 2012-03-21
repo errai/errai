@@ -51,7 +51,7 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
           }
         };
 
-        final Annotation qualB = new Annotation() {
+        final QualB qualB = new QualB() {
           @Override
           public Class<? extends Annotation> annotationType() {
             return QualB.class;

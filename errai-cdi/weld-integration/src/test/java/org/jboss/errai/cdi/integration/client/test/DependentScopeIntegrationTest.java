@@ -140,8 +140,8 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
         ServiceC serviceC = IOC.getBeanManager()
                 .lookupBean(ServiceC.class).getInstance();
 
-        assertSame("ApplicationScopedBean should be same instance even in dependent scoped",
-                serviceC.getBean(), applicationScopedBean);
+        assertEquals("ApplicationScopedBean should be same instance even in dependent scoped",
+                applicationScopedBean.getBeanId(), serviceC.getBean().getBeanId());
 
         finishTest();
       }

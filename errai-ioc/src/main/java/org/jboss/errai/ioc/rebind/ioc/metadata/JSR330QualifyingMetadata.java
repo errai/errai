@@ -63,7 +63,7 @@ public class JSR330QualifyingMetadata implements QualifyingMetadata {
     else return metadata == null;
   }
 
-  static JSR330QualifyingMetadata createFromAnnotations(Annotation[] annotations) {
+  public static JSR330QualifyingMetadata createFromAnnotations(Annotation[] annotations) {
     if (annotations == null || annotations.length == 0) return createDefaultQualifyingMetaData();
 
     Set<Annotation> qualifiers = new HashSet<Annotation>();

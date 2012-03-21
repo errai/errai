@@ -33,6 +33,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.context.SessionScoped;
+import javax.enterprise.inject.Alternative;
 import javax.enterprise.inject.Default;
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -82,6 +83,7 @@ import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.injector.ProviderInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadataFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,7 +92,6 @@ import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
-import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.rebind.SourceWriter;
 import com.google.gwt.user.rebind.StringSourceWriter;
 
@@ -523,47 +524,17 @@ public class IOCBootstrapGenerator {
   }
 
   private void defaultConfigureProcessor() {
-    final MetaClass widgetType = MetaClassFactory.get(Widget.class);
+    injectionContext.mapElementType(WiringElementType.SingletonBean, Singleton.class);
+    injectionContext.mapElementType(WiringElementType.SingletonBean, EntryPoint.class);
+    injectionContext.mapElementType(WiringElementType.SingletonBean, Service.class);
 
-    procContext.addSingletonScopeAnnotation(Singleton.class);
-    procContext.addSingletonScopeAnnotation(EntryPoint.class);
-    procContext.addSingletonScopeAnnotation(Service.class);
+    injectionContext.mapElementType(WiringElementType.DependentBean, Dependent.class);
 
-    procFactory.registerHandler(TestMock.class, new JSR330AnnotationHandler<TestMock>() {
-      @Override
-      public boolean handle(InjectableInstance instance, TestMock annotation, IOCProcessingContext context) {
-        injectionContext.addReplacementType(instance.getEnclosingType().getFullyQualifiedName());
-        return false;
-      }
-    });
+    injectionContext.mapElementType(WiringElementType.InjectionPoint, Inject.class);
+    injectionContext.mapElementType(WiringElementType.InjectionPoint, com.google.inject.Inject.class);
 
-    procFactory.registerHandler(Singleton.class, new JSR330AnnotationHandler<Singleton>() {
-      @Override
-      public boolean handle(final InjectableInstance type, Singleton annotation, IOCProcessingContext context) {
-        Injector injector = injectionContext.getInjector(type.getType());
-        injector.getBeanInstance(injectionContext, null);
-        return true;
-      }
-    });
-
-    procFactory.registerHandler(EntryPoint.class, new JSR330AnnotationHandler<EntryPoint>() {
-      @Override
-      public boolean handle(final InjectableInstance type, EntryPoint annotation, IOCProcessingContext context) {
-        Injector injector = injectionContext.getInjector(type.getType());
-        injector.getBeanInstance(injectionContext, null);
-        return true;
-      }
-    });
-
-    procFactory.registerHandler(Service.class, new JSR330AnnotationHandler<Service>() {
-      @Override
-      public boolean handle(final InjectableInstance type, Service annotation, IOCProcessingContext context) {
-        Injector injector = injectionContext.getInjector(type.getType());
-        injector.getBeanInstance(injectionContext, null);
-        return true;
-      }
-    });
-
+    injectionContext.mapElementType(WiringElementType.AlternativeBean, Alternative.class);
+    injectionContext.mapElementType(WiringElementType.TestMockBean, TestMock.class);
   }
 
   public void setUseReflectionStubs(boolean useReflectionStubs) {
