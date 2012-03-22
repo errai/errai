@@ -14,10 +14,13 @@
 
   <dependencies>
 
+    <!-- It is important that the Hibernate dependencies come before the GWT dependencies
+         (or Errai dependencies that transitively include GWT). Otherwise, you get
+         NoSuchMethodError on JPA2 calls like EntityManagerFactory.getMetamodel(). -->
     <dependency>
-      <groupId>org.jboss.errai</groupId>
-      <artifactId>errai-ioc</artifactId>
-      <version>${project.version}</version>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-entitymanager</artifactId>
+      <version>4.1.1.Final</version>
     </dependency>
 
     <dependency>
@@ -27,9 +30,9 @@
     </dependency>
 
     <dependency>
-      <groupId>org.hibernate</groupId>
-      <artifactId>hibernate-jpamodelgen</artifactId>
-      <version>1.2.0.Final</version>
+      <groupId>org.jboss.errai</groupId>
+      <artifactId>errai-ioc</artifactId>
+      <version>${project.version}</version>
     </dependency>
 
     <dependency>
@@ -42,6 +45,12 @@
       <artifactId>gwt-dev</artifactId>
       <scope>provided</scope>
     </dependency>
+    
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava-gwt</artifactId>
+    </dependency>
+    
   </dependencies>
 
   <build>

@@ -1,22 +1,19 @@
 package org.jboss.errai.jpa.gen;
 
 import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
 
-import javax.persistence.Entity;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.Metamodel;
 
 import org.jboss.errai.codegen.framework.Parameter;
-import org.jboss.errai.codegen.framework.Variable;
 import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
-import org.jboss.errai.codegen.framework.builder.ContextualStatementBuilder;
 import org.jboss.errai.codegen.framework.builder.MethodBlockBuilder;
-import org.jboss.errai.codegen.framework.builder.impl.ClassBuilder;
-import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
-import org.jboss.errai.codegen.framework.util.Bool;
 import org.jboss.errai.codegen.framework.util.Implementations;
-import org.jboss.errai.codegen.framework.util.Stmt;
-import org.jboss.errai.common.metadata.MetaDataScanner;
-import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 
 import com.google.gwt.core.ext.Generator;
@@ -30,36 +27,36 @@ public class ErraiEntityManagerGenerator extends Generator {
   public String generate(TreeLogger logger, GeneratorContext context,
       String typeName) throws UnableToCompleteException {
 
-    MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
-    ClassStructureBuilder<?> classBuilder = ClassBuilder.implement(ErraiEntityManager.class);
+    Map<String, String> properties = new HashMap<String, String>();
+    properties.put("hibernate.dialect", "org.hibernate.dialect.HSQLDialect");
+    properties.put("javax.persistence.validation.mode", "none");
+    EntityManagerFactory emf = Persistence.createEntityManagerFactory("ErraiJpaClientTests", properties);
+    System.out.println("EntityManagerFactory is " + emf);
+    EntityManager em = emf.createEntityManager();
+    System.out.println("EntityManager is " + em);
 
-    // mpm = "master persist method"
-    MethodBlockBuilder<?> mpm = classBuilder.publicMethod(void.class, "persist", Parameter.of(Object.class, "entity"));
-
-    for (Class<?> entityType : scanner.getTypesAnnotatedWith(Entity.class, RebindUtils.findTranslatablePackages(context))) {
-      String pemName = persistEntityMethodName(entityType);
-
-      // create persist entity method ("pem") for this entity
-      MethodBlockBuilder<?> pem = classBuilder.publicMethod(void.class, pemName, Parameter.of(entityType, "e"));
-      pem.finish();
-
-      // add conditional call to pem from the master persist method
-      ContextualStatementBuilder entityAsItsOwnType = Stmt.castTo(entityType, Stmt.loadVariable("entity"));
-      mpm.append(Stmt.if_(Bool.instanceOf(Variable.get("entity"), MetaClassFactory.getAsStatement(entityType)))
-          .append(Stmt.loadStatic(classBuilder.getClassDefinition(), "this").invoke(pemName, entityAsItsOwnType))
-          .append(Stmt.returnVoid())
-          .finish());
+    // XXX this is strange: get a NoSuchMethodError on a normal call to getMetamodel, but reflective call works?!
+    Metamodel mm;
+    try {
+      mm = (Metamodel) em.getClass().getMethod("getMetamodel").invoke(em);
+      System.out.println("Metamodel via reflection: " + mm);
+    } catch (Exception e) {
+      UnableToCompleteException ex = new UnableToCompleteException();
+      ex.initCause(e);
+      throw ex;
     }
 
-    ContextualStatementBuilder exceptionMessage =
-        Stmt.load(Implementations.newStringBuilder()
-            .append(Stmt.loadVariable("entity").invoke("getClass"))
-            .append(Stmt.loadLiteral(" is not a known entity type")))
-            .invoke("toString");
+    ClassStructureBuilder<?> classBuilder = Implementations.extend(ErraiEntityManager.class, "GeneratedErraiEntityManager");
 
-    mpm.append(Stmt.throw_(IllegalArgumentException.class, exceptionMessage));
+    // pmm = "populate metamodel method"
+    MethodBlockBuilder<?> pmm = classBuilder.packageMethod(void.class, "populateMetamodel", Parameter.of(Object.class, "entity"));
 
-    mpm.finish();
+    for (EntityType<?> et : mm.getEntities()) {
+      System.out.println(et);
+      //      pmm.append(Stmt.loadClassMember("metamodel").invoke("addEntityType", et));
+    }
+
+    pmm.finish();
 
     String out = classBuilder.toJavaString();
 

@@ -1,6 +1,7 @@
 package org.jboss.errai.jpa.client.local;
 
 import javax.persistence.EntityManager;
+import javax.persistence.metamodel.Metamodel;
 
 /**
  * The Errai specialization of the JPA 2.0 EntityManager interface. An
@@ -9,7 +10,12 @@ import javax.persistence.EntityManager;
  *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
-public interface ErraiEntityManager extends EntityManager {
+public abstract class ErraiEntityManager implements EntityManager {
 
-  // TODO deprecate all the methods we don't implement on the client side
+  final Metamodel metamodel = new ErraiMetamodel();
+
+  @Override
+  public Metamodel getMetamodel() {
+    return metamodel;
+  }
 }
