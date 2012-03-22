@@ -53,6 +53,21 @@ public class Implementations {
             .body();
   }
 
+  /**
+   * Creates a builder for a new class that extends the given superclass. The
+   * new class being built will be in the same package as the given superclass.
+   *
+   * @param superclass
+   *          The class that the class being built extends.
+   * @param implClassName
+   *          The simple name (no package prefix) of the new class to be built.
+   * @return
+   */
+  public static ClassStructureBuilder<?> extend(Class<?> superclass, String implClassName) {
+    return ClassBuilder.define(superclass.getPackage().getName() + "." + implClassName, superclass)
+            .publicScope()
+            .body();
+  }
 
   public static void autoInitializedField(ClassStructureBuilder<?> builder, MetaClass type,
                                           String name, Class<?> implementation) {
@@ -72,7 +87,7 @@ public class Implementations {
   public static StringBuilderBuilder newStringBuilder() {
     return newStringBuilder(64);
   }
-  
+
   public static StringBuilderBuilder newStringBuilder(int length) {
     final ContextualStatementBuilder statementBuilder
             = Stmt.nestedCall(Stmt.newObject(StringBuilder.class).withParameters(length));
