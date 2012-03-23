@@ -15,6 +15,7 @@ import java.util.Set;
 
 import org.jboss.errai.codegen.framework.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder;
+import org.jboss.errai.codegen.framework.exception.CyclicalObjectGraphException;
 import org.jboss.errai.codegen.framework.literal.NullLiteral;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
@@ -93,6 +94,7 @@ public final class SnapshotMaker {
 
         final AnonymousClassStructureBuilder builder = ObjectBuilder.newInstanceOf(typeToExtend, context)
             .extend();
+        unfinishedSnapshots.add(o);
         for (Method method : sortedMethods) {
           if (method.getReturnType().equals(void.class)) {
             builder.publicOverridesMethod(method.getName()).finish();
@@ -106,17 +108,13 @@ public final class SnapshotMaker {
             }
             else if (typesToRecurseOn.contains(method.getReturnType())) {
               if (unfinishedSnapshots.contains(retval)) {
-                throw new UnsupportedOperationException(
-                    "There is a cyclical reference in the object graph. This is not " +
-                    "presently supported. Objects involved in the cycle are: " + unfinishedSnapshots);
+                throw new CyclicalObjectGraphException(unfinishedSnapshots);
               }
-              unfinishedSnapshots.add(o);
               System.out.println("Recursing on generate. unfinishedSnapshots=" + unfinishedSnapshots);
 
               // use Stmt.create(context) to pass the context along.
               methodBody = Stmt.create(subContext).nestedCall(makeSnapshotAsSubclass(
                   retval, method.getReturnType(), typesToRecurseOn, existingSnapshots, unfinishedSnapshots)).returnValue();
-              unfinishedSnapshots.remove(o);
             }
             else {
               methodBody = Stmt.load(retval).returnValue();
@@ -133,7 +131,9 @@ public final class SnapshotMaker {
           }
         }
 
-        return generatedCache = prettyPrintJava(builder.finish().toJavaString());
+        generatedCache = prettyPrintJava(builder.finish().toJavaString());
+        unfinishedSnapshots.remove(o);
+        return generatedCache;
       }
 
       @Override

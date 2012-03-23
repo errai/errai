@@ -1,17 +1,20 @@
 package org.jboss.errai.codegen.framework.tests;
 
+import static org.junit.Assert.assertTrue;
+
+import java.util.Arrays;
+
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.SnapshotMaker;
+import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.exception.CyclicalObjectGraphException;
 import org.jboss.errai.codegen.framework.tests.model.Person;
 import org.jboss.errai.codegen.framework.tests.model.PersonImpl;
 import org.jboss.errai.codegen.framework.tests.model.SnapshotInterfaceWithCollections;
 import org.jboss.errai.codegen.framework.tests.model.SnapshotInterfaceWithCollectionsImpl;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
-
-import java.util.Arrays;
 
 // Note: extends from AbstractCodeGenTest to inherit overridden assertEquals(String, String) methods which are whitespace
 //       insensitive.
@@ -21,8 +24,10 @@ public class SnapshotMakerTest extends AbstractCodegenTest {
   public void testGenerateSnapshotOfMethod() throws Exception {
     Person mother = new PersonImpl("mom", 30, null);
     Person child = new PersonImpl("kid", 5, mother);
+    Statement snapshotStmt = SnapshotMaker.makeSnapshotAsSubclass(child, Person.class, Person.class);
+
     final String generated
-            = SnapshotMaker.makeSnapshotAsSubclass(child, Person.class, Person.class).generate(Context.create());
+            = snapshotStmt.generate(Context.create());
 
     final String expectedValue =
             "new org.jboss.errai.codegen.framework.tests.model.Person() {\n" +
@@ -48,22 +53,24 @@ public class SnapshotMakerTest extends AbstractCodegenTest {
                     "}";
 
     assertEquals(expectedValue, generated);
+
   }
 
   // FIXME this test is failing now, but Mike wants me to push anyway
   @Test
-  @Ignore
   public void testNoStackOverflowOnObjectCycle() {
     PersonImpl cycle1 = new PersonImpl("cycle1", 30, null);
     Person cycle2 = new PersonImpl("cycle2", 5, cycle1);
     cycle1.setMother(cycle2);
 
     try {
-      System.out.println(SnapshotMaker.makeSnapshotAsSubclass(cycle2, Person.class, Person.class).generate(Context.create()));
+      Statement snapshotStmt = SnapshotMaker.makeSnapshotAsSubclass(cycle2, Person.class, Person.class);
+      System.out.println(snapshotStmt.generate(Context.create()));
       Assert.fail("Instance cycle was not detected");
     }
-    catch (UnsupportedOperationException e) {
-      // expected
+    catch (CyclicalObjectGraphException e) {
+      assertTrue(e.getObjectsInvolvedInCycle().contains(cycle1));
+      assertTrue(e.getObjectsInvolvedInCycle().contains(cycle2));
     }
   }
 
