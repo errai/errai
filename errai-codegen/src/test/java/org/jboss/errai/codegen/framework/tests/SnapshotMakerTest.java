@@ -75,9 +75,9 @@ public class SnapshotMakerTest extends AbstractCodegenTest {
    */
   @Test
   public void testCollectionsLiteralizableInSnapshots() throws Exception {
-    Person jonathan = new PersonImpl("Jonathan F.", 20, null);
-    Person christian = new PersonImpl("Christian S.", 20, null);
-    Person mike = new PersonImpl("Mike B.", 20, null);
+    Person jonathan = new PersonImpl("Jonathan F.", 20, new PersonImpl("Jonathans's Parent", 50, null));
+    Person christian = new PersonImpl("Christian S.", 20, new PersonImpl("Christians's Parent", 50, null));
+    Person mike = new PersonImpl("Mike B.", 0, new PersonImpl("Mike's Parent", 50, null));
 
     SnapshotInterfaceWithCollections snapshot
             = new SnapshotInterfaceWithCollectionsImpl(Arrays.asList(jonathan, christian, mike));
@@ -102,7 +102,17 @@ public class SnapshotMakerTest extends AbstractCodegenTest {
                     "            return 20;\n" +
                     "          }\n" +
                     "          public org.jboss.errai.codegen.framework.tests.model.Person getMother() {\n" +
-                    "            return null;\n" +
+                    "            return new org.jboss.errai.codegen.framework.tests.model.Person() {\n" +
+                    "              public int getAge() {\n" +
+                    "                return 50;\n" +
+                    "              }\n" +
+                    "              public org.jboss.errai.codegen.framework.tests.model.Person getMother() {\n" +
+                    "                return null;\n" +
+                    "              }\n" +
+                    "              public String getName() {\n" +
+                    "                return \"Jonathans's Parent\";\n" +
+                    "              }\n" +
+                    "            };\n" +
                     "          }\n" +
                     "          public String getName() {\n" +
                     "            return \"Jonathan F.\";\n" +
@@ -113,7 +123,17 @@ public class SnapshotMakerTest extends AbstractCodegenTest {
                     "            return 20;\n" +
                     "          }\n" +
                     "          public org.jboss.errai.codegen.framework.tests.model.Person getMother() {\n" +
-                    "            return null;\n" +
+                    "            return new org.jboss.errai.codegen.framework.tests.model.Person() {\n" +
+                    "              public int getAge() {\n" +
+                    "                return 50;\n" +
+                    "              }\n" +
+                    "              public org.jboss.errai.codegen.framework.tests.model.Person getMother() {\n" +
+                    "                return null;\n" +
+                    "              }\n" +
+                    "              public String getName() {\n" +
+                    "                return \"Christians's Parent\";\n" +
+                    "              }\n" +
+                    "            };\n" +
                     "          }\n" +
                     "          public String getName() {\n" +
                     "            return \"Christian S.\";\n" +
@@ -121,10 +141,20 @@ public class SnapshotMakerTest extends AbstractCodegenTest {
                     "        });\n" +
                     "        add(new org.jboss.errai.codegen.framework.tests.model.Person() {\n" +
                     "          public int getAge() {\n" +
-                    "            return 20;\n" +
+                    "            return 0;\n" +
                     "          }\n" +
                     "          public org.jboss.errai.codegen.framework.tests.model.Person getMother() {\n" +
-                    "            return null;\n" +
+                    "            return new org.jboss.errai.codegen.framework.tests.model.Person() {\n" +
+                    "              public int getAge() {\n" +
+                    "                return 50;\n" +
+                    "              }\n" +
+                    "              public org.jboss.errai.codegen.framework.tests.model.Person getMother() {\n" +
+                    "                return null;\n" +
+                    "              }\n" +
+                    "              public String getName() {\n" +
+                    "                return \"Mike's Parent\";\n" +
+                    "              }\n" +
+                    "            };\n" +
                     "          }\n" +
                     "          public String getName() {\n" +
                     "            return \"Mike B.\";\n" +
