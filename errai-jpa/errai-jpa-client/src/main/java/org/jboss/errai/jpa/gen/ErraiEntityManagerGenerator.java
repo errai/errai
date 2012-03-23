@@ -9,6 +9,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.Metamodel;
+import javax.persistence.metamodel.SingularAttribute;
 
 import org.jboss.errai.codegen.framework.Parameter;
 import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
@@ -52,7 +53,19 @@ public class ErraiEntityManagerGenerator extends Generator {
     MethodBlockBuilder<?> pmm = classBuilder.packageMethod(void.class, "populateMetamodel", Parameter.of(Object.class, "entity"));
 
     for (EntityType<?> et : mm.getEntities()) {
-      System.out.println(et);
+
+      SingularAttribute<?, ?> id = null;
+      SingularAttribute<?, ?> version = null;
+      for (SingularAttribute<?, ?> attrib : et.getSingularAttributes()) {
+        if (attrib.isId()) id = new ErraiSingularAttribute(et.getName(), et.get);
+        if (attrib.isVersion()) version = attrib;
+      }
+
+
+
+      metamodel.addEntityType(new ErraiEntityType(id, version, et.getSupertype()));
+
+      //Stmt.loadVariable("metamodel").invoke("addEntityType", );
       //      pmm.append(Stmt.loadClassMember("metamodel").invoke("addEntityType", et));
     }
 
@@ -84,4 +97,6 @@ public class ErraiEntityManagerGenerator extends Generator {
   static String persistEntityMethodName(Class<?> forType) {
     return "persist_" + forType.getCanonicalName().replace('.', '_');
   }
+
+
 }
