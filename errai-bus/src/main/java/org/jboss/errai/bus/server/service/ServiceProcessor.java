@@ -142,16 +142,7 @@ public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
           }
         }
 
-        RolesRequiredRule rule = null;
-        if (clazz.isAnnotationPresent(RequireRoles.class)) {
-          rule = new RolesRequiredRule(clazz.getAnnotation(RequireRoles.class).value(), context.getBus());
-        }
-        else if (clazz.isAnnotationPresent(RequireAuthentication.class)) {
-          rule = new RolesRequiredRule(new HashSet<Object>(), context.getBus());
-        }
-        if (rule != null) {
-          context.getBus().addRule(svcName, rule);
-        }
+
       }
 
       if (svc == null) {
@@ -188,12 +179,26 @@ public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
         }
       }
 
+      RolesRequiredRule rule = null;
+      if (loadClass.isAnnotationPresent(RequireRoles.class)) {
+        rule = new RolesRequiredRule(loadClass.getAnnotation(RequireRoles.class).value(), context.getBus());
+      }
+      else if (loadClass.isAnnotationPresent(RequireAuthentication.class)) {
+        rule = new RolesRequiredRule(new HashSet<Object>(), context.getBus());
+      }
+
+
       if (!epts.isEmpty()) {
+        final String rpcEndpointName = loadClass.getSimpleName() + ":RPC";
         if (local) {
-          context.getBus().subscribeLocal(loadClass.getSimpleName() + ":RPC", new RemoteServiceCallback(epts));
+          context.getBus().subscribeLocal(rpcEndpointName, new RemoteServiceCallback(epts));
         }
         else {
-          context.getBus().subscribe(loadClass.getSimpleName() + ":RPC", new RemoteServiceCallback(epts));
+          context.getBus().subscribe(rpcEndpointName, new RemoteServiceCallback(epts));
+        }
+
+        if (rule != null) {
+          context.getBus().addRule(rpcEndpointName, rule);
         }
       }
 
@@ -205,6 +210,10 @@ public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
         else {
           context.getBus().subscribe(svcName, new CommandBindingsCallback(commandPoints, svc));
         }
+      }
+
+      if (rule != null) {
+        context.getBus().addRule(svcName, rule);
       }
     }
   }
