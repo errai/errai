@@ -13,13 +13,41 @@ import org.junit.Test;
 
 import java.util.Arrays;
 
+// Note: extends from AbstractCodeGenTest to inherit overridden assertEquals(String, String) methods which are whitespace
+//       insensitive.
 public class SnapshotMakerTest extends AbstractCodegenTest {
 
   @Test
   public void testGenerateSnapshotOfMethod() throws Exception {
     Person mother = new PersonImpl("mom", 30, null);
     Person child = new PersonImpl("kid", 5, mother);
-    System.out.println(SnapshotMaker.makeSnapshotAsSubclass(child, Person.class, Person.class).generate(Context.create()));
+    final String generated
+            = SnapshotMaker.makeSnapshotAsSubclass(child, Person.class, Person.class).generate(Context.create());
+
+    final String expectedValue =
+            "new org.jboss.errai.codegen.framework.tests.model.Person() {\n" +
+                    "  public int getAge() {\n" +
+                    "    return 5;\n" +
+                    "  }\n" +
+                    "  public org.jboss.errai.codegen.framework.tests.model.Person getMother() {\n" +
+                    "    return new org.jboss.errai.codegen.framework.tests.model.Person() {\n" +
+                    "      public int getAge() {\n" +
+                    "        return 30;\n" +
+                    "      }\n" +
+                    "      public org.jboss.errai.codegen.framework.tests.model.Person getMother() {\n" +
+                    "        return null;\n" +
+                    "      }\n" +
+                    "      public String getName() {\n" +
+                    "        return \"mom\";\n" +
+                    "      }\n" +
+                    "    };\n" +
+                    "  }\n" +
+                    "  public String getName() {\n" +
+                    "    return \"kid\";\n" +
+                    "  }\n" +
+                    "}";
+
+    assertEquals(expectedValue, generated);
   }
 
   // FIXME this test is failing now, but Mike wants me to push anyway

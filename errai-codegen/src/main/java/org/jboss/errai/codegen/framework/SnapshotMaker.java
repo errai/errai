@@ -26,6 +26,8 @@ public final class SnapshotMaker {
 
   private SnapshotMaker() {}
 
+
+
   /**
    *
    * @param o
@@ -36,27 +38,11 @@ public final class SnapshotMaker {
   public static Statement makeSnapshotAsSubclass(final Object o,
                                                  final Class<?> typeToExtend,
                                                  final Class<?> ... typesToRecurseOn) {
-    return makeSnapshotAsSubclass(Context.create(), o, typeToExtend, typesToRecurseOn);
-  }
-
-  /**
-   *
-   * @param o
-   * @param typeToExtend
-   * @param typesToRecurseOn
-   * @return
-   */
-  public static Statement makeSnapshotAsSubclass(final Context context,
-                                                 final Object o,
-                                                 final Class<?> typeToExtend,
-                                                 final Class<?> ... typesToRecurseOn) {
-    return makeSnapshotAsSubclass(context,
-        o, typeToExtend, new HashSet<Class<?>>(Arrays.asList(typesToRecurseOn)),
+    return makeSnapshotAsSubclass(o, typeToExtend, new HashSet<Class<?>>(Arrays.asList(typesToRecurseOn)),
         new IdentityHashMap<Object, Statement>(), new IdentityHashSet<Object>());
   }
 
   private static Statement makeSnapshotAsSubclass(
-      final Context context,
       final Object o,
       final Class<?> typeToExtend,
       final Set<Class<?>> typesToRecurseOn,
@@ -126,7 +112,9 @@ public final class SnapshotMaker {
               }
               unfinishedSnapshots.add(o);
               System.out.println("Recursing on generate. unfinishedSnapshots=" + unfinishedSnapshots);
-              methodBody = Stmt.nestedCall(makeSnapshotAsSubclass(subContext,
+
+              // use Stmt.create(context) to pass the context along.
+              methodBody = Stmt.create(subContext).nestedCall(makeSnapshotAsSubclass(
                   retval, method.getReturnType(), typesToRecurseOn, existingSnapshots, unfinishedSnapshots)).returnValue();
               unfinishedSnapshots.remove(o);
             }
