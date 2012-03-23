@@ -19,6 +19,7 @@ package org.jboss.errai.codegen.framework.tests.literals;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.literal.LiteralFactory;
 import org.jboss.errai.codegen.framework.tests.AbstractCodegenTest;
+import org.jboss.errai.codegen.framework.util.Stmt;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -104,7 +105,7 @@ public class LiteralTest extends AbstractCodegenTest {
             "    add(\"foo\");\n" +
             "    add(\"bar\");\n" +
             "  }\n" +
-            "}", LiteralFactory.getLiteral(s).generate(Context.create()));
+            "}", Stmt.load(s).generate(Context.create()));
 
   }
 
@@ -119,7 +120,7 @@ public class LiteralTest extends AbstractCodegenTest {
             "    add(\"foo\");\n" +
             "    add(\"bar\");\n" +
             "  }\n" +
-            "}", LiteralFactory.getLiteral(s).generate(Context.create()));
+            "}", Stmt.load(s).generate(Context.create()));
 
   }
 
@@ -134,7 +135,7 @@ public class LiteralTest extends AbstractCodegenTest {
             "    put(\"foo\", \"fooz\");\n" +
             "    put(\"bar\", \"barz\");\n" +
             "  }\n" +
-            "}", LiteralFactory.getLiteral(s).generate(Context.create()));
+            "}", Stmt.load(s).generate(Context.create()));
 
   }
 }
