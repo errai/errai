@@ -20,6 +20,7 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
   }
 
   public void testBusReadyEventObserver() {
+    delayTestFinish(60000);
     CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {

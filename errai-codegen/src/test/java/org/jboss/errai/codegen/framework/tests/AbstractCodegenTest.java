@@ -23,7 +23,7 @@ import org.jboss.errai.codegen.framework.builder.impl.StatementBuilder;
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public abstract class AbstractStatementBuilderTest {
+public abstract class AbstractCodegenTest {
 
   /**
    * assertEquals, less sensitive to indentation differences.

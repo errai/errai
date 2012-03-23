@@ -18,6 +18,7 @@ package org.jboss.errai.ioc.rebind.ioc.injector.api;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import org.jboss.errai.codegen.framework.meta.HasAnnotations;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaField;
@@ -53,18 +54,29 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static java.util.Collections.unmodifiableCollection;
+
 public class InjectionContext {
   private IOCProcessingContext processingContext;
 
+  private Multimap<WiringElementType, Class<? extends Annotation>> elementBindings
+          = HashMultimap.create();
+
+  // do not refactor to a MultiMap. the resolution algorithm has dynamic replacement of injectors that is difficult
+  // to achieve with a MultiMap
   private Map<MetaClass, List<Injector>> injectors = new LinkedHashMap<MetaClass, List<Injector>>();
+
   private Multimap<MetaClass, Injector> proxiedInjectors = HashMultimap.create();
   private Multimap<MetaClass, MetaClass> cyclingTypes = HashMultimap.create();
 
   private Set<String> enabledAlternatives = new HashSet<String>();
   private Set<String> enabledReplacements = new HashSet<String>();
 
-  private Map<Class<? extends Annotation>, List<IOCDecoratorExtension>> decorators = new LinkedHashMap<Class<? extends Annotation>, List<IOCDecoratorExtension>>();
-  private Map<ElementType, Set<Class<? extends Annotation>>> decoratorsByElementType = new LinkedHashMap<ElementType, Set<Class<? extends Annotation>>>();
+  private Multimap<Class<? extends Annotation>, IOCDecoratorExtension> decorators
+          = HashMultimap.create();
+  private Multimap<ElementType, Class<? extends Annotation>> decoratorsByElementType
+          = HashMultimap.create();
+
   private List<InjectionTask> deferredInjectionTasks = new ArrayList<InjectionTask>();
   protected List<Runnable> deferredTasks = new ArrayList<Runnable>();
 
@@ -275,7 +287,10 @@ public class InjectionContext {
       injectors.put(type.getErased(), injectorList = new ArrayList<Injector>());
 
       for (MetaClass iface : type.getInterfaces()) {
-        _registerInjector(iface, new QualifiedTypeInjectorDelegate(iface, injector, iface.getParameterizedType()), false);
+        QualifiedTypeInjectorDelegate injectorDelegate
+                = new QualifiedTypeInjectorDelegate(iface, injector, iface.getParameterizedType());
+
+        _registerInjector(iface, injectorDelegate, false);
       }
     }
     else if (allowOverride) {
@@ -304,9 +319,6 @@ public class InjectionContext {
   }
 
   public void registerDecorator(IOCDecoratorExtension<?> iocExtension) {
-    if (!decorators.containsKey(iocExtension.decoratesWith()))
-      decorators.put(iocExtension.decoratesWith(), new ArrayList<IOCDecoratorExtension>());
-
     decorators.get(iocExtension.decoratesWith()).add(iocExtension);
   }
 
@@ -316,18 +328,18 @@ public class InjectionContext {
   }
 
   public IOCDecoratorExtension[] getDecorator(Class<? extends Annotation> annotation) {
-    List<IOCDecoratorExtension> decs = decorators.get(annotation);
+    Collection<IOCDecoratorExtension> decs = decorators.get(annotation);
     IOCDecoratorExtension[] da = new IOCDecoratorExtension[decs.size()];
     decs.toArray(da);
     return da;
   }
 
-  public Set<Class<? extends Annotation>> getDecoratorAnnotationsBy(ElementType type) {
+  public Collection<Class<? extends Annotation>> getDecoratorAnnotationsBy(ElementType type) {
     if (decoratorsByElementType.size() == 0) {
       sortDecorators();
     }
     if (decoratorsByElementType.containsKey(type)) {
-      return Collections.unmodifiableSet(decoratorsByElementType.get(type));
+      return unmodifiableCollection(decoratorsByElementType.get(type));
     }
     else {
       return Collections.emptySet();
@@ -338,9 +350,6 @@ public class InjectionContext {
     for (Class<? extends Annotation> a : getDecoratorAnnotations()) {
       if (a.isAnnotationPresent(Target.class)) {
         for (ElementType type : a.getAnnotation(Target.class).value()) {
-          if (!decoratorsByElementType.containsKey(type)) {
-            decoratorsByElementType.put(type, new HashSet<Class<? extends Annotation>>());
-          }
           decoratorsByElementType.get(type).add(a);
         }
       }
@@ -410,7 +419,7 @@ public class InjectionContext {
     if (!privateFieldsToExpose.containsKey(field)) {
       privateFieldsToExpose.put(field, accessType);
     }
-    else if (privateFieldsToExpose.get(field) != accessType){
+    else if (privateFieldsToExpose.get(field) != accessType) {
       accessType = PrivateAccessType.Both;
     }
     privateFieldsToExpose.put(field, accessType);
@@ -433,7 +442,7 @@ public class InjectionContext {
   }
 
   public Collection<MetaMethod> getPrivateMethodsToExpose() {
-    return Collections.unmodifiableCollection(privateMethodsToExpose);
+    return unmodifiableCollection(privateMethodsToExpose);
   }
 
   public boolean hasType(MetaClass cls) {
@@ -441,12 +450,12 @@ public class InjectionContext {
   }
 
   public void addType(MetaClass type) {
-    registerInjector(new TypeInjector(type, getProcessingContext()));
+    registerInjector(new TypeInjector(type, this));
   }
 
   public void addPsuedoScopeForType(MetaClass type) {
-    TypeInjector inj = new TypeInjector(type, getProcessingContext());
-    inj.setPsuedo(true);
+    TypeInjector inj = new TypeInjector(type, this);
+    inj.setReplaceable(true);
     registerInjector(inj);
   }
 
@@ -464,6 +473,38 @@ public class InjectionContext {
       throw new RuntimeException("ambiguous replacement type: " + name);
     }
   }
+
+  public void mapElementType(WiringElementType type, Class<? extends Annotation> annotationType) {
+    elementBindings.put(type, annotationType);
+  }
+
+  public Collection<Class<? extends Annotation>> getAnnotationsForElementType(WiringElementType type) {
+    return unmodifiableCollection(elementBindings.get(type));
+  }
+
+  public boolean isElementType(WiringElementType type, HasAnnotations hasAnnotations) {
+    for (Annotation a : hasAnnotations.getAnnotations()) {
+      if (getAnnotationsForElementType(type).contains(a.annotationType())) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public boolean isElementType(WiringElementType type, com.google.gwt.core.ext.typeinfo.HasAnnotations hasAnnotations) {
+    for (Annotation a : hasAnnotations.getAnnotations()) {
+      if (getAnnotationsForElementType(type).contains(a.annotationType())) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+
+  public Collection<Map.Entry<WiringElementType, Class<? extends  Annotation>>> getAllElementMappings() {
+    return unmodifiableCollection(elementBindings.entries());
+  }
+
 
   public void setAttribute(String name, Object value) {
     attributeMap.put(name, value);

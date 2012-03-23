@@ -53,7 +53,7 @@ import org.junit.Test;
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class StatementBuilderTest extends AbstractStatementBuilderTest {
+public class StatementBuilderTest extends AbstractCodegenTest {
 
   @Test
   public void testDeclareVariableWithExactTypeProvided() {

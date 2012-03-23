@@ -39,7 +39,7 @@ import org.junit.Test;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class IfBlockBuilderTest extends AbstractStatementBuilderTest implements IfBlockBuilderTestResult {
+public class IfBlockBuilderTest extends AbstractCodegenTest implements IfBlockBuilderTestResult {
 
   @Test
   public void testEmptyIfBlockUsingNoRhs() {

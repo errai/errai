@@ -17,6 +17,7 @@
 package org.jboss.errai.ioc.client.container;
 
 import java.lang.annotation.Annotation;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -52,11 +53,20 @@ public abstract class AbstractIOCBean<T> implements IOCBeanDef<T> {
    * @param annotations a set of annotations to compare
    * @return true if matches
    */
-  public boolean matches(Set<Annotation> annotations) {
-    return qualifiers.containsAll(annotations);
+  public boolean matches(final Set<Annotation> annotations) {
+    Set<String> matchFrom = new HashSet<String>();
+    Set<String> matchTo = new HashSet<String>();
+
+    for (Annotation a :qualifiers) {
+      matchFrom.add(a.annotationType().getName());
+    }
+
+    for (Annotation a : annotations) {
+      matchTo.add(a.annotationType().getName());
+    }
+
+    return matchFrom.containsAll(matchTo);
   }
   
   public abstract T getInstance();
-
-
 }

@@ -27,8 +27,8 @@ import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.graph.SortUnit;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 
-import javax.inject.Inject;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.HashSet;
@@ -44,16 +44,16 @@ public abstract class JSR330AnnotationHandler<T extends Annotation> implements A
   }
 
   @Override
-  public Set<SortUnit> checkDependencies(DependencyControl control, InjectableInstance instance,
-                                         T annotation,
-                                         IOCProcessingContext context) {
+  public Set<SortUnit> getDependencies(DependencyControl control, InjectableInstance instance,
+                                       T annotation,
+                                       IOCProcessingContext context) {
 
     Set<SortUnit> dependencies = new HashSet<SortUnit>();
     MetaClass mc = instance.getType();
 
     do {
       for (MetaField field : mc.getDeclaredFields()) {
-        if (field.isAnnotationPresent(Inject.class)) {
+        if (instance.getInjectionContext().isElementType(WiringElementType.InjectionPoint, field)) {
 
           dependencies.add(new SortUnit(field.getType(), InjectUtil.getQualifiersFromAnnotations(field.getAnnotations())));
           dependencies.addAll(fillInInterface(field.getType().asClass()));
@@ -61,7 +61,7 @@ public abstract class JSR330AnnotationHandler<T extends Annotation> implements A
       }
 
       for (MetaMethod method : mc.getDeclaredMethods()) {
-        if (method.isAnnotationPresent(Inject.class)) {
+        if (instance.getInjectionContext().isElementType(WiringElementType.InjectionPoint, method)) {
           for (MetaParameter parm : method.getParameters()) {
             dependencies.add(new SortUnit(parm.getType(), InjectUtil.getQualifiersFromAnnotations(parm.getAnnotations())));
             dependencies.addAll(fillInInterface(parm.getType().asClass()));
@@ -70,7 +70,7 @@ public abstract class JSR330AnnotationHandler<T extends Annotation> implements A
       }
 
       for (MetaConstructor constructor : mc.getConstructors()) {
-        if (constructor.isAnnotationPresent(Inject.class)) {
+        if (instance.getInjectionContext().isElementType(WiringElementType.InjectionPoint, constructor)) {
           for (MetaParameter parm : constructor.getParameters()) {
             dependencies.add(new SortUnit(parm.getType(), InjectUtil.getQualifiersFromAnnotations(parm.getAnnotations())));
             dependencies.addAll(fillInInterface(parm.getType().asClass()));

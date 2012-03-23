@@ -19,9 +19,11 @@ package org.jboss.errai.ioc.rebind.ioc.injector;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaParameterizedType;
+import org.jboss.errai.codegen.framework.util.Refs;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.RegistrationHook;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 
 /**
@@ -35,12 +37,21 @@ public class QualifiedTypeInjectorDelegate implements Injector {
     this.type = type;
     this.delegate = delegate;
     delegate.setQualifyingTypeInformation(parameterizedType);
+
+    delegate.addRegistrationHook(
+           new RegistrationHook() {
+             @Override
+             public void onRegister(InjectionContext context, Statement beanValue) {
+               registerWithBeanManager(context, beanValue);
+             }
+           }
+    );
+
   }
 
   @Override
   public Statement getBeanInstance(InjectionContext injectContext, InjectableInstance injectableInstance) {
     Statement val = _getType(injectContext, injectableInstance);
-    registerWithBeanManager(injectableInstance.getInjectionContext(), val);
     return val;
   }
 
@@ -130,11 +141,6 @@ public class QualifiedTypeInjectorDelegate implements Injector {
   }
 
   @Override
-  public void setQualifyingMetadata(QualifyingMetadata qualifyingMetadata) {
-    delegate.setQualifyingMetadata(qualifyingMetadata);
-  }
-
-  @Override
   public void setPostInitCallbackVar(String var) {
     delegate.setPostInitCallbackVar(var);
   }
@@ -144,16 +150,24 @@ public class QualifiedTypeInjectorDelegate implements Injector {
     delegate.setPreDestroyCallbackVar(preDestroyCallbackVar);
   }
 
+  @Override
+  public String getCreationalCallbackVarName() {
+    return delegate.getCreationalCallbackVarName();
+  }
+
+  @Override
+  public void setCreationalCallbackVarName(String creationalCallbackVarName) {
+    delegate.setCreationalCallbackVarName(creationalCallbackVarName);
+  }
+
+
+  @Override
+  public void addRegistrationHook(RegistrationHook registrationHook) {
+    delegate.addRegistrationHook(registrationHook);
+  }
+
   private void registerWithBeanManager(InjectionContext context, Statement valueRef) {
     if (InjectUtil.checkIfTypeNeedsAddingToBeanStore(context, this)) {
-      Statement initCallbackRef;
-      if (getPostInitCallbackVar() == null) {
-        initCallbackRef = Stmt.load(null);
-      }
-      else {
-        initCallbackRef = Stmt.loadVariable(getPostInitCallbackVar());
-      }
-
       QualifyingMetadata md = delegate.getQualifyingMetadata();
       if (md == null) {
         md = context.getProcessingContext().getQualifyingMetadataFactory().createDefaultMetadata();
@@ -161,7 +175,8 @@ public class QualifiedTypeInjectorDelegate implements Injector {
 
       context.getProcessingContext().appendToEnd(
               Stmt.loadVariable(context.getProcessingContext().getContextVariableReference())
-                      .invoke("addSingletonBean", type, valueRef, md.render(), initCallbackRef));
+                      .invoke("addBean", type, Refs.get(delegate.getCreationalCallbackVarName()),
+                              isSingleton() ? valueRef : null , md.render()));
     }
   }
 

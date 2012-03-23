@@ -5,6 +5,7 @@ import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaParameterizedType;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.RegistrationHook;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 
 /**
@@ -41,15 +42,19 @@ public interface Injector {
 
   void setPreDestroyCallbackVar(String preDestroyCallbackVar);
 
+  public String getCreationalCallbackVarName();
+
+  public void setCreationalCallbackVarName(String creationalCallbackVarName);
+
   boolean metadataMatches(Injector injector);
 
   boolean matches(MetaParameterizedType parameterizedType, QualifyingMetadata qualifyingMetadata);
 
   QualifyingMetadata getQualifyingMetadata();
 
-  void setQualifyingMetadata(QualifyingMetadata qualifyingMetadata);
-
   MetaParameterizedType getQualifyingTypeInformation();
 
   void setQualifyingTypeInformation(MetaParameterizedType qualifyingTypeInformation);
+
+  void addRegistrationHook(RegistrationHook registrationHook);
 }

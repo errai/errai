@@ -29,6 +29,7 @@ import org.jboss.errai.codegen.framework.ThrowsDeclaration;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
 import org.jboss.errai.codegen.framework.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.framework.builder.MethodBuildCallback;
+import org.jboss.errai.codegen.framework.builder.MethodCommentBuilder;
 import org.jboss.errai.codegen.framework.literal.LiteralFactory;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
@@ -38,8 +39,9 @@ import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class MethodBlockBuilderImpl<T> extends BlockBuilderImpl<T>
-        implements MethodBlockBuilder<T> {
+        implements MethodCommentBuilder<T> {
 
+  protected String methodComment;
   protected ThrowsDeclaration throwsDeclaration = ThrowsDeclaration.none();
   protected MethodBuildCallback<T> callback;
   protected DefParameters defParameters;
@@ -53,6 +55,12 @@ public class MethodBlockBuilderImpl<T> extends BlockBuilderImpl<T>
   public MethodBlockBuilderImpl(BlockStatement blockStatement, MethodBuildCallback<T> callback) {
     this.blockStatement = blockStatement;
     this.callback = callback;
+  }
+
+  @Override
+  public MethodBlockBuilder<T> methodComment(String comment) {
+    methodComment = comment;
+    return this;
   }
 
   @Override
@@ -132,7 +140,7 @@ public class MethodBlockBuilderImpl<T> extends BlockBuilderImpl<T>
   @Override
   public T finish() {
     if (callback != null) {
-      return callback.callback(blockStatement, defParameters, modifiers, throwsDeclaration);
+      return callback.callback(blockStatement, defParameters, modifiers, throwsDeclaration, methodComment);
     }
     return null;
   }

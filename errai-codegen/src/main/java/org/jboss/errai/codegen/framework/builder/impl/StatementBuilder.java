@@ -20,6 +20,7 @@ import javax.enterprise.util.TypeLiteral;
 
 import org.jboss.errai.codegen.framework.BooleanExpression;
 import org.jboss.errai.codegen.framework.Cast;
+import org.jboss.errai.codegen.framework.Comment;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.Variable;
@@ -381,4 +382,8 @@ public class StatementBuilder extends AbstractStatementBuilder implements Statem
     return nestedCall(Cast.to(type, statement));
   }
 
+  @Override
+  public Statement codeComment(String comment) {
+    return new Comment(comment);
+  }
 }

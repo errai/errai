@@ -33,7 +33,7 @@ import org.junit.Test;
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class AnonymousClassStructureBuilderTest extends AbstractStatementBuilderTest {
+public class AnonymousClassStructureBuilderTest extends AbstractCodegenTest {
 
   @Test
   public void testAnonymousAnnotation() {

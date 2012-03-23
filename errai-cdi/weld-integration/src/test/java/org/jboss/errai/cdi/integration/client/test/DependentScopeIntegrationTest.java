@@ -62,22 +62,27 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
     CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
-        ApplicationScopedBean beanA = IOC.getBeanManager()
-                .lookupBean(ApplicationScopedBean.class).getInstance();
+        try {
+          ApplicationScopedBean beanA = IOC.getBeanManager()
+                  .lookupBean(ApplicationScopedBean.class).getInstance();
 
-        DependentScopedBean b1 = beanA.getBean1();
-        DependentScopedBean b2 = beanA.getBean2();
-        DependentScopedBean b3 = beanA.getBean3();
-        DependentScopedBeanWithDependencies b4 = beanA.getBeanWithDependencies();
+          DependentScopedBean b1 = beanA.getBean1();
+          DependentScopedBean b2 = beanA.getBean2();
+          DependentScopedBean b3 = beanA.getBean3();
+          DependentScopedBeanWithDependencies b4 = beanA.getBeanWithDependencies();
 
-        assertTrue("dependent scoped semantics broken", b2.getInstance() > b1.getInstance());
-        assertTrue("dependent scoped semantics broken", b3.getInstance() > b2.getInstance());
+          assertTrue("dependent scoped semantics broken", b2.getInstance() > b1.getInstance());
+          assertTrue("dependent scoped semantics broken", b3.getInstance() > b2.getInstance());
 
-        assertNotNull("dependent scoped bean with injections was not injected", b4);
-        assertNotNull("dependent scoped beans own injections not injected", b4.getBean());
-        assertTrue("dependent scoped semantics broken", b4.getBean().getInstance() > b3.getInstance());
+          assertNotNull("dependent scoped bean with injections was not injected", b4);
+          assertNotNull("dependent scoped beans own injections not injected", b4.getBean());
+          assertTrue("dependent scoped semantics broken", b4.getBean().getInstance() > b3.getInstance());
 
-        finishTest();
+          finishTest();
+        }
+        catch (Throwable t) {
+          t.printStackTrace();
+        }
       }
     });
 
@@ -135,8 +140,8 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
         ServiceC serviceC = IOC.getBeanManager()
                 .lookupBean(ServiceC.class).getInstance();
 
-        assertSame("ApplicationScopedBean should be same instance even in dependent scoped",
-                serviceC.getBean(), applicationScopedBean);
+        assertEquals("ApplicationScopedBean should be same instance even in dependent scoped",
+                applicationScopedBean.getBeanId(), serviceC.getBean().getBeanId());
 
         finishTest();
       }
@@ -280,6 +285,8 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
         assertTrue("pre-destroy method not called", bean.isPreDestroyCalled());
         assertFalse("ApplicationScopedBean's predestruct method must NOT be called",
                 bean.getApplicationScopedBean().isPreDestroyCalled());
+
+        assertFalse("bean should no longer be managed", IOC.getBeanManager().isManaged(bean));
 
         finishTest();
       }

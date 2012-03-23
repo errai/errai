@@ -20,29 +20,43 @@ import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessorFactory;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class Rule {
-  public static List<RuleDef> before(Class<? extends Annotation>... annos) {
-
-    List<RuleDef> rules = new ArrayList<RuleDef>();
-    for (Class<? extends Annotation> cls : annos) {
-      rules.add(new RuleDef(cls, RelativeOrder.Before));
+  public static List<RuleDef> before(Collection<Class<? extends Annotation>>... annos) {
+    List<RuleDef> rules = new ArrayList<RuleDef>(10);
+    for (Collection<Class<? extends Annotation>> a : annos) {
+      for (Class<? extends Annotation> cls : a) {
+        rules.add(new RuleDef(cls, RelativeOrder.Before));
+      }
     }
 
     return rules;
   }
 
-  public static List<RuleDef> after(Class<? extends Annotation>... annos) {
+  public static List<RuleDef> before(Class<? extends Annotation>... annos) {
+    return before(Arrays.asList(annos));
+  }
 
-    List<RuleDef> rules = new ArrayList<RuleDef>();
-    for (Class<? extends Annotation> cls : annos) {
-      rules.add(new RuleDef(cls, RelativeOrder.After));
+
+  public static List<RuleDef> after(Collection<Class<? extends Annotation>>... annos) {
+    List<RuleDef> rules = new ArrayList<RuleDef>(10);
+    for (Collection<Class<? extends Annotation>> a : annos) {
+      for (Class<? extends Annotation> cls : a) {
+        rules.add(new RuleDef(cls, RelativeOrder.After));
+      }
     }
 
     return rules;
+  }
+
+
+  public static List<RuleDef> after(Class<? extends Annotation>... annos) {
+    return after(Arrays.asList(annos));
   }
 }

@@ -24,6 +24,8 @@ import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.container.IOC;
 
+import static org.jboss.errai.ioc.client.container.IOC.getBeanManager;
+
 /**
  * @author Mike Brock
  */
@@ -45,7 +47,7 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
     CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
-        CycleNodeA nodeA = IOC.getBeanManager()
+        CycleNodeA nodeA = getBeanManager()
                 .lookupBean(CycleNodeA.class).getInstance();
 
         assertNotNull(nodeA);
@@ -58,7 +60,6 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
         finishTest();
       }
     });
-
   }
 
   public void testBeanInjectsIntoSelf() {
@@ -67,18 +68,68 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
     CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
-        BeanInjectSelf beanA = IOC.getBeanManager()
+        BeanInjectSelf beanA = getBeanManager()
                 .lookupBean(BeanInjectSelf.class).getInstance();
 
         assertNotNull(beanA);
         assertNotNull(beanA.getSelf());
         assertEquals(beanA.getInstance(), beanA.getSelf().getInstance());
 
+        assertTrue("bean.self should be a proxy", getBeanManager().isProxyReference(beanA.getSelf()));
+        assertSame("unwrapped proxy should be the same as outer instance", beanA,
+                getBeanManager().getActualBeanReference(beanA.getSelf()));
+
         finishTest();
       }
     });
   }
 
+  public void testCyclingBeanDestroy() {
+    delayTestFinish(60000);
+
+    CDI.addPostInitTask(new Runnable() {
+      @Override
+      public void run() {
+        BeanInjectSelf beanA = getBeanManager()
+                .lookupBean(BeanInjectSelf.class).getInstance();
+
+        assertNotNull(beanA);
+        assertNotNull(beanA.getSelf());
+
+        getBeanManager().destroyBean(beanA);
+
+        assertFalse("bean should no longer be managed", getBeanManager().isManaged(beanA));
+        assertFalse("bean.self should no longer be recognized as proxy",
+                getBeanManager().isProxyReference(beanA.getSelf()));
+
+        finishTest();
+      }
+    });
+  }
+
+  public void testCyclingBeanDestroyViaProxy() {
+    delayTestFinish(60000);
+
+    CDI.addPostInitTask(new Runnable() {
+      @Override
+      public void run() {
+        BeanInjectSelf beanA = getBeanManager()
+                .lookupBean(BeanInjectSelf.class).getInstance();
+
+        assertNotNull(beanA);
+        assertNotNull(beanA.getSelf());
+
+        // destroy via the proxy reference through self
+        getBeanManager().destroyBean(beanA.getSelf());
+
+        assertFalse("bean should no longer be managed", getBeanManager().isManaged(beanA));
+        assertFalse("bean.self should no longer be recognized as proxy",
+                getBeanManager().isProxyReference(beanA.getSelf()));
+
+        finishTest();
+      }
+    });
+  }
 
   public void testDependentBeanInjectsIntoSelf() {
     delayTestFinish(60000);
@@ -86,12 +137,16 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
     CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
-        DependentBeanInjectSelf beanA = IOC.getBeanManager()
+        DependentBeanInjectSelf beanA = getBeanManager()
                 .lookupBean(DependentBeanInjectSelf.class).getInstance();
 
         assertNotNull(beanA);
         assertNotNull(beanA.getSelf());
         assertEquals(beanA.getInstance(), beanA.getSelf().getInstance());
+
+        assertTrue("bean.self should be a proxy", getBeanManager().isProxyReference(beanA.getSelf()));
+        assertSame("unwrapped proxy should be the same as outer instance", beanA, getBeanManager()
+                .getActualBeanReference(beanA.getSelf()));
 
         finishTest();
       }
@@ -104,7 +159,7 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
     CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
-        ConsumerBeanA consumerBeanA = IOC.getBeanManager()
+        ConsumerBeanA consumerBeanA = getBeanManager()
                 .lookupBean(ConsumerBeanA.class).getInstance();
 
         assertNotNull(consumerBeanA);
@@ -125,5 +180,4 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
       }
     });
   }
-
 }

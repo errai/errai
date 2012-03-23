@@ -24,6 +24,4 @@ import java.lang.annotation.Annotation;
  */
 public interface ContextualProviderContext {
   public Annotation[] getQualifiers();
-
-  public Class<?>[] getTypeArguments();
 }

@@ -29,7 +29,6 @@ import org.jboss.errai.codegen.framework.util.Refs;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
-import org.jboss.errai.ioc.rebind.ioc.exception.NonFatalFailedDependency;
 import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependenciesException;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
@@ -97,9 +96,6 @@ public class InjectionTask {
       case PrivateField: {
         try {
           val = getInjectorOrProxy(ctx, field.getType(), qualifyingMetadata);
-        }
-        catch (NonFatalFailedDependency e) {
-          return false;
         }
         catch (InjectionFailure e) {
           throw UnsatisfiedDependenciesException.createWithSingleFieldFailure(field, field.getDeclaringClass(),
@@ -256,7 +252,6 @@ public class InjectionTask {
 
     switch (taskType) {
       case Method:
-      case StaticMethod:
       case PrivateMethod:
         break;
 

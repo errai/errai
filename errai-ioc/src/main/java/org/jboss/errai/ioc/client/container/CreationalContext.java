@@ -66,22 +66,10 @@ public class CreationalContext {
     return new BeanRef(beanType, qualifiers);
   }
 
-  public boolean hasBean(BeanRef ref) {
-    return wired.containsKey(ref);
-  }
-
-  public Object getBeanInstance(BeanRef ref) {
-    return wired.get(ref);
-  }
-
   public void addBean(BeanRef ref, Object instance) {
     if (!wired.containsKey(ref)) {
       wired.put(ref, instance);
     }
-  }
-
-  public void addBean(Object beanInstance, Class<?> beanType, Annotation[] qualifiers) {
-    addBean(getBeanReference(beanType, qualifiers), beanInstance);
   }
 
   public <T> T getInstanceOrNew(CreationalCallback<T> context, Class<?> beanType, Annotation[] qualifiers) {
@@ -105,10 +93,6 @@ public class CreationalContext {
     resolverList.add(proxyResolver);
   }
 
-  public Object getUnresolvedProxy(Class<?> beanType, Annotation[] qualifiers) {
-    return unresolvedProxies.get(new BeanRef(beanType, qualifiers));
-  }
-
   public void finish() {
     resolveAllProxies();
     fireAllInitCallbacks();
@@ -123,7 +107,11 @@ public class CreationalContext {
   private void resolveAllProxies() {
     boolean beansResolved = false;
 
-    Iterator<Map.Entry<BeanRef, List<ProxyResolver>>> unresolvedIterator = unresolvedProxies.entrySet().iterator();
+    Iterator<Map.Entry<BeanRef, List<ProxyResolver>>> unresolvedIterator
+            = new HashMap<BeanRef, List<ProxyResolver>>(unresolvedProxies).entrySet().iterator();
+
+    int initialSize = unresolvedProxies.size();
+
     while (unresolvedIterator.hasNext()) {
       Map.Entry<BeanRef, List<ProxyResolver>> entry = unresolvedIterator.next();
       if (wired.containsKey(entry.getKey())) {
@@ -134,12 +122,12 @@ public class CreationalContext {
         unresolvedIterator.remove();
       }
       else {
-        Object bean = IOC.getBeanManager().lookupBean(entry.getKey().getClazz(), entry.getKey().getAnnotations())
+        Object beanInstance = IOC.getBeanManager().lookupBean(entry.getKey().getClazz(), entry.getKey().getAnnotations())
                 .getInstance(this);
 
-        if (bean != null) {
+        if (beanInstance != null) {
           if (!wired.containsKey(entry.getKey())) {
-            addBean(bean, entry.getKey().getClazz(), entry.getKey().getAnnotations());
+            addBean(getBeanReference(entry.getKey().getClazz(), entry.getKey().getAnnotations()), beanInstance);
           }
 
           beansResolved = true;
@@ -147,10 +135,11 @@ public class CreationalContext {
       }
     }
 
+
     if (beansResolved) {
       resolveAllProxies();
     }
-    else if (!unresolvedProxies.isEmpty()) {
+    else if (!unresolvedProxies.isEmpty() && initialSize != unresolvedProxies.size()) {
       for (Map.Entry<BeanRef, List<ProxyResolver>> entry : unresolvedProxies.entrySet()) {
         throw new RuntimeException("unresolved proxy: " + entry.getKey());
       }

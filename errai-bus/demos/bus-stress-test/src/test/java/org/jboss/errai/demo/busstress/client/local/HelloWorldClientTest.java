@@ -2,9 +2,7 @@ package org.jboss.errai.demo.busstress.client.local;
 
 import org.jboss.errai.bus.client.tests.AbstractErraiTest;
 import org.jboss.errai.ioc.client.Container;
-import org.jboss.errai.ioc.client.api.Bootstrapper;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Timer;
 
 public class HelloWorldClientTest extends AbstractErraiTest {
@@ -52,6 +50,6 @@ public class HelloWorldClientTest extends AbstractErraiTest {
 
       }
     });
-    delayTestFinish(20000);
+    delayTestFinish(120000);
   }
 }

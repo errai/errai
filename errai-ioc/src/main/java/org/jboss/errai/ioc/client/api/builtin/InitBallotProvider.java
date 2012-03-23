@@ -40,7 +40,6 @@ public class InitBallotProvider implements ContextualTypeProvider<InitBallot<?>>
     return new InitBallot() {
       @Override
       public void voteForInit() {
-
         InitVotes.voteFor(typeargs[0]);
       }
     };

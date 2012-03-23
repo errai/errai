@@ -36,18 +36,18 @@ public class MethodBuilderAbstractOption<T> implements Finishable<T> {
   
   public T throws_(Class<? extends Throwable>... exceptionTypes) {
     throwsDeclaration = ThrowsDeclaration.of(exceptionTypes);
-    return callback.callback(null, null, new DefModifiers(Modifier.Abstract), throwsDeclaration);
+    return callback.callback(null, null, new DefModifiers(Modifier.Abstract), throwsDeclaration, null);
   }
 
   public T throws_(MetaClass... exceptions) {
     throwsDeclaration = ThrowsDeclaration.of(exceptions);
-    return callback.callback(null, null, new DefModifiers(Modifier.Abstract), throwsDeclaration);
+    return callback.callback(null, null, new DefModifiers(Modifier.Abstract), throwsDeclaration, null);
   }
   
   @Override
   public T finish() {
     if (callback != null) {
-      return callback.callback(null, null, new DefModifiers(Modifier.Abstract), throwsDeclaration);
+      return callback.callback(null, null, new DefModifiers(Modifier.Abstract), throwsDeclaration, null);
     }
     return null;
   }

@@ -26,7 +26,7 @@ import org.jboss.errai.codegen.framework.VariableReference;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
-import org.jboss.errai.ioc.client.InterfaceInjectionContext;
+import org.jboss.errai.ioc.client.BootstrapperInjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionPoint;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.TypeDiscoveryListener;
@@ -64,11 +64,9 @@ public class IOCProcessingContext {
 
   protected SourceWriter writer;
 
-  protected Variable contextVariable = Variable.create("injContext", InterfaceInjectionContext.class);
+  protected Variable contextVariable = Variable.create("injContext", BootstrapperInjectionContext.class);
 
   protected QualifyingMetadataFactory qualifyingMetadataFactory = new JSR330QualifyingMetadataFactory();
-
-  protected Set<Class<? extends Annotation>> singletonScopes;
 
   public IOCProcessingContext(TreeLogger treeLogger,
                               GeneratorContext generatorContext,
@@ -89,23 +87,7 @@ public class IOCProcessingContext {
     this.staticInstantiationStatements = new ArrayList<Statement>();
     this.staticPostConstructStatements = new ArrayList<Statement>();
     this.typeDiscoveryListeners = new ArrayList<TypeDiscoveryListener>();
-    this.singletonScopes = new HashSet<Class<? extends Annotation>>();
     this.toInstantiate = new ArrayList<Injector>();
-  }
-
-  public void addSingletonScopeAnnotation(Class<? extends Annotation> annotation) {
-    this.singletonScopes.add(annotation);
-  }
-
-  public boolean isSingletonScope(Class<? extends Annotation> annotation) {
-    return this.singletonScopes.contains(annotation);
-  }
-
-  public boolean isSingletonScope(Annotation[] annotations) {
-    for (Annotation a : annotations) {
-      if (isSingletonScope(a.annotationType())) return true;
-    }
-    return false;
   }
 
   public BlockBuilder<?> getBlockBuilder() {

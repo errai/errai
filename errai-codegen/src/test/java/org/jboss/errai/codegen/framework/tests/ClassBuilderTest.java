@@ -38,7 +38,7 @@ import org.junit.Test;
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class ClassBuilderTest extends AbstractStatementBuilderTest implements ClassBuilderTestResult {
+public class ClassBuilderTest extends AbstractCodegenTest implements ClassBuilderTestResult {
 
   @Test
   public void testDefineClassImplementingInterface() {

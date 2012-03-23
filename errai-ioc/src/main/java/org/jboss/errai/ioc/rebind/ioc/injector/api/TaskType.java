@@ -17,5 +17,5 @@
 package org.jboss.errai.ioc.rebind.ioc.injector.api;
 
 public enum TaskType {
-  Field, Method, StaticMethod, Type, Parameter, PrivateField, PrivateMethod
+  Field, Method, Type, Parameter, PrivateField, PrivateMethod
 }

@@ -24,8 +24,8 @@ import org.jboss.errai.ioc.rebind.ioc.graph.SortUnit;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 
 public interface AnnotationHandler<T extends Annotation> {
-  public Set<SortUnit> checkDependencies(DependencyControl control,
-                                         InjectableInstance instance, T annotation, IOCProcessingContext context);
+  public Set<SortUnit> getDependencies(DependencyControl control,
+                                       InjectableInstance instance, T annotation, IOCProcessingContext context);
 
   public void registerMetadata(InjectableInstance instance, T annotation, IOCProcessingContext context);
 

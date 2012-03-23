@@ -16,6 +16,8 @@
 
 package org.jboss.errai.cdi.integration.client.shared;
 
+import com.google.gwt.user.client.Random;
+
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
@@ -36,6 +38,9 @@ public class ApplicationScopedBean {
 
   private boolean preDestroyCalled = false;
 
+  private static int counter = 0;
+
+  public int beanId = ++counter * Random.nextInt();
 
   public DependentScopedBean getBean1() {
     return bean1;
@@ -60,5 +65,9 @@ public class ApplicationScopedBean {
 
   public boolean isPreDestroyCalled() {
     return preDestroyCalled;
+  }
+
+  public int getBeanId() {
+    return beanId;
   }
 }

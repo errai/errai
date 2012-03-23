@@ -23,6 +23,7 @@ import org.jboss.errai.codegen.framework.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.util.Refs;
+import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.ioc.client.container.BeanRef;
 import org.jboss.errai.ioc.client.container.CreationalCallback;
 import org.jboss.errai.ioc.client.container.CreationalContext;
@@ -30,8 +31,8 @@ import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.ConstructionStatusCallback;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 
-import javax.enterprise.inject.Alternative;
 import javax.enterprise.inject.New;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
@@ -48,16 +49,18 @@ import static org.jboss.errai.codegen.framework.util.Stmt.loadVariable;
 public class TypeInjector extends AbstractInjector {
   protected final MetaClass type;
   protected String varName;
-  protected String creationalCallbackVarName;
 
-  public TypeInjector(MetaClass type, IOCProcessingContext context) {
+  public TypeInjector(MetaClass type, InjectionContext context) {
     this(type, context, new Annotation[0]);
   }
 
-  public TypeInjector(MetaClass type, IOCProcessingContext context, Annotation[] additionalQualifiers) {
+  public TypeInjector(MetaClass type, InjectionContext context, Annotation[] additionalQualifiers) {
     this.type = type;
-    this.singleton = context.isSingletonScope(type.getAnnotations());
-    this.alternative = type.isAnnotationPresent(Alternative.class);
+
+    // check to see if this is a singleton and/or alternative bean
+    this.singleton = context.isElementType(WiringElementType.SingletonBean, type);
+    this.alternative = context.isElementType(WiringElementType.AlternativeBean, type);
+
     this.varName = InjectUtil.getNewInjectorName();
 
     Set<Annotation> qualifiers = new HashSet<Annotation>();
@@ -65,12 +68,12 @@ public class TypeInjector extends AbstractInjector {
     qualifiers.addAll(Arrays.asList(additionalQualifiers));
 
     if (!qualifiers.isEmpty()) {
-      qualifyingMetadata = context.getQualifyingMetadataFactory().createFrom(qualifiers.toArray(new
+      qualifyingMetadata = context.getProcessingContext().getQualifyingMetadataFactory().createFrom(qualifiers.toArray(new
               Annotation[qualifiers.size()]));
 
     }
     else {
-      qualifyingMetadata = context.getQualifyingMetadataFactory().createDefaultMetadata();
+      qualifyingMetadata = context.getProcessingContext().getQualifyingMetadataFactory().createDefaultMetadata();
     }
   }
 
@@ -97,9 +100,7 @@ public class TypeInjector extends AbstractInjector {
          */
         final Set<Annotation> fromCompare = new HashSet<Annotation>(Arrays.asList(qualifyingMetadata.getQualifiers()));
         final Set<Annotation> toCompare;
-        if (injectableInstance == null
-                || injectableInstance.getQualifiers() == null
-                || injectableInstance.getQualifiers().length == 0) {
+        if (injectableInstance == null || injectableInstance.getQualifiers().length == 0) {
           toCompare = new HashSet<Annotation>(Arrays.asList(injectContext.getProcessingContext()
                   .getQualifyingMetadataFactory().createDefaultMetadata().getQualifiers()));
         }
@@ -182,17 +183,8 @@ public class TypeInjector extends AbstractInjector {
     return false;
   }
 
-  public void setSingleton(boolean singleton) {
-    this.singleton = singleton;
-  }
-
-
   public boolean isPseudo() {
-    return psuedo;
-  }
-
-  public void setPsuedo(boolean psuedo) {
-    this.psuedo = psuedo;
+    return replaceable;
   }
 
   @Override
@@ -207,33 +199,5 @@ public class TypeInjector extends AbstractInjector {
 
   public String getCreationalCallbackVarName() {
     return creationalCallbackVarName;
-  }
-
-  private void registerWithBeanManager(InjectionContext context, Statement valueRef) {
-    if (useBeanManager) {
-      if (InjectUtil.checkIfTypeNeedsAddingToBeanStore(context, this)) {
-        Statement initCallbackRef;
-        if (getPostInitCallbackVar() == null) {
-          initCallbackRef = load(null);
-        }
-        else {
-          initCallbackRef = loadVariable(getPostInitCallbackVar());
-        }
-
-        if (isSingleton()) {
-          context.getProcessingContext().appendToEnd(
-                  loadVariable(context.getProcessingContext().getContextVariableReference())
-                          .invoke("addSingletonBean", type, valueRef,
-                                  qualifyingMetadata.render(), initCallbackRef)
-          );
-        }
-        else {
-          context.getProcessingContext().appendToEnd(
-                  loadVariable(context.getProcessingContext().getContextVariableReference())
-                          .invoke("addDependentBean", type, Refs.get(creationalCallbackVarName),
-                                  qualifyingMetadata.render(), initCallbackRef));
-        }
-      }
-    }
   }
 }

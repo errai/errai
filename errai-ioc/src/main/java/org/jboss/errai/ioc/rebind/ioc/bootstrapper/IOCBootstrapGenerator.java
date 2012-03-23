@@ -33,6 +33,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.context.SessionScoped;
+import javax.enterprise.inject.Alternative;
 import javax.enterprise.inject.Default;
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -60,8 +61,8 @@ import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.ioc.client.BootstrapperInjectionContext;
 import org.jboss.errai.ioc.client.ContextualProviderContext;
-import org.jboss.errai.ioc.client.InterfaceInjectionContext;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
@@ -82,6 +83,7 @@ import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.injector.ProviderInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadataFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,7 +92,6 @@ import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
-import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.rebind.SourceWriter;
 import com.google.gwt.user.rebind.StringSourceWriter;
 
@@ -218,7 +219,8 @@ public class IOCBootstrapGenerator {
     Context buildContext = bootStrapClass.getContext();
 
     BlockBuilder<?> blockBuilder =
-            classStructureBuilder.publicMethod(InterfaceInjectionContext.class, "bootstrapContainer");
+            classStructureBuilder.publicMethod(BootstrapperInjectionContext.class, "bootstrapContainer")
+            .methodComment("The main IOC bootstrap method.");
 
     SourceWriter sourceWriter = new StringSourceWriter();
 
@@ -281,7 +283,7 @@ public class IOCBootstrapGenerator {
     blockBuilder.append(
             Stmt.declareVariable(procContext.getContextVariableReference().getType()).asFinal()
                     .named(procContext.getContextVariableReference().getName())
-                    .initializeWith(Stmt.newObject(InterfaceInjectionContext.class)));
+                    .initializeWith(Stmt.newObject(BootstrapperInjectionContext.class)));
 
     blockBuilder.append(Stmt.declareVariable(CreationalContext.class)
             .named("context")
@@ -311,7 +313,6 @@ public class IOCBootstrapGenerator {
     for (Statement stmt : procContext.getStaticPostConstructStatements()) {
       blockBuilder.append(stmt);
     }
-
 
     Map<MetaField, PrivateAccessType> privateFields = injectionContext.getPrivateFieldsToExpose();
     for (Map.Entry<MetaField, PrivateAccessType> f : privateFields.entrySet()) {
@@ -441,7 +442,7 @@ public class IOCBootstrapGenerator {
 
           boolean isContextual = false;
           for (MetaField field : type.getDeclaredFields()) {
-            if (field.isAnnotationPresent(Inject.class)
+            if (injectionContext.isElementType(WiringElementType.InjectionPoint, field)
                     && field.getType().isAssignableTo(ContextualProviderContext.class)) {
 
               isContextual = true;
@@ -481,24 +482,6 @@ public class IOCBootstrapGenerator {
       }
 
       if (bindType == null) {
-        for (MetaClass iface : type.getInterfaces()) {
-          if (!typeProviderCls.isAssignableFrom(iface)) {
-            continue;
-          }
-
-          MetaParameterizedType pType = iface.getParameterizedType();
-
-          if (pType == null) {
-            throw new InjectionFailure("could not determine the bind type for the IOCProvider class: "
-                    + type.getFullyQualifiedName());
-          }
-
-          // todo: check for nested type parameters
-          bindType = (MetaClass) pType.getTypeParameters()[0];
-        }
-      }
-
-      if (bindType == null) {
         throw new InjectionFailure("the annotated provider class does not appear to implement " +
                 TypeProvider.class.getName() + ": " + type.getFullyQualifiedName());
       }
@@ -523,47 +506,17 @@ public class IOCBootstrapGenerator {
   }
 
   private void defaultConfigureProcessor() {
-    final MetaClass widgetType = MetaClassFactory.get(Widget.class);
+    injectionContext.mapElementType(WiringElementType.SingletonBean, Singleton.class);
+    injectionContext.mapElementType(WiringElementType.SingletonBean, EntryPoint.class);
+    injectionContext.mapElementType(WiringElementType.SingletonBean, Service.class);
 
-    procContext.addSingletonScopeAnnotation(Singleton.class);
-    procContext.addSingletonScopeAnnotation(EntryPoint.class);
-    procContext.addSingletonScopeAnnotation(Service.class);
+    injectionContext.mapElementType(WiringElementType.DependentBean, Dependent.class);
 
-    procFactory.registerHandler(TestMock.class, new JSR330AnnotationHandler<TestMock>() {
-      @Override
-      public boolean handle(InjectableInstance instance, TestMock annotation, IOCProcessingContext context) {
-        injectionContext.addReplacementType(instance.getEnclosingType().getFullyQualifiedName());
-        return false;
-      }
-    });
+    injectionContext.mapElementType(WiringElementType.InjectionPoint, Inject.class);
+    injectionContext.mapElementType(WiringElementType.InjectionPoint, com.google.inject.Inject.class);
 
-    procFactory.registerHandler(Singleton.class, new JSR330AnnotationHandler<Singleton>() {
-      @Override
-      public boolean handle(final InjectableInstance type, Singleton annotation, IOCProcessingContext context) {
-        Injector injector = injectionContext.getInjector(type.getType());
-        injector.getBeanInstance(injectionContext, null);
-        return true;
-      }
-    });
-
-    procFactory.registerHandler(EntryPoint.class, new JSR330AnnotationHandler<EntryPoint>() {
-      @Override
-      public boolean handle(final InjectableInstance type, EntryPoint annotation, IOCProcessingContext context) {
-        Injector injector = injectionContext.getInjector(type.getType());
-        injector.getBeanInstance(injectionContext, null);
-        return true;
-      }
-    });
-
-    procFactory.registerHandler(Service.class, new JSR330AnnotationHandler<Service>() {
-      @Override
-      public boolean handle(final InjectableInstance type, Service annotation, IOCProcessingContext context) {
-        Injector injector = injectionContext.getInjector(type.getType());
-        injector.getBeanInstance(injectionContext, null);
-        return true;
-      }
-    });
-
+    injectionContext.mapElementType(WiringElementType.AlternativeBean, Alternative.class);
+    injectionContext.mapElementType(WiringElementType.TestMockBean, TestMock.class);
   }
 
   public void setUseReflectionStubs(boolean useReflectionStubs) {

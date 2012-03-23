@@ -22,10 +22,13 @@ package org.jboss.errai.ioc.client.container;
  * @author Mike Brock
  */
 public final class IOC {
-  private IOC() {
-  }
+  private static final IOC inst = new IOC();
 
-  private static final IOCBeanManager manager = new IOCBeanManager();
+  private final IOCBeanManager beanManager;
+
+  private IOC() {
+    beanManager = new IOCBeanManager();
+  }
 
   /**
    * Returns a reference to the bean manager in the client.
@@ -34,6 +37,6 @@ public final class IOC {
    * @see IOCBeanManager
    */
   public static IOCBeanManager getBeanManager() {
-    return manager;
+    return inst.beanManager;
   }
 }

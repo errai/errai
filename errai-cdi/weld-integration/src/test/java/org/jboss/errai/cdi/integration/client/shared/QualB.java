@@ -14,28 +14,18 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.rebind.ioc.exception;
+package org.jboss.errai.cdi.integration.client.shared;
 
-import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
+import javax.inject.Qualifier;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * @author Mike Brock
  */
-public class NonFatalFailedDependency extends RuntimeException {
-  private final MetaClass type;
-  private final QualifyingMetadata metadata;
-
-  public NonFatalFailedDependency(MetaClass type, QualifyingMetadata metadata) {
-    this.type = type;
-    this.metadata = metadata;
-  }
-
-  public MetaClass getType() {
-    return type;
-  }
-
-  public QualifyingMetadata getMetadata() {
-    return metadata;
-  }
+@Qualifier
+@Target({ElementType.FIELD,ElementType.PARAMETER,ElementType.METHOD,ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)public @interface QualB {
 }

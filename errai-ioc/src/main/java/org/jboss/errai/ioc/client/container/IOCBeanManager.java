@@ -18,6 +18,7 @@ package org.jboss.errai.ioc.client.container;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,24 +42,34 @@ public class IOCBeanManager {
   private Map<Object, Object> proxyLookupForManagedBeans = new IdentityHashMap<Object, Object>();
 
 
+  private void registerSingletonBean(final Class<Object> type, final CreationalCallback<Object> callback,
+                                     final Object instance, final Annotation[] qualifiers) {
+    registerBean(IOCSingletonBean.newBean(this, type, qualifiers, callback, instance));
+  }
+
+  private void registerDependentBean(final Class<Object> type, final CreationalCallback<Object> callback,
+                                     final Annotation[] qualifiers) {
+    registerBean(IOCDependentBean.newBean(this, type, qualifiers, callback));
+  }
 
   /**
-   * Register a bean with the manager. This is called by the generated code to advertise the bean.
+   * Register a bean with the manager. This is usually called by the generated code to advertise the bean. Adding
+   * beans at runtime will make beans available for lookup through the BeanManager, but will not in any way alter
+   * the wiring scenario of auto-discovered beans at runtime.
    *
    * @param type       the bean type
+   * @param callback   the creational callback used to construct the bean
    * @param instance   the instance reference
    * @param qualifiers any qualifiers
    */
-  public void registerSingletonBean(final Class<Object> type, final Object instance,
-                                    final Annotation[] qualifiers,
-                                    final InitializationCallback initCallback) {
-    registerBean(IOCSingletonBean.newBean(this, type, qualifiers, instance));
-  }
-
-  public void registerDependentBean(final Class<Object> type, final CreationalCallback<Object> callback,
-                                    final Annotation[] qualifiers,
-                                    final InitializationCallback<Object> initCallback) {
-    registerBean(IOCDependentBean.newBean(this, type, qualifiers, callback, initCallback));
+  public void addBean(final Class<Object> type, final CreationalCallback<Object> callback,
+                      final Object instance, final Annotation[] qualifiers) {
+    if (instance != null) {
+      registerSingletonBean(type, callback, instance, qualifiers);
+    }
+    else {
+      registerDependentBean(type, callback, qualifiers);
+    }
   }
 
 
@@ -67,17 +78,10 @@ public class IOCBeanManager {
    *
    * @param ref the instance reference of the bean
    */
-  public void destroyBean(Object ref) {
-    final Object _target;
+  public void destroyBean(final Object ref) {
+    final Object _target = getActualBeanReference(ref);
 
-    if (proxyLookupForManagedBeans.containsKey(ref)) {
-      _target = proxyLookupForManagedBeans.get(ref);
-    }
-    else {
-      _target = ref;
-    }
-
-    Map<Object, DestructionCallback> destructionCallbackList = activeManagedBeans.get(_target);
+    final Map<Object, DestructionCallback> destructionCallbackList = activeManagedBeans.get(_target);
     if (destructionCallbackList != null) {
       for (Map.Entry<Object, DestructionCallback> entry : destructionCallbackList.entrySet()) {
         entry.getValue().destroy(entry.getKey());
@@ -85,12 +89,53 @@ public class IOCBeanManager {
     }
 
     if (ref != _target) {
-      activeManagedBeans.get(ref);
-      proxyLookupForManagedBeans.get(_target);
+      proxyLookupForManagedBeans.remove(ref);
     }
     else {
-      activeManagedBeans.remove(_target);
+      proxyLookupForManagedBeans.values().remove(_target);
     }
+
+    proxyLookupForManagedBeans.remove(_target);
+    activeManagedBeans.remove(_target);
+  }
+
+  /**
+   * Indicates whether the referenced object is currently a managed bean.
+   *
+   * @param ref the reference to the bean
+   * @return returns true if under management
+   */
+  public boolean isManaged(Object ref) {
+    return activeManagedBeans.containsKey(getActualBeanReference(ref));
+  }
+
+  /**
+   * Obtains an instance to the <em>actual</em> bean. If the specified reference is a proxy, this method will
+   * return an unproxied reference to the object.
+   *
+   * @param ref the proxied or unproxied reference
+   * @return returns the absolute reference to bean if the specified reference is a proxy. If the specified reference
+   *         is not a proxy, the same instance passed to the method is returned.
+   * @see #isProxyReference(Object)
+   */
+  public Object getActualBeanReference(Object ref) {
+    if (isProxyReference(ref)) {
+      return proxyLookupForManagedBeans.get(ref);
+    }
+    else {
+      return ref;
+    }
+  }
+
+  /**
+   * Determines whether the referenced object is itself a proxy to a managed bean.
+   *
+   * @param ref the reference to check
+   * @return returns true if the specified reference is itself a proxy.
+   * @see #getActualBeanReference(Object)
+   */
+  public boolean isProxyReference(Object ref) {
+    return proxyLookupForManagedBeans.containsKey(ref);
   }
 
   void addProxyReference(Object proxyRef, Object realRef) {
@@ -107,10 +152,11 @@ public class IOCBeanManager {
    * @param bean an {@link IOCSingletonBean} reference
    */
   public void registerBean(final IOCBeanDef bean) {
-    List<IOCBeanDef> beans = beanMap.get(bean);
+    List<IOCBeanDef> beans = beanMap.get(bean.getType());
     if (beans == null) {
       beanMap.put(bean.getType(), beans = new ArrayList<IOCBeanDef>());
     }
+
     beans.add(bean);
   }
 
@@ -121,7 +167,7 @@ public class IOCBeanManager {
    * @return A list of all the beans that match the specified type. Returns an empty list if there is
    *         no matching type.
    */
-  public List<IOCBeanDef> lookupBeans(Class<?> type) {
+  public Collection<IOCBeanDef> lookupBeans(Class<?> type) {
     List<IOCBeanDef> beanList = beanMap.get(type);
     if (beanList == null) {
       return Collections.emptyList();
@@ -172,5 +218,9 @@ public class IOCBeanManager {
     else {
       return matching.get(0);
     }
+  }
+
+  void destroyAllBeans() {
+    beanMap = new HashMap<Class<?>, List<IOCBeanDef>>();
   }
 }

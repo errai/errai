@@ -123,7 +123,7 @@ public interface ClassBuilderTestResult {
           "\n" +
           " public class Foo {\n" +
           "   public void bar() {" +
-          "     this.foo();" +
+          "     foo();" +
           "   }" +
           "   public String foo() {" +
           "     return null;" +
@@ -135,7 +135,7 @@ public interface ClassBuilderTestResult {
           "\n" +
           " public class Foo {\n" +
           "   public void bar() {" +
-          "     this.foo();" +
+          "     foo();" +
           "   }" +
           "   public String foo() {" +
           "     return super.toString();" +

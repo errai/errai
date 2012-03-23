@@ -25,6 +25,7 @@ import org.jboss.errai.codegen.framework.meta.MetaType;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 
 import javax.enterprise.inject.Alternative;
 import java.lang.annotation.Annotation;
@@ -33,19 +34,19 @@ public class ContextualProviderInjector extends TypeInjector {
   private final Injector providerInjector;
 
   public ContextualProviderInjector(MetaClass type, MetaClass providerType, InjectionContext context) {
-    super(type, context.getProcessingContext());
-    this.providerInjector = new TypeInjector(providerType,context.getProcessingContext());
+    super(type, context);
+    this.providerInjector = new TypeInjector(providerType,context);
     context.registerInjector(providerInjector);
 
-    this.singleton = context.getProcessingContext()
-            .isSingletonScope(providerType.getAnnotations());
-    this.alternative = providerType.isAnnotationPresent(Alternative.class);
+    this.singleton = context.isElementType(WiringElementType.SingletonBean, providerType);
+    this.alternative = context.isElementType(WiringElementType.AlternativeBean, providerType);
+
     injected = true;
   }
 
   @Override
   public Statement getBeanInstance(InjectionContext injectContext, InjectableInstance injectableInstance) {
-    MetaClass type = null;
+    MetaClass type;
     MetaParameterizedType pType = null;
 
     switch (injectableInstance.getTaskType()) {
@@ -82,7 +83,7 @@ public class ContextualProviderInjector extends TypeInjector {
     Annotation[] qualifiers = injectableInstance.getQualifiers();
 
 
-    if (providerInjector.isSingleton()) {
+    if (providerInjector.isSingleton() && providerInjector.isInjected()) {
       return Stmt.loadVariable(providerInjector.getVarName()).invoke("provide", typeArgsClasses, qualifiers.length != 0 ? qualifiers : null);
     }
     else {

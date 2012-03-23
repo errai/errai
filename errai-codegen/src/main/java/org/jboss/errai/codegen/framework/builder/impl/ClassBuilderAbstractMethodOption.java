@@ -157,9 +157,11 @@ public class ClassBuilderAbstractMethodOption extends ClassBuilder<ClassStructur
       public ClassStructureBuilderAbstractMethodOption callback(final Statement statement,
                                                                 final DefParameters parameters,
                                                                 final DefModifiers modifiers,
-                                                                final ThrowsDeclaration throwsDeclaration) {
+                                                                final ThrowsDeclaration throwsDeclaration,
+                                                                final String comment) {
         BuildMetaMethod buildMetaMethod = new BuildMetaMethod(classDefinition, statement, scope, modifiers, name,
             returnType, null, defParameters, throwsDeclaration);
+        buildMetaMethod.setMethodComment(comment);
 
         classDefinition.addMethod(buildMetaMethod);
         return ClassBuilderAbstractMethodOption.this;
