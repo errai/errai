@@ -43,6 +43,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import junit.framework.AssertionFailedError;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
@@ -409,53 +410,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   };
 
-  private static final QueueSession sessionPlaceHolder = new QueueSession() {
-    private Map<String, Object> attributes = new HashMap<String, Object>();
 
-    @Override
-    public String getSessionId() {
-      return "<InBus>";
-    }
-
-    @Override
-    public boolean isValid() {
-      return true;
-    }
-
-    @Override
-    public boolean endSession() {
-      return false;
-    }
-
-    @Override
-    public void setAttribute(String attribute, Object value) {
-      attributes.put(attribute, value);
-    }
-
-    @Override
-    public <T> T getAttribute(Class<T> type, String attribute) {
-      return (T) attributes.get(attribute);
-    }
-
-    @Override
-    public Collection<String> getAttributeNames() {
-      return attributes.keySet();
-    }
-
-    @Override
-    public boolean hasAttribute(String attribute) {
-      return attributes.containsKey(attribute);
-    }
-
-    @Override
-    public boolean removeAttribute(String attribute) {
-      return attributes.remove(attribute) != null;
-    }
-
-    @Override
-    public void addSessionEndListener(SessionEndListener listener) {
-    }
-  };
 
   /**
    * Sends the message using it's encoded subject. If the bus has not been initialized, it will be added to
@@ -468,7 +423,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   @Override
   public void send(final Message message) {
     message.setResource(RequestDispatcher.class.getName(), dispatcherProvider);
-    message.setResource("Session", sessionPlaceHolder);
+    message.setResource("Session", JSONUtilCli.getClientSession());
 
     executeInterceptorStack(false, message);
 
@@ -704,6 +659,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
              */
             try {
               procIncomingPayload(response);
+            }
+            catch (AssertionFailedError e) {
+              throw e;
             }
             catch (Throwable e) {
               for (Message txM : txMessages) {
