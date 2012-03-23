@@ -18,6 +18,7 @@ package org.jboss.errai.codegen.framework.meta.impl.build;
 
 import java.lang.annotation.Annotation;
 
+import org.jboss.errai.codegen.framework.Comment;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.Variable;
 import org.jboss.errai.codegen.framework.builder.Builder;
@@ -44,6 +45,8 @@ public class BuildMetaField extends MetaField implements Builder {
   private boolean isStatic;
   private boolean isTransient;
   private boolean isVolatile;
+
+  private String fieldComment;
 
   public BuildMetaField(BuildMetaClass declaringClass, Statement statement, Scope scope, MetaClass type, String name) {
     this.declaringClass = declaringClass;
@@ -178,10 +181,21 @@ public class BuildMetaField extends MetaField implements Builder {
     this.statement = statement;
   }
 
+  public void setFieldComment(String fieldComment) {
+    this.fieldComment = fieldComment;
+  }
+
   @Override
   public String toJavaString() {
+    StringBuilder builder = new StringBuilder(25);
+    if (fieldComment != null) {
+      builder.append(new Comment(fieldComment).generate(null)).append('\n');
+    }
+
     declaringClass.getContext().addVariable(Variable.create(name, type));
 
-    return statement.generate(declaringClass.getContext());
+    builder.append(statement.generate(declaringClass.getContext()));
+
+    return builder.toString();
   }
 }
