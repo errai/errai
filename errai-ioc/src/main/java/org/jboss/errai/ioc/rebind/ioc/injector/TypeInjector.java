@@ -32,7 +32,6 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 
-import javax.enterprise.inject.Alternative;
 import javax.enterprise.inject.New;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
@@ -100,9 +99,7 @@ public class TypeInjector extends AbstractInjector {
          */
         final Set<Annotation> fromCompare = new HashSet<Annotation>(Arrays.asList(qualifyingMetadata.getQualifiers()));
         final Set<Annotation> toCompare;
-        if (injectableInstance == null
-                || injectableInstance.getQualifiers() == null
-                || injectableInstance.getQualifiers().length == 0) {
+        if (injectableInstance == null || injectableInstance.getQualifiers().length == 0) {
           toCompare = new HashSet<Annotation>(Arrays.asList(injectContext.getProcessingContext()
                   .getQualifyingMetadataFactory().createDefaultMetadata().getQualifiers()));
         }
@@ -185,17 +182,8 @@ public class TypeInjector extends AbstractInjector {
     return false;
   }
 
-  public void setSingleton(boolean singleton) {
-    this.singleton = singleton;
-  }
-
-
   public boolean isPseudo() {
-    return psuedo;
-  }
-
-  public void setPsuedo(boolean psuedo) {
-    this.psuedo = psuedo;
+    return replaceable;
   }
 
   @Override

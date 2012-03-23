@@ -90,7 +90,6 @@ public class InjectionPoint<T> {
       case Field:
         return type = field.getType();
       case PrivateMethod:
-      case StaticMethod:
       case Parameter:
         return type = parm.getType();
       case Type:
@@ -106,7 +105,6 @@ public class InjectionPoint<T> {
       case Field:
         return type = field.getType();
       case PrivateMethod:
-      case StaticMethod:
       case Method:
         return type = method.getReturnType();
       case Parameter:
@@ -159,7 +157,6 @@ public class InjectionPoint<T> {
         return field.getName();
 
       case Parameter:
-      case StaticMethod:
       case PrivateMethod:
       case Method:
         return method.getName();
@@ -178,7 +175,6 @@ public class InjectionPoint<T> {
       case Field:
         return field.getDeclaringClass();
       case PrivateMethod:
-      case StaticMethod:
       case Method:
         return method.getDeclaringClass();
       case Type:
@@ -220,10 +216,6 @@ public class InjectionPoint<T> {
     return injectionContext.getProcessingContext().getQualifyingMetadataFactory().createFrom(getQualifiers());
   }
 
-  public Annotation[] getAnnotations(Field field) {
-    return field == null ? null : field.getAnnotations();
-  }
-
   private Boolean _isProxyCache;
 
   public boolean isProxy() {
@@ -234,9 +226,5 @@ public class InjectionPoint<T> {
     catch (InjectionFailure e) {
       return _isProxyCache = false;
     }
-  }
-
-  public ProxyInjector getProxyInjector() {
-    return (ProxyInjector) injectionContext.getProxiedInjector(getEnclosingType(), getQualifyingMetadata());
   }
 }

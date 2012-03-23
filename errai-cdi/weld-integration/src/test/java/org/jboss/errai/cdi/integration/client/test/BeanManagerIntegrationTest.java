@@ -91,7 +91,6 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
         assertNotNull("no bean found", beanA);
         assertTrue("wrong bean looked up", beanA.getInstance() instanceof QualAppScopeBeanA);
 
-
         IOCBeanDef<CommonInterface> beanB = IOC.getBeanManager().lookupBean(CommonInterface.class, qualB);
         assertNotNull("no bean found", beanB);
         assertTrue("wrong bean looked up", beanB.getInstance() instanceof QualAppScopeBeanB);

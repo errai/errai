@@ -76,8 +76,8 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
         assertEquals(beanA.getInstance(), beanA.getSelf().getInstance());
 
         assertTrue("bean.self should be a proxy", getBeanManager().isProxyReference(beanA.getSelf()));
-        assertSame("unwrapped proxy should be the same as outer instance", beanA, getBeanManager()
-                .getActualBeanReference(beanA.getSelf()));
+        assertSame("unwrapped proxy should be the same as outer instance", beanA,
+                getBeanManager().getActualBeanReference(beanA.getSelf()));
 
         finishTest();
       }

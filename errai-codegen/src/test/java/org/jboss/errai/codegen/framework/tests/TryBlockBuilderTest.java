@@ -26,7 +26,7 @@ import org.junit.Test;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class TryBlockBuilderTest extends AbstractStatementBuilderTest implements TryBlockBuilderTestResult {
+public class TryBlockBuilderTest extends AbstractCodegenTest implements TryBlockBuilderTestResult {
 
   @Test
   public void testEmptyTryBlock() {

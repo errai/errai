@@ -45,7 +45,7 @@ import org.junit.Test;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class LoopBuilderTest extends AbstractStatementBuilderTest implements LoopBuilderTestResult {
+public class LoopBuilderTest extends AbstractCodegenTest implements LoopBuilderTestResult {
 
   @Test
   public void testForeachLoopWithStringInParameterizedList() {

@@ -20,7 +20,9 @@ import static org.jboss.errai.codegen.framework.builder.callstack.LoadClassRefer
 
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.jboss.errai.codegen.framework.AnnotationEncoder;
 import org.jboss.errai.codegen.framework.Context;
@@ -115,6 +117,15 @@ public class LiteralFactory {
     }
     else if (o instanceof MetaClass) {
       return new MetaClassLiteral((MetaClass) o);
+    }
+    else if (o instanceof Set) {
+      return new SetValue((Set) o);
+    }
+    else if (o instanceof List) {
+      return new ListValue((List) o);
+    }
+    else if (o instanceof Map) {
+      return new MapValue((Map) o);
     }
     else if (o.getClass().isArray()) {
       return new ArrayLiteral(o);

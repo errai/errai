@@ -62,17 +62,6 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
 
   }
 
-  public static <T extends Annotation> InjectableInstance<T> getStaticMethodInjectedInstance(T annotation,
-                                                                                             MetaMethod method,
-                                                                                             Injector injector,
-                                                                                             InjectionContext
-                                                                                                     context) {
-    return new InjectableInstance<T>(annotation, TaskType.StaticMethod,
-            null, method,
-            null, null, null,
-            injector, context);
-  }
-
 
   public static <T extends Annotation> InjectableInstance<T> getFieldInjectedInstance(T annotation,
                                                                                       MetaField field,
@@ -126,11 +115,6 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
 
         return Stmt.loadVariable(targetInjector.getVarName()).invoke(method, stmt);
 
-      case StaticMethod:
-        stmt = InjectUtil.resolveInjectionDependencies(method.getParameters(), injectionContext, method);
-
-        return Stmt.invokeStatic(method.getDeclaringClass(), method.getName(), stmt);
-
       case Parameter:
       case Type:
         return Refs.get(targetInjector.getVarName());
@@ -165,7 +149,6 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
         }
 
       case Method:
-      case StaticMethod:
       case PrivateMethod:
         args = new Statement[values.length + 1];
         args[0] = Refs.get(targetInjector.getVarName());

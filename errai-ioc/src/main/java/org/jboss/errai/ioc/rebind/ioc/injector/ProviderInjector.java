@@ -30,14 +30,11 @@ import javax.inject.Provider;
 public class ProviderInjector extends TypeInjector {
   private final AbstractInjector providerInjector;
   private boolean provided = false;
-  private boolean standardProvider = false;
 
   public ProviderInjector(MetaClass type, MetaClass providerType, InjectionContext context) {
     super(type, context);
     this.providerInjector = new TypeInjector(providerType, context);
     context.registerInjector(providerInjector);
-
-    this.standardProvider = providerInjector.getInjectedType().isAssignableTo(Provider.class);
     this.singleton = context.isElementType(WiringElementType.SingletonBean, providerType);
     this.alternative = context.isElementType(WiringElementType.AlternativeBean, type);
     this.injected = true;
@@ -46,23 +43,11 @@ public class ProviderInjector extends TypeInjector {
   @Override
   public Statement getBeanInstance(InjectionContext injectContext, InjectableInstance injectableInstance) {
     if (isSingleton() && provided) {
-      if (standardProvider) {
-        return Stmt.loadVariable(providerInjector.getVarName()).invoke("get");
-      }
-      else {
-        return Stmt.loadVariable(providerInjector.getVarName()).invoke("provide");
-      }
+      return Stmt.loadVariable(providerInjector.getVarName()).invoke("get");
     }
 
     provided = true;
 
-    if (standardProvider) {
-      return Stmt.nestedCall(providerInjector.getBeanInstance(injectContext, injectableInstance))
-              .invoke("get");
-    }
-    else {
-      return Stmt.nestedCall(providerInjector.getBeanInstance(injectContext, injectableInstance))
-              .invoke("provide");
-    }
+    return Stmt.nestedCall(providerInjector.getBeanInstance(injectContext, injectableInstance)).invoke("get");
   }
 }

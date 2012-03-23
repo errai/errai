@@ -80,7 +80,11 @@ public class LoadVariable extends AbstractCallElement {
         @Override
         public String generate(Context context) {
           if (generatedCache != null) return generatedCache;
-  
+
+          if (variableName.equals("this")) {
+            return generatedCache = "";
+          }
+
           StringBuilder buf = new StringBuilder((classMember
                   && !context.isNonAmbiguous(ref.getName()) ? "this." : "") + getName());
   

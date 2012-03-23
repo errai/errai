@@ -42,7 +42,7 @@ public abstract class AbstractInjector implements Injector {
   protected boolean alternative;
   protected boolean injected;
   protected boolean singleton;
-  protected boolean psuedo;
+  protected boolean replaceable;
   protected boolean provider;
 
   protected MetaClass enclosingType;
@@ -53,7 +53,6 @@ public abstract class AbstractInjector implements Injector {
   public Statement getBeanInstance(InjectableInstance injectableInstance) {
     return getBeanInstance(injectableInstance.getInjectionContext(), injectableInstance);
   }
-
 
   @Override
   public boolean isAlternative() {
@@ -77,7 +76,7 @@ public abstract class AbstractInjector implements Injector {
 
   @Override
   public boolean isPseudo() {
-    return psuedo;
+    return replaceable;
   }
 
   @Override
@@ -90,26 +89,13 @@ public abstract class AbstractInjector implements Injector {
     return enclosingType;
   }
 
-  // @Override
-  public void setAlternative(boolean alternative) {
-    this.alternative = alternative;
-  }
-
-  // @Override
   public void setInjected(boolean injected) {
     this.injected = injected;
   }
 
-  // @Override
-  public void setSingleton(boolean singleton) {
-    this.singleton = singleton;
+  public void setReplaceable(boolean replaceable) {
+    this.replaceable = replaceable;
   }
-
-  // @Override
-  public void setPsuedo(boolean psuedo) {
-    this.psuedo = psuedo;
-  }
-
 
   @Override
   public String getPostInitCallbackVar() {
@@ -172,11 +158,6 @@ public abstract class AbstractInjector implements Injector {
   }
 
   @Override
-  public void setQualifyingMetadata(QualifyingMetadata qualifyingMetadata) {
-    this.qualifyingMetadata = qualifyingMetadata;
-  }
-
-  @Override
   public MetaParameterizedType getQualifyingTypeInformation() {
     return qualifyingTypeInformation;
   }
@@ -228,7 +209,6 @@ public abstract class AbstractInjector implements Injector {
       for (RegistrationHook hook : registrationHooks) {
         hook.onRegister(context, valueRef);
       }
-
     }
   }
 

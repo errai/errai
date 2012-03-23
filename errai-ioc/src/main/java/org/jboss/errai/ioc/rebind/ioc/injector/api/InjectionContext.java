@@ -455,7 +455,7 @@ public class InjectionContext {
 
   public void addPsuedoScopeForType(MetaClass type) {
     TypeInjector inj = new TypeInjector(type, this);
-    inj.setPsuedo(true);
+    inj.setReplaceable(true);
     registerInjector(inj);
   }
 

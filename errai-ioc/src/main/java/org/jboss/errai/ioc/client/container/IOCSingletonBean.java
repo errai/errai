@@ -48,10 +48,10 @@ public class IOCSingletonBean<T> extends IOCDependentBean<T> {
 
   @Override
   public T getInstance(CreationalContext context) {
-    return getInstance();
+    return instance;
   }
 
   public T getInstance() {
-    return instance;
+    return getInstance(null);
   }
 }

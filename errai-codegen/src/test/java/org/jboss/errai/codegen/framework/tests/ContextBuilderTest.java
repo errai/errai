@@ -41,7 +41,7 @@ import org.junit.Test;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class ContextBuilderTest extends AbstractStatementBuilderTest {
+public class ContextBuilderTest extends AbstractCodegenTest {
 
   @Test
   public void testDeclareVariableWithExactTypeProvided() {

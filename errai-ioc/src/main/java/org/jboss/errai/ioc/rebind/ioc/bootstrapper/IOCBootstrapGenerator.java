@@ -482,24 +482,6 @@ public class IOCBootstrapGenerator {
       }
 
       if (bindType == null) {
-        for (MetaClass iface : type.getInterfaces()) {
-          if (!typeProviderCls.isAssignableFrom(iface)) {
-            continue;
-          }
-
-          MetaParameterizedType pType = iface.getParameterizedType();
-
-          if (pType == null) {
-            throw new InjectionFailure("could not determine the bind type for the IOCProvider class: "
-                    + type.getFullyQualifiedName());
-          }
-
-          // todo: check for nested type parameters
-          bindType = (MetaClass) pType.getTypeParameters()[0];
-        }
-      }
-
-      if (bindType == null) {
         throw new InjectionFailure("the annotated provider class does not appear to implement " +
                 TypeProvider.class.getName() + ": " + type.getFullyQualifiedName());
       }

@@ -25,7 +25,7 @@ import org.junit.Test;
 /**
  * @author Mike Brock
  */
-public class ProxyMakerTest extends AbstractStatementBuilderTest {
+public class ProxyMakerTest extends AbstractCodegenTest {
 
   @Test
   public void testBasicProxy() {

@@ -141,11 +141,6 @@ public class QualifiedTypeInjectorDelegate implements Injector {
   }
 
   @Override
-  public void setQualifyingMetadata(QualifyingMetadata qualifyingMetadata) {
-    delegate.setQualifyingMetadata(qualifyingMetadata);
-  }
-
-  @Override
   public void setPostInitCallbackVar(String var) {
     delegate.setPostInitCallbackVar(var);
   }
@@ -164,8 +159,6 @@ public class QualifiedTypeInjectorDelegate implements Injector {
   public void setCreationalCallbackVarName(String creationalCallbackVarName) {
     delegate.setCreationalCallbackVarName(creationalCallbackVarName);
   }
-
-
 
 
   @Override

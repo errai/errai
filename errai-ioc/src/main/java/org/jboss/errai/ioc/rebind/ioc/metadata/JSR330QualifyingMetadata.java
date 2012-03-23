@@ -99,19 +99,4 @@ public class JSR330QualifyingMetadata implements QualifyingMetadata {
 
     return buf.toString();
   }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof QualifyingMetadata)) return false;
-
-    QualifyingMetadata that = (JSR330QualifyingMetadata) o;
-
-    return doesSatisfy(that);
-  }
-
-  @Override
-  public int hashCode() {
-    return qualifiers != null ? qualifiers.hashCode() : 0;
-  }
 }

@@ -138,7 +138,6 @@ public class IOCProcessorFactory {
   }
 
   private void inferHandlers() {
-
     // handle producers first.
     for (final Map.Entry<WiringElementType, Class<? extends Annotation>> entry : injectionContext.getAllElementMappings()) {
       switch (entry.getKey()) {
@@ -201,7 +200,6 @@ public class IOCProcessorFactory {
                 @Override
                 public MetaClass getInjectedType() {
                   switch (instance.getTaskType()) {
-                    case StaticMethod:
                     case PrivateMethod:
                     case Method:
                       return instance.getMethod().getReturnType();
@@ -214,7 +212,6 @@ public class IOCProcessorFactory {
                 }
               });
 
-
               control.masqueradeAs(instance.getElementTypeOrMethodReturnType());
               return Collections.singleton(new SortUnit(instance.getEnclosingType(), true));
             }
@@ -222,11 +219,11 @@ public class IOCProcessorFactory {
             @Override
             public boolean handle(final InjectableInstance instance, final Annotation annotation,
                                   final IOCProcessingContext context) {
-
               return true;
             }
 
-          }, Rule.before(injectionContext.getAnnotationsForElementType(WiringElementType.SingletonBean)));
+          }, Rule.before(injectionContext.getAnnotationsForElementType(WiringElementType.SingletonBean),
+                  injectionContext.getAnnotationsForElementType(WiringElementType.DependentBean)));
           break;
       }
     }
@@ -378,20 +375,6 @@ public class IOCProcessorFactory {
 
         return entry.handler.handle(injectableInstance, anno, context);
       }
-
-      public MetaClass getType() {
-        return type;
-      }
-
-      @Override
-      public boolean equals(Object o) {
-        return o != null && toString().equals(o.toString());
-      }
-
-      @Override
-      public String toString() {
-        return clazz.getName();
-      }
     };
 
     entry.handler.registerMetadata(injectableInstance, anno, context);
@@ -417,7 +400,6 @@ public class IOCProcessorFactory {
             = getMethodInjectedInstance(anno, metaMethod, null,
             injectionContext);
 
-
     ProcessingDelegate del = new ProcessingDelegate() {
       @Override
       public Set<SortUnit> getRequiredDependencies() {
@@ -433,22 +415,7 @@ public class IOCProcessorFactory {
                 = getMethodInjectedInstance(anno, metaMethod, injector,
                 injectionContext);
 
-
         return entry.handler.handle(injectableInstance, anno, context);
-      }
-
-      public MetaClass getType() {
-        return type;
-      }
-
-      @Override
-      public boolean equals(Object o) {
-        return o != null && toString().equals(o.toString());
-      }
-
-      @Override
-      public String toString() {
-        return type.getFullyQualifiedName();
       }
     };
 
@@ -494,16 +461,6 @@ public class IOCProcessorFactory {
         entry.handler.registerMetadata(injectableInstance, anno, context);
 
         return entry.handler.handle(injectableInstance, anno, context);
-      }
-
-      @Override
-      public boolean equals(Object o) {
-        return o != null && toString().equals(o.toString());
-      }
-
-      @Override
-      public String toString() {
-        return type.getFullyQualifiedName();
       }
     };
 

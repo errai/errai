@@ -22,16 +22,7 @@ package org.jboss.errai.ioc.client.container;
  * @author Mike Brock
  */
 public class IOCResolutionException extends RuntimeException {
-
   public IOCResolutionException(String message) {
     super(message);
-  }
-
-  public IOCResolutionException(String message, Throwable cause) {
-    super(message, cause);
-  }
-
-  public IOCResolutionException(Throwable cause) {
-    super(cause);
   }
 }

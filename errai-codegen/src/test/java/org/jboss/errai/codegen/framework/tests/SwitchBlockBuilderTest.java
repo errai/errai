@@ -29,7 +29,7 @@ import org.junit.Test;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class SwitchBlockBuilderTest extends AbstractStatementBuilderTest implements SwitchBlockBuilderTestResult {
+public class SwitchBlockBuilderTest extends AbstractCodegenTest implements SwitchBlockBuilderTestResult {
   public enum TestEnum {
     A, B;
   }

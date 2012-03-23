@@ -52,8 +52,6 @@ public interface Injector {
 
   QualifyingMetadata getQualifyingMetadata();
 
-  void setQualifyingMetadata(QualifyingMetadata qualifyingMetadata);
-
   MetaParameterizedType getQualifyingTypeInformation();
 
   void setQualifyingTypeInformation(MetaParameterizedType qualifyingTypeInformation);

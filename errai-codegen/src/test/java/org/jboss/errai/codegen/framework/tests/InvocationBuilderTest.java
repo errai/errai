@@ -41,7 +41,7 @@ import org.junit.Test;
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class InvocationBuilderTest extends AbstractStatementBuilderTest {
+public class InvocationBuilderTest extends AbstractCodegenTest {
 
   @Test
   public void testSingleInvocation() {

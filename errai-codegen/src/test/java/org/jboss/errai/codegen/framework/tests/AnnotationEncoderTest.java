@@ -29,7 +29,7 @@ import org.junit.Test;
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class AnnotationEncoderTest extends AbstractStatementBuilderTest {
+public class AnnotationEncoderTest extends AbstractCodegenTest {
 
   @Test
   public void testEncodeAnnotation() {
