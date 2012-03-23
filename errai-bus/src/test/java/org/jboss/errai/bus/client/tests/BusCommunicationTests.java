@@ -331,9 +331,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
     });
   }
 
-
   public void testMultipleEndpointsOnRemoteServiceWithAuthentication() {
-
     class TestCount {
       private int countdown;
 
