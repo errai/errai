@@ -329,26 +329,70 @@ public class Context {
     }
   }
 
+  /**
+   * Mark a class "literalizable". Meaning that all classes that are assignable to this type, are candidates for
+   * reification to code snapshots for this context and all subcontexts. See {@link SnapshotMaker} for further
+   * details.
+   *
+   * @param clazz the class, interface or superclass to be considered literalizable.
+   */
   public void addLiteralizableClass(Class clazz) {
     addLiteralizableClass(MetaClassFactory.get(clazz));
   }
 
+  /**
+   * Mark a class "literalizable". Meaning that all classes that are assignable to this type, are candidates for
+   * reification to code snapshots for this context and all subcontexts. See {@link SnapshotMaker} for further
+   * details.
+   *
+   * @param clazz the class, interface or superclass to be considered literalizable.
+   */
   public void addLiteralizableClass(MetaClass clazz) {
     literalizableClasses.add(clazz);
   }
 
+  /**
+   * Returns true if the specified class is literalizable.
+   *
+   * @see #addLiteralizableClass(Class)
+   * @param clazz the class, interface or superclass to be tested if literalizable
+   * @return true if the specified class is literalizable
+   */
   public boolean isLiteralizableClass(final Class clazz) {
     return isLiteralizableClass(MetaClassFactory.get(clazz));
   }
 
+  /**
+   * Returns true if the specified class is literalizable.
+   *
+   * @see #addLiteralizableClass(org.jboss.errai.codegen.framework.meta.MetaClass)
+   * @param clazz the class, interface or superclass to be tested if literalizable
+   * @return true if the specified class is literalizable
+   */
   public boolean isLiteralizableClass(final MetaClass clazz) {
     return getLiteralizableTargetType(clazz) != null;
   }
 
+  /**
+   * Returns the literalizable target type for any matching subtype. Meaning, that if say, the type <tt com.bar.FooImpl</tt>
+   * is a subtype of the interface <tt>com.bar.Foo</tt>, which is itself marked literalizable, this method will return
+   * a reference to the <tt>java.lang.Class</tt> instance for <tt>com.bar.Foo</tt>
+   *
+   * @param clazz the class, interface or superclass to obtain a literalizable target type for.
+   * @return the literalizable target type that matches {@param clazz}. If there are no matches, returns <tt>null</tt>.
+   */
   public Class getLiteralizableTargetType(final Class clazz) {
     return getLiteralizableTargetType(MetaClassFactory.get(clazz));
   }
 
+  /**
+   * Returns the literalizable target type for any matching subtype. Meaning, that if say, the type <tt com.bar.FooImpl</tt>
+   * is a subtype of the interface <tt>com.bar.Foo</tt>, which is itself marked literalizable, this method will return
+   * a reference to the <tt>java.lang.Class</tt> instance for <tt>com.bar.Foo</tt>
+   *
+   * @param clazz the class, interface or superclass to obtain a literalizable target type for.
+   * @return the literalizable target type that matches {@param clazz}. If there are no matches, returns <tt>null</tt>.
+   */
   public Class getLiteralizableTargetType(final MetaClass clazz) {
     Context ctx = this;
     do {
