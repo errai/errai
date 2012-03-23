@@ -26,7 +26,7 @@ public class ListValue extends LiteralValue<List> {
             = ObjectBuilder.newInstanceOf(ArrayList.class, context).extend().initialize();
 
     for (Object v : getValue()) {
-      initBlock.append(Stmt.loadVariable("this").invoke("add", LiteralFactory.getLiteral(v)));
+      initBlock.append(Stmt.loadVariable("this").invoke("add", LiteralFactory.getLiteral(context, v)));
     }
 
     return initBlock.finish().finish().toJavaString();

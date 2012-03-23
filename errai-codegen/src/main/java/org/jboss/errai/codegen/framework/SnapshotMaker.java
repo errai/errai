@@ -33,13 +33,30 @@ public final class SnapshotMaker {
    * @param typesToRecurseOn
    * @return
    */
-  public static Statement makeSnapshotAsSubclass(final Object o, final Class<?> typeToExtend, final Class<?> ... typesToRecurseOn) {
-    return makeSnapshotAsSubclass(
+  public static Statement makeSnapshotAsSubclass(final Object o,
+                                                 final Class<?> typeToExtend,
+                                                 final Class<?> ... typesToRecurseOn) {
+    return makeSnapshotAsSubclass(Context.create(), o, typeToExtend, typesToRecurseOn);
+  }
+
+  /**
+   *
+   * @param o
+   * @param typeToExtend
+   * @param typesToRecurseOn
+   * @return
+   */
+  public static Statement makeSnapshotAsSubclass(final Context context,
+                                                 final Object o,
+                                                 final Class<?> typeToExtend,
+                                                 final Class<?> ... typesToRecurseOn) {
+    return makeSnapshotAsSubclass(context,
         o, typeToExtend, new HashSet<Class<?>>(Arrays.asList(typesToRecurseOn)),
         new IdentityHashMap<Object, Statement>(), new IdentityHashSet<Object>());
   }
 
   private static Statement makeSnapshotAsSubclass(
+      final Context context,
       final Object o,
       final Class<?> typeToExtend,
       final Set<Class<?>> typesToRecurseOn,
@@ -83,6 +100,11 @@ public final class SnapshotMaker {
       public String generate(Context context) {
         if (generatedCache != null) return generatedCache;
 
+        // create a subcontext and record the types we will allow the LiteralFactory to create automatic
+        // snapshots for.
+        final Context subContext = Context.create(context);
+        subContext.addLiteralizableClasses(typesToRecurseOn);
+
         final AnonymousClassStructureBuilder builder = ObjectBuilder.newInstanceOf(typeToExtend, context)
             .extend();
         for (Method method : sortedMethods) {
@@ -104,7 +126,7 @@ public final class SnapshotMaker {
               }
               unfinishedSnapshots.add(o);
               System.out.println("Recursing on generate. unfinishedSnapshots=" + unfinishedSnapshots);
-              methodBody = Stmt.nestedCall(makeSnapshotAsSubclass(
+              methodBody = Stmt.nestedCall(makeSnapshotAsSubclass(subContext,
                   retval, method.getReturnType(), typesToRecurseOn, existingSnapshots, unfinishedSnapshots)).returnValue();
               unfinishedSnapshots.remove(o);
             }

@@ -30,6 +30,7 @@ import org.jboss.errai.codegen.framework.control.branch.Label;
 import org.jboss.errai.codegen.framework.control.branch.LabelReference;
 import org.jboss.errai.codegen.framework.exception.OutOfScopeException;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaField;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.util.GenUtil;
@@ -54,11 +55,14 @@ public class Context {
   private Map<String, String> imports;
   private Set<MetaClass> classContexts;
 
+  private Set<MetaClass> literalizableClasses;
+
   private Map<String, Map<Object, Object>> renderingCache;
 
   private Context() {
     classContexts = new HashSet<MetaClass>();
     renderingCache = new HashMap<String, Map<Object, Object>>();
+    literalizableClasses = new HashSet<MetaClass>();
   }
 
   private Context(Context parent) {
@@ -311,6 +315,56 @@ public class Context {
     while ((c = c.parent) != null);
 
     return false;
+  }
+
+  public void addLiteralizableClasses(Collection<Class<?>> clazzes) {
+    for (Class<?> cls : clazzes) {
+      addLiteralizableClass(cls);
+    }
+  }
+
+  public void addLiteralizableMetaClasses(Collection<MetaClass> clazzes) {
+    for (MetaClass cls : clazzes) {
+      addLiteralizableClass(cls);
+    }
+  }
+
+  public void addLiteralizableClass(Class clazz) {
+    addLiteralizableClass(MetaClassFactory.get(clazz));
+  }
+
+  public void addLiteralizableClass(MetaClass clazz) {
+    literalizableClasses.add(clazz);
+  }
+
+  public boolean isLiteralizableClass(final Class clazz) {
+    return isLiteralizableClass(MetaClassFactory.get(clazz));
+  }
+
+  public boolean isLiteralizableClass(final MetaClass clazz) {
+    return getLiteralizableTargetType(clazz) != null;
+  }
+
+  public Class getLiteralizableTargetType(final Class clazz) {
+    return getLiteralizableTargetType(MetaClassFactory.get(clazz));
+  }
+
+  public Class getLiteralizableTargetType(final MetaClass clazz) {
+    Context ctx = this;
+    do {
+      MetaClass cls = clazz;
+      do {
+        if (ctx.literalizableClasses.contains(cls)) return cls.asClass();
+
+        for (MetaClass iface : cls.getInterfaces()) {
+          if (ctx.literalizableClasses.contains(iface)) return iface.asClass();
+        }
+      }
+      while ((cls = cls.getSuperClass()) != null);
+    }
+    while ((ctx = ctx.parent) != null);
+
+    return null;
   }
 
   public boolean isAutoImportActive() {

@@ -26,6 +26,7 @@ import java.util.Set;
 
 import org.jboss.errai.codegen.framework.AnnotationEncoder;
 import org.jboss.errai.codegen.framework.Context;
+import org.jboss.errai.codegen.framework.SnapshotMaker;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaType;
@@ -40,6 +41,10 @@ public class LiteralFactory {
   private static Map<Object, LiteralValue<?>> LITERAL_CACHE = new HashMap<Object, LiteralValue<?>>();
 
   public static LiteralValue<?> getLiteral(final Object o) {
+    return getLiteral(null, o);
+  }
+
+  public static LiteralValue<?> getLiteral(final Context context, final Object o) {
     LiteralValue<?> result = LITERAL_CACHE.get(o);
     if (result == null) {
 
@@ -50,7 +55,7 @@ public class LiteralFactory {
           public String getCanonicalString(Context context) {
             return getClassReference((MetaClass) o, context, false) + ".class";
           }
-          
+
           public String toString() {
             return o.toString() + ".class";
           }
@@ -73,14 +78,14 @@ public class LiteralFactory {
         };
       }
       else {
-        result = _getLiteral(o);
+        result = _getLiteral(context, o);
       }
       LITERAL_CACHE.put(o, result);
     }
     return result;
   }
 
-  public static LiteralValue<?> _getLiteral(Object o) {
+  private static LiteralValue<?> _getLiteral(final Context context, final Object o) {
     if (o == null) {
       return NullLiteral.INSTANCE;
     }
@@ -129,6 +134,14 @@ public class LiteralFactory {
     }
     else if (o.getClass().isArray()) {
       return new ArrayLiteral(o);
+    }
+    else if (context != null && context.isLiteralizableClass(o.getClass())) {
+      return new LiteralValue<Object>(o) {
+        @Override
+        public String getCanonicalString(Context context) {
+          return SnapshotMaker.makeSnapshotAsSubclass(context, o, context.getLiteralizableTargetType(o.getClass())).generate(context);
+        }
+      };
     }
     else {
       throw new IllegalArgumentException("type cannot be converted to a literal: "
