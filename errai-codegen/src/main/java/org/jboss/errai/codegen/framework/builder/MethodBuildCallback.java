@@ -26,5 +26,5 @@ import org.jboss.errai.codegen.framework.ThrowsDeclaration;
  */
 public interface MethodBuildCallback<T> {
   public T callback(Statement statement, DefParameters parms, DefModifiers modifiers,
-                    ThrowsDeclaration throwsDeclaration);
+                    ThrowsDeclaration throwsDeclaration, String comment);
 }

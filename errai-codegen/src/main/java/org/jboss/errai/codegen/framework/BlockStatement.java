@@ -66,7 +66,8 @@ public class BlockStatement extends AbstractStatement {
 
       buf.append(statement.generate(context));
 
-      if (!buf.toString().endsWith(";") && !buf.toString().endsWith(":") && !buf.toString().endsWith("}"))
+      if (!(statement instanceof Comment)
+              && !buf.toString().endsWith(";") && !buf.toString().endsWith(":") && !buf.toString().endsWith("}"))
         buf.append(";");
 
       lastIsBlock = statement instanceof ClosedBlock;

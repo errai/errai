@@ -26,53 +26,53 @@ import org.jboss.errai.codegen.framework.meta.MetaClass;
 public interface ClassMethodBuilder<T extends ClassStructureBuilder<T>> extends ClassConstructorBuilder<T>,
                                                                                 ClassFieldBuilder<T>, Builder {
 
-  public MethodBlockBuilder<T> publicMethod(MetaClass returnType, String name);
+  public MethodCommentBuilder<T> publicMethod(MetaClass returnType, String name);
 
-  public MethodBlockBuilder<T> publicMethod(Class<?> returnType, String name);
+  public MethodCommentBuilder<T> publicMethod(Class<?> returnType, String name);
 
-  public MethodBlockBuilder<T> publicMethod(MetaClass returnType, String name, MetaClass... parms);
+  public MethodCommentBuilder<T> publicMethod(MetaClass returnType, String name, MetaClass... parms);
 
-  public MethodBlockBuilder<T> publicMethod(Class<?> returnType, String name, Class<?>... parms);
+  public MethodCommentBuilder<T> publicMethod(Class<?> returnType, String name, Class<?>... parms);
 
-  public MethodBlockBuilder<T> publicMethod(MetaClass returnType, String name, Parameter... parms);
+  public MethodCommentBuilder<T> publicMethod(MetaClass returnType, String name, Parameter... parms);
 
-  public MethodBlockBuilder<T> publicMethod(Class<?> returnType, String name, Parameter... parms);
+  public MethodCommentBuilder<T> publicMethod(Class<?> returnType, String name, Parameter... parms);
 
-  public MethodBlockBuilder<T> privateMethod(MetaClass returnType, String name);
+  public MethodCommentBuilder<T> privateMethod(MetaClass returnType, String name);
 
-  public MethodBlockBuilder<T> privateMethod(Class<?> returnType, String name);
+  public MethodCommentBuilder<T> privateMethod(Class<?> returnType, String name);
 
-  public MethodBlockBuilder<T> privateMethod(MetaClass returnType, String name, MetaClass... parms);
+  public MethodCommentBuilder<T> privateMethod(MetaClass returnType, String name, MetaClass... parms);
 
-  public MethodBlockBuilder<T> privateMethod(Class<?> returnType, String name, Class<?>... parms);
+  public MethodCommentBuilder<T> privateMethod(Class<?> returnType, String name, Class<?>... parms);
 
-  public MethodBlockBuilder<T> privateMethod(MetaClass returnType, String name, Parameter... parms);
+  public MethodCommentBuilder<T> privateMethod(MetaClass returnType, String name, Parameter... parms);
 
-  public MethodBlockBuilder<T> privateMethod(Class<?> returnType, String name, Parameter... parms);
+  public MethodCommentBuilder<T> privateMethod(Class<?> returnType, String name, Parameter... parms);
 
-  public MethodBlockBuilder<T> protectedMethod(MetaClass returnType, String name);
+  public MethodCommentBuilder<T> protectedMethod(MetaClass returnType, String name);
 
-  public MethodBlockBuilder<T> protectedMethod(Class<?> returnType, String name);
+  public MethodCommentBuilder<T> protectedMethod(Class<?> returnType, String name);
 
-  public MethodBlockBuilder<T> protectedMethod(MetaClass returnType, String name,
+  public MethodCommentBuilder<T> protectedMethod(MetaClass returnType, String name,
                                                MetaClass... parms);
 
-  public MethodBlockBuilder<T> protectedMethod(Class<?> returnType, String name, Class<?>... parms);
+  public MethodCommentBuilder<T> protectedMethod(Class<?> returnType, String name, Class<?>... parms);
 
-  public MethodBlockBuilder<T> protectedMethod(MetaClass returnType, String name,
+  public MethodCommentBuilder<T> protectedMethod(MetaClass returnType, String name,
                                                Parameter... parms);
 
-  public MethodBlockBuilder<T> protectedMethod(Class<?> returnType, String name, Parameter... parms);
+  public MethodCommentBuilder<T> protectedMethod(Class<?> returnType, String name, Parameter... parms);
 
-  public MethodBlockBuilder<T> packageMethod(MetaClass returnType, String name);
+  public MethodCommentBuilder<T> packageMethod(MetaClass returnType, String name);
 
-  public MethodBlockBuilder<T> packageMethod(Class<?> returnType, String name);
+  public MethodCommentBuilder<T> packageMethod(Class<?> returnType, String name);
 
-  public MethodBlockBuilder<T> packageMethod(MetaClass returnType, String name, MetaClass... parms);
+  public MethodCommentBuilder<T> packageMethod(MetaClass returnType, String name, MetaClass... parms);
 
-  public MethodBlockBuilder<T> packageMethod(Class<?> returnType, String name, Class<?>... parms);
+  public MethodCommentBuilder<T> packageMethod(Class<?> returnType, String name, Class<?>... parms);
 
-  public MethodBlockBuilder<T> packageMethod(MetaClass returnType, String name, Parameter... parms);
+  public MethodCommentBuilder<T> packageMethod(MetaClass returnType, String name, Parameter... parms);
 
-  public MethodBlockBuilder<T> packageMethod(Class<?> returnType, String name, Parameter... parms);
+  public MethodCommentBuilder<T> packageMethod(Class<?> returnType, String name, Parameter... parms);
 }

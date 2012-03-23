@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jboss.errai.codegen.framework.Comment;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.DefModifiers;
 import org.jboss.errai.codegen.framework.DefParameters;
@@ -54,12 +55,13 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
   private MetaClass returnType;
   private DefParameters defParameters;
 
-  //  private MetaType genericReturnType;
   private List<MetaType> genericParameterTypes;
 
   private ThrowsDeclaration throwsDeclaration;
 
   private MetaMethod reifiedFormOf;
+
+  private String methodComment;
 
   public BuildMetaMethod(BuildMetaClass declaringClass,
                          Statement body,
@@ -285,17 +287,26 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
     this.reifiedFormOf = reifiedFormOf;
   }
 
+  public void setMethodComment(String methodComment) {
+    this.methodComment = methodComment;
+  }
+
   @Override
   public String toJavaString() {
     this.context = Context.create(declaringClass.getContext());
 
+
     for (Parameter p : defParameters.getParameters()) {
       context.addVariable(Variable.create(p.getName(), p.getType()));
     }
-    StringBuilder buf = new StringBuilder(256).append(scope.getCanonicalName())
-            .append(" ");
+    StringBuilder buf = new StringBuilder(256);
 
-    buf.append(modifiers.toJavaString()).append(" ");
+    if (methodComment != null) {
+      buf.append(new Comment(methodComment).generate(null)).append("\n");
+    }
+
+    buf.append(scope.getCanonicalName()).append(" ")
+            .append(modifiers.toJavaString()).append(" ");
 
     buf.append(LoadClassReference.getClassReference(returnType, context, false))
             .append(" ")

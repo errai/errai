@@ -219,7 +219,8 @@ public class IOCBootstrapGenerator {
     Context buildContext = bootStrapClass.getContext();
 
     BlockBuilder<?> blockBuilder =
-            classStructureBuilder.publicMethod(BootstrapperInjectionContext.class, "bootstrapContainer");
+            classStructureBuilder.publicMethod(BootstrapperInjectionContext.class, "bootstrapContainer")
+            .methodComment("The main IOC bootstrap method.");
 
     SourceWriter sourceWriter = new StringSourceWriter();
 
@@ -312,7 +313,6 @@ public class IOCBootstrapGenerator {
     for (Statement stmt : procContext.getStaticPostConstructStatements()) {
       blockBuilder.append(stmt);
     }
-
 
     Map<MetaField, PrivateAccessType> privateFields = injectionContext.getPrivateFieldsToExpose();
     for (Map.Entry<MetaField, PrivateAccessType> f : privateFields.entrySet()) {

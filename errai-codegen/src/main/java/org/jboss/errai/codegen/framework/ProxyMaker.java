@@ -50,10 +50,9 @@ public class ProxyMaker {
 
 
     ClassStructureBuilder builder = ClassBuilder.define(proxyClassName, toProxy).publicScope()
-    //        .implementsInterface(parameterizedAs(Proxy.class, typeParametersOf(toProxy)))
             .body();
 
-    String proxyVar = "_proxy";
+    final String proxyVar = "$$_proxy_$$";
 
     builder.privateField(proxyVar, toProxy).finish();
 

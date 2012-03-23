@@ -32,7 +32,7 @@ import org.jboss.errai.codegen.framework.builder.ClassStructureBuilderAbstractMe
 import org.jboss.errai.codegen.framework.builder.ConstructorBlockBuilder;
 import org.jboss.errai.codegen.framework.builder.DefaultClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.FieldBuildStart;
-import org.jboss.errai.codegen.framework.builder.MethodBlockBuilder;
+import org.jboss.errai.codegen.framework.builder.MethodCommentBuilder;
 import org.jboss.errai.codegen.framework.builder.MethodBuildCallback;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
@@ -263,129 +263,129 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
 
   // public method //
   @Override
-  public MethodBlockBuilder<T> publicMethod(MetaClass returnType, String name) {
+  public MethodCommentBuilder<T> publicMethod(MetaClass returnType, String name) {
     return genMethod(Scope.Public, returnType, name, DefParameters.none());
   }
 
   @Override
-  public MethodBlockBuilder<T> publicMethod(Class<?> returnType, String name) {
+  public MethodCommentBuilder<T> publicMethod(Class<?> returnType, String name) {
     return publicMethod(MetaClassFactory.get(returnType), name);
   }
 
   @Override
-  public MethodBlockBuilder<T> publicMethod(MetaClass returnType, String name, MetaClass... parms) {
+  public MethodCommentBuilder<T> publicMethod(MetaClass returnType, String name, MetaClass... parms) {
     return genMethod(Scope.Public, returnType, name, DefParameters.fromTypeArray(parms));
   }
 
   @Override
-  public MethodBlockBuilder<T> publicMethod(Class<?> returnType, String name, Class<?>... parms) {
+  public MethodCommentBuilder<T> publicMethod(Class<?> returnType, String name, Class<?>... parms) {
     return publicMethod(MetaClassFactory.get(returnType), name, MetaClassFactory.fromClassArray(parms));
   }
 
   @Override
-  public MethodBlockBuilder<T> publicMethod(MetaClass returnType, String name, Parameter... parms) {
+  public MethodCommentBuilder<T> publicMethod(MetaClass returnType, String name, Parameter... parms) {
     return genMethod(Scope.Public, returnType, name, DefParameters.fromParameters(parms));
   }
 
   @Override
-  public MethodBlockBuilder<T> publicMethod(Class<?> returnType, String name, Parameter... parms) {
+  public MethodCommentBuilder<T> publicMethod(Class<?> returnType, String name, Parameter... parms) {
     return publicMethod(MetaClassFactory.get(returnType), name, parms);
   }
 
   // private method //
   @Override
-  public MethodBlockBuilder<T> privateMethod(MetaClass returnType, String name) {
+  public MethodCommentBuilder<T> privateMethod(MetaClass returnType, String name) {
     return genMethod(Scope.Private, returnType, name, DefParameters.none());
   }
 
   @Override
-  public MethodBlockBuilder<T> privateMethod(Class<?> returnType, String name) {
+  public MethodCommentBuilder<T> privateMethod(Class<?> returnType, String name) {
     return privateMethod(MetaClassFactory.get(returnType), name);
   }
 
   @Override
-  public MethodBlockBuilder<T> privateMethod(MetaClass returnType, String name, MetaClass... parms) {
+  public MethodCommentBuilder<T> privateMethod(MetaClass returnType, String name, MetaClass... parms) {
     return genMethod(Scope.Private, returnType, name, DefParameters.fromTypeArray(parms));
   }
 
   @Override
-  public MethodBlockBuilder<T> privateMethod(Class<?> returnType, String name, Class<?>... parms) {
+  public MethodCommentBuilder<T> privateMethod(Class<?> returnType, String name, Class<?>... parms) {
     return privateMethod(MetaClassFactory.get(returnType), name, MetaClassFactory.fromClassArray(parms));
   }
 
   @Override
-  public MethodBlockBuilder<T> privateMethod(MetaClass returnType, String name, Parameter... parms) {
+  public MethodCommentBuilder<T> privateMethod(MetaClass returnType, String name, Parameter... parms) {
     return genMethod(Scope.Private, returnType, name, DefParameters.fromParameters(parms));
   }
 
   @Override
-  public MethodBlockBuilder<T> privateMethod(Class<?> returnType, String name, Parameter... parms) {
+  public MethodCommentBuilder<T> privateMethod(Class<?> returnType, String name, Parameter... parms) {
     return privateMethod(MetaClassFactory.get(returnType), name, parms);
   }
 
   // protected method //
   @Override
-  public MethodBlockBuilder<T> protectedMethod(MetaClass returnType, String name) {
+  public MethodCommentBuilder<T> protectedMethod(MetaClass returnType, String name) {
     return genMethod(Scope.Protected, returnType, name, DefParameters.none());
   }
 
   @Override
-  public MethodBlockBuilder<T> protectedMethod(Class<?> returnType, String name) {
+  public MethodCommentBuilder<T> protectedMethod(Class<?> returnType, String name) {
     return protectedMethod(MetaClassFactory.get(returnType), name);
   }
 
   @Override
-  public MethodBlockBuilder<T> protectedMethod(MetaClass returnType, String name, MetaClass... parms) {
+  public MethodCommentBuilder<T> protectedMethod(MetaClass returnType, String name, MetaClass... parms) {
     return genMethod(Scope.Protected, returnType, name, DefParameters.fromTypeArray(parms));
   }
 
   @Override
-  public MethodBlockBuilder<T> protectedMethod(Class<?> returnType, String name, Class<?>... parms) {
+  public MethodCommentBuilder<T> protectedMethod(Class<?> returnType, String name, Class<?>... parms) {
     return protectedMethod(MetaClassFactory.get(returnType), name, MetaClassFactory.fromClassArray(parms));
   }
 
   @Override
-  public MethodBlockBuilder<T> protectedMethod(MetaClass returnType, String name, Parameter... parms) {
+  public MethodCommentBuilder<T> protectedMethod(MetaClass returnType, String name, Parameter... parms) {
     return genMethod(Scope.Protected, returnType, name, DefParameters.fromParameters(parms));
   }
 
   @Override
-  public MethodBlockBuilder<T> protectedMethod(Class<?> returnType, String name, Parameter... parms) {
+  public MethodCommentBuilder<T> protectedMethod(Class<?> returnType, String name, Parameter... parms) {
     return protectedMethod(MetaClassFactory.get(returnType), name, parms);
   }
 
   // package-private method //
   @Override
-  public MethodBlockBuilder<T> packageMethod(MetaClass returnType, String name) {
+  public MethodCommentBuilder<T> packageMethod(MetaClass returnType, String name) {
     return genMethod(Scope.Package, returnType, name, DefParameters.none());
   }
 
   @Override
-  public MethodBlockBuilder<T> packageMethod(Class<?> returnType, String name) {
+  public MethodCommentBuilder<T> packageMethod(Class<?> returnType, String name) {
     return packageMethod(MetaClassFactory.get(returnType), name);
   }
 
   @Override
-  public MethodBlockBuilder<T> packageMethod(MetaClass returnType, String name, MetaClass... parms) {
+  public MethodCommentBuilder<T> packageMethod(MetaClass returnType, String name, MetaClass... parms) {
     return genMethod(Scope.Package, returnType, name, DefParameters.fromTypeArray(parms));
   }
 
   @Override
-  public MethodBlockBuilder<T> packageMethod(Class<?> returnType, String name, Class<?>... parms) {
+  public MethodCommentBuilder<T> packageMethod(Class<?> returnType, String name, Class<?>... parms) {
     return packageMethod(MetaClassFactory.get(returnType), name, MetaClassFactory.fromClassArray(parms));
   }
 
   @Override
-  public MethodBlockBuilder<T> packageMethod(MetaClass returnType, String name, Parameter... parms) {
+  public MethodCommentBuilder<T> packageMethod(MetaClass returnType, String name, Parameter... parms) {
     return genMethod(Scope.Package, returnType, name, DefParameters.fromParameters(parms));
   }
 
   @Override
-  public MethodBlockBuilder<T> packageMethod(Class<?> returnType, String name, Parameter... parms) {
+  public MethodCommentBuilder<T> packageMethod(Class<?> returnType, String name, Parameter... parms) {
     return packageMethod(MetaClassFactory.get(returnType), name, parms);
   }
 
-  private MethodBlockBuilder<T> genMethod(final Scope scope,
+  private MethodCommentBuilder<T> genMethod(final Scope scope,
                                           final MetaClass returnType,
                                           final String name,
                                           final DefParameters defParameters) {
@@ -395,7 +395,8 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
       public T callback(final Statement statement,
                         final DefParameters parameters,
                         final DefModifiers modifiers,
-                        final ThrowsDeclaration throwsDeclaration) {
+                        final ThrowsDeclaration throwsDeclaration,
+                        final String comment) {
 
         DefParameters dParameters;
 
@@ -409,6 +410,7 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
         BuildMetaMethod buildMetaMethod = new BuildMetaMethod(classDefinition, statement, scope,
                 modifiers, name, returnType, null, dParameters, throwsDeclaration);
 
+        buildMetaMethod.setMethodComment(comment);
         classDefinition.addMethod(buildMetaMethod);
         return (T) ClassBuilder.this;
       }
@@ -456,7 +458,7 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
   }
 
   private FieldBuildStart<T> genField(final Scope scope, final String name,
-                                            final MetaClass type) {
+                                      final MetaClass type) {
     return new FieldBuilder<T>(new BuildCallback<T>() {
       @Override
       public T callback(final Statement statement) {

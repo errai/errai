@@ -230,4 +230,8 @@ public class Stmt {
   public static StatementEnd returnVoid() {
     return StatementBuilder.create().returnVoid();
   }
+
+  public static Statement codeComment(String comment) {
+    return StatementBuilder.create().codeComment(comment);
+  }
 }
