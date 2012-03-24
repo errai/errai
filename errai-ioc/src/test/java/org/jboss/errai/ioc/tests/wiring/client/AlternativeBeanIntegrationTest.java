@@ -19,7 +19,10 @@ package org.jboss.errai.ioc.tests.wiring.client;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
 import org.jboss.errai.ioc.tests.wiring.client.res.AlternativeBeanA;
+import org.jboss.errai.ioc.tests.wiring.client.res.AlternativeCommonInterfaceB;
 import org.jboss.errai.ioc.tests.wiring.client.res.AlternativeDependentBean;
+import org.jboss.errai.ioc.tests.wiring.client.res.OverridingAltCommonInterfaceBImpl;
+import org.jboss.errai.ioc.tests.wiring.client.res.SingleAlternativeDependentBean;
 
 import java.io.File;
 
@@ -47,6 +50,24 @@ public class AlternativeBeanIntegrationTest extends AbstractErraiIOCTest {
         finishTest();
       }
     });
+  }
+
+  public void testSingleAlternativeTakesPrecedence() throws Exception {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        SingleAlternativeDependentBean bean = IOC.getBeanManager()
+                .lookupBean(SingleAlternativeDependentBean.class).getInstance();
+
+        assertNotNull(bean);
+        assertNotNull(bean.getAlternativeCommonInterfaceB());
+        assertTrue("wrong instance of bean injected",
+                bean.getAlternativeCommonInterfaceB() instanceof OverridingAltCommonInterfaceBImpl);
+
+        finishTest();
+      }
+    });
+
   }
 
 }

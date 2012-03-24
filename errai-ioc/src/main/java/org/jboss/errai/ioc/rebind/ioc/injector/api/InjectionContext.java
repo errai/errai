@@ -122,14 +122,14 @@ public class InjectionContext {
     List<Injector> injs = injectors.get(erased);
     List<Injector> matching = new ArrayList<Injector>();
 
-    boolean alternativeBeans = true;
+    boolean alternativeBeans = false;
 
     if (injs != null) {
       for (Injector inj : injs) {
         if (inj.matches(type.getParameterizedType(), metadata)) {
           matching.add(inj);
-          if (alternativeBeans && !inj.isAlternative()) {
-            alternativeBeans = false;
+          if (inj.isAlternative()) {
+            alternativeBeans = true;
           }
         }
       }
