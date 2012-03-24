@@ -17,8 +17,12 @@
 package org.jboss.errai.codegen.framework.tests.meta;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
+import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
+import org.jboss.errai.codegen.framework.tests.model.ObjectWithNested;
+import org.jboss.errai.codegen.framework.tests.model.TestInterface;
 import org.junit.Test;
 
 /**
@@ -56,5 +60,15 @@ public class MetaClassTest {
    String internalName = MetaClassFactory.get(String[][].class).getInternalName();
    assertEquals("Wrong internal name generated for multidimensional object array",
        "[[Ljava/lang/String;", internalName);
+  }
+
+  @Test
+  public void testIsAssignableFromComparisonForNested() {
+    ObjectWithNested objectWithNested = new ObjectWithNested();
+
+    MetaClass interfaceClass = MetaClassFactory.get(TestInterface.class);
+    MetaClass metaClass = MetaClassFactory.get(objectWithNested.getMyNestedInterface().getClass());
+
+    assertTrue("should be assignable", interfaceClass.isAssignableFrom(metaClass));
   }
 }

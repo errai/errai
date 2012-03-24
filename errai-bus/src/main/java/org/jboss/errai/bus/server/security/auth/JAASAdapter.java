@@ -185,14 +185,4 @@ public class JAASAdapter implements AuthenticationAdapter {
     }
     return credentials;
   }
-
-
-  public void process(Message message) {
-    if (isAuthenticated(message)) {
-      //   getAuthDescriptor(message).add(new SimpleRole(CredentialTypes.Authenticated.name()));
-
-    }
-  }
-
-
 }
