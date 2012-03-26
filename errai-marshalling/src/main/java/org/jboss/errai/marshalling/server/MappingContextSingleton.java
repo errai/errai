@@ -27,6 +27,7 @@ import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.Parser;
 import org.jboss.errai.marshalling.client.api.ParserFactory;
 import org.jboss.errai.marshalling.client.api.annotations.AlwaysQualify;
+import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.exceptions.MarshallingException;
@@ -191,7 +192,13 @@ public class MappingContextSingleton {
               marshaller = new QualifyingMarshallerWrapper(marshaller);
             }
 
-            factory.addDefinition(new MappingDefinition(marshaller, true));
+            MappingDefinition def = new MappingDefinition(marshaller, true);
+
+            if (m.isAnnotationPresent(ClientMarshaller.class)) {
+              def.setClientMarshallerClass(m.asSubclass(Marshaller.class));
+            }
+
+            factory.addDefinition(def);
 
             if (m.isAnnotationPresent(ImplementationAliases.class)) {
               for (Class<?> inherits : m.getAnnotation(ImplementationAliases.class).value()) {
