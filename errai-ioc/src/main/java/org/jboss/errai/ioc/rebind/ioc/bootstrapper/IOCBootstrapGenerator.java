@@ -52,8 +52,7 @@ import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.framework.meta.MetaType;
 import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
-import org.jboss.errai.codegen.framework.meta.impl.gwt.GWTClass;
-import org.jboss.errai.codegen.framework.meta.impl.java.JavaReflectionClass;
+import org.jboss.errai.codegen.framework.meta.impl.gwt.GWTUtil;
 import org.jboss.errai.codegen.framework.util.GenUtil;
 import org.jboss.errai.codegen.framework.util.Implementations;
 import org.jboss.errai.codegen.framework.util.PrivateAccessType;
@@ -76,12 +75,10 @@ import org.jboss.errai.ioc.client.container.CreationalContext;
 import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
-import org.jboss.errai.ioc.rebind.ioc.extension.JSR330AnnotationHandler;
 import org.jboss.errai.ioc.rebind.ioc.injector.AbstractInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.ContextualProviderInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.injector.ProviderInjector;
-import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadataFactory;
@@ -90,7 +87,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.user.rebind.SourceWriter;
 import com.google.gwt.user.rebind.StringSourceWriter;
@@ -174,27 +170,9 @@ public class IOCBootstrapGenerator {
 
     String gen;
 
-    MetaClassFactory.emptyCache();
-    if (typeOracle != null) {
-      Set<String> translatable = RebindUtils.findTranslatablePackages(context);
-      translatable.remove("java.lang");
-
-      for (JClassType type : typeOracle.getTypes()) {
-        if (!translatable.contains(type.getPackage().getName())) {
-          logger.log(com.google.gwt.core.ext.TreeLogger.Type.DEBUG, "Skipping non-translatable " + type.getQualifiedSourceName());
-          continue;
-        }
-
-        if (type.isAnnotation() != null) {
-          logger.log(com.google.gwt.core.ext.TreeLogger.Type.DEBUG, "Caching annotation type " + type.getQualifiedSourceName());
-          MetaClassFactory.pushCache(JavaReflectionClass
-                  .newUncachedInstance(MetaClassFactory.loadClass(type.getQualifiedBinaryName())));
-        }
-        else {
-          logger.log(com.google.gwt.core.ext.TreeLogger.Type.DEBUG, "Caching translatable type " + type.getQualifiedSourceName());
-          MetaClassFactory.pushCache(GWTClass.newInstance(typeOracle, type));
-        }
-      }
+    if (context != null) {
+      // context == null during some tests, in which case we don't have a GWT type oracle
+      GWTUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
     }
 
     log.info("generating IOC bootstrapping class...");
