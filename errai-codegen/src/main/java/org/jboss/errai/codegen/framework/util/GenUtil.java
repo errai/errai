@@ -103,9 +103,10 @@ public class GenUtil {
         statements[i] = convert(context, parameter, methParms[i++].getType());
       }
       catch (GenerationException t) {
-        throw new GenerationException("in method call: "
+        t.appendFailureInfo("in method call: "
                 + method.getDeclaringClass().getFullyQualifiedName()
                 + "." + method.getName() + "(" + Arrays.toString(methParms) + ")");
+        throw t;
       }
     }
     return statements;
