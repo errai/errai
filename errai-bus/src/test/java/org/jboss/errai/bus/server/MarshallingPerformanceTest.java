@@ -20,6 +20,9 @@ import junit.framework.TestCase;
 import org.jboss.errai.common.client.util.TimeUnit;
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.marshalling.server.ServerMarshalling;
+import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import java.io.*;
 import java.util.HashMap;
@@ -28,10 +31,11 @@ import java.util.Map;
 /**
  * @author Mike Brock
  */
-public class MarshallingPerformanceTests extends TestCase {
+public class MarshallingPerformanceTest {
 
   private static final int TEST_ITERATIONS = 100000;
 
+  @Test
   public void testMarshall() throws IOException {
     // ensure the marshalling system has been setup.
     MappingContextSingleton.get();
@@ -73,10 +77,10 @@ public class MarshallingPerformanceTests extends TestCase {
     System.out.println("           Encoding Time: " + encodingMillis + "ms (" + encodingPctTm + "%)");
     System.out.println("           Decoding Time: " + decodingMillis + "ms (" + decodingPctTm + "%)");
 
-    assertNotNull(payload);
-    assertFalse(payload.isEmpty());
-    assertEquals("ConnectToQueue", payload.get("CommandType"));
-    assertEquals("ServerBus", payload.get("ToSubject"));
-    assertEquals("Hello There!", payload.get("Extra"));
+    Assert.assertNotNull(payload);
+    Assert.assertFalse(payload.isEmpty());
+    Assert.assertEquals("ConnectToQueue", payload.get("CommandType"));
+    Assert.assertEquals("ServerBus", payload.get("ToSubject"));
+    Assert.assertEquals("Hello There!", payload.get("Extra"));
   }
 }

@@ -22,7 +22,11 @@ import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
 import org.jboss.errai.codegen.framework.builder.CatchBlockBuilder;
-import org.jboss.errai.codegen.framework.meta.*;
+import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
+import org.jboss.errai.codegen.framework.meta.MetaClassMember;
+import org.jboss.errai.codegen.framework.meta.MetaField;
+import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.util.Bool;
 import org.jboss.errai.codegen.framework.util.GenUtil;
 import org.jboss.errai.codegen.framework.util.Implementations;
@@ -38,7 +42,12 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.rebind.api.GeneratorMappingContext;
 import org.jboss.errai.marshalling.rebind.api.MappingStrategy;
 import org.jboss.errai.marshalling.rebind.api.ObjectMapper;
-import org.jboss.errai.marshalling.rebind.api.model.*;
+import org.jboss.errai.marshalling.rebind.api.model.ConstructorMapping;
+import org.jboss.errai.marshalling.rebind.api.model.FactoryMapping;
+import org.jboss.errai.marshalling.rebind.api.model.InstantiationMapping;
+import org.jboss.errai.marshalling.rebind.api.model.Mapping;
+import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
+import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 
 import java.util.ArrayList;
@@ -49,7 +58,6 @@ import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.typeParame
 import static org.jboss.errai.codegen.framework.util.Implementations.newStringBuilder;
 import static org.jboss.errai.codegen.framework.util.Stmt.declareVariable;
 import static org.jboss.errai.codegen.framework.util.Stmt.loadVariable;
-import static org.jboss.errai.codegen.framework.util.Stmt.newObject;
 
 /**
  * The Errai default Java-to-JSON-to-Java marshaling strategy.
@@ -209,7 +217,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
               if (setterMeth != null && !setterMeth.isPrivate()) {
                 // Bind via setter
-                bindingStatement = loadVariable("entity").invoke(setterMeth, val);
+                bindingStatement = loadVariable("entity").invoke(setterMeth, Cast.to(memberMapping.getTargetType(), val));
               }
               else if (field.getType().getCanonicalName().equals("long")) {
                 throw new RuntimeException("cannot support private field marshalling of long type" +
@@ -232,7 +240,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
           }
           else if (memberMapping.getBindingMember() instanceof MetaMethod) {
             bindingStatement = loadVariable("entity").invoke(((MetaMethod) memberMapping.getBindingMember()),
-                    Cast.to(memberMapping.getType(), val));
+                    Cast.to(memberMapping.getTargetType(), val));
           }
           else {
             throw new RuntimeException("unknown member mapping type: " + memberMapping.getType());
@@ -246,7 +254,6 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
                   )).append(bindingStatement).finish());
 
         }
-
 
         tryBuilder.append(loadVariable("entity").returnValue());
 

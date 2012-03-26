@@ -22,10 +22,14 @@ package org.jboss.errai.marshalling.rebind;
 public class DefinitionsFactorySingleton {
   private static final DefinitionsFactory factory;
   static {
-    factory = new DefinitionsFactoryImpl();
+    factory = newInstance();
   }
 
   public static DefinitionsFactory get() {
     return factory;
+  }
+
+  public static DefinitionsFactory newInstance() {
+    return new DefinitionsFactoryImpl();
   }
 }
