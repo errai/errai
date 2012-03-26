@@ -79,6 +79,10 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
       throw new InvalidMappingException("no definition for: " + toMap.getFullyQualifiedName());
     }
 
+    if (toMap.isAbstract() || toMap.isInterface()) {
+      throw new RuntimeException("cannot map an abstract class or interface: " + toMap.getFullyQualifiedName());
+    }
+
     return new ObjectMapper() {
       @Override
       public Statement getMarshaller() {
@@ -88,10 +92,6 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
         classStructureBuilder.publicOverridesMethod("getTypeHandled")
                 .append(Stmt.load(toMap).returnValue())
-                .finish();
-
-        classStructureBuilder.publicOverridesMethod("getEncodingType")
-                .append(Stmt.load("json").returnValue())
                 .finish();
 
         /**
@@ -273,13 +273,6 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
         marshallToJSON(marshallMethodBlock, toMap, mapping);
 
         marshallMethodBlock.finish();
-
-        classStructureBuilder.publicOverridesMethod("handles", Parameter.of(EJValue.class, "a0"))
-                .append(Stmt.nestedCall(Bool.and(
-                        Bool.notEquals(loadVariable("a0").invoke("isObject"), null),
-                        loadVariable("a0").invoke("isObject").invoke("get", SerializationParts.ENCODED_TYPE).invoke("isString").invoke("stringValue")
-                                .invoke("equals", loadVariable("this").invoke("getTypeHandled").invoke("getName"))
-                )).returnValue()).finish();
 
         return classStructureBuilder.finish();
       }

@@ -31,19 +31,17 @@ import org.jboss.errai.marshalling.client.util.NumbersUtils;
  *
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ClientMarshaller @ServerMarshaller
-public class ObjectMarshaller extends AbstractJSONMarshaller<Object> {
+@ClientMarshaller
+@ServerMarshaller
+public class ObjectMarshaller extends AbstractNullableMarshaller<Object> {
   @Override
   public Class<Object> getTypeHandled() {
     return Object.class;
   }
 
   @Override
-  public Object demarshall(EJValue o, MarshallingSession ctx) {
-    if (o.isNull()) {
-      return null;
-    }
-    else if (o.isObject() != null) {
+  public Object doNotNullDemarshall(EJValue o, MarshallingSession ctx) {
+    if (o.isObject() != null) {
       EJObject jsObject = o.isObject();
       EJString string = jsObject.get(SerializationParts.ENCODED_TYPE).isString();
       if (string == null) {
@@ -73,11 +71,7 @@ public class ObjectMarshaller extends AbstractJSONMarshaller<Object> {
   }
 
   @Override
-  public String marshall(Object o, MarshallingSession ctx) {
-    if (o == null) {
-      return "null";
-    }
-
+  public String doNotNullMarshall(Object o, MarshallingSession ctx) {
     if ((o instanceof Number && !o.getClass().getName().startsWith("java.math.Big")) || o instanceof Boolean) {
       return NumbersUtils.qualifiedNumericEncoding(o);
     }
@@ -91,8 +85,4 @@ public class ObjectMarshaller extends AbstractJSONMarshaller<Object> {
     return marshaller.marshall(o, ctx);
   }
 
-  @Override
-  public boolean handles(EJValue o) {
-    return false;
-  }
 }

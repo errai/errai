@@ -17,6 +17,7 @@
 package org.jboss.errai.marshalling.client.marshallers;
 
 import org.jboss.errai.common.client.protocols.SerializationParts;
+import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
@@ -25,35 +26,21 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ClientMarshaller @ServerMarshaller
-public class ShortMarshaller extends AbstractJSONMarshaller<Short> {
+@ClientMarshaller
+@ServerMarshaller
+public class ShortMarshaller extends AbstractNumberMarshaller<Short> {
   @Override
   public Class<Short> getTypeHandled() {
     return Short.class;
   }
 
   @Override
-  public Short demarshall(EJValue o, MarshallingSession ctx) {
-    if (o.isNull()) {
-      return null;
-    }
-    else if (o.isObject() != null) {
+  public Short doNotNullDemarshall(EJValue o, MarshallingSession ctx) {
+    if (o.isObject() != null) {
       return o.isObject().get(SerializationParts.NUMERIC_VALUE).isNumber().shortValue();
     }
     else {
       return o.isNumber().shortValue();
     }
-  }
-
-  @Override
-  public String marshall(Short o, MarshallingSession ctx) {
-    if (o == null)
-      return "null";
-    return o.toString();
-  }
-
-  @Override
-  public boolean handles(EJValue o) {
-    return o.isNumber() != null;
   }
 }

@@ -16,15 +16,10 @@
 
 package org.jboss.errai.marshalling.server.marshallers;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-
 import org.jboss.errai.codegen.framework.meta.MetaField;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.common.client.protocols.SerializationParts;
+import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.exceptions.MarshallingException;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
@@ -40,6 +35,12 @@ import org.jboss.errai.marshalling.server.EncodingSession;
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.marshalling.server.api.ServerMarshaller;
 import org.mvel2.DataConversion;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 /**
  * @author Mike Brock
@@ -65,11 +66,6 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
   @Override
   public Class<Object> getTypeHandled() {
     return (Class<Object>) definition.getMappingClass().asClass();
-  }
-
-  @Override
-  public String getEncodingType() {
-    return "json";
   }
 
   @Override
@@ -112,8 +108,9 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
 
               int i = 0;
               for (Mapping mapping : cMapping.getMappings()) {
+                Marshaller<Object> marshaller = ctx.getMarshallerInstance(mapping.getType().getFullyQualifiedName());
                 parms[i] = DataConversion.convert(
-                        ctx.demarshall(mapping.getType().asClass(), oMap.get(mapping.getKey())), targetTypes[i++]);
+                        marshaller.demarshall(oMap.get(mapping.getKey()), ctx), targetTypes[i++]);
               }
 
               if (cMapping instanceof ConstructorMapping) {
@@ -127,15 +124,18 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
             }
 
             for (MemberMapping mapping : definition.getWritableMemberMappings()) {
+              Marshaller<Object> marshaller = ctx.getMarshallerInstance(mapping.getType().getFullyQualifiedName());
+
               if (mapping.getBindingMember() instanceof MetaField) {
                 MetaField f = (MetaField) mapping.getBindingMember();
+
                 setProperty(newInstance, f.asField(),
-                        ctx.demarshall(mapping.getType().asClass(), oMap.get(mapping.getKey())));
+                        marshaller.demarshall(oMap.get(mapping.getKey()), ctx));
               }
               else {
                 Method m = ((MetaMethod) mapping.getBindingMember()).asMethod();
                 m.invoke(newInstance, DataConversion.convert(
-                        ctx.demarshall(mapping.getType().asClass(), oMap.get(mapping.getKey())),
+                        marshaller.demarshall(oMap.get(mapping.getKey()), ctx),
                         m.getParameterTypes()[0]));
               }
             }
@@ -277,8 +277,4 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
     }
   }
 
-  @Override
-  public boolean handles(EJValue o) {
-    return false;
-  }
 }

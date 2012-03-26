@@ -21,7 +21,9 @@ import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
+import org.jboss.errai.marshalling.client.util.SimpleTypeLiteral;
 
+import javax.enterprise.util.TypeLiteral;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -31,12 +33,12 @@ import java.util.Map;
  * @author Mike Brock
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class ErraiProtocolEnvelopeNoAutoMarshaller extends AbstractJSONMarshaller<Map<String, Object>> {
+public class ErraiProtocolEnvelopeNoAutoMarshaller implements Marshaller<Map<String, Object>> {
   public static final ErraiProtocolEnvelopeNoAutoMarshaller INSTANCE = new ErraiProtocolEnvelopeNoAutoMarshaller();
 
   @Override
   public Class<Map<String, Object>> getTypeHandled() {
-    return null;
+    return SimpleTypeLiteral.<Map<String, Object>>ofRawType(Map.class).get();
   }
 
   @Override
@@ -113,8 +115,4 @@ public class ErraiProtocolEnvelopeNoAutoMarshaller extends AbstractJSONMarshalle
   }
 
 
-  @Override
-  public boolean handles(EJValue o) {
-    return o.isObject() != null;
-  }
 }

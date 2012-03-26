@@ -17,6 +17,7 @@
 package org.jboss.errai.marshalling.client.marshallers;
 
 import org.jboss.errai.common.client.protocols.SerializationParts;
+import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
@@ -24,7 +25,7 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
 /**
  * @author Mike Brock
  */
-public abstract class AbstractBackReferencingMarshaller<C> extends AbstractJSONMarshaller<C> {
+public abstract class AbstractBackReferencingMarshaller<C> implements Marshaller<C> {
 
   @Override
   public final String marshall(C o, MarshallingSession ctx) {
@@ -52,10 +53,11 @@ public abstract class AbstractBackReferencingMarshaller<C> extends AbstractJSONM
 
   @Override
   public C demarshall(EJValue o, MarshallingSession ctx) {
-    EJObject obj = o.isObject();
-    if (obj == null) {
-      return doDemarshall(o, ctx);
+    if (o.isNull()) {
+      return null;
     }
+
+    final EJObject obj = o.isObject();
     
     String objId = obj.get(SerializationParts.OBJECT_ID).isString().stringValue();
     if (ctx.hasObjectHash(objId)) {

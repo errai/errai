@@ -36,11 +36,6 @@ public class DefaultEnumMarshaller implements Marshaller<Enum> {
     return Enum.class;
   }
 
-  @Override
-  public String getEncodingType() {
-    return "json";
-  }
-
   public Enum demarshall(EJValue a0, MarshallingSession a1) {
     try {
       if (a0.isNull()) {
@@ -70,8 +65,4 @@ public class DefaultEnumMarshaller implements Marshaller<Enum> {
             + ",\"" + SerializationParts.ENUM_STRING_VALUE + "\":\"").append(a0.name()).append("\"}").toString();
   }
 
-  @Override
-  public boolean handles(EJValue o) {
-    return false;
-  }
 }

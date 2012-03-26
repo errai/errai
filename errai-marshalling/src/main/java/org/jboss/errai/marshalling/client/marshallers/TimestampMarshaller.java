@@ -17,11 +17,11 @@
 package org.jboss.errai.marshalling.client.marshallers;
 
 import org.jboss.errai.common.client.protocols.SerializationParts;
+import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
-import org.jboss.errai.marshalling.client.util.MarshallUtil;
 
 import java.sql.Timestamp;
 
@@ -29,32 +29,19 @@ import java.sql.Timestamp;
  * @author Mike Brock
  */
 @ClientMarshaller @ServerMarshaller
-public class TimestampMarshaller extends AbstractJSONMarshaller<Timestamp> {
-  @Override
-  public Timestamp demarshall(EJValue o, MarshallingSession ctx) {
-    if (o.isNull()) {
-      return null;
-    }
-
-    return new Timestamp(Long.parseLong(o.isObject().get(SerializationParts.QUALIFIED_VALUE).isString().stringValue()));
-  }
-
-  @Override
-  public boolean handles(EJValue o) {
-    return MarshallUtil.handles(o.isObject(), getTypeHandled());
-  }
-
+public class TimestampMarshaller extends AbstractNullableMarshaller<Timestamp> {
   @Override
   public Class<Timestamp> getTypeHandled() {
     return Timestamp.class;
   }
 
   @Override
-  public String marshall(Timestamp o, MarshallingSession ctx) {
-    if (o == null) {
-      return "null";
-    }
+  public Timestamp doNotNullDemarshall(EJValue o, MarshallingSession ctx) {
+    return new Timestamp(Long.parseLong(o.isObject().get(SerializationParts.QUALIFIED_VALUE).isString().stringValue()));
+  }
 
+  @Override
+  public String doNotNullMarshall(Timestamp o, MarshallingSession ctx) {
     return "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + Timestamp.class.getName() + "\"," +
             "\"" + SerializationParts.OBJECT_ID + "\":\"" + o.hashCode() + "\"," +
             "\"" + SerializationParts.QUALIFIED_VALUE + "\":\"" + o.getTime() + "\"}";

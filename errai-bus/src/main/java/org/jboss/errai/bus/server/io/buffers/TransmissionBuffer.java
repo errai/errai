@@ -599,10 +599,6 @@ public class TransmissionBuffer implements Buffer {
 
       int readCursor = segmentToRead * segmentSize;
 
-      if (readCursor == bufferSize) {
-        readCursor = 0;
-      }
-
       final int readSize = readChunkSize(readCursor);
 
       readCursor += SEGMENT_HEADER_SIZE;
@@ -642,12 +638,6 @@ public class TransmissionBuffer implements Buffer {
         }
       }
       return segmentToRead + ((readSize + SEGMENT_HEADER_SIZE) / segmentSize) + 1;
-//      if (seq > head) {
-//        return -1;
-//      }
-//      else {
-      //       return seq;
-//      }
     }
     else {
       return -1;

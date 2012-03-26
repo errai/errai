@@ -43,7 +43,7 @@ import java.util.Map;
 @ServerMarshaller
 @AlwaysQualify
 @ImplementationAliases({AbstractMap.class, HashMap.class, LinkedHashMap.class})
-public class MapMarshaller<T extends Map> extends AbstractJSONMarshaller<T> {
+public class MapMarshaller<T extends Map> implements Marshaller<T> {
   public static final MapMarshaller INSTANCE = new MapMarshaller();
 
   @Override
@@ -58,8 +58,6 @@ public class MapMarshaller<T extends Map> extends AbstractJSONMarshaller<T> {
 
   protected T doDermashall(T impl, EJValue o, MarshallingSession ctx) {
     EJObject jsonObject = o.isObject();
-    if (jsonObject == null)
-      return null;
 
     Object demarshalledKey, demarshalledValue;
     for (String key : jsonObject.keySet()) {
@@ -134,8 +132,4 @@ public class MapMarshaller<T extends Map> extends AbstractJSONMarshaller<T> {
     return buf.append("}").toString();
   }
 
-  @Override
-  public boolean handles(EJValue o) {
-    return o.isArray() != null;
-  }
 }

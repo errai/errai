@@ -16,6 +16,7 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
+import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
@@ -25,26 +26,23 @@ import org.jboss.errai.marshalling.client.util.MarshallUtil;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ClientMarshaller @ServerMarshaller
-public class StringBuilderMarshaller extends AbstractJSONMarshaller<StringBuilder> {
+@ClientMarshaller
+@ServerMarshaller
+public class StringBuilderMarshaller extends AbstractNullableMarshaller<StringBuilder> {
   public static final StringBuilderMarshaller INSTANCE = new StringBuilderMarshaller();
 
-  @Override
-  public StringBuilder demarshall(EJValue o, MarshallingSession ctx) {
-    return (o.isNull() || o.isString() == null) ? null : new StringBuilder(o.isString().stringValue());
-  }
-
-  public String marshall(StringBuilder o, MarshallingSession ctx) {
-    return o == null ? "null" : "\"" + MarshallUtil.jsonStringEscape(o.toString())  + "\"";
-  }
-
-  @Override
-  public boolean handles(EJValue o) {
-    return o.isString() != null;
-  }
 
   @Override
   public Class<StringBuilder> getTypeHandled() {
     return StringBuilder.class;
+  }
+
+  @Override
+  public StringBuilder doNotNullDemarshall(EJValue o, MarshallingSession ctx) {
+    return new StringBuilder(o.isString().stringValue());
+  }
+
+  public String doNotNullMarshall(StringBuilder o, MarshallingSession ctx) {
+    return "\"" + MarshallUtil.jsonStringEscape(o.toString()) + "\"";
   }
 }

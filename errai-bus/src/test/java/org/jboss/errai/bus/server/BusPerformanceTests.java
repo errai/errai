@@ -17,10 +17,14 @@
 package org.jboss.errai.bus.server;
 
 import junit.framework.TestCase;
+import org.apache.tools.ant.types.Assertions;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.server.mock.MockErraiServiceConfigurator;
+import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -28,7 +32,9 @@ import java.text.NumberFormat;
 /**
  * @author Mike Brock
  */
-public class BusPerformanceTests extends TestCase {
+public class BusPerformanceTests {
+  @Test
+  @Ignore
   public void testBusThroughput() {
     class TestCallback implements MessageCallback {
       int calls;
@@ -61,6 +67,6 @@ public class BusPerformanceTests extends TestCase {
     System.out.println("Total Messages Rcvd: " + nf.format(callback.calls));
     System.out.println("Transaction Rate   : " + nf.format(iterations / (time / 1000d)) + " per second.");
 
-    assertEquals(iterations, callback.calls);
+    Assert.assertEquals(iterations, callback.calls);
   }
 }

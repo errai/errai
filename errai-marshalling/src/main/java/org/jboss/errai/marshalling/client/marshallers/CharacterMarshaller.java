@@ -17,6 +17,7 @@
 package org.jboss.errai.marshalling.client.marshallers;
 
 import org.jboss.errai.common.client.protocols.SerializationParts;
+import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
@@ -27,18 +28,15 @@ import org.jboss.errai.marshalling.client.util.MarshallUtil;
  * @author Mike Brock <cbrock@redhat.com>
  */
 @ClientMarshaller @ServerMarshaller
-public class CharacterMarshaller extends AbstractJSONMarshaller<Character> {
+public class CharacterMarshaller extends AbstractNullableMarshaller<Character> {
   @Override
   public Class<Character> getTypeHandled() {
     return Character.class;
   }
 
   @Override
-  public Character demarshall(EJValue o, MarshallingSession ctx) {
-    if (o.isNull()) {
-      return null;
-    }
-    else if (o.isObject() != null) {
+  public Character doNotNullDemarshall(EJValue o, MarshallingSession ctx) {
+  if (o.isObject() != null) {
       return o.isObject().get(SerializationParts.NUMERIC_VALUE).isString().stringValue().charAt(0);
     }
     else {
@@ -47,14 +45,7 @@ public class CharacterMarshaller extends AbstractJSONMarshaller<Character> {
   }
 
   @Override
-  public String marshall(Character o, MarshallingSession ctx) {
-    if (o == null)
-      return "null";
+  public String doNotNullMarshall(Character o, MarshallingSession ctx) {
     return "\"" + MarshallUtil.jsonStringEscape(o) + "\"";
-  }
-
-  @Override
-  public boolean handles(EJValue o) {
-    return o.isString() != null && o.isString().stringValue().length() == 1;
   }
 }
