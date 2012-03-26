@@ -45,4 +45,9 @@ public class Label extends AbstractStatement {
   public LabelReference getReference() {
     return new LabelReference(name);
   }
+  
+  @Override
+  public String toString() {
+    return "Label [name=" + name + "]";
+  }
 }

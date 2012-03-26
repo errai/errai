@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.jboss.errai.codegen.framework.BlockStatement;
+import org.jboss.errai.codegen.framework.Comment;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.DefParameters;
 import org.jboss.errai.codegen.framework.InnerClass;
@@ -69,6 +70,8 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
   private List<BuildMetaConstructor> constructors = new ArrayList<BuildMetaConstructor>();
   private List<MetaTypeVariable> typeVariables = new ArrayList<MetaTypeVariable>();
   private MetaClass reifiedFormOf;
+
+  private String classComment;
 
   public BuildMetaClass(Context context, String name) {
     super(null);
@@ -506,6 +509,10 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     return copy;
   }
 
+  public void setClassComment(String classComment) {
+    this.classComment = classComment;
+  }
+
   String generatedCache;
 
   @Override
@@ -513,6 +520,10 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
     if (generatedCache != null) return generatedCache;
 
     StringBuilder buf = new StringBuilder(512);
+
+    if (classComment != null) {
+      buf.append(new Comment(classComment).generate(null)).append("\n");
+    }
 
     context.addVariable(Variable.create("this", this));
 

@@ -50,10 +50,6 @@ public class DefaultArrayMarshaller implements Marshaller<Object> {
     return (Class<Object>) arrayType.asClass();
   }
 
-  public String getEncodingType() {
-    return "json";
-  }
-
   public Object demarshall(EJValue a0, MarshallingSession a1) {
     if (a0.isNull()) {
       return null;
@@ -68,10 +64,6 @@ public class DefaultArrayMarshaller implements Marshaller<Object> {
       _demarshall(dimensions - 1, arrayInstance, arr, a1);
       return arrayInstance;
     }
-  }
-
-  public boolean handles(EJValue a0) {
-    return true;
   }
 
   public String marshall(Object a0, MarshallingSession a1) {

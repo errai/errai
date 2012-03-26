@@ -41,7 +41,6 @@ public class Variable extends AbstractStatement {
 
   private Object initialization;
 
-
   private boolean isFinal;
 
   private Variable(String name, MetaClass type) {

@@ -37,13 +37,16 @@ import org.jboss.errai.codegen.framework.util.GenUtil;
 
 /**
  * This class represents a context in which {@link Statement}s are generated.
+ * 
  * It references its parent context and holds a map of variables to represent
  * a {@link Statement}'s scope. It further supports imports to avoid the use
  * of fully qualified class names.
  * <p/>
+ * 
  * The rendering cache can be used by {@link Statement}s to improve performance.
  *
  * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Mike Brock
  */
 public class Context {
   private Context parent = null;
@@ -225,7 +228,7 @@ public class Context {
         return Variable.create(name, Object.class).getReference();
       }
       else {
-        throw new OutOfScopeException((mustBeClassMember) ? "this." + name : name + " not found");
+        throw new OutOfScopeException((mustBeClassMember) ? "this." + name : name + " not found.\nScope:\n" + this);
       }
     }
 
@@ -425,5 +428,47 @@ public class Context {
       renderingCache.put(store.getName(), (Map<Object, Object>) (cacheStore = new HashMap<K, V>()));
     }
     return cacheStore;
+  }
+
+  @Override
+  public String toString() {
+    String indent = "";
+    StringBuilder context = new StringBuilder();
+    
+    Context ctx = this;
+    do {
+      if (ctx.variables != null && !ctx.variables.isEmpty()) {
+        context.append("Variables:\n");
+        for (String varName : ctx.variables.keySet()) {
+          context.append(indent).append(ctx.variables.get(varName)).append("\n");
+        }
+      }
+      
+      if (ctx.labels != null && !ctx.labels.isEmpty()) {
+        context.append("Labels:\n");
+        for (String labelName : ctx.labels.keySet()) {
+          context.append(indent).append(ctx.labels.get(labelName)).append("\n");
+        }
+      }   
+     
+      if (ctx.classContexts != null && !ctx.classContexts.isEmpty()) {
+        context.append("Classes:\n");
+        for (MetaClass clazz : ctx.classContexts) {
+          context.append(clazz.getFullyQualifiedName()).append("\n");
+        }
+      }
+      
+      if (ctx.imports != null && !ctx.imports.isEmpty()) {
+        context.append("Imports:\n");
+        for (String className : ctx.imports.keySet()) {
+          context.append(ctx.imports.get(className)).append(".").append(className).append("\n");;
+        }
+      }
+      
+      indent += "  ";
+    }
+    while ((ctx = ctx.parent) != null);
+    
+    return context.toString();
   }
 }

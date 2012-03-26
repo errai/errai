@@ -25,10 +25,6 @@ public interface MarshallingSession {
   public MappingContext getMappingContext();
   
   public Marshaller<Object> getMarshallerInstance(String fqcn);
-
-  public String marshall(Object o);
-  
-  public <T> T demarshall(Class<T> clazz, EJValue o);
   
   public String determineTypeFor(String formatType, Object o);
   

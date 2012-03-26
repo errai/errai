@@ -19,7 +19,10 @@ package org.jboss.errai.ioc.tests.wiring.client;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
 import org.jboss.errai.ioc.tests.wiring.client.res.AlternativeBeanA;
+import org.jboss.errai.ioc.tests.wiring.client.res.AlternativeCommonInterfaceB;
 import org.jboss.errai.ioc.tests.wiring.client.res.AlternativeDependentBean;
+import org.jboss.errai.ioc.tests.wiring.client.res.OverridingAltCommonInterfaceBImpl;
+import org.jboss.errai.ioc.tests.wiring.client.res.SingleAlternativeDependentBean;
 
 import java.io.File;
 
@@ -32,9 +35,10 @@ public class AlternativeBeanIntegrationTest extends AbstractErraiIOCTest {
     return "org.jboss.errai.ioc.tests.wiring.IOCWiringTests";
   }
 
-  // AlternativeBeanA should be configured as an alternative in the ErraiApp.properties of this
-  // test module.
+
   public void testAlternativeBeanInjection() throws Exception {
+    // AlternativeBeanA should be configured as an alternative in the ErraiApp.properties of this
+    // test module.
     runAfterInit(new Runnable() {
       @Override
       public void run() {
@@ -49,4 +53,26 @@ public class AlternativeBeanIntegrationTest extends AbstractErraiIOCTest {
     });
   }
 
+  /**
+   * This test ensures that a single enabled alternative will take resolution precedence over all other matching
+   * beans for an injection point.
+   *
+   * @throws Exception
+   */
+  public void testSingleAlternativeTakesPrecedence() throws Exception {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        SingleAlternativeDependentBean bean = IOC.getBeanManager()
+                .lookupBean(SingleAlternativeDependentBean.class).getInstance();
+
+        assertNotNull(bean);
+        assertNotNull(bean.getAlternativeCommonInterfaceB());
+        assertTrue("wrong instance of bean injected",
+                bean.getAlternativeCommonInterfaceB() instanceof OverridingAltCommonInterfaceBImpl);
+
+        finishTest();
+      }
+    });
+  }
 }

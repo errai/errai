@@ -26,21 +26,6 @@ public class DecodingSession extends AbstractMarshallingSession {
   }
 
   @Override
-  public String marshall(Object o) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public <T> T demarshall(Class<T> clazz, EJValue o) {
-   // Marshaller<Object> m = getMarshallerInstance(clazz.getName());
-    Marshaller<Object> m = context.getMarshaller(clazz.getName());
-    if (m == null) {
-      throw new RuntimeException("no marshaller available for type:" + clazz.getName());
-    }
-    return (T) m.demarshall(o, this);
-  }
-
-  @Override
   public Marshaller<Object> getMarshallerInstance(String fqcn) {
     Marshaller<Object> m = context.getMarshaller(fqcn);
     if (m == null) {

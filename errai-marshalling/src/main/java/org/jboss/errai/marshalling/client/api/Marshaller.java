@@ -24,11 +24,7 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
 public interface Marshaller<T> {
   Class<T> getTypeHandled();
 
-  String getEncodingType();
-
   T demarshall(EJValue o, MarshallingSession ctx);
 
   String marshall(T o, MarshallingSession ctx);
-
-  boolean handles(EJValue o);
 }

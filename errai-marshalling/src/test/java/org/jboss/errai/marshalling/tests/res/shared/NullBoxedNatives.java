@@ -23,6 +23,7 @@ import org.jboss.errai.common.client.api.annotations.Portable;
  * This entity type exists as a regression test for that case.
  *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Portable
 public class NullBoxedNatives {
@@ -35,6 +36,14 @@ public class NullBoxedNatives {
   private Float floatMember;
   private Double doubleMember;
   private Object objectMember;
+  private Boolean booleanMember;
+  
+  public Boolean getBooleanMember() {
+    return booleanMember;
+  }
+  public void setBooleanMember(Boolean booleanMember) {
+    this.booleanMember = booleanMember;
+  }
   public Byte getByteMember() {
     return byteMember;
   }
@@ -83,27 +92,23 @@ public class NullBoxedNatives {
   public void setObjectMember(Object objectMember) {
     this.objectMember = objectMember;
   }
+  
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
-    result = prime * result
-        + ((byteMember == null) ? 0 : byteMember.hashCode());
-    result = prime * result
-        + ((charMember == null) ? 0 : charMember.hashCode());
-    result = prime * result
-        + ((doubleMember == null) ? 0 : doubleMember.hashCode());
-    result = prime * result
-        + ((floatMember == null) ? 0 : floatMember.hashCode());
+    result = prime * result + ((booleanMember == null) ? 0 : booleanMember.hashCode());
+    result = prime * result + ((byteMember == null) ? 0 : byteMember.hashCode());
+    result = prime * result + ((charMember == null) ? 0 : charMember.hashCode());
+    result = prime * result + ((doubleMember == null) ? 0 : doubleMember.hashCode());
+    result = prime * result + ((floatMember == null) ? 0 : floatMember.hashCode());
     result = prime * result + ((intMember == null) ? 0 : intMember.hashCode());
-    result = prime * result
-        + ((longMember == null) ? 0 : longMember.hashCode());
-    result = prime * result
-        + ((objectMember == null) ? 0 : objectMember.hashCode());
-    result = prime * result
-        + ((shortMember == null) ? 0 : shortMember.hashCode());
+    result = prime * result + ((longMember == null) ? 0 : longMember.hashCode());
+    result = prime * result + ((objectMember == null) ? 0 : objectMember.hashCode());
+    result = prime * result + ((shortMember == null) ? 0 : shortMember.hashCode());
     return result;
   }
+  
   @Override
   public boolean equals(Object obj) {
     if (this == obj)
@@ -113,6 +118,12 @@ public class NullBoxedNatives {
     if (getClass() != obj.getClass())
       return false;
     NullBoxedNatives other = (NullBoxedNatives) obj;
+    if (booleanMember == null) {
+      if (other.booleanMember != null)
+        return false;
+    }
+    else if (!booleanMember.equals(other.booleanMember))
+      return false;
     if (byteMember == null) {
       if (other.byteMember != null)
         return false;

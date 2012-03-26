@@ -164,6 +164,7 @@ public class InvocationBuilderTest extends AbstractCodegenTest {
       fail("expected OutOfScopeException");
     }
     catch (OutOfScopeException oose) {
+      oose.printStackTrace();
       // expected
       assertTrue(oose.getMessage().contains("param2"));
     }

@@ -45,7 +45,7 @@ public class Cast implements Statement {
   public String generate(Context context) {
     String stmt = statement.generate(context);
 
-    if (!toType.isAssignableFrom(statement.getType()) && !toType.isAssignableTo(statement.getType())) {
+    if (!toType.isPrimitive() && !toType.isAssignableFrom(statement.getType()) && !toType.isAssignableTo(statement.getType())) {
       throw new InvalidTypeException(statement.getType() + " cannot be cast to " + toType);
     }
     else if (toType.isAssignableFrom(statement.getType())) {

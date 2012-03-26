@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jboss.errai.codegen.framework.Comment;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.DefParameters;
 import org.jboss.errai.codegen.framework.Parameter;
@@ -51,6 +52,8 @@ public class BuildMetaConstructor extends MetaConstructor implements Builder {
   private List<MetaTypeVariable> typeVariables = new ArrayList<MetaTypeVariable>();
 
   private MetaConstructor reifiedFormOf;
+
+  private String constructorComment;
 
   public BuildMetaConstructor(BuildMetaClass declaringClass) {
     this.context = Context.create(declaringClass.getContext());
@@ -199,9 +202,6 @@ public class BuildMetaConstructor extends MetaConstructor implements Builder {
 
   @Override
   public boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
-//    for (Annotation a : annotations) {
-//      if (a.getClass().equals(annotation)) return true;
-//    }
     return false;
   }
 
@@ -226,13 +226,6 @@ public class BuildMetaConstructor extends MetaConstructor implements Builder {
   public void setDefParameters(DefParameters defParameters) {
     this.defParameters = defParameters;
   }
-//
-//  public void addCheckedException(MetaClass clazz) {
-//    if (!clazz.isAssignableFrom(Throwable.class)) {
-//      throw new RuntimeException("not an exception type: " + clazz.getFullyQualifiedName());
-//    }
-//    checkedExceptions.add(clazz);
-//  }
 
 
   @Override
@@ -267,6 +260,10 @@ public class BuildMetaConstructor extends MetaConstructor implements Builder {
     this.reifiedFormOf = reifiedFormOf;
   }
 
+  public void setConstructorComment(String constructorComment) {
+    this.constructorComment = constructorComment;
+  }
+
   String generatedCache;
 
   @Override
@@ -275,6 +272,12 @@ public class BuildMetaConstructor extends MetaConstructor implements Builder {
 
     for (Parameter p : defParameters.getParameters()) {
       context.addVariable(Variable.create(p.getName(), p.getType()));
+    }
+
+    StringBuilder build = new StringBuilder(512);
+
+    if (constructorComment != null)  {
+      build.append(new Comment(constructorComment).generate(null)).append('\n');
     }
 
     return generatedCache = new StringBuilder(512).append(scope.getCanonicalName())

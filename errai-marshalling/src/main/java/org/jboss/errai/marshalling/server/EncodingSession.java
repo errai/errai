@@ -36,34 +36,6 @@ public class EncodingSession extends AbstractMarshallingSession {
   }
 
   @Override
-  public String marshall(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    else {
-      Marshaller<Object> m = getMarshallerInstance(o.getClass().getName());
-      if (m == null) {
-        throw new MarshallingException("no marshaller for type: " + o.getClass().getName());
-      }
-      return m.marshall(o, this);
-    }
-  }
-
-  @Override
-  public <T> T demarshall(Class<T> clazz, EJValue o) {
-    if (o == null) {
-      return null;
-    }
-    else {
-      Marshaller<Object> m = context.getMarshaller(clazz.getName());
-      if (m == null) {
-        throw new MarshallingException("no marshaller for type: " + o.getClass().getName());
-      }
-      return (T) m.demarshall(o, this);
-    }
-  }
-
-  @Override
   public String determineTypeFor(String formatType, Object o) {
     if (o == null) return null;
 

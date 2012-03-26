@@ -21,18 +21,23 @@ import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
+import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.QueueSession;
+import org.jboss.errai.bus.client.api.SessionEndListener;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
-import org.jboss.errai.bus.client.util.BusTools;
+import org.jboss.errai.bus.client.framework.RequestDispatcher;
+import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.marshalling.client.MarshallingSessionProviderFactory;
-import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 import org.jboss.errai.marshalling.client.api.json.impl.gwt.GWTJSON;
 import org.jboss.errai.marshalling.client.marshallers.ErraiProtocolEnvelopeNoAutoMarshaller;
 import org.jboss.errai.marshalling.client.protocols.ErraiProtocol;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -122,8 +127,72 @@ public class JSONUtilCli {
     }
   }
 
+  private static final QueueSession clientSession = new QueueSession() {
+    private Map<String, Object> attributes = new HashMap<String, Object>();
+
+    @Override
+    public String getSessionId() {
+      return "<InBus>";
+    }
+
+    @Override
+    public boolean isValid() {
+      return true;
+    }
+
+    @Override
+    public boolean endSession() {
+      return false;
+    }
+
+    @Override
+    public void setAttribute(String attribute, Object value) {
+      attributes.put(attribute, value);
+    }
+
+    @Override
+    public <T> T getAttribute(Class<T> type, String attribute) {
+      return (T) attributes.get(attribute);
+    }
+
+    @Override
+    public Collection<String> getAttributeNames() {
+      return attributes.keySet();
+    }
+
+    @Override
+    public boolean hasAttribute(String attribute) {
+      return attributes.containsKey(attribute);
+    }
+
+    @Override
+    public boolean removeAttribute(String attribute) {
+      return attributes.remove(attribute) != null;
+    }
+
+    @Override
+    public void addSessionEndListener(SessionEndListener listener) {
+    }
+  };
+
+  public static QueueSession getClientSession() {
+    return clientSession;
+  }
+
+  private static final ResourceProvider<RequestDispatcher> requestDispatcherProvider
+          = new ResourceProvider<RequestDispatcher>() {
+    @Override
+    public RequestDispatcher get() {
+      return ErraiBus.getDispatcher();
+    }
+  };
+
+
   public static Message decodeCommandMessage(Object value) {
-    return CommandMessage.createWithParts(decodePayload(value));
+    CommandMessage msg = CommandMessage.createWithParts(decodePayload(value));
+    msg.setResource(RequestDispatcher.class.getName(), requestDispatcherProvider);
+    msg.setResource("Session", clientSession);
+    return msg;
   }
 
   public static void setAutoDemarshall(boolean autoDemarshall1) {

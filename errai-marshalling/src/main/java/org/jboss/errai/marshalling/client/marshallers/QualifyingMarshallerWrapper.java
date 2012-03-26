@@ -27,7 +27,7 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
  *
  * @author Mike Brock
  */
-public class QualifyingMarshallerWrapper<T> implements Marshaller<T> {
+public class QualifyingMarshallerWrapper<T> extends AbstractNullableMarshaller<T> {
   private final Marshaller<T> delegate;
 
   public QualifyingMarshallerWrapper(Marshaller<T> delegate) {
@@ -40,16 +40,7 @@ public class QualifyingMarshallerWrapper<T> implements Marshaller<T> {
   }
 
   @Override
-  public String getEncodingType() {
-    return delegate.getEncodingType();
-  }
-
-  @Override
-  public T demarshall(EJValue o, MarshallingSession ctx) {
-    if (o.isNull()) {
-      return null;
-    }
-
+  public T doNotNullDemarshall(EJValue o, MarshallingSession ctx) {
     EJObject obj = o.isObject();
     String objId = obj.get(SerializationParts.OBJECT_ID).isString().stringValue();
     if (ctx.hasObjectHash(objId)) {
@@ -63,11 +54,7 @@ public class QualifyingMarshallerWrapper<T> implements Marshaller<T> {
   }
 
   @Override
-  public String marshall(T o, MarshallingSession ctx) {
-    if (o == null) {
-      return "null";
-    }
-
+  public String doNotNullMarshall(T o, MarshallingSession ctx) {
     final boolean isNew = !ctx.isEncoded(o);
     final String objId = ctx.getObjectHash(o);
 
@@ -82,10 +69,5 @@ public class QualifyingMarshallerWrapper<T> implements Marshaller<T> {
       return buf.append(",\"").append(SerializationParts.QUALIFIED_VALUE).append("\":").append(delegate.marshall(o, ctx))
               .append("}").toString();
     }
-  }
-
-  @Override
-  public boolean handles(EJValue o) {
-    return delegate.handles(o);
   }
 }

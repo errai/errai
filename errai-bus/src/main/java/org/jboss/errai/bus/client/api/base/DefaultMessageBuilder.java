@@ -60,7 +60,6 @@ class DefaultMessageBuilder<R extends Sendable> {
    *
    * @return the <tt>MessageBuildSubject</tt> with the appropriate fields
    *         and functions for the message builder
-   *         @param <R> the inter
    */
   public MessageBuildSubject<R> start() {
     final Sendable sendable = new MessageReplySendable() {
@@ -92,6 +91,8 @@ class DefaultMessageBuilder<R extends Sendable> {
 
       @Override
       public void sendGlobalWith(MessageBus viaThis) {
+        if (reply) createConversationService(viaThis, message);
+
         viaThis.sendGlobal(message);
       }
 

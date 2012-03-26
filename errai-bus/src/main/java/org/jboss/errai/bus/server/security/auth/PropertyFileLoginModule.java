@@ -25,6 +25,7 @@ import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 import java.security.Principal;
 import java.util.Map;
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 /**
@@ -77,29 +78,34 @@ public class PropertyFileLoginModule implements LoginModule {
   }
 
   public void loadRoles() {
-    ResourceBundle bundle = ResourceBundle.getBundle("roles");
-    String[] roles = bundle.getString(login).split(",");
+    try {
+      ResourceBundle bundle = ResourceBundle.getBundle("roles");
+      String[] roles = bundle.getString(login).split(",");
 
-    for (final String role : roles) {
-      subject.getPrincipals().add(new Principal() {
-        private String name = role.trim();
+      for (final String role : roles) {
+        subject.getPrincipals().add(new Principal() {
+          private String name = role.trim();
 
-        public String getName() {
-          return name;
-        }
+          public String getName() {
+            return name;
+          }
 
-        @Override
-        public boolean equals(Object obj) {
-          return name.equals(obj);
-        }
+          @Override
+          public boolean equals(Object obj) {
+            return name.equals(obj);
+          }
 
-        @Override
-        public String toString() {
-          return name;
-        }
-      });
+          @Override
+          public String toString() {
+            return name;
+          }
+        });
+      }
+
     }
-
+    catch (MissingResourceException e) {
+      // ignore.
+    }
 
   }
 
@@ -112,6 +118,6 @@ public class PropertyFileLoginModule implements LoginModule {
   }
 
   public boolean logout() throws LoginException {
-    return false;  //To change body of implemented methods use File | Settings | File Templates.
+    return false;
   }
 }

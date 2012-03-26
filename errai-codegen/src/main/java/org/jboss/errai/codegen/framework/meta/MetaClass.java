@@ -83,13 +83,44 @@ public abstract class MetaClass implements HasAnnotations, MetaType, MetaGeneric
   public abstract MetaClass getSuperClass();
 
   public abstract MetaClass getComponentType();
-  
+
   public abstract MetaClass getOuterComponentType();
 
+  /**
+   * Reports if the type represented by this MetaClass is a supertype of (or the
+   * same class as) the type represented by the given MetaClass. In other words,
+   * this method returns true if the following code would compile without error,
+   * where ThisType is the class represented by this MetaClass object, and
+   * GivenType is the class represented by the given "clazz" argument:
+   *
+   * <pre>
+   *   GivenType given = ...;
+   *   ThisType a = given;
+   * </pre>
+   *
+   * @param clazz
+   *          The type to check for assignability to this MetaClass's type.
+   * @return True if the given type is assignable to this metaclass's type.
+   */
   public abstract boolean isAssignableFrom(MetaClass clazz);
 
   public abstract boolean isAssignableTo(MetaClass clazz);
 
+  /**
+   * Reports if the type represented by this MetaClass is a supertype of (or the
+   * same class as) the given class. In other words, this method returns true if
+   * the following code would compile without error, where ThisType is the class
+   * represented by this MetaClass object, and GivenType is the class
+   * represented by the given "clazz" argument:
+   *
+   * <pre>
+   *   GivenType given = ...;
+   *   ThisType a = given;
+   * </pre>
+   *
+   * @param clazz The type to check for assignability to this MetaClass's type.
+   * @return True if the given type is assignable to this metaclass's type.
+   */
   public abstract boolean isAssignableFrom(Class clazz);
 
   public abstract boolean isAssignableTo(Class clazz);
@@ -127,7 +158,7 @@ public abstract class MetaClass implements HasAnnotations, MetaType, MetaGeneric
   public abstract MetaClass asBoxed();
 
   public abstract MetaClass asUnboxed();
-  
+
   public abstract MetaClass asArrayOf(int dimensions);
 
   public abstract MetaClass getErased();

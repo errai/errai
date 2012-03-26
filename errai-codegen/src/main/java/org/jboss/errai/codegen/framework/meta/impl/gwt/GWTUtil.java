@@ -18,16 +18,22 @@ package org.jboss.errai.codegen.framework.meta.impl.gwt;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
-import com.google.gwt.core.ext.typeinfo.JArrayType;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaType;
 import org.jboss.errai.codegen.framework.meta.MetaTypeVariable;
+import org.jboss.errai.codegen.framework.meta.impl.java.JavaReflectionClass;
+import org.jboss.errai.common.metadata.RebindUtils;
 
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.typeinfo.JArrayType;
+import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.JType;
 import com.google.gwt.core.ext.typeinfo.JTypeParameter;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -108,6 +114,43 @@ public class GWTUtil {
     }
     else {
       return null;
+    }
+  }
+
+  /**
+   * Erases the {@link MetaClassFactory} cache, then populates it with types
+   * discovered via GWT's TypeOracle. The reason for the initial flush of the
+   * MetaClassFactory is to support hot reploy in Dev Mode. The reason for doing
+   * this operation at all is so that the overridden class definitions
+   * (super-source classes) are used in preference to the Java reflection based
+   * class definitions.
+   *
+   * @param context The GeneratorContext supplied by the GWT compiler. Not null.
+   * @param logger The TreeLogger supplied by the GWT compiler. Not null.
+   */
+  public static void populateMetaClassFactoryFromTypeOracle(GeneratorContext context, TreeLogger logger) {
+    TypeOracle typeOracle = context.getTypeOracle();
+    MetaClassFactory.emptyCache();
+    if (typeOracle != null) {
+      Set<String> translatable = RebindUtils.findTranslatablePackages(context);
+      translatable.remove("java.lang");
+
+      for (JClassType type : typeOracle.getTypes()) {
+        if (!translatable.contains(type.getPackage().getName())) {
+          logger.log(com.google.gwt.core.ext.TreeLogger.Type.DEBUG, "Skipping non-translatable " + type.getQualifiedSourceName());
+          continue;
+        }
+
+        if (type.isAnnotation() != null) {
+          logger.log(com.google.gwt.core.ext.TreeLogger.Type.DEBUG, "Caching annotation type " + type.getQualifiedSourceName());
+          MetaClassFactory.pushCache(JavaReflectionClass
+                  .newUncachedInstance(MetaClassFactory.loadClass(type.getQualifiedBinaryName())));
+        }
+        else {
+          logger.log(com.google.gwt.core.ext.TreeLogger.Type.DEBUG, "Caching translatable type " + type.getQualifiedSourceName());
+          MetaClassFactory.pushCache(GWTClass.newInstance(typeOracle, type));
+        }
+      }
     }
   }
 }

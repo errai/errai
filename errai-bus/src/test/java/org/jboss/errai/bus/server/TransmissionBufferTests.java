@@ -18,16 +18,29 @@ package org.jboss.errai.bus.server;
 
 import junit.framework.TestCase;
 import org.jboss.errai.bus.client.tests.support.RandomProvider;
-import org.jboss.errai.bus.client.tests.support.SType;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
-import org.jboss.errai.marshalling.client.protocols.ErraiProtocol;
-import org.jboss.errai.marshalling.server.MappingContextSingleton;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -41,7 +54,6 @@ import java.util.concurrent.locks.LockSupport;
 public class TransmissionBufferTests extends TestCase {
   static {
     // make sure protocol provider is initialized;
-    MappingContextSingleton.get();
   }
 
   public void testBufferWriteAndRead() {
@@ -251,12 +263,13 @@ public class TransmissionBufferTests extends TestCase {
     assertEquals(createCount, count);
   }
 
+
   public void testLargeOversizedSegments() {
     final TransmissionBuffer buffer = TransmissionBuffer.create();
 
     final BufferColor colorA = BufferColor.getNewColor();
 
-    SType type = SType.create(new RandomProvider() {
+    RandomProvider random = new RandomProvider() {
       private char[] CHARS = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q',
               'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'};
 
@@ -286,12 +299,14 @@ public class TransmissionBufferTests extends TestCase {
         }
         return builder.toString();
       }
-    });
+    };
 
-    Map<String, Object> vars = new HashMap<String, Object>();
-    vars.put("SType", type);
+    StringBuilder builder = new StringBuilder();
+    for (int i = 0; i < 1024 * 10; i++) {
+      builder.append(random.nextChar());
+    }
 
-    String s = ErraiProtocol.encodePayload(vars);
+    String s = builder.toString();
 
     ByteArrayInputStream bInputStream = new ByteArrayInputStream(s.getBytes());
     ByteArrayOutputStream bOutputStream = new ByteArrayOutputStream();

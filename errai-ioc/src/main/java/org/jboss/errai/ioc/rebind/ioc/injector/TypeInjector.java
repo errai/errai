@@ -17,13 +17,26 @@
 package org.jboss.errai.ioc.rebind.ioc.injector;
 
 
+import static org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder.newInstanceOf;
+import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.typeParametersOf;
+import static org.jboss.errai.codegen.framework.util.Stmt.declareVariable;
+import static org.jboss.errai.codegen.framework.util.Stmt.load;
+import static org.jboss.errai.codegen.framework.util.Stmt.loadVariable;
+
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.enterprise.inject.New;
+
 import org.jboss.errai.codegen.framework.Parameter;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.BlockBuilder;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.util.Refs;
-import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.ioc.client.container.BeanRef;
 import org.jboss.errai.ioc.client.container.CreationalCallback;
 import org.jboss.errai.ioc.client.container.CreationalContext;
@@ -32,19 +45,6 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.ConstructionStatusCallback;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
-
-import javax.enterprise.inject.New;
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
-import static org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder.newInstanceOf;
-import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.parameterizedAs;
-import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.typeParametersOf;
-import static org.jboss.errai.codegen.framework.util.Stmt.declareVariable;
-import static org.jboss.errai.codegen.framework.util.Stmt.load;
-import static org.jboss.errai.codegen.framework.util.Stmt.loadVariable;
 
 public class TypeInjector extends AbstractInjector {
   protected final MetaClass type;
@@ -61,7 +61,7 @@ public class TypeInjector extends AbstractInjector {
     this.singleton = context.isElementType(WiringElementType.SingletonBean, type);
     this.alternative = context.isElementType(WiringElementType.AlternativeBean, type);
 
-    this.varName = InjectUtil.getNewInjectorName();
+    this.varName = InjectUtil.getNewInjectorName() + "_" + type.getName();
 
     Set<Annotation> qualifiers = new HashSet<Annotation>();
     qualifiers.addAll(InjectUtil.getQualifiersFromAnnotations(type.getAnnotations()));
@@ -128,7 +128,7 @@ public class TypeInjector extends AbstractInjector {
 
     ctx.pushBlockBuilder(callbackBuilder);
 
-    creationalCallbackVarName = InjectUtil.getNewInjectorName();
+    creationalCallbackVarName = InjectUtil.getNewInjectorName() + "_" + type.getName() + "_creationalCallback";
 
     InjectUtil.getConstructionStrategy(this, injectContext).generateConstructor(new ConstructionStatusCallback() {
       @Override

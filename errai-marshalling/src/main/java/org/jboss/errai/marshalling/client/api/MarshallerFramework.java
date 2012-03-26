@@ -22,7 +22,6 @@ import com.google.gwt.json.client.JSONParser;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.MarshallingSessionProviderFactory;
-import org.jboss.errai.marshalling.client.api.exceptions.MarshallingException;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.api.json.impl.gwt.GWTJSON;
@@ -124,11 +123,6 @@ public class MarshallerFramework implements EntryPoint {
             }
 
             @Override
-            public String getEncodingType() {
-              return "json";
-            }
-
-            @Override
             public Object demarshall(EJValue o, MarshallingSession ctx) {
               return o.getRawValue().toString();
             }
@@ -138,41 +132,9 @@ public class MarshallerFramework implements EntryPoint {
               return "\"MarshallingNotSupported\"";
             }
 
-            @Override
-            public boolean handles(EJValue o) {
-              return false;
-            }
           };
         }
         return m;
-      }
-    }
-
-    @Override
-    public String marshall(Object o) {
-      if (o == null) {
-        return "null";
-      }
-      else {
-        Marshaller<Object> m = getMarshallerInstance(o.getClass().getName());
-        if (m == null) {
-          throw new MarshallingException("no marshaller for type: " + o.getClass().getName());
-        }
-        return m.marshall(o, this);
-      }
-    }
-
-    @Override
-    public <T> T demarshall(Class<T> clazz, EJValue o) {
-      if (o == null) {
-        return null;
-      }
-      else {
-        Marshaller<Object> m = getMarshallerInstance(clazz.getName());
-        if (m == null) {
-          throw new MarshallingException("no marshaller for type: " + clazz.getName());
-        }
-        return (T) m.demarshall(o, this);
       }
     }
 

@@ -26,17 +26,12 @@ import org.jboss.errai.marshalling.client.util.MarshallUtil;
  * @author Mike Brock <cbrock@redhat.com>
  */
 @ClientMarshaller @ServerMarshaller
-public class StringBufferMarshaller extends AbstractJSONMarshaller<StringBuffer> {
+public class StringBufferMarshaller extends AbstractNullableMarshaller<StringBuffer> {
   public static final StringBufferMarshaller INSTANCE = new StringBufferMarshaller();
 
   @Override
-  public StringBuffer demarshall(EJValue o, MarshallingSession ctx) {
-    return (o.isNull() || o.isString() == null) ? null : new StringBuffer(o.isString().stringValue());
-  }
-
-  @Override
-  public boolean handles(EJValue o) {
-    return o.isString() != null;
+  public StringBuffer doNotNullDemarshall(EJValue o, MarshallingSession ctx) {
+    return new StringBuffer(o.isString().stringValue());
   }
 
   @Override
@@ -45,7 +40,7 @@ public class StringBufferMarshaller extends AbstractJSONMarshaller<StringBuffer>
   }
 
   @Override
-  public String marshall(StringBuffer o, MarshallingSession ctx) {
-    return o == null ? "null" : "\"" + MarshallUtil.jsonStringEscape(o.toString())  + "\"";
+  public String doNotNullMarshall(StringBuffer o, MarshallingSession ctx) {
+    return "\"" + MarshallUtil.jsonStringEscape(o.toString())  + "\"";
   }
 }

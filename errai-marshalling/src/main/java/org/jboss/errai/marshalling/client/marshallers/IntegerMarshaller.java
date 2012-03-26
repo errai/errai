@@ -25,28 +25,22 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ClientMarshaller @ServerMarshaller
+@ClientMarshaller
+@ServerMarshaller
 public class IntegerMarshaller extends AbstractNumberMarshaller<Integer> {
   @Override
   public Class<Integer> getTypeHandled() {
     return Integer.class;
   }
 
+
   @Override
-  public Integer demarshall(EJValue o, MarshallingSession ctx) {
-    if (o.isNull()) {
-      return null;
-    }
-    else if (o.isObject() != null) {
+  public Integer doNotNullDemarshall(EJValue o, MarshallingSession ctx) {
+    if (o.isObject() != null) {
       return o.isObject().get(SerializationParts.NUMERIC_VALUE).isNumber().intValue();
     }
     else {
       return o.isNumber().intValue();
     }
-  }
-
-  @Override
-  public boolean handles(EJValue o) {
-    return o.isNumber() != null;
   }
 }

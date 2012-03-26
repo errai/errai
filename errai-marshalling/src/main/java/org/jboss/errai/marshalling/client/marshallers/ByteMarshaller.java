@@ -33,23 +33,12 @@ public class ByteMarshaller extends AbstractNumberMarshaller<Byte> {
   }
 
   @Override
-  public Byte demarshall(EJValue o, MarshallingSession ctx) {
-    if (o.isNull()) {
-      return null;
-    }
-    else if (o.isObject() != null) {
+  public Byte doNotNullDemarshall(EJValue o, MarshallingSession ctx) {
+     if (o.isObject() != null) {
       return o.isObject().get(SerializationParts.NUMERIC_VALUE).isNumber().byteValue();
     }
-    else if (o.isNumber() != null) {
+    else {
       return o.isNumber().byteValue();
     }
-    else {
-      return Byte.parseByte(o.isString().stringValue());
-    }
-  }
-
-  @Override
-  public boolean handles(EJValue o) {
-    return o.isNumber() != null;
   }
 }

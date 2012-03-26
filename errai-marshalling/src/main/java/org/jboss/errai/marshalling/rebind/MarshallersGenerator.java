@@ -25,9 +25,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
-import org.jboss.errai.codegen.framework.meta.impl.gwt.GWTClass;
-import org.jboss.errai.codegen.framework.meta.impl.java.JavaReflectionClass;
+import org.jboss.errai.codegen.framework.meta.impl.gwt.GWTUtil;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.rebind.ClassListReader;
 import org.jboss.errai.common.rebind.EnvUtil;
@@ -211,23 +209,7 @@ public class MarshallersGenerator extends Generator {
 
       logger.log(TreeLogger.INFO, "Generating Marshallers Bootstrapper...");
 
-      MetaClassFactory.emptyCache();
-      if (typeOracle != null) {
-        Set<String> translatable = RebindUtils.findTranslatablePackages(context);
-        translatable.remove("java.lang");
-
-        for (JClassType type : typeOracle.getTypes()) {
-          if (!translatable.contains(type.getPackage().getName())) continue;
-
-          if (type.isAnnotation() != null) {
-            MetaClassFactory.pushCache(JavaReflectionClass
-                    .newUncachedInstance(MetaClassFactory.loadClass(type.getQualifiedBinaryName())));
-          }
-          else {
-            MetaClassFactory.pushCache(GWTClass.newInstance(typeOracle, type));
-          }
-        }
-      }
+      GWTUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
 
       // Generate class source code
       generateMarshallerBootstrapper(logger, context);

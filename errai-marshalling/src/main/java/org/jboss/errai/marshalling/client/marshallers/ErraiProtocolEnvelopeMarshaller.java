@@ -22,6 +22,7 @@ import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
+import org.jboss.errai.marshalling.client.util.SimpleTypeLiteral;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -32,12 +33,12 @@ import java.util.Map;
  * @author Mike Brock
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public class ErraiProtocolEnvelopeMarshaller extends AbstractJSONMarshaller<Map<String, Object>> {
+public class ErraiProtocolEnvelopeMarshaller implements Marshaller<Map<String, Object>> {
   public static final ErraiProtocolEnvelopeMarshaller INSTANCE = new ErraiProtocolEnvelopeMarshaller();
 
   @Override
   public Class<Map<String, Object>> getTypeHandled() {
-    return null;
+    return SimpleTypeLiteral.<Map<String, Object>>ofRawType(Map.class).get();
   }
 
   @Override
@@ -47,8 +48,6 @@ public class ErraiProtocolEnvelopeMarshaller extends AbstractJSONMarshaller<Map<
 
   protected Map doDermashall(Map impl, EJValue o, MarshallingSession ctx) {
     EJObject jsonObject = o.isObject();
-    if (jsonObject == null)
-      return null;
 
     for (String key : jsonObject.keySet()) {
       if (MessageParts.SessionID.name().equals(key)) continue;
@@ -82,9 +81,7 @@ public class ErraiProtocolEnvelopeMarshaller extends AbstractJSONMarshaller<Map<
 
 
       Marshaller<Object> valueMarshaller;
-      buf.append("\"" + key + "\"");
-
-      buf.append(":");
+      buf.append("\"" + key + "\"").append(":");
 
       if (val == null) {
         buf.append("null");
@@ -106,8 +103,4 @@ public class ErraiProtocolEnvelopeMarshaller extends AbstractJSONMarshaller<Map<
   }
 
 
-  @Override
-  public boolean handles(EJValue o) {
-    return o.isObject() != null;
-  }
 }

@@ -25,19 +25,17 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ClientMarshaller @ServerMarshaller
-public class BooleanMarshaller extends AbstractJSONMarshaller<Boolean> {
+@ClientMarshaller
+@ServerMarshaller
+public class BooleanMarshaller extends AbstractNullableMarshaller<Boolean> {
   @Override
   public Class<Boolean> getTypeHandled() {
     return Boolean.class;
   }
 
   @Override
-  public Boolean demarshall(EJValue o, MarshallingSession ctx) {
-    if (o.isNull()) {
-      return null;
-    }
-    else if (o.isObject() != null) {
+  public Boolean doNotNullDemarshall(EJValue o, MarshallingSession ctx) {
+    if (o.isObject() != null) {
       return o.isObject().get(SerializationParts.NUMERIC_VALUE).isBoolean().booleanValue();
     }
     else {
@@ -46,12 +44,7 @@ public class BooleanMarshaller extends AbstractJSONMarshaller<Boolean> {
   }
 
   @Override
-  public String marshall(Boolean o, MarshallingSession ctx) {
+  public String doNotNullMarshall(Boolean o, MarshallingSession ctx) {
     return o.toString();
-  }
-
-  @Override
-  public boolean handles(EJValue o) {
-    return o.isBoolean() != null;
   }
 }

@@ -31,12 +31,10 @@ public interface ErraiServiceConfigurator {
   public static final String ENABLE_WEB_SOCKET_SERVER = "errai.bus.enable_web_socket_server";
   public static final String WEB_SOCKET_PORT = "errai.bus.web_socket_port";
 
-
   public static boolean HOSTED_MODE_TESTING = Boolean.getBoolean("errai.hosted_mode_testing");
   public static boolean LONG_POLLING = !HOSTED_MODE_TESTING
           && (System.getProperty(ErraiServiceConfigurator.DO_LONG_POLL) == null
           || Boolean.getBoolean(ErraiServiceConfigurator.DO_LONG_POLL));
-
 
   /**
    * Provides access to the {@link org.jboss.errai.common.metadata.MetaDataScanner}
@@ -93,7 +91,6 @@ public interface ErraiServiceConfigurator {
    * @return
    */
   public Integer getIntProperty(String key);
-
 }
 
 

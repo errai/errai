@@ -103,9 +103,10 @@ public class GenUtil {
         statements[i] = convert(context, parameter, methParms[i++].getType());
       }
       catch (GenerationException t) {
-        throw new GenerationException("in method call: "
+        t.appendFailureInfo("in method call: "
                 + method.getDeclaringClass().getFullyQualifiedName()
                 + "." + method.getName() + "(" + Arrays.toString(methParms) + ")");
+        throw t;
       }
     }
     return statements;
@@ -181,20 +182,20 @@ public class GenUtil {
           if ("null".equals(((Statement) input).generate(context))) {
             return (Statement) input;
           }
-  
+
           assertAssignableTypes(((Statement) input).getType(), targetType);
           return (Statement) input;
         }
       }
-  
+
       if (input instanceof BuildMetaClass) {
         return generate(context, input);
       }
-  
+
       if (Object.class.getName().equals(targetType.getFullyQualifiedName())) {
         return generate(context, input);
       }
-  
+
       Class<?> inputClass = input == null ? Object.class : input.getClass();
       Class<?> targetClass = targetType.asBoxed().asClass();
       if (DataConversion.canConvert(targetClass, inputClass)) {
@@ -754,7 +755,7 @@ public class GenUtil {
     try {
       throw t;
     }
-    catch (GenerationException e) {
+    catch (RuntimeException e) {
       throw e;
     }
     catch (Throwable e) {
@@ -910,5 +911,26 @@ public class GenUtil {
       }
     }
     return 0;
+  }
+
+  public static void rewriteBlameStackTrace(Throwable innerBlame) {
+    StackTraceElement[] stackTrace = innerBlame.getStackTrace();
+
+    List<StackTraceElement> innerStackTrace = new ArrayList<StackTraceElement>(10);
+    List<StackTraceElement> outerStackTrace = new ArrayList<StackTraceElement>(10);
+    for (StackTraceElement el : stackTrace) {
+      if (el.getClassName().startsWith("org.jboss.errai.codegen.framework.")) {
+        innerStackTrace.add(el);
+      }
+      else {
+        outerStackTrace.add(el);
+      }
+    }
+
+    innerBlame.setStackTrace(innerStackTrace.toArray(new StackTraceElement[innerStackTrace.size()]));
+
+    RuntimeException outerBlame = new RuntimeException("External call to API");
+    outerBlame.setStackTrace(outerStackTrace.toArray(new StackTraceElement[outerStackTrace.size()]));
+    innerBlame.initCause(outerBlame);
   }
 }

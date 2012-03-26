@@ -76,6 +76,7 @@ public class MethodCall extends AbstractCallElement {
         }
         else {
           UndefinedMethodException udme = new UndefinedMethodException(statement.getType(), methodName, parameterTypes);
+          GenUtil.rewriteBlameStackTrace(blame);
           udme.initCause(blame);
           throw udme;
         }
