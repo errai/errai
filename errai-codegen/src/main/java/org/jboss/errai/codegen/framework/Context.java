@@ -45,6 +45,7 @@ import org.jboss.errai.codegen.framework.util.GenUtil;
  * The rendering cache can be used by {@link Statement}s to improve performance.
  *
  * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Mike Brock
  */
 public class Context {
   private Context parent = null;

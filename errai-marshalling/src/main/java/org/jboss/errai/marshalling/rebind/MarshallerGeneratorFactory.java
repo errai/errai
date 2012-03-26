@@ -16,7 +16,6 @@
 
 package org.jboss.errai.marshalling.rebind;
 
-import com.google.gwt.core.ext.typeinfo.JClassType;
 import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Parameter;
 import org.jboss.errai.codegen.framework.Statement;
@@ -26,9 +25,6 @@ import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.ConstructorBlockBuilder;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
-import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
-import org.jboss.errai.codegen.framework.meta.impl.gwt.GWTClass;
-import org.jboss.errai.codegen.framework.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.codegen.framework.util.Bool;
 import org.jboss.errai.codegen.framework.util.GenUtil;
 import org.jboss.errai.codegen.framework.util.Stmt;
@@ -139,8 +135,6 @@ public class MarshallerGeneratorFactory {
       }
     });
 
-    //loadMarshallers();
-
     MetaClass javaUtilMap = MetaClassFactory.get(
             new TypeLiteral<Map<String, Marshaller>>() {
             }
@@ -235,7 +229,7 @@ public class MarshallerGeneratorFactory {
 
     for (Class<?> clazz : exposed) {
       MappingDefinition definition = mappingContext.getDefinitionsFactory().getDefinition(clazz);
-      if (definition.getClientMarshallerClass() != null) {
+      if (definition.getClientMarshallerClass() != null || definition.alreadyGenerated()) {
         continue;
       }
 
@@ -317,8 +311,6 @@ public class MarshallerGeneratorFactory {
     AnonymousClassStructureBuilder classStructureBuilder
             = Stmt.create(mappingContext.getCodegenContext())
             .newObject(parameterizedAs(Marshaller.class, typeParametersOf(arrayType))).extend();
-
-    MetaClass anonClass = classStructureBuilder.getClassDefinition();
 
     classStructureBuilder.publicOverridesMethod("getTypeHandled")
             .append(Stmt.load(toMap).returnValue())

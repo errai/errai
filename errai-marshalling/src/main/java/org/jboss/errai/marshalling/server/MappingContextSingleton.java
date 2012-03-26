@@ -56,7 +56,6 @@ public class MappingContextSingleton {
   private static final ServerMappingContext context;
   private static Logger log = getLogger("ErraiMarshalling");
 
-
   static {
     ParserFactory.registerParser(
             new Parser() {
@@ -192,11 +191,11 @@ public class MappingContextSingleton {
               marshaller = new QualifyingMarshallerWrapper(marshaller);
             }
 
-            factory.addDefinition(new MappingDefinition(marshaller));
+            factory.addDefinition(new MappingDefinition(marshaller, true));
 
             if (m.isAnnotationPresent(ImplementationAliases.class)) {
               for (Class<?> inherits : m.getAnnotation(ImplementationAliases.class).value()) {
-                factory.addDefinition(new MappingDefinition(marshaller, inherits));
+                factory.addDefinition(new MappingDefinition(marshaller, inherits, true));
               }
             }
 
@@ -206,7 +205,7 @@ public class MappingContextSingleton {
             MetaClass arrayType = MetaClassFactory.get(marshaller.getTypeHandled()).asArrayOf(1);
             if (!factory.hasDefinition(arrayType)) {
               factory.addDefinition(new MappingDefinition(
-                      EncDecUtil.qualifyMarshaller(new DefaultArrayMarshaller(arrayType, marshaller))));
+                      EncDecUtil.qualifyMarshaller(new DefaultArrayMarshaller(arrayType, marshaller)), true));
 
               /**
                * If this a pirmitive wrapper, create a special case for it using the same marshaller.
@@ -214,7 +213,7 @@ public class MappingContextSingleton {
               if (MarshallUtil.isPrimitiveWrapper(marshaller.getTypeHandled())) {
                 factory.addDefinition(new MappingDefinition(
                         EncDecUtil.qualifyMarshaller(new DefaultArrayMarshaller(
-                                arrayType.getOuterComponentType().asUnboxed().asArrayOf(1), marshaller))));
+                                arrayType.getOuterComponentType().asUnboxed().asArrayOf(1), marshaller)), true));
               }
             }
 
@@ -260,7 +259,7 @@ public class MappingContextSingleton {
                   Marshaller<Object> marshaller = outerDef.getMarshallerInstance();
 
                   MappingDefinition def = new MappingDefinition(EncDecUtil.qualifyMarshaller(
-                          new DefaultArrayMarshaller(type, marshaller)));
+                          new DefaultArrayMarshaller(type, marshaller)), true);
 
                   def.setClientMarshallerClass(outerDef.getClientMarshallerClass());
 
@@ -273,7 +272,7 @@ public class MappingContextSingleton {
 
         for (Map.Entry<String, String> entry : factory.getMappingAliases().entrySet()) {
           MappingDefinition def = factory.getDefinition(entry.getValue());
-          MappingDefinition aliasDef = new MappingDefinition(MetaClassFactory.get(entry.getKey()));
+          MappingDefinition aliasDef = new MappingDefinition(MetaClassFactory.get(entry.getKey()), true);
           aliasDef.setMarshallerInstance(def.getMarshallerInstance());
 
           factory.addDefinition(aliasDef);

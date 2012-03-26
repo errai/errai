@@ -151,7 +151,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
           InheritedMappings inheritedMappings = cls.getAnnotation(InheritedMappings.class);
 
           for (Class<?> c : inheritedMappings.value()) {
-            MappingDefinition aliasMappingDef = new MappingDefinition(c);
+            MappingDefinition aliasMappingDef = new MappingDefinition(c, true);
             aliasMappingDef.setMarshallerInstance(new DefaultDefinitionMarshaller(aliasMappingDef));
             addDefinition(aliasMappingDef);
 
@@ -179,7 +179,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       if (Marshaller.class.isAssignableFrom(marshallerCls)) {
         try {
           Class<?> type = (Class<?>) Marshaller.class.getMethod("getTypeHandled").invoke(marshallerCls.newInstance());
-          MappingDefinition marshallMappingDef = new MappingDefinition(type);
+          MappingDefinition marshallMappingDef = new MappingDefinition(type, true);
           marshallMappingDef.setClientMarshallerClass(marshallerCls.asSubclass(Marshaller.class));
           addDefinition(marshallMappingDef);
 
@@ -187,7 +187,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
           if (marshallerCls.isAnnotationPresent(ImplementationAliases.class)) {
             for (Class<?> aliasCls : marshallerCls.getAnnotation(ImplementationAliases.class).value()) {
-              MappingDefinition aliasMappingDef = new MappingDefinition(aliasCls);
+              MappingDefinition aliasMappingDef = new MappingDefinition(aliasCls, true);
               aliasMappingDef.setClientMarshallerClass(marshallerCls.asSubclass(Marshaller.class));
               addDefinition(aliasMappingDef);
 
@@ -293,7 +293,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
     //  mappingAliases.put(entry.getKey().getName(), def.getClientMarshallerClass().getName());
 
-      MappingDefinition aliasDef = new MappingDefinition(def.getMarshallerInstance(), entry.getKey());
+      MappingDefinition aliasDef = new MappingDefinition(def.getMarshallerInstance(), entry.getKey(), false);
       aliasDef.setClientMarshallerClass(def.getClientMarshallerClass());
       addDefinition(aliasDef);
     }
@@ -421,6 +421,13 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
   @Override
   public Map<String, String> getMappingAliases() {
     return mappingAliases;
+  }
+
+  @Override
+  public void deleteAllDefinitions() {
+    this.exposedClasses.clear();
+    this.mappingAliases.clear();
+    this.MAPPING_DEFINITIONS.clear();
   }
 }
 
