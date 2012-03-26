@@ -1565,7 +1565,7 @@
                 <delete dir="src/main/webapp/WEB-INF/lib" />
                 <delete dir="src/main/webapp/META-INF" />
                 <delete file="src/main/webapp/WEB-INF/web.xml" />
-                <delete dir="src/main/webapp/app" />
+                <delete dir="src/main/webapp/contacts" />
                 <delete dir="target" />
 
                 <copy file="src/${webDescriptor}/web.xml" toDir="src/main/webapp/WEB-INF" />
