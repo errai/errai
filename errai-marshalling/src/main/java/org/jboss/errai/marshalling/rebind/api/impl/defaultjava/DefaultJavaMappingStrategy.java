@@ -192,8 +192,6 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
           }
           else {
             val = fieldDemarshall(memberMapping, MetaClassFactory.get(EJObject.class));
-
-            //val = fieldDemarshall(memberMapping.getKey(), MetaClassFactory.get(JSONValue.class), memberMapping.getType().asBoxed());
           }
 
           if (memberMapping.getBindingMember() instanceof MetaField) {
@@ -233,12 +231,12 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
             }
           }
           else if (memberMapping.getBindingMember() instanceof MetaMethod) {
-            bindingStatement = loadVariable("entity").invoke(((MetaMethod) memberMapping.getBindingMember()), val);
+            bindingStatement = loadVariable("entity").invoke(((MetaMethod) memberMapping.getBindingMember()),
+                    Cast.to(memberMapping.getType(), val));
           }
           else {
             throw new RuntimeException("unknown member mapping type: " + memberMapping.getType());
           }
-
 
           tryBuilder.append(
                   Stmt.if_(Bool.and(

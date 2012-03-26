@@ -32,35 +32,42 @@ import java.util.List;
 public class MappingDefinition {
   private MetaClass toMap;
 
-  private boolean cachedMarshaller;
-  
+  private final boolean doNotGenerate;
+
   private Class<? extends Marshaller> clientMarshallerClass;
   private Class<? extends Marshaller> serverMarshallerClass;
-  
+
   private Marshaller<Object> marshallerInstance;
 
   private InstantiationMapping instantiationMapping;
 
   private List<MemberMapping> memberMappings = new ArrayList<MemberMapping>();
 
-  public MappingDefinition(Marshaller<Object> marshaller) {
-    this(marshaller, marshaller.getTypeHandled());
+  public MappingDefinition(Marshaller<Object> marshaller, boolean cached) {
+    this(marshaller, marshaller.getTypeHandled(), cached);
   }
 
-  public MappingDefinition(Marshaller<Object> marshaller, Class<?> toMap) {
+  public MappingDefinition(Marshaller<Object> marshaller, Class<?> toMap, boolean doNotGenerate) {
     this.toMap = JavaReflectionClass.newUncachedInstance(toMap);
     setMarshallerInstance(marshaller);
     instantiationMapping = new NoConstructMapping();
-  }
-  
-  public MappingDefinition(Class<?> toMap) {
-    this(JavaReflectionClass.newUncachedInstance(toMap));
+    this.doNotGenerate = doNotGenerate;
   }
 
-  public MappingDefinition(MetaClass toMap) {
+  protected MappingDefinition(Class<?> toMap) {
+    this(toMap, false);
+  }
+
+  public MappingDefinition(Class<?> toMap, boolean doNotGenerate) {
+    this(JavaReflectionClass.newUncachedInstance(toMap), doNotGenerate);
+  }
+
+  public MappingDefinition(MetaClass toMap, boolean doNotGenerate) {
     this.toMap = toMap;
     setInstantiationMapping(new SimpleConstructorMapping());
+    this.doNotGenerate = doNotGenerate;
   }
+
 
   public MetaClass getMappingClass() {
     return toMap;
@@ -80,6 +87,10 @@ public class MappingDefinition {
 
   public void setServerMarshallerClass(Class<? extends Marshaller> serverMarshallerClass) {
     this.serverMarshallerClass = serverMarshallerClass;
+  }
+
+  public boolean alreadyGenerated() {
+    return doNotGenerate;
   }
 
   public void setInstantiationMapping(InstantiationMapping mapping) {
@@ -146,6 +157,5 @@ public class MappingDefinition {
 
   public void setMarshallerInstance(Marshaller marshallerInstance) {
     this.marshallerInstance = marshallerInstance;
-    this.cachedMarshaller = marshallerInstance != null;
   }
 }

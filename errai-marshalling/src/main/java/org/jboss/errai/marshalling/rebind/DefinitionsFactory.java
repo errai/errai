@@ -110,5 +110,7 @@ public interface DefinitionsFactory {
    */
   Map<String, String> getMappingAliases();
 
+  void deleteAllDefinitions();
+
 
 }
