@@ -24,10 +24,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
@@ -248,7 +246,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       meth =  GenUtil.getBestCandidate(parameters, name, this, methodsCallback.getMethods(), false);
     }
     return meth;
-    
+
 
 //
 //    if ((meth = subMap.get(parmKey)) == null) {
@@ -420,7 +418,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   private String _hashString;
 
-  private String hashString() {
+  private final String hashString() {
     if (_hashString == null) {
       _hashString = MetaClass.class.getName() + ":" + getFullyQualifiedName();
       if (getParameterizedType() != null) {
@@ -430,42 +428,41 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return _hashString;
   }
 
-  private Set<MetaClass> POS_ASSIGNABLE_CACHE = new HashSet<MetaClass>();
-  private Set<MetaClass> NEG_ASSIGNABLE_CACHE = new HashSet<MetaClass>();
+  private Map<MetaClass, Boolean> ASSIGNABLE_CACHE = new HashMap<MetaClass, Boolean>();
 
   private static final MetaClass NULL_TYPE = MetaClassFactory.get(NullType.class);
 
   @Override
   public boolean isAssignableFrom(MetaClass clazz) {
-    if (POS_ASSIGNABLE_CACHE.contains(clazz)) return true;
-    if (NEG_ASSIGNABLE_CACHE.contains(clazz)) return false;
+    Boolean assignable = ASSIGNABLE_CACHE.get(clazz);
+    if (assignable != null) {
+      return assignable;
+    }
 
+    // XXX not sure if this is uncached on purpose.
+    // FIXME there are no tests or documentation for this case
     if (!isPrimitive() && NULL_TYPE.equals(clazz)) return true;
 
-    MetaClass cls;
+    MetaClass sup;
 
-    if (equals(cls = MetaClassFactory.get(Object.class))) {
-      POS_ASSIGNABLE_CACHE.add(cls);
-      return true;
+    if (MetaClassFactory.get(Object.class).equals(this)) {
+      assignable = true;
+    }
+    else if (this.getFullyQualifiedName().equals(clazz.getFullyQualifiedName())) {
+      assignable = true;
+    }
+    else if (_hasInterface(clazz.getInterfaces(), this.getErased())) {
+      assignable = true;
+    }
+    else if ((sup = clazz.getSuperClass()) != null) {
+      assignable = isAssignableFrom(sup);
+    }
+    else {
+      assignable = false;
     }
 
-    cls = clazz;
-
-    do {
-      if (this.getFullyQualifiedName().equals(cls.getFullyQualifiedName())) {
-        POS_ASSIGNABLE_CACHE.add(cls);
-        return true;
-      }
-    }
-    while ((cls = cls.getSuperClass()) != null);
-
-    if (_hasInterface(clazz.getInterfaces(), this.getErased())) {
-      POS_ASSIGNABLE_CACHE.add(clazz);
-      return true;
-    }
-
-    NEG_ASSIGNABLE_CACHE.add(clazz);
-    return false;
+    ASSIGNABLE_CACHE.put(clazz, assignable);
+    return assignable;
   }
 
   @Override
@@ -516,6 +513,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return parameterizedType;
   }
 
+  @Override
   public MetaParameterizedType getGenericSuperClass() {
     return genericSuperClass;
   }
@@ -542,7 +540,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       return _asClassCache;
     }
 
-    
+
     Class<?> cls = MetaClassFactory.PRIMITIVE_LOOKUP.get(getFullyQualifiedName());
     if (cls == null) {
       cls = NullType.class;
@@ -621,6 +619,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   private String _internalNameCache;
 
+  @Override
   public String getInternalName() {
     if (_internalNameCache != null) return _internalNameCache;
 
