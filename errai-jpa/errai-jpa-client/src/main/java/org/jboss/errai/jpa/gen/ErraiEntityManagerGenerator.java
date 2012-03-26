@@ -1,7 +1,9 @@
 package org.jboss.errai.jpa.gen;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
@@ -12,9 +14,13 @@ import javax.persistence.metamodel.Metamodel;
 import javax.persistence.metamodel.SingularAttribute;
 
 import org.jboss.errai.codegen.framework.Parameter;
+import org.jboss.errai.codegen.framework.SnapshotMaker;
+import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.MethodBlockBuilder;
+import org.jboss.errai.codegen.framework.meta.impl.gwt.GWTUtil;
 import org.jboss.errai.codegen.framework.util.Implementations;
+import org.jboss.errai.codegen.framework.util.Stmt;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 
 import com.google.gwt.core.ext.Generator;
@@ -27,6 +33,8 @@ public class ErraiEntityManagerGenerator extends Generator {
   @Override
   public String generate(TreeLogger logger, GeneratorContext context,
       String typeName) throws UnableToCompleteException {
+
+    GWTUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
 
     Map<String, String> properties = new HashMap<String, String>();
     properties.put("hibernate.dialect", "org.hibernate.dialect.HSQLDialect");
@@ -54,16 +62,19 @@ public class ErraiEntityManagerGenerator extends Generator {
 
     for (EntityType<?> et : mm.getEntities()) {
 
-      SingularAttribute<?, ?> id = null;
-      SingularAttribute<?, ?> version = null;
+      List<Statement> attributes = new ArrayList<Statement>();
+      Statement id = null;
+      Statement version = null;
       for (SingularAttribute<?, ?> attrib : et.getSingularAttributes()) {
-        if (attrib.isId()) id = new ErraiSingularAttribute(et.getName(), et.get);
-        if (attrib.isVersion()) version = attrib;
+        Statement attribSnapshot = SnapshotMaker.makeSnapshotAsSubclass(attrib, SingularAttribute.class);
+        if (attrib.isId()) id = attribSnapshot;
+        if (attrib.isVersion()) version = attribSnapshot;
+
+        pmm.append(Stmt.declareVariable(et.getName() + "_" + attrib.getName(), attribSnapshot));
       }
 
-
-
-      metamodel.addEntityType(new ErraiEntityType(id, version, et.getSupertype()));
+      System.out.println("singular attributes of " + et + ": " + attributes);
+//      metamodel.addEntityType(new ErraiEntityType(id, version, et.getSupertype()));
 
       //Stmt.loadVariable("metamodel").invoke("addEntityType", );
       //      pmm.append(Stmt.loadClassMember("metamodel").invoke("addEntityType", et));
