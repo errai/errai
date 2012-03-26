@@ -355,14 +355,14 @@ public class Context {
       if (ctx.classContexts != null && !ctx.classContexts.isEmpty()) {
         context.append("Classes:\n");
         for (MetaClass clazz : ctx.classContexts) {
-          context.append(clazz.getFullyQualifiedName()).append("\n");
+          context.append(indent).append(clazz.getFullyQualifiedName()).append("\n");
         }
       }
       
       if (ctx.imports != null && !ctx.imports.isEmpty()) {
         context.append("Imports:\n");
         for (String className : ctx.imports.keySet()) {
-          context.append(ctx.imports.get(className)).append(".").append(className).append("\n");;
+          context.append(indent).append(ctx.imports.get(className)).append(".").append(className).append("\n");;
         }
       }
       
