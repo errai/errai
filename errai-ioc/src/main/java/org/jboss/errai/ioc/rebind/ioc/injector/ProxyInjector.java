@@ -41,10 +41,11 @@ import static org.jboss.errai.codegen.framework.util.Stmt.newObject;
 
 /**
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ProxyInjector extends AbstractInjector {
   private boolean proxied;
-  private final String varName = InjectUtil.getNewInjectorName();
+  private final String varName;
 
   private Statement proxyStatement;
   private BlockBuilder<AnonymousClassStructureBuilder> proxyResolverBody;
@@ -54,6 +55,7 @@ public class ProxyInjector extends AbstractInjector {
 
   public ProxyInjector(IOCProcessingContext context, MetaClass proxiedType, QualifyingMetadata metadata) {
     this.proxiedType = proxiedType;
+    this.varName = InjectUtil.getNewInjectorName() + "_" + proxiedType.getName() + "_proxy";
     this.qualifyingMetadata = metadata;
     String proxyClassName = proxiedType.getFullyQualifiedName().replaceAll("\\.", "_") + "_" + varName;
     this.proxyClass = ProxyMaker.makeProxy(proxyClassName, proxiedType);
