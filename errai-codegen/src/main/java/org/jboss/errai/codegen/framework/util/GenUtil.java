@@ -754,7 +754,7 @@ public class GenUtil {
     try {
       throw t;
     }
-    catch (GenerationException e) {
+    catch (RuntimeException e) {
       throw e;
     }
     catch (Throwable e) {
