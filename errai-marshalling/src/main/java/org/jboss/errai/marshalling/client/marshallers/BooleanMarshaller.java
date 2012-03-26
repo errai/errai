@@ -47,6 +47,10 @@ public class BooleanMarshaller extends AbstractJSONMarshaller<Boolean> {
 
   @Override
   public String marshall(Boolean o, MarshallingSession ctx) {
+    if (o == null) {
+      return "null";
+    }
+    
     return o.toString();
   }
 
