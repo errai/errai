@@ -255,10 +255,14 @@ public class MappingContextSingleton {
                 MetaClass compType = type.getOuterComponentType();
 
                 if (!factory.hasDefinition(type.getInternalName())) {
-                  Marshaller<Object> marshaller = factory.getDefinition(compType).getMarshallerInstance();
+                  MappingDefinition outerDef = factory.getDefinition(compType);
+
+                  Marshaller<Object> marshaller = outerDef.getMarshallerInstance();
 
                   MappingDefinition def = new MappingDefinition(EncDecUtil.qualifyMarshaller(
                           new DefaultArrayMarshaller(type, marshaller)));
+
+                  def.setClientMarshallerClass(outerDef.getClientMarshallerClass());
 
                   factory.addDefinition(def);
                 }

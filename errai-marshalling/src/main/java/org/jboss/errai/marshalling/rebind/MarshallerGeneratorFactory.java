@@ -44,6 +44,7 @@ import org.jboss.errai.marshalling.client.marshallers.QualifyingMarshallerWrappe
 import org.jboss.errai.marshalling.rebind.api.ArrayMarshallerCallback;
 import org.jboss.errai.marshalling.rebind.api.GeneratorMappingContext;
 import org.jboss.errai.marshalling.rebind.api.MappingStrategy;
+import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -233,7 +234,8 @@ public class MarshallerGeneratorFactory {
     }
 
     for (Class<?> clazz : exposed) {
-      if (mappingContext.getDefinitionsFactory().getDefinition(clazz).getClientMarshallerClass() != null) {
+      MappingDefinition definition = mappingContext.getDefinitionsFactory().getDefinition(clazz);
+      if (definition.getClientMarshallerClass() != null) {
         continue;
       }
 
@@ -322,10 +324,6 @@ public class MarshallerGeneratorFactory {
             .append(Stmt.load(toMap).returnValue())
             .finish();
 
-    classStructureBuilder.publicOverridesMethod("getEncodingType")
-            .append(Stmt.load("json").returnValue())
-            .finish();
-
     BlockBuilder<?> bBuilder = classStructureBuilder.publicOverridesMethod("demarshall",
             Parameter.of(EJValue.class, "a0"), Parameter.of(MarshallingSession.class, "a1"));
 
@@ -355,10 +353,6 @@ public class MarshallerGeneratorFactory {
                             loadVariable("a0"), loadVariable("a1")).returnValue())
                     .finish()
     );
-
-    classStructureBuilder.publicOverridesMethod("handles", Parameter.of(EJValue.class, "a0"))
-            .append(Stmt.load(true).returnValue())
-            .finish();
 
     marshallMethodBlock.finish();
 

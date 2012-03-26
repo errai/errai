@@ -43,33 +43,24 @@ public abstract class AbstractCollectionMarshaller<C extends Collection> extends
 
     if (obj != null) {
       EJValue val = obj.get(SerializationParts.QUALIFIED_VALUE);
-
-      if (!val.isNull() && val.isArray() != null) {
-        return doDemarshall(val.isArray(), ctx);
-      }
+      return doDemarshall(val.isArray(), ctx);
     }
-    else if (!o.isNull() && o.isArray() != null) {
+    else {
       return doDemarshall(o.isArray(), ctx);
     }
-    return null;
   }
 
 
   public abstract C doDemarshall(EJArray o, MarshallingSession ctx);
 
-  @Override
-  public boolean handles(EJValue o) {
-    return o.isArray() != null;
-  }
-
   protected <T extends Collection> T marshallToCollection(T collection, EJArray array, MarshallingSession ctx) {
-    
-    
+    if (array == null) return null;
+
     for (int i = 0; i < array.size(); i++) {
       EJValue elem = array.get(i);
       if (!elem.isNull()) {
         collection.add(ctx.getMarshallerInstance(ctx.determineTypeFor(null, elem)).demarshall(elem, ctx));
-      } 
+      }
       else {
         collection.add(null);
       }

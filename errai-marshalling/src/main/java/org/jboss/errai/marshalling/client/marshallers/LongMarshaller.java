@@ -35,18 +35,10 @@ public class LongMarshaller extends AbstractNumberMarshaller<Long> {
   }
 
   @Override
-  public Long demarshall(EJValue o, MarshallingSession ctx) {
-    if (o.isNull()) return null;
-
+  public Long doNotNullDemarshall(EJValue o, MarshallingSession ctx) {
     if (o.isObject() != null) {
       EJValue numValue = o.isObject().get(SerializationParts.NUMERIC_VALUE);
-      if (numValue.isNull()) {
-        return null;
-      }
       return Long.parseLong(numValue.isString().stringValue());
-    }
-    else if (o.isString() != null) {
-      return Long.parseLong(o.isString().stringValue());
     }
     else {
       throw new MarshallingException("cannot demarshall as java.lang.Long: expected qualified value but got: " + o);
@@ -54,12 +46,7 @@ public class LongMarshaller extends AbstractNumberMarshaller<Long> {
   }
 
   @Override
-  public String marshall(Number o, MarshallingSession ctx) {
+  public String doNotNullMarshall(Long o, MarshallingSession ctx) {
     return NumbersUtils.qualifiedNumericEncoding(o);
-  }
-
-  @Override
-  public boolean handles(EJValue o) {
-    return o.isNumber() != null;
   }
 }

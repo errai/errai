@@ -41,6 +41,10 @@ import java.util.concurrent.locks.LockSupport;
 public class TransmissionBufferTests extends TestCase {
   static {
     // make sure protocol provider is initialized;
+  }
+
+  @Override
+  protected void setUp() throws Exception {
     MappingContextSingleton.get();
   }
 

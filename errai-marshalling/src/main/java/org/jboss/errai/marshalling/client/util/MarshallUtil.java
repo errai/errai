@@ -48,36 +48,10 @@ public class MarshallUtil {
     return primitiveWrappers.contains(cls);
   }
 
-  public static <T> T notNull(String message, T obj) {
-    if (obj == null) {
-      throw new NullPointerException(message);
-    }
-    return obj;
-  }
-
-  public static boolean handles(EJValue object, Class<?> cls) {
-    return handles(object.isObject(), cls);
-  }
-
-  public static boolean handles(EJObject object, Class<?> cls) {
-    EJValue v = object.get(SerializationParts.ENCODED_TYPE);
-    return !(v == null || v.isString() == null) && cls.getName().equals(v.isString().stringValue());
-  }
-
-  public static boolean handles(Map object, Class<?> cls) {
-    String v = String.valueOf(object.get(SerializationParts.ENCODED_TYPE));
-    return (v != null && cls.getName().equals(String.valueOf(v)));
-  }
-
-
   public static Marshaller<Object> getQualifiedNumberMarshaller(Object o) {
     final Class<Object> type = (Class<Object>) o.getClass();
 
     return new Marshaller<Object>() {
-      @Override
-      public boolean handles(EJValue o) {
-        return false;
-      }
 
       @Override
       public String marshall(Object o, MarshallingSession ctx) {
@@ -87,11 +61,6 @@ public class MarshallUtil {
       @Override
       public Object demarshall(EJValue o, MarshallingSession ctx) {
         return null;
-      }
-
-      @Override
-      public String getEncodingType() {
-        return "json";
       }
 
       @Override

@@ -16,14 +16,15 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
+import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 
 /**
  * @author Mike Brock
  */
-public abstract class AbstractNumberMarshaller<C extends Number> extends AbstractJSONMarshaller<C> {
+public abstract class AbstractNumberMarshaller<C extends Number> extends AbstractNullableMarshaller<C> {
   @Override
-  public String marshall(Number o, MarshallingSession ctx) {
-    return o == null ? "null" : o.toString();
+  public String doNotNullMarshall(C o, MarshallingSession ctx) {
+    return o.toString();
   }
 }

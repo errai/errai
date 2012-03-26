@@ -25,7 +25,8 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-@ClientMarshaller @ServerMarshaller
+@ClientMarshaller
+@ServerMarshaller
 public class FloatMarshaller extends AbstractNumberMarshaller<Float> {
   @Override
   public Class<Float> getTypeHandled() {
@@ -33,20 +34,12 @@ public class FloatMarshaller extends AbstractNumberMarshaller<Float> {
   }
 
   @Override
-  public Float demarshall(EJValue o, MarshallingSession ctx) {
-    if (o.isNull()) {
-      return null;
-    }
-    else if (o.isObject() != null) {
+  public Float doNotNullDemarshall(EJValue o, MarshallingSession ctx) {
+    if (o.isObject() != null) {
       return o.isObject().get(SerializationParts.NUMERIC_VALUE).isNumber().floatValue();
     }
     else {
       return o.isNumber().floatValue();
     }
-  }
-
-  @Override
-  public boolean handles(EJValue o) {
-    return o.isNumber() != null;
   }
 }
