@@ -16,18 +16,6 @@
 
 package org.jboss.errai.codegen.framework.tests;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.lang.annotation.Annotation;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.PostConstruct;
-import javax.enterprise.util.TypeLiteral;
-import javax.inject.Inject;
-
 import org.jboss.errai.codegen.framework.AssignmentOperator;
 import org.jboss.errai.codegen.framework.Cast;
 import org.jboss.errai.codegen.framework.Context;
@@ -41,12 +29,24 @@ import org.jboss.errai.codegen.framework.exception.OutOfScopeException;
 import org.jboss.errai.codegen.framework.exception.UndefinedFieldException;
 import org.jboss.errai.codegen.framework.literal.LiteralFactory;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
+import org.jboss.errai.codegen.framework.tests.model.BeanWithTypeParmedMeths;
 import org.jboss.errai.codegen.framework.tests.model.Foo;
 import org.jboss.errai.codegen.framework.util.Bool;
 import org.jboss.errai.codegen.framework.util.Refs;
 import org.jboss.errai.codegen.framework.util.Stmt;
 import org.junit.Assert;
 import org.junit.Test;
+
+import javax.annotation.PostConstruct;
+import javax.enterprise.util.TypeLiteral;
+import javax.inject.Inject;
+import java.lang.annotation.Annotation;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Tests the {@link StatementBuilder} API.
@@ -477,9 +477,9 @@ public class StatementBuilderTest extends AbstractCodegenTest {
   public void testThrowExceptionUsingInvalidVariable() {
     try {
       StatementBuilder.create()
-          .declareVariable("t", Integer.class)
-          .throw_("t")
-          .toJavaString();
+              .declareVariable("t", Integer.class)
+              .throw_("t")
+              .toJavaString();
       fail("expected InvalidTypeException");
     }
     catch (InvalidTypeException e) {
@@ -491,8 +491,8 @@ public class StatementBuilderTest extends AbstractCodegenTest {
   public void testThrowExceptionUsingUndefinedVariable() {
     try {
       StatementBuilder.create()
-          .throw_("t")
-          .toJavaString();
+              .throw_("t")
+              .toJavaString();
       fail("expected OutOfScopeException");
     }
     catch (OutOfScopeException e) {
@@ -519,16 +519,16 @@ public class StatementBuilderTest extends AbstractCodegenTest {
     assertEquals("failed to generate nested field assignment",
             "new Foo().bar.name = \"test\";", s);
   }
-  
+
   @Test
   public void testAssignInvalidField() {
     try {
       String s = Stmt.create(Context.create().autoImport()).nestedCall(
-          Stmt.newObject(Foo.class))
-            .loadField("invalid")
-            .assignValue("test")
-            .toJavaString();
-      
+              Stmt.newObject(Foo.class))
+              .loadField("invalid")
+              .assignValue("test")
+              .toJavaString();
+
       fail("expected UndefinedFieldException");
     }
     catch (UndefinedFieldException e) {
@@ -572,5 +572,16 @@ public class StatementBuilderTest extends AbstractCodegenTest {
     assertEquals("failed to generate return statement", "if (foo == null) {\n" +
             "  return;\n" +
             "}", stmt.generate(ctx));
+  }
+
+  @Test
+  public void testTypeInferenceWorksPropertyForParameterizedMethodTypes() {
+    String s = Stmt.loadStatic(BeanWithTypeParmedMeths.class, "INSTANCE")
+            .invoke("setFooBarMap", Stmt.loadStatic(BeanWithTypeParmedMeths.class, "INSTANCE").invoke("getFooBarMap")).toJavaString();
+
+    assertEquals("org.jboss.errai.codegen.framework.tests.model.BeanWithTypeParmedMeths.INSTANCE" +
+            ".setFooBarMap(org.jboss.errai.codegen.framework.tests.model.BeanWithTypeParmedMeths.INSTANCE.getFooBarMap())",
+            s);
+
   }
 }

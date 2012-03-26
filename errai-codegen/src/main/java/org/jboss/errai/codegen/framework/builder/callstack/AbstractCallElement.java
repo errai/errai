@@ -20,6 +20,10 @@ import org.jboss.errai.codegen.framework.Context;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.exception.GenerationException;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.framework.util.GenUtil;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -80,6 +84,8 @@ public abstract class AbstractCallElement implements CallElement {
 
   protected void blameAndRethrow(GenerationException e) {
     if (e.getCause() == null) {
+      GenUtil.rewriteBlameStackTrace(blame);
+
       e.initCause(blame);
     }
     throw e;

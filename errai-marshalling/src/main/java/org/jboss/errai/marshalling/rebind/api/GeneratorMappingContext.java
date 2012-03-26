@@ -68,29 +68,10 @@ public class GeneratorMappingContext implements ServerMappingContext {
     return definitionsFactory;
   }
 
-  public Class<? extends Marshaller> getMarshallerClass(String clazzName) {
-    if (definitionsFactory.getMappingAliases().containsKey(clazzName)) {
-      clazzName = definitionsFactory.getMappingAliases().get(clazzName);
-    }
-
-    return definitionsFactory.getDefinition(clazzName).getClientMarshallerClass();
-  }
-
   public void registerGeneratedMarshaller(String clazzName) {
     generatedMarshallers.add(clazzName);
   }
 
-  public boolean hasMarshaller(MetaClass clazz) {
-    if (clazz.isArray()) {
-      clazz = clazz.getOuterComponentType();
-    }
-
-    if (clazz.isPrimitive()) {
-      clazz = clazz.asBoxed();
-    }
-
-    return hasMarshaller(clazz.getFullyQualifiedName());
-  }
 
   public boolean hasMarshaller(String clazzName) {
     return definitionsFactory.hasDefinition(clazzName);
@@ -99,17 +80,6 @@ public class GeneratorMappingContext implements ServerMappingContext {
   @Override
   public Marshaller<Object> getMarshaller(String clazz) {
     return null;
-  }
-
-  public boolean hasGeneratedMarshaller(MetaClass clazz) {
-    if (clazz.isArray()) {
-      clazz = clazz.getOuterComponentType();
-    }
-    if (clazz.isPrimitive()) {
-      clazz = clazz.asBoxed();
-    }
-
-    return hasGeneratedMarshaller(clazz.getFullyQualifiedName());
   }
 
   private boolean hasGeneratedMarshaller(String clazzName) {
@@ -122,10 +92,6 @@ public class GeneratorMappingContext implements ServerMappingContext {
 
   public Context getCodegenContext() {
     return codegenContext;
-  }
-
-  public void markRendered(Class<?> clazz) {
-    markRendered(clazz.getName());
   }
 
   public void markRendered(String className) {

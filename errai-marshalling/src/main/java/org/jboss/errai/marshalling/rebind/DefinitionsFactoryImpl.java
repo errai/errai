@@ -151,7 +151,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
           InheritedMappings inheritedMappings = cls.getAnnotation(InheritedMappings.class);
 
           for (Class<?> c : inheritedMappings.value()) {
-            MappingDefinition aliasMappingDef = new MappingDefinition(c, true);
+            MappingDefinition aliasMappingDef = new MappingDefinition(c, definition.alreadyGenerated());
             aliasMappingDef.setMarshallerInstance(new DefaultDefinitionMarshaller(aliasMappingDef));
             addDefinition(aliasMappingDef);
 
