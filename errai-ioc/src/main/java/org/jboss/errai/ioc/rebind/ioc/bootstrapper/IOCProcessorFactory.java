@@ -24,7 +24,6 @@ import org.jboss.errai.codegen.framework.meta.MetaField;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.util.PrivateAccessType;
 import org.jboss.errai.common.metadata.MetaDataScanner;
-import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.api.TestMock;
 import org.jboss.errai.ioc.client.api.TestOnly;
 import org.jboss.errai.ioc.rebind.ioc.extension.AnnotationHandler;
@@ -43,8 +42,6 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.TypeDiscoveryListener;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 import org.jboss.errai.ioc.rebind.ioc.metadata.JSR330QualifyingMetadata;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Singleton;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;

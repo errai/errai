@@ -16,10 +16,8 @@
 
 package org.jboss.errai.ioc.client.test;
 
-import com.google.gwt.core.client.GWT;
 import org.jboss.errai.bus.client.tests.AbstractErraiTest;
 import org.jboss.errai.ioc.client.Container;
-import org.jboss.errai.ioc.client.api.Bootstrapper;
 
 /**
  * @author Mike Brock

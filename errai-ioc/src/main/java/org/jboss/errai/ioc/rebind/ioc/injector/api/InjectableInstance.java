@@ -25,8 +25,8 @@ import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.meta.MetaParameter;
 import org.jboss.errai.codegen.framework.util.Refs;
 import org.jboss.errai.codegen.framework.util.Stmt;
-import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
+import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 
 import java.lang.annotation.Annotation;
 

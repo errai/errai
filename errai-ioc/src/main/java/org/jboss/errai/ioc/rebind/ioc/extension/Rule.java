@@ -16,8 +16,6 @@
 
 package org.jboss.errai.ioc.rebind.ioc.extension;
 
-import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessorFactory;
-
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;

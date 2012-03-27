@@ -1507,7 +1507,8 @@
           <logLevel>INFO</logLevel>
           <runTarget>Contacts.html</runTarget>
           <warSourceDirectory>src/main/webapp/</warSourceDirectory>
-          <extraJvmArgs>-Xmx512m</extraJvmArgs>
+          <extraArgs>-draftCompile</extraArgs>
+          <extraJvmArgs>-d32 -Xmx512m</extraJvmArgs>
           <webXml>src/jetty/web.xml</webXml>
           <hostedWebapp>src/main/webapp/</hostedWebapp>
           <server>org.jboss.errai.cdi.server.gwt.JettyLauncher</server>

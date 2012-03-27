@@ -26,11 +26,6 @@ public class UnsatisfiedField extends UnsatisfiedDependency {
 
   private MetaField field;
 
-  public UnsatisfiedField(MetaField field, MetaClass enclosingType, MetaClass injectedType) {
-    super(enclosingType, injectedType);
-    this.field = field;
-  }
-
   public UnsatisfiedField(MetaField field, MetaClass enclosingType, MetaClass injectedType, String message) {
     super(enclosingType, injectedType, message);
     this.field = field;

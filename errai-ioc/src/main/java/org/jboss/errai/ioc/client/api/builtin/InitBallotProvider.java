@@ -16,15 +16,10 @@
 
 package org.jboss.errai.ioc.client.api.builtin;
 
-import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 import org.jboss.errai.ioc.client.api.InitBallot;
-import org.jboss.errai.ioc.client.api.ProviderException;
-import org.jboss.errai.ioc.client.api.ReplyTo;
-import org.jboss.errai.ioc.client.api.Sender;
-import org.jboss.errai.ioc.client.api.ToSubject;
 
 import java.lang.annotation.Annotation;
 

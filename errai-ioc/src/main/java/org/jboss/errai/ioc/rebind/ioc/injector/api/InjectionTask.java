@@ -41,7 +41,6 @@ import java.lang.annotation.Annotation;
 
 import static org.jboss.errai.codegen.framework.util.GenUtil.getPrivateFieldInjectorName;
 import static org.jboss.errai.codegen.framework.util.GenUtil.getPrivateMethodName;
-import static org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil.resolveInjectionDependencies;
 
 public class InjectionTask {
   protected final TaskType taskType;
@@ -102,7 +101,7 @@ public class InjectionTask {
                   field.getType(), e.getMessage());
         }
         catch (UnproxyableClassException e) {
-          String err = "your object graph has cyclical dependencies and the cycle could not be proxied. use of the @Dependent scope and @New qualifier may not " +
+          String err = "your object graph may have cyclical dependencies and the cycle could not be proxied. use of the @Dependent scope and @New qualifier may not " +
                   "produce properly initalized objects for: " + getInjector().getInjectedType().getFullyQualifiedName() + "\n" +
                   "\t Offending node: " + toString() + "\n" +
                   "\t Note          : this issue can be resolved by making "
@@ -262,20 +261,8 @@ public class InjectionTask {
     return injectableInstance;
   }
 
-  public TaskType getTaskType() {
-    return taskType;
-  }
-
   public Injector getInjector() {
     return injector;
-  }
-
-  public MetaField getField() {
-    return field;
-  }
-
-  public MetaMethod getMethod() {
-    return method;
   }
 
   public void setMethod(MetaMethod method) {

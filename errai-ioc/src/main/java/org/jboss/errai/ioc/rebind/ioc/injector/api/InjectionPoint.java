@@ -23,13 +23,11 @@ import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.meta.MetaParameter;
 import org.jboss.errai.codegen.framework.util.PrivateAccessType;
 import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
-import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
-import org.jboss.errai.ioc.rebind.ioc.injector.ProxyInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
+import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
 import java.util.List;
 
 import static org.jboss.errai.codegen.framework.util.GenUtil.getPrivateFieldInjectorName;

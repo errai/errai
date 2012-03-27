@@ -27,7 +27,6 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 
-import javax.enterprise.inject.Alternative;
 import java.lang.annotation.Annotation;
 
 public class ContextualProviderInjector extends TypeInjector {

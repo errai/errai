@@ -28,10 +28,6 @@ import org.jboss.errai.codegen.framework.util.PrivateAccessType;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
-import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependencies;
-import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependenciesException;
-import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedField;
-import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedMethod;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.injector.ProxyInjector;
@@ -76,9 +72,6 @@ public class InjectionContext {
           = HashMultimap.create();
   private Multimap<ElementType, Class<? extends Annotation>> decoratorsByElementType
           = HashMultimap.create();
-
-  private List<InjectionTask> deferredInjectionTasks = new ArrayList<InjectionTask>();
-  protected List<Runnable> deferredTasks = new ArrayList<Runnable>();
 
   private Map<MetaField, PrivateAccessType> privateFieldsToExpose = new HashMap<MetaField, PrivateAccessType>();
   private Collection<MetaMethod> privateMethodsToExpose = new LinkedHashSet<MetaMethod>();
@@ -356,65 +349,6 @@ public class InjectionContext {
     }
   }
 
-  public void deferTask(InjectionTask injectionTask) {
-    deferredInjectionTasks.add(injectionTask);
-  }
-
-  public void runAllDeferred() {
-
-    int start;
-    List<InjectionTask> toExecute = new ArrayList<InjectionTask>(deferredInjectionTasks);
-
-    do {
-      start = toExecute.size();
-
-      Iterator<InjectionTask> iter = toExecute.iterator();
-
-      while (iter.hasNext()) {
-        if (iter.next().doTask(this)) {
-          iter.remove();
-        }
-      }
-    }
-    while (!toExecute.isEmpty() && toExecute.size() < start);
-
-    if (!toExecute.isEmpty()) {
-      UnsatisfiedDependencies unsatisfiedDependencies = new UnsatisfiedDependencies();
-      for (InjectionTask task : toExecute) {
-        switch (task.getTaskType()) {
-          case PrivateField:
-          case Field:
-            unsatisfiedDependencies.addUnsatisfiedDependency(
-                    new UnsatisfiedField(task.getField(), task.getInjector().getInjectedType(), task.getField().getType()));
-            break;
-
-          case PrivateMethod:
-          case Method:
-            unsatisfiedDependencies.addUnsatisfiedDependency(
-                    new UnsatisfiedMethod(task.getMethod(), task.getInjector().getInjectedType(), task.getMethod().getParameters()[0].getType()));
-        }
-      }
-
-      throw new UnsatisfiedDependenciesException(unsatisfiedDependencies);
-    }
-
-    runAllDeferredTasks();    //  deferred.clear();
-  }
-
-  public void deferRunnableTask(Runnable runnable) {
-    deferredTasks.add(runnable);
-  }
-
-  private void runAllDeferredTasks() {
-    for (Runnable runnable : deferredTasks) {
-      runnable.run();
-    }
-  }
-
-  public void addExposedField(MetaField field) {
-    addExposedField(field, PrivateAccessType.Both);
-  }
-
   public void addExposedField(MetaField field, PrivateAccessType accessType) {
     if (!privateFieldsToExpose.containsKey(field)) {
       privateFieldsToExpose.put(field, accessType);
@@ -443,10 +377,6 @@ public class InjectionContext {
 
   public Collection<MetaMethod> getPrivateMethodsToExpose() {
     return unmodifiableCollection(privateMethodsToExpose);
-  }
-
-  public boolean hasType(MetaClass cls) {
-    return injectors.containsKey(cls);
   }
 
   public void addType(MetaClass type) {

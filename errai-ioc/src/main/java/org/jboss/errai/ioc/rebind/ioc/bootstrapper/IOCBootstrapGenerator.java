@@ -17,28 +17,11 @@
 package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
 
-import java.io.File;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.context.SessionScoped;
-import javax.enterprise.inject.Alternative;
-import javax.enterprise.inject.Default;
-import javax.inject.Inject;
-import javax.inject.Provider;
-import javax.inject.Singleton;
-
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import com.google.gwt.user.rebind.SourceWriter;
+import com.google.gwt.user.rebind.StringSourceWriter;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.codegen.framework.Context;
@@ -77,7 +60,6 @@ import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
 import org.jboss.errai.ioc.rebind.ioc.injector.AbstractInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.ContextualProviderInjector;
-import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.injector.ProviderInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
@@ -85,11 +67,26 @@ import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadataFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
-import com.google.gwt.user.rebind.SourceWriter;
-import com.google.gwt.user.rebind.StringSourceWriter;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.context.RequestScoped;
+import javax.enterprise.context.SessionScoped;
+import javax.enterprise.inject.Alternative;
+import javax.enterprise.inject.Default;
+import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.inject.Singleton;
+import java.io.File;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
 /**
  * The main generator class for the Errai IOC system.
@@ -274,21 +271,7 @@ public class IOCBootstrapGenerator {
 
     procFactory.process(scanner, procContext);
 
-    for (Injector inj : procContext.getToInstantiate()) {
-      inj.getBeanInstance(injectionContext, null);
-    }
-
-    runAllDeferred();
-
     for (Statement stmt : procContext.getAppendToEnd()) {
-      blockBuilder.append(stmt);
-    }
-
-    for (Statement stmt : procContext.getStaticInstantiationStatements()) {
-      blockBuilder.append(stmt);
-    }
-
-    for (Statement stmt : procContext.getStaticPostConstructStatements()) {
       blockBuilder.append(stmt);
     }
 
@@ -323,12 +306,7 @@ public class IOCBootstrapGenerator {
     }
   }
 
-  private void runAllDeferred() {
-    injectionContext.runAllDeferred();
-  }
-
   public void initializeProviders() {
-    final MetaClass typeProviderCls = MetaClassFactory.get(TypeProvider.class);
     MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
 
     /*

@@ -25,11 +25,7 @@ import org.jboss.errai.codegen.framework.meta.MetaMethod;
 public class UnsatisfiedMethod extends UnsatisfiedDependency {
 
   private MetaMethod method;
-  
-  public UnsatisfiedMethod(MetaMethod method, MetaClass enclosingType, MetaClass injectedType) {
-    super(enclosingType, injectedType);
-    this.method = method;
-  }
+
 
   public UnsatisfiedMethod(MetaMethod method, MetaClass enclosingType, MetaClass injectedType, String message) {
     super(enclosingType, injectedType, message);

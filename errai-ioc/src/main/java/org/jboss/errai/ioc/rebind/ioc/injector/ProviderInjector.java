@@ -23,9 +23,6 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 
-import javax.enterprise.inject.Alternative;
-import javax.inject.Provider;
-
 
 public class ProviderInjector extends TypeInjector {
   private final AbstractInjector providerInjector;

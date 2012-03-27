@@ -16,9 +16,8 @@
 
 package org.jboss.errai.ioc.client;
 
-import org.jboss.errai.common.client.api.extension.InitVotes;
-
 import com.google.gwt.junit.client.GWTTestCase;
+import org.jboss.errai.common.client.api.extension.InitVotes;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

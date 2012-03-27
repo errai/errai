@@ -17,20 +17,6 @@
 package org.jboss.errai.ioc.rebind.ioc.injector;
 
 
-import static org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder.newInstanceOf;
-import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.parameterizedAs;
-import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.typeParametersOf;
-import static org.jboss.errai.codegen.framework.util.Stmt.declareVariable;
-import static org.jboss.errai.codegen.framework.util.Stmt.load;
-import static org.jboss.errai.codegen.framework.util.Stmt.loadVariable;
-
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.enterprise.inject.New;
-
 import org.jboss.errai.codegen.framework.Parameter;
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.codegen.framework.builder.AnonymousClassStructureBuilder;
@@ -45,6 +31,19 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.ConstructionStatusCallback;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
+
+import javax.enterprise.inject.New;
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder.newInstanceOf;
+import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.typeParametersOf;
+import static org.jboss.errai.codegen.framework.util.Stmt.declareVariable;
+import static org.jboss.errai.codegen.framework.util.Stmt.load;
+import static org.jboss.errai.codegen.framework.util.Stmt.loadVariable;
 
 public class TypeInjector extends AbstractInjector {
   protected final MetaClass type;

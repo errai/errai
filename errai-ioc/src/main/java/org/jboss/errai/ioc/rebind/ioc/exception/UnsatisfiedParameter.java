@@ -17,7 +17,6 @@
 package org.jboss.errai.ioc.rebind.ioc.exception;
 
 import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaField;
 import org.jboss.errai.codegen.framework.meta.MetaParameter;
 
 /**
@@ -26,11 +25,6 @@ import org.jboss.errai.codegen.framework.meta.MetaParameter;
 public class UnsatisfiedParameter extends UnsatisfiedDependency {
 
   private MetaParameter field;
-
-  public UnsatisfiedParameter(MetaParameter field, MetaClass enclosingType, MetaClass injectedType) {
-    super(enclosingType, injectedType);
-    this.field = field;
-  }
 
   public UnsatisfiedParameter(MetaParameter field, MetaClass enclosingType, MetaClass injectedType, String message) {
     super(enclosingType, injectedType, message);

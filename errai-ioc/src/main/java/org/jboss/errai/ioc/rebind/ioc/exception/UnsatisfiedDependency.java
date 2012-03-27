@@ -25,11 +25,6 @@ public abstract class UnsatisfiedDependency {
   private MetaClass enclosingType;
   protected MetaClass injectedType;
   protected String message = "";
-  
-  public UnsatisfiedDependency(MetaClass enclosingType, MetaClass injectedType) {
-    this.enclosingType = enclosingType;
-    this.injectedType = injectedType;
-  }
 
   protected UnsatisfiedDependency(MetaClass enclosingType, MetaClass injectedType, String message) {
     this.enclosingType = enclosingType;

@@ -156,7 +156,7 @@ public class InjectUtil {
                                            List<InjectionTask> tasks) {
     for (InjectionTask task : tasks) {
       if (!task.doTask(ctx)) {
-        ctx.deferTask(task);
+        throw new InjectionFailure("could perform injection task: " + task);
       }
     }
   }

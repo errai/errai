@@ -16,11 +16,11 @@
 
 package org.jboss.errai.ioc.rebind.ioc.extension;
 
-import java.lang.annotation.Annotation;
-import java.util.List;
-
 import org.jboss.errai.codegen.framework.Statement;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
+
+import java.lang.annotation.Annotation;
+import java.util.List;
 
 /**
  * A code decorator extension for the Errai IOC framework. Decorators allow the generation of code in and around
