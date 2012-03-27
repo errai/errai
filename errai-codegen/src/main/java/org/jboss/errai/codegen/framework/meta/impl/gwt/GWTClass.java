@@ -17,19 +17,15 @@
 package org.jboss.errai.codegen.framework.meta.impl.gwt;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import com.google.gwt.core.ext.typeinfo.JEnumType;
-import com.google.gwt.core.ext.typeinfo.JRealClassType;
 import org.jboss.errai.codegen.framework.DefModifiers;
 import org.jboss.errai.codegen.framework.Parameter;
 import org.jboss.errai.codegen.framework.builder.impl.Scope;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.codegen.framework.meta.MetaConstructor;
 import org.jboss.errai.codegen.framework.meta.MetaField;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
@@ -48,8 +44,6 @@ import com.google.gwt.core.ext.typeinfo.JType;
 import com.google.gwt.core.ext.typeinfo.JTypeParameter;
 import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
-import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaMethod;
-import org.jboss.errai.codegen.framework.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.codegen.framework.util.GenUtil;
 
 /**

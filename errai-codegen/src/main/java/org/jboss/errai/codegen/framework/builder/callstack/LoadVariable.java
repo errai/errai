@@ -86,7 +86,7 @@ public class LoadVariable extends AbstractCallElement {
           }
 
           StringBuilder buf = new StringBuilder((classMember
-                  && !context.isNonAmbiguous(ref.getName()) ? "this." : "") + getName());
+                  && context.isAmbiguous(ref.getName()) ? "this." : "") + getName());
   
           for (Statement s : idx) {
             buf.append('[').append(s.generate(context)).append(']');

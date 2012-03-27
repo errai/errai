@@ -16,8 +16,6 @@
 
 package org.jboss.errai.codegen.framework.meta;
 
-import org.omg.CORBA.PUBLIC_MEMBER;
-
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */

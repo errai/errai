@@ -16,7 +16,6 @@
 
 package org.jboss.errai.codegen.framework.meta.impl.gwt;
 
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import org.jboss.errai.codegen.framework.DefModifiers;
 import org.jboss.errai.codegen.framework.Modifier;
 import org.jboss.errai.codegen.framework.builder.impl.Scope;
@@ -26,7 +25,6 @@ import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.meta.MetaParameter;
 import org.jboss.errai.codegen.framework.meta.MetaType;
 import org.jboss.errai.codegen.framework.meta.MetaTypeVariable;
-import org.jboss.errai.codegen.framework.util.GenUtil;
 
 import java.lang.annotation.Annotation;
 

@@ -24,8 +24,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javax.enterprise.util.TypeLiteral;
-
 import org.jboss.errai.codegen.framework.control.branch.Label;
 import org.jboss.errai.codegen.framework.control.branch.LabelReference;
 import org.jboss.errai.codegen.framework.exception.OutOfScopeException;
@@ -33,19 +31,15 @@ import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaField;
 import org.jboss.errai.codegen.framework.meta.MetaMethod;
 import org.jboss.errai.codegen.framework.util.GenUtil;
+import org.jboss.errai.common.client.framework.Assert;
 
 /**
- * This class represents a context in which {@link Statement}s are generated.
+ * This class represents a context in which {@link Statement}s are generated. 
+ * <p>
+ * Its main purpose is to support the concept of scopes so that {@link Statement}s 
+ * can be validated prior to compilation.
  * 
- * It references its parent context and holds a map of variables to represent
- * a {@link Statement}'s scope. It further supports imports to avoid the use
- * of fully qualified class names.
- * <p/>
- * 
- * The rendering cache can be used by {@link Statement}s to improve performance.
- *
  * @author Christian Sadilek <csadilek@redhat.com>
- * @author Mike Brock
  */
 public class Context {
   private Context parent = null;
@@ -72,37 +66,56 @@ public class Context {
     this.renderingCache = parent.renderingCache;
   }
 
+  /**
+   * Creates a new and empty context.
+   * 
+   * @return empty context
+   */
   public static Context create() {
     return new Context();
   }
 
+  /**
+   * Create a new sub context for the given parent context.
+   * 
+   * @param parent  the parent context to use.
+   * 
+   * @return Created sub context
+   */
   public static Context create(Context parent) {
     return new Context(parent);
   }
 
+  /**
+   * Add a variable to the current scope.
+   * 
+   * @param name  the name of the variable, must not be null.
+   * @param type  the type of the variable, must not be null.
+   * @return the current context with the variable added.
+   */
   public Context addVariable(String name, Class<?> type) {
-    return addVariable(Variable.create(name, type));
+    return addVariable(Variable.create(Assert.notNull(name), Assert.notNull(type)));
   }
-
-  public Context addVariable(String name, TypeLiteral<?> type) {
-    return addVariable(Variable.create(name, type));
-  }
-
-  public Context addVariable(String name, Object initialization) {
-    Variable v = Variable.create(name, initialization);
-    return addVariable(v);
-  }
-
+  
+  /**
+   * Add a variable to the current scope and initialize it.
+   * 
+   * @param name  the name of the variable, must not be null.
+   * @param type  the type of the variable, must not be null.
+   * @param initialization  the {@link Statement} or literal value to initialize the {@link Variable}, can be null.
+   * @return the current context with the variable added.
+   */
   public Context addVariable(String name, Class<?> type, Object initialization) {
-    Variable v = Variable.create(name, type, initialization);
+    Variable v = Variable.create(Assert.notNull(name), Assert.notNull(type), initialization);
     return addVariable(v);
   }
-
-  public Context addVariable(String name, TypeLiteral<?> type, Object initialization) {
-    Variable v = Variable.create(name, type, initialization);
-    return addVariable(v);
-  }
-
+  
+  /**
+   * Add a {@link Variable} to the current scope.
+   * 
+   * @param variable  the variable instance to add, must not be null.
+   * @return the current context with the variable added.
+   */
   public Context addVariable(Variable variable) {
     if (variables == null)
       variables = new HashMap<String, Variable>();
@@ -111,6 +124,12 @@ public class Context {
     return this;
   }
 
+  /**
+   * Add a {@link Label} to the current scope.
+   * 
+   * @param label  the label instance to add, must not be null.
+   * @return the current context with the label added.
+   */
   public Context addLabel(Label label) {
     if (labels == null)
       labels = new HashMap<String, Label>();
@@ -119,6 +138,7 @@ public class Context {
     return this;
   }
 
+  // Ensures that imports are visible/shared between all parent/child contexts.
   private void initImports() {
     if (imports == null) {
       Context c = this;
@@ -126,7 +146,8 @@ public class Context {
 
       while (c.parent != null) {
         c = c.parent;
-        if (c.imports != null) importsMap = c.imports;
+        if (c.imports != null)
+          importsMap = c.imports;
       }
 
       if (importsMap == null) {
@@ -143,6 +164,12 @@ public class Context {
     }
   }
 
+  /**
+   * Imports the given class.
+   * 
+   * @param clazz  the class to import, must not be null
+   * @return the current context with the import added.
+   */
   public Context addImport(MetaClass clazz) {
     initImports();
 
@@ -160,13 +187,19 @@ public class Context {
     return this;
   }
 
+  /**
+   * Checks whether the given class has been imported.
+   * 
+   * @param clazz  the class to check, must not be null.
+   * @return true if import exists, otherwise false.
+   */
   public boolean hasImport(MetaClass clazz) {
     if (clazz.isArray()) {
       clazz = clazz.getComponentType();
     }
 
-    return imports != null && imports.containsKey(clazz.getName()) &&
-            imports.get(clazz.getName()).equals(getImportForClass(clazz));
+    return imports != null && imports.containsKey(clazz.getName()) && 
+        imports.get(clazz.getName()).equals(getImportForClass(clazz));
   }
 
   private String getImportForClass(MetaClass clazz) {
@@ -181,6 +214,11 @@ public class Context {
     return imp;
   }
 
+  /**
+   * Returns all imports except the optional ones (java.lang.*).
+   * 
+   * @return required imports
+   */
   public Set<String> getRequiredImports() {
     if (imports == null)
       return Collections.emptySet();
@@ -195,15 +233,34 @@ public class Context {
     return importedClasses;
   }
 
+  /**
+   * Enables automatic import of classes used during code generation.
+   * 
+   * @return the current context whit auto import enabled.
+   */
   public Context autoImport() {
     this.autoImportActive = true;
     return this;
   }
 
+  /**
+   * Returns a reference to the {@link Variable} with the given name.
+   * 
+   * @param name  the name of the variable.
+   * @return the {@link VariableReference} found, can not be null.
+   * @throws OutOfScopeException  if variable with the given name can not be found.
+   */
   public VariableReference getVariable(String name) {
     return getVariable(name, false);
   }
 
+  /**
+   * Returns a reference to the class member {@link Variable} with the given name.
+   * 
+   * @param name  the name of the class member variable.
+   * @return the {@link VariableReference} found, can not be null.
+   * @throws OutOfScopeException  if member variable with the given name can not be found.
+   */
   public VariableReference getClassMember(String name) {
     return getVariable(name, true);
   }
@@ -231,6 +288,13 @@ public class Context {
     return found.getReference();
   }
 
+  /**
+   * Returns the a reference to the {@link Label} with the given name.
+   * 
+   * @param name  the name of the label.
+   * @return the {@link LabelReference} found, can not be null.
+   * @throws OutOfScopeException  if label with the given name can not be found.
+   */
   public LabelReference getLabel(String name) {
     Label found = null;
     Context ctx = this;
@@ -247,6 +311,12 @@ public class Context {
     return found.getReference();
   }
 
+  /**
+   * Checks is the given {@link Variable} is in scope.
+   * 
+   * @param variable  the variable to check.
+   * @return true if in scope, otherwise false.
+   */
   public boolean isScoped(Variable variable) {
     Context ctx = this;
     do {
@@ -257,35 +327,12 @@ public class Context {
     return false;
   }
 
-  public boolean isNonAmbiguous(String symbol) {
-    Context ctx = this;
-    int matches = 0;
-    do {
-      if (ctx.variables != null && ctx.variables.containsKey(symbol))
-        matches++;
-    }
-    while ((ctx = ctx.parent) != null);
-    return matches == 0 || matches == 1;
-  }
-
-  public Collection<Variable> getDeclaredVariables() {
-    if (variables == null)
-      return Collections.<Variable>emptyList();
-
-    return variables.values();
-  }
-
-  public Map<String, Variable> getVariables() {
-    if (variables == null)
-      return Collections.<String, Variable>emptyMap();
-
-    return Collections.<String, Variable>unmodifiableMap(variables);
-  }
-
-  public void attachClass(MetaClass clazz) {
-    this.classContexts.add(clazz);
-  }
-
+  /**
+   * Checks is the given {@link MetaMethod} is in scope (part of the attached class contexts).
+   * 
+   * @param method  the method to check.
+   * @return true if in scope, otherwise false.
+   */
   public boolean isInScope(MetaMethod method) {
     Context c = this;
     do {
@@ -301,6 +348,12 @@ public class Context {
     return false;
   }
 
+  /**
+   * Checks is the given {@link MetaField} is in scope (part of the attached class contexts).
+   * 
+   * @param field  the field to check.
+   * @return true if in scope, otherwise false.
+   */
   public boolean isInScope(MetaField field) {
     Context c = this;
     do {
@@ -315,15 +368,68 @@ public class Context {
 
     return false;
   }
+  
+  /**
+   * Checks if the the given variable name is ambiguous in this scope.
+   * 
+   * @param varName  the variable name to check.
+   * @return true if ambiguous, otherwise false.
+   */
+  public boolean isAmbiguous(String varName) {
+    Context ctx = this;
+    int matches = 0;
+    do {
+      if (ctx.variables != null && ctx.variables.containsKey(varName))
+        matches++;
+    }
+    while ((ctx = ctx.parent) != null);
+    return matches > 1;
+  }
 
+  /**
+   * Returns all variables in this scope (does not include variables of parent scopes).
+   * 
+   * @return collection of {@link Variable}, empty if no variables are in scope.
+   */
+  public Collection<Variable> getDeclaredVariables() {
+    if (variables == null)
+      return Collections.<Variable> emptyList();
+
+    return variables.values();
+  }
+
+  /**
+   * Returns all variables in this scope (does not include variables of parent scopes).
+   * 
+   * @return map of variable name to {@link Variable}, empty if no variables are in scope.
+   */
+  public Map<String, Variable> getVariables() {
+    if (variables == null)
+      return Collections.<String, Variable> emptyMap();
+
+    return Collections.<String, Variable> unmodifiableMap(variables);
+  }
+
+  /**
+   * Attaches a class to the current scope.
+   * 
+   * @param clazz  class to attach.
+   */
+  public void attachClass(MetaClass clazz) {
+    this.classContexts.add(clazz);
+  }
+
+  /**
+   * Checks if automatic import is active.
+   * 
+   * @return true if auto import active, otherwise false.
+   */
   public boolean isAutoImportActive() {
     return autoImportActive;
   }
 
-  public boolean hasParent() {
-    return parent != null;
-  }
 
+  // TODO factor this out. should not be part of Context.
   public <K, V> Map<K, V> getRenderingCache(RenderCacheStore<K, V> store) {
     Map<K, V> cacheStore = (Map<K, V>) renderingCache.get(store.getName());
     if (cacheStore == null) {
@@ -336,7 +442,7 @@ public class Context {
   public String toString() {
     String indent = "";
     StringBuilder context = new StringBuilder();
-    
+
     Context ctx = this;
     do {
       if (ctx.variables != null && !ctx.variables.isEmpty()) {
@@ -345,32 +451,33 @@ public class Context {
           context.append(indent).append(ctx.variables.get(varName)).append("\n");
         }
       }
-      
+
       if (ctx.labels != null && !ctx.labels.isEmpty()) {
         context.append("Labels:\n");
         for (String labelName : ctx.labels.keySet()) {
           context.append(indent).append(ctx.labels.get(labelName)).append("\n");
         }
-      }   
-     
+      }
+
       if (ctx.classContexts != null && !ctx.classContexts.isEmpty()) {
         context.append("Classes:\n");
         for (MetaClass clazz : ctx.classContexts) {
           context.append(indent).append(clazz.getFullyQualifiedName()).append("\n");
         }
       }
-      
+
       if (ctx.imports != null && !ctx.imports.isEmpty()) {
         context.append("Imports:\n");
         for (String className : ctx.imports.keySet()) {
-          context.append(indent).append(ctx.imports.get(className)).append(".").append(className).append("\n");;
+          context.append(indent).append(ctx.imports.get(className)).append(".").append(className).append("\n");
+          ;
         }
       }
-      
+
       indent += "  ";
     }
     while ((ctx = ctx.parent) != null);
-    
+
     return context.toString();
   }
 }

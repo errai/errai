@@ -36,7 +36,6 @@ import org.jboss.errai.codegen.framework.control.DoWhileLoop;
 import org.jboss.errai.codegen.framework.control.ForLoop;
 import org.jboss.errai.codegen.framework.control.ForeachLoop;
 import org.jboss.errai.codegen.framework.control.WhileLoop;
-import org.jboss.errai.codegen.framework.exception.GenerationException;
 import org.jboss.errai.codegen.framework.literal.NullLiteral;
 import org.jboss.errai.codegen.framework.meta.MetaClass;
 import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
