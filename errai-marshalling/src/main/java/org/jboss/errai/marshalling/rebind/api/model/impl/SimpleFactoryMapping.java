@@ -16,9 +16,9 @@
 
 package org.jboss.errai.marshalling.rebind.api.model.impl;
 
-import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaMethod;
-import org.jboss.errai.codegen.framework.meta.impl.java.JavaReflectionClass;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.marshalling.rebind.api.model.FactoryMapping;
 import org.jboss.errai.marshalling.rebind.api.model.Mapping;
 

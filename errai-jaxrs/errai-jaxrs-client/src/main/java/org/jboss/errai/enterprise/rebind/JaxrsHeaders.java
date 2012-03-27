@@ -24,8 +24,8 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
 
 import org.apache.commons.lang.StringUtils;
-import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaMethod;
 
 /**
  * Represents HTTP headers based on JAX-RS annotations.

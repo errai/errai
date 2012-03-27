@@ -16,8 +16,8 @@
 
 package org.jboss.errai.ioc.rebind.ioc.exception;
 
-import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaParameter;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaParameter;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>

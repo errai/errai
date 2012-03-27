@@ -16,7 +16,7 @@
 
 package org.jboss.errai.marshalling.rebind.api.impl.defaultjava;
 
-import org.jboss.errai.codegen.framework.meta.*;
+import org.jboss.errai.codegen.meta.*;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.annotations.Key;
 import org.jboss.errai.marshalling.client.api.annotations.MapsTo;

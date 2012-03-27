@@ -25,7 +25,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.jboss.errai.codegen.framework.meta.impl.gwt.GWTUtil;
+import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.rebind.ClassListReader;
 import org.jboss.errai.common.rebind.EnvUtil;

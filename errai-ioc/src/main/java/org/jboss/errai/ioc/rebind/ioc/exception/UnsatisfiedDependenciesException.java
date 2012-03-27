@@ -16,10 +16,10 @@
 
 package org.jboss.errai.ioc.rebind.ioc.exception;
 
-import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaField;
-import org.jboss.errai.codegen.framework.meta.MetaMethod;
-import org.jboss.errai.codegen.framework.meta.MetaParameter;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaField;
+import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaParameter;
 
 import java.util.List;
 

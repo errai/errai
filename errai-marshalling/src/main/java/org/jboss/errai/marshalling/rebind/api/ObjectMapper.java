@@ -16,7 +16,7 @@
 
 package org.jboss.errai.marshalling.rebind.api;
 
-import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.Statement;
 
 /**
  * This class will actually figure out how to deconstruct and object and put it back together

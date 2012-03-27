@@ -16,10 +16,10 @@
 
 package org.jboss.errai.ioc.rebind.ioc.builtin;
 
-import org.jboss.errai.codegen.framework.Context;
-import org.jboss.errai.codegen.framework.Statement;
-import org.jboss.errai.codegen.framework.meta.MetaMethod;
-import org.jboss.errai.codegen.framework.util.Stmt;
+import org.jboss.errai.codegen.Context;
+import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.ioc.client.api.AfterInitialization;
 import org.jboss.errai.ioc.client.api.CodeDecorator;

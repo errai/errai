@@ -16,8 +16,8 @@
 
 package org.jboss.errai.marshalling.server.marshallers;
 
-import org.jboss.errai.codegen.framework.meta.MetaField;
-import org.jboss.errai.codegen.framework.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaField;
+import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;

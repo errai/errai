@@ -16,7 +16,7 @@
 
 package org.jboss.errai.marshalling.rebind.api.model;
 
-import org.jboss.errai.codegen.framework.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaMethod;
 
 /**
  * @author Mike Brock

@@ -1,6 +1,6 @@
 package org.jboss.errai.ioc.rebind.ioc.injector.api;
 
-import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.Statement;
 
 /**
  * @author Mike Brock
