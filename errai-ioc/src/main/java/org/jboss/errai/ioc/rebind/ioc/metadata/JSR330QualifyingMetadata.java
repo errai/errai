@@ -16,9 +16,9 @@
 
 package org.jboss.errai.ioc.rebind.ioc.metadata;
 
-import org.jboss.errai.codegen.framework.Statement;
-import org.jboss.errai.codegen.framework.literal.LiteralFactory;
-import org.jboss.errai.codegen.framework.util.Stmt;
+import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.literal.LiteralFactory;
+import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.client.api.qualifiers.BuiltInQualifiers;
 
 import javax.inject.Qualifier;

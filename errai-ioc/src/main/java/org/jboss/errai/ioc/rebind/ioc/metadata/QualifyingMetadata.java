@@ -16,7 +16,7 @@
 
 package org.jboss.errai.ioc.rebind.ioc.metadata;
 
-import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.Statement;
 
 import java.lang.annotation.Annotation;
 

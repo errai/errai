@@ -16,16 +16,17 @@
 
 package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
+import java.io.PrintWriter;
+import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.common.rebind.EnvUtil;
+import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCBootstrapGenerator;
+
 import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
-import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.common.rebind.EnvUtil;
-
-import java.io.PrintWriter;
 
 /**
  * The main generator class for the errai-ioc framework.

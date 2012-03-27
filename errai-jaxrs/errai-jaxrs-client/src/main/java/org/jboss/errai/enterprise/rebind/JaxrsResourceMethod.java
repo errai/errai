@@ -22,8 +22,8 @@ import java.util.Map;
 
 import javax.ws.rs.Path;
 
-import org.jboss.errai.codegen.framework.Statement;
-import org.jboss.errai.codegen.framework.meta.MetaMethod;
+import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.meta.MetaMethod;
 
 /**
  * Represents a JAX-RS resource method.

@@ -18,11 +18,11 @@ package org.jboss.errai.bus.rebind;
 
 import java.lang.reflect.Method;
 
-import org.jboss.errai.codegen.framework.Statement;
-import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
-import org.jboss.errai.codegen.framework.meta.MetaMethod;
-import org.jboss.errai.codegen.framework.meta.MetaParameter;
-import org.jboss.errai.codegen.framework.util.Stmt;
+import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaParameter;
+import org.jboss.errai.codegen.util.Stmt;
 import org.mvel2.util.StringAppender;
 
 public class RebindUtils {

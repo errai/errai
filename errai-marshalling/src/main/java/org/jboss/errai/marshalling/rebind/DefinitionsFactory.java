@@ -16,7 +16,7 @@
 
 package org.jboss.errai.marshalling.rebind;
 
-import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 
 import java.util.Map;
