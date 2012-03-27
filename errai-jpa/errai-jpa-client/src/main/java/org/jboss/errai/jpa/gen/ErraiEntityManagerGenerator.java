@@ -2,6 +2,7 @@ package org.jboss.errai.jpa.gen;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,7 @@ import javax.persistence.metamodel.SingularAttribute;
 import org.jboss.errai.codegen.framework.Parameter;
 import org.jboss.errai.codegen.framework.SnapshotMaker;
 import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.framework.Variable;
 import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.framework.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.framework.meta.impl.gwt.GWTUtil;
@@ -62,11 +64,17 @@ public class ErraiEntityManagerGenerator extends Generator {
 
     for (EntityType<?> et : mm.getEntities()) {
 
+      // first, create a variable for the EntityType
+      Statement etVariable = Stmt.declareVariable(entitySnapshotVarName(et.getJavaType()), EntityType.class);
+      Map<Object, Statement> entityTypeReference = Collections.singletonMap(
+          (Object) et, (Statement) Variable.get(entitySnapshotVarName(et.getJavaType())));
+
+      // now, snapshot all the EntityType's attributes, adding them as we go
       List<Statement> attributes = new ArrayList<Statement>();
       Statement id = null;
       Statement version = null;
       for (SingularAttribute<?, ?> attrib : et.getSingularAttributes()) {
-        Statement attribSnapshot = SnapshotMaker.makeSnapshotAsSubclass(attrib, SingularAttribute.class);
+        Statement attribSnapshot = SnapshotMaker.makeSnapshotAsSubclass(attrib, SingularAttribute.class, entityTypeReference, EntityType.class);
         if (attrib.isId()) id = attribSnapshot;
         if (attrib.isVersion()) version = attribSnapshot;
 
@@ -105,8 +113,8 @@ public class ErraiEntityManagerGenerator extends Generator {
   }
 
   // TODO check what the other code generators do for class->method names
-  static String persistEntityMethodName(Class<?> forType) {
-    return "persist_" + forType.getCanonicalName().replace('.', '_');
+  static String entitySnapshotVarName(Class<?> forType) {
+    return "et_" + forType.getCanonicalName().replace('.', '_');
   }
 
 

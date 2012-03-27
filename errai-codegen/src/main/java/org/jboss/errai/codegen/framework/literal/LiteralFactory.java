@@ -56,6 +56,7 @@ public class LiteralFactory {
             return getClassReference((MetaClass) o, context, false) + ".class";
           }
 
+          @Override
           public String toString() {
             return o.toString() + ".class";
           }
@@ -139,7 +140,7 @@ public class LiteralFactory {
       return new LiteralValue<Object>(o) {
         @Override
         public String getCanonicalString(Context context) {
-          return SnapshotMaker.makeSnapshotAsSubclass(o, context.getLiteralizableTargetType(o.getClass())).generate(context);
+          return SnapshotMaker.makeSnapshotAsSubclass(o, context.getLiteralizableTargetType(o.getClass()), null).generate(context);
         }
       };
     }
