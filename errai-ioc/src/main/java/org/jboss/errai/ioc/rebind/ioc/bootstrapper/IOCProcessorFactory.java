@@ -375,6 +375,11 @@ public class IOCProcessorFactory {
 
         return entry.handler.handle(injectableInstance, anno, context);
       }
+      
+      @Override
+      public String toString() {
+        return type.getFullyQualifiedName();
+      }
     };
 
     entry.handler.registerMetadata(injectableInstance, anno, context);
@@ -416,6 +421,11 @@ public class IOCProcessorFactory {
                 injectionContext);
 
         return entry.handler.handle(injectableInstance, anno, context);
+      }
+      
+      @Override
+      public String toString() {
+        return type.getFullyQualifiedName();
       }
     };
 
@@ -462,6 +472,12 @@ public class IOCProcessorFactory {
 
         return entry.handler.handle(injectableInstance, anno, context);
       }
+
+      @Override
+      public String toString() {
+        return type.getFullyQualifiedName();
+      }
+      
     };
 
     Set<SortUnit> requiredDependencies = del.getRequiredDependencies();
