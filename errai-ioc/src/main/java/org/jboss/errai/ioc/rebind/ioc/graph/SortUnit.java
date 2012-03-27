@@ -83,6 +83,13 @@ public class SortUnit implements Comparable<SortUnit> {
     return dependencies;
   }
 
+  public SortUnit getDependency(SortUnit unit) {
+    for (SortUnit s : getDependencies()) {
+      if (s.equals(unit)) return s;
+    }
+    return null;
+  }
+
   public boolean isHard() {
     return hard;
   }
@@ -120,17 +127,21 @@ public class SortUnit implements Comparable<SortUnit> {
 
     SortUnit sortUnit = (SortUnit) o;
 
-    return !(type != null ? !type.equals(sortUnit.type) : sortUnit.type != null);
-
+    return type != null && type.equals(sortUnit.type);
   }
 
   @Override
   public int compareTo(SortUnit o) {
-    if (o.getDependencies().contains(this) || getDependencies().contains(o)) {
-      return 0;
-    }
-    else if (o.getDepth() < getDepth()) {
-      return 1;
+    if (o.getDependencies().contains(this) && getDependencies().contains(o)) {
+
+      if (o.getDependencies().contains(this) &&  o.getDependency(this).isHard()) {
+        return 0;
+      }
+      else if (getDependencies().contains(o) && getDependency(o).isHard()) {
+        return 0;
+      }
+
+      return getDepth() - o.getDepth();
     }
     else {
       return 0;
@@ -144,6 +155,6 @@ public class SortUnit implements Comparable<SortUnit> {
 
   @Override
   public String toString() {
-    return " (depth:" + getDepth() + ")" + type.toString() + " => " + dependencies;
+    return " (depth:" + getDepth() + ";hard=" + hard + ")" + type.toString() + " => " + dependencies;
   }
 }

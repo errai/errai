@@ -327,17 +327,13 @@ public class IOCProcessorFactory {
 
     List<SortUnit> list = sortGraph(delegates.keySet());
 
-    System.out.println("PRINTING IOC GRAPH");
     for (SortUnit unit : list) {
-      System.out.println("SortUnit:"+unit);
       for (Object item : unit.getItems()) {
-        System.out.println("ProcessingDelegate:"+item);
         if (item instanceof ProcessingDelegate) {
           ((ProcessingDelegate) item).process();
         }
       }
     }
-    System.out.println("DONE PRINTING IOC GRAPH");
   }
 
 
