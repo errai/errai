@@ -151,7 +151,7 @@ public class GWTUiBinderIOCExtension implements IOCExtensionConfigurator {
             }
 
             @Override
-            public boolean isInjected() {
+            public boolean isRendered() {
               return false;
             }
 

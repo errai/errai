@@ -206,7 +206,7 @@ public class InjectionContext {
     if (proxiedInjectors.containsKey(injectorType.getErased())) {
       for (Injector inj : injectors.get(injectorType.getErased())) {
         if (inj.matches(injectorType.getParameterizedType(), qualifyingMetadata)) {
-          return inj.isInjected();
+          return inj.isRendered();
         }
       }
     }
@@ -228,7 +228,7 @@ public class InjectionContext {
     if (injectors.containsKey(injectorType.getErased())) {
       for (Injector inj : injectors.get(injectorType.getErased())) {
         if (inj.matches(injectorType.getParameterizedType(), qualifyingMetadata)) {
-          return inj.isInjected();
+          return inj.isRendered();
         }
       }
     }

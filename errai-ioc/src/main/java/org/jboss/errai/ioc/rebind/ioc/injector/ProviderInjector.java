@@ -36,17 +36,17 @@ public class ProviderInjector extends TypeInjector {
     this.testmock = context.isElementType(WiringElementType.TestMockBean, providerType);
     this.singleton = context.isElementType(WiringElementType.SingletonBean, providerType);
     this.alternative = context.isElementType(WiringElementType.AlternativeBean, type);
-    this.injected = true;
+    this.rendered = true;
   }
 
   @Override
-  public Statement getBeanInstance(InjectionContext injectContext, InjectableInstance injectableInstance) {
+  public Statement getBeanInstance(InjectableInstance injectableInstance) {
     if (isSingleton() && provided) {
       return Stmt.loadVariable(providerInjector.getVarName()).invoke("get");
     }
 
     provided = true;
 
-    return Stmt.nestedCall(providerInjector.getBeanInstance(injectContext, injectableInstance)).invoke("get");
+    return Stmt.nestedCall(providerInjector.getBeanInstance(injectableInstance)).invoke("get");
   }
 }

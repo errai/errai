@@ -41,12 +41,11 @@ public class ContextualProviderInjector extends TypeInjector {
     this.singleton = context.isElementType(WiringElementType.SingletonBean, providerType);
     this.alternative = context.isElementType(WiringElementType.AlternativeBean, providerType);
 
-
-    injected = true;
+    rendered = true;
   }
 
   @Override
-  public Statement getBeanInstance(InjectionContext injectContext, InjectableInstance injectableInstance) {
+  public Statement getBeanInstance(InjectableInstance injectableInstance) {
     MetaClass type;
     MetaParameterizedType pType = null;
 
@@ -84,11 +83,11 @@ public class ContextualProviderInjector extends TypeInjector {
     Annotation[] qualifiers = injectableInstance.getQualifiers();
 
 
-    if (providerInjector.isSingleton() && providerInjector.isInjected()) {
+    if (providerInjector.isSingleton() && providerInjector.isRendered()) {
       return Stmt.loadVariable(providerInjector.getVarName()).invoke("provide", typeArgsClasses, qualifiers.length != 0 ? qualifiers : null);
     }
     else {
-      return Stmt.nestedCall(providerInjector.getBeanInstance(injectContext, injectableInstance))
+      return Stmt.nestedCall(providerInjector.getBeanInstance(injectableInstance))
               .invoke("provide", typeArgsClasses, qualifiers.length != 0 ? qualifiers : null);
     }
   }

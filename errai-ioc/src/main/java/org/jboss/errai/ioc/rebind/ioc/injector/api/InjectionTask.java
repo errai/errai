@@ -206,7 +206,7 @@ public class InjectionTask {
                 inj.getInjectedType(), inj.getQualifyingMetadata().getQualifiers());
       }
 
-      return ctx.getQualifiedInjector(clazz, qualifyingMetadata).getBeanInstance(ctx, injectableInstance);
+      return ctx.getQualifiedInjector(clazz, qualifyingMetadata).getBeanInstance(injectableInstance);
     }
     else {
       //todo: refactor the InjectionContext to provide a cleaner API for interface delegates
@@ -214,10 +214,10 @@ public class InjectionTask {
         // handle the case that this is an auto resolved interface
         Injector inj = ctx.getQualifiedInjector(clazz, qualifyingMetadata);
         if (inj instanceof QualifiedTypeInjectorDelegate) {
-          return inj.getBeanInstance(ctx, injectableInstance);
+          return inj.getBeanInstance(injectableInstance);
         }
         else if (inj != null) {
-          Statement retStatement = inj.getBeanInstance(ctx, injectableInstance);
+          Statement retStatement = inj.getBeanInstance(injectableInstance);
 
           if (inj.isProvider() && inj.getEnclosingType() != null &&
                   ctx.isProxiedInjectorRegistered(inj.getEnclosingType(),
@@ -241,7 +241,7 @@ public class InjectionTask {
 
       ProxyInjector proxyInjector = new ProxyInjector(ctx.getProcessingContext(), clazz, qualifyingMetadata);
       ctx.addProxiedInjector(proxyInjector);
-      return proxyInjector.getBeanInstance(ctx, injectableInstance);
+      return proxyInjector.getBeanInstance(injectableInstance);
     }
   }
 

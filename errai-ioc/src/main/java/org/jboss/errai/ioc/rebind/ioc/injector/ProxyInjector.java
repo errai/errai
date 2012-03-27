@@ -30,7 +30,6 @@ import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.client.container.ProxyResolver;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
-import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 
 import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
@@ -44,7 +43,7 @@ import static org.jboss.errai.codegen.util.Stmt.newObject;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ProxyInjector extends AbstractInjector {
-  private boolean proxied;
+  private boolean proxyClosed;
   private final String varName;
 
   private Statement proxyStatement;
@@ -67,9 +66,9 @@ public class ProxyInjector extends AbstractInjector {
   }
 
   @Override
-  public Statement getBeanInstance(InjectionContext injectContext, InjectableInstance injectableInstance) {
-    if (!isInjected()) {
-      IOCProcessingContext pCtx = injectContext.getProcessingContext();
+  public Statement getBeanInstance(InjectableInstance injectableInstance) {
+    if (!isRendered()) {
+      IOCProcessingContext pCtx = injectableInstance.getInjectionContext().getProcessingContext();
 
       pCtx.append(declareVariable(proxyClass).asFinal().named(varName).initializeWith(newObject(proxyClass)));
 
@@ -86,10 +85,10 @@ public class ProxyInjector extends AbstractInjector {
       pCtx.append(loadVariable("context").invoke("addUnresolvedProxy", proxyResolver,
               proxiedType, qualifyingMetadata.getQualifiers()));
 
-      injected = true;
+      rendered = true;
 
     }
-    return !proxied ? loadVariable(varName) : proxyStatement;
+    return !proxyClosed ? loadVariable(varName) : proxyStatement;
   }
 
   @Override
@@ -102,12 +101,8 @@ public class ProxyInjector extends AbstractInjector {
     return proxiedType;
   }
 
-  public boolean isProxied() {
-    return proxied;
-  }
-
-  public void setProxied(boolean proxied) {
-    this.proxied = proxied;
+  public void setProxyClosed(boolean proxyClosed) {
+    this.proxyClosed = proxyClosed;
   }
 
   public void setProxyStatement(Statement proxyStatement) {

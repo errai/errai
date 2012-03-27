@@ -20,7 +20,6 @@ import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.util.Refs;
-import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.RegistrationHook;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
@@ -31,8 +30,6 @@ import java.util.List;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
 public abstract class AbstractInjector implements Injector {
-  protected boolean useBeanManager = !Boolean.getBoolean("errai.ioc.no_bean_manager");
-
   protected QualifyingMetadata qualifyingMetadata;
   protected MetaParameterizedType qualifyingTypeInformation;
   protected String postInitCallbackVar = null;
@@ -41,7 +38,7 @@ public abstract class AbstractInjector implements Injector {
 
   protected boolean testmock;
   protected boolean alternative;
-  protected boolean injected;
+  protected boolean rendered;
   protected boolean singleton;
   protected boolean replaceable;
   protected boolean provider;
@@ -49,11 +46,6 @@ public abstract class AbstractInjector implements Injector {
   protected MetaClass enclosingType;
 
   private List<RegistrationHook> registrationHooks = new ArrayList<RegistrationHook>();
-
-  @Override
-  public Statement getBeanInstance(InjectableInstance injectableInstance) {
-    return getBeanInstance(injectableInstance.getInjectionContext(), injectableInstance);
-  }
 
   public boolean isTestmock() {
     return testmock;
@@ -65,8 +57,8 @@ public abstract class AbstractInjector implements Injector {
   }
 
   @Override
-  public boolean isInjected() {
-    return injected;
+  public boolean isRendered() {
+    return rendered;
   }
 
   @Override
@@ -94,8 +86,8 @@ public abstract class AbstractInjector implements Injector {
     return enclosingType;
   }
 
-  public void setInjected(boolean injected) {
-    this.injected = injected;
+  public void setRendered(boolean rendered) {
+    this.rendered = rendered;
   }
 
   public void setReplaceable(boolean replaceable) {
@@ -130,19 +122,19 @@ public abstract class AbstractInjector implements Injector {
     this.creationalCallbackVarName = creationalCallbackVarName;
   }
 
-  @Override
-  public boolean metadataMatches(Injector injector) {
-    boolean meta = (injector == null && qualifyingMetadata == null) ||
-            (injector != null && injector.getQualifyingMetadata() != null
-                    && qualifyingMetadata != null
-                    && injector.getQualifyingMetadata().doesSatisfy(qualifyingMetadata));
-
-    return meta && (qualifyingTypeInformation == null && (injector != null && injector.getQualifyingTypeInformation() ==
-            null)
-            || !(qualifyingTypeInformation == null || (injector != null && injector.getQualifyingTypeInformation() ==
-            null))
-            && injector != null && qualifyingTypeInformation.isAssignableFrom(injector.getQualifyingTypeInformation()));
-  }
+//  @Override
+//  public boolean metadataMatches(Injector injector) {
+//    boolean meta = (injector == null && qualifyingMetadata == null) ||
+//            (injector != null && injector.getQualifyingMetadata() != null
+//                    && qualifyingMetadata != null
+//                    && injector.getQualifyingMetadata().doesSatisfy(qualifyingMetadata));
+//
+//    return meta && (qualifyingTypeInformation == null && (injector != null && injector.getQualifyingTypeInformation() ==
+//            null)
+//            || !(qualifyingTypeInformation == null || (injector != null && injector.getQualifyingTypeInformation() ==
+//            null))
+//            && injector != null && qualifyingTypeInformation.isAssignableFrom(injector.getQualifyingTypeInformation()));
+//  }
 
   @Override
   public boolean matches(MetaParameterizedType parameterizedType, QualifyingMetadata qualifyingMetadata) {
@@ -167,7 +159,6 @@ public abstract class AbstractInjector implements Injector {
     return qualifyingTypeInformation;
   }
 
-  @Override
   public void setQualifyingTypeInformation(MetaParameterizedType qualifyingTypeInformation) {
     this.qualifyingTypeInformation = qualifyingTypeInformation;
   }

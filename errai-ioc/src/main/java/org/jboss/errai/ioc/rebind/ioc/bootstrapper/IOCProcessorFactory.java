@@ -258,14 +258,14 @@ public class IOCProcessorFactory {
                   this.enclosingType = instance.getEnclosingType();
 
                   if (injectionContext.isInjectorRegistered(enclosingType, qualifyingMetadata)) {
-                    setInjected(true);
+                    setRendered(true);
                   }
                   else {
                     context.registerTypeDiscoveryListener(new TypeDiscoveryListener() {
                       @Override
                       public void onDiscovery(IOCProcessingContext context, InjectionPoint injectionPoint) {
                         if (injectionPoint.getEnclosingType().equals(enclosingType)) {
-                          setInjected(true);
+                          setRendered(true);
                         }
                       }
                     });
@@ -273,7 +273,7 @@ public class IOCProcessorFactory {
                 }
 
                 @Override
-                public Statement getBeanInstance(InjectionContext injectContext, InjectableInstance injectableInstance) {
+                public Statement getBeanInstance(InjectableInstance injectableInstance) {
                   return instance.getValueStatement();
                 }
 
@@ -326,7 +326,7 @@ public class IOCProcessorFactory {
           registerHandler(entry.getValue(), new JSR330AnnotationHandler() {
             @Override
             public boolean handle(final InjectableInstance type, Annotation annotation, IOCProcessingContext context) {
-              injectionContext.getInjector(type.getType()).getBeanInstance(injectionContext, null);
+              injectionContext.getInjector(type.getType()).getBeanInstance(type);
               return true;
             }
           });

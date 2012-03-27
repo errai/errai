@@ -99,7 +99,7 @@ public class InjectUtil {
         @Override
         public void generateConstructor(ConstructionStatusCallback callback) {
           Statement[] parameterStatements = resolveInjectionDependencies(constructor.getParameters(), ctx, constructor);
-          if (injector.isSingleton() && injector.isInjected()) return;
+          if (injector.isSingleton() && injector.isRendered()) return;
 
           IOCProcessingContext processingContext = ctx.getProcessingContext();
 
@@ -111,7 +111,7 @@ public class InjectUtil {
                                   .newObject(type)
                                   .withParameters(parameterStatements))
           );
-          callback.callback(true);
+          callback.beanConstructed();
 
           handleInjectionTasks(ctx, injectionTasks);
 
@@ -130,7 +130,7 @@ public class InjectUtil {
       return new ConstructionStrategy() {
         @Override
         public void generateConstructor(ConstructionStatusCallback callback) {
-          if (injector.isSingleton() && injector.isInjected()) return;
+          if (injector.isSingleton() && injector.isRendered()) return;
 
           IOCProcessingContext processingContext = ctx.getProcessingContext();
 
@@ -141,7 +141,7 @@ public class InjectUtil {
                           .initializeWith(Stmt.newObject(type))
 
           );
-          callback.callback(true);
+          callback.beanConstructed();
 
           handleInjectionTasks(ctx, injectionTasks);
 
@@ -444,7 +444,7 @@ public class InjectUtil {
       @SuppressWarnings({"unchecked"}) InjectableInstance injectableInstance
               = new InjectableInstance(null, TaskType.Method, null, method, null, null, parms[i], injector, ctx);
 
-      parmValues[i] = injector.getBeanInstance(ctx, injectableInstance);
+      parmValues[i] = injector.getBeanInstance(injectableInstance);
     }
 
     return parmValues;
@@ -481,7 +481,7 @@ public class InjectUtil {
       @SuppressWarnings({"unchecked"}) InjectableInstance injectableInstance
               = new InjectableInstance(null, TaskType.Parameter, constructor, null, null, null, parms[i], injector, ctx);
 
-      parmValues[i] = injector.getBeanInstance(ctx, injectableInstance);
+      parmValues[i] = injector.getBeanInstance(injectableInstance);
     }
 
     return parmValues;
