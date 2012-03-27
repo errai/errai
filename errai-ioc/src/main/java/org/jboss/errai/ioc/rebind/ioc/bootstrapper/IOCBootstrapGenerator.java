@@ -374,88 +374,6 @@ public class IOCBootstrapGenerator {
       }
     }
 
-    /**
-     * IOCProvider.class
-     */
-    Set<Class<?>> providers = scanner.getTypesAnnotatedWith(IOCProvider.class);
-    for (Class<?> clazz : providers) {
-      MetaClass bindType = null;
-      MetaClass type = MetaClassFactory.get(clazz);
-
-      boolean contextual = false;
-      for (MetaClass iface : type.getInterfaces()) {
-        if (iface.getFullyQualifiedName().equals(Provider.class.getName())) {
-          injectionContext.addType(type);
-
-          MetaParameterizedType pType = iface.getParameterizedType();
-          MetaType typeParm = pType.getTypeParameters()[0];
-          if (typeParm instanceof MetaParameterizedType) {
-            bindType = (MetaClass) ((MetaParameterizedType) typeParm).getRawType();
-          }
-          else {
-            bindType = (MetaClass) pType.getTypeParameters()[0];
-          }
-
-          boolean isContextual = false;
-          for (MetaField field : type.getDeclaredFields()) {
-            if (injectionContext.isElementType(WiringElementType.InjectionPoint, field)
-                    && field.getType().isAssignableTo(ContextualProviderContext.class)) {
-
-              isContextual = true;
-              break;
-            }
-          }
-
-          if (isContextual) {
-            injectionContext.registerInjector(new ContextualProviderInjector(bindType, type, injectionContext));
-          }
-          else {
-            injectionContext.registerInjector(new ProviderInjector(bindType, type, injectionContext));
-          }
-          break;
-        }
-
-        if (iface.getFullyQualifiedName().equals(ContextualTypeProvider.class.getName())) {
-          contextual = true;
-
-          MetaParameterizedType pType = iface.getParameterizedType();
-
-          if (pType == null) {
-            throw new InjectionFailure("could not determine the bind type for the IOCProvider class: "
-                    + type.getFullyQualifiedName());
-          }
-
-          // todo: check for nested type parameters
-          MetaType typeParm = pType.getTypeParameters()[0];
-          if (typeParm instanceof MetaParameterizedType) {
-            bindType = (MetaClass) ((MetaParameterizedType) typeParm).getRawType();
-          }
-          else {
-            bindType = (MetaClass) pType.getTypeParameters()[0];
-          }
-          break;
-        }
-      }
-
-      if (bindType == null) {
-        throw new InjectionFailure("the annotated provider class does not appear to implement " +
-                TypeProvider.class.getName() + ": " + type.getFullyQualifiedName());
-      }
-
-      final MetaClass finalBindType = bindType;
-
-      AbstractInjector injector;
-      if (contextual) {
-        injector = new ContextualProviderInjector(finalBindType, type, injectionContext);
-      }
-      else {
-        injector = new ProviderInjector(finalBindType, type, injectionContext);
-      }
-
-      injectionContext.registerInjector(injector);
-    }
-
-
     for (IOCExtensionConfigurator extensionConfigurator : extensionConfigurators) {
       extensionConfigurator.afterInitialization(procContext, injectionContext, procFactory);
     }
@@ -464,9 +382,10 @@ public class IOCBootstrapGenerator {
   private void defaultConfigureProcessor() {
     injectionContext.mapElementType(WiringElementType.SingletonBean, Singleton.class);
     injectionContext.mapElementType(WiringElementType.SingletonBean, EntryPoint.class);
-    injectionContext.mapElementType(WiringElementType.SingletonBean, Service.class);
 
     injectionContext.mapElementType(WiringElementType.DependentBean, Dependent.class);
+
+    injectionContext.mapElementType(WiringElementType.TopLevelProvider, IOCProvider.class);
 
     injectionContext.mapElementType(WiringElementType.InjectionPoint, Inject.class);
     injectionContext.mapElementType(WiringElementType.InjectionPoint, com.google.inject.Inject.class);

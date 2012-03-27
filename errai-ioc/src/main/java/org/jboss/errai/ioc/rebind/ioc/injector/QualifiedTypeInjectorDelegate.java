@@ -64,6 +64,10 @@ public class QualifiedTypeInjectorDelegate implements Injector {
     return delegate.isInjected();
   }
 
+  @Override
+  public boolean isTestmock() {
+    return delegate.isTestmock();
+  }
 
   @Override
   public boolean isSingleton() {

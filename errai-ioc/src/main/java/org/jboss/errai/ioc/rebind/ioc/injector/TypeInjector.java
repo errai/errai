@@ -57,6 +57,8 @@ public class TypeInjector extends AbstractInjector {
     this.type = type;
 
     // check to see if this is a singleton and/or alternative bean
+
+    this.testmock = context.isElementType(WiringElementType.TestMockBean, type);
     this.singleton = context.isElementType(WiringElementType.SingletonBean, type);
     this.alternative = context.isElementType(WiringElementType.AlternativeBean, type);
 
@@ -85,31 +87,11 @@ public class TypeInjector extends AbstractInjector {
 
   private Statement _getType(InjectionContext injectContext, InjectableInstance injectableInstance) {
     if (isInjected()) {
-      if (isSingleton()) {
-        if (!hasNewQualifier(injectableInstance)) {
-          return Refs.get(varName);
-        }
-        else if (creationalCallbackVarName != null) {
-          return loadVariable(creationalCallbackVarName).invoke("getInstance", Refs.get("context"));
-        }
+      if (isSingleton() && !hasNewQualifier(injectableInstance)) {
+        return Refs.get(varName);
       }
       else if (creationalCallbackVarName != null) {
-        /**
-         * Ensure each permutation of qualifier meta data results in a unique wiring scenario
-         */
-        final Set<Annotation> fromCompare = new HashSet<Annotation>(Arrays.asList(qualifyingMetadata.getQualifiers()));
-        final Set<Annotation> toCompare;
-        if (injectableInstance == null || injectableInstance.getQualifiers().length == 0) {
-          toCompare = new HashSet<Annotation>(Arrays.asList(injectContext.getProcessingContext()
-                  .getQualifyingMetadataFactory().createDefaultMetadata().getQualifiers()));
-        }
-        else {
-          toCompare = new HashSet<Annotation>(Arrays.asList(injectableInstance.getQualifiers()));
-        }
-
-        if (fromCompare.equals(toCompare)) {
-          return loadVariable(creationalCallbackVarName).invoke("getInstance", Refs.get("context"));
-        }
+        return loadVariable(creationalCallbackVarName).invoke("getInstance", Refs.get("context"));
       }
     }
 

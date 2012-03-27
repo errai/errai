@@ -39,6 +39,7 @@ public abstract class AbstractInjector implements Injector {
   protected String preDestroyCallbackVar = null;
   protected String creationalCallbackVarName = null;
 
+  protected boolean testmock;
   protected boolean alternative;
   protected boolean injected;
   protected boolean singleton;
@@ -52,6 +53,10 @@ public abstract class AbstractInjector implements Injector {
   @Override
   public Statement getBeanInstance(InjectableInstance injectableInstance) {
     return getBeanInstance(injectableInstance.getInjectionContext(), injectableInstance);
+  }
+
+  public boolean isTestmock() {
+    return testmock;
   }
 
   @Override

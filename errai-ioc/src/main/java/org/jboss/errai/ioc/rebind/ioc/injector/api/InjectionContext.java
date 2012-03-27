@@ -66,7 +66,6 @@ public class InjectionContext {
   private Multimap<MetaClass, MetaClass> cyclingTypes = HashMultimap.create();
 
   private Set<String> enabledAlternatives = new HashSet<String>();
-  private Set<String> enabledReplacements = new HashSet<String>();
 
   private Multimap<Class<? extends Annotation>, IOCDecoratorExtension> decorators
           = HashMultimap.create();
@@ -141,11 +140,17 @@ public class InjectionContext {
         }
       }
 
-      if (IOCGenerator.isTestMode && !enabledReplacements.isEmpty()) {
+      if (IOCGenerator.isTestMode) {
+        List<Injector> matchingMocks = new ArrayList<Injector>();
         for (Injector inj : matching) {
-          if (enabledReplacements.contains(inj.getInjectedType().getFullyQualifiedName())) {
-            return inj;
+          if (inj.isTestmock()) {
+            matchingMocks.add(inj);
           }
+        }
+
+        if (!matchingMocks.isEmpty()) {
+          matching.clear();
+          matching.addAll(matchingMocks);
         }
       }
 
@@ -171,6 +176,7 @@ public class InjectionContext {
       return matching.get(0);
     }
   }
+
 
   public void recordCycle(MetaClass from, MetaClass to) {
     cyclingTypes.put(from, to);
@@ -274,6 +280,7 @@ public class InjectionContext {
     _registerInjector(injector.getInjectedType(), injector, true);
   }
 
+
   private void _registerInjector(MetaClass type, Injector injector, boolean allowOverride) {
     List<Injector> injectorList = injectors.get(type.getErased());
     if (injectorList == null) {
@@ -288,24 +295,14 @@ public class InjectionContext {
     }
     else if (allowOverride) {
       Iterator<Injector> iter = injectorList.iterator();
-      boolean noAdd = false;
 
       while (iter.hasNext()) {
         Injector inj = iter.next();
-        if (type.isAssignableFrom(inj.getInjectedType()) && inj.metadataMatches(injector)) {
-          noAdd = true;
-        }
 
         if (inj.isPseudo()) {
           iter.remove();
-          noAdd = false;
         }
       }
-
-      if (noAdd) {
-        return;
-      }
-
     }
 
     injectorList.add(injector);
@@ -380,6 +377,7 @@ public class InjectionContext {
   }
 
   public void addType(MetaClass type) {
+    if (injectors.containsKey(type)) return;
     registerInjector(new TypeInjector(type, this));
   }
 
@@ -398,11 +396,6 @@ public class InjectionContext {
     enabledAlternatives.add(name);
   }
 
-  public void addReplacementType(String name) {
-    if (!enabledReplacements.add(name)) {
-      throw new RuntimeException("ambiguous replacement type: " + name);
-    }
-  }
 
   public void mapElementType(WiringElementType type, Class<? extends Annotation> annotationType) {
     elementBindings.put(type, annotationType);
@@ -431,7 +424,7 @@ public class InjectionContext {
   }
 
 
-  public Collection<Map.Entry<WiringElementType, Class<? extends  Annotation>>> getAllElementMappings() {
+  public Collection<Map.Entry<WiringElementType, Class<? extends Annotation>>> getAllElementMappings() {
     return unmodifiableCollection(elementBindings.entries());
   }
 

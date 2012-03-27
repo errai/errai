@@ -232,6 +232,9 @@ public class IOCTestRunner extends ParentRunner<Runner> {
                   packages.add(packageName);
                 }
               }
+
+              packages.add("org.jboss.errai.ioc.client.api.builtin");
+
               MockIOCGenerator mockIOCGenerator = new MockIOCGenerator(packages);
 
               Class<? extends Bootstrapper> cls = mockIOCGenerator.generate();

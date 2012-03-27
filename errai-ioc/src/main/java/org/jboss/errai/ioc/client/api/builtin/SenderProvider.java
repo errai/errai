@@ -24,11 +24,13 @@ import org.jboss.errai.ioc.client.api.ReplyTo;
 import org.jboss.errai.ioc.client.api.Sender;
 import org.jboss.errai.ioc.client.api.ToSubject;
 
+import javax.inject.Singleton;
 import java.lang.annotation.Annotation;
 
 /**
  * @author Mike Brock .
  */
+@Singleton
 @IOCProvider
 public class SenderProvider implements ContextualTypeProvider<Sender<?>> {
   @Override

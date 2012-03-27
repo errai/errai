@@ -16,6 +16,8 @@ public interface Injector {
 
   Statement getBeanInstance(InjectionContext injectContext, InjectableInstance injectableInstance);
 
+  boolean isTestmock();
+
   boolean isAlternative();
 
   boolean isInjected();

@@ -21,11 +21,13 @@ import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 import org.jboss.errai.ioc.client.api.InitBallot;
 
+import javax.inject.Singleton;
 import java.lang.annotation.Annotation;
 
 /**
  * @author Mike Brock .
  */
+@Singleton
 @IOCProvider
 public class InitBallotProvider implements ContextualTypeProvider<InitBallot<?>> {
   @Override
