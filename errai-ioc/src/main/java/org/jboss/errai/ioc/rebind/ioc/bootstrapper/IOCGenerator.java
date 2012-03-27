@@ -17,8 +17,6 @@
 package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
 import java.io.PrintWriter;
-
-import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.rebind.EnvUtil;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCBootstrapGenerator;

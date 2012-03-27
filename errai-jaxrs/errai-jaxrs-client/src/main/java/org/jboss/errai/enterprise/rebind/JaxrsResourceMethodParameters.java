@@ -31,10 +31,10 @@ import javax.ws.rs.MatrixParam;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
-import org.jboss.errai.codegen.framework.DefParameters;
-import org.jboss.errai.codegen.framework.Parameter;
-import org.jboss.errai.codegen.framework.meta.MetaMethod;
-import org.jboss.errai.codegen.framework.meta.MetaParameter;
+import org.jboss.errai.codegen.DefParameters;
+import org.jboss.errai.codegen.Parameter;
+import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaParameter;
 
 /**
  * Represents parameters of a JAX-RS resource method.

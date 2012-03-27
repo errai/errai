@@ -16,6 +16,9 @@
 
 package org.jboss.errai.ioc.rebind.ioc.builtin;
 
+import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
+
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.List;
@@ -24,23 +27,20 @@ import org.jboss.errai.bus.client.api.Local;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.Subscription;
 import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.codegen.framework.Parameter;
-import org.jboss.errai.codegen.framework.Statement;
-import org.jboss.errai.codegen.framework.builder.AnonymousClassStructureBuilder;
-import org.jboss.errai.codegen.framework.builder.BlockBuilder;
-import org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder;
-import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.util.Refs;
-import org.jboss.errai.codegen.framework.util.Stmt;
+import org.jboss.errai.codegen.Parameter;
+import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
+import org.jboss.errai.codegen.builder.BlockBuilder;
+import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.util.Refs;
+import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.client.container.DestructionCallback;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
-
-import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.parameterizedAs;
-import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.typeParametersOf;
 
 @SuppressWarnings("UnusedDeclaration")
 @CodeDecorator

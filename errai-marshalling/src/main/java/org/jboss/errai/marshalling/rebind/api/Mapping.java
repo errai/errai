@@ -16,7 +16,7 @@
 
 package org.jboss.errai.marshalling.rebind.api;
 
-import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.Statement;
 
 /**
  * Classes which implement this interface should return valid statements that know how to bind/read a value

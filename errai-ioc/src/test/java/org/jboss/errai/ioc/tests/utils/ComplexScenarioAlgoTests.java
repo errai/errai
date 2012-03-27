@@ -31,7 +31,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import static java.util.Arrays.asList;
-import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.get;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.get;
 
 /**
  * @author Mike Brock

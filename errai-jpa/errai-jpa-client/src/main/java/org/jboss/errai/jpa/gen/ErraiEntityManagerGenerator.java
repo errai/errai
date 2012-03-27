@@ -14,15 +14,15 @@ import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.Metamodel;
 import javax.persistence.metamodel.SingularAttribute;
 
-import org.jboss.errai.codegen.framework.Parameter;
-import org.jboss.errai.codegen.framework.SnapshotMaker;
-import org.jboss.errai.codegen.framework.Statement;
-import org.jboss.errai.codegen.framework.Variable;
-import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
-import org.jboss.errai.codegen.framework.builder.MethodBlockBuilder;
-import org.jboss.errai.codegen.framework.meta.impl.gwt.GWTUtil;
-import org.jboss.errai.codegen.framework.util.Implementations;
-import org.jboss.errai.codegen.framework.util.Stmt;
+import org.jboss.errai.codegen.Parameter;
+import org.jboss.errai.codegen.SnapshotMaker;
+import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.Variable;
+import org.jboss.errai.codegen.builder.ClassStructureBuilder;
+import org.jboss.errai.codegen.builder.MethodBlockBuilder;
+import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
+import org.jboss.errai.codegen.util.Implementations;
+import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 
 import com.google.gwt.core.ext.Generator;

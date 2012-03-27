@@ -16,8 +16,8 @@
 
 package org.jboss.errai.ioc.rebind.ioc.exception;
 
-import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaMethod;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -25,11 +25,7 @@ import org.jboss.errai.codegen.framework.meta.MetaMethod;
 public class UnsatisfiedMethod extends UnsatisfiedDependency {
 
   private MetaMethod method;
-  
-  public UnsatisfiedMethod(MetaMethod method, MetaClass enclosingType, MetaClass injectedType) {
-    super(enclosingType, injectedType);
-    this.method = method;
-  }
+
 
   public UnsatisfiedMethod(MetaMethod method, MetaClass enclosingType, MetaClass injectedType, String message) {
     super(enclosingType, injectedType, message);

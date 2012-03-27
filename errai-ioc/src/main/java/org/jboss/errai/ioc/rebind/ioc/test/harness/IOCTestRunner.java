@@ -19,7 +19,8 @@ package org.jboss.errai.ioc.rebind.ioc.test.harness;
 import com.google.gwt.junit.JUnitShell;
 import junit.framework.TestCase;
 import junit.framework.TestResult;
-import org.jboss.errai.codegen.framework.exception.GenerationException;
+
+import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.common.client.api.tasks.AsyncTask;
 import org.jboss.errai.common.client.api.tasks.TaskManager;
 import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
@@ -232,6 +233,9 @@ public class IOCTestRunner extends ParentRunner<Runner> {
                   packages.add(packageName);
                 }
               }
+
+              packages.add("org.jboss.errai.ioc.client.api.builtin");
+
               MockIOCGenerator mockIOCGenerator = new MockIOCGenerator(packages);
 
               Class<? extends Bootstrapper> cls = mockIOCGenerator.generate();

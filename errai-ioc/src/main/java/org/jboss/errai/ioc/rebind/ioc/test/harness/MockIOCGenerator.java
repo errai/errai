@@ -17,21 +17,18 @@
 package org.jboss.errai.ioc.rebind.ioc.test.harness;
 
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-
-import javax.tools.JavaCompiler;
-import javax.tools.ToolProvider;
-
 import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCBootstrapGenerator;
 import org.jboss.errai.marshalling.server.util.ServerMarshallUtil;
+
+import javax.tools.JavaCompiler;
+import javax.tools.ToolProvider;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.util.List;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

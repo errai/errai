@@ -17,19 +17,14 @@
 package org.jboss.errai.ioc.client.container;
 
 
-import com.google.gwt.dev.util.collect.IdentityHashSet;
-
-import javax.enterprise.inject.spi.Bean;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Mike Brock

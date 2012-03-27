@@ -18,20 +18,17 @@ package org.jboss.errai.ioc.rebind.ioc.injector.api;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import org.jboss.errai.codegen.framework.meta.HasAnnotations;
-import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
-import org.jboss.errai.codegen.framework.meta.MetaField;
-import org.jboss.errai.codegen.framework.meta.MetaMethod;
-import org.jboss.errai.codegen.framework.util.GenUtil;
-import org.jboss.errai.codegen.framework.util.PrivateAccessType;
+
+import org.jboss.errai.codegen.meta.HasAnnotations;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaField;
+import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.util.GenUtil;
+import org.jboss.errai.codegen.util.PrivateAccessType;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
-import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependencies;
-import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependenciesException;
-import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedField;
-import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedMethod;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.injector.ProxyInjector;
@@ -70,15 +67,11 @@ public class InjectionContext {
   private Multimap<MetaClass, MetaClass> cyclingTypes = HashMultimap.create();
 
   private Set<String> enabledAlternatives = new HashSet<String>();
-  private Set<String> enabledReplacements = new HashSet<String>();
 
   private Multimap<Class<? extends Annotation>, IOCDecoratorExtension> decorators
           = HashMultimap.create();
   private Multimap<ElementType, Class<? extends Annotation>> decoratorsByElementType
           = HashMultimap.create();
-
-  private List<InjectionTask> deferredInjectionTasks = new ArrayList<InjectionTask>();
-  protected List<Runnable> deferredTasks = new ArrayList<Runnable>();
 
   private Map<MetaField, PrivateAccessType> privateFieldsToExpose = new HashMap<MetaField, PrivateAccessType>();
   private Collection<MetaMethod> privateMethodsToExpose = new LinkedHashSet<MetaMethod>();
@@ -148,11 +141,17 @@ public class InjectionContext {
         }
       }
 
-      if (IOCGenerator.isTestMode && !enabledReplacements.isEmpty()) {
+      if (IOCGenerator.isTestMode) {
+        List<Injector> matchingMocks = new ArrayList<Injector>();
         for (Injector inj : matching) {
-          if (enabledReplacements.contains(inj.getInjectedType().getFullyQualifiedName())) {
-            return inj;
+          if (inj.isTestmock()) {
+            matchingMocks.add(inj);
           }
+        }
+
+        if (!matchingMocks.isEmpty()) {
+          matching.clear();
+          matching.addAll(matchingMocks);
         }
       }
 
@@ -178,6 +177,7 @@ public class InjectionContext {
       return matching.get(0);
     }
   }
+
 
   public void recordCycle(MetaClass from, MetaClass to) {
     cyclingTypes.put(from, to);
@@ -281,6 +281,7 @@ public class InjectionContext {
     _registerInjector(injector.getInjectedType(), injector, true);
   }
 
+
   private void _registerInjector(MetaClass type, Injector injector, boolean allowOverride) {
     List<Injector> injectorList = injectors.get(type.getErased());
     if (injectorList == null) {
@@ -295,24 +296,14 @@ public class InjectionContext {
     }
     else if (allowOverride) {
       Iterator<Injector> iter = injectorList.iterator();
-      boolean noAdd = false;
 
       while (iter.hasNext()) {
         Injector inj = iter.next();
-        if (type.isAssignableFrom(inj.getInjectedType()) && inj.metadataMatches(injector)) {
-          noAdd = true;
-        }
 
         if (inj.isPseudo()) {
           iter.remove();
-          noAdd = false;
         }
       }
-
-      if (noAdd) {
-        return;
-      }
-
     }
 
     injectorList.add(injector);
@@ -356,65 +347,6 @@ public class InjectionContext {
     }
   }
 
-  public void deferTask(InjectionTask injectionTask) {
-    deferredInjectionTasks.add(injectionTask);
-  }
-
-  public void runAllDeferred() {
-
-    int start;
-    List<InjectionTask> toExecute = new ArrayList<InjectionTask>(deferredInjectionTasks);
-
-    do {
-      start = toExecute.size();
-
-      Iterator<InjectionTask> iter = toExecute.iterator();
-
-      while (iter.hasNext()) {
-        if (iter.next().doTask(this)) {
-          iter.remove();
-        }
-      }
-    }
-    while (!toExecute.isEmpty() && toExecute.size() < start);
-
-    if (!toExecute.isEmpty()) {
-      UnsatisfiedDependencies unsatisfiedDependencies = new UnsatisfiedDependencies();
-      for (InjectionTask task : toExecute) {
-        switch (task.getTaskType()) {
-          case PrivateField:
-          case Field:
-            unsatisfiedDependencies.addUnsatisfiedDependency(
-                    new UnsatisfiedField(task.getField(), task.getInjector().getInjectedType(), task.getField().getType()));
-            break;
-
-          case PrivateMethod:
-          case Method:
-            unsatisfiedDependencies.addUnsatisfiedDependency(
-                    new UnsatisfiedMethod(task.getMethod(), task.getInjector().getInjectedType(), task.getMethod().getParameters()[0].getType()));
-        }
-      }
-
-      throw new UnsatisfiedDependenciesException(unsatisfiedDependencies);
-    }
-
-    runAllDeferredTasks();    //  deferred.clear();
-  }
-
-  public void deferRunnableTask(Runnable runnable) {
-    deferredTasks.add(runnable);
-  }
-
-  private void runAllDeferredTasks() {
-    for (Runnable runnable : deferredTasks) {
-      runnable.run();
-    }
-  }
-
-  public void addExposedField(MetaField field) {
-    addExposedField(field, PrivateAccessType.Both);
-  }
-
   public void addExposedField(MetaField field, PrivateAccessType accessType) {
     if (!privateFieldsToExpose.containsKey(field)) {
       privateFieldsToExpose.put(field, accessType);
@@ -445,11 +377,8 @@ public class InjectionContext {
     return unmodifiableCollection(privateMethodsToExpose);
   }
 
-  public boolean hasType(MetaClass cls) {
-    return injectors.containsKey(cls);
-  }
-
   public void addType(MetaClass type) {
+    if (injectors.containsKey(type)) return;
     registerInjector(new TypeInjector(type, this));
   }
 
@@ -468,11 +397,6 @@ public class InjectionContext {
     enabledAlternatives.add(name);
   }
 
-  public void addReplacementType(String name) {
-    if (!enabledReplacements.add(name)) {
-      throw new RuntimeException("ambiguous replacement type: " + name);
-    }
-  }
 
   public void mapElementType(WiringElementType type, Class<? extends Annotation> annotationType) {
     elementBindings.put(type, annotationType);
@@ -501,7 +425,7 @@ public class InjectionContext {
   }
 
 
-  public Collection<Map.Entry<WiringElementType, Class<? extends  Annotation>>> getAllElementMappings() {
+  public Collection<Map.Entry<WiringElementType, Class<? extends Annotation>>> getAllElementMappings() {
     return unmodifiableCollection(elementBindings.entries());
   }
 

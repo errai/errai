@@ -17,14 +17,17 @@
 package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
 import com.google.gwt.core.ext.TreeLogger.Type;
-import org.jboss.errai.codegen.framework.Statement;
-import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
-import org.jboss.errai.codegen.framework.meta.MetaField;
-import org.jboss.errai.codegen.framework.meta.MetaMethod;
-import org.jboss.errai.codegen.framework.util.PrivateAccessType;
+
+import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaField;
+import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaParameterizedType;
+import org.jboss.errai.codegen.meta.MetaType;
+import org.jboss.errai.codegen.util.PrivateAccessType;
 import org.jboss.errai.common.metadata.MetaDataScanner;
-import org.jboss.errai.ioc.client.api.EntryPoint;
+import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.TestMock;
 import org.jboss.errai.ioc.client.api.TestOnly;
 import org.jboss.errai.ioc.rebind.ioc.extension.AnnotationHandler;
@@ -35,7 +38,9 @@ import org.jboss.errai.ioc.rebind.ioc.extension.Rule;
 import org.jboss.errai.ioc.rebind.ioc.extension.RuleDef;
 import org.jboss.errai.ioc.rebind.ioc.graph.SortUnit;
 import org.jboss.errai.ioc.rebind.ioc.injector.AbstractInjector;
+import org.jboss.errai.ioc.rebind.ioc.injector.ContextualProviderInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
+import org.jboss.errai.ioc.rebind.ioc.injector.ProviderInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionPoint;
@@ -43,8 +48,7 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.TypeDiscoveryListener;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 import org.jboss.errai.ioc.rebind.ioc.metadata.JSR330QualifyingMetadata;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Singleton;
+import javax.inject.Provider;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
@@ -138,7 +142,99 @@ public class IOCProcessorFactory {
   }
 
   private void inferHandlers() {
-    // handle producers first.
+    for (final Map.Entry<WiringElementType, Class<? extends Annotation>> entry : injectionContext.getAllElementMappings()) {
+      switch (entry.getKey()) {
+        case TopLevelProvider:
+          registerHandler(entry.getValue(), new JSR330AnnotationHandler() {
+            @Override
+            public Set<SortUnit> getDependencies(DependencyControl control, InjectableInstance instance,
+                                                 Annotation annotation, IOCProcessingContext context) {
+
+              final MetaClass providerClassType = instance.getType();
+              final MetaClass MC_Provider = MetaClassFactory.get(Provider.class);
+              final MetaClass MC_ContextualTypeProvider = MetaClassFactory.get(ContextualTypeProvider.class);
+
+              MetaClass providerInterface = null;
+              MetaClass providedType;
+
+              if (MC_Provider.isAssignableFrom(providerClassType)) {
+
+                for (MetaClass iface : providerClassType.getInterfaces()) {
+                  if (MC_Provider.equals(iface.getErased())) {
+                    providerInterface = iface;
+                  }
+                }
+
+                if (providerInterface == null) {
+                  throw new RuntimeException("top level provider " + providerClassType.getFullyQualifiedName()
+                          + " must directly implement " + Provider.class.getName());
+                }
+
+                if (providerInterface.getParameterizedType() == null) {
+                  throw new RuntimeException("top level provider " + providerClassType.getFullyQualifiedName()
+                          + " must use a parameterized " + Provider.class.getName() + " interface type.");
+                }
+
+                MetaType parmType = providerInterface.getParameterizedType().getTypeParameters()[0];
+                if (parmType instanceof MetaParameterizedType) {
+                  providedType = (MetaClass) ((MetaParameterizedType) parmType).getRawType();
+                }
+                else {
+                  providedType = (MetaClass) parmType;
+                }
+
+                injectionContext.registerInjector(new ProviderInjector(providedType, providerClassType, injectionContext));
+
+              }
+              else if (MC_ContextualTypeProvider.isAssignableFrom(providerClassType)) {
+                for (MetaClass iface : providerClassType.getInterfaces()) {
+                  if (MC_ContextualTypeProvider.equals(iface.getErased())) {
+                    providerInterface = iface;
+                  }
+                }
+
+                if (providerInterface == null) {
+                  throw new RuntimeException("top level provider " + providerClassType.getFullyQualifiedName()
+                          + " must directly implement " + ContextualTypeProvider.class.getName());
+                }
+
+                if (providerInterface.getParameterizedType() == null) {
+                  throw new RuntimeException("top level provider " + providerClassType.getFullyQualifiedName()
+                          + " must use a parameterized " + ContextualTypeProvider.class.getName() + " interface type.");
+                }
+
+                MetaType parmType = providerInterface.getParameterizedType().getTypeParameters()[0];
+                if (parmType instanceof MetaParameterizedType) {
+                  providedType = (MetaClass) ((MetaParameterizedType) parmType).getRawType();
+                }
+                else {
+                  providedType = (MetaClass) parmType;
+                }
+
+                injectionContext.registerInjector(new ContextualProviderInjector(providedType, providerClassType, injectionContext));
+              }
+              else {
+                throw new RuntimeException("top level provider " + providerClassType.getFullyQualifiedName()
+                        + " does not implement: " + Provider.class.getName() + " or " + ContextualTypeProvider.class);
+              }
+
+              control.masqueradeAs(providedType);
+              return super.getDependencies(control, instance, annotation, context);
+            }
+
+            @Override
+            public boolean handle(InjectableInstance instance, Annotation annotation, IOCProcessingContext context) {
+              return true;
+            }
+          }, Rule.before(injectionContext.getAnnotationsForElementType(WiringElementType.SingletonBean),
+                  injectionContext.getAnnotationsForElementType(WiringElementType.DependentBean)));
+
+
+          break;
+
+      }
+    }
+
     for (final Map.Entry<WiringElementType, Class<? extends Annotation>> entry : injectionContext.getAllElementMappings()) {
       switch (entry.getKey()) {
         case ProducerElement:
@@ -153,7 +249,6 @@ public class IOCProcessorFactory {
                 case PrivateField:
                 case PrivateMethod:
                   instance.ensureMemberExposed(PrivateAccessType.Read);
-
               }
 
               injectionContext.registerInjector(new AbstractInjector() {
@@ -222,14 +317,10 @@ public class IOCProcessorFactory {
               return true;
             }
 
-          }, Rule.before(injectionContext.getAnnotationsForElementType(WiringElementType.SingletonBean),
+          }, Rule.after(injectionContext.getAnnotationsForElementType(WiringElementType.SingletonBean),
                   injectionContext.getAnnotationsForElementType(WiringElementType.DependentBean)));
           break;
-      }
-    }
 
-    for (final Map.Entry<WiringElementType, Class<? extends Annotation>> entry : injectionContext.getAllElementMappings()) {
-      switch (entry.getKey()) {
         case DependentBean:
         case SingletonBean:
           registerHandler(entry.getValue(), new JSR330AnnotationHandler() {
@@ -237,15 +328,6 @@ public class IOCProcessorFactory {
             public boolean handle(final InjectableInstance type, Annotation annotation, IOCProcessingContext context) {
               injectionContext.getInjector(type.getType()).getBeanInstance(injectionContext, null);
               return true;
-            }
-          });
-          break;
-        case TestMockBean:
-          registerHandler(entry.getValue(), new JSR330AnnotationHandler() {
-            @Override
-            public boolean handle(InjectableInstance instance, Annotation annotation, IOCProcessingContext context) {
-              injectionContext.addReplacementType(instance.getEnclosingType().getFullyQualifiedName());
-              return false;
             }
           });
           break;
@@ -375,7 +457,7 @@ public class IOCProcessorFactory {
 
         return entry.handler.handle(injectableInstance, anno, context);
       }
-      
+
       @Override
       public String toString() {
         return type.getFullyQualifiedName();
@@ -422,7 +504,7 @@ public class IOCProcessorFactory {
 
         return entry.handler.handle(injectableInstance, anno, context);
       }
-      
+
       @Override
       public String toString() {
         return type.getFullyQualifiedName();
@@ -477,7 +559,7 @@ public class IOCProcessorFactory {
       public String toString() {
         return type.getFullyQualifiedName();
       }
-      
+
     };
 
     Set<SortUnit> requiredDependencies = del.getRequiredDependencies();

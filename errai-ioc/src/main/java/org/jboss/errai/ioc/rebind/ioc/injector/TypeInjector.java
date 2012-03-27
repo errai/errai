@@ -16,13 +16,12 @@
 
 package org.jboss.errai.ioc.rebind.ioc.injector;
 
-
-import static org.jboss.errai.codegen.framework.builder.impl.ObjectBuilder.newInstanceOf;
-import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.parameterizedAs;
-import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.typeParametersOf;
-import static org.jboss.errai.codegen.framework.util.Stmt.declareVariable;
-import static org.jboss.errai.codegen.framework.util.Stmt.load;
-import static org.jboss.errai.codegen.framework.util.Stmt.loadVariable;
+import static org.jboss.errai.codegen.builder.impl.ObjectBuilder.newInstanceOf;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
+import static org.jboss.errai.codegen.util.Stmt.declareVariable;
+import static org.jboss.errai.codegen.util.Stmt.load;
+import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
@@ -31,12 +30,12 @@ import java.util.Set;
 
 import javax.enterprise.inject.New;
 
-import org.jboss.errai.codegen.framework.Parameter;
-import org.jboss.errai.codegen.framework.Statement;
-import org.jboss.errai.codegen.framework.builder.AnonymousClassStructureBuilder;
-import org.jboss.errai.codegen.framework.builder.BlockBuilder;
-import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.util.Refs;
+import org.jboss.errai.codegen.Parameter;
+import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
+import org.jboss.errai.codegen.builder.BlockBuilder;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.ioc.client.container.BeanRef;
 import org.jboss.errai.ioc.client.container.CreationalCallback;
 import org.jboss.errai.ioc.client.container.CreationalContext;
@@ -58,6 +57,8 @@ public class TypeInjector extends AbstractInjector {
     this.type = type;
 
     // check to see if this is a singleton and/or alternative bean
+
+    this.testmock = context.isElementType(WiringElementType.TestMockBean, type);
     this.singleton = context.isElementType(WiringElementType.SingletonBean, type);
     this.alternative = context.isElementType(WiringElementType.AlternativeBean, type);
 
@@ -86,34 +87,13 @@ public class TypeInjector extends AbstractInjector {
 
   private Statement _getType(InjectionContext injectContext, InjectableInstance injectableInstance) {
     if (isInjected()) {
-      if (isSingleton()) {
-        if (!hasNewQualifier(injectableInstance)) {
-          return Refs.get(varName);
-        }
-        else if (creationalCallbackVarName != null) {
-          return loadVariable(creationalCallbackVarName).invoke("getInstance", Refs.get("context"));
-        }
+      if (isSingleton() && !hasNewQualifier(injectableInstance)) {
+        return Refs.get(varName);
       }
       else if (creationalCallbackVarName != null) {
-        /**
-         * Ensure each permutation of qualifier meta data results in a unique wiring scenario
-         */
-        final Set<Annotation> fromCompare = new HashSet<Annotation>(Arrays.asList(qualifyingMetadata.getQualifiers()));
-        final Set<Annotation> toCompare;
-        if (injectableInstance == null || injectableInstance.getQualifiers().length == 0) {
-          toCompare = new HashSet<Annotation>(Arrays.asList(injectContext.getProcessingContext()
-                  .getQualifyingMetadataFactory().createDefaultMetadata().getQualifiers()));
-        }
-        else {
-          toCompare = new HashSet<Annotation>(Arrays.asList(injectableInstance.getQualifiers()));
-        }
-
-        if (fromCompare.equals(toCompare)) {
-          return loadVariable(creationalCallbackVarName).invoke("getInstance", Refs.get("context"));
-        }
+        return loadVariable(creationalCallbackVarName).invoke("getInstance", Refs.get("context"));
       }
     }
-
 
     IOCProcessingContext ctx = injectContext.getProcessingContext();
 

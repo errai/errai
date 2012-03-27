@@ -16,10 +16,10 @@
 
 package org.jboss.errai.ioc.rebind.ioc.injector;
 
-import org.jboss.errai.codegen.framework.Statement;
-import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaParameterizedType;
-import org.jboss.errai.codegen.framework.util.Refs;
+import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaParameterizedType;
+import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.RegistrationHook;
@@ -28,7 +28,7 @@ import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.jboss.errai.codegen.framework.util.Stmt.loadVariable;
+import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
 public abstract class AbstractInjector implements Injector {
   protected boolean useBeanManager = !Boolean.getBoolean("errai.ioc.no_bean_manager");
@@ -39,6 +39,7 @@ public abstract class AbstractInjector implements Injector {
   protected String preDestroyCallbackVar = null;
   protected String creationalCallbackVarName = null;
 
+  protected boolean testmock;
   protected boolean alternative;
   protected boolean injected;
   protected boolean singleton;
@@ -52,6 +53,10 @@ public abstract class AbstractInjector implements Injector {
   @Override
   public Statement getBeanInstance(InjectableInstance injectableInstance) {
     return getBeanInstance(injectableInstance.getInjectionContext(), injectableInstance);
+  }
+
+  public boolean isTestmock() {
+    return testmock;
   }
 
   @Override

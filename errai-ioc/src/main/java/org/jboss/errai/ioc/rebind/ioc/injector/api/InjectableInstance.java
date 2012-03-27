@@ -16,22 +16,23 @@
 
 package org.jboss.errai.ioc.rebind.ioc.injector.api;
 
-import org.jboss.errai.codegen.framework.Statement;
-import org.jboss.errai.codegen.framework.literal.LiteralFactory;
-import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaConstructor;
-import org.jboss.errai.codegen.framework.meta.MetaField;
-import org.jboss.errai.codegen.framework.meta.MetaMethod;
-import org.jboss.errai.codegen.framework.meta.MetaParameter;
-import org.jboss.errai.codegen.framework.util.Refs;
-import org.jboss.errai.codegen.framework.util.Stmt;
-import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
-import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
+
+import static org.jboss.errai.codegen.util.GenUtil.getPrivateFieldInjectorName;
+import static org.jboss.errai.codegen.util.GenUtil.getPrivateMethodName;
 
 import java.lang.annotation.Annotation;
 
-import static org.jboss.errai.codegen.framework.util.GenUtil.getPrivateFieldInjectorName;
-import static org.jboss.errai.codegen.framework.util.GenUtil.getPrivateMethodName;
+import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.literal.LiteralFactory;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaConstructor;
+import org.jboss.errai.codegen.meta.MetaField;
+import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaParameter;
+import org.jboss.errai.codegen.util.Refs;
+import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
+import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 
 public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> {
 

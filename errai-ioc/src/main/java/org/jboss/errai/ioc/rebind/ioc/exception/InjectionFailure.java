@@ -17,7 +17,7 @@
 package org.jboss.errai.ioc.rebind.ioc.exception;
 
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
-import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClass;
 
 @SuppressWarnings("UnusedDeclaration")
 public class InjectionFailure extends ErraiBootstrapFailure {

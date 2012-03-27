@@ -16,17 +16,22 @@
 
 package org.jboss.errai.ioc.rebind.ioc.injector.api;
 
-import org.jboss.errai.codegen.framework.Context;
-import org.jboss.errai.codegen.framework.Statement;
-import org.jboss.errai.codegen.framework.exception.UnproxyableClassException;
-import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaConstructor;
-import org.jboss.errai.codegen.framework.meta.MetaField;
-import org.jboss.errai.codegen.framework.meta.MetaMethod;
-import org.jboss.errai.codegen.framework.meta.MetaParameter;
-import org.jboss.errai.codegen.framework.util.PrivateAccessType;
-import org.jboss.errai.codegen.framework.util.Refs;
-import org.jboss.errai.codegen.framework.util.Stmt;
+import static org.jboss.errai.codegen.util.GenUtil.getPrivateFieldInjectorName;
+import static org.jboss.errai.codegen.util.GenUtil.getPrivateMethodName;
+
+import java.lang.annotation.Annotation;
+
+import org.jboss.errai.codegen.Context;
+import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.exception.UnproxyableClassException;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaConstructor;
+import org.jboss.errai.codegen.meta.MetaField;
+import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaParameter;
+import org.jboss.errai.codegen.util.PrivateAccessType;
+import org.jboss.errai.codegen.util.Refs;
+import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
 import org.jboss.errai.ioc.rebind.ioc.exception.UnsatisfiedDependenciesException;
@@ -36,12 +41,6 @@ import org.jboss.errai.ioc.rebind.ioc.injector.ProxyInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.QualifiedTypeInjectorDelegate;
 import org.jboss.errai.ioc.rebind.ioc.injector.TypeInjector;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
-
-import java.lang.annotation.Annotation;
-
-import static org.jboss.errai.codegen.framework.util.GenUtil.getPrivateFieldInjectorName;
-import static org.jboss.errai.codegen.framework.util.GenUtil.getPrivateMethodName;
-import static org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil.resolveInjectionDependencies;
 
 public class InjectionTask {
   protected final TaskType taskType;
@@ -102,7 +101,7 @@ public class InjectionTask {
                   field.getType(), e.getMessage());
         }
         catch (UnproxyableClassException e) {
-          String err = "your object graph has cyclical dependencies and the cycle could not be proxied. use of the @Dependent scope and @New qualifier may not " +
+          String err = "your object graph may have cyclical dependencies and the cycle could not be proxied. use of the @Dependent scope and @New qualifier may not " +
                   "produce properly initalized objects for: " + getInjector().getInjectedType().getFullyQualifiedName() + "\n" +
                   "\t Offending node: " + toString() + "\n" +
                   "\t Note          : this issue can be resolved by making "
@@ -262,20 +261,8 @@ public class InjectionTask {
     return injectableInstance;
   }
 
-  public TaskType getTaskType() {
-    return taskType;
-  }
-
   public Injector getInjector() {
     return injector;
-  }
-
-  public MetaField getField() {
-    return field;
-  }
-
-  public MetaMethod getMethod() {
-    return method;
   }
 
   public void setMethod(MetaMethod method) {

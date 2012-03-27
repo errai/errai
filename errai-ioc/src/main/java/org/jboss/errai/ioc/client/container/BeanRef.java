@@ -19,7 +19,6 @@ package org.jboss.errai.ioc.client.container;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 

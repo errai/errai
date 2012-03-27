@@ -16,7 +16,7 @@
 
 package org.jboss.errai.marshalling.server.marshallers;
 
-import org.jboss.errai.codegen.framework.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.json.EJArray;

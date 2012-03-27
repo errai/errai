@@ -16,10 +16,10 @@
 
 package org.jboss.errai.marshalling.rebind.util;
 
-import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
-import org.jboss.errai.codegen.framework.meta.MetaMethod;
-import org.jboss.errai.codegen.framework.util.GenUtil;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.util.GenUtil;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>

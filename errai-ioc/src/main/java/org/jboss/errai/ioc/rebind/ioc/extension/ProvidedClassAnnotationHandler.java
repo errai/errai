@@ -16,8 +16,6 @@
 
 package org.jboss.errai.ioc.rebind.ioc.extension;
 
-import org.jboss.errai.ioc.rebind.ioc.extension.AnnotationHandler;
-
 import java.lang.annotation.Annotation;
 import java.util.Set;
 

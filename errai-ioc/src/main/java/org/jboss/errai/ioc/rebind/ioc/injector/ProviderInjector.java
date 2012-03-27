@@ -16,15 +16,12 @@
 
 package org.jboss.errai.ioc.rebind.ioc.injector;
 
-import org.jboss.errai.codegen.framework.Statement;
-import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.util.Stmt;
+import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
-
-import javax.enterprise.inject.Alternative;
-import javax.inject.Provider;
 
 
 public class ProviderInjector extends TypeInjector {
@@ -35,6 +32,8 @@ public class ProviderInjector extends TypeInjector {
     super(type, context);
     this.providerInjector = new TypeInjector(providerType, context);
     context.registerInjector(providerInjector);
+
+    this.testmock = context.isElementType(WiringElementType.TestMockBean, providerType);
     this.singleton = context.isElementType(WiringElementType.SingletonBean, providerType);
     this.alternative = context.isElementType(WiringElementType.AlternativeBean, type);
     this.injected = true;

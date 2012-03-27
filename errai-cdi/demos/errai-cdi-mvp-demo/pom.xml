@@ -1507,6 +1507,7 @@
           <logLevel>INFO</logLevel>
           <runTarget>Contacts.html</runTarget>
           <warSourceDirectory>src/main/webapp/</warSourceDirectory>
+          <draftCompile>true</draftCompile>
           <extraJvmArgs>-Xmx512m</extraJvmArgs>
           <webXml>src/jetty/web.xml</webXml>
           <hostedWebapp>src/main/webapp/</hostedWebapp>

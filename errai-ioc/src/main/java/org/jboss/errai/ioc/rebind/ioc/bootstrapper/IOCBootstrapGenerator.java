@@ -17,46 +17,29 @@
 package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
 
-import java.io.File;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.context.SessionScoped;
-import javax.enterprise.inject.Alternative;
-import javax.enterprise.inject.Default;
-import javax.inject.Inject;
-import javax.inject.Provider;
-import javax.inject.Singleton;
-
+import com.google.gwt.core.ext.GeneratorContext;
+import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import com.google.gwt.user.rebind.SourceWriter;
+import com.google.gwt.user.rebind.StringSourceWriter;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
 import org.jboss.errai.bus.server.annotations.Service;
-import org.jboss.errai.codegen.framework.Context;
-import org.jboss.errai.codegen.framework.Statement;
-import org.jboss.errai.codegen.framework.builder.BlockBuilder;
-import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
-import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
-import org.jboss.errai.codegen.framework.meta.MetaField;
-import org.jboss.errai.codegen.framework.meta.MetaMethod;
-import org.jboss.errai.codegen.framework.meta.MetaParameterizedType;
-import org.jboss.errai.codegen.framework.meta.MetaType;
-import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
-import org.jboss.errai.codegen.framework.meta.impl.gwt.GWTUtil;
-import org.jboss.errai.codegen.framework.util.GenUtil;
-import org.jboss.errai.codegen.framework.util.Implementations;
-import org.jboss.errai.codegen.framework.util.PrivateAccessType;
-import org.jboss.errai.codegen.framework.util.Stmt;
+import org.jboss.errai.codegen.Context;
+import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.builder.BlockBuilder;
+import org.jboss.errai.codegen.builder.ClassStructureBuilder;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaField;
+import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaParameterizedType;
+import org.jboss.errai.codegen.meta.MetaType;
+import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
+import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
+import org.jboss.errai.codegen.util.GenUtil;
+import org.jboss.errai.codegen.util.Implementations;
+import org.jboss.errai.codegen.util.PrivateAccessType;
+import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.metadata.ScannerSingleton;
@@ -77,7 +60,6 @@ import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
 import org.jboss.errai.ioc.rebind.ioc.injector.AbstractInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.ContextualProviderInjector;
-import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.injector.ProviderInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
@@ -85,11 +67,26 @@ import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadataFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gwt.core.ext.GeneratorContext;
-import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
-import com.google.gwt.user.rebind.SourceWriter;
-import com.google.gwt.user.rebind.StringSourceWriter;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.context.RequestScoped;
+import javax.enterprise.context.SessionScoped;
+import javax.enterprise.inject.Alternative;
+import javax.enterprise.inject.Default;
+import javax.inject.Inject;
+import javax.inject.Provider;
+import javax.inject.Singleton;
+import java.io.File;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
 /**
  * The main generator class for the Errai IOC system.
@@ -274,21 +271,7 @@ public class IOCBootstrapGenerator {
 
     procFactory.process(scanner, procContext);
 
-    for (Injector inj : procContext.getToInstantiate()) {
-      inj.getBeanInstance(injectionContext, null);
-    }
-
-    runAllDeferred();
-
     for (Statement stmt : procContext.getAppendToEnd()) {
-      blockBuilder.append(stmt);
-    }
-
-    for (Statement stmt : procContext.getStaticInstantiationStatements()) {
-      blockBuilder.append(stmt);
-    }
-
-    for (Statement stmt : procContext.getStaticPostConstructStatements()) {
       blockBuilder.append(stmt);
     }
 
@@ -323,12 +306,7 @@ public class IOCBootstrapGenerator {
     }
   }
 
-  private void runAllDeferred() {
-    injectionContext.runAllDeferred();
-  }
-
   public void initializeProviders() {
-    final MetaClass typeProviderCls = MetaClassFactory.get(TypeProvider.class);
     MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
 
     /*
@@ -396,88 +374,6 @@ public class IOCBootstrapGenerator {
       }
     }
 
-    /**
-     * IOCProvider.class
-     */
-    Set<Class<?>> providers = scanner.getTypesAnnotatedWith(IOCProvider.class);
-    for (Class<?> clazz : providers) {
-      MetaClass bindType = null;
-      MetaClass type = MetaClassFactory.get(clazz);
-
-      boolean contextual = false;
-      for (MetaClass iface : type.getInterfaces()) {
-        if (iface.getFullyQualifiedName().equals(Provider.class.getName())) {
-          injectionContext.addType(type);
-
-          MetaParameterizedType pType = iface.getParameterizedType();
-          MetaType typeParm = pType.getTypeParameters()[0];
-          if (typeParm instanceof MetaParameterizedType) {
-            bindType = (MetaClass) ((MetaParameterizedType) typeParm).getRawType();
-          }
-          else {
-            bindType = (MetaClass) pType.getTypeParameters()[0];
-          }
-
-          boolean isContextual = false;
-          for (MetaField field : type.getDeclaredFields()) {
-            if (injectionContext.isElementType(WiringElementType.InjectionPoint, field)
-                    && field.getType().isAssignableTo(ContextualProviderContext.class)) {
-
-              isContextual = true;
-              break;
-            }
-          }
-
-          if (isContextual) {
-            injectionContext.registerInjector(new ContextualProviderInjector(bindType, type, injectionContext));
-          }
-          else {
-            injectionContext.registerInjector(new ProviderInjector(bindType, type, injectionContext));
-          }
-          break;
-        }
-
-        if (iface.getFullyQualifiedName().equals(ContextualTypeProvider.class.getName())) {
-          contextual = true;
-
-          MetaParameterizedType pType = iface.getParameterizedType();
-
-          if (pType == null) {
-            throw new InjectionFailure("could not determine the bind type for the IOCProvider class: "
-                    + type.getFullyQualifiedName());
-          }
-
-          // todo: check for nested type parameters
-          MetaType typeParm = pType.getTypeParameters()[0];
-          if (typeParm instanceof MetaParameterizedType) {
-            bindType = (MetaClass) ((MetaParameterizedType) typeParm).getRawType();
-          }
-          else {
-            bindType = (MetaClass) pType.getTypeParameters()[0];
-          }
-          break;
-        }
-      }
-
-      if (bindType == null) {
-        throw new InjectionFailure("the annotated provider class does not appear to implement " +
-                TypeProvider.class.getName() + ": " + type.getFullyQualifiedName());
-      }
-
-      final MetaClass finalBindType = bindType;
-
-      AbstractInjector injector;
-      if (contextual) {
-        injector = new ContextualProviderInjector(finalBindType, type, injectionContext);
-      }
-      else {
-        injector = new ProviderInjector(finalBindType, type, injectionContext);
-      }
-
-      injectionContext.registerInjector(injector);
-    }
-
-
     for (IOCExtensionConfigurator extensionConfigurator : extensionConfigurators) {
       extensionConfigurator.afterInitialization(procContext, injectionContext, procFactory);
     }
@@ -486,9 +382,10 @@ public class IOCBootstrapGenerator {
   private void defaultConfigureProcessor() {
     injectionContext.mapElementType(WiringElementType.SingletonBean, Singleton.class);
     injectionContext.mapElementType(WiringElementType.SingletonBean, EntryPoint.class);
-    injectionContext.mapElementType(WiringElementType.SingletonBean, Service.class);
 
     injectionContext.mapElementType(WiringElementType.DependentBean, Dependent.class);
+
+    injectionContext.mapElementType(WiringElementType.TopLevelProvider, IOCProvider.class);
 
     injectionContext.mapElementType(WiringElementType.InjectionPoint, Inject.class);
     injectionContext.mapElementType(WiringElementType.InjectionPoint, com.google.inject.Inject.class);

@@ -24,17 +24,17 @@ import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.RPCStub;
-import org.jboss.errai.codegen.framework.DefParameters;
-import org.jboss.errai.codegen.framework.Parameter;
-import org.jboss.errai.codegen.framework.Statement;
-import org.jboss.errai.codegen.framework.Variable;
-import org.jboss.errai.codegen.framework.builder.BlockBuilder;
-import org.jboss.errai.codegen.framework.builder.ClassStructureBuilder;
-import org.jboss.errai.codegen.framework.builder.impl.ClassBuilder;
-import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
-import org.jboss.errai.codegen.framework.meta.MetaMethod;
-import org.jboss.errai.codegen.framework.util.Bool;
-import org.jboss.errai.codegen.framework.util.Stmt;
+import org.jboss.errai.codegen.DefParameters;
+import org.jboss.errai.codegen.Parameter;
+import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.Variable;
+import org.jboss.errai.codegen.builder.BlockBuilder;
+import org.jboss.errai.codegen.builder.ClassStructureBuilder;
+import org.jboss.errai.codegen.builder.impl.ClassBuilder;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.util.Bool;
+import org.jboss.errai.codegen.util.Stmt;
 
 /**
  * Generates an Errai RPC remote proxy.

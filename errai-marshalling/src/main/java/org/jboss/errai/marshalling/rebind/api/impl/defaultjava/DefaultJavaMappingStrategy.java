@@ -16,21 +16,21 @@
 
 package org.jboss.errai.marshalling.rebind.api.impl.defaultjava;
 
-import org.jboss.errai.codegen.framework.Cast;
-import org.jboss.errai.codegen.framework.Parameter;
-import org.jboss.errai.codegen.framework.Statement;
-import org.jboss.errai.codegen.framework.builder.AnonymousClassStructureBuilder;
-import org.jboss.errai.codegen.framework.builder.BlockBuilder;
-import org.jboss.errai.codegen.framework.builder.CatchBlockBuilder;
-import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.MetaClassFactory;
-import org.jboss.errai.codegen.framework.meta.MetaClassMember;
-import org.jboss.errai.codegen.framework.meta.MetaField;
-import org.jboss.errai.codegen.framework.meta.MetaMethod;
-import org.jboss.errai.codegen.framework.util.Bool;
-import org.jboss.errai.codegen.framework.util.GenUtil;
-import org.jboss.errai.codegen.framework.util.Implementations;
-import org.jboss.errai.codegen.framework.util.Stmt;
+import org.jboss.errai.codegen.Cast;
+import org.jboss.errai.codegen.Parameter;
+import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
+import org.jboss.errai.codegen.builder.BlockBuilder;
+import org.jboss.errai.codegen.builder.CatchBlockBuilder;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaClassMember;
+import org.jboss.errai.codegen.meta.MetaField;
+import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.util.Bool;
+import org.jboss.errai.codegen.util.GenUtil;
+import org.jboss.errai.codegen.util.Implementations;
+import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
@@ -53,11 +53,11 @@ import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.parameterizedAs;
-import static org.jboss.errai.codegen.framework.meta.MetaClassFactory.typeParametersOf;
-import static org.jboss.errai.codegen.framework.util.Implementations.newStringBuilder;
-import static org.jboss.errai.codegen.framework.util.Stmt.declareVariable;
-import static org.jboss.errai.codegen.framework.util.Stmt.loadVariable;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
+import static org.jboss.errai.codegen.util.Implementations.newStringBuilder;
+import static org.jboss.errai.codegen.util.Stmt.declareVariable;
+import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
 /**
  * The Errai default Java-to-JSON-to-Java marshaling strategy.

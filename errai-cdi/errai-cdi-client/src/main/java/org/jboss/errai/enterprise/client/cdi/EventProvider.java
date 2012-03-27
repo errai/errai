@@ -16,17 +16,14 @@
 
 package org.jboss.errai.enterprise.client.cdi;
 
-import org.jboss.errai.enterprise.client.cdi.api.CDI;
-import org.jboss.errai.ioc.client.ContextualProviderContext;
-import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
-import org.jboss.errai.ioc.client.api.IOCProvider;
-import org.jboss.errai.ioc.client.api.InitBallot;
+import java.lang.annotation.Annotation;
 
 import javax.enterprise.event.Event;
-import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
-import java.lang.annotation.Annotation;
+
+import org.jboss.errai.enterprise.client.cdi.api.CDI;
+import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
+import org.jboss.errai.ioc.client.api.IOCProvider;
 
 @IOCProvider @Singleton
 public class EventProvider implements ContextualTypeProvider<Event> {
@@ -44,8 +41,6 @@ public class EventProvider implements ContextualTypeProvider<Event> {
     * clobbered your errai-javax-enterprise source folder settings. To fix your
     * setup, see the README in the root of errai-javax-enterprise.
     */
-
-
     return new Event<Object>() {
       private Class<?> eventType = (typeargs.length == 1 ? typeargs[0] : Object.class);
       private Annotation[] _qualifiers = qualifiers;

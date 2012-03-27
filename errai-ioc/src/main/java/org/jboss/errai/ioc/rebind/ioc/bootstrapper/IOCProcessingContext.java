@@ -19,21 +19,20 @@ package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.user.rebind.SourceWriter;
-import org.jboss.errai.codegen.framework.Context;
-import org.jboss.errai.codegen.framework.Statement;
-import org.jboss.errai.codegen.framework.Variable;
-import org.jboss.errai.codegen.framework.VariableReference;
-import org.jboss.errai.codegen.framework.builder.BlockBuilder;
-import org.jboss.errai.codegen.framework.meta.MetaClass;
-import org.jboss.errai.codegen.framework.meta.impl.build.BuildMetaClass;
+
+import org.jboss.errai.codegen.Context;
+import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.Variable;
+import org.jboss.errai.codegen.VariableReference;
+import org.jboss.errai.codegen.builder.BlockBuilder;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.ioc.client.BootstrapperInjectionContext;
-import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionPoint;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.TypeDiscoveryListener;
 import org.jboss.errai.ioc.rebind.ioc.metadata.JSR330QualifyingMetadataFactory;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadataFactory;
 
-import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -46,25 +45,23 @@ import java.util.Stack;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class IOCProcessingContext {
-  protected Context context;
-  protected BuildMetaClass bootstrapClass;
-
-  protected Stack<BlockBuilder<?>> blockBuilder;
-
   protected Collection<String> packages;
-  protected List<Statement> appendToEnd;
-  protected List<Statement> staticInstantiationStatements;
-  protected List<Statement> staticPostConstructStatements;
-  protected List<TypeDiscoveryListener> typeDiscoveryListeners;
-  protected List<Injector> toInstantiate;
-  protected Set<MetaClass> discovered = new HashSet<MetaClass>();
+
+  protected final Context context;
+  protected final BuildMetaClass bootstrapClass;
+
+  protected final Stack<BlockBuilder<?>> blockBuilder;
+
+  protected final List<Statement> appendToEnd;
+  protected final List<TypeDiscoveryListener> typeDiscoveryListeners;
+  protected final Set<MetaClass> discovered = new HashSet<MetaClass>();
   
-  protected TreeLogger treeLogger;
-  protected GeneratorContext generatorContext;
+  protected final TreeLogger treeLogger;
+  protected final GeneratorContext generatorContext;
 
-  protected SourceWriter writer;
+  protected final SourceWriter writer;
 
-  protected Variable contextVariable = Variable.create("injContext", BootstrapperInjectionContext.class);
+  protected final Variable contextVariable = Variable.create("injContext", BootstrapperInjectionContext.class);
 
   protected QualifyingMetadataFactory qualifyingMetadataFactory = new JSR330QualifyingMetadataFactory();
 
@@ -84,10 +81,7 @@ public class IOCProcessingContext {
     this.blockBuilder.push(blockBuilder);
 
     this.appendToEnd = new ArrayList<Statement>();
-    this.staticInstantiationStatements = new ArrayList<Statement>();
-    this.staticPostConstructStatements = new ArrayList<Statement>();
     this.typeDiscoveryListeners = new ArrayList<TypeDiscoveryListener>();
-    this.toInstantiate = new ArrayList<Injector>();
   }
 
   public BlockBuilder<?> getBlockBuilder() {
@@ -121,18 +115,6 @@ public class IOCProcessingContext {
 
   public List<Statement> getAppendToEnd() {
     return Collections.unmodifiableList(appendToEnd);
-  }
-
-  public List<Statement> getStaticInstantiationStatements() {
-    return Collections.unmodifiableList(staticInstantiationStatements);
-  }
-
-  public List<Statement> getStaticPostConstructStatements() {
-    return Collections.unmodifiableList(staticPostConstructStatements);
-  }
-
-  public List<Injector> getToInstantiate() {
-    return Collections.unmodifiableList(toInstantiate);
   }
 
   public BuildMetaClass getBootstrapClass() {

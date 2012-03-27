@@ -16,12 +16,12 @@
 
 package org.jboss.errai.ioc.rebind.ioc.extension;
 
-import java.lang.annotation.Annotation;
-import java.util.Set;
-
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.graph.SortUnit;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
+
+import java.lang.annotation.Annotation;
+import java.util.Set;
 
 public interface AnnotationHandler<T extends Annotation> {
   public Set<SortUnit> getDependencies(DependencyControl control,

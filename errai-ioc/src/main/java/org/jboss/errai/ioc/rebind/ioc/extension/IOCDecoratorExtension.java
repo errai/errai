@@ -19,7 +19,7 @@ package org.jboss.errai.ioc.rebind.ioc.extension;
 import java.lang.annotation.Annotation;
 import java.util.List;
 
-import org.jboss.errai.codegen.framework.Statement;
+import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 
 /**
