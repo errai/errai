@@ -470,7 +470,7 @@ public class Context {
   }
 
   /**
-   * Returns the literalizable target type for any matching subtype. Meaning, that if say, the type <tt com.bar.FooImpl</tt>
+   * Returns the literalizable target type for any matching subtype. Meaning, that if say, the type <tt>com.bar.FooImpl</tt>
    * is a subtype of the interface <tt>com.bar.Foo</tt>, which is itself marked literalizable, this method will return
    * a reference to the <tt>java.lang.Class</tt> instance for <tt>com.bar.Foo</tt>
    *
