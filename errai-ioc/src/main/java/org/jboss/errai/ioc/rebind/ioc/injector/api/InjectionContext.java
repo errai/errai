@@ -24,8 +24,8 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
-import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.codegen.util.PrivateAccessType;
+import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
@@ -359,7 +359,7 @@ public class InjectionContext {
 
 
   public void addExposedMethod(MetaMethod method) {
-    String methodSignature = GenUtil.getPrivateMethodName(method);
+    String methodSignature = PrivateAccessUtil.getPrivateMethodName(method);
     if (!exposedMembers.contains(methodSignature)) {
       exposedMembers.add(methodSignature);
     }

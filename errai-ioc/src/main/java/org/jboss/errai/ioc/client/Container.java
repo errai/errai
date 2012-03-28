@@ -35,10 +35,16 @@ public class Container implements EntryPoint {
 
       final Bootstrapper bootstrapper = GWT.create(Bootstrapper.class);
 
+      System.out.println("Bootstrapepr Generated");
+
       new IOCBeanManagerLifecycle().resetBeanManager();
       final BootstrapperInjectionContext ctx = bootstrapper.bootstrapContainer();
 
+      System.out.println("Boostrapper Called");
+
       ctx.getRootContext().finish();
+
+
 
       InitVotes.voteFor(Container.class);
       return ctx;

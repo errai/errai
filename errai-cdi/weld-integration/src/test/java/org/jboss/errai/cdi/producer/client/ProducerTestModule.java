@@ -18,12 +18,8 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
  */
 @EntryPoint
 public class ProducerTestModule {
-//  private final ProducerDependentTestBean testBean;
-//
-//  @Inject
-//  public ProducerTestModule(ProducerDependentTestBean testBean) {
-//    this.testBean = testBean;
-//  }
+  @Produces
+  private static StaticallyProducedBeanB staticallyProducedBeanB = new StaticallyProducedBeanB();
 
   @Produces @A
   private Integer numberA = new Random().nextInt();
@@ -51,6 +47,12 @@ public class ProducerTestModule {
 
   @Produces @D @E
   private Float floatDE = 1.1f;
+
+  @Produces
+  private static StaticallyProducedBean produceStaticallyProducedBean() {
+    return new StaticallyProducedBean();
+  }
+
 
   public Integer getNumberA() {
     return numberA;

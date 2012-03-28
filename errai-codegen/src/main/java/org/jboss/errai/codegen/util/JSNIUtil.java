@@ -25,16 +25,29 @@ import org.jboss.errai.codegen.meta.MetaParameter;
  */
 public class JSNIUtil {
   public static String fieldAccess(MetaField field) {
-    return "instance.@" + field.getDeclaringClass().getFullyQualifiedName().replaceAll("\\$", "\\.") + "::"
-            + field.getName();
+    if (field.isStatic()) {
+      return "@" + field.getDeclaringClass().getFullyQualifiedName().replaceAll("\\$", "\\.") + "::"
+              + field.getName();
+    }
+    else {
+      return "instance.@" + field.getDeclaringClass().getFullyQualifiedName().replaceAll("\\$", "\\.") + "::"
+              + field.getName();
+    }
   }
 
   public static String methodAccess(MetaMethod method) {
-    StringBuilder buf = new StringBuilder(
-            (method.getReturnType().isVoid() ? "" : "return ") +
-                    "instance.@"
-                    + method.getDeclaringClass().getFullyQualifiedName().replaceAll("\\$", "\\.") + "::"
-                    + method.getName() + "(");
+    final StringBuilder buf = new StringBuilder();
+
+    if (!method.getReturnType().isVoid()) {
+      buf.append("return ");
+    }
+
+    if (!method.isStatic()) {
+      buf.append("instance.");
+    }
+
+    buf.append('@').append(method.getDeclaringClass().getFullyQualifiedName().replaceAll("\\$", "\\."))
+            .append("::").append(method.getName()).append('(');
 
     for (MetaParameter parm : method.getParameters()) {
       buf.append(parm.getType().getInternalName());

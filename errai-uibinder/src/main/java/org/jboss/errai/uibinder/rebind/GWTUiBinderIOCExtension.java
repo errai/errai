@@ -109,10 +109,8 @@ public class GWTUiBinderIOCExtension implements IOCExtensionConfigurator {
                             .finish().finish()
             )
             );
-
           }
           else {
-
             context.globalAppend(Stmt.declareVariable(UiBinder.class).named(varName).initializeWith(
                     Stmt.invokeStatic(GWT.class, "create", LiteralFactory.getLiteral(uiBinderBoilerPlaterIface))
             ));
@@ -176,7 +174,6 @@ public class GWTUiBinderIOCExtension implements IOCExtensionConfigurator {
             }
           });
         }
-
       }
     });
   }

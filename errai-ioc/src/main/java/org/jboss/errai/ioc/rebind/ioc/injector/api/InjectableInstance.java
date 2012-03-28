@@ -17,8 +17,8 @@
 package org.jboss.errai.ioc.rebind.ioc.injector.api;
 
 
-import static org.jboss.errai.codegen.util.GenUtil.getPrivateFieldInjectorName;
-import static org.jboss.errai.codegen.util.GenUtil.getPrivateMethodName;
+import static org.jboss.errai.codegen.util.PrivateAccessUtil.getPrivateFieldInjectorName;
+import static org.jboss.errai.codegen.util.PrivateAccessUtil.getPrivateMethodName;
 
 import java.lang.annotation.Annotation;
 
@@ -90,9 +90,14 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
     Statement[] stmt;
     switch (taskType) {
       case PrivateField:
-        return Stmt.invokeStatic(injectionContext.getProcessingContext().getBootstrapClass(),
-                getPrivateFieldInjectorName(field), Refs.get(targetInjector.getVarName()));
-
+        if (field.isStatic()) {
+          return Stmt.invokeStatic(injectionContext.getProcessingContext().getBootstrapClass(),
+                  getPrivateFieldInjectorName(field));
+        }
+        else {
+          return Stmt.invokeStatic(injectionContext.getProcessingContext().getBootstrapClass(),
+                  getPrivateFieldInjectorName(field), Refs.get(targetInjector.getVarName()));
+        }
       case Field:
         return Stmt.loadVariable(targetInjector.getVarName()).loadField(field.getName());
 
@@ -103,9 +108,16 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
 
         MetaParameter[] methParms = method.getParameters();
         Statement[] resolveParmsDeps = InjectUtil.resolveInjectionDependencies(methParms, injectionContext, method);
-        stmt = new Statement[methParms.length + 1];
-        stmt[0] = Refs.get(targetInjector.getVarName());
-        System.arraycopy(resolveParmsDeps, 0, stmt, 1, methParms.length);
+
+        if (method.isStatic()) {
+          stmt = new Statement[methParms.length];
+          System.arraycopy(resolveParmsDeps, 0, stmt, 0, methParms.length);
+        }
+        else {
+          stmt = new Statement[methParms.length + 1];
+          stmt[0] = Refs.get(targetInjector.getVarName());
+          System.arraycopy(resolveParmsDeps, 0, stmt, 1, methParms.length);
+        }
 
         //todo: this
         return Stmt.invokeStatic(injectionContext.getProcessingContext().getBootstrapClass(),

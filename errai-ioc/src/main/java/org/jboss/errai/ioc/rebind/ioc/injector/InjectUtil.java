@@ -30,7 +30,7 @@ import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
-import org.jboss.errai.codegen.util.GenUtil;
+import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.client.container.DestructionCallback;
@@ -254,7 +254,7 @@ public class InjectUtil {
 
     if (!meth.isPublic()) {
       body.append(Stmt.invokeStatic(ctx.getProcessingContext().getBootstrapClass(),
-              GenUtil.getPrivateMethodName(meth), Refs.get("obj")));
+              PrivateAccessUtil.getPrivateMethodName(meth), Refs.get("obj")));
     }
     else {
       body.append(Stmt.loadVariable("obj").invoke(meth.getName()));

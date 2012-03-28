@@ -16,8 +16,8 @@
 
 package org.jboss.errai.ioc.rebind.ioc.injector.api;
 
-import static org.jboss.errai.codegen.util.GenUtil.getPrivateFieldInjectorName;
-import static org.jboss.errai.codegen.util.GenUtil.getPrivateMethodName;
+import static org.jboss.errai.codegen.util.PrivateAccessUtil.getPrivateFieldInjectorName;
+import static org.jboss.errai.codegen.util.PrivateAccessUtil.getPrivateMethodName;
 
 import java.lang.annotation.Annotation;
 
@@ -82,7 +82,6 @@ public class InjectionTask {
 
     InjectableInstance injectableInstance = getInjectableInstance(ctx);
 
-    //  Injector inj;
     QualifyingMetadata qualifyingMetadata = processingContext.getQualifyingMetadataFactory()
             .createFrom(injectableInstance.getQualifiers());
     Statement val;
@@ -111,17 +110,22 @@ public class InjectionTask {
                   field.getType(), err);
         }
 
-        if (val instanceof HandleInProxy) {
-          ((HandleInProxy) val).getProxyInjector().addProxyCloseStatement(
-                  Stmt.invokeStatic(processingContext.getBootstrapClass(), getPrivateFieldInjectorName(field),
-                          Refs.get(injector.getVarName()), val)
-          );
+        final Statement fieldAccessStmt;
+
+        if (field.isStatic()) {
+          fieldAccessStmt = Stmt.invokeStatic(processingContext.getBootstrapClass(),
+                  getPrivateFieldInjectorName(field), val);
         }
         else {
-          processingContext.append(
-                  Stmt.invokeStatic(processingContext.getBootstrapClass(), getPrivateFieldInjectorName(field),
-                          Refs.get(injector.getVarName()), val)
-          );
+          fieldAccessStmt = Stmt.invokeStatic(processingContext.getBootstrapClass(),
+                  getPrivateFieldInjectorName(field), Refs.get(injector.getVarName()), val);
+        }
+
+        if (val instanceof HandleInProxy) {
+          ((HandleInProxy) val).getProxyInjector().addProxyCloseStatement(fieldAccessStmt);
+        }
+        else {
+          processingContext.append(fieldAccessStmt);
         }
 
         ctx.addExposedField(field, PrivateAccessType.Write);
@@ -150,10 +154,19 @@ public class InjectionTask {
           }
         }
 
-        Statement[] smts = InjectUtil.resolveInjectionDependencies(method.getParameters(), ctx, method);
-        Statement[] parms = new Statement[smts.length + 1];
-        parms[0] = Refs.get(injector.getVarName());
-        System.arraycopy(smts, 0, parms, 1, smts.length);
+        Statement[] stmts = InjectUtil.resolveInjectionDependencies(method.getParameters(), ctx, method);
+        Statement[] parms;
+
+        if (method.isStatic()) {
+          parms = new Statement[stmts.length];
+          System.arraycopy(stmts, 0, parms, 0, stmts.length);
+        }
+        else {
+          // for non-static calls, the JSNI stub or reflection stub accepts the instance as the first parameter
+          parms = new Statement[stmts.length + 1];
+          parms[0] = Refs.get(injector.getVarName());
+          System.arraycopy(stmts, 0, parms, 1, stmts.length);
+        }
 
         injectableInstance.getInjectionContext().addExposedMethod(method);
 
