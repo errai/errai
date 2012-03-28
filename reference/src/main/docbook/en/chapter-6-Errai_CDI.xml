@@ -367,7 +367,7 @@ public class MyComposite extends Composite {
         <title>Deployment in Development Mode</title>
         <para>In development mode we need to bootstrap the CDI environment on our own and make both Errai and CDI available through JNDI (common denominator across all runtimes). Since GWT uses Jetty, that only supports read only JNDI, we need to replace the default Jetty launcher with a custom one that will setup the JNDI bindings:</para>
         <informalexample>
-          <programlisting>&lt;plugin&gt;
+          <programlisting language="java">&lt;plugin&gt;
   &lt;groupId&gt;org.codehaus.mojo&lt;/groupId&gt;
   &lt;artifactId&gt;gwt-maven plugin&lt;/artifactId&gt;
   &lt;version&gt;${gwt.maven}&lt;/version&gt;
@@ -387,7 +387,7 @@ public class MyComposite extends Composite {
         </note>
         <para>Once this is set up correctly, we can bootstrap the CDI container through a servlet listener:</para>
         <informalexample>
-          <programlisting>&lt;web-app&gt;
+          <programlisting language="java">&lt;web-app&gt;
   ...
   &lt;listener&gt;
     &lt;listener-class&gt;org.jboss.errai.container.CDIServletStateListener&lt;/listener-class&gt;
@@ -434,7 +434,7 @@ public class MyComposite extends Composite {
           <code>ErraiService.properties</code>
         </para>
         <informalexample>
-          <programlisting>errai.auto_discover_services=false</programlisting>
+          <programlisting language="java">errai.auto_discover_services=false</programlisting>
         </informalexample>
       </section>
     </section>

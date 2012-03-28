@@ -13,7 +13,7 @@
       <programlisting>mvn archetype:generate \
 -DarchetypeGroupId=org.jboss.errai.archetypes \
 -DarchetypeArtifactId=cdi-quickstart \
--DarchetypeVersion=2.0.Beta3 \
+-DarchetypeVersion=2.0.Beta4 \
 -DarchetypeRepository=https://repository.jboss.org/nexus/content/groups/public/</programlisting>
     </informalexample>
     <para>Customize the build properties according to your needs.</para>

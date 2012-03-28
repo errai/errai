@@ -167,9 +167,7 @@ public class TimeServiceProvider implements Provider&lt;TimeService&gt; {
       
       <title>Wiring server side components</title>
       <para>
-        By default, ErraiBus uses Google Guice to wire components. However, we plan on standardizing on
-        <emphasis role="italics">JSR-330 Dependency Injection</emphasis>
-        specification in the near future. When deploying services on the server-side, it is currently possible to obtain references to the
+        By default, Errai uses Google Guice to wire components. When deploying services on the server-side, it is currently possible to obtain references to the
         <code>MessageBus</code>
         ,
         <code>RequestDispatcher</code>
@@ -179,6 +177,7 @@ public class TimeServiceProvider implements Provider&lt;TimeService&gt; {
         <code>ErraiService</code>
         by declaring them as injection dependencies in Service classes, extension components, and session providers.
       </para>
+      <para>Alternatively, supports CDI based wiring of server-side components. See the chapter on Errai CDI for more information.</para>
     </section>
     <section id="sid-20938792">
       
@@ -259,6 +258,17 @@ public class MyLocalService implements MessageCallback {
   }
 }</programlisting>
           </example>
+        </section>
+        <section id="sid-20938797_BusServices-LifecycleImpactofServices">
+          
+          <title>Lifecycle Impact of Services</title>
+          <para>
+            Services which are registered with ErraiBus via the bean manager through use of the
+            <code>@Service</code>
+            annotation, have de-registration hooks tied implicitly to the destruction of the bean. Thus,
+            <link linkend="sid-22872238">destruction of the bean</link>
+            implies that these associated services are to be dereferenced.
+          </para>
         </section>
       </section>
       <section id="sid-20938800">
@@ -456,5 +466,226 @@ MyOtherQualifier qual2 = new MyOtherQualifier() {
 IOCBean&lt;SimpleInterface&gt; bean = beanManager.lookupBean(SimpleBean.class, qual, qual2);</programlisting>
       </example>
       <para>In this example we manually construct instances of qualifier annotations in order to pass it to the bean manager for lookup. This is a necessary step since there's currently no support for annotation literals in Errai client code.</para>
+    </section>
+    <section id="sid-22872133">
+      
+      <title>Alternatives and Mocks</title>
+      <section id="sid-22872133_AlternativesandMocks-Alternatives">
+        
+        <title>Alternatives</title>
+        <para>It may be desirable to have multiple matching dependencies for a given injection point with the ability to specify which implementation to use at runtime. For instance, you may have different versions of your application which target different browsers or capabilities of the browser. Using alternatives allows you to share common interfaces among your beans, while still using dependency injection, by exporting consideration of what implementation to use to the container's configuration.</para>
+        <para>Consider the following example:</para>
+        <informalexample>
+          <programlisting language="java">@Singleton @Alternative
+public class MobileView implements View {
+  // ... //
+}</programlisting>
+        </informalexample>
+        <para>and</para>
+        <informalexample>
+          <programlisting language="java">@Singleton @Alternative
+public class DesktopView implements View {
+  // ... //</programlisting>
+        </informalexample>
+        <para>
+          In our controller logic we in turn inject the
+          <code>View</code>
+          interface:
+        </para>
+        <informalexample>
+          <programlisting language="java">@EntryPoint
+public class MyApp {
+  @Inject
+  View view;
+  
+  // ... //
+}</programlisting>
+        </informalexample>
+        <para>
+          This code is unaware of the implementation of
+          <code>View</code>
+          , which maintains good separation of concerns. However, this of course creates an ambiguous dependency on the
+          <code>View</code>
+          interface as it has two matching subtypes in this case. Thus, we must configure the container to specify which alternative to use. Also note, that the beans in both cases have been annotated with
+          <code>javax.enterprise.inject.Alternative</code>
+          .
+        </para>
+        <para>
+          In your
+          <code>ErraiApp.properties</code>
+          for the module, you can simply specify which active alternative should be used:
+        </para>
+        <informalexample>
+          <programlisting language="java">errai.ioc.enabled.alternatives=org.foo.MobileView</programlisting>
+        </informalexample>
+        <para>You can specify multiple alternative classes by white space separating them:</para>
+        <informalexample>
+          <programlisting language="java">errai.ioc.enabled.alternatives=org.foo.MobileView \
+                               org.foo.HTML5Orientation \
+                               org.foo.MobileStorage</programlisting>
+        </informalexample>
+        <para>You can only have one enabled alternative for matching set of alternatives, otherwise you will get ambiguous resolution errors from the container.</para>
+      </section>
+      <section id="sid-22872133_AlternativesandMocks-TestMocks">
+        
+        <title>Test Mocks</title>
+        <para>
+          Similar to alternatives, but specifically designed for testing scenarios, you can replace beans with mocks at runtime for the purposes of running unit tests. This is accomplished simply by annotating a bean with the
+          <code>org.jboss.errai.ioc.client.api.TestMock</code>
+          annotation. Doing so will prioritize consideration of the bean over any other matching beans while running unit tests.
+        </para>
+        <para>Consider the following:</para>
+        <informalexample>
+          <programlisting language="java">@ApplicationScoped
+public class UserManagementImpl implements UserManagement {
+  public List&lt;User&gt; listUsers() {
+     // do user listy things!
+  } 
+}</programlisting>
+        </informalexample>
+        <para>
+          You can specify a mock implementation of this class by implementing its common parent type (
+          <code>UserManagement</code>
+          ) and annotating that class with the
+          <code>@TestMock</code>
+          annotation inside your test package like so:
+        </para>
+        <informalexample>
+          <programlisting language="java">@TestMock @ApplicationScoped
+public class MockUserManagementImpl implements UserManagement {
+  public List&lt;User&gt; listUsers() { 
+     // return only a test user.
+     return Collections.singletonList(TestUser.INSTANCE);
+  }
+}</programlisting>
+        </informalexample>
+        <para>
+          In this case, the container will replace the
+          <code>UserManagementImpl</code>
+          with the
+          <code>MockUserManagementImpl</code>
+          automatically when running the unit tests.
+        </para>
+        <para>
+          The
+          <code>@TestMock</code>
+          annotation can also be used to specify alternative providers during test execution. For example, it can be used to mock a
+          <code>Caller&lt;T&gt;</code>
+          .
+          <code>Callers</code>
+          are used to invoke RPC or JAX-RS endpoints. During tests you might want to replace theses callers with mock implementations. For details on providers see
+          <xref linkend="sid-5931407"/>
+          .
+        </para>
+        <informalexample>
+          <programlisting language="java">@TestMock @IOCProvider
+public class MockedHappyServiceCallerProvider implements ContextualTypeProvider&lt;Caller&lt;HappyService&gt;&gt; {
+ 
+  @Override
+  public Caller&lt;HappyService&gt; provide(Class&lt;?&gt;[] typeargs, Annotation[] qualifiers) {
+    return new Caller&lt;HappyService&gt;() {
+      ...
+    }
+}</programlisting>
+        </informalexample>
+      </section>
+    </section>
+    <section id="sid-22872238">
+      
+      <title>Bean Lifecycle</title>
+      <para>
+        All beans managed by the Errai IOC container support the
+        <code>@PostConstruct</code>
+        and
+        <code>@PreDestroy</code>
+        annotations.
+      </para>
+      <para>
+        Beans which have methods annotated with
+        <code>@PostConstruct</code>
+        are guaranteed to have those methods called before the bean is put into service, and only after all dependencies within its graph has been satisfied.
+      </para>
+      <para>
+        Beans are also guaranteed to have their
+        <code>@PreDestroy</code>
+        annotated methods called before they are destroyed by the bean manager.
+      </para>
+      <important>
+        <para>This cannot be guaranteed when the browser DOM is destroyed prematurely due to: closing the browser window; closing a tab; refreshing the page, etc.</para>
+      </important>
+      <section id="sid-22872238_BeanLifecycle-DestructionofBeans">
+        
+        <title>Destruction of Beans</title>
+        <para>
+          Beans under management of Errai IOC, of any scope, can be explicitly destroyed through the client bean manager. Destruction of a managed bean is accomplished by passing a reference to the
+          <code>destroyBean()</code>
+          method of the bean manager.
+        </para>
+        <example>
+          <title>Destruction of bean</title>
+          <programlisting language="java">public MyManagedBean {
+  @Inject IOCBeanManager manager;
+
+  public void createABeanThenDestroyIt() {
+    // get a new bean.
+    SimpleBean bean = manager.lookupBean(SimpleBean.class).getInstance();
+
+    bean.sendMessage("Sorry, I need to dispose of you now");
+
+    // destroy the bean!
+    manager.destroyBean(bean);
+  }
+}</programlisting>
+        </example>
+        <para>When the bean manager "destroys" the bean, any pre-destroy methods the bean declares are called, it is taken out of service and no longer tracked by the bean manager. If there are references on the bean by other objects, the bean will continue to be accessible to those objects.</para>
+        <important>
+          <para>Container managed resources that are dependent on the bean such as bus service endpoints or CDI event observers will also be automatically destroyed when the bean is destroyed.</para>
+        </important>
+        <para>Another important consideration is the rule, "all beans created together are destroyed together." Consider the following example:</para>
+        <example>
+          <title>SimpleBean.class</title>
+          <programlisting language="java">@Dependent
+public class SimpleBean {
+   @Inject @New AnotherBean anotherBean;
+
+   public AnotherBean getAnotherBean() {
+     return anotherBean;
+   }
+
+   @PreDestroy
+   private void cleanUp() {
+     // do some cleanup tasks
+   }
+}</programlisting>
+        </example>
+        <example>
+          <title>Destroying bean from subgraph</title>
+          <programlisting language="java">public MyManagedBean {
+  @Inject IOCBeanManager manager;
+
+  public void createABeanThenDestroyIt() {
+    // get a new bean.
+    SimpleBean bean = manager.lookupBean(SimpleBean.class).getInstance();
+
+    // destroy the AnotherBean reference from inside the bean
+    manager.destroyBean(bean.getAnotherBean());
+  }
+}</programlisting>
+        </example>
+        <para>
+          In this example we pass the instance of
+          <code>AnotherBean,</code>
+          created as a dependency of
+          <code>SimpleBean,</code>
+          to the bean manager for destruction. Because this bean was created at the same time as its parent, its destruction will also result in the destruction of
+          <code>SimpleBean</code>
+          ; thus, this action will result in the
+          <code>@PreDestroy</code>
+          <code>cleanUp()</code>
+          method of
+          <code>SimpleBean</code>
+          being invoked.
+        </para>
+      </section>
     </section>
   </chapter>
