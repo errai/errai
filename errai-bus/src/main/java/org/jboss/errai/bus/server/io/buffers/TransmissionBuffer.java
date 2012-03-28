@@ -82,7 +82,7 @@ public class TransmissionBuffer implements Buffer {
    * The internal write sequence number used by the writers to allocate write space within the buffer.
    */
   private final AtomicLong writeSequenceNumber = new AtomicLong() {
-    public volatile long a1
+    @SuppressWarnings("UnusedDeclaration") public volatile long a1
             ,
             a2
             ,
@@ -122,7 +122,6 @@ public class TransmissionBuffer implements Buffer {
     writeSeg(0, (short) 0);
   }
 
-
   /**
    * Creates a transmission buffer with the default segment and buffer size, using a regular heap allocated buffer.
    *
@@ -145,9 +144,9 @@ public class TransmissionBuffer implements Buffer {
    * Creates a heap allocated transmission buffer with a specified segment size and segments. The resulting buffer
    * will be of size: <i>segmentSize * segments</i>.
    *
-   * @param segmentSize
-   * @param segments
-   * @return
+   * @param segmentSize the size of individual segments
+   * @param segments  the total number of segments
+   * @return an instance of the transmission buffer
    */
   public static TransmissionBuffer create(int segmentSize, int segments) {
     return new TransmissionBuffer(false, segmentSize, segments);
@@ -158,9 +157,9 @@ public class TransmissionBuffer implements Buffer {
    * Creates a direct allocated transmission buffer with a custom segment size and segments. The resulting buffer
    * will be of size: <i>segmentSize * segments</i>.
    *
-   * @param segmentSize
-   * @param segments
-   * @return
+   * @param segmentSize the size of the individual segments
+   * @param segments the total number of segments
+   * @return an instance of the transmission buffer
    */
   public static TransmissionBuffer createDirect(int segmentSize, int segments) {
     return new TransmissionBuffer(true, segmentSize, segments);
@@ -365,7 +364,7 @@ public class TransmissionBuffer implements Buffer {
 
         if (lastRead != -1) {
           bufferColor.sequence.set(lastRead);
-          return lastRead != read;
+          return true;
         }
 
         try {
@@ -694,7 +693,8 @@ public class TransmissionBuffer implements Buffer {
       StringBuilder build = new StringBuilder();
       int pos = i * segmentSize;
       int length = readChunkSize(pos);
-      build.append("Segment " + i + " <color:" + (int) segmentMap[i] + ";length:" + length + ";location:" + pos + ">");
+      build.append("Segment ").append(i).append(" <color:")
+              .append((int) segmentMap[i]).append(";length:").append(length).append(";location:").append(pos).append(">");
       pos += SEGMENT_HEADER_SIZE;
 
       byte[] buf = new byte[length];
