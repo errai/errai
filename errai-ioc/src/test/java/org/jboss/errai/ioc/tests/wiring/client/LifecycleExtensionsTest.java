@@ -16,7 +16,6 @@
 
 package org.jboss.errai.ioc.tests.wiring.client;
 
-import org.jboss.errai.ioc.client.container.IOCBeanManager;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
 import org.jboss.errai.ioc.tests.wiring.client.res.LifecycleBean;

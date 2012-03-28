@@ -36,15 +36,14 @@ import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceImpl;
 
 /**
- *
- * @author: Heiko Braun <hbraun@redhat.com>
- * @date: Sep 15, 2010
+ * @author Heiko Braun <hbraun@redhat.com>
  */
 public class ErraiServiceBean implements Bean {
 
   final InjectionTarget it;
   final ErraiService delegate;
 
+  @SuppressWarnings("unchecked")
   public ErraiServiceBean(BeanManager bm, ErraiService delegate) {
 
     //use this to read annotations of the class
@@ -61,6 +60,7 @@ public class ErraiServiceBean implements Bean {
     return ErraiService.class;
   }
 
+  @SuppressWarnings("unchecked")
   public Set<InjectionPoint> getInjectionPoints() {
     return it.getInjectionPoints();
   }
@@ -99,6 +99,7 @@ public class ErraiServiceBean implements Bean {
     return false;
   }
 
+  @SuppressWarnings("unchecked")
   public Object create(CreationalContext ctx) {
     Object instance = delegate;
     it.inject(instance, ctx);
@@ -106,6 +107,7 @@ public class ErraiServiceBean implements Bean {
     return instance;
   }
 
+  @SuppressWarnings("unchecked")
   public void destroy(Object instance, CreationalContext ctx) {
     it.preDestroy(instance);
     it.dispose(instance);

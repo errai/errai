@@ -15,88 +15,32 @@
  */
 package org.jboss.errai.cdi.server;
 
+import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.server.api.ServerMessageBus;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Default;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.InjectionPoint;
+import javax.enterprise.util.AnnotationLiteral;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.Default;
-import javax.enterprise.inject.spi.AnnotatedType;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.InjectionPoint;
-import javax.enterprise.util.AnnotationLiteral;
-
-import org.jboss.errai.bus.client.framework.MessageBus;
-import org.jboss.errai.bus.server.ServerMessageBusImpl;
-import org.jboss.errai.bus.server.api.ServerMessageBus;
-
 /**
  * Basically a bean wrapper that provides CDI meta data.
  * It's used to inject the {@link org.jboss.errai.bus.client.framework.MessageBus} into the CDI context.
  *
- * @author: Heiko Braun <hbraun@redhat.com>
- * @date: Sep 15, 2010
+ * @author Heiko Braun <hbraun@redhat.com>
  */
 public class MessageBusBean implements Bean {
   final MessageBus delegate;
 
-  public MessageBusBean(BeanManager bm, MessageBus delegate) {
-    AnnotatedType at = new AnnotatedType() {
-      public Class getJavaClass() {
-        return ServerMessageBusImpl.class;
-      }
-
-      public Set getConstructors() {
-        return Collections.emptySet();
-      }
-
-      public Set getMethods() {
-        return Collections.emptySet();
-      }
-
-      public Set getFields() {
-        return Collections.emptySet();
-      }
-
-      public Type getBaseType() {
-        return ServerMessageBusImpl.class;
-      }
-
-      public Set<Type> getTypeClosure() {
-        return Collections.emptySet();
-      }
-
-      ApplicationScoped a = new ApplicationScoped() {
-        public Class<? extends Annotation> annotationType() {
-          return ApplicationScoped.class;
-        }
-      };
-
-      public <T extends Annotation> T getAnnotation(Class<T> annotationType) {
-        if (ApplicationScoped.class.isAssignableFrom(annotationType)) {
-          return (T) a;
-        }
-
-        return null;
-      }
-
-      public Set<Annotation> getAnnotations() {
-        return Collections.singleton((Annotation) a);
-      }
-
-      public boolean isAnnotationPresent(Class<? extends Annotation> annotationType) {
-        return ApplicationScoped.class.isAssignableFrom(annotationType);
-      }
-    };
-
-    //use this to create the class and inject dependencies
-    //  this.it = bm.createInjectionTarget(at);
-
+  public MessageBusBean(MessageBus delegate) {
     // invocation target
     this.delegate = delegate;
   }
@@ -106,8 +50,6 @@ public class MessageBusBean implements Bean {
   }
 
   public Set<InjectionPoint> getInjectionPoints() {
-    //   return it.getInjectionPoints();
-
     return Collections.emptySet();
   }
 
@@ -134,8 +76,6 @@ public class MessageBusBean implements Bean {
     Set<Type> types = new HashSet<Type>();
     types.add(MessageBus.class);
     types.add(ServerMessageBus.class);
-    // types.add(ServerMessageBusImpl.class);
-    //    types.add(Object.class);
     return types;
   }
 
@@ -148,15 +88,10 @@ public class MessageBusBean implements Bean {
   }
 
   public Object create(CreationalContext ctx) {
-    //    Object instance = delegate;
-    //      it.inject(instance, ctx);
-    //     it.postConstruct(instance);
     return delegate;
   }
 
   public void destroy(Object instance, CreationalContext ctx) {
-    //     it.preDestroy(instance);
-    //     it.dispose(instance);
     ctx.release();
   }
 }

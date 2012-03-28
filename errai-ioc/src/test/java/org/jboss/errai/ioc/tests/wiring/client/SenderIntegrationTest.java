@@ -1,11 +1,6 @@
 package org.jboss.errai.ioc.tests.wiring.client;
 
-import java.util.Arrays;
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
+import com.google.gwt.user.client.Timer;
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
@@ -17,7 +12,10 @@ import org.jboss.errai.ioc.client.api.Sender;
 import org.jboss.errai.ioc.client.api.ToSubject;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
 
-import com.google.gwt.user.client.Timer;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.Arrays;
+import java.util.List;
 
 public class SenderIntegrationTest extends AbstractErraiIOCTest {
 

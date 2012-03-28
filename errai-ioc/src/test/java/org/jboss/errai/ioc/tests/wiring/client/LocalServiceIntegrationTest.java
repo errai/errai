@@ -16,14 +16,13 @@
 
 package org.jboss.errai.ioc.tests.wiring.client;
 
+import com.google.gwt.user.client.Timer;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Local;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.server.annotations.Service;
-
-import com.google.gwt.user.client.Timer;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
 
 import javax.inject.Singleton;
@@ -32,7 +31,6 @@ import javax.inject.Singleton;
  * @author Mike Brock
  */
 public class LocalServiceIntegrationTest extends AbstractErraiIOCTest {
-
   @Override
   public String getModuleName() {
     return "org.jboss.errai.ioc.tests.wiring.IOCWiringTests";
@@ -113,5 +111,4 @@ public class LocalServiceIntegrationTest extends AbstractErraiIOCTest {
       }
     });
   }
-
 }

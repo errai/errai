@@ -17,8 +17,8 @@
 package org.jboss.errai.ioc.tests.utils;
 
 import junit.framework.TestCase;
-import org.jboss.errai.ioc.rebind.ioc.graph.SortUnit;
 import org.jboss.errai.ioc.rebind.ioc.graph.GraphSort;
+import org.jboss.errai.ioc.rebind.ioc.graph.SortUnit;
 import org.jboss.errai.ioc.tests.utils.res.Bar;
 import org.jboss.errai.ioc.tests.utils.res.Foo;
 import org.jboss.errai.ioc.tests.utils.res.Outer;
@@ -27,21 +27,18 @@ import java.util.HashSet;
 import java.util.List;
 
 import static java.util.Arrays.asList;
-import static java.util.Arrays.sort;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.get;
 
 /**
  * @author Mike Brock
  */
 public class BasicSortAlgoTests extends TestCase {
-
   final SortUnit su1 = sortUnitOf(Foo.class, sortUnitOf(Bar.class));
   final SortUnit su2 = sortUnitOf(Bar.class, hardDep(Foo.class));
   final SortUnit su3 = sortUnitOf(Outer.class, sortUnitOf(Foo.class), sortUnitOf(Bar.class));
   final SortUnit su4 = sortUnitOf(Integer.class, sortUnitOf(Foo.class));
 
   public void testBasicSort() {
-
     List<SortUnit> sorted1 = GraphSort.sortGraph(asList(su2, su1, su3, su4));
     List<SortUnit> sorted2 = GraphSort.sortGraph(asList(su1, su2, su4, su3));
     List<SortUnit> sorted3 = GraphSort.sortGraph(asList(su3, su4, su1, su2));

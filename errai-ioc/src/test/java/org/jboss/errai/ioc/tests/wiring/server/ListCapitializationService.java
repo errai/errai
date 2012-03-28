@@ -1,13 +1,13 @@
 package org.jboss.errai.ioc.tests.wiring.server;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.common.client.protocols.MessageParts;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A service that accepts lists of strings, converts all strings in uppercase,

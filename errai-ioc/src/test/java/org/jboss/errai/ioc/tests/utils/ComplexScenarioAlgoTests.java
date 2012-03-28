@@ -18,8 +18,8 @@ package org.jboss.errai.ioc.tests.utils;
 
 import junit.framework.TestCase;
 import org.jboss.errai.ioc.client.container.IOCBeanManager;
-import org.jboss.errai.ioc.rebind.ioc.graph.SortUnit;
 import org.jboss.errai.ioc.rebind.ioc.graph.GraphSort;
+import org.jboss.errai.ioc.rebind.ioc.graph.SortUnit;
 import org.jboss.errai.ioc.tests.utils.res.AppController;
 import org.jboss.errai.ioc.tests.utils.res.Contacts;
 import org.jboss.errai.ioc.tests.utils.res.ContactsPresenter;
@@ -37,7 +37,6 @@ import static org.jboss.errai.codegen.meta.MetaClassFactory.get;
  * @author Mike Brock
  */
 public class ComplexScenarioAlgoTests extends TestCase {
-
   final SortUnit contactsSU = sortUnitOf(Contacts.class, sortUnitOf(AppController.class));
   final SortUnit handlerMgrSU = sortUnitOf(HandlerManager.class, hardDep(Contacts.class));
   final SortUnit contactsPresSU = sortUnitOf(ContactsPresenter.class, sortUnitOf(HandlerManager.class));
@@ -55,7 +54,6 @@ public class ComplexScenarioAlgoTests extends TestCase {
       assertTrue(comesBefore(sorted, contactsSU, handlerMgrSU));
     }
   }
-
 
   public static boolean comesBefore(List<SortUnit> list, SortUnit compareFrom, SortUnit compareTo) {
     return list.indexOf(compareFrom) < list.indexOf(compareTo);
