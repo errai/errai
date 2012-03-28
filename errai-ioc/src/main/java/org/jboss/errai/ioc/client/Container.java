@@ -34,11 +34,11 @@ public class Container implements EntryPoint {
       InitVotes.waitFor(Container.class);
 
       final Bootstrapper bootstrapper = GWT.create(Bootstrapper.class);
+
       new IOCBeanManagerLifecycle().resetBeanManager();
       final BootstrapperInjectionContext ctx = bootstrapper.bootstrapContainer();
 
-      CreationalContext rootContext = ctx.getRootContext();
-      rootContext.finish();
+      ctx.getRootContext().finish();
 
       InitVotes.voteFor(Container.class);
       return ctx;

@@ -55,8 +55,6 @@ public class TransmissionBuffer implements Buffer {
    */
   private final ByteBuffer _buffer;
 
-  // private final byte[] buffer;
-
   /**
    * The segment map where allocation data is stored
    */
@@ -76,7 +74,6 @@ public class TransmissionBuffer implements Buffer {
    * The total number of allocable segments in the buffer
    */
   final int segments;
-
 
   /**
    * The internal write sequence number used by the writers to allocate write space within the buffer.
@@ -115,7 +112,6 @@ public class TransmissionBuffer implements Buffer {
       this._buffer = ByteBuffer.allocate(bufferSize);
     }
 
-    // buffer = new byte[bufferSize];
     writeBuf(0, (byte) 0);
 
     segmentMap = new short[segments];
@@ -151,7 +147,6 @@ public class TransmissionBuffer implements Buffer {
   public static TransmissionBuffer create(int segmentSize, int segments) {
     return new TransmissionBuffer(false, segmentSize, segments);
   }
-
 
   /**
    * Creates a direct allocated transmission buffer with a custom segment size and segments. The resulting buffer
@@ -192,13 +187,11 @@ public class TransmissionBuffer implements Buffer {
     if (writeSize > bufferSize) {
       throw new RuntimeException("write size larger than buffer can fit");
     }
-    ReentrantLock lock = bufferColor.lock;
+    final ReentrantLock lock = bufferColor.lock;
     lock.lock();
     try {
       final int allocSize = ((writeSize + SEGMENT_HEADER_SIZE) / segmentSize) + 1;
       final long writeHead = writeSequenceNumber.getAndAdd(allocSize);
-      //   final long writeHead = headSequence;
-
       final int seq = (int) writeHead % segments;
 
       int writeCursor = seq * segmentSize;
@@ -251,7 +244,7 @@ public class TransmissionBuffer implements Buffer {
     bufferColor.lock.lock();
 
     // get the current head position.
-    long writeHead = headSequence;
+    final long writeHead = headSequence;
 
     // get the tail position for the color.
     long read = bufferColor.sequence.get();
@@ -271,7 +264,6 @@ public class TransmissionBuffer implements Buffer {
       // release the read lock on this color/
       bufferColor.lock.unlock();
     }
-
   }
 
   /**
@@ -288,7 +280,6 @@ public class TransmissionBuffer implements Buffer {
   public boolean read(final OutputStream outputStream, final BufferColor bufferColor, final BufferCallback callback) throws IOException {
     return read(outputStream, bufferColor, callback, (int) headSequence % segments);
   }
-
 
   /**
    * Reads all the available data of the specified color from the buffer into the provided <tt>OutputStream</tt>
@@ -308,7 +299,7 @@ public class TransmissionBuffer implements Buffer {
 
       try {
         // get the current head position.
-        long writeHead = headSequence;
+        final long writeHead = headSequence;
 
         // get the current tail position for this color.
         long read = bufferColor.sequence.get();
@@ -336,7 +327,6 @@ public class TransmissionBuffer implements Buffer {
     }
     return false;
   }
-
 
   /**
    * Reads from the buffer into the provided <tt>OutputStream</tt>, waiting indefinitely for data to arrive that is
@@ -402,11 +392,12 @@ public class TransmissionBuffer implements Buffer {
                           final OutputStream outputStream, final BufferColor bufferColor) throws IOException, InterruptedException {
     final ReentrantLock lock = bufferColor.getLock();
     lock.lockInterruptibly();
+
     long nanos = unit.toNanos(time);
 
     try {
       for (; ; ) {
-        long read =  bufferColor.sequence.get();
+        long read = bufferColor.sequence.get();
         long lastRead = -1;
 
         while ((read = readNextChunk(headSequence, read, bufferColor, outputStream, null)) != -1) {
@@ -436,7 +427,6 @@ public class TransmissionBuffer implements Buffer {
     }
   }
 
-
   /**
    * Reads from the buffer into the provided <tt>OutputStream</tt>, waiting indefinitely for data
    * of the specified color to become available. Otherwise, the method returns without error, having read nothing.
@@ -452,7 +442,6 @@ public class TransmissionBuffer implements Buffer {
   public boolean readWait(OutputStream outputStream, BufferColor bufferColor, BufferCallback callback) throws IOException, InterruptedException {
     return readWait(TimeUnit.NANOSECONDS, -1, outputStream, bufferColor, callback);
   }
-
 
   /**
    * Reads from the buffer into the provided <tt>OutputStream</tt>, waiting indefinitely for data
@@ -472,8 +461,9 @@ public class TransmissionBuffer implements Buffer {
     final ReentrantLock lock = bufferColor.lock;
     lock.lockInterruptibly();
 
+    long nanos = time == -1 ? 1 : unit.toNanos(time);
+
     try {
-      long nanos = time == -1 ? 1 : unit.toNanos(time);
 
       callback.before(outputStream);
 
@@ -532,7 +522,6 @@ public class TransmissionBuffer implements Buffer {
     return segmentSize;
   }
 
-
   /**
    * Returns the next segment containing data for the specified {@param bufferColor}, up to the specified
    * {@param head} position, from the specified {@param segment} position.
@@ -571,7 +560,6 @@ public class TransmissionBuffer implements Buffer {
         }
       }
     }
-
 
     return -1;
   }
@@ -665,12 +653,10 @@ public class TransmissionBuffer implements Buffer {
 
   private byte getBuf(int idx) {
     return _buffer.get(idx);
-    //  return buffer[idx];
   }
 
   private void writeBuf(int idx, byte v) {
     _buffer.put(idx, v);
-    //  buffer[idx] = v;
   }
 
   private short getSeg(int idx) {
@@ -703,8 +689,6 @@ public class TransmissionBuffer implements Buffer {
       dupBuf.position(pos);
       dupBuf.put(buf, 0, length);
 
-      //  System.arraycopy(buffer, pos, buf, 0, length);
-
       build.append("::'").append(new String(buf)).append("'");
       length += SEGMENT_HEADER_SIZE;
 
@@ -733,7 +717,6 @@ public class TransmissionBuffer implements Buffer {
       ByteBuffer dupBuf = _buffer.duplicate();
       dupBuf.position(pos);
       dupBuf.put(buf, 0, length);
-      //System.arraycopy(buffer, pos, buf, 0, length);
 
       list.add(new String(buf));
 
