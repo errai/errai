@@ -11,8 +11,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.ManagedType;
 import javax.persistence.metamodel.Metamodel;
 import javax.persistence.metamodel.SingularAttribute;
+import javax.persistence.metamodel.Type;
 
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.SnapshotMaker;
@@ -74,7 +76,8 @@ public class ErraiEntityManagerGenerator extends Generator {
       Statement id = null;
       Statement version = null;
       for (SingularAttribute<?, ?> attrib : et.getSingularAttributes()) {
-        Statement attribSnapshot = SnapshotMaker.makeSnapshotAsSubclass(attrib, SingularAttribute.class, entityTypeReference, EntityType.class);
+        Statement attribSnapshot = SnapshotMaker.makeSnapshotAsSubclass(attrib, SingularAttribute.class, entityTypeReference,
+            EntityType.class, ManagedType.class, Type.class);
         if (attrib.isId()) id = attribSnapshot;
         if (attrib.isVersion()) version = attribSnapshot;
 

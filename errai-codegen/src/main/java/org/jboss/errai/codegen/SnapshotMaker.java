@@ -16,6 +16,7 @@ import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.exception.CyclicalObjectGraphException;
 import org.jboss.errai.codegen.exception.GenerationException;
+import org.jboss.errai.codegen.exception.NotLiteralizableException;
 import org.jboss.errai.codegen.literal.NullLiteral;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -119,20 +120,16 @@ public final class SnapshotMaker {
       final Map<Object, Statement> cannedRepresentations,
       final MetaClass ... typesToRecurseOn) {
 
-    final Map<Object, Statement> nonNullCannedReps;
-    if (cannedRepresentations == null) {
-      nonNullCannedReps = Collections.emptyMap();
-    }
-    else {
-      nonNullCannedReps = cannedRepresentations;
+    IdentityHashMap<Object, Statement> existingSnapshots = new IdentityHashMap<Object, Statement>();
+    if (cannedRepresentations != null) {
+      existingSnapshots.putAll(cannedRepresentations);
     }
 
     return makeSnapshotAsSubclass(
         o,
         typeToExtend,
         new HashSet<MetaClass>(Arrays.asList(typesToRecurseOn)),
-        nonNullCannedReps,
-        new IdentityHashMap<Object, Statement>(),
+        existingSnapshots,
         new IdentityHashSet<Object>());
   }
 
@@ -161,7 +158,6 @@ public final class SnapshotMaker {
       final Object o,
       final MetaClass typeToExtend,
       final Set<MetaClass> typesToRecurseOn,
-      final Map<Object, Statement> cannedRepresentations,
       final IdentityHashMap<Object, Statement> existingSnapshots,
       final IdentityHashSet<Object> unfinishedSnapshots) {
 
@@ -175,9 +171,8 @@ public final class SnapshotMaker {
               ") is not an instance of requested type " + typeToExtend.getName());
     }
 
-    if (cannedRepresentations.containsKey(o)) {
-      return cannedRepresentations.get(o);
-    }
+    System.out.println("** Making snapshot of " + o);
+    System.out.println("   Existing snapshots: " + existingSnapshots);
 
     final List<MetaMethod> sortedMethods = Arrays.asList(typeToExtend.getMethods());
     Collections.sort(sortedMethods, new Comparator<MetaMethod>() {
@@ -199,11 +194,20 @@ public final class SnapshotMaker {
       }
     }
 
+    System.out.println("   Creating a new statement");
     return new Statement() {
       String generatedCache;
 
+      /**
+       * We retain a mapping of return values to the methods that returned them,
+       * in case we need to provide diagnostic information when an exception is
+       * thrown.
+       */
+      IdentityHashMap<Object, MetaMethod> methodReturnVals = new IdentityHashMap<Object, MetaMethod>();
+
       @Override
       public String generate(Context context) {
+        System.out.println("++ Statement.generate() for " + o);
         if (generatedCache != null) return generatedCache;
 
         // create a subcontext and record the types we will allow the LiteralFactory to create automatic
@@ -215,33 +219,47 @@ public final class SnapshotMaker {
             .extend();
         unfinishedSnapshots.add(o);
         for (MetaMethod method : sortedMethods) {
+          System.out.println("  method " + method.getName());
+          System.out.println("    return type " + method.getReturnType());
           if (method.getReturnType().equals(void.class)) {
             builder.publicOverridesMethod(method.getName()).finish();
+            System.out.println("  finished method " + method.getName());
             continue;
           }
           try {
 
             final Object retval = typeToExtend.asClass().getMethod(method.getName()).invoke(o);
+            methodReturnVals.put(retval, method);
+            System.out.println("    retval=" + retval);
             Statement methodBody;
             if (existingSnapshots.containsKey(retval)) {
+              System.out.println("    using existing snapshot");
               methodBody = existingSnapshots.get(retval);
             }
-            else if (typesToRecurseOn.contains(method.getReturnType())) {
+            else if (subContext.isLiteralizableClass(method.getReturnType())) {
               if (unfinishedSnapshots.contains(retval)) {
                 throw new CyclicalObjectGraphException(unfinishedSnapshots);
               }
-              System.out.println("Recursing on generate. unfinishedSnapshots=" + unfinishedSnapshots);
 
               // use Stmt.create(context) to pass the context along.
+              System.out.println("    >> recursing for " + retval);
               methodBody = Stmt.create(subContext).nestedCall(makeSnapshotAsSubclass(
-                  retval, method.getReturnType(), typesToRecurseOn, cannedRepresentations, existingSnapshots, unfinishedSnapshots)).returnValue();
+                  retval, method.getReturnType(), typesToRecurseOn, existingSnapshots, unfinishedSnapshots)).returnValue();
             }
             else {
+              System.out.println("    relying on literal factory");
               methodBody = Stmt.load(retval).returnValue();
             }
 
+            System.out.println("  finished method " + method.getName());
+
             builder.publicOverridesMethod(method.getName()).append(methodBody).finish();
             existingSnapshots.put(retval, methodBody);
+          }
+          catch (GenerationException e) {
+            e.appendFailureInfo("In attempt to snapshot return value of "
+                + typeToExtend.getFullyQualifiedName() + "." + method.getName() + "()");
+            throw e;
           }
           catch (RuntimeException e) {
             throw e;
@@ -251,7 +269,24 @@ public final class SnapshotMaker {
           }
         }
 
-        generatedCache = prettyPrintJava(builder.finish().toJavaString());
+        System.out.println("    finished: " + builder);
+
+        try {
+          generatedCache = prettyPrintJava(builder.finish().toJavaString());
+        } catch (NotLiteralizableException e) {
+          MetaMethod m = methodReturnVals.get(e.getNonLiteralizableObject());
+          if (m != null) {
+            e.appendFailureInfo("This value came from method " +
+                  m.getDeclaringClass().getFullyQualifiedNameWithTypeParms() + "." + m.getName() +
+                  ", which has return type " + m.getReturnType());
+          }
+          throw e;
+        } catch (GenerationException e) {
+          e.appendFailureInfo("While generating a snapshot of " + o.toString() +
+              " (actual type: " + o.getClass().getName() +
+              "; type to extend: " + typeToExtend.getFullyQualifiedName() + ")");
+          throw e;
+        }
         unfinishedSnapshots.remove(o);
         return generatedCache;
       }
