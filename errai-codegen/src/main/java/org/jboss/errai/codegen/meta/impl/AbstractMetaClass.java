@@ -523,13 +523,9 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return o instanceof AbstractMetaClass && hashString().equals(((AbstractMetaClass) o).hashString());
   }
 
-
-  int _hashCode;
-
   @Override
   public int hashCode() {
-    if (_hashCode != 0) return _hashCode;
-    return _hashCode = hashString().hashCode();
+    return hashString().hashCode();
   }
 
   private volatile transient Class<?> _asClassCache;
@@ -729,6 +725,6 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   @Override
   public String toString() {
-    return getCanonicalName();
+    return getFullyQualifiedNameWithTypeParms();
   }
 }

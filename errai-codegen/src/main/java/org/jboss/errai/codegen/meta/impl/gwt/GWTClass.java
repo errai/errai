@@ -21,15 +21,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.google.gwt.core.ext.typeinfo.JEnumType;
-
 import org.jboss.errai.codegen.DefModifiers;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.builder.impl.Scope;
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaConstructor;
+import org.jboss.errai.codegen.meta.MetaField;
+import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaTypeVariable;
+import org.jboss.errai.codegen.meta.impl.AbstractMetaClass;
+import org.jboss.errai.codegen.util.GenUtil;
 
 import com.google.gwt.core.ext.typeinfo.JArrayType;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.JConstructor;
+import com.google.gwt.core.ext.typeinfo.JEnumType;
 import com.google.gwt.core.ext.typeinfo.JField;
 import com.google.gwt.core.ext.typeinfo.JGenericType;
 import com.google.gwt.core.ext.typeinfo.JMethod;
@@ -39,14 +45,6 @@ import com.google.gwt.core.ext.typeinfo.JType;
 import com.google.gwt.core.ext.typeinfo.JTypeParameter;
 import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
-
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaConstructor;
-import org.jboss.errai.codegen.meta.MetaField;
-import org.jboss.errai.codegen.meta.MetaMethod;
-import org.jboss.errai.codegen.meta.MetaTypeVariable;
-import org.jboss.errai.codegen.meta.impl.AbstractMetaClass;
-import org.jboss.errai.codegen.util.GenUtil;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -62,7 +60,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
   protected GWTClass(TypeOracle oracle, JType classType, boolean erased) {
     super(classType);
     this.oracle = oracle;
-    
+
     JParameterizedType parameterizedType = classType.isParameterized();
     if (!erased) {
       if (parameterizedType != null) {
@@ -488,10 +486,4 @@ public class GWTClass extends AbstractMetaClass<JType> {
 
     return new GWTClass(oracle, type, false);
   }
-
-  @Override
-  public String toString() {
-    return getFullyQualifiedName();
-  }
-
 }
