@@ -1,9 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>errai-cdi-demos-tagcloud</artifactId>
+  <artifactId>errai-cdi-demo-tagcloud</artifactId>
   <packaging>war</packaging>
-  <name>Errai::CDI::Demos::Tag Cloud</name>
+  <name>Errai::CDI::Demo::Tag Cloud</name>
 
   <parent>
     <groupId>org.jboss.errai</groupId>
