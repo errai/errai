@@ -46,34 +46,57 @@ public class InjectionTask {
   protected final TaskType taskType;
   protected final Injector injector;
 
-  protected MetaConstructor constructor;
-  protected MetaField field;
-  protected MetaMethod method;
-  protected MetaClass type;
-  protected MetaParameter parm;
+  protected final MetaConstructor constructor;
+  protected final MetaField field;
+  protected final MetaMethod method;
+  protected final MetaClass type;
+  protected final MetaParameter parm;
 
   public InjectionTask(Injector injector, MetaField field) {
     this.taskType = !field.isPublic() ? TaskType.PrivateField : TaskType.Field;
     this.injector = injector;
     this.field = field;
+    this.constructor = null;
+    this.method = null;
+    this.parm = null;
+    this.type = null;
   }
 
   public InjectionTask(Injector injector, MetaMethod method) {
     this.taskType = !method.isPublic() ? TaskType.PrivateMethod : TaskType.Method;
     this.injector = injector;
     this.method = method;
+    this.constructor = null;
+    this.field = null;
+    this.parm = null;
+    this.type = null;
   }
 
   public InjectionTask(Injector injector, MetaParameter parm) {
     this.taskType = TaskType.Parameter;
     this.injector = injector;
     this.parm = parm;
+    this.field = null;
+    this.type = null;
+
+    if (parm.getDeclaringMember() instanceof MetaConstructor) {
+      this.constructor = (MetaConstructor) parm.getDeclaringMember();
+      this.method = null;
+    }
+    else {
+      this.method = (MetaMethod) parm.getDeclaringMember();
+      this.constructor = null;
+    }
   }
 
   public InjectionTask(Injector injector, MetaClass type) {
     this.taskType = TaskType.Type;
     this.injector = injector;
     this.type = type;
+    this.constructor = null;
+    this.field = null;
+    this.method = null;
+    this.parm = null;
   }
 
   @SuppressWarnings({"unchecked"})
@@ -223,37 +246,46 @@ public class InjectionTask {
     }
     else {
       //todo: refactor the InjectionContext to provide a cleaner API for interface delegates
+
+      // try to inject it
       try {
-        // handle the case that this is an auto resolved interface
-        Injector inj = ctx.getQualifiedInjector(clazz, qualifyingMetadata);
-        if (inj instanceof QualifiedTypeInjectorDelegate) {
-          return inj.getBeanInstance(injectableInstance);
-        }
-        else if (inj != null) {
-          Statement retStatement = inj.getBeanInstance(injectableInstance);
+        if (ctx.isInjectorRegistered(clazz, qualifyingMetadata)) {
+          Injector inj = ctx.getQualifiedInjector(clazz, qualifyingMetadata);
 
-          if (inj.isProvider() && inj.getEnclosingType() != null &&
-                  ctx.isProxiedInjectorRegistered(inj.getEnclosingType(),
-                          ctx.getProcessingContext().getQualifyingMetadataFactory().createDefaultMetadata())) {
+          if (inj.isProvider()) {
+            ProxyInjector proxyInjector;
+            ctx.recordCycle(inj.getEnclosingType(), injectableInstance.getEnclosingType());
+            proxyInjector = new ProxyInjector(ctx.getProcessingContext(), inj.getEnclosingType(), qualifyingMetadata);
+            ctx.addProxiedInjector(proxyInjector);
 
-            ProxyInjector proxyInjector = (ProxyInjector) ctx.getProxiedInjector(inj.getEnclosingType(),
-                    ctx.getProcessingContext().getQualifyingMetadataFactory().createDefaultMetadata());
-
-            return new HandleInProxy(proxyInjector, retStatement);
+            /**
+             * Inform the caller that we are in a proxy and that the operation they're doing must
+             * necesarily be done within the ProxyResolver resolve operation since this provider operation
+             * relies on a bean which is not yet available.
+             */
+            return new HandleInProxy(proxyInjector, inj.getBeanInstance(injectableInstance));
           }
-
-          return retStatement;
+          else {
+            return inj.getBeanInstance(injectableInstance);
+          }
         }
-
       }
-      catch (Exception e) {
-        // fall through for now and assume a proxy is needed.
+      catch (InjectionFailure e) {
       }
 
       ctx.recordCycle(clazz, injectableInstance.getEnclosingType());
 
-      ProxyInjector proxyInjector = new ProxyInjector(ctx.getProcessingContext(), clazz, qualifyingMetadata);
-      ctx.addProxiedInjector(proxyInjector);
+      final ProxyInjector proxyInjector;
+      if (ctx.isProxiedInjectorRegistered(clazz, qualifyingMetadata)) {
+        proxyInjector = (ProxyInjector)
+                ctx.getProxiedInjector(clazz, qualifyingMetadata);
+      }
+      else {
+        proxyInjector = new ProxyInjector(ctx.getProcessingContext(), clazz, qualifyingMetadata);
+        ctx.addProxiedInjector(proxyInjector);
+      }
+
+
       return proxyInjector.getBeanInstance(injectableInstance);
     }
   }
@@ -268,7 +300,7 @@ public class InjectionTask {
         break;
 
       default:
-        ctx.getProcessingContext().handleDiscoveryOfType(injectableInstance);
+        //  ctx.getProcessingContext().handleDiscoveryOfType(injectableInstance);
     }
 
     return injectableInstance;
@@ -276,16 +308,6 @@ public class InjectionTask {
 
   public Injector getInjector() {
     return injector;
-  }
-
-  public void setMethod(MetaMethod method) {
-    if (this.method == null)
-      this.method = method;
-  }
-
-  public void setField(MetaField field) {
-    if (this.field == null)
-      this.field = field;
   }
 
   public String toString() {

@@ -36,7 +36,7 @@ public class ProviderInjector extends TypeInjector {
     this.testmock = context.isElementType(WiringElementType.TestMockBean, providerType);
     this.singleton = context.isElementType(WiringElementType.SingletonBean, providerType);
     this.alternative = context.isElementType(WiringElementType.AlternativeBean, type);
-    this.rendered = true;
+    setRendered(true);
   }
 
   @Override

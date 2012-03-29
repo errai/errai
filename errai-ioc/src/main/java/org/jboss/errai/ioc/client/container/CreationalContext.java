@@ -117,7 +117,8 @@ public class CreationalContext {
         unresolvedIterator.remove();
       }
       else {
-        Object beanInstance = IOC.getBeanManager().lookupBean(entry.getKey().getClazz(), entry.getKey().getAnnotations())
+        IOCBeanDef<?> iocBeanDef = IOC.getBeanManager().lookupBean(entry.getKey().getClazz(), entry.getKey().getAnnotations());
+        Object beanInstance = iocBeanDef
                 .getInstance(this);
 
         if (beanInstance != null) {

@@ -31,7 +31,7 @@ import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
  * to the underlying bean. For instance if two beans implement a common interface, with two different type
  * parameters, each bean will be wrapped in this injector and added as common injectors to the interface.
  *
- * @author Mike Brock <cbrock@redhat.com>
+ * @author Mike Brock
  */
 public class QualifiedTypeInjectorDelegate extends AbstractInjector {
   private MetaClass type;

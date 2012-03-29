@@ -62,7 +62,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
   protected GWTClass(TypeOracle oracle, JType classType, boolean erased) {
     super(classType);
     this.oracle = oracle;
-    
+
     JParameterizedType parameterizedType = classType.isParameterized();
     if (!erased) {
       if (parameterizedType != null) {
@@ -385,20 +385,15 @@ public class GWTClass extends AbstractMetaClass<JType> {
   @Override
   public Annotation[] getAnnotations() {
     if (annotationsCache == null) {
-//      try {
-//        Class<?> cls = Class.forName(getEnclosedMetaObject().getQualifiedSourceName(), false,
-//                Thread.currentThread().getContextClassLoader());
+      JClassType classOrInterface = getEnclosedMetaObject().isClassOrInterface();
 
+      if (classOrInterface != null) {
+        annotationsCache = classOrInterface.getAnnotations();
+      }
 
-      annotationsCache = getEnclosedMetaObject().isClassOrInterface().getAnnotations();
       if (annotationsCache == null) {
         annotationsCache = new Annotation[0];
       }
-//
-//      }
-//      catch (ClassNotFoundException e) {
-//        e.printStackTrace();
-//      }
     }
 
     return annotationsCache;

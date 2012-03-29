@@ -16,7 +16,6 @@
 
 package org.jboss.errai.ioc.rebind.ioc.injector.api;
 
-import java.lang.annotation.Annotation;
 
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.meta.MetaClass;
@@ -25,6 +24,8 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
+
+import java.lang.annotation.Annotation;
 
 public class DecoratorTask extends InjectionTask {
   private final IOCDecoratorExtension[] IOCExtensions;

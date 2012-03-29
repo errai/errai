@@ -16,59 +16,40 @@
 
 package org.jboss.errai.ioc.rebind.ioc.graph;
 
+import com.google.gwt.dev.util.collect.IdentityHashSet;
 import org.jboss.errai.codegen.meta.MetaClass;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 /**
  * @author Mike Brock
  */
-public class SortUnit implements Comparable<SortUnit> {
+public class SortUnit implements Comparable<SortUnit>, GraphNode {
+
   private final MetaClass type;
   private final List<Object> items;
   private final Set<SortUnit> dependencies;
   private final boolean hard;
 
-  public SortUnit(MetaClass type) {
-    this.type = type;
-    this.dependencies = Collections.emptySet();
-    this.items = new ArrayList<Object>();
-    this.hard = false;
-  }
-
-  public SortUnit(MetaClass type, boolean hard) {
-    this.type = type;
-    this.dependencies = Collections.emptySet();
-    this.items = new ArrayList<Object>();
+  protected SortUnit(MetaClass type, List<Object> items, Set<SortUnit> dependencies, boolean hard) {
+    this.type = type.getErased();
+    this.items = Collections.unmodifiableList(items);
+    this.dependencies = Collections.unmodifiableSet(dependencies);
     this.hard = hard;
   }
 
-  public SortUnit(MetaClass type, Object item) {
-    this(type, item, Collections.<SortUnit>emptySet());
+  public static SortUnit create(MetaClass type, Collection<Object> items, Collection<SortUnit> dependencies, boolean hard) {
+    return new SortUnit(type, new ArrayList<Object>(items), new HashSet<SortUnit>(dependencies), hard);
   }
 
-  public SortUnit(MetaClass type, Object item, Set<SortUnit> dependencies) {
-    this.type = type;
-    this.items = new ArrayList<Object>();
-    if (item != null) {
-      this.items.add(item);
-    }
-    this.dependencies = dependencies;
-    this.hard = false;
-  }
-
-  public SortUnit(MetaClass type, List<Object> items, Set<SortUnit> dependencies, boolean hard) {
-    this.type = type;
-    this.items = items;
-    this.dependencies = dependencies;
-    this.hard = hard;
-  }
-
-  public void addItem(Object item) {
-    items.add(item);
+  public static SortUnit copyOfAsHard(SortUnit toCopy) {
+    return new SortUnit(toCopy.getType(), toCopy.getItems(), toCopy.getDependencies(), true);
   }
 
   public MetaClass getType() {
@@ -99,7 +80,7 @@ public class SortUnit implements Comparable<SortUnit> {
     for (SortUnit su : getDependencies()) {
       if (su.equals(this)) continue;
 
-      int d = _getDepth(this, 1, su);
+      int d = _getDepth(new IdentityHashSet<SortUnit>(), this, 1, su);
       if (d > depth) {
         depth = d;
       }
@@ -107,11 +88,18 @@ public class SortUnit implements Comparable<SortUnit> {
     return depth;
   }
 
-  private static int _getDepth(SortUnit outer, int depth, SortUnit su) {
+
+  private static int _getDepth(Set<SortUnit> visited, SortUnit outer, int depth, SortUnit su) {
+    if (visited.contains(su)) {
+      return 0;
+    }
+
+    visited.add(su);
+
     for (SortUnit dep : su.getDependencies()) {
       if (dep.equals(outer)) continue;
 
-      int d = _getDepth(outer, depth + 1, dep);
+      int d = _getDepth(visited, outer, depth + 1, dep);
       if (d > depth) {
         depth = d;
       }
@@ -127,14 +115,13 @@ public class SortUnit implements Comparable<SortUnit> {
 
     SortUnit sortUnit = (SortUnit) o;
 
-    return type != null && type.equals(sortUnit.type);
+    return type != null && type.getFullyQualifiedName().equals(sortUnit.type.getFullyQualifiedName());
   }
 
   @Override
   public int compareTo(SortUnit o) {
     if (o.getDependencies().contains(this) && getDependencies().contains(o)) {
-
-      if (o.getDependencies().contains(this) &&  o.getDependency(this).isHard()) {
+      if (o.getDependencies().contains(this) && o.getDependency(this).isHard()) {
         return 0;
       }
       else if (getDependencies().contains(o) && getDependency(o).isHard()) {
@@ -150,11 +137,35 @@ public class SortUnit implements Comparable<SortUnit> {
 
   @Override
   public int hashCode() {
-    return type != null ? type.hashCode() : 0;
+    return type != null ? type.getFullyQualifiedName().hashCode() * 37 : 0;
   }
 
   @Override
   public String toString() {
-    return " (depth:" + getDepth() + ";hard=" + hard + ")" + type.toString() + " => " + dependencies;
+    return _toString(new HashSet<SortUnit>());
+  }
+
+  private String _toString(Set<SortUnit> visited) {
+    return "(depth:" + getDepth() + ";hard=" + hard + ")" + type.toString()
+            + " => " + _renderDependencyTree(visited, this);
+  }
+
+
+  private static String _renderDependencyTree(Set<SortUnit> visited, SortUnit visit) {
+    if (visited.contains(visit)) {
+      return "<CYCLE>";
+    }
+    visited.add(visit);
+
+    StringBuilder sb = new StringBuilder("[");
+    Iterator<SortUnit> iter = visit.dependencies.iterator();
+    while (iter.hasNext()) {
+      sb.append(iter.next()._toString(visited));
+      if (iter.hasNext()) {
+        sb.append(", ");
+      }
+    }
+
+    return sb.append("]").toString();
   }
 }

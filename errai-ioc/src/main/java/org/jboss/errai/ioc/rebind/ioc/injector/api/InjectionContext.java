@@ -406,6 +406,17 @@ public class InjectionContext {
     return unmodifiableCollection(elementBindings.get(type));
   }
 
+  public boolean isAnyKnownElementType(HasAnnotations hasAnnotations) {
+    return isAnyOfElementTypes(hasAnnotations, WiringElementType.values());
+  }
+
+  public boolean isAnyOfElementTypes(HasAnnotations hasAnnotations, WiringElementType... types) {
+    for (WiringElementType t : types) {
+      if (isElementType(t, hasAnnotations)) return true;
+    }
+    return false;
+  }
+
   public boolean isElementType(WiringElementType type, HasAnnotations hasAnnotations) {
     for (Annotation a : hasAnnotations.getAnnotations()) {
       if (getAnnotationsForElementType(type).contains(a.annotationType())) {

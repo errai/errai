@@ -49,6 +49,8 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
  * This injector implementation is responsible for the lion's share of the container's workload. It is responsible
  * for generating the <tt>CreationalContext</tt>'s which produce instances of beans. It is also responsible for
  * handling the differences in semantics between singleton and dependent-scoped beans.
+ *
+ * @author Mike Brock
  */
 public class TypeInjector extends AbstractInjector {
   protected final MetaClass type;
@@ -92,7 +94,7 @@ public class TypeInjector extends AbstractInjector {
 
   private Statement _getType(InjectableInstance injectableInstance) {
     // check to see if this injector has already been injected
-    if (isRendered()) {
+    if (isCreated()) {
       if (isSingleton() && !hasNewQualifier(injectableInstance)) {
 
         /*
@@ -157,7 +159,7 @@ public class TypeInjector extends AbstractInjector {
         callbackBuilder.append(loadVariable("context").invoke("addBean", Refs.get("beanRef"), Refs.get(varName)));
 
         /* mark this injector as injected so we don't go into a loop if there is a cycle. */
-        setRendered(true);
+        setCreated(true);
       }
     });
 
@@ -201,25 +203,13 @@ public class TypeInjector extends AbstractInjector {
     }
 
     /*
-     check to see if there is an unclosed proxy in the context for which this injector satisfies.
+      notify any component waiting for this type that is is ready now.
      */
-    if (injectContext.isProxiedInjectorAvailable(type, qualifyingMetadata)) {
-      /*
-       cool. we satisfy this proxy. let's get an instance of the proxy.
-       */
-      ProxyInjector proxyInjector = (ProxyInjector) injectContext.getProxiedInjector(type, qualifyingMetadata);
 
-      /*
-      pass the instance of this bean into the proxy to close the proxy.
-      */
-      proxyInjector.setProxyStatement(retVal);
+    setRendered(true);
 
-      /*
-      mark the proxy closed.
-       */
-      proxyInjector.setProxyClosed(true);
-    }
-
+    injectableInstance.getInjectionContext().getProcessingContext()
+            .handleDiscoveryOfType(injectableInstance);
     /*
       return the reference to this bean to whoever called us.
      */

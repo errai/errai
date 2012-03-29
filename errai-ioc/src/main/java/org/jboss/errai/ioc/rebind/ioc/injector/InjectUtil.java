@@ -99,7 +99,7 @@ public class InjectUtil {
         @Override
         public void generateConstructor(ConstructionStatusCallback callback) {
           Statement[] parameterStatements = resolveInjectionDependencies(constructor.getParameters(), ctx, constructor);
-          if (injector.isSingleton() && injector.isRendered()) return;
+          if (injector.isSingleton() && injector.isCreated()) return;
 
           IOCProcessingContext processingContext = ctx.getProcessingContext();
 
@@ -130,7 +130,7 @@ public class InjectUtil {
       return new ConstructionStrategy() {
         @Override
         public void generateConstructor(ConstructionStatusCallback callback) {
-          if (injector.isSingleton() && injector.isRendered()) return;
+          if (injector.isSingleton() && injector.isCreated()) return;
 
           IOCProcessingContext processingContext = ctx.getProcessingContext();
 
@@ -286,7 +286,6 @@ public class InjectUtil {
             }
             else {
               InjectionTask task = new InjectionTask(injector, meth);
-              task.setField(field);
               accumulator.add(task);
             }
 
@@ -334,7 +333,6 @@ public class InjectUtil {
                 for (MetaParameter parameter : meth.getParameters()) {
                   if (parameter.isAnnotationPresent(a)) {
                     DecoratorTask task = new DecoratorTask(injector, parameter, ctx.getDecorator(a));
-                    task.setMethod(meth);
                     accumulator.add(task);
                   }
                 }

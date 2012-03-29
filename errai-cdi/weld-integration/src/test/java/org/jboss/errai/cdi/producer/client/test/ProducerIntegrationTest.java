@@ -2,7 +2,9 @@ package org.jboss.errai.cdi.producer.client.test;
 
 
 import org.jboss.errai.cdi.producer.client.ProducerDependentTestBean;
+import org.jboss.errai.cdi.producer.client.ProducerDependentTestBeanWithCycle;
 import org.jboss.errai.cdi.producer.client.ProducerTestModule;
+import org.jboss.errai.cdi.producer.client.ProducerTestModuleWithCycle;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.container.IOC;
 
@@ -75,5 +77,14 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
   public void testStaticProducers() {
     assertNotNull("bean was not injected!", testBean.getStaticallyProducedBean());
     assertNotNull("bean was not injected!", testBean.getStaticallyProducedBeanB());
+  }
+
+  public void testCycleThroughAProducedInterface() {
+    ProducerDependentTestBeanWithCycle bean = IOC.getBeanManager()
+            .lookupBean(ProducerDependentTestBeanWithCycle.class).getInstance();
+
+    assertNotNull(bean);
+    assertNotNull(bean.getFooface());
+    assertEquals("HiThere", bean.getFooface().getMessage());
   }
 }

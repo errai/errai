@@ -36,6 +36,12 @@ public interface Injector {
   boolean isRendered();
 
   /**
+   * Checks if construction has begun.
+   * @return
+   */
+  public boolean isCreated();
+
+  /**
    * Checks if the injector for a singleton bean.
    * @return true if the injector handles a singleton bean.
    */

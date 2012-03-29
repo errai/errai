@@ -41,7 +41,7 @@ public class ContextualProviderInjector extends TypeInjector {
     this.singleton = context.isElementType(WiringElementType.SingletonBean, providerType);
     this.alternative = context.isElementType(WiringElementType.AlternativeBean, providerType);
 
-    rendered = true;
+    setRendered(true);
   }
 
   @Override
@@ -50,6 +50,8 @@ public class ContextualProviderInjector extends TypeInjector {
     MetaParameterizedType pType = null;
 
     switch (injectableInstance.getTaskType()) {
+      case Type:
+        return null;
       case PrivateField:
       case Field:
         MetaField field = injectableInstance.getField();

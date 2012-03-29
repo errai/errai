@@ -16,8 +16,9 @@
 
 package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.google.gwt.core.ext.TreeLogger.Type;
-
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -36,6 +37,8 @@ import org.jboss.errai.ioc.rebind.ioc.extension.JSR330AnnotationHandler;
 import org.jboss.errai.ioc.rebind.ioc.extension.ProvidedClassAnnotationHandler;
 import org.jboss.errai.ioc.rebind.ioc.extension.Rule;
 import org.jboss.errai.ioc.rebind.ioc.extension.RuleDef;
+import org.jboss.errai.ioc.rebind.ioc.graph.Dependency;
+import org.jboss.errai.ioc.rebind.ioc.graph.GraphBuilder;
 import org.jboss.errai.ioc.rebind.ioc.graph.SortUnit;
 import org.jboss.errai.ioc.rebind.ioc.injector.AbstractInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.ContextualProviderInjector;
@@ -48,15 +51,15 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.TypeDiscoveryListener;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 import org.jboss.errai.ioc.rebind.ioc.metadata.JSR330QualifyingMetadata;
 
+import javax.enterprise.context.Dependent;
 import javax.inject.Provider;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -70,8 +73,14 @@ import static org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance.get
 
 @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
 public class IOCProcessorFactory {
-  private SortedSet<ProcessingEntry> processingEntries = new TreeSet<ProcessingEntry>();
-  private Map<SortUnit, SortUnit> delegates = new LinkedHashMap<SortUnit, SortUnit>();
+  private GraphBuilder graphBuilder = new GraphBuilder();
+  private Stack<SortedSet<ProcessingEntry>> processingTasksStack = new Stack<SortedSet<ProcessingEntry>>();
+
+  // private Multimap<Class<? extends  Annotation>, MetaClass> processedTasks = HashMultimap.create();
+
+  //  private Set<Class<?>> allDiscoveredDependentScopedBeans = new HashSet<Class<?>>();
+//  private Set<Class<?>> discoveredDependentScopeBeans = new HashSet<Class<?>>();
+  private Set<Class<?>> processedBeans = new HashSet<Class<?>>();
 
   private InjectionContext injectionContext;
 
@@ -80,23 +89,18 @@ public class IOCProcessorFactory {
   }
 
   public void registerHandler(Class<? extends Annotation> annotation, AnnotationHandler handler) {
-    processingEntries.add(new ProcessingEntry(annotation, handler));
+    getProcessingTasksSet().add(new ProcessingEntry(annotation, handler));
   }
 
   public void registerHandler(Class<? extends Annotation> annotation, AnnotationHandler handler, List<RuleDef> rules) {
-    processingEntries.add(new ProcessingEntry(annotation, handler, rules));
+    getProcessingTasksSet().add(new ProcessingEntry(annotation, handler, rules));
   }
 
-  private void addToDelegates(SortUnit unit) {
-    if (delegates.containsKey(unit)) {
-      SortUnit existing = delegates.get(unit);
-      for (Object o : unit.getItems()) {
-        existing.addItem(o);
-      }
+  protected SortedSet<ProcessingEntry> getProcessingTasksSet() {
+    if (processingTasksStack.isEmpty()) {
+      processingTasksStack.push(new TreeSet<ProcessingEntry>());
     }
-    else {
-      delegates.put(unit, unit);
-    }
+    return processingTasksStack.peek();
   }
 
   class DependencyControlImpl implements DependencyControl {
@@ -113,31 +117,40 @@ public class IOCProcessorFactory {
     }
 
     @Override
-    public void addType(final Class<? extends Annotation> annotation, final Class clazz) {
-      if (tasksStack.isEmpty()) {
-        tasksStack.push(new TreeSet<ProcessingEntry>());
+    public void notifyDependency(final MetaClass clazz) {
+
+      if (injectionContext.isAnyKnownElementType(clazz)) {
+        graphBuilder.addDependency(masqueradeClass, Dependency.on(clazz));
       }
-      tasksStack.peek().add(new ProcessingEntry(annotation, new ProvidedClassAnnotationHandler() {
+//
+//      try {
+//
+//        if (!allDiscoveredDependentScopedBeans.contains(clazz.asClass())
+//                && !injectionContext.isAnyKnownElementType(clazz)) {
+//
+//          allDiscoveredDependentScopedBeans.add(clazz.asClass());
+//          if (discoveredDependentScopeBeans.isEmpty()) {
+//            registerHandler(Dependent.class, new JSR330AnnotationHandler() {
+//              @Override
+//              public boolean handle(InjectableInstance instance, Annotation annotation, IOCProcessingContext context) {
+//              //  injectionContext.getInjector(instance.getType()).getBeanInstance(instance);
+//                return true;
+//              }
+//            });
+//          }
+//          discoveredDependentScopeBeans.add(clazz.asClass());
+//        }
+//      }
+//      catch (UnsupportedOperationException e) {
+//        // can't properly handle this right now -- must be a generated class :(
+//      }
+    }
 
-        @Override
-        public void registerMetadata(InjectableInstance instance, Annotation annotation, IOCProcessingContext context) {
-        }
-
-        @Override
-        public Set<Class> getClasses() {
-          return Collections.singleton(clazz);
-        }
-
-        @Override
-        public Set<SortUnit> getDependencies(DependencyControl control, InjectableInstance instance, Annotation annotation, IOCProcessingContext context) {
-          return Collections.emptySet();
-        }
-
-        @Override
-        public boolean handle(InjectableInstance instance, Annotation annotation, IOCProcessingContext context) {
-          return false;
-        }
-      }));
+    @Override
+    public void notifyDependencies(Collection<MetaClass> clazzes) {
+      for (MetaClass clazz : clazzes) {
+        notifyDependency(clazz);
+      }
     }
   }
 
@@ -147,8 +160,8 @@ public class IOCProcessorFactory {
         case TopLevelProvider:
           registerHandler(entry.getValue(), new JSR330AnnotationHandler() {
             @Override
-            public Set<SortUnit> getDependencies(DependencyControl control, InjectableInstance instance,
-                                                 Annotation annotation, IOCProcessingContext context) {
+            public void getDependencies(DependencyControl control, InjectableInstance instance,
+                                        Annotation annotation, IOCProcessingContext context) {
 
               final MetaClass providerClassType = instance.getType();
               final MetaClass MC_Provider = MetaClassFactory.get(Provider.class);
@@ -219,7 +232,7 @@ public class IOCProcessorFactory {
               }
 
               control.masqueradeAs(providedType);
-              return super.getDependencies(control, instance, annotation, context);
+              super.getDependencies(control, instance, annotation, context);
             }
 
             @Override
@@ -240,8 +253,8 @@ public class IOCProcessorFactory {
         case ProducerElement:
           registerHandler(entry.getValue(), new JSR330AnnotationHandler() {
             @Override
-            public Set<SortUnit> getDependencies(DependencyControl control, final InjectableInstance instance, Annotation annotation,
-                                                 final IOCProcessingContext context) {
+            public void getDependencies(DependencyControl control, final InjectableInstance instance, Annotation annotation,
+                                        final IOCProcessingContext context) {
 
               switch (instance.getTaskType()) {
                 case Type:
@@ -308,7 +321,7 @@ public class IOCProcessorFactory {
               });
 
               control.masqueradeAs(instance.getElementTypeOrMethodReturnType());
-              return Collections.singleton(new SortUnit(instance.getEnclosingType(), true));
+              control.notifyDependency(instance.getEnclosingType());
             }
 
             @Override
@@ -338,10 +351,6 @@ public class IOCProcessorFactory {
   @SuppressWarnings({"unchecked"})
   public void process(final MetaDataScanner scanner, final IOCProcessingContext context) {
     inferHandlers();
-
-    Stack<SortedSet<ProcessingEntry>> processingTasksStack = new Stack<SortedSet<ProcessingEntry>>();
-    processingTasksStack.push(processingEntries);
-
     /**
      * Let's accumulate all the processing tasks.
      */
@@ -379,6 +388,16 @@ public class IOCProcessorFactory {
                 classes = scanner.getTypesAnnotatedWith(annoClass, context.getPackages());
               }
 
+              // hack for lately discovered @Dependent beans
+//              if (annoClass.equals(Dependent.class)) {
+//                classes.addAll(discoveredDependentScopeBeans);
+//                discoveredDependentScopeBeans.clear();
+
+//                classes.removeAll(processedBeans);
+//                processedBeans.addAll(classes);
+//              }
+
+
               for (final Class<?> clazz : classes) {
                 handleType(entry, dependencyControl, clazz, annoClass, context);
               }
@@ -407,7 +426,9 @@ public class IOCProcessorFactory {
     }
     while (!processingTasksStack.isEmpty());
 
-    List<SortUnit> list = sortGraph(delegates.keySet());
+    List<SortUnit> toSort = graphBuilder.build();
+
+    List<SortUnit> list = sortGraph(toSort);
 
     for (SortUnit unit : list) {
       for (Object item : unit.getItems()) {
@@ -430,6 +451,10 @@ public class IOCProcessorFactory {
     final Annotation anno = clazz.getAnnotation(aClass);
     final MetaClass type = MetaClassFactory.get(clazz);
 
+//    if (processedTasks.containsEntry(aClass, type)) return;
+//    processedTasks.put(aClass, type);
+
+
     dependencyControl.masqueradeAs(type);
 
     if (!IOCGenerator.isTestMode) {
@@ -443,8 +468,8 @@ public class IOCProcessorFactory {
 
     ProcessingDelegate del = new ProcessingDelegate() {
       @Override
-      public Set<SortUnit> getRequiredDependencies() {
-        return entry.handler.getDependencies(dependencyControl, injectableInstance, anno, context);
+      public void processDependencies() {
+        entry.handler.getDependencies(dependencyControl, injectableInstance, anno, context);
       }
 
       @Override
@@ -466,8 +491,11 @@ public class IOCProcessorFactory {
 
     entry.handler.registerMetadata(injectableInstance, anno, context);
 
-    Set<SortUnit> requiredDependencies = del.getRequiredDependencies();
-    addToDelegates(new SortUnit(((DependencyControlImpl) dependencyControl).masqueradeClass, del, requiredDependencies));
+    del.processDependencies();
+
+    final MetaClass masq = ((DependencyControlImpl) dependencyControl).masqueradeClass;
+
+    graphBuilder.addItem(masq, del);
   }
 
   @SuppressWarnings("unchecked")
@@ -479,6 +507,10 @@ public class IOCProcessorFactory {
 
     final Annotation anno = method.getAnnotation(annoClass);
     final MetaClass type = MetaClassFactory.get(method.getDeclaringClass());
+
+//    if (processedTasks.containsEntry(annoClass, type)) return;
+//    processedTasks.put(annoClass, type);
+
     final MetaMethod metaMethod = MetaClassFactory.get(method);
 
     dependencyControl.masqueradeAs(type);
@@ -489,8 +521,8 @@ public class IOCProcessorFactory {
 
     ProcessingDelegate del = new ProcessingDelegate() {
       @Override
-      public Set<SortUnit> getRequiredDependencies() {
-        return entry.handler.getDependencies(dependencyControl, injectableInstance, anno, context);
+      public void processDependencies() {
+        entry.handler.getDependencies(dependencyControl, injectableInstance, anno, context);
       }
 
       @Override
@@ -513,8 +545,11 @@ public class IOCProcessorFactory {
 
     entry.handler.registerMetadata(injectableInstance, anno, context);
 
-    Set<SortUnit> requiredDependencies = del.getRequiredDependencies();
-    addToDelegates(new SortUnit(((DependencyControlImpl) dependencyControl).masqueradeClass, del, requiredDependencies));
+    del.processDependencies();
+
+    final MetaClass masq = ((DependencyControlImpl) dependencyControl).masqueradeClass;
+
+    graphBuilder.addItem(masq, del);
   }
 
   private void handleField(final ProcessingEntry entry,
@@ -525,6 +560,10 @@ public class IOCProcessorFactory {
 
     final Annotation anno = field.getAnnotation(annoClass);
     final MetaClass type = MetaClassFactory.get(field.getDeclaringClass());
+
+//    if (processedTasks.containsEntry(annoClass, type)) return;
+//    processedTasks.put(annoClass, type);
+
     final MetaField metaField = MetaClassFactory.get(field);
 
     dependencyControl.masqueradeAs(type);
@@ -532,12 +571,12 @@ public class IOCProcessorFactory {
     ProcessingDelegate del = new ProcessingDelegate() {
       @SuppressWarnings("unchecked")
       @Override
-      public Set<SortUnit> getRequiredDependencies() {
+      public void processDependencies() {
         final InjectableInstance injectableInstance
                 = InjectableInstance.getFieldInjectedInstance(anno, metaField, null,
                 injectionContext);
 
-        return entry.handler.getDependencies(dependencyControl, injectableInstance, anno, context);
+        entry.handler.getDependencies(dependencyControl, injectableInstance, anno, context);
       }
 
       @SuppressWarnings("unchecked")
@@ -562,8 +601,11 @@ public class IOCProcessorFactory {
 
     };
 
-    Set<SortUnit> requiredDependencies = del.getRequiredDependencies();
-    addToDelegates(new SortUnit(((DependencyControlImpl) dependencyControl).masqueradeClass, del, requiredDependencies));
+    del.processDependencies();
+
+    final MetaClass masq = ((DependencyControlImpl) dependencyControl).masqueradeClass;
+
+    graphBuilder.addItem(masq, del);
   }
 
   private class ProcessingEntry implements Comparable<ProcessingEntry> {
@@ -627,6 +669,6 @@ public class IOCProcessorFactory {
   private static interface ProcessingDelegate {
     public boolean process();
 
-    public Set<SortUnit> getRequiredDependencies();
+    public void processDependencies();
   }
 }

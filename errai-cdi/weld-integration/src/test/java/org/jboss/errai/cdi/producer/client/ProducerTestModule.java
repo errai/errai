@@ -2,6 +2,7 @@ package org.jboss.errai.cdi.producer.client;
 
 import java.util.Random;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 
 import org.jboss.errai.cdi.client.qualifier.A;
@@ -16,7 +17,7 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@EntryPoint
+@ApplicationScoped
 public class ProducerTestModule {
   @Produces
   private static StaticallyProducedBeanB staticallyProducedBeanB = new StaticallyProducedBeanB();
@@ -52,7 +53,6 @@ public class ProducerTestModule {
   private static StaticallyProducedBean produceStaticallyProducedBean() {
     return new StaticallyProducedBean();
   }
-
 
   public Integer getNumberA() {
     return numberA;

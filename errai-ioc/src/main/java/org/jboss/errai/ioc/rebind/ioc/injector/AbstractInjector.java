@@ -38,7 +38,8 @@ public abstract class AbstractInjector implements Injector {
 
   protected boolean testmock;
   protected boolean alternative;
-  protected boolean rendered;
+  private boolean created;
+  private boolean rendered;
   protected boolean singleton;
   protected boolean replaceable;
   protected boolean provider;
@@ -84,6 +85,14 @@ public abstract class AbstractInjector implements Injector {
   @Override
   public MetaClass getEnclosingType() {
     return enclosingType;
+  }
+
+  public boolean isCreated() {
+    return created;
+  }
+
+  public void setCreated(boolean created) {
+    this.created = created;
   }
 
   public void setRendered(boolean rendered) {

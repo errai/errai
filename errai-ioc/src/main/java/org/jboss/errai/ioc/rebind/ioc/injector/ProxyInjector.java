@@ -32,6 +32,9 @@ import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
 import static org.jboss.errai.codegen.util.Stmt.declareVariable;
@@ -43,20 +46,19 @@ import static org.jboss.errai.codegen.util.Stmt.newObject;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ProxyInjector extends AbstractInjector {
-  private boolean proxyClosed;
   private final String varName;
-
-  private Statement proxyStatement;
-  private BlockBuilder<AnonymousClassStructureBuilder> proxyResolverBody;
-
+  private final List<Statement> closeStatements;
   private final MetaClass proxiedType;
   private final BuildMetaClass proxyClass;
 
   public ProxyInjector(IOCProcessingContext context, MetaClass proxiedType, QualifyingMetadata metadata) {
     this.proxiedType = proxiedType;
-    this.varName = InjectUtil.getNewInjectorName() + "_" + proxiedType.getName() + "_proxy";
+    this.varName = InjectUtil.getNewInjectorName() + "_proxy";
     this.qualifyingMetadata = metadata;
     String proxyClassName = proxiedType.getFullyQualifiedName().replaceAll("\\.", "_") + "_" + varName;
+
+    this.closeStatements = new ArrayList<Statement>();
+
     this.proxyClass = ProxyMaker.makeProxy(proxyClassName, proxiedType);
     this.proxyClass.setStatic(true);
     this.proxyClass.setScope(Scope.Package);
@@ -74,7 +76,7 @@ public class ProxyInjector extends AbstractInjector {
 
       MetaClass proxyResolverRef = parameterizedAs(ProxyResolver.class, typeParametersOf(proxiedType));
 
-      proxyResolverBody = newObject(proxyResolverRef)
+      BlockBuilder<AnonymousClassStructureBuilder> proxyResolverBody = newObject(proxyResolverRef)
               .extend().publicOverridesMethod("resolve", Parameter.of(proxiedType, "obj"));
 
       Statement proxyResolver = proxyResolverBody.append(loadVariable(varName)
@@ -85,10 +87,14 @@ public class ProxyInjector extends AbstractInjector {
       pCtx.append(loadVariable("context").invoke("addUnresolvedProxy", proxyResolver,
               proxiedType, qualifyingMetadata.getQualifiers()));
 
-      rendered = true;
+      for (Statement statement : closeStatements) {
+        proxyResolverBody.append(statement);
+      }
+
+      setRendered(true);
 
     }
-    return !proxyClosed ? loadVariable(varName) : proxyStatement;
+    return loadVariable(varName);
   }
 
   @Override
@@ -101,15 +107,7 @@ public class ProxyInjector extends AbstractInjector {
     return proxiedType;
   }
 
-  public void setProxyClosed(boolean proxyClosed) {
-    this.proxyClosed = proxyClosed;
-  }
-
-  public void setProxyStatement(Statement proxyStatement) {
-    this.proxyStatement = proxyStatement;
-  }
-
   public void addProxyCloseStatement(Statement statement) {
-    proxyResolverBody.append(statement);
+    closeStatements.add(statement);
   }
 }
