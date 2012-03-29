@@ -1493,7 +1493,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       VerticalPanel panel = new VerticalPanel();
 
       HorizontalPanel titleBar = new HorizontalPanel();
-      titleBar.getElement().getStyle().setProperty("backgroundColor", "darkgrey");
+      titleBar.getElement().getStyle().setProperty("backgroundColor", "#A9A9A9");
       titleBar.getElement().getStyle().setWidth(100, Style.Unit.PCT);
       titleBar.getElement().getStyle().setProperty("borderBottom", "1px solid black");
       titleBar.getElement().getStyle().setProperty("marginBottom", "5px");
