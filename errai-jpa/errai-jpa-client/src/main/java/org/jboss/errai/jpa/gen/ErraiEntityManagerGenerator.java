@@ -16,9 +16,9 @@ import javax.persistence.metamodel.Metamodel;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.Type;
 
-import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.SnapshotMaker;
 import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
@@ -50,7 +50,7 @@ public class ErraiEntityManagerGenerator extends Generator {
     ClassStructureBuilder<?> classBuilder = Implementations.extend(ErraiEntityManager.class, "GeneratedErraiEntityManager");
 
     // pmm = "populate metamodel method"
-    MethodBlockBuilder<?> pmm = classBuilder.packageMethod(void.class, "populateMetamodel", Parameter.of(Object.class, "entity"));
+    MethodBlockBuilder<?> pmm = classBuilder.protectedMethod(void.class, "populateMetamodel");
 
     for (EntityType<?> et : mm.getEntities()) {
 
@@ -62,7 +62,7 @@ public class ErraiEntityManagerGenerator extends Generator {
       String entityTypeVarName = entitySnapshotVarName(et.getJavaType());
       pmm.append(Stmt.declareVariable(ErraiEntityType.class).asFinal()
           .named(entityTypeVarName)
-          .initializeWith(Stmt.newObject(ErraiEntityType.class)));
+          .initializeWith(Stmt.newObject(ErraiEntityType.class).withParameters(et.getName(), et.getJavaType())));
       Map<Object, Statement> entityTypeReference = Collections.singletonMap(
           (Object) et, Stmt.loadVariable(entitySnapshotVarName(et.getJavaType())).returnValue());
 
@@ -75,6 +75,7 @@ public class ErraiEntityManagerGenerator extends Generator {
         pmm.append(Stmt.loadVariable(entityTypeVarName).invoke("addAttribute", attribSnapshot));
       }
 
+      pmm.append(Stmt.loadVariable("metamodel").invoke("addEntityType", Variable.get(entityTypeVarName)));
       System.out.println("singular attributes of " + et + ": " + attributes);
 //      metamodel.addEntityType(new ErraiEntityType(id, version, et.getSupertype()));
 
@@ -82,6 +83,7 @@ public class ErraiEntityManagerGenerator extends Generator {
       //      pmm.append(Stmt.loadClassMember("metamodel").invoke("addEntityType", et));
     }
 
+    pmm.append(Stmt.loadVariable("metamodel").invoke("freeze"));
     pmm.finish();
 
     String out = classBuilder.toJavaString();

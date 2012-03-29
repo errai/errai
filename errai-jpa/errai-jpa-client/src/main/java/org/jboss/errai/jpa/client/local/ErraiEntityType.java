@@ -21,7 +21,12 @@ public class ErraiEntityType<X> implements EntityType<X> {
   private SingularAttribute<? super X, ?> id;
   private SingularAttribute<? super X, ?> version;
 
-  public ErraiEntityType() {
+  private final String name;
+  private final Class<X> javaType;
+
+  public ErraiEntityType(String name, Class<X> javaType) {
+    this.name = name;
+    this.javaType = javaType;
   }
 
   public <Y> void addAttribute(SingularAttribute<X, Y> attribute) {
@@ -260,27 +265,22 @@ public class ErraiEntityType<X> implements EntityType<X> {
 
   @Override
   public Class<X> getJavaType() {
-    // TODO Auto-generated method stub
-    throw new RuntimeException("Not implemented");
+    return javaType;
   }
 
   @Override
   public javax.persistence.metamodel.Bindable.BindableType getBindableType() {
-    // TODO Auto-generated method stub
-    throw new RuntimeException("Not implemented");
+    return BindableType.ENTITY_TYPE;
   }
 
   @Override
   public Class<X> getBindableJavaType() {
-    // TODO Auto-generated method stub
-    throw new RuntimeException("Not implemented");
+    return javaType;
   }
 
   @Override
   public String getName() {
-    // TODO Auto-generated method stub
-    throw new RuntimeException("Not implemented");
+    return name;
   }
-
 
 }

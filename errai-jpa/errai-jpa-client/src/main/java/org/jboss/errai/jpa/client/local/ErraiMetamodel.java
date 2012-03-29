@@ -75,7 +75,11 @@ public class ErraiMetamodel implements Metamodel {
   @Override
   @SuppressWarnings("unchecked")
   public <X> EntityType<X> entity(Class<X> cls) {
-    return (EntityType<X>) entityTypes.get(cls);
+    EntityType<X> et = (EntityType<X>) entityTypes.get(cls);
+    if (et == null) {
+      throw new IllegalArgumentException(cls.getClass().getName() + " is not a known entity type");
+    }
+    return et;
   }
 
   @Override
