@@ -72,5 +72,4 @@ public class GraphBuilder {
 
     return proxySortUnit;
   }
-
 }

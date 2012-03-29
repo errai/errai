@@ -36,7 +36,6 @@ public class GraphSort {
     return topologicalSort(new ArrayList<SortUnit>(in));
   }
 
-
   private static List<SortUnit> topologicalSort(List<SortUnit> S) {
     Set<String> V = new HashSet<String>();
     List<SortUnit> L = new ArrayList<SortUnit>();
@@ -55,6 +54,4 @@ public class GraphSort {
       L.add(n);
     }
   }
-
-
 }
