@@ -60,10 +60,14 @@ public final class SnapshotMaker {
    *          requirements listed in the SnapshotMaker class-level
    *          documentation.
    * @param cannedRepresentations
-   *          A map of objects for which you want to provide a pre-made
-   *          Statement, rather than allowing the code generator's default
+   *          A map of objects for which you want to provide a pre-made return
+   *          statement, rather than allowing the code generator's default
    *          behaviour to generate a snapshot. This can be used to refer back
    *          to an existing variable or a singleton instance.
+   *          <p>
+   *          The provided statements will be used verbatim as the entire method
+   *          body of any method that returns the corresponding key value, so be
+   *          sure that each statement is a return statement.
    * @param typesToRecurseOn
    *          The types for which the snapshot maker should be applied
    *          recursively.
@@ -72,8 +76,8 @@ public final class SnapshotMaker {
    *           if any objects reachable from {@code o} form a reference cycle.
    *           The simplest example of this would be a method on {@code o} that
    *           returns {@code o} itself. You may be able to work around such a
-   *           problem by supplying a canned representation of one of the objects
-   *           in the cycle.
+   *           problem by supplying a canned representation of one of the
+   *           objects in the cycle.
    */
   public static Statement makeSnapshotAsSubclass(
       final Object o,

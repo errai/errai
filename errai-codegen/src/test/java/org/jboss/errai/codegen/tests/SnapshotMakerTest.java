@@ -9,7 +9,6 @@ import java.util.Map;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.SnapshotMaker;
 import org.jboss.errai.codegen.Statement;
-import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
@@ -197,7 +196,7 @@ public class SnapshotMakerTest extends AbstractCodegenTest {
         .initializeWith(SnapshotMaker.makeSnapshotAsSubclass(mom, Person.class, null, Person.class));
     method.append(momVar);
 
-    Map<Object, Statement> momReference = Collections.singletonMap((Object) mom, (Statement) Variable.get("mom"));
+    Map<Object, Statement> momReference = Collections.singletonMap((Object) mom, Stmt.loadVariable("mom").returnValue());
 
     method.append(Stmt.declareVariable("kid1", SnapshotMaker.makeSnapshotAsSubclass(kid1, Person.class, momReference, Person.class)));
     method.append(Stmt.declareVariable("kid2", SnapshotMaker.makeSnapshotAsSubclass(kid2, Person.class, momReference, Person.class)));
