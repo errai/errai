@@ -16,8 +16,6 @@
 
 package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
 import com.google.gwt.core.ext.TreeLogger.Type;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.meta.MetaClass;
@@ -51,7 +49,6 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.TypeDiscoveryListener;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 import org.jboss.errai.ioc.rebind.ioc.metadata.JSR330QualifyingMetadata;
 
-import javax.enterprise.context.Dependent;
 import javax.inject.Provider;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
@@ -75,14 +72,8 @@ import static org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance.get
 public class IOCProcessorFactory {
   private GraphBuilder graphBuilder = new GraphBuilder();
   private Stack<SortedSet<ProcessingEntry>> processingTasksStack = new Stack<SortedSet<ProcessingEntry>>();
-
-  // private Multimap<Class<? extends  Annotation>, MetaClass> processedTasks = HashMultimap.create();
-
-  //  private Set<Class<?>> allDiscoveredDependentScopedBeans = new HashSet<Class<?>>();
-//  private Set<Class<?>> discoveredDependentScopeBeans = new HashSet<Class<?>>();
-  private Set<Class<?>> processedBeans = new HashSet<Class<?>>();
-
   private InjectionContext injectionContext;
+  private Set<String> visitedAutoDiscoveredDependentBeans = new HashSet<String>();
 
   public IOCProcessorFactory(InjectionContext injectionContext) {
     this.injectionContext = injectionContext;
@@ -117,33 +108,36 @@ public class IOCProcessorFactory {
     }
 
     @Override
-    public void notifyDependency(final MetaClass clazz) {
-
-      if (injectionContext.isAnyKnownElementType(clazz)) {
-        graphBuilder.addDependency(masqueradeClass, Dependency.on(clazz));
+    public void notifyDependency(final MetaClass dependentClazz) {
+      if (injectionContext.isAnyKnownElementType(dependentClazz)) {
+        graphBuilder.addDependency(masqueradeClass, Dependency.on(dependentClazz));
       }
-//
-//      try {
-//
-//        if (!allDiscoveredDependentScopedBeans.contains(clazz.asClass())
-//                && !injectionContext.isAnyKnownElementType(clazz)) {
-//
-//          allDiscoveredDependentScopedBeans.add(clazz.asClass());
-//          if (discoveredDependentScopeBeans.isEmpty()) {
-//            registerHandler(Dependent.class, new JSR330AnnotationHandler() {
-//              @Override
-//              public boolean handle(InjectableInstance instance, Annotation annotation, IOCProcessingContext context) {
-//              //  injectionContext.getInjector(instance.getType()).getBeanInstance(instance);
-//                return true;
-//              }
-//            });
-//          }
-//          discoveredDependentScopeBeans.add(clazz.asClass());
-//        }
-//      }
-//      catch (UnsupportedOperationException e) {
-//        // can't properly handle this right now -- must be a generated class :(
-//      }
+      else {
+        DependencyControl control = new DependencyControl() {
+          @Override
+          public void masqueradeAs(MetaClass clazz) {
+            // can't masquerade.
+          }
+
+          @Override
+          public void notifyDependency(MetaClass clazz) {
+            if (visitedAutoDiscoveredDependentBeans.contains(clazz.getFullyQualifiedName())) return;
+            visitedAutoDiscoveredDependentBeans.add(clazz.getFullyQualifiedName());
+
+            graphBuilder.addDependency(dependentClazz, Dependency.on(clazz));
+          }
+
+          @Override
+          public void notifyDependencies(Collection<MetaClass> clazzes) {
+            for (MetaClass clazz : clazzes) {
+              notifyDependency(clazz);
+            }
+          }
+        };
+
+        graphBuilder.addDependency(masqueradeClass, Dependency.on(dependentClazz));
+        JSR330AnnotationHandler.processDependencies(control, dependentClazz, injectionContext);
+      }
     }
 
     @Override
@@ -388,16 +382,6 @@ public class IOCProcessorFactory {
                 classes = scanner.getTypesAnnotatedWith(annoClass, context.getPackages());
               }
 
-              // hack for lately discovered @Dependent beans
-//              if (annoClass.equals(Dependent.class)) {
-//                classes.addAll(discoveredDependentScopeBeans);
-//                discoveredDependentScopeBeans.clear();
-
-//                classes.removeAll(processedBeans);
-//                processedBeans.addAll(classes);
-//              }
-
-
               for (final Class<?> clazz : classes) {
                 handleType(entry, dependencyControl, clazz, annoClass, context);
               }
@@ -450,10 +434,6 @@ public class IOCProcessorFactory {
 
     final Annotation anno = clazz.getAnnotation(aClass);
     final MetaClass type = MetaClassFactory.get(clazz);
-
-//    if (processedTasks.containsEntry(aClass, type)) return;
-//    processedTasks.put(aClass, type);
-
 
     dependencyControl.masqueradeAs(type);
 
@@ -508,9 +488,6 @@ public class IOCProcessorFactory {
     final Annotation anno = method.getAnnotation(annoClass);
     final MetaClass type = MetaClassFactory.get(method.getDeclaringClass());
 
-//    if (processedTasks.containsEntry(annoClass, type)) return;
-//    processedTasks.put(annoClass, type);
-
     final MetaMethod metaMethod = MetaClassFactory.get(method);
 
     dependencyControl.masqueradeAs(type);
@@ -561,9 +538,6 @@ public class IOCProcessorFactory {
     final Annotation anno = field.getAnnotation(annoClass);
     final MetaClass type = MetaClassFactory.get(field.getDeclaringClass());
 
-//    if (processedTasks.containsEntry(annoClass, type)) return;
-//    processedTasks.put(annoClass, type);
-
     final MetaField metaField = MetaClassFactory.get(field);
 
     dependencyControl.masqueradeAs(type);
@@ -598,7 +572,6 @@ public class IOCProcessorFactory {
       public String toString() {
         return type.getFullyQualifiedName();
       }
-
     };
 
     del.processDependencies();

@@ -53,7 +53,6 @@ public class GWTMethod extends MetaMethod {
     return method.getName();
   }
 
-
   @Override
   public MetaClass getReturnType() {
     return GWTUtil.eraseOrReturn(oracle, method.getReturnType());

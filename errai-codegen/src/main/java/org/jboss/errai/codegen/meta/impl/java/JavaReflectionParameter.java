@@ -75,6 +75,6 @@ public class JavaReflectionParameter extends MetaParameter {
 
   @Override
   public String toString() {
-    return String.valueOf(type);
+    return type.getFullyQualifiedName();
   }
 }

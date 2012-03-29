@@ -368,13 +368,13 @@ public class GenUtil {
     return true;
   }
 
-
   public static boolean equals(MetaParameter a, MetaParameter b) {
     return a.getType().isAssignableFrom(b.getType()) || b.getType().isAssignableFrom(a.getType());
   }
 
-
-
+  public static String getMethodString(MetaMethod method) {
+    return method.getName() + "(" + Arrays.toString(method.getParameters()) + ")";
+  }
 
   public static MetaClass getPrimitiveWrapper(MetaClass clazz) {
     if (clazz.isPrimitive()) {

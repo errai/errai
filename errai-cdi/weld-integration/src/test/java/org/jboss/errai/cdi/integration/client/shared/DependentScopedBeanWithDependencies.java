@@ -16,6 +16,7 @@
 
 package org.jboss.errai.cdi.integration.client.shared;
 
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 /**

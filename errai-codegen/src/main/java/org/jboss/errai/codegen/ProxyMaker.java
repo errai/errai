@@ -24,9 +24,12 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
+import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.codegen.util.Stmt;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Mike Brock
@@ -59,10 +62,15 @@ public class ProxyMaker {
 
     final String proxyVar = "$$_proxy_$$";
 
-    builder.privateField(proxyVar, toProxy).finish();
+    Set<String> renderedMethods = new HashSet<String>();
 
+    builder.privateField(proxyVar, toProxy).finish();
     for (MetaMethod method : toProxy.getMethods()) {
-      if (method.isSynthetic() ||
+      String methodString = GenUtil.getMethodString(method);
+      if (renderedMethods.contains(methodString)) continue;
+      renderedMethods.add(methodString);
+
+      if (method.isSynthetic() || method.isFinal() ||
               method.getDeclaringClass().getFullyQualifiedName().equals("java.lang.Object")) continue;
 
       DefParameters defParameters = DefParameters.from(method);

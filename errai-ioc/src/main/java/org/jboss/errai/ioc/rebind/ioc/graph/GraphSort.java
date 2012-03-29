@@ -33,7 +33,9 @@ import java.util.Set;
  */
 public class GraphSort {
   public static List<SortUnit> sortGraph(final Collection<SortUnit> in) {
-    return topologicalSort(new ArrayList<SortUnit>(in));
+    List<SortUnit> sortUnitList = topologicalSort(new ArrayList<SortUnit>(in));
+    Collections.sort(sortUnitList);
+    return sortUnitList;
   }
 
   private static List<SortUnit> topologicalSort(List<SortUnit> S) {

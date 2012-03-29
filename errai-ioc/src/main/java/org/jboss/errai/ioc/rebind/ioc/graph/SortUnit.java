@@ -48,10 +48,6 @@ public class SortUnit implements Comparable<SortUnit>, GraphNode {
     return new SortUnit(type, new ArrayList<Object>(items), new HashSet<SortUnit>(dependencies), hard);
   }
 
-  public static SortUnit copyOfAsHard(SortUnit toCopy) {
-    return new SortUnit(toCopy.getType(), toCopy.getItems(), toCopy.getDependencies(), true);
-  }
-
   public MetaClass getType() {
     return type;
   }
@@ -69,6 +65,28 @@ public class SortUnit implements Comparable<SortUnit>, GraphNode {
       if (s.equals(unit)) return s;
     }
     return null;
+  }
+
+  public boolean hasDependency(SortUnit unit) {
+    return _hasDependency(new HashSet<String>(), this, unit);
+  }
+
+  private static boolean _hasDependency(Set<String> visited, SortUnit from, SortUnit to) {
+    String fromType = from.getType().getFullyQualifiedName();
+    if (visited.contains(fromType)) {
+      return false;
+    }
+    visited.add(fromType);
+
+    if (!from.getDependencies().contains(to)) {
+      for (SortUnit dep : from.getDependencies()) {
+        if (_hasDependency(visited, dep, to)) return true;
+      }
+      return false;
+    }
+    else {
+      return true;
+    }
   }
 
   public boolean isHard() {
@@ -120,7 +138,7 @@ public class SortUnit implements Comparable<SortUnit>, GraphNode {
 
   @Override
   public int compareTo(SortUnit o) {
-    if (o.getDependencies().contains(this) && getDependencies().contains(o)) {
+    if (o.hasDependency(this) && hasDependency(o)) {
       if (o.getDependencies().contains(this) && o.getDependency(this).isHard()) {
         return 0;
       }
@@ -128,7 +146,7 @@ public class SortUnit implements Comparable<SortUnit>, GraphNode {
         return 0;
       }
 
-      return getDepth() - o.getDepth();
+      return o.getDepth() - getDepth();
     }
     else {
       return 0;
@@ -153,12 +171,12 @@ public class SortUnit implements Comparable<SortUnit>, GraphNode {
 
   private static String _renderDependencyTree(Set<SortUnit> visited, SortUnit visit) {
     if (visited.contains(visit)) {
-      return "<CYCLE>";
+      return "<CYCLE ON: " + visit.getType().getFullyQualifiedName() + ">";
     }
     visited.add(visit);
 
     StringBuilder sb = new StringBuilder("[");
-    Iterator<SortUnit> iter = visit.dependencies.iterator();
+    Iterator<SortUnit> iter = visit.getDependencies().iterator();
     while (iter.hasNext()) {
       sb.append(iter.next()._toString(visited));
       if (iter.hasNext()) {

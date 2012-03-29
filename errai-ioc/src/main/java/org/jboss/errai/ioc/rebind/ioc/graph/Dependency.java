@@ -18,10 +18,6 @@ public class Dependency implements GraphNode {
     return new Dependency(type, false);
   }
 
-  public static Dependency hardOn(MetaClass type) {
-    return new Dependency(type, true);
-  }
-
   @Override
   public MetaClass getType() {
     return type;

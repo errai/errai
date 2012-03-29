@@ -180,16 +180,16 @@ public class InjectionTask {
         Statement[] stmts = InjectUtil.resolveInjectionDependencies(method.getParameters(), ctx, method);
         Statement[] parms;
 
-        if (method.isStatic()) {
-          parms = new Statement[stmts.length];
-          System.arraycopy(stmts, 0, parms, 0, stmts.length);
-        }
-        else {
-          // for non-static calls, the JSNI stub or reflection stub accepts the instance as the first parameter
-          parms = new Statement[stmts.length + 1];
-          parms[0] = Refs.get(injector.getVarName());
-          System.arraycopy(stmts, 0, parms, 1, stmts.length);
-        }
+//        if (method.isStatic()) {
+//          parms = new Statement[stmts.length];
+//          System.arraycopy(stmts, 0, parms, 0, stmts.length);
+//        }
+//        else {
+        // for non-static calls, the JSNI stub or reflection stub accepts the instance as the first parameter
+        parms = new Statement[stmts.length + 1];
+        parms[0] = Refs.get(injector.getVarName());
+        System.arraycopy(stmts, 0, parms, 1, stmts.length);
+//        }
 
         injectableInstance.getInjectionContext().addExposedMethod(method);
 
@@ -265,7 +265,7 @@ public class InjectionTask {
              */
             return new HandleInProxy(proxyInjector, inj.getBeanInstance(injectableInstance));
           }
-          else {
+          else if (inj.isDependent()) {
             return inj.getBeanInstance(injectableInstance);
           }
         }
@@ -300,7 +300,7 @@ public class InjectionTask {
         break;
 
       default:
-        //  ctx.getProcessingContext().handleDiscoveryOfType(injectableInstance);
+        ctx.getProcessingContext().handleDiscoveryOfType(injectableInstance);
     }
 
     return injectableInstance;

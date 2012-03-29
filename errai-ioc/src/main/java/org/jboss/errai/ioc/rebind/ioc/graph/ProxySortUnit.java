@@ -55,7 +55,7 @@ public class ProxySortUnit extends SortUnit {
 
       @Override
       public String toString() {
-        return unit.toString();
+        return "<CYCLE>";
       }
     };
   }

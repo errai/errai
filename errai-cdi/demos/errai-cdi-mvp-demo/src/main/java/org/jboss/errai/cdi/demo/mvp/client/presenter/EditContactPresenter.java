@@ -19,7 +19,8 @@ import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 
 @Dependent
-public class EditContactPresenter implements Presenter {
+public class
+        EditContactPresenter implements Presenter {
   public interface Display {
     HasClickHandlers getSaveButton();
     HasClickHandlers getCancelButton();
