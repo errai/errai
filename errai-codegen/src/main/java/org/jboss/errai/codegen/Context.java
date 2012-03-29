@@ -432,7 +432,7 @@ public class Context {
    * @param clazz the class, interface or superclass to be considered literalizable.
    */
   public void addLiteralizableClass(MetaClass clazz) {
-    literalizableClasses.add(clazz);
+    literalizableClasses.add(clazz.getErased());
   }
 
   /**

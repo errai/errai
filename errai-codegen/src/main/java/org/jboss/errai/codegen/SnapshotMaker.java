@@ -236,7 +236,7 @@ public final class SnapshotMaker {
               System.out.println("    using existing snapshot");
               methodBody = existingSnapshots.get(retval);
             }
-            else if (subContext.isLiteralizableClass(method.getReturnType())) {
+            else if (subContext.isLiteralizableClass(method.getReturnType().getErased())) {
               if (unfinishedSnapshots.contains(retval)) {
                 throw new CyclicalObjectGraphException(unfinishedSnapshots);
               }
