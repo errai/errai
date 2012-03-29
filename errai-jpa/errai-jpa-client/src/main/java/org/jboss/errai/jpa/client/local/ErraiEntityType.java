@@ -1,4 +1,4 @@
-package org.jboss.errai.jpa.gen;
+package org.jboss.errai.jpa.client.local;
 
 import java.util.HashSet;
 import java.util.Set;

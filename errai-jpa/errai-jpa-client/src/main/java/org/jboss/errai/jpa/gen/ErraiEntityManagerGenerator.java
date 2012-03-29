@@ -19,13 +19,13 @@ import javax.persistence.metamodel.Type;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.SnapshotMaker;
 import org.jboss.errai.codegen.Statement;
-import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
 import org.jboss.errai.codegen.util.Implementations;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
+import org.jboss.errai.jpa.client.local.ErraiEntityType;
 
 import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
@@ -55,23 +55,24 @@ public class ErraiEntityManagerGenerator extends Generator {
     for (EntityType<?> et : mm.getEntities()) {
 
       // first, create a variable for the EntityType
+      pmm.append(Stmt.codeComment(
+          "**\n" +
+          "** EntityType for " + et.getJavaType().getName() + "\n" +
+          "**"));
+      String entityTypeVarName = entitySnapshotVarName(et.getJavaType());
       pmm.append(Stmt.declareVariable(ErraiEntityType.class).asFinal()
-          .named(entitySnapshotVarName(et.getJavaType()))
+          .named(entityTypeVarName)
           .initializeWith(Stmt.newObject(ErraiEntityType.class)));
       Map<Object, Statement> entityTypeReference = Collections.singletonMap(
-          (Object) et, (Statement) Variable.get(entitySnapshotVarName(et.getJavaType())));
+          (Object) et, Stmt.loadVariable(entitySnapshotVarName(et.getJavaType())).returnValue());
 
       // now, snapshot all the EntityType's attributes, adding them as we go
       List<Statement> attributes = new ArrayList<Statement>();
-      Statement id = null;
-      Statement version = null;
       for (SingularAttribute<?, ?> attrib : et.getSingularAttributes()) {
-        Statement attribSnapshot = SnapshotMaker.makeSnapshotAsSubclass(attrib, SingularAttribute.class, entityTypeReference,
+        Statement attribSnapshot = SnapshotMaker.makeSnapshotAsSubclass(
+            attrib, SingularAttribute.class, entityTypeReference,
             EntityType.class, ManagedType.class, Type.class);
-        if (attrib.isId()) id = attribSnapshot;
-        if (attrib.isVersion()) version = attribSnapshot;
-
-        pmm.append(Stmt.declareVariable(et.getName() + "_" + attrib.getName(), attribSnapshot));
+        pmm.append(Stmt.loadVariable(entityTypeVarName).invoke("addAttribute", attribSnapshot));
       }
 
       System.out.println("singular attributes of " + et + ": " + attributes);
