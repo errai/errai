@@ -179,6 +179,8 @@ public class LiteralFactory {
       return new ArrayLiteral(o);
     }
     else if (context != null && context.isLiteralizableClass(o.getClass())) {
+      // the new instance of LiteralValue here provides surprising (but desirable) caching behaviour.
+      // see LiteralTest.testGenerateObjectArrayThenModifyThenGenerateAgain for details.
       return new LiteralValue<Object>(o) {
         @Override
         public String getCanonicalString(Context context) {

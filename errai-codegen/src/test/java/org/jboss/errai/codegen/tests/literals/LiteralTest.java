@@ -16,19 +16,23 @@
 
 package org.jboss.errai.codegen.tests.literals;
 
-import org.jboss.errai.codegen.Context;
-import org.jboss.errai.codegen.literal.LiteralFactory;
-import org.jboss.errai.codegen.tests.AbstractCodegenTest;
-import org.jboss.errai.codegen.util.Stmt;
-import org.junit.Test;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.jboss.errai.codegen.Context;
+import org.jboss.errai.codegen.literal.LiteralFactory;
+import org.jboss.errai.codegen.tests.AbstractCodegenTest;
+import org.jboss.errai.codegen.tests.model.Person;
+import org.jboss.errai.codegen.tests.model.PersonImpl;
+import org.jboss.errai.codegen.util.Stmt;
+import org.junit.Test;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -88,6 +92,61 @@ public class LiteralTest extends AbstractCodegenTest {
 
     assertEquals(expected, LiteralFactory.getLiteral(input).generate(Context.create()));
   }
+
+  /**
+   * This tests that any caching in LiteralFactory does not affect literal
+   * values generated from mutated arrays.
+   */
+  @Test
+  public void testGenerateIntArrayThenModifyThenGenerateAgain() {
+    final int[] a = new int[] { 1, 2, 3, 4 };
+
+    assertEquals("new int[] { 1, 2, 3, 4 }", LiteralFactory.getLiteral(a).generate(Context.create()));
+
+    a[0] = 10;
+
+    assertEquals("new int[] { 10, 2, 3, 4 }", LiteralFactory.getLiteral(a).generate(Context.create()));
+  }
+
+  /**
+   * This tests that any caching in LiteralFactory does not affect literal
+   * values generated from mutates arrays of identity-equality values.
+   */
+  @Test
+  public void testGenerateObjectArrayThenModifyThenGenerateAgain() {
+    PersonImpl p = new PersonImpl("person", 1, null);
+
+    {
+      // pre-flight check: this test is only effective if PersonImpl is equal-by-identity
+      // and not equal-by-value (that is, PersonImpl inherits Object.equals behaviour)
+      PersonImpl p2 = new PersonImpl("person", 1, null);
+      assertNotSame(p, p2);
+      assertFalse(p.equals(p2));
+    }
+
+    // now the test itself
+    final Person[] a = new Person[] { p };
+
+    Context ctx = Context.create();
+    ctx.addLiteralizableClass(Person.class);
+
+    assertEquals("new org.jboss.errai.codegen.tests.model.Person[] { " +
+        "new org.jboss.errai.codegen.tests.model.Person() { " +
+        "public int getAge() { return 1; } " +
+        "public org.jboss.errai.codegen.tests.model.Person getMother() { return null; } " +
+        "public String getName() { return \"person\"; } } }",
+        LiteralFactory.getLiteral(a).generate(ctx));
+
+    p.setAge(10);
+
+    assertEquals("new org.jboss.errai.codegen.tests.model.Person[] { " +
+        "new org.jboss.errai.codegen.tests.model.Person() { " +
+        "public int getAge() { return 10; } " +
+        "public org.jboss.errai.codegen.tests.model.Person getMother() { return null; } " +
+        "public String getName() { return \"person\"; } } }",
+        LiteralFactory.getLiteral(a).generate(ctx));
+  }
+
 
   @Test
   public void testClassLiteral() {
