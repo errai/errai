@@ -67,7 +67,9 @@ public class ErraiEntityManagerGenerator extends Generator {
     for (EntityType<?> et : mm.getEntities()) {
 
       // first, create a variable for the EntityType
-      Statement etVariable = Stmt.declareVariable(entitySnapshotVarName(et.getJavaType()), EntityType.class);
+      pmm.append(Stmt.declareVariable(ErraiEntityType.class).asFinal()
+          .named(entitySnapshotVarName(et.getJavaType()))
+          .initializeWith(Stmt.newObject(ErraiEntityType.class)));
       Map<Object, Statement> entityTypeReference = Collections.singletonMap(
           (Object) et, (Statement) Variable.get(entitySnapshotVarName(et.getJavaType())));
 

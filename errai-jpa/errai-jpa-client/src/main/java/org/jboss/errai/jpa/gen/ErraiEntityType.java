@@ -1,5 +1,6 @@
 package org.jboss.errai.jpa.gen;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.metamodel.Attribute;
@@ -15,16 +16,18 @@ import javax.persistence.metamodel.Type;
 
 public class ErraiEntityType<X> implements EntityType<X> {
 
-  private final SingularAttribute<? super X, ?> id;
-  private final SingularAttribute<? super X, ?> version;
-  private final IdentifiableType<? super X> supertype;
+  private final Set<SingularAttribute<? super X, ?>> singularAttributes = new HashSet<SingularAttribute<? super X,?>>();
 
-  public ErraiEntityType(SingularAttribute<? super X, ?> id,
-      SingularAttribute<? super X, ?> version,
-      IdentifiableType<? super X> supertype) {
-    this.id = id;
-    this.version = version;
-    this.supertype = supertype;
+  private SingularAttribute<? super X, ?> id;
+  private SingularAttribute<? super X, ?> version;
+
+  public ErraiEntityType() {
+  }
+
+  public <Y> void addAttribute(SingularAttribute<X, Y> attribute) {
+    singularAttributes.add(attribute);
+    if (attribute.isId()) id = attribute;
+    if (attribute.isVersion()) version = attribute;
   }
 
   @Override
@@ -51,7 +54,7 @@ public class ErraiEntityType<X> implements EntityType<X> {
 
   @Override
   public IdentifiableType<? super X> getSupertype() {
-    return supertype;
+    throw new RuntimeException("Not implemented");
   }
 
   @Override
@@ -77,208 +80,206 @@ public class ErraiEntityType<X> implements EntityType<X> {
 
   @Override
   public Set<Attribute<? super X, ?>> getAttributes() {
-    // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Not implemented");
   }
 
   @Override
   public Set<Attribute<X, ?>> getDeclaredAttributes() {
     // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Not implemented");
   }
 
   @Override
   public <Y> SingularAttribute<? super X, Y> getSingularAttribute(String name,
       Class<Y> type) {
     // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Not implemented");
   }
 
   @Override
   public <Y> SingularAttribute<X, Y> getDeclaredSingularAttribute(String name,
       Class<Y> type) {
     // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Not implemented");
   }
 
   @Override
   public Set<SingularAttribute<? super X, ?>> getSingularAttributes() {
-    // TODO Auto-generated method stub
-    return null;
+    return singularAttributes;
   }
 
   @Override
   public Set<SingularAttribute<X, ?>> getDeclaredSingularAttributes() {
     // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Not implemented");
   }
 
   @Override
   public <E> CollectionAttribute<? super X, E> getCollection(String name,
       Class<E> elementType) {
     // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Not implemented");
   }
 
   @Override
   public <E> CollectionAttribute<X, E> getDeclaredCollection(String name,
       Class<E> elementType) {
     // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Not implemented");
   }
 
   @Override
   public <E> SetAttribute<? super X, E> getSet(String name, Class<E> elementType) {
     // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Not implemented");
   }
 
   @Override
   public <E> SetAttribute<X, E> getDeclaredSet(String name, Class<E> elementType) {
     // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Not implemented");
   }
 
   @Override
   public <E> ListAttribute<? super X, E> getList(String name,
       Class<E> elementType) {
     // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Not implemented");
   }
 
   @Override
   public <E> ListAttribute<X, E> getDeclaredList(String name,
       Class<E> elementType) {
     // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Not implemented");
   }
 
   @Override
   public <K, V> MapAttribute<? super X, K, V> getMap(String name,
       Class<K> keyType, Class<V> valueType) {
     // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Not implemented");
   }
 
   @Override
   public <K, V> MapAttribute<X, K, V> getDeclaredMap(String name,
       Class<K> keyType, Class<V> valueType) {
     // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Not implemented");
   }
 
   @Override
   public Set<PluralAttribute<? super X, ?, ?>> getPluralAttributes() {
     // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Not implemented");
   }
 
   @Override
   public Set<PluralAttribute<X, ?, ?>> getDeclaredPluralAttributes() {
     // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Not implemented");
   }
 
   @Override
   public Attribute<? super X, ?> getAttribute(String name) {
     // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Not implemented");
   }
 
   @Override
   public Attribute<X, ?> getDeclaredAttribute(String name) {
     // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Not implemented");
   }
 
   @Override
   public SingularAttribute<? super X, ?> getSingularAttribute(String name) {
     // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Not implemented");
   }
 
   @Override
   public SingularAttribute<X, ?> getDeclaredSingularAttribute(String name) {
     // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Not implemented");
   }
 
   @Override
   public CollectionAttribute<? super X, ?> getCollection(String name) {
     // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Not implemented");
   }
 
   @Override
   public CollectionAttribute<X, ?> getDeclaredCollection(String name) {
     // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Not implemented");
   }
 
   @Override
   public SetAttribute<? super X, ?> getSet(String name) {
     // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Not implemented");
   }
 
   @Override
   public SetAttribute<X, ?> getDeclaredSet(String name) {
     // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Not implemented");
   }
 
   @Override
   public ListAttribute<? super X, ?> getList(String name) {
     // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Not implemented");
   }
 
   @Override
   public ListAttribute<X, ?> getDeclaredList(String name) {
     // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Not implemented");
   }
 
   @Override
   public MapAttribute<? super X, ?, ?> getMap(String name) {
     // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Not implemented");
   }
 
   @Override
   public MapAttribute<X, ?, ?> getDeclaredMap(String name) {
     // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Not implemented");
   }
 
   @Override
   public javax.persistence.metamodel.Type.PersistenceType getPersistenceType() {
     // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Not implemented");
   }
 
   @Override
   public Class<X> getJavaType() {
     // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Not implemented");
   }
 
   @Override
   public javax.persistence.metamodel.Bindable.BindableType getBindableType() {
     // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Not implemented");
   }
 
   @Override
   public Class<X> getBindableJavaType() {
     // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Not implemented");
   }
 
   @Override
   public String getName() {
     // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Not implemented");
   }
 
 
