@@ -112,7 +112,6 @@ public class IOCProcessingContext {
     appendToEnd.add(statement);
   }
 
-
   public List<Statement> getAppendToEnd() {
     return Collections.unmodifiableList(appendToEnd);
   }

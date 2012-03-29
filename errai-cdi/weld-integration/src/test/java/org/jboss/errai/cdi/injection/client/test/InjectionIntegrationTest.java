@@ -4,7 +4,7 @@ package org.jboss.errai.cdi.injection.client.test;
 import org.jboss.errai.cdi.injection.client.InjectionTestModule;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.rebind.ioc.test.harness.IOCTestRunner;
+import org.jboss.errai.ioc.rebind.ioc.test.harness.IOCSimulatedTestRunner;
 import org.junit.runner.RunWith;
 
 /**
@@ -12,7 +12,6 @@ import org.junit.runner.RunWith;
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@RunWith(IOCTestRunner.class)
 public class InjectionIntegrationTest extends IOCClientTestCase {
 
   @Override

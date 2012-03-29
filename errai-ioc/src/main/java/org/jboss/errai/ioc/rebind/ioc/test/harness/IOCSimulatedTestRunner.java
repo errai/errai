@@ -16,10 +16,8 @@
 
 package org.jboss.errai.ioc.rebind.ioc.test.harness;
 
-import com.google.gwt.junit.JUnitShell;
 import junit.framework.TestCase;
 import junit.framework.TestResult;
-
 import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.common.client.api.tasks.AsyncTask;
 import org.jboss.errai.common.client.api.tasks.TaskManager;
@@ -48,13 +46,11 @@ import java.util.concurrent.ScheduledFuture;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public class IOCTestRunner extends ParentRunner<Runner> {
-  public static boolean SIMULATED = Boolean.getBoolean("errai.ioc.debug.simulated_client");
-
+public class IOCSimulatedTestRunner extends ParentRunner<Runner> {
   List<Runner> runners = new ArrayList<Runner>();
   private Object instance;
 
-  public IOCTestRunner(Class<? extends TestCase> toRun) throws Throwable {
+  public IOCSimulatedTestRunner(Class<? extends TestCase> toRun) throws Throwable {
     super(toRun);
 
     for (final Method method : toRun.getDeclaredMethods()) {
@@ -70,25 +66,20 @@ public class IOCTestRunner extends ParentRunner<Runner> {
             final IOCClientTestCase iocClientTestCase = (IOCClientTestCase) getInstance();
 
             Description description = getDescription();
-
             notifier.fireTestStarted(description);
+
             TestResult result = new TestResult();
 
             try {
-              if (SIMULATED) {
-                System.setProperty("errai.simulatedClient", "true");
-                try {
-                  iocClientTestCase.gwtSetUp();
-                  method.invoke(getInstance());
-                }
-                finally {
-                  System.setProperty("errai.simulatedClient", "false");
-                }
+              System.setProperty("errai.simulatedClient", "true");
+              try {
+                iocClientTestCase.gwtSetUp();
+                method.invoke(getInstance());
               }
-              else {
-                iocClientTestCase.setName(method.getName());
-                JUnitShell.runTest(iocClientTestCase, result);
+              finally {
+                System.setProperty("errai.simulatedClient", "false");
               }
+
             }
             catch (GenerationException e) {
               notifier.fireTestFailure(new Failure(description, e));
@@ -153,118 +144,114 @@ public class IOCTestRunner extends ParentRunner<Runner> {
   public void run(RunNotifier notifier) {
     final IOCClientTestCase iocClientTestCase = (IOCClientTestCase) getInstance();
 
-    if (SIMULATED) {
-      TaskManagerFactory.setTaskManagerProvider(new TaskManagerProvider() {
-        ScheduledExecutorService service = Executors.newScheduledThreadPool(1);
+    TaskManagerFactory.setTaskManagerProvider(new TaskManagerProvider() {
+      ScheduledExecutorService service = Executors.newScheduledThreadPool(1);
 
+      @Override
+      public TaskManager get() {
+        return new TaskManager() {
+          @Override
+          public void execute(Runnable task) {
+            service.execute(task);
+          }
+
+          @Override
+          public AsyncTask scheduleRepeating(TimeUnit unit, int interval, Runnable task) {
+            final ScheduledFuture<?> future =
+                    service.scheduleAtFixedRate(task, unit.toMillis(interval), 0,
+                            java.util.concurrent.TimeUnit.MILLISECONDS);
+
+
+            return new AsyncTask() {
+              @Override
+              public void cancel(boolean interrupt) {
+                future.cancel(true);
+              }
+
+              @Override
+              public void setExitHandler(Runnable runnable) {
+              }
+
+              @Override
+              public boolean isCancelled() {
+                return future.isCancelled();
+              }
+            };
+          }
+
+          @Override
+          public AsyncTask schedule(TimeUnit unit, int interval, Runnable task) {
+            final ScheduledFuture<?> future =
+                    service.schedule(task, unit.toMillis(interval), java.util.concurrent.TimeUnit.MILLISECONDS);
+
+
+            return new AsyncTask() {
+              @Override
+              public void cancel(boolean interrupt) {
+                future.cancel(true);
+              }
+
+              @Override
+              public void setExitHandler(Runnable runnable) {
+              }
+
+              @Override
+              public boolean isCancelled() {
+                return future.isCancelled();
+              }
+            };
+          }
+
+          @Override
+          public void requestStop() {
+          }
+        };
+      }
+    });
+
+
+    if (instance instanceof IOCClientTestCase) {
+      iocClientTestCase.setInitializer(new IOCClientTestCase.ContainerBootstrapper() {
         @Override
-        public TaskManager get() {
-          return new TaskManager() {
-            @Override
-            public void execute(Runnable task) {
-              service.execute(task);
+        public BootstrapperInjectionContext bootstrap() {
+          try {
+            String rootPackage = iocClientTestCase.getModulePackage();
+            List<String> packages = new ArrayList<String>();
+            for (Package p : Package.getPackages()) {
+              String packageName = p.getName();
+              if (packageName.startsWith(rootPackage)) {
+                packages.add(packageName);
+              }
             }
 
-            @Override
-            public AsyncTask scheduleRepeating(TimeUnit unit, int interval, Runnable task) {
-              final ScheduledFuture<?> future =
-                      service.scheduleAtFixedRate(task, unit.toMillis(interval), 0,
-                              java.util.concurrent.TimeUnit.MILLISECONDS);
+            packages.add("org.jboss.errai.ioc.client.api.builtin");
 
+            MockIOCGenerator mockIOCGenerator = new MockIOCGenerator(packages);
 
-              return new AsyncTask() {
-                @Override
-                public void cancel(boolean interrupt) {
-                  future.cancel(true);
-                }
+            Class<? extends Bootstrapper> cls = mockIOCGenerator.generate();
+            Bootstrapper bs = cls.newInstance();
 
-                @Override
-                public void setExitHandler(Runnable runnable) {
-                }
+            long tm = System.currentTimeMillis();
+            new IOCBeanManagerLifecycle().resetBeanManager();
+            BootstrapperInjectionContext ctx = bs.bootstrapContainer();
+            ctx.getRootContext().finish();
 
-                @Override
-                public boolean isCancelled() {
-                  return future.isCancelled();
-                }
-              };
-            }
-
-            @Override
-            public AsyncTask schedule(TimeUnit unit, int interval, Runnable task) {
-              final ScheduledFuture<?> future =
-                      service.schedule(task, unit.toMillis(interval), java.util.concurrent.TimeUnit.MILLISECONDS);
-
-
-              return new AsyncTask() {
-                @Override
-                public void cancel(boolean interrupt) {
-                  future.cancel(true);
-                }
-
-                @Override
-                public void setExitHandler(Runnable runnable) {
-                }
-
-                @Override
-                public boolean isCancelled() {
-                  return future.isCancelled();
-                }
-              };
-            }
-
-            @Override
-            public void requestStop() {
-            }
-          };
+            System.out.println("bootstrapped simulated container in " + (System.currentTimeMillis() - tm) + "ms");
+            return ctx;
+          }
+          catch (GenerationException e) {
+            throw e;
+          }
+          catch (Exception e) {
+            throw new RuntimeException("failed to run in emulated mode", e);
+          }
         }
       });
 
-
-      if (instance instanceof IOCClientTestCase) {
-        iocClientTestCase.setInitializer(new IOCClientTestCase.ContainerBootstrapper() {
-          @Override
-          public BootstrapperInjectionContext bootstrap() {
-            try {
-              String rootPackage = iocClientTestCase.getModulePackage();
-              List<String> packages = new ArrayList<String>();
-              for (Package p : Package.getPackages()) {
-                String packageName = p.getName();
-                if (packageName.startsWith(rootPackage)) {
-                  packages.add(packageName);
-                }
-              }
-
-              packages.add("org.jboss.errai.ioc.client.api.builtin");
-
-              MockIOCGenerator mockIOCGenerator = new MockIOCGenerator(packages);
-
-              Class<? extends Bootstrapper> cls = mockIOCGenerator.generate();
-              Bootstrapper bs = cls.newInstance();
-
-              long tm = System.currentTimeMillis();
-              new IOCBeanManagerLifecycle().resetBeanManager();
-              BootstrapperInjectionContext ctx = bs.bootstrapContainer();
-              ctx.getRootContext().finish();
-
-              System.out.println("bootstrapped simulated container in " + (System.currentTimeMillis() - tm) + "ms");
-              return ctx;
-            }
-            catch (GenerationException e) {
-              throw e;
-            }
-            catch (Exception e) {
-              throw new RuntimeException("failed to run in emulated mode", e);
-            }
-          }
-        });
-
-        iocClientTestCase.setForcePureJava(true);
-      }
-
-      super.run(notifier);
+      iocClientTestCase.setForcePureJava(true);
     }
-    else {
-      super.run(notifier);
-    }
+
+    super.run(notifier);
+
   }
 }
