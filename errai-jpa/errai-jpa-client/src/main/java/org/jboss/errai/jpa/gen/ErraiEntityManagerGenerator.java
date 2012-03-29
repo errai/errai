@@ -44,20 +44,8 @@ public class ErraiEntityManagerGenerator extends Generator {
     properties.put("hibernate.dialect", "org.hibernate.dialect.HSQLDialect");
     properties.put("javax.persistence.validation.mode", "none");
     EntityManagerFactory emf = Persistence.createEntityManagerFactory("ErraiJpaClientTests", properties);
-    System.out.println("EntityManagerFactory is " + emf);
     EntityManager em = emf.createEntityManager();
-    System.out.println("EntityManager is " + em);
-
-    // XXX this is strange: get a NoSuchMethodError on a normal call to getMetamodel, but reflective call works?!
-    Metamodel mm;
-    try {
-      mm = (Metamodel) em.getClass().getMethod("getMetamodel").invoke(em);
-      System.out.println("Metamodel via reflection: " + mm);
-    } catch (Exception e) {
-      UnableToCompleteException ex = new UnableToCompleteException();
-      ex.initCause(e);
-      throw ex;
-    }
+    Metamodel mm = em.getMetamodel();
 
     ClassStructureBuilder<?> classBuilder = Implementations.extend(ErraiEntityManager.class, "GeneratedErraiEntityManager");
 
