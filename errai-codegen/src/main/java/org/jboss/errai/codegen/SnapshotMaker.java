@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
@@ -45,6 +44,39 @@ import com.google.gwt.dev.util.collect.IdentityHashSet;
  * @author Mike Brock
  */
 public final class SnapshotMaker {
+
+  /**
+   * Callback interface for providing custom method bodies in snapshots. There are three major use cases:
+   * <ol>
+   *  <li>To implement methods that take parameters (snapshots of
+   *      these methods cannot be generated automatically)
+   *  <li>To return a reference to some object that's already in the
+   *      scope of the snapshot (such as a reference to a parent object
+   *      from a getParent() method)
+   *  <li>To implement additional methods in the case that the snapshot
+   *      type is not the same as the type to extend.
+   * </ol>
+   *
+   * @author Jonathan Fuerth <jfuerth@gmail.com>
+   */
+  public interface MethodBodyCallback {
+
+    /**
+     * Optionally returns the statement that should be used as the body of the
+     * given method for the given object's snapshot.
+     *
+     * @param method
+     *          The method to provide the body for
+     * @param o
+     *          The object instance to provide the method for
+     * @return The Statement to use as the method body (must return a type
+     *         compatible with {@code method}'s return type), or null if the
+     *         snapshot maker should generate the method body by invoking method
+     *         on {@code o} and returning a Literal of its value.
+     */
+    Statement generateMethodBody(MetaMethod method, Object o);
+
+  }
 
   /** This class should not be instantiated. */
   private SnapshotMaker() {}
@@ -82,14 +114,14 @@ public final class SnapshotMaker {
   public static Statement makeSnapshotAsSubclass(
       final Object o,
       final Class<?> typeToExtend,
-      final Map<Object, Statement> cannedRepresentations,
+      final MethodBodyCallback methodBodyCallback,
       final Class<?> ... typesToRecurseOn) {
     MetaClass metaTypeToExtend = MetaClassFactory.get(typeToExtend);
     MetaClass[] metaTypesToRecurseOn = new MetaClass[typesToRecurseOn.length];
     for (int i = 0; i < typesToRecurseOn.length; i++) {
       metaTypesToRecurseOn[i] = MetaClassFactory.get(typesToRecurseOn[i]);
     }
-    return makeSnapshotAsSubclass(o, metaTypeToExtend, cannedRepresentations, metaTypesToRecurseOn);
+    return makeSnapshotAsSubclass(o, metaTypeToExtend, methodBodyCallback, metaTypesToRecurseOn);
   }
 
   /**
@@ -121,19 +153,16 @@ public final class SnapshotMaker {
   public static Statement makeSnapshotAsSubclass(
       final Object o,
       final MetaClass typeToExtend,
-      final Map<Object, Statement> cannedRepresentations,
+      final MethodBodyCallback methodBodyCallback,
       final MetaClass ... typesToRecurseOn) {
-
-    IdentityHashMap<Object, Statement> existingSnapshots = new IdentityHashMap<Object, Statement>();
-    if (cannedRepresentations != null) {
-      existingSnapshots.putAll(cannedRepresentations);
-    }
 
     return makeSnapshotAsSubclass(
         o,
         typeToExtend,
+        typeToExtend,
+        methodBodyCallback,
         new HashSet<MetaClass>(Arrays.asList(typesToRecurseOn)),
-        existingSnapshots,
+        new IdentityHashMap<Object, Statement>(),
         new IdentityHashSet<Object>());
   }
 
@@ -142,12 +171,20 @@ public final class SnapshotMaker {
    *
    * @param o
    *          The object to snapshot.
+   * @param typeToSnapshot
+   *          The type to read the snapshot attributes from. Must be a
+   *          superclass of o or an interface implemented by o.
    * @param typeToExtend
-   *          The type of the snapshot to produce.
+   *          The type of the snapshot to produce. Must be a subclass or
+   *          subinterface of typeToSnapshot, and the additional methods present
+   *          in typeToExtend vs. typeToSnapshot must be provided by the
+   *          MethodMaker callback, since they can't be generated from o.
    * @param typesToRecurseOn
    *          Types for which this method should be called recursively.
-   * @param cannedRepresentations
-   *          Object instances for which a given representation should be used.
+   * @param methodBodyCallback
+   *          A callback that can provide method bodies, preventing the standard
+   *          snapshot behaviour for those methods. This callback is optional;
+   *          null is acceptable as "no callback."
    * @param existingSnapshots
    *          Object instances for which a snapshot has already been completed.
    *          Bootstrap this with an empty IdentityHashMap.
@@ -160,7 +197,9 @@ public final class SnapshotMaker {
    */
   private static Statement makeSnapshotAsSubclass(
       final Object o,
+      final MetaClass typeToSnapshot,
       final MetaClass typeToExtend,
+      final MethodBodyCallback methodBodyCallback,
       final Set<MetaClass> typesToRecurseOn,
       final IdentityHashMap<Object, Statement> existingSnapshots,
       final IdentityHashSet<Object> unfinishedSnapshots) {
@@ -225,6 +264,18 @@ public final class SnapshotMaker {
         for (MetaMethod method : sortedMethods) {
           System.out.println("  method " + method.getName());
           System.out.println("    return type " + method.getReturnType());
+
+          if (methodBodyCallback != null) {
+            Statement providedMethod = methodBodyCallback.generateMethodBody(method, o);
+            if (providedMethod != null) {
+              System.out.println("    body provided by callback");
+              builder
+                  .publicOverridesMethod(method.getName(), Parameter.of(method.getParameters()))
+                  .append(providedMethod)
+                  .finish();
+              continue;
+            }
+          }
           if (method.getReturnType().equals(void.class)) {
             builder.publicOverridesMethod(method.getName()).finish();
             System.out.println("  finished method " + method.getName());
@@ -248,7 +299,8 @@ public final class SnapshotMaker {
               // use Stmt.create(context) to pass the context along.
               System.out.println("    >> recursing for " + retval);
               methodBody = Stmt.create(subContext).nestedCall(makeSnapshotAsSubclass(
-                  retval, method.getReturnType(), typesToRecurseOn, existingSnapshots, unfinishedSnapshots)).returnValue();
+                  retval, method.getReturnType(), method.getReturnType(),
+                  methodBodyCallback, typesToRecurseOn, existingSnapshots, unfinishedSnapshots)).returnValue();
             }
             else {
               System.out.println("    relying on literal factory");
