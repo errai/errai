@@ -179,7 +179,7 @@ public class SnapshotMakerTest extends AbstractCodegenTest {
   }
 
   @Test
-  public void testCannedRepresentation() {
+  public void testMethodBodyCallback() {
     Person mom = new PersonImpl("mom", 30, null);
     Person kid1 = new PersonImpl("Kid 1", 3, mom);
     Person kid2 = new PersonImpl("Kid 2", 4, mom);

@@ -30,13 +30,13 @@ import com.google.gwt.dev.util.collect.IdentityHashSet;
  * <ul>
  *  <li>It must be an interface or a non-final class with a public no-args constructor.
  *  <li>None of the public methods take arguments (except {@code equals(Object)}, which is always ignored)
- *  <li>Each public method must return one of the following:
+ *  <li>Each public method must be handled by the given MethodBodyCallback, or return one
+ *      of the following values for which a snapshot can be generated automatically:
  *    <ul>
  *      <li>{@code void}
  *      <li>a Java primitive type
  *      <li>a {@link Context#addLiteralizableClass(Class) literalizable type} in the current code generator context
  *      <li>a type that is explicitly mentioned as a "type to recurse on" (these types must in turn follow this set of rules)
- *      <li>an object instance for which a "canned representation" is provided (these are matched by instance equality, not by type)
  *    </ul>
  *  </ul>
  *
@@ -91,15 +91,10 @@ public final class SnapshotMaker {
    *          The type that the snapshot will have. This type must meet the
    *          requirements listed in the SnapshotMaker class-level
    *          documentation.
-   * @param cannedRepresentations
-   *          A map of objects for which you want to provide a pre-made return
-   *          statement, rather than allowing the code generator's default
-   *          behaviour to generate a snapshot. This can be used to refer back
-   *          to an existing variable or a singleton instance.
-   *          <p>
-   *          The provided statements will be used verbatim as the entire method
-   *          body of any method that returns the corresponding key value, so be
-   *          sure that each statement is a return statement.
+   * @param methodBodyCallback
+   *          A callback that can provide method bodies, preventing the standard
+   *          snapshot behaviour for those methods. This callback is optional;
+   *          null is acceptable as "no callback."
    * @param typesToRecurseOn
    *          The types for which the snapshot maker should be applied
    *          recursively.
@@ -134,11 +129,10 @@ public final class SnapshotMaker {
    *          The type that the snapshot will have. This type must meet the
    *          requirements listed in the SnapshotMaker class-level
    *          documentation.
-   * @param cannedRepresentations
-   *          A map of objects for which you want to provide a pre-made
-   *          Statement, rather than allowing the code generator's default
-   *          behaviour to generate a snapshot. This can be used to refer back
-   *          to an existing variable or a singleton instance.
+   * @param methodBodyCallback
+   *          A callback that can provide method bodies, preventing the standard
+   *          snapshot behaviour for those methods. This callback is optional;
+   *          null is acceptable as "no callback."
    * @param typesToRecurseOn
    *          The types for which the snapshot maker should be applied
    *          recursively.
