@@ -1,8 +1,16 @@
 package org.jboss.errai.jpa.client.local;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import javax.persistence.EntityManager;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.Metamodel;
+
+import org.jboss.errai.jpa.client.local.backend.StorageBackend;
+import org.jboss.errai.jpa.client.local.backend.WebStorageBackend;
+import org.jboss.errai.marshalling.client.Marshalling;
 
 /**
  * The Errai specialization of the JPA 2.0 EntityManager interface. An
@@ -13,10 +21,25 @@ import javax.persistence.metamodel.Metamodel;
  */
 public abstract class ErraiEntityManager implements EntityManager {
 
+  /**
+   * The metamodel. Gets populated on first call to {@link #getMetamodel()}.
+   */
   final ErraiMetamodel metamodel = new ErraiMetamodel();
 
+  /**
+   * All of the objects that need to be examined when {@link #flush()} is called.
+   */
+  final List<Object> persistenceContext = new ArrayList<Object>();
+
+  /**
+   * The actual storage backend.
+   */
+  private final StorageBackend backend = new WebStorageBackend();
+
+  /**
+   * Constructor for subclasses.
+   */
   protected ErraiEntityManager() {
-    populateMetamodel();
   }
 
   /**
@@ -34,6 +57,42 @@ public abstract class ErraiEntityManager implements EntityManager {
    */
   protected abstract void populateMetamodel();
 
+  /**
+   * This method performs the unchecked (but safe) cast of
+   * {@code object.getClass()} to {@code Class<T>}. Using this method avoids the
+   * need to mark larger blocks of code with a SuppressWarnings annotation.
+   *
+   * @param object
+   *          The object to get the associated Class object from. Not null.
+   * @return The Class object with type parameter fixed to the compile-time type
+   *         of object.
+   */
+  @SuppressWarnings("unchecked")
+  private <T> Class<T> getNarrowedClass(T object) {
+    return (Class<T>) object.getClass();
+  }
+
+  private <T> void persistImpl(T entity) {
+    EntityType<T> entityType = getMetamodel().entity(getNarrowedClass(entity));
+    persistenceContext.add(entity);
+
+    ErraiSingularAttribute<? super T,?> idAttr;
+    switch (entityType.getIdType().getPersistenceType()) {
+    case BASIC:
+      idAttr = (ErraiSingularAttribute<? super T, ?>) entityType.getId(entityType.getIdType().getJavaType());
+      break;
+    default:
+      throw new RuntimeException(entityType.getIdType().getPersistenceType() + " ids are not yet supported");
+    }
+
+    Object id = idAttr.get(entity);
+
+    String idJson = Marshalling.toJSON(id);
+    String entityJson = Marshalling.toJSON(entity);
+    backend.put(idJson, entityJson);
+  }
+  // -------------- Actual JPA API below this line -------------------
+
   @Override
   public Metamodel getMetamodel() {
     if (!metamodel.isFrozen()) {
@@ -47,6 +106,30 @@ public abstract class ErraiEntityManager implements EntityManager {
 
   @Override
   public void persist(Object entity) {
-    EntityType<?> entityType = metamodel.entity(entity.getClass());
+    persistImpl(entity);
+  }
+
+  @Override
+  public void flush() {
+    for (Object entity : persistenceContext) {
+      System.out.println("Flushing " + entity);
+    }
+  }
+
+  @Override
+  public void detach(Object entity) {
+    persistenceContext.remove(entity);
+  }
+
+  @Override
+  public <T> T find(Class<T> entityClass, Object primaryKey) {
+    EntityType<T> entityType = getMetamodel().entity(entityClass);
+    // TODO
+    return null;
+  }
+
+  @Override
+  public <T> T find(Class<T> entityClass, Object primaryKey, Map<String, Object> properties) {
+    return find(entityClass, primaryKey);
   }
 }
