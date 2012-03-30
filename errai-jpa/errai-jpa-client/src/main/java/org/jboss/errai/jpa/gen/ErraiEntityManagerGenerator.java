@@ -2,7 +2,6 @@ package org.jboss.errai.jpa.gen;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,10 +16,12 @@ import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.Type;
 
 import org.jboss.errai.codegen.SnapshotMaker;
+import org.jboss.errai.codegen.SnapshotMaker.MethodBodyCallback;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.MethodBlockBuilder;
+import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
 import org.jboss.errai.codegen.util.Implementations;
 import org.jboss.errai.codegen.util.Stmt;
@@ -52,7 +53,7 @@ public class ErraiEntityManagerGenerator extends Generator {
     // pmm = "populate metamodel method"
     MethodBlockBuilder<?> pmm = classBuilder.protectedMethod(void.class, "populateMetamodel");
 
-    for (EntityType<?> et : mm.getEntities()) {
+    for (final EntityType<?> et : mm.getEntities()) {
 
       // first, create a variable for the EntityType
       pmm.append(Stmt.codeComment(
@@ -63,14 +64,26 @@ public class ErraiEntityManagerGenerator extends Generator {
       pmm.append(Stmt.declareVariable(ErraiEntityType.class).asFinal()
           .named(entityTypeVarName)
           .initializeWith(Stmt.newObject(ErraiEntityType.class).withParameters(et.getName(), et.getJavaType())));
-      Map<Object, Statement> entityTypeReference = Collections.singletonMap(
-          (Object) et, Stmt.loadVariable(entitySnapshotVarName(et.getJavaType())).returnValue());
+
+      MethodBodyCallback methodBodyCallback = new MethodBodyCallback() {
+
+        @Override
+        public Statement generateMethodBody(MetaMethod method, Object o) {
+          // provide reference to declaring type (et) from its attributes
+          if (o instanceof SingularAttribute
+                  && method.getName().equals("getDeclaringType")
+                  && ((SingularAttribute<?, ?>) o).getDeclaringType() == et) {
+            return Stmt.loadVariable(entitySnapshotVarName(et.getJavaType())).returnValue();
+          }
+          return null;
+        }
+      };
 
       // now, snapshot all the EntityType's attributes, adding them as we go
       List<Statement> attributes = new ArrayList<Statement>();
       for (SingularAttribute<?, ?> attrib : et.getSingularAttributes()) {
         Statement attribSnapshot = SnapshotMaker.makeSnapshotAsSubclass(
-            attrib, SingularAttribute.class, entityTypeReference,
+            attrib, SingularAttribute.class, methodBodyCallback,
             EntityType.class, ManagedType.class, Type.class);
         pmm.append(Stmt.loadVariable(entityTypeVarName).invoke("addAttribute", attribSnapshot));
       }
