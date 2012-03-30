@@ -76,8 +76,8 @@ public class TypeInjector extends AbstractInjector {
     qualifiers.addAll(Arrays.asList(additionalQualifiers));
 
     if (!qualifiers.isEmpty()) {
-      qualifyingMetadata = context.getProcessingContext().getQualifyingMetadataFactory().createFrom(qualifiers.toArray(new
-              Annotation[qualifiers.size()]));
+      qualifyingMetadata = context.getProcessingContext().getQualifyingMetadataFactory()
+              .createFrom(qualifiers.toArray(new Annotation[qualifiers.size()]));
 
     }
     else {

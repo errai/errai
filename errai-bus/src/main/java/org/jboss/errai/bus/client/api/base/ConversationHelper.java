@@ -24,7 +24,7 @@ import org.jboss.errai.common.client.protocols.MessageParts;
 
 /**
  * Utility to create conversational messages on the bus.
- * 
+ *
  * @author Mike Brock
  * @author Jonathan Fuerth <jfuerth@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -46,11 +46,12 @@ class ConversationHelper {
     }
   }
 
-  static int counter = 0;
+  private static volatile int counter = 0;
+  private static final Object counterLock = new Object();
+
   static int count() {
-    if (++counter > 1000) {
-      return counter = 0;
+    synchronized (counterLock) {
+      return ++counter;
     }
-    return counter;
   }
 }

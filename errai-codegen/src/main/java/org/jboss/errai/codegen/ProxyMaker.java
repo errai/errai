@@ -25,11 +25,17 @@ import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.util.GenUtil;
+import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static org.jboss.errai.codegen.util.Bool.isNull;
+import static org.jboss.errai.codegen.util.Stmt.if_;
+import static org.jboss.errai.codegen.util.Stmt.loadVariable;
+import static org.jboss.errai.codegen.util.Stmt.throw_;
 
 /**
  * @author Mike Brock
@@ -67,7 +73,9 @@ public class ProxyMaker {
     builder.privateField(proxyVar, toProxy).finish();
     for (MetaMethod method : toProxy.getMethods()) {
       String methodString = GenUtil.getMethodString(method);
-      if (renderedMethods.contains(methodString)) continue;
+      if (renderedMethods.contains(methodString) || method.getName().equals("hashCode")
+              || (method.getName().equals("equals") && method.getParameters().length == 1
+              && method.getParameters()[0].getType().getFullyQualifiedName().equals("java.lang.Object"))) continue;
       renderedMethods.add(methodString);
 
       if (method.isSynthetic() || method.isFinal() ||
@@ -81,20 +89,45 @@ public class ProxyMaker {
 
       Statement[] statementVars = new Statement[parms.size()];
       for (int i = 0; i < parms.size(); i++) {
-        statementVars[i] = Stmt.loadVariable(parms.get(i).getName());
+        statementVars[i] = loadVariable(parms.get(i).getName());
       }
 
       if (method.getReturnType().isVoid()) {
-        methBody.append(Stmt.loadVariable(proxyVar).invoke(method, statementVars));
+        methBody._(loadVariable(proxyVar).invoke(method, statementVars));
       }
       else {
-        methBody.append(Stmt.loadVariable(proxyVar).invoke(method, statementVars).returnValue());
+        methBody._(loadVariable(proxyVar).invoke(method, statementVars).returnValue());
       }
       methBody.finish();
     }
 
+    // implement hashCode()
+    builder.publicMethod(int.class, "hashCode").body()
+            ._(
+                    if_(isNull(loadVariable(proxyVar)))
+                            ._(throw_(IllegalStateException.class, "call to hashCode() on an unclosed proxy."))
+                            .finish()
+                            .else_()
+                            ._(Stmt.loadVariable(proxyVar).invoke("hashCode").returnValue())
+                            .finish()
+            )
+            .finish();
+
+    // implements equals()
+    builder.publicMethod(boolean.class, "equals", Parameter.of(Object.class, "o")).body()
+            ._(
+                    if_(isNull(loadVariable(proxyVar)))
+                            ._(throw_(IllegalStateException.class, "call to equal() on an unclosed proxy."))
+                            .finish()
+                            .else_()
+                            ._(Stmt.loadVariable(proxyVar).invoke("equals", Refs.get("o")).returnValue())
+                            .finish()
+            )
+            .finish();
+
+
     builder.publicMethod(void.class, PROXY_BIND_METHOD).parameters(DefParameters.of(Parameter.of(toProxy, "proxy")))
-            .append(Stmt.loadVariable(proxyVar).assignValue(Stmt.loadVariable("proxy"))).finish();
+            ._(loadVariable(proxyVar).assignValue(loadVariable("proxy"))).finish();
 
     return builder.getClassDefinition();
   }

@@ -69,31 +69,28 @@ public class ProxyInjector extends AbstractInjector {
 
   @Override
   public Statement getBeanInstance(InjectableInstance injectableInstance) {
-    if (!isRendered()) {
-      IOCProcessingContext pCtx = injectableInstance.getInjectionContext().getProcessingContext();
+    IOCProcessingContext pCtx = injectableInstance.getInjectionContext().getProcessingContext();
 
-      pCtx.append(declareVariable(proxyClass).asFinal().named(varName).initializeWith(newObject(proxyClass)));
+    pCtx.append(declareVariable(proxyClass).asFinal().named(varName).initializeWith(newObject(proxyClass)));
 
-      MetaClass proxyResolverRef = parameterizedAs(ProxyResolver.class, typeParametersOf(proxiedType));
+    MetaClass proxyResolverRef = parameterizedAs(ProxyResolver.class, typeParametersOf(proxiedType));
 
-      BlockBuilder<AnonymousClassStructureBuilder> proxyResolverBody = newObject(proxyResolverRef)
-              .extend().publicOverridesMethod("resolve", Parameter.of(proxiedType, "obj"));
+    BlockBuilder<AnonymousClassStructureBuilder> proxyResolverBody = newObject(proxyResolverRef)
+            .extend().publicOverridesMethod("resolve", Parameter.of(proxiedType, "obj"));
 
-      Statement proxyResolver = proxyResolverBody.append(loadVariable(varName)
-              .invoke(ProxyMaker.PROXY_BIND_METHOD, Refs.get("obj"))).finish().finish();
+    Statement proxyResolver = proxyResolverBody.append(loadVariable(varName)
+            .invoke(ProxyMaker.PROXY_BIND_METHOD, Refs.get("obj"))).finish().finish();
 
-      proxyResolverBody.append(Stmt.loadVariable("context").invoke("addProxyReference", Refs.get(varName), Refs.get("obj")));
+    proxyResolverBody.append(Stmt.loadVariable("context").invoke("addProxyReference", Refs.get(varName), Refs.get("obj")));
 
-      pCtx.append(loadVariable("context").invoke("addUnresolvedProxy", proxyResolver,
-              proxiedType, qualifyingMetadata.getQualifiers()));
+    pCtx.append(loadVariable("context").invoke("addUnresolvedProxy", proxyResolver,
+            proxiedType, qualifyingMetadata.getQualifiers()));
 
-      for (Statement statement : closeStatements) {
-        proxyResolverBody.append(statement);
-      }
-
-      setRendered(true);
-
+    for (Statement statement : closeStatements) {
+      proxyResolverBody.append(statement);
     }
+
+    setRendered(true);
     return loadVariable(varName);
   }
 

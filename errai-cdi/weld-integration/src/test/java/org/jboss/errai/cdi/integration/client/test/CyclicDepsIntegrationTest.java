@@ -20,6 +20,8 @@ import org.jboss.errai.cdi.integration.client.shared.BeanInjectSelf;
 import org.jboss.errai.cdi.integration.client.shared.ConsumerBeanA;
 import org.jboss.errai.cdi.integration.client.shared.CycleNodeA;
 import org.jboss.errai.cdi.integration.client.shared.DependentBeanInjectSelf;
+import org.jboss.errai.cdi.integration.client.shared.EquHashCheckCycleA;
+import org.jboss.errai.cdi.integration.client.shared.EquHashCheckCycleB;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.container.IOC;
@@ -52,10 +54,13 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
 
         assertNotNull(nodeA);
         assertNotNull(nodeA.getCycleNodeB());
+        assertNotNull(nodeA.getCycleNodeB().getCycleNodeA());
         assertNotNull(nodeA.getCycleNodeB().getCycleNodeC());
         assertNotNull(nodeA.getCycleNodeB().getCycleNodeC().getCycleNodeA());
         assertEquals("CycleNodeA is a different instance at different points in the graph",
                 nodeA.getNodeId(), nodeA.getCycleNodeB().getCycleNodeC().getCycleNodeA().getNodeId());
+        assertEquals("CycleNodeA is a different instance at different points in the graph",
+                nodeA.getNodeId(), nodeA.getCycleNodeB().getCycleNodeA().getNodeId());
 
         finishTest();
       }
@@ -180,4 +185,35 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
       }
     });
   }
+
+  public void testHashcodeAndEqualsWorkThroughProxies() {
+    delayTestFinish(60000);
+
+    CDI.addPostInitTask(new Runnable() {
+      @Override
+      public void run() {
+        EquHashCheckCycleA equHashCheckCycleA = getBeanManager()
+                .lookupBean(EquHashCheckCycleA.class).getInstance();
+
+        EquHashCheckCycleB equHashCheckCycleB = getBeanManager()
+                .lookupBean(EquHashCheckCycleB.class).getInstance();
+
+        assertNotNull(equHashCheckCycleA);
+        assertNotNull(equHashCheckCycleB);
+
+        assertEquals("equals contract broken", equHashCheckCycleA, equHashCheckCycleB.getEquHashCheckCycleA());
+        assertEquals("equals contract broken", equHashCheckCycleB, equHashCheckCycleA.getEquHashCheckCycleB());
+
+        assertEquals("hashCode contract broken", equHashCheckCycleA.hashCode(),
+                equHashCheckCycleB.getEquHashCheckCycleA().hashCode());
+
+        assertEquals("hashCode contract broken", equHashCheckCycleB.hashCode(),
+                equHashCheckCycleA.getEquHashCheckCycleB().hashCode());
+
+        finishTest();
+      }
+    });
+
+  }
+
 }

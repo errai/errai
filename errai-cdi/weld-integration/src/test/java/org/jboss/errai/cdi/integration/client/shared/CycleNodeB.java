@@ -24,7 +24,12 @@ import javax.inject.Inject;
  */
 @ApplicationScoped
 public class CycleNodeB {
+  @Inject CycleNodeA cycleNodeA;
   @Inject CycleNodeC cycleNodeC;
+
+  public CycleNodeA getCycleNodeA() {
+    return cycleNodeA;
+  }
 
   public CycleNodeC getCycleNodeC() {
     return cycleNodeC;
