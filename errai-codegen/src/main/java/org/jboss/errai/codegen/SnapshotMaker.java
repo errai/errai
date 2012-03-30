@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -87,10 +86,16 @@ public final class SnapshotMaker {
    *
    * @param o
    *          The object to snapshot.
+   * @param typeToSnapshot
+   *          The type to read the snapshot attributes from. Must be a
+   *          superclass of o or an interface implemented by o, and methods not
+   *          supplied by {@code methodBodyCallback} must meed the requirements
+   *          laid out in the class-level SnapshotMaker documentation.
    * @param typeToExtend
-   *          The type that the snapshot will have. This type must meet the
-   *          requirements listed in the SnapshotMaker class-level
-   *          documentation.
+   *          The type of the snapshot to produce. Must be a subclass or
+   *          subinterface of typeToSnapshot, and the additional methods present
+   *          in typeToExtend vs. typeToSnapshot must be provided by the
+   *          MethodMaker callback, since they can't be generated from o.
    * @param methodBodyCallback
    *          A callback that can provide method bodies, preventing the standard
    *          snapshot behaviour for those methods. This callback is optional;
@@ -108,15 +113,17 @@ public final class SnapshotMaker {
    */
   public static Statement makeSnapshotAsSubclass(
       final Object o,
+      final Class<?> typeToSnapshot,
       final Class<?> typeToExtend,
       final MethodBodyCallback methodBodyCallback,
       final Class<?> ... typesToRecurseOn) {
+    MetaClass metaTypeToSnapshot = MetaClassFactory.get(typeToSnapshot);
     MetaClass metaTypeToExtend = MetaClassFactory.get(typeToExtend);
     MetaClass[] metaTypesToRecurseOn = new MetaClass[typesToRecurseOn.length];
     for (int i = 0; i < typesToRecurseOn.length; i++) {
       metaTypesToRecurseOn[i] = MetaClassFactory.get(typesToRecurseOn[i]);
     }
-    return makeSnapshotAsSubclass(o, metaTypeToExtend, methodBodyCallback, metaTypesToRecurseOn);
+    return makeSnapshotAsSubclass(o, metaTypeToSnapshot, metaTypeToExtend, methodBodyCallback, metaTypesToRecurseOn);
   }
 
   /**
@@ -125,10 +132,16 @@ public final class SnapshotMaker {
    *
    * @param o
    *          The object to snapshot.
+   * @param typeToSnapshot
+   *          The type to read the snapshot attributes from. Must be a
+   *          superclass of o or an interface implemented by o, and methods not
+   *          supplied by {@code methodBodyCallback} must meed the requirements
+   *          laid out in the class-level SnapshotMaker documentation.
    * @param typeToExtend
-   *          The type that the snapshot will have. This type must meet the
-   *          requirements listed in the SnapshotMaker class-level
-   *          documentation.
+   *          The type of the snapshot to produce. Must be a subclass or
+   *          subinterface of typeToSnapshot, and the additional methods present
+   *          in typeToExtend vs. typeToSnapshot must be provided by the
+   *          MethodMaker callback, since they can't be generated from o.
    * @param methodBodyCallback
    *          A callback that can provide method bodies, preventing the standard
    *          snapshot behaviour for those methods. This callback is optional;
@@ -146,13 +159,14 @@ public final class SnapshotMaker {
    */
   public static Statement makeSnapshotAsSubclass(
       final Object o,
+      final MetaClass typeToSnapshot,
       final MetaClass typeToExtend,
       final MethodBodyCallback methodBodyCallback,
       final MetaClass ... typesToRecurseOn) {
 
     return makeSnapshotAsSubclass(
         o,
-        typeToExtend,
+        typeToSnapshot,
         typeToExtend,
         methodBodyCallback,
         new HashSet<MetaClass>(Arrays.asList(typesToRecurseOn)),
@@ -167,7 +181,9 @@ public final class SnapshotMaker {
    *          The object to snapshot.
    * @param typeToSnapshot
    *          The type to read the snapshot attributes from. Must be a
-   *          superclass of o or an interface implemented by o.
+   *          superclass of o or an interface implemented by o, and methods not
+   *          supplied by {@code methodBodyCallback} must meed the requirements
+   *          laid out in the class-level SnapshotMaker documentation.
    * @param typeToExtend
    *          The type of the snapshot to produce. Must be a subclass or
    *          subinterface of typeToSnapshot, and the additional methods present
@@ -202,10 +218,10 @@ public final class SnapshotMaker {
       return NullLiteral.INSTANCE;
     }
 
-    if (!typeToExtend.isAssignableFrom(o.getClass())) {
+    if (!typeToSnapshot.isAssignableFrom(o.getClass())) {
       throw new IllegalArgumentException(
           "Given object (of type " + o.getClass().getName() +
-              ") is not an instance of requested type " + typeToExtend.getName());
+              ") is not an instance of requested type to snapshot " + typeToSnapshot.getName());
     }
 
     System.out.println("** Making snapshot of " + o);
@@ -218,18 +234,6 @@ public final class SnapshotMaker {
         return m1.getName().compareTo(m2.getName());
       }
     });
-
-    Iterator<MetaMethod> it = sortedMethods.iterator();
-    while (it.hasNext()) {
-      MetaMethod m = it.next();
-      if ("equals".equals(m.getName()) || "hashCode".equals(m.getName())) {
-        it.remove();
-        continue;
-      }
-      if (m.getParameters().length > 0) {
-        throw new UnsupportedOperationException("I can't make a snapshot of a type that has public methods with parameters (other than equals()).");
-      }
-    }
 
     System.out.println("   Creating a new statement");
     return new Statement() {
@@ -270,6 +274,18 @@ public final class SnapshotMaker {
               continue;
             }
           }
+
+          if (method.getName().equals("equals") || method.getName().equals("hashCode")) {
+            // we skip these if not provided by the callback
+            System.out.println("    skipping special-case method " + method.getName());
+            continue;
+          }
+
+          if (method.getParameters().length > 0) {
+            throw new GenerationException("Method " + method + " takes parameters. Such methods must " +
+            		"be covered by the MethodBodyCallback, because they cannot be snapshotted.");
+          }
+
           if (method.getReturnType().equals(void.class)) {
             builder.publicOverridesMethod(method.getName()).finish();
             System.out.println("  finished method " + method.getName());

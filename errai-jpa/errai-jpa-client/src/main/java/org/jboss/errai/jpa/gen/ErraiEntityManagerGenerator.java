@@ -27,6 +27,7 @@ import org.jboss.errai.codegen.util.Implementations;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.client.local.ErraiEntityType;
+import org.jboss.errai.jpa.client.local.ErraiSingularAttribute;
 
 import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
@@ -75,6 +76,23 @@ public class ErraiEntityManagerGenerator extends Generator {
                   && ((SingularAttribute<?, ?>) o).getDeclaringType() == et) {
             return Stmt.loadVariable(entitySnapshotVarName(et.getJavaType())).returnValue();
           }
+
+          // provide get method
+          if (o instanceof SingularAttribute
+                  && method.getName().equals("get")) {
+            SingularAttribute<?, ?> attr = (SingularAttribute<?, ?>) o;
+            // TODO direct property access
+            return Stmt.loadVariable("entityInstance").invoke(attr.getJavaMember().getName()).returnValue();
+          }
+
+          // provide set method
+          if (o instanceof SingularAttribute
+                  && method.getName().equals("set")) {
+            SingularAttribute<?, ?> attr = (SingularAttribute<?, ?>) o;
+            // TODO direct property access
+            return Stmt.loadVariable("entityInstance").invoke(attr.getJavaMember().getName()).returnValue();
+          }
+
           return null;
         }
       };
@@ -83,7 +101,7 @@ public class ErraiEntityManagerGenerator extends Generator {
       List<Statement> attributes = new ArrayList<Statement>();
       for (SingularAttribute<?, ?> attrib : et.getSingularAttributes()) {
         Statement attribSnapshot = SnapshotMaker.makeSnapshotAsSubclass(
-            attrib, SingularAttribute.class, methodBodyCallback,
+            attrib, SingularAttribute.class, ErraiSingularAttribute.class, methodBodyCallback,
             EntityType.class, ManagedType.class, Type.class);
         pmm.append(Stmt.loadVariable(entityTypeVarName).invoke("addAttribute", attribSnapshot));
       }

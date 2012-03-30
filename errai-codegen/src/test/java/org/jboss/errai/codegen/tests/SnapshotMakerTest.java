@@ -28,7 +28,7 @@ public class SnapshotMakerTest extends AbstractCodegenTest {
   public void testGenerateSnapshotOfMethod() throws Exception {
     Person mother = new PersonImpl("mom", 30, null);
     Person child = new PersonImpl("kid", 5, mother);
-    Statement snapshotStmt = SnapshotMaker.makeSnapshotAsSubclass(child, Person.class, null, Person.class);
+    Statement snapshotStmt = SnapshotMaker.makeSnapshotAsSubclass(child, Person.class, Person.class, null, Person.class);
 
     final String generated
             = snapshotStmt.generate(Context.create());
@@ -67,7 +67,7 @@ public class SnapshotMakerTest extends AbstractCodegenTest {
     cycle1.setMother(cycle2);
 
     try {
-      Statement snapshotStmt = SnapshotMaker.makeSnapshotAsSubclass(cycle2, Person.class, null, Person.class);
+      Statement snapshotStmt = SnapshotMaker.makeSnapshotAsSubclass(cycle2, Person.class, Person.class, null, Person.class);
       System.out.println(snapshotStmt.generate(Context.create()));
       Assert.fail("Instance cycle was not detected");
     }
@@ -192,7 +192,7 @@ public class SnapshotMakerTest extends AbstractCodegenTest {
         .declareVariable(Person.class)
         .asFinal()
         .named("mom")
-        .initializeWith(SnapshotMaker.makeSnapshotAsSubclass(mom, Person.class, null, Person.class));
+        .initializeWith(SnapshotMaker.makeSnapshotAsSubclass(mom, Person.class, Person.class, null, Person.class));
     method.append(momVar);
 
     SnapshotMaker.MethodBodyCallback mbcb = new SnapshotMaker.MethodBodyCallback() {
@@ -205,9 +205,9 @@ public class SnapshotMakerTest extends AbstractCodegenTest {
       }
     };
 
-    method.append(Stmt.declareVariable("kid1", SnapshotMaker.makeSnapshotAsSubclass(kid1, Person.class, mbcb, Person.class)));
-    method.append(Stmt.declareVariable("kid2", SnapshotMaker.makeSnapshotAsSubclass(kid2, Person.class, mbcb, Person.class)));
-    method.append(Stmt.declareVariable("kid3", SnapshotMaker.makeSnapshotAsSubclass(kid3, Person.class, mbcb, Person.class)));
+    method.append(Stmt.declareVariable("kid1", SnapshotMaker.makeSnapshotAsSubclass(kid1, Person.class, Person.class, mbcb, Person.class)));
+    method.append(Stmt.declareVariable("kid2", SnapshotMaker.makeSnapshotAsSubclass(kid2, Person.class, Person.class, mbcb, Person.class)));
+    method.append(Stmt.declareVariable("kid3", SnapshotMaker.makeSnapshotAsSubclass(kid3, Person.class, Person.class, mbcb, Person.class)));
 
     method.finish();
 

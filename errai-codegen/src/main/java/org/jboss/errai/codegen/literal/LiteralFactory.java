@@ -184,7 +184,8 @@ public class LiteralFactory {
       return new LiteralValue<Object>(o) {
         @Override
         public String getCanonicalString(Context context) {
-          return SnapshotMaker.makeSnapshotAsSubclass(o, context.getLiteralizableTargetType(o.getClass()), null).generate(context);
+          Class<?> targetType = context.getLiteralizableTargetType(o.getClass());
+          return SnapshotMaker.makeSnapshotAsSubclass(o, targetType, targetType, null).generate(context);
         }
       };
     }
