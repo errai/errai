@@ -26,7 +26,7 @@ import javax.inject.Inject;
 /**
  * @author Mike Brock
  */
-//@ApplicationScoped
+@ApplicationScoped
 public class AppController {
   @Inject
   private IOCBeanManager manager;

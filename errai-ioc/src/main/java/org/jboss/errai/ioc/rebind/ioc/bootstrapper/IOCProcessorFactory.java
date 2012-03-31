@@ -274,7 +274,7 @@ public class IOCProcessorFactory {
                   instance.ensureMemberExposed(PrivateAccessType.Read);
               }
 
-              injectionContext.registerInjector(new AbstractInjector() {
+              AbstractInjector injector = new AbstractInjector() {
                 {
                   super.qualifyingMetadata = JSR330QualifyingMetadata.createFromAnnotations(instance.getQualifiers());
                   this.provider = true;
@@ -328,10 +328,13 @@ public class IOCProcessorFactory {
                       return null;
                   }
                 }
-              });
+              };
+              injectionContext.registerInjector(injector);
 
               control.masqueradeAs(instance.getEnclosingType());
-              control.notifyHardDependency(instance.getEnclosingType());
+
+              graphBuilder.addDependency(injector.getInjectedType(), Dependency.on(instance.getEnclosingType()));
+
             }
 
             @Override

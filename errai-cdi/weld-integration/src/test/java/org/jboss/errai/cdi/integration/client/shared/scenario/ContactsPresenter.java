@@ -16,20 +16,38 @@
 
 package org.jboss.errai.cdi.integration.client.shared.scenario;
 
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.event.shared.HandlerManager;
+import com.google.gwt.user.client.ui.Widget;
 import org.jboss.errai.ioc.client.api.Caller;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
+import java.util.List;
 
 /**
  * @author Mike Brock
  */
-//@Dependent
+@Dependent
 public class ContactsPresenter {
+
+  public interface Display {
+ 		HasClickHandlers getAddButton();
+ 		HasClickHandlers getDeleteButton();
+ 		HasClickHandlers getList();
+ 		void setData(List<String> data);
+ 		int getClickedRow(ClickEvent event);
+ 		List<Integer> getSelectedRows();
+ 		Widget asWidget();
+ 	}
 
   @Inject
   private HandlerManager eventBus;
+
+  @Inject
+  private Display display;
 
   public HandlerManager getEventBus() {
     return eventBus;

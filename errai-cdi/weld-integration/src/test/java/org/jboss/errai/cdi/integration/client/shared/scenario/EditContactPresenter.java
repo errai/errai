@@ -24,7 +24,7 @@ import javax.inject.Inject;
 /**
  * @author Mike Brock
  */
-//@Dependent
+@Dependent
 public class EditContactPresenter {
   @Inject
   private HandlerManager eventBus;
