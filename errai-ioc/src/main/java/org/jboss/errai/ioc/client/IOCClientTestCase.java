@@ -26,9 +26,9 @@ public abstract class IOCClientTestCase extends GWTTestCase {
   private ContainerBootstrapper initializer = new ContainerBootstrapper() {
 
     @Override
-    public BootstrapperInjectionContext bootstrap() {
+    public void bootstrap() {
       try {
-        return new Container().boostrapContainer();
+        new Container().boostrapContainer();
       }
       catch (Throwable t) {
         t.printStackTrace();
@@ -40,8 +40,9 @@ public abstract class IOCClientTestCase extends GWTTestCase {
   protected IOCClientTestCase() {
   }
 
-  protected BootstrapperInjectionContext bootstrapContainer() {
-    return initializer.bootstrap();
+  protected void bootstrapContainer() {
+
+    initializer.bootstrap();
   }
 
   public void setInitializer(ContainerBootstrapper initializer) {
@@ -67,6 +68,6 @@ public abstract class IOCClientTestCase extends GWTTestCase {
   }
 
   public static interface ContainerBootstrapper {
-    public BootstrapperInjectionContext bootstrap();
+    public void bootstrap();
   }
 }

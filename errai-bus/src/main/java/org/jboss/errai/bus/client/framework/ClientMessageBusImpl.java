@@ -17,6 +17,7 @@
 package org.jboss.errai.bus.client.framework;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -406,7 +407,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       return ErraiBus.getDispatcher();
     }
   };
-
 
 
   /**
@@ -1298,23 +1298,33 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * incoming timer to ensure the client's polling with the server is active.
    */
   private void initializeMessagingBus() {
-    if (disconnected) {
-      return;
-    }
-
-    RpcProxyLoader loader = GWT.create(RpcProxyLoader.class);
-    loader.loadProxies(ClientMessageBusImpl.this);
-    InitVotes.voteFor(RpcProxyLoader.class);
-
-    final Timer initialPollTimer = new Timer() {
+    GWT.runAsync(new RunAsyncCallback() {
       @Override
-      public void run() {
-        performPoll();
+      public void onFailure(Throwable reason) {
+        showError("failed to load RPC script from server", reason);
       }
-    };
 
+      @Override
+      public void onSuccess() {
+        if (disconnected) {
+          return;
+        }
 
-    initialPollTimer.schedule(10);
+        RpcProxyLoader loader = GWT.create(RpcProxyLoader.class);
+        loader.loadProxies(ClientMessageBusImpl.this);
+        InitVotes.voteFor(RpcProxyLoader.class);
+
+        final Timer initialPollTimer = new Timer() {
+          @Override
+          public void run() {
+            performPoll();
+          }
+        };
+
+        initialPollTimer.schedule(10);
+      }
+    });
+
   }
 
   /**
