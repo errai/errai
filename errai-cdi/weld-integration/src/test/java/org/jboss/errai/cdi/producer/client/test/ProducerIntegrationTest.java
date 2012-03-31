@@ -1,10 +1,10 @@
 package org.jboss.errai.cdi.producer.client.test;
 
 
+import org.jboss.errai.cdi.producer.client.BeanConsumesOwnProducer;
 import org.jboss.errai.cdi.producer.client.ProducerDependentTestBean;
 import org.jboss.errai.cdi.producer.client.ProducerDependentTestBeanWithCycle;
 import org.jboss.errai.cdi.producer.client.ProducerTestModule;
-import org.jboss.errai.cdi.producer.client.ProducerTestModuleWithCycle;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.container.IOC;
 
@@ -86,5 +86,12 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
     assertNotNull(bean);
     assertNotNull(bean.getFooface());
     assertEquals("HiThere", bean.getFooface().getMessage());
+  }
+
+  public void testBeanCanConsumeProducerFromItself() {
+    BeanConsumesOwnProducer bean = IOC.getBeanManager().lookupBean(BeanConsumesOwnProducer.class).getInstance();
+
+    assertNotNull(bean);
+    assertNotNull("bean did not inject its own producer", bean.getMagic());
   }
 }

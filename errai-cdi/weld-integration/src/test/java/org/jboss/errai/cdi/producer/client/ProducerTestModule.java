@@ -16,6 +16,7 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
  * Test module used by {@see ProducerIntegrationTest}.
  *
  * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Mike Brock
  */
 @ApplicationScoped
 public class ProducerTestModule {
