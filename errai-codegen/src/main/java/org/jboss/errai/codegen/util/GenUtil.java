@@ -26,6 +26,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.RunAsyncCallback;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.DefModifiers;
@@ -40,6 +43,7 @@ import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.CatchBlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
+import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.builder.impl.Scope;
 import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.exception.InvalidTypeException;
@@ -639,4 +643,5 @@ public class GenUtil {
     outerBlame.setStackTrace(outerStackTrace.toArray(new StackTraceElement[outerStackTrace.size()]));
     innerBlame.initCause(outerBlame);
   }
+
 }

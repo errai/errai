@@ -18,6 +18,7 @@ package org.jboss.errai.ioc.rebind.ioc.builtin;
 
 import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
+import static org.jboss.errai.ioc.util.MessageCallbackWrapper.wrapMessageCallbackInAsync;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
@@ -41,6 +42,7 @@ import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
+import org.jboss.errai.ioc.util.MessageCallbackWrapper;
 
 @SuppressWarnings("UnusedDeclaration")
 @CodeDecorator
@@ -79,11 +81,11 @@ public class ServiceIOCExtension extends IOCDecoratorExtension<Service> {
 
     if (local) {
       subscribeStatement = Stmt.nestedCall(busHandle)
-              .invoke("subscribeLocal", svcName, injectableInstance.getValueStatement());
+              .invoke("subscribeLocal", svcName, wrapMessageCallbackInAsync(injectableInstance.getValueStatement()));
     }
     else {
       subscribeStatement = Stmt.nestedCall(busHandle)
-              .invoke("subscribe", svcName, injectableInstance.getValueStatement());
+              .invoke("subscribe", svcName, wrapMessageCallbackInAsync(injectableInstance.getValueStatement()));
     }
 
     Statement declareVar = Stmt.declareVariable(Subscription.class).asFinal().named(varName)
