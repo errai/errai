@@ -27,7 +27,6 @@ import java.util.Collection;
 public interface DependencyControl {
   public void masqueradeAs(MetaClass clazz);
 
-  public void notifyHardDependency(MetaClass clazz);
   public void notifyDependency(MetaClass clazz);
   public void notifyDependencies(Collection<MetaClass> clazzes);
 }

@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Builds graphs
+ * Builds a dependency graph for use by the container.
  *
  * @author Mike Brock
  */
@@ -20,12 +20,26 @@ public class GraphBuilder {
   public final Multimap<String, Dependency> dependencyMap = HashMultimap.create();
   public final Multimap<String, Object> itemMap = HashMultimap.create();
 
+  /**
+   * Records a dependency on the specified type.
+   *
+   * @param type the type to record a dependency on.
+   * @param dependency the depedency
+   * @return the same instance of the GraphBuilder that called this method.
+   */
   public GraphBuilder addDependency(MetaClass type, Dependency dependency) {
     dependencyMap.put(type.getFullyQualifiedName(), dependency);
     recordClassForLookup(dependency.getType());
     return this;
   }
 
+  /**
+   * Record an arbitrary object to be associated with a type.
+   *
+   * @param type the type to record the item for.
+   * @param item the arbitrary object
+   * @return the same instance of the GraphBuilder that called this method.
+   */
   public GraphBuilder addItem(MetaClass type, Object item) {
     itemMap.put(type.getFullyQualifiedName(), item);
     recordClassForLookup(type);
@@ -36,6 +50,11 @@ public class GraphBuilder {
     classLookup.put(type.getFullyQualifiedName(), type);
   }
 
+  /**
+   * Returns a graph of only incoming edges for use in a topological sort.
+   *
+   * @return a list of incoming edges in the graph.
+   */
   public List<SortUnit> build() {
     final List<SortUnit> sortUnitList = new ArrayList<SortUnit>(10);
     final HashMap<String, SortUnit> sortUnitHashMap = new HashMap<String, SortUnit>(10);
@@ -49,12 +68,7 @@ public class GraphBuilder {
 
   private SortUnit _build(Map<String, SortUnit> sortUnits, String type, boolean hard) {
     if (sortUnits.containsKey(type)) {
-      if (hard) {
-        return ProxySortUnit.hardDepProxy(classLookup.get(type), sortUnits.get(type));
-      }
-      else {
-        return sortUnits.get(type);
-      }
+      return sortUnits.get(type);
     }
 
     final ProxySortUnit proxySortUnit = ProxySortUnit.proxyOf(classLookup.get(type));
@@ -68,7 +82,7 @@ public class GraphBuilder {
       sortUnitDependencies.add(_build(sortUnits, d.getType().getFullyQualifiedName(), d.isHard()));
     }
 
-    proxySortUnit.setDelegate(SortUnit.create(classLookup.get(type), items, sortUnitDependencies, false));
+    proxySortUnit.setDelegate(SortUnit.create(classLookup.get(type), items, sortUnitDependencies));
 
     return proxySortUnit;
   }

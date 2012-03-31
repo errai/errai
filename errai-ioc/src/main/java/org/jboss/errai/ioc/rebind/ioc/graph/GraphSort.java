@@ -29,9 +29,20 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * Topological sort algorithm to sort the dependency graph prior to emission of the generated code for the IOC
+ * bootstrapper.
+ *
  * @author Mike Brock
  */
-public class GraphSort {
+public final class GraphSort {
+  private GraphSort() {}
+
+  /**
+   * Performs of a topological sort and returns a new list of sorted {@link SortUnit}s.
+   *
+   * @param in a list of sort units to be sorted.
+   * @return a new sorted lis
+   */
   public static List<SortUnit> sortGraph(final Collection<SortUnit> in) {
     List<SortUnit> sortUnitList = topologicalSort(new ArrayList<SortUnit>(in));
     Collections.sort(sortUnitList);

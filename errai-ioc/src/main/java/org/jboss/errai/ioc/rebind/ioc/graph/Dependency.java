@@ -5,7 +5,7 @@ import org.jboss.errai.codegen.meta.MetaClass;
 /**
  * @author Mike Brock
  */
-public class Dependency implements GraphNode {
+public class Dependency {
   private final MetaClass type;
   private final boolean hard;
 
@@ -23,8 +23,6 @@ public class Dependency implements GraphNode {
     return new Dependency(type, true);
   }
 
-
-  @Override
   public MetaClass getType() {
     return type;
   }

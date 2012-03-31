@@ -200,17 +200,6 @@ public class InjectionContext {
     return false;
   }
 
-  public boolean isProxiedInjectorAvailable(MetaClass injectorType, QualifyingMetadata qualifyingMetadata) {
-    if (proxiedInjectors.containsKey(injectorType.getErased())) {
-      for (Injector inj : injectors.get(injectorType.getErased())) {
-        if (inj.matches(injectorType.getParameterizedType(), qualifyingMetadata)) {
-          return inj.isRendered();
-        }
-      }
-    }
-    return false;
-  }
-
   public boolean isInjectorRegistered(MetaClass injectorType, QualifyingMetadata qualifyingMetadata) {
     if (injectors.containsKey(injectorType.getErased())) {
       for (Injector inj : injectors.get(injectorType.getErased())) {

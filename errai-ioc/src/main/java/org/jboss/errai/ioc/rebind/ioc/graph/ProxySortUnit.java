@@ -7,67 +7,32 @@ import java.util.List;
 import java.util.Set;
 
 /**
+ * A cycle breaking proxy used by the {@link GraphBuilder} to properly construct a graph which can accurately
+ * represent cycles. A <tt>ProxySortUnit</tt> must be closed by calling {@link #setDelegate(SortUnit)} before
+ * being put into use, otherwise calls to any methods will result in {@link NullPointerException}.
+ *
  * @author Mike Brock
  */
 public class ProxySortUnit extends SortUnit {
   private SortUnit delegate;
 
-  private ProxySortUnit(MetaClass type, boolean hard) {
-    super(type, Collections.<Object>emptyList(), Collections.<SortUnit>emptySet(), hard);
+  private ProxySortUnit(MetaClass type) {
+    super(type, Collections.<Object>emptyList(), Collections.<SortUnit>emptySet());
   }
 
+  /**
+   * Creates a new proxied SortUnit on the specified type.
+   *
+   * @param type the sort unit
+   * @return a new instance of ProxySortUnit
+   */
   public static ProxySortUnit proxyOf(MetaClass type) {
-    return new ProxySortUnit(type, false);
-  }
-
-  public static ProxySortUnit hardDepProxy(final MetaClass type,final SortUnit unit) {
-    return new ProxySortUnit(type, true) {
-
-      @Override
-      public Set<SortUnit> getDependencies() {
-        return unit.getDependencies();
-      }
-
-      @Override
-      public SortUnit getDependency(SortUnit unit) {
-        return unit.getDependency(unit);
-      }
-
-      @Override
-      public List<Object> getItems() {
-        return unit.getItems();
-      }
-
-      @Override
-      public MetaClass getType() {
-        return unit.getType();
-      }
-
-      @Override
-      public int getDepth() {
-        return unit.getDepth();
-      }
-
-      @Override
-      public int compareTo(SortUnit o) {
-        return unit.compareTo(o);
-      }
-
-      @Override
-      public String toString() {
-        return "<CYCLE>";
-      }
-    };
+    return new ProxySortUnit(type);
   }
 
   @Override
   public Set<SortUnit> getDependencies() {
     return delegate.getDependencies();
-  }
-
-  @Override
-  public SortUnit getDependency(SortUnit unit) {
-    return delegate.getDependency(unit);
   }
 
   @Override
@@ -95,6 +60,10 @@ public class ProxySortUnit extends SortUnit {
     return delegate.toString();
   }
 
+  /**
+   * Sets the instance of {@link SortUnit} which should be proxied on.
+   * @param unit
+   */
   public void setDelegate(SortUnit unit) {
     this.delegate = unit;
   }
