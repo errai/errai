@@ -224,7 +224,7 @@ public class IOCSimulatedTestRunner extends ParentRunner<Runner> {
       if (instance instanceof IOCClientTestCase) {
         iocClientTestCase.setInitializer(new IOCClientTestCase.ContainerBootstrapper() {
           @Override
-          public BootstrapperInjectionContext bootstrap() {
+          public void bootstrap() {
             try {
               String rootPackage = iocClientTestCase.getModulePackage();
               List<String> packages = new ArrayList<String>();
@@ -248,7 +248,6 @@ public class IOCSimulatedTestRunner extends ParentRunner<Runner> {
               ctx.getRootContext().finish();
 
               System.out.println("bootstrapped simulated container in " + (System.currentTimeMillis() - tm) + "ms");
-              return ctx;
             }
             catch (GenerationException e) {
               throw e;
