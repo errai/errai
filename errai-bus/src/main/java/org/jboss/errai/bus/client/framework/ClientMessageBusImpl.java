@@ -161,6 +161,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private boolean disconnected = false;
 
+
+  private BusErrorDialog errorDialog;
+
   static {
     MarshallerFramework.initializeDefaultSessionProvider();
   }
@@ -189,11 +192,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   };
 
-  private BusErrorDialog errorDialog = new BusErrorDialog();
-
   public ClientMessageBusImpl() {
-
-
     init();
   }
 
@@ -1397,8 +1396,26 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     logAdapter.error(message + " -- Additional Details: " + additionalDetails, e);
   }
 
-  private void showError(String message, Throwable e) {
-    errorDialog.addError(message, "", e);
+  private void ensureInitErrorDialog() {
+    if (errorDialog == null) {
+      errorDialog = new BusErrorDialog();
+    }
+  }
+
+  private void showError(final String message, final Throwable e) {
+    GWT.runAsync(new RunAsyncCallback() {
+      @Override
+      public void onFailure(Throwable reason) {
+        LogUtil.nativeLog("could not load error dialog: " + reason);
+      }
+
+      @Override
+      public void onSuccess() {
+        ensureInitErrorDialog();
+        errorDialog.addError(message, "", e);
+      }
+    });
+
 
     if (LogUtil.isNativeJavaScriptLoggerSupported()) {
       LogUtil.nativeLog(message);
@@ -1682,7 +1699,19 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private static void _showErrorConsole() {
-    ClientMessageBusImpl bus = (ClientMessageBusImpl) ErraiBus.get();
-    bus.errorDialog.show();
+    GWT.runAsync(new RunAsyncCallback() {
+      @Override
+      public void onFailure(Throwable reason) {
+        LogUtil.nativeLog("could not load script to display error dialog: " + reason);
+      }
+
+      @Override
+      public void onSuccess() {
+        ClientMessageBusImpl bus = (ClientMessageBusImpl) ErraiBus.get();
+        bus.ensureInitErrorDialog();
+        bus.errorDialog.show();
+      }
+    });
+
   }
 }
