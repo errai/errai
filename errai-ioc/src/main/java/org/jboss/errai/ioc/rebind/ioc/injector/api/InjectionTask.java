@@ -253,17 +253,14 @@ public class InjectionTask {
           Injector inj = ctx.getQualifiedInjector(clazz, qualifyingMetadata);
 
           if (inj.isProvider()) {
-            ProxyInjector proxyInjector;
-            ctx.recordCycle(inj.getEnclosingType(), injectableInstance.getEnclosingType());
-            proxyInjector = new ProxyInjector(ctx.getProcessingContext(), inj.getEnclosingType(), qualifyingMetadata);
-            ctx.addProxiedInjector(proxyInjector);
-
             /**
              * Inform the caller that we are in a proxy and that the operation they're doing must
              * necesarily be done within the ProxyResolver resolve operation since this provider operation
              * relies on a bean which is not yet available.
              */
-            return new HandleInProxy(proxyInjector, inj.getBeanInstance(injectableInstance));
+            ctx.recordCycle(inj.getEnclosingType(), injectableInstance.getEnclosingType());
+            return new HandleInProxy(getOrCreateProxy(ctx, inj.getEnclosingType(), qualifyingMetadata),
+                    inj.getBeanInstance(injectableInstance));
           }
           else if (inj.isDependent()) {
             return inj.getBeanInstance(injectableInstance);
@@ -274,20 +271,21 @@ public class InjectionTask {
       }
 
       ctx.recordCycle(clazz, injectableInstance.getEnclosingType());
-
-      final ProxyInjector proxyInjector;
-      if (ctx.isProxiedInjectorRegistered(clazz, qualifyingMetadata)) {
-        proxyInjector = (ProxyInjector)
-                ctx.getProxiedInjector(clazz, qualifyingMetadata);
-      }
-      else {
-        proxyInjector = new ProxyInjector(ctx.getProcessingContext(), clazz, qualifyingMetadata);
-        ctx.addProxiedInjector(proxyInjector);
-      }
-
-
-      return proxyInjector.getBeanInstance(injectableInstance);
+      return getOrCreateProxy(ctx, clazz, qualifyingMetadata).getBeanInstance(injectableInstance);
     }
+  }
+
+  private ProxyInjector getOrCreateProxy(InjectionContext ctx, MetaClass clazz, QualifyingMetadata qualifyingMetadata) {
+    final ProxyInjector proxyInjector;
+    if (ctx.isProxiedInjectorRegistered(clazz, qualifyingMetadata)) {
+      proxyInjector = (ProxyInjector)
+              ctx.getProxiedInjector(clazz, qualifyingMetadata);
+    }
+    else {
+      proxyInjector = new ProxyInjector(ctx.getProcessingContext(), clazz, qualifyingMetadata);
+      ctx.addProxiedInjector(proxyInjector);
+    }
+    return proxyInjector;
   }
 
   private InjectableInstance getInjectableInstance(InjectionContext ctx) {

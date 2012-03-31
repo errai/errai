@@ -38,6 +38,11 @@ public class ProducerBeanA {
     return foo;
   }
 
+  @Produces
+  public Baz produceBaz() {
+    return new Baz();
+  }
+
   public Foo getFoo() {
     return foo;
   }

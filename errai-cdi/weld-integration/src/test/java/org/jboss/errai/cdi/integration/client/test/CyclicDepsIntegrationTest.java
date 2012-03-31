@@ -169,6 +169,7 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
 
         assertNotNull(consumerBeanA);
         assertNotNull("foo was not injected", consumerBeanA.getFoo());
+        assertNotNull("baz was not inject", consumerBeanA.getBaz());
 
         assertEquals("barz", consumerBeanA.getFoo().getName());
 

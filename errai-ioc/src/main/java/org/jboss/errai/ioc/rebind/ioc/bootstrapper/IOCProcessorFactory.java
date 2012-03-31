@@ -128,6 +128,14 @@ public class IOCProcessorFactory {
           }
 
           @Override
+          public void notifyHardDependency(MetaClass clazz) {
+            if (visitedAutoDiscoveredDependentBeans.contains(clazz.getFullyQualifiedName())) return;
+            visitedAutoDiscoveredDependentBeans.add(clazz.getFullyQualifiedName());
+
+            graphBuilder.addDependency(dependentClazz, Dependency.hard(clazz));
+          }
+
+          @Override
           public void notifyDependencies(Collection<MetaClass> clazzes) {
             for (MetaClass clazz : clazzes) {
               notifyDependency(clazz);
@@ -138,6 +146,14 @@ public class IOCProcessorFactory {
         graphBuilder.addDependency(masqueradeClass, Dependency.on(dependentClazz));
         JSR330AnnotationHandler.processDependencies(control, dependentClazz, injectionContext);
       }
+    }
+
+    @Override
+    public void notifyHardDependency(MetaClass clazz) {
+      if (visitedAutoDiscoveredDependentBeans.contains(clazz.getFullyQualifiedName())) return;
+      visitedAutoDiscoveredDependentBeans.add(clazz.getFullyQualifiedName());
+
+      graphBuilder.addDependency(clazz, Dependency.hard(clazz));
     }
 
     @Override
@@ -314,8 +330,8 @@ public class IOCProcessorFactory {
                 }
               });
 
-              control.masqueradeAs(instance.getElementTypeOrMethodReturnType());
-              control.notifyDependency(instance.getEnclosingType());
+              control.masqueradeAs(instance.getEnclosingType());
+              control.notifyHardDependency(instance.getEnclosingType());
             }
 
             @Override
@@ -422,7 +438,6 @@ public class IOCProcessorFactory {
       }
     }
   }
-
 
   @SuppressWarnings("unchecked")
   private void handleType(final ProcessingEntry entry,

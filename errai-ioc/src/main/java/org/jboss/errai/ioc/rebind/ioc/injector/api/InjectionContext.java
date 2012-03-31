@@ -17,6 +17,7 @@
 package org.jboss.errai.ioc.rebind.ioc.injector.api;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 
 import org.jboss.errai.codegen.meta.HasAnnotations;
@@ -63,7 +64,7 @@ public class InjectionContext {
   // to achieve with a MultiMap
   private Map<MetaClass, List<Injector>> injectors = new LinkedHashMap<MetaClass, List<Injector>>();
 
-  private Multimap<MetaClass, Injector> proxiedInjectors = HashMultimap.create();
+  private Multimap<MetaClass, Injector> proxiedInjectors = LinkedHashMultimap.create();
   private Multimap<MetaClass, MetaClass> cyclingTypes = HashMultimap.create();
 
   private Set<String> enabledAlternatives = new HashSet<String>();
@@ -101,12 +102,9 @@ public class InjectionContext {
     if (matching.isEmpty()) {
       throw new InjectionFailure(erased);
     }
-    else if (matching.size() > 1) {
-      throw new InjectionFailure("ambiguous injection type (multiple injectors resolved): " + erased
-              .getFullyQualifiedName() + (metadata == null ? "" : metadata.toString()));
-    }
     else {
-      return matching.get(0);
+      // proxies can only be used once, so just receive the last declared one.
+      return matching.get(matching.size() - 1);
     }
   }
 
