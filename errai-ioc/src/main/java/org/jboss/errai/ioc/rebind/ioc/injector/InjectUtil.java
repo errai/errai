@@ -471,7 +471,6 @@ public class InjectUtil {
                 ctx.getProcessingContext().pushBlockBuilder(proxyInject.getProxyResolverBlockBuilder());
                 pushedProxy = true;
                 ctx.markOpenProxy();
-                inj.getBeanInstance(injectableInstance);
                 return proxyInject.getBeanInstance(injectableInstance);
               }
             }
