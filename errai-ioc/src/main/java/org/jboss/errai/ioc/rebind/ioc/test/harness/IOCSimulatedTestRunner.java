@@ -220,7 +220,6 @@ public class IOCSimulatedTestRunner extends ParentRunner<Runner> {
         }
       });
 
-
       if (instance instanceof IOCClientTestCase) {
         iocClientTestCase.setInitializer(new IOCClientTestCase.ContainerBootstrapper() {
           @Override

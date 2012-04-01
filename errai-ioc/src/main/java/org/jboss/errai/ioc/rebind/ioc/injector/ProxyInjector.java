@@ -22,6 +22,7 @@ import org.jboss.errai.codegen.ProxyMaker;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
+import org.jboss.errai.codegen.builder.impl.BlockBuilderImpl;
 import org.jboss.errai.codegen.builder.impl.Scope;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
@@ -106,5 +107,15 @@ public class ProxyInjector extends AbstractInjector {
 
   public void addProxyCloseStatement(Statement statement) {
     closeStatements.add(statement);
+  }
+
+  public BlockBuilder getProxyResolverBlockBuilder() {
+    return new BlockBuilderImpl() {
+      @Override
+      public BlockBuilder append(Statement stmt) {
+        closeStatements.add(stmt);
+        return this;
+      }
+    };
   }
 }

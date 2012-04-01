@@ -37,7 +37,7 @@ public class CreationalContext {
   private Map<Object, DestructionCallback> destructionCallbacks =
           new IdentityHashMap<Object, DestructionCallback>();
 
-  private Map<BeanRef, List<ProxyResolver>> unresolvedProxies = new HashMap<BeanRef, List<ProxyResolver>>();
+  private Map<BeanRef, List<ProxyResolver>> unresolvedProxies = new LinkedHashMap<BeanRef, List<ProxyResolver>>();
   private Map<BeanRef, Object> wired = new LinkedHashMap<BeanRef, Object>();
 
   public CreationalContext(IOCBeanManager beanManager) {
@@ -103,7 +103,7 @@ public class CreationalContext {
     boolean beansResolved = false;
 
     Iterator<Map.Entry<BeanRef, List<ProxyResolver>>> unresolvedIterator
-            = new HashMap<BeanRef, List<ProxyResolver>>(unresolvedProxies).entrySet().iterator();
+            = new LinkedHashMap<BeanRef, List<ProxyResolver>>(unresolvedProxies).entrySet().iterator();
 
     int initialSize = unresolvedProxies.size();
 
@@ -118,15 +118,17 @@ public class CreationalContext {
       }
       else {
         IOCBeanDef<?> iocBeanDef = IOC.getBeanManager().lookupBean(entry.getKey().getClazz(), entry.getKey().getAnnotations());
-        Object beanInstance = iocBeanDef
-                .getInstance(this);
 
-        if (beanInstance != null) {
-          if (!wired.containsKey(entry.getKey())) {
-            addBean(getBeanReference(entry.getKey().getClazz(), entry.getKey().getAnnotations()), beanInstance);
+        if (iocBeanDef != null) {
+          Object beanInstance = iocBeanDef.getInstance(this);
+
+          if (beanInstance != null) {
+            if (!wired.containsKey(entry.getKey())) {
+              addBean(getBeanReference(entry.getKey().getClazz(), entry.getKey().getAnnotations()), beanInstance);
+            }
+
+            beansResolved = true;
           }
-
-          beansResolved = true;
         }
       }
     }

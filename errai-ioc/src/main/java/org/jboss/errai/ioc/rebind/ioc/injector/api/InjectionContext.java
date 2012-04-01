@@ -81,9 +81,13 @@ public class InjectionContext {
 
   private Set<String> exposedMembers = new HashSet<String>();
 
+  private boolean allowProxyCapture = false;
+  private boolean openProxy = false;
+
   public InjectionContext(IOCProcessingContext processingContext) {
     this.processingContext = processingContext;
   }
+
 
   public Injector getProxiedInjector(MetaClass type, QualifyingMetadata metadata) {
     //todo: figure out why I was doing this.
@@ -405,14 +409,16 @@ public class InjectionContext {
   }
 
   public boolean isElementType(WiringElementType type, HasAnnotations hasAnnotations) {
-    for (Annotation a : hasAnnotations.getAnnotations()) {
-      if (getAnnotationsForElementType(type).contains(a.annotationType())) {
-        return true;
-      }
-    }
-    return false;
+    return getMatchingAnnotationForElementType(type, hasAnnotations) != null;
   }
 
+  /**
+   * Overloaded version to check GWT's JClassType classes.
+   *
+   * @param type
+   * @param hasAnnotations
+   * @return
+   */
   public boolean isElementType(WiringElementType type, com.google.gwt.core.ext.typeinfo.HasAnnotations hasAnnotations) {
     for (Annotation a : hasAnnotations.getAnnotations()) {
       if (getAnnotationsForElementType(type).contains(a.annotationType())) {
@@ -422,9 +428,40 @@ public class InjectionContext {
     return false;
   }
 
+  public Annotation getMatchingAnnotationForElementType(WiringElementType type, HasAnnotations hasAnnotations) {
+    for (Annotation a : hasAnnotations.getAnnotations()) {
+      if (getAnnotationsForElementType(type).contains(a.annotationType())) {
+        return a;
+      }
+    }
+    return null;
+  }
+
 
   public Collection<Map.Entry<WiringElementType, Class<? extends Annotation>>> getAllElementMappings() {
     return unmodifiableCollection(elementBindings.entries());
+  }
+
+  public void allowProxyCapture() {
+    allowProxyCapture = true;
+  }
+
+  public void markOpenProxy() {
+    if (allowProxyCapture) {
+      openProxy = true;
+    }
+  }
+
+  public boolean isProxyOpen() {
+    return openProxy;
+  }
+
+  public void closeProxyIfOpen() {
+    if (openProxy) {
+      getProcessingContext().popBlockBuilder();
+      openProxy = false;
+    }
+    allowProxyCapture = false;
   }
 
 

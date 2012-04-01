@@ -18,6 +18,7 @@ package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
 import com.google.gwt.core.ext.TreeLogger.Type;
 import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaField;
@@ -25,10 +26,13 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.util.PrivateAccessType;
+import org.jboss.errai.codegen.util.Refs;
+import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.TestMock;
 import org.jboss.errai.ioc.client.api.TestOnly;
+import org.jboss.errai.ioc.client.container.BeanRef;
 import org.jboss.errai.ioc.rebind.ioc.extension.AnnotationHandler;
 import org.jboss.errai.ioc.rebind.ioc.extension.DependencyControl;
 import org.jboss.errai.ioc.rebind.ioc.extension.JSR330AnnotationHandler;
@@ -40,6 +44,7 @@ import org.jboss.errai.ioc.rebind.ioc.graph.GraphBuilder;
 import org.jboss.errai.ioc.rebind.ioc.graph.SortUnit;
 import org.jboss.errai.ioc.rebind.ioc.injector.AbstractInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.ContextualProviderInjector;
+import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.injector.ProviderInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
@@ -55,6 +60,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -64,9 +70,11 @@ import java.util.SortedSet;
 import java.util.Stack;
 import java.util.TreeSet;
 
+import static org.jboss.errai.codegen.util.Stmt.declareVariable;
+import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 import static org.jboss.errai.ioc.rebind.ioc.graph.GraphSort.sortGraph;
 import static org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance.getMethodInjectedInstance;
-import static org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance.getTypeInjectedInstance;
+import static org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance.getInjectedInstance;
 
 @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
 public class IOCProcessorFactory {
@@ -281,7 +289,18 @@ public class IOCProcessorFactory {
 
                 @Override
                 public Statement getBeanInstance(InjectableInstance injectableInstance) {
-                  return instance.getValueStatement();
+                  BlockBuilder callbackBuilder = injectionContext.getProcessingContext().getBlockBuilder();
+
+                  String var = InjectUtil.getUniqueVarName();
+                  callbackBuilder.append(Stmt.declareVariable(instance.getElementTypeOrMethodReturnType())
+                          .named(var).initializeWith(instance.getValueStatement()));
+
+                  callbackBuilder.append(loadVariable("context").invoke("addBean",
+                          loadVariable("context").invoke("getBeanReference",
+                                  Stmt.load(instance.getElementTypeOrMethodReturnType()),
+                                  Stmt.load(instance.getQualifyingMetadata().getQualifiers())), Refs.get(var)));
+
+                  return Stmt.loadVariable(var);
                 }
 
                 @Override
@@ -446,7 +465,7 @@ public class IOCProcessorFactory {
       }
     }
     final InjectableInstance injectableInstance
-            = getTypeInjectedInstance(anno, type, null, injectionContext);
+            = getInjectedInstance(anno, type, null, injectionContext);
 
     ProcessingDelegate del = new ProcessingDelegate() {
       @Override
@@ -460,7 +479,7 @@ public class IOCProcessorFactory {
 
         Injector injector = injectionContext.getInjector(type);
         final InjectableInstance injectableInstance
-                = getTypeInjectedInstance(anno, type, injector, injectionContext);
+                = getInjectedInstance(anno, type, injector, injectionContext);
 
         return entry.handler.handle(injectableInstance, anno, context);
       }
@@ -495,7 +514,7 @@ public class IOCProcessorFactory {
     dependencyControl.masqueradeAs(type);
 
     final InjectableInstance injectableInstance
-            = getMethodInjectedInstance(anno, metaMethod, null,
+            = getMethodInjectedInstance(metaMethod, null,
             injectionContext);
 
     ProcessingDelegate del = new ProcessingDelegate() {
@@ -510,7 +529,7 @@ public class IOCProcessorFactory {
 
         Injector injector = injectionContext.getInjector(type);
         final InjectableInstance injectableInstance
-                = getMethodInjectedInstance(anno, metaMethod, injector,
+                = getMethodInjectedInstance(metaMethod, injector,
                 injectionContext);
 
         return entry.handler.handle(injectableInstance, anno, context);
@@ -549,7 +568,7 @@ public class IOCProcessorFactory {
       @Override
       public void processDependencies() {
         final InjectableInstance injectableInstance
-                = InjectableInstance.getFieldInjectedInstance(anno, metaField, null,
+                = InjectableInstance.getFieldInjectedInstance(metaField, null,
                 injectionContext);
 
         entry.handler.getDependencies(dependencyControl, injectableInstance, anno, context);
@@ -562,7 +581,7 @@ public class IOCProcessorFactory {
 
         Injector injector = injectionContext.getInjector(type);
         final InjectableInstance injectableInstance
-                = InjectableInstance.getFieldInjectedInstance(anno, metaField, injector,
+                = InjectableInstance.getFieldInjectedInstance(metaField, injector,
                 injectionContext);
 
         entry.handler.registerMetadata(injectableInstance, anno, context);

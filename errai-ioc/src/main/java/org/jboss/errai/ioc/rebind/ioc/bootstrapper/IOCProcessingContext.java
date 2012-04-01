@@ -106,6 +106,10 @@ public class IOCProcessingContext {
 
   public void popBlockBuilder() {
     this.blockBuilder.pop();
+
+    if (this.blockBuilder.size() == 0) {
+      throw new AssertionError("block builder was over popped! something is wrong.");
+    }
   }
 
   public void appendToEnd(Statement statement) {

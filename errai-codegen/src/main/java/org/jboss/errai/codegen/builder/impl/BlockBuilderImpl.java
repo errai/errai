@@ -53,7 +53,7 @@ public class BlockBuilderImpl<T> implements BlockBuilder<T> {
 
   @Override
   public void insertBefore(final InnerClass innerClass) {
-    this.blockStatement.insertBefore(new Statement() {
+    insertBefore(new Statement() {
 
       @Override
       public String generate(Context context) {

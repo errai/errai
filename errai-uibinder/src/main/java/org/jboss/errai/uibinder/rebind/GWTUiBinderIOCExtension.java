@@ -45,6 +45,8 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.TypeDiscoveryListener;
 import org.jboss.errai.uibinder.client.UiBinderProvider;
 
 import java.lang.annotation.Annotation;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Mike Brock
