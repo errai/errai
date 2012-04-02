@@ -16,13 +16,13 @@ public class BeanConstrConsumesOwnProducer {
   }
 
   @Inject
-  public BeanConstrConsumesOwnProducer(WrappedThing thing, ProducerFactory factory) {
+  public BeanConstrConsumesOwnProducer(@Produced WrappedThing thing, ProducerFactory factory) {
     this.thing = thing;
     this.factory = factory;
   }
 
-  @Produces
-  private WrappedThing produceWrappedThing(Thing thing) {
+  @Produces @Produced
+  private WrappedThing produceWrappedThing(@Produced Thing thing) {
     return new WrappedThing(thing);
   }
 

@@ -26,12 +26,8 @@ import java.util.List;
  * @author Mike Brock
  */
 public class PrivateAccessUtil {
-
-
   private static final String JAVA_REFL_FLD_UTIL_METH = "_getAccessibleField";
-
   private static final String JAVA_REFL_METH_UTIL_METH = "_getAccessibleMethod";
-
 
   public static void createJavaReflectionFieldInitializerUtilMethod(ClassStructureBuilder<?> classBuilder) {
 
@@ -42,15 +38,15 @@ public class PrivateAccessUtil {
     classBuilder.privateMethod(Field.class, JAVA_REFL_FLD_UTIL_METH).modifiers(Modifier.Static)
             .parameters(DefParameters.of(Parameter.of(Class.class, "cls"), Parameter.of(String.class, "name")))
             .body()
-            .append(Stmt.try_()
-                    .append(Stmt.declareVariable("fld", Stmt.loadVariable("cls").invoke("getDeclaredField",
+            ._(Stmt.try_()
+                    ._(Stmt.declareVariable("fld", Stmt.loadVariable("cls").invoke("getDeclaredField",
                             Stmt.loadVariable("name"))))
-                    .append(Stmt.loadVariable("fld").invoke("setAccessible", true))
-                    .append(Stmt.loadVariable("fld").returnValue())
+                    ._(Stmt.loadVariable("fld").invoke("setAccessible", true))
+                    ._(Stmt.loadVariable("fld").returnValue())
                     .finish()
                     .catch_(Throwable.class, "e")
-                    .append(Stmt.loadVariable("e").invoke("printStackTrace"))
-                    .append(Stmt.throw_(RuntimeException.class, Refs.get("e")))
+                    ._(Stmt.loadVariable("e").invoke("printStackTrace"))
+                    ._(Stmt.throw_(RuntimeException.class, Refs.get("e")))
                     .finish())
             .finish();
   }
@@ -66,15 +62,15 @@ public class PrivateAccessUtil {
             .parameters(DefParameters.of(Parameter.of(Class.class, "cls"), Parameter.of(String.class, "name"),
                     Parameter.of(Class[].class, "parms")))
             .body()
-            .append(Stmt.try_()
-                    .append(Stmt.declareVariable("meth", Stmt.loadVariable("cls").invoke("getDeclaredMethod",
+            ._(Stmt.try_()
+                    ._(Stmt.declareVariable("meth", Stmt.loadVariable("cls").invoke("getDeclaredMethod",
                             Stmt.loadVariable("name"), Stmt.loadVariable("parms"))))
-                    .append(Stmt.loadVariable("meth").invoke("setAccessible", true))
-                    .append(Stmt.loadVariable("meth").returnValue())
+                    ._(Stmt.loadVariable("meth").invoke("setAccessible", true))
+                    ._(Stmt.loadVariable("meth").returnValue())
                     .finish()
                     .catch_(Throwable.class, "e")
-                    .append(Stmt.loadVariable("e").invoke("printStackTrace"))
-                    .append(Stmt.throw_(RuntimeException.class, Refs.get("e")))
+                    ._(Stmt.loadVariable("e").invoke("printStackTrace"))
+                    ._(Stmt.throw_(RuntimeException.class, Refs.get("e")))
                     .finish())
             .finish();
   }
@@ -134,7 +130,7 @@ public class PrivateAccessUtil {
 
         methodBuilder.modifiers(Modifier.Static, Modifier.JSNI)
                 .body()
-                .append(new StringStatement(JSNIUtil.fieldAccess(f) + " = value"))
+                ._(new StringStatement(JSNIUtil.fieldAccess(f) + " = value"))
                 .finish();
       }
 
@@ -148,7 +144,7 @@ public class PrivateAccessUtil {
 
         instance.modifiers(Modifier.Static, Modifier.JSNI)
                 .body()
-                .append(new StringStatement("return " + JSNIUtil.fieldAccess(f)))
+                ._(new StringStatement("return " + JSNIUtil.fieldAccess(f)))
                 .finish();
       }
     }
@@ -172,12 +168,12 @@ public class PrivateAccessUtil {
 
         methodBuilder.modifiers(Modifier.Static)
                 .body()
-                .append(Stmt.try_()
-                        .append(Stmt.loadVariable(cachedField).invoke(setterName, Refs.get("instance"), Refs.get("value")))
+                ._(Stmt.try_()
+                        ._(Stmt.loadVariable(cachedField).invoke(setterName, Refs.get("instance"), Refs.get("value")))
                         .finish()
                         .catch_(Throwable.class, "e")
-                        .append(Stmt.loadVariable("e").invoke("printStackTrace"))
-                        .append(Stmt.throw_(RuntimeException.class, Refs.get("e")))
+                        ._(Stmt.loadVariable("e").invoke("printStackTrace"))
+                        ._(Stmt.throw_(RuntimeException.class, Refs.get("e")))
                         .finish())
                 .finish();
       }
@@ -196,13 +192,13 @@ public class PrivateAccessUtil {
 
         methodBuilder.modifiers(Modifier.Static)
                 .body()
-                .append(Stmt.try_()
-                        .append(Stmt.nestedCall(Cast.to(f.getType(), Stmt.loadVariable(cachedField)
+                ._(Stmt.try_()
+                        ._(Stmt.nestedCall(Cast.to(f.getType(), Stmt.loadVariable(cachedField)
                                 .invoke(getterName, f.isStatic() ? null : Refs.get("instance")))).returnValue())
                         .finish()
                         .catch_(Throwable.class, "e")
-                        .append(Stmt.loadVariable("e").invoke("printStackTrace"))
-                        .append(Stmt.throw_(RuntimeException.class, Refs.get("e")))
+                        ._(Stmt.loadVariable("e").invoke("printStackTrace"))
+                        ._(Stmt.throw_(RuntimeException.class, Refs.get("e")))
                         .finish())
                 .finish();
       }
@@ -225,7 +221,7 @@ public class PrivateAccessUtil {
               .parameters(new DefParameters(wrapperDefParms))
               .modifiers(Modifier.Static, Modifier.JSNI)
               .body()
-              .append(new StringStatement(JSNIUtil.methodAccess(m)))
+              ._(new StringStatement(JSNIUtil.methodAccess(m)))
               .finish();
     }
     else {
@@ -250,17 +246,17 @@ public class PrivateAccessUtil {
               .invoke("invoke", m.isStatic() ? null : Refs.get("instance"), args);
 
       if (m.getReturnType().isVoid()) {
-        tryBuilder.append(statementBuilder);
+        tryBuilder._(statementBuilder);
       }
       else {
-        tryBuilder.append(statementBuilder.returnValue());
+        tryBuilder._(statementBuilder.returnValue());
       }
 
-      body.append(tryBuilder
+      body._(tryBuilder
               .finish()
               .catch_(Throwable.class, "e")
-              .append(Stmt.loadVariable("e").invoke("printStackTrace"))
-              .append(Stmt.throw_(RuntimeException.class, Refs.get("e")))
+              ._(Stmt.loadVariable("e").invoke("printStackTrace"))
+              ._(Stmt.throw_(RuntimeException.class, Refs.get("e")))
               .finish())
               .finish();
     }
