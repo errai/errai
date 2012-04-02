@@ -103,6 +103,7 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
 
     assertNotNull(bean);
     assertNotNull(bean.getThing());
+    assertNotNull(bean.getThing().getThing());
   }
 
   public void testProducersObserveSingletonScope() {

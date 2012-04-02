@@ -134,9 +134,10 @@ public class TypeInjector extends AbstractInjector {
     render local variables Class::beanType and Annotation[]::qualifiers at the beginning of the getInstance()
     method so we can easily refer to them later on.
     */
-    callbackBuilder.append(declareVariable(Class.class).named("beanType").initializeWith(load(type)));
-    callbackBuilder.append(declareVariable(Annotation[].class).named("qualifiers")
-            .initializeWith(load(qualifyingMetadata.getQualifiers())));
+    callbackBuilder
+            ._(declareVariable(Class.class).named("beanType").initializeWith(load(type)))
+            ._(declareVariable(Annotation[].class).named("qualifiers")
+                    .initializeWith(load(qualifyingMetadata.getQualifiers())));
 
 
     /* push the method block builder onto the stack, so injection tasks are rendered appropriately. */

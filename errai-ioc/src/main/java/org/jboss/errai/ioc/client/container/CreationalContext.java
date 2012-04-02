@@ -68,6 +68,10 @@ public class CreationalContext {
     return new BeanRef(beanType, qualifiers);
   }
 
+  public void addBean(Class<?> beanType, Annotation[] qualifiers, Object instance) {
+    addBean(getBeanReference(beanType, qualifiers), instance);
+  }
+
   public void addBean(BeanRef ref, Object instance) {
     if (!wired.containsKey(ref)) {
       wired.put(ref, instance);

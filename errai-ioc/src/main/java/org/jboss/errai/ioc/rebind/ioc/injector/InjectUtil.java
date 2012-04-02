@@ -459,11 +459,13 @@ public class InjectUtil {
             try {
               if (injectableInstance.getTaskType() == TaskType.Parameter && injectableInstance.getConstructor() != null) {
                 // eek! a producer element is produced by this bean and injected into it's own constructor!
-
                 ProxyInjector producedElementProxy = getOrCreateProxy(ctx, inj.getInjectedType(), qualifyingMetadata);
 
+                proxyInject.addProxyCloseStatement(Stmt.loadVariable("context")
+                        .invoke("addBean", Stmt.load(inj.getInjectedType()),
+                                qualifyingMetadata.getQualifiers(), inj.getBeanInstance(injectableInstance)));
+
                 proxyInject.getBeanInstance(injectableInstance);
-                proxyInject.addProxyCloseStatement(inj.getBeanInstance(injectableInstance));
 
                 return producedElementProxy.getBeanInstance(injectableInstance);
               }

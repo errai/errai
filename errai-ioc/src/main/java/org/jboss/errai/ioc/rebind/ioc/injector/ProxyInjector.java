@@ -70,13 +70,13 @@ public class ProxyInjector extends AbstractInjector {
 
   @Override
   public Statement getBeanInstance(InjectableInstance injectableInstance) {
-    IOCProcessingContext pCtx = injectableInstance.getInjectionContext().getProcessingContext();
+    final IOCProcessingContext pCtx = injectableInstance.getInjectionContext().getProcessingContext();
 
     pCtx.append(declareVariable(proxyClass).asFinal().named(varName).initializeWith(newObject(proxyClass)));
 
-    MetaClass proxyResolverRef = parameterizedAs(ProxyResolver.class, typeParametersOf(proxiedType));
+    final MetaClass proxyResolverRef = parameterizedAs(ProxyResolver.class, typeParametersOf(proxiedType));
 
-    BlockBuilder<AnonymousClassStructureBuilder> proxyResolverBody = newObject(proxyResolverRef)
+    final BlockBuilder<AnonymousClassStructureBuilder> proxyResolverBody = newObject(proxyResolverRef)
             .extend().publicOverridesMethod("resolve", Parameter.of(proxiedType, "obj"));
 
     Statement proxyResolver = proxyResolverBody.append(loadVariable(varName)
