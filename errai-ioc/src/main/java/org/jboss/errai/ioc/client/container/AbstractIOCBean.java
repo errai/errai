@@ -21,12 +21,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
+ *
  * @author Mike Brock
  */
 public abstract class AbstractIOCBean<T> implements IOCBeanDef<T> {
   protected Class<T> type;
   protected Set<Annotation> qualifiers;
-
 
   /**
    * Returns the absolute type of the bean
@@ -45,7 +45,6 @@ public abstract class AbstractIOCBean<T> implements IOCBeanDef<T> {
   public Set<Annotation> getQualifiers() {
     return qualifiers;
   }
-
 
   /**
    * Returns true if the underlying bean contains all of the annotations specified.

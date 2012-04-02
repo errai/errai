@@ -21,7 +21,6 @@ import org.jboss.errai.ioc.client.BootstrapperInjectionContext;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -29,6 +28,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * A CreationalContext is used for representing context associated with the creation of a bean and its dependencies.
+ * A CreationalContext captures {@link InitializationCallback}s and {@link DestructionCallback}s associated with
+ * the graph being constructed.
+ * <p>
+ * This class is relied upon by the {@link IOCBeanManager} itself and should not generally be used directly.
+ *
  * @author Mike Brock
  */
 public class CreationalContext {
@@ -69,8 +74,9 @@ public class CreationalContext {
     }
   }
 
+  @SuppressWarnings("unchecked")
   public <T> T getBeanInstance(Class<T> beanType, Annotation[] qualifiers) {
-    T t = (T) wired.get(getBeanReference(beanType, qualifiers));
+    final T t = (T) wired.get(getBeanReference(beanType, qualifiers));
     if (t == null) {
       // see if the instance is available in the bean manager
       IOCBeanDef<T> beanDef = IOC.getBeanManager().lookupBean(beanType, qualifiers);
@@ -82,8 +88,9 @@ public class CreationalContext {
     return t;
   }
 
+  @SuppressWarnings({"unchecked", "UnusedDeclaration"})
   public <T> T getInstanceOrNew(CreationalCallback<T> context, Class<?> beanType, Annotation[] qualifiers) {
-    BeanRef ref = getBeanReference(beanType, qualifiers);
+    final BeanRef ref = getBeanReference(beanType, qualifiers);
 
     if (wired.containsKey(ref)) {
       return (T) wired.get(ref);
@@ -96,7 +103,7 @@ public class CreationalContext {
   public <T> T getSingletonInstanceOrNew(BootstrapperInjectionContext injectionContext,
                                          CreationalCallback<T> callback, Class<?> beanType, Annotation[] qualifiers) {
 
-    T inst = (T) getBeanInstance(beanType, qualifiers);
+    @SuppressWarnings("unchecked") T inst = (T) getBeanInstance(beanType, qualifiers);
 
     if (inst != null) {
       return inst;
@@ -110,7 +117,8 @@ public class CreationalContext {
 
 
   public void addUnresolvedProxy(ProxyResolver proxyResolver, Class<?> beanType, Annotation[] qualifiers) {
-    BeanRef ref = getBeanReference(beanType, qualifiers);
+    final BeanRef ref = getBeanReference(beanType, qualifiers);
+
     List<ProxyResolver> resolverList = unresolvedProxies.get(ref);
     if (resolverList == null) {
       unresolvedProxies.put(ref, resolverList = new ArrayList<ProxyResolver>());
@@ -124,12 +132,14 @@ public class CreationalContext {
     fireAllInitCallbacks();
   }
 
+  @SuppressWarnings("unchecked")
   private void fireAllInitCallbacks() {
     for (Map.Entry<Object, InitializationCallback> entry : initializationCallbacks.entrySet()) {
       entry.getValue().init(entry.getKey());
     }
   }
 
+  @SuppressWarnings("unchecked")
   private void resolveAllProxies() {
     boolean beansResolved = false;
 
@@ -164,14 +174,11 @@ public class CreationalContext {
       }
     }
 
-
     if (beansResolved) {
       resolveAllProxies();
     }
     else if (!unresolvedProxies.isEmpty() && initialSize != unresolvedProxies.size()) {
-      for (Map.Entry<BeanRef, List<ProxyResolver>> entry : unresolvedProxies.entrySet()) {
-        throw new RuntimeException("unresolved proxy: " + entry.getKey());
-      }
+      throw new RuntimeException("unresolved proxy: " + unresolvedProxies.entrySet().iterator().next().getKey());
     }
   }
 }

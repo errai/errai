@@ -65,8 +65,6 @@ import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
  */
 @CodeDecorator
 public class ObservesExtension extends IOCDecoratorExtension<Observes> {
-  private final AtomicInteger counter = new AtomicInteger();
-
   public ObservesExtension(Class<Observes> decoratesWith) {
     super(decoratesWith);
   }
