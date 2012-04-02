@@ -50,6 +50,7 @@ public class ProducerInjector extends AbstractInjector {
     this.enclosingType = producerMember.getDeclaringClass();
     this.producerMember = producerMember;
     this.producerInjectableInstance = producerInjectableInstance;
+
     this.singleton = injectionContext.isElementType(WiringElementType.SingletonBean, getProducerMember());
 
     if (injectionContext.isInjectorRegistered(enclosingType, qualifyingMetadata)) {
@@ -104,9 +105,10 @@ public class ProducerInjector extends AbstractInjector {
             Stmt.load(qualifyingMetadata.getQualifiers()));
   }
 
+
   @Override
-  public boolean isPseudo() {
-    return false;
+  public boolean isStatic() {
+    return getProducerMember().isStatic();
   }
 
   public MetaClassMember getProducerMember() {

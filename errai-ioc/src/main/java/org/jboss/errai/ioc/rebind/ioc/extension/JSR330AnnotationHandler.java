@@ -87,7 +87,7 @@ public abstract class JSR330AnnotationHandler<T extends Annotation> implements A
   }
 
 
-  private static <T> Set<MetaClass> fillInInterface(Class<T> cls) {
+  public static <T> Set<MetaClass> fillInInterface(Class<T> cls) {
     if (cls.isInterface()) {
       Set<Class<? extends T>> subTypes = ScannerSingleton.getOrCreateInstance().getSubTypesOf(cls);
       Set<MetaClass> deps = new HashSet<MetaClass>();

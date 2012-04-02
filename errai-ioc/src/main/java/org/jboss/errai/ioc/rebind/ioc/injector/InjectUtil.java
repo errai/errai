@@ -445,6 +445,10 @@ public class InjectUtil {
           Injector inj = ctx.getQualifiedInjector(clazz, qualifyingMetadata);
 
           if (inj.isProvider()) {
+            if (inj.isStatic()) {
+              return inj.getBeanInstance(injectableInstance);
+            }
+
             /**
              * Inform the caller that we are in a proxy and that the operation they're doing must
              * necesarily be done within the ProxyResolver resolve operation since this provider operation

@@ -78,6 +78,7 @@ public class IOCBeanManager {
    *
    * @param ref the instance reference of the bean
    */
+  @SuppressWarnings("unchecked")
   public void destroyBean(final Object ref) {
     final Object _target = getActualBeanReference(ref);
 
@@ -188,6 +189,7 @@ public class IOCBeanManager {
    *         no matching type. Throws an {@link IOCResolutionException} if there is a matching type but none of the
    *         qualifiers match or if more than one bean  matches.
    */
+  @SuppressWarnings("unchecked")
   public <T> IOCBeanDef<T> lookupBean(Class<T> type, Annotation... qualifiers) {
     List<IOCBeanDef> beanList = beanMap.get(type);
     if (beanList == null) {

@@ -83,6 +83,11 @@ public abstract class AbstractInjector implements Injector {
   }
 
   @Override
+  public boolean isStatic() {
+    return false;
+  }
+
+  @Override
   public MetaClass getEnclosingType() {
     return enclosingType;
   }

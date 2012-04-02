@@ -26,6 +26,7 @@ import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.util.PrivateAccessType;
@@ -267,114 +268,6 @@ public class IOCProcessorFactory {
             public void getDependencies(DependencyControl control, final InjectableInstance instance, Annotation annotation,
                                         final IOCProcessingContext context) {
 
-
-//              AbstractInjector injector = new AbstractInjector() {
-//                {
-//                  super.qualifyingMetadata = JSR330QualifyingMetadata.createFromAnnotations(instance.getQualifiers());
-//                  this.provider = true;
-//                  this.singleton = injectionContext.isElementType(WiringElementType.SingletonBean, getProducerMember());
-//                  this.enclosingType = instance.getEnclosingType();
-//
-//
-//                  if (injectionContext.isInjectorRegistered(enclosingType, qualifyingMetadata)) {
-//                    setRendered(true);
-//                  }
-//                  else {
-//                    context.registerTypeDiscoveryListener(new TypeDiscoveryListener() {
-//                      @Override
-//                      public void onDiscovery(IOCProcessingContext context, InjectionPoint injectionPoint) {
-//                        if (injectionPoint.getEnclosingType().equals(enclosingType)) {
-//                          setRendered(true);
-//                        }
-//                      }
-//                    });
-//                  }
-//                }
-//
-//                private String varName = InjectUtil.getNewInjectorName();
-//
-//                @Override
-//                public Statement getBeanInstance(InjectableInstance injectableInstance) {
-//                  if (isDependent()) {
-//                    return instance.getValueStatement();
-//                  }
-//
-//                  BlockBuilder callbackBuilder = injectionContext.getProcessingContext().getBlockBuilder();
-//
-//                  final MetaClass creationCallbackRef = parameterizedAs(CreationalCallback.class,
-//                          typeParametersOf(instance.getElementTypeOrMethodReturnType()));
-//
-//                  String var = InjectUtil.getUniqueVarName();
-//                  Statement producerCreationalCallback = ObjectBuilder.newInstanceOf(creationCallbackRef)
-//                          .extend()
-//                          .publicOverridesMethod("getInstance", Parameter.of(CreationalContext.class, "pContext"))
-//                          .append(Stmt.declareVariable(instance.getElementTypeOrMethodReturnType())
-//                                  .named(var).initializeWith(instance.getValueStatement()))
-//                          .append(loadVariable("context").invoke("addBean",
-//                                  loadVariable("context").invoke("getBeanReference",
-//                                          Stmt.load(instance.getElementTypeOrMethodReturnType()),
-//                                          Stmt.load(instance.getQualifyingMetadata().getQualifiers())), Refs.get(var)))
-//                          .append(Stmt.loadVariable(var).returnValue())
-//                          .finish().finish();
-//
-//                  callbackBuilder.append(Stmt.declareVariable(creationCallbackRef).asFinal().named(var)
-//                          .initializeWith(producerCreationalCallback));
-//
-//                  if (isSingleton()) {
-//                    return loadVariable("context").invoke("getSingletonInstanceOrNew",
-//                            Stmt.loadVariable("injContext"),
-//                            Stmt.loadVariable(var),
-//                            Stmt.load(instance.getElementTypeOrMethodReturnType()),
-//                            Stmt.load(instance.getQualifyingMetadata().getQualifiers()));
-//
-//                  }
-//                  else {
-//                    return loadVariable("context").invoke("getInstanceOrNew",
-//                            Stmt.loadVariable(var),
-//                            Stmt.load(instance.getElementTypeOrMethodReturnType()),
-//                            Stmt.load(instance.getQualifyingMetadata().getQualifiers()));
-//                  }
-//                }
-//
-//                @Override
-//                public boolean isPseudo() {
-//                  return false;
-//                }
-//
-//                @Override
-//                public String getVarName() {
-//                  return varName;
-//                }
-//
-//                public MetaClassMember getProducerMember() {
-//                  switch (instance.getTaskType()) {
-//
-//                    case Field:
-//                    case PrivateField:
-//                      return instance.getField();
-//                    case Method:
-//                    case PrivateMethod:
-//                      return instance.getMethod();
-//                    default:
-//                      throw new RuntimeException("not a supported producer member.");
-//                  }
-//                }
-//
-//                @Override
-//                public MetaClass getInjectedType() {
-//                  switch (instance.getTaskType()) {
-//                    case PrivateMethod:
-//                    case Method:
-//                      return instance.getMethod().getReturnType();
-//                    case PrivateField:
-//                    case Field:
-//                      return instance.getField().getType();
-//                    default:
-//                      return null;
-//                  }
-//                }
-//              };
-
               MetaClass injectedType = instance.getElementTypeOrMethodReturnType();
               MetaClassMember producerMember;
 
@@ -382,6 +275,12 @@ public class IOCProcessorFactory {
                 case PrivateMethod:
                 case Method:
                   producerMember = instance.getMethod();
+
+                  for (MetaParameter parm : instance.getMethod().getParameters()) {
+                    control.notifyDependency(injectedType);
+                    control.notifyDependencies(fillInInterface(parm.getType().asClass()));
+                  }
+
                   break;
                 case PrivateField:
                 case Field:
@@ -404,8 +303,10 @@ public class IOCProcessorFactory {
 
               control.masqueradeAs(instance.getEnclosingType());
 
-              graphBuilder.addDependency(injectedType, Dependency.on(instance.getEnclosingType()));
-
+              if (!producerMember.isStatic()) {
+                // if this is a static producer, it does not have a dependency on its parent bean
+                graphBuilder.addDependency(injectedType, Dependency.on(instance.getEnclosingType()));
+              }
             }
 
             @Override
