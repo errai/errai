@@ -46,14 +46,6 @@
 
         <dependency>
             <groupId>org.jboss.errai</groupId>
-            <artifactId>errai-tools</artifactId>
-            <version>${project.parent.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-
-        <dependency>
-            <groupId>org.jboss.errai</groupId>
             <artifactId>errai-marshalling</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
