@@ -3,9 +3,11 @@ package org.jboss.errai.cdi.producer.client.test;
 
 import org.jboss.errai.cdi.producer.client.BeanConstrConsumesOwnProducer;
 import org.jboss.errai.cdi.producer.client.BeanConsumesOwnProducer;
+import org.jboss.errai.cdi.producer.client.DependentProducedBeanDependentBean;
 import org.jboss.errai.cdi.producer.client.ProducerDependentTestBean;
 import org.jboss.errai.cdi.producer.client.ProducerDependentTestBeanWithCycle;
 import org.jboss.errai.cdi.producer.client.ProducerTestModule;
+import org.jboss.errai.cdi.producer.client.SingletonProducedBeanDependentBean;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.container.IOC;
 
@@ -101,5 +103,24 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
 
     assertNotNull(bean);
     assertNotNull(bean.getThing());
+  }
+
+  public void testProducersObserveSingletonScope() {
+    SingletonProducedBeanDependentBean bean = IOC.getBeanManager().lookupBean(SingletonProducedBeanDependentBean.class)
+            .getInstance();
+
+    assertNotNull(bean);
+    assertNotNull(bean.getKayakA());
+    assertNotNull(bean.getKayakB());
+    assertEquals("singleton scope for producer violated!", bean.getKayakA().getId(), bean.getKayakB().getId());
+
+    DependentProducedBeanDependentBean beanB = IOC.getBeanManager().lookupBean(DependentProducedBeanDependentBean.class)
+            .getInstance();
+
+    assertNotNull(beanB);
+    assertNotNull(beanB.getKayakA());
+    assertNotNull(beanB.getKayakB());
+    assertEquals("singleton scope for producer violated!", bean.getKayakA().getId(), beanB.getKayakA().getId());
+    assertEquals("singleton scope for producer violated!", bean.getKayakA().getId(), beanB.getKayakB().getId());
   }
 }

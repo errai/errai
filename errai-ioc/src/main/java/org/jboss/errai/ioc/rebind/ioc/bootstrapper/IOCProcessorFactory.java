@@ -17,10 +17,13 @@
 package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
 import com.google.gwt.core.ext.TreeLogger.Type;
+import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.BlockBuilder;
+import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
@@ -33,6 +36,8 @@ import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.TestMock;
 import org.jboss.errai.ioc.client.api.TestOnly;
 import org.jboss.errai.ioc.client.container.BeanRef;
+import org.jboss.errai.ioc.client.container.CreationalCallback;
+import org.jboss.errai.ioc.client.container.CreationalContext;
 import org.jboss.errai.ioc.rebind.ioc.extension.AnnotationHandler;
 import org.jboss.errai.ioc.rebind.ioc.extension.DependencyControl;
 import org.jboss.errai.ioc.rebind.ioc.extension.JSR330AnnotationHandler;
@@ -70,6 +75,8 @@ import java.util.SortedSet;
 import java.util.Stack;
 import java.util.TreeSet;
 
+import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
 import static org.jboss.errai.codegen.util.Stmt.declareVariable;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 import static org.jboss.errai.ioc.rebind.ioc.graph.GraphSort.sortGraph;
@@ -270,7 +277,9 @@ public class IOCProcessorFactory {
                 {
                   super.qualifyingMetadata = JSR330QualifyingMetadata.createFromAnnotations(instance.getQualifiers());
                   this.provider = true;
+                  this.singleton = injectionContext.isElementType(WiringElementType.SingletonBean, getProducerMember());
                   this.enclosingType = instance.getEnclosingType();
+
 
                   if (injectionContext.isInjectorRegistered(enclosingType, qualifyingMetadata)) {
                     setRendered(true);
@@ -287,25 +296,47 @@ public class IOCProcessorFactory {
                   }
                 }
 
+                private boolean injected = false;
+                private String varName = InjectUtil.getNewInjectorName();
+
                 @Override
                 public Statement getBeanInstance(InjectableInstance injectableInstance) {
+
                   BlockBuilder callbackBuilder = injectionContext.getProcessingContext().getBlockBuilder();
 
+                  final MetaClass creationCallbackRef = parameterizedAs(CreationalCallback.class,
+                          typeParametersOf(instance.getElementTypeOrMethodReturnType()));
+
                   String var = InjectUtil.getUniqueVarName();
-                  callbackBuilder.append(Stmt.declareVariable(instance.getElementTypeOrMethodReturnType())
-                          .named(var).initializeWith(instance.getValueStatement()));
+                  Statement producerCreationalCallback = ObjectBuilder.newInstanceOf(creationCallbackRef)
+                          .extend()
+                          .publicOverridesMethod("getInstance", Parameter.of(CreationalContext.class, "pContext"))
+                          .append(Stmt.declareVariable(instance.getElementTypeOrMethodReturnType())
+                                  .named(var).initializeWith(instance.getValueStatement()))
+                          .append(loadVariable("context").invoke("addBean",
+                                  loadVariable("context").invoke("getBeanReference",
+                                          Stmt.load(instance.getElementTypeOrMethodReturnType()),
+                                          Stmt.load(instance.getQualifyingMetadata().getQualifiers())), Refs.get(var)))
+                          .append(Stmt.loadVariable(var).returnValue())
+                          .finish().finish();
 
-                  callbackBuilder.append(loadVariable("context").invoke("addBean",
-                          loadVariable("context").invoke("getBeanReference",
-                                  Stmt.load(instance.getElementTypeOrMethodReturnType()),
-                                  Stmt.load(instance.getQualifyingMetadata().getQualifiers())), Refs.get(var)));
+                  callbackBuilder.append(Stmt.declareVariable(creationCallbackRef).asFinal().named(var)
+                          .initializeWith(producerCreationalCallback));
 
-                  return Stmt.loadVariable(var);
-                }
+                  if (isSingleton()) {
+                    return loadVariable("context").invoke("getSingletonInstanceOrNew",
+                            Stmt.loadVariable("injContext"),
+                            Stmt.loadVariable(var),
+                            Stmt.load(instance.getElementTypeOrMethodReturnType()),
+                            Stmt.load(instance.getQualifyingMetadata().getQualifiers()));
 
-                @Override
-                public boolean isSingleton() {
-                  return false;
+                  }
+                  else {
+                    return loadVariable("context").invoke("getInstanceOrNew",
+                            Stmt.loadVariable(var),
+                            Stmt.load(instance.getElementTypeOrMethodReturnType()),
+                            Stmt.load(instance.getQualifyingMetadata().getQualifiers()));
+                  }
                 }
 
                 @Override
@@ -315,7 +346,21 @@ public class IOCProcessorFactory {
 
                 @Override
                 public String getVarName() {
-                  return null;
+                  return varName;
+                }
+
+                public MetaClassMember getProducerMember() {
+                  switch (instance.getTaskType()) {
+
+                    case Field:
+                    case PrivateField:
+                      return instance.getField();
+                    case Method:
+                    case PrivateMethod:
+                      return instance.getMethod();
+                    default:
+                      throw new RuntimeException("not a supported producer member.");
+                  }
                 }
 
                 @Override

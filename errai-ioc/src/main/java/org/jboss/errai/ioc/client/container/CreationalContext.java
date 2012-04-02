@@ -17,6 +17,8 @@
 package org.jboss.errai.ioc.client.container;
 
 
+import org.jboss.errai.ioc.client.BootstrapperInjectionContext;
+
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -67,6 +69,19 @@ public class CreationalContext {
     }
   }
 
+  public <T> T getBeanInstance(Class<T> beanType, Annotation[] qualifiers) {
+    T t = (T) wired.get(getBeanReference(beanType, qualifiers));
+    if (t == null) {
+      // see if the instance is available in the bean manager
+      IOCBeanDef<T> beanDef = IOC.getBeanManager().lookupBean(beanType, qualifiers);
+
+      if (beanDef != null && beanDef instanceof IOCSingletonBean) {
+        return beanDef.getInstance();
+      }
+    }
+    return t;
+  }
+
   public <T> T getInstanceOrNew(CreationalCallback<T> context, Class<?> beanType, Annotation[] qualifiers) {
     BeanRef ref = getBeanReference(beanType, qualifiers);
 
@@ -77,6 +92,22 @@ public class CreationalContext {
       return context.getInstance(this);
     }
   }
+
+  public <T> T getSingletonInstanceOrNew(BootstrapperInjectionContext injectionContext,
+                                         CreationalCallback<T> callback, Class<?> beanType, Annotation[] qualifiers) {
+
+    T inst = (T) getBeanInstance(beanType, qualifiers);
+
+    if (inst != null) {
+      return inst;
+    }
+    else {
+      inst = callback.getInstance(this);
+      injectionContext.addBean(beanType, callback, inst, qualifiers);
+      return inst;
+    }
+  }
+
 
   public void addUnresolvedProxy(ProxyResolver proxyResolver, Class<?> beanType, Annotation[] qualifiers) {
     BeanRef ref = getBeanReference(beanType, qualifiers);
