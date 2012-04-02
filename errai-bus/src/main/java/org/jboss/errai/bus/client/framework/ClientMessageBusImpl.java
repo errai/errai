@@ -16,6 +16,47 @@
 
 package org.jboss.errai.bus.client.framework;
 
+import static org.jboss.errai.bus.client.json.JSONUtilCli.decodePayload;
+import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteSubscribe;
+import static org.jboss.errai.common.client.protocols.MessageParts.PriorityProcessing;
+import static org.jboss.errai.common.client.protocols.MessageParts.ReplyTo;
+import static org.jboss.errai.common.client.protocols.MessageParts.Subject;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
+
+import junit.framework.AssertionFailedError;
+
+import org.jboss.errai.bus.client.ErraiBus;
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.MessageListener;
+import org.jboss.errai.bus.client.api.PreInitializationListener;
+import org.jboss.errai.bus.client.api.SessionExpirationListener;
+import org.jboss.errai.bus.client.api.SubscribeListener;
+import org.jboss.errai.bus.client.api.UnsubscribeListener;
+import org.jboss.errai.bus.client.api.base.Capabilities;
+import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.api.base.NoSubscribersToDeliverTo;
+import org.jboss.errai.bus.client.api.base.TransportIOException;
+import org.jboss.errai.bus.client.json.JSONUtilCli;
+import org.jboss.errai.bus.client.protocols.BusCommands;
+import org.jboss.errai.bus.client.util.BusTools;
+import org.jboss.errai.common.client.api.ResourceProvider;
+import org.jboss.errai.common.client.api.extension.InitVotes;
+import org.jboss.errai.common.client.framework.Assert;
+import org.jboss.errai.common.client.protocols.MessageParts;
+import org.jboss.errai.common.client.util.LogUtil;
+import org.jboss.errai.marshalling.client.api.MarshallerFramework;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.dom.client.Style;
@@ -44,44 +85,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
-import junit.framework.AssertionFailedError;
-import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.api.MessageListener;
-import org.jboss.errai.bus.client.api.PreInitializationListener;
-import org.jboss.errai.bus.client.api.SessionExpirationListener;
-import org.jboss.errai.bus.client.api.SubscribeListener;
-import org.jboss.errai.bus.client.api.UnsubscribeListener;
-import org.jboss.errai.bus.client.api.base.Capabilities;
-import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
-import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.api.base.NoSubscribersToDeliverTo;
-import org.jboss.errai.bus.client.api.base.TransportIOException;
-import org.jboss.errai.bus.client.json.JSONUtilCli;
-import org.jboss.errai.bus.client.protocols.BusCommands;
-import org.jboss.errai.bus.client.util.BusTools;
-import org.jboss.errai.common.client.api.ResourceProvider;
-import org.jboss.errai.common.client.api.extension.InitVotes;
-import org.jboss.errai.common.client.framework.Assert;
-import org.jboss.errai.common.client.protocols.MessageParts;
-import org.jboss.errai.common.client.util.LogUtil;
-import org.jboss.errai.marshalling.client.api.MarshallerFramework;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-
-import static org.jboss.errai.bus.client.json.JSONUtilCli.decodePayload;
-import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteSubscribe;
-import static org.jboss.errai.common.client.protocols.MessageParts.PriorityProcessing;
-import static org.jboss.errai.common.client.protocols.MessageParts.ReplyTo;
-import static org.jboss.errai.common.client.protocols.MessageParts.Subject;
 
 /**
  * The default client <tt>MessageBus</tt> implementation.  This bus runs in the browser and automatically federates
@@ -124,7 +127,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private Map<String, MessageCallback> remotes;
 
-
   private List<SessionExpirationListener> sessionExpirationListeners
           = new ArrayList<SessionExpirationListener>();
 
@@ -140,14 +142,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private List<Message> deferredMessages = new ArrayList<Message>();
   private Queue<Message> toSendBuffer = new LinkedList<Message>();
 
-
   /* True if the client's message bus has been initialized */
   private boolean initialized = false;
   private boolean reinit = false;
   private boolean postInit = false;
-
-  /* Default is 2 -- one for the RPC proxies,  one for the server connection  */
-//  private int initVotesRequired = 2;
 
   /**
    * The unique ID that will sent with the next request.
@@ -713,7 +711,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   @Override
   public void stop(boolean sendDisconnect) {
     try {
-      if (sendDisconnect) {
+      if (sendDisconnect && isRemoteCommunicationEnabled()) {
         sendBuilder.setHeader("phase", "disconnect");
 
         Message m = MessageBuilder.createMessage()
@@ -835,8 +833,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     for (PreInitializationListener listener : preInitializationListeners) {
       listener.beforeInitialization();
     }
-
-    remoteSubscribe(BuiltInServices.ServerEchoService.name());
+    
+    if (isRemoteCommunicationEnabled()) {
+      remoteSubscribe(BuiltInServices.ServerEchoService.name());
+    }
+    
     directSubscribe(BuiltInServices.ClientBus.name(), new MessageCallback() {
       @Override
       @SuppressWarnings({"unchecked"})
@@ -1092,6 +1093,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     remotes.put(subject, remoteCallback);
     //  addShadowSubscription(subject, remoteCallback);
   }
+  
+  Set<String> getRemoteSubscriptions() {
+    if (remotes == null) 
+      return null;
+    
+    return remotes.keySet();
+  }
 
   private void sendAllDeferred() {
     if (!deferredMessages.isEmpty())
@@ -1112,14 +1120,20 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   /**
-   * Sends the initial message to connect to the queue, to estabish an HTTP session. Otherwise, concurrent
+   * Sends the initial message to connect to the queue, to establish an HTTP session. Otherwise, concurrent
    * requests will result in multiple sessions being created.
    *
    * @return true if initial message was sent successfully.
    */
   private boolean sendInitialMessage() {
+    if (!isRemoteCommunicationEnabled()) {
+      LogUtil.log("Initializing client bus in offline mode (erraiBusRemoteCommunicationEnabled was set to false)!");
+      InitVotes.voteFor(ClientMessageBusImpl.class);
+      InitVotes.voteFor(RpcProxyLoader.class);
+      return true;
+    }
+    
     try {
-
       LogUtil.log("sending initial handshake to remote bus");
 
       String initialMessage = "{\"CommandType\":\"ConnectToQueue\",\"ToSubject\":\"ServerBus\"," +
@@ -1712,6 +1726,23 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         bus.errorDialog.show();
       }
     });
-
   }
+  
+  /**
+   * Checks whether remote bus communication is enabled. 
+   * <p>
+   * The JavaScript variable <code>erraiBusRemoteCommunicationEnabled</code> can be used 
+   * to control this value. If the variable is not present in the window object, the default 
+   * value <code>true</code> is returned.
+   * 
+   * @return true if remote communication enabled, otherwise false.
+   */
+  public native boolean isRemoteCommunicationEnabled() /*-{
+    if ($wnd.erraiBusRemoteCommunicationEnabled === undefined || $wnd.erraiBusRemoteCommunicationEnabled.length === 0) {
+      return true; 
+    } 
+    else {
+      return $wnd.erraiBusRemoteCommunicationEnabled;
+    }
+  }-*/;
 }
