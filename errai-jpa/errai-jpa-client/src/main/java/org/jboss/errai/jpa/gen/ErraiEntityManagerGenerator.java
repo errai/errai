@@ -1,6 +1,8 @@
 package org.jboss.errai.jpa.gen;
 
 import java.io.PrintWriter;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,15 +17,20 @@ import javax.persistence.metamodel.Metamodel;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.Type;
 
+import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.SnapshotMaker;
 import org.jboss.errai.codegen.SnapshotMaker.MethodBodyCallback;
 import org.jboss.errai.codegen.Statement;
-import org.jboss.errai.codegen.Variable;
+import org.jboss.errai.codegen.StringStatement;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.MethodBlockBuilder;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
 import org.jboss.errai.codegen.util.Implementations;
+import org.jboss.errai.codegen.util.PrivateAccessType;
+import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.client.local.ErraiEntityType;
@@ -49,7 +56,7 @@ public class ErraiEntityManagerGenerator extends Generator {
     EntityManager em = emf.createEntityManager();
     Metamodel mm = em.getMetamodel();
 
-    ClassStructureBuilder<?> classBuilder = Implementations.extend(ErraiEntityManager.class, "GeneratedErraiEntityManager");
+    final ClassStructureBuilder<?> classBuilder = Implementations.extend(ErraiEntityManager.class, "GeneratedErraiEntityManager");
 
     // pmm = "populate metamodel method"
     MethodBlockBuilder<?> pmm = classBuilder.protectedMethod(void.class, "populateMetamodel");
@@ -69,7 +76,8 @@ public class ErraiEntityManagerGenerator extends Generator {
       MethodBodyCallback methodBodyCallback = new MethodBodyCallback() {
 
         @Override
-        public Statement generateMethodBody(MetaMethod method, Object o) {
+        public Statement generateMethodBody(MetaMethod method, Object o,
+                ClassStructureBuilder<?> containingClassBuilder) {
           // provide reference to declaring type (et) from its attributes
           if (o instanceof SingularAttribute
                   && method.getName().equals("getDeclaringType")
@@ -81,18 +89,60 @@ public class ErraiEntityManagerGenerator extends Generator {
           if (o instanceof SingularAttribute
                   && method.getName().equals("get")) {
             SingularAttribute<?, ?> attr = (SingularAttribute<?, ?>) o;
-            // TODO direct property access
-            return Stmt.loadVariable("entityInstance").invoke(attr.getJavaMember().getName()).returnValue();
+
+            String entityInstanceParam = method.getParameters()[0].getName();
+
+            if (attr.getJavaMember() instanceof Field) {
+
+              // First we need to generate an accessor for the field.
+              MetaField field = MetaClassFactory.get((Field) attr.getJavaMember());
+              PrivateAccessUtil.addPrivateAccessStubs(PrivateAccessType.Both, true, containingClassBuilder, field, new Modifier[] {});
+
+              // Now generate a call to the private accessor method for the field in question.
+              return Stmt.loadVariable("this")
+                      .invoke(PrivateAccessUtil.getPrivateFieldInjectorName(field),
+                              Stmt.castTo(et.getJavaType(), Stmt.loadVariable(entityInstanceParam)))
+                      .returnValue();
+            }
+            else if (attr.getJavaMember() instanceof Method) {
+              return Stmt.loadVariable(entityInstanceParam).invoke(attr.getJavaMember().getName()).returnValue();
+            }
+            else {
+              throw new AssertionError(
+                      "JPA properties should only be Field or Method, but this one is " +
+                      attr.getJavaMember() == null ? "null" : attr.getJavaMember().getClass());
+            }
           }
 
           // provide set method
           if (o instanceof SingularAttribute
                   && method.getName().equals("set")) {
             SingularAttribute<?, ?> attr = (SingularAttribute<?, ?>) o;
-            // TODO direct property access
-            return Stmt.loadVariable("entityInstance").invoke(attr.getJavaMember().getName()).returnValue();
+
+            String entityInstanceParam = method.getParameters()[0].getName();
+            String newValueParam = method.getParameters()[1].getName();
+
+            if (attr.getJavaMember() instanceof Field) {
+
+              // The write accessor for the field was defined while generating the get() method.
+              // Now generate a call to the private accessor method for the field in question.
+              MetaField field = MetaClassFactory.get((Field) attr.getJavaMember());
+              return Stmt.loadVariable("this")
+                      .invoke(PrivateAccessUtil.getPrivateFieldInjectorName(field),
+                              Stmt.castTo(et.getJavaType(), Stmt.loadVariable(entityInstanceParam)),
+                              Stmt.castTo(MetaClassFactory.get(attr.getJavaType()).asBoxed(), Stmt.loadVariable(newValueParam)));
+            }
+            else if (attr.getJavaMember() instanceof Method) {
+              return Stmt.loadVariable("entityInstance").invoke(attr.getJavaMember().getName()).returnValue();
+            }
+            else {
+              throw new AssertionError(
+                      "JPA properties should only be Field or Method, but this one is " +
+                      attr.getJavaMember() == null ? "null" : attr.getJavaMember().getClass());
+            }
           }
 
+          // allow SnapshotMaker default (read value and create snapshot)
           return null;
         }
       };
@@ -106,15 +156,16 @@ public class ErraiEntityManagerGenerator extends Generator {
         pmm.append(Stmt.loadVariable(entityTypeVarName).invoke("addAttribute", attribSnapshot));
       }
 
-      pmm.append(Stmt.loadVariable("metamodel").invoke("addEntityType", Variable.get(entityTypeVarName)));
+      // XXX using StringStatement because this gives OutOfScopeException for metamodel:
+      // pmm.append(Stmt.loadClassMember("metamodel").invoke("addEntityType", Variable.get(entityTypeVarName)));
+      pmm.append(new StringStatement("metamodel.addEntityType(" + entityTypeVarName + ")"));
       System.out.println("singular attributes of " + et + ": " + attributes);
-//      metamodel.addEntityType(new ErraiEntityType(id, version, et.getSupertype()));
-
-      //Stmt.loadVariable("metamodel").invoke("addEntityType", );
-      //      pmm.append(Stmt.loadClassMember("metamodel").invoke("addEntityType", et));
     }
 
-    pmm.append(Stmt.loadVariable("metamodel").invoke("freeze"));
+    // XXX using StringStatement because this gives OutOfScopeException for metamodel:
+    // pmm.append(Stmt.loadClassMember("metamodel").invoke("freeze"));
+    pmm.append(new StringStatement("metamodel.freeze()"));
+
     pmm.finish();
 
     String out = classBuilder.toJavaString();

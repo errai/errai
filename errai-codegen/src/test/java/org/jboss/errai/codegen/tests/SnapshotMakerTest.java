@@ -197,7 +197,7 @@ public class SnapshotMakerTest extends AbstractCodegenTest {
 
     SnapshotMaker.MethodBodyCallback mbcb = new SnapshotMaker.MethodBodyCallback() {
       @Override
-      public Statement generateMethodBody(MetaMethod method, Object o) {
+      public Statement generateMethodBody(MetaMethod method, Object o, ClassStructureBuilder<?> containingClass) {
         if (method.getName().equals("getMother")) {
           return Stmt.loadVariable("mom").returnValue();
         }

@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
+import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.exception.CyclicalObjectGraphException;
 import org.jboss.errai.codegen.exception.GenerationException;
@@ -62,18 +63,25 @@ public final class SnapshotMaker {
 
     /**
      * Optionally returns the statement that should be used as the body of the
-     * given method for the given object's snapshot.
+     * given method for the given object's snapshot. If the default snapshot
+     * behaviour provided by SnapshotMaker is sufficient for the given method,
+     * this callback can simply return null.
      *
      * @param method
-     *          The method to provide the body for
+     *          The method to provide the body for.
      * @param o
-     *          The object instance to provide the method for
+     *          The instance object that we are taking the snapshot of. You can
+     *          use this reference if you need to invoke {@code method}.
+     * @param containingClass
+     *          The class that will contain the generated method. During the
+     *          callback, you can generate additional methods and fields within
+     *          this class if you like.
      * @return The Statement to use as the method body (must return a type
      *         compatible with {@code method}'s return type), or null if the
      *         snapshot maker should generate the method body by invoking method
      *         on {@code o} and returning a Literal of its value.
      */
-    Statement generateMethodBody(MetaMethod method, Object o);
+    Statement generateMethodBody(MetaMethod method, Object o, ClassStructureBuilder<?> containingClass);
 
   }
 
@@ -264,7 +272,7 @@ public final class SnapshotMaker {
           System.out.println("    return type " + method.getReturnType());
 
           if (methodBodyCallback != null) {
-            Statement providedMethod = methodBodyCallback.generateMethodBody(method, o);
+            Statement providedMethod = methodBodyCallback.generateMethodBody(method, o, builder);
             if (providedMethod != null) {
               System.out.println("    body provided by callback");
               builder
@@ -282,8 +290,9 @@ public final class SnapshotMaker {
           }
 
           if (method.getParameters().length > 0) {
-            throw new GenerationException("Method " + method + " takes parameters. Such methods must " +
-            		"be covered by the MethodBodyCallback, because they cannot be snapshotted.");
+            throw new GenerationException("Method " + method + " in " + typeToSnapshot +
+                    " takes parameters. Such methods must be handled by the MethodBodyCallback," +
+                    " because they cannot be snapshotted.");
           }
 
           if (method.getReturnType().equals(void.class)) {

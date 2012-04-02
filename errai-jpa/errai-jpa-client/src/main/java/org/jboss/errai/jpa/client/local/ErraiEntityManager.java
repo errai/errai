@@ -11,6 +11,7 @@ import javax.persistence.metamodel.Metamodel;
 import org.jboss.errai.jpa.client.local.backend.StorageBackend;
 import org.jboss.errai.jpa.client.local.backend.WebStorageBackend;
 import org.jboss.errai.marshalling.client.Marshalling;
+import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 
 /**
  * The Errai specialization of the JPA 2.0 EntityManager interface. An
@@ -20,6 +21,12 @@ import org.jboss.errai.marshalling.client.Marshalling;
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
 public abstract class ErraiEntityManager implements EntityManager {
+
+  // magic incantation. ooga booga!
+  static {
+    // ensure that the marshalling framework has been initialized
+    MarshallerFramework.initializeDefaultSessionProvider();
+  }
 
   /**
    * The metamodel. Gets populated on first call to {@link #getMetamodel()}.
@@ -88,6 +95,7 @@ public abstract class ErraiEntityManager implements EntityManager {
     Object id = idAttr.get(entity);
 
     String idJson = Marshalling.toJSON(id);
+    System.out.println("About to convert entity to JSON: " + entity);
     String entityJson = Marshalling.toJSON(entity);
     backend.put(idJson, entityJson);
   }
