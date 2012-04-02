@@ -34,8 +34,8 @@ import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,7 +85,7 @@ public class ServerMonitorPanel implements Attachable {
     serviceExplorer = new JTree();
 
     JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-        new JScrollPane(busServices), new JScrollPane(serviceExplorer));
+            new JScrollPane(busServices), new JScrollPane(serviceExplorer));
     splitPane.setDividerLocation(150);
 
     rootPanel.add(splitPane, BorderLayout.CENTER);
@@ -110,41 +110,10 @@ public class ServerMonitorPanel implements Attachable {
       }
     });
 
-    busServices.addMouseListener(new MouseListener() {
-      Object lastComponent;
-      long lastClick;
-
+    busServices.addMouseListener(new MouseAdapter() {
       public void mouseClicked(MouseEvent e) {
-        if (e.getButton() != MouseEvent.BUTTON1) return;
-        switch (e.getClickCount()) {
-          case 1:
-            lastClick = System.currentTimeMillis();
-            lastComponent = e.getComponent();
-            break;
-          case 2:
-            if (!e.isConsumed() && e.getComponent() == lastComponent &&
-                (System.currentTimeMillis() - lastClick < 1000)) {
-              e.consume();
-              openActivityMonitor();
-              break;
-            }
-
-          default:
-            lastComponent = null;
-            e.consume();
-        }
-      }
-
-      public void mousePressed(MouseEvent e) {
-      }
-
-      public void mouseReleased(MouseEvent e) {
-      }
-
-      public void mouseEntered(MouseEvent e) {
-      }
-
-      public void mouseExited(MouseEvent e) {
+        if (e.getButton() != MouseEvent.BUTTON1 || e.getClickCount() != 2) return;
+        openActivityMonitor();
       }
     });
 
@@ -159,7 +128,6 @@ public class ServerMonitorPanel implements Attachable {
         openConversationMonitor();
       }
     });
-
 
     activityConsoleButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
@@ -267,7 +235,7 @@ public class ServerMonitorPanel implements Attachable {
       List<MessageCallback> receivers = smb.getReceivers(currentlySelectedService);
 
       DefaultMutableTreeNode receiversNode
-          = new DefaultMutableTreeNode("Receivers (" + receivers.size() + ")", true);
+              = new DefaultMutableTreeNode("Receivers (" + receivers.size() + ")", true);
 
       for (MessageCallback mc : receivers) {
         receiversNode.add(new DefaultMutableTreeNode(mc.getClass().getName()));
@@ -275,13 +243,13 @@ public class ServerMonitorPanel implements Attachable {
         if (mc instanceof RuleDelegateMessageCallback) {
           RuleDelegateMessageCallback ruleDelegate = (RuleDelegateMessageCallback) mc;
           DefaultMutableTreeNode securityNode =
-              new DefaultMutableTreeNode("Security");
+                  new DefaultMutableTreeNode("Security");
 
           if (ruleDelegate.getRoutingRule() instanceof RolesRequiredRule) {
             RolesRequiredRule rule = (RolesRequiredRule) ruleDelegate.getRoutingRule();
 
             DefaultMutableTreeNode rolesNode =
-                new DefaultMutableTreeNode(rule.getRoles().isEmpty() ? "Requires Authentication" : "Roles Required");
+                    new DefaultMutableTreeNode(rule.getRoles().isEmpty() ? "Requires Authentication" : "Roles Required");
 
             for (Object o : rule.getRoles()) {
               //     DefaultMutableTreeNode roleNode = new DefaultMutableTreeNode(String.valueOf(o));
@@ -300,7 +268,7 @@ public class ServerMonitorPanel implements Attachable {
           Set<String> endpoints = remCB.getEndpoints();
 
           DefaultMutableTreeNode remoteCPs =
-              new DefaultMutableTreeNode("Callpoints (" + endpoints.size() + ")");
+                  new DefaultMutableTreeNode("Callpoints (" + endpoints.size() + ")");
 
           for (String endpoint : endpoints) {
             String[] epParts = endpoint.split(":");
