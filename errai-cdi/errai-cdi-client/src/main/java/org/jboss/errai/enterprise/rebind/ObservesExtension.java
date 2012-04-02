@@ -38,6 +38,7 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.util.Bool;
+import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.codegen.util.PrivateAccessType;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
@@ -49,6 +50,7 @@ import org.jboss.errai.ioc.client.container.DestructionCallback;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
+import org.jboss.errai.ioc.util.RunAsyncWrapper;
 
 import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
@@ -63,8 +65,6 @@ import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
  */
 @CodeDecorator
 public class ObservesExtension extends IOCDecoratorExtension<Observes> {
-  private final AtomicInteger counter = new AtomicInteger();
-
   public ObservesExtension(Class<Observes> decoratesWith) {
     super(decoratesWith);
   }
@@ -98,7 +98,7 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
       callBack = callBackBlock.finish();
     }
 
-    callBackBlock = callBack.publicOverridesMethod("callback", Parameter.of(Message.class, "message"))
+    callBackBlock = callBack.publicOverridesMethod("callback", Parameter.of(Message.class, "message", true))
             .append(Stmt.declareVariable("msgQualifiers", new TypeLiteral<Set<String>>() {
             },
                     Stmt.loadVariable("message").invoke("get", Set.class, CDIProtocol.Qualifiers)))
@@ -107,11 +107,13 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
                             Stmt.loadClassMember("qualifierSet").invoke("equals", Refs.get("msgQualifiers")),
                             Bool.and(Bool.equals(Refs.get("msgQualifiers"), null),
                                     Stmt.loadClassMember("qualifierSet").invoke("isEmpty"))))
-                    .append(instance.callOrBind(Stmt.loadVariable("message").invoke("get", parm.getType().asClass(), CDIProtocol.BeanReference)))
+                    .append(RunAsyncWrapper.wrap(instance.callOrBind(Stmt.loadVariable("message")
+                            .invoke("get", parm.getType().asClass(), CDIProtocol.BeanReference))))
                     .finish());
 
     // create the destruction callback to deregister the service when the bean is destroyed.
     final String subscrVar = InjectUtil.getUniqueVarName();
+
 
     Statement subscribeStatement =
             Stmt.declareVariable(Subscription.class).asFinal().named(subscrVar)

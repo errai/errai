@@ -2,6 +2,7 @@ package org.jboss.errai.cdi.producer.client;
 
 import java.util.Random;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 
 import org.jboss.errai.cdi.client.qualifier.A;
@@ -15,15 +16,12 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
  * Test module used by {@see ProducerIntegrationTest}.
  *
  * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Mike Brock
  */
-@EntryPoint
+@ApplicationScoped
 public class ProducerTestModule {
-//  private final ProducerDependentTestBean testBean;
-//
-//  @Inject
-//  public ProducerTestModule(ProducerDependentTestBean testBean) {
-//    this.testBean = testBean;
-//  }
+  @Produces
+  private static StaticallyProducedBeanB staticallyProducedBeanB = new StaticallyProducedBeanB();
 
   @Produces @A
   private Integer numberA = new Random().nextInt();
@@ -51,6 +49,11 @@ public class ProducerTestModule {
 
   @Produces @D @E
   private Float floatDE = 1.1f;
+
+  @Produces
+  private static StaticallyProducedBean produceStaticallyProducedBean() {
+    return new StaticallyProducedBean();
+  }
 
   public Integer getNumberA() {
     return numberA;

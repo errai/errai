@@ -17,28 +17,39 @@
 package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
 import com.google.gwt.core.ext.TreeLogger.Type;
-
+import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.builder.BlockBuilder;
+import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.util.PrivateAccessType;
+import org.jboss.errai.codegen.util.Refs;
+import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.TestMock;
 import org.jboss.errai.ioc.client.api.TestOnly;
+import org.jboss.errai.ioc.client.container.BeanRef;
+import org.jboss.errai.ioc.client.container.CreationalCallback;
+import org.jboss.errai.ioc.client.container.CreationalContext;
 import org.jboss.errai.ioc.rebind.ioc.extension.AnnotationHandler;
 import org.jboss.errai.ioc.rebind.ioc.extension.DependencyControl;
 import org.jboss.errai.ioc.rebind.ioc.extension.JSR330AnnotationHandler;
 import org.jboss.errai.ioc.rebind.ioc.extension.ProvidedClassAnnotationHandler;
 import org.jboss.errai.ioc.rebind.ioc.extension.Rule;
 import org.jboss.errai.ioc.rebind.ioc.extension.RuleDef;
+import org.jboss.errai.ioc.rebind.ioc.graph.Dependency;
+import org.jboss.errai.ioc.rebind.ioc.graph.GraphBuilder;
 import org.jboss.errai.ioc.rebind.ioc.graph.SortUnit;
 import org.jboss.errai.ioc.rebind.ioc.injector.AbstractInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.ContextualProviderInjector;
+import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.injector.ProviderInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
@@ -54,9 +65,9 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -64,39 +75,38 @@ import java.util.SortedSet;
 import java.util.Stack;
 import java.util.TreeSet;
 
+import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
+import static org.jboss.errai.codegen.util.Stmt.declareVariable;
+import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 import static org.jboss.errai.ioc.rebind.ioc.graph.GraphSort.sortGraph;
 import static org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance.getMethodInjectedInstance;
-import static org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance.getTypeInjectedInstance;
+import static org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance.getInjectedInstance;
 
 @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
 public class IOCProcessorFactory {
-  private SortedSet<ProcessingEntry> processingEntries = new TreeSet<ProcessingEntry>();
-  private Map<SortUnit, SortUnit> delegates = new LinkedHashMap<SortUnit, SortUnit>();
-
+  private GraphBuilder graphBuilder = new GraphBuilder();
+  private Stack<SortedSet<ProcessingEntry>> processingTasksStack = new Stack<SortedSet<ProcessingEntry>>();
   private InjectionContext injectionContext;
+  private Set<String> visitedAutoDiscoveredDependentBeans = new HashSet<String>();
 
   public IOCProcessorFactory(InjectionContext injectionContext) {
     this.injectionContext = injectionContext;
   }
 
   public void registerHandler(Class<? extends Annotation> annotation, AnnotationHandler handler) {
-    processingEntries.add(new ProcessingEntry(annotation, handler));
+    getProcessingTasksSet().add(new ProcessingEntry(annotation, handler));
   }
 
   public void registerHandler(Class<? extends Annotation> annotation, AnnotationHandler handler, List<RuleDef> rules) {
-    processingEntries.add(new ProcessingEntry(annotation, handler, rules));
+    getProcessingTasksSet().add(new ProcessingEntry(annotation, handler, rules));
   }
 
-  private void addToDelegates(SortUnit unit) {
-    if (delegates.containsKey(unit)) {
-      SortUnit existing = delegates.get(unit);
-      for (Object o : unit.getItems()) {
-        existing.addItem(o);
-      }
+  protected SortedSet<ProcessingEntry> getProcessingTasksSet() {
+    if (processingTasksStack.isEmpty()) {
+      processingTasksStack.push(new TreeSet<ProcessingEntry>());
     }
-    else {
-      delegates.put(unit, unit);
-    }
+    return processingTasksStack.peek();
   }
 
   class DependencyControlImpl implements DependencyControl {
@@ -113,31 +123,43 @@ public class IOCProcessorFactory {
     }
 
     @Override
-    public void addType(final Class<? extends Annotation> annotation, final Class clazz) {
-      if (tasksStack.isEmpty()) {
-        tasksStack.push(new TreeSet<ProcessingEntry>());
+    public void notifyDependency(final MetaClass dependentClazz) {
+      if (injectionContext.isAnyKnownElementType(dependentClazz)) {
+        graphBuilder.addDependency(masqueradeClass, Dependency.on(dependentClazz));
       }
-      tasksStack.peek().add(new ProcessingEntry(annotation, new ProvidedClassAnnotationHandler() {
+      else {
+        DependencyControl control = new DependencyControl() {
+          @Override
+          public void masqueradeAs(MetaClass clazz) {
+            // can't masquerade.
+          }
 
-        @Override
-        public void registerMetadata(InjectableInstance instance, Annotation annotation, IOCProcessingContext context) {
-        }
+          @Override
+          public void notifyDependency(MetaClass clazz) {
+            if (visitedAutoDiscoveredDependentBeans.contains(clazz.getFullyQualifiedName())) return;
+            visitedAutoDiscoveredDependentBeans.add(clazz.getFullyQualifiedName());
 
-        @Override
-        public Set<Class> getClasses() {
-          return Collections.singleton(clazz);
-        }
+            graphBuilder.addDependency(dependentClazz, Dependency.on(clazz));
+          }
 
-        @Override
-        public Set<SortUnit> getDependencies(DependencyControl control, InjectableInstance instance, Annotation annotation, IOCProcessingContext context) {
-          return Collections.emptySet();
-        }
+          @Override
+          public void notifyDependencies(Collection<MetaClass> clazzes) {
+            for (MetaClass clazz : clazzes) {
+              notifyDependency(clazz);
+            }
+          }
+        };
 
-        @Override
-        public boolean handle(InjectableInstance instance, Annotation annotation, IOCProcessingContext context) {
-          return false;
-        }
-      }));
+        graphBuilder.addDependency(masqueradeClass, Dependency.on(dependentClazz));
+        JSR330AnnotationHandler.processDependencies(control, dependentClazz, injectionContext);
+      }
+    }
+
+    @Override
+    public void notifyDependencies(Collection<MetaClass> clazzes) {
+      for (MetaClass clazz : clazzes) {
+        notifyDependency(clazz);
+      }
     }
   }
 
@@ -147,8 +169,8 @@ public class IOCProcessorFactory {
         case TopLevelProvider:
           registerHandler(entry.getValue(), new JSR330AnnotationHandler() {
             @Override
-            public Set<SortUnit> getDependencies(DependencyControl control, InjectableInstance instance,
-                                                 Annotation annotation, IOCProcessingContext context) {
+            public void getDependencies(DependencyControl control, InjectableInstance instance,
+                                        Annotation annotation, IOCProcessingContext context) {
 
               final MetaClass providerClassType = instance.getType();
               final MetaClass MC_Provider = MetaClassFactory.get(Provider.class);
@@ -219,7 +241,7 @@ public class IOCProcessorFactory {
               }
 
               control.masqueradeAs(providedType);
-              return super.getDependencies(control, instance, annotation, context);
+              super.getDependencies(control, instance, annotation, context);
             }
 
             @Override
@@ -240,8 +262,8 @@ public class IOCProcessorFactory {
         case ProducerElement:
           registerHandler(entry.getValue(), new JSR330AnnotationHandler() {
             @Override
-            public Set<SortUnit> getDependencies(DependencyControl control, final InjectableInstance instance, Annotation annotation,
-                                                 final IOCProcessingContext context) {
+            public void getDependencies(DependencyControl control, final InjectableInstance instance, Annotation annotation,
+                                        final IOCProcessingContext context) {
 
               switch (instance.getTaskType()) {
                 case Type:
@@ -251,35 +273,72 @@ public class IOCProcessorFactory {
                   instance.ensureMemberExposed(PrivateAccessType.Read);
               }
 
-              injectionContext.registerInjector(new AbstractInjector() {
+              AbstractInjector injector = new AbstractInjector() {
                 {
                   super.qualifyingMetadata = JSR330QualifyingMetadata.createFromAnnotations(instance.getQualifiers());
                   this.provider = true;
+                  this.singleton = injectionContext.isElementType(WiringElementType.SingletonBean, getProducerMember());
                   this.enclosingType = instance.getEnclosingType();
 
+
                   if (injectionContext.isInjectorRegistered(enclosingType, qualifyingMetadata)) {
-                    setInjected(true);
+                    setRendered(true);
                   }
                   else {
                     context.registerTypeDiscoveryListener(new TypeDiscoveryListener() {
                       @Override
                       public void onDiscovery(IOCProcessingContext context, InjectionPoint injectionPoint) {
                         if (injectionPoint.getEnclosingType().equals(enclosingType)) {
-                          setInjected(true);
+                          setRendered(true);
                         }
                       }
                     });
                   }
                 }
 
-                @Override
-                public Statement getBeanInstance(InjectionContext injectContext, InjectableInstance injectableInstance) {
-                  return instance.getValueStatement();
-                }
+                private String varName = InjectUtil.getNewInjectorName();
 
                 @Override
-                public boolean isSingleton() {
-                  return false;
+                public Statement getBeanInstance(InjectableInstance injectableInstance) {
+                  if (isDependent()) {
+                    return instance.getValueStatement();
+                  }
+
+                  BlockBuilder callbackBuilder = injectionContext.getProcessingContext().getBlockBuilder();
+
+                  final MetaClass creationCallbackRef = parameterizedAs(CreationalCallback.class,
+                          typeParametersOf(instance.getElementTypeOrMethodReturnType()));
+
+                  String var = InjectUtil.getUniqueVarName();
+                  Statement producerCreationalCallback = ObjectBuilder.newInstanceOf(creationCallbackRef)
+                          .extend()
+                          .publicOverridesMethod("getInstance", Parameter.of(CreationalContext.class, "pContext"))
+                          .append(Stmt.declareVariable(instance.getElementTypeOrMethodReturnType())
+                                  .named(var).initializeWith(instance.getValueStatement()))
+                          .append(loadVariable("context").invoke("addBean",
+                                  loadVariable("context").invoke("getBeanReference",
+                                          Stmt.load(instance.getElementTypeOrMethodReturnType()),
+                                          Stmt.load(instance.getQualifyingMetadata().getQualifiers())), Refs.get(var)))
+                          .append(Stmt.loadVariable(var).returnValue())
+                          .finish().finish();
+
+                  callbackBuilder.append(Stmt.declareVariable(creationCallbackRef).asFinal().named(var)
+                          .initializeWith(producerCreationalCallback));
+
+                  if (isSingleton()) {
+                    return loadVariable("context").invoke("getSingletonInstanceOrNew",
+                            Stmt.loadVariable("injContext"),
+                            Stmt.loadVariable(var),
+                            Stmt.load(instance.getElementTypeOrMethodReturnType()),
+                            Stmt.load(instance.getQualifyingMetadata().getQualifiers()));
+
+                  }
+                  else {
+                    return loadVariable("context").invoke("getInstanceOrNew",
+                            Stmt.loadVariable(var),
+                            Stmt.load(instance.getElementTypeOrMethodReturnType()),
+                            Stmt.load(instance.getQualifyingMetadata().getQualifiers()));
+                  }
                 }
 
                 @Override
@@ -289,7 +348,21 @@ public class IOCProcessorFactory {
 
                 @Override
                 public String getVarName() {
-                  return null;
+                  return varName;
+                }
+
+                public MetaClassMember getProducerMember() {
+                  switch (instance.getTaskType()) {
+
+                    case Field:
+                    case PrivateField:
+                      return instance.getField();
+                    case Method:
+                    case PrivateMethod:
+                      return instance.getMethod();
+                    default:
+                      throw new RuntimeException("not a supported producer member.");
+                  }
                 }
 
                 @Override
@@ -305,10 +378,13 @@ public class IOCProcessorFactory {
                       return null;
                   }
                 }
-              });
+              };
+              injectionContext.registerInjector(injector);
 
-              control.masqueradeAs(instance.getElementTypeOrMethodReturnType());
-              return Collections.singleton(new SortUnit(instance.getEnclosingType(), true));
+              control.masqueradeAs(instance.getEnclosingType());
+
+              graphBuilder.addDependency(injector.getInjectedType(), Dependency.on(instance.getEnclosingType()));
+
             }
 
             @Override
@@ -326,7 +402,7 @@ public class IOCProcessorFactory {
           registerHandler(entry.getValue(), new JSR330AnnotationHandler() {
             @Override
             public boolean handle(final InjectableInstance type, Annotation annotation, IOCProcessingContext context) {
-              injectionContext.getInjector(type.getType()).getBeanInstance(injectionContext, null);
+              injectionContext.getInjector(type.getType()).getBeanInstance(type);
               return true;
             }
           });
@@ -338,10 +414,6 @@ public class IOCProcessorFactory {
   @SuppressWarnings({"unchecked"})
   public void process(final MetaDataScanner scanner, final IOCProcessingContext context) {
     inferHandlers();
-
-    Stack<SortedSet<ProcessingEntry>> processingTasksStack = new Stack<SortedSet<ProcessingEntry>>();
-    processingTasksStack.push(processingEntries);
-
     /**
      * Let's accumulate all the processing tasks.
      */
@@ -407,7 +479,9 @@ public class IOCProcessorFactory {
     }
     while (!processingTasksStack.isEmpty());
 
-    List<SortUnit> list = sortGraph(delegates.keySet());
+    List<SortUnit> toSort = graphBuilder.build();
+
+    List<SortUnit> list = sortGraph(toSort);
 
     for (SortUnit unit : list) {
       for (Object item : unit.getItems()) {
@@ -417,7 +491,6 @@ public class IOCProcessorFactory {
       }
     }
   }
-
 
   @SuppressWarnings("unchecked")
   private void handleType(final ProcessingEntry entry,
@@ -439,12 +512,12 @@ public class IOCProcessorFactory {
       }
     }
     final InjectableInstance injectableInstance
-            = getTypeInjectedInstance(anno, type, null, injectionContext);
+            = getInjectedInstance(anno, type, null, injectionContext);
 
     ProcessingDelegate del = new ProcessingDelegate() {
       @Override
-      public Set<SortUnit> getRequiredDependencies() {
-        return entry.handler.getDependencies(dependencyControl, injectableInstance, anno, context);
+      public void processDependencies() {
+        entry.handler.getDependencies(dependencyControl, injectableInstance, anno, context);
       }
 
       @Override
@@ -453,7 +526,7 @@ public class IOCProcessorFactory {
 
         Injector injector = injectionContext.getInjector(type);
         final InjectableInstance injectableInstance
-                = getTypeInjectedInstance(anno, type, injector, injectionContext);
+                = getInjectedInstance(anno, type, injector, injectionContext);
 
         return entry.handler.handle(injectableInstance, anno, context);
       }
@@ -466,8 +539,11 @@ public class IOCProcessorFactory {
 
     entry.handler.registerMetadata(injectableInstance, anno, context);
 
-    Set<SortUnit> requiredDependencies = del.getRequiredDependencies();
-    addToDelegates(new SortUnit(((DependencyControlImpl) dependencyControl).masqueradeClass, del, requiredDependencies));
+    del.processDependencies();
+
+    final MetaClass masq = ((DependencyControlImpl) dependencyControl).masqueradeClass;
+
+    graphBuilder.addItem(masq, del);
   }
 
   @SuppressWarnings("unchecked")
@@ -479,18 +555,19 @@ public class IOCProcessorFactory {
 
     final Annotation anno = method.getAnnotation(annoClass);
     final MetaClass type = MetaClassFactory.get(method.getDeclaringClass());
+
     final MetaMethod metaMethod = MetaClassFactory.get(method);
 
     dependencyControl.masqueradeAs(type);
 
     final InjectableInstance injectableInstance
-            = getMethodInjectedInstance(anno, metaMethod, null,
+            = getMethodInjectedInstance(metaMethod, null,
             injectionContext);
 
     ProcessingDelegate del = new ProcessingDelegate() {
       @Override
-      public Set<SortUnit> getRequiredDependencies() {
-        return entry.handler.getDependencies(dependencyControl, injectableInstance, anno, context);
+      public void processDependencies() {
+        entry.handler.getDependencies(dependencyControl, injectableInstance, anno, context);
       }
 
       @Override
@@ -499,7 +576,7 @@ public class IOCProcessorFactory {
 
         Injector injector = injectionContext.getInjector(type);
         final InjectableInstance injectableInstance
-                = getMethodInjectedInstance(anno, metaMethod, injector,
+                = getMethodInjectedInstance(metaMethod, injector,
                 injectionContext);
 
         return entry.handler.handle(injectableInstance, anno, context);
@@ -513,8 +590,11 @@ public class IOCProcessorFactory {
 
     entry.handler.registerMetadata(injectableInstance, anno, context);
 
-    Set<SortUnit> requiredDependencies = del.getRequiredDependencies();
-    addToDelegates(new SortUnit(((DependencyControlImpl) dependencyControl).masqueradeClass, del, requiredDependencies));
+    del.processDependencies();
+
+    final MetaClass masq = ((DependencyControlImpl) dependencyControl).masqueradeClass;
+
+    graphBuilder.addItem(masq, del);
   }
 
   private void handleField(final ProcessingEntry entry,
@@ -525,6 +605,7 @@ public class IOCProcessorFactory {
 
     final Annotation anno = field.getAnnotation(annoClass);
     final MetaClass type = MetaClassFactory.get(field.getDeclaringClass());
+
     final MetaField metaField = MetaClassFactory.get(field);
 
     dependencyControl.masqueradeAs(type);
@@ -532,12 +613,12 @@ public class IOCProcessorFactory {
     ProcessingDelegate del = new ProcessingDelegate() {
       @SuppressWarnings("unchecked")
       @Override
-      public Set<SortUnit> getRequiredDependencies() {
+      public void processDependencies() {
         final InjectableInstance injectableInstance
-                = InjectableInstance.getFieldInjectedInstance(anno, metaField, null,
+                = InjectableInstance.getFieldInjectedInstance(metaField, null,
                 injectionContext);
 
-        return entry.handler.getDependencies(dependencyControl, injectableInstance, anno, context);
+        entry.handler.getDependencies(dependencyControl, injectableInstance, anno, context);
       }
 
       @SuppressWarnings("unchecked")
@@ -547,7 +628,7 @@ public class IOCProcessorFactory {
 
         Injector injector = injectionContext.getInjector(type);
         final InjectableInstance injectableInstance
-                = InjectableInstance.getFieldInjectedInstance(anno, metaField, injector,
+                = InjectableInstance.getFieldInjectedInstance(metaField, injector,
                 injectionContext);
 
         entry.handler.registerMetadata(injectableInstance, anno, context);
@@ -559,11 +640,13 @@ public class IOCProcessorFactory {
       public String toString() {
         return type.getFullyQualifiedName();
       }
-
     };
 
-    Set<SortUnit> requiredDependencies = del.getRequiredDependencies();
-    addToDelegates(new SortUnit(((DependencyControlImpl) dependencyControl).masqueradeClass, del, requiredDependencies));
+    del.processDependencies();
+
+    final MetaClass masq = ((DependencyControlImpl) dependencyControl).masqueradeClass;
+
+    graphBuilder.addItem(masq, del);
   }
 
   private class ProcessingEntry implements Comparable<ProcessingEntry> {
@@ -627,6 +710,6 @@ public class IOCProcessorFactory {
   private static interface ProcessingDelegate {
     public boolean process();
 
-    public Set<SortUnit> getRequiredDependencies();
+    public void processDependencies();
   }
 }

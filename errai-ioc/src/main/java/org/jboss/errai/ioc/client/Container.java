@@ -18,6 +18,7 @@ package org.jboss.errai.ioc.client;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.RunAsyncCallback;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
 import org.jboss.errai.ioc.client.container.CreationalContext;
@@ -29,19 +30,27 @@ public class Container implements EntryPoint {
     boostrapContainer();
   }
 
-  public BootstrapperInjectionContext boostrapContainer() {
+  public void boostrapContainer() {
     try {
+
+
       InitVotes.waitFor(Container.class);
 
       final Bootstrapper bootstrapper = GWT.create(Bootstrapper.class);
+
+      System.out.println("Bootstrapepr Generated");
+
       new IOCBeanManagerLifecycle().resetBeanManager();
       final BootstrapperInjectionContext ctx = bootstrapper.bootstrapContainer();
 
-      CreationalContext rootContext = ctx.getRootContext();
-      rootContext.finish();
+      System.out.println("Boostrapper Called");
+
+      ctx.getRootContext().finish();
 
       InitVotes.voteFor(Container.class);
-      return ctx;
+
+
+      // return ctx;
     }
     catch (Throwable t) {
       t.printStackTrace();

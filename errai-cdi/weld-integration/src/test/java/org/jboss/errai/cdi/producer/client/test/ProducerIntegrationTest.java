@@ -1,19 +1,21 @@
 package org.jboss.errai.cdi.producer.client.test;
 
 
+import org.jboss.errai.cdi.producer.client.BeanConstrConsumesOwnProducer;
+import org.jboss.errai.cdi.producer.client.BeanConsumesOwnProducer;
+import org.jboss.errai.cdi.producer.client.DependentProducedBeanDependentBean;
 import org.jboss.errai.cdi.producer.client.ProducerDependentTestBean;
+import org.jboss.errai.cdi.producer.client.ProducerDependentTestBeanWithCycle;
 import org.jboss.errai.cdi.producer.client.ProducerTestModule;
+import org.jboss.errai.cdi.producer.client.SingletonProducedBeanDependentBean;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.container.IOC;
-import org.jboss.errai.ioc.rebind.ioc.test.harness.IOCTestRunner;
-import org.junit.runner.RunWith;
 
 /**
  * Tests CDI producers.
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@RunWith(IOCTestRunner.class)
 public class ProducerIntegrationTest extends IOCClientTestCase {
 
   @Override
@@ -30,7 +32,7 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
     module = IOC.getBeanManager().lookupBean(ProducerTestModule.class).getInstance();
     testBean = IOC.getBeanManager().lookupBean(ProducerDependentTestBean.class).getInstance();
   }
-  
+
   public void testInjectionUsingProducerField() {
     assertEquals("Failed to inject produced @A",
             module.getNumberA(),
@@ -73,5 +75,52 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
     String val = "TestFieldABC";
     testBean.setTestField(val);
     assertEquals(val, testBean.getTestField());
+  }
+
+  public void testStaticProducers() {
+    assertNotNull("bean was not injected!", testBean.getStaticallyProducedBean());
+    assertNotNull("bean was not injected!", testBean.getStaticallyProducedBeanB());
+  }
+
+  public void testCycleThroughAProducedInterface() {
+    ProducerDependentTestBeanWithCycle bean = IOC.getBeanManager()
+            .lookupBean(ProducerDependentTestBeanWithCycle.class).getInstance();
+
+    assertNotNull(bean);
+    assertNotNull(bean.getFooface());
+    assertEquals("HiThere", bean.getFooface().getMessage());
+  }
+
+  public void testBeanCanConsumeProducerFromItself() {
+    BeanConsumesOwnProducer bean = IOC.getBeanManager().lookupBean(BeanConsumesOwnProducer.class).getInstance();
+
+    assertNotNull(bean);
+    assertNotNull("bean did not inject its own producer", bean.getMagic());
+  }
+
+  public void testBeanCanConsumerProducerFromItselfThroughConstrCycle() {
+    BeanConstrConsumesOwnProducer bean = IOC.getBeanManager().lookupBean(BeanConstrConsumesOwnProducer.class).getInstance();
+
+    assertNotNull(bean);
+    assertNotNull(bean.getThing());
+  }
+
+  public void testProducersObserveSingletonScope() {
+    SingletonProducedBeanDependentBean bean = IOC.getBeanManager().lookupBean(SingletonProducedBeanDependentBean.class)
+            .getInstance();
+
+    assertNotNull(bean);
+    assertNotNull(bean.getKayakA());
+    assertNotNull(bean.getKayakB());
+    assertEquals("singleton scope for producer violated!", bean.getKayakA().getId(), bean.getKayakB().getId());
+
+    DependentProducedBeanDependentBean beanB = IOC.getBeanManager().lookupBean(DependentProducedBeanDependentBean.class)
+            .getInstance();
+
+    assertNotNull(beanB);
+    assertNotNull(beanB.getKayakA());
+    assertNotNull(beanB.getKayakB());
+    assertEquals("singleton scope for producer violated!", bean.getKayakA().getId(), beanB.getKayakA().getId());
+    assertEquals("singleton scope for producer violated!", bean.getKayakA().getId(), beanB.getKayakB().getId());
   }
 }

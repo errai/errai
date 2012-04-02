@@ -27,7 +27,7 @@ import javax.inject.Inject;
 /**
  * @author Mike Brock
  */
-//@EntryPoint
+@EntryPoint
 public class Contacts {
   private HandlerManager eventBus = new HandlerManager(null);
 

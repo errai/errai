@@ -46,22 +46,6 @@ public class CommandMessage implements Message {
   int routingFlags;
 
   /**
-   * @deprecated Please use the MessageBuilder class.
-   */
-  @Deprecated
-  static CommandMessage create(String commandType) {
-    return new CommandMessage(commandType);
-  }
-
-  /**
-   * @deprecated Please use the MessageBuilder class.
-   */
-  @Deprecated
-  static CommandMessage create(Enum<?> commandType) {
-    return new CommandMessage(commandType);
-  }
-
-  /**
    * Creates a new CommandMessage with no parts and no provided parts.
    *
    * @return a new instance of CommandMessage.
@@ -120,14 +104,6 @@ public class CommandMessage implements Message {
   private CommandMessage(Map<String, Object> parts, Map<String, ResourceProvider<?>> providers) {
     this.parts = parts;
     this.providedParts = providers;
-  }
-
-  private CommandMessage(String commandType) {
-    command(commandType);
-  }
-
-  private CommandMessage(Enum<?> commandType) {
-    command(commandType.name());
   }
 
   @Override

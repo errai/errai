@@ -21,6 +21,8 @@ import java.util.Collections;
 import java.util.HashSet;
 
 /**
+ * Represents a default dependent scoped bean.
+ *
  * @author Mike Brock
  */
 public class IOCDependentBean<T> extends AbstractIOCBean<T> {
@@ -58,7 +60,6 @@ public class IOCDependentBean<T> extends AbstractIOCBean<T> {
     context.finish();
     return t;
   }
-
 
   @Override
   public T getInstance(CreationalContext context) {

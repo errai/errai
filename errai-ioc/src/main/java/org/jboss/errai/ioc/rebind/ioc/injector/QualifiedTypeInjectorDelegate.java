@@ -27,16 +27,21 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.RegistrationHook;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 
 /**
- * @author Mike Brock <cbrock@redhat.com>
+ * This injector wraps another injector to create qualifying references based on type parameters and qualifiers
+ * to the underlying bean. For instance if two beans implement a common interface, with two different type
+ * parameters, each bean will be wrapped in this injector and added as common injectors to the interface.
+ *
+ * @author Mike Brock
  */
-public class QualifiedTypeInjectorDelegate implements Injector {
+public class QualifiedTypeInjectorDelegate extends AbstractInjector {
   private MetaClass type;
   private Injector delegate;
 
   public QualifiedTypeInjectorDelegate(MetaClass type, Injector delegate, MetaParameterizedType parameterizedType) {
     this.type = type;
     this.delegate = delegate;
-    delegate.setQualifyingTypeInformation(parameterizedType);
+    this.qualifyingMetadata = delegate.getQualifyingMetadata();
+    this.qualifyingTypeInformation = parameterizedType;
 
     delegate.addRegistrationHook(
            new RegistrationHook() {
@@ -46,22 +51,11 @@ public class QualifiedTypeInjectorDelegate implements Injector {
              }
            }
     );
-
   }
 
   @Override
-  public Statement getBeanInstance(InjectionContext injectContext, InjectableInstance injectableInstance) {
-    Statement val = _getType(injectContext, injectableInstance);
-    return val;
-  }
-
-  public Statement _getType(InjectionContext injectContext, InjectableInstance injectableInstance) {
-    return delegate.getBeanInstance(injectContext, injectableInstance);
-  }
-
-  @Override
-  public boolean isInjected() {
-    return delegate.isInjected();
+  public boolean isRendered() {
+    return delegate.isRendered();
   }
 
   @Override
@@ -87,16 +81,6 @@ public class QualifiedTypeInjectorDelegate implements Injector {
   @Override
   public MetaClass getInjectedType() {
     return delegate.getInjectedType();
-  }
-
-  @Override
-  public boolean metadataMatches(Injector injector) {
-    return delegate.metadataMatches(injector);
-  }
-
-  @Override
-  public QualifyingMetadata getQualifyingMetadata() {
-    return delegate.getQualifyingMetadata();
   }
 
   @Override
@@ -130,21 +114,6 @@ public class QualifiedTypeInjectorDelegate implements Injector {
   }
 
   @Override
-  public boolean matches(MetaParameterizedType parameterizedType, QualifyingMetadata qualifyingMetadata) {
-    return delegate.matches(parameterizedType, qualifyingMetadata);
-  }
-
-  @Override
-  public MetaParameterizedType getQualifyingTypeInformation() {
-    return delegate.getQualifyingTypeInformation();
-  }
-
-  @Override
-  public void setQualifyingTypeInformation(MetaParameterizedType qualifyingTypeInformation) {
-    delegate.setQualifyingTypeInformation(qualifyingTypeInformation);
-  }
-
-  @Override
   public void setPostInitCallbackVar(String var) {
     delegate.setPostInitCallbackVar(var);
   }
@@ -159,18 +128,7 @@ public class QualifiedTypeInjectorDelegate implements Injector {
     return delegate.getCreationalCallbackVarName();
   }
 
-  @Override
-  public void setCreationalCallbackVarName(String creationalCallbackVarName) {
-    delegate.setCreationalCallbackVarName(creationalCallbackVarName);
-  }
-
-
-  @Override
-  public void addRegistrationHook(RegistrationHook registrationHook) {
-    delegate.addRegistrationHook(registrationHook);
-  }
-
-  private void registerWithBeanManager(InjectionContext context, Statement valueRef) {
+  public void registerWithBeanManager(InjectionContext context, Statement valueRef) {
     if (InjectUtil.checkIfTypeNeedsAddingToBeanStore(context, this)) {
       QualifyingMetadata md = delegate.getQualifyingMetadata();
       if (md == null) {

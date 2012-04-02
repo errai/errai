@@ -16,10 +16,10 @@
 
 package org.jboss.errai.ioc.tests.wiring.client.res;
 
+import org.jboss.errai.ioc.client.api.Caller;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
-
-import org.jboss.errai.ioc.client.api.Caller;
 
 /**
  * @author Mike Brock

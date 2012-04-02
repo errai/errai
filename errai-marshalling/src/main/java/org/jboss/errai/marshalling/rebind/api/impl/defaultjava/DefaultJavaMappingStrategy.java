@@ -30,6 +30,7 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.codegen.util.Implementations;
+import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.Marshaller;
@@ -226,13 +227,13 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
               }
               else {
                 if (!context.isExposed(field)) {
-                  GenUtil.addPrivateAccessStubs(gwtTarget, context.getClassStructureBuilder(), field);
+                  PrivateAccessUtil.addPrivateAccessStubs(gwtTarget, context.getClassStructureBuilder(), field);
                   context.markExposed(field);
                 }
 
                 // Bind via JSNI
                 bindingStatement = Stmt.invokeStatic(context.getGeneratedBootstrapClass(),
-                        GenUtil.getPrivateFieldInjectorName(field),
+                        PrivateAccessUtil.getPrivateFieldInjectorName(field),
                         loadVariable("entity"), val);
               }
 
@@ -452,11 +453,11 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
         }
         else {
           if (!context.isExposed(field)) {
-            GenUtil.addPrivateAccessStubs(gwtTarget, context.getClassStructureBuilder(), field);
+            PrivateAccessUtil.addPrivateAccessStubs(gwtTarget, context.getClassStructureBuilder(), field);
             context.markExposed(field);
           }
 
-          return Stmt.invokeStatic(context.getGeneratedBootstrapClass(), GenUtil.getPrivateFieldInjectorName(field),
+          return Stmt.invokeStatic(context.getGeneratedBootstrapClass(), PrivateAccessUtil.getPrivateFieldInjectorName(field),
                   loadVariable("a0"));
         }
       }

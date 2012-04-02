@@ -10,23 +10,38 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
  * Test module used by {@see InjectionIntegrationTest}.
  *
  * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Mike Brock
  */
 @EntryPoint
 public class InjectionTestModule {
   private boolean postConstructFired;
 
-  @Inject
   private InjectionDependentTestBeanA beanA;
 
-  @Inject
   private InjectionDependentTestBeanC beanC;
 
   @Inject @New
   private InjectionDependentTestBeanC beacC1;
+
+  // test public mutable field injection -- not that this is a terribly good idea.
+  @Inject
+  public SomeRandomBeanToInject randomBeanToInject;
   
   @PostConstruct
   public void doPostConstruct() {
     postConstructFired = true;
+  }
+
+  // test public method injection
+  @Inject
+  public void setBeanA(InjectionDependentTestBeanA beanA) {
+    this.beanA = beanA;
+  }
+
+  // test private method injection
+  @Inject
+  private void setBeanC(InjectionDependentTestBeanC beanC) {
+    this.beanC = beanC;
   }
 
   public InjectionDependentTestBeanA getBeanA() {
@@ -39,6 +54,10 @@ public class InjectionTestModule {
 
   public InjectionDependentTestBeanC getBeanC1() {
     return beacC1;
+  }
+
+  public SomeRandomBeanToInject getRandomBeanToInject() {
+    return randomBeanToInject;
   }
 
   public boolean isPostConstructFired() {

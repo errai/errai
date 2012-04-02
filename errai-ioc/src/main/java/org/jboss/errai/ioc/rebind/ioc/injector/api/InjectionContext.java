@@ -17,6 +17,7 @@
 package org.jboss.errai.ioc.rebind.ioc.injector.api;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 
 import org.jboss.errai.codegen.meta.HasAnnotations;
@@ -24,8 +25,8 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
-import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.codegen.util.PrivateAccessType;
+import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
@@ -63,7 +64,7 @@ public class InjectionContext {
   // to achieve with a MultiMap
   private Map<MetaClass, List<Injector>> injectors = new LinkedHashMap<MetaClass, List<Injector>>();
 
-  private Multimap<MetaClass, Injector> proxiedInjectors = HashMultimap.create();
+  private Multimap<MetaClass, Injector> proxiedInjectors = LinkedHashMultimap.create();
   private Multimap<MetaClass, MetaClass> cyclingTypes = HashMultimap.create();
 
   private Set<String> enabledAlternatives = new HashSet<String>();
@@ -80,9 +81,13 @@ public class InjectionContext {
 
   private Set<String> exposedMembers = new HashSet<String>();
 
+  private boolean allowProxyCapture = false;
+  private boolean openProxy = false;
+
   public InjectionContext(IOCProcessingContext processingContext) {
     this.processingContext = processingContext;
   }
+
 
   public Injector getProxiedInjector(MetaClass type, QualifyingMetadata metadata) {
     //todo: figure out why I was doing this.
@@ -101,12 +106,9 @@ public class InjectionContext {
     if (matching.isEmpty()) {
       throw new InjectionFailure(erased);
     }
-    else if (matching.size() > 1) {
-      throw new InjectionFailure("ambiguous injection type (multiple injectors resolved): " + erased
-              .getFullyQualifiedName() + (metadata == null ? "" : metadata.toString()));
-    }
     else {
-      return matching.get(0);
+      // proxies can only be used once, so just receive the last declared one.
+      return matching.get(matching.size() - 1);
     }
   }
 
@@ -202,17 +204,6 @@ public class InjectionContext {
     return false;
   }
 
-  public boolean isProxiedInjectorAvailable(MetaClass injectorType, QualifyingMetadata qualifyingMetadata) {
-    if (proxiedInjectors.containsKey(injectorType.getErased())) {
-      for (Injector inj : injectors.get(injectorType.getErased())) {
-        if (inj.matches(injectorType.getParameterizedType(), qualifyingMetadata)) {
-          return inj.isInjected();
-        }
-      }
-    }
-    return false;
-  }
-
   public boolean isInjectorRegistered(MetaClass injectorType, QualifyingMetadata qualifyingMetadata) {
     if (injectors.containsKey(injectorType.getErased())) {
       for (Injector inj : injectors.get(injectorType.getErased())) {
@@ -228,7 +219,7 @@ public class InjectionContext {
     if (injectors.containsKey(injectorType.getErased())) {
       for (Injector inj : injectors.get(injectorType.getErased())) {
         if (inj.matches(injectorType.getParameterizedType(), qualifyingMetadata)) {
-          return inj.isInjected();
+          return inj.isRendered();
         }
       }
     }
@@ -359,7 +350,7 @@ public class InjectionContext {
 
 
   public void addExposedMethod(MetaMethod method) {
-    String methodSignature = GenUtil.getPrivateMethodName(method);
+    String methodSignature = PrivateAccessUtil.getPrivateMethodName(method);
     if (!exposedMembers.contains(methodSignature)) {
       exposedMembers.add(methodSignature);
     }
@@ -406,15 +397,28 @@ public class InjectionContext {
     return unmodifiableCollection(elementBindings.get(type));
   }
 
-  public boolean isElementType(WiringElementType type, HasAnnotations hasAnnotations) {
-    for (Annotation a : hasAnnotations.getAnnotations()) {
-      if (getAnnotationsForElementType(type).contains(a.annotationType())) {
-        return true;
-      }
+  public boolean isAnyKnownElementType(HasAnnotations hasAnnotations) {
+    return isAnyOfElementTypes(hasAnnotations, WiringElementType.values());
+  }
+
+  public boolean isAnyOfElementTypes(HasAnnotations hasAnnotations, WiringElementType... types) {
+    for (WiringElementType t : types) {
+      if (isElementType(t, hasAnnotations)) return true;
     }
     return false;
   }
 
+  public boolean isElementType(WiringElementType type, HasAnnotations hasAnnotations) {
+    return getMatchingAnnotationForElementType(type, hasAnnotations) != null;
+  }
+
+  /**
+   * Overloaded version to check GWT's JClassType classes.
+   *
+   * @param type
+   * @param hasAnnotations
+   * @return
+   */
   public boolean isElementType(WiringElementType type, com.google.gwt.core.ext.typeinfo.HasAnnotations hasAnnotations) {
     for (Annotation a : hasAnnotations.getAnnotations()) {
       if (getAnnotationsForElementType(type).contains(a.annotationType())) {
@@ -424,9 +428,40 @@ public class InjectionContext {
     return false;
   }
 
+  public Annotation getMatchingAnnotationForElementType(WiringElementType type, HasAnnotations hasAnnotations) {
+    for (Annotation a : hasAnnotations.getAnnotations()) {
+      if (getAnnotationsForElementType(type).contains(a.annotationType())) {
+        return a;
+      }
+    }
+    return null;
+  }
+
 
   public Collection<Map.Entry<WiringElementType, Class<? extends Annotation>>> getAllElementMappings() {
     return unmodifiableCollection(elementBindings.entries());
+  }
+
+  public void allowProxyCapture() {
+    allowProxyCapture = true;
+  }
+
+  public void markOpenProxy() {
+    if (allowProxyCapture) {
+      openProxy = true;
+    }
+  }
+
+  public boolean isProxyOpen() {
+    return openProxy;
+  }
+
+  public void closeProxyIfOpen() {
+    if (openProxy) {
+      getProcessingContext().popBlockBuilder();
+      openProxy = false;
+    }
+    allowProxyCapture = false;
   }
 
 

@@ -71,7 +71,6 @@
         <module>jetty</module>
         <module>errai-cdi-client</module>
         <module>weld-integration</module>
-        <module>jboss</module>
         <module>errai-javax-enterprise</module>
         <module>demos/errai-cdi-mobile-demo</module>
         <module>demos/errai-cdi-mvp-demo</module>

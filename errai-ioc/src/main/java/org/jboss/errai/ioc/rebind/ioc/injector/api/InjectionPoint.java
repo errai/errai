@@ -30,7 +30,7 @@ import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 import java.lang.annotation.Annotation;
 import java.util.List;
 
-import static org.jboss.errai.codegen.util.GenUtil.getPrivateFieldInjectorName;
+import static org.jboss.errai.codegen.util.PrivateAccessUtil.getPrivateFieldInjectorName;
 
 /**
  * @author Mike Brock

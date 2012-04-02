@@ -23,44 +23,32 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.user.rebind.SourceWriter;
 import com.google.gwt.user.rebind.StringSourceWriter;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
-import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
-import org.jboss.errai.codegen.meta.MetaParameterizedType;
-import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
-import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.codegen.util.Implementations;
 import org.jboss.errai.codegen.util.PrivateAccessType;
+import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.ioc.client.BootstrapperInjectionContext;
-import org.jboss.errai.ioc.client.ContextualProviderContext;
 import org.jboss.errai.ioc.client.api.Bootstrapper;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
-import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.api.IOCBootstrapTask;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 import org.jboss.errai.ioc.client.api.TaskOrder;
 import org.jboss.errai.ioc.client.api.TestMock;
-import org.jboss.errai.ioc.client.api.TypeProvider;
 import org.jboss.errai.ioc.client.container.CreationalContext;
-import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
-import org.jboss.errai.ioc.rebind.ioc.injector.AbstractInjector;
-import org.jboss.errai.ioc.rebind.ioc.injector.ContextualProviderInjector;
-import org.jboss.errai.ioc.rebind.ioc.injector.ProviderInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadataFactory;
@@ -74,7 +62,6 @@ import javax.enterprise.context.SessionScoped;
 import javax.enterprise.inject.Alternative;
 import javax.enterprise.inject.Default;
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 import java.io.File;
 import java.lang.annotation.Annotation;
@@ -277,13 +264,13 @@ public class IOCBootstrapGenerator {
 
     Map<MetaField, PrivateAccessType> privateFields = injectionContext.getPrivateFieldsToExpose();
     for (Map.Entry<MetaField, PrivateAccessType> f : privateFields.entrySet()) {
-      GenUtil.addPrivateAccessStubs(f.getValue(), !useReflectionStubs, classBuilder, f.getKey());
+      PrivateAccessUtil.addPrivateAccessStubs(f.getValue(), !useReflectionStubs, classBuilder, f.getKey());
     }
 
     Collection<MetaMethod> privateMethods = injectionContext.getPrivateMethodsToExpose();
 
     for (MetaMethod m : privateMethods) {
-      GenUtil.addPrivateAccessStubs(!useReflectionStubs, classBuilder, m);
+      PrivateAccessUtil.addPrivateAccessStubs(!useReflectionStubs, classBuilder, m);
     }
 
     _doRunnableTasks(afterTasks, blockBuilder);

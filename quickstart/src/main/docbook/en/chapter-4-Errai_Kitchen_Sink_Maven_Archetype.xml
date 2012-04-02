@@ -6,7 +6,7 @@
     <para>The Errai Kitchen Sink archetype generates a project that uses everything but the kitchen sink: annotation-driven CDI and Java Bean Validation on both the client and server, plus JPA and JAX-RS on the server side. It also demonstrates usage of Errai RPC and GWT UiBinder.</para>
     <para>
       <emphasis role="strong">Note:</emphasis>
-      Unlike the other Errai Archetypes, this Kitchen Sink archetype creates a project that only works with JBoss AS 7. Although this project could be made to work on other servers, the POM would be quite unwieldy if it included profiles for Tomcat and Jetty.
+      Unlike the other Errai Archetypes, this Kitchen Sink archetype creates a project that only works with JBoss AS 7.1 or newer. Although this project could be made to work on other servers, the POM would be quite unwieldy if it included profiles for Tomcat and Jetty.
     </para>
     <para>
       Here's how to create a project layout using a maven build structure, which will provide us with a bare bones project, including all dependencies, which you can import into your IDE of choice. You will need to have
@@ -17,7 +17,7 @@
       <programlisting>mvn archetype:generate \
 -DarchetypeGroupId=org.jboss.errai.archetypes \
 -DarchetypeArtifactId=kitchensink-quickstart \
--DarchetypeVersion=2.0.Beta3 \
+-DarchetypeVersion=2.0.Beta4 \
 -DarchetypeRepository=https://repository.jboss.org/nexus/content/groups/public/</programlisting>
     </informalexample>
     <para>Customize the build properties according to your needs.</para>

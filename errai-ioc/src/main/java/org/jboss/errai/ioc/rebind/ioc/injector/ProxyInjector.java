@@ -22,6 +22,7 @@ import org.jboss.errai.codegen.ProxyMaker;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
+import org.jboss.errai.codegen.builder.impl.BlockBuilderImpl;
 import org.jboss.errai.codegen.builder.impl.Scope;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
@@ -30,8 +31,10 @@ import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.client.container.ProxyResolver;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
-import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
@@ -44,20 +47,19 @@ import static org.jboss.errai.codegen.util.Stmt.newObject;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ProxyInjector extends AbstractInjector {
-  private boolean proxied;
   private final String varName;
-
-  private Statement proxyStatement;
-  private BlockBuilder<AnonymousClassStructureBuilder> proxyResolverBody;
-
+  private final List<Statement> closeStatements;
   private final MetaClass proxiedType;
   private final BuildMetaClass proxyClass;
 
   public ProxyInjector(IOCProcessingContext context, MetaClass proxiedType, QualifyingMetadata metadata) {
     this.proxiedType = proxiedType;
-    this.varName = InjectUtil.getNewInjectorName() + "_" + proxiedType.getName() + "_proxy";
+    this.varName = InjectUtil.getNewInjectorName() + "_proxy";
     this.qualifyingMetadata = metadata;
     String proxyClassName = proxiedType.getFullyQualifiedName().replaceAll("\\.", "_") + "_" + varName;
+
+    this.closeStatements = new ArrayList<Statement>();
+
     this.proxyClass = ProxyMaker.makeProxy(proxyClassName, proxiedType);
     this.proxyClass.setStatic(true);
     this.proxyClass.setScope(Scope.Package);
@@ -67,29 +69,30 @@ public class ProxyInjector extends AbstractInjector {
   }
 
   @Override
-  public Statement getBeanInstance(InjectionContext injectContext, InjectableInstance injectableInstance) {
-    if (!isInjected()) {
-      IOCProcessingContext pCtx = injectContext.getProcessingContext();
+  public Statement getBeanInstance(InjectableInstance injectableInstance) {
+    IOCProcessingContext pCtx = injectableInstance.getInjectionContext().getProcessingContext();
 
-      pCtx.append(declareVariable(proxyClass).asFinal().named(varName).initializeWith(newObject(proxyClass)));
+    pCtx.append(declareVariable(proxyClass).asFinal().named(varName).initializeWith(newObject(proxyClass)));
 
-      MetaClass proxyResolverRef = parameterizedAs(ProxyResolver.class, typeParametersOf(proxiedType));
+    MetaClass proxyResolverRef = parameterizedAs(ProxyResolver.class, typeParametersOf(proxiedType));
 
-      proxyResolverBody = newObject(proxyResolverRef)
-              .extend().publicOverridesMethod("resolve", Parameter.of(proxiedType, "obj"));
+    BlockBuilder<AnonymousClassStructureBuilder> proxyResolverBody = newObject(proxyResolverRef)
+            .extend().publicOverridesMethod("resolve", Parameter.of(proxiedType, "obj"));
 
-      Statement proxyResolver = proxyResolverBody.append(loadVariable(varName)
-              .invoke(ProxyMaker.PROXY_BIND_METHOD, Refs.get("obj"))).finish().finish();
+    Statement proxyResolver = proxyResolverBody.append(loadVariable(varName)
+            .invoke(ProxyMaker.PROXY_BIND_METHOD, Refs.get("obj"))).finish().finish();
 
-      proxyResolverBody.append(Stmt.loadVariable("context").invoke("addProxyReference", Refs.get(varName), Refs.get("obj")));
+    proxyResolverBody.append(Stmt.loadVariable("context").invoke("addProxyReference", Refs.get(varName), Refs.get("obj")));
 
-      pCtx.append(loadVariable("context").invoke("addUnresolvedProxy", proxyResolver,
-              proxiedType, qualifyingMetadata.getQualifiers()));
+    pCtx.append(loadVariable("context").invoke("addUnresolvedProxy", proxyResolver,
+            proxiedType, qualifyingMetadata.getQualifiers()));
 
-      injected = true;
-
+    for (Statement statement : closeStatements) {
+      proxyResolverBody.append(statement);
     }
-    return !proxied ? loadVariable(varName) : proxyStatement;
+
+    setRendered(true);
+    return loadVariable(varName);
   }
 
   @Override
@@ -102,19 +105,17 @@ public class ProxyInjector extends AbstractInjector {
     return proxiedType;
   }
 
-  public boolean isProxied() {
-    return proxied;
-  }
-
-  public void setProxied(boolean proxied) {
-    this.proxied = proxied;
-  }
-
-  public void setProxyStatement(Statement proxyStatement) {
-    this.proxyStatement = proxyStatement;
-  }
-
   public void addProxyCloseStatement(Statement statement) {
-    proxyResolverBody.append(statement);
+    closeStatements.add(statement);
+  }
+
+  public BlockBuilder getProxyResolverBlockBuilder() {
+    return new BlockBuilderImpl() {
+      @Override
+      public BlockBuilder append(Statement stmt) {
+        closeStatements.add(stmt);
+        return this;
+      }
+    };
   }
 }

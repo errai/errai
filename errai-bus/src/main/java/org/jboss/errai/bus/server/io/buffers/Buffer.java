@@ -33,16 +33,21 @@ public interface Buffer {
 
   public boolean read(OutputStream outputStream, BufferColor bufferColor, BufferCallback callback) throws IOException;
 
-  public boolean read(OutputStream outputStream, BufferColor bufferColor, BufferCallback callback, long sequence) throws IOException;
+  public boolean read(OutputStream outputStream, BufferColor bufferColor, BufferCallback callback, long sequence)
+          throws IOException;
   
 
-  public boolean readWait(OutputStream outputStream, BufferColor bufferColor) throws IOException, InterruptedException;
+  public boolean readWait(OutputStream outputStream, BufferColor bufferColor)
+          throws IOException, InterruptedException;
 
-  public boolean readWait(TimeUnit unit, long time, OutputStream outputStream, BufferColor bufferColor) throws IOException, InterruptedException;
+  public boolean readWait(TimeUnit unit, long time, OutputStream outputStream, BufferColor bufferColor)
+          throws IOException, InterruptedException;
 
-  public boolean readWait(OutputStream outputStream, BufferColor bufferColor, BufferCallback callback) throws IOException, InterruptedException;
+  public boolean readWait(OutputStream outputStream, BufferColor bufferColor, BufferCallback callback)
+          throws IOException, InterruptedException;
 
-  public boolean readWait(TimeUnit unit, long time, OutputStream outputStream, BufferColor bufferColor, BufferCallback callback) throws IOException, InterruptedException;
+  public boolean readWait(TimeUnit unit, long time, OutputStream outputStream, BufferColor bufferColor,
+                          BufferCallback callback) throws IOException, InterruptedException;
 
   public long getHeadSequence();
   

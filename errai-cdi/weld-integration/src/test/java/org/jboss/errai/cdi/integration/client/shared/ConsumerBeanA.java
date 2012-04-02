@@ -28,6 +28,7 @@ import javax.inject.Inject;
  */
 @ApplicationScoped
 public class ConsumerBeanA {
+  @Inject Baz baz;
   @Inject Foo foo;
   @Inject ProducerBeanA producerBeanA;
 
@@ -45,6 +46,10 @@ public class ConsumerBeanA {
 
   public Foo getFoo() {
     return foo;
+  }
+
+  public Baz getBaz() {
+    return baz;
   }
 
   public ProducerBeanA getProducerBeanA() {

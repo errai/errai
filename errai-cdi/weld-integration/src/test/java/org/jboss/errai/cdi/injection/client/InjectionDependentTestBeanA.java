@@ -10,6 +10,10 @@ import javax.inject.Inject;
 public class InjectionDependentTestBeanA {
   private InjectionDependentTestBeanB beanB;
 
+  // must be proxyable.
+  public InjectionDependentTestBeanA() {
+  }
+
   @Inject
   public InjectionDependentTestBeanA(InjectionDependentTestBeanB beanB) {
     this.beanB = beanB;

@@ -53,7 +53,7 @@ public class BlockBuilderImpl<T> implements BlockBuilder<T> {
 
   @Override
   public void insertBefore(final InnerClass innerClass) {
-    this.blockStatement.insertBefore(new Statement() {
+    insertBefore(new Statement() {
 
       @Override
       public String generate(Context context) {
@@ -88,6 +88,16 @@ public class BlockBuilderImpl<T> implements BlockBuilder<T> {
       }
     });
     return this;
+  }
+
+  @Override
+  public BlockBuilder<T> _(Statement stmt) {
+    return append(stmt);
+  }
+
+  @Override
+  public BlockBuilder<T> _(InnerClass innerClass) {
+    return append(innerClass);
   }
 
   @Override

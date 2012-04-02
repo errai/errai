@@ -43,9 +43,10 @@ public interface IOCBeanDef<T> {
   T getInstance(CreationalContext context);
 
   /**
-   * Returns a new instance of the bean.
+   * Returns a new instance of the bean. Calling this method overrides the underlying scope and instantiates a new
+   * instance of the bean.
    *
-   * @return
+   * @return a new isntance of the bean.
    */
   public T newInstance();
 

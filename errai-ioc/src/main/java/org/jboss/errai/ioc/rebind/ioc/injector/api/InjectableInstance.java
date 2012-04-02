@@ -17,8 +17,8 @@
 package org.jboss.errai.ioc.rebind.ioc.injector.api;
 
 
-import static org.jboss.errai.codegen.util.GenUtil.getPrivateFieldInjectorName;
-import static org.jboss.errai.codegen.util.GenUtil.getPrivateMethodName;
+import static org.jboss.errai.codegen.util.PrivateAccessUtil.getPrivateFieldInjectorName;
+import static org.jboss.errai.codegen.util.PrivateAccessUtil.getPrivateMethodName;
 
 import java.lang.annotation.Annotation;
 
@@ -42,34 +42,62 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
     super(annotation, taskType, constructor, method, field, type, parm, injector, injectionContext);
   }
 
-  public static <T extends Annotation> InjectableInstance<T> getTypeInjectedInstance(T annotation,
-                                                                                     MetaClass type,
-                                                                                     Injector injector,
-                                                                                     InjectionContext context) {
+  public static <T extends Annotation> InjectableInstance<T> getInjectedInstance(T annotation,
+                                                                                 MetaClass type,
+                                                                                 Injector injector,
+                                                                                 InjectionContext context) {
     return new InjectableInstance<T>(annotation, TaskType.Type, null, null, null, type,
             null, injector, context);
 
   }
 
-  public static <T extends Annotation> InjectableInstance<T> getMethodInjectedInstance(T annotation,
-                                                                                       MetaMethod method,
+  public static <T extends Annotation> InjectableInstance<T> getMethodInjectedInstance(MetaMethod method,
                                                                                        Injector injector,
                                                                                        InjectionContext context) {
 
-    return new InjectableInstance<T>(annotation, !method.isPublic() ? TaskType.PrivateMethod : TaskType.Method, null,
+    //noinspection unchecked
+    return new InjectableInstance(
+            context.getMatchingAnnotationForElementType(WiringElementType.InjectionPoint, method),
+            !method.isPublic() ? TaskType.PrivateMethod : TaskType.Method, null,
             method, null,
             method.getDeclaringClass(),
             null, injector, context);
 
   }
 
+  public static <T extends Annotation> InjectableInstance<T> getParameterInjectedInstance(MetaParameter parm,
+                                                                                          Injector injector,
+                                                                                          InjectionContext context) {
 
-  public static <T extends Annotation> InjectableInstance<T> getFieldInjectedInstance(T annotation,
-                                                                                      MetaField field,
+    if (parm.getDeclaringMember() instanceof MetaConstructor) {
+
+      //noinspection unchecked
+      return new InjectableInstance(context.getMatchingAnnotationForElementType(WiringElementType.InjectionPoint,
+              parm.getDeclaringMember()),
+              TaskType.Parameter, ((MetaConstructor) parm.getDeclaringMember()),
+              null, null, parm.getDeclaringMember().getDeclaringClass(), parm, injector, context);
+    }
+    else {
+      //noinspection unchecked
+      return new InjectableInstance(context.getMatchingAnnotationForElementType(WiringElementType.InjectionPoint,
+              parm.getDeclaringMember()),
+              TaskType.Parameter, null,
+              ((MetaMethod) parm.getDeclaringMember()), null, parm.getDeclaringMember().getDeclaringClass(),
+              parm, injector, context);
+    }
+
+
+  }
+
+
+  public static <T extends Annotation> InjectableInstance<T> getFieldInjectedInstance(MetaField field,
                                                                                       Injector injector,
                                                                                       InjectionContext context) {
 
-    return new InjectableInstance<T>(annotation, !field.isPublic() ? TaskType.PrivateField : TaskType.Field, null,
+    //noinspection unchecked
+    return new InjectableInstance(context.getMatchingAnnotationForElementType(WiringElementType.InjectionPoint,
+            field),
+            !field.isPublic() ? TaskType.PrivateField : TaskType.Field, null,
             null, field,
             field.getDeclaringClass(),
             null, injector, context);
@@ -90,9 +118,14 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
     Statement[] stmt;
     switch (taskType) {
       case PrivateField:
-        return Stmt.invokeStatic(injectionContext.getProcessingContext().getBootstrapClass(),
-                getPrivateFieldInjectorName(field), Refs.get(targetInjector.getVarName()));
-
+        if (field.isStatic()) {
+          return Stmt.invokeStatic(injectionContext.getProcessingContext().getBootstrapClass(),
+                  getPrivateFieldInjectorName(field));
+        }
+        else {
+          return Stmt.invokeStatic(injectionContext.getProcessingContext().getBootstrapClass(),
+                  getPrivateFieldInjectorName(field), Refs.get(targetInjector.getVarName()));
+        }
       case Field:
         return Stmt.loadVariable(targetInjector.getVarName()).loadField(field.getName());
 
@@ -103,9 +136,16 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
 
         MetaParameter[] methParms = method.getParameters();
         Statement[] resolveParmsDeps = InjectUtil.resolveInjectionDependencies(methParms, injectionContext, method);
-        stmt = new Statement[methParms.length + 1];
-        stmt[0] = Refs.get(targetInjector.getVarName());
-        System.arraycopy(resolveParmsDeps, 0, stmt, 1, methParms.length);
+
+        if (method.isStatic()) {
+          stmt = new Statement[methParms.length];
+          System.arraycopy(resolveParmsDeps, 0, stmt, 0, methParms.length);
+        }
+        else {
+          stmt = new Statement[methParms.length + 1];
+          stmt[0] = Refs.get(targetInjector.getVarName());
+          System.arraycopy(resolveParmsDeps, 0, stmt, 1, methParms.length);
+        }
 
         //todo: this
         return Stmt.invokeStatic(injectionContext.getProcessingContext().getBootstrapClass(),

@@ -19,7 +19,10 @@ package org.jboss.errai.codegen.meta.impl.gwt;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.jboss.errai.codegen.DefModifiers;
 import org.jboss.errai.codegen.Parameter;
@@ -70,15 +73,6 @@ public class GWTClass extends AbstractMetaClass<JType> {
   }
 
   public static MetaClass newInstance(TypeOracle oracle, JType type) {
-//    if (type instanceof JRealClassType) {
-//      try {
-//        return MetaClassFactory.get(type.getQualifiedBinaryName());
-//      }
-//      catch (Throwable t) {
-//        // fall-through;
-//      }
-//    }
-
     return newUncachedInstance(oracle, type);
   }
 
@@ -92,28 +86,12 @@ public class GWTClass extends AbstractMetaClass<JType> {
   }
 
   public static MetaClass newUncachedInstance(TypeOracle oracle, JType type) {
-//    if (type instanceof JRealClassType) {
-//      try {
-//        return JavaReflectionClass.newUncachedInstance(MetaClassFactory.loadClass(type.getQualifiedBinaryName()));
-//      }
-//      catch (Throwable t) {
-//        // fall-through;
-//      }
-//    }
+
 
     return new GWTClass(oracle, type, false);
   }
 
   public static MetaClass newUncachedInstance(TypeOracle oracle, JType type, boolean erased) {
-//    if (type instanceof JRealClassType) {
-//      try {
-//        return MetaClassFactory.get(type.getQualifiedBinaryName(), erased);
-//      }
-//      catch (Throwable t) {
-//        // fall-through
-//      }
-//    }
-
     return new GWTClass(oracle, type, erased);
   }
 
@@ -168,7 +146,6 @@ public class GWTClass extends AbstractMetaClass<JType> {
       return Class.forName(name, false, Thread.currentThread().getContextClassLoader());
     }
   }
-
 
   @Override
   public String getName() {
@@ -227,14 +204,13 @@ public class GWTClass extends AbstractMetaClass<JType> {
 
   @Override
   public MetaMethod[] getMethods() {
-    List<MetaMethod> meths = new ArrayList<MetaMethod>();
+    Set<MetaMethod> meths = new LinkedHashSet<MetaMethod>();
     meths.addAll(getSpecialTypeMethods());
 
     JClassType type = getEnclosedMetaObject().isClassOrInterface();
     if (type == null) {
       return null;
     }
-
 
     do {
       for (JMethod jMethod : type.getMethods()) {
@@ -383,20 +359,15 @@ public class GWTClass extends AbstractMetaClass<JType> {
   @Override
   public Annotation[] getAnnotations() {
     if (annotationsCache == null) {
-//      try {
-//        Class<?> cls = Class.forName(getEnclosedMetaObject().getQualifiedSourceName(), false,
-//                Thread.currentThread().getContextClassLoader());
+      JClassType classOrInterface = getEnclosedMetaObject().isClassOrInterface();
 
+      if (classOrInterface != null) {
+        annotationsCache = classOrInterface.getAnnotations();
+      }
 
-      annotationsCache = getEnclosedMetaObject().isClassOrInterface().getAnnotations();
       if (annotationsCache == null) {
         annotationsCache = new Annotation[0];
       }
-//
-//      }
-//      catch (ClassNotFoundException e) {
-//        e.printStackTrace();
-//      }
     }
 
     return annotationsCache;

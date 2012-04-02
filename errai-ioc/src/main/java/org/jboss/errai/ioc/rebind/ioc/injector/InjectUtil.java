@@ -30,7 +30,7 @@ import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
-import org.jboss.errai.codegen.util.GenUtil;
+import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.client.container.DestructionCallback;
@@ -98,8 +98,10 @@ public class InjectUtil {
       return new ConstructionStrategy() {
         @Override
         public void generateConstructor(ConstructionStatusCallback callback) {
-          Statement[] parameterStatements = resolveInjectionDependencies(constructor.getParameters(), ctx, constructor);
-          if (injector.isSingleton() && injector.isInjected()) return;
+          Statement[] parameterStatements
+                  = resolveInjectionDependencies(constructor.getParameters(), ctx, constructor);
+
+          if (injector.isSingleton() && injector.isCreated()) return;
 
           IOCProcessingContext processingContext = ctx.getProcessingContext();
 
@@ -111,7 +113,7 @@ public class InjectUtil {
                                   .newObject(type)
                                   .withParameters(parameterStatements))
           );
-          callback.callback(true);
+          callback.beanConstructed();
 
           handleInjectionTasks(ctx, injectionTasks);
 
@@ -130,7 +132,7 @@ public class InjectUtil {
       return new ConstructionStrategy() {
         @Override
         public void generateConstructor(ConstructionStatusCallback callback) {
-          if (injector.isSingleton() && injector.isInjected()) return;
+          if (injector.isSingleton() && injector.isCreated()) return;
 
           IOCProcessingContext processingContext = ctx.getProcessingContext();
 
@@ -141,7 +143,7 @@ public class InjectUtil {
                           .initializeWith(Stmt.newObject(type))
 
           );
-          callback.callback(true);
+          callback.beanConstructed();
 
           handleInjectionTasks(ctx, injectionTasks);
 
@@ -254,7 +256,7 @@ public class InjectUtil {
 
     if (!meth.isPublic()) {
       body.append(Stmt.invokeStatic(ctx.getProcessingContext().getBootstrapClass(),
-              GenUtil.getPrivateMethodName(meth), Refs.get("obj")));
+              PrivateAccessUtil.getPrivateMethodName(meth), Refs.get("obj")));
     }
     else {
       body.append(Stmt.loadVariable("obj").invoke(meth.getName()));
@@ -286,7 +288,6 @@ public class InjectUtil {
             }
             else {
               InjectionTask task = new InjectionTask(injector, meth);
-              task.setField(field);
               accumulator.add(task);
             }
 
@@ -334,7 +335,6 @@ public class InjectUtil {
                 for (MetaParameter parameter : meth.getParameters()) {
                   if (parameter.isAnnotationPresent(a)) {
                     DecoratorTask task = new DecoratorTask(injector, parameter, ctx.getDecorator(a));
-                    task.setMethod(meth);
                     accumulator.add(task);
                   }
                 }
@@ -404,24 +404,110 @@ public class InjectUtil {
     return newArray;
   }
 
-  public static Injector getInjectorOrProxy(InjectionContext ctx,
-                                            MetaClass clazz, QualifyingMetadata qualifyingMetadata) {
+  public static Statement getInjectorOrProxy(InjectionContext ctx,
+                                             InjectableInstance injectableInstance,
+                                             MetaClass clazz,
+                                             QualifyingMetadata qualifyingMetadata) {
 
-    Injector inj = null;
+    return getInjectorOrProxy(ctx, injectableInstance, clazz, qualifyingMetadata, false);
+  }
+
+
+  public static Statement getInjectorOrProxy(InjectionContext ctx,
+                                             InjectableInstance injectableInstance,
+                                             MetaClass clazz,
+                                             QualifyingMetadata qualifyingMetadata,
+                                             boolean alwaysProxyDependent) {
+
     if (ctx.isInjectableQualified(clazz, qualifyingMetadata)) {
-      inj = ctx.getQualifiedInjector(clazz, qualifyingMetadata);
-    }
+      Injector inj = ctx.getQualifiedInjector(clazz, qualifyingMetadata);
 
-    if (inj != null) {
-      return inj;
+      /**
+       * Special handling for cycles. If two beans directly depend on each other. We shimmy in a call to the
+       * binding reference to check the context for the instance to avoid a hanging duplicate reference.
+       */
+      if (ctx.cycles(injectableInstance.getEnclosingType(), clazz) && inj instanceof TypeInjector) {
+        TypeInjector typeInjector = (TypeInjector) inj;
+
+        return Stmt.loadVariable("context").invoke("getInstanceOrNew",
+                Refs.get(typeInjector.getCreationalCallbackVarName()),
+                inj.getInjectedType(), inj.getQualifyingMetadata().getQualifiers());
+      }
+
+      return ctx.getQualifiedInjector(clazz, qualifyingMetadata).getBeanInstance(injectableInstance);
     }
     else {
+      //todo: refactor the InjectionContext to provide a cleaner API for interface delegates
 
-      ProxyInjector proxyInjector = new ProxyInjector(ctx.getProcessingContext(), clazz, qualifyingMetadata);
-      ctx.addProxiedInjector(proxyInjector);
-      return proxyInjector;
+      // try to inject it
+      try {
+        if (ctx.isInjectorRegistered(clazz, qualifyingMetadata)) {
+          Injector inj = ctx.getQualifiedInjector(clazz, qualifyingMetadata);
+
+          if (inj.isProvider()) {
+            /**
+             * Inform the caller that we are in a proxy and that the operation they're doing must
+             * necesarily be done within the ProxyResolver resolve operation since this provider operation
+             * relies on a bean which is not yet available.
+             */
+            ctx.recordCycle(inj.getEnclosingType(), injectableInstance.getEnclosingType());
+
+            ProxyInjector proxyInject = getOrCreateProxy(ctx, inj.getEnclosingType(), qualifyingMetadata);
+
+            boolean pushedProxy = false;
+
+            try {
+              if (injectableInstance.getTaskType() == TaskType.Parameter && injectableInstance.getConstructor() != null) {
+                // eek! a producer element is produced by this bean and injected into it's own constructor!
+
+                ProxyInjector producedElementProxy = getOrCreateProxy(ctx, inj.getInjectedType(), qualifyingMetadata);
+
+                proxyInject.getBeanInstance(injectableInstance);
+                proxyInject.addProxyCloseStatement(inj.getBeanInstance(injectableInstance));
+
+                return producedElementProxy.getBeanInstance(injectableInstance);
+              }
+              else {
+                ctx.getProcessingContext().pushBlockBuilder(proxyInject.getProxyResolverBlockBuilder());
+                pushedProxy = true;
+                ctx.markOpenProxy();
+                return proxyInject.getBeanInstance(injectableInstance);
+              }
+            }
+            finally {
+              if (!ctx.isProxyOpen() && pushedProxy) {
+                ctx.getProcessingContext().popBlockBuilder();
+              }
+            }
+
+          }
+          else if (!alwaysProxyDependent && inj.isDependent()) {
+            return inj.getBeanInstance(injectableInstance);
+          }
+        }
+      }
+      catch (InjectionFailure e) {
+        e.printStackTrace();
+      }
+
+      ctx.recordCycle(clazz, injectableInstance.getEnclosingType());
+      return getOrCreateProxy(ctx, clazz, qualifyingMetadata).getBeanInstance(injectableInstance);
     }
   }
+
+  private static ProxyInjector getOrCreateProxy(InjectionContext ctx, MetaClass clazz, QualifyingMetadata qualifyingMetadata) {
+    final ProxyInjector proxyInjector;
+    if (ctx.isProxiedInjectorRegistered(clazz, qualifyingMetadata)) {
+      proxyInjector = (ProxyInjector)
+              ctx.getProxiedInjector(clazz, qualifyingMetadata);
+    }
+    else {
+      proxyInjector = new ProxyInjector(ctx.getProcessingContext(), clazz, qualifyingMetadata);
+      ctx.addProxiedInjector(proxyInjector);
+    }
+    return proxyInjector;
+  }
+
 
   public static Statement[] resolveInjectionDependencies(MetaParameter[] parms, InjectionContext ctx,
                                                          MetaMethod method) {
@@ -429,10 +515,17 @@ public class InjectUtil {
     MetaClass[] parmTypes = parametersToClassTypeArray(parms);
     Statement[] parmValues = new Statement[parmTypes.length];
 
+
     for (int i = 0; i < parmTypes.length; i++) {
-      Injector injector;
+      Statement stmt;
       try {
-        injector = getInjectorOrProxy(ctx, parmTypes[i],
+        InjectableInstance injectableInstance = InjectableInstance.getParameterInjectedInstance(
+                parms[i],
+                null,
+                ctx);
+
+
+        stmt = getInjectorOrProxy(ctx, injectableInstance, parmTypes[i],
                 ctx.getProcessingContext().getQualifyingMetadataFactory().createFrom(parms[i].getAnnotations()));
       }
       catch (InjectionFailure e) {
@@ -441,10 +534,7 @@ public class InjectUtil {
         throw e;
       }
 
-      @SuppressWarnings({"unchecked"}) InjectableInstance injectableInstance
-              = new InjectableInstance(null, TaskType.Method, null, method, null, null, parms[i], injector, ctx);
-
-      parmValues[i] = injector.getBeanInstance(ctx, injectableInstance);
+      parmValues[i] = stmt;
     }
 
     return parmValues;
@@ -457,17 +547,22 @@ public class InjectUtil {
 
     for (int i = 0; i < parmTypes.length; i++
             ) {
-      Injector injector;
+      Statement stmt;
       try {
-        injector = getInjectorOrProxy(ctx, parmTypes[i],
-                ctx.getProcessingContext().getQualifyingMetadataFactory().createFrom(parms[i].getAnnotations()));
+        InjectableInstance injectableInstance
+                = InjectableInstance.getParameterInjectedInstance(parms[i], null, ctx);
+
+        stmt = getInjectorOrProxy(ctx, injectableInstance, parmTypes[i],
+                ctx.getProcessingContext().getQualifyingMetadataFactory().createFrom(parms[i].getAnnotations()), true);
+        ctx.closeProxyIfOpen();
+
       }
       catch (UnproxyableClassException e) {
         String err = "your object graph has cyclical dependencies and the cycle could not be proxied. use of the @Dependent scope and @New qualifier may not " +
                 "produce properly initalized objects for: " + parmTypes[i].getFullyQualifiedName() + "\n" +
                 "\t Offending node: " + constructor.getDeclaringClass().getFullyQualifiedName() + "\n" +
                 "\t Note          : this issue can be resolved by making "
-                + parmTypes[i].getFullyQualifiedName() + " proxyable. Introduce a default no-arg constructor and make sure the class is non-final.";
+                + e.getUnproxyableClass() + " proxyable. Introduce a default no-arg constructor and make sure the class is non-final.";
 
         throw UnsatisfiedDependenciesException.createWithSingleParameterFailure(parms[i], constructor.getDeclaringClass(),
                 parms[i].getType(), err);
@@ -478,10 +573,7 @@ public class InjectUtil {
         throw e;
       }
 
-      @SuppressWarnings({"unchecked"}) InjectableInstance injectableInstance
-              = new InjectableInstance(null, TaskType.Parameter, constructor, null, null, null, parms[i], injector, ctx);
-
-      parmValues[i] = injector.getBeanInstance(ctx, injectableInstance);
+      parmValues[i] = stmt;
     }
 
     return parmValues;

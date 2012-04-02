@@ -83,4 +83,9 @@ public class GWTParameter extends MetaParameter {
   public MetaClassMember getDeclaringMember() {
     return declaredBy;
   }
+
+  @Override
+  public String toString() {
+    return getType().getFullyQualifiedName();
+  }
 }

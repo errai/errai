@@ -121,4 +121,25 @@ private Caller&lt;MyRemoteService&gt; remoteService;</programlisting>
         .
       </para>
     </section>
+    <section id="sid-5931313_RemoteProcedureCalls%28RPC%29-SessionandrequestobjectsinRPCendpoints">
+      
+      <title>Session and request objects in RPC endpoints</title>
+      <para>
+        Before invoking an endpoint method, Errai sets up a
+        <code>RpcContext</code>
+        that provides access to message resources otherwise not visible to RPC endpoints.
+      </para>
+      <informalexample>
+        <programlisting language="java">@Service
+public class MyRemoteServiceImpl implements MyRemoteService {
+
+  public boolean isEveryoneHappy() {
+    HttpSession session = RpcContext.getHttpSession();
+    ServletRequest request = RpcContext.getServletRequest();
+    ...
+    return true;
+  }
+}</programlisting>
+      </informalexample>
+    </section>
   </chapter>

@@ -32,6 +32,12 @@ public class ProducerDependentTestBean {
   @Inject @D
   Float dFloat;
 
+  @Inject
+  StaticallyProducedBean staticallyProducedBean;
+
+  @Inject
+  StaticallyProducedBeanB staticallyProducedBeanB;
+
   String testField;
   
   public Integer getIntegerA() {
@@ -64,5 +70,13 @@ public class ProducerDependentTestBean {
 
   public void setTestField(String testField) {
     this.testField = testField;
+  }
+
+  public StaticallyProducedBean getStaticallyProducedBean() {
+    return staticallyProducedBean;
+  }
+
+  public StaticallyProducedBeanB getStaticallyProducedBeanB() {
+    return staticallyProducedBeanB;
   }
 }

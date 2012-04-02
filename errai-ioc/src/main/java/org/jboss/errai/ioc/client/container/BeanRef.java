@@ -66,9 +66,8 @@ public final class BeanRef {
 
       AnnotationHashWapper that = (AnnotationHashWapper) o;
 
-      if (type != null ? !type.equals(that.type) : that.type != null) return false;
+      return !(type != null ? !type.equals(that.type) : that.type != null);
 
-      return true;
     }
 
     @Override
@@ -94,10 +93,8 @@ public final class BeanRef {
 
     BeanRef beanRef = (BeanRef) o;
 
-    if (annotations != null ? !annotations.equals(beanRef.annotations) : beanRef.annotations != null) return false;
-    if (clazz != null ? !clazz.equals(beanRef.clazz) : beanRef.clazz != null) return false;
-
-    return true;
+    return !(annotations != null ? !annotations.equals(beanRef.annotations) : beanRef.annotations != null)
+            && !(clazz != null ? !clazz.equals(beanRef.clazz) : beanRef.clazz != null);
   }
 
   @Override

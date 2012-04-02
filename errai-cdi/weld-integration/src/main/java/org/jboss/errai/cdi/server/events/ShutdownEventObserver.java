@@ -17,6 +17,7 @@ package org.jboss.errai.cdi.server.events;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -40,19 +41,15 @@ import org.slf4j.LoggerFactory;
  *
  * @author Heiko Braun <hbraun@redhat.com>
  */
-@ApplicationScoped
 public class ShutdownEventObserver implements ObserverMethod {
-
   private static final Logger log = LoggerFactory.getLogger(ShutdownEventObserver.class);
 
   private TypeRegistry managedTypes;
   private MessageBus bus;
-  private String uuid;
 
-  public ShutdownEventObserver(TypeRegistry managedTypes, MessageBus bus, String uuid) {
+  public ShutdownEventObserver(TypeRegistry managedTypes, MessageBus bus) {
     this.managedTypes = managedTypes;
     this.bus = bus;
-    this.uuid = uuid;
   }
 
   public Class<?> getBeanClass() {
@@ -63,10 +60,8 @@ public class ShutdownEventObserver implements ObserverMethod {
     return BeforeShutdown.class;
   }
 
-
   public Set<Annotation> getObservedQualifiers() {
-    Set<Annotation> qualifiers = new HashSet<Annotation>();
-    return qualifiers;
+    return Collections.emptySet();
   }
 
   public Reception getReception() {
@@ -78,7 +73,6 @@ public class ShutdownEventObserver implements ObserverMethod {
   }
 
   public void notify(Object o) {
-    log.debug("stopped errai cdi context: " + uuid);
 
     // unsubscribe bean endpoints        
     for (AnnotatedType<?> svc : managedTypes.getServiceEndpoints()) {

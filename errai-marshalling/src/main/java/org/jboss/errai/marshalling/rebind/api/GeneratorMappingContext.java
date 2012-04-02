@@ -22,10 +22,9 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
-import org.jboss.errai.codegen.util.GenUtil;
+import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
-import org.jboss.errai.marshalling.rebind.DefinitionsFactoryImpl;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactorySingleton;
 import org.jboss.errai.marshalling.server.ServerMappingContext;
 
@@ -112,10 +111,10 @@ public class GeneratorMappingContext implements ServerMappingContext {
 
   private static String getPrivateMemberName(MetaClassMember member) {
     if (member instanceof MetaField) {
-      return GenUtil.getPrivateFieldInjectorName((MetaField) member);
+      return PrivateAccessUtil.getPrivateFieldInjectorName((MetaField) member);
     }
     else {
-      return GenUtil.getPrivateMethodName((MetaMethod) member);
+      return PrivateAccessUtil.getPrivateMethodName((MetaMethod) member);
     }
   }
 

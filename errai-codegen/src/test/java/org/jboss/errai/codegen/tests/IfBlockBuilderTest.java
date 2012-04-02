@@ -83,10 +83,10 @@ public class IfBlockBuilderTest extends AbstractCodegenTest implements IfBlockBu
         .loadVariable("str")
         .invoke("endsWith", "abc")
         .if_()
-          .append(Stmt.declareVariable(Integer.class).named("n").initializeWith(0))
+          ._(Stmt.declareVariable(Integer.class).named("n").initializeWith(0))
         .finish()
         .else_()
-          .append(Stmt.declareVariable(Integer.class).named("n").initializeWith(1))
+          ._(Stmt.declareVariable(Integer.class).named("n").initializeWith(1))
         .finish().toJavaString();
 
     assertEquals("Failed to generate empty if block using no rhs", IF_ELSE_BLOCK_NO_RHS, s);
@@ -99,10 +99,10 @@ public class IfBlockBuilderTest extends AbstractCodegenTest implements IfBlockBu
         .declareVariable("m", Integer.class)
         .loadVariable("n")
         .if_(BooleanOperator.GreaterThan, Variable.get("m"))
-          .append(Stmt.declareVariable(Integer.class).named("n").initializeWith(0))
+          ._(Stmt.declareVariable(Integer.class).named("n").initializeWith(0))
         .finish()
         .else_()
-          .append(Stmt.declareVariable(Integer.class).named("n").initializeWith(1))
+          ._(Stmt.declareVariable(Integer.class).named("n").initializeWith(1))
         .finish().toJavaString();
 
     assertEquals("Failed to generate empty if block using a rhs", IF_ELSE_BLOCK_RHS, s);
@@ -116,13 +116,13 @@ public class IfBlockBuilderTest extends AbstractCodegenTest implements IfBlockBu
         .loadVariable("s")
         .invoke("endsWith", "abc")
         .if_()
-          .append(StatementBuilder.create(c).loadVariable("n").assignValue(0))
+          ._(StatementBuilder.create(c).loadVariable("n").assignValue(0))
         .finish()
         .else_()
-          .append(StatementBuilder.create(c).loadVariable("s")
+          ._(StatementBuilder.create(c).loadVariable("s")
               .invoke("startsWith", "def")
               .if_()
-                .append(StatementBuilder.create(c).loadVariable("n").assignValue(1))
+                ._(StatementBuilder.create(c).loadVariable("n").assignValue(1))
               .finish()
         )
         .finish().toJavaString();

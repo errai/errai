@@ -18,6 +18,7 @@ package org.jboss.errai.ioc.rebind.ioc.builtin;
 
 import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
+import static org.jboss.errai.ioc.util.MessageCallbackWrapper.wrapMessageCallbackInAsync;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
@@ -41,6 +42,7 @@ import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
+import org.jboss.errai.ioc.util.MessageCallbackWrapper;
 
 @SuppressWarnings("UnusedDeclaration")
 @CodeDecorator
@@ -50,24 +52,24 @@ public class ServiceIOCExtension extends IOCDecoratorExtension<Service> {
   }
 
   @Override
-  public List<? extends Statement> generateDecorator(InjectableInstance<Service> decContext) {
-    final InjectionContext ctx = decContext.getInjectionContext();
+  public List<? extends Statement> generateDecorator(InjectableInstance<Service> injectableInstance) {
+    final InjectionContext ctx = injectableInstance.getInjectionContext();
 
     /**
      * Ensure the the container generates a stub to internally expose the field if it's private.
      */
-    decContext.ensureMemberExposed();
+    injectableInstance.ensureMemberExposed();
 
-    final Statement busHandle = ctx.getInjector(MessageBus.class).getBeanInstance(ctx, decContext);
+    final Statement busHandle = ctx.getInjector(MessageBus.class).getBeanInstance(injectableInstance);
 
     /**
      * Figure out the service name;
      */
-    final String svcName = decContext.getAnnotation().value().equals("")
-            ? decContext.getMemberName() : decContext.getAnnotation().value();
+    final String svcName = injectableInstance.getAnnotation().value().equals("")
+            ? injectableInstance.getMemberName() : injectableInstance.getAnnotation().value();
 
     boolean local = false;
-    for (Annotation a : decContext.getQualifiers()) {
+    for (Annotation a : injectableInstance.getQualifiers()) {
       if (Local.class.equals(a.annotationType())) {
         local = true;
       }
@@ -79,27 +81,27 @@ public class ServiceIOCExtension extends IOCDecoratorExtension<Service> {
 
     if (local) {
       subscribeStatement = Stmt.nestedCall(busHandle)
-              .invoke("subscribeLocal", svcName, decContext.getValueStatement());
+              .invoke("subscribeLocal", svcName, wrapMessageCallbackInAsync(injectableInstance.getValueStatement()));
     }
     else {
       subscribeStatement = Stmt.nestedCall(busHandle)
-              .invoke("subscribe", svcName, decContext.getValueStatement());
+              .invoke("subscribe", svcName, wrapMessageCallbackInAsync(injectableInstance.getValueStatement()));
     }
 
     Statement declareVar = Stmt.declareVariable(Subscription.class).asFinal().named(varName)
             .initializeWith(subscribeStatement);
 
     final MetaClass destructionCallbackType =
-            parameterizedAs(DestructionCallback.class, typeParametersOf(decContext.getEnclosingType()));
+            parameterizedAs(DestructionCallback.class, typeParametersOf(injectableInstance.getEnclosingType()));
 
     // register a destructor to unregister the service when the bean is destroyed.
     final BlockBuilder<AnonymousClassStructureBuilder> destroyMeth
             = ObjectBuilder.newInstanceOf(destructionCallbackType).extend()
-            .publicOverridesMethod("destroy", Parameter.of(decContext.getEnclosingType(), "obj", true))
+            .publicOverridesMethod("destroy", Parameter.of(injectableInstance.getEnclosingType(), "obj", true))
             .append(Stmt.loadVariable(varName).invoke("remove"));
 
     Statement descrCallback = Stmt.create().loadVariable("context").invoke("addDestructionCallback",
-            Refs.get(decContext.getInjector().getVarName()), destroyMeth.finish().finish());
+            Refs.get(injectableInstance.getInjector().getVarName()), destroyMeth.finish().finish());
 
 
     return Arrays.asList(declareVar, descrCallback);

@@ -17,6 +17,7 @@
 package org.jboss.errai.cdi.integration.client.shared;
 
 import javax.annotation.PreDestroy;
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 

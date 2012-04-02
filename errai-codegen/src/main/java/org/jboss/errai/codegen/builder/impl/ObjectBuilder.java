@@ -151,8 +151,14 @@ public class ObjectBuilder extends AbstractStatementBuilder {
           CallParameters callParameters = (parameters != null) ?
                   fromStatements(GenUtil.generateCallParameters(context, parameters)) : CallParameters.none();
 
-          if (!type.isInterface() && type.getBestMatchingConstructor(callParameters.getParameterTypes()) == null)
-            throw new UndefinedConstructorException(type, callParameters.getParameterTypes());
+          if (!type.isInterface() && type.getBestMatchingConstructor(callParameters.getParameterTypes()) == null) {
+            if (GenUtil.isPermissiveMode()) {
+               // fall-through
+            }
+            else {
+              throw new UndefinedConstructorException(type, callParameters.getParameterTypes());
+            }
+          }
 
           StringBuilder buf = new StringBuilder();
           buf.append("new ").append(LoadClassReference.getClassReference(type, context, true));
@@ -178,4 +184,6 @@ public class ObjectBuilder extends AbstractStatementBuilder {
       return null;
     }
   }
+
+
 }

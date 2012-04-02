@@ -23,19 +23,26 @@ import org.jboss.errai.common.client.api.extension.InitVotes;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public abstract class IOCClientTestCase extends GWTTestCase {
-  private  ContainerBootstrapper initializer = new ContainerBootstrapper() {
+  private ContainerBootstrapper initializer = new ContainerBootstrapper() {
 
     @Override
-    public BootstrapperInjectionContext bootstrap() {
-        return new Container().boostrapContainer();
+    public void bootstrap() {
+      try {
+        new Container().boostrapContainer();
+      }
+      catch (Throwable t) {
+        t.printStackTrace();
+        throw new RuntimeException("failed to bootstrap container", t);
+      }
     }
   };
 
   protected IOCClientTestCase() {
   }
 
-  protected BootstrapperInjectionContext bootstrapContainer() {
-    return initializer.bootstrap();
+  protected void bootstrapContainer() {
+
+    initializer.bootstrap();
   }
 
   public void setInitializer(ContainerBootstrapper initializer) {
@@ -48,12 +55,19 @@ public abstract class IOCClientTestCase extends GWTTestCase {
 
   @Override
   public void gwtSetUp() throws Exception {
-    super.gwtSetUp();
-    InitVotes.reset();
-    bootstrapContainer();
+    try {
+      super.gwtSetUp();
+      InitVotes.reset();
+      bootstrapContainer();
+    }
+    catch (Exception t) {
+      t.printStackTrace();
+      throw t;
+    }
+
   }
 
   public static interface ContainerBootstrapper {
-    public BootstrapperInjectionContext bootstrap();
+    public void bootstrap();
   }
 }

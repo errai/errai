@@ -19,11 +19,14 @@ package org.jboss.errai.ioc.rebind.ioc.extension;
 import org.jboss.errai.codegen.meta.MetaClass;
 
 import java.lang.annotation.Annotation;
+import java.util.Collection;
 
 /**
  * @author Mike Brock
  */
 public interface DependencyControl {
   public void masqueradeAs(MetaClass clazz);
-  public void addType(Class<? extends Annotation> annotation, Class clazz);
+
+  public void notifyDependency(MetaClass clazz);
+  public void notifyDependencies(Collection<MetaClass> clazzes);
 }

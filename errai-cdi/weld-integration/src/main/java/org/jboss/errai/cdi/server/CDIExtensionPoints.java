@@ -15,39 +15,6 @@
  */
 package org.jboss.errai.cdi.server;
 
-import static java.util.ResourceBundle.getBundle;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.UUID;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.AfterBeanDiscovery;
-import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AnnotatedType;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.BeforeBeanDiscovery;
-import javax.enterprise.inject.spi.Extension;
-import javax.enterprise.inject.spi.ProcessAnnotatedType;
-import javax.enterprise.inject.spi.ProcessObserverMethod;
-import javax.inject.Inject;
-import javax.inject.Qualifier;
-
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.builder.DefaultRemoteCallBuilder;
@@ -63,6 +30,7 @@ import org.jboss.errai.bus.server.SimpleDispatcher;
 import org.jboss.errai.bus.server.annotations.Command;
 import org.jboss.errai.bus.server.annotations.Remote;
 import org.jboss.errai.bus.server.annotations.Service;
+import org.jboss.errai.bus.server.io.CommandBindingsCallback;
 import org.jboss.errai.bus.server.io.ConversationalEndpointCallback;
 import org.jboss.errai.bus.server.io.RemoteServiceCallback;
 import org.jboss.errai.bus.server.io.ServiceInstanceProvider;
@@ -84,6 +52,37 @@ import org.jboss.weld.manager.BeanManagerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.BeforeBeanDiscovery;
+import javax.enterprise.inject.spi.Extension;
+import javax.enterprise.inject.spi.ProcessAnnotatedType;
+import javax.enterprise.inject.spi.ProcessObserverMethod;
+import javax.inject.Inject;
+import javax.inject.Qualifier;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.Set;
+
+import static java.util.ResourceBundle.getBundle;
+import static org.jboss.errai.cdi.server.CDIServerUtil.lookupRPCBean;
+
 /**
  * Extension points to the CDI container.
  * Makes Errai components available as CDI beans (i.e. the message bus)
@@ -93,13 +92,11 @@ import org.slf4j.LoggerFactory;
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@ApplicationScoped
+@SuppressWarnings("CdiManagedBeanInconsistencyInspection")
 public class CDIExtensionPoints implements Extension {
   private static final Logger log = LoggerFactory.getLogger(CDIExtensionPoints.class);
 
   private TypeRegistry managedTypes = null;
-  private String uuid = null;
-  private ErraiService<?> service;
 
   private Set<EventConsumer> eventConsumers = new LinkedHashSet<EventConsumer>();
   private Set<MessageSender> messageSenders = new LinkedHashSet<MessageSender>();
@@ -113,8 +110,6 @@ public class CDIExtensionPoints implements Extension {
 
   private static final String ERRAI_CDI_STANDALONE = "errai.cdi.standalone";
 
-  private boolean standalone = Boolean.getBoolean(ERRAI_CDI_STANDALONE);
-
   static {
     Set<String> veto = new HashSet<String>();
     veto.add(ServerMessageBusImpl.class.getName());
@@ -124,15 +119,15 @@ public class CDIExtensionPoints implements Extension {
     vetoClasses = Collections.unmodifiableSet(veto);
   }
 
+  @SuppressWarnings("UnusedDeclaration")
   public void beforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
-    this.uuid = UUID.randomUUID().toString();
     this.managedTypes = new TypeRegistry();
 
     try {
       log.info("starting errai cdi ...");
       ResourceBundle erraiServiceConfig = getBundle("ErraiService");
       if (erraiServiceConfig.containsKey(ERRAI_CDI_STANDALONE)) {
-        standalone = "true".equals(erraiServiceConfig.getString(ERRAI_CDI_STANDALONE).trim());
+        boolean standalone = "true".equals(erraiServiceConfig.getString(ERRAI_CDI_STANDALONE).trim());
 
         if (standalone) {
           log.info("errai cdi running in standalone mode.");
@@ -149,7 +144,6 @@ public class CDIExtensionPoints implements Extension {
                   AsyncDispatcher.class.getName() + " dispatcher implementation. Due to limitations of Weld, you must use the " +
                   SimpleDispatcher.class.getName() + " in order to use this module.");
         }
-
       }
     }
     catch (ErraiBootstrapFailure e) {
@@ -158,8 +152,6 @@ public class CDIExtensionPoints implements Extension {
     catch (Exception e) {
       throw new ErraiBootstrapFailure("Error reading from configuration. Did you include ErraiService.properties?", e);
     }
-
-    log.debug("Created errai cdi context: " + uuid);
   }
 
   /**
@@ -168,6 +160,7 @@ public class CDIExtensionPoints implements Extension {
    * @param event -
    * @param <T>   -
    */
+  @SuppressWarnings("UnusedDeclaration")
   public <T> void observeResources(@Observes ProcessAnnotatedType<T> event) {
     final AnnotatedType<T> type = event.getAnnotatedType();
 
@@ -263,9 +256,7 @@ public class CDIExtensionPoints implements Extension {
         }
         else if (Sender.class.isAssignableFrom(f.getType())) {
           ParameterizedType pType = (ParameterizedType) f.getGenericType();
-
           Class sendType = (Class) pType.getActualTypeArguments()[0];
-
           Set<Annotation> qualifiers = new HashSet<Annotation>();
 
           /**
@@ -298,6 +289,7 @@ public class CDIExtensionPoints implements Extension {
     return false;
   }
 
+  @SuppressWarnings({"UnusedDeclaration", "unchecked"})
   public void processObserverMethod(@Observes ProcessObserverMethod processObserverMethod) {
     Type t = processObserverMethod.getObserverMethod().getObservedType();
     Class type = null;
@@ -307,8 +299,8 @@ public class CDIExtensionPoints implements Extension {
     }
 
     if (type != null && isExposedEntityType(type)) {
-      Annotation[] methodQualifiers = (Annotation[]) processObserverMethod.getObserverMethod().getObservedQualifiers()
-              .toArray(new Annotation[0]);
+      Set<Annotation> annotations = processObserverMethod.getObserverMethod().getObservedQualifiers();
+      Annotation[] methodQualifiers = annotations.toArray(new Annotation[annotations.size()]);
       for (Annotation qualifier : methodQualifiers) {
         eventQualifiers.put(qualifier.annotationType().getName(), qualifier);
       }
@@ -317,9 +309,10 @@ public class CDIExtensionPoints implements Extension {
     }
   }
 
+  @SuppressWarnings({"UnusedDeclaration", "CdiInjectionPointsInspection"})
   public void afterBeanDiscovery(@Observes AfterBeanDiscovery abd, BeanManager bm) {
     // Errai Service wrapper
-    this.service = CDIServerUtil.lookupErraiService();
+    ErraiService<?> service = CDIServerUtil.lookupErraiService();
 
     final MessageBus bus = service.getBus();
 
@@ -327,7 +320,7 @@ public class CDIExtensionPoints implements Extension {
       return;
     }
 
-    abd.addBean(new ErraiServiceBean(bm, this.service));
+    abd.addBean(new ErraiServiceBean(bm, service));
     // event dispatcher
     EventDispatcher eventDispatcher = new EventDispatcher(bm, observableEvents, eventQualifiers);
 
@@ -349,13 +342,13 @@ public class CDIExtensionPoints implements Extension {
     }
 
     // Errai bus injection
-    abd.addBean(new MessageBusBean(bm, bus));
+    abd.addBean(new MessageBusBean(bus));
 
     // Support to inject the request dispatcher.
     abd.addBean(new RequestDispatcherMetaData(bm, service.getDispatcher()));
 
     // Register observers
-    abd.addObserverMethod(new ShutdownEventObserver(managedTypes, bus, uuid));
+    abd.addObserverMethod(new ShutdownEventObserver(managedTypes, bus));
 
     // subscribe service and rpc endpoints
     subscribeServices(bm, bus);
@@ -408,14 +401,15 @@ public class CDIExtensionPoints implements Extension {
 
       final String subjectName = CDIServerUtil.resolveServiceName(type.getJavaClass());
 
-      bus.subscribe(subjectName, new MessageCallback() {
-        @Override
-        public void callback(final Message message) {
-          MessageCallback callback = (MessageCallback) CDIServerUtil.lookupBean(beanManager,
-                  type.getJavaClass());
-          callback.callback(message);
-        }
-      });
+      final MessageCallback callback = (MessageCallback) CDIServerUtil.lookupBean(beanManager,
+              type.getJavaClass());
+
+      if (commandPoints.isEmpty()) {
+        bus.subscribe(subjectName, callback);
+      }
+      else {
+        bus.subscribeLocal(subjectName, new CommandBindingsCallback(commandPoints, callback));
+      }
     }
 
     for (final Class<?> rpcIntf : managedTypes.getRemoteInterfaces()) {
@@ -430,6 +424,7 @@ public class CDIExtensionPoints implements Extension {
     for (final Method method : remoteIface.getDeclaredMethods()) {
       if (RebindUtils.isMethodInInterface(remoteIface, method)) {
         epts.put(RebindUtils.createCallSignature(method), new ConversationalEndpointCallback(new ServiceInstanceProvider() {
+          @SuppressWarnings("unchecked")
           @Override
           public Object get(Message message) {
             if (message.hasPart(CDIProtocol.Qualifiers)) {
@@ -438,10 +433,10 @@ public class CDIExtensionPoints implements Extension {
               for (int i = 0; i < quals.size(); i++) {
                 qualAnnos[i] = beanQualifiers.get(quals.get(i));
               }
-              return CDIServerUtil.lookupRPCBean(beanManager, remoteIface, qualAnnos);
+              return lookupRPCBean(beanManager, remoteIface, qualAnnos);
             }
             else {
-              return CDIServerUtil.lookupRPCBean(beanManager, remoteIface, null);
+              return lookupRPCBean(beanManager, remoteIface, null);
             }
           }
 
@@ -464,10 +459,6 @@ public class CDIExtensionPoints implements Extension {
         throw new RuntimeException("There is not yet an available Errai RPC implementation for the server-side environment.");
       }
     }));
-  }
-
-  private static boolean isApplicationScoped(AnnotatedType type) {
-    return type.isAnnotationPresent(ApplicationScoped.class);
   }
 
   static class EventConsumer {
@@ -503,10 +494,6 @@ public class CDIExtensionPoints implements Extension {
       return eventBeanType;
     }
 
-    public Type getEventType() {
-      return eventType;
-    }
-
     public Annotation[] getQualifiers() {
       return qualifiers;
     }
@@ -540,7 +527,6 @@ public class CDIExtensionPoints implements Extension {
       this.senderType = senderType;
       this.qualifiers = qualifiers;
     }
-
 
     public Type getSenderType() {
       return senderType;

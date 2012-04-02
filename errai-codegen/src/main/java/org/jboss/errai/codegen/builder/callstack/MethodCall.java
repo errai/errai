@@ -133,9 +133,6 @@ public class MethodCall extends AbstractCallElement {
           parms.append(GenUtil.generate(context, parameters[i]));
           if (i + 1 < parameters.length) parms.append(", ");
         }
-        
-        
-        
         return methodName + "(" + parms.toString() + ")";
       }
 

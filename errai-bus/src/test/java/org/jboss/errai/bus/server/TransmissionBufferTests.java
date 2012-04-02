@@ -57,7 +57,7 @@ public class TransmissionBufferTests extends TestCase {
   }
 
   public void testBufferWriteAndRead() {
-    TransmissionBuffer buffer = TransmissionBuffer.create();
+    TransmissionBuffer buffer = TransmissionBuffer.createDirect();
 
     String s = "This is a test";
 

@@ -17,6 +17,7 @@
 package org.jboss.errai.bus.client.framework;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -160,6 +161,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private boolean disconnected = false;
 
+
+  private BusErrorDialog errorDialog;
+
   static {
     MarshallerFramework.initializeDefaultSessionProvider();
   }
@@ -188,11 +192,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   };
 
-  private BusErrorDialog errorDialog = new BusErrorDialog();
-
   public ClientMessageBusImpl() {
-
-
     init();
   }
 
@@ -406,7 +406,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       return ErraiBus.getDispatcher();
     }
   };
-
 
 
   /**
@@ -1298,23 +1297,33 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    * incoming timer to ensure the client's polling with the server is active.
    */
   private void initializeMessagingBus() {
-    if (disconnected) {
-      return;
-    }
-
-    RpcProxyLoader loader = GWT.create(RpcProxyLoader.class);
-    loader.loadProxies(ClientMessageBusImpl.this);
-    InitVotes.voteFor(RpcProxyLoader.class);
-
-    final Timer initialPollTimer = new Timer() {
+    GWT.runAsync(new RunAsyncCallback() {
       @Override
-      public void run() {
-        performPoll();
+      public void onFailure(Throwable reason) {
+        showError("failed to load RPC script from server", reason);
       }
-    };
 
+      @Override
+      public void onSuccess() {
+        if (disconnected) {
+          return;
+        }
 
-    initialPollTimer.schedule(10);
+        RpcProxyLoader loader = GWT.create(RpcProxyLoader.class);
+        loader.loadProxies(ClientMessageBusImpl.this);
+        InitVotes.voteFor(RpcProxyLoader.class);
+
+        final Timer initialPollTimer = new Timer() {
+          @Override
+          public void run() {
+            performPoll();
+          }
+        };
+
+        initialPollTimer.schedule(10);
+      }
+    });
+
   }
 
   /**
@@ -1387,8 +1396,26 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     logAdapter.error(message + " -- Additional Details: " + additionalDetails, e);
   }
 
-  private void showError(String message, Throwable e) {
-    errorDialog.addError(message, "", e);
+  private void ensureInitErrorDialog() {
+    if (errorDialog == null) {
+      errorDialog = new BusErrorDialog();
+    }
+  }
+
+  private void showError(final String message, final Throwable e) {
+    GWT.runAsync(new RunAsyncCallback() {
+      @Override
+      public void onFailure(Throwable reason) {
+        LogUtil.nativeLog("could not load error dialog: " + reason);
+      }
+
+      @Override
+      public void onSuccess() {
+        ensureInitErrorDialog();
+        errorDialog.addError(message, "", e);
+      }
+    });
+
 
     if (LogUtil.isNativeJavaScriptLoggerSupported()) {
       LogUtil.nativeLog(message);
@@ -1493,7 +1520,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       VerticalPanel panel = new VerticalPanel();
 
       HorizontalPanel titleBar = new HorizontalPanel();
-      titleBar.getElement().getStyle().setProperty("backgroundColor", "darkgrey");
+      titleBar.getElement().getStyle().setProperty("backgroundColor", "#A9A9A9");
       titleBar.getElement().getStyle().setWidth(100, Style.Unit.PCT);
       titleBar.getElement().getStyle().setProperty("borderBottom", "1px solid black");
       titleBar.getElement().getStyle().setProperty("marginBottom", "5px");
@@ -1672,7 +1699,19 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private static void _showErrorConsole() {
-    ClientMessageBusImpl bus = (ClientMessageBusImpl) ErraiBus.get();
-    bus.errorDialog.show();
+    GWT.runAsync(new RunAsyncCallback() {
+      @Override
+      public void onFailure(Throwable reason) {
+        LogUtil.nativeLog("could not load script to display error dialog: " + reason);
+      }
+
+      @Override
+      public void onSuccess() {
+        ClientMessageBusImpl bus = (ClientMessageBusImpl) ErraiBus.get();
+        bus.ensureInitErrorDialog();
+        bus.errorDialog.show();
+      }
+    });
+
   }
 }

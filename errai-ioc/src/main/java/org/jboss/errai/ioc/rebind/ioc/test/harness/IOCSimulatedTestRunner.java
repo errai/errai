@@ -19,7 +19,6 @@ package org.jboss.errai.ioc.rebind.ioc.test.harness;
 import com.google.gwt.junit.JUnitShell;
 import junit.framework.TestCase;
 import junit.framework.TestResult;
-
 import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.common.client.api.tasks.AsyncTask;
 import org.jboss.errai.common.client.api.tasks.TaskManager;
@@ -48,13 +47,13 @@ import java.util.concurrent.ScheduledFuture;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public class IOCTestRunner extends ParentRunner<Runner> {
+public class IOCSimulatedTestRunner extends ParentRunner<Runner> {
   public static boolean SIMULATED = Boolean.getBoolean("errai.ioc.debug.simulated_client");
 
   List<Runner> runners = new ArrayList<Runner>();
   private Object instance;
 
-  public IOCTestRunner(Class<? extends TestCase> toRun) throws Throwable {
+  public IOCSimulatedTestRunner(Class<? extends TestCase> toRun) throws Throwable {
     super(toRun);
 
     for (final Method method : toRun.getDeclaredMethods()) {
@@ -72,6 +71,7 @@ public class IOCTestRunner extends ParentRunner<Runner> {
             Description description = getDescription();
 
             notifier.fireTestStarted(description);
+
             TestResult result = new TestResult();
 
             try {
@@ -84,6 +84,7 @@ public class IOCTestRunner extends ParentRunner<Runner> {
                 finally {
                   System.setProperty("errai.simulatedClient", "false");
                 }
+
               }
               else {
                 iocClientTestCase.setName(method.getName());
@@ -219,11 +220,10 @@ public class IOCTestRunner extends ParentRunner<Runner> {
         }
       });
 
-
       if (instance instanceof IOCClientTestCase) {
         iocClientTestCase.setInitializer(new IOCClientTestCase.ContainerBootstrapper() {
           @Override
-          public BootstrapperInjectionContext bootstrap() {
+          public void bootstrap() {
             try {
               String rootPackage = iocClientTestCase.getModulePackage();
               List<String> packages = new ArrayList<String>();
@@ -234,7 +234,7 @@ public class IOCTestRunner extends ParentRunner<Runner> {
                 }
               }
 
-              packages.add("org.jboss.errai.ioc.client.api.builtin");
+            packages.add("org.jboss.errai.ioc.client.api.builtin");
 
               MockIOCGenerator mockIOCGenerator = new MockIOCGenerator(packages);
 
@@ -247,7 +247,6 @@ public class IOCTestRunner extends ParentRunner<Runner> {
               ctx.getRootContext().finish();
 
               System.out.println("bootstrapped simulated container in " + (System.currentTimeMillis() - tm) + "ms");
-              return ctx;
             }
             catch (GenerationException e) {
               throw e;

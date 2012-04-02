@@ -49,6 +49,7 @@ public class CDIServerUtil {
 
   private static Logger log = LoggerFactory.getLogger("ErraiJNDI");
 
+  @SuppressWarnings("unchecked")
   public static <T> T lookupBean(BeanManager beanManager, Class<T> serviceType) {
     Bean<?> bean = beanManager.resolve(beanManager.getBeans(serviceType));
 
@@ -64,8 +65,9 @@ public class CDIServerUtil {
   }
 
 
+  @SuppressWarnings("unchecked")
   public static <T> T lookupRPCBean(BeanManager beanManager, Class beanClass, Annotation[] annotations) {
-    Bean<?> bean = null;
+    Bean<?> bean;
 
     if (annotations != null) {
       bean = beanManager.resolve(beanManager.getBeans(beanClass, annotations));

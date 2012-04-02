@@ -24,12 +24,13 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
-import org.jboss.errai.ioc.rebind.ioc.graph.SortUnit;
-import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
+import org.jboss.errai.ioc.rebind.ioc.graph.Dependency;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
+import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -44,55 +45,60 @@ public abstract class JSR330AnnotationHandler<T extends Annotation> implements A
   }
 
   @Override
-  public Set<SortUnit> getDependencies(DependencyControl control, InjectableInstance instance,
-                                       T annotation,
-                                       IOCProcessingContext context) {
+  public void getDependencies(DependencyControl control, InjectableInstance instance,
+                              T annotation,
+                              IOCProcessingContext context) {
 
-    Set<SortUnit> dependencies = new HashSet<SortUnit>();
     MetaClass mc = instance.getType();
+    processDependencies(control, mc, instance.getInjectionContext());
+  }
+
+  public static void processDependencies(DependencyControl control, MetaClass mc, InjectionContext context) {
 
     do {
       for (MetaField field : mc.getDeclaredFields()) {
-        if (instance.getInjectionContext().isElementType(WiringElementType.InjectionPoint, field)) {
 
-          dependencies.add(new SortUnit(field.getType(), InjectUtil.getQualifiersFromAnnotations(field.getAnnotations())));
-          dependencies.addAll(fillInInterface(field.getType().asClass()));
+        if (context.isElementType(WiringElementType.InjectionPoint, field)) {
+          control.notifyDependency(field.getType());
+          control.notifyDependencies(fillInInterface(field.getType().asClass()));
         }
       }
 
       for (MetaMethod method : mc.getDeclaredMethods()) {
-        if (instance.getInjectionContext().isElementType(WiringElementType.InjectionPoint, method)) {
+        if (context.isElementType(WiringElementType.InjectionPoint, method)) {
           for (MetaParameter parm : method.getParameters()) {
-            dependencies.add(new SortUnit(parm.getType(), InjectUtil.getQualifiersFromAnnotations(parm.getAnnotations())));
-            dependencies.addAll(fillInInterface(parm.getType().asClass()));
+            control.notifyDependency(parm.getType());
+            control.notifyDependencies(fillInInterface(parm.getType().asClass()));
           }
         }
       }
 
       for (MetaConstructor constructor : mc.getConstructors()) {
-        if (instance.getInjectionContext().isElementType(WiringElementType.InjectionPoint, constructor)) {
+        if (context.isElementType(WiringElementType.InjectionPoint, constructor)) {
           for (MetaParameter parm : constructor.getParameters()) {
-            dependencies.add(new SortUnit(parm.getType(), InjectUtil.getQualifiersFromAnnotations(parm.getAnnotations())));
-            dependencies.addAll(fillInInterface(parm.getType().asClass()));
+            control.notifyDependency(parm.getType());
+            control.notifyDependencies(fillInInterface(parm.getType().asClass()));
           }
         }
       }
 
     }
     while ((mc = mc.getSuperClass()) != null);
-
-    return Collections.unmodifiableSet(dependencies);
   }
 
-  private static <T> Set<SortUnit> fillInInterface(Class<T> cls) {
+
+  private static <T> Set<MetaClass> fillInInterface(Class<T> cls) {
     if (cls.isInterface()) {
       Set<Class<? extends T>> subTypes = ScannerSingleton.getOrCreateInstance().getSubTypesOf(cls);
-      Set<SortUnit> sortUnits = new HashSet<SortUnit>();
+      Set<MetaClass> deps = new HashSet<MetaClass>();
       for (Class<? extends T> c : subTypes) {
-        sortUnits.add(new SortUnit(MetaClassFactory.get(c)));
+        if (c.isSynthetic() || c.isAnonymousClass()) continue;
+        if (Modifier.isPublic(c.getModifiers())) {
+          deps.add(MetaClassFactory.get(c));
+        }
       }
 
-      return sortUnits;
+      return deps;
     }
     else {
       return Collections.emptySet();

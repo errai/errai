@@ -19,12 +19,9 @@ package org.jboss.errai.ioc.tests.wiring.client;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
 import org.jboss.errai.ioc.tests.wiring.client.res.AlternativeBeanA;
-import org.jboss.errai.ioc.tests.wiring.client.res.AlternativeCommonInterfaceB;
 import org.jboss.errai.ioc.tests.wiring.client.res.AlternativeDependentBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.OverridingAltCommonInterfaceBImpl;
 import org.jboss.errai.ioc.tests.wiring.client.res.SingleAlternativeDependentBean;
-
-import java.io.File;
 
 /**
  * @author Mike Brock

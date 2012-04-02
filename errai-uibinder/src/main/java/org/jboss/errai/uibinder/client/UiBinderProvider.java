@@ -20,6 +20,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 
+import javax.inject.Singleton;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +28,7 @@ import java.util.Map;
 /**
  * @author Mike Brock
  */
-@IOCProvider
+@IOCProvider @Singleton
 public class UiBinderProvider implements ContextualTypeProvider<UiBinder<?, ?>> {
   private static final Map<Class<?>, UiBinder> UI_BINDER_MAP = new HashMap<Class<?>, UiBinder>();
 
