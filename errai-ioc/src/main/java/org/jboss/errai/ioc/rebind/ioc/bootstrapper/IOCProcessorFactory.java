@@ -296,11 +296,13 @@ public class IOCProcessorFactory {
                   }
                 }
 
-                private boolean injected = false;
                 private String varName = InjectUtil.getNewInjectorName();
 
                 @Override
                 public Statement getBeanInstance(InjectableInstance injectableInstance) {
+                  if (isDependent()) {
+                    return instance.getValueStatement();
+                  }
 
                   BlockBuilder callbackBuilder = injectionContext.getProcessingContext().getBlockBuilder();
 
