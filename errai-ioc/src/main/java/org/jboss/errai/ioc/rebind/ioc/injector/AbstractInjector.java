@@ -131,20 +131,6 @@ public abstract class AbstractInjector implements Injector {
     this.creationalCallbackVarName = creationalCallbackVarName;
   }
 
-//  @Override
-//  public boolean metadataMatches(Injector injector) {
-//    boolean meta = (injector == null && qualifyingMetadata == null) ||
-//            (injector != null && injector.getQualifyingMetadata() != null
-//                    && qualifyingMetadata != null
-//                    && injector.getQualifyingMetadata().doesSatisfy(qualifyingMetadata));
-//
-//    return meta && (qualifyingTypeInformation == null && (injector != null && injector.getQualifyingTypeInformation() ==
-//            null)
-//            || !(qualifyingTypeInformation == null || (injector != null && injector.getQualifyingTypeInformation() ==
-//            null))
-//            && injector != null && qualifyingTypeInformation.isAssignableFrom(injector.getQualifyingTypeInformation()));
-//  }
-
   @Override
   public boolean matches(MetaParameterizedType parameterizedType, QualifyingMetadata qualifyingMetadata) {
     boolean parmTypesSatisfied = true;
@@ -172,6 +158,10 @@ public abstract class AbstractInjector implements Injector {
     this.qualifyingTypeInformation = qualifyingTypeInformation;
   }
 
+  @Override
+  public String getVarName() {
+    throw new UnsupportedOperationException("this injector type does have any variable name associated with it");
+  }
 
   static class RegisterCache {
     private final InjectionContext _injectionContextForRegister;

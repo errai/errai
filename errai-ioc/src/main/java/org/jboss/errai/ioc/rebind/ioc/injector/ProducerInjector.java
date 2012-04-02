@@ -17,7 +17,6 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionPoint;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.TypeDiscoveryListener;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
-import org.jboss.errai.ioc.rebind.ioc.metadata.JSR330QualifyingMetadata;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
 
 import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
@@ -39,8 +38,6 @@ public class ProducerInjector extends AbstractInjector {
                           final InjectableInstance producerInjectableInstance) {
 
     switch (producerInjectableInstance.getTaskType()) {
-      case Type:
-        break;
       case PrivateField:
       case PrivateMethod:
         producerInjectableInstance.ensureMemberExposed(PrivateAccessType.Read);
@@ -70,8 +67,6 @@ public class ProducerInjector extends AbstractInjector {
     }
   }
 
-  private String varName = InjectUtil.getNewInjectorName();
-
   @Override
   public Statement getBeanInstance(InjectableInstance injectableInstance) {
     final InjectionContext injectionContext = injectableInstance.getInjectionContext();
@@ -80,13 +75,14 @@ public class ProducerInjector extends AbstractInjector {
       return producerInjectableInstance.getValueStatement();
     }
 
-    BlockBuilder callbackBuilder = injectionContext.getProcessingContext().getBlockBuilder();
+    final BlockBuilder callbackBuilder = injectionContext.getProcessingContext().getBlockBuilder();
 
     final MetaClass creationCallbackRef = parameterizedAs(CreationalCallback.class,
             typeParametersOf(injectedType));
 
-    String var = InjectUtil.getUniqueVarName();
-    Statement producerCreationalCallback = ObjectBuilder.newInstanceOf(creationCallbackRef)
+    final String var = InjectUtil.getUniqueVarName();
+
+    final Statement producerCreationalCallback = ObjectBuilder.newInstanceOf(creationCallbackRef)
             .extend()
             .publicOverridesMethod("getInstance", Parameter.of(CreationalContext.class, "pContext"))
             ._(Stmt.declareVariable(injectedType)
@@ -101,30 +97,16 @@ public class ProducerInjector extends AbstractInjector {
     callbackBuilder.append(Stmt.declareVariable(creationCallbackRef).asFinal().named(var)
             .initializeWith(producerCreationalCallback));
 
-    if (isSingleton()) {
-      return loadVariable("context").invoke("getSingletonInstanceOrNew",
-              Stmt.loadVariable("injContext"),
-              Stmt.loadVariable(var),
-              Stmt.load(injectedType),
-              Stmt.load(qualifyingMetadata.getQualifiers()));
-
-    }
-    else {
-      return loadVariable("context").invoke("getInstanceOrNew",
-              Stmt.loadVariable(var),
-              Stmt.load(injectedType),
-              Stmt.load(qualifyingMetadata.getQualifiers()));
-    }
+    return loadVariable("context").invoke("getSingletonInstanceOrNew",
+            Stmt.loadVariable("injContext"),
+            Stmt.loadVariable(var),
+            Stmt.load(injectedType),
+            Stmt.load(qualifyingMetadata.getQualifiers()));
   }
 
   @Override
   public boolean isPseudo() {
     return false;
-  }
-
-  @Override
-  public String getVarName() {
-    return varName;
   }
 
   public MetaClassMember getProducerMember() {
