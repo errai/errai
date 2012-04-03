@@ -75,9 +75,8 @@ public class EventDispatcher implements MessageCallback {
           final Object o = message.get(Object.class, CDIProtocol.BeanReference);
           EventConversationContext.activate(o, CDIServerUtil.getSessionId(message));
           try {
-
             @SuppressWarnings("unchecked")
-            Set<String> qualifierNames = message.get(Set.class, CDIProtocol.Qualifiers);
+            final Set<String> qualifierNames = message.get(Set.class, CDIProtocol.Qualifiers);
             List<Annotation> qualifiers = null;
             if (qualifierNames != null) {
               for (String qualifierName : qualifierNames) {

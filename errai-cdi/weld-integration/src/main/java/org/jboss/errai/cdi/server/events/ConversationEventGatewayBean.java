@@ -37,17 +37,17 @@ public class ConversationEventGatewayBean {
   public void observesConversationEvents(@Observes ConversationalEventWrapper wrapper) {
     EventConversationContext.Context ctx = EventConversationContext.get();
     if (ctx != null && ctx.getSession() != null) {
-      String subject = CDI.getSubjectNameByType(wrapper.getEventType());
+    //  String subject = CDI.getSubjectNameByType(wrapper.getEventType());
       try {
         if (wrapper.getQualifierStrings() != null && !wrapper.getQualifierStrings().isEmpty()) {
-          MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
+          MessageBuilder.createMessage().toSubject(CDI.CLIENT_DISPATCHER_SUBJECT).command(CDICommands.CDIEvent)
                   .with(MessageParts.SessionID.name(), ctx.getSession())
                   .with(CDIProtocol.BeanType, wrapper.getEventType().getName()).with(CDIProtocol.Qualifiers, wrapper.getQualifierStrings())
                   .with(CDIProtocol.BeanReference, wrapper.getEventObject())
                   .flag(RoutingFlag.NonGlobalRouting).noErrorHandling().sendNowWith(wrapper.getBus());
         }
         else {
-          MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
+          MessageBuilder.createMessage().toSubject(CDI.CLIENT_DISPATCHER_SUBJECT).command(CDICommands.CDIEvent)
                   .with(MessageParts.SessionID.name(), ctx.getSession())
                   .with(CDIProtocol.BeanType,wrapper.getEventType().getName()).with(CDIProtocol.BeanReference, wrapper.getEventObject())
                   .flag(RoutingFlag.NonGlobalRouting).noErrorHandling()

@@ -80,11 +80,12 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
     }
 
     final String parmClassName = parm.getType().getFullyQualifiedName();
-    final Statement bus = instance.getInjectionContext().getInjector(MessageBus.class).getBeanInstance(instance);
-    final String subscribeMethodName = method.isAnnotationPresent(Local.class) ? "subscribeLocal" : "subscribe";
+    //  final Statement bus = instance.getInjectionContext().getInjector(MessageBus.class).getBeanInstance(instance);
+    // final String subscribeMethodName = method.isAnnotationPresent(Local.class) ? "subscribeLocal" : "subscribe";
 
-    final String subject = CDI.getSubjectNameByType(parmClassName);
-    final Annotation[] qualifiers = InjectUtil.extractQualifiers(instance).toArray(new Annotation[0]);
+    final String subject = parmClassName;
+    final List<Annotation> annotations = InjectUtil.extractQualifiers(instance);
+    final Annotation[] qualifiers = annotations.toArray(new Annotation[annotations.size()]);
     final List<String> qualifierNames = CDI.getQualifiersPart(qualifiers);
 
     AnonymousClassStructureBuilder callBack = Stmt.newObject(AbstractCDIEventCallback.class).extend();
@@ -99,25 +100,24 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
     }
 
     callBackBlock = callBack.publicOverridesMethod("callback", Parameter.of(Message.class, "message", true))
-            .append(Stmt.declareVariable("msgQualifiers", new TypeLiteral<Set<String>>() {
+            ._(Stmt.declareVariable("msgQualifiers", new TypeLiteral<Set<String>>() {
             },
                     Stmt.loadVariable("message").invoke("get", Set.class, CDIProtocol.Qualifiers)))
-            .append(Stmt
+            ._(Stmt
                     .if_(Bool.or(
                             Stmt.loadClassMember("qualifierSet").invoke("equals", Refs.get("msgQualifiers")),
                             Bool.and(Bool.equals(Refs.get("msgQualifiers"), null),
                                     Stmt.loadClassMember("qualifierSet").invoke("isEmpty"))))
-                    .append(RunAsyncWrapper.wrap(instance.callOrBind(Stmt.loadVariable("message")
+                    ._(RunAsyncWrapper.wrap(instance.callOrBind(Stmt.loadVariable("message")
                             .invoke("get", parm.getType().asClass(), CDIProtocol.BeanReference))))
                     .finish());
 
     // create the destruction callback to deregister the service when the bean is destroyed.
     final String subscrVar = InjectUtil.getUniqueVarName();
 
-
     Statement subscribeStatement =
             Stmt.declareVariable(Subscription.class).asFinal().named(subscrVar)
-                    .initializeWith(Stmt.create(ctx).nestedCall(bus).invoke(subscribeMethodName, subject, callBackBlock.finish().finish()));
+                    .initializeWith(Stmt.create(ctx).invokeStatic(CDI.class, "subscribe", subject, callBackBlock.finish().finish()));
 
     final MetaClass destructionCallbackType =
             parameterizedAs(DestructionCallback.class, typeParametersOf(instance.getEnclosingType()));

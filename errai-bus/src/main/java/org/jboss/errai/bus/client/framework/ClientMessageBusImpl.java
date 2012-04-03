@@ -261,7 +261,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     if (!postInit) {
       final DeferredSubscription deferredSubscription = new DeferredSubscription();
 
-      postInitTasks.add(new Runnable() {
+      addPostInitTask(new Runnable() {
         @Override
         public void run() {
           deferredSubscription.attachSubscription(_subscribe(subject, callback, local));
@@ -522,6 +522,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     if (!subscriptions.containsKey(subject)) {
       subscriptions.put(subject, new ArrayList<MessageCallback>());
     }
+    else {
+      System.out.println();
+    }
 
     if (!subscriptions.get(subject).contains(reference)) {
       subscriptions.get(subject).add(reference);
@@ -776,25 +779,25 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     this.reinit = reinit;
   }
 
+  private void registerInitVoteCallbacks() {
+    InitVotes.waitFor(ClientMessageBusImpl.class);
+    InitVotes.waitFor(RpcProxyLoader.class);
+
+    InitVotes.registerOneTimeInitCallback(new Runnable() {
+      @Override
+      public void run() {
+        completeInit();
+      }
+    });
+  }
+
+
   /**
    * Initializes the message bus, by subscribing to the ClientBus (to receive subscription messages) and the
    * ClientErrorBus to dispatch errors when called.
    */
   @Override
   public void init() {
-    if (!reinit) {
-      InitVotes.waitFor(ClientMessageBusImpl.class);
-      InitVotes.waitFor(RpcProxyLoader.class);
-
-      InitVotes.registerOneTimeInitCallback(new Runnable() {
-        @Override
-        public void run() {
-          completeInit();
-        }
-      });
-    }
-
-
     declareDebugFunction();
 
     if (sendBuilder == null) {
@@ -826,6 +829,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     if (reinit) {
       resubscribeShadowSubcriptions();
     }
+    else {
+      registerInitVoteCallbacks();
+    }
 
     /**
      * Fire initialization listeners now.
@@ -833,11 +839,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     for (PreInitializationListener listener : preInitializationListeners) {
       listener.beforeInitialization();
     }
-    
+
     if (isRemoteCommunicationEnabled()) {
       remoteSubscribe(BuiltInServices.ServerEchoService.name());
     }
-    
+
     directSubscribe(BuiltInServices.ClientBus.name(), new MessageCallback() {
       @Override
       @SuppressWarnings({"unchecked"})
@@ -1066,7 +1072,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private void completeInit() {
-    if (!postInit) {
+    if (!postInit && !initialized) {
       postInit = true;
 
       LogUtil.log("received final vote for initialization ...");
@@ -1074,11 +1080,14 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       if (!postInitTasks.isEmpty())
         LogUtil.log("executing " + postInitTasks.size() + " post init task(s)");
 
-      Iterator<Runnable> postInitTasksIter = postInitTasks.iterator();
-      while (postInitTasksIter.hasNext()) {
-        postInitTasksIter.next().run();
-        postInitTasksIter.remove();
+      do {
+        for (Runnable runnable : new ArrayList<Runnable>(postInitTasks)) {
+          postInitTasks.remove(runnable);
+          runnable.run();
+        }
       }
+      while (!postInitTasks.isEmpty());
+
 
       sendAllDeferred();
       postInitTasks.clear();
@@ -1093,11 +1102,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     remotes.put(subject, remoteCallback);
     //  addShadowSubscription(subject, remoteCallback);
   }
-  
+
   Set<String> getRemoteSubscriptions() {
-    if (remotes == null) 
+    if (remotes == null)
       return null;
-    
+
     return remotes.keySet();
   }
 
@@ -1132,7 +1141,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       InitVotes.voteFor(RpcProxyLoader.class);
       return true;
     }
-    
+
     try {
       LogUtil.log("sending initial handshake to remote bus");
 
@@ -1347,7 +1356,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    */
   @Override
   public void addPostInitTask(Runnable run) {
-    if (isInitialized()) {
+    if (isInitialized() || postInit) {
       run.run();
       return;
     }
@@ -1727,20 +1736,20 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
     });
   }
-  
+
   /**
-   * Checks whether remote bus communication is enabled. 
-   * <p>
-   * The JavaScript variable <code>erraiBusRemoteCommunicationEnabled</code> can be used 
-   * to control this value. If the variable is not present in the window object, the default 
+   * Checks whether remote bus communication is enabled.
+   * <p/>
+   * The JavaScript variable <code>erraiBusRemoteCommunicationEnabled</code> can be used
+   * to control this value. If the variable is not present in the window object, the default
    * value <code>true</code> is returned.
-   * 
+   *
    * @return true if remote communication enabled, otherwise false.
    */
   public native boolean isRemoteCommunicationEnabled() /*-{
     if ($wnd.erraiBusRemoteCommunicationEnabled === undefined || $wnd.erraiBusRemoteCommunicationEnabled.length === 0) {
-      return true; 
-    } 
+      return true;
+    }
     else {
       return $wnd.erraiBusRemoteCommunicationEnabled;
     }

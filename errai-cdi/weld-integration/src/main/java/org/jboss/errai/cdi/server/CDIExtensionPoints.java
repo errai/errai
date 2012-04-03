@@ -65,6 +65,7 @@ import javax.enterprise.inject.spi.ProcessObserverMethod;
 import javax.inject.Inject;
 import javax.inject.Qualifier;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -98,13 +99,13 @@ public class CDIExtensionPoints implements Extension {
 
   private TypeRegistry managedTypes = null;
 
-  private Set<EventConsumer> eventConsumers = new LinkedHashSet<EventConsumer>();
-  private Set<MessageSender> messageSenders = new LinkedHashSet<MessageSender>();
+  private final Set<EventConsumer> eventConsumers = new LinkedHashSet<EventConsumer>();
+  private final Set<MessageSender> messageSenders = new LinkedHashSet<MessageSender>();
 
-  private Map<String, Annotation> eventQualifiers = new HashMap<String, Annotation>();
-  private Map<String, Annotation> beanQualifiers = new HashMap<String, Annotation>();
+  private final Map<String, Annotation> eventQualifiers = new HashMap<String, Annotation>();
+  private final Map<String, Annotation> beanQualifiers = new HashMap<String, Annotation>();
 
-  private Set<String> observableEvents = new HashSet<String>();
+  private final Set<String> observableEvents = new HashSet<String>();
 
   private static final Set<String> vetoClasses;
 
@@ -211,71 +212,95 @@ public class CDIExtensionPoints implements Extension {
 
     for (Field f : clazz.getDeclaredFields()) {
       if (f.isAnnotationPresent(Inject.class)) {
-        if (Event.class.isAssignableFrom(f.getType())) {
-          ParameterizedType pType = (ParameterizedType) f.getGenericType();
-
-          Class eventType = (Class) pType.getActualTypeArguments()[0];
-
-          if (isExposedEntityType(eventType)) {
-            List<Annotation> qualifiers = new ArrayList<Annotation>();
-
-            /**
-             * Collect Qualifier types for the Event consumer.
-             */
-            for (Annotation annotation : f.getAnnotations()) {
-              if (annotation.annotationType().isAnnotationPresent(Qualifier.class)) {
-                qualifiers.add(annotation);
-                eventQualifiers.put(annotation.annotationType().getName(), annotation);
-              }
-            }
-
-            eventConsumers.add(new EventConsumer(eventType.isAnnotationPresent(Conversational.class),
-                    null, eventType, qualifiers.toArray(new Annotation[qualifiers.size()])));
-          }
+        processEventInjector(f.getType(), f.getGenericType(), f.getAnnotations());
+      }
+    }
+    for (Method m : clazz.getDeclaredMethods()) {
+      if (m.isAnnotationPresent(Inject.class)) {
+        Class<?>[] parameterTypes = m.getParameterTypes();
+        for (int i = 0, parameterTypesLength = parameterTypes.length; i < parameterTypesLength; i++) {
+          Class<?> parmType = parameterTypes[i];
+          processEventInjector(parmType, m.getGenericParameterTypes()[i], m.getParameterAnnotations()[i]);
         }
-        else if (ConversationalEvent.class.isAssignableFrom(f.getType())) {
-          ParameterizedType pType = (ParameterizedType) f.getGenericType();
-
-          Class eventType = (Class) pType.getActualTypeArguments()[0];
-
-          if (isExposedEntityType(eventType)) {
-            List<Annotation> qualifiers = new ArrayList<Annotation>();
-
-            /**
-             * Collect Qualifier types for the Event consumer.
-             */
-            for (Annotation annotation : f.getAnnotations()) {
-              if (annotation.annotationType().isAnnotationPresent(Qualifier.class)) {
-                qualifiers.add(annotation);
-                eventQualifiers.put(annotation.annotationType().getName(), annotation);
-              }
-            }
-            eventConsumers.add(new EventConsumer(true, f.getGenericType(), eventType,
-                    qualifiers.toArray(new Annotation[qualifiers.size()])));
-          }
-        }
-        else if (Sender.class.isAssignableFrom(f.getType())) {
-          ParameterizedType pType = (ParameterizedType) f.getGenericType();
-          Class sendType = (Class) pType.getActualTypeArguments()[0];
-          Set<Annotation> qualifiers = new HashSet<Annotation>();
-
-          /**
-           * Collect Qualifier types for the Event consumer.
-           */
-          for (Annotation annotation : f.getAnnotations()) {
-            if (annotation.annotationType().isAnnotationPresent(Qualifier.class)) {
-              qualifiers.add(annotation);
-              eventQualifiers.put(annotation.annotationType().getName(), annotation);
-            }
-          }
-
-          if (isExposedEntityType(sendType)) {
-            messageSenders.add(new MessageSender(f.getGenericType(), qualifiers));
-          }
+      }
+    }
+    for (Constructor c : clazz.getDeclaredConstructors()) {
+      if (c.isAnnotationPresent(Inject.class)) {
+        Class<?>[] parameterTypes = c.getParameterTypes();
+        for (int i = 0, parameterTypesLength = parameterTypes.length; i < parameterTypesLength; i++) {
+          Class<?> parmType = parameterTypes[i];
+          processEventInjector(parmType, c.getGenericParameterTypes()[i], c.getParameterAnnotations()[i]);
         }
       }
     }
   }
+
+  private void processEventInjector(Class<?> type, Type typeParm, Annotation[] annotations) {
+    if (Event.class.isAssignableFrom(type)) {
+      ParameterizedType pType = (ParameterizedType) typeParm;
+
+      Class eventType = (Class) pType.getActualTypeArguments()[0];
+
+      if (isExposedEntityType(eventType)) {
+        List<Annotation> qualifiers = new ArrayList<Annotation>();
+
+        /**
+         * Collect Qualifier types for the Event consumer.
+         */
+        for (Annotation annotation : annotations) {
+          if (annotation.annotationType().isAnnotationPresent(Qualifier.class)) {
+            qualifiers.add(annotation);
+            eventQualifiers.put(annotation.annotationType().getName(), annotation);
+          }
+        }
+
+        eventConsumers.add(new EventConsumer(eventType.isAnnotationPresent(Conversational.class),
+                null, eventType, qualifiers.toArray(new Annotation[qualifiers.size()])));
+      }
+    }
+    else if (ConversationalEvent.class.isAssignableFrom(type)) {
+      ParameterizedType pType = (ParameterizedType) typeParm;
+
+      Class eventType = (Class) pType.getActualTypeArguments()[0];
+
+
+      if (isExposedEntityType(eventType)) {
+        List<Annotation> qualifiers = new ArrayList<Annotation>();
+
+        /**
+         * Collect Qualifier types for the Event consumer.
+         */
+        for (Annotation annotation : annotations) {
+          if (annotation.annotationType().isAnnotationPresent(Qualifier.class)) {
+            qualifiers.add(annotation);
+            eventQualifiers.put(annotation.annotationType().getName(), annotation);
+          }
+        }
+        eventConsumers.add(new EventConsumer(true, typeParm, eventType,
+                qualifiers.toArray(new Annotation[qualifiers.size()])));
+      }
+    }
+    else if (Sender.class.isAssignableFrom(type)) {
+      ParameterizedType pType = (ParameterizedType) typeParm;
+      Class sendType = (Class) pType.getActualTypeArguments()[0];
+      Set<Annotation> qualifiers = new HashSet<Annotation>();
+
+      /**
+       * Collect Qualifier types for the Event consumer.
+       */
+      for (Annotation annotation : annotations) {
+        if (annotation.annotationType().isAnnotationPresent(Qualifier.class)) {
+          qualifiers.add(annotation);
+          eventQualifiers.put(annotation.annotationType().getName(), annotation);
+        }
+      }
+
+      if (isExposedEntityType(sendType)) {
+        messageSenders.add(new MessageSender(typeParm, qualifiers));
+      }
+    }
+  }
+
 
   private boolean isExposedEntityType(Class type) {
     if (type.isAnnotationPresent(Portable.class)) {
