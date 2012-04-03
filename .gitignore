@@ -30,3 +30,4 @@ release.properties
 *.JUnit/
 gwt-unitCache/
 class_list.txt
+*.jpage
