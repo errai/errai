@@ -1269,7 +1269,6 @@
           </plugin>
           <plugin>
             <artifactId>maven-surefire-plugin</artifactId>
-            <version>2.7.2</version>
             <configuration>
               <skipTests>false</skipTests>
               <additionalClasspathElements>
@@ -1533,18 +1532,10 @@
 
         </configuration>
       </plugin>
-      <plugin>
-        <artifactId>maven-clean-plugin</artifactId>
-        <version>2.2</version>
-        <configuration>
-          <skip>true</skip>
-        </configuration>
-      </plugin>
       <!-- Tests are skipped by default because they require additional GWT 
         dependencies. Run mvn with -Pintegration-test to enable testing. -->
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.7.2</version>
         <configuration>
           <skipTests>true</skipTests>
         </configuration>
@@ -1562,13 +1553,9 @@
                 <!-- The gwt-maven-plugin use the war source folder as it's 
                   build directory. We need to cleanup after we'd run the plugin and remove 
                   all GWT related artifacts that are required to run the hosted mode. -->
-                <delete dir="src/main/webapp/WEB-INF/classes" />
-                <delete dir="src/main/webapp/WEB-INF/lib" />
-                <delete dir="src/main/webapp/META-INF" />
-                <delete file="src/main/webapp/WEB-INF/web.xml" />
                 <delete dir="src/main/webapp/contacts" />
-                <delete dir="target" />
 
+                <!-- FIXME this should be done as an additional resource in the maven-war-plugin -->
                 <copy file="src/${webDescriptor}/web.xml" toDir="src/main/webapp/WEB-INF" />
               </tasks>
             </configuration>

@@ -16,27 +16,31 @@
 
 package org.jboss.errai.cdi.integration.client.shared;
 
+import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 /**
  * @author Mike Brock
  */
-@ApplicationScoped
-public class TestBean {
-  @Inject private ServiceA serviceA;
-  @Inject private ServiceB serviceB;
-  @Inject private ServiceC serviceC;
+@Dependent
+public class DestroyA {
+  private boolean isDestroyed = false;
 
-  public ServiceA getServiceA() {
-    return serviceA;
+  @Inject
+  private DestroyB testDestroyB;
+
+  @PreDestroy
+  private void destroy() {
+    isDestroyed = true;
   }
 
-  public ServiceB getServiceB() {
-    return serviceB;
+  public DestroyB getTestDestroyB() {
+    return testDestroyB;
   }
 
-  public ServiceC getServiceC() {
-    return serviceC;
+  public boolean isDestroyed() {
+    return isDestroyed;
   }
 }

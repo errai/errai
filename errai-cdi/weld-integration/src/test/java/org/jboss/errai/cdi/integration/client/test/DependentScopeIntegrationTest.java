@@ -30,9 +30,9 @@ import org.jboss.errai.cdi.integration.client.shared.LincolnCat;
 import org.jboss.errai.cdi.integration.client.shared.ServiceA;
 import org.jboss.errai.cdi.integration.client.shared.ServiceB;
 import org.jboss.errai.cdi.integration.client.shared.ServiceC;
-import org.jboss.errai.cdi.integration.client.shared.TestBean;
-import org.jboss.errai.cdi.integration.client.shared.TestDestroyA;
-import org.jboss.errai.cdi.integration.client.shared.TestOuterBean;
+import org.jboss.errai.cdi.integration.client.shared.Bean;
+import org.jboss.errai.cdi.integration.client.shared.DestroyA;
+import org.jboss.errai.cdi.integration.client.shared.OuterBean;
 import org.jboss.errai.cdi.integration.client.shared.UnreferencedDependentRootBean;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
@@ -93,12 +93,12 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
     CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
-        TestOuterBean outBean = IOC.getBeanManager()
-                .lookupBean(TestOuterBean.class).getInstance();
+        OuterBean outBean = IOC.getBeanManager()
+                .lookupBean(OuterBean.class).getInstance();
 
         assertNotNull("outer bean was null", outBean);
 
-        TestBean testBean = outBean.getTestBean();
+        Bean testBean = outBean.getTestBean();
         assertNotNull("outBean.getTestBean() returned null", testBean);
 
         ServiceA serviceA = testBean.getServiceA();
@@ -237,8 +237,8 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
 
       @Override
       public void run() {
-        TestDestroyA bean = IOC.getBeanManager()
-                .lookupBean(TestDestroyA.class).getInstance();
+        DestroyA bean = IOC.getBeanManager()
+                .lookupBean(DestroyA.class).getInstance();
 
         IOC.getBeanManager().destroyBean(bean);
 

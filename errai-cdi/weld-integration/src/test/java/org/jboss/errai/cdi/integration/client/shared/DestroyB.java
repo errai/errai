@@ -24,10 +24,10 @@ import javax.inject.Inject;
  * @author Mike Brock
  */
 @Dependent
-public class TestDestroyB {
+public class DestroyB {
   private boolean isDestroyed = false;
 
-  @Inject TestDestroyA testDestroyA;
+  @Inject DestroyA testDestroyA;
 
   @PreDestroy
   private void destroy() {

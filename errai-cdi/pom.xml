@@ -233,7 +233,6 @@
         <plugins>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.5</version>
                 <configuration>
                     <skipTests>true</skipTests>
                     <failIfNoTests>false</failIfNoTests>
