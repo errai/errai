@@ -16,6 +16,9 @@
 
 package org.jboss.errai.bus.server;
 
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.tests.support.Person;
 import org.jboss.errai.bus.client.tests.support.TestException;
 import org.jboss.errai.bus.client.tests.support.TestRPCService;
@@ -26,7 +29,7 @@ import org.jboss.errai.bus.server.annotations.Service;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Service
-public class TestRPCServiceImpl implements TestRPCService {
+public class TestRPCServiceImpl implements TestRPCService, MessageCallback {
   public boolean isGreaterThan(int a, int b) {
     System.out.println("TestRPCService.isGreaterThan(" + a + ", " + b + ")");
     return a > b;
@@ -45,5 +48,12 @@ public class TestRPCServiceImpl implements TestRPCService {
   @Override
   public Person returnNull() {
     return null;
+  }
+
+  @Override
+  public void callback(Message message) {
+    MessageBuilder.createConversation(message)
+      .subjectProvided()
+      .done().reply();
   }
 }
