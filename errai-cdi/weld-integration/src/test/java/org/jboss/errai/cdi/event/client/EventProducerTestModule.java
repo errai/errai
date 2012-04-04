@@ -10,7 +10,6 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
 import org.jboss.errai.cdi.client.event.FinishEvent;
-import org.jboss.errai.cdi.client.event.Poop;
 import org.jboss.errai.cdi.client.event.ReceivedEvent;
 import org.jboss.errai.cdi.client.qualifier.A;
 import org.jboss.errai.cdi.client.qualifier.B;
@@ -149,7 +148,7 @@ public class EventProducerTestModule {
   }
 
 
-  public void collectResults(@Observes Poop event) {
+  public void collectResults(@Observes ReceivedEvent event) {
     if (event.getEvent().equals("FINISH")) {
       if (verifier != null) {
         verifier.run();
