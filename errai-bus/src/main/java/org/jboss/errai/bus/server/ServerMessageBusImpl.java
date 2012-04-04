@@ -183,7 +183,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
       @SuppressWarnings({"unchecked", "SynchronizationOnLocalVariableOrMethodParameter"})
       public void callback(Message message) {
         try {
-          QueueSession session = getSession(message);
+          final QueueSession session = getSession(message);
           MessageQueueImpl queue = (MessageQueueImpl) messageQueues.get(session);
 
           switch (BusCommands.valueOf(message.getCommandType())) {
@@ -226,7 +226,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
               if (queue == null) return;
 
               synchronized (messageQueues) {
-                queue = (MessageQueueImpl) messageQueues.get(session);
                 queue.stopQueue();
                 closeQueue(queue);
                 session.endSession();
@@ -250,7 +249,9 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                   messageQueues.get(session).stopQueue();
                 }
 
-                addQueue(session, queue = new MessageQueueImpl(transmissionbuffer, session));
+                queue = new MessageQueueImpl(transmissionbuffer, session);
+
+                addQueue(session, queue);
 
                 if (deferred != null) {
                   deferredQueue.put(queue, deferred);
@@ -263,7 +264,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 busMonitor.notifyQueueAttached(session.getSessionId(), queue);
               }
 
-              List<String> subjects = new LinkedList<String>();
+              final List<String> subjects = new ArrayList<String>(subscriptions.size());
               for (String service : subscriptions.keySet()) {
                 if (service.startsWith("local:")) {
                 }
@@ -279,11 +280,11 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                       .with(MessageParts.PriorityProcessing, "1")
                       .noErrorHandling().sendNowWith(ServerMessageBusImpl.this, false);
 
-              CommandMessage msg = ConversationMessage.create(message);
+              final CommandMessage msg = ConversationMessage.create(message);
               msg.toSubject(BuiltInServices.ClientBus.name())
                       .command(BusCommands.CapabilitiesNotice);
 
-              StringBuilder capabilitiesBuffer = new StringBuilder();
+              StringBuilder capabilitiesBuffer = new StringBuilder(25);
 
               boolean first;
               if (ErraiServiceConfigurator.LONG_POLLING) {
@@ -341,7 +342,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                           .command(BusCommands.WebsocketChannelOpen)
                           .done().sendNowWith(ServerMessageBusImpl.this, false);
                 }
-
               }
 
               break;
@@ -383,7 +383,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     });
 
     scheduler.scheduleAtFixedRate(new Runnable() {
-
       int runCount = 0;
       boolean lastWasEmpty = false;
 
@@ -392,7 +391,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         runCount++;
         boolean houseKeepingPerformed = false;
         List<MessageQueue> endSessions = new LinkedList<MessageQueue>();
-
 
         int paged = 0, killed = 0;
 
@@ -542,8 +540,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     return new BufferStatus(free, (int) (highSegBytes - lowSegBytes), activeTails, ((float) free) / bufSize);
   }
 
-
-  private void addQueue(QueueSession session, MessageQueueImpl queue) {
+  private void addQueue(QueueSession session, MessageQueue queue) {
     messageQueues.put(session, queue);
     sessionLookup.put(session.getSessionId(), session);
   }
@@ -896,7 +893,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     return plan;
   }
 
-
   private static final Set<String> broadcastExclusionSet = new HashSet<String>() {
     {
       add(BuiltInServices.ClientBus.name());
@@ -935,7 +931,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     fireSubscribeListeners(new SubscriptionEvent(true, sessionContext.getSessionId(), rmc.getQueueCount(), isNew, subject));
   }
-
 
   public class RemoteMessageCallback implements MessageCallback {
     private final String svc;
