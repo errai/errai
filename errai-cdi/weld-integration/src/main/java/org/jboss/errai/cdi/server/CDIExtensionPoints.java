@@ -42,6 +42,8 @@ import org.jboss.errai.cdi.server.events.EventDispatcher;
 import org.jboss.errai.cdi.server.events.EventObserverMethod;
 import org.jboss.errai.cdi.server.events.ShutdownEventObserver;
 import org.jboss.errai.common.client.framework.Assert;
+import org.jboss.errai.common.metadata.MetaDataScanner;
+import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.common.rebind.EnvUtil;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
@@ -238,9 +240,9 @@ public class CDIExtensionPoints implements Extension {
     if (Event.class.isAssignableFrom(type)) {
       ParameterizedType pType = (ParameterizedType) typeParm;
 
-      Class eventType = (Class) pType.getActualTypeArguments()[0];
+      final Class eventType = (Class) pType.getActualTypeArguments()[0];
 
-      if (EnvUtil.isPortableType(eventType)) {
+      for (Class<?> observesType : EnvUtil.getAllPortableSubtypes(eventType)) {
         List<Annotation> qualifiers = new ArrayList<Annotation>();
 
         /**
@@ -253,17 +255,16 @@ public class CDIExtensionPoints implements Extension {
           }
         }
 
-        eventConsumers.add(new EventConsumer(eventType.isAnnotationPresent(Conversational.class),
-                null, eventType, qualifiers.toArray(new Annotation[qualifiers.size()])));
+        eventConsumers.add(new EventConsumer(observesType.isAnnotationPresent(Conversational.class),
+                null, observesType, qualifiers.toArray(new Annotation[qualifiers.size()])));
       }
     }
     else if (ConversationalEvent.class.isAssignableFrom(type)) {
       ParameterizedType pType = (ParameterizedType) typeParm;
 
-      Class eventType = (Class) pType.getActualTypeArguments()[0];
+      final Class eventType = (Class) pType.getActualTypeArguments()[0];
 
-
-      if (EnvUtil.isPortableType(eventType)) {
+      for (Class<?> observesType : EnvUtil.getAllPortableSubtypes(eventType)) {
         List<Annotation> qualifiers = new ArrayList<Annotation>();
 
         /**
@@ -275,7 +276,7 @@ public class CDIExtensionPoints implements Extension {
             eventQualifiers.put(annotation.annotationType().getName(), annotation);
           }
         }
-        eventConsumers.add(new EventConsumer(true, typeParm, eventType,
+        eventConsumers.add(new EventConsumer(true, typeParm, observesType,
                 qualifiers.toArray(new Annotation[qualifiers.size()])));
       }
     }

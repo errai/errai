@@ -598,7 +598,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    */
   private void transmitRemote(final String message, final List<Message> txMessages) {
     if (message == null) return;
-    //   System.out.println("TX: " + message);
+  //  System.out.println("TX: " + message);
     try {
       txActive = true;
 
@@ -1453,7 +1453,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   public void procPayload(String text) {
-    //   System.out.println("RX:" + text);
     try {
       for (MarshalledMessage m : decodePayload(text)) {
         rxNumber++;
@@ -1490,7 +1489,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
       if (!validMessage) // brute force for now
         throw new RuntimeException("Interceptor " + intcp.getClass() + " invalidates message");
-
     }
 
     return validMessage;
@@ -1499,7 +1497,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   public void addInterceptor(MessageInterceptor interceptor) {
     interceptorStack.add(interceptor);
   }
-
 
   @Override
   public Set<String> getAllRegisteredSubjects() {

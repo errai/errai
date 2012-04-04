@@ -15,20 +15,7 @@
  */
 package org.jboss.errai.enterprise.rebind;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.enterprise.event.Observes;
-import javax.enterprise.util.TypeLiteral;
-
-import org.jboss.errai.bus.client.api.Local;
 import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.Subscription;
 import org.jboss.errai.codegen.Context;
@@ -41,12 +28,9 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.util.Bool;
-import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.codegen.util.PrivateAccessType;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
-import org.jboss.errai.common.client.api.annotations.Portable;
-import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.common.rebind.EnvUtil;
 import org.jboss.errai.enterprise.client.cdi.AbstractCDIEventCallback;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
@@ -58,9 +42,16 @@ import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.util.RunAsyncWrapper;
 
+import javax.enterprise.event.Observes;
+import javax.enterprise.util.TypeLiteral;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
+
 import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
-import static org.jboss.errai.common.metadata.ScannerSingleton.getOrCreateInstance;
 
 /**
  * Generates the boiler plate for @Observes annotations use in GWT clients.<br/>
@@ -143,26 +134,14 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
             .publicOverridesMethod("destroy", Parameter.of(instance.getEnclosingType(), "obj", true))
             .append(Stmt.loadVariable(subscrVar).invoke("remove"));
 
-    Set<Class<?>> toSubscribe = new HashSet<Class<?>>(getOrCreateInstance().getSubTypesOf(parm.getType().asClass()));
-    toSubscribe.add(parm.getType().asClass());
 
-    boolean isPortable = false;
+    for (Class<?> cls : EnvUtil.getAllPortableConcreteSubtypes(parm.getType().asClass())) {
 
-    for (Class<?> cls : toSubscribe) {
-      if (EnvUtil.isPortableType(cls)) {
-        isPortable = true;
-        break;
-      }
-    }
-
-    if (isPortable) {
-      for (Class<?> cls : toSubscribe) {
-        final String subscrHandle = InjectUtil.getUniqueVarName();
-        statements.add(Stmt.declareVariable(Subscription.class).asFinal().named(subscrHandle)
-                .initializeWith(Stmt.nestedCall(bus).invoke("subscribe", CDI.getSubjectNameByType(cls.getName()),
-                        Stmt.loadStatic(CDI.class, "ROUTING_CALLBACK"))));
-        destroyMeth.append(Stmt.loadVariable(subscrHandle).invoke("remove"));
-      }
+      final String subscrHandle = InjectUtil.getUniqueVarName();
+      statements.add(Stmt.declareVariable(Subscription.class).asFinal().named(subscrHandle)
+              .initializeWith(Stmt.nestedCall(bus).invoke("subscribe", CDI.getSubjectNameByType(cls.getName()),
+                      Stmt.loadStatic(CDI.class, "ROUTING_CALLBACK"))));
+      destroyMeth.append(Stmt.loadVariable(subscrHandle).invoke("remove"));
     }
 
     Statement destructionCallback = Stmt.create().loadVariable("context").invoke("addDestructionCallback",

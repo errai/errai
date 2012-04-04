@@ -140,4 +140,34 @@ public abstract class EnvUtil {
     }
     return false;
   }
+
+  public static Set<Class<?>> getAllPortableConcreteSubtypes(final Class<?> clazz) {
+    final Set<Class<?>> portableSubtypes = new HashSet<Class<?>>();
+    if (isPortableType(clazz)) {
+      portableSubtypes.add(clazz);
+    }
+
+    for (Class<?> subType : ScannerSingleton.getOrCreateInstance().getSubTypesOf(clazz)) {
+      if (isPortableType(subType)) {
+        portableSubtypes.add(subType);
+      }
+    }
+
+    return portableSubtypes;
+  }
+
+  public static Set<Class<?>> getAllPortableSubtypes(final Class<?> clazz) {
+    final Set<Class<?>> portableSubtypes = new HashSet<Class<?>>();
+     if (clazz.isInterface() || isPortableType(clazz)) {
+       portableSubtypes.add(clazz);
+     }
+
+     for (Class<?> subType : ScannerSingleton.getOrCreateInstance().getSubTypesOf(clazz)) {
+       if (clazz.isInterface() || isPortableType(subType)) {
+         portableSubtypes.add(subType);
+       }
+     }
+
+     return portableSubtypes;
+  }
 }

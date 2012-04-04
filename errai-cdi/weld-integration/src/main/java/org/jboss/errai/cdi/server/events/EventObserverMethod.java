@@ -32,6 +32,8 @@ import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 
+import static org.jboss.errai.enterprise.client.cdi.api.CDI.getSubjectNameByType;
+
 /**
  * An implementation of the the CDI SPI {@code ObserverMethod} interface which is used to intercept events within the 
  * CDI container. The purpose of this implementation is to observe an event which is exposed to the bus and
@@ -64,12 +66,8 @@ public class EventObserverMethod implements ObserverMethod {
    */
   protected final MessageBus bus;
 
-  /**
-   * The pre-calculated subject to be used to transmit the event remotely.
-   */
-  protected final String subject;
 
-  public EventObserverMethod(Class<?> type, MessageBus bus, Annotation... qualifiers) {
+  public EventObserverMethod(final Class<?> type, final MessageBus bus, final Annotation... qualifiers) {
     this.type = type;
     this.bus = bus;
 
@@ -81,8 +79,6 @@ public class EventObserverMethod implements ObserverMethod {
       this.observedQualifiers = Collections.unmodifiableSet(new HashSet<Annotation>(Arrays.asList(qualifiers)));
       this.qualifierForWire = CDI.getQualifiersPart(qualifiers);
     }
-
-    this.subject = CDI.getSubjectNameByType(type.getName());
   }
 
   public Class<?> getBeanClass() {
@@ -106,15 +102,15 @@ public class EventObserverMethod implements ObserverMethod {
   }
 
   public void notify(Object event) {
-    if (!type.equals(event.getClass()) || EventConversationContext.isEventObjectInContext(event)) return;
+    if (EventConversationContext.isEventObjectInContext(event)) return;
 
     if (!qualifierForWire.isEmpty()) {
-      MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
+      MessageBuilder.createMessage().toSubject(getSubjectNameByType(event.getClass().getName())).command(CDICommands.CDIEvent)
               .with(CDIProtocol.BeanType, type.getName()).with(CDIProtocol.BeanReference, event)
               .with(CDIProtocol.Qualifiers, qualifierForWire).noErrorHandling().sendNowWith(bus);
     }
     else {
-      MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
+      MessageBuilder.createMessage().toSubject(getSubjectNameByType(event.getClass().getName())).command(CDICommands.CDIEvent)
               .with(CDIProtocol.BeanType, type.getName()).with(CDIProtocol.BeanReference, event).noErrorHandling()
               .sendNowWith(bus);
     }
