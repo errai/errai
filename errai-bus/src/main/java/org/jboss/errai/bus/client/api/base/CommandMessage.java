@@ -16,9 +16,6 @@
 
 package org.jboss.errai.bus.client.api.base;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.framework.MessageBus;
@@ -28,6 +25,9 @@ import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.common.client.types.TypeHandlerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * The default implementation of the Message interface. The usual way to create a CommandMessage is through the
@@ -39,8 +39,8 @@ import org.jboss.errai.common.client.types.TypeHandlerFactory;
  */
 @SuppressWarnings({"UnusedDeclarations"})
 public class CommandMessage implements Message {
-  transient Map<String, ResourceProvider<?>> providedParts;
-  Map<String, Object> parts;
+  transient final Map<String, ResourceProvider<?>> providedParts;
+  final Map<String, Object> parts;
   transient Map<String, Object> resources;
   ErrorCallback errorsCall;
   int routingFlags;
@@ -98,17 +98,18 @@ public class CommandMessage implements Message {
 
   CommandMessage() {
     this.parts = new HashMap<String, Object>();
-    this.providedParts = new HashMap<String, ResourceProvider<?>>();
+    this.providedParts = new HashMap<String, ResourceProvider<?>>(0);
   }
 
   private CommandMessage(Map<String, Object> parts) {
     this.parts = parts;
-    this.providedParts = new HashMap<String, ResourceProvider<?>>();
+    this.providedParts = new HashMap<String, ResourceProvider<?>>(0);
   }
 
   public CommandMessage(Map<String, Object> parts, int routingFlags) {
     this.parts = parts;
     this.routingFlags = routingFlags;
+    this.providedParts = new HashMap<String, ResourceProvider<?>>(0);
   }
 
   private CommandMessage(Map<String, Object> parts, Map<String, ResourceProvider<?>> providers) {
@@ -240,7 +241,8 @@ public class CommandMessage implements Message {
 
   @Override
   public Message setParts(Map<String, Object> parts) {
-    this.parts = parts;
+    parts.clear();
+    parts.putAll(parts);
     return this;
   }
 
