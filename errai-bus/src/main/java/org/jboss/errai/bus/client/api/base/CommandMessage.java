@@ -98,7 +98,7 @@ public class CommandMessage implements Message {
 
   CommandMessage() {
     this.parts = new HashMap<String, Object>();
-    this.providedParts = new HashMap<String, ResourceProvider<?>>(0);
+    this.providedParts = new HashMap<String, ResourceProvider<?>>(5);
   }
 
   private CommandMessage(Map<String, Object> parts) {
@@ -109,7 +109,7 @@ public class CommandMessage implements Message {
   public CommandMessage(Map<String, Object> parts, int routingFlags) {
     this.parts = parts;
     this.routingFlags = routingFlags;
-    this.providedParts = new HashMap<String, ResourceProvider<?>>(0);
+    this.providedParts = new HashMap<String, ResourceProvider<?>>(5);
   }
 
   private CommandMessage(Map<String, Object> parts, Map<String, ResourceProvider<?>> providers) {

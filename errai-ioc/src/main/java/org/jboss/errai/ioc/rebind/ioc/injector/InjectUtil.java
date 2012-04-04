@@ -67,8 +67,6 @@ import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
 
 public class InjectUtil {
-
-
   private static final AtomicInteger injectorCounter = new AtomicInteger(0);
   private static final AtomicInteger uniqueCounter = new AtomicInteger(0);
 
