@@ -22,6 +22,7 @@ import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.common.rebind.EnvUtil;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
@@ -221,51 +222,8 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     exposedClasses.addAll(exposedFromScanner);
 
     exposedClasses.add(Object.class);
-
-    Properties props = scanner.getProperties("ErraiApp.properties");
-    if (props != null) {
-      log.debug("checking ErraiApp.properties for configured types ...");
-
-      for (Object o : props.keySet()) {
-        String key = (String) o;
-        if (key.equals(MarshallingGenUtil.CONFIG_ERRAI_OLD_SERIALIZABLE_TYPE)
-                || key.equals(MarshallingGenUtil.CONFIG_ERRAI_SERIALIZABLE_TYPE)) {
-          for (String s : props.getProperty(key).split(" ")) {
-            try {
-              Class<?> cls = Class.forName(s.trim());
-              exposedClasses.add(cls);
-            }
-            catch (Exception e) {
-              throw new RuntimeException("could not find class defined in ErraiApp.properties for serialization: " + s);
-            }
-          }
-
-          break;
-        }
-
-        if (key.equals(MarshallingGenUtil.CONFIG_ERRAI_MAPPING_ALIASES)) {
-          for (String s : props.getProperty(key).split(" ")) {
-            try {
-              String[] mapping = s.split("->");
-              
-              if (mapping.length != 2) {
-                throw new RuntimeException("syntax error: mapping for marshalling alias: " + s);
-              }
-
-              Class<?> fromMapping = Class.forName(mapping[0].trim());
-              Class<?> toMapping = Class.forName(mapping[1].trim());
-
-              mappingAliases.put(fromMapping.getName(), toMapping.getName());
-            }
-            catch (Exception e) {
-              throw new RuntimeException("could not find class defined in ErraiApp.properties for mapping: " + s);
-            }
-          }
-          break;
-        }
-      }
-    }
-
+    exposedClasses.addAll(EnvUtil.getEnvironmentConfig().getExposedClasses());
+    mappingAliases.putAll(EnvUtil.getEnvironmentConfig().getMappingAliases());
 
     Map<Class<?>, Class<?>> aliasToMarshaller = new HashMap<Class<?>, Class<?>>();
 

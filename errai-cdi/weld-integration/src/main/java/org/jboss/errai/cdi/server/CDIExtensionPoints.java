@@ -41,9 +41,8 @@ import org.jboss.errai.cdi.server.events.ConversationalEventObserverMethod;
 import org.jboss.errai.cdi.server.events.EventDispatcher;
 import org.jboss.errai.cdi.server.events.EventObserverMethod;
 import org.jboss.errai.cdi.server.events.ShutdownEventObserver;
-import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.common.client.framework.Assert;
-import org.jboss.errai.common.client.types.TypeHandlerFactory;
+import org.jboss.errai.common.rebind.EnvUtil;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.enterprise.client.cdi.api.Conversational;
@@ -241,7 +240,7 @@ public class CDIExtensionPoints implements Extension {
 
       Class eventType = (Class) pType.getActualTypeArguments()[0];
 
-      if (isExposedEntityType(eventType)) {
+      if (EnvUtil.isPortableType(eventType)) {
         List<Annotation> qualifiers = new ArrayList<Annotation>();
 
         /**
@@ -264,7 +263,7 @@ public class CDIExtensionPoints implements Extension {
       Class eventType = (Class) pType.getActualTypeArguments()[0];
 
 
-      if (isExposedEntityType(eventType)) {
+      if (EnvUtil.isPortableType(eventType)) {
         List<Annotation> qualifiers = new ArrayList<Annotation>();
 
         /**
@@ -295,24 +294,12 @@ public class CDIExtensionPoints implements Extension {
         }
       }
 
-      if (isExposedEntityType(sendType)) {
+      if (EnvUtil.isPortableType(sendType)) {
         messageSenders.add(new MessageSender(typeParm, qualifiers));
       }
     }
   }
 
-
-  private boolean isExposedEntityType(Class type) {
-    if (type.isAnnotationPresent(Portable.class)) {
-      return true;
-    }
-    else {
-      if (String.class.equals(type) || TypeHandlerFactory.getHandler(type) != null) {
-        return true;
-      }
-    }
-    return false;
-  }
 
   @SuppressWarnings({"UnusedDeclaration", "unchecked"})
   public void processObserverMethod(@Observes ProcessObserverMethod processObserverMethod) {
@@ -323,7 +310,7 @@ public class CDIExtensionPoints implements Extension {
       type = (Class) t;
     }
 
-    if (type != null && isExposedEntityType(type)) {
+    if (type != null && EnvUtil.isPortableType(type)) {
       Set<Annotation> annotations = processObserverMethod.getObserverMethod().getObservedQualifiers();
       Annotation[] methodQualifiers = annotations.toArray(new Annotation[annotations.size()]);
       for (Annotation qualifier : methodQualifiers) {

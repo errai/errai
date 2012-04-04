@@ -38,7 +38,14 @@ public class DisabledRemoteCommunicationTest extends AbstractErraiTest {
     setRemoteCommunicationEnabled(false);
     super.gwtSetUp();
   }
-  
+
+  @Override
+  protected void gwtTearDown() throws Exception {
+    // renable when test is done so this doesn't interfere with other tests
+    setRemoteCommunicationEnabled(true);
+    super.gwtTearDown();
+  }
+
   public void testDisableRemoteCommunication() {
     runAfterInit(new Runnable() {
       public void run() {
@@ -46,7 +53,8 @@ public class DisabledRemoteCommunicationTest extends AbstractErraiTest {
         
         assertNotNull(remoteSubscriptions);
         assertTrue("Expected to find no remote subscriptions", remoteSubscriptions.isEmpty());
-        
+
+        // re-enable
         finishTest();
       }
     });

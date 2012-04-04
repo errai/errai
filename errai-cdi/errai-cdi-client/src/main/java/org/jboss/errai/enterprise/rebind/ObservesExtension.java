@@ -45,7 +45,9 @@ import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.codegen.util.PrivateAccessType;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.common.rebind.EnvUtil;
 import org.jboss.errai.enterprise.client.cdi.AbstractCDIEventCallback;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
@@ -114,7 +116,7 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
                             .invoke("get", parm.getType().asClass(), CDIProtocol.BeanReference))))
                     .finish()).finish()
             .publicOverridesMethod("toString")
-              ._(Stmt.load("Observer: " + parmClassName + " " + Arrays.toString(qualifiers)).returnValue());
+            ._(Stmt.load("Observer: " + parmClassName + " " + Arrays.toString(qualifiers)).returnValue());
 
 
     final List<Statement> statements = new ArrayList<Statement>();
@@ -131,10 +133,6 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
     statements.add(subscribeStatement);
 
 
-    Set<Class<?>> toSubscribe = new HashSet<Class<?>>(getOrCreateInstance().getSubTypesOf(parm.getType().asClass()));
-    toSubscribe.add(parm.getType().asClass());
-
-
     // create the destruction callback to deregister the service when the bean is destroyed.
 
     final MetaClass destructionCallbackType =
@@ -145,12 +143,26 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
             .publicOverridesMethod("destroy", Parameter.of(instance.getEnclosingType(), "obj", true))
             .append(Stmt.loadVariable(subscrVar).invoke("remove"));
 
+    Set<Class<?>> toSubscribe = new HashSet<Class<?>>(getOrCreateInstance().getSubTypesOf(parm.getType().asClass()));
+    toSubscribe.add(parm.getType().asClass());
+
+    boolean isPortable = false;
+
     for (Class<?> cls : toSubscribe) {
-      final String subscrHandle = InjectUtil.getUniqueVarName();
-      statements.add(Stmt.declareVariable(Subscription.class).asFinal().named(subscrHandle)
-              .initializeWith(Stmt.nestedCall(bus).invoke("subscribe", CDI.getSubjectNameByType(cls.getName()),
-                      Stmt.loadStatic(CDI.class, "ROUTING_CALLBACK"))));
-      destroyMeth.append(Stmt.loadVariable(subscrHandle).invoke("remove"));
+      if (EnvUtil.isPortableType(cls)) {
+        isPortable = true;
+        break;
+      }
+    }
+
+    if (isPortable) {
+      for (Class<?> cls : toSubscribe) {
+        final String subscrHandle = InjectUtil.getUniqueVarName();
+        statements.add(Stmt.declareVariable(Subscription.class).asFinal().named(subscrHandle)
+                .initializeWith(Stmt.nestedCall(bus).invoke("subscribe", CDI.getSubjectNameByType(cls.getName()),
+                        Stmt.loadStatic(CDI.class, "ROUTING_CALLBACK"))));
+        destroyMeth.append(Stmt.loadVariable(subscrHandle).invoke("remove"));
+      }
     }
 
     Statement destructionCallback = Stmt.create().loadVariable("context").invoke("addDestructionCallback",

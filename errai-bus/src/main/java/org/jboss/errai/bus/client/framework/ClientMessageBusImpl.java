@@ -796,6 +796,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   @Override
   public void init() {
     declareDebugFunction();
+    if (!reinit) {
+      registerInitVoteCallbacks();
+    }
 
     if (sendBuilder == null) {
       if (!GWT.isScript()) {   // Hosted Mode
@@ -825,9 +828,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     if (reinit) {
       resubscribeShadowSubcriptions();
-    }
-    else {
-      registerInitVoteCallbacks();
     }
 
     /**
