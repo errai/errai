@@ -67,7 +67,7 @@ public class EventObserverMethod implements ObserverMethod {
   /**
    * The pre-calculated subject to be used to transmit the event remotely.
    */
- // protected final String subject;
+  protected final String subject;
 
   public EventObserverMethod(Class<?> type, MessageBus bus, Annotation... qualifiers) {
     this.type = type;
@@ -82,7 +82,7 @@ public class EventObserverMethod implements ObserverMethod {
       this.qualifierForWire = CDI.getQualifiersPart(qualifiers);
     }
 
-   // this.subject = CDI.getSubjectNameByType(type);
+    this.subject = CDI.getSubjectNameByType(type.getName());
   }
 
   public Class<?> getBeanClass() {
@@ -105,16 +105,16 @@ public class EventObserverMethod implements ObserverMethod {
     return null;
   }
 
-  public void notify(final Object event) {
+  public void notify(Object event) {
     if (!type.equals(event.getClass()) || EventConversationContext.isEventObjectInContext(event)) return;
 
     if (!qualifierForWire.isEmpty()) {
-      MessageBuilder.createMessage().toSubject(CDI.CLIENT_DISPATCHER_SUBJECT).command(CDICommands.CDIEvent)
+      MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
               .with(CDIProtocol.BeanType, type.getName()).with(CDIProtocol.BeanReference, event)
               .with(CDIProtocol.Qualifiers, qualifierForWire).noErrorHandling().sendNowWith(bus);
     }
     else {
-      MessageBuilder.createMessage().toSubject(CDI.CLIENT_DISPATCHER_SUBJECT).command(CDICommands.CDIEvent)
+      MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
               .with(CDIProtocol.BeanType, type.getName()).with(CDIProtocol.BeanReference, event).noErrorHandling()
               .sendNowWith(bus);
     }

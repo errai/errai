@@ -522,9 +522,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     if (!subscriptions.containsKey(subject)) {
       subscriptions.put(subject, new ArrayList<MessageCallback>());
     }
-    else {
-      System.out.println();
-    }
 
     if (!subscriptions.get(subject).contains(reference)) {
       subscriptions.get(subject).add(reference);
@@ -1501,6 +1498,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   public void addInterceptor(MessageInterceptor interceptor) {
     interceptorStack.add(interceptor);
+  }
+
+
+  @Override
+  public Set<String> getAllRegisteredSubjects() {
+    return Collections.unmodifiableSet(subscriptions.keySet());
   }
 
   public void _store(String subject, Message msg) {

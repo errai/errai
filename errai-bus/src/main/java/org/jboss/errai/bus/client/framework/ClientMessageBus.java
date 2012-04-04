@@ -21,6 +21,7 @@ import org.jboss.errai.bus.client.api.SessionExpirationListener;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * An extended client-specific/in-browser interface of {@link MessageBus}, which defines client-specific functionalities.
@@ -90,6 +91,8 @@ public interface ClientMessageBus extends MessageBus {
   public boolean isInitialized();
 
   public void setLogAdapter(LogAdapter logAdapter);
+
+  public Set<String> getAllRegisteredSubjects();
 
   public LogAdapter getLogAdapter();
 }

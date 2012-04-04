@@ -19,8 +19,7 @@ import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
-import org.jboss.errai.bus.client.api.base.MessageBuilder;
-import org.jboss.errai.bus.client.api.laundry.LaundryList;
+import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.bus.client.framework.Subscription;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.common.client.protocols.MessageParts;
@@ -34,6 +33,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -49,6 +49,7 @@ public class CDI {
   public static final String CDI_SUBJECT_PREFIX = "cdi.event:";
   public static final String SERVER_DISPATCHER_SUBJECT = CDI_SUBJECT_PREFIX + "Dispatcher";
   public static final String CLIENT_DISPATCHER_SUBJECT = CDI_SUBJECT_PREFIX + "ClientDispatcher";
+  private static final String CLIENT_ALREADY_FIRED_RESOURCE = CDI_SUBJECT_PREFIX + "AlreadyFired";
 
   private static final Set<String> remoteEvents = new HashSet<String>();
   private static boolean active = false;
@@ -58,10 +59,27 @@ public class CDI {
   private static Map<String, List<MessageCallback>> eventObservers = new HashMap<String, List<MessageCallback>>();
   private static Map<String, Collection<String>> lookupTable = Collections.emptyMap();
 
+  public static final MessageCallback ROUTING_CALLBACK = new MessageCallback() {
+    @Override
+    public void callback(Message message) {
+      consumeEventFromMessage(message);
+    }
+  };
+
+  public static String getSubjectNameByType(final String typeName) {
+    return CDI_SUBJECT_PREFIX + typeName;
+  }
+
   /**
    * Should only be called by bootstrapper for testing purposes.
    */
   public void __resetSubsystem() {
+    for (String eventType : new HashSet<String>(((ClientMessageBusImpl) ErraiBus.get()).getAllRegisteredSubjects())) {
+      if (eventType.startsWith(CDI_SUBJECT_PREFIX)) {
+        ErraiBus.get().unsubscribeAll(eventType);
+      }
+    }
+
     remoteEvents.clear();
     active = false;
     deferredEvents.clear();
@@ -161,8 +179,21 @@ public class CDI {
     List<MessageCallback> eventCallbacks = eventObservers.get(beanType);
     if (eventCallbacks != null) {
       for (MessageCallback callback : eventCallbacks) {
-        callback.callback(message);
+        fireIfNotFired(callback, message);
       }
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  private static void fireIfNotFired(final MessageCallback callback, final Message message) {
+    Map<Object, Object> alreadyFired = message.getResource(Map.class, CLIENT_ALREADY_FIRED_RESOURCE);
+    if (alreadyFired == null) {
+      message.setResource(CLIENT_ALREADY_FIRED_RESOURCE, alreadyFired = new IdentityHashMap<Object, Object>());
+    }
+
+    if (!alreadyFired.containsKey(callback)) {
+      callback.callback(message);
+      alreadyFired.put(callback, "");
     }
   }
 

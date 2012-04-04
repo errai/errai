@@ -24,7 +24,6 @@ import org.jboss.errai.bus.client.framework.RoutingFlag;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
-import org.jboss.errai.enterprise.client.cdi.api.CDI;
 
 /**
  * An implementation of the the CDI SPI {@code ObserverMethod} interface which is used to intercept events within the
@@ -47,14 +46,14 @@ public class ConversationalEventObserverMethod extends EventObserverMethod {
       if (ctx.getEventObject() == event) return;
 
       if (!qualifierForWire.isEmpty()) {
-        MessageBuilder.createMessage().toSubject(CDI.CLIENT_DISPATCHER_SUBJECT).command(CDICommands.CDIEvent)
+        MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
                 .with(MessageParts.SessionID.name(), ctx.getSession())
                 .with(CDIProtocol.BeanType, type.getName()).with(CDIProtocol.Qualifiers, qualifierForWire)
                 .with(CDIProtocol.BeanReference, event)
                 .flag(RoutingFlag.NonGlobalRouting).noErrorHandling().sendNowWith(bus);
       }
       else {
-        MessageBuilder.createMessage().toSubject(CDI.CLIENT_DISPATCHER_SUBJECT).command(CDICommands.CDIEvent)
+        MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
                 .with(MessageParts.SessionID.name(), ctx.getSession())
                 .with(CDIProtocol.BeanType, type.getName()).with(CDIProtocol.BeanReference, event)
                 .flag(RoutingFlag.NonGlobalRouting).noErrorHandling()

@@ -3,7 +3,7 @@ package org.jboss.errai.cdi.client.event;
 import org.jboss.errai.common.client.api.annotations.Portable;
 
 @Portable
-public class ReceivedEvent {
+public class ReceivedEvent implements Poop {
   private String receiver;
   private String event;
 

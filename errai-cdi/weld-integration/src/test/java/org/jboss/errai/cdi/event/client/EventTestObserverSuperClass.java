@@ -34,7 +34,7 @@ public abstract class EventTestObserverSuperClass {
     if (events == null)
       events = new ArrayList<String>();
 
-    if (events.contains(event))
+    if (!receiver.equals("") && events.contains(event))
       throw new RuntimeException(receiver + " received " + event + " twice!");
 
     events.add(event);
