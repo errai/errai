@@ -17,7 +17,10 @@
 package org.jboss.errai.cdi.server.events;
 
 import java.lang.annotation.Annotation;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RoutingFlag;
@@ -46,20 +49,19 @@ public class ConversationalEventObserverMethod extends EventObserverMethod {
     if (ctx != null && ctx.getSession() != null) {
       if (ctx.getEventObject() == event) return;
 
+      final Map<String, Object> messageParts = new HashMap<String, Object>(20);
+      messageParts.put(MessageParts.ToSubject.name(), getSubjectNameByType(event.getClass().getName()));
+      messageParts.put(MessageParts.CommandType.name(), CDICommands.CDIEvent.name());
+      messageParts.put(CDIProtocol.BeanType.name(), event.getClass().getName());
+      messageParts.put(CDIProtocol.BeanReference.name(), event);
+
+      messageParts.put(MessageParts.SessionID.name(), ctx.getSession());
+
       if (!qualifierForWire.isEmpty()) {
-        MessageBuilder.createMessage().toSubject(getSubjectNameByType(event.getClass().getName())).command(CDICommands.CDIEvent)
-                .with(MessageParts.SessionID.name(), ctx.getSession())
-                .with(CDIProtocol.BeanType, type.getName()).with(CDIProtocol.Qualifiers, qualifierForWire)
-                .with(CDIProtocol.BeanReference, event)
-                .flag(RoutingFlag.NonGlobalRouting).noErrorHandling().sendNowWith(bus);
+        messageParts.put(CDIProtocol.Qualifiers.name(), qualifierForWire);
       }
-      else {
-        MessageBuilder.createMessage().toSubject(getSubjectNameByType(event.getClass().getName())).command(CDICommands.CDIEvent)
-                .with(MessageParts.SessionID.name(), ctx.getSession())
-                .with(CDIProtocol.BeanType, type.getName()).with(CDIProtocol.BeanReference, event)
-                .flag(RoutingFlag.NonGlobalRouting).noErrorHandling()
-                .sendNowWith(bus);
-      }
+
+      bus.send(CommandMessage.createWithParts(messageParts, RoutingFlag.NonGlobalRouting.flag()));
     }
   }
 }

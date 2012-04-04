@@ -70,6 +70,11 @@ public class CommandMessage implements Message {
     return new CommandMessage(Assert.notNull(parts));
   }
 
+  public static CommandMessage createWithParts(Map<String, Object> parts, int flags) {
+    return new CommandMessage(Assert.notNull(parts), flags);
+  }
+
+
   /**
    * Creates a new CommandMessage with the given parts and provided parts.
    * <p>
@@ -99,6 +104,11 @@ public class CommandMessage implements Message {
   private CommandMessage(Map<String, Object> parts) {
     this.parts = parts;
     this.providedParts = new HashMap<String, ResourceProvider<?>>();
+  }
+
+  public CommandMessage(Map<String, Object> parts, int routingFlags) {
+    this.parts = parts;
+    this.routingFlags = routingFlags;
   }
 
   private CommandMessage(Map<String, Object> parts, Map<String, ResourceProvider<?>> providers) {

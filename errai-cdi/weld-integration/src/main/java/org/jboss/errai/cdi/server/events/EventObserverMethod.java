@@ -18,16 +18,20 @@ package org.jboss.errai.cdi.server.events;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.enterprise.event.Reception;
 import javax.enterprise.event.TransactionPhase;
 import javax.enterprise.inject.spi.ObserverMethod;
 
+import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
@@ -104,15 +108,16 @@ public class EventObserverMethod implements ObserverMethod {
   public void notify(Object event) {
     if (EventConversationContext.isEventObjectInContext(event)) return;
 
+    final Map<String, Object> messageParts = new HashMap<String, Object>(10);
+    messageParts.put(MessageParts.ToSubject.name(), getSubjectNameByType(event.getClass().getName()));
+    messageParts.put(MessageParts.CommandType.name(), CDICommands.CDIEvent.name());
+    messageParts.put(CDIProtocol.BeanType.name(), event.getClass().getName());
+    messageParts.put(CDIProtocol.BeanReference.name(), event);
+
     if (!qualifierForWire.isEmpty()) {
-      MessageBuilder.createMessage().toSubject(getSubjectNameByType(event.getClass().getName())).command(CDICommands.CDIEvent)
-              .with(CDIProtocol.BeanType, type.getName()).with(CDIProtocol.BeanReference, event)
-              .with(CDIProtocol.Qualifiers, qualifierForWire).noErrorHandling().sendNowWith(bus);
+      messageParts.put(CDIProtocol.Qualifiers.name(), qualifierForWire);
     }
-    else {
-      MessageBuilder.createMessage().toSubject(getSubjectNameByType(event.getClass().getName())).command(CDICommands.CDIEvent)
-              .with(CDIProtocol.BeanType, type.getName()).with(CDIProtocol.BeanReference, event).noErrorHandling()
-              .sendNowWith(bus);
-    }
+
+    bus.send(CommandMessage.createWithParts(messageParts));
   }
 }
