@@ -62,6 +62,21 @@ public abstract class EnvUtil {
     MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
     final Map<String, String> mappingAliases = new HashMap<String, String>();
     final Set<Class<?>> exposedClasses = new HashSet<Class<?>>();
+
+    final Set<Class<?>> exposedFromScanner = new HashSet<Class<?>>(scanner.getTypesAnnotatedWith(Portable.class));
+
+    for (Class<?> cls : exposedFromScanner) {
+      for (Class<?> decl : cls.getDeclaredClasses()) {
+        if (decl.isSynthetic()) {
+          continue;
+        }
+
+        exposedClasses.add(decl);
+      }
+    }
+
+    exposedClasses.addAll(exposedFromScanner);
+
     Properties props = scanner.getProperties("ErraiApp.properties");
     if (props != null) {
       log.debug("checking ErraiApp.properties for configured types ...");

@@ -51,6 +51,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import static org.jboss.errai.common.rebind.EnvUtil.getEnvironmentConfig;
+
 /**
  * The default implementation of {@link DefinitionsFactory}. This implementation covers the detection and
  * mapping of classes annotated with the {@link Portable} annotation, and custom mappings annotated with
@@ -207,25 +209,11 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       }
     }
 
-    Set<Class<?>> exposedFromScanner = new HashSet<Class<?>>(scanner.getTypesAnnotatedWith(Portable.class));
-
-    for (Class<?> cls : exposedFromScanner) {
-      for (Class<?> decl : cls.getDeclaredClasses()) {
-        if (decl.isSynthetic()) {
-          continue;
-        }
-
-        exposedClasses.add(decl);
-      }
-    }
-
-    exposedClasses.addAll(exposedFromScanner);
-
     exposedClasses.add(Object.class);
-    exposedClasses.addAll(EnvUtil.getEnvironmentConfig().getExposedClasses());
-    mappingAliases.putAll(EnvUtil.getEnvironmentConfig().getMappingAliases());
+    exposedClasses.addAll(getEnvironmentConfig().getExposedClasses());
+    mappingAliases.putAll(getEnvironmentConfig().getMappingAliases());
 
-    Map<Class<?>, Class<?>> aliasToMarshaller = new HashMap<Class<?>, Class<?>>();
+    final Map<Class<?>, Class<?>> aliasToMarshaller = new HashMap<Class<?>, Class<?>>();
 
     for (Class<?> mappedClass : exposedClasses) {
       if (mappedClass.isSynthetic()) continue;
@@ -248,8 +236,6 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
         throw new InvalidMappingException("cannot alias type " + entry.getKey().getName()
                 + " to " + entry.getValue().getName() + ": the specified alias type does not exist ");
       }
-
-    //  mappingAliases.put(entry.getKey().getName(), def.getClientMarshallerClass().getName());
 
       MappingDefinition aliasDef = new MappingDefinition(def.getMarshallerInstance(), entry.getKey(), false);
       aliasDef.setClientMarshallerClass(def.getClientMarshallerClass());

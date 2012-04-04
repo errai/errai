@@ -11,7 +11,7 @@ public class EnviromentConfig {
   private final Map<String, String> mappingAliases;
   private final Set<Class<?>> exposedClasses;
 
-  public EnviromentConfig(Map<String, String> mappingAliases, Set<Class<?>> exposedClasses) {
+  EnviromentConfig(Map<String, String> mappingAliases, Set<Class<?>> exposedClasses) {
     this.mappingAliases = Collections.unmodifiableMap(mappingAliases);
     this.exposedClasses = Collections.unmodifiableSet(exposedClasses);
   }
