@@ -6,6 +6,8 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
 import org.jboss.errai.cdi.client.event.FinishEvent;
+import org.jboss.errai.cdi.client.event.MyEventImpl;
+import org.jboss.errai.cdi.client.event.MyEventInterface;
 import org.jboss.errai.cdi.client.event.StartEvent;
 import org.jboss.errai.cdi.client.qualifier.A;
 import org.jboss.errai.cdi.client.qualifier.B;
@@ -39,6 +41,9 @@ public class CdiTestEventProducerService {
   private Event<String> eventABC;
   
   @Inject
+  private Event<MyEventInterface> myEvent;
+  
+  @Inject
   private Event<FinishEvent> finishEvent;
 
   public void start(@Observes StartEvent event) {
@@ -46,50 +51,15 @@ public class CdiTestEventProducerService {
   }
 
   public void fireAll() {
-    fire();
-    fireA();
-    fireB();
-    fireC();
-    fireAB();
-    fireAC();
-    fireBC();
-    fireABC();
-    fireFinish();
-  }
-
-  public void fire() {
     event.fire("");
-  }
-
-  public void fireA() {
     eventA.fire("A");
-  }
-
-  public void fireB() {
     eventB.fire("B");
-  }
-
-  public void fireC() {
     eventC.fire("C");
-  }
-
-  public void fireAB() {
     eventAB.fire("AB");
-  }
-
-  public void fireBC() {
-    eventBC.fire("BC");
-  }
-
-  public void fireAC() {
     eventAC.fire("AC");
-  }
-
-  public void fireABC() {
+    eventBC.fire("BC");
     eventABC.fire("ABC");
-  }
-  
-  public void fireFinish() {
+    myEvent.fire(new MyEventImpl());
     finishEvent.fire(new FinishEvent());
   }
 }

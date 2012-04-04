@@ -147,7 +147,6 @@ public class EventProducerTestModule {
     return eventABC;
   }
 
-
   public void collectResults(@Observes ReceivedEvent event) {
     if (event.getEvent().equals("FINISH")) {
       if (verifier != null) {

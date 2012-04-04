@@ -5,6 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jboss.errai.cdi.client.event.MyAbstractEvent;
+import org.jboss.errai.cdi.client.event.MyAbstractEventInterface;
+import org.jboss.errai.cdi.client.event.MyEventImpl;
+import org.jboss.errai.cdi.client.event.MyEventInterface;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 
 import com.google.gwt.junit.client.TimeoutException;
@@ -43,7 +47,7 @@ public abstract class AbstractEventIntegrationTest extends AbstractErraiCDITest 
    * 
    * Maps observers to the events they should receive during execution of the tests.
    */
-  protected static final Map<String, List<String>> expectedEvents = new HashMap<String, List<String>>() {
+  protected static final Map<String, List<String>> expectedQualifiedEvents = new HashMap<String, List<String>>() {
     {
       put("", Arrays.asList(new String[] { "", "A", "B", "C", "AB", "AC", "BC", "ABC" }));
       put("A", Arrays.asList(new String[] { "A", "AB", "AC", "ABC" }));
@@ -58,21 +62,38 @@ public abstract class AbstractEventIntegrationTest extends AbstractErraiCDITest 
   };
 
   /**
-   * Verify the actual received events against the expected events
+   * Verify the actual qualified events received against the expected events
    * 
    * @param actualEvents
    */
-  protected void verifyEvents(Map<String, List<String>> actualEvents) {
+  protected void verifyQualifiedEvents(Map<String, List<String>> actualEvents) {
     // These asserts could be combined but provide nicer failure messages this way
-    assertEquals("Wrong events observed for @{}", expectedEvents.get(""), actualEvents.get(""));
-    assertEquals("Wrong events observed for @A", expectedEvents.get("A"), actualEvents.get("A"));
-    assertEquals("Wrong events observed for @B", expectedEvents.get("B"), actualEvents.get("B"));
-    assertEquals("Wrong events observed for @C", expectedEvents.get("C"), actualEvents.get("C"));
-    assertEquals("Wrong events observed for @AB", expectedEvents.get("AB"), actualEvents.get("AB"));
-    assertEquals("Wrong events observed for @BA", expectedEvents.get("AB"), actualEvents.get("BA"));
-    assertEquals("Wrong events observed for @AC", expectedEvents.get("AC"), actualEvents.get("AC"));
-    assertEquals("Wrong events observed for @BC", expectedEvents.get("BC"), actualEvents.get("BC"));
-    assertEquals("Wrong events observed for @ABC", expectedEvents.get("ABC"), actualEvents.get("ABC"));
+    assertEquals("Wrong events observed for @{}", expectedQualifiedEvents.get(""), actualEvents.get(""));
+    assertEquals("Wrong events observed for @A", expectedQualifiedEvents.get("A"), actualEvents.get("A"));
+    assertEquals("Wrong events observed for @B", expectedQualifiedEvents.get("B"), actualEvents.get("B"));
+    assertEquals("Wrong events observed for @C", expectedQualifiedEvents.get("C"), actualEvents.get("C"));
+    assertEquals("Wrong events observed for @AB", expectedQualifiedEvents.get("AB"), actualEvents.get("AB"));
+    assertEquals("Wrong events observed for @BA", expectedQualifiedEvents.get("AB"), actualEvents.get("BA"));
+    assertEquals("Wrong events observed for @AC", expectedQualifiedEvents.get("AC"), actualEvents.get("AC"));
+    assertEquals("Wrong events observed for @BC", expectedQualifiedEvents.get("BC"), actualEvents.get("BC"));
+    assertEquals("Wrong events observed for @ABC", expectedQualifiedEvents.get("ABC"), actualEvents.get("ABC"));
+  }
+  
+  /**
+   * Verify the actual events received (observing super types) against the expected events
+   * 
+   * @param actualEvents
+   */
+  protected void verifySuperTypeEvents(List<String> actualEvents) {
+    // These asserts could be combined but provide nicer failure messages this way
+    assertEquals("Wrong number of super type events observed", actualEvents.size(), 4); 
+    
+    assertTrue("Failed to observe event using its super type", actualEvents.contains(MyAbstractEvent.class.getName()));
+    assertTrue("Failed to observe event using its super type's interface type", 
+        actualEvents.contains(MyAbstractEventInterface.class.getName()));
+    
+    assertTrue("Failed to observe event using its interface type", actualEvents.contains(MyEventInterface.class.getName()));
+    assertTrue("Failed to observe event using its actual type", actualEvents.contains(MyEventImpl.class.getName()));
   }
 
   /**

@@ -1,8 +1,5 @@
 package org.jboss.errai.cdi.event.client.test;
 
-import java.util.List;
-import java.util.Map;
-
 import org.jboss.errai.cdi.event.client.EventObserverTestModule;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.container.IOC;
@@ -37,10 +34,10 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
       public void run() {
         EventObserverTestModule module = IOC.getBeanManager().lookupBean(EventObserverTestModule.class).getInstance();
 
-        Map<String, List<String>> actualEvents = module.getReceivedEvents();
-
         // assert that client received all events
-        EventObserverIntegrationTest.this.verifyEvents(actualEvents);
+        EventObserverIntegrationTest.this.verifyQualifiedEvents(module.getReceivedQualifiedEvents());
+        EventObserverIntegrationTest.this.verifySuperTypeEvents(module.getReceivedSuperTypeEvents());
+       
         finishTest();
       }
     };

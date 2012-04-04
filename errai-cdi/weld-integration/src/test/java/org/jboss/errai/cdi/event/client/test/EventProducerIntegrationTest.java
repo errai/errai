@@ -40,6 +40,7 @@ public class EventProducerIntegrationTest extends AbstractEventIntegrationTest {
           assertNotNull(module.getEventAC());
           assertNotNull(module.getEventBC());
           assertNotNull(module.getEventABC());
+          
           finishTest();
       }
     });
@@ -53,7 +54,7 @@ public class EventProducerIntegrationTest extends AbstractEventIntegrationTest {
         Map<String, List<String>> actualEvents = module.getReceivedEventsOnServer();
 
         // assert that the server received all events
-        EventProducerIntegrationTest.this.verifyEvents(actualEvents);
+        EventProducerIntegrationTest.this.verifyQualifiedEvents(actualEvents);
         finishTest();
       }
     };

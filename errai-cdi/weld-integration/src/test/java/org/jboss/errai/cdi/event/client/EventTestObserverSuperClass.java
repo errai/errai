@@ -17,34 +17,46 @@
 package org.jboss.errai.cdi.event.client;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.enterprise.event.Observes;
 
+import org.jboss.errai.cdi.client.event.MyAbstractEvent;
+import org.jboss.errai.cdi.client.event.MyAbstractEventInterface;
+import org.jboss.errai.cdi.client.event.MyEventImpl;
+import org.jboss.errai.cdi.client.event.MyEventInterface;
+
 /**
- * @author Mike Brock
+ * This class serves a dual-purpose for now: to test whether @Observes works in abstract super classes 
+ * and to check if super types of event types can be observed.
+ * 
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public abstract class EventTestObserverSuperClass {
-  protected Map<String, List<String>> receivedEvents = new HashMap<String, List<String>>();
+  private List<String> receivedSuperTypeEvents = new ArrayList<String>();
 
-  protected void addReceivedEvent(String receiver, String event) {
-    List<String> events = receivedEvents.get(receiver);
-    if (events == null)
-      events = new ArrayList<String>();
-
-    if (!receiver.equals("") && events.contains(event))
-      throw new RuntimeException(receiver + " received " + event + " twice!");
-
-    events.add(event);
-    receivedEvents.put(receiver, events);
+  public List<String> getReceivedSuperTypeEvents() {
+    return receivedSuperTypeEvents;
   }
 
+  public void observeInterface(@Observes Cloneable e) {
+    // should never fire
+    receivedSuperTypeEvents.add(Comparable.class.getName());
+  }
 
-  // all the observer methods
-  @SuppressWarnings("unused")
-  private void onEvent(@Observes String event) {
-    addReceivedEvent("", event);
+  public void observeInterface(@Observes MyEventInterface e) {
+    receivedSuperTypeEvents.add(MyEventInterface.class.getName());
+  }
+  
+  public void observeSuperTypeInterface(@Observes MyAbstractEventInterface e) {
+    receivedSuperTypeEvents.add(MyAbstractEventInterface.class.getName());
+  }
+
+  public void observeSuperType(@Observes MyAbstractEvent e) {
+    receivedSuperTypeEvents.add(MyAbstractEvent.class.getName());
+  }
+
+  public void observeImplementation(@Observes MyEventImpl e) {
+    receivedSuperTypeEvents.add(MyEventImpl.class.getName());
   }
 }

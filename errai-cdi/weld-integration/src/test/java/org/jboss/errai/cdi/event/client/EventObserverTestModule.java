@@ -1,5 +1,7 @@
 package org.jboss.errai.cdi.event.client;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +24,8 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
  */
 @EntryPoint
 public class EventObserverTestModule extends EventTestObserverSuperClass {
+  private Map<String, List<String>> receivedQualifiedEvents = new HashMap<String, List<String>>();
+  
   private int busReadyEventsReceived = 0;
   private Runnable verifier;
 
@@ -32,8 +36,8 @@ public class EventObserverTestModule extends EventTestObserverSuperClass {
     return busReadyEventsReceived;
   }
 
-  public Map<String, List<String>> getReceivedEvents() {
-    return receivedEvents;
+  public Map<String, List<String>> getReceivedQualifiedEvents() {
+    return receivedQualifiedEvents;
   }
 
   public Event<StartEvent> getStartEvent() {
@@ -54,36 +58,41 @@ public class EventObserverTestModule extends EventTestObserverSuperClass {
     startEvent.fire(new StartEvent());
   }
 
+  @SuppressWarnings("unused")
+  private void onEvent(@Observes String event) {
+    addQualifiedReceivedEvent("", event);
+  }
+  
   public void onEventA(@Observes @A String event) {
-    addReceivedEvent("A", event);
+    addQualifiedReceivedEvent("A", event);
   }
 
   public void onEventB(@Observes @B String event) {
-    addReceivedEvent("B", event);
+    addQualifiedReceivedEvent("B", event);
   }
 
   public void onEventC(@Observes @C String event) {
-    addReceivedEvent("C", event);
+    addQualifiedReceivedEvent("C", event);
   }
 
   public void onEventAB(@Observes @A @B String event) {
-    addReceivedEvent("AB", event);
+    addQualifiedReceivedEvent("AB", event);
   }
 
   public void onEventBA(@Observes @B @A String event) {
-    addReceivedEvent("BA", event);
+    addQualifiedReceivedEvent("BA", event);
   }
 
   public void onEventAC(@Observes @A @C String event) {
-    addReceivedEvent("AC", event);
+    addQualifiedReceivedEvent("AC", event);
   }
 
   public void onEventBC(@Observes @B @C String event) {
-    addReceivedEvent("BC", event);
+    addQualifiedReceivedEvent("BC", event);
   }
 
   public void onEventABC(@Observes @A @B @C String event) {
-    addReceivedEvent("ABC", event);
+    addQualifiedReceivedEvent("ABC", event);
   }
 
   public void onFinish(@Observes FinishEvent event) {
@@ -94,5 +103,17 @@ public class EventObserverTestModule extends EventTestObserverSuperClass {
 
   public void setResultVerifier(Runnable verifier) {
     this.verifier = verifier;
+  }
+  
+  private void addQualifiedReceivedEvent(String receiver, String event) {
+    List<String> events = receivedQualifiedEvents.get(receiver);
+    if (events == null)
+      events = new ArrayList<String>();
+
+    if (events.contains(event))
+      throw new RuntimeException(receiver + " received " + event + " twice!");
+
+    events.add(event);
+    receivedQualifiedEvents.put(receiver, events);
   }
 }
