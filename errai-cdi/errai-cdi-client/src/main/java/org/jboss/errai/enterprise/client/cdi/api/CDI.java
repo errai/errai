@@ -102,7 +102,6 @@ public class CDI {
       return;
     }
 
-
     final List<String> qualifiersPart = getQualifiersPart(qualifiers);
 
     final Map<String, Object> messageMap = new HashMap<String, Object>();
@@ -206,6 +205,10 @@ public class CDI {
       deferredEvents.clear();
     }
     InitVotes.voteFor(CDI.class);
+  }
+
+  public static Set<String> getAllObservedTypes() {
+    return Collections.unmodifiableSet(lookupTable.keySet());
   }
 
   static class DeferredEvent {

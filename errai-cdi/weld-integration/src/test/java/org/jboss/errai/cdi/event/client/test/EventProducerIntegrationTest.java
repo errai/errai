@@ -9,7 +9,7 @@ import org.jboss.errai.ioc.client.container.IOC;
 
 /**
  * Tests CDI event producers.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class EventProducerIntegrationTest extends AbstractEventIntegrationTest {
@@ -25,11 +25,13 @@ public class EventProducerIntegrationTest extends AbstractEventIntegrationTest {
   }
 
   public void testInjectedEvents() {
+    delayTestFinish(60000);
+
       CDI.addPostInitTask(new Runnable() {
         @Override
         public void run() {
           EventProducerTestModule module = IOC.getBeanManager().lookupBean(EventProducerTestModule.class).getInstance();
-      
+
           assertNotNull(module.getEvent());
           assertNotNull(module.getEventA());
           assertNotNull(module.getEventB());
@@ -38,6 +40,7 @@ public class EventProducerIntegrationTest extends AbstractEventIntegrationTest {
           assertNotNull(module.getEventAC());
           assertNotNull(module.getEventBC());
           assertNotNull(module.getEventABC());
+          finishTest();
       }
     });
   }

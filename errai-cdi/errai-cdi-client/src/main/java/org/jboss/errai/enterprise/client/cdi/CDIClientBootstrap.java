@@ -43,7 +43,9 @@ public class CDIClientBootstrap implements EntryPoint {
     final Runnable busReadyEvent = new Runnable() {
       public void run() {
         if (bus.isRemoteCommunicationEnabled()) {
-          MessageBuilder.createMessage().toSubject(CDI.SERVER_DISPATCHER_SUBJECT).command(CDICommands.AttachRemote).done()
+          MessageBuilder.createMessage().toSubject(CDI.SERVER_DISPATCHER_SUBJECT)
+                  .command(CDICommands.AttachRemote)
+                  .done()
                   .sendNowWith(bus);
           InitVotes.waitFor(CDI.class);
         }

@@ -80,10 +80,6 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
     }
 
     final String parmClassName = parm.getType().getFullyQualifiedName();
-    //  final Statement bus = instance.getInjectionContext().getInjector(MessageBus.class).getBeanInstance(instance);
-    // final String subscribeMethodName = method.isAnnotationPresent(Local.class) ? "subscribeLocal" : "subscribe";
-
-    final String subject = parmClassName;
     final List<Annotation> annotations = InjectUtil.extractQualifiers(instance);
     final Annotation[] qualifiers = annotations.toArray(new Annotation[annotations.size()]);
     final List<String> qualifierNames = CDI.getQualifiersPart(qualifiers);
@@ -117,7 +113,7 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
 
     Statement subscribeStatement =
             Stmt.declareVariable(Subscription.class).asFinal().named(subscrVar)
-                    .initializeWith(Stmt.create(ctx).invokeStatic(CDI.class, "subscribe", subject, callBackBlock.finish().finish()));
+                    .initializeWith(Stmt.create(ctx).invokeStatic(CDI.class, "subscribe", parmClassName, callBackBlock.finish().finish()));
 
     final MetaClass destructionCallbackType =
             parameterizedAs(DestructionCallback.class, typeParametersOf(instance.getEnclosingType()));
