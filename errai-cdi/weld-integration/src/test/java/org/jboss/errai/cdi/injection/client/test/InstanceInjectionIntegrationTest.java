@@ -35,38 +35,31 @@ public class InstanceInjectionIntegrationTest extends AbstractErraiCDITest {
   }
 
   public void testInstanceInjections() {
-    delayTestFinish(60000);
-    CDI.addPostInitTask(new Runnable() {
-      @Override
-      public void run() {
-        InstanceTestBean testBean = IOC.getBeanManager().lookupBean(InstanceTestBean.class).getInstance();
 
-        assertNotNull("InstanceTestBean is null", testBean);
+    InstanceTestBean testBean = IOC.getBeanManager().lookupBean(InstanceTestBean.class).getInstance();
 
-        Instance<ApplicationScopedBeanA> instanceApplicationScopedBean = testBean.getInjectApplicationScoped();
-        assertNotNull("InstanceTestBean.Instance<ApplicationScopedBeanA> is null", instanceApplicationScopedBean);
+    assertNotNull("InstanceTestBean is null", testBean);
 
-        Instance<DependentBeanA> instanceDependentBeanA = testBean.getInjectDependentBeanA();
-        assertNotNull("InstanceTestBean.Instance<DependentBeanA> is null", instanceDependentBeanA);
+    Instance<ApplicationScopedBeanA> instanceApplicationScopedBean = testBean.getInjectApplicationScoped();
+    assertNotNull("InstanceTestBean.Instance<ApplicationScopedBeanA> is null", instanceApplicationScopedBean);
 
-        ApplicationScopedBeanA a = instanceApplicationScopedBean.get();
-        assertNotNull(a);
+    Instance<DependentBeanA> instanceDependentBeanA = testBean.getInjectDependentBeanA();
+    assertNotNull("InstanceTestBean.Instance<DependentBeanA> is null", instanceDependentBeanA);
 
-        DependentBeanA b = instanceDependentBeanA.get();
-        assertNotNull(b);
+    ApplicationScopedBeanA a = instanceApplicationScopedBean.get();
+    assertNotNull(a);
 
-        ApplicationScopedBeanA a1 = instanceApplicationScopedBean.get();
-        DependentBeanA b1 = instanceDependentBeanA.get();
+    DependentBeanA b = instanceDependentBeanA.get();
+    assertNotNull(b);
 
-        assertSame(a, a1);
-        assertNotSame(b, b1);
-        assertTrue(b1.isPostConstr());
+    ApplicationScopedBeanA a1 = instanceApplicationScopedBean.get();
+    DependentBeanA b1 = instanceDependentBeanA.get();
 
-        assertNotNull(b1.getBeanB());
-        assertTrue(b1.getBeanB().isPostConstr());
+    assertSame(a, a1);
+    assertNotSame(b, b1);
+    assertTrue(b1.isPostConstr());
 
-        finishTest();
-      }
-    });
+    assertNotNull(b1.getBeanB());
+    assertTrue(b1.getBeanB().isPostConstr());
   }
 }

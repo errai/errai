@@ -208,7 +208,6 @@ public class CDI {
   }
 
   public static void addPostInitTask(Runnable runnable) {
-
     if (active) {
       runnable.run();
     }
