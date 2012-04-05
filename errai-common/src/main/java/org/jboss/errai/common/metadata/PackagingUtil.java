@@ -30,41 +30,25 @@ import java.util.zip.ZipInputStream;
 /**
  * A set of utilities for processing a {@link DeploymentContext}
  *
- * @author: Heiko Braun <hbraun@redhat.com>
- * @date: Aug 9, 2010
- */
+ * @author Heiko Braun <hbraun@redhat.com>
+\ */
 public class PackagingUtil {
-  private static Logger log = LoggerFactory.getLogger(PackagingUtil.class);
+  private static final Logger log = LoggerFactory.getLogger("ClasspathScanning");
 
   public static File identifyDeployment(URL url) {
     String actualFilePath = url.getPath();
-    String nestedPath = "";
     if (actualFilePath.startsWith("file:")) {
       actualFilePath = actualFilePath.substring(5);
     }
 
     int nestedSeperator = actualFilePath.indexOf('!');
     if (nestedSeperator != -1) {
-      nestedPath = actualFilePath.substring(nestedSeperator + 1);
       actualFilePath = actualFilePath.substring(0, nestedSeperator);
-
-      if (nestedPath.equals("/")) {
-        nestedPath = "";
-      }
     }
 
-    log.debug("identifying deployment type for uri: " + actualFilePath);
+    log.debug("scanning inside: " + actualFilePath);
 
     return findActualDeploymentFile(new File(actualFilePath));
-  }
-
-  private static URL toUrl(String s) {
-    try {
-      return new URL(s);
-    }
-    catch (MalformedURLException e) {
-      throw new RuntimeException("Invalid URL " + s, e);
-    }
   }
 
   static File findActualDeploymentFile(File start) {

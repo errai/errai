@@ -101,18 +101,18 @@ public class CommandMessage implements Message {
     this.providedParts = new HashMap<String, ResourceProvider<?>>(5);
   }
 
-  private CommandMessage(Map<String, Object> parts) {
+  private CommandMessage(final Map<String, Object> parts) {
     this.parts = parts;
     this.providedParts = new HashMap<String, ResourceProvider<?>>(0);
   }
 
-  public CommandMessage(Map<String, Object> parts, int routingFlags) {
+  public CommandMessage(final Map<String, Object> parts, final int routingFlags) {
     this.parts = parts;
     this.routingFlags = routingFlags;
     this.providedParts = new HashMap<String, ResourceProvider<?>>(5);
   }
 
-  private CommandMessage(Map<String, Object> parts, Map<String, ResourceProvider<?>> providers) {
+  private CommandMessage(final Map<String, Object> parts, final Map<String, ResourceProvider<?>> providers) {
     this.parts = parts;
     this.providedParts = providers;
   }
