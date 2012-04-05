@@ -93,18 +93,20 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  * @author Mike Brock
  */
 public class ClientMessageBusImpl implements ClientMessageBus {
-  private String clientId;
+  private final String clientId;
   private String sessionId;
 
   /* The encoded URL to be used for the bus */
-  String OUT_SERVICE_ENTRY_POINT = "out.erraiBus";
-  String IN_SERVICE_ENTRY_POINT = "in.erraiBus";
+  String OUT_SERVICE_ENTRY_POINT;
+  String IN_SERVICE_ENTRY_POINT;
 
   /* ArrayList of all subscription listeners */
-  private List<SubscribeListener> onSubscribeHooks;
+  private final List<SubscribeListener> onSubscribeHooks
+          = new ArrayList<SubscribeListener>();
 
   /* ArrayList of all unsubscription listeners */
-  private List<UnsubscribeListener> onUnsubscribeHooks;
+  private List<UnsubscribeListener> onUnsubscribeHooks
+          = new ArrayList<UnsubscribeListener>();
 
   /* Used to build the HTTP POST request */
   private RequestBuilder sendBuilder;
@@ -119,28 +121,26 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private RequestCallback receiveCommCallback = new NoPollRequestCallback();
 
-  private Map<String, List<MessageCallback>> subscriptions =
+  private final Map<String, List<MessageCallback>> subscriptions =
           new HashMap<String, List<MessageCallback>>();
 
-  private Map<String, List<MessageCallback>> localSubscriptions =
+  private final Map<String, List<MessageCallback>> localSubscriptions =
           new HashMap<String, List<MessageCallback>>();
 
-  private Map<String, MessageCallback> remotes;
+  private final Map<String, MessageCallback> remotes
+          = new HashMap<String, MessageCallback>();
 
-  private List<SessionExpirationListener> sessionExpirationListeners
+  private final List<SessionExpirationListener> sessionExpirationListeners
           = new ArrayList<SessionExpirationListener>();
 
-  private List<PreInitializationListener> preInitializationListeners
+  private final List<PreInitializationListener> preInitializationListeners
           = new ArrayList<PreInitializationListener>();
-
-  /* Map of subjects to references registered in this session */
-  private Map<String, List<Object>> registeredInThisSession = new HashMap<String, List<Object>>();
 
   /* A list of {@link Runnable} initialization tasks to be executed after the bus has successfully finished it's
 * initialization and is now communicating with the remote bus. */
-  private List<Runnable> postInitTasks = new ArrayList<Runnable>();
-  private List<Message> deferredMessages = new ArrayList<Message>();
-  private Queue<Message> toSendBuffer = new LinkedList<Message>();
+  private final List<Runnable> postInitTasks = new ArrayList<Runnable>();
+  private final List<Message> deferredMessages = new ArrayList<Message>();
+  private final Queue<Message> toSendBuffer = new LinkedList<Message>();
 
   /* True if the client's message bus has been initialized */
   private boolean initialized = false;
@@ -155,18 +155,18 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private int txNumber = 0;
   private int rxNumber = 0;
   private long lastTx = System.currentTimeMillis();
+  boolean txActive = false;
+  boolean rxActive = false;
 
+  private static int conversationCounter = 0;
 
   private boolean disconnected = false;
-
 
   private BusErrorDialog errorDialog;
 
   static {
     MarshallerFramework.initializeDefaultSessionProvider();
   }
-
-  private List<MessageInterceptor> interceptorStack = new LinkedList<MessageInterceptor>();
 
   private LogAdapter logAdapter = new LogAdapter() {
     @Override
@@ -191,6 +191,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   };
 
   public ClientMessageBusImpl() {
+    clientId = String.valueOf(com.google.gwt.user.client.Random.nextInt(99999))
+            + "-" + (System.currentTimeMillis() % com.google.gwt.user.client.Random.nextInt(99999));
+
+    IN_SERVICE_ENTRY_POINT = "in." + clientId + ".erraiBus";
+    OUT_SERVICE_ENTRY_POINT = "out." + clientId + ".erraiBus";
+
     init();
   }
 
@@ -292,7 +298,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       @Override
       public void callback(Message message) {
         try {
-          executeInterceptorStack(true, message);
           callback.callback(message);
         }
         catch (Exception e) {
@@ -350,30 +355,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   }
 
-  private static int conversationCounter = 0;
 
-  /**
-   * Have a single two-way conversation
-   *
-   * @param message  - The message to be sent in the conversation
-   * @param callback - The function to be called when the message is received
-   */
-  @Override
-  public void conversationWith(final Message message, final MessageCallback callback) {
-    final String tempSubject = "temp:Reply:" + (++conversationCounter);
-
-    message.set(ReplyTo, tempSubject);
-
-    subscribe(tempSubject, new MessageCallback() {
-      @Override
-      public void callback(Message message) {
-        unsubscribeAll(tempSubject);
-        callback.callback(message);
-      }
-    });
-
-    send(message);
-  }
 
   /**
    * Globally send message to all receivers.
@@ -418,8 +400,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   public void send(final Message message) {
     message.setResource(RequestDispatcher.class.getName(), dispatcherProvider);
     message.setResource("Session", JSONUtilCli.getClientSession());
-
-    executeInterceptorStack(false, message);
 
     message.commit();
     try {
@@ -476,7 +456,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   }
 
-  boolean txActive = false;
 
   private boolean throttleOutgoing() {
     return (System.currentTimeMillis() - lastTx) < 150;
@@ -561,36 +540,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   /**
-   * Retrieve all registrations that have occured during the current capture context.
-   * <p/>
-   * The Map returned has the subject of the registrations as the key, and Sets of registration objects as the
-   * value of the Map.
-   *
-   * @return A map of registrations captured in the current capture context.
-   */
-  @Override
-  public Map<String, List<Object>> getCapturedRegistrations() {
-    return registeredInThisSession;
-  }
-
-  /**
-   * Marks the beginning of a new capture context.<p/>  From this point, the message is called forward, all
-   * registration events which occur will be captured.
-   */
-  @Override
-  public void beginCapture() {
-    registeredInThisSession = new HashMap<String, List<Object>>();
-  }
-
-  /**
-   * End the current capturing context.
-   */
-  @Override
-  public void endCapture() {
-    registeredInThisSession = null;
-  }
-
-  /**
    * Transmits JSON string containing message, using the <tt>sendBuilder</tt>
    *
    * @param message    - JSON string representation of message
@@ -598,7 +547,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    */
   private void transmitRemote(final String message, final List<Message> txMessages) {
     if (message == null) return;
-  //  System.out.println("TX: " + message);
+    //  System.out.println("TX: " + message);
     try {
       txActive = true;
 
@@ -688,7 +637,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     }
   }
 
-  boolean rxActive = false;
 
   private void performPoll() {
     try {
@@ -753,15 +701,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     initialized = false;
     disconnected = false;
 
-    clientId = String.valueOf(com.google.gwt.user.client.Random.nextInt(99999))
-            + "-" + (System.currentTimeMillis() % com.google.gwt.user.client.Random.nextInt(99999));
-
-    IN_SERVICE_ENTRY_POINT = "in." + clientId + ".erraiBus";
-    OUT_SERVICE_ENTRY_POINT = "out." + clientId + ".erraiBus";
-
-    onSubscribeHooks = new ArrayList<SubscribeListener>();
-    onUnsubscribeHooks = new ArrayList<UnsubscribeListener>();
-    remotes = new HashMap<String, MessageCallback>();
+    remotes.clear();
+    onSubscribeHooks.clear();
+    onUnsubscribeHooks.clear();
   }
 
   public void setInitialized(boolean initialized) {
@@ -779,7 +721,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private void registerInitVoteCallbacks() {
     InitVotes.waitFor(ClientMessageBusImpl.class);
     InitVotes.waitFor(RpcProxyLoader.class);
-
     InitVotes.registerOneTimeInitCallback(new Runnable() {
       @Override
       public void run() {
@@ -787,7 +728,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
     });
   }
-
 
   /**
    * Initializes the message bus, by subscribing to the ClientBus (to receive subscription messages) and the
@@ -1479,25 +1419,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     return logAdapter;
   }
 
-  private boolean executeInterceptorStack(boolean inbound, Message message) {
-    boolean validMessage = true;
-    for (MessageInterceptor intcp : interceptorStack) {
-      if (inbound)
-        validMessage = intcp.processInbound(message);
-      else
-        validMessage = intcp.processOutbound(message);
-
-      if (!validMessage) // brute force for now
-        throw new RuntimeException("Interceptor " + intcp.getClass() + " invalidates message");
-    }
-
-    return validMessage;
-  }
-
-  public void addInterceptor(MessageInterceptor interceptor) {
-    interceptorStack.add(interceptor);
-  }
-
   @Override
   public Set<String> getAllRegisteredSubjects() {
     return Collections.unmodifiableSet(subscriptions.keySet());
@@ -1681,7 +1602,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private static void _displayStatusToLog() {
     ClientMessageBusImpl bus = (ClientMessageBusImpl) ErraiBus.get();
 
-    LogUtil.nativeLog("ErraiBus Status");
+    LogUtil.displayDebuggerUtilityTitle("ErraiBus Status");
+
     LogUtil.nativeLog("------------------------------------------------");
     LogUtil.nativeLog("Bus State              : " + (bus.initialized ? "Online/Federated" : "Disconnected"));
     LogUtil.nativeLog("");
@@ -1698,14 +1620,14 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     LogUtil.nativeLog("Endpoints");
     LogUtil.nativeLog("  Remote (total)       : " + (bus.remotes.size()));
     LogUtil.nativeLog("  Local (total)        : " + (bus.subscriptions.size()));
-    LogUtil.nativeLog("------------------------------------------------");
+
+    LogUtil.displaySeparator();
   }
 
   private static void _listAvailableServicesToLog() {
     ClientMessageBusImpl bus = (ClientMessageBusImpl) ErraiBus.get();
 
-    LogUtil.nativeLog("Service and Routing Table");
-    LogUtil.nativeLog("------------------------------------------------");
+    LogUtil.displayDebuggerUtilityTitle("Service and Routing Table");
     LogUtil.nativeLog("[REMOTES]");
 
     for (String remoteName : bus.remotes.keySet()) {
@@ -1718,7 +1640,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       LogUtil.nativeLog(localName + " (" + bus.subscriptions.get(localName).size() + ")");
     }
 
-    LogUtil.nativeLog("------------------------------------------------");
+    LogUtil.displaySeparator();
   }
 
   private static void _showErrorConsole() {

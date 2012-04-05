@@ -67,7 +67,6 @@ public final class BeanRef {
       AnnotationHashWapper that = (AnnotationHashWapper) o;
 
       return !(type != null ? !type.equals(that.type) : that.type != null);
-
     }
 
     @Override

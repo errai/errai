@@ -25,7 +25,7 @@ import org.jboss.errai.common.client.protocols.MessageParts;
 
 /**
  * Error handling tests
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ErrorHandlingTest extends AbstractErraiTest {
@@ -34,32 +34,47 @@ public class ErrorHandlingTest extends AbstractErraiTest {
   public String getModuleName() {
     return "org.jboss.errai.bus.ErraiBusTests";
   }
-  
+
   private Throwable caught;
-  
+  private String originalServiceEntryPoint;
+
+  @Override
+  protected void gwtSetUp() throws Exception {
+    super.gwtSetUp();
+    originalServiceEntryPoint = ((ClientMessageBusImpl) bus).IN_SERVICE_ENTRY_POINT;
+
+  }
+
+  @Override
+  protected void gwtTearDown() throws Exception {
+    super.gwtTearDown();
+
+    ((ClientMessageBusImpl)bus).IN_SERVICE_ENTRY_POINT = originalServiceEntryPoint;
+  }
+
   public void testBasicErrorHandling() {
     caught = null;
-   
+
     runAfterInit(new Runnable() {
       public void run() {
-        
+
         // this is just to get a status code other than 200 -> TransportIOException
-        ((ClientMessageBusImpl)bus).IN_SERVICE_ENTRY_POINT = "invalid.url";
-        
+        ((ClientMessageBusImpl) bus).IN_SERVICE_ENTRY_POINT = "invalid.url";
+
         bus.subscribe(DefaultErrorCallback.CLIENT_ERROR_SUBJECT, new MessageCallback() {
           @Override
           public void callback(Message message) {
-              caught = message.get(Throwable.class, MessageParts.Throwable);
-              assertNotNull("Throwable is null.", caught);
-              try {
-                throw caught;
-              } 
-              catch(TransportIOException e) {
-                finishTest();
-              }
-              catch (Throwable throwable) {
-                fail("Received wrong Throwable.");
-              }
+            caught = message.get(Throwable.class, MessageParts.Throwable);
+            assertNotNull("Throwable is null.", caught);
+            try {
+              throw caught;
+            }
+            catch (TransportIOException e) {
+              finishTest();
+            }
+            catch (Throwable throwable) {
+              fail("Received wrong Throwable.");
+            }
           }
         });
       }

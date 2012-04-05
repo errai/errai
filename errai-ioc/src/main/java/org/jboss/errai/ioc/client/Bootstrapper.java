@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.ioc.client.api;
-
-import org.jboss.errai.ioc.client.BootstrapperInjectionContext;
+package org.jboss.errai.ioc.client;
 
 public interface Bootstrapper {
-  public BootstrapperInjectionContext bootstrapContainer();
+  BootstrapperInjectionContext bootstrapContainer();
 }

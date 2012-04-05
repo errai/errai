@@ -103,17 +103,6 @@ public interface MessageBus {
    */
   public void send(Message message, boolean fireListeners);
 
-
-  /**
-   * Have a conversation with a remote service.
-   *
-   * @param message
-   * @param callback
-   * @deprecated use {@link org.jboss.errai.bus.client.api.base.MessageBuilder#createConversation(org.jboss.errai.bus.client.api.Message)}
-   */
-  @Deprecated
-  public void conversationWith(Message message, MessageCallback callback);
-
   /**
    * Subscribe a listener to the specified subject.
    *

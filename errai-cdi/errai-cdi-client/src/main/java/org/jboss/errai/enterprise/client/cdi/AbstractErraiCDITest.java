@@ -16,13 +16,10 @@
 
 package org.jboss.errai.enterprise.client.cdi;
 
-import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
+import com.google.gwt.junit.client.GWTTestCase;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.Container;
-
-import com.google.gwt.junit.client.GWTTestCase;
 
 /**
  * Abstract base class of all Errai CDI integration tests,

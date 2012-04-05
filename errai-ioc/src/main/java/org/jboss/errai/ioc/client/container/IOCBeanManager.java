@@ -35,11 +35,14 @@ import java.util.Set;
  * @author Mike Brock
  */
 public class IOCBeanManager {
-  private Map<Class<?>, List<IOCBeanDef>> beanMap = new HashMap<Class<?>, List<IOCBeanDef>>();
+  private final Map<Class<?>, List<IOCBeanDef>> beanMap
+          = new HashMap<Class<?>, List<IOCBeanDef>>();
 
-  private Map<Object, Map<Object, DestructionCallback>> activeManagedBeans
+  private final Map<Object, Map<Object, DestructionCallback>> activeManagedBeans
           = new IdentityHashMap<Object, Map<Object, DestructionCallback>>();
-  private Map<Object, Object> proxyLookupForManagedBeans = new IdentityHashMap<Object, Object>();
+
+  private final Map<Object, Object> proxyLookupForManagedBeans
+          = new IdentityHashMap<Object, Object>();
 
 
   private void registerSingletonBean(final Class<Object> type, final CreationalCallback<Object> callback,
@@ -191,7 +194,7 @@ public class IOCBeanManager {
    */
   @SuppressWarnings("unchecked")
   public <T> IOCBeanDef<T> lookupBean(Class<T> type, Annotation... qualifiers) {
-    List<IOCBeanDef> beanList = beanMap.get(type);
+    final List<IOCBeanDef> beanList = beanMap.get(type);
     if (beanList == null) {
       return null;
     }
@@ -200,10 +203,10 @@ public class IOCBeanManager {
       return beanList.get(0);
     }
 
-    Set<Annotation> qualSet = new HashSet<Annotation>();
+    final Set<Annotation> qualSet = new HashSet<Annotation>(qualifiers.length * 2);
     Collections.addAll(qualSet, qualifiers);
 
-    List<IOCBeanDef> matching = new ArrayList<IOCBeanDef>();
+    final List<IOCBeanDef> matching = new ArrayList<IOCBeanDef>();
 
     for (IOCBeanDef iocBean : beanList) {
       if (iocBean.matches(qualSet)) {
@@ -223,6 +226,6 @@ public class IOCBeanManager {
   }
 
   void destroyAllBeans() {
-    beanMap = new HashMap<Class<?>, List<IOCBeanDef>>();
+    beanMap.clear();
   }
 }

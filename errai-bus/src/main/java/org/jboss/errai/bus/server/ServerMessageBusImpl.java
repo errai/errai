@@ -1035,17 +1035,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
   }
 
   /**
-   * Starts a conversation using the specified message
-   *
-   * @param message  - the message to initiate the conversation
-   * @param callback - the message's callback function
-   */
-  @Override
-  public void conversationWith(Message message, MessageCallback callback) {
-    throw new RuntimeException("conversationWith not yet implemented.");
-  }
-
-  /**
    * Checks if a subscription exists for <tt>subject</tt>
    *
    * @param subject - the subject to search the subscriptions for

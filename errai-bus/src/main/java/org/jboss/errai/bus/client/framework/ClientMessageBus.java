@@ -32,29 +32,6 @@ public interface ClientMessageBus extends MessageBus {
   public static final String REMOTE_QUEUE_ID_HEADER = "RemoteQueueID";
 
   /**
-   * Retrieve all registrations that have occured during the current capture context.
-   * <p/>
-   * The Map returned has the subject of the registrations as the key, and Sets of registration objects as the
-   * value of the Map.  The implementation of the registration objects is subject to the underlying bus
-   * implementation.
-   *
-   * @return A map of registrations captured in the current capture context.
-   */
-  public Map<String, List<Object>> getCapturedRegistrations();
-
-
-  /**
-   * Mark the beginning of a new capture context.<p/>  From the point this message is called forward, all
-   * registration events which occur will be captured.
-   */
-  public void beginCapture();
-
-  /**
-   * End the current capturing context.
-   */
-  public void endCapture();
-
-  /**
    * Add a {@link Runnable} initialization task to be executed after the bus has successfuly finished it's
    * initialization and is now communicating with the remote bus.
    *
