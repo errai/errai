@@ -21,12 +21,12 @@
         <dependency>
             <groupId>org.jboss.errai</groupId>
             <artifactId>errai-tools</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.errai</groupId>
             <artifactId>errai-ioc</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
@@ -85,7 +85,7 @@
                         </exclusion>
                     </exclusions>
                     <scope>provided</scope>
-                    <version>${version}</version>
+                    <version>${project.version}</version>
                 </dependency>
 
                 <dependency>
@@ -132,7 +132,7 @@
                         </exclusion>
                     </exclusions>
                     <scope>provided</scope>
-                    <version>${version}</version>
+                    <version>${project.version}</version>
                 </dependency>
 
                 <dependency>

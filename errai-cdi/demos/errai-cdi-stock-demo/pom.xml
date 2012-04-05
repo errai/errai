@@ -617,7 +617,7 @@
         <plugins>
           <plugin>
             <artifactId>maven-war-plugin</artifactId>
-            <version>2.1-beta-1</version>
+            <version>2.1.1</version>
             <configuration>
               <warSourceDirectory>war</warSourceDirectory>
               <webappDirectory>war</webappDirectory>
@@ -827,7 +827,7 @@
         <plugins>
           <plugin>
             <artifactId>maven-war-plugin</artifactId>
-            <version>2.1-beta-1</version>
+            <version>2.1.1</version>
             <configuration>
               <warSourceDirectory>war</warSourceDirectory>
               <webappDirectory>war</webappDirectory>
@@ -868,18 +868,6 @@
                 </goals>
               </execution>
             </executions>
-          </plugin>
-
-          <plugin>
-            <artifactId>maven-war-plugin</artifactId>
-            <version>2.1-beta-1</version>
-            <configuration>
-              <warSourceDirectory>war</warSourceDirectory>
-              <webappDirectory>war</webappDirectory>
-              <webXml>src/jetty/web.xml</webXml>
-              <packagingExcludes>**/javax/**/*.*,**/client/local/**/*.class</packagingExcludes>
-              <outputDirectory>deployments</outputDirectory>
-            </configuration>
           </plugin>
 
           <plugin>
@@ -1061,7 +1049,7 @@
         <plugins>
           <plugin>
             <artifactId>maven-war-plugin</artifactId>
-            <version>2.1-beta-1</version>
+            <version>2.1.1</version>
             <configuration>
               <warSourceDirectory>war.cache</warSourceDirectory>
               <webappDirectory>war.cache</webappDirectory>
@@ -1154,7 +1142,7 @@
       </plugin>
       <plugin>
         <artifactId>maven-war-plugin</artifactId>
-        <version>2.1-beta-1</version>
+        <version>2.1.1</version>
         <configuration>
           <warSourceDirectory>war</warSourceDirectory>
           <webappDirectory>war</webappDirectory>

@@ -18,14 +18,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>com.google.gwt</groupId>
-			<artifactId>gwt-dev</artifactId>
-			<!-- This should not be packaged with the Errai Distro. There are no runtime 
-				dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
 			<groupId>javax.enterprise</groupId>
 			<artifactId>cdi-api</artifactId>
 			<version>1.0-SP4</version>
