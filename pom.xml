@@ -72,12 +72,10 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <gwt.version>2.4.0</gwt.version>
-        <gwt.maven>2.4.0</gwt.maven>
+        <gwt.maven.version>2.4.0</gwt.maven.version>
         <guice.version>3.0</guice.version>
         <mvel.version>2.1.Beta8</mvel.version>
-        <mosaic.version>0.4.0-rc4</mosaic.version>
         <appengine.version>1.3.5</appengine.version>
-        <!--<reflections.version>0.9.6_jboss_errai_r3</reflections.version>-->
         <validation.api.version>1.0.0.GA</validation.api.version>
     </properties>
 
@@ -293,7 +291,10 @@
                                 <include>.errai/**</include>
                                 <include>war/WEB-INF/deploy/**</include>
                                 <include>war/WEB-INF/lib/**</include>
+                                <include>war/WEB-INF/classes/**</include>
                                 <include>src/main/webapp/WEB-INF/deploy/**</include>
+                                <include>src/main/webapp/WEB-INF/lib/**</include>
+                                <include>src/main/webapp/WEB-INF/classes/**</include>
                                 <include>**/gwt-unitCache/**</include>
                                 <include>**/*.JUnit/**</include>
                             </includes>
@@ -306,6 +307,26 @@
         <!-- PluginManagement -->
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>gwt-maven-plugin</artifactId>
+                    <version>${gwt.maven.version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                              <goal>resources</goal>
+                              <goal>compile</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>clean</id>
+                            <phase>clean</phase>
+                            <goals>
+                              <goal>clean</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>

@@ -45,17 +45,8 @@
   </organization>
 
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-    <gwt.version>2.4.0</gwt.version>
-    <hsqldb.version>1.8.0.7</hsqldb.version>
-    <weld.version>1.1.0.Final</weld.version>
-    <gwt.maven>2.4.0</gwt.maven>
-    <mvel.version>2.1.Beta6</mvel.version>
-    <jetty.version>6.1.25</jetty.version>
     <slf4j.version>1.6.1</slf4j.version>
-    <validation.api.version>1.0.0.GA</validation.api.version>
-    <resteasy.version>2.2.1.GA</resteasy.version>
+    <resteasy.version>2.2.3.GA</resteasy.version>
   </properties>
 
   <modules>

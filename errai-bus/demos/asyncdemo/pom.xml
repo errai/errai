@@ -32,7 +32,6 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>gwt-maven-plugin</artifactId>
-                <version>${gwt.maven}</version>
                 <configuration>
                     <inplace>true</inplace>
                     <logLevel>INFO</logLevel>
