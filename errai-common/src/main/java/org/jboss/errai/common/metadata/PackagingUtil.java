@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
@@ -89,7 +88,7 @@ public class PackagingUtil {
           ctx.getSubContexts().put(file.getName(), file); // WEB-INF/classes
 
         ZipInputStream zipFile = new ZipInputStream(new FileInputStream(file));
-        ZipEntry zipEntry = null;
+        ZipEntry zipEntry;
 
         try {
           while ((zipEntry = zipFile.getNextEntry()) != null) {
@@ -114,15 +113,16 @@ public class PackagingUtil {
   }
 
   protected static File expandZipEntry(ZipInputStream stream, ZipEntry entry, DeploymentContext ctx) {
-
-    String tmpUUID = "erraiBootstrap_" + UUID.randomUUID().toString().replaceAll("\\-", "_");
-    String tmpDir = System.getProperty("java.io.tmpdir") + "/" + tmpUUID;
-    int idx = entry.getName().lastIndexOf('/');
-    String tmpFileName = tmpDir + "/" + entry.getName().substring(idx == -1 ? 0 : idx);
+    final String tmpUUID = "erraiBootstrap_" + UUID.randomUUID().toString().replaceAll("\\-", "_");
+    final String tmpDir = System.getProperty("java.io.tmpdir") + "/" + tmpUUID;
+    final int idx = entry.getName().lastIndexOf('/');
+    final String tmpFileName = tmpDir + "/" + entry.getName().substring(idx == -1 ? 0 : idx);
 
     try {
       File tmpDirFile = new File(tmpDir);
-      tmpDirFile.mkdirs();
+      if (!tmpDirFile.exists() && !tmpDirFile.mkdirs()) {
+        throw new RuntimeException("unable to create temporary directory: " + tmpDirFile.getAbsolutePath());
+      }
       ctx.markTmpFile(tmpDirFile);
 
       File newFile = new File(tmpFileName);
@@ -137,9 +137,10 @@ public class PackagingUtil {
       outStream.flush();
       outStream.close();
 
-      newFile.getParentFile();
-
       return newFile;
+    }
+    catch (RuntimeException e) {
+      throw e;
     }
     catch (Exception e) {
       throw new RuntimeException("Error reading from stream", e);
