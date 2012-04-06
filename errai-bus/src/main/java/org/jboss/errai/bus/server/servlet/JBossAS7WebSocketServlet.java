@@ -3,7 +3,7 @@ package org.jboss.errai.bus.server.servlet;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import org.jboss.as.websockets.WebSocket;
-import org.jboss.as.websockets.servlet.WebsocketServlet;
+import org.jboss.as.websockets.servlet.WebSocketServlet;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
@@ -12,7 +12,6 @@ import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.server.ServerMessageBusImpl;
-import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.bus.server.api.SessionProvider;
 import org.jboss.errai.bus.server.io.MessageFactory;
@@ -33,7 +32,6 @@ import org.jboss.servlet.http.HttpEvent;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -43,7 +41,7 @@ import java.io.OutputStream;
 /**
  * @author Mike Brock
  */
-public class JBossAS7WebSocketServlet extends WebsocketServlet {
+public class JBossAS7WebSocketServlet extends WebSocketServlet {
 
   /* New and configured errai service */
   protected ErraiService service;
@@ -267,7 +265,9 @@ public class JBossAS7WebSocketServlet extends WebsocketServlet {
 
 
   @Override
-  protected void onReceivedTextFrame(HttpEvent event, final WebSocket socket, String text) throws IOException {
+  protected void onReceivedTextFrame(HttpEvent event, final WebSocket socket) throws IOException {
+    final String text = socket.readTextFrame();
+
     final QueueSession session = sessionProvider.getSession(event.getHttpServletRequest().getSession(),
             event.getHttpServletRequest().getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
 
