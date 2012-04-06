@@ -17,6 +17,7 @@
 package org.jboss.errai.bus.server.service;
 
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
 
 import java.util.Collection;
@@ -64,6 +65,7 @@ public interface ErraiService<S> extends ServiceComposite<S> {
   public ErraiServiceConfigurator getConfiguration();
 
   public void addShutdownHook(Runnable runnable);
+
 
   /**
    * Shut down the entire Errai service.

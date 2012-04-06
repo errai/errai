@@ -140,7 +140,6 @@ public class MessageQueueImpl implements MessageQueue {
     }
 
     if (useDirectSocketChannel && directSocketChannel.isConnected()) {
-   //   directSocketChannel.write(new TextWebSocketFrame("[" + ServerBusTools.encodeMessage(message) + "]"));
        directSocketChannel.write("[" + ServerBusTools.encodeMessage(message) + "]");
     }
     else {
@@ -420,7 +419,7 @@ public class MessageQueueImpl implements MessageQueue {
     this.directSocketChannel = channel;
     this.useDirectSocketChannel = true;
 
-    log.debug("queue " + getSession().getSessionId() + " transitioned to direct channel mode.");
+    log.info("queue " + getSession().getSessionId() + " transitioned to direct channel mode.");
   }
 
   @Override

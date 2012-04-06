@@ -1190,6 +1190,12 @@ public class ServerMessageBusImpl implements ServerMessageBus {
   }
 
   @Override
+  public void associateNewQueue(QueueSession oldSession, QueueSession newSession) {
+    sessionLookup.put(newSession.getSessionId(), oldSession);
+    messageQueues.put(newSession, getQueue(oldSession));
+  }
+
+  @Override
   public MessageQueue getQueueBySession(String sessionId) {
     return getQueue(sessionLookup.get(sessionId));
   }

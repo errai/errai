@@ -106,24 +106,20 @@ public class JBossAS7WebSocketServlet extends HttpServlet implements HttpEventSe
     websocketHandshakes = Collections.unmodifiableList(handshakeList);
   }
 
-  private static final String SESSION_READ_BUFFER_KEY = "JBoss:Experimental:WebsocketReadBuffer";
-  private static final String SESSION_WRITE_STREAM_KEY = "JBoss:Experimental:WebsocketWriteStream";
+  private static final String SESSION_READ_BUFFER_KEY = "JBoss:Experimental:Websocket:ReadBuffer";
+  private static final String SESSION_WRITE_STREAM_KEY = "JBoss:Experimental:Websocket:WriteStream";
+  private static final String WEBSOCKET_SESSION_ALIAS = "JBoss:Experimental:Websocket:Errai:SessionAlias";
 
 
   public void event(final HttpEvent event) throws IOException, ServletException {
-    System.out.println("Event:" + event);
     switch (event.getType()) {
       case BEGIN:
         event.setTimeout(20000);
         final HttpServletRequest request = event.getHttpServletRequest();
         final HttpServletResponse response = event.getHttpServletResponse();
-        System.out.println("Begin WebSocket Handshake ...");
         if (response instanceof UpgradableHttpServletResponse) {
           for (Handshake handshake : websocketHandshakes) {
-            System.out.println("Checking handshake ... " + request);
             if (handshake.matches(request)) {
-              System.out.println("Using handshake: " + handshake.getClass().getName());
-
               handshake.generateResponse(event);
 
               response.setHeader("Upgrade", "websocket");
@@ -174,11 +170,7 @@ public class JBossAS7WebSocketServlet extends HttpServlet implements HttpEventSe
 
   public static String readFrame(HttpEvent event, InputStream stream) throws IOException {
     final StringBuilder payloadBuffer = new StringBuilder();
-    int b;
-    boolean last;
-
-    b = stream.read();
-    last = (b & FRAME_FIN) != 0;
+    int b = stream.read();
 
     int opcode = (b & FRAME_OPCODE);
 
@@ -200,9 +192,9 @@ public class JBossAS7WebSocketServlet extends HttpServlet implements HttpEventSe
       frameMaskingKey[2] = stream.read();
       frameMaskingKey[3] = stream.read();
     }
-
-    System.out.println("WS_FRAME(opcode=" + opcode + ";frameMasked=" + frameMasked + ";payloadLength="
-            + payloadLength + ";frameMask=" + Arrays.toString(frameMaskingKey) + ")");
+//
+//    System.out.println("WS_FRAME(opcode=" + opcode + ";frameMasked=" + frameMasked + ";payloadLength="
+//            + payloadLength + ";frameMask=" + Arrays.toString(frameMaskingKey) + ")");
 
     switch (opcode) {
       case OPCODE_TEXT:
@@ -251,10 +243,10 @@ public class JBossAS7WebSocketServlet extends HttpServlet implements HttpEventSe
   private static byte[] mask = {getMask(), getMask(), getMask(), getMask()};
 
   public static void writeWebSocketFrame(final OutputStream stream, final String txt) throws IOException {
+//    System.out.println("TX_TO_CLIENT <<" + txt + ">>");
     byte[] strBytes = txt.getBytes("UTF-8");
     boolean big = strBytes.length > 125;
 
-    int i = 0;
     stream.write(-127);
     if (big) {
       stream.write(-2);
@@ -453,70 +445,71 @@ public class JBossAS7WebSocketServlet extends HttpServlet implements HttpEventSe
     });
   }
 
+  private static class SimpleEventChannelWrapped implements QueueChannel {
+    private final HttpEvent event;
+
+    public SimpleEventChannelWrapped(HttpEvent event) {
+      this.event = event;
+    }
+
+    @Override
+    public boolean isConnected() {
+      return true;
+    }
+
+    @Override
+    public void write(String data) throws IOException {
+      writeWebSocketFrame(event.getHttpServletResponse().getOutputStream(), data);
+    }
+  }
+
 
   protected void notifyConnectionBegin(final HttpEvent event) {
     final QueueSession session = sessionProvider.getSession(event.getHttpServletRequest().getSession(),
             event.getHttpServletRequest().getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
-
-    System.out.println("notifyConnectionBegin() SessionID=" + session.getSessionId());
   }
 
   protected void handleReceivedEvent(final HttpEvent event, final String text) throws IOException {
     final QueueSession session = sessionProvider.getSession(event.getHttpServletRequest().getSession(),
             event.getHttpServletRequest().getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
 
-    System.out.println("Websocket_Receieved <<" + text + ">>");
-
     if (text.length() == 0) return;
 
     @SuppressWarnings("unchecked") EJObject val = JSONDecoder.decode(text).isObject();
 
 
-    final QueueChannel channel = new QueueChannel() {
-      @Override
-      public boolean isConnected() {
-        return session.isValid();
-      }
-
-      @Override
-      public void write(String data) {
-        try {
-          if (event.isWriteReady()) {
-            writeWebSocketFrame(event.getHttpServletResponse().getOutputStream(), data);
-          }
-        }
-        catch (IOException e) {
-          e.printStackTrace();
-        }
-      }
-    };
-
     // this is not an active channel.
-    if (!session.hasAttribute("websocket.active")) {
+    if (!session.hasAttribute(WEBSOCKET_SESSION_ALIAS)) {
       String commandType = val.get(MessageParts.CommandType.name()).isString().stringValue();
 
       // this client apparently wants to connect.
       if (BusCommands.ConnectToQueue.name().equals(commandType)) {
         String sessionKey = val.get(MessageParts.ConnectionSessionKey.name()).isString().stringValue();
-        System.out.println("ConnectToQueue for SeessionKey: " + sessionKey);
 
         final QueueSession cometSession;
 
         // has this client already attempted a connection, and is in a wait verify state
         if (sessionKey != null && (cometSession = service.getBus().getSessionBySessionId(sessionKey)) != null) {
-          System.out.println("Found the Comet Session!");
-
           if (cometSession.hasAttribute(WebSocketServerHandler.SESSION_ATTR_WS_STATUS) &&
                   WebSocketServerHandler.WEBSOCKET_ACTIVE.equals(cometSession.getAttribute(String.class, WebSocketServerHandler.SESSION_ATTR_WS_STATUS))) {
 
-            System.out.println("YAY!");
-
-            session.setAttribute("websocket.active", "1");
-
-            // open the channel
-
             // set the session queue into direct channel mode.
-            service.getBus().getQueueBySession(sessionKey).setDirectSocketChannel(channel);
+            service.getBus().getQueue(cometSession).setDirectSocketChannel(new QueueChannel() {
+              @Override
+              public boolean isConnected() {
+                return cometSession.isValid();
+              }
+
+              @Override
+              public void write(String data) throws IOException {
+                writeWebSocketFrame(event.getHttpServletResponse().getOutputStream(), data);
+              }
+            });
+
+            session.setAttribute(WEBSOCKET_SESSION_ALIAS, cometSession);
+
+            // associate the new WebSocket session with the the old comet session.
+            //   service.getBus().associateNewQueue(cometSession, session);
 
             // remove the web socket token so it cannot be re-used for authentication.
             cometSession.removeAttribute(MessageParts.WebSocketToken.name());
@@ -529,10 +522,9 @@ public class JBossAS7WebSocketServlet extends HttpServlet implements HttpEventSe
           String activationKey = cometSession.getAttribute(String.class, MessageParts.WebSocketToken.name());
           if (activationKey == null || !activationKey.equals(val.get(MessageParts.WebSocketToken.name()).isString().stringValue())) {
             // nope. go away!
-            sendMessage(channel, getFailedNegotiation("bad negotiation key"));
+            sendMessage(new SimpleEventChannelWrapped(event), getFailedNegotiation("bad negotiation key"));
           }
           else {
-            System.out.println("MATCHING KEY!");
             // the key matches. now we send the reverse challenge to prove this client is actually
             // already talking to the bus over the COMET channel.
             String reverseToken = SecureHashUtil.nextSecureHash("SHA-256");
@@ -540,36 +532,30 @@ public class JBossAS7WebSocketServlet extends HttpServlet implements HttpEventSe
             cometSession.setAttribute(WebSocketServerHandler.SESSION_ATTR_WS_STATUS, WebSocketServerHandler.WEBSOCKET_AWAIT_ACTIVATION);
 
             // send the challenge.
-            System.out.println("SENDING REVERSE CHALLENGE: " + reverseToken);
-            sendMessage(channel, getReverseChallenge(reverseToken));
+            sendMessage(new SimpleEventChannelWrapped(event), getReverseChallenge(reverseToken));
             return;
           }
 
-          sendMessage(channel, getSuccessfulNegotiation());
+          sendMessage(new SimpleEventChannelWrapped(event), getSuccessfulNegotiation());
         }
         else {
-          sendMessage(channel, getFailedNegotiation("bad session id"));
+          sendMessage(new SimpleEventChannelWrapped(event), getFailedNegotiation("bad session id"));
         }
       }
       else {
-        sendMessage(channel, getFailedNegotiation("bad command"));
+        sendMessage(new SimpleEventChannelWrapped(event), getFailedNegotiation("bad command"));
       }
 
     }
     else {
-      // this is an active session. send the message.
+      // this is an active session. send the message.;
 
-      Message msg = MessageFactory.createCommandMessage(session, text);
+      Message msg = MessageFactory.createCommandMessage(session.getAttribute(QueueSession.class, WEBSOCKET_SESSION_ALIAS), text);
       service.store(msg);
     }
-
-
-    service.store(createCommandMessage(session, text));
-
-    pollForMessages(session, event.getHttpServletRequest(), event.getHttpServletResponse(), false);
   }
 
-  public static void sendMessage(QueueChannel channel, String message) {
+  public static void sendMessage(QueueChannel channel, String message) throws IOException {
     channel.write(message);
   }
 
