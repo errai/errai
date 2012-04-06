@@ -98,43 +98,34 @@ public class BusTests extends TestCase {
 
   public void testHandshake() throws Exception {
     final List<Byte> byteList = new ArrayList<Byte>();
-    byte firstByte = (byte) (Byte.MIN_VALUE | 126);
+    byte firstByte = (byte) -1;
 
-    System.out.println((int) (firstByte));
+    System.out.println((int) (firstByte & 127));
 
-    byteList.add(firstByte);
-    String toEncode = "Test!";
-    byteList.add((byte) toEncode.length());
-
-    for (byte b : toEncode.getBytes()) {
-      byteList.add(b);
-    }
-    byteList.add((byte) 0x01);
-
-    String s = JBossAS7WebSocketServlet.readFrame(null, new InputStream() {
-      int cursor;
-
-      @Override
-      public int read() throws IOException {
-        return byteList.get(cursor++);
-      }
-
-      @Override
-      public int available() throws IOException {
-        return byteList.size() - cursor;
-      }
-    });
-
-    System.out.println(s);
+//    byteList.add(firstByte);
+//    String toEncode = "Test!";
+//    byteList.add((byte) toEncode.length());
+//
+//    for (byte b : toEncode.getBytes()) {
+//      byteList.add(b);
+//    }
+//    byteList.add((byte) 0x01);
+//
+//    String s = JBossAS7WebSocketServlet.readFrame(null, new InputStream() {
+//      int cursor;
+//
+//      @Override
+//      public int read() throws IOException {
+//        return byteList.get(cursor++);
+//      }
+//
+//      @Override
+//      public int available() throws IOException {
+//        return byteList.size() - cursor;
+//      }
+//    });
+//
+//    System.out.println(s);
   }
 
-  public void testFrameRoundTrip() throws Exception {
-    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-    JBossAS7WebSocketServlet.writeWebSocketFrame(byteArrayOutputStream, "FooBarFooFarHELLO!");
-
-    ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
-    String bah = JBossAS7WebSocketServlet.readFrame(null, byteArrayInputStream);
-    System.out.println(bah);
-
-  }
 }
