@@ -2,13 +2,8 @@ package org.jboss.errai.bus.server.servlet;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
-import org.jboss.as.websockets.Handshake;
-import org.jboss.as.websockets.buffer.BufferColor;
-import org.jboss.as.websockets.buffer.TransmissionBuffer;
-import org.jboss.as.websockets.protocol.ietf00.Ietf00Handshake;
-import org.jboss.as.websockets.protocol.ietf07.Ietf07Handshake;
-import org.jboss.as.websockets.protocol.ietf08.Ietf08Handshake;
-import org.jboss.as.websockets.protocol.ietf13.Ietf13Handshake;
+import org.jboss.as.websockets.WebSocket;
+import org.jboss.as.websockets.servlet.WebsocketServlet;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
@@ -34,32 +29,21 @@ import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.server.JSONDecoder;
 import org.jboss.servlet.http.HttpEvent;
-import org.jboss.servlet.http.HttpEventServlet;
-import org.jboss.servlet.http.UpgradableHttpServletResponse;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
 
 /**
  * @author Mike Brock
  */
-public class JBossAS7WebSocketServlet extends HttpServlet implements HttpEventServlet {
+public class JBossAS7WebSocketServlet extends WebsocketServlet {
 
   /* New and configured errai service */
   protected ErraiService service;
@@ -94,198 +78,8 @@ public class JBossAS7WebSocketServlet extends HttpServlet implements HttpEventSe
     }
   }
 
-  private static final List<Handshake> websocketHandshakes;
+  private static final String WEBSOCKET_SESSION_ALIAS = "Websocket:Errai:SessionAlias";
 
-  static {
-    final List<Handshake> handshakeList = new ArrayList<Handshake>();
-    handshakeList.add(new Ietf00Handshake());
-    handshakeList.add(new Ietf07Handshake());
-    handshakeList.add(new Ietf08Handshake());
-    handshakeList.add(new Ietf13Handshake());
-
-    websocketHandshakes = Collections.unmodifiableList(handshakeList);
-  }
-
-  private static final String SESSION_READ_BUFFER_KEY = "JBoss:Experimental:Websocket:ReadBuffer";
-  private static final String SESSION_WRITE_STREAM_KEY = "JBoss:Experimental:Websocket:WriteStream";
-  private static final String WEBSOCKET_SESSION_ALIAS = "JBoss:Experimental:Websocket:Errai:SessionAlias";
-
-
-  public void event(final HttpEvent event) throws IOException, ServletException {
-    switch (event.getType()) {
-      case BEGIN:
-        event.setTimeout(20000);
-        final HttpServletRequest request = event.getHttpServletRequest();
-        final HttpServletResponse response = event.getHttpServletResponse();
-        if (response instanceof UpgradableHttpServletResponse) {
-          for (Handshake handshake : websocketHandshakes) {
-            if (handshake.matches(request)) {
-              handshake.generateResponse(event);
-
-              response.setHeader("Upgrade", "websocket");
-              response.setHeader("Connection", "Upgrade");
-
-              ((UpgradableHttpServletResponse) response).sendUpgrade();
-
-              createSessionBufferEntry(event);
-              notifyConnectionBegin(event);
-            }
-          }
-        }
-        else {
-          throw new IllegalStateException("cannot upgrade connection");
-        }
-        break;
-      case END:
-        break;
-      case ERROR:
-        event.close();
-        break;
-      case EVENT:
-      case READ:
-        while (event.isReadReady()) {
-          handleReceivedEvent(event, readFrame(event, event.getHttpServletRequest().getInputStream()));
-        }
-        break;
-
-      case TIMEOUT:
-        event.resume();
-        break;
-
-    }
-  }
-
-
-  private static final byte FRAME_FIN = Byte.MIN_VALUE;
-  private static final byte FRAME_OPCODE = 0x0F;
-  private static final byte FRAME_MASKED = Byte.MIN_VALUE;
-  private static final byte FRAME_LENGTH = 127;
-
-  private static final int OPCODE_CONTINUATION = 0;
-  private static final int OPCODE_TEXT = 1;
-  private static final int OPCODE_BINARY = 2;
-  private static final int OPCODE_CONNECTION_CLOSE = 3;
-  private static final int OPCODE_PING = 4;
-  private static final int OPCODE_PONG = 5;
-
-  public static String readFrame(HttpEvent event, InputStream stream) throws IOException {
-    final StringBuilder payloadBuffer = new StringBuilder();
-    int b = stream.read();
-
-    int opcode = (b & FRAME_OPCODE);
-
-    b = stream.read();
-
-    boolean frameMasked = (b & FRAME_MASKED) != 0;
-
-    int payloadLength = (b & FRAME_LENGTH);
-    if (payloadLength == 126) {
-      payloadLength = ((stream.read() & 0xFF) << 8) +
-              (stream.read() & 0xFF);
-    }
-
-    final int[] frameMaskingKey = new int[4];
-
-    if (frameMasked) {
-      frameMaskingKey[0] = stream.read();
-      frameMaskingKey[1] = stream.read();
-      frameMaskingKey[2] = stream.read();
-      frameMaskingKey[3] = stream.read();
-    }
-//
-//    System.out.println("WS_FRAME(opcode=" + opcode + ";frameMasked=" + frameMasked + ";payloadLength="
-//            + payloadLength + ";frameMask=" + Arrays.toString(frameMaskingKey) + ")");
-
-    switch (opcode) {
-      case OPCODE_TEXT:
-        int read = 0;
-        if (frameMasked) {
-          do {
-            int r = stream.read();
-            payloadBuffer.append(((char) ((r ^ frameMaskingKey[read % 4]) & 127)));
-          }
-          while (++read < payloadLength);
-        }
-        else {
-          // support unmasked frames for testing.
-
-          do {
-            payloadBuffer.append((char) stream.read());
-          }
-          while (++read < payloadLength);
-        }
-        break;
-      case OPCODE_CONNECTION_CLOSE:
-        event.close();
-        break;
-
-      case OPCODE_PING:
-      case OPCODE_PONG:
-        break;
-
-      case OPCODE_BINARY:
-        // binary transmission not supported
-        break;
-
-    }
-
-    return payloadBuffer.toString();
-  }
-
-  private static final byte[] randomSeed = SecureHashUtil.nextSecureHash("SHA-1",
-          String.valueOf(System.nanoTime())).getBytes();
-  private static int counter = (int) (System.currentTimeMillis() % 10000);
-
-  public static byte getMask() {
-    return randomSeed[++counter % (randomSeed.length - 1)];
-  }
-
-  private static byte[] mask = {getMask(), getMask(), getMask(), getMask()};
-
-  public static void writeWebSocketFrame(final OutputStream stream, final String txt) throws IOException {
-//    System.out.println("TX_TO_CLIENT <<" + txt + ">>");
-    byte[] strBytes = txt.getBytes("UTF-8");
-    boolean big = strBytes.length > 125;
-
-    stream.write(-127);
-    if (big) {
-      stream.write(-2);
-      stream.write(((strBytes.length >> 8) & 0xFF));
-      stream.write(((strBytes.length) & 0xFF));
-    }
-    else {
-      stream.write(-128 | (strBytes.length & 127));
-    }
-
-    stream.write(mask[0]);
-    stream.write(mask[1]);
-    stream.write(mask[2]);
-    stream.write(mask[3]);
-
-
-    int len = strBytes.length;
-    for (int j = 0; j < len; j++) {
-      stream.write((strBytes[j] ^ mask[j % 4]));
-    }
-
-    stream.flush();
-  }
-
-
-  private static void createSessionBufferEntry(HttpEvent event) throws IOException {
-    final HttpSession session = event.getHttpServletRequest().getSession();
-
-    session.setAttribute(SESSION_READ_BUFFER_KEY, BufferColor.getNewColor());
-    session.setAttribute(SESSION_WRITE_STREAM_KEY, event.getHttpServletResponse().getOutputStream());
-  }
-
-  public static BufferColor getSessionBufferEntry(HttpEvent event) {
-    return getSessionBufferEntry(event.getHttpServletRequest().getSession());
-  }
-
-  public static BufferColor getSessionBufferEntry(HttpSession session) {
-    return (BufferColor) session.getAttribute(SESSION_READ_BUFFER_KEY);
-  }
 
   @Override
   public void init(ServletConfig config) throws ServletException {
@@ -446,10 +240,10 @@ public class JBossAS7WebSocketServlet extends HttpServlet implements HttpEventSe
   }
 
   private static class SimpleEventChannelWrapped implements QueueChannel {
-    private final HttpEvent event;
+    private final WebSocket socket;
 
-    public SimpleEventChannelWrapped(HttpEvent event) {
-      this.event = event;
+    public SimpleEventChannelWrapped(WebSocket socket) {
+      this.socket = socket;
     }
 
     @Override
@@ -459,17 +253,21 @@ public class JBossAS7WebSocketServlet extends HttpServlet implements HttpEventSe
 
     @Override
     public void write(String data) throws IOException {
-      writeWebSocketFrame(event.getHttpServletResponse().getOutputStream(), data);
+      socket.writeTextFrame(data);
     }
   }
 
-
-  protected void notifyConnectionBegin(final HttpEvent event) {
-    final QueueSession session = sessionProvider.getSession(event.getHttpServletRequest().getSession(),
-            event.getHttpServletRequest().getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
+  @Override
+  protected void onSocketOpened(HttpEvent event, WebSocket socket) throws IOException {
   }
 
-  protected void handleReceivedEvent(final HttpEvent event, final String text) throws IOException {
+  @Override
+  protected void onSocketClosed(HttpEvent event) throws IOException {
+  }
+
+
+  @Override
+  protected void onReceivedTextFrame(HttpEvent event, final WebSocket socket, String text) throws IOException {
     final QueueSession session = sessionProvider.getSession(event.getHttpServletRequest().getSession(),
             event.getHttpServletRequest().getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
 
@@ -502,7 +300,7 @@ public class JBossAS7WebSocketServlet extends HttpServlet implements HttpEventSe
 
               @Override
               public void write(String data) throws IOException {
-                writeWebSocketFrame(event.getHttpServletResponse().getOutputStream(), data);
+                socket.writeTextFrame(data);
               }
             });
 
@@ -522,7 +320,7 @@ public class JBossAS7WebSocketServlet extends HttpServlet implements HttpEventSe
           String activationKey = cometSession.getAttribute(String.class, MessageParts.WebSocketToken.name());
           if (activationKey == null || !activationKey.equals(val.get(MessageParts.WebSocketToken.name()).isString().stringValue())) {
             // nope. go away!
-            sendMessage(new SimpleEventChannelWrapped(event), getFailedNegotiation("bad negotiation key"));
+            sendMessage(new SimpleEventChannelWrapped(socket), getFailedNegotiation("bad negotiation key"));
           }
           else {
             // the key matches. now we send the reverse challenge to prove this client is actually
@@ -532,18 +330,18 @@ public class JBossAS7WebSocketServlet extends HttpServlet implements HttpEventSe
             cometSession.setAttribute(WebSocketServerHandler.SESSION_ATTR_WS_STATUS, WebSocketServerHandler.WEBSOCKET_AWAIT_ACTIVATION);
 
             // send the challenge.
-            sendMessage(new SimpleEventChannelWrapped(event), getReverseChallenge(reverseToken));
+            sendMessage(new SimpleEventChannelWrapped(socket), getReverseChallenge(reverseToken));
             return;
           }
 
-          sendMessage(new SimpleEventChannelWrapped(event), getSuccessfulNegotiation());
+          sendMessage(new SimpleEventChannelWrapped(socket), getSuccessfulNegotiation());
         }
         else {
-          sendMessage(new SimpleEventChannelWrapped(event), getFailedNegotiation("bad session id"));
+          sendMessage(new SimpleEventChannelWrapped(socket), getFailedNegotiation("bad session id"));
         }
       }
       else {
-        sendMessage(new SimpleEventChannelWrapped(event), getFailedNegotiation("bad command"));
+        sendMessage(new SimpleEventChannelWrapped(socket), getFailedNegotiation("bad command"));
       }
 
     }
@@ -574,40 +372,6 @@ public class JBossAS7WebSocketServlet extends HttpServlet implements HttpEventSe
     return "[{\"" + MessageParts.ToSubject.name() + "\":\"ClientBus\", \"" + MessageParts.CommandType.name() + "\":\""
             + BusCommands.WebsocketChannelVerify.name() + "\",\"" + MessageParts.WebSocketToken + "\":\"" +
             token + "\"}]";
-  }
-
-
-  private void pollForMessages(QueueSession session, HttpServletRequest httpServletRequest,
-                               HttpServletResponse httpServletResponse, boolean wait) throws IOException {
-    try {
-      // note about caching: clients now include a uniquifier in a request parameter called "z"
-      // so no-cache headers are now unnecessary.
-      httpServletResponse.setContentType("application/json");
-
-      final MessageQueue queue = service.getBus().getQueue(session);
-      final ServletOutputStream outputStream = httpServletResponse.getOutputStream();
-
-      if (queue == null) {
-        switch (getConnectionPhase(httpServletRequest)) {
-          case CONNECTING:
-          case DISCONNECTING:
-            return;
-        }
-
-        sendDisconnectDueToSessionExpiry(outputStream);
-        return;
-      }
-
-      queue.heartBeat();
-
-      queue.poll(wait, outputStream);
-
-      outputStream.close();
-    }
-    catch (final Throwable t) {
-      t.printStackTrace();
-      writeExceptionToOutputStream(httpServletResponse, t);
-    }
   }
 
 }
