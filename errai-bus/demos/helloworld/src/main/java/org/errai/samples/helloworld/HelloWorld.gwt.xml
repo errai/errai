@@ -4,4 +4,6 @@
     <inherits name="com.google.gwt.user.User"/>
     <inherits name="org.jboss.errai.bus.ErraiBus"/>
     <inherits name="org.jboss.errai.ioc.Container"/>
+
+    <set-property name="user.agent" value="safari"/>
 </module>

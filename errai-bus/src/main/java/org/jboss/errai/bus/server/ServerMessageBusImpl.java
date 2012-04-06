@@ -114,6 +114,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
   private Set<String> reservedNames = new HashSet<String>();
 
+  private final boolean webSocketServlet;
   private final boolean webSocketServer;
 
   /**
@@ -128,8 +129,15 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     this.webSocketServer = config
             .getBooleanProperty(ErraiServiceConfigurator.ENABLE_WEB_SOCKET_SERVER);
 
-    final int webSocketPort = WebSocketServer.getWebSocketPort(config);
-    final String webSocketPath = WebSocketServerHandler.WEBSOCKET_PATH;
+    final int webSocketPort;
+    final String webSocketPath;
+
+    webSocketServlet = Boolean.getBoolean("org.jboss.errai.websocket_servlet");
+
+    webSocketPort = WebSocketServer.getWebSocketPort(config);
+    webSocketPath = config.hasProperty(ErraiServiceConfigurator.WEB_SOCKET_URL) ?
+            config.getProperty(ErraiServiceConfigurator.WEB_SOCKET_URL) :
+            WebSocketServerHandler.WEBSOCKET_PATH;
 
     Integer bufferSize = config.getIntProperty(IOConfigAttribs.BUS_BUFFER_SIZE);
     Integer segmentSize = config.getIntProperty(IOConfigAttribs.BUS_BUFFER_SEGMENT_SIZE);
@@ -297,7 +305,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 msg.set(MessageParts.PollFrequency, ErraiServiceConfigurator.HOSTED_MODE_TESTING ? 50 : 250);
               }
 
-              if (webSocketServer) {
+              if (webSocketServer || webSocketServlet) {
                 if (!first) {
                   capabilitiesBuffer.append(',');
                 }

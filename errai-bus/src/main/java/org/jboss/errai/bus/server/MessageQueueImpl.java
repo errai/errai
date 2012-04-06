@@ -16,13 +16,12 @@
 
 package org.jboss.errai.bus.server;
 
-import io.netty.channel.Channel;
-import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueActivationCallback;
 import org.jboss.errai.bus.server.io.BufferHelper;
+import org.jboss.errai.bus.server.io.QueueChannel;
 import org.jboss.errai.bus.server.io.buffers.BufferCallback;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
@@ -66,7 +65,7 @@ public class MessageQueueImpl implements MessageQueue {
   private final BufferColor bufferColor;
 
   private volatile boolean useDirectSocketChannel = false;
-  private Channel directSocketChannel;
+  private QueueChannel directSocketChannel;
 
   private final Object activationLock = new Object();
   private final AtomicInteger messageCount = new AtomicInteger();
@@ -141,7 +140,8 @@ public class MessageQueueImpl implements MessageQueue {
     }
 
     if (useDirectSocketChannel && directSocketChannel.isConnected()) {
-      directSocketChannel.write(new TextWebSocketFrame("[" + ServerBusTools.encodeMessage(message) + "]"));
+   //   directSocketChannel.write(new TextWebSocketFrame("[" + ServerBusTools.encodeMessage(message) + "]"));
+       directSocketChannel.write("[" + ServerBusTools.encodeMessage(message) + "]");
     }
     else {
       try {
@@ -279,7 +279,8 @@ public class MessageQueueImpl implements MessageQueue {
       if (isDirectChannelOpen()) {
         UnwrappedByteArrayOutputStream outputStream = new UnwrappedByteArrayOutputStream();
         buffer.read(outputStream, bufferColor, new BufferHelper.MultiMessageHandlerCallback());
-        directSocketChannel.write(new TextWebSocketFrame(new String(outputStream.toByteArray(), 0, outputStream.size())));
+       // directSocketChannel.write(new TextWebSocketFrame(new String(outputStream.toByteArray(), 0, outputStream.size())));
+        directSocketChannel.write(new String(outputStream.toByteArray(), 0, outputStream.size()));
       }
       else {
         BufferHelper.encodeAndWriteNoop(buffer, bufferColor);
@@ -356,7 +357,7 @@ public class MessageQueueImpl implements MessageQueue {
   }
 
   private boolean isDirectChannelOpen() {
-    return useDirectSocketChannel && directSocketChannel.isOpen();
+    return useDirectSocketChannel && directSocketChannel.isConnected();
   }
 
   /**
@@ -415,7 +416,7 @@ public class MessageQueueImpl implements MessageQueue {
   }
 
   @Override
-  public void setDirectSocketChannel(Channel channel) {
+  public void setDirectSocketChannel(QueueChannel channel) {
     this.directSocketChannel = channel;
     this.useDirectSocketChannel = true;
 

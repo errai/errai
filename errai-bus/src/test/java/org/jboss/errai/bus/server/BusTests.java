@@ -17,15 +17,20 @@
 package org.jboss.errai.bus.server;
 
 import junit.framework.TestCase;
+import org.jboss.as.websockets.protocol.ietf07.Ietf07Handshake;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.SessionEndListener;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
+import org.jboss.errai.bus.server.servlet.JBossAS7WebSocketServlet;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * @author Mike Brock
@@ -80,7 +85,7 @@ public class BusTests extends TestCase {
 
     BufferColor global = BufferColor.getAllBuffersColor();
     String bufData = "writeIn";
-    
+
     ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bufData.getBytes());
     buffer.write(byteArrayInputStream, global);
 
@@ -89,5 +94,47 @@ public class BusTests extends TestCase {
     messageQueue.poll(false, outputStream);
 
     assertEquals("[]", new String(outputStream.toByteArray()));
+  }
+
+  public void testHandshake() throws Exception {
+    final List<Byte> byteList = new ArrayList<Byte>();
+    byte firstByte = (byte) (Byte.MIN_VALUE | 126);
+
+    System.out.println((int) (firstByte));
+
+    byteList.add(firstByte);
+    String toEncode = "Test!";
+    byteList.add((byte) toEncode.length());
+
+    for (byte b : toEncode.getBytes()) {
+      byteList.add(b);
+    }
+    byteList.add((byte) 0x01);
+
+    String s = JBossAS7WebSocketServlet.readFrame(null, new InputStream() {
+      int cursor;
+
+      @Override
+      public int read() throws IOException {
+        return byteList.get(cursor++);
+      }
+
+      @Override
+      public int available() throws IOException {
+        return byteList.size() - cursor;
+      }
+    });
+
+    System.out.println(s);
+  }
+
+  public void testFrameRoundTrip() throws Exception {
+    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+    JBossAS7WebSocketServlet.writeWebSocketFrame(byteArrayOutputStream, "FooBarFooFarHELLO!");
+
+    ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+    String bah = JBossAS7WebSocketServlet.readFrame(null, byteArrayInputStream);
+    System.out.println(bah);
+
   }
 }

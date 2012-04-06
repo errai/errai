@@ -132,7 +132,7 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
             activeChannels.put(ctx.getChannel(), session);
 
             // set the session queue into direct channel mode.
-            svc.getBus().getQueueBySession(sessionKey).setDirectSocketChannel(ctx.getChannel());
+            svc.getBus().getQueueBySession(sessionKey).setDirectSocketChannel(new NettyQueueChannel(ctx.getChannel()));
 
             // remove the web socket token so it cannot be re-used for authentication.
             session.removeAttribute(MessageParts.WebSocketToken.name());

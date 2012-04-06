@@ -23,13 +23,24 @@
 
     <servlet>
         <servlet-name>ErraiServlet</servlet-name>
-        <servlet-class>org.jboss.errai.bus.server.servlet.JettyContinuationsServlet</servlet-class>
+        <servlet-class>org.jboss.errai.bus.server.servlet.DefaultBlockingServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>ErraiServletWebSocket</servlet-name>
+        <servlet-class>org.jboss.errai.bus.server.servlet.JBossAS7WebSocketServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
 
     <servlet-mapping>
         <servlet-name>ErraiServlet</servlet-name>
         <url-pattern>*.erraiBus</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>ErraiServletWebSocket</servlet-name>
+        <url-pattern>/erraiws.bus</url-pattern>
     </servlet-mapping>
 
     <welcome-file-list>
