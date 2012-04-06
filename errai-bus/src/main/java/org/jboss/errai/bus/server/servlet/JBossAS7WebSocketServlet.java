@@ -3,7 +3,7 @@ package org.jboss.errai.bus.server.servlet;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import org.jboss.as.websockets.WebSocket;
-import org.jboss.as.websockets.servlet.WebSocketServlet;
+import org.jboss.as.websockets.servlet.WebSocketServletA;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
@@ -41,7 +41,7 @@ import java.io.OutputStream;
 /**
  * @author Mike Brock
  */
-public class JBossAS7WebSocketServlet extends WebSocketServlet {
+public class JBossAS7WebSocketServlet extends WebSocketServletA {
 
   /* New and configured errai service */
   protected ErraiService service;
