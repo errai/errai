@@ -114,8 +114,6 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
     final QueueSession session = sessionProvider.getSession(httpServletRequest.getSession(),
             httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
 
-    System.out.println("SessionID:" + session.getSessionId());
-
     service.store(createCommandMessage(session, httpServletRequest));
 
     pollForMessages(session, httpServletRequest, httpServletResponse, false);
