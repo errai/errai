@@ -17,6 +17,8 @@
 package org.jboss.errai.bus.server;
 
 import junit.framework.TestCase;
+import org.jboss.as.websockets.protocol.ietf00.Hybi00Socket;
+import org.jboss.as.websockets.protocol.ietf00.Ietf00Handshake;
 import org.jboss.as.websockets.protocol.ietf07.Ietf07Handshake;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.SessionEndListener;
@@ -126,6 +128,22 @@ public class BusTests extends TestCase {
 //    });
 //
 //    System.out.println(s);
+  }
+
+  public void testHybi00Handshake() throws Exception {
+    String key1 = "P388 O503D&ul7 {K%gX( %7  15";
+    String key2 = "1 N ?|k UT0or 3o  4 I97N 5-S3O 31";
+    //String additionalBytes = "Tm[K T2u";
+    byte[] additionalBytes = {0x47, 0x30, 0x22, 0x2D, 0x5A, 0x3F, 0x47, 0x58};
+
+    byte[] solved =
+            Ietf00Handshake.solve("MD5", Ietf00Handshake.decodeKey(key1), Ietf00Handshake.decodeKey(key2),
+                    additionalBytes);
+
+    for (byte b : solved) {
+      System.out.print(Integer.toHexString(b) + " ");
+    }
+    System.out.println();
   }
 
 }
