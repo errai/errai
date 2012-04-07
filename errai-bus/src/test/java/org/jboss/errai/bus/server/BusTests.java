@@ -17,19 +17,15 @@
 package org.jboss.errai.bus.server;
 
 import junit.framework.TestCase;
-import org.jboss.as.websockets.protocol.ietf00.Hybi00Socket;
-import org.jboss.as.websockets.protocol.ietf00.Ietf00Handshake;
-import org.jboss.as.websockets.protocol.ietf07.Ietf07Handshake;
+import org.jboss.as.websockets.protocol.ietf00.Hybi00Handshake;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.SessionEndListener;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
-import org.jboss.errai.bus.server.servlet.JBossAS7WebSocketServlet;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -137,7 +133,7 @@ public class BusTests extends TestCase {
     byte[] additionalBytes = {0x47, 0x30, 0x22, 0x2D, 0x5A, 0x3F, 0x47, 0x58};
 
     byte[] solved =
-            Ietf00Handshake.solve("MD5", Ietf00Handshake.decodeKey(key1), Ietf00Handshake.decodeKey(key2),
+            Hybi00Handshake.solve("MD5", Hybi00Handshake.decodeKey(key1), Hybi00Handshake.decodeKey(key2),
                     additionalBytes);
 
     for (byte b : solved) {

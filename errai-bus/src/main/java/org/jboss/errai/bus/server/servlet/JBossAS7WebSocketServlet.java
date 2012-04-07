@@ -81,6 +81,8 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
 
   @Override
   public void init(ServletConfig config) throws ServletException {
+    //setProtocolName("J.REP1.0/ErraiBus");
+
     System.setProperty("org.jboss.errai.websocket_servlet", "true");
 
     init(config.getServletContext(), config.getInitParameter("service-locator"));
