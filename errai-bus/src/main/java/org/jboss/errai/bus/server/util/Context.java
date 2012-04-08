@@ -33,6 +33,8 @@ public interface Context {
 
   public <T> T getAttribute(Class<T> type, String param);
 
+  public boolean hasAttribute(String param);
+
   public Collection<String> getAttributeNames();
 
   public boolean removeAttribute(Enum<?> key);

@@ -16,21 +16,34 @@
 package org.jboss.errai.bus.server.io.websockets;
 
 import io.netty.buffer.ChannelBuffers;
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ExceptionEvent;
+import io.netty.channel.MessageEvent;
+import io.netty.channel.SimpleChannelUpstreamHandler;
 import io.netty.handler.codec.http.DefaultHttpResponse;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
-import io.netty.handler.codec.http.websocketx.*;
+import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.PingWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.PongWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import io.netty.handler.codec.http.websocketx.WebSocketServerHandshaker;
+import io.netty.handler.codec.http.websocketx.WebSocketServerHandshakerFactory;
 import io.netty.util.CharsetUtil;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.server.io.MessageFactory;
 import org.jboss.errai.bus.server.service.ErraiService;
-import org.jboss.errai.bus.server.util.SecureHashUtil;
+import org.jboss.errai.bus.server.util.LocalContext;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
+import org.jboss.errai.marshalling.client.api.json.EJString;
 import org.jboss.errai.marshalling.server.JSONDecoder;
 
 import java.util.Map;
@@ -41,7 +54,6 @@ import static io.netty.handler.codec.http.HttpHeaders.setContentLength;
 import static io.netty.handler.codec.http.HttpMethod.GET;
 import static io.netty.handler.codec.http.HttpResponseStatus.FORBIDDEN;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
-
 
 /**
  * The working prototype ErraiBus Websocket Server.
@@ -125,8 +137,10 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
 
         // has this client already attempted a connection, and is in a wait verify state
         if (sessionKey != null && (session = svc.getBus().getSessionBySessionId(sessionKey)) != null) {
-          if (session.hasAttribute(SESSION_ATTR_WS_STATUS) &&
-                  WEBSOCKET_ACTIVE.equals(session.getAttribute(String.class, SESSION_ATTR_WS_STATUS))) {
+          LocalContext localContext = LocalContext.get(session);
+
+          if (localContext.hasAttribute(SESSION_ATTR_WS_STATUS) &&
+                  WEBSOCKET_ACTIVE.equals(localContext.getAttribute(String.class, SESSION_ATTR_WS_STATUS))) {
 
             // open the channel
             activeChannels.put(ctx.getChannel(), session);
@@ -135,24 +149,24 @@ public class WebSocketServerHandler extends SimpleChannelUpstreamHandler {
             svc.getBus().getQueueBySession(sessionKey).setDirectSocketChannel(new NettyQueueChannel(ctx.getChannel()));
 
             // remove the web socket token so it cannot be re-used for authentication.
-            session.removeAttribute(MessageParts.WebSocketToken.name());
-            session.removeAttribute(SESSION_ATTR_WS_STATUS);
+            localContext.removeAttribute(MessageParts.WebSocketToken.name());
+            localContext.removeAttribute(SESSION_ATTR_WS_STATUS);
 
             return;
           }
 
-          // check the activation key matches what we have in the ssession.
-          String activationKey = session.getAttribute(String.class, MessageParts.WebSocketToken.name());
-          if (activationKey == null || !activationKey.equals(val.get(MessageParts.WebSocketToken.name()).isString().stringValue())) {
+          // check the activation key matches.
+          EJString activationKey = val.get(MessageParts.WebSocketToken.name()).isString();
+          if (activationKey == null || !WebSocketTokenManager.verifyOneTimeToken(session, activationKey.stringValue())) {
             // nope. go away!
             sendMessage(ctx, getFailedNegotiation("bad negotiation key"));
           }
           else {
             // the key matches. now we send the reverse challenge to prove this client is actually
             // already talking to the bus over the COMET channel.
-            String reverseToken = SecureHashUtil.nextSecureHash("SHA-256");
-            session.setAttribute(MessageParts.WebSocketToken.name(), reverseToken);
-            session.setAttribute(SESSION_ATTR_WS_STATUS, WEBSOCKET_AWAIT_ACTIVATION);
+            String reverseToken = WebSocketTokenManager.getNewOneTimeToken(session);
+            localContext.setAttribute(MessageParts.WebSocketToken.name(), reverseToken);
+            localContext.setAttribute(SESSION_ATTR_WS_STATUS, WEBSOCKET_AWAIT_ACTIVATION);
 
             // send the challenge.
             sendMessage(ctx, getReverseChallenge(reverseToken));

@@ -51,7 +51,6 @@ public class MessageQueueImpl implements MessageQueue {
   private static final long DOWNGRADE_THRESHOLD = Boolean.getBoolean("org.jboss.errai.debugmode") ?
           secs(1600) : secs(10);
 
-
   private final QueueSession session;
 
   private boolean initLock = true;
@@ -70,9 +69,9 @@ public class MessageQueueImpl implements MessageQueue {
   private final Object activationLock = new Object();
   private final AtomicInteger messageCount = new AtomicInteger();
 
-  private Logger log = getLogger(getClass());
+  private static final Logger log = getLogger(MessageQueueImpl.class);
 
-  public MessageQueueImpl(TransmissionBuffer buffer, final QueueSession session) {
+  public MessageQueueImpl(final TransmissionBuffer buffer, final QueueSession session) {
     this.buffer = buffer;
     this.session = session;
     this.bufferColor = BufferColor.getNewColorFromHead(buffer);
@@ -415,7 +414,7 @@ public class MessageQueueImpl implements MessageQueue {
   }
 
   @Override
-  public void setDirectSocketChannel(QueueChannel channel) {
+  public void setDirectSocketChannel(final QueueChannel channel) {
     this.directSocketChannel = channel;
     this.useDirectSocketChannel = true;
 

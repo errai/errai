@@ -78,6 +78,10 @@ public class LocalContext implements Context {
     return ctx.getAttribute(type, param);
   }
 
+  public boolean hasAttribute(String param) {
+    return ctx.hasAttribute(param);
+  }
+
   public Collection<String> getAttributeNames() {
     return ctx.getAttributeNames();
   }

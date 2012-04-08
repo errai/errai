@@ -17,15 +17,18 @@ import org.jboss.errai.bus.server.api.SessionProvider;
 import org.jboss.errai.bus.server.io.MessageFactory;
 import org.jboss.errai.bus.server.io.QueueChannel;
 import org.jboss.errai.bus.server.io.websockets.WebSocketServerHandler;
+import org.jboss.errai.bus.server.io.websockets.WebSocketTokenManager;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
 import org.jboss.errai.bus.server.service.ErraiServiceImpl;
+import org.jboss.errai.bus.server.util.LocalContext;
 import org.jboss.errai.bus.server.util.SecureHashUtil;
 import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
+import org.jboss.errai.marshalling.client.api.json.EJString;
 import org.jboss.errai.marshalling.server.JSONDecoder;
 import org.jboss.servlet.http.HttpEvent;
 
@@ -37,6 +40,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.security.MessageDigest;
 
 /**
  * @author Mike Brock
@@ -271,33 +275,36 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
     final String text = socket.readTextFrame();
 
     final QueueSession session = sessionProvider.getSession(event.getHttpServletRequest().getSession(),
-            event.getHttpServletRequest().getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
+            socket.getSocketID());
 
     if (text.length() == 0) return;
 
     @SuppressWarnings("unchecked") EJObject val = JSONDecoder.decode(text).isObject();
 
+    final LocalContext localSessionContext = LocalContext.get(session);
+    QueueSession cometSession = localSessionContext.getAttribute(QueueSession.class, WEBSOCKET_SESSION_ALIAS);
 
     // this is not an active channel.
-    if (!session.hasAttribute(WEBSOCKET_SESSION_ALIAS)) {
+    if (cometSession == null) {
       String commandType = val.get(MessageParts.CommandType.name()).isString().stringValue();
 
       // this client apparently wants to connect.
       if (BusCommands.ConnectToQueue.name().equals(commandType)) {
         String sessionKey = val.get(MessageParts.ConnectionSessionKey.name()).isString().stringValue();
 
-        final QueueSession cometSession;
-
         // has this client already attempted a connection, and is in a wait verify state
         if (sessionKey != null && (cometSession = service.getBus().getSessionBySessionId(sessionKey)) != null) {
-          if (cometSession.hasAttribute(WebSocketServerHandler.SESSION_ATTR_WS_STATUS) &&
-                  WebSocketServerHandler.WEBSOCKET_ACTIVE.equals(cometSession.getAttribute(String.class, WebSocketServerHandler.SESSION_ATTR_WS_STATUS))) {
+          LocalContext localCometSession = LocalContext.get(cometSession);
+
+          if (localCometSession.hasAttribute(WebSocketServerHandler.SESSION_ATTR_WS_STATUS) &&
+                  WebSocketServerHandler.WEBSOCKET_ACTIVE.equals(localCometSession.getAttribute(String.class, WebSocketServerHandler.SESSION_ATTR_WS_STATUS))) {
 
             // set the session queue into direct channel mode.
+            final QueueSession sessionRef = cometSession;
             service.getBus().getQueue(cometSession).setDirectSocketChannel(new QueueChannel() {
               @Override
               public boolean isConnected() {
-                return cometSession.isValid();
+                return sessionRef.isValid();
               }
 
               @Override
@@ -306,30 +313,24 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
               }
             });
 
-            session.setAttribute(WEBSOCKET_SESSION_ALIAS, cometSession);
-
-            // associate the new WebSocket session with the the old comet session.
-            //   service.getBus().associateNewQueue(cometSession, session);
-
-            // remove the web socket token so it cannot be re-used for authentication.
-            cometSession.removeAttribute(MessageParts.WebSocketToken.name());
+            localSessionContext.setAttribute(WEBSOCKET_SESSION_ALIAS, cometSession);
             cometSession.removeAttribute(WebSocketServerHandler.SESSION_ATTR_WS_STATUS);
 
             return;
           }
 
-          // check the activation key matches what we have in the ssession.
-          String activationKey = cometSession.getAttribute(String.class, MessageParts.WebSocketToken.name());
-          if (activationKey == null || !activationKey.equals(val.get(MessageParts.WebSocketToken.name()).isString().stringValue())) {
+          // check the activation key matches.
+          EJString activationKey = val.get(MessageParts.WebSocketToken.name()).isString();
+          if (activationKey == null || !WebSocketTokenManager.verifyOneTimeToken(cometSession, activationKey.stringValue())) {
+
             // nope. go away!
             sendMessage(new SimpleEventChannelWrapped(socket), getFailedNegotiation("bad negotiation key"));
           }
           else {
             // the key matches. now we send the reverse challenge to prove this client is actually
             // already talking to the bus over the COMET channel.
-            String reverseToken = SecureHashUtil.nextSecureHash("SHA-256");
-            cometSession.setAttribute(MessageParts.WebSocketToken.name(), reverseToken);
-            cometSession.setAttribute(WebSocketServerHandler.SESSION_ATTR_WS_STATUS, WebSocketServerHandler.WEBSOCKET_AWAIT_ACTIVATION);
+            String reverseToken = WebSocketTokenManager.getNewOneTimeToken(cometSession);
+            localCometSession.setAttribute(WebSocketServerHandler.SESSION_ATTR_WS_STATUS, WebSocketServerHandler.WEBSOCKET_AWAIT_ACTIVATION);
 
             // send the challenge.
             sendMessage(new SimpleEventChannelWrapped(socket), getReverseChallenge(reverseToken));
@@ -350,7 +351,7 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
     else {
       // this is an active session. send the message.;
 
-      Message msg = MessageFactory.createCommandMessage(session.getAttribute(QueueSession.class, WEBSOCKET_SESSION_ALIAS), text);
+      Message msg = MessageFactory.createCommandMessage(cometSession, text);
       service.store(msg);
     }
   }

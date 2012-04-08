@@ -24,7 +24,7 @@ import java.io.ByteArrayInputStream;
  * Decodes a JSON string or character array, and provides a proper collection of elements
  */
 public class JSONDecoder {
-  public static EJValue decode(String o) {
+  public static EJValue decode(final String o) {
     return new JSONStreamDecoder(new ByteArrayInputStream(o.getBytes())).parse();
   }
 }

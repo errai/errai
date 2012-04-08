@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
+import com.google.gwt.user.client.Cookies;
 import junit.framework.AssertionFailedError;
 
 import org.jboss.errai.bus.client.ErraiBus;
@@ -112,6 +113,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private RequestBuilder sendBuilder;
 
   private volatile boolean cometChannelOpen = true;
+
+  private volatile boolean webSocketUpgradeAvailable = false;
   private volatile boolean webSocketOpen = false;
   private String webSocketUrl;
   private String webSocketToken;
@@ -354,7 +357,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
     }
   }
-
 
 
   /**
@@ -815,14 +817,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 case WebSockets:
                   webSocketUrl = message.get(String.class, MessageParts.WebSocketURL);
                   webSocketToken = message.get(String.class, MessageParts.WebSocketToken);
-
-                  LogUtil.log("attempting web sockets connection at URL: " + webSocketUrl);
-
-                  Object o = ClientWebSocketChannel.attemptWebSocketConnect(ClientMessageBusImpl.this, webSocketUrl);
-
-                  if (o instanceof String) {
-                    LogUtil.log("could not use web sockets. reason: " + o);
-                  }
+                  webSocketUpgradeAvailable = true;
                   break;
                 case LongPollAvailable:
 
@@ -930,6 +925,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
                 InitVotes.voteFor(ClientMessageBusImpl.class);
 
+                if (webSocketUpgradeAvailable) {
+                  websocketUpgrade();
+                }
+
 
                 // end of FinishStateSync Timer
               }
@@ -1006,6 +1005,39 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     if (!sendInitialMessage()) {
       logError("Could not connect to remote bus", "", null);
     }
+  }
+
+  private void websocketUpgrade() {
+
+    new Timer() {
+      int attempts = 0;
+
+      @Override
+      public void run() {
+        if (attempts > 10) {
+          LogUtil.log("did not negotiate websocket because a valid session cookie was not detected.");
+          return;
+        }
+
+        if (Cookies.getCookie("JSESSIONID") == null) {
+          attempts++;
+
+          schedule(100);
+          return;
+        }
+
+        LogUtil.log("using session coookie for websocket: " + Cookies.getCookie("JSESSIONID"));
+
+
+        LogUtil.log("attempting web sockets connection at URL: " + webSocketUrl);
+
+        Object o = ClientWebSocketChannel.attemptWebSocketConnect(ClientMessageBusImpl.this, webSocketUrl);
+
+        if (o instanceof String) {
+          LogUtil.log("could not use web sockets. reason: " + o);
+        }
+      }
+    }.schedule(1);
   }
 
   private void completeInit() {
