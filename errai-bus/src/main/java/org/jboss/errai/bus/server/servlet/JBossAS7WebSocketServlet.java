@@ -95,7 +95,7 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
     }
 
     System.setProperty("org.jboss.errai.websocket.servlet.path",
-            config.getServletContext().getContextPath() + pathElement);
+            config.getServletContext().getContextPath() + "/" +  pathElement);
 
 
     init(config.getServletContext(), config.getInitParameter("service-locator"));

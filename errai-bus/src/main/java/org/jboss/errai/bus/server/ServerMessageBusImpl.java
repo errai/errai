@@ -329,7 +329,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 HttpServletRequest request = message.getResource(HttpServletRequest.class, HttpServletRequest.class.getName());
 
                 if (webSocketServlet) {
-                  webSocketURL = "ws://" + request.getHeader("Host") + request.getContextPath() + "/" + webSocketPath;
+                  webSocketURL = "ws://" + request.getHeader("Host") + webSocketPath;
                 }
                 else {
                   webSocketURL = "ws://" + request.getLocalName() + ":" + webSocketPort + webSocketPath;
