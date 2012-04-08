@@ -38,12 +38,12 @@ import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 /**
  * The default DefaultBlockingServlet which provides the HTTP-protocol gateway
  * between the server bus and the client buses.
- *
+ * <p/>
  * <h2>Configuration</h2>
- *
+ * <p/>
  * The DefaultBlockingServlet, as its name suggests, is normally configured as
  * an HTTP Servlet in the <code>web.xml</code> file:
- *
+ * <p/>
  * <pre>
  * {@code <servlet>}
  *   {@code <servlet-name>ErraiServlet</servlet-name>}
@@ -56,14 +56,14 @@ import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
  *   {@code <url-pattern>*.erraiBus</url-pattern>}
  * {@code </servlet-mapping>}
  * </pre>
- *
+ * <p/>
  * Alternatively, the DefaultBlockingServlet can be deployed as a Servlet
  * Filter. This may be necessary in cases where an existing filter is configured
  * in the web application, and that filter interferes with the Errai Bus
  * requests. In this case, configuring DefaultBlockingServlet to handle
  * {@code *.erraiBus} requests ahead of other filters in web.xml will solve the
  * problem:
- *
+ * <p/>
  * <pre>
  * {@code <filter>}
  *   {@code <filter-name>ErraiServlet</filter-name>}
@@ -154,7 +154,7 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
 
   @Override
   public void init(FilterConfig filterConfig) throws ServletException {
-    init(filterConfig.getServletContext(), filterConfig.getInitParameter("service-locator"));
+    super.initAsFilter(filterConfig);
   }
 
   /**
@@ -165,7 +165,7 @@ public class DefaultBlockingServlet extends AbstractErraiServlet implements Filt
    */
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-      throws IOException, ServletException {
+          throws IOException, ServletException {
     service(request, response);
   }
 }

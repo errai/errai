@@ -135,10 +135,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     final int webSocketPort;
     final String webSocketPath;
 
-    webSocketServlet = Boolean.getBoolean("org.jboss.errai.websocket_servlet");
+    webSocketServlet = config.getBooleanAttribute("org.jboss.errai.websocket.servlet.enabled");
 
     if (webSocketServlet) {
-      webSocketPath = System.getProperty("org.jboss.errai.websocket.servlet.path");
+      webSocketPath = config.getAttribute("org.jboss.errai.websocket.servlet.path");
       webSocketPort = -1;
     }
     else {

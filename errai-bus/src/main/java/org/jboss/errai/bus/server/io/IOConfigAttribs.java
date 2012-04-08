@@ -57,5 +57,4 @@ public abstract class IOConfigAttribs {
    *
    */
   public static final String BUF_BUFFER_ALLOCATION_MODE = "errai.bus.buffer_allocation_mode";
-  
 }

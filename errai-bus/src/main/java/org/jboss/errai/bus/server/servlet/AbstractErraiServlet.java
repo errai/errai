@@ -19,6 +19,8 @@ package org.jboss.errai.bus.server.servlet;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import javax.servlet.Filter;
+import javax.servlet.FilterConfig;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -55,16 +57,10 @@ public abstract class AbstractErraiServlet extends HttpServlet {
   /* A default Http session provider */
   protected SessionProvider<HttpSession> sessionProvider;
 
-  protected volatile ClassLoader contextClassLoader;
-
   // protected Logger log = LoggerFactory.getLogger(getClass());
 
   public enum ConnectionPhase {
     NORMAL, CONNECTING, DISCONNECTING, UNKNOWN
-  }
-
-  static {
-    ScannerSingleton.class.getName();
   }
 
   public static ConnectionPhase getConnectionPhase(HttpServletRequest request) {
@@ -82,67 +78,15 @@ public abstract class AbstractErraiServlet extends HttpServlet {
     }
   }
 
-
   @Override
   public void init(ServletConfig config) throws ServletException {
-    init(config.getServletContext(), config.getInitParameter("service-locator"));
+    service = ServletBootstrapUtil.getService(config);
+    sessionProvider = service.getSessionProvider();
   }
 
-  /**
-   * Common initialization logic that works for both Servlets and Filters.
-   *
-   * @param context             The ServletContext of the web application.
-   * @param serviceLocatorClass The value of the (Servlet or Filter) init parameter
-   *                            <code>"service-locator"</code>. If specified, it must be the
-   *                            fully-qualified name of a class that implements
-   *                            {@link ServiceLocator}. If null, the service locator is built by a
-   *                            call to {@link #buildService()}.
-   */
-  protected void init(final ServletContext context, String serviceLocatorClass) {
-    service = (ErraiService) context.getAttribute("errai");
-    if (null == service) {
-      synchronized (context) {
-        // Build or lookup service
-        if (serviceLocatorClass != null) {
-          // locate externally created service instance, i.e. CDI
-          try {
-            ClassLoader loader = Thread.currentThread().getContextClassLoader();
-            Class<?> aClass = loader.loadClass(serviceLocatorClass);
-            ServiceLocator locator = (ServiceLocator) aClass.newInstance();
-            this.service = locator.locateService();
-          }
-          catch (Exception e) {
-            throw new RuntimeException("Failed to create service", e);
-          }
-        }
-        else {
-          // create a service instance manually
-          this.service = buildService();
-        }
 
-        contextClassLoader = Thread.currentThread().getContextClassLoader();
-
-        service.getConfiguration().getResourceProviders()
-                .put("errai.experimental.classLoader", new ResourceProvider<ClassLoader>() {
-                  @Override
-                  public ClassLoader get() {
-                    return contextClassLoader;
-                  }
-                });
-
-        service.getConfiguration().getResourceProviders()
-                .put("errai.experimental.servletContext", new ResourceProvider<ServletContext>() {
-                  @Override
-                  public ServletContext get() {
-                    return context;
-                  }
-                });
-
-        // store it in servlet context
-        context.setAttribute("errai", service);
-      }
-    }
-
+  public void initAsFilter(FilterConfig config) throws ServletException {
+    service = ServletBootstrapUtil.getService(config);
     sessionProvider = service.getSessionProvider();
   }
 
@@ -150,21 +94,6 @@ public abstract class AbstractErraiServlet extends HttpServlet {
   public void destroy() {
     service.stopService();
   }
-
-  @SuppressWarnings({"unchecked"})
-  protected ErraiService<HttpSession> buildService() {
-    return Guice.createInjector(new AbstractModule() {
-      @Override
-      @SuppressWarnings({"unchecked"})
-      public void configure() {
-        bind(ErraiService.class).to(ErraiServiceImpl.class);
-        bind(ErraiServiceConfigurator.class).to(ErraiServiceConfiguratorImpl.class);
-        bind(MessageBus.class).to(ServerMessageBusImpl.class);
-        bind(ServerMessageBus.class).to(ServerMessageBusImpl.class);
-      }
-    }).getInstance(ErraiService.class);
-  }
-
 
   /**
    * Writes the message to the output stream
