@@ -137,10 +137,17 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     webSocketServlet = Boolean.getBoolean("org.jboss.errai.websocket_servlet");
 
-    webSocketPort = WebSocketServer.getWebSocketPort(config);
-    webSocketPath = config.hasProperty(ErraiServiceConfigurator.WEB_SOCKET_URL) ?
-            config.getProperty(ErraiServiceConfigurator.WEB_SOCKET_URL) :
-            WebSocketServerHandler.WEBSOCKET_PATH;
+    if (webSocketServlet) {
+      webSocketPath = System.getProperty("org.jboss.errai.websocket.servlet.path");
+      webSocketPort = -1;
+    }
+    else {
+      webSocketPath = config.hasProperty(ErraiServiceConfigurator.WEB_SOCKET_URL) ?
+              config.getProperty(ErraiServiceConfigurator.WEB_SOCKET_URL) :
+              WebSocketServerHandler.WEBSOCKET_PATH;
+
+      webSocketPort = WebSocketServer.getWebSocketPort(config);
+    }
 
     Integer bufferSize = config.getIntProperty(IOConfigAttribs.BUS_BUFFER_SIZE);
     Integer segmentSize = config.getIntProperty(IOConfigAttribs.BUS_BUFFER_SEGMENT_SIZE);

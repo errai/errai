@@ -30,6 +30,13 @@
     <servlet>
         <servlet-name>ErraiServletWebSocket</servlet-name>
         <servlet-class>org.jboss.errai.bus.server.servlet.JBossAS7WebSocketServlet</servlet-class>
+
+
+        <init-param>
+            <param-name>websocket-path-element</param-name>
+            <param-value>in.erraiBusWebSocket</param-value>
+        </init-param>
+
         <load-on-startup>1</load-on-startup>
     </servlet>
 
