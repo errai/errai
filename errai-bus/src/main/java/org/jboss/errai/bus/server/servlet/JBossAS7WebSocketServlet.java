@@ -30,7 +30,6 @@ import org.jboss.errai.bus.server.io.websockets.WebSocketTokenManager;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.util.LocalContext;
 import org.jboss.errai.common.client.protocols.MessageParts;
-import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJString;
 import org.jboss.errai.marshalling.server.JSONDecoder;
@@ -55,10 +54,6 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
 
   public enum ConnectionPhase {
     NORMAL, CONNECTING, DISCONNECTING, UNKNOWN
-  }
-
-  static {
-    ScannerSingleton.class.getName();
   }
 
   private static final String WEBSOCKET_SESSION_ALIAS = "Websocket:Errai:SessionAlias";
@@ -235,5 +230,4 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
             + BusCommands.WebsocketChannelVerify.name() + "\",\"" + MessageParts.WebSocketToken + "\":\"" +
             token + "\"}]";
   }
-
 }
