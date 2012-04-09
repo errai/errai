@@ -5,11 +5,11 @@ import com.google.inject.Guice;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.server.ServerMessageBusImpl;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
+import org.jboss.errai.bus.server.service.ErraiConfigAttribs;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
 import org.jboss.errai.bus.server.service.ErraiServiceImpl;
-import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 
 import javax.servlet.FilterConfig;
@@ -73,41 +73,20 @@ public final class ServletBootstrapUtil {
       final ServletContext context = config.getServletContext();
 
       final String serviceLocatorClass = config.getInitOrContextParameter("service-locator");
-      final ClassLoader contextClassLoader;
 
       ErraiService service = (ErraiService) context.getAttribute(ErraiService.class.getName());
       if (null == service) {
         final ErraiServiceConfigurator configurator = new ErraiServiceConfiguratorImpl();
 
-        contextClassLoader = Thread.currentThread().getContextClassLoader();
+        String pathElement = ServletInitAttribs.WEBSOCKETS_PATH_ELEMENT
+                .getInitOrContextValue(config, "in.erraiBusWebSocket");
 
-        configurator.getResourceProviders()
-                .put("errai.experimental.classLoader", new ResourceProvider<ClassLoader>() {
-                  @Override
-                  public ClassLoader get() {
-                    return contextClassLoader;
-                  }
-                });
-
-        configurator.getResourceProviders()
-                .put("errai.experimental.servletContext", new ResourceProvider<ServletContext>() {
-                  @Override
-                  public ServletContext get() {
-                    return context;
-                  }
-                });
-
-        String pathElement = config.getInitOrContextParameter("websocket-path-element");
-        if (pathElement == null) {
-          pathElement = "in.erraiBusWebSocket";
-        }
-
-        String webSocketsEnabled = config.getInitOrContextParameter("websockets-enabled");
+        String webSocketsEnabled = ServletInitAttribs.WEBSOCKETS_ENABLED.getInitOrContextValue(config);
         if (webSocketsEnabled != null) {
-          configurator.setAttribute("org.jboss.errai.websocket.servlet.enabled", webSocketsEnabled);
+          ErraiConfigAttribs.WEBSOCKET_SERVLET_ENABLED.set(configurator, webSocketsEnabled);
         }
 
-        configurator.setAttribute("org.jboss.errai.websocket.servlet.path",
+        ErraiConfigAttribs.WEBSOCKET_SERVLET_CONTEXT_PATH.set(configurator,
                 context.getContextPath() + "/" + pathElement);
 
         // Build or lookup service
@@ -149,23 +128,4 @@ public final class ServletBootstrapUtil {
     }).getInstance(ErraiService.class);
   }
 
-  private interface InitConfig {
-    String getInitParameter(String parameter);
-
-    String getContextParameter(String paramater);
-
-    String getInitOrContextParameter(String parameter);
-
-    ServletContext getServletContext();
-  }
-
-  private static abstract class AbstractInitConfig implements InitConfig  {
-    public String getInitOrContextParameter(String parameter){
-      String val = getInitParameter(parameter);
-      if (val == null) {
-        val = getContextParameter(parameter);
-      }
-      return val;
-    }
-  }
 }

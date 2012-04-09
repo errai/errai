@@ -118,7 +118,7 @@ public class SecureHashUtil {
 
   private static byte[] _nextSecureHash(final String algorithm, final byte[]... additionalSeed) {
     try {
-      final MessageDigest md = MessageDigest.getInstance(algorithm);
+     final MessageDigest md = MessageDigest.getInstance(algorithm);
 
       if (additionalSeed != null) {
         for (byte[] seed : additionalSeed) {
@@ -163,9 +163,5 @@ public class SecureHashUtil {
     }
 
     return saltTable[index];
-  }
-
-  public static void main(String[] args) {
-    System.out.println(nextSecureHash("SHA-256"));
   }
 }

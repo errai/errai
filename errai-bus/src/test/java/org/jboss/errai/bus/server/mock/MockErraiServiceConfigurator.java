@@ -64,16 +64,6 @@ public class MockErraiServiceConfigurator implements ErraiServiceConfigurator {
   }
 
   @Override
-  public void setAttribute(String key, String value) {
-  }
-
-  @Override
-  public String getAttribute(String key) {
-    return null;
-  }
-
-  @Override
-  public boolean getBooleanAttribute(String key) {
-    return false;
+  public void setProperty(String key, String value) {
   }
 }

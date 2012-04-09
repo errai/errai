@@ -43,15 +43,14 @@ import org.jboss.errai.bus.server.api.QueueCloseEvent;
 import org.jboss.errai.bus.server.api.QueueClosedListener;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.bus.server.io.BufferHelper;
-import org.jboss.errai.bus.server.io.IOConfigAttribs;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
 import org.jboss.errai.bus.server.io.websockets.WebSocketServer;
 import org.jboss.errai.bus.server.io.websockets.WebSocketServerHandler;
 import org.jboss.errai.bus.server.io.websockets.WebSocketTokenManager;
+import org.jboss.errai.bus.server.service.ErraiConfigAttribs;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.bus.server.util.LocalContext;
-import org.jboss.errai.bus.server.util.SecureHashUtil;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.common.client.protocols.Resources;
 import org.slf4j.Logger;
@@ -135,10 +134,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     final int webSocketPort;
     final String webSocketPath;
 
-    webSocketServlet = config.getBooleanAttribute("org.jboss.errai.websocket.servlet.enabled");
+    webSocketServlet = ErraiConfigAttribs.WEBSOCKET_SERVLET_ENABLED.getBoolean(config);
 
     if (webSocketServlet) {
-      webSocketPath = config.getAttribute("org.jboss.errai.websocket.servlet.path");
+      webSocketPath = ErraiConfigAttribs.WEBSOCKET_SERVLET_CONTEXT_PATH.get(config);
       webSocketPort = -1;
     }
     else {
@@ -149,10 +148,11 @@ public class ServerMessageBusImpl implements ServerMessageBus {
       webSocketPort = WebSocketServer.getWebSocketPort(config);
     }
 
-    Integer bufferSize = config.getIntProperty(IOConfigAttribs.BUS_BUFFER_SIZE);
-    Integer segmentSize = config.getIntProperty(IOConfigAttribs.BUS_BUFFER_SEGMENT_SIZE);
-    Integer segmentCount = config.getIntProperty(IOConfigAttribs.BUS_BUFFER_SEGMENT_COUNT);
-    String allocMode = config.getProperty(IOConfigAttribs.BUF_BUFFER_ALLOCATION_MODE);
+
+    Integer bufferSize = ErraiConfigAttribs.BUS_BUFFER_SIZE.getInt(config);
+    Integer segmentSize = ErraiConfigAttribs.BUS_BUFFER_SEGMENT_SIZE.getInt(config);
+    Integer segmentCount = ErraiConfigAttribs.BUS_BUFFER_SEGMENT_COUNT.getInt(config);
+    String allocMode = ErraiConfigAttribs.BUS_BUFFER_ALLOCATION_MODE.get(config);
 
     if (segmentSize == null) {
       segmentSize = 8 * 1024;
@@ -164,7 +164,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     if (bufferSize != null) {
       segmentCount = (bufferSize * 1024 * 1024) * segmentSize;
     }
-
     else if (segmentCount == null) {
       segmentCount = 16384;
     }
@@ -179,7 +178,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
       }
       else {
         throw new ErraiBootstrapFailure("unrecognized option for property: "
-                + IOConfigAttribs.BUF_BUFFER_ALLOCATION_MODE);
+                + ErraiConfigAttribs.BUS_BUFFER_ALLOCATION_MODE.get(config));
       }
     }
     else {

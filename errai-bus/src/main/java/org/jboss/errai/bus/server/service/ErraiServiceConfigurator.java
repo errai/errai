@@ -93,17 +93,7 @@ public interface ErraiServiceConfigurator {
    */
   public Integer getIntProperty(String key);
 
-  /**
-   * Set a configuration attribtue.
-   *
-   * @param key the attribute key
-   * @param value the attribute value.
-   */
-  public void setAttribute(String key, String value);
-
-  public String getAttribute(String key);
-
-  public boolean getBooleanAttribute(String key);
+  public void setProperty(String key, String value);
 }
 
 

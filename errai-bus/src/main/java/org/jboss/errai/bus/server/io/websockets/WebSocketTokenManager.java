@@ -16,7 +16,7 @@ public final class WebSocketTokenManager {
 
   private static final String TOKEN_STORE = WebSocketTokenManager.class.getName() + ":Store";
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "SynchronizationOnLocalVariableOrMethodParameter"})
   @GuardedBy("session")
   public static String getNewOneTimeToken(final QueueSession session) {
     synchronized (session) {
@@ -36,6 +36,7 @@ public final class WebSocketTokenManager {
     }
   }
 
+  @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
   @GuardedBy("session")
   public static boolean verifyOneTimeToken(final QueueSession session, final String token) {
     synchronized (session) {
@@ -51,7 +52,6 @@ public final class WebSocketTokenManager {
         tokenRemoved = false;
       }
       return tokenRemoved;
-
     }
   }
 }

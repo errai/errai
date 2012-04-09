@@ -59,7 +59,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
 
   // lockdown the configuration so it can't be modified.
   public void lockdown() {
-    properties = Collections.unmodifiableMap(properties);
+//    properties = Collections.unmodifiableMap(properties);
     extensionBindings = Collections.unmodifiableMap(extensionBindings);
     serializableTypes = Collections.unmodifiableSet(serializableTypes);
   }
@@ -170,18 +170,8 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
   }
 
   @Override
-  public void setAttribute(String key, String value) {
-    attributeMap.put(key, value);
-  }
-
-  @Override
-  public String getAttribute(String key) {
-    return attributeMap.get(key);
-  }
-
-  @Override
-  public boolean getBooleanAttribute(String key) {
-    return attributeMap.containsKey(key) && Boolean.parseBoolean(getAttribute(key));
+  public void setProperty(String key, String value) {
+    this.properties.put(key, value);
   }
 }
 
