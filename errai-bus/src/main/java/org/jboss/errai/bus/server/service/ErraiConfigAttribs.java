@@ -54,9 +54,9 @@ public enum ErraiConfigAttribs {
    * direct buffers. Benchmarking may be necessary to properly tune this setting for your use case and expected
    * load.
    * <p/>
-   * Default value: 'heap'
+   * Default value: 'direct'
    */
-  BUS_BUFFER_ALLOCATION_MODE("errai.bus.buffer_allocation_mode", "heap"),
+  BUS_BUFFER_ALLOCATION_MODE("errai.bus.buffer_allocation_mode", "direct"),
 
   WEBSOCKET_SERVLET_ENABLED("errai.bus.websocket.servlet.enabled", "false"),
   WEBSOCKET_SERVLET_CONTEXT_PATH("errai.bus.websocket.servlet.path", "in.erraiBusWebSocket");
