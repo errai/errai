@@ -16,6 +16,7 @@ public final class WebSocketTokenManager {
 
   private static final String TOKEN_STORE = WebSocketTokenManager.class.getName() + ":Store";
 
+  @SuppressWarnings("unchecked")
   @GuardedBy("session")
   public static String getNewOneTimeToken(final QueueSession session) {
     synchronized (session) {
@@ -28,7 +29,7 @@ public final class WebSocketTokenManager {
         throw new RuntimeException("too many active tokens!");
       }
 
-      final String oneTimeToken = SecureHashUtil.nextSecureHash("SHA-1");
+      final String oneTimeToken = SecureHashUtil.nextSecureHash("SHA-256");
       tokenStore.add(oneTimeToken);
 
       return oneTimeToken;

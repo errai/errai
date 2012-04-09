@@ -98,7 +98,8 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
     public HttpSessionWrapper(SessionsContainer container, String httpSessionId, String remoteQueueID) {
       this.container = container;
       this.remoteQueueID = remoteQueueID;
-      this.sessionId = SecureHashUtil.nextSecureHash("SHA-256", httpSessionId);
+      this.sessionId = SecureHashUtil.nextSecureHash("SHA-256",
+              httpSessionId.getBytes(), remoteQueueID.getBytes());
     }
 
     public String getSessionId() {
