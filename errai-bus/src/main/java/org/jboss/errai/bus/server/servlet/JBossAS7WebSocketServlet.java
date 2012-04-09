@@ -20,7 +20,6 @@ import org.jboss.as.websockets.WebSocket;
 import org.jboss.as.websockets.servlet.WebSocketServlet;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.QueueSession;
-import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.server.api.SessionProvider;
@@ -29,7 +28,6 @@ import org.jboss.errai.bus.server.io.QueueChannel;
 import org.jboss.errai.bus.server.io.websockets.WebSocketServerHandler;
 import org.jboss.errai.bus.server.io.websockets.WebSocketTokenManager;
 import org.jboss.errai.bus.server.service.ErraiService;
-import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.bus.server.util.LocalContext;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.common.metadata.ScannerSingleton;
@@ -40,7 +38,6 @@ import org.jboss.servlet.http.HttpEvent;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -55,8 +52,6 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
 
   /* A default Http session provider */
   protected SessionProvider<HttpSession> sessionProvider;
-
-  // protected Logger log = LoggerFactory.getLogger(getClass());
 
   public enum ConnectionPhase {
     NORMAL, CONNECTING, DISCONNECTING, UNKNOWN
@@ -105,54 +100,6 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
     }
     stream.write(']');
 
-  }
-
-
-  protected void writeExceptionToOutputStream(HttpServletResponse httpServletResponse
-          , final
-  Throwable t) throws IOException {
-    httpServletResponse.setHeader("Cache-Control", "no-cache");
-    httpServletResponse.addHeader("Payload-Size", "1");
-    httpServletResponse.setContentType("application/json");
-    OutputStream stream = httpServletResponse.getOutputStream();
-
-    stream.write('[');
-
-    writeToOutputStream(stream, new MarshalledMessage() {
-      @Override
-      public String getSubject() {
-        return DefaultErrorCallback.CLIENT_ERROR_SUBJECT;
-      }
-
-      @Override
-      public Object getMessage() {
-        StringBuilder b = new StringBuilder("{\"ErrorMessage\":\"").append(t.getMessage()).append("\"," +
-                "\"AdditionalDetails\":\"");
-        for (StackTraceElement e : t.getStackTrace()) {
-          b.append(e.toString()).append("<br/>");
-        }
-
-        return b.append("\"}").toString();
-      }
-    });
-
-    stream.write(']');
-    stream.close();
-  }
-
-
-  protected void sendDisconnectDueToSessionExpiry(OutputStream stream) throws IOException {
-    writeToOutputStream(stream, new MarshalledMessage() {
-      @Override
-      public String getSubject() {
-        return "ClientBus";
-      }
-
-      @Override
-      public Object getMessage() {
-        return "{\"ToSubject\":\"ClientBus\", \"CommandType\":\"" + BusCommands.SessionExpired + "\"}";
-      }
-    });
   }
 
   private static class SimpleEventChannelWrapped implements QueueChannel {
