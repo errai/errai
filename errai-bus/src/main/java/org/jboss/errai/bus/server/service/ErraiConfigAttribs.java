@@ -30,7 +30,6 @@ public enum ErraiConfigAttribs {
    */
   BUS_BUFFER_SIZE("errai.bus.buffer_size"),
 
-
   /**
    * The segment size in bytes.
    * <p/>
@@ -59,9 +58,8 @@ public enum ErraiConfigAttribs {
    */
   BUS_BUFFER_ALLOCATION_MODE("errai.bus.buffer_allocation_mode", "heap"),
 
-
-  WEBSOCKET_SERVLET_ENABLED("org.jboss.errai.websocket.servlet.enabled", "false"),
-  WEBSOCKET_SERVLET_CONTEXT_PATH("org.jboss.errai.websocket.servlet.path", "in.erraiBusWebSocket");
+  WEBSOCKET_SERVLET_ENABLED("errai.bus.websocket.servlet.enabled", "false"),
+  WEBSOCKET_SERVLET_CONTEXT_PATH("errai.bus.websocket.servlet.path", "in.erraiBusWebSocket");
 
   protected final String attributeName;
   protected final String defaultValue;
