@@ -214,9 +214,9 @@
 
 
         <dependency>
-            <groupId>jboss-as-websockets</groupId>
+            <groupId>org.jboss.as</groupId>
             <artifactId>jboss-as-websockets</artifactId>
-            <version>1.0</version>
+            <version>0.1.Alpha2</version>
         </dependency>
 
         <!-- Netty for WebSockets Support -->
