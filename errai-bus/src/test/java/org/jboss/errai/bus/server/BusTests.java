@@ -17,7 +17,6 @@
 package org.jboss.errai.bus.server;
 
 import junit.framework.TestCase;
-import org.jboss.as.websockets.protocol.ietf00.Hybi00Handshake;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.SessionEndListener;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
@@ -26,9 +25,7 @@ import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * @author Mike Brock
