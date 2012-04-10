@@ -61,7 +61,6 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
     sessionProvider = service.getSessionProvider();
   }
 
-
   @Override
   public void destroy() {
     service.stopService();
