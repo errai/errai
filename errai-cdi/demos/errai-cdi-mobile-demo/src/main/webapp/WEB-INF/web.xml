@@ -44,19 +44,4 @@
         <resource-env-ref-type>org.jboss.errai.bus.server.service.ErraiService</resource-env-ref-type>
     </resource-env-ref>
 
-    <context-param>
-        <param-name>errai.properties</param-name>
-        <param-value>/WEB-INF/errai.properties</param-value>
-    </context-param>
-
-    <context-param>
-        <param-name>login.config</param-name>
-        <param-value>/WEB-INF/login.config</param-value>
-    </context-param>
-
-    <context-param>
-        <param-name>users.properties</param-name>
-        <param-value>/WEB-INF/users.properties</param-value>
-    </context-param>
-
 </web-app>
