@@ -36,7 +36,6 @@ public abstract class EnvUtil {
   public static final String CONFIG_ERRAI_SERIALIZABLE_TYPE = "errai.marshalling.serializableTypes";
   public static final String CONFIG_ERRAI_MAPPING_ALIASES = "errai.marshalling.mappingAliases";
 
-
   public static boolean isJUnitTest() {
     for (StackTraceElement el : new Throwable().getStackTrace()) {
       if (el.getClassName().startsWith("com.google.gwt.junit.client.")

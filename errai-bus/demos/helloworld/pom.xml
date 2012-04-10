@@ -52,7 +52,6 @@
                     <runTarget>HelloWorld.html</runTarget>
                     <warSourceDirectory>war</warSourceDirectory>
                     <extraJvmArgs>-Xmx512m</extraJvmArgs>
-                    <soyc>false</soyc>
                     <hostedWebapp>war</hostedWebapp>
                 </configuration>
                 <executions>
@@ -148,6 +147,16 @@
             <properties>
                 <webXmlPath>src/jboss/web.xml</webXmlPath>
             </properties>
+
+            <dependencies>
+                <dependency>
+                    <groupId>org.jboss.as</groupId>
+                    <artifactId>jboss-as-websockets</artifactId>
+                    <version>0.1.Alpha5</version>
+                </dependency>
+            </dependencies>
+
+
         </profile>
         <profile>
             <id>tomcat</id>

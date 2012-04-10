@@ -166,7 +166,7 @@
             <artifactId>jbossweb</artifactId>
             <scope>provided</scope>
             <!-- TODO: don't hard code this -->
-            <version>7.0.14.Final</version>
+            <version>7.0.0.SNAPSHOT</version>
         </dependency>
 
 
@@ -213,11 +213,6 @@
         </dependency>
 
 
-        <dependency>
-            <groupId>org.jboss.as</groupId>
-            <artifactId>jboss-as-websockets</artifactId>
-            <version>0.1.Alpha2</version>
-        </dependency>
 
         <!-- Netty for WebSockets Support -->
 
@@ -226,6 +221,14 @@
             <artifactId>netty</artifactId>
             <version>4.0.0.Alpha1.errai.r1</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.jboss.as</groupId>
+            <artifactId>jboss-as-websockets</artifactId>
+            <version>0.1.Alpha5</version>
+            <scope>provided</scope>
+        </dependency>
+
 
     </dependencies>
 

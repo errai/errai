@@ -20,7 +20,6 @@ import org.jboss.as.websockets.WebSocket;
 import org.jboss.as.websockets.servlet.WebSocketServlet;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.QueueSession;
-import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.client.protocols.BusCommands;
 import org.jboss.errai.bus.server.api.SessionProvider;
 import org.jboss.errai.bus.server.io.MessageFactory;
@@ -39,7 +38,6 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.io.OutputStream;
 
 /**
  * @author Mike Brock
@@ -52,15 +50,12 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
   /* A default Http session provider */
   protected SessionProvider<HttpSession> sessionProvider;
 
-  public enum ConnectionPhase {
-    NORMAL, CONNECTING, DISCONNECTING, UNKNOWN
-  }
-
   private static final String WEBSOCKET_SESSION_ALIAS = "Websocket:Errai:SessionAlias";
 
+  @SuppressWarnings("unchecked")
   @Override
   public void init(final ServletConfig config) throws ServletException {
-    //setProtocolName("J.REP1.0/ErraiBus");
+    setProtocolName("J.REP1.0/ErraiBus");
 
     service = ServletBootstrapUtil.getService(config);
     sessionProvider = service.getSessionProvider();
@@ -70,31 +65,6 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
   @Override
   public void destroy() {
     service.stopService();
-  }
-
-  /**
-   * Writes the message to the output stream
-   *
-   * @param stream - the stream to write to
-   * @param m      - the message to write to the stream
-   * @throws java.io.IOException - is thrown if any input/output errors occur while writing to the stream
-   */
-  public static void writeToOutputStream(OutputStream stream, MarshalledMessage m) throws IOException {
-    stream.write('[');
-
-    if (m.getMessage() == null) {
-      stream.write('n');
-      stream.write('u');
-      stream.write('l');
-      stream.write('l');
-    }
-    else {
-      for (byte b : ((String) m.getMessage()).getBytes()) {
-        stream.write(b);
-      }
-    }
-    stream.write(']');
-
   }
 
   private static class SimpleEventChannelWrapped implements QueueChannel {
@@ -120,11 +90,16 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
   }
 
   @Override
-  protected void onSocketClosed(HttpEvent event) throws IOException {
+  protected void onSocketClosed(HttpEvent event, WebSocket socket) throws IOException {
+    final QueueSession session = sessionProvider.getSession(event.getHttpServletRequest().getSession(),
+            socket.getSocketID());
+
+    final LocalContext localSessionContext = LocalContext.get(session);
+    QueueSession cometSession = localSessionContext.getAttribute(QueueSession.class, WEBSOCKET_SESSION_ALIAS);
+    service.getBus().getQueue(cometSession).setDirectSocketChannel(null);
   }
 
-
-  @Override
+ @Override
   protected void onReceivedTextFrame(HttpEvent event, final WebSocket socket) throws IOException {
     final String text = socket.readTextFrame();
 
@@ -200,7 +175,6 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
       else {
         sendMessage(new SimpleEventChannelWrapped(socket), getFailedNegotiation("bad command"));
       }
-
     }
     else {
       // this is an active session. send the message.;

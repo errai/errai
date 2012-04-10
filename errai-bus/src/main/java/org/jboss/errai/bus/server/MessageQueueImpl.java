@@ -139,7 +139,7 @@ public class MessageQueueImpl implements MessageQueue {
     }
 
     if (useDirectSocketChannel && directSocketChannel.isConnected()) {
-       directSocketChannel.write("[" + ServerBusTools.encodeMessage(message) + "]");
+      directSocketChannel.write("[" + ServerBusTools.encodeMessage(message) + "]");
     }
     else {
       try {
@@ -277,7 +277,7 @@ public class MessageQueueImpl implements MessageQueue {
       if (isDirectChannelOpen()) {
         UnwrappedByteArrayOutputStream outputStream = new UnwrappedByteArrayOutputStream();
         buffer.read(outputStream, bufferColor, new BufferHelper.MultiMessageHandlerCallback());
-       // directSocketChannel.write(new TextWebSocketFrame(new String(outputStream.toByteArray(), 0, outputStream.size())));
+        // directSocketChannel.write(new TextWebSocketFrame(new String(outputStream.toByteArray(), 0, outputStream.size())));
         directSocketChannel.write(new String(outputStream.toByteArray(), 0, outputStream.size()));
       }
       else {
@@ -416,9 +416,11 @@ public class MessageQueueImpl implements MessageQueue {
   @Override
   public void setDirectSocketChannel(final QueueChannel channel) {
     this.directSocketChannel = channel;
-    this.useDirectSocketChannel = true;
+    this.useDirectSocketChannel = channel != null;
 
-    log.debug("queue " + getSession().getSessionId() + " transitioned to direct channel mode.");
+    if (useDirectSocketChannel) {
+      log.debug("queue " + getSession().getSessionId() + " transitioned to direct channel mode.");
+    }
   }
 
   @Override
