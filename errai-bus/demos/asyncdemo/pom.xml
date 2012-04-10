@@ -1,145 +1,15 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <name>Errai::Bus::Demos::AsyncDemo</name>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <name>Errai::Bus::Demos::AsyncDemo</name>
+  <groupId>org.jboss.errai</groupId>
+  <artifactId>errai-bus-demos-asyncdemo</artifactId>
+  <packaging>war</packaging>
+
+  <parent>
     <groupId>org.jboss.errai</groupId>
-    <artifactId>errai-bus-demos-asyncdemo</artifactId>
-    <packaging>war</packaging>
-
-    <properties>
-        <webXmlPath>src/jetty/web.xml</webXmlPath>
-    </properties>
-
-    <!-- Parent -->
-    <parent>
-        <groupId>org.jboss.errai</groupId>
-        <artifactId>errai-bus-demos</artifactId>
-        <version>2.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
-    </parent>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.jboss.errai</groupId>
-            <artifactId>errai-tools</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-    </dependencies>
-
-    <build>
-        <finalName>${project.artifactId}</finalName>
-        <outputDirectory>war/WEB-INF/classes</outputDirectory>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>gwt-maven-plugin</artifactId>
-                <configuration>
-                    <inplace>true</inplace>
-                    <logLevel>INFO</logLevel>
-                    <runTarget>AsyncDemo.html</runTarget>
-                    <warSourceDirectory>war</warSourceDirectory>
-                    <extraJvmArgs>-Xmx512m</extraJvmArgs>
-                    <webXml>${webXmlPath}</webXml>
-                    <hostedWebapp>war</hostedWebapp>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-war-plugin</artifactId>
-                <configuration>
-                    <warSourceDirectory>war</warSourceDirectory>
-                    <webXml>${webXmlPath}</webXml>
-                    <packagingExcludes>**/javax/**/*.*,**/client/local/**/*.class</packagingExcludes>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-    <profiles>
-        <profile>
-            <id>jboss5</id>
-
-            <properties>
-                <webXmlPath>src/jboss/web.xml</webXmlPath>
-            </properties>
-
-            <dependencies>
-                <dependency>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                    <version>1.6.1</version>
-                    <scope>provided</scope>
-                </dependency>
-
-                <dependency>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                    <version>1.6.1</version>
-                    <scope>provided</scope>
-                </dependency>
-
-                <dependency>
-                    <groupId>org.javassist</groupId>
-                    <artifactId>javassist</artifactId>
-                    <version>3.15.0-GA</version>
-                    <scope>provided</scope>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
-            <id>jboss6</id>
-
-            <properties>
-                <webXmlPath>src/jboss/web.xml</webXmlPath>
-            </properties>
-
-            <dependencies>
-                <dependency>
-                    <groupId>javax.inject</groupId>
-                    <artifactId>javax.inject</artifactId>
-                    <version>1</version>
-                    <scope>provided</scope>
-                </dependency>
-
-                <dependency>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                    <version>1.6.1</version>
-                    <scope>provided</scope>
-                </dependency>
-
-                <dependency>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                    <version>1.6.1</version>
-                    <scope>provided</scope>
-                </dependency>
-
-                <dependency>
-                    <groupId>org.javassist</groupId>
-                    <artifactId>javassist</artifactId>
-                    <version>3.15.0-GA</version>
-                    <scope>provided</scope>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
-            <id>jboss7</id>
-
-            <properties>
-                <webXmlPath>src/jboss/web.xml</webXmlPath>
-            </properties>
-        </profile>
-        <profile>
-            <id>tomcat</id>
-
-            <properties>
-                <webXmlPath>src/tomcat/web.xml</webXmlPath>
-            </properties>
-        </profile>
-    </profiles>
+    <artifactId>errai-bus-demos</artifactId>
+    <version>2.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
 </project>
