@@ -16,6 +16,15 @@
 
 package org.jboss.errai.bus.server.servlet;
 
+import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
+
+import java.io.IOException;
+import java.io.OutputStream;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.framework.ClientMessageBus;
@@ -25,14 +34,6 @@ import org.jboss.errai.bus.server.api.QueueActivationCallback;
 import org.mortbay.jetty.RetryRequest;
 import org.mortbay.util.ajax.Continuation;
 import org.mortbay.util.ajax.ContinuationSupport;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.OutputStream;
-
-import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
 
 /**
  * The <tt>JettyContinuationsServlet</tt> provides the HTTP-protocol gateway between the server bus and the client buses,
@@ -137,10 +138,12 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
       stream.write('[');
 
       writeToOutputStream(stream, new MarshalledMessage() {
+        @Override
         public String getSubject() {
           return DefaultErrorCallback.CLIENT_ERROR_SUBJECT;
         }
 
+        @Override
         public Object getMessage() {
           StringBuilder b = new StringBuilder("{Error" +
                   "Message:\"").append(t.getMessage()).append("\",AdditionalDetails:\"");
@@ -176,6 +179,7 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
       this.cont = cont;
     }
 
+    @Override
     public void activate(MessageQueue queue) {
       queue.setActivationCallback(null);
       cont.resume();

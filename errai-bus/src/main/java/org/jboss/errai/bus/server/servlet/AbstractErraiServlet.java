@@ -19,10 +19,8 @@ package org.jboss.errai.bus.server.servlet;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -31,20 +29,9 @@ import javax.servlet.http.HttpSession;
 
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
-import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.protocols.BusCommands;
-import org.jboss.errai.bus.server.ServerMessageBusImpl;
-import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.bus.server.api.SessionProvider;
 import org.jboss.errai.bus.server.service.ErraiService;
-import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
-import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
-import org.jboss.errai.bus.server.service.ErraiServiceImpl;
-import org.jboss.errai.common.client.api.ResourceProvider;
-
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import org.jboss.errai.common.metadata.ScannerSingleton;
 
 /**
  * The <tt>AbstractErraiServlet</tt> provides a starting point for creating Http-protocol gateway between the server

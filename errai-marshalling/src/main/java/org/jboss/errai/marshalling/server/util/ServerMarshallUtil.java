@@ -180,14 +180,14 @@ public abstract class ServerMarshallUtil {
 
     @Override
     public int compile(OutputStream out, OutputStream errors, String outputPath, String toCompile, String classpath) {
-      return compiler.run(null, out, errors, "-classpath", classpath, "-d", outputPath, toCompile);
+      return compiler.run(null, out, errors, "-classpath", classpath, "-d", "\"" + outputPath + "\"", toCompile);
     }
   }
 
   public static class JDTCompiler implements CompilerAdapter {
     @Override
     public int compile(OutputStream out, OutputStream errors, String outputPath, String toCompile, String classpath) {
-      return BatchCompiler.compile("-classpath " + classpath + " -d " + outputPath + " -source 1.6 " + toCompile, new PrintWriter(out), new PrintWriter(errors),
+      return BatchCompiler.compile("-classpath \"" + classpath + "\" -d " + outputPath + " -source 1.6 " + toCompile, new PrintWriter(out), new PrintWriter(errors),
               new CompilationProgress() {
                 @Override
                 public void begin(int remainingWork) {
