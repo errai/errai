@@ -37,7 +37,6 @@ import org.jboss.errai.bus.server.io.websockets.WebSocketTokenManager;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.util.LocalContext;
 import org.jboss.errai.common.client.protocols.MessageParts;
-import org.jboss.errai.common.server.HiddenFromDevModeWebappContext;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJString;
 import org.jboss.errai.marshalling.server.JSONDecoder;
@@ -46,7 +45,6 @@ import org.jboss.servlet.http.HttpEvent;
 /**
  * @author Mike Brock
  */
-@HiddenFromDevModeWebappContext
 public class JBossAS7WebSocketServlet extends WebSocketServlet {
 
   /* New and configured errai service */

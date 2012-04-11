@@ -31,7 +31,6 @@ import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueActivationCallback;
-import org.jboss.errai.common.server.HiddenFromDevModeWebappContext;
 import org.mortbay.jetty.RetryRequest;
 import org.mortbay.util.ajax.Continuation;
 import org.mortbay.util.ajax.ContinuationSupport;
@@ -40,7 +39,6 @@ import org.mortbay.util.ajax.ContinuationSupport;
  * The <tt>JettyContinuationsServlet</tt> provides the HTTP-protocol gateway between the server bus and the client buses,
  * using Jetty Continuations.
  */
-@HiddenFromDevModeWebappContext
 public class JettyContinuationsServlet extends AbstractErraiServlet {
   /**
    * Called by the server (via the <tt>service</tt> method) to allow a servlet to handle a GET request by supplying

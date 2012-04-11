@@ -39,7 +39,6 @@ import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueActivationCallback;
-import org.jboss.errai.common.server.HiddenFromDevModeWebappContext;
 import org.jboss.servlet.http.HttpEvent;
 import org.jboss.servlet.http.HttpEventServlet;
 import org.mvel2.util.StringAppender;
@@ -50,7 +49,6 @@ import org.slf4j.LoggerFactory;
  * The <tt>JBossCometServlet</tt> provides the HTTP-protocol gateway between the server bus and the client buses,
  * using JBoss Comet.
  */
-@HiddenFromDevModeWebappContext
 public class JBossCometServlet extends AbstractErraiServlet implements HttpEventServlet {
 
   private final Map<MessageQueue, QueueSession> queueToSession = new HashMap<MessageQueue, QueueSession>();

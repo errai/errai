@@ -31,14 +31,12 @@ import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueActivationCallback;
-import org.jboss.errai.common.server.HiddenFromDevModeWebappContext;
 
 /**
  * An implementation of {@link AbstractErraiServlet} leveraging asynchronous support of Servlet 3.0.
  *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@HiddenFromDevModeWebappContext
 public class StandardAsyncServlet extends AbstractErraiServlet {
   private static final long serialVersionUID = 1L;
 
