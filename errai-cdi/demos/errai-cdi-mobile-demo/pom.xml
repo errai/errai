@@ -177,6 +177,7 @@
         <dependency>
           <groupId>org.mortbay.jetty</groupId>
           <artifactId>jetty</artifactId>
+          <version>${jetty.version}</version>
           <scope>provided</scope>
         </dependency>
 
@@ -201,7 +202,7 @@
         <dependency>
           <groupId>org.jboss.errai</groupId>
           <artifactId>errai-cdi-jetty</artifactId>
-          <version>${errai.version}</version>
+          <version>${project.version}</version>
           <scope>provided</scope>
         </dependency>
       </dependencies>
