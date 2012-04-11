@@ -385,8 +385,12 @@
             <configuration>
               <mainClass>org.jboss.errai.demo.mobile.about.SyntaxHighlight</mainClass>
               <arguments>
+                <!-- First arg: location of the .java source files -->
                 <argument>${project.build.sourceDirectory}</argument>
-                <argument>${project.projectDirectory}/war/about/java-sources</argument>
+                
+                <!-- Second arg: where to deposit the syntax-highlighted .html files (mirroring the source file directory structure) -->
+                <!-- This has to be somewhere under the "webappDirectory" of maven-war-plugin. -->
+                <argument>${project.build.directory}/${project.build.finalName}/about/java-sources</argument>
               </arguments>
             </configuration>
           </execution>
