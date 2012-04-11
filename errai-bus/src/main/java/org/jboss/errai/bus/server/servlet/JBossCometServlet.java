@@ -16,34 +16,41 @@
 
 package org.jboss.errai.bus.server.servlet;
 
+import static org.jboss.errai.bus.client.framework.ClientMessageBus.REMOTE_QUEUE_ID_HEADER;
+import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.CharBuffer;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueActivationCallback;
+import org.jboss.errai.common.server.HiddenFromDevModeWebappContext;
 import org.jboss.servlet.http.HttpEvent;
 import org.jboss.servlet.http.HttpEventServlet;
 import org.mvel2.util.StringAppender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.CharBuffer;
-import java.util.*;
-
-import static org.jboss.errai.bus.client.framework.ClientMessageBus.REMOTE_QUEUE_ID_HEADER;
-import static org.jboss.errai.bus.server.io.MessageFactory.createCommandMessage;
-
 /**
  * The <tt>JBossCometServlet</tt> provides the HTTP-protocol gateway between the server bus and the client buses,
  * using JBoss Comet.
  */
+@HiddenFromDevModeWebappContext
 public class JBossCometServlet extends AbstractErraiServlet implements HttpEventServlet {
 
   private final Map<MessageQueue, QueueSession> queueToSession = new HashMap<MessageQueue, QueueSession>();
@@ -59,6 +66,7 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
    * @throws IOException      - thrown if there is a read/write error
    * @throws ServletException - thrown if a servlet error occurs
    */
+  @Override
   public void event(final HttpEvent event) throws IOException, ServletException {
     final HttpServletRequest request = event.getHttpServletRequest();
     final QueueSession session = sessionProvider.getSession(request.getSession(), request.getHeader("RemoteQueueID"));
@@ -184,10 +192,12 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
     stream.write('[');
 
     writeToOutputStream(stream, new MarshalledMessage() {
+      @Override
       public String getSubject() {
         return DefaultErrorCallback.CLIENT_ERROR_SUBJECT;
       }
 
+      @Override
       public Object getMessage() {
         StringBuilder b = new StringBuilder("{ErrorMessage:\"").append(CONFIG_PROBLEM_TEXT).append("\",AdditionalDetails:\"");
         return b.append("\"}").toString();
@@ -197,10 +207,12 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
     stream.write(',');
 
     writeToOutputStream(stream, new MarshalledMessage() {
+      @Override
       public String getSubject() {
         return "ClientBus";
       }
 
+      @Override
       public Object getMessage() {
         return "{CommandType:\"Disconnect\"}";
       }
@@ -252,6 +264,7 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
       queue.setActivationCallback(new QueueActivationCallback() {
         boolean resumed = false;
 
+        @Override
         public void activate(MessageQueue queue) {
           if (resumed) {
             return;

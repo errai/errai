@@ -31,19 +31,21 @@ import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueActivationCallback;
+import org.jboss.errai.common.server.HiddenFromDevModeWebappContext;
 
 /**
  * An implementation of {@link AbstractErraiServlet} leveraging asynchronous support of Servlet 3.0.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
+@HiddenFromDevModeWebappContext
 public class StandardAsyncServlet extends AbstractErraiServlet {
   private static final long serialVersionUID = 1L;
 
   @Override
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException,
       IOException {
-    
+
     final QueueSession session = sessionProvider.getSession(request.getSession(),
         request.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
 
@@ -63,7 +65,7 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
       queue.poll(false, response.getOutputStream());
       return;
     }
-    
+
     final AsyncContext asyncContext = request.startAsync();
     asyncContext.addListener(new AsyncListener() {
       @Override
@@ -71,13 +73,13 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
         poll(queue, asyncContext);
         asyncContext.complete();
       }
-      
+
       @Override
       public void onComplete(AsyncEvent event) throws IOException {}
-      
+
       @Override
       public void onError(AsyncEvent event) throws IOException {}
-      
+
       @Override
       public void onStartAsync(AsyncEvent event) throws IOException {}
     });
@@ -116,7 +118,7 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
       }
     }
   }
-  
+
   private void poll(MessageQueue queue, AsyncContext asyncContext) throws IOException {
     if (queue == null) return;
     queue.setActivationCallback(null);

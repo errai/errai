@@ -16,6 +16,13 @@
 
 package org.jboss.errai.bus.server.servlet;
 
+import java.io.IOException;
+import java.io.OutputStream;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpSession;
+
 import org.jboss.as.websockets.WebSocket;
 import org.jboss.as.websockets.servlet.WebSocketServlet;
 import org.jboss.errai.bus.client.api.Message;
@@ -30,20 +37,16 @@ import org.jboss.errai.bus.server.io.websockets.WebSocketTokenManager;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.util.LocalContext;
 import org.jboss.errai.common.client.protocols.MessageParts;
+import org.jboss.errai.common.server.HiddenFromDevModeWebappContext;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJString;
 import org.jboss.errai.marshalling.server.JSONDecoder;
 import org.jboss.servlet.http.HttpEvent;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpSession;
-import java.io.IOException;
-import java.io.OutputStream;
-
 /**
  * @author Mike Brock
  */
+@HiddenFromDevModeWebappContext
 public class JBossAS7WebSocketServlet extends WebSocketServlet {
 
   /* New and configured errai service */

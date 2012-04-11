@@ -1,12 +1,12 @@
 /*
  * Copyright 2008 Google Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
  * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
@@ -20,10 +20,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Iterator;
 
-import org.jboss.errai.bus.server.service.ServiceLocator;
-import org.jboss.errai.bus.server.servlet.AbstractErraiServlet;
-import org.jboss.errai.bus.server.servlet.DefaultBlockingServlet;
-import org.jboss.errai.bus.server.servlet.JettyContinuationsServlet;
+import org.jboss.errai.common.server.HiddenFromDevModeWebappContext;
 import org.mortbay.component.AbstractLifeCycle;
 import org.mortbay.jetty.AbstractConnector;
 import org.mortbay.jetty.HttpFields.Field;
@@ -41,6 +38,7 @@ import org.mortbay.log.Logger;
 import com.google.gwt.core.ext.ServletContainer;
 import com.google.gwt.core.ext.ServletContainerLauncher;
 import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.TreeLogger.Type;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.dev.shell.jetty.JettyNullLogger;
 import com.google.gwt.dev.util.InstalledHelpInfo;
@@ -73,6 +71,7 @@ public class JettyLauncher extends ServletContainerLauncher {
     /**
      * Log an HTTP request/response to TreeLogger.
      */
+    @Override
     @SuppressWarnings("unchecked")
     public void log(Request request, Response response) {
       int status = response.getStatus();
@@ -145,34 +144,42 @@ public class JettyLauncher extends ServletContainerLauncher {
       this.logger = logger;
     }
 
+    @Override
     public void debug(String msg, Object arg0, Object arg1) {
       logger.log(TreeLogger.SPAM, format(msg, arg0, arg1));
     }
 
+    @Override
     public void debug(String msg, Throwable th) {
       logger.log(TreeLogger.SPAM, msg, th);
     }
 
+    @Override
     public Logger getLogger(String name) {
       return this;
     }
 
+    @Override
     public void info(String msg, Object arg0, Object arg1) {
       logger.log(TreeLogger.INFO, format(msg, arg0, arg1));
     }
 
+    @Override
     public boolean isDebugEnabled() {
       return logger.isLoggable(TreeLogger.SPAM);
     }
 
+    @Override
     public void setDebugEnabled(boolean enabled) {
       // ignored
     }
 
+    @Override
     public void warn(String msg, Object arg0, Object arg1) {
       logger.log(TreeLogger.WARN, format(msg, arg0, arg1));
     }
 
+    @Override
     public void warn(String msg, Throwable th) {
       logger.log(TreeLogger.WARN, msg, th);
     }
@@ -338,50 +345,60 @@ public class JettyLauncher extends ServletContainerLauncher {
 
       @Override
       protected Class<?> findClass(String name) throws ClassNotFoundException {
-        if ((name.startsWith("org.jboss.errai.bus.server.servlet.")
-                        && !name.contains(ServiceLocator.class.getSimpleName())
-                        && !name.contains(AbstractErraiServlet.class.getSimpleName())
-                        && !name.contains(JettyContinuationsServlet.class.getName())
-                        && !name.contains(DefaultBlockingServlet.class.getName())) ||
-                        name.equals("org.jboss.servlet.http.HttpEventServlet") ||
-                        name.equals("org.apache.catalina.CometProcessor")) {
+        if (name.equals("org.jboss.servlet.http.HttpEventServlet") ||
+                 name.equals("org.apache.catalina.CometProcessor")) {
+          logger.log(Type.TRACE, "Hiding class " + name + " from webapp classloader");
           return null;
         }
+
+        Class<?> foundClass = null;
 
         // For system path, always prefer the outside world.
         if (isSystemPath(name)) {
           try {
-            return systemClassLoader.loadClass(name);
+            foundClass = systemClassLoader.loadClass(name);
           } catch (ClassNotFoundException e) {
           }
         }
 
-        try {
-          return super.findClass(name);
-        } catch (ClassNotFoundException e) {
-          // Don't allow server classes to be loaded from the outside.
-          if (isServerPath(name)) {
-            throw e;
+        if (foundClass == null) {
+          try {
+            foundClass = super.findClass(name);
+          } catch (ClassNotFoundException e) {
+            // Don't allow server classes to be loaded from the outside.
+            if (isServerPath(name)) {
+              throw e;
+            }
+          } catch (NoClassDefFoundError e) {
+            System.out.println();
           }
-        } catch (NoClassDefFoundError e) {
-          System.out.println();
         }
 
-        // See if the outside world has a URL for it.
-        String resourceName = name.replace('.', '/') + ".class";
-        URL found = systemClassLoader.getResource(resourceName);
-        if (found == null) {
+        if (foundClass == null) {
+          // See if the outside world has a URL for it.
+          String resourceName = name.replace('.', '/') + ".class";
+          URL found = systemClassLoader.getResource(resourceName);
+          if (found == null) {
+            return null;
+          }
+
+          // Warn, add containing URL to our own ClassLoader, and retry the call.
+          String warnMessage = "Server class '"
+                  + name
+                  + "' could not be found in the web app, but was found on the system classpath";
+          if (!addContainingClassPathEntry(warnMessage, found, resourceName)) {
+            throw new ClassNotFoundException(name);
+          }
+          foundClass = super.findClass(name);
+        }
+
+        if (foundClass != null && foundClass.isAnnotationPresent(HiddenFromDevModeWebappContext.class)) {
+          logger.log(Type.TRACE, "Hiding class" + name + " from webapp because it is annotated with @" +
+                  HiddenFromDevModeWebappContext.class.getSimpleName());
           return null;
         }
 
-        // Warn, add containing URL to our own ClassLoader, and retry the call.
-        String warnMessage = "Server class '"
-                        + name
-                        + "' could not be found in the web app, but was found on the system classpath";
-        if (!addContainingClassPathEntry(warnMessage, found, resourceName)) {
-          throw new ClassNotFoundException(name);
-        }
-        return super.findClass(name);
+        return foundClass;
       }
 
       private boolean addContainingClassPathEntry(String warnMessage,
