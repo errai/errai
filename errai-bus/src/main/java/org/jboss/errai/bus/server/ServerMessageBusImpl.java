@@ -92,11 +92,10 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class ServerMessageBusImpl implements ServerMessageBus {
 
   private final List<MessageListener> listeners = new ArrayList<MessageListener>();
-
-  // 16 kb buffers * 8192 segments = 128 megabytes
   private final TransmissionBuffer transmissionbuffer;
 
   private final Map<String, DeliveryPlan> subscriptions = new ConcurrentHashMap<String, DeliveryPlan>();
+  private final Set<String> globalSubscriptions = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
   private final Map<String, RemoteMessageCallback> remoteSubscriptions = new ConcurrentHashMap<String, RemoteMessageCallback>();
 
   private final Map<QueueSession, MessageQueue> messageQueues = new ConcurrentHashMap<QueueSession, MessageQueue>();
@@ -165,7 +164,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
       segmentCount = (bufferSize * 1024 * 1024) * segmentSize;
     }
     else if (segmentCount == null) {
-      segmentCount = 16384;
+      segmentCount = 4096;
     }
 
     boolean directAlloc;
@@ -185,12 +184,22 @@ public class ServerMessageBusImpl implements ServerMessageBus {
       directAlloc = false;
     }
 
+    TransmissionBuffer buffer;
     if (directAlloc) {
-      transmissionbuffer = TransmissionBuffer.createDirect(segmentSize, segmentCount);
+      try {
+        buffer = TransmissionBuffer.createDirect(segmentSize, segmentCount);
+      }
+      catch (OutOfMemoryError e) {
+        log.warn("could not allocate direct memory buffer. insufficient direct memory. increase the direct memory buffer size with the JVM argument: -XX:MaxDirectMemorySize=<size>");
+        log.warn("falling back to a heap allocated buffer.");
+        buffer = TransmissionBuffer.create(segmentSize, segmentCount);
+      }
     }
     else {
-      transmissionbuffer = TransmissionBuffer.create(segmentSize, segmentCount);
+      buffer = TransmissionBuffer.create(segmentSize, segmentCount);
     }
+
+    transmissionbuffer = buffer;
 
     /**
      * Define the default ServerBus service used for intrabus communication.
@@ -281,19 +290,10 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                 busMonitor.notifyQueueAttached(session.getSessionId(), queue);
               }
 
-              final List<String> subjects = new ArrayList<String>(subscriptions.size());
-              for (String service : subscriptions.keySet()) {
-                if (service.startsWith("local:")) {
-                }
-                else if (!remoteSubscriptions.containsKey(service)) {
-                  subjects.add(service);
-                }
-              }
-
               createConversation(message)
                       .toSubject(BuiltInServices.ClientBus.name())
                       .command(BusCommands.RemoteSubscribe)
-                      .with(MessageParts.SubjectsList, subjects)
+                      .with(MessageParts.SubjectsList, new HashSet(globalSubscriptions))
                       .with(MessageParts.PriorityProcessing, "1")
                       .noErrorHandling().sendNowWith(ServerMessageBusImpl.this, false);
 
@@ -863,12 +863,30 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
     final DeliveryPlan plan = createOrAddDeliveryPlan(subject, receiver);
 
+    globalSubscriptions.add(subject);
+
     fireSubscribeListeners(new SubscriptionEvent(false, null, plan.getTotalReceivers(), true, subject));
 
     return new Subscription() {
       @Override
       public void remove() {
-        removeFromDeliveryPlan(subject, receiver);
+        if (removeFromDeliveryPlan(subject, receiver).getTotalReceivers() == 0) {
+          globalSubscriptions.remove(subject);
+          subscriptions.remove(subject);
+        }
+        else {
+          boolean nonRemote = true;
+          for (MessageCallback callback : plan.getDeliverTo()) {
+            if (!(callback instanceof RemoteMessageCallback)) {
+              nonRemote = false;
+              break;
+            }
+          }
+          if (nonRemote) {
+            globalSubscriptions.remove(subject);
+            subscriptions.remove(subject);
+          }
+        }
       }
     };
   }
@@ -1039,7 +1057,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
     catch (Exception e) {
       e.printStackTrace();
-      System.out.println("Exception running listeners");
     }
   }
 
@@ -1054,6 +1071,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
       throw new IllegalArgumentException("Attempt to modify lockdown service: " + subject);
 
     subscriptions.remove(subject);
+    globalSubscriptions.remove(subject);
 
     fireUnsubscribeListeners(new SubscriptionEvent(false, null, 0, false, subject));
   }

@@ -23,6 +23,7 @@ import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.bus.client.framework.Subscription;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.common.client.protocols.MessageParts;
+import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIEventTypeLookup;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
@@ -223,7 +224,6 @@ public class CDI {
   public static void activate() {
     if (!active) {
       active = true;
-
       for (DeferredEvent o : deferredEvents) {
         fireEvent(o.eventInstance, o.annotations);
       }
@@ -233,6 +233,8 @@ public class CDI {
       }
 
       deferredEvents.clear();
+
+      LogUtil.log("activated CDI eventing subsystem.");
     }
     InitVotes.voteFor(CDI.class);
   }

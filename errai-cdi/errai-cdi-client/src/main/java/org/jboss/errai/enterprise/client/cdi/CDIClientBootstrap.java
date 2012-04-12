@@ -47,7 +47,6 @@ public class CDIClientBootstrap implements EntryPoint {
                   .command(CDICommands.AttachRemote)
                   .done()
                   .sendNowWith(bus);
-          InitVotes.waitFor(CDI.class);
         }
         else {
           InitVotes.waitFor(CDI.class);

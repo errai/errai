@@ -33,57 +33,57 @@ public class ErraiServiceActivator implements ServiceActivator {
 
   @Override
   public void activate(ServiceActivatorContext serviceActivatorContext) throws ServiceRegistryException {
-
-    log.info("JBoss AS 7 service activator initialized ...");
-
-    final ServiceName bindingServiceName = ContextNames.GLOBAL_CONTEXT_SERVICE_NAME
-            .append("ErraiService");
-
-    final BinderService binderService = new BinderService("ErraiService");
-    ServiceBuilder<ManagedReferenceFactory> builder = serviceActivatorContext.getServiceTarget()
-            .addService(bindingServiceName, binderService);
-    builder.addDependency(ContextNames.GLOBAL_CONTEXT_SERVICE_NAME, NamingStore.class,
-            binderService.getNamingStoreInjector());
-    binderService.getManagedObjectInjector().inject(new ManagedReferenceFactory() {
-      private volatile ErraiService service;
-
-      private void init() {
-        service = Guice.createInjector(new AbstractModule() {
-          public void configure() {
-            bind(MessageBus.class).to(ServerMessageBusImpl.class);
-            bind(ServerMessageBus.class).to(ServerMessageBusImpl.class);
-            bind(ErraiService.class).to(ErraiServiceImpl.class);
-            bind(ErraiServiceConfigurator.class).to(ErraiServiceConfiguratorImpl.class);
-          }
-        }).getInstance(ErraiService.class);
-      }
-
-      @Override
-      public synchronized ManagedReference getReference() {
-        if (service == null) {
-          init();
-        }
-        return new ManagedReference() {
-          @Override
-          public void release() {
-            service.stopService();
-          }
-
-          @Override
-          public Object getInstance() {
-            return service;
-          }
-        };
-      }
-    });
-
-    try {
-      builder.install();
-    }
-    catch (DuplicateServiceException dse) {
-      log.debug("service already registered.");
-    }
-
-    log.debug("bound errai service to JNDI context: java:global/ErraiService");
+//
+//    log.info("JBoss AS 7 service activator initialized ...");
+//
+//    final ServiceName bindingServiceName = ContextNames.GLOBAL_CONTEXT_SERVICE_NAME
+//            .append("ErraiService");
+//
+//    final BinderService binderService = new BinderService("ErraiService");
+//    ServiceBuilder<ManagedReferenceFactory> builder = serviceActivatorContext.getServiceTarget()
+//            .addService(bindingServiceName, binderService);
+//    builder.addDependency(ContextNames.GLOBAL_CONTEXT_SERVICE_NAME, NamingStore.class,
+//            binderService.getNamingStoreInjector());
+//    binderService.getManagedObjectInjector().inject(new ManagedReferenceFactory() {
+//      private volatile ErraiService service;
+//
+//      private void init() {
+//        service = Guice.createInjector(new AbstractModule() {
+//          public void configure() {
+//            bind(MessageBus.class).to(ServerMessageBusImpl.class);
+//            bind(ServerMessageBus.class).to(ServerMessageBusImpl.class);
+//            bind(ErraiService.class).to(ErraiServiceImpl.class);
+//            bind(ErraiServiceConfigurator.class).to(ErraiServiceConfiguratorImpl.class);
+//          }
+//        }).getInstance(ErraiService.class);
+//      }
+//
+//      @Override
+//      public synchronized ManagedReference getReference() {
+//        if (service == null) {
+//          init();
+//        }
+//        return new ManagedReference() {
+//          @Override
+//          public void release() {
+//            service.stopService();
+//          }
+//
+//          @Override
+//          public Object getInstance() {
+//            return service;
+//          }
+//        };
+//      }
+//    });
+//
+//    try {
+//      builder.install();
+//    }
+//    catch (DuplicateServiceException dse) {
+//      log.debug("service already registered.");
+//    }
+//
+//    log.debug("bound errai service to JNDI context: java:global/ErraiService");
   }
 }

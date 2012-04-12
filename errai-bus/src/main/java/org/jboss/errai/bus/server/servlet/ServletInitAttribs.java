@@ -22,7 +22,8 @@ package org.jboss.errai.bus.server.servlet;
 public enum ServletInitAttribs {
   SERVICE_LOCATOR("service-locator"),
   WEBSOCKETS_PATH_ELEMENT("websocket-path-element"),
-  WEBSOCKETS_ENABLED("websockets-enabled");
+  WEBSOCKETS_ENABLED("websockets-enabled"),
+  AUTO_DISCOVER_SERVICES("auto-discover-services");
 
   private final String attributeName;
 

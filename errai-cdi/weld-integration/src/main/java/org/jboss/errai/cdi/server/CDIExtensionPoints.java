@@ -35,6 +35,7 @@ import org.jboss.errai.bus.server.io.ConversationalEndpointCallback;
 import org.jboss.errai.bus.server.io.RemoteServiceCallback;
 import org.jboss.errai.bus.server.io.ServiceInstanceProvider;
 import org.jboss.errai.bus.server.service.ErraiService;
+import org.jboss.errai.bus.server.service.ErraiServiceSingleton;
 import org.jboss.errai.cdi.server.events.ConversationalEvent;
 import org.jboss.errai.cdi.server.events.ConversationalEventBean;
 import org.jboss.errai.cdi.server.events.ConversationalEventObserverMethod;
@@ -325,7 +326,7 @@ public class CDIExtensionPoints implements Extension {
   @SuppressWarnings({"UnusedDeclaration", "CdiInjectionPointsInspection"})
   public void afterBeanDiscovery(@Observes AfterBeanDiscovery abd, BeanManager bm) {
     // Errai Service wrapper
-    ErraiService<?> service = CDIServerUtil.lookupErraiService();
+    ErraiService<?> service = ErraiServiceSingleton.getService();
 
     final MessageBus bus = service.getBus();
 
@@ -333,7 +334,7 @@ public class CDIExtensionPoints implements Extension {
       return;
     }
 
-    abd.addBean(new ErraiServiceBean(bm, service));
+    abd.addBean(new ErraiServiceBean(bm));
     // event dispatcher
     EventDispatcher eventDispatcher = new EventDispatcher(bm, observableEvents, eventQualifiers);
 

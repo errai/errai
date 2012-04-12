@@ -26,7 +26,7 @@ public enum ErraiConfigAttribs {
    * then the segment count is inferred by the simple calculation {@code BUF_BUFFER_SIZE / BUS_BUFFER_SEGMENT_SIZE}.
    * If the {@link #BUS_BUFFER_SEGMENT_COUNT} is specified, it will be ignored in the presence of this attribute.
    * <p/>
-   * Default value: 128
+   * Default value: 32
    */
   BUS_BUFFER_SIZE("errai.bus.buffer_size"),
 
@@ -59,7 +59,9 @@ public enum ErraiConfigAttribs {
   BUS_BUFFER_ALLOCATION_MODE("errai.bus.buffer_allocation_mode", "direct"),
 
   WEBSOCKET_SERVLET_ENABLED("errai.bus.websocket.servlet.enabled", "false"),
-  WEBSOCKET_SERVLET_CONTEXT_PATH("errai.bus.websocket.servlet.path", "in.erraiBusWebSocket");
+  WEBSOCKET_SERVLET_CONTEXT_PATH("errai.bus.websocket.servlet.path", "in.erraiBusWebSocket"),
+
+  AUTO_DISCOVER_SERVICES("errai.bus.auto_discover_services", "false");
 
   protected final String attributeName;
   protected final String defaultValue;

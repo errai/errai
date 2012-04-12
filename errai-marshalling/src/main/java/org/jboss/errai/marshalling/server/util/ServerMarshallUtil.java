@@ -57,9 +57,11 @@ import org.slf4j.Logger;
  * @author Mike Brock
  */
 public abstract class ServerMarshallUtil {
+  private static final String USE_NATIVE_JAVA_COMPILER = "errai.marshalling.use_native_javac";
   private static final String CLASSLOADING_MODE_PROPERTY = "errai.marshalling.classloading.mode";
-  private static final String classLoadingMode;
 
+  private static final String classLoadingMode;
+  private static final boolean useNativeJavac = Boolean.getBoolean(USE_NATIVE_JAVA_COMPILER);
   private static Logger log = getLogger("ErraiMarshalling");
 
   static {
@@ -180,7 +182,7 @@ public abstract class ServerMarshallUtil {
 
     @Override
     public int compile(OutputStream out, OutputStream errors, String outputPath, String toCompile, String classpath) {
-      return compiler.run(null, out, errors, "-classpath", classpath, "-d", "\"" + outputPath + "\"", toCompile);
+      return compiler.run(null, out, errors, "-classpath", classpath, "-d", outputPath, toCompile);
     }
   }
 
@@ -210,7 +212,6 @@ public abstract class ServerMarshallUtil {
                 public void worked(int workIncrement, int remainingWork) {
                 }
               }) ? 0 : -1;
-
     }
   }
 
@@ -224,7 +225,7 @@ public abstract class ServerMarshallUtil {
       JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
       CompilerAdapter adapter;
 
-      if (compiler == null) {
+      if (compiler == null || !useNativeJavac) {
         adapter = new JDTCompiler();
       }
       else {
@@ -259,16 +260,19 @@ public abstract class ServerMarshallUtil {
       }
       log.debug("<<< Done searching for all jars by " + MetaDataScanner.ERRAI_CONFIG_STUB_NAME);
 
-      for (File file : classpathElements)
+      for (File file : classpathElements) {
         sb.append(file.getAbsolutePath()).append(File.pathSeparator);
+      }
 
       sb.append(System.getProperty("java.class.path"));
       sb.append(findAllJarsByManifest());
 
+      final String classPath = sb.toString();
+
       /**
        * Attempt to run the compiler without any classpath specified.
        */
-      if (adapter.compile(System.out, errorOutputStream, outputPath, inFile.getAbsolutePath(), sb.toString()) != 0) {
+      if (adapter.compile(System.out, errorOutputStream, outputPath, inFile.getAbsolutePath(), classPath) != 0) {
 
         System.out.println("*** FAILED TO COMPILE MARSHALLER CLASS ***");
         System.out.println("*** Classpath Used: " + sb.toString());
@@ -344,15 +348,12 @@ public abstract class ServerMarshallUtil {
           break;
         }
       }
-
     }
-
 
     Class<?> mainClass = clsLoader
             .defineClassX(packageName + "." + className, classDefinition, 0, classDefinition.length);
 
     inputStream.close();
-
 
     for (int i = 1; i < Integer.MAX_VALUE; i++) {
 

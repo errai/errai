@@ -10,7 +10,10 @@ import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
 import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
 import org.jboss.errai.bus.server.service.ErraiServiceImpl;
+import org.jboss.errai.bus.server.service.ErraiServiceSingleton;
 import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletConfig;
@@ -29,7 +32,7 @@ public final class ServletBootstrapUtil {
   }
 
   public static ErraiService getService(final FilterConfig config) {
-    return getService(new AbstractInitConfig() {
+    return initService(new AbstractInitConfig() {
       @Override
       public String getInitParameter(String parameter) {
         return config.getInitParameter(parameter);
@@ -48,7 +51,7 @@ public final class ServletBootstrapUtil {
   }
 
   public static ErraiService getService(final ServletConfig config) {
-    return getService(new AbstractInitConfig() {
+    return initService(new AbstractInitConfig() {
       @Override
       public String getInitParameter(String parameter) {
         return config.getInitParameter(parameter);
@@ -68,64 +71,37 @@ public final class ServletBootstrapUtil {
 
   private static final Object getServiceLock = new Object();
 
-  private static ErraiService getService(final InitConfig config) {
+  private static ErraiService initService(final InitConfig config) {
     synchronized (getServiceLock) {
+      if (ErraiServiceSingleton.isInitialized()) {
+        return ErraiServiceSingleton.getService();
+      }
+
       final ServletContext context = config.getServletContext();
 
-      final String serviceLocatorClass = config.getInitOrContextParameter("service-locator");
+      final ErraiServiceConfigurator configurator = new ErraiServiceConfiguratorImpl();
 
-      ErraiService service = (ErraiService) context.getAttribute(ErraiService.class.getName());
-      if (null == service) {
-        final ErraiServiceConfigurator configurator = new ErraiServiceConfiguratorImpl();
+      final String autoDiscoverServices
+              = ServletInitAttribs.AUTO_DISCOVER_SERVICES.getInitOrContextValue(config, "false");
 
-        String pathElement = ServletInitAttribs.WEBSOCKETS_PATH_ELEMENT
-                .getInitOrContextValue(config, "in.erraiBusWebSocket");
-
-        String webSocketsEnabled = ServletInitAttribs.WEBSOCKETS_ENABLED.getInitOrContextValue(config);
-        if (webSocketsEnabled != null) {
-          ErraiConfigAttribs.WEBSOCKET_SERVLET_ENABLED.set(configurator, webSocketsEnabled);
-        }
-
-        ErraiConfigAttribs.WEBSOCKET_SERVLET_CONTEXT_PATH.set(configurator,
-                context.getContextPath() + "/" + pathElement);
-
-        // Build or lookup service
-        if (serviceLocatorClass != null) {
-          // locate externally created service instance, i.e. CDI
-          try {
-            ClassLoader loader = Thread.currentThread().getContextClassLoader();
-            Class<?> aClass = loader.loadClass(serviceLocatorClass);
-            ServiceLocator locator = (ServiceLocator) aClass.newInstance();
-            service = locator.locateService();
-          }
-          catch (Exception e) {
-            throw new RuntimeException("Failed to create service", e);
-          }
-        }
-        else {
-          // create a service instance manually
-          service = buildService(configurator);
-        }
-
-        // store it in servlet context
-        context.setAttribute(ErraiService.class.getName(), service);
+      if (autoDiscoverServices != null) {
+        ErraiConfigAttribs.AUTO_DISCOVER_SERVICES.set(configurator, autoDiscoverServices);
       }
-      return service;
+
+      String pathElement = ServletInitAttribs.WEBSOCKETS_PATH_ELEMENT
+              .getInitOrContextValue(config, "in.erraiBusWebSocket");
+
+      String webSocketsEnabled = ServletInitAttribs.WEBSOCKETS_ENABLED.getInitOrContextValue(config);
+
+
+      if (webSocketsEnabled != null) {
+        ErraiConfigAttribs.WEBSOCKET_SERVLET_ENABLED.set(configurator, webSocketsEnabled);
+      }
+
+      ErraiConfigAttribs.WEBSOCKET_SERVLET_CONTEXT_PATH.set(configurator,
+              context.getContextPath() + "/" + pathElement);
+
+      return ErraiServiceSingleton.initSingleton(configurator);
     }
   }
-
-  @SuppressWarnings({"unchecked"})
-  private static ErraiService<HttpSession> buildService(final ErraiServiceConfigurator configurator) {
-    return Guice.createInjector(new AbstractModule() {
-      @Override
-      @SuppressWarnings({"unchecked"})
-      public void configure() {
-        bind(ErraiService.class).to(ErraiServiceImpl.class);
-        bind(ErraiServiceConfigurator.class).toInstance(configurator);
-        bind(MessageBus.class).to(ServerMessageBusImpl.class);
-        bind(ServerMessageBus.class).to(ServerMessageBusImpl.class);
-      }
-    }).getInstance(ErraiService.class);
-  }
-
 }

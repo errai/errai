@@ -1,27 +1,22 @@
 <web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
 		  http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
-	version="2.5">
+         version="2.5">
 
-	<display-name>Errai Tag Cloud Demo</display-name>
-	
-	<servlet>
-		<servlet-name>ErraiServlet</servlet-name>
-		  <servlet-class>org.jboss.errai.bus.server.servlet.JettyContinuationsServlet</servlet-class>
-      
-		<init-param>
-            <param-name>service-locator</param-name>
-            <param-value>org.jboss.errai.cdi.server.CDIServiceLocator</param-value>
-        </init-param>
-		<load-on-startup>1</load-on-startup>
-	</servlet>
+    <display-name>Errai Tag Cloud Demo</display-name>
 
-	<servlet-mapping>
-		<servlet-name>ErraiServlet</servlet-name>
-		<url-pattern>*.erraiBus</url-pattern>
-	</servlet-mapping>
-	
-	<listener>
+    <servlet>
+        <servlet-name>ErraiServlet</servlet-name>
+        <servlet-class>org.jboss.errai.bus.server.servlet.JettyContinuationsServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>ErraiServlet</servlet-name>
+        <url-pattern>*.erraiBus</url-pattern>
+    </servlet-mapping>
+
+    <listener>
         <listener-class>org.jboss.errai.container.CDIServletStateListener</listener-class>
     </listener>
 
@@ -35,5 +30,5 @@
         <description>Object factory for the Errai Service</description>
         <resource-env-ref-name>Errai</resource-env-ref-name>
         <resource-env-ref-type>org.jboss.errai.bus.server.service.ErraiService</resource-env-ref-type>
-    </resource-env-ref>    
+    </resource-env-ref>
 </web-app>

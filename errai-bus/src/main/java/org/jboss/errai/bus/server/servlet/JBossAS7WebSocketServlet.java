@@ -36,6 +36,7 @@ import org.jboss.servlet.http.HttpEvent;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
@@ -179,6 +180,7 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
       // this is an active session. send the message.;
 
       Message msg = MessageFactory.createCommandMessage(cometSession, text);
+      msg.setResource(HttpServletRequest.class.getName(), event.getHttpServletRequest());
       service.store(msg);
     }
   }

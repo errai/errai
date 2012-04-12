@@ -55,6 +55,7 @@ import org.jboss.errai.bus.client.api.SessionExpirationListener;
 import org.jboss.errai.bus.client.api.SubscribeListener;
 import org.jboss.errai.bus.client.api.UnsubscribeListener;
 import org.jboss.errai.bus.client.api.base.Capabilities;
+import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.api.base.NoSubscribersToDeliverTo;
@@ -81,6 +82,7 @@ import java.util.Set;
 
 import static org.jboss.errai.bus.client.json.JSONUtilCli.decodePayload;
 import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteSubscribe;
+import static org.jboss.errai.bus.client.protocols.BusCommands.RemoteUnsubscribe;
 import static org.jboss.errai.common.client.protocols.MessageParts.PriorityProcessing;
 import static org.jboss.errai.common.client.protocols.MessageParts.Subject;
 
@@ -150,7 +152,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   /**
    * The unique ID that will sent with the next request.
    * <p/>
-   * IMPORTANT: only access this member via {@link #getNextRequestNumber()}.
+   * IMPORTANT: only access this member via {@link #getNextRequestNumber()}}.
    */
   private int txNumber = 0;
   private int rxNumber = 0;
@@ -439,6 +441,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private void directStore(final Message message) {
     String subject = message.getSubject();
 
+  //  LogUtil.log("directStore=" + message);
+
     if (remotes.containsKey(subject)) {
       remotes.get(subject).callback(message);
     }
@@ -544,11 +548,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    */
   private void transmitRemote(final String message, final List<Message> txMessages) {
     if (message == null) return;
+
     //  System.out.println("TX: " + message);
     try {
       txActive = true;
 
       if (webSocketOpen) {
+      //  LogUtil.log("TX(WebSocket):" + message);
         if (ClientWebSocketChannel.transmitToSocket(webSocketChannel, message)) {
           return;
         }
@@ -567,6 +573,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
 
       try {
+      //  LogUtil.log("TX(Comet):" + message);
         sendBuilder.sendRequest(message, new RequestCallback() {
 
           @Override
@@ -659,10 +666,16 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       if (sendDisconnect && isRemoteCommunicationEnabled()) {
         sendBuilder.setHeader("phase", "disconnect");
 
-        Message m = MessageBuilder.createMessage()
+        Message m = CommandMessage.createWithParts(new HashMap<String, Object>())
                 .toSubject(BuiltInServices.ServerBus.name())
-                .command(BusCommands.Disconnect).getMessage()
+                .command(BusCommands.Disconnect)
                 .set(MessageParts.PriorityProcessing, "1");
+
+
+//        Message m = MessageBuilder.createMessage()
+//                .toSubject(BuiltInServices.ServerBus.name())
+//                .command(BusCommands.Disconnect).getMessage()
+//                .set(MessageParts.PriorityProcessing, "1");
 
         encodeAndTransmit(m);
       }
@@ -716,7 +729,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private void registerInitVoteCallbacks() {
-    InitVotes.waitFor(ClientMessageBusImpl.class);
+    InitVotes.waitFor(ClientMessageBus.class);
     InitVotes.waitFor(RpcProxyLoader.class);
     InitVotes.registerOneTimeInitCallback(new Runnable() {
       @Override
@@ -856,20 +869,32 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
                 remoteSubscribe(BuiltInServices.ServerBus.name());
 
-                MessageBuilder.createMessage()
+                encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
                         .toSubject(BuiltInServices.ServerBus.name())
                         .command(RemoteSubscribe)
-                        .with(MessageParts.SubjectsList, subjects)
-                        .with(PriorityProcessing, "1")
-                        .noErrorHandling()
-                        .sendNowWith(ClientMessageBusImpl.this);
+                        .set(MessageParts.SubjectsList, subjects)
+                        .set(PriorityProcessing, "1"));
 
+//
+//                MessageBuilder.createMessage()
+//                        .toSubject(BuiltInServices.ServerBus.name())
+//                        .command(RemoteSubscribe)
+//                        .with(MessageParts.SubjectsList, subjects)
+//                        .with(PriorityProcessing, "1")
+//                        .noErrorHandling()
+//                        .sendNowWith(ClientMessageBusImpl.this);
 
-                MessageBuilder.createMessage()
+                encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
                         .toSubject(BuiltInServices.ServerBus.name())
                         .command(BusCommands.FinishStateSync)
-                        .with(PriorityProcessing, "1")
-                        .noErrorHandling().sendNowWith(ClientMessageBusImpl.this);
+                        .set(PriorityProcessing, "1"));
+
+
+//                MessageBuilder.createMessage()
+//                        .toSubject(BuiltInServices.ServerBus.name())
+//                        .command(BusCommands.FinishStateSync)
+//                        .with(PriorityProcessing, "1")
+//                        .noErrorHandling().sendNowWith(ClientMessageBusImpl.this);
 
                 /**
                  * ... also send RemoteUnsubscribe signals.
@@ -883,11 +908,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                     }
 
                     if (event.isNew()) {
-                      MessageBuilder.getMessageProvider().get().command(RemoteSubscribe)
+                      encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
                               .toSubject(BuiltInServices.ServerBus.name())
+                              .command(RemoteSubscribe)
                               .set(Subject, event.getSubject())
-                              .set(PriorityProcessing, "1")
-                              .sendNowWith(ClientMessageBusImpl.this);
+                              .set(PriorityProcessing, "1"));
                     }
                   }
                 });
@@ -895,11 +920,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 addUnsubscribeListener(new UnsubscribeListener() {
                   @Override
                   public void onUnsubscribe(SubscriptionEvent event) {
-                    MessageBuilder.getMessageProvider().get().command(BusCommands.RemoteUnsubscribe)
+                    encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
                             .toSubject(BuiltInServices.ServerBus.name())
+                            .command(RemoteUnsubscribe)
                             .set(Subject, event.getSubject())
-                            .set(PriorityProcessing, "1")
-                            .sendNowWith(ClientMessageBusImpl.this);
+                            .set(PriorityProcessing, "1"));
                   }
                 });
 
@@ -918,10 +943,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                   }
                 });
 
-                InitVotes.voteFor(ClientMessageBusImpl.class);
 
                 if (webSocketUpgradeAvailable) {
                   websocketUpgrade();
+                }
+                else {
+                  InitVotes.voteFor(ClientMessageBus.class);
                 }
 
 
@@ -955,11 +982,20 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
           case WebsocketChannelVerify:
             LogUtil.log("received verification token for websocket connection");
-            MessageBuilder.createMessage()
+
+            Message msg = CommandMessage.createWithParts(new HashMap<String, Object>())
                     .toSubject(BuiltInServices.ServerBus.name())
                     .command(BusCommands.WebsocketChannelVerify)
-                    .copy(MessageParts.WebSocketToken, message)
-                    .done().sendNowWith(ClientMessageBusImpl.this);
+                    .copy(MessageParts.WebSocketToken, message);
+//
+//
+//            Message m = MessageBuilder.createMessage()
+//                    .toSubject(BuiltInServices.ServerBus.name())
+//                    .command(BusCommands.WebsocketChannelVerify)
+//                    .copy(MessageParts.WebSocketToken, message)
+//                    .done().getMessage();
+
+            encodeAndTransmit(msg);
             break;
 
           case WebsocketChannelOpen:
@@ -971,6 +1007,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             ClientWebSocketChannel.transmitToSocket(webSocketChannel, getWebSocketNegotiationString());
 
             LogUtil.log("web socket channel successfully negotiated. comet channel deactivated.");
+
+            new Timer() {
+              @Override
+              public void run() {
+                InitVotes.voteFor(ClientMessageBus.class);
+              }
+            }.schedule(50);
 
             break;
 
@@ -1003,36 +1046,14 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private void websocketUpgrade() {
+ //   LogUtil.log("using session coookie for websocket: " + Cookies.getCookie("JSESSIONID"));
+    LogUtil.log("attempting web sockets connection at URL: " + webSocketUrl);
 
-    new Timer() {
-      int attempts = 0;
+    Object o = ClientWebSocketChannel.attemptWebSocketConnect(ClientMessageBusImpl.this, webSocketUrl);
 
-      @Override
-      public void run() {
-        if (attempts > 10) {
-          LogUtil.log("did not negotiate websocket because a valid session cookie was not detected.");
-          return;
-        }
-
-        if (Cookies.getCookie("JSESSIONID") == null) {
-          attempts++;
-
-          schedule(100);
-          return;
-        }
-
-        LogUtil.log("using session coookie for websocket: " + Cookies.getCookie("JSESSIONID"));
-
-
-        LogUtil.log("attempting web sockets connection at URL: " + webSocketUrl);
-
-        Object o = ClientWebSocketChannel.attemptWebSocketConnect(ClientMessageBusImpl.this, webSocketUrl);
-
-        if (o instanceof String) {
-          LogUtil.log("could not use web sockets. reason: " + o);
-        }
-      }
-    }.schedule(1);
+    if (o instanceof String) {
+      LogUtil.log("could not use web sockets. reason: " + o);
+    }
   }
 
   private void completeInit() {
@@ -1046,12 +1067,18 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
       do {
         for (Runnable runnable : new ArrayList<Runnable>(postInitTasks)) {
+          LogUtil.log("running post init task: " + runnable);
           postInitTasks.remove(runnable);
-          runnable.run();
+          try {
+            runnable.run();
+          }
+          catch (Throwable t) {
+            LogUtil.log("[error] running post init task: " + t);
+            LogUtil.log("     -> " + t.getMessage());
+          }
         }
       }
       while (!postInitTasks.isEmpty());
-
 
       sendAllDeferred();
       postInitTasks.clear();
@@ -1064,7 +1091,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private void remoteSubscribe(String subject) {
     remotes.put(subject, remoteCallback);
-    //  addShadowSubscription(subject, remoteCallback);
   }
 
   Set<String> getRemoteSubscriptions() {
@@ -1078,17 +1104,30 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     if (!deferredMessages.isEmpty())
       LogUtil.log("transmitting deferred messages now ...");
 
-    for (Iterator<Message> iter = deferredMessages.iterator(); iter.hasNext(); ) {
-      Message m = iter.next();
-      if (m.hasPart(MessageParts.PriorityProcessing)) {
-        directStore(m);
-        iter.remove();
+    for (Message message : new ArrayList<Message>(deferredMessages)) {
+      if (message.hasPart(MessageParts.PriorityProcessing)) {
+        transmitDeferred(message);
+        deferredMessages.remove(message);
       }
     }
 
-    for (Iterator<Message> iter = deferredMessages.iterator(); iter.hasNext(); ) {
-      directStore(iter.next());
-      iter.remove();
+    do {
+      // defensively copy and don't use a fail-fast iterator -- these tasks may send messages
+      for (Message message : new ArrayList<Message>(deferredMessages)) {
+        transmitDeferred(message);
+        deferredMessages.remove(message);
+      }
+    }
+    while (!deferredMessages.isEmpty());
+  }
+
+  private void transmitDeferred(Message message) {
+    try {
+      directStore(message);
+    }
+    catch (Throwable t) {
+      LogUtil.log("[error] failed to transmit deferred message: " + message);
+      LogUtil.log("    -> " + t.getMessage());
     }
   }
 
@@ -1098,10 +1137,11 @@ public class ClientMessageBusImpl implements ClientMessageBus {
    *
    * @return true if initial message was sent successfully.
    */
+
   private boolean sendInitialMessage() {
     if (!isRemoteCommunicationEnabled()) {
-      LogUtil.log("Initializing client bus in offline mode (erraiBusRemoteCommunicationEnabled was set to false)!");
-      InitVotes.voteFor(ClientMessageBusImpl.class);
+      LogUtil.log("initializing client bus in offline mode (erraiBusRemoteCommunicationEnabled was set to false)");
+      InitVotes.voteFor(ClientMessageBus.class);
       InitVotes.voteFor(RpcProxyLoader.class);
       return true;
     }
@@ -1420,6 +1460,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   public void procPayload(String text) {
+   // LogUtil.log("RX:" + text);
     try {
       for (MarshalledMessage m : decodePayload(text)) {
         rxNumber++;
@@ -1576,7 +1617,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     public void addError(String message, String additionalDetails, Throwable e) {
       if (!showErrors) return;
-
 
       contentPanel.add(new HTML("<strong style='background:red;color:white;'>" + message + "</strong>"));
 

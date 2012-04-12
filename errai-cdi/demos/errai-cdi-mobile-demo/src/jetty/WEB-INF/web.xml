@@ -16,11 +16,6 @@
              profile in pom.xml to use that. -->
         <servlet-name>ErraiServlet</servlet-name>
         <servlet-class>org.jboss.errai.bus.server.servlet.DefaultBlockingServlet</servlet-class>
-
-        <init-param>
-            <param-name>service-locator</param-name>
-            <param-value>org.jboss.errai.cdi.server.CDIServiceLocator</param-value>
-        </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
 
