@@ -560,7 +560,7 @@
         <configuration>
           <warName>${project.artifactId}</warName>
           <outputFileNameMapping>@{artifactId}@-@{baseVersion}@@{dashClassifier?}@.@{extension}@</outputFileNameMapping>
-          <packagingExcludes>**/javax/**/*.*,**/client/local/**/*.class</packagingExcludes>
+          <packagingExcludes>**/javax/**/*.*,**/client/local/**/*.class,**/SyntaxHighlight.class</packagingExcludes>
 
           <webResources>
             <resource>
