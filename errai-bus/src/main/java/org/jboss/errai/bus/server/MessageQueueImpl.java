@@ -25,6 +25,7 @@ import org.jboss.errai.bus.server.io.QueueChannel;
 import org.jboss.errai.bus.server.io.buffers.BufferCallback;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
+import org.jboss.errai.bus.server.util.LocalContext;
 import org.jboss.errai.bus.server.util.MarkedOutputStream;
 import org.jboss.errai.bus.server.util.ServerBusTools;
 import org.jboss.errai.marshalling.server.util.UnwrappedByteArrayOutputStream;
@@ -139,7 +140,16 @@ public class MessageQueueImpl implements MessageQueue {
     }
 
     if (useDirectSocketChannel && directSocketChannel.isConnected()) {
-      directSocketChannel.write("[" + ServerBusTools.encodeMessage(message) + "]");
+      try {
+        directSocketChannel.write("[" + ServerBusTools.encodeMessage(message) + "]");
+      }
+      catch (Throwable e) {
+        log.info("error writing to socket for queue " + session.getSessionId());
+        LocalContext.get(session).destroy();
+        directSocketChannel = null;
+        stopQueue();
+        e.printStackTrace();
+      }
     }
     else {
       try {
@@ -273,6 +283,8 @@ public class MessageQueueImpl implements MessageQueue {
 
   @Override
   public void wake() {
+    if (!queueRunning) return;
+
     try {
       if (isDirectChannelOpen()) {
         UnwrappedByteArrayOutputStream outputStream = new UnwrappedByteArrayOutputStream();
@@ -286,8 +298,9 @@ public class MessageQueueImpl implements MessageQueue {
 
       activateActivationCallback();
     }
-    catch (IOException e) {
-      e.printStackTrace();
+    catch (Throwable e) {
+      log.debug("unable to wake queue: " + session.getSessionId());
+      stopQueue();
     }
   }
 
@@ -336,7 +349,7 @@ public class MessageQueueImpl implements MessageQueue {
    * @return true if the queue is stale
    */
   public boolean isStale() {
-    return !isDirectChannelOpen() && (!queueRunning || ((nanoTime() - lastTransmission) > TIMEOUT));
+    return !queueRunning || !isDirectChannelOpen() || (((nanoTime() - lastTransmission) > TIMEOUT));
   }
 
 

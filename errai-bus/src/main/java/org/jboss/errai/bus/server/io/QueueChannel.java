@@ -8,4 +8,5 @@ import java.io.IOException;
 public interface QueueChannel {
   public boolean isConnected();
   public void write(String data) throws IOException;
+  public String getId();
 }
