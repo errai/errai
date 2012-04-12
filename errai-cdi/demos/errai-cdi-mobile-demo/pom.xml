@@ -27,6 +27,20 @@
       <scope>test</scope>
     </dependency>
 
+    <dependency>
+        <groupId>org.jboss.ejb3</groupId>
+        <artifactId>jboss-ejb3-api</artifactId>
+        <scope>provided</scope>
+        <version>3.1.0</version>
+    </dependency>
+
+    <dependency>
+        <groupId>javax.enterprise</groupId>
+        <artifactId>cdi-api</artifactId>
+        <scope>provided</scope>
+        <version>1.0-SP4</version>
+    </dependency>
+
     <!-- Errai Core -->
     <dependency>
       <groupId>org.jboss.errai</groupId>
@@ -151,7 +165,7 @@
       <groupId>net.sf.squirrel-sql.thirdparty-non-maven</groupId>
       <artifactId>ostermiller-syntax</artifactId>
       <version>1.1.1</version>
-      <scope>compile</scope>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 
@@ -164,6 +178,14 @@
       <properties>
         <webDescriptor>jetty</webDescriptor>
       </properties>
+      <dependencies>
+        <!-- We need this for CDI BeanManager to work in Dev Mode -->
+        <dependency>
+          <groupId>org.mortbay.jetty</groupId>
+          <artifactId>jetty-naming</artifactId>
+          <scope>compile</scope>
+        </dependency>
+      </dependencies>
     </profile>
 
     <profile>
@@ -238,10 +260,25 @@
           <version>${project.version}</version>
         </dependency>
 
+        <!-- Exclude all the stuff provided by AS6 -->
         <dependency>
           <groupId>javax.inject</groupId>
           <artifactId>javax.inject</artifactId>
           <version>1</version>
+          <scope>provided</scope>
+        </dependency>
+    
+        <dependency>
+          <groupId>javax.annotation</groupId>
+          <artifactId>jsr250-api</artifactId>
+          <version>1.0</version>
+          <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+          <groupId>log4j</groupId>
+          <artifactId>log4j</artifactId>
+          <version>1.2.16</version>
           <scope>provided</scope>
         </dependency>
 
@@ -545,6 +582,7 @@
               <goal>java</goal>
             </goals>
             <configuration>
+              <classpathScope>compile</classpathScope>
               <mainClass>org.jboss.errai.demo.mobile.about.SyntaxHighlight</mainClass>
               <arguments>
                 <!-- First arg: location of the .java source files -->
@@ -558,6 +596,28 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>2.4.1</version>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>${basedir}</directory>
+              <includes>
+                <include>www-test/**</include>
+                <include>.gwt/**</include>
+                <include>.errai/**</include>
+                <include>src/main/webapp/ErraiCdiMobileDemo/**</include>
+                <include>src/main/webapp/WEB-INF/deploy/**</include>
+                <include>src/main/webapp/WEB-INF/lib/**</include>
+                <include>src/main/webapp/WEB-INF/classes/**</include>
+                <include>**/gwt-unitCache/**</include>
+                <include>**/*.JUnit/**</include>
+              </includes>
+            </fileset>
+          </filesets>
+        </configuration>
       </plugin>
     </plugins>
 
