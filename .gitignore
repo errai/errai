@@ -7,7 +7,6 @@
 .gwt-tmp/
 target/
 classes/
-tomcat/
 deploy/
 .errai/
 .DS_Store
