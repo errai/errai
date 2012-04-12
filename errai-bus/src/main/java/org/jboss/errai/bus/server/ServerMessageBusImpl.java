@@ -161,7 +161,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
 
     if (bufferSize != null) {
-      segmentCount = (bufferSize * 1024 * 1024) * segmentSize;
+      segmentCount = (bufferSize * 1024 * 1024) / segmentSize;
     }
     else if (segmentCount == null) {
       segmentCount = 4096;
