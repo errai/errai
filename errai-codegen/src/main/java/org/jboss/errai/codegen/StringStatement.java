@@ -16,15 +16,28 @@
 
 package org.jboss.errai.codegen;
 
+import org.jboss.errai.codegen.meta.MetaClass;
+
 public class StringStatement extends AbstractStatement {
   private final String statement;
+  private final MetaClass clazz;
 
   public StringStatement(String statement) {
+    this(statement, null);
+  }
+
+  public StringStatement(String statement, MetaClass returnType) {
     this.statement = statement;
+    this.clazz = returnType;
   }
 
   @Override
   public String generate(Context context) {
     return statement;
+  }
+
+  @Override
+  public MetaClass getType() {
+    return clazz;
   }
 }

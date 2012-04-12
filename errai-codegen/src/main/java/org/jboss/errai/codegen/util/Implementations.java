@@ -108,7 +108,7 @@ public class Implementations {
   public static BlockBuilder<StatementEnd> autoForLoop(String varName, Statement value) {
     return Stmt.for_(Stmt.declareVariable(int.class).named("i").initializeWith(0),
             Bool.lessThan(Variable.get("i"), value),
-            new StringStatement(varName + "++"));
+            new StringStatement(varName + "++", null));
   }
 
 }
