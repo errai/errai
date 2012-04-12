@@ -33,6 +33,10 @@ public class LocalContext implements Context {
     return new LocalContext("<NoSession>", session);
   }
 
+//  public static LocalContext get(String contextName, QueueSession session) {
+//    return new LocalContext(contextName, session);
+//  }
+
   public static LocalContext get(Message message) {
     return new LocalContext(message.getSubject(), message.getResource(QueueSession.class, "Session"));
   }

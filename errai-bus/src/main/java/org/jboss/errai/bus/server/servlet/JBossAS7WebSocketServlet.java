@@ -83,6 +83,11 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
     public void write(String data) throws IOException {
       socket.writeTextFrame(data);
     }
+
+    @Override
+    public String getId() {
+      return socket.getSocketID();
+    }
   }
 
   @Override
@@ -111,6 +116,7 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
     @SuppressWarnings("unchecked") EJObject val = JSONDecoder.decode(text).isObject();
 
     final LocalContext localSessionContext = LocalContext.get(session);
+
     QueueSession cometSession = localSessionContext.getAttribute(QueueSession.class, WEBSOCKET_SESSION_ALIAS);
 
     // this is not an active channel.
@@ -129,18 +135,7 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
                   WebSocketServerHandler.WEBSOCKET_ACTIVE.equals(localCometSession.getAttribute(String.class, WebSocketServerHandler.SESSION_ATTR_WS_STATUS))) {
 
             // set the session queue into direct channel mode.
-            final QueueSession sessionRef = cometSession;
-            service.getBus().getQueue(cometSession).setDirectSocketChannel(new QueueChannel() {
-              @Override
-              public boolean isConnected() {
-                return sessionRef.isValid();
-              }
-
-              @Override
-              public void write(String data) throws IOException {
-                socket.writeTextFrame(data);
-              }
-            });
+            service.getBus().getQueue(cometSession).setDirectSocketChannel(new SimpleEventChannelWrapped(socket));
 
             localSessionContext.setAttribute(WEBSOCKET_SESSION_ALIAS, cometSession);
             cometSession.removeAttribute(WebSocketServerHandler.SESSION_ATTR_WS_STATUS);

@@ -23,4 +23,9 @@ public class NettyQueueChannel implements QueueChannel {
   public void write(String data) {
     channel.write(new TextWebSocketFrame(data));
   }
+
+  @Override
+  public String getId() {
+    return String.valueOf(channel.getId());
+  }
 }
