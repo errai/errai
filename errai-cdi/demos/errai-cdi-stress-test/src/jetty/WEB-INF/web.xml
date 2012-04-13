@@ -6,6 +6,11 @@
          version="2.5">
 
     <servlet>
+
+        <!-- NOTE: the integration-test profile uses this web.xml. Integration tests only work properly
+             with the DefaultBlockingServlet. If you change this setting, make a backup of this web.xml
+             (perhaps under src/integration-test-settings/web.xml and alter the integration-test
+             profile in pom.xml to use that. -->
         <servlet-name>ErraiServlet</servlet-name>
         <servlet-class>org.jboss.errai.bus.server.servlet.DefaultBlockingServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
