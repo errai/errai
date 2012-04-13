@@ -31,7 +31,15 @@ import org.jboss.errai.bus.server.util.ServerBusTools;
 import org.jboss.errai.marshalling.server.util.UnwrappedByteArrayOutputStream;
 import org.slf4j.Logger;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
@@ -76,6 +84,8 @@ public class MessageQueueImpl implements MessageQueue {
     this.buffer = buffer;
     this.session = session;
     this.bufferColor = BufferColor.getNewColorFromHead(buffer);
+
+
   }
 
   /**
@@ -349,7 +359,15 @@ public class MessageQueueImpl implements MessageQueue {
    * @return true if the queue is stale
    */
   public boolean isStale() {
-    return !queueRunning || !isDirectChannelOpen() || (((nanoTime() - lastTransmission) > TIMEOUT));
+    if (!queueRunning) {
+      return true;
+    }
+    else if (!isDirectChannelOpen() && (((nanoTime() - lastTransmission) > TIMEOUT))) {
+      return true;
+    }
+    else {
+      return false;
+    }
   }
 
 
