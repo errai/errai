@@ -21,6 +21,8 @@ import com.google.gwt.core.client.RunAsyncCallback;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.CloseEvent;
+import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.http.client.Request;
@@ -162,6 +164,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private boolean disconnected = false;
 
+  private boolean appClosing = false;
+
   private BusErrorDialog errorDialog;
 
   static {
@@ -196,6 +200,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     IN_SERVICE_ENTRY_POINT = "in." + clientId + ".erraiBus";
     OUT_SERVICE_ENTRY_POINT = "out." + clientId + ".erraiBus";
+
+    Window.addCloseHandler(new CloseHandler<Window>() {
+      @Override
+      public void onClose(CloseEvent<Window> windowCloseEvent) {
+        appClosing = true;
+      }
+    });
 
     init();
   }
@@ -441,7 +452,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private void directStore(final Message message) {
     String subject = message.getSubject();
 
-  //  LogUtil.log("directStore=" + message);
+    //  LogUtil.log("directStore=" + message);
 
     if (remotes.containsKey(subject)) {
       remotes.get(subject).callback(message);
@@ -554,7 +565,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       txActive = true;
 
       if (webSocketOpen) {
-      //  LogUtil.log("TX(WebSocket):" + message);
+        //  LogUtil.log("TX(WebSocket):" + message);
         if (ClientWebSocketChannel.transmitToSocket(webSocketChannel, message)) {
           return;
         }
@@ -573,7 +584,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
 
       try {
-      //  LogUtil.log("TX(Comet):" + message);
+        //  LogUtil.log("TX(Comet):" + message);
         sendBuilder.sendRequest(message, new RequestCallback() {
 
           @Override
@@ -1046,7 +1057,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private void websocketUpgrade() {
- //   LogUtil.log("using session coookie for websocket: " + Cookies.getCookie("JSESSIONID"));
+    //   LogUtil.log("using session coookie for websocket: " + Cookies.getCookie("JSESSIONID"));
     LogUtil.log("attempting web sockets connection at URL: " + webSocketUrl);
 
     Object o = ClientWebSocketChannel.attemptWebSocketConnect(ClientMessageBusImpl.this, webSocketUrl);
@@ -1220,11 +1231,14 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   protected class LongPollRequestCallback implements RequestCallback {
     @Override
     public void onError(Request request, Throwable throwable) {
+      if (appClosing) return;
+
       switch (statusCode) {
         case 1:
         case 408:
         case 502:
         case 504:
+
           if (retries != maxRetries) {
             if (timeoutDB == null) {
               createConnectAttemptGUI();
@@ -1265,7 +1279,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           case 307:
             break;
           default:
-            onError(request, new TransportIOException("Unexpected response code", statusCode, response.getStatusText()));
+              onError(request, new TransportIOException("Unexpected response code: " + statusCode, statusCode, response.getStatusText()));
             return;
         }
       }
@@ -1460,7 +1474,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   public void procPayload(String text) {
-   // LogUtil.log("RX:" + text);
+    // LogUtil.log("RX:" + text);
     try {
       for (MarshalledMessage m : decodePayload(text)) {
         rxNumber++;
