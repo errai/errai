@@ -615,12 +615,6 @@
 					<version>1.1.Final</version>
 				</dependency>
 
-				<!-- AS7 Service Activator -->
-				<dependency>
-					<groupId>org.jboss.errai</groupId>
-					<artifactId>jboss7-support</artifactId>
-					<version>${project.version}</version>
-				</dependency>
 
 				<!-- Jetty is used for testing only -->
 				<dependency>
@@ -823,13 +817,6 @@
 					<artifactId>weld-spi</artifactId>
 					<scope>provided</scope>
 					<version>1.1.Final</version>
-				</dependency>
-
-				<!-- AS7 Service Activator -->
-				<dependency>
-					<groupId>org.jboss.errai</groupId>
-					<artifactId>jboss7-support</artifactId>
-					<version>${project.version}</version>
 				</dependency>
 
 				<!-- Jetty is used for testing only -->
@@ -1040,13 +1027,6 @@
 					<artifactId>weld-spi</artifactId>
 					<scope>provided</scope>
 					<version>1.1.Final</version>
-				</dependency>
-
-				<!-- AS7 Service Activator -->
-				<dependency>
-					<groupId>org.jboss.errai</groupId>
-					<artifactId>jboss7-support</artifactId>
-					<version>${project.version}</version>
 				</dependency>
 
 				<!-- Jetty is used for testing only -->
