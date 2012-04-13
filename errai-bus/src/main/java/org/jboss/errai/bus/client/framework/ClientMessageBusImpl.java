@@ -164,8 +164,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   private boolean disconnected = false;
 
-  private boolean appClosing = false;
-
   private BusErrorDialog errorDialog;
 
   static {
@@ -200,13 +198,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     IN_SERVICE_ENTRY_POINT = "in." + clientId + ".erraiBus";
     OUT_SERVICE_ENTRY_POINT = "out." + clientId + ".erraiBus";
-
-    Window.addCloseHandler(new CloseHandler<Window>() {
-      @Override
-      public void onClose(CloseEvent<Window> windowCloseEvent) {
-        appClosing = true;
-      }
-    });
 
     init();
   }
@@ -1231,9 +1222,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   protected class LongPollRequestCallback implements RequestCallback {
     @Override
     public void onError(Request request, Throwable throwable) {
-      if (appClosing) return;
-
       switch (statusCode) {
+        case 0:
+          return;
         case 1:
         case 408:
         case 502:
