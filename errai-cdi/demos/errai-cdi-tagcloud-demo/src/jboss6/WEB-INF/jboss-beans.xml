@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<deployment xmlns="urn:jboss:bean-deployer:2.0">
+
+    <bean class="org.jboss.errai.container.JBossService" name="ErraiService">
+        <property name="jndiName"><value>java:comp/env/ErraiService</value></property>
+
+        <!--
+        Make Sure the JMS provider is available before Errai boots
+        in case we pull in the JMS binding extensions.
+        -->
+        <depends>jboss.jca:name=JmsXA,service=ManagedConnectionFactory</depends>
+    </bean>
+
+</deployment>

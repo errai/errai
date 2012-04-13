@@ -5,8 +5,6 @@
 		  http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
          version="2.5">
 
-    <display-name>Errai Tag Cloud Demo</display-name>
-    
     <servlet>
         <servlet-name>ErraiServlet</servlet-name>
         <servlet-class>org.jboss.errai.bus.server.servlet.DefaultBlockingServlet</servlet-class>
@@ -18,18 +16,4 @@
         <url-pattern>*.erraiBus</url-pattern>
     </servlet-mapping>
 
-    <context-param>
-        <param-name>errai.properties</param-name>
-        <param-value>/WEB-INF/errai.properties</param-value>
-    </context-param>
-
-    <context-param>
-        <param-name>login.config</param-name>
-        <param-value>/WEB-INF/login.config</param-value>
-    </context-param>
-
-    <context-param>
-        <param-name>users.properties</param-name>
-        <param-value>/WEB-INF/users.properties</param-value>
-    </context-param>
 </web-app>
