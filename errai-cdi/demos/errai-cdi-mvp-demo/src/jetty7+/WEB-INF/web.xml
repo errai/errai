@@ -24,7 +24,7 @@
   </listener>
 
   <listener>
-    <listener-class>org.jboss.errai.container.BeanManagerResourceBindingListener</listener-class>
+    <listener-class>org.jboss.weld.environment.servlet.BeanManagerResourceBindingListener</listener-class>
   </listener>
 
   <context-param>
