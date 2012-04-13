@@ -25,12 +25,21 @@ import org.jboss.errai.bus.server.io.QueueChannel;
 import org.jboss.errai.bus.server.io.buffers.BufferCallback;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
+import org.jboss.errai.bus.server.util.LocalContext;
 import org.jboss.errai.bus.server.util.MarkedOutputStream;
 import org.jboss.errai.bus.server.util.ServerBusTools;
 import org.jboss.errai.marshalling.server.util.UnwrappedByteArrayOutputStream;
 import org.slf4j.Logger;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
@@ -75,6 +84,8 @@ public class MessageQueueImpl implements MessageQueue {
     this.buffer = buffer;
     this.session = session;
     this.bufferColor = BufferColor.getNewColorFromHead(buffer);
+
+
   }
 
   /**
@@ -139,7 +150,16 @@ public class MessageQueueImpl implements MessageQueue {
     }
 
     if (useDirectSocketChannel && directSocketChannel.isConnected()) {
-      directSocketChannel.write("[" + ServerBusTools.encodeMessage(message) + "]");
+      try {
+        directSocketChannel.write("[" + ServerBusTools.encodeMessage(message) + "]");
+      }
+      catch (Throwable e) {
+        log.info("error writing to socket for queue " + session.getSessionId());
+        LocalContext.get(session).destroy();
+        directSocketChannel = null;
+        stopQueue();
+        e.printStackTrace();
+      }
     }
     else {
       try {
@@ -273,6 +293,8 @@ public class MessageQueueImpl implements MessageQueue {
 
   @Override
   public void wake() {
+    if (!queueRunning) return;
+
     try {
       if (isDirectChannelOpen()) {
         UnwrappedByteArrayOutputStream outputStream = new UnwrappedByteArrayOutputStream();
@@ -286,8 +308,9 @@ public class MessageQueueImpl implements MessageQueue {
 
       activateActivationCallback();
     }
-    catch (IOException e) {
-      e.printStackTrace();
+    catch (Throwable e) {
+      log.debug("unable to wake queue: " + session.getSessionId());
+      stopQueue();
     }
   }
 
@@ -336,7 +359,15 @@ public class MessageQueueImpl implements MessageQueue {
    * @return true if the queue is stale
    */
   public boolean isStale() {
-    return !isDirectChannelOpen() && (!queueRunning || ((nanoTime() - lastTransmission) > TIMEOUT));
+    if (!queueRunning) {
+      return true;
+    }
+    else if (!isDirectChannelOpen() && (((nanoTime() - lastTransmission) > TIMEOUT))) {
+      return true;
+    }
+    else {
+      return false;
+    }
   }
 
 

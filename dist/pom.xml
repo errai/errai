@@ -93,12 +93,7 @@
             <artifactId>errai-javax-enterprise</artifactId>
             <version>${project.version}</version>
         </dependency>
-        
-        <dependency>
-            <groupId>org.jboss.errai</groupId>
-            <artifactId>jboss7-support</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+
     </dependencies>
 
     <!-- Plugins -->
