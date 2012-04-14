@@ -32,7 +32,6 @@ import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJString;
 import org.jboss.errai.marshalling.server.JSONDecoder;
-import org.jboss.servlet.http.HttpEvent;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -91,12 +90,12 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
   }
 
   @Override
-  protected void onSocketOpened(HttpEvent event, WebSocket socket) throws IOException {
+  protected void onSocketOpened(WebSocket socket) throws IOException {
   }
 
   @Override
-  protected void onSocketClosed(HttpEvent event, WebSocket socket) throws IOException {
-    final QueueSession session = sessionProvider.getSession(event.getHttpServletRequest().getSession(),
+  protected void onSocketClosed(WebSocket socket) throws IOException {
+    final QueueSession session = sessionProvider.getSession(socket.getHttpSession(),
             socket.getSocketID());
 
     final LocalContext localSessionContext = LocalContext.get(session);
@@ -105,10 +104,10 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
   }
 
  @Override
-  protected void onReceivedTextFrame(HttpEvent event, final WebSocket socket) throws IOException {
+  protected void onReceivedTextFrame(final WebSocket socket) throws IOException {
     final String text = socket.readTextFrame();
 
-    final QueueSession session = sessionProvider.getSession(event.getHttpServletRequest().getSession(),
+    final QueueSession session = sessionProvider.getSession(socket.getHttpSession(),
             socket.getSocketID());
 
     if (text.length() == 0) return;
@@ -175,7 +174,7 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
       // this is an active session. send the message.;
 
       Message msg = MessageFactory.createCommandMessage(cometSession, text);
-      msg.setResource(HttpServletRequest.class.getName(), event.getHttpServletRequest());
+      msg.setResource(HttpServletRequest.class.getName(), socket.getServletRequest());
       service.store(msg);
     }
   }
