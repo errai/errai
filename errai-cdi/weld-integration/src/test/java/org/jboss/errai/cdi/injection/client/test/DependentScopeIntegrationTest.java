@@ -22,6 +22,7 @@ import java.util.Set;
 import org.jboss.errai.cdi.injection.client.ApplicationScopedBean;
 import org.jboss.errai.cdi.injection.client.ApplicationScopedBeanB;
 import org.jboss.errai.cdi.injection.client.Bean;
+import org.jboss.errai.cdi.injection.client.BeanInjectsNonModuleDependentBean;
 import org.jboss.errai.cdi.injection.client.DepScopedBeanWithASBeanDep;
 import org.jboss.errai.cdi.injection.client.DependentBeanCycleA;
 import org.jboss.errai.cdi.injection.client.DependentBeanCycleB;
@@ -287,6 +288,24 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
                 bean.getApplicationScopedBean().isPreDestroyCalled());
 
         assertFalse("bean should no longer be managed", IOC.getBeanManager().isManaged(bean));
+
+        finishTest();
+      }
+    });
+  }
+
+  public void testNonModuleTranslatableClassInjectableAsDependent() {
+    InitVotes.registerOneTimeInitCallback(new Runnable() {
+      @Override
+      public void run() {
+        BeanInjectsNonModuleDependentBean bean = IOC.getBeanManager()
+                .lookupBean(BeanInjectsNonModuleDependentBean.class).getInstance();
+
+        assertNotNull("no instance returned for bean", bean);
+        assertNotNull("non-module dependent bean not injected", bean.getList());
+        assertEquals("wrong number of elements in list", 2, bean.getList().size());
+        assertEquals("wrong element", "foo", bean.getList().get(0));
+        assertEquals("wrong element", "bar", bean.getList().get(1));
 
         finishTest();
       }

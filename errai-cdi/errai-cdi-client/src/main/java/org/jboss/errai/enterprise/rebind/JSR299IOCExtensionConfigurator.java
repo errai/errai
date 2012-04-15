@@ -63,8 +63,8 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
       for (JPackage pkg : context.getGeneratorContext().getTypeOracle().getPackages()) {
         TypeScan:
         for (JClassType type : pkg.getTypes()) {
-          if (type.isAbstract() || type.isInterface() != null
-                  || type.getQualifiedSourceName().startsWith("java.")) continue;
+//          if (type.isAbstract() || type.isInterface() != null
+//                  || type.getQualifiedSourceName().startsWith("java.")) continue;
 
           if (!type.isDefaultInstantiable()) {
             boolean hasInjectableConstructor = false;

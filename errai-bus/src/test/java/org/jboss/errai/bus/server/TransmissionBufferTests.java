@@ -27,6 +27,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
@@ -79,7 +80,7 @@ public class TransmissionBufferTests extends TestCase {
   }
 
   public void testBufferCycle() throws IOException {
-    TransmissionBuffer buffer = TransmissionBuffer.create(10, 5);
+    TransmissionBuffer buffer = TransmissionBuffer.create(10, 10);
 
     BufferColor color = BufferColor.getNewColor();
 
@@ -707,5 +708,43 @@ public class TransmissionBufferTests extends TestCase {
     for (Thread thread : threads) {
       thread.join();
     }
+  }
+
+  private static class TestInputStream extends InputStream {
+    int count = 0;
+
+    @Override
+    public int read() throws IOException {
+      if (++count > 201) {
+        throw new AssertionError("buffer should have overflown");
+      }
+
+      return 0x01;
+    }
+
+    @Override
+    public int available() throws IOException {
+      return 200;
+    }
+
+  }
+
+  public void testBufferOverFlowCondition() throws IOException {
+    final TransmissionBuffer buffer = TransmissionBuffer.create(100, 2);
+
+    buffer.write(new TestInputStream(), BufferColor.getAllBuffersColor());
+    buffer.write(new TestInputStream(), BufferColor.getAllBuffersColor());
+
+    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+    try {
+      buffer.read(byteArrayOutputStream, BufferColor.getAllBuffersColor());
+    }
+    catch (IOException e) {
+      assertTrue(e.getMessage().contains("overflow"));
+      return;
+    }
+
+    fail("should have overflowed");
+
   }
 }
