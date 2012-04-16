@@ -155,6 +155,7 @@
                 <include>src/main/webapp/App/**</include>
                 <include>**/gwt-unitCache/**</include>
                 <include>**/*.JUnit/**</include>
+                <include>monitordb.*</include>
               </includes>
             </fileset>
           </filesets>

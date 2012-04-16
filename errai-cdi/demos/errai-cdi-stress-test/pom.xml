@@ -571,6 +571,7 @@
                 <include>src/main/webapp/WEB-INF/classes/**</include>
                 <include>**/gwt-unitCache/**</include>
                 <include>**/*.JUnit/**</include>
+                <include>monitordb.*</include>
               </includes>
             </fileset>
           </filesets>
