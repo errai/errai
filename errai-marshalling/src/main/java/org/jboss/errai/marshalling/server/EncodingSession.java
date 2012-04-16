@@ -55,7 +55,7 @@ public class EncodingSession extends AbstractMarshallingSession {
 
   @Override
   public Marshaller<Object> getMarshallerInstance(String fqcn) {
-    Marshaller<Object> m = context.getMarshaller(fqcn);
+    final Marshaller<Object> m = context.getMarshaller(fqcn);
     if (m == null) {
       throw new RuntimeException("no marshaller available for: " + fqcn);
     }

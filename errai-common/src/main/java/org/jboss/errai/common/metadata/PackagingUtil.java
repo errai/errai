@@ -34,7 +34,7 @@ import java.util.zip.ZipInputStream;
 public class PackagingUtil {
   private static final Logger log = LoggerFactory.getLogger("ClasspathScanning");
 
-  public static File identifyDeployment(URL url) {
+  public static File identifyDeployment(final URL url) {
     String actualFilePath = url.getPath();
     if (actualFilePath.startsWith("file:")) {
       actualFilePath = actualFilePath.substring(5);

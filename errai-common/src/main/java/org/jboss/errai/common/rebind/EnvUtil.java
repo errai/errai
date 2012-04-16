@@ -36,24 +36,47 @@ public abstract class EnvUtil {
   public static final String CONFIG_ERRAI_SERIALIZABLE_TYPE = "errai.marshalling.serializableTypes";
   public static final String CONFIG_ERRAI_MAPPING_ALIASES = "errai.marshalling.mappingAliases";
 
+  private static volatile Boolean _isJUnitTest;
+
   public static boolean isJUnitTest() {
+    if (_isJUnitTest != null) return _isJUnitTest;
+
     for (StackTraceElement el : new Throwable().getStackTrace()) {
       if (el.getClassName().startsWith("com.google.gwt.junit.client.")
               || el.getClassName().startsWith("org.junit")) {
-        return true;
+        return _isJUnitTest = Boolean.TRUE;
       }
     }
-    return false;
+    return _isJUnitTest = Boolean.FALSE;
   }
 
+  private static volatile Boolean _isDevMode;
+
   public static boolean isDevMode() {
+    if (_isDevMode != null) return _isDevMode;
+
     for (StackTraceElement el : new Throwable().getStackTrace()) {
       if (el.getClassName().startsWith("com.google.gwt.dev.shell.OophmSessionHandler")) {
-        return true;
+        return _isDevMode = Boolean.TRUE;
       }
     }
-    return false;
+    return _isDevMode = Boolean.FALSE;
   }
+
+  private static volatile  Boolean _isProdMode;
+
+  public static boolean isProdMode() {
+    if (_isProdMode != null) return _isProdMode;
+
+    return _isProdMode = Boolean.valueOf(!isDevMode() && !isJUnitTest());
+  }
+
+  public static void recordEnvironmentState() {
+    isJUnitTest();
+    isDevMode();
+    isProdMode();
+  }
+
 
   private static Logger log = LoggerFactory.getLogger(EnvUtil.class);
 

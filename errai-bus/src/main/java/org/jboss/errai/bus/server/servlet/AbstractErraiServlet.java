@@ -44,13 +44,11 @@ public abstract class AbstractErraiServlet extends HttpServlet {
   /* A default Http session provider */
   protected SessionProvider<HttpSession> sessionProvider;
 
-  // protected Logger log = LoggerFactory.getLogger(getClass());
-
   public enum ConnectionPhase {
     NORMAL, CONNECTING, DISCONNECTING, UNKNOWN
   }
 
-  public static ConnectionPhase getConnectionPhase(HttpServletRequest request) {
+  public static ConnectionPhase getConnectionPhase(final HttpServletRequest request) {
     if (request.getHeader("phase") == null) return ConnectionPhase.NORMAL;
     else {
       String phase = request.getHeader("phase");
@@ -66,13 +64,13 @@ public abstract class AbstractErraiServlet extends HttpServlet {
   }
 
   @Override
-  public void init(ServletConfig config) throws ServletException {
+  public void init(final ServletConfig config) throws ServletException {
     service = ServletBootstrapUtil.getService(config);
     sessionProvider = service.getSessionProvider();
   }
 
 
-  public void initAsFilter(FilterConfig config) throws ServletException {
+  public void initAsFilter(final FilterConfig config) throws ServletException {
     service = ServletBootstrapUtil.getService(config);
     sessionProvider = service.getSessionProvider();
   }
@@ -89,7 +87,7 @@ public abstract class AbstractErraiServlet extends HttpServlet {
    * @param m      - the message to write to the stream
    * @throws java.io.IOException - is thrown if any input/output errors occur while writing to the stream
    */
-  public static void writeToOutputStream(OutputStream stream, MarshalledMessage m) throws IOException {
+  public static void writeToOutputStream(final OutputStream stream, final MarshalledMessage m) throws IOException {
     stream.write('[');
 
     if (m.getMessage() == null) {
@@ -108,13 +106,14 @@ public abstract class AbstractErraiServlet extends HttpServlet {
   }
 
 
-  protected void writeExceptionToOutputStream(HttpServletResponse httpServletResponse
-          , final
-  Throwable t) throws IOException {
+  protected void writeExceptionToOutputStream(
+          final HttpServletResponse httpServletResponse,
+          final Throwable t) throws IOException {
+
     httpServletResponse.setHeader("Cache-Control", "no-cache");
     httpServletResponse.addHeader("Payload-Size", "1");
     httpServletResponse.setContentType("application/json");
-    OutputStream stream = httpServletResponse.getOutputStream();
+    final OutputStream stream = httpServletResponse.getOutputStream();
 
     stream.write('[');
 
