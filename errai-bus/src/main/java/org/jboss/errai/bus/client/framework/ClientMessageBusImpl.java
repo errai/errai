@@ -1055,6 +1055,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
     if (o instanceof String) {
       LogUtil.log("could not use web sockets. reason: " + o);
+      InitVotes.voteFor(ClientMessageBus.class);
     }
   }
 
