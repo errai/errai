@@ -119,7 +119,7 @@ public class ServerLogPanel extends JFrame implements Attachable {
     }
 
     public Object getMessage() {
-      return String.valueOf(message);
+      return (message==null) ? "" : String.valueOf(message);
     }
   }
 

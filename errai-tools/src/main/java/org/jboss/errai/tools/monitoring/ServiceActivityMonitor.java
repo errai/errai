@@ -17,6 +17,7 @@
 package org.jboss.errai.tools.monitoring;
 
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.framework.RoutingFlag;
 import org.jboss.errai.bus.server.util.ServerBusTools;
 
 import javax.swing.*;
@@ -526,17 +527,9 @@ public class ServiceActivityMonitor extends JFrame implements Attachable {
   public void attach(ActivityProcessor proc) {
     handle = proc.registerEvent(EventType.MESSAGE, new MessageMonitor() {
       public void monitorEvent(MessageEvent event) {
-        if (event.getToBus().equals(busId) && service.equals(event.getSubject())) {
-
-          if (service.endsWith("TagCloud")) {
-            try {
-              throw new Throwable();
-            }
-            catch (Throwable t) {
-              t.printStackTrace();
-            }
-          }
-
+        Message m = (Message) event.getContents();
+        // if the message is sent to the currently monitored bus (or is global) and the subject matches, then notify
+        if ((event.getToBus().equals(busId) || !m.isFlagSet(RoutingFlag.NonGlobalRouting)) && service.equals(event.getSubject())) {
           notifyMessage(event.getTime(), (Message) event.getContents());
         }
       }
