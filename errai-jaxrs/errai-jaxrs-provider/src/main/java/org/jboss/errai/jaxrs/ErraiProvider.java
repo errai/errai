@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.nio.charset.Charset;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
@@ -36,7 +37,7 @@ import org.jboss.errai.marshalling.server.ServerMarshalling;
 
 /**
  * Provider for serialization/deserialization of Errai objects.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Provider
@@ -47,7 +48,7 @@ public class ErraiProvider implements MessageBodyReader<Object>, MessageBodyWrit
   static {
     MappingContextSingleton.get();
   }
-  
+
   @Override
   public boolean isReadable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {
     return ServerMarshalling.canHandle(type);
@@ -67,8 +68,8 @@ public class ErraiProvider implements MessageBodyReader<Object>, MessageBodyWrit
   public void writeTo(Object t, Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType,
       MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream) throws IOException,
       WebApplicationException {
-    
-    entityStream.write(ServerMarshalling.toJSON(t).getBytes());
+
+    entityStream.write(ServerMarshalling.toJSON(t).getBytes(Charset.forName("UTF-8")));
   }
 
   @Override

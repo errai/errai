@@ -48,6 +48,17 @@ public class JSONStreamDecoder {
   private int read;
   private boolean initial = true;
 
+  /**
+   * Decodes the JSON payload by reading from the given stream of UTF-8 encoded
+   * characters. Reads to the end of the input stream unless there are errors,
+   * in which case the current position in the stream will not be at EOF, but
+   * may possibly be beyond the character that caused the error.
+   *
+   * @param inStream
+   *          The input stream to read from. It must contain character data
+   *          encoded as UTF-8, and it must be positioned to read from the start
+   *          of the JSON message to be parsed.
+   */
   public JSONStreamDecoder(InputStream inStream) {
     this.buffer = CharBuffer.allocate(25);
     try {

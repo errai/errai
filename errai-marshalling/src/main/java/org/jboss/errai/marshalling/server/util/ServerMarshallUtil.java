@@ -16,13 +16,7 @@
 
 package org.jboss.errai.marshalling.server.util;
 
-import org.jboss.errai.codegen.util.ClassChangeUtil;
-import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.marshalling.client.api.MarshallerFactory;
-import org.jboss.errai.marshalling.rebind.MarshallerGeneratorFactory;
-import org.jboss.errai.marshalling.rebind.MarshallerOuputTarget;
-import org.jboss.errai.marshalling.rebind.MarshallersGenerator;
-import org.slf4j.Logger;
+import static org.slf4j.LoggerFactory.getLogger;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -34,7 +28,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.slf4j.LoggerFactory.getLogger;
+import org.jboss.errai.codegen.util.ClassChangeUtil;
+import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.marshalling.client.api.MarshallerFactory;
+import org.jboss.errai.marshalling.rebind.MarshallerGeneratorFactory;
+import org.jboss.errai.marshalling.rebind.MarshallerOuputTarget;
+import org.jboss.errai.marshalling.rebind.MarshallersGenerator;
+import org.slf4j.Logger;
 
 /**
  * Utility which provides convenience methods for generating marshallers for the server-side.
@@ -126,7 +126,7 @@ public abstract class ServerMarshallUtil {
 
       FileOutputStream outputStream = new FileOutputStream(sourceFile);
 
-      outputStream.write(classStr.getBytes());
+      outputStream.write(classStr.getBytes("UTF-8"));
       outputStream.flush();
       outputStream.close();
 

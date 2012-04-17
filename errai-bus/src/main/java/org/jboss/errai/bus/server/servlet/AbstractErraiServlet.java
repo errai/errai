@@ -18,6 +18,7 @@ package org.jboss.errai.bus.server.servlet;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletConfig;
@@ -38,6 +39,8 @@ import org.jboss.errai.bus.server.service.ErraiService;
  * bus and the client buses.
  */
 public abstract class AbstractErraiServlet extends HttpServlet {
+  private static final Charset UTF_8 = Charset.forName("UTF-8");
+
   /* New and configured errai service */
   protected ErraiService service;
 
@@ -97,7 +100,7 @@ public abstract class AbstractErraiServlet extends HttpServlet {
       stream.write('l');
     }
     else {
-      for (byte b : ((String) m.getMessage()).getBytes()) {
+      for (byte b : ((String) m.getMessage()).getBytes(UTF_8)) {
         stream.write(b);
       }
     }

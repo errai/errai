@@ -4,14 +4,13 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -26,6 +25,7 @@ import java.util.zip.ZipInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.io.Files;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.typeinfo.JPackage;
 import com.google.gwt.dev.cfg.ModuleDef;
@@ -222,7 +222,7 @@ public class RebindUtils {
   public static void writeStringToFile(final File file, final String data) {
     try {
       final OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file, false));
-      outputStream.write(data.getBytes());
+      outputStream.write(data.getBytes("UTF-8"));
       outputStream.close();
     }
     catch (IOException e) {
@@ -231,26 +231,12 @@ public class RebindUtils {
   }
 
   public static String readFileToString(final File file) {
-    final StringBuilder buf = new StringBuilder();
     try {
-      InputStream inputStream = new BufferedInputStream(new FileInputStream(file));
-      byte[] b = new byte[1024];
-      int read;
-      while ((read = inputStream.read(b)) != -1) {
-        for (int i = 0; i < read; i++) {
-          buf.append((char) b[i]);
-        }
-      }
-      inputStream.close();
-    }
-    catch (FileNotFoundException e) {
-      throw new RuntimeException("could not read file for debug cache", e);
+      return Files.toString(file, Charset.forName("UTF-8"));
     }
     catch (IOException e) {
       throw new RuntimeException("could not read file for debug cache", e);
     }
-
-    return buf.toString();
   }
 
   public static String packageNameToDirName(final String pkg) {
