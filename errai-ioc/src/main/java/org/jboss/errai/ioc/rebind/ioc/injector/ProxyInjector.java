@@ -52,6 +52,7 @@ public class ProxyInjector extends AbstractInjector {
   private final MetaClass proxiedType;
   private final BuildMetaClass proxyClass;
 
+
   public ProxyInjector(IOCProcessingContext context, MetaClass proxiedType, QualifyingMetadata metadata) {
     this.proxiedType = proxiedType;
     this.varName = InjectUtil.getNewInjectorName() + "_proxy";

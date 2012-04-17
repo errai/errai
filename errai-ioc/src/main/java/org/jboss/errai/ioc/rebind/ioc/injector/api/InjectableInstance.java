@@ -111,9 +111,6 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
    * @return
    */
   public Statement getValueStatement() {
-    final Injector targetInjector
-            = isProxy() ? injectionContext.getProxiedInjector(getEnclosingType(), getQualifyingMetadata()) :
-            injectionContext.getQualifiedInjector(getEnclosingType(), getQualifyingMetadata());
 
     Statement[] stmt;
     switch (taskType) {
@@ -124,10 +121,15 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
         }
         else {
           return Stmt.invokeStatic(injectionContext.getProcessingContext().getBootstrapClass(),
-                  getPrivateFieldInjectorName(field), Refs.get(targetInjector.getVarName()));
+                  getPrivateFieldInjectorName(field), Refs.get(getTargetInjector().getVarName()));
         }
       case Field:
-        return Stmt.loadVariable(targetInjector.getVarName()).loadField(field.getName());
+        if (field.isStatic()) {
+          return Stmt.loadStatic(getEnclosingType(), field.getName());
+        }
+        else {
+          return Stmt.loadVariable(getTargetInjector().getVarName()).loadField(field.getName());
+        }
 
       case PrivateMethod:
         if (method.getReturnType().isVoid()) {
@@ -143,7 +145,7 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
         }
         else {
           stmt = new Statement[methParms.length + 1];
-          stmt[0] = Refs.get(targetInjector.getVarName());
+          stmt[0] = Refs.get(getTargetInjector().getVarName());
           System.arraycopy(resolveParmsDeps, 0, stmt, 1, methParms.length);
         }
 
@@ -154,15 +156,36 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
       case Method:
         stmt = InjectUtil.resolveInjectionDependencies(method.getParameters(), injectionContext, method);
 
-        return Stmt.loadVariable(targetInjector.getVarName()).invoke(method, stmt);
+        if (method.isStatic()) {
+          return Stmt.invokeStatic(getEnclosingType(), method.getName(), stmt);
+        }
+
+        else {
+          return Stmt.loadVariable(getTargetInjector().getVarName()).invoke(method, stmt);
+        }
 
       case Parameter:
       case Type:
-        return Refs.get(targetInjector.getVarName());
+        return Refs.get(getTargetInjector().getVarName());
 
       default:
         return LiteralFactory.getLiteral(null);
     }
+  }
+
+  private Injector getTargetInjector() {
+    Injector targetInjector
+            = isProxy() ? injectionContext.getProxiedInjector(getEnclosingType(), getQualifyingMetadata()) :
+            injectionContext.getQualifiedInjector(getEnclosingType(), getQualifyingMetadata());
+
+    if (!isProxy()) {
+      if (!targetInjector.isCreated()) {
+        targetInjector = InjectUtil.getOrCreateProxy(injectionContext, getEnclosingType(), getQualifyingMetadata());
+        targetInjector.getBeanInstance(this);
+      }
+    }
+
+    return targetInjector;
   }
 
   public Statement callOrBind(Statement... values) {

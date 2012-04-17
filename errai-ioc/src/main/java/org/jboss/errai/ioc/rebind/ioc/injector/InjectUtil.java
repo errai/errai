@@ -499,7 +499,7 @@ public class InjectUtil {
     }
   }
 
-  private static ProxyInjector getOrCreateProxy(InjectionContext ctx, MetaClass clazz, QualifyingMetadata qualifyingMetadata) {
+  public static ProxyInjector getOrCreateProxy(InjectionContext ctx, MetaClass clazz, QualifyingMetadata qualifyingMetadata) {
     final ProxyInjector proxyInjector;
     if (ctx.isProxiedInjectorRegistered(clazz, qualifyingMetadata)) {
       proxyInjector = (ProxyInjector)
