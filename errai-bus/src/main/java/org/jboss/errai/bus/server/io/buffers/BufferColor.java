@@ -69,6 +69,12 @@ public class BufferColor {
     this.color = color;
   }
 
+  /**
+   * Return a new unique BufferColor.
+   *
+   * @see #getNewColorFromHead(TransmissionBuffer)
+   * @return a new unique BufferColor
+   */
   public static BufferColor getNewColor() {
     short val = (short) bufferColorCounter.incrementAndGet();
 
@@ -81,12 +87,23 @@ public class BufferColor {
     return new BufferColor(val);
   }
 
-  public static BufferColor getNewColorFromHead(TransmissionBuffer buffer) {
+  /**
+   * Returns a new unique BufferColor set to the head sequence of the specified TransmissionBuffer.
+   *
+   * @param buffer the buffer instance to obtain the head sequence from.
+   * @return a new unique BufferColor instance.
+   */
+  public static BufferColor getNewColorFromHead(final TransmissionBuffer buffer) {
     final BufferColor color = getNewColor();
     color.sequence.set(buffer.getHeadSequence());
     return color;
   }
 
+  /**
+   * Returns the all colors BufferColor which creates buffer data visible to all colors.
+   *
+   * @return the all colors (global) BufferColor instance.
+   */
   public static BufferColor getAllBuffersColor() {
     return allBuffersColor;
   }

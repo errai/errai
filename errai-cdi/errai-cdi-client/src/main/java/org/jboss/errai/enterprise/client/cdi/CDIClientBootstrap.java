@@ -87,6 +87,7 @@ public class CDIClientBootstrap implements EntryPoint {
         }
       });
     }
+
     /*
      * Register an initialization lister to run the bus ready event.  This will be added
      * post-initialization, so it is designed to fire on bus reconnection events.
