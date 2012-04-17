@@ -274,6 +274,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         public void run() {
           deferredSubscription.attachSubscription(_subscribe(subject, callback, local));
         }
+
+        public String toString() {
+          return "DeferredSubscribe:" + subject;
+        }
       });
 
       return deferredSubscription;
@@ -1070,7 +1074,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
       do {
         for (Runnable runnable : new ArrayList<Runnable>(postInitTasks)) {
-          LogUtil.log("running post init task: " + runnable);
+       //   LogUtil.log("running post init task: " + runnable);
           postInitTasks.remove(runnable);
           try {
             runnable.run();

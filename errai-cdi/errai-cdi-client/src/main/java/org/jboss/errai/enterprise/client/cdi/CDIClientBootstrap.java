@@ -55,6 +55,10 @@ public class CDIClientBootstrap implements EntryPoint {
 
         CDI.fireEvent(new BusReadyEvent());
       }
+
+      public String toString() {
+        return "BusReadyEvent";
+      }
     };
 
     bus.addPostInitTask(busReadyEvent);
@@ -69,6 +73,10 @@ public class CDIClientBootstrap implements EntryPoint {
                 @Override
                 public void run() {
                   CDI.activate();
+                }
+
+                public String toString() {
+                  return "CDI service activate";
                 }
               });
               break;
