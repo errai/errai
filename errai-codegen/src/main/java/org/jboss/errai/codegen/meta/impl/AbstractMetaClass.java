@@ -507,11 +507,9 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       return _asClassCache;
     }
 
-
     Class<?> cls = MetaClassFactory.PRIMITIVE_LOOKUP.get(getFullyQualifiedName());
     if (cls == null) {
       cls = NullType.class;
-
     }
 
     if (enclosedMetaObject instanceof Class) {
@@ -537,14 +535,6 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
         // ignore.
       }
     }
-
-
-//    if (cls == NullType.class) {
-//      System.out.println("[Did Not Resolve " + getFullyQualifiedName() + ">>");
-//      new Throwable().printStackTrace();
-//      System.out.println("<<Did Not Resolve " + getFullyQualifiedName() + "]");
-//
-//    }
 
     return _asClassCache = cls;
   }

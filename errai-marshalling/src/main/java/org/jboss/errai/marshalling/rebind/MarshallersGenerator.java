@@ -247,7 +247,7 @@ public class MarshallersGenerator extends Generator {
 
   private String _generate(GeneratorContext context) {
     synchronized (generatorLock) {
-      boolean junitOrDevMode = EnvUtil.isJUnitTest();
+      boolean junitOrDevMode = !EnvUtil.isProdMode();
 
       if (SERVER_MARSHALLER_OUTPUT_ENABLED) {
 
@@ -260,6 +260,8 @@ public class MarshallersGenerator extends Generator {
                   .generate(SERVER_MARSHALLER_PACKAGE_NAME, SERVER_MARSHALLER_CLASS_NAME);
           _serverMarshallerCache = serverSideClass;
         }
+
+      //  System.out.println("SERVER MARSHALLER>>>\n" + serverSideClass + "<<<SERVER MARSHALLER");
 
 
         if (junitOrDevMode) {
