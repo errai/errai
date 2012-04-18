@@ -10,6 +10,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
@@ -38,22 +39,23 @@ public class OrientationDataSatellite {
   @Inject @Disconnected
   private Event<OrientationEvent> disconnectEventSrc;
 
+  private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+
   public void onClientOrientationChange(@Observes @Ongoing OrientationEvent e) {
     clientOrientations.put(e.getClientId(), e);
   }
 
   @PostConstruct
   public void startRedistributionService() {
-    ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
     executor.scheduleWithFixedDelay(new Runnable() {
 
       @Override
       public void run() {
-        // TODO remove clients who have not sent an update for a while
         List<OrientationEvent> clientOrientationList =
             new ArrayList<OrientationEvent>(clientOrientations.values());
         orientationEventSrc.fire(new AllClientOrientations(clientOrientationList));
 
+        // Notify everyone about clients who have gone away
         long cutoffTime = System.currentTimeMillis() - 2000;
         Iterator<Map.Entry<String, OrientationEvent>> it = clientOrientations.entrySet().iterator();
         while (it.hasNext()) {
@@ -65,5 +67,10 @@ public class OrientationDataSatellite {
         }
       }
     }, 1000, 250, TimeUnit.MILLISECONDS);
+  }
+
+  @PreDestroy
+  public void stopRedistributionService() {
+    executor.shutdown();
   }
 }

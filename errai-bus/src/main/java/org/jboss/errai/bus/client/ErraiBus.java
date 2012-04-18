@@ -55,10 +55,6 @@ public class ErraiBus implements EntryPoint {
         }
 
         @Override
-        public void conversationWith(Message message, MessageCallback callback) {
-        }
-
-        @Override
         public Subscription subscribe(String subject, MessageCallback receiver) {
           return null;
         }

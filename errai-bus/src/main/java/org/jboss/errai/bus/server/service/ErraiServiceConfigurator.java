@@ -28,6 +28,7 @@ public interface ErraiServiceConfigurator {
   public static final String ERRAI_DISPATCHER_IMPLEMENTATION = "errai.dispatcher_implementation";
   public static final String ERRAI_SESSION_PROVIDER_IMPLEMENTATION = "errai.session_provider_implementation";
   public static final String DO_LONG_POLL = "org.jboss.errai.bus.do_long_poll";
+  public static final String WEB_SOCKET_URL ="errai.bus.web_socket_url";
   public static final String ENABLE_WEB_SOCKET_SERVER = "errai.bus.enable_web_socket_server";
   public static final String WEB_SOCKET_PORT = "errai.bus.web_socket_port";
 
@@ -91,6 +92,8 @@ public interface ErraiServiceConfigurator {
    * @return
    */
   public Integer getIntProperty(String key);
+
+  public void setProperty(String key, String value);
 }
 
 

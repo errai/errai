@@ -33,6 +33,10 @@ public class LocalContext implements Context {
     return new LocalContext("<NoSession>", session);
   }
 
+//  public static LocalContext get(String contextName, QueueSession session) {
+//    return new LocalContext(contextName, session);
+//  }
+
   public static LocalContext get(Message message) {
     return new LocalContext(message.getSubject(), message.getResource(QueueSession.class, "Session"));
   }
@@ -76,6 +80,10 @@ public class LocalContext implements Context {
 
   public <T> T getAttribute(Class<T> type, String param) {
     return ctx.getAttribute(type, param);
+  }
+
+  public boolean hasAttribute(String param) {
+    return ctx.hasAttribute(param);
   }
 
   public Collection<String> getAttributeNames() {

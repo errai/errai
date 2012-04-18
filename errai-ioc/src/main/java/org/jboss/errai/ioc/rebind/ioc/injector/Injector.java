@@ -71,6 +71,14 @@ public interface Injector {
 
 
   /**
+   * Checks is the injector is a static injector, meaning that it can safely be referenced from anywhere, without
+   * concern for ordering of its declaring class.
+   *
+   * @return true if the injector is a static injector
+   */
+  boolean isStatic();
+
+  /**
    * The enclosing type of the injector. For producer injectors, this method will return the bean which the
    * producer method is a member.
    * @return the enclosing bean type of the injector, if applicable. Null if not applicable.

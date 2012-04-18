@@ -92,13 +92,14 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
     private SessionsContainer container;
     private String sessionId;
     private String remoteQueueID;
-    private boolean valid;
+    private boolean valid = true;
     private List<SessionEndListener> sessionEndListeners;
 
     public HttpSessionWrapper(SessionsContainer container, String httpSessionId, String remoteQueueID) {
       this.container = container;
       this.remoteQueueID = remoteQueueID;
-      this.sessionId = SecureHashUtil.nextSecureHash("SHA-256", httpSessionId);
+      this.sessionId = SecureHashUtil.nextSecureHash("SHA-256",
+              httpSessionId.getBytes(), remoteQueueID.getBytes());
     }
 
     public String getSessionId() {

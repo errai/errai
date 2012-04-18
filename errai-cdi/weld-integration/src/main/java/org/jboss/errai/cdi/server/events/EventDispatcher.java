@@ -17,6 +17,8 @@ package org.jboss.errai.cdi.server.events;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -42,6 +44,8 @@ import org.jboss.errai.enterprise.client.cdi.api.CDI;
  */
 public class EventDispatcher implements MessageCallback {
   private static final String CDI_EVENT_CHANNEL_OPEN = "cdi.event.channel.open";
+  private static final String CDI_REMOTE_EVENTS_ACTIVE = "cdi.event.active.events";
+
   private BeanManager beanManager;
 
   private Set<String> observedEvents;
@@ -65,19 +69,19 @@ public class EventDispatcher implements MessageCallback {
       if (!message.isFlagSet(RoutingFlag.FromRemote))
         return;
 
+      final LocalContext localContext = LocalContext.get(message);
+
       switch (CDICommands.valueOf(message.getCommandType())) {
         case CDIEvent:
-          if (!"1".equals(LocalContext.get(message).getAttribute(String.class, CDI_EVENT_CHANNEL_OPEN))
-                  || !observedEvents.contains(message.get(String.class, CDIProtocol.BeanType))) {
+          if (!isRoutable(localContext, message)) {
             return;
           }
 
           final Object o = message.get(Object.class, CDIProtocol.BeanReference);
           EventConversationContext.activate(o, CDIServerUtil.getSessionId(message));
           try {
-
             @SuppressWarnings("unchecked")
-            Set<String> qualifierNames = message.get(Set.class, CDIProtocol.Qualifiers);
+            final Set<String> qualifierNames = message.get(Set.class, CDIProtocol.Qualifiers);
             List<Annotation> qualifiers = null;
             if (qualifierNames != null) {
               for (String qualifierName : qualifierNames) {
@@ -109,9 +113,9 @@ public class EventDispatcher implements MessageCallback {
                   .command(BusCommands.RemoteSubscribe)
                   .with(MessageParts.Value, observedEvents.toArray(new String[observedEvents.size()])).done().reply();
 
-          LocalContext.get(message).setAttribute(CDI_EVENT_CHANNEL_OPEN, "1");
-
+          localContext.setAttribute(CDI_EVENT_CHANNEL_OPEN, "1");
           break;
+
         default:
           throw new IllegalArgumentException("Unknown command type " + message.getCommandType());
       }
@@ -119,5 +123,10 @@ public class EventDispatcher implements MessageCallback {
     catch (Exception e) {
       throw new RuntimeException("Failed to dispatch CDI Event", e);
     }
+  }
+
+  public boolean isRoutable(final LocalContext localContext, final Message message) {
+    return "1".equals(localContext.getAttribute(String.class, CDI_EVENT_CHANNEL_OPEN))
+            && observedEvents.contains(message.get(String.class, CDIProtocol.BeanType));
   }
 }

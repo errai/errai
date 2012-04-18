@@ -17,11 +17,11 @@
 package org.jboss.errai.ioc.rebind.ioc.test.harness;
 
 
+import org.jboss.errai.codegen.util.ClassChangeUtil;
 import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.ioc.client.api.Bootstrapper;
+import org.jboss.errai.ioc.client.Bootstrapper;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCBootstrapGenerator;
-import org.jboss.errai.marshalling.server.util.ServerMarshallUtil;
 
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
@@ -83,7 +83,7 @@ public class MockIOCGenerator {
       }
 
       Class<? extends Bootstrapper> bsClass
-              = ServerMarshallUtil.loadClassDefinition(outFile.getAbsolutePath(), packageName, className);
+              = ClassChangeUtil.loadClassDefinition(outFile.getAbsolutePath(), packageName, className);
 
       return bsClass;
 

@@ -49,10 +49,10 @@ public class IOCGenerator extends Generator {
           throws UnableToCompleteException {
 
     typeOracle = context.getTypeOracle();
-
-    Thread iocGenThread = new Thread() {
-      @Override
-      public void run() {
+//
+//    Thread iocGenThread = new Thread() {
+//      @Override
+//      public void run() {
         try {
           // get classType and save instance variables
 
@@ -70,16 +70,16 @@ public class IOCGenerator extends Generator {
           e.printStackTrace();
           logger.log(TreeLogger.ERROR, "Error generating extensions", e);
         }
-      }
-    };
+//      }
+//    };
 
-    iocGenThread.start();
-    try {
-      iocGenThread.join();
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-    }
+//    iocGenThread.start();
+//    try {
+//      iocGenThread.join();
+//    }
+//    catch (Exception e) {
+//      e.printStackTrace();
+//    }
 
     // return the fully qualified name of the class generated
     return packageName + "." + className;

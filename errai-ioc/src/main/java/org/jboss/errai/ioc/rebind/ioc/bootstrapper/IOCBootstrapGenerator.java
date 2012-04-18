@@ -17,6 +17,7 @@
 package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
@@ -38,8 +39,9 @@ import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.common.rebind.EnvUtil;
+import org.jboss.errai.ioc.client.Bootstrapper;
 import org.jboss.errai.ioc.client.BootstrapperInjectionContext;
-import org.jboss.errai.ioc.client.api.Bootstrapper;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.client.api.IOCBootstrapTask;
@@ -138,37 +140,49 @@ public class IOCBootstrapGenerator {
   public IOCBootstrapGenerator() {
   }
 
+  // production mode cache only -- used so work is only done in one permutation
+  private static volatile String _bootstrapperCache;
+  private static final Object generatorLock = new Object();
+
   public String generate(String packageName, String className) {
-    File fileCacheDir = RebindUtils.getErraiCacheDir();
-    File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + className + ".java");
+    synchronized (generatorLock) {
+      EnvUtil.recordEnvironmentState();
 
-    final Set<Class<? extends Annotation>> annos = new HashSet<Class<? extends Annotation>>();
-    annos.add(ApplicationScoped.class);
-    annos.add(SessionScoped.class);
-    annos.add(RequestScoped.class);
-    annos.add(Singleton.class);
-    annos.add(EntryPoint.class);
-    annos.add(IOCBootstrapTask.class);
-    annos.add(Dependent.class);
-    annos.add(Default.class);
+      if (_bootstrapperCache != null && EnvUtil.isProdMode()) {
+        return _bootstrapperCache;
+      }
 
-    String gen;
+      File fileCacheDir = RebindUtils.getErraiCacheDir();
+      File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + className + ".java");
 
-    if (context != null) {
-      // context == null during some tests, in which case we don't have a GWT type oracle
-      GWTUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
+      final Set<Class<? extends Annotation>> annos = new HashSet<Class<? extends Annotation>>();
+      annos.add(ApplicationScoped.class);
+      annos.add(SessionScoped.class);
+      annos.add(RequestScoped.class);
+      annos.add(Singleton.class);
+      annos.add(EntryPoint.class);
+      annos.add(IOCBootstrapTask.class);
+      annos.add(Dependent.class);
+      annos.add(Default.class);
+
+      String gen;
+
+      if (context != null) {
+        // context == null during some tests, in which case we don't have a GWT type oracle
+        GWTUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
+      }
+
+      log.info("generating IOC bootstrapping class...");
+      long st = System.currentTimeMillis();
+      gen = _generate(packageName, className);
+      log.info("generated IOC bootstrapping class in " + (System.currentTimeMillis() - st) + "ms");
+
+      RebindUtils.writeStringToFile(cacheFile, gen);
+
+      log.info("using IOC bootstrapping code at: " + cacheFile.getAbsolutePath());
+
+      return _bootstrapperCache = gen;
     }
-
-    log.info("generating IOC bootstrapping class...");
-    long st = System.currentTimeMillis();
-    gen = _generate(packageName, className);
-    log.info("generated IOC bootstrapping class in " + (System.currentTimeMillis() - st) + "ms");
-
-    RebindUtils.writeStringToFile(cacheFile, gen);
-
-    log.info("using IOC bootstrapping code at: " + cacheFile.getAbsolutePath());
-
-    return gen;
   }
 
   private String _generate(String packageName, String className) {
@@ -182,7 +196,7 @@ public class IOCBootstrapGenerator {
 
     BlockBuilder<?> blockBuilder =
             classStructureBuilder.publicMethod(BootstrapperInjectionContext.class, "bootstrapContainer")
-            .methodComment("The main IOC bootstrap method.");
+                    .methodComment("The main IOC bootstrap method.");
 
     SourceWriter sourceWriter = new StringSourceWriter();
 
@@ -192,7 +206,6 @@ public class IOCBootstrapGenerator {
 
     MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
     Properties props = scanner.getProperties("ErraiApp.properties");
-
 
     if (props != null) {
       logger.log(TreeLogger.Type.INFO, "Checking ErraiApp.properties for configured types ...");

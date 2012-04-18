@@ -41,7 +41,7 @@ public class ConstructorBlockBuilderImpl<T extends ClassStructureBuilder<T>> ext
 
   @Override
   public BlockBuilder<T> callSuper() {
-    append(new StringStatement("super()"));
+    append(new StringStatement("super()", null));
     return this;
   }
 

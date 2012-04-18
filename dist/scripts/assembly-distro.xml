@@ -41,7 +41,6 @@
                 <include>org.jboss.errai:errai-bus</include>
                 <include>org.jboss.errai:errai-ioc</include>
                 <include>org.jboss.errai:errai-tools</include>
-                <include>org.jboss.errai:jboss7-support</include>
                 <include>org.jboss.errai:errai-marshalling</include>
                 <include>org.jboss.errai:errai-codegen</include>
                 <include>org.jboss.errai:errai-cdi-client</include>

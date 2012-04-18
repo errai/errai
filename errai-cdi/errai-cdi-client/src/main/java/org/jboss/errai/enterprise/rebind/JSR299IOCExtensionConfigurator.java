@@ -17,14 +17,26 @@
 package org.jboss.errai.enterprise.rebind;
 
 import java.lang.annotation.Annotation;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.NormalScope;
+import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Produces;
 import javax.inject.Scope;
 
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTClass;
+import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.common.metadata.MetaDataScanner;
+import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.enterprise.client.cdi.CDIEventTypeLookup;
+import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.api.IOCExtension;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessorFactory;
@@ -45,12 +57,14 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
     injectionContext.mapElementType(WiringElementType.DependentBean, Dependent.class);
     injectionContext.mapElementType(WiringElementType.ProducerElement, Produces.class);
 
+    final Set<MetaClass> knownObserverTypes = new HashSet<MetaClass>();
+
     if (context.getGeneratorContext() != null && context.getGeneratorContext().getTypeOracle() != null) {
       for (JPackage pkg : context.getGeneratorContext().getTypeOracle().getPackages()) {
         TypeScan:
         for (JClassType type : pkg.getTypes()) {
-          if (type.isAbstract() || type.isInterface() != null
-                  || type.getQualifiedSourceName().startsWith("java.")) continue;
+//          if (type.isAbstract() || type.isInterface() != null
+//                  || type.getQualifiedSourceName().startsWith("java.")) continue;
 
           if (!type.isDefaultInstantiable()) {
             boolean hasInjectableConstructor = false;
@@ -74,10 +88,57 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
             }
           }
 
-          injectionContext.addPsuedoScopeForType(GWTClass.newInstance(type.getOracle(), type));
+          MetaClass clazz = GWTClass.newInstance(type.getOracle(), type);
+
+          injectionContext.addPsuedoScopeForType(clazz);
+
+          for (MetaMethod method : clazz.getMethods()) {
+            for (MetaParameter parameter : method.getParameters()) {
+              if (parameter.isAnnotationPresent(Observes.class)) {
+                knownObserverTypes.add(parameter.getType());
+              }
+            }
+          }
         }
       }
     }
+
+    final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
+
+    final Set<MetaClass> knownTypesWithSuperTypes = new HashSet<MetaClass>(knownObserverTypes);
+    for (MetaClass cls : knownObserverTypes) {
+      for (Class subClass : scanner.getSubTypesOf(cls.asClass())) {
+        knownTypesWithSuperTypes.add(MetaClassFactory.get(subClass));
+      }
+    }
+
+    addTypeHeirarchyFor(context, knownTypesWithSuperTypes);
+
+    context.append(Stmt.nestedCall(Stmt.newObject(CDI.class))
+                .invoke("__resetSubsystem"));
+
+    context.append(Stmt.nestedCall(Stmt.newObject(CDI.class))
+            .invoke("initLookupTable", Stmt.invokeStatic(CDIEventTypeLookup.class, "get")));
+  }
+
+  public static void addTypeHeirarchyFor(IOCProcessingContext context, final Set<MetaClass> classes) {
+    for (final MetaClass subClass : classes) {
+      MetaClass cls = subClass;
+      do {
+        if (cls != subClass) {
+          context.append(Stmt.invokeStatic(CDIEventTypeLookup.class, "get")
+                  .invoke("addLookup", subClass.getFullyQualifiedName(), cls.getFullyQualifiedName()));
+        }
+
+        for (MetaClass interfaceClass : cls.getInterfaces()) {
+          context.append(Stmt.invokeStatic(CDIEventTypeLookup.class, "get")
+                  .invoke("addLookup", subClass.getFullyQualifiedName(), interfaceClass.getFullyQualifiedName()));
+
+        }
+      }
+      while ((cls = cls.getSuperClass()) != null);
+    }
+
   }
 
   public void afterInitialization(IOCProcessingContext context, InjectionContext injectorFactory,

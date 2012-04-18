@@ -1,8 +1,8 @@
 package org.jboss.errai.cdi.producer.client;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
+
 
 /**
  * @author Mike Brock

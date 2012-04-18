@@ -34,6 +34,7 @@ import javax.enterprise.util.AnnotationLiteral;
 
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceImpl;
+import org.jboss.errai.bus.server.service.ErraiServiceSingleton;
 
 /**
  * @author Heiko Braun <hbraun@redhat.com>
@@ -41,19 +42,15 @@ import org.jboss.errai.bus.server.service.ErraiServiceImpl;
 public class ErraiServiceBean implements Bean {
 
   final InjectionTarget it;
-  final ErraiService delegate;
 
   @SuppressWarnings("unchecked")
-  public ErraiServiceBean(BeanManager bm, ErraiService delegate) {
+  public ErraiServiceBean(BeanManager bm) {
 
     //use this to read annotations of the class
     AnnotatedType at = bm.createAnnotatedType(ErraiServiceImpl.class);
 
     //use this to create the class and inject dependencies
     this.it = bm.createInjectionTarget(at);
-
-    // invocation target
-    this.delegate = delegate;
   }
 
   public Class<?> getBeanClass() {
@@ -101,7 +98,7 @@ public class ErraiServiceBean implements Bean {
 
   @SuppressWarnings("unchecked")
   public Object create(CreationalContext ctx) {
-    Object instance = delegate;
+    Object instance = ErraiServiceSingleton.getService();
     it.inject(instance, ctx);
     it.postConstruct(instance);
     return instance;

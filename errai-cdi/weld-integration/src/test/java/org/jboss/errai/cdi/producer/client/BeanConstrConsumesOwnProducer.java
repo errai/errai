@@ -12,6 +12,7 @@ public class BeanConstrConsumesOwnProducer {
   WrappedThing thing;
   ProducerFactory factory;
 
+  // needed because of cycle in main constructor
   public BeanConstrConsumesOwnProducer() {
   }
 

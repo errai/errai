@@ -80,7 +80,7 @@ public class BusTests extends TestCase {
 
     BufferColor global = BufferColor.getAllBuffersColor();
     String bufData = "writeIn";
-    
+
     ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bufData.getBytes());
     buffer.write(byteArrayInputStream, global);
 

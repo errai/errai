@@ -10,7 +10,6 @@ import org.jboss.errai.cdi.client.qualifier.B;
 import org.jboss.errai.cdi.client.qualifier.C;
 import org.jboss.errai.cdi.client.qualifier.D;
 import org.jboss.errai.cdi.client.qualifier.E;
-import org.jboss.errai.ioc.client.api.EntryPoint;
 
 /**
  * Test module used by {@see ProducerIntegrationTest}.

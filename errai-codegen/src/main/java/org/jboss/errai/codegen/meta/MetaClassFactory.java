@@ -16,10 +16,12 @@
 
 package org.jboss.errai.codegen.meta;
 
+import java.io.File;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -29,6 +31,7 @@ import java.util.Map;
 
 import javax.enterprise.util.TypeLiteral;
 
+import com.google.gwt.core.ext.TreeLogger;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.DefParameters;
 import org.jboss.errai.codegen.Parameter;
@@ -43,8 +46,10 @@ import org.jboss.errai.codegen.meta.impl.build.BuildMetaParameterizedType;
 import org.jboss.errai.codegen.meta.impl.build.ShadowBuildMetaField;
 import org.jboss.errai.codegen.meta.impl.build.ShadowBuildMetaMethod;
 import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
+import org.jboss.errai.codegen.util.ClassChangeUtil;
 import org.jboss.errai.codegen.util.EmptyStatement;
 import org.jboss.errai.codegen.util.GenUtil;
+import org.jboss.errai.common.metadata.RebindUtils;
 import org.mvel2.ConversionHandler;
 import org.mvel2.DataConversion;
 
@@ -462,7 +467,47 @@ public final class MetaClassFactory {
       return cls;
     }
     catch (ClassNotFoundException e) {
+      final URL url = MetaClassFactory.class.getClassLoader()
+              .getResource(fullyQualifiedName.replaceAll("\\.", "/") + ".java");
+
+
+      if (url != null) {
+        final File sourceFile = new File(url.getFile()).getAbsoluteFile();
+        if (sourceFile.exists()) {
+
+          File directory = sourceFile.getParentFile();
+          String packageName = fullyQualifiedName.substring(0, fullyQualifiedName.lastIndexOf('.'));
+          String className = fullyQualifiedName.substring(fullyQualifiedName.lastIndexOf('.') + 1);
+
+
+          String temp = RebindUtils.getTempDirectory() + "/hotload/";
+
+          String location = ClassChangeUtil.compileClass(directory.getAbsolutePath(),
+                  packageName,
+                  className,
+                  temp);
+
+          try {
+            return ClassChangeUtil.loadClassDefinition(location,
+                    packageName, className);
+          }
+          catch (Exception e2) {
+            throw new RuntimeException("Could not load class: " + fullyQualifiedName, e2);
+          }
+        }
+      }
+
       throw new RuntimeException("Could not load class: " + fullyQualifiedName);
+    }
+  }
+
+  public static boolean canLoadClass(String fullyQualifiedName) {
+    try {
+      Class cls = loadClass(fullyQualifiedName);
+      return cls != null;
+    }
+    catch (Throwable t) {
+      return false;
     }
   }
 

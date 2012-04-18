@@ -19,8 +19,8 @@ package org.jboss.errai.bus.server.servlet;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import javax.servlet.FilterConfig;
 import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -29,20 +29,9 @@ import javax.servlet.http.HttpSession;
 
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.framework.MarshalledMessage;
-import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.protocols.BusCommands;
-import org.jboss.errai.bus.server.ServerMessageBusImpl;
-import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.bus.server.api.SessionProvider;
 import org.jboss.errai.bus.server.service.ErraiService;
-import org.jboss.errai.bus.server.service.ErraiServiceConfigurator;
-import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
-import org.jboss.errai.bus.server.service.ErraiServiceImpl;
-import org.jboss.errai.common.client.api.ResourceProvider;
-
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import org.jboss.errai.common.metadata.ScannerSingleton;
 
 /**
  * The <tt>AbstractErraiServlet</tt> provides a starting point for creating Http-protocol gateway between the server
@@ -55,19 +44,11 @@ public abstract class AbstractErraiServlet extends HttpServlet {
   /* A default Http session provider */
   protected SessionProvider<HttpSession> sessionProvider;
 
-  protected volatile ClassLoader contextClassLoader;
-
-  // protected Logger log = LoggerFactory.getLogger(getClass());
-
   public enum ConnectionPhase {
     NORMAL, CONNECTING, DISCONNECTING, UNKNOWN
   }
 
-  static {
-    ScannerSingleton.class.getName();
-  }
-
-  public static ConnectionPhase getConnectionPhase(HttpServletRequest request) {
+  public static ConnectionPhase getConnectionPhase(final HttpServletRequest request) {
     if (request.getHeader("phase") == null) return ConnectionPhase.NORMAL;
     else {
       String phase = request.getHeader("phase");
@@ -82,67 +63,15 @@ public abstract class AbstractErraiServlet extends HttpServlet {
     }
   }
 
-
   @Override
-  public void init(ServletConfig config) throws ServletException {
-    init(config.getServletContext(), config.getInitParameter("service-locator"));
+  public void init(final ServletConfig config) throws ServletException {
+    service = ServletBootstrapUtil.getService(config);
+    sessionProvider = service.getSessionProvider();
   }
 
-  /**
-   * Common initialization logic that works for both Servlets and Filters.
-   *
-   * @param context             The ServletContext of the web application.
-   * @param serviceLocatorClass The value of the (Servlet or Filter) init parameter
-   *                            <code>"service-locator"</code>. If specified, it must be the
-   *                            fully-qualified name of a class that implements
-   *                            {@link ServiceLocator}. If null, the service locator is built by a
-   *                            call to {@link #buildService()}.
-   */
-  protected void init(final ServletContext context, String serviceLocatorClass) {
-    service = (ErraiService) context.getAttribute("errai");
-    if (null == service) {
-      synchronized (context) {
-        // Build or lookup service
-        if (serviceLocatorClass != null) {
-          // locate externally created service instance, i.e. CDI
-          try {
-            ClassLoader loader = Thread.currentThread().getContextClassLoader();
-            Class<?> aClass = loader.loadClass(serviceLocatorClass);
-            ServiceLocator locator = (ServiceLocator) aClass.newInstance();
-            this.service = locator.locateService();
-          }
-          catch (Exception e) {
-            throw new RuntimeException("Failed to create service", e);
-          }
-        }
-        else {
-          // create a service instance manually
-          this.service = buildService();
-        }
 
-        contextClassLoader = Thread.currentThread().getContextClassLoader();
-
-        service.getConfiguration().getResourceProviders()
-                .put("errai.experimental.classLoader", new ResourceProvider<ClassLoader>() {
-                  @Override
-                  public ClassLoader get() {
-                    return contextClassLoader;
-                  }
-                });
-
-        service.getConfiguration().getResourceProviders()
-                .put("errai.experimental.servletContext", new ResourceProvider<ServletContext>() {
-                  @Override
-                  public ServletContext get() {
-                    return context;
-                  }
-                });
-
-        // store it in servlet context
-        context.setAttribute("errai", service);
-      }
-    }
-
+  public void initAsFilter(final FilterConfig config) throws ServletException {
+    service = ServletBootstrapUtil.getService(config);
     sessionProvider = service.getSessionProvider();
   }
 
@@ -151,21 +80,6 @@ public abstract class AbstractErraiServlet extends HttpServlet {
     service.stopService();
   }
 
-  @SuppressWarnings({"unchecked"})
-  protected ErraiService<HttpSession> buildService() {
-    return Guice.createInjector(new AbstractModule() {
-      @Override
-      @SuppressWarnings({"unchecked"})
-      public void configure() {
-        bind(ErraiService.class).to(ErraiServiceImpl.class);
-        bind(ErraiServiceConfigurator.class).to(ErraiServiceConfiguratorImpl.class);
-        bind(MessageBus.class).to(ServerMessageBusImpl.class);
-        bind(ServerMessageBus.class).to(ServerMessageBusImpl.class);
-      }
-    }).getInstance(ErraiService.class);
-  }
-
-
   /**
    * Writes the message to the output stream
    *
@@ -173,7 +87,7 @@ public abstract class AbstractErraiServlet extends HttpServlet {
    * @param m      - the message to write to the stream
    * @throws java.io.IOException - is thrown if any input/output errors occur while writing to the stream
    */
-  public static void writeToOutputStream(OutputStream stream, MarshalledMessage m) throws IOException {
+  public static void writeToOutputStream(final OutputStream stream, final MarshalledMessage m) throws IOException {
     stream.write('[');
 
     if (m.getMessage() == null) {
@@ -192,13 +106,14 @@ public abstract class AbstractErraiServlet extends HttpServlet {
   }
 
 
-  protected void writeExceptionToOutputStream(HttpServletResponse httpServletResponse
-          , final
-  Throwable t) throws IOException {
+  protected void writeExceptionToOutputStream(
+          final HttpServletResponse httpServletResponse,
+          final Throwable t) throws IOException {
+
     httpServletResponse.setHeader("Cache-Control", "no-cache");
     httpServletResponse.addHeader("Payload-Size", "1");
     httpServletResponse.setContentType("application/json");
-    OutputStream stream = httpServletResponse.getOutputStream();
+    final OutputStream stream = httpServletResponse.getOutputStream();
 
     stream.write('[');
 

@@ -57,8 +57,8 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 
 /**
- * @author: Heiko Braun <hbraun@redhat.com>
- * @date: Aug 3, 2010
+ * @author Heiko Braun <hbraun@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
   private Logger log = LoggerFactory.getLogger(ServiceProcessor.class);
@@ -109,7 +109,8 @@ public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
       if (remoteImpl != null) {
         svc = createRPCScaffolding(remoteImpl, loadClass, context);
       }
-      else if (MessageCallback.class.isAssignableFrom(loadClass)) {
+      
+      if (MessageCallback.class.isAssignableFrom(loadClass)) {
         final Class<? extends MessageCallback> clazz = loadClass.asSubclass(MessageCallback.class);
         log.debug("discovered service: " + clazz.getName());
         try {
@@ -141,8 +142,6 @@ public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
             context.getBus().subscribe(svcName, (MessageCallback) svc);
           }
         }
-
-
       }
 
       if (svc == null) {
@@ -205,7 +204,6 @@ public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
       if (!commandPoints.isEmpty()) {
         if (local) {
           context.getBus().subscribeLocal(svcName, new CommandBindingsCallback(commandPoints, svc));
-
         }
         else {
           context.getBus().subscribe(svcName, new CommandBindingsCallback(commandPoints, svc));

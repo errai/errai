@@ -22,6 +22,7 @@ import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.common.rebind.EnvUtil;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
@@ -49,6 +50,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+
+import static org.jboss.errai.common.rebind.EnvUtil.getEnvironmentConfig;
 
 /**
  * The default implementation of {@link DefinitionsFactory}. This implementation covers the detection and
@@ -206,68 +209,11 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       }
     }
 
-    Set<Class<?>> exposedFromScanner = new HashSet<Class<?>>(scanner.getTypesAnnotatedWith(Portable.class));
-
-    for (Class<?> cls : exposedFromScanner) {
-      for (Class<?> decl : cls.getDeclaredClasses()) {
-        if (decl.isSynthetic()) {
-          continue;
-        }
-
-        exposedClasses.add(decl);
-      }
-    }
-
-    exposedClasses.addAll(exposedFromScanner);
-
     exposedClasses.add(Object.class);
+    exposedClasses.addAll(getEnvironmentConfig().getExposedClasses());
+    mappingAliases.putAll(getEnvironmentConfig().getMappingAliases());
 
-    Properties props = scanner.getProperties("ErraiApp.properties");
-    if (props != null) {
-      log.debug("checking ErraiApp.properties for configured types ...");
-
-      for (Object o : props.keySet()) {
-        String key = (String) o;
-        if (key.equals(MarshallingGenUtil.CONFIG_ERRAI_OLD_SERIALIZABLE_TYPE)
-                || key.equals(MarshallingGenUtil.CONFIG_ERRAI_SERIALIZABLE_TYPE)) {
-          for (String s : props.getProperty(key).split(" ")) {
-            try {
-              Class<?> cls = Class.forName(s.trim());
-              exposedClasses.add(cls);
-            }
-            catch (Exception e) {
-              throw new RuntimeException("could not find class defined in ErraiApp.properties for serialization: " + s);
-            }
-          }
-
-          break;
-        }
-
-        if (key.equals(MarshallingGenUtil.CONFIG_ERRAI_MAPPING_ALIASES)) {
-          for (String s : props.getProperty(key).split(" ")) {
-            try {
-              String[] mapping = s.split("->");
-              
-              if (mapping.length != 2) {
-                throw new RuntimeException("syntax error: mapping for marshalling alias: " + s);
-              }
-
-              Class<?> fromMapping = Class.forName(mapping[0].trim());
-              Class<?> toMapping = Class.forName(mapping[1].trim());
-
-              mappingAliases.put(fromMapping.getName(), toMapping.getName());
-            }
-            catch (Exception e) {
-              throw new RuntimeException("could not find class defined in ErraiApp.properties for mapping: " + s);
-            }
-          }
-          break;
-        }
-      }
-    }
-
-
-    Map<Class<?>, Class<?>> aliasToMarshaller = new HashMap<Class<?>, Class<?>>();
+    final Map<Class<?>, Class<?>> aliasToMarshaller = new HashMap<Class<?>, Class<?>>();
 
     for (Class<?> mappedClass : exposedClasses) {
       if (mappedClass.isSynthetic()) continue;
@@ -290,8 +236,6 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
         throw new InvalidMappingException("cannot alias type " + entry.getKey().getName()
                 + " to " + entry.getValue().getName() + ": the specified alias type does not exist ");
       }
-
-    //  mappingAliases.put(entry.getKey().getName(), def.getClientMarshallerClass().getName());
 
       MappingDefinition aliasDef = new MappingDefinition(def.getMarshallerInstance(), entry.getKey(), false);
       aliasDef.setClientMarshallerClass(def.getClientMarshallerClass());

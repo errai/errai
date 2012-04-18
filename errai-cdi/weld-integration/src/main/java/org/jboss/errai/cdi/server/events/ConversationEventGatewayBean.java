@@ -19,12 +19,18 @@ package org.jboss.errai.cdi.server.events;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 
+import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.RoutingFlag;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.jboss.errai.enterprise.client.cdi.api.CDI.getSubjectNameByType;
 
 /**
  * A gateway for intercepting {@link ConversationalEventWrapper} instances and then passing them into the bus for
@@ -37,22 +43,20 @@ public class ConversationEventGatewayBean {
   public void observesConversationEvents(@Observes ConversationalEventWrapper wrapper) {
     EventConversationContext.Context ctx = EventConversationContext.get();
     if (ctx != null && ctx.getSession() != null) {
-      String subject = CDI.getSubjectNameByType(wrapper.getEventType());
+      final Map<String, Object> messageParts = new HashMap<String, Object>(20);
+      messageParts.put(MessageParts.ToSubject.name(), CDI.getSubjectNameByType(wrapper.getEventType().getName()));
+      messageParts.put(MessageParts.CommandType.name(), CDICommands.CDIEvent.name());
+      messageParts.put(CDIProtocol.BeanType.name(), wrapper.getEventObject().getClass().getName());
+      messageParts.put(CDIProtocol.BeanReference.name(), wrapper.getEventObject());
+
+      messageParts.put(MessageParts.SessionID.name(), ctx.getSession());
+
       try {
         if (wrapper.getQualifierStrings() != null && !wrapper.getQualifierStrings().isEmpty()) {
-          MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
-                  .with(MessageParts.SessionID.name(), ctx.getSession())
-                  .with(CDIProtocol.BeanType, wrapper.getEventType().getName()).with(CDIProtocol.Qualifiers, wrapper.getQualifierStrings())
-                  .with(CDIProtocol.BeanReference, wrapper.getEventObject())
-                  .flag(RoutingFlag.NonGlobalRouting).noErrorHandling().sendNowWith(wrapper.getBus());
+          messageParts.put(CDIProtocol.Qualifiers.name(), wrapper.getQualifierStrings());
         }
-        else {
-          MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
-                  .with(MessageParts.SessionID.name(), ctx.getSession())
-                  .with(CDIProtocol.BeanType,wrapper.getEventType().getName()).with(CDIProtocol.BeanReference, wrapper.getEventObject())
-                  .flag(RoutingFlag.NonGlobalRouting).noErrorHandling()
-                  .sendNowWith(wrapper.getBus());
-        }
+
+        wrapper.getBus().send(CommandMessage.createWithParts(messageParts, RoutingFlag.NonGlobalRouting.flag()));
       }
       finally {
         EventConversationContext.deactivate();

@@ -19,6 +19,7 @@ package org.jboss.errai.bus.server.api;
 import io.netty.channel.Channel;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.QueueSession;
+import org.jboss.errai.bus.server.io.QueueChannel;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -29,7 +30,7 @@ public interface MessageQueue {
 
   boolean offer(Message message) throws IOException;
   
-  void setDirectSocketChannel(Channel channel);
+  void setDirectSocketChannel(QueueChannel channel);
 
   /**
    * Get the current sequence number for the queue.

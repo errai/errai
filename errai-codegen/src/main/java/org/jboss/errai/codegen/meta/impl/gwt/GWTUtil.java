@@ -16,6 +16,8 @@
 
 package org.jboss.errai.codegen.meta.impl.gwt;
 
+import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -25,6 +27,7 @@ import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
 import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
+import org.jboss.errai.codegen.util.ClassChangeUtil;
 import org.jboss.errai.common.metadata.RebindUtils;
 
 import com.google.gwt.core.ext.GeneratorContext;
@@ -34,6 +37,7 @@ import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.JType;
 import com.google.gwt.core.ext.typeinfo.JTypeParameter;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import org.jboss.errai.common.rebind.EnvUtil;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -117,6 +121,8 @@ public class GWTUtil {
     }
   }
 
+  private static volatile boolean typeOraclePopulated = false;
+
   /**
    * Erases the {@link MetaClassFactory} cache, then populates it with types
    * discovered via GWT's TypeOracle. The reason for the initial flush of the
@@ -126,9 +132,13 @@ public class GWTUtil {
    * class definitions.
    *
    * @param context The GeneratorContext supplied by the GWT compiler. Not null.
-   * @param logger The TreeLogger supplied by the GWT compiler. Not null.
+   * @param logger  The TreeLogger supplied by the GWT compiler. Not null.
    */
   public static void populateMetaClassFactoryFromTypeOracle(GeneratorContext context, TreeLogger logger) {
+    // if we're in production mode -- it means we're compiling, and we do not need to accommodate dynamically
+    // changing classes. Therefore, do a NOOP after the first successful call.
+    if (EnvUtil.isProdMode() && typeOraclePopulated) return;
+
     TypeOracle typeOracle = context.getTypeOracle();
     MetaClassFactory.emptyCache();
     if (typeOracle != null) {
@@ -143,6 +153,12 @@ public class GWTUtil {
 
         if (type.isAnnotation() != null) {
           logger.log(com.google.gwt.core.ext.TreeLogger.Type.DEBUG, "Caching annotation type " + type.getQualifiedSourceName());
+
+          if (!MetaClassFactory.canLoadClass(type.getQualifiedBinaryName()))  {
+             throw new RuntimeException("a new annotation has been introduced (" + type.getQualifiedSourceName() + "); "
+             + "you cannot currently introduce new annotations in devmode. Please restart.");
+          }
+
           MetaClassFactory.pushCache(JavaReflectionClass
                   .newUncachedInstance(MetaClassFactory.loadClass(type.getQualifiedBinaryName())));
         }
@@ -152,5 +168,6 @@ public class GWTUtil {
         }
       }
     }
+    typeOraclePopulated = true;
   }
 }

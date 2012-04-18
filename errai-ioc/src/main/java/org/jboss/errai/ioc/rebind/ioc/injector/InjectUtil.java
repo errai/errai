@@ -67,8 +67,6 @@ import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
 
 public class InjectUtil {
-
-
   private static final AtomicInteger injectorCounter = new AtomicInteger(0);
   private static final AtomicInteger uniqueCounter = new AtomicInteger(0);
 
@@ -420,14 +418,14 @@ public class InjectUtil {
                                              boolean alwaysProxyDependent) {
 
     if (ctx.isInjectableQualified(clazz, qualifyingMetadata)) {
-      Injector inj = ctx.getQualifiedInjector(clazz, qualifyingMetadata);
+      final Injector inj = ctx.getQualifiedInjector(clazz, qualifyingMetadata);
 
       /**
        * Special handling for cycles. If two beans directly depend on each other. We shimmy in a call to the
        * binding reference to check the context for the instance to avoid a hanging duplicate reference.
        */
       if (ctx.cycles(injectableInstance.getEnclosingType(), clazz) && inj instanceof TypeInjector) {
-        TypeInjector typeInjector = (TypeInjector) inj;
+        final TypeInjector typeInjector = (TypeInjector) inj;
 
         return Stmt.loadVariable("context").invoke("getInstanceOrNew",
                 Refs.get(typeInjector.getCreationalCallbackVarName()),
@@ -442,9 +440,13 @@ public class InjectUtil {
       // try to inject it
       try {
         if (ctx.isInjectorRegistered(clazz, qualifyingMetadata)) {
-          Injector inj = ctx.getQualifiedInjector(clazz, qualifyingMetadata);
+          final Injector inj = ctx.getQualifiedInjector(clazz, qualifyingMetadata);
 
           if (inj.isProvider()) {
+            if (inj.isStatic()) {
+              return inj.getBeanInstance(injectableInstance);
+            }
+
             /**
              * Inform the caller that we are in a proxy and that the operation they're doing must
              * necesarily be done within the ProxyResolver resolve operation since this provider operation
@@ -452,18 +454,20 @@ public class InjectUtil {
              */
             ctx.recordCycle(inj.getEnclosingType(), injectableInstance.getEnclosingType());
 
-            ProxyInjector proxyInject = getOrCreateProxy(ctx, inj.getEnclosingType(), qualifyingMetadata);
+            final ProxyInjector proxyInject = getOrCreateProxy(ctx, inj.getEnclosingType(), qualifyingMetadata);
 
             boolean pushedProxy = false;
 
             try {
               if (injectableInstance.getTaskType() == TaskType.Parameter && injectableInstance.getConstructor() != null) {
                 // eek! a producer element is produced by this bean and injected into it's own constructor!
+                final ProxyInjector producedElementProxy = getOrCreateProxy(ctx, inj.getInjectedType(), qualifyingMetadata);
 
-                ProxyInjector producedElementProxy = getOrCreateProxy(ctx, inj.getInjectedType(), qualifyingMetadata);
+                proxyInject.addProxyCloseStatement(Stmt.loadVariable("context")
+                        .invoke("addBean", Stmt.load(inj.getInjectedType()),
+                                qualifyingMetadata.getQualifiers(), inj.getBeanInstance(injectableInstance)));
 
                 proxyInject.getBeanInstance(injectableInstance);
-                proxyInject.addProxyCloseStatement(inj.getBeanInstance(injectableInstance));
 
                 return producedElementProxy.getBeanInstance(injectableInstance);
               }

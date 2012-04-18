@@ -41,13 +41,6 @@ public class CallParameters extends AbstractStatement {
     return new CallParameters(Arrays.asList(statements));
   }
 
-  public static CallParameters fromStatements(String... statements) {
-    List<Statement> parameters = new ArrayList<Statement>(statements.length);
-    for (String s : statements) {
-      parameters.add(new StringStatement(s));
-    }
-    return new CallParameters(parameters);
-  }
 
   public static CallParameters none() {
     return new CallParameters(Collections.<Statement>emptyList());

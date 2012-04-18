@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
@@ -30,41 +29,25 @@ import java.util.zip.ZipInputStream;
 /**
  * A set of utilities for processing a {@link DeploymentContext}
  *
- * @author: Heiko Braun <hbraun@redhat.com>
- * @date: Aug 9, 2010
- */
+ * @author Heiko Braun <hbraun@redhat.com>
+\ */
 public class PackagingUtil {
-  private static Logger log = LoggerFactory.getLogger(PackagingUtil.class);
+  private static final Logger log = LoggerFactory.getLogger("ClasspathScanning");
 
-  public static File identifyDeployment(URL url) {
+  public static File identifyDeployment(final URL url) {
     String actualFilePath = url.getPath();
-    String nestedPath = "";
     if (actualFilePath.startsWith("file:")) {
       actualFilePath = actualFilePath.substring(5);
     }
 
     int nestedSeperator = actualFilePath.indexOf('!');
     if (nestedSeperator != -1) {
-      nestedPath = actualFilePath.substring(nestedSeperator + 1);
       actualFilePath = actualFilePath.substring(0, nestedSeperator);
-
-      if (nestedPath.equals("/")) {
-        nestedPath = "";
-      }
     }
 
-    log.debug("identifying deployment type for uri: " + actualFilePath);
+    log.debug("scanning inside: " + actualFilePath);
 
     return findActualDeploymentFile(new File(actualFilePath));
-  }
-
-  private static URL toUrl(String s) {
-    try {
-      return new URL(s);
-    }
-    catch (MalformedURLException e) {
-      throw new RuntimeException("Invalid URL " + s, e);
-    }
   }
 
   static File findActualDeploymentFile(File start) {
@@ -105,7 +88,7 @@ public class PackagingUtil {
           ctx.getSubContexts().put(file.getName(), file); // WEB-INF/classes
 
         ZipInputStream zipFile = new ZipInputStream(new FileInputStream(file));
-        ZipEntry zipEntry = null;
+        ZipEntry zipEntry;
 
         try {
           while ((zipEntry = zipFile.getNextEntry()) != null) {
@@ -130,15 +113,16 @@ public class PackagingUtil {
   }
 
   protected static File expandZipEntry(ZipInputStream stream, ZipEntry entry, DeploymentContext ctx) {
-
-    String tmpUUID = "erraiBootstrap_" + UUID.randomUUID().toString().replaceAll("\\-", "_");
-    String tmpDir = System.getProperty("java.io.tmpdir") + "/" + tmpUUID;
-    int idx = entry.getName().lastIndexOf('/');
-    String tmpFileName = tmpDir + "/" + entry.getName().substring(idx == -1 ? 0 : idx);
+    final String tmpUUID = "erraiBootstrap_" + UUID.randomUUID().toString().replaceAll("\\-", "_");
+    final String tmpDir = System.getProperty("java.io.tmpdir") + "/" + tmpUUID;
+    final int idx = entry.getName().lastIndexOf('/');
+    final String tmpFileName = tmpDir + "/" + entry.getName().substring(idx == -1 ? 0 : idx);
 
     try {
       File tmpDirFile = new File(tmpDir);
-      tmpDirFile.mkdirs();
+      if (!tmpDirFile.exists() && !tmpDirFile.mkdirs()) {
+        throw new RuntimeException("unable to create temporary directory: " + tmpDirFile.getAbsolutePath());
+      }
       ctx.markTmpFile(tmpDirFile);
 
       File newFile = new File(tmpFileName);
@@ -153,9 +137,10 @@ public class PackagingUtil {
       outStream.flush();
       outStream.close();
 
-      newFile.getParentFile();
-
       return newFile;
+    }
+    catch (RuntimeException e) {
+      throw e;
     }
     catch (Exception e) {
       throw new RuntimeException("Error reading from stream", e);

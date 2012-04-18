@@ -1,8 +1,0 @@
-war/WEB-INF/deploy
-war/org.jboss.errai.demo.busstress.App.JUnit
-.classpath
-.project
-.gwt
-.settings
-war/App
-war/WEB-INF/lib
