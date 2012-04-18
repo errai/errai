@@ -516,9 +516,8 @@ public class InjectUtil {
   public static Statement[] resolveInjectionDependencies(MetaParameter[] parms, InjectionContext ctx,
                                                          MetaMethod method) {
 
-    MetaClass[] parmTypes = parametersToClassTypeArray(parms);
-    Statement[] parmValues = new Statement[parmTypes.length];
-
+    final MetaClass[] parmTypes = parametersToClassTypeArray(parms);
+    final Statement[] parmValues = new Statement[parmTypes.length];
 
     for (int i = 0; i < parmTypes.length; i++) {
       Statement stmt;
@@ -633,7 +632,7 @@ public class InjectUtil {
   }
 
   public static boolean checkIfTypeNeedsAddingToBeanStore(InjectionContext context, Injector injector) {
-    Set<Injector> store = getBeanInjectionTrackStore(context);
+    final Set<Injector> store = getBeanInjectionTrackStore(context);
     if (store.contains(injector)) {
       return false;
     }
