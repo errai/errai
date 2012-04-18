@@ -44,7 +44,6 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.ConstructionStatusCallback;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
-import org.mvel2.util.NullType;
 
 /**
  * This injector implementation is responsible for the lion's share of the container's workload. It is responsible
@@ -63,10 +62,6 @@ public class TypeInjector extends AbstractInjector {
 
   public TypeInjector(MetaClass type, InjectionContext context, Annotation[] additionalQualifiers) {
     this.type = type;
-
-    if (type.getFullyQualifiedName().equals(NullType.class.getName())) {
-      new Throwable().printStackTrace();
-    }
 
     // check to see if this is a singleton and/or alternative bean
 

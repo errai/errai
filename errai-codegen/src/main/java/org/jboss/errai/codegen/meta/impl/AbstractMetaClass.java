@@ -18,8 +18,6 @@ package org.jboss.errai.codegen.meta.impl;
 
 import static org.jboss.errai.codegen.meta.MetaClassFactory.asClassArray;
 import static org.jboss.errai.codegen.util.GenUtil.classToMeta;
-import static org.jboss.errai.codegen.util.GenUtil.getArrayDimensions;
-import static org.jboss.errai.codegen.util.GenUtil.getBestConstructorCandidate;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -235,12 +233,7 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   @Override
   public MetaMethod getBestMatchingStaticMethod(String name, MetaClass... parameters) {
-    return getBestMatchingMethod(new GetMethodsCallback() {
-      @Override
-      public MetaMethod[] getMethods() {
-        return getStaticMethods();
-      }
-    }, name, parameters);
+    return getBestMatchingStaticMethod(name, asClassArray(parameters));
   }
 
   private static interface GetMethodsCallback {
@@ -248,11 +241,58 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   }
 
   private MetaMethod getBestMatchingMethod(GetMethodsCallback methodsCallback, String name, MetaClass... parameters) {
-    MetaMethod meth = GenUtil.getBestCandidate(parameters, name, this, methodsCallback.getMethods(), false);
+    MetaMethod meth =  GenUtil.getBestCandidate(parameters, name, this, methodsCallback.getMethods(), false);
     if (meth == null) {
-      meth = GenUtil.getBestCandidate(parameters, name, this, methodsCallback.getMethods(), false);
+      meth =  GenUtil.getBestCandidate(parameters, name, this, methodsCallback.getMethods(), false);
     }
     return meth;
+
+
+//
+//    if ((meth = subMap.get(parmKey)) == null) {
+//      Class<?> cls = asClass();
+//
+//      if (cls != null) {
+//        List<Method> methodList = new ArrayList<Method>();
+//        for (Method m : (methodsCallback == null) ? cls.getMethods() : methodsCallback.getMethods()) {
+//          if (!m.isBridge()) {
+//            methodList.add(m);
+//          }
+//        }
+//
+//        Method[] methods = methodList.toArray(new Method[methodList.size()]);
+//        Method m = ParseTools.getBestCandidate(parameters, name, cls, methods, true);
+//        if (m == null) {
+//          if (isInterface()) {
+//            m = ParseTools.getBestCandidate(parameters, name, Object.class, Object.class.getMethods(), true);
+//          }
+//
+//          if (m == null) {
+//            m = ParseTools.getBestCandidate(parameters, name, cls, methods, false);
+//            if (m == null) {
+//              if (isInterface()) {
+//                m = ParseTools.getBestCandidate(parameters, name, Object.class, Object.class.getMethods(), false);
+//              }
+//
+//              if (m == null) {
+//                return null;
+////                meth = ;
+////                if (meth == null || meth.isStatic()) return null;
+////                return meth;
+//              }
+//            }
+//          }
+//        }
+//        meth = getMethod(name, m.getParameterTypes());
+//      }
+//      else {
+//        meth = getMethod(name, parameters);
+//      }
+//
+//      subMap.put(parmKey, meth);
+//    }
+//
+//    return meth;
   }
 
   private MetaMethod[] staticMethodCache;
@@ -321,28 +361,26 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
 
   @Override
   public MetaConstructor getBestMatchingConstructor(Class... parameters) {
-    return getBestMatchingConstructor(MetaClassFactory.fromClassArray(parameters));
-
-//    Class<?> cls = asClass();
-//    if (cls != null) {
-//      Constructor c = ParseTools.getBestConstructorCandidate(parameters, cls, true);
-//      if (c == null) {
-//        c = ParseTools.getBestConstructorCandidate(parameters, cls, false);
-//        if (c == null) {
-//          return null;
-//        }
-//      }
-//      MetaClass metaClass = MetaClassFactory.get(cls);
-//      return metaClass.getConstructor(c.getParameterTypes());
-//    }
-//    else {
-//      return getConstructor(parameters);
-//    }
+    Class<?> cls = asClass();
+    if (cls != null) {
+      Constructor c = ParseTools.getBestConstructorCandidate(parameters, cls, true);
+      if (c == null) {
+        c = ParseTools.getBestConstructorCandidate(parameters, cls, false);
+        if (c == null) {
+          return null;
+        }
+      }
+      MetaClass metaClass = MetaClassFactory.get(cls);
+      return metaClass.getConstructor(c.getParameterTypes());
+    }
+    else {
+      return getConstructor(parameters);
+    }
   }
 
   @Override
   public MetaConstructor getBestMatchingConstructor(MetaClass... parameters) {
-    return GenUtil.getBestConstructorCandidate(parameters, this, getConstructors(), false);
+    return getBestMatchingConstructor(asClassArray(parameters));
   }
 
   @Override
@@ -404,11 +442,6 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     // XXX not sure if this is uncached on purpose.
     // FIXME there are no tests or documentation for this case
     if (!isPrimitive() && NULL_TYPE.equals(clazz)) return true;
-
-    if (isArray() && clazz.isArray()) {
-      return getOuterComponentType().equals(clazz.getOuterComponentType())
-              && getArrayDimensions(this) == getArrayDimensions(clazz);
-    }
 
     MetaClass sup;
 
@@ -539,13 +572,16 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
     return _asClassCache = cls;
   }
 
-
   private MetaClass _boxedCache;
 
   @Override
   public MetaClass asBoxed() {
     if (_boxedCache != null) return _boxedCache;
-    return _boxedCache = GenUtil.getPrimitiveWrapper(this);
+    Class<?> cls = asClass();
+    if (cls == null)
+      return _boxedCache = this;
+
+    return _boxedCache = MetaClassFactory.get(ParseTools.boxPrimitive(cls));
   }
 
   private MetaClass _unboxedCache;
@@ -553,7 +589,12 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   @Override
   public MetaClass asUnboxed() {
     if (_unboxedCache != null) return _unboxedCache;
-    return _unboxedCache = GenUtil.getUnboxedFromWrapper(this);
+
+    Class<?> cls = asClass();
+    if (cls == null)
+      return _unboxedCache = this;
+
+    return _unboxedCache = MetaClassFactory.get(ParseTools.unboxPrimitive(cls));
   }
 
   private MetaClass _erasedCache;
