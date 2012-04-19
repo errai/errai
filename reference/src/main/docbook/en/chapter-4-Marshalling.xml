@@ -128,18 +128,20 @@ public class Person {
             
             <title>Mapping Existing Client Classes</title>
             <para>
-              If you client-exposed classes that cannot be annotated with the
+              If you have client-exposed classes that cannot be annotated with the
               <code>@Portable</code>
               annotation, you may manually map these classes so that the marshaller framework will comprehend and produce marshallers for them.
             </para>
             <para>
               To do this, you may specify them in your
               <emphasis role="strong">ErraiApp.properties</emphasis>
-              file, using the {{errai.marshalling.serializableTypes} attribute with a whitespace separated list of classes to make portable.
+              file, using the
+              <code>errai.marshalling.serializableTypes</code>
+              attribute with a whitespace separated list of classes to make portable.
             </para>
             <example>
               <title>Example ErraiApp.properties defining portable classes.</title>
-              <programlisting language="java">errai.marshalling.serializableTypes=org.foo.client.UserEntity \
+              <programlisting>errai.marshalling.serializableTypes=org.foo.client.UserEntity \
                                     org.foo.client.GroupEntity \
                                     org.abcinc.model.client.Profile</programlisting>
             </example>
@@ -156,7 +158,7 @@ public class Person {
               <code>LinkedList</code>
               , by default, these implementations are merely aliased to the
               <code>java.util.List</code>
-              } marshaller.
+              marshaller.
             </para>
             <para>
               There are two distinct ways to go about doing this. The most straightforward is to specify which marshaller to alias when declaring your class is
@@ -184,7 +186,7 @@ public MyListImpl extends ArrayList {
               attribute.
             </para>
             <informalexample>
-              <programlisting language="java">errai.marshalling.mappingAliases=org.foo.client.MyListImpl-&gt;java.uti.List \
+              <programlisting>errai.marshalling.mappingAliases=org.foo.client.MyListImpl-&gt;java.uti.List \
                                  org.foo.client.MyMapImpl-&gt;java.util.Map</programlisting>
             </informalexample>
             <para>The list of classes is whitespace-separated so that it may be split across lines.</para>
@@ -368,7 +370,12 @@ public MySuperCustomEntityMapping extends MappingDefinition {
         <example>
           <title>DataMarshaller.java from the built-in marshallers</title>
           <programlisting language="java">@ClientMarshaller @ServerMarshaller
-public class DateMarshaller extends AbstractJSONMarshaller&lt;Date&gt; {
+public class DateMarshaller extends AbstractNullableMarshaller&lt;Date&gt; {
+  @Override
+  public Class&lt;Date&gt; getTypeHandled() {
+    return Date.class;
+  }
+
   @Override
   public Date demarshall(EJValue o, MarshallingSession ctx) {
     // check if the JSON element is null
@@ -377,19 +384,8 @@ public class DateMarshaller extends AbstractJSONMarshaller&lt;Date&gt; {
       return null;
     }
 
-    // instantiate our Data!
+    // instantiate our Date!
     return new Date(Long.parseLong(o.isObject().get(SerializationParts.QUALIFIED_VALUE).isString().stringValue()));
-  }
-
-  @Override
-  public boolean handles(EJValue o) {
-    // check that this marshaller can be used for this type
-    return MarshallUtil.handles(o.isObject(), getTypeHandled());
-  }
-
-  @Override
-  public Class&lt;Date&gt; getTypeHandled() {
-    return Date.class;
   }
 
   @Override
@@ -409,11 +405,7 @@ public class DateMarshaller extends AbstractJSONMarshaller&lt;Date&gt; {
           <code>@ClientMarshaller</code>
           and
           <code>@ServerMarshaller</code>
-          indicating that this class should be used for both marshalling on the client and on the server. We have extended
-          <code>AbstractJSONMarshaller&lt;T&gt;</code>
-          which simply implements the
-          <code>getEncodingType()</code>
-          method for us.
+          indicating that this class should be used for both marshalling on the client and on the server.
         </para>
         <para>
           The

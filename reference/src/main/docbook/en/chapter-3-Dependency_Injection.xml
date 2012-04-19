@@ -415,19 +415,19 @@ public class MyClientBean {
         If you need to access the bean manager outside a managed bean, such as in a unit test, you can access it by calling
         <code>org.jboss.errai.ioc.client.container.IOC.getBeanManager()</code>
       </para>
-      <para>
-        <emphasis role="strong">Looking up Beans</emphasis>
-      </para>
-      <para>
-        Looking up beans can be done through the use of the
-        <code>lookupBean()</code>
-        method in
-        <code>IOCBeanManager</code>
-        . Here's a basic example:
-      </para>
-      <example>
-        <title>Example lookup of a bean</title>
-        <programlisting language="java">public MyManagedBean {
+      <section id="sid-21627016_Client-SideBeanManager-Lookingupbeans">
+        
+        <title>Looking up beans</title>
+        <para>
+          Looking up beans can be done through the use of the
+          <code>lookupBean()</code>
+          method in
+          <code>IOCBeanManager</code>
+          . Here's a basic example:
+        </para>
+        <example>
+          <title>Example lookup of a bean</title>
+          <programlisting language="java">public MyManagedBean {
   @Inject IOCBeanManager manager;
    
   public void lookupBean() {
@@ -440,17 +440,17 @@ public class MyClientBean {
     }
   }
 }</programlisting>
-      </example>
-      <para>
-        In this example we lookup a bean class named
-        <code>SimpleBean</code>
-        . This example will succeed assuming that
-        <code>SimpleBean</code>
-        is unambiguous. If the bean is ambiguous and requires qualification, you can do a qualified lookup like so:
-      </para>
-      <example>
-        <title>Looking up beans with qualifiers</title>
-        <programlisting language="java">MyQualifier qual = new MyQualifier() {
+        </example>
+        <para>
+          In this example we lookup a bean class named
+          <code>SimpleBean</code>
+          . This example will succeed assuming that
+          <code>SimpleBean</code>
+          is unambiguous. If the bean is ambiguous and requires qualification, you can do a qualified lookup like so:
+        </para>
+        <example>
+          <title>Looking up beans with qualifiers</title>
+          <programlisting language="java">MyQualifier qual = new MyQualifier() {
   public annotationType() {
     return MyQualifier.class;
   }
@@ -464,8 +464,19 @@ MyOtherQualifier qual2 = new MyOtherQualifier() {
 
 // pass qualifiers to IOCBeanManager.lookupBean
 IOCBean&lt;SimpleInterface&gt; bean = beanManager.lookupBean(SimpleBean.class, qual, qual2);</programlisting>
-      </example>
-      <para>In this example we manually construct instances of qualifier annotations in order to pass it to the bean manager for lookup. This is a necessary step since there's currently no support for annotation literals in Errai client code.</para>
+        </example>
+        <para>In this example we manually construct instances of qualifier annotations in order to pass it to the bean manager for lookup. This is a necessary step since there's currently no support for annotation literals in Errai client code.</para>
+        <para id="sid-21627016_Client-SideBeanManager-AvailabilityOfBeans"/>
+      </section>
+      <section id="sid-21627016_Client-SideBeanManager-Availabilityofbeans">
+        
+        <title>Availability of beans</title>
+        <para>
+          Not all beans that are available for injection are available for lookup from the bean manager by default. Only beans which are
+          <emphasis role="italics">explicitly</emphasis>
+          scoped are available for dynamic lookup. This is an intentional feature to keep the size of the generated code down in the browser.
+        </para>
+      </section>
     </section>
     <section id="sid-22872133">
       
@@ -516,11 +527,11 @@ public class MyApp {
           for the module, you can simply specify which active alternative should be used:
         </para>
         <informalexample>
-          <programlisting language="java">errai.ioc.enabled.alternatives=org.foo.MobileView</programlisting>
+          <programlisting>errai.ioc.enabled.alternatives=org.foo.MobileView</programlisting>
         </informalexample>
         <para>You can specify multiple alternative classes by white space separating them:</para>
         <informalexample>
-          <programlisting language="java">errai.ioc.enabled.alternatives=org.foo.MobileView \
+          <programlisting>errai.ioc.enabled.alternatives=org.foo.MobileView \
                                org.foo.HTML5Orientation \
                                org.foo.MobileStorage</programlisting>
         </informalexample>
@@ -686,6 +697,27 @@ public class SimpleBean {
           <code>SimpleBean</code>
           being invoked.
         </para>
+        <section id="sid-22872238_BeanLifecycle-Disposers">
+          
+          <title>Disposers</title>
+          <para>
+            Another way which beans can be destroyed is through the use of the injectable
+            <code>org.jboss.errai.ioc.client.api.Disposer&lt;T&gt;</code>
+            class. The class provides a straight forward way of disposing of bean type.
+          </para>
+          <para>For instance:</para>
+          <example>
+            <title>Destroying bean with disposer</title>
+            <programlisting language="java">public MyManagedBean {
+  @Inject @New SimpleBean myNewSimpleBean;
+  @Inject Disposer&lt;SimpleBean&gt; simpleBeanDisposer;
+
+  public void destroyMyBean() {
+    simpleBeanDisposer.dispose(myNewSimpleBean);
+  }
+}</programlisting>
+          </example>
+        </section>
       </section>
     </section>
   </chapter>
