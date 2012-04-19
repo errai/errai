@@ -29,7 +29,10 @@ import java.io.OutputStream;
 /**
  * @author Mike Brock
  */
-public class BufferHelper {
+public final class BufferHelper {
+  private BufferHelper() {}
+
+
   public static class MultiMessageHandlerCallback implements BufferCallback {
     int brackCount;
     int seg;

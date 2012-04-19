@@ -321,7 +321,7 @@ public interface Message {
   /**
    * Sets the provided flag for this message.
    *
-   * @param flags  message routing flag
+   * @param flag  message routing flag
    */
   public void setFlag(RoutingFlag flag);
 

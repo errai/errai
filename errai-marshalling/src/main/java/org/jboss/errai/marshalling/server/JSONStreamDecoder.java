@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 JBoss, a divison Red Hat, Inc.                              
+ * Copyright 2010 JBoss, a divison Red Hat, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,19 @@
 
 package org.jboss.errai.marshalling.server;
 
-import org.jboss.errai.marshalling.client.api.json.EJValue;
-import org.jboss.errai.marshalling.server.json.impl.ErraiJSONValue;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.nio.CharBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static java.lang.Math.pow;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
+import org.jboss.errai.marshalling.server.json.impl.ErraiJSONValue;
 
 /**
  * High-performance stream JSON parser. Provides the decoding algorithm to interpret the Errai Wire Protcol,
@@ -46,6 +48,17 @@ public class JSONStreamDecoder {
   private int read;
   private boolean initial = true;
 
+  /**
+   * Decodes the JSON payload by reading from the given stream of UTF-8 encoded
+   * characters. Reads to the end of the input stream unless there are errors,
+   * in which case the current position in the stream will not be at EOF, but
+   * may possibly be beyond the character that caused the error.
+   *
+   * @param inStream
+   *          The input stream to read from. It must contain character data
+   *          encoded as UTF-8, and it must be positioned to read from the start
+   *          of the JSON message to be parsed.
+   */
   public JSONStreamDecoder(InputStream inStream) {
     this.buffer = CharBuffer.allocate(25);
     try {
@@ -64,12 +77,9 @@ public class JSONStreamDecoder {
 
   public char read() throws IOException {
     if (carry != 0) {
-      try {
-        return carry;
-      }
-      finally {
-        carry = 0;
-      }
+      char oldCarry = carry;
+      carry = 0;
+      return oldCarry;
     }
     if (read <= 0) {
       if (!initial) buffer.rewind();
@@ -147,8 +157,9 @@ public class JSONStreamDecoder {
           continue;
 
         default:
-          if (isValidNumberPart(c)) {
-            ctx.addValue(parseDouble(c));
+          if (isNumberStart(c)) {
+            carry = c;
+            ctx.addValue(parseDouble());
             break;
           }
           else if (Character.isJavaIdentifierPart(c)) {
@@ -221,29 +232,149 @@ public class JSONStreamDecoder {
     }
   }
 
-  private double parseDouble(char c) throws IOException {
-    char[] buf = new char[25];
-    int len = 0;
-    boolean exp = false;
+  /** The states the double recognizer can go through while attempting to parse a JSON numeric value. */
+  private static enum State { READ_SIGN, READ_INT, READ_FRAC, READ_EXP_SIGN, READ_EXP };
 
-    do {
-      do {
-        buf[len++] = c;
+  /**
+   * Parses a JSON numeric literal <b>with the side effect of consuming
+   * characters from the input</b> up until a character is encountered that
+   * cannot be used to form a JSON number. JSON numbers have the following
+   * grammar:
+   *
+   * <dl>
+   * <dt><i>number</i>
+   * <dd><i>int</i>
+   * <dd><i>int frac</i>
+   * <dd><i>int exp</i>
+   * <dd><i>int frac exp</i>
+   *
+   * <dt><i>int</i>
+   * <dd><i>digit</i>
+   * <dd><i>digit1-9</i> <i>digits</i>
+   * <dd><b>'-'</b> <i>digit</i>
+   * <dd><b>'-'</b> <i>digit1-9</i> <i>digits</i>
+   *
+   * <dt><i>frac</i>
+   * <dd><b>'.'</b> <i>digits</i>
+   *
+   * <dt><i>exp</i>
+   * <dd><i>e digits</i>
+   *
+   * <dt><i>digits</i>
+   * <dd><i>digit</i>
+   * <dd><i>digit digits</i>
+   *
+   * <dt><i>digit1-9</i>
+   * <dd><b>'1'</b> | <b>'2'</b> | <b>'3'</b> | <b>'4'</b> | <b>'5'</b> |
+   * <b>'6'</b> | <b>'7'</b> | <b>'8'</b> | <b>'9'</b>
+   *
+   * <dt><i>digit</i>
+   * <dd><b>'0'</b> | <b>'1'</b> | <b>'2'</b> | <b>'3'</b> | <b>'4'</b> |
+   * <b>'5'</b> | <b>'6'</b> | <b>'7'</b> | <b>'8'</b> | <b>'9'</b>
+   *
+   * <dt><i>e</i>
+   * <dd><b>'e'</b> | <b>'e+'</b> | <b>'e-'</b> | <b>'E'</b> | <b>'E+'</b> |
+   * <b>'E-'</b>
+   * </dl>
+   *
+   * @return The number that was parsed from the input stream.
+   * <p><i>Note on side effects:</i>after this method returns, the next
+   * @throws IOException
+   */
+  private double parseDouble() throws IOException {
+    StringBuilder sb = new StringBuilder(25);
+
+    State state = State.READ_SIGN;
+
+    char c;
+
+    recognize:
+    while ((c = read()) != 0) {
+      switch (state) {
+
+      case READ_SIGN:
+        if (c == '-' || ('0' <= c && c <= '9')) {
+          sb.append(c);
+          state = State.READ_INT;
+        }
+        else {
+          throw new NumberFormatException("Found '" + c + "' but expected '-' or a digit 1-9");
+        }
+        break;
+
+      case READ_INT:
+        if ('0' <= c && c <= '9') {
+          sb.append(c);
+        }
+        else if (c == '.') {
+          sb.append(c);
+          state = State.READ_FRAC;
+        }
+        else if (c == 'E' || c == 'e') {
+          sb.append(c);
+          state = State.READ_EXP_SIGN;
+        }
+        else {
+          // found the end of the numeric literal
+          carry = c;
+          break recognize;
+        }
+        break;
+
+      case READ_FRAC:
+        if ('0' <= c && c <= '9') {
+          sb.append(c);
+        }
+        else if (c == 'E' || c == 'e') {
+          sb.append(c);
+          state = State.READ_EXP_SIGN;
+        }
+        else {
+          // found the end of the numeric literal
+          carry = c;
+          break recognize;
+        }
+        break;
+
+      case READ_EXP_SIGN:
+        if (c == '-' || c == '+' || ('0' <= c && c <= '9')) {
+          sb.append(c);
+          state = State.READ_EXP;
+        }
+        else {
+          throw new NumberFormatException("The numeric literal \"" + sb + "\" is malformed (can't end with e or E)");
+        }
+        break;
+
+      case READ_EXP:
+        if ('0' <= c && c <= '9') {
+          sb.append(c);
+        }
+        else {
+          // found the end of the numeric literal
+          carry = c;
+          break recognize;
+        }
+        break;
       }
-      while ((c = read()) != 0 && isValidNumberPart(c));
-    }
-    while (!exp && (c == 'E' || c == 'e') && (exp = true));
-
-    if (c != 0) {
-      carry = c;
     }
 
-    if (len == 1 && buf[0] == '-') return -0;
-
-    return Double.parseDouble(new String(buf, 0, len));
+    return Double.parseDouble(sb.toString());
   }
 
-  private static boolean isValidNumberPart(char c) {
+  /**
+   * Returns true if c could be the start of a JSON number. Note that a return
+   * value of true does not indicate that the value will be a valid number. JSON
+   * numbers are not permitted to begin with a '0' or a '.', so in those cases
+   * {@link #parseDouble()} will throw an error even though this method returned
+   * true. This is an acceptable outcome, though, because there is nothing else
+   * the errant character could represent in the JSON stream.
+   *
+   * @param c
+   *          the character to test
+   * @return true if c is a numeric digit, '-', or '.'.
+   */
+  private static boolean isNumberStart(char c) {
     switch (c) {
       case '.':
       case '-':

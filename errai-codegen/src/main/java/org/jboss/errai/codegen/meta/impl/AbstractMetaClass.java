@@ -540,7 +540,6 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
       return _asClassCache;
     }
 
-
     Class<?> cls = MetaClassFactory.PRIMITIVE_LOOKUP.get(getFullyQualifiedName());
     if (cls == null) {
       cls = NullType.class;

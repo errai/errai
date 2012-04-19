@@ -79,12 +79,17 @@ public class ProxyMaker {
 
       renderedMethods.add(methodString);
 
-      if (!method.isPublic() || method.isSynthetic() || method.isFinal() ||
-              method.getDeclaringClass().getFullyQualifiedName().equals("java.lang.Object")) continue;
+      if (!method.isPublic() || 
+          method.isSynthetic() ||
+          method.isFinal() ||
+          method.isStatic() ||
+          method.getDeclaringClass().getFullyQualifiedName().equals("java.lang.Object"))
+        continue;
 
       DefParameters defParameters = DefParameters.from(method);
-      BlockBuilder methBody = builder.publicMethod(method.getReturnType(), method.getName()).parameters(defParameters)
-              .body();
+      BlockBuilder methBody = builder.publicMethod(method.getReturnType(), method.getName())
+            .parameters(defParameters)
+            .throws_(method.getCheckedExceptions());
 
       List<Parameter> parms = defParameters.getParameters();
 

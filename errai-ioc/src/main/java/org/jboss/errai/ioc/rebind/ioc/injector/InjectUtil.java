@@ -499,7 +499,7 @@ public class InjectUtil {
     }
   }
 
-  private static ProxyInjector getOrCreateProxy(InjectionContext ctx, MetaClass clazz, QualifyingMetadata qualifyingMetadata) {
+  public static ProxyInjector getOrCreateProxy(InjectionContext ctx, MetaClass clazz, QualifyingMetadata qualifyingMetadata) {
     final ProxyInjector proxyInjector;
     if (ctx.isProxiedInjectorRegistered(clazz, qualifyingMetadata)) {
       proxyInjector = (ProxyInjector)
@@ -516,9 +516,8 @@ public class InjectUtil {
   public static Statement[] resolveInjectionDependencies(MetaParameter[] parms, InjectionContext ctx,
                                                          MetaMethod method) {
 
-    MetaClass[] parmTypes = parametersToClassTypeArray(parms);
-    Statement[] parmValues = new Statement[parmTypes.length];
-
+    final MetaClass[] parmTypes = parametersToClassTypeArray(parms);
+    final Statement[] parmValues = new Statement[parmTypes.length];
 
     for (int i = 0; i < parmTypes.length; i++) {
       Statement stmt;
@@ -633,7 +632,7 @@ public class InjectUtil {
   }
 
   public static boolean checkIfTypeNeedsAddingToBeanStore(InjectionContext context, Injector injector) {
-    Set<Injector> store = getBeanInjectionTrackStore(context);
+    final Set<Injector> store = getBeanInjectionTrackStore(context);
     if (store.contains(injector)) {
       return false;
     }

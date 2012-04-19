@@ -37,7 +37,7 @@ public class DeliveryPlan {
   }
 
   public MessageCallback[] getDeliverTo() {
-    MessageCallback[] newArray = new MessageCallback[deliverTo.length];
+    final MessageCallback[] newArray = new MessageCallback[deliverTo.length];
 
     //noinspection ManualArrayCopy
     for (int i = 0; i < deliverTo.length; i++) {
@@ -50,8 +50,8 @@ public class DeliveryPlan {
     return deliverTo.length;
   }
 
-  public DeliveryPlan newDeliveryPlanWith(MessageCallback callback) {
-    MessageCallback[] newPlan = new MessageCallback[deliverTo.length + 1];
+  public DeliveryPlan newDeliveryPlanWith(final MessageCallback callback) {
+    final MessageCallback[] newPlan = new MessageCallback[deliverTo.length + 1];
 
     //noinspection ManualArrayCopy
     for (int i = 0; i < deliverTo.length; i++) {
@@ -62,8 +62,8 @@ public class DeliveryPlan {
     return new DeliveryPlan(newPlan);
   }
 
-  public DeliveryPlan newDeliveryPlanWithOut(MessageCallback callback) {
-    MessageCallback[] newPlan = new MessageCallback[deliverTo.length - 1];
+  public DeliveryPlan newDeliveryPlanWithOut(final MessageCallback callback) {
+    final MessageCallback[] newPlan = new MessageCallback[deliverTo.length - 1];
 
     boolean found = false;
     //noinspection ManualArrayCopy

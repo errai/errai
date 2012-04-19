@@ -16,15 +16,20 @@
 
 package org.jboss.errai.marshalling.server;
 
-import org.jboss.errai.marshalling.client.api.json.EJValue;
-
 import java.io.ByteArrayInputStream;
+import java.io.UnsupportedEncodingException;
+
+import org.jboss.errai.marshalling.client.api.json.EJValue;
 
 /**
  * Decodes a JSON string or character array, and provides a proper collection of elements
  */
 public class JSONDecoder {
   public static EJValue decode(final String o) {
-    return new JSONStreamDecoder(new ByteArrayInputStream(o.getBytes())).parse();
+    try {
+      return new JSONStreamDecoder(new ByteArrayInputStream(o.getBytes("UTF-8"))).parse();
+    } catch (UnsupportedEncodingException e) {
+      throw new AssertionError("UTF-8 not supported by this JRE?");
+    }
   }
 }

@@ -22,7 +22,7 @@ package org.jboss.errai.bus.client.framework;
  * @see org.jboss.errai.bus.client.api.SubscribeListener
  * @see org.jboss.errai.bus.client.api.UnsubscribeListener
  */
-public class SubscriptionEvent extends BusEvent<SubscriptionEvent> {
+public class SubscriptionEvent extends BusEvent {
   private boolean remote = false;
   private boolean lastRemoteSubject = false;
   private boolean localOnly = false;

@@ -46,7 +46,7 @@ public class AsyncDispatcher implements RequestDispatcher {
    * @param service - the service where the bus is located
    */
   @Inject
-  public AsyncDispatcher(ErraiService service) {
+  public AsyncDispatcher(final ErraiService service) {
     this.service = service;
     this.workerFactory = new WorkerFactory(service);
 
@@ -65,7 +65,7 @@ public class AsyncDispatcher implements RequestDispatcher {
    *
    * @param message - a message to dispatch globally
    */
-  public void dispatchGlobal(Message message) throws InterruptedException {
+  public void dispatchGlobal(final Message message) throws InterruptedException {
     if (message.hasPart(MessageParts.PriorityProcessing)) {
       try {
         service.getBus().sendGlobal(message);

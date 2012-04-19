@@ -16,7 +16,7 @@
 
 package org.jboss.errai.bus.client.framework;
 
-public abstract class BusEvent<T> {
+public abstract class BusEvent {
   private boolean disposeListener = false;
 
   /**

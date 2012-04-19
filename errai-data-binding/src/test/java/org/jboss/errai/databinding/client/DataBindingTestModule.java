@@ -16,9 +16,9 @@
 
 package org.jboss.errai.databinding.client;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import org.jboss.errai.databinding.api.Bind;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
 import com.google.gwt.user.client.ui.TextBox;
@@ -29,11 +29,18 @@ import com.google.gwt.user.client.ui.TextBox;
 @EntryPoint
 public class DataBindingTestModule {
 
-  @Inject @Bind("value") 
-  private TextBox textBox;
+  private TextBox textBox = new TextBox();
   
   @Inject
   private DataBindingTestModel model;
+  
+  // @Inject
+  // private DataBinder dataBinder;
+  
+  @PostConstruct
+  public void init() {
+    // dataBinder.bind(textBox, model, "value");
+  }
   
   public String getTextBoxValue() {
     return textBox.getText();

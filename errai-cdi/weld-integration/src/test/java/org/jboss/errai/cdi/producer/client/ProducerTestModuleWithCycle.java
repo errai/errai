@@ -10,8 +10,11 @@ import javax.inject.Inject;
  */
 @ApplicationScoped
 public class ProducerTestModuleWithCycle {
-  private final ProducerTestModule testModule;
-  private final DependentFoofaceFactory foofaceFactory;
+  private ProducerTestModule testModule;
+  private DependentFoofaceFactory foofaceFactory;
+
+  public ProducerTestModuleWithCycle() {
+  }
 
   @Inject
   public ProducerTestModuleWithCycle(ProducerTestModule testModule, DependentFoofaceFactory foofaceFactory) {

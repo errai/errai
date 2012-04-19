@@ -55,6 +55,10 @@ public class CDIClientBootstrap implements EntryPoint {
 
         CDI.fireEvent(new BusReadyEvent());
       }
+
+      public String toString() {
+        return "BusReadyEvent";
+      }
     };
 
     bus.addPostInitTask(busReadyEvent);
@@ -70,6 +74,10 @@ public class CDIClientBootstrap implements EntryPoint {
                 public void run() {
                   CDI.activate();
                 }
+
+                public String toString() {
+                  return "CDI service activate";
+                }
               });
               break;
             case CDIEvent:
@@ -79,6 +87,7 @@ public class CDIClientBootstrap implements EntryPoint {
         }
       });
     }
+
     /*
      * Register an initialization lister to run the bus ready event.  This will be added
      * post-initialization, so it is designed to fire on bus reconnection events.
