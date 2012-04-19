@@ -35,12 +35,17 @@ public class AppController {
   private HandlerManager eventBus;
 
   private HasWidgets container;
+  
+  // This bean is proxied, we add some methods to it that should not be overridden by the proxy for testing purposes
+  public static void staticMethod() {}
+  private void privateMethod() {}
+  void packagePrivateMethod() {}
 
   public void go(HasWidgets container) {
     this.container = container;
   }
 
-  public IOCBeanManager getManager() {
+  public IOCBeanManager getManager() throws Exception {
     return manager;
   }
 
