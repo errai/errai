@@ -44,17 +44,19 @@ public class LiteralFactory {
     if (result == null) {
 
 
-      if (o instanceof MetaType) {
-        result = new LiteralValue<MetaType>((MetaType) o) {
-          @Override
-          public String getCanonicalString(Context context) {
-            return getClassReference((MetaClass) o, context, false) + ".class";
-          }
-          
-          public String toString() {
-            return o.toString() + ".class";
-          }
-        };
+      if (o instanceof MetaClass) {
+        result = new MetaClassLiteral((MetaClass)o);
+
+//        result = new LiteralValue<MetaType>((MetaType) o) {
+//          @Override
+//          public String getCanonicalString(Context context) {
+//            return getClassReference((MetaClass) o, context, false) + ".class";
+//          }
+//
+//          public String toString() {
+//            return o.toString() + ".class";
+//          }
+//        };
       }
       else if (o instanceof Annotation) {
         result = new LiteralValue<Annotation>((Annotation) o) {

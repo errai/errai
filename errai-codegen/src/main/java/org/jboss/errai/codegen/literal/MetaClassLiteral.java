@@ -25,27 +25,31 @@ import org.jboss.errai.codegen.meta.MetaClassFactory;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public class MetaClassLiteral extends LiteralValue<MetaClass> {
+public class MetaClassLiteral extends LiteralValue<MetaClass> implements TypeLiteral {
 
   public MetaClassLiteral(MetaClass value) {
     super(value);
   }
 
   @Override
+  public String generate(Context context) {
+    return getCanonicalString(context);
+  }
+
   public String getCanonicalString(Context context) {
     if (context == null) {
-      return getValue().getName() + ".class";
-    } else {
+      return getValue().getFullyQualifiedName() + ".class";
+    }
+    else {
       return getClassReference(getValue(), context, false) + ".class";
     }
   }
-  
-  @Override
+
   public MetaClass getType() {
     return MetaClassFactory.get(Class.class);
   }
-  
+
   public MetaClass getActualType() {
-    return super.getType();
+    return getValue();
   }
 }

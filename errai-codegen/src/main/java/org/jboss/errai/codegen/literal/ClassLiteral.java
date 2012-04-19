@@ -25,7 +25,7 @@ import org.jboss.errai.codegen.meta.MetaClassFactory;
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
-public class ClassLiteral extends LiteralValue<Class<?>> {
+public class ClassLiteral extends LiteralValue<Class<?>> implements TypeLiteral {
   
   public ClassLiteral(Class<?> value) {
     super(value);

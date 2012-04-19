@@ -261,9 +261,6 @@ public class MarshallersGenerator extends Generator {
           _serverMarshallerCache = serverSideClass;
         }
 
-      //  System.out.println("SERVER MARSHALLER>>>\n" + serverSideClass + "<<<SERVER MARSHALLER");
-
-
         if (junitOrDevMode) {
           String tmpLocation = new File(sourceOutputTemp).getAbsolutePath();
           log.info("*** using temporary path: " + tmpLocation + " ***");
