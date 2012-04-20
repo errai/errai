@@ -102,7 +102,6 @@ public class TransmissionBuffer implements Buffer {
   private volatile long headSequence = STARTING_SEQUENCE;
 
   private TransmissionBuffer(boolean directBuffer, int segmentSize, int segments) {
-    // must pad segment size for size headers -- or the last segment may be odd-sized (that would not be good)
     this.segmentSize = segmentSize;
     this.bufferSize = segmentSize * segments;
     this.segments = segments;
@@ -352,8 +351,6 @@ public class TransmissionBuffer implements Buffer {
     bufferColor.lock.lockInterruptibly();
 
     try {
-
-
       for (; ; ) {
         long read = bufferColor.sequence.get();
         checkOverflow(read);

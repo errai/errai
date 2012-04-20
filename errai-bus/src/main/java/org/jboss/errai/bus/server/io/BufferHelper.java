@@ -32,7 +32,6 @@ import java.io.OutputStream;
 public final class BufferHelper {
   private BufferHelper() {}
 
-
   public static class MultiMessageHandlerCallback implements BufferCallback {
     int brackCount;
     int seg;
