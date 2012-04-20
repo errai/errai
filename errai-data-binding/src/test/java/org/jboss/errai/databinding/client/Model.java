@@ -16,15 +16,20 @@
 
 package org.jboss.errai.databinding.client;
 
-import org.jboss.errai.databinding.api.Bindable;
+import javax.enterprise.context.Dependent;
+
+import org.jboss.errai.databinding.client.api.Bindable;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Bindable
-public class DataBindingTestModel {
+@Dependent
+public class Model {
 
   private String value;
+  private String _name;
+  private Integer _age;
 
   public String getValue() {
     return value;
@@ -32,5 +37,21 @@ public class DataBindingTestModel {
 
   public void setValue(String value) {
     this.value = value;
+  }
+
+  public String getName() {
+    return _name;
+  }
+
+  public void setName(String name) {
+    this._name = name;
+  }
+
+  public Integer getAge() {
+    return _age;
+  }
+
+  public void setAge(Integer age) {
+    this._age = age;
   }
 }

@@ -16,38 +16,10 @@
 
 package org.jboss.errai.databinding.client;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-
-import org.jboss.errai.databinding.client.api.DataBinder;
-import org.jboss.errai.ioc.client.api.EntryPoint;
-
-import com.google.gwt.user.client.ui.TextBox;
-
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@EntryPoint
-public class DataBindingTestModule {
+public interface BindableProxy {
 
-  private TextBox textBox = new TextBox();
-  
-  @Inject
-  private Model model;
-  
-  @Inject
-  private DataBinder dataBinder;
-  
-  @PostConstruct
-  public void init() {
-    dataBinder.bind(textBox, model, "value");
-  }
-  
-  public TextBox getTextBox() {
-    return textBox;
-  }
-  
-  public Model getModel() {
-    return model;
-  }
+  public void set(String property, Object value);
 }

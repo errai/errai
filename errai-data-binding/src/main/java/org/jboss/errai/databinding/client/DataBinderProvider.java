@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.databinding.api;
+package org.jboss.errai.databinding.client;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import javax.inject.Provider;
+import javax.inject.Singleton;
+
+import org.jboss.errai.databinding.client.api.DataBinder;
+import org.jboss.errai.ioc.client.api.IOCProvider;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE, ElementType.FIELD})
-public @interface Bindable {
-  String value() default "";
+@IOCProvider @Singleton
+public class DataBinderProvider implements Provider<DataBinder> {
+  
+  @Override
+  public DataBinder get() {
+    return new DataBinder();
+  }
 }

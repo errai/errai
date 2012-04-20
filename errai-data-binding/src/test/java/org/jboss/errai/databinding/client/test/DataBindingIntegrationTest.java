@@ -32,11 +32,14 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
   
   @Test
-  public void testBindModelToWidgetByFieldName() {
+  public void testDataBindingUsingInjectedModel() {
     DataBindingTestModule module = IOC.getBeanManager().lookupBean(DataBindingTestModule.class).getInstance();
-    assertNull("Initial value should be null", module.getTextBoxValue());
-    module.getModel().setValue("changed");
-    assertEquals("Widget not properly updated", "changed", module.getTextBoxValue());
+    
+    module.getModel().setValue("model change");
+    assertEquals("Widget not properly updated", "model change", module.getTextBox().getText());
+    
+    // simulate a UI change
+    module.getTextBox().setValue("UI change", true);
+    assertEquals("Model not properly updated", "UI change", module.getModel().getValue());
   }
-
 }

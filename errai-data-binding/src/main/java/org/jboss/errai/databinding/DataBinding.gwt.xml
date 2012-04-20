@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2010 JBoss, a divison Red Hat, Inc
+  ~ Copyright 2011 JBoss, by Red Hat, Inc
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -14,10 +14,13 @@
   ~ limitations under the License.
   -->
 
-<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 1.6//EN"
-        "http://google-web-toolkit.googlecode.com/svn/releases/1.6/distro-source/core/src/gwt-module.dtd">
-<module rename-to="TestModule">
-    <inherits name="com.google.gwt.user.User"/>
-    <inherits name="org.jboss.errai.ioc.Container"/>
-    <inherits name="org.jboss.errai.databinding.DataBinding"/>
+<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.0//EN"
+        "http://google-web-toolkit.googlecode.com/svn/releases/2.0/distro-source/core/src/gwt-module.dtd">
+<module>
+    <inherits name='com.google.gwt.user.User'/>
+
+    <generate-with class="org.jboss.errai.databinding.rebind.BindableProxyLoaderGenerator">
+        <when-type-assignable
+                class="org.jboss.errai.databinding.client.BindableProxyLoader"/>
+    </generate-with>
 </module>

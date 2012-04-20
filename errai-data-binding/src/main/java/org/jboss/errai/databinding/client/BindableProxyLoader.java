@@ -16,38 +16,15 @@
 
 package org.jboss.errai.databinding.client;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-
-import org.jboss.errai.databinding.client.api.DataBinder;
-import org.jboss.errai.ioc.client.api.EntryPoint;
-
-import com.google.gwt.user.client.ui.TextBox;
+import org.jboss.errai.databinding.client.api.Bindable;
 
 /**
+ * This interface is used internally during compile time to produce the required proxies for {@link Bindable} types.
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@EntryPoint
-public class DataBindingTestModule {
+public interface BindableProxyLoader {
+  
+  public void loadBindableProxies();
 
-  private TextBox textBox = new TextBox();
-  
-  @Inject
-  private Model model;
-  
-  @Inject
-  private DataBinder dataBinder;
-  
-  @PostConstruct
-  public void init() {
-    dataBinder.bind(textBox, model, "value");
-  }
-  
-  public TextBox getTextBox() {
-    return textBox;
-  }
-  
-  public Model getModel() {
-    return model;
-  }
 }

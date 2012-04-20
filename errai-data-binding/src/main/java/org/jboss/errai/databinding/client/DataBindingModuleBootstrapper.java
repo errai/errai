@@ -16,38 +16,24 @@
 
 package org.jboss.errai.databinding.client;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
+import org.jboss.errai.common.client.api.extension.InitVotes;
+import org.jboss.errai.ioc.client.api.IOCBootstrapTask;
+import org.jboss.errai.ioc.client.api.TaskOrder;
 
-import org.jboss.errai.databinding.client.api.DataBinder;
-import org.jboss.errai.ioc.client.api.EntryPoint;
-
-import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.core.client.GWT;
 
 /**
+ * Bootstrapper for the data binding module.
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@EntryPoint
-public class DataBindingTestModule {
-
-  private TextBox textBox = new TextBox();
-  
-  @Inject
-  private Model model;
-  
-  @Inject
-  private DataBinder dataBinder;
-  
-  @PostConstruct
-  public void init() {
-    dataBinder.bind(textBox, model, "value");
-  }
-  
-  public TextBox getTextBox() {
-    return textBox;
-  }
-  
-  public Model getModel() {
-    return model;
+@IOCBootstrapTask(TaskOrder.Before)
+public class DataBindingModuleBootstrapper implements Runnable {
+  @Override
+  public void run() {
+    InitVotes.waitFor(DataBindingModuleBootstrapper.class);
+    BindableProxyLoader proxyLoader = GWT.create(BindableProxyLoader.class);
+    proxyLoader.loadBindableProxies();
+    InitVotes.voteFor(DataBindingModuleBootstrapper.class);
   }
 }

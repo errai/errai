@@ -14,40 +14,18 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.databinding.client;
+package org.jboss.errai.databinding.client.api;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-
-import org.jboss.errai.databinding.client.api.DataBinder;
-import org.jboss.errai.ioc.client.api.EntryPoint;
-
-import com.google.gwt.user.client.ui.TextBox;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@EntryPoint
-public class DataBindingTestModule {
-
-  private TextBox textBox = new TextBox();
-  
-  @Inject
-  private Model model;
-  
-  @Inject
-  private DataBinder dataBinder;
-  
-  @PostConstruct
-  public void init() {
-    dataBinder.bind(textBox, model, "value");
-  }
-  
-  public TextBox getTextBox() {
-    return textBox;
-  }
-  
-  public Model getModel() {
-    return model;
-  }
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE, ElementType.FIELD})
+public @interface Bindable {
+  String value() default "";
 }
