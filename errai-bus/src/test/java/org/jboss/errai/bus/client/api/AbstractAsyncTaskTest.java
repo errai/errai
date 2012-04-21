@@ -1,8 +1,11 @@
 package org.jboss.errai.bus.client.api;
 
 import com.google.gwt.junit.client.GWTTestCase;
+import com.google.gwt.user.client.Timer;
 import org.jboss.errai.common.client.api.tasks.AsyncTask;
 import org.jboss.errai.common.client.api.tasks.HasAsyncTaskRef;
+import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
+import org.jboss.errai.common.client.util.TimeUnit;
 
 /**
  * Abstract test that covers the contract of the AsyncTask interface. Tests for
@@ -190,5 +193,21 @@ public abstract class AbstractAsyncTaskTest extends GWTTestCase {
     AsyncTask task = getTaskUnderTest(runnable);
     assertNotNull("No AsyncTask was injected into runnable", runnable.getAsyncTask());
     assertSame("Wrong AsyncTask injected into runnable", task, runnable.getAsyncTask());
+  }
+
+  public void testRepeatingTask() throws Exception {
+    final CountingRunnable cr = new CountingRunnable();
+    final AsyncTask task = TaskManagerFactory.get()
+            .scheduleRepeating(TimeUnit.MILLISECONDS, 50, cr);
+
+    delayTestFinish(5000);
+    new Timer() {
+      @Override
+      public void run() {
+        task.cancel(true);
+        assertTrue("task does not appear to be repeating", cr.getRunCount() > 30);
+        finishTest();
+      }
+    }.schedule(2000);
   }
 }
