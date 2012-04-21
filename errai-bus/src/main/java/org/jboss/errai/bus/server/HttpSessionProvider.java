@@ -63,14 +63,15 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
   }
 
   public static class SessionsContainer {
+
     /**
      * Share these attributes across all the sub-sessions
      */
-    private Map<String, Object> sharedAttributes = new HashMap<String, Object>();
-    private Map<String, QueueSession> queueSessions = new HashMap<String, QueueSession>();
+    private final Map<String, Object> sharedAttributes = new HashMap<String, Object>();
+    private final Map<String, QueueSession> queueSessions = new HashMap<String, QueueSession>();
 
     public QueueSession createSession(String httpSessionId, String remoteQueueId) {
-      QueueSession qs = new HttpSessionWrapper(this, remoteQueueId, httpSessionId);
+      QueueSession qs = new HttpSessionWrapper(this, httpSessionId, remoteQueueId);
       queueSessions.put(remoteQueueId, qs);
       return qs;
     }
@@ -89,21 +90,28 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
    * If the reference does not have an HttpSession already, a new session is created using this wrapper class
    */
   public static class HttpSessionWrapper implements QueueSession, Serializable {
-    private SessionsContainer container;
-    private String sessionId;
-    private String remoteQueueID;
+    private final SessionsContainer container;
+    private final String parentSessionId;
+    private final String sessionId;
+    private final String remoteQueueID;
     private boolean valid = true;
     private List<SessionEndListener> sessionEndListeners;
 
     public HttpSessionWrapper(SessionsContainer container, String httpSessionId, String remoteQueueID) {
       this.container = container;
       this.remoteQueueID = remoteQueueID;
+      this.parentSessionId = httpSessionId;
       this.sessionId = SecureHashUtil.nextSecureHash("SHA-256",
               httpSessionId.getBytes(), remoteQueueID.getBytes());
     }
 
     public String getSessionId() {
       return sessionId;
+    }
+
+    @Override
+    public String getParentSessionId() {
+      return parentSessionId;
     }
 
     public boolean isValid() {
