@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.codegen.tests.meta;
+package org.jboss.errai.codegen.tests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

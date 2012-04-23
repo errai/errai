@@ -16,7 +16,6 @@
 
 package org.jboss.errai.codegen.tests;
 
-import org.jboss.errai.codegen.tests.literals.LiteralTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 

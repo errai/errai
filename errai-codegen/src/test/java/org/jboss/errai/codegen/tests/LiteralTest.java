@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.codegen.tests.literals;
+package org.jboss.errai.codegen.tests;
 
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.literal.LiteralFactory;

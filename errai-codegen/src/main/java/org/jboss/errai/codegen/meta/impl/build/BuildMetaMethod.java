@@ -41,9 +41,9 @@ import org.jboss.errai.codegen.meta.MetaTypeVariable;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class BuildMetaMethod extends MetaMethod implements Builder {
-  private Context context;
   private BuildMetaClass declaringClass;
   private Statement body;
 
@@ -292,8 +292,7 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
 
   @Override
   public String toJavaString() {
-    this.context = Context.create(declaringClass.getContext());
-
+    Context context = Context.create(declaringClass.getContext());
 
     for (Parameter p : defParameters.getParameters()) {
       context.addVariable(Variable.create(p.getName(), p.getType()));
