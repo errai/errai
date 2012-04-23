@@ -44,14 +44,14 @@ public class ClientTaskManager implements TaskManager {
   @Override
   public AsyncTask scheduleRepeating(TimeUnit unit, int interval, final Runnable userTask) {
     final TaskManagerTimer timer = new TaskManagerTimer(userTask);
-    timer.scheduleRepeating((int) unit.convert(interval, TimeUnit.MILLISECONDS));
+    timer.scheduleRepeating((int) unit.toMillis(interval));
     return timer.asyncTask;
   }
 
   @Override
   public AsyncTask schedule(TimeUnit unit, int interval, final Runnable userTask) {
     final TaskManagerTimer timer = new TaskManagerTimer(userTask);
-    timer.schedule((int) unit.convert(interval, TimeUnit.MILLISECONDS));
+    timer.schedule((int) unit.toMillis(interval));
     return timer.asyncTask;
   }
 

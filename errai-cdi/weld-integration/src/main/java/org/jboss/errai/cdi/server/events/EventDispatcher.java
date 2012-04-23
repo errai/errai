@@ -17,8 +17,6 @@ package org.jboss.errai.cdi.server.events;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -78,7 +76,7 @@ public class EventDispatcher implements MessageCallback {
           }
 
           final Object o = message.get(Object.class, CDIProtocol.BeanReference);
-          EventConversationContext.activate(o, CDIServerUtil.getSessionId(message));
+          EventConversationContext.activate(o, CDIServerUtil.getSession(message));
           try {
             @SuppressWarnings("unchecked")
             final Set<String> qualifierNames = message.get(Set.class, CDIProtocol.Qualifiers);

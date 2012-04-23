@@ -21,13 +21,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jboss.errai.bus.client.api.base.CommandMessage;
-import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RoutingFlag;
 import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
-import org.jboss.errai.enterprise.client.cdi.api.CDI;
 
 import static org.jboss.errai.enterprise.client.cdi.api.CDI.getSubjectNameByType;
 
@@ -46,7 +44,7 @@ public class ConversationalEventObserverMethod extends EventObserverMethod {
   @Override
   public void notify(Object event) {
     EventConversationContext.Context ctx = EventConversationContext.get();
-    if (ctx != null && ctx.getSession() != null) {
+    if (ctx != null && ctx.getSessionId() != null) {
       if (ctx.getEventObject() == event) return;
 
       final Map<String, Object> messageParts = new HashMap<String, Object>(20);
@@ -54,8 +52,7 @@ public class ConversationalEventObserverMethod extends EventObserverMethod {
       messageParts.put(MessageParts.CommandType.name(), CDICommands.CDIEvent.name());
       messageParts.put(CDIProtocol.BeanType.name(), event.getClass().getName());
       messageParts.put(CDIProtocol.BeanReference.name(), event);
-
-      messageParts.put(MessageParts.SessionID.name(), ctx.getSession());
+      messageParts.put(MessageParts.SessionID.name(), ctx.getSessionId());
 
       if (!qualifierForWire.isEmpty()) {
         messageParts.put(CDIProtocol.Qualifiers.name(), qualifierForWire);

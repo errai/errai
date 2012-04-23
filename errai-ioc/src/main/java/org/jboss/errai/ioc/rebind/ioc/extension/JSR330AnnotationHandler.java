@@ -16,6 +16,7 @@
 
 package org.jboss.errai.ioc.rebind.ioc.extension;
 
+import javassist.bytecode.stackmap.TypeData;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaConstructor;
@@ -28,6 +29,7 @@ import org.jboss.errai.ioc.rebind.ioc.graph.Dependency;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
+import org.mvel2.util.NullType;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Modifier;
@@ -86,8 +88,11 @@ public abstract class JSR330AnnotationHandler<T extends Annotation> implements A
     while ((mc = mc.getSuperClass()) != null);
   }
 
-
   public static <T> Set<MetaClass> fillInInterface(Class<T> cls) {
+    if (NullType.class.isAssignableFrom(cls)) {
+      return Collections.emptySet();
+    }
+
     if (cls.isInterface()) {
       Set<Class<? extends T>> subTypes = ScannerSingleton.getOrCreateInstance().getSubTypesOf(cls);
       Set<MetaClass> deps = new HashSet<MetaClass>();
@@ -103,6 +108,5 @@ public abstract class JSR330AnnotationHandler<T extends Annotation> implements A
     else {
       return Collections.emptySet();
     }
-
   }
 }

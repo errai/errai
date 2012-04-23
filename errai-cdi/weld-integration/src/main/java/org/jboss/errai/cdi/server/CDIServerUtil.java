@@ -25,6 +25,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,8 +53,8 @@ public class CDIServerUtil {
     return (T) beanManager.getReference(bean, serviceType, beanManager.createCreationalContext(bean));
   }
 
-  public static String getSessionId(Message message) {
-    return message.getResource(String.class, "SessionID");
+  public static QueueSession getSession(Message message) {
+    return message.getResource(QueueSession.class, "Session");
   }
 
 

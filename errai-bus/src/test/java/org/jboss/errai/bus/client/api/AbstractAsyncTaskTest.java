@@ -1,23 +1,23 @@
 package org.jboss.errai.bus.client.api;
 
 import com.google.gwt.junit.client.GWTTestCase;
+import com.google.gwt.user.client.Timer;
 import org.jboss.errai.common.client.api.tasks.AsyncTask;
 import org.jboss.errai.common.client.api.tasks.HasAsyncTaskRef;
+import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
+import org.jboss.errai.common.client.util.TimeUnit;
 
 /**
- * Abstract test that covers the contract of the AsyncTask interface. Tests for
- * client-side AsyncTask implementations should extend
- * {@link ClientAsyncTaskTest}; tests for server-side implementations should
- * extend this class directly.
- *
+ * Abstract test that covers the contract of the AsyncTask interface. Tests for client-side AsyncTask implementations
+ * should extend {@link ClientAsyncTaskTest}; tests for server-side implementations should extend this class directly.
+ * 
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
 public abstract class AbstractAsyncTaskTest extends GWTTestCase {
 
   /**
-   * A Runnable implementation whose instances keep track of how many times they
-   * have been run. Optionally wraps a task that runs whenever {@link #run()} is
-   * called. Also implements {@link HasAsyncTaskRef} to make it easier to verify
+   * A Runnable implementation whose instances keep track of how many times they have been run. Optionally wraps a task
+   * that runs whenever {@link #run()} is called. Also implements {@link HasAsyncTaskRef} to make it easier to verify
    * injection of AsyncTask.
    */
   public static class CountingRunnable implements Runnable, HasAsyncTaskRef {
@@ -40,14 +40,14 @@ public abstract class AbstractAsyncTaskTest extends GWTTestCase {
         if (wrappedRunnable != null) {
           wrappedRunnable.run();
         }
-      } finally {
+      }
+      finally {
         runCount++;
       }
     }
 
     /**
-     * Returns the number of times the {@link #run()} method has been called on
-     * this CountingRunnable.
+     * Returns the number of times the {@link #run()} method has been called on this CountingRunnable.
      */
     public int getRunCount() {
       return runCount;
@@ -70,13 +70,14 @@ public abstract class AbstractAsyncTaskTest extends GWTTestCase {
    */
   public static final Runnable BLOW_UP = new Runnable() {
     @Override
-    public void run() { throw new RuntimeException(); };
+    public void run() {
+      throw new RuntimeException();
+    };
   };
 
   /**
-   * This version returns null, which forces GWTTestCase to run the tests in
-   * "pure java" (not client) mode. If you are testing client-side code, extend
-   * {@link ClientAsyncTaskTest} instead of this class.
+   * This version returns null, which forces GWTTestCase to run the tests in "pure java" (not client) mode. If you are
+   * testing client-side code, extend {@link ClientAsyncTaskTest} instead of this class.
    */
   @Override
   public String getModuleName() {
@@ -85,19 +86,17 @@ public abstract class AbstractAsyncTaskTest extends GWTTestCase {
 
   /**
    * Returns the AsyncTask implementation that should be tested.
-   *
+   * 
    * @param task
-   *          the Runnable to pass to the execution system. <b>Note to
-   *          subclassers: this runnable must be passed as-is, without
-   *          wrapping.</b> Tests such as {@link #testAsyncTaskRefInjection}
-   *          depend on it.
+   *          the Runnable to pass to the execution system. <b>Note to subclassers: this runnable must be passed as-is,
+   *          without wrapping.</b> Tests such as {@link #testAsyncTaskRefInjection} depend on it.
    */
   protected abstract AsyncTask getTaskUnderTest(CountingRunnable task);
 
   /**
-   * Runs the given Runnable after the AsyncTask most recently returned from
-   * {@link #getTaskUnderTest(CountingRunnable)} has completed.
-   *
+   * Runs the given Runnable after the AsyncTask most recently returned from {@link #getTaskUnderTest(CountingRunnable)}
+   * has completed.
+   * 
    * @param r
    */
   protected abstract void runAfterTaskFinished(Runnable r);
@@ -138,7 +137,8 @@ public abstract class AbstractAsyncTaskTest extends GWTTestCase {
     try {
       task.setExitHandler(cr2);
       fail("Expected IllegalStateException");
-    } catch (IllegalStateException e) {
+    }
+    catch (IllegalStateException e) {
       // expected
     }
 

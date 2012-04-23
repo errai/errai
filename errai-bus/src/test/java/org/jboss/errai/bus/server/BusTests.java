@@ -40,6 +40,11 @@ public class BusTests extends TestCase {
       }
 
       @Override
+      public String getParentSessionId() {
+        return "ParentID";
+      }
+
+      @Override
       public boolean isValid() {
         return false;
       }

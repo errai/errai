@@ -15,9 +15,9 @@
     </important>
     <section id="sid-5931498">
       
-      <title>CDI Overview</title>
+      <title>Features and Limitations</title>
       <para>Beans that are deployed to a CDI container will automatically be registered with Errai and exposed to your GWT client application. So, you can use Errai to communicate between your GWT client components and your CDI backend beans.</para>
-      <para>Errai CDI based applications use the same annotation-driven programming model as server-side CDI components, with some notable limitations.</para>
+      <para>Errai CDI based applications use the same annotation-driven programming model as server-side CDI components, with some notable limitations. Many of these limitations will be addressed in future releases.</para>
       <orderedlist>
         <listitem>
           <para>There is no support for CDI interceptors in the client. Although this is planned in a future release.</para>
@@ -28,27 +28,44 @@
         <listitem>
           <para>The JSR-299 SPI is not supported for client side code. Although writing extensions for the client side container is possible via the Errai IOC Extensions API.</para>
         </listitem>
+        <listitem>
+          <para>
+            The
+            <code>@Typed</code>
+            annotation is unsupported.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            The
+            <code>@Disposes</code>
+            annotation is unsupported.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            The
+            <code>@Specializes</code>
+            annotation is unsupported.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Qualifier attributes are not currently supported. (eg.
+            <code>@MyQualifier(foo=BAR)</code>
+            and
+            <code>@MyQualifier(foo=FOO)</code>
+            will be considered equivalent in the client).
+          </para>
+        </listitem>
       </orderedlist>
-      <section id="sid-5931498_CDIOverview-RPCStyleInvocationsonCDIbeans">
+      <section id="sid-5931498_FeaturesandLimitations-Otherfeatures">
         
-        <title>RPC Style Invocations on CDI beans</title>
+        <title>Other features</title>
         <para>
-          When choosing RPC style invocations on beans, you basically rely on a typed java interface the CDI managed bean needs to expose. A GWT client component can then create an invocation proxy based on this interface. For more information see
-          <link linkend="sid-5931313">chapter on RPC mechanism</link>
-          .
-        </para>
-      </section>
-      <section id="sid-5931498_CDIOverview-Publish%2FSubscribewithCDImanagedcomponents">
-        
-        <title>Publish/Subscribe with CDI managed components</title>
-        <para>
-          If you choose publish/subscribe then your CDI bean needs to implement the
-          <code>MessageCallback</code>
-          interface, as described in chapter
-          <xref linkend="sid-5931263"/>
-          . Any bean exposed in this way can be accessed through the
-          <link linkend="sid-5931280">MessageBuilderAPI</link>
-          .
+          The CDI container in Errai is built around the
+          <link linkend="sid-5931402">Errai IOC module</link>
+          , and thus is a superset of the existing functionality in Errai IOC. Thus, all features and APIs documented in Errai IOC are accessible and usable with this Errai CDI programming model.
         </para>
       </section>
     </section>
@@ -87,6 +104,18 @@ public void MyClientBean {
   // ... //
 }</programlisting>
       </example>
+      <important>
+        <title>Availability of dependent beans in the client-side BeanManager</title>
+        <para>
+          As is mentioned in the
+          <link linkend="sid-21627016_Client-SideBeanManager-AvailabilityOfBeans">bean manager documentation</link>
+          , only beans that are
+          <emphasis role="italics">explicitly</emphasis>
+          scoped will be made available to the bean manager for lookup. So while it is not necessary for regular injection, you must annotate your dependent scoped beans with
+          <code>@Dependent</code>
+          if you wish to dynamically lookup these beans at runtime.
+        </para>
+      </important>
     </section>
     <section id="sid-21758054">
       
@@ -327,7 +356,7 @@ public class App {
   ...
 
   @Produces @Supported
-  public MyBaseWidget createWidget() {
+  private MyBaseWidget createWidget() {
     return (Canvas.isSupported()) ? new MyHtml5Widget() : new MyDefaultWidget();
   }
 }</programlisting>
@@ -338,9 +367,25 @@ public class App {
 public class MyComposite extends Composite {
   
   @Inject @Supported
-  public MyBaseWidget widget;
+  private MyBaseWidget widget;
 
   ...
+}</programlisting>
+      </example>
+      <para>
+        Producers can also be scoped themselves. By default, producer methods are dependent-scoped, meaning they get called every time an injection for their provided type is requested. If a producer method is scoped
+        <code>@Singleton</code>
+        for instance, the method will only be called once, and the bean manager will inject the instance from the first invokation of the producer into every matching injection point.
+      </para>
+      <example>
+        <title>Singleton producer</title>
+        <programlisting language="java">public class App {
+  ...
+
+  @Produces @Singleton
+  private MyBean produceMyBean() {
+    return new MyBean();
+  }
 }</programlisting>
       </example>
       <para>
@@ -354,7 +399,11 @@ public class MyComposite extends Composite {
     <section id="sid-5931501">
       
       <title>Deploying Errai CDI</title>
-      <para>If you do not care about the deployment details for now and just want to get started take a look at the ERRAI:CDI Quickstart Guide.</para>
+      <para>
+        If you do not care about the deployment details for now and just want to get started take a look at the
+        <ulink url="https://docs.jboss.org/author/pages/viewpage.action?pageId=5833096">Quickstart Guide</ulink>
+        .
+      </para>
       <para>The CDI integration is a plugin to the Errai core framework and represents a CDI portable extension. Which means it is discovered automatically by both Errai and the CDI container. In order to use it, you first need to understand the different runtime models involved when working GWT, Errai and CDI.</para>
       <para>
         Typically a GWT application lifecycle begins in
@@ -367,7 +416,7 @@ public class MyComposite extends Composite {
         <title>Deployment in Development Mode</title>
         <para>In development mode we need to bootstrap the CDI environment on our own and make both Errai and CDI available through JNDI (common denominator across all runtimes). Since GWT uses Jetty, that only supports read only JNDI, we need to replace the default Jetty launcher with a custom one that will setup the JNDI bindings:</para>
         <informalexample>
-          <programlisting language="java">&lt;plugin&gt;
+          <programlisting>&lt;plugin&gt;
   &lt;groupId&gt;org.codehaus.mojo&lt;/groupId&gt;
   &lt;artifactId&gt;gwt-maven plugin&lt;/artifactId&gt;
   &lt;version&gt;${gwt.maven}&lt;/version&gt;
@@ -387,7 +436,7 @@ public class MyComposite extends Composite {
         </note>
         <para>Once this is set up correctly, we can bootstrap the CDI container through a servlet listener:</para>
         <informalexample>
-          <programlisting language="java">&lt;web-app&gt;
+          <programlisting>&lt;web-app&gt;
   ...
   &lt;listener&gt;
     &lt;listener-class&gt;org.jboss.errai.container.CDIServletStateListener&lt;/listener-class&gt;
@@ -434,7 +483,7 @@ public class MyComposite extends Composite {
           <code>ErraiService.properties</code>
         </para>
         <informalexample>
-          <programlisting language="java">errai.auto_discover_services=false</programlisting>
+          <programlisting>errai.auto_discover_services=false</programlisting>
         </informalexample>
       </section>
     </section>

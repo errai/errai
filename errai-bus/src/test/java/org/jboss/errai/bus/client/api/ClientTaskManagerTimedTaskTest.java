@@ -33,4 +33,25 @@ public class ClientTaskManagerTimedTaskTest extends ClientAsyncTaskTest {
       }
     }.schedule(120);
   }
+  
+  public void testRepeatingTask() throws Exception {
+    final CountingRunnable cr = new CountingRunnable();
+    final AsyncTask task = TaskManagerFactory.get()
+            .scheduleRepeating(TimeUnit.MILLISECONDS, 50, cr);
+
+    // TODO move this to AbstractAsyncTaskTest and make sure it works on both the client and the server
+    new Timer() {
+      @Override
+      public void run() {
+        task.cancel(true);
+        int actualRunCount = cr.getRunCount();
+        int expectedRunCount = 30;
+        assertTrue("task executed " + actualRunCount + " times. Should have been at least " + expectedRunCount,
+            actualRunCount > expectedRunCount);
+        finishTest();
+      }
+    }.schedule(2000);
+
+    delayTestFinish(5000);
+  }
 }

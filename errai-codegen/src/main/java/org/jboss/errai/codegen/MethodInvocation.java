@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.jboss.errai.codegen.builder.callstack.CallWriter;
 import org.jboss.errai.codegen.literal.ClassLiteral;
+import org.jboss.errai.codegen.literal.TypeLiteral;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
@@ -121,8 +122,8 @@ public class MethodInvocation extends AbstractStatement {
       Statement parm = callParameters.getParameters().get(methodParmIndex);
 
       MetaType callParmType;
-      if (parm instanceof ClassLiteral) {
-        callParmType = ((ClassLiteral) parm).getActualType();
+      if (parm instanceof TypeLiteral) {
+        callParmType = ((TypeLiteral) parm).getActualType();
       }
       else {
         callParmType = parm.getType();

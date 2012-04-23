@@ -75,7 +75,7 @@ public class ProxyMaker {
       String methodString = GenUtil.getMethodString(method);
       if (renderedMethods.contains(methodString) || method.getName().equals("hashCode")
               || (method.getName().equals("equals") && method.getParameters().length == 1
-              && method.getParameters()[0].getType().getFullyQualifiedName().equals("java.lang.Object"))) continue;
+              && method.getParameters()[0].getType().getFullyQualifiedName().equals(Object.class.getName()))) continue;
 
       renderedMethods.add(methodString);
 
@@ -83,7 +83,7 @@ public class ProxyMaker {
           method.isSynthetic() ||
           method.isFinal() ||
           method.isStatic() ||
-          method.getDeclaringClass().getFullyQualifiedName().equals("java.lang.Object"))
+          method.getDeclaringClass().getFullyQualifiedName().equals(Object.class.getName()))
         continue;
 
       DefParameters defParameters = DefParameters.from(method);
