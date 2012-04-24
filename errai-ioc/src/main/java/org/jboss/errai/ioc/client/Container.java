@@ -18,11 +18,15 @@ package org.jboss.errai.ioc.client;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.RunAsyncCallback;
 import org.jboss.errai.common.client.api.extension.InitVotes;
-import org.jboss.errai.ioc.client.api.Bootstrapper;
-import org.jboss.errai.ioc.client.container.CreationalContext;
+import org.jboss.errai.ioc.client.container.BeanRef;
 import org.jboss.errai.ioc.client.container.IOCBeanManagerLifecycle;
+
+import java.lang.annotation.Annotation;
+
+import static org.jboss.errai.common.client.util.LogUtil.displayDebuggerUtilityTitle;
+import static org.jboss.errai.common.client.util.LogUtil.displaySeparator;
+import static org.jboss.errai.common.client.util.LogUtil.log;
 
 public class Container implements EntryPoint {
   @Override
@@ -30,31 +34,61 @@ public class Container implements EntryPoint {
     boostrapContainer();
   }
 
+  // stored for debugging purposes only. overwritten every time the container is bootstrapped.
+  private static BootstrapperInjectionContext injectionContext;
+
   public void boostrapContainer() {
     try {
-
-
       InitVotes.waitFor(Container.class);
 
       final Bootstrapper bootstrapper = GWT.create(Bootstrapper.class);
-
-      System.out.println("Bootstrapepr Generated");
+      log("IOC bootstrapper successfully initialized.");
 
       new IOCBeanManagerLifecycle().resetBeanManager();
       final BootstrapperInjectionContext ctx = bootstrapper.bootstrapContainer();
-
-      System.out.println("Boostrapper Called");
+      log("IOC container bootstrapped.");
 
       ctx.getRootContext().finish();
+      log(ctx.getRootContext().getAllCreatedBeans().size() + " beans successfully deployed.");
 
       InitVotes.voteFor(Container.class);
 
+      injectionContext = ctx;
 
-      // return ctx;
+      declareDebugFunction();
+
     }
     catch (Throwable t) {
       t.printStackTrace();
       throw new RuntimeException("critical error in IOC container bootstrap", t);
     }
+  }
+
+  private static native void declareDebugFunction() /*-{
+    $wnd.errai_bean_manager_status = function () {
+      @org.jboss.errai.ioc.client.Container::displayBeanManagerStaus()();
+    }
+  }-*/;
+
+  private static void displayBeanManagerStaus() {
+    displayDebuggerUtilityTitle("BeanManager Status");
+
+    log("[WIRED BEANS]");
+    for (BeanRef ref : injectionContext.getRootContext().getAllCreatedBeans()) {
+      log(" -> " + ref.getClazz().getName());
+      log("     qualifiers: " + annotationsToString(ref.getAnnotations()) + ")");
+    }
+    log("Total: " + injectionContext.getRootContext().getAllCreatedBeans().size());
+    displaySeparator();
+  }
+
+  private static String annotationsToString(Annotation[] annotations) {
+    StringBuilder sb = new StringBuilder("[");
+    for (int i = 0; i < annotations.length; i++) {
+      sb.append(annotations[i].annotationType().getName());
+
+      if (i + 1 < annotations.length) sb.append(", ");
+    }
+    return sb.toString();
   }
 }

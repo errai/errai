@@ -8,7 +8,7 @@ import javax.enterprise.inject.Produces;
  */
 @ApplicationScoped
 public class ProducerFactory {
-  @Produces
+  @Produces @Produced
   public Thing produceThing() {
     return new Thing();
   }

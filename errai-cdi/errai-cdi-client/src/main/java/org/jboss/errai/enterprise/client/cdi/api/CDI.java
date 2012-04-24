@@ -16,16 +16,27 @@
 package org.jboss.errai.enterprise.client.cdi.api;
 
 import org.jboss.errai.bus.client.ErraiBus;
-import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.api.base.CommandMessage;
+import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
+import org.jboss.errai.bus.client.framework.Subscription;
 import org.jboss.errai.common.client.api.extension.InitVotes;
+import org.jboss.errai.common.client.protocols.MessageParts;
+import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.enterprise.client.cdi.CDICommands;
+import org.jboss.errai.enterprise.client.cdi.CDIEventTypeLookup;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 
-import javax.enterprise.inject.Any;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -39,36 +50,53 @@ public class CDI {
   public static final String CDI_SUBJECT_PREFIX = "cdi.event:";
   public static final String SERVER_DISPATCHER_SUBJECT = CDI_SUBJECT_PREFIX + "Dispatcher";
   public static final String CLIENT_DISPATCHER_SUBJECT = CDI_SUBJECT_PREFIX + "ClientDispatcher";
-  
-  public static Any ANY_INSTANCE = new Any() {
-    @Override
-    public Class<? extends Annotation> annotationType() {
-      return Any.class;
-    }
+  private static final String CLIENT_ALREADY_FIRED_RESOURCE = CDI_SUBJECT_PREFIX + "AlreadyFired";
 
-    public String toString() {
-      return "@Any";
+  private static final Set<String> remoteEvents = new HashSet<String>();
+  private static boolean active = false;
+  private static final List<DeferredEvent> deferredEvents = new ArrayList<DeferredEvent>();
+  private static final List<Runnable> postInitTasks = new ArrayList<Runnable>();
+
+  private static Map<String, List<MessageCallback>> eventObservers = new HashMap<String, List<MessageCallback>>();
+  private static Map<String, Collection<String>> lookupTable = Collections.emptyMap();
+
+  public static final MessageCallback ROUTING_CALLBACK = new MessageCallback() {
+    @Override
+    public void callback(Message message) {
+      consumeEventFromMessage(message);
     }
   };
-  
-  public static final Annotation[] DEFAULT_QUALIFIERS = new Annotation[] { ANY_INSTANCE };
-
-  static private Set<String> remoteEvents = new HashSet<String>();
-
-  static private boolean active = false;
-  static private List<DeferredEvent> deferredEvents = new ArrayList<DeferredEvent>();
-  static private List<Runnable> postInitTasks = new ArrayList<Runnable>();
-
-  public static String getSubjectNameByType(final Class<?> type) {
-    return getSubjectNameByType(type.getName());
-  }
 
   public static String getSubjectNameByType(final String typeName) {
     return CDI_SUBJECT_PREFIX + typeName;
   }
 
   /**
+   * Should only be called by bootstrapper for testing purposes.
+   */
+  public void __resetSubsystem() {
+    for (String eventType : new HashSet<String>(((ClientMessageBusImpl) ErraiBus.get()).getAllRegisteredSubjects())) {
+      if (eventType.startsWith(CDI_SUBJECT_PREFIX)) {
+        ErraiBus.get().unsubscribeAll(eventType);
+      }
+    }
+
+    remoteEvents.clear();
+    active = false;
+    deferredEvents.clear();
+    postInitTasks.clear();
+    eventObservers.clear();
+    lookupTable = Collections.emptyMap();
+  }
+
+
+  public void initLookupTable(final CDIEventTypeLookup lookup) {
+    lookupTable = lookup.getTypeLookupMap();
+  }
+
+  /**
    * Return a list of string representations for the qualifiers.
+   *
    * @param qualifiers
    * @return
    */
@@ -82,49 +110,92 @@ public class CDI {
         qualifiersPart.add(qualifier.annotationType().getName());
       }
     }
-    return qualifiersPart;
+    return qualifiersPart == null ? Collections.<String>emptyList() : qualifiersPart;
   }
 
   public static void fireEvent(final Object payload, final Annotation... qualifiers) {
+    if (payload == null) return;
+
     if (!active) {
       deferredEvents.add(new DeferredEvent(payload, qualifiers));
       return;
     }
-    else {
+
+    final List<String> qualifiersPart = getQualifiersPart(qualifiers);
+
+    final Map<String, Object> messageMap = new HashMap<String, Object>();
+    messageMap.put(MessageParts.CommandType.name(), CDICommands.CDIEvent.name());
+    messageMap.put(CDIProtocol.BeanType.name(), payload.getClass().getName());
+    messageMap.put(CDIProtocol.BeanReference.name(), payload);
+
+    if (!qualifiersPart.isEmpty()) {
+      messageMap.put(CDIProtocol.Qualifiers.name(), qualifiersPart);
     }
 
-    String subject = getSubjectNameByType(payload.getClass());
-    List<String> qualifiersPart = getQualifiersPart(qualifiers);
-
-    if (ErraiBus.get().isSubscribed(subject)) {
-      if (qualifiersPart != null && !qualifiersPart.isEmpty()) {
-        MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
-                .with(CDIProtocol.BeanType, payload.getClass().getName()).with(CDIProtocol.BeanReference, payload)
-                .with(CDIProtocol.Qualifiers, qualifiersPart).noErrorHandling().sendNowWith(ErraiBus.get());
-      }
-      else {
-        MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
-                .with(CDIProtocol.BeanType, payload.getClass().getName()).with(CDIProtocol.BeanReference, payload)
-                .noErrorHandling().sendNowWith(ErraiBus.get());
-      }
-    }
+    consumeEventFromMessage(CommandMessage.createWithParts(messageMap));
 
     if (remoteEvents.contains(payload.getClass().getName())) {
-      if (qualifiersPart != null && !qualifiersPart.isEmpty()) {
-        MessageBuilder.createMessage().toSubject(SERVER_DISPATCHER_SUBJECT).command(CDICommands.CDIEvent)
-                .with(CDIProtocol.BeanType, payload.getClass().getName()).with(CDIProtocol.BeanReference, payload)
-                .with(CDIProtocol.Qualifiers, qualifiersPart).noErrorHandling().sendNowWith(ErraiBus.get());
+      messageMap.put(MessageParts.ToSubject.name(), SERVER_DISPATCHER_SUBJECT);
+      ErraiBus.get().send(CommandMessage.createWithParts(messageMap));
+    }
+  }
+
+  public static Subscription subscribe(final String eventType, final MessageCallback callback) {
+    List<MessageCallback> observerCallbacks = eventObservers.get(eventType);
+    if (observerCallbacks == null) {
+      eventObservers.put(eventType, observerCallbacks = new ArrayList<MessageCallback>());
+    }
+    observerCallbacks.add(callback);
+    return new Subscription() {
+      @Override
+      public void remove() {
+        unsubscribe(eventType, callback);
       }
-      else {
-        MessageBuilder.createMessage().toSubject(SERVER_DISPATCHER_SUBJECT).command(CDICommands.CDIEvent)
-                .with(CDIProtocol.BeanType, payload.getClass().getName()).with(CDIProtocol.BeanReference, payload)
-                .noErrorHandling().sendNowWith(ErraiBus.get());
+    };
+  }
+
+  private static void unsubscribe(final String eventType, final MessageCallback callback) {
+    List<MessageCallback> observerCallbacks = eventObservers.get(eventType);
+    if (observerCallbacks != null) {
+      observerCallbacks.remove(callback);
+
+      if (observerCallbacks.isEmpty()) {
+        eventObservers.remove(eventType);
       }
     }
   }
 
-  public static String generateId() {
-    return String.valueOf(com.google.gwt.user.client.Random.nextInt(1000)) + "-" + (System.currentTimeMillis() % 1000);
+  public static void consumeEventFromMessage(Message message) {
+    final String beanType = message.get(String.class, CDIProtocol.BeanType);
+    _fireEvent(beanType, message);
+
+    if (lookupTable.containsKey(beanType)) {
+      for (String superType : lookupTable.get(beanType)) {
+        _fireEvent(superType, message);
+      }
+    }
+  }
+
+  private static void _fireEvent(String beanType, Message message) {
+    List<MessageCallback> eventCallbacks = eventObservers.get(beanType);
+    if (eventCallbacks != null) {
+      for (MessageCallback callback : eventCallbacks) {
+        fireIfNotFired(callback, message);
+      }
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  private static void fireIfNotFired(final MessageCallback callback, final Message message) {
+    Map<Object, Object> alreadyFired = message.getResource(Map.class, CLIENT_ALREADY_FIRED_RESOURCE);
+    if (alreadyFired == null) {
+      message.setResource(CLIENT_ALREADY_FIRED_RESOURCE, alreadyFired = new IdentityHashMap<Object, Object>());
+    }
+
+    if (!alreadyFired.containsKey(callback)) {
+      callback.callback(message);
+      alreadyFired.put(callback, "");
+    }
   }
 
   public static void addRemoteEventType(String remoteEvent) {
@@ -138,7 +209,6 @@ public class CDI {
   }
 
   public static void addPostInitTask(Runnable runnable) {
-
     if (active) {
       runnable.run();
     }
@@ -154,7 +224,6 @@ public class CDI {
   public static void activate() {
     if (!active) {
       active = true;
-
       for (DeferredEvent o : deferredEvents) {
         fireEvent(o.eventInstance, o.annotations);
       }
@@ -163,10 +232,15 @@ public class CDI {
         r.run();
       }
 
+      deferredEvents.clear();
 
-      deferredEvents = null;
+      LogUtil.log("activated CDI eventing subsystem.");
     }
     InitVotes.voteFor(CDI.class);
+  }
+
+  public static Set<String> getAllObservedTypes() {
+    return Collections.unmodifiableSet(lookupTable.keySet());
   }
 
   static class DeferredEvent {

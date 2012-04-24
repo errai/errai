@@ -28,9 +28,6 @@ import java.lang.annotation.RetentionPolicy;
  * components. If {@code @Local} is used on the server, then the service is only
  * visible to other server components.
  * <p>
- * As of Errai 2.0, local bus subscriptions only work on the server side. This
- * limitation will be remedied in a future release of Errai.
- * <p>
  * Note: Errai extensions that build on top of the bus and extend its
  * functionality should make their best efforts to integrate this annotation and
  * its intended behaviour.

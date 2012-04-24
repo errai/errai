@@ -2,6 +2,7 @@ package org.jboss.errai.cdi.producer.client;
 
 import javax.enterprise.context.ApplicationScoped;
 
+
 /**
  * @author Mike Brock
  */

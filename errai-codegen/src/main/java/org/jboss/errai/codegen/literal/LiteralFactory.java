@@ -30,7 +30,6 @@ import org.jboss.errai.codegen.SnapshotMaker;
 import org.jboss.errai.codegen.exception.NotLiteralizableException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.meta.MetaType;
 
 /**
  * The literal factory provides a LiteralValue for the specified object (if possible).
@@ -85,19 +84,8 @@ public class LiteralFactory {
     LiteralValue<?> result = LITERAL_CACHE.get(o);
     if (result == null) {
 
-
-      if (o instanceof MetaType) {
-        result = new LiteralValue<MetaType>((MetaType) o) {
-          @Override
-          public String getCanonicalString(Context context) {
-            return getClassReference((MetaClass) o, context, false) + ".class";
-          }
-
-          @Override
-          public String toString() {
-            return o.toString() + ".class";
-          }
-        };
+      if (o instanceof MetaClass) {
+        result = new MetaClassLiteral((MetaClass)o);
       }
       else if (o instanceof Annotation) {
         result = new LiteralValue<Annotation>((Annotation) o) {

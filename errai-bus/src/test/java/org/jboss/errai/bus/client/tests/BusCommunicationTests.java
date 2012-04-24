@@ -47,7 +47,6 @@ public class BusCommunicationTests extends AbstractErraiTest {
       public void run() {
         bus.subscribe("MyTestService", new MessageCallback() {
           public void callback(Message message) {
-            System.out.println("GOT ECHO");
             finishTest();
           }
         });
@@ -67,9 +66,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
       public void run() {
         bus.subscribe("GiantStringClient", new MessageCallback() {
           public void callback(Message message) {
-            System.out.println(message.get(String.class, "string"));
-            System.out.println(++replies);
-            if (replies == 51)
+            if (++replies == 51)
               finishTest();
           }
         });
@@ -87,7 +84,6 @@ public class BusCommunicationTests extends AbstractErraiTest {
       public void run() {
         bus.subscribe("MyTestService", new MessageCallback() {
           public void callback(Message message) {
-            System.out.println("GOT ECHO");
             finishTest();
           }
         });
@@ -136,26 +132,18 @@ public class BusCommunicationTests extends AbstractErraiTest {
         try {
           final SType sType1 = SType.create(new GWTRandomProvider());
 
-          System.out.println("ORIGINAL: " + sType1.toString());
-
           bus.subscribe("ClientReceiver", new MessageCallback() {
             public void callback(Message message) {
               SType type = message.get(SType.class, "SType");
 
               try {
                 assertNotNull(type);
-                System.out.println("CLIENT: " + type.toString());
                 assertEquals(sType1, type);
-
-                //   assertTrue(sType1.equals(type));
-
-                System.out.println("**TEST PASSED**");
                 finishTest();
                 return;
               }
               catch (Throwable e) {
                 e.printStackTrace();
-
               }
               fail();
             }
@@ -185,9 +173,6 @@ public class BusCommunicationTests extends AbstractErraiTest {
 
             try {
               assertNotNull(u);
-
-              System.out.println("BEFORE: " + user.toString());
-              System.out.println("AFTER : " + u.toString());
               assertTrue(user.toString().equals(u.toString()));
 
               finishTest();
@@ -228,28 +213,28 @@ public class BusCommunicationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       public void run() {
         MessageBuilder.createCall(
-                new RemoteCallback<Object>() {
-                  public void callback(Object response) {
-                  }
-                },
-                new ErrorCallback() {
-                  public boolean error(final Message message, final Throwable caught) {
-                    assertNotNull("Message is null.", message);
-                    assertNotNull("Throwable is null.", caught);
+            new RemoteCallback<Object>() {
+              public void callback(Object response) {
+              }
+            },
+            new ErrorCallback() {
+              public boolean error(final Message message, final Throwable caught) {
+                assertNotNull("Message is null.", message);
+                assertNotNull("Throwable is null.", caught);
 
-                    try {
-                      throw caught;
-                    }
-                    catch (TestException e) {
-                      finishTest();
-                    }
-                    catch (Throwable throwable) {
-                      fail("Received wrong Throwable.");
-                    }
-                    return false;
-                  }
-                },
-                TestRPCService.class
+                try {
+                  throw caught;
+                }
+                catch (TestException e) {
+                  finishTest();
+                }
+                catch (Throwable throwable) {
+                  fail("Received wrong Throwable.");
+                }
+                return false;
+              }
+            },
+            TestRPCService.class
         ).exception();
       }
     });
@@ -259,12 +244,12 @@ public class BusCommunicationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       public void run() {
         MessageBuilder.createCall(
-                new RemoteCallback<Void>() {
-                  public void callback(Void response) {
-                    finishTest();
-                  }
-                },
-                TestRPCService.class).returnVoid();
+            new RemoteCallback<Void>() {
+              public void callback(Void response) {
+                finishTest();
+              }
+            },
+            TestRPCService.class).returnVoid();
       }
     });
   }
@@ -319,6 +304,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
                 .toSubject("TestSvc")
                 .command("bar")
                 .done().repliesTo(new MessageCallback() {
+                  
           @Override
           public void callback(Message message) {
             assertEquals("Bar!", message.get(String.class, "Msg"));
@@ -388,7 +374,6 @@ public class BusCommunicationTests extends AbstractErraiTest {
               fail("failed to authenticate with server");
             }
             else if (message.getCommandType().equals("SuccessfulAuth")) {
-              System.out.println("Yay!");
               new CommunicationTasks().tryCommunication();
             }
             else {
@@ -404,6 +389,23 @@ public class BusCommunicationTests extends AbstractErraiTest {
         });
 
         new CommunicationTasks().tryCommunication();
+      }
+    });
+  }
+  
+  public void testPlainMessagingWithRpcEndpoint() {
+    runAfterInit(new Runnable() {
+      public void run() {
+        bus.subscribe("PlainMessageResponse", new MessageCallback() {
+          public void callback(Message message) {
+            finishTest();
+          }
+        });
+
+        MessageBuilder.createMessage()
+                .toSubject("TestRPCServiceImpl")
+                .with(MessageParts.ReplyTo, "PlainMessageResponse")
+                .done().sendNowWith(bus);
       }
     });
   }

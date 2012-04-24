@@ -38,9 +38,9 @@ import org.jboss.errai.codegen.util.GenUtil;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class BuildMetaConstructor extends MetaConstructor implements Builder {
-  private Context context;
   private BuildMetaClass declaringClass;
   private Statement body;
 
@@ -56,28 +56,21 @@ public class BuildMetaConstructor extends MetaConstructor implements Builder {
   private String constructorComment;
 
   public BuildMetaConstructor(BuildMetaClass declaringClass) {
-    this.context = Context.create(declaringClass.getContext());
     this.declaringClass = declaringClass;
   }
 
   public BuildMetaConstructor(BuildMetaClass declaringClass, Statement body) {
-    this.context = Context.create(declaringClass.getContext());
     this.declaringClass = declaringClass;
     this.body = body;
   }
 
   public BuildMetaConstructor(BuildMetaClass declaringClass, Statement body, DefParameters defParameters) {
-    this.context = Context.create(declaringClass.getContext());
-    this.declaringClass = declaringClass;
-    this.body = body;
+    this(declaringClass, body);
     this.defParameters = defParameters;
   }
 
   public BuildMetaConstructor(BuildMetaClass declaringClass, Statement body, Scope scope, DefParameters defParameters) {
-    this.context = Context.create(declaringClass.getContext());
-    this.declaringClass = declaringClass;
-    this.body = body;
-    this.defParameters = defParameters;
+    this(declaringClass, body, defParameters);
     this.scope = scope;
   }
 
@@ -270,6 +263,8 @@ public class BuildMetaConstructor extends MetaConstructor implements Builder {
   public String toJavaString() {
     if (generatedCache != null) return generatedCache;
 
+    Context context = Context.create(declaringClass.getContext());
+    
     for (Parameter p : defParameters.getParameters()) {
       context.addVariable(Variable.create(p.getName(), p.getType()));
     }

@@ -55,7 +55,9 @@ import java.util.Set;
 
 import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
-import static org.jboss.errai.codegen.util.Implementations.*;
+import static org.jboss.errai.codegen.util.Implementations.autoForLoop;
+import static org.jboss.errai.codegen.util.Implementations.autoInitializedField;
+import static org.jboss.errai.codegen.util.Implementations.implement;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 import static org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil.getVarName;
 
@@ -64,6 +66,7 @@ import static org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil.getVarN
  */
 public class MarshallerGeneratorFactory {
   private static final String MARSHALLERS_VAR = "marshallers";
+  private final MarshallerOuputTarget target;
 
   private GeneratorMappingContext mappingContext;
 
@@ -71,13 +74,12 @@ public class MarshallerGeneratorFactory {
   ConstructorBlockBuilder<?> constructor;
   Context classContext;
 
-  Set<String> arrayMarshallers = new HashSet<String>();
+  private final Set<String> arrayMarshallers = new HashSet<String>();
 
-  private Logger log = LoggerFactory.getLogger(MarshallerGeneratorFactory.class);
+  private static final Logger log = LoggerFactory.getLogger(MarshallerGeneratorFactory.class);
 
   long startTime;
 
-  private MarshallerOuputTarget target;
 
   private MarshallerGeneratorFactory(MarshallerOuputTarget target) {
     this.target = target;
@@ -88,8 +90,8 @@ public class MarshallerGeneratorFactory {
   }
 
   public String generate(final String packageName, final String clazzName) {
-    File fileCacheDir = RebindUtils.getErraiCacheDir();
-    File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + clazzName + ".java");
+    final File fileCacheDir = RebindUtils.getErraiCacheDir();
+    final File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + clazzName + ".java");
 
     final Set<Class<? extends Annotation>> annos = new HashSet<Class<? extends Annotation>>();
     annos.add(Portable.class);
@@ -135,7 +137,7 @@ public class MarshallerGeneratorFactory {
       }
     });
 
-    MetaClass javaUtilMap = MetaClassFactory.get(
+    final MetaClass javaUtilMap = MetaClassFactory.get(
             new TypeLiteral<Map<String, Marshaller>>() {
             }
     );
@@ -158,7 +160,7 @@ public class MarshallerGeneratorFactory {
         continue;
       }
 
-      String varName = getVarName(clsName);
+      final String varName = getVarName(clsName);
 
 
       if (marshallerCls.isAnnotationPresent(AlwaysQualify.class)) {
@@ -228,15 +230,15 @@ public class MarshallerGeneratorFactory {
     }
 
     for (Class<?> clazz : exposed) {
-      MappingDefinition definition = mappingContext.getDefinitionsFactory().getDefinition(clazz);
+      final MappingDefinition definition = mappingContext.getDefinitionsFactory().getDefinition(clazz);
       if (definition.getClientMarshallerClass() != null || definition.alreadyGenerated()) {
         continue;
       }
 
-      MetaClass metaClazz = MetaClassFactory.get(clazz);
-      Statement marshaller = marshal(metaClazz);
-      MetaClass type = marshaller.getType();
-      String varName = getVarName(clazz);
+      final MetaClass metaClazz = MetaClassFactory.get(clazz);
+      final Statement marshaller = marshal(metaClazz);
+      final MetaClass type = marshaller.getType();
+      final String varName = getVarName(clazz);
 
       classStructureBuilder.privateField(varName, type).finish();
 
@@ -269,7 +271,8 @@ public class MarshallerGeneratorFactory {
   }
 
   private Statement marshal(MetaClass cls) {
-    MappingStrategy strategy = MappingStrategyFactory.createStrategy(target == MarshallerOuputTarget.GWT, mappingContext, cls);
+    final MappingStrategy strategy = MappingStrategyFactory
+            .createStrategy(target == MarshallerOuputTarget.GWT, mappingContext, cls);
     if (strategy == null) {
       throw new RuntimeException("no available marshaller for class: " + cls.getName());
     }
@@ -277,10 +280,10 @@ public class MarshallerGeneratorFactory {
   }
 
   private String addArrayMarshaller(MetaClass type) {
-    String varName = getVarName(type);
+    final String varName = getVarName(type);
 
     if (!arrayMarshallers.contains(varName)) {
-      Statement marshaller = generateArrayMarshaller(type);
+      final Statement marshaller = generateArrayMarshaller(type);
 
       classStructureBuilder.privateField(varName,
               MetaClassFactory.parameterizedAs(QualifyingMarshallerWrapper.class,
@@ -306,9 +309,9 @@ public class MarshallerGeneratorFactory {
     while (toMap.isArray()) {
       toMap = toMap.getComponentType();
     }
-    int dimensions = GenUtil.getArrayDimensions(arrayType);
+    final int dimensions = GenUtil.getArrayDimensions(arrayType);
 
-    AnonymousClassStructureBuilder classStructureBuilder
+    final AnonymousClassStructureBuilder classStructureBuilder
             = Stmt.create(mappingContext.getCodegenContext())
             .newObject(parameterizedAs(Marshaller.class, typeParametersOf(arrayType))).extend();
 
@@ -316,7 +319,7 @@ public class MarshallerGeneratorFactory {
             .append(Stmt.load(toMap).returnValue())
             .finish();
 
-    BlockBuilder<?> bBuilder = classStructureBuilder.publicOverridesMethod("demarshall",
+    final BlockBuilder<?> bBuilder = classStructureBuilder.publicOverridesMethod("demarshall",
             Parameter.of(EJValue.class, "a0"), Parameter.of(MarshallingSession.class, "a1"));
 
     bBuilder.append(
@@ -362,11 +365,11 @@ public class MarshallerGeneratorFactory {
       outerType = outerType.asBoxed();
     }
 
-    Statement demarshallerStatement =
+    final Statement demarshallerStatement =
             Stmt.loadVariable(getVarName(outerType)).invoke("demarshall", loadVariable("a0")
                     .invoke("get", loadVariable("i")), Stmt.loadVariable("a1"));
 
-    Statement outerAccessorStatement =
+    final Statement outerAccessorStatement =
             loadVariable("newArray", loadVariable("i"))
                     .assignValue(demarshallerStatement);
 

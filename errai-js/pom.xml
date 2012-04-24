@@ -63,7 +63,6 @@ dependencies on it and it breaks deployment on JBoss AS and Tomcat -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>gwt-maven-plugin</artifactId>
-                <version>${gwt.maven}</version>
                 <configuration>
                     <warSourceDirectory>war</warSourceDirectory>
                     <hostedWebapp>war</hostedWebapp>

@@ -16,6 +16,13 @@
 
 package org.jboss.errai.marshalling.server.marshallers;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.nio.charset.Charset;
+
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.common.client.protocols.SerializationParts;
@@ -36,16 +43,12 @@ import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.marshalling.server.api.ServerMarshaller;
 import org.mvel2.DataConversion;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-
 /**
  * @author Mike Brock
  */
 public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
+
+  Charset UTF_8 = Charset.forName("UTF-8");
 
   private MappingDefinition definition;
 
@@ -180,7 +183,7 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
   public void marshall(final OutputStream outstream, Object o, MarshallingSession mSession) throws IOException {
 
     if (o == null) {
-      outstream.write("null".getBytes());
+      outstream.write("null".getBytes(UTF_8));
       return;
     }
 
@@ -193,7 +196,7 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
       outstream.write(("{\"" + SerializationParts.ENCODED_TYPE + "\":\""
               + enumer.getDeclaringClass().getName() + "\""
               + ",\"" + SerializationParts.ENUM_STRING_VALUE + "\":\"" + enumer.name() + "\"}")
-              .getBytes());
+              .getBytes(UTF_8));
 
       return;
     }
@@ -208,7 +211,7 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
        */
 
       outstream.write(("{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + cls.getName()
-              + "\",\"" + SerializationParts.OBJECT_ID + "\":\"" + hash + "\"}").getBytes());
+              + "\",\"" + SerializationParts.OBJECT_ID + "\":\"" + hash + "\"}").getBytes(UTF_8));
 
       return;
     }
@@ -217,7 +220,7 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
     boolean first = true;
 
     outstream.write(("{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + cls.getName() + "\",\""
-            + SerializationParts.OBJECT_ID + "\":\"" + hash + "\",").getBytes());
+            + SerializationParts.OBJECT_ID + "\":\"" + hash + "\",").getBytes(UTF_8));
 
 
     for (MemberMapping mapping : definition.getReadableMemberMappings()) {
@@ -249,20 +252,20 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
         }
       }
 
-      outstream.write(("\"" + mapping.getKey() + "\"").getBytes());
+      outstream.write(("\"" + mapping.getKey() + "\"").getBytes(UTF_8));
 
       outstream.write(':');
       outstream.write(
               MappingContextSingleton.get().getDefinitionsFactory()
                       .getDefinition(mapping.getType()).getMarshallerInstance().marshall(v, ctx)
-                      .getBytes()
+                      .getBytes(UTF_8)
       );
 
       first = false;
     }
 
     if (i == 0) {
-      outstream.write(("\"" + SerializationParts.INSTANTIATE_ONLY + "\":true").getBytes());
+      outstream.write(("\"" + SerializationParts.INSTANTIATE_ONLY + "\":true").getBytes(UTF_8));
     }
 
     outstream.write('}');

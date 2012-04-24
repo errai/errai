@@ -16,22 +16,30 @@
 
 package org.jboss.errai.bus.server;
 
-import io.netty.channel.Channel;
-import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueActivationCallback;
 import org.jboss.errai.bus.server.io.BufferHelper;
+import org.jboss.errai.bus.server.io.QueueChannel;
 import org.jboss.errai.bus.server.io.buffers.BufferCallback;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
+import org.jboss.errai.bus.server.util.LocalContext;
 import org.jboss.errai.bus.server.util.MarkedOutputStream;
 import org.jboss.errai.bus.server.util.ServerBusTools;
 import org.jboss.errai.marshalling.server.util.UnwrappedByteArrayOutputStream;
 import org.slf4j.Logger;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
@@ -52,7 +60,6 @@ public class MessageQueueImpl implements MessageQueue {
   private static final long DOWNGRADE_THRESHOLD = Boolean.getBoolean("org.jboss.errai.debugmode") ?
           secs(1600) : secs(10);
 
-
   private final QueueSession session;
 
   private boolean initLock = true;
@@ -66,17 +73,19 @@ public class MessageQueueImpl implements MessageQueue {
   private final BufferColor bufferColor;
 
   private volatile boolean useDirectSocketChannel = false;
-  private Channel directSocketChannel;
+  private QueueChannel directSocketChannel;
 
   private final Object activationLock = new Object();
   private final AtomicInteger messageCount = new AtomicInteger();
 
-  private Logger log = getLogger(getClass());
+  private static final Logger log = getLogger(MessageQueueImpl.class);
 
-  public MessageQueueImpl(TransmissionBuffer buffer, final QueueSession session) {
+  public MessageQueueImpl(final TransmissionBuffer buffer, final QueueSession session) {
     this.buffer = buffer;
     this.session = session;
     this.bufferColor = BufferColor.getNewColorFromHead(buffer);
+
+
   }
 
   /**
@@ -141,7 +150,16 @@ public class MessageQueueImpl implements MessageQueue {
     }
 
     if (useDirectSocketChannel && directSocketChannel.isConnected()) {
-      directSocketChannel.write(new TextWebSocketFrame("[" + ServerBusTools.encodeMessage(message) + "]"));
+      try {
+        directSocketChannel.write("[" + ServerBusTools.encodeMessage(message) + "]");
+      }
+      catch (Throwable e) {
+        log.info("error writing to socket for queue " + session.getSessionId());
+        LocalContext.get(session).destroy();
+        directSocketChannel = null;
+        stopQueue();
+        e.printStackTrace();
+      }
     }
     else {
       try {
@@ -275,11 +293,14 @@ public class MessageQueueImpl implements MessageQueue {
 
   @Override
   public void wake() {
+    if (!queueRunning) return;
+
     try {
       if (isDirectChannelOpen()) {
         UnwrappedByteArrayOutputStream outputStream = new UnwrappedByteArrayOutputStream();
         buffer.read(outputStream, bufferColor, new BufferHelper.MultiMessageHandlerCallback());
-        directSocketChannel.write(new TextWebSocketFrame(new String(outputStream.toByteArray(), 0, outputStream.size())));
+        // directSocketChannel.write(new TextWebSocketFrame(new String(outputStream.toByteArray(), 0, outputStream.size())));
+        directSocketChannel.write(new String(outputStream.toByteArray(), 0, outputStream.size()));
       }
       else {
         BufferHelper.encodeAndWriteNoop(buffer, bufferColor);
@@ -287,8 +308,9 @@ public class MessageQueueImpl implements MessageQueue {
 
       activateActivationCallback();
     }
-    catch (IOException e) {
-      e.printStackTrace();
+    catch (Throwable e) {
+      log.debug("unable to wake queue: " + session.getSessionId());
+      stopQueue();
     }
   }
 
@@ -337,7 +359,15 @@ public class MessageQueueImpl implements MessageQueue {
    * @return true if the queue is stale
    */
   public boolean isStale() {
-    return !isDirectChannelOpen() && (!queueRunning || ((nanoTime() - lastTransmission) > TIMEOUT));
+    if (!queueRunning) {
+      return true;
+    }
+    else if (!isDirectChannelOpen() && (((nanoTime() - lastTransmission) > TIMEOUT))) {
+      return true;
+    }
+    else {
+      return false;
+    }
   }
 
 
@@ -356,7 +386,7 @@ public class MessageQueueImpl implements MessageQueue {
   }
 
   private boolean isDirectChannelOpen() {
-    return useDirectSocketChannel && directSocketChannel.isOpen();
+    return useDirectSocketChannel && directSocketChannel.isConnected();
   }
 
   /**
@@ -415,11 +445,13 @@ public class MessageQueueImpl implements MessageQueue {
   }
 
   @Override
-  public void setDirectSocketChannel(Channel channel) {
+  public void setDirectSocketChannel(final QueueChannel channel) {
     this.directSocketChannel = channel;
-    this.useDirectSocketChannel = true;
+    this.useDirectSocketChannel = channel != null;
 
-    log.debug("queue " + getSession().getSessionId() + " transitioned to direct channel mode.");
+    if (useDirectSocketChannel) {
+      log.debug("queue " + getSession().getSessionId() + " transitioned to direct channel mode.");
+    }
   }
 
   @Override

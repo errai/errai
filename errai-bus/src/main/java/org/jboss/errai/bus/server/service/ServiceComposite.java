@@ -19,8 +19,8 @@ import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.server.api.SessionProvider;
 
 /**
- * @author: Heiko Braun <hbraun@redhat.com>
- * @date: May 4, 2010
+ * @author Heiko Braun <hbraun@redhat.com>
+ * @date May 4, 2010
  */
 public interface ServiceComposite<S> {
   public SessionProvider<S> getSessionProvider();

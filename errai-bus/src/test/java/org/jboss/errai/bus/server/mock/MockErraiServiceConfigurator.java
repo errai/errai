@@ -62,4 +62,8 @@ public class MockErraiServiceConfigurator implements ErraiServiceConfigurator {
   public Integer getIntProperty(String key) {
     return null;
   }
+
+  @Override
+  public void setProperty(String key, String value) {
+  }
 }

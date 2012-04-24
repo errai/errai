@@ -30,7 +30,7 @@ public class BusTools {
   public static final Set<String> RESERVED_SERVICES;
 
   static {
-    Set<String> s = new HashSet<String>();
+    final Set<String> s = new HashSet<String>();
 
     s.add("ServerBus");
     s.add("AuthorizationService");

@@ -628,4 +628,504 @@ MessageBuilder.createMessage()
       
       <title>Client Logging and Error Handling</title>
     </section>
+    <section id="sid-23036473">
+      
+      <title>Wire Protocol (J.REP)</title>
+      <para>ErraiBus implements a JSON-based wire protocol which is used for the federated communication between different buses. The protocol specification encompasses a standard JSON payload structure, a set of verbs, and an object marshalling protocol. The protocol is named J.REP. Which stands for JSON Rich Event Protocol.  The protocol is named J.REP. Which stands for JSON Rich Event Protocol.</para>
+      <section id="sid-23036473_WireProtocol%28J.REP%29-PayloadStructure">
+        
+        <title>Payload Structure</title>
+        <para>
+          All wire messages sent across are assumed to be JSON arrays at the outermost element, contained in which, there are
+          <emphasis role="italics">0..n</emphasis>
+          messages. An empty array is considered a no-operation, but should be counted as activity against any idle timeout limit between federated buses.
+        </para>
+        <example>
+          <title>Figure 1 - Example J.REP Payload</title>
+          <programlisting language="java">[
+  {"ToSubject" : "SomeEndpoint", "Value" : "SomeValue" },
+  {"ToSubject" : "SomeOtherEndpoint", "Value" : "SomeOtherValue"}
+]</programlisting>
+        </example>
+        <para>
+          In
+          <emphasis role="strong">Figure 1</emphasis>
+          , we see an example of a J.REP payload containing two messages. One bound for an endpoint named
+          <code>"SomeEndpoint"</code>
+          and the other bound for the endpoint
+          <code>"SomeOtherEndpoint"</code>
+          . They both include a payload element
+          <code>"Value"</code>
+          which contain strings. Let's take a look at the anatomy of an individual message.
+        </para>
+        <example>
+          <title>Figure 2 - An J.REP Message</title>
+          <programlisting language="java">{
+  "ToSubject" : "TopicSubscriber",
+  "CommandType" : "Subscribe",
+  "Value " : "happyTopic",
+  "ReplyTo" : "MyTopicSubscriberReplyTo"
+}</programlisting>
+        </example>
+        <para>
+          The message shown in
+          <emphasis role="strong">Figure 2</emphasis>
+          shows a very vanilla J.REP message. The keys of the JSON Object represent individual
+          <emphasis role="italics">message parts</emphasis>
+          , with the values representing their corresponding values. The standard J.REP protocol encompasses a set of standard message parts and values, which for the purposes of this specification we'll collectively refer to as the protocol verbs.
+        </para>
+        <para>The following table describes all of the message parts that a J.REP capable client is expected to understand:</para>
+        <informaltable>
+          <tgroup cols="4">
+            <thead>
+              <row>
+                <entry>
+                  <para>Part</para>
+                </entry>
+                <entry>
+                  <para>Required</para>
+                </entry>
+                <entry>
+                  <para>JSON Type</para>
+                </entry>
+                <entry>
+                  <para>Description</para>
+                </entry>
+              </row>
+            </thead>
+            <tbody>
+              <row>
+                <entry>
+                  <para>
+                    <code>ToSubject</code>
+                  </para>
+                </entry>
+                <entry>
+                  <para>Yes</para>
+                </entry>
+                <entry>
+                  <para>String</para>
+                </entry>
+                <entry>
+                  <para>Specifies the subject within the bus, and its federation, which the message should be routed to.</para>
+                </entry>
+              </row>
+              <row>
+                <entry>
+                  <para>
+                    <code>CommandType</code>
+                  </para>
+                </entry>
+                <entry>
+                  <para>No</para>
+                </entry>
+                <entry>
+                  <para>String</para>
+                </entry>
+                <entry>
+                  <para>Specifies a command verb to be transmitted to the receiving subject. This is an optional part of a message contract, but is required for using management services</para>
+                </entry>
+              </row>
+              <row>
+                <entry>
+                  <para>
+                    <code>ReplyTo</code>
+                  </para>
+                </entry>
+                <entry>
+                  <para>No</para>
+                </entry>
+                <entry>
+                  <para>String</para>
+                </entry>
+                <entry>
+                  <para>Specifies to the receiver what subject it should reply to in response to this message.</para>
+                </entry>
+              </row>
+              <row>
+                <entry>
+                  <para>
+                    <code>Value</code>
+                  </para>
+                </entry>
+                <entry>
+                  <para>No</para>
+                </entry>
+                <entry>
+                  <para>Any</para>
+                </entry>
+                <entry>
+                  <para>A recommended but not required standard payload part for sending data to services</para>
+                </entry>
+              </row>
+              <row>
+                <entry>
+                  <para>
+                    <code>PriorityProcessing</code>
+                  </para>
+                </entry>
+                <entry>
+                  <para>No</para>
+                </entry>
+                <entry>
+                  <para>Number</para>
+                </entry>
+                <entry>
+                  <para>A processing order salience attribute. Messages which specify priority processing will be processed first if they are competing for resources with other messages in flight. Note: the current version of ErraiBus only supports two salience levels (0 and &gt;1). Any non-zero salience in ErraiBus will be given the same priority relative to 0 salience messages</para>
+                </entry>
+              </row>
+              <row>
+                <entry>
+                  <para>
+                    <code>ErrorMessage</code>
+                  </para>
+                </entry>
+                <entry>
+                  <para>No</para>
+                </entry>
+                <entry>
+                  <para>String</para>
+                </entry>
+                <entry>
+                  <para>An accompanying error message with any serialized exception</para>
+                </entry>
+              </row>
+              <row>
+                <entry>
+                  <para>
+                    <code>Throwable</code>
+                  </para>
+                </entry>
+                <entry>
+                  <para>No</para>
+                </entry>
+                <entry>
+                  <para>Object</para>
+                </entry>
+                <entry>
+                  <para>If applicable, an encoded object representing any remote exception that was thrown while dispatching the specified service</para>
+                </entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </informaltable>
+        <section id="sid-23036473_WireProtocol%28J.REP%29-BuiltinSubjects">
+          
+          <title>Built-in Subjects</title>
+          <para>The table contains a list of reserved subject names used for facilitating things like bus management and error handling. A bus should never allow clients to subscribe to these subjects directly.</para>
+          <informaltable>
+            <tgroup cols="2">
+              <thead>
+                <row>
+                  <entry>
+                    <para>Subject</para>
+                  </entry>
+                  <entry>
+                    <para>Description</para>
+                  </entry>
+                </row>
+              </thead>
+              <tbody>
+                <row>
+                  <entry>
+                    <para>
+                      <code>ClientBus</code>
+                    </para>
+                  </entry>
+                  <entry>
+                    <para>The self-hosted message bus endpoint on the client</para>
+                  </entry>
+                </row>
+                <row>
+                  <entry>
+                    <para>
+                      <code>ServerBus</code>
+                    </para>
+                  </entry>
+                  <entry>
+                    <para>The self-hosted message bus endpoint on the server</para>
+                  </entry>
+                </row>
+                <row>
+                  <entry>
+                    <para>
+                      <code>ClientBusErrors</code>
+                    </para>
+                  </entry>
+                  <entry>
+                    <para>The standard error receiving service for clients</para>
+                  </entry>
+                </row>
+              </tbody>
+            </tgroup>
+          </informaltable>
+          <para>
+            As this table indicates, the bus management protocols in J.REP are accomplished using self-hosted services. See the section on
+            <emphasis role="strong">Bus Management and Handshaking Protocols</emphasis>
+            for details.
+          </para>
+        </section>
+      </section>
+      <section id="sid-23036473_WireProtocol%28J.REP%29-MessageRouting">
+        
+        <title>Message Routing</title>
+        <para>There is no real distinction in the J.REP protocol between communication with the server, versus communication with the client. In fact, it assumed from an architectural standpoint that there is no real distinction between a client and a server. Each bus participates in a flat-namespaced federation. Therefore, it is possible that a subject may be observed on both the server and the client.</para>
+        <para>One in-built assumption of a J.REP-compliant bus however, is that messages are routed within the auspices of session isolation. Consider the following diagram:</para>
+        <para>
+          <figure>
+            <title>Figure 3 - Topology of a J.REP Messaging Federation</title>
+            <mediaobject>
+              <imageobject>
+                <imagedata fileref="author/download/attachments/23036473/FederationTopology.png"/>
+              </imageobject>
+            </mediaobject>
+          </figure>
+        </para>
+        <para>
+          In
+          <emphasis role="strong">Figure 3</emphasis>
+          , is is possible for
+          <emphasis role="italics">Client A</emphasis>
+          to send messages to the subjects
+          <emphasis role="italics">ServiceA</emphasis>
+          and
+          <emphasis role="italics">ServiceB</emphasis>
+          . But it is not possible to address messages to
+          <emphasis role="italics">ServiceC</emphasis>
+          . Conversely,
+          <emphasis role="italics">Client A</emphasis>
+          can address messages to
+          <emphasis role="italics">ServiceC</emphasis>
+          and
+          <emphasis role="italics">ServiceB</emphasis>
+          , but not
+          <emphasis role="italics">ServiceA</emphasis>
+          .
+        </para>
+      </section>
+      <section id="sid-23036473_WireProtocol%28J.REP%29-BusManagementandHandshakingProtocols">
+        
+        <title>Bus Management and Handshaking Protocols</title>
+        <para>
+          Federation between buses requires management traffic to negotiate connections and manage visibility of services between buses. This is accomplished through  services named
+          <code>ClientBus</code>
+          and
+          <code>ServerBus</code>
+          which both implement the same protocol contracts which are defined in this section.
+        </para>
+        <section id="sid-23036473_WireProtocol%28J.REP%29-ServerBusandClientBuscommands">
+          
+          <title>ServerBus and ClientBus commands</title>
+          <para>
+            Both bus services share the same management protocols, by implementing verbs (or commands) that perform different actions. These are specified in the protocol with the
+            <code>CommandType</code>
+            message part. The following table describes these commands:
+          </para>
+          <table>
+            <title>Message Parts for Bus Commands:</title>
+            <tgroup cols="3">
+              <thead>
+                <row>
+                  <entry>
+                    <para>Command / Verb</para>
+                  </entry>
+                  <entry>
+                    <para>Message Parts</para>
+                  </entry>
+                  <entry>
+                    <para>Description</para>
+                  </entry>
+                </row>
+              </thead>
+              <tbody>
+                <row>
+                  <entry>
+                    <para>
+                      <code>ConnectToQueue</code>
+                    </para>
+                  </entry>
+                  <entry>
+                    <para>N/A</para>
+                  </entry>
+                  <entry>
+                    <para>The first message sent by a connecting client to begin the handshaking process.</para>
+                  </entry>
+                </row>
+                <row>
+                  <entry>
+                    <para>
+                      <code>CapabilitiesNotice</code>
+                    </para>
+                  </entry>
+                  <entry>
+                    <para>
+                      <code>CapabilitiesFlags</code>
+                    </para>
+                  </entry>
+                  <entry>
+                    <para>A message sent by one bus to another to notify it of its capabilities during handshake (for instance long polling or websockets)</para>
+                  </entry>
+                </row>
+                <row>
+                  <entry>
+                    <para>
+                      <code>FinishStateSync</code>
+                    </para>
+                  </entry>
+                  <entry>
+                    <para>N/A</para>
+                  </entry>
+                  <entry>
+                    <para>A message sent from one bus to another to indicate that it has now provided all necessary information to the counter-party bus to establish the federation. When both buses have sent this message to each other, the federation is considered active.</para>
+                  </entry>
+                </row>
+                <row>
+                  <entry>
+                    <para>
+                      <code>RemoteSubscribe</code>
+                    </para>
+                  </entry>
+                  <entry>
+                    <para>
+                      <code>Subject</code>
+                      <emphasis role="italics">or</emphasis>
+                      <code>SubjectsList</code>
+                    </para>
+                  </entry>
+                  <entry>
+                    <para>A message sent to the remote bus to notify it of a service or set of services which it is capable of routing to.</para>
+                  </entry>
+                </row>
+                <row>
+                  <entry>
+                    <para>
+                      <code>RemoteUnsubscribe</code>
+                    </para>
+                  </entry>
+                  <entry>
+                    <para>
+                      <code>Subject</code>
+                    </para>
+                  </entry>
+                  <entry>
+                    <para>A message sent to the remote bus to notify it that a service is no longer available.</para>
+                  </entry>
+                </row>
+                <row>
+                  <entry>
+                    <para>
+                      <code>Disconnect</code>
+                    </para>
+                  </entry>
+                  <entry>
+                    <para>
+                      <code>Reason</code>
+                    </para>
+                  </entry>
+                  <entry>
+                    <para>A message sent to a server bus from a client bus to indicate that it wishes to disconnect and defederate. Or, when sent from the client to server, indicates that the session has been terminated.</para>
+                  </entry>
+                </row>
+                <row>
+                  <entry>
+                    <para>
+                      <code>SessionExpired</code>
+                    </para>
+                  </entry>
+                  <entry>
+                    <para>N/A</para>
+                  </entry>
+                  <entry>
+                    <para>A message sent to a client bus to indicate that its messages are no longer being routed because it no longer has an active session</para>
+                  </entry>
+                </row>
+                <row>
+                  <entry>
+                    <para>
+                      <code>Heartbeat</code>
+                    </para>
+                  </entry>
+                  <entry>
+                    <para>N/A</para>
+                  </entry>
+                  <entry>
+                    <para>A message sent from one bus to another periodically to indicate it is still active.</para>
+                  </entry>
+                </row>
+              </tbody>
+            </tgroup>
+          </table>
+          <informaltable>
+            <tgroup cols="4">
+              <thead>
+                <row>
+                  <entry>
+                    <para>Part</para>
+                  </entry>
+                  <entry>
+                    <para>Required</para>
+                  </entry>
+                  <entry>
+                    <para>JSON Type</para>
+                  </entry>
+                  <entry>
+                    <para>Description</para>
+                  </entry>
+                </row>
+              </thead>
+              <tbody>
+                <row>
+                  <entry>
+                    <para>
+                      <code>CapabilitiesFlags</code>
+                    </para>
+                  </entry>
+                  <entry>
+                    <para>Yes</para>
+                  </entry>
+                  <entry>
+                    <para>String</para>
+                  </entry>
+                  <entry>
+                    <para>A comma delimited string of capabilities the bus is capable of us</para>
+                  </entry>
+                </row>
+                <row>
+                  <entry>
+                    <para>
+                      <code>Subject</code>
+                    </para>
+                  </entry>
+                  <entry>
+                    <para>Yes</para>
+                  </entry>
+                  <entry>
+                    <para>String</para>
+                  </entry>
+                  <entry>
+                    <para>The subject to subscribe or unsubscribe from</para>
+                  </entry>
+                </row>
+                <row>
+                  <entry>
+                    <para>
+                      <code>SubjectsList</code>
+                    </para>
+                  </entry>
+                  <entry>
+                    <para>Yes</para>
+                  </entry>
+                  <entry>
+                    <para>Array</para>
+                  </entry>
+                  <entry>
+                    <para>An array of strings representing a list of subjects to subscribe to</para>
+                  </entry>
+                </row>
+              </tbody>
+            </tgroup>
+          </informaltable>
+        </section>
+      </section>
+    </section>
   </chapter>

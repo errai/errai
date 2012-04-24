@@ -25,6 +25,7 @@ import org.jboss.errai.marshalling.server.ServerMarshalling;
 import org.jboss.errai.marshalling.tests.res.SType;
 import org.jboss.errai.marshalling.tests.res.shared.Role;
 import org.jboss.errai.marshalling.tests.res.shared.User;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -49,8 +50,6 @@ public class ServerMarshallingTest {
 
     MarshallingSession encSession = MarshallingSessionProviderFactory.getEncoding();
     String enc = "[" + marshaller.marshall(value, encSession) + "]";
-
-    System.out.println("encoded: " + enc);
 
     MarshallingSession decSession = MarshallingSessionProviderFactory.getDecoding();
     EJValue parsedJson = ParserFactory.get().parse(enc);
@@ -101,6 +100,35 @@ public class ServerMarshallingTest {
   @Test
   public void testString() {
     testEncodeDecode(String.class, "ThisIsOurTestString");
+  }
+
+  @Test
+  public void testStringEncodeWithHighLevelAPI() {
+    final String val = "Seventeen-oh-one";
+    String json = ServerMarshalling.toJSON(val);
+    assertEquals("\"Seventeen-oh-one\"", json);
+  }
+
+  /**
+   * This method tests for string round-trip encode/decode using the
+   * ServerMarshalling.toJSON() and ServerMarshalling.fromJSON() methods
+   * specifically. The success or failure of this method is not predicted by the
+   * success or failure of {@link #testString()}, which uses lower-level APIs.
+   */
+  @Test @Ignore // FIXME ignored for 2.0. hope to fix in 2.1. (ERRAI-271)
+  public void testStringRoundTripWithHighLevelAPI() {
+    final String val = "Seventeen-oh-one";
+    String json = ServerMarshalling.toJSON(val);
+    Assert.assertEquals("Failed to round-trip the string", val, ServerMarshalling.fromJSON(json));
+  }
+
+  /**
+   * Tests that strings containing non-ASCII characters survive the
+   * encode/decode process.
+   */
+  @Test
+  public void testNonAsciiString() {
+    testEncodeDecode(String.class, "S\u00ebvent\u00e9\u00ebn-\u00f8h-\u00f3\u00f1e");
   }
 
   @Test
@@ -443,4 +471,5 @@ public class ServerMarshallingTest {
     String json = ServerMarshalling.toJSON(val);
     Assert.assertEquals("Failed to marshall/demarshall float", val, ServerMarshalling.fromJSON(json));
   }
+
 }

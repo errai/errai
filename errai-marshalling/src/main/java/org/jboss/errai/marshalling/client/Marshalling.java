@@ -6,7 +6,7 @@
  * You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
- *  
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,17 +16,18 @@
 
 package org.jboss.errai.marshalling.client;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.ParserFactory;
+import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.marshallers.ListMarshaller;
 import org.jboss.errai.marshalling.client.marshallers.MapMarshaller;
 import org.jboss.errai.marshalling.client.util.NumbersUtils;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author Mike Brock
@@ -65,8 +66,10 @@ public abstract class Marshalling {
   }
 
   public static <T> T fromJSON(String json, Class<T> type) {
+    EJValue parsedValue = ParserFactory.get().parse(json);
     MarshallingSession session = MarshallingSessionProviderFactory.getDecoding();
-    return (T) session.getMarshallerInstance(type.getName()).demarshall(ParserFactory.get().parse(json), session);
+    Marshaller<Object> marshallerInstance = session.getMarshallerInstance(type.getName());
+    return (T) marshallerInstance.demarshall(parsedValue, session);
   }
 
   public static Object fromJSON(String json) {
@@ -74,8 +77,7 @@ public abstract class Marshalling {
   }
 
   private static boolean needsQualification(Object o) {
-    return o instanceof String
-            || (o instanceof Number && o.getClass().getName().startsWith("java.lang.") && !(o instanceof Long))
+    return (o instanceof Number && o.getClass().getName().startsWith("java.lang.") && !(o instanceof Long))
             || o instanceof Boolean || o instanceof Character;
   }
 }

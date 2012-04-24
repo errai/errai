@@ -136,6 +136,11 @@ public class JSONUtilCli {
     }
 
     @Override
+    public String getParentSessionId() {
+      return "<InBus>";
+    }
+
+    @Override
     public boolean isValid() {
       return true;
     }

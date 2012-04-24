@@ -17,13 +17,18 @@
 package org.jboss.errai.bus.server.service;
 
 import com.google.inject.Inject;
-import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
-import org.jboss.errai.bus.server.api.ServerMessageBus;
+import org.jboss.errai.common.client.api.ResourceProvider;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.Set;
 
 import static java.util.ResourceBundle.getBundle;
 
@@ -31,22 +36,20 @@ import static java.util.ResourceBundle.getBundle;
  * Default implementation of the ErraiBus server-side configurator.
  */
 public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
-  private ServerMessageBus bus;
   private MetaDataScanner scanner;
   private Map<String, String> properties;
 
+  private final Map<String, String> attributeMap;
   private Map<Class<?>, ResourceProvider> extensionBindings;
   private Map<String, ResourceProvider> resourceProviders;
   private Set<Class> serializableTypes;
 
   /**
    * Initializes the <tt>ErraiServiceConfigurator</tt> with a specified <tt>ServerMessageBus</tt>
-   *
-   * @param bus - the server message bus in charge of transmitting messages
    */
   @Inject
-  public ErraiServiceConfiguratorImpl(ServerMessageBus bus) {
-    this.bus = bus;
+  public ErraiServiceConfiguratorImpl() {
+    this.attributeMap = new HashMap<String, String>();
     this.extensionBindings = new HashMap<Class<?>, ResourceProvider>();
     this.resourceProviders = new HashMap<String, ResourceProvider>();
     this.serializableTypes = new HashSet<Class>();
@@ -56,7 +59,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
 
   // lockdown the configuration so it can't be modified.
   public void lockdown() {
-    properties = Collections.unmodifiableMap(properties);
+//    properties = Collections.unmodifiableMap(properties);
     extensionBindings = Collections.unmodifiableMap(extensionBindings);
     serializableTypes = Collections.unmodifiableSet(serializableTypes);
   }
@@ -165,4 +168,10 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
   public Set<Class> getSerializableTypes() {
     return serializableTypes;
   }
+
+  @Override
+  public void setProperty(String key, String value) {
+    this.properties.put(key, value);
+  }
 }
+

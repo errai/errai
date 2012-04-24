@@ -52,11 +52,12 @@ public class ProxyInjector extends AbstractInjector {
   private final MetaClass proxiedType;
   private final BuildMetaClass proxyClass;
 
+
   public ProxyInjector(IOCProcessingContext context, MetaClass proxiedType, QualifyingMetadata metadata) {
     this.proxiedType = proxiedType;
     this.varName = InjectUtil.getNewInjectorName() + "_proxy";
     this.qualifyingMetadata = metadata;
-    String proxyClassName = proxiedType.getFullyQualifiedName().replaceAll("\\.", "_") + "_" + varName;
+    final String proxyClassName = proxiedType.getFullyQualifiedName().replaceAll("\\.", "_") + "_" + varName;
 
     this.closeStatements = new ArrayList<Statement>();
 
@@ -70,19 +71,19 @@ public class ProxyInjector extends AbstractInjector {
 
   @Override
   public Statement getBeanInstance(InjectableInstance injectableInstance) {
-    IOCProcessingContext pCtx = injectableInstance.getInjectionContext().getProcessingContext();
+    final IOCProcessingContext pCtx = injectableInstance.getInjectionContext().getProcessingContext();
 
     pCtx.append(declareVariable(proxyClass).asFinal().named(varName).initializeWith(newObject(proxyClass)));
 
-    MetaClass proxyResolverRef = parameterizedAs(ProxyResolver.class, typeParametersOf(proxiedType));
+    final MetaClass proxyResolverRef = parameterizedAs(ProxyResolver.class, typeParametersOf(proxiedType));
 
-    BlockBuilder<AnonymousClassStructureBuilder> proxyResolverBody = newObject(proxyResolverRef)
+    final BlockBuilder<AnonymousClassStructureBuilder> proxyResolverBody = newObject(proxyResolverRef)
             .extend().publicOverridesMethod("resolve", Parameter.of(proxiedType, "obj"));
 
-    Statement proxyResolver = proxyResolverBody.append(loadVariable(varName)
+    final Statement proxyResolver = proxyResolverBody._(loadVariable(varName)
             .invoke(ProxyMaker.PROXY_BIND_METHOD, Refs.get("obj"))).finish().finish();
 
-    proxyResolverBody.append(Stmt.loadVariable("context").invoke("addProxyReference", Refs.get(varName), Refs.get("obj")));
+    proxyResolverBody._(Stmt.loadVariable("context").invoke("addProxyReference", Refs.get(varName), Refs.get("obj")));
 
     pCtx.append(loadVariable("context").invoke("addUnresolvedProxy", proxyResolver,
             proxiedType, qualifyingMetadata.getQualifiers()));

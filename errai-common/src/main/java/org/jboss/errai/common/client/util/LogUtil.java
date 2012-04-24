@@ -44,4 +44,15 @@ public final class LogUtil {
   public static native void nativeLog(String message) /*-{
     window.console.log(message);
   }-*/;
+
+  public static void displaySeparator() {
+    nativeLog("------------------------------------------------");
+
+  }
+
+  public static void displayDebuggerUtilityTitle(String title) {
+    nativeLog(title);
+    displaySeparator();
+  }
+
 }

@@ -44,6 +44,7 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.ConstructionStatusCallback;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
+import org.mvel2.util.NullType;
 
 /**
  * This injector implementation is responsible for the lion's share of the container's workload. It is responsible
@@ -62,6 +63,10 @@ public class TypeInjector extends AbstractInjector {
 
   public TypeInjector(MetaClass type, InjectionContext context, Annotation[] additionalQualifiers) {
     this.type = type;
+
+    if (type.getFullyQualifiedName().equals(NullType.class.getName())) {
+      new Throwable().printStackTrace();
+    }
 
     // check to see if this is a singleton and/or alternative bean
 
@@ -134,9 +139,10 @@ public class TypeInjector extends AbstractInjector {
     render local variables Class::beanType and Annotation[]::qualifiers at the beginning of the getInstance()
     method so we can easily refer to them later on.
     */
-    callbackBuilder.append(declareVariable(Class.class).named("beanType").initializeWith(load(type)));
-    callbackBuilder.append(declareVariable(Annotation[].class).named("qualifiers")
-            .initializeWith(load(qualifyingMetadata.getQualifiers())));
+    callbackBuilder
+            ._(declareVariable(Class.class).named("beanType").initializeWith(load(type)))
+            ._(declareVariable(Annotation[].class).named("qualifiers")
+                    .initializeWith(load(qualifyingMetadata.getQualifiers())));
 
 
     /* push the method block builder onto the stack, so injection tasks are rendered appropriately. */

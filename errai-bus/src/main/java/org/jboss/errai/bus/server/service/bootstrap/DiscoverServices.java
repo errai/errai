@@ -15,6 +15,7 @@
  */
 package org.jboss.errai.bus.server.service.bootstrap;
 
+import org.jboss.errai.bus.server.service.ErraiConfigAttribs;
 import org.jboss.errai.bus.server.service.ErraiServiceConfiguratorImpl;
 import org.jboss.errai.bus.server.service.ServiceProcessor;
 import org.jboss.errai.common.metadata.MetaDataProcessor;
@@ -25,7 +26,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Parses the annotation meta data and configures both services and extensions.
  *
- * @author Heiko Braun <hbraun@redhat.com>
+ * @author Heiko Braun
+ * @author Mike Brock
  */
 class DiscoverServices implements BootstrapExecution {
   private Logger log = LoggerFactory.getLogger(DiscoverServices.class);
@@ -57,15 +59,7 @@ class DiscoverServices implements BootstrapExecution {
   }
 
   private boolean isAutoScanEnabled(ErraiServiceConfiguratorImpl config) {
-    boolean autoScanModules = true;
-
-    if (System.getProperty("errai.auto_discover_services") != null) {
-      autoScanModules = Boolean.getBoolean("errai.auto_discover_services");
-    }
-    else if (config.hasProperty("errai.auto_discover_services")) {
-      autoScanModules = Boolean.parseBoolean(config.getProperty("errai.auto_discover_services"));
-    }
-    return autoScanModules;
+    return ErraiConfigAttribs.AUTO_DISCOVER_SERVICES.getBoolean(config);
   }
 
 }

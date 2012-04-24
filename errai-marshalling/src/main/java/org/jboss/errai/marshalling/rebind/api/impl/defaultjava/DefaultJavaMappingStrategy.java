@@ -19,6 +19,8 @@ package org.jboss.errai.marshalling.rebind.api.impl.defaultjava;
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.StringStatement;
+import org.jboss.errai.codegen.TernaryStatement;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.CatchBlockBuilder;
@@ -472,16 +474,27 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
   }
 
   public Statement demarshallEnum(Statement valueStatement, MetaClass toType) {
-    return Stmt.invokeStatic(Enum.class, "valueOf", toType, Stmt.nestedCall(valueStatement)
-            .invoke("get", SerializationParts.ENUM_STRING_VALUE).invoke("isString").invoke("stringValue"));
+    TernaryStatement ternaryStatement = new TernaryStatement(Bool.isNotNull(valueStatement),
+            Stmt.invokeStatic(Enum.class, "valueOf", toType, Stmt.nestedCall(valueStatement)
+                    .invoke("get", SerializationParts.ENUM_STRING_VALUE).invoke("isString").invoke("stringValue")),
+            Stmt.load(null));
+
+    return ternaryStatement;
   }
 
   public Implementations.StringBuilderBuilder marshallEnum(Implementations.StringBuilderBuilder sb,
                                                            Statement valueStatement,
                                                            MetaClass toType) {
-    return sb.append("{\"" + SerializationParts.ENCODED_TYPE
-            + "\":\"" + toType.getFullyQualifiedName() + "\",\"" + SerializationParts.ENUM_STRING_VALUE + "\":\"")
+
+    Implementations.StringBuilderBuilder internalSBB = Implementations.newStringBuilder()
+            .append("{\"" + SerializationParts.ENCODED_TYPE
+                    + "\":\"" + toType.getFullyQualifiedName() + "\",\"" + SerializationParts.ENUM_STRING_VALUE + "\":\"")
             .append(Stmt.nestedCall(valueStatement).invoke("name")).append("\"}");
+
+    TernaryStatement ternaryStatement = new TernaryStatement(
+            Bool.isNotNull(valueStatement), internalSBB, Stmt.load("null"));
+
+    return sb.append(ternaryStatement);
   }
 
 

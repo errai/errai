@@ -20,6 +20,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Timer;
 import org.jboss.errai.common.client.api.tasks.AsyncTask;
 import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
+import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.common.client.util.TimeUnit;
 
 import java.util.ArrayList;
@@ -49,9 +50,12 @@ public final class InitVotes {
   private static boolean armed = false;
   private static final Set<String> waitForSet = new HashSet<String>();
 
-  private static int timeoutMillis = !GWT.isProdMode() ? 60000 : 5000;
+  private static int timeoutMillis = !GWT.isProdMode() ? 60000 : 7500;
 
   private static volatile AsyncTask initTimeout;
+  private static volatile AsyncTask initDelay;
+
+  private static boolean _initWait = false;
 
   private static final Object lock = new Object();
 
@@ -119,7 +123,6 @@ public final class InitVotes {
    */
   public static void voteFor(final Class<?> clazz) {
     voteFor(clazz.getName());
-
   }
 
   private static void voteFor(String topic) {
@@ -132,25 +135,34 @@ public final class InitVotes {
         log("  still waiting for -> " + waitForSet);
 
       if (armed && waitForSet.isEmpty()) {
-        initWindow();
+        scheduleFinish();
       }
     }
   }
 
-  private static void initWindow() {
-    synchronized (lock) {
-      cancelFailTimer();
-      TaskManagerFactory.get().schedule(TimeUnit.MILLISECONDS, 50, new Runnable() {
-        @Override
-        public void run() {
-          cancelFailTimer();
-          if (armed && waitForSet.isEmpty()) {
-            finishInit();
-          }
-        }
-      });
-    }
+  private static void scheduleFinish() {
+    if (_initWait) return;
+    _initWait = true;
 
+    final Runnable tryInit = new Runnable() {
+      @Override
+       public void run() {
+         if (armed && waitForSet.isEmpty()) {
+           cancelFailTimer();
+           finishInit();
+           _initWait = false;
+         }
+         else {
+           _scheduleFinish(this);
+         }
+       }
+    };
+
+    _scheduleFinish(tryInit);
+  }
+
+  private static void _scheduleFinish(Runnable runnable) {
+    initDelay = TaskManagerFactory.get().schedule(TimeUnit.MILLISECONDS, 250, runnable);
   }
 
   /**
@@ -186,12 +198,20 @@ public final class InitVotes {
       }
 
       armed = true;
+      _initWait = false;
+      if (initTimeout != null) {
+        initTimeout.cancel(true);
+      }
 
       initTimeout = TaskManagerFactory.get().schedule(TimeUnit.MILLISECONDS, timeoutMillis, new Runnable() {
         @Override
         public void run() {
           synchronized (lock) {
             if (waitForSet.isEmpty() || !armed) return;
+
+            if (initDelay != null) {
+              initDelay.cancel(true);
+            }
 
             log("components failed to initialize");
             for (String comp : waitForSet) {

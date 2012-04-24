@@ -35,8 +35,6 @@ Release Steps
    * Edit the version numbers in Book_Info.xml to reflect release version
    * UPLOAD SINGLE_HTML OUTPUT, not the multi-page version
 
-1. Update quickstart docs to reflect the new version number
-
 1. Export docbook from confluence for /quickstart
    * https://docs.jboss.org/author/spaces/jboss_docbook_tools/exportandpostprocessConfigure.action?spaceKey=ERRAI&pageId=5833096
      (Single book output, no static files)
@@ -46,6 +44,8 @@ Release Steps
    * Manually copy the author directory from the downloaded zip into all three docbook
      output directories (html_single, html, pdf)
    * remember to upload single_html, multi-page html, and pdf versions
+
+1. Update quickstart docs to reflect the new version number
 
 1. Ask Maven to update the version number in all the pom.xml files:
    cd into the errai root directory	
@@ -82,26 +82,8 @@ Release Steps
 
 1. Create and upload the a-la-carte binary Errai distribution and docs
    * % mvn install -Pdistro
-   * % sftp errai@filemgmt.jboss.org
-   
-   * sftp> cd /docs_htdocs/errai
-   * sftp> mkdir x.y.z.Final
-   * sftp> cd x.y.z.Final
-   * sftp> mkdir errai
-   * sftp> mkdir errai-cdi
-   
-   * sftp> cd /downloads_htdocs/errai/dist
-   * sftp> mkdir x.y.z.Final
-
-   * % scp errai-x.y.z-Final.zip errai@filemgmt.jboss.org:/downloads_htdocs/errai/dist/x.y.z.Final/
-
-   * Errai docs:
-   * % scp -rp . errai@filemgmt.jboss.org:/docs_htdocs/errai/x.y.z.Final/errai/reference
-   * % scp -rp . errai@filemgmt.jboss.org:/docs_htdocs/errai/x.y.z.Final/errai/quickstart
-   * Download author directory of previous release and upload it to both /reference/html/author and /reference/html_single/author
-
-   * rename PDFs to Errai[_CDI]_x.y.z.Final_[Reference][Quickstart]_Guide.pdf
-
+   * % cd dist
+   * % ./scripts/upload_binaries.sh {version}
 
 1. Browse to nexus (https://repository.jboss.org/nexus/index.html)
    Find the corresponding staging repository (Sort by repository name)
@@ -120,5 +102,3 @@ Release Steps
 
 TODO list:
   - fix docbook export to include images, and add language="java" attribute to programmlistings
-  - configure docbook to generate proper pdf file name
-  - automate ftp upload procedure

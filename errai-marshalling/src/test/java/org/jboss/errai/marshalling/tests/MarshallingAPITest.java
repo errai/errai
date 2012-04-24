@@ -21,6 +21,7 @@ import java.util.Set;
 
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.marshalling.server.ServerMarshalling;
+import org.jboss.errai.marshalling.tests.res.shared.ItemWithEnum;
 import org.jboss.errai.marshalling.tests.res.shared.NullBoxedNatives;
 import org.jboss.errai.marshalling.tests.res.shared.Role;
 import org.jboss.errai.marshalling.tests.res.shared.User;
@@ -108,5 +109,11 @@ public class MarshallingAPITest {
   public void testEntityWithNullBoxedNatives() {
     NullBoxedNatives entity = new NullBoxedNatives();
     testEncodeDecode(entity);
+  }
+
+  @Test
+  public void testNullEnumInEntity() {
+    ItemWithEnum itemWithEnum = new ItemWithEnum();
+    testEncodeDecode(itemWithEnum);
   }
 }

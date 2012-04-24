@@ -40,6 +40,11 @@ public class BusTests extends TestCase {
       }
 
       @Override
+      public String getParentSessionId() {
+        return "ParentID";
+      }
+
+      @Override
       public boolean isValid() {
         return false;
       }
@@ -80,7 +85,7 @@ public class BusTests extends TestCase {
 
     BufferColor global = BufferColor.getAllBuffersColor();
     String bufData = "writeIn";
-    
+
     ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bufData.getBytes());
     buffer.write(byteArrayInputStream, global);
 

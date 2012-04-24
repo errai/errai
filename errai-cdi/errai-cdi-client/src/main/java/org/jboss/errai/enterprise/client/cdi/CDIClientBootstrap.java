@@ -31,7 +31,7 @@ import com.google.gwt.core.client.EntryPoint;
 
 /**
  * The GWT entry point for the Errai CDI module.
- * 
+ *
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -42,32 +42,51 @@ public class CDIClientBootstrap implements EntryPoint {
 
     final Runnable busReadyEvent = new Runnable() {
       public void run() {
-        MessageBuilder.createMessage().toSubject(CDI.SERVER_DISPATCHER_SUBJECT).command(CDICommands.AttachRemote).done()
-                .sendNowWith(bus);
+        if (bus.isRemoteCommunicationEnabled()) {
+          MessageBuilder.createMessage().toSubject(CDI.SERVER_DISPATCHER_SUBJECT)
+                  .command(CDICommands.AttachRemote)
+                  .done()
+                  .sendNowWith(bus);
+        }
+        else {
+          InitVotes.waitFor(CDI.class);
+          CDI.activate();
+        }
 
-        InitVotes.waitFor(CDI.class);
         CDI.fireEvent(new BusReadyEvent());
+      }
+
+      public String toString() {
+        return "BusReadyEvent";
       }
     };
 
     bus.addPostInitTask(busReadyEvent);
 
-    bus.subscribe(CDI.CLIENT_DISPATCHER_SUBJECT, new MessageCallback() {
-      public void callback(Message message) {
-        switch (BusCommands.valueOf(message.getCommandType())) {
-          case RemoteSubscribe:
-            CDI.addRemoteEventTypes(message.get(String[].class, MessageParts.Value));
+    if (!bus.isSubscribed(CDI.CLIENT_DISPATCHER_SUBJECT)) {
+      bus.subscribe(CDI.CLIENT_DISPATCHER_SUBJECT, new MessageCallback() {
+        public void callback(Message message) {
+          switch (CDICommands.valueOf(message.getCommandType())) {
+            case RemoteSubscribe:
+              CDI.addRemoteEventTypes(message.get(String[].class, MessageParts.Value));
+              bus.addPostInitTask(new Runnable() {
+                @Override
+                public void run() {
+                  CDI.activate();
+                }
 
-            bus.addPostInitTask(new Runnable() {
-              @Override
-              public void run() {
-                CDI.activate();
-              }
-            });
-            break;
+                public String toString() {
+                  return "CDI service activate";
+                }
+              });
+              break;
+            case CDIEvent:
+              CDI.consumeEventFromMessage(message);
+              break;
+          }
         }
-      }
-    });
+      });
+    }
 
     /*
      * Register an initialization lister to run the bus ready event.  This will be added

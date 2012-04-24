@@ -24,7 +24,15 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * @author Mike Brock .
+ * Identifies an annotated event type is a conversational type. Meaning, that the annotated event must not result
+ * in a propagation to other event observation methods outside the current session context.
+ * <p>
+ * The annotated class must also be annotated with {@link org.jboss.errai.common.client.api.annotations.Portable} in
+ * addition to being marked conversational, in order for the event to be transmittable across buses.
+ * <p>
+ * Events marked conversational are <em>always</em> conversational and may not never be used for broadcasting.
+ *
+ * @author Mike Brock
  */
 @Target({ElementType.TYPE})
 @Retention(RUNTIME)

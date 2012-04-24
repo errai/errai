@@ -31,6 +31,16 @@ public interface QueueSession {
    */
   public String getSessionId();
 
+
+  /**
+   * Get the associated parent session ID for this session instance. For instance, a single authenticated session
+   * may have multiple connections to the bus, with each connection having it's own unique queue session. However,
+   * the parent session ID is common to all of them.
+   *
+   * @return the parent session id
+   */
+  public String getParentSessionId();
+
   /**
    * Returns true if the session is still valid
    *

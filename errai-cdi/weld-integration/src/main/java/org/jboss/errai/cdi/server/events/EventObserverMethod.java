@@ -18,19 +18,25 @@ package org.jboss.errai.cdi.server.events;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.enterprise.event.Reception;
 import javax.enterprise.event.TransactionPhase;
 import javax.enterprise.inject.spi.ObserverMethod;
 
+import org.jboss.errai.bus.client.api.base.CommandMessage;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.common.client.protocols.MessageParts;
 import org.jboss.errai.enterprise.client.cdi.CDICommands;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
+
+import static org.jboss.errai.enterprise.client.cdi.api.CDI.getSubjectNameByType;
 
 /**
  * An implementation of the the CDI SPI {@code ObserverMethod} interface which is used to intercept events within the 
@@ -64,12 +70,8 @@ public class EventObserverMethod implements ObserverMethod {
    */
   protected final MessageBus bus;
 
-  /**
-   * The pre-calculated subject to be used to transmit the event remotely.
-   */
-  protected final String subject;
 
-  public EventObserverMethod(Class<?> type, MessageBus bus, Annotation... qualifiers) {
+  public EventObserverMethod(final Class<?> type, final MessageBus bus, final Annotation... qualifiers) {
     this.type = type;
     this.bus = bus;
 
@@ -81,8 +83,6 @@ public class EventObserverMethod implements ObserverMethod {
       this.observedQualifiers = Collections.unmodifiableSet(new HashSet<Annotation>(Arrays.asList(qualifiers)));
       this.qualifierForWire = CDI.getQualifiersPart(qualifiers);
     }
-
-    this.subject = CDI.getSubjectNameByType(type);
   }
 
   public Class<?> getBeanClass() {
@@ -106,17 +106,18 @@ public class EventObserverMethod implements ObserverMethod {
   }
 
   public void notify(Object event) {
-    if (!type.equals(event.getClass()) || EventConversationContext.isEventObjectInContext(event)) return;
+    if (EventConversationContext.isEventObjectInContext(event)) return;
+
+    final Map<String, Object> messageParts = new HashMap<String, Object>(10);
+    messageParts.put(MessageParts.ToSubject.name(), getSubjectNameByType(event.getClass().getName()));
+    messageParts.put(MessageParts.CommandType.name(), CDICommands.CDIEvent.name());
+    messageParts.put(CDIProtocol.BeanType.name(), event.getClass().getName());
+    messageParts.put(CDIProtocol.BeanReference.name(), event);
 
     if (!qualifierForWire.isEmpty()) {
-      MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
-              .with(CDIProtocol.BeanType, type.getName()).with(CDIProtocol.BeanReference, event)
-              .with(CDIProtocol.Qualifiers, qualifierForWire).noErrorHandling().sendNowWith(bus);
+      messageParts.put(CDIProtocol.Qualifiers.name(), qualifierForWire);
     }
-    else {
-      MessageBuilder.createMessage().toSubject(subject).command(CDICommands.CDIEvent)
-              .with(CDIProtocol.BeanType, type.getName()).with(CDIProtocol.BeanReference, event).noErrorHandling()
-              .sendNowWith(bus);
-    }
+
+    bus.send(CommandMessage.createWithParts(messageParts));
   }
 }

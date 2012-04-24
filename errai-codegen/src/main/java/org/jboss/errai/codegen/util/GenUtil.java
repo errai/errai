@@ -201,8 +201,17 @@ public class GenUtil {
       }
 
       Class<?> inputClass = input == null ? Object.class : input.getClass();
+
+      if (MetaClass.class.isAssignableFrom(inputClass)) {
+        inputClass = Class.class;
+      }
+
       Class<?> targetClass = targetType.asBoxed().asClass();
-      if (DataConversion.canConvert(targetClass, inputClass)) {
+      if (NullType.class.getName().equals(targetClass.getName())) {
+        return generate(context, input);
+      }
+
+      if (!targetClass.isAssignableFrom(inputClass) && DataConversion.canConvert(targetClass, inputClass)) {
         return generate(context, DataConversion.convert(input, targetClass));
       }
       else {
@@ -421,6 +430,34 @@ public class GenUtil {
             || Byte.class.getName().equals(clazz.getFullyQualifiedName());
   }
 
+  public static MetaClass getUnboxedFromWrapper(MetaClass clazz) {
+    if (Integer.class.getName().equals(clazz.getFullyQualifiedName())) {
+      return MetaClassFactory.get(int.class);
+    }
+    else if (Boolean.class.getName().equals(clazz.getFullyQualifiedName())) {
+      return MetaClassFactory.get(boolean.class);
+    }
+    else if (Long.class.getName().equals(clazz.getFullyQualifiedName())) {
+      return MetaClassFactory.get(long.class);
+    }
+    else if (Double.class.getName().equals(clazz.getFullyQualifiedName())) {
+      return MetaClassFactory.get(double.class);
+    }
+    else if (Float.class.getName().equals(clazz.getFullyQualifiedName())) {
+      return MetaClassFactory.get(float.class);
+    }
+    else if (Short.class.getName().equals(clazz.getFullyQualifiedName())) {
+      return MetaClassFactory.get(short.class);
+    }
+    else if (Character.class.getName().equals(clazz.getFullyQualifiedName())) {
+      return MetaClassFactory.get(char.class);
+    }
+    else if (Byte.class.getName().equals(clazz.getFullyQualifiedName())) {
+      return MetaClassFactory.get(byte.class);
+    }
+    return clazz;
+  }
+
   public static int getArrayDimensions(MetaClass type) {
     if (!type.isArray()) return 0;
 
@@ -579,6 +616,113 @@ public class GenUtil {
 
     return bestCandidate;
   }
+
+  public static MetaConstructor getBestConstructorCandidate(MetaClass[] arguments, MetaClass decl,
+                                                            MetaConstructor[] constructors,
+                                                            boolean classTarget) {
+    if (constructors.length == 0) {
+      return null;
+    }
+
+    MetaParameter[] parmTypes;
+    MetaConstructor bestCandidate = null;
+    int bestScore = 0;
+    int score = 0;
+    boolean retry = false;
+
+    do {
+      for (MetaConstructor meth : constructors) {
+        if (classTarget && (meth.isStatic())) continue;
+
+        boolean isVarArgs = meth.isVarArgs();
+        if ((parmTypes = meth.getParameters()).length != arguments.length && !isVarArgs) {
+          continue;
+        }
+        else if (arguments.length == 0 && parmTypes.length == 0) {
+          bestCandidate = meth;
+          break;
+        }
+
+        for (int i = 0; i != arguments.length; i++) {
+          MetaClass actualParamType;
+          if (isVarArgs && !arguments[arguments.length - 1].isArray() && i >= parmTypes.length - 1)
+            actualParamType = parmTypes[parmTypes.length - 1].getType().getComponentType();
+          else
+            actualParamType = parmTypes[i].getType();
+
+          if (arguments[i] == null) {
+            if (!actualParamType.isPrimitive()) {
+              score += 6;
+            }
+            else {
+              score = 0;
+              break;
+            }
+          }
+          else if (actualParamType.equals(arguments[i])) {
+            score += 7;
+          }
+          else if (actualParamType.isPrimitive() && actualParamType.asBoxed().equals(arguments[i])) {
+            score += 6;
+          }
+          else if (arguments[i].isPrimitive() && arguments[i].asUnboxed().equals(actualParamType)) {
+            score += 6;
+          }
+          else if (actualParamType.isAssignableFrom(arguments[i])) {
+            score += 5;
+          }
+          else if (isNumericallyCoercible(arguments[i], actualParamType)) {
+            score += 4;
+          }
+          else if (actualParamType.asBoxed().isAssignableFrom(arguments[i].asBoxed())
+                  && !Object_MetaClass.equals(arguments[i])) {
+            score += 3 + scoreInterface(actualParamType, arguments[i]);
+          }
+          else if (canConvert(actualParamType, arguments[i])) {
+            if (actualParamType.isArray() && arguments[i].isArray()) score += 1;
+            else if (actualParamType.equals(char_MetaClass) && arguments[i].equals(String_MetaClass)) score += 1;
+
+            score += 1;
+          }
+          else if (actualParamType.equals(Object_MetaClass) || arguments[i].equals(NullType_MetaClass)) {
+            score += 1;
+          }
+          else {
+            score = 0;
+            break;
+          }
+        }
+
+        if (score != 0 && score > bestScore) {
+          bestCandidate = meth;
+          bestScore = score;
+        }
+        score = 0;
+      }
+
+      if (!retry && bestCandidate == null && decl.isInterface()) {
+        MetaConstructor[] objMethods = Object_MetaClass.getConstructors();
+        MetaConstructor[] nMethods = new MetaConstructor[constructors.length + objMethods.length];
+        for (int i = 0; i < constructors.length; i++) {
+          nMethods[i] = constructors[i];
+        }
+
+        for (int i = 0; i < objMethods.length; i++) {
+          nMethods[i + constructors.length] = objMethods[i];
+        }
+        constructors = nMethods;
+
+        retry = true;
+      }
+      else {
+        break;
+      }
+    }
+    while (true);
+
+    return bestCandidate;
+  }
+
 
   private static final MetaClass Number_MetaClass = MetaClassFactory.get(Number.class);
   private static final MetaClass Object_MetaClass = MetaClassFactory.get(Object.class);

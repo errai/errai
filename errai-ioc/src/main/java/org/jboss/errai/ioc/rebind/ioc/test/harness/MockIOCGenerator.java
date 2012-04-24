@@ -17,18 +17,19 @@
 package org.jboss.errai.ioc.rebind.ioc.test.harness;
 
 
-import org.jboss.errai.common.client.framework.Assert;
-import org.jboss.errai.common.metadata.RebindUtils;
-import org.jboss.errai.ioc.client.api.Bootstrapper;
-import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCBootstrapGenerator;
-import org.jboss.errai.marshalling.server.util.ServerMarshallUtil;
-
-import javax.tools.JavaCompiler;
-import javax.tools.ToolProvider;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.List;
+
+import javax.tools.JavaCompiler;
+import javax.tools.ToolProvider;
+
+import org.jboss.errai.codegen.util.ClassChangeUtil;
+import org.jboss.errai.common.client.framework.Assert;
+import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.ioc.client.Bootstrapper;
+import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCBootstrapGenerator;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -66,7 +67,7 @@ public class MockIOCGenerator {
 
       FileOutputStream outputStream = new FileOutputStream(sourceFile);
 
-      outputStream.write(classStr.getBytes());
+      outputStream.write(classStr.getBytes("UTF-8"));
       outputStream.flush();
       outputStream.close();
 
@@ -83,7 +84,7 @@ public class MockIOCGenerator {
       }
 
       Class<? extends Bootstrapper> bsClass
-              = ServerMarshallUtil.loadClassDefinition(outFile.getAbsolutePath(), packageName, className);
+              = ClassChangeUtil.loadClassDefinition(outFile.getAbsolutePath(), packageName, className);
 
       return bsClass;
 

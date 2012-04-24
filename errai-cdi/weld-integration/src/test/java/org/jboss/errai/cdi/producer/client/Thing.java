@@ -8,5 +8,4 @@ import javax.enterprise.inject.Produces;
  */
 
 public class Thing {
-
 }

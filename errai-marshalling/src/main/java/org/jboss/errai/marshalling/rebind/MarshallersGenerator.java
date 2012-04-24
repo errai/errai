@@ -25,7 +25,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gwt.core.client.GWT;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
+import org.jboss.errai.codegen.util.ClassChangeUtil;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.rebind.ClassListReader;
 import org.jboss.errai.common.rebind.EnvUtil;
@@ -77,7 +79,7 @@ public class MarshallersGenerator extends Generator {
               @Override
               public Set<String> getCandidate(GeneratorContext context, DiscoveryContext veto) {
                 File cwd = new File("").getAbsoluteFile();
-                Set<File> matching = ServerMarshallUtil.findAllMatching("classlist.mf", cwd);
+                Set<File> matching = ClassChangeUtil.findAllMatching("classlist.mf", cwd);
                 Set<String> candidateDirectories = new HashSet<String>();
 
                 veto.resultsAbsolute();
@@ -146,7 +148,7 @@ public class MarshallersGenerator extends Generator {
 
                 File cwd = new File("").getAbsoluteFile();
 
-                Set<File> roots = ServerMarshallUtil.findMatchingOutputDirectoryByModel(matchNames, cwd);
+                Set<File> roots = ClassChangeUtil.findMatchingOutputDirectoryByModel(matchNames, cwd);
 
                 if (!roots.isEmpty()) {
                   for (File file : roots) {
@@ -196,9 +198,14 @@ public class MarshallersGenerator extends Generator {
    */
   private String packageName = null;
 
+
   @Override
   public String generate(final TreeLogger logger, final GeneratorContext context, final String typeName)
           throws UnableToCompleteException {
+
+    if (GWT.isProdMode()) {
+      log.info("compiling in production mode.");
+    }
 
     try {
       TypeOracle typeOracle = context.getTypeOracle();
@@ -233,93 +240,113 @@ public class MarshallersGenerator extends Generator {
 
   private static final String sourceOutputTemp = RebindUtils.getTempDirectory() + "/errai.marshalling/gen/";
 
+
+  private static volatile String _serverMarshallerCache;
+  private static volatile String _clientMarshallerCache;
+  private static final Object generatorLock = new Object();
+
   private String _generate(GeneratorContext context) {
-    boolean junitOrDevMode = EnvUtil.isJUnitTest();
+    synchronized (generatorLock) {
+      boolean junitOrDevMode = !EnvUtil.isProdMode();
 
-    if (SERVER_MARSHALLER_OUTPUT_ENABLED) {
-      String serverSideClass = MarshallerGeneratorFactory.getFor(MarshallerOuputTarget.Java)
-              .generate(SERVER_MARSHALLER_PACKAGE_NAME, SERVER_MARSHALLER_CLASS_NAME);
+      if (SERVER_MARSHALLER_OUTPUT_ENABLED) {
 
-      if (junitOrDevMode) {
-        String tmpLocation = new File(sourceOutputTemp).getAbsolutePath();
-        log.info("*** using temporary path: " + tmpLocation + " ***");
-
-        String toLoad = generateServerMarshallers(tmpLocation, serverSideClass, tmpLocation);
-
-        try {
-          ServerMarshallUtil.loadClassDefinition(toLoad, SERVER_MARSHALLER_PACKAGE_NAME, SERVER_MARSHALLER_CLASS_NAME);
+        String serverSideClass;
+        if (!junitOrDevMode && _serverMarshallerCache != null) {
+          serverSideClass = _serverMarshallerCache;
         }
-        catch (IOException e) {
-          throw new RuntimeException("failed to load server marshallers", e);
+        else {
+          serverSideClass = MarshallerGeneratorFactory.getFor(MarshallerOuputTarget.Java)
+                  .generate(SERVER_MARSHALLER_PACKAGE_NAME, SERVER_MARSHALLER_CLASS_NAME);
+          _serverMarshallerCache = serverSideClass;
         }
 
-      }
-      else if (SERVER_MARSHALLER_OUTPUT_DIR != null) {
-        generateServerMarshallers(sourceOutputTemp, serverSideClass, SERVER_MARSHALLER_OUTPUT_DIR);
-        logger.info("** deposited marshaller class in : " + new File(SERVER_MARSHALLER_OUTPUT_DIR).getAbsolutePath());
-      }
-      else {
-        logger.debug("Searching candidate output directories for generated marshallers");
-        File outputDirCdt;
+        if (junitOrDevMode) {
+          String tmpLocation = new File(sourceOutputTemp).getAbsolutePath();
+          log.info("*** using temporary path: " + tmpLocation + " ***");
 
-        class DiscoveryContextImpl implements DiscoveryContext {
-          boolean vetoed = false;
-          boolean absolute = false;
+          String toLoad = generateServerMarshallers(tmpLocation, serverSideClass, tmpLocation);
 
-          @Override
-          public void veto() {
-            this.vetoed = true;
+          try {
+            ClassChangeUtil.loadClassDefinition(toLoad, SERVER_MARSHALLER_PACKAGE_NAME, SERVER_MARSHALLER_CLASS_NAME);
+          }
+          catch (IOException e) {
+            throw new RuntimeException("failed to load server marshallers", e);
           }
 
-          @Override
-          public void resultsAbsolute() {
-            this.absolute = true;
-          }
         }
+        else if (SERVER_MARSHALLER_OUTPUT_DIR != null) {
+          generateServerMarshallers(sourceOutputTemp, serverSideClass, SERVER_MARSHALLER_OUTPUT_DIR);
+          logger.info("** deposited marshaller class in : " + new File(SERVER_MARSHALLER_OUTPUT_DIR).getAbsolutePath());
+        }
+        else {
+          logger.debug("Searching candidate output directories for generated marshallers");
+          File outputDirCdt;
 
-        int deposits = 0;
+          class DiscoveryContextImpl implements DiscoveryContext {
+            boolean vetoed = false;
+            boolean absolute = false;
 
+            @Override
+            public void veto() {
+              this.vetoed = true;
+            }
 
-        Strategies:
-        for (DiscoveryStrategy strategy : rootDiscoveryStrategies) {
-          DiscoveryContextImpl discoveryContext = new DiscoveryContextImpl();
-          for (String rootPath : strategy.getCandidate(context, discoveryContext)) {
-            for (String candidate : discoveryContext.absolute ? new String[]{"/"} : candidateOutputDirectories) {
-              logger.info("considering '" + rootPath + candidate + "' as module output path ...");
-
-              if (discoveryContext.vetoed) {
-                continue Strategies;
-              }
-
-              outputDirCdt = new File(rootPath + "/" + candidate).getAbsoluteFile();
-              if (outputDirCdt.exists()) {
-                logger.info("   found '" + outputDirCdt + "' output directory");
-
-                generateServerMarshallers(sourceOutputTemp, serverSideClass, outputDirCdt.getAbsolutePath());
-                logger.info("** deposited marshaller class in : " + outputDirCdt.getAbsolutePath());
-                deposits++;
-              }
-              else {
-                logger.debug("   " + outputDirCdt + " does not exist");
-              }
+            @Override
+            public void resultsAbsolute() {
+              this.absolute = true;
             }
           }
-          if (deposits > 0) {
-            break;
+
+          int deposits = 0;
+
+
+          Strategies:
+          for (DiscoveryStrategy strategy : rootDiscoveryStrategies) {
+            DiscoveryContextImpl discoveryContext = new DiscoveryContextImpl();
+            for (String rootPath : strategy.getCandidate(context, discoveryContext)) {
+              for (String candidate : discoveryContext.absolute ? new String[]{"/"} : candidateOutputDirectories) {
+                logger.info("considering '" + rootPath + candidate + "' as module output path ...");
+
+                if (discoveryContext.vetoed) {
+                  continue Strategies;
+                }
+
+                outputDirCdt = new File(rootPath + "/" + candidate).getAbsoluteFile();
+                if (outputDirCdt.exists()) {
+                  logger.info("   found '" + outputDirCdt + "' output directory");
+
+                  generateServerMarshallers(sourceOutputTemp, serverSideClass, outputDirCdt.getAbsolutePath());
+                  logger.info("** deposited marshaller class in : " + outputDirCdt.getAbsolutePath());
+                  deposits++;
+                }
+                else {
+                  logger.debug("   " + outputDirCdt + " does not exist");
+                }
+              }
+            }
+            if (deposits > 0) {
+              break;
+            }
+          }
+
+          if (deposits == 0) {
+            logger.warn(" *** the server marshaller was not deposited into your build output!\n" +
+                    "   A target output could not be resolved through configuration or auto-detection!");
           }
         }
-
-        if (deposits == 0) {
-          logger.warn(" *** the server marshaller was not deposited into your build output!\n" +
-                  "   A target output could not be resolved through configuration or auto-detection!");
-        }
       }
-    }
-    else {
-      logger.info("not emitting server marshaller class");
-    }
+      else {
+        logger.info("not emitting server marshaller class");
+      }
 
-    return MarshallerGeneratorFactory.getFor(MarshallerOuputTarget.GWT).generate(packageName, className);
+      if (!junitOrDevMode && _clientMarshallerCache != null) {
+        return _clientMarshallerCache;
+      }
+
+      return _clientMarshallerCache
+              = MarshallerGeneratorFactory.getFor(MarshallerOuputTarget.GWT).generate(packageName, className);
+    }
   }
 
   interface DiscoveryContext {
@@ -345,7 +372,7 @@ public class MarshallersGenerator extends Generator {
 
     RebindUtils.writeStringToFile(sourceFile, serverSideClass);
 
-    ServerMarshallUtil.compileClass(outputDir.getAbsolutePath(),
+    ClassChangeUtil.compileClass(outputDir.getAbsolutePath(),
             SERVER_MARSHALLER_PACKAGE_NAME,
             SERVER_MARSHALLER_CLASS_NAME,
             classOutputPath.getAbsolutePath());

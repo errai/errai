@@ -1,6 +1,7 @@
 package org.jboss.errai.cdi.producer.client.test;
 
 
+import org.jboss.errai.cdi.producer.client.BeanConstrConsumersMultiProducers;
 import org.jboss.errai.cdi.producer.client.BeanConstrConsumesOwnProducer;
 import org.jboss.errai.cdi.producer.client.BeanConsumesOwnProducer;
 import org.jboss.errai.cdi.producer.client.DependentProducedBeanDependentBean;
@@ -103,6 +104,7 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
 
     assertNotNull(bean);
     assertNotNull(bean.getThing());
+    assertNotNull(bean.getThing().getThing());
   }
 
   public void testProducersObserveSingletonScope() {
@@ -122,5 +124,17 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
     assertNotNull(beanB.getKayakB());
     assertEquals("singleton scope for producer violated!", bean.getKayakA().getId(), beanB.getKayakA().getId());
     assertEquals("singleton scope for producer violated!", bean.getKayakA().getId(), beanB.getKayakB().getId());
+  }
+
+  public void testComplexConstructorInjectionScenario() {
+    BeanConstrConsumersMultiProducers bean = IOC.getBeanManager().lookupBean(BeanConstrConsumersMultiProducers.class)
+            .getInstance();
+
+    assertNotNull(bean);
+    assertNotNull(bean.getGreeting());
+    assertNotNull(bean.getParting());
+    assertNotNull(bean.getResponse());
+    assertNotNull(bean.getTestEvent());
+    assertNotNull(bean.getPanel());
   }
 }

@@ -12,6 +12,7 @@ import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.exception.CyclicalObjectGraphException;
 import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.test.AbstractCodegenTest;
 import org.jboss.errai.codegen.tests.model.Person;
 import org.jboss.errai.codegen.tests.model.PersonImpl;
 import org.jboss.errai.codegen.tests.model.SnapshotInterfaceWithCollections;

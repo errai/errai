@@ -79,6 +79,7 @@ public class MappingContextSingleton {
           sContext = loadPrecompiledMarshallers();
         }
         catch (Throwable t) {
+          t.printStackTrace();
           log.error("failed to load static marshallers", t);
           log.warn("failing over to dynamic marshallers ... performance may be affected.");
           sContext = loadDynamicMarshallers();

@@ -71,6 +71,11 @@ public class SessionContext implements Context {
     return session.getAttribute(type, param);
   }
 
+  @Override
+  public boolean hasAttribute(String param) {
+    return session.hasAttribute(param);
+  }
+
   public Collection<String> getAttributeNames() {
     return session.getAttributeNames();
   }

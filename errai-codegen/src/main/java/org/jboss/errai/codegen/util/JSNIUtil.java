@@ -36,7 +36,7 @@ public class JSNIUtil {
   }
 
   public static String methodAccess(MetaMethod method) {
-    final StringBuilder buf = new StringBuilder();
+    final StringBuilder buf = new StringBuilder(50);
 
     if (!method.getReturnType().isVoid()) {
       buf.append("return ");

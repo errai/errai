@@ -16,18 +16,21 @@
 
 package org.jboss.errai.marshalling.server.protocol;
 
-import org.jboss.errai.marshalling.client.protocols.ErraiProtocol;
-
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Map;
+
+import org.jboss.errai.marshalling.client.protocols.ErraiProtocol;
 
 /**
  * @author Mike Brock
  */
 public class ErraiProtocolServer extends ErraiProtocol{
   public static ByteArrayInputStream encodePayloadToByteArrayInputStream(Map<String, Object> payload) {
-    return new ByteArrayInputStream(encodePayload(payload).getBytes());
+    try {
+      return new ByteArrayInputStream(encodePayload(payload).getBytes("UTF-8"));
+    } catch (UnsupportedEncodingException e) {
+      throw new AssertionError("UTF-8 appears not to be supported by this JRE, but that's impossible");
+    }
   }
 }

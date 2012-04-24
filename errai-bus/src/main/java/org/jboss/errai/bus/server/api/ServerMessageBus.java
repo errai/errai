@@ -107,6 +107,8 @@ public interface ServerMessageBus extends MessageBus {
 
   public QueueSession getSessionBySessionId(String id);
 
+  public void associateNewQueue(QueueSession oldSession, QueueSession newSession);
+
   /**
    * Stop the MessateBus.
    */

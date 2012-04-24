@@ -35,15 +35,17 @@ import org.jboss.errai.bus.server.io.ConversationalEndpointCallback;
 import org.jboss.errai.bus.server.io.RemoteServiceCallback;
 import org.jboss.errai.bus.server.io.ServiceInstanceProvider;
 import org.jboss.errai.bus.server.service.ErraiService;
+import org.jboss.errai.bus.server.service.ErraiServiceSingleton;
 import org.jboss.errai.cdi.server.events.ConversationalEvent;
 import org.jboss.errai.cdi.server.events.ConversationalEventBean;
 import org.jboss.errai.cdi.server.events.ConversationalEventObserverMethod;
 import org.jboss.errai.cdi.server.events.EventDispatcher;
 import org.jboss.errai.cdi.server.events.EventObserverMethod;
 import org.jboss.errai.cdi.server.events.ShutdownEventObserver;
-import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.common.client.framework.Assert;
-import org.jboss.errai.common.client.types.TypeHandlerFactory;
+import org.jboss.errai.common.metadata.MetaDataScanner;
+import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.common.rebind.EnvUtil;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.enterprise.client.cdi.api.Conversational;
@@ -65,6 +67,7 @@ import javax.enterprise.inject.spi.ProcessObserverMethod;
 import javax.inject.Inject;
 import javax.inject.Qualifier;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -98,13 +101,13 @@ public class CDIExtensionPoints implements Extension {
 
   private TypeRegistry managedTypes = null;
 
-  private Set<EventConsumer> eventConsumers = new LinkedHashSet<EventConsumer>();
-  private Set<MessageSender> messageSenders = new LinkedHashSet<MessageSender>();
+  private final Set<EventConsumer> eventConsumers = new LinkedHashSet<EventConsumer>();
+  private final Set<MessageSender> messageSenders = new LinkedHashSet<MessageSender>();
 
-  private Map<String, Annotation> eventQualifiers = new HashMap<String, Annotation>();
-  private Map<String, Annotation> beanQualifiers = new HashMap<String, Annotation>();
+  private final Map<String, Annotation> eventQualifiers = new HashMap<String, Annotation>();
+  private final Map<String, Annotation> beanQualifiers = new HashMap<String, Annotation>();
 
-  private Set<String> observableEvents = new HashSet<String>();
+  private final Set<String> observableEvents = new HashSet<String>();
 
   private static final Set<String> vetoClasses;
 
@@ -211,83 +214,94 @@ public class CDIExtensionPoints implements Extension {
 
     for (Field f : clazz.getDeclaredFields()) {
       if (f.isAnnotationPresent(Inject.class)) {
-        if (Event.class.isAssignableFrom(f.getType())) {
-          ParameterizedType pType = (ParameterizedType) f.getGenericType();
-
-          Class eventType = (Class) pType.getActualTypeArguments()[0];
-
-          if (isExposedEntityType(eventType)) {
-            List<Annotation> qualifiers = new ArrayList<Annotation>();
-
-            /**
-             * Collect Qualifier types for the Event consumer.
-             */
-            for (Annotation annotation : f.getAnnotations()) {
-              if (annotation.annotationType().isAnnotationPresent(Qualifier.class)) {
-                qualifiers.add(annotation);
-                eventQualifiers.put(annotation.annotationType().getName(), annotation);
-              }
-            }
-
-            eventConsumers.add(new EventConsumer(eventType.isAnnotationPresent(Conversational.class),
-                    null, eventType, qualifiers.toArray(new Annotation[qualifiers.size()])));
-          }
+        processEventInjector(f.getType(), f.getGenericType(), f.getAnnotations());
+      }
+    }
+    for (Method m : clazz.getDeclaredMethods()) {
+      if (m.isAnnotationPresent(Inject.class)) {
+        Class<?>[] parameterTypes = m.getParameterTypes();
+        for (int i = 0, parameterTypesLength = parameterTypes.length; i < parameterTypesLength; i++) {
+          Class<?> parmType = parameterTypes[i];
+          processEventInjector(parmType, m.getGenericParameterTypes()[i], m.getParameterAnnotations()[i]);
         }
-        else if (ConversationalEvent.class.isAssignableFrom(f.getType())) {
-          ParameterizedType pType = (ParameterizedType) f.getGenericType();
-
-          Class eventType = (Class) pType.getActualTypeArguments()[0];
-
-          if (isExposedEntityType(eventType)) {
-            List<Annotation> qualifiers = new ArrayList<Annotation>();
-
-            /**
-             * Collect Qualifier types for the Event consumer.
-             */
-            for (Annotation annotation : f.getAnnotations()) {
-              if (annotation.annotationType().isAnnotationPresent(Qualifier.class)) {
-                qualifiers.add(annotation);
-                eventQualifiers.put(annotation.annotationType().getName(), annotation);
-              }
-            }
-            eventConsumers.add(new EventConsumer(true, f.getGenericType(), eventType,
-                    qualifiers.toArray(new Annotation[qualifiers.size()])));
-          }
-        }
-        else if (Sender.class.isAssignableFrom(f.getType())) {
-          ParameterizedType pType = (ParameterizedType) f.getGenericType();
-          Class sendType = (Class) pType.getActualTypeArguments()[0];
-          Set<Annotation> qualifiers = new HashSet<Annotation>();
-
-          /**
-           * Collect Qualifier types for the Event consumer.
-           */
-          for (Annotation annotation : f.getAnnotations()) {
-            if (annotation.annotationType().isAnnotationPresent(Qualifier.class)) {
-              qualifiers.add(annotation);
-              eventQualifiers.put(annotation.annotationType().getName(), annotation);
-            }
-          }
-
-          if (isExposedEntityType(sendType)) {
-            messageSenders.add(new MessageSender(f.getGenericType(), qualifiers));
-          }
+      }
+    }
+    for (Constructor c : clazz.getDeclaredConstructors()) {
+      if (c.isAnnotationPresent(Inject.class)) {
+        Class<?>[] parameterTypes = c.getParameterTypes();
+        for (int i = 0, parameterTypesLength = parameterTypes.length; i < parameterTypesLength; i++) {
+          Class<?> parmType = parameterTypes[i];
+          processEventInjector(parmType, c.getGenericParameterTypes()[i], c.getParameterAnnotations()[i]);
         }
       }
     }
   }
 
-  private boolean isExposedEntityType(Class type) {
-    if (type.isAnnotationPresent(Portable.class)) {
-      return true;
-    }
-    else {
-      if (String.class.equals(type) || TypeHandlerFactory.getHandler(type) != null) {
-        return true;
+  private void processEventInjector(Class<?> type, Type typeParm, Annotation[] annotations) {
+    if (Event.class.isAssignableFrom(type)) {
+      ParameterizedType pType = (ParameterizedType) typeParm;
+
+      final Class eventType = (Class) pType.getActualTypeArguments()[0];
+
+      for (Class<?> observesType : EnvUtil.getAllPortableSubtypes(eventType)) {
+        List<Annotation> qualifiers = new ArrayList<Annotation>();
+
+        /**
+         * Collect Qualifier types for the Event consumer.
+         */
+        for (Annotation annotation : annotations) {
+          if (annotation.annotationType().isAnnotationPresent(Qualifier.class)) {
+            qualifiers.add(annotation);
+            eventQualifiers.put(annotation.annotationType().getName(), annotation);
+          }
+        }
+
+        eventConsumers.add(new EventConsumer(observesType.isAnnotationPresent(Conversational.class),
+                null, observesType, qualifiers.toArray(new Annotation[qualifiers.size()])));
       }
     }
-    return false;
+    else if (ConversationalEvent.class.isAssignableFrom(type)) {
+      ParameterizedType pType = (ParameterizedType) typeParm;
+
+      final Class eventType = (Class) pType.getActualTypeArguments()[0];
+
+      for (Class<?> observesType : EnvUtil.getAllPortableSubtypes(eventType)) {
+        List<Annotation> qualifiers = new ArrayList<Annotation>();
+
+        /**
+         * Collect Qualifier types for the Event consumer.
+         */
+        for (Annotation annotation : annotations) {
+          if (annotation.annotationType().isAnnotationPresent(Qualifier.class)) {
+            qualifiers.add(annotation);
+            eventQualifiers.put(annotation.annotationType().getName(), annotation);
+          }
+        }
+        eventConsumers.add(new EventConsumer(true, typeParm, observesType,
+                qualifiers.toArray(new Annotation[qualifiers.size()])));
+      }
+    }
+    else if (Sender.class.isAssignableFrom(type)) {
+      ParameterizedType pType = (ParameterizedType) typeParm;
+      Class sendType = (Class) pType.getActualTypeArguments()[0];
+      Set<Annotation> qualifiers = new HashSet<Annotation>();
+
+      /**
+       * Collect Qualifier types for the Event consumer.
+       */
+      for (Annotation annotation : annotations) {
+        if (annotation.annotationType().isAnnotationPresent(Qualifier.class)) {
+          qualifiers.add(annotation);
+          eventQualifiers.put(annotation.annotationType().getName(), annotation);
+        }
+      }
+
+      if (EnvUtil.isPortableType(sendType)) {
+        messageSenders.add(new MessageSender(typeParm, qualifiers));
+      }
+    }
   }
+
 
   @SuppressWarnings({"UnusedDeclaration", "unchecked"})
   public void processObserverMethod(@Observes ProcessObserverMethod processObserverMethod) {
@@ -298,7 +312,7 @@ public class CDIExtensionPoints implements Extension {
       type = (Class) t;
     }
 
-    if (type != null && isExposedEntityType(type)) {
+    if (type != null && EnvUtil.isPortableType(type)) {
       Set<Annotation> annotations = processObserverMethod.getObserverMethod().getObservedQualifiers();
       Annotation[] methodQualifiers = annotations.toArray(new Annotation[annotations.size()]);
       for (Annotation qualifier : methodQualifiers) {
@@ -312,7 +326,7 @@ public class CDIExtensionPoints implements Extension {
   @SuppressWarnings({"UnusedDeclaration", "CdiInjectionPointsInspection"})
   public void afterBeanDiscovery(@Observes AfterBeanDiscovery abd, BeanManager bm) {
     // Errai Service wrapper
-    ErraiService<?> service = CDIServerUtil.lookupErraiService();
+    ErraiService<?> service = ErraiServiceSingleton.getService();
 
     final MessageBus bus = service.getBus();
 
@@ -320,7 +334,7 @@ public class CDIExtensionPoints implements Extension {
       return;
     }
 
-    abd.addBean(new ErraiServiceBean(bm, service));
+    abd.addBean(new ErraiServiceBean(bm));
     // event dispatcher
     EventDispatcher eventDispatcher = new EventDispatcher(bm, observableEvents, eventQualifiers);
 

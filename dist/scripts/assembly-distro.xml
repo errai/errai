@@ -41,7 +41,6 @@
                 <include>org.jboss.errai:errai-bus</include>
                 <include>org.jboss.errai:errai-ioc</include>
                 <include>org.jboss.errai:errai-tools</include>
-                <include>org.jboss.errai:jboss7-support</include>
                 <include>org.jboss.errai:errai-marshalling</include>
                 <include>org.jboss.errai:errai-codegen</include>
                 <include>org.jboss.errai:errai-cdi-client</include>
@@ -50,6 +49,7 @@
                 <include>org.jboss.errai:errai-cdi-jetty</include>
                 <include>org.jboss.errai:errai-jaxrs-client</include>
                 <include>org.jboss.errai:errai-jaxrs-provider</include>
+                <include>org.jboss.errai:errai-uibinder</include>
             </includes>
         </dependencySet>
         <dependencySet>
@@ -96,14 +96,7 @@
                 <exclude>**/WEB-INF/lib/**</exclude>
                 <exclude>**/WEB-INF/classes/**</exclude>
 
-                <exclude>**/war/App/**</exclude>
-                <exclude>**/war/AsyncDemo/**</exclude>
-                <exclude>**/war/ClientService/**</exclude>
-                <exclude>**/war/HelloWorld/**</exclude>
-                <exclude>**/war/QueryService/**</exclude>
-                <exclude>**/war/RPCDemo/**</exclude>
-                <exclude>**/war/Serialization/**</exclude>
-                <exclude>**/war/StockDemo/**</exclude>
+                <exclude>**/src/main/webapp/App/**</exclude>
             </excludes>
         </fileSet>
         <fileSet>
@@ -124,10 +117,10 @@
                 <exclude>**/WEB-INF/lib/**</exclude>
                 <exclude>**/WEB-INF/classes/**</exclude>
 
-                <exclude>**/war/TagCloudDemo/**</exclude>
-                <exclude>**/war/app/**</exclude>
-                <exclude>**/war/org.jboss.errai.demo.mobile.ErraiCdiMobileDemo/**</exclude>
-                <exclude>**/war/contacts/**</exclude>
+                <exclude>**/src/main/webapp/TagCloudDemo/**</exclude>
+                <exclude>**/src/main/webapp/app/**</exclude>
+                <exclude>**/src/main/webapp/ErraiCdiMobileDemo/**</exclude>
+                <exclude>**/src/main/webapp/contacts/**</exclude>
             </excludes>
         </fileSet>
         <fileSet>
@@ -148,7 +141,7 @@
                 <exclude>**/WEB-INF/lib/**</exclude>
                 <exclude>**/WEB-INF/classes/**</exclude>
 
-                <exclude>**/war/RestDemo/**</exclude>
+                <exclude>**/src/main/webapp/RestDemo/**</exclude>
             </excludes>
         </fileSet>
     </fileSets>

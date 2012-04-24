@@ -27,13 +27,12 @@ import java.util.concurrent.locks.ReentrantLock;
 public class BufferColor {
   // an automatic counter to ensure each buffer has a unique color
   private static final AtomicInteger bufferColorCounter = new AtomicInteger();
-
   private static final BufferColor allBuffersColor = new BufferColor(Short.MIN_VALUE);
 
   /**
    * The current tail position for this buffer color.
    */
-  final AtomicLong sequence = new AtomicLong();
+  final AtomicLong sequence = new AtomicLong(TransmissionBuffer.STARTING_SEQUENCE);
 
   /**
    * The color.
@@ -66,24 +65,45 @@ public class BufferColor {
     return lock;
   }
 
-  private BufferColor(int color) {
-    this.color = (short) color;
-  }
-
   private BufferColor(short color) {
     this.color = color;
   }
 
+  /**
+   * Return a new unique BufferColor.
+   *
+   * @see #getNewColorFromHead(TransmissionBuffer)
+   * @return a new unique BufferColor
+   */
   public static BufferColor getNewColor() {
-    return new BufferColor(bufferColorCounter.incrementAndGet());
+    short val = (short) bufferColorCounter.incrementAndGet();
+
+    // in a long-running system, do not allow it to recycle over the global
+    // color.
+    if (val == Short.MIN_VALUE) {
+      val = (short) bufferColorCounter.incrementAndGet();
+    }
+
+    return new BufferColor(val);
   }
 
-  public static BufferColor getNewColorFromHead(TransmissionBuffer buffer) {
+  /**
+   * Returns a new unique BufferColor set to the head sequence of the specified TransmissionBuffer.
+   *
+   * @param buffer the buffer instance to obtain the head sequence from.
+   * @return a new unique BufferColor instance.
+   */
+  public static BufferColor getNewColorFromHead(final TransmissionBuffer buffer) {
     final BufferColor color = getNewColor();
     color.sequence.set(buffer.getHeadSequence());
     return color;
   }
 
+  /**
+   * Returns the all colors BufferColor which creates buffer data visible to all colors.
+   *
+   * @return the all colors (global) BufferColor instance.
+   */
   public static BufferColor getAllBuffersColor() {
     return allBuffersColor;
   }

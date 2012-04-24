@@ -17,6 +17,7 @@
 package org.jboss.errai.cdi.server.events;
 
 import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.cdi.server.CDIServerUtil;
 
 /**
@@ -34,18 +35,18 @@ public class EventConversationContext {
    * Activate the conversation scope. If there is a currently active scope, it is replaced with this new scope.
    * 
    * @param o reference to the event object which is opening the scope.
-   * @param sessionId the bus session ID of the scope.
+   * @param session the bus session ID of the scope.
    */
-  public static void activate(Object o, String sessionId) {
-    threadLocalConversationContext.set(new Context(o, sessionId));
+  public static void activate(Object o, QueueSession session) {
+    threadLocalConversationContext.set(new Context(o, session));
   }
 
   /**
    * Activate a conversations scope. If there is a currently active scope, it is replaced with this new scope.
-   * @param sessionId the bus session ID of the scope.
+   * @param session the bus session ID of the scope.
    */
-  public static void activate(String sessionId) {
-    threadLocalConversationContext.set(new Context(null, sessionId));
+  public static void activate(QueueSession session) {
+    threadLocalConversationContext.set(new Context(null, session));
   }
 
   /**
@@ -55,7 +56,7 @@ public class EventConversationContext {
    * @param message An Errai message.
    */
   public static void activate(Message message) {
-    activate(CDIServerUtil.getSessionId(message));
+    activate(CDIServerUtil.getSession(message));
   }
 
   /**
@@ -85,9 +86,9 @@ public class EventConversationContext {
 
   public static class Context {
     private final Object eventObject;
-    private final String session;
+    private final QueueSession session;
 
-    public Context(Object eventObject, String session) {
+    public Context(Object eventObject, QueueSession session) {
       this.eventObject = eventObject;
       this.session = session;
     }
@@ -96,7 +97,11 @@ public class EventConversationContext {
       return eventObject;
     }
 
-    public String getSession() {
+    public String getSessionId() {
+      return session.getSessionId();
+    }
+
+    public QueueSession getSession() {
       return session;
     }
   }

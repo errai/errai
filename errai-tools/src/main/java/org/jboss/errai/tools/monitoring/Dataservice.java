@@ -1,12 +1,12 @@
 /*
- * Copyright 2010 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
- *
+ *  
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -69,7 +69,8 @@ public class Dataservice implements Attachable {
     private String service;
     private Object message;
 
-    public Record(long time, int eventId, int eventType, int subEventId, String fromBus, String toBus, String service, Object message) {
+    public Record(long time, int eventId, int eventType, int subEventId, String fromBus, String toBus, String service,
+        Object message) {
       this.eventId = eventId;
       this.eventType = eventType;
       this.subEventId = subEventId;
@@ -123,7 +124,8 @@ public class Dataservice implements Attachable {
 
   public void storeRecord(long time, String fromBus, String toBus, String service, Message message) {
     try {
-      PreparedStatement stmt = c.prepareStatement("INSERT INTO MONITORDB (EVENT_TYPE, TM, BUS_ID, TO_BUS_ID, SERVICE_NAME, MESSAGE_OBJ) VALUES (?, ?, ?, ?, ?, ?)");
+      PreparedStatement stmt =
+          c.prepareStatement("INSERT INTO MONITORDB (EVENT_TYPE, TM, BUS_ID, TO_BUS_ID, SERVICE_NAME, MESSAGE_OBJ) VALUES (?, ?, ?, ?, ?, ?)");
       stmt.setInt(1, EventType.MESSAGE.ordinal());
       stmt.setLong(2, time);
       stmt.setString(3, fromBus);
@@ -137,9 +139,11 @@ public class Dataservice implements Attachable {
     }
   }
 
-  public void storeBusEvent(long time, SubEventType subEventType, String fromBus, String toBus, String service, Object message) {
+  public void storeBusEvent(long time, SubEventType subEventType, String fromBus, String toBus, String service,
+      Object message) {
     try {
-      PreparedStatement stmt = c.prepareStatement("INSERT INTO MONITORDB (EVENT_TYPE, SUBEVENT_TYPE, TM, BUS_ID, TO_BUS_ID, SERVICE_NAME, MESSAGE_OBJ) VALUES (?, ?, ?, ?, ?, ?, ?)");
+      PreparedStatement stmt =
+          c.prepareStatement("INSERT INTO MONITORDB (EVENT_TYPE, SUBEVENT_TYPE, TM, BUS_ID, TO_BUS_ID, SERVICE_NAME, MESSAGE_OBJ) VALUES (?, ?, ?, ?, ?, ?, ?)");
       stmt.setInt(1, EventType.BUS_EVENT.ordinal());
       stmt.setInt(2, subEventType.ordinal());
       stmt.setLong(3, time);
@@ -156,7 +160,8 @@ public class Dataservice implements Attachable {
 
   public void storeError(long time, String busId, String service, Throwable error) {
     try {
-      PreparedStatement stmt = c.prepareStatement("INSERT INTO MONITORDB (EVENT_TYPE, TM, BUS_ID, SERVICE_NAME, MESSAGE_OBJ) VALUES (?, ?, ?, ?, ?)");
+      PreparedStatement stmt =
+          c.prepareStatement("INSERT INTO MONITORDB (EVENT_TYPE, TM, BUS_ID, SERVICE_NAME, MESSAGE_OBJ) VALUES (?, ?, ?, ?, ?)");
       stmt.setInt(1, EventType.ERROR.ordinal());
       stmt.setLong(2, time);
       stmt.setString(3, busId);
@@ -169,26 +174,33 @@ public class Dataservice implements Attachable {
     }
   }
 
-
   public List<Record> getAllMessages(EventType type, String busId, String service) {
     try {
-      PreparedStatement stmt = c.prepareStatement("SELECT * FROM MONITORDB WHERE EVENT_TYPE=?" + (busId != null ? " AND TO_BUS_ID=?" : "") + (service != null ? " AND SERVICE_NAME LIKE ?" : ""));
+      PreparedStatement stmt =
+          c.prepareStatement("SELECT * FROM MONITORDB WHERE EVENT_TYPE=?" + (busId != null ? " AND TO_BUS_ID=?" : "")
+              + (service != null ? " AND SERVICE_NAME LIKE ?" : ""));
 
       stmt.setInt(1, type.ordinal());
 
       int x = 2;
-      if (busId != null) stmt.setString(x++, busId);
-      if (service != null) stmt.setString(x, service);
+      if (busId != null) {
+        stmt.setString(x++, busId);
+      }
+
+      if (service != null) {
+        stmt.setString(x, service);
+      }
 
       if (stmt.execute()) {
         ResultSet results = stmt.getResultSet();
         ArrayList<Record> records = new ArrayList<Record>(100);
         while (results.next()) {
+          String messageResult = results.getString(8);
+          Object message = (messageResult == null) ? null : UiHelper.decodeAndDemarshall(valueOf(messageResult));
           records.add(new Record(results.getLong(1), results.getInt(2), results.getInt(3), results.getInt(4),
-              results.getString(5), results.getString(6), results.getString(7), UiHelper.decodeAndDemarshall(valueOf(results.getObject(8)))));
+              results.getString(5), results.getString(6), results.getString(7), message));
         }
         return records;
-
       }
       return null;
     }
@@ -201,7 +213,8 @@ public class Dataservice implements Attachable {
     proc.registerEvent(EventType.MESSAGE, new MessageMonitor() {
       public void monitorEvent(MessageEvent event) {
         if (!event.isReplay()) {
-          storeRecord(event.getTime(), event.getFromBus(), event.getToBus(), event.getSubject(), (Message) event.getContents());
+          storeRecord(event.getTime(), event.getFromBus(), event.getToBus(), event.getSubject(), (Message) event
+              .getContents());
         }
       }
     });
@@ -209,7 +222,8 @@ public class Dataservice implements Attachable {
     proc.registerEvent(EventType.BUS_EVENT, new MessageMonitor() {
       public void monitorEvent(MessageEvent event) {
         if (!event.isReplay()) {
-          storeBusEvent(event.getTime(), event.getSubType(), event.getFromBus(), event.getToBus(), event.getSubject(), event.getContents());
+          storeBusEvent(event.getTime(), event.getSubType(), event.getFromBus(), event.getToBus(), event.getSubject(),
+              event.getContents());
         }
       }
     });
@@ -217,7 +231,8 @@ public class Dataservice implements Attachable {
     proc.registerEvent(EventType.REPLAY_MESSAGES, new MessageMonitor() {
       public void monitorEvent(MessageEvent event) {
         for (Record r : getAllMessages(EventType.MESSAGE, event.getFromBus(), event.getSubject())) {
-          proc.notifyEvent(r.time, EventType.values()[r.eventType], SubEventType.values()[r.subEventId], r.fromBus, r.toBus, r.service, (Message) r.message, null, true);
+          proc.notifyEvent(r.time, EventType.values()[r.eventType], SubEventType.values()[r.subEventId], r.fromBus,
+              r.toBus, r.service, (Message) r.message, null, true);
         }
       }
     });
@@ -225,11 +240,10 @@ public class Dataservice implements Attachable {
     proc.registerEvent(EventType.REPLAY_BUS_EVENTS, new MessageMonitor() {
       public void monitorEvent(MessageEvent event) {
         for (Record r : getAllMessages(EventType.BUS_EVENT, "Server", event.getSubject())) {
-          proc.notifyEvent(r.time, EventType.values()[r.eventType], SubEventType.values()[r.subEventId], r.fromBus, r.toBus, r.service, (Message) r.message, null, true);
+          proc.notifyEvent(r.time, EventType.values()[r.eventType], SubEventType.values()[r.subEventId], r.fromBus,
+              r.toBus, r.service, (Message) r.message, null, true);
         }
       }
     });
   }
 }
-
-

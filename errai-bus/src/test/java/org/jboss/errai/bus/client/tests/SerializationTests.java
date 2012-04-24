@@ -86,6 +86,23 @@ public class SerializationTests extends AbstractErraiTest {
     });
   }
 
+  public void testStringWithNonAsciiChars() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final String expected = "Th\u00efs is a test string";
+
+        MessageBuilder.createCall(new RemoteCallback<String>() {
+          @Override
+          public void callback(String response) {
+            assertEquals(expected, response);
+            finishTest();
+          }
+        }, TestSerializationRPCService.class).testString(expected);
+      }
+    });
+  }
+
   public void testInteger() {
     runAfterInit(new Runnable() {
       @Override
@@ -222,6 +239,17 @@ public class SerializationTests extends AbstractErraiTest {
     });
   }
 
+  /**
+   * Formats a failure message of the form
+   * "expected: <i>expect</i>; but was: <i>got</i>". Does not cause a test
+   * failure. You still have to call Assert.fail() if you want that.
+   *
+   * @param expect
+   *          The expected value.
+   * @param got
+   *          The actual value.
+   * @return A new String as described above.
+   */
   private static String failMessage(Object expect, Object got) {
     return "expected: " + expect + "; but was: " + got;
   }
@@ -233,9 +261,10 @@ public class SerializationTests extends AbstractErraiTest {
     else if (a.length != b.length) {
       fail(failMessage(a, b));
     }
-
-    for (int i = 0; i < a.length; i++) {
-      assertEquals(a[i], b[i]);
+    else {
+      for (int i = 0; i < a.length; i++) {
+        assertEquals(a[i], b[i]);
+      }
     }
   }
 
@@ -246,9 +275,10 @@ public class SerializationTests extends AbstractErraiTest {
     else if (a.length != b.length) {
       fail(failMessage(a, b));
     }
-
-    for (int i = 0; i < a.length; i++) {
-      assertEquals(a[i], b[i]);
+    else {
+      for (int i = 0; i < a.length; i++) {
+        assertEquals(a[i], b[i]);
+      }
     }
   }
 
@@ -259,9 +289,10 @@ public class SerializationTests extends AbstractErraiTest {
     else if (a.length != b.length) {
       fail(failMessage(a, b));
     }
-
-    for (int i = 0; i < a.length; i++) {
-      assertEquals(a[i], b[i]);
+    else {
+      for (int i = 0; i < a.length; i++) {
+        assertEquals(a[i], b[i]);
+      }
     }
   }
 
@@ -272,9 +303,10 @@ public class SerializationTests extends AbstractErraiTest {
     else if (a.length != b.length) {
       fail(failMessage(a, b));
     }
-
-    for (int i = 0; i < a.length; i++) {
-      assertEquals(a[i], b[i]);
+    else {
+      for (int i = 0; i < a.length; i++) {
+        assertEquals(a[i], b[i]);
+      }
     }
   }
 
@@ -285,9 +317,10 @@ public class SerializationTests extends AbstractErraiTest {
     else if (a.length != b.length) {
       fail(failMessage(a, b));
     }
-
-    for (int i = 0; i < a.length; i++) {
-      assertEquals(a[i], b[i]);
+    else {
+      for (int i = 0; i < a.length; i++) {
+        assertEquals(a[i], b[i]);
+      }
     }
   }
 
@@ -298,9 +331,10 @@ public class SerializationTests extends AbstractErraiTest {
     else if (a.length != b.length) {
       fail(failMessage(a, b));
     }
-
-    for (int i = 0; i < a.length; i++) {
-      assertEquals(a[i], b[i]);
+    else {
+      for (int i = 0; i < a.length; i++) {
+        assertEquals(a[i], b[i]);
+      }
     }
   }
 
@@ -311,9 +345,10 @@ public class SerializationTests extends AbstractErraiTest {
     else if (a.length != b.length) {
       fail(failMessage(a, b));
     }
-
-    for (int i = 0; i < a.length; i++) {
-      assertEquals(a[i], b[i]);
+    else {
+      for (int i = 0; i < a.length; i++) {
+        assertEquals(a[i], b[i]);
+      }
     }
   }
 
@@ -324,9 +359,10 @@ public class SerializationTests extends AbstractErraiTest {
     else if (a.length != b.length) {
       fail(failMessage(a, b));
     }
-
-    for (int i = 0; i < a.length; i++) {
-      assertEquals(a[i], b[i]);
+    else {
+      for (int i = 0; i < a.length; i++) {
+        assertEquals(a[i], b[i]);
+      }
     }
   }
 
@@ -337,9 +373,10 @@ public class SerializationTests extends AbstractErraiTest {
     else if (a.length != b.length) {
       fail(failMessage(a, b));
     }
-
-    for (int i = 0; i < a.length; i++) {
-      assertEquals(a[i], b[i]);
+    else {
+      for (int i = 0; i < a.length; i++) {
+        assertEquals(a[i], b[i]);
+      }
     }
   }
 
@@ -1473,6 +1510,7 @@ public class SerializationTests extends AbstractErraiTest {
     });
   }
 
+  @SuppressWarnings("unchecked")
   public void testInheritedDefinitionFromExistingParent() {
     runAfterInit(new Runnable() {
       @Override
