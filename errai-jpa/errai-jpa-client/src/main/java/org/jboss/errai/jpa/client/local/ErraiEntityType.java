@@ -35,22 +35,26 @@ public class ErraiEntityType<X> implements EntityType<X> {
     if (attribute.isVersion()) version = attribute;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public <Y> SingularAttribute<? super X, Y> getId(Class<Y> type) {
     return (SingularAttribute<? super X, Y>) id;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public <Y> SingularAttribute<X, Y> getDeclaredId(Class<Y> type) {
     // XXX the JPA spec is not clear on the difference between id and declaredId
     return (SingularAttribute<X, Y>) id;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public <Y> SingularAttribute<? super X, Y> getVersion(Class<Y> type) {
     return (SingularAttribute<? super X, Y>) version;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public <Y> SingularAttribute<X, Y> getDeclaredVersion(Class<Y> type) {
     // XXX the JPA spec is not clear on the difference between version and declaredVersion
