@@ -92,6 +92,7 @@
         <module>errai-cdi</module>
         <module>errai-jaxrs</module>
         <module>errai-uibinder</module>
+        <module>errai-data-binding</module>
     </modules>
 
     <dependencyManagement>

@@ -26,10 +26,19 @@ import com.google.gwt.user.client.ui.HasValue;
 public interface BindableProxyProvider {
 
   /**
+   * Returns an unbound proxy.
+   * 
+   * @return proxy instance
+   */
+  public BindableProxy getBindableProxy();
+
+  /**
    * Returns a proxy for the provided model bound to the provided widget.
    * 
-   * @param hasValue  widget that proxy should be bound to.
-   * @param model     model to proxy.
+   * @param hasValue
+   *          the widget that proxy should be bound to.
+   * @param model
+   *          the model to proxy
    * @return proxy instance
    */
   public BindableProxy getBindableProxy(HasValue<?> hasValue, Object model);

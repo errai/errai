@@ -16,24 +16,39 @@
 
 package org.jboss.errai.databinding.client;
 
-import java.lang.annotation.Annotation;
-
-import javax.inject.Singleton;
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.jboss.errai.databinding.client.api.DataBinder;
-import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
-import org.jboss.errai.ioc.client.api.IOCProvider;
+import org.jboss.errai.ioc.client.api.EntryPoint;
+
+import com.google.gwt.user.client.ui.TextBox;
 
 /**
- * {@link IOCProvider} to make the {@link DataBinder} injectable.
+ * Module used for integration testing.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@IOCProvider @Singleton
-public class DataBinderProvider implements ContextualTypeProvider<DataBinder<?>> {
-  
-  @Override
-  public DataBinder<?> provide(Class<?>[] typeargs, Annotation[] qualifiers) {
-    return new DataBinder(typeargs[0]);
+@EntryPoint
+public class ModuleWithInjectedDataBinder {
+
+  private TextBox textBox = new TextBox();
+
+  @Inject
+  private DataBinder<Model> dataBinder;
+
+  @PostConstruct
+  public void init() {
+    // bind the value of the text box to the name property of the model so they are automatically kept in sync
+    // until unbind is called.
+    dataBinder.bind(textBox, "name");
+  }
+
+  public TextBox getTextBox() {
+    return textBox;
+  }
+
+  public Model getModel() {
+    return dataBinder.getModel();
   }
 }

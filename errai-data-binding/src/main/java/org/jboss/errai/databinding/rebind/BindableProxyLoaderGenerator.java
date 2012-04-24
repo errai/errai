@@ -86,15 +86,15 @@ public class BindableProxyLoaderGenerator extends Generator {
     File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + className + ".java");
 
     String gen;
- //   if (RebindUtils.hasClasspathChangedForAnnotatedWith(Bindable.class) || !cacheFile.exists()) {
- //     log.info("generating bindable proxy loader class.");
-      gen = generate(context, logger);
-      RebindUtils.writeStringToFile(cacheFile, gen);
- //    }
- //   else {
- //     log.info("nothing has changed. using cached bindable proxy loader class.");
- //     gen = RebindUtils.readFileToString(cacheFile);
- //   }
+     if (RebindUtils.hasClasspathChangedForAnnotatedWith(Bindable.class) || !cacheFile.exists()) {
+       log.info("generating bindable proxy loader class.");
+       gen = generate(context, logger);
+       RebindUtils.writeStringToFile(cacheFile, gen);
+    }
+    else {
+      log.info("nothing has changed. using cached bindable proxy loader class.");
+       gen = RebindUtils.readFileToString(cacheFile);
+    }
 
     return gen;
   }
@@ -104,30 +104,34 @@ public class BindableProxyLoaderGenerator extends Generator {
     ClassStructureBuilder<?> classBuilder = ClassBuilder.implement(BindableProxyLoader.class);
 
     MethodBlockBuilder<?> loadProxies = classBuilder.publicMethod(void.class, "loadBindableProxies");
-    for (Class<?> bindable : scanner.getTypesAnnotatedWith(Bindable.class, 
+    for (Class<?> bindable : scanner.getTypesAnnotatedWith(Bindable.class,
         RebindUtils.findTranslatablePackages(context))) {
 
       if (Modifier.isFinal(bindable.getModifiers())) {
         log.warn("Ignoring bindable type because it is marked as final:" + bindable.getName());
         continue;
       }
-      
+
       ClassStructureBuilder<?> bindableProxy = new BindableProxyGenerator(bindable).generate();
       loadProxies.append(new InnerClass(bindableProxy.getClassDefinition()));
-      
+
       Statement proxyProvider = ObjectBuilder.newInstanceOf(BindableProxyProvider.class)
           .extend()
-          .publicOverridesMethod("getBindableProxy", 
+          .publicOverridesMethod("getBindableProxy",
               Parameter.of(HasValue.class, "hasValue"), Parameter.of(bindable, "model"))
           .append(Stmt.nestedCall(Stmt.newObject(bindableProxy.getClassDefinition())
               .withParameters(Variable.get("hasValue"), Cast.to(bindable, Stmt.loadVariable("model")))).returnValue())
           .finish()
+           .publicOverridesMethod("getBindableProxy")
+          .append(Stmt.nestedCall(Stmt.newObject(bindableProxy.getClassDefinition())).returnValue())
+          .finish()
+
           .finish();
 
       loadProxies.append(Stmt.invokeStatic(BindableProxyFactory.class, "addBindableProxy", bindable, proxyProvider));
     }
-    classBuilder = (ClassStructureBuilder<?>) loadProxies.finish();
 
+    classBuilder = (ClassStructureBuilder<?>) loadProxies.finish();
     String s = classBuilder.toJavaString();
     System.out.println(s);
     return s;

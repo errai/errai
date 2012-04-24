@@ -18,19 +18,38 @@ package org.jboss.errai.databinding.client;
 
 import org.jboss.errai.databinding.client.api.Bindable;
 
+import com.google.gwt.user.client.ui.HasValue;
+
 /**
- * This interface is implemented by the generated proxies for {@link Bindable} types. It provides the methods to change
- * the state of the model in response to UI changes.
+ * This interface is implemented by the generated proxies for {@link Bindable} types.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface BindableProxy {
 
   /**
-   * Sets a property value on the model instance.
+   * Sets a property value on the model instance. This method is invoked to change the state of the model in response to
+   * UI changes.
    * 
-   * @param property  name of the property following Java bean conventions
-   * @param value  new value of the property
+   * @param property
+   *          name of the property following Java bean conventions
+   * @param value
+   *          new value of the property
    */
   public void set(String property, Object value);
+
+  /**
+   * Returns the target object (the actual model instance)
+   * 
+   * @return target object
+   */
+  public Object getTarget();
+
+  /**
+   * Binds the proxy/model to the provided UI field/component.
+   * 
+   * @param hasValue
+   *          the widget instance to bind to
+   */
+  public void bindTo(HasValue<?> hasValue);
 }

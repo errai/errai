@@ -16,7 +16,8 @@
 
 package org.jboss.errai.databinding.client.test;
 
-import org.jboss.errai.databinding.client.DataBindingTestModule;
+import org.jboss.errai.databinding.client.Module;
+import org.jboss.errai.databinding.client.ModuleWithInjectedDataBinder;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
 import org.junit.Test;
@@ -32,16 +33,29 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   public String getModuleName() {
     return "org.jboss.errai.databinding.DataBindingTestModule";
   }
-  
+
   @Test
   public void testDataBinding() {
-    DataBindingTestModule module = IOC.getBeanManager().lookupBean(DataBindingTestModule.class).getInstance();
-    
+    Module module = IOC.getBeanManager().lookupBean(Module.class).getInstance();
+
     module.getModel().setValue("model change");
     assertEquals("Widget not properly updated", "model change", module.getTextBox().getText());
-    
+
     // simulate a UI change
     module.getTextBox().setValue("UI change", true);
     assertEquals("Model not properly updated", "UI change", module.getModel().getValue());
+  }
+
+  @Test
+  public void testDataBindingUsingInjectedModel() {
+    ModuleWithInjectedDataBinder module =
+        IOC.getBeanManager().lookupBean(ModuleWithInjectedDataBinder.class).getInstance();
+
+    module.getModel().setName("model change");
+    assertEquals("Widget not properly updated", "model change", module.getTextBox().getText());
+
+    // simulate a UI change
+    module.getTextBox().setValue("UI change", true);
+    assertEquals("Model not properly updated", "UI change", module.getModel().getName());
   }
 }

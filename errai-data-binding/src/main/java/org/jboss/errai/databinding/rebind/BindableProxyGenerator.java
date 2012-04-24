@@ -58,6 +58,7 @@ public class BindableProxyGenerator {
         .privateField("target", bindable)
         .finish()
         .publicConstructor()
+        .append(Stmt.loadClassMember("target").assignValue(Stmt.newObject(bindable)))
         .finish()
         .publicConstructor(Parameter.of(HasValue.class, "hasValue"), Parameter.of(bindable, "target"))
         .append(Stmt.loadClassMember("hasValue").assignValue(Variable.get("hasValue")))
@@ -77,6 +78,13 @@ public class BindableProxyGenerator {
   }
 
   private void generateProxyMethods(PropertyDescriptor[] propertyDescriptors, ClassStructureBuilder<?> classBuilder) {
+    classBuilder.publicMethod(bindable, "getTarget")
+        .append(Stmt.loadClassMember("target").returnValue())
+        .finish()
+        .publicMethod(void.class, "bindTo", Parameter.of(HasValue.class, "hasValue"))
+        .append(Stmt.loadClassMember("hasValue").assignValue(Variable.get("hasValue")))
+        .finish();
+
     BlockBuilder<?> setMethod = classBuilder.publicMethod(void.class, "set",
         Parameter.of(String.class, "property"),
         Parameter.of(Object.class, "value"));
