@@ -10,12 +10,12 @@ public class WebStorageBackend implements StorageBackend {
 
   @Override
   public native void put(String key, String value) /*-{
-    $wnd.localStorage.setItem(key, value);
+    $wnd.sessionStorage.setItem(key, value);
   }-*/;
 
   @Override
   public native String get(String key) /*-{
-    return $wnd.localStorage.getItem(key);
+    return $wnd.sessionStorage.getItem(key);
   }-*/;
 
 }

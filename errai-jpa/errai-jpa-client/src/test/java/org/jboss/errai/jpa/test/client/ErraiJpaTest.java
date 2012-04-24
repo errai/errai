@@ -61,7 +61,7 @@ public class ErraiJpaTest extends GWTTestCase {
     em.persist(album);
     em.flush();
     em.detach(album);
-    assertTrue(album.getId() != 0);
+    assertNotNull(album.getId());
 
     // fetch it
     Album fetchedAlbum = em.find(Album.class, album.getId());

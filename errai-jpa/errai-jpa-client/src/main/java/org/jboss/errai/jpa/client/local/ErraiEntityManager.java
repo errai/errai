@@ -97,6 +97,7 @@ public abstract class ErraiEntityManager implements EntityManager {
     String idJson = Marshalling.toJSON(id);
     System.out.println("About to convert entity to JSON: " + entity);
     String entityJson = Marshalling.toJSON(entity);
+    System.out.println("Storing.\nKey=" + idJson + "\nValue=" + entityJson);
     backend.put(idJson, entityJson);
   }
   // -------------- Actual JPA API below this line -------------------
