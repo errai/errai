@@ -25,6 +25,9 @@ import org.jboss.errai.databinding.client.api.Bindable;
  */
 public interface BindableProxyLoader {
   
+  /**
+   * Registers the generated proxies for bindable types.
+   */
   public void loadBindableProxies();
 
 }

@@ -16,10 +16,21 @@
 
 package org.jboss.errai.databinding.client;
 
+import org.jboss.errai.databinding.client.api.Bindable;
+
 /**
+ * This interface is implemented by the generated proxies for {@link Bindable} types. It provides the methods to change
+ * the state of the model in response to UI changes.
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface BindableProxy {
 
+  /**
+   * Sets a property value on the model instance.
+   * 
+   * @param property  name of the property following Java bean conventions
+   * @param value  new value of the property
+   */
   public void set(String property, Object value);
 }

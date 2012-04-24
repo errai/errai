@@ -23,6 +23,8 @@ import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 
 /**
+ * {@link IOCProvider} to make the {@link DataBinder} injectable.
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @IOCProvider @Singleton

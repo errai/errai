@@ -17,9 +17,11 @@
 package org.jboss.errai.databinding.rebind;
 
 import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.Parameter;
@@ -35,7 +37,7 @@ import org.jboss.errai.databinding.client.api.Bindable;
 import com.google.gwt.user.client.ui.HasValue;
 
 /**
- * Generates the proxy for a {@link Bindable}.
+ * Generates the proxy for a {@link Bindable} type.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -46,7 +48,7 @@ public class BindableProxyGenerator {
     this.bindable = bindable;
   }
 
-  public ClassStructureBuilder<?> generate() throws Exception {
+  public ClassStructureBuilder<?> generate() {
     ClassStructureBuilder<?> classBuilder = ClassBuilder.define(bindable.getSimpleName() + "Proxy", bindable)
         .packageScope()
         .implementsInterface(BindableProxy.class)
@@ -62,16 +64,28 @@ public class BindableProxyGenerator {
         .append(Stmt.loadClassMember("target").assignValue(Variable.get("target")))
         .finish();
 
+    BeanInfo beanInfo;
+    try {
+      beanInfo = Introspector.getBeanInfo(bindable);
+      generateProxyMethods(beanInfo.getPropertyDescriptors(), classBuilder);
+    }
+    catch (IntrospectionException e) {
+      throw new RuntimeException("Failed to introspect bean:" + bindable.getName(), e);
+    }
+
+    return classBuilder;
+  }
+
+  private void generateProxyMethods(PropertyDescriptor[] propertyDescriptors, ClassStructureBuilder<?> classBuilder) {
     BlockBuilder<?> setMethod = classBuilder.publicMethod(void.class, "set",
         Parameter.of(String.class, "property"),
         Parameter.of(Object.class, "value"));
 
-    BeanInfo beanInfo = Introspector.getBeanInfo(bindable);
-    PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
     if (propertyDescriptors != null) {
       for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
+
         Method setterMethod = propertyDescriptor.getWriteMethod();
-        if (setterMethod != null) {
+        if (setterMethod != null && !Modifier.isFinal(setterMethod.getModifiers())) {
           setMethod
               .append(Stmt
                   .if_(Bool.expr(Stmt.loadVariable("property").invoke("equals", propertyDescriptor.getName())))
@@ -83,17 +97,22 @@ public class BindableProxyGenerator {
           classBuilder.publicMethod(setterMethod.getReturnType(), setterMethod.getName(),
               Parameter.of(setterMethod.getParameterTypes()[0], propertyDescriptor.getName()))
               .append(Stmt
-                    .loadClassMember("target").invoke(setterMethod.getName(), 
+                    .loadClassMember("target").invoke(setterMethod.getName(),
                         Cast.to(setterMethod.getParameterTypes()[0], Stmt.loadVariable(propertyDescriptor.getName()))))
               .append(Stmt
-                  .loadClassMember("hasValue").invoke("setValue", 
+                  .loadClassMember("hasValue").invoke("setValue",
                         Stmt.loadVariable(propertyDescriptor.getName()), true))
+              .finish();
+        }
+
+        Method getterMethod = propertyDescriptor.getReadMethod();
+        if (getterMethod != null && !Modifier.isFinal(getterMethod.getModifiers())) {
+          classBuilder.publicMethod(getterMethod.getReturnType(), getterMethod.getName())
+              .append(Stmt.loadClassMember("target").invoke(getterMethod.getName()).returnValue())
               .finish();
         }
       }
     }
     setMethod.finish();
-
-    return classBuilder;
   }
 }

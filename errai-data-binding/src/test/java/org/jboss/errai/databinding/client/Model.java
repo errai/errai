@@ -16,15 +16,14 @@
 
 package org.jboss.errai.databinding.client;
 
-import javax.enterprise.context.Dependent;
-
 import org.jboss.errai.databinding.client.api.Bindable;
 
 /**
+ * Simple bindable model for testing purposes.
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Bindable
-@Dependent
 public class Model {
 
   private String value;

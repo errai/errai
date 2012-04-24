@@ -20,17 +20,28 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jboss.errai.common.client.framework.Assert;
-import org.jboss.errai.ioc.client.container.IOC;
+import org.jboss.errai.databinding.client.api.Bindable;
 
 import com.google.gwt.user.client.ui.HasValue;
 
 /**
+ * This class provides access to the generated proxies for {@link Bindable} types.
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class BindableProxyFactory {
   private static Map<Class<?>, BindableProxyProvider> bindableProxyProviders =
       new HashMap<Class<?>, BindableProxyProvider>();
 
+  /**
+   * Returns a proxy for the provided model instance bound to the provided widget. Changes to the proxy's state will
+   * result in updates on the widget given the corresponding property was bound.
+   * 
+   * @param <T>       bindable type
+   * @param hasValue  the widget instance to bind to
+   * @param model     the model instance to proxy
+   * @return proxy    that can be used in place of the model instance.
+   */
   public static <T> T getBindableProxy(HasValue<?> hasValue, T model) {
     if (bindableProxyProviders.isEmpty()) {
       throw new RuntimeException("There are no proxy providers for bindable types registered yet.");
@@ -38,15 +49,16 @@ public class BindableProxyFactory {
 
     BindableProxyProvider proxyProvider;
     Class<?> type = model.getClass();
-    do  {
+    do {
       proxyProvider = bindableProxyProviders.get(type);
-      // try the class's supertype (it could have been proxied by IOC)
-    } while (proxyProvider == null && (type = type.getSuperclass()) != null);
+      // try the class's super type (it could have been proxied by IOC)
+    }
+    while (proxyProvider == null && (type = type.getSuperclass()) != null);
 
     if (proxyProvider == null) {
       throw new RuntimeException("No proxy provider found for bindable type:" + model.getClass().getName());
     }
-    
+
     BindableProxy proxy = proxyProvider.getBindableProxy(hasValue, model);
     if (proxy == null) {
       throw new RuntimeException("No proxy instance provided for bindable type: " + model.getClass().getName());
@@ -55,6 +67,12 @@ public class BindableProxyFactory {
     return (T) proxy;
   }
 
+  /**
+   * Registers a generated bindable proxy. This method is called by the generated BindableProxyLoader.
+   * 
+   * @param proxyType  bindable type, must not be null
+   * @param proxyProvider  the proxy provided for the generated bindable proxy, must not be null.    
+   */
   public static void addBindableProxy(Class<?> proxyType, BindableProxyProvider proxyProvider) {
     Assert.notNull(proxyType);
     Assert.notNull(proxyProvider);

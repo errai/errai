@@ -22,6 +22,8 @@ import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
 import org.junit.Test;
 
 /**
+ * Data binding tests.
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
@@ -32,7 +34,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
   
   @Test
-  public void testDataBindingUsingInjectedModel() {
+  public void testDataBinding() {
     DataBindingTestModule module = IOC.getBeanManager().lookupBean(DataBindingTestModule.class).getInstance();
     
     module.getModel().setValue("model change");

@@ -18,6 +18,7 @@ package org.jboss.errai.databinding.rebind;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.lang.reflect.Modifier;
 
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.InnerClass;
@@ -63,12 +64,6 @@ public class BindableProxyLoaderGenerator extends Generator {
 
     try {
       JClassType classType = context.getTypeOracle().getType(typeName);
-
-      if (classType.isInterface() == null) {
-        logger.log(TreeLogger.ERROR, typeName + "is not an interface.");
-        throw new RuntimeException("invalid type: not an interface");
-      }
-
       packageName = classType.getPackage().getName();
       className = classType.getSimpleSourceName() + "Impl";
 
@@ -101,7 +96,6 @@ public class BindableProxyLoaderGenerator extends Generator {
  //     gen = RebindUtils.readFileToString(cacheFile);
  //   }
 
-     
     return gen;
   }
 
@@ -110,21 +104,21 @@ public class BindableProxyLoaderGenerator extends Generator {
     ClassStructureBuilder<?> classBuilder = ClassBuilder.implement(BindableProxyLoader.class);
 
     MethodBlockBuilder<?> loadProxies = classBuilder.publicMethod(void.class, "loadBindableProxies");
-    for (Class<?> bindable : scanner.getTypesAnnotatedWith(Bindable.class, RebindUtils.findTranslatablePackages(context))) {
+    for (Class<?> bindable : scanner.getTypesAnnotatedWith(Bindable.class, 
+        RebindUtils.findTranslatablePackages(context))) {
 
-      ClassStructureBuilder<?> bindableProxy = null;
-      try {
-        bindableProxy = new BindableProxyGenerator(bindable).generate();
-      } 
-      catch (Exception e) {
-        logger.log(TreeLogger.ERROR, "Error generating data-binding extensions", e);
+      if (Modifier.isFinal(bindable.getModifiers())) {
+        log.warn("Ignoring bindable type because it is marked as final:" + bindable.getName());
+        continue;
       }
+      
+      ClassStructureBuilder<?> bindableProxy = new BindableProxyGenerator(bindable).generate();
       loadProxies.append(new InnerClass(bindableProxy.getClassDefinition()));
       
-      // create the proxy provider
       Statement proxyProvider = ObjectBuilder.newInstanceOf(BindableProxyProvider.class)
           .extend()
-          .publicOverridesMethod("getBindableProxy", Parameter.of(HasValue.class, "hasValue"), Parameter.of(bindable, "model"))
+          .publicOverridesMethod("getBindableProxy", 
+              Parameter.of(HasValue.class, "hasValue"), Parameter.of(bindable, "model"))
           .append(Stmt.nestedCall(Stmt.newObject(bindableProxy.getClassDefinition())
               .withParameters(Variable.get("hasValue"), Cast.to(bindable, Stmt.loadVariable("model")))).returnValue())
           .finish()

@@ -22,10 +22,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * Indicates that instances of the annotated class are bindable to UI components. 
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE, ElementType.FIELD})
+@Target({ElementType.TYPE})
 public @interface Bindable {
-  String value() default "";
+
 }

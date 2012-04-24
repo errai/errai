@@ -25,15 +25,15 @@ import org.jboss.errai.ioc.client.api.EntryPoint;
 import com.google.gwt.user.client.ui.TextBox;
 
 /**
+ * Module used for integration testing.
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @EntryPoint
 public class DataBindingTestModule {
 
   private TextBox textBox = new TextBox();
-  
-  @Inject
-  private Model model;
+  private Model model = new Model();
   
   @Inject
   private DataBinder dataBinder;
