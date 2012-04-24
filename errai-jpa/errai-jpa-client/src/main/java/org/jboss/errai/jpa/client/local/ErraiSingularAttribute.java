@@ -3,11 +3,14 @@ package org.jboss.errai.jpa.client.local;
 import javax.persistence.metamodel.SingularAttribute;
 
 /**
- * Extends the JPA SingularAttribute interface with methods for reading and
- * writing the attribute value.
+ * Extends the JPA SingularAttribute interface with methods required by Errai
+ * persistence but missing from the JPA metamodel. Most importantly, this
+ * interface provides methods for reading and writing the attribute value.
  *
- * @param <X> The type containing the represented attribute
- * @param <T> The type of the represented attribute
+ * @param <X>
+ *          The type containing the represented attribute
+ * @param <T>
+ *          The type of the represented attribute
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
 public interface ErraiSingularAttribute<X, T> extends SingularAttribute<X, T> {
@@ -34,4 +37,9 @@ public interface ErraiSingularAttribute<X, T> extends SingularAttribute<X, T> {
    *          The value to set the attribute to.
    */
   public void set(X entityInstance, T value);
+
+  /**
+   * Can the attribute's value be generated (usually for ID attributes).
+   */
+  public boolean isGeneratedValue();
 }

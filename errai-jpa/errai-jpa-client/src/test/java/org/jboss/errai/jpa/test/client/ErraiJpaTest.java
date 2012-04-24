@@ -48,7 +48,7 @@ public class ErraiJpaTest extends GWTTestCase {
   /**
    * Tests the persistence of one entity with no related entities.
    */
-  public void ignoretestPersistOneAlbum() { // implementation isn't complete yet
+  public void testPersistOneAlbum() { // implementation isn't complete yet
 
     // make it
     Album album = new Album();
@@ -66,5 +66,7 @@ public class ErraiJpaTest extends GWTTestCase {
     // fetch it
     Album fetchedAlbum = em.find(Album.class, album.getId());
     assertNotSame(album, fetchedAlbum);
+    assertEquals(album.toString(), fetchedAlbum.toString());
+    assertEquals(album, fetchedAlbum);
   }
 }

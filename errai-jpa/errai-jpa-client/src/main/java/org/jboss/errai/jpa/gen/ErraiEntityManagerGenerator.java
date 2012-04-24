@@ -2,6 +2,7 @@ package org.jboss.errai.jpa.gen;
 
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,6 +11,7 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Persistence;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.ManagedType;
@@ -133,13 +135,21 @@ public class ErraiEntityManagerGenerator extends Generator {
                               Stmt.castTo(MetaClassFactory.get(attr.getJavaType()).asBoxed(), Stmt.loadVariable(newValueParam)));
             }
             else if (attr.getJavaMember() instanceof Method) {
-              return Stmt.loadVariable("entityInstance").invoke(attr.getJavaMember().getName()).returnValue();
+              return Stmt.loadVariable(entityInstanceParam).invoke(attr.getJavaMember().getName()).returnValue();
             }
             else {
               throw new AssertionError(
                       "JPA properties should only be Field or Method, but this one is " +
                       attr.getJavaMember() == null ? "null" : attr.getJavaMember().getClass());
             }
+          }
+
+          // provide indication of generated value annotation
+          if (o instanceof SingularAttribute
+                  && method.getName().equals("isGeneratedValue")) {
+            SingularAttribute<?, ?> attr = (SingularAttribute<?, ?>) o;
+
+            return Stmt.loadLiteral(isGeneratedValue(attr.getJavaMember())).returnValue();
           }
 
           // allow SnapshotMaker default (read value and create snapshot)
@@ -188,6 +198,27 @@ public class ErraiEntityManagerGenerator extends Generator {
     }
 
     return classBuilder.getClassDefinition().getFullyQualifiedName();
+  }
+
+  /**
+   * Returns true if the given Java member is annotated as a JPA generated value.
+   * <p>
+   * TODO: support this determination for XML-configured entities.
+   *
+   * @param javaMember the Java member for the attribute in question
+   */
+  protected boolean isGeneratedValue(Member javaMember) {
+    if (javaMember instanceof Field) {
+      MetaField field = MetaClassFactory.get((Field) javaMember);
+      return field.isAnnotationPresent(GeneratedValue.class);
+    }
+    else if (javaMember instanceof Method) {
+      MetaMethod method = MetaClassFactory.get((Method) javaMember);
+      return method.isAnnotationPresent(GeneratedValue.class);
+    }
+    throw new IllegalArgumentException("Given member is a "
+            + javaMember.getClass().getName()
+            + " but JPA attributes can only be a Field or a Method.");
   }
 
   // TODO check what the other code generators do for class->method names

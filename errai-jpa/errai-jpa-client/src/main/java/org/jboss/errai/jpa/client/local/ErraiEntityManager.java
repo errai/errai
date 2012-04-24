@@ -1,12 +1,15 @@
 package org.jboss.errai.jpa.client.local;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.Metamodel;
+import javax.persistence.metamodel.SingularAttribute;
 
 import org.jboss.errai.jpa.client.local.backend.StorageBackend;
 import org.jboss.errai.jpa.client.local.backend.WebStorageBackend;
@@ -93,13 +96,56 @@ public abstract class ErraiEntityManager implements EntityManager {
     }
 
     Object id = idAttr.get(entity);
-
+    if (id == null) {
+      id = generateAndSetLocalId(entity, idAttr);
+      // TODO track this generated ID for later reconciliation with the server
+    }
     String idJson = Marshalling.toJSON(id);
     System.out.println("About to convert entity to JSON: " + entity);
     String entityJson = Marshalling.toJSON(entity);
     System.out.println("Storing.\nKey=" + idJson + "\nValue=" + entityJson);
     backend.put(idJson, entityJson);
   }
+
+
+  // XXX these would be better held by the SingularAttribute instances themselves
+  private final Map<SingularAttribute<?, ?>, Iterator<?>> localIdGenerators = new HashMap<SingularAttribute<?, ?>, Iterator<?>>();
+
+
+  /**
+   * Generates a new ID value for the given entity instance that is guaranteed
+   * to be unique <i>on this client</i>. If the entity instance with this ID is
+   * ever synchronized to the server, this client-local ID will be replaced by a
+   * permanent server-generated ID.
+   * <p>
+   * This method only works for attributes that are configured as
+   * {@code @GeneratedValue}s. The GenerationType has no effect locally, but of
+   * course it will come into play on the server side when and if the entity is
+   * synchronized to the server.
+   *
+   * @param entityInstance
+   *          the entity instance to receive the generated ID. This attribute of
+   *          that entity instance will be set to the newly generated ID value.
+   * @return the generated ID value, which has already been set on the entity
+   *         instance.
+   */
+  public <X, T> T generateAndSetLocalId(X entityInstance, ErraiSingularAttribute<X, T> attr) {
+    Iterator<T> idGenerator = (Iterator<T>) localIdGenerators.get(attr);
+    if (idGenerator == null) {
+      if (attr.getJavaType() == Long.class) {
+        // XXX move this into the attribute class so it can always be the right type of sequence generator
+        idGenerator = (Iterator<T>) new LongIdGenerator(this, (ErraiSingularAttribute<?, Long>) attr);
+        localIdGenerators.put(attr, idGenerator);
+      } else {
+        throw new UnsupportedOperationException("Can't generate ID of type " + attr.getJavaType());
+      }
+    }
+
+    T nextId = idGenerator.next();
+    attr.set(entityInstance, nextId);
+    return nextId;
+  }
+
   // -------------- Actual JPA API below this line -------------------
 
   @Override
@@ -132,9 +178,16 @@ public abstract class ErraiEntityManager implements EntityManager {
 
   @Override
   public <T> T find(Class<T> entityClass, Object primaryKey) {
-    EntityType<T> entityType = getMetamodel().entity(entityClass);
-    // TODO
-    return null;
+
+    // we call this to ensure it's a valid entity type
+    getMetamodel().entity(entityClass);
+
+    String idJson = Marshalling.toJSON(primaryKey);
+    String entityJson = backend.get(idJson);
+    if (entityJson == null) {
+      return null;
+    }
+    return Marshalling.fromJSON(entityJson, entityClass);
   }
 
   @Override
