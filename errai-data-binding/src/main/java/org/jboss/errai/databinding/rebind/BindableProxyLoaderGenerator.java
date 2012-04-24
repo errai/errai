@@ -19,10 +19,11 @@ package org.jboss.errai.databinding.rebind;
 import java.io.File;
 import java.io.PrintWriter;
 
-import org.jboss.errai.codegen.Context;
+import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
@@ -123,8 +124,9 @@ public class BindableProxyLoaderGenerator extends Generator {
       // create the proxy provider
       Statement proxyProvider = ObjectBuilder.newInstanceOf(BindableProxyProvider.class)
           .extend()
-          .publicOverridesMethod("getBindableProxy", Parameter.of(HasValue.class, "hasValue"), Parameter.of(Object.class, "model"))
-          .append(Stmt.nestedCall(Stmt.newObject(bindableProxy.getClassDefinition())).returnValue())
+          .publicOverridesMethod("getBindableProxy", Parameter.of(HasValue.class, "hasValue"), Parameter.of(bindable, "model"))
+          .append(Stmt.nestedCall(Stmt.newObject(bindableProxy.getClassDefinition())
+              .withParameters(Variable.get("hasValue"), Cast.to(bindable, Stmt.loadVariable("model")))).returnValue())
           .finish()
           .finish();
 

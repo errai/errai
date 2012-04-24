@@ -47,7 +47,7 @@ public class BindableProxyFactory {
       throw new RuntimeException("No proxy provider found for bindable type:" + model.getClass().getName());
     }
     
-    Object proxy = proxyProvider.getBindableProxy(hasValue, model);
+    BindableProxy proxy = proxyProvider.getBindableProxy(hasValue, model);
     if (proxy == null) {
       throw new RuntimeException("No proxy instance provided for bindable type: " + model.getClass().getName());
     }

@@ -22,7 +22,6 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 
 import org.jboss.errai.codegen.Cast;
-import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.BlockBuilder;

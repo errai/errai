@@ -23,5 +23,5 @@ import com.google.gwt.user.client.ui.HasValue;
  */
 public interface BindableProxyProvider {
 
-  public Object getBindableProxy(HasValue<?> hasValue, Object model);
+  public BindableProxy getBindableProxy(HasValue<?> hasValue, Object model);
 }

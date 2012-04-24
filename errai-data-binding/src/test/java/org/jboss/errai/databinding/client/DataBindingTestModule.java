@@ -40,7 +40,7 @@ public class DataBindingTestModule {
   
   @PostConstruct
   public void init() {
-    dataBinder.bind(textBox, model, "value");
+    model = dataBinder.bind(textBox, model, "value");
   }
   
   public TextBox getTextBox() {
