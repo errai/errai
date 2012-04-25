@@ -36,23 +36,24 @@ public class InstanceInjectionIntegrationTest extends AbstractErraiCDITest {
 
   public void testInstanceInjections() {
 
-    InstanceTestBean testBean = IOC.getBeanManager().lookupBean(InstanceTestBean.class).getInstance();
+    final InstanceTestBean testBean = IOC.getBeanManager().lookupBean(InstanceTestBean.class).getInstance();
 
     assertNotNull("InstanceTestBean is null", testBean);
 
-    Instance<ApplicationScopedBeanA> instanceApplicationScopedBean = testBean.getInjectApplicationScoped();
+    final Instance<ApplicationScopedBeanA> instanceApplicationScopedBean
+            = testBean.getInjectApplicationScoped();
     assertNotNull("InstanceTestBean.Instance<ApplicationScopedBeanA> is null", instanceApplicationScopedBean);
 
-    Instance<DependentBeanA> instanceDependentBeanA = testBean.getInjectDependentBeanA();
+    final Instance<DependentBeanA> instanceDependentBeanA = testBean.getInjectDependentBeanA();
     assertNotNull("InstanceTestBean.Instance<DependentBeanA> is null", instanceDependentBeanA);
 
-    ApplicationScopedBeanA a = instanceApplicationScopedBean.get();
+    final ApplicationScopedBeanA a = instanceApplicationScopedBean.get();
     assertNotNull(a);
 
-    DependentBeanA b = instanceDependentBeanA.get();
+    final DependentBeanA b = instanceDependentBeanA.get();
     assertNotNull(b);
 
-    ApplicationScopedBeanA a1 = instanceApplicationScopedBean.get();
+    final ApplicationScopedBeanA a1 = instanceApplicationScopedBean.get();
     DependentBeanA b1 = instanceDependentBeanA.get();
 
     assertSame(a, a1);

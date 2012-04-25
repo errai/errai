@@ -20,6 +20,9 @@ package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
+import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.JConstructor;
+import com.google.gwt.core.ext.typeinfo.JPackage;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import com.google.gwt.user.rebind.SourceWriter;
 import com.google.gwt.user.rebind.StringSourceWriter;
@@ -28,9 +31,12 @@ import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
+import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
+import org.jboss.errai.codegen.meta.impl.gwt.GWTClass;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
 import org.jboss.errai.codegen.util.Implementations;
 import org.jboss.errai.codegen.util.PrivateAccessType;
@@ -59,11 +65,14 @@ import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
+import javax.enterprise.context.NormalScope;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.context.SessionScoped;
+import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Alternative;
 import javax.enterprise.inject.Default;
 import javax.inject.Inject;
+import javax.inject.Scope;
 import javax.inject.Singleton;
 import java.io.File;
 import java.lang.annotation.Annotation;
@@ -392,6 +401,40 @@ public class IOCBootstrapGenerator {
 
     injectionContext.mapElementType(WiringElementType.AlternativeBean, Alternative.class);
     injectionContext.mapElementType(WiringElementType.TestMockBean, TestMock.class);
+
+
+    if (context != null) {
+      for (JPackage pkg : context.getTypeOracle().getPackages()) {
+        TypeScan:
+        for (JClassType type : pkg.getTypes()) {
+          if (!type.isDefaultInstantiable()) {
+            boolean hasInjectableConstructor = false;
+            for (JConstructor c : type.getConstructors()) {
+              if (injectionContext.isElementType(WiringElementType.InjectionPoint, c)) {
+                hasInjectableConstructor = true;
+                break;
+              }
+            }
+
+            if (!hasInjectableConstructor) {
+              continue;
+            }
+          }
+
+          for (Annotation a : type.getAnnotations()) {
+            Class<? extends Annotation> annoClass = a.annotationType();
+            if (annoClass.isAnnotationPresent(Scope.class)
+                    || annoClass.isAnnotationPresent(NormalScope.class)) {
+              continue TypeScan;
+            }
+          }
+
+          MetaClass clazz = GWTClass.newInstance(type.getOracle(), type);
+
+          injectionContext.addPsuedoScopeForType(clazz);
+        }
+      }
+    }
   }
 
   public void setUseReflectionStubs(boolean useReflectionStubs) {

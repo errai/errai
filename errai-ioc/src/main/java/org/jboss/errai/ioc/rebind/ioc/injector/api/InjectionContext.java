@@ -442,6 +442,10 @@ public class InjectionContext {
     return unmodifiableCollection(elementBindings.entries());
   }
 
+  public Collection<MetaClass> getAllKnownInjectionTypes() {
+    return unmodifiableCollection(injectors.keySet());
+  }
+
   public void allowProxyCapture() {
     allowProxyCapture = true;
   }

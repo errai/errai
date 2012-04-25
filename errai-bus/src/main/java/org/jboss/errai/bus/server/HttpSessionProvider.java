@@ -47,7 +47,7 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
    * @param externSessRef - the external session reference
    * @return an instance of <tt>QueueSession</tt>
    */
-  public QueueSession getSession(HttpSession externSessRef, String remoteQueueID) {
+  public QueueSession getSession(final HttpSession externSessRef, final String remoteQueueID) {
     SessionsContainer sc = (SessionsContainer) externSessRef.getAttribute(HTTP_SESS);
     if (sc == null) {
       externSessRef.setAttribute(HTTP_SESS, sc = new SessionsContainer());
@@ -70,17 +70,17 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
     private final Map<String, Object> sharedAttributes = new HashMap<String, Object>();
     private final Map<String, QueueSession> queueSessions = new HashMap<String, QueueSession>();
 
-    public QueueSession createSession(String httpSessionId, String remoteQueueId) {
-      QueueSession qs = new HttpSessionWrapper(this, httpSessionId, remoteQueueId);
+    public QueueSession createSession(final String httpSessionId, final String remoteQueueId) {
+      final QueueSession qs = new HttpSessionWrapper(this, httpSessionId, remoteQueueId);
       queueSessions.put(remoteQueueId, qs);
       return qs;
     }
 
-    public QueueSession getSession(String remoteQueueId) {
+    public QueueSession getSession(final String remoteQueueId) {
       return queueSessions.get(remoteQueueId);
     }
 
-    public void remoteSession(String remoteQueueId) {
+    public void remoteSession(final String remoteQueueId) {
       queueSessions.remove(remoteQueueId);
     }
   }
@@ -97,7 +97,8 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
     private boolean valid = true;
     private List<SessionEndListener> sessionEndListeners;
 
-    public HttpSessionWrapper(SessionsContainer container, String httpSessionId, String remoteQueueID) {
+    public HttpSessionWrapper(final SessionsContainer container, final String httpSessionId,
+                              final String remoteQueueID) {
       this.container = container;
       this.remoteQueueID = remoteQueueID;
       this.parentSessionId = httpSessionId;
@@ -125,11 +126,11 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
       return true;
     }
 
-    public void setAttribute(String attribute, Object value) {
+    public void setAttribute(final String attribute, final Object value) {
       container.sharedAttributes.put(attribute, value);
     }
 
-    public <T> T getAttribute(Class<T> type, String attribute) {
+    public <T> T getAttribute(final Class<T> type, final String attribute) {
       return (T) container.sharedAttributes.get(attribute);
     }
 
@@ -137,15 +138,15 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
       return container.sharedAttributes.keySet();
     }
 
-    public boolean hasAttribute(String attribute) {
+    public boolean hasAttribute(final String attribute) {
       return container.sharedAttributes.containsKey(attribute);
     }
 
-    public boolean removeAttribute(String attribute) {
+    public boolean removeAttribute(final String attribute) {
       return container.sharedAttributes.remove(attribute) != null;
     }
 
-    public void addSessionEndListener(SessionEndListener listener) {
+    public void addSessionEndListener(final SessionEndListener listener) {
       synchronized (this) {
         if (sessionEndListeners == null) {
           sessionEndListeners = new ArrayList<SessionEndListener>();

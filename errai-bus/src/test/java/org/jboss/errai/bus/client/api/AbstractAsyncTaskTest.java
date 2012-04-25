@@ -192,3 +192,4 @@ public abstract class AbstractAsyncTaskTest extends GWTTestCase {
     assertSame("Wrong AsyncTask injected into runnable", task, runnable.getAsyncTask());
   }
 }
+
