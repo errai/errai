@@ -1,11 +1,8 @@
 package org.jboss.errai.bus.client.api;
 
 import com.google.gwt.junit.client.GWTTestCase;
-import com.google.gwt.user.client.Timer;
 import org.jboss.errai.common.client.api.tasks.AsyncTask;
 import org.jboss.errai.common.client.api.tasks.HasAsyncTaskRef;
-import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
-import org.jboss.errai.common.client.util.TimeUnit;
 
 /**
  * Abstract test that covers the contract of the AsyncTask interface. Tests for client-side AsyncTask implementations

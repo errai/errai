@@ -124,8 +124,7 @@ public class Worker extends Thread {
         }
       }
       catch (QueueUnavailableException e) {
-        e.printStackTrace();
-        //  handleMessageDeliveryFailure(bus, message, "Queue is not available", e, true);
+        log.debug("queue not available", e);
       }
       catch (Throwable e) {
         message.setResource("Exception", e.getCause());
