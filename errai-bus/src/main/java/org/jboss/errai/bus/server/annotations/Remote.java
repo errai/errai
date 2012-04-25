@@ -21,6 +21,34 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
+
+/**
+ * Indicates that the annotated interface specifies the contract for a remote
+ * service.
+ * <p>
+ * <i>Usage notes:</i> The most common way of invoking a remote service is via
+ * the Caller facility in ErraiIOC:
+ * <pre>
+ *     {@code @Remote}
+ *     public class MyService {
+ *       void serviceMethod();
+ *     }
+ *
+ *     public class ClientClass {
+ *       {@code @Inject}
+ *       private Caller<MyService> myService;
+ *
+ *       ...
+ *
+ *       private void callRemoteService() {
+ *         myService.call(new RemoteCallback() { ... }).serviceMethod();
+ *       }
+ *     }
+ * </pre>
+ * <p>
+ * Another mechanism for invoking a remote service is the {@link MessageBuilder#createCall()} API.
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface Remote {

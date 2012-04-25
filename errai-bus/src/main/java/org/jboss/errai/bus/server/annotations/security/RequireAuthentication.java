@@ -21,6 +21,17 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.jboss.errai.bus.server.annotations.Service;
+
+/**
+ * Indicates that the service can only be accessed by logged-in users. No
+ * additional security permissions are required.
+ * <p>
+ * This annotation can appear anywhere the {@link Service} annotation can
+ * appear.
+ *
+ * @see Service
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface RequireAuthentication {

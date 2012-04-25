@@ -30,14 +30,12 @@ import org.jboss.errai.bus.client.framework.ProxyFactory;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.rebind.RebindUtils;
 import org.jboss.errai.bus.server.annotations.Command;
-import org.jboss.errai.bus.server.annotations.Endpoint;
 import org.jboss.errai.bus.server.annotations.Remote;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.annotations.security.RequireAuthentication;
 import org.jboss.errai.bus.server.annotations.security.RequireRoles;
 import org.jboss.errai.bus.server.io.CommandBindingsCallback;
 import org.jboss.errai.bus.server.io.ConversationalEndpointCallback;
-import org.jboss.errai.bus.server.io.EndpointCallback;
 import org.jboss.errai.bus.server.io.RemoteServiceCallback;
 import org.jboss.errai.bus.server.io.ServiceInstanceProvider;
 import org.jboss.errai.bus.server.security.auth.rules.RolesRequiredRule;
@@ -160,23 +158,7 @@ public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
         }).getInstance(loadClass);
       }
 
-      Map<String, MessageCallback> epts = new HashMap<String, MessageCallback>();
-
       final Object targetService = svc;
-
-      // we scan for endpoints
-      for (final Method method : loadClass.getDeclaredMethods()) {
-        if (method.isAnnotationPresent(Endpoint.class)) {
-          epts.put(method.getName(), method.getReturnType() == Void.class ?
-                  new EndpointCallback(svc, method) :
-                  new ConversationalEndpointCallback(new ServiceInstanceProvider() {
-                    @Override
-                    public Object get(Message message) {
-                      return targetService;
-                    }
-                  }, method, context.getBus()));
-        }
-      }
 
       RolesRequiredRule rule = null;
       if (loadClass.isAnnotationPresent(RequireRoles.class)) {
@@ -184,21 +166,6 @@ public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
       }
       else if (loadClass.isAnnotationPresent(RequireAuthentication.class)) {
         rule = new RolesRequiredRule(new HashSet<Object>(), context.getBus());
-      }
-
-
-      if (!epts.isEmpty()) {
-        final String rpcEndpointName = loadClass.getSimpleName() + ":RPC";
-        if (local) {
-          context.getBus().subscribeLocal(rpcEndpointName, new RemoteServiceCallback(epts));
-        }
-        else {
-          context.getBus().subscribe(rpcEndpointName, new RemoteServiceCallback(epts));
-        }
-
-        if (rule != null) {
-          context.getBus().addRule(rpcEndpointName, rule);
-        }
       }
 
       if (!commandPoints.isEmpty()) {
