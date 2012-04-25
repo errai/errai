@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.Set;
 
@@ -86,10 +87,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Extension points to the CDI container.
- * Makes Errai components available as CDI beans (i.e. the message bus)
- * and registers CDI components as services with Errai.
- *
+ * Extension points to the CDI container. Makes Errai components available as CDI beans (i.e. the message bus) and
+ * registers CDI components as services with Errai.
+ * 
  * @author Heiko Braun <hbraun@redhat.com>
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -125,42 +125,45 @@ public class CDIExtensionPoints implements Extension {
   public void beforeBeanDiscovery(@Observes BeforeBeanDiscovery bbd) {
     this.managedTypes = new TypeRegistry();
 
+    log.info("starting errai cdi ...");
+    ResourceBundle erraiServiceConfig;
     try {
-      log.info("starting errai cdi ...");
-      ResourceBundle erraiServiceConfig = getBundle("ErraiService");
-      if (erraiServiceConfig.containsKey(ERRAI_CDI_STANDALONE)) {
-        boolean standalone = "true".equals(erraiServiceConfig.getString(ERRAI_CDI_STANDALONE).trim());
+      erraiServiceConfig = getBundle("ErraiService");
+    }
+    catch (MissingResourceException e) {
+      // ErraiService is optional!
+      return;
+    }
 
-        if (standalone) {
-          log.info("errai cdi running in standalone mode.");
-        }
-        else {
-          log.info("errai cdi running as regular extension.");
-        }
+    if (erraiServiceConfig.containsKey(ERRAI_CDI_STANDALONE)) {
+      boolean standalone = "true".equals(erraiServiceConfig.getString(ERRAI_CDI_STANDALONE).trim());
+
+      if (standalone) {
+        log.info("errai cdi running in standalone mode.");
       }
+      else {
+        log.info("errai cdi running as regular extension.");
+      }
+    }
 
-      final String dispatchImplKey = "errai.dispatcher_implementation";
-      if (erraiServiceConfig.containsKey(dispatchImplKey)) {
-        if (AsyncDispatcher.class.getName().equals(erraiServiceConfig.getString(dispatchImplKey))) {
-          throw new ErraiBootstrapFailure("Cannot start Errai CDI. You have have configured the service to use the " +
-                  AsyncDispatcher.class.getName() + " dispatcher implementation. Due to limitations of Weld, you must use the " +
+    final String dispatchImplKey = "errai.dispatcher_implementation";
+    if (erraiServiceConfig.containsKey(dispatchImplKey)) {
+      if (AsyncDispatcher.class.getName().equals(erraiServiceConfig.getString(dispatchImplKey))) {
+        throw new ErraiBootstrapFailure("Cannot start Errai CDI. You have have configured the service to use the " +
+                  AsyncDispatcher.class.getName()
+            + " dispatcher implementation. Due to limitations of Weld, you must use the " +
                   SimpleDispatcher.class.getName() + " in order to use this module.");
-        }
       }
-    }
-    catch (ErraiBootstrapFailure e) {
-      throw e;
-    }
-    catch (Exception e) {
-      throw new ErraiBootstrapFailure("Error reading from configuration. Did you include ErraiService.properties?", e);
     }
   }
 
   /**
    * Register managed beans as Errai services
-   *
-   * @param event -
-   * @param <T>   -
+   * 
+   * @param event
+   *          -
+   * @param <T>
+   *          -
    */
   @SuppressWarnings("UnusedDeclaration")
   public <T> void observeResources(@Observes ProcessAnnotatedType<T> event) {
@@ -301,8 +304,7 @@ public class CDIExtensionPoints implements Extension {
     }
   }
 
-
-  @SuppressWarnings({"UnusedDeclaration", "unchecked"})
+  @SuppressWarnings({ "UnusedDeclaration", "unchecked" })
   public void processObserverMethod(@Observes ProcessObserverMethod processObserverMethod) {
     Type t = processObserverMethod.getObserverMethod().getObservedType();
     Class type = null;
@@ -322,7 +324,7 @@ public class CDIExtensionPoints implements Extension {
     }
   }
 
-  @SuppressWarnings({"UnusedDeclaration", "CdiInjectionPointsInspection"})
+  @SuppressWarnings({ "UnusedDeclaration", "CdiInjectionPointsInspection" })
   public void afterBeanDiscovery(@Observes AfterBeanDiscovery abd, BeanManager bm) {
     // Errai Service wrapper
     ErraiService<?> service = ErraiServiceSingleton.getService();
@@ -436,24 +438,25 @@ public class CDIExtensionPoints implements Extension {
     // beware of classloading issues. better reflect on the actual instance
     for (final Method method : remoteIface.getMethods()) {
       if (RebindUtils.isMethodInInterface(remoteIface, method)) {
-        epts.put(RebindUtils.createCallSignature(method), new ConversationalEndpointCallback(new ServiceInstanceProvider() {
-          @SuppressWarnings("unchecked")
-          @Override
-          public Object get(Message message) {
-            if (message.hasPart(CDIProtocol.Qualifiers)) {
-              List<String> quals = message.get(List.class, CDIProtocol.Qualifiers);
-              Annotation[] qualAnnos = new Annotation[quals.size()];
-              for (int i = 0; i < quals.size(); i++) {
-                qualAnnos[i] = beanQualifiers.get(quals.get(i));
+        epts.put(RebindUtils.createCallSignature(method), new ConversationalEndpointCallback(
+            new ServiceInstanceProvider() {
+              @SuppressWarnings("unchecked")
+              @Override
+              public Object get(Message message) {
+                if (message.hasPart(CDIProtocol.Qualifiers)) {
+                  List<String> quals = message.get(List.class, CDIProtocol.Qualifiers);
+                  Annotation[] qualAnnos = new Annotation[quals.size()];
+                  for (int i = 0; i < quals.size(); i++) {
+                    qualAnnos[i] = beanQualifiers.get(quals.get(i));
+                  }
+                  return lookupRPCBean(beanManager, remoteIface, qualAnnos);
+                }
+                else {
+                  return lookupRPCBean(beanManager, remoteIface, null);
+                }
               }
-              return lookupRPCBean(beanManager, remoteIface, qualAnnos);
-            }
-            else {
-              return lookupRPCBean(beanManager, remoteIface, null);
-            }
-          }
 
-        }, method, bus));
+            }, method, bus));
       }
     }
 
@@ -469,7 +472,8 @@ public class CDIExtensionPoints implements Extension {
     DefaultRemoteCallBuilder.setProxyFactory(Assert.notNull(new ProxyFactory() {
       @Override
       public <T> T getRemoteProxy(Class<T> proxyType) {
-        throw new RuntimeException("There is not yet an available Errai RPC implementation for the server-side environment.");
+        throw new RuntimeException(
+            "There is not yet an available Errai RPC implementation for the server-side environment.");
       }
     }));
   }
@@ -518,8 +522,10 @@ public class CDIExtensionPoints implements Extension {
 
     @Override
     public boolean equals(Object o) {
-      if (this == o) return true;
-      if (!(o instanceof EventConsumer)) return false;
+      if (this == o)
+        return true;
+      if (!(o instanceof EventConsumer))
+        return false;
 
       EventConsumer that = (EventConsumer) o;
 
