@@ -15,6 +15,39 @@
  */
 package org.jboss.errai.cdi.server;
 
+import static java.util.ResourceBundle.getBundle;
+import static org.jboss.errai.cdi.server.CDIServerUtil.lookupRPCBean;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.Set;
+
+import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.BeforeBeanDiscovery;
+import javax.enterprise.inject.spi.Extension;
+import javax.enterprise.inject.spi.ProcessAnnotatedType;
+import javax.enterprise.inject.spi.ProcessObserverMethod;
+import javax.inject.Inject;
+import javax.inject.Qualifier;
+
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.builder.DefaultRemoteCallBuilder;
@@ -43,8 +76,6 @@ import org.jboss.errai.cdi.server.events.EventDispatcher;
 import org.jboss.errai.cdi.server.events.EventObserverMethod;
 import org.jboss.errai.cdi.server.events.ShutdownEventObserver;
 import org.jboss.errai.common.client.framework.Assert;
-import org.jboss.errai.common.metadata.MetaDataScanner;
-import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.common.rebind.EnvUtil;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
@@ -53,38 +84,6 @@ import org.jboss.errai.ioc.client.api.Sender;
 import org.jboss.weld.manager.BeanManagerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.enterprise.event.Event;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.AfterBeanDiscovery;
-import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AnnotatedType;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.BeforeBeanDiscovery;
-import javax.enterprise.inject.spi.Extension;
-import javax.enterprise.inject.spi.ProcessAnnotatedType;
-import javax.enterprise.inject.spi.ProcessObserverMethod;
-import javax.inject.Inject;
-import javax.inject.Qualifier;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.Set;
-
-import static java.util.ResourceBundle.getBundle;
-import static org.jboss.errai.cdi.server.CDIServerUtil.lookupRPCBean;
 
 /**
  * Extension points to the CDI container.
@@ -435,7 +434,7 @@ public class CDIExtensionPoints implements Extension {
     Map<String, MessageCallback> epts = new HashMap<String, MessageCallback>();
 
     // beware of classloading issues. better reflect on the actual instance
-    for (final Method method : remoteIface.getDeclaredMethods()) {
+    for (final Method method : remoteIface.getMethods()) {
       if (RebindUtils.isMethodInInterface(remoteIface, method)) {
         epts.put(RebindUtils.createCallSignature(method), new ConversationalEndpointCallback(new ServiceInstanceProvider() {
           @SuppressWarnings("unchecked")

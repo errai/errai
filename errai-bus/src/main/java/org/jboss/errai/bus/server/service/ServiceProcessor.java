@@ -24,8 +24,6 @@ import java.util.Set;
 import org.jboss.errai.bus.client.api.Local;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.common.client.api.tasks.TaskManager;
-import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
 import org.jboss.errai.bus.client.api.builder.DefaultRemoteCallBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.ProxyFactory;
@@ -46,6 +44,8 @@ import org.jboss.errai.bus.server.security.auth.rules.RolesRequiredRule;
 import org.jboss.errai.bus.server.service.bootstrap.BootstrapContext;
 import org.jboss.errai.bus.server.service.bootstrap.GuiceProviderProxy;
 import org.jboss.errai.common.client.api.ResourceProvider;
+import org.jboss.errai.common.client.api.tasks.TaskManager;
+import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
 import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.common.metadata.MetaDataProcessor;
 import org.jboss.errai.common.metadata.MetaDataScanner;
@@ -109,7 +109,7 @@ public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
       if (remoteImpl != null) {
         svc = createRPCScaffolding(remoteImpl, loadClass, context);
       }
-      
+
       if (MessageCallback.class.isAssignableFrom(loadClass)) {
         final Class<? extends MessageCallback> clazz = loadClass.asSubclass(MessageCallback.class);
         log.debug("discovered service: " + clazz.getName());
@@ -251,7 +251,7 @@ public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
 
     // beware of classloading issues. better reflect on the actual instance
     for (Class<?> intf : svc.getClass().getInterfaces()) {
-      for (final Method method : intf.getDeclaredMethods()) {
+      for (final Method method : intf.getMethods()) {
         if (RebindUtils.isMethodInInterface(remoteIface, method)) {
           epts.put(RebindUtils.createCallSignature(method), new ConversationalEndpointCallback(new ServiceInstanceProvider() {
             @Override

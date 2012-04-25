@@ -26,6 +26,7 @@ import org.jboss.errai.cdi.client.qualifier.B;
 import org.jboss.errai.cdi.client.remote.MyInterceptedRemote;
 import org.jboss.errai.cdi.client.remote.MyRemote;
 import org.jboss.errai.cdi.client.remote.MySessionAttributeSettingRemote;
+import org.jboss.errai.cdi.client.remote.SubService;
 import org.jboss.errai.ioc.client.api.Caller;
 
 /**
@@ -37,18 +38,21 @@ public class RpcTestBean {
 
   @Inject
   private Caller<MyRemote> myRemoteCaller;
-  
+
   @Inject
   private Caller<MyInterceptedRemote> myInterceptedRemoteCaller;
-  
+
   @Inject
   private Caller<MySessionAttributeSettingRemote> mySessionAttributeSettingRemoteCaller;
-  
+
   @Inject @A
   private Caller<MyRemote> myRemoteCallerA;
-  
+
   @Inject @B
   private Caller<MyRemote> myRemoteCallerB;
+
+  @Inject
+  private Caller<SubService> subServiceCaller;
 
   private static RpcTestBean instance;
 
@@ -56,19 +60,19 @@ public class RpcTestBean {
   public void init() {
     instance = this;
   }
-  
+
   public void callRemoteCaller(RemoteCallback<String> callback, String val) {
     myRemoteCaller.call(callback).call(val);
   }
-  
+
   public void callInterceptedRemoteCaller(RemoteCallback<String> callback, String val) {
     myInterceptedRemoteCaller.call(callback).interceptedCall(val);
   }
-  
+
   public void callRemoteCallerA(RemoteCallback<String> callback, String val) {
     myRemoteCallerA.call(callback).call(val);
-  }                               
-  
+  }
+
   public void callRemoteCallerB(RemoteCallback<String> callback, String val) {
     myRemoteCallerB.call(callback).call(val);
   }
@@ -76,11 +80,16 @@ public class RpcTestBean {
   public void callSetSessionAttribute(RemoteCallback<Void> callback, String key, String value) {
      mySessionAttributeSettingRemoteCaller.call(callback).setSessionAttribute(key, value);
   }
-  
+
   public void callGetSessionAttribute(RemoteCallback<String> callback, String key) {
     mySessionAttributeSettingRemoteCaller.call(callback).getSessionAttribute(key);
- }
-  
+  }
+
+  /** Invokes the inherited baseServiceMethod() on the remote SubService implementation. */
+  public void callSubServiceInheritedMethod(RemoteCallback<Integer> callback) {
+    subServiceCaller.call(callback).baseServiceMethod();
+  }
+
   public static RpcTestBean getInstance() {
     return instance;
   }
