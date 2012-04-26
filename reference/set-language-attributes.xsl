@@ -12,14 +12,14 @@
   <xsl:template match="programlisting">
     <programlisting>
       <xsl:choose>
-        <xsl:when test="matches(text(), ' &lt;[-a-zA-Z0-9]+')">
-          <xsl:attribute name="langauge">xml</xsl:attribute>
+        <xsl:when test="matches(text(), '&lt;/[-a-zA-Z0-9]+') or matches(text(), '/&gt;')">
+          <xsl:attribute name="language">xml</xsl:attribute>
         </xsl:when>
-        <xsl:when test="matches(text(), '\\\n')">
-          <xsl:attribute name="langauge">ini</xsl:attribute> <!-- Actually a .properties file, but close enough -->
+        <xsl:when test="matches(text(), '\\\n') or matches(text(), '\n#')">
+          <xsl:attribute name="language">ini</xsl:attribute> <!-- Actually a .properties file, but close enough -->
         </xsl:when>
         <xsl:otherwise>
-          <xsl:attribute name="langauge">java</xsl:attribute>
+          <xsl:attribute name="language">java</xsl:attribute>
         </xsl:otherwise>
       </xsl:choose>
       <xsl:apply-templates select="node()"/>

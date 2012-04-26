@@ -1,31 +1,18 @@
-<?xml version='1.0' encoding='utf-8' ?>
-<!--
-  ~ Copyright 2011 JBoss, by Red Hat, Inc
-  ~
-  ~ Licensed under the Apache License, Version 2.0 (the "License");
-  ~ you may not use this file except in compliance with the License.
-  ~ You may obtain a copy of the License at
-  ~
-  ~    http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~ Unless required by applicable law or agreed to in writing, software
-  ~ distributed under the License is distributed on an "AS IS" BASIS,
-  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~ See the License for the specific language governing permissions and
-  ~ limitations under the License.
-  -->
-
-<!DOCTYPE authorgroup PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<?xml version="1.0" encoding="UTF-8"?>
 <authorgroup>
-
-  <author>
-    <firstname>Mike</firstname>
-    <surname>Brock</surname>
-    <email>cbrock@redhat.com</email>
-  </author>
-  <author>
-    <firstname>Christian</firstname>
-    <surname>Sadilek</surname>
-    <email>csadilek@redhat.com</email>
-  </author>
+   <author>
+      <firstname>Lincoln</firstname>
+      <surname>Baxter III</surname>
+      <email>lincolnbaxter@gmail.com</email>
+   </author>
+   <author>
+      <firstname>Mike</firstname>
+      <surname>Brock</surname>
+      <email>cbrock@redhat.com</email>
+   </author>
+   <author>
+      <firstname>Christian</firstname>
+      <surname>Sadilek</surname>
+      <email>csadilek@redhat.com</email>
+   </author>
 </authorgroup>

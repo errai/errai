@@ -1,33 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="sid-5833089">
-    
-    <title>Reporting problems</title>
-    <para>If you run into trouble don't hesitate to get in touch with us:</para>
-    <itemizedlist>
+   <title>Reporting problems</title>
+   <para>If you run into trouble don't hesitate to get in touch with us:</para>
+   <itemizedlist>
       <listitem>
-        <para>
+         <para>
           JIRA Issue Tracking:
           <ulink url="https://jira.jboss.org/jira/browse/ERRAI"/>
         </para>
       </listitem>
       <listitem>
-        <para>
+         <para>
           User Forum:
           <ulink url="http://community.jboss.org/en/errai?view=discussions"/>
         </para>
       </listitem>
       <listitem>
-        <para>
+         <para>
           Mailing List:
           <ulink url="http://jboss.org/errai/MailingLists.html"/>
         </para>
       </listitem>
       <listitem>
-        <para>
+         <para>
           IRC:
           <ulink url="irc://irc.freenode.net/errai"/>
         </para>
       </listitem>
-    </itemizedlist>
-  </chapter>
+   </itemizedlist>
+</chapter>
