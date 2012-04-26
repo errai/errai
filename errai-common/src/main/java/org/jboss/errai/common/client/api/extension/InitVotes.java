@@ -50,7 +50,7 @@ public final class InitVotes {
   private static boolean armed = false;
   private static final Set<String> waitForSet = new HashSet<String>();
 
-  private static int timeoutMillis = !GWT.isProdMode() ? 60000 : 7500;
+  private static int timeoutMillis = !GWT.isProdMode() ? 90000 : 45000;
 
   private static volatile AsyncTask initTimeout;
   private static volatile AsyncTask initDelay;
