@@ -423,7 +423,7 @@ public class CDIExtensionPoints implements Extension {
         bus.subscribe(subjectName, callback);
       }
       else {
-        bus.subscribeLocal(subjectName, new CommandBindingsCallback(commandPoints, callback));
+        bus.subscribeLocal(subjectName, new CommandBindingsCallback(commandPoints, callback, bus));
       }
     }
 
