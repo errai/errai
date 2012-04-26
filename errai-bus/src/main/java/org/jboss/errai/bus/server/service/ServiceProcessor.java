@@ -170,10 +170,10 @@ public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
 
       if (!commandPoints.isEmpty()) {
         if (local) {
-          context.getBus().subscribeLocal(svcName, new CommandBindingsCallback(commandPoints, svc));
+          context.getBus().subscribeLocal(svcName, new CommandBindingsCallback(commandPoints, svc, context.getBus()));
         }
         else {
-          context.getBus().subscribe(svcName, new CommandBindingsCallback(commandPoints, svc));
+          context.getBus().subscribe(svcName, new CommandBindingsCallback(commandPoints, svc, context.getBus()));
         }
       }
 

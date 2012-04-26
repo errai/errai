@@ -21,6 +21,7 @@ import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.RemoteCallback;
+import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
@@ -32,6 +33,8 @@ import org.jboss.errai.bus.client.tests.support.TestException;
 import org.jboss.errai.bus.client.tests.support.TestRPCService;
 import org.jboss.errai.bus.client.tests.support.User;
 import org.jboss.errai.common.client.protocols.MessageParts;
+
+import com.google.gwt.user.client.Timer;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -365,6 +368,69 @@ public class BusCommunicationTests extends AbstractErraiTest {
     });
   }
 
+  public void testCommandMessageThrowingException() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        MessageBuilder.createMessage()
+          .toSubject("TestSvc")
+          .command("baz")
+          .errorsHandledBy(new ErrorCallback() {
+              @Override
+              public boolean error(Message message, Throwable throwable) {
+                fail("An exception thrown by a MessageCallback should not be delivered to the caller!");
+                return false;
+              }
+            })
+          .repliesTo(new MessageCallback() {
+              @Override
+              public void callback(Message message) {
+                fail("This service throws an Exception and does not reply. " +
+                		"The MessageCallback should not have been invoked.");
+              }
+            })
+        .sendGlobalWith(ErraiBus.get());
+      }
+    }, 20000);
+    
+    new Timer() {
+      @Override
+      public void run() {
+        finishTest();
+        
+      }
+    }.schedule(15000);
+  }
+  
+  public void testNonExistingCommandMessage() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        bus.subscribe(DefaultErrorCallback.CLIENT_ERROR_SUBJECT, new MessageCallback() {
+          @Override
+          public void callback(Message message) {
+            assertTrue("throwable should contain non-existing service name", 
+                message.get(String.class, MessageParts.ErrorMessage).contains("non-existing"));
+            finishTest();
+          }
+        });
+        
+        MessageBuilder.createMessage()
+          .toSubject("TestSvc")
+          .command("non-existing")
+          .done()
+          .repliesTo(new MessageCallback() {
+              @Override
+              public void callback(Message message) {
+                fail("Callback should not have been invoked!");
+              }
+            })
+        .sendGlobalWith(ErraiBus.get());
+      }
+    });
+  }
+  
+  
   public void testMultipleEndpointsOnRemoteServiceWithAuthentication() {
     class TestCount {
       private int countdown;
@@ -398,7 +464,8 @@ public class BusCommunicationTests extends AbstractErraiTest {
         MessageBuilder.createMessage()
                 .toSubject("TestSvcAuth")
                 .command("bar")
-                .done().repliesTo(new MessageCallback() {
+                .done()
+                .repliesTo(new MessageCallback() {
           @Override
           public void callback(Message message) {
             assertEquals("Bar!", message.get(String.class, "Msg"));
@@ -406,7 +473,8 @@ public class BusCommunicationTests extends AbstractErraiTest {
               finishTest();
             }
           }
-        }).sendGlobalWith(ErraiBus.get());
+        })
+        .sendGlobalWith(ErraiBus.get());
       }
     }
 
