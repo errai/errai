@@ -22,6 +22,10 @@ import org.jboss.errai.marshalling.client.api.ParserFactory;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.marshalling.server.ServerMarshalling;
+import org.jboss.errai.marshalling.tests.res.EnumContainer;
+import org.jboss.errai.marshalling.tests.res.EnumContainerContainer;
+import org.jboss.errai.marshalling.tests.res.EnumTestA;
+import org.jboss.errai.marshalling.tests.res.EnumWithState;
 import org.jboss.errai.marshalling.tests.res.SType;
 import org.jboss.errai.marshalling.tests.res.shared.Role;
 import org.jboss.errai.marshalling.tests.res.shared.User;
@@ -470,6 +474,67 @@ public class ServerMarshallingTest {
     final float val = 1701f;
     String json = ServerMarshalling.toJSON(val);
     Assert.assertEquals("Failed to marshall/demarshall float", val, ServerMarshalling.fromJSON(json));
+  }
+
+  @Test
+  public void testSimpleEnumRoundTrip() {
+    EnumTestA val = EnumTestA.FIRST;
+    String json = ServerMarshalling.toJSON(val);
+    Assert.assertEquals("Failed to marshall/demarshall enum", val, ServerMarshalling.fromJSON(json));
+  }
+
+  @Test
+  public void testEnumContainerWithNullRefs() {
+    EnumContainer val = new EnumContainer();
+    String json = ServerMarshalling.toJSON(val);
+    Assert.assertEquals("Failed to marshall/demarshall enum container with nulls",
+            val.toString(), ServerMarshalling.fromJSON(json).toString());
+  }
+
+  @Test
+  public void testEnumContainerWithDistinctRefs() {
+    EnumContainer val = new EnumContainer();
+    val.setEnumA1(EnumTestA.FIRST);
+    val.setEnumA2(EnumTestA.SECOND);
+    val.setEnumA3(EnumTestA.THIRD);
+    val.setStatefulEnum1(EnumWithState.THING1);
+    val.setStatefulEnum2(EnumWithState.THING2);
+
+    String json = ServerMarshalling.toJSON(val);
+    Assert.assertEquals("Failed to marshall/demarshall enum container with distinct refs",
+            val.toString(), ServerMarshalling.fromJSON(json).toString());
+  }
+
+  @Test
+  public void testEnumContainerWithRepeatedRefs() {
+    EnumContainer val = new EnumContainer();
+    val.setEnumA1(EnumTestA.FIRST);
+    val.setEnumA2(EnumTestA.FIRST);
+    val.setEnumA3(EnumTestA.FIRST);
+    val.setStatefulEnum1(EnumWithState.THING1);
+    val.setStatefulEnum2(EnumWithState.THING1);
+    val.setStatefulEnum3(EnumWithState.THING1);
+
+    String json = ServerMarshalling.toJSON(val);
+    System.out.println(json);
+    Assert.assertEquals("Failed to marshall/demarshall enum container with repeated refs",
+            val.toString(), ServerMarshalling.fromJSON(json).toString());
+  }
+
+  @Test
+  public void testEnumContainerContainer() {
+    EnumContainerContainer val = new EnumContainerContainer();
+
+    EnumContainer enumContainer = new EnumContainer();
+    enumContainer.setEnumA1(EnumTestA.FIRST);
+
+    val.setEnumContainer(enumContainer);
+    val.setEnumA(EnumTestA.FIRST);
+
+    String json = ServerMarshalling.toJSON(val);
+    System.out.println(json);
+    Assert.assertEquals("Failed to marshall/demarshall enum container container",
+            val.toString(), ServerMarshalling.fromJSON(json).toString());
   }
 
 }
