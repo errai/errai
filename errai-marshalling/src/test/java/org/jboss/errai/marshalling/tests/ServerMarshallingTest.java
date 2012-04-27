@@ -516,7 +516,6 @@ public class ServerMarshallingTest {
     val.setStatefulEnum3(EnumWithState.THING1);
 
     String json = ServerMarshalling.toJSON(val);
-    System.out.println(json);
     Assert.assertEquals("Failed to marshall/demarshall enum container with repeated refs",
             val.toString(), ServerMarshalling.fromJSON(json).toString());
   }

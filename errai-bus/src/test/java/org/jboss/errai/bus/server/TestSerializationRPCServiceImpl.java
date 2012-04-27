@@ -34,6 +34,7 @@ import org.jboss.errai.bus.client.tests.support.EntityWithGenericCollections;
 import org.jboss.errai.bus.client.tests.support.EntityWithStringBufferAndStringBuilder;
 import org.jboss.errai.bus.client.tests.support.EntityWithSuperClassField;
 import org.jboss.errai.bus.client.tests.support.EntityWithUnqualifiedFields;
+import org.jboss.errai.bus.client.tests.support.EnumContainerContainer;
 import org.jboss.errai.bus.client.tests.support.FactoryEntity;
 import org.jboss.errai.bus.client.tests.support.GenericEntity;
 import org.jboss.errai.bus.client.tests.support.Group;
@@ -347,5 +348,10 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
   @Override
   public User testEntityWithNullField(User u) {
     return u;
+  }
+
+  @Override
+  public EnumContainerContainer testEntityWithEnumContainerContainer(EnumContainerContainer ecc) {
+    return ecc;
   }
 }

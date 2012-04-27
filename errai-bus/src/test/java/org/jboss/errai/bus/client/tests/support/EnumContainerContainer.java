@@ -1,11 +1,11 @@
-package org.jboss.errai.marshalling.tests.res;
+package org.jboss.errai.bus.client.tests.support;
 
 import org.jboss.errai.common.client.api.annotations.Portable;
 
 /**
- * A portable entity type that contains an EnumContainer and an EnumTestA, for
+ * A portable entity type that contains an EnumContainer and an TestEnumA, for
  * testing enum backreferences between different types of objects (because
- * EnumContainer can be set up to contain a reference to the same EnumTestA
+ * EnumContainer can be set up to contain a reference to the same TestEnumA
  * instance as this object does).
  *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
@@ -15,13 +15,13 @@ public class EnumContainerContainer {
 
   private EnumContainer enumContainer;
 
-  private EnumTestA enumA;
+  private TestEnumA enumA;
 
   public EnumContainer getEnumContainer() {
     return enumContainer;
   }
 
-  public EnumTestA getEnumA() {
+  public TestEnumA getEnumA() {
     return enumA;
   }
 
@@ -29,7 +29,7 @@ public class EnumContainerContainer {
     this.enumContainer = enumContainer;
   }
 
-  public void setEnumA(EnumTestA enumA) {
+  public void setEnumA(TestEnumA enumA) {
     this.enumA = enumA;
   }
 
