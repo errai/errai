@@ -75,7 +75,7 @@ public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
       Service svcAnnotation = loadClass.getAnnotation(Service.class);
       if (null == svcAnnotation) {
         // Diagnose Errai-111
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("Service annotation cannot be loaded. (See https://jira.jboss.org/browse/ERRAI-111)\n");
         sb.append(loadClass.getSimpleName()).append(" loader: ").append(loadClass.getClassLoader()).append("\n");
         sb.append("@Service loader:").append(Service.class.getClassLoader()).append("\n");
@@ -158,8 +158,6 @@ public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
         }).getInstance(loadClass);
       }
 
-      final Object targetService = svc;
-
       RolesRequiredRule rule = null;
       if (loadClass.isAnnotationPresent(RequireRoles.class)) {
         rule = new RolesRequiredRule(loadClass.getAnnotation(RequireRoles.class).value(), context.getBus());
@@ -231,7 +229,6 @@ public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
     }
 
     context.getBus().subscribe(remoteIface.getName() + ":RPC", new RemoteServiceCallback(epts));
-
 
     // note: this method just exists because we want AbstractRemoteCallBuilder to be package private.
     DefaultRemoteCallBuilder.setProxyFactory(Assert.notNull(new ProxyFactory() {
