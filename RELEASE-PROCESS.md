@@ -81,7 +81,7 @@ Release Steps
    * % git push upstream --tags
 
 1. Create and upload the a-la-carte binary Errai distribution and docs
-   * % mvn install -Pdistro
+   * % mvn install -Pdistro -Dmaven.test.skip=true -Dgwt.compiler.skip=true
    * % cd dist
    * % ./scripts/upload_binaries.sh {version}
 

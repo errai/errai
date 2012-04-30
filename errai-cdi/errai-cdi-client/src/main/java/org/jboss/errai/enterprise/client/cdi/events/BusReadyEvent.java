@@ -17,8 +17,17 @@
 package org.jboss.errai.enterprise.client.cdi.events;
 
 import org.jboss.errai.common.client.api.annotations.Portable;
+import org.jboss.errai.ioc.client.api.AfterInitialization;
 
 /**
+ * An event that is fired locally on the client after the ErraiBus has completed
+ * federation with the server. All remote (server-side) CDI services are known
+ * before this event is fired.
+ * <p>
+ * <i>Usage note:</i> methods annotated with {@link AfterInitialization} are
+ * also called after remote service discovery, and these methods are often an
+ * easier way of arranging for client-side startup code to execute.
+ *
  * @author Mike Brock .
  */
 @Portable

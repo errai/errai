@@ -64,7 +64,7 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
       @Override
       public void run() {
         try {
-          ApplicationScopedBean beanA = IOC.getBeanManager()
+          final ApplicationScopedBean beanA = IOC.getBeanManager()
                   .lookupBean(ApplicationScopedBean.class).getInstance();
 
           DependentScopedBean b1 = beanA.getBean1();
@@ -94,7 +94,7 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
     CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
-        OuterBean outBean = IOC.getBeanManager()
+        final OuterBean outBean = IOC.getBeanManager()
                 .lookupBean(OuterBean.class).getInstance();
 
         assertNotNull("outer bean was null", outBean);
@@ -133,12 +133,12 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
     CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
-        ApplicationScopedBean applicationScopedBean = IOC.getBeanManager()
+        final ApplicationScopedBean applicationScopedBean = IOC.getBeanManager()
                 .lookupBean(ApplicationScopedBean.class).getInstance();
 
         assertNotNull("ApplicationScopedBean was null", applicationScopedBean);
 
-        ServiceC serviceC = IOC.getBeanManager()
+        final ServiceC serviceC = IOC.getBeanManager()
                 .lookupBean(ServiceC.class).getInstance();
 
         assertEquals("ApplicationScopedBean should be same instance even in dependent scoped",
@@ -160,7 +160,7 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
       @Override
       public void run() {
 
-        UnreferencedDependentRootBean applicationScopedBean = IOC.getBeanManager()
+        final UnreferencedDependentRootBean applicationScopedBean = IOC.getBeanManager()
                 .lookupBean(UnreferencedDependentRootBean.class).getInstance();
 
         assertNotNull("UnreferencedDependentRootBean was null", applicationScopedBean);
@@ -177,7 +177,7 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
     CDI.addPostInitTask(new Runnable() {
       @Override
       public void run() {
-        ApplicationScopedBeanB bean = IOC.getBeanManager()
+        final ApplicationScopedBeanB bean = IOC.getBeanManager()
                 .lookupBean(ApplicationScopedBeanB.class).getInstance();
 
         assertNotNull("DependentBeanCycleA was null", bean);
@@ -201,7 +201,7 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
       public void run() {
         DependentBeanCycleB.instanceCount = 1;
 
-        DependentBeanCycleB bean = IOC.getBeanManager()
+        final DependentBeanCycleB bean = IOC.getBeanManager()
                 .lookupBean(DependentBeanCycleB.class).getInstance();
 
         assertNotNull("bean was null", bean);
@@ -214,7 +214,7 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
 
         DependentBeanCycleB.instanceCount = 1;
 
-        DependentBeanCycleA beanA = IOC.getBeanManager()
+        final DependentBeanCycleA beanA = IOC.getBeanManager()
                 .lookupBean(DependentBeanCycleA.class).getInstance();
 
         assertNotNull("beanA was null", beanA);
@@ -238,7 +238,7 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
 
       @Override
       public void run() {
-        DestroyA bean = IOC.getBeanManager()
+        final DestroyA bean = IOC.getBeanManager()
                 .lookupBean(DestroyA.class).getInstance();
 
         IOC.getBeanManager().destroyBean(bean);
@@ -258,7 +258,7 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
 
       @Override
       public void run() {
-        LincolnCat bean = IOC.getBeanManager()
+        final LincolnCat bean = IOC.getBeanManager()
                 .lookupBean(LincolnCat.class).getInstance();
 
         assertNotNull("no instance returned for bean", bean);
@@ -275,7 +275,7 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
 
       @Override
       public void run() {
-        DepScopedBeanWithASBeanDep bean = IOC.getBeanManager()
+        final DepScopedBeanWithASBeanDep bean = IOC.getBeanManager()
                 .lookupBean(DepScopedBeanWithASBeanDep.class).getInstance();
 
         assertNotNull("no instance returned for bean", bean);
@@ -298,7 +298,7 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
     InitVotes.registerOneTimeInitCallback(new Runnable() {
       @Override
       public void run() {
-        BeanInjectsNonModuleDependentBean bean = IOC.getBeanManager()
+        final BeanInjectsNonModuleDependentBean bean = IOC.getBeanManager()
                 .lookupBean(BeanInjectsNonModuleDependentBean.class).getInstance();
 
         assertNotNull("no instance returned for bean", bean);
@@ -310,6 +310,5 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
         finishTest();
       }
     });
-
   }
 }

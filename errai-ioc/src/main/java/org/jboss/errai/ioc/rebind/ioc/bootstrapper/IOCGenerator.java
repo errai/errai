@@ -53,7 +53,7 @@ public class IOCGenerator extends Generator {
     try {
       // get classType and save instance variables
 
-      JClassType classType = typeOracle.getType(typeName);
+      final JClassType classType = typeOracle.getType(typeName);
       packageName = classType.getPackage().getName();
       className = classType.getSimpleSourceName() + "Impl";
 
@@ -82,16 +82,16 @@ public class IOCGenerator extends Generator {
    */
   private void generateIOCBootstrapClass(TreeLogger logger, GeneratorContext context) {
     // get print writer that receives the source code
-    PrintWriter printWriter = context.tryCreate(logger, packageName, className);
+    final PrintWriter printWriter = context.tryCreate(logger, packageName, className);
 
     // if null, source code has ALREADY been generated,
     if (printWriter == null)
       return;
 
-    IOCBootstrapGenerator iocBootstrapGenerator = new IOCBootstrapGenerator(typeOracle, context, logger,
+    final IOCBootstrapGenerator iocBootstrapGenerator = new IOCBootstrapGenerator(typeOracle, context, logger,
             RebindUtils.findTranslatablePackages(context));
 
-    String out = iocBootstrapGenerator.generate(packageName, className);
+    final String out = iocBootstrapGenerator.generate(packageName, className);
 
     if (Boolean.getBoolean("errai.codegen.printOut")) {
       System.out.println("---IOC Bootstrapper--->");

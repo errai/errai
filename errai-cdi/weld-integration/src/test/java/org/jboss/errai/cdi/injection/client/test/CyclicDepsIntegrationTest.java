@@ -213,7 +213,5 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
         finishTest();
       }
     });
-
   }
-
 }

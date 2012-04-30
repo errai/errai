@@ -276,7 +276,7 @@ public class GWTClass extends AbstractMetaClass<JType> {
     JField field = type.getField(name);
 
     if (field == null) {
-      throw new RuntimeException("no such field: " + field);
+      throw new RuntimeException("no such field: " + name + " in class: " + this);
     }
 
     return new GWTField(oracle, field);

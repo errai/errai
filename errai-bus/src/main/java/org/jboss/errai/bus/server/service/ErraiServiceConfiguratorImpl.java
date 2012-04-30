@@ -69,7 +69,6 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
     String bundlePath = System.getProperty("errai.service_config_prefix_path");
 
     try {
-
       ResourceBundle erraiServiceConfig = getBundle(bundlePath == null ? "ErraiService" : bundlePath + ".ErraiService");
       Enumeration<String> keys = erraiServiceConfig.getKeys();
       String key;
@@ -83,10 +82,7 @@ public class ErraiServiceConfiguratorImpl implements ErraiServiceConfigurator {
         // try to load the default service bundle -- used for testing, etc.
         System.setProperty("errai.service_config_prefix_path", "org.jboss.errai.bus");
         loadServiceProperties();
-        return;
       }
-
-      throw new ErraiBootstrapFailure("Error reading from configuration. Did you include ErraiService.properties?", e);
     }
   }
 
