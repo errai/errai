@@ -186,9 +186,31 @@ public abstract class ErraiEntityManager implements EntityManager {
     while (iterator.hasNext()) {
       if (iterator.next().getValue() == entity) {
         iterator.remove();
+        finishDetach(entity);
         break;
       }
     }
+  }
+
+  /**
+   * Internal routine that completes the detach process for a managed entity.
+   * This method does not alter the {@link #persistenceContext}, so it is safe
+   * to use while iterating over that collection.
+   *
+   * @param entity
+   *          the entity whose state is transitioning from <i>managed</i> to
+   *          <i>detached</i>.
+   */
+  private void finishDetach(Object entity) {
+
+  }
+
+  @Override
+  public void clear() {
+    for (Object entity : persistenceContext.values()) {
+      finishDetach(entity);
+    }
+    persistenceContext.clear();
   }
 
   @Override
@@ -206,4 +228,5 @@ public abstract class ErraiEntityManager implements EntityManager {
   public <T> T find(Class<T> entityClass, Object primaryKey, Map<String, Object> properties) {
     return find(entityClass, primaryKey);
   }
+
 }

@@ -11,11 +11,27 @@ import org.jboss.errai.jpa.test.entity.Artist;
 
 import com.google.gwt.junit.client.GWTTestCase;
 
+/**
+ * Tests the JPA EntityManager facilities provided by Errai JPA.
+ * <p>
+ * Note that there is a {@link HibernateJpaTest subclass of this test} that runs
+ * all the same checks against Hibernate, as a sanity check that we're testing
+ * for actual JPA-sanctioned and JPA-compatible behaviour.
+ *
+ * @author Jonathan Fuerth <jfuerth@gmail.com>
+ */
 public class ErraiJpaTest extends GWTTestCase {
 
   @Override
   public String getModuleName() {
     return "org.jboss.errai.jpa.test.JpaTest";
+  }
+
+  protected EntityManager getEntityManager() {
+    JpaTestClient testClient = JpaTestClient.INSTANCE;
+    assertNotNull(testClient);
+    assertNotNull(testClient.entityManager);
+    return JpaTestClient.INSTANCE.entityManager;
   }
 
   @Override
@@ -28,9 +44,7 @@ public class ErraiJpaTest extends GWTTestCase {
   }
 
   public void testEntityManagerInjection() throws Exception {
-    JpaTestClient testClient = JpaTestClient.INSTANCE;
-    assertNotNull(testClient);
-    assertNotNull(testClient.entityManager);
+    getEntityManager(); // has its own assertions
   }
 
   /**
@@ -38,7 +52,7 @@ public class ErraiJpaTest extends GWTTestCase {
    */
   public void testPersistNonEntity() {
     try {
-      EntityManager em = JpaTestClient.INSTANCE.entityManager;
+      EntityManager em = getEntityManager();
       em.persist("this is a string, not an entity");
       fail();
     } catch (IllegalArgumentException ex) {
@@ -58,7 +72,7 @@ public class ErraiJpaTest extends GWTTestCase {
     album.setReleaseDate(new Date(-8366400000L));
 
     // store it
-    EntityManager em = JpaTestClient.INSTANCE.entityManager;
+    EntityManager em = getEntityManager();
     em.persist(album);
     em.flush();
     em.detach(album);
@@ -68,7 +82,6 @@ public class ErraiJpaTest extends GWTTestCase {
     Album fetchedAlbum = em.find(Album.class, album.getId());
     assertNotSame(album, fetchedAlbum);
     assertEquals(album.toString(), fetchedAlbum.toString());
-    assertEquals(album, fetchedAlbum);
   }
 
   /**
@@ -78,21 +91,24 @@ public class ErraiJpaTest extends GWTTestCase {
 
     // make Album (not attached to Artist)
     Album album = new Album();
-    album.setId(10L); // same ID as album, on purpose
+//    album.setId(10L); // same ID as album, on purpose
     album.setArtist(null);
     album.setName("Let It Be");
     album.setReleaseDate(new Date(11012400L));
 
-    // make Artist (not attached to Album)
+    // store them
+    EntityManager em = getEntityManager();
+    em.persist(album);
+    em.flush();
+
+    // make Artist (completely unrelated to Album, but has same numeric ID)
     Artist artist = new Artist();
-    artist.setId(10L); // same ID as artist, on purpose
+    artist.setId(album.getId()); // to verify proper separation by entity type
     artist.setName("The Beatles");
 
-    // store them
-    EntityManager em = JpaTestClient.INSTANCE.entityManager;
-    em.persist(album);
     em.persist(artist);
     em.flush();
+
     em.detach(album);
     em.detach(artist);
 
@@ -104,11 +120,9 @@ public class ErraiJpaTest extends GWTTestCase {
 
     // ensure Album is intact
     assertEquals(album.toString(), fetchedAlbum.toString());
-    assertEquals(album, fetchedAlbum);
 
     // ensure Artist is intact
     assertEquals(artist.toString(), fetchedArtist.toString());
-    assertEquals(artist, fetchedArtist);
   }
 
   /**
@@ -118,13 +132,12 @@ public class ErraiJpaTest extends GWTTestCase {
   public void testRetrievePersistentEntity() throws Exception {
     // make it
     Album album = new Album();
-    album.setId(14L);
     album.setArtist(null);
     album.setName("Abbey Road");
     album.setReleaseDate(new Date(-8366400000L));
 
     // store it
-    EntityManager em = JpaTestClient.INSTANCE.entityManager;
+    EntityManager em = getEntityManager();
     em.persist(album);
 
     // should come directly from the persistence unit cache at this point

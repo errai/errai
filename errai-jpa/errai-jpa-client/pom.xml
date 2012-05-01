@@ -30,6 +30,13 @@
     </dependency>
 
     <dependency>
+      <groupId>org.hsqldb</groupId>
+      <artifactId>hsqldb</artifactId>
+      <version>2.2.8</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
       <groupId>org.jboss.errai</groupId>
       <artifactId>errai-ioc</artifactId>
       <version>${project.version}</version>
