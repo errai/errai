@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.persistence.EntityManager;
-import javax.persistence.metamodel.SingularAttribute;
 
 import org.jboss.errai.jpa.client.local.backend.StorageBackend;
 import org.jboss.errai.jpa.client.local.backend.WebStorageBackend;
@@ -116,11 +115,6 @@ public abstract class ErraiEntityManager implements EntityManager {
     backend.put(key, entity);
   }
 
-
-  // XXX these would be better held by the SingularAttribute instances themselves
-  private final Map<SingularAttribute<?, ?>, Iterator<?>> localIdGenerators = new HashMap<SingularAttribute<?, ?>, Iterator<?>>();
-
-
   /**
    * Generates a new ID value for the given entity instance that is guaranteed
    * to be unique <i>on this client</i>. If the entity instance with this ID is
@@ -139,18 +133,7 @@ public abstract class ErraiEntityManager implements EntityManager {
    *         instance.
    */
   public <X, T> T generateAndSetLocalId(X entityInstance, ErraiSingularAttribute<X, T> attr) {
-    Iterator<T> idGenerator = (Iterator<T>) localIdGenerators.get(attr);
-    if (idGenerator == null) {
-      if (attr.getJavaType() == Long.class) {
-        // XXX move this into the attribute class so it can always be the right type of sequence generator
-        idGenerator = (Iterator<T>) new LongIdGenerator(this, (ErraiSingularAttribute<?, Long>) attr);
-        localIdGenerators.put(attr, idGenerator);
-      } else {
-        throw new UnsupportedOperationException("Can't generate ID of type " + attr.getJavaType());
-      }
-    }
-
-    T nextId = idGenerator.next();
+    T nextId = attr.getValueGenerator().next();
     attr.set(entityInstance, nextId);
     return nextId;
   }

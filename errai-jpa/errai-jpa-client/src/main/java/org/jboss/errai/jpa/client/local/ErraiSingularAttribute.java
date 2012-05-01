@@ -1,5 +1,7 @@
 package org.jboss.errai.jpa.client.local;
 
+import java.util.Iterator;
+
 import javax.persistence.metamodel.SingularAttribute;
 
 /**
@@ -42,4 +44,14 @@ public interface ErraiSingularAttribute<X, T> extends SingularAttribute<X, T> {
    * Can the attribute's value be generated (usually for ID attributes).
    */
   public boolean isGeneratedValue();
+
+  /**
+   * Returns a generator for the values of this attribute. Only works for
+   * attributes that are annotated with {@code @GeneratedValue}.
+   *
+   * @return the ID generator for this generated attribute. Never null.
+   * @throws UnsupportedOperationException
+   *           if this attribute is not a {@code @GeneratedValue}.
+   */
+  public Iterator<T> getValueGenerator();
 }

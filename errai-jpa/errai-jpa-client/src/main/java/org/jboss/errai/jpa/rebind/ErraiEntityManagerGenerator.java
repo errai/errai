@@ -6,9 +6,11 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.enterprise.util.TypeLiteral;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.GeneratedValue;
@@ -24,6 +26,7 @@ import org.jboss.errai.codegen.SnapshotMaker;
 import org.jboss.errai.codegen.SnapshotMaker.MethodBodyCallback;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.StringStatement;
+import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -37,6 +40,7 @@ import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.client.local.ErraiEntityType;
 import org.jboss.errai.jpa.client.local.ErraiSingularAttribute;
+import org.jboss.errai.jpa.client.local.LongIdGenerator;
 
 import com.google.gwt.core.ext.Generator;
 import com.google.gwt.core.ext.GeneratorContext;
@@ -150,6 +154,32 @@ public class ErraiEntityManagerGenerator extends Generator {
             SingularAttribute<?, ?> attr = (SingularAttribute<?, ?>) o;
 
             return Stmt.loadLiteral(isGeneratedValue(attr.getJavaMember())).returnValue();
+          }
+
+          // provide generated value iterator
+          if (o instanceof SingularAttribute
+                  && method.getName().equals("getValueGenerator")) {
+            SingularAttribute<?, ?> attr = (SingularAttribute<?, ?>) o;
+
+            if (isGeneratedValue(attr.getJavaMember())) {
+
+              // TODO support generated types other than Long
+              if (attr.getJavaType() != Long.class) {
+                throw new UnsupportedOperationException("ID generation for types other than Long not yet supported");
+              }
+
+              containingClassBuilder
+                .privateField("valueGenerator", MetaClassFactory.get(new TypeLiteral<Iterator<Long>>() {}))
+                .initializesWith(Stmt.newObject(LongIdGenerator.class)
+                    .withParameters(Stmt.loadStatic(classBuilder.getClassDefinition(), "this"), Variable.get("this")))
+                .finish();
+
+              // StringStatement is a workaround: codegen says valueGenerator is out of scope when we do this properly
+              return new StringStatement("return valueGenerator");
+
+            } else {
+              return Stmt.throw_(UnsupportedOperationException.class, "Not a generated attribute");
+            }
           }
 
           // allow SnapshotMaker default (read value and create snapshot)

@@ -94,7 +94,7 @@ public class ErraiJpaTest extends GWTTestCase {
 //    album.setId(10L); // same ID as album, on purpose
     album.setArtist(null);
     album.setName("Let It Be");
-    album.setReleaseDate(new Date(11012400L));
+    album.setReleaseDate(new Date(11012400000L));
 
     // store them
     EntityManager em = getEntityManager();
