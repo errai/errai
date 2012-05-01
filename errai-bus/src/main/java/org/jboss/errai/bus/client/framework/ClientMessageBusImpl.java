@@ -681,6 +681,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       this.postInit = false;
       this.stateSyncInProgress = false;
       this.sendBuilder = null;
+      this.deferredSubscriptions.clear();
       this.postInitTasks.clear();
 
       InitVotes.reset();
