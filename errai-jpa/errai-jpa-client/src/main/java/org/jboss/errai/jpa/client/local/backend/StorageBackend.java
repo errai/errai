@@ -1,5 +1,7 @@
 package org.jboss.errai.jpa.client.local.backend;
 
+import org.jboss.errai.jpa.client.local.ErraiEntityType;
+
 /**
  * Represents a browser-local persistent storage backend.
  * <p>
@@ -10,8 +12,8 @@ package org.jboss.errai.jpa.client.local.backend;
  */
 public interface StorageBackend {
 
-  void put(String key, String value);
+  <X, T> void put(ErraiEntityType<X> type, T key, X value);
 
-  String get(String key);
+  <X, T> X get(ErraiEntityType<X> type, T key);
 
 }

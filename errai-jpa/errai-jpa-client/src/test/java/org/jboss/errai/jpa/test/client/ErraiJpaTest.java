@@ -7,6 +7,7 @@ import javax.persistence.EntityManager;
 
 import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.jpa.test.entity.Album;
+import org.jboss.errai.jpa.test.entity.Artist;
 
 import com.google.gwt.junit.client.GWTTestCase;
 
@@ -48,7 +49,7 @@ public class ErraiJpaTest extends GWTTestCase {
   /**
    * Tests the persistence of one entity with no related entities.
    */
-  public void testPersistOneAlbum() { // implementation isn't complete yet
+  public void testPersistOneAlbum() {
 
     // make it
     Album album = new Album();
@@ -69,4 +70,45 @@ public class ErraiJpaTest extends GWTTestCase {
     assertEquals(album.toString(), fetchedAlbum.toString());
     assertEquals(album, fetchedAlbum);
   }
+
+  /**
+   * Tests the persistence of two unrelated entities of different types.
+   */
+  public void testPersistOneAlbumAndOneArtist() {
+
+    // make Album (not attached to Artist)
+    Album album = new Album();
+    album.setId(10L); // same ID as album, on purpose
+    album.setArtist(null);
+    album.setName("Let It Be");
+    album.setReleaseDate(new Date(11012400L));
+
+    // make Artist (not attached to Album)
+    Artist artist = new Artist();
+    artist.setId(10L); // same ID as artist, on purpose
+    artist.setName("The Beatles");
+
+    // store them
+    EntityManager em = JpaTestClient.INSTANCE.entityManager;
+    em.persist(album);
+    em.persist(artist);
+    em.flush();
+    em.detach(album);
+    em.detach(artist);
+
+    // fetch them
+    Album fetchedAlbum = em.find(Album.class, album.getId());
+    Artist fetchedArtist = em.find(Artist.class, artist.getId());
+    assertNotSame(album, fetchedAlbum);
+    assertNotSame(artist, fetchedArtist);
+
+    // ensure Album is intact
+    assertEquals(album.toString(), fetchedAlbum.toString());
+    assertEquals(album, fetchedAlbum);
+
+    // ensure Artist is intact
+    assertEquals(artist.toString(), fetchedArtist.toString());
+    assertEquals(artist, fetchedArtist);
+  }
+
 }

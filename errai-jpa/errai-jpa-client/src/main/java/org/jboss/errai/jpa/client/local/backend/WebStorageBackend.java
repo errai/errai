@@ -1,5 +1,8 @@
 package org.jboss.errai.jpa.client.local.backend;
 
+import org.jboss.errai.jpa.client.local.ErraiEntityType;
+import org.jboss.errai.marshalling.client.Marshalling;
+
 /**
  * The storage backend for HTML WebStorage, a storage facility supported by most
  * browsers for at least 2.5 million characters of data.
@@ -8,14 +11,34 @@ package org.jboss.errai.jpa.client.local.backend;
  */
 public class WebStorageBackend implements StorageBackend {
 
-  @Override
-  public native void put(String key, String value) /*-{
+  private native void putImpl(String key, String value) /*-{
     $wnd.sessionStorage.setItem(key, value);
   }-*/;
 
-  @Override
-  public native String get(String key) /*-{
+  private native String getImpl(String key) /*-{
     return $wnd.sessionStorage.getItem(key);
   }-*/;
 
+  @Override
+  public <X, T> void put(ErraiEntityType<X> type, T id, X value) {
+    String keyJson = makeKey(type, id);
+    String valueJson = Marshalling.toJSON(value);
+    System.out.println("Storing.\nKey=" + keyJson + "\nValue=" + valueJson);
+    putImpl(keyJson, valueJson);
+  }
+
+  @Override
+  public <X, T> X get(ErraiEntityType<X> type, T id) {
+    String keyJson = makeKey(type, id);
+    String valueJson = getImpl(keyJson);
+    if (valueJson == null) {
+      return null;
+    }
+    return Marshalling.fromJSON(valueJson, type.getJavaType());
+  }
+
+  private String makeKey(ErraiEntityType<?> type, Object id) {
+    return "{ entityType: \"" + type.getJavaType().getName()
+            + "\", key: " + Marshalling.toJSON(id) + "}";
+  }
 }

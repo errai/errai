@@ -7,13 +7,10 @@ import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
-import javax.persistence.metamodel.EntityType;
-import javax.persistence.metamodel.Metamodel;
 import javax.persistence.metamodel.SingularAttribute;
 
 import org.jboss.errai.jpa.client.local.backend.StorageBackend;
 import org.jboss.errai.jpa.client.local.backend.WebStorageBackend;
-import org.jboss.errai.marshalling.client.Marshalling;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 
 /**
@@ -83,7 +80,7 @@ public abstract class ErraiEntityManager implements EntityManager {
   }
 
   private <T> void persistImpl(T entity) {
-    EntityType<T> entityType = getMetamodel().entity(getNarrowedClass(entity));
+    ErraiEntityType<T> entityType = getMetamodel().entity(getNarrowedClass(entity));
     persistenceContext.add(entity);
 
     ErraiSingularAttribute<? super T,?> idAttr;
@@ -100,11 +97,8 @@ public abstract class ErraiEntityManager implements EntityManager {
       id = generateAndSetLocalId(entity, idAttr);
       // TODO track this generated ID for later reconciliation with the server
     }
-    String idJson = Marshalling.toJSON(id);
-    System.out.println("About to convert entity to JSON: " + entity);
-    String entityJson = Marshalling.toJSON(entity);
-    System.out.println("Storing.\nKey=" + idJson + "\nValue=" + entityJson);
-    backend.put(idJson, entityJson);
+
+    backend.put(entityType, id, entity);
   }
 
 
@@ -149,7 +143,7 @@ public abstract class ErraiEntityManager implements EntityManager {
   // -------------- Actual JPA API below this line -------------------
 
   @Override
-  public Metamodel getMetamodel() {
+  public ErraiMetamodel getMetamodel() {
     if (!metamodel.isFrozen()) {
       populateMetamodel();
       if (!metamodel.isFrozen()) {
@@ -178,16 +172,9 @@ public abstract class ErraiEntityManager implements EntityManager {
 
   @Override
   public <T> T find(Class<T> entityClass, Object primaryKey) {
-
-    // we call this to ensure it's a valid entity type
-    getMetamodel().entity(entityClass);
-
-    String idJson = Marshalling.toJSON(primaryKey);
-    String entityJson = backend.get(idJson);
-    if (entityJson == null) {
-      return null;
-    }
-    return Marshalling.fromJSON(entityJson, entityClass);
+    ErraiEntityType<T> entityType = getMetamodel().entity(entityClass);
+    T entity = backend.get(entityType, primaryKey);
+    return entity;
   }
 
   @Override
