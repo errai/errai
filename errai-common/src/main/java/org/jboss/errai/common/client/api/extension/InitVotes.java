@@ -17,10 +17,8 @@
 package org.jboss.errai.common.client.api.extension;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.Timer;
 import org.jboss.errai.common.client.api.tasks.AsyncTask;
 import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
-import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.common.client.util.TimeUnit;
 
 import java.util.ArrayList;

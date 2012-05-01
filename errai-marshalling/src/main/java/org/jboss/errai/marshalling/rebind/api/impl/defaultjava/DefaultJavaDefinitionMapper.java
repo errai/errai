@@ -161,8 +161,8 @@ public class DefaultJavaDefinitionMapper {
       }
     }
 
-    Set<String> writeKeys = new HashSet<String>();
-    Set<String> readKeys = new HashSet<String>();
+    final Set<String> writeKeys = new HashSet<String>();
+    final Set<String> readKeys = new HashSet<String>();
 
     for (Mapping m : simpleConstructorMapping.getMappings()) {
       writeKeys.add(m.getKey());

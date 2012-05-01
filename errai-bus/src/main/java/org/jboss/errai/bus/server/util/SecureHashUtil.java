@@ -19,6 +19,7 @@ package org.jboss.errai.bus.server.util;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Random;
 
 /**
  * A utility class for producing secure hashes throughout the Errai code where needed.
@@ -34,37 +35,28 @@ public class SecureHashUtil {
   static {
     try {
       random = SecureRandom.getInstance(secureRandomAlgorithm);
-      random.setSeed(SecureRandom.getInstance(secureRandomAlgorithm).generateSeed(64));
+      random.setSeed(SecureRandom.getInstance(secureRandomAlgorithm).generateSeed(128));
 
-      // build the salting table
-      SecureRandom sec1 = SecureRandom.getInstance(secureRandomAlgorithm);
-      sec1.setSeed(SecureRandom.getSeed(64));
-
-      SecureRandom sec2 = SecureRandom.getInstance(secureRandomAlgorithm);
-      sec1.setSeed(SecureRandom.getSeed(64));
-
-      SecureRandom sec3 = SecureRandom.getInstance(secureRandomAlgorithm);
-      sec1.setSeed(SecureRandom.getSeed(64));
-
-      SecureRandom sec4 = SecureRandom.getInstance(secureRandomAlgorithm);
-      sec1.setSeed(SecureRandom.getSeed(64));
-
+      final Random rnd1 = new Random(random.nextLong());
+      final Random rnd2 = new Random(random.nextLong());
+      final Random rnd3 = new Random(random.nextLong());
+      final Random rnd4 = new Random(random.nextLong());
 
       saltTable = new long[random.nextInt(500) + 500];
 
       for (int i = 0; i < saltTable.length; i++) {
         switch (random.nextInt(Integer.MAX_VALUE) % 4) {
           case 0:
-            saltTable[i] = sec1.nextLong();
+            saltTable[i] = rnd1.nextLong();
             break;
           case 1:
-            saltTable[i] = sec2.nextLong();
+            saltTable[i] = rnd2.nextLong();
             break;
           case 2:
-            saltTable[i] = sec3.nextLong();
+            saltTable[i] = rnd3.nextLong();
             break;
           case 3:
-            saltTable[i] = sec4.nextLong();
+            saltTable[i] = rnd4.nextLong();
             break;
         }
       }
