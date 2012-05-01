@@ -8,7 +8,7 @@
   <super-source path="api"/>
   <source path="client" />
 
-  <generate-with class="org.jboss.errai.jpa.gen.ErraiEntityManagerGenerator">
+  <generate-with class="org.jboss.errai.jpa.rebind.ErraiEntityManagerGenerator">
 
     <!-- Could use when-type-assignable to javax.persistence.EntityManager, but this
          could give us better interop with other frameworks that try to do the same -->

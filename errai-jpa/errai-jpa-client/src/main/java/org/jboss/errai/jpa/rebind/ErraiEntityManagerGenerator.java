@@ -1,4 +1,4 @@
-package org.jboss.errai.jpa.gen;
+package org.jboss.errai.jpa.rebind;
 
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
