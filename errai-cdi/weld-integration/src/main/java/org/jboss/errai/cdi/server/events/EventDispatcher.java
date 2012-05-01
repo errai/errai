@@ -59,7 +59,6 @@ public class EventDispatcher implements MessageCallback {
   public void callback(final Message message) {
     try {
       ScopeUtil.associateRequestContext(message);
-      ScopeUtil.associateSessionContext(message);
 
       /**
        * If the message didn't not come from a remote, we don't handle it.

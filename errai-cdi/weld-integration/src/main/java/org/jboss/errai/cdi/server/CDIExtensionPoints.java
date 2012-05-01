@@ -242,7 +242,6 @@ public class CDIExtensionPoints implements Extension {
   private void processEventInjector(Class<?> type, Type typeParm, Annotation[] annotations) {
     if (Event.class.isAssignableFrom(type)) {
       ParameterizedType pType = (ParameterizedType) typeParm;
-
       final Class eventType = (Class) pType.getActualTypeArguments()[0];
 
       for (Class<?> observesType : EnvUtil.getAllPortableSubtypes(eventType)) {
@@ -444,8 +443,8 @@ public class CDIExtensionPoints implements Extension {
               @Override
               public Object get(Message message) {
                 if (message.hasPart(CDIProtocol.Qualifiers)) {
-                  List<String> quals = message.get(List.class, CDIProtocol.Qualifiers);
-                  Annotation[] qualAnnos = new Annotation[quals.size()];
+                  final List<String> quals = message.get(List.class, CDIProtocol.Qualifiers);
+                  final Annotation[] qualAnnos = new Annotation[quals.size()];
                   for (int i = 0; i < quals.size(); i++) {
                     qualAnnos[i] = beanQualifiers.get(quals.get(i));
                   }

@@ -21,7 +21,6 @@ import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.rebind.EnvUtil;
@@ -37,7 +36,6 @@ import java.io.PrintWriter;
 public class IOCGenerator extends Generator {
   private String className = null;
   private String packageName = null;
-  private TypeOracle typeOracle;
 
   public static final boolean isTestMode = EnvUtil.isJUnitTest();
 
@@ -48,12 +46,10 @@ public class IOCGenerator extends Generator {
   public String generate(final TreeLogger logger, final GeneratorContext context, final String typeName)
           throws UnableToCompleteException {
 
-    typeOracle = context.getTypeOracle();
-
     try {
       // get classType and save instance variables
 
-      final JClassType classType = typeOracle.getType(typeName);
+      final JClassType classType = context.getTypeOracle().getType(typeName);
       packageName = classType.getPackage().getName();
       className = classType.getSimpleSourceName() + "Impl";
 
@@ -88,7 +84,7 @@ public class IOCGenerator extends Generator {
     if (printWriter == null)
       return;
 
-    final IOCBootstrapGenerator iocBootstrapGenerator = new IOCBootstrapGenerator(typeOracle, context, logger,
+    final IOCBootstrapGenerator iocBootstrapGenerator = new IOCBootstrapGenerator(context, logger,
             RebindUtils.findTranslatablePackages(context));
 
     final String out = iocBootstrapGenerator.generate(packageName, className);

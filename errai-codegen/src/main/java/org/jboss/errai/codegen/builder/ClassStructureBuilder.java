@@ -25,5 +25,10 @@ import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 public interface ClassStructureBuilder<T extends ClassStructureBuilder<T>> extends ClassMethodBuilder<T>,
         ClassConstructorBuilder<T>, ClassFieldBuilder<T>, Builder {
 
+  /**
+   * The mutable class definition which is being constructed by this builder.
+   *
+   * @return an instance of {@link BuildMetaClass}
+   */
   public BuildMetaClass getClassDefinition();
 }
