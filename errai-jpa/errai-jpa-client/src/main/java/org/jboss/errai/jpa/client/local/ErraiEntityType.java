@@ -287,4 +287,8 @@ public class ErraiEntityType<X> implements EntityType<X> {
     return name;
   }
 
+  @Override
+  public String toString() {
+    return "[EntityType \"" + getName() + "\" (" + getJavaType().getName() + ")]";
+  }
 }

@@ -1,6 +1,6 @@
 package org.jboss.errai.jpa.client.local.backend;
 
-import org.jboss.errai.jpa.client.local.ErraiEntityType;
+import org.jboss.errai.jpa.client.local.Key;
 import org.jboss.errai.marshalling.client.Marshalling;
 
 /**
@@ -20,25 +20,21 @@ public class WebStorageBackend implements StorageBackend {
   }-*/;
 
   @Override
-  public <X, T> void put(ErraiEntityType<X> type, T id, X value) {
-    String keyJson = makeKey(type, id);
+  public <X, T> void put(Key<X, T> key, X value) {
+    String keyJson = key.toJson();
     String valueJson = Marshalling.toJSON(value);
     System.out.println("Storing.\nKey=" + keyJson + "\nValue=" + valueJson);
     putImpl(keyJson, valueJson);
   }
 
   @Override
-  public <X, T> X get(ErraiEntityType<X> type, T id) {
-    String keyJson = makeKey(type, id);
+  public <X, T> X get(Key<X, T> key) {
+    String keyJson = key.toJson();
     String valueJson = getImpl(keyJson);
     if (valueJson == null) {
       return null;
     }
-    return Marshalling.fromJSON(valueJson, type.getJavaType());
+    return Marshalling.fromJSON(valueJson, key.getEntityType().getJavaType());
   }
 
-  private String makeKey(ErraiEntityType<?> type, Object id) {
-    return "{ entityType: \"" + type.getJavaType().getName()
-            + "\", key: " + Marshalling.toJSON(id) + "}";
-  }
 }

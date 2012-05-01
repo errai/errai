@@ -1,10 +1,9 @@
 package org.jboss.errai.jpa.client.local;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.persistence.EntityManager;
 import javax.persistence.metamodel.SingularAttribute;
@@ -34,9 +33,9 @@ public abstract class ErraiEntityManager implements EntityManager {
   final ErraiMetamodel metamodel = new ErraiMetamodel();
 
   /**
-   * All of the objects that need to be examined when {@link #flush()} is called.
+   * All persistent instances known to this entity manager.
    */
-  final List<Object> persistenceContext = new ArrayList<Object>();
+  final Map<Key<?, ?>, Object> persistenceContext = new HashMap<Key<?, ?>, Object>();
 
   /**
    * The actual storage backend.
@@ -79,9 +78,23 @@ public abstract class ErraiEntityManager implements EntityManager {
     return (Class<T>) object.getClass();
   }
 
+  /**
+   * Performs an unchecked cast of the given value to the given type. This
+   * inlineable method exists because GWT does not implement Class.cast(), which
+   * necessitates unchecked casts in generic code. It's important to narrow the
+   * unchecked warning suppression to the smallest possible amount of code.
+   *
+   * @param type The type that {@code value} is believed to have.
+   * @param value The value to cast.
+   * @return value
+   */
+  @SuppressWarnings("unchecked")
+  private static final <T> T cast(Class<T> type, Object value) {
+    return (T) value;
+  }
+
   private <T> void persistImpl(T entity) {
     ErraiEntityType<T> entityType = getMetamodel().entity(getNarrowedClass(entity));
-    persistenceContext.add(entity);
 
     ErraiSingularAttribute<? super T,?> idAttr;
     switch (entityType.getIdType().getPersistenceType()) {
@@ -98,7 +111,9 @@ public abstract class ErraiEntityManager implements EntityManager {
       // TODO track this generated ID for later reconciliation with the server
     }
 
-    backend.put(entityType, id, entity);
+    Key<T, ?> key = new Key<T, Object>(entityType, id);
+    persistenceContext.put(key, entity);
+    backend.put(key, entity);
   }
 
 
@@ -160,20 +175,30 @@ public abstract class ErraiEntityManager implements EntityManager {
 
   @Override
   public void flush() {
-    for (Object entity : persistenceContext) {
-      System.out.println("Flushing " + entity);
-    }
+    // deferred backend operations not (yet!) implemented
   }
 
   @Override
   public void detach(Object entity) {
-    persistenceContext.remove(entity);
+    // this implementation becomes poor when the persistence context is large.
+    // Turning the persistenceContext into a bimap where the value set is done by object identity would be better.
+    Iterator<Entry<Key<?, ?>, Object>> iterator = persistenceContext.entrySet().iterator();
+    while (iterator.hasNext()) {
+      if (iterator.next().getValue() == entity) {
+        iterator.remove();
+        break;
+      }
+    }
   }
 
   @Override
-  public <T> T find(Class<T> entityClass, Object primaryKey) {
-    ErraiEntityType<T> entityType = getMetamodel().entity(entityClass);
-    T entity = backend.get(entityType, primaryKey);
+  public <X> X find(Class<X> entityClass, Object primaryKey) {
+    Key<X, ?> key = Key.get(this, entityClass, primaryKey);
+    X entity = cast(entityClass, persistenceContext.get(key));
+    if (entity == null) {
+      entity = backend.get(key);
+//      persistenceContext.put(key, entity);
+    }
     return entity;
   }
 

@@ -111,4 +111,32 @@ public class ErraiJpaTest extends GWTTestCase {
     assertEquals(artist, fetchedArtist);
   }
 
+  /**
+   * Tests that an entity in the "persistent" state (known to the entity manager
+   * and not detached) is always a canonical reference to the same object.
+   */
+  public void testRetrievePersistentEntity() throws Exception {
+    // make it
+    Album album = new Album();
+    album.setId(14L);
+    album.setArtist(null);
+    album.setName("Abbey Road");
+    album.setReleaseDate(new Date(-8366400000L));
+
+    // store it
+    EntityManager em = JpaTestClient.INSTANCE.entityManager;
+    em.persist(album);
+
+    // should come directly from the persistence unit cache at this point
+    Album fetchedAlbum = em.find(Album.class, album.getId());
+    assertSame(album, fetchedAlbum);
+
+    // ensure it's stored in the database
+    em.flush();
+
+    // should still come directly from the persistence unit cache
+    fetchedAlbum = em.find(Album.class, album.getId());
+    assertSame(album, fetchedAlbum);
+  }
+
 }
