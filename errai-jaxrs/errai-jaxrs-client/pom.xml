@@ -33,7 +33,7 @@
           </additionalClasspathElements>
           <useManifestOnlyJar>false</useManifestOnlyJar>
           <forkMode>pertest</forkMode>
-          <argLine>${argLine} -Xmx2048m -Derrai.devel.nocache=true -Derrai.codegen.permissive=false</argLine>
+          <argLine>${argLine} -Xmx2048m -Derrai.devel.nocache=true</argLine>
 
           <systemProperties>
             <!-- Must disable long polling for automated tests to succeed -->
@@ -133,11 +133,18 @@
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
-    
+
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>resteasy-jaxrs</artifactId>
       <version>${resteasy.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-mapper-asl</artifactId>
+      <version>1.9.6</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

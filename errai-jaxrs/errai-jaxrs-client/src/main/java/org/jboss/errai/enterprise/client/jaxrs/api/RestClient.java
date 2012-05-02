@@ -24,10 +24,7 @@ import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.framework.ProxyFactory;
 import org.jboss.errai.bus.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.enterprise.client.jaxrs.JaxrsProxy;
-import org.jboss.errai.enterprise.client.jaxrs.JaxrsProxyLoader;
 import org.jboss.errai.marshalling.client.api.MarshallerFramework;
-
-import com.google.gwt.core.client.GWT;
 
 /**
  * API for executing HTTP calls based on a JAX-RS interface.
@@ -100,15 +97,6 @@ public class RestClient {
       baseUrl += "/";
     
     T proxy = proxyProvider.getRemoteProxy(remoteService);
-    if (proxy == null || !(proxy instanceof JaxrsProxy)) {
-
-      JaxrsProxyLoader loader = GWT.create(JaxrsProxyLoader.class);
-      loader.loadProxies();
-
-      proxy = proxyProvider.getRemoteProxy(remoteService); 
-      if (proxy == null || !(proxy instanceof JaxrsProxy))
-        throw new RuntimeException("No proxy found for JAX-RS interface: " + remoteService.getName());
-    }
 
     // Can't use ArrayUtils (class has to be translatable).
     if (successCodes.length > 0) {

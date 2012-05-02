@@ -16,7 +16,6 @@
 
 package org.jboss.errai.enterprise.jaxrs.client.test;
 
-import com.google.gwt.http.client.Response;
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
@@ -24,8 +23,9 @@ import org.jboss.errai.enterprise.client.jaxrs.api.ResponseException;
 import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
 import org.jboss.errai.enterprise.jaxrs.client.TestModule;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.Entity;
-import org.jboss.errai.ioc.client.Container;
 import org.junit.Test;
+
+import com.google.gwt.http.client.Response;
 
 /**
  * Testing caller injection.
@@ -41,7 +41,6 @@ public class CallerInjectionIntegrationTest extends AbstractErraiJaxrsTest {
 
   @Override
   protected void gwtSetUp() throws Exception {
-    new Container().boostrapContainer();
     super.gwtSetUp();
   }
 
