@@ -5,7 +5,7 @@ import org.jboss.errai.marshalling.client.Marshalling;
 
 /**
  * The storage backend for HTML WebStorage, a storage facility supported by most
- * browsers for at least 2.5 million characters of data.
+ * browsers for at least 2.5 million characters of data, (5 megabytes of unicode text).
  *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
@@ -17,6 +17,10 @@ public class WebStorageBackend implements StorageBackend {
 
   private native String getImpl(String key) /*-{
     return $wnd.sessionStorage.getItem(key);
+  }-*/;
+
+  private native String removeImpl(String key) /*-{
+    return $wnd.sessionStorage.removeItem(key);
   }-*/;
 
   @Override
@@ -35,6 +39,12 @@ public class WebStorageBackend implements StorageBackend {
       return null;
     }
     return Marshalling.fromJSON(valueJson, key.getEntityType().getJavaType());
+  }
+
+  @Override
+  public <X, T> void remove(Key<X, T> key) {
+    String keyJson = key.toJson();
+    removeImpl(keyJson);
   }
 
 }
