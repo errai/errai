@@ -125,10 +125,10 @@ public class ErraiJpaTest extends GWTTestCase {
   }
 
   /**
-   * Tests that an entity in the "persistent" state (known to the entity manager
-   * and not detached) is always a canonical reference to the same object.
+   * Tests that an entity that was just persisted in this session is always a
+   * canonical reference to the same object.
    */
-  public void testRetrievePersistentEntity() throws Exception {
+  public void testRetrievePersistedEntity() throws Exception {
     // make it
     Album album = new Album();
     album.setArtist(null);
@@ -149,6 +149,36 @@ public class ErraiJpaTest extends GWTTestCase {
     // should still come directly from the persistence unit cache
     fetchedAlbum = em.find(Album.class, album.getId());
     assertSame(album, fetchedAlbum);
+  }
+
+  /**
+   * Tests that an entity that was fetched in this session is always a canonical
+   * reference to the same object.
+   */
+  public void testRetrieveEntityTwice() throws Exception {
+    // make it
+    Album album = new Album();
+    album.setArtist(null);
+    album.setName("Abbey Road");
+    album.setReleaseDate(new Date(-8366400000L));
+
+    // store it
+    EntityManager em = getEntityManager();
+    em.persist(album);
+
+    // ensure it's stored in the database
+    em.flush();
+
+    // now forget it
+    em.detach(album);
+
+    // multiple fetches should come directly from the persistence unit cache at this point
+    Album fetchedAlbum = em.find(Album.class, album.getId());
+    Album fetchedAlbum2 = em.find(Album.class, album.getId());
+    assertSame(fetchedAlbum, fetchedAlbum2);
+
+    // ensure it's not the original instance we persisted and detached
+    assertNotSame(album, fetchedAlbum);
   }
 
   /**

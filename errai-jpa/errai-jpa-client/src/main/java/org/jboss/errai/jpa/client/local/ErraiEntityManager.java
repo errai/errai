@@ -212,7 +212,7 @@ public abstract class ErraiEntityManager implements EntityManager {
     X entity = cast(entityClass, persistenceContext.get(key));
     if (entity == null) {
       entity = backend.get(key);
-//      persistenceContext.put(key, entity);
+      persistenceContext.put(key, entity);
     }
     return entity;
   }
