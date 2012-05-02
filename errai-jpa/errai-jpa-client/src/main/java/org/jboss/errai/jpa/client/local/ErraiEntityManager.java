@@ -1,7 +1,6 @@
 package org.jboss.errai.jpa.client.local;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -138,6 +137,37 @@ public abstract class ErraiEntityManager implements EntityManager {
     return nextId;
   }
 
+  /**
+   * Internal routine that completes the detach process for a managed entity.
+   * This method does not alter the {@link #persistenceContext}, so it is safe
+   * to use while iterating over that collection.
+   *
+   * @param entity
+   *          the entity whose state is transitioning from <i>managed</i> to
+   *          <i>detached</i>.
+   */
+  private void finishDetach(Object entity) {
+    // in fact, it's probably better to create a single method that transitions
+    // the state of an entity, checking for illegal transitions and firing the
+    // appropriate events along the way.
+  }
+
+  private <X, T> Key<X, T> lookupManagedEntity(X entity, boolean throwIfAbsent) {
+    // this implementation becomes poor when the persistence context is large.
+    // Turning the persistenceContext into a bimap where the value set is done by object identity would be better.
+    // in fact, for the generics to behave themselves, it's probably best to create a whole PersistenceContext class.
+    for (Entry<Key<?, ?>, Object> entry : persistenceContext.entrySet()) {
+      if (entry.getValue() == entity) {
+        return (Key<X, T>) entry.getKey();
+      }
+    }
+
+    if (throwIfAbsent) {
+      throw new IllegalArgumentException("Not a managed entity: " + entity);
+    }
+    return null;
+  }
+
   // -------------- Actual JPA API below this line -------------------
 
   @Override
@@ -163,29 +193,9 @@ public abstract class ErraiEntityManager implements EntityManager {
 
   @Override
   public void detach(Object entity) {
-    // this implementation becomes poor when the persistence context is large.
-    // Turning the persistenceContext into a bimap where the value set is done by object identity would be better.
-    Iterator<Entry<Key<?, ?>, Object>> iterator = persistenceContext.entrySet().iterator();
-    while (iterator.hasNext()) {
-      if (iterator.next().getValue() == entity) {
-        iterator.remove();
-        finishDetach(entity);
-        break;
-      }
-    }
-  }
-
-  /**
-   * Internal routine that completes the detach process for a managed entity.
-   * This method does not alter the {@link #persistenceContext}, so it is safe
-   * to use while iterating over that collection.
-   *
-   * @param entity
-   *          the entity whose state is transitioning from <i>managed</i> to
-   *          <i>detached</i>.
-   */
-  private void finishDetach(Object entity) {
-
+    Key<Object, Object> key = lookupManagedEntity(entity, true);
+    finishDetach(entity);
+    persistenceContext.remove(key);
   }
 
   @Override
@@ -212,4 +222,10 @@ public abstract class ErraiEntityManager implements EntityManager {
     return find(entityClass, primaryKey);
   }
 
+  @Override
+  public void remove(Object entity) {
+    Key<?, ?> key = lookupManagedEntity(entity, true);
+    persistenceContext.remove(key);
+    backend.remove(key);
+  }
 }

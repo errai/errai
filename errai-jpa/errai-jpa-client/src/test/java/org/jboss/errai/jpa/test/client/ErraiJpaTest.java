@@ -188,4 +188,31 @@ public class ErraiJpaTest extends GWTTestCase {
     assertNotSame(artist, fetchedArtist);
   }
 
+  /**
+   * Tests the persistence of two unrelated entities of different types.
+   */
+  public void testRemoveOneEntity() {
+
+    // make Album
+    Album album = new Album();
+    album.setArtist(null);
+    album.setName("Let It Be");
+    album.setReleaseDate(new Date(11012400000L));
+
+    // store it
+    EntityManager em = getEntityManager();
+    em.persist(album);
+    em.flush();
+
+    // make sure it's persistent and managed
+    assertSame(album, em.find(Album.class, album.getId()));
+
+    // remove it
+    em.remove(album);
+
+    // make sure it's gone
+    assertNotNull(album.getId());
+    assertNull(em.find(Album.class, album.getId()));
+  }
+
 }
