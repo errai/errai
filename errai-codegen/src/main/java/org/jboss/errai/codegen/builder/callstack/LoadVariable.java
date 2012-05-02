@@ -81,7 +81,7 @@ public class LoadVariable extends AbstractCallElement {
         public String generate(Context context) {
           if (generatedCache != null) return generatedCache;
 
-          if (variableName.equals("this")) {
+          if (variableName.equals("this") && next != null && !(next instanceof ReturnValue)) {
             return generatedCache = "";
           }
 
