@@ -17,10 +17,11 @@
 package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import com.google.gwt.core.ext.typeinfo.JClassType;
+import com.google.gwt.core.ext.typeinfo.JConstructor;
+import com.google.gwt.core.ext.typeinfo.JPackage;
 import com.google.gwt.user.rebind.SourceWriter;
 import com.google.gwt.user.rebind.StringSourceWriter;
 import org.jboss.errai.bus.server.ErraiBootstrapFailure;
@@ -28,9 +29,11 @@ import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
+import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
+import org.jboss.errai.codegen.meta.impl.gwt.GWTClass;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
 import org.jboss.errai.codegen.util.Implementations;
 import org.jboss.errai.codegen.util.PrivateAccessType;
@@ -59,11 +62,13 @@ import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
+import javax.enterprise.context.NormalScope;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.context.SessionScoped;
 import javax.enterprise.inject.Alternative;
 import javax.enterprise.inject.Default;
 import javax.inject.Inject;
+import javax.inject.Scope;
 import javax.inject.Singleton;
 import java.io.File;
 import java.lang.annotation.Annotation;
@@ -77,72 +82,63 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import static org.jboss.errai.codegen.util.Stmt.declareVariable;
+import static org.jboss.errai.codegen.util.Stmt.loadVariable;
+
 /**
  * The main generator class for the Errai IOC system.
  *
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class IOCBootstrapGenerator {
-  IOCProcessingContext procContext;
-  TypeOracle typeOracle;
-  GeneratorContext context;
-
-  InjectionContext injectionContext;
-  IOCProcessorFactory procFactory;
+  private final GeneratorContext context;
 
   private Collection<String> packages = null;
   private boolean useReflectionStubs = false;
 
-  private List<Class<?>> beforeTasks = new ArrayList<Class<?>>();
-  private List<Class<?>> afterTasks = new ArrayList<Class<?>>();
-
-  private Logger log = LoggerFactory.getLogger(IOCBootstrapGenerator.class);
+  private final List<Class<?>> beforeTasks = new ArrayList<Class<?>>();
+  private final List<Class<?>> afterTasks = new ArrayList<Class<?>>();
 
   public static final String QUALIFYING_METADATA_FACTORY_PROPERTY = "errai.ioc.QualifyingMetaDataFactory";
   public static final String ENABLED_ALTERNATIVES_PROPERTY = "errai.ioc.enabled.alternatives";
 
-  TreeLogger logger = new TreeLogger() {
-    @Override
-    public TreeLogger branch(Type type, String msg, Throwable caught, HelpInfo helpInfo) {
-      return null;
-    }
+  private final TreeLogger logger;
+  private static final Logger log = LoggerFactory.getLogger(IOCBootstrapGenerator.class);
 
-    @Override
-    public boolean isLoggable(Type type) {
-      return false;
-    }
+    // production mode cache only -- used so work is only done in one permutation
+  private static volatile String _bootstrapperCache;
+  private static final Object generatorLock = new Object();
 
-    @Override
-    public void log(Type type, String msg, Throwable caught, HelpInfo helpInfo) {
-      System.out.println(type.getLabel() + ": " + msg);
-      if (caught != null) {
-        caught.printStackTrace();
-      }
-    }
-  };
-
-  public IOCBootstrapGenerator(TypeOracle typeOracle,
-                               GeneratorContext context,
-                               TreeLogger logger) {
-    this.typeOracle = typeOracle;
-    this.context = context;
-    this.logger = logger;
-  }
-
-  public IOCBootstrapGenerator(TypeOracle typeOracle,
-                               GeneratorContext context,
+  public IOCBootstrapGenerator(GeneratorContext context,
                                TreeLogger logger,
                                Collection<String> packages) {
-    this(typeOracle, context, logger);
+    this.context = context;
+    this.logger = logger;
     this.packages = packages;
   }
 
   public IOCBootstrapGenerator() {
-  }
+    logger = new TreeLogger() {
+      @Override
+      public TreeLogger branch(Type type, String msg, Throwable caught, HelpInfo helpInfo) {
+        return null;
+      }
 
-  // production mode cache only -- used so work is only done in one permutation
-  private static volatile String _bootstrapperCache;
-  private static final Object generatorLock = new Object();
+      @Override
+      public boolean isLoggable(Type type) {
+        return false;
+      }
+
+      @Override
+      public void log(Type type, String msg, Throwable caught, HelpInfo helpInfo) {
+        System.out.println(type.getLabel() + ": " + msg);
+        if (caught != null) {
+          caught.printStackTrace();
+        }
+      }
+    };
+    this.context = null;
+  }
 
   public String generate(String packageName, String className) {
     synchronized (generatorLock) {
@@ -152,8 +148,8 @@ public class IOCBootstrapGenerator {
         return _bootstrapperCache;
       }
 
-      File fileCacheDir = RebindUtils.getErraiCacheDir();
-      File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + className + ".java");
+      final File fileCacheDir = RebindUtils.getErraiCacheDir();
+      final File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + className + ".java");
 
       final Set<Class<? extends Annotation>> annos = new HashSet<Class<? extends Annotation>>();
       annos.add(ApplicationScoped.class);
@@ -186,26 +182,28 @@ public class IOCBootstrapGenerator {
   }
 
   private String _generate(String packageName, String className) {
-    ClassStructureBuilder<?> classStructureBuilder =
+    final ClassStructureBuilder<?> classStructureBuilder =
             Implementations.implement(Bootstrapper.class, packageName, className);
 
     logger.log(com.google.gwt.core.ext.TreeLogger.Type.DEBUG, "Generating IOC Bootstrapper " + packageName + "." + className);
 
-    BuildMetaClass bootStrapClass = classStructureBuilder.getClassDefinition();
-    Context buildContext = bootStrapClass.getContext();
+    final BuildMetaClass bootStrapClass = classStructureBuilder.getClassDefinition();
+    final Context buildContext = bootStrapClass.getContext();
 
-    BlockBuilder<?> blockBuilder =
+    final BlockBuilder<?> blockBuilder =
             classStructureBuilder.publicMethod(BootstrapperInjectionContext.class, "bootstrapContainer")
                     .methodComment("The main IOC bootstrap method.");
 
-    SourceWriter sourceWriter = new StringSourceWriter();
+    final SourceWriter sourceWriter = new StringSourceWriter();
 
-    procContext = new IOCProcessingContext(logger, context, sourceWriter, buildContext, bootStrapClass, blockBuilder);
-    injectionContext = new InjectionContext(procContext);
-    procFactory = new IOCProcessorFactory(injectionContext);
+    IOCProcessingContext procContext = new IOCProcessingContext(logger, context, sourceWriter, buildContext,
+            bootStrapClass, blockBuilder);
 
-    MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
-    Properties props = scanner.getProperties("ErraiApp.properties");
+    InjectionContext injectionContext = new InjectionContext(procContext);
+    IOCProcessorFactory procFactory = new IOCProcessorFactory(injectionContext);
+
+    final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
+    final Properties props = scanner.getProperties("ErraiApp.properties");
 
     if (props != null) {
       logger.log(TreeLogger.Type.INFO, "Checking ErraiApp.properties for configured types ...");
@@ -243,31 +241,35 @@ public class IOCBootstrapGenerator {
 
     procContext.setPackages(packages);
 
-    defaultConfigureProcessor();
+    defaultConfigureProcessor(context, injectionContext);
 
     // generator constructor source code
-    initializeProviders();
-    generateExtensions(sourceWriter, classStructureBuilder, blockBuilder);
-    // close generated class
+    initializeProviders(procContext, injectionContext, procFactory, beforeTasks, afterTasks);
+    generateExtensions(procContext, procFactory, injectionContext, sourceWriter, classStructureBuilder, blockBuilder);
 
+    // close generated class
     return sourceWriter.toString();
   }
 
-  private void generateExtensions(SourceWriter sourceWriter, ClassStructureBuilder<?> classBuilder,
-                                  BlockBuilder<?> blockBuilder) {
+  private void generateExtensions(final IOCProcessingContext procContext,
+                                  final IOCProcessorFactory procFactory,
+                                  final InjectionContext injectionContext,
+                                  final SourceWriter sourceWriter,
+                                  final ClassStructureBuilder<?> classBuilder,
+                                  final BlockBuilder<?> blockBuilder) {
     blockBuilder.append(
-            Stmt.declareVariable(procContext.getContextVariableReference().getType()).asFinal()
+            declareVariable(procContext.getContextVariableReference().getType()).asFinal()
                     .named(procContext.getContextVariableReference().getName())
                     .initializeWith(Stmt.newObject(BootstrapperInjectionContext.class)));
 
-    blockBuilder.append(Stmt.declareVariable(CreationalContext.class)
+    blockBuilder.append(declareVariable(CreationalContext.class)
             .named("context")
-            .initializeWith(Stmt.loadVariable(procContext.getContextVariableReference().getName())
+            .initializeWith(loadVariable(procContext.getContextVariableReference().getName())
                     .invoke("getRootContext")));
 
     _doRunnableTasks(beforeTasks, blockBuilder);
 
-    MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
+    final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
 
     procFactory.process(scanner, procContext);
 
@@ -275,12 +277,12 @@ public class IOCBootstrapGenerator {
       blockBuilder.append(stmt);
     }
 
-    Map<MetaField, PrivateAccessType> privateFields = injectionContext.getPrivateFieldsToExpose();
+    final Map<MetaField, PrivateAccessType> privateFields = injectionContext.getPrivateFieldsToExpose();
     for (Map.Entry<MetaField, PrivateAccessType> f : privateFields.entrySet()) {
       PrivateAccessUtil.addPrivateAccessStubs(f.getValue(), !useReflectionStubs, classBuilder, f.getKey());
     }
 
-    Collection<MetaMethod> privateMethods = injectionContext.getPrivateMethodsToExpose();
+    final Collection<MetaMethod> privateMethods = injectionContext.getPrivateMethodsToExpose();
 
     for (MetaMethod m : privateMethods) {
       PrivateAccessUtil.addPrivateAccessStubs(!useReflectionStubs, classBuilder, m);
@@ -288,7 +290,7 @@ public class IOCBootstrapGenerator {
 
     _doRunnableTasks(afterTasks, blockBuilder);
 
-    blockBuilder.append(Stmt.loadVariable(procContext.getContextVariableReference()).returnValue());
+    blockBuilder.append(loadVariable(procContext.getContextVariableReference()).returnValue());
 
     blockBuilder.finish();
 
@@ -306,15 +308,21 @@ public class IOCBootstrapGenerator {
     }
   }
 
-  public void initializeProviders() {
-    MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
+  public static void initializeProviders(IOCProcessingContext procContext,
+                                         InjectionContext injectionContext,
+                                         IOCProcessorFactory procFactory,
+                                         List<Class<?>> beforeTasks,
+                                         List<Class<?>> afterTasks) {
+
+    final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
 
     /*
     * IOCDecoratorExtension.class
     */
-    Set<Class<?>> iocExtensions = scanner
+    final Set<Class<?>> iocExtensions = scanner
             .getTypesAnnotatedWith(org.jboss.errai.ioc.client.api.IOCExtension.class);
-    List<IOCExtensionConfigurator> extensionConfigurators = new ArrayList<IOCExtensionConfigurator>();
+    final List<IOCExtensionConfigurator> extensionConfigurators = new ArrayList<IOCExtensionConfigurator>();
+
     for (Class<?> clazz : iocExtensions) {
       try {
         Class<? extends IOCExtensionConfigurator> configuratorClass = clazz.asSubclass(IOCExtensionConfigurator.class);
@@ -330,7 +338,7 @@ public class IOCBootstrapGenerator {
       }
     }
 
-    Set<Class<?>> bootstrappers = scanner.getTypesAnnotatedWith(IOCBootstrapTask.class);
+    final Set<Class<?>> bootstrappers = scanner.getTypesAnnotatedWith(IOCBootstrapTask.class);
     for (Class<?> clazz : bootstrappers) {
       IOCBootstrapTask task = clazz.getAnnotation(IOCBootstrapTask.class);
       if (task.value() == TaskOrder.Before) {
@@ -344,7 +352,7 @@ public class IOCBootstrapGenerator {
     /**
      * CodeDecorator.class
      */
-    Set<Class<?>> decorators = scanner.getTypesAnnotatedWith(CodeDecorator.class);
+    final Set<Class<?>> decorators = scanner.getTypesAnnotatedWith(CodeDecorator.class);
     for (Class<?> clazz : decorators) {
       try {
         Class<? extends IOCDecoratorExtension> decoratorClass = clazz.asSubclass(IOCDecoratorExtension.class);
@@ -379,7 +387,7 @@ public class IOCBootstrapGenerator {
     }
   }
 
-  private void defaultConfigureProcessor() {
+  private static void defaultConfigureProcessor(GeneratorContext context, InjectionContext injectionContext) {
     injectionContext.mapElementType(WiringElementType.SingletonBean, Singleton.class);
     injectionContext.mapElementType(WiringElementType.SingletonBean, EntryPoint.class);
 
@@ -392,6 +400,38 @@ public class IOCBootstrapGenerator {
 
     injectionContext.mapElementType(WiringElementType.AlternativeBean, Alternative.class);
     injectionContext.mapElementType(WiringElementType.TestMockBean, TestMock.class);
+
+    if (context != null) {
+      for (JPackage pkg : context.getTypeOracle().getPackages()) {
+        TypeScan:
+        for (JClassType type : pkg.getTypes()) {
+          if (!type.isDefaultInstantiable()) {
+            boolean hasInjectableConstructor = false;
+            for (JConstructor c : type.getConstructors()) {
+              if (injectionContext.isElementType(WiringElementType.InjectionPoint, c)) {
+                hasInjectableConstructor = true;
+                break;
+              }
+            }
+
+            if (!hasInjectableConstructor) {
+              continue;
+            }
+          }
+
+          for (Annotation a : type.getAnnotations()) {
+            Class<? extends Annotation> annoClass = a.annotationType();
+            if (annoClass.isAnnotationPresent(Scope.class)
+                    || annoClass.isAnnotationPresent(NormalScope.class)) {
+              continue TypeScan;
+            }
+          }
+
+          MetaClass clazz = GWTClass.newInstance(type.getOracle(), type);
+          injectionContext.addPsuedoScopeForType(clazz);
+        }
+      }
+    }
   }
 
   public void setUseReflectionStubs(boolean useReflectionStubs) {

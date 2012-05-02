@@ -22,6 +22,8 @@ import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.callstack.LoadClassReference;
 
+import static org.jboss.errai.codegen.builder.callstack.LoadClassReference.getClassReference;
+
 /**
  * Foreach statement (enhanced for loop).
  *
@@ -45,14 +47,10 @@ public class ForeachLoop extends AbstractStatement {
   public String generate(Context context) {
     if (generatedCache != null) return generatedCache;
 
-    StringBuilder buf = new StringBuilder(256);
-
-    buf.append("for (").append(LoadClassReference.getClassReference(loopVar.getType(), context))
-        .append(" ").append(loopVar.getName())
-        .append(" : ").append(collectionExpr).append(") {")
-        .append("\n\t").append(body.generate(context).replaceAll("\n", "\n\t"))
-        .append("\n}");
-
-    return generatedCache = buf.toString();
+    return generatedCache
+            = "for (" + getClassReference(loopVar.getType(), context)
+            + " " + loopVar.getName() + " : " + collectionExpr + ") {"
+            + "\n\t" + body.generate(context).replaceAll("\n", "\n\t")
+            + "\n}";
   }
 }

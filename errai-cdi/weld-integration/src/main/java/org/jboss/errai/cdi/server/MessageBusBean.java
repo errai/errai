@@ -16,6 +16,7 @@
 package org.jboss.errai.cdi.server;
 
 import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -31,6 +32,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.unmodifiableSet;
+
 /**
  * Basically a bean wrapper that provides CDI meta data.
  * It's used to inject the {@link org.jboss.errai.bus.client.framework.MessageBus} into the CDI context.
@@ -40,7 +44,18 @@ import java.util.Set;
 public class MessageBusBean implements Bean {
   final MessageBus delegate;
 
-  public MessageBusBean(MessageBus delegate) {
+
+  static final Set<Annotation> qualifiers = unmodifiableSet(new HashSet<Annotation>(
+          asList(new AnnotationLiteral<Default>() {
+                 },
+                 new AnnotationLiteral<Any>() {
+                 }
+          )));
+
+  static final Set<Type> types = unmodifiableSet(new HashSet<Type>(
+          asList(MessageBus.class, ServerMessageBus.class, Object.class)));
+
+  public MessageBusBean(final MessageBus delegate) {
     // invocation target
     this.delegate = delegate;
   }
@@ -58,9 +73,6 @@ public class MessageBusBean implements Bean {
   }
 
   public Set<Annotation> getQualifiers() {
-    Set<Annotation> qualifiers = new HashSet<Annotation>();
-    qualifiers.add(new AnnotationLiteral<Default>() {});
-    qualifiers.add(new AnnotationLiteral<Any>() {});
     return qualifiers;
   }
 
@@ -73,9 +85,6 @@ public class MessageBusBean implements Bean {
   }
 
   public Set<Type> getTypes() {
-    Set<Type> types = new HashSet<Type>();
-    types.add(MessageBus.class);
-    types.add(ServerMessageBus.class);
     return types;
   }
 

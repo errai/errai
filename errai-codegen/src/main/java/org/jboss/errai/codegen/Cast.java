@@ -20,16 +20,17 @@ import org.jboss.errai.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.codegen.exception.InvalidTypeException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.common.client.framework.Assert;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class Cast implements Statement {
-  private MetaClass toType;
+  private final MetaClass toType;
   private Statement statement;
 
   private Cast(MetaClass toType, Statement statement) {
-    this.toType = toType;
+    this.toType = Assert.notNull(toType);
     this.statement = statement;
   }
 

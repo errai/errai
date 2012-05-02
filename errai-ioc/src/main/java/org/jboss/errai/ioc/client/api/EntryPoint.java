@@ -22,8 +22,15 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Specifies the annotated bean is an application entry-point, and should be instantiated when the application is
- * loaded.
+ * Specifies that the annotated bean is an application entry point. Beans
+ * annotated with {@code @EntryPoint} are instantiated when the client-side
+ * application is first loaded. At the time an Entry Point bean is first
+ * instantiated, the client has not yet federated with the server bus, so remote
+ * service names are not yet known. Most often, initialization code should be
+ * placed in a method annotated with {@link AfterInitialization} rather than in
+ * the bean's constructor.
+ *
+ * @see AfterInitialization
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

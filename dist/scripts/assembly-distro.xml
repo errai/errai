@@ -51,6 +51,7 @@
                 <include>org.jboss.errai:errai-jaxrs-provider</include>
                 <include>org.jboss.errai:errai-uibinder</include>
                 <include>org.jboss.errai:errai-data-binding</include>
+                <include>org.jboss.errai:errai-jpa-client</include>
             </includes>
         </dependencySet>
         <dependencySet>

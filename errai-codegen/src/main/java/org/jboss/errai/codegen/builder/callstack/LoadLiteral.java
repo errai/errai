@@ -35,7 +35,7 @@ public class LoadLiteral extends AbstractCallElement {
   public void handleCall(CallWriter writer, Context context, Statement statement) {
     writer.reset();
     try {
-      nextOrReturn(writer, context, LiteralFactory.getLiteral(literalValue));
+      nextOrReturn(writer, context, LiteralFactory.getLiteral(context, literalValue));
     }
     catch (GenerationException e) {
       blameAndRethrow(e);

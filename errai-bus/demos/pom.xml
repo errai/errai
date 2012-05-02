@@ -10,7 +10,7 @@
   <parent>
     <groupId>org.jboss.errai</groupId>
     <artifactId>errai-parent</artifactId>
-    <version>2.0-SNAPSHOT</version>
+    <version>2.1-SNAPSHOT</version>
     <relativePath>../../pom.xml</relativePath>
   </parent>
 
@@ -161,6 +161,15 @@
           </filesets>
         </configuration>
       </plugin>
+
+      <!-- We do not want to deploy the .war files for these demos to Maven Central. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
     </plugins>
 
     <pluginManagement>
@@ -259,7 +268,7 @@
         </dependency>
       </dependencies>
     </profile>
-    
+
     <profile>
       <id>jboss6</id>
 

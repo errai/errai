@@ -83,14 +83,14 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
           }
         };
 
-        Collection<IOCBeanDef> beans = IOC.getBeanManager().lookupBeans(CommonInterface.class);
+        final Collection<IOCBeanDef> beans = IOC.getBeanManager().lookupBeans(CommonInterface.class);
         assertEquals("wrong number of beans", 2, beans.size());
 
-        IOCBeanDef<CommonInterface> beanA = IOC.getBeanManager().lookupBean(CommonInterface.class, qualA);
+        final IOCBeanDef<CommonInterface> beanA = IOC.getBeanManager().lookupBean(CommonInterface.class, qualA);
         assertNotNull("no bean found", beanA);
         assertTrue("wrong bean looked up", beanA.getInstance() instanceof QualAppScopeBeanA);
 
-        IOCBeanDef<CommonInterface> beanB = IOC.getBeanManager().lookupBean(CommonInterface.class, qualB);
+        final IOCBeanDef<CommonInterface> beanB = IOC.getBeanManager().lookupBean(CommonInterface.class, qualB);
         assertNotNull("no bean found", beanB);
         assertTrue("wrong bean looked up", beanB.getInstance() instanceof QualAppScopeBeanB);
         finishTest();
@@ -112,7 +112,7 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
         };
 
         try {
-          IOCBeanDef<CommonInterface> bean = IOC.getBeanManager().lookupBean(CommonInterface.class);
+          final IOCBeanDef<CommonInterface> bean = IOC.getBeanManager().lookupBean(CommonInterface.class);
           fail("should have thrown an exception, but got: " + bean);
         }
         catch (IOCResolutionException e) {
@@ -120,7 +120,7 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
         }
 
         try {
-          IOCBeanDef<CommonInterface> bean = IOC.getBeanManager().lookupBean(CommonInterface.class, wrongAnno);
+          final IOCBeanDef<CommonInterface> bean = IOC.getBeanManager().lookupBean(CommonInterface.class, wrongAnno);
           fail("should have thrown an exception, but got: " + bean);
         }
         catch (IOCResolutionException e) {

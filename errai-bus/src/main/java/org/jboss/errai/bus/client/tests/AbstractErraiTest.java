@@ -108,6 +108,10 @@ public abstract class AbstractErraiTest extends GWTTestCase {
   }
 
   protected void runAfterInit(final Runnable r) {
+    runAfterInit(r, 90000);
+  }
+  
+  protected void runAfterInit(final Runnable r, final int timeout) {
     final Timer t = new Timer() {
 
       @Override
@@ -122,6 +126,6 @@ public abstract class AbstractErraiTest extends GWTTestCase {
       }
     };
     t.schedule(100);
-    delayTestFinish(90000);
+    delayTestFinish(timeout);
   }
 }

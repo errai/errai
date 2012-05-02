@@ -152,9 +152,9 @@ public class MetaDataScanner extends Reflections {
   public static MetaDataScanner createInstance(List<URL> urls) {
     registerUrlTypeHandlers();
 
-    DeploymentContext ctx = new DeploymentContext(urls);
-    List<URL> actualUrls = ctx.process();
-    MetaDataScanner scanner = new MetaDataScanner(actualUrls);
+    final DeploymentContext ctx = new DeploymentContext(urls);
+    final List<URL> actualUrls = ctx.process();
+    final MetaDataScanner scanner = new MetaDataScanner(actualUrls);
     ctx.close(); // needs to closed after the scanner was created
 
     return scanner;
@@ -172,9 +172,9 @@ public class MetaDataScanner extends Reflections {
   public Set<Class<?>> getTypesAnnotatedWithExcluding(
           Class<? extends Annotation> annotation, String excludeRegex) {
     Pattern p = Pattern.compile(excludeRegex);
-    Set<String> result = new HashSet<String>();
 
-    Set<String> types = getStore().getTypesAnnotatedWith(annotation.getName());
+    final Set<String> result = new HashSet<String>();
+    final Set<String> types = getStore().getTypesAnnotatedWith(annotation.getName());
     for (String className : types) {
       if (!p.matcher(className).matches())
         result.add(className);
@@ -184,7 +184,7 @@ public class MetaDataScanner extends Reflections {
   }
 
   public Set<Class<?>> getTypesAnnotatedWith(Class<? extends Annotation> annotation, Collection<String> packages) {
-    Set<Class<?>> results = new HashSet<Class<?>>();
+    final Set<Class<?>> results = new HashSet<Class<?>>();
     for (Class<?> cls : getTypesAnnotatedWith(annotation)) {
       if (packages.contains(cls.getPackage().getName())) {
         results.add(cls);
@@ -194,7 +194,7 @@ public class MetaDataScanner extends Reflections {
   }
 
   public Set<Method> getMethodsAnnotatedWith(Class<? extends Annotation> annotation, Collection<String> packages) {
-    Set<Method> results = new HashSet<Method>();
+    final Set<Method> results = new HashSet<Method>();
     for (Method method : getMethodsAnnotatedWith(annotation)) {
       if (packages.contains(method.getDeclaringClass().getPackage().getName())) {
         results.add(method);
@@ -204,7 +204,7 @@ public class MetaDataScanner extends Reflections {
   }
 
   public Set<Field> getFieldsAnnotatedWith(Class<? extends Annotation> annotation, Collection<String> packages) {
-    Set<Field> results = new HashSet<Field>();
+    final Set<Field> results = new HashSet<Field>();
     for (Field field : getFieldsAnnotatedWith(annotation)) {
       if (packages.contains(field.getDeclaringClass().getPackage().getName())) {
         results.add(field);
@@ -258,9 +258,9 @@ public class MetaDataScanner extends Reflections {
 
   public static List<URL> getConfigUrls(ClassLoader loader) {
     try {
-      Enumeration<URL> configTargets = loader.getResources(ERRAI_CONFIG_STUB_NAME);
+      final Enumeration<URL> configTargets = loader.getResources(ERRAI_CONFIG_STUB_NAME);
+      final List<URL> urls = new ArrayList<URL>();
 
-      List<URL> urls = new ArrayList<URL>();
       while (configTargets.hasMoreElements()) {
         URL url = configTargets.nextElement();
 

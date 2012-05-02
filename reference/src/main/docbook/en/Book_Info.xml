@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='utf-8' ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ Copyright 2011 JBoss, by Red Hat, Inc
   ~
@@ -13,21 +13,17 @@
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
-  -->
-
-<!DOCTYPE bookinfo PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
-<bookinfo id="booki-Reference_Guide">
-    <title>Errai</title>
-    <subtitle>Errai Reference Guide</subtitle>
-    <productname>Errai</productname>
-    <productnumber>2.0</productnumber>
-    <edition>2.0</edition>
-    <pubsnumber>2.0</pubsnumber>
-    <abstract>
-        <para>
+  --><bookinfo id="booki-Reference_Guide">
+   <title>Errai</title>
+   <subtitle>Errai Reference Guide</subtitle>
+   <productname class="trade">Errai</productname>
+   <productnumber>2.0</productnumber>
+   <edition>2.0</edition>
+   <pubsnumber>2.0</pubsnumber>
+   <abstract>
+      <para>
             This is the Errai Reference Guide.
         </para>
-    </abstract>
-
-    <xi:include href="Common_Content/Legal_Notice.xml" xmlns:xi="http://www.w3.org/2001/XInclude"/>
+   </abstract>
+   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="Common_Content/Legal_Notice.xml"/>
 </bookinfo>

@@ -40,11 +40,10 @@ import org.jboss.errai.marshalling.server.json.impl.ErraiJSONValue;
  * @since 1.1
  */
 public class JSONStreamDecoder {
-  private CharBuffer buffer;
-  private BufferedReader reader;
+  private final CharBuffer buffer;
+  private final BufferedReader reader;
 
   private char carry;
-
   private int read;
   private boolean initial = true;
 
@@ -59,7 +58,7 @@ public class JSONStreamDecoder {
    *          encoded as UTF-8, and it must be positioned to read from the start
    *          of the JSON message to be parsed.
    */
-  public JSONStreamDecoder(InputStream inStream) {
+  public JSONStreamDecoder(final InputStream inStream) {
     this.buffer = CharBuffer.allocate(25);
     try {
       this.reader = new BufferedReader(

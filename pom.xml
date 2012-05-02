@@ -20,7 +20,7 @@
     <name>Errai</name>
     <groupId>org.jboss.errai</groupId>
     <artifactId>errai-parent</artifactId>
-    <version>2.0-SNAPSHOT</version>
+    <version>2.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <url>http://jboss.org/errai/errai</url>
@@ -93,6 +93,7 @@
         <module>errai-jaxrs</module>
         <module>errai-uibinder</module>
         <module>errai-data-binding</module>
+        <module>errai-jpa</module>
     </modules>
 
     <dependencyManagement>
@@ -143,6 +144,12 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
+                <version>10.0.1</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava-gwt</artifactId>
                 <version>10.0.1</version>
             </dependency>
 

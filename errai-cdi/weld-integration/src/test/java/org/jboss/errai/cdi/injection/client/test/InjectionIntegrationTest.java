@@ -19,7 +19,7 @@ public class InjectionIntegrationTest extends AbstractErraiIOCTest {
   }
 
   public void testInjections() {
-    InjectionTestModule module = IOC.getBeanManager()
+    final InjectionTestModule module = IOC.getBeanManager()
             .lookupBean(InjectionTestModule.class).getInstance();
 
     assertNotNull("Field injection of BeanA failed", module.getBeanA());

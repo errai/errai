@@ -17,10 +17,8 @@
 package org.jboss.errai.common.client.api.extension;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.Timer;
 import org.jboss.errai.common.client.api.tasks.AsyncTask;
 import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
-import org.jboss.errai.common.client.util.LogUtil;
 import org.jboss.errai.common.client.util.TimeUnit;
 
 import java.util.ArrayList;
@@ -50,7 +48,7 @@ public final class InitVotes {
   private static boolean armed = false;
   private static final Set<String> waitForSet = new HashSet<String>();
 
-  private static int timeoutMillis = !GWT.isProdMode() ? 60000 : 7500;
+  private static int timeoutMillis = !GWT.isProdMode() ? 90000 : 45000;
 
   private static volatile AsyncTask initTimeout;
   private static volatile AsyncTask initDelay;

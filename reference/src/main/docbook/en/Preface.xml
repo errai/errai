@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='utf-8' ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ Copyright 2011 JBoss, by Red Hat, Inc
   ~
@@ -13,15 +13,12 @@
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
-  -->
-
-<!DOCTYPE preface PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
-<preface id="preface-Reference_Guide">
-  <title>Preface</title>
-  <xi:include href="Common_Content/Conventions.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
-  <xi:include href="Feedback.xml" xmlns:xi="http://www.w3.org/2001/XInclude">
-    <xi:fallback xmlns:xi="http://www.w3.org/2001/XInclude">
-      <xi:include href="Common_Content/Feedback.xml" xmlns:xi="http://www.w3.org/2001/XInclude" />
-    </xi:fallback>
+  --><preface id="preface-Reference_Guide">
+   <title>Preface</title>
+   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="Common_Content/Conventions.xml"/>
+   <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="Feedback.xml">
+      <xi:fallback>
+         <xi:include href="Common_Content/Feedback.xml"/>
+      </xi:fallback>
   </xi:include>
 </preface>

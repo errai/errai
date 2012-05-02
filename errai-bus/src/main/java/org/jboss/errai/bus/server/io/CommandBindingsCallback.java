@@ -16,23 +16,33 @@
 
 package org.jboss.errai.bus.server.io;
 
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
+import static org.slf4j.LoggerFactory.getLogger;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.MessageCallback;
+import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.client.util.ErrorHelper;
+import org.jboss.errai.common.client.framework.Assert;
+import org.slf4j.Logger;
+
 public class CommandBindingsCallback implements MessageCallback {
+  private static final Logger log = getLogger(CommandBindingsCallback.class);
+  
   private final Map<String, MethodDispatcher> methodDispatchers;
   private final MessageCallback defaultCallback;
   private final boolean defaultAction;
+  private final MessageBus bus;
 
-  public CommandBindingsCallback(final Map<String, Method> commandBindings, final Object delegate) {
+  public CommandBindingsCallback(final Map<String, Method> commandBindings, final Object delegate, final MessageBus bus) {
     this.methodDispatchers = new HashMap<String, MethodDispatcher>(commandBindings.size() * 2);
     this.defaultAction = delegate instanceof MessageCallback;
     this.defaultCallback = defaultAction ? (MessageCallback) delegate : null;
+    this.bus = Assert.notNull(bus);
 
     for (Map.Entry<String, Method> entry : commandBindings.entrySet()) {
       Class[] parmTypes = entry.getValue().getParameterTypes();
@@ -57,7 +67,7 @@ public class CommandBindingsCallback implements MessageCallback {
         defaultCallback.callback(message);
       }
       else {
-        throw new RuntimeException("no such command: " + message.getCommandType());
+        ErrorHelper.sendClientError(bus, message, "no such command: " + message.getCommandType(), "");
       }
     }
     else {
@@ -65,7 +75,8 @@ public class CommandBindingsCallback implements MessageCallback {
         method.dispatch(message);
       }
       catch (Exception e) {
-        throw new MessageDeliveryFailure(e);
+        // see ERRAI-290: we may want to hand this exception over to a user-provided server-side callback.
+        log.error("Command method threw an exception. This exception is not propagated to the client.", e);
       }
     }
   }
@@ -99,7 +110,7 @@ public class CommandBindingsCallback implements MessageCallback {
     }
 
     @Override
-    void dispatch(Message m) throws Exception {
+    void dispatch(Message m) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
       method.invoke(delegate, m);
     }
   }

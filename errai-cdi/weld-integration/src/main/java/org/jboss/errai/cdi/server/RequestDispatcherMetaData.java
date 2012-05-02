@@ -17,6 +17,7 @@ package org.jboss.errai.cdi.server;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -34,6 +35,9 @@ import javax.enterprise.util.AnnotationLiteral;
 
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.unmodifiableSet;
+
 /**
  * Basically a bean wrapper that provides CDI meta data.
  * It's used to inject the {@link org.jboss.errai.bus.client.framework.MessageBus} into the CDI context.
@@ -45,7 +49,16 @@ public class RequestDispatcherMetaData implements Bean {
   final InjectionTarget it;
   final RequestDispatcher delegate;
 
-  public RequestDispatcherMetaData(BeanManager bm, RequestDispatcher delegate) {
+  static final Set<Annotation> qualifiers = unmodifiableSet(new HashSet<Annotation>(
+          asList(new AnnotationLiteral<Default>() {
+                 },
+                 new AnnotationLiteral<Any>() {
+                 }
+          )));
+
+  static final Set<Type> types = unmodifiableSet(new HashSet<Type>(asList(RequestDispatcher.class, Object.class)));
+
+  public RequestDispatcherMetaData(final BeanManager bm, final RequestDispatcher delegate) {
 
     //use this to read annotations of the class
     AnnotatedType at = bm.createAnnotatedType(delegate.getClass());
@@ -70,9 +83,6 @@ public class RequestDispatcherMetaData implements Bean {
   }
 
   public Set<Annotation> getQualifiers() {
-    Set<Annotation> qualifiers = new HashSet<Annotation>();
-    qualifiers.add(new AnnotationLiteral<Default>() {});
-    qualifiers.add(new AnnotationLiteral<Any>() {});
     return qualifiers;
   }
 
@@ -85,9 +95,6 @@ public class RequestDispatcherMetaData implements Bean {
   }
 
   public Set<Type> getTypes() {
-    Set<Type> types = new HashSet<Type>();
-    types.add(RequestDispatcher.class);
-    types.add(Object.class);
     return types;
   }
 
@@ -100,10 +107,9 @@ public class RequestDispatcherMetaData implements Bean {
   }
 
   public Object create(CreationalContext ctx) {
-    Object instance = delegate;
-    it.inject(instance, ctx);
-    it.postConstruct(instance);
-    return instance;
+    it.inject(delegate, ctx);
+    it.postConstruct(delegate);
+    return delegate;
   }
 
   public void destroy(Object instance, CreationalContext ctx) {

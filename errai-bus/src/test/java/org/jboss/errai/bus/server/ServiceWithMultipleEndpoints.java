@@ -26,5 +26,9 @@ public class ServiceWithMultipleEndpoints {
             .with("Msg", "Bar!")
             .done().reply();
   }
-
+  
+  @Command("baz")
+  public void baz(Message message) {
+    throw new RuntimeException("This should not be sent to the client!");
+  }
 }

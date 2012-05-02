@@ -32,22 +32,9 @@ public class ScopeUtil {
     return message.getResource(QueueSession.class, "Session");
   }
 
-  public static HttpSessionContext getSessionContext(Message message) {
-    HttpSessionContext context = getSessionFrom(message)
-            .getAttribute(HttpSessionContext.class, HttpSessionContext.class.getName());
-
-    if (context == null) {
-      getSessionFrom(message)
-              .setAttribute(HttpSessionContext.class.getName(),
-                      context = Container.instance().deploymentManager().instance()
-                              .select(HttpSessionContext.class).get());
-    }
-    return context;
-  }
-
-  public static HttpRequestContext getRequestContext(Message message) {
-    HttpRequestContext context = getSessionFrom(message)
-            .getAttribute(HttpRequestContext.class, HttpRequestContext.class.getName());
+  public static HttpRequestContext getRequestContext(final Message message) {
+    HttpRequestContext context
+            = getSessionFrom(message).getAttribute(HttpRequestContext.class, HttpRequestContext.class.getName());
 
     if (context == null) {
       getSessionFrom(message)
@@ -59,22 +46,8 @@ public class ScopeUtil {
     return context;
   }
 
-  public static void associateSessionContext(Message message) {
-    HttpSessionContext ctx = getSessionContext(message);
-    ctx.associate(getHttpServletRequest(message));
-  }
-
-  public static void associateRequestContext(Message message) {
-    HttpRequestContext ctx = getRequestContext(message);
-    ctx.associate(getHttpServletRequest(message));
-  }
-
-  public static void disassociateSessionContext(Message message) {
-    getSessionContext(message).dissociate(getHttpServletRequest(message));
-  }
-
-  public static void disassociateRequestContext(Message message) {
-    getRequestContext(message).dissociate(getHttpServletRequest(message));
+  public static void associateRequestContext(final Message message) {
+    getRequestContext(message).associate(getHttpServletRequest(message));
   }
 
   private static HttpServletRequest getHttpServletRequest(Message message) {

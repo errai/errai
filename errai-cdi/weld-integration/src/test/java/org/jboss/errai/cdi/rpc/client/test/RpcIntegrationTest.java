@@ -83,7 +83,7 @@ public class RpcIntegrationTest extends AbstractErraiCDITest {
 
     delayTestFinish(60000);
   }
-  
+
   public void testInterceptedRpc() {
     CDI.addPostInitTask(new Runnable() {
       @Override
@@ -100,7 +100,7 @@ public class RpcIntegrationTest extends AbstractErraiCDITest {
 
     delayTestFinish(60000);
   }
-  
+
   public void testRpcAccesssingHttpSession() {
     CDI.addPostInitTask(new Runnable() {
       @Override
@@ -109,6 +109,7 @@ public class RpcIntegrationTest extends AbstractErraiCDITest {
           @Override
           public void callback(Void response) {
             RpcTestBean.getInstance().callGetSessionAttribute(new RemoteCallback<String>() {
+              @Override
               public void callback(String response) {
                 assertEquals("success", response);
                 finishTest();
@@ -118,7 +119,32 @@ public class RpcIntegrationTest extends AbstractErraiCDITest {
         }, "test", "success");
       }
     });
-    
+
     delayTestFinish(60000);
   }
+
+  /**
+   * Regression test for ERRAI-282 under the CDI implementation of ErraiRPC.
+   * Note that there is a similar test in ErraiBus
+   * (BusCommunicationTests.testRpcToInheritedMethod), which has a strikingly
+   * similar, yet independent, implementation of ErraiRPC.
+   */
+  public void testRpcToInheritedMethod() {
+    CDI.addPostInitTask(new Runnable() {
+      @Override
+      public void run() {
+        RpcTestBean.getInstance().callSubServiceInheritedMethod(new RemoteCallback<Integer>() {
+          @Override
+          public void callback(Integer response) {
+            assertNotNull(response);
+            assertEquals(1, (int) response);
+            finishTest();
+          }
+        });
+      }
+    });
+
+    delayTestFinish(60000);
+  }
+
 }

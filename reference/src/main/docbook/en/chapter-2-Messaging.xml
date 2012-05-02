@@ -1,19 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="sid-5931263">
-    
-    <title>Messaging</title>
-    <para>This section covers the core messaging concepts of the ErraiBus messaging framework.</para>
-    <para>ErraiBus forms the backbone of the Errai framework's approach to application design. Most importantly, it provides a straight-forward approach to a complex problem space. Providing common APIs across the client and server, developers will have no trouble working with complex messaging scenarios from building instant messaging clients, stock tickers, to monitoring instruments. There's no more messing with RPC APIs, or unweildy AJAX or COMET frameworks. We've built it all in to one, consice messaging framework. It's single-paradigm, and it's fun to work with.</para>
-    <section id="sid-5931265">
-      
+   <title>Messaging</title>
+   <para>This section covers the core messaging concepts of the ErraiBus messaging framework.</para>
+   <para>ErraiBus forms the backbone of the Errai framework's approach to application design. Most importantly, it provides a straight-forward approach to a complex problem space. Providing common APIs across the client and server, developers will have no trouble working with complex messaging scenarios from building instant messaging clients, stock tickers, to monitoring instruments. There's no more messing with RPC APIs, or unweildy AJAX or COMET frameworks. We've built it all in to one, consice messaging framework. It's single-paradigm, and it's fun to work with.</para>
+   <section id="sid-5931265">
       <title>Messaging Overview</title>
       <para>It's important to understand the concept of how messaging works in ErraiBus. Service endpoints are given string-based names that are referenced by message senders. There is no difference between sending a message to a client-based service, or sending a message to a server-based service. In fact, a service of the same name may co-exist on both the client and the server and both will receive all messages bound for that service name, whether they are sent from the client or from the server.</para>
       <para>Services are lightweight in ErraiBus, and can be declared liberally and extensively within your application to provide a message-based infrastructure for your web application. It can be tempting to think of ErraiBus simply as a client-server communication platform, but there is a plethora of possibilities for using ErraiBus purely with the GWT client context, such as a way to advertise and expose components dynamically, to get around the lack of reflection in GWT.</para>
       <para>In fact, ErraiBus was originally designed to run completely within the client but quickly evolved into having the capabilities it now has today. So keep that in mind when you run up against problems in the client space that could benefit from runtime federation.</para>
-    </section>
-    <section id="sid-5931280">
-      
+   </section>
+   <section id="sid-5931280">
       <title>Messaging API Basics</title>
       <para>
         The MessageBuilder is the heart of the messaging API in ErraiBus. It provides a fluent / builder API, that is used for constructing messages. All three major message patterns can be constructed from the
@@ -27,17 +23,16 @@
       </para>
       <para>But before we dive into the details, let look at some use cases first.</para>
       <section id="sid-5931280_MessagingAPIBasics-SendingMessageswiththeClientBus">
-        
-        <title>Sending Messages with the Client Bus</title>
-        <para>
+         <title>Sending Messages with the Client Bus</title>
+         <para>
           In order to send a message from a client you need to create a
           <code>Message</code>
           and send it through an instance of
           <code>MessageBus</code>
           . In this simple example we send it to the subject 'HelloWorldService'.
         </para>
-        <informalexample>
-          <programlisting language="java">public class HelloWorld implements EntryPoint {
+         <informalexample>
+            <programlisting language="java">public class HelloWorld implements EntryPoint {
 
   // Get an instance of the RequestDispatcher
   private RequestDispatcher dispatcher = ErraiBus.getDispatcher();
@@ -59,39 +54,39 @@
       }
    }
 }</programlisting>
-        </informalexample>
-        <para>In the above example we build and send a message every time the button is clicked. Here's an explanation of what's going on as annotated above:</para>
-        <orderedlist>
-          <listitem>
-            <para>
+         </informalexample>
+         <para>In the above example we build and send a message every time the button is clicked. Here's an explanation of what's going on as annotated above:</para>
+         <orderedlist inheritnum="ignore" continuation="restarts">
+            <listitem>
+               <para>
               We specify the subject we wish to send a message to. In this case, "
               <code>HelloWorldService</code>
               ".
             </para>
-          </listitem>
-          <listitem>
-            <para>
+            </listitem>
+            <listitem>
+               <para>
               We indicate that we wish to only signal the service, meaning, that we're not sending a qualifying command to the service. For information on this, read the section on
               <emphasis role="italics">Protocols</emphasis>
               .
             </para>
-          </listitem>
-          <listitem>
-            <para>
+            </listitem>
+            <listitem>
+               <para>
               We indicate that we do not want to provide an
               <code>ErrorCallback</code>
               to deal with errors for this message.
             </para>
-          </listitem>
-          <listitem>
-            <para>
+            </listitem>
+            <listitem>
+               <para>
               We transmit the message by providing an instance to the
               <code>RequestDispatcher</code>
-            </para>
-          </listitem>
-        </orderedlist>
-        <note>
-          <para>
+               </para>
+            </listitem>
+         </orderedlist>
+         <note>
+            <para>
             An astute observer will note that access to the
             <code>RequestDispatcher</code>
             differs within client code and server code. Because the client code does not run within a container, access to the
@@ -104,36 +99,34 @@
             <code>ErraiBus.getDispatcher()</code>
             methods. The server-side code, conversely, runs inside a dependency container for managing components. See the section on Errai IOC and Errai CDI for using ErraiBus from a client-side container.
           </para>
-        </note>
+         </note>
       </section>
       <section id="sid-5931280_MessagingAPIBasics-RecievingMessagesontheServerBus%2FServerServices">
-        
-        <title>Recieving Messages on the Server Bus / Server Services</title>
-        <para>Every message has a sender and at least one receiver. A receiver is as it sounds--it receives the message and does something with it. Implementing a receiver (also referred to as a service) is as simple as implementing our standard MessageCallback interface, which is used pervasively across, both client and server code. Let's begin with server side component that receives messages:</para>
-        <informalexample>
-          <programlisting language="java">@Service
+         <title>Recieving Messages on the Server Bus / Server Services</title>
+         <para>Every message has a sender and at least one receiver. A receiver is as it sounds--it receives the message and does something with it. Implementing a receiver (also referred to as a service) is as simple as implementing our standard MessageCallback interface, which is used pervasively across, both client and server code. Let's begin with server side component that receives messages:</para>
+         <informalexample>
+            <programlisting language="java">@Service
   public class HelloWorldService implements MessageCallback {
     public void callback(Message message) {
       System.out.println("Hello, World!");
     }
   }</programlisting>
-        </informalexample>
-        <para>
+         </informalexample>
+         <para>
           He we declare an extremely simple service. The
           <code>@Service</code>
           annotation provides a convenient, meta-data based way of having the bus auto-discover and deploy the service.
         </para>
       </section>
       <section id="sid-5931280_MessagingAPIBasics-SendingMessageswiththeServerBus">
-        
-        <title>Sending Messages with the Server Bus</title>
-        <para>
+         <title>Sending Messages with the Server Bus</title>
+         <para>
           In the following example we extend our server side component to reply with a message when the callback method is invoked. It will create a message and address it to the subject '
           <code>HelloWorldClient</code>
           ':
         </para>
-        <informalexample>
-          <programlisting language="java">@Service
+         <informalexample>
+            <programlisting language="java">@Service
 public class HelloWorldService implements MessageCallback {
 
   private RequestDispatcher dispatcher;
@@ -154,44 +147,43 @@ public class HelloWorldService implements MessageCallback {
     });
   }
 }</programlisting>
-        </informalexample>
-        <para>The above example shows a service which sends a message in response to receiving a message. Here's what's going on:</para>
-        <orderedlist>
-          <listitem>
-            <para>
+         </informalexample>
+         <para>The above example shows a service which sends a message in response to receiving a message. Here's what's going on:</para>
+         <orderedlist inheritnum="ignore" continuation="restarts">
+            <listitem>
+               <para>
               We specify the subject we wish to send a message to. In this case, "
               <code>HelloWorldClient</code>
               ". We are sending this message to all clients which are listening in on this subject. For information on how to communicate with a single client, see Section 2.6.
             </para>
-          </listitem>
-          <listitem>
-            <para>We indicate that we wish to only signal the service, meaning that we're not sending a qualifying command to the service. For information on this, read the section on Protocols.</para>
-          </listitem>
-          <listitem>
-            <para>We add a message part called "text" which contains the value "Hi there".</para>
-          </listitem>
-          <listitem>
-            <para>
+            </listitem>
+            <listitem>
+               <para>We indicate that we wish to only signal the service, meaning that we're not sending a qualifying command to the service. For information on this, read the section on Protocols.</para>
+            </listitem>
+            <listitem>
+               <para>We add a message part called "text" which contains the value "Hi there".</para>
+            </listitem>
+            <listitem>
+               <para>
               We indicate that we do not want to provide an
               <code>ErrorCallback</code>
               to deal with errors for this message.
             </para>
-          </listitem>
-          <listitem>
-            <para>
+            </listitem>
+            <listitem>
+               <para>
               We transmit the message by providing an instance of the
               <code>RequestDispatcher</code>
               .
             </para>
-          </listitem>
-        </orderedlist>
+            </listitem>
+         </orderedlist>
       </section>
       <section id="sid-5931280_MessagingAPIBasics-ReceivingMessagesontheClientBus%2FClientServices">
-        
-        <title>Receiving Messages on the Client Bus/ Client Services</title>
-        <para>Messages can be received asynchronously and arbitriraily by declaring callback services within the client bus. As ErraiBus maintains an open COMET channel at all times, these messages are delivered in real time to the client as they are sent. This provides built-in push messaging for all client services.</para>
-        <informalexample>
-          <programlisting language="java">public class HelloWorld implements EntryPoint {
+         <title>Receiving Messages on the Client Bus/ Client Services</title>
+         <para>Messages can be received asynchronously and arbitriraily by declaring callback services within the client bus. As ErraiBus maintains an open COMET channel at all times, these messages are delivered in real time to the client as they are sent. This provides built-in push messaging for all client services.</para>
+         <informalexample>
+            <programlisting language="java">public class HelloWorld implements EntryPoint {
 
   private MessageBus bus = ErraiBus.get();
 
@@ -215,16 +207,20 @@ public class HelloWorldService implements MessageCallback {
      [...]
   }
 }</programlisting>
-        </informalexample>
-        <para>
+         </informalexample>
+         <para>
           In the above example, we declare a new client service called
           <code>"BroadcastReceiver"</code>
           which can now accept both local messages and remote messages from the server bus. The service will be available in the client to receive messages as long the client bus is and the service is not explicitly de-registered.
         </para>
-        <para>ConversationsConversations are message exchanges which are between a single client and a service. They are a fundmentally important concept in ErraiBus, since by default, a message will be broadcast to all client services listening on a particular channel.</para>
-        <para>When you create a reply with an incoming message, you ensure that the message you are sending back is received by the same client which sent the incoming message. A simple example:</para>
-        <informalexample>
-          <programlisting language="java">@Service
+      </section>
+   </section>
+   <section id="sid-24674472">
+      <title>Conversations</title>
+      <para>Conversations are message exchanges which are between a single client and a service. They are a fundmentally important concept in ErraiBus, since by default, a message will be broadcast to all client services listening on a particular channel.</para>
+      <para>When you create a reply with an incoming message, you ensure that the message you are sending back is received by the same client which sent the incoming message. A simple example:</para>
+      <informalexample>
+         <programlisting language="java">@Service
 public class HelloWorldService implements MessageCallback {
   public void callback(CommandMessage message) {
     // Send a message to the 'HelloWorldClient' on the client that sent us the
@@ -237,18 +233,16 @@ public class HelloWorldService implements MessageCallback {
     });
   }
 }</programlisting>
-        </informalexample>
-        <para>
-          Note that the only difference between the example in the  previous section (2.4) and this is the use of the
-          <code>createConversation()</code>
-          method with
-          <code>MessageBuilder</code>
-          .
-        </para>
-      </section>
-    </section>
-    <section id="sid-5931306">
-      
+      </informalexample>
+      <para>
+        Note that the only difference between the example in the  previous section and this is the use of the
+        <code>createConversation()</code>
+        method with
+        <code>MessageBuilder</code>
+        .
+      </para>
+   </section>
+   <section id="sid-5931306">
       <title>Handling Errors</title>
       <para>
         Asynchronous messaging necessitates the need for asynchronous error handling. Luckily, support for handling errors is built directly into the
@@ -265,7 +259,7 @@ public class HelloWorldService implements MessageCallback {
         . It will lead to faster and quicker identification of problems with your applications if you have error handlers, and generally help you build more robust code.
       </para>
       <informalexample>
-        <programlisting language="java">MessageBuilder.createMessage()
+         <programlisting language="java">MessageBuilder.createMessage()
     .toSubject("HelloWorldService")
     .signalling()
     .with("msg", "Hi there!")
@@ -279,7 +273,7 @@ public class HelloWorldService implements MessageCallback {
       </informalexample>
       <para>The addition of error handling at first may put off developers as it makes code more verbose and less-readable. This is nothing that some good practice can't fix. In fact, you may find cases where the same error handler can appropriately be shared between multiple different calls.</para>
       <informalexample>
-        <programlisting language="java">ErrorCallback error = new ErrorCallback() {
+         <programlisting language="java">ErrorCallback error = new ErrorCallback() {
   public boolean error(Message message, Throwable throwable) {
     throwable.printStackTrace();
     return true;
@@ -302,7 +296,7 @@ MessageBuilder.createMessage()
       </para>
       <para>Errai further provides a subject to subscribe to for handling global errors on the client (such as a disconnected server bus or an invalid response code) that occur outside a regular application message exchange. Subscribing to this subject is useful to detect errors early (e.g. due to failing heartbeat requests). A use case that comes to mind here is activating your application's offline mode.</para>
       <informalexample>
-        <programlisting language="java">bus.subscribe(DefaultErrorCallback.CLIENT_ERROR_SUBJECT, new MessageCallback() {
+         <programlisting language="java">bus.subscribe(DefaultErrorCallback.CLIENT_ERROR_SUBJECT, new MessageCallback() {
   @Override
   public void callback(Message message) {
     try {
@@ -318,9 +312,8 @@ MessageBuilder.createMessage()
   }
 });</programlisting>
       </informalexample>
-    </section>
-    <section id="sid-5931284">
-      
+   </section>
+   <section id="sid-5931284">
       <title>Single-Response Conversations &amp; Psuedo-Synchronous Messaging</title>
       <para>
         It is possible to contruct a message and a default response handler as part of the
@@ -337,7 +330,7 @@ MessageBuilder.createMessage()
         API after specifying the error handling of the message.
       </para>
       <informalexample>
-        <programlisting language="java">MessageBuilder.createMessage()
+         <programlisting language="java">MessageBuilder.createMessage()
   .toSubject("ConversationalService").signalling()
   .with("SomeField", someValue)
   .noErrorHandling()
@@ -348,13 +341,12 @@ MessageBuilder.createMessage()
    })</programlisting>
       </informalexample>
       <para>See the next section on how to build conversational services that can respond to such messages.</para>
-    </section>
-    <section id="sid-5931291">
-      
+   </section>
+   <section id="sid-5931291">
       <title>Broadcasting</title>
       <para>Broadcasting messages to all clients listening on a specific subject is quite simple and involves nothing more than forgoing use of the reply API. For instance:</para>
       <informalexample>
-        <programlisting language="java">MessageBuilder.createMessage().
+         <programlisting language="java">MessageBuilder.createMessage().
     .toSubject("MessageListener")
     .with("Text", "Hello, from your overlords in the cloud")
     .noErrorHandling().sendGlobalWith(dispatcher);</programlisting>
@@ -364,24 +356,21 @@ MessageBuilder.createMessage()
         <code>"MessageListener"</code>
         will receive the message. It's as simple as that.
       </para>
-    </section>
-    <section id="sid-5931293">
-      
+   </section>
+   <section id="sid-5931293">
       <title>Client-to-Client Communication</title>
       <para>Communication from one client to another client is not directly possible within the bus federation, by design. This isn't to say that it's not possible. But one client cannot see a service within the federation of another client. We institute this limitation as a matter of basic security. But many software engineers will likely find the prospects of such communication appealing, so this section will provide some basic pointers on how to go about accomplishing it.</para>
       <section id="sid-5931293_Client-to-ClientCommunication-RelayServices">
-        
-        <title>Relay Services</title>
-        <para>The essential architectural thing you'll need to do is create a relay service that runs on the server. Since a service advertised on the server is visible to all clients and all clients are visible to the server, you might already see where we're going with this.</para>
-        <para>By creating a service on the server which accepts messages from clients, you can create a simple protocol on-top of the bus to enable quasi peer-to-peer communication. (We say quasi, because it still needs to be routed through the server)</para>
-        <para>
+         <title>Relay Services</title>
+         <para>The essential architectural thing you'll need to do is create a relay service that runs on the server. Since a service advertised on the server is visible to all clients and all clients are visible to the server, you might already see where we're going with this.</para>
+         <para>By creating a service on the server which accepts messages from clients, you can create a simple protocol on-top of the bus to enable quasi peer-to-peer communication. (We say quasi, because it still needs to be routed through the server)</para>
+         <para>
           While you can probably imagine simply creating a broadcast-like service which accepts a message from one client and broadcasts it to the rest of the world, it may be less clear how to go about routing from one particular client to another particular client, so we'll focus on that problem. This is covered in
           <xref linkend="sid-5931301"/>
         </para>
       </section>
-    </section>
-    <section id="sid-5931309">
-      
+   </section>
+   <section id="sid-5931309">
       <title>Asynchronous Message Tasks</title>
       <para>
         In some applications, it may be necessary or desirable to delay transmission of, or continually stream data to a remote client or group of clients (or from a client to the server). In cases like this, you can utilize the
@@ -404,7 +393,7 @@ MessageBuilder.createMessage()
         ).
       </para>
       <informalexample>
-        <programlisting language="java">MessageBuilder.createConversation(msg)
+         <programlisting language="java">MessageBuilder.createConversation(msg)
     .toSubject("FunSubject")
     .signalling()
     .noErrorHandling()
@@ -412,15 +401,14 @@ MessageBuilder.createMessage()
       </informalexample>
       <para>or</para>
       <informalexample>
-        <programlisting language="java">MessageBuilder.createMessage()
+         <programlisting language="java">MessageBuilder.createMessage()
      .toSubject("FunSubject")
      .signalling()
      .noErrorHandling()
      .sendDelayed(requestDispatcher, TimeUnit.SECONDS, 5); // sends the message after 5 seconds.</programlisting>
       </informalexample>
-    </section>
-    <section id="sid-5931311">
-      
+   </section>
+   <section id="sid-5931311">
       <title>Repeating Tasks</title>
       <para>
         A repeating task is sent using one of the MessageBuilder's
@@ -428,7 +416,7 @@ MessageBuilder.createMessage()
         methods. The task will repeat indefinitely until cancelled (see next section).
       </para>
       <informalexample>
-        <programlisting language="java">MessageBuilder.createMessage()
+         <programlisting language="java">MessageBuilder.createMessage()
     .toSubject("FunSubject")
     .signalling()
     .withProvided("time", new ResourceProvider&lt;String&gt;() {
@@ -456,7 +444,7 @@ MessageBuilder.createMessage()
         instance which is returned when creating a task. Reference to the AsyncTask object can be retained and cancelled by any other thread.
       </para>
       <informalexample>
-        <programlisting language="java">AsyncTask task = MessageBuilder.createConversation(message)
+         <programlisting language="java">AsyncTask task = MessageBuilder.createConversation(message)
   .toSubject("TimeChannel").signalling()
   .withProvided(TimeServerParts.TimeString, new ResourceProvider&lt;String&gt;() {
      public String get() {
@@ -469,9 +457,8 @@ MessageBuilder.createMessage()
   // cancel the task and interrupt it's thread if necessary.
   task.cancel(true);</programlisting>
       </informalexample>
-    </section>
-    <section id="sid-5931289">
-      
+   </section>
+   <section id="sid-5931289">
       <title>Sender Inferred Subjects</title>
       <para>
         It is possible for the sender to infer, to whatever conversational service it is calling, what subject it would like the reply to go to. This is accomplished by utilizing the standard
@@ -480,7 +467,7 @@ MessageBuilder.createMessage()
       </para>
       <para>Consider the following client side code:</para>
       <informalexample>
-        <programlisting language="java">MessageBuilder.createMessage()
+         <programlisting language="java">MessageBuilder.createMessage()
     .toSubject("ObjectService").signalling()
     .with(MessageParts.ReplyTo, "ClientEndpoint")
     .noErrorHandling().sendNowWith(dispatcher);</programlisting>
@@ -491,7 +478,7 @@ MessageBuilder.createMessage()
         ):
       </para>
       <informalexample>
-        <programlisting language="java">MessageBuilder.createConversation(message)
+         <programlisting language="java">MessageBuilder.createConversation(message)
     .subjectProvided().signalling()
     .with("Records", records)
     .noErrorHandling().reply();</programlisting>
@@ -503,9 +490,8 @@ MessageBuilder.createMessage()
         <code>ReplyTo</code>
         subject that was provided by the sender, and send the message back to the subject desired by the client on the client that sent the message.
       </para>
-    </section>
-    <section id="sid-5931301">
-      
+   </section>
+   <section id="sid-5931301">
       <title>Message Routing Information</title>
       <para>Every message that is sent between a local and remote (or server and client) buses contain session routing information. This information is used by the bus to determine what outbound queues to use to deliver the message to, so they will reach their intended recipients. It is possible to manually specify this information to indicate to the bus, where you want a specific message to go.</para>
       <para>
@@ -518,7 +504,7 @@ MessageBuilder.createMessage()
         resource:
       </para>
       <informalexample>
-        <programlisting language="java">QueueSession sess = message.getResource(QueueSession.class, Resources.Session.name());
+         <programlisting language="java">QueueSession sess = message.getResource(QueueSession.class, Resources.Session.name());
    String sessionId = sess.getSessionId();</programlisting>
       </informalexample>
       <para>
@@ -529,7 +515,7 @@ MessageBuilder.createMessage()
         from a message so that you may use it for routing. For example:
       </para>
       <informalexample>
-        <programlisting language="java">...
+         <programlisting language="java">...
   public void callback(Message message) {
    QueueSession sess = message.getResource(QueueSession.class, Resources.Session.name());
    String sessionId = sess.getSessionId();
@@ -548,7 +534,7 @@ MessageBuilder.createMessage()
         as a  MessagePart to indicate to the bus where you want the message to go.
       </para>
       <informalexample>
-        <programlisting language="java">MessageBuilder.createMessage()
+         <programlisting language="java">MessageBuilder.createMessage()
     .toSubject("ClientMessageListener")
     .signalling()
     .with(MessageParts.SessionID, sessionId)
@@ -570,27 +556,23 @@ MessageBuilder.createMessage()
         <code>SessionID</code>
         information is not ever transmitted from bus-to-bus, and therefore is only directly relevant to the proximate bus.
       </para>
-    </section>
-    <section id="sid-5931315">
-      
+   </section>
+   <section id="sid-5931315">
       <title>Queue Sessions</title>
       <para>The ErraiBus maintains it's own seperate session management on-top of the regular HTTP session management. While the queue sessions are tied to, and dependant on HTTP sessions for the most part (meaning they die when HTTP sessions die), they provide extra layers of session tracking to make dealing with complex applications built on Errai easier.</para>
       <section id="sid-5931315_QueueSessions-Lifecycle">
-        
-        <title>Lifecycle</title>
-        <para>The lifescyle of a session is bound by the underlying HTTP session. It is also bound by activity thresholds. Clients are required to send heartbeat messages every once in a while to maintain their sessions with the server. If a heartbeat message is not received after a certain period of time, the session is terminated and any resources are deallocated.</para>
+         <title>Lifecycle</title>
+         <para>The lifescyle of a session is bound by the underlying HTTP session. It is also bound by activity thresholds. Clients are required to send heartbeat messages every once in a while to maintain their sessions with the server. If a heartbeat message is not received after a certain period of time, the session is terminated and any resources are deallocated.</para>
       </section>
       <section id="sid-5931315_QueueSessions-Scopes">
-        
-        <title>Scopes</title>
-        <para>One of the things Errai offers is the concept of session and local scopes.</para>
-        <section id="sid-5931315_QueueSessions-SessionScope">
-          
-          <title>Session Scope</title>
-          <para>A session scope is scoped across all instances of the same session. When a session scope is used, any parameters stored will be accessible and visible by all browser instances and tabs.</para>
-          <para>The SessionContext helper class is used for accessing the session scope.</para>
-          <informalexample>
-            <programlisting language="java">public class TestService implements MessageCallback {
+         <title>Scopes</title>
+         <para>One of the things Errai offers is the concept of session and local scopes.</para>
+         <section id="sid-5931315_QueueSessions-SessionScope">
+            <title>Session Scope</title>
+            <para>A session scope is scoped across all instances of the same session. When a session scope is used, any parameters stored will be accessible and visible by all browser instances and tabs.</para>
+            <para>The SessionContext helper class is used for accessing the session scope.</para>
+            <informalexample>
+               <programlisting language="java">public class TestService implements MessageCallback {
   public void callback(final Message message) {
     // obtain a reference to the session context by referencing the incoming message.
     SessionContext injectionContext = SessionContext.get(message);
@@ -599,19 +581,18 @@ MessageBuilder.createMessage()
     injectionContext.setAttribute("MyAttribute", "Foo");
   }
 }</programlisting>
-          </informalexample>
-        </section>
-        <section id="sid-5931315_QueueSessions-LocalScope">
-          
-          <title>Local Scope</title>
-          <para>A local scope is scoped to a single browser instance. But not to a single session.</para>
-          <para>
+            </informalexample>
+         </section>
+         <section id="sid-5931315_QueueSessions-LocalScope">
+            <title>Local Scope</title>
+            <para>A local scope is scoped to a single browser instance. But not to a single session.</para>
+            <para>
             In a browser a local scope would be confined to a tab or a window within a browser. You can store parameters inside a local scope just like with a session by using the
             <code>LocalContext</code>
             helper class.
           </para>
-          <informalexample>
-            <programlisting language="java">public class TestService implements MessageCallback {
+            <informalexample>
+               <programlisting language="java">public class TestService implements MessageCallback {
   public void callback(final Message message) {
     // obtain a reference to the local context by referencing the incoming message.
     LocalContext injectionContext = LocalContext.get(message);
@@ -620,34 +601,31 @@ MessageBuilder.createMessage()
     injectionContext.setAttribute("MyAttribute", "Foo");
   }
 }</programlisting>
-          </informalexample>
-        </section>
+            </informalexample>
+         </section>
       </section>
-    </section>
-    <section id="sid-20938805">
-      
+   </section>
+   <section id="sid-20938805">
       <title>Client Logging and Error Handling</title>
-    </section>
-    <section id="sid-23036473">
-      
+   </section>
+   <section id="sid-23036473">
       <title>Wire Protocol (J.REP)</title>
       <para>ErraiBus implements a JSON-based wire protocol which is used for the federated communication between different buses. The protocol specification encompasses a standard JSON payload structure, a set of verbs, and an object marshalling protocol. The protocol is named J.REP. Which stands for JSON Rich Event Protocol.  The protocol is named J.REP. Which stands for JSON Rich Event Protocol.</para>
       <section id="sid-23036473_WireProtocol%28J.REP%29-PayloadStructure">
-        
-        <title>Payload Structure</title>
-        <para>
+         <title>Payload Structure</title>
+         <para>
           All wire messages sent across are assumed to be JSON arrays at the outermost element, contained in which, there are
           <emphasis role="italics">0..n</emphasis>
           messages. An empty array is considered a no-operation, but should be counted as activity against any idle timeout limit between federated buses.
         </para>
-        <example>
-          <title>Figure 1 - Example J.REP Payload</title>
-          <programlisting language="java">[
+         <example>
+            <title>Figure 1 - Example J.REP Payload</title>
+            <programlisting language="java">[
   {"ToSubject" : "SomeEndpoint", "Value" : "SomeValue" },
   {"ToSubject" : "SomeOtherEndpoint", "Value" : "SomeOtherValue"}
 ]</programlisting>
-        </example>
-        <para>
+         </example>
+         <para>
           In
           <emphasis role="strong">Figure 1</emphasis>
           , we see an example of a J.REP payload containing two messages. One bound for an endpoint named
@@ -658,230 +636,228 @@ MessageBuilder.createMessage()
           <code>"Value"</code>
           which contain strings. Let's take a look at the anatomy of an individual message.
         </para>
-        <example>
-          <title>Figure 2 - An J.REP Message</title>
-          <programlisting language="java">{
+         <example>
+            <title>Figure 2 - An J.REP Message</title>
+            <programlisting language="java">{
   "ToSubject" : "TopicSubscriber",
   "CommandType" : "Subscribe",
   "Value " : "happyTopic",
   "ReplyTo" : "MyTopicSubscriberReplyTo"
 }</programlisting>
-        </example>
-        <para>
+         </example>
+         <para>
           The message shown in
           <emphasis role="strong">Figure 2</emphasis>
           shows a very vanilla J.REP message. The keys of the JSON Object represent individual
           <emphasis role="italics">message parts</emphasis>
           , with the values representing their corresponding values. The standard J.REP protocol encompasses a set of standard message parts and values, which for the purposes of this specification we'll collectively refer to as the protocol verbs.
         </para>
-        <para>The following table describes all of the message parts that a J.REP capable client is expected to understand:</para>
-        <informaltable>
-          <tgroup cols="4">
-            <thead>
-              <row>
-                <entry>
-                  <para>Part</para>
-                </entry>
-                <entry>
-                  <para>Required</para>
-                </entry>
-                <entry>
-                  <para>JSON Type</para>
-                </entry>
-                <entry>
-                  <para>Description</para>
-                </entry>
-              </row>
-            </thead>
-            <tbody>
-              <row>
-                <entry>
-                  <para>
-                    <code>ToSubject</code>
-                  </para>
-                </entry>
-                <entry>
-                  <para>Yes</para>
-                </entry>
-                <entry>
-                  <para>String</para>
-                </entry>
-                <entry>
-                  <para>Specifies the subject within the bus, and its federation, which the message should be routed to.</para>
-                </entry>
-              </row>
-              <row>
-                <entry>
-                  <para>
-                    <code>CommandType</code>
-                  </para>
-                </entry>
-                <entry>
-                  <para>No</para>
-                </entry>
-                <entry>
-                  <para>String</para>
-                </entry>
-                <entry>
-                  <para>Specifies a command verb to be transmitted to the receiving subject. This is an optional part of a message contract, but is required for using management services</para>
-                </entry>
-              </row>
-              <row>
-                <entry>
-                  <para>
-                    <code>ReplyTo</code>
-                  </para>
-                </entry>
-                <entry>
-                  <para>No</para>
-                </entry>
-                <entry>
-                  <para>String</para>
-                </entry>
-                <entry>
-                  <para>Specifies to the receiver what subject it should reply to in response to this message.</para>
-                </entry>
-              </row>
-              <row>
-                <entry>
-                  <para>
-                    <code>Value</code>
-                  </para>
-                </entry>
-                <entry>
-                  <para>No</para>
-                </entry>
-                <entry>
-                  <para>Any</para>
-                </entry>
-                <entry>
-                  <para>A recommended but not required standard payload part for sending data to services</para>
-                </entry>
-              </row>
-              <row>
-                <entry>
-                  <para>
-                    <code>PriorityProcessing</code>
-                  </para>
-                </entry>
-                <entry>
-                  <para>No</para>
-                </entry>
-                <entry>
-                  <para>Number</para>
-                </entry>
-                <entry>
-                  <para>A processing order salience attribute. Messages which specify priority processing will be processed first if they are competing for resources with other messages in flight. Note: the current version of ErraiBus only supports two salience levels (0 and &gt;1). Any non-zero salience in ErraiBus will be given the same priority relative to 0 salience messages</para>
-                </entry>
-              </row>
-              <row>
-                <entry>
-                  <para>
-                    <code>ErrorMessage</code>
-                  </para>
-                </entry>
-                <entry>
-                  <para>No</para>
-                </entry>
-                <entry>
-                  <para>String</para>
-                </entry>
-                <entry>
-                  <para>An accompanying error message with any serialized exception</para>
-                </entry>
-              </row>
-              <row>
-                <entry>
-                  <para>
-                    <code>Throwable</code>
-                  </para>
-                </entry>
-                <entry>
-                  <para>No</para>
-                </entry>
-                <entry>
-                  <para>Object</para>
-                </entry>
-                <entry>
-                  <para>If applicable, an encoded object representing any remote exception that was thrown while dispatching the specified service</para>
-                </entry>
-              </row>
-            </tbody>
-          </tgroup>
-        </informaltable>
-        <section id="sid-23036473_WireProtocol%28J.REP%29-BuiltinSubjects">
-          
-          <title>Built-in Subjects</title>
-          <para>The table contains a list of reserved subject names used for facilitating things like bus management and error handling. A bus should never allow clients to subscribe to these subjects directly.</para>
-          <informaltable>
-            <tgroup cols="2">
-              <thead>
-                <row>
-                  <entry>
-                    <para>Subject</para>
-                  </entry>
-                  <entry>
-                    <para>Description</para>
-                  </entry>
-                </row>
-              </thead>
-              <tbody>
-                <row>
-                  <entry>
-                    <para>
-                      <code>ClientBus</code>
-                    </para>
-                  </entry>
-                  <entry>
-                    <para>The self-hosted message bus endpoint on the client</para>
-                  </entry>
-                </row>
-                <row>
-                  <entry>
-                    <para>
-                      <code>ServerBus</code>
-                    </para>
-                  </entry>
-                  <entry>
-                    <para>The self-hosted message bus endpoint on the server</para>
-                  </entry>
-                </row>
-                <row>
-                  <entry>
-                    <para>
-                      <code>ClientBusErrors</code>
-                    </para>
-                  </entry>
-                  <entry>
-                    <para>The standard error receiving service for clients</para>
-                  </entry>
-                </row>
-              </tbody>
+         <para>The following table describes all of the message parts that a J.REP capable client is expected to understand:</para>
+         <informaltable>
+            <tgroup cols="4">
+               <thead>
+                  <row>
+                     <entry>
+                        <para>Part</para>
+                     </entry>
+                     <entry>
+                        <para>Required</para>
+                     </entry>
+                     <entry>
+                        <para>JSON Type</para>
+                     </entry>
+                     <entry>
+                        <para>Description</para>
+                     </entry>
+                  </row>
+               </thead>
+               <tbody>
+                  <row>
+                     <entry>
+                        <para>
+                           <code>ToSubject</code>
+                        </para>
+                     </entry>
+                     <entry>
+                        <para>Yes</para>
+                     </entry>
+                     <entry>
+                        <para>String</para>
+                     </entry>
+                     <entry>
+                        <para>Specifies the subject within the bus, and its federation, which the message should be routed to.</para>
+                     </entry>
+                  </row>
+                  <row>
+                     <entry>
+                        <para>
+                           <code>CommandType</code>
+                        </para>
+                     </entry>
+                     <entry>
+                        <para>No</para>
+                     </entry>
+                     <entry>
+                        <para>String</para>
+                     </entry>
+                     <entry>
+                        <para>Specifies a command verb to be transmitted to the receiving subject. This is an optional part of a message contract, but is required for using management services</para>
+                     </entry>
+                  </row>
+                  <row>
+                     <entry>
+                        <para>
+                           <code>ReplyTo</code>
+                        </para>
+                     </entry>
+                     <entry>
+                        <para>No</para>
+                     </entry>
+                     <entry>
+                        <para>String</para>
+                     </entry>
+                     <entry>
+                        <para>Specifies to the receiver what subject it should reply to in response to this message.</para>
+                     </entry>
+                  </row>
+                  <row>
+                     <entry>
+                        <para>
+                           <code>Value</code>
+                        </para>
+                     </entry>
+                     <entry>
+                        <para>No</para>
+                     </entry>
+                     <entry>
+                        <para>Any</para>
+                     </entry>
+                     <entry>
+                        <para>A recommended but not required standard payload part for sending data to services</para>
+                     </entry>
+                  </row>
+                  <row>
+                     <entry>
+                        <para>
+                           <code>PriorityProcessing</code>
+                        </para>
+                     </entry>
+                     <entry>
+                        <para>No</para>
+                     </entry>
+                     <entry>
+                        <para>Number</para>
+                     </entry>
+                     <entry>
+                        <para>A processing order salience attribute. Messages which specify priority processing will be processed first if they are competing for resources with other messages in flight. Note: the current version of ErraiBus only supports two salience levels (0 and &gt;1). Any non-zero salience in ErraiBus will be given the same priority relative to 0 salience messages</para>
+                     </entry>
+                  </row>
+                  <row>
+                     <entry>
+                        <para>
+                           <code>ErrorMessage</code>
+                        </para>
+                     </entry>
+                     <entry>
+                        <para>No</para>
+                     </entry>
+                     <entry>
+                        <para>String</para>
+                     </entry>
+                     <entry>
+                        <para>An accompanying error message with any serialized exception</para>
+                     </entry>
+                  </row>
+                  <row>
+                     <entry>
+                        <para>
+                           <code>Throwable</code>
+                        </para>
+                     </entry>
+                     <entry>
+                        <para>No</para>
+                     </entry>
+                     <entry>
+                        <para>Object</para>
+                     </entry>
+                     <entry>
+                        <para>If applicable, an encoded object representing any remote exception that was thrown while dispatching the specified service</para>
+                     </entry>
+                  </row>
+               </tbody>
             </tgroup>
-          </informaltable>
-          <para>
+         </informaltable>
+         <section id="sid-23036473_WireProtocol%28J.REP%29-BuiltinSubjects">
+            <title>Built-in Subjects</title>
+            <para>The table contains a list of reserved subject names used for facilitating things like bus management and error handling. A bus should never allow clients to subscribe to these subjects directly.</para>
+            <informaltable>
+               <tgroup cols="2">
+                  <thead>
+                     <row>
+                        <entry>
+                           <para>Subject</para>
+                        </entry>
+                        <entry>
+                           <para>Description</para>
+                        </entry>
+                     </row>
+                  </thead>
+                  <tbody>
+                     <row>
+                        <entry>
+                           <para>
+                              <code>ClientBus</code>
+                           </para>
+                        </entry>
+                        <entry>
+                           <para>The self-hosted message bus endpoint on the client</para>
+                        </entry>
+                     </row>
+                     <row>
+                        <entry>
+                           <para>
+                              <code>ServerBus</code>
+                           </para>
+                        </entry>
+                        <entry>
+                           <para>The self-hosted message bus endpoint on the server</para>
+                        </entry>
+                     </row>
+                     <row>
+                        <entry>
+                           <para>
+                              <code>ClientBusErrors</code>
+                           </para>
+                        </entry>
+                        <entry>
+                           <para>The standard error receiving service for clients</para>
+                        </entry>
+                     </row>
+                  </tbody>
+               </tgroup>
+            </informaltable>
+            <para>
             As this table indicates, the bus management protocols in J.REP are accomplished using self-hosted services. See the section on
             <emphasis role="strong">Bus Management and Handshaking Protocols</emphasis>
             for details.
           </para>
-        </section>
+         </section>
       </section>
       <section id="sid-23036473_WireProtocol%28J.REP%29-MessageRouting">
-        
-        <title>Message Routing</title>
-        <para>There is no real distinction in the J.REP protocol between communication with the server, versus communication with the client. In fact, it assumed from an architectural standpoint that there is no real distinction between a client and a server. Each bus participates in a flat-namespaced federation. Therefore, it is possible that a subject may be observed on both the server and the client.</para>
-        <para>One in-built assumption of a J.REP-compliant bus however, is that messages are routed within the auspices of session isolation. Consider the following diagram:</para>
-        <para>
-          <figure>
-            <title>Figure 3 - Topology of a J.REP Messaging Federation</title>
-            <mediaobject>
-              <imageobject>
-                <imagedata fileref="author/download/attachments/23036473/FederationTopology.png"/>
-              </imageobject>
-            </mediaobject>
-          </figure>
+         <title>Message Routing</title>
+         <para>There is no real distinction in the J.REP protocol between communication with the server, versus communication with the client. In fact, it assumed from an architectural standpoint that there is no real distinction between a client and a server. Each bus participates in a flat-namespaced federation. Therefore, it is possible that a subject may be observed on both the server and the client.</para>
+         <para>One in-built assumption of a J.REP-compliant bus however, is that messages are routed within the auspices of session isolation. Consider the following diagram:</para>
+         <para>
+            <figure float="0">
+               <title>Figure 3 - Topology of a J.REP Messaging Federation</title>
+               <mediaobject>
+                  <imageobject>
+                     <imagedata fileref="author/download/attachments/23036473/FederationTopology.png"/>
+                  </imageobject>
+               </mediaobject>
+            </figure>
         </para>
-        <para>
+         <para>
           In
           <emphasis role="strong">Figure 3</emphasis>
           , is is possible for
@@ -904,228 +880,226 @@ MessageBuilder.createMessage()
         </para>
       </section>
       <section id="sid-23036473_WireProtocol%28J.REP%29-BusManagementandHandshakingProtocols">
-        
-        <title>Bus Management and Handshaking Protocols</title>
-        <para>
+         <title>Bus Management and Handshaking Protocols</title>
+         <para>
           Federation between buses requires management traffic to negotiate connections and manage visibility of services between buses. This is accomplished through  services named
           <code>ClientBus</code>
           and
           <code>ServerBus</code>
           which both implement the same protocol contracts which are defined in this section.
         </para>
-        <section id="sid-23036473_WireProtocol%28J.REP%29-ServerBusandClientBuscommands">
-          
-          <title>ServerBus and ClientBus commands</title>
-          <para>
+         <section id="sid-23036473_WireProtocol%28J.REP%29-ServerBusandClientBuscommands">
+            <title>ServerBus and ClientBus commands</title>
+            <para>
             Both bus services share the same management protocols, by implementing verbs (or commands) that perform different actions. These are specified in the protocol with the
             <code>CommandType</code>
             message part. The following table describes these commands:
           </para>
-          <table>
-            <title>Message Parts for Bus Commands:</title>
-            <tgroup cols="3">
-              <thead>
-                <row>
-                  <entry>
-                    <para>Command / Verb</para>
-                  </entry>
-                  <entry>
-                    <para>Message Parts</para>
-                  </entry>
-                  <entry>
-                    <para>Description</para>
-                  </entry>
-                </row>
-              </thead>
-              <tbody>
-                <row>
-                  <entry>
-                    <para>
-                      <code>ConnectToQueue</code>
-                    </para>
-                  </entry>
-                  <entry>
-                    <para>N/A</para>
-                  </entry>
-                  <entry>
-                    <para>The first message sent by a connecting client to begin the handshaking process.</para>
-                  </entry>
-                </row>
-                <row>
-                  <entry>
-                    <para>
-                      <code>CapabilitiesNotice</code>
-                    </para>
-                  </entry>
-                  <entry>
-                    <para>
-                      <code>CapabilitiesFlags</code>
-                    </para>
-                  </entry>
-                  <entry>
-                    <para>A message sent by one bus to another to notify it of its capabilities during handshake (for instance long polling or websockets)</para>
-                  </entry>
-                </row>
-                <row>
-                  <entry>
-                    <para>
-                      <code>FinishStateSync</code>
-                    </para>
-                  </entry>
-                  <entry>
-                    <para>N/A</para>
-                  </entry>
-                  <entry>
-                    <para>A message sent from one bus to another to indicate that it has now provided all necessary information to the counter-party bus to establish the federation. When both buses have sent this message to each other, the federation is considered active.</para>
-                  </entry>
-                </row>
-                <row>
-                  <entry>
-                    <para>
-                      <code>RemoteSubscribe</code>
-                    </para>
-                  </entry>
-                  <entry>
-                    <para>
-                      <code>Subject</code>
-                      <emphasis role="italics">or</emphasis>
-                      <code>SubjectsList</code>
-                    </para>
-                  </entry>
-                  <entry>
-                    <para>A message sent to the remote bus to notify it of a service or set of services which it is capable of routing to.</para>
-                  </entry>
-                </row>
-                <row>
-                  <entry>
-                    <para>
-                      <code>RemoteUnsubscribe</code>
-                    </para>
-                  </entry>
-                  <entry>
-                    <para>
-                      <code>Subject</code>
-                    </para>
-                  </entry>
-                  <entry>
-                    <para>A message sent to the remote bus to notify it that a service is no longer available.</para>
-                  </entry>
-                </row>
-                <row>
-                  <entry>
-                    <para>
-                      <code>Disconnect</code>
-                    </para>
-                  </entry>
-                  <entry>
-                    <para>
-                      <code>Reason</code>
-                    </para>
-                  </entry>
-                  <entry>
-                    <para>A message sent to a server bus from a client bus to indicate that it wishes to disconnect and defederate. Or, when sent from the client to server, indicates that the session has been terminated.</para>
-                  </entry>
-                </row>
-                <row>
-                  <entry>
-                    <para>
-                      <code>SessionExpired</code>
-                    </para>
-                  </entry>
-                  <entry>
-                    <para>N/A</para>
-                  </entry>
-                  <entry>
-                    <para>A message sent to a client bus to indicate that its messages are no longer being routed because it no longer has an active session</para>
-                  </entry>
-                </row>
-                <row>
-                  <entry>
-                    <para>
-                      <code>Heartbeat</code>
-                    </para>
-                  </entry>
-                  <entry>
-                    <para>N/A</para>
-                  </entry>
-                  <entry>
-                    <para>A message sent from one bus to another periodically to indicate it is still active.</para>
-                  </entry>
-                </row>
-              </tbody>
-            </tgroup>
-          </table>
-          <informaltable>
-            <tgroup cols="4">
-              <thead>
-                <row>
-                  <entry>
-                    <para>Part</para>
-                  </entry>
-                  <entry>
-                    <para>Required</para>
-                  </entry>
-                  <entry>
-                    <para>JSON Type</para>
-                  </entry>
-                  <entry>
-                    <para>Description</para>
-                  </entry>
-                </row>
-              </thead>
-              <tbody>
-                <row>
-                  <entry>
-                    <para>
-                      <code>CapabilitiesFlags</code>
-                    </para>
-                  </entry>
-                  <entry>
-                    <para>Yes</para>
-                  </entry>
-                  <entry>
-                    <para>String</para>
-                  </entry>
-                  <entry>
-                    <para>A comma delimited string of capabilities the bus is capable of us</para>
-                  </entry>
-                </row>
-                <row>
-                  <entry>
-                    <para>
-                      <code>Subject</code>
-                    </para>
-                  </entry>
-                  <entry>
-                    <para>Yes</para>
-                  </entry>
-                  <entry>
-                    <para>String</para>
-                  </entry>
-                  <entry>
-                    <para>The subject to subscribe or unsubscribe from</para>
-                  </entry>
-                </row>
-                <row>
-                  <entry>
-                    <para>
-                      <code>SubjectsList</code>
-                    </para>
-                  </entry>
-                  <entry>
-                    <para>Yes</para>
-                  </entry>
-                  <entry>
-                    <para>Array</para>
-                  </entry>
-                  <entry>
-                    <para>An array of strings representing a list of subjects to subscribe to</para>
-                  </entry>
-                </row>
-              </tbody>
-            </tgroup>
-          </informaltable>
-        </section>
+            <table>
+               <title>Message Parts for Bus Commands:</title>
+               <tgroup cols="3">
+                  <thead>
+                     <row>
+                        <entry>
+                           <para>Command / Verb</para>
+                        </entry>
+                        <entry>
+                           <para>Message Parts</para>
+                        </entry>
+                        <entry>
+                           <para>Description</para>
+                        </entry>
+                     </row>
+                  </thead>
+                  <tbody>
+                     <row>
+                        <entry>
+                           <para>
+                              <code>ConnectToQueue</code>
+                           </para>
+                        </entry>
+                        <entry>
+                           <para>N/A</para>
+                        </entry>
+                        <entry>
+                           <para>The first message sent by a connecting client to begin the handshaking process.</para>
+                        </entry>
+                     </row>
+                     <row>
+                        <entry>
+                           <para>
+                              <code>CapabilitiesNotice</code>
+                           </para>
+                        </entry>
+                        <entry>
+                           <para>
+                              <code>CapabilitiesFlags</code>
+                           </para>
+                        </entry>
+                        <entry>
+                           <para>A message sent by one bus to another to notify it of its capabilities during handshake (for instance long polling or websockets)</para>
+                        </entry>
+                     </row>
+                     <row>
+                        <entry>
+                           <para>
+                              <code>FinishStateSync</code>
+                           </para>
+                        </entry>
+                        <entry>
+                           <para>N/A</para>
+                        </entry>
+                        <entry>
+                           <para>A message sent from one bus to another to indicate that it has now provided all necessary information to the counter-party bus to establish the federation. When both buses have sent this message to each other, the federation is considered active.</para>
+                        </entry>
+                     </row>
+                     <row>
+                        <entry>
+                           <para>
+                              <code>RemoteSubscribe</code>
+                           </para>
+                        </entry>
+                        <entry>
+                           <para>
+                              <code>Subject</code>
+                              <emphasis role="italics">or</emphasis>
+                              <code>SubjectsList</code>
+                           </para>
+                        </entry>
+                        <entry>
+                           <para>A message sent to the remote bus to notify it of a service or set of services which it is capable of routing to.</para>
+                        </entry>
+                     </row>
+                     <row>
+                        <entry>
+                           <para>
+                              <code>RemoteUnsubscribe</code>
+                           </para>
+                        </entry>
+                        <entry>
+                           <para>
+                              <code>Subject</code>
+                           </para>
+                        </entry>
+                        <entry>
+                           <para>A message sent to the remote bus to notify it that a service is no longer available.</para>
+                        </entry>
+                     </row>
+                     <row>
+                        <entry>
+                           <para>
+                              <code>Disconnect</code>
+                           </para>
+                        </entry>
+                        <entry>
+                           <para>
+                              <code>Reason</code>
+                           </para>
+                        </entry>
+                        <entry>
+                           <para>A message sent to a server bus from a client bus to indicate that it wishes to disconnect and defederate. Or, when sent from the client to server, indicates that the session has been terminated.</para>
+                        </entry>
+                     </row>
+                     <row>
+                        <entry>
+                           <para>
+                              <code>SessionExpired</code>
+                           </para>
+                        </entry>
+                        <entry>
+                           <para>N/A</para>
+                        </entry>
+                        <entry>
+                           <para>A message sent to a client bus to indicate that its messages are no longer being routed because it no longer has an active session</para>
+                        </entry>
+                     </row>
+                     <row>
+                        <entry>
+                           <para>
+                              <code>Heartbeat</code>
+                           </para>
+                        </entry>
+                        <entry>
+                           <para>N/A</para>
+                        </entry>
+                        <entry>
+                           <para>A message sent from one bus to another periodically to indicate it is still active.</para>
+                        </entry>
+                     </row>
+                  </tbody>
+               </tgroup>
+            </table>
+            <informaltable>
+               <tgroup cols="4">
+                  <thead>
+                     <row>
+                        <entry>
+                           <para>Part</para>
+                        </entry>
+                        <entry>
+                           <para>Required</para>
+                        </entry>
+                        <entry>
+                           <para>JSON Type</para>
+                        </entry>
+                        <entry>
+                           <para>Description</para>
+                        </entry>
+                     </row>
+                  </thead>
+                  <tbody>
+                     <row>
+                        <entry>
+                           <para>
+                              <code>CapabilitiesFlags</code>
+                           </para>
+                        </entry>
+                        <entry>
+                           <para>Yes</para>
+                        </entry>
+                        <entry>
+                           <para>String</para>
+                        </entry>
+                        <entry>
+                           <para>A comma delimited string of capabilities the bus is capable of us</para>
+                        </entry>
+                     </row>
+                     <row>
+                        <entry>
+                           <para>
+                              <code>Subject</code>
+                           </para>
+                        </entry>
+                        <entry>
+                           <para>Yes</para>
+                        </entry>
+                        <entry>
+                           <para>String</para>
+                        </entry>
+                        <entry>
+                           <para>The subject to subscribe or unsubscribe from</para>
+                        </entry>
+                     </row>
+                     <row>
+                        <entry>
+                           <para>
+                              <code>SubjectsList</code>
+                           </para>
+                        </entry>
+                        <entry>
+                           <para>Yes</para>
+                        </entry>
+                        <entry>
+                           <para>Array</para>
+                        </entry>
+                        <entry>
+                           <para>An array of strings representing a list of subjects to subscribe to</para>
+                        </entry>
+                     </row>
+                  </tbody>
+               </tgroup>
+            </informaltable>
+         </section>
       </section>
-    </section>
-  </chapter>
+   </section>
+</chapter>

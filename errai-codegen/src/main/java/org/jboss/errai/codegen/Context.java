@@ -28,17 +28,18 @@ import org.jboss.errai.codegen.control.branch.Label;
 import org.jboss.errai.codegen.control.branch.LabelReference;
 import org.jboss.errai.codegen.exception.OutOfScopeException;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.common.client.framework.Assert;
 
 /**
- * This class represents a context in which {@link Statement}s are generated. 
+ * This class represents a context in which {@link Statement}s are generated.
  * <p>
- * Its main purpose is to support the concept of scopes so that {@link Statement}s 
+ * Its main purpose is to support the concept of scopes so that {@link Statement}s
  * can be validated prior to compilation.
- * 
+ *
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class Context {
@@ -51,11 +52,14 @@ public class Context {
   private Map<String, String> imports;
   private Set<MetaClass> classContexts;
 
+  private Set<MetaClass> literalizableClasses;
+
   private Map<String, Map<Object, Object>> renderingCache;
 
   private Context() {
     classContexts = new HashSet<MetaClass>();
     renderingCache = new HashMap<String, Map<Object, Object>>();
+    literalizableClasses = new HashSet<MetaClass>();
   }
 
   private Context(Context parent) {
@@ -68,7 +72,7 @@ public class Context {
 
   /**
    * Creates a new and empty context.
-   * 
+   *
    * @return empty context
    */
   public static Context create() {
@@ -77,9 +81,9 @@ public class Context {
 
   /**
    * Create a new sub context for the given parent context.
-   * 
+   *
    * @param parent  the parent context to use.
-   * 
+   *
    * @return Created sub context
    */
   public static Context create(Context parent) {
@@ -88,7 +92,7 @@ public class Context {
 
   /**
    * Add a variable to the current scope.
-   * 
+   *
    * @param name  the name of the variable, must not be null.
    * @param type  the type of the variable, must not be null.
    * @return the current context with the variable added.
@@ -96,10 +100,10 @@ public class Context {
   public Context addVariable(String name, Class<?> type) {
     return addVariable(Variable.create(Assert.notNull(name), Assert.notNull(type)));
   }
-  
+
   /**
    * Add a variable to the current scope and initialize it.
-   * 
+   *
    * @param name  the name of the variable, must not be null.
    * @param type  the type of the variable, must not be null.
    * @param initialization  the {@link Statement} or literal value to initialize the {@link Variable}, can be null.
@@ -109,10 +113,10 @@ public class Context {
     Variable v = Variable.create(Assert.notNull(name), Assert.notNull(type), initialization);
     return addVariable(v);
   }
-  
+
   /**
    * Add a {@link Variable} to the current scope.
-   * 
+   *
    * @param variable  the variable instance to add, must not be null.
    * @return the current context with the variable added.
    */
@@ -126,7 +130,7 @@ public class Context {
 
   /**
    * Add a {@link Label} to the current scope.
-   * 
+   *
    * @param label  the label instance to add, must not be null.
    * @return the current context with the label added.
    */
@@ -166,7 +170,7 @@ public class Context {
 
   /**
    * Imports the given class.
-   * 
+   *
    * @param clazz  the class to import, must not be null
    * @return the current context with the import added.
    */
@@ -189,7 +193,7 @@ public class Context {
 
   /**
    * Checks whether the given class has been imported.
-   * 
+   *
    * @param clazz  the class to check, must not be null.
    * @return true if import exists, otherwise false.
    */
@@ -198,7 +202,7 @@ public class Context {
       clazz = clazz.getComponentType();
     }
 
-    return imports != null && imports.containsKey(clazz.getName()) && 
+    return imports != null && imports.containsKey(clazz.getName()) &&
         imports.get(clazz.getName()).equals(getImportForClass(clazz));
   }
 
@@ -216,7 +220,7 @@ public class Context {
 
   /**
    * Returns all imports except the optional ones (java.lang.*).
-   * 
+   *
    * @return required imports
    */
   public Set<String> getRequiredImports() {
@@ -235,7 +239,7 @@ public class Context {
 
   /**
    * Enables automatic import of classes used during code generation.
-   * 
+   *
    * @return the current context whit auto import enabled.
    */
   public Context autoImport() {
@@ -245,7 +249,7 @@ public class Context {
 
   /**
    * Returns a reference to the {@link Variable} with the given name.
-   * 
+   *
    * @param name  the name of the variable.
    * @return the {@link VariableReference} found, can not be null.
    * @throws OutOfScopeException  if variable with the given name can not be found.
@@ -256,7 +260,7 @@ public class Context {
 
   /**
    * Returns a reference to the class member {@link Variable} with the given name.
-   * 
+   *
    * @param name  the name of the class member variable.
    * @return the {@link VariableReference} found, can not be null.
    * @throws OutOfScopeException  if member variable with the given name can not be found.
@@ -290,7 +294,7 @@ public class Context {
 
   /**
    * Returns the a reference to the {@link Label} with the given name.
-   * 
+   *
    * @param name  the name of the label.
    * @return the {@link LabelReference} found, can not be null.
    * @throws OutOfScopeException  if label with the given name can not be found.
@@ -313,7 +317,7 @@ public class Context {
 
   /**
    * Checks is the given {@link Variable} is in scope.
-   * 
+   *
    * @param variable  the variable to check.
    * @return true if in scope, otherwise false.
    */
@@ -329,7 +333,7 @@ public class Context {
 
   /**
    * Checks is the given {@link MetaMethod} is in scope (part of the attached class contexts).
-   * 
+   *
    * @param method  the method to check.
    * @return true if in scope, otherwise false.
    */
@@ -350,7 +354,7 @@ public class Context {
 
   /**
    * Checks is the given {@link MetaField} is in scope (part of the attached class contexts).
-   * 
+   *
    * @param field  the field to check.
    * @return true if in scope, otherwise false.
    */
@@ -368,10 +372,10 @@ public class Context {
 
     return false;
   }
-  
+
   /**
    * Checks if the the given variable name is ambiguous in this scope.
-   * 
+   *
    * @param varName  the variable name to check.
    * @return true if ambiguous, otherwise false.
    */
@@ -388,19 +392,112 @@ public class Context {
 
   /**
    * Returns all variables in this scope (does not include variables of parent scopes).
-   * 
+   *
    * @return collection of {@link Variable}, empty if no variables are in scope.
    */
   public Collection<Variable> getDeclaredVariables() {
     if (variables == null)
       return Collections.<Variable> emptyList();
-
     return variables.values();
+  }
+
+  public void addLiteralizableClasses(Collection<Class<?>> clazzes) {
+    for (Class<?> cls : clazzes) {
+      addLiteralizableClass(cls);
+    }
+  }
+
+  public void addLiteralizableMetaClasses(Collection<MetaClass> clazzes) {
+    for (MetaClass cls : clazzes) {
+      addLiteralizableClass(cls);
+    }
+  }
+
+  /**
+   * Mark a class "literalizable". Meaning that all classes that are assignable to this type, are candidates for
+   * reification to code snapshots for this context and all subcontexts. See {@link SnapshotMaker} for further
+   * details.
+   *
+   * @param clazz the class, interface or superclass to be considered literalizable.
+   */
+  public void addLiteralizableClass(Class clazz) {
+    addLiteralizableClass(MetaClassFactory.get(clazz));
+  }
+
+  /**
+   * Mark a class "literalizable". Meaning that all classes that are assignable to this type, are candidates for
+   * reification to code snapshots for this context and all subcontexts. See {@link SnapshotMaker} for further
+   * details.
+   *
+   * @param clazz the class, interface or superclass to be considered literalizable.
+   */
+  public void addLiteralizableClass(MetaClass clazz) {
+    literalizableClasses.add(clazz.getErased());
+  }
+
+  /**
+   * Returns true if the specified class is literalizable.
+   *
+   * @see #addLiteralizableClass(Class)
+   * @param clazz the class, interface or superclass to be tested if literalizable
+   * @return true if the specified class is literalizable
+   */
+  public boolean isLiteralizableClass(final Class clazz) {
+    return isLiteralizableClass(MetaClassFactory.get(clazz));
+  }
+
+  /**
+   * Returns true if the specified class is literalizable.
+   *
+   * @see #addLiteralizableClass(org.jboss.errai.codegen.framework.meta.MetaClass)
+   * @param clazz the class, interface or superclass to be tested if literalizable
+   * @return true if the specified class is literalizable
+   */
+  public boolean isLiteralizableClass(final MetaClass clazz) {
+    return getLiteralizableTargetType(clazz) != null;
+  }
+
+  /**
+   * Returns the literalizable target type for any matching subtype. Meaning, that if say, the type <tt com.bar.FooImpl</tt>
+   * is a subtype of the interface <tt>com.bar.Foo</tt>, which is itself marked literalizable, this method will return
+   * a reference to the <tt>java.lang.Class</tt> instance for <tt>com.bar.Foo</tt>
+   *
+   * @param clazz the class, interface or superclass to obtain a literalizable target type for.
+   * @return the literalizable target type that matches {@param clazz}. If there are no matches, returns <tt>null</tt>.
+   */
+  public Class getLiteralizableTargetType(final Class clazz) {
+    return getLiteralizableTargetType(MetaClassFactory.get(clazz));
+  }
+
+  /**
+   * Returns the literalizable target type for any matching subtype. Meaning, that if say, the type <tt>com.bar.FooImpl</tt>
+   * is a subtype of the interface <tt>com.bar.Foo</tt>, which is itself marked literalizable, this method will return
+   * a reference to the <tt>java.lang.Class</tt> instance for <tt>com.bar.Foo</tt>
+   *
+   * @param clazz the class, interface or superclass to obtain a literalizable target type for.
+   * @return the literalizable target type that matches {@param clazz}. If there are no matches, returns <tt>null</tt>.
+   */
+  public Class getLiteralizableTargetType(final MetaClass clazz) {
+    Context ctx = this;
+    do {
+      MetaClass cls = clazz;
+      do {
+        if (ctx.literalizableClasses.contains(cls)) return cls.asClass();
+
+        for (MetaClass iface : cls.getInterfaces()) {
+          if (ctx.literalizableClasses.contains(iface)) return iface.asClass();
+        }
+      }
+      while ((cls = cls.getSuperClass()) != null);
+    }
+    while ((ctx = ctx.parent) != null);
+
+    return null;
   }
 
   /**
    * Returns all variables in this scope (does not include variables of parent scopes).
-   * 
+   *
    * @return map of variable name to {@link Variable}, empty if no variables are in scope.
    */
   public Map<String, Variable> getVariables() {
@@ -412,7 +509,7 @@ public class Context {
 
   /**
    * Attaches a class to the current scope.
-   * 
+   *
    * @param clazz  class to attach.
    */
   public void attachClass(MetaClass clazz) {
@@ -421,7 +518,7 @@ public class Context {
 
   /**
    * Checks if automatic import is active.
-   * 
+   *
    * @return true if auto import active, otherwise false.
    */
   public boolean isAutoImportActive() {

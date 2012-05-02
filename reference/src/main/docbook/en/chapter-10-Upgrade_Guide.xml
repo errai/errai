@@ -1,15 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
 <chapter id="sid-21758202">
-    
-    <title>Upgrade Guide</title>
-    <para>
+   <title>Upgrade Guide</title>
+   <para>
       This chapter contains important information for migrating to newer versions of Errai. If you experience any problems, don't hesitate to get in touch with us. See
       <xref linkend="sid-5833089"/>
       .
     </para>
-    <section id="sid-21758204">
-      
+   <section id="sid-21758204">
       <title>Upgrading from 1.x to 2.0</title>
       <para>
         The first issues that will arise after replacing the jars or after changing the version numbers in the
@@ -22,19 +19,19 @@
       </para>
       <para>The following is a list of manual steps that have to be carried out when upgrading:</para>
       <itemizedlist>
-        <listitem>
-          <para>
+         <listitem>
+            <para>
             @ExposedEntity became @Portable (
             <code>org.jboss.errai.common.client.api.annotations.Portable</code>
             ). See
             <xref linkend="sid-5931328"/>
             for details.
           </para>
-        </listitem>
+         </listitem>
       </itemizedlist>
       <itemizedlist>
-        <listitem>
-          <para>
+         <listitem>
+            <para>
             Errai CDI projects must now use the
             <code>SimpleDispatcher</code>
             instead of the
@@ -43,11 +40,11 @@
             <xref linkend="sid-5931338"/>
             .
           </para>
-        </listitem>
+         </listitem>
       </itemizedlist>
       <itemizedlist>
-        <listitem>
-          <para>
+         <listitem>
+            <para>
             The bootstrap listener (configured in
             <code>WEB-INF/web.xml</code>
             ) for Errai CDI has changed (
@@ -56,36 +53,36 @@
             <code>org.jboss.errai.container.CDIServletStateListener</code>
             ).
           </para>
-        </listitem>
+         </listitem>
       </itemizedlist>
       <itemizedlist>
-        <listitem>
-          <para>gwt 2.3.0 or newer must be used and replace older versions.</para>
-        </listitem>
+         <listitem>
+            <para>gwt 2.3.0 or newer must be used and replace older versions.</para>
+         </listitem>
       </itemizedlist>
       <itemizedlist>
-        <listitem>
-          <para>mvel2 2.1.Beta8 or newer must be used and replace older versions.</para>
-        </listitem>
+         <listitem>
+            <para>mvel2 2.1.Beta8 or newer must be used and replace older versions.</para>
+         </listitem>
       </itemizedlist>
       <itemizedlist>
-        <listitem>
-          <para>weld 1.1.5.Final or newer must be used and replace older versions.</para>
-        </listitem>
+         <listitem>
+            <para>weld 1.1.5.Final or newer must be used and replace older versions.</para>
+         </listitem>
       </itemizedlist>
       <itemizedlist>
-        <listitem>
-          <para>slf4j 1.6.1 or newer must be used and replace older versions.</para>
-        </listitem>
+         <listitem>
+            <para>slf4j 1.6.1 or newer must be used and replace older versions.</para>
+         </listitem>
       </itemizedlist>
       <itemizedlist>
-        <listitem>
-          <para>This step can be skipped if Maven is used to build the project. If the project is NOT built using Maven, the following jar files have to be added manually to project's build/class path: errai-common-2.x.jar, errai-marshalling-2.x.jar, errai-codegen-2.x.jar, netty-4.0.0.Alpha1.errai.r1.jar.</para>
-        </listitem>
+         <listitem>
+            <para>This step can be skipped if Maven is used to build the project. If the project is NOT built using Maven, the following jar files have to be added manually to project's build/class path: errai-common-2.x.jar, errai-marshalling-2.x.jar, errai-codegen-2.x.jar, netty-4.0.0.Alpha1.errai.r1.jar.</para>
+         </listitem>
       </itemizedlist>
       <itemizedlist>
-        <listitem>
-          <para>
+         <listitem>
+            <para>
             If the project was built using an early version of an Errai archetype the configuration of the maven-gwt-plugin has to be modified to contain the
             <code>&lt;hostedWebapp&gt;path-to-your-standard-webapp-folder&lt;/hostedWebapp&gt;</code>
             . This is usually either
@@ -94,7 +91,41 @@
             <code>src/main/webapp</code>
             .
           </para>
-        </listitem>
+         </listitem>
       </itemizedlist>
-    </section>
-  </chapter>
+   </section>
+   <section id="sid-24838246">
+      <title>Upgrading from 2.0.Beta to 2.0.CR1 (or Final)</title>
+      <para>The following is a list of manual steps that have to be carried out when upgrading from a 2.0.Beta version to 2.0.CR1 or 2.0.Final:</para>
+      <itemizedlist>
+         <listitem>
+            <para>
+            Starting with 2.0.CR1 the default for automatic service discovery has been changed in favour of CDI based applications. That means it has to be explicitly turned on for plain bus applications (Errai applications that do not use Errai-CDI). Not doing so will result in
+            <code>NoSubscribersToDeliverTo</code>
+            exceptions. The snippet below shows how to activate automatic service discovery:
+          </para>
+            <example>
+               <title>web.xml</title>
+               <programlisting language="xml">&lt;servlet&gt;
+  &lt;servlet-name&gt;ErraiServlet&lt;/servlet-name&gt;
+  &lt;servlet-class&gt;org.jboss.errai.bus.server.servlet.DefaultBlockingServlet&lt;/servlet-class&gt;
+  &lt;init-param&gt;
+    &lt;param-name&gt;auto-discover-services&lt;/param-name&gt;
+    &lt;param-value&gt;true&lt;/param-value&gt;
+  &lt;/init-param&gt;
+  &lt;load-on-startup&gt;1&lt;/load-on-startup&gt;
+&lt;/servlet&gt;</programlisting>
+            </example>
+         </listitem>
+      </itemizedlist>
+      <itemizedlist>
+         <listitem>
+            <para>
+            The
+            <code>jboss7-support</code>
+            module was deleted and is no longer needed as a dependency.
+          </para>
+         </listitem>
+      </itemizedlist>
+   </section>
+</chapter>

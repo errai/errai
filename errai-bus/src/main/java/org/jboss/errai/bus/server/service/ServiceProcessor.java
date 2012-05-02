@@ -24,28 +24,26 @@ import java.util.Set;
 import org.jboss.errai.bus.client.api.Local;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
-import org.jboss.errai.common.client.api.tasks.TaskManager;
-import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
 import org.jboss.errai.bus.client.api.builder.DefaultRemoteCallBuilder;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.ProxyFactory;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 import org.jboss.errai.bus.rebind.RebindUtils;
 import org.jboss.errai.bus.server.annotations.Command;
-import org.jboss.errai.bus.server.annotations.Endpoint;
 import org.jboss.errai.bus.server.annotations.Remote;
 import org.jboss.errai.bus.server.annotations.Service;
 import org.jboss.errai.bus.server.annotations.security.RequireAuthentication;
 import org.jboss.errai.bus.server.annotations.security.RequireRoles;
 import org.jboss.errai.bus.server.io.CommandBindingsCallback;
 import org.jboss.errai.bus.server.io.ConversationalEndpointCallback;
-import org.jboss.errai.bus.server.io.EndpointCallback;
 import org.jboss.errai.bus.server.io.RemoteServiceCallback;
 import org.jboss.errai.bus.server.io.ServiceInstanceProvider;
 import org.jboss.errai.bus.server.security.auth.rules.RolesRequiredRule;
 import org.jboss.errai.bus.server.service.bootstrap.BootstrapContext;
 import org.jboss.errai.bus.server.service.bootstrap.GuiceProviderProxy;
 import org.jboss.errai.common.client.api.ResourceProvider;
+import org.jboss.errai.common.client.api.tasks.TaskManager;
+import org.jboss.errai.common.client.api.tasks.TaskManagerFactory;
 import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.common.metadata.MetaDataProcessor;
 import org.jboss.errai.common.metadata.MetaDataScanner;
@@ -77,7 +75,7 @@ public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
       Service svcAnnotation = loadClass.getAnnotation(Service.class);
       if (null == svcAnnotation) {
         // Diagnose Errai-111
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("Service annotation cannot be loaded. (See https://jira.jboss.org/browse/ERRAI-111)\n");
         sb.append(loadClass.getSimpleName()).append(" loader: ").append(loadClass.getClassLoader()).append("\n");
         sb.append("@Service loader:").append(Service.class.getClassLoader()).append("\n");
@@ -109,7 +107,7 @@ public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
       if (remoteImpl != null) {
         svc = createRPCScaffolding(remoteImpl, loadClass, context);
       }
-      
+
       if (MessageCallback.class.isAssignableFrom(loadClass)) {
         final Class<? extends MessageCallback> clazz = loadClass.asSubclass(MessageCallback.class);
         log.debug("discovered service: " + clazz.getName());
@@ -160,24 +158,6 @@ public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
         }).getInstance(loadClass);
       }
 
-      Map<String, MessageCallback> epts = new HashMap<String, MessageCallback>();
-
-      final Object targetService = svc;
-
-      // we scan for endpoints
-      for (final Method method : loadClass.getDeclaredMethods()) {
-        if (method.isAnnotationPresent(Endpoint.class)) {
-          epts.put(method.getName(), method.getReturnType() == Void.class ?
-                  new EndpointCallback(svc, method) :
-                  new ConversationalEndpointCallback(new ServiceInstanceProvider() {
-                    @Override
-                    public Object get(Message message) {
-                      return targetService;
-                    }
-                  }, method, context.getBus()));
-        }
-      }
-
       RolesRequiredRule rule = null;
       if (loadClass.isAnnotationPresent(RequireRoles.class)) {
         rule = new RolesRequiredRule(loadClass.getAnnotation(RequireRoles.class).value(), context.getBus());
@@ -186,27 +166,12 @@ public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
         rule = new RolesRequiredRule(new HashSet<Object>(), context.getBus());
       }
 
-
-      if (!epts.isEmpty()) {
-        final String rpcEndpointName = loadClass.getSimpleName() + ":RPC";
-        if (local) {
-          context.getBus().subscribeLocal(rpcEndpointName, new RemoteServiceCallback(epts));
-        }
-        else {
-          context.getBus().subscribe(rpcEndpointName, new RemoteServiceCallback(epts));
-        }
-
-        if (rule != null) {
-          context.getBus().addRule(rpcEndpointName, rule);
-        }
-      }
-
       if (!commandPoints.isEmpty()) {
         if (local) {
-          context.getBus().subscribeLocal(svcName, new CommandBindingsCallback(commandPoints, svc));
+          context.getBus().subscribeLocal(svcName, new CommandBindingsCallback(commandPoints, svc, context.getBus()));
         }
         else {
-          context.getBus().subscribe(svcName, new CommandBindingsCallback(commandPoints, svc));
+          context.getBus().subscribe(svcName, new CommandBindingsCallback(commandPoints, svc, context.getBus()));
         }
       }
 
@@ -251,7 +216,7 @@ public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
 
     // beware of classloading issues. better reflect on the actual instance
     for (Class<?> intf : svc.getClass().getInterfaces()) {
-      for (final Method method : intf.getDeclaredMethods()) {
+      for (final Method method : intf.getMethods()) {
         if (RebindUtils.isMethodInInterface(remoteIface, method)) {
           epts.put(RebindUtils.createCallSignature(method), new ConversationalEndpointCallback(new ServiceInstanceProvider() {
             @Override
@@ -264,7 +229,6 @@ public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
     }
 
     context.getBus().subscribe(remoteIface.getName() + ":RPC", new RemoteServiceCallback(epts));
-
 
     // note: this method just exists because we want AbstractRemoteCallBuilder to be package private.
     DefaultRemoteCallBuilder.setProxyFactory(Assert.notNull(new ProxyFactory() {

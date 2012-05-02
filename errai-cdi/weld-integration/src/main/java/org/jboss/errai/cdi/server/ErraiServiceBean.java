@@ -32,9 +32,14 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.InjectionTarget;
 import javax.enterprise.util.AnnotationLiteral;
 
+import org.jboss.errai.bus.client.framework.MessageBus;
+import org.jboss.errai.bus.server.api.ServerMessageBus;
 import org.jboss.errai.bus.server.service.ErraiService;
 import org.jboss.errai.bus.server.service.ErraiServiceImpl;
 import org.jboss.errai.bus.server.service.ErraiServiceSingleton;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.unmodifiableSet;
 
 /**
  * @author Heiko Braun <hbraun@redhat.com>
@@ -43,8 +48,18 @@ public class ErraiServiceBean implements Bean {
 
   final InjectionTarget it;
 
+  static final Set<Annotation> qualifiers = unmodifiableSet(new HashSet<Annotation>(
+          asList(new AnnotationLiteral<Default>() {
+                 },
+                 new AnnotationLiteral<Any>() {
+                 }
+          )));
+
+  static final Set<Type> types = unmodifiableSet(new HashSet<Type>(
+          asList(ErraiService.class, Object.class)));
+
   @SuppressWarnings("unchecked")
-  public ErraiServiceBean(BeanManager bm) {
+  public ErraiServiceBean(final BeanManager bm) {
 
     //use this to read annotations of the class
     AnnotatedType at = bm.createAnnotatedType(ErraiServiceImpl.class);
@@ -67,10 +82,7 @@ public class ErraiServiceBean implements Bean {
   }
 
   public Set<Annotation> getQualifiers() {
-    Set<Annotation> qualifiers = new HashSet<Annotation>();
-    qualifiers.add(new AnnotationLiteral<Default>() {});
-    qualifiers.add(new AnnotationLiteral<Any>() {});
-    return qualifiers;
+  return qualifiers;
   }
 
   public Class<? extends Annotation> getScope() {
@@ -82,9 +94,6 @@ public class ErraiServiceBean implements Bean {
   }
 
   public Set<Type> getTypes() {
-    Set<Type> types = new HashSet<Type>();
-    types.add(ErraiService.class);
-    types.add(Object.class);
     return types;
   }
 

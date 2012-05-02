@@ -21,11 +21,51 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.jboss.errai.bus.client.api.base.MessageBuilder;
+
 /**
- * Used for creating services which contain a set of different commands.
+ * Indicates that the annotated method, which is part of a service class,
+ * implements a command callback of that service.
+ *
+ * <p>
+ * Example:
+ *
+ * <pre>
+ *     {@code @Service("TestSvc")}
+ *     public class ServiceWithMultipleEndpoints {
+ *
+ *       {@code @Command("foo")}
+ *       public void foo(Message message) {
+ *         ...
+ *       }
+ *
+ *       {@code @Command("bar")}
+ *       public void bar(Message message) {
+ *         ...
+ *       }
+ *     }
+ * </pre>
+ *
+ * <p>To compose a message with a command, specify a {@code command} in the MessageBuilder like this:
+ * <pre>
+ *     MessageBuilder.createMessage()
+ *             .toSubject("TestSvc")
+ *             .command("bar")
+ *             .done()
+ *             .repliesTo(new MessageCallback() { ... })
+ *             .sendNowWith(bus);
+ * </pre>
+ *
+ * @see Service
+ * @see MessageBuilder
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD})
 public @interface Command {
+
+  /**
+   * The command names that this method handles within the service. Defaults to
+   * the name of the method.
+   */
   String[] value() default "";
 }

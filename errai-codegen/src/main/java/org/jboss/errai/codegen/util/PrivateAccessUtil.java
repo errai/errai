@@ -1,5 +1,10 @@
 package org.jboss.errai.codegen.util;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.DefParameters;
 import org.jboss.errai.codegen.Modifier;
@@ -16,11 +21,6 @@ import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Mike Brock
@@ -99,16 +99,72 @@ public class PrivateAccessUtil {
     return fieldName;
   }
 
+  /**
+   * Generates methods for accessing a private field using either JSNI or Java
+   * Reflection. The generated methods will be private and static.
+   *
+   * @param useJSNIStubs
+   *          If true, the generated methods will use JSNI to access the field.
+   *          Otherwise, Java reflection will be used (in this case, the
+   *          generated code will not be GWT translatable).
+   * @param classBuilder
+   *          The class builder to add the generated methods to.
+   * @param f
+   *          The field the generated accessors read and write.
+   */
   public static void addPrivateAccessStubs(boolean useJSNIStubs,
                                            ClassStructureBuilder<?> classBuilder,
                                            MetaField f) {
     addPrivateAccessStubs(PrivateAccessType.Both, useJSNIStubs, classBuilder, f);
   }
 
+  /**
+   * Generates methods for accessing a private field using either JSNI or Java
+   * Reflection. The generated methods will be private and static.
+   *
+   * @param accessType
+   *          Whether to generate a read method, a write method, or both.
+   * @param useJSNIStubs
+   *          If true, the generated methods will use JSNI to access the field.
+   *          Otherwise, Java reflection will be used (in this case, the
+   *          generated code will not be GWT translatable).
+   * @param classBuilder
+   *          The class builder to add the generated methods to.
+   * @param f
+   *          The field the generated accessors read and write.
+   */
+  public static void addPrivateAccessStubs(PrivateAccessType accessType,
+          boolean useJSNIStubs,
+          ClassStructureBuilder<?> classBuilder,
+          MetaField f) {
+    addPrivateAccessStubs(accessType, useJSNIStubs, classBuilder, f, new Modifier[] { Modifier.Static });
+  }
+
+  /**
+   * Generates methods for accessing a private field using either JSNI or Java
+   * Reflection. The generated methods will be private.
+   *
+   * @param accessType
+   *          Whether to generate a read method, a write method, or both.
+   * @param useJSNIStubs
+   *          If true, the generated methods will use JSNI to access the field.
+   *          Otherwise, Java reflection will be used (in this case, the
+   *          generated code will not be GWT translatable).
+   * @param classBuilder
+   *          The class builder to add the generated methods to.
+   * @param f
+   *          The field the generated accessors read and write.
+   * @param modifiers
+   *          The modifiers on the generated method, for example
+   *          {@link Modifier#Final} or {@link Modifier#Synchronized}. <i>Never
+   *          specify {@code Modifier.JSNI}</i>; it is added automatically when
+   *          needed.
+   */
   public static void addPrivateAccessStubs(PrivateAccessType accessType,
                                            boolean useJSNIStubs,
                                            ClassStructureBuilder<?> classBuilder,
-                                           MetaField f) {
+                                           MetaField f,
+                                           Modifier[] modifiers) {
     MetaClass type = f.getType();
     if (type.getCanonicalName().equals("long")) {
       type = type.asBoxed();
@@ -118,6 +174,13 @@ public class PrivateAccessUtil {
     boolean write = accessType == PrivateAccessType.Write || accessType == PrivateAccessType.Both;
 
     if (useJSNIStubs) {
+
+      // append JSNI modifier to the given modifier array
+      Modifier[] origModifiers = modifiers;
+      modifiers = new Modifier[origModifiers.length + 1];
+      System.arraycopy(origModifiers, 0, modifiers, 0, origModifiers.length);
+      modifiers[modifiers.length - 1] = Modifier.JSNI;
+
       if (write) {
         final MethodCommentBuilder<? extends ClassStructureBuilder<?>> methodBuilder
                 = classBuilder.privateMethod(void.class, getPrivateFieldInjectorName(f));
@@ -128,7 +191,7 @@ public class PrivateAccessUtil {
                           Parameter.of(type, "value")));
         }
 
-        methodBuilder.modifiers(Modifier.Static, Modifier.JSNI)
+        methodBuilder.modifiers(modifiers)
                 .body()
                 ._(new StringStatement(JSNIUtil.fieldAccess(f) + " = value"))
                 .finish();
@@ -142,14 +205,15 @@ public class PrivateAccessUtil {
           instance.parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance")));
         }
 
-        instance.modifiers(Modifier.Static, Modifier.JSNI)
+        instance.modifiers(modifiers)
                 .body()
                 ._(new StringStatement("return " + JSNIUtil.fieldAccess(f)))
                 .finish();
       }
     }
     else {
-      /**
+
+      /*
        * Reflection stubs
        */
 
@@ -166,7 +230,7 @@ public class PrivateAccessUtil {
                           Parameter.of(f.getType(), "value")));
         }
 
-        methodBuilder.modifiers(Modifier.Static)
+        methodBuilder.modifiers(modifiers)
                 .body()
                 ._(Stmt.try_()
                         ._(Stmt.loadVariable(cachedField).invoke(setterName, Refs.get("instance"), Refs.get("value")))
@@ -190,7 +254,7 @@ public class PrivateAccessUtil {
                   .parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance")));
         }
 
-        methodBuilder.modifiers(Modifier.Static)
+        methodBuilder.modifiers(modifiers)
                 .body()
                 ._(Stmt.try_()
                         ._(Stmt.nestedCall(Cast.to(f.getType(), Stmt.loadVariable(cachedField)

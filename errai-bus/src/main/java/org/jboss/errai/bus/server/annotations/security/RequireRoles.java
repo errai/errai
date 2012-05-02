@@ -21,8 +21,24 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.jboss.errai.bus.server.annotations.Service;
+
+/**
+ * Indicates that the service can only be accessed by logged-in users who belong
+ * to all of the given security roles.
+ * <p>
+ * This annotation can appear anywhere the {@link Service} annotation can
+ * appear.
+ *
+ * @see Service
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface RequireRoles {
+
+  /**
+   * The set of roles that the calling user must belong to in order to invoke
+   * the target service.
+   */
   String[] value();
 }

@@ -16,22 +16,10 @@
 
 package org.jboss.errai.enterprise.rebind;
 
-import java.lang.annotation.Annotation;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
-import javax.enterprise.context.NormalScope;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Produces;
-import javax.inject.Scope;
-
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
-import org.jboss.errai.codegen.meta.impl.gwt.GWTClass;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.ScannerSingleton;
@@ -44,9 +32,11 @@ import org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 
-import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.core.ext.typeinfo.JConstructor;
-import com.google.gwt.core.ext.typeinfo.JPackage;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Produces;
+import java.util.HashSet;
+import java.util.Set;
 
 @IOCExtension
 public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator {
@@ -54,50 +44,15 @@ public class JSR299IOCExtensionConfigurator implements IOCExtensionConfigurator 
                         final IOCProcessorFactory procFactory) {
 
     injectionContext.mapElementType(WiringElementType.SingletonBean, ApplicationScoped.class);
-    injectionContext.mapElementType(WiringElementType.DependentBean, Dependent.class);
     injectionContext.mapElementType(WiringElementType.ProducerElement, Produces.class);
 
     final Set<MetaClass> knownObserverTypes = new HashSet<MetaClass>();
 
-    if (context.getGeneratorContext() != null && context.getGeneratorContext().getTypeOracle() != null) {
-      for (JPackage pkg : context.getGeneratorContext().getTypeOracle().getPackages()) {
-        TypeScan:
-        for (JClassType type : pkg.getTypes()) {
-//          if (type.isAbstract() || type.isInterface() != null
-//                  || type.getQualifiedSourceName().startsWith("java.")) continue;
-
-          if (!type.isDefaultInstantiable()) {
-            boolean hasInjectableConstructor = false;
-            for (JConstructor c : type.getConstructors()) {
-              if (injectionContext.isElementType(WiringElementType.InjectionPoint, c)) {
-                hasInjectableConstructor = true;
-                break;
-              }
-            }
-
-            if (!hasInjectableConstructor) {
-              continue;
-            }
-          }
-
-          for (Annotation a : type.getAnnotations()) {
-            Class<? extends Annotation> annoClass = a.annotationType();
-            if (annoClass.isAnnotationPresent(Scope.class)
-                    || annoClass.isAnnotationPresent(NormalScope.class)) {
-              continue TypeScan;
-            }
-          }
-
-          MetaClass clazz = GWTClass.newInstance(type.getOracle(), type);
-
-          injectionContext.addPsuedoScopeForType(clazz);
-
-          for (MetaMethod method : clazz.getMethods()) {
-            for (MetaParameter parameter : method.getParameters()) {
-              if (parameter.isAnnotationPresent(Observes.class)) {
-                knownObserverTypes.add(parameter.getType());
-              }
-            }
+    for (MetaClass type : injectionContext.getAllKnownInjectionTypes()) {
+      for (MetaMethod method : type.getMethods()) {
+        for (MetaParameter parameter : method.getParameters()) {
+          if (parameter.isAnnotationPresent(Observes.class)) {
+            knownObserverTypes.add(parameter.getType());
           }
         }
       }
