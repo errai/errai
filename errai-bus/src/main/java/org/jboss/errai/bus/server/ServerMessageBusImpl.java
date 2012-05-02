@@ -42,7 +42,6 @@ import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueCloseEvent;
 import org.jboss.errai.bus.server.api.QueueClosedListener;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
-import org.jboss.errai.bus.server.io.BufferHelper;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
 import org.jboss.errai.bus.server.io.websockets.WebSocketServer;
@@ -78,6 +77,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.jboss.errai.bus.client.api.base.MessageBuilder.createConversation;
 import static org.jboss.errai.bus.client.protocols.SecurityCommands.MessageNotDelivered;
 import static org.jboss.errai.bus.client.util.ErrorHelper.handleMessageDeliveryFailure;
+import static org.jboss.errai.bus.server.io.BufferHelper.encodeAndWrite;
 import static org.jboss.errai.bus.server.io.websockets.WebSocketTokenManager.verifyOneTimeToken;
 import static org.jboss.errai.common.client.protocols.MessageParts.ReplyTo;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -101,6 +101,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
   private final Map<QueueSession, MessageQueue> messageQueues = new ConcurrentHashMap<QueueSession, MessageQueue>();
 
   private final Map<MessageQueue, List<Message>> deferredQueue = new ConcurrentHashMap<MessageQueue, List<Message>>();
+
   private final Map<String, QueueSession> sessionLookup = new ConcurrentHashMap<String, QueueSession>();
 
   private final List<SubscribeListener> subscribeListeners = new LinkedList<SubscribeListener>();
@@ -993,8 +994,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         // all queues are listening to this subject. therefore we can save memory and time by
         // writing to the broadcast color on the buffer
         try {
-
-          BufferHelper.encodeAndWrite(transmissionbuffer, BufferColor.getAllBuffersColor(), message);
+          encodeAndWrite(transmissionbuffer, BufferColor.getAllBuffersColor(), message);
 
           for (MessageQueue q : queues) {
             q.wake();
@@ -1048,7 +1048,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
       return;
     }
 
-    RemoteMessageCallback rmc = remoteSubscriptions.get(subject);
+    final RemoteMessageCallback rmc = remoteSubscriptions.get(subject);
     rmc.removeQueue(queue);
 
     try {
@@ -1306,7 +1306,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     }
 
     scheduler.shutdown();
-
     transmissionbuffer.clear();
     subscriptions.clear();
     remoteSubscriptions.clear();

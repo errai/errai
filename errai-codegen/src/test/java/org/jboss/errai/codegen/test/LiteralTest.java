@@ -28,8 +28,8 @@ import java.util.Set;
 
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.literal.LiteralFactory;
-import org.jboss.errai.codegen.tests.model.Person;
-import org.jboss.errai.codegen.tests.model.PersonImpl;
+import org.jboss.errai.codegen.test.model.Person;
+import org.jboss.errai.codegen.test.model.PersonImpl;
 import org.jboss.errai.codegen.util.Stmt;
 import org.junit.Test;
 
@@ -129,19 +129,19 @@ public class LiteralTest extends AbstractCodegenTest {
     Context ctx = Context.create();
     ctx.addLiteralizableClass(Person.class);
 
-    assertEquals("new org.jboss.errai.codegen.tests.model.Person[] { " +
-        "new org.jboss.errai.codegen.tests.model.Person() { " +
+    assertEquals("new org.jboss.errai.codegen.test.model.Person[] { " +
+        "new org.jboss.errai.codegen.test.model.Person() { " +
         "public int getAge() { return 1; } " +
-        "public org.jboss.errai.codegen.tests.model.Person getMother() { return null; } " +
+        "public org.jboss.errai.codegen.test.model.Person getMother() { return null; } " +
         "public String getName() { return \"person\"; } } }",
         LiteralFactory.getLiteral(a).generate(ctx));
 
     p.setAge(10);
 
-    assertEquals("new org.jboss.errai.codegen.tests.model.Person[] { " +
-        "new org.jboss.errai.codegen.tests.model.Person() { " +
+    assertEquals("new org.jboss.errai.codegen.test.model.Person[] { " +
+        "new org.jboss.errai.codegen.test.model.Person() { " +
         "public int getAge() { return 10; } " +
-        "public org.jboss.errai.codegen.tests.model.Person getMother() { return null; } " +
+        "public org.jboss.errai.codegen.test.model.Person getMother() { return null; } " +
         "public String getName() { return \"person\"; } } }",
         LiteralFactory.getLiteral(a).generate(ctx));
   }

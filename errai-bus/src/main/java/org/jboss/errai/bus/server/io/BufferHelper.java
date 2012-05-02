@@ -26,41 +26,51 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import static org.jboss.errai.marshalling.server.protocol.ErraiProtocolServer.encodePayloadToByteArrayInputStream;
+
 /**
  * @author Mike Brock
  */
 public final class BufferHelper {
-  private BufferHelper() {}
+  private BufferHelper() {
+  }
 
   public static class MultiMessageHandlerCallback implements BufferCallback {
     int brackCount;
     int seg;
 
     @Override
-    public void before(OutputStream outstream) throws IOException {
+    public void before(final OutputStream outstream) throws IOException {
       outstream.write('[');
     }
 
     @Override
-    public int each(int i, OutputStream outstream) throws IOException {
-      switch (i) {
-        case '{':
-          if (++brackCount == 1 && seg != 0) {
-            outstream.write(',');
-          }
-          break;
-        case '}':
-          if (--brackCount < 0) {
-            i = ' ';
-          }
-          seg++;
-          break;
+    public int each(int i, final OutputStream outstream) throws IOException {
+      if (i == '{' && ++brackCount == 1 && seg != 0) {
+        outstream.write(',');
       }
+      else if (i == '}' && brackCount != 0 && --brackCount == 0) {
+        seg++;
+      }
+//
+//      switch (i) {
+//        case '{':
+//          if (++brackCount == 1 && seg != 0) {
+//            outstream.write(',');
+//          }
+//          break;
+//        case '}':
+//          if (brackCount == 0) break;
+//          if (--brackCount == 0) {
+//            seg++;
+//          }
+//          break;
+//      }
       return i;
     }
 
     @Override
-    public void after(OutputStream outstream) throws IOException {
+    public void after(final OutputStream outstream) throws IOException {
       if (brackCount == 1) {
         outstream.write('}');
       }
@@ -68,13 +78,17 @@ public final class BufferHelper {
     }
   }
 
-  public static void encodeAndWrite(Buffer buffer, BufferColor bufferColor, Message message) throws IOException {
-    buffer.write(ErraiProtocolServer.encodePayloadToByteArrayInputStream(message.getParts()), bufferColor);
+  public static void encodeAndWrite(final Buffer buffer, final BufferColor bufferColor, final Message message)
+          throws IOException {
+
+    buffer.write(encodePayloadToByteArrayInputStream(message.getParts()), bufferColor);
   }
 
   private static final byte[] NOOP_ARRAY = new byte[0];
 
-  public static void encodeAndWriteNoop(Buffer buffer, BufferColor bufferColor) throws IOException {
+  public static void encodeAndWriteNoop(final Buffer buffer, final BufferColor bufferColor)
+          throws IOException {
+
     buffer.write(NOOP_ARRAY.length, new ByteArrayInputStream(NOOP_ARRAY), bufferColor);
   }
 }

@@ -1,4 +1,4 @@
-package org.jboss.errai.codegen.tests.model;
+package org.jboss.errai.codegen.test.model;
 
 public class PersonImpl implements Person {
 

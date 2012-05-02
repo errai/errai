@@ -584,4 +584,5 @@ public class StatementBuilderTest extends AbstractCodegenTest {
             s);
 
   }
+
 }
