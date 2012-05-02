@@ -91,7 +91,6 @@ public class ErraiJpaTest extends GWTTestCase {
 
     // make Album (not attached to Artist)
     Album album = new Album();
-//    album.setId(10L); // same ID as album, on purpose
     album.setArtist(null);
     album.setName("Let It Be");
     album.setReleaseDate(new Date(11012400000L));
@@ -150,6 +149,43 @@ public class ErraiJpaTest extends GWTTestCase {
     // should still come directly from the persistence unit cache
     fetchedAlbum = em.find(Album.class, album.getId());
     assertSame(album, fetchedAlbum);
+  }
+
+  /**
+   * Tests the persistence of two unrelated entities of different types.
+   */
+  public void testClearDetachesAll() {
+
+    // make Album
+    Album album = new Album();
+    album.setArtist(null);
+    album.setName("Let It Be");
+    album.setReleaseDate(new Date(11012400000L));
+
+    // make artist
+    Artist artist = new Artist();
+    artist.setId(123L);
+    artist.setName("The Beatles");
+
+    // store them
+    EntityManager em = getEntityManager();
+    em.persist(album);
+    em.persist(artist);
+    em.flush();
+
+    // make sure they're persistent and managed
+    assertSame(album, em.find(Album.class, album.getId()));
+    assertSame(artist, em.find(Artist.class, artist.getId()));
+
+    em.clear();
+
+    // make sure they were detached
+    Album fetchedAlbum = em.find(Album.class, album.getId());
+    Artist fetchedArtist = em.find(Artist.class, artist.getId());
+    assertNotNull(fetchedAlbum);
+    assertNotNull(fetchedArtist);
+    assertNotSame(album, fetchedAlbum);
+    assertNotSame(artist, fetchedArtist);
   }
 
 }
