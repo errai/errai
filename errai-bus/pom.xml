@@ -224,7 +224,7 @@
         <dependency>
             <groupId>org.jboss.as</groupId>
             <artifactId>jboss-as-websockets</artifactId>
-            <version>0.1.Alpha6</version>
+            <version>0.2.Alpha1</version>
             <scope>provided</scope>
         </dependency>
 

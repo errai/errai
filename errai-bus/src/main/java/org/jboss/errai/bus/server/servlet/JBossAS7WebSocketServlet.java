@@ -16,7 +16,11 @@
 
 package org.jboss.errai.bus.server.servlet;
 
+import org.jboss.as.websockets.Frame;
+import org.jboss.as.websockets.FrameType;
 import org.jboss.as.websockets.WebSocket;
+import org.jboss.as.websockets.frame.PongFrame;
+import org.jboss.as.websockets.frame.TextFrame;
 import org.jboss.as.websockets.servlet.WebSocketServlet;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.QueueSession;
@@ -52,11 +56,13 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
 
   private static final String WEBSOCKET_SESSION_ALIAS = "Websocket:Errai:SessionAlias";
 
+  public JBossAS7WebSocketServlet() {
+    super("J.REP1.0/ErraiBus");
+  }
+
   @SuppressWarnings("unchecked")
   @Override
   public void init(final ServletConfig config) throws ServletException {
-    setProtocolName("J.REP1.0/ErraiBus");
-
     service = ServletBootstrapUtil.getService(config);
     sessionProvider = service.getSessionProvider();
   }
@@ -80,7 +86,7 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
 
     @Override
     public void write(String data) throws IOException {
-      socket.writeTextFrame(data);
+      socket.writeFrame(TextFrame.from(data));
     }
 
     @Override
@@ -103,9 +109,25 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
     service.getBus().getQueue(cometSession).setDirectSocketChannel(null);
   }
 
- @Override
-  protected void onReceivedTextFrame(final WebSocket socket) throws IOException {
-    final String text = socket.readTextFrame();
+
+  @Override
+  protected void onReceivedFrame(final WebSocket socket) throws IOException {
+    final Frame frame = socket.readFrame();
+
+    switch (frame.getType()) {
+      case Ping:
+        socket.writeFrame(new PongFrame());
+        break;
+      case Binary:
+        socket.writeFrame(TextFrame.from("Binary Frames Not Supported!"));
+        break;
+      default:
+        if (frame.getType() != FrameType.Text) {
+          return;
+        }
+    }
+
+    final String text = ((TextFrame) frame).getText();
 
     final QueueSession session = sessionProvider.getSession(socket.getHttpSession(),
             socket.getSocketID());
