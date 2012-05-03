@@ -139,6 +139,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   /* A list of {@link Runnable} initialization tasks to be executed after the bus has successfully finished it's
 * initialization and is now communicating with the remote bus. */
+  private final List<Runnable> deferredSubscriptions = new ArrayList<Runnable>();
   private final List<Runnable> postInitTasks = new ArrayList<Runnable>();
   private final List<Message> deferredMessages = new ArrayList<Message>();
   private final Queue<Message> toSendBuffer = new LinkedList<Message>();
@@ -147,6 +148,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   private boolean initialized = false;
   private boolean reinit = false;
   private boolean postInit = false;
+  private boolean stateSyncInProgress = false;
 
   /**
    * The unique ID that will sent with the next request.
@@ -257,10 +259,10 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     if (BuiltInServices.ServerBus.name().equals(subject) && subscriptions.containsKey(BuiltInServices.ServerBus.name()))
       return null;
 
-    if (!postInit) {
+    if (!postInit && !stateSyncInProgress) {
       final DeferredSubscription deferredSubscription = new DeferredSubscription();
 
-      addPostInitTask(new Runnable() {
+      deferredSubscriptions.add(new Runnable() {
         @Override
         public void run() {
           deferredSubscription.attachSubscription(_subscribe(subject, callback, local));
@@ -659,9 +661,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         sendBuilder.setHeader("phase", "disconnect");
 
         encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
-                        .toSubject(BuiltInServices.ServerBus.name())
-                        .command(BusCommands.Disconnect)
-                        .set(MessageParts.PriorityProcessing, "1"));
+                .toSubject(BuiltInServices.ServerBus.name())
+                .command(BusCommands.Disconnect)
+                .set(MessageParts.PriorityProcessing, "1"));
       }
 
       unsubscribeAll(BuiltInServices.ClientBus.name());
@@ -677,7 +679,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       this.disconnected = true;
       this.initialized = false;
       this.postInit = false;
+      this.stateSyncInProgress = false;
       this.sendBuilder = null;
+      this.deferredSubscriptions.clear();
       this.postInitTasks.clear();
 
       InitVotes.reset();
@@ -842,6 +846,12 @@ public class ClientMessageBusImpl implements ClientMessageBus {
               public void run() {
                 LogUtil.log("received FinishStateSync message. preparing to bring up the federation");
 
+                stateSyncInProgress = true;
+
+                for (Runnable deferredSubscr : deferredSubscriptions) {
+                  deferredSubscr.run();
+                }
+
                 List<String> subjects = new ArrayList<String>();
                 for (String s : subscriptions.keySet()) {
                   if (s.startsWith("local:")) continue;
@@ -862,6 +872,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                         .toSubject(BuiltInServices.ServerBus.name())
                         .command(BusCommands.FinishStateSync)
                         .set(PriorityProcessing, "1"));
+
 
                 /**
                  * ... also send RemoteUnsubscribe signals.
@@ -910,6 +921,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                   }
                 });
 
+                stateSyncInProgress = true;
 
                 if (webSocketUpgradeAvailable) {
                   websocketUpgrade();
@@ -949,9 +961,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
             LogUtil.log("received verification token for websocket connection");
 
             encodeAndTransmit(CommandMessage.createWithParts(new HashMap<String, Object>())
-                                .toSubject(BuiltInServices.ServerBus.name())
-                                .command(BusCommands.WebsocketChannelVerify)
-                                .copy(MessageParts.WebSocketToken, message));
+                    .toSubject(BuiltInServices.ServerBus.name())
+                    .command(BusCommands.WebsocketChannelVerify)
+                    .copy(MessageParts.WebSocketToken, message));
             break;
 
           case WebsocketChannelOpen:
@@ -1107,7 +1119,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
       final String initialMessage =
               "{\"CommandType\":\"ConnectToQueue\",\"ToSubject\":\"ServerBus\"," +
-              " \"PriorityProcessing\":\"1\"}";
+                      " \"PriorityProcessing\":\"1\"}";
 
       final RequestBuilder initialRequest = getSendBuilder();
 
@@ -1225,7 +1237,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           case 307:
             break;
           default:
-              onError(request, new TransportIOException("Unexpected response code: " + statusCode, statusCode, response.getStatusText()));
+            onError(request, new TransportIOException("Unexpected response code: " + statusCode, statusCode, response.getStatusText()));
             return;
         }
       }
