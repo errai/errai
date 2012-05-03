@@ -129,7 +129,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
         if (toMap.isEnum()) {
           tryBuilder.append(Stmt.declareVariable(toMap).named("entity")
-              .initializeWith(demarshallEnum(loadVariable("obj"), toMap)));
+              .initializeWith(demarshallEnum(loadVariable("obj"), loadVariable("a0"), toMap)));
         }
         else {
 
@@ -483,11 +483,16 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
     }
   }
 
-  public Statement demarshallEnum(Statement valueStatement, MetaClass toType) {
-    TernaryStatement ternaryStatement = new TernaryStatement(Bool.isNotNull(valueStatement),
-        Stmt.invokeStatic(Enum.class, "valueOf", toType, Stmt.nestedCall(valueStatement)
-            .invoke("get", SerializationParts.ENUM_STRING_VALUE).invoke("isString").invoke("stringValue")),
-            Stmt.load(null));
+  public Statement demarshallEnum(Statement objStatement, Statement valStatement, MetaClass toType) {
+    Statement trueStatement = Stmt.invokeStatic(Enum.class, "valueOf", toType, 
+        Stmt.nestedCall(objStatement)
+        .invoke("get", SerializationParts.ENUM_STRING_VALUE).invoke("isString").invoke("stringValue"));
+    
+    Statement falseStatement = (valStatement !=null) ? Stmt.invokeStatic(Enum.class, "valueOf", toType, 
+        Stmt.nestedCall(valStatement).invoke("isString").invoke("stringValue")) : Stmt.load(null);
+    
+    TernaryStatement ternaryStatement = 
+        new TernaryStatement(Bool.isNotNull(objStatement), trueStatement, falseStatement);
 
     return ternaryStatement;
   }
@@ -510,7 +515,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
 
   public Statement unwrapJSON(Statement valueStatement, MetaClass toType) {
     if (toType.isEnum()) {
-      return demarshallEnum(Stmt.nestedCall(valueStatement).invoke("isObject"), toType);
+      return demarshallEnum(Stmt.nestedCall(valueStatement).invoke("isObject"), valueStatement, toType);
     }
     else {
       return Stmt.create(context.getCodegenContext())

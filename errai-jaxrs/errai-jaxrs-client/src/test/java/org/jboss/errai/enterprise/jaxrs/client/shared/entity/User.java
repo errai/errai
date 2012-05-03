@@ -28,76 +28,108 @@ import org.jboss.errai.common.client.api.annotations.Portable;
  */
 @Portable
 public class User {
+
+  public enum Gender {
+    MALE, FEMALE
+  }
+
   private String firstName;
   private String lastName;
-  
+  private Gender gender;
+
   private User parent;
-  private User parentRef; // This is just to test back references
+  private User parentRef; // This is to test back references
 
   private List<String> petNames = new ArrayList<String>();
   private List<User> friends = new ArrayList<User>();
   private Integer age;
   private boolean alive = true;
-  
+
   public User() {}
-  
-  public User(String firstName, String lastName, Integer age, User parent) {
+
+  public User(String firstName, String lastName, Integer age, Gender gender, User parent) {
     super();
     this.firstName = firstName;
     this.lastName = lastName;
+    this.age = age;
+    this.gender = gender;
     this.parent = parent;
     this.parentRef = parent;
-    this.age = age;
+    
   }
-  
+
   public String getFirstName() {
     return firstName;
   }
+
   public void setFirstName(String firstName) {
     this.firstName = firstName;
   }
+
   public String getLastName() {
     return lastName;
   }
+
   public void setLastName(String lastName) {
     this.lastName = lastName;
   }
+
   public User getParent() {
     return parent;
   }
+
   public void setParent(User parent) {
     this.parent = parent;
   }
+
   public User getParentRef() {
     return parentRef;
   }
+
   public void setParentRef(User parentRef) {
     this.parentRef = parentRef;
   }
+
   public List<String> getPetNames() {
     return petNames;
   }
+
   public void setPetNames(List<String> petNames) {
     this.petNames = petNames;
   }
+
   public List<User> getFriends() {
     return friends;
   }
+
   public void setFriends(List<User> friends) {
     this.friends = friends;
   }
+
   public Integer getAge() {
     return age;
   }
+
   public void setAge(Integer age) {
     this.age = age;
   }
+
   public boolean isAlive() {
     return alive;
   }
+
   public void setAlive(boolean alive) {
     this.alive = alive;
   }
+
+  public Gender getGender() {
+    return gender;
+  }
+
+  public void setGender(Gender gender) {
+    this.gender = gender;
+  }
+
   @Override
   public int hashCode() {
     final int prime = 31;
@@ -106,12 +138,14 @@ public class User {
     result = prime * result + (alive ? 1231 : 1237);
     result = prime * result + ((firstName == null) ? 0 : firstName.hashCode());
     result = prime * result + ((friends == null) ? 0 : friends.hashCode());
+    result = prime * result + ((gender == null) ? 0 : gender.hashCode());
     result = prime * result + ((lastName == null) ? 0 : lastName.hashCode());
     result = prime * result + ((parent == null) ? 0 : parent.hashCode());
     result = prime * result + ((parentRef == null) ? 0 : parentRef.hashCode());
     result = prime * result + ((petNames == null) ? 0 : petNames.hashCode());
     return result;
   }
+
   @Override
   public boolean equals(Object obj) {
     if (this == obj)
@@ -141,6 +175,8 @@ public class User {
     }
     else if (!friends.equals(other.friends))
       return false;
+    if (gender != other.gender)
+      return false;
     if (lastName == null) {
       if (other.lastName != null)
         return false;
@@ -166,5 +202,11 @@ public class User {
     else if (!petNames.equals(other.petNames))
       return false;
     return true;
+  }
+
+  @Override
+  public String toString() {
+    return "User [firstName=" + firstName + ", lastName=" + lastName + ", gender=" + gender + ", age=" + age
+        + ", alive=" + alive + "]";
   }
 }

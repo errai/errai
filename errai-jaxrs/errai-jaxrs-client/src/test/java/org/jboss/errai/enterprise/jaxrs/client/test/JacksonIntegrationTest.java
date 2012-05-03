@@ -24,6 +24,7 @@ import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
 import org.jboss.errai.enterprise.jaxrs.client.shared.JacksonTestService;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.User;
+import org.jboss.errai.enterprise.jaxrs.client.shared.entity.User.Gender;
 import org.jboss.errai.marshalling.client.Marshalling;
 import org.junit.Test;
 
@@ -43,29 +44,25 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
   public void testJacksonMarshalling() {
    delayTestFinish(5000);
     
-    final User user = new User("first", "last", 20, new User("first2", "last2", 40, null));
+    final User user = new User("first", "last", 20, Gender.MALE, new User("first2", "last2", 40, Gender.FEMALE, null));
     user.setPetNames(new ArrayList<String>() {{
       add("pet1");
       add("pet2");
     }});
     user.setFriends(new ArrayList<User>() {{
-      add(new User("friend1-first", "friend1-last", 1, null));
-      add(new User("friend2-first", "friend2-last", 2, null));
+      add(new User("friend1-first", "friend1-last", 1, Gender.MALE, null));
+      add(new User("friend2-first", "friend2-last", 2, Gender.FEMALE, null));
     }});
    
     String erraiJson = Marshalling.toJSON(user);
-    System.out.println(erraiJson);
-    String jackson = new JacksonTransformer().toJackson(erraiJson);
-    System.out.println(jackson);
+    String jackson = JacksonTransformer.toJackson(erraiJson);
     
     RestClient.create(JacksonTestService.class,
         new RemoteCallback<String>() {
           @Override
           public void callback(String jackson) {
             assertNotNull("Server failed to parse JSON", jackson);
-            System.out.println(jackson);
-            String erraiJson = new JacksonTransformer().fromJackson(jackson);
-            System.out.println(erraiJson);
+            String erraiJson = JacksonTransformer.fromJackson(jackson);
             assertEquals(user, (User) Marshalling.fromJSON(erraiJson, User.class));
             finishTest();
           }

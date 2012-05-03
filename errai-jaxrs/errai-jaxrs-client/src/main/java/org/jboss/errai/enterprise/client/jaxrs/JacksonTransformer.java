@@ -31,73 +31,86 @@ import com.google.gwt.json.client.JSONValue;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class JacksonTransformer {
+  private static final String ENCODED_TYPE = "^EncodedType";
+  private static final String VALUE = "^Value";
+  private static final String OBJECT_ID = "^ObjectID";
+  private static final String ENUM_STRING_VALUE = "^EnumStringValue";
 
-  public String toJackson(String erraiJson) {
+  private JacksonTransformer() {};
+
+  public static String toJackson(String erraiJson) {
     JSONValue val = JSONParser.parseStrict(erraiJson);
     if (val.isObject() != null) {
-      toJackson(val, null, null);
+      toJackson(val, null, null, new HashMap<String, JSONValue>());
     }
 
     return val.toString();
   }
 
-  public String fromJackson(String jackson) {
-    JSONValue val = JSONParser.parseStrict(jackson);
-    if (val.isObject() != null) {
-      fromJackson(val, null, null);
-    }
-
-    return val.toString();
-  }
-
-  int i;
-  private void fromJackson(JSONValue val, JSONObject parent, String key) {
+  private static void toJackson(JSONValue val, String key, JSONObject parent, Map<String, JSONValue> backReferences) {
     JSONObject obj;
     JSONArray arr;
     if ((obj = val.isObject()) != null) {
-      obj.put("^ObjectID", new JSONString(new Integer(++i).toString()));
+      JSONValue objectId = obj.get(OBJECT_ID);
+      if (objectId != null) {
+        JSONValue backRef = backReferences.get(objectId.toString());
+        if (backRef != null) {
+          parent.put(key, backRef);
+        }
+        else {
+          backReferences.put(obj.get(OBJECT_ID).toString(), obj);
+        }
+      }
+
+      obj.put(OBJECT_ID, null);
+      obj.put(ENCODED_TYPE, null);
 
       for (String k : obj.keySet()) {
-        fromJackson(obj.get(k), obj, k);
+        if ((arr = obj.get(k).isArray()) != null) {
+          for (int i = 0; i < arr.size(); i++) {
+            toJackson(arr.get(i), VALUE, obj, backReferences);
+          }
+          parent.put(key, obj.get(k));
+        }
+        else if (k.equals(ENUM_STRING_VALUE)) {
+          parent.put(key, obj.get(k));
+        }
+
+        toJackson(obj.get(k), k, obj, backReferences);
+      }
+    }
+  }
+
+  public static String fromJackson(String jackson) {
+    JSONValue val = JSONParser.parseStrict(jackson);
+    if (val.isObject() != null) {
+      fromJackson(val, null, null, 0);
+    }
+
+    return val.toString();
+  }
+
+  private static int fromJackson(JSONValue val, String key, JSONObject parent, int objectId) {
+    JSONObject obj;
+    JSONArray arr;
+    if ((obj = val.isObject()) != null) {
+      obj.put(OBJECT_ID, new JSONString(new Integer(++objectId).toString()));
+      
+      for (String k : obj.keySet()) {
+        objectId = fromJackson(obj.get(k), k, obj, objectId);
       }
     }
 
     if ((arr = val.isArray()) != null) {
       JSONObject arrayObject = new JSONObject();
-      arrayObject.put("^ObjectID", new JSONString(new Integer(++i).toString()));
-      arrayObject.put("^Value", arr);
+      arrayObject.put(OBJECT_ID, new JSONString(new Integer(++objectId).toString()));
+      arrayObject.put(VALUE, arr);
       parent.put(key, arrayObject);
 
       for (int i = 0; i < arr.size(); i++) {
-        fromJackson(arr.get(i), arrayObject, "^Value");
+        objectId = fromJackson(arr.get(i), VALUE, arrayObject, objectId);
       }
     }
-  }
-
-  Map<String, JSONValue> backReferences = new HashMap<String, JSONValue>();
-  private void toJackson(JSONValue val, JSONObject parent, String key) {
-    JSONObject obj;
-    JSONArray arr;
-    if ((obj = val.isObject()) != null) {
-      JSONValue backRef = backReferences.get(obj.get("^ObjectID").toString());
-      if (backRef != null) {
-        parent.put(key, backRef);
-      } else {
-       backReferences.put(obj.get("^ObjectID").toString(), obj);
-      }
-        
-      obj.put("^ObjectID", null);
-      obj.put("^EncodedType", null);
-
-      for (String k : obj.keySet()) {
-        if ((arr = obj.get(k).isArray()) != null) {
-          for (int i = 0; i < arr.size(); i++) {
-            toJackson(arr.get(i), obj, "^Value");
-          }
-          parent.put(key, obj.get(k));
-        }
-        toJackson(obj.get(k), obj, k);
-      }
-    }
+    return objectId;
   }
 }
