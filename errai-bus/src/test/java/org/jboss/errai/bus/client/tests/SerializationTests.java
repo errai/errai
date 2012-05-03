@@ -44,6 +44,9 @@ import org.jboss.errai.bus.client.tests.support.EntityWithGenericCollections;
 import org.jboss.errai.bus.client.tests.support.EntityWithStringBufferAndStringBuilder;
 import org.jboss.errai.bus.client.tests.support.EntityWithSuperClassField;
 import org.jboss.errai.bus.client.tests.support.EntityWithUnqualifiedFields;
+import org.jboss.errai.bus.client.tests.support.EnumContainer;
+import org.jboss.errai.bus.client.tests.support.EnumContainerContainer;
+import org.jboss.errai.bus.client.tests.support.EnumWithState;
 import org.jboss.errai.bus.client.tests.support.FactoryEntity;
 import org.jboss.errai.bus.client.tests.support.GenericEntity;
 import org.jboss.errai.bus.client.tests.support.Group;
@@ -1825,4 +1828,38 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
+
+  public void testEntityWithEnumContainerContainer() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        // we will nest this into "ecc"
+        final EnumContainer ec = new EnumContainer();
+        ec.setEnumA1(TestEnumA.Jonathan);
+        ec.setStatefulEnum1(EnumWithState.THING1);
+        ec.setStatefulEnum2(EnumWithState.THING1);
+
+        // this is the object we'll be transmitting. it contains "ec"
+        final EnumContainerContainer ecc = new EnumContainerContainer();
+        ecc.setEnumA(TestEnumA.Jonathan);
+        ecc.setEnumContainer(ec);
+
+        MessageBuilder.createCall(new RemoteCallback<EnumContainerContainer>() {
+          @Override
+          public void callback(EnumContainerContainer response) {
+            try {
+              assertEquals(ecc.toString(), response.toString());
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestSerializationRPCService.class).testEntityWithEnumContainerContainer(ecc);
+      }
+    });
+  }
+
 }

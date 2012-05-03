@@ -154,4 +154,6 @@ public interface TestSerializationRPCService {
 
   public User testEntityWithNullField(User u);
 
+  public EnumContainerContainer testEntityWithEnumContainerContainer(EnumContainerContainer ecc);
+
 }
