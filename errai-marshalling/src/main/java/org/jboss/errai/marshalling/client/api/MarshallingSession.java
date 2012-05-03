@@ -16,8 +16,6 @@
 
 package org.jboss.errai.marshalling.client.api;
 
-import org.jboss.errai.marshalling.client.api.json.EJValue;
-
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
@@ -27,6 +25,10 @@ public interface MarshallingSession {
   public Marshaller<Object> getMarshallerInstance(String fqcn);
   
   public String determineTypeFor(String formatType, Object o);
+  
+  public String getAssumedElementType();
+  
+  public void setAssumedElementType(String assumendElementType);
   
   public boolean hasObjectHash(Object reference);
   

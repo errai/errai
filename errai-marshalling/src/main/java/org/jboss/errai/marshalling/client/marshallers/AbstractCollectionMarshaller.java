@@ -16,6 +16,8 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
+import java.util.Collection;
+
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.json.EJArray;
@@ -23,10 +25,9 @@ import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.util.EncDecUtil;
 
-import java.util.Collection;
-
 /**
  * @author Mike Brock
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public abstract class AbstractCollectionMarshaller<C extends Collection> extends AbstractBackReferencingMarshaller<C> {
 
@@ -50,16 +51,30 @@ public abstract class AbstractCollectionMarshaller<C extends Collection> extends
     }
   }
 
-
   public abstract C doDemarshall(EJArray o, MarshallingSession ctx);
 
   protected <T extends Collection> T marshallToCollection(T collection, EJArray array, MarshallingSession ctx) {
     if (array == null) return null;
 
+    String assumedElementType = ctx.getAssumedElementType();
+    
     for (int i = 0; i < array.size(); i++) {
       EJValue elem = array.get(i);
       if (!elem.isNull()) {
-        collection.add(ctx.getMarshallerInstance(ctx.determineTypeFor(null, elem)).demarshall(elem, ctx));
+        String type = null;
+        EJObject jsonObject;
+        if ((jsonObject = elem.isObject()) != null) {
+          if (!jsonObject.containsKey(SerializationParts.ENCODED_TYPE)) {
+            // for collections with a concrete type parameter, we treat the ^EncodedType value as optional
+            type = assumedElementType;
+          }
+        }
+        
+        if (type == null) {
+          type = ctx.determineTypeFor(null, elem);
+        }
+        
+        collection.add(ctx.getMarshallerInstance(type).demarshall(elem, ctx));
       }
       else {
         collection.add(null);

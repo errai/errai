@@ -33,6 +33,7 @@ import org.junit.runners.Suite;
     CustomTypeIntegrationTest.class,
     ErrorHandlingIntegrationTest.class,
     HeaderParamIntegrationTest.class,
+    JacksonIntegrationTest.class,
     MatrixParamIntegrationTest.class,
     PathParamIntegrationTest.class,
     PlainMethodIntegrationTest.class,

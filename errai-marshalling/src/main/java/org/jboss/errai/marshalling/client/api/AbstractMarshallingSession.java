@@ -26,6 +26,7 @@ import java.util.Map;
 public abstract class AbstractMarshallingSession implements MarshallingSession {
   private Map<Object, Integer> objects = new IdentityHashMap<Object, Integer>();
   private Map<String, Object> objectMap = new HashMap<String, Object>();
+  private String assumedElementType = null;
 
   @Override
   public boolean hasObjectHash(String hashCode) {
@@ -66,5 +67,15 @@ public abstract class AbstractMarshallingSession implements MarshallingSession {
     }
 
     return s;
+  }
+
+  @Override
+  public String getAssumedElementType() {
+    return this.assumedElementType;
+  }
+
+  @Override
+  public void setAssumedElementType(String assumendElementType) {
+     this.assumedElementType = assumendElementType;
   }
 }
