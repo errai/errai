@@ -17,12 +17,10 @@
 package org.jboss.errai.enterprise.client.jaxrs.test;
 
 import org.jboss.errai.bus.client.api.RemoteCallback;
-import org.jboss.errai.enterprise.client.jaxrs.JaxrsProxyLoader;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.ioc.client.Container;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.junit.client.GWTTestCase;
 

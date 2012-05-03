@@ -29,6 +29,7 @@ import com.google.gwt.core.client.GWT;
  */
 @IOCBootstrapTask(TaskOrder.Before)
 public class JaxrsModuleBootstrapper implements Runnable {
+  
   @Override
   public void run() {
     InitVotes.waitFor(JaxrsModuleBootstrapper.class);

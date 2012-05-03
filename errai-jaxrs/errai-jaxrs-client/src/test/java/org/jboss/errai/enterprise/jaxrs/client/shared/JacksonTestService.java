@@ -28,14 +28,14 @@ import javax.ws.rs.Path;
 public interface JacksonTestService {
 
   /**
-   * Accepts a jackson compatible JSON string, marshals it into an object using the jackson ObjectMapper (which we
-   * can't use on the client), then demarshals it again and returns the representation.
+   * Accepts a jackson compatible JSON string, marshals it into an object using the jackson ObjectMapper (which we can't
+   * use on the client), then demarshals it again and returns the representation.
    * 
    * @param jackson
    *          jackson compatible JSON representation
-   *          
-   * @return the jackson JSON representation the client (unit test) can use to confirm it can unmarshal it, resulting
-   *         in an object equal to the original.
+   * 
+   * @return the jackson JSON representation the client (unit test) can use to confirm that it can unmarshal it,
+   *         resulting in an object equal to the original.
    */
   @POST
   public String postJackson(String jackson);

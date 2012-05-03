@@ -24,7 +24,6 @@ import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.framework.ProxyFactory;
 import org.jboss.errai.bus.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.enterprise.client.jaxrs.JaxrsProxy;
-import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 
 /**
  * API for executing HTTP calls based on a JAX-RS interface.
@@ -32,11 +31,6 @@ import org.jboss.errai.marshalling.client.api.MarshallerFramework;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class RestClient {
-  static {
-    // ensure that the marshalling framework has been initialized
-    MarshallerFramework.initializeDefaultSessionProvider();
-  }
-  
   private static ProxyFactory proxyProvider = new RemoteServiceProxyFactory();
 
   /**
@@ -142,5 +136,28 @@ public class RestClient {
     else {
       $wnd.erraiJaxRsApplicationRoot = path;
     }
+  }-*/;
+  
+  /**
+   * Checks if a jackson compatible JSON format should be used instead of Errai JSON.
+   * 
+   * @return true, if jackson marshalling should be used, otherwise false.
+   */
+  public static native boolean isJacksonMarshallingActive() /*-{
+    if ($wnd.erraiJaxRsJacksonMarshallingActive === undefined) {
+      return false; 
+    } 
+    else {
+      return $wnd.erraiJaxRsJacksonMarshallingActive;
+    }
+  }-*/;
+  
+  /**
+   * Activates/Deactivates jackson conform JSON marshalling.
+   * 
+   * @param active  true if jackson marshalling should be activated, otherwise false.
+   */
+  public static native void setJacksonMarshallingActive(boolean active) /*-{
+    $wnd.erraiJaxRsJacksonMarshallingActive = active;
   }-*/;
 }

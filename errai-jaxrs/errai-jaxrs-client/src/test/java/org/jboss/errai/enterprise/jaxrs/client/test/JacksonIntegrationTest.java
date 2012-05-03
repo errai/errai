@@ -41,6 +41,7 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
   }
 
   @Test
+  @SuppressWarnings("serial")
   public void testJacksonMarshalling() {
    delayTestFinish(5000);
     

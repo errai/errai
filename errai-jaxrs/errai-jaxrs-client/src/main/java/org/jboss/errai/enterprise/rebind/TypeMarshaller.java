@@ -22,7 +22,7 @@ import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.util.Stmt;
-import org.jboss.errai.marshalling.client.Marshalling;
+import org.jboss.errai.enterprise.client.jaxrs.MarshallingWrapper;
 
 /**
  * Generates the required {@link Statement}s for type marshalling.
@@ -45,7 +45,7 @@ public class TypeMarshaller {
       marshallingStatement = PrimitiveTypeMarshaller.marshal(type, statement);
     }
     else {
-      marshallingStatement = Stmt.invokeStatic(Marshalling.class, "toJSON", statement);
+      marshallingStatement = Stmt.invokeStatic(MarshallingWrapper.class, "toJSON", statement);
     }
     return marshallingStatement;
   }
@@ -60,7 +60,7 @@ public class TypeMarshaller {
       demarshallingStatement = PrimitiveTypeMarshaller.demarshal(type, statement);
     }
     else {
-      demarshallingStatement = Stmt.invokeStatic(Marshalling.class, "fromJSON", statement);
+      demarshallingStatement = Stmt.invokeStatic(MarshallingWrapper.class, "fromJSON", statement);
     }
     return demarshallingStatement;
   }
