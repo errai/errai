@@ -546,7 +546,6 @@ MessageBuilder.createMessage()
         <code>SessionID</code>
         part in the message, the bus will see this and use it for routing the message to the relevant queue.
       </para>
-      <para>Now you're routing from client-to-client!</para>
       <para>
         It may be tempting however, to try and include destination
         <code>SessionIDs</code>
@@ -610,7 +609,7 @@ MessageBuilder.createMessage()
    </section>
    <section id="sid-23036473">
       <title>Wire Protocol (J.REP)</title>
-      <para>ErraiBus implements a JSON-based wire protocol which is used for the federated communication between different buses. The protocol specification encompasses a standard JSON payload structure, a set of verbs, and an object marshalling protocol. The protocol is named J.REP. Which stands for JSON Rich Event Protocol.  The protocol is named J.REP. Which stands for JSON Rich Event Protocol.</para>
+      <para>ErraiBus implements a JSON-based wire protocol which is used for the federated communication between different buses. The protocol specification encompasses a standard JSON payload structure, a set of verbs, and an object marshalling protocol. The protocol is named J.REP. Which stands for JSON Rich Event Protocol.</para>
       <section id="sid-23036473_WireProtocol%28J.REP%29-PayloadStructure">
          <title>Payload Structure</title>
          <para>
