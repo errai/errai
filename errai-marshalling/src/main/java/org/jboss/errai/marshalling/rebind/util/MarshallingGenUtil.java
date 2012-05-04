@@ -16,9 +16,13 @@
 
 package org.jboss.errai.marshalling.rebind.util;
 
+import java.util.Collection;
+
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaParameterizedType;
+import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.util.GenUtil;
 
 /**
@@ -84,6 +88,43 @@ public class MarshallingGenUtil {
     for (MetaMethod m : cls.getDeclaredMethods()) {
       if (m.getName().toUpperCase().equals(key) && m.getParameters().length == 0) {
         return m;
+      }
+    }
+    return null;
+  }
+  
+  
+  /**
+   * Returns the element type of the given metaclass under the following conditions:
+   * <ul>
+   * <li>toType is a collection type
+   * <li>toType has a single type parameter
+   * <li>toType's type parameter is not a wildcard
+   * <li>toType's type parameter is a non-abstract (concrete) type
+   * <li>toType's type parameter is not java.lang.Object
+   * </ul>
+   * 
+   * @param toType
+   *          The type to check for a known concrete collection element type.
+   * @return The concrete element type meeting all above-mentioned criteria, or null if one or more of the criteria
+   *         fails.
+   */
+  public static MetaClass getConcreteCollectionElementType(MetaClass toType) {
+    if (toType.isAssignableTo(Collection.class) && toType.getParameterizedType() != null) {
+      MetaType[] typeParms = toType.getParameterizedType().getTypeParameters();
+      if (typeParms != null && typeParms.length == 1) {
+
+        MetaClass typeParameter = null;
+        if (typeParms[0] instanceof MetaParameterizedType) {
+          MetaParameterizedType parameterizedTypeParemeter = (MetaParameterizedType) typeParms[0];
+          typeParameter = (MetaClass) parameterizedTypeParemeter.getRawType();
+        }
+        else if (typeParms[0] instanceof MetaClass) {
+          typeParameter = (MetaClass) typeParms[0];
+        }      
+
+        if (!MetaClassFactory.get(Object.class).equals(typeParameter))
+          return typeParameter;
       }
     }
     return null;

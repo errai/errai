@@ -16,19 +16,22 @@
 
 package org.jboss.errai.marshalling.client.util;
 
-import org.jboss.errai.common.client.protocols.SerializationParts;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaParameterizedType;
+import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
-import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
-
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  * @author Jonathan Fuerth <jfuerth@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class MarshallUtil {
   private static final Set<Class<?>> primitiveWrappers = new HashSet<Class<?>>();
@@ -69,7 +72,6 @@ public class MarshallUtil {
       }
     };
   }
-
 
   public static String jsonStringEscape(final String s) {
     StringBuilder sb = new StringBuilder(s.length());

@@ -39,5 +39,18 @@ public interface JacksonTestService {
    */
   @POST
   public String postJackson(String jackson);
-
+  
+  /**
+   * Accepts a jackson compatible JSON string, marshals it into an list using the jackson ObjectMapper (which we can't
+   * use on the client), then demarshals it again and returns the representation.
+   * 
+   * @param jackson
+   *          jackson compatible JSON representation
+   * 
+   * @return the jackson JSON representation the client (unit test) can use to confirm that it can unmarshal it,
+   *         resulting in an list equal to the original.
+   */
+  @POST
+  @Path("/list")
+  public String postJacksonList(String jackson);
 }

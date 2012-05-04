@@ -66,8 +66,15 @@ public abstract class Marshalling {
   }
 
   public static <T> T fromJSON(String json, Class<T> type) {
+    return fromJSON(json, type, null);
+  }
+  
+  public static <T> T fromJSON(String json, Class<T> type, Class<?> assumedElementType) {
     EJValue parsedValue = ParserFactory.get().parse(json);
     MarshallingSession session = MarshallingSessionProviderFactory.getDecoding();
+    if (assumedElementType != null) {
+      session.setAssumedElementType(assumedElementType.getName());
+    }
     Marshaller<Object> marshallerInstance = session.getMarshallerInstance(type.getName());
     return (T) marshallerInstance.demarshall(parsedValue, session);
   }

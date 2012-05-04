@@ -240,8 +240,13 @@ public class JaxrsProxyMethodGenerator {
     Statement handleResponse = Stmt.loadStatic(declaringClass, "this").loadField("remoteCallback")
         .invoke("callback", Stmt.loadVariable("response"));
 
-    Statement result = demarshal(resourceMethod.getMethod().getReturnType(),
+    Statement result = null;
+    if (resourceMethod.getMethod().getReturnType().equals(MetaClassFactory.get(void.class))) {
+      result = Stmt.load(null);
+    } else {
+     result = demarshal(resourceMethod.getMethod().getReturnType(),
         Stmt.loadVariable("response").invoke("getText"), resourceMethod.getAcceptHeader());
+    }
 
     Statement handleResult = Stmt
         .if_(Bool.equals(Stmt.loadVariable("response").invoke("getStatusCode"), 204))

@@ -19,6 +19,7 @@ package org.jboss.errai.enterprise.client.jaxrs;
 import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.ioc.client.api.IOCBootstrapTask;
 import org.jboss.errai.ioc.client.api.TaskOrder;
+import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 
 import com.google.gwt.core.client.GWT;
 
@@ -29,6 +30,10 @@ import com.google.gwt.core.client.GWT;
  */
 @IOCBootstrapTask(TaskOrder.Before)
 public class JaxrsModuleBootstrapper implements Runnable {
+  static {
+    // ensure that the marshalling framework has been initialized
+    MarshallerFramework.initializeDefaultSessionProvider();
+  }
   
   @Override
   public void run() {

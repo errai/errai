@@ -36,6 +36,7 @@ public abstract class AbstractErraiJaxrsTest extends GWTTestCase {
   protected void gwtSetUp() throws Exception {
     new Container().boostrapContainer();
     RestClient.setApplicationRoot(jaxRsApplicationRoot);
+    RestClient.setJacksonMarshallingActive(false);
     super.gwtSetUp();
   }
 

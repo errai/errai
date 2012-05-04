@@ -16,34 +16,21 @@
 
 package org.jboss.errai.codegen.util;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.RunAsyncCallback;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.DefModifiers;
-import org.jboss.errai.codegen.DefParameters;
 import org.jboss.errai.codegen.Modifier;
-import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
-import org.jboss.errai.codegen.StringStatement;
 import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.VariableReference;
-import org.jboss.errai.codegen.builder.BlockBuilder;
-import org.jboss.errai.codegen.builder.CatchBlockBuilder;
-import org.jboss.errai.codegen.builder.ClassStructureBuilder;
-import org.jboss.errai.codegen.builder.ContextualStatementBuilder;
-import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.builder.impl.Scope;
 import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.exception.InvalidTypeException;
@@ -787,5 +774,4 @@ public class GenUtil {
     outerBlame.setStackTrace(outerStackTrace.toArray(new StackTraceElement[outerStackTrace.size()]));
     innerBlame.initCause(outerBlame);
   }
-
 }

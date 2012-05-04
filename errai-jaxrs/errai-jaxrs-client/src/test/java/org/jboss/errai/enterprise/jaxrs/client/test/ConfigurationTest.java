@@ -60,4 +60,15 @@ public class ConfigurationTest extends AbstractErraiJaxrsTest {
     RestClient.setApplicationRoot("http://localhost:8080/root/");
     assertEquals("http://localhost:8080/root/", RestClient.getApplicationRoot());
   }
+  
+  @Test
+  public void testUndefinedJacksonMarshallingActive() {
+    assertFalse(RestClient.isJacksonMarshallingActive());
+  }
+
+  @Test
+  public void testJacksonMarshallingActive() {
+    RestClient.setJacksonMarshallingActive(true);
+    assertTrue(RestClient.isJacksonMarshallingActive());
+  }
 }

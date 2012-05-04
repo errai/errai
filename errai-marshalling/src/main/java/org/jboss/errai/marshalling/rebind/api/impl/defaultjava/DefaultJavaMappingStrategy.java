@@ -23,7 +23,6 @@ import static org.jboss.errai.codegen.util.Stmt.declareVariable;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.jboss.errai.codegen.Cast;
@@ -39,8 +38,6 @@ import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
-import org.jboss.errai.codegen.meta.MetaParameterizedType;
-import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.codegen.util.Implementations;
@@ -254,7 +251,7 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
               Bool.expr(loadVariable("obj").invoke("containsKey", memberMapping.getKey())),
               Bool.notExpr(loadVariable("obj").invoke("get", memberMapping.getKey()).invoke("isNull"))));
 
-          MetaClass elementType = getConcreteElementType(memberMapping.getType());
+          MetaClass elementType = MarshallingGenUtil.getConcreteCollectionElementType(memberMapping.getType());
           if (elementType != null) {
             ifBlockBuilder.append(Stmt.loadVariable("a1").invoke("setAssumedElementType", elementType.getFullyQualifiedName()));
           }
@@ -522,41 +519,5 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
       .loadVariable(MarshallingGenUtil.getVarName(toType))
       .invoke("demarshall", valueStatement, loadVariable("a1"));
     }
-  }
-
-  /**
-   * Returns the element type of the given metaclass under the following conditions:
-   * <ul>
-   * <li>toType is a collection type
-   * <li>toType has a single type parameter
-   * <li>toType's type parameter is not a wildcard
-   * <li>toType's type parameter is a non-abstract (concrete) type
-   * <li>toType's type parameter is not java.lang.Object
-   * </ul>
-   * 
-   * @param toType
-   *          The type to check for a known concrete collection element type.
-   * @return The concrete element type meeting all above-mentioned criteria, or null if one or more of the criteria
-   *         fails.
-   */
-  private static MetaClass getConcreteElementType(MetaClass toType) {
-    if (toType.isAssignableTo(Collection.class) && toType.getParameterizedType() != null) {
-      MetaType[] typeParms = toType.getParameterizedType().getTypeParameters();
-      if (typeParms != null && typeParms.length == 1) {
-
-        MetaClass typeParameter = null;
-        if (typeParms[0] instanceof MetaParameterizedType) {
-          MetaParameterizedType parameterizedTypeParemeter = (MetaParameterizedType) typeParms[0];
-          typeParameter = (MetaClass) parameterizedTypeParemeter.getRawType();
-        }
-        else if (typeParms[0] instanceof MetaClass) {
-          typeParameter = (MetaClass) typeParms[0];
-        }      
-
-        if (!MetaClassFactory.get(Object.class).equals(typeParameter))
-          return typeParameter;
-      }
-    }
-    return null;
   }
 }

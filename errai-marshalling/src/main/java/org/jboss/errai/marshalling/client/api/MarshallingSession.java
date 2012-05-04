@@ -28,7 +28,7 @@ public interface MarshallingSession {
   
   public String getAssumedElementType();
   
-  public void setAssumedElementType(String assumendElementType);
+  public void setAssumedElementType(String assumedElementType);
   
   public boolean hasObjectHash(Object reference);
   

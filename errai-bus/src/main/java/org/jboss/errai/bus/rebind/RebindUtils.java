@@ -17,11 +17,15 @@
 package org.jboss.errai.bus.rebind;
 
 import java.lang.reflect.Method;
+import java.util.Collection;
 
 import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
+import org.jboss.errai.codegen.meta.MetaParameterizedType;
+import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.util.Stmt;
 import org.mvel2.util.StringAppender;
 

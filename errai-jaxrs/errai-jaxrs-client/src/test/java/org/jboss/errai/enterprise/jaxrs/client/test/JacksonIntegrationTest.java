@@ -17,15 +17,15 @@
 package org.jboss.errai.enterprise.jaxrs.client.test;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.jboss.errai.bus.client.api.RemoteCallback;
-import org.jboss.errai.enterprise.client.jaxrs.JacksonTransformer;
+import org.jboss.errai.enterprise.client.jaxrs.MarshallingWrapper;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
 import org.jboss.errai.enterprise.jaxrs.client.shared.JacksonTestService;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.User;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.User.Gender;
-import org.jboss.errai.marshalling.client.Marshalling;
 import org.junit.Test;
 
 /**
@@ -40,33 +40,60 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
     return "org.jboss.errai.enterprise.jaxrs.TestModule";
   }
 
+  @Override
+  protected void gwtSetUp() throws Exception {
+    super.gwtSetUp();
+    RestClient.setJacksonMarshallingActive(true);
+  }
+  
   @Test
   @SuppressWarnings("serial")
   public void testJacksonMarshalling() {
-   delayTestFinish(5000);
-    
+    delayTestFinish(5000);
+
     final User user = new User("first", "last", 20, Gender.MALE, new User("first2", "last2", 40, Gender.FEMALE, null));
     user.setPetNames(new ArrayList<String>() {{
-      add("pet1");
-      add("pet2");
-    }});
+        add("pet1");
+        add("pet2");
+      }
+    });
     user.setFriends(new ArrayList<User>() {{
-      add(new User("friend1-first", "friend1-last", 1, Gender.MALE, null));
-      add(new User("friend2-first", "friend2-last", 2, Gender.FEMALE, null));
-    }});
-   
-    String erraiJson = Marshalling.toJSON(user);
-    String jackson = JacksonTransformer.toJackson(erraiJson);
-    
+        add(new User("friend1-first", "friend1-last", 1, Gender.MALE, null));
+        add(new User("friend2-first", "friend2-last", 2, Gender.FEMALE, null));
+      }
+    });
+
+    String jackson = MarshallingWrapper.toJSON(user);
+
     RestClient.create(JacksonTestService.class,
         new RemoteCallback<String>() {
           @Override
           public void callback(String jackson) {
-            assertNotNull("Server failed to parse JSON", jackson);
-            String erraiJson = JacksonTransformer.fromJackson(jackson);
-            assertEquals(user, (User) Marshalling.fromJSON(erraiJson, User.class));
+            assertNotNull("Server failed to parse JSON using Jackson", jackson);
+            assertEquals(user, MarshallingWrapper.fromJSON(jackson, User.class));
             finishTest();
           }
     }).postJackson(jackson);
+  }
+
+  @Test
+  public void testJacksonMarshallingOfList() {
+    delayTestFinish(5000);
+    
+    final List<User> users = new ArrayList<User>();
+    users.add(new User("first", "last", 20, Gender.MALE, null));
+    users.add(new User("firs2", "las2", 40, Gender.MALE, null));
+
+    String jackson = MarshallingWrapper.toJSON(users);
+   
+    RestClient.create(JacksonTestService.class,
+        new RemoteCallback<String>() {
+          @Override
+          public void callback(String jackson) {
+            assertNotNull("Server failed to parse JSON using Jackson", jackson);
+            assertEquals(users, MarshallingWrapper.fromJSON(jackson, List.class, User.class));
+            finishTest();
+          }
+    }).postJacksonList(jackson);
   }
 }

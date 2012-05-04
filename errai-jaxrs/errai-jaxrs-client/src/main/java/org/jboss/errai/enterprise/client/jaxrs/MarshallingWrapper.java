@@ -21,19 +21,13 @@ import java.util.Map;
 
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.marshalling.client.Marshalling;
-import org.jboss.errai.marshalling.client.api.MarshallerFramework;
 
 /**
- * Wrapper around {@link Marshalling} that provides a hook for format transformations.
+ * Wrapper around {@link Marshalling} to provide a hook for format transformations.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class MarshallingWrapper {
-  static {
-    // ensure that the marshalling framework has been initialized
-    MarshallerFramework.initializeDefaultSessionProvider();
-  }
-  
   public static String toJSON(Object obj) {
     return _toJSON(Marshalling.toJSON(obj));
   }
@@ -56,6 +50,10 @@ public class MarshallingWrapper {
 
   public static <T> T fromJSON(String json, Class<T> type) {
     return Marshalling.fromJSON(_fromJSON(json), type);
+  }
+  
+  public static <T> T fromJSON(String json, Class<T> type, Class<?> elementType) {
+    return Marshalling.fromJSON(_fromJSON(json), type, elementType);
   }
 
   public static Object fromJSON(String json) {
