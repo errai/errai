@@ -131,7 +131,7 @@ public class IOCProcessorFactory {
         graphBuilder.addDependency(masqueradeClass, Dependency.on(dependentClazz));
       }
       else {
-        DependencyControl control = new DependencyControl() {
+        final DependencyControl control = new DependencyControl() {
           @Override
           public void masqueradeAs(MetaClass clazz) {
             // can't masquerade.

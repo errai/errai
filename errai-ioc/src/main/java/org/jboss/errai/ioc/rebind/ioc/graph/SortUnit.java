@@ -60,7 +60,7 @@ public class SortUnit implements Comparable<SortUnit> {
 
   /**
    * Returns the list of arbitrary items associated with this sort unit. There is no contract on what this should be,
-   * although the order in which items are represented in the return List are garaunteed to be the same order in which
+   * although the order in which items are represented in the return List are guaranteed to be the same order in which
    * they were added.
    * <p>
    * Typically items are units of work used by the container to orchestrate the generation of code in the correct
@@ -69,16 +69,16 @@ public class SortUnit implements Comparable<SortUnit> {
    * @return an unmodifiable list of arbitrary items.
    */
   public List<Object> getItems() {
-    return Collections.unmodifiableList(items);
+    return items;
   }
 
   /**
    * Returns a list of SortUnits which are depended on by this SortUnit.
    *
-   * @return an umodifiable set of SortUnits which are depended on by this SortUnit.
+   * @return an unmodifiable set of SortUnits which are depended on by this SortUnit.
    */
   public Set<SortUnit> getDependencies() {
-    return Collections.unmodifiableSet(dependencies);
+    return dependencies;
   }
 
   /**

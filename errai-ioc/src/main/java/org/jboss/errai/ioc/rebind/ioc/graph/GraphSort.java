@@ -44,7 +44,7 @@ public final class GraphSort {
    * @return a new sorted lis
    */
   public static List<SortUnit> sortGraph(final Collection<SortUnit> in) {
-    List<SortUnit> sortUnitList = topologicalSort(new ArrayList<SortUnit>(in));
+    final List<SortUnit> sortUnitList = topologicalSort(new ArrayList<SortUnit>(in));
     Collections.sort(sortUnitList);
     return sortUnitList;
   }

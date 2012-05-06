@@ -27,7 +27,7 @@ public class GraphBuilder {
    * @param dependency the depedency
    * @return the same instance of the GraphBuilder that called this method.
    */
-  public GraphBuilder addDependency(MetaClass type, Dependency dependency) {
+  public GraphBuilder addDependency(final MetaClass type, final xDependency dependency) {
     dependencyMap.put(type.getFullyQualifiedName(), dependency);
     recordClassForLookup(dependency.getType());
     return this;
@@ -40,13 +40,13 @@ public class GraphBuilder {
    * @param item the arbitrary object
    * @return the same instance of the GraphBuilder that called this method.
    */
-  public GraphBuilder addItem(MetaClass type, Object item) {
+  public GraphBuilder addItem(final MetaClass type, final Object item) {
     itemMap.put(type.getFullyQualifiedName(), item);
     recordClassForLookup(type);
     return this;
   }
 
-  private void recordClassForLookup(MetaClass type) {
+  private void recordClassForLookup(final MetaClass type) {
     classLookup.put(type.getFullyQualifiedName(), type);
   }
 
