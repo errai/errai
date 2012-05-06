@@ -28,7 +28,7 @@ import org.jboss.errai.common.rebind.EnvUtil;
 import java.io.PrintWriter;
 
 /**
- * The main generator class for the errai-ioc framework.
+ * The main generator class for the Errai IOC framework.
  *
  * @author Mike Brock
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -85,7 +85,7 @@ public class IOCGenerator extends Generator {
       return;
 
     final IOCBootstrapGenerator iocBootstrapGenerator = new IOCBootstrapGenerator(context, logger,
-            RebindUtils.findTranslatablePackages(context));
+            RebindUtils.findTranslatablePackages(context), false);
 
     final String out = iocBootstrapGenerator.generate(packageName, className);
 

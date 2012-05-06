@@ -50,11 +50,8 @@ public class ModuleAnnotationProcessor extends AbstractProcessor {
       }
 
       try {
-        final FileObject fo = processingEnv.getFiler().createResource(
-                StandardLocation.CLASS_OUTPUT,
-                "",
-                "classlist.mf",
-                null);
+        final FileObject fo
+                = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", "classlist.mf", null);
 
         Writer writer = fo.openWriter();
         writer.write(builder.toString());
@@ -67,5 +64,4 @@ public class ModuleAnnotationProcessor extends AbstractProcessor {
     }
     return false;
   }
-
 }

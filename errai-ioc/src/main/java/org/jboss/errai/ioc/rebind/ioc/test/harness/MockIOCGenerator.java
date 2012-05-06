@@ -25,6 +25,7 @@ import java.util.List;
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 
+import com.google.gwt.core.ext.TreeLogger;
 import org.jboss.errai.codegen.util.ClassChangeUtil;
 import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.common.metadata.RebindUtils;
@@ -45,9 +46,27 @@ public class MockIOCGenerator {
     String packageName = Bootstrapper.class.getPackage().getName();
     String className = "MockBootstrapperImpl";
 
-    IOCBootstrapGenerator bootstrapGenerator = new IOCBootstrapGenerator();
-    bootstrapGenerator.setUseReflectionStubs(true);
-    bootstrapGenerator.setPackages(packages);
+    final IOCBootstrapGenerator bootstrapGenerator = new IOCBootstrapGenerator(null,
+            new TreeLogger() {
+                  @Override
+                  public TreeLogger branch(Type type, String msg, Throwable caught, HelpInfo helpInfo) {
+                    return null;
+                  }
+
+                  @Override
+                  public boolean isLoggable(Type type) {
+                    return false;
+                  }
+
+                  @Override
+                  public void log(Type type, String msg, Throwable caught, HelpInfo helpInfo) {
+                    System.out.println(type.getLabel() + ": " + msg);
+                    if (caught != null) {
+                      caught.printStackTrace();
+                    }
+                  }
+                }, packages, true);
+
 
     final String classStr = bootstrapGenerator.generate(packageName, className);
 

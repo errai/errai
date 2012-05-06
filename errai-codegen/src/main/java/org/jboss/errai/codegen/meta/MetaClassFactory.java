@@ -16,22 +16,6 @@
 
 package org.jboss.errai.codegen.meta;
 
-import java.io.File;
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.enterprise.util.TypeLiteral;
-
-import com.google.gwt.core.ext.TreeLogger;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.DefParameters;
 import org.jboss.errai.codegen.Parameter;
@@ -53,10 +37,26 @@ import org.jboss.errai.common.metadata.RebindUtils;
 import org.mvel2.ConversionHandler;
 import org.mvel2.DataConversion;
 
+import javax.enterprise.util.TypeLiteral;
+import java.io.File;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public final class MetaClassFactory {
+  private static final Map<String, MetaClass> PRIMARY_CLASS_CACHE = new HashMap<String, MetaClass>(1000);
+  private static final Map<String, MetaClass> ERASED_CLASS_CACHE = new HashMap<String, MetaClass>(1000);
   static {
     DataConversion.addConversionHandler(Class.class, new ConversionHandler() {
       @Override
@@ -77,12 +77,12 @@ public final class MetaClassFactory {
 
     DataConversion.addConversionHandler(Class[].class, new ConversionHandler() {
       @Override
-      public Object convertFrom(Object in) {
-        int length = Array.getLength(in);
+      public Object convertFrom(final Object in) {
+        final int length = Array.getLength(in);
+        final Class[] cls = new Class[length];
 
-        Class[] cls = new Class[length];
         for (int i = 0; i < length; i++) {
-          Object el = Array.get(in, i);
+          final Object el = Array.get(in, i);
 
           if (el instanceof MetaClass) {
             cls[i] = ((MetaClass) el).asClass();
@@ -107,11 +107,7 @@ public final class MetaClassFactory {
     });
   }
 
-  private static final Map<String, MetaClass> PRIMARY_CLASS_CACHE = new HashMap<String, MetaClass>(1000);
-  private static final Map<String, MetaClass> ERASED_CLASS_CACHE = new HashMap<String, MetaClass>(1000);
-  // private static final Map<Class, MetaClass> CLASS_CACHE = new HashMap<Class, MetaClass>();
-
-  public static void pushCache(MetaClass clazz) {
+  public static void pushCache(final MetaClass clazz) {
     PRIMARY_CLASS_CACHE.put(clazz.getFullyQualifiedName(), clazz);
   }
 
@@ -191,14 +187,6 @@ public final class MetaClassFactory {
     return ERASED_CLASS_CACHE.get(fullyQualifiedClassName);
   }
 
-//  private static MetaClass createOrGet(TypeOracle oracle, String fullyQualifiedClassName) {
-//    if (!ERASED_CLASS_CACHE.containsKey(fullyQualifiedClassName)) {
-//      return createOrGet(load(oracle, fullyQualifiedClassName));
-//    }
-//
-//    return ERASED_CLASS_CACHE.get(fullyQualifiedClassName);
-//  }
-
   private static MetaClass createOrGet(TypeLiteral type) {
     if (type == null) return null;
 
@@ -211,25 +199,6 @@ public final class MetaClassFactory {
 
     return ERASED_CLASS_CACHE.get(type.toString());
   }
-
-
-//  private static MetaClass createOrGet(JType type) {
-//    if (type == null) return null;
-//
-//    if (type.isParameterized() != null) {
-//      return GWTClass.newUncachedInstance(type);
-//    }
-//
-//    if (!ERASED_CLASS_CACHE.containsKey(type.getQualifiedSourceName())) {
-//      MetaClass gwtClass = GWTClass.newUncachedInstance(type, true);
-//
-//      addLookups(type, gwtClass);
-//      return gwtClass;
-//    }
-//
-//    return ERASED_CLASS_CACHE.get(type.getQualifiedSourceName());
-//  }
-
 
   private static MetaClass createOrGet(String clsName, boolean erased) {
     if (clsName == null) return null;
@@ -266,7 +235,6 @@ public final class MetaClassFactory {
 
     return ERASED_CLASS_CACHE.get(cls.getName());
   }
-
 
   public static MetaClass parameterizedAs(Class clazz, MetaParameterizedType parameterizedType) {
     return parameterizedAs(MetaClassFactory.get(clazz), parameterizedType);
@@ -434,14 +402,9 @@ public final class MetaClassFactory {
     ERASED_CLASS_CACHE.put(cls.getName(), metaClass);
   }
 
-//  private static void addLookups(JType cls, MetaClass metaClass) {
-//    ERASED_CLASS_CACHE.put(cls.getQualifiedSourceName(), metaClass);
-//  }
-
   private static void addLookups(String encName, MetaClass metaClass) {
     ERASED_CLASS_CACHE.put(encName, metaClass);
   }
-
 
   public static Map<String, Class<?>> PRIMITIVE_LOOKUP = Collections.unmodifiableMap(new HashMap<String, Class<?>>() {
     {
@@ -478,7 +441,6 @@ public final class MetaClassFactory {
           File directory = sourceFile.getParentFile();
           String packageName = fullyQualifiedName.substring(0, fullyQualifiedName.lastIndexOf('.'));
           String className = fullyQualifiedName.substring(fullyQualifiedName.lastIndexOf('.') + 1);
-
 
           String temp = RebindUtils.getTempDirectory() + "/hotload/";
 

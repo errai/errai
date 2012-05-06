@@ -319,9 +319,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   /**
    * Fire listeners to notify that a new subscription has been registered on the bus.
    *
-   * @param subject - new subscription registered
-   * @param local   -
-   * @param isNew   -
+   * @param subject the subject name which has been registered.
+   * @param local   a boolean indicating whether the subscription is local only.
+   * @param isNew   a boolean indicating whether the subscription is new (ie. no other endpoints listen on this subject)
    */
   private void fireAllSubscribeListeners(String subject, boolean local, boolean isNew) {
     final Iterator<SubscribeListener> iter = onSubscribeHooks.iterator();

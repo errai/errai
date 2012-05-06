@@ -88,10 +88,10 @@ import static org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance.get
 
 @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
 public class IOCProcessorFactory {
-  private GraphBuilder graphBuilder = new GraphBuilder();
-  private Stack<SortedSet<ProcessingEntry>> processingTasksStack = new Stack<SortedSet<ProcessingEntry>>();
-  private InjectionContext injectionContext;
-  private Set<String> visitedAutoDiscoveredDependentBeans = new HashSet<String>();
+  private final GraphBuilder graphBuilder = new GraphBuilder();
+  private final Stack<SortedSet<ProcessingEntry>> processingTasksStack = new Stack<SortedSet<ProcessingEntry>>();
+  private final InjectionContext injectionContext;
+  private final Set<String> visitedAutoDiscoveredDependentBeans = new HashSet<String>();
 
   public IOCProcessorFactory(InjectionContext injectionContext) {
     this.injectionContext = injectionContext;

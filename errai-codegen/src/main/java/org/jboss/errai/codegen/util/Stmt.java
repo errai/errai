@@ -42,6 +42,11 @@ import org.jboss.errai.codegen.meta.MetaClass;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class Stmt {
+
+  /**
+   * Create a new statement builder.
+   * @return a new statement builder instance.
+   */
   public static StatementBegin create() {
     return StatementBuilder.create();
   }

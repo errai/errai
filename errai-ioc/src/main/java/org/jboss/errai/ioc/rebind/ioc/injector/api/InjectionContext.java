@@ -27,6 +27,7 @@ import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.util.PrivateAccessType;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
+import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
@@ -55,37 +56,64 @@ import java.util.Set;
 import static java.util.Collections.unmodifiableCollection;
 
 public class InjectionContext {
-  private IOCProcessingContext processingContext;
+  private final IOCProcessingContext processingContext;
 
-  private Multimap<WiringElementType, Class<? extends Annotation>> elementBindings
+  private final Multimap<WiringElementType, Class<? extends Annotation>> elementBindings
           = HashMultimap.create();
 
   // do not refactor to a MultiMap. the resolution algorithm has dynamic replacement of injectors that is difficult
   // to achieve with a MultiMap
-  private Map<MetaClass, List<Injector>> injectors = new LinkedHashMap<MetaClass, List<Injector>>();
+  private final Map<MetaClass, List<Injector>> injectors = new LinkedHashMap<MetaClass, List<Injector>>();
 
-  private Multimap<MetaClass, Injector> proxiedInjectors = LinkedHashMultimap.create();
-  private Multimap<MetaClass, MetaClass> cyclingTypes = HashMultimap.create();
+  private final Multimap<MetaClass, Injector> proxiedInjectors = LinkedHashMultimap.create();
+  private final Multimap<MetaClass, MetaClass> cyclingTypes = HashMultimap.create();
 
-  private Set<String> enabledAlternatives = new HashSet<String>();
+  private final Set<String> enabledAlternatives;
 
-  private Multimap<Class<? extends Annotation>, IOCDecoratorExtension> decorators
+  private final Multimap<Class<? extends Annotation>, IOCDecoratorExtension> decorators
           = HashMultimap.create();
-  private Multimap<ElementType, Class<? extends Annotation>> decoratorsByElementType
+  private final Multimap<ElementType, Class<? extends Annotation>> decoratorsByElementType
           = HashMultimap.create();
 
-  private Map<MetaField, PrivateAccessType> privateFieldsToExpose = new HashMap<MetaField, PrivateAccessType>();
-  private Collection<MetaMethod> privateMethodsToExpose = new LinkedHashSet<MetaMethod>();
+  private final Map<MetaField, PrivateAccessType> privateFieldsToExpose = new HashMap<MetaField, PrivateAccessType>();
+  private final Collection<MetaMethod> privateMethodsToExpose = new LinkedHashSet<MetaMethod>();
 
-  private Map<String, Object> attributeMap = new HashMap<String, Object>();
+  private final Map<String, Object> attributeMap = new HashMap<String, Object>();
 
-  private Set<String> exposedMembers = new HashSet<String>();
+  private final Set<String> exposedMembers = new HashSet<String>();
 
   private boolean allowProxyCapture = false;
   private boolean openProxy = false;
 
-  public InjectionContext(IOCProcessingContext processingContext) {
+  private InjectionContext(IOCProcessingContext processingContext,
+                           Set<String> enabledAlternatives) {
     this.processingContext = processingContext;
+    this.enabledAlternatives = Collections.unmodifiableSet(new HashSet<String>(enabledAlternatives)) ;
+  }
+
+  public static class Builder {
+    private IOCProcessingContext processingContext;
+    private final HashSet<String> enabledAlternatives = new HashSet<String>();
+
+    public static Builder create() {
+      return new Builder();
+    }
+
+    public Builder processingContext(IOCProcessingContext processingContext) {
+      this.processingContext = processingContext;
+      return this;
+    }
+
+    public Builder enabledAlternative(String fqcn) {
+      enabledAlternatives.add(fqcn);
+      return this;
+    }
+
+    public InjectionContext build() {
+      Assert.notNull("the processingContext cannot be null", processingContext);
+
+      return new InjectionContext(processingContext, enabledAlternatives);
+    }
   }
 
 

@@ -27,6 +27,7 @@ import org.jboss.errai.codegen.VariableReference;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
+import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.ioc.client.BootstrapperInjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionPoint;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.TypeDiscoveryListener;
@@ -45,7 +46,7 @@ import java.util.Stack;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class IOCProcessingContext {
-  protected Collection<String> packages;
+  protected final Collection<String> packages;
 
   protected final Context context;
   protected final BuildMetaClass bootstrapClass;
@@ -55,7 +56,7 @@ public class IOCProcessingContext {
   protected final List<Statement> appendToEnd;
   protected final List<TypeDiscoveryListener> typeDiscoveryListeners;
   protected final Set<MetaClass> discovered = new HashSet<MetaClass>();
-  
+
   protected final TreeLogger treeLogger;
   protected final GeneratorContext generatorContext;
 
@@ -63,14 +64,16 @@ public class IOCProcessingContext {
 
   protected final Variable contextVariable = Variable.create("injContext", BootstrapperInjectionContext.class);
 
-  protected QualifyingMetadataFactory qualifyingMetadataFactory = new JSR330QualifyingMetadataFactory();
+  protected final QualifyingMetadataFactory qualifyingMetadataFactory;
 
-  public IOCProcessingContext(TreeLogger treeLogger,
-                              GeneratorContext generatorContext,
-                              SourceWriter writer,
-                              Context context,
-                              BuildMetaClass bootstrapClass,
-                              BlockBuilder<?> blockBuilder) {
+  private IOCProcessingContext(TreeLogger treeLogger,
+                               GeneratorContext generatorContext,
+                               SourceWriter writer,
+                               Context context,
+                               BuildMetaClass bootstrapClass,
+                               BlockBuilder<?> blockBuilder,
+                               Collection<String> packages,
+                               QualifyingMetadataFactory qualifyingMetadataFactory) {
     this.treeLogger = treeLogger;
     this.generatorContext = generatorContext;
     this.writer = writer;
@@ -82,6 +85,79 @@ public class IOCProcessingContext {
 
     this.appendToEnd = new ArrayList<Statement>();
     this.typeDiscoveryListeners = new ArrayList<TypeDiscoveryListener>();
+    this.packages = packages;
+    this.qualifyingMetadataFactory = qualifyingMetadataFactory;
+  }
+
+  public static class Builder {
+    private TreeLogger treeLogger;
+    private GeneratorContext generatorContext;
+    private SourceWriter sourceWriter;
+    private Context context;
+    private BuildMetaClass bootstrapClassInstance;
+    private BlockBuilder<?> blockBuilder;
+    private Collection<String> packages;
+    private QualifyingMetadataFactory qualifyingMetadataFactory;
+
+    public static Builder create() {
+      return new Builder();
+    }
+
+    public Builder logger(TreeLogger treeLogger) {
+      this.treeLogger = treeLogger;
+      return this;
+    }
+
+    public Builder generatorContext(GeneratorContext generatorContext) {
+      this.generatorContext = generatorContext;
+      return this;
+    }
+
+    public Builder sourceWriter(SourceWriter sourceWriter) {
+      this.sourceWriter = sourceWriter;
+      return this;
+    }
+
+    public Builder context(Context context) {
+      this.context = context;
+      return this;
+    }
+
+    public Builder bootstrapClassInstance(BuildMetaClass bootstrapClassInstance) {
+      this.bootstrapClassInstance = bootstrapClassInstance;
+      return this;
+    }
+
+    public Builder blockBuilder(BlockBuilder<?> blockBuilder) {
+      this.blockBuilder = blockBuilder;
+      return this;
+    }
+
+    public Builder packages(Collection<String> packages) {
+      this.packages = packages;
+      return this;
+    }
+
+    public Builder qualifyingMetadata(QualifyingMetadataFactory qualifyingMetadataFactory) {
+      this.qualifyingMetadataFactory = qualifyingMetadataFactory;
+      return this;
+    }
+
+    public IOCProcessingContext build() {
+      Assert.notNull("treeLogger cannot be null", treeLogger);
+      Assert.notNull("sourceWriter cannot be null", sourceWriter);
+      Assert.notNull("context cannot be null", context);
+      Assert.notNull("bootstrapClassInstance cannot be null", bootstrapClassInstance);
+      Assert.notNull("blockBuilder cannot be null", blockBuilder);
+      Assert.notNull("packages cannot be null", packages);
+
+      if (qualifyingMetadataFactory == null) {
+        qualifyingMetadataFactory = new JSR330QualifyingMetadataFactory();
+      }
+
+      return new IOCProcessingContext(treeLogger, generatorContext, sourceWriter, context, bootstrapClassInstance,
+              blockBuilder, packages, qualifyingMetadataFactory);
+    }
   }
 
   public BlockBuilder<?> getBlockBuilder() {
@@ -91,7 +167,7 @@ public class IOCProcessingContext {
   public BlockBuilder<?> append(Statement statement) {
     return getBlockBuilder().append(statement);
   }
-  
+
   public void globalInsertBefore(Statement statement) {
     blockBuilder.get(0).insertBefore(statement);
   }
@@ -128,10 +204,6 @@ public class IOCProcessingContext {
     return context;
   }
 
-  public void setPackages(Collection<String> packages) {
-    this.packages = packages;
-  }
-
   public Collection<String> getPackages() {
     return packages;
   }
@@ -151,10 +223,6 @@ public class IOCProcessingContext {
 
   public QualifyingMetadataFactory getQualifyingMetadataFactory() {
     return qualifyingMetadataFactory;
-  }
-
-  public void setQualifyingMetadataFactory(QualifyingMetadataFactory qualifyingMetadataFactory) {
-    this.qualifyingMetadataFactory = qualifyingMetadataFactory;
   }
 
   public void registerTypeDiscoveryListener(TypeDiscoveryListener discoveryListener) {

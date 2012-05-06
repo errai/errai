@@ -82,19 +82,20 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import static java.util.Collections.unmodifiableSet;
 import static org.jboss.errai.codegen.util.Stmt.declareVariable;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
 /**
- * The main generator class for the Errai IOC system.
+ * Generator for the Bootstrapper class generated to wire an application at runtime.
  *
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class IOCBootstrapGenerator {
   private final GeneratorContext context;
 
-  private Collection<String> packages = null;
-  private boolean useReflectionStubs = false;
+  private final Collection<String> packages;
+  private final boolean useReflectionStubs;
 
   private final List<Class<?>> beforeTasks = new ArrayList<Class<?>>();
   private final List<Class<?>> afterTasks = new ArrayList<Class<?>>();
@@ -105,39 +106,18 @@ public class IOCBootstrapGenerator {
   private final TreeLogger logger;
   private static final Logger log = LoggerFactory.getLogger(IOCBootstrapGenerator.class);
 
-    // production mode cache only -- used so work is only done in one permutation
+  // production mode cache only -- used so work is only done in one permutation
   private static volatile String _bootstrapperCache;
   private static final Object generatorLock = new Object();
 
   public IOCBootstrapGenerator(GeneratorContext context,
                                TreeLogger logger,
-                               Collection<String> packages) {
+                               Collection<String> packages,
+                               boolean useReflectionStubs) {
     this.context = context;
     this.logger = logger;
     this.packages = packages;
-  }
-
-  public IOCBootstrapGenerator() {
-    logger = new TreeLogger() {
-      @Override
-      public TreeLogger branch(Type type, String msg, Throwable caught, HelpInfo helpInfo) {
-        return null;
-      }
-
-      @Override
-      public boolean isLoggable(Type type) {
-        return false;
-      }
-
-      @Override
-      public void log(Type type, String msg, Throwable caught, HelpInfo helpInfo) {
-        System.out.println(type.getLabel() + ": " + msg);
-        if (caught != null) {
-          caught.printStackTrace();
-        }
-      }
-    };
-    this.context = null;
+    this.useReflectionStubs = useReflectionStubs;
   }
 
   public String generate(String packageName, String className) {
@@ -151,15 +131,18 @@ public class IOCBootstrapGenerator {
       final File fileCacheDir = RebindUtils.getErraiCacheDir();
       final File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + className + ".java");
 
-      final Set<Class<? extends Annotation>> annos = new HashSet<Class<? extends Annotation>>();
-      annos.add(ApplicationScoped.class);
-      annos.add(SessionScoped.class);
-      annos.add(RequestScoped.class);
-      annos.add(Singleton.class);
-      annos.add(EntryPoint.class);
-      annos.add(IOCBootstrapTask.class);
-      annos.add(Dependent.class);
-      annos.add(Default.class);
+      final Set<Class<? extends Annotation>> annotations = unmodifiableSet(new HashSet<Class<? extends Annotation>>() {
+        {
+          add(ApplicationScoped.class);
+          add(SessionScoped.class);
+          add(RequestScoped.class);
+          add(Singleton.class);
+          add(EntryPoint.class);
+          add(IOCBootstrapTask.class);
+          add(Dependent.class);
+          add(Default.class);
+        }
+      });
 
       String gen;
 
@@ -196,11 +179,18 @@ public class IOCBootstrapGenerator {
 
     final SourceWriter sourceWriter = new StringSourceWriter();
 
-    IOCProcessingContext procContext = new IOCProcessingContext(logger, context, sourceWriter, buildContext,
-            bootStrapClass, blockBuilder);
+    final IOCProcessingContext.Builder iocProcContextBuilder
+            = IOCProcessingContext.Builder.create();
 
-    InjectionContext injectionContext = new InjectionContext(procContext);
-    IOCProcessorFactory procFactory = new IOCProcessorFactory(injectionContext);
+    iocProcContextBuilder.blockBuilder(blockBuilder);
+    iocProcContextBuilder.generatorContext(context);
+    iocProcContextBuilder.context(buildContext);
+    iocProcContextBuilder.bootstrapClassInstance(bootStrapClass);
+    iocProcContextBuilder.logger(logger);
+    iocProcContextBuilder.sourceWriter(sourceWriter);
+
+    final InjectionContext.Builder injectionContextBuilder
+            = InjectionContext.Builder.create();
 
     final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
     final Properties props = scanner.getProperties("ErraiApp.properties");
@@ -214,11 +204,11 @@ public class IOCBootstrapGenerator {
           String fqcnQualifyingMetadataFactory = String.valueOf(props.get(key));
 
           try {
-            QualifyingMetadataFactory factory = (QualifyingMetadataFactory)
+            final QualifyingMetadataFactory factory = (QualifyingMetadataFactory)
                     Class.forName
                             (fqcnQualifyingMetadataFactory).newInstance();
 
-            procContext.setQualifyingMetadataFactory(factory);
+            iocProcContextBuilder.qualifyingMetadata(factory);
           }
           catch (ClassNotFoundException e) {
             e.printStackTrace();
@@ -233,17 +223,23 @@ public class IOCBootstrapGenerator {
         else if (key.equals(ENABLED_ALTERNATIVES_PROPERTY)) {
           String[] alternatives = String.valueOf(props.get(ENABLED_ALTERNATIVES_PROPERTY)).split("\\s");
           for (String alternative : alternatives) {
-            injectionContext.addEnabledAlternative(alternative.trim());
+            injectionContextBuilder.enabledAlternative(alternative.trim());
           }
         }
       }
     }
 
-    procContext.setPackages(packages);
+    iocProcContextBuilder.packages(packages);
+
+    final IOCProcessingContext procContext = iocProcContextBuilder.build();
+
+    injectionContextBuilder.processingContext(procContext);
+    final InjectionContext injectionContext = injectionContextBuilder.build();
 
     defaultConfigureProcessor(context, injectionContext);
 
     // generator constructor source code
+    final IOCProcessorFactory procFactory = new IOCProcessorFactory(injectionContext);
     initializeProviders(procContext, injectionContext, procFactory, beforeTasks, afterTasks);
     generateExtensions(procContext, procFactory, injectionContext, sourceWriter, classStructureBuilder, blockBuilder);
 
@@ -325,10 +321,9 @@ public class IOCBootstrapGenerator {
 
     for (Class<?> clazz : iocExtensions) {
       try {
-        Class<? extends IOCExtensionConfigurator> configuratorClass = clazz.asSubclass(IOCExtensionConfigurator.class);
+        final Class<? extends IOCExtensionConfigurator> configuratorClass = clazz.asSubclass(IOCExtensionConfigurator.class);
 
-        IOCExtensionConfigurator configurator = configuratorClass.newInstance();
-
+        final IOCExtensionConfigurator configurator = configuratorClass.newInstance();
         configurator.configure(procContext, injectionContext, procFactory);
 
         extensionConfigurators.add(configurator);
@@ -387,7 +382,12 @@ public class IOCBootstrapGenerator {
     }
   }
 
-  private static void defaultConfigureProcessor(GeneratorContext context, InjectionContext injectionContext) {
+  /**
+   *
+   * @param context
+   * @param injectionContext
+   */
+  private static void defaultConfigureProcessor(final GeneratorContext context, final InjectionContext injectionContext) {
     injectionContext.mapElementType(WiringElementType.SingletonBean, Singleton.class);
     injectionContext.mapElementType(WiringElementType.SingletonBean, EntryPoint.class);
 
@@ -434,11 +434,7 @@ public class IOCBootstrapGenerator {
     }
   }
 
-  public void setUseReflectionStubs(boolean useReflectionStubs) {
-    this.useReflectionStubs = useReflectionStubs;
-  }
-
-  public void setPackages(List<String> packages) {
-    this.packages = packages;
-  }
+//  public void setUseReflectionStubs(boolean useReflectionStubs) {
+//    this.useReflectionStubs = useReflectionStubs;
+//  }
 }
