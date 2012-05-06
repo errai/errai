@@ -93,6 +93,12 @@ public interface ErraiServiceConfigurator {
    */
   public Integer getIntProperty(String key);
 
+  /**
+   * Sets a property with the specified key and value
+   *
+   * @param key the name of the property.
+   * @param value the string value of the property.
+   */
   public void setProperty(String key, String value);
 }
 

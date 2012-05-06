@@ -96,12 +96,12 @@ public class InjectUtil {
       return new ConstructionStrategy() {
         @Override
         public void generateConstructor(ConstructionStatusCallback callback) {
-          Statement[] parameterStatements
+          final Statement[] parameterStatements
                   = resolveInjectionDependencies(constructor.getParameters(), ctx, constructor);
 
           if (injector.isSingleton() && injector.isCreated()) return;
 
-          IOCProcessingContext processingContext = ctx.getProcessingContext();
+          final IOCProcessingContext processingContext = ctx.getProcessingContext();
 
           processingContext.append(
                   Stmt.declareVariable(type)
@@ -132,7 +132,7 @@ public class InjectUtil {
         public void generateConstructor(ConstructionStatusCallback callback) {
           if (injector.isSingleton() && injector.isCreated()) return;
 
-          IOCProcessingContext processingContext = ctx.getProcessingContext();
+          final IOCProcessingContext processingContext = ctx.getProcessingContext();
 
           processingContext.append(
                   Stmt.declareVariable(type)
@@ -274,7 +274,7 @@ public class InjectUtil {
     MetaClass visit = type;
 
     do {
-      for (MetaField field : visit.getDeclaredFields()) {
+      for (final MetaField field : visit.getDeclaredFields()) {
         if (isInjectionPoint(ctx, field)) {
           if (!field.isPublic()) {
             MetaMethod meth = visit.getMethod(ReflectionUtil.getSetter(field.getName()),
@@ -385,7 +385,7 @@ public class InjectUtil {
   }
 
   @SuppressWarnings({"unchecked"})
-  private static boolean isInjectionPoint(InjectionContext context, HasAnnotations hasAnnotations) {
+  private static boolean isInjectionPoint(final InjectionContext context, final HasAnnotations hasAnnotations) {
     return context.isElementType(WiringElementType.InjectionPoint, hasAnnotations);
   }
 
@@ -522,11 +522,10 @@ public class InjectUtil {
     for (int i = 0; i < parmTypes.length; i++) {
       Statement stmt;
       try {
-        InjectableInstance injectableInstance = InjectableInstance.getParameterInjectedInstance(
+        final InjectableInstance injectableInstance = InjectableInstance.getParameterInjectedInstance(
                 parms[i],
                 null,
                 ctx);
-
 
         stmt = getInjectorOrProxy(ctx, injectableInstance, parmTypes[i],
                 ctx.getProcessingContext().getQualifyingMetadataFactory().createFrom(parms[i].getAnnotations()));
@@ -543,16 +542,17 @@ public class InjectUtil {
     return parmValues;
   }
 
-  public static Statement[] resolveInjectionDependencies(MetaParameter[] parms, InjectionContext ctx,
-                                                         MetaConstructor constructor) {
-    MetaClass[] parmTypes = parametersToClassTypeArray(parms);
-    Statement[] parmValues = new Statement[parmTypes.length];
+  public static Statement[] resolveInjectionDependencies(final MetaParameter[] parms,
+                                                         final InjectionContext ctx,
+                                                         final MetaConstructor constructor) {
+    final MetaClass[] parmTypes = parametersToClassTypeArray(parms);
+    final Statement[] parmValues = new Statement[parmTypes.length];
 
     for (int i = 0; i < parmTypes.length; i++
             ) {
       Statement stmt;
       try {
-        InjectableInstance injectableInstance
+        final InjectableInstance injectableInstance
                 = InjectableInstance.getParameterInjectedInstance(parms[i], null, ctx);
 
         stmt = getInjectorOrProxy(ctx, injectableInstance, parmTypes[i],
@@ -590,7 +590,7 @@ public class InjectUtil {
     return "var" + uniqueCounter.addAndGet(1);
   }
 
-  public static List<Annotation> extractQualifiers(InjectableInstance<? extends Annotation> injectableInstance) {
+  public static List<Annotation> extractQualifiers(final InjectableInstance<? extends Annotation> injectableInstance) {
     switch (injectableInstance.getTaskType()) {
       case Field:
         return getQualifiersFromAnnotations(injectableInstance.getField().getAnnotations());
@@ -605,8 +605,8 @@ public class InjectUtil {
     }
   }
 
-  public static List<Annotation> getQualifiersFromAnnotations(Annotation[] annotations) {
-    List<Annotation> quals = new ArrayList<Annotation>();
+  public static List<Annotation> getQualifiersFromAnnotations(final Annotation[] annotations) {
+    final List<Annotation> quals = new ArrayList<Annotation>();
     for (Annotation a : annotations) {
       if (a.annotationType().isAnnotationPresent(Qualifier.class)) {
         quals.add(a);
@@ -631,7 +631,8 @@ public class InjectUtil {
     return store;
   }
 
-  public static boolean checkIfTypeNeedsAddingToBeanStore(InjectionContext context, Injector injector) {
+  public static boolean checkIfTypeNeedsAddingToBeanStore(final InjectionContext context,
+                                                          final Injector injector) {
     final Set<Injector> store = getBeanInjectionTrackStore(context);
     if (store.contains(injector)) {
       return false;

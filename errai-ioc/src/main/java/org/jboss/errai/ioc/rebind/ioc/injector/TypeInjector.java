@@ -68,8 +68,6 @@ public class TypeInjector extends AbstractInjector {
       new Throwable().printStackTrace();
     }
 
-    // check to see if this is a singleton and/or alternative bean
-
     this.testmock = context.isElementType(WiringElementType.TestMockBean, type);
     this.singleton = context.isElementType(WiringElementType.SingletonBean, type);
     this.alternative = context.isElementType(WiringElementType.AlternativeBean, type);

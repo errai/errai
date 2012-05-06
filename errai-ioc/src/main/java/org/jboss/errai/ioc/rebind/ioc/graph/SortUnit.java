@@ -34,7 +34,6 @@ import java.util.Set;
  * @author Mike Brock
  */
 public class SortUnit implements Comparable<SortUnit> {
-
   private final MetaClass type;
   private final List<Object> items;
   private final Set<SortUnit> dependencies;
@@ -92,7 +91,7 @@ public class SortUnit implements Comparable<SortUnit> {
   }
 
   private static boolean _hasDependency(final Set<String> visited, final SortUnit from, final SortUnit to) {
-    String fromType = from.getType().getFullyQualifiedName();
+    final String fromType = from.getType().getFullyQualifiedName();
     if (visited.contains(fromType)) {
       return false;
     }
@@ -128,7 +127,7 @@ public class SortUnit implements Comparable<SortUnit> {
   }
 
 
-  private static int _getDepth(Set<SortUnit> visited, SortUnit outer, int depth, SortUnit su) {
+  private static int _getDepth(final Set<SortUnit> visited, final SortUnit outer, int depth, final SortUnit su) {
     if (visited.contains(su)) {
       return 0;
     }
