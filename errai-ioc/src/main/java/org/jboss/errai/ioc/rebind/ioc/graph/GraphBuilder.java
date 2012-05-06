@@ -27,7 +27,7 @@ public class GraphBuilder {
    * @param dependency the depedency
    * @return the same instance of the GraphBuilder that called this method.
    */
-  public GraphBuilder addDependency(final MetaClass type, final xDependency dependency) {
+  public GraphBuilder addDependency(final MetaClass type, final Dependency dependency) {
     dependencyMap.put(type.getFullyQualifiedName(), dependency);
     recordClassForLookup(dependency.getType());
     return this;
