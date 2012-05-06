@@ -23,7 +23,7 @@ public class GraphBuilder {
   /**
    * Records a dependency on the specified type.
    *
-   * @param type the type to record a dependency on.
+   * @param type       the type to record a dependency on.
    * @param dependency the depedency
    * @return the same instance of the GraphBuilder that called this method.
    */
@@ -60,13 +60,13 @@ public class GraphBuilder {
     final HashMap<String, SortUnit> sortUnitHashMap = new HashMap<String, SortUnit>(10);
 
     for (String type : itemMap.keySet()) {
-      sortUnitList.add(_build(sortUnitHashMap, type, false));
+      sortUnitList.add(_build(sortUnitHashMap, type));
     }
 
     return sortUnitList;
   }
 
-  private SortUnit _build(Map<String, SortUnit> sortUnits, String type, boolean hard) {
+  private SortUnit _build(Map<String, SortUnit> sortUnits, String type) {
     if (sortUnits.containsKey(type)) {
       return sortUnits.get(type);
     }
@@ -79,7 +79,7 @@ public class GraphBuilder {
 
     List<SortUnit> sortUnitDependencies = new ArrayList<SortUnit>();
     for (Dependency d : deps) {
-      sortUnitDependencies.add(_build(sortUnits, d.getType().getFullyQualifiedName(), d.isHard()));
+      sortUnitDependencies.add(_build(sortUnits, d.getType().getFullyQualifiedName()));
     }
 
     proxySortUnit.setDelegate(SortUnit.create(classLookup.get(type), items, sortUnitDependencies));

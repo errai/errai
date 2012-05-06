@@ -7,20 +7,13 @@ import org.jboss.errai.codegen.meta.MetaClass;
  */
 public class Dependency {
   private final MetaClass type;
-  private final boolean hard;
 
-  private Dependency(MetaClass type, boolean hard) {
+  private Dependency(MetaClass type) {
     this.type = type;
-    this.hard = hard;
   }
 
   public static Dependency on(MetaClass type) {
-    return new Dependency(type, false);
-  }
-
-
-  public static Dependency hard(MetaClass type) {
-    return new Dependency(type, true);
+    return new Dependency(type);
   }
 
   public MetaClass getType() {
@@ -42,9 +35,5 @@ public class Dependency {
   @Override
   public int hashCode() {
     return type != null ? type.hashCode() : 0;
-  }
-
-  public boolean isHard() {
-    return hard;
   }
 }
