@@ -301,8 +301,8 @@ public class ServerMessageBusImpl implements ServerMessageBus {
                       .with(MessageParts.PriorityProcessing, "1")
                       .noErrorHandling().sendNowWith(ServerMessageBusImpl.this, false);
 
-              final CommandMessage msg = ConversationMessage.create(message);
-              msg.toSubject(BuiltInServices.ClientBus.name())
+              final Message msg = ConversationMessage.create(message)
+                      .toSubject(BuiltInServices.ClientBus.name())
                       .command(BusCommands.CapabilitiesNotice);
 
               final StringBuilder capabilitiesBuffer = new StringBuilder(25);
@@ -904,10 +904,14 @@ public class ServerMessageBusImpl implements ServerMessageBus {
   }
 
   private DeliveryPlan createOrAddDeliveryPlan(final String subject, final MessageCallback receiver) {
+    if (receiver == null) {
+      throw new NullPointerException("message callback cannot but null");
+    }
+
     DeliveryPlan plan = subscriptions.get(subject);
 
     if (plan == null) {
-      subscriptions.put(subject, plan = new DeliveryPlan(new MessageCallback[]{receiver}));
+      subscriptions.put(subject, plan = DeliveryPlan.newDeliveryPlan(receiver));
     }
     else {
       subscriptions.put(subject, plan.newDeliveryPlanWith(receiver));
