@@ -15,6 +15,7 @@ import org.jboss.errai.bus.client.framework.Subscription;
 import org.jboss.errai.bus.server.api.MessageQueue;
 import org.jboss.errai.bus.server.api.QueueClosedListener;
 import org.jboss.errai.bus.server.api.ServerMessageBus;
+import org.jboss.errai.common.client.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
@@ -42,6 +43,8 @@ public class MessageBusProxy implements ServerMessageBus {
 
   @Override
   public void sendGlobal(Message message) {
+    Assert.notNull("message cannot be null", message);
+
     if (proxyClosed) {
       proxied.sendGlobal(message);
     }
@@ -52,6 +55,8 @@ public class MessageBusProxy implements ServerMessageBus {
 
   @Override
   public void send(Message message) {
+    Assert.notNull("message cannot be null", message);
+
     if (proxyClosed) {
       proxied.send(message);
     }
@@ -62,6 +67,8 @@ public class MessageBusProxy implements ServerMessageBus {
 
   @Override
   public void send(Message message, boolean fireListeners) {
+    Assert.notNull("message cannot be null", message);
+
     if (proxyClosed) {
       proxied.send(message, fireListeners);
     }
@@ -72,6 +79,8 @@ public class MessageBusProxy implements ServerMessageBus {
 
   @Override
   public Subscription subscribe(String subject, MessageCallback receiver) {
+    Assert.notNull("message callback cannot be null", receiver);
+
     if (proxyClosed) {
       return proxied.subscribe(subject, receiver);
     }
@@ -88,6 +97,8 @@ public class MessageBusProxy implements ServerMessageBus {
 
   @Override
   public Subscription subscribeLocal(String subject, MessageCallback receiver) {
+    Assert.notNull("message callback cannot be null", receiver);
+
     if (proxyClosed) {
       return proxied.subscribe(subject, receiver);
     }
@@ -113,6 +124,8 @@ public class MessageBusProxy implements ServerMessageBus {
 
   @Override
   public void addGlobalListener(MessageListener listener) {
+    Assert.notNull("message listener cannot be null", listener);
+
     if (proxyClosed) {
       proxied.addGlobalListener(listener);
     }
@@ -123,6 +136,8 @@ public class MessageBusProxy implements ServerMessageBus {
 
   @Override
   public void addSubscribeListener(SubscribeListener listener) {
+    Assert.notNull("subscribe listener cannot be null", listener);
+
     if (proxyClosed) {
       proxied.addSubscribeListener(listener);
     }
@@ -133,6 +148,8 @@ public class MessageBusProxy implements ServerMessageBus {
 
   @Override
   public void addUnsubscribeListener(UnsubscribeListener listener) {
+    Assert.notNull("unsubscribe listener cannot be null", listener);
+
     if (proxyClosed) {
       proxied.addUnsubscribeListener(listener);
     }
@@ -215,6 +232,8 @@ public class MessageBusProxy implements ServerMessageBus {
   }
 
   public void closeProxy(MessageBus bus) {
+    Assert.notNull("message bus reference cannot be null", bus);
+
     if (proxied != null) {
       throw new IllegalStateException("proxy already closed");
     }
