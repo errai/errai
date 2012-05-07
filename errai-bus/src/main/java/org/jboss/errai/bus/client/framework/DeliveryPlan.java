@@ -26,8 +26,16 @@ public class DeliveryPlan {
     deliverTo = new MessageCallback[0];
   }
 
-  public DeliveryPlan(MessageCallback[] deliverTo) {
+  private DeliveryPlan(MessageCallback[] deliverTo) {
     this.deliverTo = deliverTo;
+  }
+
+  public static DeliveryPlan newDeliveryPlan(final MessageCallback callback) {
+    if (callback == null) {
+      throw new NullPointerException("null callback");
+    }
+
+    return new DeliveryPlan(new MessageCallback[] { callback });
   }
 
   public void deliver(Message m) {
@@ -51,6 +59,10 @@ public class DeliveryPlan {
   }
 
   public DeliveryPlan newDeliveryPlanWith(final MessageCallback callback) {
+    if (callback == null) {
+      throw new NullPointerException("null callback");
+    }
+
     final MessageCallback[] newPlan = new MessageCallback[deliverTo.length + 1];
 
     //noinspection ManualArrayCopy
