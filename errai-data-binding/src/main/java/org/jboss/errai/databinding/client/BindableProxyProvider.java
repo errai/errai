@@ -16,30 +16,28 @@
 
 package org.jboss.errai.databinding.client;
 
-import com.google.gwt.user.client.ui.HasValue;
+import org.jboss.errai.databinding.client.api.Bindable;
 
 /**
- * Provides instances of {@link BindableProxy}s.
+ * Provides instances of {@link BindableProxy}s (proxy objects for types annotated with {@link Bindable}).
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface BindableProxyProvider {
 
   /**
-   * Returns an unbound proxy.
+   * Returns a proxy for a newly created model instance, bound to the provided widget.
    * 
    * @return proxy instance
    */
   public BindableProxy getBindableProxy();
 
   /**
-   * Returns a proxy for the provided model bound to the provided widget.
+   * Returns a proxy for the provided model instance, bound to the provided widget.
    * 
-   * @param hasValue
-   *          the widget that proxy should be bound to.
    * @param model
    *          the model to proxy
    * @return proxy instance
    */
-  public BindableProxy getBindableProxy(HasValue<?> hasValue, Object model);
+  public BindableProxy getBindableProxy(Object model);
 }

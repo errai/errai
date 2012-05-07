@@ -33,11 +33,11 @@ public class Module {
 
   private TextBox textBox = new TextBox();
   private Model model = new Model();
-  private DataBinder<Model> dataBinder = new DataBinder<Model>();
+  private DataBinder<Model> dataBinder = new DataBinder<Model>(model);
   
   @PostConstruct
   public void init() {
-    model = dataBinder.bind(textBox, model, "value");
+    model = dataBinder.bind(textBox, "value");
   }
   
   public TextBox getTextBox() {
@@ -46,5 +46,9 @@ public class Module {
   
   public Model getModel() {
     return model;
+  }
+  
+  public DataBinder<Model> getDataBinder() {
+    return dataBinder;
   }
 }

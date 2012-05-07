@@ -51,6 +51,7 @@ public interface LoopBuilderTestResult {
 
   public static final String FOREACH_KEYSET_LOOP =
       "   for (Object key : map.keySet()) {" +
+          " System.out.println(key);" +
           "\n}";
 
   public static final String FOREACH_LITERAL_STRING_ARRAY =

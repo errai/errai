@@ -16,8 +16,6 @@
 
 package org.jboss.errai.databinding.client;
 
-import javax.enterprise.context.Dependent;
-
 import org.jboss.errai.databinding.client.api.Bindable;
 
 /**

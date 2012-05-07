@@ -69,7 +69,6 @@ public class SnapshotMakerTest extends AbstractCodegenTest {
 
     try {
       Statement snapshotStmt = SnapshotMaker.makeSnapshotAsSubclass(cycle2, Person.class, Person.class, null, Person.class);
-      System.out.println(snapshotStmt.generate(Context.create()));
       Assert.fail("Instance cycle was not detected");
     }
     catch (CyclicalObjectGraphException e) {

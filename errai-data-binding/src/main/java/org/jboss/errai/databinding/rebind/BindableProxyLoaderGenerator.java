@@ -24,7 +24,6 @@ import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
-import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
@@ -45,7 +44,6 @@ import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.core.ext.typeinfo.JClassType;
-import com.google.gwt.user.client.ui.HasValue;
 
 /**
  * Generates the proxy loader for {@link Bindable}s.
@@ -117,15 +115,13 @@ public class BindableProxyLoaderGenerator extends Generator {
 
       Statement proxyProvider = ObjectBuilder.newInstanceOf(BindableProxyProvider.class)
           .extend()
-          .publicOverridesMethod("getBindableProxy",
-              Parameter.of(HasValue.class, "hasValue"), Parameter.of(bindable, "model"))
+          .publicOverridesMethod("getBindableProxy", Parameter.of(bindable, "model"))
           .append(Stmt.nestedCall(Stmt.newObject(bindableProxy.getClassDefinition())
-              .withParameters(Variable.get("hasValue"), Cast.to(bindable, Stmt.loadVariable("model")))).returnValue())
+              .withParameters(Cast.to(bindable, Stmt.loadVariable("model")))).returnValue())
           .finish()
-           .publicOverridesMethod("getBindableProxy")
+          .publicOverridesMethod("getBindableProxy")
           .append(Stmt.nestedCall(Stmt.newObject(bindableProxy.getClassDefinition())).returnValue())
           .finish()
-
           .finish();
 
       loadProxies.append(Stmt.invokeStatic(BindableProxyFactory.class, "addBindableProxy", bindable, proxyProvider));

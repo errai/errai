@@ -41,7 +41,6 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     module.getModel().setValue("model change");
     assertEquals("Widget not properly updated", "model change", module.getTextBox().getText());
 
-    // simulate a UI change
     module.getTextBox().setValue("UI change", true);
     assertEquals("Model not properly updated", "UI change", module.getModel().getValue());
   }
@@ -54,8 +53,31 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     module.getModel().setName("model change");
     assertEquals("Widget not properly updated", "model change", module.getTextBox().getText());
 
-    // simulate a UI change
     module.getTextBox().setValue("UI change", true);
     assertEquals("Model not properly updated", "UI change", module.getModel().getName());
+  }
+  
+  @Test
+  public void testUnbindingSingleProperty() {
+    Module module = IOC.getBeanManager().lookupBean(Module.class).getInstance();
+    module.getDataBinder().unbind("value");
+    
+    module.getModel().setValue("model change");
+    assertEquals("Widget should not have been updated", "", module.getTextBox().getText());
+
+    module.getTextBox().setValue("UI change", true);
+    assertEquals("Model should not have been updated", "model change", module.getModel().getValue());
+  }
+  
+  @Test
+  public void testUnbindingAll() {
+    Module module = IOC.getBeanManager().lookupBean(Module.class).getInstance();
+    module.getDataBinder().unbind();
+    
+    module.getModel().setValue("model change");
+    assertEquals("Widget should not have been updated", "", module.getTextBox().getText());
+
+    module.getTextBox().setValue("UI change", true);
+    assertEquals("Model should not have been updated", "model change", module.getModel().getValue());
   }
 }

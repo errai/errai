@@ -28,8 +28,8 @@ import com.google.gwt.user.client.ui.HasValue;
 public interface BindableProxy {
 
   /**
-   * Sets a property value on the model instance. This method is invoked to change the state of the model in response to
-   * UI changes.
+   * Sets a property value on the target model instance. This method is invoked to change the state of the model in
+   * response to UI changes.
    * 
    * @param property
    *          name of the property following Java bean conventions
@@ -46,10 +46,17 @@ public interface BindableProxy {
   public Object getTarget();
 
   /**
-   * Binds the proxy/model to the provided UI field/component.
-   * 
-   * @param hasValue
-   *          the widget instance to bind to
+   * Binds the property with the given name to the provided widget.
    */
-  public void bindTo(HasValue<?> hasValue);
+  public void bind(HasValue<?> widget, String property);
+  
+  /**
+   * Unbinds the property with the given name.
+   */
+  public void unbind(String property);
+  
+  /**
+   * Unbinds all properties.
+   */
+  public void unbind();
 }

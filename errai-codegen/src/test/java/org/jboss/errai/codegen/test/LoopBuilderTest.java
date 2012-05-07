@@ -175,7 +175,9 @@ public class LoopBuilderTest extends AbstractCodegenTest implements LoopBuilderT
         .declareVariable("map", Map.class)
         .loadVariable("map")
         .invoke("keySet")
-        .foreach("key").finish();
+        .foreach("key")
+        .append(Stmt.loadStatic(System.class, "out").invoke("println", Variable.get("key")))
+        .finish();
 
     assertEquals("Failed to generate foreach loop using invoke()",
         FOREACH_KEYSET_LOOP, loop.toJavaString());
