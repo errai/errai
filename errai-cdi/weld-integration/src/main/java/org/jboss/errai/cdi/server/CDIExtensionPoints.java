@@ -35,6 +35,9 @@ import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
@@ -371,8 +374,73 @@ public class CDIExtensionPoints implements Extension {
     bus.subscribe(CDI.SERVER_DISPATCHER_SUBJECT, eventDispatcher);
   }
 
-  private void subscribeServices(final BeanManager beanManager, final MessageBus bus) {
+  private class StartupCallback implements Runnable {
+    private final Set<Object> registered = new HashSet<Object>();
+    private final BeanManager beanManager;
+    private final MessageBus bus;
+    private final ScheduledExecutorService scheduledExecutorService;
+    private final long expiryTime;
 
+    private StartupCallback(BeanManager beanManager, MessageBus bus,
+                            ScheduledExecutorService scheduledExecutorService,
+                            int timeOutInSeconds) {
+      this.beanManager = beanManager;
+      this.bus = bus;
+      this.scheduledExecutorService = scheduledExecutorService;
+      registered.addAll(managedTypes.getServiceEndpoints());
+
+      this.expiryTime = System.currentTimeMillis() + (timeOutInSeconds * 1000);
+    }
+
+    @Override
+    public void run() {
+      if (System.currentTimeMillis() > expiryTime) {
+        scheduledExecutorService.shutdown();
+        throw new RuntimeException("failed to discover beans: " + managedTypes.getServiceEndpoints());
+      }
+
+      if (registered.isEmpty()) {
+        scheduledExecutorService.shutdown();
+        log.info("all services registered successfully");
+        return;
+      }
+
+      for (final AnnotatedType<?> type : managedTypes.getServiceEndpoints()) {
+        if (!registered.contains(type) || beanManager.getBeans(type.getJavaClass()).size() == 0) {
+          continue;
+        }
+
+        final MessageCallback callback = (MessageCallback) CDIServerUtil.lookupBean(beanManager,
+                type.getJavaClass());
+
+        registered.remove(type);
+
+        // Discriminate on @Command
+        final Map<String, Method> commandPoints = new HashMap<String, Method>();
+        for (final AnnotatedMethod method : type.getMethods()) {
+          if (method.isAnnotationPresent(Command.class)) {
+            Command command = method.getAnnotation(Command.class);
+            for (String cmdName : command.value()) {
+              if (cmdName.equals(""))
+                cmdName = method.getJavaMember().getName();
+              commandPoints.put(cmdName, method.getJavaMember());
+            }
+          }
+        }
+
+        final String subjectName = CDIServerUtil.resolveServiceName(type.getJavaClass());
+
+        if (commandPoints.isEmpty()) {
+          bus.subscribe(subjectName, callback);
+        }
+        else {
+          bus.subscribeLocal(subjectName, new CommandBindingsCallback(commandPoints, callback, bus));
+        }
+      }
+    }
+  }
+
+  private void subscribeServices(final BeanManager beanManager, final MessageBus bus) {
     for (Map.Entry<AnnotatedType, List<AnnotatedMethod>> entry : managedTypes.getServiceMethods().entrySet()) {
       final Class<?> type = entry.getKey().getJavaClass();
 
@@ -399,37 +467,13 @@ public class CDIExtensionPoints implements Extension {
       }
     }
 
-    for (final AnnotatedType<?> type : managedTypes.getServiceEndpoints()) {
-      // Discriminate on @Command
-      Map<String, Method> commandPoints = new HashMap<String, Method>();
-      for (final AnnotatedMethod method : type.getMethods()) {
-        if (method.isAnnotationPresent(Command.class)) {
-          Command command = method.getAnnotation(Command.class);
-          for (String cmdName : command.value()) {
-            if (cmdName.equals(""))
-              cmdName = method.getJavaMember().getName();
-
-            commandPoints.put(cmdName, method.getJavaMember());
-          }
-        }
-      }
-
-      final String subjectName = CDIServerUtil.resolveServiceName(type.getJavaClass());
-      final MessageCallback callback = (MessageCallback)
-              CDIServerUtil.lookupBean(beanManager, type.getJavaClass());
-
-      if (callback == null) {
-        throw new RuntimeException("failed to locate service callback '" + subjectName + "' [callbackClass="
-                + type.getJavaClass().getName() + "]");
-      }
-
-      if (commandPoints.isEmpty()) {
-        bus.subscribe(subjectName, callback);
-      }
-      else {
-        bus.subscribeLocal(subjectName, new CommandBindingsCallback(commandPoints, callback, bus));
-      }
-    }
+    /**
+     * Due to the lack of contract in CDI guaranteeing when beans will be available, we use an executor to search for
+     * the beans every 100ms until it finds them. Or, after a 25 seconds, blow up if they don't become available.
+     */
+    final ScheduledExecutorService startupScheduler = Executors.newScheduledThreadPool(1);
+    startupScheduler.scheduleAtFixedRate(
+            new StartupCallback(beanManager, bus, startupScheduler, 25), 0, 100, TimeUnit.MILLISECONDS);
 
     for (final Class<?> rpcIntf : managedTypes.getRemoteInterfaces()) {
       createRPCScaffolding(rpcIntf, bus, beanManager);
