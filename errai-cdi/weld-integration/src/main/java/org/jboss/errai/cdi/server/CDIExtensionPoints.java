@@ -113,7 +113,7 @@ public class CDIExtensionPoints implements Extension {
   private static final String ERRAI_CDI_STANDALONE = "errai.cdi.standalone";
 
   static {
-    Set<String> veto = new HashSet<String>();
+    final Set<String> veto = new HashSet<String>();
     veto.add(ServerMessageBusImpl.class.getName());
     veto.add(RequestDispatcher.class.getName());
     veto.add(ErraiService.class.getName());
@@ -177,7 +177,7 @@ public class CDIExtensionPoints implements Extension {
 
     // services
     if (type.isAnnotationPresent(Service.class)) {
-      log.debug("Discovered Errai annotation on type: " + type);
+      log.debug("discovered Errai annotation on type: " + type);
       boolean isRpc = false;
 
       Class<T> javaClass = type.getJavaClass();
@@ -408,6 +408,7 @@ public class CDIExtensionPoints implements Extension {
           for (String cmdName : command.value()) {
             if (cmdName.equals(""))
               cmdName = method.getJavaMember().getName();
+
             commandPoints.put(cmdName, method.getJavaMember());
           }
         }

@@ -1,0 +1,17 @@
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/!svn/ver/403/trunk/src/client/ui/src/com/google/gwt/webworker/linker
+END
+DedicatedWorkerLinker.java
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/!svn/ver/3/trunk/src/client/ui/src/com/google/gwt/webworker/linker/DedicatedWorkerLinker.java
+END
+DedicatedWorkerTemplate.js
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/!svn/ver/403/trunk/src/client/ui/src/com/google/gwt/webworker/linker/DedicatedWorkerTemplate.js
+END

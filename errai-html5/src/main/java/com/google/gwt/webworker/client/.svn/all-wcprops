@@ -1,0 +1,71 @@
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/!svn/ver/331/trunk/src/client/ui/src/com/google/gwt/webworker/client
+END
+MessageHandler.java
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/!svn/ver/3/trunk/src/client/ui/src/com/google/gwt/webworker/client/MessageHandler.java
+END
+WorkerLocation.java
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/!svn/ver/3/trunk/src/client/ui/src/com/google/gwt/webworker/client/WorkerLocation.java
+END
+WorkerGlobalScope.java
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/!svn/ver/3/trunk/src/client/ui/src/com/google/gwt/webworker/client/WorkerGlobalScope.java
+END
+MessageEvent.java
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/!svn/ver/212/trunk/src/client/ui/src/com/google/gwt/webworker/client/MessageEvent.java
+END
+ErrorHandler.java
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/!svn/ver/3/trunk/src/client/ui/src/com/google/gwt/webworker/client/ErrorHandler.java
+END
+MessagePort.java
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/!svn/ver/331/trunk/src/client/ui/src/com/google/gwt/webworker/client/MessagePort.java
+END
+Worker.java
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/!svn/ver/331/trunk/src/client/ui/src/com/google/gwt/webworker/client/Worker.java
+END
+ErrorEvent.java
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/!svn/ver/76/trunk/src/client/ui/src/com/google/gwt/webworker/client/ErrorEvent.java
+END
+DedicatedWorkerGlobalScope.java
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/!svn/ver/3/trunk/src/client/ui/src/com/google/gwt/webworker/client/DedicatedWorkerGlobalScope.java
+END
+DedicatedWorkerEntryPoint.java
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svn/!svn/ver/3/trunk/src/client/ui/src/com/google/gwt/webworker/client/DedicatedWorkerEntryPoint.java
+END
+AbstractWorker.java
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/!svn/ver/331/trunk/src/client/ui/src/com/google/gwt/webworker/client/AbstractWorker.java
+END
