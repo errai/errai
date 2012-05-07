@@ -65,5 +65,4 @@ public class TypeRegistry {
   public Set<Class<?>> getRemoteInterfaces() {
     return remoteInterfaces;
   }
-
 }

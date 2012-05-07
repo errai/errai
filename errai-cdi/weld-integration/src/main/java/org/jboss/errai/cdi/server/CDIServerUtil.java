@@ -35,12 +35,6 @@ import org.slf4j.LoggerFactory;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class CDIServerUtil {
-  private static final String COMPONENT_CONTEXT = "java:comp/env";
-
-  private static final String BEAN_MANAGER_JNDI = "java:comp/BeanManager";
-  private static final String BEAN_MANAGER_FALLBACK_JNDI = "java:comp/env/BeanManager";
-
-  private static Logger log = LoggerFactory.getLogger("ErraiJNDI");
 
   @SuppressWarnings("unchecked")
   public static <T> T lookupBean(BeanManager beanManager, Class<T> serviceType) {
@@ -74,41 +68,12 @@ public class CDIServerUtil {
 
   }
 
-  /**
-   * Attempts to get a reference to the CDI BeanManager by searching for it in
-   * in the JNDI InitialContext. Several locations are searched.
-   *
-   * @return The BeanManager that was retrieved from JNDI. Never null.
-   * @throws NamingException
-   *           If the BeanManager could not be found at any of the possible JNDI
-   *           paths.
-   */
-  public static BeanManager lookupBeanManager() throws NamingException {
-    final String[] names = { BEAN_MANAGER_JNDI, BEAN_MANAGER_FALLBACK_JNDI };
-
-    BeanManager bm = null;
-
-    InitialContext ctx = new InitialContext();
-    for (String name : names) {
-      try {
-        bm = (BeanManager) ctx.lookup(name);
-      }
-      catch (NamingException e) {
-        // allow loop to try again
-      }
-    }
-
-    if (bm == null) {
-      throw new NamingException("Failed to locate the CDI BeanManager under any of the JNDI names: " + Arrays.toString(names));
-    }
-
-    return bm;
-  }
-
   public static String resolveServiceName(Class<?> type) {
     String subjectName = type.getAnnotation(Service.class).value();
+
     if (subjectName.equals(""))
       subjectName = type.getSimpleName();
+
     return subjectName;
   }
 }
