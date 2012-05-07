@@ -419,6 +419,11 @@ public class CDIExtensionPoints implements Extension {
       final MessageCallback callback = (MessageCallback) CDIServerUtil.lookupBean(beanManager,
               type.getJavaClass());
 
+      if (callback == null) {
+        throw new RuntimeException("failed to locate service callback '" + subjectName + "' [callbackClass="
+                + type.getJavaClass().getName() + "]");
+      }
+
       if (commandPoints.isEmpty()) {
         bus.subscribe(subjectName, callback);
       }
