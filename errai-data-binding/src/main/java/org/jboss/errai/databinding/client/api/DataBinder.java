@@ -71,7 +71,7 @@ public class DataBinder<T> {
   }
 
   /**
-   * Unbinds the widget and model bound by previous calls to {@link DataBinder#bind(HasValue, Object, String)}
+   * Unbinds the widget and model bound by previous calls to {@link DataBinder#bind(HasValue, Object, String)}.
    * 
    * @return the unwrapped model
    */
@@ -82,7 +82,7 @@ public class DataBinder<T> {
 
   /**
    * Unbinds the widget from the specified model property, bound by a previous call to
-   * {@link DataBinder#bind(HasValue, Object, String)}
+   * {@link DataBinder#bind(HasValue, Object, String)}.
    * 
    * @param the
    *          name of the property to unbind, must not be null.

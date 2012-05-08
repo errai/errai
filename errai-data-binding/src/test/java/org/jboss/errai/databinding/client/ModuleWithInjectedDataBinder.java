@@ -32,7 +32,8 @@ import com.google.gwt.user.client.ui.TextBox;
 @EntryPoint
 public class ModuleWithInjectedDataBinder {
 
-  private TextBox textBox = new TextBox();
+  private TextBox valueTextBox = new TextBox();
+  private TextBox nameTextBox = new TextBox();
 
   @Inject
   private DataBinder<Model> dataBinder;
@@ -41,14 +42,23 @@ public class ModuleWithInjectedDataBinder {
   public void init() {
     // bind the value of the text box to the name property of the model so they are automatically kept in sync
     // until unbind is called.
-    dataBinder.bind(textBox, "name");
+    dataBinder.bind(nameTextBox, "name");
+    dataBinder.bind(valueTextBox, "value");
   }
 
-  public TextBox getTextBox() {
-    return textBox;
+  public TextBox getValueTextBox() {
+    return valueTextBox;
+  }
+  
+  public TextBox getNameTextBox() {
+    return nameTextBox;
   }
 
   public Model getModel() {
     return dataBinder.getModel();
+  }
+  
+  public DataBinder getDataBinder() {
+    return dataBinder;
   }
 }

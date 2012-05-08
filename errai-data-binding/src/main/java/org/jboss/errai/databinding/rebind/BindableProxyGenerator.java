@@ -95,6 +95,7 @@ public class BindableProxyGenerator {
   private void generateProxyBindingMethods(ClassStructureBuilder<?> classBuilder) {
     classBuilder.publicMethod(void.class, "bind", Parameter.of(HasValue.class, "widget", true),
         Parameter.of(String.class, "property", true))
+        .append(Stmt.loadVariable("this").invoke("unbind", Variable.get("property")))
         .append(Stmt.loadClassMember("bindings").invoke("put", Variable.get("property"), Variable.get("widget")))
         .append(
             Stmt.loadClassMember("handlerRegistrations").invoke(
@@ -110,7 +111,9 @@ public class BindableProxyGenerator {
                                 Stmt.nestedCall(Stmt.loadVariable("event").invoke("getValue"))))
                         .finish()
                         .finish()
-                    )))
+                    )
+                )
+            )
         .finish();
 
     classBuilder.publicMethod(void.class, "unbind", Parameter.of(String.class, "property"))
@@ -137,6 +140,7 @@ public class BindableProxyGenerator {
 
   private void generateProxyAccessorMethods(PropertyDescriptor[] propertyDescriptors,
       ClassStructureBuilder<?> classBuilder) {
+
     classBuilder.publicMethod(bindable, "getTarget")
         .append(Stmt.loadClassMember("target").returnValue())
         .finish();
