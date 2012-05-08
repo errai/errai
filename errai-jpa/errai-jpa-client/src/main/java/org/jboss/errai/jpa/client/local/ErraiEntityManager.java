@@ -1,9 +1,12 @@
 package org.jboss.errai.jpa.client.local;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 
 import org.jboss.errai.jpa.client.local.backend.StorageBackend;
@@ -91,29 +94,6 @@ public abstract class ErraiEntityManager implements EntityManager {
     return (T) value;
   }
 
-  private <T> void persistImpl(T entity) {
-    ErraiEntityType<T> entityType = getMetamodel().entity(getNarrowedClass(entity));
-
-    ErraiSingularAttribute<? super T,?> idAttr;
-    switch (entityType.getIdType().getPersistenceType()) {
-    case BASIC:
-      idAttr = (ErraiSingularAttribute<? super T, ?>) entityType.getId(entityType.getIdType().getJavaType());
-      break;
-    default:
-      throw new RuntimeException(entityType.getIdType().getPersistenceType() + " ids are not yet supported");
-    }
-
-    Object id = idAttr.get(entity);
-    if (id == null) {
-      id = generateAndSetLocalId(entity, idAttr);
-      // TODO track this generated ID for later reconciliation with the server
-    }
-
-    Key<T, ?> key = new Key<T, Object>(entityType, id);
-    persistenceContext.put(key, entity);
-    backend.put(key, entity);
-  }
-
   /**
    * Generates a new ID value for the given entity instance that is guaranteed
    * to be unique <i>on this client</i>. If the entity instance with this ID is
@@ -137,21 +117,6 @@ public abstract class ErraiEntityManager implements EntityManager {
     return nextId;
   }
 
-  /**
-   * Internal routine that completes the detach process for a managed entity.
-   * This method does not alter the {@link #persistenceContext}, so it is safe
-   * to use while iterating over that collection.
-   *
-   * @param entity
-   *          the entity whose state is transitioning from <i>managed</i> to
-   *          <i>detached</i>.
-   */
-  private void finishDetach(Object entity) {
-    // in fact, it's probably better to create a single method that transitions
-    // the state of an entity, checking for illegal transitions and firing the
-    // appropriate events along the way.
-  }
-
   private <X, T> Key<X, T> lookupManagedEntity(X entity, boolean throwIfAbsent) {
     // this implementation becomes poor when the persistence context is large.
     // Turning the persistenceContext into a bimap where the value set is done by object identity would be better.
@@ -166,6 +131,93 @@ public abstract class ErraiEntityManager implements EntityManager {
       throw new IllegalArgumentException("Not a managed entity: " + entity);
     }
     return null;
+  }
+
+  /**
+   * As they say in television, "this is where the magic happens." This method
+   * attempts to resolve the given object as an entity and put that entity into
+   * the given state, taking into account its existing state and performing the
+   * required side effects during the state transition.
+   */
+  private <T> void changeEntityState(T entity, EntityState newState) {
+    ErraiEntityType<T> entityType = getMetamodel().entity(getNarrowedClass(entity));
+
+    ErraiSingularAttribute<? super T, ?> idAttr;
+    switch (entityType.getIdType().getPersistenceType()) {
+    case BASIC:
+      idAttr = (ErraiSingularAttribute<? super T, ?>) entityType.getId(entityType.getIdType().getJavaType());
+      break;
+    default:
+      throw new RuntimeException(entityType.getIdType().getPersistenceType() + " ids are not yet supported");
+    }
+    Object id = idAttr.get(entity);
+    if (id == null) {
+      id = generateAndSetLocalId(entity, idAttr);
+      // TODO track this generated ID for later reconciliation with the server
+    }
+
+    Key<T, ?> key = new Key<T, Object>(entityType, id);
+
+    final EntityState oldState;
+    if (persistenceContext.get(key) != null) {
+      oldState = EntityState.MANAGED;
+    }
+    else if (backend.get(key) != null) {
+      oldState = EntityState.DETACHED;
+    }
+    else {
+      oldState = EntityState.NEW;
+    }
+    // TODO handle REMOVED state
+
+    switch (newState) {
+    case MANAGED:
+      switch (oldState) {
+      case NEW:
+      case REMOVED:
+        entityType.deliverPrePersist(entity);
+        persistenceContext.put(key, entity);
+        backend.put(key, entity);
+        entityType.deliverPostPersist(entity);
+        // FALLTHROUGH
+      case MANAGED:
+        // no-op, but cascade to relatives
+        break;
+      case DETACHED:
+        throw new EntityExistsException();
+      }
+      break;
+    case DETACHED:
+      switch (oldState) {
+      case NEW:
+      case DETACHED:
+        // ignore
+        break;
+      case MANAGED:
+      case REMOVED:
+        persistenceContext.remove(key);
+        break;
+      }
+      break;
+    case REMOVED:
+      switch (oldState) {
+      case NEW:
+      case MANAGED:
+        entityType.deliverPreRemove(entity);
+        persistenceContext.remove(key);
+        backend.remove(key);
+        entityType.deliverPostRemove(entity);
+        break;
+      case DETACHED:
+        throw new IllegalArgumentException("Entities can't transition from " + oldState + " to " + newState);
+      case REMOVED:
+        // ignore
+        break;
+      }
+      break;
+    case NEW:
+      throw new IllegalArgumentException("Entities can't transition from " + oldState + " to " + newState);
+    }
   }
 
   // -------------- Actual JPA API below this line -------------------
@@ -183,7 +235,7 @@ public abstract class ErraiEntityManager implements EntityManager {
 
   @Override
   public void persist(Object entity) {
-    persistImpl(entity);
+    changeEntityState(entity, EntityState.MANAGED);
   }
 
   @Override
@@ -193,17 +245,15 @@ public abstract class ErraiEntityManager implements EntityManager {
 
   @Override
   public void detach(Object entity) {
-    Key<Object, Object> key = lookupManagedEntity(entity, true);
-    finishDetach(entity);
-    persistenceContext.remove(key);
+    changeEntityState(entity, EntityState.DETACHED);
   }
 
   @Override
   public void clear() {
-    for (Object entity : persistenceContext.values()) {
-      finishDetach(entity);
+    List<?> entities = new ArrayList<Object>(persistenceContext.values());
+    for (Object entity : entities) {
+      detach(entity);
     }
-    persistenceContext.clear();
   }
 
   @Override
@@ -212,7 +262,12 @@ public abstract class ErraiEntityManager implements EntityManager {
     X entity = cast(entityClass, persistenceContext.get(key));
     if (entity == null) {
       entity = backend.get(key);
-      persistenceContext.put(key, entity);
+      if (entity != null) {
+        persistenceContext.put(key, entity);
+
+        // XXX when persistenceContext gets its own class, this should go on the ultimate ingress point
+        getMetamodel().entity(entityClass).deliverPostLoad(entity);
+      }
     }
     return entity;
   }
@@ -224,8 +279,6 @@ public abstract class ErraiEntityManager implements EntityManager {
 
   @Override
   public void remove(Object entity) {
-    Key<?, ?> key = lookupManagedEntity(entity, true);
-    persistenceContext.remove(key);
-    backend.remove(key);
+    changeEntityState(entity, EntityState.REMOVED);
   }
 }

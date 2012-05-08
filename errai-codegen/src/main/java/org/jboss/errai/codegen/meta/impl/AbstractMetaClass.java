@@ -16,15 +16,13 @@
 
 package org.jboss.errai.codegen.meta.impl;
 
-import static org.jboss.errai.codegen.meta.MetaClassFactory.asClassArray;
 import static org.jboss.errai.codegen.util.GenUtil.classToMeta;
 import static org.jboss.errai.codegen.util.GenUtil.getArrayDimensions;
-import static org.jboss.errai.codegen.util.GenUtil.getBestConstructorCandidate;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +36,6 @@ import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.mvel2.util.NullType;
-import org.mvel2.util.ParseTools;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -372,6 +369,22 @@ public abstract class AbstractMetaClass<T> extends MetaClass {
   @Override
   public final boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
     return getAnnotation(annotation) != null;
+  }
+
+  // docs inherited from superclass
+  @Override
+  public final List<MetaMethod> getMethodsAnnotatedWith(Class<? extends Annotation> annotation) {
+    List<MetaMethod> methods = new ArrayList<MetaMethod>();
+    MetaClass scanTarget = this;
+    while (scanTarget != null) {
+      for (MetaMethod m : scanTarget.getDeclaredMethods()) {
+        if (m.isAnnotationPresent(annotation)) {
+          methods.add(m);
+        }
+      }
+      scanTarget = scanTarget.getSuperClass();
+    }
+    return Collections.unmodifiableList(methods); // in case we want to cache this in the future
   }
 
   public T getEnclosedMetaObject() {

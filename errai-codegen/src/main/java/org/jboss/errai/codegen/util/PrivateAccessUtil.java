@@ -23,7 +23,13 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 
 /**
+ * Utility class with methods that generate code to access private, default
+ * access ("package private"), and protected methods and fields in arbirtary
+ * classes. Each generator allows the choice of generating Java Reflection code
+ * (for use on the server side) or JSNI code (for use on the client side).
+ *
  * @author Mike Brock
+ * @author Jonathan Fuerth
  */
 public class PrivateAccessUtil {
   private static final String JAVA_REFL_FLD_UTIL_METH = "_getAccessibleField";
@@ -175,11 +181,7 @@ public class PrivateAccessUtil {
 
     if (useJSNIStubs) {
 
-      // append JSNI modifier to the given modifier array
-      Modifier[] origModifiers = modifiers;
-      modifiers = new Modifier[origModifiers.length + 1];
-      System.arraycopy(origModifiers, 0, modifiers, 0, origModifiers.length);
-      modifiers[modifiers.length - 1] = Modifier.JSNI;
+      modifiers = appendJsni(modifiers);
 
       if (write) {
         final MethodCommentBuilder<? extends ClassStructureBuilder<?>> methodBuilder
@@ -269,7 +271,47 @@ public class PrivateAccessUtil {
     }
   }
 
+  /**
+   * Generates methods for accessing a nonpublic method using either JSNI or
+   * Java Reflection. The generated method will be private and static. The name
+   * of the generated method can be discovered by calling
+   * {@link #getPrivateMethodName(MetaMethod)}.
+   *
+   * @param useJSNIStubs
+   *          If true, the generated method will use JSNI to access the field.
+   *          Otherwise, Java reflection will be used (in this case, the
+   *          generated code will not be GWT translatable).
+   * @param classBuilder
+   *          The class builder to add the generated method to.
+   * @param m
+   *          The method the generated accessors read and write.
+   */
   public static void addPrivateAccessStubs(boolean useJSNIStubs, ClassStructureBuilder<?> classBuilder, MetaMethod m) {
+    addPrivateAccessStubs(useJSNIStubs, classBuilder, m, new Modifier[] { Modifier.Static });
+  }
+
+  /**
+   * Generates methods for accessing a nonpublic method using either JSNI or Java
+   * Reflection. The generated method will be private and static.
+   *
+   * @param useJSNIStubs
+   *          If true, the generated method will use JSNI to access the field.
+   *          Otherwise, Java reflection will be used (in this case, the
+   *          generated code will not be GWT translatable).
+   * @param classBuilder
+   *          The class builder to add the generated method to.
+   * @param m
+   *          The method the generated accessors read and write.
+   * @param modifiers
+   *          The modifiers on the generated method, for example
+   *          {@link Modifier#Final} or {@link Modifier#Synchronized}. <i>Never
+   *          specify {@code Modifier.JSNI}</i>; it is added automatically when
+   *          needed.
+   */
+  public static void addPrivateAccessStubs(
+          boolean useJSNIStubs, ClassStructureBuilder<?> classBuilder,
+          MetaMethod m, Modifier[] modifiers) {
+
     List<Parameter> wrapperDefParms = new ArrayList<Parameter>();
 
     if (!m.isStatic()) {
@@ -281,9 +323,10 @@ public class PrivateAccessUtil {
     wrapperDefParms.addAll(methodDefParms);
 
     if (useJSNIStubs) {
+      modifiers = appendJsni(modifiers);
       classBuilder.publicMethod(m.getReturnType(), getPrivateMethodName(m))
               .parameters(new DefParameters(wrapperDefParms))
-              .modifiers(Modifier.Static, Modifier.JSNI)
+              .modifiers(modifiers)
               .body()
               ._(new StringStatement(JSNIUtil.methodAccess(m)))
               .finish();
@@ -301,7 +344,7 @@ public class PrivateAccessUtil {
       BlockBuilder<? extends ClassStructureBuilder> body = classBuilder.publicMethod(m.getReturnType(),
               getPrivateMethodName(m))
               .parameters(new DefParameters(wrapperDefParms))
-              .modifiers(Modifier.Static)
+              .modifiers(modifiers)
               .body();
 
       BlockBuilder<CatchBlockBuilder> tryBuilder = Stmt.try_();
@@ -340,6 +383,23 @@ public class PrivateAccessUtil {
     }
 
     return buf.toString();
+  }
+
+  /**
+   * Returns a new array consisting of a copy of the given array, plus
+   * Modifiers.JSNI as the last element.
+   *
+   * @param modifiers The array to copy. May be empty, but must not be null.
+   * @return An array of length {@code n + 1}, where {@code n} is the length of
+   *         the given array. Positions 0..n-1 correspond with the respective
+   *         entries in the given array, and position n contains Modifiers.JSNI.
+   */
+  private static Modifier[] appendJsni(Modifier[] modifiers) {
+    Modifier[] origModifiers = modifiers;
+    modifiers = new Modifier[origModifiers.length + 1];
+    System.arraycopy(origModifiers, 0, modifiers, 0, origModifiers.length);
+    modifiers[modifiers.length - 1] = Modifier.JSNI;
+    return modifiers;
   }
 
   private static String _getReflectionFieldMethGetName(MetaField f) {

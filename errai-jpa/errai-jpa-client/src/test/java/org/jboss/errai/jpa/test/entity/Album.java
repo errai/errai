@@ -1,11 +1,21 @@
 package org.jboss.errai.jpa.test.entity;
 
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.PostLoad;
+import javax.persistence.PostPersist;
+import javax.persistence.PostRemove;
+import javax.persistence.PostUpdate;
+import javax.persistence.PrePersist;
+import javax.persistence.PreRemove;
+import javax.persistence.PreUpdate;
+import javax.persistence.Transient;
 
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.ioc.client.api.TestOnly;
@@ -64,4 +74,25 @@ public class Album {
             + (artist == null ? "null" : artist.getName())
             + ", releaseDate=" + releaseDate + "]";
   }
+
+  // ------ Lifecycle callbacks (assorted access levels to test that they all work) ------
+
+  @Transient
+  private transient final List<Class<?>> callbackLog = new ArrayList<Class<?>>();
+
+  public List<Class<?>> getCallbackLog() {
+    return callbackLog;
+  }
+
+  @SuppressWarnings("unused")
+  @PrePersist private void prePersist() { callbackLog.add(PrePersist.class); };
+
+  @SuppressWarnings("unused")
+  @PostPersist private void postPersist() { callbackLog.add(PostPersist.class); };
+
+  @PreRemove void preRemove() { callbackLog.add(PreRemove.class); };
+  @PostRemove void postRemove() { callbackLog.add(PostRemove.class); };
+  @PreUpdate protected void preUpdate() { callbackLog.add(PreUpdate.class); };
+  @PostUpdate protected void postUpdate() { callbackLog.add(PostUpdate.class); };
+  @PostLoad public void postLoad() { callbackLog.add(PostLoad.class); };
 }

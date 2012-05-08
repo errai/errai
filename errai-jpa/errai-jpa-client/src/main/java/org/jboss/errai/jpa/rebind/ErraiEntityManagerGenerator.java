@@ -1,10 +1,13 @@
 package org.jboss.errai.jpa.rebind;
 
 import java.io.PrintWriter;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -15,6 +18,13 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Persistence;
+import javax.persistence.PostLoad;
+import javax.persistence.PostPersist;
+import javax.persistence.PostRemove;
+import javax.persistence.PostUpdate;
+import javax.persistence.PrePersist;
+import javax.persistence.PreRemove;
+import javax.persistence.PreUpdate;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.ManagedType;
 import javax.persistence.metamodel.Metamodel;
@@ -22,13 +32,17 @@ import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.Type;
 
 import org.jboss.errai.codegen.Modifier;
+import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.SnapshotMaker;
 import org.jboss.errai.codegen.SnapshotMaker.MethodBodyCallback;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.StringStatement;
 import org.jboss.errai.codegen.Variable;
+import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
+import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.MethodBlockBuilder;
+import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
@@ -37,6 +51,7 @@ import org.jboss.errai.codegen.util.Implementations;
 import org.jboss.errai.codegen.util.PrivateAccessType;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.client.local.ErraiEntityType;
 import org.jboss.errai.jpa.client.local.ErraiSingularAttribute;
@@ -48,6 +63,19 @@ import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 
 public class ErraiEntityManagerGenerator extends Generator {
+
+  private static final List<Class<? extends Annotation>> LIFECYCLE_EVENT_TYPES;
+  static {
+    List<Class<? extends Annotation>> l = new ArrayList<Class<? extends Annotation>>();
+    l.add(PrePersist.class);
+    l.add(PostPersist.class);
+    l.add(PreUpdate.class);
+    l.add(PostUpdate.class);
+    l.add(PreRemove.class);
+    l.add(PostRemove.class);
+    l.add(PostLoad.class);
+    LIFECYCLE_EVENT_TYPES = Collections.unmodifiableList(l);
+  }
 
   @Override
   public String generate(TreeLogger logger, GeneratorContext context,
@@ -68,6 +96,7 @@ public class ErraiEntityManagerGenerator extends Generator {
     MethodBlockBuilder<?> pmm = classBuilder.protectedMethod(void.class, "populateMetamodel");
 
     for (final EntityType<?> et : mm.getEntities()) {
+      MetaClass met = MetaClassFactory.get(et.getJavaType());
 
       // first, create a variable for the EntityType
       pmm.append(Stmt.codeComment(
@@ -75,9 +104,16 @@ public class ErraiEntityManagerGenerator extends Generator {
           "** EntityType for " + et.getJavaType().getName() + "\n" +
           "**"));
       String entityTypeVarName = entitySnapshotVarName(et.getJavaType());
+
+      AnonymousClassStructureBuilder entityTypeSubclass =
+              Stmt.newObject(MetaClassFactory.get(ErraiEntityType.class, new ParameterizedEntityType(et.getJavaType())))
+              .extend();
+
+      generateLifecycleEventDeliveryMethods(met, entityTypeSubclass);
+
       pmm.append(Stmt.declareVariable(ErraiEntityType.class).asFinal()
           .named(entityTypeVarName)
-          .initializeWith(Stmt.newObject(ErraiEntityType.class).withParameters(et.getName(), et.getJavaType())));
+          .initializeWith(entityTypeSubclass.finish().withParameters(et.getName(), et.getJavaType())));
 
       MethodBodyCallback methodBodyCallback = new MethodBodyCallback() {
 
@@ -231,6 +267,44 @@ public class ErraiEntityManagerGenerator extends Generator {
   }
 
   /**
+   * Generates the event delivery methods for the given JPA Entity type.
+   *
+   * @param entityType
+   *          The metaclass representing the entity type.
+   * @param classBuilder
+   *          The target builder to receive the generated methods. For the
+   *          generated code to be valid, this should be a builder of a subclass
+   *          of {@link ErraiEntityType}.
+   */
+  protected void generateLifecycleEventDeliveryMethods(
+          MetaClass entityType,
+          AnonymousClassStructureBuilder classBuilder) {
+
+    for (Class<? extends Annotation> eventType : LIFECYCLE_EVENT_TYPES) {
+      BlockBuilder<AnonymousClassStructureBuilder> methodBuilder =
+              classBuilder.publicMethod(
+                      Void.TYPE,
+                      "deliver" + eventType.getSimpleName(),
+                      Parameter.of(entityType, "targetEntity"));
+
+      // TODO also scan standalone listener types mentioned in class-level annotation
+
+      for (MetaMethod callback : entityType.getMethodsAnnotatedWith(eventType)) {
+        if (!callback.isPublic()) {
+          PrivateAccessUtil.addPrivateAccessStubs(true, classBuilder, callback, new Modifier[] {});
+          methodBuilder.append(
+                  Stmt.loadVariable("this")
+                  .invoke(PrivateAccessUtil.getPrivateMethodName(callback), Stmt.loadVariable("targetEntity")));
+        }
+        else {
+          methodBuilder.append(Stmt.loadVariable("targetEntity").invoke(callback));
+        }
+      }
+      methodBuilder.finish();
+    }
+  }
+
+  /**
    * Returns true if the given Java member is annotated as a JPA generated value.
    * <p>
    * TODO: support this determination for XML-configured entities.
@@ -256,5 +330,60 @@ public class ErraiEntityManagerGenerator extends Generator {
     return "et_" + forType.getCanonicalName().replace('.', '_');
   }
 
+  /**
+   * Represents the parameterized Java reflection type for
+   * {@code ErraiEntityType<X>}, where {@code X} can be provided at runtime.
+   *
+   * @author Jonathan Fuerth <jfuerth@gmail.com>
+   */
+  static final class ParameterizedEntityType implements ParameterizedType {
 
+    private final java.lang.reflect.Type entityType;
+
+    public ParameterizedEntityType(java.lang.reflect.Type entityType) {
+      this.entityType = Assert.notNull(entityType);
+    }
+
+    @Override
+    public java.lang.reflect.Type[] getActualTypeArguments() {
+      return new java.lang.reflect.Type[] { entityType };
+    }
+
+    @Override
+    public java.lang.reflect.Type getRawType() {
+      return ErraiEntityType.class;
+    }
+
+    @Override
+    public java.lang.reflect.Type getOwnerType() {
+      return null;
+    }
+
+    @Override
+    public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result
+              + ((entityType == null) ? 0 : entityType.hashCode());
+      return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj)
+        return true;
+      if (obj == null)
+        return false;
+      if (getClass() != obj.getClass())
+        return false;
+      ParameterizedEntityType other = (ParameterizedEntityType) obj;
+      if (entityType == null) {
+        if (other.entityType != null)
+          return false;
+      }
+      else if (!entityType.equals(other.entityType))
+        return false;
+      return true;
+    }
+  }
 }

@@ -16,6 +16,9 @@
 
 package org.jboss.errai.codegen.meta;
 
+import java.lang.annotation.Annotation;
+import java.util.List;
+
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
@@ -33,6 +36,21 @@ public abstract class MetaClass implements HasAnnotations, MetaType, MetaGeneric
   public abstract String getPackageName();
 
   public abstract MetaMethod[] getMethods();
+
+  /**
+   * Returns all declared and inherited methods on this class that have the
+   * given annotation targeting them.
+   * <p>
+   * TODO: the returned collection should not include overridden methods from superclasses.
+   *
+   * @param annotation
+   *          The annotation to scan this class's methods for. Must not be null.
+   * @return An unmodifiable list of all declared and inherited methods of this
+   *         class that are annotated with the given annotation.
+   * @throws NullPointerException
+   *           if {@code} annotation is null.
+   */
+  public abstract List<MetaMethod> getMethodsAnnotatedWith(Class<? extends Annotation> annotation);
 
   public abstract MetaMethod[] getDeclaredMethods();
 
@@ -124,10 +142,6 @@ public abstract class MetaClass implements HasAnnotations, MetaType, MetaGeneric
   public abstract boolean isAssignableFrom(Class clazz);
 
   public abstract boolean isAssignableTo(Class clazz);
-//
-//  public abstract boolean isAssignableFrom(JClassType clazz);
-//
-//  public abstract boolean isAssignableTo(JClassType clazz);
 
   public abstract boolean isPrimitive();
 

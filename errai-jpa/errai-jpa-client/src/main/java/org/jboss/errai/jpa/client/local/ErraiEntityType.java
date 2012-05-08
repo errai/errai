@@ -3,6 +3,7 @@ package org.jboss.errai.jpa.client.local;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.PrePersist;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.CollectionAttribute;
 import javax.persistence.metamodel.EntityType;
@@ -14,7 +15,7 @@ import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.Type;
 
-public class ErraiEntityType<X> implements EntityType<X> {
+public abstract class ErraiEntityType<X> implements EntityType<X> {
 
   private final Set<SingularAttribute<? super X, ?>> singularAttributes = new HashSet<SingularAttribute<? super X,?>>();
 
@@ -34,6 +35,71 @@ public class ErraiEntityType<X> implements EntityType<X> {
     if (attribute.isId()) id = attribute;
     if (attribute.isVersion()) version = attribute;
   }
+
+  /**
+   * Delivers the {@link PrePersist} event to the pre-persist listeners on the given
+   * instance of this entity.
+   *
+   * @param targetEntity
+   *          The entity instance to deliver the PrePersist event to.
+   */
+  public abstract void deliverPrePersist(X targetEntity);
+
+  /**
+   * Delivers the {@link PostPersist} event to the post-persist listeners on the given
+   * instance of this entity.
+   *
+   * @param targetEntity
+   *          The entity instance to deliver the PostPersist event to.
+   */
+  public abstract void deliverPostPersist(X targetEntity);
+
+  /**
+   * Delivers the {@link PreUpdate} event to the pre-Update listeners on the given
+   * instance of this entity.
+   *
+   * @param targetEntity
+   *          The entity instance to deliver the PreUpdate event to.
+   */
+  public abstract void deliverPreUpdate(X targetEntity);
+
+  /**
+   * Delivers the {@link PostUpdate} event to the post-Update listeners on the given
+   * instance of this entity.
+   *
+   * @param targetEntity
+   *          The entity instance to deliver the PostUpdate event to.
+   */
+  public abstract void deliverPostUpdate(X targetEntity);
+
+  /**
+   * Delivers the {@link PreRemove} event to the pre-Remove listeners on the given
+   * instance of this entity.
+   *
+   * @param targetEntity
+   *          The entity instance to deliver the PreRemove event to.
+   */
+  public abstract void deliverPreRemove(X targetEntity);
+
+  /**
+   * Delivers the {@link PostRemove} event to the post-Remove listeners on the given
+   * instance of this entity.
+   *
+   * @param targetEntity
+   *          The entity instance to deliver the PostRemove event to.
+   */
+  public abstract void deliverPostRemove(X targetEntity);
+
+  /**
+   * Delivers the {@link PostLoad} event to the post-load listeners on the given
+   * instance of this entity.
+   *
+   * @param targetEntity
+   *          The entity instance to deliver the PostLoad event to.
+   */
+  public abstract void deliverPostLoad(X targetEntity);
+
+  // ---------- JPA API Below This Line -------------
 
   @SuppressWarnings("unchecked")
   @Override

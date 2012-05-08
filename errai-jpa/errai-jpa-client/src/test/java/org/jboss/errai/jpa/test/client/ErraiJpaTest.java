@@ -2,10 +2,20 @@ package org.jboss.errai.jpa.test.client;
 
 
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PostLoad;
+import javax.persistence.PostPersist;
+import javax.persistence.PostRemove;
+import javax.persistence.PostUpdate;
+import javax.persistence.PrePersist;
+import javax.persistence.PreRemove;
+import javax.persistence.PreUpdate;
 
 import org.jboss.errai.ioc.client.Container;
+import org.jboss.errai.jpa.rebind.ErraiEntityManagerGenerator;
 import org.jboss.errai.jpa.test.entity.Album;
 import org.jboss.errai.jpa.test.entity.Artist;
 
@@ -43,6 +53,15 @@ public class ErraiJpaTest extends GWTTestCase {
     new Container().boostrapContainer();
   }
 
+  /**
+   * Tests that the entity manager was injected into the testing class. If this
+   * test fails, the likely cause is that the
+   * {@link ErraiEntityManagerGenerator} failed to output a compilable class. In
+   * that case, try re-running this test with
+   * {@code -Derrai.codegen.permissive=true} and
+   * {@code -Derrai.codegen.printOut=true}. This should allow you to inspect the
+   * generated source code and to see the Java compiler errors.
+   */
   public void testEntityManagerInjection() throws Exception {
     getEntityManager(); // has its own assertions
   }
@@ -243,6 +262,122 @@ public class ErraiJpaTest extends GWTTestCase {
     // make sure it's gone
     assertNotNull(album.getId());
     assertNull(em.find(Album.class, album.getId()));
+  }
+
+  public void testPersistNewEntityLifecycle() throws Exception {
+
+    List<Class<?>> expectedLifecycle = new ArrayList<Class<?>>();
+
+    // make it
+    Album album = new Album();
+    album.setArtist(null);
+    album.setName("Abbey Road");
+    album.setReleaseDate(new Date(-8366400000L));
+
+    assertEquals(expectedLifecycle, album.getCallbackLog());
+
+    // store it
+    EntityManager em = getEntityManager();
+    em.persist(album);
+
+    expectedLifecycle.add(PrePersist.class);
+    expectedLifecycle.add(PostPersist.class);
+    assertEquals(expectedLifecycle, album.getCallbackLog());
+
+    em.flush();
+    assertEquals(expectedLifecycle, album.getCallbackLog());
+
+    // verify that detach causes no lifecycle updates
+    em.detach(album);
+    assertEquals(expectedLifecycle, album.getCallbackLog());
+  }
+
+  public void testFetchEntityLifecycle() throws Exception {
+
+    // make it
+    Album album = new Album();
+    album.setArtist(null);
+    album.setName("Abbey Road");
+    album.setReleaseDate(new Date(-8366400000L));
+
+    // store it
+    EntityManager em = getEntityManager();
+    em.persist(album);
+    List<Class<?>> expectedLifecycle = new ArrayList<Class<?>>();
+    em.flush();
+    em.detach(album);
+
+    // fetch a fresh copy
+    Album fetchedAlbum = em.find(Album.class, album.getId());
+    expectedLifecycle.add(PostLoad.class);
+    assertEquals(expectedLifecycle, fetchedAlbum.getCallbackLog());
+
+    // fetch again; expect no more PostLoad notifications
+    Album fetchedAlbum2 = em.find(Album.class, album.getId());
+    assertSame(fetchedAlbum, fetchedAlbum2);
+    assertEquals(expectedLifecycle, fetchedAlbum2.getCallbackLog());
+  }
+
+  public void testRemoveEntityLifecycle() throws Exception {
+
+    // make it
+    Album album = new Album();
+    album.setArtist(null);
+    album.setName("Abbey Road");
+    album.setReleaseDate(new Date(-8366400000L));
+
+    // store it
+    EntityManager em = getEntityManager();
+    em.persist(album);
+    List<Class<?>> expectedLifecycle = new ArrayList<Class<?>>();
+    em.flush();
+    em.detach(album);
+
+    // fetch a fresh copy
+    Album fetchedAlbum = em.find(Album.class, album.getId());
+    expectedLifecycle.add(PostLoad.class);
+    assertEquals(expectedLifecycle, fetchedAlbum.getCallbackLog());
+
+    // delete it
+    em.remove(fetchedAlbum);
+    em.flush();
+    expectedLifecycle.add(PreRemove.class);
+    expectedLifecycle.add(PostRemove.class);
+    assertEquals(expectedLifecycle, fetchedAlbum.getCallbackLog());
+
+    // verify that detached entity received no further lifecycle updates
+    expectedLifecycle.clear();
+    expectedLifecycle.add(PrePersist.class);
+    expectedLifecycle.add(PostPersist.class);
+    assertEquals(expectedLifecycle, album.getCallbackLog());
+  }
+
+  // disabled until we support updates to existing entities
+  public void IGNOREtestUpdateEntityLifecycle() throws Exception {
+
+    // make it
+    Album album = new Album();
+    album.setArtist(null);
+    album.setName("Abbey Road");
+    album.setReleaseDate(new Date(-8366400000L));
+
+    // store it
+    EntityManager em = getEntityManager();
+    em.persist(album);
+    List<Class<?>> expectedLifecycle = new ArrayList<Class<?>>();
+    em.flush();
+
+    expectedLifecycle.add(PrePersist.class);
+    expectedLifecycle.add(PostPersist.class);
+    assertEquals(expectedLifecycle, album.getCallbackLog());
+
+    // modify it
+    album.setName("Cowabunga");
+    em.flush();
+
+    expectedLifecycle.add(PreUpdate.class);
+    expectedLifecycle.add(PostUpdate.class);
+    assertEquals(expectedLifecycle, album.getCallbackLog());
   }
 
 }
