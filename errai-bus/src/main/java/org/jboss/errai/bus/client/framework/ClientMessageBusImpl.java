@@ -290,7 +290,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     };
   }
 
-
   private boolean directSubscribe(final String subject, final MessageCallback callback, final boolean local) {
     final boolean isNew = !isSubscribed(subject);
 
@@ -354,7 +353,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
     }
   }
-
 
   /**
    * Globally send message to all receivers.
