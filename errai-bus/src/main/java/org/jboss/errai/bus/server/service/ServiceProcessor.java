@@ -220,7 +220,7 @@ public class ServiceProcessor implements MetaDataProcessor<BootstrapContext> {
     for (Class<?> intf : svc.getClass().getInterfaces()) {
       for (final Method method : intf.getMethods()) {
         if (RebindUtils.isMethodInInterface(remoteIface, method)) {
-          epts.put(RebindUtils.createCallSignature(method), new ConversationalEndpointCallback(new ServiceInstanceProvider() {
+          epts.put(RebindUtils.createCallSignature(intf, method), new ConversationalEndpointCallback(new ServiceInstanceProvider() {
             @Override
             public Object get(Message message) {
               return svc;

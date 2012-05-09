@@ -116,12 +116,12 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     return packageName;
   }
 
-  private static MetaMethod[] fromMethodArray(Method[] methods) {
+  private MetaMethod[] fromMethodArray(Method[] methods) {
     List<MetaMethod> methodList = new ArrayList<MetaMethod>();
 
     for (Method m : methods) {
       if (!m.isBridge()) {
-        methodList.add(new JavaReflectionMethod(m));
+        methodList.add(new JavaReflectionMethod(this, m));
       }
     }
 

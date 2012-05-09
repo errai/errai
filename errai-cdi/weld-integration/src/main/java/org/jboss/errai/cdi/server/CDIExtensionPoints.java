@@ -488,7 +488,7 @@ public class CDIExtensionPoints implements Extension {
     // beware of classloading issues. better reflect on the actual instance
     for (final Method method : remoteIface.getMethods()) {
       if (RebindUtils.isMethodInInterface(remoteIface, method)) {
-        epts.put(RebindUtils.createCallSignature(method), new ConversationalEndpointCallback(
+        epts.put(RebindUtils.createCallSignature(remoteIface, method), new ConversationalEndpointCallback(
                 new ServiceInstanceProvider() {
                   @SuppressWarnings("unchecked")
                   @Override

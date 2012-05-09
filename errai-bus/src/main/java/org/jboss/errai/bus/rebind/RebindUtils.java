@@ -17,6 +17,7 @@
 package org.jboss.errai.bus.rebind;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -24,6 +25,8 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.util.Stmt;
 import org.mvel2.util.StringAppender;
+
+import com.google.common.reflect.TypeToken;
 
 public class RebindUtils {
   public static String createCallSignature(MetaMethod m) {
@@ -34,10 +37,12 @@ public class RebindUtils {
     return append.toString();
   }
   
-  public static String createCallSignature(Method m) {
+  public static String createCallSignature(Class<?> referenceClass, Method m) {
+    TypeToken<?> resolver = TypeToken.of(referenceClass);
     StringAppender append = new StringAppender(m.getName()).append(':');
-    for (Class c : m.getParameterTypes()) {
-      append.append(c.getCanonicalName()).append(':');
+    for (Type c : m.getGenericParameterTypes()) {
+      TypeToken<?> resolvedParamType = resolver.resolveType(c);
+      append.append(resolvedParamType.getRawType().getCanonicalName()).append(':');
     }
     return append.toString();
   }

@@ -30,15 +30,20 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.meta.MetaTypeVariable;
+import org.jboss.errai.common.client.framework.Assert;
+
+import com.google.common.reflect.TypeToken;
 
 public class JavaReflectionMethod extends MetaMethod {
-  private Method method;
+  private final Method method;
+  private final MetaClass referenceClass;
   private MetaParameter[] parameters;
   private MetaClass declaringClass;
   private MetaClass returnType;
 
-  JavaReflectionMethod(Method method) {
-    this.method = method;
+  JavaReflectionMethod(MetaClass referenceClass, Method method) {
+    this.referenceClass = Assert.notNull(referenceClass);
+    this.method = Assert.notNull(method);
   }
 
   @Override
@@ -56,10 +61,11 @@ public class JavaReflectionMethod extends MetaMethod {
       Annotation[][] parmAnnos = method.getParameterAnnotations();
 
       for (int i = 0; i < parmTypes.length; i++) {
-        MetaClass mcParm = MetaClassFactory.get(parmTypes[i], genParmTypes[i]);
+        TypeToken<?> token = TypeToken.of(referenceClass.asClass());
+        Class<?> parmType = token.resolveType(genParmTypes[i]).getRawType();
 
-        parmList.add(new JavaReflectionParameter(mcParm,
-                parmAnnos[i], this));
+        MetaClass mcParm = MetaClassFactory.get(parmType, genParmTypes[i]);
+        parmList.add(new JavaReflectionParameter(mcParm, parmAnnos[i], this));
       }
       parameters = parmList.toArray(new MetaParameter[parmList.size()]);
     }
@@ -93,14 +99,16 @@ public class JavaReflectionMethod extends MetaMethod {
 
   @Override
   public Annotation[] getAnnotations() {
-    if (_annotationsCache != null) return _annotationsCache;
+    if (_annotationsCache != null)
+      return _annotationsCache;
     return _annotationsCache = method.getAnnotations();
   }
 
   @Override
   public final <A extends Annotation> A getAnnotation(Class<A> annotation) {
     for (Annotation a : getAnnotations()) {
-      if (a.annotationType().equals(annotation)) return (A) a;
+      if (a.annotationType().equals(annotation))
+        return (A) a;
     }
     return null;
   }
