@@ -22,7 +22,6 @@ import org.jboss.errai.ioc.client.BootstrapperInjectionContext;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -33,18 +32,19 @@ import java.util.Set;
  * A CreationalContext is used for representing context associated with the creation of a bean and its dependencies.
  * A CreationalContext captures {@link InitializationCallback}s and {@link DestructionCallback}s associated with
  * the graph being constructed.
- * <p>
+ * <p/>
  * This class is relied upon by the {@link IOCBeanManager} itself and should not generally be used directly.
  *
  * @author Mike Brock
  */
 public class CreationalContext {
   private final IOCBeanManager beanManager;
-  private final Map<Object, InitializationCallback> initializationCallbacks =
-          new IdentityHashMap<Object, InitializationCallback>();
 
-  private final Map<Object, DestructionCallback> destructionCallbacks =
-          new IdentityHashMap<Object, DestructionCallback>();
+  private final List<Tuple<Object, InitializationCallback>> initializationCallbacks =
+          new ArrayList<Tuple<Object, InitializationCallback>>();
+
+  private final List<Tuple<Object, DestructionCallback>> destructionCallbacks
+          = new ArrayList<Tuple<Object, DestructionCallback>>();
 
   private final Map<BeanRef, List<ProxyResolver>> unresolvedProxies
           = new LinkedHashMap<BeanRef, List<ProxyResolver>>();
@@ -58,11 +58,12 @@ public class CreationalContext {
   /**
    * Records a {@link InitializationCallback} to the creational context. All initialization callbacks are executed
    * when the {@link #finish()} method is called.
+   *
    * @param beanInstance the instance of the bean associated witht he {@link InitializationCallback}
-   * @param callback the instance of the {@link InitializationCallback}
+   * @param callback     the instance of the {@link InitializationCallback}
    */
   public void addInitializationCallback(Object beanInstance, InitializationCallback callback) {
-    initializationCallbacks.put(beanInstance, callback);
+    initializationCallbacks.add(Tuple.of(beanInstance, callback));
   }
 
   /**
@@ -71,10 +72,10 @@ public class CreationalContext {
    * destroyed.
    *
    * @param beanInstance the instance of the bean associated with the {@link DestructionCallback}.
-   * @param callback the instance of the {@link DestructionCallback}
+   * @param callback     the instance of the {@link DestructionCallback}
    */
   public void addDestructionCallback(Object beanInstance, DestructionCallback callback) {
-    destructionCallbacks.put(beanInstance, callback);
+    destructionCallbacks.add(Tuple.of(beanInstance, callback));
     beanManager.addDestructionCallbacks(beanInstance, destructionCallbacks);
   }
 
@@ -83,7 +84,7 @@ public class CreationalContext {
    * bootstrapping code.
    *
    * @param proxyRef the reference to the proxy instance
-   * @param realRef the reference to the actual bean instance which the proxy wraps
+   * @param realRef  the reference to the actual bean instance which the proxy wraps
    */
   @SuppressWarnings("UnusedDeclaration") // used by generated code
   public void addProxyReference(Object proxyRef, Object realRef) {
@@ -94,7 +95,7 @@ public class CreationalContext {
    * Returns a {@link BeanRef} which matches the specified type and qualifiers whether or not the bean is within
    * the creational context or not.
    *
-   * @param beanType the type of the bean
+   * @param beanType   the type of the bean
    * @param qualifiers the qualifiers for the bean
    * @return a {@link BeanRef} matching the specified type and qualifiers.
    */
@@ -106,9 +107,9 @@ public class CreationalContext {
    * Adds a bean to the creational context based on the specified bean type and qualifiers with a reference to an
    * actual instantiated instance of the bean.
    *
-   * @param beanType the type of the bean
+   * @param beanType   the type of the bean
    * @param qualifiers the qualifiers for the bean
-   * @param instance the instance to the bean
+   * @param instance   the instance to the bean
    */
   public void addBean(final Class<?> beanType, final Annotation[] qualifiers, final Object instance) {
     addBean(getBeanReference(beanType, qualifiers), instance);
@@ -118,7 +119,7 @@ public class CreationalContext {
    * Adds a bean to the creational context based on the {@link BeanRef} with a reference to the an actual instantiated
    * instance of the bean.
    *
-   * @param ref the {@link BeanRef} representing the bean
+   * @param ref      the {@link BeanRef} representing the bean
    * @param instance the instance of the bean
    */
   public void addBean(final BeanRef ref, final Object instance) {
@@ -139,9 +140,9 @@ public class CreationalContext {
   /**
    * Obtains an instance of the bean within the creational context based on the specified bean type and qualifiers.
    *
-   * @param beanType the type of the bean
+   * @param beanType   the type of the bean
    * @param qualifiers the qualifiers fo the bean
-   * @param <T> the type of the bean
+   * @param <T>        the type of the bean
    * @return the actual instance of the bean
    */
   @SuppressWarnings("unchecked")
@@ -162,14 +163,13 @@ public class CreationalContext {
    * Returns the instance of the specified bean of matching type and qualifiers, or if there is no matching bean within
    * the context, the specified {@link CreationalCallback} is called to instantiate and add the bean to the context.
    *
-   * @param callback the {@link CreationalCallback} to be called in order to instantiate the bean if it is not already
-   *                available withint he current creational context.
-   *
-   * @see #getSingletonInstanceOrNew(org.jboss.errai.ioc.client.BootstrapperInjectionContext, CreationalCallback, Class, java.lang.annotation.Annotation[])
-   * @param beanType the type of the bean
+   * @param callback   the {@link CreationalCallback} to be called in order to instantiate the bean if it is not already
+   *                   available withint he current creational context.
+   * @param beanType   the type of the bean
    * @param qualifiers the qualifiers for the bean
-   * @param <T> the type of the bean
+   * @param <T>        the type of the bean
    * @return the instance of the bean
+   * @see #getSingletonInstanceOrNew(org.jboss.errai.ioc.client.BootstrapperInjectionContext, CreationalCallback, Class, java.lang.annotation.Annotation[])
    */
   @SuppressWarnings({"unchecked", "UnusedDeclaration"})
   public <T> T getInstanceOrNew(final CreationalCallback<T> callback, final Class<?> beanType, final Annotation[] qualifiers) {
@@ -188,18 +188,18 @@ public class CreationalContext {
    * the context, an instance of the bean will be obtained from the {@link BootstrapperInjectionContext}. This method
    * assumes that the caller <em>knows</em> that the bean is a singleton bean. It is called directly by the
    * IOC bootstrapping code.
-   * <p>
+   * <p/>
    * In the event that bean is not available within the {@link BootstrapperInjectionContext}, the specified
    * {@link CreationalCallback} is invoked at the bean is added to the {@link BootstrapperInjectionContext}. This
    * functionality primarily enables proper behavior for singleton producers.
    *
-   * @see #getInstanceOrNew(CreationalCallback, Class, java.lang.annotation.Annotation[])
    * @param injectionContext the {@link BootstrapperInjectionContext} of the container
-   * @param callback the {@link CreationalCallback} to be called in order to instantiate the bean if it is not already
-   *                available withint he current creational context.   * @param beanType
-   * @param qualifiers the qualifiers for the bean
-   * @param <T> the type of the bean
+   * @param callback         the {@link CreationalCallback} to be called in order to instantiate the bean if it is not already
+   *                         available withint he current creational context.   * @param beanType
+   * @param qualifiers       the qualifiers for the bean
+   * @param <T>              the type of the bean
    * @return the instance of the bean
+   * @see #getInstanceOrNew(CreationalCallback, Class, java.lang.annotation.Annotation[])
    */
   public <T> T getSingletonInstanceOrNew(BootstrapperInjectionContext injectionContext,
                                          CreationalCallback<T> callback, Class<?> beanType, Annotation[] qualifiers) {
@@ -220,15 +220,15 @@ public class CreationalContext {
    * Adds an unresolved proxy into the creational context. This is called to indicate a proxy was required while
    * building a bean, due to a forward reference in a cycle situation. The caller is responsible, through the providing
    * of the {@link ProxyResolver} callback, for implementing its own proxy closing strategy.
-   * <p>
+   * <p/>
    * After a creational context has added all beans to the context, calling {@link #finish()} will result in all of
    * the provided {@link ProxyResolver}s being executed.
-   * <p>
+   * <p/>
    * This method is typically called directly by the generated bootstapper.
    *
    * @param proxyResolver the {@link ProxyResolver} used for handling closure of the cycle.
-   * @param beanType the type of the bean
-   * @param qualifiers the qualifiers for the bean
+   * @param beanType      the type of the bean
+   * @param qualifiers    the qualifiers for the bean
    */
   @SuppressWarnings("UnusedDeclaration") // used by generated code
   public void addUnresolvedProxy(final ProxyResolver proxyResolver, final Class<?> beanType,
@@ -255,7 +255,7 @@ public class CreationalContext {
 
   @SuppressWarnings("unchecked")
   private void fireAllInitCallbacks() {
-    for (Map.Entry<Object, InitializationCallback> entry : initializationCallbacks.entrySet()) {
+    for (Tuple<Object, InitializationCallback> entry : initializationCallbacks) {
       entry.getValue().init(entry.getKey());
     }
   }
@@ -302,4 +302,5 @@ public class CreationalContext {
       throw new RuntimeException("unresolved proxy: " + unresolvedProxies.entrySet().iterator().next().getKey());
     }
   }
+
 }

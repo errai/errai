@@ -38,8 +38,8 @@ public class IOCBeanManager {
   private final Map<Class<?>, List<IOCBeanDef>> beanMap
           = new HashMap<Class<?>, List<IOCBeanDef>>();
 
-  private final Map<Object, Map<Object, DestructionCallback>> activeManagedBeans
-          = new IdentityHashMap<Object, Map<Object, DestructionCallback>>();
+  private final Map<Object, List<Tuple<Object, DestructionCallback>>> activeManagedBeans
+          = new IdentityHashMap<Object, List<Tuple<Object, DestructionCallback>>>();
 
   private final Map<Object, Object> proxyLookupForManagedBeans
           = new IdentityHashMap<Object, Object>();
@@ -85,9 +85,9 @@ public class IOCBeanManager {
   public void destroyBean(final Object ref) {
     final Object _target = getActualBeanReference(ref);
 
-    final Map<Object, DestructionCallback> destructionCallbackList = activeManagedBeans.get(_target);
+    final List<Tuple<Object, DestructionCallback>> destructionCallbackList = activeManagedBeans.get(_target);
     if (destructionCallbackList != null) {
-      for (Map.Entry<Object, DestructionCallback> entry : destructionCallbackList.entrySet()) {
+      for (Tuple<Object, DestructionCallback> entry : destructionCallbackList) {
         entry.getValue().destroy(entry.getKey());
       }
     }
@@ -146,7 +146,7 @@ public class IOCBeanManager {
     proxyLookupForManagedBeans.put(proxyRef, realRef);
   }
 
-  void addDestructionCallbacks(Object ref, Map<Object, DestructionCallback> callbacks) {
+  void addDestructionCallbacks(Object ref, List<Tuple<Object, DestructionCallback>> callbacks) {
     activeManagedBeans.put(ref, callbacks);
   }
 
