@@ -10,7 +10,7 @@ import java.util.ArrayList;
  */
 @ApplicationScoped
 public class BeanInjectsNonModuleDependentBean {
-  @Inject ArrayList list;
+  @Inject ArrayList<String> list;
 
   @PostConstruct
   private void postConstructBean() {
@@ -18,7 +18,7 @@ public class BeanInjectsNonModuleDependentBean {
     list.add("bar");
   }
 
-  public ArrayList getList() {
+  public ArrayList<String> getList() {
     return list;
   }
 }
