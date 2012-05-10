@@ -66,11 +66,11 @@ public class Container implements EntryPoint {
 
   private static native void declareDebugFunction() /*-{
     $wnd.errai_bean_manager_status = function () {
-      @org.jboss.errai.ioc.client.Container::displayBeanManagerStaus()();
+      @org.jboss.errai.ioc.client.Container::displayBeanManagerStatus()();
     }
   }-*/;
 
-  private static void displayBeanManagerStaus() {
+  private static void displayBeanManagerStatus() {
     displayDebuggerUtilityTitle("BeanManager Status");
 
     log("[WIRED BEANS]");
