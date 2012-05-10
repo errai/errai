@@ -29,6 +29,7 @@
         <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
+            <version>${guice.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -46,7 +47,7 @@
         <dependency>
             <groupId>javax.enterprise</groupId>
             <artifactId>cdi-api</artifactId>
-            <version>1.0-SP4</version>
+            <version>1.0-SP4-redhat-1</version>
             <!--<scope>provided</scope>-->
         </dependency>
         <!--<dependency>-->
