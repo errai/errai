@@ -46,7 +46,7 @@ public interface IOCBeanDef<T> {
    * Returns a new instance of the bean. Calling this method overrides the underlying scope and instantiates a new
    * instance of the bean.
    *
-   * @return a new isntance of the bean.
+   * @return a new instance of the bean.
    */
   public T newInstance();
 

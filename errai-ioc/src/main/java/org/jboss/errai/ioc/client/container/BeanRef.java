@@ -16,6 +16,8 @@
 
 package org.jboss.errai.ioc.client.container;
 
+import org.jboss.errai.common.client.framework.Assert;
+
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Collection;
@@ -23,13 +25,36 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
+ * This class is used as a resolver class within the bean manager to represent a unique bean definition
+ * for a given type and combination of qualifiers. It provides consistent {@link #equals(Object)} and
+ * {@link #hashCode()} functionality for any two instances of <tt>BeanRef</tt>.
+ * <p/>
+ * For example:
+ * <pre>
+ *   <code>
+ *     BeanRef beanRefA = new BeanRef(String.class, new Annotation[] { Foo.class });
+ *     BeanRef beanRefB = new BeanRef(String.class, new Annotation[] { Foo.class });
+ *     assertTrue(beanRefA.equals(beanRefB)); // should equal true!
+ *   </code>
+ * </pre>
+ *
  * @author Mike Brock
  */
 public final class BeanRef {
   private final Class<?> clazz;
   private final Set<Annotation> annotations;
 
+  /**
+   * Constructs a new instance of <tt>BeanRef</tt> with the given bean type and qualifiers. Neither the {@parm clazz}
+   * or the {@parm annotation} parameter may be null.
+   *
+   * @param clazz       the bean type.
+   * @param annotations an array of qualifiers associated with this bean.
+   */
   public BeanRef(Class<?> clazz, Annotation[] annotations) {
+    Assert.notNull(clazz);
+    Assert.notNull(annotations);
+
     this.clazz = clazz;
     this.annotations = new HashSet<Annotation>(wrapAnnotations(Arrays.asList(annotations)));
   }
@@ -42,10 +67,20 @@ public final class BeanRef {
     return annos;
   }
 
+  /**
+   * Return the bean type.
+   *
+   * @return an instance of {@link Class} representing the type of this bean.
+   */
   public Class<?> getClazz() {
     return clazz;
   }
 
+  /**
+   * Return an array of qualifiers associated with this bean.
+   *
+   * @return an array of {{@link Annotation}} representing the qualifiers for this bean.
+   */
   public Annotation[] getAnnotations() {
     return annotations.toArray(new Annotation[annotations.size()]);
   }

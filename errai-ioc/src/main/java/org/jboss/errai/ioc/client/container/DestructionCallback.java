@@ -17,8 +17,18 @@
 package org.jboss.errai.ioc.client.container;
 
 /**
+ * A destruction callback is used to implement a set of tasks to be performed on a bean prior to it being destroyed
+ * (or taken out of service) by the bean manager. This interface is not designed to be directly used. Its
+ * implementations are usually provided by Errai's code generators and are used to orchestrate tasks such as
+ * {@link javax.annotation.PreDestroy} for beans. It is also used to implement implicit garbage collection tasks,
+ * such as the de-registering of listeners and resources associated with the bean.
+ *
  * @author Mike Brock
  */
 public interface DestructionCallback<T> {
+  /**
+   * Called to perform the destruction task against the specified bean.
+   * @param t the bean instance.
+   */
   public void destroy(T bean);
 }
