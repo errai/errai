@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
 import javax.persistence.PostLoad;
 import javax.persistence.PostPersist;
 import javax.persistence.PostRemove;
@@ -264,6 +265,56 @@ public class ErraiJpaTest extends GWTTestCase {
     assertNull(em.find(Album.class, album.getId()));
   }
 
+  public void testUpdateEntity() throws Exception {
+
+    // make it
+    Album album = new Album();
+    album.setArtist(null);
+    album.setName("Abbey Road");
+    album.setReleaseDate(new Date(-8366400000L));
+
+    // store it
+    EntityManager em = getEntityManager();
+    em.persist(album);
+    em.flush();
+
+    // modify it
+    album.setName("Cowabunga");
+    em.flush();
+
+    // fetch and compare
+    em.clear();
+    Album fetchedAlbum = em.find(Album.class, album.getId());
+    assertNotNull(fetchedAlbum);
+    assertNotSame(album, fetchedAlbum);
+    assertEquals(album.toString(), fetchedAlbum.toString());
+  }
+
+  public void testIdUpdateIsRejected() throws Exception {
+
+    // make it
+    Album album = new Album();
+    album.setArtist(null);
+    album.setName("Abbey Road");
+    album.setReleaseDate(new Date(-8366400000L));
+
+    // store it
+    EntityManager em = getEntityManager();
+    em.persist(album);
+    em.flush();
+
+    // set ID (not allowed)
+    try {
+      album.setId(1234L);
+      em.flush();
+      fail("ID change was not detected");
+    } catch (PersistenceException e) {
+      assertTrue(
+              e.getMessage().contains("Actual ID: 1234") || // errai message
+              e.getMessage().contains("to 1234")); // hibernate message
+    }
+  }
+
   public void testPersistNewEntityLifecycle() throws Exception {
 
     List<Class<?>> expectedLifecycle = new ArrayList<Class<?>>();
@@ -352,8 +403,7 @@ public class ErraiJpaTest extends GWTTestCase {
     assertEquals(expectedLifecycle, album.getCallbackLog());
   }
 
-  // disabled until we support updates to existing entities
-  public void IGNOREtestUpdateEntityLifecycle() throws Exception {
+  public void testUpdateEntityLifecycle() throws Exception {
 
     // make it
     Album album = new Album();

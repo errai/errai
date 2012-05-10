@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
 
 import org.jboss.errai.jpa.client.local.backend.StorageBackend;
 import org.jboss.errai.jpa.client.local.backend.WebStorageBackend;
@@ -145,7 +146,7 @@ public abstract class ErraiEntityManager implements EntityManager {
     ErraiSingularAttribute<? super T, ?> idAttr;
     switch (entityType.getIdType().getPersistenceType()) {
     case BASIC:
-      idAttr = (ErraiSingularAttribute<? super T, ?>) entityType.getId(entityType.getIdType().getJavaType());
+      idAttr = entityType.getId(entityType.getIdType().getJavaType());
       break;
     default:
       throw new RuntimeException(entityType.getIdType().getPersistenceType() + " ids are not yet supported");
@@ -220,6 +221,42 @@ public abstract class ErraiEntityManager implements EntityManager {
     }
   }
 
+  /**
+   * Updates the persistent representation of the given entity in this entity
+   * manager's storage backend.
+   * <p>
+   * This methods checks if the entity value has truly changed, and if so it
+   * fires the PreUpdate and PostUpdate events.
+   * <p>
+   * This method also verifies that the entity's current identity matches the
+   * key's identity. In JPA 2.0, application code is not allowed to modify a
+   * managed entity's ID attribute. This is just a safety check to ensure that
+   * hasn't happened.
+   *
+   * @param key
+   *          The entity's key in the persistence context.
+   * @param entity
+   *          The "live" entity value in the persistence context.
+   * @throws PersistenceException
+   *           if the entity's current ID attribute value differs from the one
+   *           in the key (which would have been its identity when it first
+   *           became managed).
+   */
+  private <X> void updateInBackend(Key<X, ?> key, X entity) {
+    ErraiEntityType<X> entityType = getMetamodel().entity(getNarrowedClass(entity));
+    if (backend.isModified(key, entity)) {
+      Object currentId = entityType.getId(Object.class).get(entity);
+      if (!key.getId().equals(currentId)) {
+        throw new PersistenceException(
+                "Detected ID attribute change in managed entity. Expected ID: " +
+                key.getId() + "; Actual ID: " + currentId);
+      }
+      entityType.deliverPreUpdate(entity);
+      backend.put(key, entity);
+      entityType.deliverPostUpdate(entity);
+    }
+  }
+
   // -------------- Actual JPA API below this line -------------------
 
   @Override
@@ -241,6 +278,12 @@ public abstract class ErraiEntityManager implements EntityManager {
   @Override
   public void flush() {
     // deferred backend operations not (yet!) implemented
+
+    // persist updates to entities in the persistence context
+    for (Map.Entry<Key<?, ?>, Object> entry : persistenceContext.entrySet()) {
+      // type safety warning should go away when we have a real PersistenceContext implementation
+      updateInBackend((Key<Object, ?>) entry.getKey(), entry.getValue());
+    }
   }
 
   @Override

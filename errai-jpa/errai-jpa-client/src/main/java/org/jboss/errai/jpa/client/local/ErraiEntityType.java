@@ -103,8 +103,8 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
 
   @SuppressWarnings("unchecked")
   @Override
-  public <Y> SingularAttribute<? super X, Y> getId(Class<Y> type) {
-    return (SingularAttribute<? super X, Y>) id;
+  public <Y> ErraiSingularAttribute<? super X, Y> getId(Class<Y> type) {
+    return (ErraiSingularAttribute<? super X, Y>) id;
   }
 
   @SuppressWarnings("unchecked")

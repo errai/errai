@@ -24,15 +24,14 @@ public class WebStorageBackend implements StorageBackend {
   }-*/;
 
   @Override
-  public <X, T> void put(Key<X, T> key, X value) {
+  public <X> void put(Key<X, ?> key, X value) {
     String keyJson = key.toJson();
     String valueJson = Marshalling.toJSON(value);
-    System.out.println("Storing.\nKey=" + keyJson + "\nValue=" + valueJson);
     putImpl(keyJson, valueJson);
   }
 
   @Override
-  public <X, T> X get(Key<X, T> key) {
+  public <X> X get(Key<X, ?> key) {
     String keyJson = key.toJson();
     String valueJson = getImpl(keyJson);
     if (valueJson == null) {
@@ -42,9 +41,16 @@ public class WebStorageBackend implements StorageBackend {
   }
 
   @Override
-  public <X, T> void remove(Key<X, T> key) {
+  public <X> void remove(Key<X, ?> key) {
     String keyJson = key.toJson();
     removeImpl(keyJson);
+  }
+
+  @Override
+  public <X> boolean isModified(Key<X, ?> key, X value) {
+    String keyJson = key.toJson();
+    String valueJson = Marshalling.toJSON(value);
+    return !valueJson.equals(getImpl(keyJson));
   }
 
 }
