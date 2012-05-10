@@ -25,8 +25,6 @@ import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
-import org.jboss.errai.bus.client.tests.support.BaseEntity;
-import org.jboss.errai.bus.client.tests.support.GenericServiceA;
 import org.jboss.errai.bus.client.tests.support.GenericServiceB;
 import org.jboss.errai.bus.client.tests.support.Person;
 import org.jboss.errai.bus.client.tests.support.RandomProvider;
@@ -36,9 +34,6 @@ import org.jboss.errai.bus.client.tests.support.SubService;
 import org.jboss.errai.bus.client.tests.support.TestException;
 import org.jboss.errai.bus.client.tests.support.TestRPCService;
 import org.jboss.errai.bus.client.tests.support.User;
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.common.client.protocols.MessageParts;
 
 import com.google.gwt.user.client.Timer;
