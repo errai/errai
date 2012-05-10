@@ -17,8 +17,17 @@
 package org.jboss.errai.ioc.client.container;
 
 /**
+ * An initialization callback is used to implement a set of tasks to be executed against the specified bean, prior
+ * to putting the bean into service. This interface is not designed to be directly used. Its implementations are
+ * usually provided by Errai's code generators and are used to orchestrate tasks such as
+ * {@link javax.annotation.PostConstruct} for beans.
+ *
  * @author Mike Brock
  */
 public interface InitializationCallback<T> {
+  /**
+   * Called to perform the initialization task against the specified bean.
+   * @param t the bean instance.
+   */
   public void init(T t);
 }

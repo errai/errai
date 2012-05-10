@@ -51,7 +51,7 @@ public class CreationalContext {
 
   private final Map<BeanRef, Object> wired = new LinkedHashMap<BeanRef, Object>();
 
-  public CreationalContext(IOCBeanManager beanManager) {
+  public CreationalContext(final IOCBeanManager beanManager) {
     this.beanManager = beanManager;
   }
 

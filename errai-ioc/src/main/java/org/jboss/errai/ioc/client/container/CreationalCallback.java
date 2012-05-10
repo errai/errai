@@ -17,8 +17,21 @@
 package org.jboss.errai.ioc.client.container;
 
 /**
+ * A creational callback is used for defining the actual procedure for generating a bean. It is responsible for
+ * instantiating and wiring the bean. This interface, however, is implemented by the Errai code generators directly
+ * and is not meant to be used directly by users.
+ *
  * @author Mike Brock
  */
 public interface CreationalCallback<T> {
+  /**
+   * Returns a new instance of the bean which this <tt>CreationalCallback</tt> represents. It does not however, return
+   * the bean in a ready-to-user state. Any {@link InitializationCallback} tasks or {@link ProxyResolver} tasks should
+   * be added to the {@link CreationalContext} by this method, only to be called by the bean manager itself, before
+   * putting all beans created within the context into service.
+   *
+   * @param context the {@link CreationalContext} associated with this bean construction.
+   * @return a new instance of the bean.
+   */
   public T getInstance(CreationalContext context);
 }
