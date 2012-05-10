@@ -70,8 +70,10 @@ public class ErraiServiceImpl<S> implements ErraiService<S> {
     new OrderedBootstrap().execute(context);
 
     if (config.getBooleanProperty(ErraiServiceConfigurator.ENABLE_WEB_SOCKET_SERVER)) {
-      WebSocketServer server = new WebSocketServer(this);
-      server.start();
+// Disabled support for io.netty.* & websockets    	
+//      WebSocketServer server = new WebSocketServer(this);
+//      server.start();
+    	log.warn("Support of Netty & Websockets is disabled!");
     }
   }
 

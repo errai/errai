@@ -16,19 +16,20 @@
 
 package org.jboss.errai.bus.server.io.websockets;
 
-import static io.netty.channel.Channels.*;
-
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.ChannelPipelineFactory;
-import io.netty.handler.codec.http.HttpChunkAggregator;
-import io.netty.handler.codec.http.HttpRequestDecoder;
-import io.netty.handler.codec.http.HttpResponseEncoder;
+//import static io.netty.channel.Channels.*;
+//
+//import io.netty.channel.ChannelPipeline;
+//import io.netty.channel.ChannelPipelineFactory;
+//import io.netty.handler.codec.http.HttpChunkAggregator;
+//import io.netty.handler.codec.http.HttpRequestDecoder;
+//import io.netty.handler.codec.http.HttpResponseEncoder;
 import org.jboss.errai.bus.server.service.ErraiService;
 
 /**
  * @author Mike Brock
  */
-public class WebSocketServerPipelineFactory implements ChannelPipelineFactory {
+public class WebSocketServerPipelineFactory //implements ChannelPipelineFactory 
+{
   private ErraiService svc;
   private WebSocketServerHandler webSocketServerHandler;
 
@@ -37,15 +38,15 @@ public class WebSocketServerPipelineFactory implements ChannelPipelineFactory {
     this.webSocketServerHandler = new WebSocketServerHandler(svc);
   }
 
-  public ChannelPipeline getPipeline() throws Exception {
-    // Create a default pipeline implementation.
-    ChannelPipeline pipeline = pipeline();
-    pipeline.addLast("decoder", new HttpRequestDecoder());
-    pipeline.addLast("aggregator", new HttpChunkAggregator(65536));
-    pipeline.addLast("encoder", new HttpResponseEncoder());
-    pipeline.addLast("handler", webSocketServerHandler);
-    return pipeline;
-  }
+//  public ChannelPipeline getPipeline() throws Exception {
+//    // Create a default pipeline implementation.
+//    ChannelPipeline pipeline = pipeline();
+//    pipeline.addLast("decoder", new HttpRequestDecoder());
+//    pipeline.addLast("aggregator", new HttpChunkAggregator(65536));
+//    pipeline.addLast("encoder", new HttpResponseEncoder());
+//    pipeline.addLast("handler", webSocketServerHandler);
+//    return pipeline;
+//  }
 
   public WebSocketServerHandler getWebSocketServerHandler() {
     return webSocketServerHandler;

@@ -215,11 +215,11 @@
 
         <!-- Netty for WebSockets Support -->
 
-        <dependency>
+        <!-- dependency>
             <groupId>org.jboss.errai.io.netty</groupId>
             <artifactId>netty</artifactId>
             <version>4.0.0.Alpha1.errai.r1</version>
-        </dependency>
+        </dependency-->
 
         <dependency>
             <groupId>org.jboss.as</groupId>

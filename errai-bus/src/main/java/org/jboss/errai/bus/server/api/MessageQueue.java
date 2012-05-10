@@ -16,7 +16,7 @@
 
 package org.jboss.errai.bus.server.api;
 
-import io.netty.channel.Channel;
+//import io.netty.channel.Channel;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.QueueSession;
 import org.jboss.errai.bus.server.io.QueueChannel;
