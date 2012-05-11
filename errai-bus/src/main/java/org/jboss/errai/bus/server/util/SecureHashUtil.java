@@ -119,7 +119,7 @@ public class SecureHashUtil {
       }
 
       byte[] randBytes = new byte[64];
-      random.nextBytes(randBytes);
+      seed(randBytes);
       md.update(randBytes);
 
       for (int i = 0; i < 1000; i++) {
@@ -145,6 +145,18 @@ public class SecureHashUtil {
     return _nextSecureHash("SHA-256",
             String.valueOf(System.nanoTime() % Long.MAX_VALUE).getBytes(), String.valueOf(salt).getBytes());
   }
+
+  private static byte[] seed(byte[] seedArray) {
+    for (int i = 0; i < seedArray.length; i++) {
+      seedArray[i] = (byte) (getSalt() % Byte.MAX_VALUE);
+      if (getSalt() % 1000 > 499) {
+        seedArray[i] = (byte) -seedArray[i];
+      }
+    }
+    return seedArray;
+  }
+
+
 
   // doesn't need to be synchronized. merely increments to decrease chances of nanoTime collisions.
   private static long saltCounter = random.nextLong();
