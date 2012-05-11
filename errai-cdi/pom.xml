@@ -61,6 +61,7 @@
         <jetty.version>6.1.25</jetty.version>
         <slf4j.version>1.6.1</slf4j.version>
         <validation.api.version>1.0.0.GA</validation.api.version>
+        <exec.maven.plugin.version>1.2.1-redhat-1</exec.maven.plugin.version>
     </properties>
 
     <modules>
@@ -198,7 +199,7 @@
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.8.1</version>
+			    <version>${junit.version}</version>
                 <scope>provided</scope>
             </dependency>
 
