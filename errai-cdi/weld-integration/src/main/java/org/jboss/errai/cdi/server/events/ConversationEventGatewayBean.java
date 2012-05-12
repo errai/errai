@@ -38,7 +38,7 @@ import java.util.Map;
 @ApplicationScoped
 public class ConversationEventGatewayBean {
   public void observesConversationEvents(@Observes ConversationalEventWrapper wrapper) {
-    EventConversationContext.Context ctx = EventConversationContext.get();
+    final EventConversationContext.Context ctx = EventConversationContext.get();
     if (ctx != null && ctx.getSessionId() != null) {
       final Map<String, Object> messageParts = new HashMap<String, Object>(20);
       messageParts.put(MessageParts.ToSubject.name(), CDI.getSubjectNameByType(wrapper.getEventType().getName()));

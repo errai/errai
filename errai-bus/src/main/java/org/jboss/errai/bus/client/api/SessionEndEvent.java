@@ -19,7 +19,7 @@ package org.jboss.errai.bus.client.api;
 import org.jboss.errai.bus.client.api.QueueSession;
 
 public class SessionEndEvent {
-  private QueueSession session;
+  private final QueueSession session;
 
   public SessionEndEvent(QueueSession session) {
     this.session = session;

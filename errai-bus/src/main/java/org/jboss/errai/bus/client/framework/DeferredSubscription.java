@@ -37,5 +37,4 @@ public class DeferredSubscription implements Subscription {
     }
     this.subscription = subscription;
   }
-
 }

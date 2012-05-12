@@ -26,7 +26,7 @@ import org.jboss.errai.marshalling.client.protocols.ErraiProtocol;
  * @author Mike Brock
  */
 public class ErraiProtocolServer extends ErraiProtocol{
-  public static ByteArrayInputStream encodePayloadToByteArrayInputStream(Map<String, Object> payload) {
+  public static ByteArrayInputStream encodePayloadToByteArrayInputStream(final Map<String, Object> payload) {
     try {
       return new ByteArrayInputStream(encodePayload(payload).getBytes("UTF-8"));
     } catch (UnsupportedEncodingException e) {

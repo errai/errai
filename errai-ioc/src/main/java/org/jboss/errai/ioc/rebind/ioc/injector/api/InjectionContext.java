@@ -85,10 +85,9 @@ public class InjectionContext {
   private boolean allowProxyCapture = false;
   private boolean openProxy = false;
 
-  private InjectionContext(IOCProcessingContext processingContext,
-                           Set<String> enabledAlternatives) {
-    this.processingContext = processingContext;
-    this.enabledAlternatives = Collections.unmodifiableSet(new HashSet<String>(enabledAlternatives)) ;
+  private InjectionContext(final Builder builder) {
+    this.processingContext = builder.processingContext;
+    this.enabledAlternatives = Collections.unmodifiableSet(new HashSet<String>(builder.enabledAlternatives)) ;
   }
 
   public static class Builder {
@@ -112,16 +111,16 @@ public class InjectionContext {
     public InjectionContext build() {
       Assert.notNull("the processingContext cannot be null", processingContext);
 
-      return new InjectionContext(processingContext, enabledAlternatives);
+      return new InjectionContext(this);
     }
   }
 
 
-  public Injector getProxiedInjector(MetaClass type, QualifyingMetadata metadata) {
+  public Injector getProxiedInjector(final MetaClass type, final QualifyingMetadata metadata) {
     //todo: figure out why I was doing this.
-    MetaClass erased = type.getErased();
-    Collection<Injector> injs = proxiedInjectors.get(erased);
-    List<Injector> matching = new ArrayList<Injector>();
+    final MetaClass erased = type.getErased();
+    final Collection<Injector> injs = proxiedInjectors.get(erased);
+    final List<Injector> matching = new ArrayList<Injector>();
 
     if (injs != null) {
       for (Injector inj : injs) {
@@ -140,10 +139,10 @@ public class InjectionContext {
     }
   }
 
-  public Injector getQualifiedInjector(MetaClass type, QualifyingMetadata metadata) {
-    MetaClass erased = type.getErased();
-    List<Injector> injs = injectors.get(erased);
-    List<Injector> matching = new ArrayList<Injector>();
+  public Injector getQualifiedInjector(final MetaClass type, final QualifyingMetadata metadata) {
+    final MetaClass erased = type.getErased();
+    final List<Injector> injs = injectors.get(erased);
+    final List<Injector> matching = new ArrayList<Injector>();
 
     boolean alternativeBeans = false;
 
@@ -192,7 +191,7 @@ public class InjectionContext {
         return matching.get(0);
       }
 
-      StringBuilder buf = new StringBuilder();
+      final StringBuilder buf = new StringBuilder();
       for (Injector inj : matching) {
         buf.append("     matching> ").append(inj.toString()).append("\n");
       }

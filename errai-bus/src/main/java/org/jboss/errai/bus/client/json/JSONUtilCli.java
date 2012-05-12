@@ -44,7 +44,7 @@ import java.util.Map;
 public class JSONUtilCli {
   private static boolean autoDemarshall = true;
 
-  public static List<MarshalledMessage> decodePayload(String value) {
+  public static List<MarshalledMessage> decodePayload(final String value) {
     if (value == null || value.trim().length() == 0) return Collections.emptyList();
 
     /**
@@ -53,8 +53,6 @@ public class JSONUtilCli {
      * field and send the unparsed JSON object onwards.
      *
      */
-
-
     JSONValue val = null;
 
     try {
@@ -70,19 +68,19 @@ public class JSONUtilCli {
     if (val == null) {
       return Collections.emptyList();
     }
-    JSONArray arr = val.isArray();
+    final JSONArray arr = val.isArray();
     if (arr == null) {
       throw new RuntimeException("unrecognized payload" + val.toString());
     }
-    ArrayList<MarshalledMessage> list = new ArrayList<MarshalledMessage>();
+    final ArrayList<MarshalledMessage> list = new ArrayList<MarshalledMessage>();
     unwrap(list, arr);
     return list;
 
   }
 
-  private static void unwrap(List<MarshalledMessage> messages, JSONArray val) {
+  private static void unwrap(final List<MarshalledMessage> messages, final JSONArray val) {
     for (int i = 0; i < val.size(); i++) {
-      JSONValue v = val.get(i);
+      final JSONValue v = val.get(i);
       if (v.isArray() != null) {
         unwrap(messages, v.isArray());
       }
@@ -109,7 +107,7 @@ public class JSONUtilCli {
   }
 
   @SuppressWarnings({"unchecked"})
-  public static Map<String, Object> decodePayload(Object value) {
+  public static Map<String, Object> decodePayload(final Object value) {
     if (value == null) {
       return null;
     }
@@ -151,12 +149,12 @@ public class JSONUtilCli {
     }
 
     @Override
-    public void setAttribute(String attribute, Object value) {
+    public void setAttribute(final String attribute, final Object value) {
       attributes.put(attribute, value);
     }
 
     @Override
-    public <T> T getAttribute(Class<T> type, String attribute) {
+    public <T> T getAttribute(final Class<T> type, final String attribute) {
       return (T) attributes.get(attribute);
     }
 
@@ -166,12 +164,12 @@ public class JSONUtilCli {
     }
 
     @Override
-    public boolean hasAttribute(String attribute) {
+    public boolean hasAttribute(final String attribute) {
       return attributes.containsKey(attribute);
     }
 
     @Override
-    public boolean removeAttribute(String attribute) {
+    public boolean removeAttribute(final String attribute) {
       return attributes.remove(attribute) != null;
     }
 
@@ -193,8 +191,8 @@ public class JSONUtilCli {
   };
 
 
-  public static Message decodeCommandMessage(Object value) {
-    CommandMessage msg = CommandMessage.createWithParts(decodePayload(value));
+  public static Message decodeCommandMessage(final Object value) {
+    final CommandMessage msg = CommandMessage.createWithParts(decodePayload(value));
     msg.setResource(RequestDispatcher.class.getName(), requestDispatcherProvider);
     msg.setResource("Session", clientSession);
     return msg;

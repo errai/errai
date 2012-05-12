@@ -28,14 +28,14 @@ import java.util.List;
  * Messages are always transmitted in the order the arrive for transmission.
  */
 public class Payload {
-  private List<MarshalledMessage> messages = new LinkedList<MarshalledMessage>();
+  private final List<MarshalledMessage> messages = new LinkedList<MarshalledMessage>();
 
   /**
    * Creates a new <tt>Payload</tt> with a single initial {@link MarshalledMessage}.
    *
    * @param m a message
    */
-  public Payload(MarshalledMessage m) {
+  public Payload(final MarshalledMessage m) {
     messages.add(m);
   }
 
@@ -44,7 +44,7 @@ public class Payload {
    *
    * @param m a marshalled message.
    */
-  public void addMessage(MarshalledMessage m) {
+  public void addMessage(final MarshalledMessage m) {
     messages.add(m);
   }
 

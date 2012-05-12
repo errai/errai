@@ -16,7 +16,7 @@ import java.util.Map;
 public class DecodingSession extends AbstractMarshallingSession {
   private final ServerMappingContext context;
 
-  public DecodingSession(ServerMappingContext context) {
+  public DecodingSession(final ServerMappingContext context) {
     this.context = context;
   }
 
@@ -26,7 +26,7 @@ public class DecodingSession extends AbstractMarshallingSession {
   }
 
   @Override
-  public Marshaller<Object> getMarshallerInstance(String fqcn) {
+  public Marshaller<Object> getMarshallerInstance(final String fqcn) {
     final Marshaller<Object> m = context.getMarshaller(fqcn);
     if (m == null) {
       throw new RuntimeException("no marshalling definition available for type:" + fqcn);
@@ -36,11 +36,11 @@ public class DecodingSession extends AbstractMarshallingSession {
   }
 
   @Override
-  public String determineTypeFor(String formatType, Object o) {
-    EJValue jsonValue = (EJValue) o;
+  public String determineTypeFor(final String formatType, final Object o) {
+    final EJValue jsonValue = (EJValue) o;
 
     if (jsonValue.isObject() != null) {
-      EJObject jsonObject = jsonValue.isObject();
+      final EJObject jsonObject = jsonValue.isObject();
       if (jsonObject.containsKey(SerializationParts.ENCODED_TYPE)) {
         return jsonObject.get(SerializationParts.ENCODED_TYPE).isString().stringValue();
       }

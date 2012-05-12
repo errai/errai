@@ -20,7 +20,7 @@ package org.jboss.errai.bus.client.framework;
  * @author Mike Brock
  */
 public class ClientWebSocketChannel {
-  public static native Object attemptWebSocketConnect(ClientMessageBusImpl bus, String websocketAddr) /*-{
+  public static native Object attemptWebSocketConnect(final ClientMessageBusImpl bus, final String websocketAddr) /*-{
     var socket;
     if (window.WebSocket) {
       socket = new WebSocket(websocketAddr);
@@ -34,8 +34,7 @@ public class ClientWebSocketChannel {
       };
       socket.onclose = function (event) {
          // should probably do something here.
-      };
-
+    };
       return socket;
     } else {
       return "NotSupportedByBrowser";
@@ -43,7 +42,7 @@ public class ClientWebSocketChannel {
 
   }-*/;
 
-  public static native boolean transmitToSocket(Object socket, String text) /*-{
+  public static native boolean transmitToSocket(final Object socket, final String text) /*-{
     if (socket.readyState == WebSocket.OPEN) {
       socket.send(text);
       return true;

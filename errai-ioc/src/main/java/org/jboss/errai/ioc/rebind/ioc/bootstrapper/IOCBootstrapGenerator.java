@@ -427,14 +427,9 @@ public class IOCBootstrapGenerator {
             }
           }
 
-          MetaClass clazz = GWTClass.newInstance(type.getOracle(), type);
-          injectionContext.addPsuedoScopeForType(clazz);
+          injectionContext.addPsuedoScopeForType(GWTClass.newInstance(type.getOracle(), type));
         }
       }
     }
   }
-
-//  public void setUseReflectionStubs(boolean useReflectionStubs) {
-//    this.useReflectionStubs = useReflectionStubs;
-//  }
 }

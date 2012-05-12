@@ -129,7 +129,7 @@ public class CDIExtensionPoints implements Extension {
     this.managedTypes = new TypeRegistry();
 
     log.info("starting errai cdi ...");
-    ResourceBundle erraiServiceConfig;
+    final ResourceBundle erraiServiceConfig;
     try {
       erraiServiceConfig = getBundle("ErraiService");
     }

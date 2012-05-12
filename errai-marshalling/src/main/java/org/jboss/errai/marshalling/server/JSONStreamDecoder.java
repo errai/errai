@@ -70,13 +70,13 @@ public class JSONStreamDecoder {
     }
   }
 
-  public static EJValue decode(InputStream instream) throws IOException {
+  public static EJValue decode(final InputStream instream) throws IOException {
     return new JSONStreamDecoder(instream).parse();
   }
 
   public char read() throws IOException {
     if (carry != 0) {
-      char oldCarry = carry;
+      final char oldCarry = carry;
       carry = 0;
       return oldCarry;
     }
@@ -94,7 +94,6 @@ public class JSONStreamDecoder {
 
   public EJValue parse() {
     try {
-
       return new ErraiJSONValue(_parse(new OuterContext()));
     }
     catch (Exception e) {
@@ -123,7 +122,6 @@ public class JSONStreamDecoder {
           ctx.record();
           break;
 
-
         case '"':
         case '\'':
           char term = c;
@@ -149,7 +147,6 @@ public class JSONStreamDecoder {
           if (term != 0) {
             throw new RuntimeException("unterminated string literal");
           }
-
           break;
 
         case ':':
@@ -281,7 +278,7 @@ public class JSONStreamDecoder {
    * @throws IOException
    */
   private double parseDouble() throws IOException {
-    StringBuilder sb = new StringBuilder(25);
+    final StringBuilder sb = new StringBuilder(25);
 
     State state = State.READ_SIGN;
 

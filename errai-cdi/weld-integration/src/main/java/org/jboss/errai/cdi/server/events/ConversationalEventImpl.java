@@ -38,10 +38,11 @@ import org.jboss.weld.manager.BeanManagerImpl;
  * @author Mike Brock
  */
 public class ConversationalEventImpl<T> implements ConversationalEvent<T>, Serializable {
-  private Type type;
+  private final Type type;
+  private final BeanManagerImpl manager;
+  private final Annotation[] qualifiers;
+
   private Class rawType;
-  private BeanManagerImpl manager;
-  private Annotation[] qualifiers;
   private List<String> qualifiersForWire;
   private MessageBus bus;
 
@@ -82,7 +83,7 @@ public class ConversationalEventImpl<T> implements ConversationalEvent<T>, Seria
       }
     }
     else {
-      throw new RuntimeException("unparameterized conversational event: " + type);
+      throw new RuntimeException("unparameterized conversational event: " + injectionPoint.getType());
     }
   }
 

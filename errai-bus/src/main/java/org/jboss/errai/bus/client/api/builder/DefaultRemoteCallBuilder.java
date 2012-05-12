@@ -162,7 +162,7 @@ public class DefaultRemoteCallBuilder {
         message.command(endPointName);
 
         if (qualifiers != null) {
-          List<String> qualNames = new ArrayList<String>(qualifiers.length);
+          final List<String> qualNames = new ArrayList<String>(qualifiers.length);
           for (Annotation a : qualifiers) {
             qualNames.add(a.annotationType().getName());
           }

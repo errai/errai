@@ -46,7 +46,6 @@ public class SenderBean implements Bean {
   private final MessageBus bus;
   private final Set<Type> typesSet;
  
-
   public SenderBean(Type type, Set<Annotation> qualifiers, MessageBus bus) {
     this.bus = bus;
     this.qualifiers = qualifiers;
@@ -99,19 +98,19 @@ public class SenderBean implements Bean {
 
   @Override
   public Object create(CreationalContext creationalContext) {
-    InjectionPoint injectionPoint = Container.instance().services().get(CurrentInjectionPoint.class).peek();
-    Set<Annotation> qualifiers = injectionPoint.getQualifiers();
+    final InjectionPoint injectionPoint = Container.instance().services().get(CurrentInjectionPoint.class).peek();
+    final Set<Annotation> qualifiers = injectionPoint.getQualifiers();
     
-    ParameterizedType injectionPointType = (ParameterizedType) injectionPoint.getType();
-    Type innerType = injectionPointType.getActualTypeArguments()[0];
-    Class senderType = null;
-    
-    if (innerType instanceof Class) {
-      senderType = (Class) innerType;  
-    }
-    else if (innerType instanceof ParameterizedType) {
-      senderType = (Class) ((ParameterizedType) innerType).getRawType();
-    }
+//    final ParameterizedType injectionPointType = (ParameterizedType) injectionPoint.getType();
+//    final Type innerType = injectionPointType.getActualTypeArguments()[0];
+//    Class senderType = null;
+//
+//    if (innerType instanceof Class) {
+//      senderType = (Class) innerType;
+//    }
+//    else if (innerType instanceof ParameterizedType) {
+//      senderType = (Class) ((ParameterizedType) innerType).getRawType();
+//    }
         
     String toSubject = null, replyTo = null;
 

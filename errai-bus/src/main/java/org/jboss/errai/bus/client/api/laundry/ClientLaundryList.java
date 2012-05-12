@@ -25,7 +25,7 @@ class ClientLaundryList implements LaundryList {
 
   // TODO this never gets called!
   public void cleanAll() {
-    Iterator<Laundry> iter = laundryList.iterator();
+    final Iterator<Laundry> iter = laundryList.iterator();
     while (iter.hasNext()) {
       try {
         iter.next().clean();
@@ -49,7 +49,7 @@ class ClientLaundryList implements LaundryList {
     };
   }
 
-  public boolean remove(Laundry laundry) {
+  public boolean remove(final Laundry laundry) {
     return laundryList.remove(laundry);
   }
 }

@@ -76,13 +76,13 @@ public class ShutdownEventObserver implements ObserverMethod {
 
     // unsubscribe bean endpoints        
     for (AnnotatedType<?> svc : managedTypes.getServiceEndpoints()) {
-      String subject = CDIServerUtil.resolveServiceName(svc.getJavaClass());
+      final String subject = CDIServerUtil.resolveServiceName(svc.getJavaClass());
       log.debug("unsubscribe: " + subject);
       bus.unsubscribeAll(subject);
     }
 
     for (Class<?> rpcIntf : managedTypes.getRemoteInterfaces()) {
-      String rpcSubjectName = rpcIntf.getName() + ":RPC";
+      final String rpcSubjectName = rpcIntf.getName() + ":RPC";
       log.debug("unsubscribe: " + rpcSubjectName);
       bus.unsubscribeAll(rpcSubjectName);
     }

@@ -35,9 +35,9 @@ import javax.enterprise.inject.spi.AnnotatedType;
  */
 public class TypeRegistry {
 
-  private List<AnnotatedType> serviceEndpoints = new ArrayList<AnnotatedType>();
-  private Map<AnnotatedType, List<AnnotatedMethod>> serviceMethods = new HashMap<AnnotatedType, List<AnnotatedMethod>>();
-  private Set<Class<?>> remoteInterfaces = new HashSet<Class<?>>();
+  private final List<AnnotatedType> serviceEndpoints = new ArrayList<AnnotatedType>();
+  private final Map<AnnotatedType, List<AnnotatedMethod>> serviceMethods = new HashMap<AnnotatedType, List<AnnotatedMethod>>();
+  private final Set<Class<?>> remoteInterfaces = new HashSet<Class<?>>();
 
   public void addServiceEndpoint(AnnotatedType service) {
     serviceEndpoints.add(service);

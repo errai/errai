@@ -44,7 +44,6 @@ import static java.util.Collections.unmodifiableSet;
 public class MessageBusBean implements Bean {
   final MessageBus delegate;
 
-
   static final Set<Annotation> qualifiers = unmodifiableSet(new HashSet<Annotation>(
           asList(new AnnotationLiteral<Default>() {
                  },

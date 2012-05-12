@@ -61,7 +61,7 @@ public class RequestDispatcherMetaData implements Bean {
   public RequestDispatcherMetaData(final BeanManager bm, final RequestDispatcher delegate) {
 
     //use this to read annotations of the class
-    AnnotatedType at = bm.createAnnotatedType(delegate.getClass());
+    final AnnotatedType at = bm.createAnnotatedType(delegate.getClass());
 
     //use this to create the class and inject dependencies
     this.it = bm.createInjectionTarget(at);

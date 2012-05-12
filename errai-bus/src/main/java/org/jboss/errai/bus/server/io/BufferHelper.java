@@ -52,20 +52,6 @@ public final class BufferHelper {
       else if (i == '}' && brackCount != 0 && --brackCount == 0) {
         seg++;
       }
-//
-//      switch (i) {
-//        case '{':
-//          if (++brackCount == 1 && seg != 0) {
-//            outstream.write(',');
-//          }
-//          break;
-//        case '}':
-//          if (brackCount == 0) break;
-//          if (--brackCount == 0) {
-//            seg++;
-//          }
-//          break;
-//      }
       return i;
     }
 

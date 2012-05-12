@@ -37,8 +37,8 @@ import org.slf4j.LoggerFactory;
 public class CDIServerUtil {
 
   @SuppressWarnings("unchecked")
-  public static <T> T lookupBean(BeanManager beanManager, Class<T> serviceType) {
-    Bean<?> bean = beanManager.resolve(beanManager.getBeans(serviceType));
+  public static <T> T lookupBean(final BeanManager beanManager, final Class<T> serviceType) {
+    final Bean<?> bean = beanManager.resolve(beanManager.getBeans(serviceType));
 
     if (bean == null) {
       return null;
@@ -47,14 +47,16 @@ public class CDIServerUtil {
     return (T) beanManager.getReference(bean, serviceType, beanManager.createCreationalContext(bean));
   }
 
-  public static QueueSession getSession(Message message) {
+  public static QueueSession getSession(final Message message) {
     return message.getResource(QueueSession.class, "Session");
   }
 
 
   @SuppressWarnings("unchecked")
-  public static <T> T lookupRPCBean(BeanManager beanManager, Class beanClass, Annotation[] annotations) {
-    Bean<?> bean;
+  public static <T> T lookupRPCBean(final BeanManager beanManager,
+                                    final Class beanClass,
+                                    final Annotation[] annotations) {
+    final Bean<?> bean;
 
     if (annotations != null) {
       bean = beanManager.resolve(beanManager.getBeans(beanClass, annotations));
@@ -63,8 +65,7 @@ public class CDIServerUtil {
       bean = beanManager.resolve(beanManager.getBeans(beanClass));
     }
 
-    CreationalContext<?> context = beanManager.createCreationalContext(bean);
-    return (T) beanManager.getReference(bean, beanClass, context);
+    return (T) beanManager.getReference(bean, beanClass, beanManager.createCreationalContext(bean));
 
   }
 

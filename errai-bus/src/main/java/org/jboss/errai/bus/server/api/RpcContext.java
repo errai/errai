@@ -37,10 +37,10 @@ public class RpcContext {
    * 
    * @param message
    */
-  public static void set(Message message) {
-    QueueSession queueSession = message.getResource(QueueSession.class, "Session");
+  public static void set(final Message message) {
+    final QueueSession queueSession = message.getResource(QueueSession.class, "Session");
     if (queueSession != null) {
-      HttpSession session =
+      final HttpSession session =
             queueSession.getAttribute(HttpSession.class, HttpSession.class.getName());
 
       if (session != null) {
@@ -48,7 +48,8 @@ public class RpcContext {
       }
     }
 
-    HttpServletRequest request = message.getResource(HttpServletRequest.class, HttpServletRequest.class.getName());
+    final HttpServletRequest request
+            = message.getResource(HttpServletRequest.class, HttpServletRequest.class.getName());
     if (request != null) {
       threadLocalServletRequest.set(request);
     }

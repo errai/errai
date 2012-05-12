@@ -38,7 +38,7 @@ public class DeliveryPlan {
     return new DeliveryPlan(new MessageCallback[] { callback });
   }
 
-  public void deliver(Message m) {
+  public void deliver(final Message m) {
     for (MessageCallback callback : deliverTo) {
       callback.callback(m);
     }

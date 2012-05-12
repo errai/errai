@@ -31,12 +31,12 @@ import java.util.Map;
 public class EncodingSession extends AbstractMarshallingSession {
   private final ServerMappingContext context;
 
-  public EncodingSession(ServerMappingContext context) {
+  public EncodingSession(final ServerMappingContext context) {
     this.context = context;
   }
 
   @Override
-  public String determineTypeFor(String formatType, Object o) {
+  public String determineTypeFor(final String formatType, final Object o) {
     if (o == null) return null;
 
     if (o instanceof Map) {

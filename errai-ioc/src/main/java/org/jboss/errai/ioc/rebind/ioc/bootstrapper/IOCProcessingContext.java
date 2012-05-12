@@ -66,27 +66,20 @@ public class IOCProcessingContext {
 
   protected final QualifyingMetadataFactory qualifyingMetadataFactory;
 
-  private IOCProcessingContext(TreeLogger treeLogger,
-                               GeneratorContext generatorContext,
-                               SourceWriter writer,
-                               Context context,
-                               BuildMetaClass bootstrapClass,
-                               BlockBuilder<?> blockBuilder,
-                               Collection<String> packages,
-                               QualifyingMetadataFactory qualifyingMetadataFactory) {
-    this.treeLogger = treeLogger;
-    this.generatorContext = generatorContext;
-    this.writer = writer;
-    this.context = context;
-    this.bootstrapClass = bootstrapClass;
+  private IOCProcessingContext(final Builder builder) {
+    this.treeLogger = builder.treeLogger;
+    this.generatorContext = builder.generatorContext;
+    this.writer = builder.sourceWriter;
+    this.context = builder.context;
+    this.bootstrapClass = builder.bootstrapClassInstance;
 
     this.blockBuilder = new Stack<BlockBuilder<?>>();
-    this.blockBuilder.push(blockBuilder);
+    this.blockBuilder.push(builder.blockBuilder);
 
     this.appendToEnd = new ArrayList<Statement>();
     this.typeDiscoveryListeners = new ArrayList<TypeDiscoveryListener>();
-    this.packages = packages;
-    this.qualifyingMetadataFactory = qualifyingMetadataFactory;
+    this.packages = builder.packages;
+    this.qualifyingMetadataFactory = builder.qualifyingMetadataFactory;
   }
 
   public static class Builder {
@@ -155,8 +148,7 @@ public class IOCProcessingContext {
         qualifyingMetadataFactory = new JSR330QualifyingMetadataFactory();
       }
 
-      return new IOCProcessingContext(treeLogger, generatorContext, sourceWriter, context, bootstrapClassInstance,
-              blockBuilder, packages, qualifyingMetadataFactory);
+      return new IOCProcessingContext(this);
     }
   }
 
