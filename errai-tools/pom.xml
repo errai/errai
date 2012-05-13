@@ -16,7 +16,7 @@
 	</parent>
 
 	<properties>
-		<hsqldb.version>1.8.0.7</hsqldb.version>
+		<hsqldb.version>1.8.0.10-patch-01</hsqldb.version>
 	</properties>
 
 	<dependencies>
@@ -41,6 +41,7 @@
 		<dependency>
 			<groupId>com.google.gwt</groupId>
 			<artifactId>gwt-user</artifactId>
+			<version>${gwt.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -71,11 +72,11 @@
 				</executions>
 			</plugin>
 
-			<plugin>
+			<!-- plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>ideauidesigner-maven-plugin</artifactId>
 				<version>1.0-beta-1</version>
-			</plugin>
+			</plugin-->
 
 			<plugin>
 				<artifactId>maven-war-plugin</artifactId>

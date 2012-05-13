@@ -12,12 +12,12 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <dependencies>
- 	<dependency>
+    <!-- dependencies>
+ 		<dependency>
             <groupId>org.jboss.as</groupId>
             <artifactId>jboss-as-websockets</artifactId>
             <version>0.1.Alpha6</version>
         </dependency>
-    </dependencies>
+    </dependencies-->
 
 </project>

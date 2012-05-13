@@ -71,8 +71,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <gwt.version>2.3.0-redhat-1</gwt.version>
-        <gwt.maven.version>2.4.0</gwt.maven.version>
+        <gwt.version>2.4.0</gwt.version>
+        <gwt.maven.version>2.3.0-redhat-1</gwt.maven.version>
         <guice.version>3.0-redhat-1</guice.version>
         <mvel.version>2.1.Beta8</mvel.version>
         <appengine.version>1.3.5</appengine.version>
@@ -81,7 +81,7 @@
         <log4j.version>1.2.16-redhat-1</log4j.version>
         <jboss.vfs.version>3.1.0.Final-redhat-1</jboss.vfs.version>
         <junit.version>4.8.2</junit.version>
-        
+        <cal10n.version>0.7.3-redhat-1</cal10n.version>
     </properties>
 
     <modules>
@@ -89,18 +89,17 @@
         <module>errai-codegen</module>
         <module>errai-marshalling</module>
         <module>errai-bus</module>
-        <!-- module>errai-bus/demos</module>
         <module>errai-tools</module>
         <module>errai-ioc</module>
+        <!-- module>errai-bus/demos</module-->
         <module>errai-js</module>
+        <module>errai-uibinder</module>
         <module>errai-cdi</module>
-        <module>errai-jaxrs</module>
-        <module>errai-uibinder</module-->
+        <!-- module>errai-jaxrs</module-->
     </modules>
 
     <dependencyManagement>
         <dependencies>
-            <!-- WFK2 defined dependecies -->
             <dependency>
                 <groupId>javax.inject</groupId>
                 <artifactId>javax.inject</artifactId>
@@ -112,6 +111,8 @@
 		      <artifactId>junit</artifactId>
 		      <version>${junit.version}</version>
 		    </dependency>
+		    
+		    
 
 		    <dependency>
 		      <groupId>log4j</groupId>
@@ -136,6 +137,24 @@
                 <groupId>com.google.gwt</groupId>
                 <artifactId>gwt-dev</artifactId>
                 <version>${gwt.version}</version>
+            </dependency>
+            
+            <dependency>
+ 		        <groupId>org.springframework</groupId>
+		        <artifactId>spring-core</artifactId>
+		        <version>3.0.6.RELEASE</version>
+            </dependency>
+            
+            <dependency>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>gwt-maven-plugin</artifactId>
+                <version>${gwt.maven.version}</version>
+                <exclusions>
+                    <exclusion>
+				      <groupId>org.springframework</groupId>
+				      <artifactId>spring-core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
@@ -205,6 +224,7 @@
                 <artifactId>reflections</artifactId>
                 <version>2.0.0.Final-redhat-1</version>
             </dependency>
+            
         </dependencies>
     </dependencyManagement>
 

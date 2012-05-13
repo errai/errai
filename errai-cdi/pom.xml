@@ -57,10 +57,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <weld.version>1.1.6.Final</weld.version>
+        <weld.version>1.1.4.Final</weld.version>
         <jetty.version>6.1.25</jetty.version>
-        <slf4j.version>1.6.1</slf4j.version>
-        <validation.api.version>1.0.0.GA</validation.api.version>
         <exec.maven.plugin.version>1.2.1-redhat-1</exec.maven.plugin.version>
     </properties>
 
@@ -78,6 +76,40 @@
 
     <dependencyManagement>
         <dependencies>
+        
+            <!-- WFK2 related Dependencies -->
+            <dependency>
+                <groupId>javax.mail</groupId>
+                <artifactId>mail</artifactId>
+                <version>1.4.4-redhat-1</version>
+            </dependency>
+        
+            <dependency>
+                <groupId>org.jboss</groupId>
+                <artifactId>jboss-common-core</artifactId>
+                <version>2.2.17.GA-redhat-1</version>
+            </dependency>
+            
+	        <dependency>
+	          <groupId>org.slf4j</groupId>
+	          <artifactId>slf4j-ext</artifactId>
+	          <version>${slf4j.version}</version>
+	        </dependency>
+            
+	        <dependency>
+	          <groupId>ch.qos.cal10n</groupId>
+	          <artifactId>cal10n-api</artifactId>
+	          <version>${cal10n.version}</version>
+	        </dependency>
+	        
+             <dependency>
+                 <groupId>org.mortbay.jetty</groupId>
+                 <artifactId>servlet-api-2.5</artifactId>
+                 <version>6.1.5</version>
+                 <scope>provided</scope>
+             </dependency>
+	        
+
             <!-- Project Dependencies -->
             <dependency>
                 <groupId>org.jboss.errai</groupId>
