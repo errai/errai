@@ -91,11 +91,11 @@
         <module>errai-bus</module>
         <module>errai-tools</module>
         <module>errai-ioc</module>
-        <!-- module>errai-bus/demos</module-->
+        <module>errai-bus/demos</module>
         <module>errai-js</module>
         <module>errai-uibinder</module>
         <module>errai-cdi</module>
-        <!-- module>errai-jaxrs</module-->
+        <module>errai-jaxrs</module>
     </modules>
 
     <dependencyManagement>
