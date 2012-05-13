@@ -19,11 +19,13 @@ package org.jboss.errai.cdi.injection.client.test;
 import static org.jboss.errai.ioc.client.container.IOC.getBeanManager;
 
 import org.jboss.errai.cdi.injection.client.BeanInjectSelf;
+import org.jboss.errai.cdi.injection.client.Car;
 import org.jboss.errai.cdi.injection.client.ConsumerBeanA;
 import org.jboss.errai.cdi.injection.client.CycleNodeA;
 import org.jboss.errai.cdi.injection.client.DependentBeanInjectSelf;
 import org.jboss.errai.cdi.injection.client.EquHashCheckCycleA;
 import org.jboss.errai.cdi.injection.client.EquHashCheckCycleB;
+import org.jboss.errai.cdi.injection.client.Petrol;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 
@@ -60,6 +62,20 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
                 nodeA.getNodeId(), nodeA.getCycleNodeB().getCycleNodeC().getCycleNodeA().getNodeId());
         assertEquals("CycleNodeA is a different instance at different points in the graph",
                 nodeA.getNodeId(), nodeA.getCycleNodeB().getCycleNodeA().getNodeId());
+
+        finishTest();
+      }
+    });
+  }
+
+  public void testCircularInjectionOnOneNormalAndOneDependentBean() throws Exception {
+    CDI.addPostInitTask(new Runnable() {
+      @Override
+      public void run() {
+        Petrol petrol = getBeanManager().lookupBean(Petrol.class).getInstance();
+        Car car = getBeanManager().lookupBean(Car.class).getInstance();
+        assertEquals(petrol.getNameOfCar(), car.getName());
+        assertEquals(car.getNameOfPetrol(), petrol.getName());
 
         finishTest();
       }
