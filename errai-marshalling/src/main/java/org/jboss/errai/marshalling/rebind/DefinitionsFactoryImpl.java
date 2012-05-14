@@ -239,6 +239,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
       MappingDefinition aliasDef = new MappingDefinition(def.getMarshallerInstance(), entry.getKey(), false);
       aliasDef.setClientMarshallerClass(def.getClientMarshallerClass());
+      mergeDefinition(aliasDef);
       addDefinition(aliasDef);
     }
 

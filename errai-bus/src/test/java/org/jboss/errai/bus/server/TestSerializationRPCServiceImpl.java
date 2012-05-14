@@ -21,6 +21,7 @@ import java.math.BigInteger;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -39,6 +40,7 @@ import org.jboss.errai.bus.client.tests.support.FactoryEntity;
 import org.jboss.errai.bus.client.tests.support.GenericEntity;
 import org.jboss.errai.bus.client.tests.support.Group;
 import org.jboss.errai.bus.client.tests.support.Koron;
+import org.jboss.errai.bus.client.tests.support.SubMoron;
 import org.jboss.errai.bus.client.tests.support.TestEnumA;
 import org.jboss.errai.bus.client.tests.support.TestSerializationRPCService;
 import org.jboss.errai.bus.client.tests.support.TestingTickCache;
@@ -320,6 +322,11 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
   }
 
   @Override
+  public SubMoron testSubMoron(SubMoron s) {
+    return s;
+  }
+
+  @Override
   public List<TreeNodeContainer> acceptTreeNodeContainers(List<TreeNodeContainer> listOfContainers) {
     int count = 0;
     for (TreeNodeContainer tc : listOfContainers) {
@@ -353,5 +360,10 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
   @Override
   public EnumContainerContainer testEntityWithEnumContainerContainer(EnumContainerContainer ecc) {
     return ecc;
+  }
+
+  @Override
+  public LinkedHashMap<String, Integer> testLinkedHashMap(LinkedHashMap<String, Integer> map) {
+    return map;
   }
 }

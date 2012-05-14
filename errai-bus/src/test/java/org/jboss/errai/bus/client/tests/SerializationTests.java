@@ -23,6 +23,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +54,7 @@ import org.jboss.errai.bus.client.tests.support.Group;
 import org.jboss.errai.bus.client.tests.support.Koron;
 import org.jboss.errai.bus.client.tests.support.Student;
 import org.jboss.errai.bus.client.tests.support.StudyTreeNodeContainer;
+import org.jboss.errai.bus.client.tests.support.SubMoron;
 import org.jboss.errai.bus.client.tests.support.TestEnumA;
 import org.jboss.errai.bus.client.tests.support.TestSerializationRPCService;
 import org.jboss.errai.bus.client.tests.support.TestingTick;
@@ -970,6 +972,36 @@ public class SerializationTests extends AbstractErraiTest {
     });
   }
 
+  public void testLinkedHashMap() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final LinkedHashMap<String,Integer> map = new LinkedHashMap<String, Integer>();
+        map.put("jonathan",   1);
+        map.put("christian",  2);
+        map.put("mike",       3);
+        map.put("lincoln",    4);
+        map.put("marius",     5);
+        map.put("banana",     6);
+        map.put("fruit",      7);
+        map.put("peas",       8);
+        map.put("hamburger",  9);
+        map.put("durian",     10);
+
+        MessageBuilder.createCall(new RemoteCallback<LinkedHashMap<String, Integer>>() {
+          @Override
+          public void callback(LinkedHashMap<String, Integer> response) {
+            String compareTo = map.toString();
+            String compareFrom = response.toString();
+
+            assertEquals(compareTo, compareFrom);
+            finishTest();
+          }
+        }, TestSerializationRPCService.class).testLinkedHashMap(map);
+      }
+    });
+  }
+
   public void testNestedClassSerialization() {
     runAfterInit(new Runnable() {
       @Override
@@ -1538,6 +1570,27 @@ public class SerializationTests extends AbstractErraiTest {
             }
           }
         }, TestSerializationRPCService.class).testInheritedDefinitionFromExistingParent(customList);
+      }
+    });
+  }
+
+  public void testAliasedMarshaller() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+       final SubMoron subMoron = new SubMoron("ABCDEFG");
+        subMoron.setDumbFieldThatShouldntBeMarshalled("Hello, There!");
+
+        MessageBuilder.createCall(new RemoteCallback<SubMoron>() {
+          @Override
+          public void callback(SubMoron response) {
+            assertEquals(subMoron.getValue(), response.getValue());
+            assertNull(response.getDumbFieldThatShouldntBeMarshalled());
+
+            finishTest();
+
+          }
+        }, TestSerializationRPCService.class).testSubMoron(subMoron);
       }
     });
   }

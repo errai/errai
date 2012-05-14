@@ -8,14 +8,8 @@ import javax.inject.Inject;
  */
 @ApplicationScoped
 public class Petrol {
-  public static boolean success;
-
   @Inject
   Car car;
-
-  public Petrol() {
-    success = false;
-  }
 
   public String getName() {
     return "petrol";
