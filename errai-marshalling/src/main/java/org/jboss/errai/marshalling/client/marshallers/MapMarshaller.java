@@ -32,7 +32,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.AbstractMap;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -42,7 +41,7 @@ import java.util.Map;
 @ClientMarshaller
 @ServerMarshaller
 @AlwaysQualify
-@ImplementationAliases({AbstractMap.class, HashMap.class, LinkedHashMap.class})
+@ImplementationAliases({AbstractMap.class, HashMap.class})
 public class MapMarshaller<T extends Map> implements Marshaller<T> {
   public static final MapMarshaller INSTANCE = new MapMarshaller();
 

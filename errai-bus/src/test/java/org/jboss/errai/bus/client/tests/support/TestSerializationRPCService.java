@@ -21,6 +21,7 @@ import java.math.BigInteger;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -142,6 +143,8 @@ public interface TestSerializationRPCService {
 
   public Koron testKoron(Koron k);
 
+  public SubMoron testSubMoron(SubMoron s);
+
   public TestingTickCache testMoron(TestingTickCache moron);
 
   public List<TreeNodeContainer> acceptTreeNodeContainers(List<TreeNodeContainer> listOfContainers);
@@ -154,4 +157,7 @@ public interface TestSerializationRPCService {
 
   public User testEntityWithNullField(User u);
 
+  public EnumContainerContainer testEntityWithEnumContainerContainer(EnumContainerContainer ecc);
+
+  public LinkedHashMap<String,Integer> testLinkedHashMap(LinkedHashMap<String,Integer> map);
 }

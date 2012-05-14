@@ -66,7 +66,6 @@ public class CDIServerUtil {
     }
 
     return (T) beanManager.getReference(bean, beanClass, beanManager.createCreationalContext(bean));
-
   }
 
   public static String resolveServiceName(Class<?> type) {

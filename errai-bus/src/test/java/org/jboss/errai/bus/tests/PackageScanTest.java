@@ -23,6 +23,7 @@ import java.util.Set;
 
 import junit.framework.TestCase;
 
+import org.apache.commons.io.FileUtils;
 import org.jboss.errai.bus.client.api.Local;
 import org.jboss.errai.bus.client.tests.support.FunAnnotatedClientClass;
 import org.jboss.errai.bus.client.tests.support.FunAnnotatedClientClass2;
@@ -119,7 +120,7 @@ public class PackageScanTest extends TestCase {
     String annotationToSearchFor = Local.class.getName();
     Set<String> annotated = scanner.getStore().getTypesAnnotatedWith(annotationToSearchFor);
     assertFalse("Cannot find " + annotationToSearchFor + " in " + warBaseDir, annotated.isEmpty());
-    Files.deleteDirectoryContents(warParentDir);
+    FileUtils.deleteDirectory(warParentDir);
     warParentDir.delete();
   }
 

@@ -17,6 +17,9 @@
 
 package org.jboss.errai.marshalling.server;
 
+import org.jboss.errai.marshalling.client.api.json.EJValue;
+import org.jboss.errai.marshalling.server.json.impl.ErraiJSONValue;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,12 +27,9 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.nio.CharBuffer;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.jboss.errai.marshalling.client.api.json.EJValue;
-import org.jboss.errai.marshalling.server.json.impl.ErraiJSONValue;
 
 /**
  * High-performance stream JSON parser. Provides the decoding algorithm to interpret the Errai Wire Protcol,
@@ -111,7 +111,7 @@ public class JSONStreamDecoder {
           break;
 
         case '{':
-          ctx.addValue(_parse(new ObjectContext(new HashMap<Object, Object>())));
+          ctx.addValue(_parse(new ObjectContext(new LinkedHashMap<Object, Object>())));
           break;
 
         case ']':

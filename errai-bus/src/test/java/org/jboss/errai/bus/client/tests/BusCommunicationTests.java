@@ -25,9 +25,11 @@ import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
+import org.jboss.errai.bus.client.tests.support.GenericServiceB;
 import org.jboss.errai.bus.client.tests.support.Person;
 import org.jboss.errai.bus.client.tests.support.RandomProvider;
 import org.jboss.errai.bus.client.tests.support.SType;
+import org.jboss.errai.bus.client.tests.support.SpecificEntity;
 import org.jboss.errai.bus.client.tests.support.SubService;
 import org.jboss.errai.bus.client.tests.support.TestException;
 import org.jboss.errai.bus.client.tests.support.TestRPCService;
@@ -213,7 +215,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
     });
   }
 
-  public void testRPC() {
+  public void testRpc() {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
@@ -253,7 +255,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
     });
   }
 
-  public void testRPCThrowingException() {
+  public void testRpcThrowingException() {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
@@ -287,7 +289,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
     });
   }
 
-  public void testRPCReturningVoid() {
+  public void testRpcReturningVoid() {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
@@ -303,7 +305,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
     });
   }
 
-  public void testRPCReturningNull() {
+  public void testRpcReturningNull() {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
@@ -320,6 +322,25 @@ public class BusCommunicationTests extends AbstractErraiTest {
     });
   }
 
+ 
+  public void testRpcToGenericService() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        GenericServiceB remote = MessageBuilder.createCall(new RemoteCallback<String>() {
+          @Override
+          public void callback(String response) {
+            assertNotNull(response);
+            assertEquals("SpecificEntity", response);
+            finishTest();
+          }
+        }, GenericServiceB.class);
+
+        remote.create(new SpecificEntity());
+      }
+    });
+  }
+  
   public void testMultipleEndpointsOnRemoteService() {
     runAfterInit(new Runnable() {
       @Override

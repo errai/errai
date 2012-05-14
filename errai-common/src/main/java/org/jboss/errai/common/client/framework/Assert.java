@@ -26,7 +26,23 @@ package org.jboss.errai.common.client.framework;
 public class Assert {
 
   private Assert() {}
-  
+
+  /**
+   * Throws NullPointerException if the value is null with an error message.
+   *
+   * @param <V>
+   * @param errorMessage an error message to be displayed as part of the NullPointerException thrown.
+   * @param value the value that must not be null
+   * @throws NullPointerException if value is null.
+   * @return
+   */
+  public static <V> V notNull(String errorMessage, V value) {
+    if (value == null) {
+      throw new NullPointerException(errorMessage);
+    }
+    return value;
+  }
+
   /**
    * Throws NullPointerException if the value is null.
    * 

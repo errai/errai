@@ -23,6 +23,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -44,12 +45,16 @@ import org.jboss.errai.bus.client.tests.support.EntityWithGenericCollections;
 import org.jboss.errai.bus.client.tests.support.EntityWithStringBufferAndStringBuilder;
 import org.jboss.errai.bus.client.tests.support.EntityWithSuperClassField;
 import org.jboss.errai.bus.client.tests.support.EntityWithUnqualifiedFields;
+import org.jboss.errai.bus.client.tests.support.EnumContainer;
+import org.jboss.errai.bus.client.tests.support.EnumContainerContainer;
+import org.jboss.errai.bus.client.tests.support.EnumWithState;
 import org.jboss.errai.bus.client.tests.support.FactoryEntity;
 import org.jboss.errai.bus.client.tests.support.GenericEntity;
 import org.jboss.errai.bus.client.tests.support.Group;
 import org.jboss.errai.bus.client.tests.support.Koron;
 import org.jboss.errai.bus.client.tests.support.Student;
 import org.jboss.errai.bus.client.tests.support.StudyTreeNodeContainer;
+import org.jboss.errai.bus.client.tests.support.SubMoron;
 import org.jboss.errai.bus.client.tests.support.TestEnumA;
 import org.jboss.errai.bus.client.tests.support.TestSerializationRPCService;
 import org.jboss.errai.bus.client.tests.support.TestingTick;
@@ -967,6 +972,36 @@ public class SerializationTests extends AbstractErraiTest {
     });
   }
 
+  public void testLinkedHashMap() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final LinkedHashMap<String,Integer> map = new LinkedHashMap<String, Integer>();
+        map.put("jonathan",   1);
+        map.put("christian",  2);
+        map.put("mike",       3);
+        map.put("lincoln",    4);
+        map.put("marius",     5);
+        map.put("banana",     6);
+        map.put("fruit",      7);
+        map.put("peas",       8);
+        map.put("hamburger",  9);
+        map.put("durian",     10);
+
+        MessageBuilder.createCall(new RemoteCallback<LinkedHashMap<String, Integer>>() {
+          @Override
+          public void callback(LinkedHashMap<String, Integer> response) {
+            String compareTo = map.toString();
+            String compareFrom = response.toString();
+
+            assertEquals(compareTo, compareFrom);
+            finishTest();
+          }
+        }, TestSerializationRPCService.class).testLinkedHashMap(map);
+      }
+    });
+  }
+
   public void testNestedClassSerialization() {
     runAfterInit(new Runnable() {
       @Override
@@ -1539,6 +1574,27 @@ public class SerializationTests extends AbstractErraiTest {
     });
   }
 
+  public void testAliasedMarshaller() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+       final SubMoron subMoron = new SubMoron("ABCDEFG");
+        subMoron.setDumbFieldThatShouldntBeMarshalled("Hello, There!");
+
+        MessageBuilder.createCall(new RemoteCallback<SubMoron>() {
+          @Override
+          public void callback(SubMoron response) {
+            assertEquals(subMoron.getValue(), response.getValue());
+            assertNull(response.getDumbFieldThatShouldntBeMarshalled());
+
+            finishTest();
+
+          }
+        }, TestSerializationRPCService.class).testSubMoron(subMoron);
+      }
+    });
+  }
+
   public void testNakedEnum() {
     runAfterInit(new Runnable() {
       @Override
@@ -1825,4 +1881,38 @@ public class SerializationTests extends AbstractErraiTest {
       }
     });
   }
+
+  public void testEntityWithEnumContainerContainer() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        // we will nest this into "ecc"
+        final EnumContainer ec = new EnumContainer();
+        ec.setEnumA1(TestEnumA.Jonathan);
+        ec.setStatefulEnum1(EnumWithState.THING1);
+        ec.setStatefulEnum2(EnumWithState.THING1);
+
+        // this is the object we'll be transmitting. it contains "ec"
+        final EnumContainerContainer ecc = new EnumContainerContainer();
+        ecc.setEnumA(TestEnumA.Jonathan);
+        ecc.setEnumContainer(ec);
+
+        MessageBuilder.createCall(new RemoteCallback<EnumContainerContainer>() {
+          @Override
+          public void callback(EnumContainerContainer response) {
+            try {
+              assertEquals(ecc.toString(), response.toString());
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestSerializationRPCService.class).testEntityWithEnumContainerContainer(ecc);
+      }
+    });
+  }
+
 }
