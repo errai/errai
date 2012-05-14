@@ -224,12 +224,12 @@
             <version>4.0.0.Alpha1.errai.r1</version>
         </dependency-->
 
-        <!-- dependency>
+        <dependency>
             <groupId>org.jboss.as</groupId>
             <artifactId>jboss-as-websockets</artifactId>
             <version>0.1.Alpha6</version>
             <scope>provided</scope>
-        </dependency-->
+        </dependency>
 
 
     </dependencies>
