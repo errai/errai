@@ -16,7 +16,7 @@
     <licenses>
         <license>
             <name>DO WHAT THE F#*@ YOU WANT TO PUBLIC LICENSE</name>
-            <url>https://raw.github.com/errai/Reflections/master/reflections/COPYING.txt</url>
+            <url>https://raw.github.com/errai/errai/master/errai-reflections/reflections/COPYING.txt</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
