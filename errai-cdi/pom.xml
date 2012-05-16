@@ -157,6 +157,10 @@
                         <artifactId>javax.enterprise</artifactId>
                         <groupId>cdi-api</groupId>
                     </exclusion>
+                    <exclusion>
+	                    <groupId>org.jboss.weld</groupId>
+	                    <artifactId>weld-build-config</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
 
@@ -170,13 +174,11 @@
                         <artifactId>javax.enterprise</artifactId>
                         <groupId>cdi-api</groupId>
                     </exclusion>
+                    <exclusion>
+	                    <groupId>org.jboss.weld</groupId>
+	                    <artifactId>weld-core</artifactId>
+                    </exclusion>
                 </exclusions>
-            </dependency>
-
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${slf4j.version}</version>
             </dependency>
 
             <dependency>
@@ -193,9 +195,31 @@
                         <artifactId>javax.enterprise</artifactId>
                         <groupId>cdi-api</groupId>
                     </exclusion>
+                    <exclusion>
+						<groupId>javax.el</groupId>
+						<artifactId>el-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+	                    <groupId>org.jboss.weld</groupId>
+	                    <artifactId>weld-spi</artifactId>
+                    </exclusion>
+                    <exclusion>
+	                    <groupId>org.jboss.weld</groupId>
+	                    <artifactId>weld-core</artifactId>
+                    </exclusion>
+                    <exclusion>
+	                    <groupId>org.jboss.weld</groupId>
+	                    <artifactId>weld-build-config</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
-
+            
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            
             <!-- Custom Jetty Version -->
             <dependency>
                 <groupId>org.mortbay.jetty</groupId>

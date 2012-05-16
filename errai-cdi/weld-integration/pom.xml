@@ -72,16 +72,41 @@
 
                 <!-- Weld -->
                 <dependency>
+                    <groupId>org.jboss.weld</groupId>
+                    <artifactId>weld-build-config</artifactId>
+                    <version>1.1.8.Final-redhat-1</version>
+                    <scope>compile</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.jboss.weld</groupId>
+                    <artifactId>weld-spi</artifactId>
+                    <version>1.1.Final-redhat-1</version>
+                    <scope>compile</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.jboss.weld</groupId>
+                    <artifactId>weld-core</artifactId>
+                    <version>1.1.8.Final-redhat-1</version>
+                    <scope>compile</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.jboss.weld.se</groupId>
+                    <artifactId>weld-se-core</artifactId>
+                    <version>${weld.version}</version>
+                    <scope>compile</scope>
+                </dependency>
+                <dependency>
                     <groupId>org.jboss.weld.servlet</groupId>
                     <artifactId>weld-servlet</artifactId>
+                    <version>${weld.version}</version>
+                    <scope>compile</scope>
                 </dependency>
-
-                <dependency>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                    <scope>provided</scope>
-                </dependency>
-
+			    <dependency>
+				  <groupId>org.jboss.spec.javax.el</groupId>
+				  <artifactId>jboss-el-api_2.2_spec</artifactId>
+				  <version>1.0.1.Final-redhat-1</version>
+			    </dependency>
+			    
                 <!-- GWT -->
                 <dependency>
                     <groupId>com.google.gwt</groupId>
@@ -105,13 +130,6 @@
                     <groupId>javax.validation</groupId>
                     <artifactId>validation-api</artifactId>
                     <classifier>sources</classifier>
-                    <scope>provided</scope>
-                </dependency>
-
-                <dependency>
-                    <groupId>org.jboss.weld.se</groupId>
-                    <artifactId>weld-se-core</artifactId>
-                    <version>${weld.version}</version>
                     <scope>provided</scope>
                 </dependency>
 
@@ -300,6 +318,24 @@
 
                 <!-- Weld Modules -->
                 <dependency>
+                    <groupId>org.jboss.weld</groupId>
+                    <artifactId>weld-build-config</artifactId>
+                    <version>1.1.8.Final-redhat-1</version>
+                    <scope>compile</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.jboss.weld</groupId>
+                    <artifactId>weld-spi</artifactId>
+                    <version>1.1.Final-redhat-1</version>
+                    <scope>compile</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.jboss.weld</groupId>
+                    <artifactId>weld-core</artifactId>
+                    <version>1.1.8.Final-redhat-1</version>
+                    <scope>compile</scope>
+                </dependency>
+                <dependency>
                     <groupId>org.jboss.weld.se</groupId>
                     <artifactId>weld-se-core</artifactId>
                     <version>${weld.version}</version>
@@ -317,6 +353,12 @@
                     <scope>runtime</scope>
                     <version>2.1.2-b04</version>
                 </dependency>
+			    <dependency>
+			      <groupId>org.jboss.spec.javax.el.jboss-el-api_2.2_spec</groupId>
+			      <artifactId>jboss-el-api_2.2_spec</artifactId>
+			      <version>1.0.1.Final-redhat-1</version>
+			    </dependency>
+                
 
                 <!-- GWT and GWT Extensions -->
                 <dependency>
