@@ -1,5 +1,5 @@
 
-Errai Framework 1.3 (http://jboss.org/errai)
+Errai Framework 2.0.0.Final (http://jboss.org/errai)
 =================================================
 
 Errai is a GWT-based framework for building rich web applications
@@ -15,13 +15,12 @@ before reading any further:
 
 [Contents of this distribution]
 
+    |-bus-examples
+    |-cdi-examples
     |-deps
-    |---lib 		(third party libs)
-    |-docs
-    |---reference	(reference guide)
-    |---quickstart	(quickstart guide)
-    |-examples		(demo apps)
-    |-libi		(errai libs)
+    |---lib		(3rd party libs)
+    |-jaxrs-examples
+    |-lib		(errai libs)
     
 
 [Running the examples]
