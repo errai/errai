@@ -3,6 +3,8 @@ package org.jboss.errai.ui.test.client;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.junit.Test;
 
+import com.google.gwt.user.client.ui.RootPanel;
+
 public class LoadTemplateTest extends AbstractErraiCDITest {
 
   @Override
@@ -17,7 +19,15 @@ public class LoadTemplateTest extends AbstractErraiCDITest {
       public void run() {
         App app = CDITestHelper.instance.app;
         assertNotNull(app.getTemplate());
-        assertEquals("HI TEMPLATE", app.getTemplate().getText());
+        assertTrue(app.getTemplate().getText().contains("HI TEMPLATE"));
+
+        RootPanel lbl = RootPanel.get("lbl");
+
+        assertNotNull(lbl);
+
+        String innerText = lbl.asWidget().getElement().getInnerText();
+        assertEquals(innerText, "Added by component");
+        
         finishTest();
       }
     });

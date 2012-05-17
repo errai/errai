@@ -110,6 +110,7 @@
                      <additionalClasspathElements>
                         <additionalClasspathElement>${basedir}/target/classes/</additionalClasspathElement>
                         <additionalClasspathElement>${basedir}/test-classes/</additionalClasspathElement>
+                        <additionalClasspathElement>${basedir}/src/main/java/</additionalClasspathElement>
                         <additionalClasspathElement>${basedir}/src/test/java/</additionalClasspathElement>
                      </additionalClasspathElements>
                      <useSystemClassLoader>false</useSystemClassLoader>
