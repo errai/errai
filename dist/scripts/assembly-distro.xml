@@ -21,12 +21,12 @@
           xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
           http://maven.apache.org/xsd/assembly-1.1.0-SNAPSHOT.xsd">
 
-    <id>errai.distribution</id>
+    <id>distribution</id>
     <formats>
         <format>zip</format>
     </formats>
     <includeBaseDirectory>true</includeBaseDirectory>
-    <baseDirectory>errai-${project.version}</baseDirectory>
+    <baseDirectory>/</baseDirectory>
 
     <!-- Dependency Sets -->
     <dependencySets>
@@ -77,72 +77,6 @@
         <fileSet>
             <directory>../quickstart/target/docbook/publish/en</directory>
             <outputDirectory>docs/quickstart</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>../errai-bus/demos/</directory>
-            <outputDirectory>bus-examples/</outputDirectory>
-            <excludes>
-                <exclude>pom.xml</exclude>
-                <exclude>**/*.iml</exclude>
-                <exclude>**/gwt-unitCache/**</exclude>
-                <exclude>**/.settings/**</exclude>
-                <exclude>**/.classpath</exclude>
-                <exclude>**/.project</exclude>
-                <exclude>**/.gitignore</exclude>
-                <exclude>**/.gwt/**</exclude>
-                <exclude>**/.errai/**</exclude>
-                <exclude>**/*.JUnit/**</exclude>
-                <exclude>**/target/**</exclude>
-                <exclude>**/WEB-INF/lib/**</exclude>
-                <exclude>**/WEB-INF/classes/**</exclude>
-
-                <exclude>**/src/main/webapp/App/**</exclude>
-            </excludes>
-        </fileSet>
-        <fileSet>
-            <directory>../errai-cdi/demos/</directory>
-            <outputDirectory>cdi-examples/</outputDirectory>
-            <excludes>
-                <exclude>pom.xml</exclude>
-                <exclude>**/*.iml</exclude>
-                <exclude>**/gwt-unitCache/**</exclude>
-                <exclude>**/.settings/**</exclude>
-                <exclude>**/.classpath</exclude>
-                <exclude>**/.project</exclude>
-                <exclude>**/.gitignore</exclude>
-                <exclude>**/.gwt/**</exclude>
-                <exclude>**/.errai/**</exclude>
-                <exclude>**/*.JUnit/**</exclude>
-                <exclude>**/target/**</exclude>
-                <exclude>**/WEB-INF/lib/**</exclude>
-                <exclude>**/WEB-INF/classes/**</exclude>
-
-                <exclude>**/src/main/webapp/TagCloudDemo/**</exclude>
-                <exclude>**/src/main/webapp/app/**</exclude>
-                <exclude>**/src/main/webapp/ErraiCdiMobileDemo/**</exclude>
-                <exclude>**/src/main/webapp/contacts/**</exclude>
-            </excludes>
-        </fileSet>
-        <fileSet>
-            <directory>../errai-jaxrs/demos/</directory>
-            <outputDirectory>jaxrs-examples/</outputDirectory>
-            <excludes>
-                <exclude>pom.xml</exclude>
-                <exclude>**/*.iml</exclude>
-                <exclude>**/gwt-unitCache/**</exclude>
-                <exclude>**/.settings/**</exclude>
-                <exclude>**/.classpath</exclude>
-                <exclude>**/.project</exclude>
-                <exclude>**/.gitignore</exclude>
-                <exclude>**/.gwt/**</exclude>
-                <exclude>**/.errai/**</exclude>
-                <exclude>**/*.JUnit/**</exclude>
-                <exclude>**/target/**</exclude>
-                <exclude>**/WEB-INF/lib/**</exclude>
-                <exclude>**/WEB-INF/classes/**</exclude>
-
-                <exclude>**/src/main/webapp/RestDemo/**</exclude>
-            </excludes>
         </fileSet>
     </fileSets>
 </assembly>
