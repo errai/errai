@@ -114,7 +114,6 @@ public class CDIExtensionPoints implements Extension {
 
   private static final String ERRAI_CDI_STANDALONE = "errai.cdi.standalone";
 
-
   static {
     final Set<String> veto = new HashSet<String>();
     veto.add(ServerMessageBusImpl.class.getName());
@@ -525,10 +524,10 @@ public class CDIExtensionPoints implements Extension {
   }
 
   static class EventConsumer {
-    private boolean conversational;
-    private Type eventBeanType;
-    private Type eventType;
-    private Annotation[] qualifiers;
+    private final boolean conversational;
+    private final Type eventBeanType;
+    private final Type eventType;
+    private final Annotation[] qualifiers;
 
     EventConsumer(boolean conversational, Type eventBeanType, Type type, Annotation[] qualifiers) {
       this.conversational = conversational;
@@ -585,8 +584,8 @@ public class CDIExtensionPoints implements Extension {
   }
 
   static class MessageSender {
-    private Type senderType;
-    private Set<Annotation> qualifiers;
+    private final Type senderType;
+    private final Set<Annotation> qualifiers;
 
     MessageSender(Type senderType, Set<Annotation> qualifiers) {
       this.senderType = senderType;

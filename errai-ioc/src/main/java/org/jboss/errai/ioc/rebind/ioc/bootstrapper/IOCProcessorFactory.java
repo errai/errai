@@ -88,7 +88,6 @@ import static org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance.get
 
 @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
 public class IOCProcessorFactory {
-  private final GraphBuilder graphBuilder = new GraphBuilder();
   private final Stack<SortedSet<ProcessingEntry>> processingTasksStack = new Stack<SortedSet<ProcessingEntry>>();
   private final InjectionContext injectionContext;
   private final Set<String> visitedAutoDiscoveredDependentBeans = new HashSet<String>();
@@ -128,7 +127,7 @@ public class IOCProcessorFactory {
     @Override
     public void notifyDependency(final MetaClass dependentClazz) {
       if (injectionContext.isAnyKnownElementType(dependentClazz)) {
-        graphBuilder.addDependency(masqueradeClass, Dependency.on(dependentClazz));
+        injectionContext.getGraphBuilder().addDependency(masqueradeClass, Dependency.on(dependentClazz));
       }
       else {
         final DependencyControl control = new DependencyControl() {
@@ -142,7 +141,7 @@ public class IOCProcessorFactory {
             if (visitedAutoDiscoveredDependentBeans.contains(clazz.getFullyQualifiedName())) return;
             visitedAutoDiscoveredDependentBeans.add(clazz.getFullyQualifiedName());
 
-            graphBuilder.addDependency(dependentClazz, Dependency.on(clazz));
+            injectionContext.getGraphBuilder().addDependency(dependentClazz, Dependency.on(clazz));
           }
 
           @Override
@@ -153,7 +152,7 @@ public class IOCProcessorFactory {
           }
         };
 
-        graphBuilder.addDependency(masqueradeClass, Dependency.on(dependentClazz));
+        injectionContext.getGraphBuilder().addDependency(masqueradeClass, Dependency.on(dependentClazz));
         JSR330AnnotationHandler.processDependencies(control, dependentClazz, injectionContext);
       }
     }
@@ -305,7 +304,7 @@ public class IOCProcessorFactory {
 
               if (!producerMember.isStatic()) {
                 // if this is a static producer, it does not have a dependency on its parent bean
-                graphBuilder.addDependency(injectedType, Dependency.on(instance.getEnclosingType()));
+                injectionContext.getGraphBuilder().addDependency(injectedType, Dependency.on(instance.getEnclosingType()));
               }
             }
 
@@ -401,7 +400,7 @@ public class IOCProcessorFactory {
     }
     while (!processingTasksStack.isEmpty());
 
-    List<SortUnit> toSort = graphBuilder.build();
+    List<SortUnit> toSort = injectionContext.getGraphBuilder().build();
 
     List<SortUnit> list = sortGraph(toSort);
 
@@ -465,7 +464,7 @@ public class IOCProcessorFactory {
 
     final MetaClass masq = ((DependencyControlImpl) dependencyControl).masqueradeClass;
 
-    graphBuilder.addItem(masq, del);
+    injectionContext.getGraphBuilder().addItem(masq, del);
   }
 
   @SuppressWarnings("unchecked")
@@ -516,7 +515,7 @@ public class IOCProcessorFactory {
 
     final MetaClass masq = ((DependencyControlImpl) dependencyControl).masqueradeClass;
 
-    graphBuilder.addItem(masq, del);
+    injectionContext.getGraphBuilder().addItem(masq, del);
   }
 
   private void handleField(final ProcessingEntry entry,
@@ -568,7 +567,7 @@ public class IOCProcessorFactory {
 
     final MetaClass masq = ((DependencyControlImpl) dependencyControl).masqueradeClass;
 
-    graphBuilder.addItem(masq, del);
+    injectionContext.getGraphBuilder().addItem(masq, del);
   }
 
   private class ProcessingEntry implements Comparable<ProcessingEntry> {

@@ -15,7 +15,5 @@ public class BusInitializationBean {
 
   @PostConstruct
   private void init() {
-
-
   }
 }

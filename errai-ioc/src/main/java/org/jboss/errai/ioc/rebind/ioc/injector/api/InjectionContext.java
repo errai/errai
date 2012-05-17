@@ -32,6 +32,7 @@ import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCGenerator;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
+import org.jboss.errai.ioc.rebind.ioc.graph.GraphBuilder;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.injector.ProxyInjector;
 import org.jboss.errai.ioc.rebind.ioc.injector.QualifiedTypeInjectorDelegate;
@@ -81,6 +82,8 @@ public class InjectionContext {
   private final Map<String, Object> attributeMap = new HashMap<String, Object>();
 
   private final Set<String> exposedMembers = new HashSet<String>();
+
+  private final GraphBuilder graphBuilder = new GraphBuilder();
 
   private boolean allowProxyCapture = false;
   private boolean openProxy = false;
@@ -495,7 +498,6 @@ public class InjectionContext {
     allowProxyCapture = false;
   }
 
-
   public void setAttribute(String name, Object value) {
     attributeMap.put(name, value);
   }
@@ -506,5 +508,9 @@ public class InjectionContext {
 
   public boolean hasAttribute(String name) {
     return attributeMap.containsKey(name);
+  }
+
+  public GraphBuilder getGraphBuilder() {
+    return graphBuilder;
   }
 }

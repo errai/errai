@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class CDIServerUtil {
-
   @SuppressWarnings("unchecked")
   public static <T> T lookupBean(final BeanManager beanManager, final Class<T> serviceType) {
     final Bean<?> bean = beanManager.resolve(beanManager.getBeans(serviceType));
@@ -50,7 +49,6 @@ public class CDIServerUtil {
   public static QueueSession getSession(final Message message) {
     return message.getResource(QueueSession.class, "Session");
   }
-
 
   @SuppressWarnings("unchecked")
   public static <T> T lookupRPCBean(final BeanManager beanManager,
