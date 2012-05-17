@@ -3,8 +3,6 @@ package org.jboss.errai.ui.test.client;
 import java.util.ArrayList;
 import java.util.List;
 
-import java_cup.parser;
-
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
