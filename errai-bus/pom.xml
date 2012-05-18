@@ -168,7 +168,7 @@
             <groupId>org.jboss.web</groupId>
             <artifactId>jbossweb</artifactId>
             <scope>provided</scope>
-            <version>7.0.15.Final-redhat-1</version>
+            <version>7.0.16.Final-redhat-1</version>
         </dependency>
 
 
@@ -203,7 +203,7 @@
         <dependency>
             <groupId>org.javassist</groupId>
             <artifactId>javassist</artifactId>
-            <version>3.15.0-GA</version>
+            <version>3.15.0.GA-redhat-1</version>
         </dependency>
 
 
