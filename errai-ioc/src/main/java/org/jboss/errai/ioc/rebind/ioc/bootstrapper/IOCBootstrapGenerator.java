@@ -236,11 +236,12 @@ public class IOCBootstrapGenerator {
     injectionContextBuilder.processingContext(procContext);
     final InjectionContext injectionContext = injectionContextBuilder.build();
 
-    defaultConfigureProcessor(context, injectionContext);
 
     // generator constructor source code
     final IOCProcessorFactory procFactory = new IOCProcessorFactory(injectionContext);
     initializeProviders(procContext, injectionContext, procFactory, beforeTasks, afterTasks);
+    defaultConfigureProcessor(context, injectionContext);
+
     generateExtensions(procContext, procFactory, injectionContext, sourceWriter, classStructureBuilder, blockBuilder);
 
     // close generated class

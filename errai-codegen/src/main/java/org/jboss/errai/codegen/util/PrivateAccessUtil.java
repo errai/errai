@@ -9,6 +9,7 @@ import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.DefParameters;
 import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.Parameter;
+import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.StringStatement;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.CatchBlockBuilder;
@@ -467,4 +468,6 @@ public class PrivateAccessUtil {
     }
     return null;
   }
+
+
 }

@@ -645,4 +645,21 @@ public class InjectUtil {
     store.add(injector);
     return true;
   }
+
+  public static Statement getPrivateReference(final IOCProcessingContext processingContext,
+                                              final Statement obj,
+                                              final MetaField field) {
+    return Stmt.invokeStatic(processingContext.getBootstrapClass(),
+            PrivateAccessUtil.getPrivateFieldInjectorName(field), obj);
+  }
+
+  public static Statement setPrivateReference(final IOCProcessingContext processingContext,
+                                              final Statement obj,
+                                              final MetaField field,
+                                              final Statement val) {
+    return Stmt.invokeStatic(processingContext.getBootstrapClass(),
+            PrivateAccessUtil.getPrivateFieldInjectorName(field), obj, val);
+  }
+
+
 }
