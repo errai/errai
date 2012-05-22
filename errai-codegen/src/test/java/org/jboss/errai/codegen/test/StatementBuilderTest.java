@@ -30,6 +30,7 @@ import org.jboss.errai.codegen.exception.UndefinedFieldException;
 import org.jboss.errai.codegen.literal.LiteralFactory;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.test.model.BeanWithTypeParmedMeths;
+import org.jboss.errai.codegen.test.model.Bwah;
 import org.jboss.errai.codegen.test.model.Foo;
 import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.Refs;
@@ -582,7 +583,13 @@ public class StatementBuilderTest extends AbstractCodegenTest {
     assertEquals("org.jboss.errai.codegen.test.model.BeanWithTypeParmedMeths.INSTANCE" +
             ".setFooBarMap(org.jboss.errai.codegen.test.model.BeanWithTypeParmedMeths.INSTANCE.getFooBarMap())",
             s);
+  }
 
+  @Test
+  public void testGenericReturnType() {
+    String s = Stmt.invokeStatic(Bwah.class, "create", Map.class).invoke("size").generate(Context.create());
+
+    System.out.println(s);
   }
 
 }

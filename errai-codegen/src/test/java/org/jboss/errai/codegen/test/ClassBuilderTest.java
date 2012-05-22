@@ -501,17 +501,22 @@ public class ClassBuilderTest extends AbstractCodegenTest implements ClassBuilde
             .publicScope().implementsInterface(Runnable.class)
             .body()
             .publicMethod(void.class, "run")
-            .annotatedWith(new Override() {
+            .annotatedWith(new SuppressWarnings() {
+              @Override
+              public String[] value() {
+                return new String[] {"blah"};
+              }
+
               @Override
               public Class<? extends Annotation> annotationType() {
-                return Override.class;
+                return SuppressWarnings.class;
               }
             }).body()
             .append(Stmt.returnVoid())
             .finish().toJavaString();
 
     assertEquals("public class MyRunnable implements Runnable {\n" +
-            "  @Override public void run() {\n" +
+            "  @SuppressWarnings(value = { \"blah\" }) public void run() {\n" +
             "    return;\n" +
             "  }\n" +
             "}", cls);

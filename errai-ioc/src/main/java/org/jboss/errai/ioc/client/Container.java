@@ -42,6 +42,7 @@ public class Container implements EntryPoint {
       InitVotes.waitFor(Container.class);
 
       final Bootstrapper bootstrapper = GWT.create(Bootstrapper.class);
+
       log("IOC bootstrapper successfully initialized.");
 
       new IOCBeanManagerLifecycle().resetBeanManager();

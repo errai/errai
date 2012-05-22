@@ -58,6 +58,8 @@ public class AnnotationLiteral extends LiteralValue<Annotation> {
     });
 
     List<String> elements = new ArrayList<String>();
+
+    String lastMethodRendered = "";
     
     for (Method method : sortedMethods) {
       if (((method.getModifiers() & (Modifier.PRIVATE | Modifier.PROTECTED)) == 0)
@@ -65,6 +67,7 @@ public class AnnotationLiteral extends LiteralValue<Annotation> {
         try {
           method.setAccessible(true);
           elements.add(method.getName() + " = " + LiteralFactory.getLiteral(method.invoke(getValue())).getCanonicalString(context));
+          lastMethodRendered = method.getName();
         }
         catch (IllegalAccessException e) {
           throw new RuntimeException("error generation annotation wrapper", e);
@@ -85,6 +88,12 @@ public class AnnotationLiteral extends LiteralValue<Annotation> {
       else builder.append(")");
     }
 
-    return builder.toString();
+    String toReturn = builder.toString().replaceAll("new (String|int|float|double|boolean|byte|short)\\[\\]", "");
+
+    if (elements.size() == 1 && "value".endsWith(lastMethodRendered)) {
+      toReturn = toReturn.replaceFirst("(\\s)+value =(\\s)+", "");
+    }
+
+    return toReturn;
   }
 }
