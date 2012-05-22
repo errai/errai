@@ -516,7 +516,7 @@ public class ClassBuilderTest extends AbstractCodegenTest implements ClassBuilde
             .finish().toJavaString();
 
     assertEquals("public class MyRunnable implements Runnable {\n" +
-            "  @SuppressWarnings(value = { \"blah\" }) public void run() {\n" +
+            "  @SuppressWarnings({ \"blah\" }) public void run() {\n" +
             "    return;\n" +
             "  }\n" +
             "}", cls);

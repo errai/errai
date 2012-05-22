@@ -91,7 +91,7 @@ public class AnnotationLiteral extends LiteralValue<Annotation> {
     String toReturn = builder.toString().replaceAll("new (String|int|float|double|boolean|byte|short)\\[\\]", "");
 
     if (elements.size() == 1 && "value".endsWith(lastMethodRendered)) {
-      toReturn = toReturn.replaceFirst("(\\s)+value =(\\s)+", "");
+      toReturn = toReturn.replaceFirst("(\\s)*value =(\\s)+", "");
     }
 
     return toReturn;
