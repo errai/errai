@@ -584,12 +584,4 @@ public class StatementBuilderTest extends AbstractCodegenTest {
             ".setFooBarMap(org.jboss.errai.codegen.test.model.BeanWithTypeParmedMeths.INSTANCE.getFooBarMap())",
             s);
   }
-
-  @Test
-  public void testGenericReturnType() {
-    String s = Stmt.invokeStatic(Bwah.class, "create", Map.class).invoke("size").generate(Context.create());
-
-    System.out.println(s);
-  }
-
 }
