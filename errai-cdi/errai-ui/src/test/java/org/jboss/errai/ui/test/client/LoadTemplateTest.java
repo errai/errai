@@ -18,8 +18,8 @@ public class LoadTemplateTest extends AbstractErraiCDITest {
       @Override
       public void run() {
         App app = CDITestHelper.instance.app;
-        assertNotNull(app.getTemplate());
-        assertTrue(app.getTemplate().getText().contains("HI TEMPLATE"));
+        assertNotNull(app.getComponent());
+        assertTrue(app.getComponent().getElement().getInnerHTML().contains("HI TEMPLATE"));
 
         RootPanel lbl = RootPanel.get("lbl");
 
@@ -36,7 +36,7 @@ public class LoadTemplateTest extends AbstractErraiCDITest {
     // returns.
     // We need this delay to give the HelloMessage time to come back from the
     // server.
-    delayTestFinish(20000);
+    delayTestFinish(40000);
   }
 
 }

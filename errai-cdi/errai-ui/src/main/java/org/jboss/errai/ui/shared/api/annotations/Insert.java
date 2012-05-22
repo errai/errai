@@ -1,4 +1,4 @@
-package org.jboss.errai.ui.shared;
+package org.jboss.errai.ui.shared.api.annotations;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -11,6 +11,6 @@ import java.lang.annotation.Target;
 @Documented
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Replace {
+public @interface Insert {
 
 }

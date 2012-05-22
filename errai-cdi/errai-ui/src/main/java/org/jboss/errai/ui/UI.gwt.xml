@@ -24,10 +24,4 @@
   
   <source path="client" />
   <source path="shared" />
-
-    <!-- 
-  <generate-with class="org.jboss.errai.ui.rebind.TemplateGenerator">
-    <when-type-assignable class="org.jboss.errai.ui.shared.Template"/>
-  </generate-with> 
-  -->
 </module>

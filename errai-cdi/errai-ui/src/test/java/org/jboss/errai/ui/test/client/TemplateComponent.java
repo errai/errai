@@ -1,12 +1,16 @@
 package org.jboss.errai.ui.test.client;
 
 import javax.annotation.PostConstruct;
+import javax.enterprise.context.Dependent;
 
-import org.jboss.errai.ui.shared.Replace;
+import org.jboss.errai.ui.shared.api.annotations.Replace;
+import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
 
+@Dependent
+@Templated
 public class TemplateComponent extends Composite {
 
   @Replace
