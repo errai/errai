@@ -18,14 +18,18 @@ package org.jboss.errai.codegen.builder;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 
+import java.lang.annotation.Annotation;
+
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public interface MethodBlockBuilder<T> extends BlockBuilder<T>,
                                                MethodBlockModifiers<MethodBlockBuilder<T>, T>,
                                                MethodBlockParameters<T> {
+
+  public MethodBlockBuilder<T> annotatedWith(Annotation... annotations);
+
   public BlockBuilder<T> throws_(Class<? extends Throwable>... exceptionTypes);
 
   public BlockBuilder<T> throws_(MetaClass... exceptions);
-
 }

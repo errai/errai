@@ -1413,7 +1413,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
     });
 
-
     if (LogUtil.isNativeJavaScriptLoggerSupported()) {
       LogUtil.nativeLog(message);
     }
@@ -1630,7 +1629,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     $wnd.errai_show_error_console = function () {
       @org.jboss.errai.bus.client.framework.ClientMessageBusImpl::_showErrorConsole()();
     }
-
   }-*/;
 
   /**

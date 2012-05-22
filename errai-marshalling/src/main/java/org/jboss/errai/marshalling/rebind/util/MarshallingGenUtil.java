@@ -38,28 +38,28 @@ public class MarshallingGenUtil {
   public static final String CONFIG_ERRAI_SERIALIZABLE_TYPE = "errai.marshalling.serializableTypes";
   public static final String CONFIG_ERRAI_MAPPING_ALIASES = "errai.marshalling.mappingAliases";
 
-  public static String getVarName(MetaClass clazz) {
+  public static String getVarName(final MetaClass clazz) {
     return clazz.isArray()
             ? getArrayVarName(clazz.getOuterComponentType().getFullyQualifiedName())
             + "_D" + GenUtil.getArrayDimensions(clazz)
             : getVarName(clazz.asBoxed().getFullyQualifiedName());
   }
 
-  public static String getVarName(Class<?> clazz) {
+  public static String getVarName(final Class<?> clazz) {
     return getVarName(MetaClassFactory.get(clazz));
   }
 
   private static final String ARRAY_VAR_PREFIX = "arrayOf_";
 
-  public static String getArrayVarName(String clazz) {
-    char[] newName = new char[clazz.length() + ARRAY_VAR_PREFIX.length()];
+  public static String getArrayVarName(final String clazz) {
+    final char[] newName = new char[clazz.length() + ARRAY_VAR_PREFIX.length()];
     _replaceAllDotsWithUnderscores(ARRAY_VAR_PREFIX, newName, 0);
     _replaceAllDotsWithUnderscores(clazz, newName, ARRAY_VAR_PREFIX.length());
     return new String(newName);
   }
 
   public static String getVarName(String clazz) {
-    char[] newName = new char[clazz.length()];
+    final char[] newName = new char[clazz.length()];
     _replaceAllDotsWithUnderscores(clazz, newName, 0);
     return new String(newName);
   }
@@ -92,7 +92,6 @@ public class MarshallingGenUtil {
     }
     return null;
   }
-  
   
   /**
    * Returns the element type of the given metaclass under the following conditions:

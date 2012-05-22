@@ -19,6 +19,7 @@ package org.jboss.errai.codegen.test;
 import static org.junit.Assert.fail;
 
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Modifier;
@@ -483,13 +484,36 @@ public class ClassBuilderTest extends AbstractCodegenTest implements ClassBuilde
             .finish()
             .toJavaString();
 
-   assertEquals("did not properly render 'this' reference", "package org.foo;\n" +
-           "\n" +
-           "\n" +
-           "public class Foo {\n" +
-           "  public Foo getThis() {\n" +
-           "    return this;\n" +
-           "  }\n" +
-           "}", cls);
+    assertEquals("did not properly render 'this' reference", "package org.foo;\n" +
+            "\n" +
+            "\n" +
+            "public class Foo {\n" +
+            "  public Foo getThis() {\n" +
+            "    return this;\n" +
+            "  }\n" +
+            "}", cls);
+  }
+
+  @Test
+  public void testMethodAnnotated() {
+
+    String cls = ClassBuilder.define("MyRunnable")
+            .publicScope().implementsInterface(Runnable.class)
+            .body()
+            .publicMethod(void.class, "run")
+            .annotatedWith(new Override() {
+              @Override
+              public Class<? extends Annotation> annotationType() {
+                return Override.class;
+              }
+            }).body()
+            .append(Stmt.returnVoid())
+            .finish().toJavaString();
+
+    assertEquals("public class MyRunnable implements Runnable {\n" +
+            "  @Override public void run() {\n" +
+            "    return;\n" +
+            "  }\n" +
+            "}", cls);
   }
 }

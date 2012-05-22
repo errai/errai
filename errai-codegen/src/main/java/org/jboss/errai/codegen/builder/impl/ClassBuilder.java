@@ -42,6 +42,10 @@ import org.jboss.errai.codegen.meta.impl.build.BuildMetaField;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaMethod;
 import org.jboss.errai.codegen.util.GenUtil;
 
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * @author Mike Brock <cbrock@redhat.com>
  * @author Christian Sadilek <csadilek@redhat.com>
@@ -386,9 +390,9 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
   }
 
   private MethodCommentBuilder<T> genMethod(final Scope scope,
-                                          final MetaClass returnType,
-                                          final String name,
-                                          final DefParameters defParameters) {
+                                            final MetaClass returnType,
+                                            final String name,
+                                            final DefParameters defParameters) {
 
     return new MethodBlockBuilderImpl<T>(new MethodBuildCallback<T>() {
       @Override
@@ -396,6 +400,7 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
                         final DefParameters parameters,
                         final DefModifiers modifiers,
                         final ThrowsDeclaration throwsDeclaration,
+                        final List<Annotation> annotations,
                         final String comment) {
 
         DefParameters dParameters;
@@ -409,6 +414,10 @@ public class ClassBuilder<T extends ClassStructureBuilder<T>> implements
 
         BuildMetaMethod buildMetaMethod = new BuildMetaMethod(classDefinition, statement, scope,
                 modifiers, name, returnType, null, dParameters, throwsDeclaration);
+
+        if (annotations != null) {
+          buildMetaMethod.addAnnotations(annotations);
+        }
 
         buildMetaMethod.setMethodComment(comment);
         classDefinition.addMethod(buildMetaMethod);

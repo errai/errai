@@ -194,16 +194,6 @@ public class BuildMetaConstructor extends MetaConstructor implements Builder {
   }
 
   @Override
-  public boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
-    return false;
-  }
-
-  @Override
-  public <A extends Annotation> A getAnnotation(Class<A> annotation) {
-    return null;
-  }
-
-  @Override
   public MetaTypeVariable[] getTypeParameters() {
     return typeVariables.toArray(new MetaTypeVariable[typeVariables.size()]);
   }

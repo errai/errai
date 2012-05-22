@@ -553,14 +553,27 @@ public class BuildMetaClass extends AbstractMetaClass<Object> implements Builder
       buf.append(" class ").append(getName());
     }
 
+    final List<MetaClass> interfacesToRender = new ArrayList<MetaClass>(interfaces.size() + 1);
+    interfacesToRender.addAll(interfaces);
+
     if (getSuperClass() != null) {
-      buf.append(" extends ").append(LoadClassReference.getClassReference(getSuperClass(), context));
+      if (isInterface()) {
+        interfacesToRender.add(getSuperClass());
+      }
+      else {
+        buf.append(" extends ").append(LoadClassReference.getClassReference(getSuperClass(), context));
+      }
     }
 
-    if (interfaces.size() != 0) {
-      buf.append(" implements ");
+    if (!interfacesToRender.isEmpty()) {
+      if (isInterface()) {
+        buf.append(" extends ");
+      }
+      else {
+        buf.append(" implements ");
+      }
 
-      Iterator<MetaClass> iter = interfaces.iterator();
+      Iterator<MetaClass> iter = interfacesToRender.iterator();
       while (iter.hasNext()) {
         buf.append(LoadClassReference.getClassReference(iter.next(), context));
         if (iter.hasNext())

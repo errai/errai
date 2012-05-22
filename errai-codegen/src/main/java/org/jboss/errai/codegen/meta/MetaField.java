@@ -54,8 +54,6 @@ public abstract class MetaField implements HasAnnotations, MetaClassMember {
      return null;
   }
 
-
-
   public static class ArrayLengthMetaField extends MetaField {
 
     private MetaClass componentType;
@@ -149,6 +147,4 @@ public abstract class MetaField implements HasAnnotations, MetaClassMember {
       return null;
     }
   }
-
-
 }

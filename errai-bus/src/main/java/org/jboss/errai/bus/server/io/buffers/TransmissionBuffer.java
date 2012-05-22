@@ -50,7 +50,7 @@ public class TransmissionBuffer implements Buffer {
   public static int DEFAULT_SEGMENT_SIZE = 1024 * 16;             /* 16 Kilobytes */
   public static int DEFAULT_BUFFER_SIZE = 2048;                   /* 2048 x 16kb = 32 Megabytes */
 
-  public static int SEGMENT_HEADER_SIZE = 4;                      /* to accomodate a 32-bit integer  */
+  public static int SEGMENT_HEADER_SIZE = 4;                      /* to accommodate a 32-bit integer  */
 
   /**
    * The main buffer where the data is stored
@@ -404,7 +404,6 @@ public class TransmissionBuffer implements Buffer {
     long nanos = unit.toNanos(time);
 
     try {
-
       for (; ; ) {
         long read = bufferColor.sequence.get();
         checkOverflow(read);
@@ -573,7 +572,6 @@ public class TransmissionBuffer implements Buffer {
 
     final long sequenceToRead = getNextSegment(color,  head , sequence );
     if (sequenceToRead != -1) {
-
       int readCursor = ((int) sequenceToRead % segments) * segmentSize;
 
       final int readSize = readChunkSize(readCursor);

@@ -105,20 +105,6 @@ public class JavaReflectionMethod extends MetaMethod {
   }
 
   @Override
-  public final <A extends Annotation> A getAnnotation(Class<A> annotation) {
-    for (Annotation a : getAnnotations()) {
-      if (a.annotationType().equals(annotation))
-        return (A) a;
-    }
-    return null;
-  }
-
-  @Override
-  public boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
-    return getAnnotation(annotation) != null;
-  }
-
-  @Override
   public MetaClass[] getCheckedExceptions() {
     return MetaClassFactory.fromClassArray(method.getExceptionTypes());
   }

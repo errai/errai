@@ -162,7 +162,6 @@ public class MarshallerGeneratorFactory {
 
       final String varName = getVarName(clsName);
 
-
       if (marshallerCls.isAnnotationPresent(AlwaysQualify.class)) {
         classStructureBuilder.privateField(varName,
                 MetaClassFactory.parameterizedAs(QualifyingMarshallerWrapper.class,

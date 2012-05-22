@@ -16,6 +16,7 @@
 
 package org.jboss.errai.codegen.builder.impl;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,6 +47,7 @@ public class MethodBlockBuilderImpl<T> extends BlockBuilderImpl<T>
   protected MethodBuildCallback<T> callback;
   protected DefParameters defParameters;
   protected DefModifiers modifiers = new DefModifiers();
+  protected List<Annotation> annotations = new ArrayList<Annotation>();
 
 
   public MethodBlockBuilderImpl(MethodBuildCallback<T> callback) {
@@ -60,6 +62,14 @@ public class MethodBlockBuilderImpl<T> extends BlockBuilderImpl<T>
   @Override
   public MethodBlockBuilder<T> methodComment(String comment) {
     methodComment = comment;
+    return this;
+  }
+
+  @Override
+  public MethodBlockBuilder<T> annotatedWith(Annotation... annotations) {
+    for (Annotation a : annotations) {
+      this.annotations.add(a);
+    }
     return this;
   }
 
@@ -140,7 +150,7 @@ public class MethodBlockBuilderImpl<T> extends BlockBuilderImpl<T>
   @Override
   public T finish() {
     if (callback != null) {
-      return callback.callback(blockStatement, defParameters, modifiers, throwsDeclaration, methodComment);
+      return callback.callback(blockStatement, defParameters, modifiers, throwsDeclaration, annotations, methodComment);
     }
     return null;
   }

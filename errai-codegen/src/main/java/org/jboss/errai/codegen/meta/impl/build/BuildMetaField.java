@@ -17,6 +17,7 @@
 package org.jboss.errai.codegen.meta.impl.build;
 
 import java.lang.annotation.Annotation;
+import java.util.List;
 
 import org.jboss.errai.codegen.Comment;
 import org.jboss.errai.codegen.Statement;

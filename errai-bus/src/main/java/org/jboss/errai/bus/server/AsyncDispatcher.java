@@ -43,7 +43,7 @@ public class AsyncDispatcher implements RequestDispatcher {
    * Constructs the <tt>AsyncDispatcher</tt> with the specified service. The injection makes it possible to obtain
    * a reference to the <tt>ErraiService</tt>
    *
-   * @param service - the service where the bus is located
+   * @param service the service where the bus is located
    */
   @Inject
   public AsyncDispatcher(final ErraiService service) {
@@ -58,12 +58,11 @@ public class AsyncDispatcher implements RequestDispatcher {
     });
   }
 
-
   /**
    * Sends the message globally. If the <tt>PriorityProcessing</tt> routing flag is set, then the message is sent
    * globally on the bus. If not, the message is sent globally through the <tt>workerFactory</tt>
    *
-   * @param message - a message to dispatch globally
+   * @param message a message to dispatch globally
    */
   public void dispatchGlobal(final Message message) throws InterruptedException {
     if (message.hasPart(MessageParts.PriorityProcessing)) {
@@ -87,7 +86,7 @@ public class AsyncDispatcher implements RequestDispatcher {
   }
 
   /**
-   * @param message - a message to dispatch
+   * @param message a message to dispatch
    */
   public void dispatch(Message message) throws InterruptedException {
     workerFactory.deliver(message);

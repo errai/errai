@@ -39,7 +39,6 @@ public class ClientWebSocketChannel {
     } else {
       return "NotSupportedByBrowser";
     }
-
   }-*/;
 
   public static native boolean transmitToSocket(final Object socket, final String text) /*-{

@@ -16,6 +16,7 @@
 
 package org.jboss.errai.codegen.meta;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
@@ -49,7 +50,21 @@ public abstract class MetaMethod implements MetaClassMember, MetaGenericDeclarat
   public boolean equals(Object o) {
     return o instanceof MetaMethod && ((MetaMethod)o).hashString().equals(hashString());
   }
-  
+
+  @Override
+  public final <A extends Annotation> A getAnnotation(Class<A> annotation) {
+    for (Annotation a : getAnnotations()) {
+      if (a.annotationType().equals(annotation))
+        return (A) a;
+    }
+    return null;
+  }
+
+  @Override
+  public final boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
+    return getAnnotation(annotation) != null;
+  }
+
   public Method asMethod() {
     throw new UnsupportedOperationException();
   }

@@ -73,11 +73,9 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
   private Logger log = LoggerFactory.getLogger(MarshallerGeneratorFactory.class);
 
-
   DefinitionsFactoryImpl() {
     loadCustomMappings();
   }
-
 
   @Override
   public boolean hasDefinition(String clazz) {
@@ -100,10 +98,9 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
   }
 
   @Override
-  public void addDefinition(MappingDefinition definition) {
-    
+  public void addDefinition(final MappingDefinition definition) {
     MAPPING_DEFINITIONS.put(definition.getMappingClass().getFullyQualifiedName(), definition);
-    
+
     if (definition.getMappingClass().isArray() && definition.getMappingClass().getOuterComponentType().isPrimitive()) {
       MAPPING_DEFINITIONS.put(definition.getMappingClass().getInternalName(), definition);
     }
@@ -118,7 +115,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
   }
 
   @Override
-  public MappingDefinition getDefinition(MetaClass clazz) {
+  public MappingDefinition getDefinition(final MetaClass clazz) {
     MappingDefinition def = getDefinition(clazz.getFullyQualifiedName());
     if (def == null) {
       def = getDefinition(clazz.getInternalName());
@@ -127,12 +124,12 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
   }
 
   @Override
-  public MappingDefinition getDefinition(Class<?> clazz) {
+  public MappingDefinition getDefinition(final Class<?> clazz) {
     return getDefinition(clazz.getName());
   }
 
   private void loadCustomMappings() {
-    MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
+    final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
 
     for (Class<?> cls : scanner.getTypesAnnotatedWith(CustomMapping.class)) {
       if (!MappingDefinition.class.isAssignableFrom(cls)) {
@@ -140,7 +137,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       }
 
       try {
-        MappingDefinition definition = (MappingDefinition) cls.newInstance();
+        final MappingDefinition definition = (MappingDefinition) cls.newInstance();
         definition.setMarshallerInstance(new DefaultDefinitionMarshaller(definition));
         addDefinition(definition);
         exposedClasses.add(definition.getMappingClass().asClass());
@@ -149,9 +146,8 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
           log.debug("loaded custom mapping class: " + cls.getName() + " (for mapping: "
                   + definition.getMappingClass().getFullyQualifiedName() + ")");
 
-
         if (cls.isAnnotationPresent(InheritedMappings.class)) {
-          InheritedMappings inheritedMappings = cls.getAnnotation(InheritedMappings.class);
+          final InheritedMappings inheritedMappings = cls.getAnnotation(InheritedMappings.class);
 
           for (Class<?> c : inheritedMappings.value()) {
             MappingDefinition aliasMappingDef = new MappingDefinition(c, definition.alreadyGenerated());
@@ -162,10 +158,8 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
             if (log.isDebugEnabled())
               log.debug("mapping inherited mapping " + c.getName() + " -> " + cls.getName());
-
           }
         }
-
       }
       catch (Throwable t) {
         throw new RuntimeException("Failed to load definition", t);
@@ -176,7 +170,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       mergeDefinition(def);
     }
 
-    Set<Class<?>> marshallers = scanner.getTypesAnnotatedWith(ClientMarshaller.class);
+    final Set<Class<?>> marshallers = scanner.getTypesAnnotatedWith(ClientMarshaller.class);
 
     for (Class<?> marshallerCls : marshallers) {
       if (Marshaller.class.isAssignableFrom(marshallerCls)) {
@@ -244,7 +238,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     }
 
     // key = all types, value = list of all types which inherit from.
-    Map<String, List<String>> inheritanceMap = new HashMap<String, List<String>>();
+    final Map<String, List<String>> inheritanceMap = new HashMap<String, List<String>>();
 
     for (Map.Entry<String, MappingDefinition> entry : MAPPING_DEFINITIONS.entrySet()) {
       checkInheritance(inheritanceMap, entry.getValue().getMappingClass());
@@ -272,13 +266,13 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     log.debug("comprehended " + exposedClasses.size() + " classes");
   }
 
-  private static boolean isTypeFinal(Map<String, List<String>> inheritanceMap, MetaClass type) {
-    List<String> subTypes = inheritanceMap.get(type.getFullyQualifiedName());
+  private static boolean isTypeFinal(final Map<String, List<String>> inheritanceMap, final MetaClass type) {
+    final List<String> subTypes = inheritanceMap.get(type.getFullyQualifiedName());
     return subTypes == null || subTypes.isEmpty();
   }
 
 
-  private static void checkInheritance(Map<String, List<String>> inheritanceMap, MetaClass root) {
+  private static void checkInheritance(final Map<String, List<String>> inheritanceMap, final MetaClass root) {
     MetaClass cls = root;
     String fqcn;
 
@@ -311,9 +305,8 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
     while ((cls = cls.getSuperClass()) != null) {
       if (hasDefinition(cls)) {
-        MappingDefinition toMerge = getDefinition(cls);
-
-        Set<String> parentKeys = new HashSet<String>();
+        final MappingDefinition toMerge = getDefinition(cls);
+        final Set<String> parentKeys = new HashSet<String>();
 
         for (Mapping m : toMerge.getInstantiationMapping().getMappings())
           parentKeys.add(m.getKey());
@@ -321,7 +314,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
         for (MemberMapping m : toMerge.getMemberMappings())
           parentKeys.add(m.getKey());
 
-        Iterator<MemberMapping> defMappings = def.getMemberMappings().iterator();
+        final Iterator<MemberMapping> defMappings = def.getMemberMappings().iterator();
         while (defMappings.hasNext()) {
           if (parentKeys.contains(defMappings.next().getKey())) defMappings.remove();
         }
@@ -330,7 +323,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
           def.addInheritedMapping(memberMapping);
         }
 
-        InstantiationMapping instantiationMapping = def.getInstantiationMapping();
+        final InstantiationMapping instantiationMapping = def.getInstantiationMapping();
 
         if (instantiationMapping instanceof ConstructorMapping &&
                 def.getInstantiationMapping().getMappings().length == 0 &&

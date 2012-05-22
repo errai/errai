@@ -85,19 +85,6 @@ public class GWTConstructor extends MetaConstructor {
   }
 
   @Override
-  public final <A extends Annotation> A getAnnotation(Class<A> annotation) {
-    for (Annotation a : getAnnotations()) {
-      if (a.annotationType().equals(annotation)) return (A) a;
-    }
-    return null;
-  }
-
-  @Override
-  public final boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
-    return getAnnotation(annotation) != null;
-  }
-
-  @Override
   public MetaType[] getGenericParameterTypes() {
     return null;
   }

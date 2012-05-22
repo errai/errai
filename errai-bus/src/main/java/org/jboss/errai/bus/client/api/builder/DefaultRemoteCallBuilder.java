@@ -82,7 +82,7 @@ public class DefaultRemoteCallBuilder {
 
       @Override
       public void sendNowWith(final MessageBus bus) {
-        Integer id = null;
+        Integer id;
 
         final String replyTo =
             message.getSubject() + "." + message.getCommandType() + ":RespondTo:" + (id = uniqueNumber());
@@ -185,7 +185,7 @@ public class DefaultRemoteCallBuilder {
   }
 
   private static int uniqueNumber() {
-    return ++callCounter > 10000 ? callCounter = 0 : callCounter;
+    return ++callCounter > 100000 ? callCounter = 0 : callCounter;
   }
 
   /**

@@ -28,6 +28,9 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaMethod;
 
+import java.lang.annotation.Annotation;
+import java.util.List;
+
 /**
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -158,9 +161,14 @@ public class ClassBuilderAbstractMethodOption extends ClassBuilder<ClassStructur
                                                                 final DefParameters parameters,
                                                                 final DefModifiers modifiers,
                                                                 final ThrowsDeclaration throwsDeclaration,
+                                                                final List<Annotation> annotations,
                                                                 final String comment) {
         BuildMetaMethod buildMetaMethod = new BuildMetaMethod(classDefinition, statement, scope, modifiers, name,
             returnType, null, defParameters, throwsDeclaration);
+
+        if (annotations != null) {
+          buildMetaMethod.addAnnotations(annotations);
+        }
         buildMetaMethod.setMethodComment(comment);
 
         classDefinition.addMethod(buildMetaMethod);

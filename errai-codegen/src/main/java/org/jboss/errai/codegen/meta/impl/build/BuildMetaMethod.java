@@ -18,6 +18,7 @@ package org.jboss.errai.codegen.meta.impl.build;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.jboss.errai.codegen.Comment;
@@ -32,6 +33,7 @@ import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.Builder;
 import org.jboss.errai.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.codegen.builder.impl.Scope;
+import org.jboss.errai.codegen.literal.AnnotationLiteral;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaMethod;
@@ -59,6 +61,8 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
   private ThrowsDeclaration throwsDeclaration;
 
   private MetaMethod reifiedFormOf;
+
+  private List<Annotation> annotations = new ArrayList<Annotation>();
 
   private String methodComment;
 
@@ -208,19 +212,22 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
     return modifiers.hasModifier(Modifier.Synchronized);
   }
 
+  public void addAnnotations(Annotation... annotations) {
+    for (Annotation a : annotations) {
+      this.annotations.add(a);
+    }
+  }
+
+  public void addAnnotations(Collection<Annotation> annotations) {
+    for (Annotation a : annotations) {
+      this.annotations.add(a);
+    }
+  }
+
+
   @Override
   public Annotation[] getAnnotations() {
-    return new Annotation[0];
-  }
-
-  @Override
-  public boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
-    return false;
-  }
-
-  @Override
-  public <A extends Annotation> A getAnnotation(Class<A> annotation) {
-    return null;
+    return annotations.toArray(new Annotation[annotations.size()]);
   }
 
   @Override
@@ -299,6 +306,13 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
     }
     StringBuilder buf = new StringBuilder(256);
 
+    if (!annotations.isEmpty()) {
+      for (Annotation a : annotations) {
+        buf.append(new AnnotationLiteral(a).getCanonicalString(context)).append(" ");
+      }
+      buf.append("\n");
+    }
+
     if (methodComment != null) {
       buf.append(new Comment(methodComment).generate(null)).append("\n");
     }
@@ -316,7 +330,7 @@ public class BuildMetaMethod extends MetaMethod implements Builder {
               .append(throwsDeclaration.generate(context));
     }
 
-    if (modifiers.hasModifier(Modifier.Abstract)) {
+    if (modifiers.hasModifier(Modifier.Abstract) || getDeclaringClass().isInterface()) {
       buf.append(";");
     }
     else if (modifiers.hasModifier(Modifier.JSNI)) {

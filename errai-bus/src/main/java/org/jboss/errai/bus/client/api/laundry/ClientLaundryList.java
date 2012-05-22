@@ -16,6 +16,7 @@
 
 package org.jboss.errai.bus.client.api.laundry;
 
+import java.lang.annotation.Retention;
 import java.util.Iterator;
 import java.util.LinkedList;
 
