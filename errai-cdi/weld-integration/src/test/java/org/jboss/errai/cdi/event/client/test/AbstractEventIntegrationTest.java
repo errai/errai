@@ -86,7 +86,7 @@ public abstract class AbstractEventIntegrationTest extends AbstractErraiCDITest 
    */
   protected void verifySuperTypeEvents(List<String> actualEvents) {
     // These asserts could be combined but provide nicer failure messages this way
-    assertEquals("Wrong number of super type events observed", actualEvents.size(), 4); 
+    assertEquals("Wrong number of super type events observed", 4, actualEvents.size());
     
     assertTrue("Failed to observe event using its super type", actualEvents.contains(MyAbstractEvent.class.getName()));
     assertTrue("Failed to observe event using its super type's interface type", 

@@ -29,7 +29,6 @@ import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
-import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
@@ -237,11 +236,11 @@ public class IOCBootstrapGenerator {
     final InjectionContext injectionContext = injectionContextBuilder.build();
 
 
-    // generator constructor source code
-    final IOCProcessorFactory procFactory = new IOCProcessorFactory(injectionContext);
-    initializeProviders(procContext, injectionContext, procFactory, beforeTasks, afterTasks);
     defaultConfigureProcessor(context, injectionContext);
 
+    // generator constructor source code
+    final IOCProcessorFactory procFactory = new IOCProcessorFactory(injectionContext);
+    processExtensions(context, procContext, injectionContext, procFactory, beforeTasks, afterTasks);
     generateExtensions(procContext, procFactory, injectionContext, sourceWriter, classStructureBuilder, blockBuilder);
 
     // close generated class
@@ -305,11 +304,12 @@ public class IOCBootstrapGenerator {
     }
   }
 
-  public static void initializeProviders(IOCProcessingContext procContext,
-                                         InjectionContext injectionContext,
-                                         IOCProcessorFactory procFactory,
-                                         List<Class<?>> beforeTasks,
-                                         List<Class<?>> afterTasks) {
+  public static void processExtensions(GeneratorContext context,
+                                       IOCProcessingContext procContext,
+                                       InjectionContext injectionContext,
+                                       IOCProcessorFactory procFactory,
+                                       List<Class<?>> beforeTasks,
+                                       List<Class<?>> afterTasks) {
 
     final MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
 
@@ -333,6 +333,8 @@ public class IOCBootstrapGenerator {
         throw new ErraiBootstrapFailure("unable to load IOC Extension Configurator: " + e.getMessage(), e);
       }
     }
+
+    computeDependentScope(context, injectionContext);
 
     final Set<Class<?>> bootstrappers = scanner.getTypesAnnotatedWith(IOCBootstrapTask.class);
     for (Class<?> clazz : bootstrappers) {
@@ -384,7 +386,6 @@ public class IOCBootstrapGenerator {
   }
 
   /**
-   *
    * @param context
    * @param injectionContext
    */
@@ -401,7 +402,9 @@ public class IOCBootstrapGenerator {
 
     injectionContext.mapElementType(WiringElementType.AlternativeBean, Alternative.class);
     injectionContext.mapElementType(WiringElementType.TestMockBean, TestMock.class);
+  }
 
+  private static void computeDependentScope(final GeneratorContext context, final InjectionContext injectionContext) {
     if (context != null) {
       for (JPackage pkg : context.getTypeOracle().getPackages()) {
         TypeScan:
