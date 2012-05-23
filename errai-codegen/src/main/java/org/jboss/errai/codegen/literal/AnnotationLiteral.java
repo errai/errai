@@ -17,6 +17,7 @@
 package org.jboss.errai.codegen.literal;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -60,14 +61,24 @@ public class AnnotationLiteral extends LiteralValue<Annotation> {
     List<String> elements = new ArrayList<String>();
 
     String lastMethodRendered = "";
-    
+    String lastValueRendered = "";
+
     for (Method method : sortedMethods) {
       if (((method.getModifiers() & (Modifier.PRIVATE | Modifier.PROTECTED)) == 0)
               && (!"equals".equals(method.getName()) && !"hashCode".equals(method.getName()))) {
         try {
           method.setAccessible(true);
-          elements.add(method.getName() + " = " + LiteralFactory.getLiteral(method.invoke(getValue())).getCanonicalString(context));
           lastMethodRendered = method.getName();
+          Object methodValue = method.invoke(getValue());
+
+          if (method.getReturnType().isArray() && Array.getLength(methodValue) == 1) {
+            lastValueRendered = LiteralFactory.getLiteral(Array.get(methodValue, 0)).getCanonicalString(context);
+          }
+          else {
+            lastValueRendered = LiteralFactory.getLiteral(method.invoke(getValue())).getCanonicalString(context);
+          }
+
+          elements.add(lastMethodRendered + " = " + lastValueRendered);
         }
         catch (IllegalAccessException e) {
           throw new RuntimeException("error generation annotation wrapper", e);
@@ -77,7 +88,7 @@ public class AnnotationLiteral extends LiteralValue<Annotation> {
         }
       }
     }
-    
+
     Iterator<String> els = elements.iterator();
     if (els.hasNext()) {
       builder.append("(");

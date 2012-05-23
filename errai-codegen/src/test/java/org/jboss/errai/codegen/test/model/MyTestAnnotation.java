@@ -31,4 +31,4 @@ public @interface MyTestAnnotation {
   public String foo() default "foobar";
 
   public TEnum testEum();
-}
+  }
