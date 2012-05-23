@@ -165,9 +165,6 @@ public class InjectionTask {
         for (MetaParameter parm : method.getParameters()) {
           ctx.getProcessingContext().handleDiscoveryOfType(
                   new InjectableInstance(null, TaskType.Parameter, null, method, null, parm.getType(), parm, injector, ctx));
-          if (!ctx.isInjectableQualified(parm.getType(), qualifyingMetadata)) {
-            return false;
-          }
         }
 
         Statement[] stmts = InjectUtil.resolveInjectionDependencies(method.getParameters(), ctx, method);
@@ -192,9 +189,6 @@ public class InjectionTask {
           ctx.getProcessingContext().handleDiscoveryOfType(
                   new InjectableInstance(null, TaskType.Parameter, null, method, null, parm.getType(), parm, injector, ctx));
 
-          if (!ctx.isInjectableQualified(parm.getType(), qualifyingMetadata)) {
-            return false;
-          }
         }
 
         processingContext.append(
