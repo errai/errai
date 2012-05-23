@@ -33,7 +33,7 @@ public abstract class AbstractBackReferencingMarshaller<C> implements Marshaller
       return "null";
     }
 
-    final boolean isNew = !ctx.isEncoded(o);
+    final boolean isNew = !ctx.hasObjectHash(o);
     final String objId = ctx.getObjectHash(o);
 
     final StringBuilder buf = new StringBuilder("{\"").append(SerializationParts.ENCODED_TYPE).append("\":\"")

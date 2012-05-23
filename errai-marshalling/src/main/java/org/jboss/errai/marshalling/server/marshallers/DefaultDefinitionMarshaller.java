@@ -202,7 +202,7 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
     }
 
 
-    boolean enc = ctx.isEncoded(o);
+    boolean enc = ctx.hasObjectHash(o);
     String hash = ctx.getObjectHash(o);
 
     if (enc) {

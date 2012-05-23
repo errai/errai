@@ -49,18 +49,13 @@ public abstract class AbstractMarshallingSession implements MarshallingSession {
   }
 
   @Override
-  public boolean isEncoded(Object ref) {
-    return hasObjectHash(ref);
-  }
-
-  @Override
-  public String getObjectHash(Object o) {
-    Integer i = objects.get(o);
+  public String getObjectHash(Object reference) {
+    Integer i = objects.get(reference);
     String s;
     
     if (i == null) {
-      objects.put(o, (i = objects.size() + 1));
-      recordObjectHash(s = i.toString(), o);
+      objects.put(reference, (i = objects.size() + 1));
+      recordObjectHash(s = i.toString(), reference);
     }
     else {
       s = i.toString();

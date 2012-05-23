@@ -55,7 +55,7 @@ public class QualifyingMarshallerWrapper<T> extends AbstractNullableMarshaller<T
 
   @Override
   public String doNotNullMarshall(T o, MarshallingSession ctx) {
-    final boolean isNew = !ctx.isEncoded(o);
+    final boolean isNew = !ctx.hasObjectHash(o);
     final String objId = ctx.getObjectHash(o);
 
     final StringBuilder buf = new StringBuilder("{\"").append(SerializationParts.ENCODED_TYPE).append("\":\"")
