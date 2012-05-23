@@ -6,9 +6,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.persistence.CascadeType;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
+import javax.persistence.metamodel.PluralAttribute;
+import javax.persistence.metamodel.SingularAttribute;
 
 import org.jboss.errai.jpa.client.local.backend.StorageBackend;
 import org.jboss.errai.jpa.client.local.backend.WebStorageBackend;
@@ -140,36 +143,11 @@ public abstract class ErraiEntityManager implements EntityManager {
    * the given state, taking into account its existing state and performing the
    * required side effects during the state transition.
    */
-  private <T> void changeEntityState(T entity, EntityState newState) {
-    ErraiEntityType<T> entityType = getMetamodel().entity(getNarrowedClass(entity));
+  private <X> void changeEntityState(X entity, EntityState newState) {
+    ErraiEntityType<X> entityType = getMetamodel().entity(getNarrowedClass(entity));
 
-    ErraiSingularAttribute<? super T, ?> idAttr;
-    switch (entityType.getIdType().getPersistenceType()) {
-    case BASIC:
-      idAttr = entityType.getId(entityType.getIdType().getJavaType());
-      break;
-    default:
-      throw new RuntimeException(entityType.getIdType().getPersistenceType() + " ids are not yet supported");
-    }
-    Object id = idAttr.get(entity);
-    if (id == null) {
-      id = generateAndSetLocalId(entity, idAttr);
-      // TODO track this generated ID for later reconciliation with the server
-    }
-
-    Key<T, ?> key = new Key<T, Object>(entityType, id);
-
-    final EntityState oldState;
-    if (persistenceContext.get(key) != null) {
-      oldState = EntityState.MANAGED;
-    }
-    else if (backend.get(key) != null) {
-      oldState = EntityState.DETACHED;
-    }
-    else {
-      oldState = EntityState.NEW;
-    }
-    // TODO handle REMOVED state
+    final Key<X, ?> key = keyFor(entityType, entity);
+    final EntityState oldState = getState(key);
 
     switch (newState) {
     case MANAGED:
@@ -218,6 +196,108 @@ public abstract class ErraiEntityManager implements EntityManager {
       break;
     case NEW:
       throw new IllegalArgumentException("Entities can't transition from " + oldState + " to " + newState);
+    }
+
+    // now cascade the operation
+    for (SingularAttribute<? super X, ?> a : entityType.getSingularAttributes()) {
+      ErraiSingularAttribute<? super X, ?> attrib = (ErraiSingularAttribute<? super X, ?>) a;
+      cascadeStateChange(attrib, entity, newState);
+    }
+    for (PluralAttribute<? super X, ?, ?> a : entityType.getPluralAttributes()) {
+      ErraiPluralAttribute<? super X, ?, ?> attrib = (ErraiPluralAttribute<? super X, ?, ?>) a;
+      cascadeStateChange(attrib, entity, newState);
+    }
+
+  }
+
+  /**
+   * Creates the key that describes the given entity, <b>generating and setting
+   * it if it is presently unset and the given entity type's ID is configured to
+   * be generated on demand</b>.
+   *
+   * @param entityType
+   *          The entity type of the entity
+   * @param entity
+   *          The entity instance. <b>Side effect: this instance may have its ID
+   *          value initialized as a result of this call</b>.
+   * @return The key for the given entity, which--for generated values--may have
+   *         just been set on the entity.
+   */
+  private <X> Key<X, ?> keyFor(ErraiEntityType<X> entityType, X entity) {
+    ErraiSingularAttribute<? super X, ?> idAttr;
+    switch (entityType.getIdType().getPersistenceType()) {
+    case BASIC:
+      idAttr = entityType.getId(entityType.getIdType().getJavaType());
+      break;
+    default:
+      throw new RuntimeException(entityType.getIdType().getPersistenceType() + " ids are not yet supported");
+    }
+    Object id = idAttr.get(entity);
+    if (id == null) {
+      id = generateAndSetLocalId(entity, idAttr);
+      // TODO track this generated ID for later reconciliation with the server
+    }
+    return new Key<X, Object>(entityType, id);
+  }
+
+  /**
+   * Determines the current state of the entity identified by the given key.
+   *
+   * @param key
+   *          The entity key
+   * @return The current state of the given entity according to this entity
+   *         manager.
+   */
+  private <T> EntityState getState(Key<T, ?> key) {
+    final EntityState oldState;
+    if (persistenceContext.get(key) != null) {
+      oldState = EntityState.MANAGED;
+    }
+    else if (backend.get(key) != null) {
+      oldState = EntityState.DETACHED;
+    }
+    else {
+      oldState = EntityState.NEW;
+    }
+    // TODO handle REMOVED state
+    return oldState;
+  }
+
+  /**
+   * Subroutine of {@link #changeEntityState(Object, EntityState)}. Cascades the
+   * given change of state onto all of the related entities whose cascade rules
+   * are appropriate to the new state. It is assumed that the given entity is
+   * already in the given state.
+   *
+   * @param <X> the type of the owning entity we are cascading from
+   * @param <R> the type of the related entity we are cascading to
+   */
+  private <X, R> void cascadeStateChange(ErraiAttribute<X, R> cascadeAcross, X owningEntity, EntityState newState) {
+    if (!cascadeAcross.isAssociation()) return;
+
+    CascadeType cascadeType;
+    switch (newState) {
+    case DETACHED: cascadeType = CascadeType.DETACH; break;
+    case MANAGED: cascadeType = CascadeType.MERGE; break;
+    case REMOVED: cascadeType = CascadeType.REMOVE; break;
+    case NEW: throw new IllegalArgumentException();
+    default: throw new AssertionError("Unknown entity state " + newState);
+    }
+    R relatedEntity = cascadeAcross.get(owningEntity);
+    System.out.println("*** Cascade across " + cascadeAcross + " to " + relatedEntity + "?");
+    if (cascadeAcross.cascades(cascadeType)) {
+      System.out.println("    Yes");
+      if (cascadeAcross.isCollection()) {
+        for (Object element : (Iterable<?>) relatedEntity) {
+          changeEntityState(element, newState);
+        }
+      }
+      else {
+        changeEntityState(relatedEntity, newState);
+      }
+    }
+    else {
+      System.out.println("    No");
     }
   }
 

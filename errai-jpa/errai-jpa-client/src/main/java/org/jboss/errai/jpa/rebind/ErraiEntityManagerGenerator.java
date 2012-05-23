@@ -2,6 +2,7 @@ package org.jboss.errai.jpa.rebind;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
@@ -14,9 +15,14 @@ import java.util.List;
 import java.util.Map;
 
 import javax.enterprise.util.TypeLiteral;
+import javax.persistence.CascadeType;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.GeneratedValue;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Persistence;
 import javax.persistence.PostLoad;
 import javax.persistence.PostPersist;
@@ -25,12 +31,15 @@ import javax.persistence.PostUpdate;
 import javax.persistence.PrePersist;
 import javax.persistence.PreRemove;
 import javax.persistence.PreUpdate;
+import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
 import javax.persistence.metamodel.ManagedType;
 import javax.persistence.metamodel.Metamodel;
+import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.Type;
 
+import org.jboss.errai.codegen.BooleanExpression;
 import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.SnapshotMaker;
@@ -42,11 +51,13 @@ import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.MethodBlockBuilder;
+import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
+import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.Implementations;
 import org.jboss.errai.codegen.util.PrivateAccessType;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
@@ -54,6 +65,7 @@ import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.client.local.ErraiEntityType;
+import org.jboss.errai.jpa.client.local.ErraiPluralAttribute;
 import org.jboss.errai.jpa.client.local.ErraiSingularAttribute;
 import org.jboss.errai.jpa.client.local.LongIdGenerator;
 
@@ -121,16 +133,16 @@ public class ErraiEntityManagerGenerator extends Generator {
         public Statement generateMethodBody(MetaMethod method, Object o,
                 ClassStructureBuilder<?> containingClassBuilder) {
           // provide reference to declaring type (et) from its attributes
-          if (o instanceof SingularAttribute
+          if (o instanceof Attribute
                   && method.getName().equals("getDeclaringType")
-                  && ((SingularAttribute<?, ?>) o).getDeclaringType() == et) {
+                  && ((Attribute<?, ?>) o).getDeclaringType() == et) {
             return Stmt.loadVariable(entitySnapshotVarName(et.getJavaType())).returnValue();
           }
 
           // provide get method
-          if (o instanceof SingularAttribute
+          if (o instanceof Attribute
                   && method.getName().equals("get")) {
-            SingularAttribute<?, ?> attr = (SingularAttribute<?, ?>) o;
+            Attribute<?, ?> attr = (Attribute<?, ?>) o;
 
             String entityInstanceParam = method.getParameters()[0].getName();
 
@@ -157,9 +169,9 @@ public class ErraiEntityManagerGenerator extends Generator {
           }
 
           // provide set method
-          if (o instanceof SingularAttribute
+          if (o instanceof Attribute
                   && method.getName().equals("set")) {
-            SingularAttribute<?, ?> attr = (SingularAttribute<?, ?>) o;
+            Attribute<?, ?> attr = (Attribute<?, ?>) o;
 
             String entityInstanceParam = method.getParameters()[0].getName();
             String newValueParam = method.getParameters()[1].getName();
@@ -218,6 +230,55 @@ public class ErraiEntityManagerGenerator extends Generator {
             }
           }
 
+          // generate isAssociation because the Hibernate implementation is broken
+          if (o instanceof SingularAttribute
+                  && method.getName().equals("isAssociation")) {
+            SingularAttribute<?, ?> attr = (SingularAttribute<?, ?>) o;
+
+            return Stmt.loadLiteral(isAssociation(attr)).returnValue();
+          }
+
+          // provide generated value iterator
+          if (o instanceof Attribute
+                  && method.getName().equals("cascades")) {
+            Attribute<?, ?> attr = (Attribute<?, ?>) o;
+
+            // grab cascade annotations from live object then generate a statement like
+            // return (cascadeType == [type] || cascadeType == [type] || ...)
+            CascadeType[] cascadeTypes = extractCascadeTypes(attr.getJavaMember());
+            if (cascadeTypes == null) {
+              return Stmt.throw_(UnsupportedOperationException.class, "Not a relationship attribute");
+            }
+            if (cascadeTypes.length == 0) {
+              return Stmt.loadLiteral(false).returnValue();
+            }
+
+            BooleanExpression megaExpr = null;
+            for (CascadeType type : cascadeTypes) {
+              if (type == CascadeType.ALL) {
+                // if the list includes ALL, abandon megaExpr and just return true
+                return Stmt.loadLiteral(true).returnValue();
+              }
+              BooleanExpression comparison = Bool.equals(Stmt.loadVariable(method.getParameters()[0].getName()), Stmt.loadLiteral(type));
+              if (megaExpr == null) {
+                megaExpr = comparison;
+              } else {
+                megaExpr = Bool.or(comparison, megaExpr);
+              }
+            }
+            return Stmt.load(megaExpr).returnValue();
+          }
+
+          // provide generated value iterator
+          if (o instanceof Attribute
+                  && method.getName().equals("toString")) {
+            Attribute<?, ?> attr = (Attribute<?, ?>) o;
+            return Stmt.loadLiteral(
+                    attr.getPersistentAttributeType() + " attribute " +
+                    attr.getDeclaringType().getJavaType().getSimpleName() +
+                    "." + attr.getName()).returnValue();
+          }
+
           // allow SnapshotMaker default (read value and create snapshot)
           return null;
         }
@@ -228,6 +289,12 @@ public class ErraiEntityManagerGenerator extends Generator {
       for (SingularAttribute<?, ?> attrib : et.getSingularAttributes()) {
         Statement attribSnapshot = SnapshotMaker.makeSnapshotAsSubclass(
             attrib, SingularAttribute.class, ErraiSingularAttribute.class, methodBodyCallback,
+            EntityType.class, ManagedType.class, Type.class);
+        pmm.append(Stmt.loadVariable(entityTypeVarName).invoke("addAttribute", attribSnapshot));
+      }
+      for (PluralAttribute<?, ?, ?> attrib : et.getPluralAttributes()) {
+        Statement attribSnapshot = SnapshotMaker.makeSnapshotAsSubclass(
+            attrib, PluralAttribute.class, ErraiPluralAttribute.class, methodBodyCallback,
             EntityType.class, ManagedType.class, Type.class);
         pmm.append(Stmt.loadVariable(entityTypeVarName).invoke("addAttribute", attribSnapshot));
       }
@@ -325,16 +392,73 @@ public class ErraiEntityManagerGenerator extends Generator {
             + " but JPA attributes can only be a Field or a Method.");
   }
 
+  /**
+   * Determines if the given attribute is an association. This is necessary
+   * because the Hibernate implementation of SingularAttribute.isAssociation
+   * always returns false.
+   *
+   * @param attr
+   *          The attribute to test for association-ness.
+   * @return True iff the attribute's Java Member is annotated with
+   *         {@code ManyToMany}, {@code ManyToOne}, {@code OneToMany}, or
+   *         {@code OneToOne}.
+   */
+  private boolean isAssociation(SingularAttribute<?, ?> attr) {
+    AccessibleObject member = (AccessibleObject) attr.getJavaMember();
+    return (member.getAnnotation(ManyToMany.class) != null
+            || member.getAnnotation(ManyToOne.class) != null
+            || member.getAnnotation(OneToMany.class) != null
+            || member.getAnnotation(OneToOne.class) != null);
+  }
+
   // TODO check what the other code generators do for class->method names
   static String entitySnapshotVarName(Class<?> forType) {
     return "et_" + forType.getCanonicalName().replace('.', '_');
   }
 
   /**
+   * Extracts the list of cascade types from the given Java Member, which is
+   * expected to be a Field or a Method.
+   *
+   * @param javaMember
+   *          The Java Member of the attribute.
+   * @return The array of CascadeType that specifies all types that should be
+   *         cascaded, or null if the Member does not have any of the
+   *         relationship annotations (ManyToMany, ManyToOne, OneToMany,
+   *         OneToOne).
+   */
+  private static CascadeType[] extractCascadeTypes(Member javaMember) {
+    if (!(javaMember instanceof AccessibleObject)) {
+      Class<? extends Member> memberType = javaMember == null ? null : javaMember.getClass();
+      throw new GenerationException(
+              "Found a SingularAttribute whose Java Member is not a field or a method (it is a " + memberType + ")");
+    }
+    AccessibleObject member = (AccessibleObject) javaMember;
+
+    if (member.getAnnotation(ManyToMany.class) != null) {
+      ManyToMany anno = member.getAnnotation(ManyToMany.class);
+      return anno.cascade();
+    }
+    if (member.getAnnotation(ManyToOne.class) != null) {
+      ManyToOne anno = member.getAnnotation(ManyToOne.class);
+      return anno.cascade();
+    }
+    if (member.getAnnotation(OneToMany.class) != null) {
+      OneToMany anno = member.getAnnotation(OneToMany.class);
+      return anno.cascade();
+    }
+    if (member.getAnnotation(OneToOne.class) != null) {
+      OneToOne anno = member.getAnnotation(OneToOne.class);
+      return anno.cascade();
+    }
+
+    // the member must not be a relationship (or at least not the owning side of one)
+    return null;
+  }
+
+  /**
    * Represents the parameterized Java reflection type for
    * {@code ErraiEntityType<X>}, where {@code X} can be provided at runtime.
-   *
-   * @author Jonathan Fuerth <jfuerth@gmail.com>
    */
   static final class ParameterizedEntityType implements ParameterizedType {
 

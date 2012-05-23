@@ -315,6 +315,46 @@ public class ErraiJpaTest extends GWTTestCase {
     }
   }
 
+  public void testPersistRelatedCollection() {
+    // make them
+    Artist artist = new Artist();
+    artist.setId(9L); // Artist uses user-assigned/non-generated IDs
+    artist.setName("The Beatles");
+
+    Album album = new Album();
+    album.setName("Abbey Road");
+    album.setReleaseDate(new Date(-8366400000L));
+
+    album.setArtist(artist);
+    artist.addAlbum(album);
+
+    // store it
+    EntityManager em = getEntityManager();
+    em.persist(artist); // should cascade onto album, which is in the collection relation
+    em.flush();
+
+    assertNotNull(album.getId());
+
+    // ensure both are in the persistence context
+    assertSame(artist, em.find(Artist.class, artist.getId()));
+    assertSame(album, em.find(Album.class, album.getId()));
+
+    em.clear();
+
+    // ensure both are retrieved (TBD: should Errai always/ever fetch related entities?)
+    Artist fetchedArtist = em.find(Artist.class, artist.getId());
+    assertNotNull(fetchedArtist);
+
+    assertEquals(1, fetchedArtist.getAlbums().size());
+    Album fetchedAlbum = fetchedArtist.getAlbums().iterator().next();
+
+    assertNotSame(album, fetchedAlbum);
+    assertNotSame(artist, fetchedArtist);
+
+    assertEquals(artist.toString(), fetchedArtist.toString());
+    assertEquals(album.toString(), fetchedAlbum.toString());
+  }
+
   public void testPersistNewEntityLifecycle() throws Exception {
 
     List<Class<?>> expectedLifecycle = new ArrayList<Class<?>>();

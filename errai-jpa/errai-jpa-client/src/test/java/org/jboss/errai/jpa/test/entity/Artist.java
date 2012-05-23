@@ -3,6 +3,7 @@ package org.jboss.errai.jpa.test.entity;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
@@ -18,7 +19,7 @@ public class Artist {
 
   private String name;
 
-  @OneToMany(mappedBy="artist")
+  @OneToMany(mappedBy="artist", cascade=CascadeType.ALL)
   private Set<Album> albums = new HashSet<Album>();
 
   public Long getId() {
@@ -43,6 +44,10 @@ public class Artist {
 
   public void setAlbums(Set<Album> albums) {
     this.albums = albums;
+  }
+
+  public void addAlbum(Album album) {
+    albums.add(album);
   }
 
   @Override

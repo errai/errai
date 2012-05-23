@@ -3,7 +3,13 @@ package org.jboss.errai.jpa.client.local;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.PostLoad;
+import javax.persistence.PostPersist;
+import javax.persistence.PostRemove;
+import javax.persistence.PostUpdate;
 import javax.persistence.PrePersist;
+import javax.persistence.PreRemove;
+import javax.persistence.PreUpdate;
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.CollectionAttribute;
 import javax.persistence.metamodel.EntityType;
@@ -18,6 +24,7 @@ import javax.persistence.metamodel.Type;
 public abstract class ErraiEntityType<X> implements EntityType<X> {
 
   private final Set<SingularAttribute<? super X, ?>> singularAttributes = new HashSet<SingularAttribute<? super X,?>>();
+  private final Set<PluralAttribute<? super X, ?, ?>> pluralAttributes = new HashSet<PluralAttribute<? super X, ?, ?>>();
 
   private SingularAttribute<? super X, ?> id;
   private SingularAttribute<? super X, ?> version;
@@ -30,10 +37,21 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
     this.javaType = javaType;
   }
 
-  public <Y> void addAttribute(SingularAttribute<X, Y> attribute) {
-    singularAttributes.add(attribute);
-    if (attribute.isId()) id = attribute;
-    if (attribute.isVersion()) version = attribute;
+  public <Y> void addAttribute(Attribute<X, Y> attribute) {
+    if (attribute instanceof SingularAttribute) {
+      SingularAttribute<? super X, ?> sa = (SingularAttribute<? super X, ?>) attribute;
+      singularAttributes.add(sa);
+      if (sa.isId()) id = sa;
+      if (sa.isVersion()) version = sa;
+    }
+    else if (attribute instanceof PluralAttribute) {
+      @SuppressWarnings("unchecked")
+      PluralAttribute<? super X, ?, ?> pa = (PluralAttribute<? super X, ?, ?>) attribute;
+      pluralAttributes.add(pa);
+    }
+    else {
+      assert (false) : "Unknown attribute type " + attribute;
+    }
   }
 
   /**
@@ -245,8 +263,7 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
 
   @Override
   public Set<PluralAttribute<? super X, ?, ?>> getPluralAttributes() {
-    // TODO Auto-generated method stub
-    throw new RuntimeException("Not implemented");
+    return pluralAttributes;
   }
 
   @Override
