@@ -65,6 +65,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
+import static org.jboss.errai.codegen.util.PrivateAccessUtil.getPrivateFieldInjectorName;
 
 public class InjectUtil {
   private static final AtomicInteger injectorCounter = new AtomicInteger(0);
@@ -647,36 +648,147 @@ public class InjectUtil {
   }
 
   /**
-   * Retrieves the value of a private field.
+   * Retrieves the value of a private field managed IOC component.
    *
    * @param processingContext an instance of the {@link IOCProcessingContext}
-   * @param obj a {@link Statement} reference to the bean instance whose field is to be accessed
-   * @param field the {@link MetaField} which will be privately accessed
+   * @param obj               a {@link Statement} reference to the bean instance whose field is to be accessed.
+   *                          <tt>null</tt> can be provided for static field access.
+   * @param field             the {@link MetaField} which will be privately accessed
    * @return a {@link Statement} reference to the value of the field.
    */
   public static Statement getPrivateFieldValue(final IOCProcessingContext processingContext,
                                                final Statement obj,
                                                final MetaField field) {
-    return Stmt.invokeStatic(processingContext.getBootstrapClass(),
-            PrivateAccessUtil.getPrivateFieldInjectorName(field), obj);
+
+    if (field.isStatic()) {
+      return Stmt.invokeStatic(processingContext.getBootstrapClass(),
+              PrivateAccessUtil.getPrivateFieldInjectorName(field));
+    }
+    else {
+      return Stmt.invokeStatic(processingContext.getBootstrapClass(),
+              PrivateAccessUtil.getPrivateFieldInjectorName(field), obj);
+    }
   }
 
   /**
-   * Set the value of a private field.
+   * Set the value of a private field on a managed IOC component.
    *
    * @param processingContext an instance of the {@link IOCProcessingContext}
-   * @param obj a {@link Statement} reference to the bean instance whose field is to be accessed
-   * @param field the {@link MetaField} which will be privately accessed
-   * @param val  the {@link Statement} reference to the value to be set.
-   * @return the {@link Statement} which will peform the writing to the field.
+   * @param obj               a {@link Statement} reference to the bean instance whose field is to be accessed.
+   *                          <tt>null</tt> can be provided for static field access.
+   * @param field             the {@link MetaField} which will be privately accessed
+   * @param val               the {@link Statement} reference to the value to be set.
+   * @return the {@link Statement} which will perform the writing to the field.
    */
   public static Statement setPrivateFieldValue(final IOCProcessingContext processingContext,
                                                final Statement obj,
                                                final MetaField field,
                                                final Statement val) {
-    return Stmt.invokeStatic(processingContext.getBootstrapClass(),
-            PrivateAccessUtil.getPrivateFieldInjectorName(field), obj, val);
+
+    if (field.isStatic()) {
+      return Stmt.invokeStatic(processingContext.getBootstrapClass(),
+              PrivateAccessUtil.getPrivateFieldInjectorName(field), obj);
+    }
+    else {
+      return Stmt.invokeStatic(processingContext.getBootstrapClass(),
+              PrivateAccessUtil.getPrivateFieldInjectorName(field), obj, val);
+    }
   }
 
+  /**
+   * Invokes a private method on a managed IOC component.
+   *
+   * @param processingContext an instance of the {@link IOCProcessingContext}
+   * @param obj               a {@link Statement} reference to the bean instance whose field is to be accessed.
+   *                          <tt>null</tt> can be provided for static method calls.
+   * @param method            the {@link MetaMethod} to be invoked
+   * @param arguments         the arguments to be passed to the private method
+   * @return the {@link Statement} which represents the return value of the method.
+   */
+  public static Statement invokePrivateMethod(final IOCProcessingContext processingContext,
+                                              final Statement obj,
+                                              final MetaMethod method,
+                                              final Statement... arguments) {
 
+    Statement[] args;
+    if (method.isStatic()) {
+      args = new Statement[arguments.length];
+      System.arraycopy(arguments, 0, args, 0, arguments.length);
+    }
+    else {
+      args = new Statement[arguments.length + 1];
+      args[0] = obj;
+      System.arraycopy(arguments, 0, args, 1, arguments.length);
+    }
+
+    return Stmt.invokeStatic(processingContext.getBootstrapClass(),
+            PrivateAccessUtil.getPrivateMethodName(method), args);
+  }
+
+  /**
+   * Read from the specified field, and automatically determine whether to make a public or private read based on the
+   * visibility of the specified field.
+   *
+   * @param processingContext an instance of the {@link IOCProcessingContext}
+   * @param obj               a {@link Statement} reference to the bean instance whose field is to be accessed
+   * @param field             the {@link MetaField} which will be privately accessed
+   * @return a {@link Statement} reference to the value of the field.
+   */
+  public static Statement getPublicOrPrivateFieldValue(final IOCProcessingContext processingContext,
+                                                       final Statement obj,
+                                                       final MetaField field) {
+
+    if (!field.isPublic()) {
+      return getPrivateFieldValue(processingContext, obj, field);
+    }
+    else {
+      return Stmt.nestedCall(obj).loadField(field);
+    }
+  }
+
+  /**
+   * Write to the specified field, and automatically determine whether to make a public or private write based on the
+   * visibility of the specified field.
+   *
+   * @param processingContext an instance of the {@link IOCProcessingContext}
+   * @param obj               a {@link Statement} reference to the bean instance whose field is to be accessed
+   * @param field             the {@link MetaField} which will be privately accessed
+   * @param val               the {@link Statement} reference to the value to be set.
+   * @return the {@link Statement} which will perform the writing to the field.
+   */
+  public static Statement setPublicOrPrivateFieldValue(final IOCProcessingContext processingContext,
+                                                       final Statement obj,
+                                                       final MetaField field,
+                                                       final Statement val) {
+
+    if (!field.isPublic()) {
+      return setPrivateFieldValue(processingContext, obj, field, val);
+    }
+    else {
+      return Stmt.nestedCall(obj).loadField(field).assignValue(val);
+    }
+  }
+
+  /**
+   * Invoke the specified method, and automatically determine whether to make the invocation public or private based
+   * on the visibility of the specified method.
+   *
+   * @param processingContext an instance of the {@link IOCProcessingContext}
+   * @param obj               a {@link Statement} reference to the bean instance whose field is to be accessed
+   * @param method            the {@link MetaMethod} to be invoked
+   * @param arguments         the arguments to be passed to the private method
+   * @return the {@link Statement} which represents the return value of the method.
+   */
+  public static Statement invokePublicOrPrivateMethod(final IOCProcessingContext processingContext,
+                                                      final Statement obj,
+                                                      final MetaMethod method,
+                                                      final Statement... arguments) {
+
+    if (!method.isPublic()) {
+      return invokePrivateMethod(processingContext, obj, method, arguments);
+    }
+    else {
+      return Stmt.nestedCall(obj).invoke(method, arguments);
+    }
+  }
 }

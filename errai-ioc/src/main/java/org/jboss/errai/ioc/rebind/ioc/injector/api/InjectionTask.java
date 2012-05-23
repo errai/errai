@@ -112,90 +112,58 @@ public class InjectionTask {
         ctx.getQualifiedInjector(type, qualifyingMetadata);
         break;
 
-      case PrivateField: {
-        try {
-          val = InjectUtil.getInjectorOrProxy(ctx, getInjectableInstance(ctx), field.getType(), qualifyingMetadata);
-        }
-        catch (InjectionFailure e) {
-          throw UnsatisfiedDependenciesException.createWithSingleFieldFailure(field, field.getDeclaringClass(),
-                  field.getType(), e.getMessage());
-        }
-        catch (UnproxyableClassException e) {
-          String err = "your object graph may have cyclical dependencies and the cycle could not be proxied. use of the @Dependent scope and @New qualifier may not " +
-                  "produce properly initalized objects for: " + getInjector().getInjectedType().getFullyQualifiedName() + "\n" +
-                  "\t Offending node: " + toString() + "\n" +
-                  "\t Note          : this issue can be resolved by making "
-                  + e.getUnproxyableClass().getFullyQualifiedName() + " proxyable. Introduce a default no-arg constructor and make sure the class is non-final.";
-
-          throw UnsatisfiedDependenciesException.createWithSingleFieldFailure(field, field.getDeclaringClass(),
-                  field.getType(), err);
-        }
-
-        final Statement fieldAccessStmt;
-
-        if (field.isStatic()) {
-          throw new InjectionFailure("attempt to inject bean into a static field: "
-                  + field.getDeclaringClass().getFullyQualifiedName() + "." + field.getName());
-        }
-        else {
-       //   InjectUtil.setPrivateFieldValue(processingContext, Refs.get(injector.getVarName()), field, val);
-          fieldAccessStmt = InjectUtil.setPrivateFieldValue(processingContext, Refs.get(injector.getVarName()), field, val);
-        }
-
-        processingContext.append(fieldAccessStmt);
-
+      case PrivateField:
         ctx.addExposedField(field, PrivateAccessType.Write);
-        break;
-      }
 
       case Field:
         try {
-          val = InjectUtil.getInjectorOrProxy(ctx, getInjectableInstance(ctx), field.getType(), qualifyingMetadata);
-        }
-        catch (UnproxyableClassException e) {
-          return false;
-        }
-        processingContext.append(
-                Stmt.loadVariable(injector.getVarName()).loadField(field.getName()).assignValue(val)
-        );
+           val = InjectUtil.getInjectorOrProxy(ctx, getInjectableInstance(ctx), field.getType(), qualifyingMetadata);
+         }
+         catch (InjectionFailure e) {
+           throw UnsatisfiedDependenciesException.createWithSingleFieldFailure(field, field.getDeclaringClass(),
+                   field.getType(), e.getMessage());
+         }
+         catch (UnproxyableClassException e) {
+           String err = "your object graph may have cyclical dependencies and the cycle could not be proxied. use of the @Dependent scope and @New qualifier may not " +
+                   "produce properly initalized objects for: " + getInjector().getInjectedType().getFullyQualifiedName() + "\n" +
+                   "\t Offending node: " + toString() + "\n" +
+                   "\t Note          : this issue can be resolved by making "
+                   + e.getUnproxyableClass().getFullyQualifiedName() + " proxyable. Introduce a default no-arg constructor and make sure the class is non-final.";
+
+           throw UnsatisfiedDependenciesException.createWithSingleFieldFailure(field, field.getDeclaringClass(),
+                   field.getType(), err);
+         }
+
+         final Statement fieldAccessStmt;
+
+         if (field.isStatic()) {
+           throw new InjectionFailure("attempt to inject bean into a static field: "
+                   + field.getDeclaringClass().getFullyQualifiedName() + "." + field.getName());
+         }
+         else {
+           fieldAccessStmt = InjectUtil.setPublicOrPrivateFieldValue(processingContext, Refs.get(injector.getVarName()), field, val);
+         }
+
+         processingContext.append(fieldAccessStmt);
 
         break;
 
-      case PrivateMethod: {
-        for (MetaParameter parm : method.getParameters()) {
-          ctx.getProcessingContext().handleDiscoveryOfType(
-                  new InjectableInstance(null, TaskType.Parameter, null, method, null, parm.getType(), parm, injector, ctx));
-        }
-
-        Statement[] stmts = InjectUtil.resolveInjectionDependencies(method.getParameters(), ctx, method);
-        Statement[] parms;
-
-        parms = new Statement[stmts.length + 1];
-        parms[0] = Refs.get(injector.getVarName());
-        System.arraycopy(stmts, 0, parms, 1, stmts.length);
-
-        injectableInstance.getInjectionContext().addExposedMethod(method);
-
-        processingContext.append(
-                Stmt.invokeStatic(processingContext.getBootstrapClass(), getPrivateMethodName(method),
-                        parms)
-        );
-
-        break;
-      }
-
+      case PrivateMethod:
+        ctx.addExposedMethod(method);
       case Method:
         for (MetaParameter parm : method.getParameters()) {
           ctx.getProcessingContext().handleDiscoveryOfType(
                   new InjectableInstance(null, TaskType.Parameter, null, method, null, parm.getType(), parm, injector, ctx));
-
         }
 
-        processingContext.append(
-                Stmt.loadVariable(injector.getVarName()).invoke(method,
-                        InjectUtil.resolveInjectionDependencies(method.getParameters(), ctx, method))
-        );
+        Statement[] args = InjectUtil.resolveInjectionDependencies(method.getParameters(), ctx, method);
 
+        processingContext.append(
+                InjectUtil.invokePublicOrPrivateMethod(processingContext,
+                        Refs.get(injector.getVarName()),
+                        method,
+                        args)
+        );
         break;
     }
 

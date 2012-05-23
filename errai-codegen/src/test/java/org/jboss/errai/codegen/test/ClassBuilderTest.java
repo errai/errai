@@ -44,7 +44,7 @@ public class ClassBuilderTest extends AbstractCodegenTest implements ClassBuilde
 
   @Test
   public void testDefineClassImplementingInterface() {
-    String cls = ClassBuilder.define("org.foo.Bar")
+    final String cls = ClassBuilder.define("org.foo.Bar")
             .publicScope()
             .implementsInterface(Serializable.class)
             .body()
@@ -57,7 +57,7 @@ public class ClassBuilderTest extends AbstractCodegenTest implements ClassBuilde
 
   @Test
   public void testDefineClassImplementingMultipleInterfaces() {
-    String cls = ClassBuilder.define("org.foo.Bar")
+    final String cls = ClassBuilder.define("org.foo.Bar")
             .publicScope()
             .implementsInterface(Serializable.class)
             .implementsInterface(Cloneable.class)
@@ -72,7 +72,7 @@ public class ClassBuilderTest extends AbstractCodegenTest implements ClassBuilde
 
   @Test
   public void testDefineInnerClass() {
-    ClassStructureBuilder<?> innerClass = ClassBuilder.define("Inner")
+    final ClassStructureBuilder<?> innerClass = ClassBuilder.define("Inner")
             .packageScope()
             .implementsInterface(Serializable.class)
             .body()
@@ -82,7 +82,7 @@ public class ClassBuilderTest extends AbstractCodegenTest implements ClassBuilde
             .append(Stmt.loadClassMember("name").assignValue(Variable.get("name")))
             .finish();
 
-    String cls = ClassBuilder.define("foo.bar.Baz")
+    final String cls = ClassBuilder.define("foo.bar.Baz")
             .publicScope()
             .body()
             .publicMethod(void.class, "someMethod")
@@ -97,7 +97,7 @@ public class ClassBuilderTest extends AbstractCodegenTest implements ClassBuilde
 
   @Test
   public void testDefineClassWithAccessorMethods() {
-    String cls = ClassBuilder.define("org.foo.Foo")
+    final String cls = ClassBuilder.define("org.foo.Foo")
             .publicScope()
             .body()
             .privateField("name", String.class)
@@ -116,7 +116,7 @@ public class ClassBuilderTest extends AbstractCodegenTest implements ClassBuilde
 
   @Test
   public void testDefineClassWithAccessorMethodsUsingThisKeyword() {
-    String cls = ClassBuilder
+    final String cls = ClassBuilder
             .define("org.foo.Foo")
             .publicScope()
             .body()
@@ -136,8 +136,7 @@ public class ClassBuilderTest extends AbstractCodegenTest implements ClassBuilde
 
   @Test
   public void testDefineClassWithParent() {
-
-    String cls = ClassBuilder
+    final String cls = ClassBuilder
             .define("org.foo.Foo", String.class)
             .publicScope()
             .body()
@@ -151,7 +150,7 @@ public class ClassBuilderTest extends AbstractCodegenTest implements ClassBuilde
   @Test
   public void testDefineAbstractClass() {
 
-    String cls = ClassBuilder
+    final String cls = ClassBuilder
             .define("org.foo.Foo")
             .publicScope()
             .abstractClass()
@@ -166,7 +165,7 @@ public class ClassBuilderTest extends AbstractCodegenTest implements ClassBuilde
   @Test
   public void testDefineAbstractClassWithAbstractMethods() {
 
-    String cls = ClassBuilder
+    final String cls = ClassBuilder
             .define("org.foo.Foo")
             .publicScope()
             .abstractClass()
@@ -186,7 +185,7 @@ public class ClassBuilderTest extends AbstractCodegenTest implements ClassBuilde
 
   @Test
   public void testDefineClassWithConstructorCallingSuper() {
-    String cls = ClassBuilder.define("org.foo.Foo")
+    final String cls = ClassBuilder.define("org.foo.Foo")
             .publicScope()
             .body()
             .publicConstructor()
@@ -200,7 +199,7 @@ public class ClassBuilderTest extends AbstractCodegenTest implements ClassBuilde
 
   @Test
   public void testDefineClassWithConstructorCallingThis() {
-    String cls = ClassBuilder.define("org.foo.Foo")
+    final String cls = ClassBuilder.define("org.foo.Foo")
             .publicScope()
             .body()
             .privateField("b", boolean.class)
@@ -219,7 +218,7 @@ public class ClassBuilderTest extends AbstractCodegenTest implements ClassBuilde
 
   @Test
   public void testDefineClassWithMethodCallingMethodOnThis() {
-    String cls = ClassBuilder.define("org.foo.Foo")
+    final String cls = ClassBuilder.define("org.foo.Foo")
             .publicScope()
             .body()
             .publicMethod(void.class, "bar")
@@ -257,7 +256,7 @@ public class ClassBuilderTest extends AbstractCodegenTest implements ClassBuilde
 
   @Test
   public void testDefineClassWithMethodCallingMethodOnSuper() {
-    String cls = ClassBuilder.define("org.foo.Foo")
+    final String cls = ClassBuilder.define("org.foo.Foo")
             .publicScope()
             .body()
             .publicMethod(void.class, "bar")
@@ -295,8 +294,7 @@ public class ClassBuilderTest extends AbstractCodegenTest implements ClassBuilde
 
   @Test
   public void testDefineClassWithMethodHavingThrowsDeclaration() {
-
-    String cls = ClassBuilder
+    final String cls = ClassBuilder
             .define("org.foo.Foo")
             .publicScope()
             .body()
@@ -311,8 +309,7 @@ public class ClassBuilderTest extends AbstractCodegenTest implements ClassBuilde
 
   @Test
   public void testDefineClassWithMethodsOfAllScopes() {
-
-    String cls = ClassBuilder
+    final String cls = ClassBuilder
             .define("org.foo.Foo")
             .publicScope()
             .body()
@@ -331,8 +328,7 @@ public class ClassBuilderTest extends AbstractCodegenTest implements ClassBuilde
 
   @Test
   public void testDefineClassWithFieldsOfAllScopes() {
-
-    String cls = ClassBuilder
+    final String cls = ClassBuilder
             .define("org.foo.Foo")
             .publicScope()
             .body()
@@ -351,8 +347,7 @@ public class ClassBuilderTest extends AbstractCodegenTest implements ClassBuilde
 
   @Test
   public void testDefineClassWithConstructorsOfAllScopes() {
-
-    String cls = ClassBuilder
+    final String cls = ClassBuilder
             .define("org.foo.Foo")
             .publicScope()
             .body()
@@ -372,7 +367,7 @@ public class ClassBuilderTest extends AbstractCodegenTest implements ClassBuilde
 
   @Test
   public void testDefineClassByImplementingInterface() {
-    String cls = ClassBuilder.implement(Baz.class)
+    final String cls = ClassBuilder.implement(Baz.class)
             .publicMethod(void.class, "someMethod")
             .finish().toJavaString();
 
@@ -382,7 +377,7 @@ public class ClassBuilderTest extends AbstractCodegenTest implements ClassBuilde
 
   @Test
   public void testDefineClassWithStaticMethod() {
-    String cls = ClassBuilder.define("my.test.Clazz")
+    final String cls = ClassBuilder.define("my.test.Clazz")
             .publicScope().body()
             .publicMethod(void.class, "test").modifiers(Modifier.Static)
             .body()
@@ -395,7 +390,7 @@ public class ClassBuilderTest extends AbstractCodegenTest implements ClassBuilde
 
   @Test
   public void testDefineClassWithJSNIMethod() {
-    String cls = ClassBuilder.define("my.test.Clazz")
+    final String cls = ClassBuilder.define("my.test.Clazz")
             .publicScope().body()
             .publicMethod(void.class, "test").modifiers(Modifier.JSNI)
             .body()
@@ -407,13 +402,12 @@ public class ClassBuilderTest extends AbstractCodegenTest implements ClassBuilde
   }
 
   public interface TestInterface {
-  }
 
-  ;
+  }
 
   @Test
   public void testCollidingImportsWithInnerClass() {
-    String cls = ClassBuilder.define("my.test.Clazz")
+    final String cls = ClassBuilder.define("my.test.Clazz")
             .publicScope()
             .implementsInterface(org.jboss.errai.codegen.test.model.TestInterface.class)
             .implementsInterface(TestInterface.class)
@@ -429,7 +423,7 @@ public class ClassBuilderTest extends AbstractCodegenTest implements ClassBuilde
 
   @Test
   public void testCollidingImportsWithInnerClassFirst() {
-    String cls = ClassBuilder.define("my.test.Clazz")
+    final String cls = ClassBuilder.define("my.test.Clazz")
             .publicScope()
             .implementsInterface(TestInterface.class)
             .implementsInterface(org.jboss.errai.codegen.test.model.TestInterface.class)
@@ -445,7 +439,7 @@ public class ClassBuilderTest extends AbstractCodegenTest implements ClassBuilde
 
   @Test
   public void testCollidingImportsWithJavaLang() {
-    String cls = ClassBuilder.define("my.test.Clazz")
+    final String cls = ClassBuilder.define("my.test.Clazz")
             .publicScope()
             .body()
             .privateField("i", org.jboss.errai.codegen.test.model.Integer.class)
@@ -460,7 +454,7 @@ public class ClassBuilderTest extends AbstractCodegenTest implements ClassBuilde
 
   @Test
   public void testCollidingImportsWithJavaLangFirst() {
-    String cls = ClassBuilder.define("my.test.Clazz")
+    final String cls = ClassBuilder.define("my.test.Clazz")
             .publicScope()
             .body()
             .privateField("i", Integer.class)
@@ -476,9 +470,10 @@ public class ClassBuilderTest extends AbstractCodegenTest implements ClassBuilde
 
   @Test
   public void testThisReferenceWithStmtLoadVariable() {
-    ClassStructureBuilder<? extends ClassStructureBuilder<?>> body = ClassBuilder.define("org.foo.Foo").publicScope().body();
+    final ClassStructureBuilder<? extends ClassStructureBuilder<?>> body
+            = ClassBuilder.define("org.foo.Foo").publicScope().body();
 
-    String cls = body
+    final String cls = body
             .publicMethod(body.getClassDefinition(), "getThis")
             .append(Stmt.loadVariable("this").returnValue())
             .finish()
@@ -497,7 +492,7 @@ public class ClassBuilderTest extends AbstractCodegenTest implements ClassBuilde
   @Test
   public void testMethodAnnotated() {
 
-    String cls = ClassBuilder.define("MyRunnable")
+    final String cls = ClassBuilder.define("MyRunnable")
             .publicScope().implementsInterface(Runnable.class)
             .body()
             .publicMethod(void.class, "run")

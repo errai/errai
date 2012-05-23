@@ -20,8 +20,39 @@ import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessorFactory;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 
+/**
+ * This class is implemented by modules which need to extend functionality of the IOC container, such as by adding
+ * additional annotation processing rules, problematically providing dependencies, etc.
+ * <p>
+ * All classes implementing <tt>IOCExtensionConfigurator</tt> and annotated with {@link org.jboss.errai.ioc.client.api.IOCExtension}
+ * will be instantiated and called by the IOC container at generation time.
+ * <p>
+ * All classes implementing this interface MUST:
+ * <ol>
+ *   <li>Have a default public, no-argument constructor.</li>
+ *   <li>Be in a Errai discoverable classpath location (with an <tt>ErraiApp.properties</tt> at the classpath root)</li>
+ * </ol>
+ *
+ *
+ */
 public interface IOCExtensionConfigurator {
+  /**
+   * This method is called by the container <em>before</em> any processing or class discovery begins. This gives an
+   * opportunity to configure the scanning rules, such as configuring annotation rules.
+   *
+   * @param context
+   * @param injectionContext
+   * @param procFactory
+   */
   public void configure(IOCProcessingContext context, InjectionContext injectionContext, IOCProcessorFactory procFactory);
 
+  /**
+   * THis method is called <em>after</em> the container has initialized all configuration, and <em>before</em> any
+   * class generation for the container begins.
+   *
+   * @param context
+   * @param injectionContext
+   * @param procFactory
+   */
   public void afterInitialization(IOCProcessingContext context, InjectionContext injectionContext, IOCProcessorFactory procFactory);
 }

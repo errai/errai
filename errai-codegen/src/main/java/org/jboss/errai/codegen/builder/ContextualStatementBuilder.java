@@ -17,6 +17,7 @@
 package org.jboss.errai.codegen.builder;
 
 import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 
 /**
@@ -29,6 +30,8 @@ public interface ContextualStatementBuilder extends ContextualLoopBuilder, Conte
   public ContextualStatementBuilder invoke(MetaMethod method, Object... parameters);
 
   public ContextualStatementBuilder invoke(String methodName, Object... parameters);
+
+  public VariableReferenceContextualStatementBuilder loadField(MetaField field);
 
   public VariableReferenceContextualStatementBuilder loadField(String fieldName);
 

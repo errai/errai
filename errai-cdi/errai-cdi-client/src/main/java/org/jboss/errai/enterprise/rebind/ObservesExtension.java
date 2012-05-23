@@ -131,7 +131,7 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
 
     final BlockBuilder<AnonymousClassStructureBuilder> destroyMeth
             = ObjectBuilder.newInstanceOf(destructionCallbackType).extend()
-            .publicOverridesMethod("destroy", Parameter.of(instance.getEnclosingType(), "obj", true))
+            .publicOverridesMethod("destroy", Parameter.finalOf(instance.getEnclosingType(), "obj"))
             .append(Stmt.loadVariable(subscrVar).invoke("remove"));
 
 

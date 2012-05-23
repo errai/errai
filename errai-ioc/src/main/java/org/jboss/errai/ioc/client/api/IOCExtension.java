@@ -22,9 +22,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * User: christopherbrock
- * Date: 19-Jul-2010
- * Time: 3:49:41 PM
+ * This annotation indicates that the annotated class is an IOC extension module and should be instantiated and
+ * its method invoked as part of the IOC container initialization.
+ *
+ * @see org.jboss.errai.ioc.rebind.ioc.extension.IOCExtensionConfigurator
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

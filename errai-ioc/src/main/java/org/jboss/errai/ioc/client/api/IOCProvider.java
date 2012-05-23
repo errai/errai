@@ -22,7 +22,23 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Defines a top-level provider for the IOC Container.
+ * Defines a top-level provider for the IOC Container. Top-level providers are a special feature of the container
+ * used for defining injectable beans which are available anywhere within the container, from any scope, at any
+ * point of the runtime lifecycle.
+ * <p>
+ * Top-level providers are used for defining framework-level features such as support for injecting instances of
+ * the <tt>MessageBus</tt> or the RPC <tt>Callable</tt> interface.
+ * <p>
+ * The production of top-level providers are <em>not</em> managed beans. But the instances of the top-level providers
+ * are themselves, managed and are scopable. Thus, all top-level providers that do not declare an explicit scope are
+ * of the <em>pseudo-dependant scope</em> and are instantiated prior to all invocations of the provider.
+ * <p>
+ * Classes which are annotated with <tt>@IOCProvider</tt> MUST implement either:
+ * <ul>
+ *   <li>{@link javax.inject.Provider}</li>
+ *   <li>{@link ContextualTypeProvider}</li>
+ * </ul>
+ *
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

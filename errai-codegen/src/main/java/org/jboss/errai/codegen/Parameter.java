@@ -55,6 +55,14 @@ public class Parameter extends AbstractStatement {
     return new Parameter(MetaClassFactory.get(type), name, isFinal);
   }
 
+  public static Parameter finalOf(MetaClass type, String name) {
+    return of(type, name, true);
+  }
+
+  public static Parameter finalOf(Class<?> type, String name) {
+    return of(type, name, true);
+  }
+
   public static Parameter[] of(MetaParameter[] parameters) {
     Parameter[] ps = new Parameter[parameters.length];
     for (int i = 0; i < ps.length; i++) {

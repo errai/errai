@@ -114,24 +114,14 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
 
     Statement[] stmt;
     switch (taskType) {
-      case PrivateField:
-        if (field.isStatic()) {
-          return Stmt.invokeStatic(injectionContext.getProcessingContext().getBootstrapClass(),
-                  getPrivateFieldInjectorName(field));
-        }
-        else {
-          return Stmt.invokeStatic(injectionContext.getProcessingContext().getBootstrapClass(),
-                  getPrivateFieldInjectorName(field), Refs.get(getTargetInjector().getVarName()));
-        }
       case Field:
-        if (field.isStatic()) {
-          return Stmt.loadStatic(getEnclosingType(), field.getName());
-        }
-        else {
-          return Stmt.loadVariable(getTargetInjector().getVarName()).loadField(field.getName());
-        }
+      case PrivateField:
+        return InjectUtil.getPublicOrPrivateFieldValue(injectionContext.getProcessingContext(),
+                Refs.get(getTargetInjector().getVarName()),
+                field);
 
       case PrivateMethod:
+      case Method:
         if (method.getReturnType().isVoid()) {
           return Stmt.load(Void.class);
         }
@@ -139,30 +129,12 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
         MetaParameter[] methParms = method.getParameters();
         Statement[] resolveParmsDeps = InjectUtil.resolveInjectionDependencies(methParms, injectionContext, method);
 
-        if (method.isStatic()) {
-          stmt = new Statement[methParms.length];
-          System.arraycopy(resolveParmsDeps, 0, stmt, 0, methParms.length);
-        }
-        else {
-          stmt = new Statement[methParms.length + 1];
-          stmt[0] = Refs.get(getTargetInjector().getVarName());
-          System.arraycopy(resolveParmsDeps, 0, stmt, 1, methParms.length);
-        }
-
-        //todo: this
-        return Stmt.invokeStatic(injectionContext.getProcessingContext().getBootstrapClass(),
-                getPrivateMethodName(method), stmt);
-
-      case Method:
         stmt = InjectUtil.resolveInjectionDependencies(method.getParameters(), injectionContext, method);
 
-        if (method.isStatic()) {
-          return Stmt.invokeStatic(getEnclosingType(), method.getName(), stmt);
-        }
-
-        else {
-          return Stmt.loadVariable(getTargetInjector().getVarName()).invoke(method, stmt);
-        }
+        return InjectUtil.invokePublicOrPrivateMethod(injectionContext.getProcessingContext(),
+                Refs.get(getTargetInjector().getVarName()),
+                method,
+                stmt);
 
       case Parameter:
       case Type:
@@ -194,15 +166,12 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
     MetaMethod meth = method;
     switch (taskType) {
       case PrivateField:
-        Statement[] args = new Statement[values.length + 1];
-        args[0] = Refs.get(targetInjector.getVarName());
-        System.arraycopy(values, 0, args, 1, values.length);
-
-        return Stmt.invokeStatic(injectionContext.getProcessingContext().getBootstrapClass(),
-                getPrivateFieldInjectorName(field), args);
-
       case Field:
-        return Stmt.loadVariable(targetInjector.getVarName()).loadField(field.getName()).assignValue(values[0]);
+        return InjectUtil.setPublicOrPrivateFieldValue(
+                injectionContext.getProcessingContext(),
+                Refs.get(targetInjector.getVarName()),
+                field,
+                values[0]);
 
       case Parameter:
         if (parm.getDeclaringMember() instanceof MetaMethod) {
@@ -214,17 +183,10 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
 
       case Method:
       case PrivateMethod:
-        args = new Statement[values.length + 1];
-        args[0] = Refs.get(targetInjector.getVarName());
-        System.arraycopy(values, 0, args, 1, values.length);
-
-        if (!meth.isPublic()) {
-          return Stmt.invokeStatic(injectionContext.getProcessingContext().getBootstrapClass(),
-                  getPrivateMethodName(meth), args);
-        }
-        else {
-          return Stmt.loadVariable(targetInjector.getVarName()).invoke(meth, values);
-        }
+        return InjectUtil.invokePublicOrPrivateMethod(injectionContext.getProcessingContext(),
+                Refs.get(targetInjector.getVarName()),
+                meth,
+                values);
 
       default:
         throw new RuntimeException("cannot call tasktype: " + taskType);

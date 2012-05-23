@@ -32,6 +32,7 @@ import org.jboss.errai.codegen.builder.callstack.AssignVariable;
 import org.jboss.errai.codegen.builder.callstack.LoadField;
 import org.jboss.errai.codegen.builder.callstack.MethodCall;
 import org.jboss.errai.codegen.builder.callstack.ReturnValue;
+import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 
 /**
@@ -56,6 +57,12 @@ public class ContextualStatementBuilderImpl extends AbstractStatementBuilder imp
   @Override
   public ContextualStatementBuilder invoke(String methodName, Object... parameters) {
     appendCallElement(new MethodCall(methodName, parameters));
+    return this;
+  }
+
+  @Override
+  public VariableReferenceContextualStatementBuilder loadField(MetaField field) {
+    appendCallElement(new LoadField(field.getName()));
     return this;
   }
 
