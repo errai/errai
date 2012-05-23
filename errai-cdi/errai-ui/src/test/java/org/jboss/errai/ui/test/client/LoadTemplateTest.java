@@ -3,7 +3,8 @@ package org.jboss.errai.ui.test.client;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.junit.Test;
 
-import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.dom.client.Element;
 
 public class LoadTemplateTest extends AbstractErraiCDITest {
 
@@ -13,30 +14,21 @@ public class LoadTemplateTest extends AbstractErraiCDITest {
   }
 
   @Test
-  public void testInitialSetup() {
-    CDITestHelper.afterCdiInitialized(new Runnable() {
-      @Override
-      public void run() {
-        App app = CDITestHelper.instance.app;
-        assertNotNull(app.getComponent());
-        assertTrue(app.getComponent().getElement().getInnerHTML().contains("HI TEMPLATE"));
+  public void testInsertAndReplace() {
+    App app = CDITestHelper.instance.app;
+    assertNotNull(app.getComponent());
+    assertTrue(app.getComponent().getElement().getInnerHTML().contains("<h1>This will be rendered</h1>"));
+    assertTrue(app.getComponent().getElement().getInnerHTML().contains("<div>This will be rendered</div>"));
+    assertFalse(app.getComponent().getElement().getInnerHTML().contains("This will not be rendered"));
 
-        RootPanel lbl = RootPanel.get("lbl");
+    Element lbl = Document.get().getElementById("lbl");
+    assertNotNull(lbl);
+    assertEquals("Added by component", lbl.getInnerText());
 
-        assertNotNull(lbl);
+    assertNotNull(Document.get().getElementById("btn"));
 
-        String innerText = lbl.asWidget().getElement().getInnerText();
-        assertEquals(innerText, "Added by component");
-        
-        finishTest();
-      }
-    });
-
-    // This call tells GWT's test runner to wait 20 seconds after the test
-    // returns.
-    // We need this delay to give the HelloMessage time to come back from the
-    // server.
-    delayTestFinish(40000);
+    assertNull(Document.get().getElementById("content"));
+    assertNotNull(Document.get().getElementById("content2"));
   }
 
 }

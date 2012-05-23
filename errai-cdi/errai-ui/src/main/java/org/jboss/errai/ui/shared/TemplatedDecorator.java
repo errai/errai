@@ -31,6 +31,7 @@ import org.jboss.errai.ui.shared.api.annotations.Replace;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ClientBundle.Source;
 import com.google.gwt.resources.client.TextResource;
@@ -91,11 +92,43 @@ public class TemplatedDecorator extends IOCDecoratorExtension<Templated> {
       // replace current element of this component with HTML from template
 
       String templateVarName = InjectUtil.getUniqueVarName();
-      builder.append(Stmt.declareVariable(getConstructedTemplateTypes(ctx).get(declaringClass)).named(templateVarName)
-              .initializeWith(Stmt.invokeStatic(GWT.class, "create", getConstructedTemplateTypes(ctx).get(declaringClass))));
+      builder.append(Stmt
+              .declareVariable(getConstructedTemplateTypes(ctx).get(declaringClass))
+              .named(templateVarName)
+              .initializeWith(
+                      Stmt.invokeStatic(GWT.class, "create", getConstructedTemplateTypes(ctx).get(declaringClass))));
 
-      builder.append(Stmt.invokeStatic(TemplateUtil.class, "composite", Refs.get(ctx.getInjector().getVarName()), Stmt
-              .loadVariable(templateVarName).invoke("getContents").invoke("getText")));
+      String rootTemplateElementVarName = InjectUtil.getUniqueVarName();
+      builder.append(Stmt
+              .declareVariable(Element.class)
+              .named(rootTemplateElementVarName)
+              .initializeWith(
+                      Stmt.invokeStatic(TemplateUtil.class, "getRootTemplateElement", Stmt
+                              .loadVariable(templateVarName).invoke("getContents").invoke("getText"))));
+
+      Statement rootTemplateElement = Stmt.loadVariable(rootTemplateElementVarName);
+      Statement component = Refs.get(ctx.getInjector().getVarName());
+
+      String dataFieldElementsVarName = InjectUtil.getUniqueVarName();
+      builder.append(Stmt.declareVariable(Map.class).named(dataFieldElementsVarName)
+              .initializeWith(Stmt.invokeStatic(TemplateUtil.class, "getDataFieldElements", rootTemplateElement)));
+
+      Statement dataFieldElements = Stmt.loadVariable(dataFieldElementsVarName);
+
+      builder.append(Stmt.invokeStatic(TemplateUtil.class, "initWidget", component, rootTemplateElement));
+
+      for (MetaField field : declaringClass.getFields()) {
+        if (field.isAnnotationPresent(Insert.class)) {
+          builder.append(Stmt.invokeStatic(TemplateUtil.class, "compositeComponentInsert", InjectUtil
+                  .getPublicOrPrivateFieldValue(ctx.getInjectionContext().getProcessingContext(), component, field),
+                  dataFieldElements, field.getName()));
+        }
+        else if (field.isAnnotationPresent(Replace.class)) {
+          builder.append(Stmt.invokeStatic(TemplateUtil.class, "compositeComponentReplace", InjectUtil
+                  .getPublicOrPrivateFieldValue(ctx.getInjectionContext().getProcessingContext(), component, field),
+                  dataFieldElements, field.getName()));
+        }
+      }
 
       builder.append(Stmt.loadStatic(System.class, "out").invoke("println", "Hello IOC World!"));
     }
