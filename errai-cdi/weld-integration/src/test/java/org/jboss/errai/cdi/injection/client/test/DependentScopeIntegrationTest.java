@@ -321,10 +321,10 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
                 .lookupBean(BeanInjectsNonModuleDependentBeanB.class).getInstance();
 
         assertNotNull("no instance returned for bean", bean);
-        assertNotNull("non-module dependent bean not injected", bean.getList());
-        assertEquals("wrong number of elements in list", 2, bean.getList().size());
-        assertEquals("wrong element", "foo", bean.getList().get(0));
-        assertEquals("wrong element", "bar", bean.getList().get(1));
+        assertNotNull("non-module dependent bean not injected", bean.getFunArrayListOfString());
+        assertEquals("wrong number of elements in list", 2, bean.getFunArrayListOfString().size());
+        assertEquals("wrong element", "foo", bean.getFunArrayListOfString().get(0));
+        assertEquals("wrong element", "bar", bean.getFunArrayListOfString().get(1));
 
         finishTest();
       }

@@ -2,7 +2,6 @@ package org.jboss.errai.cdi.injection.client;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import java.util.ArrayList;
 
 /**
@@ -10,15 +9,19 @@ import java.util.ArrayList;
  */
 @ApplicationScoped
 public class BeanInjectsNonModuleDependentBeanB {
-  @Funject ArrayList<String> list;
+  @Funject ArrayList<String> funArrayListOfString;
 
   @PostConstruct
   private void postConstructBean() {
-    list.add("foo");
-    list.add("bar");
+    funArrayListOfString.add("foo");
+    funArrayListOfString.add("bar");
   }
 
-  public ArrayList<String> getList() {
-    return list;
+  public ArrayList<String> getFunArrayListOfString() {
+    return funArrayListOfString;
+  }
+
+  public void setFunArrayListOfString(ArrayList<String> funArrayListOfString) {
+    this.funArrayListOfString = funArrayListOfString;
   }
 }
