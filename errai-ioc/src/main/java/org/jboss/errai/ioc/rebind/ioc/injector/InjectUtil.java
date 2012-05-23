@@ -646,17 +646,34 @@ public class InjectUtil {
     return true;
   }
 
-  public static Statement getPrivateReference(final IOCProcessingContext processingContext,
-                                              final Statement obj,
-                                              final MetaField field) {
+  /**
+   * Retrieves the value of a private field.
+   *
+   * @param processingContext an instance of the {@link IOCProcessingContext}
+   * @param obj a {@link Statement} reference to the bean instance whose field is to be accessed
+   * @param field the {@link MetaField} which will be privately accessed
+   * @return a {@link Statement} reference to the value of the field.
+   */
+  public static Statement getPrivateFieldValue(final IOCProcessingContext processingContext,
+                                               final Statement obj,
+                                               final MetaField field) {
     return Stmt.invokeStatic(processingContext.getBootstrapClass(),
             PrivateAccessUtil.getPrivateFieldInjectorName(field), obj);
   }
 
-  public static Statement setPrivateReference(final IOCProcessingContext processingContext,
-                                              final Statement obj,
-                                              final MetaField field,
-                                              final Statement val) {
+  /**
+   * Set the value of a private field.
+   *
+   * @param processingContext an instance of the {@link IOCProcessingContext}
+   * @param obj a {@link Statement} reference to the bean instance whose field is to be accessed
+   * @param field the {@link MetaField} which will be privately accessed
+   * @param val  the {@link Statement} reference to the value to be set.
+   * @return the {@link Statement} which will peform the writing to the field.
+   */
+  public static Statement setPrivateFieldValue(final IOCProcessingContext processingContext,
+                                               final Statement obj,
+                                               final MetaField field,
+                                               final Statement val) {
     return Stmt.invokeStatic(processingContext.getBootstrapClass(),
             PrivateAccessUtil.getPrivateFieldInjectorName(field), obj, val);
   }
