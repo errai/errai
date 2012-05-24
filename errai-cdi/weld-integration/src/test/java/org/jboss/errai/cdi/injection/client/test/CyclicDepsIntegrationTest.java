@@ -45,189 +45,127 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
   }
 
   public void testBasicDependencyCycle() {
-    delayTestFinish(60000);
 
-    CDI.addPostInitTask(new Runnable() {
-      @Override
-      public void run() {
-        CycleNodeA nodeA = getBeanManager()
-                .lookupBean(CycleNodeA.class).getInstance();
+    CycleNodeA nodeA = getBeanManager()
+            .lookupBean(CycleNodeA.class).getInstance();
 
-        assertNotNull(nodeA);
-        assertNotNull(nodeA.getCycleNodeB());
-        assertNotNull(nodeA.getCycleNodeB().getCycleNodeA());
-        assertNotNull(nodeA.getCycleNodeB().getCycleNodeC());
-        assertNotNull(nodeA.getCycleNodeB().getCycleNodeC().getCycleNodeA());
-        assertEquals("CycleNodeA is a different instance at different points in the graph",
-                nodeA.getNodeId(), nodeA.getCycleNodeB().getCycleNodeC().getCycleNodeA().getNodeId());
-        assertEquals("CycleNodeA is a different instance at different points in the graph",
-                nodeA.getNodeId(), nodeA.getCycleNodeB().getCycleNodeA().getNodeId());
-
-        finishTest();
-      }
-    });
+    assertNotNull(nodeA);
+    assertNotNull(nodeA.getCycleNodeB());
+    assertNotNull(nodeA.getCycleNodeB().getCycleNodeA());
+    assertNotNull(nodeA.getCycleNodeB().getCycleNodeC());
+    assertNotNull(nodeA.getCycleNodeB().getCycleNodeC().getCycleNodeA());
+    assertEquals("CycleNodeA is a different instance at different points in the graph",
+            nodeA.getNodeId(), nodeA.getCycleNodeB().getCycleNodeC().getCycleNodeA().getNodeId());
+    assertEquals("CycleNodeA is a different instance at different points in the graph",
+            nodeA.getNodeId(), nodeA.getCycleNodeB().getCycleNodeA().getNodeId());
   }
 
   public void testCircularInjectionOnOneNormalAndOneDependentBean() throws Exception {
-    CDI.addPostInitTask(new Runnable() {
-      @Override
-      public void run() {
-        Petrol petrol = getBeanManager().lookupBean(Petrol.class).getInstance();
-        Car car = getBeanManager().lookupBean(Car.class).getInstance();
-        assertEquals(petrol.getNameOfCar(), car.getName());
-        assertEquals(car.getNameOfPetrol(), petrol.getName());
-
-        finishTest();
-      }
-    });
+    Petrol petrol = getBeanManager().lookupBean(Petrol.class).getInstance();
+    Car car = getBeanManager().lookupBean(Car.class).getInstance();
+    assertEquals(petrol.getNameOfCar(), car.getName());
+    assertEquals(car.getNameOfPetrol(), petrol.getName());
   }
 
   public void testBeanInjectsIntoSelf() {
-    delayTestFinish(60000);
+    BeanInjectSelf beanA = getBeanManager()
+            .lookupBean(BeanInjectSelf.class).getInstance();
 
-    CDI.addPostInitTask(new Runnable() {
-      @Override
-      public void run() {
-        BeanInjectSelf beanA = getBeanManager()
-                .lookupBean(BeanInjectSelf.class).getInstance();
+    assertNotNull(beanA);
+    assertNotNull(beanA.getSelf());
+    assertEquals(beanA.getInstance(), beanA.getSelf().getInstance());
 
-        assertNotNull(beanA);
-        assertNotNull(beanA.getSelf());
-        assertEquals(beanA.getInstance(), beanA.getSelf().getInstance());
-
-        assertTrue("bean.self should be a proxy", getBeanManager().isProxyReference(beanA.getSelf()));
-        assertSame("unwrapped proxy should be the same as outer instance", beanA,
-                getBeanManager().getActualBeanReference(beanA.getSelf()));
-
-        finishTest();
-      }
-    });
+    assertTrue("bean.self should be a proxy", getBeanManager().isProxyReference(beanA.getSelf()));
+    assertSame("unwrapped proxy should be the same as outer instance", beanA,
+            getBeanManager().getActualBeanReference(beanA.getSelf()));
   }
 
   public void testCyclingBeanDestroy() {
-    delayTestFinish(60000);
+    BeanInjectSelf beanA = getBeanManager()
+            .lookupBean(BeanInjectSelf.class).getInstance();
 
-    CDI.addPostInitTask(new Runnable() {
-      @Override
-      public void run() {
-        BeanInjectSelf beanA = getBeanManager()
-                .lookupBean(BeanInjectSelf.class).getInstance();
+    assertNotNull(beanA);
+    assertNotNull(beanA.getSelf());
 
-        assertNotNull(beanA);
-        assertNotNull(beanA.getSelf());
+    getBeanManager().destroyBean(beanA);
 
-        getBeanManager().destroyBean(beanA);
-
-        assertFalse("bean should no longer be managed", getBeanManager().isManaged(beanA));
-        assertFalse("bean.self should no longer be recognized as proxy",
-                getBeanManager().isProxyReference(beanA.getSelf()));
-
-        finishTest();
-      }
-    });
+    assertFalse("bean should no longer be managed", getBeanManager().isManaged(beanA));
+    assertFalse("bean.self should no longer be recognized as proxy",
+            getBeanManager().isProxyReference(beanA.getSelf()));
   }
 
   public void testCyclingBeanDestroyViaProxy() {
-    delayTestFinish(60000);
 
-    CDI.addPostInitTask(new Runnable() {
-      @Override
-      public void run() {
-        BeanInjectSelf beanA = getBeanManager()
-                .lookupBean(BeanInjectSelf.class).getInstance();
+    BeanInjectSelf beanA = getBeanManager()
+            .lookupBean(BeanInjectSelf.class).getInstance();
 
-        assertNotNull(beanA);
-        assertNotNull(beanA.getSelf());
+    assertNotNull(beanA);
+    assertNotNull(beanA.getSelf());
 
-        // destroy via the proxy reference through self
-        getBeanManager().destroyBean(beanA.getSelf());
+    // destroy via the proxy reference through self
+    getBeanManager().destroyBean(beanA.getSelf());
 
-        assertFalse("bean should no longer be managed", getBeanManager().isManaged(beanA));
-        assertFalse("bean.self should no longer be recognized as proxy",
-                getBeanManager().isProxyReference(beanA.getSelf()));
+    assertFalse("bean should no longer be managed", getBeanManager().isManaged(beanA));
+    assertFalse("bean.self should no longer be recognized as proxy",
+            getBeanManager().isProxyReference(beanA.getSelf()));
 
-        finishTest();
-      }
-    });
   }
 
   public void testDependentBeanInjectsIntoSelf() {
-    delayTestFinish(60000);
 
-    CDI.addPostInitTask(new Runnable() {
-      @Override
-      public void run() {
-        DependentBeanInjectSelf beanA = getBeanManager()
-                .lookupBean(DependentBeanInjectSelf.class).getInstance();
+    DependentBeanInjectSelf beanA = getBeanManager()
+            .lookupBean(DependentBeanInjectSelf.class).getInstance();
 
-        assertNotNull(beanA);
-        assertNotNull(beanA.getSelf());
-        assertEquals(beanA.getInstance(), beanA.getSelf().getInstance());
+    assertNotNull(beanA);
+    assertNotNull(beanA.getSelf());
+    assertEquals(beanA.getInstance(), beanA.getSelf().getInstance());
 
-        assertTrue("bean.self should be a proxy", getBeanManager().isProxyReference(beanA.getSelf()));
-        assertSame("unwrapped proxy should be the same as outer instance", beanA, getBeanManager()
-                .getActualBeanReference(beanA.getSelf()));
+    assertTrue("bean.self should be a proxy", getBeanManager().isProxyReference(beanA.getSelf()));
+    assertSame("unwrapped proxy should be the same as outer instance", beanA, getBeanManager()
+            .getActualBeanReference(beanA.getSelf()));
 
-        finishTest();
-      }
-    });
   }
 
   public void testCycleOnProducerBeans() {
-    delayTestFinish(60000);
 
-    CDI.addPostInitTask(new Runnable() {
-      @Override
-      public void run() {
-        ConsumerBeanA consumerBeanA = getBeanManager()
-                .lookupBean(ConsumerBeanA.class).getInstance();
+    ConsumerBeanA consumerBeanA = getBeanManager()
+            .lookupBean(ConsumerBeanA.class).getInstance();
 
-        assertNotNull(consumerBeanA);
-        assertNotNull("foo was not injected", consumerBeanA.getFoo());
-        assertNotNull("baz was not inject", consumerBeanA.getBaz());
+    assertNotNull(consumerBeanA);
+    assertNotNull("foo was not injected", consumerBeanA.getFoo());
+    assertNotNull("baz was not inject", consumerBeanA.getBaz());
 
-        assertEquals("barz", consumerBeanA.getFoo().getName());
+    assertEquals("barz", consumerBeanA.getFoo().getName());
 
-        assertNotNull(consumerBeanA.getProducerBeanA());
-        assertNotNull(consumerBeanA.getProducerBeanA().getConsumerBeanA());
-        assertEquals("barz", consumerBeanA.getProducerBeanA().getConsumerBeanA().getFoo().getName());
+    assertNotNull(consumerBeanA.getProducerBeanA());
+    assertNotNull(consumerBeanA.getProducerBeanA().getConsumerBeanA());
+    assertEquals("barz", consumerBeanA.getProducerBeanA().getConsumerBeanA().getFoo().getName());
 
-        assertNotNull(consumerBeanA.getBar());
-        assertEquals("fooz", consumerBeanA.getBar().getName());
-        assertNotNull(consumerBeanA.getProducerBeanA().getConsumerBeanA().getBar());
-        assertEquals("fooz", consumerBeanA.getProducerBeanA().getConsumerBeanA().getBar().getName());
-
-        finishTest();
-      }
-    });
+    assertNotNull(consumerBeanA.getBar());
+    assertEquals("fooz", consumerBeanA.getBar().getName());
+    assertNotNull(consumerBeanA.getProducerBeanA().getConsumerBeanA().getBar());
+    assertEquals("fooz", consumerBeanA.getProducerBeanA().getConsumerBeanA().getBar().getName());
   }
 
   public void testHashcodeAndEqualsWorkThroughProxies() {
-    delayTestFinish(60000);
 
-    CDI.addPostInitTask(new Runnable() {
-      @Override
-      public void run() {
-        EquHashCheckCycleA equHashCheckCycleA = getBeanManager()
-                .lookupBean(EquHashCheckCycleA.class).getInstance();
+    EquHashCheckCycleA equHashCheckCycleA = getBeanManager()
+            .lookupBean(EquHashCheckCycleA.class).getInstance();
 
-        EquHashCheckCycleB equHashCheckCycleB = getBeanManager()
-                .lookupBean(EquHashCheckCycleB.class).getInstance();
+    EquHashCheckCycleB equHashCheckCycleB = getBeanManager()
+            .lookupBean(EquHashCheckCycleB.class).getInstance();
 
-        assertNotNull(equHashCheckCycleA);
-        assertNotNull(equHashCheckCycleB);
+    assertNotNull(equHashCheckCycleA);
+    assertNotNull(equHashCheckCycleB);
 
-        assertEquals("equals contract broken", equHashCheckCycleA, equHashCheckCycleB.getEquHashCheckCycleA());
-        assertEquals("equals contract broken", equHashCheckCycleB, equHashCheckCycleA.getEquHashCheckCycleB());
+    assertEquals("equals contract broken", equHashCheckCycleA, equHashCheckCycleB.getEquHashCheckCycleA());
+    assertEquals("equals contract broken", equHashCheckCycleB, equHashCheckCycleA.getEquHashCheckCycleB());
 
-        assertEquals("hashCode contract broken", equHashCheckCycleA.hashCode(),
-                equHashCheckCycleB.getEquHashCheckCycleA().hashCode());
+    assertEquals("hashCode contract broken", equHashCheckCycleA.hashCode(),
+            equHashCheckCycleB.getEquHashCheckCycleA().hashCode());
 
-        assertEquals("hashCode contract broken", equHashCheckCycleB.hashCode(),
-                equHashCheckCycleA.getEquHashCheckCycleB().hashCode());
+    assertEquals("hashCode contract broken", equHashCheckCycleB.hashCode(),
+            equHashCheckCycleA.getEquHashCheckCycleB().hashCode());
 
-        finishTest();
-      }
-    });
   }
 }

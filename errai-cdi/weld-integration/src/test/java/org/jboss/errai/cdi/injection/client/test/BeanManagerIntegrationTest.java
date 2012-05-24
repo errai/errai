@@ -6,6 +6,8 @@ import java.util.Set;
 
 import org.jboss.errai.cdi.injection.client.ApplicationScopedBean;
 import org.jboss.errai.cdi.injection.client.CommonInterface;
+import org.jboss.errai.cdi.injection.client.DependentScopedBean;
+import org.jboss.errai.cdi.injection.client.InheritedApplicationScopedBean;
 import org.jboss.errai.cdi.injection.client.qualifier.LincolnBar;
 import org.jboss.errai.cdi.injection.client.qualifier.QualA;
 import org.jboss.errai.cdi.injection.client.qualifier.QualAppScopeBeanA;
@@ -29,106 +31,88 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
   }
 
   public void testBeanManagerLookupSimple() {
-    delayTestFinish(60000);
-
-    CDI.addPostInitTask(new Runnable() {
-      @Override
-      public void run() {
-        IOCBeanDef<ApplicationScopedBean> bean = IOC.getBeanManager().lookupBean(ApplicationScopedBean.class);
-        assertNotNull(bean);
-        finishTest();
-      }
-    });
+    final IOCBeanDef<ApplicationScopedBean> bean = IOC.getBeanManager().lookupBean(ApplicationScopedBean.class);
+    assertNotNull(bean);
   }
 
+  public void testBeanManagerLookupInheritedScopeBean() {
+    final IOCBeanDef<InheritedApplicationScopedBean> bean
+            = IOC.getBeanManager().lookupBean(InheritedApplicationScopedBean.class);
+    assertNotNull("inherited application scoped bean did not lookup", bean);
+
+    final InheritedApplicationScopedBean beanInst = bean.getInstance();
+    assertNotNull("bean instance is null", beanInst);
+
+    final DependentScopedBean bean1 = beanInst.getBean1();
+    assertNotNull("bean1 is null", bean1);
+
+    final InheritedApplicationScopedBean beanInst2 = bean.getInstance();
+    assertSame("bean is not observing application scope", beanInst, beanInst2);
+  }
+
+
   public void testBeanManagerAPIs() {
-    delayTestFinish(60000);
+    final IOCBeanManager mgr = IOC.getBeanManager();
+    final IOCBeanDef<QualAppScopeBeanA> bean = mgr.lookupBean(QualAppScopeBeanA.class);
 
-    CDI.addPostInitTask(new Runnable() {
-      @Override
-      public void run() {
-        IOCBeanManager mgr = IOC.getBeanManager();
+    final Set<Annotation> a = bean.getQualifiers();
+    assertEquals("there should be one qualifier", 1, a.size());
+    assertEquals("wrong qualifier", QualA.class, a.iterator().next().annotationType());
 
-        IOCBeanDef<QualAppScopeBeanA> bean = mgr.lookupBean(QualAppScopeBeanA.class);
-
-        final Set<Annotation> a = bean.getQualifiers();
-        assertEquals("there should be one qualifier", 1, a.size());
-        assertEquals("wrong qualifier", QualA.class, a.iterator().next().annotationType());
-
-        assertEquals("unmanaged bean should have no entries", 0, mgr.lookupBeans(String.class).size());
-        assertEquals("unmanaged bean should return null bean ref", null, mgr.lookupBean(String.class));
-
-        finishTest();
-      }
-    });
+    assertEquals("unmanaged bean should have no entries", 0, mgr.lookupBeans(String.class).size());
+    assertEquals("unmanaged bean should return null bean ref", null, mgr.lookupBean(String.class));
   }
 
   public void testQualifiedLookup() {
-    delayTestFinish(60000);
-
-    CDI.addPostInitTask(new Runnable() {
+    final Annotation qualA = new Annotation() {
       @Override
-      public void run() {
-        final Annotation qualA = new Annotation() {
-          @Override
-          public Class<? extends Annotation> annotationType() {
-            return QualA.class;
-          }
-        };
-
-        final QualB qualB = new QualB() {
-          @Override
-          public Class<? extends Annotation> annotationType() {
-            return QualB.class;
-          }
-        };
-
-        final Collection<IOCBeanDef> beans = IOC.getBeanManager().lookupBeans(CommonInterface.class);
-        assertEquals("wrong number of beans", 2, beans.size());
-
-        final IOCBeanDef<CommonInterface> beanA = IOC.getBeanManager().lookupBean(CommonInterface.class, qualA);
-        assertNotNull("no bean found", beanA);
-        assertTrue("wrong bean looked up", beanA.getInstance() instanceof QualAppScopeBeanA);
-
-        final IOCBeanDef<CommonInterface> beanB = IOC.getBeanManager().lookupBean(CommonInterface.class, qualB);
-        assertNotNull("no bean found", beanB);
-        assertTrue("wrong bean looked up", beanB.getInstance() instanceof QualAppScopeBeanB);
-        finishTest();
+      public Class<? extends Annotation> annotationType() {
+        return QualA.class;
       }
-    });
+    };
+
+    final QualB qualB = new QualB() {
+      @Override
+      public Class<? extends Annotation> annotationType() {
+        return QualB.class;
+      }
+    };
+
+    final Collection<IOCBeanDef> beans = IOC.getBeanManager().lookupBeans(CommonInterface.class);
+    assertEquals("wrong number of beans", 2, beans.size());
+
+    final IOCBeanDef<CommonInterface> beanA = IOC.getBeanManager().lookupBean(CommonInterface.class, qualA);
+    assertNotNull("no bean found", beanA);
+    assertTrue("wrong bean looked up", beanA.getInstance() instanceof QualAppScopeBeanA);
+
+    final IOCBeanDef<CommonInterface> beanB = IOC.getBeanManager().lookupBean(CommonInterface.class, qualB);
+    assertNotNull("no bean found", beanB);
+    assertTrue("wrong bean looked up", beanB.getInstance() instanceof QualAppScopeBeanB);
   }
 
   public void testQualifiedLookupFailure() {
-    delayTestFinish(60000);
 
-    CDI.addPostInitTask(new Runnable() {
+    final Annotation wrongAnno = new Annotation() {
       @Override
-      public void run() {
-        final Annotation wrongAnno = new Annotation() {
-          @Override
-          public Class<? extends Annotation> annotationType() {
-            return LincolnBar.class;
-          }
-        };
-
-        try {
-          final IOCBeanDef<CommonInterface> bean = IOC.getBeanManager().lookupBean(CommonInterface.class);
-          fail("should have thrown an exception, but got: " + bean);
-        }
-        catch (IOCResolutionException e) {
-          assertTrue("wrong exception thrown", e.getMessage().contains("multiple matching"));
-        }
-
-        try {
-          final IOCBeanDef<CommonInterface> bean = IOC.getBeanManager().lookupBean(CommonInterface.class, wrongAnno);
-          fail("should have thrown an exception, but got: " + bean);
-        }
-        catch (IOCResolutionException e) {
-          assertTrue("wrong exception thrown", e.getMessage().contains("no matching"));
-        }
-
-        finishTest();
+      public Class<? extends Annotation> annotationType() {
+        return LincolnBar.class;
       }
-    });
+    };
+
+    try {
+      final IOCBeanDef<CommonInterface> bean = IOC.getBeanManager().lookupBean(CommonInterface.class);
+      fail("should have thrown an exception, but got: " + bean);
+    }
+    catch (IOCResolutionException e) {
+      assertTrue("wrong exception thrown", e.getMessage().contains("multiple matching"));
+    }
+
+    try {
+      final IOCBeanDef<CommonInterface> bean = IOC.getBeanManager().lookupBean(CommonInterface.class, wrongAnno);
+      fail("should have thrown an exception, but got: " + bean);
+    }
+    catch (IOCResolutionException e) {
+      assertTrue("wrong exception thrown", e.getMessage().contains("no matching"));
+    }
   }
 }
