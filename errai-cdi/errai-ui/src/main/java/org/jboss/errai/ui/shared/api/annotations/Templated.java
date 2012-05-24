@@ -25,4 +25,5 @@ import com.google.gwt.user.client.ui.Composite;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Templated {
+  String value() default "";
 }

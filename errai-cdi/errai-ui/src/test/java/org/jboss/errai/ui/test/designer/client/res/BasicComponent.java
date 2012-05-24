@@ -1,4 +1,4 @@
-package org.jboss.errai.ui.test.client;
+package org.jboss.errai.ui.test.designer.client.res;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
@@ -13,7 +13,7 @@ import com.google.gwt.user.client.ui.Label;
 
 @Dependent
 @Templated
-public class TemplateComponent extends Composite {
+public class BasicComponent extends Composite {
 
   @Replace
   private Label content;

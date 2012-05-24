@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Parameter;
@@ -30,6 +32,7 @@ import org.jboss.errai.ui.shared.api.annotations.Insert;
 import org.jboss.errai.ui.shared.api.annotations.Replace;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
+import com.google.common.base.Strings;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.resources.client.ClientBundle;
@@ -98,13 +101,19 @@ public class TemplatedDecorator extends IOCDecoratorExtension<Templated> {
               .initializeWith(
                       Stmt.invokeStatic(GWT.class, "create", getConstructedTemplateTypes(ctx).get(declaringClass))));
 
+      builder.append(Stmt.loadStatic(System.class, "out").invoke(
+              "println",
+              "Parsing template: " + getTemplateFileName(declaringClass) + "#"
+                      + getTemplateFragmentName(declaringClass) + ""));
+
       String rootTemplateElementVarName = InjectUtil.getUniqueVarName();
       builder.append(Stmt
               .declareVariable(Element.class)
               .named(rootTemplateElementVarName)
               .initializeWith(
                       Stmt.invokeStatic(TemplateUtil.class, "getRootTemplateElement", Stmt
-                              .loadVariable(templateVarName).invoke("getContents").invoke("getText"))));
+                              .loadVariable(templateVarName).invoke("getContents").invoke("getText"),
+                              getTemplateFragmentName(declaringClass))));
 
       Statement rootTemplateElement = Stmt.loadVariable(rootTemplateElementVarName);
       Statement component = Refs.get(ctx.getInjector().getVarName());
@@ -118,42 +127,29 @@ public class TemplatedDecorator extends IOCDecoratorExtension<Templated> {
       builder.append(Stmt.invokeStatic(TemplateUtil.class, "initWidget", component, rootTemplateElement));
 
       for (MetaField field : declaringClass.getFields()) {
+
         if (field.isAnnotationPresent(Insert.class)) {
           builder.append(Stmt.invokeStatic(TemplateUtil.class, "compositeComponentInsert", InjectUtil
                   .getPublicOrPrivateFieldValue(ctx.getInjectionContext().getProcessingContext(), component, field),
-                  dataFieldElements, field.getName()));
+                  dataFieldElements, getTemplateDataFieldName(field.getName(), field.getAnnotation(Insert.class))));
         }
         else if (field.isAnnotationPresent(Replace.class)) {
           builder.append(Stmt.invokeStatic(TemplateUtil.class, "compositeComponentReplace", InjectUtil
                   .getPublicOrPrivateFieldValue(ctx.getInjectionContext().getProcessingContext(), component, field),
-                  dataFieldElements, field.getName()));
+                  dataFieldElements, getTemplateDataFieldName(field.getName(), field.getAnnotation(Replace.class))));
         }
       }
-
-      builder.append(Stmt.loadStatic(System.class, "out").invoke("println", "Hello IOC World!"));
     }
-
-    /*
-     * replace root element of new component with contents of resource bundle
-     * 
-     * insert/replace data-field elements with field corresponding Elements
-     */
   }
 
-  /**
-   * Get the name of the {@link Template} class of the given {@link MetaClass}
-   * type
-   */
-  private String getTemplateTypeName(MetaClass type) {
-    return type.getFullyQualifiedName().replaceAll("\\.", "_") + "TemplateResource";
+  private String getTemplateDataFieldName(String fieldName, Insert anno) {
+    String value = Strings.nullToEmpty(anno.value()).trim();
+    return value.isEmpty() ? fieldName : value ;
   }
-
-  /**
-   * Get the name of the {@link Template} HTML file of the given
-   * {@link MetaClass} type
-   */
-  private String getTemplateFileName(MetaClass type) {
-    return type.getFullyQualifiedName().replaceAll("\\.", "/") + ".html";
+  
+  private String getTemplateDataFieldName(String fieldName, Replace anno) {
+    String value = Strings.nullToEmpty(anno.value()).trim();
+    return value.isEmpty() ? fieldName : value ;
   }
 
   /**
@@ -194,6 +190,72 @@ public class TemplatedDecorator extends IOCDecoratorExtension<Templated> {
     if (result == null) {
       result = new HashMap<MetaClass, BuildMetaClass>();
       ctx.getInjectionContext().setAttribute(CONSTRUCTED_TEMPLATE_SET_KEY, result);
+    }
+
+    return result;
+  }
+
+  /*
+   * Non-generation utility methods.
+   */
+
+  /**
+   * Get the name of the {@link Template} class of the given {@link MetaClass}
+   * type
+   */
+  private String getTemplateTypeName(MetaClass type) {
+    return type.getFullyQualifiedName().replaceAll("\\.", "_") + "TemplateResource";
+  }
+
+  /**
+   * Get the name of the {@link Template} HTML file of the given
+   * {@link MetaClass} component type
+   */
+  private String getTemplateFileName(MetaClass type) {
+    String resource = type.getFullyQualifiedName().replaceAll("\\.", "/") + ".html";
+
+    if (type.isAnnotationPresent(Templated.class)) {
+      String source = canonicalizeTemplateSourceSyntax(type, type.getAnnotation(Templated.class).value());
+      Matcher matcher = Pattern.compile("^([^#]+)#?.*$").matcher(source);
+      if (matcher.matches()) {
+        resource = (matcher.group(1) == null ? resource : matcher.group(1));
+        if (resource.matches("\\S+\\.html")) {
+          resource = type.getPackageName().replaceAll("\\.", "/") + "/" + resource;
+        }
+      }
+    }
+
+    return resource;
+  }
+
+  /**
+   * Get the name of the {@link Template} HTML fragment (Element subtree) to be
+   * used as the template root of the given {@link MetaClass} component type
+   */
+  private String getTemplateFragmentName(MetaClass type) {
+    String fragment = "";
+
+    if (type.isAnnotationPresent(Templated.class)) {
+      String source = canonicalizeTemplateSourceSyntax(type, type.getAnnotation(Templated.class).value());
+      Matcher matcher = Pattern.compile("^.*#([^#]+)$").matcher(source);
+      if (matcher.matches()) {
+        fragment = (matcher.group(1) == null ? fragment : matcher.group(1));
+      }
+    }
+
+    return fragment;
+  }
+
+  /**
+   * Throw an exception if the template source syntax is invalid
+   */
+  private String canonicalizeTemplateSourceSyntax(MetaClass component, String source) {
+    String result = Strings.nullToEmpty(source).trim();
+
+    if (result.matches(".*#.*#.*")) {
+      throw new IllegalArgumentException("Invalid syntax: @" + Templated.class.getSimpleName() + "(" + source
+              + ") on component " + component.getFullyQualifiedName()
+              + ". Multiple '#' found, where only one fragment is permitted.");
     }
 
     return result;

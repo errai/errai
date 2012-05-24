@@ -1,0 +1,28 @@
+package org.jboss.errai.ui.test.nested.client;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+
+import org.jboss.errai.ioc.client.api.EntryPoint;
+import org.jboss.errai.ui.test.nested.client.res.ParentComponent;
+
+import com.google.gwt.user.client.ui.RootPanel;
+
+@EntryPoint
+public class MultiTemplateTestApp {
+
+  @Inject
+  private RootPanel root;
+
+  @Inject
+  private ParentComponent component;
+
+  @PostConstruct
+  public void setup() {
+    root.add(component);
+  }
+  
+  public ParentComponent getComponent() {
+    return component;
+  }
+}

@@ -1,20 +1,21 @@
-package org.jboss.errai.ui.test.client;
+package org.jboss.errai.ui.test.basic.client;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.jboss.errai.ioc.client.api.EntryPoint;
+import org.jboss.errai.ui.test.basic.client.res.BasicComponent;
 
 import com.google.gwt.user.client.ui.RootPanel;
 
 @EntryPoint
-public class App {
+public class LoadTemplateTestApp {
 
   @Inject
   private RootPanel root;
 
   @Inject
-  private TemplateComponent component;
+  private BasicComponent component;
 
   @PostConstruct
   public void setup() {
@@ -22,7 +23,7 @@ public class App {
     System.out.println(root.getElement().getInnerHTML());
   }
   
-  public TemplateComponent getComponent() {
+  public BasicComponent getComponent() {
     return component;
   }
 }

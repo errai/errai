@@ -4,12 +4,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.Node;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 
+/**
+ * Errai UI Runtime Utility for handling {@link Template} composition.
+ * 
+ * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
+ */
 public final class TemplateUtil {
   private TemplateUtil() {
   }
@@ -20,10 +24,20 @@ public final class TemplateUtil {
    */
   public static void compositeComponentReplace(UIObject field, final Map<String, Element> dataFieldElements,
           String fieldName) {
-    System.out.println("Compositing @Replace [data-field=" + fieldName + "]");
     Element element = dataFieldElements.get(fieldName);
+    if (element == null) {
+      throw new IllegalStateException("Template did not contain data-field attribute for field [" + fieldName + "]");
+    }
+    System.out.println("Compositing @Replace [data-field=" + fieldName + "] element [" + element + "] with Component "
+            + field.getClass().getName() + " [" + field.getElement() + "]");
     Element parentElement = element.getParentElement();
-    parentElement.replaceChild(field.getElement(), element);
+
+    try {
+      parentElement.replaceChild(field.getElement(), element);
+    } catch (Exception e) {
+      throw new IllegalStateException("Could not replace Element with [data-field=" + fieldName
+              + "] - Did you already @Insert or @Replace a parent Element?", e);
+    }
   }
 
   /**
@@ -32,29 +46,63 @@ public final class TemplateUtil {
    */
   public static void compositeComponentInsert(UIObject field, final Map<String, Element> dataFieldElements,
           String fieldName) {
-    System.out.println("Compositing @Insert [data-field=" + fieldName + "]");
     Element element = dataFieldElements.get(fieldName);
+    System.out.println("Compositing @Insert [data-field=" + fieldName + "] element [" + element + "] with Component "
+            + field.getClass().getName() + " [" + field.getElement() + "]");
+
+    if (element == null) {
+      throw new IllegalStateException("No such Element with [data-field=" + fieldName
+              + "] found in template. Did you specify the correct data-field name?");
+    }
+
     element.setInnerHTML("");
     element.appendChild(field.getElement());
   }
 
-  public static Element getRootTemplateElement(String templateContents) {
-    final Element parserDiv = DOM.createDiv();
+  public static Element getRootTemplateElement(String templateContents, final String rootField) {
+    Element parserDiv = DOM.createDiv();
     parserDiv.setInnerHTML(templateContents);
-    return parserDiv;
+
+    if (rootField != null && !rootField.trim().isEmpty()) {
+      System.out.println("Locating root element: " + rootField);
+      VisitContext<Element> context = Visit.accept(parserDiv, new Visitor<Element>() {
+        @Override
+        public void visit(VisitContextMutable<Element> context, Element element) {
+          if (element.hasAttribute("data-field") && element.getAttribute("data-field").equals(rootField)) {
+            Element result = DOM.createDiv();
+            result.appendChild(element);
+            context.setResult(result);
+            context.setVisitComplete();
+          }
+        }
+      });
+
+      if (context.getResult() != null) {
+        parserDiv = context.getResult();
+      }
+      else {
+        throw new IllegalStateException("Could not locate Element in template with data-field=[" + rootField + "]\n"
+                + parserDiv.getInnerHTML());
+      }
+    }
+
+    System.out.println(parserDiv.getInnerHTML().trim());
+
+    return parserDiv.getFirstChildElement();
   }
 
-  public static Map<String, Element> getDataFieldElements(final Element parserDiv) {
-    Element templateRoot = parserDiv.getFirstChildElement();
+  public static Map<String, Element> getDataFieldElements(final Element templateRoot) {
     final Map<String, Element> childTemplateElements = new HashMap<String, Element>();
 
+    System.out.println("Searching template for fields.");
     // TODO do this as browser split deferred binding using
     // Document.querySelectorAll() -
     // https://developer.mozilla.org/En/DOM/Element.querySelectorAll
-    Visit.accept(templateRoot, new Visitor() {
+    Visit.accept(templateRoot, new Visitor<Object>() {
       @Override
-      public void visit(VisitContext context, Element element) {
+      public void visit(VisitContextMutable<Object> context, Element element) {
         if (element.hasAttribute("data-field")) {
+          System.out.println("Located field: " + element.getAttribute("data-field"));
           childTemplateElements.put(element.getAttribute("data-field"), element);
         }
       }
@@ -68,6 +116,6 @@ public final class TemplateUtil {
   }
 
   private static native void initWidgetNative(Composite component, Widget root) /*-{
-		component.@com.google.gwt.user.client.ui.Composite::initWidget(Lcom/google/gwt/user/client/ui/Widget;)(root);
-  }-*/;
+                                                                                component.@com.google.gwt.user.client.ui.Composite::initWidget(Lcom/google/gwt/user/client/ui/Widget;)(root);
+                                                                                }-*/;
 }

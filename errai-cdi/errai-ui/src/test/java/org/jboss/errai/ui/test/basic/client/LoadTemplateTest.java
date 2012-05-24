@@ -1,6 +1,7 @@
-package org.jboss.errai.ui.test.client;
+package org.jboss.errai.ui.test.basic.client;
 
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
+import org.jboss.errai.ioc.client.container.IOC;
 import org.junit.Test;
 
 import com.google.gwt.dom.client.Document;
@@ -10,12 +11,12 @@ public class LoadTemplateTest extends AbstractErraiCDITest {
 
   @Override
   public String getModuleName() {
-    return "org.jboss.errai.ui.test.Test";
+    return getClass().getName().replaceAll("client.*$", "Test");
   }
 
   @Test
   public void testInsertAndReplace() {
-    App app = CDITestHelper.instance.app;
+    LoadTemplateTestApp app = IOC.getBeanManager().lookupBean(LoadTemplateTestApp.class).getInstance();
     assertNotNull(app.getComponent());
     assertTrue(app.getComponent().getElement().getInnerHTML().contains("<h1>This will be rendered</h1>"));
     assertTrue(app.getComponent().getElement().getInnerHTML().contains("<div>This will be rendered</div>"));
