@@ -62,7 +62,6 @@ public class ConversationalEventImpl<T> implements ConversationalEvent<T>, Seria
     }
     this.qualifiers = filteredQualifiers.toArray(new Annotation[filteredQualifiers.size()]);
     this.qualifiersForWire = CDI.getQualifiersPart(qualifiers);
-    //  this.type = injectionPoint.getType();
 
     Type t = injectionPoint.getType();
     if (t instanceof ParameterizedType) {
