@@ -23,17 +23,15 @@ public class MultiTemplateTest extends AbstractErraiCDITest {
     assertTrue(app.getComponent().getElement().getInnerHTML().contains("<div>This will be rendered</div>"));
     assertFalse(app.getComponent().getElement().getInnerHTML().contains("This will not be rendered"));
 
-    Element lbl = Document.get().getElementById("lbl");
+    Element lbl = Document.get().getElementById("c1a");
     assertNotNull(lbl);
     assertEquals("Added by component", lbl.getInnerText());
 
-    assertNull(Document.get().getElementById("newButton"));
-
     assertNull(Document.get().getElementById("content"));
-    assertNotNull(Document.get().getElementById("sub"));
-    assertNotNull(Document.get().getElementById("btn"));
-    assertNotNull(Document.get().getElementById("btn2"));
-    assertNotNull(Document.get().getElementById("content2"));
+    assertNotNull(Document.get().getElementById("c1"));
+    assertNotNull(Document.get().getElementById("c1a"));
+    assertNotNull(Document.get().getElementById("c1b"));
+    assertNotNull(Document.get().getElementById("c2"));
   }
 
 }

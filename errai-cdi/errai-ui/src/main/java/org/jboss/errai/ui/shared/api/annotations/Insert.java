@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 
 @Inherited
 @Documented
-@Target(ElementType.FIELD)
+@Target({ ElementType.FIELD, ElementType.METHOD, ElementType.CONSTRUCTOR })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Insert {
 

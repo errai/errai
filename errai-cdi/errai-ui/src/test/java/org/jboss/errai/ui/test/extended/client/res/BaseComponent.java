@@ -1,4 +1,4 @@
-package org.jboss.errai.ui.test.nested.client.res;
+package org.jboss.errai.ui.test.extended.client.res;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
@@ -7,23 +7,24 @@ import org.jboss.errai.ui.shared.api.annotations.Insert;
 import org.jboss.errai.ui.shared.api.annotations.Replace;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 
 @Dependent
 @Templated
-public class ParentComponent extends Composite {
+public class BaseComponent extends Composite {
 
   @Insert
-  private ChildComponent c1;
+  private Anchor c1;
 
-  @Replace("c2")
-  private Button button;
+  @Replace
+  private Button c2;
 
   @PostConstruct
   public void init() {
     c1.getElement().setAttribute("id", "c1");
-    button.getElement().setAttribute("id", "c2");
+    c2.getElement().setAttribute("id", "c2");
   }
   
 }

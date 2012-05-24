@@ -3,7 +3,9 @@ package org.jboss.errai.ui.shared;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Node;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.UIObject;
@@ -33,6 +35,12 @@ public final class TemplateUtil {
     Element parentElement = element.getParentElement();
 
     try {
+      final JsArray<Node> attributes = getAttributes(element);
+      for (int i = 0; i < attributes.length(); i++) {
+        final Node node = attributes.get(i);
+        field.getElement().setAttribute(node.getNodeName(),
+                join(new String[] { field.getElement().getAttribute(node.getNodeName()), node.getNodeValue() }, " "));
+      }
       parentElement.replaceChild(field.getElement(), element);
     } catch (Exception e) {
       throw new IllegalStateException("Could not replace Element with [data-field=" + fieldName
@@ -116,6 +124,27 @@ public final class TemplateUtil {
   }
 
   private static native void initWidgetNative(Composite component, Widget root) /*-{
-                                                                                component.@com.google.gwt.user.client.ui.Composite::initWidget(Lcom/google/gwt/user/client/ui/Widget;)(root);
-                                                                                }-*/;
+    component.@com.google.gwt.user.client.ui.Composite::initWidget(Lcom/google/gwt/user/client/ui/Widget;)(root);
+  }-*/;
+
+  /**
+   * Join strings inserting separator between them.
+   */
+  private static String join(String[] strings, String separator) {
+    StringBuffer result = new StringBuffer();
+
+    for (String s : strings) {
+      if (result.length() != 0) {
+        result.append(separator);
+      }
+      result.append(s);
+    }
+
+    return result.toString();
+  }
+
+  private static native JsArray<Node> getAttributes(Element elem) /*-{
+    return elem.attributes;
+  }-*/;
+
 }

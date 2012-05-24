@@ -13,27 +13,27 @@ import com.google.gwt.user.client.ui.Label;
 
 @Dependent
 @Templated
-public class TemplateComponent extends Composite {
+public class ChildComponent extends Composite {
 
   @Replace
-  private Label content;
+  private Label c1;
 
-  @Insert
+  @Insert("c2")
   private Button content2;
   
   @PostConstruct
   public void init()
   {
-    content.getElement().setAttribute("id","lbl");
-    content.setText("Added by component");
-    content2.getElement().setAttribute("id", "btn2");
+    c1.getElement().setAttribute("id","c1a");
+    c1.setText("Added by component");
+    content2.getElement().setAttribute("id", "c1b");
   }
 
-  public Label getContent() {
-    return content;
+  public Label getC1() {
+    return c1;
   }
   
-  public Button getContent2() {
+  public Button getC2() {
     return content2;
   }
   

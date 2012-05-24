@@ -126,30 +126,39 @@ public class TemplatedDecorator extends IOCDecoratorExtension<Templated> {
 
       builder.append(Stmt.invokeStatic(TemplateUtil.class, "initWidget", component, rootTemplateElement));
 
-      for (MetaField field : declaringClass.getFields()) {
+      generateComponentFieldCompositions(ctx, builder, component, dataFieldElements, declaringClass);
+    }
+  }
 
-        if (field.isAnnotationPresent(Insert.class)) {
-          builder.append(Stmt.invokeStatic(TemplateUtil.class, "compositeComponentInsert", InjectUtil
-                  .getPublicOrPrivateFieldValue(ctx.getInjectionContext().getProcessingContext(), component, field),
-                  dataFieldElements, getTemplateDataFieldName(field.getName(), field.getAnnotation(Insert.class))));
-        }
-        else if (field.isAnnotationPresent(Replace.class)) {
-          builder.append(Stmt.invokeStatic(TemplateUtil.class, "compositeComponentReplace", InjectUtil
-                  .getPublicOrPrivateFieldValue(ctx.getInjectionContext().getProcessingContext(), component, field),
-                  dataFieldElements, getTemplateDataFieldName(field.getName(), field.getAnnotation(Replace.class))));
-        }
+  private void generateComponentFieldCompositions(InjectableInstance<Templated> ctx,
+          BlockBuilder<AnonymousClassStructureBuilder> builder, Statement component, Statement dataFieldElements,
+          MetaClass declaringClass) {
+
+    if (declaringClass.getSuperClass() != null)
+      generateComponentFieldCompositions(ctx, builder, component, dataFieldElements, declaringClass.getSuperClass());
+
+    for (MetaField field : declaringClass.getFields()) {
+      if (field.isAnnotationPresent(Insert.class)) {
+        builder.append(Stmt.invokeStatic(TemplateUtil.class, "compositeComponentInsert", InjectUtil
+                .getPublicOrPrivateFieldValue(ctx.getInjectionContext().getProcessingContext(), component, field),
+                dataFieldElements, getTemplateDataFieldName(field.getName(), field.getAnnotation(Insert.class))));
+      }
+      else if (field.isAnnotationPresent(Replace.class)) {
+        builder.append(Stmt.invokeStatic(TemplateUtil.class, "compositeComponentReplace", InjectUtil
+                .getPublicOrPrivateFieldValue(ctx.getInjectionContext().getProcessingContext(), component, field),
+                dataFieldElements, getTemplateDataFieldName(field.getName(), field.getAnnotation(Replace.class))));
       }
     }
   }
 
   private String getTemplateDataFieldName(String fieldName, Insert anno) {
     String value = Strings.nullToEmpty(anno.value()).trim();
-    return value.isEmpty() ? fieldName : value ;
+    return value.isEmpty() ? fieldName : value;
   }
-  
+
   private String getTemplateDataFieldName(String fieldName, Replace anno) {
     String value = Strings.nullToEmpty(anno.value()).trim();
-    return value.isEmpty() ? fieldName : value ;
+    return value.isEmpty() ? fieldName : value;
   }
 
   /**

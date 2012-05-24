@@ -9,7 +9,7 @@ import org.jboss.errai.ui.test.basic.client.res.BasicComponent;
 import com.google.gwt.user.client.ui.RootPanel;
 
 @EntryPoint
-public class LoadTemplateTestApp {
+public class BasicTemplateTestApp {
 
   @Inject
   private RootPanel root;
