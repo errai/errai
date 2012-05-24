@@ -17,6 +17,8 @@ public class ExtendedTemplateTest extends AbstractErraiCDITest {
   public void testInsertAndReplaceNested() {
     ExtendedTemplateTestApp app = IOC.getBeanManager().lookupBean(ExtendedTemplateTestApp.class).getInstance();
     assertNotNull(app.getComponent());
+    
+    System.out.println("DUMPING: " + Document.get().getElementById("root").getInnerHTML());
 
     assertNotNull(Document.get().getElementById("root"));
     assertNotNull(Document.get().getElementById("c1"));

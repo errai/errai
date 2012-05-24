@@ -3,9 +3,11 @@ package org.jboss.errai.ui.test.extended.client.res;
 import javax.annotation.PostConstruct;
 
 import org.jboss.errai.ui.shared.api.annotations.Insert;
+import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import com.google.gwt.user.client.ui.Label;
 
+@Templated("BaseComponent.html")
 public class ExtensionComponent extends BaseComponent {
 
   @Insert("c3")
