@@ -59,95 +59,66 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
   }
 
   public void testDependentBeanScope() {
-    delayTestFinish(60000);
+    final ApplicationScopedBean beanA = IOC.getBeanManager()
+            .lookupBean(ApplicationScopedBean.class).getInstance();
 
-    CDI.addPostInitTask(new Runnable() {
-      @Override
-      public void run() {
-        try {
-          final ApplicationScopedBean beanA = IOC.getBeanManager()
-                  .lookupBean(ApplicationScopedBean.class).getInstance();
+    DependentScopedBean b1 = beanA.getBean1();
+    DependentScopedBean b2 = beanA.getBean2();
+    DependentScopedBean b3 = beanA.getBean3();
+    DependentScopedBeanWithDependencies b4 = beanA.getBeanWithDependencies();
 
-          DependentScopedBean b1 = beanA.getBean1();
-          DependentScopedBean b2 = beanA.getBean2();
-          DependentScopedBean b3 = beanA.getBean3();
-          DependentScopedBeanWithDependencies b4 = beanA.getBeanWithDependencies();
+    assertTrue("dependent scoped semantics broken", b2.getInstance() > b1.getInstance());
+    assertTrue("dependent scoped semantics broken", b3.getInstance() > b2.getInstance());
 
-          assertTrue("dependent scoped semantics broken", b2.getInstance() > b1.getInstance());
-          assertTrue("dependent scoped semantics broken", b3.getInstance() > b2.getInstance());
-
-          assertNotNull("dependent scoped bean with injections was not injected", b4);
-          assertNotNull("dependent scoped beans own injections not injected", b4.getBean());
-          assertTrue("dependent scoped semantics broken", b4.getBean().getInstance() > b3.getInstance());
-
-          finishTest();
-        }
-        catch (Throwable t) {
-          t.printStackTrace();
-        }
-      }
-    });
-
+    assertNotNull("dependent scoped bean with injections was not injected", b4);
+    assertNotNull("dependent scoped beans own injections not injected", b4.getBean());
+    assertTrue("dependent scoped semantics broken", b4.getBean().getInstance() > b3.getInstance());
   }
 
   public void testDependentScopesWithTransverseDependentBeans() {
-    delayTestFinish(60000);
-    CDI.addPostInitTask(new Runnable() {
-      @Override
-      public void run() {
-        final OuterBean outBean = IOC.getBeanManager()
-                .lookupBean(OuterBean.class).getInstance();
+    final OuterBean outBean = IOC.getBeanManager()
+            .lookupBean(OuterBean.class).getInstance();
 
-        assertNotNull("outer bean was null", outBean);
+    assertNotNull("outer bean was null", outBean);
 
-        Bean testBean = outBean.getTestBean();
-        assertNotNull("outBean.getTestBean() returned null", testBean);
+    Bean testBean = outBean.getTestBean();
+    assertNotNull("outBean.getTestBean() returned null", testBean);
 
-        ServiceA serviceA = testBean.getServiceA();
-        ServiceB serviceB = testBean.getServiceB();
-        ServiceC serviceC = testBean.getServiceC();
+    ServiceA serviceA = testBean.getServiceA();
+    ServiceB serviceB = testBean.getServiceB();
+    ServiceC serviceC = testBean.getServiceC();
 
-        assertNotNull("serviceA is null", serviceA);
-        assertNotNull("serviceB is null", serviceB);
-        assertNotNull("serviceC is null", serviceC);
+    assertNotNull("serviceA is null", serviceA);
+    assertNotNull("serviceB is null", serviceB);
+    assertNotNull("serviceC is null", serviceC);
 
-        ServiceC serviceC1 = serviceA.getServiceC();
-        ServiceC serviceC2 = serviceB.getServiceC();
+    ServiceC serviceC1 = serviceA.getServiceC();
+    ServiceC serviceC2 = serviceB.getServiceC();
 
-        assertNotNull("serviceC in serviceA is null", serviceC1);
-        assertNotNull("serviceC in serviceB is null", serviceC2);
+    assertNotNull("serviceC in serviceA is null", serviceC1);
+    assertNotNull("serviceC in serviceB is null", serviceC2);
 
-        Set<String> testDependentScope = new HashSet<String>();
-        testDependentScope.add(serviceC.getName());
-        testDependentScope.add(serviceC1.getName());
-        testDependentScope.add(serviceC2.getName());
+    Set<String> testDependentScope = new HashSet<String>();
+    testDependentScope.add(serviceC.getName());
+    testDependentScope.add(serviceC1.getName());
+    testDependentScope.add(serviceC2.getName());
 
-        assertEquals("ServiceC should have been instantiated 3 times", 3, testDependentScope.size());
-
-        finishTest();
-      }
-    });
+    assertEquals("ServiceC should have been instantiated 3 times", 3, testDependentScope.size());
   }
 
   public void testDependentScopeDoesNotViolateBroaderApplicationScope() {
-    delayTestFinish(60000);
-    CDI.addPostInitTask(new Runnable() {
-      @Override
-      public void run() {
-        final ApplicationScopedBean applicationScopedBean = IOC.getBeanManager()
-                .lookupBean(ApplicationScopedBean.class).getInstance();
 
-        assertNotNull("ApplicationScopedBean was null", applicationScopedBean);
+    final ApplicationScopedBean applicationScopedBean = IOC.getBeanManager()
+            .lookupBean(ApplicationScopedBean.class).getInstance();
 
-        final ServiceC serviceC = IOC.getBeanManager()
-                .lookupBean(ServiceC.class).getInstance();
+    assertNotNull("ApplicationScopedBean was null", applicationScopedBean);
 
-        assertEquals("ApplicationScopedBean should be same instance even in dependent scoped",
-                applicationScopedBean.getBeanId(), serviceC.getBean().getBeanId());
+    final ServiceC serviceC = IOC.getBeanManager()
+            .lookupBean(ServiceC.class).getInstance();
 
-        finishTest();
-      }
-    });
+    assertEquals("ApplicationScopedBean should be same instance even in dependent scoped",
+            applicationScopedBean.getBeanId(), serviceC.getBean().getBeanId());
+
   }
 
   /**
@@ -156,161 +127,105 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
    * it implements and that the interface is an innerclass of another bean.
    */
   public void testUnreferencedDependentRootBeanAccessible() {
-    delayTestFinish(60000);
-    CDI.addPostInitTask(new Runnable() {
-      @Override
-      public void run() {
+    final UnreferencedDependentRootBean applicationScopedBean = IOC.getBeanManager()
+            .lookupBean(UnreferencedDependentRootBean.class).getInstance();
 
-        final UnreferencedDependentRootBean applicationScopedBean = IOC.getBeanManager()
-                .lookupBean(UnreferencedDependentRootBean.class).getInstance();
-
-        assertNotNull("UnreferencedDependentRootBean was null", applicationScopedBean);
-        assertNotNull("Dependent injection was null", applicationScopedBean.getBeanB());
-
-        finishTest();
-      }
-    });
+    assertNotNull("UnreferencedDependentRootBean was null", applicationScopedBean);
+    assertNotNull("Dependent injection was null", applicationScopedBean.getBeanB());
   }
 
   public void testDependentBeanCycleFromApplicationScopedRoot() {
-    delayTestFinish(60000);
 
-    CDI.addPostInitTask(new Runnable() {
-      @Override
-      public void run() {
-        final ApplicationScopedBeanB bean = IOC.getBeanManager()
-                .lookupBean(ApplicationScopedBeanB.class).getInstance();
+    final ApplicationScopedBeanB bean = IOC.getBeanManager()
+            .lookupBean(ApplicationScopedBeanB.class).getInstance();
 
-        assertNotNull("DependentBeanCycleA was null", bean);
-        assertNotNull("dependentScopedBean.dependentBeanCycleA injection was null",
-                bean.getDependentBeanCycleA());
-        assertNotNull("dependentScopedBean.dependentBeanCycleA.dependentBeanCycleB was null",
-                bean.getDependentBeanCycleA().getDependentBeanCycleB());
-        assertEquals("there should have been only one instantiation of DependentBeanCycleB",
-                1, bean.getDependentBeanCycleA().getDependentBeanCycleB().getInstance());
+    assertNotNull("DependentBeanCycleA was null", bean);
+    assertNotNull("dependentScopedBean.dependentBeanCycleA injection was null",
+            bean.getDependentBeanCycleA());
+    assertNotNull("dependentScopedBean.dependentBeanCycleA.dependentBeanCycleB was null",
+            bean.getDependentBeanCycleA().getDependentBeanCycleB());
+    assertEquals("there should have been only one instantiation of DependentBeanCycleB",
+            1, bean.getDependentBeanCycleA().getDependentBeanCycleB().getInstance());
 
-        finishTest();
-      }
-    });
   }
 
   public void testDependentBeanCycleFromDependentRoot() {
-    delayTestFinish(60000);
+    DependentBeanCycleB.instanceCount = 1;
 
-    CDI.addPostInitTask(new Runnable() {
-      @Override
-      public void run() {
-        DependentBeanCycleB.instanceCount = 1;
+    final DependentBeanCycleB bean = IOC.getBeanManager()
+            .lookupBean(DependentBeanCycleB.class).getInstance();
 
-        final DependentBeanCycleB bean = IOC.getBeanManager()
-                .lookupBean(DependentBeanCycleB.class).getInstance();
+    assertNotNull("bean was null", bean);
+    assertNotNull("bean.dependentBeanCycleA injection was null",
+            bean.getDependentBeanCycleA());
+    assertNotNull("dependentScopedBean.dependentBeanCycleB.dependentBeanCycleA was null",
+            bean.getDependentBeanCycleA().getDependentBeanCycleB());
+    assertEquals("there should have been only one instantiation of DependentBeanCycleB",
+            1, bean.getDependentBeanCycleA().getDependentBeanCycleB().getInstance());
 
-        assertNotNull("bean was null", bean);
-        assertNotNull("bean.dependentBeanCycleA injection was null",
-                bean.getDependentBeanCycleA());
-        assertNotNull("dependentScopedBean.dependentBeanCycleB.dependentBeanCycleA was null",
-                bean.getDependentBeanCycleA().getDependentBeanCycleB());
-        assertEquals("there should have been only one instantiation of DependentBeanCycleB",
-                1, bean.getDependentBeanCycleA().getDependentBeanCycleB().getInstance());
+    DependentBeanCycleB.instanceCount = 1;
 
-        DependentBeanCycleB.instanceCount = 1;
+    final DependentBeanCycleA beanA = IOC.getBeanManager()
+            .lookupBean(DependentBeanCycleA.class).getInstance();
 
-        final DependentBeanCycleA beanA = IOC.getBeanManager()
-                .lookupBean(DependentBeanCycleA.class).getInstance();
+    assertNotNull("beanA was null", beanA);
+    assertNotNull("dependentScopedBean.dependentBeanCycleB injection was null",
+            beanA.getDependentBeanCycleB());
+    assertNotNull("dependentScopedBean.dependentBeanCycleB.dependentBeanCycleA was null",
+            beanA.getDependentBeanCycleB().getDependentBeanCycleA());
+    assertEquals("there should have been only two instantiations of DependentBeanCycleB",
+            1, beanA.getDependentBeanCycleB().getDependentBeanCycleA().getDependentBeanCycleB().getInstance());
 
-        assertNotNull("beanA was null", beanA);
-        assertNotNull("dependentScopedBean.dependentBeanCycleB injection was null",
-                beanA.getDependentBeanCycleB());
-        assertNotNull("dependentScopedBean.dependentBeanCycleB.dependentBeanCycleA was null",
-                beanA.getDependentBeanCycleB().getDependentBeanCycleA());
-        assertEquals("there should have been only two instantiations of DependentBeanCycleB",
-                1, beanA.getDependentBeanCycleB().getDependentBeanCycleA().getDependentBeanCycleB().getInstance());
-
-        finishTest();
-      }
-    });
   }
 
 
   public void testDependentBeanCycleWithPreDestroy() {
-    delayTestFinish(60000);
 
-    InitVotes.registerOneTimeInitCallback(new Runnable() {
+    final DestroyA bean = IOC.getBeanManager()
+            .lookupBean(DestroyA.class).getInstance();
 
-      @Override
-      public void run() {
-        final DestroyA bean = IOC.getBeanManager()
-                .lookupBean(DestroyA.class).getInstance();
+    IOC.getBeanManager().destroyBean(bean);
 
-        IOC.getBeanManager().destroyBean(bean);
+    assertTrue("predestroy method not called!", bean.isDestroyed());
+    assertTrue("predestroy method not called", bean.getTestDestroyB().isDestroyed());
 
-        assertTrue("predestroy method not called!", bean.isDestroyed());
-        assertTrue("predestroy method not called", bean.getTestDestroyB().isDestroyed());
-
-        finishTest();
-      }
-    });
   }
 
   public void testDependentBeanWithProducerDependency() {
-    delayTestFinish(60000);
+    final LincolnCat bean = IOC.getBeanManager()
+            .lookupBean(LincolnCat.class).getInstance();
 
-    InitVotes.registerOneTimeInitCallback(new Runnable() {
-
-      @Override
-      public void run() {
-        final LincolnCat bean = IOC.getBeanManager()
-                .lookupBean(LincolnCat.class).getInstance();
-
-        assertNotNull("no instance returned for bean", bean);
-        assertNotNull("value not injected", bean.getBar());
-        assertEquals("wrong value injected", "bar", bean.getBar());
-
-        finishTest();
-      }
-    });
+    assertNotNull("no instance returned for bean", bean);
+    assertNotNull("value not injected", bean.getBar());
+    assertEquals("wrong value injected", "bar", bean.getBar());
   }
 
   public void testDependentScopedBeanWithAppScopedDependencyDestroy() {
-    InitVotes.registerOneTimeInitCallback(new Runnable() {
 
-      @Override
-      public void run() {
-        final DepScopedBeanWithASBeanDep bean = IOC.getBeanManager()
-                .lookupBean(DepScopedBeanWithASBeanDep.class).getInstance();
+    final DepScopedBeanWithASBeanDep bean = IOC.getBeanManager()
+            .lookupBean(DepScopedBeanWithASBeanDep.class).getInstance();
 
-        assertNotNull("no instance returned for bean", bean);
-        assertNotNull("ApplicationScopedBean not injected", bean.getApplicationScopedBean());
+    assertNotNull("no instance returned for bean", bean);
+    assertNotNull("ApplicationScopedBean not injected", bean.getApplicationScopedBean());
 
-        IOC.getBeanManager().destroyBean(bean);
+    IOC.getBeanManager().destroyBean(bean);
 
-        assertTrue("pre-destroy method not called", bean.isPreDestroyCalled());
-        assertFalse("ApplicationScopedBean's predestruct method must NOT be called",
-                bean.getApplicationScopedBean().isPreDestroyCalled());
+    assertTrue("pre-destroy method not called", bean.isPreDestroyCalled());
+    assertFalse("ApplicationScopedBean's predestruct method must NOT be called",
+            bean.getApplicationScopedBean().isPreDestroyCalled());
 
-        assertFalse("bean should no longer be managed", IOC.getBeanManager().isManaged(bean));
-
-        finishTest();
-      }
-    });
+    assertFalse("bean should no longer be managed", IOC.getBeanManager().isManaged(bean));
   }
 
   public void testNonModuleTranslatableClassInjectableAsDependent() {
-    InitVotes.registerOneTimeInitCallback(new Runnable() {
-      @Override
-      public void run() {
-        final BeanInjectsNonModuleDependentBean bean = IOC.getBeanManager()
-                .lookupBean(BeanInjectsNonModuleDependentBean.class).getInstance();
+    final BeanInjectsNonModuleDependentBean bean = IOC.getBeanManager()
+            .lookupBean(BeanInjectsNonModuleDependentBean.class).getInstance();
 
-        assertNotNull("no instance returned for bean", bean);
-        assertNotNull("non-module dependent bean not injected", bean.getList());
-        assertEquals("wrong number of elements in list", 2, bean.getList().size());
-        assertEquals("wrong element", "foo", bean.getList().get(0));
-        assertEquals("wrong element", "bar", bean.getList().get(1));
-
-        finishTest();
-      }
-    });
+    assertNotNull("no instance returned for bean", bean);
+    assertNotNull("non-module dependent bean not injected", bean.getList());
+    assertEquals("wrong number of elements in list", 2, bean.getList().size());
+    assertEquals("wrong element", "foo", bean.getList().get(0));
+    assertEquals("wrong element", "bar", bean.getList().get(1));
   }
 
   public void testNonModuleTranslatableClassInjectableAsDependentWithAliasedInjectionPoint() {

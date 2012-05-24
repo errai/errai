@@ -253,9 +253,7 @@ public class IOCProcessorFactory {
           }, Rule.before(injectionContext.getAnnotationsForElementType(WiringElementType.SingletonBean),
                   injectionContext.getAnnotationsForElementType(WiringElementType.DependentBean)));
 
-
           break;
-
       }
     }
 
@@ -401,7 +399,6 @@ public class IOCProcessorFactory {
     while (!processingTasksStack.isEmpty());
 
     List<SortUnit> toSort = injectionContext.getGraphBuilder().build();
-
     List<SortUnit> list = sortGraph(toSort);
 
     for (SortUnit unit : list) {
@@ -435,7 +432,7 @@ public class IOCProcessorFactory {
     final InjectableInstance injectableInstance
             = getInjectedInstance(anno, type, null, injectionContext);
 
-    ProcessingDelegate del = new ProcessingDelegate() {
+    final ProcessingDelegate del = new ProcessingDelegate() {
       @Override
       public void processDependencies() {
         entry.handler.getDependencies(dependencyControl, injectableInstance, anno, context);
@@ -485,7 +482,7 @@ public class IOCProcessorFactory {
             = getMethodInjectedInstance(metaMethod, null,
             injectionContext);
 
-    ProcessingDelegate del = new ProcessingDelegate() {
+    final ProcessingDelegate del = new ProcessingDelegate() {
       @Override
       public void processDependencies() {
         entry.handler.getDependencies(dependencyControl, injectableInstance, anno, context);
@@ -531,7 +528,7 @@ public class IOCProcessorFactory {
 
     dependencyControl.masqueradeAs(type);
 
-    ProcessingDelegate del = new ProcessingDelegate() {
+    final ProcessingDelegate del = new ProcessingDelegate() {
       @SuppressWarnings("unchecked")
       @Override
       public void processDependencies() {

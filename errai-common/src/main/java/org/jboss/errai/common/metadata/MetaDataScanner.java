@@ -220,7 +220,15 @@ public class MetaDataScanner extends Reflections {
   public Set<Class<?>> getTypesAnnotatedWith(Class<? extends Annotation> annotation) {
     Set<Class<?>> types = _annotationCache.get(annotation);
     if (types == null) {
-      _annotationCache.put(annotation, types = super.getTypesAnnotatedWith(annotation));
+      types = new HashSet<Class<?>>(super.getTypesAnnotatedWith(annotation));
+
+      if (annotation.isAnnotationPresent(Inherited.class)) {
+         for (Class<?> cls : new ArrayList<Class<?>>(types)) {
+           types.addAll(getSubTypesOf(cls));
+         }
+      }
+
+      _annotationCache.put(annotation, types);
     }
 
     return types;

@@ -150,6 +150,7 @@ public class InjectionTask {
 
       case PrivateMethod:
         ctx.addExposedMethod(method);
+
       case Method:
         for (MetaParameter parm : method.getParameters()) {
           ctx.getProcessingContext().handleDiscoveryOfType(
