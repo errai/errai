@@ -997,6 +997,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
         // all queues are listening to this subject. therefore we can save memory and time by
         // writing to the broadcast color on the buffer
         try {
+          if (queues.isEmpty()) return;
 
           BufferHelper.encodeAndWrite(transmissionbuffer, BufferColor.getAllBuffersColor(), message);
 
