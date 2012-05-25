@@ -1,6 +1,7 @@
 package org.jboss.errai.ui.shared;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.core.client.JsArray;
@@ -24,7 +25,7 @@ public final class TemplateUtil {
    * Replace the {@link Element} with thte data-field of the given
    * {@link String} with the root {@link Element} of the given {@link UIObject}
    */
-  public static void compositeComponentReplace(UIObject field, final Map<String, Element> dataFieldElements,
+  public static void compositeComponentReplace(Widget field, final Map<String, Element> dataFieldElements,
           String fieldName) {
     Element element = dataFieldElements.get(fieldName);
     if (element == null) {
@@ -48,11 +49,29 @@ public final class TemplateUtil {
     }
   }
 
+  public static Widget attachField(Composite component, Widget field) {
+    setParentNative(component, field);
+    return field;
+  }
+
+  private static native void setParentNative(Composite component, Widget field) /*-{
+		field.@com.google.gwt.user.client.ui.Composite::setParent(Lcom/google/gwt/user/client/ui/Widget;)(component);
+  }-*/;
+
+  public static void initWidget(Composite component, Element wrapped, List<Widget> fields) {
+    initWidgetNative(component, new TemplateWidget(wrapped, fields));
+    DOM.setEventListener(component.getElement(), component);
+  }
+
+  private static native void initWidgetNative(Composite component, Widget wrapped) /*-{
+		component.@com.google.gwt.user.client.ui.Composite::initWidget(Lcom/google/gwt/user/client/ui/Widget;)(wrapped);
+  }-*/;
+
   /**
    * Insert the root {@link Element} of the given {@link UIObject} into the
    * {@link Element} with the data-field of the given {@link String}
    */
-  public static void compositeComponentInsert(UIObject field, final Map<String, Element> dataFieldElements,
+  public static void compositeComponentInsert(Widget field, final Map<String, Element> dataFieldElements,
           String fieldName) {
     Element element = dataFieldElements.get(fieldName);
     System.out.println("Compositing @Insert [data-field=" + fieldName + "] element [" + element + "] with Component "
@@ -119,14 +138,6 @@ public final class TemplateUtil {
     return childTemplateElements;
   }
 
-  public static void initWidget(Composite component, Element rootTemplateElement) {
-    initWidgetNative(component, new TemplateWidget(rootTemplateElement));
-  }
-
-  private static native void initWidgetNative(Composite component, Widget root) /*-{
-    component.@com.google.gwt.user.client.ui.Composite::initWidget(Lcom/google/gwt/user/client/ui/Widget;)(root);
-  }-*/;
-
   /**
    * Join strings inserting separator between them.
    */
@@ -144,7 +155,7 @@ public final class TemplateUtil {
   }
 
   private static native JsArray<Node> getAttributes(Element elem) /*-{
-    return elem.attributes;
+		return elem.attributes;
   }-*/;
 
 }
