@@ -74,7 +74,7 @@
         <gwt.version>2.4.0</gwt.version>
         <gwt.maven.version>2.4.0</gwt.maven.version>
         <guice.version>3.0</guice.version>
-        <guava.verson>12.0</guava.verson>
+        <guava.version>12.0</guava.version>
         <mvel.version>2.1.Beta8</mvel.version>
         <appengine.version>1.3.5</appengine.version>
         <validation.api.version>1.0.0.GA</validation.api.version>
@@ -147,13 +147,13 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>${guava.verson}</version>
+                <version>${guava.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava-gwt</artifactId>
-                <version>${guava.verson}</version>
+                <version>${guava.version}</version>
             </dependency>
 
             <dependency>
