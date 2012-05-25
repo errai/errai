@@ -86,15 +86,17 @@ public class TemplatedDecorator extends IOCDecoratorExtension<Templated> {
 
     Map<MetaClass, BuildMetaClass> constructed = getConstructedTemplateTypes(ctx);
 
-    /*
-     * Generate this component's ClientBundle if necessary
-     */
     MetaClass declaringClass = ctx.getEnclosingType();
     if (!constructed.containsKey(declaringClass)) {
+
+      /*
+       * Generate this component's ClientBundle resource if necessary
+       */
       generateTemplateResourceInterface(ctx, declaringClass);
 
-      // replace current element of this component with HTML from template
-
+      /*
+       * Instantiate the ClientBundle Template resource
+       */
       String templateVarName = InjectUtil.getUniqueVarName();
       builder.append(Stmt
               .declareVariable(getConstructedTemplateTypes(ctx).get(declaringClass))
@@ -107,6 +109,9 @@ public class TemplatedDecorator extends IOCDecoratorExtension<Templated> {
               "Parsing template: " + getTemplateFileName(declaringClass) + "#"
                       + getTemplateFragmentName(declaringClass) + ""));
 
+      /*
+       * Get root Template Element
+       */
       String rootTemplateElementVarName = InjectUtil.getUniqueVarName();
       builder.append(Stmt
               .declareVariable(Element.class)
@@ -117,65 +122,125 @@ public class TemplatedDecorator extends IOCDecoratorExtension<Templated> {
                               getTemplateFragmentName(declaringClass))));
 
       Statement rootTemplateElement = Stmt.loadVariable(rootTemplateElementVarName);
+
+      /*
+       * Get a reference to the actual Composite component being created
+       */
       Statement component = Refs.get(ctx.getInjector().getVarName());
 
+      /*
+       * Get all of the data-field Elements from the Template
+       */
       String dataFieldElementsVarName = InjectUtil.getUniqueVarName();
       builder.append(Stmt.declareVariable(Map.class).named(dataFieldElementsVarName)
               .initializeWith(Stmt.invokeStatic(TemplateUtil.class, "getDataFieldElements", rootTemplateElement)));
 
       Statement dataFieldElements = Stmt.loadVariable(dataFieldElementsVarName);
 
+      /*
+       * Create a List within which to aggregate the Widget field children
+       */
       String fieldsVarName = InjectUtil.getUniqueVarName();
       builder.append(Stmt.declareVariable(List.class).named(fieldsVarName)
               .initializeWith(ObjectBuilder.newInstanceOf(ArrayList.class)));
 
-      generateComponentFieldCompositions(ctx, builder, fieldsVarName, component, dataFieldElements, declaringClass);
+      /*
+       * Attach Widget field children Elements to the Template DOM
+       */
+      List<MetaField> fields = collectComponentFieldCompositions(ctx, builder, component, dataFieldElements,
+              declaringClass);
+      generateComponentFieldCompositions(ctx, builder, fieldsVarName, component, dataFieldElements, fields);
 
+      /*
+       * Attach the Template to the Component, and set up the GWT Widget
+       * hierarchy to preserve Handlers and DOM events.
+       */
       builder.append(Stmt.invokeStatic(TemplateUtil.class, "initWidget", component, rootTemplateElement,
               Stmt.loadVariable(fieldsVarName)));
     }
   }
 
-  private void generateComponentFieldCompositions(InjectableInstance<Templated> ctx,
-          BlockBuilder<AnonymousClassStructureBuilder> builder, String fieldsVarName, Statement component,
-          Statement dataFieldElements, MetaClass declaringClass) {
+  private List<MetaField> collectComponentFieldCompositions(InjectableInstance<Templated> ctx,
+          BlockBuilder<AnonymousClassStructureBuilder> builder, Statement component, Statement dataFieldElements,
+          MetaClass declaringClass) {
 
-    if (declaringClass.getSuperClass() != null)
-      generateComponentFieldCompositions(ctx, builder, fieldsVarName, component, dataFieldElements,
-              declaringClass.getSuperClass());
+    List<MetaField> result = new ArrayList<MetaField>();
+
+    if (declaringClass.getSuperClass() != null) {
+      result.addAll(collectComponentFieldCompositions(ctx, builder, component, dataFieldElements,
+              declaringClass.getSuperClass()));
+    }
 
     for (MetaField field : declaringClass.getFields()) {
+      if (field.isAnnotationPresent(Insert.class) || field.isAnnotationPresent(Replace.class)) {
+        for (MetaField superField : result) {
+          String name = getTemplateDataFieldName(superField);
+          if (name.equals(getTemplateDataFieldName(field))) {
+            result.remove(superField);
+            break;
+          }
+        }
+        result.add(field);
+      }
+    }
+
+    return result;
+  }
+
+  private void generateComponentFieldCompositions(InjectableInstance<Templated> ctx,
+          BlockBuilder<AnonymousClassStructureBuilder> builder, String fieldsVarName, Statement component,
+          Statement dataFieldElements, List<MetaField> fields) {
+
+    for (MetaField field : fields) {
       if (field.isAnnotationPresent(Insert.class)) {
+
+        /*
+         * Insert this field's Element into the DOM
+         */
         builder.append(Stmt.invokeStatic(TemplateUtil.class, "compositeComponentInsert", InjectUtil
                 .getPublicOrPrivateFieldValue(ctx.getInjectionContext().getProcessingContext(), component, field),
-                dataFieldElements, getTemplateDataFieldName(field.getName(), field.getAnnotation(Insert.class))));
+                dataFieldElements, getTemplateDataFieldName(field)));
 
+        /*
+         * Add this field to the list of children of the new Composite
+         */
         builder.append(Stmt.loadVariable(fieldsVarName).invoke(
                 "add",
                 InjectUtil.getPublicOrPrivateFieldValue(ctx.getInjectionContext().getProcessingContext(), component,
                         field)));
       }
       else if (field.isAnnotationPresent(Replace.class)) {
+
+        /*
+         * Replace this field's Element into the DOM
+         */
         builder.append(Stmt.invokeStatic(TemplateUtil.class, "compositeComponentReplace", InjectUtil
                 .getPublicOrPrivateFieldValue(ctx.getInjectionContext().getProcessingContext(), component, field),
-                dataFieldElements, getTemplateDataFieldName(field.getName(), field.getAnnotation(Replace.class))));
+                dataFieldElements, getTemplateDataFieldName(field)));
 
+        /*
+         * Add this field to the list of children of the new Composite
+         */
         builder.append(Stmt.loadVariable(fieldsVarName).invoke(
                 "add",
                 InjectUtil.getPublicOrPrivateFieldValue(ctx.getInjectionContext().getProcessingContext(), component,
                         field)));
       }
     }
+
   }
 
-  private String getTemplateDataFieldName(String fieldName, Insert anno) {
-    String value = Strings.nullToEmpty(anno.value()).trim();
-    return value.isEmpty() ? fieldName : value;
-  }
+  private String getTemplateDataFieldName(MetaField field) {
 
-  private String getTemplateDataFieldName(String fieldName, Replace anno) {
-    String value = Strings.nullToEmpty(anno.value()).trim();
-    return value.isEmpty() ? fieldName : value;
+    if (field.isAnnotationPresent(Insert.class)) {
+      String value = Strings.nullToEmpty(field.getAnnotation(Insert.class).value()).trim();
+      return value.isEmpty() ? field.getName() : value;
+    }
+    else if (field.isAnnotationPresent(Replace.class)) {
+      String value = Strings.nullToEmpty(field.getAnnotation(Replace.class).value()).trim();
+      return value.isEmpty() ? field.getName() : value;
+    }
+    return null;
   }
 
   /**

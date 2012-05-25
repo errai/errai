@@ -22,7 +22,7 @@ public class BaseComponent extends Composite {
   private Button c2;
 
   @PostConstruct
-  public void initBase() {
+  public final void initBase() {
     c1.getElement().setAttribute("id", "c1");
     c2.getElement().setAttribute("id", "c2");
   }

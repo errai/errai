@@ -10,17 +10,25 @@ import com.google.gwt.user.client.ui.Label;
 @Templated("BaseComponent.html")
 public class ExtensionComponent extends BaseComponent {
 
+  @Insert
+  private Label c2;
+  
   @Insert("c3")
   private Label content3;
   
   @PostConstruct
-  public void init()
+  public final void init()
   {
+    c2.getElement().setAttribute("id", "c2");
     content3.getElement().setAttribute("id", "c3");
   }
 
   public Label getContent3() {
     return content3;
+  }
+
+  public Label getC2() {
+    return c2;
   }
   
 }
