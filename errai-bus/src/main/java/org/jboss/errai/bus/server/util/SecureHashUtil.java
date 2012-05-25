@@ -112,25 +112,4 @@ public class SecureHashUtil {
     random.nextBytes(seed);
     return seed;
   }
-
-  public static void main(String[] args) {
-
-    for (int x = 0; x < 10; x++) {
-
-      long tm = System.currentTimeMillis();
-      for (int i = 0; i < 10000; i++) {
-        nextSecureHash("SHA-256");
-      }
-      System.out.println("nextSecureHash() = " + (System.currentTimeMillis() - tm));
-
-      tm = System.currentTimeMillis();
-      for (int i = 0; i < 10000; i++) {
-        byte[] bytez = new byte[64];
-        random.nextBytes(bytez);
-        hashToHexString(bytez);
-      }
-      System.out.println("nextBytes() = " + (System.currentTimeMillis() - tm));
-
-    }
-  }
 }
