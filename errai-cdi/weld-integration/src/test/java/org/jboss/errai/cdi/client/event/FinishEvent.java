@@ -1,8 +1,7 @@
 package org.jboss.errai.cdi.client.event;
 
-import org.jboss.errai.common.client.api.annotations.Portable;
-
-@Portable
+// this is defined portable in the ErraiApp.properties file
 public class FinishEvent {
 
 }
+

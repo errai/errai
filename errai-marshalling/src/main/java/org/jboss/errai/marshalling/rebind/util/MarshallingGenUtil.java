@@ -33,10 +33,6 @@ public class MarshallingGenUtil {
   /**
    * Use 'errai.marshalling.serializableTypes' now.
    */
-  public static final String CONFIG_ERRAI_OLD_SERIALIZABLE_TYPE = "errai.bus.serializableTypes";
-
-  public static final String CONFIG_ERRAI_SERIALIZABLE_TYPE = "errai.marshalling.serializableTypes";
-  public static final String CONFIG_ERRAI_MAPPING_ALIASES = "errai.marshalling.mappingAliases";
 
   public static String getVarName(final MetaClass clazz) {
     return clazz.isArray()

@@ -23,10 +23,16 @@ import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
+import java.util.PropertyResourceBundle;
+import java.util.ResourceBundle;
 import java.util.Set;
 
 /**
@@ -63,7 +69,7 @@ public abstract class EnvUtil {
     return _isDevMode = Boolean.FALSE;
   }
 
-  private static volatile  Boolean _isProdMode;
+  private static volatile Boolean _isProdMode;
 
   public static boolean isProdMode() {
     if (_isProdMode != null) return _isProdMode;
@@ -99,45 +105,81 @@ public abstract class EnvUtil {
 
     exposedClasses.addAll(exposedFromScanner);
 
-    Properties props = scanner.getProperties("ErraiApp.properties");
-    if (props != null) {
-      log.debug("checking ErraiApp.properties for configured types ...");
+    final Enumeration<URL> erraiAppProperties;
 
-      for (Object o : props.keySet()) {
-        String key = (String) o;
-        if (key.equals(CONFIG_ERRAI_SERIALIZABLE_TYPE)) {
-          for (String s : props.getProperty(key).split(" ")) {
-            try {
-              Class<?> cls = Class.forName(s.trim());
-              exposedClasses.add(cls);
-            }
-            catch (Exception e) {
-              throw new RuntimeException("could not find class defined in ErraiApp.properties for serialization: " + s);
-            }
-          }
+    try {
+      erraiAppProperties = Thread.currentThread().getContextClassLoader()
+              .getResources("ErraiApp.properties");
+    }
+    catch (IOException e) {
+      throw new RuntimeException("failed to load ErraiApp.properties from classloader", e);
+    }
 
-          break;
-        }
 
-        if (key.equals(CONFIG_ERRAI_MAPPING_ALIASES)) {
-          for (String s : props.getProperty(key).split(" ")) {
-            try {
-              String[] mapping = s.split("->");
+    //  new PropertyResourceBundle(erraiAppProperties.nextElement().openStream())
 
-              if (mapping.length != 2) {
-                throw new RuntimeException("syntax error: mapping for marshalling alias: " + s);
+    while (erraiAppProperties.hasMoreElements()) {
+      InputStream inputStream = null;
+      try {
+        final URL url = erraiAppProperties.nextElement();
+
+        log.debug("checking " + url.getFile() + " for configured types ...");
+
+        inputStream = url.openStream();
+
+        ResourceBundle props = new PropertyResourceBundle(inputStream);
+        if (props != null) {
+
+          for (Object o : props.keySet()) {
+            String key = (String) o;
+            if (key.equals(CONFIG_ERRAI_SERIALIZABLE_TYPE)) {
+              for (String s : props.getString(key).split(" ")) {
+                try {
+                  Class<?> cls = Class.forName(s.trim());
+                  exposedClasses.add(cls);
+                }
+                catch (Exception e) {
+                  throw new RuntimeException("could not find class defined in ErraiApp.properties for serialization: " + s);
+                }
               }
 
-              Class<?> fromMapping = Class.forName(mapping[0].trim());
-              Class<?> toMapping = Class.forName(mapping[1].trim());
-
-              mappingAliases.put(fromMapping.getName(), toMapping.getName());
+              break;
             }
-            catch (Exception e) {
-              throw new RuntimeException("could not find class defined in ErraiApp.properties for mapping: " + s);
+
+            if (key.equals(CONFIG_ERRAI_MAPPING_ALIASES)) {
+              for (String s : props.getString(key).split(" ")) {
+                try {
+                  String[] mapping = s.split("->");
+
+                  if (mapping.length != 2) {
+                    throw new RuntimeException("syntax error: mapping for marshalling alias: " + s);
+                  }
+
+                  Class<?> fromMapping = Class.forName(mapping[0].trim());
+                  Class<?> toMapping = Class.forName(mapping[1].trim());
+
+                  mappingAliases.put(fromMapping.getName(), toMapping.getName());
+                }
+                catch (Exception e) {
+                  throw new RuntimeException("could not find class defined in ErraiApp.properties for mapping: " + s);
+                }
+              }
+              break;
             }
           }
-          break;
+        }
+      }
+      catch (IOException e) {
+        throw new RuntimeException("error reading ErraiApp.properties", e);
+      }
+      finally {
+        if (inputStream != null) {
+          try {
+            inputStream.close();
+          }
+          catch (IOException e) {
+            //
+          }
         }
       }
     }
@@ -180,16 +222,16 @@ public abstract class EnvUtil {
 
   public static Set<Class<?>> getAllPortableSubtypes(final Class<?> clazz) {
     final Set<Class<?>> portableSubtypes = new HashSet<Class<?>>();
-     if (clazz.isInterface() || isPortableType(clazz)) {
-       portableSubtypes.add(clazz);
-     }
+    if (clazz.isInterface() || isPortableType(clazz)) {
+      portableSubtypes.add(clazz);
+    }
 
-     for (Class<?> subType : ScannerSingleton.getOrCreateInstance().getSubTypesOf(clazz)) {
-       if (clazz.isInterface() || isPortableType(subType)) {
-         portableSubtypes.add(subType);
-       }
-     }
+    for (Class<?> subType : ScannerSingleton.getOrCreateInstance().getSubTypesOf(clazz)) {
+      if (clazz.isInterface() || isPortableType(subType)) {
+        portableSubtypes.add(subType);
+      }
+    }
 
-     return portableSubtypes;
+    return portableSubtypes;
   }
 }
