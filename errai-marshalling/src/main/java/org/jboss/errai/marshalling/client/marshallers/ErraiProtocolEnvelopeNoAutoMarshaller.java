@@ -104,7 +104,7 @@ public class ErraiProtocolEnvelopeNoAutoMarshaller implements Marshaller<Map<Str
             valueMarshaller = (Marshaller) StringMarshaller.INSTANCE;
           }
           else {
-            valueMarshaller = ctx.getMarshallerInstance(val.getClass().getName());
+            valueMarshaller = MarshallUtil.getMarshaller(val, ctx);
           }
         }
         buf.append(valueMarshaller.marshall(val, ctx));
@@ -113,6 +113,4 @@ public class ErraiProtocolEnvelopeNoAutoMarshaller implements Marshaller<Map<Str
 
     return buf.append("}").toString();
   }
-
-
 }

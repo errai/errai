@@ -16,14 +16,10 @@
 
 package org.jboss.errai.marshalling.client.util;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.meta.MetaParameterizedType;
-import org.jboss.errai.codegen.meta.MetaType;
+import org.jboss.errai.common.client.api.WrappedPortable;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
@@ -128,5 +124,17 @@ public class MarshallUtil {
           sb.append(ch);
         }
     }
+  }
+  
+  public static Marshaller<Object> getMarshaller(Object obj, MarshallingSession session) {
+    Marshaller<Object> m = session.getMarshallerInstance(obj.getClass().getName());
+    if (m == null && obj instanceof WrappedPortable) {
+      obj = ((WrappedPortable) obj).unwrap();
+      m = session.getMarshallerInstance(obj.getClass().getName());
+    }
+    if (m == null) {
+      throw new RuntimeException("no marshalling definition available for type:" + obj.getClass().getName());
+    }
+    return m;
   }
 }

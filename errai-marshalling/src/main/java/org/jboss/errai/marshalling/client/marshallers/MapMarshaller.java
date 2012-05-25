@@ -16,6 +16,12 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.AbstractMap;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
@@ -27,12 +33,6 @@ import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
-
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.AbstractMap;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -103,7 +103,7 @@ public class MapMarshaller<T extends Map> implements Marshaller<T> {
           keyMarshaller = MarshallUtil.getQualifiedNumberMarshaller(key);
         }
         else {
-          keyMarshaller = ctx.getMarshallerInstance(key.getClass().getName());
+          keyMarshaller = MarshallUtil.getMarshaller(key, ctx);
         }
         buf.append(("\"" + SerializationParts.EMBEDDED_JSON))
                 .append(MarshallUtil.jsonStringEscape(keyMarshaller.marshall(key, ctx)))
@@ -122,7 +122,7 @@ public class MapMarshaller<T extends Map> implements Marshaller<T> {
           valueMarshaller = MarshallUtil.getQualifiedNumberMarshaller(val);
         }
         else {
-          valueMarshaller = ctx.getMarshallerInstance(val.getClass().getName());
+          valueMarshaller = MarshallUtil.getMarshaller(val, ctx);
         }
         buf.append(valueMarshaller.marshall(val, ctx));
       }

@@ -77,7 +77,7 @@ public class DataBinder<T> {
    */
   public T unbind() {
     ((BindableProxy) model).unbind();
-    return unwrap();
+    return (T) this.model;
   }
 
   /**
@@ -91,19 +91,7 @@ public class DataBinder<T> {
    */
   public T unbind(String property) {
     ((BindableProxy) model).unbind(property);
-    return unwrap();
-  }
-
-  /**
-   * Unwraps the proxied model and returns the actual target model instance.
-   * 
-   * @return target model instance
-   */
-  public T unwrap() {
-    if (model != null) {
-      return (T) ((BindableProxy) model).getTarget();
-    }
-    return null;
+    return (T) this.model;
   }
 
   /**
@@ -112,6 +100,6 @@ public class DataBinder<T> {
    * @return the bound model instance.
    */
   public T getModel() {
-    return (T) model;
+    return (T) this.model;
   }
 }

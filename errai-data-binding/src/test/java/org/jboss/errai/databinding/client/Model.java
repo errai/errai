@@ -16,6 +16,7 @@
 
 package org.jboss.errai.databinding.client;
 
+import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.databinding.client.api.Bindable;
 
 /**
@@ -24,6 +25,7 @@ import org.jboss.errai.databinding.client.api.Bindable;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @Bindable
+@Portable
 public class Model {
 
   private String value;
@@ -52,5 +54,45 @@ public class Model {
 
   public void setAge(Integer age) {
     this._age = age;
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((_age == null) ? 0 : _age.hashCode());
+    result = prime * result + ((_name == null) ? 0 : _name.hashCode());
+    result = prime * result + ((value == null) ? 0 : value.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    Model other = (Model) obj;
+    if (_age == null) {
+      if (other._age != null)
+        return false;
+    }
+    else if (!_age.equals(other._age))
+      return false;
+    if (_name == null) {
+      if (other._name != null)
+        return false;
+    }
+    else if (!_name.equals(other._name))
+      return false;
+    if (value == null) {
+      if (other.value != null)
+        return false;
+    }
+    else if (!value.equals(other.value))
+      return false;
+    return true;
   }
 }

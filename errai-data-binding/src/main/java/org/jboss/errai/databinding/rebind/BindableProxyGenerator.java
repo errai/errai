@@ -77,7 +77,17 @@ public class BindableProxyGenerator {
             .finish()
             .publicConstructor(Parameter.of(bindable, "target"))
             .append(Stmt.loadClassMember("target").assignValue(Variable.get("target")))
+            .finish()
+            .publicMethod(bindable, "unwrap")
+            .append(Stmt.loadClassMember("target").returnValue())
+            .finish()
+            .publicMethod(boolean.class, "equals", Parameter.of(Object.class, "obj"))
+            .append(Stmt.loadClassMember("target").invoke("equals", Variable.get("obj")).returnValue())
+            .finish()
+            .publicMethod(int.class, "hashCode")
+            .append(Stmt.loadClassMember("target").invoke("hashCode").returnValue())
             .finish();
+            
 
     BeanInfo beanInfo;
     try {
@@ -140,10 +150,6 @@ public class BindableProxyGenerator {
 
   private void generateProxyAccessorMethods(PropertyDescriptor[] propertyDescriptors,
       ClassStructureBuilder<?> classBuilder) {
-
-    classBuilder.publicMethod(bindable, "getTarget")
-        .append(Stmt.loadClassMember("target").returnValue())
-        .finish();
 
     BlockBuilder<?> setMethod = classBuilder.publicMethod(void.class, "set",
         Parameter.of(String.class, "property"),

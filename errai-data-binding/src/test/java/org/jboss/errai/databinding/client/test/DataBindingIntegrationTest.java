@@ -16,11 +16,17 @@
 
 package org.jboss.errai.databinding.client.test;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.jboss.errai.databinding.client.Model;
 import org.jboss.errai.databinding.client.Module;
 import org.jboss.errai.databinding.client.ModuleWithInjectedDataBinder;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
+import org.jboss.errai.marshalling.client.Marshalling;
 import org.junit.Test;
 
 import com.google.gwt.user.client.ui.TextBox;
@@ -97,7 +103,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
   
   @Test
-  public void testMultipleBindings() {
+  public void testMultipleDataBindings() {
     ModuleWithInjectedDataBinder module =
         IOC.getBeanManager().lookupBean(ModuleWithInjectedDataBinder.class).getInstance();
 
@@ -133,5 +139,38 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     model.setValue("model.value");
     assertEquals("Widget for name should not have been updated", "ui.name", nameTextBox.getText());
     assertEquals("Widget for value not properly updated", "model.value", valueTextBox.getText());
+  }
+  
+  @Test
+  public void testBindableProxyMarshalling() {
+    ModuleWithInjectedDataBinder module =
+      IOC.getBeanManager().lookupBean(ModuleWithInjectedDataBinder.class).getInstance();
+
+    Model model = module.getModel();
+    String marshalledModel = Marshalling.toJSON(model);
+    assertEquals(model, Marshalling.fromJSON(marshalledModel, Model.class));
+  }
+  
+  @Test
+  public void testBindableProxyListMarshalling() {
+    ModuleWithInjectedDataBinder module =
+      IOC.getBeanManager().lookupBean(ModuleWithInjectedDataBinder.class).getInstance();
+
+    List<Model> modelList = new ArrayList<Model>();
+    modelList.add(module.getModel());
+    String marshalledModelList = Marshalling.toJSON(modelList);
+    assertEquals(modelList, Marshalling.fromJSON(marshalledModelList, List.class));
+  }
+  
+  @Test
+  public void testBindableProxyMapMarshalling() {
+    ModuleWithInjectedDataBinder module =
+      IOC.getBeanManager().lookupBean(ModuleWithInjectedDataBinder.class).getInstance();
+
+    Model model = module.getModel();
+    Map<Model, Model> modelMap = new HashMap<Model, Model>();
+    modelMap.put(model, model);
+    String marshalledModelMap = Marshalling.toJSON(modelMap);
+    assertEquals(modelMap, Marshalling.fromJSON(marshalledModelMap, Map.class));
   }
 }

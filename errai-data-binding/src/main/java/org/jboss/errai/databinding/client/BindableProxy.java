@@ -16,6 +16,7 @@
 
 package org.jboss.errai.databinding.client;
 
+import org.jboss.errai.common.client.api.WrappedPortable;
 import org.jboss.errai.databinding.client.api.Bindable;
 
 import com.google.gwt.user.client.ui.HasValue;
@@ -25,10 +26,10 @@ import com.google.gwt.user.client.ui.HasValue;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface BindableProxy {
+public interface BindableProxy extends WrappedPortable {
 
   /**
-   * Sets a property value on the target model instance. This method is invoked to change the state of the model in
+   * Sets a property value on the target (proxied model) instance. This method is invoked to change the state of the model in
    * response to UI changes.
    * 
    * @param property
@@ -37,13 +38,6 @@ public interface BindableProxy {
    *          new value of the property
    */
   public void set(String property, Object value);
-
-  /**
-   * Returns the target object (the actual model instance)
-   * 
-   * @return target object
-   */
-  public Object getTarget();
 
   /**
    * Binds the property with the given name to the provided widget.

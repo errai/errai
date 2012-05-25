@@ -27,6 +27,7 @@ import org.jboss.errai.marshalling.client.api.ParserFactory;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.marshallers.ListMarshaller;
 import org.jboss.errai.marshalling.client.marshallers.MapMarshaller;
+import org.jboss.errai.marshalling.client.util.MarshallUtil;
 import org.jboss.errai.marshalling.client.util.NumbersUtils;
 
 /**
@@ -35,6 +36,7 @@ import org.jboss.errai.marshalling.client.util.NumbersUtils;
  *
  * @author Mike Brock
  * @author Jonathan Fuerth <jfuerth@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public abstract class Marshalling {
 
@@ -77,7 +79,7 @@ public abstract class Marshalling {
       return NumbersUtils.qualifiedNumericEncoding(obj);
     }
     else {
-      return session.getMarshallerInstance(obj.getClass().getName()).marshall(obj, session);
+      return MarshallUtil.getMarshaller(obj, session).marshall(obj, session);
     }
   }
 

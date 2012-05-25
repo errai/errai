@@ -16,13 +16,12 @@
 
 package org.jboss.errai.marshalling.client.util;
 
-import org.jboss.errai.common.client.protocols.SerializationParts;
+import java.util.Collection;
+import java.util.Iterator;
+
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.marshallers.QualifyingMarshallerWrapper;
-
-import java.util.Collection;
-import java.util.Iterator;
 
 /**
  * @author Mike Brock
@@ -46,7 +45,7 @@ public class EncDecUtil {
           marshaller = MarshallUtil.getQualifiedNumberMarshaller(elem);
         }
         else {
-          marshaller = ctx.getMarshallerInstance(elem.getClass().getName());
+          marshaller = MarshallUtil.getMarshaller(elem, ctx);
         }
   
         buf.append(marshaller.marshall(elem, ctx));
