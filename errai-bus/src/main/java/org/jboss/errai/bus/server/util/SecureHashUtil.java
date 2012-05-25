@@ -30,36 +30,9 @@ public class SecureHashUtil {
   final static String secureRandomAlgorithm = "SHA1PRNG";
   final static SecureRandom random;
 
-  final static long[] saltTable;
-
   static {
     try {
       random = SecureRandom.getInstance(secureRandomAlgorithm);
-      random.setSeed(SecureRandom.getInstance(secureRandomAlgorithm).generateSeed(128));
-
-      final Random rnd1 = new Random(random.nextLong());
-      final Random rnd2 = new Random(random.nextLong());
-      final Random rnd3 = new Random(random.nextLong());
-      final Random rnd4 = new Random(random.nextLong());
-
-      saltTable = new long[random.nextInt(500) + 500];
-
-      for (int i = 0; i < saltTable.length; i++) {
-        switch (random.nextInt(Integer.MAX_VALUE) % 4) {
-          case 0:
-            saltTable[i] = rnd1.nextLong();
-            break;
-          case 1:
-            saltTable[i] = rnd2.nextLong();
-            break;
-          case 2:
-            saltTable[i] = rnd3.nextLong();
-            break;
-          case 3:
-            saltTable[i] = rnd4.nextLong();
-            break;
-        }
-      }
     }
     catch (NoSuchAlgorithmException e) {
       throw new RuntimeException("runtime does not support secure random algorithm: " + secureRandomAlgorithm);
@@ -82,7 +55,7 @@ public class SecureHashUtil {
    * @return a hex string representation of the hash.
    */
   public static String nextSecureHash(final String algorithm) {
-    return nextSecureHash(algorithm, SecureRandom.getSeed(128));
+    return nextSecureHash(algorithm, seed());
   }
 
   /**
@@ -96,33 +69,26 @@ public class SecureHashUtil {
   public static String nextSecureHash(final String algorithm, final byte[]... additionalSeed) {
     byte[][] seeds;
     if (additionalSeed != null) {
-      seeds = new byte[additionalSeed.length + 2][];
+      seeds = new byte[additionalSeed.length + 1][];
       System.arraycopy(additionalSeed, 0, seeds, 0, additionalSeed.length);
-      seeds[seeds.length - 2] = simpleSeed(getSalt());
-      seeds[seeds.length - 1] = simpleSeed(getSalt());
+      seeds[seeds.length - 1] = seed();
     }
     else {
-      seeds = new byte[][]{simpleSeed(getSalt()), simpleSeed(getSalt())};
+      seeds = new byte[][]{seed()};
     }
 
     return hashToHexString(_nextSecureHash(algorithm, seeds));
   }
 
-  private static byte[] _nextSecureHash(final String algorithm, final byte[]... additionalSeed) {
+  private static byte[] _nextSecureHash(final String algorithm, final byte[]... seeds) {
     try {
-     final MessageDigest md = MessageDigest.getInstance(algorithm);
+      final MessageDigest md = MessageDigest.getInstance(algorithm);
 
-      if (additionalSeed != null) {
-        for (byte[] seed : additionalSeed) {
-          md.update(seed);
-        }
+      for (byte[] seed : seeds) {
+        md.update(seed);
       }
 
-      byte[] randBytes = new byte[64];
-      seed(randBytes);
-      md.update(randBytes);
-
-      for (int i = 0; i < 1000; i++) {
+      for (int i = 0; i < 100; i++) {
         md.update(md.digest());
       }
 
@@ -141,31 +107,30 @@ public class SecureHashUtil {
     return hexString.toString();
   }
 
-  private static byte[] simpleSeed(long salt) {
-    return _nextSecureHash("SHA-256",
-            String.valueOf(System.nanoTime() % Long.MAX_VALUE).getBytes(), String.valueOf(salt).getBytes());
+  private static byte[] seed() {
+    byte[] seed = new byte[16];
+    random.nextBytes(seed);
+    return seed;
   }
 
-  private static byte[] seed(byte[] seedArray) {
-    for (int i = 0; i < seedArray.length; i++) {
-      seedArray[i] = (byte) (getSalt() % Byte.MAX_VALUE);
-      if (getSalt() % 1000 > 499) {
-        seedArray[i] = (byte) -seedArray[i];
+  public static void main(String[] args) {
+
+    for (int x = 0; x < 10; x++) {
+
+      long tm = System.currentTimeMillis();
+      for (int i = 0; i < 10000; i++) {
+        nextSecureHash("SHA-256");
       }
+      System.out.println("nextSecureHash() = " + (System.currentTimeMillis() - tm));
+
+      tm = System.currentTimeMillis();
+      for (int i = 0; i < 10000; i++) {
+        byte[] bytez = new byte[64];
+        random.nextBytes(bytez);
+        hashToHexString(bytez);
+      }
+      System.out.println("nextBytes() = " + (System.currentTimeMillis() - tm));
+
     }
-    return seedArray;
-  }
-
-
-
-  // doesn't need to be synchronized. merely increments to decrease chances of nanoTime collisions.
-  private static long saltCounter = random.nextLong();
-  private static long getSalt() {
-    int index = (int) ((System.nanoTime() + (++saltCounter)) % saltTable.length);
-    if (index < 0) {
-      index = -index;
-    }
-
-    return saltTable[index];
   }
 }
