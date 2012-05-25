@@ -7,6 +7,7 @@ import org.jboss.errai.ui.shared.api.annotations.Insert;
 import org.jboss.errai.ui.shared.api.annotations.Replace;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
@@ -24,6 +25,9 @@ public class BasicComponent extends Composite {
 
   @Replace
   private TextBox c3;
+
+  @Replace
+  private Anchor c4;
   
   @PostConstruct
   public void init()
@@ -47,6 +51,10 @@ public class BasicComponent extends Composite {
   public void setTextBox(TextBox box)
   {
     this.c3 = box;
+  }
+  
+  public Anchor getC4() {
+    return c4;
   }
   
 }

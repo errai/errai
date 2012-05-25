@@ -9,6 +9,7 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HasHTML;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -42,6 +43,8 @@ public final class TemplateUtil {
         field.getElement().setAttribute(node.getNodeName(), node.getNodeValue());
       }
       parentElement.replaceChild(field.getElement(), element);
+      if(field instanceof HasHTML)
+        ((HasHTML) field).setHTML(element.getInnerHTML());
     } catch (Exception e) {
       throw new IllegalStateException("Could not replace Element with [data-field=" + fieldName
               + "] - Did you already @Insert or @Replace a parent Element?", e);

@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.user.client.ui.Anchor;
 
 public class BasicTemplateTest extends AbstractErraiCDITest {
 
@@ -43,6 +44,14 @@ public class BasicTemplateTest extends AbstractErraiCDITest {
     Element c3 = app.getComponent().getTextBox().getElement();
     assertEquals("c3", c3.getAttribute("data-field"));
     assertEquals("address", c3.getAttribute("name"));
+
+    Anchor c4comp = app.getComponent().getC4();
+    assertEquals("Inner HTML should be preserved when component implements ", "<div>LinkHTML</div>", c4comp.getHTML());
+    Element c4 = c4comp.getElement();
+    assertEquals("c4", c4.getAttribute("data-field"));
+    assertEquals("blah", c4.getAttribute("href"));
+    assertEquals("DIV", c4.getFirstChildElement().getTagName());
+    assertEquals("LinkHTML", c4.getFirstChildElement().getInnerHTML());
   }
 
 }
