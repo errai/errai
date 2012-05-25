@@ -152,8 +152,8 @@ public class TemplatedDecorator extends IOCDecoratorExtension<Templated> {
 
         builder.append(Stmt.loadVariable(fieldsVarName).invoke(
                 "add",
-                Stmt.invokeStatic(TemplateUtil.class, "attachField", component, InjectUtil.getPublicOrPrivateFieldValue(ctx
-                        .getInjectionContext().getProcessingContext(), component, field))));
+                InjectUtil.getPublicOrPrivateFieldValue(ctx.getInjectionContext().getProcessingContext(), component,
+                        field)));
       }
       else if (field.isAnnotationPresent(Replace.class)) {
         builder.append(Stmt.invokeStatic(TemplateUtil.class, "compositeComponentReplace", InjectUtil
@@ -162,8 +162,8 @@ public class TemplatedDecorator extends IOCDecoratorExtension<Templated> {
 
         builder.append(Stmt.loadVariable(fieldsVarName).invoke(
                 "add",
-                Stmt.invokeStatic(TemplateUtil.class, "attachField", component, InjectUtil.getPublicOrPrivateFieldValue(ctx
-                        .getInjectionContext().getProcessingContext(), component, field))));
+                InjectUtil.getPublicOrPrivateFieldValue(ctx.getInjectionContext().getProcessingContext(), component,
+                        field)));
       }
     }
   }

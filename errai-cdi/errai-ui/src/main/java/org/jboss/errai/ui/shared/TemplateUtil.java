@@ -49,15 +49,6 @@ public final class TemplateUtil {
     }
   }
 
-  public static Widget attachField(Composite component, Widget field) {
-    setParentNative(component, field);
-    return field;
-  }
-
-  private static native void setParentNative(Composite component, Widget field) /*-{
-		field.@com.google.gwt.user.client.ui.Composite::setParent(Lcom/google/gwt/user/client/ui/Widget;)(component);
-  }-*/;
-
   public static void initWidget(Composite component, Element wrapped, List<Widget> fields) {
     initWidgetNative(component, new TemplateWidget(wrapped, fields));
     DOM.setEventListener(component.getElement(), component);
