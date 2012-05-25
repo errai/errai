@@ -7,6 +7,7 @@ import java.util.Set;
 import org.jboss.errai.cdi.injection.client.ApplicationScopedBean;
 import org.jboss.errai.cdi.injection.client.CommonInterface;
 import org.jboss.errai.cdi.injection.client.DependentScopedBean;
+import org.jboss.errai.cdi.injection.client.DependentScopedBeanWithDependencies;
 import org.jboss.errai.cdi.injection.client.InheritedApplicationScopedBean;
 import org.jboss.errai.cdi.injection.client.qualifier.LincolnBar;
 import org.jboss.errai.cdi.injection.client.qualifier.QualA;
@@ -46,10 +47,15 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
     final DependentScopedBean bean1 = beanInst.getBean1();
     assertNotNull("bean1 is null", bean1);
 
+    final DependentScopedBeanWithDependencies beanWithDependencies = beanInst.getBeanWithDependencies();
+    assertNotNull("beanWithDependencies is null", beanWithDependencies);
+
+    final DependentScopedBean bean2 = beanWithDependencies.getBean();
+    assertNotSame("bean1 and bean2 should be different", bean1, bean2);
+
     final InheritedApplicationScopedBean beanInst2 = bean.getInstance();
     assertSame("bean is not observing application scope", beanInst, beanInst2);
   }
-
 
   public void testBeanManagerAPIs() {
     final IOCBeanManager mgr = IOC.getBeanManager();
@@ -91,7 +97,6 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
   }
 
   public void testQualifiedLookupFailure() {
-
     final Annotation wrongAnno = new Annotation() {
       @Override
       public Class<? extends Annotation> annotationType() {

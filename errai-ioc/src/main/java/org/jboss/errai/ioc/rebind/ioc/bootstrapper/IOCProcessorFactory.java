@@ -287,7 +287,6 @@ public class IOCProcessorFactory {
                   throw new RuntimeException("illegal producer type");
               }
 
-
               ProducerInjector producerInjector
                       = new ProducerInjector(
                       injectionContext,

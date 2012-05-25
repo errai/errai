@@ -21,6 +21,9 @@ public class PostConstructOrderTest extends AbstractErraiCDITest {
   public void testPostConstructFiresInCorrectOrder() {
     PostConstructTestUtil.reset();
     final PostConstrBeanA beanA = IOC.getBeanManager().lookupBean(PostConstrBeanA.class).getInstance();
+
+    assertNotNull("PostConstrBeanA was not resolved", beanA);
+
     final List<String> postConstructOrder = PostConstructTestUtil.getOrderOfFiring();
 
     assertEquals(PostConstrBeanC.class.getName(), postConstructOrder.get(0));
