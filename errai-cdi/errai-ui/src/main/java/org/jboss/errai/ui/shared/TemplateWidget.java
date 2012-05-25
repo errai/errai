@@ -25,14 +25,6 @@ public class TemplateWidget extends Panel {
     }
   }
 
-  private static native void onAttachNative(Widget widget) /*-{
-		widget.@com.google.gwt.user.client.ui.Widget::onAttach()();
-  }-*/;
-
-  private static native void onDetachNative(Widget widget) /*-{
-		widget.@com.google.gwt.user.client.ui.Widget::onDetach()();
-  }-*/;
-
   private static native void setParentNative(Widget parent, Widget field) /*-{
 		field.@com.google.gwt.user.client.ui.Widget::setParent(Lcom/google/gwt/user/client/ui/Widget;)(parent);
   }-*/;
