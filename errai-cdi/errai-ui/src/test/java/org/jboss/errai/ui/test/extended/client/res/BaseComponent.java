@@ -27,4 +27,8 @@ public class BaseComponent extends Composite {
     c2.getElement().setAttribute("id", "c2");
   }
   
+  public Button getC2Base() {
+    return c2;
+  }
+  
 }
