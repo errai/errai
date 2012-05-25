@@ -32,11 +32,11 @@ public class BasicTemplateTest extends AbstractErraiCDITest {
   }
 
   @Test
-  public void testAttributesAreMergedFromTemplateToComponentElement() {
+  public void testAttributesFromTemplateOverrideComponentElement() {
     BasicTemplateTestApp app = IOC.getBeanManager().lookupBean(BasicTemplateTestApp.class).getInstance();
     
     Element c1 = app.getComponent().getLabel().getElement();
-    assertEquals("gwt-Label something", c1.getAttribute("class"));
+    assertEquals("something", c1.getAttribute("class"));
     assertEquals("left", c1.getAttribute("align"));
     assertEquals("c1", c1.getAttribute("data-field"));
 

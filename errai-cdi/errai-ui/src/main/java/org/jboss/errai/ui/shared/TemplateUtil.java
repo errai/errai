@@ -36,11 +36,10 @@ public final class TemplateUtil {
     Element parentElement = element.getParentElement();
 
     try {
-      final JsArray<Node> attributes = getAttributes(element);
-      for (int i = 0; i < attributes.length(); i++) {
-        final Node node = attributes.get(i);
-        field.getElement().setAttribute(node.getNodeName(),
-                join(new String[] { field.getElement().getAttribute(node.getNodeName()), node.getNodeValue() }, " "));
+      final JsArray<Node> templateAttributes = getAttributes(element);
+      for (int i = 0; i < templateAttributes.length(); i++) {
+        final Node node = templateAttributes.get(i);
+        field.getElement().setAttribute(node.getNodeName(), node.getNodeValue());
       }
       parentElement.replaceChild(field.getElement(), element);
     } catch (Exception e) {
