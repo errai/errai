@@ -16,7 +16,6 @@
 
 package org.jboss.errai.databinding.client;
 
-import org.jboss.errai.common.client.api.WrappedPortable;
 import org.jboss.errai.databinding.client.api.Bindable;
 
 import com.google.gwt.user.client.ui.HasValue;
@@ -26,7 +25,7 @@ import com.google.gwt.user.client.ui.HasValue;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface BindableProxy extends WrappedPortable {
+public interface BindableProxy {
 
   /**
    * Sets a property value on the target (proxied model) instance. This method is invoked to change the state of the model in

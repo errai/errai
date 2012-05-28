@@ -36,6 +36,7 @@ import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.common.client.api.WrappedPortable;
 import org.jboss.errai.databinding.client.BindableProxy;
 import org.jboss.errai.databinding.client.api.Bindable;
 
@@ -62,6 +63,7 @@ public class BindableProxyGenerator {
         ClassBuilder.define(bindable.getSimpleName() + "Proxy", bindable)
             .packageScope()
             .implementsInterface(BindableProxy.class)
+            .implementsInterface(WrappedPortable.class)
             .body()
             .privateField("bindings", MetaClassFactory.get(new TypeLiteral<Map<String, HasValue>>() {}))
             .initializesWith(Stmt.newObject(new TypeLiteral<HashMap<String, HasValue>>() {}))
@@ -87,7 +89,6 @@ public class BindableProxyGenerator {
             .publicMethod(int.class, "hashCode")
             .append(Stmt.loadClassMember("target").invoke("hashCode").returnValue())
             .finish();
-            
 
     BeanInfo beanInfo;
     try {
@@ -170,8 +171,7 @@ public class BindableProxyGenerator {
 
           classBuilder.publicMethod(setterMethod.getReturnType(), setterMethod.getName(),
               Parameter.of(setterMethod.getParameterTypes()[0], propertyDescriptor.getName()))
-              .append(Stmt
-                    .loadClassMember("target").invoke(setterMethod.getName(),
+              .append(Stmt.loadClassMember("target").invoke(setterMethod.getName(),
                         Cast.to(setterMethod.getParameterTypes()[0], Stmt.loadVariable(propertyDescriptor.getName()))))
               .append(
                   Stmt.if_(

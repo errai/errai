@@ -28,7 +28,8 @@ import org.jboss.errai.databinding.client.api.Bindable;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class BindableProxyFactory {
-  private static Map<Class<?>, BindableProxyProvider> bindableProxyProviders = new HashMap<Class<?>, BindableProxyProvider>();
+  private static Map<Class<?>, BindableProxyProvider> bindableProxyProviders =
+      new HashMap<Class<?>, BindableProxyProvider>();
 
   /**
    * Returns a proxy for the provided model instance. Changes to the proxy's state will result in updates on the widget
