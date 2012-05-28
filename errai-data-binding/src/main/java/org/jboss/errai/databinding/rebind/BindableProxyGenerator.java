@@ -136,14 +136,16 @@ public class BindableProxyGenerator {
                 .append(
                     Stmt.loadVariable("widget").invoke(
                         "setValue",
-                        Stmt.loadVariable("initialState").invoke("getInitialValue", Variable.get("target"),
-                            Variable.get("widget"))))
+                        Stmt.loadVariable("initialState").invoke("getInitialValue",
+                            Stmt.loadVariable("this").invoke("get", Variable.get("property")),
+                            Stmt.loadVariable("widget").invoke("getValue"))))
                 .append(
                     Stmt.loadVariable("this").invoke(
                         "set",
                         Variable.get("property"),
-                        Stmt.loadVariable("initialState").invoke("getInitialValue", Variable.get("target"),
-                            Variable.get("widget"))))
+                        Stmt.loadVariable("initialState").invoke("getInitialValue",
+                            Stmt.loadVariable("this").invoke("get", Variable.get("property")),
+                            Stmt.loadVariable("widget").invoke("getValue"))))
                 .finish()
             )
         .finish();
@@ -174,6 +176,9 @@ public class BindableProxyGenerator {
 
   private void generateProxyAccessorMethods(PropertyDescriptor[] propertyDescriptors,
       ClassStructureBuilder<?> classBuilder) {
+
+    BlockBuilder<?> getMethod = classBuilder.publicMethod(Object.class, "get",
+        Parameter.of(String.class, "property"));
 
     BlockBuilder<?> setMethod = classBuilder.publicMethod(void.class, "set",
         Parameter.of(String.class, "property"),
@@ -213,12 +218,21 @@ public class BindableProxyGenerator {
 
         Method getterMethod = propertyDescriptor.getReadMethod();
         if (getterMethod != null && !Modifier.isFinal(getterMethod.getModifiers())) {
+          getMethod
+              .append(Stmt
+                  .if_(Bool.expr(Stmt.loadVariable("property").invoke("equals", propertyDescriptor.getName())))
+                  .append(
+                      Stmt.loadVariable("this").invoke(getterMethod.getName()).returnValue())
+                  .finish()
+              );
+
           classBuilder.publicMethod(getterMethod.getReturnType(), getterMethod.getName())
               .append(Stmt.loadClassMember("target").invoke(getterMethod.getName()).returnValue())
               .finish();
         }
       }
     }
+    getMethod.append(Stmt.load(null).returnValue()).finish();
     setMethod.finish();
   }
 }

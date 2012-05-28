@@ -15,8 +15,8 @@ public enum InitialState {
    */
   FROM_MODEL {
     @Override
-    public <T> T getInitialValue(T model, T widget) {
-      return model;
+    public <T> T getInitialValue(T modelValue, T widgetValue) {
+      return modelValue;
     }
   },
   
@@ -26,20 +26,20 @@ public enum InitialState {
    */
   FROM_UI {
     @Override
-    public <T> T getInitialValue(T model, T widget) {
-      return widget;
+    public <T> T getInitialValue(T modelValue, T widgetValue) {
+      return widgetValue;
     }
   };
   
   /**
    * Returns the model value or the UI value, as appropriate.
    * 
-   * @param model
+   * @param modelValue
    *          The pre-existing model value
-   * @param widget
+   * @param widgetValue
    *          The pre-existing UI widget value.
    * @return Either model or widget. Return value will be null if the
    *         corresponding parameter value is null.
    */
-  public abstract <T> T getInitialValue(T model, T widget);
+  public abstract <T> T getInitialValue(T modelValue, T widgetValue);
 }

@@ -44,7 +44,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
 
   @Test
-  public void testDataBinding() {
+  public void testBasicBinding() {
     Module module = IOC.getBeanManager().lookupBean(Module.class).getInstance();
 
     Model model = module.getModel();
@@ -58,7 +58,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
 
   @Test
-  public void testDataBindingUsingInjectedModel() {
+  public void testBindingUsingInjection() {
     ModuleWithInjectedDataBinder module =
         IOC.getBeanManager().lookupBean(ModuleWithInjectedDataBinder.class).getInstance();
 
@@ -71,6 +71,17 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     nameTextBox.setValue("UI change", true);
     assertEquals("Model not properly updated", "UI change", model.getName());
   }
+  
+  @Test
+  public void testInitialStateSync() {
+    Module module = IOC.getBeanManager().lookupBean(Module.class).getInstance();
+    
+    module.getModel().setName("initial name");
+    
+    module.getDataBinder().bind(module.getTextBox(), "name");
+    assertEquals("Widget not properly initialized based on model's state", "initial name", 
+        module.getTextBox().getText());
+  }
 
   @Test
   public void testUnbindingSingleProperty() {
@@ -79,7 +90,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
 
     Model model = module.getModel();
     TextBox textBox = module.getTextBox();
-    
+
     model.setValue("model change");
     assertEquals("Widget should not have been updated because unbind was called", "", textBox.getText());
 
