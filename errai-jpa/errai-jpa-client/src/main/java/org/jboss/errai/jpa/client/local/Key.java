@@ -110,7 +110,7 @@ public class Key<X, T> {
   }
 
   public String toJson() {
-    return "{ entityType: \"" + entityType.getJavaType().getName()
-            + "\", id: " + Marshalling.toJSON(id) + "}";
+    return ("{ entityType: \"" + entityType.getJavaType().getName()
+            + "\", id: " + Marshalling.toJSON(id) + "}").replace('\"', '!');
   }
 }

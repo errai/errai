@@ -353,6 +353,8 @@ public class ErraiJpaTest extends GWTTestCase {
 
     assertEquals(artist.toString(), fetchedArtist.toString());
     assertEquals(album.toString(), fetchedAlbum.toString());
+
+    assertSame(fetchedAlbum, em.find(Album.class, fetchedAlbum.getId()));
   }
 
   public void testPersistNewEntityLifecycle() throws Exception {

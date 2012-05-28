@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.persistence.CascadeType;
 import javax.persistence.EntityExistsException;
@@ -45,7 +44,7 @@ public abstract class ErraiEntityManager implements EntityManager {
   /**
    * The actual storage backend.
    */
-  private final StorageBackend backend = new WebStorageBackend();
+  private final StorageBackend backend = new WebStorageBackend(this); // XXX publishing reference to partially-constructed object
 
   /**
    * Constructor for subclasses.
@@ -115,26 +114,10 @@ public abstract class ErraiEntityManager implements EntityManager {
    * @return the generated ID value, which has already been set on the entity
    *         instance.
    */
-  public <X, T> T generateAndSetLocalId(X entityInstance, ErraiSingularAttribute<X, T> attr) {
+  private <X, T> T generateAndSetLocalId(X entityInstance, ErraiSingularAttribute<X, T> attr) {
     T nextId = attr.getValueGenerator().next();
     attr.set(entityInstance, nextId);
     return nextId;
-  }
-
-  private <X, T> Key<X, T> lookupManagedEntity(X entity, boolean throwIfAbsent) {
-    // this implementation becomes poor when the persistence context is large.
-    // Turning the persistenceContext into a bimap where the value set is done by object identity would be better.
-    // in fact, for the generics to behave themselves, it's probably best to create a whole PersistenceContext class.
-    for (Entry<Key<?, ?>, Object> entry : persistenceContext.entrySet()) {
-      if (entry.getValue() == entity) {
-        return (Key<X, T>) entry.getKey();
-      }
-    }
-
-    if (throwIfAbsent) {
-      throw new IllegalArgumentException("Not a managed entity: " + entity);
-    }
-    return null;
   }
 
   /**
@@ -213,6 +196,27 @@ public abstract class ErraiEntityManager implements EntityManager {
   /**
    * Creates the key that describes the given entity, <b>generating and setting
    * it if it is presently unset and the given entity type's ID is configured to
+   * be generated on demand</b>. This version of the {@code keyFor()} method
+   * assumes the given object's entity type can be obtained by calling {@code
+   * entity.getClass()}. If you already have a specific entity type in mind, use
+   * the {@link #keyFor(ErraiEntityType, Object)} version of the method.
+   *
+   * @param entityType
+   *          The entity type of the entity
+   * @param entity
+   *          The entity instance. <b>Side effect: this instance may have its ID
+   *          value initialized as a result of this call</b>.
+   * @return The key for the given entity, which--for generated values--may have
+   *         just been set on the entity.
+   */
+  public <X> Key<X, ?> keyFor(X entity) {
+    ErraiEntityType<X> entityType = getMetamodel().entity(getNarrowedClass(entity));
+    return keyFor(entityType, entity);
+  }
+
+  /**
+   * Creates the key that describes the given entity, <b>generating and setting
+   * it if it is presently unset and the given entity type's ID is configured to
    * be generated on demand</b>.
    *
    * @param entityType
@@ -223,7 +227,7 @@ public abstract class ErraiEntityManager implements EntityManager {
    * @return The key for the given entity, which--for generated values--may have
    *         just been set on the entity.
    */
-  private <X> Key<X, ?> keyFor(ErraiEntityType<X> entityType, X entity) {
+  public <X> Key<X, ?> keyFor(ErraiEntityType<X> entityType, X entity) {
     ErraiSingularAttribute<? super X, ?> idAttr;
     switch (entityType.getIdType().getPersistenceType()) {
     case BASIC:
