@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * A utility class for testing the equality of qualifiers at runtime.
+ *
  * @author Mike Brock
  */
 public class QualifierUtil {

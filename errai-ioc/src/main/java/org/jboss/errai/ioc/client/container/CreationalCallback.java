@@ -26,7 +26,7 @@ package org.jboss.errai.ioc.client.container;
 public interface CreationalCallback<T> {
   /**
    * Returns a new instance of the bean which this <tt>CreationalCallback</tt> represents. It does not however, return
-   * the bean in a ready-to-user state. Any {@link InitializationCallback} tasks or {@link ProxyResolver} tasks should
+   * the bean in a ready-to-use state. Any {@link InitializationCallback} tasks or {@link ProxyResolver} tasks should
    * be added to the {@link CreationalContext} by this method, only to be called by the bean manager itself, before
    * putting all beans created within the context into service.
    *

@@ -112,6 +112,11 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
       public Class<? extends Annotation> annotationType() {
         return QualV.class;
       }
+
+      @Override
+      public int amount() {
+        return 5;
+      }
     };
 
     final QualV qualOranges = new QualV() {
@@ -123,6 +128,11 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
       @Override
       public Class<? extends Annotation> annotationType() {
         return QualV.class;
+      }
+
+      @Override
+      public int amount() {
+        return 6;
       }
     };
 

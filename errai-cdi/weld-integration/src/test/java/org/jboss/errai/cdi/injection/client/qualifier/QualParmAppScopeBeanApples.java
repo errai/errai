@@ -7,6 +7,7 @@ import javax.enterprise.context.ApplicationScoped;
 /**
  * @author Mike Brock
  */
-@ApplicationScoped @QualV(QualEnum.APPLES)
+@ApplicationScoped
+@QualV(value = QualEnum.APPLES, amount = 10)
 public class QualParmAppScopeBeanApples implements CommonInterfaceB {
 }
