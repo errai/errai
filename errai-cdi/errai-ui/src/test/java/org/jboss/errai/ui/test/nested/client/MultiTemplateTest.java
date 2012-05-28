@@ -21,7 +21,8 @@ public class MultiTemplateTest extends AbstractErraiCDITest {
     System.out.println(app.getComponent().getElement().getInnerHTML());
     assertTrue(app.getComponent().getElement().getInnerHTML().contains("<h1>This will be rendered</h1>"));
     assertTrue(app.getComponent().getElement().getInnerHTML().contains("<div>This will be rendered</div>"));
-    assertFalse(app.getComponent().getElement().getInnerHTML().contains("This will not be rendered"));
+    assertTrue(app.getComponent().getButton().getElement().getInnerHTML()
+            .contains("This will be rendered inside button"));
 
     Element lbl = Document.get().getElementById("c1a");
     assertNotNull(lbl);

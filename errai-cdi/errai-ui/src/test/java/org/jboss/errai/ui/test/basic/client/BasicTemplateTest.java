@@ -7,6 +7,7 @@ import org.junit.Test;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.Image;
 
 public class BasicTemplateTest extends AbstractErraiCDITest {
 
@@ -35,7 +36,7 @@ public class BasicTemplateTest extends AbstractErraiCDITest {
   @Test
   public void testAttributesFromTemplateOverrideComponentElement() {
     BasicTemplateTestApp app = IOC.getBeanManager().lookupBean(BasicTemplateTestApp.class).getInstance();
-    
+
     Element c1 = app.getComponent().getLabel().getElement();
     assertEquals("something", c1.getAttribute("class"));
     assertEquals("left", c1.getAttribute("align"));
@@ -44,6 +45,11 @@ public class BasicTemplateTest extends AbstractErraiCDITest {
     Element c3 = app.getComponent().getTextBox().getElement();
     assertEquals("c3", c3.getAttribute("data-field"));
     assertEquals("address", c3.getAttribute("name"));
+  }
+
+  @Test
+  public void testHasHTMLPreservesInnerHTML() throws Exception {
+    BasicTemplateTestApp app = IOC.getBeanManager().lookupBean(BasicTemplateTestApp.class).getInstance();
 
     Anchor c4comp = app.getComponent().getC4();
     assertEquals("Inner HTML should be preserved when component implements ", "<div>LinkHTML</div>", c4comp.getHTML());
@@ -52,6 +58,16 @@ public class BasicTemplateTest extends AbstractErraiCDITest {
     assertEquals("blah", c4.getAttribute("href"));
     assertEquals("DIV", c4.getFirstChildElement().getTagName());
     assertEquals("LinkHTML", c4.getFirstChildElement().getInnerHTML());
+  }
+
+  @Test
+  public void testHasHTMLReparentsChildElements() throws Exception {
+    BasicTemplateTestApp app = IOC.getBeanManager().lookupBean(BasicTemplateTestApp.class).getInstance();
+
+    Anchor c5 = app.getComponent().getC5();
+    Image c6 = app.getComponent().getC6();
+    
+    assertEquals(c6.getElement(), c5.getElement().getFirstChildElement());
   }
 
 }

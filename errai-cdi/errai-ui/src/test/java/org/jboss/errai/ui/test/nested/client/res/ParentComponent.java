@@ -26,4 +26,8 @@ public class ParentComponent extends Composite {
     button.getElement().setAttribute("id", "c2");
   }
   
+  public Button getButton() {
+    return button;
+  }
+  
 }

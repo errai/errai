@@ -10,6 +10,7 @@ import org.jboss.errai.ui.shared.api.annotations.Templated;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 
@@ -28,6 +29,12 @@ public class BasicComponent extends Composite {
 
   @Replace
   private Anchor c4;
+  
+  @Replace
+  private Image c6;
+
+  @Replace
+  private Anchor c5;
   
   @PostConstruct
   public void init()
@@ -57,4 +64,11 @@ public class BasicComponent extends Composite {
     return c4;
   }
   
+  public Anchor getC5() {
+    return c5;
+  }
+  
+  public Image getC6() {
+    return c6;
+  }
 }
