@@ -82,6 +82,11 @@ public class QualiferEqualityFactoryGenerator extends Generator {
                                                 final TreeLogger logger,
                                                 final GeneratorContext generatorContext) {
 
+    final PrintWriter printWriter = generatorContext.tryCreate(logger, packageName, className);
+    if (printWriter == null) {
+      return;
+    }
+
     final TypeOracle oracle = generatorContext.getTypeOracle();
 
     final ClassStructureBuilder<? extends ClassStructureBuilder<?>> builder = ClassBuilder.define(packageName + "." + className)
@@ -152,7 +157,6 @@ public class QualiferEqualityFactoryGenerator extends Generator {
                     .finish()).finish();
 
 
-    final PrintWriter printWriter = generatorContext.tryCreate(logger, packageName, className);
     String out = builder.toJavaString();
 
     System.out.println(out);
