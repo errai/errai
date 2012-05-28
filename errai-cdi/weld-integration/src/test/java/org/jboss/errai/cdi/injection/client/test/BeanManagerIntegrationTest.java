@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.jboss.errai.cdi.injection.client.ApplicationScopedBean;
 import org.jboss.errai.cdi.injection.client.CommonInterface;
+import org.jboss.errai.cdi.injection.client.CommonInterfaceB;
 import org.jboss.errai.cdi.injection.client.DependentScopedBean;
 import org.jboss.errai.cdi.injection.client.DependentScopedBeanWithDependencies;
 import org.jboss.errai.cdi.injection.client.InheritedApplicationScopedBean;
@@ -14,6 +15,10 @@ import org.jboss.errai.cdi.injection.client.qualifier.QualA;
 import org.jboss.errai.cdi.injection.client.qualifier.QualAppScopeBeanA;
 import org.jboss.errai.cdi.injection.client.qualifier.QualAppScopeBeanB;
 import org.jboss.errai.cdi.injection.client.qualifier.QualB;
+import org.jboss.errai.cdi.injection.client.qualifier.QualEnum;
+import org.jboss.errai.cdi.injection.client.qualifier.QualParmAppScopeBeanApples;
+import org.jboss.errai.cdi.injection.client.qualifier.QualParmAppScopeBeanOranges;
+import org.jboss.errai.cdi.injection.client.qualifier.QualV;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.container.IOC;
@@ -70,7 +75,7 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
   }
 
   public void testQualifiedLookup() {
-    final Annotation qualA = new Annotation() {
+    final QualA qualA = new QualA() {
       @Override
       public Class<? extends Annotation> annotationType() {
         return QualA.class;
@@ -96,8 +101,45 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
     assertTrue("wrong bean looked up", beanB.getInstance() instanceof QualAppScopeBeanB);
   }
 
+  public void testQualifierLookupWithAnnoAttrib() {
+    final QualV qualApples = new QualV() {
+      @Override
+      public QualEnum value() {
+        return QualEnum.APPLES;
+      }
+
+      @Override
+      public Class<? extends Annotation> annotationType() {
+        return QualV.class;
+      }
+    };
+
+    final QualV qualOranges = new QualV() {
+      @Override
+      public QualEnum value() {
+        return QualEnum.ORANGES;
+      }
+
+      @Override
+      public Class<? extends Annotation> annotationType() {
+        return QualV.class;
+      }
+    };
+
+    final Collection<IOCBeanDef> beans = IOC.getBeanManager().lookupBeans(CommonInterfaceB.class);
+    assertEquals("wrong number of beans", 2, beans.size());
+
+    final IOCBeanDef<CommonInterfaceB> beanA = IOC.getBeanManager().lookupBean(CommonInterfaceB.class, qualApples);
+    assertNotNull("no bean found", beanA);
+    assertTrue("wrong bean looked up", beanA.getInstance() instanceof QualParmAppScopeBeanApples);
+
+    final IOCBeanDef<CommonInterfaceB> beanB = IOC.getBeanManager().lookupBean(CommonInterfaceB.class, qualOranges);
+    assertNotNull("no bean found", beanB);
+    assertTrue("wrong bean looked up", beanB.getInstance() instanceof QualParmAppScopeBeanOranges);
+  }
+
   public void testQualifiedLookupFailure() {
-    final Annotation wrongAnno = new Annotation() {
+    final LincolnBar wrongAnno = new LincolnBar() {
       @Override
       public Class<? extends Annotation> annotationType() {
         return LincolnBar.class;

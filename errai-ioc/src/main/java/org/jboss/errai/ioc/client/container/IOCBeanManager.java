@@ -34,7 +34,7 @@ import java.util.Set;
  *
  * @author Mike Brock
  */
-public class IOCBeanManager {
+public class  IOCBeanManager {
   private final Map<Class<?>, List<IOCBeanDef>> beanMap
           = new HashMap<Class<?>, List<IOCBeanDef>>();
 

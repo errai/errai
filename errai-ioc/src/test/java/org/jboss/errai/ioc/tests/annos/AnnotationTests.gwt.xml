@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2011 JBoss, by Red Hat, Inc
+  ~ Copyright 2011 JBoss, a divison Red Hat, Inc
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -18,19 +18,11 @@
         "http://google-web-toolkit.googlecode.com/svn/releases/2.0/distro-source/core/src/gwt-module.dtd">
 <module>
     <inherits name='com.google.gwt.user.User'/>
-    <inherits name='org.jboss.errai.bus.ErraiBus'/>
+    <inherits name="javax.validation.Validation" />
+    <inherits name="com.google.gwt.junit.JUnit"/>
+    <inherits name="org.jboss.errai.ioc.Container"/>
+    <inherits name="org.jboss.errai.bus.ErraiBus"/>
+    <inherits name="com.google.gwt.logging.Logging"/>
 
-    <entry-point class='org.jboss.errai.ioc.client.Container'/>
-
-    <generate-with class="org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCGenerator">
-        <when-type-assignable
-                class="org.jboss.errai.ioc.client.Bootstrapper"/>
-    </generate-with>
-
-    <generate-with class="org.jboss.errai.ioc.rebind.ioc.bootstrapper.QualiferEqualityFactoryGenerator">
-        <when-type-assignable class="org.jboss.errai.ioc.client.QualifierEqualityFactory" />
-    </generate-with>
-
-    <super-source path="compat"/>
-    <source path="client"/>
+    <set-property name='gwt.logging.logLevel' value='SEVERE'/>
 </module>
