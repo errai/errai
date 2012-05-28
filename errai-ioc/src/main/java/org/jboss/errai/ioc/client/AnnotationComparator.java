@@ -22,4 +22,12 @@ public interface AnnotationComparator<T extends Annotation> {
    * @return true if the annotations match.
    */
   public boolean isEqual(T a1, T a2);
+
+  /**
+   * Creates a consistent hashCode based on the attribute values of the annotation.
+   *
+   * @param a1 the annotation to have a hashCode generated for. cannot be null.
+   * @return a consistent hash code.
+   */
+  public int hashCodeOf(T a1);
 }

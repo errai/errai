@@ -10,4 +10,6 @@ import java.lang.annotation.Annotation;
  */
 public interface QualifierEqualityFactory {
   public boolean isEqual(Annotation a1, Annotation a2);
+
+  public int hashCodeOf(Annotation a1);
 }

@@ -59,7 +59,16 @@ import org.mvel2.util.NullType;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class GenUtil {
-  private static final boolean PERMISSIVE_MODE = Boolean.getBoolean("errai.codegen.permissive");
+  private static final boolean PERMISSIVE_MODE;
+
+  static {
+    if (System.getProperty("errai.codegen.permissive") != null) {
+      PERMISSIVE_MODE = Boolean.getBoolean("errai.codegen.permissive");
+    }
+    else {
+      PERMISSIVE_MODE = true;
+    }
+  }
 
   public static boolean isPermissiveMode() {
     return PERMISSIVE_MODE;

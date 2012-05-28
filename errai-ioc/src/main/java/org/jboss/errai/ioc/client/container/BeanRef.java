@@ -43,6 +43,7 @@ import java.util.Set;
 public final class BeanRef {
   private final Class<?> clazz;
   private final Set<Annotation> annotations;
+  private final Set<Annotation> hashConsistentAnnotations;
 
   /**
    * Constructs a new instance of <tt>BeanRef</tt> with the given bean type and qualifiers. Neither the {@parm clazz}
@@ -56,7 +57,8 @@ public final class BeanRef {
     Assert.notNull(annotations);
 
     this.clazz = clazz;
-    this.annotations = new HashSet<Annotation>(wrapAnnotations(Arrays.asList(annotations)));
+    this.annotations = new HashSet<Annotation>(Arrays.asList(annotations));
+    this.hashConsistentAnnotations = wrapAnnotations(this.annotations);
   }
 
   private static Set<Annotation> wrapAnnotations(Collection<Annotation> list) {
@@ -127,14 +129,15 @@ public final class BeanRef {
 
     BeanRef beanRef = (BeanRef) o;
 
-    return !(annotations != null ? !annotations.equals(beanRef.annotations) : beanRef.annotations != null)
+    return !(hashConsistentAnnotations != null ?
+            !hashConsistentAnnotations.equals(beanRef.hashConsistentAnnotations) : beanRef.hashConsistentAnnotations != null)
             && !(clazz != null ? !clazz.equals(beanRef.clazz) : beanRef.clazz != null);
   }
 
   @Override
   public int hashCode() {
     int result = clazz != null ? clazz.hashCode() : 0;
-    result = 31 * result + (annotations != null ? annotations.hashCode() : 0);
+    result = 31 * result + (hashConsistentAnnotations != null ? hashConsistentAnnotations.hashCode() : 0);
     return result;
   }
 

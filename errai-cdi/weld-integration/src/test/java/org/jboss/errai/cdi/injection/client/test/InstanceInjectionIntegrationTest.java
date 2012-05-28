@@ -21,9 +21,15 @@ import javax.enterprise.inject.Instance;
 import org.jboss.errai.cdi.injection.client.ApplicationScopedBeanA;
 import org.jboss.errai.cdi.injection.client.DependentBeanA;
 import org.jboss.errai.cdi.injection.client.InstanceTestBean;
+import org.jboss.errai.cdi.injection.client.QaulParamDependentBeanApples;
+import org.jboss.errai.cdi.injection.client.QaulParamDependentBeanOranges;
+import org.jboss.errai.cdi.injection.client.qualifier.QualParmAppScopeBeanApples;
+import org.jboss.errai.cdi.injection.client.qualifier.QualParmAppScopeBeanOranges;
 import org.jboss.errai.enterprise.client.cdi.AbstractErraiCDITest;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.container.IOC;
+
+import static org.jboss.errai.ioc.client.container.IOC.getBeanManager;
 
 /**
  * @author Mike Brock
@@ -36,7 +42,7 @@ public class InstanceInjectionIntegrationTest extends AbstractErraiCDITest {
 
   public void testInstanceInjections() {
 
-    final InstanceTestBean testBean = IOC.getBeanManager().lookupBean(InstanceTestBean.class).getInstance();
+    final InstanceTestBean testBean = getBeanManager().lookupBean(InstanceTestBean.class).getInstance();
 
     assertNotNull("InstanceTestBean is null", testBean);
 
@@ -62,5 +68,21 @@ public class InstanceInjectionIntegrationTest extends AbstractErraiCDITest {
 
     assertNotNull(b1.getBeanB());
     assertTrue(b1.getBeanB().isPostConstr());
+  }
+
+  public void testQualifierBasedInjection() {
+    final QaulParamDependentBeanApples instanceA
+            = getBeanManager().lookupBean(QaulParamDependentBeanApples.class).getInstance();
+
+    assertNotNull("bean is null", instanceA);
+    assertTrue("incorrect instance injected",
+            getBeanManager().getActualBeanReference(instanceA.getCommonInterfaceB()) instanceof QualParmAppScopeBeanApples);
+
+    final QaulParamDependentBeanOranges instanceB
+            = getBeanManager().lookupBean(QaulParamDependentBeanOranges.class).getInstance();
+
+    assertNotNull("bean is null", instanceB);
+    assertTrue("incorrect instance injected",
+            getBeanManager().getActualBeanReference(instanceB.getCommonInterfaceB()) instanceof QualParmAppScopeBeanOranges);
   }
 }

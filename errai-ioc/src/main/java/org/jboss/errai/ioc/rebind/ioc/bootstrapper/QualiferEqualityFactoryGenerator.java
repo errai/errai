@@ -7,9 +7,11 @@ import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
+import org.jboss.errai.codegen.ArithmeticOperator;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
+import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.ConstructorBlockBuilder;
 import org.jboss.errai.codegen.builder.MethodBlockBuilder;
@@ -19,6 +21,7 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTClass;
+import org.jboss.errai.codegen.util.Arith;
 import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
@@ -135,6 +138,20 @@ public class QualiferEqualityFactoryGenerator extends Generator {
                     ._(Stmt.load(false).returnValue())
                     .finish()).finish();
 
+
+    builder.publicMethod(int.class, "hashCodeOf", Parameter.of(Annotation.class, "a1"))
+            .body()
+            ._(
+                    if_(Bool.expr(Stmt.loadVariable(COMPARATOR_MAP_VAR).invoke("containsKey",
+                      Stmt.loadVariable("a1").invoke("annotationType").invoke("getName"))))
+                      ._(Stmt.loadVariable(COMPARATOR_MAP_VAR).invoke("get", Stmt.loadVariable("a1").invoke("annotationType").invoke("getName"))
+                      .invoke("hashCodeOf", Refs.get("a1")).returnValue())
+                            .finish()
+                    .else_()
+                    ._(Stmt.loadVariable("a1").invoke("hashCode").returnValue())
+                    .finish()).finish();
+
+
     final PrintWriter printWriter = generatorContext.tryCreate(logger, packageName, className);
     String out = builder.toJavaString();
 
@@ -159,7 +176,8 @@ public class QualiferEqualityFactoryGenerator extends Generator {
   private Statement generateComparatorFor(final MetaClass MC_annotationClass, final Collection<MetaMethod> methods) {
     final MetaClass MC_annoComparator = parameterizedAs(AnnotationComparator.class, typeParametersOf(MC_annotationClass));
 
-    final MethodBlockBuilder<AnonymousClassStructureBuilder> builder = ObjectBuilder.newInstanceOf(MC_annoComparator).extend()
+    final AnonymousClassStructureBuilder clsBuilder = ObjectBuilder.newInstanceOf(MC_annoComparator).extend();
+    final MethodBlockBuilder<AnonymousClassStructureBuilder> isEqualBuilder = clsBuilder
             .publicMethod(boolean.class, "isEqual",
                     Parameter.of(MC_annotationClass, "a1"), Parameter.of(MC_annotationClass, "a2"))
             .annotatedWith(new Override() {
@@ -170,18 +188,15 @@ public class QualiferEqualityFactoryGenerator extends Generator {
             });
 
     for (MetaMethod method : methods) {
-      if (method.isPrivate() || method.isProtected() || method.getName().equals("equals") ||
-              method.getName().equals("hashCode")) continue;
-
       if (method.getReturnType().isPrimitive()) {
-        builder._(
+        isEqualBuilder._(
                 Stmt.if_(Bool.notEquals(Stmt.loadVariable("a1").invoke(method), Stmt.loadVariable("a2").invoke(method)))
                         ._(Stmt.load(false).returnValue())
                         .finish()
         );
       }
       else {
-        builder._(
+        isEqualBuilder._(
                 Stmt.if_(Bool.notExpr(Stmt.loadVariable("a1").invoke(method).invoke("equals", Stmt.loadVariable("a2").invoke(method))))
                         ._(Stmt.load(false).returnValue())
                         .finish()
@@ -189,11 +204,33 @@ public class QualiferEqualityFactoryGenerator extends Generator {
       }
     }
 
-    builder._(Stmt.load(true).returnValue());
+    isEqualBuilder._(Stmt.load(true).returnValue());
+
+    final BlockBuilder<AnonymousClassStructureBuilder> hashCodeOfBuilder
+            = clsBuilder.publicOverridesMethod("hashCodeOf", Parameter.of(MC_annotationClass, "a1"));
+
+    hashCodeOfBuilder._(Stmt.declareVariable(int.class).named("hash")
+            .initializeWith(Stmt.loadVariable("a1").invoke("annotationType").invoke("hashCode")));
+
+    for (MetaMethod method : methods) {
+        hashCodeOfBuilder._(Stmt.loadVariable("hash")
+                .assignValue(hashArith(method)));
+    }
+
+    hashCodeOfBuilder._(Stmt.loadVariable("hash").returnValue());
+
+    hashCodeOfBuilder.finish();
 
     // finish method;
-    final AnonymousClassStructureBuilder classStructureBuilder = builder.finish();
+    final AnonymousClassStructureBuilder classStructureBuilder = isEqualBuilder.finish();
 
     return classStructureBuilder.finish();
+  }
+
+  private static Statement hashArith(MetaMethod method) {
+    return Arith.expr(
+            Arith.expr(31, ArithmeticOperator.Multiplication, Refs.get("hash")),
+            ArithmeticOperator.Addition,
+            Stmt.invokeStatic(QualifierUtil.class, "hashValueFor", Stmt.loadVariable("a1").invoke(method)));
   }
 }

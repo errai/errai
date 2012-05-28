@@ -23,6 +23,10 @@ public class QualifierUtil {
     return !(a1 == null || a2 == null) && a1.annotationType().equals(a2.annotationType());
   }
 
+  public static int hashCodeOf(Annotation a1) {
+    return factory.hashCodeOf(a1);
+  }
+
   public static boolean containsAll(final Collection<Annotation> allOf, final Collection<Annotation> in) {
     if (allOf.isEmpty()) return true;
 
@@ -48,5 +52,42 @@ public class QualifierUtil {
     }
 
     return true;
+  }
+
+  static int hashValueFor(int i) {
+    return i;
+  }
+
+  static int hashValueFor(boolean b) {
+    return b ? 1 : 0;
+  }
+
+  static int hashValueFor(long l) {
+    return (int) l;
+  }
+
+  static int hashValueFor(float f) {
+    return (int) f * 1000;
+  }
+
+  static int hashValueFor(double d) {
+    return (int) d * 1000;
+  }
+
+  static int hashValueFor(char c) {
+    return (int) c;
+  }
+
+  static int hashValueFor(byte b) {
+    return (int) b;
+  }
+
+  static int hashValueFor(short s) {
+    return (int) s;
+  }
+
+  static int hashValueFor(Object o) {
+    if (o == null) return -1;
+    return o.hashCode();
   }
 }

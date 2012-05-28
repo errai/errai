@@ -102,7 +102,7 @@ public class TypeInjector extends AbstractInjector {
 
         /*
         if this bean is a singleton bean and there is no @New qualifier on the site we're injecting
-        into, we mearly return a reference to the singleton instance variable from the bootstrapper.
+        into, we merely return a reference to the singleton instance variable from the bootstrapper.
         */
         return Refs.get(varName);
       }
