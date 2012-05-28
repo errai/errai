@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONString;
@@ -37,6 +38,7 @@ public class JacksonTransformer {
   private static final String VALUE = "^Value";
   private static final String OBJECT_ID = "^ObjectID";
   private static final String ENUM_STRING_VALUE = "^EnumStringValue";
+  private static final String NUM_VALUE = "^NumVal";
 
   private JacksonTransformer() {};
 
@@ -65,6 +67,10 @@ public class JacksonTransformer {
    *  <li>If an enum is encountered, remove the Errai specific ENUM_STRING_VALUE key, by associating its actual
    *  value with the object's key directly:
    *  "gender": {"^EnumStringValue": "MALE"} becomes "gender": "MALE"
+   *  </li>
+   *   <li>If a long is encountered, remove the Errai specific NUM_VALUE key, by associating its actual
+   *  value with the object's key directly and turning it into a number:
+   *  "id": {"^NumValue": "1"} becomes "id": 1
    *  </li>
    * </ul>
    * 
@@ -107,6 +113,15 @@ public class JacksonTransformer {
         else if (k.equals(ENUM_STRING_VALUE)) {
           if (parent != null) {
             parent.put(key, obj.get(k));
+          }
+          else {
+            return val;
+          }
+        }
+        else if (k.equals(NUM_VALUE)) {
+          if (parent != null) {
+            String numValue = obj.get(k).isString().stringValue();
+            parent.put(key, new JSONNumber(Double.parseDouble(numValue)));
           }
           else {
             return val;

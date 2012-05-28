@@ -20,7 +20,6 @@ import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
-import org.jboss.errai.marshalling.client.api.exceptions.MarshallingException;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.util.NumbersUtils;
 
@@ -41,7 +40,7 @@ public class LongMarshaller extends AbstractNumberMarshaller<Long> {
       return Long.parseLong(numValue.isString().stringValue());
     }
     else {
-      throw new MarshallingException("cannot demarshall as java.lang.Long: expected qualified value but got: " + o);
+      return new Double(o.isNumber().doubleValue()).longValue();
     }
   }
 

@@ -51,15 +51,15 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
   public void testJacksonMarshalling() {
     delayTestFinish(5000);
 
-    final User user = new User("first", "last", 20, Gender.MALE, new User("first2", "last2", 40, Gender.FEMALE, null));
+    final User user = new User(11l, "first", "last", 20, Gender.MALE, new User(12l, "first2", "last2", 40, Gender.FEMALE, null));
     user.setPetNames(new ArrayList<String>() {{
         add("pet1");
         add("pet2");
       }
     });
     user.setFriends(new ArrayList<User>() {{
-        add(new User("friend1-first", "friend1-last", 1, Gender.MALE, null));
-        add(new User("friend2-first", "friend2-last", 2, Gender.FEMALE, null));
+        add(new User(13l, "friend1-first", "friend1-last", 1, Gender.MALE, null));
+        add(new User(14l, "friend2-first", "friend2-last", 2, Gender.FEMALE, null));
       }
     });
 
@@ -81,8 +81,8 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
     delayTestFinish(5000);
     
     final List<User> users = new ArrayList<User>();
-    users.add(new User("first", "last", 20, Gender.MALE, null));
-    users.add(new User("firs2", "las2", 40, Gender.MALE, null));
+    users.add(new User(11l, "first", "last", 20, Gender.MALE, null));
+    users.add(new User(12l, "firs2", "las2", 40, Gender.MALE, null));
 
     String jackson = MarshallingWrapper.toJSON(users);
    

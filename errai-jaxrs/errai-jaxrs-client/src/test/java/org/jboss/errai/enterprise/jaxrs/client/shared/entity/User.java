@@ -33,6 +33,7 @@ public class User {
     MALE, FEMALE
   }
 
+  private Long id;
   private String firstName;
   private String lastName;
   private Gender gender;
@@ -47,8 +48,9 @@ public class User {
 
   public User() {}
 
-  public User(String firstName, String lastName, Integer age, Gender gender, User parent) {
+  public User(Long id, String firstName, String lastName, Integer age, Gender gender, User parent) {
     super();
+    this.id = id;
     this.firstName = firstName;
     this.lastName = lastName;
     this.age = age;
@@ -58,6 +60,14 @@ public class User {
     
   }
 
+  public Long getId() {
+    return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+  
   public String getFirstName() {
     return firstName;
   }
@@ -139,6 +149,7 @@ public class User {
     result = prime * result + ((firstName == null) ? 0 : firstName.hashCode());
     result = prime * result + ((friends == null) ? 0 : friends.hashCode());
     result = prime * result + ((gender == null) ? 0 : gender.hashCode());
+    result = prime * result + ((id == null) ? 0 : id.hashCode());
     result = prime * result + ((lastName == null) ? 0 : lastName.hashCode());
     result = prime * result + ((parent == null) ? 0 : parent.hashCode());
     result = prime * result + ((parentRef == null) ? 0 : parentRef.hashCode());
@@ -177,6 +188,12 @@ public class User {
       return false;
     if (gender != other.gender)
       return false;
+    if (id == null) {
+      if (other.id != null)
+        return false;
+    }
+    else if (!id.equals(other.id))
+      return false;
     if (lastName == null) {
       if (other.lastName != null)
         return false;
@@ -206,7 +223,8 @@ public class User {
 
   @Override
   public String toString() {
-    return "User [firstName=" + firstName + ", lastName=" + lastName + ", gender=" + gender + ", age=" + age
-        + ", alive=" + alive + "]";
+    return "User [id=" + id + ", firstName=" + firstName + ", lastName=" + lastName + ", gender=" + gender
+        + ", parent=" + parent + ", parentRef=" + parentRef + ", petNames=" + petNames + ", friends=" + friends
+        + ", age=" + age + ", alive=" + alive + "]";
   }
 }
