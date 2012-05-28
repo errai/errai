@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.databinding.client.api.Bindable;
+import org.jboss.errai.databinding.client.api.InitialState;
 
 /**
  * This class provides access to the generated proxies for {@link Bindable} types.
@@ -40,12 +41,15 @@ public class BindableProxyFactory {
    *          bindable type
    * @param model
    *          the model instance to proxy
+   * @param state
+   *          specifies the origin of the initial state of both model and UI widget
+   *                   
    * @return proxy that can be used in place of the model instance.
    */
-  public static <T> T getBindableProxy(T model) {
+  public static <T> T getBindableProxy(T model, InitialState state) {
     BindableProxyProvider proxyProvider = getBindableProxyProvider(model.getClass());
 
-    BindableProxy proxy = proxyProvider.getBindableProxy(model);
+    BindableProxy proxy = proxyProvider.getBindableProxy(model, state);
     if (proxy == null) {
       throw new RuntimeException("No proxy instance provided for bindable type: " + model.getClass().getName());
     }
@@ -60,12 +64,14 @@ public class BindableProxyFactory {
    * 
    * @param bindableType
    *          the bindable type
+   * @param state
+   *          specifies the origin of the initial state of both model and UI widget
    * @return proxy that can be used in place of the model instance.
    */
-  public static <T> T getBindableProxy(Class<?> bindableType) {
+  public static <T> T getBindableProxy(Class<?> bindableType, InitialState state) {
     BindableProxyProvider proxyProvider = getBindableProxyProvider(bindableType);
 
-    BindableProxy proxy = proxyProvider.getBindableProxy();
+    BindableProxy proxy = proxyProvider.getBindableProxy(state);
     if (proxy == null) {
       throw new RuntimeException("No proxy instance provided for bindable type: " + bindableType.getName());
     }

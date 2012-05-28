@@ -39,6 +39,7 @@ import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.api.WrappedPortable;
 import org.jboss.errai.databinding.client.BindableProxy;
 import org.jboss.errai.databinding.client.api.Bindable;
+import org.jboss.errai.databinding.client.api.InitialState;
 
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -74,11 +75,15 @@ public class BindableProxyGenerator {
             .finish()
             .privateField("target", bindable)
             .finish()
-            .publicConstructor()
-            .append(Stmt.loadClassMember("target").assignValue(Stmt.newObject(bindable)))
+            .privateField("initialState", InitialState.class)
             .finish()
-            .publicConstructor(Parameter.of(bindable, "target"))
+            .publicConstructor(Parameter.of(InitialState.class, "initialState"))
+            .append(Stmt.loadClassMember("target").assignValue(Stmt.newObject(bindable)))
+            .append(Stmt.loadClassMember("initialState").assignValue(Variable.get("initialState")))
+            .finish()
+            .publicConstructor(Parameter.of(bindable, "target"), Parameter.of(InitialState.class, "initialState"))
             .append(Stmt.loadClassMember("target").assignValue(Variable.get("target")))
+            .append(Stmt.loadClassMember("initialState").assignValue(Variable.get("initialState")))
             .finish()
             .publicMethod(bindable, "unwrap")
             .append(Stmt.loadClassMember("target").returnValue())
@@ -93,7 +98,8 @@ public class BindableProxyGenerator {
     BeanInfo beanInfo;
     try {
       beanInfo = Introspector.getBeanInfo(bindable);
-      generateProxyBindingMethods(classBuilder);
+      generateProxyBindMethod(classBuilder);
+      generateProxyUnbindMethods(classBuilder);
       generateProxyAccessorMethods(beanInfo.getPropertyDescriptors(), classBuilder);
     }
     catch (IntrospectionException e) {
@@ -103,7 +109,7 @@ public class BindableProxyGenerator {
     return classBuilder;
   }
 
-  private void generateProxyBindingMethods(ClassStructureBuilder<?> classBuilder) {
+  private void generateProxyBindMethod(ClassStructureBuilder<?> classBuilder) {
     classBuilder.publicMethod(void.class, "bind", Parameter.of(HasValue.class, "widget", true),
         Parameter.of(String.class, "property", true))
         .append(Stmt.loadVariable("this").invoke("unbind", Variable.get("property")))
@@ -125,8 +131,25 @@ public class BindableProxyGenerator {
                     )
                 )
             )
+        .append(
+            Stmt.if_(Bool.isNotNull(Variable.get("initialState")))
+                .append(
+                    Stmt.loadVariable("widget").invoke(
+                        "setValue",
+                        Stmt.loadVariable("initialState").invoke("getInitialValue", Variable.get("target"),
+                            Variable.get("widget"))))
+                .append(
+                    Stmt.loadVariable("this").invoke(
+                        "set",
+                        Variable.get("property"),
+                        Stmt.loadVariable("initialState").invoke("getInitialValue", Variable.get("target"),
+                            Variable.get("widget"))))
+                .finish()
+            )
         .finish();
+  }
 
+  private void generateProxyUnbindMethods(ClassStructureBuilder<?> classBuilder) {
     classBuilder.publicMethod(void.class, "unbind", Parameter.of(String.class, "property"))
         .append(Stmt.loadClassMember("bindings").invoke("remove", Variable.get("property")))
         .append(Stmt.declareVariable("reg", HandlerRegistration.class,
@@ -164,9 +187,11 @@ public class BindableProxyGenerator {
           setMethod
               .append(Stmt
                   .if_(Bool.expr(Stmt.loadVariable("property").invoke("equals", propertyDescriptor.getName())))
-                  .append(Stmt.loadVariable("target").invoke(
-                      setterMethod.getName(), Cast.to(MetaClassFactory.get(setterMethod.getParameterTypes()[0]).asBoxed(), 
-                          Stmt.loadVariable("value"))))
+                  .append(
+                      Stmt.loadVariable("target").invoke(
+                          setterMethod.getName(),
+                          Cast.to(MetaClassFactory.get(setterMethod.getParameterTypes()[0]).asBoxed(),
+                              Stmt.loadVariable("value"))))
                   .finish()
               );
 

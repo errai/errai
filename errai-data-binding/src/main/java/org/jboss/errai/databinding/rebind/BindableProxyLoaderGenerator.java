@@ -24,6 +24,7 @@ import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
@@ -36,6 +37,7 @@ import org.jboss.errai.databinding.client.BindableProxyFactory;
 import org.jboss.errai.databinding.client.BindableProxyLoader;
 import org.jboss.errai.databinding.client.BindableProxyProvider;
 import org.jboss.errai.databinding.client.api.Bindable;
+import org.jboss.errai.databinding.client.api.InitialState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,14 +86,14 @@ public class BindableProxyLoaderGenerator extends Generator {
     File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + className + ".java");
 
     String gen;
-     if (RebindUtils.hasClasspathChangedForAnnotatedWith(Bindable.class) || !cacheFile.exists()) {
-       log.info("generating bindable proxy loader class.");
-       gen = generate(context, logger);
-       RebindUtils.writeStringToFile(cacheFile, gen);
+    if (RebindUtils.hasClasspathChangedForAnnotatedWith(Bindable.class) || !cacheFile.exists()) {
+      log.info("generating bindable proxy loader class.");
+      gen = generate(context, logger);
+      RebindUtils.writeStringToFile(cacheFile, gen);
     }
     else {
       log.info("nothing has changed. using cached bindable proxy loader class.");
-       gen = RebindUtils.readFileToString(cacheFile);
+      gen = RebindUtils.readFileToString(cacheFile);
     }
 
     return gen;
@@ -113,16 +115,21 @@ public class BindableProxyLoaderGenerator extends Generator {
       ClassStructureBuilder<?> bindableProxy = new BindableProxyGenerator(bindable).generate();
       loadProxies.append(new InnerClass(bindableProxy.getClassDefinition()));
 
-      Statement proxyProvider = ObjectBuilder.newInstanceOf(BindableProxyProvider.class)
-          .extend()
-          .publicOverridesMethod("getBindableProxy", Parameter.of(bindable, "model"))
-          .append(Stmt.nestedCall(Stmt.newObject(bindableProxy.getClassDefinition())
-              .withParameters(Cast.to(bindable, Stmt.loadVariable("model")))).returnValue())
-          .finish()
-          .publicOverridesMethod("getBindableProxy")
-          .append(Stmt.nestedCall(Stmt.newObject(bindableProxy.getClassDefinition())).returnValue())
-          .finish()
-          .finish();
+      Statement proxyProvider =
+          ObjectBuilder.newInstanceOf(BindableProxyProvider.class)
+              .extend()
+              .publicOverridesMethod("getBindableProxy", Parameter.of(bindable, "model"),
+                  Parameter.of(InitialState.class, "state"))
+              .append(Stmt.nestedCall(Stmt.newObject(bindableProxy.getClassDefinition())
+                  .withParameters(Cast.to(bindable, Stmt.loadVariable("model")), Variable.get("state"))).returnValue())
+              .finish()
+              .publicOverridesMethod("getBindableProxy", Parameter.of(InitialState.class, "state"))
+              .append(
+                  Stmt.nestedCall(
+                      Stmt.newObject(bindableProxy.getClassDefinition()).withParameters(Variable.get("state")))
+                      .returnValue())
+              .finish()
+              .finish();
 
       loadProxies.append(Stmt.invokeStatic(BindableProxyFactory.class, "addBindableProxy", bindable, proxyProvider));
     }

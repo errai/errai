@@ -4,6 +4,8 @@ package org.jboss.errai.databinding.client.api;
  * Specifies the state from which a {@link DataBinder}'s properties should be initialized.
  * 
  * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
+ * @author Jonathan Fuerth <jfuerth@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 public enum InitialState {
   
@@ -13,8 +15,8 @@ public enum InitialState {
    */
   FROM_MODEL {
     @Override
-    public <T> T getInitialValue(T modelValue, T uiValue) {
-      return modelValue;
+    public <T> T getInitialValue(T model, T widget) {
+      return model;
     }
   },
   
@@ -24,20 +26,20 @@ public enum InitialState {
    */
   FROM_UI {
     @Override
-    public <T> T getInitialValue(T modelValue, T uiValue) {
-      return uiValue;
+    public <T> T getInitialValue(T model, T widget) {
+      return widget;
     }
   };
   
   /**
    * Returns the model value or the UI value, as appropriate.
    * 
-   * @param modelValue
+   * @param model
    *          The pre-existing model value
-   * @param uiValue
+   * @param widget
    *          The pre-existing UI widget value.
-   * @return Either modelValue or uiValue. Return value will be null if the
+   * @return Either model or widget. Return value will be null if the
    *         corresponding parameter value is null.
    */
-  public abstract <T> T getInitialValue(T modelValue, T uiValue);
+  public abstract <T> T getInitialValue(T model, T widget);
 }
