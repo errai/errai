@@ -15,9 +15,7 @@
   -->
 
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-             xmlns:gwt='urn:import:com.google.gwt.user.client.ui'
-             xmlns:errai='urn:import:org.jboss.errai.workspaces.client.layout'
-             xmlns:widgets='urn:import:org.jboss.errai.widgets.client'>
+             xmlns:gwt='urn:import:com.google.gwt.user.client.ui'>
     <gwt:VerticalPanel>
         <gwt:HorizontalPanel>
             <gwt:Label text="Query"/>
