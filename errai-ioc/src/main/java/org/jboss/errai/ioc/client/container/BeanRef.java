@@ -17,6 +17,7 @@
 package org.jboss.errai.ioc.client.container;
 
 import org.jboss.errai.common.client.framework.Assert;
+import org.jboss.errai.ioc.client.QualifierUtil;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
@@ -90,10 +91,14 @@ public final class BeanRef {
   private static class AnnotationHashWapper implements Annotation {
     private final Annotation _delegate;
     private final Class<?> type;
+    private final int hashCode;
 
     private AnnotationHashWapper(Annotation _delegate) {
+      Assert.notNull(_delegate);
+
       this._delegate = _delegate;
       this.type = _delegate.annotationType();
+      this.hashCode = QualifierUtil.hashCodeOf(_delegate);
     }
 
     @Override
@@ -108,7 +113,7 @@ public final class BeanRef {
 
     @Override
     public int hashCode() {
-      return type != null ? type.hashCode() : 0;
+      return hashCode;
     }
 
     @Override

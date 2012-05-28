@@ -148,7 +148,7 @@ public class QualiferEqualityFactoryGenerator extends Generator {
                       .invoke("hashCodeOf", Refs.get("a1")).returnValue())
                             .finish()
                     .else_()
-                    ._(Stmt.loadVariable("a1").invoke("hashCode").returnValue())
+                    ._(Stmt.loadVariable("a1").invoke("annotationType").invoke("hashCode").returnValue())
                     .finish()).finish();
 
 
