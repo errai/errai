@@ -165,7 +165,8 @@ public class BindableProxyGenerator {
               .append(Stmt
                   .if_(Bool.expr(Stmt.loadVariable("property").invoke("equals", propertyDescriptor.getName())))
                   .append(Stmt.loadVariable("target").invoke(
-                      setterMethod.getName(), Cast.to(setterMethod.getParameterTypes()[0], Stmt.loadVariable("value"))))
+                      setterMethod.getName(), Cast.to(MetaClassFactory.get(setterMethod.getParameterTypes()[0]).asBoxed(), 
+                          Stmt.loadVariable("value"))))
                   .finish()
               );
 

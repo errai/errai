@@ -31,6 +31,7 @@ public class Model {
   private String value;
   private String _name;
   private Integer _age;
+  private boolean active;
 
   public String getValue() {
     return value;
@@ -56,12 +57,21 @@ public class Model {
     this._age = age;
   }
 
+  public boolean isActive() {
+    return active;
+  }
+
+  public void setActive(boolean active) {
+    this.active = active;
+  }
+
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((_age == null) ? 0 : _age.hashCode());
     result = prime * result + ((_name == null) ? 0 : _name.hashCode());
+    result = prime * result + (active ? 1231 : 1237);
     result = prime * result + ((value == null) ? 0 : value.hashCode());
     return result;
   }
@@ -86,6 +96,8 @@ public class Model {
         return false;
     }
     else if (!_name.equals(other._name))
+      return false;
+    if (active != other.active)
       return false;
     if (value == null) {
       if (other.value != null)
