@@ -261,13 +261,13 @@ public class InjectionContext {
   }
 
   public Injector getInjector(MetaClass type) {
-    MetaClass erased = type.getErased();
+    final MetaClass erased = type.getErased();
     if (!injectors.containsKey(erased)) {
       throw new InjectionFailure("could not resolve type for injection: " + erased.getFullyQualifiedName());
     }
-    List<Injector> injectorList = new ArrayList<Injector>(injectors.get(erased));
 
-    Iterator<Injector> iter = injectorList.iterator();
+    final List<Injector> injectorList = new ArrayList<Injector>(injectors.get(erased));
+    final Iterator<Injector> iter = injectorList.iterator();
     Injector inj;
 
     if (injectorList.size() > 1) {
@@ -309,7 +309,7 @@ public class InjectionContext {
       injectors.put(type.getErased(), injectorList = new ArrayList<Injector>());
 
       for (MetaClass iface : type.getInterfaces()) {
-        QualifiedTypeInjectorDelegate injectorDelegate
+        final QualifiedTypeInjectorDelegate injectorDelegate
                 = new QualifiedTypeInjectorDelegate(iface, injector, iface.getParameterizedType());
 
         _registerInjector(iface, injectorDelegate, false);

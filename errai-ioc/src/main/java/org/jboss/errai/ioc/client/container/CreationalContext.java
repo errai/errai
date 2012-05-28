@@ -270,7 +270,8 @@ public class CreationalContext {
     final int initialSize = unresolvedProxies.size();
 
     while (unresolvedIterator.hasNext()) {
-      Map.Entry<BeanRef, List<ProxyResolver>> entry = unresolvedIterator.next();
+      final Map.Entry<BeanRef, List<ProxyResolver>> entry = unresolvedIterator.next();
+
       if (wired.containsKey(entry.getKey())) {
         for (ProxyResolver pr : entry.getValue()) {
           pr.resolve(wired.get(entry.getKey()));
@@ -279,10 +280,11 @@ public class CreationalContext {
         unresolvedIterator.remove();
       }
       else {
-        IOCBeanDef<?> iocBeanDef = IOC.getBeanManager().lookupBean(entry.getKey().getClazz(), entry.getKey().getAnnotations());
+        final IOCBeanDef<?> iocBeanDef
+                = IOC.getBeanManager().lookupBean(entry.getKey().getClazz(), entry.getKey().getAnnotations());
 
         if (iocBeanDef != null) {
-          Object beanInstance = iocBeanDef.getInstance(this);
+          final Object beanInstance = iocBeanDef.getInstance(this);
 
           if (beanInstance != null) {
             if (!wired.containsKey(entry.getKey())) {
@@ -302,5 +304,4 @@ public class CreationalContext {
       throw new RuntimeException("unresolved proxy: " + unresolvedProxies.entrySet().iterator().next().getKey());
     }
   }
-
 }
