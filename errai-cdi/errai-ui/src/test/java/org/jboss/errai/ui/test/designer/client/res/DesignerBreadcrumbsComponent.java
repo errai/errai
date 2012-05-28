@@ -29,4 +29,12 @@ public class DesignerBreadcrumbsComponent extends Composite {
     something.getElement().setAttribute("id", "somethingNew");
     newButton.getElement().setAttribute("id", "btn");
   }
+  
+  public DesignerSubComponent getSubComponent() {
+    return something;
+  }
+  
+  public Button getButton() {
+    return newButton;
+  }
 }

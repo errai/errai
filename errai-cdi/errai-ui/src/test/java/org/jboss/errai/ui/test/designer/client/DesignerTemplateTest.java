@@ -20,6 +20,7 @@ public class DesignerTemplateTest extends AbstractErraiCDITest {
     System.out.println(app.getRoot().getElement().getInnerHTML());
 
     assertNotNull(Document.get().getElementById("btn"));
+    assertEquals("Will be rendered inside button", app.getComponent().getButton().getElement().getInnerHTML());
     assertNotNull(Document.get().getElementById("somethingNew"));
     assertNotNull(Document.get().getElementById("basic"));
     assertNotNull(Document.get().getElementById("h2"));

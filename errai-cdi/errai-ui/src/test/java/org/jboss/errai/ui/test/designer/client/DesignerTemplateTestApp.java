@@ -6,7 +6,6 @@ import javax.inject.Inject;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ui.test.designer.client.res.DesignerBreadcrumbsComponent;
 
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.RootPanel;
 
 @EntryPoint
@@ -23,7 +22,7 @@ public class DesignerTemplateTestApp {
     root.add(component);
   }
   
-  public Composite getComponent() {
+  public DesignerBreadcrumbsComponent getComponent() {
     return component;
   }
   
