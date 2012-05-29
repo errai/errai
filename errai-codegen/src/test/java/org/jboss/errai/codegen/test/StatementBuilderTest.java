@@ -16,6 +16,19 @@
 
 package org.jboss.errai.codegen.test;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+
+import javax.annotation.PostConstruct;
+import javax.enterprise.util.TypeLiteral;
+import javax.inject.Inject;
+
 import org.jboss.errai.codegen.AssignmentOperator;
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.Context;
@@ -30,7 +43,6 @@ import org.jboss.errai.codegen.exception.UndefinedFieldException;
 import org.jboss.errai.codegen.literal.LiteralFactory;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.test.model.BeanWithTypeParmedMeths;
-import org.jboss.errai.codegen.test.model.Bwah;
 import org.jboss.errai.codegen.test.model.Foo;
 import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.Refs;
@@ -38,20 +50,9 @@ import org.jboss.errai.codegen.util.Stmt;
 import org.junit.Assert;
 import org.junit.Test;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.util.TypeLiteral;
-import javax.inject.Inject;
-import java.lang.annotation.Annotation;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 /**
  * Tests the {@link StatementBuilder} API.
- *
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class StatementBuilderTest extends AbstractCodegenTest {
@@ -257,44 +258,44 @@ public class StatementBuilderTest extends AbstractCodegenTest {
   }
 
   @Test
-  @SuppressWarnings(value = {"all"})
+  @SuppressWarnings(value = { "all" })
   public void testCreateAndInitializeTwoDimensionalArray() {
     String s = StatementBuilder.create().newArray(Integer.class)
-            .initialize(new Integer[][]{{1, 2}, {3, 4}})
+            .initialize(new Integer[][] { { 1, 2 }, { 3, 4 } })
             .toJavaString();
 
     assertEquals("Failed to generate two dimensional array", "new Integer[][] { { 1, 2 }, { 3, 4 } }", s);
   }
 
   @Test
-  @SuppressWarnings(value = {"all"})
+  @SuppressWarnings(value = { "all" })
   public void testCreateAndInitializeTwoDimensionalArrayWithSingleValue() {
     String s = StatementBuilder.create().newArray(Integer.class)
-            .initialize(new Object[][]{{1, 2}})
+            .initialize(new Object[][] { { 1, 2 } })
             .toJavaString();
 
     assertEquals("Failed to generate two dimensional array", "new Integer[][] { { 1, 2 } }", s);
   }
 
   @Test
-  @SuppressWarnings(value = {"all"})
+  @SuppressWarnings(value = { "all" })
   public void testCreateAndInitializeTwoDimensionalObjectArrayWithIntegers() {
     String s = StatementBuilder.create().newArray(Object.class)
-            .initialize(new Object[][]{{1, 2}})
+            .initialize(new Object[][] { { 1, 2 } })
             .toJavaString();
 
     assertEquals("Failed to generate two dimensional array", "new Object[][] { { 1, 2 } }", s);
   }
 
   @Test
-  @SuppressWarnings(value = {"all"})
+  @SuppressWarnings(value = { "all" })
   public void testCreateAndInitializeTwoDimensionalArrayWithStatements() {
     String s = StatementBuilder.create().newArray(String.class)
-            .initialize(new Statement[][]{
-                    {StatementBuilder.create().invokeStatic(Integer.class, "toString", 1),
-                            StatementBuilder.create().invokeStatic(Integer.class, "toString", 2)},
-                    {StatementBuilder.create().invokeStatic(Integer.class, "toString", 3),
-                            StatementBuilder.create().invokeStatic(Integer.class, "toString", 4)}})
+            .initialize(new Statement[][] {
+                    { StatementBuilder.create().invokeStatic(Integer.class, "toString", 1),
+                            StatementBuilder.create().invokeStatic(Integer.class, "toString", 2) },
+                    { StatementBuilder.create().invokeStatic(Integer.class, "toString", 3),
+                            StatementBuilder.create().invokeStatic(Integer.class, "toString", 4) } })
             .toJavaString();
 
     assertEquals("Failed to generate two dimensional array using statements",
@@ -303,12 +304,12 @@ public class StatementBuilderTest extends AbstractCodegenTest {
   }
 
   @Test
-  @SuppressWarnings(value = {"all"})
+  @SuppressWarnings(value = { "all" })
   public void testCreateAndInitializeTwoDimensionalArrayWithStatementsAndLiterals() {
     String s = StatementBuilder.create().newArray(String.class)
-            .initialize(new Object[][]{
-                    {StatementBuilder.create().invokeStatic(Integer.class, "toString", 1), "2"},
-                    {StatementBuilder.create().invokeStatic(Integer.class, "toString", 3), "4"}})
+            .initialize(new Object[][] {
+                    { StatementBuilder.create().invokeStatic(Integer.class, "toString", 1), "2" },
+                    { StatementBuilder.create().invokeStatic(Integer.class, "toString", 3), "4" } })
             .toJavaString();
 
     assertEquals("Failed to generate two dimensional array using statements and objects",
@@ -317,10 +318,10 @@ public class StatementBuilderTest extends AbstractCodegenTest {
   }
 
   @Test
-  @SuppressWarnings(value = {"all"})
+  @SuppressWarnings(value = { "all" })
   public void testCreateAndInitializeThreeDimensionalArray() {
     String s = StatementBuilder.create().newArray(String.class)
-            .initialize(new String[][][]{{{"1", "2"}, {"a", "b"}}, {{"3", "4"}, {"b", "c"}}})
+            .initialize(new String[][][] { { { "1", "2" }, { "a", "b" } }, { { "3", "4" }, { "b", "c" } } })
             .toJavaString();
 
     assertEquals("Failed to generate three dimensional array",
@@ -411,45 +412,57 @@ public class StatementBuilderTest extends AbstractCodegenTest {
 
   @Test
   public void testObjectCreationWithParameterizedType() {
-    String s = StatementBuilder.create().newObject(new TypeLiteral<List<String>>() {
-    }).toJavaString();
-    assertEquals("failed to generate new object with parameterized type", "new java.util.List<String>()", s);
+    String s = StatementBuilder.create().newObject(new TypeLiteral<ArrayList<String>>() {
+        }).toJavaString();
+    assertEquals("failed to generate new object with parameterized type", "new java.util.ArrayList<String>()", s);
   }
 
   @Test
   public void testObjectCreationWithAutoImportedParameterizedType() {
     Context c = Context.create().autoImport();
-    String s = StatementBuilder.create(c).newObject(new TypeLiteral<List<Date>>() {
-    }).toJavaString();
-    assertEquals("failed to generate new object with parameterized type", "new List<Date>()", s);
+    String s = StatementBuilder.create(c).newObject(new TypeLiteral<ArrayList<Date>>() {
+        }).toJavaString();
+    assertEquals("failed to generate new object with parameterized type", "new ArrayList<Date>()", s);
   }
 
   @Test
   public void testObjectCreationWithParameterizedTypeAndClassImport() {
-    Context c = Context.create().addImport(MetaClassFactory.get(List.class));
-    String s = StatementBuilder.create(c).newObject(new TypeLiteral<List<String>>() {
-    }).toJavaString();
-    assertEquals("failed to generate new object with parameterized type", "new List<String>()", s);
+    Context c = Context.create().addImport(MetaClassFactory.get(ArrayList.class));
+    String s = StatementBuilder.create(c).newObject(new TypeLiteral<ArrayList<String>>() {
+        }).toJavaString();
+    assertEquals("failed to generate new object with parameterized type", "new ArrayList<String>()", s);
   }
 
   @Test
   public void testObjectCreationWithFullyQualifiedParameterizedTypeAndClassImport() {
-    Context c = Context.create().addImport(MetaClassFactory.get(List.class));
-    String s = StatementBuilder.create(c).newObject(new TypeLiteral<List<Date>>() {
-    }).toJavaString();
-    assertEquals("failed to generate new object with parameterized type", "new List<java.util.Date>()", s);
+    Context c = Context.create().addImport(MetaClassFactory.get(ArrayList.class));
+    String s = StatementBuilder.create(c).newObject(new TypeLiteral<ArrayList<Date>>() {
+        }).toJavaString();
+    assertEquals("failed to generate new object with parameterized type", "new ArrayList<java.util.Date>()", s);
   }
 
   @Test
   public void testObjectCreationWithNestedParameterizedTypeAndClassImports() {
     Context c = Context.create()
-            .addImport(MetaClassFactory.get(List.class))
-            .addImport(MetaClassFactory.get(Map.class));
+            .addImport(MetaClassFactory.get(ArrayList.class))
+            .addImport(MetaClassFactory.get(HashMap.class));
 
     String s = StatementBuilder.create(c)
-            .newObject(new TypeLiteral<List<List<Map<String, Integer>>>>() {
-            }).toJavaString();
-    assertEquals("failed to generate new object with parameterized type", "new List<List<Map<String, Integer>>>()", s);
+            .newObject(new TypeLiteral<ArrayList<ArrayList<HashMap<String, Integer>>>>() {
+                }).toJavaString();
+    assertEquals("failed to generate new object with parameterized type",
+        "new ArrayList<ArrayList<HashMap<String, Integer>>>()", s);
+  }
+  
+  @Test
+  public void testObjectCreationOfUninstantiableType() {
+    try {
+      Stmt.newObject(List.class).toJavaString();
+      fail("Expected InvalidTypeExcpetion");
+    }
+    catch (InvalidTypeException e) {
+      // Expected, List is not instantiable
+    }
   }
 
   @Test
@@ -557,7 +570,7 @@ public class StatementBuilderTest extends AbstractCodegenTest {
       fail("expected InvalidTypeException");
     }
     catch (InvalidTypeException e) {
-      //expected
+      // expected
       assertEquals("Wrong exception message", "java.lang.String cannot be cast to java.lang.Integer", e.getMessage());
     }
   }
@@ -577,8 +590,10 @@ public class StatementBuilderTest extends AbstractCodegenTest {
 
   @Test
   public void testTypeInferenceWorksPropertyForParameterizedMethodTypes() {
-    String s = Stmt.loadStatic(BeanWithTypeParmedMeths.class, "INSTANCE")
-            .invoke("setFooBarMap", Stmt.loadStatic(BeanWithTypeParmedMeths.class, "INSTANCE").invoke("getFooBarMap")).toJavaString();
+    String s =
+        Stmt.loadStatic(BeanWithTypeParmedMeths.class, "INSTANCE")
+            .invoke("setFooBarMap", Stmt.loadStatic(BeanWithTypeParmedMeths.class, "INSTANCE").invoke("getFooBarMap"))
+            .toJavaString();
 
     assertEquals("org.jboss.errai.codegen.test.model.BeanWithTypeParmedMeths.INSTANCE" +
             ".setFooBarMap(org.jboss.errai.codegen.test.model.BeanWithTypeParmedMeths.INSTANCE.getFooBarMap())",

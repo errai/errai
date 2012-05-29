@@ -31,6 +31,7 @@ import org.jboss.errai.codegen.builder.callstack.CallWriter;
 import org.jboss.errai.codegen.builder.callstack.DeferredCallElement;
 import org.jboss.errai.codegen.builder.callstack.DeferredCallback;
 import org.jboss.errai.codegen.builder.callstack.LoadClassReference;
+import org.jboss.errai.codegen.exception.InvalidTypeException;
 import org.jboss.errai.codegen.exception.UndefinedConstructorException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -50,6 +51,7 @@ public class ObjectBuilder extends AbstractStatementBuilder {
 
   ObjectBuilder(MetaClass type, Context context, CallElementBuilder callElementBuilder) {
     super(context, callElementBuilder);
+    
     if (context != null) {
       context.attachClass(type);
 
@@ -98,7 +100,6 @@ public class ObjectBuilder extends AbstractStatementBuilder {
     return newInstanceOf(MetaClassFactory.get(type), context);
   }
 
-
   public static ObjectBuilder newInstanceOf(MetaClass type, Context context, CallElementBuilder callElementBuilder) {
     return new ObjectBuilder(type, context, callElementBuilder);
   }
@@ -110,7 +111,6 @@ public class ObjectBuilder extends AbstractStatementBuilder {
   public static ObjectBuilder newInstanceOf(TypeLiteral<?> type, Context context, CallElementBuilder callElementBuilder) {
     return newInstanceOf(MetaClassFactory.get(type), context, callElementBuilder);
   }
-
 
   public StatementEnd withParameters(Object... parameters) {
     this.parameters = parameters;
@@ -138,7 +138,6 @@ public class ObjectBuilder extends AbstractStatementBuilder {
     return type;
   }
 
-
   @Override
   public String generate(final Context context) {
 
@@ -146,6 +145,9 @@ public class ObjectBuilder extends AbstractStatementBuilder {
       appendCallElement(new DeferredCallElement(new DeferredCallback() {
         @Override
         public void doDeferred(CallWriter writer, Context context, Statement statement) {
+          if (extendsBlock == null && (type.isAbstract() || type.isInterface()))
+            throw new InvalidTypeException("Cannot instantiate type:"+type);
+          
           writer.reset();
 
           CallParameters callParameters = (parameters != null) ?
@@ -184,6 +186,4 @@ public class ObjectBuilder extends AbstractStatementBuilder {
       return null;
     }
   }
-
-
 }
