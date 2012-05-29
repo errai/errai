@@ -24,6 +24,7 @@ import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJString;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
+import org.jboss.errai.marshalling.client.util.MarshallUtil;
 import org.jboss.errai.marshalling.client.util.NumbersUtils;
 
 /**
@@ -76,7 +77,7 @@ public class ObjectMarshaller extends AbstractNullableMarshaller<Object> {
       return NumbersUtils.qualifiedNumericEncoding(o);
     }
 
-    Marshaller<Object> marshaller = ctx.getMarshallerInstance(o.getClass().getName());
+    Marshaller<Object> marshaller = MarshallUtil.getMarshaller(o, ctx);
 
     if (marshaller == null) {
       throw new RuntimeException("marshalled type is unknown to the marshalling framework: " + o.getClass().getName());
