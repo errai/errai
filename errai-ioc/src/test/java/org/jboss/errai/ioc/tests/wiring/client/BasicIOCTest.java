@@ -30,11 +30,12 @@ import org.jboss.errai.ioc.tests.wiring.client.res.SimpleBean;
 import org.jboss.errai.ioc.tests.wiring.client.res.SimpleBean2;
 import org.jboss.errai.ioc.tests.wiring.client.res.TestResultsSingleton;
 import org.jboss.errai.ioc.tests.wiring.client.res.TransverseDepService;
+import org.junit.Ignore;
 import org.junit.runner.RunWith;
 
 import java.util.List;
 
-@RunWith(IOCSimulatedTestRunner.class)
+@RunWith(IOCSimulatedTestRunner.class) @Ignore
 public class  BasicIOCTest extends IOCClientTestCase {
 
   static {
