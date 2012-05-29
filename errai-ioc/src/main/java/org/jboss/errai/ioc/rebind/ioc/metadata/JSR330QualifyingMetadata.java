@@ -16,16 +16,23 @@
 
 package org.jboss.errai.ioc.rebind.ioc.metadata;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
+
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.literal.LiteralFactory;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.ioc.client.api.qualifiers.BuiltInQualifiers;
 
+import javax.enterprise.util.Nonbinding;
 import javax.inject.Qualifier;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -52,15 +59,57 @@ public class JSR330QualifyingMetadata implements QualifyingMetadata {
   @Override
   public boolean doesSatisfy(QualifyingMetadata metadata) {
     if (metadata instanceof JSR330QualifyingMetadata) {
-      JSR330QualifyingMetadata comparable = (JSR330QualifyingMetadata) metadata;
+      final JSR330QualifyingMetadata comparable = (JSR330QualifyingMetadata) metadata;
 
       return ((comparable.qualifiers.size() == 1
               && comparable.qualifiers.contains(BuiltInQualifiers.ANY_INSTANCE))
               || qualifiers.size() == 1
               && qualifiers.contains(BuiltInQualifiers.ANY_INSTANCE)
-              || qualifiers.containsAll(comparable.qualifiers));
+              || doQualifiersMatch(qualifiers, comparable.qualifiers));
     }
     else return metadata == null;
+  }
+
+  private static boolean doQualifiersMatch(Set<Annotation> from, Set<Annotation> to) {
+    final Map<String, Annotation> fromAnnos = new HashMap<String, Annotation>();
+
+    for (final Annotation a : from) {
+      fromAnnos.put(a.annotationType().getName(), a);
+    }
+
+    for (Annotation a : to) {
+      if (fromAnnos.containsKey(a.annotationType().getName())) {
+        if (!annotationMatches(a, fromAnnos.get(a.annotationType().getName()))) return false;
+      }
+      else {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  private static boolean annotationMatches(final Annotation a1, final Annotation a2) {
+    final Class<? extends Annotation> anno = a1.annotationType();
+
+    for (Method method : anno.getDeclaredMethods()) {
+      int modifiers = method.getModifiers();
+      if (method.isAnnotationPresent(Nonbinding.class) || Modifier.isPrivate(modifiers)
+              || Modifier.isProtected(modifiers) || method.getName().equals("equals") || method.getName().equals("hashCode"))
+        continue;
+
+      try {
+        if (!method.invoke(a1).equals(method.invoke(a2))) return false;
+      }
+      catch (IllegalAccessException e) {
+        e.printStackTrace();
+      }
+      catch (InvocationTargetException e) {
+        e.printStackTrace();
+      }
+    }
+
+    return true;
   }
 
   public static JSR330QualifyingMetadata createFromAnnotations(Annotation[] annotations) {

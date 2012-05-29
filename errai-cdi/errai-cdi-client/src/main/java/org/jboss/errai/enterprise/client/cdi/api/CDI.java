@@ -19,6 +19,7 @@ import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.base.CommandMessage;
+import org.jboss.errai.bus.client.framework.ClientMessageBus;
 import org.jboss.errai.bus.client.framework.ClientMessageBusImpl;
 import org.jboss.errai.bus.client.framework.Subscription;
 import org.jboss.errai.common.client.api.extension.InitVotes;
@@ -75,7 +76,7 @@ public class CDI {
    * Should only be called by bootstrapper for testing purposes.
    */
   public void __resetSubsystem() {
-    for (String eventType : new HashSet<String>(((ClientMessageBusImpl) ErraiBus.get()).getAllRegisteredSubjects())) {
+    for (String eventType : new HashSet<String>(((ClientMessageBus) ErraiBus.get()).getAllRegisteredSubjects())) {
       if (eventType.startsWith(CDI_SUBJECT_PREFIX)) {
         ErraiBus.get().unsubscribeAll(eventType);
       }
@@ -88,7 +89,6 @@ public class CDI {
     eventObservers.clear();
     lookupTable = Collections.emptyMap();
   }
-
 
   public void initLookupTable(final CDIEventTypeLookup lookup) {
     lookupTable = lookup.getTypeLookupMap();

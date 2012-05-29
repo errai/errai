@@ -26,6 +26,7 @@ import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.graph.Dependency;
+import org.jboss.errai.ioc.rebind.ioc.graph.GraphBuilder;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
@@ -57,12 +58,17 @@ public abstract class JSR330AnnotationHandler<T extends Annotation> implements A
 
   public static void processDependencies(DependencyControl control, MetaClass mc, InjectionContext context) {
 
+    final GraphBuilder graphBuilder = context.getGraphBuilder();
+
     do {
       for (MetaField field : mc.getDeclaredFields()) {
 
         if (context.isElementType(WiringElementType.InjectionPoint, field)) {
           control.notifyDependency(field.getType());
-          control.notifyDependencies(fillInInterface(field.getType().asClass()));
+
+          for (MetaClass cls : fillInInterface(field.getType().asClass())) {
+            graphBuilder.addDependency(field.getType(), Dependency.on(cls));
+          }
         }
       }
 
@@ -70,7 +76,10 @@ public abstract class JSR330AnnotationHandler<T extends Annotation> implements A
         if (context.isElementType(WiringElementType.InjectionPoint, method)) {
           for (MetaParameter parm : method.getParameters()) {
             control.notifyDependency(parm.getType());
-            control.notifyDependencies(fillInInterface(parm.getType().asClass()));
+
+            for (MetaClass cls : fillInInterface(parm.getType().asClass())) {
+              graphBuilder.addDependency(parm.getType(), Dependency.on(cls));
+            }
           }
         }
       }
@@ -79,7 +88,10 @@ public abstract class JSR330AnnotationHandler<T extends Annotation> implements A
         if (context.isElementType(WiringElementType.InjectionPoint, constructor)) {
           for (MetaParameter parm : constructor.getParameters()) {
             control.notifyDependency(parm.getType());
-            control.notifyDependencies(fillInInterface(parm.getType().asClass()));
+
+            for (MetaClass cls : fillInInterface(parm.getType().asClass())) {
+              graphBuilder.addDependency(parm.getType(), Dependency.on(cls));
+            }
           }
         }
       }

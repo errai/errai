@@ -18,12 +18,17 @@ package org.jboss.errai.bus.client;
 
 import org.jboss.errai.bus.client.api.*;
 import org.jboss.errai.bus.client.framework.BusMonitor;
+import org.jboss.errai.bus.client.framework.ClientMessageBus;
+import org.jboss.errai.bus.client.framework.LogAdapter;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.RequestDispatcher;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import org.jboss.errai.bus.client.framework.Subscription;
+
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * The main GWT <tt>EntryPoint</tt> class for ErraiBus.  This class also contains a static global reference to the
@@ -40,7 +45,7 @@ public class ErraiBus implements EntryPoint {
 
       // edge case: in simulated client mode, client code runs in an environment where GWT.isClient() returns false
       // obviously, this code will not be able to contact the server, but framework code still assumes bus != null
-      bus = new MessageBus() {
+      bus = new ClientMessageBus() {
         @Override
         public void sendGlobal(Message message) {
 
@@ -87,6 +92,45 @@ public class ErraiBus implements EntryPoint {
 
         @Override
         public void attachMonitor(BusMonitor monitor) {
+        }
+
+        @Override
+        public void addPostInitTask(Runnable run) {
+        }
+
+        @Override
+        public void addSessionExpirationListener(SessionExpirationListener listener) {
+        }
+
+        @Override
+        public void addPreInitializationListener(PreInitializationListener listener) {
+        }
+
+        @Override
+        public void init() {
+        }
+
+        @Override
+        public void stop(boolean sendDisconnectToServer) {
+        }
+
+        @Override
+        public boolean isInitialized() {
+          return false;
+        }
+
+        @Override
+        public void setLogAdapter(LogAdapter logAdapter) {
+        }
+
+        @Override
+        public Set<String> getAllRegisteredSubjects() {
+          return Collections.emptySet();
+        }
+
+        @Override
+        public LogAdapter getLogAdapter() {
+          return null;
         }
       };
     }

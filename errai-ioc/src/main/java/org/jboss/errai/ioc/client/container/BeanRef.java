@@ -33,8 +33,8 @@ import java.util.Set;
  * For example:
  * <pre>
  *   <code>
- *     BeanRef beanRefA = new BeanRef(String.class, new Annotation[] { Foo.class });
- *     BeanRef beanRefB = new BeanRef(String.class, new Annotation[] { Foo.class });
+ *     BeanRef beanRefA = new BeanRef(String.class, new Annotation[] { new Foo() { ... } });
+ *     BeanRef beanRefB = new BeanRef(String.class, new Annotation[] { new Foo() { ... } });
  *     assertTrue(beanRefA.equals(beanRefB)); // should equal true!
  *   </code>
  * </pre>

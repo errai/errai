@@ -17,6 +17,7 @@
 package org.jboss.errai.ioc.rebind.ioc.extension;
 
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.ioc.rebind.ioc.graph.GraphBuilder;
 
 import java.lang.annotation.Annotation;
 import java.util.Collection;
@@ -29,4 +30,4 @@ public interface DependencyControl {
 
   public void notifyDependency(MetaClass clazz);
   public void notifyDependencies(Collection<MetaClass> clazzes);
-}
+  }
