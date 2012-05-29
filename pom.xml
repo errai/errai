@@ -48,6 +48,9 @@
             <name>Jonathan Fuerth</name>
         </developer>
         <developer>
+            <name>Lincoln Baxter, III</name>
+        </developer>
+        <developer>
             <name>Heiko Braun</name>
         </developer>
     </developers>
@@ -97,6 +100,7 @@
         <module>errai-jpa</module>
         <module>errai-html5</module>
         <module>errai-reflections</module>
+        <module>errai-javaee-all</module>
     </modules>
 
     <dependencyManagement>
