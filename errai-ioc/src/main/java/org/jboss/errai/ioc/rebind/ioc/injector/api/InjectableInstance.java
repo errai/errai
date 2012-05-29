@@ -103,7 +103,7 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
 
   public Statement getBeanValueStatement() {
     return Stmt.loadVariable("context")
-            .invoke("getBeanReference", getType(), getQualifiers());
+            .invoke("getBeanInstance", getType(), getQualifiers());
   }
 
   /**
