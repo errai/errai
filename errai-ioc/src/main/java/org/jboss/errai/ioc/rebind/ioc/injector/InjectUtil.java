@@ -424,8 +424,9 @@ public class InjectUtil {
       final Injector inj = ctx.getQualifiedInjector(clazz, qualifyingMetadata);
 
       /**
-       * Special handling for cycles. If two beans directly depend on each other. We shimmy in a call to the
-       * binding reference to check the context for the instance to avoid a hanging duplicate reference.
+       * Special handling for cycles. If two beans directly depend on each other, we shimmy in a call to the
+       * binding reference to check the context for the instance to avoid a hanging duplicate reference. It is to
+       * ensure only one instance of each bean is created.
        */
       if (ctx.cycles(injectableInstance.getEnclosingType(), clazz) && inj instanceof TypeInjector) {
         final TypeInjector typeInjector = (TypeInjector) inj;
@@ -452,7 +453,7 @@ public class InjectUtil {
 
             /**
              * Inform the caller that we are in a proxy and that the operation they're doing must
-             * necesarily be done within the ProxyResolver resolve operation since this provider operation
+             * necessarily be done within the ProxyResolver resolve operation since this provider operation
              * relies on a bean which is not yet available.
              */
             ctx.recordCycle(inj.getEnclosingType(), injectableInstance.getEnclosingType());

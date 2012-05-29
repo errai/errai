@@ -101,6 +101,11 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
 
   }
 
+  public Statement getBeanValueStatement() {
+    return Stmt.loadVariable("context")
+            .invoke("getBeanReference", getType(), getQualifiers());
+  }
+
   /**
    * Returns an instance of a {@link Statement} which represents the value associated for injection at this
    * InjectionPoint.
