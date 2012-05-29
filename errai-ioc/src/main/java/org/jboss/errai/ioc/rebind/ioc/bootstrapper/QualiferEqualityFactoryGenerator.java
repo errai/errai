@@ -23,6 +23,7 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTClass;
 import org.jboss.errai.codegen.util.Arith;
 import org.jboss.errai.codegen.util.Bool;
+import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.MetaDataScanner;
@@ -54,6 +55,7 @@ public class QualiferEqualityFactoryGenerator extends Generator {
   public String generate(TreeLogger logger, GeneratorContext context, String typeName) throws UnableToCompleteException {
     try {
       // get classType and save instance variables
+      GenUtil.setPermissiveMode(true);
 
       final JClassType classType = context.getTypeOracle().getType(typeName);
       String packageName = classType.getPackage().getName();

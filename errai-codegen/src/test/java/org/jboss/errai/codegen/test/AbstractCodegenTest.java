@@ -17,6 +17,8 @@
 package org.jboss.errai.codegen.test;
 
 import org.jboss.errai.codegen.builder.impl.StatementBuilder;
+import org.jboss.errai.codegen.util.GenUtil;
+import org.junit.Before;
 
 /**
  * Base class for all {@link StatementBuilder} tests.
@@ -24,6 +26,11 @@ import org.jboss.errai.codegen.builder.impl.StatementBuilder;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public abstract class AbstractCodegenTest {
+
+  @Before
+  public void onBefore() {
+    GenUtil.setPermissiveMode(false);
+  }
 
   /**
    * assertEquals, less sensitive to indentation differences.

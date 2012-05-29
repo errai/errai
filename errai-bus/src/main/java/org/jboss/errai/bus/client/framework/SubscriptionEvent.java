@@ -50,7 +50,6 @@ public class SubscriptionEvent extends BusEvent {
     this.subject = subject;
   }
 
-
   /**
    * Return the associated sessionId with the subscription event.
    *

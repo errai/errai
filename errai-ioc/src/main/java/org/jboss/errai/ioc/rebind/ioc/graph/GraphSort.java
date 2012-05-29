@@ -16,16 +16,11 @@
 
 package org.jboss.errai.ioc.rebind.ioc.graph;
 
-import org.jboss.errai.codegen.meta.MetaClass;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.IdentityHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**

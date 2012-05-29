@@ -59,7 +59,7 @@ import org.mvel2.util.NullType;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class GenUtil {
-  private static final boolean PERMISSIVE_MODE;
+  private static boolean PERMISSIVE_MODE;
 
   static {
     if (System.getProperty("errai.codegen.permissive") != null) {
@@ -72,6 +72,10 @@ public class GenUtil {
 
   public static boolean isPermissiveMode() {
     return PERMISSIVE_MODE;
+  }
+
+  public static void setPermissiveMode(boolean permissiveMode) {
+    PERMISSIVE_MODE = permissiveMode;
   }
 
   public static Statement[] generateCallParameters(Context context, Object... parameters) {
@@ -532,61 +536,12 @@ public class GenUtil {
             break;
           }
 
-          for (int i = 0; i != arguments.length; i++) {
-            MetaClass actualParamType;
-            if (isVarArgs && !arguments[arguments.length - 1].isArray() && i >= parmTypes.length - 1)
-              actualParamType = parmTypes[parmTypes.length - 1].getType().getComponentType();
-            else
-              actualParamType = parmTypes[i].getType();
-
-            if (arguments[i] == null) {
-              if (!actualParamType.isPrimitive()) {
-                score += 6;
-              }
-              else {
-                score = 0;
-                break;
-              }
-            }
-            else if (actualParamType.equals(arguments[i])) {
-              score += 7;
-            }
-            else if (actualParamType.isPrimitive() && actualParamType.asBoxed().equals(arguments[i])) {
-              score += 6;
-            }
-            else if (arguments[i].isPrimitive() && arguments[i].asUnboxed().equals(actualParamType)) {
-              score += 6;
-            }
-            else if (actualParamType.isAssignableFrom(arguments[i])) {
-              score += 5;
-            }
-            else if (isNumericallyCoercible(arguments[i], actualParamType)) {
-              score += 4;
-            }
-            else if (actualParamType.asBoxed().isAssignableFrom(arguments[i].asBoxed())
-                    && !Object_MetaClass.equals(arguments[i])) {
-              score += 3 + scoreInterface(actualParamType, arguments[i]);
-            }
-            else if (canConvert(actualParamType, arguments[i])) {
-              if (actualParamType.isArray() && arguments[i].isArray()) score += 1;
-              else if (actualParamType.equals(char_MetaClass) && arguments[i].equals(String_MetaClass)) score += 1;
-
-              score += 1;
-            }
-            else if (actualParamType.equals(Object_MetaClass) || arguments[i].equals(NullType_MetaClass)) {
-              score += 1;
-            }
-            else {
-              score = 0;
-              break;
-            }
-          }
+          score = scoreMethods(arguments, parmTypes, isVarArgs);
 
           if (score != 0 && score > bestScore) {
             bestCandidate = meth;
             bestScore = score;
           }
-          score = 0;
         }
       }
 
@@ -611,6 +566,60 @@ public class GenUtil {
     while (true);
 
     return bestCandidate;
+  }
+
+  public static int scoreMethods(MetaClass[] arguments, MetaParameter[] parmTypes, boolean isVarArgs) {
+    int score = 0;
+    for (int i = 0; i != arguments.length; i++) {
+      MetaClass actualParamType;
+      if (isVarArgs && !arguments[arguments.length - 1].isArray() && i >= parmTypes.length - 1)
+        actualParamType = parmTypes[parmTypes.length - 1].getType().getComponentType();
+      else
+        actualParamType = parmTypes[i].getType();
+
+      if (arguments[i] == null) {
+        if (!actualParamType.isPrimitive()) {
+          score += 6;
+        }
+        else {
+          score = 0;
+          break;
+        }
+      }
+      else if (actualParamType.equals(arguments[i])) {
+        score += 7;
+      }
+      else if (actualParamType.isPrimitive() && actualParamType.asBoxed().equals(arguments[i])) {
+        score += 6;
+      }
+      else if (arguments[i].isPrimitive() && arguments[i].asUnboxed().equals(actualParamType)) {
+        score += 6;
+      }
+      else if (actualParamType.isAssignableFrom(arguments[i])) {
+        score += 5;
+      }
+      else if (isNumericallyCoercible(arguments[i], actualParamType)) {
+        score += 4;
+      }
+      else if (actualParamType.asBoxed().isAssignableFrom(arguments[i].asBoxed())
+              && !Object_MetaClass.equals(arguments[i])) {
+        score += 3 + scoreInterface(actualParamType, arguments[i]);
+      }
+      else if (canConvert(actualParamType, arguments[i])) {
+        if (actualParamType.isArray() && arguments[i].isArray()) score += 1;
+        else if (actualParamType.equals(char_MetaClass) && arguments[i].equals(String_MetaClass)) score += 1;
+
+        score += 1;
+      }
+      else if (actualParamType.equals(Object_MetaClass) || arguments[i].equals(NullType_MetaClass)) {
+        score += 1;
+      }
+      else {
+        score = 0;
+        break;
+      }
+    }
+    return score;
   }
 
   public static MetaConstructor getBestConstructorCandidate(MetaClass[] arguments, MetaClass decl,
@@ -639,61 +648,12 @@ public class GenUtil {
           break;
         }
 
-        for (int i = 0; i != arguments.length; i++) {
-          MetaClass actualParamType;
-          if (isVarArgs && !arguments[arguments.length - 1].isArray() && i >= parmTypes.length - 1)
-            actualParamType = parmTypes[parmTypes.length - 1].getType().getComponentType();
-          else
-            actualParamType = parmTypes[i].getType();
-
-          if (arguments[i] == null) {
-            if (!actualParamType.isPrimitive()) {
-              score += 6;
-            }
-            else {
-              score = 0;
-              break;
-            }
-          }
-          else if (actualParamType.equals(arguments[i])) {
-            score += 7;
-          }
-          else if (actualParamType.isPrimitive() && actualParamType.asBoxed().equals(arguments[i])) {
-            score += 6;
-          }
-          else if (arguments[i].isPrimitive() && arguments[i].asUnboxed().equals(actualParamType)) {
-            score += 6;
-          }
-          else if (actualParamType.isAssignableFrom(arguments[i])) {
-            score += 5;
-          }
-          else if (isNumericallyCoercible(arguments[i], actualParamType)) {
-            score += 4;
-          }
-          else if (actualParamType.asBoxed().isAssignableFrom(arguments[i].asBoxed())
-                  && !Object_MetaClass.equals(arguments[i])) {
-            score += 3 + scoreInterface(actualParamType, arguments[i]);
-          }
-          else if (canConvert(actualParamType, arguments[i])) {
-            if (actualParamType.isArray() && arguments[i].isArray()) score += 1;
-            else if (actualParamType.equals(char_MetaClass) && arguments[i].equals(String_MetaClass)) score += 1;
-
-            score += 1;
-          }
-          else if (actualParamType.equals(Object_MetaClass) || arguments[i].equals(NullType_MetaClass)) {
-            score += 1;
-          }
-          else {
-            score = 0;
-            break;
-          }
-        }
+        score = scoreMethods(arguments, parmTypes, isVarArgs);
 
         if (score != 0 && score > bestScore) {
           bestCandidate = meth;
           bestScore = score;
         }
-        score = 0;
       }
 
       if (!retry && bestCandidate == null && decl.isInterface()) {

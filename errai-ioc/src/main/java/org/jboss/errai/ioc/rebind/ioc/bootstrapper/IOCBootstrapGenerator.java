@@ -34,6 +34,7 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTClass;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
+import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.codegen.util.Implementations;
 import org.jboss.errai.codegen.util.PrivateAccessType;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
@@ -120,6 +121,8 @@ public class IOCBootstrapGenerator {
   }
 
   public String generate(String packageName, String className) {
+    GenUtil.setPermissiveMode(true);
+
     synchronized (generatorLock) {
       EnvUtil.recordEnvironmentState();
 

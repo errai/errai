@@ -45,12 +45,12 @@ import java.util.concurrent.locks.ReentrantLock;
  * @since Errai v2.0
  */
 public class TransmissionBuffer implements Buffer {
-  public static long STARTING_SEQUENCE = 0;
+  public static final long STARTING_SEQUENCE = 0;
 
-  public static int DEFAULT_SEGMENT_SIZE = 1024 * 16;             /* 16 Kilobytes */
-  public static int DEFAULT_BUFFER_SIZE = 2048;                   /* 2048 x 16kb = 32 Megabytes */
+  public static final int DEFAULT_SEGMENT_SIZE = 1024 * 16;             /* 16 Kilobytes */
+  private static final int DEFAULT_BUFFER_SIZE = 2048;                   /* 2048 x 16kb = 32 Megabytes */
 
-  public static int SEGMENT_HEADER_SIZE = 4;                      /* to accommodate a 32-bit integer  */
+  private static final int SEGMENT_HEADER_SIZE = 4;                      /* to accommodate a 32-bit integer  */
 
   /**
    * The main buffer where the data is stored
@@ -65,17 +65,17 @@ public class TransmissionBuffer implements Buffer {
   /**
    * The absolute size (in bytes) of the buffer
    */
-  final int bufferSize;
+  private final int bufferSize;
 
   /**
    * The size of an individual segment in the buffer
    */
-  final int segmentSize;
+  private final int segmentSize;
 
   /**
    * The total number of allocable segments in the buffer
    */
-  final int segments;
+  private final int segments;
 
   /**
    * The internal write sequence number used by the writers to allocate write space within the buffer.

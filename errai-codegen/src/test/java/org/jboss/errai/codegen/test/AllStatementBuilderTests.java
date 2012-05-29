@@ -16,6 +16,7 @@
 
 package org.jboss.errai.codegen.test;
 
+import org.jboss.errai.codegen.util.GenUtil;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
@@ -23,9 +24,11 @@ import org.junit.runners.Suite;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({ AnnotationEncoderTest.class, ClassBuilderTest.class, AnonymousClassStructureBuilderTest.class,
-    ContextBuilderTest.class, IfBlockBuilderTest.class, InvocationBuilderTest.class, LiteralTest.class,
-    LoopBuilderTest.class, StatementBuilderTest.class, SwitchBlockBuilderTest.class, TryBlockBuilderTest.class })
+@Suite.SuiteClasses({AnnotationEncoderTest.class, ClassBuilderTest.class, AnonymousClassStructureBuilderTest.class,
+        ContextBuilderTest.class, IfBlockBuilderTest.class, InvocationBuilderTest.class, LiteralTest.class,
+        LoopBuilderTest.class, StatementBuilderTest.class, SwitchBlockBuilderTest.class, TryBlockBuilderTest.class})
 public class AllStatementBuilderTests {
-
+  static {
+    GenUtil.setPermissiveMode(false);
+  }
 }
