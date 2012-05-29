@@ -62,7 +62,7 @@ public class TemplatedDecorator extends IOCDecoratorExtension<Templated> {
       }
     }
 
-    System.out.println("Handling @Templated annotation on field: " + declaringClass);
+    System.out.println("Handling @Templated annotation on class: " + declaringClass);
 
     MetaClass callbackMetaClass = MetaClassFactory.parameterizedAs(InitializationCallback.class,
             MetaClassFactory.typeParametersOf(declaringClass));
