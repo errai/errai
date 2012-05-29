@@ -16,6 +16,9 @@
 
 package org.jboss.errai.ioc.rebind.ioc.injector.api;
 
+import java.lang.annotation.Annotation;
+import java.util.List;
+
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
@@ -26,11 +29,6 @@ import org.jboss.errai.ioc.rebind.ioc.exception.InjectionFailure;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadata;
-
-import java.lang.annotation.Annotation;
-import java.util.List;
-
-import static org.jboss.errai.codegen.util.PrivateAccessUtil.getPrivateFieldInjectorName;
 
 /**
  * @author Mike Brock
@@ -149,12 +147,11 @@ public class InjectionPoint<T> {
   public String getMemberName() {
     switch (taskType) {
       case PrivateField:
-        return getPrivateFieldInjectorName(field) + "(" + injector.getVarName() + ")";
-
       case Field:
         return field.getName();
 
       case Parameter:
+         return parm.getName();
       case PrivateMethod:
       case Method:
         return method.getName();
