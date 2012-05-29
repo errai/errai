@@ -262,7 +262,9 @@ public class InjectUtil {
     }
   }
 
-  private static List<InjectionTask> scanForTasks(Injector injector, InjectionContext ctx, MetaClass type) {
+  private static List<InjectionTask> scanForTasks(final Injector injector,
+                                                  final InjectionContext ctx,
+                                                  final MetaClass type) {
     final List<InjectionTask> accumulator = new LinkedList<InjectionTask>();
     final Set<Class<? extends Annotation>> decorators = ctx.getDecoratorAnnotations();
 
@@ -563,6 +565,7 @@ public class InjectUtil {
 
         stmt = getInjectorOrProxy(ctx, injectableInstance, parmTypes[i],
                 ctx.getProcessingContext().getQualifyingMetadataFactory().createFrom(parms[i].getAnnotations()), true);
+
         ctx.closeProxyIfOpen();
 
       }
@@ -619,6 +622,11 @@ public class InjectUtil {
       }
     }
     return Collections.unmodifiableList(quals);
+  }
+
+  public static Annotation[] getQualifiersFromAnnotationsAsArray(final Annotation[] annotations) {
+    final List<Annotation> quals = getQualifiersFromAnnotations(annotations);
+    return quals.toArray(new Annotation[quals.size()]);
   }
 
   private static final String BEAN_INJECTOR_STORE = "InjectorBeanManagerStore";

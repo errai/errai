@@ -157,7 +157,7 @@ public class InjectionTask {
                   new InjectableInstance(null, TaskType.Parameter, null, method, null, parm.getType(), parm, injector, ctx));
         }
 
-        Statement[] args = InjectUtil.resolveInjectionDependencies(method.getParameters(), ctx, method);
+        final Statement[] args = InjectUtil.resolveInjectionDependencies(method.getParameters(), ctx, method);
 
         processingContext.append(
                 InjectUtil.invokePublicOrPrivateMethod(processingContext,

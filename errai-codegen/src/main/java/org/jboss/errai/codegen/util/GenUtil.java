@@ -519,7 +519,7 @@ public class GenUtil {
     MetaParameter[] parmTypes;
     MetaMethod bestCandidate = null;
     int bestScore = 0;
-    int score = 0;
+    int score;
     boolean retry = false;
 
     do {
@@ -568,7 +568,7 @@ public class GenUtil {
     return bestCandidate;
   }
 
-  public static int scoreMethods(MetaClass[] arguments, MetaParameter[] parmTypes, boolean isVarArgs) {
+  public static int scoreMethods(final MetaClass[] arguments, final MetaParameter[] parmTypes, final boolean isVarArgs) {
     int score = 0;
     for (int i = 0; i != arguments.length; i++) {
       MetaClass actualParamType;
@@ -679,13 +679,11 @@ public class GenUtil {
     return bestCandidate;
   }
 
-
   private static final MetaClass Number_MetaClass = MetaClassFactory.get(Number.class);
   private static final MetaClass Object_MetaClass = MetaClassFactory.get(Object.class);
   private static final MetaClass NullType_MetaClass = MetaClassFactory.get(NullType.class);
   private static final MetaClass char_MetaClass = MetaClassFactory.get(char.class);
   private static final MetaClass String_MetaClass = MetaClassFactory.get(String.class);
-
 
   public static boolean canConvert(MetaClass to, MetaClass from) {
     try {

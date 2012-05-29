@@ -24,7 +24,7 @@ import org.jboss.errai.codegen.meta.MetaParameter;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class JSNIUtil {
-  public static String fieldAccess(MetaField field) {
+  public static String fieldAccess(final MetaField field) {
     if (field.isStatic()) {
       return "@" + field.getDeclaringClass().getFullyQualifiedName().replaceAll("\\$", "\\.") + "::"
               + field.getName();
@@ -35,7 +35,7 @@ public class JSNIUtil {
     }
   }
 
-  public static String methodAccess(MetaMethod method) {
+  public static String methodAccess(final MetaMethod method) {
     final StringBuilder buf = new StringBuilder(50);
 
     if (!method.getReturnType().isVoid()) {
