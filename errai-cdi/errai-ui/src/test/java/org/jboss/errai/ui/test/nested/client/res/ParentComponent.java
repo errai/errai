@@ -18,7 +18,6 @@ public class ParentComponent extends Composite {
   @DataField
   private ChildComponent c1;
 
-  @DataField("c2")
   private Button button;
 
   @PostConstruct
@@ -26,9 +25,14 @@ public class ParentComponent extends Composite {
     c1.getElement().setAttribute("id", "c1");
     button.getElement().setAttribute("id", "c2");
   }
-  
+
   public Button getButton() {
     return button;
   }
-  
+
+  @Inject
+  public void setButton(@DataField("c2") Button button) {
+    this.button = button;
+  }
+
 }
