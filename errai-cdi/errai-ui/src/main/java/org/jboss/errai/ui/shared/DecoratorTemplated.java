@@ -163,7 +163,8 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
        * Merge this field's Widget Element into the DOM in place of the
        * corresponding data-field
        */
-      builder.append(Stmt.invokeStatic(TemplateUtil.class, "compositeComponentReplace", ctx.getType().getFullyQualifiedName(), Cast.to(Widget.class, field.getValue()),
+      builder.append(Stmt.invokeStatic(TemplateUtil.class, "compositeComponentReplace", ctx.getType()
+              .getFullyQualifiedName(), getTemplateFileName(ctx.getType()), Cast.to(Widget.class, field.getValue()),
               dataFieldElements, field.getKey()));
 
       /*

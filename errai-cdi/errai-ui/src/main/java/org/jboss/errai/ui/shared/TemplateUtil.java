@@ -28,7 +28,7 @@ public final class TemplateUtil {
    * Replace the {@link Element} with thte data-field of the given
    * {@link String} with the root {@link Element} of the given {@link UIObject}
    */
-  public static void compositeComponentReplace(String componentType, Widget field,
+  public static void compositeComponentReplace(String componentType, String templateFile, Widget field,
           final Map<String, Element> dataFieldElements, String fieldName) {
     if (field == null) {
       throw new IllegalStateException("Widget to be composited into [" + componentType + "] data-field [" + fieldName
@@ -36,7 +36,8 @@ public final class TemplateUtil {
     }
     Element element = dataFieldElements.get(fieldName);
     if (element == null) {
-      throw new IllegalStateException("Template did not contain data-field attribute for field [" + fieldName + "]");
+      throw new IllegalStateException("Template [" + templateFile
+              + "] did not contain data-field attribute for field [" + fieldName + "]");
     }
     System.out.println("Compositing @Replace [data-field=" + fieldName + "] element [" + element + "] with Component "
             + field.getClass().getName() + " [" + field.getElement() + "]");
