@@ -1,8 +1,9 @@
 package org.jboss.errai.ui.test.extended.client.res;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
-import org.jboss.errai.ui.shared.api.annotations.Insert;
+import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import com.google.gwt.user.client.ui.Label;
@@ -10,10 +11,12 @@ import com.google.gwt.user.client.ui.Label;
 @Templated("BaseComponent.html")
 public class ExtensionComponent extends BaseComponent {
 
-  @Insert
+  @Inject
+  @DataField
   private Label c2;
   
-  @Insert("c3")
+  @Inject
+  @DataField("c3")
   private Label content3;
   
   @PostConstruct

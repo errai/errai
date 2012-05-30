@@ -2,9 +2,9 @@ package org.jboss.errai.ui.test.nested.client.res;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 
-import org.jboss.errai.ui.shared.api.annotations.Insert;
-import org.jboss.errai.ui.shared.api.annotations.Replace;
+import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import com.google.gwt.user.client.ui.Button;
@@ -14,10 +14,11 @@ import com.google.gwt.user.client.ui.Composite;
 @Templated
 public class ParentComponent extends Composite {
 
-  @Insert
+  @Inject
+  @DataField
   private ChildComponent c1;
 
-  @Replace("c2")
+  @DataField("c2")
   private Button button;
 
   @PostConstruct

@@ -45,7 +45,7 @@ public class DecoratorDataField extends IOCDecoratorExtension<DataField> {
   }
 
   private void saveDataField(InjectableInstance<DataField> ctx, String name, Statement instance) {
-    Map<String, Statement> map = dataFieldMap(ctx, ctx.getInjector().getEnclosingType());
+    Map<String, Statement> map = dataFieldMap(ctx, ctx.getEnclosingType());
     map.put(name, instance);
     System.out.println("Saving data-field [" + name + "] Statment instance [" + instance + "]");
   }
@@ -77,7 +77,7 @@ public class DecoratorDataField extends IOCDecoratorExtension<DataField> {
    * of {@link DataField} names and variable {@link Statement} instances for
    * that type.
    */
-  public static final String dataFieldMapName(MetaClass composite) {
+  private static final String dataFieldMapName(MetaClass composite) {
     return DecoratorDataField.class.getName() + "_DATA_FIELD_MAP_" + composite.getName();
   }
 

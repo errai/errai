@@ -22,7 +22,7 @@ public class BasicTemplateTest extends AbstractErraiCDITest {
     assertNotNull(app.getComponent());
     assertTrue(app.getComponent().getElement().getInnerHTML().contains("<h1>This will be rendered</h1>"));
     assertTrue(app.getComponent().getElement().getInnerHTML().contains("<div>This will be rendered</div>"));
-    assertFalse(app.getComponent().getElement().getInnerHTML().contains("This will not be rendered"));
+    assertTrue(app.getComponent().getElement().getInnerHTML().contains("This will be rendered inside button"));
 
     Element c1 = Document.get().getElementById("c1");
     assertNotNull(c1);

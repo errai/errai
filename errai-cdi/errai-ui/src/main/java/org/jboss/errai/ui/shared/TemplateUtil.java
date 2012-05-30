@@ -1,5 +1,6 @@
 package org.jboss.errai.ui.shared;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,10 @@ public final class TemplateUtil {
    */
   public static void compositeComponentReplace(Widget field, final Map<String, Element> dataFieldElements,
           String fieldName) {
+    if (field == null) {
+      throw new IllegalStateException("Widget to be composited into data-field [" + fieldName
+              + "] was null. Did you forget to @Inject or initialize this field?");
+    }
     Element element = dataFieldElements.get(fieldName);
     if (element == null) {
       throw new IllegalStateException("Template did not contain data-field attribute for field [" + fieldName + "]");
@@ -44,8 +49,7 @@ public final class TemplateUtil {
         field.getElement().setAttribute(node.getNodeName(), node.getNodeValue());
       }
       parentElement.replaceChild(field.getElement(), element);
-      if(field instanceof HasHTML)
-      {
+      if (field instanceof HasHTML) {
         NodeList<Node> children = element.getChildNodes();
         for (int i = 0; i < children.getLength(); i++) {
           field.getElement().appendChild(children.getItem(i));
@@ -57,33 +61,14 @@ public final class TemplateUtil {
     }
   }
 
-  public static void initWidget(Composite component, Element wrapped, List<Widget> fields) {
-    initWidgetNative(component, new TemplateWidget(wrapped, fields));
+  public static void initWidget(Composite component, Element wrapped, Collection<Widget> dataFields) {
+    initWidgetNative(component, new TemplateWidget(wrapped, dataFields));
     DOM.setEventListener(component.getElement(), component);
   }
 
   private static native void initWidgetNative(Composite component, Widget wrapped) /*-{
 		component.@com.google.gwt.user.client.ui.Composite::initWidget(Lcom/google/gwt/user/client/ui/Widget;)(wrapped);
   }-*/;
-
-  /**
-   * Insert the root {@link Element} of the given {@link UIObject} into the
-   * {@link Element} with the data-field of the given {@link String}
-   */
-  public static void compositeComponentInsert(Widget field, final Map<String, Element> dataFieldElements,
-          String fieldName) {
-    Element element = dataFieldElements.get(fieldName);
-    System.out.println("Compositing @Insert [data-field=" + fieldName + "] element [" + element + "] with Component "
-            + field.getClass().getName() + " [" + field.getElement() + "]");
-
-    if (element == null) {
-      throw new IllegalStateException("No such Element with [data-field=" + fieldName
-              + "] found in template. Did you specify the correct data-field name?");
-    }
-
-    element.setInnerHTML("");
-    element.appendChild(field.getElement());
-  }
 
   public static Element getRootTemplateElement(String templateContents, final String rootField) {
     Element parserDiv = DOM.createDiv();

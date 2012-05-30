@@ -2,9 +2,9 @@ package org.jboss.errai.ui.test.designer.client.res;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 
-import org.jboss.errai.ui.shared.api.annotations.Insert;
-import org.jboss.errai.ui.shared.api.annotations.Replace;
+import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import com.google.gwt.user.client.ui.Button;
@@ -15,26 +15,28 @@ import com.google.gwt.user.client.ui.Label;
 @Templated
 public class BasicComponent extends Composite {
 
-  @Replace
-  private Label content;
+  @Inject
+  @DataField
+  private Label c1;
 
-  @Insert
-  private Button content2;
+  @Inject
+  @DataField
+  private Button c2;
   
   @PostConstruct
   public void init()
   {
-    content.getElement().setAttribute("id","lbl");
-    content.setText("Added by component");
-    content2.getElement().setAttribute("id", "btn");
+    c1.getElement().setAttribute("id","lbl");
+    c1.setText("Added by component");
+    c2.getElement().setAttribute("id", "btn");
   }
 
-  public Label getContent() {
-    return content;
+  public Label getC1() {
+    return c1;
   }
   
-  public Button getContent2() {
-    return content2;
+  public Button getC2() {
+    return c2;
   }
   
 }

@@ -2,19 +2,20 @@ package org.jboss.errai.ui.test.designer.client.res;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 
-import org.jboss.errai.ui.shared.api.annotations.Replace;
+import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
 
 @Dependent
-@Templated("DesignerTemplate.html#designerContent")
+@Templated("DesignerTemplate.html#subTemplate")
 public class DesignerSubComponent extends Composite {
 
-  @Replace
-  private Label h2;
+  @DataField
+  private Label h2 = new Label();
 
   @PostConstruct
   public void init() {

@@ -2,9 +2,9 @@ package org.jboss.errai.ui.test.designer.client.res;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 
-import org.jboss.errai.ui.shared.api.annotations.Insert;
-import org.jboss.errai.ui.shared.api.annotations.Replace;
+import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import com.google.gwt.user.client.ui.Button;
@@ -14,27 +14,30 @@ import com.google.gwt.user.client.ui.Composite;
 @Templated("DesignerTemplate.html#breadcrumbs")
 public class DesignerBreadcrumbsComponent extends Composite {
 
-  @Insert
-  private BasicComponent newContent;
+  @Inject
+  @DataField
+  private BasicComponent c1;
 
-  @Insert("designerContent")
+  @Inject
+  @DataField("subTemplate")
   private DesignerSubComponent something;
-  
-  @Replace
-  private Button newButton;
+
+  @Inject
+  @DataField
+  private Button c2;
 
   @PostConstruct
   public void init() {
-    newContent.getElement().setAttribute("id", "basic");
+    c1.getElement().setAttribute("id", "basic");
     something.getElement().setAttribute("id", "somethingNew");
-    newButton.getElement().setAttribute("id", "btn");
+    c2.getElement().setAttribute("id", "btn");
   }
-  
+
   public DesignerSubComponent getSubComponent() {
     return something;
   }
-  
+
   public Button getButton() {
-    return newButton;
+    return c2;
   }
 }

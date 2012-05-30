@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 
 import javax.enterprise.util.TypeLiteral;
 
+import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
@@ -162,7 +163,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
        * Merge this field's Widget Element into the DOM in place of the
        * corresponding data-field
        */
-      builder.append(Stmt.invokeStatic(TemplateUtil.class, "compositeComponentReplace", field.getValue(),
+      builder.append(Stmt.invokeStatic(TemplateUtil.class, "compositeComponentReplace", Cast.to(Widget.class, field.getValue()),
               dataFieldElements, field.getKey()));
 
       /*

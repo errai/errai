@@ -3,7 +3,7 @@ package org.jboss.errai.ui.test.handler.client.res;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
 
-import org.jboss.errai.ui.shared.api.annotations.Replace;
+import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -15,13 +15,13 @@ import com.google.gwt.user.client.ui.Composite;
 @Templated
 public class HandledComponent extends Composite {
 
-  @Replace
+  @DataField
   private Button b1;
 
-  @Replace
+  @DataField
   private Button b2;
 
-  @Replace
+  @DataField
   private VocalWidget b3;
 
   @PostConstruct

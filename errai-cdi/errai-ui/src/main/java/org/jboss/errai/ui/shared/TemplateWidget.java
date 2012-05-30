@@ -1,5 +1,6 @@
 package org.jboss.errai.ui.shared;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -14,9 +15,9 @@ import com.google.gwt.user.client.ui.Widget;
  * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
  */
 public class TemplateWidget extends Panel {
-  private List<Widget> children;
+  private Collection<Widget> children;
 
-  public TemplateWidget(Element root, List<Widget> children) {
+  public TemplateWidget(Element root, Collection<Widget> children) {
     this.setElement(root);
     this.children = children;
     
