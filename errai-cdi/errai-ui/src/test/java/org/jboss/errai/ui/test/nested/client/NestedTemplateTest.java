@@ -7,7 +7,7 @@ import org.junit.Test;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 
-public class MultiTemplateTest extends AbstractErraiCDITest {
+public class NestedTemplateTest extends AbstractErraiCDITest {
 
   @Override
   public String getModuleName() {
@@ -16,7 +16,7 @@ public class MultiTemplateTest extends AbstractErraiCDITest {
 
   @Test
   public void testInsertAndReplaceNested() {
-    MultiTemplateTestApp app = IOC.getBeanManager().lookupBean(MultiTemplateTestApp.class).getInstance();
+    NestedTemplateTestApp app = IOC.getBeanManager().lookupBean(NestedTemplateTestApp.class).getInstance();
     assertNotNull(app.getComponent());
     System.out.println(app.getComponent().getElement().getInnerHTML());
     assertTrue(app.getComponent().getElement().getInnerHTML().contains("<h1>This will be rendered</h1>"));

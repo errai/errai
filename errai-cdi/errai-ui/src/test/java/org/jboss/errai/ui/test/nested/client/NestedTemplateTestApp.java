@@ -9,7 +9,7 @@ import org.jboss.errai.ui.test.nested.client.res.ParentComponent;
 import com.google.gwt.user.client.ui.RootPanel;
 
 @EntryPoint
-public class MultiTemplateTestApp {
+public class NestedTemplateTestApp {
 
   @Inject
   private RootPanel root;
