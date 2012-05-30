@@ -51,7 +51,7 @@ public class ObjectBuilder extends AbstractStatementBuilder {
 
   ObjectBuilder(MetaClass type, Context context, CallElementBuilder callElementBuilder) {
     super(context, callElementBuilder);
-    
+
     if (context != null) {
       context.attachClass(type);
 
@@ -117,7 +117,7 @@ public class ObjectBuilder extends AbstractStatementBuilder {
     return this;
   }
 
-  //todo: return a builder interface -- not a concrete implementation
+  // todo: return a builder interface -- not a concrete implementation
   public AnonymousClassStructureBuilder extend() {
     return new AnonymousClassStructureBuilderImpl(type, new BuildCallback<ObjectBuilder>() {
       @Override
@@ -145,9 +145,9 @@ public class ObjectBuilder extends AbstractStatementBuilder {
       appendCallElement(new DeferredCallElement(new DeferredCallback() {
         @Override
         public void doDeferred(CallWriter writer, Context context, Statement statement) {
-          if (extendsBlock == null && (type.isAbstract() || type.isInterface()))
-            throw new InvalidTypeException("Cannot instantiate type:"+type);
-          
+          if (extendsBlock == null && (type.isAbstract() || type.isInterface() || type.isPrimitive()))
+            throw new InvalidTypeException("Cannot instantiate type:" + type);
+
           writer.reset();
 
           CallParameters callParameters = (parameters != null) ?
@@ -155,7 +155,7 @@ public class ObjectBuilder extends AbstractStatementBuilder {
 
           if (!type.isInterface() && type.getBestMatchingConstructor(callParameters.getParameterTypes()) == null) {
             if (GenUtil.isPermissiveMode()) {
-               // fall-through
+              // fall-through
             }
             else {
               throw new UndefinedConstructorException(type, callParameters.getParameterTypes());

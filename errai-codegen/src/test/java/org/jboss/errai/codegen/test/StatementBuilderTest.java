@@ -594,7 +594,7 @@ public class StatementBuilderTest extends AbstractCodegenTest {
         Stmt.loadStatic(BeanWithTypeParmedMeths.class, "INSTANCE")
             .invoke("setFooBarMap", Stmt.loadStatic(BeanWithTypeParmedMeths.class, "INSTANCE").invoke("getFooBarMap"))
             .toJavaString();
-
+    
     assertEquals("org.jboss.errai.codegen.test.model.BeanWithTypeParmedMeths.INSTANCE" +
             ".setFooBarMap(org.jboss.errai.codegen.test.model.BeanWithTypeParmedMeths.INSTANCE.getFooBarMap())",
             s);
