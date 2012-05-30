@@ -121,6 +121,10 @@ public class ErraiEntityManagerGenerator extends Generator {
               Stmt.newObject(MetaClassFactory.get(ErraiEntityType.class, new ParameterizedEntityType(et.getJavaType())))
               .extend();
 
+      entityTypeSubclass.publicMethod(et.getJavaType(), "newInstance")
+              .append(Stmt.nestedCall(Stmt.newObject(et.getJavaType())).returnValue())
+              .finish();
+
       generateLifecycleEventDeliveryMethods(met, entityTypeSubclass);
 
       pmm.append(Stmt.declareVariable(ErraiEntityType.class).asFinal()

@@ -44,7 +44,7 @@ public abstract class ErraiEntityManager implements EntityManager {
   /**
    * The actual storage backend.
    */
-  private final StorageBackend backend = new WebStorageBackend(this); // XXX publishing reference to partially-constructed object
+  private final StorageBackend backend = new WebStorageBackend(this); // XXX publishing reference to partially constructed object
 
   /**
    * Constructor for subclasses.

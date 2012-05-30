@@ -1,7 +1,12 @@
 package org.jboss.errai.jpa.client.local.backend;
 
+import org.jboss.errai.common.client.framework.Assert;
+import org.jboss.errai.jpa.client.local.ErraiEntityManager;
+import org.jboss.errai.jpa.client.local.ErraiEntityType;
 import org.jboss.errai.jpa.client.local.Key;
-import org.jboss.errai.marshalling.client.Marshalling;
+
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONValue;
 
 /**
  * The storage backend for HTML WebStorage, a storage facility supported by most
@@ -10,6 +15,12 @@ import org.jboss.errai.marshalling.client.Marshalling;
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
 public class WebStorageBackend implements StorageBackend {
+
+  private final ErraiEntityManager em;
+
+  public WebStorageBackend(ErraiEntityManager erraiEntityManager) {
+    em = Assert.notNull(erraiEntityManager);
+  }
 
   private native void putImpl(String key, String value) /*-{
     $wnd.sessionStorage.setItem(key, value);
@@ -24,20 +35,29 @@ public class WebStorageBackend implements StorageBackend {
   }-*/;
 
   @Override
-  public <X> void put(Key<X, ?> key, X value) {
+  public <X> void put(Key<X,?> key, X value) {
+    ErraiEntityType<X> entityType = key.getEntityType();
     String keyJson = key.toJson();
-    String valueJson = Marshalling.toJSON(value);
-    putImpl(keyJson, valueJson);
+    JSONValue valueJson = entityType.toJson(em, value);
+    System.out.println(">>>put '" + keyJson + "'");
+    putImpl(keyJson, valueJson.toString());
   }
 
   @Override
   public <X> X get(Key<X, ?> key) {
+    ErraiEntityType<X> entityType = key.getEntityType();
     String keyJson = key.toJson();
     String valueJson = getImpl(keyJson);
+    System.out.println("<<<get '" + keyJson + "' : " + valueJson);
+    X entity;
     if (valueJson == null) {
-      return null;
+      entity = null;
     }
-    return Marshalling.fromJSON(valueJson, key.getEntityType().getJavaType());
+    else {
+      entity = entityType.fromJson(em, JSONParser.parseStrict(valueJson));
+    }
+    System.out.println("   returning " + entity);
+    return entity;
   }
 
   @Override
@@ -48,8 +68,9 @@ public class WebStorageBackend implements StorageBackend {
 
   @Override
   public <X> boolean isModified(Key<X, ?> key, X value) {
+    ErraiEntityType<X> entityType = key.getEntityType();
     String keyJson = key.toJson();
-    String valueJson = Marshalling.toJSON(value);
+    String valueJson = entityType.toJson(em, value).toString();
     return !valueJson.equals(getImpl(keyJson));
   }
 

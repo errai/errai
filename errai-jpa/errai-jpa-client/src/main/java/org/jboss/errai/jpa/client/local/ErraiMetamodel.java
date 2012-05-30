@@ -38,6 +38,7 @@ public class ErraiMetamodel implements Metamodel {
 
   <X> void addEntityType(EntityType<X> e) {
     entityTypeBuilder.put(e.getJavaType(), e);
+    managedTypeBuilder.put(e.getJavaType(), e);
   }
 
   <X> void addManagedType(ManagedType<X> e) {
@@ -46,6 +47,7 @@ public class ErraiMetamodel implements Metamodel {
 
   <X> void addEmbeddableType(EmbeddableType<X> e) {
     embeddableTypeBuilder.put(e.getJavaType(), e);
+    managedTypeBuilder.put(e.getJavaType(), e);
   }
 
   /**
@@ -77,7 +79,7 @@ public class ErraiMetamodel implements Metamodel {
   public <X> ErraiEntityType<X> entity(Class<X> cls) {
     ErraiEntityType<X> et = (ErraiEntityType<X>) entityTypes.get(cls);
     if (et == null) {
-      throw new IllegalArgumentException(cls.getClass().getName() + " is not a known entity type");
+      throw new IllegalArgumentException(cls.getName() + " is not a known entity type");
     }
     return et;
   }

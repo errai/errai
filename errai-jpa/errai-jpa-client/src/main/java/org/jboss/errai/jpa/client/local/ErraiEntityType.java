@@ -1,8 +1,14 @@
 package org.jboss.errai.jpa.client.local;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.EntityManager;
 import javax.persistence.PostLoad;
 import javax.persistence.PostPersist;
 import javax.persistence.PostRemove;
@@ -20,6 +26,14 @@ import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.Type;
+
+import org.jboss.errai.common.client.framework.Assert;
+
+import com.google.gwt.json.client.JSONNull;
+import com.google.gwt.json.client.JSONNumber;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
+import com.google.gwt.json.client.JSONValue;
 
 public abstract class ErraiEntityType<X> implements EntityType<X> {
 
@@ -53,6 +67,13 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
       assert (false) : "Unknown attribute type " + attribute;
     }
   }
+
+  /**
+   * Creates and returns a new instance of the represented entity type.
+   *
+   * @return a new instance of type X.
+   */
+  public abstract X newInstance();
 
   /**
    * Delivers the {@link PrePersist} event to the pre-persist listeners on the given
@@ -115,7 +136,195 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
    * @param targetEntity
    *          The entity instance to deliver the PostLoad event to.
    */
-  public abstract void deliverPostLoad(X targetEntity);
+  public abstract <Y> void deliverPostLoad(X targetEntity);
+
+  public X fromJson(EntityManager em, JSONValue jsonValue) {
+    final ErraiEntityManager eem = (ErraiEntityManager) em;
+    X entity = newInstance();
+    // TODO get all attributes, not just singular ones
+    for (SingularAttribute<? super X, ?> a : getSingularAttributes()) {
+      ErraiSingularAttribute<? super X, ?> attr = (ErraiSingularAttribute<? super X, ?>) a;
+      JSONValue attrJsonValue = jsonValue.isObject().get(attr.getName());
+
+      switch (attr.getPersistentAttributeType()) {
+      case ELEMENT_COLLECTION:
+      case EMBEDDED:
+      case BASIC:
+        parseInlineJson(entity, attr, attrJsonValue, eem);
+      break;
+
+      case MANY_TO_MANY:
+      case MANY_TO_ONE:
+      case ONE_TO_MANY:
+      case ONE_TO_ONE:
+        // TODO parseJsonReference(entity, attr, attrJsonValue, eem);
+      }
+    }
+    return entity;
+  }
+
+  public JSONValue toJson(EntityManager em, X targetEntity) {
+    final ErraiEntityManager eem = (ErraiEntityManager) em;
+    JSONObject jsonValue = new JSONObject();
+
+    // TODO get all attributes, not just singular ones
+    for (SingularAttribute<? super X, ?> a : getSingularAttributes()) {
+      ErraiSingularAttribute<? super X, ?> attr = (ErraiSingularAttribute<? super X, ?>) a;
+      switch (attr.getPersistentAttributeType()) {
+      case ELEMENT_COLLECTION:
+      case EMBEDDED:
+      case BASIC:
+        jsonValue.put(attr.getName(), makeInlineJson(targetEntity, attr, eem));
+      break;
+
+      case MANY_TO_MANY:
+      case MANY_TO_ONE:
+      case ONE_TO_MANY:
+      case ONE_TO_ONE:
+        jsonValue.put(attr.getName(), makeJsonReference(targetEntity, attr, eem));
+      }
+    }
+
+    return jsonValue;
+  }
+
+  /**
+   * Returns an inline JSON representation of the value of the given attribute
+   * of the given entity instance.
+   *
+   * @param targetEntity
+   *          The instance of the entity to retrieve the attribute value from.
+   *          Not null.
+   * @param attr
+   *          The attribute to read from {@code targetEntity}. Not null.
+   * @param eem
+   *          The ErraiEntityManager that owns the entity. Not null.
+   * @return a JSONValue that represents the requested attribute value of the
+   *         given entity. Never null, although it could be JSONNull.
+   */
+  private <Y> JSONValue makeInlineJson(X targetEntity, ErraiSingularAttribute<? super X, Y> attr, ErraiEntityManager eem) {
+    Class<Y> attributeType = attr.getJavaType();
+    Y attrValue = attr.get(Assert.notNull(targetEntity));
+
+    // FIXME this should search all managed types, or maybe all embeddables. not just entities.
+    if (eem.getMetamodel().getEntities().contains(attributeType)) {
+      ErraiEntityType<Y> attrEntityType = eem.getMetamodel().entity(attributeType);
+      return attrEntityType.toJson(eem, attrValue);
+    }
+    else if (attrValue instanceof String
+            || attrValue instanceof BigInteger || attrValue instanceof BigDecimal
+
+            // Long doesn't fit in a JSONNumber
+            || attrValue instanceof Long
+
+            // Timestamp includes nanoseconds, and has a special String representation that is parseable
+            || attrValue instanceof Timestamp) {
+      return new JSONString(attrValue.toString());
+    }
+    else if (attrValue instanceof Number) {
+      return new JSONNumber(((Number) attrValue).doubleValue());
+    }
+    else if (attrValue instanceof Date) {  // covers java.sql.[Date,Time,Timestamp]
+      return new JSONString(String.valueOf(((Date) attrValue).getTime()));
+    }
+    // TODO byte[],  Byte[],  char[],  Character[]
+    else {
+      throw new RuntimeException("I don't know how JSONify attribute " + attr);
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  private <Y> void parseInlineJson(X targetEntity, ErraiSingularAttribute<? super X, Y> attr, JSONValue attrJsonValue, ErraiEntityManager eem) {
+    Class<Y> attributeType = attr.getJavaType();
+    // FIXME this should search all managed types, or maybe all embeddables. not just entities.
+    Y value;
+    if (eem.getMetamodel().getEntities().contains(attributeType)) {
+      ErraiEntityType<Y> attrEntityType = eem.getMetamodel().entity(attributeType);
+      attr.set(targetEntity, attrEntityType.fromJson(eem, attrJsonValue));
+      return;
+    }
+    else if (attributeType == String.class) {
+      value = (Y) attrJsonValue.isString().stringValue();
+    }
+    else if (attributeType == BigInteger.class) {
+      value = (Y) new BigInteger(attrJsonValue.isString().stringValue());
+    }
+    else if (attributeType == BigDecimal.class) {
+      value = (Y) new BigDecimal(attrJsonValue.isString().stringValue());
+    }
+    else if (attributeType == byte.class || attributeType == Byte.class) {
+      Byte b = Byte.valueOf((byte) attrJsonValue.isNumber().doubleValue());
+      value = (Y) b;
+    }
+    else if (attributeType == short.class || attributeType == Short.class) {
+      Short s = Short.valueOf((short) attrJsonValue.isNumber().doubleValue());
+      value = (Y) s;
+    }
+    else if (attributeType == int.class || attributeType == Integer.class) {
+      Integer i = Integer.valueOf((int) attrJsonValue.isNumber().doubleValue());
+      value = (Y) i;
+    }
+    else if (attributeType == long.class || attributeType == Long.class) {
+      value = (Y) Long.valueOf(attrJsonValue.isString().stringValue());
+    }
+    else if (attributeType == float.class || attributeType == Float.class) {
+      Float f = Float.valueOf((float) attrJsonValue.isNumber().doubleValue());
+      value = (Y) f;
+    }
+    else if (attributeType == double.class || attributeType == Double.class) {
+      value = (Y) Double.valueOf(attrJsonValue.isNumber().doubleValue());
+    }
+    else if (attributeType == Date.class) {
+      value = (Y) new Date(Long.parseLong(attrJsonValue.isString().stringValue()));
+    }
+    else if (attributeType == java.sql.Date.class) {
+      value = (Y) new java.sql.Date(Long.parseLong(attrJsonValue.isString().stringValue()));
+    }
+    else if (attributeType == Time.class) {
+      value = (Y) new Time(Long.parseLong(attrJsonValue.isString().stringValue()));
+    }
+    else if (attributeType == Timestamp.class) {
+      value = (Y) Timestamp.valueOf(attrJsonValue.isString().stringValue());
+    }
+    // TODO byte[],  Byte[],  char[],  Character[]
+    else {
+      throw new RuntimeException("I don't know how unJSONify attribute " + attr);
+    }
+
+    attr.set(targetEntity, value);
+  }
+
+  /**
+   * Returns a JSON object that represents a reference to the given attribute.
+   * The reference is done by Entity identity (the type of the attribute is
+   * assumed to be an entity type).
+   *
+   * @param targetEntity
+   *          The instance of the entity to retrieve the attribute value from.
+   *          Not null.
+   * @param attr
+   *          The attribute to read from {@code targetEntity}. Not null, and
+   *          must be an entity type.
+   * @param eem
+   *          The ErraiEntityManager that owns the entity. Not null.
+   * @return a JSONValue that is a reference to the given attribute value. Never
+   *         null, although it could be JSONNull.
+   */
+  private <Y> JSONValue makeJsonReference(X targetEntity, ErraiSingularAttribute<? super X, Y> attr, ErraiEntityManager eem) {
+    Class<Y> attributeType = attr.getJavaType();
+    Y attrValue = attr.get(targetEntity);
+    if (attrValue == null) {
+      return JSONNull.getInstance();
+    }
+    ErraiEntityType<Y> attrEntityType = eem.getMetamodel().entity(attributeType);
+    if (attrEntityType == null) {
+      throw new IllegalArgumentException("Can't make a reference to non-entity-typed attribute " + attr);
+    }
+
+    JSONObject ref = new JSONObject();
+    ref.put("entityReference", attrEntityType.makeInlineJson(attrValue, attrEntityType.getId(Object.class), eem));
+    return ref;
+  }
 
   // ---------- JPA API Below This Line -------------
 
