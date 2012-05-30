@@ -1,6 +1,7 @@
 package org.jboss.errai.codegen.util;
 
 import java.lang.reflect.Constructor;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -10,7 +11,6 @@ import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.DefParameters;
 import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.Parameter;
-import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.StringStatement;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.CatchBlockBuilder;
@@ -25,6 +25,8 @@ import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 
+import com.google.gwt.core.client.UnsafeNativeLong;
+
 /**
  * Utility class with methods that generate code to access private, default
  * access ("package private"), and protected methods and fields in arbirtary
@@ -38,6 +40,14 @@ public class PrivateAccessUtil {
   private static final String JAVA_REFL_FLD_UTIL_METH = "_getAccessibleField";
   private static final String JAVA_REFL_METH_UTIL_METH = "_getAccessibleMethod";
   private static final String JAVA_REFL_CONSTRUCTOR_UTIL_METH = "_getAccessibleConstructor";
+
+  /** Annotation instance that can be passed to the code generator when generating long accessors. */
+  private static final UnsafeNativeLong UNSAFE_NATIVE_LONG_ANNOTATION = new UnsafeNativeLong() {
+    @Override
+    public Class<? extends Annotation> annotationType() {
+      return UnsafeNativeLong.class;
+    }
+  };
 
   public static void createJavaReflectionFieldInitializerUtilMethod(ClassStructureBuilder<?> classBuilder) {
 
@@ -199,9 +209,6 @@ public class PrivateAccessUtil {
                                            MetaField f,
                                            Modifier[] modifiers) {
     MetaClass type = f.getType();
-    if (type.getCanonicalName().equals("long")) {
-      type = type.asBoxed();
-    }
 
     boolean read = accessType == PrivateAccessType.Read || accessType == PrivateAccessType.Both;
     boolean write = accessType == PrivateAccessType.Write || accessType == PrivateAccessType.Both;
@@ -213,6 +220,10 @@ public class PrivateAccessUtil {
       if (write) {
         final MethodCommentBuilder<? extends ClassStructureBuilder<?>> methodBuilder =
             classBuilder.privateMethod(void.class, getPrivateFieldInjectorName(f));
+
+        if (type.getCanonicalName().equals("long")) {
+          methodBuilder.annotatedWith(UNSAFE_NATIVE_LONG_ANNOTATION);
+        }
 
         if (!f.isStatic()) {
           methodBuilder
@@ -232,6 +243,10 @@ public class PrivateAccessUtil {
 
         if (!f.isStatic()) {
           instance.parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance")));
+        }
+
+        if (type.getCanonicalName().equals("long")) {
+          instance.annotatedWith(UNSAFE_NATIVE_LONG_ANNOTATION);
         }
 
         instance.modifiers(modifiers)
