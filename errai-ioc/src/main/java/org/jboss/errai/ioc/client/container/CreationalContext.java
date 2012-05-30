@@ -150,7 +150,7 @@ public class CreationalContext {
     final T t = (T) wired.get(getBeanReference(beanType, qualifiers));
     if (t == null) {
       // see if the instance is available in the bean manager
-      IOCBeanDef<T> beanDef = IOC.getBeanManager().lookupBean(beanType, qualifiers);
+      final IOCBeanDef<T> beanDef = IOC.getBeanManager().lookupBean(beanType, qualifiers);
 
       if (beanDef != null && beanDef instanceof IOCSingletonBean) {
         return beanDef.getInstance();
