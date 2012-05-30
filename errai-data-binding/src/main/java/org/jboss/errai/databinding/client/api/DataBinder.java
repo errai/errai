@@ -20,7 +20,10 @@ import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.databinding.client.BindableProxy;
 import org.jboss.errai.databinding.client.BindableProxyFactory;
 
+import com.google.gwt.user.client.ui.HasHTML;
 import com.google.gwt.user.client.ui.HasValue;
+import com.google.gwt.user.client.ui.Image;
+import com.google.gwt.user.client.ui.Label;
 
 /**
  * This class can be used to programmatically bind the properties of a data model instance (any POJO annotated with
@@ -82,6 +85,21 @@ public class DataBinder<T> {
     Assert.notNull(property);
 
     ((BindableProxy) model).bind(widget, property);
+    return this.model;
+  }
+  
+  public T bind(final HasHTML widget, final String property) {
+    // TODO implement
+    return this.model;
+  }
+  
+  public T bind(final Label widget, final String property) {
+    // TODO implement
+    return this.model;
+  }
+  
+  public T bind(final Image widget, final String property) {
+    // TODO implement
     return this.model;
   }
 

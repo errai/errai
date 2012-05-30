@@ -17,6 +17,7 @@ import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.InnerClass;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
@@ -27,8 +28,10 @@ import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.util.PrivateAccessType;
+import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.client.container.InitializationCallback;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
@@ -43,6 +46,7 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ClientBundle.Source;
 import com.google.gwt.resources.client.TextResource;
+import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -62,7 +66,8 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
     MetaClass declaringClass = ctx.getEnclosingType();
 
     for (MetaField field : declaringClass.getFields()) {
-      if (field.isAnnotationPresent(DataField.class)) {
+      if (field.isAnnotationPresent(DataField.class) ||
+          field.getType().getErased().equals(MetaClassFactory.get(DataBinder.class))) {
         ctx.getInjectionContext().addExposedField(field, PrivateAccessType.Both);
       }
     }
@@ -156,9 +161,39 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
 
     String fieldsVarName = InjectUtil.getUniqueVarName();
     builder.append(Stmt.declareVariable(fieldsVarName, new TypeLiteral<Collection<Widget>>() {
-    }, Stmt.newObject(new TypeLiteral<ArrayList<Widget>>() {
-    })));
+        }, Stmt.newObject(new TypeLiteral<ArrayList<Widget>>() {
+        })));
 
+    /*
+     * Search for data binder fields
+     */
+    MetaField dataBinderField = null;
+    for (MetaField field : ctx.getInjector().getInjectedType().getFields()) {
+      if (field.getType().getErased().equals(MetaClassFactory.get(DataBinder.class))) {
+        if (dataBinderField != null) {
+          System.out.println("Multiple data binders found in class:"
+              + ctx.getInjector().getInjectedType() + " - skipping automatic binding!");
+          dataBinderField = null;
+          break;
+        }
+        dataBinderField = field;
+      }
+    }
+
+    /*
+     * Create a reference to the composite's data binder
+     */
+    if (dataBinderField != null) {
+      builder.append(
+          Stmt.declareVariable("binder", DataBinder.class,
+            Stmt.invokeStatic(ctx.getInjectionContext().getProcessingContext().getBootstrapClass(), 
+                PrivateAccessUtil.getPrivateFieldInjectorName(dataBinderField),
+                Variable.get(ctx.getInjector().getVarName())
+            )
+          )
+      );
+    }
+    
     for (Entry<String, Statement> field : DecoratorDataField.dataFieldMap(ctx, ctx.getType()).entrySet()) {
       /*
        * Merge this field's Widget Element into the DOM in place of the
@@ -173,6 +208,13 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
        * Template
        */
       builder.append(Stmt.loadVariable(fieldsVarName).invoke("add", field.getValue()));
+
+      /*
+       * Bind widget 
+       */
+      if (dataBinderField != null) {
+        builder.append(Stmt.loadVariable("binder").invoke("bind", field.getValue(), field.getKey()));
+      }
     }
 
     /*
@@ -185,8 +227,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
   }
 
   /**
-   * Create an inner interface for the given {@link Template} class and its HTML
-   * corresponding resource
+   * Create an inner interface for the given {@link Template} class and its HTML corresponding resource
    */
   private void generateTemplateResourceInterface(InjectableInstance<Templated> ctx, final MetaClass type) {
     ClassStructureBuilder<?> componentTemplateResource = ClassBuilder.define(getTemplateTypeName(type)).publicScope()
@@ -232,16 +273,14 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
    */
 
   /**
-   * Get the name of the {@link Template} class of the given {@link MetaClass}
-   * type
+   * Get the name of the {@link Template} class of the given {@link MetaClass} type
    */
   private String getTemplateTypeName(MetaClass type) {
     return type.getFullyQualifiedName().replaceAll("\\.", "_") + "TemplateResource";
   }
 
   /**
-   * Get the name of the {@link Template} HTML file of the given
-   * {@link MetaClass} component type
+   * Get the name of the {@link Template} HTML file of the given {@link MetaClass} component type
    */
   private String getTemplateFileName(MetaClass type) {
     String resource = type.getFullyQualifiedName().replaceAll("\\.", "/") + ".html";
@@ -261,8 +300,8 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
   }
 
   /**
-   * Get the name of the {@link Template} HTML fragment (Element subtree) to be
-   * used as the template root of the given {@link MetaClass} component type
+   * Get the name of the {@link Template} HTML fragment (Element subtree) to be used as the template root of the given
+   * {@link MetaClass} component type
    */
   private String getTemplateFragmentName(MetaClass type) {
     String fragment = "";
