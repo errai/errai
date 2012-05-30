@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 
 @Inherited
 @Documented
-@Target({ ElementType.FIELD, ElementType.METHOD, ElementType.CONSTRUCTOR })
+@Target({ ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DataField {
 

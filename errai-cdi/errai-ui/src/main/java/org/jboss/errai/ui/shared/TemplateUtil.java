@@ -28,11 +28,11 @@ public final class TemplateUtil {
    * Replace the {@link Element} with thte data-field of the given
    * {@link String} with the root {@link Element} of the given {@link UIObject}
    */
-  public static void compositeComponentReplace(Widget field, final Map<String, Element> dataFieldElements,
-          String fieldName) {
+  public static void compositeComponentReplace(String componentType, Widget field,
+          final Map<String, Element> dataFieldElements, String fieldName) {
     if (field == null) {
-      throw new IllegalStateException("Widget to be composited into data-field [" + fieldName
-              + "] was null. Did you forget to @Inject or initialize this field?");
+      throw new IllegalStateException("Widget to be composited into [" + componentType + "] data-field [" + fieldName
+              + "] was null. Did you forget to @Inject or initialize this @DataField?");
     }
     Element element = dataFieldElements.get(fieldName);
     if (element == null) {

@@ -2,6 +2,7 @@ package org.jboss.errai.ui.test.handler.client.res;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
@@ -15,14 +16,18 @@ import com.google.gwt.user.client.ui.Composite;
 @Templated
 public class HandledComponent extends Composite {
 
-  @DataField
   private Button b1;
 
   @DataField
-  private Button b2;
+  private Button b2 = new Button("Will be rendered inside button from GWT");
 
-  @DataField
   private VocalWidget b3;
+
+  @Inject
+  public HandledComponent(@DataField Button b1, @DataField VocalWidget b3) {
+    this.b1 = b1;
+    this.b3 = b3;
+  }
 
   @PostConstruct
   public void init() {
