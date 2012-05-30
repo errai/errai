@@ -28,6 +28,7 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
+import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.ioc.client.container.ProxyResolver;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
@@ -53,7 +54,13 @@ public class ProxyInjector extends AbstractInjector {
   private final BuildMetaClass proxyClass;
 
 
-  public ProxyInjector(IOCProcessingContext context, MetaClass proxiedType, QualifyingMetadata metadata) {
+  public ProxyInjector(final IOCProcessingContext context,
+                       final MetaClass proxiedType,
+                       final QualifyingMetadata metadata) {
+
+    Assert.notNull(proxiedType);
+    Assert.notNull(metadata);
+
     this.proxiedType = proxiedType;
     this.varName = InjectUtil.getNewInjectorName() + "_proxy";
     this.qualifyingMetadata = metadata;

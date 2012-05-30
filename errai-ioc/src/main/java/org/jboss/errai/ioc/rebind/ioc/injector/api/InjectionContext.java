@@ -68,6 +68,7 @@ public class InjectionContext {
 
   private final Multimap<MetaClass, Injector> proxiedInjectors = LinkedHashMultimap.create();
   private final Multimap<MetaClass, MetaClass> cyclingTypes = HashMultimap.create();
+  private final Set<String> knownTypesWithCycles = new HashSet<String>();
 
   private final Set<String> enabledAlternatives;
 
@@ -110,6 +111,7 @@ public class InjectionContext {
       enabledAlternatives.add(fqcn);
       return this;
     }
+
 
     public InjectionContext build() {
       Assert.notNull("the processingContext cannot be null", processingContext);
@@ -508,6 +510,14 @@ public class InjectionContext {
 
   public boolean hasAttribute(String name) {
     return attributeMap.containsKey(name);
+  }
+
+  public void addKnownTypesWithCycles(Collection<String> types) {
+    knownTypesWithCycles.addAll(types);
+  }
+
+  public boolean typeContainsGraphCycles(MetaClass type) {
+    return knownTypesWithCycles.contains(type.getFullyQualifiedName());
   }
 
   public GraphBuilder getGraphBuilder() {

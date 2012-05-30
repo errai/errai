@@ -90,6 +90,10 @@ public class SortUnit implements Comparable<SortUnit> {
     return _hasDependency(new HashSet<String>(), this, unit);
   }
 
+  public boolean isCyclicGraph() {
+    return _hasCycle(new HashSet<SortUnit>());
+  }
+
   private static boolean _hasDependency(final Set<String> visited, final SortUnit from, final SortUnit to) {
     final String fromType = from.getType().getFullyQualifiedName();
     if (visited.contains(fromType)) {
@@ -198,5 +202,24 @@ public class SortUnit implements Comparable<SortUnit> {
     }
 
     return sb.append("]").toString();
+  }
+
+  private boolean _hasCycle(final Set<SortUnit> visited) {
+    return _cycleSearch(visited, this);
+  }
+
+
+  private static boolean _cycleSearch(final Set<SortUnit> visited, final SortUnit visit) {
+    if (visited.contains(visit)) {
+      return true;
+    }
+
+    visited.add(visit);
+
+    for (SortUnit sortUnit : visit.getDependencies()) {
+      if (sortUnit._hasCycle(visited)) return true;
+    }
+
+    return false;
   }
 }

@@ -123,7 +123,7 @@ public class JSR330QualifyingMetadata implements QualifyingMetadata {
       }
     }
 
-    return qualifiers.isEmpty() ? null : new JSR330QualifyingMetadata(qualifiers);
+    return qualifiers.isEmpty() ? createDefaultQualifyingMetaData() : new JSR330QualifyingMetadata(qualifiers);
   }
 
   private static final JSR330QualifyingMetadata DEFAULT = new JSR330QualifyingMetadata(

@@ -27,6 +27,8 @@ import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.ioc.rebind.ioc.bootstrapper.IOCProcessingContext;
 import org.jboss.errai.ioc.rebind.ioc.graph.Dependency;
 import org.jboss.errai.ioc.rebind.ioc.graph.GraphBuilder;
+import org.jboss.errai.ioc.rebind.ioc.injector.AbstractInjector;
+import org.jboss.errai.ioc.rebind.ioc.injector.Injector;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectionContext;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
@@ -56,10 +58,12 @@ public abstract class JSR330AnnotationHandler<T extends Annotation> implements A
     processDependencies(control, mc, instance.getInjectionContext());
   }
 
-  public static void processDependencies(DependencyControl control, MetaClass mc, InjectionContext context) {
+  public static void processDependencies(final DependencyControl control,
+                                         final MetaClass metaClass,
+                                         final InjectionContext context) {
 
     final GraphBuilder graphBuilder = context.getGraphBuilder();
-
+    MetaClass mc = metaClass;
     do {
       for (MetaField field : mc.getDeclaredFields()) {
 
@@ -95,7 +99,6 @@ public abstract class JSR330AnnotationHandler<T extends Annotation> implements A
           }
         }
       }
-
     }
     while ((mc = mc.getSuperClass()) != null);
   }

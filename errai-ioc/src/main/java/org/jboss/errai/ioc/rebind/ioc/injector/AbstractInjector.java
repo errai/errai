@@ -43,6 +43,7 @@ public abstract class AbstractInjector implements Injector {
   protected boolean singleton;
   protected boolean replaceable;
   protected boolean provider;
+  protected boolean basic;
 
   protected MetaClass enclosingType;
 

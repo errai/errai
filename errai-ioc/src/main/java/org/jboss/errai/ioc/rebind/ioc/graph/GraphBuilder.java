@@ -7,8 +7,10 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Builds a dependency graph for use by the container.
@@ -16,9 +18,9 @@ import java.util.Map;
  * @author Mike Brock
  */
 public class GraphBuilder {
-  public final Map<String, MetaClass> classLookup = new HashMap<String, MetaClass>();
-  public final Multimap<String, Dependency> dependencyMap = HashMultimap.create();
-  public final Multimap<String, Object> itemMap = HashMultimap.create();
+  private final Map<String, MetaClass> classLookup = new HashMap<String, MetaClass>();
+  private final Multimap<String, Dependency> dependencyMap = HashMultimap.create();
+  private final Multimap<String, Object> itemMap = HashMultimap.create();
 
   /**
    * Records a dependency on the specified type.
@@ -44,6 +46,16 @@ public class GraphBuilder {
     itemMap.put(type.getFullyQualifiedName(), item);
     recordClassForLookup(type);
     return this;
+  }
+
+  /**
+   * Returns the number of recorded dependencies for the specified type.
+   *
+   * @param type the type to query for the number of dependencies.
+   * @return the number of dependencies for the specified type.
+   */
+  public int getDependencyCount(final MetaClass type) {
+    return dependencyMap.get(type.getFullyQualifiedName()).size();
   }
 
   private void recordClassForLookup(final MetaClass type) {

@@ -397,8 +397,23 @@ public class IOCProcessorFactory {
     }
     while (!processingTasksStack.isEmpty());
 
-    List<SortUnit> toSort = injectionContext.getGraphBuilder().build();
-    List<SortUnit> list = sortGraph(toSort);
+    final List<SortUnit> toSort = injectionContext.getGraphBuilder().build();
+    final List<SortUnit> list = sortGraph(toSort);
+
+    for (SortUnit unit : list) {
+      if (unit.isCyclicGraph()) {
+        final Set<String> knownCycles = new HashSet<String>();
+        knownCycles.add(unit.getType().getFullyQualifiedName());
+
+        for (SortUnit dep : unit.getDependencies()) {
+          if (dep.isCyclicGraph()) {
+            knownCycles.add(dep.getType().getFullyQualifiedName());
+          }
+        }
+
+        injectionContext.addKnownTypesWithCycles(knownCycles);
+      }
+    }
 
     for (SortUnit unit : list) {
       for (Object item : unit.getItems()) {

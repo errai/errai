@@ -489,7 +489,8 @@ public class InjectUtil {
             }
 
           }
-          else if (!alwaysProxyDependent && inj.isDependent()) {
+          else if (inj.isDependent() && (!alwaysProxyDependent || !ctx.typeContainsGraphCycles(inj.getInjectedType()))) {
+     //     else if (!alwaysProxyDependent && inj.isDependent()) {
             if (inj.isCreated() && !inj.isRendered()) {
               throw new InjectionFailure("unresolveable cycle on dependent scoped bean: "
                       + inj.getInjectedType().getFullyQualifiedName() + "; does the bean intersect with a normal scope?");

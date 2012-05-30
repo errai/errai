@@ -150,9 +150,11 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
   }
 
   private Injector getTargetInjector() {
+    final MetaClass targetType = getInjector() == null ? getEnclosingType() : getInjector().getInjectedType();
+
     Injector targetInjector
-            = isProxy() ? injectionContext.getProxiedInjector(getEnclosingType(), getQualifyingMetadata()) :
-            injectionContext.getQualifiedInjector(getEnclosingType(), getQualifyingMetadata());
+            = isProxy() ? injectionContext.getProxiedInjector(targetType, getQualifyingMetadata()) :
+            injectionContext.getQualifiedInjector(targetType, getQualifyingMetadata());
 
     if (!isProxy()) {
       if (!targetInjector.isCreated()) {
