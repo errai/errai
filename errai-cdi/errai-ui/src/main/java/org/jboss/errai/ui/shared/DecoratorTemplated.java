@@ -86,6 +86,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
   /**
    * Generate the actual construction logic for our {@link Templated} component
    */
+  @SuppressWarnings("serial")
   private void generateTemplatedInitialization(InjectableInstance<Templated> ctx,
           BlockBuilder<AnonymousClassStructureBuilder> builder) {
 
@@ -137,8 +138,8 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
        * Get all of the data-field Elements from the Template
        */
       String dataFieldElementsVarName = InjectUtil.getUniqueVarName();
-      builder.append(Stmt.declareVariable(Map.class).named(dataFieldElementsVarName)
-              .initializeWith(Stmt.invokeStatic(TemplateUtil.class, "getDataFieldElements", rootTemplateElement)));
+      builder.append(Stmt.declareVariable(dataFieldElementsVarName, new TypeLiteral<Map<String, Element>>() {
+      }, Stmt.invokeStatic(TemplateUtil.class, "getDataFieldElements", rootTemplateElement)));
 
       /*
        * Attach Widget field children Elements to the Template DOM
