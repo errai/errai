@@ -57,4 +57,14 @@ public class HibernateJpaTest extends ErraiJpaTest {
 
   // the actual test methods are inherited from the superclass
 
+  /**
+   * Hibernate (at least on top of HSQLDB) damages BigDecimal (adds extra
+   * precision), java.util.Date (returns a java.sql.Date), and
+   * java.sql.Timestamp (truncates nanosecond precision). So we skip this test
+   * in Hibernate mode.
+   */
+  @Override
+  public void testStoreAndFetchOneWithEverything() throws Exception {
+    // skip
+  }
 }

@@ -47,6 +47,9 @@ public interface ErraiAttribute<X, Y> extends Attribute<X, Y> {
    */
   public void set(X entityInstance, Y value);
 
+//  public JSONValue getAsJson(X entityInstance);
+//  public void setAsJson(X entityInstance, JSONValue value);
+
   /**
    * Returns the type of this attribute, its owning entity type, and the attribute's name.
    */

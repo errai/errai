@@ -29,6 +29,7 @@ import javax.persistence.metamodel.Type;
 
 import org.jboss.errai.common.client.framework.Assert;
 
+import com.google.gwt.json.client.JSONBoolean;
 import com.google.gwt.json.client.JSONNull;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
@@ -207,7 +208,11 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
     Y attrValue = attr.get(Assert.notNull(targetEntity));
 
     // FIXME this should search all managed types, or maybe all embeddables. not just entities.
-    if (eem.getMetamodel().getEntities().contains(attributeType)) {
+    // TODO it would be better to code-generate an Attribute.asJson() method than to do this at runtime
+    if (attrValue == null) {
+      return JSONNull.getInstance();
+    }
+    else if (eem.getMetamodel().getEntities().contains(attributeType)) {
       ErraiEntityType<Y> attrEntityType = eem.getMetamodel().entity(attributeType);
       return attrEntityType.toJson(eem, attrValue);
     }
@@ -217,34 +222,66 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
             // Long doesn't fit in a JSONNumber
             || attrValue instanceof Long
 
+            // Character isn't a java.lang.Number
+            || attrValue instanceof Character
+
             // Timestamp includes nanoseconds, and has a special String representation that is parseable
             || attrValue instanceof Timestamp) {
       return new JSONString(attrValue.toString());
     }
+    else if (attrValue instanceof Boolean) {
+      return JSONBoolean.getInstance((Boolean) attrValue);
+    }
     else if (attrValue instanceof Number) {
       return new JSONNumber(((Number) attrValue).doubleValue());
+    }
+    else if (attrValue instanceof Enum) {
+      return new JSONString(((Enum<?>) attrValue).name());
     }
     else if (attrValue instanceof Date) {  // covers java.sql.[Date,Time,Timestamp]
       return new JSONString(String.valueOf(((Date) attrValue).getTime()));
     }
-    // TODO byte[],  Byte[],  char[],  Character[]
+    else if (attrValue instanceof byte[]) {
+      byte[] value = (byte[]) attrValue;
+      return new JSONString(Base64Util.encode(value, 0, value.length));
+    }
+    else if (attrValue instanceof Byte[]) {
+      Byte[] value = (Byte[]) attrValue;
+      return new JSONString(Base64Util.encode(value, 0, value.length));
+    }
+    else if (attrValue instanceof char[]) {
+      return new JSONString(String.copyValueOf(((char[]) attrValue)));
+    }
+    else if (attrValue instanceof Character[]) {
+      Character[] value = (Character[]) attrValue;
+      StringBuilder sb = new StringBuilder(value.length);
+      for (Character c : value) {
+        sb.append((char) c);
+      }
+      return new JSONString(sb.toString());
+    }
     else {
-      throw new RuntimeException("I don't know how JSONify attribute " + attr);
+      throw new RuntimeException("I don't know how JSONify " + attr);
     }
   }
 
   @SuppressWarnings("unchecked")
   private <Y> void parseInlineJson(X targetEntity, ErraiSingularAttribute<? super X, Y> attr, JSONValue attrJsonValue, ErraiEntityManager eem) {
     Class<Y> attributeType = attr.getJavaType();
-    // FIXME this should search all managed types, or maybe all embeddables. not just entities.
     Y value;
-    if (eem.getMetamodel().getEntities().contains(attributeType)) {
+    if (attrJsonValue.isNull() != null) {
+      value = null;
+    }
+    // FIXME this should search all managed types, or maybe all embeddables. not just entities.
+    else if (eem.getMetamodel().getEntities().contains(attributeType)) {
       ErraiEntityType<Y> attrEntityType = eem.getMetamodel().entity(attributeType);
-      attr.set(targetEntity, attrEntityType.fromJson(eem, attrJsonValue));
-      return;
+      value = attrEntityType.fromJson(eem, attrJsonValue);
     }
     else if (attributeType == String.class) {
       value = (Y) attrJsonValue.isString().stringValue();
+    }
+    else if (attributeType == boolean.class || attributeType == Boolean.class) {
+      value = (Y) Boolean.valueOf(attrJsonValue.isBoolean().booleanValue());
     }
     else if (attributeType == BigInteger.class) {
       value = (Y) new BigInteger(attrJsonValue.isString().stringValue());
@@ -253,23 +290,22 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
       value = (Y) new BigDecimal(attrJsonValue.isString().stringValue());
     }
     else if (attributeType == byte.class || attributeType == Byte.class) {
-      Byte b = Byte.valueOf((byte) attrJsonValue.isNumber().doubleValue());
-      value = (Y) b;
+      value = (Y) Byte.valueOf((byte) attrJsonValue.isNumber().doubleValue());
+    }
+    else if (attributeType == char.class || attributeType == Character.class) {
+      value = (Y) Character.valueOf(attrJsonValue.isString().stringValue().charAt(0));
     }
     else if (attributeType == short.class || attributeType == Short.class) {
-      Short s = Short.valueOf((short) attrJsonValue.isNumber().doubleValue());
-      value = (Y) s;
+      value = (Y) Short.valueOf((short) attrJsonValue.isNumber().doubleValue());
     }
     else if (attributeType == int.class || attributeType == Integer.class) {
-      Integer i = Integer.valueOf((int) attrJsonValue.isNumber().doubleValue());
-      value = (Y) i;
+      value = (Y) Integer.valueOf((int) attrJsonValue.isNumber().doubleValue());
     }
     else if (attributeType == long.class || attributeType == Long.class) {
       value = (Y) Long.valueOf(attrJsonValue.isString().stringValue());
     }
     else if (attributeType == float.class || attributeType == Float.class) {
-      Float f = Float.valueOf((float) attrJsonValue.isNumber().doubleValue());
-      value = (Y) f;
+      value = (Y) Float.valueOf((float) attrJsonValue.isNumber().doubleValue());
     }
     else if (attributeType == double.class || attributeType == Double.class) {
       value = (Y) Double.valueOf(attrJsonValue.isNumber().doubleValue());
@@ -286,7 +322,27 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
     else if (attributeType == Timestamp.class) {
       value = (Y) Timestamp.valueOf(attrJsonValue.isString().stringValue());
     }
-    // TODO byte[],  Byte[],  char[],  Character[]
+    else if (attributeType.isEnum()) {
+      @SuppressWarnings("rawtypes") Class enumType = attributeType;
+      value = (Y) Enum.valueOf(enumType, attrJsonValue.isString().stringValue());
+    }
+    else if (attributeType == byte[].class) {
+      value = (Y) Base64Util.decode(attrJsonValue.isString().stringValue());
+    }
+    else if (attributeType == Byte[].class) {
+      value = (Y) Base64Util.decodeAsBoxed(attrJsonValue.isString().stringValue());
+    }
+    else if (attributeType == char[].class) {
+      value = (Y) attrJsonValue.isString().stringValue().toCharArray();
+    }
+    else if (attributeType == Character[].class) {
+      String str = attrJsonValue.isString().stringValue();
+      Character[] boxedArray = new Character[str.length()];
+      for (int i = 0; i < str.length(); i++) {
+        boxedArray[i] = str.charAt(i);
+      }
+      value = (Y) boxedArray;
+    }
     else {
       throw new RuntimeException("I don't know how unJSONify attribute " + attr);
     }
