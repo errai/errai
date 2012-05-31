@@ -7,6 +7,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -63,10 +64,12 @@ import org.jboss.errai.codegen.util.PrivateAccessType;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.framework.Assert;
+import org.jboss.errai.jpa.client.local.BigIntegerIdGenerator;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.client.local.ErraiEntityType;
 import org.jboss.errai.jpa.client.local.ErraiPluralAttribute;
 import org.jboss.errai.jpa.client.local.ErraiSingularAttribute;
+import org.jboss.errai.jpa.client.local.IntIdGenerator;
 import org.jboss.errai.jpa.client.local.LongIdGenerator;
 
 import com.google.gwt.core.ext.Generator;
@@ -215,16 +218,31 @@ public class ErraiEntityManagerGenerator extends Generator {
 
             if (isGeneratedValue(attr.getJavaMember())) {
 
-              // TODO support generated types other than Long
-              if (attr.getJavaType() != Long.class) {
-                throw new UnsupportedOperationException("ID generation for types other than Long not yet supported");
+              MetaClass generatorDeclaredType;
+              Class<? extends Iterator<?>> generatorType;
+
+              if (attr.getJavaType() == Long.class || attr.getJavaType() == long.class) {
+                generatorDeclaredType = MetaClassFactory.get(new TypeLiteral<Iterator<Long>>() {});
+                generatorType = LongIdGenerator.class;
+              }
+              else if (attr.getJavaType() == Integer.class || attr.getJavaType() == int.class) {
+                generatorDeclaredType = MetaClassFactory.get(new TypeLiteral<Iterator<Integer>>() {});
+                generatorType = IntIdGenerator.class;
+              }
+              else if (attr.getJavaType() == BigInteger.class) {
+                generatorDeclaredType = MetaClassFactory.get(new TypeLiteral<Iterator<BigInteger>>() {});
+                generatorType = BigIntegerIdGenerator.class;
+              }
+              else {
+                // TODO implement the missing generatable ID types (which are silly: byte, char, short)
+                throw new UnsupportedOperationException("@Generated ID values of " + attr.getJavaType() + " not supported");
               }
 
               containingClassBuilder
-                .privateField("valueGenerator", MetaClassFactory.get(new TypeLiteral<Iterator<Long>>() {}))
-                .initializesWith(Stmt.newObject(LongIdGenerator.class)
-                    .withParameters(Stmt.loadStatic(classBuilder.getClassDefinition(), "this"), Variable.get("this")))
-                .finish();
+                  .privateField("valueGenerator", generatorDeclaredType)
+                  .initializesWith(Stmt.newObject(generatorType)
+                      .withParameters(Stmt.loadStatic(classBuilder.getClassDefinition(), "this"), Variable.get("this")))
+                  .finish();
 
               // StringStatement is a workaround: codegen says valueGenerator is out of scope when we do this properly
               return new StringStatement("return valueGenerator");

@@ -237,7 +237,7 @@ public abstract class ErraiEntityManager implements EntityManager {
       throw new RuntimeException(entityType.getIdType().getPersistenceType() + " ids are not yet supported");
     }
     Object id = idAttr.get(entity);
-    if (id == null) {
+    if ( id == null || (id instanceof Number && ((Number) id).doubleValue() == 0.0) ) {
       id = generateAndSetLocalId(entity, idAttr);
       // TODO track this generated ID for later reconciliation with the server
     }
