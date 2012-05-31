@@ -144,6 +144,10 @@ public class Base64Util {
   public static byte[] decode(String data) {
     byte b1, b2, b3, b4;
 
+    if (data.length() == 0) {
+      return new byte[0];
+    }
+
     int end = data.length();
 
     while (end > 0) {
