@@ -1,10 +1,5 @@
 package org.jboss.errai.jpa.client.local;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -214,86 +209,16 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
     return JsonUtil.basicValueToJson(attrValue);
   }
 
-  @SuppressWarnings("unchecked")
   private <Y> void parseInlineJson(X targetEntity, ErraiSingularAttribute<? super X, Y> attr, JSONValue attrJsonValue, ErraiEntityManager eem) {
     Class<Y> attributeType = attr.getJavaType();
     Y value;
-    if (attrJsonValue.isNull() != null) {
-      value = null;
-    }
     // FIXME this should search all managed types, or maybe all embeddables. not just entities.
-    else if (eem.getMetamodel().getEntities().contains(attributeType)) {
+    if (eem.getMetamodel().getEntities().contains(attributeType)) {
       ErraiEntityType<Y> attrEntityType = eem.getMetamodel().entity(attributeType);
       value = attrEntityType.fromJson(eem, attrJsonValue);
     }
-    else if (attributeType == String.class) {
-      value = (Y) attrJsonValue.isString().stringValue();
-    }
-    else if (attributeType == boolean.class || attributeType == Boolean.class) {
-      value = (Y) Boolean.valueOf(attrJsonValue.isBoolean().booleanValue());
-    }
-    else if (attributeType == BigInteger.class) {
-      value = (Y) new BigInteger(attrJsonValue.isString().stringValue());
-    }
-    else if (attributeType == BigDecimal.class) {
-      value = (Y) new BigDecimal(attrJsonValue.isString().stringValue());
-    }
-    else if (attributeType == byte.class || attributeType == Byte.class) {
-      value = (Y) Byte.valueOf((byte) attrJsonValue.isNumber().doubleValue());
-    }
-    else if (attributeType == char.class || attributeType == Character.class) {
-      value = (Y) Character.valueOf(attrJsonValue.isString().stringValue().charAt(0));
-    }
-    else if (attributeType == short.class || attributeType == Short.class) {
-      value = (Y) Short.valueOf((short) attrJsonValue.isNumber().doubleValue());
-    }
-    else if (attributeType == int.class || attributeType == Integer.class) {
-      value = (Y) Integer.valueOf((int) attrJsonValue.isNumber().doubleValue());
-    }
-    else if (attributeType == long.class || attributeType == Long.class) {
-      value = (Y) Long.valueOf(attrJsonValue.isString().stringValue());
-    }
-    else if (attributeType == float.class || attributeType == Float.class) {
-      value = (Y) Float.valueOf((float) attrJsonValue.isNumber().doubleValue());
-    }
-    else if (attributeType == double.class || attributeType == Double.class) {
-      value = (Y) Double.valueOf(attrJsonValue.isNumber().doubleValue());
-    }
-    else if (attributeType == Date.class) {
-      value = (Y) new Date(Long.parseLong(attrJsonValue.isString().stringValue()));
-    }
-    else if (attributeType == java.sql.Date.class) {
-      value = (Y) new java.sql.Date(Long.parseLong(attrJsonValue.isString().stringValue()));
-    }
-    else if (attributeType == Time.class) {
-      value = (Y) new Time(Long.parseLong(attrJsonValue.isString().stringValue()));
-    }
-    else if (attributeType == Timestamp.class) {
-      value = (Y) Timestamp.valueOf(attrJsonValue.isString().stringValue());
-    }
-    else if (attributeType.isEnum()) {
-      @SuppressWarnings("rawtypes") Class enumType = attributeType;
-      value = (Y) Enum.valueOf(enumType, attrJsonValue.isString().stringValue());
-    }
-    else if (attributeType == byte[].class) {
-      value = (Y) Base64Util.decode(attrJsonValue.isString().stringValue());
-    }
-    else if (attributeType == Byte[].class) {
-      value = (Y) Base64Util.decodeAsBoxed(attrJsonValue.isString().stringValue());
-    }
-    else if (attributeType == char[].class) {
-      value = (Y) attrJsonValue.isString().stringValue().toCharArray();
-    }
-    else if (attributeType == Character[].class) {
-      String str = attrJsonValue.isString().stringValue();
-      Character[] boxedArray = new Character[str.length()];
-      for (int i = 0; i < str.length(); i++) {
-        boxedArray[i] = str.charAt(i);
-      }
-      value = (Y) boxedArray;
-    }
     else {
-      throw new RuntimeException("I don't know how unJSONify attribute " + attr);
+      value = JsonUtil.basicValueFromJson(attrJsonValue, attributeType);
     }
 
     attr.set(targetEntity, value);
