@@ -22,6 +22,7 @@ import javax.inject.Inject;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 
 /**
@@ -34,6 +35,7 @@ public class ModuleWithInjectedDataBinder {
 
   private TextBox valueTextBox = new TextBox();
   private TextBox nameTextBox = new TextBox();
+  private Label idLabel = new Label();
 
   @Inject
   private DataBinder<Model> dataBinder;
@@ -44,6 +46,7 @@ public class ModuleWithInjectedDataBinder {
     // until unbind is called.
     dataBinder.bind(nameTextBox, "name");
     dataBinder.bind(valueTextBox, "value");
+    dataBinder.bind(idLabel, "id");
   }
 
   public TextBox getValueTextBox() {
@@ -52,6 +55,10 @@ public class ModuleWithInjectedDataBinder {
   
   public TextBox getNameTextBox() {
     return nameTextBox;
+  }
+  
+  public Label getIdLabel() {
+    return idLabel;
   }
 
   public Model getModel() {

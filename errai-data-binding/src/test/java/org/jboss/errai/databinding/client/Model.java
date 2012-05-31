@@ -28,10 +28,19 @@ import org.jboss.errai.databinding.client.api.Bindable;
 @Portable
 public class Model {
 
+  private int id;
   private String value;
   private String _name;
   private Integer _age;
   private boolean active;
+
+  public int getId() {
+    return id;
+  }
+
+  public void setId(int id) {
+    this.id = id;
+  }
 
   public String getValue() {
     return value;
@@ -45,16 +54,16 @@ public class Model {
     return _name;
   }
 
-  public void setName(String name) {
-    this._name = name;
+  public void setName(String _name) {
+    this._name = _name;
   }
 
   public Integer getAge() {
     return _age;
   }
 
-  public void setAge(Integer age) {
-    this._age = age;
+  public void setAge(Integer _age) {
+    this._age = _age;
   }
 
   public boolean isActive() {
@@ -72,6 +81,7 @@ public class Model {
     result = prime * result + ((_age == null) ? 0 : _age.hashCode());
     result = prime * result + ((_name == null) ? 0 : _name.hashCode());
     result = prime * result + (active ? 1231 : 1237);
+    result = prime * result + id;
     result = prime * result + ((value == null) ? 0 : value.hashCode());
     return result;
   }
@@ -99,6 +109,8 @@ public class Model {
       return false;
     if (active != other.active)
       return false;
+    if (id != other.id)
+      return false;
     if (value == null) {
       if (other.value != null)
         return false;
@@ -107,4 +119,5 @@ public class Model {
       return false;
     return true;
   }
+
 }
