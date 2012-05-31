@@ -29,11 +29,8 @@ import javax.persistence.metamodel.Type;
 
 import org.jboss.errai.common.client.framework.Assert;
 
-import com.google.gwt.json.client.JSONBoolean;
 import com.google.gwt.json.client.JSONNull;
-import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
 
 public abstract class ErraiEntityType<X> implements EntityType<X> {
@@ -209,60 +206,12 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
 
     // FIXME this should search all managed types, or maybe all embeddables. not just entities.
     // TODO it would be better to code-generate an Attribute.asJson() method than to do this at runtime
-    if (attrValue == null) {
-      return JSONNull.getInstance();
-    }
-    else if (eem.getMetamodel().getEntities().contains(attributeType)) {
+    if (eem.getMetamodel().getEntities().contains(attributeType)) {
       ErraiEntityType<Y> attrEntityType = eem.getMetamodel().entity(attributeType);
       return attrEntityType.toJson(eem, attrValue);
     }
-    else if (attrValue instanceof String
-            || attrValue instanceof BigInteger || attrValue instanceof BigDecimal
 
-            // Long doesn't fit in a JSONNumber
-            || attrValue instanceof Long
-
-            // Character isn't a java.lang.Number
-            || attrValue instanceof Character
-
-            // Timestamp includes nanoseconds, and has a special String representation that is parseable
-            || attrValue instanceof Timestamp) {
-      return new JSONString(attrValue.toString());
-    }
-    else if (attrValue instanceof Boolean) {
-      return JSONBoolean.getInstance((Boolean) attrValue);
-    }
-    else if (attrValue instanceof Number) {
-      return new JSONNumber(((Number) attrValue).doubleValue());
-    }
-    else if (attrValue instanceof Enum) {
-      return new JSONString(((Enum<?>) attrValue).name());
-    }
-    else if (attrValue instanceof Date) {  // covers java.sql.[Date,Time,Timestamp]
-      return new JSONString(String.valueOf(((Date) attrValue).getTime()));
-    }
-    else if (attrValue instanceof byte[]) {
-      byte[] value = (byte[]) attrValue;
-      return new JSONString(Base64Util.encode(value, 0, value.length));
-    }
-    else if (attrValue instanceof Byte[]) {
-      Byte[] value = (Byte[]) attrValue;
-      return new JSONString(Base64Util.encode(value, 0, value.length));
-    }
-    else if (attrValue instanceof char[]) {
-      return new JSONString(String.copyValueOf(((char[]) attrValue)));
-    }
-    else if (attrValue instanceof Character[]) {
-      Character[] value = (Character[]) attrValue;
-      StringBuilder sb = new StringBuilder(value.length);
-      for (Character c : value) {
-        sb.append((char) c);
-      }
-      return new JSONString(sb.toString());
-    }
-    else {
-      throw new RuntimeException("I don't know how JSONify " + attr);
-    }
+    return JsonUtil.basicValueToJson(attrValue);
   }
 
   @SuppressWarnings("unchecked")

@@ -1,7 +1,6 @@
 package org.jboss.errai.jpa.client.local;
 
 import org.jboss.errai.common.client.framework.Assert;
-import org.jboss.errai.marshalling.client.Marshalling;
 
 /**
  * Holder class for a storage key: a tuple of type and identity value.
@@ -39,7 +38,7 @@ public class Key<X, T> {
    *          given class). Must not be null.
    * @param entityClass
    *          The class of the entity for the key. Must not be null.
-   * @param primaryKey
+   * @param id
    *          The ID value for the entity. Must not be null.
    * @return A Key instance for the given entity type and ID value.
    * @throws NullPointerException
@@ -111,6 +110,6 @@ public class Key<X, T> {
 
   public String toJson() {
     return ("{ entityType: \"" + entityType.getJavaType().getName()
-            + "\", id: " + Marshalling.toJSON(id) + "}").replace('\"', '!');
+            + "\", id: " + JsonUtil.basicValueToJson(id) + "}");
   }
 }
