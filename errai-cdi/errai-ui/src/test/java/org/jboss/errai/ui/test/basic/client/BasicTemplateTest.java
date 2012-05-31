@@ -66,7 +66,7 @@ public class BasicTemplateTest extends AbstractErraiCDITest {
 
     Anchor c5 = app.getComponent().getC5();
     Image c6 = app.getComponent().getC6();
-    
+
     assertEquals(c6.getElement(), c5.getElement().getFirstChildElement());
   }
 

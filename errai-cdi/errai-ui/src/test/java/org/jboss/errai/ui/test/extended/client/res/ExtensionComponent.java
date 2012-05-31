@@ -14,14 +14,13 @@ public class ExtensionComponent extends BaseComponent {
   @Inject
   @DataField
   private Label c2;
-  
+
   @Inject
   @DataField("c3")
   private Label content3;
-  
+
   @PostConstruct
-  public final void init()
-  {
+  public final void init() {
     c2.getElement().setAttribute("id", "c2");
     content3.getElement().setAttribute("id", "c3");
   }
@@ -33,5 +32,5 @@ public class ExtensionComponent extends BaseComponent {
   public Label getC2() {
     return c2;
   }
-  
+
 }

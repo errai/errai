@@ -22,7 +22,7 @@ public class HandlerTemplateTestApp {
     root.add(component);
     System.out.println(root.getElement().getInnerHTML());
   }
-  
+
   public HandledComponent getComponent() {
     return component;
   }

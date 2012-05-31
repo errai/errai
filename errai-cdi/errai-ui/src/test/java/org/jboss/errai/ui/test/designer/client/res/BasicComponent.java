@@ -22,11 +22,10 @@ public class BasicComponent extends Composite {
   @Inject
   @DataField
   private Button c2;
-  
+
   @PostConstruct
-  public void init()
-  {
-    c1.getElement().setAttribute("id","lbl");
+  public void init() {
+    c1.getElement().setAttribute("id", "lbl");
     c1.setText("Added by component");
     c2.getElement().setAttribute("id", "btn");
   }
@@ -34,9 +33,9 @@ public class BasicComponent extends Composite {
   public Label getC1() {
     return c1;
   }
-  
+
   public Button getC2() {
     return c2;
   }
-  
+
 }

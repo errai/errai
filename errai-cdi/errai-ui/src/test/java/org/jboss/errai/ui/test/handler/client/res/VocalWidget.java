@@ -9,7 +9,7 @@ public class VocalWidget extends Widget {
     super();
     setElement(DOM.createDiv());
   }
-  
+
   @Override
   protected void onAttach() {
     System.out.println("Vocalwidget attached!");

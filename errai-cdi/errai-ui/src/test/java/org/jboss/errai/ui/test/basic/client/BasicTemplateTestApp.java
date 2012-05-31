@@ -22,7 +22,7 @@ public class BasicTemplateTestApp {
     root.add(component);
     System.out.println(root.getElement().getInnerHTML());
   }
-  
+
   public BasicComponent getComponent() {
     return component;
   }

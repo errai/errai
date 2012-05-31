@@ -22,11 +22,10 @@ public class ChildComponent extends Composite {
   @Inject
   @DataField("c2")
   private Button content2;
-  
+
   @PostConstruct
-  public void init()
-  {
-    c1.getElement().setAttribute("id","c1a");
+  public void init() {
+    c1.getElement().setAttribute("id", "c1a");
     c1.setText("Added by component");
     content2.getElement().setAttribute("id", "c1b");
   }
@@ -34,9 +33,9 @@ public class ChildComponent extends Composite {
   public Label getC1() {
     return c1;
   }
-  
+
   public Button getC2() {
     return content2;
   }
-  
+
 }

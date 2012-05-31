@@ -21,11 +21,11 @@ public class DesignerTemplateTestApp {
   public void setup() {
     root.add(component);
   }
-  
+
   public DesignerBreadcrumbsComponent getComponent() {
     return component;
   }
-  
+
   public RootPanel getRoot() {
     return root;
   }

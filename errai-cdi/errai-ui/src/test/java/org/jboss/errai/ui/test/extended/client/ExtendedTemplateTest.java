@@ -25,10 +25,10 @@ public class ExtendedTemplateTest extends AbstractErraiCDITest {
     assertNotNull(Document.get().getElementById("c2"));
     assertEquals("DIV", Document.get().getElementById("c2").getTagName());
     assertNotNull(Document.get().getElementById("c3"));
-    
+
     assertNotNull("Field in base template should be initialized", app.getComponent().getC2Base());
     assertFalse("Field in base template should not be attached", app.getComponent().getC2Base().isAttached());
-    
+
     assertNotNull("Field in extension template should be initialized", app.getComponent().getC2());
     assertTrue("Field in extension template should be attached", app.getComponent().getC2().isAttached());
 

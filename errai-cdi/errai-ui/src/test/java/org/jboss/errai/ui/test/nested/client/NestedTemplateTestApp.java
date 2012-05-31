@@ -21,7 +21,7 @@ public class NestedTemplateTestApp {
   public void setup() {
     root.add(component);
   }
-  
+
   public ParentComponent getComponent() {
     return component;
   }
