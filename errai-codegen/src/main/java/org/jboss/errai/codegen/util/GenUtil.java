@@ -66,7 +66,7 @@ public class GenUtil {
       PERMISSIVE_MODE = Boolean.getBoolean("errai.codegen.permissive");
     }
     else {
-      PERMISSIVE_MODE = true;
+      PERMISSIVE_MODE = false;
     }
   }
 

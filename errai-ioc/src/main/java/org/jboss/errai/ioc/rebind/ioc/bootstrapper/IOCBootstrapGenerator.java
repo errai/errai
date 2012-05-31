@@ -121,7 +121,7 @@ public class IOCBootstrapGenerator {
   }
 
   public String generate(String packageName, String className) {
-    GenUtil.setPermissiveMode(true);
+    //GenUtil.setPermissiveMode(true);
 
     synchronized (generatorLock) {
       EnvUtil.recordEnvironmentState();

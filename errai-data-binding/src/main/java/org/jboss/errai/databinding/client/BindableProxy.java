@@ -18,7 +18,7 @@ package org.jboss.errai.databinding.client;
 
 import org.jboss.errai.databinding.client.api.Bindable;
 
-import com.google.gwt.user.client.ui.HasValue;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * This interface is implemented by the generated proxies for {@link Bindable} types.
@@ -41,7 +41,7 @@ public interface BindableProxy {
   /**
    * Binds the property with the given name to the provided widget.
    */
-  public void bind(HasValue<?> widget, String property);
+  public void bind(Widget widget, String property);
   
   /**
    * Unbinds the property with the given name.
