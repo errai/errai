@@ -57,4 +57,11 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
     verifyInBackupTimer(verifier, 120000);
     delayTestFinish(240000);
   }
+  
+  public void testDestroyBeanWithEventObservers() {
+    EventObserverTestModule module = IOC.getBeanManager().lookupBean(EventObserverTestModule.class).getInstance();
+    IOC.getBeanManager().destroyBean(module);
+    assertTrue("Bean wasn't destroyed", module.isDestroyed());
+  }
+  
 }
