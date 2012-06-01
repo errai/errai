@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PreDestroy;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
@@ -28,10 +29,16 @@ public class EventObserverTestModule extends EventTestObserverSuperClass {
   
   private int busReadyEventsReceived = 0;
   private Runnable verifier;
-
+  private boolean destroyed;
+  
   @Inject
   private Event<StartEvent> startEvent;
 
+  @PreDestroy
+  private void destroy() {
+    destroyed = true;
+  }
+  
   public int getBusReadyEventsReceived() {
     return busReadyEventsReceived;
   }
@@ -42,6 +49,10 @@ public class EventObserverTestModule extends EventTestObserverSuperClass {
 
   public Event<StartEvent> getStartEvent() {
     return startEvent;
+  }
+  
+  public boolean isDestroyed() {
+    return destroyed;
   }
 
   /**

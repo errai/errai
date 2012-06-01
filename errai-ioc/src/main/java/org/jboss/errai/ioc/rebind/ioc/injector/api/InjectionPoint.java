@@ -175,7 +175,7 @@ public class InjectionPoint<T> {
       case Type:
         return type;
       case Parameter:
-        return parm.getType();
+        return parm.getDeclaringMember().getDeclaringClass();
       default:
         throw new RuntimeException("unsupported operation: getEncodingType for task: " + taskType);
     }
