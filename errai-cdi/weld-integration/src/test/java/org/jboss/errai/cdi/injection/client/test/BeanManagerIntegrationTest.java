@@ -148,6 +148,53 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
     assertTrue("wrong bean looked up", beanB.getInstance() instanceof QualParmAppScopeBeanOranges);
   }
 
+  public void testQualifierLookupWithAnnoAttribFailure() {
+    final QualV qualOrange = new QualV() {
+      @Override
+      public QualEnum value() {
+        return QualEnum.ORANGES;
+      }
+
+      @Override
+      public Class<? extends Annotation> annotationType() {
+        return QualV.class;
+      }
+
+      @Override
+      public int amount() {
+        return 5;
+      }
+    };
+
+    final QualV qualApple = new QualV() {
+      @Override
+      public QualEnum value() {
+        return QualEnum.APPLES;
+      }
+
+      @Override
+      public Class<? extends Annotation> annotationType() {
+        return QualV.class;
+      }
+
+      @Override
+      public int amount() {
+        return 6;
+      }
+    };
+
+    final Collection<IOCBeanDef> beans = IOC.getBeanManager().lookupBeans(CommonInterfaceB.class);
+    assertEquals("wrong number of beans", 2, beans.size());
+
+    final IOCBeanDef<CommonInterfaceB> beanA = IOC.getBeanManager().lookupBean(CommonInterfaceB.class, qualOrange);
+    assertNotNull("no bean found", beanA);
+    assertFalse("wrong bean looked up", beanA.getInstance() instanceof QualParmAppScopeBeanApples);
+
+    final IOCBeanDef<CommonInterfaceB> beanB = IOC.getBeanManager().lookupBean(CommonInterfaceB.class, qualApple);
+    assertNotNull("no bean found", beanB);
+    assertFalse("wrong bean looked up", beanB.getInstance() instanceof QualParmAppScopeBeanOranges);
+  }
+
   public void testQualifiedLookupFailure() {
     final LincolnBar wrongAnno = new LincolnBar() {
       @Override

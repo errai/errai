@@ -133,8 +133,8 @@ public class QualiferEqualityFactoryGenerator extends Generator {
                     ._(
                             if_(Bool.expr(Stmt.loadVariable(COMPARATOR_MAP_VAR).invoke("containsKey",
                                     Stmt.loadVariable("a1").invoke("annotationType").invoke("getName"))))
-                                    ._(Stmt.loadVariable(COMPARATOR_MAP_VAR).invoke("get", Stmt.loadVariable("a1").invoke("annotationType").invoke("getName"))
-                                            .invoke("isEqual", Refs.get("a1"), Refs.get("a2")).returnValue())
+                                    ._(Stmt.castTo(AnnotationComparator.class, Stmt.loadVariable(COMPARATOR_MAP_VAR).invoke("get", Stmt.loadVariable("a1").invoke("annotationType").invoke("getName"))
+                                            ).invoke("isEqual", Refs.get("a1"), Refs.get("a2")).returnValue())
                                     .finish()
                                     .else_()
                                     ._(Stmt.load(true).returnValue())
@@ -151,8 +151,9 @@ public class QualiferEqualityFactoryGenerator extends Generator {
             ._(
                     if_(Bool.expr(Stmt.loadVariable(COMPARATOR_MAP_VAR).invoke("containsKey",
                       Stmt.loadVariable("a1").invoke("annotationType").invoke("getName"))))
-                      ._(Stmt.loadVariable(COMPARATOR_MAP_VAR).invoke("get", Stmt.loadVariable("a1").invoke("annotationType").invoke("getName"))
-                      .invoke("hashCodeOf", Refs.get("a1")).returnValue())
+                      ._(Stmt.castTo(AnnotationComparator.class, Stmt.loadVariable(COMPARATOR_MAP_VAR)
+                              .invoke("get", Stmt.loadVariable("a1").invoke("annotationType").invoke("getName"))
+                      ).invoke("hashCodeOf", Refs.get("a1")).returnValue())
                             .finish()
                     .else_()
                     ._(Stmt.loadVariable("a1").invoke("annotationType").invoke("hashCode").returnValue())

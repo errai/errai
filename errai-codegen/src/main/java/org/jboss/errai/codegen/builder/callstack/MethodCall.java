@@ -68,12 +68,13 @@ public class MethodCall extends AbstractCallElement {
               : callType.getBestMatchingMethod(methodName, parameterTypes);
 
       if (method == null) {
-        callType.getBestMatchingMethod(methodName, parameterTypes);
 
         if (GenUtil.isPermissiveMode()) {
           UndefinedMethodException udme = new UndefinedMethodException(statement.getType(), methodName, parameterTypes);
+          GenUtil.rewriteBlameStackTrace(blame);
+          udme.initCause(blame);
           udme.printStackTrace();
-        
+
           dummyReturn(writer, context);
           return;
         }
