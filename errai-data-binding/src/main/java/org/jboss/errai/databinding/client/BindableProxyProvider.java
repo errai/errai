@@ -33,7 +33,7 @@ public interface BindableProxyProvider {
    *          specifies the origin of the initial state of both model and UI widget
    * @return proxy instance
    */
-  public BindableProxy getBindableProxy(InitialState state);
+  public BindableProxy<?> getBindableProxy(InitialState state);
 
   /**
    * Returns a proxy for the provided model instance, bound to the provided widget.
@@ -44,5 +44,5 @@ public interface BindableProxyProvider {
    *          specifies the origin of the initial state of both model and UI widget
    * @return proxy instance
    */
-  public BindableProxy getBindableProxy(Object model, InitialState state);
+  public BindableProxy<?> getBindableProxy(Object model, InitialState state);
 }

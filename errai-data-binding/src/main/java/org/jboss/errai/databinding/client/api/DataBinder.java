@@ -24,8 +24,9 @@ import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
- * This class can be used to programmatically bind the properties of a data model instance (any POJO annotated with
- * {@link Bindable}) to UI model instance (any POJO annotated with {@link Bindable}) to UI fields/widgets.
+ * This class can be used to programmatically bind properties of a data model instance (any POJO annotated with
+ * {@link Bindable}) to UI fields/widgets. The properties of the model and the UI components will automatically be kept
+ * in sync for as long as they are bound.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -58,11 +59,11 @@ public class DataBinder<T> {
    * 
    * @param model
    *          the instance of a {@link Bindable} type, must not be null
-   * @param state
+   * @param intialState
    *          specifies the origin of the initial state of both model and UI widget.
    */
-  public DataBinder(T model, InitialState state) {
-    this.model = BindableProxyFactory.getBindableProxy(Assert.notNull(model), state);
+  public DataBinder(T model, InitialState intialState) {
+    this.model = BindableProxyFactory.getBindableProxy(Assert.notNull(model), intialState);
   }
 
   /**
@@ -78,21 +79,12 @@ public class DataBinder<T> {
    * @return the proxied model which has to be used in place of the model instance provided (also accessible using
    *         {@link DataBinder#getModel()})
    */
+  @SuppressWarnings("unchecked")
   public T bind(final Widget widget, final String property) {
     Assert.notNull(widget);
     Assert.notNull(property);
-    ((BindableProxy) model).bind(widget, property);
+    ((BindableProxy<T>) this.model).bind(widget, property);
     return this.model;
-  }
-  
-  /**
-   * Unbinds the widget and model bound by previous calls to {@link DataBinder#bind(HasValue, Object, String)}.
-   * 
-   * @return the unwrapped model
-   */
-  public T unbind() {
-    ((BindableProxy) model).unbind();
-    return (T) this.model;
   }
 
   /**
@@ -104,8 +96,49 @@ public class DataBinder<T> {
    * 
    * @return the unwrapped model
    */
+  @SuppressWarnings("unchecked")
   public T unbind(String property) {
-    ((BindableProxy) model).unbind(property);
+    ((BindableProxy<T>) this.model).unbind(property);
+    return (T) this.model;
+  }
+
+  /**
+   * Unbinds the widget and model bound by previous calls to {@link DataBinder#bind(HasValue, Object, String)}.
+   * 
+   * @return the unwrapped model
+   */
+  @SuppressWarnings("unchecked")
+  public T unbind() {
+    ((BindableProxy<T>) this.model).unbind();
+    return (T) this.model;
+  }
+
+  /**
+   * Changes the model instance. The bindings stay intact.
+   * 
+   * @param model
+   *          the instance of a {@link Bindable} type, must not be null
+   * @return the proxied model which has to be used in place of the model instance provided (also accessible using
+   *         {@link DataBinder#getModel()})
+   */
+  public T setModel(T model) {
+    return setModel(model, null);
+  }
+
+  /**
+   * Changes the model instance. The bindings stay intact.
+   * 
+   * @param model
+   *          the instance of a {@link Bindable} type, must not be null
+   * @param initialState
+   *          specifies the origin of the initial state of both model and UI widget, null if no initial state
+   *          synchronization should be carried out.
+   * @return the proxied model which has to be used in place of the model instance provided (also accessible using
+   *         {@link DataBinder#getModel()})
+   */
+  @SuppressWarnings("unchecked")
+  public T setModel(T model, InitialState initialState) {
+    ((BindableProxy<T>) this.model).setTarget(model, initialState);
     return (T) this.model;
   }
 

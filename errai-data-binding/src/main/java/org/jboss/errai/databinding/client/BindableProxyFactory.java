@@ -49,7 +49,7 @@ public class BindableProxyFactory {
   public static <T> T getBindableProxy(T model, InitialState state) {
     BindableProxyProvider proxyProvider = getBindableProxyProvider(model.getClass());
 
-    BindableProxy proxy = proxyProvider.getBindableProxy(model, state);
+    BindableProxy<?> proxy = proxyProvider.getBindableProxy(model, state);
     if (proxy == null) {
       throw new RuntimeException("No proxy instance provided for bindable type: " + model.getClass().getName());
     }
@@ -71,7 +71,7 @@ public class BindableProxyFactory {
   public static <T> T getBindableProxy(Class<?> bindableType, InitialState state) {
     BindableProxyProvider proxyProvider = getBindableProxyProvider(bindableType);
 
-    BindableProxy proxy = proxyProvider.getBindableProxy(state);
+    BindableProxy<?> proxy = proxyProvider.getBindableProxy(state);
     if (proxy == null) {
       throw new RuntimeException("No proxy instance provided for bindable type: " + bindableType.getName());
     }

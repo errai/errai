@@ -17,6 +17,7 @@
 package org.jboss.errai.databinding.client;
 
 import org.jboss.errai.databinding.client.api.Bindable;
+import org.jboss.errai.databinding.client.api.InitialState;
 
 import com.google.gwt.user.client.ui.Widget;
 
@@ -25,31 +26,31 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface BindableProxy {
-
-  /**
-   * Sets a property value on the target (proxied model) instance. This method is invoked to change the state of the model in
-   * response to UI changes.
-   * 
-   * @param property
-   *          name of the property following Java bean conventions
-   * @param value
-   *          new value of the property
-   */
-  public void set(String property, Object value);
+public interface BindableProxy<T> {
 
   /**
    * Binds the property with the given name to the provided widget.
    */
   public void bind(Widget widget, String property);
-  
+
   /**
    * Unbinds the property with the given name.
    */
   public void unbind(String property);
-  
+
   /**
    * Unbinds all properties.
    */
   public void unbind();
+
+  /**
+   * Changes the target model instance of this proxy. The bindings stay intact.
+   * 
+   * @param model
+   *          the instance of a {@link Bindable} type, must not be null
+   * @param state
+   *          specifies the origin of the initial state of both model and UI widget, null if no initial state
+   *          synchronization should be carried out.
+   */
+  public void setTarget(T model, InitialState initialState);
 }
