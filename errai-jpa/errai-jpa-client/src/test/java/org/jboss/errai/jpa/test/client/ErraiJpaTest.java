@@ -321,7 +321,7 @@ public class ErraiJpaTest extends GWTTestCase {
     }
   }
 
-  public void IGNOREtestPersistRelatedCollection() {
+  public void testPersistRelatedCollection() {
     // make them
     Artist artist = new Artist();
     artist.setId(9L); // Artist uses user-assigned/non-generated IDs
@@ -352,15 +352,20 @@ public class ErraiJpaTest extends GWTTestCase {
     assertNotNull(fetchedArtist);
 
     assertEquals(1, fetchedArtist.getAlbums().size());
-    Album fetchedAlbum = fetchedArtist.getAlbums().iterator().next();
+    Album cascadeFetchedAlbum = fetchedArtist.getAlbums().iterator().next();
+    assertNotNull(cascadeFetchedAlbum);
 
-    assertNotSame(album, fetchedAlbum);
     assertNotSame(artist, fetchedArtist);
+    assertNotSame(album, cascadeFetchedAlbum);
 
     assertEquals(artist.toString(), fetchedArtist.toString());
-    assertEquals(album.toString(), fetchedAlbum.toString());
+    assertEquals(album.toString(), cascadeFetchedAlbum.toString());
 
-    assertSame(fetchedAlbum, em.find(Album.class, fetchedAlbum.getId()));
+    // now ensure we haven't retrieved a ghost album
+    assertSame(cascadeFetchedAlbum, em.find(Album.class, cascadeFetchedAlbum.getId()));
+
+    // ensure "parent pointer" of album points at correct artist instance
+    assertSame(fetchedArtist, cascadeFetchedAlbum.getArtist());
   }
 
   public void testPersistNewEntityLifecycle() throws Exception {

@@ -61,6 +61,14 @@ public class WebStorageBackend implements StorageBackend {
   }
 
   @Override
+  public boolean contains(Key<?, ?> key) {
+    String keyJson = key.toJson();
+    boolean contains = getImpl(keyJson) != null;
+    System.out.println("<<<contains '" + keyJson + "' : " + contains);
+    return contains;
+  }
+
+  @Override
   public <X> void remove(Key<X, ?> key) {
     String keyJson = key.toJson();
     removeImpl(keyJson);

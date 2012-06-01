@@ -31,17 +31,35 @@ public interface StorageBackend {
 
   /**
    * Retrieves the value most recently stored in this backend under the given
-   * key.
+   * key, reconnecting referenced objects by calling back up into the owning
+   * EntityManager.
+   * <p>
+   * Note that this operation is <i>not</i> a good method for testing if the
+   * backend contains a given object, because of the potentially wide-reaching
+   * side effects caused by recursively resolving the entity references in the
+   * object being retrieved. To test if the backend contains an object for a
+   * particular key, use {@link #contains(Key)}.
    *
    * @param key
    *          The identity of the object to be retrieved. Null is not permitted.
    * @param <X>
    *          The entity's Java type
    * @return The retrieved object, reconstituted from its backend (serialized)
-   *         representation using Errai Marshalling. Return value is null if
-   *         there is no value presently associated with {@code key}.
+   *         representation, including references to other objects. Return value
+   *         is null if there is no value presently associated with {@code key}.
    */
   <X> X get(Key<X, ?> key);
+
+  /**
+   * Tests if this backend contains data for the given key.
+   *
+   * @param key
+   *          The identity of the object to be tested for. Null is not
+   *          permitted.
+   * @return True if the backend contains the entity instance associated with
+   *         the given key, and false otherwise.
+   */
+  boolean contains(Key<?, ?> key);
 
   /**
    * Removes the key and its associated value (if any) from this storage

@@ -1,9 +1,13 @@
 package org.jboss.errai.jpa.client.local;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
 import javax.persistence.PostLoad;
 import javax.persistence.PostPersist;
 import javax.persistence.PostRemove;
@@ -24,11 +28,21 @@ import javax.persistence.metamodel.Type;
 
 import org.jboss.errai.common.client.framework.Assert;
 
+import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONNull;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 
 public abstract class ErraiEntityType<X> implements EntityType<X> {
+
+  /**
+   * All of the entities that are partly constructed but are still getting their
+   * references connected up. This is required in order to prevent infinite
+   * recursion when demarshalling cyclic object graphs.
+   */
+  // XXX this probably belongs in EntityManager or PersistenceContext
+  private static Map<Key<Object, Object>, Object> partiallyConstructedEntities = new HashMap<Key<Object, Object>, Object>();
+
 
   private final Set<SingularAttribute<? super X, ?>> singularAttributes = new HashSet<SingularAttribute<? super X,?>>();
   private final Set<PluralAttribute<? super X, ?, ?>> pluralAttributes = new HashSet<PluralAttribute<? super X, ?, ?>>();
@@ -134,26 +148,39 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
   public X fromJson(EntityManager em, JSONValue jsonValue) {
     final ErraiEntityManager eem = (ErraiEntityManager) em;
     X entity = newInstance();
-    // TODO get all attributes, not just singular ones
-    for (SingularAttribute<? super X, ?> a : getSingularAttributes()) {
-      ErraiSingularAttribute<? super X, ?> attr = (ErraiSingularAttribute<? super X, ?>) a;
-      JSONValue attrJsonValue = jsonValue.isObject().get(attr.getName());
+    Key<X, ?> key = keyFromJson(jsonValue);
+    try {
+      partiallyConstructedEntities.put((Key<Object, Object>) key, entity);
+      for (Attribute<? super X, ?> a : getAttributes()) {
+        ErraiAttribute<? super X, ?> attr = (ErraiAttribute<? super X, ?>) a;
+        JSONValue attrJsonValue = jsonValue.isObject().get(attr.getName());
 
-      switch (attr.getPersistentAttributeType()) {
-      case ELEMENT_COLLECTION:
-      case EMBEDDED:
-      case BASIC:
-        parseInlineJson(entity, attr, attrJsonValue, eem);
-      break;
+        switch (attr.getPersistentAttributeType()) {
+        case ELEMENT_COLLECTION:
+        case EMBEDDED:
+        case BASIC:
+          parseInlineJson(entity, attr, attrJsonValue, eem);
+          break;
 
-      case MANY_TO_MANY:
-      case MANY_TO_ONE:
-      case ONE_TO_MANY:
-      case ONE_TO_ONE:
-        // TODO parseJsonReference(entity, attr, attrJsonValue, eem);
+        case MANY_TO_MANY:
+        case MANY_TO_ONE:
+        case ONE_TO_MANY:
+        case ONE_TO_ONE:
+          if (attr instanceof ErraiSingularAttribute) {
+            parseSingularJsonReference(entity, (ErraiSingularAttribute<? super X, ?>) attr, attrJsonValue, eem);
+          }
+          else if (attr instanceof ErraiPluralAttribute) {
+            parsePluralJsonReference(entity, (ErraiPluralAttribute<? super X, ?, ?>) attr, attrJsonValue.isArray(), eem);
+          }
+          else {
+            throw new PersistenceException("Unknown attribute type " + attr);
+          }
+        }
       }
+      return entity;
+    } finally {
+      partiallyConstructedEntities.remove(key);
     }
-    return entity;
   }
 
   public JSONValue toJson(EntityManager em, X targetEntity) {
@@ -161,8 +188,8 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
     JSONObject jsonValue = new JSONObject();
 
     // TODO get all attributes, not just singular ones
-    for (SingularAttribute<? super X, ?> a : getSingularAttributes()) {
-      ErraiSingularAttribute<? super X, ?> attr = (ErraiSingularAttribute<? super X, ?>) a;
+    for (Attribute<? super X, ?> a : getAttributes()) {
+      ErraiAttribute<? super X, ?> attr = (ErraiAttribute<? super X, ?>) a;
       switch (attr.getPersistentAttributeType()) {
       case ELEMENT_COLLECTION:
       case EMBEDDED:
@@ -174,7 +201,17 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
       case MANY_TO_ONE:
       case ONE_TO_MANY:
       case ONE_TO_ONE:
-        jsonValue.put(attr.getName(), makeJsonReference(targetEntity, attr, eem));
+        JSONValue attributeValue;
+        if (attr instanceof ErraiSingularAttribute) {
+          attributeValue = makeJsonReference(targetEntity, (ErraiSingularAttribute<? super X, ?>) attr, eem);
+        }
+        else if (attr instanceof ErraiPluralAttribute) {
+          attributeValue = makeJsonReference(targetEntity, (ErraiPluralAttribute<? super X, ?, ?>) attr, eem);
+        }
+        else {
+          throw new PersistenceException("Unknown attribute type " + attr);
+        }
+        jsonValue.put(attr.getName(), attributeValue);
       }
     }
 
@@ -195,7 +232,7 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
    * @return a JSONValue that represents the requested attribute value of the
    *         given entity. Never null, although it could be JSONNull.
    */
-  private <Y> JSONValue makeInlineJson(X targetEntity, ErraiSingularAttribute<? super X, Y> attr, ErraiEntityManager eem) {
+  private <Y> JSONValue makeInlineJson(X targetEntity, ErraiAttribute<? super X, Y> attr, ErraiEntityManager eem) {
     Class<Y> attributeType = attr.getJavaType();
     Y attrValue = attr.get(Assert.notNull(targetEntity));
 
@@ -209,7 +246,7 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
     return JsonUtil.basicValueToJson(attrValue);
   }
 
-  private <Y> void parseInlineJson(X targetEntity, ErraiSingularAttribute<? super X, Y> attr, JSONValue attrJsonValue, ErraiEntityManager eem) {
+  private <Y> void parseInlineJson(X targetEntity, ErraiAttribute<? super X, Y> attr, JSONValue attrJsonValue, ErraiEntityManager eem) {
     Class<Y> attributeType = attr.getJavaType();
     Y value;
     // FIXME this should search all managed types, or maybe all embeddables. not just entities.
@@ -254,6 +291,97 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
     JSONObject ref = new JSONObject();
     ref.put("entityReference", attrEntityType.makeInlineJson(attrValue, attrEntityType.getId(Object.class), eem));
     return ref;
+  }
+
+  /**
+   * Returns a JSON object that represents a reference to the given attribute.
+   * The reference is done by Entity identity (the type of the attribute is
+   * assumed to be an entity type).
+   *
+   * @param targetEntity
+   *          The instance of the entity to retrieve the attribute value from.
+   *          Not null.
+   * @param attr
+   *          The attribute to read from {@code targetEntity}. Not null, and
+   *          must be an entity type.
+   * @param eem
+   *          The ErraiEntityManager that owns the entity. Not null.
+   * @return a JSONArray that contains references to each element in the given
+   *         attribute's collection value. Returns JSONNull if the attribute has
+   *         a null collection.
+   */
+  private <C, E> JSONValue makeJsonReference(X targetEntity, ErraiPluralAttribute<? super X, C, E> attr, ErraiEntityManager eem) {
+
+    C attrValue = attr.get(targetEntity);
+    if (attrValue == null) {
+      return JSONNull.getInstance();
+    }
+
+    Class<E> attributeType = attr.getElementType().getJavaType();
+    ErraiEntityType<E> attrEntityType = eem.getMetamodel().entity(attributeType);
+    if (attrEntityType == null) {
+      throw new IllegalArgumentException("Can't make a reference to collection of non-entity-typed attributes " + attr);
+    }
+
+    JSONArray array = new JSONArray();
+    int index = 0;
+    for (E element : (Iterable<E>) attrValue) {
+      Object idToReference = attrEntityType.getId(Object.class).get(element);
+      JSONObject ref = new JSONObject();
+      ref.put("entityReference", JsonUtil.basicValueToJson(idToReference));
+      array.set(index++, ref);
+    }
+    return array;
+  }
+
+  private <Y> void parseSingularJsonReference(
+          X targetEntity, ErraiSingularAttribute<? super X, Y> attr, JSONValue attrJsonValue, ErraiEntityManager eem) {
+
+    if (attrJsonValue == null || attrJsonValue.isNull() != null) return;
+
+    Class<Y> attributeType = attr.getJavaType();
+    ErraiEntityType<Y> attrEntityType = eem.getMetamodel().entity(attributeType);
+
+    JSONValue idJson = attrJsonValue.isObject().get("entityReference");
+    Class<?> idType = attrEntityType.getId(Object.class).getJavaType();
+    Object id = JsonUtil.basicValueFromJson(idJson, idType);
+
+    System.out.println("   looking for " + attrEntityType.getJavaType() + " with id " + id);
+    Y value = eem.find(attrEntityType.getJavaType(), id);
+    attr.set(targetEntity, value);
+  }
+
+  private <C, E> void parsePluralJsonReference(
+          X targetEntity, ErraiPluralAttribute<? super X, C, E> attr, JSONArray attrJsonValues, ErraiEntityManager eem) {
+
+    if (attrJsonValues == null || attrJsonValues.isNull() != null) return;
+
+    Class<E> attributeElementType = attr.getElementType().getJavaType();
+    ErraiEntityType<E> attrEntityType = eem.getMetamodel().entity(attributeElementType);
+
+    Collection<E> collection = (Collection<E>) attr.createEmptyCollection(); // FIXME this is broken for Map attributes
+
+    for (int i = 0; i < attrJsonValues.size(); i++) {
+      JSONValue idJson = attrJsonValues.get(i).isObject().get("entityReference");
+      Class<?> idType = attrEntityType.getId(Object.class).getJavaType();
+      Object id = JsonUtil.basicValueFromJson(idJson, idType);
+
+      System.out.println("   looking for " + attrEntityType.getJavaType() + " with id " + id);
+      E value = (E) partiallyConstructedEntities.get(Key.get(eem, attrEntityType.getJavaType(), id));
+      if (value == null) {
+        value = eem.find(attrEntityType.getJavaType(), id);
+      }
+
+      collection.add(value);
+    }
+
+    attr.set(targetEntity, (C) collection);
+  }
+
+  private Key<X, ?> keyFromJson(JSONValue json) {
+    JSONValue keyJson = json.isObject().get(id.getName());
+    Object idValue = JsonUtil.basicValueFromJson(keyJson, id.getJavaType());
+    return new Key<X, Object>(this, idValue);
   }
 
   // ---------- JPA API Below This Line -------------
@@ -312,7 +440,10 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
 
   @Override
   public Set<Attribute<? super X, ?>> getAttributes() {
-    throw new RuntimeException("Not implemented");
+    Set<Attribute<? super X, ?>> attributes = new HashSet<Attribute<? super X, ?>>();
+    attributes.addAll(singularAttributes);
+    attributes.addAll(pluralAttributes);
+    return attributes;
   }
 
   @Override

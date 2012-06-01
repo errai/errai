@@ -17,4 +17,16 @@ import javax.persistence.metamodel.PluralAttribute;
  */
 public interface ErraiPluralAttribute<X, C, E> extends ErraiAttribute<X, C>, PluralAttribute<X, C, E> {
 
+  /**
+   * Creates a new, empty collection of a type that is assignable to this
+   * attribute via the {@link #set(Object, Object)} method. Note that the
+   * returned type is not necessarily a subtype of java.util.Collection: it
+   * could also be a java.util.Map.
+   *
+   * @return A new collection instance that is type-compatible with this
+   *         attribute's collection type.
+   * @see #getCollectionType()
+   */
+  C createEmptyCollection();
+
 }

@@ -257,7 +257,7 @@ public abstract class ErraiEntityManager implements EntityManager {
     if (persistenceContext.get(key) != null) {
       oldState = EntityState.MANAGED;
     }
-    else if (backend.get(key) != null) {
+    else if (backend.contains(key)) {
       oldState = EntityState.DETACHED;
     }
     else {

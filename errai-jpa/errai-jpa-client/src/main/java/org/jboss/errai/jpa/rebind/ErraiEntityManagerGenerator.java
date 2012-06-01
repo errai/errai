@@ -9,11 +9,15 @@ import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.enterprise.util.TypeLiteral;
 import javax.persistence.CascadeType;
@@ -40,6 +44,7 @@ import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.Type;
 
+import org.apache.commons.collections.OrderedMap;
 import org.jboss.errai.codegen.BooleanExpression;
 import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.Parameter;
@@ -299,6 +304,37 @@ public class ErraiEntityManagerGenerator extends Generator {
                     attr.getPersistentAttributeType() + " attribute " +
                     attr.getDeclaringType().getJavaType().getSimpleName() +
                     "." + attr.getName()).returnValue();
+          }
+
+          // generate isAssociation because the Hibernate implementation is broken
+          if (o instanceof PluralAttribute
+                  && method.getName().equals("createEmptyCollection")) {
+            PluralAttribute<?, ?, ?> attr = (PluralAttribute<?, ?, ?>) o;
+
+            Class<?> declaredCollectionType = attr.getJavaType();
+            Class<?> collectionTypeToInstantiate;
+            if (!declaredCollectionType.isInterface()) {
+              collectionTypeToInstantiate = declaredCollectionType;
+            }
+            else if (List.class.isAssignableFrom(declaredCollectionType)) {
+              collectionTypeToInstantiate = ArrayList.class;
+            }
+            else if (Set.class.isAssignableFrom(declaredCollectionType)) {
+              collectionTypeToInstantiate = HashSet.class;
+            }
+            else if (OrderedMap.class.isAssignableFrom(declaredCollectionType)) {
+              collectionTypeToInstantiate = LinkedHashMap.class;
+            }
+            else if (Map.class.isAssignableFrom(declaredCollectionType)) {
+              collectionTypeToInstantiate = HashMap.class;
+            }
+            else if (Collection.class.isAssignableFrom(declaredCollectionType)) {
+              collectionTypeToInstantiate = ArrayList.class;
+            }
+            else {
+              throw new RuntimeException("Don't know how to instantiate a collection of " + declaredCollectionType);
+            }
+            return Stmt.nestedCall(Stmt.newObject(collectionTypeToInstantiate)).returnValue();
           }
 
           // allow SnapshotMaker default (read value and create snapshot)
