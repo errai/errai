@@ -22,20 +22,32 @@ package org.jboss.errai.bus.client.framework;
 public class DeferredSubscription implements Subscription {
   private volatile Subscription subscription;
 
+  // allows for deferred cancelling of the subscription
+  private volatile boolean cancelled;
+
   public DeferredSubscription() {
   }
 
   @Override
   public void remove() {
-    if (subscription == null) throw new IllegalStateException("subscription not yet attached");
-    subscription.remove();
+    if (subscription == null) {
+      this.cancelled = true;
+    }
+    else {
+      subscription.remove();
+    }
   }
 
   public void attachSubscription(Subscription subscription) {
     if (this.subscription != null) {
       throw new IllegalStateException("subscription already attached.");
     }
-    this.subscription = subscription;
+    else if (cancelled) {
+      // remove() was called before attachSubscription() so we remove the subscription now.
+      subscription.remove();
+    }
+    else {
+      this.subscription = subscription;
+    }
   }
-
 }
