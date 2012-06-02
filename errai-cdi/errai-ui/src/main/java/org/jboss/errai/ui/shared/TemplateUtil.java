@@ -10,7 +10,7 @@ import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HasHTML;
+import com.google.gwt.user.client.ui.HasText;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -49,7 +49,7 @@ public final class TemplateUtil {
         field.getElement().setAttribute(node.getNodeName(), node.getNodeValue());
       }
       parentElement.replaceChild(field.getElement(), element);
-      if (field instanceof HasHTML) {
+      if (field instanceof HasText) {
         NodeList<Node> children = element.getChildNodes();
         for (int i = 0; i < children.getLength(); i++) {
           field.getElement().appendChild(children.getItem(i));

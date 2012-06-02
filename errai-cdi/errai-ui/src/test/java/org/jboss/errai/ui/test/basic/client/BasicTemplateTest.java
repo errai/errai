@@ -52,7 +52,7 @@ public class BasicTemplateTest extends AbstractErraiCDITest {
     BasicTemplateTestApp app = IOC.getBeanManager().lookupBean(BasicTemplateTestApp.class).getInstance();
 
     Anchor c4comp = app.getComponent().getC4();
-    assertEquals("Inner HTML should be preserved when component implements ", "<div>LinkHTML</div>", c4comp.getHTML());
+    assertEquals("Inner HTML should be preserved when component implements ", "<span>LinkHTML</span>", c4comp.getHTML());
     Element c4 = c4comp.getElement();
     assertEquals("c4", c4.getAttribute("data-field"));
     assertEquals("blah", c4.getAttribute("href"));
