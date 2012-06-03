@@ -3,11 +3,11 @@ package org.jboss.errai.ui.shared;
 import com.google.gwt.dom.client.Element;
 
 public class Visit {
-  public static <T> VisitContext<T> accept(Element root, Visitor<T> visitor) {
-    return accept(new VisitContextImpl<T>(), root, visitor);
+  public static <T> VisitContext<T> breadthFirst(Element root, Visitor<T> visitor) {
+    return breadthFirst(new VisitContextImpl<T>(), root, visitor);
   }
 
-  private static <T> VisitContext<T> accept(VisitContextImpl<T> context, Element root, Visitor<T> visitor) {
+  private static <T> VisitContext<T> breadthFirst(VisitContextImpl<T> context, Element root, Visitor<T> visitor) {
     if (root == null)
       throw new IllegalArgumentException("Root Element to visit must not be null.");
 
@@ -19,7 +19,7 @@ public class Visit {
     current = current.getFirstChildElement();
 
     while (current != null && !context.isVisitComplete()) {
-      accept(context, current, visitor);
+      breadthFirst(context, current, visitor);
       current = current.getNextSiblingElement();
     }
 

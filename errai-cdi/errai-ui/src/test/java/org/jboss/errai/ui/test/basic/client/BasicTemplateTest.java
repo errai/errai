@@ -56,7 +56,7 @@ public class BasicTemplateTest extends AbstractErraiCDITest {
     Element c4 = c4comp.getElement();
     assertEquals("c4", c4.getAttribute("data-field"));
     assertEquals("blah", c4.getAttribute("href"));
-    assertEquals("DIV", c4.getFirstChildElement().getTagName());
+    assertEquals("SPAN", c4.getFirstChildElement().getTagName());
     assertEquals("LinkHTML", c4.getFirstChildElement().getInnerHTML());
   }
 
@@ -66,6 +66,8 @@ public class BasicTemplateTest extends AbstractErraiCDITest {
 
     Anchor c5 = app.getComponent().getC5();
     Image c6 = app.getComponent().getC6();
+
+    System.out.println("DUMPING: " + Document.get().getElementById("root").getInnerHTML());
 
     assertEquals(c6.getElement(), c5.getElement().getFirstChildElement());
   }

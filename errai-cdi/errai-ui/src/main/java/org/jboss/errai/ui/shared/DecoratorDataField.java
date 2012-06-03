@@ -1,7 +1,7 @@
 package org.jboss.errai.ui.shared;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,8 +33,7 @@ public class DecoratorDataField extends IOCDecoratorExtension<DataField> {
   public List<? extends Statement> generateDecorator(InjectableInstance<DataField> ctx) {
 
     Statement instance = ctx.getValueStatement();
-    if(ctx.getType().isAssignableTo(Element.class))
-    {
+    if (ctx.getType().isAssignableTo(Element.class)) {
       instance = ObjectBuilder.newInstanceOf(ElementWrapperWidget.class).withParameters(instance);
     }
     String name = getTemplateDataFieldName(ctx.getAnnotation(), ctx.getMemberName());
@@ -59,17 +58,41 @@ public class DecoratorDataField extends IOCDecoratorExtension<DataField> {
    * Get the map of {@link DataField} names and {@link Statement} instances.
    */
   @SuppressWarnings("unchecked")
-  public static Map<String, Statement> dataFieldMap(InjectableInstance<?> ctx, MetaClass templateType) {
+  private static Map<String, Statement> dataFieldMap(InjectableInstance<?> ctx, MetaClass templateType) {
     String dataFieldMapName = dataFieldMapName(templateType);
 
     Map<String, Statement> dataFields = (Map<String, Statement>) ctx.getInjectionContext().getAttribute(
             dataFieldMapName);
     if (dataFields == null) {
-      dataFields = new HashMap<String, Statement>();
+      dataFields = new LinkedHashMap<String, Statement>();
       ctx.getInjectionContext().setAttribute(dataFieldMapName, dataFields);
     }
 
     return dataFields;
+  }
+
+  /**
+   * Get the aggregate map of {@link DataField} names and {@link Statement}
+   * instances for the given {@link MetaClass} type and all ancestors returned
+   * by {@link MetaClass#getSuperClass()}.
+   */
+  @SuppressWarnings("unchecked")
+  public static Map<String, Statement> aggregateDataFieldMap(InjectableInstance<?> ctx, MetaClass templateType) {
+
+    Map<String, Statement> result = new LinkedHashMap<String, Statement>();
+
+    if (templateType.getSuperClass() != null) {
+      result.putAll(aggregateDataFieldMap(ctx, templateType.getSuperClass()));
+    }
+
+    String dataFieldMapName = dataFieldMapName(templateType);
+    Map<String, Statement> dataFields = (Map<String, Statement>) ctx.getInjectionContext().getAttribute(
+            dataFieldMapName);
+    if (dataFields != null) {
+      result.putAll(dataFields);
+    }
+
+    return result;
   }
 
   /**

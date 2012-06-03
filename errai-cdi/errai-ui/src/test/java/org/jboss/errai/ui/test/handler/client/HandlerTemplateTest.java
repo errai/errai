@@ -20,6 +20,8 @@ public class HandlerTemplateTest extends AbstractErraiCDITest {
     final HandlerTemplateTestApp app = IOC.getBeanManager().lookupBean(HandlerTemplateTestApp.class).getInstance();
     assertNotNull(app.getComponent());
 
+    System.out.println("DUMPING: " + Document.get().getElementById("root").getInnerHTML());
+    
     assertNotNull(Document.get().getElementById("b1"));
     app.getComponent().getB1().click();
     assertNull(Document.get().getElementById("b1"));

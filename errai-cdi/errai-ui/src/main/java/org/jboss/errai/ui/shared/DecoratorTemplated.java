@@ -4,7 +4,7 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -47,7 +47,6 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.resources.client.ClientBundle;
 import com.google.gwt.resources.client.ClientBundle.Source;
 import com.google.gwt.resources.client.TextResource;
-import com.google.gwt.user.client.ui.HasValue;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -197,7 +196,8 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
      * Merge each field's Widget Element into the DOM in place of the
      * corresponding data-field
      */
-    for (Entry<String, Statement> field : DecoratorDataField.dataFieldMap(ctx, ctx.getType()).entrySet()) {
+    Map<String, Statement> dataFields = DecoratorDataField.aggregateDataFieldMap(ctx, ctx.getType());
+    for (Entry<String, Statement> field : dataFields.entrySet()) {
       builder.append(Stmt.invokeStatic(TemplateUtil.class, "compositeComponentReplace", ctx.getType()
               .getFullyQualifiedName(), getTemplateFileName(ctx.getType()), Cast.to(Widget.class, field.getValue()),
               dataFieldElements, field.getKey()));
@@ -207,7 +207,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
      * Add each field to the Collection of children of the new Composite
      * Template
      */
-    for (Entry<String, Statement> field : DecoratorDataField.dataFieldMap(ctx, ctx.getType()).entrySet()) {
+    for (Entry<String, Statement> field : dataFields.entrySet()) {
       builder.append(Stmt.loadVariable(fieldsVarName).invoke("add", field.getValue()));
     }
 
@@ -216,7 +216,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
      * TODO this should really only bind if the developer has have asked it to be bound.
      */
     if (dataBinderField != null && dataBinderField.isAnnotationPresent(Inject.class)) {
-      for (Entry<String, Statement> field : DecoratorDataField.dataFieldMap(ctx, ctx.getType()).entrySet()) {
+      for (Entry<String, Statement> field : dataFields.entrySet()) {
         builder.append(Stmt.loadVariable("binder").invoke("bind", field.getValue(), field.getKey()));
       }
     }
@@ -266,7 +266,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
             CONSTRUCTED_TEMPLATE_SET_KEY);
 
     if (result == null) {
-      result = new HashMap<MetaClass, BuildMetaClass>();
+      result = new LinkedHashMap<MetaClass, BuildMetaClass>();
       ctx.getInjectionContext().setAttribute(CONSTRUCTED_TEMPLATE_SET_KEY, result);
     }
 

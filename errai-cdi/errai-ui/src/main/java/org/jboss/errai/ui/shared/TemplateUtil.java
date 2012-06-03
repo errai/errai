@@ -1,7 +1,7 @@
 package org.jboss.errai.ui.shared;
 
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.google.gwt.core.client.JsArray;
@@ -52,7 +52,8 @@ public final class TemplateUtil {
       if (field instanceof HasText) {
         NodeList<Node> children = element.getChildNodes();
         for (int i = 0; i < children.getLength(); i++) {
-          field.getElement().appendChild(children.getItem(i));
+          Node child = children.getItem(i);
+          field.getElement().appendChild(child);
         }
       }
     } catch (Exception e) {
@@ -76,7 +77,7 @@ public final class TemplateUtil {
 
     if (rootField != null && !rootField.trim().isEmpty()) {
       System.out.println("Locating root element: " + rootField);
-      VisitContext<Element> context = Visit.accept(parserDiv, new Visitor<Element>() {
+      VisitContext<Element> context = Visit.breadthFirst(parserDiv, new Visitor<Element>() {
         @Override
         public void visit(VisitContextMutable<Element> context, Element element) {
           if (element.hasAttribute("data-field") && element.getAttribute("data-field").equals(rootField)) {
@@ -103,13 +104,13 @@ public final class TemplateUtil {
   }
 
   public static Map<String, Element> getDataFieldElements(final Element templateRoot) {
-    final Map<String, Element> childTemplateElements = new HashMap<String, Element>();
+    final Map<String, Element> childTemplateElements = new LinkedHashMap<String, Element>();
 
     System.out.println("Searching template for fields.");
     // TODO do this as browser split deferred binding using
     // Document.querySelectorAll() -
     // https://developer.mozilla.org/En/DOM/Element.querySelectorAll
-    Visit.accept(templateRoot, new Visitor<Object>() {
+    Visit.breadthFirst(templateRoot, new Visitor<Object>() {
       @Override
       public void visit(VisitContextMutable<Object> context, Element element) {
         if (element.hasAttribute("data-field")) {

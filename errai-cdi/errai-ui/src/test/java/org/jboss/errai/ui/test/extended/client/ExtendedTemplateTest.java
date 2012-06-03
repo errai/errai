@@ -18,13 +18,16 @@ public class ExtendedTemplateTest extends AbstractErraiCDITest {
     ExtendedTemplateTestApp app = IOC.getBeanManager().lookupBean(ExtendedTemplateTestApp.class).getInstance();
     assertNotNull(app.getComponent());
 
-    System.out.println("DUMPING: " + Document.get().getElementById("root").getInnerHTML());
+    System.out.println("DUMPING: " + Document.get().getBody().getInnerHTML());
 
     assertNotNull(Document.get().getElementById("root"));
     assertNotNull(Document.get().getElementById("c1"));
+    assertEquals("This will be rendered inside anchor", Document.get().getElementById("c1").getInnerText());
     assertNotNull(Document.get().getElementById("c2"));
+    assertEquals("This will be rendered inside label c2", Document.get().getElementById("c2").getInnerText());
     assertEquals("DIV", Document.get().getElementById("c2").getTagName());
     assertNotNull(Document.get().getElementById("c3"));
+    assertEquals("This will be rendered inside label c3", Document.get().getElementById("c3").getInnerText());
 
     assertNotNull("Field in base template should be initialized", app.getComponent().getC2Base());
     assertFalse("Field in base template should not be attached", app.getComponent().getC2Base().isAttached());
