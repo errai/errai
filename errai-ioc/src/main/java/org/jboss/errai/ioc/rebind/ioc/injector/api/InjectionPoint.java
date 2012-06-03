@@ -45,8 +45,16 @@ public class InjectionPoint<T> {
   protected Injector injector;
   protected InjectionContext injectionContext;
 
-  public InjectionPoint(T annotation, TaskType taskType, MetaConstructor constructor, MetaMethod method,
-                        MetaField field, MetaClass type, MetaParameter parm, Injector injector, InjectionContext injectionContext) {
+  public InjectionPoint(final T annotation,
+                        final TaskType taskType,
+                        final MetaConstructor constructor,
+                        final MetaMethod method,
+                        final MetaField field,
+                        final MetaClass type,
+                        final MetaParameter parm,
+                        final Injector injector,
+                        final InjectionContext injectionContext) {
+
     this.annotation = annotation;
     this.taskType = taskType;
     this.constructor = constructor;
@@ -79,7 +87,9 @@ public class InjectionPoint<T> {
   }
 
   public MetaClass getType() {
-    if (type != null) return type;
+    if (type != null) {
+      return type;
+    }
 
     switch (taskType) {
       case PrivateField:

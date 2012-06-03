@@ -105,7 +105,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           = new ArrayList<SubscribeListener>();
 
   /* ArrayList of all unsubscription listeners */
-  private List<UnsubscribeListener> onUnsubscribeHooks
+  private final List<UnsubscribeListener> onUnsubscribeHooks
           = new ArrayList<UnsubscribeListener>();
 
   /* Used to build the HTTP POST request */
@@ -930,8 +930,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 // end of FinishStateSync Timer
               }
             }.schedule(5);
-
-
             break;
 
           case SessionExpired:
@@ -952,7 +950,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
             init();
             setReinit(false);
-
             break;
 
           case WebsocketChannelVerify:
@@ -980,7 +977,6 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 InitVotes.voteFor(ClientMessageBus.class);
               }
             }.schedule(50);
-
             break;
 
           case WebsocketNegotiationFailed:

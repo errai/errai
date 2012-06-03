@@ -63,12 +63,12 @@ import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
  */
 @CodeDecorator
 public class ObservesExtension extends IOCDecoratorExtension<Observes> {
-  public ObservesExtension(Class<Observes> decoratesWith) {
+  public ObservesExtension(final Class<Observes> decoratesWith) {
     super(decoratesWith);
   }
 
   @Override
-  public List<? extends Statement> generateDecorator(InjectableInstance<Observes> instance) {
+  public List<? extends Statement> generateDecorator(final InjectableInstance<Observes> instance) {
     final Context ctx = instance.getInjectionContext().getProcessingContext().getContext();
     final MetaMethod method = instance.getMethod();
     final MetaParameter parm = instance.getParm();
@@ -109,20 +109,18 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
             .publicOverridesMethod("toString")
             ._(Stmt.load("Observer: " + parmClassName + " " + Arrays.toString(qualifiers)).returnValue());
 
-
     final List<Statement> statements = new ArrayList<Statement>();
 
     // create the destruction callback to deregister the service when the bean is destroyed.
     final String subscrVar = InjectUtil.getUniqueVarName();
 
 
-    Statement subscribeStatement =
+    final Statement subscribeStatement =
             Stmt.declareVariable(Subscription.class).asFinal().named(subscrVar)
                     .initializeWith(Stmt.create(ctx).invokeStatic(CDI.class, "subscribe", parmClassName,
                             callBackBlock.finish().finish()));
 
     statements.add(subscribeStatement);
-
 
     // create the destruction callback to deregister the service when the bean is destroyed.
 
@@ -136,7 +134,6 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
 
 
     for (Class<?> cls : EnvUtil.getAllPortableConcreteSubtypes(parm.getType().asClass())) {
-
       final String subscrHandle = InjectUtil.getUniqueVarName();
       statements.add(Stmt.declareVariable(Subscription.class).asFinal().named(subscrHandle)
               .initializeWith(Stmt.nestedCall(bus).invoke("subscribe", CDI.getSubjectNameByType(cls.getName()),
@@ -144,7 +141,7 @@ public class ObservesExtension extends IOCDecoratorExtension<Observes> {
       destroyMeth.append(Stmt.loadVariable(subscrHandle).invoke("remove"));
     }
 
-    Statement destructionCallback = Stmt.create().loadVariable("context").invoke("addDestructionCallback",
+    final Statement destructionCallback = Stmt.create().loadVariable("context").invoke("addDestructionCallback",
             Refs.get(instance.getInjector().getVarName()), destroyMeth.finish().finish());
 
     statements.add(destructionCallback);

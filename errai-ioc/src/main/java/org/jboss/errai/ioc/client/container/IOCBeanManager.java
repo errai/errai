@@ -75,7 +75,6 @@ public class  IOCBeanManager {
     }
   }
 
-
   /**
    * Destroy a bean and all other beans associated with its creational context in the bean manager.
    *
@@ -109,7 +108,7 @@ public class  IOCBeanManager {
    * @param ref the reference to the bean
    * @return returns true if under management
    */
-  public boolean isManaged(Object ref) {
+  public boolean isManaged(final Object ref) {
     return activeManagedBeans.containsKey(getActualBeanReference(ref));
   }
 
@@ -122,7 +121,7 @@ public class  IOCBeanManager {
    *         is not a proxy, the same instance passed to the method is returned.
    * @see #isProxyReference(Object)
    */
-  public Object getActualBeanReference(Object ref) {
+  public Object getActualBeanReference(final Object ref) {
     if (isProxyReference(ref)) {
       return proxyLookupForManagedBeans.get(ref);
     }
@@ -138,15 +137,15 @@ public class  IOCBeanManager {
    * @return returns true if the specified reference is itself a proxy.
    * @see #getActualBeanReference(Object)
    */
-  public boolean isProxyReference(Object ref) {
+  public boolean isProxyReference(final Object ref) {
     return proxyLookupForManagedBeans.containsKey(ref);
   }
 
-  void addProxyReference(Object proxyRef, Object realRef) {
+  void addProxyReference(final Object proxyRef, final Object realRef) {
     proxyLookupForManagedBeans.put(proxyRef, realRef);
   }
 
-  void addDestructionCallbacks(Object ref, List<Tuple<Object, DestructionCallback>> callbacks) {
+  void addDestructionCallbacks(final Object ref, final List<Tuple<Object, DestructionCallback>> callbacks) {
     activeManagedBeans.put(ref, callbacks);
   }
 
@@ -171,8 +170,8 @@ public class  IOCBeanManager {
    * @return A list of all the beans that match the specified type. Returns an empty list if there is
    *         no matching type.
    */
-  public Collection<IOCBeanDef> lookupBeans(Class<?> type) {
-    List<IOCBeanDef> beanList = beanMap.get(type);
+  public Collection<IOCBeanDef> lookupBeans(final Class<?> type) {
+    final List<IOCBeanDef> beanList = beanMap.get(type);
     if (beanList == null) {
       return Collections.emptyList();
     }
@@ -193,7 +192,7 @@ public class  IOCBeanManager {
    *         qualifiers match or if more than one bean  matches.
    */
   @SuppressWarnings("unchecked")
-  public <T> IOCBeanDef<T> lookupBean(Class<T> type, Annotation... qualifiers) {
+  public <T> IOCBeanDef<T> lookupBean(final Class<T> type, final Annotation... qualifiers) {
     final List<IOCBeanDef> beanList = beanMap.get(type);
     if (beanList == null) {
       return null;

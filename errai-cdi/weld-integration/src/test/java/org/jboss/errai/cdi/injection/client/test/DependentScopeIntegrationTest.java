@@ -16,6 +16,8 @@
 
 package org.jboss.errai.cdi.injection.client.test;
 
+import java.lang.annotation.RetentionPolicy;
+import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -62,10 +64,10 @@ public class DependentScopeIntegrationTest extends AbstractErraiCDITest {
     final ApplicationScopedBean beanA = IOC.getBeanManager()
             .lookupBean(ApplicationScopedBean.class).getInstance();
 
-    DependentScopedBean b1 = beanA.getBean1();
-    DependentScopedBean b2 = beanA.getBean2();
-    DependentScopedBean b3 = beanA.getBean3();
-    DependentScopedBeanWithDependencies b4 = beanA.getBeanWithDependencies();
+    final DependentScopedBean b1 = beanA.getBean1();
+    final DependentScopedBean b2 = beanA.getBean2();
+    final DependentScopedBean b3 = beanA.getBean3();
+    final DependentScopedBeanWithDependencies b4 = beanA.getBeanWithDependencies();
 
     assertTrue("dependent scoped semantics broken", b2.getInstance() > b1.getInstance());
     assertTrue("dependent scoped semantics broken", b3.getInstance() > b2.getInstance());

@@ -27,8 +27,8 @@ import java.util.Random;
  * @author Mike Brock
  */
 public class SecureHashUtil {
-  final static String secureRandomAlgorithm = "SHA1PRNG";
-  final static SecureRandom random;
+  private final static String secureRandomAlgorithm = "SHA1PRNG";
+  private final static SecureRandom random;
 
   static {
     try {
@@ -67,7 +67,7 @@ public class SecureHashUtil {
    * @return a hex string representation of the hash.
    */
   public static String nextSecureHash(final String algorithm, final byte[]... additionalSeed) {
-    byte[][] seeds;
+    final byte[][] seeds;
     if (additionalSeed != null) {
       seeds = new byte[additionalSeed.length + 1][];
       System.arraycopy(additionalSeed, 0, seeds, 0, additionalSeed.length);

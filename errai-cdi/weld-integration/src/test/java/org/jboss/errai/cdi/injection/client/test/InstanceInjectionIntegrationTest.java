@@ -69,20 +69,4 @@ public class InstanceInjectionIntegrationTest extends AbstractErraiCDITest {
     assertNotNull(b1.getBeanB());
     assertTrue(b1.getBeanB().isPostConstr());
   }
-
-  public void testQualifierBasedInjection() {
-    final QaulParamDependentBeanApples instanceA
-            = getBeanManager().lookupBean(QaulParamDependentBeanApples.class).getInstance();
-
-    assertNotNull("bean is null", instanceA);
-    assertTrue("incorrect instance injected",
-            getBeanManager().getActualBeanReference(instanceA.getCommonInterfaceB()) instanceof QualParmAppScopeBeanApples);
-
-    final QaulParamDependentBeanOranges instanceB
-            = getBeanManager().lookupBean(QaulParamDependentBeanOranges.class).getInstance();
-
-    assertNotNull("bean is null", instanceB);
-    assertTrue("incorrect instance injected",
-            getBeanManager().getActualBeanReference(instanceB.getCommonInterfaceB()) instanceof QualParmAppScopeBeanOranges);
-  }
 }
