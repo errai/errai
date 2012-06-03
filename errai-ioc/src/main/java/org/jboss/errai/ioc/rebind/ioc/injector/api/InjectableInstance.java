@@ -101,11 +101,6 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
 
   }
 
-  public Statement getBeanValueStatement() {
-    return Stmt.loadVariable("context")
-            .invoke("getBeanInstance", getType(), getQualifiers());
-  }
-
   /**
    * Returns an instance of a {@link Statement} which represents the value associated for injection at this
    * InjectionPoint.
@@ -136,11 +131,15 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
                 stmt);
 
       case Parameter:
-
-       return Stmt.loadVariable("context").invoke("getBeanReference",
-               parm.getType(),
-               InjectUtil.getQualifiersFromAnnotationsAsArray(parm.getAnnotations()));
-
+        final Statement inlineStmt = injectionContext.getInlineBeanReference(parm);
+        if (inlineStmt == null) {
+          return Stmt.loadVariable("context").invoke("getBeanInstance",
+                  parm.getType(),
+                  InjectUtil.getQualifiersFromAnnotationsAsArray(parm.getAnnotations()));
+        }
+        else {
+          return inlineStmt;
+        }
       case Type:
         return Refs.get(getTargetInjector().getVarName());
 

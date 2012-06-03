@@ -74,7 +74,9 @@ public class DecoratorTask extends InjectionTask {
         case Type:
           anno = type.getAnnotation(dec.decoratesWith());
           break;
-
+        case Parameter:
+          anno = parm.getAnnotation(dec.decoratesWith());
+          break;
       }
 
       for (Statement stmt : dec.generateDecorator(new InjectableInstance(anno, taskType, constructor, method, field, type,

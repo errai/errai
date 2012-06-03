@@ -20,11 +20,13 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 
+import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.meta.HasAnnotations;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
+import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.util.PrivateAccessType;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.common.client.framework.Assert;
@@ -77,11 +79,12 @@ public class InjectionContext {
   private final Multimap<ElementType, Class<? extends Annotation>> decoratorsByElementType
           = HashMultimap.create();
 
+  private final Map<MetaParameter, Statement> inlineBeanReferenceMap = new HashMap<MetaParameter, Statement>();
+
   private final Map<MetaField, PrivateAccessType> privateFieldsToExpose = new HashMap<MetaField, PrivateAccessType>();
   private final Collection<MetaMethod> privateMethodsToExpose = new LinkedHashSet<MetaMethod>();
 
   private final Map<String, Object> attributeMap = new HashMap<String, Object>();
-
   private final Set<String> exposedMembers = new HashSet<String>();
 
   private final GraphBuilder graphBuilder = new GraphBuilder();
@@ -518,6 +521,14 @@ public class InjectionContext {
 
   public boolean typeContainsGraphCycles(MetaClass type) {
     return knownTypesWithCycles.contains(type.getFullyQualifiedName());
+  }
+
+  public void addInlineBeanReference(MetaParameter ref, Statement statement) {
+    inlineBeanReferenceMap.put(ref, statement);
+  }
+
+  public Statement getInlineBeanReference(MetaParameter ref) {
+    return inlineBeanReferenceMap.get(ref);
   }
 
   public GraphBuilder getGraphBuilder() {

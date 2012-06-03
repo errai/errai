@@ -20,6 +20,7 @@ import org.jboss.errai.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.codegen.exception.InvalidTypeException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.common.client.framework.Assert;
 
 /**
@@ -47,10 +48,15 @@ public class Cast implements Statement {
     String stmt = statement.generate(context);
 
     if (!toType.isPrimitive() && !toType.isAssignableFrom(statement.getType())
-        && !toType.isAssignableTo(statement.getType()) && !toType.isInterface()
-        && !statement.getType().asBoxed().equals(toType)) {
+            && !toType.isAssignableTo(statement.getType()) && !toType.isInterface()
+            && !statement.getType().asBoxed().equals(toType)) {
 
-      throw new InvalidTypeException(statement.getType() + " cannot be cast to " + toType);
+      if (GenUtil.isPermissiveMode()) {
+        return "(" + LoadClassReference.getClassReference(toType, context) + ") " + stmt;
+      }
+      else {
+        throw new InvalidTypeException(statement.getType() + " cannot be cast to " + toType);
+      }
     }
     else if (toType.isAssignableFrom(statement.getType())) {
       return stmt;

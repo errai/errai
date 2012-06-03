@@ -539,6 +539,8 @@ public class InjectUtil {
 
         stmt = getInjectorOrProxy(ctx, injectableInstance, parmTypes[i],
                 ctx.getProcessingContext().getQualifyingMetadataFactory().createFrom(parms[i].getAnnotations()));
+
+        stmt = recordInlineReference(stmt, ctx, parms[i]);
       }
       catch (InjectionFailure e) {
         e.setTarget(method.getDeclaringClass() + "." + method.getName() + DefParameters.from(method)
@@ -568,6 +570,8 @@ public class InjectUtil {
         stmt = getInjectorOrProxy(ctx, injectableInstance, parmTypes[i],
                 ctx.getProcessingContext().getQualifyingMetadataFactory().createFrom(parms[i].getAnnotations()), true);
 
+        stmt = recordInlineReference(stmt, ctx, parms[i]);
+
         ctx.closeProxyIfOpen();
 
       }
@@ -591,6 +595,22 @@ public class InjectUtil {
     }
 
     return parmValues;
+  }
+
+  private static final Statement recordInlineReference(final Statement beanCreationStmt,
+                                                       final InjectionContext ctx,
+                                                       final MetaParameter parm) {
+    final String varName = InjectUtil.getUniqueVarName();
+
+    ctx.getProcessingContext()
+            .append(Stmt.declareVariable(parm.getType()).asFinal().named(varName)
+            .initializeWith(beanCreationStmt));
+
+    final Statement stmt = Refs.get(varName);
+
+    ctx.addInlineBeanReference(parm, stmt);
+
+    return stmt;
   }
 
   public static String getNewInjectorName() {
