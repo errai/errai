@@ -67,7 +67,7 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
   @Override
   public void event(final HttpEvent event) throws IOException, ServletException {
     final HttpServletRequest request = event.getHttpServletRequest();
-    final QueueSession session = sessionProvider.getSession(request.getSession(), request.getHeader("RemoteQueueID"));
+    final QueueSession session = sessionProvider.createOrGetSession(request.getSession(), request.getHeader("RemoteQueueID"));
 
     MessageQueue queue;
     switch (event.getType()) {
@@ -234,7 +234,7 @@ public class JBossCometServlet extends AbstractErraiServlet implements HttpEvent
       buffer.rewind();
     }
 
-    Message msg = createCommandMessage(sessionProvider.getSession(request.getSession(),
+    Message msg = createCommandMessage(sessionProvider.createOrGetSession(request.getSession(),
         request.getHeader(REMOTE_QUEUE_ID_HEADER)), request, sb.toString());
     if (msg != null) {
       try {

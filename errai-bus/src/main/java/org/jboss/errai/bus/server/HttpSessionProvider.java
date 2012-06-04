@@ -34,20 +34,13 @@ import org.jboss.errai.bus.server.util.SecureHashUtil;
 import org.jboss.errai.bus.server.util.ServerLaundryList;
 
 /**
- * <tt>HttpSessionProvider</tt> implements <tt>SessionProvider</tt> as an <tt>HttpSession</tt>. It provides a getter
- * function to obtain the current session.
+ * The SessionProvider for HTTP-based queue sessions.
  */
 public class HttpSessionProvider implements SessionProvider<HttpSession> {
   public static final String HTTP_SESS = "org.jboss.errai.QueueSessions";
 
-  /**
-   * Gets an instance of <tt>QueueSession</tt> using the external session reference given. If there is no available
-   * session, a <tt>QueueSession</tt> is created
-   *
-   * @param externSessRef - the external session reference
-   * @return an instance of <tt>QueueSession</tt>
-   */
-  public QueueSession getSession(final HttpSession externSessRef, final String remoteQueueID) {
+  @Override
+  public QueueSession createOrGetSession(final HttpSession externSessRef, final String remoteQueueID) {
     SessionsContainer sc = (SessionsContainer) externSessRef.getAttribute(HTTP_SESS);
     if (sc == null) {
       externSessRef.setAttribute(HTTP_SESS, sc = new SessionsContainer());
@@ -63,10 +56,6 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
   }
 
   public static class SessionsContainer {
-
-    /**
-     * Share these attributes across all the sub-sessions
-     */
     private final Map<String, Object> sharedAttributes = new HashMap<String, Object>();
     private final Map<String, QueueSession> queueSessions = new HashMap<String, QueueSession>();
 
@@ -80,21 +69,16 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
       return queueSessions.get(remoteQueueId);
     }
 
-    public void remoteSession(final String remoteQueueId) {
+    public void removeSession(final String remoteQueueId) {
       queueSessions.remove(remoteQueueId);
     }
   }
 
-  /**
-   * <tt>HttpSessionWrapper</tt> provides an implementation of <tt>QueueSession</tt>. When trying to obtain a session,
-   * If the reference does not have an HttpSession already, a new session is created using this wrapper class
-   */
   public static class HttpSessionWrapper implements QueueSession, Serializable {
     private final SessionsContainer container;
     private final String parentSessionId;
     private final String sessionId;
     private final String remoteQueueID;
-    private boolean valid = true;
     private List<SessionEndListener> sessionEndListeners;
 
     public HttpSessionWrapper(final SessionsContainer container, final String httpSessionId,
@@ -106,6 +90,7 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
               httpSessionId.getBytes(), remoteQueueID.getBytes());
     }
 
+    @Override
     public String getSessionId() {
       return sessionId;
     }
@@ -115,37 +100,39 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
       return parentSessionId;
     }
 
-    public boolean isValid() {
-      return valid;
-    }
-
+    @Override
     public boolean endSession() {
-      valid = false;
-      container.remoteSession(remoteQueueID);
+      container.removeSession(remoteQueueID);
       fireSessionEndListeners();
       return true;
     }
 
+    @Override
     public void setAttribute(final String attribute, final Object value) {
       container.sharedAttributes.put(attribute, value);
     }
 
+    @Override
     public <T> T getAttribute(final Class<T> type, final String attribute) {
       return (T) container.sharedAttributes.get(attribute);
     }
 
+    @Override
     public Collection<String> getAttributeNames() {
       return container.sharedAttributes.keySet();
     }
 
+    @Override
     public boolean hasAttribute(final String attribute) {
       return container.sharedAttributes.containsKey(attribute);
     }
 
-    public boolean removeAttribute(final String attribute) {
-      return container.sharedAttributes.remove(attribute) != null;
+    @Override
+    public Object removeAttribute(final String attribute) {
+      return container.sharedAttributes.remove(attribute);
     }
 
+    @Override
     public void addSessionEndListener(final SessionEndListener listener) {
       synchronized (this) {
         if (sessionEndListeners == null) {
@@ -173,7 +160,6 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
 
       HttpSessionWrapper that = (HttpSessionWrapper) o;
 
-      if (valid != that.valid) return false;
       if (remoteQueueID != null ? !remoteQueueID.equals(that.remoteQueueID) : that.remoteQueueID != null) return false;
       if (sessionId != null ? !sessionId.equals(that.sessionId) : that.sessionId != null) return false;
 
@@ -184,7 +170,6 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
     public int hashCode() {
       int result = (sessionId != null ? sessionId.hashCode() : 0);
       result = 31 * result + (remoteQueueID != null ? remoteQueueID.hashCode() : 0);
-      result = 31 * result + (valid ? 1 : 0);
       return result;
     }
 
@@ -193,7 +178,6 @@ public class HttpSessionProvider implements SessionProvider<HttpSession> {
       return "HttpSessionWrapper{" +
               ", sessionId='" + sessionId + '\'' +
               ", remoteQueueID='" + remoteQueueID + '\'' +
-              ", valid=" + valid +
               '}';
     }
   }

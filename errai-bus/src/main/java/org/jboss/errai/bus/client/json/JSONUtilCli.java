@@ -139,11 +139,6 @@ public class JSONUtilCli {
     }
 
     @Override
-    public boolean isValid() {
-      return true;
-    }
-
-    @Override
     public boolean endSession() {
       return false;
     }
@@ -169,8 +164,8 @@ public class JSONUtilCli {
     }
 
     @Override
-    public boolean removeAttribute(final String attribute) {
-      return attributes.remove(attribute) != null;
+    public Object removeAttribute(final String attribute) {
+      return attributes.remove(attribute);
     }
 
     @Override

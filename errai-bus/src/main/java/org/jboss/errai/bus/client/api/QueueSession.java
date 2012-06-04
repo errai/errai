@@ -19,81 +19,112 @@ package org.jboss.errai.bus.client.api;
 import java.util.Collection;
 
 /**
- * This interface, <tt>QueueSession</tt>, is a template for creating a queue session with the bus. In practice, the
- * <tt>QueueSession</tt> would be wrapped around an HTTP session. The purpose is to separate Errai from the Servlet API
+ * The combination of a communication channel (identified by an HTTPSession or other communication session, such as an
+ * open WebSocket channel) with an Errai Bus queue ID. An instance of QueueSession identifies a physical communication
+ * link with a specific subject on a remote bus. A single communication link typically has many QueueSession instances
+ * (one per bus subject).
+ * 
+ * <h3>Note on scope of attributes</h3>
+ * <p>
+ * QueueSession provides a map-like facility for storing and retrieving arbitrary object ("attributes") by name. These
+ * attributes are shared among all QueueSession instances that are associated with the same communication channel (for
+ * example, an HTTPSession or a WebSocketChannel).
  */
 public interface QueueSession {
 
   /**
-   * Gets the current session id
-   *
-   * @return the session id
+   * Returns the ID of this session, which uniquely identifies it within the scope of this client (or server for a
+   * server side session). This is <i>not</i> the ID of the underlying wrapped session (for example, it is not a Servlet
+   * Session ID).
+   * 
+   * @return the session id, which is unique within the confines of the present client (or server). Never null.
    */
   public String getSessionId();
 
-
   /**
-   * Get the associated parent session ID for this session instance. For instance, a single authenticated session
-   * may have multiple connections to the bus, with each connection having it's own unique queue session. However,
-   * the parent session ID is common to all of them.
-   *
-   * @return the parent session id
+   * Returns the ID of the session this QueueSession wraps. In the case of a wrapper around an HTTP Session, this method
+   * would return the HTTP Session ID.
+   * 
+   * @return the session ID from the underlying communication layer, or a unique ID synthesized by the framework for
+   *         communication layers that don't have unique session ID's of their own. Never null.
    */
   public String getParentSessionId();
 
   /**
-   * Returns true if the session is still valid
-   *
-   * @return false if the session is not valid
-   */
-  public boolean isValid();
-
-  /**
-   * Closes the session
-   *
-   * @return true if session was closed successfully
+   * Closes this session and notifies the {@link SessionEndListener}s (optional operation; not all QueueSession
+   * implementations are closeable).
+   * 
+   * @return true, if this session was closed and listeners have been notified. In the case of a QueueSession that does
+   *         not implement this operation, listeners are not notified and this method returns false.
    */
   public boolean endSession();
 
   /**
-   * Sets the attribute with the specified value.
-   *
-   * @param attribute - new or old attribute to set
-   * @param value     - new value for attribute
+   * Associates the given value with the given key, replacing the existing value, if any, for the key.
+   * <p>
+   * See the class-level documentation for a note on the scope of these attributes.
+   * 
+   * @param attribute
+   *          the name (key) of the attribute. Not null.
+   * @param value
+   *          new value for attribute. Null is permitted.
    */
   public void setAttribute(String attribute, Object value);
 
   /**
-   * Gets an attribute, if it exists.
-   *
-   * @param type      - the type of to cast the attribute's value to
-   * @param attribute - the attribute's name
-   * @param <T>       - the type
-   * @return the value of the attribute as the specified <tt>type</tt>
+   * Returns the value associated with the given key.
+   * <p>
+   * See the class-level documentation for a note on the scope of these attributes.
+   * 
+   * @param type
+   *          the type to attempt to cast the attribute's value to
+   * @param attribute
+   *          the name (key) of the attribute. Not null.
+   * @param <T>
+   *          the type
+   * @return the value of the attribute, as the specified type. Returns null if the attribute's value is null, or if no
+   *         such attribute exists. Use {@link #hasAttribute(String)} to test for the existence of a null-valued
+   *         attribute.
    */
   public <T> T getAttribute(Class<T> type, String attribute);
 
+  /**
+   * Returns the names of all attributes within this session.
+   * <p>
+   * See the class-level documentation for a note on the scope of these attributes.
+   * 
+   * @return collection of attribute names.
+   */
   public Collection<String> getAttributeNames();
 
   /**
-   * Returns true if the specified attribute exists
-   *
-   * @param attribute - the attribute to search for
-   * @return true if it exists
+   * Returns true if the specified attribute exists.
+   * <p>
+   * See the class-level documentation for a note on the scope of these attributes.
+   * 
+   * @param attribute
+   *          the attribute name to search for.
+   * @return true if it exists, otherwise false
    */
   public boolean hasAttribute(String attribute);
 
   /**
-   * Removes the specified attribute
-   *
-   * @param attribute - the attribute to remove
+   * Removes the specified attribute from this session.
+   * <p>
+   * See the class-level documentation for a note on the scope of these attributes.
+   * 
+   * @param attribute
+   *          the name of the attribute to remove.
+   * @return the attribute value previously associated with the given name (which may be null). Returns null in case the
+   *         attribute did not exist.
    */
-  public boolean removeAttribute(String attribute);
+  public Object removeAttribute(String attribute);
 
   /**
-   * Register a listener to be fired when the session ends.
-   *
-   * @param listener The listener to be registered
+   * Registers a listener that will notified when this session ends.
+   * 
+   * @param listener
+   *          the listener to be notified at session end.
    */
   public void addSessionEndListener(SessionEndListener listener);
-  }
+}

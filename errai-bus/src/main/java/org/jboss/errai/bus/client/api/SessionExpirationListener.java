@@ -19,6 +19,8 @@ package org.jboss.errai.bus.client.api;
 import org.jboss.errai.bus.client.framework.ClientMessageBus;
 
 /**
+ * //FIXME document and re-visit the concept of session expiration!
+ * 
  * Callback interface for receiving notifications that the connection to the
  * server has become unavailable.
  *

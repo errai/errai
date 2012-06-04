@@ -44,7 +44,7 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException,
       IOException {
 
-    final QueueSession session = sessionProvider.getSession(request.getSession(),
+    final QueueSession session = sessionProvider.createOrGetSession(request.getSession(),
         request.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
 
     final MessageQueue queue = service.getBus().getQueue(session);
@@ -105,7 +105,7 @@ public class StandardAsyncServlet extends AbstractErraiServlet {
 
   @Override
   protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-    final QueueSession session = sessionProvider.getSession(request.getSession(),
+    final QueueSession session = sessionProvider.createOrGetSession(request.getSession(),
             request.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
     try {
       service.store(createCommandMessage(session, request));

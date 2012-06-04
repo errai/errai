@@ -16,13 +16,13 @@
 
 package org.jboss.errai.bus.server.util;
 
+import java.util.Collection;
+
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.QueueSession;
 
-import java.util.Collection;
-
 public class SessionContext implements Context {
-  private QueueSession session;
+  private final QueueSession session;
 
   public static SessionContext get(QueueSession session) {
     return new SessionContext(session);
@@ -39,14 +39,17 @@ public class SessionContext implements Context {
     this.session = session;
   }
 
+  @Override
   public void setAttribute(Enum<?> key, Object value) {
     session.setAttribute(key.toString(), value);
   }
 
+  @Override
   public <T> T getAttribute(Class<T> type, Enum<?> key) {
     return session.getAttribute(type, key.toString());
   }
 
+  @Override
   public void setAttribute(Class<?> typeIndexed, Object value) {
     if (session.hasAttribute(typeIndexed.getName())) {
       throw new IllegalStateException("The type-indexed property already exists: " + typeIndexed.getName());
@@ -55,18 +58,22 @@ public class SessionContext implements Context {
     session.setAttribute(typeIndexed.getName(), value);
   }
 
+  @Override
   public <T> T getAttribute(Class<T> type, Class<?> typeIndexed) {
     return session.getAttribute(type, typeIndexed.getName());
   }
 
+  @Override
   public <T> T getAttribute(Class<T> type) {
     return getAttribute(type, type);
   }
 
+  @Override
   public void setAttribute(String param, Object value) {
     session.setAttribute(param, value);
   }
 
+  @Override
   public <T> T getAttribute(Class<T> type, String param) {
     return session.getAttribute(type, param);
   }
@@ -76,19 +83,23 @@ public class SessionContext implements Context {
     return session.hasAttribute(param);
   }
 
+  @Override
   public Collection<String> getAttributeNames() {
     return session.getAttributeNames();
   }
 
-  public boolean removeAttribute(Enum key) {
+  @Override
+  public Object removeAttribute(Enum key) {
     return session.removeAttribute(key.toString());
   }
 
-  public boolean removeAttribute(Class<?> typeIndexed) {
+  @Override
+  public Object removeAttribute(Class<?> typeIndexed) {
     return session.removeAttribute(typeIndexed.getName());
   }
 
-  public boolean removeAttribute(String param) {
+  @Override
+  public Object removeAttribute(String param) {
     return session.removeAttribute(param);
   }
 

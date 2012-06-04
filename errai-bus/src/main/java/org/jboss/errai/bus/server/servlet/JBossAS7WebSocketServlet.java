@@ -101,7 +101,7 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
 
   @Override
   protected void onSocketClosed(WebSocket socket) throws IOException {
-    final QueueSession session = sessionProvider.getSession(socket.getHttpSession(),
+    final QueueSession session = sessionProvider.createOrGetSession(socket.getHttpSession(),
             socket.getSocketID());
 
     final LocalContext localSessionContext = LocalContext.get(session);
@@ -129,7 +129,7 @@ public class JBossAS7WebSocketServlet extends WebSocketServlet {
 
     final String text = ((TextFrame) frame).getText();
 
-    final QueueSession session = sessionProvider.getSession(socket.getHttpSession(),
+    final QueueSession session = sessionProvider.createOrGetSession(socket.getHttpSession(),
             socket.getSocketID());
 
     if (text.length() == 0) return;

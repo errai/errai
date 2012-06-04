@@ -16,16 +16,17 @@
 
 package org.jboss.errai.bus.server;
 
-import junit.framework.TestCase;
-import org.jboss.errai.bus.client.api.QueueSession;
-import org.jboss.errai.bus.client.api.SessionEndListener;
-import org.jboss.errai.bus.server.io.buffers.BufferColor;
-import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Collection;
+
+import junit.framework.TestCase;
+
+import org.jboss.errai.bus.client.api.QueueSession;
+import org.jboss.errai.bus.client.api.SessionEndListener;
+import org.jboss.errai.bus.server.io.buffers.BufferColor;
+import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
 
 /**
  * @author Mike Brock
@@ -42,11 +43,6 @@ public class BusTests extends TestCase {
       @Override
       public String getParentSessionId() {
         return "ParentID";
-      }
-
-      @Override
-      public boolean isValid() {
-        return false;
       }
 
       @Override
@@ -74,8 +70,8 @@ public class BusTests extends TestCase {
       }
 
       @Override
-      public boolean removeAttribute(String attribute) {
-        return false;
+      public Object removeAttribute(String attribute) {
+        return null;
       }
 
       @Override

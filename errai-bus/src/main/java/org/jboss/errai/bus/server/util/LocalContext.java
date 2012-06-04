@@ -16,26 +16,22 @@
 
 package org.jboss.errai.bus.server.util;
 
-import org.jboss.errai.bus.client.api.Message;
-import org.jboss.errai.bus.client.api.QueueSession;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jboss.errai.bus.client.api.Message;
+import org.jboss.errai.bus.client.api.QueueSession;
+
 
 public class LocalContext implements Context {
-  private String context;
-  private SubContext ctx;
-  private QueueSession session;
+  private final String context;
+  private final SubContext ctx;
+  private final QueueSession session;
 
   public static LocalContext get(QueueSession session) {
     return new LocalContext("<NoSession>", session);
   }
-
-//  public static LocalContext get(String contextName, QueueSession session) {
-//    return new LocalContext(contextName, session);
-//  }
 
   public static LocalContext get(Message message) {
     return new LocalContext(message.getSubject(), message.getResource(QueueSession.class, "Session"));
@@ -50,10 +46,12 @@ public class LocalContext implements Context {
     this.ctx = getLocalContext();
   }
 
+  @Override
   public void setAttribute(Enum<?> key, Object value) {
     ctx.setAttribute(key.toString(), value);
   }
 
+  @Override
   public void setAttribute(Class<?> typeIndexed, Object value) {
     if (ctx.hasAttribute(typeIndexed.getName())) {
       throw new IllegalStateException("The type-indexed property already exists: " + typeIndexed.getName());
@@ -62,43 +60,53 @@ public class LocalContext implements Context {
     ctx.setAttribute(typeIndexed.getName(), value);
   }
 
+  @Override
   public void setAttribute(String param, Object value) {
     ctx.setAttribute(param, value);
   }
 
+  @Override
   public <T> T getAttribute(Class<T> type, Enum<?> key) {
     return ctx.getAttribute(type, key.toString());
   }
 
+  @Override
   public <T> T getAttribute(Class<T> type, Class<?> typeIndexed) {
     return ctx.getAttribute(type, typeIndexed.getName());
   }
 
+  @Override
   public <T> T getAttribute(Class<T> type) {
     return getAttribute(type, type);
   }
 
+  @Override
   public <T> T getAttribute(Class<T> type, String param) {
     return ctx.getAttribute(type, param);
   }
 
+  @Override
   public boolean hasAttribute(String param) {
     return ctx.hasAttribute(param);
   }
 
+  @Override
   public Collection<String> getAttributeNames() {
     return ctx.getAttributeNames();
   }
 
-  public boolean removeAttribute(Enum<?> key) {
+  @Override
+  public Object removeAttribute(Enum<?> key) {
     return ctx.removeAttribute(key.toString());
   }
 
-  public boolean removeAttribute(Class<?> typeIndexed) {
+  @Override
+  public Object removeAttribute(Class<?> typeIndexed) {
     return ctx.removeAttribute(typeIndexed.getName());
   }
 
-  public boolean removeAttribute(String param) {
+  @Override
+  public Object removeAttribute(String param) {
     return ctx.removeAttribute(param);
   }
 
@@ -125,7 +133,7 @@ public class LocalContext implements Context {
   }
 
   private static final class SubContext {
-    private Map<String, Object> contextAttributes = new HashMap<String, Object>();
+    private final Map<String, Object> contextAttributes = new HashMap<String, Object>();
 
     public void setAttribute(String attribute, Object value) {
       contextAttributes.put(attribute, value);

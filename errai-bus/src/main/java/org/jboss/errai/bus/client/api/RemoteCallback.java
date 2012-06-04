@@ -19,11 +19,12 @@ package org.jboss.errai.bus.client.api;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 
 /**
- * Callback interface for receiving the response of an RPC call.
- *
+ * Callback interface for receiving the response of an RPC call, regardless of the RPC mechanism.
+ * 
  * @see MessageBuilder#createCall()
  * @see MessageBuilder#createCall(RemoteCallback, Class)
  * @see MessageBuilder#createCall(RemoteCallback, ErrorCallback, Class)
+ * @see the Errai JAX-RS client module
  * @param <R>
  *          type of response the callback expects. Use {@link Void} for methods returning {@code void}.
  */

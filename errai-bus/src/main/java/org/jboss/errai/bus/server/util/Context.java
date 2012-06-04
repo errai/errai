@@ -37,9 +37,9 @@ public interface Context {
 
   public Collection<String> getAttributeNames();
 
-  public boolean removeAttribute(Enum<?> key);
+  public Object removeAttribute(Enum<?> key);
 
-  public boolean removeAttribute(Class<?> typeIndexed);
+  public Object removeAttribute(Class<?> typeIndexed);
 
-  public boolean removeAttribute(String param);
+  public Object removeAttribute(String param);
 }

@@ -52,7 +52,7 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
   @Override
   protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
           throws ServletException, IOException {
-    pollForMessages(sessionProvider.getSession(httpServletRequest.getSession(),
+    pollForMessages(sessionProvider.createOrGetSession(httpServletRequest.getSession(),
             httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER)),
             httpServletRequest, httpServletResponse, true);
   }
@@ -70,7 +70,7 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
   protected void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
           throws ServletException, IOException {
 
-    final QueueSession session = sessionProvider.getSession(httpServletRequest.getSession(),
+    final QueueSession session = sessionProvider.createOrGetSession(httpServletRequest.getSession(),
             httpServletRequest.getHeader(ClientMessageBus.REMOTE_QUEUE_ID_HEADER));
 
     try {

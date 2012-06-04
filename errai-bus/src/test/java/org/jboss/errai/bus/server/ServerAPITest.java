@@ -42,7 +42,7 @@ public class ServerAPITest {
 
     String remoteQueueID = SecureHashUtil.nextSecureHash("SHA1");
 
-    QueueSession queueSession = sessionProvider.getSession(session, remoteQueueID);
+    QueueSession queueSession = sessionProvider.createOrGetSession(session, remoteQueueID);
 
     LaundryListProviderFactory
             .setLaundryListProvider(new LaundryListProvider() {

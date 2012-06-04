@@ -19,6 +19,7 @@ package org.jboss.errai.bus.client.api;
 /**
  * Thrown when a message has not been properly formed and therefore cannot be transmitted.
  */
+@SuppressWarnings("serial")
 public class BadlyFormedMessageException extends RuntimeException {
   public BadlyFormedMessageException(String message) {
     super(message);

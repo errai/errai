@@ -16,15 +16,29 @@
 
 package org.jboss.errai.bus.client.api;
 
-import org.jboss.errai.bus.client.api.QueueSession;
+import org.jboss.errai.common.client.framework.Assert;
 
+
+/**
+ * The event object that is delievered to {@link SessionEndListener}s when a {@link QueueSession} ends.
+ */
 public class SessionEndEvent {
   private final QueueSession session;
 
+  /**
+   * Creates a SessionEndEvent for the given QueueSession.
+   * 
+   * @param session the session that is ending. Not null.
+   */
   public SessionEndEvent(QueueSession session) {
-    this.session = session;
+    this.session = Assert.notNull(session);
   }
 
+  /**
+   * Returns the session that ended.
+   * 
+   * @return the session that ended. Never null.
+   */
   public QueueSession getSession() {
     return session;
   }

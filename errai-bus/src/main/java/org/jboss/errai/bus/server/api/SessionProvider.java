@@ -16,19 +16,26 @@
 
 package org.jboss.errai.bus.server.api;
 
+import javax.servlet.http.HttpSession;
+
 import org.jboss.errai.bus.client.api.QueueSession;
 
 /**
- * This interface, <tt>SessionProvider</tt>, is a template for creating a session provider based on the type of
- * session specified
+ * Allows retrieval and creation of {@link QueueSession}s for a specific type of communication channel.
  */
 public interface SessionProvider<T> {
 
   /**
-   * Gets an instance of <tt>QueueSession</tt> using the external session reference given.
-   *
-   * @param externSessRef - the external session reference
-   * @return an instance of <tt>QueueSession</tt>
+   * Looks up or creates the {@link QueueSession} that identifies a communication channel with a specific queue in a
+   * specific remote Errai Bus.
+   * 
+   * @param externSessRef
+   *          the session object (for example, an {@link HttpSession}) that identifies a communications link to a remote
+   *          Errai Bus.
+   * @param remoteQueueId
+   *          the ID of the queue in the remote bus
+   * @return the QueueSession that identifies the communication link to the given remote queue in the given remote bus.
+   *         If none already exists, one is created.
    */
-  public QueueSession getSession(T externSessRef, String remoteQueueId);
+  public QueueSession createOrGetSession(T externSessRef, String remoteQueueId);
 }
