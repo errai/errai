@@ -5,22 +5,23 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Queue;
 
+import javax.annotation.Nonnull;
+
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 
 /**
  * Test for regression in marshaller generator.
- *
+ * 
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
 @Portable
 public class TestingTickCache implements Iterable<TestingTick> {
 
   /**
-   * The entries in this cache. On the server side, we inject a
-   * ConcurrentLinkedQueue, which supports simultaneous iteration and
-   * modification (because CDI events are dispatched asynchronously).
-   * On the client, it's a plain old LinkedList.
+   * The entries in this cache. On the server side, we inject a ConcurrentLinkedQueue, which supports simultaneous
+   * iteration and modification (because CDI events are dispatched asynchronously). On the client, it's a plain old
+   * LinkedList.
    */
   private final Queue<TestingTick> entries;
 
@@ -34,13 +35,15 @@ public class TestingTickCache implements Iterable<TestingTick> {
    */
   private TestingTick newestEntry;
 
-  public TestingTickCache(@MapsTo("entries") Queue<TestingTick> queueImpl) {
+  // The @Nonnull annotation is there to ensure that multiple annotations can be specified on a constructor parameter
+  // without affecting the behaviour for @MapsTo (see https://issues.jboss.org/browse/ERRAI-312)
+  public TestingTickCache(@Nonnull @MapsTo("entries") Queue<TestingTick> queueImpl) {
     entries = queueImpl;
   }
 
   /**
    * Adds the given tick to this cache, pruning ticks that are older than {@link #timeSpan} milliseconds.
-   *
+   * 
    * @param tick
    *          The tick to add
    */
@@ -61,9 +64,8 @@ public class TestingTickCache implements Iterable<TestingTick> {
   }
 
   /**
-   * Returns an iterator over this cache's entries. The returned iterator will
-   * not throw {@link ConcurrentModificationException} even if entries are added
-   * to the cache during iteration.
+   * Returns an iterator over this cache's entries. The returned iterator will not throw
+   * {@link ConcurrentModificationException} even if entries are added to the cache during iteration.
    */
   @Override
   public Iterator<TestingTick> iterator() {
@@ -88,7 +90,7 @@ public class TestingTickCache implements Iterable<TestingTick> {
 
   /**
    * Returns the newest entry in this cache.
-   *
+   * 
    * @throws NoSuchElementException
    *           if the cache is empty
    */
@@ -132,6 +134,5 @@ public class TestingTickCache implements Iterable<TestingTick> {
       return false;
     return true;
   }
-
 
 }

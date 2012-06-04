@@ -16,12 +16,19 @@
 
 package org.jboss.errai.marshalling.rebind.api.impl.defaultjava;
 
-import org.jboss.errai.codegen.meta.*;
-import org.jboss.errai.marshalling.client.api.Marshaller;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaClassMember;
+import org.jboss.errai.codegen.meta.MetaConstructor;
+import org.jboss.errai.codegen.meta.MetaField;
+import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.marshalling.client.api.annotations.Key;
 import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 import org.jboss.errai.marshalling.client.api.exceptions.InvalidMappingException;
-import org.jboss.errai.marshalling.client.util.EncDecUtil;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
 import org.jboss.errai.marshalling.rebind.api.model.ConstructorMapping;
 import org.jboss.errai.marshalling.rebind.api.model.Mapping;
@@ -32,12 +39,6 @@ import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleConstructorMappin
 import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleFactoryMapping;
 import org.jboss.errai.marshalling.rebind.api.model.impl.WriteMapping;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
-import org.jboss.errai.marshalling.server.marshallers.DefaultArrayMarshaller;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * @author Mike Brock
@@ -60,7 +61,6 @@ public class DefaultJavaDefinitionMapper {
     for (MetaConstructor c : toMap.getConstructors()) {
       if (c.getParameters().length != 0) {
         boolean satisifed = true;
-        FieldScan:
         for (int i = 0; i < c.getParameters().length; i++) {
           Annotation[] annotations = c.getParameters()[i].getAnnotations();
           if (annotations.length == 0) {
@@ -68,11 +68,7 @@ public class DefaultJavaDefinitionMapper {
           }
           else {
             for (Annotation a : annotations) {
-              if (!MapsTo.class.isAssignableFrom(a.annotationType())) {
-                satisifed = false;
-                break FieldScan;
-              }
-              else {
+              if (MapsTo.class.isAssignableFrom(a.annotationType())) {
                 MapsTo mapsTo = (MapsTo) a;
                 String key = mapsTo.value();
                 simpleConstructorMapping.mapParmToIndex(key, i, c.getParameters()[i].getType());
@@ -113,7 +109,6 @@ public class DefaultJavaDefinitionMapper {
       for (MetaMethod method : toMap.getDeclaredMethods()) {
         if (method.isStatic()) {
           boolean satisifed = true;
-          FieldScan:
           for (int i = 0; i < method.getParameters().length; i++) {
             Annotation[] annotations = method.getParameters()[i].getAnnotations();
             if (annotations.length == 0) {
@@ -121,11 +116,7 @@ public class DefaultJavaDefinitionMapper {
             }
             else {
               for (Annotation a : annotations) {
-                if (!MapsTo.class.isAssignableFrom(a.annotationType())) {
-                  satisifed = false;
-                  break FieldScan;
-                }
-                else {
+                if (MapsTo.class.isAssignableFrom(a.annotationType())) {
                   MapsTo mapsTo = (MapsTo) a;
                   String key = mapsTo.value();
                   simpleFactoryMapping.mapParmToIndex(key, i, method.getParameters()[i].getType());
@@ -233,7 +224,7 @@ public class DefaultJavaDefinitionMapper {
 
         definition.addMemberMapping(new MemberMapping() {
           private MetaClass type = (field.getType().isArray() ? field.getType() : field.getType());
-          private MetaClass targetType = type;
+          private final MetaClass targetType = type;
 
           @Override
           public MetaClassMember getBindingMember() {
