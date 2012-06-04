@@ -74,8 +74,11 @@ public class InjectUtil {
   public static ConstructionStrategy getConstructionStrategy(final Injector injector, final InjectionContext ctx) {
     final MetaClass type = injector.getInjectedType();
 
-    final List<MetaConstructor> constructorInjectionPoints = scanForConstructorInjectionPoints(ctx, type);
-    final List<InjectionTask> injectionTasks = scanForTasks(injector, ctx, type);
+    final List<InjectionTask> injectionTasks = new ArrayList<InjectionTask>();
+    final List<MetaConstructor> constructorInjectionPoints = scanForConstructorInjectionPoints(injector, ctx, type, injectionTasks);
+
+    injectionTasks.addAll(scanForTasks(injector, ctx, type));
+
     final List<MetaMethod> postConstructTasks = scanForPostConstruct(type);
     final List<MetaMethod> preDestroyTasks = scanForPreDestroy(type);
 
@@ -349,12 +352,40 @@ public class InjectUtil {
     return accumulator;
   }
 
-  private static List<MetaConstructor> scanForConstructorInjectionPoints(InjectionContext ctx, MetaClass type) {
+  private static List<MetaConstructor> scanForConstructorInjectionPoints(final Injector injector,
+                                                                         final InjectionContext ctx,
+                                                                         final MetaClass type,
+                                                                         final List<InjectionTask> tasks) {
     final List<MetaConstructor> accumulator = new LinkedList<MetaConstructor>();
+    final Set<Class<? extends Annotation>> decorators = ctx.getDecoratorAnnotations();
+
 
     for (MetaConstructor cns : type.getConstructors()) {
       if (isInjectionPoint(ctx, cns)) {
         accumulator.add(cns);
+      }
+
+      ElementType[] elTypes;
+      for (Class<? extends Annotation> a : decorators) {
+        elTypes = a.isAnnotationPresent(Target.class) ? a.getAnnotation(Target.class).value()
+                : new ElementType[]{ElementType.FIELD};
+
+        for (ElementType elType : elTypes) {
+          switch (elType) {
+            case CONSTRUCTOR:
+              if (cns.isAnnotationPresent(a)) {
+                tasks.add(new DecoratorTask(injector, cns, ctx.getDecorator(a)));
+              }
+              break;
+            case PARAMETER:
+              for (MetaParameter parameter : cns.getParameters()) {
+                if (parameter.isAnnotationPresent(a)) {
+                  DecoratorTask task = new DecoratorTask(injector, parameter, ctx.getDecorator(a));
+                  tasks.add(task);
+                }
+              }
+          }
+        }
       }
     }
 

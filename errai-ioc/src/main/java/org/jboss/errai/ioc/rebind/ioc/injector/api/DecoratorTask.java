@@ -19,6 +19,7 @@ package org.jboss.errai.ioc.rebind.ioc.injector.api;
 
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
@@ -37,6 +38,11 @@ public class DecoratorTask extends InjectionTask {
 
   public DecoratorTask(Injector injector, MetaField field, IOCDecoratorExtension[] decs) {
     super(injector, field);
+    this.IOCExtensions = decs;
+  }
+
+  public DecoratorTask(Injector injector, MetaConstructor constr, IOCDecoratorExtension[] decs) {
+    super(injector, constr);
     this.IOCExtensions = decs;
   }
 
