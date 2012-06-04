@@ -103,11 +103,7 @@ public class ErraiEntityManagerGenerator extends Generator {
 
     GWTUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
 
-    Map<String, String> properties = new HashMap<String, String>();
-    properties.put("hibernate.dialect", "org.hibernate.dialect.HSQLDialect");
-    properties.put("javax.persistence.validation.mode", "none");
-    EntityManagerFactory emf = Persistence.createEntityManagerFactory("ErraiJpaClientTests", properties);
-    EntityManager em = emf.createEntityManager();
+    EntityManager em = createHibernateEntityManager();
     Metamodel mm = em.getMetamodel();
 
     final ClassStructureBuilder<?> classBuilder = Implementations.extend(ErraiEntityManager.class, "GeneratedErraiEntityManager");
@@ -116,231 +112,11 @@ public class ErraiEntityManagerGenerator extends Generator {
     MethodBlockBuilder<?> pmm = classBuilder.protectedMethod(void.class, "populateMetamodel");
 
     for (final EntityType<?> et : mm.getEntities()) {
-      MetaClass met = MetaClassFactory.get(et.getJavaType());
 
       // first, create a variable for the EntityType
-      pmm.append(Stmt.codeComment(
-          "**\n" +
-          "** EntityType for " + et.getJavaType().getName() + "\n" +
-          "**"));
-      String entityTypeVarName = entitySnapshotVarName(et.getJavaType());
+      String entityTypeVarName = generateErraiEntityType(et, pmm);
 
-      AnonymousClassStructureBuilder entityTypeSubclass =
-              Stmt.newObject(MetaClassFactory.get(ErraiEntityType.class, new ParameterizedEntityType(et.getJavaType())))
-              .extend();
-
-      entityTypeSubclass.publicMethod(et.getJavaType(), "newInstance")
-              .append(Stmt.nestedCall(Stmt.newObject(et.getJavaType())).returnValue())
-              .finish();
-
-      generateLifecycleEventDeliveryMethods(met, entityTypeSubclass);
-
-      pmm.append(Stmt.declareVariable(ErraiEntityType.class).asFinal()
-          .named(entityTypeVarName)
-          .initializeWith(entityTypeSubclass.finish().withParameters(et.getName(), et.getJavaType())));
-
-      MethodBodyCallback methodBodyCallback = new MethodBodyCallback() {
-
-        @Override
-        public Statement generateMethodBody(MetaMethod method, Object o,
-                ClassStructureBuilder<?> containingClassBuilder) {
-          // provide reference to declaring type (et) from its attributes
-          if (o instanceof Attribute
-                  && method.getName().equals("getDeclaringType")
-                  && ((Attribute<?, ?>) o).getDeclaringType() == et) {
-            return Stmt.loadVariable(entitySnapshotVarName(et.getJavaType())).returnValue();
-          }
-
-          // provide get method
-          if (o instanceof Attribute
-                  && method.getName().equals("get")) {
-            Attribute<?, ?> attr = (Attribute<?, ?>) o;
-
-            String entityInstanceParam = method.getParameters()[0].getName();
-
-            if (attr.getJavaMember() instanceof Field) {
-
-              // First we need to generate an accessor for the field.
-              MetaField field = MetaClassFactory.get((Field) attr.getJavaMember());
-              PrivateAccessUtil.addPrivateAccessStubs(PrivateAccessType.Both, true, containingClassBuilder, field, new Modifier[] {});
-
-              // Now generate a call to the private accessor method for the field in question.
-              return Stmt.loadVariable("this")
-                      .invoke(PrivateAccessUtil.getPrivateFieldInjectorName(field),
-                              Stmt.castTo(et.getJavaType(), Stmt.loadVariable(entityInstanceParam)))
-                      .returnValue();
-            }
-            else if (attr.getJavaMember() instanceof Method) {
-              return Stmt.loadVariable(entityInstanceParam).invoke(attr.getJavaMember().getName()).returnValue();
-            }
-            else {
-              throw new AssertionError(
-                      "JPA properties should only be Field or Method, but this one is " +
-                      attr.getJavaMember() == null ? "null" : attr.getJavaMember().getClass());
-            }
-          }
-
-          // provide set method
-          if (o instanceof Attribute
-                  && method.getName().equals("set")) {
-            Attribute<?, ?> attr = (Attribute<?, ?>) o;
-
-            String entityInstanceParam = method.getParameters()[0].getName();
-            String newValueParam = method.getParameters()[1].getName();
-
-            if (attr.getJavaMember() instanceof Field) {
-
-              // The write accessor for the field was defined while generating the get() method.
-              // Now generate a call to the private accessor method for the field in question.
-              MetaField field = MetaClassFactory.get((Field) attr.getJavaMember());
-              return Stmt.loadVariable("this")
-                      .invoke(PrivateAccessUtil.getPrivateFieldInjectorName(field),
-                              Stmt.castTo(et.getJavaType(), Stmt.loadVariable(entityInstanceParam)),
-                              Stmt.castTo(MetaClassFactory.get(attr.getJavaType()).asBoxed(), Stmt.loadVariable(newValueParam)));
-            }
-            else if (attr.getJavaMember() instanceof Method) {
-              return Stmt.loadVariable(entityInstanceParam).invoke(attr.getJavaMember().getName()).returnValue();
-            }
-            else {
-              throw new AssertionError(
-                      "JPA properties should only be Field or Method, but this one is " +
-                      attr.getJavaMember() == null ? "null" : attr.getJavaMember().getClass());
-            }
-          }
-
-          // provide indication of generated value annotation
-          if (o instanceof SingularAttribute
-                  && method.getName().equals("isGeneratedValue")) {
-            SingularAttribute<?, ?> attr = (SingularAttribute<?, ?>) o;
-
-            return Stmt.loadLiteral(isGeneratedValue(attr.getJavaMember())).returnValue();
-          }
-
-          // provide generated value iterator
-          if (o instanceof SingularAttribute
-                  && method.getName().equals("getValueGenerator")) {
-            SingularAttribute<?, ?> attr = (SingularAttribute<?, ?>) o;
-
-            if (isGeneratedValue(attr.getJavaMember())) {
-
-              MetaClass generatorDeclaredType;
-              Class<? extends Iterator<?>> generatorType;
-
-              if (attr.getJavaType() == Long.class || attr.getJavaType() == long.class) {
-                generatorDeclaredType = MetaClassFactory.get(new TypeLiteral<Iterator<Long>>() {});
-                generatorType = LongIdGenerator.class;
-              }
-              else if (attr.getJavaType() == Integer.class || attr.getJavaType() == int.class) {
-                generatorDeclaredType = MetaClassFactory.get(new TypeLiteral<Iterator<Integer>>() {});
-                generatorType = IntIdGenerator.class;
-              }
-              else if (attr.getJavaType() == BigInteger.class) {
-                generatorDeclaredType = MetaClassFactory.get(new TypeLiteral<Iterator<BigInteger>>() {});
-                generatorType = BigIntegerIdGenerator.class;
-              }
-              else {
-                // TODO implement the missing generatable ID types (which are silly: byte, char, short)
-                throw new UnsupportedOperationException("@Generated ID values of " + attr.getJavaType() + " not supported");
-              }
-
-              containingClassBuilder
-                  .privateField("valueGenerator", generatorDeclaredType)
-                  .initializesWith(Stmt.newObject(generatorType)
-                      .withParameters(Stmt.loadStatic(classBuilder.getClassDefinition(), "this"), Variable.get("this")))
-                  .finish();
-
-              // StringStatement is a workaround: codegen says valueGenerator is out of scope when we do this properly
-              return new StringStatement("return valueGenerator");
-
-            } else {
-              return Stmt.throw_(UnsupportedOperationException.class, "Not a generated attribute");
-            }
-          }
-
-          // generate isAssociation because the Hibernate implementation is broken
-          if (o instanceof SingularAttribute
-                  && method.getName().equals("isAssociation")) {
-            SingularAttribute<?, ?> attr = (SingularAttribute<?, ?>) o;
-
-            return Stmt.loadLiteral(isAssociation(attr)).returnValue();
-          }
-
-          // provide generated value iterator
-          if (o instanceof Attribute
-                  && method.getName().equals("cascades")) {
-            Attribute<?, ?> attr = (Attribute<?, ?>) o;
-
-            // grab cascade annotations from live object then generate a statement like
-            // return (cascadeType == [type] || cascadeType == [type] || ...)
-            CascadeType[] cascadeTypes = extractCascadeTypes(attr.getJavaMember());
-            if (cascadeTypes == null) {
-              return Stmt.throw_(UnsupportedOperationException.class, "Not a relationship attribute");
-            }
-            if (cascadeTypes.length == 0) {
-              return Stmt.loadLiteral(false).returnValue();
-            }
-
-            BooleanExpression megaExpr = null;
-            for (CascadeType type : cascadeTypes) {
-              if (type == CascadeType.ALL) {
-                // if the list includes ALL, abandon megaExpr and just return true
-                return Stmt.loadLiteral(true).returnValue();
-              }
-              BooleanExpression comparison = Bool.equals(Stmt.loadVariable(method.getParameters()[0].getName()), Stmt.loadLiteral(type));
-              if (megaExpr == null) {
-                megaExpr = comparison;
-              } else {
-                megaExpr = Bool.or(comparison, megaExpr);
-              }
-            }
-            return Stmt.load(megaExpr).returnValue();
-          }
-
-          // provide generated value iterator
-          if (o instanceof Attribute
-                  && method.getName().equals("toString")) {
-            Attribute<?, ?> attr = (Attribute<?, ?>) o;
-            return Stmt.loadLiteral(
-                    attr.getPersistentAttributeType() + " attribute " +
-                    attr.getDeclaringType().getJavaType().getSimpleName() +
-                    "." + attr.getName()).returnValue();
-          }
-
-          // generate isAssociation because the Hibernate implementation is broken
-          if (o instanceof PluralAttribute
-                  && method.getName().equals("createEmptyCollection")) {
-            PluralAttribute<?, ?, ?> attr = (PluralAttribute<?, ?, ?>) o;
-
-            Class<?> declaredCollectionType = attr.getJavaType();
-            Class<?> collectionTypeToInstantiate;
-            if (!declaredCollectionType.isInterface()) {
-              collectionTypeToInstantiate = declaredCollectionType;
-            }
-            else if (List.class.isAssignableFrom(declaredCollectionType)) {
-              collectionTypeToInstantiate = ArrayList.class;
-            }
-            else if (Set.class.isAssignableFrom(declaredCollectionType)) {
-              collectionTypeToInstantiate = HashSet.class;
-            }
-            else if (OrderedMap.class.isAssignableFrom(declaredCollectionType)) {
-              collectionTypeToInstantiate = LinkedHashMap.class;
-            }
-            else if (Map.class.isAssignableFrom(declaredCollectionType)) {
-              collectionTypeToInstantiate = HashMap.class;
-            }
-            else if (Collection.class.isAssignableFrom(declaredCollectionType)) {
-              collectionTypeToInstantiate = ArrayList.class;
-            }
-            else {
-              throw new RuntimeException("Don't know how to instantiate a collection of " + declaredCollectionType);
-            }
-            return Stmt.nestedCall(Stmt.newObject(collectionTypeToInstantiate)).returnValue();
-          }
-
-          // allow SnapshotMaker default (read value and create snapshot)
-          return null;
-        }
-      };
+      MethodBodyCallback methodBodyCallback = new JpaMetamodelMethodBodyCallback(classBuilder, et);
 
       // now, snapshot all the EntityType's attributes, adding them as we go
       List<Statement> attributes = new ArrayList<Statement>();
@@ -389,6 +165,39 @@ public class ErraiEntityManagerGenerator extends Generator {
     }
 
     return classBuilder.getClassDefinition().getFullyQualifiedName();
+  }
+
+  private EntityManager createHibernateEntityManager() {
+    Map<String, String> properties = new HashMap<String, String>();
+    properties.put("hibernate.dialect", "org.hibernate.dialect.HSQLDialect");
+    properties.put("javax.persistence.validation.mode", "none");
+    EntityManagerFactory emf = Persistence.createEntityManagerFactory("ErraiJpaClientTests", properties);
+    EntityManager em = emf.createEntityManager();
+    return em;
+  }
+
+  private String generateErraiEntityType(final EntityType<?> et, MethodBlockBuilder<?> pmm) {
+    MetaClass met = MetaClassFactory.get(et.getJavaType());
+    pmm.append(Stmt.codeComment(
+        "**\n" +
+        "** EntityType for " + et.getJavaType().getName() + "\n" +
+        "**"));
+    String entityTypeVarName = entitySnapshotVarName(et.getJavaType());
+
+    AnonymousClassStructureBuilder entityTypeSubclass =
+            Stmt.newObject(MetaClassFactory.get(ErraiEntityType.class, new ParameterizedEntityType(et.getJavaType())))
+            .extend();
+
+    entityTypeSubclass.publicMethod(et.getJavaType(), "newInstance")
+            .append(Stmt.nestedCall(Stmt.newObject(et.getJavaType())).returnValue())
+            .finish();
+
+    generateLifecycleEventDeliveryMethods(met, entityTypeSubclass);
+
+    pmm.append(Stmt.declareVariable(ErraiEntityType.class).asFinal()
+        .named(entityTypeVarName)
+        .initializeWith(entityTypeSubclass.finish().withParameters(et.getName(), et.getJavaType())));
+    return entityTypeVarName;
   }
 
   /**
@@ -469,8 +278,15 @@ public class ErraiEntityManagerGenerator extends Generator {
             || member.getAnnotation(OneToOne.class) != null);
   }
 
-  // TODO check what the other code generators do for class->method names
-  static String entitySnapshotVarName(Class<?> forType) {
+  /**
+   * Returns a human-readable variable name that is unique to the given type.
+   *
+   * @param forType
+   *          The type you want a variable name for.
+   * @return A legal Java identifier that can be used to refer to the given
+   *         type.
+   */
+  private static String entitySnapshotVarName(Class<?> forType) {
     return "et_" + forType.getCanonicalName().replace('.', '_');
   }
 
@@ -512,6 +328,233 @@ public class ErraiEntityManagerGenerator extends Generator {
 
     // the member must not be a relationship (or at least not the owning side of one)
     return null;
+  }
+
+  /**
+   * Helper callback for customized methods during the JPA Metamodel snapshot operation.
+   */
+  private final class JpaMetamodelMethodBodyCallback implements
+          MethodBodyCallback {
+    private final ClassStructureBuilder<?> classBuilder;
+    private final EntityType<?> et;
+
+    private JpaMetamodelMethodBodyCallback(
+            ClassStructureBuilder<?> classBuilder, EntityType<?> et) {
+      this.classBuilder = Assert.notNull(classBuilder);
+      this.et = Assert.notNull(et);
+    }
+
+    @Override
+    public Statement generateMethodBody(MetaMethod method, Object sourceObject,
+            ClassStructureBuilder<?> containingClassBuilder) {
+      // provide reference to declaring type (et) from its attributes
+      if (sourceObject instanceof Attribute
+              && method.getName().equals("getDeclaringType")
+              && ((Attribute<?, ?>) sourceObject).getDeclaringType() == et) {
+        return Stmt.loadVariable(entitySnapshotVarName(et.getJavaType())).returnValue();
+      }
+
+      // provide get method
+      if (sourceObject instanceof Attribute && method.getName().equals("get")) {
+        return generateAttributeGetMethod(method, sourceObject, containingClassBuilder);
+      }
+
+      // provide set method
+      if (sourceObject instanceof Attribute && method.getName().equals("set")) {
+        return generateAttributeSetMethod(method, sourceObject);
+      }
+
+      // provide indication of generated value annotation
+      if (sourceObject instanceof SingularAttribute && method.getName().equals("isGeneratedValue")) {
+        SingularAttribute<?, ?> attr = (SingularAttribute<?, ?>) sourceObject;
+
+        return Stmt.loadLiteral(isGeneratedValue(attr.getJavaMember())).returnValue();
+      }
+
+      // provide generated value iterator
+      if (sourceObject instanceof SingularAttribute && method.getName().equals("getValueGenerator")) {
+        return generateGetValueGenerator(sourceObject, containingClassBuilder);
+      }
+
+      // generate isAssociation because the Hibernate implementation is broken
+      if (sourceObject instanceof SingularAttribute && method.getName().equals("isAssociation")) {
+        SingularAttribute<?, ?> attr = (SingularAttribute<?, ?>) sourceObject;
+        return Stmt.loadLiteral(isAssociation(attr)).returnValue();
+      }
+
+      if (sourceObject instanceof Attribute && method.getName().equals("cascades")) {
+        return generateCascadesMethod(method, sourceObject);
+      }
+
+      if (sourceObject instanceof Attribute && method.getName().equals("toString")) {
+        Attribute<?, ?> attr = (Attribute<?, ?>) sourceObject;
+        return Stmt.loadLiteral(
+                attr.getPersistentAttributeType() + " attribute " +
+                attr.getDeclaringType().getJavaType().getSimpleName() +
+                "." + attr.getName()).returnValue();
+      }
+
+      if (sourceObject instanceof PluralAttribute && method.getName().equals("createEmptyCollection")) {
+        return generateCreateEmptyCollectionMethod(sourceObject);
+      }
+
+      // allow SnapshotMaker default (read value and create snapshot)
+      return null;
+    }
+
+    private Statement generateCreateEmptyCollectionMethod(Object sourceObject) {
+      PluralAttribute<?, ?, ?> attr = (PluralAttribute<?, ?, ?>) sourceObject;
+
+      Class<?> declaredCollectionType = attr.getJavaType();
+      Class<?> collectionTypeToInstantiate;
+      if (!declaredCollectionType.isInterface()) {
+        collectionTypeToInstantiate = declaredCollectionType;
+      }
+      else if (List.class.isAssignableFrom(declaredCollectionType)) {
+        collectionTypeToInstantiate = ArrayList.class;
+      }
+      else if (Set.class.isAssignableFrom(declaredCollectionType)) {
+        collectionTypeToInstantiate = HashSet.class;
+      }
+      else if (OrderedMap.class.isAssignableFrom(declaredCollectionType)) {
+        collectionTypeToInstantiate = LinkedHashMap.class;
+      }
+      else if (Map.class.isAssignableFrom(declaredCollectionType)) {
+        collectionTypeToInstantiate = HashMap.class;
+      }
+      else if (Collection.class.isAssignableFrom(declaredCollectionType)) {
+        collectionTypeToInstantiate = ArrayList.class;
+      }
+      else {
+        throw new RuntimeException("Don't know how to instantiate a collection of " + declaredCollectionType);
+      }
+      return Stmt.nestedCall(Stmt.newObject(collectionTypeToInstantiate)).returnValue();
+    }
+
+    private Statement generateCascadesMethod(MetaMethod method, Object sourceObject) {
+      Attribute<?, ?> attr = (Attribute<?, ?>) sourceObject;
+
+      // grab cascade annotations from live object then generate a statement like
+      // return (cascadeType == [type] || cascadeType == [type] || ...)
+      CascadeType[] cascadeTypes = extractCascadeTypes(attr.getJavaMember());
+      if (cascadeTypes == null) {
+        return Stmt.throw_(UnsupportedOperationException.class, "Not a relationship attribute");
+      }
+      if (cascadeTypes.length == 0) {
+        return Stmt.loadLiteral(false).returnValue();
+      }
+
+      BooleanExpression megaExpr = null;
+      for (CascadeType type : cascadeTypes) {
+        if (type == CascadeType.ALL) {
+          // if the list includes ALL, abandon megaExpr and just return true
+          return Stmt.loadLiteral(true).returnValue();
+        }
+        BooleanExpression comparison = Bool.equals(Stmt.loadVariable(method.getParameters()[0].getName()), Stmt.loadLiteral(type));
+        if (megaExpr == null) {
+          megaExpr = comparison;
+        } else {
+          megaExpr = Bool.or(comparison, megaExpr);
+        }
+      }
+      return Stmt.load(megaExpr).returnValue();
+    }
+
+    private Statement generateGetValueGenerator(Object sourceObject,
+            ClassStructureBuilder<?> containingClassBuilder) {
+      SingularAttribute<?, ?> attr = (SingularAttribute<?, ?>) sourceObject;
+
+      if (isGeneratedValue(attr.getJavaMember())) {
+
+        MetaClass generatorDeclaredType;
+        Class<? extends Iterator<?>> generatorType;
+
+        if (attr.getJavaType() == Long.class || attr.getJavaType() == long.class) {
+          generatorDeclaredType = MetaClassFactory.get(new TypeLiteral<Iterator<Long>>() {});
+          generatorType = LongIdGenerator.class;
+        }
+        else if (attr.getJavaType() == Integer.class || attr.getJavaType() == int.class) {
+          generatorDeclaredType = MetaClassFactory.get(new TypeLiteral<Iterator<Integer>>() {});
+          generatorType = IntIdGenerator.class;
+        }
+        else if (attr.getJavaType() == BigInteger.class) {
+          generatorDeclaredType = MetaClassFactory.get(new TypeLiteral<Iterator<BigInteger>>() {});
+          generatorType = BigIntegerIdGenerator.class;
+        }
+        else {
+          // TODO implement the missing generatable ID types (which are silly: byte, char, short)
+          throw new UnsupportedOperationException("@Generated ID values of " + attr.getJavaType() + " not supported");
+        }
+
+        containingClassBuilder
+            .privateField("valueGenerator", generatorDeclaredType)
+            .initializesWith(Stmt.newObject(generatorType)
+                .withParameters(Stmt.loadStatic(classBuilder.getClassDefinition(), "this"), Variable.get("this")))
+            .finish();
+
+        // StringStatement is a workaround: codegen says valueGenerator is out of scope when we do this properly
+        return new StringStatement("return valueGenerator");
+
+      } else {
+        return Stmt.throw_(UnsupportedOperationException.class, "Not a generated attribute");
+      }
+    }
+
+    private Statement generateAttributeSetMethod(MetaMethod method, Object sourceObject)
+            throws AssertionError {
+      Attribute<?, ?> attr = (Attribute<?, ?>) sourceObject;
+
+      String entityInstanceParam = method.getParameters()[0].getName();
+      String newValueParam = method.getParameters()[1].getName();
+
+      if (attr.getJavaMember() instanceof Field) {
+
+        // The write accessor for the field was defined while generating the get() method.
+        // Now generate a call to the private accessor method for the field in question.
+        MetaField field = MetaClassFactory.get((Field) attr.getJavaMember());
+        return Stmt.loadVariable("this")
+                .invoke(PrivateAccessUtil.getPrivateFieldInjectorName(field),
+                        Stmt.castTo(et.getJavaType(), Stmt.loadVariable(entityInstanceParam)),
+                        Stmt.castTo(MetaClassFactory.get(attr.getJavaType()).asBoxed(), Stmt.loadVariable(newValueParam)));
+      }
+      else if (attr.getJavaMember() instanceof Method) {
+        return Stmt.loadVariable(entityInstanceParam).invoke(attr.getJavaMember().getName()).returnValue();
+      }
+      else {
+        throw new AssertionError(
+                "JPA properties should only be Field or Method, but this one is " +
+                attr.getJavaMember() == null ? "null" : attr.getJavaMember().getClass());
+      }
+    }
+
+    private Statement generateAttributeGetMethod(MetaMethod method, Object o,
+            ClassStructureBuilder<?> containingClassBuilder)
+            throws AssertionError {
+      Attribute<?, ?> attr = (Attribute<?, ?>) o;
+
+      String entityInstanceParam = method.getParameters()[0].getName();
+
+      if (attr.getJavaMember() instanceof Field) {
+
+        // First we need to generate an accessor for the field.
+        MetaField field = MetaClassFactory.get((Field) attr.getJavaMember());
+        PrivateAccessUtil.addPrivateAccessStubs(PrivateAccessType.Both, true, containingClassBuilder, field, new Modifier[] {});
+
+        // Now generate a call to the private accessor method for the field in question.
+        return Stmt.loadVariable("this")
+                .invoke(PrivateAccessUtil.getPrivateFieldInjectorName(field),
+                        Stmt.castTo(et.getJavaType(), Stmt.loadVariable(entityInstanceParam)))
+                .returnValue();
+      }
+      else if (attr.getJavaMember() instanceof Method) {
+        return Stmt.loadVariable(entityInstanceParam).invoke(attr.getJavaMember().getName()).returnValue();
+      }
+      else {
+        throw new AssertionError(
+                "JPA properties should only be Field or Method, but this one is " +
+                attr.getJavaMember() == null ? "null" : attr.getJavaMember().getClass());
+      }
+    }
   }
 
   /**
