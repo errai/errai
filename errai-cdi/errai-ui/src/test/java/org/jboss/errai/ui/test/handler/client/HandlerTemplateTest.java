@@ -38,5 +38,6 @@ public class HandlerTemplateTest extends AbstractErraiCDITest {
     app.getComponent().getB2().click();
 
     assertNull(Document.get().getElementById("b2"));
+    assertNull(Document.get().getElementById("b3"));
   }
 }
