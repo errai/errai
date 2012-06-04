@@ -147,8 +147,14 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
 
   public X fromJson(EntityManager em, JSONValue jsonValue) {
     final ErraiEntityManager eem = (ErraiEntityManager) em;
-    X entity = newInstance();
+
     Key<X, ?> key = keyFromJson(jsonValue);
+    X entity = (X) partiallyConstructedEntities.get(key);
+    if (entity != null) {
+      return entity;
+    }
+
+    entity = newInstance();
     try {
       partiallyConstructedEntities.put((Key<Object, Object>) key, entity);
       for (Attribute<? super X, ?> a : getAttributes()) {
