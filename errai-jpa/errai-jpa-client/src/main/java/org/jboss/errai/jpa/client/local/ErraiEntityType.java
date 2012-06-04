@@ -1,9 +1,7 @@
 package org.jboss.errai.jpa.client.local;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.EntityManager;
@@ -34,15 +32,6 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONValue;
 
 public abstract class ErraiEntityType<X> implements EntityType<X> {
-
-  /**
-   * All of the entities that are partly constructed but are still getting their
-   * references connected up. This is required in order to prevent infinite
-   * recursion when demarshalling cyclic object graphs.
-   */
-  // XXX this probably belongs in EntityManager or PersistenceContext
-  private static Map<Key<Object, Object>, Object> partiallyConstructedEntities = new HashMap<Key<Object, Object>, Object>();
-
 
   private final Set<SingularAttribute<? super X, ?>> singularAttributes = new HashSet<SingularAttribute<? super X,?>>();
   private final Set<PluralAttribute<? super X, ?, ?>> pluralAttributes = new HashSet<PluralAttribute<? super X, ?, ?>>();
@@ -145,18 +134,33 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
    */
   public abstract <Y> void deliverPostLoad(X targetEntity);
 
+  /**
+   * Converts the given JSONValue, which represents an instance of this entity
+   * type, into the actual instance of this entity type that exists in the given
+   * EntityManager's persistence context. References to other entities are
+   * recursively retrieved from the EntityManager.
+   *
+   * @param em
+   *          The EntityManager that owns this entity type and houses the
+   *          persistence context.
+   * @param jsonValue
+   *          A value that represents an instance of this entity type.
+   * @return A managed entity that is in the given EntityManager's persistence
+   *         context.
+   */
   public X fromJson(EntityManager em, JSONValue jsonValue) {
     final ErraiEntityManager eem = (ErraiEntityManager) em;
 
     Key<X, ?> key = keyFromJson(jsonValue);
-    X entity = (X) partiallyConstructedEntities.get(key);
+
+    X entity = eem.getPartiallyConstructedEntity(key);
     if (entity != null) {
       return entity;
     }
 
     entity = newInstance();
     try {
-      partiallyConstructedEntities.put((Key<Object, Object>) key, entity);
+      eem.putPartiallyConstructedEntity(key, entity);
       for (Attribute<? super X, ?> a : getAttributes()) {
         ErraiAttribute<? super X, ?> attr = (ErraiAttribute<? super X, ?>) a;
         JSONValue attrJsonValue = jsonValue.isObject().get(attr.getName());
@@ -185,7 +189,7 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
       }
       return entity;
     } finally {
-      partiallyConstructedEntities.remove(key);
+      eem.removePartiallyConstructedEntity(key);
     }
   }
 
@@ -318,6 +322,7 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
    */
   private <C, E> JSONValue makeJsonReference(X targetEntity, ErraiPluralAttribute<? super X, C, E> attr, ErraiEntityManager eem) {
 
+    // XXX when we support maps, we should use getCollection()/getMap() and this will fix the type safety warnings
     C attrValue = attr.get(targetEntity);
     if (attrValue == null) {
       return JSONNull.getInstance();
@@ -365,7 +370,9 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
     Class<E> attributeElementType = attr.getElementType().getJavaType();
     ErraiEntityType<E> attrEntityType = eem.getMetamodel().entity(attributeElementType);
 
-    Collection<E> collection = (Collection<E>) attr.createEmptyCollection(); // FIXME this is broken for Map attributes
+    // FIXME this is broken for Map attributes
+    // TODO when we support Map attributes, we should get the attribute with getCollection()/getMap() to fix this warning
+    Collection<E> collection = (Collection<E>) attr.createEmptyCollection();
 
     for (int i = 0; i < attrJsonValues.size(); i++) {
       JSONValue idJson = attrJsonValues.get(i).isObject().get("entityReference");
@@ -373,7 +380,7 @@ public abstract class ErraiEntityType<X> implements EntityType<X> {
       Object id = JsonUtil.basicValueFromJson(idJson, idType);
 
       System.out.println("   looking for " + attrEntityType.getJavaType() + " with id " + id);
-      E value = (E) partiallyConstructedEntities.get(Key.get(eem, attrEntityType.getJavaType(), id));
+      E value = eem.getPartiallyConstructedEntity(Key.get(eem, attrEntityType.getJavaType(), id));
       if (value == null) {
         value = eem.find(attrEntityType.getJavaType(), id);
       }

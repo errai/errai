@@ -42,6 +42,13 @@ public abstract class ErraiEntityManager implements EntityManager {
   final Map<Key<?, ?>, Object> persistenceContext = new HashMap<Key<?, ?>, Object>();
 
   /**
+   * All of the entities that are partly constructed but are still getting their
+   * references connected up. This is required in order to prevent infinite
+   * recursion when demarshalling cyclic object graphs.
+   */
+  private Map<Key<Object, Object>, Object> partiallyConstructedEntities = new HashMap<Key<Object, Object>, Object>();
+
+  /**
    * The actual storage backend.
    */
   private final StorageBackend backend = new WebStorageBackend(this); // XXX publishing reference to partially constructed object
@@ -339,6 +346,43 @@ public abstract class ErraiEntityManager implements EntityManager {
       backend.put(key, entity);
       entityType.deliverPostUpdate(entity);
     }
+  }
+
+  /**
+   * Makes the Entity Manager aware of an entity instance that is in the process
+   * of being constructed: its fields and references to other entities may not
+   * yet be fully populated. Partially constructed entities are tracked
+   * primarily for the benefit of the storage and marshaling backends; they are
+   * not part of the persistence context and they do not cause any lifecycle
+   * events to be fired.
+   */
+  @SuppressWarnings("unchecked")
+  <X> void putPartiallyConstructedEntity(Key<X, ?> key, X instance) {
+    partiallyConstructedEntities.put((Key<Object, Object>) key, (Object) instance);
+  }
+
+  /**
+   * Retieves the partially constructed entity associated with the given key, if
+   * any.
+   *
+   * @return the partially constructed entity, or null if there is not a
+   *         partially constructed entity associated with the given key.
+   * @see #putPartiallyConstructedEntity(Key, Object)
+   */
+  @SuppressWarnings("unchecked")
+  <X> X getPartiallyConstructedEntity(Key<X, ?> key) {
+    return (X) partiallyConstructedEntities.get(key);
+  }
+
+  /**
+   * Removes the partially constructed entity associated with the given key, if
+   * any. Has no effect if the given key is not associated with a partially
+   * constructed entity.
+   *
+   * @see #putPartiallyConstructedEntity(Key, Object)
+   */
+  void removePartiallyConstructedEntity(Key<?, ?> key) {
+    partiallyConstructedEntities.remove(key);
   }
 
   // -------------- Actual JPA API below this line -------------------
