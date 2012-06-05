@@ -40,14 +40,16 @@ public final class TemplateUtil {
     }
     System.out.println("Compositing @Replace [data-field=" + fieldName + "] element [" + element + "] with Component "
             + field.getClass().getName() + " [" + field.getElement() + "]");
+
+    if (!element.getTagName().equals(field.getElement().getTagName())) {
+      System.out.println("WARNING: Replacing Element type [" + element.getTagName() + "] with type ["
+              + field.getElement().getTagName() + "]");
+    }
     Element parentElement = element.getParentElement();
 
+    Widget temp = new ElementWrapperWidget(element);
+
     try {
-      final JsArray<Node> templateAttributes = getAttributes(element);
-      for (int i = 0; i < templateAttributes.length(); i++) {
-        final Node node = templateAttributes.get(i);
-        field.getElement().setAttribute(node.getNodeName(), node.getNodeValue());
-      }
       parentElement.replaceChild(field.getElement(), element);
       if (field instanceof HasText) {
         NodeList<Node> children = element.getChildNodes();
@@ -55,6 +57,15 @@ public final class TemplateUtil {
           Node child = children.getItem(i);
           field.getElement().appendChild(child);
         }
+      }
+
+      /*
+       * Preserve template Element attributes.
+       */
+      final JsArray<Node> templateAttributes = getAttributes(element);
+      for (int i = 0; i < templateAttributes.length(); i++) {
+        final Node node = templateAttributes.get(i);
+        field.getElement().setAttribute(node.getNodeName(), node.getNodeValue());
       }
     } catch (Exception e) {
       throw new IllegalStateException("Could not replace Element with [data-field=" + fieldName

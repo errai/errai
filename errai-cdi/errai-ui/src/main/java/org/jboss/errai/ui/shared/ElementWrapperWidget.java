@@ -14,6 +14,10 @@ import com.google.gwt.user.client.ui.Widget;
 public class ElementWrapperWidget extends Widget implements HasHTML {
 
   public ElementWrapperWidget(Element wrapped) {
+    if (wrapped == null) {
+      throw new IllegalArgumentException(
+              "Element to be wrapped must not be null - Did you forget to initialize or @Inject a @DataField?");
+    }
     this.setElement(wrapped);
     DOM.setEventListener(this.getElement(), this);
   }
