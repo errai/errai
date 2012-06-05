@@ -96,4 +96,25 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
           }
     }).postJacksonList(jackson);
   }
+  
+  @Test
+  public void testJacksonMarshallingOfListOfBytes() {
+    delayTestFinish(5000);
+    
+    final List<Byte> bytes = new ArrayList<Byte>();
+    bytes.add(new Byte("10"));
+    bytes.add(new Byte("4"));
+    
+    String jackson = MarshallingWrapper.toJSON(bytes);
+   
+    RestClient.create(JacksonTestService.class,
+        new RemoteCallback<String>() {
+          @Override
+          public void callback(String jackson) {
+            assertNotNull("Server failed to parse JSON using Jackson", jackson);
+            assertEquals(bytes, MarshallingWrapper.fromJSON(jackson, List.class, Byte.class));
+            finishTest();
+          }
+    }).postJacksonListOfBytes(jackson);
+  }
 }

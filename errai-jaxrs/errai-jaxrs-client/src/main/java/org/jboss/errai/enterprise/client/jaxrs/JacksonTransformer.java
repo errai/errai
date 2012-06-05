@@ -49,6 +49,7 @@ public class JacksonTransformer {
    * @return jackson compatible JSON 
    */
   public static String toJackson(String erraiJson) {
+    System.out.println(erraiJson);
     JSONValue val = JSONParser.parseStrict(erraiJson);
     val = toJackson(val, null, null, new HashMap<String, JSONValue>());
 
@@ -68,8 +69,8 @@ public class JacksonTransformer {
    *  value with the object's key directly:
    *  "gender": {"^EnumStringValue": "MALE"} becomes "gender": "MALE"
    *  </li>
-   *   <li>If a long is encountered, remove the Errai specific NUM_VALUE key, by associating its actual
-   *  value with the object's key directly and turning it into a number:
+   *   <li>If a number is encountered, remove the Errai specific NUM_VALUE key, by associating its actual
+   *  value with the object's key directly and turning it into a JSON number, if required:
    *  "id": {"^NumValue": "1"} becomes "id": 1
    *  </li>
    * </ul>
@@ -120,8 +121,13 @@ public class JacksonTransformer {
         }
         else if (k.equals(NUM_VALUE)) {
           if (parent != null) {
-            String numValue = obj.get(k).isString().stringValue();
-            parent.put(key, new JSONNumber(Double.parseDouble(numValue)));
+            if (obj.get(k).isString() != null) {
+              String numValue = obj.get(k).isString().stringValue();
+              parent.put(key, new JSONNumber(Double.parseDouble(numValue)));
+            } 
+            else {
+              parent.put(key, obj.get(k));
+            }
           }
           else {
             return val;

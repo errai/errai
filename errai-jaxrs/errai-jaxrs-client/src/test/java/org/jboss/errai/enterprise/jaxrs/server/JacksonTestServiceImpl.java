@@ -54,4 +54,17 @@ public class JacksonTestServiceImpl implements JacksonTestService {
       return null;
     }
   }
+  
+  @Override
+  public String postJacksonListOfBytes(String jackson) {
+    ObjectMapper mapper = new ObjectMapper();
+    try {
+      List<Byte> users = mapper.readValue(jackson, List.class);
+      return mapper.writeValueAsString(users);
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      return null;
+    }
+  }
 }
