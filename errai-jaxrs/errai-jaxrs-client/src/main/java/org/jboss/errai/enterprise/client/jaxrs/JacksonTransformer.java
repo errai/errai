@@ -49,7 +49,6 @@ public class JacksonTransformer {
    * @return jackson compatible JSON 
    */
   public static String toJackson(String erraiJson) {
-    System.out.println(erraiJson);
     JSONValue val = JSONParser.parseStrict(erraiJson);
     val = toJackson(val, null, null, new HashMap<String, JSONValue>());
 
