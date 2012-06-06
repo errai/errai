@@ -13,7 +13,7 @@ import com.google.gwt.user.client.ui.Label;
 
 @Dependent
 @Templated
-public class BasicComponent extends Composite {
+public class BasicComponent1 extends Composite {
 
   @Inject
   @DataField

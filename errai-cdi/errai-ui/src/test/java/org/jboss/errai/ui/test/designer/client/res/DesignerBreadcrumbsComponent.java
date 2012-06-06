@@ -16,7 +16,7 @@ public class DesignerBreadcrumbsComponent extends Composite {
 
   @Inject
   @DataField
-  private BasicComponent c1;
+  private BasicComponent1 c1;
 
   @Inject
   @DataField("subTemplate")
