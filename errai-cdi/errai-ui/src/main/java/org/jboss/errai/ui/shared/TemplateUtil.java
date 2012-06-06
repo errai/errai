@@ -7,7 +7,6 @@ import java.util.Map;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
-import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HasText;
@@ -47,17 +46,19 @@ public final class TemplateUtil {
     }
     Element parentElement = element.getParentElement();
 
-    Widget temp = new ElementWrapperWidget(element);
-
     try {
-      parentElement.replaceChild(field.getElement(), element);
       if (field instanceof HasText) {
-        NodeList<Node> children = element.getChildNodes();
-        for (int i = 0; i < children.getLength(); i++) {
-          Node child = children.getItem(i);
-          field.getElement().appendChild(child);
+        Node firstNode = element.getFirstChild();
+        while (firstNode != null) {
+          if (firstNode != element.getFirstChildElement())
+            field.getElement().appendChild(element.getFirstChild());
+          else {
+            field.getElement().appendChild(element.getFirstChildElement());
+          }
+          firstNode = element.getFirstChild();
         }
       }
+      parentElement.replaceChild(field.getElement(), element);
 
       /*
        * Preserve template Element attributes.
