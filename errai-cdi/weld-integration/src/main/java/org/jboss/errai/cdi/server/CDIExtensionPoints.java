@@ -35,16 +35,13 @@ import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
-import javax.enterprise.inject.spi.AfterDeploymentValidation;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.BeanManager;
@@ -87,6 +84,7 @@ import org.jboss.errai.common.rebind.EnvUtil;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.enterprise.client.cdi.api.Conversational;
+import org.jboss.errai.enterprise.rebind.ObserversMarshallingExtension;
 import org.jboss.errai.ioc.client.api.Sender;
 import org.jboss.weld.manager.BeanManagerImpl;
 import org.slf4j.Logger;
@@ -348,10 +346,19 @@ public class CDIExtensionPoints implements Extension {
       if (ec.isConversational()) {
         abd.addObserverMethod(new ConversationalEventObserverMethod(ec.getRawType(), bus, ec.getQualifiers()));
       }
+    }
+
+    final Set<ObserversMarshallingExtension.ObserverPoint> observerPoints = ObserversMarshallingExtension.scanForObserverPointsInClassPath();
+    for (ObserversMarshallingExtension.ObserverPoint observerPoint :
+            observerPoints) {
+      if (EnvUtil.isPortableType(observerPoint.getObservedType())) {
+        abd.addObserverMethod(new EventObserverMethod(observerPoint.getObservedType(), bus, observerPoint.getQualifiers()));
+      }
       else {
-        abd.addObserverMethod(new EventObserverMethod(ec.getRawType(), bus, ec.getQualifiers()));
+        System.out.println("not adding: " + observerPoint.getObservedType());
       }
     }
+
 
     for (MessageSender ms : messageSenders) {
       abd.addBean(new SenderBean(ms.getSenderType(), ms.getQualifiers(), bus));

@@ -17,12 +17,16 @@
 package org.jboss.errai.codegen.meta.impl.build;
 
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.jboss.errai.codegen.Comment;
+import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.Builder;
 import org.jboss.errai.codegen.builder.impl.Scope;
+import org.jboss.errai.codegen.literal.AnnotationLiteral;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaType;
@@ -46,6 +50,9 @@ public class BuildMetaField extends MetaField implements Builder {
   private boolean isVolatile;
 
   private String fieldComment;
+
+  private List<Annotation> annotations = new ArrayList<Annotation>();
+
 
   public BuildMetaField(BuildMetaClass declaringClass, Statement statement, Scope scope, MetaClass type, String name) {
     this.declaringClass = declaringClass;
@@ -132,11 +139,16 @@ public class BuildMetaField extends MetaField implements Builder {
 
   @Override
   public boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
-    return false;
+    return getAnnotation(annotation) != null;
   }
 
   @Override
   public <A extends Annotation> A getAnnotation(Class<A> annotation) {
+    for (Annotation a : annotations) {
+      if (a.annotationType().equals(annotation)) {
+        return (A) a;
+      }
+    }
     return null;
   }
 
@@ -176,6 +188,10 @@ public class BuildMetaField extends MetaField implements Builder {
     isVolatile = aVolatile;
   }
 
+  public void addAnnotation(Annotation annotation) {
+    annotations.add(annotation);
+  }
+
   public void setStatement(Statement statement) {
     this.statement = statement;
   }
@@ -189,6 +205,12 @@ public class BuildMetaField extends MetaField implements Builder {
     StringBuilder builder = new StringBuilder(25);
     if (fieldComment != null) {
       builder.append(new Comment(fieldComment).generate(null)).append('\n');
+    }
+
+    if (!annotations.isEmpty()) {
+      for (Annotation a : annotations) {
+        builder.append(new AnnotationLiteral(a).getCanonicalString(Context.create())).append(" ");
+      }
     }
 
     declaringClass.getContext().addVariable(Variable.create(name, type));

@@ -16,6 +16,7 @@
 
 package org.jboss.errai.marshalling.rebind;
 
+import org.apache.tools.ant.taskdefs.Java;
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
@@ -30,6 +31,7 @@ import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallerFactory;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
@@ -40,11 +42,15 @@ import org.jboss.errai.marshalling.client.marshallers.QualifyingMarshallerWrappe
 import org.jboss.errai.marshalling.rebind.api.ArrayMarshallerCallback;
 import org.jboss.errai.marshalling.rebind.api.GeneratorMappingContext;
 import org.jboss.errai.marshalling.rebind.api.MappingStrategy;
+import org.jboss.errai.marshalling.rebind.api.MarshallingExtension;
+import org.jboss.errai.marshalling.rebind.api.MarshallingExtensionConfigurator;
 import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.enterprise.context.Dependent;
+import javax.enterprise.context.NormalScope;
 import javax.enterprise.util.TypeLiteral;
 import java.io.File;
 import java.lang.annotation.Annotation;
@@ -98,16 +104,16 @@ public class MarshallerGeneratorFactory {
 
     String gen;
 
-      log.info("generating marshalling class...");
-      long st = System.currentTimeMillis();
-      gen = _generate(packageName, clazzName);
-      log.info("generated marshalling class in " + (System.currentTimeMillis() - st) + "ms.");
+    log.info("generating marshalling class...");
+    long st = System.currentTimeMillis();
+    gen = _generate(packageName, clazzName);
+    log.info("generated marshalling class in " + (System.currentTimeMillis() - st) + "ms.");
 
-      if (Boolean.getBoolean("errai.codegen.printOut")) {
-        System.out.println(gen);
-      }
+    if (Boolean.getBoolean("errai.codegen.printOut")) {
+      System.out.println(gen);
+    }
 
-      RebindUtils.writeStringToFile(cacheFile, gen);
+    RebindUtils.writeStringToFile(cacheFile, gen);
 
     return gen;
   }
@@ -143,6 +149,24 @@ public class MarshallerGeneratorFactory {
     );
 
     autoInitializedField(classStructureBuilder, javaUtilMap, MARSHALLERS_VAR, HashMap.class);
+
+    for (final Class<?> extensionClass :
+            ScannerSingleton.getOrCreateInstance().getTypesAnnotatedWith(MarshallingExtension.class)) {
+      if (!MarshallingExtensionConfigurator.class.isAssignableFrom(extensionClass)) {
+        throw new RuntimeException("class " + extensionClass.getName() + " is not a valid marshalling extension. " +
+                "marshalling extensions should implement: " + MarshallingExtensionConfigurator.class.getName());
+      }
+
+      try {
+        final MarshallingExtensionConfigurator configurator
+                = extensionClass.asSubclass(MarshallingExtensionConfigurator.class).newInstance();
+
+        configurator.configure(mappingContext);
+      }
+      catch (Exception e) {
+        throw new RuntimeException("error loading marshalling extension: " + extensionClass.getName(), e);
+      }
+    }
 
     constructor = classStructureBuilder.publicConstructor();
 
@@ -218,6 +242,10 @@ public class MarshallerGeneratorFactory {
     addArrayMarshaller(MetaClassFactory.get(Short[].class));
     addArrayMarshaller(MetaClassFactory.get(Boolean[].class));
     addArrayMarshaller(MetaClassFactory.get(Byte[].class));
+
+    if (target == MarshallerOuputTarget.Java) {
+      exposeCDIObserversToServer();
+    }
 
     return classStructureBuilder.toJavaString();
   }
@@ -419,6 +447,22 @@ public class MarshallerGeneratorFactory {
     if (dim > 1) {
       arrayDemarshallCode(toMap, dim - 1, anonBuilder);
     }
+  }
+
+  /**
+   * @Observes expose hack.
+   */
+  private static void exposeCDIObserversToServer() {
+    final Set<Class<?>> annotationsToScan = new HashSet<Class<?>>() {
+      {
+        add(Dependent.class);
+      }
+    };
+
+    for (Class scope : annotationsToScan) {
+      System.out.println(scope);
+    }
+
   }
 
 }

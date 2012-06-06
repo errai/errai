@@ -18,9 +18,13 @@ package org.jboss.errai.codegen.builder;
 
 import org.jboss.errai.codegen.Statement;
 
+import java.lang.annotation.Annotation;
+
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public interface FieldBuildInitializer<T> extends Finishable<T> {
+  public FieldBuildInitializer<T> annotatedWith(Annotation... annotation);
+
   public Finishable<T> initializesWith(Statement statement);
 }
