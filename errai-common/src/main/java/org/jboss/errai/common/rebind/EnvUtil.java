@@ -90,6 +90,7 @@ public abstract class EnvUtil {
     MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
     final Map<String, String> mappingAliases = new HashMap<String, String>();
     final Set<Class<?>> exposedClasses = new HashSet<Class<?>>();
+    final Set<Class<?>> portableNonExposed = new HashSet<Class<?>>();
 
     final Set<Class<?>> exposedFromScanner = new HashSet<Class<?>>(scanner.getTypesAnnotatedWith(Portable.class));
 
@@ -183,7 +184,22 @@ public abstract class EnvUtil {
         }
       }
     }
-    return new EnviromentConfig(mappingAliases, exposedClasses);
+
+    for (Class<?> cls : exposedClasses) {
+      fillInInterfacesAndSuperTypes(portableNonExposed, cls);
+    }
+
+    return new EnviromentConfig(mappingAliases, exposedClasses, portableNonExposed);
+  }
+
+  private static void fillInInterfacesAndSuperTypes(Set<Class<?>> set, Class<?> type) {
+    for (Class<?> iface : type.getInterfaces()) {
+      set.add(iface);
+      fillInInterfacesAndSuperTypes(set, iface);
+    }
+    if (type.getSuperclass() != null) {
+      fillInInterfacesAndSuperTypes(set, type.getSuperclass());
+    }
   }
 
   private static EnviromentConfig _environmentConfigCache;
@@ -193,8 +209,9 @@ public abstract class EnvUtil {
     return _environmentConfigCache;
   }
 
-  public static boolean isPortableType(Class cls) {
-    if (cls.isAnnotationPresent(Portable.class) || getEnvironmentConfig().getExposedClasses().contains(cls)) {
+  public static boolean isPortableType(Class<?> cls) {
+    if (cls.isAnnotationPresent(Portable.class) || getEnvironmentConfig().getExposedClasses().contains(cls)
+            || getEnvironmentConfig().getPortableSuperTypes().contains(cls)) {
       return true;
     }
     else {

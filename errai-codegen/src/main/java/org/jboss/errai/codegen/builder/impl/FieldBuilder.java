@@ -20,6 +20,7 @@ import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.DefModifiers;
 import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.BuildCallback;
 import org.jboss.errai.codegen.builder.FieldBuildInitializer;
 import org.jboss.errai.codegen.builder.FieldBuildName;
@@ -27,14 +28,20 @@ import org.jboss.errai.codegen.builder.FieldBuildStart;
 import org.jboss.errai.codegen.builder.FieldBuildType;
 import org.jboss.errai.codegen.builder.Finishable;
 import org.jboss.errai.codegen.builder.callstack.LoadClassReference;
+import org.jboss.errai.codegen.literal.AnnotationLiteral;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
+
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class FieldBuilder<T> implements FieldBuildStart<T>, FieldBuildType<T>,
-                                        FieldBuildName<T>, FieldBuildInitializer<T> {
+        FieldBuildName<T>, FieldBuildInitializer<T> {
 
   private BuildCallback<T> callback;
   private Scope scope;
@@ -42,6 +49,7 @@ public class FieldBuilder<T> implements FieldBuildStart<T>, FieldBuildType<T>,
   private MetaClass type;
   private String name;
   private Statement initializer;
+  private List<Annotation> annotations = new ArrayList<Annotation>();
 
   public FieldBuilder(BuildCallback<T> callback) {
     this.callback = callback;
@@ -90,6 +98,12 @@ public class FieldBuilder<T> implements FieldBuildStart<T>, FieldBuildType<T>,
   }
 
   @Override
+  public FieldBuildInitializer<T> annotatedWith(Annotation... annotation) {
+    annotations.addAll(Arrays.asList(annotation));
+    return this;
+  }
+
+  @Override
   public T finish() {
     if (callback != null) {
       return callback.callback(new Statement() {
@@ -98,9 +112,17 @@ public class FieldBuilder<T> implements FieldBuildStart<T>, FieldBuildType<T>,
 
         @Override
         public String generate(Context context) {
+          callback.getParentContext().addVariable(Variable.create(name, type));
+
           if (generatedCache != null) return generatedCache;
 
-          StringBuilder sbuf = new StringBuilder(scope.getCanonicalName())
+          final StringBuilder sbuf = new StringBuilder();
+
+          for (Annotation a : annotations) {
+            sbuf.append(new AnnotationLiteral(a).getCanonicalString(context)).append(" ");
+          }
+
+          sbuf.append(scope.getCanonicalName())
                   .append(scope == Scope.Package ? "" : " ")
                   .append(modifiers != null ? modifiers.toJavaString() + " " : "")
                   .append(LoadClassReference.getClassReference(type, context, type.getTypeParameters() != null))

@@ -10,10 +10,14 @@ import java.util.Set;
 public class EnviromentConfig {
   private final Map<String, String> mappingAliases;
   private final Set<Class<?>> exposedClasses;
+  private final Set<Class<?>> portableSuperTypes;
 
-  EnviromentConfig(final Map<String, String> mappingAliases, final Set<Class<?>> exposedClasses) {
+  EnviromentConfig(final Map<String, String> mappingAliases,
+                   final Set<Class<?>> exposedClasses,
+                   final Set<Class<?>> portableSuperTypes) {
     this.mappingAliases = Collections.unmodifiableMap(mappingAliases);
     this.exposedClasses = Collections.unmodifiableSet(exposedClasses);
+    this.portableSuperTypes = Collections.unmodifiableSet(portableSuperTypes);
   }
 
   public Map<String, String> getMappingAliases() {
@@ -22,6 +26,10 @@ public class EnviromentConfig {
 
   public Set<Class<?>> getExposedClasses() {
     return exposedClasses;
+  }
+
+  public Set<Class<?>> getPortableSuperTypes() {
+    return portableSuperTypes;
   }
 }
 
