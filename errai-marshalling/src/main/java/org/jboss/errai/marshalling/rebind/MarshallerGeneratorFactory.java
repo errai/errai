@@ -242,10 +242,6 @@ public class MarshallerGeneratorFactory {
     addArrayMarshaller(MetaClassFactory.get(Boolean[].class));
     addArrayMarshaller(MetaClassFactory.get(Byte[].class));
 
-    if (target == MarshallerOuputTarget.Java) {
-      exposeCDIObserversToServer();
-    }
-
     return classStructureBuilder.toJavaString();
   }
 
@@ -447,21 +443,4 @@ public class MarshallerGeneratorFactory {
       arrayDemarshallCode(toMap, dim - 1, anonBuilder);
     }
   }
-
-  /**
-   * @Observes expose hack.
-   */
-  private static void exposeCDIObserversToServer() {
-    final Set<Class<?>> annotationsToScan = new HashSet<Class<?>>() {
-      {
-        add(Dependent.class);
-      }
-    };
-
-    for (Class scope : annotationsToScan) {
-      System.out.println(scope);
-    }
-
-  }
-
 }
