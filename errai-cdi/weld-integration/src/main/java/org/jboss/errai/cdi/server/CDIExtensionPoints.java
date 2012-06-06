@@ -389,9 +389,6 @@ public class CDIExtensionPoints implements Extension {
       if (EnvUtil.isPortableType(observerPoint.getObservedType())) {
         abd.addObserverMethod(new EventObserverMethod(observerPoint.getObservedType(), bus, observerPoint.getQualifiers()));
       }
-      else {
-        System.out.println("not adding: " + observerPoint.getObservedType());
-      }
     }
 
 
