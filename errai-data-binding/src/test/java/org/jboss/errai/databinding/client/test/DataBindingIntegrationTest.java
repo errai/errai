@@ -24,6 +24,7 @@ import java.util.Map;
 import org.jboss.errai.databinding.client.Model;
 import org.jboss.errai.databinding.client.Module;
 import org.jboss.errai.databinding.client.ModuleWithInjectedDataBinder;
+import org.jboss.errai.databinding.client.api.InitialState;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
 import org.jboss.errai.marshalling.client.Marshalling;
@@ -59,7 +60,7 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
 
   @Test
-  public void testBindingUsingInjection() {
+  public void testBindingUsingInjectedDataBinder() {
     ModuleWithInjectedDataBinder module =
         IOC.getBeanManager().lookupBean(ModuleWithInjectedDataBinder.class).getInstance();
 
@@ -86,16 +87,22 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   }
 
   @Test
-  public void testInitialStateSync() {
+  public void testIntegerToStringBinding() {
     Module module = IOC.getBeanManager().lookupBean(Module.class).getInstance();
 
-    module.getModel().setName("initial name");
+    Model model = module.getModel();
+    TextBox textBox = module.getTextBox();
 
-    module.getDataBinder().bind(module.getTextBox(), "name");
-    assertEquals("Widget not properly initialized based on model's state", "initial name",
-        module.getTextBox().getText());
+    module.getDataBinder().unbind();
+    module.getDataBinder().bind(textBox, "age");
+
+    model.setAge(25);
+    assertEquals("Widget not properly updated", "25", textBox.getText());
+
+    textBox.setValue("52", true);
+    assertEquals("Model not properly updated", Integer.valueOf(52), model.getAge());
   }
-
+  
   @Test
   public void testUnbindingSingleProperty() {
     Module module = IOC.getBeanManager().lookupBean(Module.class).getInstance();
@@ -196,5 +203,18 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
     modelMap.put(model, model);
     String marshalledModelMap = Marshalling.toJSON(modelMap);
     assertEquals(modelMap, Marshalling.fromJSON(marshalledModelMap, Map.class));
+  }
+  
+  @Test
+  public void testInitialStateSync() {
+    Module module = IOC.getBeanManager().lookupBean(Module.class).getInstance();
+    
+    module.getModel().setName("initial name");
+    module.getDataBinder().unbind();
+    module.getDataBinder().bind(module.getTextBox(), "name");
+    module.getDataBinder().setModel(module.getModel(), InitialState.FROM_MODEL);
+    
+    assertEquals("Widget not properly initialized based on model's state", "initial name",
+        module.getTextBox().getText());
   }
 }

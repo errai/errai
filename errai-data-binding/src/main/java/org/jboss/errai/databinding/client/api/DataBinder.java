@@ -92,14 +92,14 @@ public class DataBinder<T> {
    * {@link DataBinder#bind(HasValue, Object, String)}.
    * 
    * @param the
-   *          name of the property to unbind, must not be null.
+   *          name of the property to unbind, must not be null
    * 
    * @return the unwrapped model
    */
   @SuppressWarnings("unchecked")
   public T unbind(String property) {
     ((BindableProxy<T>) this.model).unbind(property);
-    return (T) this.model;
+    return this.model;
   }
 
   /**
@@ -110,9 +110,18 @@ public class DataBinder<T> {
   @SuppressWarnings("unchecked")
   public T unbind() {
     ((BindableProxy<T>) this.model).unbind();
-    return (T) this.model;
+    return this.model;
   }
 
+  /**
+   * Returns the proxied model instance.
+   * 
+   * @return the bound model instance
+   */
+  public T getModel() {
+    return this.model;
+  }
+  
   /**
    * Changes the model instance. The bindings stay intact.
    * 
@@ -132,22 +141,18 @@ public class DataBinder<T> {
    *          the instance of a {@link Bindable} type, must not be null
    * @param initialState
    *          specifies the origin of the initial state of both model and UI widget, null if no initial state
-   *          synchronization should be carried out.
+   *          synchronization should be carried out
    * @return the proxied model which has to be used in place of the model instance provided (also accessible using
    *         {@link DataBinder#getModel()})
    */
   @SuppressWarnings("unchecked")
   public T setModel(T model, InitialState initialState) {
-    ((BindableProxy<T>) this.model).setTarget(model, initialState);
-    return (T) this.model;
-  }
+    // Ensure that we do not proxy the model twice
+    if (model instanceof BindableProxy) {
+      model = (T) ((BindableProxy) model).unwrap();
+    }
 
-  /**
-   * Returns the proxied model instance.
-   * 
-   * @return the bound model instance.
-   */
-  public T getModel() {
-    return (T) this.model;
+    ((BindableProxy<T>) this.model).setTarget(model, initialState);
+    return this.model;
   }
 }

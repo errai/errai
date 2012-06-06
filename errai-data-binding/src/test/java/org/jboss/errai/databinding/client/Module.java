@@ -19,7 +19,6 @@ package org.jboss.errai.databinding.client;
 import javax.annotation.PostConstruct;
 
 import org.jboss.errai.databinding.client.api.DataBinder;
-import org.jboss.errai.databinding.client.api.InitialState;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
 import com.google.gwt.user.client.ui.TextBox;
@@ -32,9 +31,9 @@ import com.google.gwt.user.client.ui.TextBox;
 @EntryPoint
 public class Module {
 
-  private TextBox textBox = new TextBox();
+  private final TextBox textBox = new TextBox();
   private Model model = new Model();
-  private DataBinder<Model> dataBinder = new DataBinder<Model>(model, InitialState.FROM_MODEL);
+  private final DataBinder<Model> dataBinder = new DataBinder<Model>(model);
   
   @PostConstruct
   public void init() {

@@ -16,6 +16,7 @@
 
 package org.jboss.errai.databinding.client;
 
+import org.jboss.errai.common.client.api.WrappedPortable;
 import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.databinding.client.api.InitialState;
 
@@ -26,7 +27,7 @@ import com.google.gwt.user.client.ui.Widget;
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface BindableProxy<T> {
+public interface BindableProxy<T> extends WrappedPortable {
 
   /**
    * Binds the property with the given name to the provided widget.

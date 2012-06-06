@@ -59,8 +59,8 @@ public class JacksonTransformer {
    * The transformation to Jackson contains the following steps:
    * <ul>
    *  <li>For all JSON objects, recursively remove the Errai specific OBJECT_ID and ENCODED_TYPE values</li>
-   *  <li>Keep a reference to the removed OBJECT_IDs, so backreferences can be resolved</li>
-   *  <li>If an array is encountered, process all it's elements, then remove the Errai specific VALUE key,
+   *  <li>Keep a reference to the removed OBJECT_IDs, so back-references can be resolved</li>
+   *  <li>If an array is encountered, process all its elements, then remove the Errai specific VALUE key,
    *  by associating its actual value with the object's key directly: 
    *  "list": {"^Value": ["e1","e2"]} becomes "list": ["e1","e2"]
    *  </li>

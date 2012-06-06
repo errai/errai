@@ -37,8 +37,8 @@ import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.Stmt;
-import org.jboss.errai.common.client.api.WrappedPortable;
 import org.jboss.errai.databinding.client.BindableProxy;
+import org.jboss.errai.databinding.client.Convert;
 import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
@@ -67,7 +67,7 @@ import com.google.gwt.user.client.ui.Widget;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class BindableProxyGenerator {
-  private Class<?> bindable;
+  private final Class<?> bindable;
 
   public BindableProxyGenerator(Class<?> bindable) {
     this.bindable = bindable;
@@ -79,7 +79,6 @@ public class BindableProxyGenerator {
         ClassBuilder.define(bindable.getSimpleName() + "Proxy", bindable)
             .packageScope()
             .implementsInterface(BindableProxy.class)
-            .implementsInterface(WrappedPortable.class)
             .body()
             .privateField("bindings", MetaClassFactory.get(new TypeLiteral<Map<String, Widget>>() {}))
             .initializesWith(Stmt.newObject(new TypeLiteral<HashMap<String, Widget>>() {}))
@@ -136,6 +135,11 @@ public class BindableProxyGenerator {
         classBuilder.publicMethod(void.class, "bind", Parameter.of(Widget.class, "widget", true),
             Parameter.of(String.class, "property", true))
             .append(Stmt.loadVariable("this").invoke("unbind", Variable.get("property")))
+            .append(
+                Stmt.if_(Bool.expr(Stmt.loadVariable("bindings").invoke("containsValue", Variable.get("widget"))))
+                    .append(Stmt.throw_(RuntimeException.class, "Widget already bound to a different property!"))
+                    .finish()
+            )
             .append(Stmt.loadClassMember("bindings").invoke("put", Variable.get("property"), Variable.get("widget")))
             .append(
                 Stmt.if_(Bool.instanceOf(Variable.get("widget"), MetaClassFactory.getAsStatement(HasValue.class)))
@@ -299,7 +303,9 @@ public class BindableProxyGenerator {
                   Stmt.loadVariable("target").invoke(
                       setterMethod.getName(),
                       Cast.to(MetaClassFactory.get(setterMethod.getParameterTypes()[0]).asBoxed(),
-                          Stmt.loadVariable("value"))))
+                          Stmt.invokeStatic(Convert.class, "to",
+                              MetaClassFactory.get(setterMethod.getParameterTypes()[0]).asBoxed().asClass(),
+                              Stmt.loadVariable("value")))))
               .finish()
           );
 
@@ -317,17 +323,27 @@ public class BindableProxyGenerator {
                       Stmt.if_(
                           Bool.instanceOf(Variable.get("widget"), MetaClassFactory.getAsStatement(HasValue.class)))
                           .append(
-                              Stmt.castTo(HasValue.class, Stmt.loadVariable("widget")).invoke("setValue",
-                                  Stmt.loadVariable(propertyDescriptor.getName()), true))
+                              Stmt.castTo(HasValue.class, Stmt.loadVariable("widget")).invoke(
+                                  "setValue",
+                                  Stmt.invokeStatic(Convert.class, "to",
+                                      Stmt.castTo(HasValue.class, Stmt.loadVariable("widget")).invoke("getValue")
+                                          .invoke("getClass"),
+                                      Stmt.loadVariable(propertyDescriptor.getName())), true))
                           .finish()
                           .elseif_(
-                              Bool.instanceOf(Variable.get("widget"), MetaClassFactory
-                                  .getAsStatement(HasText.class)))
+                              Bool.instanceOf(Variable.get("widget"), MetaClassFactory.getAsStatement(HasText.class)))
                           .append(
-                              Stmt.castTo(HasText.class, Stmt.loadVariable("widget")).invoke(
-                                  "setText",
-                                  Stmt.castTo(boxedParmType, Stmt.loadVariable(propertyDescriptor.getName()))
-                                      .invoke("toString")))
+                              Stmt.castTo(HasText.class, Stmt.loadVariable("widget"))
+                                  .invoke(
+                                      "setText",
+                                      Stmt.castTo(String.class,
+                                          Stmt.invokeStatic(Convert.class, "to", String.class,
+                                              Stmt.castTo(boxedParmType, Stmt
+                                                  .loadVariable(propertyDescriptor.getName()))
+                                              )
+                                          )
+                                  )
+                          )
                           .finish()
                   ).finish())
           .finish();
