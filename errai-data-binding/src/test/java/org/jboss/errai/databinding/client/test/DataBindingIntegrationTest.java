@@ -24,6 +24,7 @@ import java.util.Map;
 import org.jboss.errai.databinding.client.Model;
 import org.jboss.errai.databinding.client.Module;
 import org.jboss.errai.databinding.client.ModuleWithInjectedDataBinder;
+import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.databinding.client.api.InitialState;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.test.AbstractErraiIOCTest;
@@ -208,13 +209,19 @@ public class DataBindingIntegrationTest extends AbstractErraiIOCTest {
   @Test
   public void testInitialStateSync() {
     Module module = IOC.getBeanManager().lookupBean(Module.class).getInstance();
+    Model model = module.getModel();
+    TextBox textBox = module.getTextBox();
+    DataBinder<Model> binder = module.getDataBinder();
+
+    binder.unbind();
     
-    module.getModel().setName("initial name");
-    module.getDataBinder().unbind();
-    module.getDataBinder().bind(module.getTextBox(), "name");
-    module.getDataBinder().setModel(module.getModel(), InitialState.FROM_MODEL);
+    model.setName("initial name");
+    binder.bind(textBox, "name");
+    binder.setModel(model, InitialState.FROM_MODEL);
+    assertEquals("Widget not properly initialized based on model's initial state", "initial name", textBox.getText());
     
-    assertEquals("Widget not properly initialized based on model's state", "initial name",
-        module.getTextBox().getText());
+    textBox.setText("changed name");
+    binder.setModel(model, InitialState.FROM_UI);
+    assertEquals("Model not properly initialized based on widget's initial state", "changed name", model.getName());
   }
 }
