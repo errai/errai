@@ -1,5 +1,6 @@
 package org.jboss.errai.jpa.rebind;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AccessibleObject;
@@ -8,6 +9,7 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.math.BigInteger;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -15,6 +17,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,6 +48,8 @@ import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.Type;
 
 import org.apache.commons.collections.OrderedMap;
+import org.hibernate.ejb.packaging.PersistenceMetadata;
+import org.hibernate.ejb.packaging.PersistenceXmlLoader;
 import org.jboss.errai.codegen.BooleanExpression;
 import org.jboss.errai.codegen.Modifier;
 import org.jboss.errai.codegen.Parameter;
@@ -99,7 +104,7 @@ public class ErraiEntityManagerGenerator extends Generator {
 
   @Override
   public String generate(TreeLogger logger, GeneratorContext context,
-      String typeName) throws UnableToCompleteException {
+          String typeName) throws UnableToCompleteException {
 
     GWTUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
 
@@ -122,14 +127,14 @@ public class ErraiEntityManagerGenerator extends Generator {
       List<Statement> attributes = new ArrayList<Statement>();
       for (SingularAttribute<?, ?> attrib : et.getSingularAttributes()) {
         Statement attribSnapshot = SnapshotMaker.makeSnapshotAsSubclass(
-            attrib, SingularAttribute.class, ErraiSingularAttribute.class, methodBodyCallback,
-            EntityType.class, ManagedType.class, Type.class);
+                attrib, SingularAttribute.class, ErraiSingularAttribute.class, methodBodyCallback,
+                EntityType.class, ManagedType.class, Type.class);
         pmm.append(Stmt.loadVariable(entityTypeVarName).invoke("addAttribute", attribSnapshot));
       }
       for (PluralAttribute<?, ?, ?> attrib : et.getPluralAttributes()) {
         Statement attribSnapshot = SnapshotMaker.makeSnapshotAsSubclass(
-            attrib, PluralAttribute.class, ErraiPluralAttribute.class, methodBodyCallback,
-            EntityType.class, ManagedType.class, Type.class);
+                attrib, PluralAttribute.class, ErraiPluralAttribute.class, methodBodyCallback,
+                EntityType.class, ManagedType.class, Type.class);
         pmm.append(Stmt.loadVariable(entityTypeVarName).invoke("addAttribute", attribSnapshot));
       }
 
@@ -154,9 +159,9 @@ public class ErraiEntityManagerGenerator extends Generator {
     }
 
     PrintWriter printWriter = context.tryCreate(
-        logger,
-        classBuilder.getClassDefinition().getPackageName(),
-        classBuilder.getClassDefinition().getName());
+            logger,
+            classBuilder.getClassDefinition().getPackageName(),
+            classBuilder.getClassDefinition().getName());
 
     // printWriter is null if code has already been generated.
     if (printWriter != null) {
@@ -168,10 +173,39 @@ public class ErraiEntityManagerGenerator extends Generator {
   }
 
   private EntityManager createHibernateEntityManager() {
+
+    // this is a Set on purpose: two copies of the same persistence.xml will often be present
+    // because GWT likes having source directories on the classpath.
+    Set<String> persistenceUnits = new LinkedHashSet<String>();
+
+    try {
+      for (URL url : Collections.list(getClass().getClassLoader().getResources("META-INF/persistence.xml"))) {
+        try {
+          for (PersistenceMetadata pm : PersistenceXmlLoader.deploy(url, Collections.emptyMap(), null)) {
+            persistenceUnits.add(pm.getName());
+          }
+        } catch (Exception e) {
+          throw new RuntimeException("Failed to parse the persistence unit at " + url + " -- skipping it");
+        }
+      }
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to locate META-INF/persistence.xml", e);
+    }
+
+    if (persistenceUnits.isEmpty()) {
+      throw new RuntimeException(
+              "Can't generate an ErraiEntityManager because no META-INF/persistence.xml" +
+              " resources were found on the classpath");
+    }
+    if (persistenceUnits.size() > 1) {
+      throw new RuntimeException("Found more than one persistence unit on the classpath: " + persistenceUnits);
+    }
+
     Map<String, String> properties = new HashMap<String, String>();
     properties.put("hibernate.dialect", "org.hibernate.dialect.HSQLDialect");
     properties.put("javax.persistence.validation.mode", "none");
-    EntityManagerFactory emf = Persistence.createEntityManagerFactory("ErraiJpaClientTests", properties);
+
+    EntityManagerFactory emf = Persistence.createEntityManagerFactory(persistenceUnits.iterator().next(), properties);
     EntityManager em = emf.createEntityManager();
     return em;
   }
@@ -179,9 +213,9 @@ public class ErraiEntityManagerGenerator extends Generator {
   private String generateErraiEntityType(final EntityType<?> et, MethodBlockBuilder<?> pmm) {
     MetaClass met = MetaClassFactory.get(et.getJavaType());
     pmm.append(Stmt.codeComment(
-        "**\n" +
-        "** EntityType for " + et.getJavaType().getName() + "\n" +
-        "**"));
+            "**\n" +
+                    "** EntityType for " + et.getJavaType().getName() + "\n" +
+            "**"));
     String entityTypeVarName = entitySnapshotVarName(et.getJavaType());
 
     AnonymousClassStructureBuilder entityTypeSubclass =
@@ -189,14 +223,14 @@ public class ErraiEntityManagerGenerator extends Generator {
             .extend();
 
     entityTypeSubclass.publicMethod(et.getJavaType(), "newInstance")
-            .append(Stmt.nestedCall(Stmt.newObject(et.getJavaType())).returnValue())
-            .finish();
+    .append(Stmt.nestedCall(Stmt.newObject(et.getJavaType())).returnValue())
+    .finish();
 
     generateLifecycleEventDeliveryMethods(met, entityTypeSubclass);
 
     pmm.append(Stmt.declareVariable(ErraiEntityType.class).asFinal()
-        .named(entityTypeVarName)
-        .initializeWith(entityTypeSubclass.finish().withParameters(et.getName(), et.getJavaType())));
+            .named(entityTypeVarName)
+            .initializeWith(entityTypeSubclass.finish().withParameters(et.getName(), et.getJavaType())));
     return entityTypeVarName;
   }
 
@@ -334,7 +368,7 @@ public class ErraiEntityManagerGenerator extends Generator {
    * Helper callback for customized methods during the JPA Metamodel snapshot operation.
    */
   private final class JpaMetamodelMethodBodyCallback implements
-          MethodBodyCallback {
+  MethodBodyCallback {
     private final ClassStructureBuilder<?> classBuilder;
     private final EntityType<?> et;
 
@@ -390,8 +424,8 @@ public class ErraiEntityManagerGenerator extends Generator {
         Attribute<?, ?> attr = (Attribute<?, ?>) sourceObject;
         return Stmt.loadLiteral(
                 attr.getPersistentAttributeType() + " attribute " +
-                attr.getDeclaringType().getJavaType().getSimpleName() +
-                "." + attr.getName()).returnValue();
+                        attr.getDeclaringType().getJavaType().getSimpleName() +
+                        "." + attr.getName()).returnValue();
       }
 
       if (sourceObject instanceof PluralAttribute && method.getName().equals("createEmptyCollection")) {
@@ -487,10 +521,10 @@ public class ErraiEntityManagerGenerator extends Generator {
         }
 
         containingClassBuilder
-            .privateField("valueGenerator", generatorDeclaredType)
-            .initializesWith(Stmt.newObject(generatorType)
+        .privateField("valueGenerator", generatorDeclaredType)
+        .initializesWith(Stmt.newObject(generatorType)
                 .withParameters(Stmt.loadStatic(classBuilder.getClassDefinition(), "this"), Variable.get("this")))
-            .finish();
+                .finish();
 
         // StringStatement is a workaround: codegen says valueGenerator is out of scope when we do this properly
         return new StringStatement("return valueGenerator");
@@ -523,13 +557,13 @@ public class ErraiEntityManagerGenerator extends Generator {
       else {
         throw new AssertionError(
                 "JPA properties should only be Field or Method, but this one is " +
-                attr.getJavaMember() == null ? "null" : attr.getJavaMember().getClass());
+                        attr.getJavaMember() == null ? "null" : attr.getJavaMember().getClass());
       }
     }
 
     private Statement generateAttributeGetMethod(MetaMethod method, Object o,
             ClassStructureBuilder<?> containingClassBuilder)
-            throws AssertionError {
+                    throws AssertionError {
       Attribute<?, ?> attr = (Attribute<?, ?>) o;
 
       String entityInstanceParam = method.getParameters()[0].getName();
@@ -544,7 +578,7 @@ public class ErraiEntityManagerGenerator extends Generator {
         return Stmt.loadVariable("this")
                 .invoke(PrivateAccessUtil.getPrivateFieldInjectorName(field),
                         Stmt.castTo(et.getJavaType(), Stmt.loadVariable(entityInstanceParam)))
-                .returnValue();
+                        .returnValue();
       }
       else if (attr.getJavaMember() instanceof Method) {
         return Stmt.loadVariable(entityInstanceParam).invoke(attr.getJavaMember().getName()).returnValue();
@@ -552,7 +586,7 @@ public class ErraiEntityManagerGenerator extends Generator {
       else {
         throw new AssertionError(
                 "JPA properties should only be Field or Method, but this one is " +
-                attr.getJavaMember() == null ? "null" : attr.getJavaMember().getClass());
+                        attr.getJavaMember() == null ? "null" : attr.getJavaMember().getClass());
       }
     }
   }
