@@ -143,6 +143,13 @@ public class MarshallerGeneratorFactory {
       }
     });
 
+    classStructureBuilder.getClassDefinition().addAnnotation(new Dependent() {
+      @Override
+      public Class<? extends Annotation> annotationType() {
+        return Dependent.class;
+      }
+    });
+
     final MetaClass javaUtilMap = MetaClassFactory.get(
             new TypeLiteral<Map<String, Marshaller>>() {
             }
