@@ -16,13 +16,23 @@
 
 package org.jboss.errai.marshalling.rebind;
 
+import static org.jboss.errai.common.rebind.EnvUtil.getEnvironmentConfig;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.ScannerSingleton;
-import org.jboss.errai.common.rebind.EnvUtil;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
@@ -36,22 +46,9 @@ import org.jboss.errai.marshalling.rebind.api.model.Mapping;
 import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
 import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleConstructorMapping;
-import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 import org.jboss.errai.marshalling.server.marshallers.DefaultDefinitionMarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
-import static org.jboss.errai.common.rebind.EnvUtil.getEnvironmentConfig;
 
 /**
  * The default implementation of {@link DefinitionsFactory}. This implementation covers the detection and
@@ -71,7 +68,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
   private final Map<String, MappingDefinition> MAPPING_DEFINITIONS
           = new HashMap<String, MappingDefinition>();
 
-  private Logger log = LoggerFactory.getLogger(MarshallerGeneratorFactory.class);
+  private final Logger log = LoggerFactory.getLogger(MarshallerGeneratorFactory.class);
 
 
   DefinitionsFactoryImpl() {
@@ -101,22 +98,31 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
   @Override
   public void addDefinition(MappingDefinition definition) {
-    
-    MAPPING_DEFINITIONS.put(definition.getMappingClass().getFullyQualifiedName(), definition);
+    putDefinitionIfAbsent(definition.getMappingClass().getFullyQualifiedName(), definition);
     
     if (definition.getMappingClass().isArray() && definition.getMappingClass().getOuterComponentType().isPrimitive()) {
-      MAPPING_DEFINITIONS.put(definition.getMappingClass().getInternalName(), definition);
+      putDefinitionIfAbsent(definition.getMappingClass().getInternalName(), definition);
     }
     
     if (definition.getMappingClass().isPrimitiveWrapper()) {
-      MAPPING_DEFINITIONS.put(definition.getMappingClass().asUnboxed().getInternalName(), definition);
-      MAPPING_DEFINITIONS.put(definition.getMappingClass().asUnboxed().getFullyQualifiedName(), definition);
+      putDefinitionIfAbsent(definition.getMappingClass().asUnboxed().getInternalName(), definition);
+      putDefinitionIfAbsent(definition.getMappingClass().asUnboxed().getFullyQualifiedName(), definition);
     }
     
   if (log.isDebugEnabled())
       log.debug("loaded definition: " + definition.getMappingClass().getFullyQualifiedName());
   }
-
+  
+  private void putDefinitionIfAbsent(String key, MappingDefinition value) {
+    if (MAPPING_DEFINITIONS.containsKey(key)) {
+      throw new IllegalStateException(
+          "Mapping definition collision for " + key +
+          "\nAlready have: " + MAPPING_DEFINITIONS.get(key) +
+          "\nAttempted to add: " + value);
+    }
+    MAPPING_DEFINITIONS.put(key, value);
+  }
+  
   @Override
   public MappingDefinition getDefinition(MetaClass clazz) {
     MappingDefinition def = getDefinition(clazz.getFullyQualifiedName());
@@ -359,6 +365,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     return exposedClasses.contains(clazz);
   }
 
+  @Override
   public Set<Class<?>> getExposedClasses() {
     return Collections.unmodifiableSet(exposedClasses);
   }

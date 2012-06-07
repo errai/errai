@@ -35,10 +35,10 @@ import org.jboss.errai.bus.server.api.RpcContext;
  * <tt>ConversationalEndpointCallback</tt> creates a conversation that invokes an endpoint function
  */
 public class ConversationalEndpointCallback implements MessageCallback {
-  private ServiceInstanceProvider serviceProvider;
-  private Class[] targetTypes;
+  private final ServiceInstanceProvider serviceProvider;
+  private final Class[] targetTypes;
   private Method method;
-  private MessageBus bus;
+  private final MessageBus bus;
 
   /**
    * Initializes the service, method and bus
@@ -62,6 +62,7 @@ public class ConversationalEndpointCallback implements MessageCallback {
    * @param message
    *          - the message to initiate the conversation
    */
+  @Override
   @SuppressWarnings({ "unchecked" })
   public void callback(Message message) {
     Object[] parms = message.get(Object[].class, "MethodParms");
