@@ -338,6 +338,9 @@ public class CDIExtensionPoints implements Extension {
 
     abd.addBean(new ErraiServiceBean(bm));
 
+    final Set<ObserversMarshallingExtension.ObserverPoint> observerPoints
+            = new HashSet<ObserversMarshallingExtension.ObserverPoint>();
+
     for (EventConsumer ec : eventConsumers) {
       if (ec.getEventBeanType() != null) {
         abd.addBean(new ConversationalEventBean(ec.getEventBeanType(), (BeanManagerImpl) bm, bus));
@@ -346,9 +349,13 @@ public class CDIExtensionPoints implements Extension {
       if (ec.isConversational()) {
         abd.addObserverMethod(new ConversationalEventObserverMethod(ec.getRawType(), bus, ec.getQualifiers()));
       }
+      else {
+        observerPoints.add(new ObserversMarshallingExtension.ObserverPoint(ec.getRawType(), ec.getQualifiers()));
+      }
     }
 
-    final Set<ObserversMarshallingExtension.ObserverPoint> observerPoints = ObserversMarshallingExtension.scanForObserverPointsInClassPath();
+    observerPoints.addAll(ObserversMarshallingExtension.scanForObserverPointsInClassPath());
+
     for (ObserversMarshallingExtension.ObserverPoint observerPoint :
             observerPoints) {
       if (EnvUtil.isPortableType(observerPoint.getObservedType())) {

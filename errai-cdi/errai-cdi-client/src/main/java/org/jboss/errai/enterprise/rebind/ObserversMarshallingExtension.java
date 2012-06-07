@@ -94,7 +94,7 @@ public class ObserversMarshallingExtension implements MarshallingExtensionConfig
         final Class<?> fieldType = field.getType();
 
         if (field.isAnnotationPresent(Inject.class)) {
-          visit(visitedTypes, observerPoints, beanType);
+          visit(visitedTypes, observerPoints, fieldType);
           for (final Class<?> type : ScannerSingleton.getOrCreateInstance().getSubTypesOf(fieldType)) {
             visit(visitedTypes, observerPoints, type);
           }
@@ -139,7 +139,7 @@ public class ObserversMarshallingExtension implements MarshallingExtensionConfig
     private final Class<?> observedType;
     private final Set<Annotation> annotations;
 
-    private ObserverPoint(Class<?> observedType, Annotation[] annotations) {
+    public ObserverPoint(Class<?> observedType, Annotation[] annotations) {
       this.observedType = observedType;
       this.annotations = new HashSet<Annotation>(Arrays.asList(annotations));
     }
