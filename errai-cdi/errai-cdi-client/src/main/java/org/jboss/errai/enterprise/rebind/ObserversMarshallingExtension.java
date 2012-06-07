@@ -87,36 +87,41 @@ public class ObserversMarshallingExtension implements MarshallingExtensionConfig
                                             final Set<ObserverPoint> observerPoints,
                                             final Class<?> beanType) {
 
-    visitedTypes.add(beanType.getName());
+    try {
+      visitedTypes.add(beanType.getName());
 
-    for (final Field field : beanType.getDeclaredFields()) {
-      final Class<?> fieldType = field.getType();
+      for (final Field field : beanType.getDeclaredFields()) {
+        final Class<?> fieldType = field.getType();
 
-      if (field.isAnnotationPresent(Inject.class)) {
-        visit(visitedTypes, observerPoints, beanType);
-        for (final Class<?> type : ScannerSingleton.getOrCreateInstance().getSubTypesOf(fieldType)) {
-          visit(visitedTypes, observerPoints, type);
-        }
-      }
-    }
-
-    for (final Method method : beanType.getMethods()) {
-      final int parameterLength = method.getParameterTypes().length;
-      for (int i = 0; i < parameterLength; i++) {
-        final Annotation[] parmAnnotations = method.getParameterAnnotations()[i];
-        for (Annotation a : parmAnnotations) {
-          if (Observes.class.equals(a.annotationType())) {
-            final List<Annotation> qualifiersFromAnnotations = InjectUtil.getQualifiersFromAnnotations(parmAnnotations);
-            final Annotation[] qualifiers =
-                    qualifiersFromAnnotations.toArray(new Annotation[qualifiersFromAnnotations.size()]);
-            observerPoints.add(new ObserverPoint(method.getParameterTypes()[i], qualifiers));
+        if (field.isAnnotationPresent(Inject.class)) {
+          visit(visitedTypes, observerPoints, beanType);
+          for (final Class<?> type : ScannerSingleton.getOrCreateInstance().getSubTypesOf(fieldType)) {
+            visit(visitedTypes, observerPoints, type);
           }
         }
       }
-    }
 
-    if (!Object.class.equals(beanType)) {
-      visit(visitedTypes, observerPoints, beanType.getSuperclass());
+      for (final Method method : beanType.getMethods()) {
+        final int parameterLength = method.getParameterTypes().length;
+        for (int i = 0; i < parameterLength; i++) {
+          final Annotation[] parmAnnotations = method.getParameterAnnotations()[i];
+          for (Annotation a : parmAnnotations) {
+            if (Observes.class.equals(a.annotationType())) {
+              final List<Annotation> qualifiersFromAnnotations = InjectUtil.getQualifiersFromAnnotations(parmAnnotations);
+              final Annotation[] qualifiers =
+                      qualifiersFromAnnotations.toArray(new Annotation[qualifiersFromAnnotations.size()]);
+              observerPoints.add(new ObserverPoint(method.getParameterTypes()[i], qualifiers));
+            }
+          }
+        }
+      }
+
+      if (!Object.class.equals(beanType)) {
+        visit(visitedTypes, observerPoints, beanType.getSuperclass());
+      }
+    }
+    catch (NoClassDefFoundError e) {
+      // ignore this -- may be GWT client code.
     }
   }
 
