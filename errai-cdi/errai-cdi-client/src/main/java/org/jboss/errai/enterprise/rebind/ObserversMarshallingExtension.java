@@ -95,13 +95,13 @@ public class ObserversMarshallingExtension implements MarshallingExtensionConfig
 
         if (field.isAnnotationPresent(Inject.class)) {
           visit(visitedTypes, observerPoints, fieldType);
-          for (final Class<?> type : ScannerSingleton.getOrCreateInstance().getSubTypesOf(fieldType)) {
-            visit(visitedTypes, observerPoints, type);
+          for (final Class<?> subType : ScannerSingleton.getOrCreateInstance().getSubTypesOf(fieldType)) {
+            visit(visitedTypes, observerPoints, subType);
           }
         }
       }
 
-      for (final Method method : beanType.getMethods()) {
+      for (final Method method : beanType.getDeclaredMethods()) {
         final int parameterLength = method.getParameterTypes().length;
         for (int i = 0; i < parameterLength; i++) {
           final Annotation[] parmAnnotations = method.getParameterAnnotations()[i];
@@ -132,6 +132,9 @@ public class ObserversMarshallingExtension implements MarshallingExtensionConfig
 
     if (!visitedTypes.contains(beanType.getName())) {
       scanForObserverPoints(visitedTypes, observerPoints, beanType);
+    }
+    else {
+      System.out.println("already visited: " + beanType.getName());
     }
   }
 
