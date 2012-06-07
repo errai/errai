@@ -115,7 +115,7 @@ public class ObserversMarshallingExtension implements MarshallingExtensionConfig
       }
     }
 
-    if (!Object.class.equals(beanType.getSuperclass())) {
+    if (!Object.class.equals(beanType)) {
       visit(visitedTypes, observerPoints, beanType.getSuperclass());
     }
   }
@@ -123,6 +123,8 @@ public class ObserversMarshallingExtension implements MarshallingExtensionConfig
   private static void visit(final Set<String> visitedTypes,
                             final Set<ObserverPoint> observerPoints,
                             final Class<?> beanType) {
+    if (beanType == null) return;
+
     if (!visitedTypes.contains(beanType.getName())) {
       scanForObserverPoints(visitedTypes, observerPoints, beanType);
     }
