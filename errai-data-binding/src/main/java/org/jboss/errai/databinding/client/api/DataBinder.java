@@ -149,7 +149,7 @@ public class DataBinder<T> {
   public T setModel(T model, InitialState initialState) {
     // Ensure that we do not proxy the model twice
     if (model instanceof BindableProxy) {
-      model = (T) ((BindableProxy) model).unwrap();
+      model = (T) ((BindableProxy<?>) model).unwrap();
     }
 
     ((BindableProxy<T>) this.model).setTarget(model, initialState);

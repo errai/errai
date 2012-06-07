@@ -16,8 +16,13 @@
 
 package org.jboss.errai.databinding.client;
 
+import java.util.Date;
+
 import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.databinding.client.api.Bindable;
+
+import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.shared.DateTimeFormat.PredefinedFormat;
 
 /**
  * Simple type conversion utility used by the generated {@link Bindable} proxies.
@@ -43,22 +48,31 @@ public class Convert {
       return o;
     }
     else if (toType.equals(String.class)) {
+      if (o.getClass().equals(Date.class)) {
+        // TODO we obviously need to give users more control over this!
+        return DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_FULL).format((Date) o);
+      }
       return o.toString();
     }
-    else if (toType.equals(Integer.class) && o.getClass().equals(String.class)) {
-      return Integer.parseInt((String) o);
-    }
-    else if (toType.equals(Long.class) && o.getClass().equals(String.class)) {
-      return Long.parseLong((String) o);
-    }
-    else if (toType.equals(Float.class) && o.getClass().equals(String.class)) {
-      return Float.parseFloat((String) o);
-    }
-    else if (toType.equals(Double.class) && o.getClass().equals(String.class)) {
-      return Double.parseDouble((String) o);
-    }
-    else if (toType.equals(Boolean.class) && o.getClass().equals(String.class)) {
-      return Boolean.parseBoolean((String) o);
+    else if (o.getClass().equals(String.class)) {
+      if (toType.equals(Integer.class)) {
+        return Integer.parseInt((String) o);
+      }
+      else if (toType.equals(Long.class)) {
+        return Long.parseLong((String) o);
+      }
+      else if (toType.equals(Float.class)) {
+        return Float.parseFloat((String) o);
+      }
+      else if (toType.equals(Double.class)) {
+        return Double.parseDouble((String) o);
+      }
+      else if (toType.equals(Boolean.class)) {
+        return Boolean.parseBoolean((String) o);
+      }
+      else if (toType.equals(Date.class)) {
+        return DateTimeFormat.getFormat(PredefinedFormat.DATE_TIME_FULL).parse((String) o);
+      }
     }
     return o;
   }
