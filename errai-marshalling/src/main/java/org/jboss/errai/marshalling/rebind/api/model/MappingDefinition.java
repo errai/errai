@@ -16,21 +16,21 @@
 
 package org.jboss.errai.marshalling.rebind.api.model;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.rebind.api.model.impl.NoConstructMapping;
 import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleConstructorMapping;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 /**
  * @author Mike Brock
  */
 public class MappingDefinition {
-  private MetaClass toMap;
+  private final MetaClass toMap;
 
   private final boolean doNotGenerate;
 
@@ -41,7 +41,7 @@ public class MappingDefinition {
 
   private InstantiationMapping instantiationMapping;
 
-  private List<MemberMapping> memberMappings = new ArrayList<MemberMapping>();
+  private final List<MemberMapping> memberMappings = new ArrayList<MemberMapping>();
 
   public MappingDefinition(Marshaller<Object> marshaller, boolean cached) {
     this(marshaller, marshaller.getTypeHandled(), cached);
@@ -158,4 +158,11 @@ public class MappingDefinition {
   public void setMarshallerInstance(Marshaller marshallerInstance) {
     this.marshallerInstance = marshallerInstance;
   }
+
+  @Override
+  public String toString() {
+    return "MappingDefinition [mappingClass=" + getMappingClass() + ", clientMarshallerClass="
+        + getClientMarshallerClass() + ", serverMarshallerClass=" + getServerMarshallerClass() + "]";
+  }
+  
 }

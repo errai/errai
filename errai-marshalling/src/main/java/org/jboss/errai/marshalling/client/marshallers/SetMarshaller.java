@@ -16,19 +16,22 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
+import java.util.AbstractSet;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJArray;
 
-import java.util.*;
-
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 @ClientMarshaller @ServerMarshaller
-@ImplementationAliases({AbstractSet.class, HashSet.class, SortedSet.class, LinkedHashSet.class})
+@ImplementationAliases({AbstractSet.class, HashSet.class, LinkedHashSet.class})
 public class SetMarshaller extends AbstractCollectionMarshaller<Set> {
   @Override
   public Class<Set> getTypeHandled() {
