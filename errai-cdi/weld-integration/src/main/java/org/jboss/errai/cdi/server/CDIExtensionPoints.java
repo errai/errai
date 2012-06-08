@@ -354,15 +354,14 @@ public class CDIExtensionPoints implements Extension {
       }
     }
 
-    observerPoints.addAll(ObserversMarshallingExtension.scanForObserverPointsInClassPath());
+    observerPoints.addAll(org.jboss.errai.enterprise.rebind.ObserversMarshallingExtension.scanForObserverPointsInClassPath());
 
-    for (ObserversMarshallingExtension.ObserverPoint observerPoint :
+    for (org.jboss.errai.enterprise.rebind.ObserversMarshallingExtension.ObserverPoint observerPoint :
             observerPoints) {
-      if (EnvUtil.isPortableType(observerPoint.getObservedType())) {
+      if (org.jboss.errai.common.rebind.EnvUtil.isPortableType(observerPoint.getObservedType())) {
         abd.addObserverMethod(new EventObserverMethod(observerPoint.getObservedType(), bus, observerPoint.getQualifiers()));
       }
     }
-
 
     for (MessageSender ms : messageSenders) {
       abd.addBean(new SenderBean(ms.getSenderType(), ms.getQualifiers(), bus));

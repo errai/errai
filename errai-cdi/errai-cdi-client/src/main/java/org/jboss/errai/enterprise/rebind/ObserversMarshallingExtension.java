@@ -133,9 +133,6 @@ public class ObserversMarshallingExtension implements MarshallingExtensionConfig
     if (!visitedTypes.contains(beanType.getName())) {
       scanForObserverPoints(visitedTypes, observerPoints, beanType);
     }
-    else {
-      System.out.println("already visited: " + beanType.getName());
-    }
   }
 
   public static class ObserverPoint {
