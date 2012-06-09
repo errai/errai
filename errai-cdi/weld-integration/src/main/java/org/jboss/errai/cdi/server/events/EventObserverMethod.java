@@ -105,7 +105,7 @@ public class EventObserverMethod implements ObserverMethod {
     return null;
   }
 
-  public void notify(Object event) {
+  public void notify(final Object event) {
     if (EventConversationContext.isEventObjectInContext(event)) return;
 
     final Map<String, Object> messageParts = new HashMap<String, Object>(10);

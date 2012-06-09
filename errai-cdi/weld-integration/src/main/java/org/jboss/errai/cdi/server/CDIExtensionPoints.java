@@ -85,6 +85,7 @@ import org.jboss.errai.common.rebind.EnvUtil;
 import org.jboss.errai.enterprise.client.cdi.CDIProtocol;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.enterprise.client.cdi.api.Conversational;
+import org.jboss.errai.enterprise.client.cdi.internal.ObserverModel;
 import org.jboss.errai.enterprise.rebind.ObserversMarshallingExtension;
 import org.jboss.errai.ioc.client.api.Sender;
 import org.jboss.weld.manager.BeanManagerImpl;
@@ -252,12 +253,12 @@ public class CDIExtensionPoints implements Extension {
     Class clazz = type.getJavaClass();
 
     for (Field f : clazz.getDeclaredFields()) {
-      if (f.isAnnotationPresent(Inject.class)) {
+      if (f.isAnnotationPresent(Inject.class) && f.isAnnotationPresent(ObserverModel.class)) {
         processEventInjector(f.getType(), f.getGenericType(), f.getAnnotations());
       }
     }
     for (Method m : clazz.getDeclaredMethods()) {
-      if (m.isAnnotationPresent(Inject.class)) {
+      if (m.isAnnotationPresent(Inject.class) && m.isAnnotationPresent(ObserverModel.class)) {
         Class<?>[] parameterTypes = m.getParameterTypes();
         for (int i = 0, parameterTypesLength = parameterTypes.length; i < parameterTypesLength; i++) {
           Class<?> parmType = parameterTypes[i];
@@ -266,7 +267,7 @@ public class CDIExtensionPoints implements Extension {
       }
     }
     for (Constructor c : clazz.getDeclaredConstructors()) {
-      if (c.isAnnotationPresent(Inject.class)) {
+      if (c.isAnnotationPresent(Inject.class) && c.isAnnotationPresent(ObserverModel.class)) {
         Class<?>[] parameterTypes = c.getParameterTypes();
         for (int i = 0, parameterTypesLength = parameterTypes.length; i < parameterTypesLength; i++) {
           Class<?> parmType = parameterTypes[i];
@@ -288,7 +289,8 @@ public class CDIExtensionPoints implements Extension {
          * Collect Qualifier types for the Event consumer.
          */
         for (Annotation annotation : annotations) {
-          if (annotation.annotationType().isAnnotationPresent(Qualifier.class)) {
+          if (annotation.annotationType().isAnnotationPresent(Qualifier.class)
+                  && !annotation.annotationType().equals(ObserverModel.class)) {
             qualifiers.add(annotation);
             eventQualifiers.put(annotation.annotationType().getName(), annotation);
           }
@@ -310,7 +312,8 @@ public class CDIExtensionPoints implements Extension {
          * Collect Qualifier types for the Event consumer.
          */
         for (Annotation annotation : annotations) {
-          if (annotation.annotationType().isAnnotationPresent(Qualifier.class)) {
+          if (annotation.annotationType().isAnnotationPresent(Qualifier.class)
+                  && !annotation.annotationType().equals(ObserverModel.class)) {
             qualifiers.add(annotation);
             eventQualifiers.put(annotation.annotationType().getName(), annotation);
           }
@@ -328,7 +331,8 @@ public class CDIExtensionPoints implements Extension {
        * Collect Qualifier types for the Event consumer.
        */
       for (Annotation annotation : annotations) {
-        if (annotation.annotationType().isAnnotationPresent(Qualifier.class)) {
+        if (annotation.annotationType().isAnnotationPresent(Qualifier.class)
+                && !annotation.annotationType().equals(ObserverModel.class)) {
           qualifiers.add(annotation);
           eventQualifiers.put(annotation.annotationType().getName(), annotation);
         }
@@ -389,6 +393,9 @@ public class CDIExtensionPoints implements Extension {
       }
     }
 
+    /**
+     * Scan to support development mode testing.
+     */
     observerPoints.addAll(org.jboss.errai.enterprise.rebind.ObserversMarshallingExtension.scanForObserverPointsInClassPath());
 
     for (org.jboss.errai.enterprise.rebind.ObserversMarshallingExtension.ObserverPoint observerPoint :

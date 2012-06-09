@@ -4,6 +4,7 @@ import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.common.rebind.EnvUtil;
+import org.jboss.errai.enterprise.client.cdi.internal.ObserverModel;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
 import org.jboss.errai.marshalling.rebind.api.GeneratorMappingContext;
@@ -39,6 +40,12 @@ public class ObserversMarshallingExtension implements MarshallingExtensionConfig
       return Inject.class;
     }
   };
+  private static final ObserverModel OBSERVER_MODEL_INSTANCE = new ObserverModel() {
+    @Override
+    public Class<? extends Annotation> annotationType() {
+      return ObserverModel.class;
+    }
+  };
 
   @Override
   public void configure(GeneratorMappingContext generatorMappingContext) {
@@ -52,6 +59,7 @@ public class ObserversMarshallingExtension implements MarshallingExtensionConfig
 
       builder.privateField(InjectUtil.getUniqueVarName(), eventObserverType)
               .annotatedWith(INJECT_INSTANCE)
+              .annotatedWith(OBSERVER_MODEL_INSTANCE)
               .annotatedWith(observerPoint.getQualifiers()).finish();
     }
   }
