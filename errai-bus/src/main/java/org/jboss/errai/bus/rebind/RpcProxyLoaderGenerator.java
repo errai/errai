@@ -51,7 +51,7 @@ import com.google.gwt.core.ext.typeinfo.TypeOracle;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class RpcProxyLoaderGenerator extends Generator {
-  private Logger log = LoggerFactory.getLogger(RpcProxyLoaderGenerator.class);
+  private final Logger log = LoggerFactory.getLogger(RpcProxyLoaderGenerator.class);
 
   /**
    * Simple name of class to be generated
@@ -135,10 +135,8 @@ public class RpcProxyLoaderGenerator extends Generator {
     }
 
     classBuilder = (ClassStructureBuilder<?>) loadProxies.finish();
-
     String generatedStr = classBuilder.toJavaString();
-
-    if (Boolean.getBoolean("errai.marshalling.printOut")) {
+    if (Boolean.getBoolean("errai.codegen.printOut")) {
       System.out.println("----[start rpc proxy]---");
       System.out.println(generatedStr);
       System.out.println("----[end rpc proxy]-----");

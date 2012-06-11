@@ -16,6 +16,10 @@
 
 package org.jboss.errai.ioc.client.api.builtin;
 
+import java.lang.annotation.Annotation;
+
+import javax.inject.Singleton;
+
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.framework.RPCStub;
@@ -24,18 +28,15 @@ import org.jboss.errai.ioc.client.api.Caller;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.IOCProvider;
 
-import javax.inject.Singleton;
-import java.lang.annotation.Annotation;
-
 /**
  * @author Mike Brock
  */
 @IOCProvider @Singleton
-public class CallerProvider implements ContextualTypeProvider<Caller> {
+public class CallerProvider implements ContextualTypeProvider<Caller<?>> {
   private static final RemoteServiceProxyFactory factory = new RemoteServiceProxyFactory();
 
   @Override
-  public Caller provide(final Class<?>[] typeargs, final Annotation[] qualifiers) {
+  public Caller<?> provide(final Class<?>[] typeargs, final Annotation[] qualifiers) {
     return new Caller<Object>() {
       @Override
       public Object call(RemoteCallback<?> callback) {

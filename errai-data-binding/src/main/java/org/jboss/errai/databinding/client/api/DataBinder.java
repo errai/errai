@@ -68,14 +68,15 @@ public class DataBinder<T> {
 
   /**
    * Bind the provided widget to the specified property of the model instance associated with this {@link DataBinder}
-   * instance. If an existing binding for the specified property exists, it will be replaced.
+   * instance. If an existing binding for the specified property exists it will be replaced.
    * 
    * @param <T>
-   *          the model type
+   *          The model type
    * @param widget
    *          The widget the model instance should be bound to, must not be null.
    * @param property
-   *          The property that should be used for the binding, following Java bean conventions, must not be null
+   *          The name of the property that should be used for the binding, following Java bean conventions. Must not be
+   *          null.
    * @return The proxied model which has to be used in place of the model instance provided (also accessible using
    *         {@link DataBinder#getModel()}).
    */
@@ -91,7 +92,7 @@ public class DataBinder<T> {
    * Unbinds the widget from the specified model property, bound by a previous call to
    * {@link DataBinder#bind(HasValue, Object, String)}.
    * 
-   * @param the
+   * @param property
    *          The name of the property to unbind, must not be null.
    * 
    * @return the unwrapped model
@@ -127,7 +128,7 @@ public class DataBinder<T> {
    * 
    * @param model
    *          The instance of a {@link Bindable} type, must not be null.
-   * @return The proxied model which has to be used in place of the model instance provided (also accessible using
+   * @return The proxied model which has to be used in place of the provided model instance (also accessible using
    *         {@link DataBinder#getModel()}).
    */
   public T setModel(T model) {

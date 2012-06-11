@@ -26,7 +26,7 @@ import org.jboss.errai.bus.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.enterprise.client.jaxrs.JaxrsProxy;
 
 /**
- * API for executing HTTP calls based on a JAX-RS interface.
+ * API for communicating with REST endpoints based on JAX-RS interfaces.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -36,7 +36,7 @@ public class RestClient {
   /**
    * Creates a client/proxy for the provided JAX-RS resource interface.
    *
-   * @param remoteService  the JAX-RS interface
+   * @param remoteService  the JAX-RS resource interface
    * @param callback  the asynchronous callback to use
    * @param successCodes  optional HTTP status codes used to determine if the request was successful
    * @return proxy of the specified remote service type
@@ -49,8 +49,8 @@ public class RestClient {
   /**
    * Creates a client/proxy for the provided JAX-RS resource interface.
    * 
-   * @param remoteService  the JAX-RS interface
-   * @param baseUrl  the base url overriding the default application root path
+   * @param remoteService  the JAX-RS resource interface
+   * @param baseUrl  the base URL overriding the default application root path
    * @param callback  the asynchronous callback to use
    * @param successCodes  optional HTTP status codes used to determine if the request was successful
    * @return proxy of the specified remote service type
@@ -63,7 +63,7 @@ public class RestClient {
   /**
    * Creates a client/proxy for the provided JAX-RS resource interface.
    * 
-   * @param remoteService  the JAX-RS interface
+   * @param remoteService  the JAX-RS resource interface
    * @param callback  the asynchronous callback to use 
    * @param errorCallback  the error callback to use
    * @param successCodes  optional HTTP status codes used to determine if the request was successful
@@ -77,8 +77,8 @@ public class RestClient {
   /**
    * Creates a client/proxy for the provided JAX-RS resource interface.
    * 
-   * @param remoteService  the JAX-RS interface
-   * @param baseUrl  the base url overriding the default application root path
+   * @param remoteService  the JAX-RS resource interface
+   * @param baseUrl  the base URL overriding the default application root path
    * @param callback  the asynchronous callback to use
    * @param errorCallback  the error callback to use
    * @param successCodes  optional HTTP status codes used to determine if the request was successful

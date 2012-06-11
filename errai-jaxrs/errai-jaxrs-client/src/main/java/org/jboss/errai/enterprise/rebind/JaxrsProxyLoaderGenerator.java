@@ -29,7 +29,6 @@ import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
-import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.RebindUtils;
@@ -50,7 +49,7 @@ import com.google.gwt.core.ext.typeinfo.JClassType;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class JaxrsProxyLoaderGenerator extends Generator {
-  private Logger log = LoggerFactory.getLogger(JaxrsProxyLoaderGenerator.class);
+  private final Logger log = LoggerFactory.getLogger(JaxrsProxyLoaderGenerator.class);
   
   @Override
   public String generate(TreeLogger logger, GeneratorContext context, String typeName)
@@ -106,11 +105,12 @@ public class JaxrsProxyLoaderGenerator extends Generator {
     ClassStructureBuilder<?> classBuilder = ClassBuilder.implement(JaxrsProxyLoader.class);
 
     MethodBlockBuilder<?> loadProxies = classBuilder.publicMethod(void.class, "loadProxies");
+    
     for (Class<?> remote : scanner.getTypesAnnotatedWith(Path.class, RebindUtils.findTranslatablePackages(context))) {
       if (remote.isInterface()) {
         // create the remote proxy for this interface
         ClassStructureBuilder<?> remoteProxy = new JaxrsProxyGenerator(remote).generate();
-        loadProxies.append(new InnerClass((BuildMetaClass) remoteProxy.getClassDefinition()));
+        loadProxies.append(new InnerClass(remoteProxy.getClassDefinition()));
 
         // create the proxy provider
         Statement proxyProvider = ObjectBuilder.newInstanceOf(ProxyProvider.class)
@@ -126,7 +126,6 @@ public class JaxrsProxyLoaderGenerator extends Generator {
     classBuilder = (ClassStructureBuilder<?>) loadProxies.finish();
     
     String out = classBuilder.toJavaString();
-
     if (Boolean.getBoolean("errai.codegen.printOut")) {
       System.out.println("---JAX-RS Proxy-->");
       System.out.println(out);
