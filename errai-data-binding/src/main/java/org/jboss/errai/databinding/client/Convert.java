@@ -35,10 +35,10 @@ public class Convert {
    * Convert the provided object to the provided type.
    * 
    * @param toType
-   *          the type to convert to, must not be null
+   *          The type to convert to, must not be null.
    * @param o
-   *          the object to convert, must not be null
-   * @return converted object
+   *          The object to convert, must not be null.
+   * @return the converted object
    */
   public static Object to(Class<?> toType, Object o) {
     Assert.notNull(toType);

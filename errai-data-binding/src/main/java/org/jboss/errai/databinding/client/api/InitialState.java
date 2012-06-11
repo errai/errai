@@ -35,7 +35,7 @@ public enum InitialState {
    * Returns the model value or the UI value, as appropriate.
    * 
    * @param modelValue
-   *          The pre-existing model value
+   *          The pre-existing model value.
    * @param widgetValue
    *          The pre-existing UI widget value.
    * @return Either model or widget. Return value will be null if the

@@ -23,7 +23,7 @@ import org.jboss.errai.ioc.client.api.TaskOrder;
 import com.google.gwt.core.client.GWT;
 
 /**
- * Bootstrapper for the data binding module.
+ * Bootstrapper for Errai's data binding module.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */

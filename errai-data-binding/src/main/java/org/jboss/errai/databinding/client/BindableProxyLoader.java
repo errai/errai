@@ -19,12 +19,13 @@ package org.jboss.errai.databinding.client;
 import org.jboss.errai.databinding.client.api.Bindable;
 
 /**
- * This interface is used internally during compile time to produce the required proxies for {@link Bindable} types.
+ * This interface is used internally during compile time to produce the required proxies for {@link Bindable} types (see
+ * the GWT module descriptor).
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public interface BindableProxyLoader {
-  
+
   /**
    * Registers the generated proxies for bindable types.
    */

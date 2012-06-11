@@ -48,9 +48,9 @@ public interface BindableProxy<T> extends WrappedPortable {
    * Changes the target model instance of this proxy. The bindings stay intact.
    * 
    * @param model
-   *          the instance of a {@link Bindable} type, must not be null
+   *          The instance of a {@link Bindable} type, must not be null.
    * @param state
-   *          specifies the origin of the initial state of both model and UI widget, null if no initial state
+   *          Specifies the origin of the initial state of both model and UI widget, null if no initial state
    *          synchronization should be carried out.
    */
   public void setTarget(T model, InitialState initialState);

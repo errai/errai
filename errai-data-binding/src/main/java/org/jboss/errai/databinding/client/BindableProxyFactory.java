@@ -24,7 +24,7 @@ import org.jboss.errai.databinding.client.api.Bindable;
 import org.jboss.errai.databinding.client.api.InitialState;
 
 /**
- * This class provides access to the generated proxies for {@link Bindable} types.
+ * Provides access to the generated proxies for {@link Bindable} types.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
@@ -38,11 +38,11 @@ public class BindableProxyFactory {
    * {@link BindableProxy#bind(String, com.google.gwt.user.client.ui.HasValue)}).
    * 
    * @param <T>
-   *          bindable type
+   *          the bindable type
    * @param model
-   *          the model instance to proxy
+   *          The model instance to proxy.
    * @param state
-   *          specifies the origin of the initial state of both model and UI widget
+   *          Specifies the origin of the initial state of both model and UI widget.
    *                   
    * @return proxy that can be used in place of the model instance.
    */
@@ -65,7 +65,7 @@ public class BindableProxyFactory {
    * @param bindableType
    *          the bindable type
    * @param state
-   *          specifies the origin of the initial state of both model and UI widget
+   *          Specifies the origin of the initial state of both model and UI widget.
    * @return proxy that can be used in place of the model instance.
    */
   public static <T> T getBindableProxy(Class<?> bindableType, InitialState state) {
@@ -96,9 +96,9 @@ public class BindableProxyFactory {
    * Registers a generated bindable proxy. This method is called by the generated BindableProxyLoader.
    * 
    * @param proxyType
-   *          bindable type, must not be null
+   *          The bindable type, must not be null.
    * @param proxyProvider
-   *          the proxy provided for the generated bindable proxy, must not be null.
+   *          The proxy provider for the generated bindable proxy, must not be null.
    */
   public static void addBindableProxy(Class<?> proxyType, BindableProxyProvider proxyProvider) {
     Assert.notNull(proxyType);

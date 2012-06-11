@@ -37,7 +37,7 @@ public class DataBinder<T> {
    * Creates a {@link DataBinder} for a newly created model instance of the provided type.
    * 
    * @param modelType
-   *          the bindable type, must not be null
+   *          The bindable type, must not be null.
    */
   public DataBinder(Class<T> modelType) {
     this.model = BindableProxyFactory.getBindableProxy(Assert.notNull(modelType), null);
@@ -47,7 +47,7 @@ public class DataBinder<T> {
    * Creates a {@link DataBinder} for the provided model instance.
    * 
    * @param model
-   *          the instance of a {@link Bindable} type, must not be null
+   *          The instance of a {@link Bindable} type, must not be null.
    */
   public DataBinder(T model) {
     this(Assert.notNull(model), null);
@@ -58,9 +58,9 @@ public class DataBinder<T> {
    * value defined by {@link InitialState}.
    * 
    * @param model
-   *          the instance of a {@link Bindable} type, must not be null
+   *          The instance of a {@link Bindable} type, must not be null.
    * @param intialState
-   *          specifies the origin of the initial state of both model and UI widget.
+   *          Specifies the origin of the initial state of both model and UI widget.
    */
   public DataBinder(T model, InitialState intialState) {
     this.model = BindableProxyFactory.getBindableProxy(Assert.notNull(model), intialState);
@@ -73,11 +73,11 @@ public class DataBinder<T> {
    * @param <T>
    *          the model type
    * @param widget
-   *          widget the model instance should be bound to, must not be null
+   *          The widget the model instance should be bound to, must not be null.
    * @param property
-   *          the property that should be used for the binding, following Java bean conventions, must not be null
-   * @return the proxied model which has to be used in place of the model instance provided (also accessible using
-   *         {@link DataBinder#getModel()})
+   *          The property that should be used for the binding, following Java bean conventions, must not be null
+   * @return The proxied model which has to be used in place of the model instance provided (also accessible using
+   *         {@link DataBinder#getModel()}).
    */
   @SuppressWarnings("unchecked")
   public T bind(final Widget widget, final String property) {
@@ -92,7 +92,7 @@ public class DataBinder<T> {
    * {@link DataBinder#bind(HasValue, Object, String)}.
    * 
    * @param the
-   *          name of the property to unbind, must not be null
+   *          The name of the property to unbind, must not be null.
    * 
    * @return the unwrapped model
    */
@@ -121,14 +121,14 @@ public class DataBinder<T> {
   public T getModel() {
     return this.model;
   }
-  
+
   /**
    * Changes the model instance. The bindings stay intact.
    * 
    * @param model
-   *          the instance of a {@link Bindable} type, must not be null
-   * @return the proxied model which has to be used in place of the model instance provided (also accessible using
-   *         {@link DataBinder#getModel()})
+   *          The instance of a {@link Bindable} type, must not be null.
+   * @return The proxied model which has to be used in place of the model instance provided (also accessible using
+   *         {@link DataBinder#getModel()}).
    */
   public T setModel(T model) {
     return setModel(model, null);
@@ -138,11 +138,11 @@ public class DataBinder<T> {
    * Changes the model instance. The bindings stay intact.
    * 
    * @param model
-   *          the instance of a {@link Bindable} type, must not be null
+   *          The instance of a {@link Bindable} type, must not be null.
    * @param initialState
-   *          specifies the origin of the initial state of both model and UI widget, null if no initial state
-   *          synchronization should be carried out
-   * @return the proxied model which has to be used in place of the model instance provided (also accessible using
+   *          Specifies the origin of the initial state of both model and UI widget, null if no initial state
+   *          synchronization should be carried out.
+   * @return The proxied model which has to be used in place of the provided model instance (also accessible using
    *         {@link DataBinder#getModel()})
    */
   @SuppressWarnings("unchecked")
