@@ -23,7 +23,7 @@ import org.jboss.errai.bus.client.framework.RoutingFlag;
 import org.jboss.errai.common.client.protocols.MessageParts;
 
 /**
- * Utility to create conversational messages on the bus.
+ * Utilities for creating conversational messages on the bus.
  *
  * @author Mike Brock
  * @author Jonathan Fuerth <jfuerth@redhat.com>
