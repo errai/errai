@@ -530,6 +530,40 @@ public class BusCommunicationTests extends AbstractErraiTest {
     });
   }
 
+  public void testInterceptedRpcBypassingRemoteEndpoint() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        TestRPCService remote = MessageBuilder.createCall(new RemoteCallback<String>() {
+          @Override
+          public void callback(String response) {
+            assertEquals("Request was not intercepted", "intercepted", response);
+            finishTest();
+          }
+        }, TestRPCService.class);
+
+        remote.interceptedRpcBypassingRemoteEndpoint();
+      }
+    });
+  }
+  
+  public void testInterceptedRpcWithResultManipulation() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        TestRPCService remote = MessageBuilder.createCall(new RemoteCallback<String>() {
+          @Override
+          public void callback(String response) {
+            assertEquals("Request was not intercepted", "result_intercepted", response);
+            finishTest();
+          }
+        }, TestRPCService.class);
+
+        remote.interceptedRpcManipulatingResult();
+      }
+    });
+  }
+  
   public void testPlainMessagingWithRpcEndpoint() {
     runAfterInit(new Runnable() {
       @Override

@@ -23,7 +23,7 @@ import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.framework.MessageBus;
 import org.jboss.errai.bus.client.framework.ProxyFactory;
-import org.jboss.errai.bus.client.framework.RPCStub;
+import org.jboss.errai.bus.client.framework.RpcStub;
 import org.jboss.errai.bus.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.common.client.protocols.MessageParts;
@@ -58,8 +58,8 @@ public class DefaultRemoteCallBuilder {
 
   public <T, R> T call(final RemoteCallback<R> callback, final ErrorCallback errorCallback, final Class<T> remoteService) {
     T svc = proxyFactory.getRemoteProxy(remoteService);
-    ((RPCStub) svc).setRemoteCallback(callback);
-    ((RPCStub) svc).setErrorCallback(errorCallback);
+    ((RpcStub) svc).setRemoteCallback(callback);
+    ((RpcStub) svc).setErrorCallback(errorCallback);
     return svc;
   }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 JBoss, a divison Red Hat, Inc
+ * Copyright 2011 JBoss, by Red Hat, Inc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,24 @@
 
 package org.jboss.errai.bus.client.tests.support;
 
-import org.jboss.errai.bus.client.api.interceptor.InterceptedCall;
-import org.jboss.errai.bus.server.annotations.Remote;
+import org.jboss.errai.bus.client.api.RemoteCallback;
+import org.jboss.errai.bus.client.api.interceptor.RemoteCallContext;
+import org.jboss.errai.bus.client.api.interceptor.RpcInterceptor;
 
 /**
- * @author Mike Brock <cbrock@redhat.com>
+ * RPC interceptor for testing purposes. Manipulates the result returned from the remote endpoint.
+ * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-@Remote
-public interface TestRPCService {
-  public boolean isGreaterThan(int a, int b);
-  public void exception() throws TestException;
-  public void returnVoid();
-  public Person returnNull();
-  
-  @InterceptedCall(RpcBypassingInterceptor.class)
-  public String interceptedRpcBypassingRemoteEndpoint();
-  
-  @InterceptedCall(RpcResultManipulatingInterceptor.class)
-  public String interceptedRpcManipulatingResult();
+public class RpcResultManipulatingInterceptor implements RpcInterceptor {
+
+  @Override
+  public void aroundInvoke(final RemoteCallContext context) {
+    context.proceed(new RemoteCallback<String>() {
+      @Override
+      public void callback(String response) {
+        context.setResult(response + "_intercepted");
+      }
+    });
+  }
 }

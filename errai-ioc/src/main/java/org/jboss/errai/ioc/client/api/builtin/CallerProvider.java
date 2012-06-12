@@ -22,7 +22,7 @@ import javax.inject.Singleton;
 
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.RemoteCallback;
-import org.jboss.errai.bus.client.framework.RPCStub;
+import org.jboss.errai.bus.client.framework.RpcStub;
 import org.jboss.errai.bus.client.framework.RemoteServiceProxyFactory;
 import org.jboss.errai.ioc.client.api.Caller;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
@@ -41,17 +41,17 @@ public class CallerProvider implements ContextualTypeProvider<Caller<?>> {
       @Override
       public Object call(RemoteCallback<?> callback) {
         Object proxy = factory.getRemoteProxy(typeargs[0]);
-        ((RPCStub) proxy).setRemoteCallback(callback);
-        ((RPCStub) proxy).setQualifiers(qualifiers);
+        ((RpcStub) proxy).setRemoteCallback(callback);
+        ((RpcStub) proxy).setQualifiers(qualifiers);
         return proxy;
       }
 
       @Override
       public Object call(RemoteCallback<?> callback, ErrorCallback errorCallback) {
         Object proxy = factory.getRemoteProxy(typeargs[0]);
-        ((RPCStub) proxy).setRemoteCallback(callback);
-        ((RPCStub) proxy).setErrorCallback(errorCallback);
-        ((RPCStub) proxy).setQualifiers(qualifiers);
+        ((RpcStub) proxy).setRemoteCallback(callback);
+        ((RpcStub) proxy).setErrorCallback(errorCallback);
+        ((RpcStub) proxy).setQualifiers(qualifiers);
         return proxy;
       }
     };

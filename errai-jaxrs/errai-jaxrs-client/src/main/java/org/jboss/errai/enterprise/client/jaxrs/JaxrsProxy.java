@@ -18,14 +18,14 @@ package org.jboss.errai.enterprise.client.jaxrs;
 
 import java.util.List;
 
-import org.jboss.errai.bus.client.framework.RPCStub;
+import org.jboss.errai.bus.client.framework.RpcStub;
 
 /**
- * JAX-RS proxies are basically {@link RPCStub}s managed by the same {@see RemoteServiceProxyFactory}.
+ * JAX-RS proxies are basically {@link RpcStub}s managed by the same {@see RemoteServiceProxyFactory}.
  * 
  * @author Christian Sadilek <csadilek@redhat.com>
  */
-public interface JaxrsProxy extends RPCStub {
+public interface JaxrsProxy extends RpcStub {
   
   /**
    * If not set explicitly, the base url is the configured default application root path {@see RestClient}.

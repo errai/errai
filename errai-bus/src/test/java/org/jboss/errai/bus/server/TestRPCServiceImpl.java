@@ -30,6 +30,7 @@ import org.jboss.errai.bus.server.annotations.Service;
  */
 @Service
 public class TestRPCServiceImpl implements TestRPCService, MessageCallback {
+  @Override
   public boolean isGreaterThan(int a, int b) {
     System.out.println("TestRPCService.isGreaterThan(" + a + ", " + b + ")");
     return a > b;
@@ -55,5 +56,15 @@ public class TestRPCServiceImpl implements TestRPCService, MessageCallback {
     MessageBuilder.createConversation(message)
       .subjectProvided()
       .done().reply();
+  }
+
+  @Override
+  public String interceptedRpcBypassingRemoteEndpoint() {
+    return "not intercetped";
+  }
+
+  @Override
+  public String interceptedRpcManipulatingResult() {
+    return "result";
   }
 }

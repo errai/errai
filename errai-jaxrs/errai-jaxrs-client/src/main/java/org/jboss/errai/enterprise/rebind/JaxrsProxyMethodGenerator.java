@@ -19,11 +19,13 @@ package org.jboss.errai.enterprise.rebind;
 import static org.jboss.errai.enterprise.rebind.TypeMarshaller.demarshal;
 import static org.jboss.errai.enterprise.rebind.TypeMarshaller.marshal;
 
+import org.jboss.errai.bus.client.api.interceptor.InterceptedCall;
 import org.jboss.errai.bus.rebind.RebindUtils;
 import org.jboss.errai.codegen.BooleanOperator;
 import org.jboss.errai.codegen.DefParameters;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.StringStatement;
 import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
@@ -34,6 +36,7 @@ import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseCallback;
 import org.jboss.errai.enterprise.client.jaxrs.api.ResponseException;
+import org.jboss.errai.enterprise.client.jaxrs.api.interceptor.RestCallContext;
 
 import com.google.gwt.http.client.Request;
 import com.google.gwt.http.client.RequestBuilder;
@@ -50,52 +53,100 @@ import com.google.gwt.user.client.Cookies;
  */
 public class JaxrsProxyMethodGenerator {
   private static final String APPEND = "append";
- 
-  private MetaClass declaringClass;
-  private JaxrsResourceMethod resourceMethod;
-  private BlockBuilder<?> methodBlock;
+
+  private final MetaClass declaringClass;
+  private final JaxrsResourceMethod resourceMethod;
+  private final BlockBuilder<?> methodBlock;
 
   public JaxrsProxyMethodGenerator(ClassStructureBuilder<?> classBuilder, JaxrsResourceMethod resourceMethod) {
     this.declaringClass = classBuilder.getClassDefinition();
     this.resourceMethod = resourceMethod;
+
+    Parameter[] parms = DefParameters.from(resourceMethod.getMethod()).getParameters().toArray(new Parameter[0]);
+    Parameter[] finalParms = new Parameter[parms.length];
+    for (int i = 0; i < parms.length; i++) {
+      finalParms[i] = Parameter.of(parms[i].getType(), parms[i].getName(), true);
+    }
     this.methodBlock = classBuilder.publicMethod(resourceMethod.getMethod().getReturnType(),
-        resourceMethod.getMethod().getName(),
-        DefParameters.from(resourceMethod.getMethod()).getParameters().toArray(new Parameter[0]));
+        resourceMethod.getMethod().getName(), finalParms);
   }
 
   public void generate() {
     if (resourceMethod.getHttpMethod() != null) {
-      generateRequest();
+      generateRequestBuilder();
+      generateHeaders();
+
+      if (resourceMethod.getMethod().isAnnotationPresent(InterceptedCall.class) ||
+          resourceMethod.getMethod().getDeclaringClass().isAnnotationPresent(InterceptedCall.class)) {
+        generateInterceptorLogic();
+      }
+      else {
+        methodBlock.append(generateRequest(false));
+      }
     }
     generateReturnStatement();
   }
 
-  private void generateRequest() {
-    generateRequestBuilder();
-    generateHeaders();
-    
-    ContextualStatementBuilder sendRequest = Stmt.loadVariable("requestBuilder");
+  private void generateInterceptorLogic() {
+    Statement callContext =
+        RebindUtils.generateProxyMethodCallContext(RestCallContext.class, declaringClass, resourceMethod.getMethod(),
+            generateRequest(true));
+
+    InterceptedCall interceptedCall = resourceMethod.getMethod().getAnnotation(InterceptedCall.class);
+    if (interceptedCall == null) {
+      interceptedCall = resourceMethod.getMethod().getDeclaringClass().getAnnotation(InterceptedCall.class);
+    }
+
+    methodBlock.append(
+        Stmt.try_()
+            .append(
+                Stmt.declareVariable(RestCallContext.class).asFinal().named("callContext")
+                    .initializeWith(callContext))
+            .append(
+                Stmt.loadVariable("callContext").invoke("setRequestBuilder", Variable.get("requestBuilder")))
+            .append(
+                Stmt.nestedCall(Stmt.newObject(interceptedCall.value())).invoke("aroundInvoke",
+                    Variable.get("callContext")))
+            .append(
+                Stmt.if_(Bool.isNotNull(Stmt.loadVariable("callContext").invoke("getResult")))
+                    .append(
+                        Stmt.loadVariable("remoteCallback").invoke("callback",
+                            Stmt.loadVariable("callContext").invoke("getResult")))
+                    .finish()
+            )
+            .finish()
+            .catch_(Throwable.class, "throwable")
+            .append(errorHandling())
+            .finish()
+        );
+  }
+
+  private Statement generateRequest(boolean intercepted) {
+    ContextualStatementBuilder sendRequest = (intercepted) ?
+        Stmt.nestedCall(new StringStatement("getRequestBuilder()", MetaClassFactory.get(RequestBuilder.class))) :
+          Stmt.loadVariable("requestBuilder");
+
     if (resourceMethod.getParameters().getEntityParameter() == null) {
       sendRequest = sendRequest.invoke("sendRequest", null, createRequestCallback());
     }
     else {
-      Statement body = marshal(resourceMethod.getParameters().getEntityParameter(), 
+      Statement body = marshal(resourceMethod.getParameters().getEntityParameter(),
           resourceMethod.getContentTypeHeader());
       sendRequest = sendRequest.invoke("sendRequest", body, createRequestCallback());
     }
 
-    methodBlock.append(Stmt
+    return Stmt
         .try_()
         .append(sendRequest)
         .finish()
         .catch_(RequestException.class, "throwable")
         .append(errorHandling())
-        .finish());
+        .finish();
   }
-  
+
   private void generateRequestBuilder() {
     generateUrl();
-    
+
     Statement requestBuilder =
         Stmt.declareVariable("requestBuilder", RequestBuilder.class,
             Stmt.newObject(RequestBuilder.class)
@@ -103,9 +154,9 @@ public class JaxrsProxyMethodGenerator {
 
     methodBlock.append(requestBuilder);
   }
-  
+
   private void generateUrl() {
-    methodBlock.append(Stmt.declareVariable("url", StringBuilder.class, 
+    methodBlock.append(Stmt.declareVariable("url", StringBuilder.class,
         Stmt.newObject(StringBuilder.class).withParameters(Stmt.loadVariable("this").invoke("getBaseUrl"))));
 
     JaxrsResourceMethodParameters params = resourceMethod.getParameters();
@@ -118,7 +169,7 @@ public class JaxrsProxyMethodGenerator {
       pathValue = pathValue.invoke("replace", "{" + pathParamName + "}",
           encodePath(marshal(params.getPathParameter(pathParamName))));
     }
-    
+
     if (params.getMatrixParameters() != null) {
       for (String matrixParamName : params.getMatrixParameters().keySet()) {
         pathValue = pathValue.invoke("concat", ";" + matrixParamName + "=")
@@ -126,7 +177,7 @@ public class JaxrsProxyMethodGenerator {
       }
     }
     ContextualStatementBuilder urlBuilder = Stmt.loadVariable("url").invoke(APPEND, pathValue);
-    
+
     // construct query using @QueryParams
     if (params.getQueryParameters() != null) {
       urlBuilder = urlBuilder.invoke(APPEND, "?");
@@ -146,7 +197,6 @@ public class JaxrsProxyMethodGenerator {
     if (urlBuilder != null)
       methodBlock.append(urlBuilder);
   }
-
 
   private void generateHeaders() {
     JaxrsResourceMethodParameters params = resourceMethod.getParameters();
@@ -192,37 +242,40 @@ public class JaxrsProxyMethodGenerator {
 
   private Statement createRequestCallback() {
     Statement statusCode = Stmt.loadVariable("response").invoke("getStatusCode");
-    
-    Statement requestCallback = Stmt
-        .newObject(RequestCallback.class)
-        .extend()
-        .publicOverridesMethod("onError", Parameter.of(Request.class, "request"),
-            Parameter.of(Throwable.class, "throwable"))
-        .append(errorHandling())
-        .finish()
-        .publicOverridesMethod("onResponseReceived", Parameter.of(Request.class, "request"),
-            Parameter.of(Response.class, "response"))
-        .append(Stmt.if_(
-                Bool.and(
-                    Bool.or(
-                        Bool.isNull(Stmt.loadStatic(declaringClass, "this").loadField("successCodes")),
-                        Stmt.loadStatic(declaringClass, "this").loadField("successCodes").invoke("contains", statusCode)
-                    ),
-                    Bool.and(
-                        Bool.greaterThanOrEqual(statusCode, 200),
-                        Bool.lessThan(statusCode, 300))
-                     )
-                   )
-            .append(responseHandling())
+
+    Statement requestCallback =
+        Stmt
+            .newObject(RequestCallback.class)
+            .extend()
+            .publicOverridesMethod("onError", Parameter.of(Request.class, "request"),
+                Parameter.of(Throwable.class, "throwable"))
+            .append(errorHandling())
             .finish()
-            .else_()
-            .append(Stmt.declareVariable("throwable", ResponseException.class,
-                 Stmt.newObject(ResponseException.class).withParameters(
-                     Stmt.loadVariable("response").invoke("getStatusText"), Variable.get("response"))))
-            .append(responseErrorHandling())
-            .finish())
-        .finish()
-        .finish();
+            .publicOverridesMethod("onResponseReceived", Parameter.of(Request.class, "request"),
+                Parameter.of(Response.class, "response"))
+            .append(
+                Stmt.if_(
+                    Bool.and(
+                        Bool.or(
+                            Bool.isNull(Stmt.loadStatic(declaringClass, "this").loadField("successCodes")),
+                            Stmt.loadStatic(declaringClass, "this").loadField("successCodes").invoke("contains",
+                                statusCode)
+                            ),
+                        Bool.and(
+                            Bool.greaterThanOrEqual(statusCode, 200),
+                            Bool.lessThan(statusCode, 300))
+                        )
+                    )
+                    .append(responseHandling())
+                    .finish()
+                    .else_()
+                    .append(Stmt.declareVariable("throwable", ResponseException.class,
+                        Stmt.newObject(ResponseException.class).withParameters(
+                            Stmt.loadVariable("response").invoke("getStatusText"), Variable.get("response"))))
+                    .append(responseErrorHandling())
+                    .finish())
+            .finish()
+            .finish();
 
     return requestCallback;
   }
@@ -243,18 +296,21 @@ public class JaxrsProxyMethodGenerator {
     Statement result = null;
     if (resourceMethod.getMethod().getReturnType().equals(MetaClassFactory.get(void.class))) {
       result = Stmt.load(null);
-    } else {
-     result = demarshal(resourceMethod.getMethod().getReturnType(),
-        Stmt.loadVariable("response").invoke("getText"), resourceMethod.getAcceptHeader());
+    }
+    else {
+      result = demarshal(resourceMethod.getMethod().getReturnType(),
+          Stmt.loadVariable("response").invoke("getText"), resourceMethod.getAcceptHeader());
     }
 
-    Statement handleResult = Stmt
-        .if_(Bool.equals(Stmt.loadVariable("response").invoke("getStatusCode"), 204))
-        .append(Stmt.loadStatic(declaringClass, "this").loadField("remoteCallback").invoke("callback", Stmt.load(null)))
-        .finish()
-        .else_()
-        .append(Stmt.loadStatic(declaringClass, "this").loadField("remoteCallback").invoke("callback", result))
-        .finish();
+    Statement handleResult =
+        Stmt
+            .if_(Bool.equals(Stmt.loadVariable("response").invoke("getStatusCode"), 204))
+            .append(
+                Stmt.loadStatic(declaringClass, "this").loadField("remoteCallback").invoke("callback", Stmt.load(null)))
+            .finish()
+            .else_()
+            .append(Stmt.loadStatic(declaringClass, "this").loadField("remoteCallback").invoke("callback", result))
+            .finish();
 
     return Stmt
         .if_(Bool.instanceOf(Stmt.loadStatic(declaringClass, "this").loadField("remoteCallback"),
@@ -273,7 +329,7 @@ public class JaxrsProxyMethodGenerator {
   private Statement encodeQuery(Statement s) {
     return Stmt.invokeStatic(URL.class, "encodeQueryString", s);
   }
-  
+
   private void generateReturnStatement() {
     Statement returnStatement = RebindUtils.generateProxyMethodReturnStatement(resourceMethod.getMethod());
     if (returnStatement != null) {

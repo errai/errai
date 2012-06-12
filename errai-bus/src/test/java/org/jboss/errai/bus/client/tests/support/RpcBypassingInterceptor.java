@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-package org.jboss.errai.bus.client.framework;
+package org.jboss.errai.bus.client.tests.support;
 
-import org.jboss.errai.bus.client.api.ErrorCallback;
-import org.jboss.errai.bus.client.api.RemoteCallback;
+import org.jboss.errai.bus.client.api.interceptor.RemoteCallContext;
+import org.jboss.errai.bus.client.api.interceptor.RpcInterceptor;
 
-import java.lang.annotation.Annotation;
+/**
+ * RPC interceptor for testing purposes. Prevents the actual remote request and sets the result directly.
+ * 
+ * @author Christian Sadilek <csadilek@redhat.com>
+ */
+public class RpcBypassingInterceptor implements RpcInterceptor {
 
-public interface RPCStub {
-  public void setRemoteCallback(RemoteCallback callback);
-
-  public void setErrorCallback(ErrorCallback callback);
-
-  public void setQualifiers(Annotation[] annotations);
+  @Override
+  public void aroundInvoke(final RemoteCallContext context) {
+    context.setResult("intercepted");
+  }
 }
