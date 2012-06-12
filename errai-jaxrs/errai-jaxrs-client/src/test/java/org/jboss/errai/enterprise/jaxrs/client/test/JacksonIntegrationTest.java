@@ -45,19 +45,22 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
     super.gwtSetUp();
     RestClient.setJacksonMarshallingActive(true);
   }
-  
+
   @Test
   @SuppressWarnings("serial")
   public void testJacksonMarshalling() {
     delayTestFinish(5000);
 
-    final User user = new User(11l, "first", "last", 20, Gender.MALE, new User(12l, "first2", "last2", 40, Gender.FEMALE, null));
-    user.setPetNames(new ArrayList<String>() {{
+    final User user =
+        new User(11l, "first", "last", 20, Gender.MALE, new User(12l, "first2", "last2", 40, Gender.FEMALE, null));
+    user.setPetNames(new ArrayList<String>() {
+      {
         add("pet1");
         add("pet2");
       }
     });
-    user.setFriends(new ArrayList<User>() {{
+    user.setFriends(new ArrayList<User>() {
+      {
         add(new User(13l, "friend1-first", "friend1-last", 1, Gender.MALE, null));
         add(new User(14l, "friend2-first", "friend2-last", 2, Gender.FEMALE, null));
       }
@@ -73,19 +76,19 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
             assertEquals(user, MarshallingWrapper.fromJSON(jackson, User.class));
             finishTest();
           }
-    }).postJackson(jackson);
+        }).postJackson(jackson);
   }
 
   @Test
   public void testJacksonMarshallingOfList() {
     delayTestFinish(5000);
-    
+
     final List<User> users = new ArrayList<User>();
     users.add(new User(11l, "first", "last", 20, Gender.MALE, null));
     users.add(new User(12l, "firs2", "las2", 40, Gender.MALE, null));
 
     String jackson = MarshallingWrapper.toJSON(users);
-   
+
     RestClient.create(JacksonTestService.class,
         new RemoteCallback<String>() {
           @Override
@@ -94,19 +97,19 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
             assertEquals(users, MarshallingWrapper.fromJSON(jackson, List.class, User.class));
             finishTest();
           }
-    }).postJacksonList(jackson);
+        }).postJacksonList(jackson);
   }
-  
+
   @Test
   public void testJacksonMarshallingOfListOfBytes() {
     delayTestFinish(5000);
-    
+
     final List<Byte> bytes = new ArrayList<Byte>();
     bytes.add(new Byte("10"));
     bytes.add(new Byte("4"));
-    
+
     String jackson = MarshallingWrapper.toJSON(bytes);
-   
+
     RestClient.create(JacksonTestService.class,
         new RemoteCallback<String>() {
           @Override
@@ -115,6 +118,7 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
             assertEquals(bytes, MarshallingWrapper.fromJSON(jackson, List.class, Byte.class));
             finishTest();
           }
-    }).postJacksonListOfBytes(jackson);
+        }).postJacksonListOfBytes(jackson);
   }
+  
 }

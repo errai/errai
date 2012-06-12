@@ -63,7 +63,7 @@ public class TypeMarshaller {
     else {
       if (!type.equals(MetaClassFactory.get(void.class))) {
       demarshallingStatement = Stmt.invokeStatic(MarshallingWrapper.class, "fromJSON", statement, 
-          type.asBoxed().asClass(), MarshallingGenUtil.getConcreteCollectionElementType(type.asBoxed()));
+          type.asBoxed().asClass(), MarshallingGenUtil.getConcreteElementType(type.asBoxed()));
       } 
       else {
         demarshallingStatement = Stmt.invokeStatic(MarshallingWrapper.class, "fromJSON", statement);

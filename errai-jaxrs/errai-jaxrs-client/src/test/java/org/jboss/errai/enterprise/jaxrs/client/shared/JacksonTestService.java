@@ -19,6 +19,8 @@ package org.jboss.errai.enterprise.jaxrs.client.shared;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 
+import org.jboss.errai.enterprise.jaxrs.client.shared.entity.User;
+
 /**
  * This service is used to test support for Jackson generated JSON.
  * 
@@ -41,8 +43,8 @@ public interface JacksonTestService {
   public String postJackson(String jackson);
 
   /**
-   * Accepts a jackson compatible JSON string, marshals it into an list using the jackson ObjectMapper (which we can't
-   * use on the client), then demarshals it again and returns the representation.
+   * Accepts a jackson compatible JSON string, marshals it into an list of {@link User} using the jackson ObjectMapper
+   * (which we can't use on the client), then demarshals it again and returns the representation.
    * 
    * @param jackson
    *          jackson compatible JSON representation
