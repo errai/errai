@@ -441,6 +441,9 @@ public class JSONStreamDecoder {
         else if (val instanceof Map) {
           _wrapped = new ObjectContext((Map<Object, Object>) (col = val));
         }
+        else if (val instanceof String) {
+            _wrapped = new StringContext((String) (col = val));
+          }
         else {
           throw new RuntimeException("expected list or map but found: " + (val == null ? null : val.getClass().getName()));
         }
@@ -468,6 +471,23 @@ public class JSONStreamDecoder {
       return collection;
     }
   }
+  
+  private static class StringContext extends Context<String> {
+	    String value;
+
+	    private StringContext(String value) {
+	      this.value = value;
+	    }
+
+	    @Override
+	    void addValue(Object val) {}
+
+	    @Override
+	    public String record() {
+	      return value;
+	    }
+	  }
+  
 
   private static class ObjectContext extends Context<Map> {
     protected Object lhs;

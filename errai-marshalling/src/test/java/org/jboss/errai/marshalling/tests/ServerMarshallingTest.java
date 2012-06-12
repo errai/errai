@@ -119,7 +119,7 @@ public class ServerMarshallingTest {
    * specifically. The success or failure of this method is not predicted by the
    * success or failure of {@link #testString()}, which uses lower-level APIs.
    */
-  @Test @Ignore // FIXME ignored for 2.0. hope to fix in 2.1. (ERRAI-271)
+  @Test
   public void testStringRoundTripWithHighLevelAPI() {
     final String val = "Seventeen-oh-one";
     String json = ServerMarshalling.toJSON(val);
