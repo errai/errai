@@ -1,5 +1,8 @@
 package org.jboss.errai.jpa.client.local.backend;
 
+import java.util.List;
+
+import org.jboss.errai.jpa.client.local.ErraiEntityType;
 import org.jboss.errai.jpa.client.local.Key;
 
 /**
@@ -49,6 +52,13 @@ public interface StorageBackend {
    *         is null if there is no value presently associated with {@code key}.
    */
   <X> X get(Key<X, ?> key);
+
+  /**
+   * EXPERIMENTAL; for feeding queries. Returns all entities of the given type.
+   *
+   * @return all the entities of a given type (TODO: decide about how to populate/not populate relationships)
+   */
+  <X> List<X> getAll(ErraiEntityType<X> type);
 
   /**
    * Tests if this backend contains data for the given key.

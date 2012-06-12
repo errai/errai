@@ -2,6 +2,10 @@ package org.jboss.errai.jpa.client.local;
 
 import org.jboss.errai.common.client.framework.Assert;
 
+import com.google.gwt.json.client.JSONException;
+import com.google.gwt.json.client.JSONParser;
+import com.google.gwt.json.client.JSONValue;
+
 /**
  * Holder class for a storage key: a tuple of type and identity value.
  * <p>
@@ -109,7 +113,24 @@ public class Key<X, T> {
   }
 
   public String toJson() {
-    return ("{ entityType: \"" + entityType.getJavaType().getName()
-            + "\", id: " + JsonUtil.basicValueToJson(id) + "}");
+    return ("{\"entityType\":\"" + entityType.getJavaType().getName()
+            + "\",\"id\":" + JsonUtil.basicValueToJson(id) + "}");
+  }
+
+  public static Key<?, ?> fromJson(ErraiEntityManager em, String key) {
+    JSONValue k;
+    try {
+      k = JSONParser.parseStrict(key);
+
+    } catch (JSONException e) {
+      throw new JSONException("Input: " + key, e);
+    }
+
+    String entityClassName = k.isObject().get("entityType").isString().stringValue();
+    ErraiEntityType<Object> et = em.getMetamodel().entity(entityClassName);
+    ErraiSingularAttribute<?, Object> idAttr = et.getId(Object.class);
+    Object id = JsonUtil.basicValueFromJson(k.isObject().get("id"), idAttr.getJavaType());
+
+    return new Key<Object, Object>(et, id);
   }
 }

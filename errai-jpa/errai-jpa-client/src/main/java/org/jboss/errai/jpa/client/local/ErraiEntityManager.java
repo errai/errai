@@ -9,6 +9,8 @@ import javax.persistence.CascadeType;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
+import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import javax.persistence.metamodel.PluralAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 
@@ -54,6 +56,12 @@ public abstract class ErraiEntityManager implements EntityManager {
   private final StorageBackend backend = new WebStorageBackend(this); // XXX publishing reference to partially constructed object
 
   /**
+   * All the named queries. Populated by a generated method in the
+   * GeneratedErraiEntityManager subclass.
+   */
+  final Map<String, TypedQueryFactory> namedQueries = new HashMap<String, TypedQueryFactory>();
+
+  /**
    * Constructor for subclasses.
    */
   protected ErraiEntityManager() {
@@ -73,6 +81,18 @@ public abstract class ErraiEntityManager implements EntityManager {
    * handwritten subclasses may also be useful for testing purposes.
    */
   protected abstract void populateMetamodel();
+
+  /**
+   * Populates the collection of named queries in this EntityManager. Called by
+   * {@link #createNamedQuery(String, Class)} if the namedQueries map is empty.
+   * <p>
+   * The implementation of this method must add factories for all known named
+   * queries to the {@link #namedQueries} map.
+   * <p>
+   * Note that this method is normally implemented by a generated subclass, but
+   * handwritten subclasses may also be useful for testing purposes.
+   */
+  protected abstract void populateNamedQueries();
 
   /**
    * This method performs the unchecked (but safe) cast of
@@ -385,6 +405,13 @@ public abstract class ErraiEntityManager implements EntityManager {
     partiallyConstructedEntities.remove(key);
   }
 
+  /**
+   * EXPERIMENTAL. This method is very unlikely to survive in the long run.
+   */
+  public <X> List<X> findAll(ErraiEntityType<X> type) {
+    return backend.getAll(type);
+  }
+
   // -------------- Actual JPA API below this line -------------------
 
   @Override
@@ -451,5 +478,20 @@ public abstract class ErraiEntityManager implements EntityManager {
   @Override
   public void remove(Object entity) {
     changeEntityState(entity, EntityState.REMOVED);
+  }
+
+  @Override
+  public Query createNamedQuery(String name) {
+    return createNamedQuery(name, Object.class);
+  }
+
+  @Override
+  public <T> TypedQuery<T> createNamedQuery(String name, Class<T> resultClass) {
+    if (namedQueries.isEmpty()) {
+      populateNamedQueries();
+    }
+    TypedQueryFactory factory = namedQueries.get(name);
+    if (factory == null) throw new IllegalArgumentException("No named query \"" + name + "\"");
+    return factory.createIfCompatible(resultClass);
   }
 }

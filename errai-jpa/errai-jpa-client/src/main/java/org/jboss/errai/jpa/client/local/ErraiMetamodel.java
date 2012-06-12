@@ -27,17 +27,17 @@ import com.google.common.collect.ImmutableBiMap.Builder;
 public class ErraiMetamodel implements Metamodel {
 
   // these are populated by a call to freeze()
-  private ImmutableBiMap<Class<?>, EntityType<?>> entityTypes;
+  private ImmutableBiMap<String, EntityType<?>> entityTypes;
   private ImmutableBiMap<Class<?>, ManagedType<?>> managedTypes;
   private ImmutableBiMap<Class<?>, EmbeddableType<?>> embeddableTypes;
 
   // these are set to null when freeze() is called
-  private Builder<Class<?>, EntityType<?>> entityTypeBuilder = ImmutableBiMap.builder();
+  private Builder<String, EntityType<?>> entityTypeBuilder = ImmutableBiMap.builder();
   private Builder<Class<?>, ManagedType<?>> managedTypeBuilder = ImmutableBiMap.builder();
   private Builder<Class<?>, EmbeddableType<?>> embeddableTypeBuilder = ImmutableBiMap.builder();
 
   <X> void addEntityType(EntityType<X> e) {
-    entityTypeBuilder.put(e.getJavaType(), e);
+    entityTypeBuilder.put(e.getJavaType().getName(), e);
     managedTypeBuilder.put(e.getJavaType(), e);
   }
 
@@ -74,14 +74,28 @@ public class ErraiMetamodel implements Metamodel {
     return entityTypeBuilder == null;
   }
 
-  @Override
+  /**
+   * Retrieves an ErraiEntityType by name rather than class reference.
+   *
+   * @param className
+   *          The fully-qualified class name of the entity type to retrieve (as
+   *          returned by {@code Class.getName()}). Null not permitted.
+   * @return the ErraiEntityType associated with the named class.
+   * @throws IllegalArgumentException
+   *           if the given class name is not an known entity type.
+   */
   @SuppressWarnings("unchecked")
-  public <X> ErraiEntityType<X> entity(Class<X> cls) {
-    ErraiEntityType<X> et = (ErraiEntityType<X>) entityTypes.get(cls);
+  public <X> ErraiEntityType<X> entity(String className) {
+    ErraiEntityType<X> et = (ErraiEntityType<X>) entityTypes.get(className);
     if (et == null) {
-      throw new IllegalArgumentException(cls.getName() + " is not a known entity type");
+      throw new IllegalArgumentException(className + " is not a known entity type");
     }
     return et;
+  }
+
+  @Override
+  public <X> ErraiEntityType<X> entity(Class<X> cls) {
+    return entity(cls.getName());
   }
 
   @Override

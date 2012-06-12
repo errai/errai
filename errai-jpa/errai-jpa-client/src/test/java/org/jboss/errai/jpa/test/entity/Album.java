@@ -8,6 +8,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
 import javax.persistence.PostLoad;
 import javax.persistence.PostPersist;
 import javax.persistence.PostRemove;
@@ -20,6 +21,7 @@ import javax.persistence.Transient;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.ioc.client.api.TestOnly;
 
+@NamedQuery(name="selectAlbumByName", query="SELECT a FROM Album a WHERE a.name=:name")
 @TestOnly @Portable @Entity
 public class Album {
 

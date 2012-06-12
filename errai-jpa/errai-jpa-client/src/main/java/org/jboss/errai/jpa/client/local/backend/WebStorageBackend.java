@@ -1,5 +1,8 @@
 package org.jboss.errai.jpa.client.local.backend;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.client.local.ErraiEntityType;
@@ -34,6 +37,21 @@ public class WebStorageBackend implements StorageBackend {
     return $wnd.sessionStorage.removeItem(key);
   }-*/;
 
+  /**
+   * Invokes the given entry visitor on each key/value pair in this entire
+   * storage backend.
+   *
+   * @param entryVisitor
+   *          The visitor that will act on each key/value pair.
+   */
+  private native void forEachKey(EntryVisitor entryVisitor) /*-{
+    for (var i = 0, n = $wnd.sessionStorage.length; i < n; i++) {
+      var key = $wnd.sessionStorage.key(i);
+      var value = $wnd.sessionStorage.getItem(key);
+      entryVisitor.@org.jboss.errai.jpa.client.local.backend.EntryVisitor::visit(Ljava/lang/String;Ljava/lang/String;)(key, value);
+    }
+  }-*/;
+
   @Override
   public <X> void put(Key<X,?> key, X value) {
     ErraiEntityType<X> entityType = key.getEntityType();
@@ -58,6 +76,29 @@ public class WebStorageBackend implements StorageBackend {
     }
     System.out.println("   returning " + entity);
     return entity;
+  }
+
+  @Override
+  public <X> List<X> getAll(final ErraiEntityType<X> type) {
+    // TODO index entries by entity type
+
+    // FIXME this needs to be done by examining JSON representations, not by deserializing everything into the persistence context.
+
+    final List<X> entities = new ArrayList<X>();
+    forEachKey(new EntryVisitor() {
+      @Override
+      public void visit(String key, String value) {
+        Key<?, ?> k = Key.fromJson(em, key);
+        if (k.getEntityType() == type) {
+
+          @SuppressWarnings("unchecked")
+          Key<X, ?> typedKey = (Key<X, ?>) k;
+
+          entities.add(get(typedKey));
+        }
+      }
+    });
+    return entities;
   }
 
   @Override

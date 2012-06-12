@@ -29,6 +29,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.GeneratedValue;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Persistence;
@@ -62,6 +63,7 @@ import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
 import org.jboss.errai.codegen.builder.MethodBlockBuilder;
+import org.jboss.errai.codegen.builder.MethodCommentBuilder;
 import org.jboss.errai.codegen.exception.GenerationException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -74,6 +76,9 @@ import org.jboss.errai.codegen.util.PrivateAccessType;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.framework.Assert;
+import org.jboss.errai.common.metadata.MetaDataScanner;
+import org.jboss.errai.common.metadata.RebindUtils;
+import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.jpa.client.local.BigIntegerIdGenerator;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.client.local.ErraiEntityType;
@@ -113,6 +118,47 @@ public class ErraiEntityManagerGenerator extends Generator {
 
     final ClassStructureBuilder<?> classBuilder = Implementations.extend(ErraiEntityManager.class, "GeneratedErraiEntityManager");
 
+    generatePopulateMetamodelMethod(classBuilder, mm);
+
+    // pnqm = populate named queries method
+    MethodCommentBuilder<?> pnqm = classBuilder.protectedMethod(void.class, "populateNamedQueries");
+    MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
+    for (Class<?> remote : scanner.getTypesAnnotatedWith(NamedQuery.class, RebindUtils.findTranslatablePackages(context))) {
+      NamedQuery namedQuery = remote.getAnnotation(NamedQuery.class);
+      TypedQueryFactoryGenerator generator = new TypedQueryFactoryGenerator(remote, namedQuery.query());
+      Statement generatedFactory = generator.generate();
+      pnqm._(Stmt.loadVariable("super").loadField("namedQueries")
+              .invoke("put",
+                      Stmt.loadLiteral(namedQuery.name()),
+                      generatedFactory));
+//      pnqm._(new StringStatement("namedQueries.put(\"" + namedQuery.name() + "\", new ()"));
+    }
+    pnqm.finish();
+
+    String out = classBuilder.toJavaString();
+
+    if (Boolean.getBoolean("errai.codegen.printOut")) {
+      System.out.println("---ErraiEntityManager-->");
+      System.out.println(out);
+      System.out.println("<--ErraiEntityManager---");
+    }
+
+    PrintWriter printWriter = context.tryCreate(
+            logger,
+            classBuilder.getClassDefinition().getPackageName(),
+            classBuilder.getClassDefinition().getName());
+
+    // printWriter is null if code has already been generated.
+    if (printWriter != null) {
+      printWriter.append(out);
+      context.commit(logger, printWriter);
+    }
+
+    return classBuilder.getClassDefinition().getFullyQualifiedName();
+  }
+
+  private void generatePopulateMetamodelMethod(
+          final ClassStructureBuilder<?> classBuilder, Metamodel mm) {
     // pmm = "populate metamodel method"
     MethodBlockBuilder<?> pmm = classBuilder.protectedMethod(void.class, "populateMetamodel");
 
@@ -149,27 +195,6 @@ public class ErraiEntityManagerGenerator extends Generator {
     pmm.append(new StringStatement("metamodel.freeze()"));
 
     pmm.finish();
-
-    String out = classBuilder.toJavaString();
-
-    if (Boolean.getBoolean("errai.codegen.printOut")) {
-      System.out.println("---ErraiEntityManager-->");
-      System.out.println(out);
-      System.out.println("<--ErraiEntityManager---");
-    }
-
-    PrintWriter printWriter = context.tryCreate(
-            logger,
-            classBuilder.getClassDefinition().getPackageName(),
-            classBuilder.getClassDefinition().getName());
-
-    // printWriter is null if code has already been generated.
-    if (printWriter != null) {
-      printWriter.append(out);
-      context.commit(logger, printWriter);
-    }
-
-    return classBuilder.getClassDefinition().getFullyQualifiedName();
   }
 
   private EntityManager createHibernateEntityManager() {
