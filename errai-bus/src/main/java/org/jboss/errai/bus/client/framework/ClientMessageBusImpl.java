@@ -277,21 +277,41 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       return deferredSubscription;
     }
 
-    fireAllSubscribeListeners(subject, local, directSubscribe(subject, callback, local));
+    final WrappedCallbackHolder wrappedCallbackHolder = new WrappedCallbackHolder(callback);
+    fireAllSubscribeListeners(subject, local, directSubscribe(subject, callback, local, wrappedCallbackHolder));
 
     return new Subscription() {
       @Override
       public void remove() {
         final List<MessageCallback> cbs = local ? localSubscriptions.get(subject) : subscriptions.get(subject);
         if (cbs != null) {
-          cbs.remove(callback);
+          cbs.remove(wrappedCallbackHolder.wrappedCallback);
+          if (cbs.isEmpty()) {
+            unsubscribeAll(subject);
+          }
         }
       }
     };
   }
 
+  final static class WrappedCallbackHolder  {
+    private MessageCallback wrappedCallback;
 
-  private boolean directSubscribe(final String subject, final MessageCallback callback, final boolean local) {
+    WrappedCallbackHolder(final MessageCallback wrappedCallback) {
+      this.wrappedCallback = wrappedCallback;
+    }
+  }
+
+  private boolean directSubscribe(final String subject,
+                                   final MessageCallback callback,
+                                   final boolean local) {
+    return directSubscribe(subject, callback, local, new WrappedCallbackHolder(null));
+  }
+
+  private boolean directSubscribe(final String subject,
+                                  final MessageCallback callback,
+                                  final boolean local,
+                                  final WrappedCallbackHolder callbackHolder) {
     final boolean isNew = !isSubscribed(subject);
 
     final MessageCallback cb = new MessageCallback() {
@@ -305,6 +325,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         }
       }
     };
+
+    callbackHolder.wrappedCallback = cb;
 
     if (local) {
       addLocalSubscriptionEntry(subject, cb);

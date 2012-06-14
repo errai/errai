@@ -16,6 +16,7 @@
 
 package org.jboss.errai.bus.client.tests;
 
+import com.google.common.eventbus.Subscribe;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
@@ -23,6 +24,8 @@ import org.jboss.errai.bus.client.api.MessageCallback;
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
+import org.jboss.errai.bus.client.api.base.NoSubscribersToDeliverTo;
+import org.jboss.errai.bus.client.framework.Subscription;
 import org.jboss.errai.bus.client.protocols.SecurityCommands;
 import org.jboss.errai.bus.client.protocols.SecurityParts;
 import org.jboss.errai.bus.client.tests.support.GenericServiceB;
@@ -545,6 +548,34 @@ public class BusCommunicationTests extends AbstractErraiTest {
                 .toSubject("TestRPCServiceImpl")
                 .with(MessageParts.ReplyTo, "PlainMessageResponse")
                 .done().sendNowWith(bus);
+      }
+    });
+  }
+
+  public void testBusUnsubscribe() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        final String subjectToSubcribe = "testBusUnsubscribeTestSubjectThatWillBeRemovedAndThrowAnException";
+
+        final Subscription subs = bus.subscribe(subjectToSubcribe, new MessageCallback() {
+          @Override
+          public void callback(Message message) {
+          }
+        });
+
+        subs.remove();
+
+        try {
+          MessageBuilder.createMessage()
+                  .toSubject(subjectToSubcribe).done().sendNowWith(bus);
+        }
+        catch (NoSubscribersToDeliverTo e) {
+          finishTest();
+          return;
+        }
+
+        fail("should have thrown exception because service should have been de-registered");
       }
     });
   }
