@@ -39,6 +39,7 @@ import java.util.TreeSet;
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.base.MessageBuilder;
 import org.jboss.errai.bus.client.tests.support.Boron;
+import org.jboss.errai.bus.client.tests.support.BuilderEntity;
 import org.jboss.errai.bus.client.tests.support.ClassWithNestedClass;
 import org.jboss.errai.bus.client.tests.support.CustomList;
 import org.jboss.errai.bus.client.tests.support.EntityWithGenericCollections;
@@ -1250,6 +1251,30 @@ public class SerializationTests extends AbstractErraiTest {
             }
           }
         }, TestSerializationRPCService.class).testFactorySerialization(entity);
+      }
+    });
+  }
+
+  public void testBuilderSerializationWithPrivateConstructor() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        final BuilderEntity entity = new BuilderEntity.Builder().name("foobar").age(123).build();
+
+        MessageBuilder.createCall(new RemoteCallback<BuilderEntity>() {
+          @Override
+          public void callback(BuilderEntity response) {
+            try {
+              assertEquals("Failed to serialize entity with private constructor", entity, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestSerializationRPCService.class).testBuilderSerializationWithPrivateConstructor(entity);
       }
     });
   }

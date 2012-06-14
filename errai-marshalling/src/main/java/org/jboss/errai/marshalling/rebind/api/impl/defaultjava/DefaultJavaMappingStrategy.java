@@ -16,10 +16,18 @@
 
 package org.jboss.errai.marshalling.rebind.api.impl.defaultjava;
 
+import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
+import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
+import static org.jboss.errai.codegen.util.Implementations.newStringBuilder;
+import static org.jboss.errai.codegen.util.Stmt.declareVariable;
+import static org.jboss.errai.codegen.util.Stmt.loadVariable;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
-import org.jboss.errai.codegen.StringStatement;
 import org.jboss.errai.codegen.TernaryStatement;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
@@ -27,6 +35,7 @@ import org.jboss.errai.codegen.builder.CatchBlockBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaClassMember;
+import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.util.Bool;
@@ -53,24 +62,15 @@ import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
-import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
-import static org.jboss.errai.codegen.util.Implementations.newStringBuilder;
-import static org.jboss.errai.codegen.util.Stmt.declareVariable;
-import static org.jboss.errai.codegen.util.Stmt.loadVariable;
-
 /**
  * The Errai default Java-to-JSON-to-Java marshaling strategy.
  *
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class DefaultJavaMappingStrategy implements MappingStrategy {
-  private GeneratorMappingContext context;
-  private MetaClass toMap;
-  private boolean gwtTarget;
+  private final GeneratorMappingContext context;
+  private final MetaClass toMap;
+  private final boolean gwtTarget;
 
   public DefaultJavaMappingStrategy(boolean gwtTarget, GeneratorMappingContext context, MetaClass toMap) {
     this.gwtTarget = gwtTarget;
@@ -169,9 +169,22 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
             }
 
             if (instantiationMapping instanceof ConstructorMapping) {
-              tryBuilder.append(Stmt.declareVariable(toMap).named("entity")
-                      .initializeWith(Stmt.newObject(toMap)
-                              .withParameters(constructorParameters.toArray(new Object[constructorParameters.size()]))));
+              ConstructorMapping mapping = (ConstructorMapping) instantiationMapping;
+              MetaConstructor constructor = mapping.getMember();
+              if (constructor.isPublic()) {
+                tryBuilder.append(Stmt.declareVariable(toMap).named("entity")
+                    .initializeWith(Stmt.newObject(toMap)
+                        .withParameters(constructorParameters.toArray(new Object[constructorParameters.size()]))));
+              }
+              else {
+                PrivateAccessUtil.addPrivateAccessStubs(gwtTarget, context.getClassStructureBuilder(), constructor);
+                tryBuilder.append(Stmt.declareVariable(toMap).named("entity")
+                    .initializeWith(
+                        Stmt.invokeStatic(
+                            context.getClassStructureBuilder().getClassDefinition(),
+                            PrivateAccessUtil.getPrivateMethodName(constructor),
+                            constructorParameters.toArray(new Object[constructorParameters.size()]))));
+              }
             }
             else if (instantiationMapping instanceof FactoryMapping) {
               tryBuilder.append(Stmt.declareVariable(toMap).named("entity")
