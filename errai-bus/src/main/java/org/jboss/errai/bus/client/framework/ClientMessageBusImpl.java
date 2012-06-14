@@ -105,7 +105,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           = new ArrayList<SubscribeListener>();
 
   /* ArrayList of all unsubscription listeners */
-  private final List<UnsubscribeListener> onUnsubscribeHooks
+  private List<UnsubscribeListener> onUnsubscribeHooks
           = new ArrayList<UnsubscribeListener>();
 
   /* Used to build the HTTP POST request */
@@ -277,20 +277,41 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       return deferredSubscription;
     }
 
-    fireAllSubscribeListeners(subject, local, directSubscribe(subject, callback, local));
+    final WrappedCallbackHolder wrappedCallbackHolder = new WrappedCallbackHolder(callback);
+    fireAllSubscribeListeners(subject, local, directSubscribe(subject, callback, local, wrappedCallbackHolder));
 
     return new Subscription() {
       @Override
       public void remove() {
         final List<MessageCallback> cbs = local ? localSubscriptions.get(subject) : subscriptions.get(subject);
         if (cbs != null) {
-          cbs.remove(callback);
+          cbs.remove(wrappedCallbackHolder.wrappedCallback);
+          if (cbs.isEmpty()) {
+            unsubscribeAll(subject);
+          }
         }
       }
     };
   }
 
-  private boolean directSubscribe(final String subject, final MessageCallback callback, final boolean local) {
+  final static class WrappedCallbackHolder  {
+    private MessageCallback wrappedCallback;
+
+    WrappedCallbackHolder(final MessageCallback wrappedCallback) {
+      this.wrappedCallback = wrappedCallback;
+    }
+  }
+
+  private boolean directSubscribe(final String subject,
+                                   final MessageCallback callback,
+                                   final boolean local) {
+    return directSubscribe(subject, callback, local, new WrappedCallbackHolder(null));
+  }
+
+  private boolean directSubscribe(final String subject,
+                                  final MessageCallback callback,
+                                  final boolean local,
+                                  final WrappedCallbackHolder callbackHolder) {
     final boolean isNew = !isSubscribed(subject);
 
     final MessageCallback cb = new MessageCallback() {
@@ -305,6 +326,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
     };
 
+    callbackHolder.wrappedCallback = cb;
+
     if (local) {
       addLocalSubscriptionEntry(subject, cb);
     }
@@ -318,9 +341,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   /**
    * Fire listeners to notify that a new subscription has been registered on the bus.
    *
-   * @param subject the subject name which has been registered.
-   * @param local   a boolean indicating whether the subscription is local only.
-   * @param isNew   a boolean indicating whether the subscription is new (ie. no other endpoints listen on this subject)
+   * @param subject - new subscription registered
+   * @param local   -
+   * @param isNew   -
    */
   private void fireAllSubscribeListeners(String subject, boolean local, boolean isNew) {
     final Iterator<SubscribeListener> iter = onSubscribeHooks.iterator();
@@ -353,6 +376,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
     }
   }
+
 
   /**
    * Globally send message to all receivers.
@@ -930,6 +954,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 // end of FinishStateSync Timer
               }
             }.schedule(5);
+
+
             break;
 
           case SessionExpired:
@@ -950,6 +976,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
             init();
             setReinit(false);
+
             break;
 
           case WebsocketChannelVerify:
@@ -977,6 +1004,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 InitVotes.voteFor(ClientMessageBus.class);
               }
             }.schedule(50);
+
             break;
 
           case WebsocketNegotiationFailed:
@@ -1409,6 +1437,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
       }
     });
 
+
     if (LogUtil.isNativeJavaScriptLoggerSupported()) {
       LogUtil.nativeLog(message);
     }
@@ -1625,6 +1654,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     $wnd.errai_show_error_console = function () {
       @org.jboss.errai.bus.client.framework.ClientMessageBusImpl::_showErrorConsole()();
     }
+
   }-*/;
 
   /**
