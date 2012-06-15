@@ -20,8 +20,6 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.gwt.core.ext.typeinfo.TypeOracle;
-
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaParameter;
@@ -31,15 +29,16 @@ import org.jboss.errai.codegen.util.GenUtil;
 
 import com.google.gwt.core.ext.typeinfo.JConstructor;
 import com.google.gwt.core.ext.typeinfo.JParameter;
+import com.google.gwt.core.ext.typeinfo.TypeOracle;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class GWTConstructor extends MetaConstructor {
-  private JConstructor constructor;
-  private MetaClass declaringClass;
-  private Annotation[] annotations;
-  private TypeOracle oracle;
+  private final JConstructor constructor;
+  private final MetaClass declaringClass;
+  private final Annotation[] annotations;
+  private final TypeOracle oracle;
 
   public GWTConstructor(TypeOracle oracle, JConstructor c) {
     this.constructor = c;
@@ -139,7 +138,7 @@ public class GWTConstructor extends MetaConstructor {
 
   @Override
   public boolean isStatic() {
-    return false;
+    return true;
   }
 
   @Override

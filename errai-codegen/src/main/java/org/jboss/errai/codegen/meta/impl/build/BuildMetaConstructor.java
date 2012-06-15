@@ -41,7 +41,7 @@ import org.jboss.errai.codegen.util.GenUtil;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class BuildMetaConstructor extends MetaConstructor implements Builder {
-  private BuildMetaClass declaringClass;
+  private final BuildMetaClass declaringClass;
   private Statement body;
 
   private boolean isVarArgs;
@@ -49,7 +49,7 @@ public class BuildMetaConstructor extends MetaConstructor implements Builder {
   private Scope scope;
 
   private DefParameters defParameters;
-  private List<MetaTypeVariable> typeVariables = new ArrayList<MetaTypeVariable>();
+  private final List<MetaTypeVariable> typeVariables = new ArrayList<MetaTypeVariable>();
 
   private MetaConstructor reifiedFormOf;
 
@@ -161,7 +161,7 @@ public class BuildMetaConstructor extends MetaConstructor implements Builder {
 
   @Override
   public boolean isStatic() {
-    return false;
+    return true;
   }
 
   @Override
