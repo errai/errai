@@ -27,8 +27,8 @@ public interface Reply {
   /**
    * Sets a Message part to the specified value.
    *
-   * @param part  - The <tt>String</tt> name of the message part
-   * @param value - the value to set the part to
+   * @param part  The <tt>String</tt> name of the message part
+   * @param value the value to set the part to
    * @return the updated message
    */
   public void set(String part, Object value);
@@ -36,8 +36,8 @@ public interface Reply {
   /**
    * Sets a Message part to the specified value.
    *
-   * @param part  - The <tt>Enum</tt> representation of the message part
-   * @param value - the value to set the part to
+   * @param part  The <tt>Enum</tt> representation of the message part
+   * @param value the value to set the part to
    * @return the updated message
    */
   public void set(Enum<?> part, Object value);

@@ -50,7 +50,6 @@ public abstract class AbstractConfigBase {
     cache.add(cls);
   }
 
-
   protected static void _traverseFiles(File root, File start, Set<String> loadedTargets, VisitDelegate visitor) {
     if (start.getPath().endsWith(".svn")) return;
     if (start.isDirectory()) {

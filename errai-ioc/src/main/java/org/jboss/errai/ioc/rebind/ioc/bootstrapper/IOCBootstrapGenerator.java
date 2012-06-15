@@ -121,8 +121,6 @@ public class IOCBootstrapGenerator {
   }
 
   public String generate(String packageName, String className) {
-    //GenUtil.setPermissiveMode(true);
-
     synchronized (generatorLock) {
       EnvUtil.recordEnvironmentState();
 
@@ -132,19 +130,6 @@ public class IOCBootstrapGenerator {
 
       final File fileCacheDir = RebindUtils.getErraiCacheDir();
       final File cacheFile = new File(fileCacheDir.getAbsolutePath() + "/" + className + ".java");
-
-      final Set<Class<? extends Annotation>> annotations = unmodifiableSet(new HashSet<Class<? extends Annotation>>() {
-        {
-          add(ApplicationScoped.class);
-          add(SessionScoped.class);
-          add(RequestScoped.class);
-          add(Singleton.class);
-          add(EntryPoint.class);
-          add(IOCBootstrapTask.class);
-          add(Dependent.class);
-          add(Default.class);
-        }
-      });
 
       String gen;
 
