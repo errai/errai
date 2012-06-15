@@ -20,13 +20,18 @@ import org.jboss.errai.codegen.builder.callstack.LoadClassReference;
 import org.jboss.errai.codegen.exception.InvalidTypeException;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.mvel2.util.NullType;
 
 /**
+ * Implements code generation of type casting statements.
+ * 
  * @author Mike Brock <cbrock@redhat.com>
+ * @author Christian Sadilek <csadilek@redhat.com>
+ * @author Jonathan Fuerth <jfuerth@redhat.com>
  */
 public class Cast implements Statement {
-  private MetaClass toType;
-  private Statement statement;
+  private final MetaClass toType;
+  private final Statement statement;
 
   private Cast(MetaClass toType, Statement statement) {
     this.toType = toType;
@@ -48,7 +53,7 @@ public class Cast implements Statement {
     if (!toType.isPrimitive() && !toType.isAssignableFrom(statement.getType()) && !toType.isAssignableTo(statement.getType())) {
       throw new InvalidTypeException(statement.getType() + " cannot be cast to " + toType);
     }
-    else if (toType.isAssignableFrom(statement.getType())) {
+    else if (toType.isAssignableFrom(statement.getType()) && !statement.getType().equals(MetaClassFactory.get(NullType.class))) {
       return stmt;
     }
     else {
