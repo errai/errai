@@ -16,6 +16,7 @@
 
 package org.jboss.errai.bus.client.tests.support;
 
+import org.jboss.errai.common.client.api.annotations.NonPortable;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.marshalling.client.api.annotations.MapsTo;
 
@@ -32,15 +33,16 @@ public class BuilderEntity {
     this.age = age;
   }
 
+  @NonPortable
   public static class Builder {
-    private String name;
+    private final String name;
     private int age;
 
-    public Builder name(String name) {
+    public Builder(String name) {
       this.name = name;
-      return this;
+      
     }
-
+    
     public Builder age(int age) {
       this.age = age;
       return this;
@@ -51,6 +53,15 @@ public class BuilderEntity {
     }
   }
 
+  
+  /**
+   * This class exists only to prove that nested classes can be excluded using a property in ErraiApp.properties.
+   */
+  public static class NonPortableNestedClass {
+    public NonPortableNestedClass(String x) {
+    }
+  }
+  
   public String getName() {
     return name;
   }

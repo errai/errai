@@ -1260,7 +1260,7 @@ public class SerializationTests extends AbstractErraiTest {
       @Override
       public void run() {
 
-        final BuilderEntity entity = new BuilderEntity.Builder().name("foobar").age(123).build();
+        final BuilderEntity entity = new BuilderEntity.Builder("foobar").age(123).build();
 
         MessageBuilder.createCall(new RemoteCallback<BuilderEntity>() {
           @Override
