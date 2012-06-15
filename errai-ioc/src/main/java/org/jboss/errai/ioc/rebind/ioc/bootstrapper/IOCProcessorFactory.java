@@ -182,7 +182,6 @@ public class IOCProcessorFactory {
               MetaClass providedType;
 
               if (MC_Provider.isAssignableFrom(providerClassType)) {
-
                 for (MetaClass iface : providerClassType.getInterfaces()) {
                   if (MC_Provider.equals(iface.getErased())) {
                     providerInterface = iface;
