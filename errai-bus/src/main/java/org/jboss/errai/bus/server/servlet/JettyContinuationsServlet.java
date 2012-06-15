@@ -89,8 +89,6 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
 
     try {
       final MessageQueue queue = service.getBus().getQueue(session);
-      queue.heartBeat();
-
       if (queue == null) {
         switch (getConnectionPhase(httpServletRequest)) {
           case CONNECTING:
@@ -102,7 +100,7 @@ public class JettyContinuationsServlet extends AbstractErraiServlet {
 
         return;
       }
-
+      queue.heartBeat();
 
       if (wait) {
         synchronized (queue.getActivationLock()) {
