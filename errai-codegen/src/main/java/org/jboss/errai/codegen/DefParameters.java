@@ -22,7 +22,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.jboss.errai.codegen.meta.MetaClass;
-import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 
@@ -30,9 +29,9 @@ import org.jboss.errai.codegen.meta.MetaParameter;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class DefParameters extends AbstractStatement {
-  private List<Parameter> parameters;
+  private final List<Parameter> parameters;
 
-  public DefParameters(List<Parameter> parameters) {
+  private DefParameters(List<Parameter> parameters) {
     this.parameters = parameters;
   }
 
@@ -52,14 +51,6 @@ public class DefParameters extends AbstractStatement {
     int i = 0;
     for (MetaParameter parm : method.getParameters()) {
       parameters.add(Parameter.of(parm.getType(), mergeNames[i].getName(), mergeNames[i++].isFinal()));
-    }
-    return new DefParameters(parameters);
-  }
-
-  public static DefParameters from(MetaConstructor constructor) {
-    List<Parameter> parameters = new ArrayList<Parameter>();
-    for (MetaParameter parm : constructor.getParameters()) {
-      parameters.add(Parameter.of(parm.getType(), parm.getName()));
     }
     return new DefParameters(parameters);
   }

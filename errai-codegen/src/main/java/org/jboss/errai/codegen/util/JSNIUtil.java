@@ -16,6 +16,7 @@
 
 package org.jboss.errai.codegen.util;
 
+import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
@@ -47,7 +48,7 @@ public class JSNIUtil {
     }
 
     buf.append('@').append(method.getDeclaringClass().getFullyQualifiedName().replaceAll("\\$", "\\."))
-            .append("::").append(method.getName()).append('(');
+            .append("::").append(method instanceof MetaConstructor ? "new" : method.getName()).append('(');
 
     for (MetaParameter parm : method.getParameters()) {
       buf.append(parm.getType().getInternalName());

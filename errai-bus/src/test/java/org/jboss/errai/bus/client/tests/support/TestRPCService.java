@@ -35,4 +35,7 @@ public interface TestRPCService {
   
   @InterceptedCall(RpcResultManipulatingInterceptor.class)
   public String interceptedRpcManipulatingResult();
+
+  public String testVarArgs(String name, String... additional);
+
 }

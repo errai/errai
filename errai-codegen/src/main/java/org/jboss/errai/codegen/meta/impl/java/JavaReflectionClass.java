@@ -227,6 +227,12 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
 
   @Override
   public MetaConstructor[] getDeclaredConstructors() {
+    if (getEnclosedMetaObject().isEnum()) {
+      // Enum constructors have strange metadata, so we avoid trouble by saying enums have no constructors
+      // (getParameterTypes().length != getGenericParameterTypes().length)
+      return new MetaConstructor[0];
+    }
+    
     if (declConstructorCache != null) {
       return declConstructorCache;
     }
@@ -373,7 +379,7 @@ public class JavaReflectionClass extends AbstractMetaClass<Class> {
     return (getEnclosedMetaObject().getModifiers() & Modifier.STATIC) != 0;
   }
 
-  private Map<Integer, MetaClass> _arrayTypeCache = new HashMap<Integer, MetaClass>();
+  private final Map<Integer, MetaClass> _arrayTypeCache = new HashMap<Integer, MetaClass>();
 
   @Override
   public MetaClass asArrayOf(int dimensions) {

@@ -1,5 +1,6 @@
 package org.jboss.errai.common.client.api.annotations;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -13,6 +14,7 @@ import java.lang.annotation.Target;
  * @since Errai 2.0
  * @author Mike Brock <cbrock@redhat.com>
  */
+@Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface Portable {

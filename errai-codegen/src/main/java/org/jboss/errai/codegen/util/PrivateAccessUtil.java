@@ -1,5 +1,6 @@
 package org.jboss.errai.codegen.util;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import org.jboss.errai.codegen.builder.MethodBlockBuilder;
 import org.jboss.errai.codegen.builder.MethodCommentBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
@@ -35,6 +37,7 @@ import org.jboss.errai.codegen.meta.MetaParameter;
 public class PrivateAccessUtil {
   private static final String JAVA_REFL_FLD_UTIL_METH = "_getAccessibleField";
   private static final String JAVA_REFL_METH_UTIL_METH = "_getAccessibleMethod";
+  private static final String JAVA_REFL_CONSTRUCTOR_UTIL_METH = "_getAccessibleConstructor";
 
   public static void createJavaReflectionFieldInitializerUtilMethod(ClassStructureBuilder<?> classBuilder) {
 
@@ -82,6 +85,30 @@ public class PrivateAccessUtil {
             .finish();
   }
 
+  public static void createJavaReflectionConstructorInitializerUtilMethod(
+      ClassStructureBuilder<?> classBuilder) {
+
+    if (classBuilder.getClassDefinition().getMethod(JAVA_REFL_CONSTRUCTOR_UTIL_METH, Class.class, String.class,
+        Class[].class) != null) {
+      return;
+    }
+
+    classBuilder.privateMethod(Constructor.class, JAVA_REFL_CONSTRUCTOR_UTIL_METH).modifiers(Modifier.Static)
+        .parameters(DefParameters.of(Parameter.of(Class.class, "cls"), Parameter.of(Class[].class, "parms")))
+        .body()
+        ._(Stmt.try_()
+                ._(Stmt.declareVariable("cons", Stmt.loadVariable("cls").invoke("getDeclaredConstructor",
+                    Stmt.loadVariable("parms"))))
+                ._(Stmt.loadVariable("cons").invoke("setAccessible", true))
+                ._(Stmt.loadVariable("cons").returnValue())
+                .finish()
+                .catch_(Throwable.class, "e")
+                ._(Stmt.loadVariable("e").invoke("printStackTrace"))
+                ._(Stmt.throw_(RuntimeException.class, Refs.get("e")))
+                .finish())
+        .finish();
+  }
+
   public static String initCachedField(ClassStructureBuilder<?> classBuilder, MetaField f) {
     createJavaReflectionFieldInitializerUtilMethod(classBuilder);
 
@@ -106,19 +133,18 @@ public class PrivateAccessUtil {
     return fieldName;
   }
 
-  /**
-   * Generates methods for accessing a private field using either JSNI or Java
-   * Reflection. The generated methods will be private and static.
-   *
-   * @param useJSNIStubs
-   *          If true, the generated methods will use JSNI to access the field.
-   *          Otherwise, Java reflection will be used (in this case, the
-   *          generated code will not be GWT translatable).
-   * @param classBuilder
-   *          The class builder to add the generated methods to.
-   * @param f
-   *          The field the generated accessors read and write.
-   */
+  public static String initCachedMethod(ClassStructureBuilder<?> classBuilder, MetaConstructor c) {
+    createJavaReflectionConstructorInitializerUtilMethod(classBuilder);
+
+    String fieldName = getPrivateMethodName(c) + "_meth";
+
+    classBuilder.privateField(fieldName, Constructor.class).modifiers(Modifier.Static)
+            .initializesWith(Stmt.invokeStatic(classBuilder.getClassDefinition(), JAVA_REFL_CONSTRUCTOR_UTIL_METH,
+                    c.getDeclaringClass(), MetaClassFactory.asClassArray(c.getParameters()))).finish();
+
+    return fieldName;
+  }
+
   public static void addPrivateAccessStubs(boolean useJSNIStubs,
                                            ClassStructureBuilder<?> classBuilder,
                                            MetaField f) {
@@ -185,8 +211,8 @@ public class PrivateAccessUtil {
       modifiers = appendJsni(modifiers);
 
       if (write) {
-        final MethodCommentBuilder<? extends ClassStructureBuilder<?>> methodBuilder
-                = classBuilder.privateMethod(void.class, getPrivateFieldInjectorName(f));
+        final MethodCommentBuilder<? extends ClassStructureBuilder<?>> methodBuilder =
+            classBuilder.privateMethod(void.class, getPrivateFieldInjectorName(f));
 
         if (!f.isStatic()) {
           methodBuilder
@@ -201,8 +227,8 @@ public class PrivateAccessUtil {
       }
 
       if (read) {
-        MethodBlockBuilder<? extends ClassStructureBuilder<?>> instance
-                = classBuilder.privateMethod(type, getPrivateFieldInjectorName(f));
+        MethodBlockBuilder<? extends ClassStructureBuilder<?>> instance =
+            classBuilder.privateMethod(type, getPrivateFieldInjectorName(f));
 
         if (!f.isStatic()) {
           instance.parameters(DefParameters.fromParameters(Parameter.of(f.getDeclaringClass(), "instance")));
@@ -224,8 +250,8 @@ public class PrivateAccessUtil {
       String setterName = _getReflectionFieldMethSetName(f);
 
       if (write) {
-        MethodCommentBuilder<? extends ClassStructureBuilder<?>> methodBuilder
-                = classBuilder.privateMethod(void.class, getPrivateFieldInjectorName(f));
+        MethodCommentBuilder<? extends ClassStructureBuilder<?>> methodBuilder =
+            classBuilder.privateMethod(void.class, getPrivateFieldInjectorName(f));
 
         if (!f.isStatic()) {
           methodBuilder
@@ -248,9 +274,8 @@ public class PrivateAccessUtil {
       String getterName = _getReflectionFieldMethGetName(f);
 
       if (read) {
-        MethodCommentBuilder<? extends ClassStructureBuilder<?>> methodBuilder
-                = classBuilder.privateMethod(f.getType(), getPrivateFieldInjectorName(f));
-
+        MethodCommentBuilder<? extends ClassStructureBuilder<?>> methodBuilder =
+            classBuilder.privateMethod(f.getType(), getPrivateFieldInjectorName(f));
 
         if (!f.isStatic()) {
           methodBuilder
@@ -273,6 +298,63 @@ public class PrivateAccessUtil {
   }
 
   /**
+   * Generates methods for accessing a nonpublic constructor using either JSNI or
+   * Java Reflection. The generated method will be private and static. The name
+   * of the generated method can be discovered by calling
+   * {@link #getPrivateMethodName(MetaMethod)}.
+   *
+   * @param useJSNIStubs
+   *          If true, the generated method will use JSNI to access the field.
+   *          Otherwise, Java reflection will be used (in this case, the
+   *          generated code will not be GWT translatable).
+   * @param classBuilder
+   *          The class builder to add the generated method to.
+   * @param m
+   *          The constructor the generated method will invoke
+   */
+  public static void addPrivateAccessStubs(boolean useJSNIStubs, ClassStructureBuilder<?> classBuilder,
+      MetaConstructor m) {
+    DefParameters methodDefParms = DefParameters.from(m);
+
+    if (useJSNIStubs) {
+      classBuilder.publicMethod(m.getReturnType(), getPrivateMethodName(m))
+              .parameters(methodDefParms)
+              .modifiers(Modifier.Static, Modifier.JSNI)
+              .body()
+              ._(new StringStatement(JSNIUtil.methodAccess(m)))
+              .finish();
+    }
+    else {
+      String cachedMethod = initCachedMethod(classBuilder, m);
+      Object[] args = new Object[methodDefParms.getParameters().size()];
+      int i = 0;
+      for (Parameter p : methodDefParms.getParameters()) {
+        args[i++] = Refs.get(p.getName());
+      }
+
+      BlockBuilder<? extends ClassStructureBuilder> body = classBuilder.publicMethod(m.getReturnType(),
+              getPrivateMethodName(m))
+              .parameters(methodDefParms)
+              .modifiers(Modifier.Static)
+              .body();
+
+      Statement tryBuilder =
+          Stmt.try_()
+              .append(
+                  Stmt.nestedCall(
+                      Stmt.castTo(m.getReturnType(), Stmt.loadVariable(cachedMethod).invoke("newInstance",
+                          (Object) args))).returnValue())
+              .finish()
+              .catch_(Throwable.class, "e")
+              .append(Stmt.loadVariable("e").invoke("printStackTrace"))
+              .append(Stmt.throw_(RuntimeException.class, Refs.get("e")))
+              .finish();
+
+      body.append(tryBuilder).finish();
+    }
+  }
+
+  /**
    * Generates methods for accessing a nonpublic method using either JSNI or
    * Java Reflection. The generated method will be private and static. The name
    * of the generated method can be discovered by calling
@@ -285,7 +367,7 @@ public class PrivateAccessUtil {
    * @param classBuilder
    *          The class builder to add the generated method to.
    * @param m
-   *          The method the generated accessors read and write.
+   *          The nonpublic method the generated method will invoke
    */
   public static void addPrivateAccessStubs(boolean useJSNIStubs, ClassStructureBuilder<?> classBuilder, MetaMethod m) {
     addPrivateAccessStubs(useJSNIStubs, classBuilder, m, new Modifier[] { Modifier.Static });
@@ -320,13 +402,12 @@ public class PrivateAccessUtil {
     }
 
     List<Parameter> methodDefParms = DefParameters.from(m).getParameters();
-
     wrapperDefParms.addAll(methodDefParms);
 
     if (useJSNIStubs) {
       modifiers = appendJsni(modifiers);
       classBuilder.publicMethod(m.getReturnType(), getPrivateMethodName(m))
-              .parameters(new DefParameters(wrapperDefParms))
+              .parameters(DefParameters.fromParameters(wrapperDefParms))
               .modifiers(modifiers)
               .body()
               ._(new StringStatement(JSNIUtil.methodAccess(m)))
@@ -344,7 +425,7 @@ public class PrivateAccessUtil {
 
       BlockBuilder<? extends ClassStructureBuilder> body = classBuilder.publicMethod(m.getReturnType(),
               getPrivateMethodName(m))
-              .parameters(new DefParameters(wrapperDefParms))
+              .parameters(DefParameters.fromParameters(wrapperDefParms))
               .modifiers(modifiers)
               .body();
 
@@ -360,7 +441,7 @@ public class PrivateAccessUtil {
         tryBuilder._(statementBuilder.returnValue());
       }
 
-      body._(tryBuilder
+      ClassStructureBuilder finished = body._(tryBuilder
               .finish()
               .catch_(Throwable.class, "e")
               ._(Stmt.loadVariable("e").invoke("printStackTrace"))

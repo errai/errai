@@ -58,7 +58,7 @@ public class DefaultJavaDefinitionMapper {
     SimpleConstructorMapping simpleConstructorMapping = new SimpleConstructorMapping();
     MappingDefinition definition = new MappingDefinition(toMap, false);
 
-    for (MetaConstructor c : toMap.getConstructors()) {
+    for (MetaConstructor c : toMap.getDeclaredConstructors()) {
       if (c.getParameters().length != 0) {
         boolean satisifed = true;
         for (int i = 0; i < c.getParameters().length; i++) {

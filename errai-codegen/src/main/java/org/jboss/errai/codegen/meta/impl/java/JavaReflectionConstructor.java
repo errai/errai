@@ -35,7 +35,7 @@ import org.jboss.errai.codegen.util.GenUtil;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class JavaReflectionConstructor extends MetaConstructor {
-  private Constructor constructor;
+  private final Constructor constructor;
   private MetaParameter[] parameters;
   private MetaClass declaringClass;
   private Annotation[] annotationsCache;
@@ -118,7 +118,7 @@ public class JavaReflectionConstructor extends MetaConstructor {
 
   @Override
   public boolean isAbstract() {
-    return (constructor.getModifiers() & Modifier.ABSTRACT) != 0;
+    return false;
   }
 
   @Override
@@ -138,17 +138,17 @@ public class JavaReflectionConstructor extends MetaConstructor {
 
   @Override
   public boolean isFinal() {
-    return (constructor.getModifiers() & Modifier.FINAL) != 0;
+    return false;
   }
 
   @Override
   public boolean isStatic() {
-    return (constructor.getModifiers() & Modifier.STATIC) != 0;
+    return true;
   }
 
   @Override
   public boolean isTransient() {
-    return (constructor.getModifiers() & Modifier.TRANSIENT) != 0;
+    return false;
   }
 
   @Override

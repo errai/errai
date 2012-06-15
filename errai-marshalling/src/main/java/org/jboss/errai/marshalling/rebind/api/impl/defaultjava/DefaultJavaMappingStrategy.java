@@ -36,6 +36,7 @@ import org.jboss.errai.codegen.builder.ElseBlockBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaClassMember;
+import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.util.Bool;
@@ -70,9 +71,9 @@ import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
  * @author Jonathan Fuerth <jfuerth@redhat.com>
  */
 public class DefaultJavaMappingStrategy implements MappingStrategy {
-  private GeneratorMappingContext context;
-  private MetaClass toMap;
-  private boolean gwtTarget;
+  private final GeneratorMappingContext context;
+  private final MetaClass toMap;
+  private final boolean gwtTarget;
 
   public DefaultJavaMappingStrategy(boolean gwtTarget, GeneratorMappingContext context, MetaClass toMap) {
     this.gwtTarget = gwtTarget;
@@ -167,9 +168,22 @@ public class DefaultJavaMappingStrategy implements MappingStrategy {
             }
 
             if (instantiationMapping instanceof ConstructorMapping) {
-              tryBuilder.append(Stmt.declareVariable(toMap).named("entity")
-                      .initializeWith(Stmt.newObject(toMap)
-                              .withParameters(constructorParameters.toArray(new Object[constructorParameters.size()]))));
+              ConstructorMapping mapping = (ConstructorMapping) instantiationMapping;
+              MetaConstructor constructor = mapping.getMember();
+              if (constructor.isPublic()) {
+                tryBuilder.append(Stmt.declareVariable(toMap).named("entity")
+                    .initializeWith(Stmt.newObject(toMap)
+                        .withParameters(constructorParameters.toArray(new Object[constructorParameters.size()]))));
+              }
+              else {
+                PrivateAccessUtil.addPrivateAccessStubs(gwtTarget, context.getClassStructureBuilder(), constructor);
+                tryBuilder.append(Stmt.declareVariable(toMap).named("entity")
+                    .initializeWith(
+                        Stmt.invokeStatic(
+                            context.getClassStructureBuilder().getClassDefinition(),
+                            PrivateAccessUtil.getPrivateMethodName(constructor),
+                            constructorParameters.toArray(new Object[constructorParameters.size()]))));
+              }
             }
             else if (instantiationMapping instanceof FactoryMapping) {
               tryBuilder.append(Stmt.declareVariable(toMap).named("entity")

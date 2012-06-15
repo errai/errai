@@ -30,6 +30,7 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 
 import org.jboss.errai.bus.client.tests.support.Boron;
+import org.jboss.errai.bus.client.tests.support.BuilderEntity;
 import org.jboss.errai.bus.client.tests.support.ClassWithNestedClass;
 import org.jboss.errai.bus.client.tests.support.EntityWithGenericCollections;
 import org.jboss.errai.bus.client.tests.support.EntityWithStringBufferAndStringBuilder;
@@ -365,5 +366,10 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
   @Override
   public LinkedHashMap<String, Integer> testLinkedHashMap(LinkedHashMap<String, Integer> map) {
     return map;
+  }
+
+  @Override
+  public BuilderEntity testBuilderSerializationWithPrivateConstructor(BuilderEntity e) {
+    return e;
   }
 }

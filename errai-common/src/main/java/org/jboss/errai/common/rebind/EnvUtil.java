@@ -16,13 +16,6 @@
 
 package org.jboss.errai.common.rebind;
 
-import org.jboss.errai.common.client.api.annotations.Portable;
-import org.jboss.errai.common.client.types.TypeHandlerFactory;
-import org.jboss.errai.common.metadata.MetaDataScanner;
-import org.jboss.errai.common.metadata.ScannerSingleton;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -30,16 +23,24 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Properties;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 import java.util.Set;
+
+import org.jboss.errai.common.client.api.annotations.NonPortable;
+import org.jboss.errai.common.client.api.annotations.Portable;
+import org.jboss.errai.common.client.types.TypeHandlerFactory;
+import org.jboss.errai.common.metadata.MetaDataScanner;
+import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Mike Brock
  */
 public abstract class EnvUtil {
   public static final String CONFIG_ERRAI_SERIALIZABLE_TYPE = "errai.marshalling.serializableTypes";
+  public static final String CONFIG_ERRAI_NONSERIALIZABLE_TYPE = "errai.marshalling.nonserializableTypes";
   public static final String CONFIG_ERRAI_MAPPING_ALIASES = "errai.marshalling.mappingAliases";
 
   private static volatile Boolean _isJUnitTest;
@@ -90,10 +91,12 @@ public abstract class EnvUtil {
     MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
     final Map<String, String> mappingAliases = new HashMap<String, String>();
     final Set<Class<?>> exposedClasses = new HashSet<Class<?>>();
+    final Set<Class<?>> nonportableClasses = new HashSet<Class<?>>();
     final Set<Class<?>> portableNonExposed = new HashSet<Class<?>>();
 
     final Set<Class<?>> exposedFromScanner = new HashSet<Class<?>>(scanner.getTypesAnnotatedWith(Portable.class));
-
+    nonportableClasses.addAll(scanner.getTypesAnnotatedWith(NonPortable.class));
+    
     for (Class<?> cls : exposedFromScanner) {
       for (Class<?> decl : cls.getDeclaredClasses()) {
         if (decl.isSynthetic()) {
@@ -147,6 +150,20 @@ public abstract class EnvUtil {
               break;
             }
 
+            if (key.equals(CONFIG_ERRAI_NONSERIALIZABLE_TYPE)) {
+              for (String s : props.getString(key).split(" ")) {
+                try {
+                  Class<?> cls = Class.forName(s.trim());
+                  nonportableClasses.add(cls);
+                }
+                catch (Exception e) {
+                  throw new RuntimeException("could not find class defined in ErraiApp.properties as nonserializable: " + s);
+                }
+              }
+
+              break;
+            }
+
             if (key.equals(CONFIG_ERRAI_MAPPING_ALIASES)) {
               for (String s : props.getString(key).split(" ")) {
                 try {
@@ -185,6 +202,9 @@ public abstract class EnvUtil {
       }
     }
 
+    // must do this before filling in interfaces and supertypes!
+    exposedClasses.removeAll(nonportableClasses);
+    
     for (Class<?> cls : exposedClasses) {
       fillInInterfacesAndSuperTypes(portableNonExposed, cls);
     }
