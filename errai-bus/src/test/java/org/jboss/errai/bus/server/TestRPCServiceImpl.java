@@ -44,16 +44,27 @@ public class TestRPCServiceImpl implements TestRPCService, MessageCallback {
   public void returnVoid() {
     return;
   }
-  
+
   @Override
   public Person returnNull() {
     return null;
   }
 
   @Override
+  public String testVarArgs(String name, String... additional) {
+    final StringBuilder sb = new StringBuilder(name);
+    if (additional != null) {
+      for (String s : additional) {
+        sb.append(s);
+      }
+    }
+    return sb.toString();
+  }
+
+  @Override
   public void callback(Message message) {
     MessageBuilder.createConversation(message)
-      .subjectProvided()
-      .done().reply();
+            .subjectProvided()
+            .done().reply();
   }
 }

@@ -28,4 +28,5 @@ public interface TestRPCService {
   public void exception() throws TestException;
   public void returnVoid();
   public Person returnNull();
+  public String testVarArgs(String name, String... additional);
 }

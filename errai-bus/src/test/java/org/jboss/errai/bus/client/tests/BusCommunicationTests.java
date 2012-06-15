@@ -111,8 +111,14 @@ public class BusCommunicationTests extends AbstractErraiTest {
   }
 
   public static class GWTRandomProvider implements RandomProvider {
-    private static char[] CHARS = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q',
-            'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'};
+    private static char[] CHARS = {
+            'a', 'b', 'c', 'd', 'e', 'f',
+            'g', 'h', 'i', 'j', 'k', 'l',
+            'm', 'n', 'o', 'p', 'q', 'r',
+            's', 't', 'u', 'v', 'w', 'x',
+            'y', 'z', '0', '1', '2', '3',
+            '4', '5', '6', '7', '8', '9'
+    };
 
     @Override
     public boolean nextBoolean() {
@@ -136,7 +142,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
 
     @Override
     public String randString() {
-      StringBuilder builder = new StringBuilder();
+      final StringBuilder builder = new StringBuilder();
       int len = nextInt(25) + 5;
       for (int i = 0; i < len; i++) {
         builder.append(nextChar());
@@ -144,7 +150,6 @@ public class BusCommunicationTests extends AbstractErraiTest {
       return builder.toString();
     }
   }
-
 
   public void testSerializableCase() {
     runAfterInit(new Runnable() {
@@ -330,7 +335,7 @@ public class BusCommunicationTests extends AbstractErraiTest {
     runAfterInit(new Runnable() {
       @Override
       public void run() {
-        GenericServiceB remote = MessageBuilder.createCall(new RemoteCallback<String>() {
+        final GenericServiceB remote = MessageBuilder.createCall(new RemoteCallback<String>() {
           @Override
           public void callback(String response) {
             assertNotNull(response);
@@ -340,6 +345,54 @@ public class BusCommunicationTests extends AbstractErraiTest {
         }, GenericServiceB.class);
 
         remote.create(new SpecificEntity());
+      }
+    });
+  }
+
+  /**
+   * Related to issue: https://issues.jboss.org/browse/ERRAI-318
+   */
+  public void testVarArgsToRPC1() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        MessageBuilder.createCall(new RemoteCallback<String>() {
+          @Override
+          public void callback(String response) {
+            assertEquals("foobar", response);
+            finishTest();
+          }
+        }, TestRPCService.class).testVarArgs("foo", "bar");
+      }
+    });
+  }
+
+  public void testVarArgsToRPC2() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        MessageBuilder.createCall(new RemoteCallback<String>() {
+          @Override
+          public void callback(String response) {
+            assertEquals("foo", response);
+            finishTest();
+          }
+        }, TestRPCService.class).testVarArgs("foo", null);
+      }
+    });
+  }
+
+  public void testVarArgsToRPC3() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        MessageBuilder.createCall(new RemoteCallback<String>() {
+          @Override
+          public void callback(String response) {
+            assertEquals("foo", response);
+            finishTest();
+          }
+        }, TestRPCService.class).testVarArgs("foo");
       }
     });
   }
