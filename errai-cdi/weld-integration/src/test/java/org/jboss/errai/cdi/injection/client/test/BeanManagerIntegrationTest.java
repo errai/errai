@@ -4,10 +4,14 @@ import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Set;
 
+import org.jboss.errai.cdi.injection.client.AbstractBean;
 import org.jboss.errai.cdi.injection.client.ApplicationScopedBean;
 import org.jboss.errai.cdi.injection.client.CommonInterface;
 import org.jboss.errai.cdi.injection.client.DependentScopedBean;
 import org.jboss.errai.cdi.injection.client.InheritedApplicationScopedBean;
+import org.jboss.errai.cdi.injection.client.InheritedFromAbstractBean;
+import org.jboss.errai.cdi.injection.client.OuterBean;
+import org.jboss.errai.cdi.injection.client.OuterBeanInterface;
 import org.jboss.errai.cdi.injection.client.qualifier.LincolnBar;
 import org.jboss.errai.cdi.injection.client.qualifier.QualA;
 import org.jboss.errai.cdi.injection.client.qualifier.QualAppScopeBeanA;
@@ -48,6 +52,32 @@ public class BeanManagerIntegrationTest extends AbstractErraiCDITest {
 
     final InheritedApplicationScopedBean beanInst2 = bean.getInstance();
     assertSame("bean is not observing application scope", beanInst, beanInst2);
+  }
+
+  public void testBeanManagerLookupBeanFromAbstractRootType() {
+    final IOCBeanDef<AbstractBean> bean
+            = IOC.getBeanManager().lookupBean(AbstractBean.class);
+    assertNotNull("did not find any beans matching", bean);
+
+    final AbstractBean beanInst = bean.getInstance();
+    assertNotNull("bean instance is null", beanInst);
+
+    assertTrue("bean is incorrect instance: " + beanInst.getClass(), beanInst instanceof InheritedFromAbstractBean);
+  }
+
+  /**
+   * This test effectively tests that the IOC container comprehends the full type heirarchy, considering both
+   * supertypes and transverse interface types.
+   */
+  public void testBeanManagerLookupBeanFromOuterInterfaceRootType() {
+    final IOCBeanDef<OuterBeanInterface> bean
+            = IOC.getBeanManager().lookupBean(OuterBeanInterface.class);
+    assertNotNull("did not find any beans matching", bean);
+
+    final OuterBeanInterface beanInst = bean.getInstance();
+    assertNotNull("bean instance is null", beanInst);
+
+    assertTrue("bean is incorrect instance: " + beanInst.getClass(), beanInst instanceof InheritedFromAbstractBean);
   }
 
 

@@ -169,7 +169,6 @@ public class GenUtil {
           return;
         }
 
-
         throw new InvalidTypeException(to.getFullyQualifiedName() + " is not assignable from "
                 + from.getFullyQualifiedName());
       }

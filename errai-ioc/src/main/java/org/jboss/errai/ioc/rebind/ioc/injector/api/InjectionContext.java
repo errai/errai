@@ -278,12 +278,23 @@ public class InjectionContext {
     if (injectorList == null) {
       injectors.put(type.getErased(), injectorList = new ArrayList<Injector>());
 
-      for (MetaClass iface : type.getInterfaces()) {
-        QualifiedTypeInjectorDelegate injectorDelegate
-                = new QualifiedTypeInjectorDelegate(iface, injector, iface.getParameterizedType());
+      MetaClass cls = type;
+      do {
+        if (cls != type && (cls.isAbstract() || cls.isInterface())) {
+          final QualifiedTypeInjectorDelegate injectorDelegate
+                  = new QualifiedTypeInjectorDelegate(cls, injector, cls.getParameterizedType());
 
-        _registerInjector(iface, injectorDelegate, false);
+          _registerInjector(cls, injectorDelegate, false);
+        }
+
+        for (MetaClass iface : cls.getInterfaces()) {
+          final QualifiedTypeInjectorDelegate injectorDelegate
+                  = new QualifiedTypeInjectorDelegate(iface, injector, iface.getParameterizedType());
+
+          _registerInjector(iface, injectorDelegate, false);
+        }
       }
+      while ((cls = cls.getSuperClass()) != null);
     }
     else if (allowOverride) {
       Iterator<Injector> iter = injectorList.iterator();
