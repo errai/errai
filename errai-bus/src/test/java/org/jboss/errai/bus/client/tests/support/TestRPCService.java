@@ -29,7 +29,7 @@ public interface TestRPCService {
   public void exception() throws TestException;
   public void returnVoid();
   public Person returnNull();
-  
+
   @InterceptedCall(RpcBypassingInterceptor.class)
   public String interceptedRpcBypassingRemoteEndpoint();
   
@@ -37,5 +37,4 @@ public interface TestRPCService {
   public String interceptedRpcManipulatingResult();
 
   public String testVarArgs(String name, String... additional);
-
 }
