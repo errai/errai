@@ -2,6 +2,7 @@ package org.jboss.errai.jpa.client.local.backend;
 
 import java.util.List;
 
+import org.jboss.errai.jpa.client.local.EntityJsonMatcher;
 import org.jboss.errai.jpa.client.local.ErraiEntityType;
 import org.jboss.errai.jpa.client.local.Key;
 
@@ -54,11 +55,16 @@ public interface StorageBackend {
   <X> X get(Key<X, ?> key);
 
   /**
-   * EXPERIMENTAL; for feeding queries. Returns all entities of the given type.
+   * Returns all entities of the given type whose JSON representations are
+   * accepted by the given matcher.
    *
-   * @return all the entities of a given type (TODO: decide about how to populate/not populate relationships)
+   * @param type
+   *          The type of entities to retrieve
+   * @param matcher
+   *          The matcher that decides which entity instances will be retrieved.
+   * @return all matching entities of the given type.
    */
-  <X> List<X> getAll(ErraiEntityType<X> type);
+  <X> List<X> getAll(ErraiEntityType<X> type, EntityJsonMatcher matcher);
 
   /**
    * Tests if this backend contains data for the given key.

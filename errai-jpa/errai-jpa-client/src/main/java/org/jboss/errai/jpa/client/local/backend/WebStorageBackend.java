@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.jboss.errai.common.client.framework.Assert;
+import org.jboss.errai.jpa.client.local.EntityJsonMatcher;
 import org.jboss.errai.jpa.client.local.ErraiEntityManager;
 import org.jboss.errai.jpa.client.local.ErraiEntityType;
 import org.jboss.errai.jpa.client.local.Key;
 
+import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
 
@@ -79,10 +81,8 @@ public class WebStorageBackend implements StorageBackend {
   }
 
   @Override
-  public <X> List<X> getAll(final ErraiEntityType<X> type) {
+  public <X> List<X> getAll(final ErraiEntityType<X> type, final EntityJsonMatcher matcher) {
     // TODO index entries by entity type
-
-    // FIXME this needs to be done by examining JSON representations, not by deserializing everything into the persistence context.
 
     final List<X> entities = new ArrayList<X>();
     forEachKey(new EntryVisitor() {
@@ -90,11 +90,13 @@ public class WebStorageBackend implements StorageBackend {
       public void visit(String key, String value) {
         Key<?, ?> k = Key.fromJson(em, key);
         if (k.getEntityType() == type) {
-
-          @SuppressWarnings("unchecked")
-          Key<X, ?> typedKey = (Key<X, ?>) k;
-
-          entities.add(get(typedKey));
+          JSONObject candidate = JSONParser.parseStrict(value).isObject();
+          if (matcher.matches(candidate)) {
+            @SuppressWarnings("unchecked")
+            Key<X, ?> typedKey = (Key<X, ?>) k;
+            // TODO the value is already parsed. it would be nice to avoid the re-fetch here.
+            entities.add(get(typedKey));
+          }
         }
       }
     });

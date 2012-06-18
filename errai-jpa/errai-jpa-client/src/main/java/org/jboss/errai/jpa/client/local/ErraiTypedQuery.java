@@ -16,6 +16,8 @@ import javax.persistence.PersistenceException;
 import javax.persistence.TemporalType;
 import javax.persistence.TypedQuery;
 
+import org.jboss.errai.common.client.framework.Assert;
+
 import com.google.common.collect.ImmutableBiMap;
 
 /**
@@ -26,7 +28,7 @@ import com.google.common.collect.ImmutableBiMap;
  * @param <X> The result type of this query
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
-public abstract class ErraiTypedQuery<X> implements TypedQuery<X> {
+public class ErraiTypedQuery<X> implements TypedQuery<X> {
 
   private int maxResults = Integer.MAX_VALUE;
   private int firstResult = 0;
@@ -44,14 +46,35 @@ public abstract class ErraiTypedQuery<X> implements TypedQuery<X> {
 
   private FlushModeType flushMode = FlushModeType.AUTO;
   private LockModeType lockMode = LockModeType.OPTIMISTIC_FORCE_INCREMENT;
+  private final ErraiEntityManager em;
+  private final Class<X> resultType;
+  private final EntityJsonMatcher matcher;
 
-  protected ErraiTypedQuery(Parameter<?> ... parameters) {
-    ImmutableBiMap.Builder<String, Parameter<?>> pb = ImmutableBiMap.builder();
-    for (Parameter<?> p : parameters) {
-      pb.put(p.getName(), p);
-    }
-    this.parameters = pb.build();
+  /**
+   *
+   * @param entityManager
+   *          The EntityManager within whose scope this query will be executed.
+   * @param actualResultType
+   *          The result type of this query. Must be an entity type known to
+   *          {@code entityManager}.
+   * @param matcher
+   *          The matcher that chooses which entity instances to accept.
+   * @param parameters
+   *          The parameters of this query. The iteration order of the
+   *          parameters in the map must be their numeric order in the query
+   *          (ImmutableMap has a stable iteration order).
+   */
+  protected ErraiTypedQuery(
+          ErraiEntityManager entityManager,
+          Class<X> actualResultType,
+          EntityJsonMatcher matcher,
+          ImmutableBiMap<String, Parameter<?>> parameters) {
+    this.em = Assert.notNull(entityManager);
+    this.resultType = Assert.notNull(actualResultType);
+    this.matcher = Assert.notNull(matcher);
+    this.parameters = Assert.notNull(parameters);
   }
+
   /**
    * Works like {@link #getParameter(String)}, but throws an exception if the
    * parameter does not exist.
@@ -179,7 +202,9 @@ public abstract class ErraiTypedQuery<X> implements TypedQuery<X> {
   }
 
   @Override
-  public abstract List<X> getResultList();
+  public List<X> getResultList() {
+    return em.findAll(em.getMetamodel().entity(resultType), matcher);
+  }
 
   @Override
   public X getSingleResult() {

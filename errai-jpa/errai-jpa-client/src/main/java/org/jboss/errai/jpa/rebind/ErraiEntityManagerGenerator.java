@@ -32,7 +32,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.Persistence;
 import javax.persistence.PostLoad;
 import javax.persistence.PostPersist;
 import javax.persistence.PostRemove;
@@ -49,6 +48,7 @@ import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.Type;
 
 import org.apache.commons.collections.OrderedMap;
+import org.hibernate.ejb.HibernatePersistence;
 import org.hibernate.ejb.packaging.PersistenceMetadata;
 import org.hibernate.ejb.packaging.PersistenceXmlLoader;
 import org.jboss.errai.codegen.BooleanExpression;
@@ -123,10 +123,10 @@ public class ErraiEntityManagerGenerator extends Generator {
     // pnqm = populate named queries method
     MethodCommentBuilder<?> pnqm = classBuilder.protectedMethod(void.class, "populateNamedQueries");
     MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
-    for (Class<?> remote : scanner.getTypesAnnotatedWith(NamedQuery.class, RebindUtils.findTranslatablePackages(context))) {
-      NamedQuery namedQuery = remote.getAnnotation(NamedQuery.class);
-      TypedQueryFactoryGenerator generator = new TypedQueryFactoryGenerator(remote, namedQuery.query());
-      Statement generatedFactory = generator.generate();
+    for (Class<?> queryClass : scanner.getTypesAnnotatedWith(NamedQuery.class, RebindUtils.findTranslatablePackages(context))) {
+      NamedQuery namedQuery = queryClass.getAnnotation(NamedQuery.class);
+      TypedQueryFactoryGenerator generator = new TypedQueryFactoryGenerator(em, queryClass, namedQuery.name(), namedQuery.query());
+      Statement generatedFactory = generator.generate(Stmt.loadVariable("this"));
       pnqm._(Stmt.loadVariable("super").loadField("namedQueries")
               .invoke("put",
                       Stmt.loadLiteral(namedQuery.name()),
@@ -197,14 +197,14 @@ public class ErraiEntityManagerGenerator extends Generator {
     pmm.finish();
   }
 
-  private EntityManager createHibernateEntityManager() {
+  public static EntityManager createHibernateEntityManager() {
 
     // this is a Set on purpose: two copies of the same persistence.xml will often be present
     // because GWT likes having source directories on the classpath.
     Set<String> persistenceUnits = new LinkedHashSet<String>();
 
     try {
-      for (URL url : Collections.list(getClass().getClassLoader().getResources("META-INF/persistence.xml"))) {
+      for (URL url : Collections.list(ErraiEntityManagerGenerator.class.getClassLoader().getResources("META-INF/persistence.xml"))) {
         try {
           for (PersistenceMetadata pm : PersistenceXmlLoader.deploy(url, Collections.emptyMap(), null)) {
             persistenceUnits.add(pm.getName());
@@ -230,7 +230,7 @@ public class ErraiEntityManagerGenerator extends Generator {
     properties.put("hibernate.dialect", "org.hibernate.dialect.HSQLDialect");
     properties.put("javax.persistence.validation.mode", "none");
 
-    EntityManagerFactory emf = Persistence.createEntityManagerFactory(persistenceUnits.iterator().next(), properties);
+    EntityManagerFactory emf = new HibernatePersistence().createEntityManagerFactory(persistenceUnits.iterator().next(), properties);
     EntityManager em = emf.createEntityManager();
     return em;
   }

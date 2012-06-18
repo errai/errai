@@ -408,8 +408,8 @@ public abstract class ErraiEntityManager implements EntityManager {
   /**
    * EXPERIMENTAL. This method is very unlikely to survive in the long run.
    */
-  public <X> List<X> findAll(ErraiEntityType<X> type) {
-    return backend.getAll(type);
+  public <X> List<X> findAll(ErraiEntityType<X> type, EntityJsonMatcher matcher) {
+    return backend.getAll(type, matcher);
   }
 
   // -------------- Actual JPA API below this line -------------------
