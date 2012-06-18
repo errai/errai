@@ -12,7 +12,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.enterprise.util.TypeLiteral;
-import javax.inject.Inject;
 
 import org.jboss.errai.codegen.Cast;
 import org.jboss.errai.codegen.InnerClass;
@@ -22,12 +21,14 @@ import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.AnonymousClassStructureBuilder;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
+import org.jboss.errai.codegen.builder.ElseBlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaField;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
+import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.PrivateAccessType;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
 import org.jboss.errai.codegen.util.Refs;
@@ -144,7 +145,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
        */
       String dataFieldElementsVarName = InjectUtil.getUniqueVarName();
       builder.append(Stmt.declareVariable(dataFieldElementsVarName, new TypeLiteral<Map<String, Element>>() {
-      }, Stmt.invokeStatic(TemplateUtil.class, "getDataFieldElements", rootTemplateElement)));
+          }, Stmt.invokeStatic(TemplateUtil.class, "getDataFieldElements", rootTemplateElement)));
 
       /*
        * Attach Widget field children Elements to the Template DOM
@@ -161,8 +162,8 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
 
     String fieldsVarName = InjectUtil.getUniqueVarName();
     builder.append(Stmt.declareVariable(fieldsVarName, new TypeLiteral<Collection<Widget>>() {
-    }, Stmt.newObject(new TypeLiteral<ArrayList<Widget>>() {
-    })));
+        }, Stmt.newObject(new TypeLiteral<ArrayList<Widget>>() {
+        })));
 
     /*
      * Search for data binder fields
@@ -172,7 +173,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
       if (field.getType().getErased().equals(MetaClassFactory.get(DataBinder.class))) {
         if (dataBinderField != null) {
           System.out.println("Multiple data binders found in class:" + ctx.getInjector().getInjectedType()
-                  + " - skipping automatic binding!");
+                  + " - skipping automatic binding generation!");
           dataBinderField = null;
           break;
         }
@@ -212,13 +213,23 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
     }
 
     /*
-     * Bind each widget if data-binder is found and injected 
+     * Bind each widget if data-binder is found and has been initialized. 
      * TODO this should really only bind if the developer has have asked it to be bound.
      */
-    if (dataBinderField != null && dataBinderField.isAnnotationPresent(Inject.class)) {
+    if (dataBinderField != null) {
+      BlockBuilder<ElseBlockBuilder> binderBlockBuilder = Stmt.if_(Bool.isNotNull(Variable.get("binder")));
       for (Entry<String, Statement> field : dataFields.entrySet()) {
-        builder.append(Stmt.loadVariable("binder").invoke("bind", field.getValue(), field.getKey()));
+        binderBlockBuilder.append(Stmt.loadVariable("binder").invoke("bind", field.getValue(), field.getKey()));
       }
+      builder.append(binderBlockBuilder
+          .finish()
+          .else_()
+          .append(
+              Stmt.invokeStatic(GWT.class, "log", "DataBinder in class " 
+                  + dataBinderField.getDeclaringClass().getFullyQualifiedName()
+                  + " (field named " + dataBinderField.getName() + ")" + 
+                  " has not been initialized - skipping automatic binding!"))
+          .finish());
     }
 
     /*
@@ -231,8 +242,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
   }
 
   /**
-   * Create an inner interface for the given {@link Template} class and its HTML
-   * corresponding resource
+   * Create an inner interface for the given {@link Template} class and its HTML corresponding resource
    */
   private void generateTemplateResourceInterface(InjectableInstance<Templated> ctx, final MetaClass type) {
     ClassStructureBuilder<?> componentTemplateResource = ClassBuilder.define(getTemplateTypeName(type)).publicScope()
@@ -278,16 +288,14 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
    */
 
   /**
-   * Get the name of the {@link Template} class of the given {@link MetaClass}
-   * type
+   * Get the name of the {@link Template} class of the given {@link MetaClass} type
    */
   private String getTemplateTypeName(MetaClass type) {
     return type.getFullyQualifiedName().replaceAll("\\.", "_") + "TemplateResource";
   }
 
   /**
-   * Get the name of the {@link Template} HTML file of the given
-   * {@link MetaClass} component type
+   * Get the name of the {@link Template} HTML file of the given {@link MetaClass} component type
    */
   private String getTemplateFileName(MetaClass type) {
     String resource = type.getFullyQualifiedName().replaceAll("\\.", "/") + ".html";
@@ -307,8 +315,8 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
   }
 
   /**
-   * Get the name of the {@link Template} HTML fragment (Element subtree) to be
-   * used as the template root of the given {@link MetaClass} component type
+   * Get the name of the {@link Template} HTML fragment (Element subtree) to be used as the template root of the given
+   * {@link MetaClass} component type
    */
   private String getTemplateFragmentName(MetaClass type) {
     String fragment = "";
