@@ -5,12 +5,17 @@ import org.jboss.errai.cdi.producer.client.BeanConstrConsumersMultiProducers;
 import org.jboss.errai.cdi.producer.client.BeanConstrConsumesOwnProducer;
 import org.jboss.errai.cdi.producer.client.BeanConsumesOwnProducer;
 import org.jboss.errai.cdi.producer.client.DependentProducedBeanDependentBean;
+import org.jboss.errai.cdi.producer.client.Fooblie;
+import org.jboss.errai.cdi.producer.client.FooblieDependentBean;
+import org.jboss.errai.cdi.producer.client.FooblieMaker;
 import org.jboss.errai.cdi.producer.client.ProducerDependentTestBean;
 import org.jboss.errai.cdi.producer.client.ProducerDependentTestBeanWithCycle;
 import org.jboss.errai.cdi.producer.client.ProducerTestModule;
 import org.jboss.errai.cdi.producer.client.SingletonProducedBeanDependentBean;
 import org.jboss.errai.ioc.client.IOCClientTestCase;
 import org.jboss.errai.ioc.client.container.IOC;
+
+import java.util.List;
 
 /**
  * Tests CDI producers.
@@ -136,5 +141,23 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
     assertNotNull(bean.getResponse());
     assertNotNull(bean.getTestEvent());
     assertNotNull(bean.getPanel());
+  }
+
+  public void testDisposerMethod() {
+    FooblieMaker maker = IOC.getBeanManager().lookupBean(FooblieMaker.class).getInstance();
+
+    FooblieDependentBean fooblieDependentBean1
+            = IOC.getBeanManager().lookupBean(FooblieDependentBean.class).getInstance();
+    FooblieDependentBean fooblieDependentBean2
+            = IOC.getBeanManager().lookupBean(FooblieDependentBean.class).getInstance();
+
+    IOC.getBeanManager().destroyBean(fooblieDependentBean1.getFooblie());
+    IOC.getBeanManager().destroyBean(fooblieDependentBean2.getFooblie());
+
+    final List<Fooblie> destroyed = maker.getDestroyedFooblies();
+
+    assertEquals("there should be two destroyed beans", 2, destroyed.size());
+    assertEquals(fooblieDependentBean1.getFooblie(), destroyed.get(0));
+    assertEquals(fooblieDependentBean2.getFooblie(), destroyed.get(1));
   }
 }

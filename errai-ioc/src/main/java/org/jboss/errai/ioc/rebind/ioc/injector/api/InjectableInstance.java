@@ -148,7 +148,7 @@ public class InjectableInstance<T extends Annotation> extends InjectionPoint<T> 
     }
   }
 
-  private Injector getTargetInjector() {
+  public Injector getTargetInjector() {
     final MetaClass targetType = getInjector() == null ? getEnclosingType() : getInjector().getInjectedType();
 
     Injector targetInjector

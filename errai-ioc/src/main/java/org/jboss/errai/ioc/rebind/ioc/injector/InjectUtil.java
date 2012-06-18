@@ -56,6 +56,7 @@ import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -216,7 +217,6 @@ public class InjectUtil {
                                    final List<MetaMethod> preDestroyTasks) {
 
     if (preDestroyTasks.isEmpty()) return;
-
 
     final MetaClass destructionCallbackType =
             parameterizedAs(DestructionCallback.class, typeParametersOf(injector.getInjectedType()));
@@ -636,7 +636,7 @@ public class InjectUtil {
 
     ctx.getProcessingContext()
             .append(Stmt.declareVariable(parm.getType()).asFinal().named(varName)
-            .initializeWith(beanCreationStmt));
+                    .initializeWith(beanCreationStmt));
 
     final Statement stmt = Refs.get(varName);
 
@@ -681,6 +681,62 @@ public class InjectUtil {
   public static Annotation[] getQualifiersFromAnnotationsAsArray(final Annotation[] annotations) {
     final List<Annotation> quals = getQualifiersFromAnnotations(annotations);
     return quals.toArray(new Annotation[quals.size()]);
+  }
+
+  public static interface BeanMetric {
+    public MetaConstructor getInjectorConstructor();
+
+    public Collection<MetaField> getFieldInjectors();
+
+    public Collection<MetaMethod> getMethodInjectors();
+  }
+
+  public static BeanMetric analyzeBean(final InjectionContext context, final MetaClass clazz) {
+    MetaConstructor injectConstructor = null;
+    for (MetaConstructor constructor : clazz.getDeclaredConstructors()) {
+      if (isInjectionPoint(context, constructor)) {
+        injectConstructor = constructor;
+        break;
+      }
+    }
+
+    final Collection<MetaField> fields = new ArrayList<MetaField>();
+    final Collection<MetaMethod> methods = new ArrayList<MetaMethod>();
+
+    MetaClass toScan = clazz;
+    do {
+      for (MetaField field : toScan.getDeclaredFields()) {
+        if (isInjectionPoint(context, field)) {
+          fields.add(field);
+        }
+      }
+
+      for (MetaMethod method : toScan.getDeclaredMethods()) {
+        if (isInjectionPoint(context, method)) {
+          methods.add(method);
+        }
+      }
+    }
+    while ((toScan = toScan.getSuperClass()) != null);
+
+    final MetaConstructor constructor = injectConstructor;
+
+    return new BeanMetric() {
+      @Override
+      public MetaConstructor getInjectorConstructor() {
+        return constructor;
+      }
+
+      @Override
+      public Collection<MetaField> getFieldInjectors() {
+        return fields;
+      }
+
+      @Override
+      public Collection<MetaMethod> getMethodInjectors() {
+        return methods;
+      }
+    };
   }
 
   private static final String BEAN_INJECTOR_STORE = "InjectorBeanManagerStore";

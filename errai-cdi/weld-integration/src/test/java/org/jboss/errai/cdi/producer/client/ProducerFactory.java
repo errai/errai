@@ -1,6 +1,7 @@
 package org.jboss.errai.cdi.producer.client;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Produces;
 
 /**
