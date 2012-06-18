@@ -4,8 +4,10 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import org.jboss.errai.databinding.client.api.DataBinder;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
+import org.jboss.errai.ui.test.common.client.Model;
 
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -16,15 +18,15 @@ import com.google.gwt.user.client.ui.Composite;
 @Templated
 public class HandledComponent extends Composite {
 
-  private Button b1;
+  private final Button b1;
 
   @DataField
-  private Button b2 = new Button("Will be rendered inside button from GWT");
+  private final Button b2 = new Button("Will be rendered inside button from GWT");
 
-  private VocalWidget b3;
+  private final VocalWidget b3;
 
   @Inject
-  public HandledComponent(@DataField Button b1, @DataField VocalWidget b3) {
+  public HandledComponent(@DataField Button b1, @DataField VocalWidget b3, DataBinder<Model> binder) {
     this.b1 = b1;
     this.b3 = b3;
   }

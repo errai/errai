@@ -26,7 +26,9 @@ import org.jboss.errai.codegen.builder.impl.ClassBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
+import org.jboss.errai.codegen.meta.MetaConstructor;
 import org.jboss.errai.codegen.meta.MetaField;
+import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.util.Bool;
 import org.jboss.errai.codegen.util.PrivateAccessType;
@@ -38,6 +40,7 @@ import org.jboss.errai.ioc.client.api.CodeDecorator;
 import org.jboss.errai.ioc.client.container.InitializationCallback;
 import org.jboss.errai.ioc.rebind.ioc.extension.IOCDecoratorExtension;
 import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil;
+import org.jboss.errai.ioc.rebind.ioc.injector.InjectUtil.BeanMetric;
 import org.jboss.errai.ioc.rebind.ioc.injector.api.InjectableInstance;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
@@ -51,7 +54,10 @@ import com.google.gwt.resources.client.TextResource;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
+ * Generates the code required for {@link Templated} classes.
+ * 
  * @author <a href="mailto:lincolnbaxter@gmail.com">Lincoln Baxter, III</a>
+ * @author Christian Sadilek <csadilek@redhat.com>
  */
 @CodeDecorator
 public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
@@ -166,31 +172,46 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
         })));
 
     /*
-     * Search for data binder fields
+     * In case of constructor injection, search for the data binder parameter 
      */
-    MetaField dataBinderField = null;
-    for (MetaField field : ctx.getInjector().getInjectedType().getFields()) {
-      if (field.getType().getErased().equals(MetaClassFactory.get(DataBinder.class))) {
-        if (dataBinderField != null) {
-          System.out.println("Multiple data binders found in class:" + ctx.getInjector().getInjectedType()
-                  + " - skipping automatic binding generation!");
-          dataBinderField = null;
+    Statement dataBinderRef = null;
+    BeanMetric beanMetric = InjectUtil.analyzeBean(ctx.getInjectionContext(), ctx.getEnclosingType());
+    MetaConstructor mc = beanMetric.getInjectorConstructor();
+    if (mc != null) {
+      for (MetaParameter mp : mc.getParameters()) {
+        if (mp.getType().getErased().isAssignableTo(MetaClassFactory.get(DataBinder.class))) {
+          dataBinderRef = ctx.getInjectionContext().getInlineBeanReference(mp);  
           break;
         }
-        dataBinderField = field;
       }
     }
-
+    
+    /*
+     * Search for data binder fields, in case no data binder was injected into the constructor
+     */
+    if (dataBinderRef == null) {
+      MetaField dataBinderField = null;
+      for (MetaField field : ctx.getInjector().getInjectedType().getFields()) {
+        if (field.getType().getErased().equals(MetaClassFactory.get(DataBinder.class))) {
+          if (dataBinderField != null) {
+            System.out.println("Multiple data binders found in class:" + ctx.getInjector().getInjectedType()
+                    + " - skipping automatic binding generation!");
+            dataBinderField = null;
+            break;
+          }
+          dataBinderField = field;
+          dataBinderRef = Stmt.invokeStatic(ctx.getInjectionContext().getProcessingContext().getBootstrapClass(),
+              PrivateAccessUtil.getPrivateFieldInjectorName(dataBinderField),
+              Variable.get(ctx.getInjector().getVarName()));
+        }
+      }
+    }
+    
     /*
      * Create a reference to the composite's data binder
      */
-    if (dataBinderField != null) {
-      builder.append(Stmt.declareVariable(
-              "binder",
-              DataBinder.class,
-              Stmt.invokeStatic(ctx.getInjectionContext().getProcessingContext().getBootstrapClass(),
-                      PrivateAccessUtil.getPrivateFieldInjectorName(dataBinderField),
-                      Variable.get(ctx.getInjector().getVarName()))));
+    if (dataBinderRef != null) {
+      builder.append(Stmt.declareVariable("binder", DataBinder.class, dataBinderRef));
     }
 
     /*
@@ -216,7 +237,7 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
      * Bind each widget if data-binder is found and has been initialized. 
      * TODO this should really only bind if the developer has have asked it to be bound.
      */
-    if (dataBinderField != null) {
+    if (dataBinderRef != null) {
       BlockBuilder<ElseBlockBuilder> binderBlockBuilder = Stmt.if_(Bool.isNotNull(Variable.get("binder")));
       for (Entry<String, Statement> field : dataFields.entrySet()) {
         binderBlockBuilder.append(Stmt.loadVariable("binder").invoke("bind", field.getValue(), field.getKey()));
@@ -226,9 +247,8 @@ public class DecoratorTemplated extends IOCDecoratorExtension<Templated> {
           .else_()
           .append(
               Stmt.invokeStatic(GWT.class, "log", "DataBinder in class " 
-                  + dataBinderField.getDeclaringClass().getFullyQualifiedName()
-                  + " (field named " + dataBinderField.getName() + ")" + 
-                  " has not been initialized - skipping automatic binding!"))
+                  + ctx.getEnclosingType().getFullyQualifiedName()
+                  + " has not been initialized - skipping automatic binding!"))
           .finish());
     }
 
