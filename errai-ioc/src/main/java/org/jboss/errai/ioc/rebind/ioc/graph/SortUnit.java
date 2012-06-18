@@ -38,7 +38,7 @@ public class SortUnit implements Comparable<SortUnit> {
   private final List<Object> items;
   private final Set<SortUnit> dependencies;
 
-  protected SortUnit(MetaClass type, List<Object> items, Set<SortUnit> dependencies) {
+  protected SortUnit(final MetaClass type, final List<Object> items, final Set<SortUnit> dependencies) {
     this.type = type.getErased();
     this.items = Collections.unmodifiableList(items);
     this.dependencies = Collections.unmodifiableSet(dependencies);
@@ -94,7 +94,10 @@ public class SortUnit implements Comparable<SortUnit> {
     return _hasCycle(new HashSet<SortUnit>());
   }
 
-  private static boolean _hasDependency(final Set<String> visited, final SortUnit from, final SortUnit to) {
+  private static boolean _hasDependency(final Set<String> visited,
+                                        final SortUnit from,
+                                        final SortUnit to) {
+
     final String fromType = from.getType().getFullyQualifiedName();
     if (visited.contains(fromType)) {
       return false;
@@ -130,8 +133,10 @@ public class SortUnit implements Comparable<SortUnit> {
     return depth;
   }
 
-
-  private static int _getDepth(final Set<SortUnit> visited, final SortUnit outer, int depth, final SortUnit su) {
+  private static int _getDepth(final Set<SortUnit> visited,
+                               final SortUnit outer,
+                               int depth,
+                               final SortUnit su) {
     if (visited.contains(su)) {
       return 0;
     }
@@ -147,21 +152,20 @@ public class SortUnit implements Comparable<SortUnit> {
       }
     }
     return depth;
-
   }
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(final Object o) {
     if (this == o) return true;
     if (!(o instanceof SortUnit)) return false;
 
-    SortUnit sortUnit = (SortUnit) o;
+    final SortUnit sortUnit = (SortUnit) o;
 
     return type != null && type.getFullyQualifiedName().equals(sortUnit.type.getFullyQualifiedName());
   }
 
   @Override
-  public int compareTo(SortUnit o) {
+  public int compareTo(final SortUnit o) {
     if (o.hasDependency(this) && hasDependency(o)) {
       return o.getDepth() - getDepth();
     }
@@ -185,15 +189,15 @@ public class SortUnit implements Comparable<SortUnit> {
             + " => " + _renderDependencyTree(visited, this);
   }
 
-
-  private static String _renderDependencyTree(Set<SortUnit> visited, SortUnit visit) {
+  private static String _renderDependencyTree(final Set<SortUnit> visited,
+                                              final SortUnit visit) {
     if (visited.contains(visit)) {
       return "<CYCLE ON: " + visit.getType().getFullyQualifiedName() + ">";
     }
     visited.add(visit);
 
-    StringBuilder sb = new StringBuilder("[");
-    Iterator<SortUnit> iter = visit.getDependencies().iterator();
+    final StringBuilder sb = new StringBuilder("[");
+    final Iterator<SortUnit> iter = visit.getDependencies().iterator();
     while (iter.hasNext()) {
       sb.append(iter.next()._toString(visited));
       if (iter.hasNext()) {
@@ -208,8 +212,9 @@ public class SortUnit implements Comparable<SortUnit> {
     return _cycleSearch(visited, this);
   }
 
+  private static boolean _cycleSearch(final Set<SortUnit> visited,
+                                      final SortUnit visit) {
 
-  private static boolean _cycleSearch(final Set<SortUnit> visited, final SortUnit visit) {
     if (visited.contains(visit)) {
       return true;
     }

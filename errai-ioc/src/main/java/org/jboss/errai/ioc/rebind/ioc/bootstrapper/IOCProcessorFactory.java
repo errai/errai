@@ -33,6 +33,7 @@ import org.jboss.errai.codegen.util.PrivateAccessType;
 import org.jboss.errai.codegen.util.Refs;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.metadata.MetaDataScanner;
+import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
 import org.jboss.errai.ioc.client.api.TestMock;
 import org.jboss.errai.ioc.client.api.TestOnly;
@@ -63,6 +64,7 @@ import org.jboss.errai.ioc.rebind.ioc.injector.api.WiringElementType;
 import org.jboss.errai.ioc.rebind.ioc.metadata.JSR330QualifyingMetadata;
 
 import javax.inject.Provider;
+import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
@@ -398,6 +400,14 @@ public class IOCProcessorFactory {
 
     final List<SortUnit> toSort = injectionContext.getGraphBuilder().build();
     final List<SortUnit> list = sortGraph(toSort);
+
+    final File dotFile = new File(RebindUtils.getErraiCacheDir().getAbsolutePath() + "/beangraph.gv");
+
+    RebindUtils.writeStringToFile(dotFile,
+            "//\n" +
+            "// Generated IOC bean dependency graph in GraphViz DOT format.\n" +
+            "//\n\n" +
+            GraphBuilder.toDOTRepresentation(list));
 
     for (SortUnit unit : list) {
       if (unit.isCyclicGraph()) {

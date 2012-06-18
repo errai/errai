@@ -89,7 +89,7 @@ public class GraphBuilder {
     final Collection<Object> items = itemMap.get(type);
     final Collection<Dependency> deps = dependencyMap.get(type);
 
-    List<SortUnit> sortUnitDependencies = new ArrayList<SortUnit>();
+    final List<SortUnit> sortUnitDependencies = new ArrayList<SortUnit>();
     for (Dependency d : deps) {
       sortUnitDependencies.add(_build(sortUnits, d.getType().getFullyQualifiedName()));
     }
@@ -97,5 +97,66 @@ public class GraphBuilder {
     proxySortUnit.setDelegate(SortUnit.create(classLookup.get(type), items, sortUnitDependencies));
 
     return proxySortUnit;
+  }
+
+  public String toDOTRepresentation() {
+    return toDOTRepresentation(build());
+  }
+
+  public static String toDOTRepresentation(final List<SortUnit> graph) {
+    final StringBuilder sb = new StringBuilder("digraph g {\n");
+    final Set<String> visited = new HashSet<String>();
+    for (SortUnit su : graph) {
+      if (!visit(visited, su)) {
+        continue;
+      }
+
+      if (su.getDependencies().isEmpty()) {
+        sb.append("  ").append(quote(su)).append("\n");
+      }
+      else {
+        for (SortUnit node : su.getDependencies()) {
+          if (!visit(visited, su, node)) {
+            continue;
+          }
+
+          sb.append("  ").append(quote(su)).append(" -> ").append(quote(node)).append("\n");
+        }
+      }
+    }
+    return sb.append("}").toString();
+  }
+
+  private static boolean visit(final Set<String> visited, final SortUnit su) {
+    if (visited.contains(su.getType().getFullyQualifiedName())) {
+      return false;
+    }
+    else {
+      visited.add(su.getType().getFullyQualifiedName());
+      return true;
+    }
+  }
+
+  private static boolean visit(final Set<String> visited, final SortUnit from, final SortUnit to) {
+    final String str = from.getType().getFullyQualifiedName() + "->" + to.getType().getFullyQualifiedName();
+    if (visited.contains(str)) {
+      return false;
+    }
+    else {
+      visited.add(str);
+      return true;
+    }
+  }
+
+  /**
+   * Returns a quoted representation of the object's toString() suitable for use
+   * in the GraphViz DOT language.
+   *
+   * @param n The object whose quoted string representation to generate.
+   * @return A quoted string representation of n.
+   */
+  private static String quote(SortUnit n) {
+    // note that only " is escaped in the DOT language (a bare backslash is just a bare backslash)
+    return "\"" + n.getType().getFullyQualifiedName().replaceAll("\\Q\"\\E", "\\\"") + "\"";
   }
 }

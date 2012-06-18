@@ -44,22 +44,25 @@ public final class GraphSort {
     return sortUnitList;
   }
 
-  private static List<SortUnit> topologicalSort(List<SortUnit> S) {
-    Set<String> V = new HashSet<String>();
-    List<SortUnit> L = new ArrayList<SortUnit>();
-    for (SortUnit n : S) {
-      _topologicalSort(V, L, n);
+  private static List<SortUnit> topologicalSort(List<SortUnit> toSort) {
+    final Set<String> visited = new HashSet<String>();
+    final List<SortUnit> sorted = new ArrayList<SortUnit>();
+    for (SortUnit n : toSort) {
+      _topologicalSort(visited, sorted, n);
     }
-    return L;
+    return sorted;
   }
 
-  private static void _topologicalSort(final Set<String> V, final List<SortUnit> L, final SortUnit n) {
-    if (!V.contains(n.getType().getFullyQualifiedName())) {
-      V.add(n.getType().getFullyQualifiedName());
-      for (SortUnit m : n.getDependencies()) {
-        _topologicalSort(V, L, m);
+  private static void _topologicalSort(final Set<String> visited,
+                                       final List<SortUnit> sorted,
+                                       final SortUnit n) {
+
+    if (!visited.contains(n.getType().getFullyQualifiedName())) {
+      visited.add(n.getType().getFullyQualifiedName());
+      for (final SortUnit m : n.getDependencies()) {
+        _topologicalSort(visited, sorted, m);
       }
-      L.add(n);
+      sorted.add(n);
     }
   }
 }

@@ -75,7 +75,9 @@ public class InjectUtil {
     final MetaClass type = injector.getInjectedType();
 
     final List<InjectionTask> injectionTasks = new ArrayList<InjectionTask>();
-    final List<MetaConstructor> constructorInjectionPoints = scanForConstructorInjectionPoints(injector, ctx, type, injectionTasks);
+
+    final List<MetaConstructor> constructorInjectionPoints
+            = scanForConstructorInjectionPoints(injector, ctx, type, injectionTasks);
 
     injectionTasks.addAll(scanForTasks(injector, ctx, type));
 
@@ -145,6 +147,7 @@ public class InjectUtil {
                           .initializeWith(Stmt.newObject(type))
 
           );
+
           callback.beanConstructed();
 
           handleInjectionTasks(ctx, injectionTasks);
@@ -192,7 +195,7 @@ public class InjectUtil {
 
     AnonymousClassStructureBuilder classStructureBuilder = initMeth.finish();
 
-    IOCProcessingContext pc = ctx.getProcessingContext();
+    final IOCProcessingContext pc = ctx.getProcessingContext();
 
     pc.globalInsertBefore(Stmt.declareVariable(initializationCallbackType).asFinal().named(varName)
             .initializeWith(classStructureBuilder.finish()));
@@ -227,9 +230,9 @@ public class InjectUtil {
 
     renderLifeCycleEvents(PreDestroy.class, injector, ctx, initMeth, preDestroyTasks);
 
-    AnonymousClassStructureBuilder classStructureBuilder = initMeth.finish();
+    final AnonymousClassStructureBuilder classStructureBuilder = initMeth.finish();
 
-    IOCProcessingContext pc = ctx.getProcessingContext();
+    final IOCProcessingContext pc = ctx.getProcessingContext();
 
     pc.globalInsertBefore(Stmt.declareVariable(destructionCallbackType).asFinal().named(varName)
             .initializeWith(classStructureBuilder.finish()));
@@ -323,9 +326,8 @@ public class InjectUtil {
           accumulator.add(new InjectionTask(injector, meth));
         }
 
-        ElementType[] elTypes;
         for (Class<? extends Annotation> a : decorators) {
-          elTypes = a.isAnnotationPresent(Target.class) ? a.getAnnotation(Target.class).value()
+          final ElementType[] elTypes = a.isAnnotationPresent(Target.class) ? a.getAnnotation(Target.class).value()
                   : new ElementType[]{ElementType.FIELD};
 
           for (ElementType elType : elTypes) {
@@ -521,7 +523,6 @@ public class InjectUtil {
 
           }
           else if (inj.isDependent() && (!alwaysProxyDependent || !ctx.typeContainsGraphCycles(inj.getInjectedType()))) {
-     //     else if (!alwaysProxyDependent && inj.isDependent()) {
             if (inj.isCreated() && !inj.isRendered()) {
               throw new InjectionFailure("unresolveable cycle on dependent scoped bean: "
                       + inj.getInjectedType().getFullyQualifiedName() + "; does the bean intersect with a normal scope?");

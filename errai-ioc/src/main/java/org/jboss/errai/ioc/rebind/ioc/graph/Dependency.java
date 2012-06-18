@@ -8,11 +8,11 @@ import org.jboss.errai.codegen.meta.MetaClass;
 public class Dependency {
   private final MetaClass type;
 
-  private Dependency(MetaClass type) {
+  private Dependency(final MetaClass type) {
     this.type = type;
   }
 
-  public static Dependency on(MetaClass type) {
+  public static Dependency on(final MetaClass type) {
     return new Dependency(type);
   }
 
@@ -21,11 +21,11 @@ public class Dependency {
   }
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(final Object o) {
     if (this == o) return true;
     if (!(o instanceof Dependency)) return false;
 
-    Dependency that = (Dependency) o;
+    final Dependency that = (Dependency) o;
 
     if (type != null ? !type.equals(that.type) : that.type != null) return false;
 
