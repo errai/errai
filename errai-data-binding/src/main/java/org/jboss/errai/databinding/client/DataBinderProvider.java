@@ -30,11 +30,12 @@ import org.jboss.errai.ioc.client.api.IOCProvider;
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 @IOCProvider @Singleton
-public class DataBinderProvider implements ContextualTypeProvider<DataBinder<?>> {
+@SuppressWarnings("rawtypes")
+public class DataBinderProvider implements ContextualTypeProvider<DataBinder> {
   
   @Override
   @SuppressWarnings("all")
-  public DataBinder<?> provide(Class<?>[] typeargs, Annotation[] qualifiers) {
+  public DataBinder provide(Class<?>[] typeargs, Annotation[] qualifiers) {
     return new DataBinder(typeargs[0]);
   }
 }
