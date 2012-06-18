@@ -16,11 +16,10 @@
 
 package org.jboss.errai.bus.client.api.base;
 
-import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
 
 /**
- * <tt>NoSubscribersToDeliverTo</tt> extends the <tt>RuntimeException</tt>. It is thrown when there is no where to
- * deliver a message to
+ * Thrown when a message given to the bus has a subject name that no subscribers are listening for on the local bus or
+ * any remote bus federated with it.
  */
 public class NoSubscribersToDeliverTo extends MessageDeliveryFailure {
   private static final long serialVersionUID = -5385972750788483158L;

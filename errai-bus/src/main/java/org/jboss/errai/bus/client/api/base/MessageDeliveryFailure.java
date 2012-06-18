@@ -19,8 +19,7 @@ package org.jboss.errai.bus.client.api.base;
 import org.jboss.errai.common.client.api.annotations.Portable;
 
 /**
- * <tt>MessageDeliveryFailure</tt> extends the <tt>RuntimeException</tt>. It is thrown when there is an error
- * delivering a message
+ * Thrown to indicate that delivery could not be completed for a message which was given to ErraiBus. 
  */
 @Portable
 public class MessageDeliveryFailure extends RuntimeException {

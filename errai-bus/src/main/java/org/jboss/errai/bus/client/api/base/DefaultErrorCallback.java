@@ -26,15 +26,27 @@ import org.jboss.errai.bus.client.api.builder.MessageBuildParms;
 import org.jboss.errai.common.client.protocols.MessageParts;
 
 /**
- * The default error callback implementation, used when {@link MessageBuildParms#defaultErrorHandling()} was invoked.
- *
+ * The default error callback implementation, used when {@link MessageBuildParms#defaultErrorHandling()} was invoked
+ * (which is the default when there is no explicit mention of error handling to the MessageBuilder).
+ * 
  * @author Mike Brock
  * @author Christian Sadilek <csadilek@redhat.com>
  */
 public class DefaultErrorCallback implements ErrorCallback {
   public static final DefaultErrorCallback INSTANCE = new DefaultErrorCallback();
   public static final String CLIENT_ERROR_SUBJECT = "ClientBusErrors";
-
+  
+  /**
+   * Constructs an error message and puts it on the client message bus with the subject {@link #CLIENT_ERROR_SUBJECT}.
+   * The error message is constructed with the following parts: 
+   * <dl>
+   * <dt>Subject <dd>{@link #CLIENT_ERROR_SUBJECT}
+   * <dt>ErrorMessage <dd>{@code e.getMessage()} if e != null; otherwise, {@code "Null exception reference"} 
+   * <dt>AdditionalDetails <dd>HTML marked-up stack trace of {@code e} if e != null; otherwise, {@code "No additional details"}
+   * <dt>Throwable <dd>A marshalled representation of the exception object {@code e} if e != null; otherwise, this message part is omitted.
+   * </dl>
+   */
+  @Override
   public boolean error(Message message, final Throwable e) {
     try {
       if (e != null) {
@@ -63,7 +75,7 @@ public class DefaultErrorCallback implements ErrorCallback {
         if (message == null) {
           createMessage(CLIENT_ERROR_SUBJECT)
                   .with(MessageParts.ErrorMessage, e.getMessage())
-                  .with("AdditionalDetails", a.toString())
+                  .with(MessageParts.AdditionalDetails, a.toString())
                   .with(MessageParts.Throwable, e)
                   .noErrorHandling().sendNowWith(ErraiBus.get());
         }
@@ -71,7 +83,7 @@ public class DefaultErrorCallback implements ErrorCallback {
           createConversation(message)
                   .toSubject(CLIENT_ERROR_SUBJECT)
                   .with(MessageParts.ErrorMessage, e.getMessage())
-                  .with("AdditionalDetails", a.toString())
+                  .with(MessageParts.AdditionalDetails, a.toString())
                   .with(MessageParts.Throwable, e)
                   .noErrorHandling().reply();
         }
@@ -79,15 +91,15 @@ public class DefaultErrorCallback implements ErrorCallback {
       else {
         if (message == null) {
           createMessage(CLIENT_ERROR_SUBJECT)
-                  .with("ErrorMessage", "Null exception reference")
-                  .with("AdditionalDetails", "No additional details")
+                  .with(MessageParts.ErrorMessage, "Null exception reference")
+                  .with(MessageParts.AdditionalDetails, "No additional details")
                   .noErrorHandling().sendNowWith(ErraiBus.get());
         }
         else {
           createConversation(message)
                   .toSubject(CLIENT_ERROR_SUBJECT)
-                  .with("ErrorMessage", "Null exception reference")
-                  .with("AdditionalDetails", "No additional details")
+                  .with(MessageParts.ErrorMessage, "Null exception reference")
+                  .with(MessageParts.AdditionalDetails, "No additional details")
                   .noErrorHandling().reply();
         }
       }

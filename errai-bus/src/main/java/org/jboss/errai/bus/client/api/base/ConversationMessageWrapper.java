@@ -35,6 +35,14 @@ class ConversationMessageWrapper implements Message {
   protected Message message;
   protected Message newMessage;
 
+  /**
+   * Creates a new wrapper that makes newMessage a reply to the given message.
+   *  
+   * @param inReplyTo
+   *          The message this wrapper is in reply to. Not null.
+   * @param newMessage
+   *          The new message to be wrapped. Not null.
+   */
   public ConversationMessageWrapper(Message inReplyTo, Message newMessage) {
     this.message = Assert.notNull(inReplyTo);
     this.newMessage = Assert.notNull(newMessage);

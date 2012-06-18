@@ -19,12 +19,32 @@ package org.jboss.errai.bus.client.api.base;
 import org.jboss.errai.bus.client.api.HasEncoded;
 import org.jboss.errai.bus.client.api.Message;
 
-
+/**
+ * Internal wrapper that extends {@link ConversationMessageWrapper} for wrapping messages that also implement
+ * {@link HasEncoded}.
+ */
 class HasEncodedConvMessageWrapper extends ConversationMessageWrapper implements HasEncoded {
+
+  /**
+   * Creates a new wrapper that makes newMessage a reply to the given message.
+   *  
+   * @param inReplyTo
+   *          The message this wrapper is in reply to. Not null.
+   * @param newMessage
+   *          The new message to be wrapped. Must implement HasEncoded. Not null.
+   * @throws ClassCastException
+   *           if {@code newMessage} is not an instance of HasEncoded.
+   */
   public HasEncodedConvMessageWrapper(Message inReplyTo, Message newMessage) {
     super(inReplyTo, newMessage);
+    
+    // have to check this now; otherwise #getEncoded() will blow up later
+    if (!(newMessage instanceof HasEncoded)) {
+      throw new ClassCastException("Given message does not implement HasEncoded");
+    }
   }
 
+  @Override
   public String getEncoded() {
     return ((HasEncoded) newMessage).getEncoded();
   }
