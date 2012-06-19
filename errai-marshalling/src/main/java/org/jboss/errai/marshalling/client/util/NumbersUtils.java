@@ -70,7 +70,7 @@ public class NumbersUtils {
 
     return "{" + quote + SerializationParts.ENCODED_TYPE + quote + ":"
             + quote + typeName + quote + ", "
-            + quote + SerializationParts.OBJECT_ID + quote + ": " + quote + (o != null ? o.hashCode() : -1) + quote + "," +
+            + quote + SerializationParts.OBJECT_ID + quote + ": " + quote + "-1" + quote + "," +
             quote + SerializationParts.NUMERIC_VALUE + quote + ":"
             + (o instanceof Long || o instanceof Character ? quote + String.valueOf(o) + quote : String.valueOf(o)) + "}";
 
