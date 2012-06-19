@@ -56,7 +56,7 @@ public class PackagingUtil {
 
     do {
       start = new File(rootPath);
-      rootPath = rootPath.substring(0, (pivotPoint = rootPath.lastIndexOf("/")) < 0 ? 0 : pivotPoint);
+      rootPath = rootPath.substring(0, (pivotPoint = rootPath.lastIndexOf(File.separator)) < 0 ? 0 : pivotPoint);
     }
     while (!start.exists() && pivotPoint > 0);
 
