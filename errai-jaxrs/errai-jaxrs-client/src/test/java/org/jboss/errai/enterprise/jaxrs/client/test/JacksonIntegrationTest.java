@@ -24,6 +24,7 @@ import org.jboss.errai.enterprise.client.jaxrs.MarshallingWrapper;
 import org.jboss.errai.enterprise.client.jaxrs.api.RestClient;
 import org.jboss.errai.enterprise.client.jaxrs.test.AbstractErraiJaxrsTest;
 import org.jboss.errai.enterprise.jaxrs.client.shared.JacksonTestService;
+import org.jboss.errai.enterprise.jaxrs.client.shared.entity.ByteArrayTestWrapper;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.User;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.User.Gender;
 import org.junit.Test;
@@ -119,6 +120,25 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
             finishTest();
           }
         }).postJacksonListOfBytes(jackson);
+  }
+  
+  @Test
+  @SuppressWarnings("serial")
+  public void testJacksonMarshallingOfPortableWithByteArray() {
+    delayTestFinish(5000);
+
+    final ByteArrayTestWrapper entity = new ByteArrayTestWrapper();
+    String jackson = MarshallingWrapper.toJSON(entity);
+
+    RestClient.create(JacksonTestService.class,
+        new RemoteCallback<String>() {
+          @Override
+          public void callback(String jackson) {
+            assertNotNull("Server failed to parse JSON using Jackson", jackson);
+            assertEquals(entity, MarshallingWrapper.fromJSON(jackson, ByteArrayTestWrapper.class));
+            finishTest();
+          }
+        }).postJacksonPortableWithByteArray(jackson);
   }
   
 }

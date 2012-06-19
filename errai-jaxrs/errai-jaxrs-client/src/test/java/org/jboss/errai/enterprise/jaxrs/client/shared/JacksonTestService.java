@@ -69,4 +69,8 @@ public interface JacksonTestService {
   @POST
   @Path("/listOfBytes")
   public String postJacksonListOfBytes(String jackson);
+  
+  @POST
+  @Path("/PortableWithByteArray")
+  public String postJacksonPortableWithByteArray(String jackson);
 }

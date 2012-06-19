@@ -43,6 +43,7 @@ public class User {
 
   private List<String> petNames = new ArrayList<String>();
   private List<User> friends = new ArrayList<User>();
+  private List<Integer> favoriteNumbers = new ArrayList<Integer>();
   private Integer age;
   private boolean alive = true;
 
@@ -57,7 +58,8 @@ public class User {
     this.gender = gender;
     this.parent = parent;
     this.parentRef = parent;
-    
+    this.favoriteNumbers.add(17);
+    this.favoriteNumbers.add(11);
   }
 
   public Long getId() {
@@ -67,7 +69,7 @@ public class User {
   public void setId(Long id) {
     this.id = id;
   }
-  
+
   public String getFirstName() {
     return firstName;
   }
@@ -140,12 +142,21 @@ public class User {
     this.gender = gender;
   }
 
+  public List<Integer> getFavoriteNumbers() {
+    return favoriteNumbers;
+  }
+
+  public void setFavoriteNumbers(List<Integer> favoriteNumbers) {
+    this.favoriteNumbers = favoriteNumbers;
+  }
+
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((age == null) ? 0 : age.hashCode());
     result = prime * result + (alive ? 1231 : 1237);
+    result = prime * result + ((favoriteNumbers == null) ? 0 : favoriteNumbers.hashCode());
     result = prime * result + ((firstName == null) ? 0 : firstName.hashCode());
     result = prime * result + ((friends == null) ? 0 : friends.hashCode());
     result = prime * result + ((gender == null) ? 0 : gender.hashCode());
@@ -173,6 +184,12 @@ public class User {
     else if (!age.equals(other.age))
       return false;
     if (alive != other.alive)
+      return false;
+    if (favoriteNumbers == null) {
+      if (other.favoriteNumbers != null)
+        return false;
+    }
+    else if (!favoriteNumbers.equals(other.favoriteNumbers))
       return false;
     if (firstName == null) {
       if (other.firstName != null)
@@ -225,6 +242,7 @@ public class User {
   public String toString() {
     return "User [id=" + id + ", firstName=" + firstName + ", lastName=" + lastName + ", gender=" + gender
         + ", parent=" + parent + ", parentRef=" + parentRef + ", petNames=" + petNames + ", friends=" + friends
-        + ", age=" + age + ", alive=" + alive + "]";
+        + ", favoriteNumbers=" + favoriteNumbers + ", age=" + age + ", alive=" + alive + "]";
   }
+
 }

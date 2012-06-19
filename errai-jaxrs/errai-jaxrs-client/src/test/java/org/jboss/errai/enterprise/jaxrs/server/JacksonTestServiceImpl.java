@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jboss.errai.enterprise.jaxrs.client.shared.JacksonTestService;
+import org.jboss.errai.enterprise.jaxrs.client.shared.entity.ByteArrayTestWrapper;
 import org.jboss.errai.enterprise.jaxrs.client.shared.entity.User;
 
 /**
@@ -61,6 +62,19 @@ public class JacksonTestServiceImpl implements JacksonTestService {
     try {
       List<Byte> users = mapper.readValue(jackson, List.class);
       return mapper.writeValueAsString(users);
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      return null;
+    }
+  }
+  
+  @Override
+  public String postJacksonPortableWithByteArray(String jackson) {
+    ObjectMapper mapper = new ObjectMapper();
+    try {
+      ByteArrayTestWrapper entity = mapper.readValue(jackson, ByteArrayTestWrapper.class);
+      return mapper.writeValueAsString(entity);
     }
     catch (Exception e) {
       e.printStackTrace();
