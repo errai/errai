@@ -97,9 +97,6 @@ public class IOCBeanManager {
         removeList.add(entry.getKey());
       }
     }
-    else {
-      throw new RuntimeException("specified object reference is not a managed bean.");
-    }
 
     for (Object o : removeList) {
       proxyLookupForManagedBeans.remove(o);
