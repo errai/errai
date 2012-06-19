@@ -294,7 +294,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     };
   }
 
-  final static class WrappedCallbackHolder  {
+  final static class WrappedCallbackHolder {
     private MessageCallback wrappedCallback;
 
     WrappedCallbackHolder(final MessageCallback wrappedCallback) {
@@ -303,8 +303,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
   }
 
   private boolean directSubscribe(final String subject,
-                                   final MessageCallback callback,
-                                   final boolean local) {
+                                  final MessageCallback callback,
+                                  final boolean local) {
     return directSubscribe(subject, callback, local, new WrappedCallbackHolder(null));
   }
 
@@ -605,6 +605,9 @@ public class ClientMessageBusImpl implements ClientMessageBus {
                 // Handle it gracefully
                 //noinspection ThrowableInstanceNeverThrown
 
+                LogUtil.log("connection problem. server returned status code: " + response.getStatusCode()
+                        + " (" + response.getStatusText() + ")");
+
                 final TransportIOException tioe
                         = new TransportIOException(response.getText(), response.getStatusCode(),
                         "Failure communicating with server");
@@ -759,6 +762,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
     if (!reinit) {
       registerInitVoteCallbacks();
     }
+
+    cometChannelOpen = true;
 
     if (sendBuilder == null) {
       if (!GWT.isScript()) {   // Hosted Mode
@@ -960,11 +965,13 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
           case SessionExpired:
             if (isReinit()) {
-              showError("Session was terminated and could not be re-established", null);
+              showError("session was terminated and could not be re-established", null);
               return;
             }
 
             if (!isInitialized()) return;
+
+            LogUtil.log("http session has expired. resetting bus and attempting reconnection.");
 
             for (SessionExpirationListener listener : sessionExpirationListeners) {
               listener.onSessionExpire();
@@ -1259,7 +1266,8 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           case 307:
             break;
           default:
-            onError(request, new TransportIOException("Unexpected response code: " + statusCode, statusCode, response.getStatusText()));
+            cometChannelOpen = false;
+            onError(request, new TransportIOException("unexpected response code: " + statusCode, statusCode, response.getStatusText()));
             return;
         }
       }
@@ -1273,7 +1281,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
         schedule();
       }
       catch (Throwable e) {
-        logError("Errai MessageBus Disconnected Due to Fatal Error",
+        logError("bus diconnected due to fatal error",
                 response.getText(), e);
       }
     }

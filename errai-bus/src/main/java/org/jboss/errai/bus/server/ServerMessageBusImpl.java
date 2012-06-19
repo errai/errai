@@ -147,7 +147,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
       webSocketPort = WebSocketServer.getWebSocketPort(config);
     }
 
-
     Integer bufferSize = ErraiConfigAttribs.BUS_BUFFER_SIZE.getInt(config);
     Integer segmentSize = ErraiConfigAttribs.BUS_BUFFER_SEGMENT_SIZE.getInt(config);
     Integer segmentCount = ErraiConfigAttribs.BUS_BUFFER_SEGMENT_COUNT.getInt(config);
@@ -351,9 +350,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
             }
 
             case WebsocketChannelVerify:
-
               if (message.hasPart(MessageParts.WebSocketToken)) {
-
                 if (verifyOneTimeToken(session, message.get(String.class, MessageParts.WebSocketToken))) {
 
                   LocalContext localContext = LocalContext.get(session);
@@ -420,7 +417,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
         while (!houseKeepingPerformed) {
           try {
-            Iterator<MessageQueue> iter = ServerMessageBusImpl.this.messageQueues.values().iterator();
+            final Iterator<MessageQueue> iter = ServerMessageBusImpl.this.messageQueues.values().iterator();
             MessageQueue q;
             while (iter.hasNext()) {
               if ((q = iter.next()).isStale()) {
@@ -826,8 +823,12 @@ public class ServerMessageBusImpl implements ServerMessageBus {
     messageQueues.values().remove(queue);
     sessionLookup.values().remove(queue.getSession());
 
-    for (RemoteMessageCallback cb : remoteSubscriptions.values()) {
+    for (Iterator<RemoteMessageCallback> iterator = remoteSubscriptions.values().iterator(); iterator.hasNext(); ) {
+      final RemoteMessageCallback cb = iterator.next();
       cb.removeQueue(queue);
+      if (cb.getQueueCount() == 0) {
+        iterator.remove();
+      }
     }
 
     fireQueueCloseListeners(new QueueCloseEvent(queue));
@@ -1219,6 +1220,7 @@ public class ServerMessageBusImpl implements ServerMessageBus {
   private MessageQueue getQueueByMessage(final Message message) {
     MessageQueue queue = getQueue(getSession(message));
     if (queue == null) {
+      System.out.println("***WARN***");
       throw new QueueUnavailableException("no queue available to send. (queue or session may have expired): " +
               "(session id: " + getSession(message).getSessionId() + ")");
     }
@@ -1235,7 +1237,11 @@ public class ServerMessageBusImpl implements ServerMessageBus {
 
   @Override
   public MessageQueue getQueueBySession(final String sessionId) {
-    return getQueue(sessionLookup.get(sessionId));
+    final QueueSession session = sessionLookup.get(sessionId);
+    if (session == null) {
+      throw new QueueUnavailableException("no queue for sessionId=" + sessionId);
+    }
+    return getQueue(session);
   }
 
   @Override
