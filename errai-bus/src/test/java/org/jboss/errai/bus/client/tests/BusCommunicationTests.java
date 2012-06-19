@@ -16,7 +16,6 @@
 
 package org.jboss.errai.bus.client.tests;
 
-import com.google.common.eventbus.Subscribe;
 import org.jboss.errai.bus.client.ErraiBus;
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
@@ -616,6 +615,23 @@ public class BusCommunicationTests extends AbstractErraiTest {
         }, TestRPCService.class);
 
         remote.interceptedRpcManipulatingResult();
+      }
+    });
+  }
+  
+  public void testInterceptedRpcWithParameterManipulation() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+        TestRPCService remote = MessageBuilder.createCall(new RemoteCallback<String>() {
+          @Override
+          public void callback(String response) {
+            assertEquals("Request was not intercepted", "interceptor_value", response);
+            finishTest();
+          }
+        }, TestRPCService.class);
+
+        remote.interceptedRpcManipulatingParameters("value");
       }
     });
   }

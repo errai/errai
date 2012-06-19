@@ -29,6 +29,7 @@ import org.jboss.errai.bus.client.framework.RpcStub;
 import org.jboss.errai.codegen.DefParameters;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
+import org.jboss.errai.codegen.StringStatement;
 import org.jboss.errai.codegen.Variable;
 import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.ClassStructureBuilder;
@@ -83,50 +84,29 @@ public class RpcProxyGenerator {
   }
 
   private void generateMethod(ClassStructureBuilder<?> classBuilder, MetaMethod method) {
+    boolean intercepted =
+        method.isAnnotationPresent(InterceptedCall.class) || remote.isAnnotationPresent(InterceptedCall.class);
+
     Parameter[] parms = DefParameters.from(method).getParameters().toArray(new Parameter[0]);
     Parameter[] finalParms = new Parameter[parms.length];
-
     List<Statement> parmVars = new ArrayList<Statement>();
     for (int i = 0; i < parms.length; i++) {
       finalParms[i] = Parameter.of(parms[i].getType(), parms[i].getName(), true);
       parmVars.add(Stmt.loadVariable(parms[i].getName()));
     }
 
-    Statement requestLogic = Stmt
-        .if_(Bool.isNull(Variable.get("errorCallback")))
-        .append(
-            Stmt
-                .invokeStatic(MessageBuilder.class, "createCall")
-                .invoke("call", remote.getName())
-                .invoke("endpoint", RebindUtils.createCallSignature(method),
-                    Stmt.loadClassMember("qualifiers"),
-                    Stmt.newArray(Object.class).initialize(parmVars.toArray()))
-                .invoke("respondTo", method.getReturnType().asBoxed(), Stmt.loadVariable("remoteCallback"))
-                .invoke("defaultErrorHandling")
-                .invoke("sendNowWith", Stmt.loadVariable("bus")))
-        .finish()
-        .else_()
-        .append(
-            Stmt
-                .invokeStatic(MessageBuilder.class, "createCall")
-                .invoke("call", remote.getName())
-                .invoke("endpoint", RebindUtils.createCallSignature(method),
-                    Stmt.loadClassMember("qualifiers"),
-                    Stmt.newArray(Object.class).initialize(parmVars.toArray()))
-                .invoke("respondTo", method.getReturnType().asBoxed(), Stmt.loadVariable("remoteCallback"))
-                .invoke("errorsHandledBy", Stmt.loadVariable("errorCallback"))
-                .invoke("sendNowWith", Stmt.loadVariable("bus")))
-        .finish();
+    Statement parameters = (intercepted) ? 
+        new StringStatement("getParameters()", MetaClassFactory.get(Object[].class)) : 
+          Stmt.newArray(Object.class).initialize(parmVars.toArray());
 
     BlockBuilder<?> methodBlock =
         classBuilder.publicMethod(method.getReturnType(), method.getName(), finalParms);
 
-    if (method.isAnnotationPresent(InterceptedCall.class) ||
-        remote.isAnnotationPresent(InterceptedCall.class)) {
-      generateInterceptorLogic(classBuilder, methodBlock, method, requestLogic, parmVars);
+    if (intercepted) {
+      generateInterceptorLogic(classBuilder, methodBlock, method, generateRequest(method, parameters, true), parmVars);
     }
     else {
-      methodBlock.append(requestLogic);
+      methodBlock.append(generateRequest(method, parameters, false));
     }
 
     Statement returnStmt = RebindUtils.generateProxyMethodReturnStatement(method);
@@ -155,6 +135,9 @@ public class RpcProxyGenerator {
                 Stmt.declareVariable(RemoteCallContext.class).asFinal().named("callContext")
                     .initializeWith(callContext))
             .append(
+                Stmt.loadVariable("callContext").invoke("setParameters",
+                    Stmt.newArray(Object.class).initialize(parmVars.toArray())))
+            .append(
                 Stmt.nestedCall(Stmt.newObject(interceptedCall.value()))
                     .invoke("aroundInvoke", Variable.get("callContext")))
             .append(
@@ -169,5 +152,33 @@ public class RpcProxyGenerator {
             .append(Stmt.loadVariable("errorCallback").invoke("error", Stmt.load(null), Variable.get("throwable")))
             .finish()
         );
+  }
+  
+  private Statement generateRequest(MetaMethod method, Statement methodParams, boolean intercepted) {
+    return Stmt
+        .if_(Bool.isNull(Variable.get("errorCallback")))
+        .append(
+            Stmt
+                .invokeStatic(MessageBuilder.class, "createCall")
+                .invoke("call", remote.getName())
+                .invoke("endpoint", RebindUtils.createCallSignature(method),
+                    Stmt.loadClassMember("qualifiers"),
+                    methodParams)
+                .invoke("respondTo", method.getReturnType().asBoxed(), Stmt.loadVariable("remoteCallback"))
+                .invoke("defaultErrorHandling")
+                .invoke("sendNowWith", Stmt.loadVariable("bus")))
+        .finish()
+        .else_()
+        .append(
+            Stmt
+                .invokeStatic(MessageBuilder.class, "createCall")
+                .invoke("call", remote.getName())
+                .invoke("endpoint", RebindUtils.createCallSignature(method),
+                    Stmt.loadClassMember("qualifiers"),
+                    methodParams)
+                .invoke("respondTo", method.getReturnType().asBoxed(), Stmt.loadVariable("remoteCallback"))
+                .invoke("errorsHandledBy", Stmt.loadVariable("errorCallback"))
+                .invoke("sendNowWith", Stmt.loadVariable("bus")))
+        .finish();
   }
 }

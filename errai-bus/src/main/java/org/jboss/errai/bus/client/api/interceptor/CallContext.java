@@ -23,6 +23,7 @@ package org.jboss.errai.bus.client.api.interceptor;
  */
 public abstract class CallContext {
   private Object result;
+  private Object[] parameters;
 
   /**
    * Returns the result of the intercepted method.
@@ -44,18 +45,31 @@ public abstract class CallContext {
   }
 
   /**
-   * Returns the name of the intercepted method.
-   * 
-   * @return the name of the method that was intercepted
-   */
-  public abstract String getMethodName();
-
-  /**
    * Provides access to the intercepted method's parameters.
    * 
-   * @return Array of method parameters in declaration order. Empty array if the intercepted method has no parameters.
+   * @return Array of method parameters in declaration order. An empty array if the intercepted method has no
+   *         parameters.
    */
-  public abstract Object[] getParameters();
+  public Object[] getParameters() {
+    return parameters;
+  }
+
+  /**
+   * Overrides the parameters that are passed to the method for which the interceptor was invoked.
+   * 
+   * @param parameters
+   *          the parameters to use when invoking the intercepted method
+   */
+  public void setParameters(Object[] parameters) {
+    this.parameters = parameters;
+  }
+
+  /**
+   * Returns the name of the intercepted method.
+   * 
+   * @return the name of the method for which the interceptor was invoked.
+   */
+  public abstract String getMethodName();
 
   /**
    * Proceeds with the execution of the intercepted method.

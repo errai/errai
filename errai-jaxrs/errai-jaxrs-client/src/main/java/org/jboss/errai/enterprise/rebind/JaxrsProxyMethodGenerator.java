@@ -19,6 +19,9 @@ package org.jboss.errai.enterprise.rebind;
 import static org.jboss.errai.enterprise.rebind.TypeMarshaller.demarshal;
 import static org.jboss.errai.enterprise.rebind.TypeMarshaller.marshal;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jboss.errai.bus.client.api.interceptor.InterceptedCall;
 import org.jboss.errai.bus.rebind.RebindUtils;
 import org.jboss.errai.codegen.BooleanOperator;
@@ -57,6 +60,7 @@ public class JaxrsProxyMethodGenerator {
   private final MetaClass declaringClass;
   private final JaxrsResourceMethod resourceMethod;
   private final BlockBuilder<?> methodBlock;
+  private final List<Statement> parameters;
 
   public JaxrsProxyMethodGenerator(ClassStructureBuilder<?> classBuilder, JaxrsResourceMethod resourceMethod) {
     this.declaringClass = classBuilder.getClassDefinition();
@@ -64,8 +68,10 @@ public class JaxrsProxyMethodGenerator {
 
     Parameter[] parms = DefParameters.from(resourceMethod.getMethod()).getParameters().toArray(new Parameter[0]);
     Parameter[] finalParms = new Parameter[parms.length];
+    parameters = new ArrayList<Statement>();
     for (int i = 0; i < parms.length; i++) {
       finalParms[i] = Parameter.of(parms[i].getType(), parms[i].getName(), true);
+      parameters.add(Stmt.loadVariable(parms[i].getName()));
     }
     this.methodBlock = classBuilder.publicMethod(resourceMethod.getMethod().getReturnType(),
         resourceMethod.getMethod().getName(), finalParms);
@@ -104,6 +110,9 @@ public class JaxrsProxyMethodGenerator {
                     .initializeWith(callContext))
             .append(
                 Stmt.loadVariable("callContext").invoke("setRequestBuilder", Variable.get("requestBuilder")))
+            .append(
+                Stmt.loadVariable("callContext").invoke("setParameters",
+                    Stmt.newArray(Object.class).initialize(parameters.toArray())))
             .append(
                 Stmt.nestedCall(Stmt.newObject(interceptedCall.value())).invoke("aroundInvoke",
                     Variable.get("callContext")))

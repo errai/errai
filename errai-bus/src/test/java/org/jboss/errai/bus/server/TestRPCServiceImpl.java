@@ -78,4 +78,9 @@ public class TestRPCServiceImpl implements TestRPCService, MessageCallback {
   public String interceptedRpcManipulatingResult() {
     return "result";
   }
+
+  @Override
+  public String interceptedRpcManipulatingParameters(String parm) {
+    return parm;
+  }
 }

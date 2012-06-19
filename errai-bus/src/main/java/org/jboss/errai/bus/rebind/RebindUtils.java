@@ -18,14 +18,11 @@ package org.jboss.errai.bus.rebind;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.jboss.errai.bus.client.api.ErrorCallback;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.RemoteCallback;
 import org.jboss.errai.bus.client.api.interceptor.CallContext;
-import org.jboss.errai.codegen.DefParameters;
 import org.jboss.errai.codegen.Parameter;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.StringStatement;
@@ -130,19 +127,10 @@ public class RebindUtils {
   public static Statement generateProxyMethodCallContext(Class<? extends CallContext> callContextType,
       MetaClass proxyClass, MetaMethod method, Statement proceed) {
 
-    Parameter[] parms = DefParameters.from(method).getParameters().toArray(new Parameter[0]);
-    List<Statement> parmVars = new ArrayList<Statement>();
-    for (Parameter parm : parms) {
-      parmVars.add(Stmt.loadVariable(parm.getName()));
-    }
-
     Statement callContext =
         Stmt.newObject(callContextType).extend()
             .publicOverridesMethod("getMethodName")
             .append(Stmt.load(method.getName()).returnValue())
-            .finish()
-            .publicOverridesMethod("getParameters")
-            .append(Stmt.nestedCall(Stmt.newArray(Object.class).initialize(parmVars.toArray())).returnValue())
             .finish()
             .publicOverridesMethod("proceed")
             .append(proceed)
