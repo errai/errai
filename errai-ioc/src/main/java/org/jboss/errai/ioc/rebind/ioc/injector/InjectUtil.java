@@ -66,7 +66,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.jboss.errai.codegen.meta.MetaClassFactory.parameterizedAs;
 import static org.jboss.errai.codegen.meta.MetaClassFactory.typeParametersOf;
-import static org.jboss.errai.codegen.util.PrivateAccessUtil.getPrivateFieldInjectorName;
 
 public class InjectUtil {
   private static final AtomicInteger injectorCounter = new AtomicInteger(0);
@@ -360,7 +359,6 @@ public class InjectUtil {
                                                                          final List<InjectionTask> tasks) {
     final List<MetaConstructor> accumulator = new LinkedList<MetaConstructor>();
     final Set<Class<? extends Annotation>> decorators = ctx.getDecoratorAnnotations();
-
 
     for (MetaConstructor cns : type.getConstructors()) {
       if (isInjectionPoint(ctx, cns)) {
