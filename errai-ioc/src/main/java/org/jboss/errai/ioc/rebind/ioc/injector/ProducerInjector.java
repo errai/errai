@@ -61,7 +61,7 @@ public class ProducerInjector extends AbstractInjector {
 
     this.singleton = injectionContext.isElementType(WiringElementType.SingletonBean, getProducerMember());
 
-    this.disposerMethod = findDisposerMethod();
+    this.disposerMethod = findDisposerMethod(injectionContext.getProcessingContext());
 
     if (injectionContext.isInjectorRegistered(enclosingType, qualifyingMetadata)) {
       setRendered(true);
@@ -123,15 +123,19 @@ public class ProducerInjector extends AbstractInjector {
     return disposerMethod != null;
   }
 
-  private MetaMethod findDisposerMethod() {
+  private MetaMethod findDisposerMethod(IOCProcessingContext ctx) {
     final MetaClass declaringClass = producerMember.getDeclaringClass();
 
     for (final MetaMethod method : declaringClass.getDeclaredMethods()) {
       final MetaParameter[] parameters = method.getParameters();
       if (parameters.length != 1) continue;
 
+      final QualifyingMetadata qualifyingMetadata
+              = ctx.getQualifyingMetadataFactory().createFrom(parameters[0].getAnnotations());
+
       if (parameters[0].isAnnotationPresent(Disposes.class)
-              && parameters[0].getType().isAssignableFrom(injectedType)) {
+              && parameters[0].getType().isAssignableFrom(injectedType)
+              && qualifyingMetadata.doesSatisfy(getQualifyingMetadata())) {
         return method;
       }
     }

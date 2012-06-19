@@ -8,10 +8,24 @@ import javax.inject.Inject;
  */
 @Dependent
 public class FooblieDependentBean {
-  @Inject
-  Fooblie fooblie;
+  @Inject @Response
+  Fooblie fooblieResponse;
 
-  public Fooblie getFooblie() {
-    return fooblie;
+  @Inject @Greets
+  Fooblie fooblieGreets;
+
+  @Inject @Parts
+  Fooblie fooblieParts;
+
+  public Fooblie getFooblieResponse() {
+    return fooblieResponse;
+  }
+
+  public Fooblie getFooblieGreets() {
+    return fooblieGreets;
+  }
+
+  public Fooblie getFooblieParts() {
+    return fooblieParts;
   }
 }

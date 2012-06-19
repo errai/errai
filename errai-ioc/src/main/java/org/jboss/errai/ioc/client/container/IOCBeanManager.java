@@ -34,7 +34,7 @@ import java.util.Set;
  *
  * @author Mike Brock
  */
-public class  IOCBeanManager {
+public class IOCBeanManager {
   private final Map<Class<?>, List<IOCBeanDef>> beanMap
           = new HashMap<Class<?>, List<IOCBeanDef>>();
 
@@ -85,21 +85,27 @@ public class  IOCBeanManager {
     final Object _target = getActualBeanReference(ref);
 
     final List<Tuple<Object, DestructionCallback>> destructionCallbackList = activeManagedBeans.get(_target);
+    final List<Object> removeList = new ArrayList<Object>();
+    removeList.add(_target);
+    if (ref != _target) {
+      removeList.add(ref);
+    }
+
     if (destructionCallbackList != null) {
       for (Tuple<Object, DestructionCallback> entry : destructionCallbackList) {
         entry.getValue().destroy(entry.getKey());
+        removeList.add(entry.getKey());
       }
     }
-
-    if (ref != _target) {
-      proxyLookupForManagedBeans.remove(ref);
-    }
     else {
-      proxyLookupForManagedBeans.values().remove(_target);
+      throw new RuntimeException("specified object reference is not a managed bean.");
     }
 
-    proxyLookupForManagedBeans.remove(_target);
-    activeManagedBeans.remove(_target);
+    for (Object o : removeList) {
+      proxyLookupForManagedBeans.remove(o);
+      proxyLookupForManagedBeans.values().remove(o);
+      activeManagedBeans.remove(o);
+    }
   }
 
   /**

@@ -11,18 +11,49 @@ import java.util.List;
  */
 @ApplicationScoped
 public class FooblieMaker {
-  private final List<Fooblie> destroyedFooblies = new ArrayList<Fooblie>();
+  private final List<Fooblie> destroyedFoobliesResponse = new ArrayList<Fooblie>();
+  private final List<Fooblie> destroyedFoobliesGreets = new ArrayList<Fooblie>();
+  private final List<Fooblie> destroyedFoobliesParts = new ArrayList<Fooblie>();
 
   @Produces
+  @Response
   Fooblie produceFooblie() {
-    return new Fooblie();
+    return new Fooblie(Response.class.getName());
   }
 
-  void destroyFooblie(@Disposes Fooblie fooblie) {
-    destroyedFooblies.add(fooblie);
+  @Produces
+  @Greets
+  Fooblie produceFooblieGreets() {
+    return new Fooblie(Greets.class.getName());
   }
 
-  public List<Fooblie> getDestroyedFooblies() {
-    return destroyedFooblies;
+  @Produces
+  @Parts
+  Fooblie produceFooblieParts() {
+    return new Fooblie(Parts.class.getName());
+  }
+
+  void destroyFooblie(@Disposes @Response Fooblie fooblie) {
+    destroyedFoobliesResponse.add(fooblie);
+  }
+
+  void destroyFooblieGreets(@Disposes @Greets Fooblie fooblie) {
+    destroyedFoobliesGreets.add(fooblie);
+  }
+
+  void destroyFooblieParts(@Disposes @Parts Fooblie fooblie) {
+    destroyedFoobliesParts.add(fooblie);
+  }
+
+  public List<Fooblie> getDestroyedFoobliesResponse() {
+    return destroyedFoobliesResponse;
+  }
+
+  public List<Fooblie> getDestroyedFoobliesGreets() {
+    return destroyedFoobliesGreets;
+  }
+
+  public List<Fooblie> getDestroyedFoobliesParts() {
+    return destroyedFoobliesParts;
   }
 }

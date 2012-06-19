@@ -151,13 +151,25 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
     FooblieDependentBean fooblieDependentBean2
             = IOC.getBeanManager().lookupBean(FooblieDependentBean.class).getInstance();
 
-    IOC.getBeanManager().destroyBean(fooblieDependentBean1.getFooblie());
-    IOC.getBeanManager().destroyBean(fooblieDependentBean2.getFooblie());
+    IOC.getBeanManager().destroyBean(fooblieDependentBean1.getFooblieResponse());
+    IOC.getBeanManager().destroyBean(fooblieDependentBean2.getFooblieResponse());
 
-    final List<Fooblie> destroyed = maker.getDestroyedFooblies();
+    final List<Fooblie> foobliesResponse = maker.getDestroyedFoobliesResponse();
 
-    assertEquals("there should be two destroyed beans", 2, destroyed.size());
-    assertEquals(fooblieDependentBean1.getFooblie(), destroyed.get(0));
-    assertEquals(fooblieDependentBean2.getFooblie(), destroyed.get(1));
+    assertEquals("there should be two destroyed beans", 2, foobliesResponse.size());
+    assertEquals(fooblieDependentBean1.getFooblieResponse(), foobliesResponse.get(0));
+    assertEquals(fooblieDependentBean2.getFooblieResponse(), foobliesResponse.get(1));
+
+    final List<Fooblie> foobliesGreets = maker.getDestroyedFoobliesGreets();
+
+    assertEquals("there should be two destroyed beans", 2, foobliesGreets.size());
+    assertEquals(fooblieDependentBean1.getFooblieGreets(), foobliesGreets.get(0));
+    assertEquals(fooblieDependentBean2.getFooblieGreets(), foobliesGreets.get(1));
+
+    final List<Fooblie> foobliesParts = maker.getDestroyedFoobliesParts();
+
+    assertEquals("there should be two destroyed beans", 2, foobliesParts.size());
+    assertEquals(fooblieDependentBean1.getFooblieParts(), foobliesParts.get(0));
+    assertEquals(fooblieDependentBean2.getFooblieParts(), foobliesParts.get(1));
   }
 }
