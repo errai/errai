@@ -9,11 +9,13 @@ import java.util.List;
 import javax.persistence.EntityManager;
 
 import org.hibernate.engine.spi.SessionImplementor;
+import org.hibernate.hql.internal.antlr.HqlSqlTokenTypes;
 import org.hibernate.hql.internal.ast.ASTQueryTranslatorFactory;
 import org.hibernate.hql.internal.ast.HqlParser;
+import org.hibernate.hql.internal.ast.HqlSqlWalker;
 import org.hibernate.hql.internal.ast.QueryTranslatorImpl;
-import org.hibernate.hql.internal.ast.util.NodeTraverser;
-import org.hibernate.hql.internal.ast.util.NodeTraverser.VisitationStrategy;
+import org.hibernate.hql.internal.ast.tree.DotNode;
+import org.hibernate.hql.internal.ast.tree.ParameterNode;
 import org.hibernate.param.NamedParameterSpecification;
 import org.hibernate.param.ParameterSpecification;
 import org.jboss.errai.codegen.Parameter;
@@ -23,7 +25,7 @@ import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.framework.Assert;
-import org.jboss.errai.jpa.client.local.EntityJsonMatcher;
+import org.jboss.errai.jpa.client.local.AbstractEntityJsonMatcher;
 import org.jboss.errai.jpa.client.local.ErraiParameter;
 import org.jboss.errai.jpa.client.local.TypedQueryFactory;
 
@@ -55,10 +57,6 @@ public class TypedQueryFactoryGenerator<T> {
       AST hqlAst = parser.getAST();
       parser.showAst(hqlAst, System.out);
 
-      CodeGeneratingVisitationStrategy visitor = new CodeGeneratingVisitationStrategy();
-      NodeTraverser walker = new NodeTraverser(visitor);
-      walker.traverseDepthFirst( hqlAst );
-
       SessionImplementor hibernateSession = em.unwrap(SessionImplementor.class);
       ASTQueryTranslatorFactory translatorFactory = new ASTQueryTranslatorFactory();
       query = (QueryTranslatorImpl) translatorFactory.createQueryTranslator(
@@ -83,7 +81,7 @@ public class TypedQueryFactoryGenerator<T> {
   public Statement generate(Statement entityManager) {
 
     // build the matcher (anonymous inner class)
-    AnonymousClassStructureBuilder generatedMatcher = ObjectBuilder.newInstanceOf(EntityJsonMatcher.class).extend();
+    AnonymousClassStructureBuilder generatedMatcher = ObjectBuilder.newInstanceOf(AbstractEntityJsonMatcher.class).extend();
     BlockBuilder<?> matchesMethod = generatedMatcher
             .publicOverridesMethod("matches", Parameter.of(JSONObject.class, "candidate"));
     fillInMatchesMethod(matchesMethod);
@@ -120,18 +118,59 @@ public class TypedQueryFactoryGenerator<T> {
    * @param matchesMethod
    */
   private void fillInMatchesMethod(BlockBuilder<?> matchesMethod) {
+    System.out.println("Query spaces are: " + query.getQuerySpaces());
+    AstInorderTraversal traverser = new AstInorderTraversal(query.getSqlAST().getWalker().getAST());
     matchesMethod.append(
-            Stmt.nestedCall(
-                    Stmt.loadLiteral("Let It Be").invoke("equals", Stmt.loadVariable("candidate").invoke("get", "name").invoke("isString").invoke("stringValue"))
-                    ).returnValue());
+            Stmt.nestedCall(generate(traverser)).returnValue());
   }
 
-  private class CodeGeneratingVisitationStrategy implements VisitationStrategy {
-
-    @Override
-    public void visit(AST node) {
-      System.out.println("Visiting " + node + "(type " + HqlParser._tokenNames[node.getType()] + ")");
+  private Statement generate(AstInorderTraversal traverser) {
+    while (traverser.hasNext()) {
+      AST ast = traverser.next();
+      switch (ast.getType()) {
+      case HqlSqlTokenTypes.WHERE:
+        if (ast.getNumberOfChildren() != 1) {
+          throw new IllegalStateException("WHERE clause has " + ast.getNumberOfChildren() + " children (expected 1)");
+        }
+        return generateBooleanExpression(traverser);
+      default:
+        System.out.println("Skipping node: " + ast);
+      }
     }
+    throw new RuntimeException("Didn't find the WHERE clause in the query");
+  }
 
+  private Statement generateBooleanExpression(AstInorderTraversal traverser) {
+    AST ast = traverser.next();
+    switch (ast.getType()) {
+    case HqlSqlTokenTypes.EQ:
+      return Stmt.load(generateValueExpression(traverser)).invoke("equals", generateValueExpression(traverser));
+    default:
+      throw new UnexpectedTokenException(ast.getType(), "Boolean expression root node");
+    }
+  }
+
+  private Statement generateValueExpression(AstInorderTraversal traverser) {
+    AST ast = traverser.next();
+    switch (ast.getType()) {
+    case HqlSqlTokenTypes.DOT:
+      DotNode dotNode = (DotNode) ast;
+      traverser.fastForwardToNextSiblingOf(dotNode);
+      // FIXME this assumes the property reference is to the candidate entity instance (it could be to another type)
+      return Stmt.loadVariable("candidate").invoke("get", dotNode.getPropertyPath()).invoke("isString").invoke("stringValue");
+    case HqlSqlTokenTypes.NAMED_PARAM:
+      ParameterNode paramNode = (ParameterNode) ast;
+      NamedParameterSpecification namedParamSpec = (NamedParameterSpecification) paramNode.getHqlParameterSpecification();
+      return Stmt.loadVariable("query").invoke("getParameterValue", namedParamSpec.getName());
+    default:
+      throw new UnexpectedTokenException(ast.getType(), "Value expression (attribute reference or named parameter)");
+    }
+  }
+
+  private static class UnexpectedTokenException extends RuntimeException {
+    UnexpectedTokenException(int actual, String expected) {
+      super("Encountered unexpected token " +
+            HqlSqlWalker._tokenNames[actual] + " (expected " + expected + ")");
+    }
   }
 }

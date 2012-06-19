@@ -23,4 +23,12 @@ public interface EntityJsonMatcher {
    * @return true if this matcher accepts the candidate; false otherwise.
    */
   boolean matches(JSONObject candidate);
+
+  // XXX see note in AbstractEntityJsonMatcher
+  ErraiTypedQuery<?> getQuery();
+
+  // XXX see note in AbstractEntityJsonMatcher
+  void setQuery(ErraiTypedQuery<?> query);
+
+
 }

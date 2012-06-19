@@ -72,6 +72,7 @@ public class ErraiTypedQuery<X> implements TypedQuery<X> {
     this.em = Assert.notNull(entityManager);
     this.resultType = Assert.notNull(actualResultType);
     this.matcher = Assert.notNull(matcher);
+    matcher.setQuery(this); // XXX escaped reference to this partly constructed object
     this.parameters = Assert.notNull(parameters);
   }
 
