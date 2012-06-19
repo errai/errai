@@ -140,6 +140,7 @@ public class RebindUtils {
             .publicOverridesMethod("proceed")
             .append(Stmt.loadVariable("proceeding").assignValue(true))
             .append(proceed)
+            .append(Stmt.load(null).returnValue())
             .finish()
             .publicOverridesMethod("proceed", Parameter.of(RemoteCallback.class, "interceptorCallback", true))
             .append(Stmt.declareVariable(RemoteCallback.class).asFinal().named("providedCallback").initializeWith(

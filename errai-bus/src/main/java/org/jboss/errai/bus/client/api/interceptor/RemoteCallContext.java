@@ -31,7 +31,7 @@ public abstract class RemoteCallContext extends CallContext {
    * 
    * @param callback
    *          The remote callback that receives the return value from the call. This callback is guaranteed to be
-   *          invoked before the callback provided on the actual call site. Cannot not be null.
+   *          invoked before the callback provided on the actual call site. Cannot be null.
    */
   public abstract void proceed(RemoteCallback<?> callback);
 
@@ -40,12 +40,12 @@ public abstract class RemoteCallContext extends CallContext {
    * 
    * @param callback
    *          The remote callback that receives the return value from the call. This callback is guaranteed to be
-   *          invoked before the callback provided on the actual call site. Cannot not be null.
+   *          invoked before the callback provided on the actual call site. Cannot be null.
    * 
    * @param errorCallback
    *          The error callback that receives transmission errors and exceptions thrown by the remote service. This
    *          error callback is guaranteed to be invoked before the error callback provided on the actual call site.
-   *          Cannot not be null.
+   *          Cannot be null.
    */
   public abstract void proceed(RemoteCallback<?> callback, ErrorCallback errorCallback);
 }
