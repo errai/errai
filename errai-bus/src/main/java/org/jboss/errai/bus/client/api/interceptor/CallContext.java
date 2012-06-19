@@ -75,4 +75,11 @@ public abstract class CallContext {
    * Proceeds with the execution of the intercepted method.
    */
   public abstract void proceed();
+
+  /**
+   * Returns whether or not the interceptor was told to proceed with the executaion of the intercepted method.
+   * 
+   * @return true, if {@link #proceed()} was called on this interceptor, otherwise false.
+   */
+  public abstract boolean isProceeding();
 }

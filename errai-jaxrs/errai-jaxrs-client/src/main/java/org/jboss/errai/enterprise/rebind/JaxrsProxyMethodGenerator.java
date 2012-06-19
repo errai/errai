@@ -105,6 +105,7 @@ public class JaxrsProxyMethodGenerator {
 
     methodBlock.append(
         Stmt.try_()
+            .append(Stmt.declareVariable(boolean.class).asFinal().named("proceeding").initializeWith(false))
             .append(
                 Stmt.declareVariable(RestCallContext.class).asFinal().named("callContext")
                     .initializeWith(callContext))
@@ -117,7 +118,7 @@ public class JaxrsProxyMethodGenerator {
                 Stmt.nestedCall(Stmt.newObject(interceptedCall.value())).invoke("aroundInvoke",
                     Variable.get("callContext")))
             .append(
-                Stmt.if_(Bool.isNotNull(Stmt.loadVariable("callContext").invoke("getResult")))
+                Stmt.if_(Bool.notExpr(Stmt.loadVariable("callContext").invoke("isProceeding")))
                     .append(
                         Stmt.loadVariable("remoteCallback").invoke("callback",
                             Stmt.loadVariable("callContext").invoke("getResult")))
