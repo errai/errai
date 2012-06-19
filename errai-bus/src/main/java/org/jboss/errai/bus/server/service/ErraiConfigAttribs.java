@@ -60,6 +60,10 @@ public enum ErraiConfigAttribs {
 
   WEBSOCKET_SERVLET_ENABLED("errai.bus.websocket.servlet.enabled", "false"),
   WEBSOCKET_SERVLET_CONTEXT_PATH("errai.bus.websocket.servlet.path", "in.erraiBusWebSocket"),
+//
+//  MAXIMUM_MESSAGE_BACKLOG("errai.bus.queue.maximum_message_backlog", "25"),
+//  MAXIMUM_TIME_BACKLOG("errai.bus.queue.maximum_time_backlog_secs", "10"),
+
 
   AUTO_DISCOVER_SERVICES("errai.bus.auto_discover_services", "false");
 

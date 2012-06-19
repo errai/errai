@@ -25,6 +25,7 @@ import org.jboss.errai.bus.server.io.QueueChannel;
 import org.jboss.errai.bus.server.io.buffers.BufferCallback;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
+import org.jboss.errai.bus.server.service.ErraiConfigAttribs;
 import org.jboss.errai.bus.server.util.LocalContext;
 import org.jboss.errai.bus.server.util.MarkedOutputStream;
 import org.jboss.errai.bus.server.util.ServerBusTools;
@@ -84,8 +85,6 @@ public class MessageQueueImpl implements MessageQueue {
     this.buffer = buffer;
     this.session = session;
     this.bufferColor = BufferColor.getNewColorFromHead(buffer);
-
-
   }
 
   /**
@@ -98,7 +97,7 @@ public class MessageQueueImpl implements MessageQueue {
    *                  <tt>RuntimeException</tt> will be thrown if the polling is active already. Concurrent polling is not allowed.
    * @param outstream - output stream to write the polling results to.
    */
-  public boolean poll(final boolean wait, final OutputStream outstream) throws IOException {
+  public boolean poll(boolean wait, final OutputStream outstream) throws IOException {
     if (!queueRunning) {
       throw new QueueUnavailableException("queue is not available");
     }
@@ -108,7 +107,8 @@ public class MessageQueueImpl implements MessageQueue {
       synchronized (pageLock) {
         if (pagedOut) {
           readInPageFile(outstream, new BufferHelper.MultiMessageHandlerCallback());
-          return false;
+          System.out.println("PAGEY!");
+          wait = false;
         }
       }
     }
@@ -186,9 +186,12 @@ public class MessageQueueImpl implements MessageQueue {
 
         BufferHelper.encodeAndWrite(buffer, bufferColor, message);
 
-        if (messageCount.incrementAndGet() > 5 && !lastTransmissionWithin(secs(3))) {
+        if (messageCount.incrementAndGet() > 10
+                && !lastTransmissionWithin(secs(10))) {
           // disconnect this client
-          stopQueue();
+          System.out.println("****PAGE****");
+          pageWaitingToDisk();
+          System.out.println("****DONE****");
         }
       }
       finally {
@@ -299,7 +302,6 @@ public class MessageQueueImpl implements MessageQueue {
       if (isDirectChannelOpen()) {
         UnwrappedByteArrayOutputStream outputStream = new UnwrappedByteArrayOutputStream();
         buffer.read(outputStream, bufferColor, new BufferHelper.MultiMessageHandlerCallback());
-        // directSocketChannel.write(new TextWebSocketFrame(new String(outputStream.toByteArray(), 0, outputStream.size())));
         directSocketChannel.write(new String(outputStream.toByteArray(), 0, outputStream.size()));
       }
       else {
@@ -324,19 +326,15 @@ public class MessageQueueImpl implements MessageQueue {
    * @param activationCallback - new activation callback function
    */
   public void setActivationCallback(QueueActivationCallback activationCallback) {
-    //  synchronized (activationLock) {
     this.activationCallback = activationCallback;
-    //   }
   }
 
   private void activateActivationCallback() {
-//    if (activationCallback != null) {
     synchronized (activationLock) {
       if (activationCallback != null) {
         activationCallback.activate(this);
       }
     }
-    //  }
   }
 
   /**

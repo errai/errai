@@ -9,6 +9,7 @@ import org.jboss.errai.common.client.api.extension.InitVotes;
 import org.jboss.errai.ioc.client.api.EntryPoint;
 
 import com.google.gwt.user.client.Timer;
+import org.jboss.errai.ioc.client.api.TestOnly;
 
 /**
  * This class provides a target for injecting parts of the application that the
@@ -35,7 +36,7 @@ import com.google.gwt.user.client.Timer;
  *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
-@EntryPoint
+@EntryPoint @TestOnly
 public class ErraiIocTestHelper {
 
   static ErraiIocTestHelper instance;

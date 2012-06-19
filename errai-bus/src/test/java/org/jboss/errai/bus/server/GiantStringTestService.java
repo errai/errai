@@ -29,7 +29,9 @@ public class GiantStringTestService implements MessageCallback {
 
   public void callback(final Message message) {
     final CountDownLatch bigMessagesLatch = new CountDownLatch(1);
-    
+
+    System.out.println("GiantStringTestService callback()");
+
     final Thread giantStringThread = new Thread(new Runnable() {
       @Override
       public void run() {
@@ -41,6 +43,7 @@ public class GiantStringTestService implements MessageCallback {
           
           // ensure some big messages are in the queue before small message is injected
           if (i == 10) {
+            System.out.println("countDown()");
             bigMessagesLatch.countDown();
           }
         }
@@ -51,7 +54,9 @@ public class GiantStringTestService implements MessageCallback {
       @Override
       public void run() {
         try {
+          System.out.println("await()");
           bigMessagesLatch.await();
+          System.out.println("done await()");
         }
         catch (InterruptedException e) {
           Thread.currentThread().interrupt();
