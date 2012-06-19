@@ -45,6 +45,8 @@ public abstract class AbstractMarshallingSession implements MarshallingSession {
 
   @Override
   public void recordObjectHash(String hashCode, Object instance) {
+    if ("-1".equals(hashCode)) return;
+
     objectMap.put(hashCode, instance);
   }
 
