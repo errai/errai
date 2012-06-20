@@ -144,15 +144,15 @@ public class ProducerIntegrationTest extends IOCClientTestCase {
   }
 
   public void testDisposerMethod() {
-    FooblieMaker maker = IOC.getBeanManager().lookupBean(FooblieMaker.class).getInstance();
+    final FooblieMaker maker = IOC.getBeanManager().lookupBean(FooblieMaker.class).getInstance();
 
-    FooblieDependentBean fooblieDependentBean1
+    final FooblieDependentBean fooblieDependentBean1
             = IOC.getBeanManager().lookupBean(FooblieDependentBean.class).getInstance();
-    FooblieDependentBean fooblieDependentBean2
+    final FooblieDependentBean fooblieDependentBean2
             = IOC.getBeanManager().lookupBean(FooblieDependentBean.class).getInstance();
 
-    IOC.getBeanManager().destroyBean(fooblieDependentBean1.getFooblieResponse());
-    IOC.getBeanManager().destroyBean(fooblieDependentBean2.getFooblieResponse());
+    IOC.getBeanManager().destroyBean(fooblieDependentBean1);
+    IOC.getBeanManager().destroyBean(fooblieDependentBean2);
 
     final List<Fooblie> foobliesResponse = maker.getDestroyedFoobliesResponse();
 
