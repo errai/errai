@@ -105,4 +105,9 @@ public interface StorageBackend {
    */
   <X> boolean isModified(Key<X, ?> key, X value);
 
+  /**
+   * Removes all data from this storage backend.
+   */
+  void removeAll();
+
 }

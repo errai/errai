@@ -39,6 +39,14 @@ public class WebStorageBackend implements StorageBackend {
     return $wnd.sessionStorage.removeItem(key);
   }-*/;
 
+  @Override
+  public native void removeAll() /*-{
+    for (var i = 0, n = $wnd.sessionStorage.length; i < n; i++) {
+      var key = $wnd.sessionStorage.key(i);
+      $wnd.sessionStorage.removeItem(key);
+    }
+  }-*/;
+
   /**
    * Invokes the given entry visitor on each key/value pair in this entire
    * storage backend.
@@ -89,7 +97,9 @@ public class WebStorageBackend implements StorageBackend {
       @Override
       public void visit(String key, String value) {
         Key<?, ?> k = Key.fromJson(em, key);
+        System.out.println("getAll(): considering " + value);
         if (k.getEntityType() == type) {
+          System.out.println(" --> correct type");
           JSONObject candidate = JSONParser.parseStrict(value).isObject();
           Assert.notNull(candidate);
           if (matcher.matches(candidate)) {
@@ -98,6 +108,12 @@ public class WebStorageBackend implements StorageBackend {
             // TODO the value is already parsed. it would be nice to avoid the re-fetch here.
             entities.add(get(typedKey));
           }
+          else {
+            System.out.println(" --> but not a match");
+          }
+        }
+        else {
+          System.out.println(" --> wrong type");
         }
       }
     });
@@ -125,5 +141,4 @@ public class WebStorageBackend implements StorageBackend {
     String valueJson = entityType.toJson(em, value).toString();
     return !valueJson.equals(getImpl(keyJson));
   }
-
 }

@@ -480,6 +480,14 @@ public abstract class ErraiEntityManager implements EntityManager {
     changeEntityState(entity, EntityState.REMOVED);
   }
 
+  /**
+   * Removes everything from the backend data store and clears the persistence context.
+   */
+  public void removeAll() {
+    clear();
+    backend.removeAll();
+  }
+
   @Override
   public Query createNamedQuery(String name) {
     return createNamedQuery(name, Object.class);

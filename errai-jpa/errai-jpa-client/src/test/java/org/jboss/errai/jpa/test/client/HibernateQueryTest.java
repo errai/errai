@@ -51,7 +51,8 @@ public class HibernateQueryTest extends QueryTest {
   }
 
   @Override
-  protected EntityManager getEntityManager() {
+  protected EntityManager getEntityManagerAndClearStorageBackend() {
+    // the backend is already clear because we set up a new in-memory database for each test
     return entityManager;
   }
 

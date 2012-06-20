@@ -488,7 +488,7 @@ public class ErraiJpaTest extends GWTTestCase {
     timestamp.setNanos(4321);
 
     Zentity original = new Zentity(
-            false, Boolean.FALSE,
+            true, Boolean.FALSE,
             (byte) -10, Byte.valueOf((byte) -10), new byte[] { -128, 0, 127, 126, 125, 124 }, new Byte[] { -128, 0, 127, -3 },
             'a', 'a', new char[] {'\u1234', '\u0000', 'a' }, new Character[] {'\u1234', '\u0000', 'a' },
             Short.MIN_VALUE, Short.valueOf(Short.MIN_VALUE),
