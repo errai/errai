@@ -140,6 +140,10 @@ public class ErraiEntityManagerGenerator extends Generator {
 
     // now generate all the query factories
     for (NamedQuery namedQuery : namedQueries) {
+      pnqm._(Stmt.codeComment("**"));
+      pnqm._(Stmt.codeComment("** NamedQuery \"" + namedQuery.name() + "\""));
+      pnqm._(Stmt.codeComment("** " + namedQuery.query()));
+      pnqm._(Stmt.codeComment("**"));
       TypedQueryFactoryGenerator generator = new TypedQueryFactoryGenerator(em, namedQuery);
       Statement generatedFactory = generator.generate(Stmt.loadVariable("this"));
       pnqm._(Stmt.loadVariable("super").loadField("namedQueries")
