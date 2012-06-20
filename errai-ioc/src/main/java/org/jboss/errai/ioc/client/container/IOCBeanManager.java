@@ -38,12 +38,11 @@ public class IOCBeanManager {
   private final Map<Class<?>, List<IOCBeanDef>> beanMap
           = new HashMap<Class<?>, List<IOCBeanDef>>();
 
-  private final Map<Object, List<Tuple<Object, DestructionCallback>>> activeManagedBeans
-          = new IdentityHashMap<Object, List<Tuple<Object, DestructionCallback>>>();
+  private final Map<Object, CreationalContext> creationalContextMap
+          = new HashMap<Object, CreationalContext>();
 
   private final Map<Object, Object> proxyLookupForManagedBeans
           = new IdentityHashMap<Object, Object>();
-
 
   private void registerSingletonBean(final Class<Object> type, final CreationalCallback<Object> callback,
                                      final Object instance, final Annotation[] qualifiers) {
@@ -75,6 +74,7 @@ public class IOCBeanManager {
     }
   }
 
+
   /**
    * Destroy a bean and all other beans associated with its creational context in the bean manager.
    *
@@ -83,25 +83,18 @@ public class IOCBeanManager {
   @SuppressWarnings("unchecked")
   public void destroyBean(final Object ref) {
     final Object _target = getActualBeanReference(ref);
+    final CreationalContext creationalContext = creationalContextMap.get(_target);
 
-    final List<Tuple<Object, DestructionCallback>> destructionCallbackList = activeManagedBeans.get(_target);
-    final List<Object> removeList = new ArrayList<Object>();
-    removeList.add(_target);
-    if (ref != _target) {
-      removeList.add(ref);
+    if (creationalContext == null) {
+      return;
     }
 
-    if (destructionCallbackList != null) {
-      for (Tuple<Object, DestructionCallback> entry : destructionCallbackList) {
-        entry.getValue().destroy(entry.getKey());
-        removeList.add(entry.getKey());
-      }
-    }
+    creationalContext.destroyContext();
 
-    for (Object o : removeList) {
-      proxyLookupForManagedBeans.remove(o);
-      proxyLookupForManagedBeans.values().remove(o);
-      activeManagedBeans.remove(o);
+    for (Object inst : creationalContext.getAllCreatedBeanInstances()) {
+      creationalContextMap.remove(inst);
+      proxyLookupForManagedBeans.remove(inst);
+      proxyLookupForManagedBeans.values().remove(inst);
     }
   }
 
@@ -111,8 +104,8 @@ public class IOCBeanManager {
    * @param ref the reference to the bean
    * @return returns true if under management
    */
-  public boolean isManaged(final Object ref) {
-    return activeManagedBeans.containsKey(getActualBeanReference(ref));
+  public boolean isManaged(Object ref) {
+    return creationalContextMap.containsKey(getActualBeanReference(ref));
   }
 
   /**
@@ -148,8 +141,8 @@ public class IOCBeanManager {
     proxyLookupForManagedBeans.put(proxyRef, realRef);
   }
 
-  void addDestructionCallbacks(final Object ref, final List<Tuple<Object, DestructionCallback>> callbacks) {
-    activeManagedBeans.put(ref, callbacks);
+  void addBeantoContext(Object ref, CreationalContext creationalContext) {
+    creationalContextMap.put(ref, creationalContext);
   }
 
   /**

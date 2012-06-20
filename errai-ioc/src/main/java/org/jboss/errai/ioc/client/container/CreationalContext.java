@@ -21,6 +21,7 @@ import org.jboss.errai.ioc.client.BootstrapperInjectionContext;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -38,6 +39,9 @@ import java.util.Set;
  * @author Mike Brock
  */
 public class CreationalContext {
+  private final boolean immutableContext;
+  private final String scopeName;
+
   private final IOCBeanManager beanManager;
 
   private final List<Tuple<Object, InitializationCallback>> initializationCallbacks =
@@ -51,8 +55,16 @@ public class CreationalContext {
 
   private final Map<BeanRef, Object> wired = new LinkedHashMap<BeanRef, Object>();
 
-  public CreationalContext(final IOCBeanManager beanManager) {
+  public CreationalContext(final IOCBeanManager beanManager, final String scopeName) {
     this.beanManager = beanManager;
+    this.immutableContext = false;
+    this.scopeName = scopeName;
+  }
+
+  public CreationalContext(boolean immutableContext, final IOCBeanManager beanManager, final String scopeName) {
+    this.immutableContext = immutableContext;
+    this.beanManager = beanManager;
+    this.scopeName = scopeName;
   }
 
   /**
@@ -76,7 +88,6 @@ public class CreationalContext {
    */
   public void addDestructionCallback(Object beanInstance, DestructionCallback callback) {
     destructionCallbacks.add(Tuple.of(beanInstance, callback));
-    beanManager.addDestructionCallbacks(beanInstance, destructionCallbacks);
   }
 
   /**
@@ -137,6 +148,10 @@ public class CreationalContext {
     return Collections.unmodifiableSet(wired.keySet());
   }
 
+  public Collection<Object> getAllCreatedBeanInstances() {
+    return Collections.unmodifiableCollection(wired.values());
+  }
+
   /**
    * Obtains an instance of the bean within the creational context based on the specified bean type and qualifiers.
    *
@@ -150,7 +165,7 @@ public class CreationalContext {
     final T t = (T) wired.get(getBeanReference(beanType, qualifiers));
     if (t == null) {
       // see if the instance is available in the bean manager
-      final IOCBeanDef<T> beanDef = IOC.getBeanManager().lookupBean(beanType, qualifiers);
+      IOCBeanDef<T> beanDef = IOC.getBeanManager().lookupBean(beanType, qualifiers);
 
       if (beanDef != null && beanDef instanceof IOCSingletonBean) {
         return beanDef.getInstance();
@@ -251,6 +266,7 @@ public class CreationalContext {
   public void finish() {
     resolveAllProxies();
     fireAllInitCallbacks();
+    registerAllBeans();
   }
 
   @SuppressWarnings("unchecked")
@@ -270,8 +286,7 @@ public class CreationalContext {
     final int initialSize = unresolvedProxies.size();
 
     while (unresolvedIterator.hasNext()) {
-      final Map.Entry<BeanRef, List<ProxyResolver>> entry = unresolvedIterator.next();
-
+      Map.Entry<BeanRef, List<ProxyResolver>> entry = unresolvedIterator.next();
       if (wired.containsKey(entry.getKey())) {
         for (ProxyResolver pr : entry.getValue()) {
           pr.resolve(wired.get(entry.getKey()));
@@ -280,11 +295,10 @@ public class CreationalContext {
         unresolvedIterator.remove();
       }
       else {
-        final IOCBeanDef<?> iocBeanDef
-                = IOC.getBeanManager().lookupBean(entry.getKey().getClazz(), entry.getKey().getAnnotations());
+        IOCBeanDef<?> iocBeanDef = IOC.getBeanManager().lookupBean(entry.getKey().getClazz(), entry.getKey().getAnnotations());
 
         if (iocBeanDef != null) {
-          final Object beanInstance = iocBeanDef.getInstance(this);
+          Object beanInstance = iocBeanDef.getInstance(this);
 
           if (beanInstance != null) {
             if (!wired.containsKey(entry.getKey())) {
@@ -302,6 +316,22 @@ public class CreationalContext {
     }
     else if (!unresolvedProxies.isEmpty() && initialSize != unresolvedProxies.size()) {
       throw new RuntimeException("unresolved proxy: " + unresolvedProxies.entrySet().iterator().next().getKey());
+    }
+  }
+
+  private void registerAllBeans() {
+    for (Object ref : getAllCreatedBeanInstances()) {
+      beanManager.addBeantoContext(ref, this);
+    }
+  }
+
+  void destroyContext() {
+    if (immutableContext) {
+      throw new IllegalStateException("scope [" + scopeName + "] is an immutable scope and cannot be destroyed");
+    }
+
+    for (Tuple<Object, DestructionCallback> tuple : destructionCallbacks) {
+      tuple.getValue().destroy(tuple.getKey());
     }
   }
 }

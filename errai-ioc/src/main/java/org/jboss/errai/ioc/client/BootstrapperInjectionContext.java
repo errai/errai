@@ -21,6 +21,7 @@ import org.jboss.errai.ioc.client.container.CreationalContext;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanManager;
 
+import javax.enterprise.context.ApplicationScoped;
 import java.lang.annotation.Annotation;
 
 public class BootstrapperInjectionContext {
@@ -29,7 +30,7 @@ public class BootstrapperInjectionContext {
 
   public BootstrapperInjectionContext() {
     manager = IOC.getBeanManager();
-    rootContext = new CreationalContext(manager);
+    rootContext = new CreationalContext(true, manager, "javax.enterprise.context.ApplicationScoped");
   }
 
   public void addBean(Class type, CreationalCallback callback, Object instance, Annotation[] qualifiers) {

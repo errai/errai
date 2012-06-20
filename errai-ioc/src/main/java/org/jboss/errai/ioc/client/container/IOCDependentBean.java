@@ -16,6 +16,7 @@
 
 package org.jboss.errai.ioc.client.container;
 
+import javax.enterprise.context.Dependent;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.HashSet;
@@ -47,7 +48,7 @@ public class IOCDependentBean<T> extends AbstractIOCBean<T> {
 
   @Override
   public T newInstance() {
-    final CreationalContext context = new CreationalContext(beanManager);
+    final CreationalContext context = new CreationalContext(beanManager, "javax.enterprise.context.Dependent");
     final T t = creationalCallback.getInstance(context);
     context.finish();
     return t;
@@ -55,7 +56,7 @@ public class IOCDependentBean<T> extends AbstractIOCBean<T> {
 
   @Override
   public T getInstance() {
-    final CreationalContext context = new CreationalContext(beanManager);
+    final CreationalContext context = new CreationalContext(beanManager, "javax.enterprise.context.Dependent");
     final T t = getInstance(context);
     context.finish();
     return t;

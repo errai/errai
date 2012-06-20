@@ -1,5 +1,6 @@
 package org.jboss.errai.cdi.event.client.test;
 
+import org.jboss.errai.cdi.event.client.DependentEventObserverTestModule;
 import org.jboss.errai.cdi.event.client.EventObserverTestModule;
 import org.jboss.errai.enterprise.client.cdi.api.CDI;
 import org.jboss.errai.ioc.client.container.IOC;
@@ -59,7 +60,7 @@ public class EventObserverIntegrationTest extends AbstractEventIntegrationTest {
   }
   
   public void testDestroyBeanWithEventObservers() {
-    EventObserverTestModule module = IOC.getBeanManager().lookupBean(EventObserverTestModule.class).getInstance();
+    DependentEventObserverTestModule module = IOC.getBeanManager().lookupBean(DependentEventObserverTestModule.class).getInstance();
     IOC.getBeanManager().destroyBean(module);
     assertTrue("Bean wasn't destroyed", module.isDestroyed());
   }
