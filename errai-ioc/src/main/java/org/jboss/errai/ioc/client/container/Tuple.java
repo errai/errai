@@ -42,4 +42,8 @@ public class Tuple<K, V> {
   public V getValue() {
     return value;
   }
+
+  public String toString() {
+    return "[" + getKey() + ", " + getValue() + "]";
+  }
 }

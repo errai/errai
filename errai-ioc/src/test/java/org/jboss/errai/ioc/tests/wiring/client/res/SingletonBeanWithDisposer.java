@@ -9,7 +9,7 @@ import javax.inject.Singleton;
  * @author Mike Brock
  */
 @Singleton
-public class BeanWithDisposer {
+public class SingletonBeanWithDisposer {
   @Inject
   Disposer<DependentBean> dependentBeanDisposer;
 

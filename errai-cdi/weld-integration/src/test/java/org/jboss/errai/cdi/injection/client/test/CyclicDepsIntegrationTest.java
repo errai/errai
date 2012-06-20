@@ -81,8 +81,8 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
   }
 
   public void testCyclingBeanDestroy() {
-    BeanInjectSelf beanA = getBeanManager()
-            .lookupBean(BeanInjectSelf.class).getInstance();
+    DependentBeanInjectSelf beanA = getBeanManager()
+            .lookupBean(DependentBeanInjectSelf.class).getInstance();
 
     assertNotNull(beanA);
     assertNotNull(beanA.getSelf());
@@ -96,8 +96,8 @@ public class CyclicDepsIntegrationTest extends AbstractErraiCDITest {
 
   public void testCyclingBeanDestroyViaProxy() {
 
-    BeanInjectSelf beanA = getBeanManager()
-            .lookupBean(BeanInjectSelf.class).getInstance();
+    DependentBeanInjectSelf beanA = getBeanManager()
+            .lookupBean(DependentBeanInjectSelf.class).getInstance();
 
     assertNotNull(beanA);
     assertNotNull(beanA.getSelf());

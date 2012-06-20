@@ -21,6 +21,7 @@ import org.jboss.errai.ioc.client.BootstrapperInjectionContext;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -38,6 +39,9 @@ import java.util.Set;
  * @author Mike Brock
  */
 public class CreationalContext {
+  private final boolean immutableContext;
+  private final String scopeName;
+
   private final IOCBeanManager beanManager;
 
   private final List<Tuple<Object, InitializationCallback>> initializationCallbacks =
@@ -51,8 +55,16 @@ public class CreationalContext {
 
   private final Map<BeanRef, Object> wired = new LinkedHashMap<BeanRef, Object>();
 
-  public CreationalContext(final IOCBeanManager beanManager) {
+  public CreationalContext(final IOCBeanManager beanManager, final String scopeName) {
     this.beanManager = beanManager;
+    this.immutableContext = false;
+    this.scopeName = scopeName;
+  }
+
+  public CreationalContext(boolean immutableContext, final IOCBeanManager beanManager, final String scopeName) {
+    this.immutableContext = immutableContext;
+    this.beanManager = beanManager;
+    this.scopeName = scopeName;
   }
 
   /**
@@ -76,7 +88,6 @@ public class CreationalContext {
    */
   public void addDestructionCallback(Object beanInstance, DestructionCallback callback) {
     destructionCallbacks.add(Tuple.of(beanInstance, callback));
-    beanManager.addDestructionCallbacks(beanInstance, destructionCallbacks);
   }
 
   /**
@@ -135,6 +146,10 @@ public class CreationalContext {
    */
   public Set<BeanRef> getAllCreatedBeans() {
     return Collections.unmodifiableSet(wired.keySet());
+  }
+
+  public Collection<Object> getAllCreatedBeanInstances() {
+    return Collections.unmodifiableCollection(wired.values());
   }
 
   /**
@@ -249,15 +264,9 @@ public class CreationalContext {
    * tasks (such as @PostConstruct) and proxy closures to occur.
    */
   public void finish() {
-    attachDestructionCallbacks();
     resolveAllProxies();
     fireAllInitCallbacks();
-  }
-
-  private void attachDestructionCallbacks() {
-    for (Object beanRef : wired.values()) {
-      beanManager.addDestructionCallbacks(beanRef, destructionCallbacks);
-    }
+    registerAllBeans();
   }
 
   @SuppressWarnings("unchecked")
@@ -310,4 +319,19 @@ public class CreationalContext {
     }
   }
 
+  private void registerAllBeans() {
+    for (Object ref : getAllCreatedBeanInstances()) {
+      beanManager.addBeantoContext(ref, this);
+    }
+  }
+
+  void destroyContext() {
+    if (immutableContext) {
+      throw new IllegalStateException("scope [" + scopeName + "] is an immutable scope and cannot be destroyed");
+    }
+
+    for (Tuple<Object, DestructionCallback> tuple : destructionCallbacks) {
+      tuple.getValue().destroy(tuple.getKey());
+    }
+  }
 }
