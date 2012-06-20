@@ -10,6 +10,8 @@ import java.util.Date;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.PersistenceContextType;
 
 import org.jboss.errai.ioc.client.api.TestOnly;
@@ -23,6 +25,10 @@ import org.jboss.errai.ioc.client.api.TestOnly;
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
 @TestOnly @Entity
+@NamedQueries({
+  @NamedQuery(name="zentityPrimitiveBoolean", query="SELECT z FROM Zentity z WHERE z.primitiveBool = :b"),
+  @NamedQuery(name="zentityString", query="SELECT z FROM Zentity z WHERE z.string = :s")
+})
 public class Zentity {
 
   @GeneratedValue @Id

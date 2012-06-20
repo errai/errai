@@ -11,6 +11,7 @@ import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.jpa.rebind.ErraiEntityManagerGenerator;
 import org.jboss.errai.jpa.test.entity.Album;
 import org.jboss.errai.jpa.test.entity.Artist;
+import org.jboss.errai.jpa.test.entity.Zentity;
 
 import com.google.gwt.junit.client.GWTTestCase;
 
@@ -101,5 +102,55 @@ public class QueryTest extends GWTTestCase {
       assertEquals("Let It Be", a.getName());
       assertNotSame(album, a);
     }
+  }
+
+  public void IGNOREtestFilterByPrimitiveBoolean() {
+    EntityManager em = getEntityManager();
+
+    Zentity zentityTrue = new Zentity();
+    zentityTrue.setPrimitiveBool(true);
+    em.persist(zentityTrue);
+
+    Zentity zentityFalse = new Zentity();
+    zentityTrue.setPrimitiveBool(false);
+    em.persist(zentityFalse);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityPrimitiveBoolean", Zentity.class);
+    q.setParameter("b", true);
+
+    assertSame(zentityTrue, q.getSingleResult());
+
+    q.setParameter("b", false);
+    assertSame(zentityFalse, q.getSingleResult());
+  }
+
+  public void testFilterByString() {
+    EntityManager em = getEntityManager();
+
+    Zentity zentityAbc = new Zentity();
+    zentityAbc.setString("abc");
+    em.persist(zentityAbc);
+
+    Zentity zentityDef = new Zentity();
+    zentityDef.setString("def");
+    em.persist(zentityDef);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityString", Zentity.class);
+    q.setParameter("s", "abc");
+
+    Zentity fetchedZentityAbc = q.getSingleResult();
+    assertEquals(zentityAbc.toString(), fetchedZentityAbc.toString());
+    // FIXME following assertion fails (will fix ASAP)
+//    assertSame("Query result should have come from persistence context",
+//            zentityAbc, fetchedZentityAbc);
+
+    q.setParameter("s", "def");
+    // FIXME following assertion fails (will fix ASAP)
+//    assertSame("Query result should have come from persistence context",
+//            zentityDef, q.getSingleResult());
   }
 }

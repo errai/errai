@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NamedQuery;
 
 import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.hql.internal.antlr.HqlSqlTokenTypes;
@@ -41,15 +42,14 @@ import com.google.gwt.json.client.JSONObject;
  *
  * @author Jonathan Fuerth <jfuerth@gmail.com>
  */
-public class TypedQueryFactoryGenerator<T> {
+public class TypedQueryFactoryGenerator {
 
-  private final Class<T> resultType;
   private final String jpaQuery;
   private QueryTranslatorImpl query;
+  private Class<?> resultType;
 
-  public TypedQueryFactoryGenerator(EntityManager em, Class<T> resultType, String queryName, String jpaQuery) {
-    this.resultType = Assert.notNull(resultType);
-    this.jpaQuery = Assert.notNull(jpaQuery);
+  public TypedQueryFactoryGenerator(EntityManager em, NamedQuery namedQuery) {
+    this.jpaQuery = Assert.notNull(namedQuery.query());
 
     try {
       HqlParser parser = HqlParser.getInstance(jpaQuery);
@@ -60,10 +60,17 @@ public class TypedQueryFactoryGenerator<T> {
       SessionImplementor hibernateSession = em.unwrap(SessionImplementor.class);
       ASTQueryTranslatorFactory translatorFactory = new ASTQueryTranslatorFactory();
       query = (QueryTranslatorImpl) translatorFactory.createQueryTranslator(
-              queryName, jpaQuery, java.util.Collections.EMPTY_MAP, hibernateSession.getFactory());
+              namedQuery.name(), jpaQuery, java.util.Collections.EMPTY_MAP, hibernateSession.getFactory());
 
       query.compile(Collections.EMPTY_MAP, false);
       System.out.println("Return types: " + Arrays.toString(query.getReturnTypes()));
+
+      if (query.getReturnTypes().length != 1) {
+        throw new RuntimeException(
+                "Presently Errai JPA only supports queries with 1 return type. This query has " +
+                query.getReturnTypes().length + ": " + jpaQuery);
+      }
+      resultType = query.getReturnTypes()[0].getReturnedClass();
       org.hibernate.hql.internal.ast.tree.Statement sqlAST = query.getSqlAST();
 
       System.out.println("Second level parse tree:");
@@ -157,6 +164,8 @@ public class TypedQueryFactoryGenerator<T> {
       DotNode dotNode = (DotNode) ast;
       traverser.fastForwardToNextSiblingOf(dotNode);
       // FIXME this assumes the property reference is to the candidate entity instance (it could be to another type)
+      // FIXME this also assumes the property is a String :)
+      // idea: move the JSON-to-Java property accessors into ErraiSingularAttribute. Don't use the JSON API here.
       return Stmt.loadVariable("candidate").invoke("get", dotNode.getPropertyPath()).invoke("isString").invoke("stringValue");
     case HqlSqlTokenTypes.NAMED_PARAM:
       ParameterNode paramNode = (ParameterNode) ast;

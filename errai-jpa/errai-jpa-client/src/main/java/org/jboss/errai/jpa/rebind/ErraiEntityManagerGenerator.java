@@ -11,6 +11,7 @@ import java.lang.reflect.ParameterizedType;
 import java.math.BigInteger;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -29,6 +30,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.GeneratedValue;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -123,15 +125,27 @@ public class ErraiEntityManagerGenerator extends Generator {
     // pnqm = populate named queries method
     MethodCommentBuilder<?> pnqm = classBuilder.protectedMethod(void.class, "populateNamedQueries");
     MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
+
+    List<NamedQuery> namedQueries = new ArrayList<NamedQuery>();
+
+    // collect solitary named query annotations
     for (Class<?> queryClass : scanner.getTypesAnnotatedWith(NamedQuery.class, RebindUtils.findTranslatablePackages(context))) {
-      NamedQuery namedQuery = queryClass.getAnnotation(NamedQuery.class);
-      TypedQueryFactoryGenerator generator = new TypedQueryFactoryGenerator(em, queryClass, namedQuery.name(), namedQuery.query());
+      namedQueries.add(queryClass.getAnnotation(NamedQuery.class));
+    }
+
+    // collect nested NamedQuery annotations
+    for (Class<?> queryClass : scanner.getTypesAnnotatedWith(NamedQueries.class, RebindUtils.findTranslatablePackages(context))) {
+      namedQueries.addAll(Arrays.asList(queryClass.getAnnotation(NamedQueries.class).value()));
+    }
+
+    // now generate all the query factories
+    for (NamedQuery namedQuery : namedQueries) {
+      TypedQueryFactoryGenerator generator = new TypedQueryFactoryGenerator(em, namedQuery);
       Statement generatedFactory = generator.generate(Stmt.loadVariable("this"));
       pnqm._(Stmt.loadVariable("super").loadField("namedQueries")
               .invoke("put",
                       Stmt.loadLiteral(namedQuery.name()),
                       generatedFactory));
-//      pnqm._(new StringStatement("namedQueries.put(\"" + namedQuery.name() + "\", new ()"));
     }
     pnqm.finish();
 

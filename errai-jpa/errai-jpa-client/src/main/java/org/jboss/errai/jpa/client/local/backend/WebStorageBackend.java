@@ -91,6 +91,7 @@ public class WebStorageBackend implements StorageBackend {
         Key<?, ?> k = Key.fromJson(em, key);
         if (k.getEntityType() == type) {
           JSONObject candidate = JSONParser.parseStrict(value).isObject();
+          Assert.notNull(candidate);
           if (matcher.matches(candidate)) {
             @SuppressWarnings("unchecked")
             Key<X, ?> typedKey = (Key<X, ?>) k;
