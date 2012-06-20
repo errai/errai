@@ -249,8 +249,15 @@ public class CreationalContext {
    * tasks (such as @PostConstruct) and proxy closures to occur.
    */
   public void finish() {
+    attachDestructionCallbacks();
     resolveAllProxies();
     fireAllInitCallbacks();
+  }
+
+  private void attachDestructionCallbacks() {
+    for (Object beanRef : wired.values()) {
+      beanManager.addDestructionCallbacks(beanRef, destructionCallbacks);
+    }
   }
 
   @SuppressWarnings("unchecked")
