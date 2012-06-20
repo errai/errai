@@ -26,8 +26,10 @@ import org.jboss.errai.codegen.builder.BlockBuilder;
 import org.jboss.errai.codegen.builder.impl.ObjectBuilder;
 import org.jboss.errai.codegen.util.Stmt;
 import org.jboss.errai.common.client.framework.Assert;
+import org.jboss.errai.common.client.framework.Comparisons;
 import org.jboss.errai.jpa.client.local.AbstractEntityJsonMatcher;
 import org.jboss.errai.jpa.client.local.ErraiParameter;
+import org.jboss.errai.jpa.client.local.JsonUtil;
 import org.jboss.errai.jpa.client.local.TypedQueryFactory;
 
 import antlr.RecognitionException;
@@ -151,7 +153,7 @@ public class TypedQueryFactoryGenerator {
     AST ast = traverser.next();
     switch (ast.getType()) {
     case HqlSqlTokenTypes.EQ:
-      return Stmt.load(generateValueExpression(traverser)).invoke("equals", generateValueExpression(traverser));
+      return Stmt.invokeStatic(Comparisons.class, "nullSafeEquals", generateValueExpression(traverser), generateValueExpression(traverser));
     default:
       throw new UnexpectedTokenException(ast.getType(), "Boolean expression root node");
     }
@@ -164,9 +166,9 @@ public class TypedQueryFactoryGenerator {
       DotNode dotNode = (DotNode) ast;
       traverser.fastForwardToNextSiblingOf(dotNode);
       // FIXME this assumes the property reference is to the candidate entity instance (it could be to another type)
-      // FIXME this also assumes the property is a String :)
-      // idea: move the JSON-to-Java property accessors into ErraiSingularAttribute. Don't use the JSON API here.
-      return Stmt.loadVariable("candidate").invoke("get", dotNode.getPropertyPath()).invoke("isString").invoke("stringValue");
+      return Stmt.invokeStatic(JsonUtil.class, "basicValueFromJson",
+              Stmt.loadVariable("candidate").invoke("get", dotNode.getPropertyPath()),
+              dotNode.getDataType().getReturnedClass());
     case HqlSqlTokenTypes.NAMED_PARAM:
       ParameterNode paramNode = (ParameterNode) ast;
       NamedParameterSpecification namedParamSpec = (NamedParameterSpecification) paramNode.getHqlParameterSpecification();
