@@ -105,7 +105,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
           = new ArrayList<SubscribeListener>();
 
   /* ArrayList of all unsubscription listeners */
-  private List<UnsubscribeListener> onUnsubscribeHooks
+  private final List<UnsubscribeListener> onUnsubscribeHooks
           = new ArrayList<UnsubscribeListener>();
 
   /* Used to build the HTTP POST request */
@@ -193,7 +193,7 @@ public class ClientMessageBusImpl implements ClientMessageBus {
 
   public ClientMessageBusImpl() {
     clientId = String.valueOf(com.google.gwt.user.client.Random.nextInt(99999))
-            + "-" + (System.currentTimeMillis() % com.google.gwt.user.client.Random.nextInt(99999));
+            + "-" + (System.currentTimeMillis() % (com.google.gwt.user.client.Random.nextInt(99999) + 1));
 
     IN_SERVICE_ENTRY_POINT = "in." + clientId + ".erraiBus";
     OUT_SERVICE_ENTRY_POINT = "out." + clientId + ".erraiBus";
