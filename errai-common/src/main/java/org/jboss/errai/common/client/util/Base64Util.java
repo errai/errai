@@ -1,4 +1,4 @@
-package org.jboss.errai.jpa.client.local;
+package org.jboss.errai.common.client.util;
 
 
 /**

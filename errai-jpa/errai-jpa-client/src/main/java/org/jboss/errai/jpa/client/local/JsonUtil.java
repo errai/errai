@@ -6,6 +6,8 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Date;
 
+import org.jboss.errai.common.client.util.Base64Util;
+
 import com.google.gwt.json.client.JSONBoolean;
 import com.google.gwt.json.client.JSONNull;
 import com.google.gwt.json.client.JSONNumber;
