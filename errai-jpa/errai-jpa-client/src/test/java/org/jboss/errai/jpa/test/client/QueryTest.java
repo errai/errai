@@ -105,6 +105,28 @@ public class QueryTest extends GWTTestCase {
     }
   }
 
+  public void testQueryDrawsFromPersistenceContext() {
+    // make Album
+    Album album = new Album();
+    album.setArtist(null);
+    album.setName("The Beatles");
+    album.setReleaseDate(new Date(11012400000L));
+
+    // store it and chuck it
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+    em.persist(album);
+
+    em.flush();
+
+    TypedQuery<Album> q = em.createNamedQuery("selectAlbumByName", Album.class);
+    q.setParameter("name", "The Beatles");
+    List<Album> fetchedAlbums = q.getResultList();
+
+    // ensure the one result we got was the album that's still in the persistence context
+    assertEquals(1, fetchedAlbums.size());
+
+  }
+
   public void testFilterByPrimitiveBoolean() {
     EntityManager em = getEntityManagerAndClearStorageBackend();
 
