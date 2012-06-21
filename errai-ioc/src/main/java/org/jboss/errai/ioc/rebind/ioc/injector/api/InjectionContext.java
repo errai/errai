@@ -315,7 +315,7 @@ public class InjectionContext {
 
       MetaClass cls = type;
       do {
-        if (cls != type && (cls.isAbstract() || cls.isInterface())) {
+        if (cls != type && cls.isPublic() && (cls.isAbstract() || cls.isInterface())) {
           final QualifiedTypeInjectorDelegate injectorDelegate
                   = new QualifiedTypeInjectorDelegate(cls, injector, cls.getParameterizedType());
 
@@ -323,6 +323,8 @@ public class InjectionContext {
         }
 
         for (MetaClass iface : cls.getInterfaces()) {
+          if (!iface.isPublic()) continue;
+
           final QualifiedTypeInjectorDelegate injectorDelegate
                   = new QualifiedTypeInjectorDelegate(iface, injector, iface.getParameterizedType());
 
