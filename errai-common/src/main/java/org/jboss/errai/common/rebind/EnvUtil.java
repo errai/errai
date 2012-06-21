@@ -89,6 +89,7 @@ public abstract class EnvUtil {
 
   private static EnviromentConfig loadConfiguredPortableTypes() {
     MetaDataScanner scanner = ScannerSingleton.getOrCreateInstance();
+    final Map<String, String> frameworkProps = new HashMap<String, String>();
     final Map<String, String> mappingAliases = new HashMap<String, String>();
     final Set<Class<?>> exposedClasses = new HashSet<Class<?>>();
     final Set<Class<?>> nonportableClasses = new HashSet<Class<?>>();
@@ -120,8 +121,6 @@ public abstract class EnvUtil {
     }
 
 
-    //  new PropertyResourceBundle(erraiAppProperties.nextElement().openStream())
-
     while (erraiAppProperties.hasMoreElements()) {
       InputStream inputStream = null;
       try {
@@ -131,11 +130,14 @@ public abstract class EnvUtil {
 
         inputStream = url.openStream();
 
-        ResourceBundle props = new PropertyResourceBundle(inputStream);
+        final ResourceBundle props = new PropertyResourceBundle(inputStream);
         if (props != null) {
 
           for (Object o : props.keySet()) {
             String key = (String) o;
+
+            frameworkProps.put(key, props.getString(key));
+
             if (key.equals(CONFIG_ERRAI_SERIALIZABLE_TYPE)) {
               for (String s : props.getString(key).split(" ")) {
                 try {
@@ -209,7 +211,7 @@ public abstract class EnvUtil {
       fillInInterfacesAndSuperTypes(portableNonExposed, cls);
     }
 
-    return new EnviromentConfig(mappingAliases, exposedClasses, portableNonExposed);
+    return new EnviromentConfig(mappingAliases, exposedClasses, portableNonExposed, frameworkProps);
   }
 
   private static void fillInInterfacesAndSuperTypes(Set<Class<?>> set, Class<?> type) {

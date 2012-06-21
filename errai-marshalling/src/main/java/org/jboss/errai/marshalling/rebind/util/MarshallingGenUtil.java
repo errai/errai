@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -27,15 +28,13 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.util.GenUtil;
+import org.jboss.errai.common.rebind.EnvUtil;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class MarshallingGenUtil {
-  @Deprecated
-  /**
-   * Use 'errai.marshalling.serializableTypes' now.
-   */
+  private static final String FORCE_STATIC_MARSHALLERS = "errai.marshalling.force_static_marshallers";
 
   public static String getVarName(final MetaClass clazz) {
     return clazz.isArray()
@@ -62,7 +61,7 @@ public class MarshallingGenUtil {
     _replaceAllDotsWithUnderscores(clazz, newName, 0);
     return new String(newName);
   }
-  
+
   private static void _replaceAllDotsWithUnderscores(String sourceString, char[] destArray, int offset) {
     char c;
     for (int i = 0; i < sourceString.length(); i++) {
@@ -74,14 +73,14 @@ public class MarshallingGenUtil {
       }
     }
   }
-  
+
   public static MetaMethod findGetterMethod(MetaClass cls, String key) {
     MetaMethod metaMethod = _findGetterMethod("get", cls, key);
     if (metaMethod != null) return metaMethod;
     metaMethod = _findGetterMethod("is", cls, key);
-     return metaMethod;
+    return metaMethod;
   }
-  
+
   private static MetaMethod _findGetterMethod(String prefix, MetaClass cls, String key) {
     key = (prefix + key).toUpperCase();
     for (MetaMethod m : cls.getDeclaredMethods()) {
@@ -91,7 +90,7 @@ public class MarshallingGenUtil {
     }
     return null;
   }
-  
+
   /**
    * Returns the element type of the given metaclass under the following conditions:
    * <ul>
@@ -101,9 +100,8 @@ public class MarshallingGenUtil {
    * <li>toType's type parameter is a non-abstract (concrete) type
    * <li>toType's type parameter is not java.lang.Object
    * </ul>
-   * 
-   * @param toType
-   *          The type to check for a known concrete collection element type.
+   *
+   * @param toType The type to check for a known concrete collection element type.
    * @return The concrete element type meeting all above-mentioned criteria, or null if one or more of the criteria
    *         fails.
    */
@@ -113,7 +111,7 @@ public class MarshallingGenUtil {
     }
     return null;
   }
-  
+
   /**
    * Returns the element type of the given metaclass under the following conditions:
    * <ul>
@@ -122,9 +120,8 @@ public class MarshallingGenUtil {
    * <li>toType's type parameter is a non-abstract (concrete) type
    * <li>toType's type parameter is not java.lang.Object
    * </ul>
-   * 
-   * @param toType
-   *          The type to check for a known concrete collection element type.
+   *
+   * @param toType The type to check for a known concrete collection element type.
    * @return The concrete element type meeting all above-mentioned criteria, or null if one or more of the criteria
    *         fails.
    */
@@ -140,7 +137,7 @@ public class MarshallingGenUtil {
         }
         else if (typeParms[0] instanceof MetaClass) {
           typeParameter = (MetaClass) typeParms[0];
-        }      
+        }
 
         if (!MetaClassFactory.get(Object.class).equals(typeParameter))
           return typeParameter;
@@ -151,7 +148,7 @@ public class MarshallingGenUtil {
 
   public static Collection<MetaClass> getDefaultArrayMarshallers() {
     final List<MetaClass> l = new ArrayList<MetaClass>();
-    
+
     l.add(MetaClassFactory.get(Object[].class));
     l.add(MetaClassFactory.get(String[].class));
     l.add(MetaClassFactory.get(int[].class));
@@ -174,5 +171,19 @@ public class MarshallingGenUtil {
 
 
     return Collections.unmodifiableCollection(l);
+  }
+
+  public static boolean isForceStaticMarshallers() {
+    if (System.getProperty(FORCE_STATIC_MARSHALLERS) != null) {
+      return Boolean.getBoolean(FORCE_STATIC_MARSHALLERS);
+    }
+
+    final Map<String, String> frameworkProperties = EnvUtil.getEnvironmentConfig().getFrameworkProperties();
+    if (frameworkProperties.containsKey(FORCE_STATIC_MARSHALLERS)) {
+      return "true".equals(frameworkProperties.get(FORCE_STATIC_MARSHALLERS));
+    }
+    else {
+      return false;
+    }
   }
 }

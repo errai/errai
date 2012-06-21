@@ -21,6 +21,7 @@ import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.common.metadata.ScannerSingleton;
+import org.jboss.errai.common.rebind.EnvUtil;
 import org.jboss.errai.marshalling.client.MarshallingSessionProviderFactory;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallerFactory;
@@ -74,28 +75,31 @@ public class MappingContextSingleton {
     ServerMappingContext sContext;
 
     try {
-      if (Boolean.getBoolean("errai.marshalling.no_ss_codegen")) {
+      if (EnvUtil.isDevMode() && !MarshallingGenUtil.isForceStaticMarshallers()) {
         sContext = loadDynamicMarshallers();
-        System.out.println("test");
       }
       else {
         try {
           sContext = loadPrecompiledMarshallers();
         }
         catch (Throwable t) {
-          t.printStackTrace();
-          log.error("failed to load static marshallers", t);
-          log.warn("failing over to dynamic marshallers ... performance may be affected.");
+          log.debug("failed to load static marshallers", t);
+          log.warn("static marshallers were not found.");
+
           sContext = loadDynamicMarshallers();
         }
       }
     }
     catch (Throwable t) {
-      t.printStackTrace();
-      sContext = null;
+      throw new RuntimeException("critical problem loading the marshallers", t);
     }
 
     context = sContext;
+  }
+
+  private static void dynamicMarshallingWarning() {
+    log.warn("using dynamic marshallers. dynamic marshallers are designed" +
+            " for development mode testing, and ideally should not be used in production.");
   }
 
   public static ServerMappingContext loadPrecompiledMarshallers() throws Exception {
@@ -104,7 +108,6 @@ public class MappingContextSingleton {
     final MarshallerFactory marshallerFactory = (MarshallerFactory) o;
 
     return new ServerMappingContext() {
-
       {
         MarshallingSessionProviderFactory.setMarshallingSessionProvider(new MarshallingSessionProvider() {
           @Override
@@ -152,6 +155,8 @@ public class MappingContextSingleton {
   }
 
   public static ServerMappingContext loadDynamicMarshallers() {
+    dynamicMarshallingWarning();
+
     return new ServerMappingContext() {
       private final DefinitionsFactory factory = DefinitionsFactorySingleton.newInstance();
 
