@@ -79,7 +79,6 @@ public class ErraiProtocolEnvelopeMarshaller implements Marshaller<Map<String, O
         buf.append(",");
       }
 
-
       Marshaller<Object> valueMarshaller;
       buf.append("\"" + key + "\"").append(":");
 

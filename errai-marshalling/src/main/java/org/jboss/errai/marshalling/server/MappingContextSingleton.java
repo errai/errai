@@ -19,6 +19,7 @@ package org.jboss.errai.marshalling.server;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.common.client.api.annotations.Portable;
+import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.common.metadata.ScannerSingleton;
 import org.jboss.errai.marshalling.client.MarshallingSessionProviderFactory;
 import org.jboss.errai.marshalling.client.api.Marshaller;
@@ -41,9 +42,12 @@ import org.jboss.errai.marshalling.rebind.DefinitionsFactoryImpl;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactorySingleton;
 import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 import org.jboss.errai.marshalling.rebind.api.model.MemberMapping;
+import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 import org.jboss.errai.marshalling.server.marshallers.DefaultArrayMarshaller;
+import org.jboss.errai.marshalling.server.marshallers.DefaultDefinitionMarshaller;
 import org.jboss.errai.marshalling.server.marshallers.DefaultEnumMarshaller;
 import org.jboss.errai.marshalling.server.util.ServerMarshallUtil;
+import org.mvel2.ast.AssertNode;
 import org.slf4j.Logger;
 
 import java.util.Map;
@@ -125,7 +129,6 @@ public class MappingContextSingleton {
         });
       }
 
-
       @Override
       public DefinitionsFactory getDefinitionsFactory() {
         return DefinitionsFactorySingleton.get();
@@ -149,14 +152,10 @@ public class MappingContextSingleton {
   }
 
   public static ServerMappingContext loadDynamicMarshallers() {
-
     return new ServerMappingContext() {
-
       private final DefinitionsFactory factory = DefinitionsFactorySingleton.newInstance();
 
       {
-        loadMarshallers();
-
         MarshallingSessionProviderFactory.setMarshallingSessionProvider(new MarshallingSessionProvider() {
           @Override
           public MarshallingSession getEncoding() {
@@ -178,114 +177,65 @@ public class MappingContextSingleton {
             return factory.getDefinition(fqcn).getMarshallerInstance();
           }
         });
-      }
 
-      private void loadMarshallers() {
-        Set<Class<?>> marshallers =
-                ScannerSingleton.getOrCreateInstance().getTypesAnnotatedWith(ServerMarshaller.class);
-
-
-        for (Class<?> m : marshallers) {
-          try {
-            Marshaller<Object> marshaller = (Marshaller<Object>) m.newInstance();
-
-            if (m.isAnnotationPresent(AlwaysQualify.class)) {
-              marshaller = new QualifyingMarshallerWrapper(marshaller);
-            }
-
-            MappingDefinition def = new MappingDefinition(marshaller, true);
-
-            if (m.isAnnotationPresent(ClientMarshaller.class)) {
-              def.setClientMarshallerClass(m.asSubclass(Marshaller.class));
-            }
-
-            factory.addDefinition(def);
-
-            if (m.isAnnotationPresent(ImplementationAliases.class)) {
-              for (Class<?> inherits : m.getAnnotation(ImplementationAliases.class).value()) {
-                factory.addDefinition(new MappingDefinition(marshaller, inherits, true));
-              }
-            }
-
-            /**
-             * Load the default array marshaller.
-             */
-            MetaClass arrayType = MetaClassFactory.get(marshaller.getTypeHandled()).asArrayOf(1);
-            if (!factory.hasDefinition(arrayType)) {
-              factory.addDefinition(new MappingDefinition(
-                      EncDecUtil.qualifyMarshaller(new DefaultArrayMarshaller(arrayType, marshaller)), true));
-
-              /**
-               * If this a pirmitive wrapper, create a special case for it using the same marshaller.
-               */
-              if (MarshallUtil.isPrimitiveWrapper(marshaller.getTypeHandled())) {
-                factory.addDefinition(new MappingDefinition(
-                        EncDecUtil.qualifyMarshaller(new DefaultArrayMarshaller(
-                                arrayType.getOuterComponentType().asUnboxed().asArrayOf(1), marshaller)), true));
-              }
-            }
-
+        for (MappingDefinition def : factory.getMappingDefinitions()) {
+          if (def.getMarshallerInstance() != null) {
           }
-          catch (ClassCastException e) {
-            throw new RuntimeException("@ServerMarshaller class "
-                    + m.getName() + " is not an instance of " + Marshaller.class.getName());
-          }
-          catch (Throwable t) {
-            throw new RuntimeException("Error instantiating " + m.getName(), t);
-          }
-        }
+          else if (def.getServerMarshallerClass() != null) {
+            try {
+              final Marshaller<Object> marshallerInstance
+                      = def.getServerMarshallerClass().asSubclass(Marshaller.class).newInstance();
 
-        for (Class<?> exposed : factory.getExposedClasses()) {
-          if (exposed.isAnnotationPresent(Portable.class)) {
-            Portable p = exposed.getAnnotation(Portable.class);
-
-            if (!p.aliasOf().equals(Object.class)) {
-              if (!factory.hasDefinition(p.aliasOf())) {
-                throw new RuntimeException("cannot alias " + exposed.getName() + " to unmapped type: "
-                        + p.aliasOf().getName());
+              if (def.getServerMarshallerClass().isAnnotationPresent(AlwaysQualify.class)) {
+                def.setMarshallerInstance(new QualifyingMarshallerWrapper<Object>(marshallerInstance));
               }
-
-              factory.getDefinition(exposed)
-                      .setMarshallerInstance(factory.getDefinition(p.aliasOf()).getMarshallerInstance());
-            }
-
-            if (exposed.isEnum()) {
-              factory.getDefinition(exposed)
-                      .setMarshallerInstance(new DefaultEnumMarshaller(exposed));
-            }
-
-            MappingDefinition definition = factory.getDefinition(exposed);
-
-            for (MemberMapping mapping : definition.getMemberMappings()) {
-              if (mapping.getType().isArray()) {
-                MetaClass type = mapping.getType();
-                MetaClass compType = type.getOuterComponentType();
-
-                if (!factory.hasDefinition(type.getInternalName())) {
-                  MappingDefinition outerDef = factory.getDefinition(compType);
-
-                  Marshaller<Object> marshaller = outerDef.getMarshallerInstance();
-
-                  MappingDefinition def = new MappingDefinition(EncDecUtil.qualifyMarshaller(
-                          new DefaultArrayMarshaller(type, marshaller)), true);
-
-                  def.setClientMarshallerClass(outerDef.getClientMarshallerClass());
-
-                  factory.addDefinition(def);
-                }
+              else {
+                def.setMarshallerInstance(marshallerInstance);
               }
+            }
+            catch (InstantiationException e) {
+              e.printStackTrace();
+            }
+            catch (IllegalAccessException e) {
+              e.printStackTrace();
+            }
+          }
+
+          for (MemberMapping mapping : def.getMemberMappings()) {
+            if (mapping.getType().isArray()) {
+              addArrayMarshaller(mapping.getType());
             }
           }
         }
 
-        for (Map.Entry<String, String> entry : factory.getMappingAliases().entrySet()) {
-          MappingDefinition def = factory.getDefinition(entry.getValue());
-          MappingDefinition aliasDef = new MappingDefinition(MetaClassFactory.get(entry.getKey()), true);
-          aliasDef.setMarshallerInstance(def.getMarshallerInstance());
-
-          factory.addDefinition(aliasDef);
+        for (MetaClass arrayType : MarshallingGenUtil.getDefaultArrayMarshallers()) {
+          addArrayMarshaller(arrayType);
         }
       }
+
+      private void addArrayMarshaller(final MetaClass type) {
+        MetaClass compType = type.getOuterComponentType();
+
+        if (!factory.hasDefinition(type.getFullyQualifiedName())
+                && !factory.hasDefinition(type.getInternalName())) {
+
+          MappingDefinition outerDef = factory.getDefinition(compType);
+          Marshaller<Object> marshaller = outerDef.getMarshallerInstance();
+
+          if (marshaller == null) {
+            System.out.println(outerDef.getMappingClass() + " has no registered marshaller; " +
+            "marshCls=" + outerDef.getServerMarshallerClass());
+          }
+
+          MappingDefinition newDef = new MappingDefinition(EncDecUtil.qualifyMarshaller(
+                  new DefaultArrayMarshaller(type, marshaller)), true);
+
+          newDef.setClientMarshallerClass(outerDef.getClientMarshallerClass());
+
+          factory.addDefinition(newDef);
+        }
+      }
+
 
       @Override
       public DefinitionsFactory getDefinitionsFactory() {
@@ -294,7 +244,7 @@ public class MappingContextSingleton {
 
       @Override
       public Marshaller<Object> getMarshaller(String clazz) {
-        MappingDefinition def = factory.getDefinition(clazz);
+        final MappingDefinition def = factory.getDefinition(clazz);
 
         if (def == null) {
           throw new MarshallingException("class is not available to the marshaller framework: " + clazz);

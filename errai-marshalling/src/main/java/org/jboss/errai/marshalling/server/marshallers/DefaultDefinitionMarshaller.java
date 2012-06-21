@@ -19,6 +19,7 @@ package org.jboss.errai.marshalling.server.marshallers;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
@@ -47,12 +48,11 @@ import org.mvel2.DataConversion;
  * @author Mike Brock
  */
 public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
+  static final Charset UTF_8 = Charset.forName("UTF-8");
 
-  Charset UTF_8 = Charset.forName("UTF-8");
+  private final MappingDefinition definition;
 
-  private MappingDefinition definition;
-
-  public DefaultDefinitionMarshaller(MappingDefinition definition) {
+  public DefaultDefinitionMarshaller(final MappingDefinition definition) {
     this.definition = definition;
   }
 
@@ -85,7 +85,7 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
           }
 
           if (oMap.containsKey(SerializationParts.OBJECT_ID)) {
-            String hash = oMap.get(SerializationParts.OBJECT_ID).isString().stringValue();
+            final String hash = oMap.get(SerializationParts.OBJECT_ID).isString().stringValue();
 
             if (ctx.hasObjectHash(hash)) {
               newInstance = ctx.getObject(Object.class, hash);
@@ -104,7 +104,7 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
                 return newInstance;
               }
 
-              InstantiationMapping cMapping = definition.getInstantiationMapping();
+              final InstantiationMapping cMapping = definition.getInstantiationMapping();
 
               Object[] parms = new Object[cMapping.getMappings().length];
               Class[] targetTypes = cMapping.getSignature();
@@ -117,7 +117,9 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
               }
 
               if (cMapping instanceof ConstructorMapping) {
-                newInstance = ((ConstructorMapping) cMapping).getMember().asConstructor().newInstance(parms);
+                final Constructor constructor = ((ConstructorMapping) cMapping).getMember().asConstructor();
+                constructor.setAccessible(true);
+                newInstance = constructor.newInstance(parms);
               }
               else {
                 newInstance = ((FactoryMapping) cMapping).getMember().asMethod().invoke(null, parms);
@@ -129,17 +131,21 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
             for (MemberMapping mapping : definition.getWritableMemberMappings()) {
               Marshaller<Object> marshaller = ctx.getMarshallerInstance(mapping.getType().getFullyQualifiedName());
 
-              if (mapping.getBindingMember() instanceof MetaField) {
-                MetaField f = (MetaField) mapping.getBindingMember();
+              final EJValue o1 = oMap.get(mapping.getKey());
 
-                setProperty(newInstance, f.asField(),
-                        marshaller.demarshall(oMap.get(mapping.getKey()), ctx));
-              }
-              else {
-                Method m = ((MetaMethod) mapping.getBindingMember()).asMethod();
-                m.invoke(newInstance, DataConversion.convert(
-                        marshaller.demarshall(oMap.get(mapping.getKey()), ctx),
-                        m.getParameterTypes()[0]));
+              if (!o1.isNull()) {
+                if (mapping.getBindingMember() instanceof MetaField) {
+                  MetaField f = (MetaField) mapping.getBindingMember();
+
+                  setProperty(newInstance, f.asField(),
+                          marshaller.demarshall(o1, ctx));
+                }
+                else {
+                  Method m = ((MetaMethod) mapping.getBindingMember()).asMethod();
+                  m.invoke(newInstance, DataConversion.convert(
+                          marshaller.demarshall(o1, ctx),
+                          m.getParameterTypes()[0]));
+                }
               }
             }
           }
@@ -188,7 +194,7 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
     }
 
     EncodingSession ctx = (EncodingSession) mSession;
-    Class cls = o.getClass();
+    final Class cls = o.getClass();
 
     if (o instanceof Enum) {
       Enum enumer = (Enum) o;
@@ -201,9 +207,8 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
       return;
     }
 
-
-    boolean enc = ctx.hasObjectHash(o);
-    String hash = ctx.getObjectHash(o);
+    final boolean enc = ctx.hasObjectHash(o);
+    final String hash = ctx.getObjectHash(o);
 
     if (enc) {
       /**
@@ -233,6 +238,7 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
 
       if (mapping.getReadingMember() instanceof MetaField) {
         Field field = ((MetaField) mapping.getReadingMember()).asField();
+        field.setAccessible(true);
 
         try {
           v = field.get(o);
@@ -243,6 +249,7 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
       }
       else {
         Method method = ((MetaMethod) mapping.getReadingMember()).asMethod();
+        method.setAccessible(true);
 
         try {
           v = method.invoke(o);
@@ -255,11 +262,17 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
       outstream.write(("\"" + mapping.getKey() + "\"").getBytes(UTF_8));
 
       outstream.write(':');
-      outstream.write(
-              MappingContextSingleton.get().getDefinitionsFactory()
-                      .getDefinition(mapping.getType()).getMarshallerInstance().marshall(v, ctx)
-                      .getBytes(UTF_8)
-      );
+
+      if (v == null) {
+        outstream.write("null".getBytes(UTF_8));
+      }
+      else {
+        outstream.write(
+                MappingContextSingleton.get().getDefinitionsFactory()
+                        .getDefinition(mapping.getType()).getMarshallerInstance().marshall(v, ctx)
+                        .getBytes(UTF_8)
+        );
+      }
 
       first = false;
     }
@@ -279,5 +292,4 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
       throw new RuntimeException("could not instantiate class", e);
     }
   }
-
 }

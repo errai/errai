@@ -17,6 +17,7 @@
 package org.jboss.errai.marshalling.server.marshallers;
 
 import org.jboss.errai.codegen.meta.MetaClass;
+import org.jboss.errai.common.client.framework.Assert;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.json.EJArray;
@@ -33,8 +34,10 @@ public class DefaultArrayMarshaller implements Marshaller<Object> {
   private final int dimensions;
 
   public DefaultArrayMarshaller(MetaClass arrayType, Marshaller<Object> outerMarshaller) {
-    this.arrayType = arrayType;
-    this.outerMarshaller = outerMarshaller;
+    this.arrayType = Assert.notNull(arrayType);
+    this.outerMarshaller = Assert.notNull("no outer marshaller specified for: " +
+            arrayType.getOuterComponentType().getFullyQualifiedName(),
+            outerMarshaller);
 
     Class<?> type = arrayType.asClass();
     int dim = 0;

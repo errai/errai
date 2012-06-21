@@ -230,24 +230,9 @@ public class MarshallerGeneratorFactory {
             .append(loadVariable(MARSHALLERS_VAR).invoke("get", loadVariable("a1")).returnValue())
             .finish();
 
-    // special support for Object[]
-    addArrayMarshaller(MetaClassFactory.get(Object[].class));
-    addArrayMarshaller(MetaClassFactory.get(String[].class));
-    addArrayMarshaller(MetaClassFactory.get(int[].class));
-    addArrayMarshaller(MetaClassFactory.get(long[].class));
-    addArrayMarshaller(MetaClassFactory.get(double[].class));
-    addArrayMarshaller(MetaClassFactory.get(float[].class));
-    addArrayMarshaller(MetaClassFactory.get(short[].class));
-    addArrayMarshaller(MetaClassFactory.get(boolean[].class));
-    addArrayMarshaller(MetaClassFactory.get(byte[].class));
-
-    addArrayMarshaller(MetaClassFactory.get(Integer[].class));
-    addArrayMarshaller(MetaClassFactory.get(Long[].class));
-    addArrayMarshaller(MetaClassFactory.get(Double[].class));
-    addArrayMarshaller(MetaClassFactory.get(Float[].class));
-    addArrayMarshaller(MetaClassFactory.get(Short[].class));
-    addArrayMarshaller(MetaClassFactory.get(Boolean[].class));
-    addArrayMarshaller(MetaClassFactory.get(Byte[].class));
+    for (MetaClass arrayType : MarshallingGenUtil.getDefaultArrayMarshallers()) {
+      addArrayMarshaller(arrayType);
+    }
 
     return classStructureBuilder.toJavaString();
   }

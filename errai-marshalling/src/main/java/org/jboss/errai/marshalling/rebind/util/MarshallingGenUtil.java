@@ -16,7 +16,10 @@
 
 package org.jboss.errai.marshalling.rebind.util;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
@@ -144,5 +147,32 @@ public class MarshallingGenUtil {
       }
     }
     return null;
+  }
+
+  public static Collection<MetaClass> getDefaultArrayMarshallers() {
+    final List<MetaClass> l = new ArrayList<MetaClass>();
+    
+    l.add(MetaClassFactory.get(Object[].class));
+    l.add(MetaClassFactory.get(String[].class));
+    l.add(MetaClassFactory.get(int[].class));
+    l.add(MetaClassFactory.get(long[].class));
+    l.add(MetaClassFactory.get(double[].class));
+    l.add(MetaClassFactory.get(float[].class));
+    l.add(MetaClassFactory.get(short[].class));
+    l.add(MetaClassFactory.get(boolean[].class));
+    l.add(MetaClassFactory.get(byte[].class));
+    l.add(MetaClassFactory.get(char[].class));
+
+    l.add(MetaClassFactory.get(Integer[].class));
+    l.add(MetaClassFactory.get(Long[].class));
+    l.add(MetaClassFactory.get(Double[].class));
+    l.add(MetaClassFactory.get(Float[].class));
+    l.add(MetaClassFactory.get(Short[].class));
+    l.add(MetaClassFactory.get(Boolean[].class));
+    l.add(MetaClassFactory.get(Byte[].class));
+    l.add(MetaClassFactory.get(Character[].class));
+
+
+    return Collections.unmodifiableCollection(l);
   }
 }

@@ -50,8 +50,15 @@ public abstract class MetaField implements HasAnnotations, MetaClassMember {
     return o instanceof MetaField && ((MetaField) o).hashString().equals(hashString());
   }
 
+
   public Field asField() {
-     return null;
+    try {
+      final Class<?> aClass = Class.forName(getDeclaringClass().getFullyQualifiedName());
+      return aClass.getDeclaredField(getName());
+    }
+    catch (Throwable e) {
+      return null;
+    }
   }
 
   public static class ArrayLengthMetaField extends MetaField {

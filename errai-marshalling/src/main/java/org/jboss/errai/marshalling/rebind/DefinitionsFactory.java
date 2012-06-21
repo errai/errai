@@ -19,6 +19,7 @@ package org.jboss.errai.marshalling.rebind;
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.marshalling.rebind.api.model.MappingDefinition;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -109,6 +110,13 @@ public interface DefinitionsFactory {
    * @return a map of aliases.
    */
   Map<String, String> getMappingAliases();
+
+  /**
+   * Returns a collection of all registered mapping definitions.
+   *
+   * @retur a collection of mapping definitions.
+   */
+  Collection<MappingDefinition> getMappingDefinitions();
 
   void deleteAllDefinitions();
 }
