@@ -24,6 +24,7 @@ import org.jboss.errai.ioc.client.Container;
 import org.jboss.errai.jpa.rebind.ErraiEntityManagerGenerator;
 import org.jboss.errai.jpa.test.entity.Album;
 import org.jboss.errai.jpa.test.entity.Artist;
+import org.jboss.errai.jpa.test.entity.Genre;
 import org.jboss.errai.jpa.test.entity.Zentity;
 
 import com.google.gwt.junit.client.GWTTestCase;
@@ -366,6 +367,40 @@ public class ErraiJpaTest extends GWTTestCase {
 
     // ensure "parent pointer" of album points at correct artist instance
     assertSame(fetchedArtist, cascadeFetchedAlbum.getArtist());
+  }
+
+  public void testFetchAssociatedEntityAlreadyInPersistenceContext() {
+    // make them
+    Artist artist = new Artist();
+    artist.setId(99L); // Artist uses user-assigned/non-generated IDs
+    artist.setName("The Beatles");
+
+    Genre rock = new Genre("Rock");
+    artist.addGenre(rock);
+
+    // store it
+    EntityManager em = getEntityManager();
+    em.persist(artist); // should cascade onto Rock genre, which is in the collection relation
+    em.flush();
+
+    assertNotNull(rock.getId());
+
+    // ensure both are in the persistence context
+    assertSame(artist, em.find(Artist.class, artist.getId()));
+    assertSame(rock, em.find(Genre.class, rock.getId()));
+
+    em.clear();
+
+    // prefetch the genre to get it into the persistence context
+    Genre fetchedRock = em.find(Genre.class, rock.getId());
+    assertNotNull(fetchedRock);
+
+    Artist fetchedArtist = em.find(Artist.class, artist.getId());
+    assertNotNull(fetchedArtist);
+
+    assertEquals(1, fetchedArtist.getGenres().size());
+    Genre cascadeFetchedGenre = fetchedArtist.getGenres().iterator().next();
+    assertSame(fetchedRock, cascadeFetchedGenre);
   }
 
   public void testPersistNewEntityLifecycle() throws Exception {
