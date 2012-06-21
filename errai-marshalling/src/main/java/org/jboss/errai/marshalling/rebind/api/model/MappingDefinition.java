@@ -41,7 +41,7 @@ public class MappingDefinition {
 
   private InstantiationMapping instantiationMapping;
 
-  private final List<MemberMapping> memberMappings = new ArrayList<MemberMapping>();
+  private final List<MemberMapping> memberMappings;
 
   public MappingDefinition(Marshaller<Object> marshaller, boolean cached) {
     this(marshaller, marshaller.getTypeHandled(), cached);
@@ -52,6 +52,7 @@ public class MappingDefinition {
     setMarshallerInstance(marshaller);
     instantiationMapping = new NoConstructMapping();
     this.doNotGenerate = doNotGenerate;
+    this.memberMappings = new ArrayList<MemberMapping>();
   }
 
   protected MappingDefinition(Class<?> toMap) {
@@ -66,6 +67,7 @@ public class MappingDefinition {
     this.toMap = toMap;
     setInstantiationMapping(new SimpleConstructorMapping());
     this.doNotGenerate = doNotGenerate;
+    this.memberMappings = new ArrayList<MemberMapping>();
   }
 
 

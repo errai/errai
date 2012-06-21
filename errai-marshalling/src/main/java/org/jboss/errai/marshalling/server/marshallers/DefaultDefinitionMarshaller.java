@@ -129,11 +129,11 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
             }
 
             for (MemberMapping mapping : definition.getWritableMemberMappings()) {
-              Marshaller<Object> marshaller = ctx.getMarshallerInstance(mapping.getType().getFullyQualifiedName());
-
               final EJValue o1 = oMap.get(mapping.getKey());
 
               if (!o1.isNull()) {
+                Marshaller<Object> marshaller = ctx.getMarshallerInstance(mapping.getType().getFullyQualifiedName());
+
                 if (mapping.getBindingMember() instanceof MetaField) {
                   MetaField f = (MetaField) mapping.getBindingMember();
 

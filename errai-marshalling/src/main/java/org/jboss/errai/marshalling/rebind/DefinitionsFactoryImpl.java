@@ -17,6 +17,7 @@
 package org.jboss.errai.marshalling.rebind;
 
 import static org.jboss.errai.common.rebind.EnvUtil.getEnvironmentConfig;
+import static org.jboss.errai.common.rebind.EnvUtil.isDevMode;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -286,15 +287,32 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       }
     }
 
+    // it is not accidental that we're not re-using the mappingAliases collection above
+    // we only want to deal with the property file specified aliases here.
+    for (Map.Entry<String, String> entry : getEnvironmentConfig().getMappingAliases().entrySet()) {
+      try {
+        aliasToMarshaller.put(Class.forName(entry.getKey()), Class.forName(entry.getValue()));
+      }
+      catch (Throwable t) {
+        throw new RuntimeException("error loading mapping alias", t);
+      }
+    }
+
     for (Map.Entry<Class<?>, Class<?>> entry : aliasToMarshaller.entrySet()) {
-      MappingDefinition def = getDefinition(entry.getValue());
+      final MappingDefinition def = getDefinition(entry.getValue());
       if (def == null) {
         throw new InvalidMappingException("cannot alias type " + entry.getKey().getName()
                 + " to " + entry.getValue().getName() + ": the specified alias type does not exist ");
       }
 
-      MappingDefinition aliasDef = new MappingDefinition(def.getMarshallerInstance(), entry.getKey(), false);
-      aliasDef.setClientMarshallerClass(def.getClientMarshallerClass());
+      final MappingDefinition aliasDef = new MappingDefinition(def.getMarshallerInstance(), entry.getKey(), false);
+      if (def.getMarshallerInstance() instanceof DefaultDefinitionMarshaller) {
+        aliasDef.setMarshallerInstance(new DefaultDefinitionMarshaller(aliasDef));
+      }
+      else {
+        aliasDef.setClientMarshallerClass(def.getClientMarshallerClass());
+        aliasDef.setServerMarshallerClass(def.getServerMarshallerClass());
+      }
       mergeDefinition(aliasDef);
       addDefinition(aliasDef);
     }
