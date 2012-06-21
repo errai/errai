@@ -107,8 +107,8 @@ public class MessageQueueImpl implements MessageQueue {
       synchronized (pageLock) {
         if (pagedOut) {
           readInPageFile(outstream, new BufferHelper.MultiMessageHandlerCallback());
-          System.out.println("PAGEY!");
           wait = false;
+          return false;
         }
       }
     }
