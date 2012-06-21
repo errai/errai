@@ -40,6 +40,7 @@ import org.jboss.errai.bus.client.tests.support.EnumContainerContainer;
 import org.jboss.errai.bus.client.tests.support.FactoryEntity;
 import org.jboss.errai.bus.client.tests.support.GenericEntity;
 import org.jboss.errai.bus.client.tests.support.Group;
+import org.jboss.errai.bus.client.tests.support.ImplicitEnum;
 import org.jboss.errai.bus.client.tests.support.Koron;
 import org.jboss.errai.bus.client.tests.support.SubMoron;
 import org.jboss.errai.bus.client.tests.support.TestEnumA;
@@ -370,6 +371,11 @@ public class TestSerializationRPCServiceImpl implements TestSerializationRPCServ
 
   @Override
   public BuilderEntity testBuilderSerializationWithPrivateConstructor(BuilderEntity e) {
+    return e;
+  }
+
+  @Override
+  public ImplicitEnum testImplicitEnum(ImplicitEnum e) {
     return e;
   }
 }

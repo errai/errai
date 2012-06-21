@@ -224,20 +224,19 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
       if (Marshaller.class.isAssignableFrom(marshallerCls)) {
         try {
           final Class<?> type = (Class<?>) Marshaller.class.getMethod("getTypeHandled").invoke(marshallerCls.newInstance());
+          final MappingDefinition definition;
+
           if (hasDefinition(type)) {
-            getDefinition(type).setServerMarshallerClass(marshallerCls.asSubclass(Marshaller.class));
+            definition = getDefinition(type);
+            definition.setServerMarshallerClass(marshallerCls.asSubclass(Marshaller.class));
           }
           else {
-            MappingDefinition marshallMappingDef = new MappingDefinition(type, true);
-            marshallMappingDef.setServerMarshallerClass(marshallerCls.asSubclass(Marshaller.class));
-            addDefinition(marshallMappingDef);
+            definition = new MappingDefinition(type, true);
+            definition.setServerMarshallerClass(marshallerCls.asSubclass(Marshaller.class));
+            addDefinition(definition);
 
             exposedClasses.add(type);
-//            if (MarshallUtil.isPrimitiveWrapper(type)) {
-//              exposedClasses.add(MetaClassFactory.get(type).asUnboxed().asClass());
-//            }
           }
-
 
           if (marshallerCls.isAnnotationPresent(ImplementationAliases.class)) {
             for (Class<?> aliasCls : marshallerCls.getAnnotation(ImplementationAliases.class).value()) {
@@ -254,6 +253,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
               }
             }
           }
+
         }
         catch (Throwable t) {
           throw new RuntimeException("could not instantiate marshaller class: " + marshallerCls.getName(), t);
@@ -272,6 +272,8 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
 
     final Map<Class<?>, Class<?>> aliasToMarshaller = new HashMap<Class<?>, Class<?>>();
 
+    final List<MetaClass> enums = new ArrayList<MetaClass>();
+
     for (Class<?> mappedClass : exposedClasses) {
       if (mappedClass.isSynthetic()) continue;
 
@@ -284,8 +286,25 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
                 this);
         def.setMarshallerInstance(new DefaultDefinitionMarshaller(def));
         addDefinition(def);
+
+        for (Mapping mapping : def.getAllMappings()) {
+          if (mapping.getType().isEnum()) {
+            enums.add(mapping.getType());
+          }
+        }
       }
     }
+
+    for (MetaClass enumType : enums) {
+      if (!hasDefinition(enumType)) {
+        MappingDefinition enumDef = DefaultJavaDefinitionMapper
+                .map(JavaReflectionClass.newUncachedInstance(enumType.asClass()), this);
+        enumDef.setMarshallerInstance(new DefaultDefinitionMarshaller(enumDef));
+        addDefinition(enumDef);
+        exposedClasses.add(enumType.asClass());
+      }
+    }
+
 
     // it is not accidental that we're not re-using the mappingAliases collection above
     // we only want to deal with the property file specified aliases here.

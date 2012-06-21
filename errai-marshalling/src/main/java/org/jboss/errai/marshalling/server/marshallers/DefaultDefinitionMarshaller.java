@@ -33,6 +33,7 @@ import org.jboss.errai.marshalling.client.api.exceptions.MarshallingException;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.util.NumbersUtils;
+import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
 import org.jboss.errai.marshalling.rebind.api.model.ConstructorMapping;
 import org.jboss.errai.marshalling.rebind.api.model.FactoryMapping;
 import org.jboss.errai.marshalling.rebind.api.model.InstantiationMapping;
@@ -196,7 +197,7 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
     EncodingSession ctx = (EncodingSession) mSession;
     final Class cls = o.getClass();
 
-    if (o instanceof Enum) {
+    if (definition.getMappingClass().isEnum()) {
       Enum enumer = (Enum) o;
 
       outstream.write(("{\"" + SerializationParts.ENCODED_TYPE + "\":\""
@@ -206,6 +207,7 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
 
       return;
     }
+
 
     final boolean enc = ctx.hasObjectHash(o);
     final String hash = ctx.getObjectHash(o);
@@ -260,16 +262,32 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
       }
 
       outstream.write(("\"" + mapping.getKey() + "\"").getBytes(UTF_8));
-
       outstream.write(':');
 
       if (v == null) {
         outstream.write("null".getBytes(UTF_8));
       }
       else {
+        final DefinitionsFactory definitionsFactory = MappingContextSingleton.get().getDefinitionsFactory();
+
+        if (definitionsFactory == null) {
+          throw new RuntimeException("definition factory is null!");
+        }
+
+        final MappingDefinition definition1 = definitionsFactory.getDefinition(mapping.getType());
+
+        if (definition1 == null) {
+          throw new RuntimeException("no mapping definition for: " + mapping.getType().getFullyQualifiedName());
+        }
+
+        final Marshaller<Object> marshallerInstance = definition1.getMarshallerInstance();
+
+        if (marshallerInstance == null) {
+          throw new RuntimeException("no marshaller instance for: " + mapping.getType().getFullyQualifiedName());
+        }
+
         outstream.write(
-                MappingContextSingleton.get().getDefinitionsFactory()
-                        .getDefinition(mapping.getType()).getMarshallerInstance().marshall(v, ctx)
+                marshallerInstance.marshall(v, ctx)
                         .getBytes(UTF_8)
         );
       }

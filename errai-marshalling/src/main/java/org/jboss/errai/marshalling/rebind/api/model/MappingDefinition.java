@@ -17,6 +17,7 @@
 package org.jboss.errai.marshalling.rebind.api.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -161,10 +162,20 @@ public class MappingDefinition {
     this.marshallerInstance = marshallerInstance;
   }
 
+  public List<Mapping> getAllMappings() {
+    final List<Mapping> mappingList = new ArrayList<Mapping>();
+    if (getInstantiationMapping() != null) {
+      mappingList.addAll(Arrays.asList(getInstantiationMapping().getMappings()));
+    }
+    mappingList.addAll(getMemberMappings());
+
+    return Collections.unmodifiableList(mappingList);
+  }
+
   @Override
   public String toString() {
     return "MappingDefinition [mappingClass=" + getMappingClass() + ", clientMarshallerClass="
-        + getClientMarshallerClass() + ", serverMarshallerClass=" + getServerMarshallerClass() + "]";
+            + getClientMarshallerClass() + ", serverMarshallerClass=" + getServerMarshallerClass() + "]";
   }
-  
+
 }

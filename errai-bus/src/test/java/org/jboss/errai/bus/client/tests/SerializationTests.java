@@ -52,6 +52,7 @@ import org.jboss.errai.bus.client.tests.support.EnumWithState;
 import org.jboss.errai.bus.client.tests.support.FactoryEntity;
 import org.jboss.errai.bus.client.tests.support.GenericEntity;
 import org.jboss.errai.bus.client.tests.support.Group;
+import org.jboss.errai.bus.client.tests.support.ImplicitEnum;
 import org.jboss.errai.bus.client.tests.support.Koron;
 import org.jboss.errai.bus.client.tests.support.Student;
 import org.jboss.errai.bus.client.tests.support.StudyTreeNodeContainer;
@@ -1640,6 +1641,30 @@ public class SerializationTests extends AbstractErraiTest {
             }
           }
         }, TestSerializationRPCService.class).testNakedEnum(e);
+      }
+    });
+  }
+
+  public void testImplicitEnum() {
+    runAfterInit(new Runnable() {
+      @Override
+      public void run() {
+
+        final ImplicitEnum e = ImplicitEnum.LOU;
+
+        MessageBuilder.createCall(new RemoteCallback<ImplicitEnum>() {
+          @Override
+          public void callback(ImplicitEnum response) {
+            try {
+              assertEquals(e, response);
+              finishTest();
+            }
+            catch (Throwable e) {
+              e.printStackTrace();
+              fail();
+            }
+          }
+        }, TestSerializationRPCService.class).testImplicitEnum(e);
       }
     });
   }

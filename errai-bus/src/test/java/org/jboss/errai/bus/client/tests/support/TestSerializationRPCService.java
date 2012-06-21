@@ -162,4 +162,6 @@ public interface TestSerializationRPCService {
   public EnumContainerContainer testEntityWithEnumContainerContainer(EnumContainerContainer ecc);
 
   public LinkedHashMap<String,Integer> testLinkedHashMap(LinkedHashMap<String,Integer> map);
+
+  public ImplicitEnum testImplicitEnum(ImplicitEnum e);
 }
