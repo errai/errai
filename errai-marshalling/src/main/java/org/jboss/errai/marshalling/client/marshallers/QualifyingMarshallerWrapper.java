@@ -17,6 +17,7 @@
 package org.jboss.errai.marshalling.client.marshallers;
 
 import org.jboss.errai.common.client.protocols.SerializationParts;
+import org.jboss.errai.common.client.util.Base64Util;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
@@ -24,7 +25,7 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
 
 /**
  * Used to wrap marshallers annotated with {@link org.jboss.errai.marshalling.client.api.annotations.AlwaysQualify}
- *
+ * 
  * @author Mike Brock
  */
 public class QualifyingMarshallerWrapper<T> extends AbstractNullableMarshaller<T> {
@@ -42,14 +43,29 @@ public class QualifyingMarshallerWrapper<T> extends AbstractNullableMarshaller<T
   @Override
   public T doNotNullDemarshall(EJValue o, MarshallingSession ctx) {
     EJObject obj = o.isObject();
-    String objId = obj.get(SerializationParts.OBJECT_ID).isString().stringValue();
-    if (ctx.hasObjectHash(objId)) {
-      //noinspection unchecked
-      return (T) ctx.getObject(Object.class, objId);
-    }
 
-    T val = delegate.demarshall(o.isObject().get(SerializationParts.QUALIFIED_VALUE), ctx);
-    ctx.recordObjectHash(objId, val);
+    T val = null;
+    if (obj != null) {
+      String objId = obj.get(SerializationParts.OBJECT_ID).isString().stringValue();
+      if (ctx.hasObjectHash(objId)) {
+        // noinspection unchecked
+        return (T) ctx.getObject(Object.class, objId);
+      }
+
+      val = delegate.demarshall(o.isObject().get(SerializationParts.QUALIFIED_VALUE), ctx);
+      ctx.recordObjectHash(objId, val);
+    }
+    else {
+      // This is only to support Jackson's char[] and byte[] representations
+      if (o.isString() != null) {
+        if (getTypeHandled().equals(byte.class)) {
+          val = (T) Base64Util.decode(o.isString().stringValue());
+        }
+        else if (getTypeHandled().equals(char.class)) {
+          val = (T) o.isString().stringValue().toCharArray();
+        }
+      }
+    }
     return val;
   }
 
@@ -66,7 +82,8 @@ public class QualifyingMarshallerWrapper<T> extends AbstractNullableMarshaller<T
       return buf.append("}").toString();
     }
     else {
-      return buf.append(",\"").append(SerializationParts.QUALIFIED_VALUE).append("\":").append(delegate.marshall(o, ctx))
+      return buf.append(",\"").append(SerializationParts.QUALIFIED_VALUE).append("\":").append(
+          delegate.marshall(o, ctx))
               .append("}").toString();
     }
   }

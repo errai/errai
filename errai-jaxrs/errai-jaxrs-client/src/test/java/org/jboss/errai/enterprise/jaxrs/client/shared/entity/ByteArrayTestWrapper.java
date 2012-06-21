@@ -17,6 +17,7 @@
 package org.jboss.errai.enterprise.jaxrs.client.shared.entity;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.jboss.errai.common.client.api.annotations.Portable;
@@ -25,12 +26,16 @@ import org.jboss.errai.common.client.api.annotations.Portable;
 public class ByteArrayTestWrapper {
 
   private List<Byte> bytes = new ArrayList<Byte>();
+  private byte[] nativeBytes;
+  private char[] nativeChars;
 
   public ByteArrayTestWrapper() {
     bytes.add(new Byte("1"));
     bytes.add(new Byte("2"));
+    nativeBytes = "34".getBytes();
+    nativeChars = "56".toCharArray();
   }
-  
+
   public List<Byte> getBytes() {
     return bytes;
   }
@@ -39,11 +44,29 @@ public class ByteArrayTestWrapper {
     this.bytes = bytes;
   }
 
+  public byte[] getNativeBytes() {
+    return nativeBytes;
+  }
+
+  public void setNativeBytes(byte[] nativeBytes) {
+    this.nativeBytes = nativeBytes;
+  }
+
+  public char[] getNativeChars() {
+    return nativeChars;
+  }
+
+  public void setNativeChars(char[] nativeChars) {
+    this.nativeChars = nativeChars;
+  }
+
   @Override
   public int hashCode() {
     final int prime = 31;
     int result = 1;
     result = prime * result + ((bytes == null) ? 0 : bytes.hashCode());
+    result = prime * result + Arrays.hashCode(nativeBytes);
+    result = prime * result + Arrays.hashCode(nativeChars);
     return result;
   }
 
@@ -62,13 +85,17 @@ public class ByteArrayTestWrapper {
     }
     else if (!bytes.equals(other.bytes))
       return false;
+    if (!Arrays.equals(nativeBytes, other.nativeBytes))
+      return false;
+    if (!Arrays.equals(nativeChars, other.nativeChars))
+      return false;
     return true;
   }
 
   @Override
   public String toString() {
-    return "ByteArrayTestWrapper [bytes=" + bytes + "]";
+    return "ByteArrayTestWrapper [bytes=" + bytes + ", nativeBytes=" + Arrays.toString(nativeBytes) + ", nativeChars="
+        + Arrays.toString(nativeChars) + "]";
   }
-  
-  
+
 }
