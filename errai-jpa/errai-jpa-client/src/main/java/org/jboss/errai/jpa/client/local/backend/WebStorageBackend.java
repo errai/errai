@@ -105,8 +105,12 @@ public class WebStorageBackend implements StorageBackend {
           if (matcher.matches(candidate)) {
             @SuppressWarnings("unchecked")
             Key<X, ?> typedKey = (Key<X, ?>) k;
-            // TODO the value is already parsed. it would be nice to avoid the re-fetch here.
-            entities.add(get(typedKey));
+
+            // Unfortunately, this throws away a lot of work we've already done (getting the entity type,
+            // creating the key, doing a backend.get(), parsing the JSON value, ...)
+            // it would be nice to avoid this, but we have to go back to the entity manager in case the
+            // thing we want is in the persistence context.
+            entities.add(em.find(type.getJavaType(), typedKey.getId()));
           }
           else {
             System.out.println(" --> but not a match");

@@ -105,6 +105,10 @@ public class QueryTest extends GWTTestCase {
     }
   }
 
+  /**
+   * Ensures that query results come from the entity manager's persistence
+   * context (that is, redundant instances are not created).
+   */
   public void testQueryDrawsFromPersistenceContext() {
     // make Album
     Album album = new Album();
@@ -124,7 +128,7 @@ public class QueryTest extends GWTTestCase {
 
     // ensure the one result we got was the album that's still in the persistence context
     assertEquals(1, fetchedAlbums.size());
-
+    assertSame(album, fetchedAlbums.get(0));
   }
 
   public void testFilterByPrimitiveBoolean() {
@@ -145,14 +149,10 @@ public class QueryTest extends GWTTestCase {
     q.setParameter("b", false);
     Zentity fetchedZentityFalse = q.getSingleResult();
     assertEquals(zentityFalse.toString(), fetchedZentityFalse.toString());
-    // FIXME following assertion fails (will fix ASAP)
-    //assertSame(zentityFalse, fetchedZentityFalse);
 
     q.setParameter("b", true);
     Zentity fetchedZentityTrue = q.getSingleResult();
     assertEquals(zentityTrue.toString(), fetchedZentityTrue.toString());
-    // FIXME following assertion fails (will fix ASAP)
-    //assertSame(zentityTrue, fetchedZentityTrue);
   }
 
   public void testFilterByString() {
@@ -169,17 +169,12 @@ public class QueryTest extends GWTTestCase {
     em.flush();
 
     TypedQuery<Zentity> q = em.createNamedQuery("zentityString", Zentity.class);
-    q.setParameter("s", "abc");
 
-    Zentity fetchedZentityAbc = q.getSingleResult();
-    assertEquals(zentityAbc.toString(), fetchedZentityAbc.toString());
-    // FIXME following assertion fails (will fix ASAP)
-//    assertSame("Query result should have come from persistence context",
-//            zentityAbc, fetchedZentityAbc);
+    q.setParameter("s", "abc");
+    assertEquals(zentityAbc.toString(), q.getSingleResult().toString());
 
     q.setParameter("s", "def");
-    // FIXME following assertion fails (will fix ASAP)
-//    assertSame("Query result should have come from persistence context",
-//            zentityDef, q.getSingleResult());
+    assertEquals(zentityDef.toString(), q.getSingleResult().toString());
   }
+
 }
