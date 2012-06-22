@@ -5,21 +5,96 @@
    <section id="sid-5931328_Marshalling-MappingYourDomain">
       <title>Mapping Your Domain</title>
       <para>All classes that you intend to be marshalled between the client and the server must be exposed to the marshalling framework. There are several ways you can do it and this section will take you through the different approaches you can take to fit your needs.</para>
-      <section id="sid-5931328_Marshalling-@Portable">
-         <title>@Portable</title>
+      <section id="sid-5931328_Marshalling-@Portableand@NonPortable">
+         <title>@Portable and @NonPortable</title>
          <para>
-          The simplest and most straight-forward way to map your domain entities is to annotate it with the
+          To make a Java class eligible for serialization with Errai Marshalling, mark it with the
           <code>org.jboss.errai.common.client.api.annotations.Portable</code>
-          annotation. Doing so will cause the marshalling system to discover the entities at both compile-time and runtime to produce the marshalling code and definitions to marshal and de-marshal the objects.
+          annotation. This tells the marshalling system to generate marshalling and demarshalling code for the annotated class and all of its nested classes.
         </para>
          <para>
-          The mapping strategy that will be used depends on how much information you provide about your model up-front. If you simply annotate a domain object with
+          The mapping strategy that will be used depends on how much information you provide about your model up-front. If you simply annotate a domain type with
           <code>@Portable</code>
-          and do nothing else, the marshalling system will use and exhaustive strategy to determine how to construct and deconstruct the object.
+          and do nothing else, the marshalling system will use and exhaustive strategy to determine how to construct and deconstruct instances of that type and its nested types.
         </para>
-         <para>Let's take a look at how this works.</para>
-         <section id="sid-5931328_Marshalling-ASimpleEntity">
-            <title>A Simple Entity</title>
+         <para>
+          The Errai marshalling system works by enumerating all of the Portable types it can find (by any of the three methods discussed in this section of the reference guide), eliminating all the non-portable types it can find (via
+          <code>@NonPortable</code>
+          annotations and entries in
+          <code>ErraiApp.properties</code>
+          ), then enumerating the marshallable properties that make up each remaining portable entity type. The rules that Errai uses for enumerating the properties of a portable entity type are as follows:
+        </para>
+         <itemizedlist>
+            <listitem>
+               <para>
+              If an entity type has a field called
+              <code>foo</code>
+              , then that entity has a property called
+              <code>foo</code>
+              unless the field is marked
+              <code>static</code>
+              or
+              <code>transient</code>
+              .
+            </para>
+            </listitem>
+         </itemizedlist>
+         <para>
+          Note that the existence of methods called
+          <code>getFoo()</code>
+          ,
+          <code>setFoo()</code>
+          , or both,
+          <emphasis role="italics">does not</emphasis>
+          mean that the entity has a property called
+          <code>foo</code>
+          . Errai Marshalling always works from fields when discovering properties.
+        </para>
+         <para>
+          When reading a field
+          <code>foo</code>
+          , Errai Marshalling will call the method
+          <code>getFoo()</code>
+          in preference to direct field access if the
+          <code>getFoo()</code>
+          method exists.
+        </para>
+         <para>
+          Similarly, when writing a field
+          <code>foo</code>
+          , Errai Marshalling will call the method
+          <code>setFoo()</code>
+          in preference to direct field access if the
+          <code>setFoo()</code>
+          method exists.
+        </para>
+         <para>
+          The above rules are sufficient for marshalling an existing entity to a JSON representation, but for de-marshalling, Errai must also know how to obtain an instance of a type. The rules that Errai uses for deciding how to create an instance of a
+          <code>@Portable</code>
+          type are as follows:
+        </para>
+         <itemizedlist>
+            <listitem>
+               <para>
+              If the entity has a public constructor where every argument is annotated with
+              <code>@MapsTo</code>
+              , and those parameters cover all properties of the entity type, then Errai uses this constructor to create the object, passing in all of the property values.
+            </para>
+            </listitem>
+            <listitem>
+               <para>
+              Otherwise, if the entity has a public static method where every argument is annotated with
+              <code>@MapsTo</code>
+              , and those parameters cover all properties of the entity type, then Errai uses this method to create the object. Note that when using this mechanism you are free to create and return a subtype of the marshalled type, or resolve one from a cache.
+            </para>
+            </listitem>
+            <listitem>
+               <para>If the entity has a public no-arguments constructor (or no explicit constructors at all), it will be created via that constructor, and the properties will be written to the new object one at a time. Each property will be written by its setter method, or by direct field access if a setter method is not available.</para>
+            </listitem>
+         </itemizedlist>
+         <para>Now let's take a look at some common examples of how this works.</para>
+         <section id="sid-5931328_Marshalling-Example%3AASimpleEntity">
+            <title>Example: A Simple Entity</title>
             <informalexample>
                <programlisting language="java">@Portable
 public class Person {
@@ -45,8 +120,8 @@ public class Person {
             </informalexample>
             <para>This is a pretty vanilla domain object. Note the default, public, no-argument constructor. In this case, it will be necessary to have one explicitly declared. But notice we have no setters. In this case, the marshaler will rely on private field access to write the values on each side of the marshalling transaction. For simple domain objects, this is both nice and convenient. But you may want to make the class immutable and have a constructor enforce invariance. See the next section for that.</para>
          </section>
-         <section id="sid-5931328_Marshalling-ImmutableObjects">
-            <title>Immutable Objects</title>
+         <section id="sid-5931328_Marshalling-Example%3AAnImmutableEntitywithaPublicConstructor">
+            <title>Example: An Immutable Entity with a Public Constructor</title>
             <para>Immutability is almost always a good practice, and the marshalling system provides you a straight forward way to tell it how to marshal and de-marshal objects which enforce an immutable contract. Let's modify our example from the previous section.</para>
             <informalexample>
                <programlisting language="java">@Portable
@@ -78,6 +153,9 @@ public class Person {
             <code>name</code>
             . Which in this case, defaults to the name of the corresponding field. This may not always be the case – as will be explored in the section on custom definitions. But for now that's a safe assumption.
           </para>
+         </section>
+         <section id="sid-5931328_Marshalling-Example%3AAnImmutableEntitywithaFactoryMethod">
+            <title>Example: An Immutable Entity with a Factory Method</title>
             <para>Another good practice is to use a factory pattern to enforce invariance. Once again, let's modify our example.</para>
             <informalexample>
                <programlisting language="java">@Portable
@@ -109,97 +187,173 @@ public class Person {
             annotation in the same way we did on the constructor from our previous example. The marshaller will see this method and know that it should use it to construct the object.
           </para>
          </section>
-         <section id="sid-5931328_Marshalling-ManualMapping">
-            <title>Manual Mapping</title>
-            <para>Some classes may be out of your control, making it impossible to annotate them for auto-discovery by the marshalling framework. For cases such as this, there are two approaches which can be undertaken to include these classes in your application.</para>
+         <section id="sid-5931328_Marshalling-Example%3AAnImmutableEntitywithaBuilder">
+            <title>Example: An Immutable Entity with a Builder</title>
+            <para>For types with a large number of optional attributes, a builder is often the best approach.</para>
+            <informalexample>
+               <programlisting language="java">@Portable
+public class Person {
+  private final String name;
+  private final int age;
+  
+  private Person(@MapsTo("name") String name, @MapsTo("age") int age) {
+    this.name = name;
+    this.age = age;
+  }
+  
+  public String getName() { 
+    return name;
+  }
+
+  public int getAge() {
+    return age; 
+  }
+
+  @NonPortable
+  public static class Builder {
+    private String name;
+    private int age;
+
+    public Builder name(String name) {
+      this.name = name;
+      return this;
+    }
+
+    public Builder age(int age) {
+      this.age = age;
+      return this;
+    }
+
+    public BuilderEntity build() {
+      return new Person(name, age);
+    }
+  }
+}</programlisting>
+            </informalexample>
             <para>
-            The first approach is the easiest, but is contingent on whether or not the class is directly exposed to the GWT compiler. That means, the classes must be part of a GWT module and within the GWT client packages. See the GWT documentation on
-            <ulink url="http://code.google.com/webtoolkit/doc/latest/DevGuideCodingBasicsClient.html">Client-Side Code</ulink>
-            for information on this.
+            In this example, we have a nested
+            <code>Builder</code>
+            class that implements the Builder Pattern and calls the private
+            <code>Person</code>
+            constructor. Hand-written code will always use the builder to create
+            <code>Person</code>
+            instances, but the
+            <code>@MapsTo</code>
+            annotations on the private
+            <code>Person</code>
+            constructor tell Errai Marshalling to bypass the builder and construct instances of Person directly.
           </para>
-            <section id="sid-5931328_Marshalling-MappingExistingClientClasses">
-               <title>Mapping Existing Client Classes</title>
-               <para>
-              If you have client-exposed classes that cannot be annotated with the
-              <code>@Portable</code>
-              annotation, you may manually map these classes so that the marshaller framework will comprehend and produce marshallers for them.
-            </para>
-               <para>
-              To do this, you may specify them in your
-              <emphasis role="strong">ErraiApp.properties</emphasis>
-              file, using the
-              <code>errai.marshalling.serializableTypes</code>
-              attribute with a whitespace separated list of classes to make portable.
-            </para>
-               <example>
-                  <title>Example ErraiApp.properties defining portable classes.</title>
-                  <programlisting language="ini">errai.marshalling.serializableTypes=org.foo.client.UserEntity \
+            <para>
+            One final note: as a nested type of
+            <code>Person</code>
+            (which is marked
+            <code>@Portable</code>
+            ), the builder itself would normally be portable. However, we do not intend to move instances of
+            <code>Person.Builder</code>
+            across the network, so we mark
+            <code>Person.Builder</code>
+            as
+            <code>@NonPortable</code>
+            .
+          </para>
+         </section>
+      </section>
+      <section id="sid-5931328_Marshalling-ManualMapping">
+         <title>Manual Mapping</title>
+         <para>Some classes may be out of your control, making it impossible to annotate them for auto-discovery by the marshalling framework. For cases such as this, there are two approaches which can be undertaken to include these classes in your application.</para>
+         <para>
+          The first approach is the easiest, but is contingent on whether or not the class is directly exposed to the GWT compiler. That means, the classes must be part of a GWT module and within the GWT client packages. See the GWT documentation on
+          <ulink url="http://code.google.com/webtoolkit/doc/latest/DevGuideCodingBasicsClient.html">Client-Side Code</ulink>
+          for information on this.
+        </para>
+         <section id="sid-5931328_Marshalling-MappingExistingClientClasses">
+            <title>Mapping Existing Client Classes</title>
+            <para>
+            If you have client-exposed classes that cannot be annotated with the
+            <code>@Portable</code>
+            annotation, you may manually map these classes so that the marshaller framework will comprehend and produce marshallers for them and their nested types.
+          </para>
+            <para>
+            To do this, specify them in
+            <emphasis role="strong">ErraiApp.properties</emphasis>
+            , using the
+            <code>errai.marshalling.serializableTypes</code>
+            attribute with a whitespace separated list of classes to make portable.
+          </para>
+            <example>
+               <title>Example ErraiApp.properties defining portable classes.</title>
+               <programlisting language="ini">errai.marshalling.serializableTypes=org.foo.client.UserEntity \
                                     org.foo.client.GroupEntity \
                                     org.abcinc.model.client.Profile</programlisting>
-               </example>
-            </section>
-            <section id="sid-5931328_Marshalling-AliasedMappingsofExistingInterfaceContracts">
-               <title>Aliased Mappings of Existing Interface Contracts</title>
-               <para>
-              The marshalling framework supports and promotes the concept of marshalling by interface contract, where possible. For instance, the framework ships with a marshaller which can marshall data to and from the
-              <code>java.util.List</code>
-              interface. Instead of having custom marshallers for classes such as
-              <code>ArrayList</code>
-              and
-              <code>LinkedList</code>
-              , by default, these implementations are merely aliased to the
-              <code>java.util.List</code>
-              marshaller.
-            </para>
-               <para>
-              There are two distinct ways to go about doing this. The most straightforward is to specify which marshaller to alias when declaring your class is
-              <code>@Portable</code>
-              .
-            </para>
-               <informalexample>
-                  <programlisting language="java">package org.foo.client;
+            </example>
+            <para>If any of the serializable types have nested classes that you wish to make non-portable, you can specify them like this:</para>
+            <example>
+               <title>Example ErraiApp.properties defining nonportable classes.</title>
+               <programlisting language="ini">errai.marshalling.nonserializableTypes=org.foo.client.UserEntity$Builder \
+                                       org.foo.client.GroupEntity$Builder</programlisting>
+            </example>
+         </section>
+         <section id="sid-5931328_Marshalling-AliasedMappingsofExistingInterfaceContracts">
+            <title>Aliased Mappings of Existing Interface Contracts</title>
+            <para>
+            The marshalling framework supports and promotes the concept of marshalling by interface contract, where possible. For instance, the framework ships with a marshaller which can marshall data to and from the
+            <code>java.util.List</code>
+            interface. Instead of having custom marshallers for classes such as
+            <code>ArrayList</code>
+            and
+            <code>LinkedList</code>
+            , by default, these implementations are merely aliased to the
+            <code>java.util.List</code>
+            marshaller.
+          </para>
+            <para>
+            There are two distinct ways to go about doing this. The most straightforward is to specify which marshaller to alias when declaring your class is
+            <code>@Portable</code>
+            .
+          </para>
+            <informalexample>
+               <programlisting language="java">package org.foo.client;
 
 @Portable(aliasOf = java.util.List.class)
 public MyListImpl extends ArrayList {
   // .. //
 }</programlisting>
-               </informalexample>
-               <para>
-              In the case of this example, the marshaller will not attempt to comprehend your class. Instead, it will merely rely on the
-              <code>java.util.List</code>
-              marshaller to dematerialize and serialize instances of this type onto the wire.
-            </para>
-               <para>
-              If for some reason it is not feasible to annotate the class, directly, you may specify the mapping in the
-              <emphasis role="strong">ErraiApp.properties</emphasis>
-              file using the
-              <code>errai.marshalling.mappingAliases</code>
-              attribute.
-            </para>
-               <informalexample>
-                  <programlisting language="ini">errai.marshalling.mappingAliases=org.foo.client.MyListImpl-&gt;java.uti.List \
+            </informalexample>
+            <para>
+            In the case of this example, the marshaller will not attempt to comprehend your class. Instead, it will merely rely on the
+            <code>java.util.List</code>
+            marshaller to dematerialize and serialize instances of this type onto the wire.
+          </para>
+            <para>
+            If for some reason it is not feasible to annotate the class, directly, you may specify the mapping in the
+            <emphasis role="strong">ErraiApp.properties</emphasis>
+            file using the
+            <code>errai.marshalling.mappingAliases</code>
+            attribute.
+          </para>
+            <informalexample>
+               <programlisting language="ini">errai.marshalling.mappingAliases=org.foo.client.MyListImpl-&gt;java.util.List \
                                  org.foo.client.MyMapImpl-&gt;java.util.Map</programlisting>
-               </informalexample>
-               <para>The list of classes is whitespace-separated so that it may be split across lines.</para>
-               <para>
-              The example above shows the equivalent mapping for the
-              <code>MyListImpl</code>
-              class from the previous example, as well as a mapping of a class to the
-              <code>java.util.Map</code>
-              marshaller.
-            </para>
-               <para>
-              The syntax of the mapping is as follows:
-              <code>&lt;class_to_map&gt;</code>
-                  <emphasis role="strong">-&gt;</emphasis>
-                  <code>&lt;contract_to_map_to&gt;</code>
-              .
-            </para>
-               <important>
-                  <title>Aliases do not inherit functionality!</title>
-                  <para>When you alias a class to another marshalling contract, extended functionality of the aliased class will not be available upon deserialization. For this you must provide custom marshallers for those classes.</para>
-               </important>
-            </section>
+            </informalexample>
+            <para>The list of classes is whitespace-separated so that it may be split across lines.</para>
+            <para>
+            The example above shows the equivalent mapping for the
+            <code>MyListImpl</code>
+            class from the previous example, as well as a mapping of a class to the
+            <code>java.util.Map</code>
+            marshaller.
+          </para>
+            <para>
+            The syntax of the mapping is as follows:
+            <code>&lt;class_to_map&gt;</code>
+               <emphasis role="strong">-&gt;</emphasis>
+               <code>&lt;contract_to_map_to&gt;</code>
+            .
+          </para>
+            <important>
+               <title>Aliases do not inherit functionality!</title>
+               <para>When you alias a class to another marshalling contract, extended functionality of the aliased class will not be available upon deserialization. For this you must provide custom marshallers for those classes.</para>
+            </important>
          </section>
       </section>
       <section id="sid-5931328_Marshalling-ManualClassMapping">

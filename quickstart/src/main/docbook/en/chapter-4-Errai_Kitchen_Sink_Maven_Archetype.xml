@@ -16,8 +16,8 @@
     <informalexample>
       <programlisting>mvn archetype:generate \
 -DarchetypeGroupId=org.jboss.errai.archetypes \
--DarchetypeArtifactId=kitchensink-quickstart \
--DarchetypeVersion=2.0.0.Final \
+-DarchetypeArtifactId=jboss-errai-kitchensink-archetype \
+-DarchetypeVersion=2.0.1.Final \
 -DarchetypeRepository=https://repository.jboss.org/nexus/content/groups/public/</programlisting>
     </informalexample>
     <para>Customize the build properties according to your needs.</para>

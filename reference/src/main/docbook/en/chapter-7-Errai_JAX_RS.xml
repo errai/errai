@@ -8,7 +8,6 @@
     </para>
    <section id="sid-9470107">
       <title>Creating Requests</title>
-      <para>The JAX-RS interface needs to be visible to the GWT compiler and should therefore reside within the client packages (e.g. client.shared).</para>
       <para>Assuming the following simple JAX-RS interface should be used:</para>
       <example>
          <title>CustomerService.java</title>
@@ -45,6 +44,9 @@ Button create = new Button("Create", new ClickHandler() {
         <xref linkend="sid-9470124"/>
         .
       </para>
+      <note>
+         <para>The JAX-RS interfaces need to be visible to the GWT compiler and must therefore reside within the client packages (e.g. client.shared).</para>
+      </note>
       <section id="sid-9470107_CreatingRequests-ProxyInjection">
          <title>Proxy Injection</title>
          <para>

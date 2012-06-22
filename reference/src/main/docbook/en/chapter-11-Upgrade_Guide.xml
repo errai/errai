@@ -7,7 +7,7 @@
       .
     </para>
    <section id="sid-21758204">
-      <title>Upgrading from 1.x to 2.0</title>
+      <title>Upgrading from 1.* to 2.0</title>
       <para>
         The first issues that will arise after replacing the jars or after changing the version numbers in the
         <code>pom.xml</code>
@@ -95,7 +95,7 @@
       </itemizedlist>
    </section>
    <section id="sid-24838246">
-      <title>Upgrading from 2.0.Beta to 2.0.CR1 (or Final)</title>
+      <title>Upgrading from 2.0.Beta to 2.0.*.Final</title>
       <para>The following is a list of manual steps that have to be carried out when upgrading from a 2.0.Beta version to 2.0.CR1 or 2.0.Final:</para>
       <itemizedlist>
          <listitem>

@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='utf-8' ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ Copyright 2011 JBoss, by Red Hat, Inc
   ~
@@ -13,13 +13,8 @@
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
-  -->
-
-<!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd" [
-]>
-<section>
-	<title>Document Conventions</title>
-	<para>
+  --><section>
+   <title>Document Conventions</title>
+   <para>
 	</para>
 </section>
-
