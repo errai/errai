@@ -27,7 +27,8 @@ import org.jboss.errai.ioc.client.api.TestOnly;
 @TestOnly @Entity
 @NamedQueries({
   @NamedQuery(name="zentityPrimitiveBoolean", query="SELECT z FROM Zentity z WHERE z.primitiveBool = :b"),
-  @NamedQuery(name="zentityString", query="SELECT z FROM Zentity z WHERE z.string = :s")
+  @NamedQuery(name="zentityString", query="SELECT z FROM Zentity z WHERE z.string = :s"),
+  @NamedQuery(name="zentityLiteralString", query="SELECT z FROM Zentity z WHERE z.string = 'D''oh!'")
 })
 public class Zentity {
 

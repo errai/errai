@@ -16,6 +16,7 @@ import org.hibernate.hql.internal.ast.HqlParser;
 import org.hibernate.hql.internal.ast.HqlSqlWalker;
 import org.hibernate.hql.internal.ast.QueryTranslatorImpl;
 import org.hibernate.hql.internal.ast.tree.DotNode;
+import org.hibernate.hql.internal.ast.tree.LiteralNode;
 import org.hibernate.hql.internal.ast.tree.ParameterNode;
 import org.hibernate.param.NamedParameterSpecification;
 import org.hibernate.param.ParameterSpecification;
@@ -173,6 +174,10 @@ public class TypedQueryFactoryGenerator {
       ParameterNode paramNode = (ParameterNode) ast;
       NamedParameterSpecification namedParamSpec = (NamedParameterSpecification) paramNode.getHqlParameterSpecification();
       return Stmt.loadVariable("query").invoke("getParameterValue", namedParamSpec.getName());
+    case HqlSqlTokenTypes.QUOTED_STRING:
+      LiteralNode literalNode = (LiteralNode) ast;
+      return Stmt.loadLiteral(SqlUtil.parseStringLiteral(literalNode.getText()));
+//      return Stmt.loadLiteral(((StringRepresentableType<?>) literalNode.getDataType()).fromStringValue(literalNode.getText()));
     default:
       throw new UnexpectedTokenException(ast.getType(), "Value expression (attribute reference or named parameter)");
     }

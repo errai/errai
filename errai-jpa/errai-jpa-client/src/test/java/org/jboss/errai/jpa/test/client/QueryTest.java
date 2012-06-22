@@ -177,4 +177,22 @@ public class QueryTest extends GWTTestCase {
     assertEquals(zentityDef.toString(), q.getSingleResult().toString());
   }
 
+  public void testFilterByLiteralString() {
+    EntityManager em = getEntityManagerAndClearStorageBackend();
+
+    Zentity zentity1 = new Zentity();
+    zentity1.setString("D'oh!");
+    em.persist(zentity1);
+
+    Zentity zentity2 = new Zentity();
+    zentity2.setString("def");
+    em.persist(zentity2);
+
+    em.flush();
+
+    TypedQuery<Zentity> q = em.createNamedQuery("zentityLiteralString", Zentity.class);
+
+    assertEquals(zentity1.toString(), q.getSingleResult().toString());
+  }
+
 }
