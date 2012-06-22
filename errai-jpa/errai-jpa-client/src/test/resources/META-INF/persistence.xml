@@ -8,6 +8,7 @@
     <description>Entities that exist in the test directory</description>
     <class>org.jboss.errai.jpa.test.entity.Album</class>
     <class>org.jboss.errai.jpa.test.entity.Artist</class>
+    <class>org.jboss.errai.jpa.test.entity.Genre</class>
     <class>org.jboss.errai.jpa.test.entity.Zentity</class>
 
     <class>org.jboss.errai.jpa.test.entity.EntityWithPrimitiveLongId</class>
