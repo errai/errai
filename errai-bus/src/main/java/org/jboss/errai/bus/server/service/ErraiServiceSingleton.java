@@ -7,29 +7,24 @@ public final class ErraiServiceSingleton {
   private ErraiServiceSingleton() {
   }
 
-  private static ErraiServiceProxy preReferenceProxy;
-  private static ErraiService service;
+  private static final Object monitor = new Object();
+  private static volatile ErraiService service = new ErraiServiceProxy();
 
   public static ErraiService initSingleton(ErraiServiceConfigurator configurator) {
-    if (service != null) throw new IllegalStateException("service already set into singleton");
-    service = ErraiServiceFactory.create(configurator);
-    if (preReferenceProxy != null) {
-      preReferenceProxy.closeProxy(service);
+    synchronized (monitor) {
+      if (isInitialized()) throw new IllegalStateException("service already set into singleton");
+      ErraiServiceProxy proxy = (ErraiServiceProxy) service;
+      service = ErraiServiceFactory.create(configurator);
+      proxy.closeProxy(service);
+      return service;
     }
-    return service;
   }
 
   public static boolean isInitialized() {
-    return service != null;
+    return !(service instanceof ErraiServiceProxy);
   }
 
   public static ErraiService getService() {
-    if (service == null) {
-      if (preReferenceProxy == null) {
-        preReferenceProxy = new ErraiServiceProxy();
-      }
-      return preReferenceProxy;
-    }
     return service;
   }
 }

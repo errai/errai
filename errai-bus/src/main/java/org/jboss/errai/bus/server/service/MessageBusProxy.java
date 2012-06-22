@@ -38,11 +38,11 @@ public class MessageBusProxy implements ServerMessageBus {
   private List<UnsubscribeListener> heldUnsubscribeListener = new ArrayList<UnsubscribeListener>();
   private BusMonitor heldBusMonitor;
 
-  private MessageBus proxied;
-  private boolean proxyClosed;
+  private ServerMessageBus proxied;
+  private volatile boolean proxyClosed;
 
   @Override
-  public void sendGlobal(Message message) {
+  public synchronized void sendGlobal(Message message) {
     Assert.notNull("message cannot be null", message);
 
     if (proxyClosed) {
@@ -54,7 +54,7 @@ public class MessageBusProxy implements ServerMessageBus {
   }
 
   @Override
-  public void send(Message message) {
+  public synchronized void send(Message message) {
     Assert.notNull("message cannot be null", message);
 
     if (proxyClosed) {
@@ -66,7 +66,7 @@ public class MessageBusProxy implements ServerMessageBus {
   }
 
   @Override
-  public void send(Message message, boolean fireListeners) {
+  public synchronized void send(Message message, boolean fireListeners) {
     Assert.notNull("message cannot be null", message);
 
     if (proxyClosed) {
@@ -78,7 +78,7 @@ public class MessageBusProxy implements ServerMessageBus {
   }
 
   @Override
-  public Subscription subscribe(String subject, MessageCallback receiver) {
+  public synchronized Subscription subscribe(String subject, MessageCallback receiver) {
     Assert.notNull("message callback cannot be null", receiver);
 
     if (proxyClosed) {
@@ -96,7 +96,7 @@ public class MessageBusProxy implements ServerMessageBus {
   }
 
   @Override
-  public Subscription subscribeLocal(String subject, MessageCallback receiver) {
+  public synchronized Subscription subscribeLocal(String subject, MessageCallback receiver) {
     Assert.notNull("message callback cannot be null", receiver);
 
     if (proxyClosed) {
@@ -118,12 +118,17 @@ public class MessageBusProxy implements ServerMessageBus {
   }
 
   @Override
-  public boolean isSubscribed(String subject) {
-    return false;
+  public synchronized boolean isSubscribed(String subject) {
+    if (proxyClosed) {
+      return proxied.isSubscribed(subject);
+    }
+    else {
+      return heldSubscribe.containsKey(subject) || heldLocalSubscribe.containsKey(subject);
+    }
   }
 
   @Override
-  public void addGlobalListener(MessageListener listener) {
+  public synchronized void addGlobalListener(MessageListener listener) {
     Assert.notNull("message listener cannot be null", listener);
 
     if (proxyClosed) {
@@ -135,7 +140,7 @@ public class MessageBusProxy implements ServerMessageBus {
   }
 
   @Override
-  public void addSubscribeListener(SubscribeListener listener) {
+  public synchronized void addSubscribeListener(SubscribeListener listener) {
     Assert.notNull("subscribe listener cannot be null", listener);
 
     if (proxyClosed) {
@@ -147,7 +152,7 @@ public class MessageBusProxy implements ServerMessageBus {
   }
 
   @Override
-  public void addUnsubscribeListener(UnsubscribeListener listener) {
+  public synchronized void addUnsubscribeListener(UnsubscribeListener listener) {
     Assert.notNull("unsubscribe listener cannot be null", listener);
 
     if (proxyClosed) {
@@ -159,7 +164,7 @@ public class MessageBusProxy implements ServerMessageBus {
   }
 
   @Override
-  public MessageQueue getQueue(QueueSession session) {
+  public synchronized MessageQueue getQueue(QueueSession session) {
     return null;
   }
 
@@ -189,12 +194,17 @@ public class MessageBusProxy implements ServerMessageBus {
   }
 
   @Override
-  public List<MessageCallback> getReceivers(String subject) {
-    return null;
+  public synchronized List<MessageCallback> getReceivers(String subject) {
+    if (proxyClosed) {
+      return proxied.getReceivers(subject);
+    }
+    else {
+      return new ArrayList<MessageCallback>(heldSubscribe.values());
+    }
   }
 
   @Override
-  public boolean hasRemoteSubscriptions(String subject) {
+  public synchronized boolean hasRemoteSubscriptions(String subject) {
     return false;
   }
 
@@ -227,11 +237,11 @@ public class MessageBusProxy implements ServerMessageBus {
   }
 
   @Override
-  public void attachMonitor(BusMonitor monitor) {
+  public synchronized void attachMonitor(BusMonitor monitor) {
     this.heldBusMonitor = monitor;
   }
 
-  public void closeProxy(MessageBus bus) {
+  public synchronized void closeProxy(ServerMessageBus bus) {
     Assert.notNull("message bus reference cannot be null", bus);
 
     if (proxied != null) {

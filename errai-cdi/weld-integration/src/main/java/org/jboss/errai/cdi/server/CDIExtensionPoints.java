@@ -116,7 +116,6 @@ public class CDIExtensionPoints implements Extension {
 
   private static final String ERRAI_CDI_STANDALONE = "errai.cdi.standalone";
 
-
   static {
     Set<String> veto = new HashSet<String>();
     veto.add(ServerMessageBusImpl.class.getName());
@@ -328,7 +327,7 @@ public class CDIExtensionPoints implements Extension {
   @SuppressWarnings({"UnusedDeclaration", "CdiInjectionPointsInspection"})
   public void afterBeanDiscovery(@Observes AfterBeanDiscovery abd, BeanManager bm) {
     // Errai Service wrapper
-    ErraiService<?> service = ErraiServiceSingleton.getService();
+    final ErraiService<?> service = ErraiServiceSingleton.getService();
 
     final MessageBus bus = service.getBus();
 
@@ -367,6 +366,11 @@ public class CDIExtensionPoints implements Extension {
       abd.addBean(new SenderBean(ms.getSenderType(), ms.getQualifiers(), bus));
     }
 
+    final EventDispatcher eventDispatcher = new EventDispatcher(bm, observableEvents, eventQualifiers);
+
+    // subscribe event dispatcher
+    bus.subscribe(CDI.SERVER_DISPATCHER_SUBJECT, eventDispatcher);
+
     // Errai bus injection
     abd.addBean(new MessageBusBean(bus));
 
@@ -378,11 +382,6 @@ public class CDIExtensionPoints implements Extension {
 
     // subscribe service and rpc endpoints
     subscribeServices(bm, bus);
-
-    EventDispatcher eventDispatcher = new EventDispatcher(bm, observableEvents, eventQualifiers);
-
-    // subscribe event dispatcher
-    bus.subscribe(CDI.SERVER_DISPATCHER_SUBJECT, eventDispatcher);
   }
 
   private class StartupCallback implements Runnable {

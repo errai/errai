@@ -443,7 +443,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
           log.debug("[bus] killed " + killed + " sessions and paged out " + paged + " queues");
         }
 
-
         for (MessageQueue ref : endSessions) {
           for (String subject : new HashSet<String>(ServerMessageBusImpl.this.remoteSubscriptions.keySet())) {
             ServerMessageBusImpl.this.remoteUnsubscribe(ref.getSession(), ref, subject);
