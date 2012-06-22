@@ -45,7 +45,7 @@ import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
  */
 public class DefaultJavaDefinitionMapper {
   public static MappingDefinition map(final MetaClass toMap, final DefinitionsFactory definitionsFactory) {
-    if (toMap.isAbstract() || toMap.isInterface())  {
+    if (toMap.isAbstract() || toMap.isInterface()) {
       throw new RuntimeException("cannot marshal an abstract class or interface: " + toMap.getFullyQualifiedName());
     }
 
@@ -53,10 +53,10 @@ public class DefaultJavaDefinitionMapper {
       return definitionsFactory.getDefinition(toMap.asBoxed());
     }
 
-    Set<MetaConstructor> constructors = new HashSet<MetaConstructor>();
+    final Set<MetaConstructor> constructors = new HashSet<MetaConstructor>();
 
-    SimpleConstructorMapping simpleConstructorMapping = new SimpleConstructorMapping();
-    MappingDefinition definition = new MappingDefinition(toMap, false);
+    final SimpleConstructorMapping simpleConstructorMapping = new SimpleConstructorMapping();
+    final MappingDefinition definition = new MappingDefinition(toMap, false);
 
     for (MetaConstructor c : toMap.getDeclaredConstructors()) {
       if (c.getParameters().length != 0) {
@@ -190,7 +190,7 @@ public class DefaultJavaDefinitionMapper {
                 || field.isTransient() || field.isStatic()) {
           continue;
         }
-        
+
         Field fld = field.asField();
         if (fld != null) {
           fld.setAccessible(true);

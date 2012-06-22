@@ -31,9 +31,9 @@ import org.jboss.errai.codegen.util.ClassChangeUtil;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.rebind.ClassListReader;
 import org.jboss.errai.common.rebind.EnvUtil;
+import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 import org.jboss.errai.marshalling.server.MappingContextSingleton;
 import org.jboss.errai.marshalling.server.ServerMappingContext;
-import org.jboss.errai.marshalling.server.util.ServerMarshallUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -217,6 +217,7 @@ public class MarshallersGenerator extends Generator {
       logger.log(TreeLogger.INFO, "Generating Marshallers Bootstrapper...");
 
       GWTUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
+      DefinitionsFactorySingleton.get().resetDefinitionsAndReload();
 
       // Generate class source code
       generateMarshallerBootstrapper(logger, context);
@@ -249,7 +250,7 @@ public class MarshallersGenerator extends Generator {
     synchronized (generatorLock) {
       boolean junitOrDevMode = !EnvUtil.isProdMode();
 
-      if (SERVER_MARSHALLER_OUTPUT_ENABLED) {
+      if (SERVER_MARSHALLER_OUTPUT_ENABLED && MarshallingGenUtil.isUseStaticMarshallers()) {
 
         String serverSideClass;
         if (!junitOrDevMode && _serverMarshallerCache != null) {

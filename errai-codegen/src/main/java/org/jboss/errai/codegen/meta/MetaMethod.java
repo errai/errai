@@ -66,6 +66,20 @@ public abstract class MetaMethod implements MetaClassMember, MetaGenericDeclarat
   }
 
   public Method asMethod() {
-    throw new UnsupportedOperationException();
+    try {
+      final Class cls = Class.forName(getDeclaringClass().getFullyQualifiedName());
+      final Class[] parms = MetaClassFactory.asClassArray(getParameters());
+
+      for (Method m : cls.getDeclaredMethods()) {
+        if (Arrays.equals(parms, m.getParameterTypes())) {
+          return m;
+        }
+      }
+      return null;
+    }
+    catch (Throwable t) {
+      return null;
+    }
+
   }
 }

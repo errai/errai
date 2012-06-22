@@ -118,5 +118,5 @@ public interface DefinitionsFactory {
    */
   Collection<MappingDefinition> getMappingDefinitions();
 
-  void deleteAllDefinitions();
+  void resetDefinitionsAndReload();
 }

@@ -16,22 +16,8 @@
 
 package org.jboss.errai.marshalling.rebind;
 
-import static org.jboss.errai.common.rebind.EnvUtil.getEnvironmentConfig;
-import static org.jboss.errai.common.rebind.EnvUtil.isDevMode;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
-import org.jboss.errai.codegen.meta.impl.java.JavaReflectionClass;
 import org.jboss.errai.common.client.api.annotations.Portable;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.ScannerSingleton;
@@ -40,7 +26,6 @@ import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.exceptions.InvalidMappingException;
-import org.jboss.errai.marshalling.client.util.MarshallUtil;
 import org.jboss.errai.marshalling.rebind.api.CustomMapping;
 import org.jboss.errai.marshalling.rebind.api.InheritedMappings;
 import org.jboss.errai.marshalling.rebind.api.impl.defaultjava.DefaultJavaDefinitionMapper;
@@ -53,6 +38,18 @@ import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleConstructorMappin
 import org.jboss.errai.marshalling.server.marshallers.DefaultDefinitionMarshaller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static org.jboss.errai.common.rebind.EnvUtil.getEnvironmentConfig;
 
 /**
  * The default implementation of {@link DefinitionsFactory}. This implementation covers the detection and
@@ -282,7 +279,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
         aliasToMarshaller.put(mappedClass, portable.aliasOf());
       }
       else if (!hasDefinition(mappedClass)) {
-        MappingDefinition def = DefaultJavaDefinitionMapper.map(JavaReflectionClass.newUncachedInstance(mappedClass),
+        MappingDefinition def = DefaultJavaDefinitionMapper.map(MetaClassFactory.get(mappedClass),
                 this);
         def.setMarshallerInstance(new DefaultDefinitionMarshaller(def));
         addDefinition(def);
@@ -298,7 +295,7 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
     for (MetaClass enumType : enums) {
       if (!hasDefinition(enumType)) {
         MappingDefinition enumDef = DefaultJavaDefinitionMapper
-                .map(JavaReflectionClass.newUncachedInstance(enumType.asClass()), this);
+                .map(MetaClassFactory.get(enumType.asClass()), this);
         enumDef.setMarshallerInstance(new DefaultDefinitionMarshaller(enumDef));
         addDefinition(enumDef);
         exposedClasses.add(enumType.asClass());
@@ -466,10 +463,11 @@ public class DefinitionsFactoryImpl implements DefinitionsFactory {
   }
 
   @Override
-  public void deleteAllDefinitions() {
+  public void resetDefinitionsAndReload() {
     this.exposedClasses.clear();
     this.mappingAliases.clear();
     this.MAPPING_DEFINITIONS.clear();
+    loadCustomMappings();
   }
 }
 

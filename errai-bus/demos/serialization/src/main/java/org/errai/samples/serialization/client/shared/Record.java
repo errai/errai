@@ -28,7 +28,6 @@ public class Record {
   private Date accountOpened;
   private RecordType type;
 
-
   private Set<Item> stuff;
   private Map<String, String> properties;
 

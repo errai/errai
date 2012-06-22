@@ -51,7 +51,6 @@ public class MarshallerFramework implements EntryPoint {
     InitVotes.voteFor(MarshallerFramework.class);
   }
 
-
   @Override
   public void onModuleLoad() {
   }
@@ -81,7 +80,6 @@ public class MarshallerFramework implements EntryPoint {
       });
     }
   }
-
 
   public static class JSONMarshallingSession extends AbstractMarshallingSession {
 

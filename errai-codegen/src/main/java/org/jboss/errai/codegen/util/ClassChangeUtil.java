@@ -98,9 +98,10 @@ public class ClassChangeUtil {
 
 
   public static String compileClass(String sourcePath, String packageName, String className, String outputPath) {
+    new Throwable().printStackTrace();
+
     try {
       File inFile = new File(sourcePath + File.separator + className + ".java");
-      //  File outFile = new File(sourcePath + File.separator + className + ".class");
 
       ByteArrayOutputStream errorOutputStream = new ByteArrayOutputStream();
       JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
