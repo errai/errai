@@ -92,7 +92,8 @@ public abstract class ServerMarshallUtil {
                   .asSubclass(MarshallerFactory.class);
         }
         catch (ClassNotFoundException e) {
-          log.warn("could not locate marshaller class. will attempt dynamic generation.");
+          log.warn("could not locate marshaller class.");
+          return null;
         }
       }
       else {

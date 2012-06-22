@@ -90,6 +90,11 @@ public class MappingContextSingleton {
   public static ServerMappingContext loadPrecompiledMarshallers() throws Exception {
 
     Object o = ServerMarshallUtil.getGeneratedMarshallerFactoryForServer().newInstance();
+
+    if (o == null) {
+      return loadDynamicMarshallers();
+    }
+
     final MarshallerFactory marshallerFactory = (MarshallerFactory) o;
 
     return new ServerMappingContext() {
