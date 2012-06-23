@@ -42,15 +42,17 @@ import org.jboss.errai.bus.server.service.ErraiServiceSingleton;
 public class ErraiServiceBean implements Bean {
 
   final InjectionTarget it;
+  final String name;
 
   @SuppressWarnings("unchecked")
-  public ErraiServiceBean(BeanManager bm) {
+  public ErraiServiceBean(BeanManager bm, String name) {
 
     //use this to read annotations of the class
     AnnotatedType at = bm.createAnnotatedType(ErraiServiceImpl.class);
 
     //use this to create the class and inject dependencies
     this.it = bm.createInjectionTarget(at);
+    this.name = name;
   }
 
   public Class<?> getBeanClass() {
@@ -63,7 +65,7 @@ public class ErraiServiceBean implements Bean {
   }
 
   public String getName() {
-    return "Errai";
+    return "ErraiServiceBean" + name;
   }
 
   public Set<Annotation> getQualifiers() {
