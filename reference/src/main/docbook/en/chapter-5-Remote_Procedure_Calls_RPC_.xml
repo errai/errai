@@ -106,7 +106,7 @@ private Caller&lt;MyRemoteService&gt; remoteService;</programlisting>
       </informalexample>
       <para>
         As remote exceptions need to be serialized to be sent to the client, the
-        <code>@ExposeEntity</code>
+        <code>@Portable</code>
         annotation needs to be present on the corresponding exception class (see
         <xref linkend="sid-5931328"/>
         ). Further the exception class needs to be part of the client-side code. For more details on
@@ -119,9 +119,9 @@ private Caller&lt;MyRemoteService&gt; remoteService;</programlisting>
    <section id="sid-5931313_RemoteProcedureCalls%28RPC%29-SessionandrequestobjectsinRPCendpoints">
       <title>Session and request objects in RPC endpoints</title>
       <para>
-        Before invoking an endpoint method, Errai sets up an
+        Before invoking an endpoint method Errai sets up an
         <code>RpcContext</code>
-        that provides access to message resources otherwise not visible to RPC endpoints.
+        that provides access to message resources that are otherwise not visible to RPC endpoints.
       </para>
       <informalexample>
          <programlisting language="java">@Service

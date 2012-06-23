@@ -9,6 +9,19 @@
       specification for in-client component wiring.
     </para>
    <para>Dependency injection (DI) allows for cleaner and more modular code, by permitting the implementation of decoupled and type-safe components. By using DI, components do not need to be aware of the implementation of provided services. Instead, they merely declare a contract with the container, which in turn provides instances of the services that component depends on.</para>
+   <note>
+      <title>Classpath Scanning and ErraiApp.properties</title>
+      <para>
+        Errai only scans the contents of classpath locations (JARs and directories) that have
+        <link linkend="sid-5931354">
+          a file called
+          <code>ErraiApp.properties</code>
+        </link>
+        at their root. If dependency injection is not working for you, double-check that you have an
+        <code>ErraiApp.properties</code>
+        in every JAR and directory that contains classes Errai should know about.
+      </para>
+   </note>
    <para>A simple example:</para>
    <informalexample>
       <programlisting language="java">public class MyLittleClass {

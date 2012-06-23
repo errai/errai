@@ -176,4 +176,8 @@ public class CDIServletStateListener extends ForwardingServletListener {
     return weldListener;
   }
 
+  private void attachErraiBus() {
+
+  }
+
 }

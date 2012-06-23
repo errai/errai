@@ -47,6 +47,7 @@ import static java.util.Collections.unmodifiableSet;
 public class ErraiServiceBean implements Bean {
 
   final InjectionTarget it;
+  final String name;
 
   static final Set<Annotation> qualifiers = unmodifiableSet(new HashSet<Annotation>(
           asList(new AnnotationLiteral<Default>() {
@@ -59,13 +60,14 @@ public class ErraiServiceBean implements Bean {
           asList(ErraiService.class, Object.class)));
 
   @SuppressWarnings("unchecked")
-  public ErraiServiceBean(final BeanManager bm) {
+  public ErraiServiceBean(BeanManager bm, String name) {
 
     //use this to read annotations of the class
     AnnotatedType at = bm.createAnnotatedType(ErraiServiceImpl.class);
 
     //use this to create the class and inject dependencies
     this.it = bm.createInjectionTarget(at);
+    this.name = name;
   }
 
   public Class<?> getBeanClass() {
@@ -78,7 +80,7 @@ public class ErraiServiceBean implements Bean {
   }
 
   public String getName() {
-    return "Errai";
+    return "ErraiServiceBean" + name;
   }
 
   public Set<Annotation> getQualifiers() {

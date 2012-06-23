@@ -132,7 +132,7 @@ public class HelloWorldService implements MessageCallback {
   private RequestDispatcher dispatcher;
 
   @Inject
-  public HelloWorldService(RequestDispatcher disaptcher) {
+  public HelloWorldService(RequestDispatcher dispatcher) {
     dispatcher = dispatcher;
   }
 

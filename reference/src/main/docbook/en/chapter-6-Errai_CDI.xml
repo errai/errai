@@ -11,6 +11,21 @@
         ), which itself implements the JSR-330 specification. Inclusion of the CDI module your GWT project will result in the extensions automatically being loaded and made available to your application.
       </para>
    </important>
+   <note>
+      <title>Classpath Scanning and ErraiApp.properties</title>
+      <para>
+        Errai CDI only scans the contents of classpath locations (JARs and directories) that have
+        <link linkend="sid-5931354">
+          a file called
+          <code>ErraiApp.properties</code>
+        </link>
+        at their root. If CDI features such as dependency injection, event observation, and
+        <code>@PostConstruct</code>
+        are not working for your classes, double-check that you have an
+        <code>ErraiApp.properties</code>
+        in every JAR and directory that contains classes Errai should know about.
+      </para>
+   </note>
    <section id="sid-5931498">
       <title>Features and Limitations</title>
       <para>Beans that are deployed to a CDI container will automatically be registered with Errai and exposed to your GWT client application. So, you can use Errai to communicate between your GWT client components and your CDI backend beans.</para>
@@ -55,6 +70,20 @@
             will be considered equivalent in the client).
           </para>
          </listitem>
+         <listitem>
+            <para>
+            The
+            <code>@Interceptor</code>
+            annotation is unsupported.
+          </para>
+         </listitem>
+         <listitem>
+            <para>
+            The
+            <code>@Decorator</code>
+            annotation is unsupported.
+          </para>
+         </listitem>
       </orderedlist>
       <section id="sid-5931498_FeaturesandLimitations-Otherfeatures">
          <title>Other features</title>
@@ -83,7 +112,7 @@
   private Event&lt;AccountActivity&gt; event; (1)
 
   private HTML responsePanel;
-  
+
   public FraudClient() {
     super(new BoxLayout(BoxLayout.Orientation.VERTICAL));
   }
@@ -133,7 +162,7 @@
          <title>AccountService.java</title>
          <programlisting language="java">@ApplicationScoped
 public class AccountService {
-  
+
   @Inject @Detected
   private Event&lt;Fraud&gt; event;
 
@@ -154,7 +183,7 @@ public class AccountService {
             <title>SubscriptionService.java</title>
             <programlisting language="java">@ApplicationScoped
 public class SubscriptionService {
-  
+
   @Inject
   private Event&lt;Documents&gt; welcomeEvent;
 
@@ -297,7 +326,7 @@ public class MyClientBean {
          <title>App.java</title>
          <programlisting language="java">@EntryPoint
 public class App {
-  ...
+  ...
 
   @Produces @Supported
   private MyBaseWidget createWidget() {
@@ -309,7 +338,7 @@ public class App {
          <title>MyComposite.java</title>
          <programlisting language="java">@ApplicationScoped
 public class MyComposite extends Composite {
-  
+
   @Inject @Supported
   private MyBaseWidget widget;
 
@@ -383,7 +412,7 @@ public class MyComposite extends Composite {
   &lt;listener&gt;
     &lt;listener-class&gt;org.jboss.errai.container.CDIServletStateListener&lt;/listener-class&gt;
   &lt;/listener&gt;
- 
+
   &lt;resource-env-ref&gt;
     &lt;description&gt;Object factory for the CDI Bean Manager&lt;/description&gt;
     &lt;resource-env-ref-name&gt;BeanManager&lt;/resource-env-ref-name&gt;
@@ -414,16 +443,6 @@ public class MyComposite extends Composite {
           <code>java:/BeanManager</code>
           ).
         </para>
-      </section>
-      <section id="sid-5931501_DeployingErraiCDI-ConfigurationOptions">
-         <title>Configuration Options</title>
-         <para>
-          Since the discovery of service implementations (beans) is delegated to the CDI container, we need to disable Errai's own service discovery mechanism. In order to do so, simply turn off the auto-discovery feature in
-          <code>ErraiService.properties</code>
-        </para>
-         <informalexample>
-            <programlisting language="java">errai.auto_discover_services=false</programlisting>
-         </informalexample>
       </section>
    </section>
 </chapter>
