@@ -17,6 +17,7 @@
 package org.jboss.errai.codegen.meta;
 
 import java.lang.reflect.Constructor;
+import java.util.Arrays;
 
 public abstract class MetaConstructor extends MetaMethod implements MetaClassMember, MetaGenericDeclaration {
   public abstract MetaParameter[] getParameters();
@@ -26,6 +27,19 @@ public abstract class MetaConstructor extends MetaMethod implements MetaClassMem
   public abstract boolean isVarArgs();
 
   public Constructor asConstructor() {
-    throw new UnsupportedOperationException();
+    try {
+      final Class cls = Class.forName(getDeclaringClass().getFullyQualifiedName());
+      final Class[] parms = MetaClassFactory.asClassArray(getParameters());
+
+      for (Constructor constructor : cls.getDeclaredConstructors()) {
+        if (Arrays.equals(parms, constructor.getParameterTypes())) {
+          return constructor;
+        }
+      }
+      return null;
+    }
+    catch (Throwable t) {
+      return null;
+    }
   }
 }

@@ -170,8 +170,10 @@ public abstract class Marshalling {
     return fromJSON(json, Object.class);
   }
 
-  private static boolean needsQualification(Object o) {
-    return (o instanceof Number && o.getClass().getName().startsWith("java.lang.") && !(o instanceof Long))
-            || o instanceof Boolean || o instanceof Character;
+  public static boolean needsQualification(Object o) {
+    return (o instanceof Number && o.getClass().getName().startsWith("java.lang.")
+            && !(o instanceof Long))
+            || o instanceof Boolean
+            || o instanceof Character;
   }
 }

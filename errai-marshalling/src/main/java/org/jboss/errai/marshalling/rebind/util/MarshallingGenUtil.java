@@ -34,7 +34,8 @@ import org.jboss.errai.common.rebind.EnvUtil;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class MarshallingGenUtil {
-  private static final String FORCE_STATIC_MARSHALLERS = "errai.marshalling.use_static_marshallers";
+  private static final String USE_STATIC_MARSHALLERS = "errai.marshalling.use_static_marshallers";
+  private static final String FORCE_STATIC_MARSHALLERS = "errai.marshalling.force_static_marshallers";
 
   public static String getVarName(final MetaClass clazz) {
     return clazz.isArray()
@@ -174,6 +175,22 @@ public class MarshallingGenUtil {
   }
 
   public static boolean isUseStaticMarshallers() {
+    if (isForceStaticMarshallers()) return true;
+
+    if (System.getProperty(USE_STATIC_MARSHALLERS) != null) {
+      return Boolean.getBoolean(USE_STATIC_MARSHALLERS);
+    }
+
+    final Map<String, String> frameworkProperties = EnvUtil.getEnvironmentConfig().getFrameworkProperties();
+    if (frameworkProperties.containsKey(USE_STATIC_MARSHALLERS)) {
+      return "true".equals(frameworkProperties.get(USE_STATIC_MARSHALLERS));
+    }
+    else {
+      return true;
+    }
+  }
+
+  public static boolean isForceStaticMarshallers() {
     if (System.getProperty(FORCE_STATIC_MARSHALLERS) != null) {
       return Boolean.getBoolean(FORCE_STATIC_MARSHALLERS);
     }

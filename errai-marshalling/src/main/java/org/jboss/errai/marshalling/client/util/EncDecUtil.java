@@ -19,6 +19,7 @@ package org.jboss.errai.marshalling.client.util;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.jboss.errai.marshalling.client.Marshalling;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.marshallers.QualifyingMarshallerWrapper;
@@ -41,7 +42,7 @@ public class EncDecUtil {
       
       if (elem != null) {
         Marshaller<Object> marshaller;
-        if (elem instanceof Number || elem instanceof Boolean || elem instanceof Character) {
+        if (Marshalling.needsQualification(elem)) {
           marshaller = MarshallUtil.getQualifiedNumberMarshaller(elem);
         }
         else {

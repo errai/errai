@@ -30,6 +30,7 @@ import org.jboss.errai.common.client.protocols.MessageParts;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -57,7 +58,7 @@ public class DefaultRemoteCallBuilder {
   }
 
   public <T, R> T call(final RemoteCallback<R> callback, final ErrorCallback errorCallback, final Class<T> remoteService) {
-    T svc = proxyFactory.getRemoteProxy(remoteService);
+    final T svc = proxyFactory.getRemoteProxy(remoteService);
     ((RpcStub) svc).setRemoteCallback(callback);
     ((RpcStub) svc).setErrorCallback(errorCallback);
     return svc;
@@ -169,7 +170,7 @@ public class DefaultRemoteCallBuilder {
 
           message.set("Qualifiers", qualNames);
         }
-        if (args != null) message.set("MethodParms", args);
+        if (args != null) message.set("MethodParms", Arrays.asList(args));
 
         return respondDef;
       }
@@ -178,7 +179,7 @@ public class DefaultRemoteCallBuilder {
       public RemoteCallResponseDef endpoint(String endPointName, Object[] args) {
         message.command(endPointName);
         if (args != null)
-          message.set("MethodParms", args);
+          message.set("MethodParms", Arrays.asList(args));
         return respondDef;
       }
     };

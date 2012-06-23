@@ -71,7 +71,7 @@ public abstract class MetaMethod implements MetaClassMember, MetaGenericDeclarat
       final Class[] parms = MetaClassFactory.asClassArray(getParameters());
 
       for (Method m : cls.getDeclaredMethods()) {
-        if (Arrays.equals(parms, m.getParameterTypes())) {
+        if (m.getName().equals(getName()) && Arrays.equals(parms, m.getParameterTypes())) {
           return m;
         }
       }
@@ -80,6 +80,5 @@ public abstract class MetaMethod implements MetaClassMember, MetaGenericDeclarat
     catch (Throwable t) {
       return null;
     }
-
   }
 }

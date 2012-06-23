@@ -17,6 +17,7 @@
 package org.jboss.errai.marshalling.client.marshallers;
 
 import org.jboss.errai.common.client.protocols.MessageParts;
+import org.jboss.errai.marshalling.client.Marshalling;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
@@ -64,7 +65,7 @@ public class ErraiProtocolEnvelopeMarshaller implements Marshaller<Map<String, O
 
   @Override
   public String marshall(Map<String, Object> o, MarshallingSession ctx) {
-    StringBuilder buf = new StringBuilder();
+    final StringBuilder buf = new StringBuilder();
 
     buf.append("{");
     Object key, val;
@@ -79,16 +80,14 @@ public class ErraiProtocolEnvelopeMarshaller implements Marshaller<Map<String, O
         buf.append(",");
       }
 
-      Marshaller<Object> valueMarshaller;
+      final Marshaller<Object> valueMarshaller;
       buf.append("\"" + key + "\"").append(":");
 
       if (val == null) {
         buf.append("null");
       }
       else {
-        if ((val instanceof Number && !(val instanceof BigInteger || val instanceof BigDecimal))
-                || val instanceof Boolean || val instanceof Character) {
-
+        if (Marshalling.needsQualification(val)) {
           valueMarshaller = MarshallUtil.getQualifiedNumberMarshaller(val);
         }
         else {

@@ -34,6 +34,7 @@ import org.jboss.errai.marshalling.client.api.MarshallerFactory;
 import org.jboss.errai.marshalling.rebind.MarshallerGeneratorFactory;
 import org.jboss.errai.marshalling.rebind.MarshallerOuputTarget;
 import org.jboss.errai.marshalling.rebind.MarshallersGenerator;
+import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 import org.slf4j.Logger;
 
 /**
@@ -93,7 +94,12 @@ public abstract class ServerMarshallUtil {
         }
         catch (ClassNotFoundException e) {
           log.warn("could not locate marshaller class.");
-          return null;
+          if (!MarshallingGenUtil.isForceStaticMarshallers()) {
+            return null;
+          }
+          else {
+            log.info("couldn't find marshaller class, attempting to generate ...");
+          }
         }
       }
       else {
@@ -125,7 +131,7 @@ public abstract class ServerMarshallUtil {
 
       directory.mkdirs();
 
-      FileOutputStream outputStream = new FileOutputStream(sourceFile);
+      final FileOutputStream outputStream = new FileOutputStream(sourceFile);
 
       outputStream.write(classStr.getBytes("UTF-8"));
       outputStream.flush();

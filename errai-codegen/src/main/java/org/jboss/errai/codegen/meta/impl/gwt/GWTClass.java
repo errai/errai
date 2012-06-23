@@ -154,7 +154,17 @@ public class GWTClass extends AbstractMetaClass<JType> {
 
   @Override
   public String getFullyQualifiedName() {
-    return getEnclosedMetaObject().getQualifiedBinaryName();
+    if (isArray()) {
+      if (getOuterComponentType().isPrimitive()) {
+        return getInternalName();
+      }
+      else {
+        return getInternalName().replaceAll("/", "\\.");
+      }
+    }
+    else {
+      return getEnclosedMetaObject().getQualifiedBinaryName();
+    }
   }
 
   @Override

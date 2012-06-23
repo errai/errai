@@ -22,15 +22,16 @@ import org.jboss.errai.bus.client.api.base.MessageDeliveryFailure;
 import org.mvel2.DataConversion;
 
 import java.lang.reflect.Method;
+import java.util.List;
 
 /**
  * <tt>EndpointCallback</tt> is a callback function for a message being sent. It invokes the endpoint function
  * specified
  */
 public class EndpointCallback implements MessageCallback {
-  private Object genericSvc;
-  private Class[] targetTypes;
-  private Method method;
+  private final Object genericSvc;
+  private final Class[] targetTypes;
+  private final Method method;
 
   /**
    * Initializes the service and endpoint method
@@ -38,7 +39,7 @@ public class EndpointCallback implements MessageCallback {
    * @param genericSvc - the service that delivers the message
    * @param method     - the endpoint function
    */
-  public EndpointCallback(Object genericSvc, Method method) {
+  public EndpointCallback(final Object genericSvc, final Method method) {
     this.genericSvc = genericSvc;
     this.targetTypes = (this.method = method).getParameterTypes();
   }
@@ -49,16 +50,18 @@ public class EndpointCallback implements MessageCallback {
    * @param message - the message
    */
   public void callback(Message message) {
-    Object[] parms = message.get(Object[].class, "MethodParms");
+    List<Object> parms = message.get(List.class, "MethodParms");
 
-    if ((parms == null && targetTypes.length != 0) || (parms.length != targetTypes.length)) {
+    if ((parms == null && targetTypes.length != 0) || (parms.size() != targetTypes.length)) {
       throw new MessageDeliveryFailure("wrong number of arguments sent to endpoint. (received: "
-          + (parms == null ? 0 : parms.length) + "; required: " + targetTypes.length + ")");
+              + (parms == null ? 0 : parms.size()) + "; required: " + targetTypes.length + ")");
     }
-    for (int i = 0; i < parms.length; i++) {
-      if (parms[i] != null && !targetTypes[i].isAssignableFrom(parms[i].getClass())) {
-        if (DataConversion.canConvert(targetTypes[i], parms[i].getClass())) {
-          parms[i] = DataConversion.convert(parms[i], targetTypes[i]);
+    for (int i = 0; i < parms.size(); i++) {
+      Object p = parms.get(i);
+
+      if (p != null && !targetTypes[i].isAssignableFrom(p.getClass())) {
+        if (DataConversion.canConvert(targetTypes[i], p.getClass())) {
+          p = DataConversion.convert(p, targetTypes[i]);
         }
         else {
           throw new MessageDeliveryFailure("type mismatch in method parameters");
