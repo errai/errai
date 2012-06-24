@@ -22,9 +22,11 @@ import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.core.ext.UnableToCompleteException;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
+import org.jboss.errai.codegen.util.ClassScanner;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.common.rebind.EnvUtil;
 
+import javax.enterprise.context.ApplicationScoped;
 import java.io.PrintWriter;
 
 /**
@@ -58,6 +60,10 @@ public class IOCGenerator extends Generator {
       logger.log(TreeLogger.INFO, "Generating Extensions Bootstrapper...");
 
       GWTUtil.populateMetaClassFactoryFromTypeOracle(context, logger);
+
+      ClassScanner.getTypesAnnotatedWith(ApplicationScoped.class);
+
+
 
       // Generate class source code
       generateIOCBootstrapClass(logger, context);

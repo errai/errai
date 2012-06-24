@@ -46,6 +46,7 @@ import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -506,5 +507,9 @@ public final class MetaClassFactory {
   public static void emptyCache() {
     PRIMARY_CLASS_CACHE.clear();
     ERASED_CLASS_CACHE.clear();
+  }
+
+  public static Collection<MetaClass> getAllCachedClasses() {
+    return Collections.unmodifiableCollection(PRIMARY_CLASS_CACHE.values());
   }
 }

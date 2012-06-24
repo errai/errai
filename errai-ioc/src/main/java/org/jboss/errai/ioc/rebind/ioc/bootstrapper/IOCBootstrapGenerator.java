@@ -34,7 +34,6 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.impl.build.BuildMetaClass;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTClass;
 import org.jboss.errai.codegen.meta.impl.gwt.GWTUtil;
-import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.codegen.util.Implementations;
 import org.jboss.errai.codegen.util.PrivateAccessType;
 import org.jboss.errai.codegen.util.PrivateAccessUtil;
@@ -60,13 +59,9 @@ import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadataFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.NormalScope;
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.context.SessionScoped;
 import javax.enterprise.inject.Alternative;
-import javax.enterprise.inject.Default;
 import javax.inject.Inject;
 import javax.inject.Scope;
 import javax.inject.Singleton;
@@ -76,13 +71,11 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import static java.util.Collections.unmodifiableSet;
 import static org.jboss.errai.codegen.util.Stmt.declareVariable;
 import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 
@@ -94,7 +87,7 @@ import static org.jboss.errai.codegen.util.Stmt.loadVariable;
 public class IOCBootstrapGenerator {
   private final GeneratorContext context;
 
-  private final Collection<String> packages;
+  private final Set<String> packages;
   private final boolean useReflectionStubs;
 
   private final List<Class<?>> beforeTasks = new ArrayList<Class<?>>();
@@ -112,7 +105,7 @@ public class IOCBootstrapGenerator {
 
   public IOCBootstrapGenerator(GeneratorContext context,
                                TreeLogger logger,
-                               Collection<String> packages,
+                               Set<String> packages,
                                boolean useReflectionStubs) {
     this.context = context;
     this.logger = logger;

@@ -19,7 +19,6 @@ package org.jboss.errai.ioc.rebind.ioc.bootstrapper;
 import com.google.gwt.core.ext.GeneratorContext;
 import com.google.gwt.core.ext.TreeLogger;
 import com.google.gwt.user.rebind.SourceWriter;
-
 import org.jboss.errai.codegen.Context;
 import org.jboss.errai.codegen.Statement;
 import org.jboss.errai.codegen.Variable;
@@ -35,7 +34,6 @@ import org.jboss.errai.ioc.rebind.ioc.metadata.JSR330QualifyingMetadataFactory;
 import org.jboss.errai.ioc.rebind.ioc.metadata.QualifyingMetadataFactory;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -46,7 +44,7 @@ import java.util.Stack;
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class IOCProcessingContext {
-  protected final Collection<String> packages;
+  protected final Set<String> packages;
 
   protected final Context context;
   protected final BuildMetaClass bootstrapClass;
@@ -89,7 +87,7 @@ public class IOCProcessingContext {
     private Context context;
     private BuildMetaClass bootstrapClassInstance;
     private BlockBuilder<?> blockBuilder;
-    private Collection<String> packages;
+    private Set<String> packages;
     private QualifyingMetadataFactory qualifyingMetadataFactory;
 
     public static Builder create() {
@@ -126,7 +124,7 @@ public class IOCProcessingContext {
       return this;
     }
 
-    public Builder packages(Collection<String> packages) {
+    public Builder packages(Set<String> packages) {
       this.packages = packages;
       return this;
     }
@@ -196,7 +194,7 @@ public class IOCProcessingContext {
     return context;
   }
 
-  public Collection<String> getPackages() {
+  public Set<String> getPackages() {
     return packages;
   }
 

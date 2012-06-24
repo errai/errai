@@ -39,7 +39,9 @@ import org.junit.runners.ParentRunner;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -226,7 +228,7 @@ public class IOCSimulatedTestRunner extends ParentRunner<Runner> {
           public void bootstrap() {
             try {
               String rootPackage = iocClientTestCase.getModulePackage();
-              List<String> packages = new ArrayList<String>();
+              Set<String> packages = new HashSet<String>();
               for (Package p : Package.getPackages()) {
                 String packageName = p.getName();
                 if (packageName.startsWith(rootPackage)) {
@@ -234,7 +236,7 @@ public class IOCSimulatedTestRunner extends ParentRunner<Runner> {
                 }
               }
 
-            packages.add("org.jboss.errai.ioc.client.api.builtin");
+              packages.add("org.jboss.errai.ioc.client.api.builtin");
 
               MockIOCGenerator mockIOCGenerator = new MockIOCGenerator(packages);
 

@@ -25,6 +25,7 @@ import org.jboss.errai.codegen.meta.MetaMethod;
 import org.jboss.errai.codegen.meta.MetaParameter;
 import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
+import org.jboss.errai.codegen.util.ClassScanner;
 import org.jboss.errai.common.metadata.MetaDataScanner;
 import org.jboss.errai.common.metadata.RebindUtils;
 import org.jboss.errai.ioc.client.api.ContextualTypeProvider;
@@ -357,15 +358,15 @@ public class IOCProcessorFactory {
 
           switch (elementType) {
             case TYPE: {
-              final Set<Class<?>> classes;
+              final Set<MetaClass> classes;
               if (entry.handler instanceof ProvidedClassAnnotationHandler) {
                 classes = ((ProvidedClassAnnotationHandler) entry.handler).getClasses();
               }
               else {
-                classes = scanner.getTypesAnnotatedWith(annoClass, context.getPackages());
+                classes = ClassScanner.getTypesAnnotatedWith(annoClass, context.getPackages());
               }
 
-              for (final Class<?> clazz : classes) {
+              for (final MetaClass clazz : classes) {
                 handleType(entry, dependencyControl, clazz, annoClass, context);
               }
             }
@@ -431,13 +432,12 @@ public class IOCProcessorFactory {
   @SuppressWarnings("unchecked")
   private void handleType(final ProcessingEntry entry,
                           final DependencyControl dependencyControl,
-                          final Class<?> clazz,
+                          final MetaClass type,
                           final Class<? extends Annotation> aClass,
                           final IOCProcessingContext context) {
 
 
-    final Annotation annotation = clazz.getAnnotation(aClass);
-    final MetaClass type = MetaClassFactory.get(clazz);
+    final Annotation annotation = type.getAnnotation(aClass);
 
     dependencyControl.masqueradeAs(type);
 
