@@ -16,12 +16,6 @@
 
 package org.jboss.errai.marshalling.rebind.util;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassFactory;
 import org.jboss.errai.codegen.meta.MetaMethod;
@@ -29,6 +23,12 @@ import org.jboss.errai.codegen.meta.MetaParameterizedType;
 import org.jboss.errai.codegen.meta.MetaType;
 import org.jboss.errai.codegen.util.GenUtil;
 import org.jboss.errai.common.rebind.EnvUtil;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -199,7 +199,7 @@ public class MarshallingGenUtil {
       return "true".equals(frameworkProperties.get(FORCE_STATIC_MARSHALLERS));
     }
     else {
-      return true;
+      return false;
     }
   }
 }
