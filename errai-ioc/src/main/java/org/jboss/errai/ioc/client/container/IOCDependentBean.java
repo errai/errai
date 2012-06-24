@@ -16,7 +16,6 @@
 
 package org.jboss.errai.ioc.client.container;
 
-import javax.enterprise.context.Dependent;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.HashSet;
@@ -30,8 +29,10 @@ public class IOCDependentBean<T> extends AbstractIOCBean<T> {
   protected IOCBeanManager beanManager;
   protected CreationalCallback<T> creationalCallback;
 
-  protected IOCDependentBean(IOCBeanManager beanManager, Class<T> type, Annotation[] qualifiers,
-                           CreationalCallback<T> creationalCallback) {
+  protected IOCDependentBean(final IOCBeanManager beanManager,
+                             final Class<T> type,
+                             final Annotation[] qualifiers,
+                             final CreationalCallback<T> creationalCallback) {
     this.beanManager = beanManager;
     this.type = type;
     this.qualifiers = new HashSet<Annotation>();
@@ -41,8 +42,10 @@ public class IOCDependentBean<T> extends AbstractIOCBean<T> {
     this.creationalCallback = creationalCallback;
   }
 
-  public static <T> IOCBeanDef<T> newBean(IOCBeanManager beanManager, Class<T> type, Annotation[] qualifiers,
-                                          CreationalCallback<T> callback) {
+  public static <T> IOCBeanDef<T> newBean(final IOCBeanManager beanManager,
+                                          final Class<T> type,
+                                          final Annotation[] qualifiers,
+                                          final CreationalCallback<T> callback) {
     return new IOCDependentBean<T>(beanManager, type, qualifiers, callback);
   }
 
@@ -63,7 +66,7 @@ public class IOCDependentBean<T> extends AbstractIOCBean<T> {
   }
 
   @Override
-  public T getInstance(CreationalContext context) {
+  public T getInstance(final CreationalContext context) {
     return creationalCallback.getInstance(context);
   }
 }

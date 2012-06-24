@@ -9,7 +9,7 @@ public class Tuple<K, V> {
   private final K key;
   private final V value;
 
-  private Tuple(K key, V value) {
+  private Tuple(final K key, final V value) {
     this.key = key;
     this.value = value;
   }
@@ -23,7 +23,7 @@ public class Tuple<K, V> {
    * @param <V> the value type
    * @return an instance of Tuple.
    */
-  public static <K, V> Tuple<K, V> of(K k, V v) {
+  public static <K, V> Tuple<K, V> of(final K k, final V v) {
     return new Tuple<K, V>(k, v);
   }
 

@@ -19,7 +19,6 @@ package org.jboss.errai.ioc.client.container;
 import org.jboss.errai.ioc.client.QualifierUtil;
 
 import java.lang.annotation.Annotation;
-import java.util.HashSet;
 import java.util.Set;
 
 /**

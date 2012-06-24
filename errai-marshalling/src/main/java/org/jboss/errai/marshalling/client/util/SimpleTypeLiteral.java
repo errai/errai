@@ -10,14 +10,16 @@ package org.jboss.errai.marshalling.client.util;
 public class SimpleTypeLiteral<T> {
   private final Class rawType;
 
-  private SimpleTypeLiteral(Class rawType) {
+  private SimpleTypeLiteral(final Class rawType) {
     this.rawType = rawType;
   }
 
-  public static <T> SimpleTypeLiteral<T> ofRawType(Class rawType) {
+  @SuppressWarnings("unchecked")
+  public static <T> SimpleTypeLiteral<T> ofRawType(final Class rawType) {
     return (SimpleTypeLiteral<T>) new SimpleTypeLiteral(rawType);
   }
 
+  @SuppressWarnings("unchecked")
   public Class<T> get() {
     return rawType;
   }

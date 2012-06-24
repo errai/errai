@@ -31,13 +31,13 @@ import static org.jboss.errai.common.client.util.LogUtil.log;
 public class Container implements EntryPoint {
   @Override
   public void onModuleLoad() {
-    boostrapContainer();
+    bootstrapContainer();
   }
 
   // stored for debugging purposes only. overwritten every time the container is bootstrapped.
   private static BootstrapperInjectionContext injectionContext;
 
-  public void boostrapContainer() {
+  public void bootstrapContainer() {
     try {
       InitVotes.waitFor(Container.class);
 
@@ -75,7 +75,7 @@ public class Container implements EntryPoint {
     displayDebuggerUtilityTitle("BeanManager Status");
 
     log("[WIRED BEANS]");
-    for (BeanRef ref : injectionContext.getRootContext().getAllCreatedBeans()) {
+    for (final BeanRef ref : injectionContext.getRootContext().getAllCreatedBeans()) {
       log(" -> " + ref.getClazz().getName());
       log("     qualifiers: " + annotationsToString(ref.getAnnotations()) + ")");
     }
@@ -83,8 +83,8 @@ public class Container implements EntryPoint {
     displaySeparator();
   }
 
-  private static String annotationsToString(Annotation[] annotations) {
-    StringBuilder sb = new StringBuilder("[");
+  private static String annotationsToString(final Annotation[] annotations) {
+    final StringBuilder sb = new StringBuilder("[");
     for (int i = 0; i < annotations.length; i++) {
       sb.append(annotations[i].annotationType().getName());
 

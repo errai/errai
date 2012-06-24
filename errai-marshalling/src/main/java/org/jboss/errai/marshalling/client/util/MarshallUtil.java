@@ -20,8 +20,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.jboss.errai.common.client.api.WrappedPortable;
+import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
+import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 
 /**
@@ -70,7 +72,7 @@ public class MarshallUtil {
   }
 
   public static String jsonStringEscape(final String s) {
-    StringBuilder sb = new StringBuilder(s.length());
+    final StringBuilder sb = new StringBuilder(s.length());
     for (int i = 0; i < s.length(); i++) {
       jsonStringEscape(sb, s.charAt(i));
     }
@@ -78,7 +80,7 @@ public class MarshallUtil {
   }
 
   public static String jsonStringEscape(final char ch) {
-    StringBuilder sb = new StringBuilder(5);
+    final StringBuilder sb = new StringBuilder(5);
     jsonStringEscape(sb, ch);
     return sb.toString();
   }
@@ -113,7 +115,7 @@ public class MarshallUtil {
         if ((ch >= '\u0000' && ch <= '\u001F') || (ch >= '\u007F' && ch <= '\u009F')
                 || (ch >= '\u2000')) {
 
-          String ss = Integer.toHexString(ch);
+          final String ss = Integer.toHexString(ch);
           sb.append("\\u");
           for (int k = 0; k < 4 - ss.length(); k++) {
             sb.append('0');
@@ -136,5 +138,13 @@ public class MarshallUtil {
       throw new RuntimeException("no marshalling definition available for type:" + obj.getClass().getName());
     }
     return m;
+  }
+
+  public static boolean isEncodedObject(final EJObject value) {
+    return value.containsKey(SerializationParts.OBJECT_ID);
+  }
+
+  public static boolean isEncodedNumeric(final EJObject value) {
+    return value.containsKey(SerializationParts.NUMERIC_VALUE);
   }
 }

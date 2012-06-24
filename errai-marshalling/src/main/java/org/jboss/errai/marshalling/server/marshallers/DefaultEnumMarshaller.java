@@ -54,14 +54,14 @@ public class DefaultEnumMarshaller implements Marshaller<Enum> {
       return "null";
     }
 
-    if (a1.hasObjectHash(a0)) {
+    if (a1.hasObject(a0)) {
       return new StringBuilder().append("{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + enumType.getName()
-              + "\",\"" + SerializationParts.OBJECT_ID + "\":\"").append(a1.getObjectHash(a0)).append("\"}").toString();
+              + "\",\"" + SerializationParts.OBJECT_ID + "\":\"").append(a1.getObject(a0)).append("\"}").toString();
     }
 
     return new StringBuilder().append("{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + enumType.getName()
             + "\","
-            + "\"" + SerializationParts.OBJECT_ID + "\":\"" + a1.getObjectHash(a0) + "\""
+            + "\"" + SerializationParts.OBJECT_ID + "\":\"" + a1.getObject(a0) + "\""
             + ",\"" + SerializationParts.ENUM_STRING_VALUE + "\":\"").append(a0.name()).append("\"}").toString();
   }
 

@@ -58,7 +58,7 @@ public class ErraiJpaTest extends GWTTestCase {
 
     // We need to bootstrap the IoC container manually because GWTTestCase
     // doesn't call onModuleLoad() for us.
-    new Container().boostrapContainer();
+    new Container().bootstrapContainer();
   }
 
   /**

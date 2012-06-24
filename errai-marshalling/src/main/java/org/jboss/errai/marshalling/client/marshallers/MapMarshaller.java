@@ -16,12 +16,6 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.AbstractMap;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
@@ -33,6 +27,13 @@ import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
+import org.jboss.errai.marshalling.client.util.SimpleTypeLiteral;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.AbstractMap;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
@@ -42,61 +43,65 @@ import org.jboss.errai.marshalling.client.util.MarshallUtil;
 @ServerMarshaller
 @AlwaysQualify
 @ImplementationAliases({AbstractMap.class, HashMap.class})
-public class MapMarshaller<T extends Map> implements Marshaller<T> {
+public class MapMarshaller<T extends Map<Object, Object>> implements Marshaller<T> {
   public static final MapMarshaller INSTANCE = new MapMarshaller();
 
   @Override
   public Class<T> getTypeHandled() {
-    return (Class<T>) Map.class;
+    return SimpleTypeLiteral.<T>ofRawType(Map.class).get();
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public T demarshall(EJValue o, MarshallingSession ctx) {
-    return doDermashall((T) new HashMap(), o, ctx);
+  public T demarshall(final EJValue o, final MarshallingSession ctx) {
+    return doDemarshall((T) new HashMap<Object, Object>(), o, ctx);
   }
 
-  protected T doDermashall(T impl, EJValue o, MarshallingSession ctx) {
-    EJObject jsonObject = o.isObject();
+  protected T doDemarshall(final T impl,
+                                             final EJValue o,
+                                             final MarshallingSession ctx) {
+    final EJObject jsonObject = o.isObject();
 
     Object demarshalledKey, demarshalledValue;
-    for (String key : jsonObject.keySet()) {
+    for (final String key : jsonObject.keySet()) {
       if (key.startsWith(SerializationParts.EMBEDDED_JSON)) {
-        EJValue val = ParserFactory.get().parse(key.substring(SerializationParts.EMBEDDED_JSON.length()));
+        final EJValue val = ParserFactory.get().parse(key.substring(SerializationParts.EMBEDDED_JSON.length()));
         demarshalledKey = ctx.getMarshallerInstance(ctx.determineTypeFor(null, val)).demarshall(val, ctx);
       }
       else {
         demarshalledKey = key;
       }
 
-      EJValue v = jsonObject.get(key);
+      final EJValue v = jsonObject.get(key);
       if (!v.isNull()) {
-       demarshalledValue = ctx.getMarshallerInstance(ctx.determineTypeFor(null, v)).demarshall(v, ctx);
-      } 
+        demarshalledValue = ctx.getMarshallerInstance(ctx.determineTypeFor(null, v)).demarshall(v, ctx);
+      }
       else {
         demarshalledValue = null;
       }
       impl.put(demarshalledKey, demarshalledValue);
     }
-    return (T) impl;
+    return impl;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public String marshall(T o, MarshallingSession ctx) {
-    StringBuilder buf = new StringBuilder();
+  public String marshall(final T o, final MarshallingSession ctx) {
+    final StringBuilder buf = new StringBuilder();
     buf.append("{");
     Object key, val;
     int i = 0;
-    for (Map.Entry<Object, Object> entry : ((Map<Object, Object>) o).entrySet()) {
+    for (final Map.Entry<Object, Object> entry : o.entrySet()) {
       if (i++ > 0) {
         buf.append(",");
       }
       key = entry.getKey();
       val = entry.getValue();
 
-      Marshaller<Object> keyMarshaller;
-      Marshaller<Object> valueMarshaller;
+      final Marshaller<Object> keyMarshaller;
+      final Marshaller<Object> valueMarshaller;
       if (key instanceof String) {
-        buf.append("\"" + key + "\"");
+        buf.append("\"").append(key).append("\"");
       }
       else if (key != null) {
         if (key instanceof Number || key instanceof Boolean || key instanceof Character) {

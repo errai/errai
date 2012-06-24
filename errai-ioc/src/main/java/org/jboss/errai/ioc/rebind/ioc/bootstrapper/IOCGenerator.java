@@ -43,7 +43,9 @@ public class IOCGenerator extends Generator {
   }
 
   @Override
-  public String generate(final TreeLogger logger, final GeneratorContext context, final String typeName)
+  public String generate(final TreeLogger logger,
+                         final GeneratorContext context,
+                         final String typeName)
           throws UnableToCompleteException {
 
     try {
@@ -73,8 +75,10 @@ public class IOCGenerator extends Generator {
   /**
    * Generate source code for new class. Class extends <code>HashMap</code>.
    *
-   * @param logger  Logger object
-   * @param context Generator context
+   * @param logger
+   *         Logger object
+   * @param context
+   *         Generator context
    */
   private void generateIOCBootstrapClass(TreeLogger logger, GeneratorContext context) {
     // get print writer that receives the source code

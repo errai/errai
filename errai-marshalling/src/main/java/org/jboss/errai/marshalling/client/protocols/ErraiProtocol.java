@@ -36,7 +36,7 @@ public class ErraiProtocol {
    * @param message A map of the key-value pairs to be encoded.
    * @return The encoded JSON
    */
-  public static String encodePayload(Map<String, Object> message) {
+  public static String encodePayload(final Map<String, Object> message) {
     return protocolMarshaller.marshall(message, MarshallingSessionProviderFactory.getEncoding());
   }
 
@@ -46,7 +46,7 @@ public class ErraiProtocol {
    * @param value The root JSON element to start parsing from.
    * @return The decoded Map.
    */
-  public static Map<String, Object> decodePayload(EJValue value) {
+  public static Map<String, Object> decodePayload(final EJValue value) {
     return protocolMarshaller.demarshall(value, MarshallingSessionProviderFactory.getDecoding());
   }
 }

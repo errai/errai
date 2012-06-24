@@ -22,6 +22,7 @@ import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ImplementationAliases;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
+import org.jboss.errai.marshalling.client.util.SimpleTypeLiteral;
 
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -33,14 +34,15 @@ import java.util.TreeMap;
 @ServerMarshaller
 @AlwaysQualify
 @ImplementationAliases({TreeMap.class})
-public class SortedMapMarshaller extends MapMarshaller<SortedMap> {
+public class SortedMapMarshaller extends MapMarshaller<SortedMap<Object, Object>> {
   @Override
-  public Class<SortedMap> getTypeHandled() {
-    return SortedMap.class;
+  public Class<SortedMap<Object, Object>> getTypeHandled() {
+    return SimpleTypeLiteral.<SortedMap<Object, Object>>ofRawType(SortedMap.class).get();
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public SortedMap demarshall(EJValue o, MarshallingSession ctx) {
-    return doDermashall(new TreeMap(), o, ctx);
+  public SortedMap<Object, Object> demarshall(final EJValue o, final MarshallingSession ctx) {
+    return doDemarshall(new TreeMap(), o, ctx);
   }
 }

@@ -35,7 +35,7 @@ public class IntegerMarshaller extends AbstractNumberMarshaller<Integer> {
 
 
   @Override
-  public Integer doNotNullDemarshall(EJValue o, MarshallingSession ctx) {
+  public Integer doNotNullDemarshall(final EJValue o, final MarshallingSession ctx) {
     if (o.isObject() != null) {
       return o.isObject().get(SerializationParts.NUMERIC_VALUE).isNumber().intValue();
     }

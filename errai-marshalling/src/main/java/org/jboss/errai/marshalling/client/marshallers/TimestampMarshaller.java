@@ -17,7 +17,6 @@
 package org.jboss.errai.marshalling.client.marshallers;
 
 import org.jboss.errai.common.client.protocols.SerializationParts;
-import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
@@ -36,12 +35,12 @@ public class TimestampMarshaller extends AbstractNullableMarshaller<Timestamp> {
   }
 
   @Override
-  public Timestamp doNotNullDemarshall(EJValue o, MarshallingSession ctx) {
+  public Timestamp doNotNullDemarshall(final EJValue o, final MarshallingSession ctx) {
     return new Timestamp(Long.parseLong(o.isObject().get(SerializationParts.QUALIFIED_VALUE).isString().stringValue()));
   }
 
   @Override
-  public String doNotNullMarshall(Timestamp o, MarshallingSession ctx) {
+  public String doNotNullMarshall(final Timestamp o, final MarshallingSession ctx) {
     return "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + Timestamp.class.getName() + "\"," +
             "\"" + SerializationParts.OBJECT_ID + "\":\"" + o.hashCode() + "\"," +
             "\"" + SerializationParts.QUALIFIED_VALUE + "\":\"" + o.getTime() + "\"}";

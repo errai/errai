@@ -16,14 +16,14 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
-import java.util.Collection;
-
 import org.jboss.errai.common.client.protocols.SerializationParts;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.json.EJArray;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.util.EncDecUtil;
+
+import java.util.Collection;
 
 /**
  * @author Mike Brock
@@ -32,18 +32,18 @@ import org.jboss.errai.marshalling.client.util.EncDecUtil;
 public abstract class AbstractCollectionMarshaller<C extends Collection> extends AbstractBackReferencingMarshaller<C> {
 
   @Override
-  public void doMarshall(StringBuilder buf, C o, MarshallingSession ctx) {
+  public void doMarshall(final StringBuilder buf, final C o, final MarshallingSession ctx) {
     EncDecUtil.arrayMarshall(buf, o, ctx);
   }
 
   @Override
-  public final C doDemarshall(EJValue o, MarshallingSession ctx) {
+  public final C doDemarshall(final EJValue o, final MarshallingSession ctx) {
     if (o.isNull()) return null;
 
-    EJObject obj = o.isObject();
+    final EJObject obj = o.isObject();
 
     if (obj != null) {
-      EJValue val = obj.get(SerializationParts.QUALIFIED_VALUE);
+      final EJValue val = obj.get(SerializationParts.QUALIFIED_VALUE);
       return doDemarshall(val.isArray(), ctx);
     }
     else {
@@ -51,18 +51,20 @@ public abstract class AbstractCollectionMarshaller<C extends Collection> extends
     }
   }
 
-  public abstract C doDemarshall(EJArray o, MarshallingSession ctx);
+  public abstract C doDemarshall(final EJArray o, MarshallingSession ctx);
 
-  protected <T extends Collection> T marshallToCollection(T collection, EJArray array, MarshallingSession ctx) {
+  protected <T extends Collection<Object>> T marshallToCollection(final T collection,
+                                                          final EJArray array,
+                                                          final MarshallingSession ctx) {
     if (array == null) return null;
 
-    String assumedElementType = ctx.getAssumedElementType();
+    final String assumedElementType = ctx.getAssumedElementType();
     
     for (int i = 0; i < array.size(); i++) {
-      EJValue elem = array.get(i);
+      final EJValue elem = array.get(i);
       if (!elem.isNull()) {
         String type = null;
-        EJObject jsonObject;
+        final EJObject jsonObject;
         if ((jsonObject = elem.isObject()) != null) {
           if (!jsonObject.containsKey(SerializationParts.ENCODED_TYPE)) {
             // for collections with a concrete type parameter, we treat the ^EncodedType value as optional

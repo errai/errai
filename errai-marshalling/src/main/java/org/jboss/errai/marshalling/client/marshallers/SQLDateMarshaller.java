@@ -17,7 +17,6 @@
 package org.jboss.errai.marshalling.client.marshallers;
 
 import org.jboss.errai.common.client.protocols.SerializationParts;
-import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
@@ -36,13 +35,13 @@ public class SQLDateMarshaller extends AbstractNullableMarshaller<Date> {
    }
 
   @Override
-  public Date doNotNullDemarshall(EJValue o, MarshallingSession ctx) {
+  public Date doNotNullDemarshall(final EJValue o, final MarshallingSession ctx) {
     return o.isObject() == null ? null :
             new Date(Long.parseLong(o.isObject().get(SerializationParts.QUALIFIED_VALUE).isString().stringValue()));
   }
 
   @Override
-  public String doNotNullMarshall(Date o, MarshallingSession ctx) {
+  public String doNotNullMarshall(final Date o, final MarshallingSession ctx) {
     return "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + Date.class.getName() + "\"," +
             "\"" + SerializationParts.OBJECT_ID + "\":\"" + o.hashCode() + "\"," +
             "\"" + SerializationParts.QUALIFIED_VALUE + "\":\"" + o.getTime() + "\"}";

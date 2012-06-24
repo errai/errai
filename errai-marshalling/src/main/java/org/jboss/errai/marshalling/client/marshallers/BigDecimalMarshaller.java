@@ -17,7 +17,6 @@
 package org.jboss.errai.marshalling.client.marshallers;
 
 import org.jboss.errai.common.client.protocols.SerializationParts;
-import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
@@ -37,13 +36,13 @@ public class BigDecimalMarshaller extends AbstractNullableMarshaller<BigDecimal>
   }
 
   @Override
-  public BigDecimal doNotNullDemarshall(EJValue o, MarshallingSession ctx) {
+  public BigDecimal doNotNullDemarshall(final EJValue o, final MarshallingSession ctx) {
     return o.isObject() == null ? null :
             new BigDecimal(o.isObject().get(SerializationParts.QUALIFIED_VALUE).isString().stringValue());
   }
 
   @Override
-  public String doNotNullMarshall(BigDecimal o, MarshallingSession ctx) {
+  public String doNotNullMarshall(final BigDecimal o, final MarshallingSession ctx) {
     return "{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + BigDecimal.class.getName() + "\"," +
             "\"" + SerializationParts.OBJECT_ID + "\":\"" + o.hashCode() + "\"," +
             "\"" + SerializationParts.QUALIFIED_VALUE + "\":\"" + o.toString() + "\"}";

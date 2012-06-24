@@ -21,6 +21,7 @@ import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJArray;
 
+import java.util.LinkedList;
 import java.util.PriorityQueue;
 
 /**
@@ -34,7 +35,7 @@ public class PriorityQueueMarshaller extends AbstractCollectionMarshaller<Priori
   }
 
   @Override
-  public PriorityQueue doDemarshall(EJArray o, MarshallingSession ctx) {
+  public PriorityQueue doDemarshall(final EJArray o, final MarshallingSession ctx) {
     return marshallToCollection(new PriorityQueue<Object>(), o, ctx);
   }
 }

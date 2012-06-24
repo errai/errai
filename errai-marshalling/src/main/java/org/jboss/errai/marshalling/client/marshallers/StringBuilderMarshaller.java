@@ -16,7 +16,6 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
-import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
@@ -38,11 +37,11 @@ public class StringBuilderMarshaller extends AbstractNullableMarshaller<StringBu
   }
 
   @Override
-  public StringBuilder doNotNullDemarshall(EJValue o, MarshallingSession ctx) {
+  public StringBuilder doNotNullDemarshall(final EJValue o, final MarshallingSession ctx) {
     return new StringBuilder(o.isString().stringValue());
   }
 
-  public String doNotNullMarshall(StringBuilder o, MarshallingSession ctx) {
+  public String doNotNullMarshall(final StringBuilder o, final MarshallingSession ctx) {
     return "\"" + MarshallUtil.jsonStringEscape(o.toString()) + "\"";
   }
 }

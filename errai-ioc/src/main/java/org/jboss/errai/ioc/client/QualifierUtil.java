@@ -15,15 +15,15 @@ import java.util.Map;
 public class QualifierUtil {
   private static final QualifierEqualityFactory factory = GWT.create(QualifierEqualityFactory.class);
 
-  public static boolean isEqual(Annotation a1, Annotation a2) {
+  public static boolean isEqual(final Annotation a1, final Annotation a2) {
     return factory.isEqual(a1, a2);
   }
 
-  public static boolean isSameType(Annotation a1, Annotation a2) {
+  public static boolean isSameType(final Annotation a1, final Annotation a2) {
     return !(a1 == null || a2 == null) && a1.annotationType().equals(a2.annotationType());
   }
 
-  public static int hashCodeOf(Annotation a1) {
+  public static int hashCodeOf(final Annotation a1) {
     return factory.hashCodeOf(a1);
   }
 
@@ -33,11 +33,11 @@ public class QualifierUtil {
     final Map<String, Annotation> allOfMap = new HashMap<String, Annotation>();
     final Map<String, Annotation> inMap = new HashMap<String, Annotation>();
 
-    for (Annotation a : allOf) {
+    for (final Annotation a : allOf) {
       allOfMap.put(a.annotationType().getName(), a);
     }
 
-    for (Annotation a : in) {
+    for (final Annotation a : in) {
       inMap.put(a.annotationType().getName(), a);
     }
 
@@ -45,7 +45,7 @@ public class QualifierUtil {
       return false;
     }
 
-    for (Map.Entry<String, Annotation> entry : allOfMap.entrySet()) {
+    for (final Map.Entry<String, Annotation> entry : allOfMap.entrySet()) {
        if (!factory.isEqual(entry.getValue(), inMap.get(entry.getKey()))) {
          return false;
        }
@@ -54,39 +54,39 @@ public class QualifierUtil {
     return true;
   }
 
-  static int hashValueFor(int i) {
+  static int hashValueFor(final int i) {
     return i;
   }
 
-  static int hashValueFor(boolean b) {
+  static int hashValueFor(final boolean b) {
     return b ? 1 : 0;
   }
 
-  static int hashValueFor(long l) {
+  static int hashValueFor(final long l) {
     return (int) l;
   }
 
-  static int hashValueFor(float f) {
+  static int hashValueFor(final float f) {
     return (int) f * 1000;
   }
 
-  static int hashValueFor(double d) {
+  static int hashValueFor(final double d) {
     return (int) d * 1000;
   }
 
-  static int hashValueFor(char c) {
+  static int hashValueFor(final char c) {
     return (int) c;
   }
 
-  static int hashValueFor(byte b) {
+  static int hashValueFor(final byte b) {
     return (int) b;
   }
 
-  static int hashValueFor(short s) {
+  static int hashValueFor(final short s) {
     return (int) s;
   }
 
-  static int hashValueFor(Object o) {
+  static int hashValueFor(final Object o) {
     if (o == null) return -1;
     return o.hashCode();
   }

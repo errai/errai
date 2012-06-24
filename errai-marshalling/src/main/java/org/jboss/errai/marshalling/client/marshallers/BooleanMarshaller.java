@@ -34,7 +34,7 @@ public class BooleanMarshaller extends AbstractNullableMarshaller<Boolean> {
   }
 
   @Override
-  public Boolean doNotNullDemarshall(EJValue o, MarshallingSession ctx) {
+  public Boolean doNotNullDemarshall(final EJValue o, final MarshallingSession ctx) {
     if (o.isObject() != null) {
       return o.isObject().get(SerializationParts.NUMERIC_VALUE).isBoolean().booleanValue();
     }
@@ -44,7 +44,7 @@ public class BooleanMarshaller extends AbstractNullableMarshaller<Boolean> {
   }
 
   @Override
-  public String doNotNullMarshall(Boolean o, MarshallingSession ctx) {
+  public String doNotNullMarshall(final Boolean o, final MarshallingSession ctx) {
     return o.toString();
   }
 }

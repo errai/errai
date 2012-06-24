@@ -46,7 +46,7 @@ public abstract class ServerMarshallUtil {
   private static Logger log = getLogger("ErraiMarshalling");
 
   private static List<String> urlToFile(Enumeration<URL> urls) {
-    ArrayList<String> files = new ArrayList<String>();
+    final ArrayList<String> files = new ArrayList<String>();
     while (urls.hasMoreElements()) {
       files.add(urls.nextElement().getFile());
     }
@@ -54,14 +54,14 @@ public abstract class ServerMarshallUtil {
   }
 
   public static Class<? extends MarshallerFactory> getGeneratedMarshallerFactoryForServer() {
-    String packageName = MarshallersGenerator.SERVER_MARSHALLER_PACKAGE_NAME;
-    String className = MarshallersGenerator.SERVER_MARSHALLER_CLASS_NAME;
+    final String packageName = MarshallersGenerator.SERVER_MARSHALLER_PACKAGE_NAME;
+    final String className = MarshallersGenerator.SERVER_MARSHALLER_CLASS_NAME;
 
     try {
       log.debug("searching for marshaller class: " + packageName + "." + className);
 
       final String classResource = packageName.replaceAll("\\.", "/") + "/" + className + ".class";
-      Set<String> locations = new HashSet<String>();
+      final Set<String> locations = new HashSet<String>();
 
       // look for the class in every classloader we can think of. For example, current thread
       // classloading works in Jetty but not JBoss AS 7.
@@ -71,7 +71,7 @@ public abstract class ServerMarshallUtil {
 
       File newest = null;
       for (String url : locations) {
-        File file = ClassChangeUtil.getFileIfExists(url);
+        final File file = ClassChangeUtil.getFileIfExists(url);
         if (file != null && (newest == null || file.lastModified() > newest.lastModified())) {
           newest = file;
         }
@@ -111,14 +111,14 @@ public abstract class ServerMarshallUtil {
       log.warn("could not read marshaller classes: " + e);
     }
 
-
     final String classStr = MarshallerGeneratorFactory.getFor(MarshallerOuputTarget.Java)
             .generate(packageName, className);
 
-    File directory =
-            new File(RebindUtils.getTempDirectory() + "/errai.gen/classes/" + packageName.replaceAll("\\.", "/"));
+     final File directory =
+            new File(RebindUtils.getTempDirectory()
+                    + "/errai.gen/classes/" + packageName.replaceAll("\\.", "/"));
 
-    File sourceFile = new File(directory.getAbsolutePath() + File.separator + className + ".java");
+    final File sourceFile = new File(directory.getAbsolutePath() + File.separator + className + ".java");
 
     try {
       if (directory.exists()) {

@@ -28,7 +28,7 @@ public abstract class IOCClientTestCase extends GWTTestCase {
     @Override
     public void bootstrap() {
       try {
-        new Container().boostrapContainer();
+        new Container().bootstrapContainer();
       }
       catch (Throwable t) {
         t.printStackTrace();

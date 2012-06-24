@@ -23,7 +23,6 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
 import org.jboss.errai.marshalling.client.util.SimpleTypeLiteral;
 
-import javax.enterprise.util.TypeLiteral;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -42,19 +41,19 @@ public class ErraiProtocolEnvelopeNoAutoMarshaller implements Marshaller<Map<Str
   }
 
   @Override
-  public Map<String, Object> demarshall(EJValue o, MarshallingSession ctx) {
-    return doDermashall(new HashMap(), o, ctx);
+  public Map<String, Object> demarshall(final EJValue o, final MarshallingSession ctx) {
+    return doDemarshall(new HashMap<String, Object>(), o, ctx);
   }
 
-  protected Map doDermashall(Map impl, EJValue o, MarshallingSession ctx) {
-    EJObject jsonObject = o.isObject();
+  protected Map<String, Object> doDemarshall(final Map<String, Object> impl, final EJValue o, final MarshallingSession ctx) {
+    final EJObject jsonObject = o.isObject();
     if (jsonObject == null)
       return null;
 
-    for (String key : jsonObject.keySet()) {
-      EJValue v = jsonObject.get(key);
+    for (final String key : jsonObject.keySet()) {
+      final EJValue v = jsonObject.get(key);
       if (!v.isNull()) {
-        String type = ctx.determineTypeFor(null, v);
+        final String type = ctx.determineTypeFor(null, v);
 
         if (type == null) {
           impl.put(key, v.toString());
@@ -70,22 +69,23 @@ public class ErraiProtocolEnvelopeNoAutoMarshaller implements Marshaller<Map<Str
     return impl;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public String marshall(Map<String, Object> o, MarshallingSession ctx) {
-    StringBuilder buf = new StringBuilder();
+  public String marshall(final Map<String, Object> o, final MarshallingSession ctx) {
+    final StringBuilder buf = new StringBuilder();
 
     buf.append("{");
     Object key, val;
     int i = 0;
-    for (Map.Entry<String, Object> entry : o.entrySet()) {
+    for (final Map.Entry<String, Object> entry : o.entrySet()) {
       if (i++ > 0) {
         buf.append(",");
       }
       key = entry.getKey();
       val = entry.getValue();
 
-      Marshaller<Object> valueMarshaller;
-      buf.append("\"" + key + "\"");
+      final Marshaller valueMarshaller;
+      buf.append("\"").append(key).append("\"");
 
       buf.append(":");
 

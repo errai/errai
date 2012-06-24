@@ -47,13 +47,16 @@ public final class BeanRef {
   private final Set<Annotation> hashConsistentAnnotations;
 
   /**
-   * Constructs a new instance of <tt>BeanRef</tt> with the given bean type and qualifiers. Neither the {@parm clazz}
-   * or the {@parm annotation} parameter may be null.
+   * Constructs a new instance of <tt>BeanRef</tt> with the given bean type and qualifiers. Neither the {@param clazz}
+   * or the {@param annotation} parameter may be null.
    *
-   * @param clazz       the bean type.
-   * @param annotations an array of qualifiers associated with this bean.
+   * @param clazz
+   *         the bean type.
+   * @param annotations
+   *         an array of qualifiers associated with this bean.
    */
-  public BeanRef(Class<?> clazz, Annotation[] annotations) {
+  public BeanRef(final Class<?> clazz,
+                 final Annotation[] annotations) {
     Assert.notNull(clazz);
     Assert.notNull(annotations);
 
@@ -62,12 +65,12 @@ public final class BeanRef {
     this.hashConsistentAnnotations = wrapAnnotations(this.annotations);
   }
 
-  private static Set<Annotation> wrapAnnotations(Collection<Annotation> list) {
-    Set<Annotation> annos = new HashSet<Annotation>();
+  private static Set<Annotation> wrapAnnotations(final Collection<Annotation> list) {
+    final Set<Annotation> annotations = new HashSet<Annotation>();
     for (final Annotation a : list) {
-      annos.add(new AnnotationHashWapper(a));
+      annotations.add(new AnnotationHashWrapper(a));
     }
-    return annos;
+    return annotations;
   }
 
   /**
@@ -88,12 +91,12 @@ public final class BeanRef {
     return annotations.toArray(new Annotation[annotations.size()]);
   }
 
-  private static class AnnotationHashWapper implements Annotation {
+  private static class AnnotationHashWrapper implements Annotation {
     private final Annotation _delegate;
     private final Class<?> type;
     private final int hashCode;
 
-    private AnnotationHashWapper(Annotation _delegate) {
+    private AnnotationHashWrapper(final Annotation _delegate) {
       Assert.notNull(_delegate);
 
       this._delegate = _delegate;
@@ -102,11 +105,11 @@ public final class BeanRef {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
       if (this == o) return true;
-      if (!(o instanceof AnnotationHashWapper)) return false;
+      if (!(o instanceof AnnotationHashWrapper)) return false;
 
-      AnnotationHashWapper that = (AnnotationHashWapper) o;
+      final AnnotationHashWrapper that = (AnnotationHashWrapper) o;
 
       return !(type != null ? !type.equals(that.type) : that.type != null);
     }
@@ -128,11 +131,11 @@ public final class BeanRef {
   }
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(final Object o) {
     if (this == o) return true;
     if (!(o instanceof BeanRef)) return false;
 
-    BeanRef beanRef = (BeanRef) o;
+    final BeanRef beanRef = (BeanRef) o;
 
     return !(hashConsistentAnnotations != null ?
             !hashConsistentAnnotations.equals(beanRef.hashConsistentAnnotations) : beanRef.hashConsistentAnnotations != null)

@@ -27,7 +27,7 @@ public abstract class AbstractErraiIOCTest extends AbstractErraiTest {
   @Override
   protected void gwtSetUp() throws Exception {
     super.gwtSetUp();
-    new Container().boostrapContainer();
+    new Container().bootstrapContainer();
   }
 }
 

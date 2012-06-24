@@ -16,11 +16,6 @@
 
 package org.jboss.errai.marshalling.rebind.api.impl.defaultjava;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.jboss.errai.codegen.meta.MetaClass;
 import org.jboss.errai.codegen.meta.MetaClassMember;
 import org.jboss.errai.codegen.meta.MetaConstructor;
@@ -40,6 +35,11 @@ import org.jboss.errai.marshalling.rebind.api.model.impl.SimpleFactoryMapping;
 import org.jboss.errai.marshalling.rebind.api.model.impl.WriteMapping;
 import org.jboss.errai.marshalling.rebind.util.MarshallingGenUtil;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * @author Mike Brock
  */
@@ -54,36 +54,35 @@ public class DefaultJavaDefinitionMapper {
     }
 
     final Set<MetaConstructor> constructors = new HashSet<MetaConstructor>();
-
     final SimpleConstructorMapping simpleConstructorMapping = new SimpleConstructorMapping();
     final MappingDefinition definition = new MappingDefinition(toMap, false);
 
-    for (MetaConstructor c : toMap.getDeclaredConstructors()) {
+    for (final MetaConstructor c : toMap.getDeclaredConstructors()) {
       if (c.getParameters().length != 0) {
-        boolean satisifed = true;
+        boolean satisfied = true;
         for (int i = 0; i < c.getParameters().length; i++) {
-          Annotation[] annotations = c.getParameters()[i].getAnnotations();
+          final Annotation[] annotations = c.getParameters()[i].getAnnotations();
           if (annotations.length == 0) {
-            satisifed = false;
+            satisfied = false;
           }
           else {
-            for (Annotation a : annotations) {
+            for (final Annotation a : annotations) {
               if (MapsTo.class.isAssignableFrom(a.annotationType())) {
-                MapsTo mapsTo = (MapsTo) a;
-                String key = mapsTo.value();
+                final MapsTo mapsTo = (MapsTo) a;
+                final String key = mapsTo.value();
                 simpleConstructorMapping.mapParmToIndex(key, i, c.getParameters()[i].getType());
               }
             }
           }
         }
 
-        if (satisifed) {
+        if (satisfied) {
           constructors.add(c);
         }
       }
     }
 
-    MetaConstructor constructor;
+    final MetaConstructor constructor;
     if (constructors.isEmpty()) {
       constructor = toMap.getConstructor(new MetaClass[0]);
     }
@@ -93,9 +92,9 @@ public class DefaultJavaDefinitionMapper {
     }
     else {
       constructor = constructors.iterator().next();
-      simpleConstructorMapping.setConstructor(constructor);
     }
 
+    simpleConstructorMapping.setConstructor(constructor);
     definition.setInstantiationMapping(simpleConstructorMapping);
 
     if (toMap.isEnum()) {
@@ -103,28 +102,28 @@ public class DefaultJavaDefinitionMapper {
     }
 
     if (simpleConstructorMapping.getMappings().length == 0) {
-      Set<MetaMethod> factoryMethods = new HashSet<MetaMethod>();
+      final Set<MetaMethod> factoryMethods = new HashSet<MetaMethod>();
+      final SimpleFactoryMapping simpleFactoryMapping = new SimpleFactoryMapping();
 
-      SimpleFactoryMapping simpleFactoryMapping = new SimpleFactoryMapping();
-      for (MetaMethod method : toMap.getDeclaredMethods()) {
+      for (final MetaMethod method : toMap.getDeclaredMethods()) {
         if (method.isStatic()) {
-          boolean satisifed = true;
+          boolean satisfied = true;
           for (int i = 0; i < method.getParameters().length; i++) {
-            Annotation[] annotations = method.getParameters()[i].getAnnotations();
+            final Annotation[] annotations = method.getParameters()[i].getAnnotations();
             if (annotations.length == 0) {
-              satisifed = false;
+              satisfied = false;
             }
             else {
-              for (Annotation a : annotations) {
+              for (final Annotation a : annotations) {
                 if (MapsTo.class.isAssignableFrom(a.annotationType())) {
-                  MapsTo mapsTo = (MapsTo) a;
-                  String key = mapsTo.value();
+                  final MapsTo mapsTo = (MapsTo) a;
+                  final String key = mapsTo.value();
                   simpleFactoryMapping.mapParmToIndex(key, i, method.getParameters()[i].getType());
                 }
               }
             }
 
-            if (satisifed) {
+            if (satisfied) {
               factoryMethods.add(method);
             }
           }
@@ -136,8 +135,8 @@ public class DefaultJavaDefinitionMapper {
                 + toMap.getFullyQualifiedName());
       }
       else if (factoryMethods.size() == 1) {
-        final MetaMethod meth = factoryMethods.iterator().next();
-        simpleFactoryMapping.setMethod(meth);
+        final MetaMethod method = factoryMethods.iterator().next();
+        simpleFactoryMapping.setMethod(method);
         definition.setInheritedInstantiationMapping(simpleFactoryMapping);
       }
     }
@@ -145,7 +144,7 @@ public class DefaultJavaDefinitionMapper {
     if (definition.getInstantiationMapping() instanceof ConstructorMapping
             && definition.getInstantiationMapping().getMappings().length == 0) {
 
-      MetaConstructor defaultConstructor = toMap.getDeclaredConstructor();
+      final MetaConstructor defaultConstructor = toMap.getDeclaredConstructor();
       if (defaultConstructor == null || !defaultConstructor.isPublic()) {
         throw new InvalidMappingException("there is no custom mapping or default no-arg constructor to map: "
                 + toMap.getFullyQualifiedName());
@@ -155,13 +154,13 @@ public class DefaultJavaDefinitionMapper {
     final Set<String> writeKeys = new HashSet<String>();
     final Set<String> readKeys = new HashSet<String>();
 
-    for (Mapping m : simpleConstructorMapping.getMappings()) {
+    for (final Mapping m : simpleConstructorMapping.getMappings()) {
       writeKeys.add(m.getKey());
     }
 
-    for (MetaMethod method : toMap.getDeclaredMethods()) {
+    for (final MetaMethod method : toMap.getDeclaredMethods()) {
       if (method.isAnnotationPresent(Key.class)) {
-        String key = method.getAnnotation(Key.class).value();
+        final String key = method.getAnnotation(Key.class).value();
 
         if (method.getParameters().length == 0) {
           // assume this is a getter
@@ -191,7 +190,7 @@ public class DefaultJavaDefinitionMapper {
           continue;
         }
 
-        Field fld = field.asField();
+        final Field fld = field.asField();
         if (fld != null) {
           fld.setAccessible(true);
         }
@@ -200,8 +199,8 @@ public class DefaultJavaDefinitionMapper {
           continue;
         }
 
-        MetaClass type = field.getType();
-        MetaClass compType = type.isArray() ? type.getOuterComponentType().asBoxed() : type.asBoxed();
+        final MetaClass type = field.getType();
+        final MetaClass compType = type.isArray() ? type.getOuterComponentType().asBoxed() : type.asBoxed();
 
         if (!type.isEnum() && !definitionsFactory.isExposedClass(compType.asClass())) {
           throw new InvalidMappingException("portable entity " + toMap.getFullyQualifiedName()
@@ -214,7 +213,7 @@ public class DefaultJavaDefinitionMapper {
          * manually mapped reader on the key.
          */
         if (writeKeys.contains(field.getName()) && !readKeys.contains(field.getName())) {
-          MetaMethod getterMethod = MarshallingGenUtil.findGetterMethod(toMap, field.getName());
+          final MetaMethod getterMethod = MarshallingGenUtil.findGetterMethod(toMap, field.getName());
 
           if (getterMethod != null) {
             definition.addMemberMapping(new ReadMapping(field.getName(), field.getType(), getterMethod.getName()));
@@ -247,7 +246,7 @@ public class DefaultJavaDefinitionMapper {
           }
 
           @Override
-          public void setType(MetaClass type) {
+          public void setType(final MetaClass type) {
             this.type = type;
           }
 
@@ -267,7 +266,7 @@ public class DefaultJavaDefinitionMapper {
           }
 
           @Override
-          public void setMappingClass(MetaClass clazz) {
+          public void setMappingClass(final MetaClass clazz) {
           }
 
           @Override

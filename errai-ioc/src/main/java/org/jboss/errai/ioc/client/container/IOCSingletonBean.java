@@ -26,8 +26,12 @@ import java.lang.annotation.Annotation;
 public class IOCSingletonBean<T> extends IOCDependentBean<T> {
   private final T instance;
 
-  private IOCSingletonBean(IOCBeanManager beanManager, Class<T> type, Annotation[] qualifiers,
-                           CreationalCallback<T> callback, T instance) {
+  private IOCSingletonBean(final IOCBeanManager beanManager,
+                           final Class<T> type,
+                           final Annotation[] qualifiers,
+                           final CreationalCallback<T> callback,
+                           final T instance) {
+
     super(beanManager, type, qualifiers, callback);
     this.instance = instance;
   }
@@ -35,19 +39,28 @@ public class IOCSingletonBean<T> extends IOCDependentBean<T> {
   /**
    * Creates a new IOC Bean reference
    *
-   * @param type       The type of a bean
-   * @param qualifiers The qualifiers of the bean.
-   * @param instance   The instance of the bean.
-   * @param <T>        The type of the bean
+   * @param type
+   *         The type of a bean
+   * @param qualifiers
+   *         The qualifiers of the bean.
+   * @param instance
+   *         The instance of the bean.
+   * @param <T>
+   *         The type of the bean
+   *
    * @return A new instance of <tt>IOCSingletonBean</tt>
    */
-  public static <T> IOCBeanDef<T> newBean(IOCBeanManager beanManager, Class<T> type, Annotation[] qualifiers,
-                                          CreationalCallback<T> callback, T instance) {
+  public static <T> IOCBeanDef<T> newBean(final IOCBeanManager beanManager,
+                                          final Class<T> type,
+                                          final Annotation[] qualifiers,
+                                          final CreationalCallback<T> callback,
+                                          final T instance) {
+
     return new IOCSingletonBean<T>(beanManager, type, qualifiers, callback, instance);
   }
 
   @Override
-  public T getInstance(CreationalContext context) {
+  public T getInstance(final CreationalContext context) {
     return instance;
   }
 

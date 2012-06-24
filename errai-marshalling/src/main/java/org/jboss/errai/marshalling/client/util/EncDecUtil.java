@@ -29,8 +29,9 @@ import org.jboss.errai.marshalling.client.marshallers.QualifyingMarshallerWrappe
  */
 public class EncDecUtil {
   public static void arrayMarshall(StringBuilder buf, Collection o, MarshallingSession ctx) {
+    final Iterator iter = o.iterator();
+
     buf.append("[");
-    Iterator iter = o.iterator();
     Object elem;
 
     int i = 0;

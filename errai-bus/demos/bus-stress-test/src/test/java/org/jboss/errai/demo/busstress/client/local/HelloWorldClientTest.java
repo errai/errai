@@ -18,7 +18,7 @@ public class HelloWorldClientTest extends AbstractErraiTest {
 
     // We need to bootstrap the IoC container manually because GWTTestCase
     // doesn't call onModuleLoad() for us.
-    new Container().boostrapContainer();
+    new Container().bootstrapContainer();
   }
 
   public void testSendMessage() throws Exception {

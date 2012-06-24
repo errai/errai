@@ -64,8 +64,11 @@ public class IOCBeanManager {
    * @param instance   the instance reference
    * @param qualifiers any qualifiers
    */
-  public void addBean(final Class<Object> type, final CreationalCallback<Object> callback,
-                      final Object instance, final Annotation[] qualifiers) {
+  public void addBean(final Class<Object> type,
+                      final CreationalCallback<Object> callback,
+                      final Object instance,
+                      final Annotation[] qualifiers) {
+
     if (instance != null) {
       registerSingletonBean(type, callback, instance, qualifiers);
     }
@@ -91,7 +94,7 @@ public class IOCBeanManager {
 
     creationalContext.destroyContext();
 
-    for (Object inst : creationalContext.getAllCreatedBeanInstances()) {
+    for (final Object inst : creationalContext.getAllCreatedBeanInstances()) {
       creationalContextMap.remove(inst);
       proxyLookupForManagedBeans.remove(inst);
       proxyLookupForManagedBeans.values().remove(inst);
@@ -104,13 +107,13 @@ public class IOCBeanManager {
    * @param ref the reference to the bean
    * @return returns true if under management
    */
-  public boolean isManaged(Object ref) {
+  public boolean isManaged(final Object ref) {
     return creationalContextMap.containsKey(getActualBeanReference(ref));
   }
 
   /**
    * Obtains an instance to the <em>actual</em> bean. If the specified reference is a proxy, this method will
-   * return an unproxied reference to the object.
+   * return an un-proxied reference to the object.
    *
    * @param ref the proxied or unproxied reference
    * @return returns the absolute reference to bean if the specified reference is a proxy. If the specified reference
@@ -141,7 +144,7 @@ public class IOCBeanManager {
     proxyLookupForManagedBeans.put(proxyRef, realRef);
   }
 
-  void addBeantoContext(Object ref, CreationalContext creationalContext) {
+  void addBeanToContext(final Object ref, final CreationalContext creationalContext) {
     creationalContextMap.put(ref, creationalContext);
   }
 
@@ -203,7 +206,7 @@ public class IOCBeanManager {
 
     final List<IOCBeanDef> matching = new ArrayList<IOCBeanDef>();
 
-    for (IOCBeanDef iocBean : beanList) {
+    for (final IOCBeanDef iocBean : beanList) {
       if (iocBean.matches(qualSet)) {
         matching.add(iocBean);
       }

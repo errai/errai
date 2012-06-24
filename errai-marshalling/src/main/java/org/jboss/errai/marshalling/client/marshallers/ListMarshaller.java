@@ -39,7 +39,7 @@ public class ListMarshaller extends AbstractCollectionMarshaller<List> {
   }
 
   @Override
-  public List doDemarshall(EJArray o, MarshallingSession ctx) {
+  public List doDemarshall(final EJArray o, final MarshallingSession ctx) {
     return marshallToCollection(new ArrayList<Object>(o.size()), o, ctx);
   }
 }

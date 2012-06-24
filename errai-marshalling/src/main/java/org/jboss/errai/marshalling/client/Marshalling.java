@@ -53,7 +53,7 @@ public abstract class Marshalling {
    *          The type to check for marshallability.
    * @return True for marshallable types and false for non-marshallable types.
    */
-  public static boolean canHandle(Class<?> type) {
+  public static boolean canHandle(final Class<?> type) {
     return MarshallingSessionProviderFactory.getProvider().hasMarshaller(type.getName());
   }
 
@@ -67,13 +67,13 @@ public abstract class Marshalling {
    * @return The JSON representation of the given object and all nested
    *         properties reachable from it.
    */
-  public static String toJSON(Object obj) {
+  public static String toJSON(final Object obj) {
     if (obj == null) {
       return "{\"" + SerializationParts.ENCODED_TYPE + "\":\"java.lang.Object\",\""
               + SerializationParts.QUALIFIED_VALUE + "\":null}";
     }
 
-    MarshallingSession session = MarshallingSessionProviderFactory.getEncoding();
+    final MarshallingSession session = MarshallingSessionProviderFactory.getEncoding();
 
     if (needsQualification(obj)) {
       return NumbersUtils.qualifiedNumericEncoding(obj);
@@ -92,10 +92,9 @@ public abstract class Marshalling {
    * @param obj
    *          The object to marshall. Should be of a type for which
    *          {@link #canHandle(Class)} returns true. Null is permitted.
-   * @return The JSON representation of the given object and all nested
-   *         properties reachable from it.
+   *
    */
-  public static void toJSON(Appendable appendTo, Object obj) throws IOException {
+  public static void toJSON(final Appendable appendTo, final Object obj) throws IOException {
     appendTo.append(toJSON(obj));
   }
 
@@ -105,17 +104,18 @@ public abstract class Marshalling {
    * @param obj The map to marshal to JSON.
    * @return The JSON representation of the map.
    */
-  public static String toJSON(Map<Object, Object> obj) {
+  @SuppressWarnings("unchecked")
+  public static String toJSON(final Map<Object, Object> obj) {
     return MapMarshaller.INSTANCE.marshall(obj, MarshallingSessionProviderFactory.getEncoding());
   }
 
   /**
    * Works the same as a call to {@link #toJSON(Object)}, but may perform better.
    *
-   * @param obj The list to marshal to JSON.
+   * @param arr The list to marshal to JSON.
    * @return The JSON representation of the list.
    */
-  public static String toJSON(List arr) {
+  public static String toJSON(final List arr) {
     return ListMarshaller.INSTANCE.marshall(arr, MarshallingSessionProviderFactory.getEncoding());
   }
 
@@ -129,7 +129,7 @@ public abstract class Marshalling {
    *          The expected type of the root of the object graph.
    * @return the root of the reconstructed object graph.
    */
-  public static <T> T fromJSON(String json, Class<T> type) {
+  public static <T> T fromJSON(final String json, final Class<T> type) {
     return fromJSON(json, type, null);
   }
 
@@ -147,13 +147,14 @@ public abstract class Marshalling {
    *          its element type is provided in the JSON message.
    * @return the root of the reconstructed object graph.
    */
-  public static <T> T fromJSON(String json, Class<T> type, Class<?> assumedElementType) {
-    EJValue parsedValue = ParserFactory.get().parse(json);
-    MarshallingSession session = MarshallingSessionProviderFactory.getDecoding();
+  @SuppressWarnings("unchecked")
+  public static <T> T fromJSON(final String json, final Class<T> type, final Class<?> assumedElementType) {
+    final EJValue parsedValue = ParserFactory.get().parse(json);
+    final MarshallingSession session = MarshallingSessionProviderFactory.getDecoding();
     if (assumedElementType != null) {
       session.setAssumedElementType(assumedElementType.getName());
     }
-    Marshaller<Object> marshallerInstance = session.getMarshallerInstance(type.getName());
+    final Marshaller<Object> marshallerInstance = session.getMarshallerInstance(type.getName());
     return (T) marshallerInstance.demarshall(parsedValue, session);
   }
 
@@ -166,11 +167,11 @@ public abstract class Marshalling {
    *          The JSON representation of the object graph to demarshall.
    * @return the root of the reconstructed object graph.
    */
-  public static Object fromJSON(String json) {
+  public static Object fromJSON(final String json) {
     return fromJSON(json, Object.class);
   }
 
-  public static boolean needsQualification(Object o) {
+  public static boolean needsQualification(final Object o) {
     return (o instanceof Number && o.getClass().getName().startsWith("java.lang.")
             && !(o instanceof Long))
             || o instanceof Boolean

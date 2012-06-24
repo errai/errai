@@ -41,10 +41,10 @@ public class ObjectMarshaller extends AbstractNullableMarshaller<Object> {
   }
 
   @Override
-  public Object doNotNullDemarshall(EJValue o, MarshallingSession ctx) {
+  public Object doNotNullDemarshall(final EJValue o, final MarshallingSession ctx) {
     if (o.isObject() != null) {
-      EJObject jsObject = o.isObject();
-      EJString string = jsObject.get(SerializationParts.ENCODED_TYPE).isString();
+      final EJObject jsObject = o.isObject();
+      final EJString string = jsObject.get(SerializationParts.ENCODED_TYPE).isString();
       if (string == null) {
         return MapMarshaller.INSTANCE.demarshall(o, ctx);
       }
@@ -53,7 +53,7 @@ public class ObjectMarshaller extends AbstractNullableMarshaller<Object> {
         return NumbersUtils.getNumber(string.stringValue(), jsObject.get(SerializationParts.NUMERIC_VALUE));
       }
 
-      Marshaller<Object> marshaller = ctx.getMarshallerInstance(string.stringValue());
+      final Marshaller<Object> marshaller = ctx.getMarshallerInstance(string.stringValue());
 
       if (marshaller == null) {
         throw new RuntimeException("marshalled type is unknown to the marshalling framework: " + string.stringValue());
@@ -72,12 +72,12 @@ public class ObjectMarshaller extends AbstractNullableMarshaller<Object> {
   }
 
   @Override
-  public String doNotNullMarshall(Object o, MarshallingSession ctx) {
+  public String doNotNullMarshall(final Object o, final MarshallingSession ctx) {
     if ((o instanceof Number && !o.getClass().getName().startsWith("java.math.Big")) || o instanceof Boolean) {
       return NumbersUtils.qualifiedNumericEncoding(o);
     }
 
-    Marshaller<Object> marshaller = MarshallUtil.getMarshaller(o, ctx);
+    final Marshaller<Object> marshaller = MarshallUtil.getMarshaller(o, ctx);
 
     if (marshaller == null) {
       throw new RuntimeException("marshalled type is unknown to the marshalling framework: " + o.getClass().getName());

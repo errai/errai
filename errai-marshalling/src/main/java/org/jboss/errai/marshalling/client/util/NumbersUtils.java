@@ -17,13 +17,19 @@
 package org.jboss.errai.marshalling.client.util;
 
 import org.jboss.errai.common.client.protocols.SerializationParts;
+import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 
 /**
  * @author Mike Brock <cbrock@redhat.com>
  */
 public class NumbersUtils {
-  public static Object getNumber(String wrapperClassName, EJValue value) {
+  public static Object getEncodedNumber(final EJObject object) {
+    return getNumber(object.get(SerializationParts.ENCODED_TYPE).isString().stringValue(),
+            object.get(SerializationParts.NUMERIC_VALUE));
+  }
+
+  public static Object getNumber(final String wrapperClassName, final EJValue value) {
     if (Integer.class.getName().equals(wrapperClassName)) {
       return new Double(value.isNumber().doubleValue()).intValue();
     }
@@ -73,7 +79,5 @@ public class NumbersUtils {
             + quote + SerializationParts.OBJECT_ID + quote + ": " + quote + "-1" + quote + "," +
             quote + SerializationParts.NUMERIC_VALUE + quote + ":"
             + (o instanceof Long || o instanceof Character ? quote + String.valueOf(o) + quote : String.valueOf(o)) + "}";
-
   }
-
 }

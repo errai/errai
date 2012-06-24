@@ -5,13 +5,13 @@ import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
 
 /**
- * Handles nulling of types as a simple wrapper.
+ * Handles null-ing of types as a simple wrapper.
  *
  * @author Mike Brock
  */
 public abstract class AbstractNullableMarshaller<T> implements Marshaller<T> {
   @Override
-  public final T demarshall(EJValue o, MarshallingSession ctx) {
+  public final T demarshall(final EJValue o, final MarshallingSession ctx) {
     if (o.isNull()) {
       return null;
     }
@@ -21,7 +21,7 @@ public abstract class AbstractNullableMarshaller<T> implements Marshaller<T> {
   }
 
   @Override
-  public final String marshall(T o, MarshallingSession ctx) {
+  public final String marshall(final T o, final MarshallingSession ctx) {
     if (o == null) {
       return "null";
     }

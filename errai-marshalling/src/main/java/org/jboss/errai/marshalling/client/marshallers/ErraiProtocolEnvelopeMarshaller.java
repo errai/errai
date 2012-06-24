@@ -25,8 +25,6 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
 import org.jboss.errai.marshalling.client.util.MarshallUtil;
 import org.jboss.errai.marshalling.client.util.SimpleTypeLiteral;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,16 +41,18 @@ public class ErraiProtocolEnvelopeMarshaller implements Marshaller<Map<String, O
   }
 
   @Override
-  public Map<String, Object> demarshall(EJValue o, MarshallingSession ctx) {
-    return doDermashall(new HashMap(), o, ctx);
+  public Map<String, Object> demarshall(final EJValue o, final MarshallingSession ctx) {
+    return doDemarshall(new HashMap<String, Object>(), o, ctx);
   }
 
-  protected Map doDermashall(Map impl, EJValue o, MarshallingSession ctx) {
-    EJObject jsonObject = o.isObject();
+  protected Map<String, Object> doDemarshall(final Map<String, Object> impl,
+                                             final EJValue o,
+                                             final MarshallingSession ctx) {
+    final EJObject jsonObject = o.isObject();
 
-    for (String key : jsonObject.keySet()) {
+    for (final String key : jsonObject.keySet()) {
       if (MessageParts.SessionID.name().equals(key)) continue;
-      EJValue v = jsonObject.get(key);
+      final EJValue v = jsonObject.get(key);
       if (!v.isNull()) {
         impl.put(key, ctx.getMarshallerInstance(ctx.determineTypeFor(null, v)).demarshall(v, ctx));
       }
@@ -64,13 +64,13 @@ public class ErraiProtocolEnvelopeMarshaller implements Marshaller<Map<String, O
   }
 
   @Override
-  public String marshall(Map<String, Object> o, MarshallingSession ctx) {
+  public String marshall(final Map<String, Object> o, final MarshallingSession ctx) {
     final StringBuilder buf = new StringBuilder();
 
     buf.append("{");
     Object key, val;
     int i = 0;
-    for (Map.Entry<String, Object> entry : o.entrySet()) {
+    for (final Map.Entry<String, Object> entry : o.entrySet()) {
       key = entry.getKey();
       val = entry.getValue();
 
@@ -81,7 +81,7 @@ public class ErraiProtocolEnvelopeMarshaller implements Marshaller<Map<String, O
       }
 
       final Marshaller<Object> valueMarshaller;
-      buf.append("\"" + key + "\"").append(":");
+      buf.append("\"").append(key).append("\"").append(":");
 
       if (val == null) {
         buf.append("null");

@@ -21,19 +21,23 @@ import org.jboss.errai.ioc.client.container.CreationalContext;
 import org.jboss.errai.ioc.client.container.IOC;
 import org.jboss.errai.ioc.client.container.IOCBeanManager;
 
-import javax.enterprise.context.ApplicationScoped;
 import java.lang.annotation.Annotation;
 
 public class BootstrapperInjectionContext {
-  private IOCBeanManager manager;
-  private CreationalContext rootContext;
+  private final IOCBeanManager manager;
+  private final CreationalContext rootContext;
 
   public BootstrapperInjectionContext() {
     manager = IOC.getBeanManager();
     rootContext = new CreationalContext(true, manager, "javax.enterprise.context.ApplicationScoped");
   }
 
-  public void addBean(Class type, CreationalCallback callback, Object instance, Annotation[] qualifiers) {
+  @SuppressWarnings("unchecked")
+  public void addBean(final Class type,
+                      final CreationalCallback callback,
+                      final Object instance,
+                      final Annotation[] qualifiers) {
+
     manager.addBean(type, callback, instance, qualifiers);
   }
 

@@ -29,12 +29,12 @@ public abstract class AbstractMarshallingSession implements MarshallingSession {
   private String assumedElementType = null;
 
   @Override
-  public boolean hasObjectHash(String hashCode) {
+  public boolean hasObject(String hashCode) {
     return objectMap.containsKey(hashCode);
   }
 
   @Override
-  public boolean hasObjectHash(Object reference) {
+  public boolean hasObject(Object reference) {
     return reference != null && objects.containsKey(reference);
   }
 
@@ -44,20 +44,20 @@ public abstract class AbstractMarshallingSession implements MarshallingSession {
   }
 
   @Override
-  public void recordObjectHash(String hashCode, Object instance) {
+  public void recordObject(String hashCode, Object instance) {
     if ("-1".equals(hashCode)) return;
 
     objectMap.put(hashCode, instance);
   }
 
   @Override
-  public String getObjectHash(Object reference) {
+  public String getObject(Object reference) {
     Integer i = objects.get(reference);
     String s;
     
     if (i == null) {
       objects.put(reference, (i = objects.size() + 1));
-      recordObjectHash(s = i.toString(), reference);
+      recordObject(s = i.toString(), reference);
     }
     else {
       s = i.toString();

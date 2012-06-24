@@ -26,5 +26,5 @@ public interface Marshaller<T> {
 
   T demarshall(EJValue o, MarshallingSession ctx);
 
-  String marshall(T o, MarshallingSession ctx);
+  String marshall(final T o, MarshallingSession ctx);
 }

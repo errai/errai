@@ -30,7 +30,7 @@ public class StringBufferMarshaller extends AbstractNullableMarshaller<StringBuf
   public static final StringBufferMarshaller INSTANCE = new StringBufferMarshaller();
 
   @Override
-  public StringBuffer doNotNullDemarshall(EJValue o, MarshallingSession ctx) {
+  public StringBuffer doNotNullDemarshall(final EJValue o, final MarshallingSession ctx) {
     return new StringBuffer(o.isString().stringValue());
   }
 
@@ -40,7 +40,7 @@ public class StringBufferMarshaller extends AbstractNullableMarshaller<StringBuf
   }
 
   @Override
-  public String doNotNullMarshall(StringBuffer o, MarshallingSession ctx) {
+  public String doNotNullMarshall(final StringBuffer o, final MarshallingSession ctx) {
     return "\"" + MarshallUtil.jsonStringEscape(o.toString())  + "\"";
   }
 }

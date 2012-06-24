@@ -170,7 +170,6 @@ public class MarshallingGenUtil {
     l.add(MetaClassFactory.get(Byte[].class));
     l.add(MetaClassFactory.get(Character[].class));
 
-
     return Collections.unmodifiableCollection(l);
   }
 

@@ -28,13 +28,13 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
 public abstract class AbstractBackReferencingMarshaller<C> implements Marshaller<C> {
 
   @Override
-  public final String marshall(C o, MarshallingSession ctx) {
+  public final String marshall(final C o, final MarshallingSession ctx) {
     if (o == null) {
       return "null";
     }
 
-    final boolean isNew = !ctx.hasObjectHash(o);
-    final String objId = ctx.getObjectHash(o);
+    final boolean isNew = !ctx.hasObject(o);
+    final String objId = ctx.getObject(o);
 
     final StringBuilder buf = new StringBuilder("{\"").append(SerializationParts.ENCODED_TYPE).append("\":\"")
             .append(o.getClass().getName()).append("\",\"").append(SerializationParts.OBJECT_ID).append("\":\"")
@@ -51,21 +51,22 @@ public abstract class AbstractBackReferencingMarshaller<C> implements Marshaller
 
   public abstract void doMarshall(StringBuilder buf, C o, MarshallingSession ctx);
 
+  @SuppressWarnings("unchecked")
   @Override
-  public C demarshall(EJValue o, MarshallingSession ctx) {
+  public C demarshall(final EJValue o, final MarshallingSession ctx) {
     if (o.isNull()) {
       return null;
     }
 
     final EJObject obj = o.isObject();
     
-    String objId = obj.get(SerializationParts.OBJECT_ID).isString().stringValue();
-    if (ctx.hasObjectHash(objId)) {
+    final String objId = obj.get(SerializationParts.OBJECT_ID).isString().stringValue();
+    if (ctx.hasObject(objId)) {
       return (C) ctx.getObject(Object.class, objId);
     }
     
-    C val = doDemarshall(o, ctx);
-    ctx.recordObjectHash(objId, val);
+    final C val = doDemarshall(o, ctx);
+    ctx.recordObject(objId, val);
     return val;
   }
   

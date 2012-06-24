@@ -69,7 +69,12 @@ public class ClassChangeUtil {
 
   public static class JDTCompiler implements CompilerAdapter {
     @Override
-    public int compile(OutputStream out, OutputStream errors, String outputPath, String toCompile, String classpath) {
+    public int compile(final OutputStream out,
+                       final OutputStream errors,
+                       final String outputPath,
+                       final String toCompile,
+                       final String classpath) {
+
       return BatchCompiler.compile("-classpath \"" + classpath + "\" -d " + outputPath + " -source 1.6 " + toCompile, new PrintWriter(out), new PrintWriter(errors),
               new CompilationProgress() {
                 @Override
@@ -320,7 +325,7 @@ public class ClassChangeUtil {
   }
 
   private static String findAllJarsByManifest() {
-    StringBuilder cp = new StringBuilder();
+    final StringBuilder cp = new StringBuilder();
     try {
       log.debug(">>> Searching for all jars by " + JarFile.MANIFEST_NAME);
       Enumeration[] enumers = new Enumeration[]

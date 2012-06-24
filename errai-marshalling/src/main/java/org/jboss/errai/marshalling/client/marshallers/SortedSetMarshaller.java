@@ -37,7 +37,7 @@ public class SortedSetMarshaller extends AbstractCollectionMarshaller<SortedSet>
   }
 
   @Override
-  public SortedSet doDemarshall(EJArray o, MarshallingSession ctx) {
+  public SortedSet doDemarshall(final EJArray o, final MarshallingSession ctx) {
     return marshallToCollection(new TreeSet(), o, ctx);
   }
 }

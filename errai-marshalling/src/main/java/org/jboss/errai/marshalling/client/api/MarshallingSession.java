@@ -36,7 +36,7 @@ public interface MarshallingSession {
    * @param hashCode a unique identifier
    * @param instance the instance of the entity.
    */
-  public void recordObjectHash(String hashCode, Object instance);
+  public void recordObject(String hashCode, Object instance);
 
   /**
    * Checks if the object is already in the context based on the object reference.
@@ -44,7 +44,7 @@ public interface MarshallingSession {
    * @param reference the entity reference
    * @return true if the session contains the object reference.
    */
-  public boolean hasObjectHash(Object reference);
+  public boolean hasObject(Object reference);
 
   /**
    * Checks if the object is already in the context based on the hash code.
@@ -52,7 +52,7 @@ public interface MarshallingSession {
    * @param hashCode the hash code
    * @return true if the session contains the object reference.
    */
-  public boolean hasObjectHash(String hashCode);
+  public boolean hasObject(String hashCode);
 
   /**
    * Returns a unique identifier for the specified object reference. Returns a new identifier if the object is unknown
@@ -61,7 +61,7 @@ public interface MarshallingSession {
    * @param reference the entity reference
    * @return a new or existing identifier within this session
    */
-  public String getObjectHash(Object reference);
+  public String getObject(Object reference);
 
   /**
    * Looks up the object based on the specified <tt>hashCode</tt> identifier. Returns null if the specified identifier

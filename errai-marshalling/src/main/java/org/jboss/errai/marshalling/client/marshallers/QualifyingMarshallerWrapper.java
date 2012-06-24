@@ -31,7 +31,7 @@ import org.jboss.errai.marshalling.client.api.json.EJValue;
 public class QualifyingMarshallerWrapper<T> extends AbstractNullableMarshaller<T> {
   private final Marshaller<T> delegate;
 
-  public QualifyingMarshallerWrapper(Marshaller<T> delegate) {
+  public QualifyingMarshallerWrapper(final Marshaller<T> delegate) {
     this.delegate = delegate;
   }
 
@@ -41,19 +41,19 @@ public class QualifyingMarshallerWrapper<T> extends AbstractNullableMarshaller<T
   }
 
   @Override
-  public T doNotNullDemarshall(EJValue o, MarshallingSession ctx) {
-    EJObject obj = o.isObject();
+  public T doNotNullDemarshall(final EJValue o, final MarshallingSession ctx) {
+    final EJObject obj = o.isObject();
 
     T val = null;
     if (obj != null) {
-      String objId = obj.get(SerializationParts.OBJECT_ID).isString().stringValue();
-      if (ctx.hasObjectHash(objId)) {
+      final String objId = obj.get(SerializationParts.OBJECT_ID).isString().stringValue();
+      if (ctx.hasObject(objId)) {
         // noinspection unchecked
         return (T) ctx.getObject(Object.class, objId);
       }
 
       val = delegate.demarshall(o.isObject().get(SerializationParts.QUALIFIED_VALUE), ctx);
-      ctx.recordObjectHash(objId, val);
+      ctx.recordObject(objId, val);
     }
     else {
       // This is only to support Jackson's char[] and byte[] representations
@@ -70,9 +70,9 @@ public class QualifyingMarshallerWrapper<T> extends AbstractNullableMarshaller<T
   }
 
   @Override
-  public String doNotNullMarshall(T o, MarshallingSession ctx) {
-    final boolean isNew = !ctx.hasObjectHash(o);
-    final String objId = ctx.getObjectHash(o);
+  public String doNotNullMarshall(final T o, final MarshallingSession ctx) {
+    final boolean isNew = !ctx.hasObject(o);
+    final String objId = ctx.getObject(o);
 
     final StringBuilder buf = new StringBuilder("{\"").append(SerializationParts.ENCODED_TYPE).append("\":\"")
             .append(o.getClass().getName()).append("\",\"").append(SerializationParts.OBJECT_ID).append("\":\"")

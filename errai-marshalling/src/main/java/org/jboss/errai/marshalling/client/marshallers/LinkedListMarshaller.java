@@ -35,7 +35,7 @@ public class LinkedListMarshaller extends AbstractCollectionMarshaller<LinkedLis
   }
 
   @Override
-  public LinkedList doDemarshall(EJArray o, MarshallingSession ctx) {
+  public LinkedList doDemarshall(final EJArray o, final MarshallingSession ctx) {
     return marshallToCollection(new LinkedList<Object>(), o, ctx);
   }
 }

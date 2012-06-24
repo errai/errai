@@ -16,7 +16,6 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
-import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
@@ -36,12 +35,12 @@ public class StringMarshaller extends AbstractNullableMarshaller<String> {
   }
 
   @Override
-  public String doNotNullDemarshall(EJValue o, MarshallingSession ctx) {
+  public String doNotNullDemarshall(final EJValue o, final MarshallingSession ctx) {
     return o.isString().stringValue();
   }
 
   @Override
-  public String doNotNullMarshall(String o, MarshallingSession ctx) {
+  public String doNotNullMarshall(final String o, final MarshallingSession ctx) {
     return "\"" + MarshallUtil.jsonStringEscape(o) + "\"";
   }
 }

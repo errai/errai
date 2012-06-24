@@ -32,6 +32,7 @@ import org.jboss.errai.marshalling.client.api.MarshallingSession;
 import org.jboss.errai.marshalling.client.api.exceptions.MarshallingException;
 import org.jboss.errai.marshalling.client.api.json.EJObject;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
+import org.jboss.errai.marshalling.client.util.MarshallUtil;
 import org.jboss.errai.marshalling.client.util.NumbersUtils;
 import org.jboss.errai.marshalling.rebind.DefinitionsFactory;
 import org.jboss.errai.marshalling.rebind.api.model.ConstructorMapping;
@@ -76,94 +77,92 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
   public Object demarshall(EJValue o, MarshallingSession ctx) {
     try {
       if (o.isObject() != null) {
-        EJObject oMap = o.isObject();
+        final EJObject oMap = o.isObject();
+        final Object newInstance;
 
-        Object newInstance;
-        if (oMap.containsKey(SerializationParts.OBJECT_ID)) {
-          if (oMap.containsKey(SerializationParts.NUMERIC_VALUE)) {
-            return NumbersUtils.getNumber(oMap.get(SerializationParts.ENCODED_TYPE).isString().stringValue(),
-                    oMap.get(SerializationParts.NUMERIC_VALUE));
+        if (MarshallUtil.isEncodedObject(oMap)) {
+          if (MarshallUtil.isEncodedNumeric(oMap)) {
+            return NumbersUtils.getEncodedNumber(oMap);
           }
 
-          if (oMap.containsKey(SerializationParts.OBJECT_ID)) {
-            final String hash = oMap.get(SerializationParts.OBJECT_ID).isString().stringValue();
+          final String objID = oMap.get(SerializationParts.OBJECT_ID).isString().stringValue();
 
-            if (ctx.hasObjectHash(hash)) {
-              newInstance = ctx.getObject(Object.class, hash);
+          if (ctx.hasObject(objID)) {
+            newInstance = ctx.getObject(Object.class, objID);
 
-              /**
-               * If this only contains 2 fields, it is only a graph reference.
-               */
-              if (oMap.size() == 2) {
-                return newInstance;
-              }
-            }
-            else {
-              if (oMap.containsKey(SerializationParts.INSTANTIATE_ONLY)) {
-                newInstance = getTypeHandled().newInstance();
-                ctx.recordObjectHash(hash, newInstance);
-                return newInstance;
-              }
-
-              final InstantiationMapping cMapping = definition.getInstantiationMapping();
-
-              Object[] parms = new Object[cMapping.getMappings().length];
-              Class[] targetTypes = cMapping.getSignature();
-
-              int i = 0;
-              for (Mapping mapping : cMapping.getMappings()) {
-                Marshaller<Object> marshaller = ctx.getMarshallerInstance(mapping.getType().getFullyQualifiedName());
-                parms[i] = DataConversion.convert(
-                        marshaller.demarshall(oMap.get(mapping.getKey()), ctx), targetTypes[i++]);
-              }
-
-              if (cMapping instanceof ConstructorMapping) {
-                final Constructor constructor = ((ConstructorMapping) cMapping).getMember().asConstructor();
-                constructor.setAccessible(true);
-                newInstance = constructor.newInstance(parms);
-              }
-              else {
-                newInstance = ((FactoryMapping) cMapping).getMember().asMethod().invoke(null, parms);
-              }
-
-              ctx.recordObjectHash(hash, newInstance);
-            }
-
-            for (MemberMapping mapping : definition.getWritableMemberMappings()) {
-              final EJValue o1 = oMap.get(mapping.getKey());
-
-              if (!o1.isNull()) {
-                Marshaller<Object> marshaller = ctx.getMarshallerInstance(mapping.getType().getFullyQualifiedName());
-
-                if (mapping.getBindingMember() instanceof MetaField) {
-                  MetaField f = (MetaField) mapping.getBindingMember();
-
-                  setProperty(newInstance, f.asField(),
-                          marshaller.demarshall(o1, ctx));
-                }
-                else {
-                  Method m = ((MetaMethod) mapping.getBindingMember()).asMethod();
-                  m.invoke(newInstance, DataConversion.convert(
-                          marshaller.demarshall(o1, ctx),
-                          m.getParameterTypes()[0]));
-                }
-              }
+            /**
+             * If this only contains 2 fields, it is only a graph reference.
+             */
+            if (oMap.size() == 2) {
+              return newInstance;
             }
           }
           else {
-            throw new RuntimeException("unknown type to demarshall");
+            /**
+             * Check to see if this object is instantiate only... meaning it has no fields to marshall.
+             */
+            if (oMap.containsKey(SerializationParts.INSTANTIATE_ONLY)) {
+              newInstance = getTypeHandled().newInstance();
+              ctx.recordObject(objID, newInstance);
+              return newInstance;
+            }
+
+            final InstantiationMapping cMapping = definition.getInstantiationMapping();
+            final Object[] parms = new Object[cMapping.getMappings().length];
+            final Class[] targetTypes = cMapping.getSignature();
+
+            int i = 0;
+            for (final Mapping mapping : cMapping.getMappings()) {
+              Marshaller<Object> marshaller = ctx.getMarshallerInstance(mapping.getType().getFullyQualifiedName());
+              parms[i] = DataConversion.convert(
+                      marshaller.demarshall(oMap.get(mapping.getKey()), ctx), targetTypes[i++]);
+            }
+
+            if (cMapping instanceof ConstructorMapping) {
+              final Constructor constructor = ((ConstructorMapping) cMapping).getMember().asConstructor();
+              constructor.setAccessible(true);
+              newInstance = constructor.newInstance(parms);
+            }
+            else {
+              newInstance = ((FactoryMapping) cMapping).getMember().asMethod().invoke(null, parms);
+            }
+
+            ctx.recordObject(objID, newInstance);
+          }
+
+          for (MemberMapping mapping : definition.getWritableMemberMappings()) {
+            final EJValue o1 = oMap.get(mapping.getKey());
+
+            if (!o1.isNull()) {
+              final Marshaller<Object> marshaller
+                      = ctx.getMarshallerInstance(mapping.getType().getFullyQualifiedName());
+
+              if (mapping.getBindingMember() instanceof MetaField) {
+                final MetaField f = (MetaField) mapping.getBindingMember();
+
+                setProperty(newInstance, f.asField(),
+                        marshaller.demarshall(o1, ctx));
+              }
+              else {
+                final Method m = ((MetaMethod) mapping.getBindingMember()).asMethod();
+
+                m.invoke(newInstance, DataConversion.convert(
+                        marshaller.demarshall(o1, ctx),
+                        m.getParameterTypes()[0]));
+              }
+            }
           }
 
           return newInstance;
         }
         else if (oMap.containsKey(SerializationParts.ENUM_STRING_VALUE)) {
-          return Enum.valueOf(getClassReference(oMap), oMap.get(SerializationParts.ENUM_STRING_VALUE).isString().stringValue());
+          return Enum.valueOf(getClassReference(oMap),
+                  oMap.get(SerializationParts.ENUM_STRING_VALUE).isString().stringValue());
         }
         else {
           throw new RuntimeException("bad payload");
         }
       }
-
       else {
         return o.getRawValue();
       }
@@ -175,7 +174,7 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
 
   @Override
   public String marshall(Object o, MarshallingSession ctx) {
-    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(1024);
+    final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(1024);
     try {
       marshall(byteArrayOutputStream, o, ctx);
       return new String(byteArrayOutputStream.toByteArray());
@@ -194,7 +193,7 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
       return;
     }
 
-    EncodingSession ctx = (EncodingSession) mSession;
+    final EncodingSession ctx = (EncodingSession) mSession;
     final Class cls = o.getClass();
 
     if (definition.getMappingClass().isEnum()) {
@@ -208,9 +207,8 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
       return;
     }
 
-
-    final boolean enc = ctx.hasObjectHash(o);
-    final String hash = ctx.getObjectHash(o);
+    final boolean enc = ctx.hasObject(o);
+    final String hash = ctx.getObject(o);
 
     if (enc) {
       /**
@@ -228,7 +226,6 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
 
     outstream.write(("{\"" + SerializationParts.ENCODED_TYPE + "\":\"" + cls.getName() + "\",\""
             + SerializationParts.OBJECT_ID + "\":\"" + hash + "\",").getBytes(UTF_8));
-
 
     for (MemberMapping mapping : definition.getReadableMemberMappings()) {
       if (!first) {
@@ -304,7 +301,8 @@ public class DefaultDefinitionMarshaller implements ServerMarshaller<Object> {
 
   public static Class getClassReference(EJObject oMap) {
     try {
-      return Thread.currentThread().getContextClassLoader().loadClass(oMap.get(SerializationParts.ENCODED_TYPE).isString().stringValue());
+      return Thread.currentThread().getContextClassLoader()
+              .loadClass(oMap.get(SerializationParts.ENCODED_TYPE).isString().stringValue());
     }
     catch (ClassNotFoundException e) {
       throw new RuntimeException("could not instantiate class", e);

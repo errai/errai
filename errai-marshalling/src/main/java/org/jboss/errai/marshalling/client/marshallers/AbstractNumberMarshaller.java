@@ -16,7 +16,6 @@
 
 package org.jboss.errai.marshalling.client.marshallers;
 
-import org.jboss.errai.marshalling.client.api.Marshaller;
 import org.jboss.errai.marshalling.client.api.MarshallingSession;
 
 /**
@@ -24,7 +23,7 @@ import org.jboss.errai.marshalling.client.api.MarshallingSession;
  */
 public abstract class AbstractNumberMarshaller<C extends Number> extends AbstractNullableMarshaller<C> {
   @Override
-  public String doNotNullMarshall(C o, MarshallingSession ctx) {
+  public String doNotNullMarshall(final C o, final MarshallingSession ctx) {
     return o.toString();
   }
 }

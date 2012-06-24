@@ -5,6 +5,7 @@ import org.jboss.errai.marshalling.client.api.annotations.AlwaysQualify;
 import org.jboss.errai.marshalling.client.api.annotations.ClientMarshaller;
 import org.jboss.errai.marshalling.client.api.annotations.ServerMarshaller;
 import org.jboss.errai.marshalling.client.api.json.EJValue;
+import org.jboss.errai.marshalling.client.util.SimpleTypeLiteral;
 
 import java.util.LinkedHashMap;
 
@@ -14,14 +15,15 @@ import java.util.LinkedHashMap;
 @ClientMarshaller
 @ServerMarshaller
 @AlwaysQualify
-public class LinkedMapMarshaller extends MapMarshaller<LinkedHashMap> {
+public class LinkedMapMarshaller extends MapMarshaller<LinkedHashMap<Object, Object>> {
   @Override
-  public Class<LinkedHashMap> getTypeHandled() {
-    return LinkedHashMap.class;
+  public Class<LinkedHashMap<Object, Object>> getTypeHandled() {
+    return SimpleTypeLiteral.<LinkedHashMap<Object, Object>>ofRawType(LinkedHashMap.class).get();
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public LinkedHashMap demarshall(EJValue o, MarshallingSession ctx) {
-    return doDermashall(new LinkedHashMap(), o, ctx);
+  public LinkedHashMap<Object, Object> demarshall(final EJValue o, final MarshallingSession ctx) {
+    return doDemarshall(new LinkedHashMap(), o, ctx);
   }
 }

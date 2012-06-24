@@ -321,7 +321,7 @@ public class CreationalContext {
 
   private void registerAllBeans() {
     for (Object ref : getAllCreatedBeanInstances()) {
-      beanManager.addBeantoContext(ref, this);
+      beanManager.addBeanToContext(ref, this);
     }
   }
 
