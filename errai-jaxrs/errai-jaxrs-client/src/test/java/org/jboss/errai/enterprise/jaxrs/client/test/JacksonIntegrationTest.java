@@ -17,6 +17,7 @@
 package org.jboss.errai.enterprise.jaxrs.client.test;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.jboss.errai.bus.client.api.RemoteCallback;
@@ -96,6 +97,27 @@ public class JacksonIntegrationTest extends AbstractErraiJaxrsTest {
           public void callback(String jackson) {
             assertNotNull("Server failed to parse JSON using Jackson", jackson);
             assertEquals(users, MarshallingWrapper.fromJSON(jackson, List.class, User.class));
+            finishTest();
+          }
+        }).postJacksonList(jackson);
+  }
+  
+  @Test
+  public void testJacksonMarshallingOfCollection() {
+    delayTestFinish(5000);
+
+    final List<User> users = new ArrayList<User>();
+    users.add(new User(11l, "first", "last", 20, Gender.MALE, null));
+    users.add(new User(12l, "firs2", "las2", 40, Gender.MALE, null));
+
+    String jackson = MarshallingWrapper.toJSON(users);
+
+    RestClient.create(JacksonTestService.class,
+        new RemoteCallback<String>() {
+          @Override
+          public void callback(String jackson) {
+            assertNotNull("Server failed to parse JSON using Jackson", jackson);
+            assertEquals(users, MarshallingWrapper.fromJSON(jackson, Collection.class, User.class));
             finishTest();
           }
         }).postJacksonList(jackson);

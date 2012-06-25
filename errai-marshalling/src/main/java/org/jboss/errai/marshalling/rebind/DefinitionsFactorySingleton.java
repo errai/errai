@@ -22,7 +22,15 @@ package org.jboss.errai.marshalling.rebind;
 public class DefinitionsFactorySingleton {
   private static final DefinitionsFactory factory;
   static {
-    factory = newInstance();
+    try {
+      factory = newInstance();
+    }
+    catch (Exception e) {
+      // This exception will probably be swallowed by the VM, which is why we print the stack trace here.
+      System.err.println("Failed to boostrap errai marshalling system!");
+      e.printStackTrace();
+      throw new RuntimeException(e);
+    }
   }
 
   public static DefinitionsFactory get() {
