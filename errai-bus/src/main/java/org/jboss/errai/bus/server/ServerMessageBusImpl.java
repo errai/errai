@@ -1219,7 +1219,6 @@ public class ServerMessageBusImpl implements ServerMessageBus {
   private MessageQueue getQueueByMessage(final Message message) {
     final MessageQueue queue = getQueue(getSession(message));
     if (queue == null) {
-      System.out.println("***WARN***");
       throw new QueueUnavailableException("no queue available to send. (queue or session may have expired): " +
               "(session id: " + getSession(message).getSessionId() + ")");
     }

@@ -16,15 +16,15 @@
 
 package org.jboss.errai.bus.client.util;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Queue;
-import java.util.Set;
-
 import org.jboss.errai.bus.client.api.HasEncoded;
 import org.jboss.errai.bus.client.api.Message;
 import org.jboss.errai.bus.client.api.base.DefaultErrorCallback;
 import org.jboss.errai.marshalling.client.protocols.ErraiProtocol;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Queue;
+import java.util.Set;
 
 public class BusTools {
   public static final Set<String> RESERVED_SERVICES;

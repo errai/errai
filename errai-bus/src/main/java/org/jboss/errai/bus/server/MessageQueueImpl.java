@@ -25,7 +25,6 @@ import org.jboss.errai.bus.server.io.QueueChannel;
 import org.jboss.errai.bus.server.io.buffers.BufferCallback;
 import org.jboss.errai.bus.server.io.buffers.BufferColor;
 import org.jboss.errai.bus.server.io.buffers.TransmissionBuffer;
-import org.jboss.errai.bus.server.service.ErraiConfigAttribs;
 import org.jboss.errai.bus.server.util.LocalContext;
 import org.jboss.errai.bus.server.util.MarkedOutputStream;
 import org.jboss.errai.bus.server.util.ServerBusTools;
@@ -102,6 +101,8 @@ public class MessageQueueImpl implements MessageQueue {
       throw new QueueUnavailableException("queue is not available");
     }
 
+    final MarkedOutputStream markedOutputStream = new MarkedOutputStream(outstream);
+
     lastTransmission = nanoTime();
     if (pagedOut) {
       synchronized (pageLock) {
@@ -112,8 +113,6 @@ public class MessageQueueImpl implements MessageQueue {
         }
       }
     }
-
-    final MarkedOutputStream markedOutputStream = new MarkedOutputStream(outstream);
 
     try {
       if (wait) {
@@ -189,9 +188,7 @@ public class MessageQueueImpl implements MessageQueue {
         if (messageCount.incrementAndGet() > 10
                 && !lastTransmissionWithin(secs(10))) {
           // disconnect this client
-          System.out.println("****PAGE****");
           pageWaitingToDisk();
-          System.out.println("****DONE****");
         }
       }
       finally {

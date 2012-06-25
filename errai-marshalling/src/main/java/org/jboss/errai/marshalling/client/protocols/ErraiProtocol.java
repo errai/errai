@@ -37,6 +37,7 @@ public class ErraiProtocol {
    * @return The encoded JSON
    */
   public static String encodePayload(final Map<String, Object> message) {
+    new Throwable().printStackTrace();
     return protocolMarshaller.marshall(message, MarshallingSessionProviderFactory.getEncoding());
   }
 
