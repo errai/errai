@@ -164,8 +164,10 @@ public class CDIExtensionPoints implements Extension {
   /**
    * Register managed beans as Errai services
    *
-   * @param event -
-   * @param <T>   -
+   * @param event
+   *         -
+   * @param <T>
+   *         -
    */
   @SuppressWarnings("UnusedDeclaration")
   public <T> void observeResources(@Observes ProcessAnnotatedType<T> event) {
@@ -368,7 +370,12 @@ public class CDIExtensionPoints implements Extension {
         for (org.jboss.errai.enterprise.rebind.ObserversMarshallingExtension.ObserverPoint observerPoint :
                 observerPoints) {
           if (org.jboss.errai.common.rebind.EnvUtil.isPortableType(observerPoint.getObservedType())) {
-            abd.addObserverMethod(new EventObserverMethod(observerPoint.getObservedType(), bus, observerPoint.getQualifiers()));
+            if (observerPoint.getObservedType().isAnnotationPresent(Conversational.class)) {
+              abd.addObserverMethod(new ConversationalEventObserverMethod(observerPoint.getObservedType(), bus, observerPoint.getQualifiers()));
+            }
+            else {
+              abd.addObserverMethod(new EventObserverMethod(observerPoint.getObservedType(), bus, observerPoint.getQualifiers()));
+            }
           }
         }
 
